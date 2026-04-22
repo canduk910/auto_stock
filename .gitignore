@@ -1,0 +1,27 @@
+# 환경 변수 (인증 정보 포함)
+.env
+.token_cache.json
+
+# 로그
+logs/
+
+# IDE
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# 임시
+_workspace/
+
+# 원본 엑셀
+*.xlsx
+
+# 스크린샷
+*.png
