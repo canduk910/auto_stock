@@ -15,7 +15,7 @@ load_dotenv()
 _env = os.getenv("KIS_ENV", "vts")
 _suffix = "_REAL" if _env == "real" else "_VTS"
 
-for key in ("KIS_APP_KEY", "KIS_APP_SECRET", "KIS_ACCOUNT_NO", "KIS_ACCOUNT_PRODUCT"):
+for key in ("KIS_APP_KEY", "KIS_APP_SECRET", "KIS_ACCOUNT_NO", "KIS_ACCOUNT_PRODUCT", "KIS_HTS_ID"):
     env_val = os.getenv(f"{key}{_suffix}") or os.getenv(key)
     if env_val:
         os.environ[key] = env_val
@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     kis_app_secret: str
     kis_account_no: str
     kis_account_product: str = "01"
+    kis_hts_id: str = ""  # 실전 체결통보(H0STCNI0) 구독 시 필요
 
     # 환경: "vts"(모의) 또는 "real"(실전)
     kis_env: str = "vts"
@@ -38,6 +39,7 @@ class Settings(BaseSettings):
     # 서버
     host: str = "0.0.0.0"
     port: int = 8000
+    auto_start: bool = False  # True: 서버 기동 시 자동 매매 시작
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

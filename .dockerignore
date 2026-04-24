@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.git/
+.idea/
+frontend/
+logs/
+node_modules/
+_workspace/
+docs/
+supabase/
+*.md
+img.png

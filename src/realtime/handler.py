@@ -95,16 +95,27 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
     if len(fields) < 15:
         return
 
-    # 필드 매핑 (체결통보 output 기준)
+    # 필드 매핑 (KIS 체결통보 output 기준)
     # [0] HTS ID, [1] 계좌번호, [2] 주문번호, [3] 원주문번호
     # [4] 매도매수구분(02:매수,01:매도), [5] 정정구분, [6] 주문종류
     # [7] 주문조건, [8] 주문단가, [9] 주문수량, [10] 체결금액
     # [11] 체결시간, [12] 거부여부, [13] 체결구분(1:접수,2:체결)
+    # [14] ?, [15] 종목번호, [16] 체결수량, [17] 고객명, [18] 종목명
     order_no = fields[2]
     side = "BUY" if fields[4] == "02" else "SELL"
-    price = int(fields[8]) if fields[8] else 0
-    quantity = int(fields[9]) if fields[9] else 0
-    ticker = fields[17] if len(fields) > 17 else ""
+    exec_type = fields[13]  # 1:접수, 2:체결
+    ticker = fields[15] if len(fields) > 15 else ""
+    price = int(fields[10]) if fields[10] else 0       # 체결금액
+    quantity = int(fields[16]) if len(fields) > 16 and fields[16] else 0  # 체결수량
+
+    # 접수 통보(1)는 무시, 체결 통보(2)만 처리
+    if exec_type != "2":
+        logger.debug("체결통보 접수(미체결): order_no=%s, ticker=%s", order_no, ticker)
+        return
+
+    if not ticker or not ticker.isdigit():
+        logger.warning("체결통보 종목코드 이상: %s (fields=%s)", ticker, fields[:20])
+        return
 
     if _on_execution:
         await _on_execution(ticker, order_no, side, price, quantity)

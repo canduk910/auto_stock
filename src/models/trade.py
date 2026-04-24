@@ -22,8 +22,11 @@ class TradeRecord(BaseModel):
     id: str | None = None
     timestamp: datetime | None = None
     ticker: str
+    ticker_name: str = ""
     trade_type: TradeType
     price: float
     quantity: int
     profit_loss: float = 0
     status: TradeStatus = TradeStatus.PENDING
+    strategy: str = "momentum"
+    order_no: str = ""

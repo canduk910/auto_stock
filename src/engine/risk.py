@@ -1,28 +1,24 @@
 """리스크 관리 모듈.
 
 - 실시간 시세에 따른 손절/익일청산 신호 감시
-- 포지션 비중 제한
+- 전략별 포지션 비중 제한
+- 전략 간 중복 매수 방지
 """
 
 import logging
 
 from src.engine.order_engine import OrderEngine
-from src.engine.strategy import (
-    Signal,
-    StrategyState,
-    check_buy_signal,
-    check_next_day_clear,
-    check_stop_loss,
-)
+from src.engine.strategy_base import Signal
+from src.engine.strategy_registry import StrategyRegistry
 
 logger = logging.getLogger(__name__)
 
 
 class RiskManager:
-    """실시간 시세를 감시하며 매매 신호에 따라 주문을 실행한다."""
+    """실시간 시세를 감시하며 전략별 매매 신호에 따라 주문을 실행한다."""
 
-    def __init__(self, state: StrategyState, order_engine: OrderEngine) -> None:
-        self.state = state
+    def __init__(self, registry: StrategyRegistry, order_engine: OrderEngine) -> None:
+        self.registry = registry
         self.order_engine = order_engine
 
     async def on_tick(
@@ -34,6 +30,8 @@ class RiskManager:
     ) -> None:
         """실시간 체결가 수신 시 호출된다."""
         from src.engine.scanner import ticker_prev_close, ticker_prices
+
+        # 1. 공용 시세 갱신 (1회)
         prev_close = ticker_prev_close.get(ticker, 0)
         prdy_ctrt = round((current_price - prev_close) / prev_close * 100, 2) if prev_close > 0 else 0.0
         ticker_prices[ticker] = {
@@ -42,31 +40,33 @@ class RiskManager:
             "change_rate": round(change_rate, 2),
             "prdy_ctrt": prdy_ctrt,
         }
-        # 일일 손실 한도 초과 시 신규 매수 중단
-        if self.state.is_daily_loss_exceeded() and not self.state.buy_disabled:
-            self.state.buy_disabled = True
-            logger.warning("일일 최대 손실 한도 도달, 신규 매수 중단")
 
-        # 보유 중이면 고가 갱신
-        pos = self.state.positions.get(ticker)
-        if pos:
-            pos.high_since_buy = max(pos.high_since_buy, current_price)
+        # 2. 활성화된 전략별 순회
+        for strategy in self.registry.enabled():
+            state = strategy.state
 
-        # 1. 당일 손절 확인
-        signal = check_stop_loss(ticker, current_price, self.state)
-        if signal == Signal.STOP_LOSS:
-            await self.order_engine.execute_sell(ticker, signal)
-            return
+            # 일일 손실 한도 초과 시 신규 매수 중단
+            if strategy.is_daily_loss_exceeded() and not state.buy_disabled:
+                state.buy_disabled = True
+                logger.warning("일일 최대 손실 한도 도달: %s, 신규 매수 중단", strategy.strategy_id)
 
-        # 2. 익일 청산 확인
-        signal = check_next_day_clear(
-            ticker, open_price, current_price, self.state
-        )
-        if signal in (Signal.NEXT_DAY_CLEAR, Signal.TRAILING_STOP):
-            await self.order_engine.execute_sell(ticker, signal)
-            return
+            # 보유 중이면 고가 갱신
+            pos = state.positions.get(ticker)
+            if pos:
+                pos.high_since_buy = max(pos.high_since_buy, current_price)
 
-        # 3. 매수 신호 확인
-        signal = check_buy_signal(ticker, current_price, open_price, self.state)
-        if signal == Signal.BUY:
-            await self.order_engine.execute_buy(ticker, current_price)
+            # 3. 청산 신호 확인 (보유 중인 경우)
+            if state.has_position(ticker):
+                signal = strategy.check_exit_signal(ticker, current_price, open_price)
+                if signal != Signal.NONE:
+                    await self.order_engine.execute_sell(ticker, signal, strategy.strategy_id)
+                    continue  # 청산 주문 후 매수 신호 확인 불필요
+
+            # 4. 매수 신호 확인
+            # 중복 매수 방지: 어떤 전략이든 해당 종목을 보유/주문 중이면 건너뜀
+            if self.registry.is_ticker_held_by_any(ticker):
+                continue
+
+            signal = strategy.check_buy_signal(ticker, current_price, open_price)
+            if signal == Signal.BUY:
+                await self.order_engine.execute_buy(ticker, current_price, strategy)

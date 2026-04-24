@@ -7,7 +7,7 @@
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -36,8 +36,13 @@ class Position:
     buy_price: int
     quantity: int
     order_no: str
+    buy_date: date = field(default_factory=date.today)  # 매수일자
     high_since_buy: int = 0       # 매수 이후 고가 (트레일링용)
-    is_next_day: bool = False     # 익일 여부
+
+    @property
+    def is_next_day(self) -> bool:
+        """매수일자가 오늘이 아니면 익일 청산 대상."""
+        return self.buy_date < date.today()
 
     def __post_init__(self):
         self.high_since_buy = self.buy_price
@@ -110,7 +115,12 @@ def check_buy_signal(
         return Signal.NONE
 
     # 직전 tick 등락률 확인 — 29% 미만에서 29% 이상으로 돌파하는 순간만 매수
-    prev_rate = _prev_prdy_rate.get(ticker, 0.0)
+    # 첫 tick(기록 없음)은 현재 등락률만 기록하고 건너뜀 (이미 상승한 종목 즉시 매수 방지)
+    if ticker not in _prev_prdy_rate:
+        _prev_prdy_rate[ticker] = change_rate
+        return Signal.NONE
+
+    prev_rate = _prev_prdy_rate[ticker]
     _prev_prdy_rate[ticker] = change_rate
 
     if prev_rate < BUY_THRESHOLD and change_rate >= BUY_THRESHOLD:

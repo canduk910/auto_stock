@@ -1,6 +1,6 @@
 ---
 name: auto-trading-orchestrator
-description: "KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하는 오케스트레이터. 팀장(트레이더)이 리더로서 백엔드(FastAPI), 프론트엔드(React), 테스터를 지휘한다. '자동매매 시스템 구축해줘', '트레이딩 시스템 개발', '매매 시스템 만들어줘' 등 시스템 전체 구축 요청 시 이 스킬을 사용할 것. 개별 모듈만 요청하는 경우에는 해당 개별 스킬을 사용한다."
+description: "KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하는 오케스트레이터. 팀장(트레이더)이 리더로서 백엔드(FastAPI), 프론트엔드(React), 테스터를 지휘한다. '자동매매 시스템 구축해줘', '트레이딩 시스템 개발', '매매 시스템 만들어줘', '전략 추가해줘' 등 시스템 전체 구축/확장 요청 시 이 스킬을 사용할 것. 개별 모듈만 요청하는 경우에는 해당 개별 스킬을 사용한다."
 ---
 
 # Auto Trading System Orchestrator
@@ -13,15 +13,28 @@ KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하여 완�
 
 ```
 [React.js Frontend] ←REST API→ [FastAPI Backend] ←KIS API→ [한국투자증권]
-     (Vercel)                   (AWS EC2)              │
+   (Vite)                       (Uvicorn)               │
                                     │              [WebSocket 실시간]
                                     ↓
                               [Supabase DB]
-                           (PostgreSQL)
-                                    ↑
-                          [AWS EventBridge + Lambda]
-                           (스케줄러: 08:25, 16:10)
+                            (PostgreSQL)
 ```
+
+## 다중 전략 아키텍처
+
+```
+StrategyBase (추상 베이스)
+├── MomentumStrategy
+├── VolatilityBreakoutStrategy
+└── (향후 추가 전략)
+
+StrategyRegistry ← 전략 등록/비중/중복 방지
+RiskManager ← on_tick에서 registry 순회, 전략별 신호 체크
+OrderEngine ← strategy_id 태깅, 전략별 포지션 관리
+TradingScheduler ← registry 기반 boot/run/settle
+```
+
+매매 전략의 구체적 규칙은 `_workspace/00_leader_trading_rules.md`에 정의한다.
 
 ## 에이전트 구성
 
@@ -36,16 +49,10 @@ KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하여 완�
 
 ### Phase 1: 준비 — 요구사항 분석
 
-1. 사용자 요청에서 매매 전략, 기능 범위를 파악한다
+1. 사용자 요청에서 기능 범위를 파악한다
 2. `_workspace/` 디렉토리를 생성한다
-3. KIS API 스펙 확인: `docs/kis/README.md` 읽기
-4. 팀장(리더)이 매매 규칙 명세를 작성한다:
-   - 종목 필터링 조건 (시총 1,000억+, 거래대금 200억+, 최대 40개)
-   - 매수 규칙 (시가 대비 +29.5%, 투자대금 25% 비중, 시장가)
-   - 당일 손절 (매수가 대비 -7.5%)
-   - 익일 청산 (갭상승 +10% 트레일링 스탑 -2% / 그 외 즉시 매도)
-   - 스케줄 (08:25 기동 → 08:30~16:00 매매 → 16:10 정산)
-   - 부분 체결 처리, Rate Limit 대응
+3. 매매 전략 명세 확인: `_workspace/00_leader_trading_rules.md`
+4. KIS API 스펙 확인: `docs/kis/README.md`
 
 ### Phase 2: 팀 구성
 
@@ -58,56 +65,27 @@ KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하여 완�
          name: "backend-dev",
          agent_type: "backend-dev",
          model: "opus",
-         prompt: "당신은 자동매매시스템의 백엔드 개발자입니다. .claude/agents/backend-dev.md를 읽고 역할을 파악하세요. .claude/skills/kis-api-integration/skill.md를 참조하여 구현하세요. KIS API 스펙은 docs/kis/에 있습니다. 모듈 완성 시 tester에게 SendMessage하고, API 스키마 확정 시 frontend-dev에게 SendMessage하세요."
+         prompt: "백엔드 개발자. .claude/agents/backend-dev.md 역할 정의, .claude/skills/kis-api-integration/skill.md 참조. KIS API 스펙은 docs/kis/. 모듈 완성 시 tester에게 SendMessage, API 스키마 확정 시 frontend-dev에게 SendMessage."
        },
        {
          name: "frontend-dev",
          agent_type: "frontend-dev",
          model: "opus",
-         prompt: "당신은 자동매매시스템의 프론트엔드 개발자입니다. .claude/agents/frontend-dev.md를 읽고 역할을 파악하세요. .claude/skills/trading-dashboard/skill.md를 참조하여 React.js 대시보드를 구현하세요. API 스키마는 backend-dev에게 SendMessage로 확인하세요. 화면 완성 시 tester에게 알려주세요."
+         prompt: "프론트엔드 개발자. .claude/agents/frontend-dev.md 역할 정의, .claude/skills/trading-dashboard/skill.md 참조. API 스키마는 backend-dev에게 확인. 화면 완성 시 tester에게 알림."
        },
        {
          name: "tester",
          agent_type: "tester",
          model: "opus",
-         prompt: "당신은 자동매매시스템의 QA 테스터입니다. .claude/agents/tester.md를 읽고 역할을 파악하세요. .claude/skills/trading-test/skill.md를 참조하여 통합 테스트를 수행하세요. 모듈 완성 알림 시 즉시 테스트하세요. 버그는 해당 개발자에게, 매매 안전성 이슈는 team-leader에게 SendMessage하세요."
+         prompt: "QA 테스터. .claude/agents/tester.md 역할 정의, .claude/skills/trading-test/skill.md 참조. 모듈 완성 알림 시 즉시 테스트. 버그는 해당 개발자에게, 매매 안전성 이슈는 team-leader에게 SendMessage."
        }
      ]
    )
    ```
 
-2. 작업 등록:
-   ```
-   TaskCreate(tasks: [
-     // 백엔드 — 인프라
-     { title: "환경 설정 및 프로젝트 초기화", description: "FastAPI 프로젝트 구조, .env, config.py, Supabase 테이블 생성", assignee: "backend-dev" },
-     { title: "인증 모듈", description: "OAuth 토큰 발급/갱신, Hashkey, 접속키 발급", assignee: "backend-dev" },
-     { title: "REST API 공통 래퍼", description: "헤더 구성, Rate Limit(Semaphore), 에러 처리, 재시도", assignee: "backend-dev", depends_on: ["인증 모듈"] },
-     
-     // 백엔드 — 매매 핵심
-     { title: "종목 필터링 모듈", description: "조건검색 API 연동, 시총/거래대금 필터, 최대 40개 제한", assignee: "backend-dev", depends_on: ["REST API 공통 래퍼"] },
-     { title: "WebSocket 실시간 모듈", description: "시세 구독, 체결통보(H0STCNI0) 수신/복호화, Heartbeat, 재연결", assignee: "backend-dev", depends_on: ["인증 모듈"] },
-     { title: "주문 모듈", description: "현금 매수/매도(TTTC0011U/0012U), 정정취소, 잔고/매수가능 조회", assignee: "backend-dev", depends_on: ["REST API 공통 래퍼"] },
-     { title: "매매 엔진", description: "시가+29.5% 매수, -7.5% 손절, 익일 청산(갭상승/트레일링스탑), 중복매수 차단, 부분체결 관리", assignee: "backend-dev", depends_on: ["주문 모듈", "WebSocket 실시간 모듈", "종목 필터링 모듈"] },
-     { title: "스케줄러", description: "08:25 기동, 08:30~16:00 매매, 16:10 정산, DB 동기화", assignee: "backend-dev", depends_on: ["매매 엔진"] },
-     
-     // 백엔드 — 프론트 연동 API
-     { title: "FastAPI 라우트", description: "/api/trading/*, /api/balance, /api/history, /api/performance 엔드포인트", assignee: "backend-dev", depends_on: ["주문 모듈"] },
-     
-     // 프론트엔드
-     { title: "프론트 프로젝트 초기화", description: "React + TypeScript + TanStack Query + Tailwind 설정", assignee: "frontend-dev" },
-     { title: "구동 관리 화면", description: "시작/정지 버튼 + 이중확인 모달 + 상태 인디케이터", assignee: "frontend-dev", depends_on: ["FastAPI 라우트"] },
-     { title: "매매 실적 화면", description: "요약 카드 + 일별/월별 차트", assignee: "frontend-dev", depends_on: ["FastAPI 라우트"] },
-     { title: "거래 내역 화면", description: "TanStack Table + 서버사이드 페이징 + 필터", assignee: "frontend-dev", depends_on: ["FastAPI 라우트"] },
-     { title: "잔고 조회 화면", description: "예수금 + 보유종목 테이블 + 자동 갱신", assignee: "frontend-dev", depends_on: ["FastAPI 라우트"] },
-     
-     // 테스트
-     { title: "인증/API 래퍼 테스트", description: "토큰 관리, Rate Limit, KIS 스펙 교차 검증", assignee: "tester", depends_on: ["인증 모듈", "REST API 공통 래퍼"] },
-     { title: "주문 흐름 E2E 테스트", description: "매수→체결→잔고→손절/청산 전체 흐름 + 부분 체결", assignee: "tester", depends_on: ["매매 엔진"] },
-     { title: "FastAPI↔React 경계면 검증", description: "엔드포인트 URL, 응답 스키마, 타입 교차 비교", assignee: "tester", depends_on: ["구동 관리 화면", "매매 실적 화면", "거래 내역 화면", "잔고 조회 화면"] },
-     { title: "매매 안전성 테스트", description: "중복 매수 차단, 손절 트리거, 트레일링 스탑, Rate Limit, 스케줄러", assignee: "tester", depends_on: ["매매 엔진", "스케줄러"] }
-   ])
-   ```
+2. 작업 등록 — 팀장(리더)이 매매 규칙 명세를 작성한 후 TaskCreate로 등록.
+   작업 내용은 요구사항에 따라 동적으로 결정한다.
+   팀원당 4~6개 작업이 적정. 의존성이 있는 작업은 `depends_on`으로 명시.
 
 ### Phase 3: 개발 — 팀 자체 조율
 
@@ -145,12 +123,7 @@ KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하여 완�
 1. 모든 팀원 작업 완료 대기 (TaskGet)
 2. tester의 최종 통합 테스트 리포트 확인
 3. 미해결 이슈가 있으면 해당 팀원에게 수정 지시
-4. 팀장이 최종 검수:
-   - 매수 조건(+29.5%)이 정확히 구현되었는가?
-   - 손절(-7.5%)이 즉시 트리거되는가?
-   - 익일 청산 로직(갭상승 분기 + 트레일링 스탑)이 올바른가?
-   - 부분 체결 상태 관리가 되는가?
-   - 스케줄러가 정시에 동작하는가?
+4. 팀장이 최종 검수 — 매매 규칙 명세(`_workspace/00_leader_trading_rules.md`)와 구현의 일치 확인
 
 ### Phase 5: 정리
 
@@ -160,9 +133,8 @@ KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하여 완�
 4. 사용자에게 결과 요약 보고:
    - 구현 완료 모듈 목록
    - 테스트 결과 요약 (통과/실패/미검증)
-   - 모의투자 테스트 가이드
    - 알려진 제한사항
-   - 실전 전환 시 변경 사항 (.env의 KIS_ENV=real)
+   - 실행 방법 안내
 
 ## 데이터 흐름
 
@@ -194,16 +166,17 @@ KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하여 완�
 ## 테스트 시나리오
 
 ### 정상 흐름
-1. 사용자가 "자동매매 시스템 만들어줘" 요청
-2. Phase 1: 매매 전략 분석 (시가+29.5% 매수, 손절, 익일 청산)
-3. Phase 2: 팀 구성 (4명) + 작업 등록 (18개)
-4. Phase 3: 팀장 매매 규칙 전달 → 백엔드(FastAPI+KIS) → 프론트(React) → 점진적 테스트
+1. 사용자가 기능 요청
+2. Phase 1: 요구사항 분석, 매매 규칙 명세 확인/작성
+3. Phase 2: 팀 구성 + 작업 등록
+4. Phase 3: 팀장 매매 규칙 전달 → 백엔드 → 프론트 → 점진적 테스트
 5. Phase 4: 최종 통합 테스트 통과
-6. Phase 5: 모의투자 테스트 가이드와 함께 결과 보고
-7. 예상 결과: `src/`(백엔드) + `frontend/`(프론트) + Supabase 스키마 완성
+6. Phase 5: 팀 정리 + 결과 보고
 
 ### 에러 흐름
-1. Phase 3에서 tester가 손절 트리거 오류 발견 (-7.5% 조건이 매수가가 아닌 시가 기준으로 구현)
-2. tester → team-leader: 매매 안전성 이슈 보고
-3. team-leader → backend-dev: "손절 기준은 매수 체결가 대비여야 함" 명확화
-4. backend-dev 수정 → tester 재검증 → 통과
+1. Phase 3에서 tester가 경계면 불일치 발견
+2. tester → 해당 개발자: 버그 리포트 (파일:라인 + 수정 제안)
+3. 개발자 수정 → tester 재검증
+4. tester가 매매 안전성 이슈 발견 → team-leader 보고
+5. team-leader → 개발자: 수정 지시 (현업 관점 명확화)
+6. 수정 → 재검증 → 통과

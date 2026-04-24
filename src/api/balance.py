@@ -48,6 +48,7 @@ async def get_balance() -> tuple[list[StockHolding], AccountSummary]:
             eval_profit_rate=float(item["evlu_pfls_rt"]),
         )
         for item in data.get("output1", [])
+        if int(item.get("hldg_qty", "0")) > 0
     ]
 
     summary_data = data.get("output2", [{}])
@@ -63,6 +64,40 @@ async def get_balance() -> tuple[list[StockHolding], AccountSummary]:
     )
 
     return holdings, summary
+
+
+async def get_daily_orders(target_date: str = "") -> list[dict]:
+    """당일(또는 지정일) 주문체결내역을 조회한다.
+
+    KIS 주식일별주문체결조회 API (TTTC0081R).
+    """
+    from datetime import date as _date
+    if not target_date:
+        target_date = _date.today().strftime("%Y%m%d")
+
+    params = {
+        "CANO": settings.kis_account_no,
+        "ACNT_PRDT_CD": settings.kis_account_product,
+        "INQR_STRT_DT": target_date,
+        "INQR_END_DT": target_date,
+        "SLL_BUY_DVSN_CD": "00",  # 전체
+        "INQR_DVSN": "00",
+        "PDNO": "",
+        "CCLD_DVSN": "00",  # 전체
+        "ORD_GNO_BRNO": "",
+        "ODNO": "",
+        "INQR_DVSN_3": "00",
+        "INQR_DVSN_1": "",
+        "CTX_AREA_FK100": "",
+        "CTX_AREA_NK100": "",
+    }
+
+    data = await kis_get(
+        "/uapi/domestic-stock/v1/trading/inquire-daily-ccld",
+        settings.get_tr_id("TTTC0081R"),
+        params,
+    )
+    return data.get("output1", [])
 
 
 async def get_buyable(ticker: str = "", price: int = 0) -> BuyableInfo:

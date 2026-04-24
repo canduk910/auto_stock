@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: .
+      target: prod
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+    env_file: .env
+    environment:
+      - PORT=8000
+      - TZ=Asia/Seoul
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      target: prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

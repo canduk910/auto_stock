@@ -60,29 +60,32 @@ Supabase SQL Editor에서 마이그레이션 파일 실행:
 # supabase/migrations/001_init.sql 내용을 Supabase SQL Editor에 붙여넣기 실행
 ```
 
-### 3. 백엔드 실행
+### 3. Docker Compose로 실행 (권장)
 
 ```bash
-# 의존성 설치
+# 개발 환경 (hot-reload 지원)
+docker compose up --build
+
+# 프로덕션 환경
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+- 개발: 프론트엔드 `http://localhost:3000`, 백엔드 `http://localhost:8002`
+- 프로덕션: `http://localhost:80` (Nginx 정적파��� + API 프록시)
+
+### 3-1. 로컬 직접 실행 (Docker 없이)
+
+```bash
+# 백엔드
 pip install -r requirements.txt
-
-# 서버 시작
-python -m src.main
-# 또는
 uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+# 프론트엔드
+cd frontend && npm install && npm run dev
 ```
 
-서버가 `http://localhost:8000`에서 실행됩니다. API 문서: `http://localhost:8000/docs`
-
-### 4. 프론트엔드 실행
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-대시보드가 `http://localhost:5173`에서 실행됩니다.
+- 백엔드: `http://localhost:8000`, API 문서: `http://localhost:8000/docs`
+- 프론트엔드: `http://localhost:3000`
 
 ## 사용 방법
 
@@ -116,11 +119,24 @@ KIS_APP_SECRET=실전용_시크릿
 
 | 구분 | 규칙 |
 |------|------|
-| 종목 선정 | 09:30~ 시총 1,000억+, 거래대��� 200억+, 최대 40종목 |
-| 매수 | 당일 시가 대비 +29.5% 도달, 투자대금 25% 비중, 시장가 |
-| 당일 손절 | 매수 체결가 대비 -7.5% 즉시 시장가 전량 매도 |
-| 익일 청산 | 09:00 시가 +10%↑ → 고점 -2% 트레일링 스탑 / 그 외 즉시 매도 |
-| 리스크 | 일일 최대 손실 5%, 동시 보유 4종목, 15:20 매수 중단 |
+### 전략 A: 상한가 모멘텀
+| 구분 | 규칙 |
+|------|------|
+| 종목 선정 | 등락률 순위 15%+ → 시총 1,000억+, 거래대금 200억+ |
+| 매수 | 전일종가 대비 +29% 돌파 순간, 할당 자금 25% 비중 |
+| 손절 | 매수가 대비 -7.5% |
+| 익일 청산 | 09:00 갭상승 +10% → 트레일링 스탑 -2% / 그 외 즉시 매도 |
+
+### 전략 B: 변동성 돌파
+| 구분 | 규칙 |
+|------|------|
+| 종목군 | 코스피+코스닥 전체, 시총/거래대금 필터, 노이즈 비율 기반 동적 K값 |
+| 매수 | 시가 + (전일 Range × K값) 돌파 순간, 할당 자금 10% 비중 |
+| 손절 | 매수가 대비 -3% |
+| 청산 | 15:20 전량 강제 청산 (오버나잇 거부) |
+| 재매수 | 당일 매도 종목 재매수 차단 |
+
+> 프론트엔드 Settings 페이지에서 전략별 자금 비중 조절 가능
 
 ## API 엔드포인트
 
@@ -128,7 +144,9 @@ KIS_APP_SECRET=실전용_시크릿
 |--------|-----|------|
 | GET | `/health` | 헬스 체크 |
 | POST | `/api/trading/start` | 자동매매 시작 |
-| POST | `/api/trading/stop` | 자동매매 ��지 |
+| POST | `/api/trading/stop` | 자동매매 정지 |
+| POST | `/api/trading/restart` | 자동매매 재기동 |
+| POST | `/api/trading/manual-sell` | 수동 매도 (시장가) |
 | GET | `/api/trading/status` | 현재 상태 조회 |
 | GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목) |
 | GET | `/api/balance/buyable` | 매수 가능 금액 조회 |
@@ -136,6 +154,12 @@ KIS_APP_SECRET=실전용_시크릿
 | GET | `/api/performance/summary` | 실적 요약 |
 | GET | `/api/performance/daily` | 일별 실적 |
 | GET | `/api/performance/monthly` | 월별 실적 |
+| GET | `/api/strategies` | 전략 목록 + 비중 + 상태 + 타겟가 |
+| PUT | `/api/strategies/weights` | 전략별 비중 수정 (매수금액 하한선 검증) |
+| PUT | `/api/strategies/{id}/params` | 전략 파라미터 수정 |
+| GET | `/api/strategies/system/auto-start` | 자동 매매 설정 조회 |
+| PUT | `/api/strategies/system/auto-start` | 자동 매매 설정 변경 |
+| GET | `/api/logs` | 시스템 로그 조회 |
 
 ## 프로젝트 구조
 
@@ -159,6 +183,9 @@ auto_stock/
 │       └── types/           # TypeScript 타입
 ├── supabase/migrations/     # DB 마이그레이션
 ├── docs/kis/                # KIS API 스펙 문서
+├── Dockerfile               # 백엔드 Docker (dev/prod 멀티스테이지)
+├── docker-compose.yml       # 개발 환경 Docker Compose
+├── docker-compose.prod.yml  # 프로덕션 환경 Docker Compose
 ├── requirements.txt         # Python 의존성
 └── .env                     # 환경 변수 (git 미추적)
 ```
@@ -167,10 +194,14 @@ auto_stock/
 
 | 시각 | 동작 |
 |------|------|
-| 08:25 | 프로세스 기동, 토큰 갱신, DB 잔고 동기화 |
-| 08:30 | WebSocket 연결 |
-| 09:00 | 익일 청산 실행 (전일 보유 종목) |
-| 09:30 | 종목 필터링 시작, 매수 감시 |
-| 15:20 | 신규 매수 중단 |
+| 08:20 | 자동 매매 시작 (AUTO_START 활성 시, 주말 자동 건너뜀) |
+| 08:25 | 프로세스 기동, 토큰 갱신, DB 포지션/설정 복구 |
+| 08:30 | WebSocket 연결, 체결통보 구독 |
+| 09:00 | 모멘텀 익일 청산 |
+| 09:01 | 변동성돌파 시가 확정 → Target Price 계산 |
+| 09:30 | 종목 스캔 시작, 매수 감시 |
+| 15:20 | 신규 매수 중단, 변동성돌파 전량 강제 청산 |
 | 15:30 | WebSocket 구독 해제 |
-| 16:10 | 일��� 정산, DB 실적 기록, Sleep |
+| 16:10 | 전략별 + 합산 일일 정산, DB 실적 기록 |
+
+**중간 시각 시작 시**: 현재 시각 이후 스케줄부터 실행 (16:10 이후 시작 거부)

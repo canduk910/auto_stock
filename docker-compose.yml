@@ -1,0 +1,34 @@
+services:
+  backend:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    env_file: .env
+    environment:
+      - PORT=8000
+      - TZ=Asia/Seoul
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tsconfig.app.json:/app/tsconfig.app.json
+      - ./frontend/tsconfig.node.json:/app/tsconfig.node.json
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend

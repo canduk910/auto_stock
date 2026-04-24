@@ -59,30 +59,27 @@ VTS_DOMAIN = "https://openapivts.koreainvestment.com:29443"
 
 ### 4. 주문 안전 장치
 - 주문 전 매수가능금액(`TTTC8908R`) 사전 조회
-- 총 투자대금의 25% 비중 자동 계산
-- 동일 종목+BUY 미체결 존재 시 중복 주문 차단
+- 전략별 비중에 따른 수량 계산 (strategy.calc_buy_quantity)
+- 전략 간 동일 종목 중복 주문 차단 (registry.is_ticker_held_by_any)
 - 부분 체결 감지 → PARTIAL 상태 기록 → 잔여 물량 추적/취소
-- 모든 주문에 고유 식별자 부여 (UUID), trade_history에 기록
+- 모든 주문에 strategy_id 태깅 → 체결통보에서 올바른 전략에 라우팅
 
-### 5. 매매 엔진 핵심 로직
+### 5. 다중 전략 매매 엔진
+
+매매 전략은 `src/engine/strategy_base.py`의 StrategyBase를 상속하여 구현한다.
+각 전략의 매수/청산 로직은 `_workspace/00_leader_trading_rules.md` 명세를 따른다.
 
 ```python
-# 매수 조건 감시 (WebSocket 시세 기반)
-# 당일 시가 대비 현재가의 등락률 계산
-change_rate = (current_price - open_price) / open_price * 100
-if change_rate >= 29.5 and not already_bought(ticker):
-    execute_buy(ticker, investment_amount * 0.25)
-
-# 손절 감시
-if (current_price - buy_price) / buy_price * 100 <= -7.5:
-    execute_sell(ticker, "STOP_LOSS")
-
-# 익일 청산 (09:00)
-gap_rate = (today_open - buy_price) / buy_price * 100
-if gap_rate >= 10.0:
-    start_trailing_stop(ticker, high_price, -2.0)  # 고점 대비 -2%
-else:
-    execute_sell(ticker, "NEXT_DAY_CLEAR")
+# RiskManager.on_tick() — 전략 레지스트리 순회
+for strategy in registry.enabled():
+    # 청산 신호 확인
+    signal = strategy.check_exit_signal(ticker, current_price, open_price)
+    if signal != Signal.NONE:
+        await order_engine.execute_sell(ticker, signal, strategy.strategy_id)
+    # 매수 신호 확인
+    signal = strategy.check_buy_signal(ticker, current_price, open_price)
+    if signal == Signal.BUY:
+        await order_engine.execute_buy(ticker, current_price, strategy)
 ```
 
 ## 프로젝트 사용 API 빠른 참조

@@ -12,15 +12,21 @@ import {
 } from 'recharts'
 import { getDailyPerformance, getMonthlyPerformance } from '../api/performance'
 
-export default function ProfitChart() {
+interface Props {
+  selectedStrategy: string
+}
+
+export default function ProfitChart({ selectedStrategy }: Props) {
+  const strategyParam = selectedStrategy === 'all' ? undefined : selectedStrategy
+
   const { data: daily, isLoading: dailyLoading } = useQuery({
-    queryKey: ['dailyPerformance'],
-    queryFn: () => getDailyPerformance(30),
+    queryKey: ['dailyPerformance', strategyParam],
+    queryFn: () => getDailyPerformance(30, strategyParam),
   })
 
   const { data: monthly, isLoading: monthlyLoading } = useQuery({
-    queryKey: ['monthlyPerformance'],
-    queryFn: getMonthlyPerformance,
+    queryKey: ['monthlyPerformance', strategyParam],
+    queryFn: () => getMonthlyPerformance(strategyParam),
   })
 
   return (

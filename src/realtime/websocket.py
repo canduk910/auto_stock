@@ -9,6 +9,7 @@
 import asyncio
 import json
 import logging
+import time
 from typing import Callable, Awaitable
 
 import websockets
@@ -20,10 +21,11 @@ from src.realtime.handler import set_aes_keys
 
 logger = logging.getLogger(__name__)
 
-MAX_SUBSCRIPTIONS = 40
+MAX_SUBSCRIPTIONS = 200  # 모멘텀 + 변동성돌파 합집합 수용
 MAX_RECONNECT = 5
 HEARTBEAT_TIMEOUT = 30  # 초
 BACKOFF_BASE = 1.0
+MIN_STABLE_SECONDS = 5  # 이 시간 이상 연결 유지해야 안정적 연결로 판단
 
 
 class KisWebSocket:
@@ -60,7 +62,7 @@ class KisWebSocket:
                     ping_interval=None,
                 ) as ws:
                     self._ws = ws
-                    self._reconnect_count = 0
+                    connected_at = time.monotonic()
                     logger.info("WebSocket 연결 성공")
 
                     # 기존 구독 복원
@@ -68,6 +70,10 @@ class KisWebSocket:
                         await self._send_subscribe(tr_id, tr_key, subscribe=True)
 
                     await self._receive_loop()
+
+                    # 안정적 연결(MIN_STABLE_SECONDS 이상 유지)이었으면 카운트 리셋
+                    if time.monotonic() - connected_at >= MIN_STABLE_SECONDS:
+                        self._reconnect_count = 0
 
             except (
                 websockets.ConnectionClosed,
@@ -101,7 +107,8 @@ class KisWebSocket:
     async def subscribe(self, tr_id: str, tr_key: str) -> None:
         """종목 구독을 등록한다."""
         if len(self._subscriptions) >= MAX_SUBSCRIPTIONS:
-            raise RuntimeError(f"최대 구독 수({MAX_SUBSCRIPTIONS}) 초과")
+            logger.warning("최대 구독 수(%d) 도달, %s/%s 구독 건너뜀", MAX_SUBSCRIPTIONS, tr_id, tr_key)
+            return
         self._subscriptions.add((tr_id, tr_key))
         if self._ws:
             await self._send_subscribe(tr_id, tr_key, subscribe=True)
@@ -167,6 +174,15 @@ class KisWebSocket:
                 if tr_id == "PINGPONG":
                     if self._ws:
                         await self._ws.send(raw)
+                    return
+
+                # 구독 에러 응답 감지 → 해당 구독 제거 (무한 재연결 방지)
+                msg1 = body.get("msg1", "")
+                if "ERROR" in msg1.upper():
+                    tr_key = header.get("tr_key", "")
+                    logger.error("WebSocket 구독 에러: tr_id=%s, tr_key=%s, msg=%s", tr_id, tr_key, msg1)
+                    # 에러 난 구독을 제거하여 재연결 시 같은 에러 반복 방지
+                    self._subscriptions.discard((tr_id, tr_key))
                     return
 
                 # 구독 성공 응답 → AES 키 저장 (체결통보용)

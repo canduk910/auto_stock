@@ -1,11 +1,15 @@
 """매매 관리 라우트: /api/trading/*"""
 
 import asyncio
+import logging
 
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 from src.engine.scheduler import trading_scheduler
 from src.models.response import ApiResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/trading", tags=["trading"])
 
@@ -42,3 +46,71 @@ async def restart_trading():
 async def get_status():
     """현재 매매 상태를 반환한다."""
     return ApiResponse(success=True, data=trading_scheduler.get_status())
+
+
+class ManualSellRequest(BaseModel):
+    ticker: str
+    quantity: int
+
+
+@router.post("/manual-sell", response_model=ApiResponse)
+async def manual_sell(req: ManualSellRequest):
+    """수동 매도 주문을 실행한다.
+
+    자동매매와 동일하게 시장가 매도 + trade_history 기록.
+    포지션이 있는 전략을 자동으로 찾아서 해당 전략으로 기록한다.
+    """
+    from src.api.order import place_order
+    from src.models.order import OrderSide
+    from src.db.trade_history import insert_trade
+    from src.models.trade import TradeRecord, TradeType, TradeStatus
+    from src.engine.scanner import t, ticker_names
+
+    registry = trading_scheduler.registry
+
+    # 포지션이 있는 전략 찾기
+    strategy = registry.find_strategy_for_ticker(req.ticker)
+    strategy_id = strategy.strategy_id if strategy else "momentum"
+    pos = strategy.state.positions.get(req.ticker) if strategy else None
+    buy_price = pos.buy_price if pos else 0
+
+    try:
+        result = await place_order(
+            ticker=req.ticker,
+            side=OrderSide.SELL,
+            quantity=req.quantity,
+            price=0,  # 시장가
+        )
+
+        # trade_history 기록
+        name = ticker_names.get(req.ticker, "")
+        record = TradeRecord(
+            ticker=req.ticker,
+            ticker_name=name,
+            trade_type=TradeType.SELL,
+            price=buy_price,
+            quantity=req.quantity,
+            profit_loss=0,  # 체결 시 확정
+            status=TradeStatus.PENDING,
+            strategy=strategy_id,
+            order_no=result.order_no,
+        )
+        await insert_trade(record)
+
+        # 주문 추적 등록 (체결통보에서 포지션 제거)
+        engine = trading_scheduler.order_engine
+        engine._order_qty[result.order_no] = req.quantity
+        engine._order_strategy[result.order_no] = strategy_id
+        engine._selling.add(req.ticker)
+
+        logger.info("수동 매도 주문 접수: %s %d주 (주문번호: %s, 전략: %s)",
+                     t(req.ticker), req.quantity, result.order_no, strategy_id)
+
+        return ApiResponse(
+            success=True,
+            message=f"{name or req.ticker} {req.quantity}주 매도 주문 접수 (주문번호: {result.order_no})",
+        )
+
+    except Exception as e:
+        logger.error("수동 매도 실패: %s — %s", req.ticker, e)
+        return ApiResponse(success=False, message=f"매도 주문 실패: {e}")

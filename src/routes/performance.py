@@ -9,15 +9,16 @@ router = APIRouter(prefix="/api/performance", tags=["performance"])
 
 
 @router.get("/summary", response_model=ApiResponse)
-async def summary():
+async def summary(strategy: str = "total"):
     """최근 30일 실적 요약을 반환한다."""
-    records = await get_performance(days=30)
+    records = await get_performance(days=30, strategy=strategy)
     if not records:
         return ApiResponse(success=True, data={
             "total_days": 0,
             "total_profit_rate": 0,
             "avg_daily_profit_rate": 0,
             "latest_asset": 0,
+            "strategy": strategy,
         })
 
     total_rate = sum(r["daily_profit_rate"] for r in records)
@@ -29,22 +30,23 @@ async def summary():
             "total_days": len(records),
             "total_profit_rate": round(total_rate, 2),
             "avg_daily_profit_rate": round(avg_rate, 2),
-            "latest_asset": records[0]["total_asset"],
+            "latest_asset": records[-1]["total_asset"] if records else 0,
+            "strategy": strategy,
         },
     )
 
 
 @router.get("/daily", response_model=ApiResponse)
-async def daily(days: int = 30):
+async def daily(days: int = 30, strategy: str = "total"):
     """일별 실적 데이터를 반환한다."""
-    records = await get_performance(days=days)
+    records = await get_performance(days=days, strategy=strategy)
     return ApiResponse(success=True, data=records)
 
 
 @router.get("/monthly", response_model=ApiResponse)
-async def monthly():
+async def monthly(strategy: str = "total"):
     """월별 실적을 반환한다."""
-    records = await get_performance(days=365)
+    records = await get_performance(days=365, strategy=strategy)
     monthly_data: dict[str, list[dict]] = {}
     for r in records:
         month = r["date"][:7]  # "YYYY-MM"

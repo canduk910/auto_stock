@@ -1,0 +1,128 @@
+"""전략 레지스트리.
+
+전략의 등록/조회/비중 관리/전략 간 중복 매수 방지를 담당한다.
+"""
+
+import logging
+
+from src.engine.strategy_base import StrategyBase
+
+logger = logging.getLogger(__name__)
+
+
+class StrategyRegistry:
+    """전략 등록/조회/비중 관리."""
+
+    def __init__(self):
+        self._strategies: dict[str, StrategyBase] = {}
+
+    def register(self, strategy: StrategyBase) -> None:
+        self._strategies[strategy.strategy_id] = strategy
+        logger.info("전략 등록: %s (%s) 비중=%.0f%%",
+                     strategy.config.name, strategy.strategy_id,
+                     strategy.config.weight * 100)
+
+    def get(self, strategy_id: str) -> StrategyBase | None:
+        return self._strategies.get(strategy_id)
+
+    def all(self) -> list[StrategyBase]:
+        return list(self._strategies.values())
+
+    def enabled(self) -> list[StrategyBase]:
+        return [s for s in self._strategies.values() if s.config.enabled]
+
+    def allocate_funds(self, total_asset: int) -> None:
+        """총 자산을 전략별 비중에 따라 분배한다."""
+        enabled = self.enabled()
+        total_weight = sum(s.config.weight for s in enabled)
+        for s in enabled:
+            ratio = s.config.weight / total_weight if total_weight > 0 else 0
+            s.state.total_investment = int(total_asset * ratio)
+            logger.info("자금 분배: %s → %s원 (%.0f%%)",
+                         s.config.name, f"{s.state.total_investment:,}",
+                         ratio * 100)
+
+    def update_weights(self, weights: dict[str, float]) -> None:
+        """전략별 비중을 업데이트한다. 비중 > 0이면 자동 활성화, 0이면 비활성화."""
+        for sid, weight in weights.items():
+            s = self._strategies.get(sid)
+            if s:
+                s.config.weight = weight
+                was_enabled = s.config.enabled
+                s.config.enabled = weight > 0
+                if s.config.enabled != was_enabled:
+                    logger.info("전략 %s: %s → %s",
+                                s.config.name,
+                                "활성" if was_enabled else "비활성",
+                                "활성" if s.config.enabled else "비활성")
+                logger.info("비중 변경: %s → %.0f%%", s.config.name, weight * 100)
+
+    def find_strategy_for_ticker(self, ticker: str) -> StrategyBase | None:
+        """특정 종목을 보유 중인 전략을 찾는다."""
+        for s in self._strategies.values():
+            if s.state.has_position(ticker):
+                return s
+        return None
+
+    def is_ticker_held_by_any(self, ticker: str) -> bool:
+        """어떤 전략이든 해당 종목을 보유 또는 주문 중인지 확인한다."""
+        for s in self._strategies.values():
+            if s.state.has_position(ticker) or s.state.is_buy_pending(ticker):
+                return True
+        return False
+
+    def get_strategies_status(self) -> dict:
+        """전략별 상태를 반환한다."""
+        from src.engine.scanner import ticker_names
+
+        total_asset = sum(s.state.total_investment for s in self._strategies.values())
+
+        result = {}
+        for sid, s in self._strategies.items():
+            positions_detail = {}
+            for ticker, pos in s.state.positions.items():
+                positions_detail[ticker] = {
+                    "name": ticker_names.get(ticker, ""),
+                    "buy_price": pos.buy_price,
+                    "quantity": pos.quantity,
+                    "high_since_buy": pos.high_since_buy,
+                    "buy_date": pos.buy_date.isoformat(),
+                    "is_next_day": pos.is_next_day,
+                }
+
+            # 전략별 스캔 종목 (있는 경우)
+            scanned = []
+            if hasattr(s, 'get_scanned_tickers'):
+                scanned = s.get_scanned_tickers()
+
+            # VB 타겟 데이터 (있는 경우)
+            targets = {}
+            if hasattr(s, 'get_targets_status'):
+                targets = s.get_targets_status()
+
+            result[sid] = {
+                "name": s.config.name,
+                "enabled": s.config.enabled,
+                "weight": s.config.weight,
+                "params": s.config.params,
+                "positions": len(s.state.positions),
+                "pending_buys": len(s.state.pending_buys),
+                "position_tickers": list(s.state.positions.keys()),
+                "total_investment": s.state.total_investment,
+                "daily_realized_pnl": s.state.daily_realized_pnl,
+                "buy_disabled": s.state.buy_disabled,
+                "buy_signals": s.state.buy_signals[-10:],
+                "positions_detail": positions_detail,
+                "pending_buy_tickers": list(s.state.pending_buys),
+                "scanned_tickers": scanned,
+                "scanned_count": len(scanned),
+                "targets": targets,
+                "invested_amount": sum(
+                    pos.buy_price * pos.quantity for pos in s.state.positions.values()
+                ),
+                "min_weight": round(
+                    sum(pos.buy_price * pos.quantity for pos in s.state.positions.values())
+                    / total_asset * 100
+                ) if total_asset > 0 and s.state.positions else 0,
+            }
+        return result

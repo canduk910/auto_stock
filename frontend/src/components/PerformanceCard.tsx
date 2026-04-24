@@ -11,10 +11,16 @@ function profitColor(value: number): string {
   return 'text-[#333333]'
 }
 
-export default function PerformanceCard() {
+interface Props {
+  selectedStrategy: string
+}
+
+export default function PerformanceCard({ selectedStrategy }: Props) {
+  const strategyParam = selectedStrategy === 'all' ? undefined : selectedStrategy
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['performanceSummary'],
-    queryFn: getPerformanceSummary,
+    queryKey: ['performanceSummary', strategyParam],
+    queryFn: () => getPerformanceSummary(strategyParam),
   })
 
   if (isLoading) return <div className="p-6 text-gray-500">실적 로딩 중...</div>
@@ -24,8 +30,16 @@ export default function PerformanceCard() {
   const cards = [
     { label: '운영 일수', value: `${data.total_days}일` },
     { label: '최근 자산', value: formatKRW(data.latest_asset) },
-    { label: '누적 수익률', value: data.total_profit_rate.toFixed(2) + '%', colorValue: data.total_profit_rate },
-    { label: '일평균 수익률', value: data.avg_daily_profit_rate.toFixed(2) + '%', colorValue: data.avg_daily_profit_rate },
+    {
+      label: '누적 수익률',
+      value: data.total_profit_rate.toFixed(2) + '%',
+      colorValue: data.total_profit_rate,
+    },
+    {
+      label: '일평균 수익률',
+      value: data.avg_daily_profit_rate.toFixed(2) + '%',
+      colorValue: data.avg_daily_profit_rate,
+    },
   ]
 
   return (

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 FLUCTUATION_RANK_URL = "/uapi/domestic-stock/v1/ranking/fluctuation"
 STOCK_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-price"
+DAILY_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-daily-price"
 
 # 스캔 최소 등락률 — 29% 매수 조건의 후보군
 MIN_CHANGE_RATE = 15.0
@@ -74,6 +75,31 @@ async def fetch_stock_detail(ticker: str) -> dict:
     }
     data = await kis_get(STOCK_PRICE_URL, "FHKST01010100", params)
     return data.get("output", {})
+
+
+async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
+    """KIS 일봉 API로 최근 N일 일봉 데이터를 조회한다.
+
+    반환: [{"stck_bsop_date", "stck_oprc"(시가), "stck_hgpr"(고가),
+            "stck_lwpr"(저가), "stck_clpr"(종가), ...}, ...]
+    """
+    from datetime import date, timedelta
+
+    end_date = date.today().strftime("%Y%m%d")
+    start_date = (date.today() - timedelta(days=days + 10)).strftime("%Y%m%d")  # 여유분
+
+    params = {
+        "fid_cond_mrkt_div_code": "J",
+        "fid_input_iscd": ticker,
+        "fid_input_date_1": start_date,
+        "fid_input_date_2": end_date,
+        "fid_period_div_code": "D",
+        "fid_org_adj_prc": "0",
+    }
+    data = await kis_get(DAILY_PRICE_URL, settings.get_tr_id("FHKST01010400"), params)
+    output = data.get("output", [])
+    # 최근 N일만 반환 (API가 최신순으로 내려줌)
+    return output[:days]
 
 
 async def fetch_rising_stocks() -> list[dict]:

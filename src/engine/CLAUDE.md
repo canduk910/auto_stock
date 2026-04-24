@@ -1,53 +1,94 @@
 # CLAUDE.md — src/engine/ (매매 엔진)
 
-자동매매의 핵심 로직. 종목 스캔, 매매 전략, 주문 실행, 리스크 관리, 스케줄러.
+다중 전략 아키텍처. StrategyBase 추상 클래스 기반 플러그인 구조.
+
+## 아키텍처
+
+```
+StrategyBase (추상)
+├── MomentumStrategy (상한가 모멘텀)
+└── VolatilityBreakoutStrategy (변동성 돌파)
+
+StrategyRegistry ← 전략 등록/비중/중복 방지
+    ↑
+RiskManager (on_tick → registry 순회 → 전략별 신호 체크)
+    ↑
+OrderEngine (strategy_id 태깅 → 체결 시 올바른 전략에 포지션)
+    ↑
+TradingScheduler (registry 기반 boot/run/settle)
+```
 
 ## 모듈별 역할
 
-### strategy.py — 매매 전략
-- 전일종가 대비 +29% 돌파 순간 매수 신호 감지 (29% 미만 → 29% 이상 돌파 시)
-- 상한가(+30%) 종목은 매수 제외
-- 매수 체결가 대비 -7.5% 손절 트리거
-- 익일 09:00 청산: 갭상승 +10% → 트레일링 스탑 -2% / 그 외 즉시 매도
-- 동시 보유 4종목 제한, 일일 손실 5% 매매 중단
+### strategy_base.py — 추상 베이스
+- `StrategyBase`: 모든 전략이 구현할 추상 메서드 (prepare, check_buy_signal, check_exit_signal, calc_buy_quantity)
+- `Signal`: NONE, BUY, STOP_LOSS, NEXT_DAY_CLEAR, TRAILING_STOP, FORCE_CLEAR
+- `Position`: ticker, buy_price, quantity, order_no, strategy_id, buy_date, is_next_day(프로퍼티)
+- `StrategyState`: 전략별 독립 상태 (positions, pending_buys, total_investment, daily_realized_pnl)
+- `StrategyConfig`: strategy_id, name, enabled, weight, params
 
-### order_engine.py — 주문 실행
-- `execute_buy()`: 매수가능 확인 → 비중 계산(25%) → 시장가 매수
-- `execute_sell()`: 시장가 매도 + 실패 시 3회 재시도(지수 백오프)
-- 중복 매수 차단 (미체결/보유 확인)
-- 부분 체결 관리 (PARTIAL 상태, 30초 후 잔여 취소)
-- 모든 TR_ID는 `settings.get_tr_id()`로 환경별 자동 변환
+### strategy_registry.py — 전략 관리
+- register/get/all/enabled: 전략 등록/조회
+- allocate_funds(total_asset): 비중 기반 자금 분배
+- update_weights(weights): 비중 변경
+- is_ticker_held_by_any(ticker): 전략 간 중복 매수 방지
+- get_strategies_status(): 전략별 상태 반환
+
+### strategies/momentum.py — 상한가 모멘텀
+- 전일종가 대비 +29% 돌파 매수 (돌파 순간만, 상한가 30% 제외)
+- 매수가 대비 -7.5% 손절
+- 익일 청산: 갭상승 +10% → 트레일링 스탑 -2% / 그 외 즉시 매도
+- 파라미터: DEFAULT_PARAMS 딕셔너리
+
+### strategies/volatility_breakout.py — 변동성 돌파
+- _scan_universe(): 코스피+코스닥 전체에서 시총/거래대금 조건 필터 (Settings에서 조건 변경 가능)
+- prepare(): 스캔 종목의 21일 일봉 → K값(20일 평균 노이즈) → Target_Offset 계산
+- 시가 확정 후 Target_Price = 시가 + offset
+- current_price >= target_price 시 매수
+- 매수가 대비 -3% 손절
+- 15:20 전량 강제 청산
 
 ### risk.py — 리스크 관리
-- 종목당 투자 비중: 25% (총 투자대금 기준)
-- 일일 최대 손실: 5% 도달 시 당일 매매 중단
-- 동시 보유: 최대 4종목
-- 실시간 tick 수신 시 ticker_prices / ticker_prev_close 기반 전일대비 등락률 갱신
+- on_tick(): ticker_prices 갱신(1회) → registry.enabled() 순회 → 전략별 exit/buy 신호
+- 중복 매수 방지: registry.is_ticker_held_by_any()
 
-### scanner.py — 종목 필터링
-- 등락률 순위 API로 전일대비 +15% 이상 급등 종목 후보 확보
-- 개별 종목 시세 API(FHKST01010100)로 시총/거래대금/전일종가 조회
-- 시총 1,000억 이상 AND 거래대금 200억 이상 필터
-- ETF/ETN 제외 (KODEX, TIGER, 인버스, 레버리지 등)
-- 최대 40종목, 5분 주기 스캔
-- ticker_names: 종목코드→종목명 매핑, t() 헬퍼로 로그에 종목명 표시
-- ticker_prices: 실시간 시세 캐시 (on_tick에서 갱신)
-- ticker_prev_close: 전일종가 (스캔 시 저장)
-- ticker_market_info: 시총/거래대금 (스캔 시 저장)
+### order_engine.py — 주문 실행
+- execute_buy(ticker, price, strategy): 전략별 calc_buy_quantity, state 참조
+- execute_sell(ticker, signal, strategy_id): `_selling` set으로 중복 매도 차단
+- _order_ticker: order_no → ticker 매핑 (체결통보 종목코드 보정)
+- _order_strategy: order_no → strategy_id 매핑
+- 체결통보: _order_ticker로 정확한 종목 → 올바른 전략에 포지션 등록/제거
+- 매수 체결 시 DB positions에 저장, 매도 체결 시 DB에서 삭제
+- 매도 체결 시 sold_today에 등록 (당일 재매수 차단)
 
 ### scheduler.py — 스케줄 관리
-- 08:25 기동/토큰 갱신/DB 동기화
-- 09:00 익일 청산 (전일 보유 종목)
-- 09:30 종목 스캔 시작
-- 15:20 신규 매수 중단
-- 15:30 WebSocket 해제
-- 16:10 일일 정산/Sleep
-- _phase: 현재 프로세스 단계 (idle/booting/trading 등)
+- StrategyRegistry 생성, 전략 등록
+- _boot(): DB positions 우선 복구 → KIS 잔고 교차 검증 (trade_history에서 전략 매핑)
+- _load_strategy_config(): DB strategy_config에서 비중/파라미터 복구
+- WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
+- 09:01 변동성돌파 시가 확정 (WebSocket 캐시 → KIS API 폴백)
+- 15:20 강제 청산, _settle(): 전략별 + 합산 daily_performance 기록
+- run_daily(): 매일 08:20 자동 시작, 주말 건너뜀
+- 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행
+- _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완
+
+### scanner.py — 종목 스캔
+- scan_stocks(): 모멘텀용 등락률 순위 스캔
+- subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 변동성돌파 종목 합집합 구독
+- 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info
+
+## 새 전략 추가 시
+1. `strategies/` 에 StrategyBase 서브클래스 작성 (prepare, check_buy_signal, check_exit_signal, calc_buy_quantity)
+2. `scheduler.py` __init__에 registry.register() 추가
+3. 필요 시 scanner.py에 스캔 함수 추가
+4. _workspace/00_leader_trading_rules.md에 전략 명세 추가
 
 ## 수정 시 주의사항
-- 매매 파라미터 변경 시 strategy.py + risk.py + _workspace/00_leader_trading_rules.md 모두 동기화
-- 매수 기준은 "전일종가" 대비 (시가 아님), 손절 기준은 "매수 체결가" 대비
-- 트레일링 스탑은 "당일 고점" 기준 (매수가가 아님)
-- order_engine.py의 매도 재시도 로직을 제거하지 말 것 — 손절 실패 = 추가 손실
-- 모든 TR_ID는 settings.get_tr_id()를 사용할 것 (하드코딩 금지)
-- scheduler의 시간 체크는 KST(한국 시간) 기준
+- 전략 파라미터는 각 전략 클래스의 DEFAULT_PARAMS에서 관리 (Settings 페이지에서 런타임 변경 가능, DB 영속화)
+- Position에 strategy_id 필수 — 체결통보에서 올바른 전략으로 라우팅
+- **체결통보(H0STCNI0/9) 구독을 절대 제거하지 말 것** — 구독 없으면 포지션 등록 불가 → 손절 불가
+- **uvicorn 단일 워커 필수** — 다중 워커 시 스케줄/포지션/WebSocket 중복
+- 매수 신호는 반드시 "돌파 순간" 감지 (이전 틱 < 기준가 AND 현재 틱 >= 기준가)
+- order_engine의 매도 재시도 로직 제거 금지
+- 모든 TR_ID는 settings.get_tr_id() 사용
+- order_engine의 매도 재시도 로직 제거 금지

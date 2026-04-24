@@ -1,32 +1,43 @@
 # CLAUDE.md — src/realtime/ (WebSocket 실시간)
 
-KIS WebSocket 실시간 시��� 수신 및 체결통보 처리.
+KIS WebSocket 실시간 시세 수신 및 체결통보 처리.
 
 ## 모듈별 역할
 
 ### websocket.py — 연결 관리
 - WebSocket 접속키 발급 (`/oauth2/Approval`)
-- 종��� 시세 구독/해제 (최대 40종목)
+- 종목 시세 구독/해제 (최대 200종목)
+- 체결통보 구독 (실전: H0STCNI0, 모의: H0STCNI9, 키: 계좌번호)
 - Heartbeat 감시 (30초 미수신 시 재연결)
 - 자동 재연결 (최대 5회, 지수 백오프)
 - 연결 시 AES 복호화용 iv/key 수신 및 저장
+- 구독 한도 초과 시 에러 대신 경고 + 건너뜀
 
 ### handler.py — 메시지 처리
 - 파이프(|) 구분 메시지 파싱
-- 체결통보(H0STCNI0) AES-256-CBC 복호화
-- 파싱된 시세 데이터를 engine/strategy.py 콜백으로 전달
+- 실시간 체결가(H0STCNT0): 현재가, 시가, 등락률 추출 → RiskManager.on_tick 콜백
+- 체결통보(H0STCNI0/H0STCNI9): AES-256-CBC 복호화 → OrderEngine.handle_execution_notice 콜백
 
 ## WebSocket 메시지 포맷
 ```
 수신: 0|H0STCNT0|001|005930^...^현재가^...
-        │  │       │    └ 데이터 (캐럿 ��분)
+        │  │       │    └ 데이터 (캐럿 구분)
         │  │       └ 건수
         │  └ TR_ID
-        └ 암호화 여부 (0: ���문, 1: 암호화)
+        └ 암호화 여부 (0: 평문, 1: 암호화)
 ```
 
+## 구독 종류
+
+| TR_ID | 용도 | 구독 키 | 비고 |
+|-------|------|---------|------|
+| H0STCNT0 | 실시간 체결가 | 종목코드 | 모멘텀+변동성돌파 종목 합집합 |
+| H0STCNI0 | 체결통보 (실전) | 계좌번호 | 매수/매도 체결 알림 |
+| H0STCNI9 | 체결통보 (모의) | 계좌번호 | 모의투자 환경 |
+
 ## 주의사항
-- 체결통보(H0STCNI0)는 실전에��� 암호화됨 — 반드시 decrypt 필요
-- 모의투자 체결통보 TR_ID: H0STCNI9 (실전: H0STCNI0)
+- **체결통보 구독은 매매의 핵심 전제조건** — 미구독 시 포지션 등록 불가 → 손절 불가
+- 체결통보는 실전에서 암호화됨 — 반드시 decrypt_aes_cbc 필요
+- scheduler.py에서 WebSocket 연결 직후 체결통보 자동 구독
 - 구독 종목 변경 시 기존 구독 해제 → 새 구독 등록 순서
-- WebSocket URL은 REST와 다��� (ops.koreainvestment.com)
+- WebSocket URL은 REST와 다름 (ops.koreainvestment.com)

@@ -9,6 +9,41 @@ export interface TradingStatusData {
   positions_detail: Record<string, PositionDetail>
   orders: OrderStatus
   strategy: StrategyStatus
+  strategies: Record<string, StrategyInfo>
+}
+
+export interface StrategyInfo {
+  name: string
+  enabled: boolean
+  weight: number
+  positions: number
+  pending_buys: number
+  position_tickers: string[]
+  total_investment: number
+  daily_realized_pnl: number
+  buy_disabled: boolean
+  buy_signals: BuySignal[]
+  positions_detail: Record<string, PositionDetail>
+  pending_buy_tickers: string[]
+  scanned_count?: number
+  scanned_tickers?: string[]
+  targets?: Record<string, unknown>
+  invested_amount?: number
+  min_weight?: number
+}
+
+export interface StrategyListItem {
+  key: string
+  name: string
+  enabled: boolean
+  weight: number
+  params?: Record<string, unknown>
+  min_weight?: number
+  invested_amount?: number
+}
+
+export interface StrategiesResponse {
+  strategies: StrategyListItem[]
 }
 
 export interface TickerPrice {
@@ -47,8 +82,16 @@ export interface OrderFill {
   order_qty: number
 }
 
+export interface PendingBuyOrder {
+  ticker: string
+  name?: string
+  price: number
+  quantity: number
+}
+
 export interface OrderStatus {
   pending_buy_tickers: string[]
+  pending_buy_orders: Record<string, PendingBuyOrder>
   fills: Record<string, OrderFill>
   pending_cancels: string[]
 }
@@ -90,6 +133,17 @@ export interface MonthlyPerformance {
 }
 
 export interface TradeRecord {
+  id: number
+  timestamp: string
+  ticker: string
+  ticker_name: string
+  trade_type: string
+  price: number
+  quantity: number
+  profit_loss: number
+  status: string
+  strategy: string
+  order_no: string
   [key: string]: unknown
 }
 

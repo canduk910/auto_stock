@@ -1,31 +1,39 @@
 """trade_history CRUD."""
 
 import logging
+from datetime import datetime, timezone, timedelta
 
 from src.db.supabase import supabase
 from src.models.trade import TradeRecord, TradeStatus, TradeType
 
 logger = logging.getLogger(__name__)
 
+KST = timezone(timedelta(hours=9))
+
 
 async def insert_trade(record: TradeRecord) -> None:
     """거래 기록을 삽입한다."""
     data = {
         "ticker": record.ticker,
+        "ticker_name": record.ticker_name,
         "trade_type": record.trade_type.value,
         "price": float(record.price),
         "quantity": record.quantity,
         "profit_loss": float(record.profit_loss),
         "status": record.status.value,
+        "strategy": record.strategy,
+        "order_no": record.order_no,
+        "timestamp": datetime.now(KST).isoformat(),
     }
     supabase.table("trade_history").insert(data).execute()
-    logger.debug("거래 기록 삽입: %s %s", record.trade_type.value, record.ticker)
+    logger.debug("거래 기록 삽입: %s %s (전략: %s)", record.trade_type.value, record.ticker, record.strategy)
 
 
 async def update_trade_status(
     ticker: str,
     trade_type: TradeType,
     status: TradeStatus,
+    strategy: str = "momentum",
 ) -> None:
     """최신 거래 기록의 상태를 업데이트한다."""
     supabase.table("trade_history").update(
@@ -36,20 +44,72 @@ async def update_trade_status(
         "trade_type", trade_type.value
     ).eq(
         "status", TradeStatus.PENDING.value
+    ).eq(
+        "strategy", strategy
     ).execute()
-    logger.debug("거래 상태 변경: %s %s -> %s", ticker, trade_type.value, status.value)
+    logger.debug("거래 상태 변경: %s %s -> %s (전략: %s)", ticker, trade_type.value, status.value, strategy)
+
+
+async def get_today_buy_trades(strategy: str | None = None) -> list[dict]:
+    """당일 매수 기록을 조회한다 (포지션 복구용)."""
+    from datetime import date
+    today = date.today().isoformat()
+    query = (
+        supabase.table("trade_history")
+        .select("*")
+        .eq("trade_type", "BUY")
+        .gte("timestamp", f"{today}T00:00:00")
+        .in_("status", ["PENDING", "COMPLETED", "PARTIAL"])
+        .order("timestamp", desc=True)
+    )
+    if strategy:
+        query = query.eq("strategy", strategy)
+    result = query.execute()
+    # 같은 종목이 여러 번 매수된 경우 최신 기록만 사용
+    seen: dict[str, dict] = {}
+    for row in result.data:
+        ticker = row["ticker"]
+        if ticker not in seen:
+            seen[ticker] = row
+    return list(seen.values())
+
+
+async def get_today_sell_trades(strategy: str | None = None) -> list[dict]:
+    """당일 매도 기록을 조회한다 (동기화용)."""
+    from datetime import date
+    today = date.today().isoformat()
+    query = (
+        supabase.table("trade_history")
+        .select("*")
+        .eq("trade_type", "SELL")
+        .gte("timestamp", f"{today}T00:00:00")
+        .in_("status", ["COMPLETED", "PARTIAL"])
+        .order("timestamp", desc=True)
+    )
+    if strategy:
+        query = query.eq("strategy", strategy)
+    result = query.execute()
+    seen: dict[str, dict] = {}
+    for row in result.data:
+        ticker = row["ticker"]
+        if ticker not in seen:
+            seen[ticker] = row
+    return list(seen.values())
 
 
 async def get_trades(
     limit: int = 50,
     offset: int = 0,
     ticker: str | None = None,
+    strategy: str | None = None,
 ) -> tuple[list[dict], int]:
     """거래 내역을 조회한다. (데이터, 전체 건수) 반환."""
     # 전체 건수 조회
     count_query = supabase.table("trade_history").select("*", count="exact")
     if ticker:
         count_query = count_query.eq("ticker", ticker)
+    if strategy:
+        count_query = count_query.eq("strategy", strategy)
     count_result = count_query.execute()
     total = count_result.count or 0
 
@@ -59,6 +119,8 @@ async def get_trades(
     ).range(offset, offset + limit - 1)
     if ticker:
         query = query.eq("ticker", ticker)
+    if strategy:
+        query = query.eq("strategy", strategy)
     result = query.execute()
 
     return result.data, total

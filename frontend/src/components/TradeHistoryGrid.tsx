@@ -7,9 +7,119 @@ import {
   createColumnHelper,
 } from '@tanstack/react-table'
 import { getTradeHistory } from '../api/history'
+import { getStrategyColor } from '../types/strategy'
 import type { TradeRecord } from '../types/trading'
 
 const columnHelper = createColumnHelper<TradeRecord>()
+
+function parseKST(timestamp: string): Date | null {
+  if (!timestamp) return null
+  return new Date(timestamp)
+}
+
+function formatDate(timestamp: string): string {
+  const d = parseKST(timestamp)
+  if (!d) return '-'
+  const yy = String(d.getFullYear()).slice(2)
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yy}-${mm}-${dd}`
+}
+
+function formatTime(timestamp: string): string {
+  const d = parseKST(timestamp)
+  if (!d) return '-'
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mi = String(d.getMinutes()).padStart(2, '0')
+  const ss = String(d.getSeconds()).padStart(2, '0')
+  return `${hh}:${mi}:${ss}`
+}
+
+const STRATEGY_NAMES: Record<string, string> = {
+  momentum: '모멘텀',
+  volatility_breakout: '변동성돌파',
+}
+
+const columns = [
+  columnHelper.accessor('timestamp', {
+    id: 'date',
+    header: '주문일',
+    cell: (info) => formatDate(String(info.getValue() ?? '')),
+  }),
+  columnHelper.accessor('timestamp', {
+    id: 'time',
+    header: '주문시각',
+    cell: (info) => formatTime(String(info.getValue() ?? '')),
+  }),
+  columnHelper.accessor('order_no', {
+    header: '주문번호',
+    cell: (info) => info.getValue() || '-',
+  }),
+  columnHelper.accessor('ticker', {
+    header: '종목코드',
+    cell: (info) => info.getValue() ?? '-',
+  }),
+  columnHelper.accessor('ticker_name', {
+    header: '종목명',
+    cell: (info) => info.getValue() || '-',
+  }),
+  columnHelper.accessor('trade_type', {
+    header: '매수/매도',
+    cell: (info) => {
+      const v = String(info.getValue() ?? '')
+      if (v === 'BUY') return <span className="text-red-600 font-medium">매수</span>
+      if (v === 'SELL') return <span className="text-blue-600 font-medium">매도</span>
+      return v
+    },
+  }),
+  columnHelper.accessor('price', {
+    header: '가격',
+    cell: (info) => {
+      const v = info.getValue()
+      return typeof v === 'number' ? v.toLocaleString() + '원' : '-'
+    },
+  }),
+  columnHelper.accessor('quantity', {
+    header: '수량',
+    cell: (info) => {
+      const v = info.getValue()
+      return typeof v === 'number' ? v.toLocaleString() + '주' : '-'
+    },
+  }),
+  columnHelper.accessor('profit_loss', {
+    header: '매매손익',
+    cell: (info) => {
+      const v = info.getValue()
+      if (typeof v !== 'number' || v === 0) return '-'
+      const cls = v > 0 ? 'text-red-600' : 'text-blue-600'
+      const sign = v > 0 ? '+' : ''
+      return <span className={cls}>{sign}{v.toLocaleString()}원</span>
+    },
+  }),
+  columnHelper.accessor('status', {
+    header: '상태',
+    cell: (info) => {
+      const v = String(info.getValue() ?? '')
+      const map: Record<string, { label: string; cls: string }> = {
+        COMPLETED: { label: '체결', cls: 'bg-green-100 text-green-700' },
+        PENDING: { label: '대기', cls: 'bg-yellow-100 text-yellow-700' },
+        PARTIAL: { label: '부분체결', cls: 'bg-orange-100 text-orange-700' },
+        CANCELLED: { label: '취소', cls: 'bg-gray-100 text-gray-500' },
+      }
+      const m = map[v] ?? { label: v, cls: 'bg-gray-100 text-gray-500' }
+      return <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${m.cls}`}>{m.label}</span>
+    },
+  }),
+  columnHelper.accessor('strategy', {
+    header: '전략',
+    cell: (info) => {
+      const v = String(info.getValue() ?? '')
+      const color = getStrategyColor(v)
+      const name = STRATEGY_NAMES[v] ?? v
+      return <span className={`px-1.5 py-0.5 rounded text-xs ${color.badge}`}>{name}</span>
+    },
+  }),
+]
 
 export default function TradeHistoryGrid() {
   const [page, setPage] = useState(1)
@@ -22,23 +132,9 @@ export default function TradeHistoryGrid() {
 
   const trades = data?.trades ?? []
 
-  const dynamicColumns = trades.length > 0
-    ? Object.keys(trades[0]).map((key) =>
-        columnHelper.accessor(key, {
-          header: key,
-          cell: (info) => {
-            const val = info.getValue()
-            if (val == null) return '-'
-            if (typeof val === 'number') return val.toLocaleString('ko-KR')
-            return String(val)
-          },
-        }),
-      )
-    : []
-
   const table = useReactTable({
     data: trades,
-    columns: dynamicColumns,
+    columns,
     getCoreRowModel: getCoreRowModel(),
   })
 
@@ -55,7 +151,7 @@ export default function TradeHistoryGrid() {
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-4 py-3 text-left font-medium text-gray-600"
+                    className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
@@ -66,7 +162,7 @@ export default function TradeHistoryGrid() {
           <tbody>
             {trades.length === 0 ? (
               <tr>
-                <td colSpan={dynamicColumns.length || 1} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-400">
                   거래 내역이 없습니다.
                 </td>
               </tr>
@@ -74,7 +170,7 @@ export default function TradeHistoryGrid() {
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="border-b hover:bg-gray-50">
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-gray-700">
+                    <td key={cell.id} className="px-3 py-2.5 text-gray-700 whitespace-nowrap">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

@@ -90,7 +90,7 @@ async def scan_stocks() -> list[str]:
         }
 
         logger.debug(
-            "스캔 통과: %s 등락률=+%.1f%% 시총=%,.0f억 거래대금=%,.0f억",
+            "스캔 통과: %s 등락률=+%.1f%% 시총=%.0f억 거래대금=%.0f억",
             name or ticker, change_rate, market_cap / 1e8, trade_amount / 1e8,
         )
 
@@ -109,20 +109,22 @@ async def scan_stocks() -> list[str]:
 
 
 def get_scan_status() -> dict:
-    """스캔 현황을 반환한다."""
+    """스캔 현황을 반환한다. 모멘텀 + 구독 중인 모든 종목의 데이터를 포함."""
     subscribed = [
         tr_key for tr_id, tr_key in kis_ws._subscriptions
         if tr_id == TICK_TR_ID
     ]
+    # 모멘텀 스캔 + 구독 종목 합집합 (VB 종목도 포함)
+    all_relevant = set(_last_scan_result) | set(subscribed)
     return {
         "filtered_tickers": _last_scan_result,
         "filtered_count": len(_last_scan_result),
         "subscribed_tickers": subscribed,
         "subscribed_count": len(subscribed),
         "last_scan_time": _last_scan_time,
-        "ticker_names": {k: v for k, v in ticker_names.items() if k in _last_scan_result},
-        "ticker_prices": {k: v for k, v in ticker_prices.items() if k in _last_scan_result},
-        "ticker_market_info": {k: v for k, v in ticker_market_info.items() if k in _last_scan_result},
+        "ticker_names": {k: v for k, v in ticker_names.items() if k in all_relevant},
+        "ticker_prices": {k: v for k, v in ticker_prices.items() if k in all_relevant},
+        "ticker_market_info": {k: v for k, v in ticker_market_info.items() if k in all_relevant},
     }
 
 
@@ -132,11 +134,67 @@ def t(ticker: str) -> str:
     return f"{name}({ticker})" if name else ticker
 
 
-async def subscribe_filtered_stocks(tickers: list[str]) -> None:
-    """필터링된 종목들에 대해 WebSocket 실시간 시세 구독을 등록한다."""
-    for ticker in tickers:
+# KOSDAQ 150 대표 종목 (하드코딩, 향후 API 조회로 변경 가능)
+KOSDAQ_150_TICKERS = [
+    "247540",  # 에코프로비엠
+    "091990",  # 셀트리온헬스케어
+    "086520",  # 에코프로
+    "263750",  # 펄어비스
+    "293490",  # 카카오게임즈
+    "328130",  # 루닛
+    "145020",  # 휴젤
+    "196170",  # 알테오젠
+    "067160",  # 아프리카TV
+    "041510",  # 에스엠
+    "112040",  # 위메이드
+    "068270",  # 셀트리온제약
+    "035720",  # 카카오
+    "035420",  # NAVER
+    "051910",  # LG화학
+    "253450",  # 스튜디오드래곤
+    "357780",  # 솔브레인
+    "058470",  # 리노공업
+    "214150",  # 클래시스
+    "277810",  # 레인보우로보틱스
+    "039030",  # 이오테크닉스
+    "078600",  # 대주전자재료
+    "095340",  # ISC
+    "240810",  # 원익IPS
+    "141080",  # 레고켐바이오
+    "131970",  # 테스나
+    "137310",  # 에스디바이오센서
+    "140410",  # 메지온
+    "060310",  # 3S
+    "383220",  # F&F
+    "403870",  # HPSP
+    "041190",  # 우리기술투자
+    "336260",  # 두산테스나
+    "108860",  # 셀바스AI
+    "222080",  # 씨아이에스
+    "089030",  # 테크윙
+    "009520",  # 포스코엠텍
+    "234080",  # JW생명과학
+    "036930",  # 주성엔지니어링
+    "330860",  # 네이처셀
+]
+
+
+def scan_kosdaq150() -> list[str]:
+    """KOSDAQ 150 종목 리스트를 반환한다."""
+    return list(KOSDAQ_150_TICKERS)
+
+
+async def subscribe_filtered_stocks(tickers: list[str], extra_tickers: list[str] | None = None) -> None:
+    """필터링된 종목들에 대해 WebSocket 실시간 시세 구독을 등록한다.
+
+    모멘텀 후보 + 추가 종목(변동성돌파 등)의 합집합을 구독한다.
+    """
+    extra = extra_tickers or []
+    all_tickers = list(dict.fromkeys(tickers + extra))  # 순서 유지 중복 제거
+    for ticker in all_tickers:
         await kis_ws.subscribe(TICK_TR_ID, ticker)
-    logger.info("실시간 시세 구독 완료: %d종목", len(tickers))
+    logger.info("실시간 시세 구독 완료: %d종목 (모멘텀: %d, 기타: %d)",
+                len(all_tickers), len(tickers), len(extra))
 
 
 async def unsubscribe_all() -> None:
