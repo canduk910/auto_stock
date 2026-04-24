@@ -190,6 +190,33 @@ auto_stock/
 └── .env                     # 환경 변수 (git 미추적)
 ```
 
+## 배포 (AWS EC2)
+
+### 서버 구성
+- **인스턴스**: EC2 t4g.small (2vCPU, 2GB RAM, ARM)
+- **리전**: ap-northeast-2 (서울) — KIS WebSocket 지연 최소화
+- **OS**: Ubuntu 24.04 LTS, Docker 설치 완료
+- **접속**: `http://<EC2_IP>` (Nginx 80포트)
+
+### 자동 배포 (CI/CD)
+`git push origin main` → GitHub Actions → EC2 자동 배포
+
+```
+git push → GitHub Actions → SSH → EC2: git pull → docker compose build → 재시작
+```
+
+GitHub Secrets 필요: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
+
+### 수동 배포
+```bash
+ssh -i ~/.ssh/auto-stock-key.pem ubuntu@<EC2_IP>
+cd ~/auto_stock
+git pull origin main
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+> **주의**: 로컬과 EC2에서 동시 실행 금지 — KIS API 동일 계정 동시 접속 시 충돌 발생
+
 ## 스케줄
 
 | 시각 | 동작 |

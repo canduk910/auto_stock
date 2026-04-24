@@ -509,3 +509,59 @@ frontend/src/
 | 비중 변경 시 매수금액 하한선 | 보유 종목 매도 전에는 비중 축소 불가 |
 | 잔고 API 0수량 필터 | KIS가 매도 완료 종목도 반환하므로 제외 |
 | 비주식 상품 필터 | 6자리 숫자 종목코드만 허용 (CMA/펀드 제외) |
+| 로컬/EC2 동시 실행 금지 | KIS API 동일 계정 동시 접속 충돌 |
+
+---
+
+## 12. 배포 환경 (AWS EC2)
+
+```
+개발자 PC                    GitHub                     AWS EC2 (서울)
+───────────                  ──────                     ──────────────
+git push ───────────→ Actions trigger
+                      ├─ appleboy/ssh-action
+                      └──────────────────────────────→ SSH 접속
+                                                       ├─ git pull origin main
+                                                       ├─ docker compose build
+                                                       └─ docker compose up -d
+```
+
+### 인프라 구성
+
+| 항목 | 값 |
+|------|---|
+| 인스턴스 | EC2 t4g.small (2vCPU, 2GB, ARM) |
+| 리전 | ap-northeast-2 (서울) |
+| OS | Ubuntu 24.04 LTS |
+| 스토리지 | 20GB gp3 |
+| Elastic IP | 고정 IP 할당 |
+| 보안 그룹 | 22(SSH), 80(HTTP), 443(HTTPS) |
+| 키페어 | `~/.ssh/auto-stock-key.pem` (ED25519) |
+
+### CI/CD 파이프라인
+
+```
+.github/workflows/deploy.yml
+─────────────────────────────
+트리거: push to main (*.md, docs/**, _workspace/** 제외)
+
+jobs:
+  deploy:
+    ├─ SSH 접속 (appleboy/ssh-action)
+    ├─ cd ~/auto_stock
+    ├─ git pull origin main
+    ├─ docker compose -f docker-compose.prod.yml up --build -d --remove-orphans
+    └─ docker image prune -f
+```
+
+GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
+
+### 서버 디렉토리
+
+```
+~/auto_stock/                  # git clone (전체 소스)
+├── .env                       # 환경변수 (chmod 600, git 미추적)
+├── logs/                      # 로그 볼륨 마운트
+├── docker-compose.prod.yml    # 프로덕션 Compose
+└── (나머지 소스 파일)
+```

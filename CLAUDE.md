@@ -126,6 +126,16 @@ src/engine/
 - vite 프록시 타겟: `VITE_API_URL` 환경변수로 분기 (Docker: `http://backend:8000`, 로컬: `http://localhost:8001`)
 - 타임존: `TZ=Asia/Seoul` (Dockerfile + docker-compose에 설정)
 
+## 배포 환경 (AWS EC2)
+- **인스턴스**: EC2 t4g.small (ARM, 서울 리전 `ap-northeast-2`)
+- **접속**: `ssh -i ~/.ssh/auto-stock-key.pem ubuntu@<EC2_IP>`
+- **서비스 경로**: `~/auto_stock/` (git clone)
+- **실행**: `docker compose -f docker-compose.prod.yml up --build -d`
+- **자동 배포**: `git push origin main` → GitHub Actions가 EC2에 SSH 접속 → `git pull` + 빌드 + 재시작
+- **CI/CD**: `.github/workflows/deploy.yml` (Docker Hub 미사용, EC2 직접 빌드)
+- **GitHub Secrets**: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
+- **주의**: 로컬과 EC2에서 동시 실행 금지 (KIS API 동일 계정 동시 접속 충돌)
+
 ## 디렉토리 역할
 - `src/auth/` — KIS OAuth 인증/토큰 관리
 - `src/api/` — KIS REST API 호출 (주문, 잔고, 조건검색, 일봉)
