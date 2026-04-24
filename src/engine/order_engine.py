@@ -293,7 +293,7 @@ class OrderEngine:
             from src.db.positions import delete_position
             await delete_position(ticker)
             self._selling.discard(ticker)
-            await update_trade_status(ticker, TradeType.SELL, TradeStatus.COMPLETED, strategy=strategy_id)
+            await update_trade_status(ticker, TradeType.SELL, TradeStatus.COMPLETED, strategy=strategy_id, price=price, profit_loss=profit_loss)
             self._filled_qty.pop(order_no, None)
             self._order_qty.pop(order_no, None)
             self._order_strategy.pop(order_no, None)
@@ -301,7 +301,7 @@ class OrderEngine:
             logger.info("매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s)", t(ticker), total_filled, price, profit_loss, strategy_id)
         else:
             # 부분 체결 → PARTIAL, 30초 후 잔여 취소 + 손절 시 재주문
-            await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id)
+            await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss)
             remaining = ordered_qty - total_filled
             self._schedule_cancel_and_reorder(ticker, order_no, remaining, is_stop_loss=True)
             logger.info("매도 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)

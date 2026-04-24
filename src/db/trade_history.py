@@ -34,10 +34,17 @@ async def update_trade_status(
     trade_type: TradeType,
     status: TradeStatus,
     strategy: str = "momentum",
+    price: int | None = None,
+    profit_loss: float | None = None,
 ) -> None:
     """최신 거래 기록의 상태를 업데이트한다."""
+    update_data: dict = {"status": status.value}
+    if price is not None:
+        update_data["price"] = float(price)
+    if profit_loss is not None:
+        update_data["profit_loss"] = float(profit_loss)
     supabase.table("trade_history").update(
-        {"status": status.value}
+        update_data
     ).eq(
         "ticker", ticker
     ).eq(
