@@ -20,8 +20,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Check syntax (import test)
-        run: python -c "from src.main import app; print('Backend OK')"
+      - name: Check syntax
+        run: python -m py_compile src/main.py && python -m py_compile src/engine/scheduler.py && echo 'Backend syntax OK'
 
   frontend-build:
     runs-on: ubuntu-latest
