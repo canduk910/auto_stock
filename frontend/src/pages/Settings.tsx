@@ -11,7 +11,7 @@ const PARAM_LABELS: Record<string, { label: string; unit: string; step: number }
   stop_loss_rate: { label: '손절 기준', unit: '%', step: 0.5 },
   gap_up_threshold: { label: '갭상승 기준', unit: '%', step: 1 },
   trailing_stop_rate: { label: '트레일링 스탑', unit: '%', step: 0.5 },
-  position_ratio: { label: '종목당 비중', unit: '', step: 0.01 },
+  position_ratio: { label: '전략 내 종목당 비중', unit: '', step: 0.01 },
   max_positions: { label: '최대 보유 종목 수', unit: '개', step: 1 },
   daily_loss_limit: { label: '일일 최대 손실', unit: '%', step: 0.5 },
   k_period: { label: 'K값 산출 기간', unit: '일', step: 1 },
@@ -283,17 +283,26 @@ export default function Settings() {
                   {editableKeys.map((key) => {
                     const meta = PARAM_LABELS[key]
                     const value = paramEdits[key] ?? 0
+                    const totalInv = s.total_investment ?? 0
                     return (
-                      <div key={key} className="flex items-center gap-4">
-                        <label className="text-sm text-gray-600 w-40 shrink-0">{meta.label}</label>
-                        <input
-                          type="number"
-                          step={meta.step}
-                          value={value}
-                          onChange={(e) => handleParamChange(key, Number(e.target.value))}
-                          className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <span className="text-xs text-gray-400 w-8">{meta.unit}</span>
+                      <div key={key}>
+                        <div className="flex items-center gap-4">
+                          <label className="text-sm text-gray-600 w-40 shrink-0">{meta.label}</label>
+                          <input
+                            type="number"
+                            step={meta.step}
+                            value={value}
+                            onChange={(e) => handleParamChange(key, Number(e.target.value))}
+                            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <span className="text-xs text-gray-400 w-8">{meta.unit}</span>
+                        </div>
+                        {key === 'position_ratio' && totalInv > 0 && (
+                          <div className="ml-44 mt-1 text-xs text-gray-400">
+                            예상 종목당 매수: ~{((totalInv * value) / 10000).toFixed(0)}만원
+                            (할당금 {(totalInv / 10000).toFixed(0)}만원 x {(value * 100).toFixed(0)}%)
+                          </div>
+                        )}
                       </div>
                     )
                   })}
@@ -318,10 +327,18 @@ export default function Settings() {
                   {editableKeys.map((key) => {
                     const meta = PARAM_LABELS[key]
                     const value = params[key] as number
+                    const totalInv = s.total_investment ?? 0
                     return (
-                      <div key={key} className="flex justify-between text-sm py-1">
-                        <span className="text-gray-500">{meta.label}</span>
-                        <span className="font-medium">{formatParamValue(key, value)}{meta.unit && !formatParamValue(key, value).includes(meta.unit) ? meta.unit : ''}</span>
+                      <div key={key}>
+                        <div className="flex justify-between text-sm py-1">
+                          <span className="text-gray-500">{meta.label}</span>
+                          <span className="font-medium">{formatParamValue(key, value)}{meta.unit && !formatParamValue(key, value).includes(meta.unit) ? meta.unit : ''}</span>
+                        </div>
+                        {key === 'position_ratio' && totalInv > 0 && (
+                          <div className="col-span-2 text-xs text-gray-400 -mt-0.5 mb-1">
+                            예상 종목당 매수: ~{((totalInv * value) / 10000).toFixed(0)}만원
+                          </div>
+                        )}
                       </div>
                     )
                   })}

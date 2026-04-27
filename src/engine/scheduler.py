@@ -362,8 +362,9 @@ class TradingScheduler:
         모멘텀 전략의 보유 중 is_next_day 포지션을 처리한다.
         1. 전일 매수 보유 종목 목록 조회
         2. 각 종목의 당일 시가 확인 (WebSocket 시세 구독으로 수신)
-        3. 시가가 매수가 대비 +10% 이상 → 트레일링 스탑 모드 (on_tick에서 고점 추적)
-        4. 시가가 +10% 미만 → 즉시 시장가 전량 매도
+        3. 60초 대기하여 시가 안정화 (대기 중 on_tick의 NEXT_DAY_CLEAR 억제)
+        4. 시가가 매수가 대비 +10% 이상 → 트레일링 스탑 모드 (on_tick에서 고점 추적)
+        5. 시가가 +10% 미만 → 즉시 시장가 전량 매도
         """
         momentum = self.registry.get("momentum")
         if not momentum:
@@ -380,6 +381,10 @@ class TradingScheduler:
 
         await write_log("INFO", f"익일 청산 대상: {[ticker for ticker, _ in next_day_positions]}")
 
+        # on_tick에서 즉시 청산하지 않도록 대기 플래그 설정 (손절은 계속 작동)
+        if isinstance(momentum, MomentumStrategy):
+            momentum._next_day_clear_pending = True
+
         # 보유 종목에 대해 시세 구독 (시가 수신용)
         from src.engine.scanner import TICK_TR_ID
         for ticker, _ in next_day_positions:
@@ -388,12 +393,23 @@ class TradingScheduler:
         # 시가 확정 대기 (09:01까지 최대 60초)
         await asyncio.sleep(60)
 
+        # 대기 완료 — on_tick 가드 해제
+        if isinstance(momentum, MomentumStrategy):
+            momentum._next_day_clear_pending = False
+
+        from src.engine.scanner import t, ticker_prices
+
         for ticker, pos in list(next_day_positions):
             if ticker not in momentum.state.positions:
-                continue  # 이미 on_tick에서 처리됨
+                continue  # 대기 중 손절로 이미 처리됨
 
-            # 당일 시가로 갭상승 판단
-            today_open = pos.high_since_buy  # on_tick에서 갱신된 고가 = 시가 부근
+            # WebSocket에서 수신한 실제 시가 사용 (high_since_buy는 전일 고가일 수 있음)
+            price_data = ticker_prices.get(ticker, {})
+            today_open = price_data.get("open_price", 0)
+            if today_open <= 0:
+                today_open = pos.high_since_buy  # 시세 미수신 시 폴백
+                logger.warning("시가 미수신, high_since_buy 사용: %s (%d)", t(ticker), today_open)
+
             if pos.buy_price > 0:
                 gap_rate = (today_open - pos.buy_price) / pos.buy_price * 100
             else:
@@ -401,18 +417,16 @@ class TradingScheduler:
 
             if gap_rate >= gap_up_threshold:
                 # +10% 이상 갭상승 → 트레일링 스탑 모드 유지 (on_tick에서 고점 추적)
-                from src.engine.scanner import t
                 logger.info(
                     "트레일링 스탑 모드: %s 갭률 %.1f%% (시가: %d, 매수가: %d)",
-                    ticker, gap_rate, today_open, pos.buy_price,
+                    t(ticker), gap_rate, today_open, pos.buy_price,
                 )
                 await write_log("INFO", f"트레일링 스탑 모드: {t(ticker)} 갭률 {gap_rate:.1f}%")
             else:
                 # +10% 미만 → 즉시 시장가 전량 매도
-                from src.engine.scanner import t
                 logger.info(
                     "익일 즉시 청산: %s 갭률 %.1f%% (시가: %d, 매수가: %d)",
-                    ticker, gap_rate, today_open, pos.buy_price,
+                    t(ticker), gap_rate, today_open, pos.buy_price,
                 )
                 await self.order_engine.execute_sell(ticker, Signal.NEXT_DAY_CLEAR, "momentum")
                 await write_log("INFO", f"익일 즉시 청산 실행: {t(ticker)} 갭률 {gap_rate:.1f}%")
@@ -649,6 +663,24 @@ class TradingScheduler:
             await self._sync_orders_to_db(all_orders)
         except Exception:
             logger.warning("DB 동기화 실패")
+
+        # 미체결 매수 주문의 전략 매핑 (DB 포지션 + trade_history 기반)
+        db_strategy_map: dict[str, str] = {
+            row["ticker"]: row["strategy_id"]
+            for row in db_positions if row.get("strategy_id")
+        }
+        try:
+            from src.db.supabase import supabase as _sb2
+            th_buys = _sb2.table("trade_history").select("ticker, strategy").eq(
+                "trade_type", "BUY"
+            ).gte(
+                "timestamp", today.isoformat()
+            ).execute()
+            for row in (th_buys.data or []):
+                if row["ticker"] not in db_strategy_map:
+                    db_strategy_map[row["ticker"]] = row.get("strategy", "momentum")
+        except Exception:
+            pass
 
         # 미체결 매수 주문 복구 → pending_buys에 등록하여 중복 주문 방지
         unfilled_count = 0

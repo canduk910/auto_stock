@@ -32,6 +32,7 @@ class MomentumStrategy(StrategyBase):
         config.params = merged
         super().__init__(config)
         self._prev_prdy_rate: dict[str, float] = {}
+        self._next_day_clear_pending = False  # 익일 청산 대기 중 플래그 (시가 안정화 대기)
 
     async def prepare(self) -> None:
         """준비 작업 없음 (실시간 스캔 기반)."""
@@ -112,6 +113,11 @@ class MomentumStrategy(StrategyBase):
 
         # 2. 익일 청산
         if not pos.is_next_day:
+            return Signal.NONE
+
+        # 시가 안정화 대기 중에는 on_tick에서 청산 판단하지 않음
+        # (scheduler._execute_next_day_clear가 60초 대기 후 직접 처리)
+        if self._next_day_clear_pending:
             return Signal.NONE
 
         gap_threshold = self.config.params["gap_up_threshold"]

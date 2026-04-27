@@ -40,6 +40,7 @@ export interface StrategyListItem {
   params?: Record<string, unknown>
   min_weight?: number
   invested_amount?: number
+  total_investment?: number
 }
 
 export interface StrategiesResponse {

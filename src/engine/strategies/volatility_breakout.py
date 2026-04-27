@@ -25,7 +25,6 @@ class VolatilityBreakoutStrategy(StrategyBase):
         "max_positions": 10,
         "daily_loss_limit": -5.0,
         "k_period": 20,
-        "force_clear_time": "15:20",
         # 종목 스캔 조건 (Settings에서 변경 가능)
         "min_market_cap": 100_000_000_000,   # 시총 1,000억 이상
         "min_trade_amount": 20_000_000_000,  # 거래대금 200억 이상

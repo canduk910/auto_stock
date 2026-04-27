@@ -27,7 +27,7 @@ src/
 └── types/         # TypeScript 타입 정의
 ```
 
-## ���엔드 연동
+## 백엔드 연동
 - 모든 API 호출은 `api/client.ts`의 axios 인스턴스를 통해 수행
 - 응답은 `types/common.ts`의 `ApiResponse<T>` 래퍼로 파싱
 - 백엔드 응답 필드명 = TypeScript 타입 속성명 (일치 필수)
@@ -36,17 +36,23 @@ src/
 - 이익: `#FF3333` (빨강)
 - 손실: `#3366FF` (파랑)
 - 보합: `#333333` (검정)
-- 금���: 천 단위 콤마
+- 금액: 천 단위 콤마
 - 수익률: 소수점 2자리 + %
 
 ## 환경 표시
-- 실전: 상단 빨간 배너 "실전 매매 ��경"
-- 모의: 상단 ���록 배너 "모의투자 ��경"
+- 실전: 상단 빨간 배너 "실전 매매 환경"
+- 모의: 상단 녹색 배너 "모의투자 환경"
 - `/api/trading/status` 응답의 환경 정보로 결정
+
+## Settings 페이지
+- 전략 비중 슬라이더: 하한선(빨간 선) = 보유 포지션 매수금액 비율 (`min_weight`, `invested_amount` 필드)
+- 파라미터 편집: 각 전략의 `params` 중 number 타입 + PARAM_LABELS에 정의된 키만 표시
+- `position_ratio`: "전략 내 종목당 비중" — 전략 할당 자금 기준 (순자산 전체 아님), 예상 매수 금액 헬퍼 텍스트 표시
+- `getStrategies` API 매퍼: `total_investment`, `invested_amount`, `min_weight` 필드 포함 필수
 
 ## 주문 안전성
 - 시작/정지 버튼: ConfirmModal로 이중 확인 필수
-- 주문 관련 버튼은 항상 확��� 단��� 포함 (오발주 방지)
+- 주문 관련 버튼은 항상 확인 단계 포함 (오발주 방지)
 
 ## 타입 수정 시 주의
 - `types/` 디렉토리의 타입은 백엔드 `src/models/` pydantic 모델과 1:1 매핑

@@ -38,6 +38,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 전일종가 대비 +29% 돌파 매수 (돌파 순간만, 상한가 30% 제외)
 - 매수가 대비 -7.5% 손절
 - 익일 청산: 갭상승 +10% → 트레일링 스탑 -2% / 그 외 즉시 매도
+- `_next_day_clear_pending`: 익일 청산 시가 안정화 대기 플래그 (check_exit_signal에서 NEXT_DAY_CLEAR 억제, 손절은 유지)
 - 파라미터: DEFAULT_PARAMS 딕셔너리
 
 ### strategies/volatility_breakout.py — 변동성 돌파
@@ -63,9 +64,10 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### scheduler.py — 스케줄 관리
 - StrategyRegistry 생성, 전략 등록
-- _boot(): DB positions 우선 복구 → KIS 잔고 교차 검증 (trade_history에서 전략 매핑)
+- _boot(): DB positions 우선 복구 → KIS 잔고 교차 검증 (trade_history에서 전략 매핑) → 미체결 주문 복구 (db_strategy_map)
 - _load_strategy_config(): DB strategy_config에서 비중/파라미터 복구
 - WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
+- 09:00 익일 청산: `_next_day_clear_pending=True` → 60초 시가 안정화 대기 → WebSocket 실제 시가(ticker_prices)로 갭률 판단 → 청산/트레일링
 - 09:01 변동성돌파 시가 확정 (WebSocket 캐시 → KIS API 폴백)
 - 15:20 강제 청산, _settle(): 전략별 + 합산 daily_performance 기록
 - run_daily(): 매일 08:20 자동 시작, 주말 건너뜀
@@ -85,10 +87,12 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ## 수정 시 주의사항
 - 전략 파라미터는 각 전략 클래스의 DEFAULT_PARAMS에서 관리 (Settings 페이지에서 런타임 변경 가능, DB 영속화)
+- **`position_ratio`는 전략 할당 자금 기준** — 순자산 전체가 아님 (순자산 × 전략비중 × position_ratio)
 - Position에 strategy_id 필수 — 체결통보에서 올바른 전략으로 라우팅
 - **체결통보(H0STCNI0/9) 구독을 절대 제거하지 말 것** — 구독 없으면 포지션 등록 불가 → 손절 불가
 - **uvicorn 단일 워커 필수** — 다중 워커 시 스케줄/포지션/WebSocket 중복
 - 매수 신호는 반드시 "돌파 순간" 감지 (이전 틱 < 기준가 AND 현재 틱 >= 기준가)
+- **익일 청산은 반드시 scheduler에서 60초 대기 후 처리** — on_tick에서 즉시 청산 금지 (`_next_day_clear_pending` 가드)
+- 익일 청산 갭률은 `ticker_prices[ticker]["open_price"]`(WebSocket 실제 시가) 사용 — `high_since_buy` 사용 금지 (전일 고가 혼입 위험)
 - order_engine의 매도 재시도 로직 제거 금지
 - 모든 TR_ID는 settings.get_tr_id() 사용
-- order_engine의 매도 재시도 로직 제거 금지

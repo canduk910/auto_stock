@@ -28,8 +28,8 @@ export const getStrategies = async (): Promise<StrategiesResponse> => {
   // API는 { momentum: {...}, volatility_breakout: {...} } 객체를 반환
   // 프론트용 배열로 변환
   const strategies = Object.entries(raw).map(([key, val]) => {
-    const v = val as { name: string; enabled: boolean; weight: number; params?: Record<string, unknown> }
-    return { key, name: v.name, enabled: v.enabled, weight: v.weight, params: v.params }
+    const v = val as { name: string; enabled: boolean; weight: number; params?: Record<string, unknown>; total_investment?: number; invested_amount?: number; min_weight?: number }
+    return { key, name: v.name, enabled: v.enabled, weight: v.weight, params: v.params, total_investment: v.total_investment, invested_amount: v.invested_amount, min_weight: v.min_weight }
   })
   return { strategies }
 }

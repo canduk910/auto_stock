@@ -67,6 +67,8 @@ src/engine/
 - 프론트 Settings 페이지에서 비중 조절 → `PUT /api/strategies/weights`
 - StrategyRegistry.allocate_funds()로 총 자산을 비중에 따라 분배
 - 각 전략은 할당된 자금 내에서만 매매
+- **`position_ratio`는 전략 할당 자금 기준** (순자산 × 전략비중 × position_ratio = 종목당 매수금액)
+- Settings 페이지에서 예상 종목당 매수 금액 표시
 - 전략 간 동일 종목 중복 매수 방지 (registry.is_ticker_held_by_any)
 
 ## 핵심 규칙
@@ -94,6 +96,7 @@ src/engine/
 - `_selling` set: 매도 진행 중 종목 중복 매도 차단
 - 돌파 순간 감지: 이전 틱 < 기준가 AND 현재 틱 >= 기준가 (매 틱 반복 매수 방지)
 - 비중 변경 시: 매수금액 이하로 비중 축소 차단
+- 익일 청산 시가 안정화: `_next_day_clear_pending` 플래그로 60초 대기 중 on_tick 즉시 청산 방지 (손절은 유지)
 
 ### 코딩 컨벤션
 - Python: pydantic 모델로 데이터 검증, async/await 사용
