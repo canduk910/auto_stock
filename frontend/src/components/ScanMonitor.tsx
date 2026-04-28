@@ -21,6 +21,7 @@ const PHASE_LABELS: Record<string, { label: string; color: string }> = {
   buy_stopped: { label: '매수 중단', color: 'bg-amber-100 text-amber-700' },
   closing: { label: '장 마감', color: 'bg-purple-100 text-purple-700' },
   settling: { label: '정산 중', color: 'bg-indigo-100 text-indigo-700' },
+  vb_trading: { label: 'VB 매매 중', color: 'bg-teal-100 text-teal-700' },
 }
 
 interface Props {
@@ -107,7 +108,15 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
             {/* 전체 탭: VB 스캔 카운트도 표시 */}
             {isAll && vbCount > 0 && (
               <div className="mb-3 px-2 py-1.5 bg-indigo-50 rounded text-xs text-indigo-700">
-                변동성 돌파 스캔: {vbCount}종목
+                변동성 돌파 스캔: {vbCount}종목 (09:01~ 매매)
+              </div>
+            )}
+
+            {/* VB 탭: 운영시각 안내 */}
+            {!isAll && selectedStrategy === 'volatility_breakout' && (
+              <div className="mb-3 px-2 py-1.5 bg-teal-50 rounded text-xs text-teal-700 flex items-center justify-between">
+                <span>매매 시간: 09:01 ~ 15:20 (시가 확정 후 즉시 시작)</span>
+                <span className="text-teal-500">{vbCount > 0 ? `${vbCount}종목 감시 중` : ''}</span>
               </div>
             )}
 

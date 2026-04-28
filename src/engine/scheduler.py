@@ -161,6 +161,14 @@ class TradingScheduler:
                 await self._wait_until(TIME_VB_OPEN_CONFIRM)
             if now <= TIME_SCAN_START:
                 await self._confirm_vb_open_prices()
+                # VB 종목 선행 구독 → 09:01부터 VB 매매 시작
+                vb = self.registry.get("volatility_breakout")
+                if vb and vb.config.enabled:
+                    vb_tickers = vb.get_scanned_tickers()
+                    if vb_tickers:
+                        await subscribe_filtered_stocks([], extra_tickers=vb_tickers)
+                        self._phase = "vb_trading"
+                        logger.info("변동성돌파 선행 매매 시작: %d종목", len(vb_tickers))
 
             # 09:30~ 종목 스캔 + 매매
             if now < TIME_SCAN_START:
@@ -710,6 +718,7 @@ class TradingScheduler:
             }
             self.order_engine._order_qty[order_no] = int(order.get("ord_qty", "0"))
             self.order_engine._order_strategy[order_no] = strategy_id
+            self.order_engine._order_ticker[order_no] = ticker
             unfilled_count += 1
             logger.info("미체결 주문 복구: %s %d주 (주문번호: %s, 전략: %s)", ticker, rmn_qty, order_no, strategy_id)
 

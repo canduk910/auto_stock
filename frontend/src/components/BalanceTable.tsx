@@ -90,9 +90,11 @@ export default function BalanceTable({ selectedStrategy }: Props) {
     return { ...h, current_price: currentPrice, eval_amount: evalAmount, eval_profit_loss: evalProfitLoss, eval_profit_rate: evalProfitRate }
   })
 
+  const isValidTicker = (t: string) => /^\d{6}$/.test(t)
+
   const filteredHoldings = isAll
-    ? enrichedHoldings
-    : enrichedHoldings.filter((h) => tickerStrategyMap[h.ticker] === selectedStrategy)
+    ? enrichedHoldings.filter((h) => isValidTicker(h.ticker))
+    : enrichedHoldings.filter((h) => isValidTicker(h.ticker) && tickerStrategyMap[h.ticker] === selectedStrategy)
 
   return (
     <div className="space-y-4">

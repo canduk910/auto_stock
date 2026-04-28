@@ -11,6 +11,11 @@ interface VBTarget {
   open_confirmed: boolean
 }
 
+/** 정상 종목코드: 6자리 숫자 */
+function isValidTicker(ticker: string): boolean {
+  return /^\d{6}$/.test(ticker)
+}
+
 interface Props {
   selectedStrategy: string
 }
@@ -226,12 +231,14 @@ function getAggregatedData(
       positionCount: strat.positions,
       pendingBuyCount: strat.pending_buys,
       pendingBuyTickers: strat.pending_buy_tickers,
-      positions: Object.entries(strat.positions_detail).map(([ticker, pos]) => ({
-        ticker,
-        pos,
-        strategyKey: selectedStrategy,
-        strategyName: strat.name,
-      })),
+      positions: Object.entries(strat.positions_detail)
+        .filter(([ticker]) => isValidTicker(ticker))
+        .map(([ticker, pos]) => ({
+          ticker,
+          pos,
+          strategyKey: selectedStrategy,
+          strategyName: strat.name,
+        })),
     }
   }
 
@@ -252,6 +259,7 @@ function getAggregatedData(
     if (strat.buy_disabled) buyDisabled = true
     pendingBuyTickers.push(...strat.pending_buy_tickers)
     for (const [ticker, pos] of Object.entries(strat.positions_detail)) {
+      if (!isValidTicker(ticker)) continue
       positions.push({ ticker, pos, strategyKey: key, strategyName: strat.name })
     }
   }

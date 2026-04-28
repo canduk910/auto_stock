@@ -145,6 +145,35 @@ export default function Settings() {
       {/* 자동 매매 시작 */}
       <AutoStartToggle />
 
+      {/* 전략별 운영시각 */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">전략별 운영시각</h2>
+        <div className="space-y-2">
+          {strategies.map((s) => {
+            const color = getStrategyColor(s.key)
+            const isVB = s.key === 'volatility_breakout'
+            return (
+              <div key={s.key} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color.hex }} />
+                  <span className="text-sm font-medium text-gray-700">{s.name}</span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  {isVB ? (
+                    <span>09:01 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(시가 확정 후 즉시)</span></span>
+                  ) : (
+                    <span>09:30 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(익일 청산 09:00)</span></span>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        <p className="text-xs text-gray-400 mt-3">
+          시스템 기동 08:20 / 마켓 오픈 08:30 / 정산 16:10
+        </p>
+      </div>
+
       {/* 비중 관리 */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">전략 비중</h2>

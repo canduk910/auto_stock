@@ -195,6 +195,9 @@ class OrderEngine:
         if known_ticker:
             ticker = known_ticker
         else:
+            if len(ticker) != 6 or not ticker.isdigit():
+                logger.warning("체결통보: 주문번호 %s 종목매핑 없음 + payload ticker 비정상(%s), 처리 불가", order_no, ticker)
+                return
             logger.warning("체결통보: 주문번호 %s에 대한 종목 매핑 없음, payload ticker 사용: %s", order_no, ticker)
 
         # 원래 주문 수량 조회
