@@ -97,6 +97,17 @@ class TradingScheduler:
     def is_running(self) -> bool:
         return self._running
 
+    async def _is_auto_start_enabled(self) -> bool:
+        """DB system_config에서 auto_start 설정을 조회한다."""
+        try:
+            from src.db.supabase import supabase
+            result = supabase.table("system_config").select("value").eq("key", "auto_start").execute()
+            raw = result.data[0]["value"] if result.data else False
+            return raw is True or raw == "true"
+        except Exception:
+            from src.config import settings
+            return settings.auto_start
+
     async def start(self) -> None:
         """매매 프로세스를 시작한다.
 
@@ -269,6 +280,12 @@ class TradingScheduler:
                 logger.info("장 종료 — 내일 %s까지 대기 (%.0f시간)",
                             tomorrow_start.strftime("%m-%d %H:%M"), wait_secs / 3600)
                 await asyncio.sleep(max(wait_secs, 0))
+                continue
+
+            # 매매 시작 전 auto_start 설정 재확인 (Settings에서 비활성화했을 수 있음)
+            if not await self._is_auto_start_enabled():
+                logger.info("auto_start 비활성화 — 자동 매매 건너뜀")
+                await asyncio.sleep(60)
                 continue
 
             # 매매 시작
@@ -924,6 +941,33 @@ class TradingScheduler:
         except Exception:
             logger.exception("정산 오류")
             await write_log("ERROR", "일일 정산 실패")
+
+        # 정산 후 전략별 일간 상태 초기화 (다음 날 _boot()에서 DB 기반으로 재구성)
+        self._reset_daily_state()
+
+    def _reset_daily_state(self) -> None:
+        """일간 상태를 초기화한다. 정산 완료 후 호출."""
+        for strategy in self.registry.all():
+            strategy.state.positions.clear()
+            strategy.state.pending_buys.clear()
+            strategy.state.sold_today.clear()
+            strategy.state.daily_realized_pnl = 0
+            strategy.state.total_investment = 0
+            strategy.state.buy_disabled = False
+            strategy.state.buy_signals.clear()
+
+        # OrderEngine 추적 상태 초기화
+        self.order_engine._selling.clear()
+        self.order_engine._filled_qty.clear()
+        self.order_engine._order_qty.clear()
+        self.order_engine._order_strategy.clear()
+        self.order_engine._order_ticker.clear()
+        self.order_engine._pending_buy_orders.clear()
+        for task in self.order_engine._pending_cancel_tasks.values():
+            task.cancel()
+        self.order_engine._pending_cancel_tasks.clear()
+
+        logger.info("일간 상태 초기화 완료")
 
     async def _wait_until(self, target: time) -> None:
         """지정 시각까지 대기한다."""

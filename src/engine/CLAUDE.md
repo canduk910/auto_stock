@@ -61,6 +61,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 체결통보: _order_ticker로 정확한 종목 → 올바른 전략에 포지션 등록/제거
 - 매수 체결 시 DB positions에 저장, 매도 체결 시 DB에서 삭제
 - 매도 체결 시 sold_today에 등록 (당일 재매수 차단)
+- 체결통보 처리 실패 시 안전장치: ticker 매핑 실패 → pending_buys 제거, strategy 미발견 → _selling 해제
 
 ### scheduler.py — 스케줄 관리
 - StrategyRegistry 생성, 전략 등록
@@ -69,8 +70,8 @@ TradingScheduler (registry 기반 boot/run/settle)
 - WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
 - 09:00 익일 청산: `_next_day_clear_pending=True` → 60초 시가 안정화 대기 → WebSocket 실제 시가(ticker_prices)로 갭률 판단 → 청산/트레일링
 - 09:01 변동성돌파 시가 확정 (WebSocket 캐시 → KIS API 폴백)
-- 15:20 강제 청산, _settle(): 전략별 + 합산 daily_performance 기록
-- run_daily(): 매일 08:20 자동 시작, 주말 건너뜀
+- 15:20 강제 청산, _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화
+- run_daily(): 매일 08:20 자동 시작, 주말 건너뜀, **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행
 - _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완
 
@@ -96,3 +97,5 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 익일 청산 갭률은 `ticker_prices[ticker]["open_price"]`(WebSocket 실제 시가) 사용 — `high_since_buy` 사용 금지 (전일 고가 혼입 위험)
 - order_engine의 매도 재시도 로직 제거 금지
 - 모든 TR_ID는 settings.get_tr_id() 사용
+- **`_reset_daily_state()` 제거 금지** — 정산 후 상태 초기화가 없으면 pending_buys/positions/sold_today가 다음 날까지 잔류
+- **체결통보 실패 시 pending_buys/_selling 정리 로직 제거 금지** — 매핑 실패 시 해당 종목이 영구 차단됨

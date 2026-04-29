@@ -36,7 +36,7 @@ cd frontend && npm run build
 - `KIS_APP_KEY_REAL/VTS`, `KIS_APP_SECRET_REAL/VTS`, `KIS_ACCOUNT_NO_REAL/VTS`: KIS 인증 (환경별 분리)
 - `KIS_HTS_ID`: 실전 체결통보(H0STCNI0) 구독에 필요한 HTS ID
 - `SUPABASE_URL`, `SUPABASE_KEY`: DB 연결
-- `AUTO_START`: `true`이면 서버 기동 시 자동 매매 시작 (DB 설정으로 대체 가능)
+- `AUTO_START`: `true`이면 서버 기동 시 자동 매매 시작 (DB `system_config.auto_start`가 우선, 매일 시작 전 DB 재확인)
 
 ## 다중 전략 아키텍처
 
@@ -90,6 +90,7 @@ src/engine/
 - 체결통보 수신 시 DB 저장 (`save_position`) / 매도 시 DB 삭제 (`delete_position`)
 - 재기동 시: DB positions 우선 복구 → KIS 잔고 API 교차 검증 (DB에 없는 종목 보완)
 - 당일 매도 종목 재매수 차단 (`sold_today`)
+- **정산(16:10) 후 `_reset_daily_state()`**: 전략별 positions/pending_buys/sold_today + OrderEngine 추적 상태 전체 초기화 → 다음 날 `_boot()`에서 DB 기반 재구성
 
 ### 매수/매도 안전장치
 - `is_max_positions()`: 보유 포지션 + 매수 대기(pending_buys) 합산으로 최대 종목 수 제한
@@ -97,6 +98,7 @@ src/engine/
 - 돌파 순간 감지: 이전 틱 < 기준가 AND 현재 틱 >= 기준가 (매 틱 반복 매수 방지)
 - 비중 변경 시: 매수금액 이하로 비중 축소 차단
 - 익일 청산 시가 안정화: `_next_day_clear_pending` 플래그로 60초 대기 중 on_tick 즉시 청산 방지 (손절은 유지)
+- 체결통보 처리 실패 안전장치: ticker 매핑 실패 시 `pending_buys` 제거, strategy 미발견 시 `_selling` 해제
 
 ### 코딩 컨벤션
 - Python: pydantic 모델로 데이터 검증, async/await 사용

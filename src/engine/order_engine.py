@@ -197,6 +197,14 @@ class OrderEngine:
         else:
             if len(ticker) != 6 or not ticker.isdigit():
                 logger.warning("체결통보: 주문번호 %s 종목매핑 없음 + payload ticker 비정상(%s), 처리 불가", order_no, ticker)
+                # pending_buys 잔류 방지: _pending_buy_orders에서 ticker를 찾아 제거
+                pending_info = self._pending_buy_orders.pop(order_no, None)
+                if pending_info:
+                    sid = pending_info.get("strategy_id", "")
+                    strat = self.registry.get(sid)
+                    if strat:
+                        strat.state.pending_buys.discard(pending_info["ticker"])
+                        logger.warning("체결통보 매핑 실패 → pending_buys 제거: %s (전략: %s)", pending_info["ticker"], sid)
                 return
             logger.warning("체결통보: 주문번호 %s에 대한 종목 매핑 없음, payload ticker 사용: %s", order_no, ticker)
 
@@ -276,6 +284,7 @@ class OrderEngine:
         strategy = self.registry.get(strategy_id)
         if not strategy:
             logger.error("매도 체결: 전략 찾을 수 없음: %s (order_no: %s)", strategy_id, order_no)
+            self._selling.discard(ticker)
             return
 
         state = strategy.state
