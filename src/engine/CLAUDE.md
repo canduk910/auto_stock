@@ -49,6 +49,15 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 매수가 대비 -3% 손절
 - 15:20 전량 강제 청산
 
+### strategies/momentum_breakout.py — 모멘텀 브레이크아웃 (합성)
+- VB 방식 조기 진입 + 상한가 도달 시 모멘텀 방식 익일 청산
+- prepare(): VB와 동일 스캔 + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up`)
+- 매수: 시가 + (전일Range × K) 돌파 + 전일대비 `min_prdy_rate`% 이상
+- 2단계 청산: `_limit_up_reached` set으로 모드 관리
+  - 당일 모드(기본): 손절 `intraday_stop_loss`(-3%), 15:20 강제 청산
+  - 상한가 모드(`limit_up_threshold` 도달): 손절 `overnight_stop_loss`(-5%), 익일 갭/트레일링 청산, 15:20 강제 청산 제외
+- `_next_day_clear_pending`: 익일 청산 시가 안정화 대기 플래그 (momentum과 동일)
+
 ### risk.py — 리스크 관리
 - on_tick(): ticker_prices 갱신(1회) → registry.enabled() 순회 → 전략별 exit/buy 신호
 - 중복 매수 방지: registry.is_ticker_held_by_any()
@@ -68,16 +77,16 @@ TradingScheduler (registry 기반 boot/run/settle)
 - _boot(): DB positions 우선 복구 → KIS 잔고 교차 검증 (trade_history에서 전략 매핑) → 미체결 주문 복구 (db_strategy_map)
 - _load_strategy_config(): DB strategy_config에서 비중/파라미터 복구
 - WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
-- 09:00 익일 청산: `_next_day_clear_pending=True` → 60초 시가 안정화 대기 → WebSocket 실제 시가(ticker_prices)로 갭률 판단 → 청산/트레일링
-- 09:01 변동성돌파 시가 확정 (WebSocket 캐시 → KIS API 폴백)
-- 15:20 강제 청산, _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화
+- 09:00 익일 청산: momentum + momentum_breakout 전략 순회, `_next_day_clear_pending=True` → 60초 시가 안정화 대기 → 갭률 판단 → 청산/트레일링
+- 09:01 돌파 전략 시가 확정: `_confirm_breakout_open_prices()` — VB + MB 전략 공용 (WebSocket 캐시 → KIS API 폴백)
+- 15:20 강제 청산: `_force_clear_intraday_strategies()` — VB + MB(상한가 미도달 종목) 공용. _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화
 - run_daily(): 매일 08:20 자동 시작, 주말 건너뜀, **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행
 - _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완
 
 ### scanner.py — 종목 스캔
 - scan_stocks(): 모멘텀용 등락률 순위 스캔
-- subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 변동성돌파 종목 합집합 구독
+- subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 돌파 전략(VB+MB) 종목 합집합 구독
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info
 
 ## 새 전략 추가 시

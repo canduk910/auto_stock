@@ -18,6 +18,11 @@ const PARAM_LABELS: Record<string, { label: string; unit: string; step: number }
   min_market_cap: { label: '최소 시가총액', unit: '원', step: 10_000_000_000 },
   min_trade_amount: { label: '최소 거래대금', unit: '원', step: 10_000_000_000 },
   max_scan_stocks: { label: '최대 스캔 종목 수', unit: '개', step: 10 },
+  min_prdy_rate: { label: '최소 전일대비 등락률', unit: '%', step: 0.5 },
+  exclude_consecutive_limit: { label: '연속상한가 제외 기준', unit: '일', step: 1 },
+  limit_up_threshold: { label: '상한가 모드 전환 기준', unit: '%', step: 0.5 },
+  intraday_stop_loss: { label: '당일 손절 기준', unit: '%', step: 0.5 },
+  overnight_stop_loss: { label: '익일 손절 기준', unit: '%', step: 0.5 },
 }
 
 const formatParamValue = (key: string, value: number): string => {

@@ -19,6 +19,7 @@ from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscri
 from src.engine.strategy_base import Signal, StrategyConfig
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.strategies.momentum import MomentumStrategy
+from src.engine.strategies.momentum_breakout import MomentumBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.realtime.handler import dispatch_message, register_execution_handler, register_tick_handler
 from src.realtime.websocket import kis_ws
@@ -58,6 +59,14 @@ class TradingScheduler:
             weight=0.0,
         ))
         self.registry.register(vb)
+
+        mb = MomentumBreakoutStrategy(StrategyConfig(
+            strategy_id="momentum_breakout",
+            name="모멘텀 브레이크아웃",
+            enabled=False,
+            weight=0.0,
+        ))
+        self.registry.register(mb)
 
         self.order_engine = OrderEngine(self.registry)
         self.risk_manager = RiskManager(self.registry, self.order_engine)
@@ -171,15 +180,13 @@ class TradingScheduler:
             if now < TIME_VB_OPEN_CONFIRM:
                 await self._wait_until(TIME_VB_OPEN_CONFIRM)
             if now <= TIME_SCAN_START:
-                await self._confirm_vb_open_prices()
-                # VB 종목 선행 구독 → 09:01부터 VB 매매 시작
-                vb = self.registry.get("volatility_breakout")
-                if vb and vb.config.enabled:
-                    vb_tickers = vb.get_scanned_tickers()
-                    if vb_tickers:
-                        await subscribe_filtered_stocks([], extra_tickers=vb_tickers)
-                        self._phase = "vb_trading"
-                        logger.info("변동성돌파 선행 매매 시작: %d종목", len(vb_tickers))
+                await self._confirm_breakout_open_prices()
+                # VB + MB 종목 선행 구독 → 09:01부터 매매 시작
+                extra = self._collect_breakout_tickers()
+                if extra:
+                    await subscribe_filtered_stocks([], extra_tickers=extra)
+                    self._phase = "vb_trading"
+                    logger.info("돌파 전략 선행 매매 시작: %d종목", len(extra))
 
             # 09:30~ 종목 스캔 + 매매
             if now < TIME_SCAN_START:
@@ -189,13 +196,12 @@ class TradingScheduler:
             if now < TIME_BUY_STOP:
                 # 스캔 + 매매 모드 진입
                 tickers = await scan_stocks()
-                vb = self.registry.get("volatility_breakout")
-                vb_tickers = vb.get_scanned_tickers() if vb and vb.config.enabled else []
-                await subscribe_filtered_stocks(tickers, extra_tickers=vb_tickers)
+                extra = self._collect_breakout_tickers()
+                await subscribe_filtered_stocks(tickers, extra_tickers=extra)
 
                 # 09:01 이후 시작이면 시가 확정 재시도 (KIS API 조회)
                 if now > TIME_VB_OPEN_CONFIRM:
-                    await self._confirm_vb_open_prices()
+                    await self._confirm_breakout_open_prices()
 
                 self._phase = "trading"
                 scan_task = asyncio.create_task(self._scan_loop())
@@ -207,11 +213,11 @@ class TradingScheduler:
             else:
                 logger.info("15:20 이후 시작 — 매수 중단 상태로 진입")
 
-            # 15:20 신규 매수 중단 + 변동성돌파 전량 강제 청산
+            # 15:20 신규 매수 중단 + 당일 청산 전략 강제 청산
             self._phase = "buy_stopped"
             for s in self.registry.enabled():
                 s.state.buy_disabled = True
-            await self._force_clear_volatility_breakout()
+            await self._force_clear_intraday_strategies()
             await write_log("INFO", "15:20 신규 매수 중단")
 
             # 15:30 장 마감, 구독 해제
@@ -384,55 +390,65 @@ class TradingScheduler:
     async def _execute_next_day_clear(self) -> None:
         """09:00 익일 청산 로직.
 
-        모멘텀 전략의 보유 중 is_next_day 포지션을 처리한다.
+        익일 청산을 지원하는 전략(momentum, momentum_breakout)의 is_next_day 포지션을 처리한다.
         1. 전일 매수 보유 종목 목록 조회
         2. 각 종목의 당일 시가 확인 (WebSocket 시세 구독으로 수신)
         3. 60초 대기하여 시가 안정화 (대기 중 on_tick의 NEXT_DAY_CLEAR 억제)
-        4. 시가가 매수가 대비 +10% 이상 → 트레일링 스탑 모드 (on_tick에서 고점 추적)
-        5. 시가가 +10% 미만 → 즉시 시장가 전량 매도
+        4. 시가가 매수가 대비 gap_up_threshold 이상 → 트레일링 스탑 모드
+        5. gap_up_threshold 미만 → 즉시 시장가 전량 매도
         """
-        momentum = self.registry.get("momentum")
-        if not momentum:
-            return
+        # 익일 청산 대상 전략 수집 (momentum + momentum_breakout)
+        overnight_strategies: list[tuple[str, object]] = []
+        for sid in ("momentum", "momentum_breakout"):
+            s = self.registry.get(sid)
+            if s and s.config.enabled:
+                overnight_strategies.append((sid, s))
 
-        gap_up_threshold = momentum.config.params.get("gap_up_threshold", 10.0)
+        # 전략별 익일 포지션 수집
+        all_next_day: list[tuple[str, object, str]] = []  # (ticker, pos, strategy_id)
+        for sid, strategy in overnight_strategies:
+            for ticker, p in strategy.state.positions.items():
+                if p.is_next_day:
+                    all_next_day.append((ticker, p, sid))
 
-        next_day_positions = [
-            (ticker, p) for ticker, p in momentum.state.positions.items() if p.is_next_day
-        ]
-        if not next_day_positions:
+        if not all_next_day:
             logger.info("익일 청산 대상 없음")
             return
 
-        await write_log("INFO", f"익일 청산 대상: {[ticker for ticker, _ in next_day_positions]}")
+        await write_log("INFO", f"익일 청산 대상: {[(t, sid) for t, _, sid in all_next_day]}")
 
         # on_tick에서 즉시 청산하지 않도록 대기 플래그 설정 (손절은 계속 작동)
-        if isinstance(momentum, MomentumStrategy):
-            momentum._next_day_clear_pending = True
+        for _, strategy in overnight_strategies:
+            if hasattr(strategy, '_next_day_clear_pending'):
+                strategy._next_day_clear_pending = True
 
         # 보유 종목에 대해 시세 구독 (시가 수신용)
         from src.engine.scanner import TICK_TR_ID
-        for ticker, _ in next_day_positions:
+        for ticker, _, _ in all_next_day:
             await kis_ws.subscribe(TICK_TR_ID, ticker)
 
         # 시가 확정 대기 (09:01까지 최대 60초)
         await asyncio.sleep(60)
 
         # 대기 완료 — on_tick 가드 해제
-        if isinstance(momentum, MomentumStrategy):
-            momentum._next_day_clear_pending = False
+        for _, strategy in overnight_strategies:
+            if hasattr(strategy, '_next_day_clear_pending'):
+                strategy._next_day_clear_pending = False
 
         from src.engine.scanner import t, ticker_prices
 
-        for ticker, pos in list(next_day_positions):
-            if ticker not in momentum.state.positions:
+        for ticker, pos, strategy_id in all_next_day:
+            strategy = self.registry.get(strategy_id)
+            if not strategy or ticker not in strategy.state.positions:
                 continue  # 대기 중 손절로 이미 처리됨
 
-            # WebSocket에서 수신한 실제 시가 사용 (high_since_buy는 전일 고가일 수 있음)
+            gap_up_threshold = strategy.config.params.get("gap_up_threshold", 10.0)
+
+            # WebSocket에서 수신한 실제 시가 사용
             price_data = ticker_prices.get(ticker, {})
             today_open = price_data.get("open_price", 0)
             if today_open <= 0:
-                today_open = pos.high_since_buy  # 시세 미수신 시 폴백
+                today_open = pos.high_since_buy
                 logger.warning("시가 미수신, high_since_buy 사용: %s (%d)", t(ticker), today_open)
 
             if pos.buy_price > 0:
@@ -441,84 +457,93 @@ class TradingScheduler:
                 gap_rate = 0.0
 
             if gap_rate >= gap_up_threshold:
-                # +10% 이상 갭상승 → 트레일링 스탑 모드 유지 (on_tick에서 고점 추적)
                 logger.info(
-                    "트레일링 스탑 모드: %s 갭률 %.1f%% (시가: %d, 매수가: %d)",
-                    t(ticker), gap_rate, today_open, pos.buy_price,
+                    "트레일링 스탑 모드: %s 갭률 %.1f%% (전략: %s)",
+                    t(ticker), gap_rate, strategy_id,
                 )
-                await write_log("INFO", f"트레일링 스탑 모드: {t(ticker)} 갭률 {gap_rate:.1f}%")
+                await write_log("INFO", f"트레일링 스탑 모드: {t(ticker)} 갭률 {gap_rate:.1f}% ({strategy_id})")
             else:
-                # +10% 미만 → 즉시 시장가 전량 매도
                 logger.info(
-                    "익일 즉시 청산: %s 갭률 %.1f%% (시가: %d, 매수가: %d)",
-                    t(ticker), gap_rate, today_open, pos.buy_price,
+                    "익일 즉시 청산: %s 갭률 %.1f%% (전략: %s)",
+                    t(ticker), gap_rate, strategy_id,
                 )
-                await self.order_engine.execute_sell(ticker, Signal.NEXT_DAY_CLEAR, "momentum")
-                await write_log("INFO", f"익일 즉시 청산 실행: {t(ticker)} 갭률 {gap_rate:.1f}%")
+                await self.order_engine.execute_sell(ticker, Signal.NEXT_DAY_CLEAR, strategy_id)
+                await write_log("INFO", f"익일 즉시 청산 실행: {t(ticker)} 갭률 {gap_rate:.1f}% ({strategy_id})")
 
         logger.info("익일 청산 실행 완료")
 
-    async def _confirm_vb_open_prices(self) -> None:
-        """변동성돌파 전략의 시가를 확정한다.
+    async def _confirm_breakout_open_prices(self) -> None:
+        """돌파 전략(VB, MB)의 시가를 확정한다.
 
         1차: WebSocket ticker_prices 캐시에서 시가 참조
         2차: 미확정 종목은 KIS 개별시세 API로 시가 조회
         """
-        vb = self.registry.get("volatility_breakout")
-        if not vb or not vb.config.enabled:
-            return
-        if not isinstance(vb, VolatilityBreakoutStrategy):
-            return
-
         from src.engine.scanner import ticker_prices
-        confirmed = 0
 
-        # 1차: WebSocket 캐시에서 시가 확정
-        unconfirmed = []
-        for ticker in list(vb._targets.keys()):
-            if vb._open_confirmed.get(ticker, False):
-                confirmed += 1
+        # on_open_price_confirmed + _targets + _open_confirmed 을 가진 전략 순회
+        for sid in ("volatility_breakout", "momentum_breakout"):
+            strategy = self.registry.get(sid)
+            if not strategy or not strategy.config.enabled:
                 continue
-            price_info = ticker_prices.get(ticker)
-            if price_info and price_info.get("open_price", 0) > 0:
-                vb.on_open_price_confirmed(ticker, price_info["open_price"])
-                confirmed += 1
-            else:
-                unconfirmed.append(ticker)
+            if not hasattr(strategy, '_targets') or not hasattr(strategy, 'on_open_price_confirmed'):
+                continue
 
-        # 2차: 미확정 종목은 KIS API로 시가 조회
-        if unconfirmed:
-            from src.api.condition import fetch_stock_detail
-            for ticker in unconfirmed:
-                try:
-                    detail = await fetch_stock_detail(ticker)
-                    open_price = int(detail.get("stck_oprc", "0"))
-                    if open_price > 0:
-                        vb.on_open_price_confirmed(ticker, open_price)
-                        confirmed += 1
-                except Exception:
-                    logger.debug("VB 시가 조회 실패: %s", ticker)
+            confirmed = 0
+            unconfirmed = []
+            for ticker in list(strategy._targets.keys()):
+                if strategy._open_confirmed.get(ticker, False):
+                    confirmed += 1
+                    continue
+                price_info = ticker_prices.get(ticker)
+                if price_info and price_info.get("open_price", 0) > 0:
+                    strategy.on_open_price_confirmed(ticker, price_info["open_price"])
+                    confirmed += 1
+                else:
+                    unconfirmed.append(ticker)
 
-        logger.info("변동성돌파 시가 확정: %d/%d종목", confirmed, len(vb._targets))
+            if unconfirmed:
+                from src.api.condition import fetch_stock_detail
+                for ticker in unconfirmed:
+                    try:
+                        detail = await fetch_stock_detail(ticker)
+                        open_price = int(detail.get("stck_oprc", "0"))
+                        if open_price > 0:
+                            strategy.on_open_price_confirmed(ticker, open_price)
+                            confirmed += 1
+                    except Exception:
+                        logger.debug("%s 시가 조회 실패: %s", sid, ticker)
 
-    async def _force_clear_volatility_breakout(self) -> None:
-        """15:20 변동성돌파 전략의 전량 강제 청산."""
-        vb = self.registry.get("volatility_breakout")
-        if not vb or not vb.config.enabled:
-            return
-        if not isinstance(vb, VolatilityBreakoutStrategy):
-            return
+            logger.info("%s 시가 확정: %d/%d종목", strategy.config.name, confirmed, len(strategy._targets))
 
-        clear_tickers = vb.check_force_clear()
-        if not clear_tickers:
-            return
+    def _collect_breakout_tickers(self) -> list[str]:
+        """돌파 전략(VB, MB)의 스캔 종목을 합산한다."""
+        tickers: list[str] = []
+        for sid in ("volatility_breakout", "momentum_breakout"):
+            strategy = self.registry.get(sid)
+            if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):
+                tickers.extend(strategy.get_scanned_tickers())
+        return tickers
 
+    async def _force_clear_intraday_strategies(self) -> None:
+        """15:20 당일 청산 전략(VB, MB)의 강제 청산."""
         from src.engine.scanner import t
-        await write_log("INFO", f"변동성돌파 강제 청산 대상: {clear_tickers}")
-        for ticker in clear_tickers:
-            if ticker in vb.state.positions:
-                await self.order_engine.execute_sell(ticker, Signal.FORCE_CLEAR, "volatility_breakout")
-                logger.info("변동성돌파 강제 청산: %s", t(ticker))
+
+        for sid in ("volatility_breakout", "momentum_breakout"):
+            strategy = self.registry.get(sid)
+            if not strategy or not strategy.config.enabled:
+                continue
+            if not hasattr(strategy, 'check_force_clear'):
+                continue
+
+            clear_tickers = strategy.check_force_clear()
+            if not clear_tickers:
+                continue
+
+            await write_log("INFO", f"{strategy.config.name} 강제 청산 대상: {clear_tickers}")
+            for ticker in clear_tickers:
+                if ticker in strategy.state.positions:
+                    await self.order_engine.execute_sell(ticker, Signal.FORCE_CLEAR, sid)
+                    logger.info("%s 강제 청산: %s", strategy.config.name, t(ticker))
 
     async def _boot(self) -> None:
         """시스템 기동: 토큰 갱신, 잔고 동기화 + 포지션 복구.

@@ -43,6 +43,7 @@ cd frontend && npm run build
 ### 전략 구성
 - **상한가 모멘텀** (`momentum`): 전일종가 대비 +29% 돌파 매수, -7.5% 손절, 익일 청산
 - **변동성 돌파** (`volatility_breakout`): 노이즈 비율 기반 K값 → Target_Price 돌파 매수, -3% 손절, 15:20 강제 청산
+- **모멘텀 브레이크아웃** (`momentum_breakout`): 변동성 돌파 방식 조기 진입 + 상한가 도달 시 익일 청산 모드 전환. 당일 손절 -3%, 상한가 모드 손절 -5%, 15:20 강제 청산(상한가 미도달 종목만)
 
 ### 핵심 파일 구조
 ```
@@ -51,11 +52,12 @@ src/engine/
 ├── strategy_registry.py   # StrategyRegistry (전략 등록/비중/중복 방지)
 ├── strategies/
 │   ├── momentum.py        # 상한가 모멘텀 전략
-│   └── volatility_breakout.py  # 변동성 돌파 전략
+│   ├── volatility_breakout.py  # 변동성 돌파 전략
+│   └── momentum_breakout.py    # 모멘텀 브레이크아웃 전략 (합성)
 ├── risk.py               # RiskManager (registry 순회, 전략별 신호 체크)
 ├── order_engine.py        # OrderEngine (strategy_id 태깅, 전략별 포지션)
 ├── scheduler.py           # TradingScheduler (registry 기반)
-└── scanner.py             # 종목 스캔 (모멘텀 + 변동성돌파 공용)
+└── scanner.py             # 종목 스캔 (모멘텀 + 돌파 전략 공용)
 ```
 
 ### 새 전략 추가 방법
@@ -83,7 +85,7 @@ src/engine/
 - 체결통보를 못 받으면 포지션이 등록되지 않아 손절 감시가 불가능
 - 실전: H0STCNI0 (구독 키: HTS ID), 모의: H0STCNI9 (구독 키: 계좌번호)
 - scheduler.py에서 WebSocket 연결 직후 자동 구독
-- 체결통보의 종목코드 필드는 신뢰하지 않음 → `_order_ticker[order_no]` 매핑으로 정확한 ticker 사용
+- 체결통보 종목코드는 `fields[8]` (단, `_order_ticker[order_no]` 매핑이 우선)
 
 ### 포지션 관리
 - DB `positions` 테이블이 포지션의 진실의 원천 (매수가/전략/매수일 정확)
