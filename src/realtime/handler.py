@@ -11,6 +11,8 @@ from typing import Callable, Awaitable
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding as sym_padding
 
+from src.config import settings
+
 logger = logging.getLogger(__name__)
 
 # 콜백 타입
@@ -96,11 +98,19 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
         return
 
     # 필드 매핑 (KIS 체결통보 output 기준)
-    # [0] HTS ID, [1] 계좌번호, [2] 주문번호, [3] 원주문번호
+    # [0] HTS ID, [1] 계좌번호(8자리)+상품코드(2자리), [2] 주문번호, [3] 원주문번호
     # [4] 매도매수구분(02:매수,01:매도), [5] 정정구분, [6] 주문종류
     # [7] 주문조건, [8] 종목코드, [9] 주문수량, [10] 체결단가
     # [11] 체결시간, [12] 거부여부, [13] 체결구분(1:접수,2:체결)
     # [14] ?, [15] ?, [16] 체결수량, [17] 고객명, [18] 종목명
+
+    # 실전 환경에서 동일 HTS ID에 묶인 다른 계좌의 체결통보가 함께 푸시됨 → 대상 계좌만 처리
+    target_account = (settings.kis_account_no or "").strip()
+    recv_account = fields[1].strip() if fields[1] else ""
+    if target_account and recv_account and not recv_account.startswith(target_account):
+        logger.debug("체결통보 계좌 불일치 - 무시: 수신=%s, 대상=%s", recv_account, target_account)
+        return
+
     order_no = fields[2]
     side = "BUY" if fields[4] == "02" else "SELL"
     exec_type = fields[13]  # 1:접수, 2:체결
