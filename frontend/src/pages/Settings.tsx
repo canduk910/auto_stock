@@ -37,7 +37,7 @@ export default function Settings() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [editingParams, setEditingParams] = useState<string | null>(null) // strategy key
-  const [paramEdits, setParamEdits] = useState<Record<string, number>>({})
+  const [paramEdits, setParamEdits] = useState<Record<string, string>>({})
   const [paramDirty, setParamDirty] = useState(false)
   const [showParamConfirm, setShowParamConfirm] = useState(false)
   const [weightError, setWeightError] = useState<string | null>(null)
@@ -122,10 +122,10 @@ export default function Settings() {
   }
 
   const openParamEditor = (strategyKey: string, params: Record<string, unknown>) => {
-    const editable: Record<string, number> = {}
+    const editable: Record<string, string> = {}
     for (const [k, v] of Object.entries(params)) {
       if (typeof v === 'number' && k in PARAM_LABELS) {
-        editable[k] = v
+        editable[k] = String(v)
       }
     }
     setParamEdits(editable)
@@ -133,14 +133,19 @@ export default function Settings() {
     setParamDirty(false)
   }
 
-  const handleParamChange = (key: string, value: number) => {
+  const handleParamChange = (key: string, value: string) => {
     setParamEdits((prev) => ({ ...prev, [key]: value }))
     setParamDirty(true)
   }
 
   const handleSaveParams = () => {
     if (!editingParams) return
-    paramMutation.mutate({ id: editingParams, params: paramEdits })
+    const parsed: Record<string, number> = {}
+    for (const [k, v] of Object.entries(paramEdits)) {
+      const n = Number(v)
+      if (Number.isFinite(n)) parsed[k] = n
+    }
+    paramMutation.mutate({ id: editingParams, params: parsed })
   }
 
   return (
@@ -316,25 +321,27 @@ export default function Settings() {
                 <div className="space-y-3">
                   {editableKeys.map((key) => {
                     const meta = PARAM_LABELS[key]
-                    const value = paramEdits[key] ?? 0
+                    const rawValue = paramEdits[key] ?? '0'
+                    const numValue = Number(rawValue)
+                    const safeNum = Number.isFinite(numValue) ? numValue : 0
                     const totalInv = s.total_investment ?? 0
                     return (
                       <div key={key}>
                         <div className="flex items-center gap-4">
                           <label className="text-sm text-gray-600 w-40 shrink-0">{meta.label}</label>
                           <input
-                            type="number"
-                            step={meta.step}
-                            value={value}
-                            onChange={(e) => handleParamChange(key, Number(e.target.value))}
+                            type="text"
+                            inputMode="decimal"
+                            value={rawValue}
+                            onChange={(e) => handleParamChange(key, e.target.value)}
                             className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                           <span className="text-xs text-gray-400 w-8">{meta.unit}</span>
                         </div>
                         {key === 'position_ratio' && totalInv > 0 && (
                           <div className="ml-44 mt-1 text-xs text-gray-400">
-                            예상 종목당 매수: ~{((totalInv * value) / 10000).toFixed(0)}만원
-                            (할당금 {(totalInv / 10000).toFixed(0)}만원 x {(value * 100).toFixed(0)}%)
+                            예상 종목당 매수: ~{((totalInv * safeNum) / 10000).toFixed(0)}만원
+                            (할당금 {(totalInv / 10000).toFixed(0)}만원 x {(safeNum * 100).toFixed(0)}%)
                           </div>
                         )}
                       </div>
