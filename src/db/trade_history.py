@@ -131,3 +131,27 @@ async def get_trades(
     result = query.execute()
 
     return result.data, total
+
+
+async def get_trades_in_range(
+    start_date,
+    end_date,
+    strategy: str | None = None,
+) -> list[dict]:
+    """[start_date, end_date] 범위의 거래 기록을 timestamp 기준 inclusive하게 조회한다.
+
+    파라미터 추천 모듈 등에서 N영업일치 통계 산출에 사용한다.
+    """
+    start_iso = f"{start_date.isoformat()}T00:00:00"
+    end_iso = f"{end_date.isoformat()}T23:59:59.999999"
+    query = (
+        supabase.table("trade_history")
+        .select("*")
+        .gte("timestamp", start_iso)
+        .lte("timestamp", end_iso)
+        .order("timestamp", desc=False)
+    )
+    if strategy:
+        query = query.eq("strategy", strategy)
+    result = query.execute()
+    return result.data or []

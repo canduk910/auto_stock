@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     port: int = 8000
     auto_start: bool = False  # True: 서버 기동 시 자동 매매 시작
 
+    # OpenAI 파라미터 추천
+    openai_api_key: str = ""
+    openai_recommend_model: str = "gpt-5.4"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     @computed_field

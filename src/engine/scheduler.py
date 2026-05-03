@@ -34,6 +34,7 @@ TIME_VB_OPEN_CONFIRM = time(9, 1)
 TIME_SCAN_START = time(9, 30)
 TIME_BUY_STOP = time(15, 20)
 TIME_MARKET_CLOSE = time(15, 30)
+TIME_RECOMMENDATION = time(16, 0)
 TIME_SETTLEMENT = time(16, 10)
 SCAN_INTERVAL = 300  # 5분마다 스캔
 
@@ -225,6 +226,17 @@ class TradingScheduler:
             self._phase = "closing"
             await unsubscribe_all()
             await write_log("INFO", "15:30 WebSocket 구독 해제")
+
+            # 16:00 파라미터 추천 생성
+            await self._wait_until(TIME_RECOMMENDATION)
+            self._phase = "recommending"
+            try:
+                from src.engine.recommendation_engine import generate_recommendations
+                await generate_recommendations()
+                await write_log("INFO", "16:00 파라미터 추천 생성 완료")
+            except Exception:
+                logger.exception("파라미터 추천 생성 실패")
+                await write_log("ERROR", "파라미터 추천 생성 실패")
 
             # 16:10 정산
             await self._wait_until(TIME_SETTLEMENT)

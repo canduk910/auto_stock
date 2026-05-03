@@ -3,11 +3,13 @@ import { useQuery } from '@tanstack/react-query'
 import { getTradingStatus } from './api/trading'
 import Dashboard from './pages/Dashboard'
 import History from './pages/History'
+import Recommendations from './pages/Recommendations'
 import Settings from './pages/Settings'
 
 const navItems = [
   { to: '/', label: '대시보드' },
   { to: '/history', label: '거래 내역' },
+  { to: '/recommendations', label: '파라미터 추천' },
   { to: '/settings', label: '설정' },
 ]
 
@@ -59,6 +61,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/history" element={<History />} />
+          <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>
