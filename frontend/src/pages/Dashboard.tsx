@@ -30,8 +30,8 @@ export default function Dashboard() {
 
       {/* 전략 선택 탭 */}
       {strategyKeys.length > 0 && (
-        <div className="bg-white rounded-lg shadow px-4 py-2">
-          <div className="flex items-center gap-1 overflow-x-auto">
+        <div className="bg-white rounded-lg shadow px-4 py-2 overflow-visible">
+          <div className="flex flex-wrap items-center gap-1">
             <span className="inline-flex items-center">
               <button
                 onClick={() => setSelectedStrategy('all')}
