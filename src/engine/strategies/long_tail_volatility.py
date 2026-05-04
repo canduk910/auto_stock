@@ -209,6 +209,20 @@ class LongTailVolatilityStrategy(StrategyBase):
         """스캔된 종목 리스트를 반환한다 (WebSocket 구독용)."""
         return self._scanned_tickers
 
+    def get_targets_status(self) -> dict[str, dict]:
+        """종목별 타겟 가격 정보를 반환한다 (VB와 동일한 형식)."""
+        return {
+            ticker: {
+                "k": info["k"],
+                "target_price": info["target_price"],
+                "open_price": info["open_price"],
+                "target_offset": info["target_offset"],
+                "open_confirmed": self._open_confirmed.get(ticker, False),
+                "limit_up_reached": ticker in self._limit_up_reached,
+            }
+            for ticker, info in self._targets.items()
+        }
+
     def on_open_price_confirmed(self, ticker: str, open_price: int) -> None:
         """시가 확정 시 Target Price를 계산한다."""
         info = self._targets.get(ticker)
