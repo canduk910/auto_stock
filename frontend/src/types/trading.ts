@@ -124,13 +124,10 @@ export interface DailyPerformance {
   date: string
   total_asset: number
   daily_profit_rate: number
-}
-
-export interface MonthlyPerformance {
-  month: string
-  trading_days: number
-  total_profit_rate: number
-  latest_asset: number
+  daily_realized_pnl?: number
+  net_external_cashflow?: number
+  deposit?: number
+  cumulative_return_rate?: number
 }
 
 export interface TradeRecord {

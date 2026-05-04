@@ -57,6 +57,26 @@ async def update_trade_status(
     logger.debug("거래 상태 변경: %s %s -> %s (전략: %s)", ticker, trade_type.value, status.value, strategy)
 
 
+async def get_today_trades_for_settlement(strategy: str | None = None) -> list[dict]:
+    """정산용 — 당일 체결 거래 전체(중복 dedup 없음, 매수+매도 합산용).
+
+    COMPLETED + PARTIAL 상태만 포함. 매매 cashflow / 실현손익 합 계산에 사용.
+    """
+    from datetime import date
+    today = date.today().isoformat()
+    query = (
+        supabase.table("trade_history")
+        .select("*")
+        .gte("timestamp", f"{today}T00:00:00")
+        .in_("status", ["COMPLETED", "PARTIAL"])
+        .order("timestamp", desc=False)
+    )
+    if strategy:
+        query = query.eq("strategy", strategy)
+    result = query.execute()
+    return result.data or []
+
+
 async def get_today_buy_trades(strategy: str | None = None) -> list[dict]:
     """당일 매수 기록을 조회한다 (포지션 복구용)."""
     from datetime import date

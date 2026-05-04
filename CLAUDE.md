@@ -116,7 +116,7 @@ src/engine/
 
 ## DB 스키마 (Supabase)
 - `trade_history`: 거래 내역 (id, timestamp, ticker, ticker_name, trade_type, price, quantity, profit_loss, status, strategy, order_no)
-- `daily_performance`: 일일 실적 (date + strategy 복합PK, total_asset, daily_profit_rate)
+- `daily_performance`: 일일 실적 (date + strategy 복합PK, total_asset, daily_profit_rate=실현손익 기반, daily_realized_pnl, net_external_cashflow=외부 입출금 추정, deposit, cumulative_return_rate=TWR 복리 누적)
 - `positions`: 보유 포지션 영속화 (ticker PK, buy_price, quantity, strategy_id, buy_date, high_since_buy)
 - `strategy_config`: 전략 설정 영속화 (strategy_id PK, enabled, weight, params JSONB)
 - `system_config`: 시스템 설정 (key PK, value JSONB) — auto_start 등

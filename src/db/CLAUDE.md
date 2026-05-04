@@ -13,8 +13,9 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `get_trades(limit, offset, ticker)`: 페이징 조회 + total count
 
 ### daily_performance.py — 일일 실적
-- `upsert_performance()`: 16:10 정산 시 당일 실적 기록
-- `get_performance(days)`: 최근 N일 실적 조회
+- `upsert_daily_performance()`: 16:10 정산 시 당일 실적 기록 (total_asset, daily_profit_rate=실현손익 기반, daily_realized_pnl, net_external_cashflow, deposit, cumulative_return_rate=TWR 복리)
+- `get_performance(days)`: 최근 N일 실적 조회 (날짜 오름차순)
+- `get_latest_performance(strategy)`: 가장 최근 영업일 1행 — TWR 누적/Δ예수금 baseline
 
 ### system_logs.py — 시스템 로그
 - `write_log(level, message)`: 이벤트/에러 기록

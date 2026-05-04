@@ -15,8 +15,7 @@
 | GET | `/api/balance/buyable` | balance.py | 매수 가능 금액 |
 | GET | `/api/history?page=&size=` | history.py | 거래 내역 (페이징, 종목명/주문번호 포함) |
 | GET | `/api/performance/summary` | performance.py | 실적 요약 |
-| GET | `/api/performance/daily` | performance.py | 일별 실적 (날짜 오름차순) |
-| GET | `/api/performance/monthly` | performance.py | 월별 실적 |
+| GET | `/api/performance/daily` | performance.py | 일별 실적 (실현손익 기반 일별 수익률 + TWR 누적 + 외부 입출금) |
 | GET | `/api/strategies` | strategies.py | 전략 목록 + 비중 + 상태 + 타겟가 |
 | PUT | `/api/strategies/weights` | strategies.py | 전략별 비중 수정 (매수금액 하한선 검증) |
 | PUT | `/api/strategies/{id}/params` | strategies.py | 전략 파라미터 수정 (DB 영속화) |

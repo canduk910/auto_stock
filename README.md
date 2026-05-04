@@ -211,9 +211,8 @@ KIS_APP_SECRET=실전용_시크릿
 | GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목) |
 | GET | `/api/balance/buyable` | 매수 가능 금액 조회 |
 | GET | `/api/history?page=&size=` | 거래 내역 (페이징) |
-| GET | `/api/performance/summary` | 실적 요약 |
-| GET | `/api/performance/daily` | 일별 실적 |
-| GET | `/api/performance/monthly` | 월별 실적 |
+| GET | `/api/performance/summary` | 실적 요약 (TWR 누적 + 일평균 실현 수익률) |
+| GET | `/api/performance/daily` | 일별 실적 (실현손익 기반 + TWR 누적 + 외부 입출금) |
 | GET | `/api/strategies` | 전략 목록 + 비중 + 상태 + 타겟가 |
 | PUT | `/api/strategies/weights` | 전략별 비중 수정 (매수금액 하한선 검증) |
 | PUT | `/api/strategies/{id}/params` | 전략 파라미터 수정 |

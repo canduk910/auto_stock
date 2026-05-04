@@ -11,7 +11,7 @@ from datetime import date, datetime, time, timedelta
 
 from src.api.balance import get_balance, get_daily_orders
 from src.auth.token import token_manager
-from src.db.daily_performance import upsert_daily_performance
+from src.db.daily_performance import get_latest_performance, upsert_daily_performance
 from src.db.system_logs import write_log
 from src.engine.order_engine import OrderEngine
 from src.engine.risk import RiskManager
@@ -1023,44 +1023,83 @@ class TradingScheduler:
                                h.name or h.ticker, h.quantity, int(h.avg_price))
 
     async def _settle(self) -> None:
-        """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록."""
+        """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.
+
+        새 수익률 모델:
+        - 외부 입출금 자동 추정: (Δ예수금) - (매도총액 - 매수총액)
+        - 일별 수익률(실현손익 기준) = daily_realized_pnl / 어제 자산
+        - 누적 수익률 = TWR 복리: (1 + prev_cum) × (1 + daily_rate) - 1
+        """
+        from src.db.trade_history import get_today_trades_for_settlement
+
         try:
             _, summary = await get_balance()
-            total_investment = sum(s.state.total_investment for s in self.registry.all())
+            today = date.today()
 
-            # 전체 합산 수익률 계산
-            if total_investment > 0:
-                profit_rate = (
-                    (summary.net_asset - total_investment)
-                    / total_investment
-                    * 100
-                )
-            else:
-                profit_rate = 0.0
+            # 전체('total') 정산
+            prev_total = await get_latest_performance(strategy="total")
+            prev_total_asset = float(prev_total["total_asset"]) if prev_total else float(summary.net_asset)
+            prev_deposit = float(prev_total["deposit"]) if prev_total else float(summary.deposit)
+            prev_cum_rate = float(prev_total["cumulative_return_rate"]) if prev_total else 0.0
 
-            # 합산('total') 기록
-            await upsert_daily_performance(
-                target_date=date.today(),
-                total_asset=float(summary.net_asset),
-                daily_profit_rate=profit_rate,
-                strategy="total",
+            # 당일 체결 raw (전 전략 합산)
+            today_trades_all = await get_today_trades_for_settlement()
+            buy_total = sum(float(t.get("price", 0)) * int(t.get("quantity", 0))
+                            for t in today_trades_all if t.get("trade_type") == "BUY")
+            sell_total = sum(float(t.get("price", 0)) * int(t.get("quantity", 0))
+                             for t in today_trades_all if t.get("trade_type") == "SELL")
+            net_trade_cashflow = sell_total - buy_total  # 매매로 인한 예수금 증가분
+
+            # 외부 입출금 추정 (Δ예수금 - 매매 cashflow)
+            net_ext_cashflow = (float(summary.deposit) - prev_deposit) - net_trade_cashflow
+
+            # 당일 실현손익 합 (매도 거래 profit_loss)
+            daily_realized_pnl_total = sum(
+                float(t.get("profit_loss") or 0) for t in today_trades_all
+                if t.get("trade_type") == "SELL"
             )
 
-            # 전략별 기록
+            # 일별 실현 수익률 — 어제 자산 분모
+            daily_rate = (daily_realized_pnl_total / prev_total_asset * 100) if prev_total_asset > 0 else 0.0
+            # 누적 TWR 복리
+            cum_rate = ((1 + prev_cum_rate / 100) * (1 + daily_rate / 100) - 1) * 100
+
+            await upsert_daily_performance(
+                target_date=today,
+                total_asset=float(summary.net_asset),
+                daily_profit_rate=daily_rate,
+                strategy="total",
+                net_external_cashflow=net_ext_cashflow,
+                daily_realized_pnl=daily_realized_pnl_total,
+                deposit=float(summary.deposit),
+                cumulative_return_rate=cum_rate,
+            )
+
+            # 전략별 기록 (TWR 복리 누적)
             for strategy in self.registry.all():
-                s_investment = strategy.state.total_investment
-                s_pnl = strategy.state.daily_realized_pnl
-                s_rate = (s_pnl / s_investment * 100) if s_investment > 0 else 0.0
+                sid = strategy.strategy_id
+                prev_s = await get_latest_performance(strategy=sid)
+                prev_s_asset = float(prev_s["total_asset"]) if prev_s else float(strategy.state.total_investment)
+                prev_s_cum = float(prev_s["cumulative_return_rate"]) if prev_s else 0.0
+
+                s_pnl = float(strategy.state.daily_realized_pnl)
+                s_rate = (s_pnl / prev_s_asset * 100) if prev_s_asset > 0 else 0.0
+                s_cum = ((1 + prev_s_cum / 100) * (1 + s_rate / 100) - 1) * 100
+
+                s_investment = float(strategy.state.total_investment)
                 await upsert_daily_performance(
-                    target_date=date.today(),
-                    total_asset=float(s_investment + s_pnl),
+                    target_date=today,
+                    total_asset=s_investment + s_pnl,
                     daily_profit_rate=s_rate,
-                    strategy=strategy.strategy_id,
+                    strategy=sid,
+                    daily_realized_pnl=s_pnl,
+                    cumulative_return_rate=s_cum,
                 )
 
             await write_log(
                 "INFO",
-                f"일일 정산: 순자산 {summary.net_asset:,}원, 수익률 {profit_rate:.2f}%",
+                f"일일 정산: 순자산 {summary.net_asset:,}원, 실현 {daily_rate:.2f}%, "
+                f"누적 {cum_rate:.2f}%, 외부입출금 {net_ext_cashflow:,.0f}원",
             )
         except Exception:
             logger.exception("정산 오류")
