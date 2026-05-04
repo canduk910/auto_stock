@@ -4,6 +4,7 @@ import { listRecommendations, applyRecommendation, rejectRecommendation } from '
 import { getStrategies } from '../api/trading'
 import { getStrategyColor } from '../types/strategy'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
+import InfoTooltip from '../components/InfoTooltip'
 import ConfirmModal from '../components/ConfirmModal'
 import type { RecommendationItem, RecommendationStatus, RecommendationMetrics } from '../types/recommendations'
 
@@ -425,7 +426,12 @@ export default function Recommendations() {
                                       </td>
                                       <td className="px-3 py-2">
                                         <div className="flex items-center gap-2">
-                                          <span className="text-gray-800">{label}</span>
+                                          <span className="text-gray-800 inline-flex items-center">
+                                            {label}
+                                            {meta?.description && (
+                                              <InfoTooltip content={meta.description} ariaLabel={`${label} 설명`} />
+                                            )}
+                                          </span>
                                           {isAlreadyApplied && (
                                             <span className="px-1.5 py-0.5 text-[10px] bg-green-100 text-green-700 rounded">
                                               적용됨

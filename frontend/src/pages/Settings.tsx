@@ -4,7 +4,9 @@ import { getStrategies, updateStrategyWeights, updateStrategyParams } from '../a
 import apiClient from '../api/client'
 import { getStrategyColor } from '../types/strategy'
 import ConfirmModal from '../components/ConfirmModal'
+import InfoTooltip from '../components/InfoTooltip'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
+import { STRATEGY_INFO } from '../utils/strategyInfo'
 
 export default function Settings() {
   const queryClient = useQueryClient()
@@ -142,7 +144,15 @@ export default function Settings() {
               <div key={s.key} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color.hex }} />
-                  <span className="text-sm font-medium text-gray-700">{s.name}</span>
+                  <span className="text-sm font-medium text-gray-700 inline-flex items-center">
+                    {s.name}
+                    {STRATEGY_INFO[s.key] && (
+                      <InfoTooltip
+                        content={`${STRATEGY_INFO[s.key].tagline}\n\n${STRATEGY_INFO[s.key].description}`}
+                        ariaLabel={`${s.name} 전략 설명`}
+                      />
+                    )}
+                  </span>
                 </div>
                 <div className="text-sm text-gray-600">
                   {isVB ? (
@@ -306,7 +316,10 @@ export default function Settings() {
                     return (
                       <div key={key}>
                         <div className="flex items-center gap-4">
-                          <label className="text-sm text-gray-600 w-40 shrink-0">{meta.label}</label>
+                          <span className="text-sm text-gray-600 w-40 shrink-0 inline-flex items-center">
+                            <label>{meta.label}</label>
+                            <InfoTooltip content={meta.description} ariaLabel={`${meta.label} 설명`} />
+                          </span>
                           <input
                             type="text"
                             inputMode="decimal"
@@ -350,7 +363,10 @@ export default function Settings() {
                     return (
                       <div key={key}>
                         <div className="flex justify-between text-sm py-1">
-                          <span className="text-gray-500">{meta.label}</span>
+                          <span className="text-gray-500 inline-flex items-center">
+                            {meta.label}
+                            <InfoTooltip content={meta.description} ariaLabel={`${meta.label} 설명`} />
+                          </span>
                           <span className="font-medium">{formatParamValue(key, value)}{meta.unit && !formatParamValue(key, value).includes(meta.unit) ? meta.unit : ''}</span>
                         </div>
                         {key === 'position_ratio' && totalInv > 0 && (

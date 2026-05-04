@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getTradingStatus } from '../api/trading'
 import { getStrategyColor } from '../types/strategy'
+import { STRATEGY_INFO, ALL_STRATEGIES_INFO } from '../utils/strategyInfo'
 import ControlPanel from '../components/ControlPanel'
+import InfoTooltip from '../components/InfoTooltip'
 import ScanMonitor from '../components/ScanMonitor'
 import OrderMonitor from '../components/OrderMonitor'
 import PerformanceCard from '../components/PerformanceCard'
@@ -30,35 +32,46 @@ export default function Dashboard() {
       {strategyKeys.length > 0 && (
         <div className="bg-white rounded-lg shadow px-4 py-2">
           <div className="flex items-center gap-1 overflow-x-auto">
-            <button
-              onClick={() => setSelectedStrategy('all')}
-              className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
-                selectedStrategy === 'all'
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              전체
-            </button>
+            <span className="inline-flex items-center">
+              <button
+                onClick={() => setSelectedStrategy('all')}
+                className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
+                  selectedStrategy === 'all'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                전체
+              </button>
+              <InfoTooltip content={ALL_STRATEGIES_INFO.description} ariaLabel="전체 탭 설명" />
+            </span>
             {strategyKeys.map((key) => {
               const info = strategies[key]
               const color = getStrategyColor(key)
               const isActive = selectedStrategy === key
+              const strategyInfo = STRATEGY_INFO[key]
               return (
-                <button
-                  key={key}
-                  onClick={() => setSelectedStrategy(key)}
-                  className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
-                    isActive
-                      ? `${color.badge} ring-1 ring-current`
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  {info.name}
-                  <span className="ml-1.5 text-xs opacity-70">
-                    ({info.positions})
-                  </span>
-                </button>
+                <span key={key} className="inline-flex items-center">
+                  <button
+                    onClick={() => setSelectedStrategy(key)}
+                    className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
+                      isActive
+                        ? `${color.badge} ring-1 ring-current`
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {info.name}
+                    <span className="ml-1.5 text-xs opacity-70">
+                      ({info.positions})
+                    </span>
+                  </button>
+                  {strategyInfo && (
+                    <InfoTooltip
+                      content={`${strategyInfo.tagline}\n\n${strategyInfo.description}`}
+                      ariaLabel={`${info.name} 전략 설명`}
+                    />
+                  )}
+                </span>
               )
             })}
           </div>
