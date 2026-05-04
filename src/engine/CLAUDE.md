@@ -31,7 +31,9 @@ TradingScheduler (registry 기반 boot/run/settle)
 - register/get/all/enabled: 전략 등록/조회
 - allocate_funds(total_asset): 비중 기반 자금 분배
 - update_weights(weights): 비중 변경
-- is_ticker_held_by_any(ticker): 전략 간 중복 매수 방지
+- is_ticker_held_by_any(ticker): 전략 간 보유/주문 중 검사 (포지션 복구 경로 등)
+- is_ticker_sold_today_by_any(ticker): 전략 간 당일 매도 여부 검사
+- is_ticker_blocked_for_buy(ticker): 매수 차단 통합 가드 — 보유 OR 주문중 OR 당일매도 (RiskManager / OrderEngine 매수 입구에서 사용)
 - get_strategies_status(): 전략별 상태 반환
 
 ### strategies/momentum.py — 상한가 모멘텀
@@ -60,7 +62,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### risk.py — 리스크 관리
 - on_tick(): ticker_prices 갱신(1회) → registry.enabled() 순회 → 전략별 exit/buy 신호
-- 중복 매수 방지: registry.is_ticker_held_by_any()
+- 중복 매수 방지: registry.is_ticker_blocked_for_buy() — 보유/주문중/당일매도 통합 검사 (전략 간)
 
 ### order_engine.py — 주문 실행
 - execute_buy(ticker, price, strategy): 전략별 calc_buy_quantity, state 참조

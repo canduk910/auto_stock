@@ -71,6 +71,30 @@ class StrategyRegistry:
                 return True
         return False
 
+    def is_ticker_sold_today_by_any(self, ticker: str) -> bool:
+        """어떤 전략이든 당일 해당 종목을 매도했는지 확인한다.
+
+        한 전략이 매도한 종목을 다른 전략이 같은 날 재매수하는 것을 차단.
+        """
+        for s in self._strategies.values():
+            if s.state.is_sold_today(ticker):
+                return True
+        return False
+
+    def is_ticker_blocked_for_buy(self, ticker: str) -> bool:
+        """매수 차단 통합 가드 — 모든 전략을 가로질러 검사한다.
+
+        다음 중 하나라도 해당하면 매수 차단:
+        - 어떤 전략이든 보유 중 (has_position)
+        - 어떤 전략이든 매수 주문 진행 중 (is_buy_pending)
+        - 어떤 전략이든 당일 매도 완료 (is_sold_today)
+        """
+        for s in self._strategies.values():
+            st = s.state
+            if st.has_position(ticker) or st.is_buy_pending(ticker) or st.is_sold_today(ticker):
+                return True
+        return False
+
     def get_strategies_status(self) -> dict:
         """전략별 상태를 반환한다."""
         from src.engine.scanner import ticker_names

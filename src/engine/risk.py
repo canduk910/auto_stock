@@ -63,8 +63,8 @@ class RiskManager:
                     continue  # 청산 주문 후 매수 신호 확인 불필요
 
             # 4. 매수 신호 확인
-            # 중복 매수 방지: 어떤 전략이든 해당 종목을 보유/주문 중이면 건너뜀
-            if self.registry.is_ticker_held_by_any(ticker):
+            # 전략 간 중복 매수 방지: 보유/주문 중/당일 매도 모두 가로질러 차단
+            if self.registry.is_ticker_blocked_for_buy(ticker):
                 continue
 
             signal = strategy.check_buy_signal(ticker, current_price, open_price)

@@ -71,7 +71,7 @@ src/engine/
 - 각 전략은 할당된 자금 내에서만 매매
 - **`position_ratio`는 전략 할당 자금 기준** (순자산 × 전략비중 × position_ratio = 종목당 매수금액)
 - Settings 페이지에서 예상 종목당 매수 금액 표시
-- 전략 간 동일 종목 중복 매수 방지 (registry.is_ticker_held_by_any)
+- 전략 간 동일 종목 중복 매수 방지 (registry.is_ticker_blocked_for_buy) — 보유/주문중/당일매도 모두 가로질러 차단
 
 ## 핵심 규칙
 

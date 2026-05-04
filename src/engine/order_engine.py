@@ -46,6 +46,13 @@ class OrderEngine:
         if state.has_position(ticker) or state.is_buy_pending(ticker):
             logger.warning("중복 매수 차단: %s (전략: %s)", t(ticker), strategy.strategy_id)
             return
+        # 전략 간 통합 가드 (race condition 대비)
+        if self.registry.is_ticker_blocked_for_buy(ticker):
+            logger.warning(
+                "전략 간 중복 매수 차단: %s (요청 전략: %s, 다른 전략이 보유/주문중/당일매도)",
+                t(ticker), strategy.strategy_id,
+            )
+            return
 
         # 매수가능금액 사전 조회
         buyable = await get_buyable(ticker, current_price)
