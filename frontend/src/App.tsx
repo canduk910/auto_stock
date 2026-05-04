@@ -9,7 +9,7 @@ import Settings from './pages/Settings'
 const navItems = [
   { to: '/', label: '대시보드' },
   { to: '/history', label: '거래 내역' },
-  { to: '/recommendations', label: '파라미터 추천' },
+  { to: '/recommendations', label: '전략수정 AI자문' },
   { to: '/settings', label: '설정' },
 ]
 

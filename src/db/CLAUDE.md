@@ -20,10 +20,18 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `write_log(level, message)`: 이벤트/에러 기록
 - level: INFO, WARNING, ERROR, CRITICAL
 
+### parameter_recommendations.py — 전략수정 AI자문 이력
+- `insert_recommendation()`: 16:00 자문 생성 시 INSERT (status: pending). (target_date, strategy_id) unique
+- `list_recommendations(days=30)`: 최근 N일 이력 조회 (신규+처리 완료 통합)
+- `get_recommendation(id)`: 단일 자문 상세
+- `update_recommendation_status(id, status, applied_params=...)`: status 갱신 + applied_at/rejected_at 자동 기록
+- `expire_pending_before(target_date)`: 이전 pending 레코드를 expired로 일괄 마킹
+
 ## DB 스키마
 - `supabase/migrations/001_init.sql`에 정의
 - trade_history.status: PENDING → COMPLETED / PARTIAL → CANCELLED
 - trade_history.trade_type: BUY / SELL
+- parameter_recommendations.status: pending → applied / partial / rejected / expired
 
 ## 주의사항
 - Supabase SDK는 동기 호출이므로 I/O-bound 작업은 `asyncio.to_thread` 고려

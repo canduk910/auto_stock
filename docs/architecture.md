@@ -196,23 +196,28 @@ TradingScheduler (scheduler.py)
        ├─ get_balance() ────────────────────────────────────→ GET inquire-balance
        ├─ allocate_funds()
        ├─ strategy.prepare() ───────────────────────────────→ GET daily-price (일봉)
+       │   └─ ticker_prev_close 사전 등록 (전일 종가)
        ├─ DB positions 복구 ←── DB positions
        └─ KIS 잔고 교차검증
        │
 08:30  connect() ──────────→ WebSocket 연결
-       │                    ├─ subscribe(H0STCNT0, 종목)
-       │                    └─ subscribe(H0STCNI0, HTS_ID)
+       │                    └─ subscribe(H0STCNI0/9, 체결통보)
        │                         │
-09:00  _execute_next_day_clear() │
-       │  (모멘텀 익일 보유종목   │
-       │   시장가 매도)          │
+08:55  _collect_presubscribe_tickers()  (TIME_PRESUBSCRIBE)
+       │  └─ 돌파 전략 스캔 종목 + 보유 포지션 사전 구독 →
+       │     subscribe(H0STCNT0, 종목들)
+       │  유니버스 비어있으면 prepare() 재실행 (KIS API 일시장애 대비)
        │                         │
-09:01  _confirm_vb_open_prices() │
-       │  (시가 확정 → Target    │
-       │   Price 계산)           │
+09:00  asyncio.create_task(_execute_next_day_clear())  ← 비차단(60초 안정화)
+       │  + _confirm_breakout_open_prices() ── 0.5초 폴링/5초
+       │     (WebSocket 시가 → KIS API 폴백)
+       │                         │
+09:00:05 _phase = "vb_trading"  (TIME_VB_OPEN_CONFIRM)
+       │  VB + MB 매매 시작 (시가 확정 직후)
        │                         │
 09:30  scan_stocks() ───────────────────────────────────────→ GET fluctuation-rank
        │  subscribe_filtered_stocks()                        GET inquire-price
+       │  _phase = "trading"  (모멘텀 매수 감시 시작)
        │
        ├─ _scan_loop() 시작 (5분 주기)
        │                         │
@@ -241,6 +246,11 @@ TradingScheduler (scheduler.py)
        │  └─ execute_sell(FORCE_CLEAR) ─────────────────────→ POST order
        │
 15:30  unsubscribe_all() ──→ WebSocket 구독 해제
+       │
+16:00  generate_recommendations()  (전략수정 AI자문)
+       │  ├─ collect_metrics() ──────────────────→ DB trade_history 집계
+       │  ├─ OpenAI Chat Completion ─────────────→ 외부 API
+       │  └─ insert_recommendation() → DB parameter_recommendations (status: pending)
        │
 16:10  _settle()
        │  ├─ get_balance() ─────────────────────────────────→ GET inquire-balance
@@ -348,7 +358,8 @@ prepare() 단계:
 ├─ fetch_daily_candles(): 21일 일봉
 ├─ K값 = avg(노이즈 비율) = avg(1 - |종가-시가| / (고가-저가))
 ├─ target_offset = 전일 Range × K
-└─ 09:01 시가 확정 → target_price = 시가 + offset
+├─ ticker_prev_close[ticker] = candles[0].stck_clpr  (전일 종가 사전 등록)
+└─ 09:00:05 시가 확정 → target_price = 시가 + offset (VB/MB 동일)
 
 on_tick(ticker, current_price)
 │

@@ -43,16 +43,16 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### strategies/volatility_breakout.py — 변동성 돌파
 - _scan_universe(): 코스피+코스닥 전체에서 시총/거래대금 조건 필터 (Settings에서 조건 변경 가능)
-- prepare(): 스캔 종목의 21일 일봉 → K값(20일 평균 노이즈) → Target_Offset 계산
+- prepare(): 스캔 종목의 21일 일봉 → K값(20일 평균 노이즈) → Target_Offset 계산. 추가로 candles[0]의 stck_clpr을 `scanner.ticker_prev_close`에 사전 등록 (09:30 scan_stocks 이전에도 등락률 필터 동작 보장)
 - 시가 확정 후 Target_Price = 시가 + offset
-- current_price >= target_price 시 매수
+- current_price >= target_price 시 매수 (09:00:05 시가 확정 직후부터 매매 가능)
 - 매수가 대비 -3% 손절
 - 15:20 전량 강제 청산
 
 ### strategies/momentum_breakout.py — 모멘텀 브레이크아웃 (합성)
 - VB 방식 조기 진입 + 상한가 도달 시 모멘텀 방식 익일 청산
-- prepare(): VB와 동일 스캔 + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up`)
-- 매수: 시가 + (전일Range × K) 돌파 + 전일대비 `min_prdy_rate`% 이상
+- prepare(): VB와 동일 스캔 + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up`) + ticker_prev_close 사전 등록
+- 매수: 시가 + (전일Range × K) 돌파 + 전일대비 `min_prdy_rate`% 이상 (09:00:05부터 매매 가능, VB와 동일 시점)
 - 2단계 청산: `_limit_up_reached` set으로 모드 관리
   - 당일 모드(기본): 손절 `intraday_stop_loss`(-3%), 15:20 강제 청산
   - 상한가 모드(`limit_up_threshold` 도달): 손절 `overnight_stop_loss`(-5%), 익일 갭/트레일링 청산, 15:20 강제 청산 제외
@@ -77,17 +77,26 @@ TradingScheduler (registry 기반 boot/run/settle)
 - _boot(): DB positions 우선 복구 → KIS 잔고 교차 검증 (trade_history에서 전략 매핑) → 미체결 주문 복구 (db_strategy_map)
 - _load_strategy_config(): DB strategy_config에서 비중/파라미터 복구
 - WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
-- 09:00 익일 청산: momentum + momentum_breakout 전략 순회, `_next_day_clear_pending=True` → 60초 시가 안정화 대기 → 갭률 판단 → 청산/트레일링
-- 09:01 돌파 전략 시가 확정: `_confirm_breakout_open_prices()` — VB + MB 전략 공용 (WebSocket 캐시 → KIS API 폴백)
+- **08:55 사전 구독** (`TIME_PRESUBSCRIBE`): `_collect_presubscribe_tickers()` — 돌파 전략 스캔 종목 + 모든 전략의 보유 포지션 합집합을 WebSocket 사전 구독 → 09:00 시가 즉시 수신. 돌파 유니버스가 비어있으면 prepare 재실행(KIS API 일시 장애 대비)
+- 09:00:00 익일 청산은 백그라운드 task(`asyncio.create_task`)로 실행하여 60초 안정화 대기를 비차단으로 처리. 동시에 `_confirm_breakout_open_prices()`(0.5초 간격 5초 폴링 → 미확정 종목 KIS API 폴백) 즉시 실행
+- **09:00:05 돌파 전략 매매 시작** (`TIME_VB_OPEN_CONFIRM = time(9, 0, 5)`): VB + MB 시가 확정 직후 진입(`_phase = "vb_trading"`)
+- 09:30 모멘텀 스캔: `scan_stocks()` + 통합 구독, `_phase = "trading"`
 - 15:20 강제 청산: `_force_clear_intraday_strategies()` — VB + MB(상한가 미도달 종목) 공용. _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화
+- _resolve_open_price(): 시가 폴링(0.5초 간격) → KIS `fetch_stock_detail()` 폴백 헬퍼. `_execute_next_day_clear()`에서 익일청산 시가 미수신 시 호출
 - run_daily(): 매일 08:20 자동 시작, 주말 건너뜀, **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
-- 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행
+- 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행 (09:00:05 이후 부팅 시에도 사전구독 + 시가확정 즉시 실행)
 - _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완
 
 ### scanner.py — 종목 스캔
 - scan_stocks(): 모멘텀용 등락률 순위 스캔
 - subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 돌파 전략(VB+MB) 종목 합집합 구독
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info
+
+### recommendation_engine.py / recommendation_metrics.py — 전략수정 AI자문
+- 16:00 `generate_recommendations()`: 전략별 metrics(승률/평균손익/손절률/누적수익률 등) 집계 → OpenAI 호출 → `parameter_recommendations`에 INSERT (status: pending)
+- 동일 (target_date, strategy_id) unique 보장. 재실행 시 중복은 None 반환
+- 사용자가 `/api/recommendations/{id}/apply`로 키 선택 적용 → `strategy_config.params` 갱신 + DB status를 applied/partial로 갱신
+- `expire_pending_before(target_date)`: 이전 영업일 pending 자동 만료
 
 ## 새 전략 추가 시
 1. `strategies/` 에 StrategyBase 서브클래스 작성 (prepare, check_buy_signal, check_exit_signal, calc_buy_quantity)

@@ -121,7 +121,8 @@ src/engine/
 - `strategy_config`: 전략 설정 영속화 (strategy_id PK, enabled, weight, params JSONB)
 - `system_config`: 시스템 설정 (key PK, value JSONB) — auto_start 등
 - `system_logs`: 시스템 로그 (timestamp, log_level, message)
-- status ENUM: PENDING, COMPLETED, PARTIAL, CANCELLED
+- `parameter_recommendations`: 전략수정 AI자문 이력 (id, target_date+strategy_id unique, current_params, recommended_params, applied_params, reasoning, metrics, status, created_at/applied_at/rejected_at)
+- status ENUM: PENDING, COMPLETED, PARTIAL, CANCELLED (trade_history) / pending, applied, partial, rejected, expired (parameter_recommendations)
 
 ## Docker 구성
 - `Dockerfile` — 백엔드 멀티스테이지 (dev: hot-reload / prod: non-root, 단일 워커)
@@ -147,8 +148,8 @@ src/engine/
 - `src/auth/` — KIS OAuth 인증/토큰 관리
 - `src/api/` — KIS REST API 호출 (주문, 잔고, 조건검색, 일봉)
 - `src/realtime/` — KIS WebSocket (시세 구독, 체결통보)
-- `src/engine/` — 매매 핵심 (전략 베이스/레지스트리/개별 전략/주문/리스크/스케줄러)
-- `src/db/` — Supabase CRUD
-- `src/routes/` — FastAPI 엔드포인트 (trading, balance, history, performance, logs, **strategies**)
+- `src/engine/` — 매매 핵심 (전략 베이스/레지스트리/개별 전략/주문/리스크/스케줄러, 16:00 AI자문 생성 엔진 `recommendation_engine.py`)
+- `src/db/` — Supabase CRUD (`parameter_recommendations` 포함)
+- `src/routes/` — FastAPI 엔드포인트 (trading, balance, history, performance, logs, strategies, **recommendations**)
 - `src/models/` — Pydantic 데이터 모델
-- `frontend/` — React 대시보드 (전략별 탭/비중 조절/잔고 분리)
+- `frontend/` — React 대시보드 (대시보드/거래 내역/전략수정 AI자문/설정)

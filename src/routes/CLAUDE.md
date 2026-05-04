@@ -23,6 +23,10 @@
 | GET | `/api/strategies/system/auto-start` | strategies.py | 자동 매매 설정 조회 |
 | PUT | `/api/strategies/system/auto-start` | strategies.py | 자동 매매 설정 변경 |
 | GET | `/api/logs` | logs.py | 시스템 로그 조회 |
+| GET | `/api/recommendations` | recommendations.py | 전략수정 AI자문 목록 (최근 30일, 신규+이력 통합) |
+| GET | `/api/recommendations/{id}` | recommendations.py | 단일 자문 상세 |
+| POST | `/api/recommendations/{id}/apply` | recommendations.py | 선택한 키만 전략 파라미터에 적용 (status: pending/partial → applied/partial) |
+| POST | `/api/recommendations/{id}/reject` | recommendations.py | 자문 전체 거절 (status → rejected) |
 
 ## 응답 형식
 모든 응답은 `models/response.py`의 `ApiResponse` 래퍼 사용:

@@ -68,12 +68,20 @@ const METRIC_FIELDS: MetricFieldDef[] = [
   { key: 'analyzed_days', label: '분석 일수', format: (m) => formatNumber(m.analyzed_days) },
 ]
 
+type TabKey = 'pending' | 'history'
+
+const PENDING_STATUSES: RecommendationStatus[] = ['pending', 'partial']
+const HISTORY_STATUSES: RecommendationStatus[] = ['applied', 'partial', 'rejected', 'expired']
+
 export default function Recommendations() {
   const queryClient = useQueryClient()
   const [selectedKeys, setSelectedKeys] = useState<Record<string, Set<string>>>({})
   const [applyTarget, setApplyTarget] = useState<RecommendationItem | null>(null)
   const [rejectTarget, setRejectTarget] = useState<RecommendationItem | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [tab, setTab] = useState<TabKey>('pending')
+  const [historyStatusFilter, setHistoryStatusFilter] = useState<RecommendationStatus | 'all'>('all')
+  const [historyStrategyFilter, setHistoryStrategyFilter] = useState<string>('all')
 
   const { data: items, isLoading, isError } = useQuery({
     queryKey: ['recommendations'],
@@ -142,11 +150,25 @@ export default function Recommendations() {
     },
   })
 
+  // 탭별 + 필터 적용
+  const filteredItems = useMemo(() => {
+    const list = items ?? []
+    if (tab === 'pending') {
+      return list.filter((it) => PENDING_STATUSES.includes(it.status))
+    }
+    // history
+    return list.filter((it) => {
+      if (!HISTORY_STATUSES.includes(it.status)) return false
+      if (historyStatusFilter !== 'all' && it.status !== historyStatusFilter) return false
+      if (historyStrategyFilter !== 'all' && it.strategy_id !== historyStrategyFilter) return false
+      return true
+    })
+  }, [items, tab, historyStatusFilter, historyStrategyFilter])
+
   // target_date 데스크 정렬 + strategy_id 정렬
   const grouped = useMemo(() => {
-    const list = items ?? []
     const byDate: Record<string, RecommendationItem[]> = {}
-    for (const it of list) {
+    for (const it of filteredItems) {
       if (!byDate[it.target_date]) byDate[it.target_date] = []
       byDate[it.target_date].push(it)
     }
@@ -155,7 +177,16 @@ export default function Recommendations() {
       date: d,
       items: byDate[d].slice().sort((a, b) => a.strategy_id.localeCompare(b.strategy_id)),
     }))
-  }, [items])
+  }, [filteredItems])
+
+  const pendingCount = useMemo(
+    () => (items ?? []).filter((it) => PENDING_STATUSES.includes(it.status)).length,
+    [items],
+  )
+  const historyCount = useMemo(
+    () => (items ?? []).filter((it) => HISTORY_STATUSES.includes(it.status)).length,
+    [items],
+  )
 
   const toggleKey = (recId: string, key: string) => {
     setSelectedKeys((prev) => {
@@ -171,8 +202,8 @@ export default function Recommendations() {
   if (isLoading) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">파라미터 추천</h1>
-        <div className="p-6 text-gray-500">추천 정보를 불러오는 중...</div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">전략수정 AI자문</h1>
+        <div className="p-6 text-gray-500">자문 정보를 불러오는 중...</div>
       </div>
     )
   }
@@ -180,28 +211,92 @@ export default function Recommendations() {
   if (isError) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">파라미터 추천</h1>
-        <div className="p-6 text-red-500">추천 정보를 불러올 수 없습니다.</div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">전략수정 AI자문</h1>
+        <div className="p-6 text-red-500">자문 정보를 불러올 수 없습니다.</div>
       </div>
     )
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">파라미터 추천</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">전략수정 AI자문</h1>
 
       {/* 안내 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
-          매일 장마감 후 16:00에 자동 생성됩니다. 전략별로 권고된 파라미터 중 원하는 항목만 선택해 적용할 수 있습니다.
+          매일 장마감 후 16:00에 OpenAI가 전략 성과를 분석해 파라미터 수정안을 자동 생성합니다. 전략별로 원하는 항목만 선택해 적용할 수 있고, 처리된 자문은 이력 탭에서 확인할 수 있습니다.
         </p>
       </div>
 
+      {/* 탭 */}
+      <div className="flex gap-1 border-b border-gray-200 mb-4">
+        <button
+          onClick={() => setTab('pending')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
+            tab === 'pending'
+              ? 'border-blue-600 text-blue-700'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          신규 자문 {pendingCount > 0 && <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">{pendingCount}</span>}
+        </button>
+        <button
+          onClick={() => setTab('history')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
+            tab === 'history'
+              ? 'border-blue-600 text-blue-700'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          이력 {historyCount > 0 && <span className="ml-1 px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{historyCount}</span>}
+        </button>
+      </div>
+
+      {/* 이력 탭 필터 */}
+      {tab === 'history' && (
+        <div className="flex flex-wrap gap-3 mb-4 items-center">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">상태</label>
+            <select
+              value={historyStatusFilter}
+              onChange={(e) => setHistoryStatusFilter(e.target.value as RecommendationStatus | 'all')}
+              className="text-sm border border-gray-300 rounded px-2 py-1"
+            >
+              <option value="all">전체</option>
+              <option value="applied">적용됨</option>
+              <option value="partial">일부 적용</option>
+              <option value="rejected">거절됨</option>
+              <option value="expired">만료</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">전략</label>
+            <select
+              value={historyStrategyFilter}
+              onChange={(e) => setHistoryStrategyFilter(e.target.value)}
+              className="text-sm border border-gray-300 rounded px-2 py-1"
+            >
+              <option value="all">전체</option>
+              {(strategiesData?.strategies ?? []).map((s) => (
+                <option key={s.key} value={s.key}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+          <span className="text-xs text-gray-400 ml-auto">{filteredItems.length}건</span>
+        </div>
+      )}
+
       {grouped.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-          아직 생성된 추천이 없습니다.
-          <br />
-          <span className="text-sm">오늘 16:00에 첫 추천이 생성됩니다.</span>
+          {tab === 'pending' ? (
+            <>
+              대기 중인 자문이 없습니다.
+              <br />
+              <span className="text-sm">오늘 16:00에 다음 자문이 생성됩니다.</span>
+            </>
+          ) : (
+            <>이력에 표시할 자문이 없습니다.</>
+          )}
         </div>
       ) : (
         <div className="space-y-6">
@@ -368,28 +463,26 @@ export default function Recommendations() {
                         </div>
                       )}
 
-                      {/* 버튼 */}
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => setRejectTarget(rec)}
-                          disabled={rec.status !== 'pending' || rejectMutation.isPending}
-                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          전체 거절
-                        </button>
-                        <button
-                          onClick={() => setApplyTarget(rec)}
-                          disabled={
-                            !actionable ||
-                            checkedSelectable.length === 0 ||
-                            applyMutation.isPending
-                          }
-                          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          선택 항목 적용
-                          {checkedSelectable.length > 0 && ` (${checkedSelectable.length})`}
-                        </button>
-                      </div>
+                      {/* 버튼 — 액션 가능 자문에서만 노출 */}
+                      {actionable && (
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setRejectTarget(rec)}
+                            disabled={rec.status !== 'pending' || rejectMutation.isPending}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            전체 거절
+                          </button>
+                          <button
+                            onClick={() => setApplyTarget(rec)}
+                            disabled={checkedSelectable.length === 0 || applyMutation.isPending}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            선택 항목 적용
+                            {checkedSelectable.length > 0 && ` (${checkedSelectable.length})`}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -401,7 +494,7 @@ export default function Recommendations() {
 
       <ConfirmModal
         open={applyTarget !== null}
-        title="파라미터 추천 적용"
+        title="AI 자문 적용"
         message={
           applyTarget
             ? `선택한 ${(selectedKeys[applyTarget.id]?.size ?? 0)}개 파라미터를 적용하시겠습니까? 다음 스캔부터 반영됩니다.`
@@ -422,10 +515,10 @@ export default function Recommendations() {
 
       <ConfirmModal
         open={rejectTarget !== null}
-        title="추천 거절"
+        title="AI 자문 거절"
         message={
           rejectTarget
-            ? `${strategyNameMap[rejectTarget.strategy_id] ?? rejectTarget.strategy_id} 전략의 추천을 모두 거절하시겠습니까?`
+            ? `${strategyNameMap[rejectTarget.strategy_id] ?? rejectTarget.strategy_id} 전략의 자문을 모두 거절하시겠습니까?`
             : ''
         }
         onConfirm={() => {

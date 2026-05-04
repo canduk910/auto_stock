@@ -29,8 +29,9 @@ logger = logging.getLogger(__name__)
 TIME_AUTO_START = time(8, 20)
 TIME_BOOT = time(8, 25)
 TIME_MARKET_OPEN = time(8, 30)
+TIME_PRESUBSCRIBE = time(8, 55)
 TIME_NEXT_DAY_CLEAR = time(9, 0)
-TIME_VB_OPEN_CONFIRM = time(9, 1)
+TIME_VB_OPEN_CONFIRM = time(9, 0, 5)
 TIME_SCAN_START = time(9, 30)
 TIME_BUY_STOP = time(15, 20)
 TIME_MARKET_CLOSE = time(15, 30)
@@ -170,24 +171,54 @@ class TradingScheduler:
 
             now = datetime.now().time()
 
-            # 09:00 익일 청산 실행
+            # 08:55 사전 구독: 돌파 종목 + 보유 포지션
+            # → 09:00:00 시가를 WebSocket으로 즉시 수신 가능하게 함
+            if now < TIME_PRESUBSCRIBE:
+                self._phase = "presubscribe_wait"
+                await self._wait_until(TIME_PRESUBSCRIBE)
+            if now <= TIME_VB_OPEN_CONFIRM:
+                # 08:25 boot 시점의 prepare에서 KIS API 미준비로 유니버스 0종목인 경우 재실행
+                # (KIS inquire-price가 장 시작 전 부정확 → 시총/거래대금 필터 실패 사례)
+                if not self._collect_breakout_tickers():
+                    logger.info("돌파 전략 유니버스 비어있음 → prepare 재실행")
+                    await write_log("INFO", "돌파 유니버스 비어있어 prepare 재실행")
+                    for sid in ("volatility_breakout", "momentum_breakout"):
+                        strategy = self.registry.get(sid)
+                        if strategy and strategy.config.enabled:
+                            try:
+                                await strategy.prepare()
+                            except Exception:
+                                logger.exception("재 prepare 실패: %s", sid)
+
+                # 09:00:05 이전 진입 시 항상 사전구독 (kis_ws.subscribe는 set 기반이라 중복 안전)
+                presub = self._collect_presubscribe_tickers()
+                if presub:
+                    await subscribe_filtered_stocks([], extra_tickers=presub)
+                    logger.info("사전 구독: %d종목 (돌파 + 보유)", len(presub))
+                    await write_log("INFO", f"사전 구독 {len(presub)}종목")
+
+            # 09:00 익일 청산은 백그라운드로 (내부 60초 sleep) + 동시에 시가 확정
+            next_day_task: asyncio.Task | None = None
             if now < TIME_NEXT_DAY_CLEAR:
                 self._phase = "next_day_clear"
                 await self._wait_until(TIME_NEXT_DAY_CLEAR)
             if now <= TIME_VB_OPEN_CONFIRM:
-                await self._execute_next_day_clear()
-
-            # 09:01 변동성돌파 시가 확정
-            if now < TIME_VB_OPEN_CONFIRM:
-                await self._wait_until(TIME_VB_OPEN_CONFIRM)
-            if now <= TIME_SCAN_START:
+                next_day_task = asyncio.create_task(self._execute_next_day_clear())
+                # 5초 폴링으로 돌파 시가 확정 → 09:00:05 매매 진입
                 await self._confirm_breakout_open_prices()
-                # VB + MB 종목 선행 구독 → 09:01부터 매매 시작
-                extra = self._collect_breakout_tickers()
-                if extra:
-                    await subscribe_filtered_stocks([], extra_tickers=extra)
+                if self._collect_breakout_tickers():
                     self._phase = "vb_trading"
-                    logger.info("돌파 전략 선행 매매 시작: %d종목", len(extra))
+                    logger.info("돌파 전략 매매 시작 (09:00:05 전후)")
+                    await write_log("INFO", "돌파 전략 매매 시작")
+            elif now <= TIME_SCAN_START:
+                # 09:00:05 이후 중간 부팅 — 사전구독 + 시가 확정 즉시 실행
+                presub = self._collect_presubscribe_tickers()
+                if presub:
+                    await subscribe_filtered_stocks([], extra_tickers=presub)
+                await self._confirm_breakout_open_prices()
+                if self._collect_breakout_tickers():
+                    self._phase = "vb_trading"
+                    logger.info("돌파 전략 매매 시작 (중간 부팅): %d종목", len(presub))
 
             # 09:30~ 종목 스캔 + 매매
             if now < TIME_SCAN_START:
@@ -200,7 +231,7 @@ class TradingScheduler:
                 extra = self._collect_breakout_tickers()
                 await subscribe_filtered_stocks(tickers, extra_tickers=extra)
 
-                # 09:01 이후 시작이면 시가 확정 재시도 (KIS API 조회)
+                # 09:00:05 이후 시작이면 시가 확정 재시도 (KIS API 조회)
                 if now > TIME_VB_OPEN_CONFIRM:
                     await self._confirm_breakout_open_prices()
 
@@ -227,16 +258,16 @@ class TradingScheduler:
             await unsubscribe_all()
             await write_log("INFO", "15:30 WebSocket 구독 해제")
 
-            # 16:00 파라미터 추천 생성
+            # 16:00 전략수정 AI자문 생성
             await self._wait_until(TIME_RECOMMENDATION)
             self._phase = "recommending"
             try:
                 from src.engine.recommendation_engine import generate_recommendations
                 await generate_recommendations()
-                await write_log("INFO", "16:00 파라미터 추천 생성 완료")
+                await write_log("INFO", "16:00 전략수정 AI자문 생성 완료")
             except Exception:
-                logger.exception("파라미터 추천 생성 실패")
-                await write_log("ERROR", "파라미터 추천 생성 실패")
+                logger.exception("전략수정 AI자문 생성 실패")
+                await write_log("ERROR", "전략수정 AI자문 생성 실패")
 
             # 16:10 정산
             await self._wait_until(TIME_SETTLEMENT)
@@ -439,7 +470,7 @@ class TradingScheduler:
         for ticker, _, _ in all_next_day:
             await kis_ws.subscribe(TICK_TR_ID, ticker)
 
-        # 시가 확정 대기 (09:01까지 최대 60초)
+        # 시가 안정화 대기 (09:01까지 60초 — on_tick의 NEXT_DAY_CLEAR 억제 구간)
         await asyncio.sleep(60)
 
         # 대기 완료 — on_tick 가드 해제
@@ -456,9 +487,12 @@ class TradingScheduler:
 
             gap_up_threshold = strategy.config.params.get("gap_up_threshold", 10.0)
 
-            # WebSocket에서 수신한 실제 시가 사용
+            # WebSocket에서 수신한 실제 시가 사용 (사전구독되어 있으면 09:00:00에 들어옴)
             price_data = ticker_prices.get(ticker, {})
             today_open = price_data.get("open_price", 0)
+            if today_open <= 0:
+                # 60초 대기에도 시가 미수신 → 짧은 폴링 + KIS API 폴백
+                today_open = await self._resolve_open_price(ticker, max_wait_s=2.0)
             if today_open <= 0:
                 today_open = pos.high_since_buy
                 logger.warning("시가 미수신, high_since_buy 사용: %s (%d)", t(ticker), today_open)
@@ -484,48 +518,63 @@ class TradingScheduler:
 
         logger.info("익일 청산 실행 완료")
 
-    async def _confirm_breakout_open_prices(self) -> None:
+    async def _confirm_breakout_open_prices(
+        self, *, max_wait_s: float = 5.0, interval_s: float = 0.5,
+    ) -> None:
         """돌파 전략(VB, MB)의 시가를 확정한다.
 
-        1차: WebSocket ticker_prices 캐시에서 시가 참조
-        2차: 미확정 종목은 KIS 개별시세 API로 시가 조회
+        1차: WebSocket ticker_prices 캐시를 max_wait_s 동안 interval_s 간격으로 폴링
+            (사전구독되어 있으면 09:00:00 시가가 즉시 들어옴)
+        2차: 폴링 종료 시점에도 미확정인 종목만 KIS 개별시세 API로 폴백 조회
         """
         from src.engine.scanner import ticker_prices
 
-        # on_open_price_confirmed + _targets + _open_confirmed 을 가진 전략 순회
+        # 대상 전략 + 종목 수집
+        targets: list[tuple[str, object, list[str]]] = []  # (sid, strategy, ticker_list)
         for sid in ("volatility_breakout", "momentum_breakout"):
             strategy = self.registry.get(sid)
             if not strategy or not strategy.config.enabled:
                 continue
             if not hasattr(strategy, '_targets') or not hasattr(strategy, 'on_open_price_confirmed'):
                 continue
+            targets.append((sid, strategy, list(strategy._targets.keys())))
 
-            confirmed = 0
-            unconfirmed = []
-            for ticker in list(strategy._targets.keys()):
-                if strategy._open_confirmed.get(ticker, False):
-                    confirmed += 1
-                    continue
-                price_info = ticker_prices.get(ticker)
-                if price_info and price_info.get("open_price", 0) > 0:
-                    strategy.on_open_price_confirmed(ticker, price_info["open_price"])
-                    confirmed += 1
-                else:
-                    unconfirmed.append(ticker)
+        if not targets:
+            return
 
-            if unconfirmed:
-                from src.api.condition import fetch_stock_detail
-                for ticker in unconfirmed:
-                    try:
-                        detail = await fetch_stock_detail(ticker)
-                        open_price = int(detail.get("stck_oprc", "0"))
-                        if open_price > 0:
-                            strategy.on_open_price_confirmed(ticker, open_price)
-                            confirmed += 1
-                    except Exception:
-                        logger.debug("%s 시가 조회 실패: %s", sid, ticker)
+        # 1차: WebSocket 폴링 (max_wait_s 동안)
+        elapsed = 0.0
+        while elapsed < max_wait_s:
+            all_done = True
+            for _, strategy, tickers in targets:
+                for ticker in tickers:
+                    if strategy._open_confirmed.get(ticker, False):
+                        continue
+                    price_info = ticker_prices.get(ticker)
+                    if price_info and price_info.get("open_price", 0) > 0:
+                        strategy.on_open_price_confirmed(ticker, price_info["open_price"])
+                    else:
+                        all_done = False
+            if all_done:
+                break
+            await asyncio.sleep(interval_s)
+            elapsed += interval_s
 
-            logger.info("%s 시가 확정: %d/%d종목", strategy.config.name, confirmed, len(strategy._targets))
+        # 2차: 미확정 종목만 KIS API 폴백
+        from src.api.condition import fetch_stock_detail
+        for sid, strategy, tickers in targets:
+            unconfirmed = [t for t in tickers if not strategy._open_confirmed.get(t, False)]
+            for ticker in unconfirmed:
+                try:
+                    detail = await fetch_stock_detail(ticker)
+                    open_price = int(detail.get("stck_oprc", "0"))
+                    if open_price > 0:
+                        strategy.on_open_price_confirmed(ticker, open_price)
+                except Exception:
+                    logger.debug("%s 시가 조회 실패: %s", sid, ticker)
+
+            confirmed = sum(1 for t in tickers if strategy._open_confirmed.get(t, False))
+            logger.info("%s 시가 확정: %d/%d종목", strategy.config.name, confirmed, len(tickers))
 
     def _collect_breakout_tickers(self) -> list[str]:
         """돌파 전략(VB, MB)의 스캔 종목을 합산한다."""
@@ -535,6 +584,44 @@ class TradingScheduler:
             if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):
                 tickers.extend(strategy.get_scanned_tickers())
         return tickers
+
+    def _collect_presubscribe_tickers(self) -> list[str]:
+        """09:00 시가 수신용 사전 구독 대상.
+
+        - 돌파 전략(VB, MB) 스캔 종목
+        - 모든 전략의 보유 포지션 (모멘텀 익일청산 시가 수신용)
+        """
+        tickers: set[str] = set(self._collect_breakout_tickers())
+        for s in self.registry.all():
+            tickers.update(s.state.positions.keys())
+        return list(tickers)
+
+    async def _resolve_open_price(
+        self, ticker: str, *, max_wait_s: float = 5.0, interval_s: float = 0.5,
+    ) -> int:
+        """시가를 해결한다. WebSocket 폴링 → KIS API 폴백 순서.
+
+        WebSocket으로 ticker_prices[ticker]["open_price"]가 채워지길 max_wait_s 동안
+        interval_s 간격으로 폴링한다. 시간 초과 시 KIS 개별시세 API로 폴백 조회.
+        """
+        from src.engine.scanner import ticker_prices
+
+        elapsed = 0.0
+        while elapsed < max_wait_s:
+            price_info = ticker_prices.get(ticker)
+            if price_info and price_info.get("open_price", 0) > 0:
+                return int(price_info["open_price"])
+            await asyncio.sleep(interval_s)
+            elapsed += interval_s
+
+        # KIS API 폴백
+        try:
+            from src.api.condition import fetch_stock_detail
+            detail = await fetch_stock_detail(ticker)
+            return int(detail.get("stck_oprc", "0"))
+        except Exception:
+            logger.debug("시가 KIS API 조회 실패: %s", ticker)
+            return 0
 
     async def _force_clear_intraday_strategies(self) -> None:
         """15:20 당일 청산 전략(VB, MB)의 강제 청산."""

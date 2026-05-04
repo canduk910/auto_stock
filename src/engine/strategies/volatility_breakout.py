@@ -90,6 +90,13 @@ class VolatilityBreakoutStrategy(StrategyBase):
                     "open_price": 0,
                 }
                 self._open_confirmed[ticker] = False
+
+                # 09:30 scan_stocks() 이전에도 등락률 필터가 동작하도록 전일종가 사전 등록
+                from src.engine.scanner import ticker_prev_close
+                prev_close = int(prev.get("stck_clpr", "0"))
+                if prev_close > 0:
+                    ticker_prev_close[ticker] = prev_close
+
                 prepared += 1
 
             except Exception as e:
