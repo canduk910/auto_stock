@@ -19,7 +19,7 @@ from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscri
 from src.engine.strategy_base import Signal, StrategyConfig
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.strategies.momentum import MomentumStrategy
-from src.engine.strategies.momentum_breakout import MomentumBreakoutStrategy
+from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.realtime.handler import dispatch_message, register_execution_handler, register_tick_handler
 from src.realtime.websocket import kis_ws
@@ -62,13 +62,13 @@ class TradingScheduler:
         ))
         self.registry.register(vb)
 
-        mb = MomentumBreakoutStrategy(StrategyConfig(
-            strategy_id="momentum_breakout",
-            name="모멘텀 브레이크아웃",
+        ltv = LongTailVolatilityStrategy(StrategyConfig(
+            strategy_id="long_tail_volatility",
+            name="롱테일 변동성 돌파",
             enabled=False,
             weight=0.0,
         ))
-        self.registry.register(mb)
+        self.registry.register(ltv)
 
         self.order_engine = OrderEngine(self.registry)
         self.risk_manager = RiskManager(self.registry, self.order_engine)
@@ -182,7 +182,7 @@ class TradingScheduler:
                 if not self._collect_breakout_tickers():
                     logger.info("돌파 전략 유니버스 비어있음 → prepare 재실행")
                     await write_log("INFO", "돌파 유니버스 비어있어 prepare 재실행")
-                    for sid in ("volatility_breakout", "momentum_breakout"):
+                    for sid in ("volatility_breakout", "long_tail_volatility"):
                         strategy = self.registry.get(sid)
                         if strategy and strategy.config.enabled:
                             try:
@@ -433,16 +433,16 @@ class TradingScheduler:
     async def _execute_next_day_clear(self) -> None:
         """09:00 익일 청산 로직.
 
-        익일 청산을 지원하는 전략(momentum, momentum_breakout)의 is_next_day 포지션을 처리한다.
+        익일 청산을 지원하는 전략(momentum, long_tail_volatility)의 is_next_day 포지션을 처리한다.
         1. 전일 매수 보유 종목 목록 조회
         2. 각 종목의 당일 시가 확인 (WebSocket 시세 구독으로 수신)
         3. 60초 대기하여 시가 안정화 (대기 중 on_tick의 NEXT_DAY_CLEAR 억제)
         4. 시가가 매수가 대비 gap_up_threshold 이상 → 트레일링 스탑 모드
         5. gap_up_threshold 미만 → 즉시 시장가 전량 매도
         """
-        # 익일 청산 대상 전략 수집 (momentum + momentum_breakout)
+        # 익일 청산 대상 전략 수집 (momentum + long_tail_volatility)
         overnight_strategies: list[tuple[str, object]] = []
-        for sid in ("momentum", "momentum_breakout"):
+        for sid in ("momentum", "long_tail_volatility"):
             s = self.registry.get(sid)
             if s and s.config.enabled:
                 overnight_strategies.append((sid, s))
@@ -531,7 +531,7 @@ class TradingScheduler:
 
         # 대상 전략 + 종목 수집
         targets: list[tuple[str, object, list[str]]] = []  # (sid, strategy, ticker_list)
-        for sid in ("volatility_breakout", "momentum_breakout"):
+        for sid in ("volatility_breakout", "long_tail_volatility"):
             strategy = self.registry.get(sid)
             if not strategy or not strategy.config.enabled:
                 continue
@@ -579,7 +579,7 @@ class TradingScheduler:
     def _collect_breakout_tickers(self) -> list[str]:
         """돌파 전략(VB, MB)의 스캔 종목을 합산한다."""
         tickers: list[str] = []
-        for sid in ("volatility_breakout", "momentum_breakout"):
+        for sid in ("volatility_breakout", "long_tail_volatility"):
             strategy = self.registry.get(sid)
             if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):
                 tickers.extend(strategy.get_scanned_tickers())
@@ -627,7 +627,7 @@ class TradingScheduler:
         """15:20 당일 청산 전략(VB, MB)의 강제 청산."""
         from src.engine.scanner import t
 
-        for sid in ("volatility_breakout", "momentum_breakout"):
+        for sid in ("volatility_breakout", "long_tail_volatility"):
             strategy = self.registry.get(sid)
             if not strategy or not strategy.config.enabled:
                 continue

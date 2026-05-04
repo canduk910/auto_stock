@@ -11,6 +11,12 @@ export const STRATEGY_COLORS: Record<string, { bg: string; text: string; badge: 
     badge: 'bg-purple-100 text-purple-700',
     hex: '#8B5CF6',
   },
+  long_tail_volatility: {
+    bg: 'bg-amber-50',
+    text: 'text-amber-700',
+    badge: 'bg-amber-100 text-amber-700',
+    hex: '#F59E0B',
+  },
 }
 
 const DEFAULT_COLOR = {

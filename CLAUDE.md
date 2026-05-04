@@ -43,7 +43,7 @@ cd frontend && npm run build
 ### 전략 구성
 - **상한가 모멘텀** (`momentum`): 전일종가 대비 +29% 돌파 매수, -7.5% 손절, 익일 청산
 - **변동성 돌파** (`volatility_breakout`): 노이즈 비율 기반 K값 → Target_Price 돌파 매수, -3% 손절, 15:20 강제 청산
-- **모멘텀 브레이크아웃** (`momentum_breakout`): 변동성 돌파 방식 조기 진입 + 상한가 도달 시 익일 청산 모드 전환. 당일 손절 -3%, 상한가 모드 손절 -5%, 15:20 강제 청산(상한가 미도달 종목만)
+- **롱테일 변동성 돌파** (`long_tail_volatility`): 변동성 돌파 방식 조기 진입 + 상한가 도달 시 익일 청산 모드 전환(롱테일 추구). 당일 손절 -3%, 상한가 모드 손절 -5%, 15:20 강제 청산(상한가 미도달 종목만)
 
 ### 핵심 파일 구조
 ```
@@ -53,7 +53,7 @@ src/engine/
 ├── strategies/
 │   ├── momentum.py        # 상한가 모멘텀 전략
 │   ├── volatility_breakout.py  # 변동성 돌파 전략
-│   └── momentum_breakout.py    # 모멘텀 브레이크아웃 전략 (합성)
+│   └── long_tail_volatility.py # 롱테일 변동성 돌파 전략 (VB + 상한가 모멘텀 합성)
 ├── risk.py               # RiskManager (registry 순회, 전략별 신호 체크)
 ├── order_engine.py        # OrderEngine (strategy_id 태깅, 전략별 포지션)
 ├── scheduler.py           # TradingScheduler (registry 기반)

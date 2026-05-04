@@ -137,7 +137,7 @@ export default function Settings() {
           {strategies.map((s) => {
             const color = getStrategyColor(s.key)
             const isVB = s.key === 'volatility_breakout'
-            const isMB = s.key === 'momentum_breakout'
+            const isLTV = s.key === 'long_tail_volatility'
             return (
               <div key={s.key} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                 <div className="flex items-center gap-2">
@@ -147,7 +147,7 @@ export default function Settings() {
                 <div className="text-sm text-gray-600">
                   {isVB ? (
                     <span>09:00:05 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(시가 확정 직후)</span></span>
-                  ) : isMB ? (
+                  ) : isLTV ? (
                     <span>09:00:05 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(시가 확정 직후, 상한가 도달 시 익일 청산)</span></span>
                   ) : (
                     <span>09:30 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(익일 청산 09:00)</span></span>

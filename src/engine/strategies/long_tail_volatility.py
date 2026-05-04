@@ -1,6 +1,6 @@
-"""모멘텀 브레이크아웃 전략.
+"""롱테일 변동성 돌파 전략.
 
-변동성 돌파 + 상한가 모멘텀 합성 전략.
+변동성 돌파 진입 + 상한가 도달 시 익일 청산으로 롱테일(긴 우측 보상) 추구.
 - 대상: 시총/거래대금 필터 + 연속상한가 제외
 - 매수: 시가 + (전일Range × K) 돌파 시 (변동성 돌파 방식)
 - 당일 상한가 미도달: 당일 손절(-3%) + 15:20 강제 청산
@@ -15,8 +15,8 @@ from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
 logger = logging.getLogger(__name__)
 
 
-class MomentumBreakoutStrategy(StrategyBase):
-    """모멘텀 브레이크아웃 전략."""
+class LongTailVolatilityStrategy(StrategyBase):
+    """롱테일 변동성 돌파 전략."""
 
     DEFAULT_PARAMS = {
         # 진입 조건
@@ -116,11 +116,11 @@ class MomentumBreakoutStrategy(StrategyBase):
                 prepared += 1
 
             except Exception as e:
-                logger.warning("모멘텀 브레이크아웃 prepare 실패: %s — %s", ticker, e)
+                logger.warning("롱테일 변동성 돌파 prepare 실패: %s — %s", ticker, e)
                 continue
 
         self._scanned_tickers = list(self._targets.keys())
-        logger.info("모멘텀 브레이크아웃 준비 완료: %d/%d종목", prepared, len(tickers))
+        logger.info("롱테일 변동성 돌파 준비 완료: %d/%d종목", prepared, len(tickers))
 
     @staticmethod
     def _is_consecutive_limit_up(candles: list[dict], threshold: int) -> bool:
@@ -183,9 +183,9 @@ class MomentumBreakoutStrategy(StrategyBase):
                         ticker_names[ticker] = name
                     all_tickers.append(ticker)
             except KisApiError:
-                logger.warning("모멘텀 브레이크아웃 거래량순위 조회 실패")
+                logger.warning("롱테일 변동성 돌파 거래량순위 조회 실패")
 
-        logger.info("모멘텀 브레이크아웃 유니버스 후보: %d종목", len(all_tickers))
+        logger.info("롱테일 변동성 돌파 유니버스 후보: %d종목", len(all_tickers))
 
         filtered: list[str] = []
         for ticker in all_tickers:
@@ -202,7 +202,7 @@ class MomentumBreakoutStrategy(StrategyBase):
             except Exception:
                 continue
 
-        logger.info("모멘텀 브레이크아웃 유니버스 확정: %d종목", len(filtered))
+        logger.info("롱테일 변동성 돌파 유니버스 확정: %d종목", len(filtered))
         return filtered
 
     def get_scanned_tickers(self) -> list[str]:
@@ -262,7 +262,7 @@ class MomentumBreakoutStrategy(StrategyBase):
         # 돌파 순간 감지
         if prev < target and current_price >= target:
             logger.info(
-                "모멘텀 브레이크아웃 매수 신호: %s 현재가(%d) >= 목표가(%d), K=%.4f",
+                "롱테일 변동성 돌파 매수 신호: %s 현재가(%d) >= 목표가(%d), K=%.4f",
                 t(ticker), current_price, target, info["k"],
             )
             self.state.buy_signals.append({
@@ -299,7 +299,7 @@ class MomentumBreakoutStrategy(StrategyBase):
                 if self._next_day_clear_pending:
                     # 손절만 유지
                     if loss_rate <= self.config.params["overnight_stop_loss"]:
-                        logger.info("모멘텀BO 익일 손절: %s %.1f%%", t(ticker), loss_rate)
+                        logger.info("롱테일VB 익일 손절: %s %.1f%%", t(ticker), loss_rate)
                         return Signal.STOP_LOSS
                     return Signal.NONE
 
@@ -308,27 +308,27 @@ class MomentumBreakoutStrategy(StrategyBase):
                 gap_rate = (open_price - pos.buy_price) / pos.buy_price * 100 if pos.buy_price > 0 else 0
 
                 if gap_rate < gap_threshold:
-                    logger.info("모멘텀BO 익일 즉시 청산: %s 갭률 %.1f%%", t(ticker), gap_rate)
+                    logger.info("롱테일VB 익일 즉시 청산: %s 갭률 %.1f%%", t(ticker), gap_rate)
                     return Signal.NEXT_DAY_CLEAR
 
                 # 갭상승 → 트레일링 스탑
                 pos.high_since_buy = max(pos.high_since_buy, current_price)
                 drop_rate = (current_price - pos.high_since_buy) / pos.high_since_buy * 100
                 if drop_rate <= trailing_rate:
-                    logger.info("모멘텀BO 트레일링 스탑: %s 고점(%d) 대비 %.1f%%", t(ticker), pos.high_since_buy, drop_rate)
+                    logger.info("롱테일VB 트레일링 스탑: %s 고점(%d) 대비 %.1f%%", t(ticker), pos.high_since_buy, drop_rate)
                     return Signal.TRAILING_STOP
                 return Signal.NONE
 
             # 당일 (상한가 도달 후) — overnight 손절만 적용
             if loss_rate <= self.config.params["overnight_stop_loss"]:
-                logger.info("모멘텀BO 손절(상한가 모드): %s %.1f%%", t(ticker), loss_rate)
+                logger.info("롱테일VB 손절(상한가 모드): %s %.1f%%", t(ticker), loss_rate)
                 return Signal.STOP_LOSS
             return Signal.NONE
 
         # --- 당일 모드 (상한가 미도달) ---
         # 손절
         if loss_rate <= self.config.params["intraday_stop_loss"]:
-            logger.info("모멘텀BO 당일 손절: %s %.1f%%", t(ticker), loss_rate)
+            logger.info("롱테일VB 당일 손절: %s %.1f%%", t(ticker), loss_rate)
             return Signal.STOP_LOSS
 
         # 상한가 도달 체크 → 모드 전환
@@ -339,7 +339,7 @@ class MomentumBreakoutStrategy(StrategyBase):
             if prdy_rate >= threshold:
                 self._limit_up_reached.add(ticker)
                 logger.info(
-                    "모멘텀BO 상한가 모드 전환: %s 등락률 %.1f%% >= %.1f%%",
+                    "롱테일VB 상한가 모드 전환: %s 등락률 %.1f%% >= %.1f%%",
                     t(ticker), prdy_rate, threshold,
                 )
 

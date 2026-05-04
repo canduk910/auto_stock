@@ -49,7 +49,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 매수가 대비 -3% 손절
 - 15:20 전량 강제 청산
 
-### strategies/momentum_breakout.py — 모멘텀 브레이크아웃 (합성)
+### strategies/long_tail_volatility.py — 롱테일 변동성 돌파 (VB + 상한가 모멘텀 합성)
 - VB 방식 조기 진입 + 상한가 도달 시 모멘텀 방식 익일 청산
 - prepare(): VB와 동일 스캔 + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up`) + ticker_prev_close 사전 등록
 - 매수: 시가 + (전일Range × K) 돌파 + 전일대비 `min_prdy_rate`% 이상 (09:00:05부터 매매 가능, VB와 동일 시점)
@@ -79,9 +79,9 @@ TradingScheduler (registry 기반 boot/run/settle)
 - WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
 - **08:55 사전 구독** (`TIME_PRESUBSCRIBE`): `_collect_presubscribe_tickers()` — 돌파 전략 스캔 종목 + 모든 전략의 보유 포지션 합집합을 WebSocket 사전 구독 → 09:00 시가 즉시 수신. 돌파 유니버스가 비어있으면 prepare 재실행(KIS API 일시 장애 대비)
 - 09:00:00 익일 청산은 백그라운드 task(`asyncio.create_task`)로 실행하여 60초 안정화 대기를 비차단으로 처리. 동시에 `_confirm_breakout_open_prices()`(0.5초 간격 5초 폴링 → 미확정 종목 KIS API 폴백) 즉시 실행
-- **09:00:05 돌파 전략 매매 시작** (`TIME_VB_OPEN_CONFIRM = time(9, 0, 5)`): VB + MB 시가 확정 직후 진입(`_phase = "vb_trading"`)
+- **09:00:05 돌파 전략 매매 시작** (`TIME_VB_OPEN_CONFIRM = time(9, 0, 5)`): VB + LTV 시가 확정 직후 진입(`_phase = "vb_trading"`)
 - 09:30 모멘텀 스캔: `scan_stocks()` + 통합 구독, `_phase = "trading"`
-- 15:20 강제 청산: `_force_clear_intraday_strategies()` — VB + MB(상한가 미도달 종목) 공용. _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화
+- 15:20 강제 청산: `_force_clear_intraday_strategies()` — VB + LTV(상한가 미도달 종목) 공용. _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화
 - _resolve_open_price(): 시가 폴링(0.5초 간격) → KIS `fetch_stock_detail()` 폴백 헬퍼. `_execute_next_day_clear()`에서 익일청산 시가 미수신 시 호출
 - run_daily(): 매일 08:20 자동 시작, 주말 건너뜀, **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행 (09:00:05 이후 부팅 시에도 사전구독 + 시가확정 즉시 실행)
@@ -89,7 +89,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### scanner.py — 종목 스캔
 - scan_stocks(): 모멘텀용 등락률 순위 스캔
-- subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 돌파 전략(VB+MB) 종목 합집합 구독
+- subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 돌파 전략(VB+LTV) 종목 합집합 구독
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info
 
 ### recommendation_engine.py / recommendation_metrics.py — 전략수정 AI자문

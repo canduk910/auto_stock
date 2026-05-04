@@ -213,7 +213,7 @@ TradingScheduler (scheduler.py)
        │     (WebSocket 시가 → KIS API 폴백)
        │                         │
 09:00:05 _phase = "vb_trading"  (TIME_VB_OPEN_CONFIRM)
-       │  VB + MB 매매 시작 (시가 확정 직후)
+       │  VB + LTV 매매 시작 (시가 확정 직후)
        │                         │
 09:30  scan_stocks() ───────────────────────────────────────→ GET fluctuation-rank
        │  subscribe_filtered_stocks()                        GET inquire-price
@@ -359,7 +359,7 @@ prepare() 단계:
 ├─ K값 = avg(노이즈 비율) = avg(1 - |종가-시가| / (고가-저가))
 ├─ target_offset = 전일 Range × K
 ├─ ticker_prev_close[ticker] = candles[0].stck_clpr  (전일 종가 사전 등록)
-└─ 09:00:05 시가 확정 → target_price = 시가 + offset (VB/MB 동일)
+└─ 09:00:05 시가 확정 → target_price = 시가 + offset (VB/LTV 동일)
 
 on_tick(ticker, current_price)
 │

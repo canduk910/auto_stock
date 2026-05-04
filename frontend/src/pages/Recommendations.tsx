@@ -70,9 +70,6 @@ const METRIC_FIELDS: MetricFieldDef[] = [
 
 type TabKey = 'pending' | 'history'
 
-const PENDING_STATUSES: RecommendationStatus[] = ['pending', 'partial']
-const HISTORY_STATUSES: RecommendationStatus[] = ['applied', 'partial', 'rejected', 'expired']
-
 export default function Recommendations() {
   const queryClient = useQueryClient()
   const [selectedKeys, setSelectedKeys] = useState<Record<string, Set<string>>>({})
@@ -150,20 +147,29 @@ export default function Recommendations() {
     },
   })
 
+  // 가장 최근 target_date — 신규 탭 기준
+  const latestTargetDate = useMemo(() => {
+    const list = items ?? []
+    if (list.length === 0) return null
+    return list.reduce<string>((acc, it) => (it.target_date > acc ? it.target_date : acc), list[0].target_date)
+  }, [items])
+
   // 탭별 + 필터 적용
   const filteredItems = useMemo(() => {
     const list = items ?? []
     if (tab === 'pending') {
-      return list.filter((it) => PENDING_STATUSES.includes(it.status))
+      // 신규 탭: 가장 최근 target_date의 자문 (status 무관)
+      if (!latestTargetDate) return []
+      return list.filter((it) => it.target_date === latestTargetDate)
     }
-    // history
+    // 이력 탭: 그 이전 + 상태/전략 필터
     return list.filter((it) => {
-      if (!HISTORY_STATUSES.includes(it.status)) return false
+      if (latestTargetDate && it.target_date === latestTargetDate) return false
       if (historyStatusFilter !== 'all' && it.status !== historyStatusFilter) return false
       if (historyStrategyFilter !== 'all' && it.strategy_id !== historyStrategyFilter) return false
       return true
     })
-  }, [items, tab, historyStatusFilter, historyStrategyFilter])
+  }, [items, tab, latestTargetDate, historyStatusFilter, historyStrategyFilter])
 
   // target_date 데스크 정렬 + strategy_id 정렬
   const grouped = useMemo(() => {
@@ -179,14 +185,16 @@ export default function Recommendations() {
     }))
   }, [filteredItems])
 
-  const pendingCount = useMemo(
-    () => (items ?? []).filter((it) => PENDING_STATUSES.includes(it.status)).length,
-    [items],
-  )
-  const historyCount = useMemo(
-    () => (items ?? []).filter((it) => HISTORY_STATUSES.includes(it.status)).length,
-    [items],
-  )
+  const pendingCount = useMemo(() => {
+    const list = items ?? []
+    if (!latestTargetDate) return 0
+    return list.filter((it) => it.target_date === latestTargetDate).length
+  }, [items, latestTargetDate])
+  const historyCount = useMemo(() => {
+    const list = items ?? []
+    if (!latestTargetDate) return list.length
+    return list.filter((it) => it.target_date !== latestTargetDate).length
+  }, [items, latestTargetDate])
 
   const toggleKey = (recId: string, key: string) => {
     setSelectedKeys((prev) => {
@@ -290,9 +298,9 @@ export default function Recommendations() {
         <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
           {tab === 'pending' ? (
             <>
-              대기 중인 자문이 없습니다.
+              표시할 신규 자문이 없습니다.
               <br />
-              <span className="text-sm">오늘 16:00에 다음 자문이 생성됩니다.</span>
+              <span className="text-sm">매일 장마감 후 16:00에 자문이 생성됩니다.</span>
             </>
           ) : (
             <>이력에 표시할 자문이 없습니다.</>

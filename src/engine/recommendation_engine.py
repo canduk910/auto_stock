@@ -195,6 +195,10 @@ async def generate_recommendations() -> list[dict]:
 
     for strategy in registry.enabled():
         strategy_id = strategy.strategy_id
+        current_params: dict = {}
+        metrics: dict = {}
+        recommended_params: dict = {}
+        reasoning = ""
         try:
             current_params = dict(strategy.config.params)
 
@@ -232,8 +236,13 @@ async def generate_recommendations() -> list[dict]:
             recommended_params, reasoning = _validate_recommendations(
                 raw, current_params,
             )
+        except Exception as e:
+            logger.exception("파라미터 추천 생성 실패: %s", strategy_id)
+            # 예외 발생 시에도 빈 자문 INSERT — 신규 탭에 누락 사실을 노출
+            reasoning = f"자문 생성 중 예외 발생: {type(e).__name__}: {e}"
 
-            # recommended_params가 비어있어도 INSERT (사용자가 통계 확인 가능)
+        # 모든 경로에서 INSERT 시도 (UNIQUE 충돌 시 None 반환 — 재실행 안전)
+        try:
             row = await insert_recommendation(
                 target_date=target_date,
                 strategy_id=strategy_id,
@@ -245,7 +254,7 @@ async def generate_recommendations() -> list[dict]:
             if row:
                 inserted.append(row)
         except Exception:
-            logger.exception("파라미터 추천 생성 실패: %s", strategy_id)
+            logger.exception("파라미터 추천 INSERT 실패: %s", strategy_id)
 
     logger.info("파라미터 추천 생성 완료: %d/%d 전략", len(inserted), len(registry.enabled()))
     return inserted
