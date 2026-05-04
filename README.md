@@ -50,12 +50,12 @@
 
 1. **Python 3.11+** 설치
 2. **Node.js 20+** 설치
-3. **한국투자증권 OpenAPI 신청** �� [KIS Developers](https://apiportal.koreainvestment.com/)에서 앱키/시크릿 발급
+3. **한국투자증권 OpenAPI 신청** — [KIS Developers](https://apiportal.koreainvestment.com/)에서 앱키/시크릿 발급
 4. **Supabase 프로젝트 생성** — [supabase.com](https://supabase.com/)에서 프로젝트 생성 후 URL/Key 확보
 
 ## 설치 및 실행
 
-### 1. 환��� 변수 설정
+### 1. 환경 변수 설정
 
 ```bash
 cp .env.example .env
@@ -95,7 +95,7 @@ docker compose -f docker-compose.prod.yml up --build -d
 ```
 
 - 개발: 프론트엔드 `http://localhost:3000`, 백엔드 `http://localhost:8002`
-- 프로덕션: `http://localhost:80` (Nginx 정적파��� + API 프록시)
+- 프로덕션: `http://localhost:80` (Nginx 정적파일 + API 프록시)
 
 ### 3-1. 로컬 직접 실행 (Docker 없이)
 
@@ -118,8 +118,8 @@ cd frontend && npm install && npm run dev
 1. `.env`에서 `KIS_ENV=vts` 확인
 2. 백엔드 + 프론트엔드 실행
 3. 대시보드에서 [시작] 버튼 클릭 → 확인 모달에서 승인
-4. 08:25~16:10 스케줄에 따라 자동매매 진행
-5. [정지] 버튼으로 ���동 중지 가능
+4. 08:20~16:10 스케줄에 따라 자동매매 진행
+5. [정지] 버튼으로 수동 중지 가능
 
 ### 대시보드 화면
 
