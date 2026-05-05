@@ -38,6 +38,7 @@ function formatTime(timestamp: string): string {
 const STRATEGY_NAMES: Record<string, string> = {
   momentum: '모멘텀',
   volatility_breakout: '변동성돌파',
+  long_tail_volatility: '롱테일 변동성',
 }
 
 const columns = [

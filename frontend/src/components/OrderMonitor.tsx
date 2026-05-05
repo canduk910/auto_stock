@@ -342,8 +342,9 @@ function PositionsTable({
   isAll: boolean
   scan?: TradingStatusData['scan']
 }) {
-  const isVB = selectedStrategy === 'volatility_breakout'
-  const vbTargets = (strategies['volatility_breakout']?.targets ?? {}) as Record<string, VBTarget>
+  const isBreakout = selectedStrategy === 'volatility_breakout' || selectedStrategy === 'long_tail_volatility'
+  const isVB = isBreakout  // 표 컬럼 구성은 VB/LTV 동일
+  const vbTargets = (strategies[selectedStrategy]?.targets ?? {}) as Record<string, VBTarget>
   const formatPrice = (n: number) => n.toLocaleString()
 
   return (
