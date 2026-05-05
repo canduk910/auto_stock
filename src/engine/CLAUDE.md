@@ -51,6 +51,14 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 매수가 대비 -3% 손절
 - 15:20 전량 강제 청산
 
+### strategies/donchian_swing.py — 20일 신고가 스윙 (추세추종 멀티데이)
+- prepare(): 시총 3,000억+ 거래대금 50억+ 종목 스캔 → 60일 일봉 fetch → Donchian 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5배 검증
+- recompute_held_atr(): _boot 후 보유 종목 ATR 재계산 (멀티데이 트레일링 유지용)
+- check_buy_signal(): 09:05~09:30 시간 가드 + 갭 +3%↑ 스킵 + 1회만 매수
+- check_exit_signal(): ATR×2 Chandelier 트레일링 + 하드 손절 -7% (시간 손절 없음)
+- check_force_clear(): 빈 리스트 — 15:20 강제 청산 제외
+- 시스템 최초의 멀티데이 보유 전략 — positions DB 영속화 + _boot DB 복구로 일자 넘어 유지
+
 ### strategies/long_tail_volatility.py — 롱테일 변동성 돌파 (VB + 상한가 모멘텀 합성)
 - VB 방식 조기 진입 + 상한가 도달 시 모멘텀 방식 익일 청산
 - prepare(): VB와 동일 스캔 + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up`) + ticker_prev_close 사전 등록

@@ -19,6 +19,7 @@ from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscri
 from src.engine.strategy_base import Signal, StrategyConfig
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.strategies.momentum import MomentumStrategy
+from src.engine.strategies.donchian_swing import DonchianSwingStrategy
 from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.realtime.handler import dispatch_message, register_execution_handler, register_tick_handler
@@ -69,6 +70,14 @@ class TradingScheduler:
             weight=0.0,
         ))
         self.registry.register(ltv)
+
+        ds = DonchianSwingStrategy(StrategyConfig(
+            strategy_id="donchian_swing",
+            name="20일 신고가 스윙",
+            enabled=False,
+            weight=0.0,
+        ))
+        self.registry.register(ds)
 
         self.order_engine = OrderEngine(self.registry)
         self.risk_manager = RiskManager(self.registry, self.order_engine)
@@ -886,12 +895,20 @@ class TradingScheduler:
         await write_log(
             "INFO",
             f"기동 완료: 순자산 {summary.net_asset:,}원, "
-            f"보유 {total_pos}종목 (DB복구: {db_restored}, KIS보완: {kis_only}, 미체결: {unfilled_count})",
+            f"보유 {total_pos}종목 (DB복구: {db_restored}, KIS복원: {kis_only}, 미체결: {unfilled_count})",
         )
         logger.info(
-            "기동 완료: 순자산 %s, 보유 %d종목 (DB복구: %d, KIS보완: %d, 미체결: %d)",
+            "기동 완료: 순자산 %s, 보유 %d종목 (DB복구: %d, KIS복원: %d, 미체결: %d)",
             summary.net_asset, total_pos, db_restored, kis_only, unfilled_count,
         )
+
+        # 멀티데이 보유 전략(donchian_swing) 보유 종목의 ATR 재계산
+        ds = self.registry.get("donchian_swing")
+        if ds and hasattr(ds, "recompute_held_atr"):
+            try:
+                await ds.recompute_held_atr()
+            except Exception:
+                logger.exception("donchian_swing recompute_held_atr 실패")
 
     async def _sync_orders_to_db(self, orders: list[dict]) -> None:
         """KIS 주문체결내역을 DB trade_history에 동기화한다.

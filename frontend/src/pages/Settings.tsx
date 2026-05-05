@@ -140,6 +140,7 @@ export default function Settings() {
             const color = getStrategyColor(s.key)
             const isVB = s.key === 'volatility_breakout'
             const isLTV = s.key === 'long_tail_volatility'
+            const isDS = s.key === 'donchian_swing'
             return (
               <div key={s.key} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                 <div className="flex items-center gap-2">
@@ -159,6 +160,8 @@ export default function Settings() {
                     <span>09:00:05 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(시가 확정 직후)</span></span>
                   ) : isLTV ? (
                     <span>09:00:05 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(시가 확정 직후, 상한가 도달 시 익일 청산)</span></span>
+                  ) : isDS ? (
+                    <span>09:05 ~ 추세 종료 <span className="text-xs text-gray-400 ml-1">(멀티데이 보유, ATR 트레일링)</span></span>
                   ) : (
                     <span>09:30 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(익일 청산 09:00)</span></span>
                   )}

@@ -115,6 +115,55 @@ export const PARAM_LABELS: Record<
     description:
       '🛑 익일까지 들고 가는 종목의 손절선.\n\n예: -5% = 당일 손절(-3%)보다 약간 여유 있게. 밤사이 변동을 견디기 위한 폭.',
   },
+  donchian_period: {
+    label: '신고가 기준 기간',
+    unit: '일',
+    step: 1,
+    description:
+      '📈 최근 며칠치 일봉 중 최고가를 신고가로 볼지.\n\n예: 20 = 최근 20일 최고가 돌파. 길수록 보수적, 짧을수록 진입 잦음.',
+  },
+  long_ma_period: {
+    label: '장기 추세 EMA 기간',
+    unit: '일',
+    step: 1,
+    description:
+      '🌊 추세 방향 판정에 쓰는 EMA 기간.\n\n예: 60 = 60일 EMA 위에 있고 우상향이어야 진입. 약세장 진입 차단용.',
+  },
+  atr_period: {
+    label: 'ATR 산출 기간',
+    unit: '일',
+    step: 1,
+    description:
+      '📏 변동폭(ATR) 계산에 쓰는 일봉 기간.\n\n예: 14 = 최근 14일치 고가-저가 평균. 트레일링 손절 폭 결정.',
+  },
+  atr_trail_mult: {
+    label: 'ATR 트레일링 배수',
+    unit: '배',
+    step: 0.1,
+    description:
+      '🎢 고점에서 ATR × 몇 배 빠지면 매도할지.\n\n예: 2.0 = ATR이 1,000원이면 고점 대비 2,000원 빠질 때 매도. 작을수록 빨리 던지고, 클수록 멀리 따라감.',
+  },
+  gap_skip_threshold: {
+    label: '익일 갭 스킵 기준',
+    unit: '%',
+    step: 0.5,
+    description:
+      '🚫 다음날 시가가 이만큼 갭상승이면 진입 스킵.\n\n예: 3% = 너무 떠서 시작한 종목은 추격 매수 위험이라 건너뜀.',
+  },
+  volume_period: {
+    label: '거래량 평균 기간',
+    unit: '일',
+    step: 1,
+    description:
+      '📊 거래대금 평균 산출 기간.\n\n예: 20 = 최근 20일 평균. 오늘 거래대금이 그 평균의 일정 배수 이상이어야 진입.',
+  },
+  volume_multiplier: {
+    label: '거래대금 증가 배수',
+    unit: '배',
+    step: 0.1,
+    description:
+      '🔥 평소 대비 거래대금이 몇 배 이상이면 진입 신호로 볼지.\n\n예: 1.5 = 평소의 1.5배 이상 들어왔을 때만 추세 진입 인정.',
+  },
 }
 
 export const formatParamValue = (key: string, value: number): string => {

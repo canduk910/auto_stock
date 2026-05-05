@@ -17,6 +17,12 @@ export const STRATEGY_COLORS: Record<string, { bg: string; text: string; badge: 
     badge: 'bg-amber-100 text-amber-700',
     hex: '#F59E0B',
   },
+  donchian_swing: {
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+    badge: 'bg-emerald-100 text-emerald-700',
+    hex: '#10B981',
+  },
 }
 
 const DEFAULT_COLOR = {
