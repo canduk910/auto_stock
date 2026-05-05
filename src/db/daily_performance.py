@@ -68,3 +68,23 @@ async def get_latest_performance(strategy: str = "total") -> dict | None:
         .execute()
     )
     return result.data[0] if result.data else None
+
+
+async def recompute_from_trades() -> bool:
+    """trade_history 기반 daily_performance 일괄 재계산 (소급 정산).
+
+    Supabase에 등록된 PostgreSQL 함수 `recompute_daily_performance()`를 RPC 호출.
+    멱등이므로 매일 정산 후 호출해도 안전.
+
+    수행 단계 (DB 함수 내부):
+    1) SELL profit_loss 합 → daily_realized_pnl (전략별 + total)
+    2) daily_profit_rate = daily_realized_pnl / 전일 total_asset * 100
+    3) cumulative_return_rate = TWR 복리 누적
+    """
+    try:
+        supabase.rpc("recompute_daily_performance", {}).execute()
+        logger.info("daily_performance 일괄 재계산 완료 (recompute_daily_performance)")
+        return True
+    except Exception:
+        logger.exception("daily_performance 재계산 실패")
+        return False

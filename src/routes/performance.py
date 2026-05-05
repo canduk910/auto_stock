@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from src.db.daily_performance import get_latest_performance, get_performance
+from src.db.daily_performance import get_latest_performance, get_performance, recompute_from_trades
 from src.models.response import ApiResponse
 
 router = APIRouter(prefix="/api/performance", tags=["performance"])
@@ -36,6 +36,20 @@ async def summary(strategy: str = "total"):
             "latest_asset": records[-1]["total_asset"] if records else 0,
             "strategy": strategy,
         },
+    )
+
+
+@router.post("/recompute", response_model=ApiResponse)
+async def recompute():
+    """trade_history 기반 daily_performance 전체 소급 재계산.
+
+    매일 정산(_settle) 후 자동 호출되지만, 거래 내역이 보정된 경우
+    수동 호출하여 즉시 반영할 수 있다. 멱등.
+    """
+    ok = await recompute_from_trades()
+    return ApiResponse(
+        success=ok,
+        message="일별 실적 재계산 완료" if ok else "재계산 실패",
     )
 
 

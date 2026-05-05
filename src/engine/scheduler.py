@@ -11,7 +11,7 @@ from datetime import date, datetime, time, timedelta
 
 from src.api.balance import get_balance, get_daily_orders
 from src.auth.token import token_manager
-from src.db.daily_performance import get_latest_performance, upsert_daily_performance
+from src.db.daily_performance import get_latest_performance, recompute_from_trades, upsert_daily_performance
 from src.db.system_logs import write_log
 from src.engine.order_engine import OrderEngine
 from src.engine.risk import RiskManager
@@ -1120,6 +1120,12 @@ class TradingScheduler:
                 f"일일 정산: 순자산 {summary.net_asset:,}원, 실현 {daily_rate:.2f}%, "
                 f"누적 {cum_rate:.2f}%, 외부입출금 {net_ext_cashflow:,.0f}원",
             )
+
+            # 정산 직후 trade_history 기반 일괄 재계산 — 누락된 영업일/cumulative 보정
+            try:
+                await recompute_from_trades()
+            except Exception:
+                logger.exception("정산 후 재계산 실패 (소급 정합성 보정)")
         except Exception:
             logger.exception("정산 오류")
             await write_log("ERROR", "일일 정산 실패")
