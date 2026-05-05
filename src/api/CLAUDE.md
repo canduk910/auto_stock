@@ -21,9 +21,11 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - 잔고조회: TTTC8434R
 - 매수가능조회: TTTC8908R
 
-### condition.py — 조건검색
-- 거래량순위 API로 종목 필터링
+### condition.py — 조건검색 + 영업일 체크
+- 거래량순위 API로 종목 필터링 (FHPST01700000)
 - 시총/거래대금 필터 적용
+- `is_market_open(date)`: KIS chk-holiday API(CTCA0903R)로 개장일 여부 (`opnd_yn == "Y"`)
+- `next_trading_day(after_date)`: 다음 개장일 조회 (휴일 다음날 자동 산정)
 
 ## 새 API 추가 절차
 1. `docs/kis/{category}.md`에서 TR_ID, URL, 파라미터 확인

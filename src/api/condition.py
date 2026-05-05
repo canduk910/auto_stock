@@ -18,6 +18,56 @@ logger = logging.getLogger(__name__)
 FLUCTUATION_RANK_URL = "/uapi/domestic-stock/v1/ranking/fluctuation"
 STOCK_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-price"
 DAILY_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-daily-price"
+HOLIDAY_URL = "/uapi/domestic-stock/v1/quotations/chk-holiday"
+
+
+async def is_market_open(target_date) -> bool:
+    """KIS 휴장일 API로 해당 일자의 주식시장 개장 여부를 반환한다.
+
+    target_date: datetime.date
+    Returns True (개장일, opnd_yn=Y) or False (휴장).
+    조회 실패 시 안전을 위해 True 반환 (영업일 가정 후 후속 단계에서 매매 검증).
+    """
+    yyyymmdd = target_date.strftime("%Y%m%d")
+    try:
+        data = await kis_get(
+            HOLIDAY_URL,
+            "CTCA0903R",
+            {"BASS_DT": yyyymmdd, "CTX_AREA_NK": "", "CTX_AREA_FK": ""},
+        )
+        for row in data.get("output", []):
+            if row.get("bass_dt") == yyyymmdd:
+                return row.get("opnd_yn") == "Y"
+        logger.warning("휴장일 응답에 %s 항목 없음", yyyymmdd)
+        return True
+    except Exception:
+        logger.exception("휴장일 조회 실패: %s — 영업일로 가정", yyyymmdd)
+        return True
+
+
+async def next_trading_day(after_date) -> "date":
+    """after_date 다음 개장일을 반환한다 (최대 14일 탐색).
+
+    KIS chk-holiday 응답이 약 30일치를 한 번에 주므로 1회 호출로 충분.
+    실패 시 단순히 다음날 반환 (안전 fallback).
+    """
+    from datetime import timedelta
+    yyyymmdd = (after_date + timedelta(days=1)).strftime("%Y%m%d")
+    try:
+        data = await kis_get(
+            HOLIDAY_URL,
+            "CTCA0903R",
+            {"BASS_DT": yyyymmdd, "CTX_AREA_NK": "", "CTX_AREA_FK": ""},
+        )
+        from datetime import date as _date
+        for row in data.get("output", []):
+            if row.get("opnd_yn") == "Y":
+                d = row.get("bass_dt", "")
+                if len(d) == 8:
+                    return _date(int(d[:4]), int(d[4:6]), int(d[6:8]))
+    except Exception:
+        logger.exception("다음 영업일 조회 실패")
+    return after_date + timedelta(days=1)
 
 # 스캔 최소 등락률 — 29% 매수 조건의 후보군
 MIN_CHANGE_RATE = 15.0

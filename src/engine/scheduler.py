@@ -337,6 +337,25 @@ class TradingScheduler:
                 await asyncio.sleep(60)
                 continue
 
+            # 휴장일(공휴일) 차단 — KIS chk-holiday API
+            from src.api.condition import is_market_open, next_trading_day
+            from src.auth.token import token_manager
+            try:
+                await token_manager.get_token()  # 토큰 선발급(휴장일 API 호출용)
+                if not await is_market_open(now.date()):
+                    nxt = await next_trading_day(now.date())
+                    next_start = datetime.combine(nxt, TIME_AUTO_START)
+                    wait_secs = (next_start - datetime.now()).total_seconds()
+                    logger.info(
+                        "오늘(%s) 휴장 — 다음 영업일 %s까지 대기 (%.0f시간)",
+                        now.date(), nxt, max(wait_secs, 0) / 3600,
+                    )
+                    await write_log("INFO", f"오늘({now.date()}) 휴장 — 다음 영업일 {nxt}까지 대기")
+                    await asyncio.sleep(max(wait_secs, 60))
+                    continue
+            except Exception:
+                logger.exception("휴장일 체크 실패 — 영업일로 가정하고 진행")
+
             # 매매 시작
             logger.info("=== 자동 매매 시작 (%s) ===", now.strftime("%Y-%m-%d %H:%M"))
             await self.start()

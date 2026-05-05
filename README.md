@@ -367,7 +367,7 @@ docker compose -f docker-compose.prod.yml up --build -d
 
 | 시각 | 동작 |
 |------|------|
-| 08:20 | 자동 매매 시작 (AUTO_START 활성 시, 주말 자동 건너뜀) |
+| 08:20 | 자동 매매 시작 (AUTO_START 활성 시, 주말+공휴일 자동 건너뜀 — KIS chk-holiday API) |
 | 08:25 | 프로세스 기동, 토큰 갱신, DB 포지션/설정 복구, 전략 prepare(일봉/K값/전일종가) |
 | 08:30 | WebSocket 연결, 체결통보 구독 |
 | 08:55 | 사전 구독 — 돌파 전략(VB/LTV) 스캔 종목 + 보유 포지션 (09:00 시가 즉시 수신용). 유니버스가 비어있으면 prepare 재실행 |
