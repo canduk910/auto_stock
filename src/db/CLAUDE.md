@@ -16,7 +16,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `upsert_daily_performance()`: 16:10 정산 시 당일 실적 기록 (total_asset, daily_profit_rate=실현손익 기반, daily_realized_pnl, net_external_cashflow, deposit, cumulative_return_rate=TWR 복리)
 - `get_performance(days)`: 최근 N일 실적 조회 (날짜 오름차순)
 - `get_latest_performance(strategy)`: 가장 최근 영업일 1행 — TWR 누적/Δ예수금 baseline
-- `recompute_from_trades()`: PostgreSQL 함수 `recompute_daily_performance()` RPC 호출 — trade_history 기반 일괄 재계산 (멱등). _settle() 끝에서 자동 호출되어 누락된 영업일/cumulative 정합성을 보정한다.
+- `recompute_from_trades()`: PostgreSQL 함수 `recompute_daily_performance()` RPC 호출 — trade_history 기반 일괄 재계산 (멱등). _settle() 끝에서 자동 호출되어 누락된 영업일/cumulative 정합성을 보정한다. daily_profit_rate 분모(prev_asset)는 직전 영업일이 아니라 **가장 가까운 0이 아닌 이전 영업일 total_asset**(correlated subquery, migration 012). 정산 시점 state.total_investment=0이라 total_asset=0이 기록된 row가 있어도 그 다음 영업일 비율 계산이 깨지지 않는다.
 
 ### system_logs.py — 시스템 로그
 - `write_log(level, message)`: 이벤트/에러 기록

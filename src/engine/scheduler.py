@@ -1150,7 +1150,12 @@ class TradingScheduler:
                 s_rate = (s_pnl / prev_s_asset * 100) if prev_s_asset > 0 else 0.0
                 s_cum = ((1 + prev_s_cum / 100) * (1 + s_rate / 100) - 1) * 100
 
+                # total_asset baseline: state.total_investment 우선, 0이면 직전 영업일 total_asset fallback.
+                # 정산 시점에 state.total_investment=0인 경우(자금 분배 직전/직후 등) total_asset이
+                # 0으로 기록되면 다음 영업일의 daily_profit_rate 분모가 0이 되는 함정을 막는다.
                 s_investment = float(strategy.state.total_investment)
+                if s_investment <= 0 and prev_s_asset > 0:
+                    s_investment = prev_s_asset
                 await upsert_daily_performance(
                     target_date=today,
                     total_asset=s_investment + s_pnl,

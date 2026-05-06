@@ -94,7 +94,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 09:00:00 익일 청산은 백그라운드 task(`asyncio.create_task`)로 실행하여 60초 안정화 대기를 비차단으로 처리. 동시에 `_confirm_breakout_open_prices()`(0.5초 간격 5초 폴링 → 미확정 종목 KIS API 폴백) 즉시 실행
 - **09:00:05 돌파 전략 매매 시작** (`TIME_VB_OPEN_CONFIRM = time(9, 0, 5)`): VB + LTV 시가 확정 직후 진입(`_phase = "vb_trading"`)
 - 09:30 모멘텀 스캔: `scan_stocks()` + 통합 구독(`extra_tickers = 돌파(VB+LTV) + 스윙(donchian_swing)`), `_phase = "trading"`
-- 15:20 강제 청산: `_force_clear_intraday_strategies()` — VB + LTV(상한가 미도달 종목) 공용. _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화
+- 15:20 강제 청산: `_force_clear_intraday_strategies()` — VB + LTV(상한가 미도달 종목) 공용. _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화. 전략별 total_asset = `state.total_investment + s_pnl`이며, `state.total_investment <= 0`이면 직전 영업일 total_asset(`prev_s_asset`)을 fallback baseline으로 사용 — total_asset=0이 기록되어 다음 영업일 분모 0으로 이어지는 함정 차단
 - _resolve_open_price(): 시가 폴링(0.5초 간격) → KIS `fetch_stock_detail()` 폴백 헬퍼. `_execute_next_day_clear()`에서 익일청산 시가 미수신 시 호출
 - run_daily(): 매일 08:20 자동 시작, 주말+공휴일 건너뜀(KIS `chk-holiday` API로 개장 여부 확인 후 다음 영업일까지 대기), **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행 (09:00:05 이후 부팅 시에도 사전구독 + 시가확정 즉시 실행)
