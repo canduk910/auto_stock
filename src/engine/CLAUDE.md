@@ -24,7 +24,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - `StrategyBase`: 모든 전략이 구현할 추상 메서드 (prepare, check_buy_signal, check_exit_signal, calc_buy_quantity)
 - `Signal`: NONE, BUY, STOP_LOSS, NEXT_DAY_CLEAR, TRAILING_STOP, FORCE_CLEAR
 - `Position`: ticker, buy_price, quantity, order_no, strategy_id, buy_date, is_next_day(프로퍼티)
-- `StrategyState`: 전략별 독립 상태 (positions, pending_buys, total_investment, daily_realized_pnl)
+- `StrategyState`: 전략별 독립 상태 (positions, pending_buys, total_investment, daily_realized_pnl, **cached_buyable_qty/amount/at**, **buy_blocked_until**) + 헬퍼(`is_buy_blocked / block_buy / unblock_buy / is_buyable_cache_fresh`)
 - `StrategyConfig`: strategy_id, name, enabled, weight, params
 
 ### strategy_registry.py — 전략 관리
@@ -74,13 +74,14 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 중복 매수 방지: registry.is_ticker_blocked_for_buy() — 보유/주문중/당일매도 통합 검사 (전략 간)
 
 ### order_engine.py — 주문 실행
-- execute_buy(ticker, price, strategy): 전략별 calc_buy_quantity, state 참조
-- execute_sell(ticker, signal, strategy_id): `_selling` set으로 중복 매도 차단
+- execute_buy(ticker, price, strategy): 전략별 calc_buy_quantity, state 참조. 진입 시 `state.is_buy_blocked()` → 차단, 캐시(`BUYABLE_CACHE_TTL=60s`) 유효 시 KIS `get_buyable()` 생략. `max_buy_quantity<=0` 또는 `KisApiError(insufficient_cash)` 시 `state.block_buy(now+BUY_BLOCK_DURATION=900s)`로 락 등록
+- execute_sell(ticker, signal, strategy_id): `_selling` set으로 중복 매도 차단. `KisApiError(insufficient_quantity)` 시 3회 재시도 생략하고 즉시 break + 메모리 포지션 + DB positions 정리(다음 잔고 sync에서 보정)
+- 주문번호 매핑(_order_qty/_order_strategy/_order_ticker/_pending_buy_orders) 등록은 `place_order` 응답 직후 동기 영역에서 수행 — `await insert_trade` 진입 전. 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 매핑이 보장된다
 - _order_ticker: order_no → ticker 매핑 (체결통보 종목코드 보정)
-- _order_strategy: order_no → strategy_id 매핑
+- _order_strategy: order_no → strategy_id 매핑 — 미등록 시 기본값 "momentum" 사용. 매핑 누락은 잘못된 전략에 INSERT/포지션 등록을 유발하므로 위 동기 등록 순서 필수
 - _completed_orders: 체결통보가 REST 응답보다 먼저 도착한 order_no를 추적하는 set. `_handle_*_fill`에서 `update_trade_status` 영향 row 0건이면 COMPLETED 직접 INSERT + set에 등록 → execute_buy/sell이 응답 후 set 체크해 PENDING INSERT 생략(중복 row 방지)
 - 체결통보: _order_ticker로 정확한 종목 → 올바른 전략에 포지션 등록/제거
-- 매수 체결 시 DB positions에 저장, 매도 체결 시 DB에서 삭제
+- 매수 체결 시 DB positions에 저장 + `state.cached_buyable_at = 0`(가용액 캐시 무효화), 매도 체결 시 DB에서 삭제
 - 매도 체결 시 sold_today에 등록 (당일 재매수 차단)
 - 체결통보 처리 실패 시 안전장치: ticker 매핑 실패 → pending_buys 제거, strategy 미발견 → _selling 해제
 
@@ -97,7 +98,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - _resolve_open_price(): 시가 폴링(0.5초 간격) → KIS `fetch_stock_detail()` 폴백 헬퍼. `_execute_next_day_clear()`에서 익일청산 시가 미수신 시 호출
 - run_daily(): 매일 08:20 자동 시작, 주말+공휴일 건너뜀(KIS `chk-holiday` API로 개장 여부 확인 후 다음 영업일까지 대기), **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행 (09:00:05 이후 부팅 시에도 사전구독 + 시가확정 즉시 실행)
-- _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완
+- _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완. 종료 시 모든 전략의 `state.unblock_buy()`로 매수 락/매수가능 캐시 일괄 해제 — 가용액 회복 가능성 반영
 
 ### scanner.py — 종목 스캔
 - scan_stocks(): 모멘텀용 등락률 순위 스캔
@@ -131,3 +132,5 @@ TradingScheduler (registry 기반 boot/run/settle)
 - **`_reset_daily_state()` 제거 금지** — 정산 후 상태 초기화가 없으면 pending_buys/positions/sold_today가 다음 날까지 잔류
 - **체결통보 실패 시 pending_buys/_selling 정리 로직 제거 금지** — 매핑 실패 시 해당 종목이 영구 차단됨
 - **체결통보 선행 race 가드(`_completed_orders` + UPDATE 0건 보정 INSERT) 제거 금지** — 시장가 즉시체결 + REST 응답 지연 시 trade_history가 PENDING으로 영구 잔존하던 이슈를 해결한다. 매수·매도 양쪽 모두 가드 필수
+- **주문번호 매핑(_order_qty/_order_strategy/_order_ticker/_pending_buy_orders) 등록을 `await insert_trade` 뒤로 옮기지 말 것** — `place_order` 응답 직후 동기 영역에서 등록해야 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 올바른 전략으로 라우팅된다. 매핑 누락 시 기본값 "momentum"으로 잘못 INSERT되어 손익 0 + 잘못된 strategy로 기록된 사례가 있었음
+- **매수가능 캐시 TTL(`BUYABLE_CACHE_TTL=60s`) / 매수 락 지속(`BUY_BLOCK_DURATION=900s`)** 변경 시 잔고 sync 주기(15분)와 정합성 확인. sync 종료 시 `unblock_buy()`로 일괄 해제되므로 BUY_BLOCK_DURATION ≈ sync 주기가 자연스럽다

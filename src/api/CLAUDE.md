@@ -20,6 +20,8 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 ### balance.py — 잔고/조회
 - 잔고조회: TTTC8434R
 - 매수가능조회: TTTC8908R
+- `is_insufficient_cash(KisApiError) -> bool`: 매수 실패 응답이 '주문가능금액 부족'(예수금 부족) 사유인지 식별. msg_cd 화이트리스트 + msg1 키워드("부족" + "주문가능금액/예수금/현금") 동시 검사. OrderEngine 매수 락 결정용.
+- `is_insufficient_quantity(KisApiError) -> bool`: 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 식별. 매도 즉시 break + 메모리 포지션 정리 결정용.
 
 ### condition.py — 조건검색 + 영업일 체크
 - 거래량순위 API로 종목 필터링 (FHPST01700000)

@@ -41,6 +41,10 @@ tr_id = settings.get_tr_id("TTTC0012U")  # 실전: TTTC0012U, 모의: VTTC0012U
 - 중복 매수 차단: 동일 종목 미체결/보유 시 주문 거부
 - 부��� 체��� 관리: PARTIAL 상태 추적, 30초 후 잔여 취소
 - 매도 실패 재시도: 최대 3회, 지수 백오프(1s, 2s, 4s), 실패 시 CRITICAL 로그
+- 매수가능 캐시(60초 TTL): `get_buyable()` 결과를 `StrategyState.cached_buyable_qty`에 캐싱 — 매 틱 KIS 호출 → 분당 1회로 축소 (`BUYABLE_CACHE_TTL = 60.0`)
+- 잔고부족 매수 락(900초): `is_insufficient_cash()` 응답 또는 `max_buy_quantity<=0` 시 `state.block_buy(now+BUY_BLOCK_DURATION)` — 다음 잔고 sync까지 KIS 호출 자체 차단 (`BUY_BLOCK_DURATION = 900.0`)
+- 매도 잔고부족 즉시 break: `is_insufficient_quantity()` 응답 시 3회 재시도 생략 + 메모리 포지션 + DB positions 정리(다음 sync에서 보정)
+- 주문번호 매핑 등록 위치: `place_order` 응답 직후 동기 영역(`await insert_trade` 전). 시장가 즉시체결 race 시에도 `_handle_*_fill`이 올바른 strategy_id를 찾도록 보장
 - 체결통보 선행 race 가드: `_completed_orders` set으로 응답보다 빨리 도착한 체결통보를 COMPLETED 직접 INSERT 처리, 뒤늦은 응답에서 PENDING INSERT 생략
 
 ### 실시간 데이터 (realtime/)

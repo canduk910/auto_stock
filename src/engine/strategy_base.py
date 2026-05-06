@@ -52,6 +52,12 @@ class StrategyState:
     daily_realized_pnl: int = 0
     buy_disabled: bool = False
     buy_signals: list[dict] = field(default_factory=list)
+    # 매수가능금액 캐시 — get_buyable() KIS 호출 빈도 절감용 (TTL 60초)
+    cached_buyable_qty: int = -1       # -1: 미초기화
+    cached_buyable_amount: int = 0     # 매수가능 총 금액
+    cached_buyable_at: float = 0.0     # epoch 초
+    # 잔고 부족 락 — 이 시각까지 KIS 매수 호출 차단 (잔고 sync 후 해제)
+    buy_blocked_until: float = 0.0     # epoch 초
 
     def has_position(self, ticker: str) -> bool:
         return ticker in self.positions
@@ -61,6 +67,27 @@ class StrategyState:
 
     def is_sold_today(self, ticker: str) -> bool:
         return ticker in self.sold_today
+
+    def is_buy_blocked(self, now_ts: float) -> bool:
+        """잔고 부족 락이 유효한지 확인."""
+        return self.buy_blocked_until > now_ts
+
+    def block_buy(self, until_ts: float) -> None:
+        """잔고 부족 락 등록 + 캐시 무효화."""
+        self.buy_blocked_until = until_ts
+        self.cached_buyable_at = 0.0
+        self.cached_buyable_qty = -1
+        self.cached_buyable_amount = 0
+
+    def unblock_buy(self) -> None:
+        """락 해제 + 캐시 무효화 (다음 호출 시 fresh 조회)."""
+        self.buy_blocked_until = 0.0
+        self.cached_buyable_at = 0.0
+        self.cached_buyable_qty = -1
+        self.cached_buyable_amount = 0
+
+    def is_buyable_cache_fresh(self, now_ts: float, ttl: float) -> bool:
+        return self.cached_buyable_qty >= 0 and (now_ts - self.cached_buyable_at) < ttl
 
 
 @dataclass

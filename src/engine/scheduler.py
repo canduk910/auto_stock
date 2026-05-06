@@ -1081,6 +1081,11 @@ class TradingScheduler:
                 logger.warning("포지션 동기화 (체결통보 누락 보완): %s %d주 @ %d",
                                h.name or h.ticker, h.quantity, int(h.avg_price))
 
+        # 잔고 동기화 후 모든 전략의 매수 락/캐시 해제 — 가용액이 회복됐을 가능성 반영
+        for s in self.registry.all():
+            if s.state.buy_blocked_until > 0 or s.state.cached_buyable_at > 0:
+                s.state.unblock_buy()
+
     async def _settle(self) -> None:
         """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.
 

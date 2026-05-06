@@ -6,7 +6,7 @@
 
 import logging
 
-from src.api.base import kis_get
+from src.api.base import KisApiError, kis_get
 from src.config import settings
 from src.models.balance import AccountSummary, BuyableInfo, StockHolding
 
@@ -14,6 +14,31 @@ logger = logging.getLogger(__name__)
 
 BALANCE_URL = "/uapi/domestic-stock/v1/trading/inquire-balance"
 PSBL_ORDER_URL = "/uapi/domestic-stock/v1/trading/inquire-psbl-order"
+
+
+def is_insufficient_cash(err: KisApiError) -> bool:
+    """KIS 매수 실패 응답이 '주문가능금액 부족'(예수금 부족) 사유인지 판단.
+
+    msg_cd가 정확히 일치하지 않을 가능성에 대비해 msg1 키워드도 함께 본다.
+    """
+    msg_cd = (err.msg_cd or "").upper()
+    msg1 = err.msg1 or ""
+    if msg_cd in {"APBK0919", "APBK0918", "EGW00120"}:
+        return True
+    if "부족" in msg1 and ("주문가능금액" in msg1 or "예수금" in msg1 or "현금" in msg1):
+        return True
+    return False
+
+
+def is_insufficient_quantity(err: KisApiError) -> bool:
+    """KIS 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 판단."""
+    msg_cd = (err.msg_cd or "").upper()
+    msg1 = err.msg1 or ""
+    if msg_cd in {"APBK0918", "APBK1234"}:
+        return True
+    if "부족" in msg1 and ("매도가능" in msg1 or "보유수량" in msg1 or "잔고" in msg1):
+        return True
+    return False
 
 
 async def get_balance() -> tuple[list[StockHolding], AccountSummary]:
