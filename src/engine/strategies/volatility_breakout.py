@@ -46,8 +46,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
     async def prepare(self) -> None:
         """장 시작 전: 시총/거래대금 조건 종목 스캔 → 21일 일봉으로 K값/Target 계산."""
-        from src.api.condition import fetch_daily_candles, fetch_stock_detail
-        from src.engine.scanner import ticker_names
+        from src.api.condition import fetch_daily_candles
 
         tickers = await self._scan_universe()
         k_period = self.config.params["k_period"]
@@ -109,11 +108,14 @@ class VolatilityBreakoutStrategy(StrategyBase):
     async def _scan_universe(self) -> list[str]:
         """시총/거래대금 조건으로 코스피+코스닥 종목을 스캔한다.
 
-        거래량순위 API로 상위 종목을 가져오고, 개별 시세로 시총/거래대금을 확인한다.
+        거래량순위 API 응답에 포함된 prdy_vol/lstn_stcn/stck_prpr/prdy_vrss로
+        시총·전일 거래대금을 직접 산출한다 (개별 inquire-price 호출 없음).
+
+        prdy_vol·prdy_close는 KIS 영업일 기준이므로 휴장 직후 첫 영업일이나
+        장 시작 전이라도 시간 의존 없이 일관된 결과를 보장한다.
         """
-        from src.api.condition import fetch_stock_detail
         from src.api.base import kis_get, KisApiError
-        from src.config import settings
+        from src.db.system_logs import write_log
         from src.engine.scanner import ticker_names, ETF_KEYWORDS
 
         min_mcap = self.config.params["min_market_cap"]
@@ -121,7 +123,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         max_stocks = self.config.params["max_scan_stocks"]
 
         # 거래량순위 API로 전체 시장 상위 종목 확보 ("J"가 코스피+코스닥 전체)
-        all_tickers: list[str] = []
+        rank_items: list[dict] = []
         for market in ["J"]:
             try:
                 params = {
@@ -143,38 +145,62 @@ class VolatilityBreakoutStrategy(StrategyBase):
                     params,
                 )
                 for item in data.get("output", []):
-                    ticker = item.get("mksc_shrn_iscd", "")
                     name = item.get("hts_kor_isnm", "")
-                    if not ticker:
-                        continue
                     if any(kw in name for kw in ETF_KEYWORDS):
                         continue
-                    if name:
-                        ticker_names[ticker] = name
-                    all_tickers.append(ticker)
+                    rank_items.append(item)
             except KisApiError:
                 logger.warning("변동성돌파 거래량순위 조회 실패: market=%s", market)
 
-        logger.info("변동성돌파 유니버스 후보: %d종목", len(all_tickers))
+        logger.info("변동성돌파 유니버스 후보: %d종목", len(rank_items))
 
-        # 개별 시세로 시총/거래대금 필터
+        # 거래량순위 응답 데이터로 시총·전일 거래대금 추정 → 필터
         filtered: list[str] = []
-        for ticker in all_tickers:
+        for item in rank_items:
             if len(filtered) >= max_stocks:
                 break
+            ticker = item.get("mksc_shrn_iscd", "")
+            if not ticker:
+                continue
             try:
-                detail = await fetch_stock_detail(ticker)
-                price = int(detail.get("stck_prpr", "0"))
-                listed = int(detail.get("lstn_stcn", "0"))
-                trade_amt = int(detail.get("acml_tr_pbmn", "0"))
-                mcap = price * listed
-                if mcap >= min_mcap and trade_amt >= min_trade:
-                    filtered.append(ticker)
-            except Exception:
+                price = int(item.get("stck_prpr", "0"))
+                listed = int(item.get("lstn_stcn", "0"))
+                prdy_vol = int(item.get("prdy_vol", "0"))
+                # KIS prdy_vrss는 부호 포함 정수 (상승=+, 하락=-)
+                prdy_vrss = int(item.get("prdy_vrss", "0"))
+                prdy_close = price - prdy_vrss
+            except (ValueError, TypeError):
                 continue
 
+            if price <= 0 or listed <= 0 or prdy_vol <= 0 or prdy_close <= 0:
+                continue
+
+            mcap = price * listed
+            prdy_trade_amt = prdy_vol * prdy_close
+            if mcap >= min_mcap and prdy_trade_amt >= min_trade:
+                name = item.get("hts_kor_isnm", "")
+                if name:
+                    ticker_names[ticker] = name
+                filtered.append(ticker)
+
         logger.info("변동성돌파 유니버스 확정: %d종목 (시총 %d억+, 거래대금 %d억+)",
-                     len(filtered), min_mcap // 1e8, min_trade // 1e8)
+                     len(filtered), min_mcap // 100_000_000, min_trade // 100_000_000)
+
+        if not filtered:
+            if not rank_items:
+                msg = "변동성돌파 유니버스 0종목 — 거래량순위 API 응답이 비어있음"
+            else:
+                msg = (
+                    f"변동성돌파 유니버스 0종목 — 후보 {len(rank_items)}종목 중 "
+                    f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
+                    f"{min_trade // 100_000_000}억+ 필터 통과 없음"
+                )
+            logger.error(msg)
+            try:
+                await write_log("ERROR", msg)
+            except Exception:
+                logger.exception("system_logs 기록 실패")
+
         return filtered
 
     def get_scanned_tickers(self) -> list[str]:

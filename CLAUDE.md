@@ -87,6 +87,7 @@ src/engine/
 - 실전: H0STCNI0 (구독 키: HTS ID), 모의: H0STCNI9 (구독 키: 계좌번호)
 - scheduler.py에서 WebSocket 연결 직후 자동 구독
 - 체결통보 종목코드는 `fields[8]` (단, `_order_ticker[order_no]` 매핑이 우선)
+- **체결통보가 매수/매도 REST 응답보다 먼저 도착하는 race 대비**: `_handle_*_fill`에서 `update_trade_status` 영향 row 0이면 `COMPLETED` 상태로 직접 INSERT하고 `_completed_orders`에 order_no 등록. `execute_buy/sell`은 응답 직후 set 체크해 PENDING INSERT를 생략 → trade_history 단일 COMPLETED row 보장
 
 ### 포지션 관리
 - DB `positions` 테이블이 포지션의 진실의 원천 (매수가/전략/매수일 정확)
@@ -102,6 +103,7 @@ src/engine/
 - 비중 변경 시: 매수금액 이하로 비중 축소 차단
 - 익일 청산 시가 안정화: `_next_day_clear_pending` 플래그로 60초 대기 중 on_tick 즉시 청산 방지 (손절은 유지)
 - 체결통보 처리 실패 안전장치: ticker 매핑 실패 시 `pending_buys` 제거, strategy 미발견 시 `_selling` 해제
+- 체결통보 선행 race 가드: `_completed_orders` set + `update_trade_status` 영향 row 0건 보정 INSERT (위 "체결통보" 섹션 참조)
 
 ### 코딩 컨벤션
 - Python: pydantic 모델로 데이터 검증, async/await 사용

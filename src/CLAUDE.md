@@ -41,6 +41,7 @@ tr_id = settings.get_tr_id("TTTC0012U")  # 실전: TTTC0012U, 모의: VTTC0012U
 - 중복 매수 차단: 동일 종목 미체결/보유 시 주문 거부
 - 부��� 체��� 관리: PARTIAL 상태 추적, 30초 후 잔여 취소
 - 매도 실패 재시도: 최대 3회, 지수 백오프(1s, 2s, 4s), 실패 시 CRITICAL 로그
+- 체결통보 선행 race 가드: `_completed_orders` set으로 응답보다 빨리 도착한 체결통보를 COMPLETED 직접 INSERT 처리, 뒤늦은 응답에서 PENDING INSERT 생략
 
 ### 실시간 데이터 (realtime/)
 - WebSocket 접속키: `/oauth2/Approval`로 발급

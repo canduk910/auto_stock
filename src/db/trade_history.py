@@ -36,14 +36,14 @@ async def update_trade_status(
     strategy: str = "momentum",
     price: int | None = None,
     profit_loss: float | None = None,
-) -> None:
-    """최신 거래 기록의 상태를 업데이트한다."""
+) -> int:
+    """최신 PENDING 거래 기록의 상태를 업데이트하고 영향받은 행 수를 반환한다."""
     update_data: dict = {"status": status.value}
     if price is not None:
         update_data["price"] = float(price)
     if profit_loss is not None:
         update_data["profit_loss"] = float(profit_loss)
-    supabase.table("trade_history").update(
+    result = supabase.table("trade_history").update(
         update_data
     ).eq(
         "ticker", ticker
@@ -54,7 +54,10 @@ async def update_trade_status(
     ).eq(
         "strategy", strategy
     ).execute()
-    logger.debug("거래 상태 변경: %s %s -> %s (전략: %s)", ticker, trade_type.value, status.value, strategy)
+    affected = len(result.data or [])
+    logger.debug("거래 상태 변경: %s %s -> %s (전략: %s, %d건)",
+                 ticker, trade_type.value, status.value, strategy, affected)
+    return affected
 
 
 async def get_today_trades_for_settlement(strategy: str | None = None) -> list[dict]:

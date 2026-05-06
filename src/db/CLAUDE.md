@@ -9,7 +9,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 
 ### trade_history.py — 거래 내역
 - `insert_trade()`: 주문 시 INSERT (status: PENDING)
-- `update_trade_status()`: 체결/취소 시 상태 ��데이트
+- `update_trade_status() -> int`: 체결/취소 시 PENDING row를 새 status로 갱신하고 영향받은 row 수를 반환. 호출자(OrderEngine)가 0건이면 체결통보 선행 race로 판단해 COMPLETED 보정 INSERT를 수행한다
 - `get_trades(limit, offset, ticker)`: 페이징 조회 + total count
 
 ### daily_performance.py — 일일 실적

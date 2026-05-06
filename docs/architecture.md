@@ -175,7 +175,8 @@ TradingScheduler (scheduler.py)
 │   ├── _order_strategy {order_no → strategy_id} # 전략 라우팅
 │   ├── _pending_buy_orders {order_no → info}    # 미체결 매수 추적
 │   ├── _selling        set[ticker]              # 매도 중복 차단
-│   └── _filled_qty     {order_no → 누적체결수량}
+│   ├── _filled_qty     {order_no → 누적체결수량}
+│   └── _completed_orders set[order_no]          # 체결통보 선행 race 가드
 │
 └── RiskManager
     └── on_tick() → registry.enabled() 순회 → 신호 체크
@@ -297,7 +298,34 @@ H0STCNI0 수신 ──────→ dispatch_message()
                                                      ├─ sold_today 등록
                                                      ├─ _selling 해제
                                                      └─ trade_history COMPLETED
+                                                        (UPDATE 0건이면 → COMPLETED 직접 INSERT
+                                                         + _completed_orders.add(order_no))
 ```
+
+### 체결통보 선행 race 가드
+
+시장가 즉시체결 시 `H0STCNI0` 체결통보가 KIS REST 응답보다 먼저 도착하는 경우가 있다.
+이 시점에는 `_order_ticker[order_no]` 매핑도, `trade_history`의 PENDING row도 아직 없다.
+
+```
+정상 흐름                            race 흐름
+────────────                         ──────────
+place_order() 응답 도착              체결통보 먼저 도착
+  ↓                                    ↓
+insert_trade(PENDING) + 매핑 등록      payload ticker로 우회 처리
+  ↓                                    ↓
+체결통보 도착                          update_trade_status → 0건 (PENDING 없음)
+  ↓                                    ↓
+update_trade_status → 1건 (COMPLETED) COMPLETED 직접 INSERT + _completed_orders.add
+                                       ↓
+                                     place_order() 응답 늦게 도착
+                                       ↓
+                                     execute_*가 _completed_orders 체크 → PENDING INSERT 생략
+                                       ↓
+                                     _completed_orders.discard(order_no)
+```
+
+→ 양쪽 흐름 모두 `trade_history`에 단일 COMPLETED row만 남는다.
 
 ---
 
@@ -354,7 +382,11 @@ on_tick(ticker, current_price)
 ```
 prepare() 단계:
 │
-├─ _scan_universe(): 거래량순위 API → 시총/거래대금 필터
+├─ _scan_universe(): 거래량순위 API(FHPST01710000) 응답 1건으로
+│    후보 + 시총·전일 거래대금 산출
+│    ├─ 시총   = stck_prpr × lstn_stcn
+│    ├─ 거래대금 = prdy_vol × (stck_prpr - prdy_vrss)   ← 영업일 기준, 시간 비의존
+│    └─ 0종목 확정 시 ERROR 로그 + system_logs 기록
 ├─ fetch_daily_candles(): 21일 일봉
 ├─ K값 = avg(노이즈 비율) = avg(1 - |종가-시가| / (고가-저가))
 ├─ target_offset = 전일 Range × K

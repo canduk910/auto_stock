@@ -44,7 +44,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 파라미터: DEFAULT_PARAMS 딕셔너리
 
 ### strategies/volatility_breakout.py — 변동성 돌파
-- _scan_universe(): 코스피+코스닥 전체에서 시총/거래대금 조건 필터 (Settings에서 조건 변경 가능)
+- _scan_universe(): 거래량순위 API(`FHPST01710000`) 응답 1건으로 후보 + 시총·전일 거래대금 산출. `prdy_vol × (stck_prpr - prdy_vrss)`로 전일 거래대금 추정 → 시간 의존 제거(휴장 직후 첫 영업일 0종목 확정 이슈 해결). 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
 - prepare(): 스캔 종목의 21일 일봉 → K값(20일 평균 노이즈) → Target_Offset 계산. 추가로 candles[0]의 stck_clpr을 `scanner.ticker_prev_close`에 사전 등록 (09:30 scan_stocks 이전에도 등락률 필터 동작 보장)
 - 시가 확정 후 Target_Price = 시가 + offset
 - current_price >= target_price 시 매수 (09:00:05 시가 확정 직후부터 매매 가능)
@@ -61,7 +61,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### strategies/long_tail_volatility.py — 롱테일 변동성 돌파 (VB + 상한가 모멘텀 합성)
 - VB 방식 조기 진입 + 상한가 도달 시 모멘텀 방식 익일 청산
-- prepare(): VB와 동일 스캔 + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up`) + ticker_prev_close 사전 등록
+- prepare(): VB와 동일 스캔(거래량순위 응답으로 시총·전일 거래대금 산출) + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up`) + ticker_prev_close 사전 등록. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
 - 매수: 시가 + (전일Range × K) 돌파 + 전일대비 `min_prdy_rate`% 이상 (09:00:05부터 매매 가능, VB와 동일 시점)
 - 2단계 청산: `_limit_up_reached` set으로 모드 관리
   - 당일 모드(기본): 손절 `intraday_stop_loss`(-3%), 15:20 강제 청산
@@ -77,6 +77,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - execute_sell(ticker, signal, strategy_id): `_selling` set으로 중복 매도 차단
 - _order_ticker: order_no → ticker 매핑 (체결통보 종목코드 보정)
 - _order_strategy: order_no → strategy_id 매핑
+- _completed_orders: 체결통보가 REST 응답보다 먼저 도착한 order_no를 추적하는 set. `_handle_*_fill`에서 `update_trade_status` 영향 row 0건이면 COMPLETED 직접 INSERT + set에 등록 → execute_buy/sell이 응답 후 set 체크해 PENDING INSERT 생략(중복 row 방지)
 - 체결통보: _order_ticker로 정확한 종목 → 올바른 전략에 포지션 등록/제거
 - 매수 체결 시 DB positions에 저장, 매도 체결 시 DB에서 삭제
 - 매도 체결 시 sold_today에 등록 (당일 재매수 차단)
@@ -127,3 +128,4 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 모든 TR_ID는 settings.get_tr_id() 사용
 - **`_reset_daily_state()` 제거 금지** — 정산 후 상태 초기화가 없으면 pending_buys/positions/sold_today가 다음 날까지 잔류
 - **체결통보 실패 시 pending_buys/_selling 정리 로직 제거 금지** — 매핑 실패 시 해당 종목이 영구 차단됨
+- **체결통보 선행 race 가드(`_completed_orders` + UPDATE 0건 보정 INSERT) 제거 금지** — 시장가 즉시체결 + REST 응답 지연 시 trade_history가 PENDING으로 영구 잔존하던 이슈를 해결한다. 매수·매도 양쪽 모두 가드 필수

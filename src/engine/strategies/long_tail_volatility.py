@@ -57,7 +57,6 @@ class LongTailVolatilityStrategy(StrategyBase):
     async def prepare(self) -> None:
         """장 시작 전: 종목 스캔 → K값 계산 → 연속상한가 필터링."""
         from src.api.condition import fetch_daily_candles
-        from src.engine.scanner import ticker_names
 
         tickers = await self._scan_universe()
         k_period = self.config.params["k_period"]
@@ -142,16 +141,21 @@ class LongTailVolatilityStrategy(StrategyBase):
         return count >= threshold
 
     async def _scan_universe(self) -> list[str]:
-        """시총/거래대금 조건으로 종목을 스캔한다 (VB와 동일 로직)."""
-        from src.api.condition import fetch_stock_detail
+        """시총/거래대금 조건으로 종목을 스캔한다 (VB와 동일 로직).
+
+        거래량순위 API 응답의 prdy_vol/lstn_stcn/stck_prpr/prdy_vrss를 직접 활용해
+        시총·전일 거래대금을 산출한다. 개별 inquire-price 호출 없음 →
+        휴장 직후 첫 영업일이나 장 시작 전에도 시간 의존 없이 일관된 결과를 보장한다.
+        """
         from src.api.base import kis_get, KisApiError
+        from src.db.system_logs import write_log
         from src.engine.scanner import ticker_names, ETF_KEYWORDS
 
         min_mcap = self.config.params["min_market_cap"]
         min_trade = self.config.params["min_trade_amount"]
         max_stocks = self.config.params["max_scan_stocks"]
 
-        all_tickers: list[str] = []
+        rank_items: list[dict] = []
         for market in ["J"]:
             try:
                 params = {
@@ -173,36 +177,59 @@ class LongTailVolatilityStrategy(StrategyBase):
                     params,
                 )
                 for item in data.get("output", []):
-                    ticker = item.get("mksc_shrn_iscd", "")
                     name = item.get("hts_kor_isnm", "")
-                    if not ticker:
-                        continue
                     if any(kw in name for kw in ETF_KEYWORDS):
                         continue
-                    if name:
-                        ticker_names[ticker] = name
-                    all_tickers.append(ticker)
+                    rank_items.append(item)
             except KisApiError:
                 logger.warning("롱테일 변동성 돌파 거래량순위 조회 실패")
 
-        logger.info("롱테일 변동성 돌파 유니버스 후보: %d종목", len(all_tickers))
+        logger.info("롱테일 변동성 돌파 유니버스 후보: %d종목", len(rank_items))
 
         filtered: list[str] = []
-        for ticker in all_tickers:
+        for item in rank_items:
             if len(filtered) >= max_stocks:
                 break
+            ticker = item.get("mksc_shrn_iscd", "")
+            if not ticker:
+                continue
             try:
-                detail = await fetch_stock_detail(ticker)
-                price = int(detail.get("stck_prpr", "0"))
-                listed = int(detail.get("lstn_stcn", "0"))
-                trade_amt = int(detail.get("acml_tr_pbmn", "0"))
-                mcap = price * listed
-                if mcap >= min_mcap and trade_amt >= min_trade:
-                    filtered.append(ticker)
-            except Exception:
+                price = int(item.get("stck_prpr", "0"))
+                listed = int(item.get("lstn_stcn", "0"))
+                prdy_vol = int(item.get("prdy_vol", "0"))
+                prdy_vrss = int(item.get("prdy_vrss", "0"))
+                prdy_close = price - prdy_vrss
+            except (ValueError, TypeError):
                 continue
 
+            if price <= 0 or listed <= 0 or prdy_vol <= 0 or prdy_close <= 0:
+                continue
+
+            mcap = price * listed
+            prdy_trade_amt = prdy_vol * prdy_close
+            if mcap >= min_mcap and prdy_trade_amt >= min_trade:
+                name = item.get("hts_kor_isnm", "")
+                if name:
+                    ticker_names[ticker] = name
+                filtered.append(ticker)
+
         logger.info("롱테일 변동성 돌파 유니버스 확정: %d종목", len(filtered))
+
+        if not filtered:
+            if not rank_items:
+                msg = "롱테일 변동성 돌파 유니버스 0종목 — 거래량순위 API 응답이 비어있음"
+            else:
+                msg = (
+                    f"롱테일 변동성 돌파 유니버스 0종목 — 후보 {len(rank_items)}종목 중 "
+                    f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
+                    f"{min_trade // 100_000_000}억+ 필터 통과 없음"
+                )
+            logger.error(msg)
+            try:
+                await write_log("ERROR", msg)
+            except Exception:
+                logger.exception("system_logs 기록 실패")
+
         return filtered
 
     def get_scanned_tickers(self) -> list[str]:

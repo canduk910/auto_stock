@@ -39,6 +39,9 @@ class OrderEngine:
         self._order_strategy: dict[str, str] = {}  # order_no -> strategy_id
         self._order_ticker: dict[str, str] = {}   # order_no -> ticker (체결통보 종목코드 보정용)
         self._selling: set[str] = set()  # 매도 진행 중인 종목 (중복 매도 차단)
+        # 체결통보가 place_order 응답보다 먼저 도착해 COMPLETED row를 직접 INSERT한 order_no.
+        # 뒤늦게 도착한 execute_buy/execute_sell이 PENDING row를 추가 INSERT하는 것을 막기 위함.
+        self._completed_orders: set[str] = set()
 
     async def execute_buy(self, ticker: str, current_price: int, strategy: StrategyBase) -> None:
         """매수 주문을 실행한다."""
@@ -84,18 +87,27 @@ class OrderEngine:
                 price=0,  # 시장가
             )
 
-            # trade_history 기록 (PENDING — 체결 전)
-            record = TradeRecord(
-                ticker=ticker,
-                ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
-                trade_type=TradeType.BUY,
-                price=current_price,
-                quantity=quantity,
-                status=TradeStatus.PENDING,
-                strategy=strategy.strategy_id,
-                order_no=result.order_no,
-            )
-            await insert_trade(record)
+            # 체결통보가 응답보다 먼저 도착해 COMPLETED row가 이미 INSERT됐다면 PENDING INSERT 생략
+            already_completed = result.order_no in self._completed_orders
+            if already_completed:
+                self._completed_orders.discard(result.order_no)
+                logger.warning(
+                    "매수 응답보다 체결통보 선행 — PENDING INSERT 생략: %s (주문번호: %s)",
+                    t(ticker), result.order_no,
+                )
+            else:
+                # trade_history 기록 (PENDING — 체결 전)
+                record = TradeRecord(
+                    ticker=ticker,
+                    ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
+                    trade_type=TradeType.BUY,
+                    price=current_price,
+                    quantity=quantity,
+                    status=TradeStatus.PENDING,
+                    strategy=strategy.strategy_id,
+                    order_no=result.order_no,
+                )
+                await insert_trade(record)
 
             # 주문번호 추적 (체결통보에서 포지션 등록에 사용)
             self._order_qty[result.order_no] = quantity
@@ -144,19 +156,27 @@ class OrderEngine:
                     price=0,  # 시장가
                 )
 
-                # trade_history 기록
-                record = TradeRecord(
-                    ticker=ticker,
-                    ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
-                    trade_type=TradeType.SELL,
-                    price=pos.buy_price,
-                    quantity=pos.quantity,
-                    profit_loss=0,  # 체결 확정 시 계산
-                    status=TradeStatus.PENDING,
-                    strategy=strategy_id,
-                    order_no=result.order_no,
-                )
-                await insert_trade(record)
+                # 체결통보가 응답보다 먼저 도착해 COMPLETED row가 이미 INSERT됐다면 PENDING INSERT 생략
+                if result.order_no in self._completed_orders:
+                    self._completed_orders.discard(result.order_no)
+                    logger.warning(
+                        "매도 응답보다 체결통보 선행 — PENDING INSERT 생략: %s (주문번호: %s)",
+                        t(ticker), result.order_no,
+                    )
+                else:
+                    # trade_history 기록
+                    record = TradeRecord(
+                        ticker=ticker,
+                        ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
+                        trade_type=TradeType.SELL,
+                        price=pos.buy_price,
+                        quantity=pos.quantity,
+                        profit_loss=0,  # 체결 확정 시 계산
+                        status=TradeStatus.PENDING,
+                        strategy=strategy_id,
+                        order_no=result.order_no,
+                    )
+                    await insert_trade(record)
 
                 # 포지션 제거는 체결통보 수신 시 처리
                 self._order_qty[result.order_no] = pos.quantity
@@ -263,7 +283,27 @@ class OrderEngine:
 
         if total_filled >= ordered_qty:
             # 전량 체결 → DB 포지션 저장
-            await update_trade_status(ticker, TradeType.BUY, TradeStatus.COMPLETED, strategy=strategy_id)
+            affected = await update_trade_status(ticker, TradeType.BUY, TradeStatus.COMPLETED, strategy=strategy_id)
+            if affected == 0:
+                # 체결통보가 execute_buy의 insert_trade(PENDING)보다 먼저 도착한 race
+                # → COMPLETED 상태로 직접 INSERT, execute_buy 측에 PENDING INSERT 생략 신호
+                self._completed_orders.add(order_no)
+                from src.engine.scanner import ticker_names as _tn
+                await insert_trade(TradeRecord(
+                    ticker=ticker,
+                    ticker_name=_tn.get(ticker, ""),
+                    trade_type=TradeType.BUY,
+                    price=price,
+                    quantity=total_filled,
+                    profit_loss=0,
+                    status=TradeStatus.COMPLETED,
+                    strategy=strategy_id,
+                    order_no=order_no,
+                ))
+                logger.warning(
+                    "체결통보 선행 race — COMPLETED 직접 INSERT: 매수 %s (주문번호: %s)",
+                    t(ticker), order_no,
+                )
             from src.db.positions import save_position
             from src.engine.scanner import ticker_names
             await save_position(
@@ -312,7 +352,30 @@ class OrderEngine:
             from src.db.positions import delete_position
             await delete_position(ticker)
             self._selling.discard(ticker)
-            await update_trade_status(ticker, TradeType.SELL, TradeStatus.COMPLETED, strategy=strategy_id, price=price, profit_loss=profit_loss)
+            affected = await update_trade_status(
+                ticker, TradeType.SELL, TradeStatus.COMPLETED,
+                strategy=strategy_id, price=price, profit_loss=profit_loss,
+            )
+            if affected == 0:
+                # 체결통보가 execute_sell의 insert_trade(PENDING)보다 먼저 도착한 race
+                # → COMPLETED 상태로 직접 INSERT, execute_sell 측에 PENDING INSERT 생략 신호
+                self._completed_orders.add(order_no)
+                from src.engine.scanner import ticker_names as _tn
+                await insert_trade(TradeRecord(
+                    ticker=ticker,
+                    ticker_name=_tn.get(ticker, ""),
+                    trade_type=TradeType.SELL,
+                    price=price,
+                    quantity=total_filled,
+                    profit_loss=profit_loss,
+                    status=TradeStatus.COMPLETED,
+                    strategy=strategy_id,
+                    order_no=order_no,
+                ))
+                logger.warning(
+                    "체결통보 선행 race — COMPLETED 직접 INSERT: 매도 %s (주문번호: %s, 손익: %d)",
+                    t(ticker), order_no, profit_loss,
+                )
             self._filled_qty.pop(order_no, None)
             self._order_qty.pop(order_no, None)
             self._order_strategy.pop(order_no, None)
