@@ -44,7 +44,7 @@ cd frontend && npm run build
 - **상한가 모멘텀** (`momentum`): 전일종가 대비 +29% 돌파 매수, -7.5% 손절, 익일 청산
 - **변동성 돌파** (`volatility_breakout`): 노이즈 비율 기반 K값 → Target_Price 돌파 매수, -3% 손절, 15:20 강제 청산
 - **롱테일 변동성 돌파** (`long_tail_volatility`): 변동성 돌파 방식 조기 진입 + 상한가 도달 시 익일 청산 모드 전환(롱테일 추구). 당일 손절 -3%, 상한가 모드 손절 -5%, 15:20 강제 청산(상한가 미도달 종목만)
-- **20일 신고가 스윙** (`donchian_swing`): 추세추종 멀티데이 스윙. 일봉 종가가 20일 신고가 돌파 + 60일 EMA 우상향 + 거래대금 1.5배 → 익일 09:05 시장가 매수(갭 +3%↑ 스킵). 청산은 ATR(14)×2 트레일링 / 하드 손절 -7% / 시간·15:20 강제 청산 없음. 평균 5~15 영업일 보유.
+- **20일 신고가 스윙** (`donchian_swing`): 추세추종 멀티데이 스윙. 유니버스는 코스피200 + 코스닥150 고정(거래량순위 API 미사용). 일봉 종가가 20일 신고가 돌파 + 60일 EMA 우상향 + 거래대금 1.5배 → 익일 09:05 시장가 매수(갭 +3%↑ 스킵). 청산은 ATR(14)×2 트레일링 / 하드 손절 -7% / 시간·15:20 강제 청산 없음. 평균 5~15 영업일 보유.
 
 ### 핵심 파일 구조
 ```
@@ -54,7 +54,8 @@ src/engine/
 ├── strategies/
 │   ├── momentum.py        # 상한가 모멘텀 전략
 │   ├── volatility_breakout.py  # 변동성 돌파 전략
-│   └── long_tail_volatility.py # 롱테일 변동성 돌파 전략 (VB + 상한가 모멘텀 합성)
+│   ├── long_tail_volatility.py # 롱테일 변동성 돌파 전략 (VB + 상한가 모멘텀 합성)
+│   └── donchian_swing.py  # 20일 신고가 스윙 (추세추종 멀티데이)
 ├── risk.py               # RiskManager (registry 순회, 전략별 신호 체크)
 ├── order_engine.py        # OrderEngine (strategy_id 태깅, 전략별 포지션)
 ├── scheduler.py           # TradingScheduler (registry 기반)

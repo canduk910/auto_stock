@@ -162,50 +162,22 @@ class DonchianSwingStrategy(StrategyBase):
         return sum(trs) / period
 
     async def _scan_universe(self) -> list[str]:
-        """시총/거래대금 조건으로 종목 스캔 (VB와 유사 패턴)."""
-        from src.api.base import KisApiError, kis_get
+        """코스피200 + 코스닥150 고정 유니버스 + 시총/거래대금 사후 컷.
+
+        추세추종 스윙은 일중 거래량 순위(단기 회전 종목 편향)와 정합성이 낮다.
+        대표 시총 상위 종목군을 고정 유니버스로 두고, fetch_stock_detail로
+        거래대금 0(휴면) 및 시총 미달만 사후 컷한다 — 시점 의존 제거.
+        """
         from src.api.condition import fetch_stock_detail
-        from src.engine.scanner import ETF_KEYWORDS, ticker_names
+        from src.db.system_logs import write_log
+        from src.engine.scanner import KOSDAQ_150_TICKERS, KOSPI_200_TICKERS
 
         min_mcap = self.config.params["min_market_cap"]
         min_trade = self.config.params["min_trade_amount"]
         max_stocks = self.config.params["max_scan_stocks"]
 
-        all_tickers: list[str] = []
-        try:
-            params = {
-                "FID_COND_MRKT_DIV_CODE": "J",
-                "FID_COND_SCR_DIV_CODE": "20171",
-                "FID_INPUT_ISCD": "0000",
-                "FID_DIV_CLS_CODE": "0",
-                "FID_BLNG_CLS_CODE": "0",
-                "FID_TRGT_CLS_CODE": "111111111",
-                "FID_TRGT_EXLS_CLS_CODE": "000000",
-                "FID_INPUT_PRICE_1": "0",
-                "FID_INPUT_PRICE_2": "0",
-                "FID_VOL_CNT": "0",
-                "FID_INPUT_DATE_1": "0",
-            }
-            data = await kis_get(
-                "/uapi/domestic-stock/v1/quotations/volume-rank",
-                "FHPST01710000",
-                params,
-            )
-            for item in data.get("output", []):
-                ticker = item.get("mksc_shrn_iscd", "")
-                name = item.get("hts_kor_isnm", "")
-                if not ticker:
-                    continue
-                if any(kw in name for kw in ETF_KEYWORDS):
-                    continue
-                if name:
-                    ticker_names[ticker] = name
-                all_tickers.append(ticker)
-        except KisApiError:
-            logger.warning("도치안 스윙 거래량순위 조회 실패")
-            return []
-
-        logger.info("도치안 스윙 유니버스 후보: %d종목", len(all_tickers))
+        all_tickers = list(dict.fromkeys(list(KOSPI_200_TICKERS) + list(KOSDAQ_150_TICKERS)))
+        logger.info("도치안 스윙 유니버스 후보(코스피200+코스닥150): %d종목", len(all_tickers))
 
         filtered: list[str] = []
         for ticker in all_tickers:
@@ -217,6 +189,10 @@ class DonchianSwingStrategy(StrategyBase):
                 listed = int(detail.get("lstn_stcn", "0"))
                 trade_amt = int(detail.get("acml_tr_pbmn", "0"))
                 mcap = price * listed
+                name = detail.get("hts_kor_isnm", "") or detail.get("rprs_mrkt_kor_name", "")
+                if name:
+                    from src.engine.scanner import ticker_names
+                    ticker_names[ticker] = name
                 if mcap >= min_mcap and trade_amt >= min_trade:
                     filtered.append(ticker)
             except Exception:
@@ -224,6 +200,11 @@ class DonchianSwingStrategy(StrategyBase):
 
         logger.info("도치안 스윙 유니버스 확정: %d종목 (시총 %d억+, 거래대금 %d억+)",
                     len(filtered), min_mcap // 1e8, min_trade // 1e8)
+        if not filtered:
+            await write_log(
+                "ERROR",
+                f"도치안 스윙 유니버스 0종목 확정 (후보 {len(all_tickers)}종목 — 시총/거래대금 컷 모두 탈락)",
+            )
         return filtered
 
     async def recompute_held_atr(self) -> None:

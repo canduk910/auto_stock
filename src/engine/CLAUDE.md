@@ -52,7 +52,8 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 15:20 전량 강제 청산
 
 ### strategies/donchian_swing.py — 20일 신고가 스윙 (추세추종 멀티데이)
-- prepare(): 시총 3,000억+ 거래대금 50억+ 종목 스캔 → 60일 일봉 fetch → Donchian 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5배 검증
+- _scan_universe(): **코스피200 + 코스닥150 고정 유니버스**(`scanner.KOSPI_200_TICKERS` + `KOSDAQ_150_TICKERS` 합집합) → `fetch_stock_detail`로 시총/거래대금 사후 컷(휴면·미달 종목 제거). 거래량순위 API 미사용 — 추세추종 부적합 + 시점 의존 제거. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
+- prepare(): 유니버스 스캔 → 60일 일봉 fetch → Donchian 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5배 검증
 - recompute_held_atr(): _boot 후 보유 종목 ATR 재계산 (멀티데이 트레일링 유지용)
 - check_buy_signal(): 09:05~09:30 시간 가드 + 갭 +3%↑ 스킵 + 1회만 매수
 - check_exit_signal(): ATR×2 Chandelier 트레일링 + 하드 손절 -7% (시간 손절 없음)
@@ -88,10 +89,10 @@ TradingScheduler (registry 기반 boot/run/settle)
 - _boot(): DB positions 우선 복구 → KIS 잔고 교차 검증 (trade_history에서 전략 매핑) → 미체결 주문 복구 (db_strategy_map)
 - _load_strategy_config(): DB strategy_config에서 비중/파라미터 복구
 - WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
-- **08:55 사전 구독** (`TIME_PRESUBSCRIBE`): `_collect_presubscribe_tickers()` — 돌파 전략 스캔 종목 + 모든 전략의 보유 포지션 합집합을 WebSocket 사전 구독 → 09:00 시가 즉시 수신. 돌파 유니버스가 비어있으면 prepare 재실행(KIS API 일시 장애 대비)
+- **08:55 사전 구독** (`TIME_PRESUBSCRIBE`): `_collect_presubscribe_tickers()` — 돌파 전략(VB+LTV) 스캔 종목 + 스윙 전략(donchian_swing) 스캔 종목(`_collect_swing_tickers()`) + 모든 전략 보유 포지션 합집합을 WebSocket 사전 구독 → 09:00 시가 즉시 수신. 돌파/스윙 유니버스가 비어있으면 각각 prepare 재실행(KIS API 일시 장애 대비)
 - 09:00:00 익일 청산은 백그라운드 task(`asyncio.create_task`)로 실행하여 60초 안정화 대기를 비차단으로 처리. 동시에 `_confirm_breakout_open_prices()`(0.5초 간격 5초 폴링 → 미확정 종목 KIS API 폴백) 즉시 실행
 - **09:00:05 돌파 전략 매매 시작** (`TIME_VB_OPEN_CONFIRM = time(9, 0, 5)`): VB + LTV 시가 확정 직후 진입(`_phase = "vb_trading"`)
-- 09:30 모멘텀 스캔: `scan_stocks()` + 통합 구독, `_phase = "trading"`
+- 09:30 모멘텀 스캔: `scan_stocks()` + 통합 구독(`extra_tickers = 돌파(VB+LTV) + 스윙(donchian_swing)`), `_phase = "trading"`
 - 15:20 강제 청산: `_force_clear_intraday_strategies()` — VB + LTV(상한가 미도달 종목) 공용. _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화
 - _resolve_open_price(): 시가 폴링(0.5초 간격) → KIS `fetch_stock_detail()` 폴백 헬퍼. `_execute_next_day_clear()`에서 익일청산 시가 미수신 시 호출
 - run_daily(): 매일 08:20 자동 시작, 주말+공휴일 건너뜀(KIS `chk-holiday` API로 개장 여부 확인 후 다음 영업일까지 대기), **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
@@ -100,7 +101,8 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### scanner.py — 종목 스캔
 - scan_stocks(): 모멘텀용 등락률 순위 스캔
-- subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 돌파 전략(VB+LTV) 종목 합집합 구독
+- subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 돌파(VB+LTV) + 스윙(donchian_swing) 종목 합집합 구독
+- KOSPI_200_TICKERS / scan_kospi200(), KOSDAQ_150_TICKERS / scan_kosdaq150(): 정적 시총 상위 리스트 (donchian_swing 고정 유니버스용)
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info
 
 ### recommendation_engine.py / recommendation_metrics.py — 전략수정 AI자문

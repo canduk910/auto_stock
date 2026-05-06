@@ -198,6 +198,15 @@ class TradingScheduler:
                                 await strategy.prepare()
                             except Exception:
                                 logger.exception("재 prepare 실패: %s", sid)
+                # 스윙 전략도 동일 안전망 — 보유 포지션이 없으면 _scanned_tickers가 곧 후보
+                ds = self.registry.get("donchian_swing")
+                if ds and ds.config.enabled and not ds.get_scanned_tickers():
+                    logger.info("스윙 전략 유니버스 비어있음 → prepare 재실행")
+                    await write_log("INFO", "스윙 유니버스 비어있어 prepare 재실행")
+                    try:
+                        await ds.prepare()
+                    except Exception:
+                        logger.exception("재 prepare 실패: donchian_swing")
 
                 # 09:00:05 이전 진입 시 항상 사전구독 (kis_ws.subscribe는 set 기반이라 중복 안전)
                 presub = self._collect_presubscribe_tickers()
@@ -237,7 +246,7 @@ class TradingScheduler:
             if now < TIME_BUY_STOP:
                 # 스캔 + 매매 모드 진입
                 tickers = await scan_stocks()
-                extra = self._collect_breakout_tickers()
+                extra = self._collect_breakout_tickers() + self._collect_swing_tickers()
                 await subscribe_filtered_stocks(tickers, extra_tickers=extra)
 
                 # 09:00:05 이후 시작이면 시가 확정 재시도 (KIS API 조회)
@@ -613,13 +622,27 @@ class TradingScheduler:
                 tickers.extend(strategy.get_scanned_tickers())
         return tickers
 
+    def _collect_swing_tickers(self) -> list[str]:
+        """스윙 전략(donchian_swing)의 스캔 종목을 반환한다.
+
+        시세 미수신 시 check_buy_signal/check_exit_signal이 호출되지 않으므로
+        사전구독·통합구독에 반드시 포함시켜야 한다.
+        """
+        tickers: list[str] = []
+        strategy = self.registry.get("donchian_swing")
+        if strategy and strategy.config.enabled and hasattr(strategy, "get_scanned_tickers"):
+            tickers.extend(strategy.get_scanned_tickers())
+        return tickers
+
     def _collect_presubscribe_tickers(self) -> list[str]:
         """09:00 시가 수신용 사전 구독 대상.
 
         - 돌파 전략(VB, MB) 스캔 종목
-        - 모든 전략의 보유 포지션 (모멘텀 익일청산 시가 수신용)
+        - 스윙 전략(donchian_swing) 스캔 종목
+        - 모든 전략의 보유 포지션 (모멘텀 익일청산/스윙 트레일링 시가 수신용)
         """
         tickers: set[str] = set(self._collect_breakout_tickers())
+        tickers.update(self._collect_swing_tickers())
         for s in self.registry.all():
             tickers.update(s.state.positions.keys())
         return list(tickers)
