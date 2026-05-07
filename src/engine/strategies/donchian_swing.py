@@ -162,18 +162,18 @@ class DonchianSwingStrategy(StrategyBase):
         return sum(trs) / period
 
     async def _scan_universe(self) -> list[str]:
-        """코스피200 + 코스닥150 고정 유니버스 + 시총/거래대금 사후 컷.
+        """코스피200 + 코스닥150 고정 유니버스 + 시총 사후 컷.
 
         추세추종 스윙은 일중 거래량 순위(단기 회전 종목 편향)와 정합성이 낮다.
-        대표 시총 상위 종목군을 고정 유니버스로 두고, fetch_stock_detail로
-        거래대금 0(휴면) 및 시총 미달만 사후 컷한다 — 시점 의존 제거.
+        거래대금 컷은 prepare()의 volume_multiplier 1.5×에서 일원화되므로 여기선
+        시총만 검사 — `acml_tr_pbmn`(당일 누적 거래대금)이 장 시작 전 0이라
+        모든 종목이 탈락하던 시점 의존성을 제거한다.
         """
         from src.api.condition import fetch_stock_detail
         from src.db.system_logs import write_log
         from src.engine.scanner import KOSDAQ_150_TICKERS, KOSPI_200_TICKERS
 
         min_mcap = self.config.params["min_market_cap"]
-        min_trade = self.config.params["min_trade_amount"]
         max_stocks = self.config.params["max_scan_stocks"]
 
         all_tickers = list(dict.fromkeys(list(KOSPI_200_TICKERS) + list(KOSDAQ_150_TICKERS)))
@@ -187,23 +187,22 @@ class DonchianSwingStrategy(StrategyBase):
                 detail = await fetch_stock_detail(ticker)
                 price = int(detail.get("stck_prpr", "0"))
                 listed = int(detail.get("lstn_stcn", "0"))
-                trade_amt = int(detail.get("acml_tr_pbmn", "0"))
                 mcap = price * listed
                 name = detail.get("hts_kor_isnm", "") or detail.get("rprs_mrkt_kor_name", "")
                 if name:
                     from src.engine.scanner import ticker_names
                     ticker_names[ticker] = name
-                if mcap >= min_mcap and trade_amt >= min_trade:
+                if mcap >= min_mcap:
                     filtered.append(ticker)
             except Exception:
                 continue
 
-        logger.info("도치안 스윙 유니버스 확정: %d종목 (시총 %d억+, 거래대금 %d억+)",
-                    len(filtered), min_mcap // 1e8, min_trade // 1e8)
+        logger.info("도치안 스윙 유니버스 확정: %d종목 (시총 %d억+)",
+                    len(filtered), min_mcap // 1e8)
         if not filtered:
             await write_log(
                 "ERROR",
-                f"도치안 스윙 유니버스 0종목 확정 (후보 {len(all_tickers)}종목 — 시총/거래대금 컷 모두 탈락)",
+                f"도치안 스윙 유니버스 0종목 확정 (후보 {len(all_tickers)}종목 — 시총 컷 모두 탈락)",
             )
         return filtered
 

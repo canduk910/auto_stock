@@ -9,7 +9,7 @@
 """
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
 
@@ -50,17 +50,24 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
         tickers = await self._scan_universe()
         k_period = self.config.params["k_period"]
+        today_str = date.today().strftime("%Y%m%d")
         prepared = 0
 
         for ticker in tickers:
             try:
-                candles = await fetch_daily_candles(ticker, days=k_period + 1)
+                # candles[0]이 "오늘 부분봉"인 경우를 고려해 +2 여유분 확보
+                candles = await fetch_daily_candles(ticker, days=k_period + 2)
                 if len(candles) < 2:
                     continue
 
-                # 노이즈 비율 계산: 1 - |Close - Open| / (High - Low)
+                # candles[0]의 거래일이 오늘이면 candles[1]을 "전일"로 사용 (장 시작 전 빈/부분봉 방어)
+                prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
+                if len(candles) <= prev_idx + 1:
+                    continue
+
+                # 노이즈 비율 계산: prev 기준 그 이전 k_period일
                 noise_list = []
-                for c in candles[1:]:
+                for c in candles[prev_idx + 1 :]:
                     high = int(c.get("stck_hgpr", "0"))
                     low = int(c.get("stck_lwpr", "0"))
                     open_p = int(c.get("stck_oprc", "0"))
@@ -76,15 +83,29 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 k = sum(noise_list) / len(noise_list)
 
                 # 전일 Range
-                prev = candles[0]
+                prev = candles[prev_idx]
                 prev_high = int(prev.get("stck_hgpr", "0"))
                 prev_low = int(prev.get("stck_lwpr", "0"))
                 prev_range = prev_high - prev_low
+                if prev_range <= 0:
+                    logger.debug(
+                        "변동성돌파 prev_range=0 skip: %s (date=%s)",
+                        ticker, prev.get("stck_bsop_date"),
+                    )
+                    continue
+
+                target_offset = int(prev_range * k)
+                if target_offset <= 0:
+                    logger.debug(
+                        "변동성돌파 target_offset=0 skip: %s (k=%.4f, range=%d)",
+                        ticker, k, prev_range,
+                    )
+                    continue
 
                 self._targets[ticker] = {
                     "k": round(k, 4),
                     "prev_range": prev_range,
-                    "target_offset": int(prev_range * k),
+                    "target_offset": target_offset,
                     "target_price": 0,
                     "open_price": 0,
                 }

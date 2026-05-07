@@ -8,7 +8,7 @@
 """
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
 
@@ -61,22 +61,31 @@ class LongTailVolatilityStrategy(StrategyBase):
         tickers = await self._scan_universe()
         k_period = self.config.params["k_period"]
         consecutive_limit = self.config.params["exclude_consecutive_limit"]
+        today_str = date.today().strftime("%Y%m%d")
         prepared = 0
 
         for ticker in tickers:
             try:
-                candles = await fetch_daily_candles(ticker, days=k_period + 1)
+                # candles[0]이 "오늘 부분봉"인 경우를 고려해 +2 여유분 확보
+                candles = await fetch_daily_candles(ticker, days=k_period + 2)
                 if len(candles) < 2:
                     continue
 
-                # 연속상한가 체크 (최근 N일 연속 +25% 이상이면 제외)
-                if consecutive_limit > 0 and self._is_consecutive_limit_up(candles, consecutive_limit):
+                # candles[0]의 거래일이 오늘이면 candles[1]을 "전일"로 사용
+                prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
+                if len(candles) <= prev_idx + 1:
+                    continue
+
+                # 연속상한가 체크 (전일 기준 최근 N일 연속 +25% 이상이면 제외)
+                if consecutive_limit > 0 and self._is_consecutive_limit_up(
+                    candles, consecutive_limit, start=prev_idx,
+                ):
                     logger.debug("연속상한가 제외: %s (%d일 이상)", ticker, consecutive_limit)
                     continue
 
-                # 노이즈 비율 계산 (VB와 동일)
+                # 노이즈 비율 계산 (전일 이전 k_period일)
                 noise_list = []
-                for c in candles[1:]:
+                for c in candles[prev_idx + 1 :]:
                     high = int(c.get("stck_hgpr", "0"))
                     low = int(c.get("stck_lwpr", "0"))
                     open_p = int(c.get("stck_oprc", "0"))
@@ -92,15 +101,29 @@ class LongTailVolatilityStrategy(StrategyBase):
                 k = sum(noise_list) / len(noise_list)
 
                 # 전일 Range
-                prev = candles[0]
+                prev = candles[prev_idx]
                 prev_high = int(prev.get("stck_hgpr", "0"))
                 prev_low = int(prev.get("stck_lwpr", "0"))
                 prev_range = prev_high - prev_low
+                if prev_range <= 0:
+                    logger.debug(
+                        "롱테일 prev_range=0 skip: %s (date=%s)",
+                        ticker, prev.get("stck_bsop_date"),
+                    )
+                    continue
+
+                target_offset = int(prev_range * k)
+                if target_offset <= 0:
+                    logger.debug(
+                        "롱테일 target_offset=0 skip: %s (k=%.4f, range=%d)",
+                        ticker, k, prev_range,
+                    )
+                    continue
 
                 self._targets[ticker] = {
                     "k": round(k, 4),
                     "prev_range": prev_range,
-                    "target_offset": int(prev_range * k),
+                    "target_offset": target_offset,
                     "target_price": 0,
                     "open_price": 0,
                 }
@@ -122,13 +145,15 @@ class LongTailVolatilityStrategy(StrategyBase):
         logger.info("롱테일 변동성 돌파 준비 완료: %d/%d종목", prepared, len(tickers))
 
     @staticmethod
-    def _is_consecutive_limit_up(candles: list[dict], threshold: int) -> bool:
-        """최근 N일 연속 상한가(+25% 이상) 여부를 판별한다.
+    def _is_consecutive_limit_up(candles: list[dict], threshold: int, start: int = 0) -> bool:
+        """start 인덱스부터 N일 연속 상한가(+25% 이상) 여부를 판별한다.
 
-        candles[0]이 가장 최근일.
+        start는 "전일"을 가리키는 인덱스(보통 0 또는 1). 오늘 부분봉이 [0]에 끼면 start=1로 호출.
         """
+        if start >= len(candles):
+            return False
         count = 0
-        for c in candles[:threshold]:
+        for c in candles[start : start + threshold]:
             close_p = int(c.get("stck_clpr", "0"))
             open_p = int(c.get("stck_oprc", "0"))
             if open_p <= 0:

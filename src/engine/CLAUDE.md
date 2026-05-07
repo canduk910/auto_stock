@@ -45,14 +45,14 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### strategies/volatility_breakout.py — 변동성 돌파
 - _scan_universe(): 거래량순위 API(`FHPST01710000`) 응답 1건으로 후보 + 시총·전일 거래대금 산출. `prdy_vol × (stck_prpr - prdy_vrss)`로 전일 거래대금 추정 → 시간 의존 제거(휴장 직후 첫 영업일 0종목 확정 이슈 해결). 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
-- prepare(): 스캔 종목의 21일 일봉 → K값(20일 평균 노이즈) → Target_Offset 계산. 추가로 candles[0]의 stck_clpr을 `scanner.ticker_prev_close`에 사전 등록 (09:30 scan_stocks 이전에도 등락률 필터 동작 보장)
+- prepare(): 스캔 종목의 22일 일봉 → K값(20일 평균 노이즈) → Target_Offset 계산. **candles[0].stck_bsop_date == 오늘이면 candles[1]을 "전일"로 사용**(장 시작 전 빈/부분 봉 방어). `prev_range==0` 또는 `target_offset==0` 종목은 skip — 시가확정 시 target_price=open_price로 떨어져 09:00:05 즉시 매수되던 회귀 차단. 전일 stck_clpr을 `scanner.ticker_prev_close`에 사전 등록 (09:30 scan_stocks 이전에도 등락률 필터 동작 보장)
 - 시가 확정 후 Target_Price = 시가 + offset
 - current_price >= target_price 시 매수 (09:00:05 시가 확정 직후부터 매매 가능)
 - 매수가 대비 -3% 손절
 - 15:20 전량 강제 청산
 
 ### strategies/donchian_swing.py — 20일 신고가 스윙 (추세추종 멀티데이)
-- _scan_universe(): **코스피200 + 코스닥150 고정 유니버스**(`scanner.KOSPI_200_TICKERS` + `KOSDAQ_150_TICKERS` 합집합) → `fetch_stock_detail`로 시총/거래대금 사후 컷(휴면·미달 종목 제거). 거래량순위 API 미사용 — 추세추종 부적합 + 시점 의존 제거. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
+- _scan_universe(): **코스피200 + 코스닥150 고정 유니버스**(`scanner.KOSPI_200_TICKERS` + `KOSDAQ_150_TICKERS` 합집합) → `fetch_stock_detail`로 **시총 사후 컷만** 적용. 거래대금 컷은 `prepare()`의 volume_multiplier 1.5×에서 일원화 — `acml_tr_pbmn`(당일 누적)은 장 시작 전 0이라 시점 의존성 발생. 거래량순위 API 미사용 — 추세추종 부적합. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
 - prepare(): 유니버스 스캔 → 60일 일봉 fetch → Donchian 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5배 검증
 - recompute_held_atr(): _boot 후 보유 종목 ATR 재계산 (멀티데이 트레일링 유지용)
 - check_buy_signal(): 09:05~09:30 시간 가드 + 갭 +3%↑ 스킵 + 1회만 매수
@@ -62,7 +62,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### strategies/long_tail_volatility.py — 롱테일 변동성 돌파 (VB + 상한가 모멘텀 합성)
 - VB 방식 조기 진입 + 상한가 도달 시 모멘텀 방식 익일 청산
-- prepare(): VB와 동일 스캔(거래량순위 응답으로 시총·전일 거래대금 산출) + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up`) + ticker_prev_close 사전 등록. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
+- prepare(): VB와 동일 스캔(거래량순위 응답으로 시총·전일 거래대금 산출) + K값 계산 + 연속상한가 필터(`_is_consecutive_limit_up(start=prev_idx)`) + ticker_prev_close 사전 등록. **VB와 동일 prev_idx 분기**(candles[0]==오늘이면 candles[1]을 전일로) + prev_range/target_offset==0 skip. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
 - 매수: 시가 + (전일Range × K) 돌파 + 전일대비 `min_prdy_rate`% 이상 (09:00:05부터 매매 가능, VB와 동일 시점)
 - 2단계 청산: `_limit_up_reached` set으로 모드 관리
   - 당일 모드(기본): 손절 `intraday_stop_loss`(-3%), 15:20 강제 청산
