@@ -4,12 +4,14 @@ import { getTradingStatus } from './api/trading'
 import Dashboard from './pages/Dashboard'
 import History from './pages/History'
 import Recommendations from './pages/Recommendations'
+import LogReports from './pages/LogReports'
 import Settings from './pages/Settings'
 
 const navItems = [
   { to: '/', label: '대시보드' },
   { to: '/history', label: '거래 내역' },
   { to: '/recommendations', label: '전략수정 AI자문' },
+  { to: '/log-reports', label: '일일 로그 분석' },
   { to: '/settings', label: '설정' },
 ]
 
@@ -62,6 +64,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/history" element={<History />} />
           <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/log-reports" element={<LogReports />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>

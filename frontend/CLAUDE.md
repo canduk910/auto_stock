@@ -44,6 +44,12 @@ src/
 - 모의: 상단 녹색 배너 "모의투자 환경"
 - `/api/trading/status` 응답의 환경 정보로 결정
 
+## LogReports 페이지 (`/log-reports`)
+- 매일 정산 직후 OpenAI가 생성한 일일 로그 분석 리포트 조회 (백엔드 `/api/log-reports`)
+- 좌측: 영업일 리스트(최근 30일, 신규순) — 클릭 시 상세 표시
+- 우측: 총평(summary) + findings 카드(severity high/medium/low + category 칩) + 원본 메트릭(접기/펼치기)
+- 우상단 "지금 분석 실행" 버튼 — `POST /api/log-reports/run` (영업일당 1건 UNIQUE)
+
 ## Settings 페이지
 - 전략 비중 슬라이더: 하한선(빨간 선) = 보유 포지션 매수금액 비율 (`min_weight`, `invested_amount` 필드)
 - 파라미터 편집: 각 전략의 `params` 중 number 타입 + PARAM_LABELS에 정의된 키만 표시
