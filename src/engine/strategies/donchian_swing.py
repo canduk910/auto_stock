@@ -94,11 +94,25 @@ class DonchianSwingStrategy(StrategyBase):
         # 60일 + 여유 = 65일 일봉 fetch
         fetch_days = max(long_ma_period + 5, donchian_period + 5)
         prepared = 0
+        short_candles_logged = False  # 길이 부족 시 첫 1건만 system_logs에 기록
 
         for ticker in tickers:
             try:
                 candles = await fetch_daily_candles(ticker, days=fetch_days)
                 if len(candles) < long_ma_period + 1:
+                    if not short_candles_logged:
+                        from src.db.system_logs import write_log
+                        msg = (
+                            f"도치안 일봉 길이 부족 — {ticker}: "
+                            f"received {len(candles)}, required {long_ma_period + 1} "
+                            f"(요청 {fetch_days}일). KIS 응답 불충분 가능"
+                        )
+                        logger.warning(msg)
+                        try:
+                            await write_log("WARNING", msg)
+                        except Exception:
+                            pass
+                        short_candles_logged = True
                     continue
 
                 # candles[0]이 가장 최근일(전일). closes[0]이 가장 최근.

@@ -28,7 +28,7 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - 시총/거래대금 필터 적용
 - `is_market_open(date)`: KIS chk-holiday API(CTCA0903R)로 개장일 여부 (`opnd_yn == "Y"`)
 - `next_trading_day(after_date)`: 다음 개장일 조회 (휴일 다음날 자동 산정)
-- `fetch_daily_candles(ticker, days)`: 일봉 N영업일치 조회. **달력일 윈도우는 영업일/달력일 비율(5/7)에 안전 마진을 더해 산정**(`days + days//2 + 10`). 이전엔 단순 `days+10`이라 days=65 요청 시 75달력일 ≈ 53영업일만 받아와 donchian_swing(60일 EMA)에서 모든 종목이 길이 컷에 탈락하던 결함을 차단
+- `fetch_daily_candles(ticker, days)`: 일봉 N영업일치 조회. **`FHKST03010100`(`/quotations/inquire-daily-itemchartprice`, 모의/실전 동일 TR_ID) 사용 — 단일 호출당 최대 100일 응답**. 이전 `FHKST01010400`(`inquire-daily-price`)은 약 30일로만 응답이 제한되어 60일 EMA 사용처(donchian_swing)에서 모든 종목이 길이 컷에 탈락하던 결함을 차단. 응답은 `output2` 배열(최신순), `stck_bsop_date`가 비어있는 placeholder 행은 제거하여 반환. 달력일 윈도우는 영업일/달력일 비율(5/7) + 마진 = `days + days//2 + 10`
 
 ## 새 API 추가 절차
 1. `docs/kis/{category}.md`에서 TR_ID, URL, 파라미터 확인

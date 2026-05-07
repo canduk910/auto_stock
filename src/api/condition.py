@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 FLUCTUATION_RANK_URL = "/uapi/domestic-stock/v1/ranking/fluctuation"
 STOCK_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-price"
-DAILY_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-daily-price"
+# `inquire-daily-price`(FHKST01010400)는 약 30일치만 반환되는 제약이 있어 60일 EMA 등
+# 장기 일봉이 필요한 사용처에서 부족하다. 100일까지 응답하는 기간별 시세 API를 사용.
+DAILY_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
 HOLIDAY_URL = "/uapi/domestic-stock/v1/quotations/chk-holiday"
 
 
@@ -128,15 +130,17 @@ async def fetch_stock_detail(ticker: str) -> dict:
 
 
 async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
-    """KIS 일봉 API로 최근 N일 일봉 데이터를 조회한다.
+    """KIS 기간별시세 API로 최근 N영업일 일봉 데이터를 조회한다.
 
     반환: [{"stck_bsop_date", "stck_oprc"(시가), "stck_hgpr"(고가),
-            "stck_lwpr"(저가), "stck_clpr"(종가), ...}, ...]
+            "stck_lwpr"(저가), "stck_clpr"(종가), "acml_vol", ...}, ...]
+    최신순(idx=0이 가장 최근일).
 
-    days는 "영업일 N개"의 의미. 호출자가 days=65를 요청하면 영업일 65개를 반드시
-    돌려주기 위해 달력일 윈도우는 영업일/달력일 비율(5/7)에 안전 마진을 더해 산정한다.
-    이전 공식(days+10)은 65일 요청 시 75 달력일 = 약 53 영업일만 들어와 donchian_swing
-    같은 60일 EMA 사용처에서 모든 종목이 길이 컷에 탈락하던 결함을 차단한다.
+    구현: `/quotations/inquire-daily-itemchartprice` (FHKST03010100) 사용.
+    이전에는 `inquire-daily-price`(FHKST01010400)를 사용했으나 응답이 약 30일로
+    제한되는 KIS 동작이 있어, 60일 EMA처럼 장기 일봉이 필요한 사용처에서
+    `len(candles) < 61` 컷에 모두 탈락하던 결함이 있었다.
+    FHKST03010100은 단일 호출당 최대 100일 응답 → days=65 사용처도 충분.
     """
     from datetime import date, timedelta
 
@@ -146,16 +150,19 @@ async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
     start_date = (date.today() - timedelta(days=window_calendar_days)).strftime("%Y%m%d")
 
     params = {
-        "fid_cond_mrkt_div_code": "J",
-        "fid_input_iscd": ticker,
-        "fid_input_date_1": start_date,
-        "fid_input_date_2": end_date,
-        "fid_period_div_code": "D",
-        "fid_org_adj_prc": "0",
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_INPUT_ISCD": ticker,
+        "FID_INPUT_DATE_1": start_date,
+        "FID_INPUT_DATE_2": end_date,
+        "FID_PERIOD_DIV_CODE": "D",
+        "FID_ORG_ADJ_PRC": "0",
     }
-    data = await kis_get(DAILY_PRICE_URL, settings.get_tr_id("FHKST01010400"), params)
-    output = data.get("output", [])
-    # 최근 N일만 반환 (API가 최신순으로 내려줌)
+    # FHKST03010100은 모의/실전 동일 TR_ID (FH 접두사 시세 API 공통)
+    data = await kis_get(DAILY_PRICE_URL, "FHKST03010100", params)
+    # FHKST03010100 응답: output2가 일봉 배열 (최신순), output1은 종목 메타
+    output = data.get("output2") or data.get("output") or []
+    # 빈 캔들(휴장 placeholder, stck_bsop_date 없음 등) 제거 — 일부 응답 말미에 포함됨
+    output = [c for c in output if c.get("stck_bsop_date")]
     return output[:days]
 
 
