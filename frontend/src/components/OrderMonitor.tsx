@@ -11,9 +11,9 @@ interface VBTarget {
   open_confirmed: boolean
 }
 
-/** 정상 종목코드: 6자리 숫자 */
+/** 정상 종목코드: 6자리 영숫자 (ETF·신주인수권 등 알파벳 포함 코드 허용) */
 function isValidTicker(ticker: string): boolean {
-  return /^\d{6}$/.test(ticker)
+  return /^[0-9A-Z]{6}$/.test(ticker)
 }
 
 interface Props {
