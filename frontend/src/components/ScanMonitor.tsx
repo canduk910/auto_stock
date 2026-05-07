@@ -42,6 +42,23 @@ function formatRunAt(iso?: string | null): string {
   }
 }
 
+function getKstMinutes(): number {
+  // 클라이언트 시간대와 무관하게 KST(Asia/Seoul) 분 단위(0~1439) 반환
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Seoul',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+  }).formatToParts(new Date())
+  const h = parseInt(parts.find((p) => p.type === 'hour')?.value ?? '0', 10)
+  const m = parseInt(parts.find((p) => p.type === 'minute')?.value ?? '0', 10)
+  return h * 60 + m
+}
+
+const SWING_ENTRY_START_MIN = 9 * 60 + 5    // 09:05
+const SWING_ENTRY_END_MIN = 9 * 60 + 30     // 09:30 (exclusive)
+const SWING_GAP_SKIP_PCT = 3.0              // donchian DEFAULT_PARAMS.gap_skip_threshold
+
 const PHASE_LABELS: Record<string, { label: string; color: string }> = {
   idle: { label: '대기', color: 'bg-gray-100 text-gray-700' },
   booting: { label: '기동 중', color: 'bg-yellow-100 text-yellow-700' },
@@ -263,13 +280,24 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               const targets = (swingStrat?.targets ?? {}) as Record<string, SwingTarget>
               const targetEntries = Object.entries(targets)
 
+              const positionsDetail = swingStrat?.positions_detail ?? {}
+              const kstMin = getKstMinutes()
+              const inEntryWindow = kstMin >= SWING_ENTRY_START_MIN && kstMin < SWING_ENTRY_END_MIN
+              const gapSkipPct =
+                Number((swingStrat?.params as Record<string, unknown> | undefined)?.gap_skip_threshold) ||
+                SWING_GAP_SKIP_PCT
+
               return (
                 <div className="mb-4">
-                  <div className="mb-3 px-2 py-1.5 bg-emerald-50 rounded text-xs text-emerald-700 flex items-center justify-between">
-                    <span>매매 시간: 09:05 ~ 09:30 (1일 1회 진입)</span>
-                    <span className="text-emerald-500">
-                      마지막 스캔 {formatRunAt(lastRunAt)}
-                    </span>
+                  <div className="mb-3 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded text-xs text-emerald-800">
+                    <div className="font-medium mb-1">진입 케이스 — 다음 영업일 09:05~09:30 KST</div>
+                    <ul className="space-y-0.5 text-emerald-700 list-disc pl-4">
+                      <li>전일 종가가 <b>20일 신고가 돌파</b> + 60일 EMA 우상향 + 종가&gt;EMA + 거래대금 ≥ 20일평균×1.5 (prepare 단계 통과)</li>
+                      <li>익일 09:05~09:30 사이 시장가 매수 — <b>1종목당 1회</b>만 시도</li>
+                      <li>시가가 전일 종가 대비 <b>+{gapSkipPct.toFixed(0)}%↑ 갭상승</b>이면 스킵 (추격 방지)</li>
+                      <li>청산: ATR(14)×2 트레일링 + 하드 손절 -7% (시간 청산 없음, 멀티데이 보유)</li>
+                    </ul>
+                    <div className="mt-1 text-emerald-500">마지막 스캔 {formatRunAt(lastRunAt)}</div>
                   </div>
 
                   {/* 단계별 깔때기 — 어디서 0이 되는지 한눈에 */}
@@ -356,7 +384,9 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                                 <th className="pb-1 pr-2 text-right">20일 신고가</th>
                                 <th className="pb-1 pr-2 text-right">EMA60</th>
                                 <th className="pb-1 pr-2 text-right">ATR(14)</th>
-                                <th className="pb-1 text-right">현재가</th>
+                                <th className="pb-1 pr-2 text-right">현재가</th>
+                                <th className="pb-1 pr-2 text-right">갭률</th>
+                                <th className="pb-1 text-center">진입 상태</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -364,7 +394,32 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                                 .sort(([, a], [, b]) => (b.prev_close || 0) - (a.prev_close || 0))
                                 .map(([ticker, t]) => {
                                   const name = scan?.ticker_names?.[ticker] ?? ''
-                                  const curPrice = scan?.ticker_prices?.[ticker]?.current_price ?? 0
+                                  const priceInfo = scan?.ticker_prices?.[ticker]
+                                  const curPrice = priceInfo?.current_price ?? 0
+                                  const openPrice = priceInfo?.open_price ?? 0
+                                  const gapPct =
+                                    openPrice > 0 && t.prev_close > 0
+                                      ? ((openPrice - t.prev_close) / t.prev_close) * 100
+                                      : null
+                                  const isHeld = ticker in positionsDetail
+                                  const gapSkipped = gapPct !== null && gapPct >= gapSkipPct
+
+                                  let badgeLabel: string
+                                  let badgeCls: string
+                                  if (isHeld) {
+                                    badgeLabel = '보유 중'
+                                    badgeCls = 'bg-emerald-100 text-emerald-700'
+                                  } else if (gapSkipped) {
+                                    badgeLabel = `갭 스킵`
+                                    badgeCls = 'bg-gray-100 text-gray-500'
+                                  } else if (!inEntryWindow) {
+                                    badgeLabel = '시간 외'
+                                    badgeCls = 'bg-amber-100 text-amber-700'
+                                  } else {
+                                    badgeLabel = '진입 대기'
+                                    badgeCls = 'bg-blue-100 text-blue-700'
+                                  }
+
                                   return (
                                     <tr key={ticker} className="border-b border-gray-50">
                                       <td className="py-1 pr-2 font-medium">
@@ -382,8 +437,24 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                                       <td className="py-1 pr-2 text-right text-gray-600">
                                         {t.atr ? t.atr.toLocaleString() : '-'}
                                       </td>
-                                      <td className="py-1 text-right">
+                                      <td className="py-1 pr-2 text-right">
                                         {curPrice > 0 ? curPrice.toLocaleString() : '-'}
+                                      </td>
+                                      <td
+                                        className={`py-1 pr-2 text-right font-mono ${
+                                          gapPct === null
+                                            ? 'text-gray-400'
+                                            : gapPct >= 0
+                                              ? 'text-red-500'
+                                              : 'text-blue-500'
+                                        }`}
+                                      >
+                                        {gapPct === null ? '-' : `${gapPct >= 0 ? '+' : ''}${gapPct.toFixed(2)}%`}
+                                      </td>
+                                      <td className="py-1 text-center">
+                                        <span className={`px-1.5 py-0.5 rounded text-xs ${badgeCls}`}>
+                                          {badgeLabel}
+                                        </span>
                                       </td>
                                     </tr>
                                   )

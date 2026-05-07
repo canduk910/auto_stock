@@ -239,7 +239,8 @@ class DonchianSwingStrategy(StrategyBase):
                 price = int(detail.get("stck_prpr", "0"))
                 listed = int(detail.get("lstn_stcn", "0"))
                 mcap = price * listed
-                name = detail.get("hts_kor_isnm", "") or detail.get("rprs_mrkt_kor_name", "")
+                # `rprs_mrkt_kor_name`은 시장 분류명(KOSPI200/KOSDAQ150)이라 종목명 fallback으로 부적합
+                name = (detail.get("hts_kor_isnm") or "").strip()
                 if name:
                     from src.engine.scanner import ticker_names
                     ticker_names[ticker] = name

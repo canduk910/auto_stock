@@ -41,6 +41,7 @@ export interface StrategyInfo {
   scanned_tickers?: string[]
   targets?: Record<string, unknown>
   scan_stats?: ScanStats | null
+  params?: Record<string, unknown>
   invested_amount?: number
   min_weight?: number
 }
