@@ -40,7 +40,9 @@ MAX_STOCKS = 40                        # 최대 구독 종목 수
 
 # ETF/ETN 제외 키워드
 ETF_KEYWORDS = ("KODEX", "TIGER", "KBSTAR", "KOSEF", "ARIRANG", "SOL", "ACE",
-                "ETN", "선물", "인버스", "레버리지")
+                "RISE", "KoAct", "PLUS", "TIMEFOLIO", "WOORI", "FOCUS",
+                "HANARO", "히어로즈", "마이티", "BNK", "MASTER", "WON",
+                "ETN", "선물", "인버스", "레버리지", "채권", "혼합")
 
 # 실시간 체결가 TR_ID
 TICK_TR_ID = "H0STCNT0"
@@ -65,6 +67,10 @@ async def scan_stocks() -> list[str]:
         price = int(item.get("stck_prpr", "0"))
         listed_shares = int(item.get("lstn_stcn", "0"))
         trade_amount = int(item.get("acml_tr_pbmn", "0"))
+
+        # 종목코드 형식 검증 — 6자리 숫자만 허용 (ETF·ETN·신주인수권 등 알파벳 포함 코드 차단)
+        if not (len(ticker) == 6 and ticker.isdigit()):
+            continue
 
         # 등락률 15% 미만 제외
         if change_rate < MIN_CHANGE_RATE:

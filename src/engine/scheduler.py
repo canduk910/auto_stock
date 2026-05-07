@@ -729,10 +729,10 @@ class TradingScheduler:
         db_positions = await load_db_positions()
         db_restored = 0
 
-        # KIS 잔고의 실제 보유종목 (6자리 숫자만)
+        # KIS 잔고의 실제 보유종목 (6자리 영숫자 — ETF·ETN·신주인수권 등 알파벳 포함 종목 포함)
         kis_tickers = {
             h.ticker for h in holdings
-            if h.quantity > 0 and len(h.ticker) == 6 and h.ticker.isdigit()
+            if h.quantity > 0 and len(h.ticker) == 6 and h.ticker.isalnum()
         }
 
         for row in db_positions:
@@ -775,7 +775,7 @@ class TradingScheduler:
         for h in holdings:
             if h.quantity <= 0:
                 continue
-            if not (len(h.ticker) == 6 and h.ticker.isdigit()):
+            if not (len(h.ticker) == 6 and h.ticker.isalnum()):
                 continue
             if h.ticker in db_tickers:
                 continue
@@ -1047,7 +1047,7 @@ class TradingScheduler:
         for h in holdings:
             if h.quantity <= 0:
                 continue
-            if not (len(h.ticker) == 6 and h.ticker.isdigit()):
+            if not (len(h.ticker) == 6 and h.ticker.isalnum()):
                 continue
 
             # DB에서 PENDING 상태인 매수 기록이 있으면 COMPLETED로 갱신

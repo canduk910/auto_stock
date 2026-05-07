@@ -109,6 +109,7 @@ src/engine/
 - **매도 잔고부족 즉시 break**: `is_insufficient_quantity` 응답 시 3회 재시도 생략 + 메모리 포지션 + DB positions 정리(다음 sync에서 보정)
 - 체결통보 처리 실패 안전장치: ticker 매핑 실패 시 `pending_buys` 제거, strategy 미발견 시 `_selling` 해제
 - 체결통보 선행 race 가드: `_completed_orders` set + `update_trade_status` 영향 row 0건 보정 INSERT (위 "체결통보" 섹션 참조)
+- **종목코드 형식 비대칭 정책**: 진입 단계는 6자리 숫자만 허용(`scanner.scan_stocks`, VB/LTV `_scan_universe` `ticker.isdigit()`) — ETF·ETN·신주인수권 등 알파벳 포함 코드 자동매매 차단. 사후처리(체결통보 핸들러, 잔고 sync, 보완 복구)는 6자리 영숫자(`isalnum`) 허용 — 예외 경로로 매수가 발생하더라도 좀비 포지션 방지. 신규 ETF 브랜드(RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS 등) 키워드는 `scanner.ETF_KEYWORDS`
 
 ### 코딩 컨벤션
 - Python: pydantic 모델로 데이터 검증, async/await 사용

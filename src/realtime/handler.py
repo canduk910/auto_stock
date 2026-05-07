@@ -123,8 +123,8 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
         logger.debug("체결통보 접수(미체결): order_no=%s, ticker=%s", order_no, ticker)
         return
 
-    if not ticker or len(ticker) != 6 or not ticker.isdigit():
-        logger.warning("체결통보 종목코드 이상(6자리 아님): %s (fields=%s)", ticker, fields[:20])
+    if not ticker or len(ticker) != 6 or not ticker.isalnum():
+        logger.warning("체결통보 종목코드 이상(6자리 영숫자 아님): %s (fields=%s)", ticker, fields[:20])
         return
 
     if _on_execution:

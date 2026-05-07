@@ -307,7 +307,7 @@ class OrderEngine:
         if known_ticker:
             ticker = known_ticker
         else:
-            if len(ticker) != 6 or not ticker.isdigit():
+            if len(ticker) != 6 or not ticker.isalnum():
                 logger.warning("체결통보: 주문번호 %s 종목매핑 없음 + payload ticker 비정상(%s), 처리 불가", order_no, ticker)
                 # pending_buys 잔류 방지: _pending_buy_orders에서 ticker를 찾아 제거
                 pending_info = self._pending_buy_orders.pop(order_no, None)

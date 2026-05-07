@@ -218,6 +218,9 @@ class LongTailVolatilityStrategy(StrategyBase):
             ticker = item.get("mksc_shrn_iscd", "")
             if not ticker:
                 continue
+            # 종목코드 형식 검증 — ETF·ETN·신주인수권 등 알파벳 포함 코드 차단
+            if not (len(ticker) == 6 and ticker.isdigit()):
+                continue
             try:
                 price = int(item.get("stck_prpr", "0"))
                 listed = int(item.get("lstn_stcn", "0"))
