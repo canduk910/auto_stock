@@ -48,6 +48,14 @@ src/
 - `donchian_swing` 탭 선택 시 단계별 통과 카운트(코스피200+코스닥150 → 시총 → 일봉 → 신고가 → EMA → 거래량 → ATR → 최종)를 막대 + 숫자로 시각화. 0이 되는 첫 단계가 탈락 원인.
 - 데이터 소스: `status.strategies.donchian_swing.scan_stats` (백엔드 `DonchianSwingStrategy.get_scan_stats()`)
 - "전체" 탭에서는 한 줄 요약(`유니버스 N1/N → 최종 K`)만 노출, 세부 깔때기는 swing 탭 전용
+- **후보 테이블 컬럼**: 종목 / 전일종가 / 20일 신고가 / EMA60 / ATR(14) / 현재가 / **갭률** / **진입 상태**
+  - 갭률 = `(open_price - prev_close) / prev_close × 100` (양수 빨강 / 음수 파랑). 데이터 부재 시 `-`
+  - 진입 상태(KST 기준 `Intl.DateTimeFormat('Asia/Seoul')` 사용):
+    - **보유 중** (`positions_detail`에 ticker, emerald)
+    - **갭 스킵** (갭 ≥ `params.gap_skip_threshold` 기본 3.0, gray)
+    - **장 시작 전** (KST < 09:05, slate)
+    - **진입 시간 종료** (KST ≥ 09:30, amber) — 오늘 진입창 만료, 다음 영업일 대기
+    - **진입 대기** (09:05~09:30, blue)
 
 ## LogReports 페이지 (`/log-reports`)
 - 매일 정산 직후 OpenAI가 생성한 일일 로그 분석 리포트 조회 (백엔드 `/api/log-reports`)

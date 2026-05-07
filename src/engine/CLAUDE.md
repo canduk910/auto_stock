@@ -52,7 +52,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 15:20 전량 강제 청산
 
 ### strategies/donchian_swing.py — 20일 신고가 스윙 (추세추종 멀티데이)
-- _scan_universe(): **코스피200 + 코스닥150 고정 유니버스**(`scanner.KOSPI_200_TICKERS` + `KOSDAQ_150_TICKERS` 합집합) → `fetch_stock_detail`로 **시총 사후 컷만** 적용. 거래대금 컷은 `prepare()`의 volume_multiplier 1.5×에서 일원화 — `acml_tr_pbmn`(당일 누적)은 장 시작 전 0이라 시점 의존성 발생. 거래량순위 API 미사용 — 추세추종 부적합. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
+- _scan_universe(): **코스피200 + 코스닥150 고정 유니버스**(`scanner.KOSPI_200_TICKERS` + `KOSDAQ_150_TICKERS` 합집합) → `fetch_stock_detail`로 **시총 사후 컷만** 적용. 거래대금 컷은 `prepare()`의 volume_multiplier 1.5×에서 일원화 — `acml_tr_pbmn`(당일 누적)은 장 시작 전 0이라 시점 의존성 발생. 거래량순위 API 미사용 — 추세추종 부적합. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록. **종목명 fallback**: `hts_kor_isnm`만 신뢰(시장 분류명 `rprs_mrkt_kor_name`은 종목명 부적합이라 fallback 제거), KIS가 빈 응답 시 `scanner.STATIC_TICKER_NAMES`로 보강
 - prepare(): 유니버스 스캔 → 60일 일봉 fetch → Donchian 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5배 검증. **단계별 통과 카운트**(`universe_candidates → universe_filtered → candle_fetch_ok → donchian_pass → ema_uptrend_pass → volume_pass → atr_pass → final_prepared`)를 `_scan_stats`에 누적
 - get_scan_stats(): 마지막 prepare의 단계별 카운트 반환 — `strategy_registry.get_strategies_status()` `scan_stats` 필드로 노출되어 프론트 ScanMonitor 깔때기 시각화에 사용
 - recompute_held_atr(): _boot 후 보유 종목 ATR 재계산 (멀티데이 트레일링 유지용)
@@ -99,12 +99,14 @@ TradingScheduler (registry 기반 boot/run/settle)
 - _resolve_open_price(): 시가 폴링(0.5초 간격) → KIS `fetch_stock_detail()` 폴백 헬퍼. `_execute_next_day_clear()`에서 익일청산 시가 미수신 시 호출
 - run_daily(): 매일 08:20 자동 시작, 주말+공휴일 건너뜀(KIS `chk-holiday` API로 개장 여부 확인 후 다음 영업일까지 대기), **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행 (09:00:05 이후 부팅 시에도 사전구독 + 시가확정 즉시 실행)
+- _scan_loop(): 09:30 이후 5분(`SCAN_INTERVAL=300`) 주기 — `unsubscribe_all()` 후 `scan_stocks()` 결과 + **돌파(VB+LTV) + 스윙(donchian) + 모든 전략 보유 종목 합집합**으로 재구독. 이전엔 VB만 재구독해 09:30 이후 swing/LTV/보유 종목 시세가 끊겨 손절 감시까지 누락되던 결함 차단
 - _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완. 종료 시 모든 전략의 `state.unblock_buy()`로 매수 락/매수가능 캐시 일괄 해제 — 가용액 회복 가능성 반영
 
 ### scanner.py — 종목 스캔
 - scan_stocks(): 모멘텀용 등락률 순위 스캔
 - subscribe_filtered_stocks(tickers, extra_tickers): 모멘텀 + 돌파(VB+LTV) + 스윙(donchian_swing) 종목 합집합 구독
 - KOSPI_200_TICKERS / scan_kospi200(), KOSDAQ_150_TICKERS / scan_kosdaq150(): 정적 시총 상위 리스트 (donchian_swing 고정 유니버스용)
+- `STATIC_TICKER_NAMES` / `_parse_static_ticker_names()`: 모듈 import 시 1회 자기 파일을 정규식(`"(\d{6})",\s*#\s*(.+)$`)으로 파싱해 인라인 코멘트의 종목명을 dict로 추출. 모듈 로드 시 `ticker_names.update(STATIC)`로 시드 — KIS `inquire-price`가 `hts_kor_isnm`을 빈 문자열로 응답해도 종목명이 시장명으로 떨어지지 않도록 보강. 코멘트 변경 시 자동 동기화
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info
 
 ### log_analysis_engine.py — 일일 로그 분석 리포트
