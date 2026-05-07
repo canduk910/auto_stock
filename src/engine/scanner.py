@@ -279,6 +279,30 @@ def scan_kospi200() -> list[str]:
     return list(KOSPI_200_TICKERS)
 
 
+# 정적 종목명 dict — KOSPI_200_TICKERS / KOSDAQ_150_TICKERS의 인라인 코멘트(`# 종목명`)를
+# 모듈 import 시 1회 정규식으로 추출. KIS API가 hts_kor_isnm을 빈 문자열로 응답하는 케이스
+# (예: 일부 종목, 모의/실전 차이)에서 프론트가 "KOSPI200(005930)" 같은 시장명 표시로
+# 떨어지지 않도록 ticker_names의 fallback으로 사용.
+import os as _os
+import re as _re
+
+_STATIC_TICKER_NAME_RE = _re.compile(r'"(\d{6})",\s*#\s*([^\n]+)')
+
+
+def _parse_static_ticker_names() -> dict[str, str]:
+    try:
+        with open(_os.path.abspath(__file__), encoding="utf-8") as f:
+            src = f.read()
+        return {m.group(1): m.group(2).strip() for m in _STATIC_TICKER_NAME_RE.finditer(src)}
+    except Exception:
+        return {}
+
+
+STATIC_TICKER_NAMES: dict[str, str] = _parse_static_ticker_names()
+# ticker_names의 시드 — KIS 응답이 비면 이 값이 그대로 노출됨. KIS 정상 응답 시 덮어씀.
+ticker_names.update(STATIC_TICKER_NAMES)
+
+
 async def subscribe_filtered_stocks(tickers: list[str], extra_tickers: list[str] | None = None) -> None:
     """필터링된 종목들에 대해 WebSocket 실시간 시세 구독을 등록한다.
 

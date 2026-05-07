@@ -241,8 +241,11 @@ class DonchianSwingStrategy(StrategyBase):
                 mcap = price * listed
                 # `rprs_mrkt_kor_name`은 시장 분류명(KOSPI200/KOSDAQ150)이라 종목명 fallback으로 부적합
                 name = (detail.get("hts_kor_isnm") or "").strip()
+                from src.engine.scanner import STATIC_TICKER_NAMES, ticker_names
+                if not name:
+                    # KIS 응답 비면 정적 dict(KOSPI200/KOSDAQ150 인라인 코멘트 추출본)에서 보강
+                    name = STATIC_TICKER_NAMES.get(ticker, "")
                 if name:
-                    from src.engine.scanner import ticker_names
                     ticker_names[ticker] = name
                 if mcap >= min_mcap:
                     filtered.append(ticker)
