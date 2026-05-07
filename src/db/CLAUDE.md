@@ -11,6 +11,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `insert_trade()`: 주문 시 INSERT (status: PENDING)
 - `update_trade_status() -> int`: 체결/취소 시 PENDING row를 새 status로 갱신하고 영향받은 row 수를 반환. 호출자(OrderEngine)가 0건이면 체결통보 선행 race로 판단해 COMPLETED 보정 INSERT를 수행한다
 - `get_trades(limit, offset, ticker)`: 페이징 조회 + total count
+- `get_trade_pairs(strategy=None, ticker=None)`: 매매손익 뷰용 매수/매도 페어 리스트. 같은 (ticker, strategy) 그룹 내 timestamp ASC 순회 → 누적 보유수량이 0으로 돌아오는 사이클마다 closed 페어 emit (매수가/매도가 가중평균, Decimal 보존), 잔여 보유는 open 페어로 emit (미실현 손익은 `scanner.ticker_prices` 현재가 fallback). 응답 키: buy_date/buy_time/sell_date/sell_time/ticker/ticker_name/buy_price/buy_qty/sell_price/sell_qty/profit_loss/profit_rate/status('closed'|'open')/strategy
 
 ### daily_performance.py — 일일 실적
 - `upsert_daily_performance()`: 16:10 정산 시 당일 실적 기록 (total_asset, daily_profit_rate=실현손익 기반, daily_realized_pnl, net_external_cashflow, deposit, cumulative_return_rate=TWR 복리)

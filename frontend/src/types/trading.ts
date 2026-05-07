@@ -167,6 +167,31 @@ export interface TradeHistoryData {
   total_pages: number
 }
 
+export interface TradePair {
+  buy_date: string | null
+  buy_time: string | null
+  sell_date: string | null
+  sell_time: string | null
+  ticker: string
+  ticker_name: string
+  buy_price: number
+  buy_qty: number
+  sell_price: number | null
+  sell_qty: number | null
+  profit_loss: number | null
+  profit_rate: number | null
+  status: 'closed' | 'open'
+  strategy: string
+}
+
+export interface TradePnLData {
+  pairs: TradePair[]
+  page: number
+  size: number
+  total: number
+  total_pages: number
+}
+
 export interface ActionResult {
   success: boolean
   message: string
