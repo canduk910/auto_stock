@@ -292,6 +292,16 @@ class TradingScheduler:
             self._phase = "settling"
             await self._settle()
 
+            # 정산 직후: 일일 로그 분석 리포트 생성 (실패해도 정산엔 영향 없음)
+            self._phase = "log_analysis"
+            try:
+                from src.engine.log_analysis_engine import generate_daily_log_report
+                await generate_daily_log_report()
+                await write_log("INFO", "일일 로그 분석 리포트 생성 완료")
+            except Exception:
+                logger.exception("일일 로그 분석 리포트 생성 실패")
+                await write_log("ERROR", "일일 로그 분석 리포트 생성 실패")
+
             await kis_ws.disconnect()
             try:
                 await ws_task

@@ -13,7 +13,7 @@ KST = timezone(timedelta(hours=9))
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config import settings
-from src.routes import trading, balance, history, performance, logs, strategies, recommendations
+from src.routes import trading, balance, history, performance, logs, strategies, recommendations, log_reports
 from src.auth.token import token_manager
 
 # --- 로깅 설정 ---
@@ -163,6 +163,7 @@ app.include_router(performance.router)
 app.include_router(logs.router)
 app.include_router(strategies.router)
 app.include_router(recommendations.router)
+app.include_router(log_reports.router)
 
 
 @app.get("/health")

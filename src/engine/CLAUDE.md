@@ -106,6 +106,15 @@ TradingScheduler (registry 기반 boot/run/settle)
 - KOSPI_200_TICKERS / scan_kospi200(), KOSDAQ_150_TICKERS / scan_kosdaq150(): 정적 시총 상위 리스트 (donchian_swing 고정 유니버스용)
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info
 
+### log_analysis_engine.py — 일일 로그 분석 리포트
+- 16:10 정산 직후(`_settle()` 호출 직후, `_phase = "log_analysis"`) `generate_daily_log_report()` 호출
+- 당일 KST 00:00~now의 `system_logs`(레벨별 카운트 + 종목코드/숫자 마스킹 후 패턴 집계 + 상위 패턴 샘플) + `trade_history`(매수/매도/실현손익/전략별/상태별 집계) → OpenAI 호출 → `daily_log_reports`에 INSERT
+- 출력 스키마: `{summary, findings: [{category, severity(high/medium/low), title, detail, suggestion}]}` — 화이트리스트 검증 후 저장
+- 카테고리: trading, order, websocket, scan, balance, settlement, data_quality, infra, etc
+- (target_date) UNIQUE — 동일 영업일 재실행 시 INSERT 무시 (None 반환)
+- OpenAI 호출 60초 타임아웃, 실패 시에도 메트릭만 보존하여 INSERT (summary는 안내 문구)
+- 모델은 `settings.openai_recommend_model` 재사용
+
 ### recommendation_engine.py / recommendation_metrics.py — 전략수정 AI자문
 - 16:00 `generate_recommendations()`: 전략별 metrics(승률/평균손익/손절률/누적수익률 등) 집계 → OpenAI 호출 → `parameter_recommendations`에 INSERT (status: pending)
 - 동일 (target_date, strategy_id) unique 보장. 재실행 시 중복은 None 반환

@@ -27,6 +27,9 @@
 | GET | `/api/recommendations/{id}` | recommendations.py | 단일 자문 상세 |
 | POST | `/api/recommendations/{id}/apply` | recommendations.py | 선택한 키만 전략 파라미터에 적용 (status: pending/partial → applied/partial) |
 | POST | `/api/recommendations/{id}/reject` | recommendations.py | 자문 전체 거절 (status → rejected) |
+| GET | `/api/log-reports?days=30` | log_reports.py | 일일 로그 분석 리포트 목록 (신규순) |
+| GET | `/api/log-reports/{YYYY-MM-DD}` | log_reports.py | 단일 영업일 리포트 상세 |
+| POST | `/api/log-reports/run` | log_reports.py | 수동 트리거 — 즉시 분석 실행 (당일 1건만, 중복 방지) |
 
 ## 응답 형식
 모든 응답은 `models/response.py`의 `ApiResponse` 래퍼 사용:

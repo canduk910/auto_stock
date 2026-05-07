@@ -22,6 +22,12 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `write_log(level, message)`: 이벤트/에러 기록
 - level: INFO, WARNING, ERROR, CRITICAL
 
+### log_reports.py — 일일 로그 분석 리포트
+- `insert_log_report()`: 16:10 정산 직후 분석 결과 INSERT (target_date UNIQUE, 충돌 시 None)
+- `list_log_reports(days=30)`: 최근 N일 신규순 조회
+- `get_log_report(target_date)`: 단일 영업일 조회
+- 스키마 컬럼: id(uuid), target_date(unique), summary(text), findings(jsonb 배열), metrics(jsonb), model(varchar), created_at
+
 ### parameter_recommendations.py — 전략수정 AI자문 이력
 - `insert_recommendation()`: 16:00 자문 생성 시 INSERT (status: pending). (target_date, strategy_id) unique
 - `list_recommendations(days=30)`: 최근 N일 이력 조회 (신규+처리 완료 통합)
