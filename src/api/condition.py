@@ -132,11 +132,18 @@ async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
 
     반환: [{"stck_bsop_date", "stck_oprc"(시가), "stck_hgpr"(고가),
             "stck_lwpr"(저가), "stck_clpr"(종가), ...}, ...]
+
+    days는 "영업일 N개"의 의미. 호출자가 days=65를 요청하면 영업일 65개를 반드시
+    돌려주기 위해 달력일 윈도우는 영업일/달력일 비율(5/7)에 안전 마진을 더해 산정한다.
+    이전 공식(days+10)은 65일 요청 시 75 달력일 = 약 53 영업일만 들어와 donchian_swing
+    같은 60일 EMA 사용처에서 모든 종목이 길이 컷에 탈락하던 결함을 차단한다.
     """
     from datetime import date, timedelta
 
     end_date = date.today().strftime("%Y%m%d")
-    start_date = (date.today() - timedelta(days=days + 10)).strftime("%Y%m%d")  # 여유분
+    # 달력일 ≈ 영업일 × 7/5 + 안전 마진 (휴일/공휴일 + 신규상장 일자 부족 등)
+    window_calendar_days = days + (days // 2) + 10
+    start_date = (date.today() - timedelta(days=window_calendar_days)).strftime("%Y%m%d")
 
     params = {
         "fid_cond_mrkt_div_code": "J",
