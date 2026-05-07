@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getTradingStatus } from '../api/trading'
 import { getStrategyColor } from '../types/strategy'
-import type { BuySignal } from '../types/trading'
+import type { BuySignal, ScanStats } from '../types/trading'
 
 interface BreakoutTarget {
   k: number
@@ -11,6 +11,35 @@ interface BreakoutTarget {
   target_offset: number
   open_confirmed: boolean
   limit_up_reached?: boolean
+}
+
+interface SwingTarget {
+  prev_close: number
+  atr: number
+  ema60: number
+  donchian_high: number
+}
+
+const SWING_KEY = 'donchian_swing'
+
+const SWING_STAGES: Array<{ key: keyof ScanStats; label: string }> = [
+  { key: 'universe_candidates', label: '코스피200+코스닥150 합집합' },
+  { key: 'universe_filtered', label: '시총 컷 통과' },
+  { key: 'candle_fetch_ok', label: '일봉 fetch + 전일종가>0' },
+  { key: 'donchian_pass', label: '20일 신고가 돌파' },
+  { key: 'ema_uptrend_pass', label: '60일 EMA 우상향 + 종가>EMA' },
+  { key: 'volume_pass', label: '거래대금 ≥ 20일평균×1.5' },
+  { key: 'atr_pass', label: 'ATR(14) > 0' },
+  { key: 'final_prepared', label: '최종 후보' },
+]
+
+function formatRunAt(iso?: string | null): string {
+  if (!iso) return '-'
+  try {
+    return new Date(iso).toLocaleString('ko-KR', { hour12: false })
+  } catch {
+    return iso
+  }
 }
 
 const PHASE_LABELS: Record<string, { label: string; color: string }> = {
@@ -38,6 +67,7 @@ interface Props {
 
 export default function ScanMonitor({ selectedStrategy }: Props) {
   const [expanded, setExpanded] = useState(false)
+  const [swingExpanded, setSwingExpanded] = useState(false)
 
   const { data: status } = useQuery({
     queryKey: ['tradingStatus'],
@@ -52,6 +82,10 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
   const strategies = status?.strategies ?? {}
   const isAll = selectedStrategy === 'all'
   const isBreakout = (BREAKOUT_KEYS as readonly string[]).includes(selectedStrategy)
+  const isSwing = selectedStrategy === SWING_KEY
+  const swingStrat = strategies[SWING_KEY]
+  const swingStats: ScanStats | null = swingStrat?.scan_stats ?? null
+  const swingCount = swingStrat?.scanned_count ?? 0
 
   // 전략별 매수 신호 집계
   let signals: (BuySignal & { strategyKey?: string; strategyName?: string })[] = []
@@ -93,17 +127,20 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
           breakoutCounts[k] = strategies[k]?.scanned_count ?? 0
         }
         const selectedBreakoutCount = isBreakout ? breakoutCounts[selectedStrategy] : 0
+        // swing 탭이면 최종 후보 수, 아니면 기존 분기
+        const summaryCount = isSwing
+          ? swingCount
+          : (showMomentumScan ? (scan?.filtered_count ?? 0) : selectedBreakoutCount)
+        const summaryLabel = isSwing
+          ? '신고가 후보'
+          : (isAll ? '모멘텀 필터' : '필터링')
 
         return (
           <>
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="text-center p-2 bg-gray-50 rounded">
-                <div className="text-lg font-bold text-gray-900">
-                  {showMomentumScan ? (scan?.filtered_count ?? 0) : selectedBreakoutCount}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {isAll ? '모멘텀 필터' : '필터링'}
-                </div>
+                <div className="text-lg font-bold text-gray-900">{summaryCount}</div>
+                <div className="text-xs text-gray-500">{summaryLabel}</div>
               </div>
               <div className="text-center p-2 bg-gray-50 rounded">
                 <div className="text-lg font-bold text-gray-900">{scan?.subscribed_count ?? 0}</div>
@@ -125,6 +162,17 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                 </div>
               )
             })}
+
+            {/* 전체 탭: 스윙 한 줄 요약 (donchian) */}
+            {isAll && swingStrat?.enabled && (
+              <div className="mb-2 px-2 py-1.5 bg-emerald-50 rounded text-xs text-emerald-700">
+                20일 신고가 스윙: 유니버스 {swingStats?.universe_filtered ?? 0}/
+                {swingStats?.universe_candidates ?? 0} → 최종 후보 {swingCount}종목
+                {swingStats?.last_run_at && (
+                  <span className="ml-2 text-emerald-500">({formatRunAt(swingStats.last_run_at)})</span>
+                )}
+              </div>
+            )}
 
             {/* 돌파 탭(VB/LTV): 운영시각 안내 */}
             {isBreakout && (
@@ -197,6 +245,158 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                 )}
               </div>
             )}
+
+            {/* 스윙 전용 탭(donchian_swing): 깔때기 통계 + 후보 종목 테이블 */}
+            {isSwing && (() => {
+              const stats = swingStats
+              const universeMax = Math.max(
+                stats?.universe_candidates ?? 0,
+                stats?.universe_filtered ?? 0,
+                1,
+              )
+              const stages = SWING_STAGES.map((stg) => ({
+                ...stg,
+                value: (stats?.[stg.key] as number | undefined) ?? 0,
+              }))
+              const lastRunAt = stats?.last_run_at ?? null
+
+              const targets = (swingStrat?.targets ?? {}) as Record<string, SwingTarget>
+              const targetEntries = Object.entries(targets)
+
+              return (
+                <div className="mb-4">
+                  <div className="mb-3 px-2 py-1.5 bg-emerald-50 rounded text-xs text-emerald-700 flex items-center justify-between">
+                    <span>매매 시간: 09:05 ~ 09:30 (1일 1회 진입)</span>
+                    <span className="text-emerald-500">
+                      마지막 스캔 {formatRunAt(lastRunAt)}
+                    </span>
+                  </div>
+
+                  {/* 단계별 깔때기 — 어디서 0이 되는지 한눈에 */}
+                  <div className="border border-gray-200 rounded p-3 mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-gray-700">
+                        조건 통과 단계별 후보 수
+                      </h4>
+                      {!stats && (
+                        <span className="text-xs text-gray-400">아직 스캔 전</span>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      {stages.map((stg, i) => {
+                        const widthPct = Math.round((stg.value / universeMax) * 100)
+                        const isZero = stg.value === 0
+                        const isFinal = stg.key === 'final_prepared'
+                        const barColor = isZero
+                          ? 'bg-rose-200'
+                          : isFinal
+                            ? 'bg-emerald-400'
+                            : 'bg-emerald-200'
+                        return (
+                          <div key={stg.key as string} className="flex items-center gap-2 text-xs">
+                            <div className="w-7 text-right text-gray-400 font-mono">{i + 1}.</div>
+                            <div className="flex-1">
+                              <div className="flex items-baseline justify-between mb-0.5">
+                                <span className={isZero ? 'text-rose-600 font-medium' : 'text-gray-700'}>
+                                  {stg.label}
+                                </span>
+                                <span
+                                  className={`font-mono font-medium ${
+                                    isZero ? 'text-rose-600' : isFinal ? 'text-emerald-700' : 'text-gray-700'
+                                  }`}
+                                >
+                                  {stg.value}
+                                </span>
+                              </div>
+                              <div className="h-1.5 bg-gray-100 rounded overflow-hidden">
+                                <div
+                                  className={`h-full ${barColor}`}
+                                  style={{ width: `${Math.max(widthPct, stg.value > 0 ? 4 : 0)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {stats && stats.final_prepared === 0 && (
+                      <p className="mt-3 text-xs text-rose-600">
+                        최종 후보 0종목 — 위에서 처음으로 0이 되는 단계가 탈락 원인입니다.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 최종 후보 종목 테이블 */}
+                  {targetEntries.length === 0 ? (
+                    <p className="text-xs text-gray-400">
+                      {swingCount > 0
+                        ? `${swingCount}종목 후보 — 신호 데이터 대기 중`
+                        : '최종 후보 종목이 없습니다.'}
+                    </p>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium text-gray-700">
+                          최종 후보 ({targetEntries.length}종목)
+                        </h4>
+                        <button
+                          onClick={() => setSwingExpanded((v) => !v)}
+                          className="text-xs text-blue-600 hover:underline"
+                        >
+                          {swingExpanded ? '접기' : '펼치기'}
+                        </button>
+                      </div>
+                      {swingExpanded && (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="text-left text-gray-500 border-b">
+                                <th className="pb-1 pr-2">종목</th>
+                                <th className="pb-1 pr-2 text-right">전일종가</th>
+                                <th className="pb-1 pr-2 text-right">20일 신고가</th>
+                                <th className="pb-1 pr-2 text-right">EMA60</th>
+                                <th className="pb-1 pr-2 text-right">ATR(14)</th>
+                                <th className="pb-1 text-right">현재가</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {targetEntries
+                                .sort(([, a], [, b]) => (b.prev_close || 0) - (a.prev_close || 0))
+                                .map(([ticker, t]) => {
+                                  const name = scan?.ticker_names?.[ticker] ?? ''
+                                  const curPrice = scan?.ticker_prices?.[ticker]?.current_price ?? 0
+                                  return (
+                                    <tr key={ticker} className="border-b border-gray-50">
+                                      <td className="py-1 pr-2 font-medium">
+                                        {name ? `${name}(${ticker})` : ticker}
+                                      </td>
+                                      <td className="py-1 pr-2 text-right">
+                                        {t.prev_close ? t.prev_close.toLocaleString() : '-'}
+                                      </td>
+                                      <td className="py-1 pr-2 text-right text-emerald-700 font-medium">
+                                        {t.donchian_high ? t.donchian_high.toLocaleString() : '-'}
+                                      </td>
+                                      <td className="py-1 pr-2 text-right text-gray-600">
+                                        {t.ema60 ? t.ema60.toLocaleString() : '-'}
+                                      </td>
+                                      <td className="py-1 pr-2 text-right text-gray-600">
+                                        {t.atr ? t.atr.toLocaleString() : '-'}
+                                      </td>
+                                      <td className="py-1 text-right">
+                                        {curPrice > 0 ? curPrice.toLocaleString() : '-'}
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* 돌파 전용 탭(VB/LTV): 종목 스캔 + 타겟 가격 테이블 */}
             {isBreakout && (() => {

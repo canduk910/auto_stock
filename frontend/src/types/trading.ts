@@ -12,6 +12,18 @@ export interface TradingStatusData {
   strategies: Record<string, StrategyInfo>
 }
 
+export interface ScanStats {
+  universe_candidates?: number
+  universe_filtered?: number
+  candle_fetch_ok?: number
+  donchian_pass?: number
+  ema_uptrend_pass?: number
+  volume_pass?: number
+  atr_pass?: number
+  final_prepared?: number
+  last_run_at?: string | null
+}
+
 export interface StrategyInfo {
   name: string
   enabled: boolean
@@ -28,6 +40,7 @@ export interface StrategyInfo {
   scanned_count?: number
   scanned_tickers?: string[]
   targets?: Record<string, unknown>
+  scan_stats?: ScanStats | null
   invested_amount?: number
   min_weight?: number
 }

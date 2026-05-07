@@ -15,9 +15,25 @@
 """
 
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timezone, timedelta
 
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
+
+KST = timezone(timedelta(hours=9))
+
+
+def _empty_scan_stats() -> dict:
+    return {
+        "universe_candidates": 0,
+        "universe_filtered": 0,
+        "candle_fetch_ok": 0,
+        "donchian_pass": 0,
+        "ema_uptrend_pass": 0,
+        "volume_pass": 0,
+        "atr_pass": 0,
+        "final_prepared": 0,
+        "last_run_at": None,
+    }
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +65,8 @@ class DonchianSwingStrategy(StrategyBase):
         self._candidates: dict[str, dict] = {}  # ticker -> {prev_close, atr, ...}
         self._scanned_tickers: list[str] = []
         self._bought_today: set[str] = set()  # 당일 진입 시도 종목 (중복 방지)
+        # 단계별 탈락 통계 — prepare() 실행 시마다 갱신, 프론트 깔때기 시각화용
+        self._scan_stats: dict = _empty_scan_stats()
 
     async def prepare(self) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
@@ -61,11 +79,16 @@ class DonchianSwingStrategy(StrategyBase):
         volume_mult = params["volume_multiplier"]
         atr_period = params["atr_period"]
 
+        # 매번 prepare 시 단계별 카운트 초기화 (universe_* 는 _scan_universe에서 채움)
+        self._candidates = {}
+        stats = _empty_scan_stats()
+        self._scan_stats = stats
+
         tickers = await self._scan_universe()
         if not tickers:
             logger.info("도치안 스윙 유니버스 0종목")
             self._scanned_tickers = []
-            self._candidates = {}
+            stats["last_run_at"] = datetime.now(KST).isoformat()
             return
 
         # 60일 + 여유 = 65일 일봉 fetch
@@ -87,11 +110,13 @@ class DonchianSwingStrategy(StrategyBase):
                 prev_close = closes[0]
                 if prev_close <= 0:
                     continue
+                stats["candle_fetch_ok"] += 1
 
                 # 1) 20일 신고가 돌파 검증 — 어제 종가가 그 이전 20일 최고가 초과
                 prior_high = max(highs[1: donchian_period + 1])
                 if prev_close <= prior_high:
                     continue
+                stats["donchian_pass"] += 1
 
                 # 2) 60일 EMA 우상향 + 종가 > EMA
                 ema_today = self._ema(list(reversed(closes[:long_ma_period])), long_ma_period)
@@ -100,17 +125,20 @@ class DonchianSwingStrategy(StrategyBase):
                     continue
                 if prev_close <= ema_today:
                     continue
+                stats["ema_uptrend_pass"] += 1
 
                 # 3) 거래량(거래대금 근사 = 종가×거래량) 20일 평균의 1.5배 이상
                 today_turnover = closes[0] * vols[0]
                 avg_turnover = sum(closes[i] * vols[i] for i in range(1, volume_period + 1)) / volume_period
                 if avg_turnover <= 0 or today_turnover < avg_turnover * volume_mult:
                     continue
+                stats["volume_pass"] += 1
 
                 # 4) ATR(14) — Wilder 단순화: 평균 True Range
                 atr = self._atr(highs, lows, closes, atr_period)
                 if atr <= 0:
                     continue
+                stats["atr_pass"] += 1
 
                 # scanner.ticker_prev_close 사전 등록 (등락률 필터 등)
                 from src.engine.scanner import ticker_prev_close
@@ -129,7 +157,15 @@ class DonchianSwingStrategy(StrategyBase):
 
         self._scanned_tickers = list(self._candidates.keys())
         self._bought_today.clear()
-        logger.info("도치안 스윙 준비 완료: %d/%d종목 (신고가 + 추세 + 거래량)", prepared, len(tickers))
+        stats["final_prepared"] = prepared
+        stats["last_run_at"] = datetime.now(KST).isoformat()
+        logger.info(
+            "도치안 스윙 준비 완료: %d/%d종목 (신고가 + 추세 + 거래량) — "
+            "fetch_ok=%d donchian=%d ema=%d volume=%d atr=%d",
+            prepared, len(tickers),
+            stats["candle_fetch_ok"], stats["donchian_pass"],
+            stats["ema_uptrend_pass"], stats["volume_pass"], stats["atr_pass"],
+        )
 
     @staticmethod
     def _ema(values: list[int], period: int) -> float:
@@ -178,6 +214,7 @@ class DonchianSwingStrategy(StrategyBase):
 
         all_tickers = list(dict.fromkeys(list(KOSPI_200_TICKERS) + list(KOSDAQ_150_TICKERS)))
         logger.info("도치안 스윙 유니버스 후보(코스피200+코스닥150): %d종목", len(all_tickers))
+        self._scan_stats["universe_candidates"] = len(all_tickers)
 
         filtered: list[str] = []
         for ticker in all_tickers:
@@ -197,6 +234,7 @@ class DonchianSwingStrategy(StrategyBase):
             except Exception:
                 continue
 
+        self._scan_stats["universe_filtered"] = len(filtered)
         logger.info("도치안 스윙 유니버스 확정: %d종목 (시총 %d억+)",
                     len(filtered), min_mcap // 1e8)
         if not filtered:
@@ -243,6 +281,10 @@ class DonchianSwingStrategy(StrategyBase):
     def get_scanned_tickers(self) -> list[str]:
         """WebSocket 사전 구독용."""
         return self._scanned_tickers
+
+    def get_scan_stats(self) -> dict:
+        """단계별 스캔/탈락 통계 — 프론트 깔때기 시각화용."""
+        return dict(self._scan_stats)
 
     def get_targets_status(self) -> dict[str, dict]:
         """대시보드 노출용 — Donchian/EMA/ATR 정보."""

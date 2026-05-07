@@ -44,6 +44,11 @@ src/
 - 모의: 상단 녹색 배너 "모의투자 환경"
 - `/api/trading/status` 응답의 환경 정보로 결정
 
+## ScanMonitor — 20일 신고가 스윙 깔때기
+- `donchian_swing` 탭 선택 시 단계별 통과 카운트(코스피200+코스닥150 → 시총 → 일봉 → 신고가 → EMA → 거래량 → ATR → 최종)를 막대 + 숫자로 시각화. 0이 되는 첫 단계가 탈락 원인.
+- 데이터 소스: `status.strategies.donchian_swing.scan_stats` (백엔드 `DonchianSwingStrategy.get_scan_stats()`)
+- "전체" 탭에서는 한 줄 요약(`유니버스 N1/N → 최종 K`)만 노출, 세부 깔때기는 swing 탭 전용
+
 ## LogReports 페이지 (`/log-reports`)
 - 매일 정산 직후 OpenAI가 생성한 일일 로그 분석 리포트 조회 (백엔드 `/api/log-reports`)
 - 좌측: 영업일 리스트(최근 30일, 신규순) — 클릭 시 상세 표시

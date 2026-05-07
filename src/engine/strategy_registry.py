@@ -124,6 +124,11 @@ class StrategyRegistry:
             if hasattr(s, 'get_targets_status'):
                 targets = s.get_targets_status()
 
+            # 단계별 스캔 통계 (있는 경우 — donchian_swing)
+            scan_stats = None
+            if hasattr(s, 'get_scan_stats'):
+                scan_stats = s.get_scan_stats()
+
             result[sid] = {
                 "name": s.config.name,
                 "enabled": s.config.enabled,
@@ -141,6 +146,7 @@ class StrategyRegistry:
                 "scanned_tickers": scanned,
                 "scanned_count": len(scanned),
                 "targets": targets,
+                "scan_stats": scan_stats,
                 "invested_amount": sum(
                     pos.buy_price * pos.quantity for pos in s.state.positions.values()
                 ),

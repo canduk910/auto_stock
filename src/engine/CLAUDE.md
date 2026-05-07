@@ -53,7 +53,8 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### strategies/donchian_swing.py — 20일 신고가 스윙 (추세추종 멀티데이)
 - _scan_universe(): **코스피200 + 코스닥150 고정 유니버스**(`scanner.KOSPI_200_TICKERS` + `KOSDAQ_150_TICKERS` 합집합) → `fetch_stock_detail`로 **시총 사후 컷만** 적용. 거래대금 컷은 `prepare()`의 volume_multiplier 1.5×에서 일원화 — `acml_tr_pbmn`(당일 누적)은 장 시작 전 0이라 시점 의존성 발생. 거래량순위 API 미사용 — 추세추종 부적합. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
-- prepare(): 유니버스 스캔 → 60일 일봉 fetch → Donchian 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5배 검증
+- prepare(): 유니버스 스캔 → 60일 일봉 fetch → Donchian 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5배 검증. **단계별 통과 카운트**(`universe_candidates → universe_filtered → candle_fetch_ok → donchian_pass → ema_uptrend_pass → volume_pass → atr_pass → final_prepared`)를 `_scan_stats`에 누적
+- get_scan_stats(): 마지막 prepare의 단계별 카운트 반환 — `strategy_registry.get_strategies_status()` `scan_stats` 필드로 노출되어 프론트 ScanMonitor 깔때기 시각화에 사용
 - recompute_held_atr(): _boot 후 보유 종목 ATR 재계산 (멀티데이 트레일링 유지용)
 - check_buy_signal(): 09:05~09:30 시간 가드 + 갭 +3%↑ 스킵 + 1회만 매수
 - check_exit_signal(): ATR×2 Chandelier 트레일링 + 하드 손절 -7% (시간 손절 없음)
