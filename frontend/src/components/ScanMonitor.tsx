@@ -282,7 +282,6 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
 
               const positionsDetail = swingStrat?.positions_detail ?? {}
               const kstMin = getKstMinutes()
-              const inEntryWindow = kstMin >= SWING_ENTRY_START_MIN && kstMin < SWING_ENTRY_END_MIN
               const gapSkipPct =
                 Number((swingStrat?.params as Record<string, unknown> | undefined)?.gap_skip_threshold) ||
                 SWING_GAP_SKIP_PCT
@@ -410,10 +409,14 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                                     badgeLabel = '보유 중'
                                     badgeCls = 'bg-emerald-100 text-emerald-700'
                                   } else if (gapSkipped) {
-                                    badgeLabel = `갭 스킵`
+                                    badgeLabel = '갭 스킵'
                                     badgeCls = 'bg-gray-100 text-gray-500'
-                                  } else if (!inEntryWindow) {
-                                    badgeLabel = '시간 외'
+                                  } else if (kstMin < SWING_ENTRY_START_MIN) {
+                                    badgeLabel = '장 시작 전'
+                                    badgeCls = 'bg-slate-100 text-slate-600'
+                                  } else if (kstMin >= SWING_ENTRY_END_MIN) {
+                                    // 진입 시간(09:30) 이후 — 오늘은 진입 못함, 다음 영업일 대기
+                                    badgeLabel = '진입 시간 종료'
                                     badgeCls = 'bg-amber-100 text-amber-700'
                                   } else {
                                     badgeLabel = '진입 대기'

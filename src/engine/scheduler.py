@@ -1030,10 +1030,16 @@ class TradingScheduler:
                 break
             try:
                 tickers = await scan_stocks()
-                vb = self.registry.get("volatility_breakout")
-                vb_tickers = vb.get_scanned_tickers() if vb and vb.config.enabled else []
+                # 돌파(VB+LTV) + 스윙(donchian) + 모든 전략 보유 포지션 합집합으로 재구독
+                # → 09:30 이후 5분 주기 unsubscribe 시 swing/LTV 시세가 끊겨 대시보드에서
+                #   현재가/갭률이 비고 손절 감시도 누락되던 결함 차단
+                extra = list(set(
+                    self._collect_breakout_tickers()
+                    + self._collect_swing_tickers()
+                    + [t for s in self.registry.all() for t in s.state.positions.keys()]
+                ))
                 await unsubscribe_all()
-                await subscribe_filtered_stocks(tickers, extra_tickers=vb_tickers)
+                await subscribe_filtered_stocks(tickers, extra_tickers=extra)
             except Exception:
                 logger.exception("종목 스캔 오류")
 
