@@ -85,6 +85,7 @@ interface Props {
 export default function ScanMonitor({ selectedStrategy }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [swingExpanded, setSwingExpanded] = useState(false)
+  const [swingHelpOpen, setSwingHelpOpen] = useState(false)
 
   const { data: status } = useQuery({
     queryKey: ['tradingStatus'],
@@ -289,7 +290,15 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               return (
                 <div className="mb-4">
                   <div className="mb-3 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded text-xs text-emerald-800">
-                    <div className="font-medium mb-1">진입 케이스 — 다음 영업일 09:05~09:30 KST</div>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="font-medium">진입 케이스 — 다음 영업일 09:05~09:30 KST</div>
+                      <button
+                        onClick={() => setSwingHelpOpen((v) => !v)}
+                        className="text-emerald-600 hover:underline"
+                      >
+                        {swingHelpOpen ? '도움말 접기' : '도움말 펼치기'}
+                      </button>
+                    </div>
                     <ul className="space-y-0.5 text-emerald-700 list-disc pl-4">
                       <li>전일 종가가 <b>20일 신고가 돌파</b> + 60일 EMA 우상향 + 종가&gt;EMA + 거래대금 ≥ 20일평균×1.5 (prepare 단계 통과)</li>
                       <li>익일 09:05~09:30 사이 시장가 매수 — <b>1종목당 1회</b>만 시도</li>
@@ -298,6 +307,118 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                     </ul>
                     <div className="mt-1 text-emerald-500">마지막 스캔 {formatRunAt(lastRunAt)}</div>
                   </div>
+
+                  {swingHelpOpen && (
+                    <div className="mb-3 px-4 py-3 bg-white border border-emerald-200 rounded text-xs text-gray-700 space-y-3 leading-relaxed">
+                      <div>
+                        <div className="font-semibold text-emerald-700 mb-1">한 줄 요약</div>
+                        <p>최근 20일 동안 가장 비싸진 종목을 다음 날 시초가에 사서, 추세가 꺾이거나 너무 떨어지면 파는 추세추종 전략. 며칠~몇 주 들고 가는 멀티데이 보유.</p>
+                      </div>
+
+                      <div>
+                        <div className="font-semibold text-emerald-700 mb-1">1. 진입 — 왜 매수하는가</div>
+                        <p className="mb-1">장 마감 후 다음 3가지를 모두 만족하는 종목만 "내일 살 후보"로 등록합니다.</p>
+                        <table className="w-full border border-gray-200 mb-1">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="text-left px-2 py-1 font-medium">조건</th>
+                              <th className="text-left px-2 py-1 font-medium">의미 (쉬운 표현)</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            <tr>
+                              <td className="px-2 py-1">어제 종가 &gt; 그 이전 20일 최고가</td>
+                              <td className="px-2 py-1">20일 통틀어 가장 비싸졌다 = 새 신고가</td>
+                            </tr>
+                            <tr>
+                              <td className="px-2 py-1">60일 평균선이 우상향 + 어제 종가 &gt; 60일 평균</td>
+                              <td className="px-2 py-1">장기 추세가 살아있다</td>
+                            </tr>
+                            <tr>
+                              <td className="px-2 py-1">어제 거래대금이 20일 평균의 1.5배↑</td>
+                              <td className="px-2 py-1">사람들이 거래에 몰리기 시작했다</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <p>세 조건 모두 통과한 종목이 다음 날 후보. <b>다음 영업일 09:05~09:30 사이 시장가로 1주문</b> (종목당 1회).</p>
+                      </div>
+
+                      <div>
+                        <div className="font-semibold text-emerald-700 mb-1">2. 갭률(Gap Rate)이란?</div>
+                        <p className="mb-1 font-mono text-emerald-700">
+                          갭률 = (오늘 시가 − 어제 종가) ÷ 어제 종가 × 100%
+                        </p>
+                        <p className="mb-1">쉽게 말해 "어제 종가에서 오늘 시가까지 얼마나 점프했는지" — 시초가에서 미리 띄워서 출발한 비율.</p>
+                        <table className="w-full border border-gray-200 mb-1">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="text-left px-2 py-1 font-medium">갭률</th>
+                              <th className="text-left px-2 py-1 font-medium">의미</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            <tr><td className="px-2 py-1">+1%</td><td className="px-2 py-1">어제 종가보다 1% 비싸게 시작</td></tr>
+                            <tr><td className="px-2 py-1">-2%</td><td className="px-2 py-1">어제 종가보다 2% 싸게 시작</td></tr>
+                            <tr className="bg-amber-50">
+                              <td className="px-2 py-1 font-medium">+{gapSkipPct.toFixed(0)}%↑</td>
+                              <td className="px-2 py-1 font-medium">너무 많이 띄워 출발 → 진입 스킵</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <p>왜 +{gapSkipPct.toFixed(0)}% 이상이면 스킵? 신고가 돌파 종목이 다음 날 갭상승까지 크면 좋은 진입가가 이미 빠져버린 상태. 그 시점에 추격 매수하면 곧바로 조정 받을 위험이 큼 — "너무 비싸게 사는 위험"을 차단하는 안전장치.</p>
+                      </div>
+
+                      <div>
+                        <div className="font-semibold text-emerald-700 mb-1">3. 청산 — 언제 파는가</div>
+                        <p className="mb-2">donchian은 추세 끝까지 따라가는 전략이라 정해진 청산 시간이 없습니다(VB는 15:20 강제 청산, momentum은 익일청산이지만 donchian은 둘 다 없음). 두 가지 중 하나만 맞으면 매도.</p>
+
+                        <div className="mb-2">
+                          <div className="font-medium mb-0.5">A. ATR 트레일링 스탑 (= Chandelier Exit)</div>
+                          <ul className="list-disc pl-5 space-y-0.5">
+                            <li>기준선 = <b>매수 후 최고가 − ATR(14) × 2</b></li>
+                            <li>주가가 오르면 기준선도 따라 올라감 (말 그대로 "끌고 가는" stop)</li>
+                            <li>주가가 떨어져 기준선 아래로 내려가면 매도 → "추세가 꺾였다" 신호</li>
+                            <li><b>ATR(Average True Range)</b>: 그 종목 최근 14일의 일평균 진폭. 변동성 큰 종목은 stop이 멀리, 작은 종목은 가까이 — 종목 특성 자동 반영</li>
+                            <li>예: 매수 후 고점 30만원, ATR 5천 → 기준선 = 30만 − 1만 = 29만. 28.9만 찍으면 매도</li>
+                          </ul>
+                        </div>
+
+                        <div className="mb-2">
+                          <div className="font-medium mb-0.5">B. 하드 손절 (-7%)</div>
+                          <ul className="list-disc pl-5 space-y-0.5">
+                            <li>매수가 대비 7% 손실에 도달하면 트레일링 무관하게 <b>즉시 매도</b></li>
+                            <li>최악의 경우 손실을 7%로 한정하는 안전장치</li>
+                          </ul>
+                        </div>
+
+                        <div>
+                          <div className="font-medium mb-0.5">시간 청산 없음</div>
+                          <ul className="list-disc pl-5 space-y-0.5">
+                            <li>추세가 살아있으면 며칠이든 몇 주든 그대로 보유 (평균 5~15 영업일)</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="font-semibold text-emerald-700 mb-1">4. 화면 컬럼이 뜻하는 것</div>
+                        <table className="w-full border border-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="text-left px-2 py-1 font-medium">컬럼</th>
+                              <th className="text-left px-2 py-1 font-medium">의미</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            <tr><td className="px-2 py-1 font-mono">20일 신고가</td><td className="px-2 py-1">진입 기준이 된 가격 (어제 종가가 이 위로 뚫고 올라온 것)</td></tr>
+                            <tr><td className="px-2 py-1 font-mono">EMA60</td><td className="px-2 py-1">60일 지수이동평균선 (장기 추세). 종가가 이 위면 추세 살아있음</td></tr>
+                            <tr><td className="px-2 py-1 font-mono">ATR(14)</td><td className="px-2 py-1">14일 평균 진폭. 트레일링 stop 거리(×2) 산정 기준</td></tr>
+                            <tr><td className="px-2 py-1 font-mono">갭률</td><td className="px-2 py-1">시초가가 어제 종가 대비 얼마나 점프했는지 (+{gapSkipPct.toFixed(0)}%↑면 스킵)</td></tr>
+                            <tr><td className="px-2 py-1 font-mono">진입 상태</td><td className="px-2 py-1">보유 중 / 진입 대기 / 갭 스킵 / 장 시작 전 / 진입 시간 종료</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   {/* 단계별 깔때기 — 어디서 0이 되는지 한눈에 */}
                   <div className="border border-gray-200 rounded p-3 mb-3">
