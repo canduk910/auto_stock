@@ -75,7 +75,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 중복 매수 방지: registry.is_ticker_blocked_for_buy() — 보유/주문중/당일매도 통합 검사 (전략 간)
 
 ### order_engine.py — 주문 실행
-- execute_buy(ticker, price, strategy): 전략별 calc_buy_quantity, state 참조. 진입 시 `state.is_buy_blocked()` → 차단, 캐시(`BUYABLE_CACHE_TTL=60s`) 유효 시 KIS `get_buyable()` 생략. `max_buy_quantity<=0` 또는 `KisApiError(insufficient_cash)` 시 `state.block_buy(now+BUY_BLOCK_DURATION=900s)`로 락 등록
+- execute_buy(ticker, price, strategy): 전략별 calc_buy_quantity, state 참조. 진입 시 `state.is_buy_blocked()` + `state.is_low_funds_blocked(ticker)` → 차단, 캐시(`BUYABLE_CACHE_TTL=60s`) 유효 시 KIS `get_buyable()` 생략. `max_buy_quantity<=0` 또는 `KisApiError(insufficient_cash)` 시 `state.block_buy(now+BUY_BLOCK_DURATION=900s)`로 락 등록. **`calc_buy_quantity()<=0`인 종목은 `state.block_low_funds(ticker, now+LOW_FUNDS_COOLDOWN=900s)` 등록** — 매 틱 같은 종목에서 "매수 수량 0" 경고 반복/무의미 호출 차단
 - execute_sell(ticker, signal, strategy_id): `_selling` set으로 중복 매도 차단. `KisApiError(insufficient_quantity)` 시 3회 재시도 생략하고 즉시 break + 메모리 포지션 + DB positions 정리(다음 잔고 sync에서 보정)
 - 주문번호 매핑(_order_qty/_order_strategy/_order_ticker/_pending_buy_orders) 등록은 `place_order` 응답 직후 동기 영역에서 수행 — `await insert_trade` 진입 전. 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 매핑이 보장된다
 - _order_ticker: order_no → ticker 매핑 (체결통보 종목코드 보정)
@@ -100,7 +100,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - run_daily(): 매일 08:20 자동 시작, 주말+공휴일 건너뜀(KIS `chk-holiday` API로 개장 여부 확인 후 다음 영업일까지 대기), **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행 (09:00:05 이후 부팅 시에도 사전구독 + 시가확정 즉시 실행)
 - _scan_loop(): 09:30 이후 5분(`SCAN_INTERVAL=300`) 주기 — `unsubscribe_all()` 후 `scan_stocks()` 결과 + **돌파(VB+LTV) + 스윙(donchian) + 모든 전략 보유 종목 합집합**으로 재구독. 이전엔 VB만 재구독해 09:30 이후 swing/LTV/보유 종목 시세가 끊겨 손절 감시까지 누락되던 결함 차단
-- _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완. 종료 시 모든 전략의 `state.unblock_buy()`로 매수 락/매수가능 캐시 일괄 해제 — 가용액 회복 가능성 반영
+- _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완. 종료 시 모든 전략의 `state.unblock_buy()` + `state.clear_low_funds()`로 매수 락/매수가능 캐시 + per-ticker 투자금 부족 cooldown 일괄 해제 — 가용액 회복 가능성 반영
 
 ### scanner.py — 종목 스캔
 - scan_stocks(): 모멘텀용 등락률 순위 스캔
@@ -145,4 +145,4 @@ TradingScheduler (registry 기반 boot/run/settle)
 - **체결통보 실패 시 pending_buys/_selling 정리 로직 제거 금지** — 매핑 실패 시 해당 종목이 영구 차단됨
 - **체결통보 선행 race 가드(`_completed_orders` + UPDATE 0건 보정 INSERT) 제거 금지** — 시장가 즉시체결 + REST 응답 지연 시 trade_history가 PENDING으로 영구 잔존하던 이슈를 해결한다. 매수·매도 양쪽 모두 가드 필수
 - **주문번호 매핑(_order_qty/_order_strategy/_order_ticker/_pending_buy_orders) 등록을 `await insert_trade` 뒤로 옮기지 말 것** — `place_order` 응답 직후 동기 영역에서 등록해야 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 올바른 전략으로 라우팅된다. 매핑 누락 시 기본값 "momentum"으로 잘못 INSERT되어 손익 0 + 잘못된 strategy로 기록된 사례가 있었음
-- **매수가능 캐시 TTL(`BUYABLE_CACHE_TTL=60s`) / 매수 락 지속(`BUY_BLOCK_DURATION=900s`)** 변경 시 잔고 sync 주기(15분)와 정합성 확인. sync 종료 시 `unblock_buy()`로 일괄 해제되므로 BUY_BLOCK_DURATION ≈ sync 주기가 자연스럽다
+- **매수가능 캐시 TTL(`BUYABLE_CACHE_TTL=60s`) / 매수 락 지속(`BUY_BLOCK_DURATION=900s`) / per-ticker low-funds cooldown(`LOW_FUNDS_COOLDOWN=900s`)** 변경 시 잔고 sync 주기(15분)와 정합성 확인. sync 종료 시 `unblock_buy()` + `clear_low_funds()`로 일괄 해제되므로 락/cooldown ≈ sync 주기가 자연스럽다

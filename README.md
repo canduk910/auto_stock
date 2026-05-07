@@ -140,7 +140,7 @@ cd frontend && npm install && npm run dev
 | 화면 | 기능 |
 |------|------|
 | 메인 대시보드 | 계좌 요약, 보유 종목, 매매 실적 차트, 상태 인디케이터, 조건검색 현황(전략별 스캔/타겟/스윙 깔때기) |
-| 거래 내역 | 매수/매도 기록 테이블 (필터, 페이징) |
+| 거래 내역 | **두 탭** — 주문체결내역(매수/매도 raw 행, 필터·페이징) / 매매손익(매수·매도 페어 1행, 가중평균. 보유 중은 open 페어로 미실현 손익 표시) |
 | 전략수정 AI자문 | 16:00 OpenAI 자동 생성 자문 — 신규 자문 탭(승인/거절) + 이력 탭(상태/전략 필터) |
 | 일일 로그 분석 | 16:10 정산 직후 OpenAI가 system_logs+trade_history 분석한 운영 개선 리포트 (영업일 리스트 + findings + 메트릭) |
 | 설정 | 전략 파라미터 조정, 자금 비중, 자동 시작 토글 |
@@ -249,6 +249,7 @@ KIS_APP_SECRET=실전용_시크릿
 | GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목) |
 | GET | `/api/balance/buyable` | 매수 가능 금액 조회 |
 | GET | `/api/history?page=&size=` | 거래 내역 (페이징) |
+| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | 매매손익 — 매수/매도 페어 1행 (포지션 0 사이클 단위 가중평균). 보유 중은 open 페어 (미실현 손익은 `ticker_prices` 현재가) |
 | GET | `/api/performance/summary` | 실적 요약 (TWR 누적 + 일평균 실현 수익률) |
 | GET | `/api/performance/daily` | 일별 실적 (실현손익 기반 + TWR 누적 + 외부 입출금) |
 | POST | `/api/performance/recompute` | trade_history 기반 daily_performance 전체 소급 재계산 (멱등) |
