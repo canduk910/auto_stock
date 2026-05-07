@@ -290,13 +290,29 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               return (
                 <div className="mb-4">
                   <div className="mb-3 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded text-xs text-emerald-800">
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1.5 gap-2">
                       <div className="font-medium">진입 케이스 — 다음 영업일 09:05~09:30 KST</div>
                       <button
                         onClick={() => setSwingHelpOpen((v) => !v)}
-                        className="text-emerald-600 hover:underline"
+                        className={
+                          swingHelpOpen
+                            ? 'shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white text-emerald-700 border border-emerald-300 hover:bg-emerald-50 transition'
+                            : 'shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-700/20 hover:bg-emerald-700 transition animate-pulse'
+                        }
+                        aria-expanded={swingHelpOpen}
+                        title={swingHelpOpen ? '도움말 접기' : '전략을 처음 보시나요? 도움말을 확인하세요'}
                       >
-                        {swingHelpOpen ? '도움말 접기' : '도움말 펼치기'}
+                        {swingHelpOpen ? (
+                          <>
+                            <span aria-hidden>▲</span>
+                            <span>도움말 접기</span>
+                          </>
+                        ) : (
+                          <>
+                            <span aria-hidden>❓</span>
+                            <span>전략 자세히 보기</span>
+                          </>
+                        )}
                       </button>
                     </div>
                     <ul className="space-y-0.5 text-emerald-700 list-disc pl-4">
