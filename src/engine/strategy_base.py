@@ -58,6 +58,9 @@ class StrategyState:
     cached_buyable_at: float = 0.0     # epoch 초
     # 잔고 부족 락 — 이 시각까지 KIS 매수 호출 차단 (잔고 sync 후 해제)
     buy_blocked_until: float = 0.0     # epoch 초
+    # per-ticker 매수 수량 0 cooldown — calc_buy_quantity() == 0인 종목에 대해
+    # 매 틱마다 똑같은 경고가 반복되는 로그 스팸 + 무의미 호출 차단. 잔고 sync 시 해제.
+    low_funds_tickers: dict[str, float] = field(default_factory=dict)  # ticker -> 만료 epoch
 
     def has_position(self, ticker: str) -> bool:
         return ticker in self.positions
@@ -88,6 +91,24 @@ class StrategyState:
 
     def is_buyable_cache_fresh(self, now_ts: float, ttl: float) -> bool:
         return self.cached_buyable_qty >= 0 and (now_ts - self.cached_buyable_at) < ttl
+
+    def is_low_funds_blocked(self, ticker: str, now_ts: float) -> bool:
+        """투자금 부족(매수 수량 0) cooldown이 유효한지 확인."""
+        until = self.low_funds_tickers.get(ticker, 0.0)
+        if until > now_ts:
+            return True
+        if until and until <= now_ts:
+            # 만료된 항목 정리
+            self.low_funds_tickers.pop(ticker, None)
+        return False
+
+    def block_low_funds(self, ticker: str, until_ts: float) -> None:
+        """투자금 부족 cooldown 등록."""
+        self.low_funds_tickers[ticker] = until_ts
+
+    def clear_low_funds(self) -> None:
+        """모든 ticker의 low-funds cooldown 해제 (잔고 sync 직후 호출)."""
+        self.low_funds_tickers.clear()
 
 
 @dataclass

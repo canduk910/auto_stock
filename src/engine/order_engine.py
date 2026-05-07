@@ -29,6 +29,7 @@ SELL_MAX_RETRIES = 3     # 매도 실패 시 최대 재시도 횟수
 SELL_RETRY_DELAY = 1.0   # 재시도 간격(초)
 BUYABLE_CACHE_TTL = 60.0  # get_buyable 캐시 유효시간(초)
 BUY_BLOCK_DURATION = 900.0  # 잔고 부족 락 기본 지속(초) — 다음 잔고 sync(15분)와 정합
+LOW_FUNDS_COOLDOWN = 900.0  # per-ticker 매수 수량 0 cooldown — 잔고 sync(15분)와 동일 주기
 
 
 class OrderEngine:
@@ -69,6 +70,9 @@ class OrderEngine:
                 t(ticker), strategy.strategy_id, state.buy_blocked_until - now_ts,
             )
             return
+        # per-ticker 투자금 부족 cooldown — 같은 종목에서 매 틱 "매수 수량 0" 반복 차단
+        if state.is_low_funds_blocked(ticker, now_ts):
+            return
 
         # 매수가능금액 — 캐시(60초 TTL) 우선, 없으면 KIS 조회
         if state.is_buyable_cache_fresh(now_ts, BUYABLE_CACHE_TTL):
@@ -95,8 +99,13 @@ class OrderEngine:
         quantity = strategy.calc_buy_quantity(current_price)
 
         if quantity <= 0:
-            logger.warning("매수 수량 0: %s (투자금: %d, 현재가: %d, 전략: %s)",
-                           ticker, state.total_investment, current_price, strategy.strategy_id)
+            # per-ticker cooldown 등록 — 다음 잔고 sync 또는 LOW_FUNDS_COOLDOWN 만료까지 같은 종목 매수 시도 차단
+            state.block_low_funds(ticker, now_ts + LOW_FUNDS_COOLDOWN)
+            logger.warning(
+                "매수 수량 0 → %ds cooldown: %s (투자금: %d, 현재가: %d, 전략: %s)",
+                int(LOW_FUNDS_COOLDOWN),
+                ticker, state.total_investment, current_price, strategy.strategy_id,
+            )
             return
 
         # 매수가능수량 제한

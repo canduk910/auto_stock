@@ -82,7 +82,16 @@ async def manual_sell(req: ManualSellRequest):
             price=0,  # 시장가
         )
 
-        # trade_history 기록
+        # 주문 추적 매핑 등록 — `place_order` 응답 직후 동기 영역에서 수행해야
+        # 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도
+        # `_order_ticker[order_no]`가 비어있지 않다 (CLAUDE.md 안전장치 준수)
+        engine = trading_scheduler.order_engine
+        engine._order_qty[result.order_no] = req.quantity
+        engine._order_strategy[result.order_no] = strategy_id
+        engine._order_ticker[result.order_no] = req.ticker
+        engine._selling.add(req.ticker)
+
+        # trade_history 기록 (await — 위에서 이미 매핑 등록 완료)
         name = ticker_names.get(req.ticker, "")
         record = TradeRecord(
             ticker=req.ticker,
@@ -96,12 +105,6 @@ async def manual_sell(req: ManualSellRequest):
             order_no=result.order_no,
         )
         await insert_trade(record)
-
-        # 주문 추적 등록 (체결통보에서 포지션 제거)
-        engine = trading_scheduler.order_engine
-        engine._order_qty[result.order_no] = req.quantity
-        engine._order_strategy[result.order_no] = strategy_id
-        engine._selling.add(req.ticker)
 
         logger.info("수동 매도 주문 접수: %s %d주 (주문번호: %s, 전략: %s)",
                      t(req.ticker), req.quantity, result.order_no, strategy_id)

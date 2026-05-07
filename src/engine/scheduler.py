@@ -1101,6 +1101,9 @@ class TradingScheduler:
         for s in self.registry.all():
             if s.state.buy_blocked_until > 0 or s.state.cached_buyable_at > 0:
                 s.state.unblock_buy()
+            # per-ticker 투자금 부족 cooldown도 잔고 sync 후 해제 — 비중 변경/예수금 입금 등 반영
+            if s.state.low_funds_tickers:
+                s.state.clear_low_funds()
 
     async def _settle(self) -> None:
         """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.
@@ -1209,6 +1212,7 @@ class TradingScheduler:
             strategy.state.total_investment = 0
             strategy.state.buy_disabled = False
             strategy.state.buy_signals.clear()
+            strategy.state.low_funds_tickers.clear()
 
         # OrderEngine 추적 상태 초기화
         self.order_engine._selling.clear()

@@ -89,7 +89,7 @@ src/engine/
 - scheduler.py에서 WebSocket 연결 직후 자동 구독
 - 체결통보 종목코드는 `fields[8]` (단, `_order_ticker[order_no]` 매핑이 우선)
 - **체결통보가 매수/매도 REST 응답보다 먼저 도착하는 race 대비**: `_handle_*_fill`에서 `update_trade_status` 영향 row 0이면 `COMPLETED` 상태로 직접 INSERT하고 `_completed_orders`에 order_no 등록. `execute_buy/sell`은 응답 직후 set 체크해 PENDING INSERT를 생략 → trade_history 단일 COMPLETED row 보장
-- **주문번호 매핑(_order_qty/_order_strategy/_order_ticker) 등록은 `place_order` 응답 직후 동기 영역에서**: `await insert_trade` 진입 전. 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 올바른 전략으로 라우팅 — 누락 시 기본값 "momentum"으로 잘못 INSERT되어 손익 0 사례 발생
+- **주문번호 매핑(_order_qty/_order_strategy/_order_ticker) 등록은 `place_order` 응답 직후 동기 영역에서**: `await insert_trade` 진입 전. 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 올바른 전략으로 라우팅 — 누락 시 기본값 "momentum"으로 잘못 INSERT되어 손익 0 사례 발생. **자동매매(OrderEngine.execute_buy/sell)뿐 아니라 수동 매도(`/api/trading/manual-sell`)도 동일 순서 준수** (3개 매핑 + `_selling` 모두 동기 등록 후 `await insert_trade`)
 
 ### 포지션 관리
 - DB `positions` 테이블이 포지션의 진실의 원천 (매수가/전략/매수일 정확)
@@ -106,6 +106,7 @@ src/engine/
 - 익일 청산 시가 안정화: `_next_day_clear_pending` 플래그로 60초 대기 중 on_tick 즉시 청산 방지 (손절은 유지)
 - **매수가능 캐시(60초 TTL)**: `StrategyState.cached_buyable_qty/at` — `get_buyable()` KIS 호출을 매 틱 → 분당 1회로 축소
 - **잔고부족 매수 락(900초)**: `state.block_buy()` — `max_buy_quantity<=0` 또는 KIS 응답이 `is_insufficient_cash`이면 다음 잔고 sync까지 매수 차단. `_sync_positions_from_balance()` 종료 시 `unblock_buy()`로 일괄 해제
+- **per-ticker 매수 수량 0 cooldown(900초)**: `state.block_low_funds(ticker)` — `calc_buy_quantity()<=0`인 종목을 다음 잔고 sync까지 차단. 매 틱 같은 종목에서 "매수 수량 0" 경고가 반복되던 로그 스팸/무의미 호출 차단. `_sync_positions_from_balance()` + `_reset_daily_state()`에서 `clear_low_funds()`로 해제
 - **매도 잔고부족 즉시 break**: `is_insufficient_quantity` 응답 시 3회 재시도 생략 + 메모리 포지션 + DB positions 정리(다음 sync에서 보정)
 - 체결통보 처리 실패 안전장치: ticker 매핑 실패 시 `pending_buys` 제거, strategy 미발견 시 `_selling` 해제
 - 체결통보 선행 race 가드: `_completed_orders` set + `update_trade_status` 영향 row 0건 보정 INSERT (위 "체결통보" 섹션 참조)
