@@ -131,13 +131,46 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
     signals = status?.strategy?.buy_signals ?? []
   }
 
+  // KST 기준 활성 보드 (시각 기반 — SessionTracker와 동일 매핑)
+  const activeBoards = (() => {
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false,
+    })
+    const parts = fmt.formatToParts(new Date())
+    const h = Number(parts.find((p) => p.type === 'hour')?.value ?? '0')
+    const m = Number(parts.find((p) => p.type === 'minute')?.value ?? '0')
+    const t = h * 60 + m
+    const result: { code: string; label: string; color: string }[] = []
+    if (t >= 8 * 60 && t < 9 * 60) result.push({ code: 'pre_nxt', label: 'NXT 프리', color: 'bg-teal-100 text-teal-700' })
+    if (t >= 8 * 60 + 30 && t < 9 * 60) result.push({ code: 'krx_open', label: 'KRX 동시호가', color: 'bg-sky-100 text-sky-700' })
+    if (t >= 9 * 60 && t < 15 * 60 + 30) result.push({ code: 'main', label: 'KRX 메인', color: 'bg-green-100 text-green-700' })
+    if (t >= 15 * 60 + 30 && t < 18 * 60) result.push({ code: 'krx_after', label: 'KRX 시간외', color: 'bg-purple-100 text-purple-700' })
+    if (t >= 15 * 60 + 30 && t < 20 * 60) result.push({ code: 'post_nxt', label: 'NXT 애프터', color: 'bg-violet-100 text-violet-700' })
+    return result
+  })()
+
   return (
     <div className="bg-white rounded-lg shadow p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-semibold text-gray-900">조건검색 현황</h3>
         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${phaseInfo.color}`}>
           {phaseInfo.label}
         </span>
+      </div>
+      {/* 활성 보드 배지 — KRX/NXT 어느 보드가 지금 매매 가능한지 즉시 식별 */}
+      <div className="flex items-center gap-1.5 mb-4 flex-wrap">
+        <span className="text-xs text-gray-500">활성 보드:</span>
+        {activeBoards.length > 0 ? (
+          activeBoards.map((b) => (
+            <span key={b.code} className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${b.color}`}>
+              {b.label}
+            </span>
+          ))
+        ) : (
+          <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-500">
+            장 외 (08:00~20:00 외)
+          </span>
+        )}
       </div>
 
       {/* 스캔 요약 */}

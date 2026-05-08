@@ -164,6 +164,27 @@ export const PARAM_LABELS: Record<
     description:
       '🔥 평소 대비 거래대금이 몇 배 이상이면 진입 신호로 볼지.\n\n예: 1.5 = 평소의 1.5배 이상 들어왔을 때만 추세 진입 인정.',
   },
+  k_value_krx_main: {
+    label: 'K값 곱 (KRX 메인)',
+    unit: '배',
+    step: 0.1,
+    description:
+      '🌅 KRX 메인장(09:00~15:20) target_offset에 곱하는 보드별 K 가중치.\n\n예: 1.0 = 기본값(전일Range × 자동K값 그대로). 1.2 = 20% 더 높은 돌파 기준 (보수적).',
+  },
+  k_value_nxt_pre: {
+    label: 'K값 곱 (NXT 프리)',
+    unit: '배',
+    step: 0.1,
+    description:
+      '🌄 NXT 프리마켓(08:00~09:00) target_offset에 곱하는 보드별 K 가중치.\n\n예: 1.0 = 기본값. NXT 프리는 거래대금이 작아 변동성이 큼 → 1.2~1.5 등으로 높여 거짓 돌파 방지 권장.',
+  },
+  k_value_nxt_post: {
+    label: 'K값 곱 (NXT 애프터)',
+    unit: '배',
+    step: 0.1,
+    description:
+      '🌃 NXT 애프터마켓(15:30~20:00) target_offset에 곱하는 보드별 K 가중치.\n\n예: 1.0 = 기본값. 야간 변동성 + 모니터링 부재로 1.2~1.5 등 보수적 운용 권장.',
+  },
 }
 
 export const formatParamValue = (key: string, value: number): string => {

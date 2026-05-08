@@ -34,9 +34,11 @@ export const getStrategies = async (): Promise<StrategiesResponse> => {
   return { strategies }
 }
 
+// tradable_boards (string[]) / exchange (string) / k_value_* (number) / 기타 number 등 혼합 허용
+export type StrategyParamValue = number | string | string[] | null
 export const updateStrategyParams = async (
   strategyId: string,
-  params: Record<string, number | string>,
+  params: Record<string, StrategyParamValue>,
 ): Promise<ActionResult> => {
   const { data } = await apiClient.put<ApiResponse<null>>(
     `/strategies/${strategyId}/params`,

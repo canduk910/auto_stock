@@ -1,12 +1,27 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getStrategies, updateStrategyWeights, updateStrategyParams } from '../api/trading'
+import type { StrategyParamValue } from '../api/trading'
 import apiClient from '../api/client'
 import { getStrategyColor } from '../types/strategy'
 import ConfirmModal from '../components/ConfirmModal'
 import InfoTooltip from '../components/InfoTooltip'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
 import { STRATEGY_INFO } from '../utils/strategyInfo'
+
+const EXCHANGE_OPTIONS: { value: string; label: string; description: string }[] = [
+  { value: 'KRX', label: 'KRX', description: '한국거래소 단일 — 안전, 모의(VTS)도 지원' },
+  { value: 'NXT', label: 'NXT', description: '넥스트레이드 ATS 단일 — 실전 한정' },
+  { value: 'SOR', label: 'SOR', description: 'Smart Order Routing — KIS가 KRX/NXT에 자동 분배 (실전 한정)' },
+]
+
+const BOARD_OPTIONS: { value: string; label: string; hint: string }[] = [
+  { value: 'pre_nxt', label: 'NXT 프리 (08:00~)', hint: 'NXT 프리마켓 — 거래대금 작아 변동성 큼' },
+  { value: 'krx_open', label: 'KRX 동시호가 (08:30~09:00)', hint: 'KRX 장전 동시호가' },
+  { value: 'main', label: 'KRX 메인 (09:00~15:20)', hint: 'KRX 정규장 — 핵심 매매 시간대' },
+  { value: 'krx_after', label: 'KRX 시간외 단일가 (15:30~18:00)', hint: 'KRX 시간외 — 현재 미사용' },
+  { value: 'post_nxt', label: 'NXT 애프터 (15:30~20:00) 🌃', hint: '야간 매매 — 사용자 부재 시간대 사고 위험' },
+]
 
 export default function Settings() {
   const queryClient = useQueryClient()
@@ -40,7 +55,7 @@ export default function Settings() {
   })
 
   const paramMutation = useMutation({
-    mutationFn: ({ id, params }: { id: string; params: Record<string, number> }) =>
+    mutationFn: ({ id, params }: { id: string; params: Record<string, StrategyParamValue> }) =>
       updateStrategyParams(id, params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['strategies'] })
@@ -132,46 +147,38 @@ export default function Settings() {
       {/* 자동 매매 시작 */}
       <AutoStartToggle />
 
-      {/* 전략별 운영시각 */}
+      {/* 야간 매매(POST_NXT) 활성 경고 — VB/LTV 중 하나라도 post_nxt 활성이면 표시 */}
+      {strategies.some((s) => {
+        const params = (s as unknown as { params?: Record<string, unknown> }).params ?? {}
+        const tb = (params.tradable_boards as string[] | undefined) ?? []
+        return s.enabled && tb.includes('post_nxt')
+      }) && (
+        <div className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6 flex items-start gap-3">
+          <span className="text-2xl">🌃</span>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-amber-900">야간 매매(NXT 애프터 15:30~20:00) 활성</h3>
+            <p className="text-xs text-amber-800 mt-1">
+              사용자 부재 시간대에 매매가 일어날 수 있습니다. 손절·트레일링은 실시간 작동하지만 NXT 거래대금이 KRX 대비 작아 변동성이 큽니다.
+              비활성화하려면 해당 전략의 매매 가능 보드에서 <strong>NXT 애프터</strong>를 해제하세요.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 전략별 거래소·매매 보드 */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">전략별 운영시각</h2>
-        <div className="space-y-2">
-          {strategies.map((s) => {
-            const color = getStrategyColor(s.key)
-            const isVB = s.key === 'volatility_breakout'
-            const isLTV = s.key === 'long_tail_volatility'
-            const isDS = s.key === 'donchian_swing'
-            return (
-              <div key={s.key} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color.hex }} />
-                  <span className="text-sm font-medium text-gray-700 inline-flex items-center">
-                    {s.name}
-                    {STRATEGY_INFO[s.key] && (
-                      <InfoTooltip
-                        content={`${STRATEGY_INFO[s.key].tagline}\n\n${STRATEGY_INFO[s.key].description}`}
-                        ariaLabel={`${s.name} 전략 설명`}
-                      />
-                    )}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600">
-                  {isVB ? (
-                    <span>NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~19:50 <span className="text-xs text-gray-400 ml-1">(보드별 시가·K값 분리)</span></span>
-                  ) : isLTV ? (
-                    <span>NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~19:50 <span className="text-xs text-gray-400 ml-1">(상한가 도달 시 다음 영업일 NXT 08:00 청산)</span></span>
-                  ) : isDS ? (
-                    <span>09:05 ~ 추세 종료 <span className="text-xs text-gray-400 ml-1">(KRX 메인만, 멀티데이 ATR 트레일링)</span></span>
-                  ) : (
-                    <span>09:30 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(KRX 메인, 익일 NXT 프리 08:00 청산)</span></span>
-                  )}
-                </div>
-              </div>
-            )
-          })}
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">전략별 거래소·매매 보드</h2>
+        <p className="text-xs text-gray-500 mb-4">
+          주문은 선택한 거래소(`EXCG_ID_DVSN_CD`)로 전송됩니다. 매매 가능 보드는 RiskManager에서 보드 가드로 동작 — 비활성 보드에서는 매수 신호 평가 자체가 차단됩니다.
+        </p>
+        <div className="space-y-3">
+          {strategies.map((s) => (
+            <ExchangeBoardRow key={s.key} strategy={s} />
+          ))}
         </div>
         <p className="text-xs text-gray-400 mt-3">
           자동 시작 07:45 / 부트 07:50 / NXT 프리 08:00 / KRX 메인 09:00 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 20:10
+          · <strong>VTS(모의)는 KRX만 지원</strong> — NXT/SOR는 실전 한정
         </p>
       </div>
 
@@ -407,6 +414,229 @@ export default function Settings() {
   )
 }
 
+type StrategyRowProps = {
+  strategy: {
+    key: string
+    name: string
+    enabled: boolean
+    params?: Record<string, unknown>
+  }
+}
+
+function ExchangeBoardRow({ strategy }: StrategyRowProps) {
+  const queryClient = useQueryClient()
+  const params = strategy.params ?? {}
+  const initialExchange = ((params.exchange as string) ?? 'KRX').toUpperCase()
+  const initialBoards = ((params.tradable_boards as string[] | undefined) ?? []) as string[]
+
+  const [exchange, setExchange] = useState(initialExchange)
+  const [boards, setBoards] = useState<string[]>(initialBoards)
+  const [editing, setEditing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [confirm, setConfirm] = useState(false)
+
+  const color = getStrategyColor(strategy.key)
+  const dirty = exchange !== initialExchange || !sameSet(boards, initialBoards)
+
+  const mutation = useMutation({
+    mutationFn: (next: Record<string, StrategyParamValue>) =>
+      updateStrategyParams(strategy.key, next),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['strategies'] })
+      queryClient.invalidateQueries({ queryKey: ['tradingStatus'] })
+      setEditing(false)
+      setConfirm(false)
+      setError(null)
+    },
+    onError: (err: Error) => {
+      setError(err.message)
+      setConfirm(false)
+    },
+  })
+
+  const toggleBoard = (b: string) => {
+    setBoards((prev) => (prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]))
+  }
+
+  const onSave = () => {
+    if (boards.length === 0) {
+      setError('최소 1개 이상의 매매 보드를 선택해야 합니다.')
+      setConfirm(false)
+      return
+    }
+    mutation.mutate({ exchange, tradable_boards: boards })
+  }
+
+  const exchangeNote = (() => {
+    if (exchange === 'KRX') return null
+    return (
+      <span className="text-xs text-amber-700">⚠️ {exchange} 주문은 실전 환경에서만 동작 — 모의(VTS)에서는 거절됩니다</span>
+    )
+  })()
+
+  return (
+    <div className="border border-gray-200 rounded p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color.hex }} />
+          <span className="text-sm font-medium text-gray-800 inline-flex items-center">
+            {strategy.name}
+            {STRATEGY_INFO[strategy.key] && (
+              <InfoTooltip
+                content={`${STRATEGY_INFO[strategy.key].tagline}\n\n${STRATEGY_INFO[strategy.key].description}`}
+                ariaLabel={`${strategy.name} 전략 설명`}
+              />
+            )}
+          </span>
+          {!strategy.enabled && (
+            <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">비활성</span>
+          )}
+        </div>
+        {!editing ? (
+          <button
+            onClick={() => setEditing(true)}
+            className="px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-50 rounded"
+          >
+            편집
+          </button>
+        ) : (
+          <div className="flex gap-1">
+            <button
+              onClick={() => {
+                setExchange(initialExchange)
+                setBoards(initialBoards)
+                setEditing(false)
+                setError(null)
+              }}
+              className="px-2 py-0.5 text-xs text-gray-600 hover:bg-gray-100 rounded"
+            >
+              취소
+            </button>
+            <button
+              onClick={() => setConfirm(true)}
+              disabled={!dirty}
+              className="px-2 py-0.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              저장
+            </button>
+          </div>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="space-y-3">
+          {/* 거래소 라디오 */}
+          <div>
+            <div className="text-xs font-medium text-gray-700 mb-1">거래소 (EXCG_ID_DVSN_CD)</div>
+            <div className="flex gap-2">
+              {EXCHANGE_OPTIONS.map((opt) => (
+                <label
+                  key={opt.value}
+                  className={`flex-1 px-2 py-1.5 text-xs border rounded cursor-pointer ${
+                    exchange === opt.value
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                  title={opt.description}
+                >
+                  <input
+                    type="radio"
+                    name={`exchange-${strategy.key}`}
+                    value={opt.value}
+                    checked={exchange === opt.value}
+                    onChange={() => setExchange(opt.value)}
+                    className="mr-1"
+                  />
+                  <strong>{opt.label}</strong>
+                  <div className="text-[10px] text-gray-500 mt-0.5">{opt.description}</div>
+                </label>
+              ))}
+            </div>
+            {exchangeNote && <div className="mt-1">{exchangeNote}</div>}
+          </div>
+
+          {/* 매매 가능 보드 체크박스 */}
+          <div>
+            <div className="text-xs font-medium text-gray-700 mb-1">매매 가능 보드 (tradable_boards)</div>
+            <div className="grid grid-cols-1 gap-1">
+              {BOARD_OPTIONS.map((opt) => {
+                const checked = boards.includes(opt.value)
+                const isPostNxt = opt.value === 'post_nxt'
+                return (
+                  <label
+                    key={opt.value}
+                    className={`flex items-center gap-2 px-2 py-1 text-xs border rounded cursor-pointer ${
+                      checked
+                        ? isPostNxt
+                          ? 'border-amber-500 bg-amber-50'
+                          : 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleBoard(opt.value)}
+                    />
+                    <span className="font-medium text-gray-800">{opt.label}</span>
+                    <span className="text-[11px] text-gray-500">— {opt.hint}</span>
+                  </label>
+                )
+              })}
+            </div>
+          </div>
+          {error && (
+            <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1">
+              {error}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-xs text-gray-600 flex items-center flex-wrap gap-2">
+          <span>
+            거래소: <strong className="text-gray-800">{initialExchange}</strong>
+          </span>
+          <span className="text-gray-300">|</span>
+          <span>매매 보드:</span>
+          {initialBoards.length > 0 ? (
+            initialBoards.map((b) => {
+              const opt = BOARD_OPTIONS.find((o) => o.value === b)
+              const isPostNxt = b === 'post_nxt'
+              return (
+                <span
+                  key={b}
+                  className={`px-1.5 py-0.5 rounded ${
+                    isPostNxt ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
+                  }`}
+                >
+                  {opt?.label.replace(/\(.*\)/, '').trim() ?? b}
+                </span>
+              )
+            })
+          ) : (
+            <span className="text-gray-400">없음 — 매매 비활성</span>
+          )}
+        </div>
+      )}
+
+      <ConfirmModal
+        open={confirm}
+        title="거래소·보드 변경"
+        message={`${strategy.name}의 거래소를 ${exchange}로, 매매 보드를 ${boards.join(', ') || '(없음)'}으로 변경합니다. 다음 매매 평가부터 적용됩니다.`}
+        onConfirm={onSave}
+        onCancel={() => setConfirm(false)}
+        loading={mutation.isPending}
+      />
+    </div>
+  )
+}
+
+function sameSet(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false
+  const bs = new Set(b)
+  return a.every((x) => bs.has(x))
+}
+
 function AutoStartToggle() {
   const queryClient = useQueryClient()
 
@@ -433,7 +663,7 @@ function AutoStartToggle() {
         <div>
           <h2 className="text-lg font-semibold text-gray-900">자동 매매 시작</h2>
           <p className="text-sm text-gray-500 mt-1">
-            활성화 시 매일 08:20에 자동으로 매매를 시작합니다. 주말은 자동 건너뜁니다.
+            활성화 시 매일 07:45에 자동으로 매매를 시작합니다. 주말·공휴일은 자동 건너뜁니다(KIS chk-holiday).
           </p>
         </div>
         <button
