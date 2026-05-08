@@ -66,8 +66,9 @@ async def dispatch_message(tr_id: str, tr_key: str, payload: str, encrypted: boo
         await _handle_tick(payload)
     elif tr_id in ("H0STCNI0", "H0STCNI9"):
         await _handle_execution(payload, encrypted=encrypted)
-    elif tr_id == "H0NXMKO0":
-        await _handle_nxt_market_op(tr_key, payload)
+    # 장운영정보 — 통합(H0UNMKO0) / KRX 단독(H0STMKO0) / NXT 단독(H0NXMKO0). 동일 메시지 포맷
+    elif tr_id in ("H0UNMKO0", "H0STMKO0", "H0NXMKO0"):
+        await _handle_market_op(tr_id, tr_key, payload)
     else:
         logger.debug("미처리 TR: %s", tr_id)
 
@@ -146,18 +147,28 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
         await _on_execution(ticker, order_no, side, price, quantity)
 
 
-async def _handle_nxt_market_op(tr_key: str, payload: str) -> None:
-    """NXT 장운영정보(H0NXMKO0) 메시지 — 보드 전환 이벤트.
+async def _handle_market_op(tr_id: str, tr_key: str, payload: str) -> None:
+    """장운영정보(H0UNMKO0/H0STMKO0/H0NXMKO0) 메시지 — 보드 전환 이벤트.
 
-    KIS 명세에 정확한 필드 순서 미기재. 운영 데이터로 구조 확정 예정.
-    Phase 3 SessionTracker가 _on_board 콜백을 통해 소비한다.
-    필드 추정: [0]=시장구분/종목코드, [1]=MKOP_CLS_CODE(110/112/121/129...)
+    KIS 명세 기준 응답 필드(공통 — 통합/KRX/NXT 동일 구조):
+      [0] TRHT_YN — 거래정지 여부
+      [1] TR_SUSP_REAS_CNTT — 거래 정지 사유
+      [2] MKOP_CLS_CODE — 장운영 구분 코드 (110/112/121/129...)
+      [3] ANTC_MKOP_CLS_CODE — 예상 장운영 구분 코드
+      [4] MRKT_TRTM_CLS_CODE — 임의연장구분코드
+      [5] DIVI_APP_CLS_CODE — 동시호가배분처리구분코드
+      [6] ISCD_STAT_CLS_CODE — 종목상태구분코드
+      [7] VI_CLS_CODE — VI적용구분코드
+      [8] OVTM_VI_CLS_CODE — 시간외단일가VI적용구분코드
+      [9] EXCH_CLS_CODE — 거래소 구분코드 (KRX/NXT)
+
+    SessionTracker가 _on_board 콜백을 통해 소비한다.
     """
     fields = payload.split("^")
-    mkop_cls_code = fields[1] if len(fields) > 1 else ""
+    mkop_cls_code = fields[2] if len(fields) > 2 else ""
     logger.info(
-        "[H0NXMKO0] tr_key=%s, mkop_cls_code=%s, payload=%s",
-        tr_key, mkop_cls_code, payload[:120],
+        "[%s] tr_key=%s, mkop_cls_code=%s, payload=%s",
+        tr_id, tr_key, mkop_cls_code, payload[:140],
     )
     if _on_board:
         await _on_board(tr_key, mkop_cls_code, payload)

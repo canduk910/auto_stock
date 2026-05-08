@@ -101,7 +101,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - StrategyRegistry 생성, 전략 등록
 - _boot(): DB positions 우선 복구 → KIS 잔고 교차 검증 (trade_history에서 전략 매핑) → 미체결 주문 복구 (db_strategy_map)
 - _load_strategy_config(): DB strategy_config에서 비중/파라미터 복구 (`tradable_boards`, `exchange`, `k_value_*` 포함)
-- WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호). **H0NXMKO0(NXT 장운영정보) 구독은 보류** — 명세상 `tr_key` Required(length 12)이지만 형식 미확정으로 빈 키 송신 시 `SUBSCRIBE ERROR : mci send failed`. SessionTracker는 시각 기반 fallback으로 정상 동작. 향후 KIS 측 정확한 tr_key(종목코드/시장구분) 확인 후 재시도
+- WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호) + **통합 장운영정보 구독** (실전 한정: `H0UNMKO0` / `005930`). 장운영정보는 종목 단위 구독이지만 `MKOP_CLS_CODE`는 시장 전체 공통이라 대표 종목 1개로 보드 전환 수신. SessionTracker.on_h0nxmko0 콜백이 코드 기록 + 시각 기반 tick()이 보드 결정 (코드/시각 정합성 검증 후 코드 → 보드 enum 직접 매핑 도입 예정)
 - **시간 상수**: `TIME_AUTO_START 07:45 / TIME_BOOT 07:50 / TIME_PRESUBSCRIBE 07:55 / TIME_PRE_NXT_OPEN 08:00 / TIME_KRX_OPEN_CONFIRM 09:00:05 / TIME_SCAN_START 09:30 / TIME_KRX_MAIN_BUY_STOP 15:20 / TIME_KRX_MAIN_CLOSE 15:30 / TIME_NXT_POST_BUY_STOP 19:50 / TIME_RECOMMENDATION 19:50 / TIME_NXT_POST_CLOSE 20:00 / TIME_SETTLEMENT 20:10`. 기존 이름(`TIME_NEXT_DAY_CLEAR/TIME_VB_OPEN_CONFIRM/TIME_BUY_STOP/TIME_MARKET_CLOSE`)은 backwards-compat alias로 보존
 - **07:55 사전 구독** (`TIME_PRESUBSCRIBE`): `_collect_presubscribe_tickers()` — 돌파(VB+LTV) + 스윙(donchian) + 모든 전략 보유 포지션 합집합을 사전 구독 → 08:00 NXT 프리 첫 거래 즉시 수신
 - **08:00 NXT 프리 진입**: 익일 청산 백그라운드 task(`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30`초 안정화) + `_confirm_breakout_open_prices(board="pre_nxt")` 시가 확정. PRE_NXT 활성 전략(VB/LTV `tradable_boards`에 pre_nxt 포함)이 매매 시작 (`_phase = "pre_nxt_trading"`)

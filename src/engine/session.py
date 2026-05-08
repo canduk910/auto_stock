@@ -159,13 +159,21 @@ class SessionTracker:
                     logger.exception("[Session] 종료 콜백 실패: %s", board.value)
 
     async def on_h0nxmko0(self, tr_key: str, mkop_cls_code: str, payload: str) -> None:
-        """H0NXMKO0(NXT 장운영정보) 메시지 수신.
+        """장운영정보(H0UNMKO0/H0STMKO0/H0NXMKO0) 메시지 수신.
 
-        명세 필드 미확정이라 현재는 코드 기록만 — 향후 운영 데이터로
-        보드 매핑 정확도를 보강할 입력 채널로 사용한다.
+        KIS MKOP_CLS_CODE 매핑(공통):
+          110: 장전 동시호가 개시 / 112: 장개시 (09:00) / 121: 장후 동시호가 개시
+          129: 장마감 (15:30) / 130-139: 장개시전시간외 (08:00-09:00)
+          140-149: 시간외 종가 매매 (15:30-16:00) / 150-159: 시간외 단일가 (16:00-18:00)
+
+        통합(H0UNMKO0)/KRX(H0STMKO0)/NXT(H0NXMKO0) 동일 메시지 포맷이라 본 콜백을 공용한다.
+        실시간 코드를 기록만 해두고, tick()의 시각 기반 매핑이 보드 결정을 담당.
+        (보드 코드 → 보드 enum 매핑 도입은 운영 데이터로 시각/코드 정합성 확인 후)
         """
         self._last_nxt_mkop_code = mkop_cls_code
-        logger.debug("[Session] H0NXMKO0: tr_key=%s, code=%s", tr_key, mkop_cls_code)
+        logger.debug(
+            "[Session] 장운영정보: tr_key=%s, MKOP_CLS_CODE=%s", tr_key, mkop_cls_code,
+        )
 
 
 # 전역 인스턴스 — scheduler/risk가 import해서 사용

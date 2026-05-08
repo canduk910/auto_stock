@@ -64,6 +64,7 @@ src/
 - **응답 호환성**: 백엔드 `_targets[ticker]`에 보드별 `boards` dict + `open_confirmed` dict 추가, top-level `target_price`/`open_price`도 backwards-compat 유지 → 프론트 화면 깨짐 0
 - **ScanMonitor 보드별 시가/타겟가 시각화**(VB/LTV 탭): `BreakoutTarget.boards: Record<string, BoardTarget>` 구조 활용. 시가/타겟가 셀이 멀티라인으로 보드별 행 노출 (chip + 값) — 활성 보드는 `font-semibold` + `ring`, 비활성/미확정 보드는 톤다운/opacity-50. 정렬·돌파 판정·근접 % 계산 모두 활성 보드 기준. 헤더 우측에 사용 중 보드 칩 (활성 보드 ●) 노출. `BOARD_META`로 한글 라벨 + 색상 매핑 (메인/프리/애프터/동시호가/시간외)
 - **OrderMonitor**(보유 포지션 행): 매수 완료된 종목이라 단일 매수가 중심이 적합 — top-level `target_price`/`open_price` 그대로 backwards-compat 사용 (보드 분리 미적용)
+- **매수 신호 이력 보드 컬럼**: ScanMonitor "최근 매수 신호" 표에 `보드` + `타겟가` 컬럼 추가 — 어느 보드(메인/프리/애프터)에서 어느 타겟가를 돌파해 신호가 떴는지 즉시 식별. `BuySignal.board?: string` / `target_price?: number` / `k?: number` 필드 추가, `BOARD_META`로 chip 색상 매핑
 - **API**: `updateStrategyParams(strategyId, params)` `params` 타입을 `Record<string, StrategyParamValue>`(`number | string | string[] | null`)로 확장. tradable_boards(list) / exchange(string) / k_value_*(number) 모두 한 호출로 송신
 
 ## ScanMonitor — 20일 신고가 스윙 깔때기

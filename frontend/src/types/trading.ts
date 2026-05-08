@@ -115,7 +115,10 @@ export interface BuySignal {
   ticker: string
   name?: string
   price: number
-  open_price: number
+  open_price?: number
+  target_price?: number
+  k?: number
+  board?: string         // VB/LTV 보드별 분리 (main/pre_nxt/post_nxt) — Phase 5
   change_rate: number
   time: string
 }

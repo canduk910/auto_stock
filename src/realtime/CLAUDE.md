@@ -37,7 +37,9 @@ KIS WebSocket 실시간 시세 수신 및 체결통보 처리.
 | H0UNCNT0 | 실시간 체결가 (KRX+NXT 통합) | 종목코드 | 현재 사용 — `scanner.TICK_TR_ID`. NXT 거래도 즉시 반영 |
 | H0STCNT0 | 실시간 체결가 (KRX 단독) | 종목코드 | 메시지 포맷 H0UNCNT0과 동일. 호환성 유지 |
 | H0NXCNT0 | 실시간 체결가 (NXT 단독) | 종목코드 | 메시지 포맷 동일 |
-| H0NXMKO0 | NXT 장운영정보 | 시장구분 | Phase 3 SessionTracker가 보드 전환 이벤트로 사용 (운영 데이터로 필드 확정) |
+| H0UNMKO0 | 통합 장운영정보 (KRX+NXT) | 종목코드 | 현재 사용 — 종목 단위 구독이지만 MKOP_CLS_CODE는 시장 전체 공통이라 대표 종목 1개(005930)만 구독해 보드 전환 수신. **모의(VTS) 미지원 — 실전 한정** |
+| H0STMKO0 | KRX 단독 장운영정보 | 종목코드 | H0UNMKO0과 동일 메시지 포맷 |
+| H0NXMKO0 | NXT 단독 장운영정보 | 종목코드 | H0UNMKO0과 동일 메시지 포맷. 통합 구독으로 충분해 별도 미구독 |
 | H0STCNI0 | 체결통보 (실전) | HTS ID | KRX/NXT/SOR 모두 같은 TR로 수신, ODER_KIND 필드로 거래소 식별 |
 | H0STCNI9 | 체결통보 (모의) | 계좌번호 | KRX 한정 (VTS는 NXT/SOR 미지원) |
 

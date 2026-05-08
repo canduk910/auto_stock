@@ -874,14 +874,17 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                   {isAll && strategyKeys.length > 1 && (
                     <th className="pb-1 pr-2">전략</th>
                   )}
+                  <th className="pb-1 pr-2">보드</th>
                   <th className="pb-1 pr-2">종목</th>
-                  <th className="pb-1 pr-2 text-right">현재가</th>
+                  <th className="pb-1 pr-2 text-right">타겟가</th>
+                  <th className="pb-1 pr-2 text-right">체결가</th>
                   <th className="pb-1 text-right">등락률</th>
                 </tr>
               </thead>
               <tbody>
                 {[...signals].reverse().map((s, i) => {
                   const color = s.strategyKey ? getStrategyColor(s.strategyKey) : null
+                  const boardMeta = s.board ? BOARD_META[s.board] : null
                   return (
                     <tr key={i} className="border-b border-gray-50">
                       <td className="py-1 pr-2 text-gray-500">{s.time}</td>
@@ -894,8 +897,20 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                           )}
                         </td>
                       )}
+                      <td className="py-1 pr-2">
+                        {boardMeta ? (
+                          <span className={`px-1.5 py-0.5 rounded text-[11px] ${boardMeta.chipCls}`}>
+                            {boardMeta.label}
+                          </span>
+                        ) : (
+                          <span className="text-gray-300">-</span>
+                        )}
+                      </td>
                       <td className="py-1 pr-2 font-medium">
                         {s.name ? `${s.name}(${s.ticker})` : s.ticker}
+                      </td>
+                      <td className="py-1 pr-2 text-right text-indigo-600">
+                        {s.target_price ? s.target_price.toLocaleString() : '-'}
                       </td>
                       <td className="py-1 pr-2 text-right">{s.price.toLocaleString()}</td>
                       <td className="py-1 text-right text-red-500">+{s.change_rate}%</td>
