@@ -91,8 +91,9 @@ class DonchianSwingStrategy(StrategyBase):
             stats["last_run_at"] = datetime.now(KST).isoformat()
             return
 
-        # 60일 + 여유 = 65일 일봉 fetch
-        fetch_days = max(long_ma_period + 5, donchian_period + 5)
+        # 60일 + 여유 = 65일 일봉 fetch (+1: candles[0]=오늘 부분봉 케이스 폴백 여유)
+        fetch_days = max(long_ma_period + 5, donchian_period + 5) + 1
+        today_str = datetime.now(KST).strftime("%Y%m%d")
         prepared = 0
         short_candles_logged = False  # 길이 부족 시 첫 1건만 system_logs에 기록
 
@@ -114,6 +115,16 @@ class DonchianSwingStrategy(StrategyBase):
                             pass
                         short_candles_logged = True
                     continue
+
+                # candles[0]의 거래일이 오늘이면 "오늘 부분봉"이므로 candles[1]을 전일로 사용
+                # (VB/LTV에 적용한 prev_idx 분기와 동일 — 장중 prepare 시 candles[0]이 5/8 일중
+                # 데이터로 들어와 5/7 종가 vs 직전 20일 최고가 비교가 어긋나던 결함 차단)
+                prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
+                if len(candles) <= prev_idx + long_ma_period:
+                    continue
+                # prev_idx 적용 — 이후 슬라이스는 모두 candles[prev_idx:]가 "전일" 기준
+                if prev_idx:
+                    candles = candles[prev_idx:]
 
                 # candles[0]이 가장 최근일(전일). closes[0]이 가장 최근.
                 closes = [int(c.get("stck_clpr", "0")) for c in candles]
