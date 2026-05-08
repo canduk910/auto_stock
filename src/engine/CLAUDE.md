@@ -71,7 +71,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - `_next_day_clear_pending`: 익일 청산 시가 안정화 대기 플래그 (momentum과 동일)
 
 ### risk.py — 리스크 관리
-- on_tick(): ticker_prices 갱신(1회) → registry.enabled() 순회 → 전략별 exit/buy 신호
+- on_tick(): ticker_prices 갱신(1회) → **동일가 연속 틱이면 신호 평가 skip**(PR7) → registry.enabled() 순회 → 전략별 exit/buy 신호. VB/momentum 돌파 판정("이전<기준 AND 현재≥기준")은 동일가에서 결과 동일 + 손절/트레일링/high_since_buy도 동일가 시 변화 없어 skip 안전. 분당 수천 틱에서 불필요 CPU 차단
 - 중복 매수 방지: registry.is_ticker_blocked_for_buy() — 보유/주문중/당일매도 통합 검사 (전략 간)
 
 ### order_engine.py — 주문 실행

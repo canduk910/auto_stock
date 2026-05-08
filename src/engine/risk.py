@@ -31,7 +31,16 @@ class RiskManager:
         """실시간 체결가 수신 시 호출된다."""
         from src.engine.scanner import ticker_prev_close, ticker_prices
 
-        # 1. 공용 시세 갱신 (1회)
+        # 동일가 연속 틱 감지 — 직전 캐시의 current_price와 비교 (PR7)
+        # 시세 캐시는 항상 갱신하되, 가격이 바뀌지 않은 틱은 신호 평가/포지션 순회를 skip해
+        # on_tick 호출 빈도(분당 수천 틱)에서 불필요한 CPU 소모 차단.
+        # 안전장치 검토: VB/momentum의 돌파 가드는 "이전 < 기준 AND 현재 ≥ 기준"이라 동일가
+        # 연속 틱에서는 결과가 변하지 않음(매수/매도 판정 동일 결과). 손절·트레일링도 동일가면
+        # 결과 변경 없음. high_since_buy = max(...)이라 동일가 시 변화 없어 skip 안전.
+        prev_info = ticker_prices.get(ticker)
+        same_price = bool(prev_info) and prev_info.get("current_price") == current_price
+
+        # 1. 공용 시세 갱신 (1회) — same_price 여부 무관하게 항상 최신 메타 반영
         prev_close = ticker_prev_close.get(ticker, 0)
         prdy_ctrt = round((current_price - prev_close) / prev_close * 100, 2) if prev_close > 0 else 0.0
         ticker_prices[ticker] = {
@@ -40,6 +49,9 @@ class RiskManager:
             "change_rate": round(change_rate, 2),
             "prdy_ctrt": prdy_ctrt,
         }
+
+        if same_price:
+            return
 
         # 2. 활성화된 전략별 순회
         for strategy in self.registry.enabled():
