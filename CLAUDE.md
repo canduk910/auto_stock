@@ -96,6 +96,7 @@ src/engine/
 - 체결통보 수신 시 DB 저장 (`save_position`) / 매도 시 DB 삭제 (`delete_position`)
 - 재기동 시: DB positions 우선 복구 → KIS 잔고 API 교차 검증 (DB에 없는 종목 보완)
 - 당일 매도 종목 재매수 차단 (`sold_today`)
+- **`_boot` 당일 BUY 시드**: trade_history의 당일 BUY 종목을 해당 strategy의 `sold_today`에 시드 — 서버 빈번 재시작 시 모멘텀 `_prev_prdy_rate` 휘발 + 보유 가드 race로 같은 종목이 짧은 시간에 여러 번 매수되던 결함 차단(092220 KEC 사례). 의미적으론 매도가 아니지만 check_buy_signal 가드 재활용으로 같은 영업일 재매수 즉시 차단
 - **정산(16:10) 후 `_reset_daily_state()`**: 전략별 positions/pending_buys/sold_today + OrderEngine 추적 상태 전체 초기화 → 다음 날 `_boot()`에서 DB 기반 재구성
 
 ### 매수/매도 안전장치

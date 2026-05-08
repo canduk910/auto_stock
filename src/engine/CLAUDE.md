@@ -100,7 +100,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - run_daily(): 매일 08:20 자동 시작, 주말+공휴일 건너뜀(KIS `chk-holiday` API로 개장 여부 확인 후 다음 영업일까지 대기), **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행 (09:00:05 이후 부팅 시에도 사전구독 + 시가확정 즉시 실행)
 - _scan_loop(): 09:30 이후 5분(`SCAN_INTERVAL=300`) 주기 — `unsubscribe_all()` 후 `scan_stocks()` 결과 + **돌파(VB+LTV) + 스윙(donchian) + 모든 전략 보유 종목 합집합**으로 재구독. 이전엔 VB만 재구독해 09:30 이후 swing/LTV/보유 종목 시세가 끊겨 손절 감시까지 누락되던 결함 차단
-- _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완. 종료 시 모든 전략의 `state.unblock_buy()` + `state.clear_low_funds()`로 매수 락/매수가능 캐시 + per-ticker 투자금 부족 cooldown 일괄 해제 — 가용액 회복 가능성 반영
+- _sync_positions_from_balance(): 15분 주기 체결통보 누락 보완. **strategy 매핑은 trade_history의 직전 BUY 행에서 상속**(이전 momentum 하드코딩 → 알루코류 BUY/SELL strategy 어긋남 재발 차단). 종료 시 모든 전략의 `state.unblock_buy()` + `state.clear_low_funds()`로 매수 락/매수가능 캐시 + per-ticker 투자금 부족 cooldown 일괄 해제 — 가용액 회복 가능성 반영
 
 ### scanner.py — 종목 스캔
 - scan_stocks(): 모멘텀용 등락률 순위 스캔

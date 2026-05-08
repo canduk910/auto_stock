@@ -889,6 +889,14 @@ class TradingScheduler:
             for row in (th_buys.data or []):
                 if row["ticker"] not in db_strategy_map:
                     db_strategy_map[row["ticker"]] = row.get("strategy", "momentum")
+                # 당일 매수 종목을 해당 전략 sold_today에 시드 — 서버 재기동 race로 같은 종목이
+                # 짧은 시간에 여러 번 매수되던 결함 차단(모멘텀 `_prev_prdy_rate` 휘발 + 보유 가드 race).
+                # 의미적으론 매도가 아니지만 모든 전략의 check_buy_signal이 sold_today를 가드로 사용하므로
+                # 같은 영업일 재매수 차단 효과 즉시 확보.
+                seed_sid = row.get("strategy") or "momentum"
+                seed_strategy = self.registry.get(seed_sid)
+                if seed_strategy:
+                    seed_strategy.state.sold_today.add(row["ticker"])
         except Exception:
             pass
 
@@ -1082,20 +1090,37 @@ class TradingScheduler:
             if self.registry.is_ticker_held_by_any(h.ticker):
                 continue
             # 체결통보 누락 — KIS 잔고에는 있지만 내부 포지션에 없음
+            # strategy 매핑: trade_history의 직전 BUY 행에서 상속
+            # (이전엔 무조건 'momentum' 하드코딩이라 BUY=VB / SELL=momentum strategy 어긋남 — 알루코 사례 재발 차단)
             strategy_id = "momentum"
-            target = self.registry.get(strategy_id)
+            try:
+                from src.db.supabase import supabase as _sb
+                th = _sb.table("trade_history").select("strategy").eq(
+                    "ticker", h.ticker
+                ).eq("trade_type", "BUY").order(
+                    "timestamp", desc=True
+                ).limit(1).execute()
+                if th.data:
+                    strategy_id = th.data[0].get("strategy") or "momentum"
+            except Exception:
+                pass
+
+            target = self.registry.get(strategy_id) or self.registry.get("momentum")
             if target:
+                actual_sid = target.strategy_id
                 target.state.positions[h.ticker] = Position(
                     ticker=h.ticker,
                     buy_price=int(h.avg_price),
                     quantity=h.quantity,
                     order_no="",
-                    strategy_id=strategy_id,
+                    strategy_id=actual_sid,
                 )
                 if h.name:
                     ticker_names[h.ticker] = h.name
-                logger.warning("포지션 동기화 (체결통보 누락 보완): %s %d주 @ %d",
-                               h.name or h.ticker, h.quantity, int(h.avg_price))
+                logger.warning(
+                    "포지션 동기화 (체결통보 누락 보완): %s %d주 @ %d (전략: %s)",
+                    h.name or h.ticker, h.quantity, int(h.avg_price), actual_sid,
+                )
 
         # 잔고 동기화 후 모든 전략의 매수 락/캐시 해제 — 가용액이 회복됐을 가능성 반영
         for s in self.registry.all():
