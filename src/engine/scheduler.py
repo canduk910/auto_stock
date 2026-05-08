@@ -84,6 +84,8 @@ class TradingScheduler:
         self._running = False
         self._phase: str = "idle"
         self._config_loaded = False
+        # 익일 청산 백그라운드 task 추적 (좀비 task 방지 — start() finally에서 cancel)
+        self._next_day_task: asyncio.Task | None = None
 
     async def _load_strategy_config(self) -> None:
         """DB에서 전략 설정(비중/파라미터)을 로드하여 적용한다."""
@@ -216,12 +218,12 @@ class TradingScheduler:
                     await write_log("INFO", f"사전 구독 {len(presub)}종목")
 
             # 09:00 익일 청산은 백그라운드로 (내부 60초 sleep) + 동시에 시가 확정
-            next_day_task: asyncio.Task | None = None
             if now < TIME_NEXT_DAY_CLEAR:
                 self._phase = "next_day_clear"
                 await self._wait_until(TIME_NEXT_DAY_CLEAR)
             if now <= TIME_VB_OPEN_CONFIRM:
-                next_day_task = asyncio.create_task(self._execute_next_day_clear())
+                # self._next_day_task로 보존 — finally/_settle/stop 시점에 lifecycle 추적 (좀비 task 방지)
+                self._next_day_task = asyncio.create_task(self._execute_next_day_clear())
                 # 5초 폴링으로 돌파 시가 확정 → 09:00:05 매매 진입
                 await self._confirm_breakout_open_prices()
                 if self._collect_breakout_tickers():
@@ -312,6 +314,14 @@ class TradingScheduler:
             logger.exception("매매 프로세스 오류")
             await write_log("ERROR", "매매 프로세스 비정상 종료")
         finally:
+            # next_day_task lifecycle — 비정상 종료 시 좀비 task 방지
+            if self._next_day_task and not self._next_day_task.done():
+                self._next_day_task.cancel()
+                try:
+                    await self._next_day_task
+                except (asyncio.CancelledError, Exception):
+                    pass
+            self._next_day_task = None
             self._running = False
             self._phase = "idle"
             await write_log("INFO", "매매 시스템 종료")
@@ -395,6 +405,14 @@ class TradingScheduler:
     async def stop(self) -> None:
         """매매 프로세스를 중지한다."""
         self._running = False
+        # 익일 청산 백그라운드 task 즉시 취소 (60초 sleep 도중에도)
+        if self._next_day_task and not self._next_day_task.done():
+            self._next_day_task.cancel()
+            try:
+                await self._next_day_task
+            except (asyncio.CancelledError, Exception):
+                pass
+        self._next_day_task = None
         await unsubscribe_all()
         await kis_ws.disconnect()
         await write_log("INFO", "매매 시스템 수동 중지")

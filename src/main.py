@@ -3,18 +3,38 @@
 import logging
 import logging.handlers
 import os
+import time
+import tracemalloc
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # KST 타임존
 KST = timezone(timedelta(hours=9))
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config import settings
-from src.routes import trading, balance, history, performance, logs, strategies, recommendations, log_reports
+from src.routes import trading, balance, history, performance, logs, strategies, recommendations, log_reports, system
 from src.auth.token import token_manager
+
+# endpoint별 응답시간 샘플 (ms) — 최근 1024개. /api/system/metrics에서 p50/p95/p99 산출
+_endpoint_metrics: dict[str, deque[float]] = defaultdict(lambda: deque(maxlen=1024))
+
+
+class MetricsMiddleware(BaseHTTPMiddleware):
+    """엔드포인트별 응답시간을 누적 측정 (PR2 측정 인프라)."""
+
+    async def dispatch(self, request: Request, call_next):
+        start = time.perf_counter()
+        response = await call_next(request)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        # path templates(/api/foo/{id})로 정규화하지 않고 raw path 사용 (단순)
+        path = request.url.path
+        _endpoint_metrics[path].append(elapsed_ms)
+        return response
 
 # --- 로깅 설정 ---
 LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs")
@@ -103,6 +123,11 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # MEMORY_PROFILE=true이면 tracemalloc 시작 — 운영 평소엔 끔(CPU 5~10% 오버헤드)
+    if os.environ.get("MEMORY_PROFILE", "").lower() in ("true", "1", "yes"):
+        tracemalloc.start(25)
+        logger.info("tracemalloc 활성화 (depth=25)")
+
     logger.info("=== 서버 시작 (env=%s, port=%s) ===", settings.kis_env, settings.port)
     try:
         await token_manager.get_token()
@@ -154,6 +179,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# 응답시간 측정 미들웨어 — /api/system/metrics에서 p50/p95/p99 노출
+app.add_middleware(MetricsMiddleware)
 
 
 app.include_router(trading.router)
@@ -164,6 +191,7 @@ app.include_router(logs.router)
 app.include_router(strategies.router)
 app.include_router(recommendations.router)
 app.include_router(log_reports.router)
+app.include_router(system.router)
 
 
 @app.get("/health")

@@ -9,3 +9,4 @@ supabase==2.15.1
 pandas==2.2.3
 python-dotenv==1.1.0
 cryptography==44.0.3
+psutil>=5.9.0

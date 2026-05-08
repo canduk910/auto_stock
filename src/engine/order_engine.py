@@ -490,15 +490,19 @@ class OrderEngine:
             self._pending_cancel_tasks[ticker].cancel()
 
         async def _cancel_after_wait():
-            await asyncio.sleep(PARTIAL_FILL_WAIT)
             try:
+                await asyncio.sleep(PARTIAL_FILL_WAIT)
                 await cancel_order(order_no, 0, cancel_all=True)
                 await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id)
                 logger.info("부분 체결 잔여 취소: %s (주문번호: %s)", t(ticker), order_no)
+            except asyncio.CancelledError:
+                pass  # 새 task로 교체됨 — pop은 새 task가 관리
             except Exception:
                 logger.exception("부분 체결 잔여 취소 실패: %s", ticker)
             finally:
-                self._pending_cancel_tasks.pop(ticker, None)
+                # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
+                if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
+                    self._pending_cancel_tasks.pop(ticker, None)
 
         self._pending_cancel_tasks[ticker] = asyncio.create_task(_cancel_after_wait())
 
@@ -510,8 +514,8 @@ class OrderEngine:
             self._pending_cancel_tasks[ticker].cancel()
 
         async def _cancel_and_reorder():
-            await asyncio.sleep(PARTIAL_FILL_WAIT)
             try:
+                await asyncio.sleep(PARTIAL_FILL_WAIT)
                 await cancel_order(order_no, 0, cancel_all=True)
                 strategy_id = self._order_strategy.get(order_no, "momentum")
                 await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id)
@@ -526,10 +530,14 @@ class OrderEngine:
                         price=0,
                     )
                     logger.info("손절 잔여 재주문: %s %d주", t(ticker), remaining)
+            except asyncio.CancelledError:
+                pass  # 새 task로 교체됨 — pop은 새 task가 관리
             except Exception:
                 logger.exception("매도 잔여 취소/재주문 실패: %s", ticker)
             finally:
-                self._pending_cancel_tasks.pop(ticker, None)
+                # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
+                if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
+                    self._pending_cancel_tasks.pop(ticker, None)
 
         self._pending_cancel_tasks[ticker] = asyncio.create_task(_cancel_and_reorder())
 
