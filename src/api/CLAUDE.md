@@ -9,8 +9,9 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - 헤더 자동 구성: authorization, appkey, appsecret, tr_id, custtype("P")
 - Rate Limit: `asyncio.Semaphore` 기반 초당 20건 제한
 - 에러 처리: `rt_cd != "0"` 시 msg_cd + msg1 로깅
-- 자동 ���시도: 네트워크 오류 최대 3회, 지수 백오프
+- 자동 재시도: 네트워크 오류 최대 3회, 지수 백오프(`BACKOFF_BASE=0.5s × 2^(attempt-1)`) + jitter(`0~BACKOFF_JITTER=0.25s` random) — thundering herd 완화
 - 토큰 만료 감지 시 자동 갱신 후 재시도
+- 호출 메트릭: `_request_metrics`(전역 dict)에 total/http_5xx/http_4xx/network_err/kis_error/retries + path별 5xx 카운트 누적. `get_request_metrics()` 스냅샷 / `reset_request_metrics()` 리셋. 일일 로그 분석(`log_analysis_engine.py`)이 20:10 INSERT 후 reset 호출
 
 ### order.py — 주문
 - 현금 매수: TTTC0012U, 매도: TTTC0011U

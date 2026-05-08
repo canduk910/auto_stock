@@ -126,6 +126,7 @@ class OrderEngine:
             return
 
         state.pending_buys.add(ticker)
+        state.order_attempt_today += 1
 
         try:
             result = await place_order(
@@ -364,6 +365,7 @@ class OrderEngine:
                 order_no=order_no,
                 strategy_id=strategy_id,
             )
+            state.fill_count_today += 1
             logger.info("매수 체결 → 포지션 등록: %s %d주 @ %d (전략: %s)", t(ticker), total_filled, price, strategy_id)
         else:
             # 추가 체결 (부분 체결 이후) → 수량/가격 갱신

@@ -124,6 +124,7 @@ src/engine/
 - **매수가능 캐시(60초 TTL)**: `StrategyState.cached_buyable_qty/at` — `get_buyable()` KIS 호출을 매 틱 → 분당 1회로 축소
 - **잔고부족 매수 락(900초)**: `state.block_buy()` — `max_buy_quantity<=0` 또는 KIS 응답이 `is_insufficient_cash`이면 다음 잔고 sync까지 매수 차단. `_sync_positions_from_balance()` 종료 시 `unblock_buy()`로 일괄 해제
 - **per-ticker 매수 수량 0 cooldown(900초)**: `state.block_low_funds(ticker)` — `calc_buy_quantity()<=0`인 종목을 다음 잔고 sync까지 차단. 매 틱 같은 종목에서 "매수 수량 0" 경고가 반복되던 로그 스팸/무의미 호출 차단. `_sync_positions_from_balance()` + `_reset_daily_state()`에서 `clear_low_funds()`로 해제
+- **자금 사전 가드 (RiskManager.on_tick, 2026-05-08)**: `state.is_low_funds_blocked(ticker)` + `current_price > state.total_investment`(1주 매수 자금 미달)이면 `check_buy_signal` 호출 자체 skip — OrderEngine 진입 후 cooldown 등록되던 사후 차단을 사전 차단으로 전환. 자금 회복 시 다음 틱에 즉시 재평가 (universe에서 영구 제외 아님)
 - **매도 잔고부족 즉시 break**: `is_insufficient_quantity` 응답 시 3회 재시도 생략 + 메모리 포지션 + DB positions 정리(다음 sync에서 보정)
 - 체결통보 처리 실패 안전장치: ticker 매핑 실패 시 `pending_buys` 제거, strategy 미발견 시 `_selling` 해제
 - 체결통보 선행 race 가드: `_completed_orders` set + `update_trade_status` 영향 row 0건 보정 INSERT (위 "체결통보" 섹션 참조)
@@ -149,7 +150,7 @@ src/engine/
 - `system_config`: 시스템 설정 (key PK, value JSONB) — auto_start 등
 - `system_logs`: 시스템 로그 (timestamp, log_level, message)
 - `parameter_recommendations`: 전략수정 AI자문 이력 (id, target_date+strategy_id unique, current_params, recommended_params, applied_params, reasoning, metrics, status, created_at/applied_at/rejected_at)
-- `daily_log_reports`: 매일 정산(16:10) 직후 system_logs+trade_history 메트릭을 OpenAI로 분석한 개선 리포트 (id, target_date unique, summary, findings JSONB, metrics JSONB, model, created_at)
+- `daily_log_reports`: 매일 정산(20:10) 직후 system_logs+trade_history 메트릭을 OpenAI로 분석한 개선 리포트 (id, target_date unique, summary, findings JSONB, metrics JSONB, model, created_at). metrics에는 로그 패턴/거래 통계 외에 `api_metrics`(KIS 호출 5xx/4xx/network/retries), `strategy_funnel`(전략별 신호→주문→체결), `trades.by_ticker_pnl` / `trades.by_hour_pnl` 포함
 - status ENUM: PENDING, COMPLETED, PARTIAL, CANCELLED (trade_history) / pending, applied, partial, rejected, expired (parameter_recommendations)
 
 ## Docker 구성
@@ -176,7 +177,7 @@ src/engine/
 - `src/auth/` — KIS OAuth 인증/토큰 관리
 - `src/api/` — KIS REST API 호출 (주문, 잔고, 조건검색, 일봉)
 - `src/realtime/` — KIS WebSocket (시세 구독, 체결통보)
-- `src/engine/` — 매매 핵심 (전략 베이스/레지스트리/개별 전략/주문/리스크/스케줄러, 16:00 AI자문 생성 엔진 `recommendation_engine.py`, 16:10 정산 직후 일일 로그 분석 엔진 `log_analysis_engine.py`)
+- `src/engine/` — 매매 핵심 (전략 베이스/레지스트리/개별 전략/주문/리스크/스케줄러, 19:50 AI자문 생성 엔진 `recommendation_engine.py`, 20:10 정산 직후 일일 로그 분석 엔진 `log_analysis_engine.py`)
 - `src/db/` — Supabase CRUD (`parameter_recommendations`, `log_reports` 포함)
 - `src/routes/` — FastAPI 엔드포인트 (trading, balance, history, performance, logs, strategies, **recommendations**, **log-reports**)
 - `src/models/` — Pydantic 데이터 모델

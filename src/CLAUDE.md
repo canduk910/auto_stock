@@ -28,8 +28,9 @@ models/ ← (모든 모듈에서 사용)
 - 헤더 자동 구성 (authorization, appkey, appsecret, tr_id)
 - `asyncio.Semaphore`로 초당 20건 Rate Limit
 - `rt_cd != "0"` 시 에러 로��
-- 네트워크 오류 시 3회 재시도 (지수 백오프)
+- 네트워크 오류 시 3회 재시도 (지수 백오프 + 0~0.25s jitter)
 - 토큰 만료 시 자동 갱신 후 재시도
+- 호출 메트릭(`_request_metrics`): http_5xx/4xx/network_err/kis_error/retries + path별 5xx 카운트. `get_request_metrics()` / `reset_request_metrics()` 노출, 일일 로그 분석에서 사용
 
 ### TR_ID 관리
 ```python

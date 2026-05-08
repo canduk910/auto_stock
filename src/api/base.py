@@ -9,7 +9,9 @@
 
 import asyncio
 import logging
+import random
 import time
+from collections import defaultdict
 
 import httpx
 
@@ -26,6 +28,41 @@ _rate_lock = asyncio.Lock()
 
 MAX_RETRIES = 3
 BACKOFF_BASE = 0.5  # 초
+BACKOFF_JITTER = 0.25  # thundering herd 완화
+
+# 일일 로그 분석용 호출 메트릭 — generate_daily_log_report 후 reset_request_metrics() 호출
+_request_metrics: dict = {
+    "total": 0,
+    "http_5xx": 0,
+    "http_4xx": 0,
+    "network_err": 0,
+    "kis_error": 0,
+    "retries": 0,
+    "by_path_5xx": defaultdict(int),
+}
+
+
+def get_request_metrics() -> dict:
+    """KIS REST 호출 누적 메트릭 스냅샷 — 일일 로그 분석에서 사용."""
+    return {
+        "total": _request_metrics["total"],
+        "http_5xx": _request_metrics["http_5xx"],
+        "http_4xx": _request_metrics["http_4xx"],
+        "network_err": _request_metrics["network_err"],
+        "kis_error": _request_metrics["kis_error"],
+        "retries": _request_metrics["retries"],
+        "top_5xx_paths": sorted(
+            _request_metrics["by_path_5xx"].items(),
+            key=lambda x: -x[1],
+        )[:5],
+    }
+
+
+def reset_request_metrics() -> None:
+    """일일 리포트 INSERT 직후 호출."""
+    for k in ("total", "http_5xx", "http_4xx", "network_err", "kis_error", "retries"):
+        _request_metrics[k] = 0
+    _request_metrics["by_path_5xx"].clear()
 
 
 class KisApiError(Exception):
@@ -88,6 +125,7 @@ async def _request(
 ) -> dict:
     """공통 요청 래퍼. 재시도 + Rate Limit + 토큰 갱신."""
     url = f"{settings.kis_base_url}{path}"
+    _request_metrics["total"] += 1
 
     for attempt in range(1, MAX_RETRIES + 1):
         await _rate_limit()
@@ -107,18 +145,29 @@ async def _request(
                     resp.raise_for_status()
                     data = resp.json()
             except httpx.HTTPStatusError as e:
+                status = e.response.status_code
+                if 500 <= status < 600:
+                    _request_metrics["http_5xx"] += 1
+                    _request_metrics["by_path_5xx"][path] += 1
+                elif 400 <= status < 500:
+                    _request_metrics["http_4xx"] += 1
                 logger.warning(
                     "HTTP %s (attempt %d/%d): %s",
-                    e.response.status_code,
+                    status,
                     attempt,
                     MAX_RETRIES,
                     path,
                 )
                 if attempt == MAX_RETRIES:
                     raise
-                await asyncio.sleep(BACKOFF_BASE * (2 ** (attempt - 1)))
+                _request_metrics["retries"] += 1
+                await asyncio.sleep(
+                    BACKOFF_BASE * (2 ** (attempt - 1))
+                    + random.uniform(0, BACKOFF_JITTER)
+                )
                 continue
             except httpx.RequestError as e:
+                _request_metrics["network_err"] += 1
                 logger.warning(
                     "네트워크 오류 (attempt %d/%d): %s — %s",
                     attempt,
@@ -128,7 +177,11 @@ async def _request(
                 )
                 if attempt == MAX_RETRIES:
                     raise
-                await asyncio.sleep(BACKOFF_BASE * (2 ** (attempt - 1)))
+                _request_metrics["retries"] += 1
+                await asyncio.sleep(
+                    BACKOFF_BASE * (2 ** (attempt - 1))
+                    + random.uniform(0, BACKOFF_JITTER)
+                )
                 continue
 
         # KIS 응답 코드 확인
@@ -144,8 +197,10 @@ async def _request(
             logger.info("토큰 만료 감지, 재발급 시도")
             await token_manager.issue()
             if attempt < MAX_RETRIES:
+                _request_metrics["retries"] += 1
                 continue
 
+        _request_metrics["kis_error"] += 1
         logger.error("KIS API 에러: rt_cd=%s, msg_cd=%s, msg1=%s", rt_cd, msg_cd, msg1)
         raise KisApiError(rt_cd, msg_cd, msg1)
 

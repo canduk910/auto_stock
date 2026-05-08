@@ -24,7 +24,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - `StrategyBase`: 모든 전략이 구현할 추상 메서드 (prepare, check_buy_signal, check_exit_signal, calc_buy_quantity)
 - `Signal`: NONE, BUY, STOP_LOSS, NEXT_DAY_CLEAR, TRAILING_STOP, FORCE_CLEAR
 - `Position`: ticker, buy_price, quantity, order_no, strategy_id, buy_date, is_next_day(프로퍼티)
-- `StrategyState`: 전략별 독립 상태 (positions, pending_buys, total_investment, daily_realized_pnl, **cached_buyable_qty/amount/at**, **buy_blocked_until**) + 헬퍼(`is_buy_blocked / block_buy / unblock_buy / is_buyable_cache_fresh`)
+- `StrategyState`: 전략별 독립 상태 (positions, pending_buys, total_investment, daily_realized_pnl, **cached_buyable_qty/amount/at**, **buy_blocked_until**, **low_funds_tickers**, **signal_count_today / order_attempt_today / fill_count_today**) + 헬퍼(`is_buy_blocked / block_buy / unblock_buy / is_buyable_cache_fresh / is_low_funds_blocked / block_low_funds / clear_low_funds`). 일일 퍼널 카운터 3종(신호→주문→체결)은 `_reset_daily_state()`에서 0 초기화, 일일 로그 분석 리포트의 `metrics.strategy_funnel`로 노출
 - `StrategyConfig`: strategy_id, name, enabled, weight, params
 
 ### strategy_registry.py — 전략 관리
@@ -74,6 +74,8 @@ TradingScheduler (registry 기반 boot/run/settle)
 ### risk.py — 리스크 관리
 - on_tick(): ticker_prices 갱신(1회) → registry.enabled() 순회 → 전략별 exit/buy 신호
 - **보드 가드** (Phase 8): 매수 신호 평가 전 `session_tracker.is_tradable(strategy_id, params)`로 현재 활성 보드가 전략의 `tradable_boards`에 있는지 확인 — 비활성 보드에서는 신호 평가 자체 skip
+- **자금 사전 가드** (2026-05-08): 매수 신호 평가 전 `state.is_low_funds_blocked(ticker)` + `current_price > state.total_investment`(1주 매수 자금 미달) 사전 차단 — OrderEngine 진입 후 cooldown 등록 사후처리에서 발생하던 매 틱 "매수 수량 0 → 900s cooldown" 경고 노이즈 제거. 자금 회복 시 다음 틱에 즉시 재평가
+- **퍼널 카운터**: BUY 신호 발생 시 `state.signal_count_today += 1` — order/fill 단계 카운터와 합쳐 일일 로그 분석 `metrics.strategy_funnel`로 노출
 - PR7 롤백 이력: 동일가 연속 틱 skip 가드는 **VB 시가 확정 직후 _prev_price=0 first-tick skip + 동일가 PR7 skip이 겹쳐 _prev_price가 영원히 0으로 유지 → 매수 신호 끝까지 미발생** 결함이 발견되어 롤백(2026-05-11). 이벤트 루프 CPU보다 매수 기회 누락 손실이 크다는 판단. 향후 동일 최적화 시 strategy._prev_price 초기화 보장 필수
 - 중복 매수 방지: registry.is_ticker_blocked_for_buy() — 보유/주문중/당일매도 통합 검사 (전략 간)
 
@@ -88,6 +90,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 매수 체결 시 DB positions에 저장 + `state.cached_buyable_at = 0`(가용액 캐시 무효화), 매도 체결 시 DB에서 삭제
 - 매도 체결 시 sold_today에 등록 (당일 재매수 차단)
 - 체결통보 처리 실패 시 안전장치: ticker 매핑 실패 → pending_buys 제거, strategy 미발견 → _selling 해제
+- **퍼널 카운터**: `place_order` 호출 직전 `state.order_attempt_today += 1`, `_handle_buy_fill` 첫 체결(신규 포지션 등록) 시 `state.fill_count_today += 1` — risk.py의 `signal_count_today`와 함께 일일 로그 분석 `metrics.strategy_funnel`로 노출(전략별 신호→주문→체결 단계 추적)
 
 ### session.py — 세션/보드 추상화 (Phase 3)
 - `MarketBoard` enum: `pre_nxt`(NXT 프리 08:00~) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00)
@@ -111,7 +114,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - **15:30 KRX 메인 마감 → NXT 애프터 전환**: 구독 유지(POST_NXT 종목 시세), `_phase = "post_nxt_trading"`
 - **19:50 NXT 애프터 신규 매수 중단 + AI자문**: `buy_disabled = True` for all enabled strategies, `generate_recommendations()` 실행
 - **20:00 NXT 애프터 종료**: `unsubscribe_all()`, `_phase = "closing"`
-- **20:10 정산 + 일일 로그 분석**: `_settle()` + `generate_daily_log_report()`
+- **20:10 정산 + 일일 로그 분석**: `_settle()` → `generate_daily_log_report()` → `_reset_daily_state()` 순서. `_reset_daily_state`는 `_settle` 안에서 호출하지 않고 run loop가 log_analysis 직후 별도 호출 — 일일 퍼널 카운터(`signal_count_today/order_attempt_today/fill_count_today`)가 분석 리포트 수집 *전*에 0으로 초기화되는 것을 막기 위함
 - _execute_next_day_clear(): 다음 영업일 NXT 프리 첫 거래 시가 + 30초 안정화 후 즉시 청산(Q2=B). 시가 미수신 시 `_resolve_open_price()` 폴백
 - _confirm_breakout_open_prices(board=None): 보드별 시가 확정. board 미지정 시 SessionTracker 활성 보드 우선순위(main → post_nxt → pre_nxt)로 결정. 해당 보드를 `tradable_boards`에 활성화한 전략만 대상
 - _force_clear_main_only(): 15:20 KRX 메인 강제 청산. POST_NXT 활성 전략은 유지(19:50 매수 중단까지)
@@ -130,8 +133,13 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info
 
 ### log_analysis_engine.py — 일일 로그 분석 리포트
-- 16:10 정산 직후(`_settle()` 호출 직후, `_phase = "log_analysis"`) `generate_daily_log_report()` 호출
+- 20:10 정산 직후(`_settle()` 완료 후, `_phase = "log_analysis"`) `generate_daily_log_report()` 호출. 호출 *후* run loop가 `_reset_daily_state()`를 별도 실행 — 퍼널 카운터 보존
 - 당일 KST 00:00~now의 `system_logs`(레벨별 카운트 + 종목코드/숫자 마스킹 후 패턴 집계 + 상위 패턴 샘플) + `trade_history`(매수/매도/실현손익/전략별/상태별 집계) → OpenAI 호출 → `daily_log_reports`에 INSERT
+- **확장 메트릭 (2026-05-08)**:
+  - `api_metrics`: `api/base.py`의 `get_request_metrics()` — 호출 총량/HTTP 5xx·4xx/network/kis_error/retries + 5xx 상위 path 5개. INSERT 후 `reset_request_metrics()`로 리셋 → 다음 영업일 누적 시작
+  - `strategy_funnel`: 전략별 `{signals, orders, fills}` (registry 순회) — VB가 신호만 있고 체결 없는 패턴 등 단계별 깔때기 추적
+  - `trades.by_ticker_pnl`: SELL 거래의 종목별 PnL — 절대값 큰 순 상위 5개
+  - `trades.by_hour_pnl`: SELL 거래의 KST hour별 PnL
 - 출력 스키마: `{summary, findings: [{category, severity(high/medium/low), title, detail, suggestion}]}` — 화이트리스트 검증 후 저장
 - 카테고리: trading, order, websocket, scan, balance, settlement, data_quality, infra, etc
 - (target_date) UNIQUE — 동일 영업일 재실행 시 INSERT 무시 (None 반환)

@@ -350,6 +350,7 @@ class TradingScheduler:
             await self._settle()
 
             # 정산 직후: 일일 로그 분석 리포트 (실패해도 정산엔 영향 없음)
+            # 주의: _reset_daily_state()는 log_analysis 후 호출 — funnel 카운터 수집 전에 0이 되면 안 됨
             self._phase = "log_analysis"
             try:
                 from src.engine.log_analysis_engine import generate_daily_log_report
@@ -358,6 +359,9 @@ class TradingScheduler:
             except Exception:
                 logger.exception("일일 로그 분석 리포트 생성 실패")
                 await write_log("ERROR", "일일 로그 분석 리포트 생성 실패")
+
+            # log_analysis가 funnel 카운터를 수집한 후에 일일 상태 초기화
+            self._reset_daily_state()
 
             await kis_ws.disconnect()
             try:
@@ -1354,8 +1358,7 @@ class TradingScheduler:
             logger.exception("정산 오류")
             await write_log("ERROR", "일일 정산 실패")
 
-        # 정산 후 전략별 일간 상태 초기화 (다음 날 _boot()에서 DB 기반으로 재구성)
-        self._reset_daily_state()
+        # 일간 상태 초기화는 _settle 호출자(run loop)에서 log_analysis 후 별도 호출 — funnel 카운터 보존을 위해
 
     def _reset_daily_state(self) -> None:
         """일간 상태를 초기화한다. 정산 완료 후 호출."""
@@ -1368,6 +1371,9 @@ class TradingScheduler:
             strategy.state.buy_disabled = False
             strategy.state.buy_signals.clear()
             strategy.state.low_funds_tickers.clear()
+            strategy.state.signal_count_today = 0
+            strategy.state.order_attempt_today = 0
+            strategy.state.fill_count_today = 0
 
         # OrderEngine 추적 상태 초기화
         self.order_engine._selling.clear()

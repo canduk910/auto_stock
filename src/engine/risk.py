@@ -7,6 +7,7 @@
 """
 
 import logging
+import time
 
 from src.engine.order_engine import OrderEngine
 from src.engine.session import session_tracker
@@ -80,6 +81,15 @@ class RiskManager:
             if self.registry.is_ticker_blocked_for_buy(ticker):
                 continue
 
+            # 자금 부족 사전 가드 — calc_buy_quantity 1주 fallback 조건과 동일.
+            # OrderEngine cooldown 등록(매 틱 경고 5건/일)을 줄이기 위해 신호 평가 자체 skip.
+            now_ts = time.time()
+            if state.is_low_funds_blocked(ticker, now_ts):
+                continue
+            if state.total_investment > 0 and current_price > state.total_investment:
+                continue
+
             signal = strategy.check_buy_signal(ticker, current_price, open_price)
             if signal == Signal.BUY:
+                state.signal_count_today += 1
                 await self.order_engine.execute_buy(ticker, current_price, strategy)

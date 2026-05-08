@@ -19,6 +19,7 @@ from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
+from src.api.base import get_request_metrics, reset_request_metrics
 from src.config import settings
 from src.db.log_reports import insert_log_report
 from src.db.supabase import supabase
@@ -128,6 +129,9 @@ def _aggregate_trades(trades: list[dict]) -> dict[str, Any]:
     pending = 0
     completed = 0
     cancelled = 0
+    # 종목별/시간대별 손익 분해 — SELL 거래만 집계
+    ticker_pnl: dict[str, dict[str, float]] = {}
+    hour_pnl: dict[str, dict[str, float]] = {}
 
     for t in trades:
         strat = t.get("strategy") or "unknown"
@@ -138,16 +142,55 @@ def _aggregate_trades(trades: list[dict]) -> dict[str, Any]:
             buys += 1
         elif ttype == "SELL":
             sells += 1
+            pnl = 0.0
             try:
-                realized_pnl += float(t.get("profit_loss") or 0)
+                pnl = float(t.get("profit_loss") or 0)
             except (TypeError, ValueError):
-                pass
+                pnl = 0.0
+            realized_pnl += pnl
+
+            # 종목별
+            ticker = t.get("ticker") or ""
+            if ticker:
+                bucket = ticker_pnl.setdefault(ticker, {"realized_pnl": 0.0, "sell_count": 0})
+                bucket["realized_pnl"] += pnl
+                bucket["sell_count"] += 1
+
+            # 시간대별 (KST hour)
+            ts = t.get("timestamp")
+            if ts:
+                try:
+                    if isinstance(ts, str):
+                        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                    else:
+                        dt = ts
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=timezone.utc)
+                    hour_key = f"{dt.astimezone(KST).hour:02d}"
+                    hbucket = hour_pnl.setdefault(hour_key, {"realized_pnl": 0.0, "sell_count": 0})
+                    hbucket["realized_pnl"] += pnl
+                    hbucket["sell_count"] += 1
+                except (ValueError, TypeError):
+                    pass
+
         if status == "PENDING":
             pending += 1
         elif status == "COMPLETED":
             completed += 1
         elif status == "CANCELLED":
             cancelled += 1
+
+    # 종목별 상위 5개(절대값 큰 순)
+    by_ticker_pnl = {
+        ticker: {"realized_pnl": round(v["realized_pnl"], 0), "sell_count": v["sell_count"]}
+        for ticker, v in sorted(
+            ticker_pnl.items(), key=lambda x: -abs(x[1]["realized_pnl"])
+        )[:5]
+    }
+    by_hour_pnl = {
+        h: {"realized_pnl": round(v["realized_pnl"], 0), "sell_count": v["sell_count"]}
+        for h, v in sorted(hour_pnl.items())
+    }
 
     return {
         "trades_total": len(trades),
@@ -158,6 +201,8 @@ def _aggregate_trades(trades: list[dict]) -> dict[str, Any]:
         "by_status": {
             "PENDING": pending, "COMPLETED": completed, "CANCELLED": cancelled,
         },
+        "by_ticker_pnl": by_ticker_pnl,
+        "by_hour_pnl": by_hour_pnl,
     }
 
 
@@ -255,11 +300,15 @@ async def generate_daily_log_report() -> dict | None:
 
     log_metrics = _aggregate_logs(logs)
     trade_metrics = _aggregate_trades(trades)
+    api_metrics = get_request_metrics()
+    strategy_funnel = _collect_strategy_funnel()
 
     metrics = {
         "target_date": target_date.isoformat(),
         "logs": log_metrics,
         "trades": trade_metrics,
+        "api_metrics": api_metrics,
+        "strategy_funnel": strategy_funnel,
     }
 
     logger.info(
@@ -295,4 +344,23 @@ async def generate_daily_log_report() -> dict | None:
             "로그 분석 리포트 저장 완료 — %s, findings %d건",
             target_date, len(findings),
         )
+    # 리포트 INSERT 후 api 메트릭 리셋 — 다음 영업일 누적 시작
+    reset_request_metrics()
     return row
+
+
+def _collect_strategy_funnel() -> dict[str, dict[str, int]]:
+    """전략별 신호→주문→체결 카운터 수집 — 정산 후 _reset_daily_state 직전에 호출됨."""
+    try:
+        from src.engine.scheduler import trading_scheduler
+    except ImportError:
+        return {}
+    funnel: dict[str, dict[str, int]] = {}
+    for strategy in trading_scheduler.registry.all():
+        s = strategy.state
+        funnel[strategy.strategy_id] = {
+            "signals": s.signal_count_today,
+            "orders": s.order_attempt_today,
+            "fills": s.fill_count_today,
+        }
+    return funnel

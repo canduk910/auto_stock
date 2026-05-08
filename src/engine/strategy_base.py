@@ -61,6 +61,10 @@ class StrategyState:
     # per-ticker 매수 수량 0 cooldown — calc_buy_quantity() == 0인 종목에 대해
     # 매 틱마다 똑같은 경고가 반복되는 로그 스팸 + 무의미 호출 차단. 잔고 sync 시 해제.
     low_funds_tickers: dict[str, float] = field(default_factory=dict)  # ticker -> 만료 epoch
+    # 일일 매매 퍼널 — 신호→주문→체결 단계별 카운터. _reset_daily_state에서 0 초기화.
+    signal_count_today: int = 0
+    order_attempt_today: int = 0
+    fill_count_today: int = 0
 
     def has_position(self, ticker: str) -> bool:
         return ticker in self.positions
