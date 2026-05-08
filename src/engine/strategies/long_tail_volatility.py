@@ -56,6 +56,8 @@ class LongTailVolatilityStrategy(StrategyBase):
 
     async def prepare(self) -> None:
         """장 시작 전: 종목 스캔 → K값 계산 → 연속상한가 필터링."""
+        import asyncio
+
         from src.api.condition import fetch_daily_candles
 
         tickers = await self._scan_universe()
@@ -64,10 +66,20 @@ class LongTailVolatilityStrategy(StrategyBase):
         today_str = date.today().strftime("%Y%m%d")
         prepared = 0
 
-        for ticker in tickers:
+        # 일봉 fetch 병렬화 (KIS Rate Limit semaphore가 자동 직렬화)
+        async def _fetch_one(ticker: str):
             try:
-                # candles[0]이 "오늘 부분봉"인 경우를 고려해 +2 여유분 확보
-                candles = await fetch_daily_candles(ticker, days=k_period + 2)
+                return ticker, await fetch_daily_candles(ticker, days=k_period + 2)
+            except Exception as e:
+                logger.warning("롱테일 일봉 fetch 실패: %s — %s", ticker, e)
+                return ticker, None
+
+        fetched = await asyncio.gather(*[_fetch_one(t) for t in tickers])
+
+        for ticker, candles in fetched:
+            if candles is None:
+                continue
+            try:
                 if len(candles) < 2:
                     continue
 

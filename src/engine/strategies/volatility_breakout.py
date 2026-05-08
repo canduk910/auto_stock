@@ -46,6 +46,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
     async def prepare(self) -> None:
         """장 시작 전: 시총/거래대금 조건 종목 스캔 → 21일 일봉으로 K값/Target 계산."""
+        import asyncio
+
         from src.api.condition import fetch_daily_candles
 
         tickers = await self._scan_universe()
@@ -53,10 +55,20 @@ class VolatilityBreakoutStrategy(StrategyBase):
         today_str = date.today().strftime("%Y%m%d")
         prepared = 0
 
-        for ticker in tickers:
+        # 일봉 fetch 병렬화 (KIS Rate Limit semaphore가 자동 직렬화)
+        async def _fetch_one(ticker: str):
             try:
-                # candles[0]이 "오늘 부분봉"인 경우를 고려해 +2 여유분 확보
-                candles = await fetch_daily_candles(ticker, days=k_period + 2)
+                return ticker, await fetch_daily_candles(ticker, days=k_period + 2)
+            except Exception as e:
+                logger.warning("변동성돌파 일봉 fetch 실패: %s — %s", ticker, e)
+                return ticker, None
+
+        fetched = await asyncio.gather(*[_fetch_one(t) for t in tickers])
+
+        for ticker, candles in fetched:
+            if candles is None:
+                continue
+            try:
                 if len(candles) < 2:
                     continue
 

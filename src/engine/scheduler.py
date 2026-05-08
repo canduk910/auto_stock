@@ -1268,7 +1268,18 @@ class TradingScheduler:
             task.cancel()
         self.order_engine._pending_cancel_tasks.clear()
 
-        logger.info("일간 상태 초기화 완료")
+        # scanner 글로벌 dict 누수 방지 — 정산 후 매일 정리(STATIC_TICKER_NAMES는 모듈 import 시 자동 시드되므로 그대로 유지)
+        from src.engine.scanner import (
+            STATIC_TICKER_NAMES, ticker_market_info, ticker_names,
+            ticker_prev_close, ticker_prices,
+        )
+        ticker_prices.clear()
+        ticker_prev_close.clear()
+        ticker_market_info.clear()
+        ticker_names.clear()
+        ticker_names.update(STATIC_TICKER_NAMES)  # 정적 시드 재주입
+
+        logger.info("일간 상태 초기화 완료 (scanner 캐시 clear 포함)")
 
     async def _wait_until(self, target: time) -> None:
         """지정 시각까지 대기한다."""

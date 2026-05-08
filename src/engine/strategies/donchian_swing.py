@@ -70,6 +70,8 @@ class DonchianSwingStrategy(StrategyBase):
 
     async def prepare(self) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
+        import asyncio
+
         from src.api.condition import fetch_daily_candles
 
         params = self.config.params
@@ -97,9 +99,23 @@ class DonchianSwingStrategy(StrategyBase):
         prepared = 0
         short_candles_logged = False  # 길이 부족 시 첫 1건만 system_logs에 기록
 
-        for ticker in tickers:
+        # 일봉 fetch 병렬화 — KIS Rate Limit(20/sec)는 base.py Semaphore에서 직렬화되므로
+        # asyncio.gather로 안전하게 묶을 수 있음. 100+ 종목 순차 호출(5~10초) → 1~2초로 단축
+        async def _fetch_one(ticker: str):
             try:
-                candles = await fetch_daily_candles(ticker, days=fetch_days)
+                return ticker, await fetch_daily_candles(ticker, days=fetch_days)
+            except Exception as e:
+                logger.warning("도치안 일봉 fetch 실패: %s — %s", ticker, e)
+                return ticker, None
+
+        fetched = await asyncio.gather(*[_fetch_one(t) for t in tickers])
+
+        for ticker, candles in fetched:
+            if candles is None:
+                continue
+            try:
+                # candles 변수는 fetch 결과를 그대로 사용 (await 제거)
+                pass
                 if len(candles) < long_ma_period + 1:
                     if not short_candles_logged:
                         from src.db.system_logs import write_log
