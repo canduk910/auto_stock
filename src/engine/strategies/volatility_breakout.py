@@ -19,12 +19,22 @@ logger = logging.getLogger(__name__)
 class VolatilityBreakoutStrategy(StrategyBase):
     """변동성 돌파 전략."""
 
+    # 매매 가능 보드 (Phase 8) — Q3=A 야간 매매 활성화. PRE_NXT/MAIN/POST_NXT 모두 활성
+    DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main", "post_nxt")
+
     DEFAULT_PARAMS = {
+        "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         "stop_loss_rate": -3.0,
         "position_ratio": 0.10,
         "max_positions": 10,
         "daily_loss_limit": -5.0,
         "k_period": 20,
+        # 보드별 K값 곱 (Phase 5 Q1=C: 보드별 분리). 기본 동일값으로 시작 후 운영 데이터로 튜닝
+        "k_value_krx_main": 1.0,
+        "k_value_nxt_pre": 1.0,
+        "k_value_nxt_post": 1.0,
+        # 거래소 라우팅 (Phase 4): KRX / NXT / SOR. 미설정 시 KRX
+        "exchange": "KRX",
         # 종목 스캔 조건 (Settings에서 변경 가능)
         "min_market_cap": 100_000_000_000,   # 시총 1,000억 이상
         "min_trade_amount": 20_000_000_000,  # 거래대금 200억 이상
@@ -35,12 +45,12 @@ class VolatilityBreakoutStrategy(StrategyBase):
         merged = {**self.DEFAULT_PARAMS, **config.params}
         config.params = merged
         super().__init__(config)
-        # ticker -> {"target_price": int, "k": float, "open_price": int}
+        # ticker -> {target_offset_base, k, prev_range, boards: {board: {open_price, target_price, target_offset}}}
         self._targets: dict[str, dict] = {}
-        # ticker -> 시가 확정 여부
-        self._open_confirmed: dict[str, bool] = {}
-        # ticker -> 이전 틱 가격 (돌파 순간 감지용)
-        self._prev_price: dict[str, int] = {}
+        # ticker -> {board: bool} — 보드별 시가 확정 여부 (Phase 5 분리)
+        self._open_confirmed: dict[str, dict[str, bool]] = {}
+        # ticker -> 보드별 이전 틱 가격 (보드별 돌파 순간 감지용)
+        self._prev_price: dict[str, dict[str, int]] = {}
         # 스캔된 종목 리스트 (subscribe용)
         self._scanned_tickers: list[str] = []
 
@@ -117,11 +127,16 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 self._targets[ticker] = {
                     "k": round(k, 4),
                     "prev_range": prev_range,
+                    "target_offset_base": target_offset,  # k_value_* 곱 전 기본값
+                    # backwards-compat (단일 보드 운영 시)
                     "target_offset": target_offset,
                     "target_price": 0,
                     "open_price": 0,
+                    # 보드별 시가/타겟 (Phase 5 Q1=C 분리)
+                    "boards": {},
                 }
-                self._open_confirmed[ticker] = False
+                # 보드별 confirmed 플래그
+                self._open_confirmed[ticker] = {}
 
                 # 09:30 scan_stocks() 이전에도 등락률 필터가 동작하도록 전일종가 사전 등록
                 from src.engine.scanner import ticker_prev_close
@@ -244,31 +259,84 @@ class VolatilityBreakoutStrategy(StrategyBase):
         return self._scanned_tickers
 
     def get_targets_status(self) -> dict[str, dict]:
-        """종목별 타겟 가격 정보를 반환한다."""
-        return {
-            ticker: {
-                "k": info["k"],
-                "target_price": info["target_price"],
-                "open_price": info["open_price"],
-                "target_offset": info["target_offset"],
-                "open_confirmed": self._open_confirmed.get(ticker, False),
-            }
-            for ticker, info in self._targets.items()
-        }
+        """종목별 타겟 가격 정보를 반환한다.
 
-    def on_open_price_confirmed(self, ticker: str, open_price: int) -> None:
-        """시가 확정 시 Target Price를 계산한다."""
+        Phase 5 보드별 분리 도입 후 응답 호환성:
+        - top-level `target_price/open_price/target_offset`은 기본 보드(첫 확정된 보드, 일반적으로 main)
+        - 추가 `boards`에 보드별 상세 노출
+        - `open_confirmed`는 보드 단위 dict (`{board: bool}`)
+        """
+        result = {}
+        for ticker, info in self._targets.items():
+            board_states = self._open_confirmed.get(ticker, {})
+            result[ticker] = {
+                "k": info.get("k", 0),
+                "target_price": info.get("target_price", 0),
+                "open_price": info.get("open_price", 0),
+                "target_offset": info.get("target_offset", 0),
+                "boards": {
+                    board: {
+                        "open_price": b.get("open_price", 0),
+                        "target_price": b.get("target_price", 0),
+                        "target_offset": b.get("target_offset", 0),
+                        "confirmed": board_states.get(board, False),
+                    }
+                    for board, b in info.get("boards", {}).items()
+                },
+                "open_confirmed": board_states,
+            }
+        return result
+
+    _BOARD_K_KEY = {
+        "main": "k_value_krx_main",
+        "pre_nxt": "k_value_nxt_pre",
+        "post_nxt": "k_value_nxt_post",
+    }
+
+    def _resolve_active_board(self) -> str | None:
+        """현재 활성 보드 중 전략의 tradable_boards에 포함된 첫 보드를 반환.
+
+        우선순위 main → post_nxt → pre_nxt — KRX 메인 활성 시 그것을 우선.
+        """
+        from src.engine.session import session_tracker, MarketBoard
+
+        active = session_tracker.active
+        if not active:
+            return None
+        allowed = self.config.params.get("tradable_boards") or list(self.DEFAULT_TRADABLE_BOARDS)
+        for candidate in ("main", "post_nxt", "pre_nxt"):
+            if candidate in allowed and MarketBoard(candidate) in active:
+                return candidate
+        return None
+
+    def on_open_price_confirmed(self, ticker: str, open_price: int, board: str = "main") -> None:
+        """보드별 시가 확정 — Target Price를 보드별로 계산한다."""
         info = self._targets.get(ticker)
-        if not info:
+        if not info or open_price <= 0:
             return
-        info["open_price"] = open_price
-        info["target_price"] = open_price + info["target_offset"]
-        self._open_confirmed[ticker] = True
+
+        base = info.get("target_offset_base", info.get("target_offset", 0))
+        k_key = self._BOARD_K_KEY.get(board, "k_value_krx_main")
+        k_mult = float(self.config.params.get(k_key, 1.0))
+        target_offset = max(int(base * k_mult), 0)
+
+        info.setdefault("boards", {})[board] = {
+            "open_price": open_price,
+            "target_price": open_price + target_offset,
+            "target_offset": target_offset,
+        }
+        self._open_confirmed.setdefault(ticker, {})[board] = True
+
+        # backwards-compat: 첫 확정된 보드의 값을 top-level에도 (대시보드/AI자문 호환)
+        if not info.get("open_price"):
+            info["open_price"] = open_price
+            info["target_price"] = open_price + target_offset
+            info["target_offset"] = target_offset
 
     def check_buy_signal(
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:
-        """현재가 >= Target Price 시 매수."""
+        """현재 활성 보드의 Target Price 돌파 시 매수."""
         if self.state.buy_disabled:
             return Signal.NONE
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker) or self.state.is_sold_today(ticker):
@@ -282,27 +350,37 @@ class VolatilityBreakoutStrategy(StrategyBase):
         if not info:
             return Signal.NONE
 
-        # 시가 미확정 시 현재가를 시가로 사용하여 확정
-        if not self._open_confirmed.get(ticker, False) and open_price > 0:
-            self.on_open_price_confirmed(ticker, open_price)
+        board = self._resolve_active_board()
+        if board is None:
+            return Signal.NONE
 
-        target = info.get("target_price", 0)
+        # 시가 미확정 시 현재가를 보드 시가로 사용하여 즉시 확정
+        confirmed = self._open_confirmed.get(ticker, {}).get(board, False)
+        if not confirmed and open_price > 0:
+            self.on_open_price_confirmed(ticker, open_price, board=board)
+
+        board_info = info.get("boards", {}).get(board)
+        if not board_info:
+            return Signal.NONE
+
+        target = board_info.get("target_price", 0)
         if target <= 0:
             return Signal.NONE
 
-        prev = self._prev_price.get(ticker, 0)
-        self._prev_price[ticker] = current_price
+        prev = self._prev_price.setdefault(ticker, {}).get(board, 0)
+        self._prev_price[ticker][board] = current_price
 
-        # 돌파 순간만 감지: 이전 틱이 타겟 미만 → 현재 틱이 타겟 이상
+        # 보드별 첫 틱은 기록만, 돌파 순간만 감지
         if prev == 0:
-            # 첫 틱은 기록만 하고 건너뜀
             return Signal.NONE
 
         if prev < target and current_price >= target:
             from src.engine.scanner import t, ticker_names
+            board_open = board_info.get("open_price", 0)
+            change_rate = round((current_price - board_open) / board_open * 100, 1) if board_open > 0 else 0
             logger.info(
-                "변동성돌파 매수 신호: %s 현재가(%d) >= 목표가(%d), 이전가(%d), K=%.4f",
-                t(ticker), current_price, target, prev, info["k"],
+                "변동성돌파 매수 신호 [%s]: %s 현재가(%d) >= 목표가(%d), 이전가(%d), K=%.4f",
+                board, t(ticker), current_price, target, prev, info["k"],
             )
             self.state.buy_signals.append({
                 "ticker": ticker,
@@ -310,7 +388,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 "price": current_price,
                 "target_price": target,
                 "k": info["k"],
-                "change_rate": round((current_price - info["open_price"]) / info["open_price"] * 100, 1) if info["open_price"] > 0 else 0,
+                "board": board,
+                "change_rate": change_rate,
                 "time": datetime.now().strftime("%H:%M:%S"),
             })
             if len(self.state.buy_signals) > 20:
@@ -344,7 +423,18 @@ class VolatilityBreakoutStrategy(StrategyBase):
         return list(self.state.positions.keys())
 
     def calc_buy_quantity(self, current_price: int) -> int:
-        """할당 자금의 10% 비중으로 매수 수량 계산."""
+        """할당 자금의 position_ratio 비중으로 매수 수량 계산.
+
+        비중 기준 0주이지만 신호가 이미 발생한 상태에서 자금이 1주는 살 수 있으면
+        1주 매수 — 매수 기회 누락 방지(고가 종목이라 비중 가드에 막혀도 신호 우선).
+        """
+        if current_price <= 0:
+            return 0
         ratio = self.config.params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        return amount // current_price if current_price > 0 else 0
+        qty = amount // current_price
+        if qty > 0:
+            return qty
+        if self.state.total_investment >= current_price:
+            return 1
+        return 0

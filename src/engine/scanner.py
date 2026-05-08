@@ -44,8 +44,9 @@ ETF_KEYWORDS = ("KODEX", "TIGER", "KBSTAR", "KOSEF", "ARIRANG", "SOL", "ACE",
                 "HANARO", "히어로즈", "마이티", "BNK", "MASTER", "WON",
                 "ETN", "선물", "인버스", "레버리지", "채권", "혼합")
 
-# 실시간 체결가 TR_ID
-TICK_TR_ID = "H0STCNT0"
+# 실시간 체결가 TR_ID — KRX+NXT 통합 (H0UNCNT0)
+# 메시지 포맷은 H0STCNT0과 동일. NXT 거래도 같은 콜백으로 즉시 흘러옴
+TICK_TR_ID = "H0UNCNT0"
 
 
 async def scan_stocks() -> list[str]:

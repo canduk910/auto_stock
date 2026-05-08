@@ -28,8 +28,12 @@ async def place_order(
     quantity: int,
     price: int = 0,
     order_division: OrderDivision = OrderDivision.MARKET,
+    exchange: str = "KRX",
 ) -> OrderResult:
-    """현금 매수 또는 매도 주문을 실행한다."""
+    """현금 매수 또는 매도 주문을 실행한다.
+
+    `exchange`: `KRX`(기본) / `NXT` / `SOR`. 모의투자(VTS)는 KRX만 허용.
+    """
     base_tr_id = "TTTC0012U" if side == OrderSide.BUY else "TTTC0011U"
     tr_id = settings.get_tr_id(base_tr_id)
 
@@ -40,6 +44,7 @@ async def place_order(
         "ORD_DVSN": order_division.value,
         "ORD_QTY": str(quantity),
         "ORD_UNPR": str(price),
+        "EXCG_ID_DVSN_CD": exchange,
     }
 
     hashkey = await generate_hashkey(body)
@@ -69,8 +74,12 @@ async def cancel_order(
     price: int = 0,
     *,
     cancel_all: bool = True,
+    exchange: str = "KRX",
 ) -> OrderResult:
-    """주문 정정 또는 취소를 실행한다."""
+    """주문 정정 또는 취소를 실행한다.
+
+    `exchange`: 원주문이 접수된 거래소. `KRX`(기본) / `NXT` / `SOR`.
+    """
     tr_id = settings.get_tr_id("TTTC0013U")
 
     body = {
@@ -83,6 +92,7 @@ async def cancel_order(
         "ORD_QTY": str(quantity),
         "ORD_UNPR": str(price),
         "QTY_ALL_ORD_YN": "Y" if cancel_all else "N",
+        "EXCG_ID_DVSN_CD": exchange,
     }
 
     hashkey = await generate_hashkey(body)

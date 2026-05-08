@@ -16,10 +16,13 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - 현금 매수: TTTC0012U, 매도: TTTC0011U
 - 정정/취소: TTTC0013U
 - `settings.get_tr_id()`로 모의/실전 자동 변환
+- `place_order(..., exchange="KRX")` / `cancel_order(..., exchange="KRX")`: 거래소ID 구분(`EXCG_ID_DVSN_CD`) body 필드. `KRX`(기본) / `NXT` / `SOR`. 모의투자(VTS)는 KRX만 허용 — SOR/NXT는 실전 한정. 호출자 미지정 시 KRX로 동작(후방 호환)
 
 ### balance.py — 잔고/조회
 - 잔고조회: TTTC8434R
 - 매수가능조회: TTTC8908R
+- `get_balance(afhr_flpr="N")`: `AFHR_FLPR_YN` query param. `N`(기본, 정규장) / `Y`(시간외 단일가) / `X`(NXT 정규장) — required
+- `get_daily_orders(target_date="", exchange="ALL")`: TTTC0081R 주식일별주문체결조회. `EXCG_ID_DVSN_CD` query param required — `ALL`(기본, KRX+NXT+SOR 합산) / `KRX` / `NXT` / `SOR`. KIS 명세 갱신(2026-05-08)에서 required로 강제 — NXT 체결 누락 방지 위해 기본값 ALL
 - `is_insufficient_cash(KisApiError) -> bool`: 매수 실패 응답이 '주문가능금액 부족'(예수금 부족) 사유인지 식별. msg_cd 화이트리스트 + msg1 키워드("부족" + "주문가능금액/예수금/현금") 동시 검사. OrderEngine 매수 락 결정용.
 - `is_insufficient_quantity(KisApiError) -> bool`: 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 식별. 매도 즉시 break + 메모리 포지션 정리 결정용.
 

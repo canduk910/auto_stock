@@ -1,0 +1,172 @@
+"""세션/보드 추상화 — KRX/NXT 매매 시간대 정책.
+
+KRX(09:00~15:30) + NXT(08:00~20:00) 통합 운영 시 어느 보드(세션 단계)가
+현재 활성인지 추적하고, 각 전략이 어느 보드에서 매매 가능한지 판정한다.
+
+활성 보드 결정:
+- 1차: 시각 기반 매핑 (`_BOARD_SCHEDULE`) — 항상 동작
+- 2차: `H0NXMKO0`(NXT 장운영정보) 실시간 메시지로 정확도 보강 — 메시지 필드
+       명세 미확정이라 코드 기록만 하고 향후 운영 데이터로 점진 정확화
+
+전략별 매매 허용 보드는 `DEFAULT_PARAMS["tradable_boards"]` (Phase 8) 또는
+`_DEFAULT_TRADABLE_BOARDS` fallback에서 가져온다.
+"""
+
+from __future__ import annotations
+
+import logging
+from datetime import datetime, time
+from enum import Enum
+from typing import Awaitable, Callable
+
+logger = logging.getLogger(__name__)
+
+
+class MarketBoard(str, Enum):
+    """매매 가능 보드 구분."""
+
+    PRE_NXT = "pre_nxt"          # NXT 프리마켓 (~09:00 직전)
+    KRX_OPEN = "krx_open"        # KRX 동시호가 (08:30~09:00)
+    MAIN = "main"                # KRX+NXT 메인 (09:00~15:20)
+    KRX_AFTER = "krx_after"      # KRX 시간외 단일가 (15:30~18:00)
+    POST_NXT = "post_nxt"        # NXT 애프터마켓 (15:30~20:00)
+
+
+# 시각 기반 보드 매핑 — H0NXMKO0 미수신 시 fallback (NXT 통상 시간 기준)
+# (start, end, active_boards) — start <= now < end
+_BOARD_SCHEDULE: list[tuple[time, time, frozenset[MarketBoard]]] = [
+    (time(8, 0), time(8, 30), frozenset({MarketBoard.PRE_NXT})),
+    (time(8, 30), time(9, 0), frozenset({MarketBoard.PRE_NXT, MarketBoard.KRX_OPEN})),
+    (time(9, 0), time(15, 20), frozenset({MarketBoard.MAIN})),
+    (time(15, 20), time(15, 30), frozenset({MarketBoard.MAIN})),  # buy_stop 구간(전략별로 가드)
+    (time(15, 30), time(18, 0), frozenset({MarketBoard.KRX_AFTER, MarketBoard.POST_NXT})),
+    (time(18, 0), time(20, 0), frozenset({MarketBoard.POST_NXT})),
+]
+
+
+# 전략별 매매 허용 보드 fallback (DEFAULT_PARAMS["tradable_boards"]가 우선)
+_DEFAULT_TRADABLE_BOARDS: dict[str, frozenset[MarketBoard]] = {
+    "momentum": frozenset({MarketBoard.KRX_OPEN, MarketBoard.MAIN}),
+    "volatility_breakout": frozenset({
+        MarketBoard.PRE_NXT, MarketBoard.MAIN, MarketBoard.POST_NXT,
+    }),
+    "long_tail_volatility": frozenset({
+        MarketBoard.PRE_NXT, MarketBoard.MAIN, MarketBoard.POST_NXT,
+    }),
+    "donchian_swing": frozenset({MarketBoard.MAIN}),
+}
+
+
+def boards_at(now_t: time) -> frozenset[MarketBoard]:
+    """지정 시각에 활성인 보드 집합 (시각 기반)."""
+    for start, end, boards in _BOARD_SCHEDULE:
+        if start <= now_t < end:
+            return boards
+    return frozenset()
+
+
+def parse_tradable_boards(value) -> frozenset[MarketBoard]:
+    """DEFAULT_PARAMS / strategy_config의 tradable_boards 값을 파싱.
+
+    list/tuple/set의 각 항목은 `MarketBoard` enum 값(`"main"`, `"pre_nxt"` 등) 문자열.
+    None/빈 값이면 빈 frozenset 반환 (호출자가 fallback 결정).
+    """
+    if not value:
+        return frozenset()
+    boards: set[MarketBoard] = set()
+    for v in value:
+        try:
+            boards.add(MarketBoard(v))
+        except ValueError:
+            logger.warning("tradable_boards 알 수 없는 값 무시: %s", v)
+    return frozenset(boards)
+
+
+def get_tradable_boards(strategy_id: str, params: dict | None = None) -> frozenset[MarketBoard]:
+    """전략의 매매 허용 보드.
+
+    `params["tradable_boards"]`가 명시돼 있으면 우선, 없으면 `_DEFAULT_TRADABLE_BOARDS` fallback.
+    """
+    if params:
+        explicit = parse_tradable_boards(params.get("tradable_boards"))
+        if explicit:
+            return explicit
+    return _DEFAULT_TRADABLE_BOARDS.get(strategy_id, frozenset())
+
+
+# 보드 진입/종료 콜백 시그니처
+BoardEnterCallback = Callable[[MarketBoard], Awaitable[None]]
+BoardExitCallback = Callable[[MarketBoard], Awaitable[None]]
+
+
+class SessionTracker:
+    """현재 활성 보드를 추적하고 진입/종료 이벤트를 콜백으로 발화."""
+
+    def __init__(self) -> None:
+        self._active: frozenset[MarketBoard] = frozenset()
+        self._on_enter: list[BoardEnterCallback] = []
+        self._on_exit: list[BoardExitCallback] = []
+        # 마지막으로 받은 H0NXMKO0 코드 — 향후 정확한 보드 매핑 도입 시 사용
+        self._last_nxt_mkop_code: str = ""
+
+    @property
+    def active(self) -> frozenset[MarketBoard]:
+        return self._active
+
+    @property
+    def last_nxt_mkop_code(self) -> str:
+        return self._last_nxt_mkop_code
+
+    def is_active(self, board: MarketBoard) -> bool:
+        return board in self._active
+
+    def is_tradable(self, strategy_id: str, params: dict | None = None) -> bool:
+        """전략이 현재 활성 보드 중 적어도 하나에서 매매 가능한지."""
+        if not self._active:
+            return False
+        allowed = get_tradable_boards(strategy_id, params)
+        return bool(allowed & self._active)
+
+    def register_on_enter(self, cb: BoardEnterCallback) -> None:
+        self._on_enter.append(cb)
+
+    def register_on_exit(self, cb: BoardExitCallback) -> None:
+        self._on_exit.append(cb)
+
+    async def tick(self, now: datetime | None = None) -> None:
+        """현재 시각 기준 활성 보드 갱신 + 변동 시 콜백 발화."""
+        now = now or datetime.now()
+        next_active = boards_at(now.time())
+
+        entered = next_active - self._active
+        exited = self._active - next_active
+        self._active = next_active
+
+        for board in entered:
+            logger.info("[Session] 보드 진입: %s", board.value)
+            for cb in self._on_enter:
+                try:
+                    await cb(board)
+                except Exception:
+                    logger.exception("[Session] 진입 콜백 실패: %s", board.value)
+
+        for board in exited:
+            logger.info("[Session] 보드 종료: %s", board.value)
+            for cb in self._on_exit:
+                try:
+                    await cb(board)
+                except Exception:
+                    logger.exception("[Session] 종료 콜백 실패: %s", board.value)
+
+    async def on_h0nxmko0(self, tr_key: str, mkop_cls_code: str, payload: str) -> None:
+        """H0NXMKO0(NXT 장운영정보) 메시지 수신.
+
+        명세 필드 미확정이라 현재는 코드 기록만 — 향후 운영 데이터로
+        보드 매핑 정확도를 보강할 입력 채널로 사용한다.
+        """
+        self._last_nxt_mkop_code = mkop_cls_code
+        logger.debug("[Session] H0NXMKO0: tr_key=%s, code=%s", tr_key, mkop_cls_code)
+
+
+# 전역 인스턴스 — scheduler/risk가 import해서 사용
+session_tracker = SessionTracker()

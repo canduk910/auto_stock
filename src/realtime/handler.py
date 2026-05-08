@@ -1,7 +1,9 @@
 """실시간 메시지 파싱/디스패치.
 
-- 실시간 체결가 (H0STCNT0): 현재가, 시가, 등락률 등 추출
-- 체결통보 (H0STCNI0): AES-256-CBC 복호화 후 체결 정보 추출
+- 실시간 체결가 (H0STCNT0/H0UNCNT0/H0NXCNT0): 현재가, 시가, 등락률 등 추출
+  - H0STCNT0(KRX) / H0UNCNT0(KRX+NXT 통합) / H0NXCNT0(NXT) — 메시지 포맷 동일
+- 체결통보 (H0STCNI0/H0STCNI9): AES-256-CBC 복호화 후 체결 정보 추출
+- NXT 장운영정보 (H0NXMKO0): 보드 전환 이벤트 (Phase 3 SessionTracker에서 활용)
 """
 
 import base64
@@ -22,8 +24,12 @@ TickHandler = Callable[[str, int, int, float], Awaitable[None]]
 ExecutionHandler = Callable[[str, str, str, int, int], Awaitable[None]]
 # ticker, order_no, side, price, quantity
 
+BoardHandler = Callable[[str, str, str], Awaitable[None]]
+# tr_key, mkop_cls_code, raw_payload — Phase 3 SessionTracker가 소비
+
 _on_tick: TickHandler | None = None
 _on_execution: ExecutionHandler | None = None
+_on_board: BoardHandler | None = None
 
 
 def register_tick_handler(handler: TickHandler) -> None:
@@ -34,6 +40,12 @@ def register_tick_handler(handler: TickHandler) -> None:
 def register_execution_handler(handler: ExecutionHandler) -> None:
     global _on_execution
     _on_execution = handler
+
+
+def register_board_handler(handler: BoardHandler) -> None:
+    """NXT 장운영정보(H0NXMKO0) 보드 전환 콜백 등록."""
+    global _on_board
+    _on_board = handler
 
 
 _aes_iv: str = ""
@@ -49,10 +61,13 @@ def set_aes_keys(iv: str, key: str) -> None:
 
 async def dispatch_message(tr_id: str, tr_key: str, payload: str, encrypted: bool = False) -> None:
     """실시간 메시지를 TR_ID에 따라 적절한 핸들러로 전달한다."""
-    if tr_id == "H0STCNT0":
+    # KRX(H0STCNT0) / KRX+NXT 통합(H0UNCNT0) / NXT 단독(H0NXCNT0) 모두 동일 메시지 포맷
+    if tr_id in ("H0STCNT0", "H0UNCNT0", "H0NXCNT0"):
         await _handle_tick(payload)
     elif tr_id in ("H0STCNI0", "H0STCNI9"):
         await _handle_execution(payload, encrypted=encrypted)
+    elif tr_id == "H0NXMKO0":
+        await _handle_nxt_market_op(tr_key, payload)
     else:
         logger.debug("미처리 TR: %s", tr_id)
 
@@ -129,6 +144,23 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
 
     if _on_execution:
         await _on_execution(ticker, order_no, side, price, quantity)
+
+
+async def _handle_nxt_market_op(tr_key: str, payload: str) -> None:
+    """NXT 장운영정보(H0NXMKO0) 메시지 — 보드 전환 이벤트.
+
+    KIS 명세에 정확한 필드 순서 미기재. 운영 데이터로 구조 확정 예정.
+    Phase 3 SessionTracker가 _on_board 콜백을 통해 소비한다.
+    필드 추정: [0]=시장구분/종목코드, [1]=MKOP_CLS_CODE(110/112/121/129...)
+    """
+    fields = payload.split("^")
+    mkop_cls_code = fields[1] if len(fields) > 1 else ""
+    logger.info(
+        "[H0NXMKO0] tr_key=%s, mkop_cls_code=%s, payload=%s",
+        tr_key, mkop_cls_code, payload[:120],
+    )
+    if _on_board:
+        await _on_board(tr_key, mkop_cls_code, payload)
 
 
 def decrypt_aes_cbc(encrypted_text: str, key: str, iv: str) -> str:

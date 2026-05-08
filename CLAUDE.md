@@ -51,16 +51,32 @@ cd frontend && npm run build
 src/engine/
 ├── strategy_base.py       # StrategyBase 추상 클래스, Signal, Position, StrategyState
 ├── strategy_registry.py   # StrategyRegistry (전략 등록/비중/중복 방지)
+├── session.py             # MarketBoard enum + SessionTracker (KRX/NXT 보드 추적, tradable_boards)
 ├── strategies/
-│   ├── momentum.py        # 상한가 모멘텀 전략
-│   ├── volatility_breakout.py  # 변동성 돌파 전략
-│   ├── long_tail_volatility.py # 롱테일 변동성 돌파 전략 (VB + 상한가 모멘텀 합성)
-│   └── donchian_swing.py  # 20일 신고가 스윙 (추세추종 멀티데이)
-├── risk.py               # RiskManager (registry 순회, 전략별 신호 체크)
+│   ├── momentum.py        # 상한가 모멘텀 (KRX_OPEN+MAIN)
+│   ├── volatility_breakout.py  # 변동성 돌파 (보드별 K값 분리, PRE_NXT/MAIN/POST_NXT)
+│   ├── long_tail_volatility.py # 롱테일 변동성 돌파 (보드별 K값 분리)
+│   └── donchian_swing.py  # 20일 신고가 스윙 (MAIN만, 추세추종 멀티데이)
+├── risk.py               # RiskManager (registry 순회, 보드 가드, 전략별 신호 체크)
 ├── order_engine.py        # OrderEngine (strategy_id 태깅, 전략별 포지션)
-├── scheduler.py           # TradingScheduler (registry 기반)
-└── scanner.py             # 종목 스캔 (모멘텀 + 돌파 전략 공용)
+├── scheduler.py           # TradingScheduler (KRX/NXT 통합 운영 08:00~20:00)
+└── scanner.py             # 종목 스캔 (TICK_TR_ID = H0UNCNT0 KRX+NXT 통합)
 ```
+
+### NXT/SOR 통합 운영 (08:00~20:00)
+- **시세**: WebSocket `H0UNCNT0` (KRX+NXT 통합 체결가) 단일 구독 — 메시지 포맷은 `H0STCNT0`과 동일
+- **NXT 장운영정보**: `H0NXMKO0` 실시간 구독 → `SessionTracker.on_h0nxmko0` (실전 한정)
+- **주문 라우팅**: `place_order(..., exchange="KRX"|"NXT"|"SOR")` body에 `EXCG_ID_DVSN_CD`. 모의(VTS)는 KRX만 (SOR/NXT 미지원)
+- **MarketBoard**: `pre_nxt`(NXT 프리 08:00~) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00)
+- **시간 가드 (`scheduler.TIME_*`)**: 자동시작 07:45 / 부트 07:50 / 사전 구독 07:55 / NXT 프리 진입 08:00 / KRX 시가 확정 09:00:05 / 모멘텀 스캔 09:30 / KRX 메인 매수 중단 + 강제 청산 15:20 / KRX 메인 마감 15:30 / NXT 애프터 매수 중단 + AI자문 19:50 / NXT 애프터 종료 20:00 / 정산 + 일일 로그 분석 20:10
+- **전략별 매매 가능 보드** (`DEFAULT_PARAMS["tradable_boards"]`):
+  - `momentum`: KRX_OPEN + MAIN (상한가 +29% KRX 기준)
+  - `volatility_breakout` / `long_tail_volatility`: PRE_NXT + MAIN + POST_NXT (Q3=A 야간 매매 활성)
+  - `donchian_swing`: MAIN (추세추종은 일중 변동성 필요)
+- **VB/LTV 시가/타겟가** (Q1=C 보드별 분리): 보드별 시가 확정 → 보드별 K값(`k_value_krx_main`/`k_value_nxt_pre`/`k_value_nxt_post`) × 전일Range = 보드별 target_price. `_targets[ticker]["boards"][board]` dict에 보드별 분리 저장. `_open_confirmed[ticker]`도 `{board: bool}` dict
+- **익일 청산** (Q2=B): 다음 영업일 NXT 프리 첫 거래(08:00 부근) + `NEXT_DAY_STABILIZE_SECS=30`초 안정화 후 즉시 청산. 60초→30초 단축
+- **15:20 강제 청산**: KRX 메인 종목만 (`_force_clear_main_only` — `tradable_boards`에 POST_NXT가 있는 전략은 19:50 매수 중단까지 보유 유지)
+- **calc_buy_quantity 1주 fallback**: 비중 기준 0주여도 자금이 1주는 살 수 있으면 1주 매수 — 매수 신호가 비중 가드에 막혀 무산되는 누락 방지
 
 ### 새 전략 추가 방법
 1. `src/engine/strategies/` 에 StrategyBase 서브클래스 작성

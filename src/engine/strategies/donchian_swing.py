@@ -41,7 +41,12 @@ logger = logging.getLogger(__name__)
 class DonchianSwingStrategy(StrategyBase):
     """20일 신고가 스윙 돌파 전략."""
 
+    # 매매 가능 보드 (Phase 8) — 추세추종은 일중 변동성 필요. KRX 메인만
+    DEFAULT_TRADABLE_BOARDS = ("main",)
+
     DEFAULT_PARAMS = {
+        "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
+        "exchange": "KRX",
         "donchian_period": 20,
         "long_ma_period": 60,
         "volume_period": 20,
@@ -439,6 +444,14 @@ class DonchianSwingStrategy(StrategyBase):
         return []
 
     def calc_buy_quantity(self, current_price: int) -> int:
+        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 1주 살 수 있으면 1주 매수."""
+        if current_price <= 0:
+            return 0
         ratio = self.config.params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        return amount // current_price if current_price > 0 else 0
+        qty = amount // current_price
+        if qty > 0:
+            return qty
+        if self.state.total_investment >= current_price:
+            return 1
+        return 0

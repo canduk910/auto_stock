@@ -3,11 +3,13 @@
 - 실시간 시세에 따른 손절/익일청산 신호 감시
 - 전략별 포지션 비중 제한
 - 전략 간 중복 매수 방지
+- 전략별 매매 가능 보드(KRX 메인 / NXT 프리 / NXT 애프터) 가드 — Phase 8
 """
 
 import logging
 
 from src.engine.order_engine import OrderEngine
+from src.engine.session import session_tracker
 from src.engine.strategy_base import Signal
 from src.engine.strategy_registry import StrategyRegistry
 
@@ -70,6 +72,10 @@ class RiskManager:
                     continue  # 청산 주문 후 매수 신호 확인 불필요
 
             # 4. 매수 신호 확인
+            # 보드 가드 — 전략의 tradable_boards에 현재 활성 보드 포함 여부 (Phase 8)
+            if not session_tracker.is_tradable(strategy.strategy_id, strategy.config.params):
+                continue
+
             # 전략 간 중복 매수 방지: 보유/주문 중/당일 매도 모두 가로질러 차단
             if self.registry.is_ticker_blocked_for_buy(ticker):
                 continue

@@ -15,8 +15,9 @@ KIS WebSocket 실시간 시세 수신 및 체결통보 처리.
 
 ### handler.py — 메시지 처리
 - 파이프(|) 구분 메시지 파싱
-- 실시간 체결가(H0STCNT0): 현재가, 시가, 등락률 추출 → RiskManager.on_tick 콜백
+- 실시간 체결가(H0STCNT0/H0UNCNT0/H0NXCNT0): 현재가, 시가, 등락률 추출 → RiskManager.on_tick 콜백 (세 TR_ID 모두 동일 메시지 포맷이라 단일 파서로 처리)
 - 체결통보(H0STCNI0/H0STCNI9): AES-256-CBC 복호화 → **계좌번호 필터** → OrderEngine.handle_execution_notice 콜백
+- NXT 장운영정보(H0NXMKO0): 보드 전환 이벤트 → `register_board_handler`로 등록한 콜백(Phase 3 SessionTracker) 전달. KIS 명세 필드 미기재로 운영 데이터 기반 확정
 - 체결통보 필드 매핑 (^ 구분): [0]HTS ID, **[1]계좌번호(8자리)+상품코드(2자리)**, [2]주문번호, [3]원주문번호, [4]매도매수구분, [5]정정구분, [6]주문종류, [7]주문조건, **[8]종목코드**, [9]주문수량, [10]체결단가, [11]체결시간, [12]거부여부, [13]체결구분(1:접수,2:체결), [14]?, [15]?, [16]체결수량, [17]고객명, [18]종목명
 - 계좌 필터: `fields[1]`이 `settings.kis_account_no`로 시작하지 않으면 무시 (실전 H0STCNI0은 동일 HTS ID에 묶인 타 계좌 통보가 함께 푸시되므로 필수)
 
@@ -33,9 +34,12 @@ KIS WebSocket 실시간 시세 수신 및 체결통보 처리.
 
 | TR_ID | 용도 | 구독 키 | 비고 |
 |-------|------|---------|------|
-| H0STCNT0 | 실시간 체결가 | 종목코드 | 모멘텀+변동성돌파 종목 합집합 |
-| H0STCNI0 | 체결통보 (실전) | HTS ID | 동일 HTS ID 산하 모든 계좌 통보 수신 → handler에서 계좌 필터링 |
-| H0STCNI9 | 체결통보 (모의) | 계좌번호 | 계좌 단위로 분리되어 들어옴 |
+| H0UNCNT0 | 실시간 체결가 (KRX+NXT 통합) | 종목코드 | 현재 사용 — `scanner.TICK_TR_ID`. NXT 거래도 즉시 반영 |
+| H0STCNT0 | 실시간 체결가 (KRX 단독) | 종목코드 | 메시지 포맷 H0UNCNT0과 동일. 호환성 유지 |
+| H0NXCNT0 | 실시간 체결가 (NXT 단독) | 종목코드 | 메시지 포맷 동일 |
+| H0NXMKO0 | NXT 장운영정보 | 시장구분 | Phase 3 SessionTracker가 보드 전환 이벤트로 사용 (운영 데이터로 필드 확정) |
+| H0STCNI0 | 체결통보 (실전) | HTS ID | KRX/NXT/SOR 모두 같은 TR로 수신, ODER_KIND 필드로 거래소 식별 |
+| H0STCNI9 | 체결통보 (모의) | 계좌번호 | KRX 한정 (VTS는 NXT/SOR 미지원) |
 
 ## 주의사항
 - **체결통보 구독은 매매의 핵심 전제조건** — 미구독 시 포지션 등록 불가 → 손절 불가

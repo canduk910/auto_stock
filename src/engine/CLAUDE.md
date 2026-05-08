@@ -43,13 +43,14 @@ TradingScheduler (registry 기반 boot/run/settle)
 - `_next_day_clear_pending`: 익일 청산 시가 안정화 대기 플래그 (check_exit_signal에서 NEXT_DAY_CLEAR 억제, 손절은 유지)
 - 파라미터: DEFAULT_PARAMS 딕셔너리
 
-### strategies/volatility_breakout.py — 변동성 돌파
-- _scan_universe(): 거래량순위 API(`FHPST01710000`) 응답 1건으로 후보 + 시총·전일 거래대금 산출. `prdy_vol × (stck_prpr - prdy_vrss)`로 전일 거래대금 추정 → 시간 의존 제거(휴장 직후 첫 영업일 0종목 확정 이슈 해결). 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
-- prepare(): 스캔 종목의 22일 일봉 → K값(20일 평균 노이즈) → Target_Offset 계산. **candles[0].stck_bsop_date == 오늘이면 candles[1]을 "전일"로 사용**(장 시작 전 빈/부분 봉 방어). `prev_range==0` 또는 `target_offset==0` 종목은 skip — 시가확정 시 target_price=open_price로 떨어져 09:00:05 즉시 매수되던 회귀 차단. 전일 stck_clpr을 `scanner.ticker_prev_close`에 사전 등록 (09:30 scan_stocks 이전에도 등락률 필터 동작 보장)
-- 시가 확정 후 Target_Price = 시가 + offset
-- current_price >= target_price 시 매수 (09:00:05 시가 확정 직후부터 매매 가능)
+### strategies/volatility_breakout.py — 변동성 돌파 (KRX+NXT 보드별 분리)
+- _scan_universe(): 거래량순위 API(`FHPST01710000`) 응답 1건으로 후보 + 시총·전일 거래대금 산출. `prdy_vol × (stck_prpr - prdy_vrss)`로 전일 거래대금 추정 → 시간 의존 제거. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
+- prepare(): 22일 일봉 → K값(20일 평균 노이즈) + 전일 Range → `target_offset_base = prev_range × k`. candles[0]==오늘이면 candles[1]을 전일로 사용. `prev_range/target_offset_base==0` 종목 skip
+- **보드별 시가/타겟가 분리** (Phase 5 Q1=C): `_targets[ticker] = {target_offset_base, k, prev_range, boards: {board: {open_price, target_price, target_offset}}}`. `on_open_price_confirmed(ticker, open_price, board)` 호출 시 `target_offset = base × k_value_{board}` 곱 후 보드별 dict에 저장. `_open_confirmed[ticker] = {board: bool}`, `_prev_price[ticker] = {board: int}` (보드별 돌파 순간 분리 감지)
+- DEFAULT_PARAMS: `tradable_boards = ["pre_nxt", "main", "post_nxt"]`, `k_value_krx_main = 1.0`, `k_value_nxt_pre = 1.0`, `k_value_nxt_post = 1.0`, `exchange = "KRX"` (Phase 4: 주문 라우팅)
+- check_buy_signal(): `_resolve_active_board()`로 현재 활성 보드(main 우선) 결정 → 해당 보드의 target_price 돌파 순간 매수
 - 매수가 대비 -3% 손절
-- 15:20 전량 강제 청산
+- 15:20 강제 청산 — POST_NXT가 `tradable_boards`에 있으면 보류 (19:50 매수 중단까지 유지)
 
 ### strategies/donchian_swing.py — 20일 신고가 스윙 (추세추종 멀티데이)
 - _scan_universe(): **코스피200 + 코스닥150 고정 유니버스**(`scanner.KOSPI_200_TICKERS` + `KOSDAQ_150_TICKERS` 합집합) → `fetch_stock_detail`로 **시총 사후 컷만** 적용. 거래대금 컷은 `prepare()`의 volume_multiplier 1.5×에서 일원화 — `acml_tr_pbmn`(당일 누적)은 장 시작 전 0이라 시점 의존성 발생. 거래량순위 API 미사용 — 추세추종 부적합. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록. **종목명 fallback**: `hts_kor_isnm`만 신뢰(시장 분류명 `rprs_mrkt_kor_name`은 종목명 부적합이라 fallback 제거), KIS가 빈 응답 시 `scanner.STATIC_TICKER_NAMES`로 보강
@@ -72,6 +73,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 
 ### risk.py — 리스크 관리
 - on_tick(): ticker_prices 갱신(1회) → registry.enabled() 순회 → 전략별 exit/buy 신호
+- **보드 가드** (Phase 8): 매수 신호 평가 전 `session_tracker.is_tradable(strategy_id, params)`로 현재 활성 보드가 전략의 `tradable_boards`에 있는지 확인 — 비활성 보드에서는 신호 평가 자체 skip
 - PR7 롤백 이력: 동일가 연속 틱 skip 가드는 **VB 시가 확정 직후 _prev_price=0 first-tick skip + 동일가 PR7 skip이 겹쳐 _prev_price가 영원히 0으로 유지 → 매수 신호 끝까지 미발생** 결함이 발견되어 롤백(2026-05-11). 이벤트 루프 CPU보다 매수 기회 누락 손실이 크다는 판단. 향후 동일 최적화 시 strategy._prev_price 초기화 보장 필수
 - 중복 매수 방지: registry.is_ticker_blocked_for_buy() — 보유/주문중/당일매도 통합 검사 (전략 간)
 
@@ -87,16 +89,33 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 매도 체결 시 sold_today에 등록 (당일 재매수 차단)
 - 체결통보 처리 실패 시 안전장치: ticker 매핑 실패 → pending_buys 제거, strategy 미발견 → _selling 해제
 
-### scheduler.py — 스케줄 관리
+### session.py — 세션/보드 추상화 (Phase 3)
+- `MarketBoard` enum: `pre_nxt`(NXT 프리 08:00~) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00)
+- `_BOARD_SCHEDULE`: 시각 → 활성 보드 frozenset 매핑 (H0NXMKO0 미수신 시 fallback)
+- `SessionTracker`: 활성 보드 추적 + 진입/종료 콜백 발화. `tick()`을 30초 주기 `_session_loop`에서 호출
+- `is_tradable(strategy_id, params)`: 현재 활성 보드 ∩ 전략 `tradable_boards`(또는 `_DEFAULT_TRADABLE_BOARDS` fallback) 비어있지 않으면 매매 가능
+- `on_h0nxmko0(tr_key, mkop_cls_code, payload)`: NXT 장운영정보 수신. 명세 필드 미확정이라 현재는 코드 기록만 — 향후 정확도 보강용
+- 전역: `session_tracker` 인스턴스 + `register_board_handler` 콜백을 scheduler.start()에서 등록
+
+### scheduler.py — 스케줄 관리 (KRX/NXT 통합 운영 08:00~20:00)
 - StrategyRegistry 생성, 전략 등록
 - _boot(): DB positions 우선 복구 → KIS 잔고 교차 검증 (trade_history에서 전략 매핑) → 미체결 주문 복구 (db_strategy_map)
-- _load_strategy_config(): DB strategy_config에서 비중/파라미터 복구
-- WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
-- **08:55 사전 구독** (`TIME_PRESUBSCRIBE`): `_collect_presubscribe_tickers()` — 돌파 전략(VB+LTV) 스캔 종목 + 스윙 전략(donchian_swing) 스캔 종목(`_collect_swing_tickers()`) + 모든 전략 보유 포지션 합집합을 WebSocket 사전 구독 → 09:00 시가 즉시 수신. 돌파/스윙 유니버스가 비어있으면 각각 prepare 재실행(KIS API 일시 장애 대비)
-- 09:00:00 익일 청산은 백그라운드 task(`asyncio.create_task`)로 실행하여 60초 안정화 대기를 비차단으로 처리. 동시에 `_confirm_breakout_open_prices()`(0.5초 간격 5초 폴링 → 미확정 종목 KIS API 폴백) 즉시 실행
-- **09:00:05 돌파 전략 매매 시작** (`TIME_VB_OPEN_CONFIRM = time(9, 0, 5)`): VB + LTV 시가 확정 직후 진입(`_phase = "vb_trading"`)
-- 09:30 모멘텀 스캔: `scan_stocks()` + 통합 구독(`extra_tickers = 돌파(VB+LTV) + 스윙(donchian_swing)`), `_phase = "trading"`
-- 15:20 강제 청산: `_force_clear_intraday_strategies()` — VB + LTV(상한가 미도달 종목) 공용. _settle(): 전략별 + 합산 daily_performance 기록 + `_reset_daily_state()`로 일간 상태 전체 초기화. 전략별 total_asset = `state.total_investment + s_pnl`이며, `state.total_investment <= 0`이면 직전 영업일 total_asset(`prev_s_asset`)을 fallback baseline으로 사용 — total_asset=0이 기록되어 다음 영업일 분모 0으로 이어지는 함정 차단
+- _load_strategy_config(): DB strategy_config에서 비중/파라미터 복구 (`tradable_boards`, `exchange`, `k_value_*` 포함)
+- WebSocket 연결 후 **체결통보 구독** (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호) + **NXT 장운영정보 구독** (실전 한정: H0NXMKO0)
+- **시간 상수**: `TIME_AUTO_START 07:45 / TIME_BOOT 07:50 / TIME_PRESUBSCRIBE 07:55 / TIME_PRE_NXT_OPEN 08:00 / TIME_KRX_OPEN_CONFIRM 09:00:05 / TIME_SCAN_START 09:30 / TIME_KRX_MAIN_BUY_STOP 15:20 / TIME_KRX_MAIN_CLOSE 15:30 / TIME_NXT_POST_BUY_STOP 19:50 / TIME_RECOMMENDATION 19:50 / TIME_NXT_POST_CLOSE 20:00 / TIME_SETTLEMENT 20:10`. 기존 이름(`TIME_NEXT_DAY_CLEAR/TIME_VB_OPEN_CONFIRM/TIME_BUY_STOP/TIME_MARKET_CLOSE`)은 backwards-compat alias로 보존
+- **07:55 사전 구독** (`TIME_PRESUBSCRIBE`): `_collect_presubscribe_tickers()` — 돌파(VB+LTV) + 스윙(donchian) + 모든 전략 보유 포지션 합집합을 사전 구독 → 08:00 NXT 프리 첫 거래 즉시 수신
+- **08:00 NXT 프리 진입**: 익일 청산 백그라운드 task(`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30`초 안정화) + `_confirm_breakout_open_prices(board="pre_nxt")` 시가 확정. PRE_NXT 활성 전략(VB/LTV `tradable_boards`에 pre_nxt 포함)이 매매 시작 (`_phase = "pre_nxt_trading"`)
+- **09:00:05 KRX 메인 시가 확정**: `_confirm_breakout_open_prices(board="main")` 재실행 — VB/LTV가 KRX 09:00 시가로 보드별 별도 target_price 계산 (`_phase = "main_trading"`)
+- 09:30 모멘텀 스캔: `scan_stocks()` + 통합 구독, `_phase = "trading"`
+- **15:20 KRX 메인 매수 중단 + 강제 청산**: `_force_clear_main_only` — `tradable_boards`에 POST_NXT가 있는 전략은 보유 유지, 나머지(POST_NXT 미활성 전략)만 청산
+- **15:30 KRX 메인 마감 → NXT 애프터 전환**: 구독 유지(POST_NXT 종목 시세), `_phase = "post_nxt_trading"`
+- **19:50 NXT 애프터 신규 매수 중단 + AI자문**: `buy_disabled = True` for all enabled strategies, `generate_recommendations()` 실행
+- **20:00 NXT 애프터 종료**: `unsubscribe_all()`, `_phase = "closing"`
+- **20:10 정산 + 일일 로그 분석**: `_settle()` + `generate_daily_log_report()`
+- _execute_next_day_clear(): 다음 영업일 NXT 프리 첫 거래 시가 + 30초 안정화 후 즉시 청산(Q2=B). 시가 미수신 시 `_resolve_open_price()` 폴백
+- _confirm_breakout_open_prices(board=None): 보드별 시가 확정. board 미지정 시 SessionTracker 활성 보드 우선순위(main → post_nxt → pre_nxt)로 결정. 해당 보드를 `tradable_boards`에 활성화한 전략만 대상
+- _force_clear_main_only(): 15:20 KRX 메인 강제 청산. POST_NXT 활성 전략은 유지(19:50 매수 중단까지)
+- _session_loop(): 30초 주기 `session_tracker.tick()` background task — 보드 진입/종료 이벤트 발화
 - _resolve_open_price(): 시가 폴링(0.5초 간격) → KIS `fetch_stock_detail()` 폴백 헬퍼. `_execute_next_day_clear()`에서 익일청산 시가 미수신 시 호출
 - run_daily(): 매일 08:20 자동 시작, 주말+공휴일 건너뜀(KIS `chk-holiday` API로 개장 여부 확인 후 다음 영업일까지 대기), **매일 시작 전 DB auto_start 설정 재확인** (`_is_auto_start_enabled()`)
 - 중간 시각 시작 대응: 현재 시각 이후 스케줄부터 실행 (09:00:05 이후 부팅 시에도 사전구독 + 시가확정 즉시 실행)

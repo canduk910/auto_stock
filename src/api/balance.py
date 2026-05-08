@@ -41,12 +41,15 @@ def is_insufficient_quantity(err: KisApiError) -> bool:
     return False
 
 
-async def get_balance() -> tuple[list[StockHolding], AccountSummary]:
-    """주식 잔고 및 계좌 요약을 조회한다."""
+async def get_balance(afhr_flpr: str = "N") -> tuple[list[StockHolding], AccountSummary]:
+    """주식 잔고 및 계좌 요약을 조회한다.
+
+    `afhr_flpr`: `N`(기본, 정규장) / `Y`(시간외 단일가) / `X`(NXT 정규장).
+    """
     params = {
         "CANO": settings.kis_account_no,
         "ACNT_PRDT_CD": settings.kis_account_product,
-        "AFHR_FLPR_YN": "N",
+        "AFHR_FLPR_YN": afhr_flpr,
         "OFL_YN": "",
         "INQR_DVSN": "01",
         "UNPR_DVSN": "01",
@@ -91,10 +94,11 @@ async def get_balance() -> tuple[list[StockHolding], AccountSummary]:
     return holdings, summary
 
 
-async def get_daily_orders(target_date: str = "") -> list[dict]:
+async def get_daily_orders(target_date: str = "", exchange: str = "ALL") -> list[dict]:
     """당일(또는 지정일) 주문체결내역을 조회한다.
 
     KIS 주식일별주문체결조회 API (TTTC0081R).
+    `exchange`: `ALL`(기본, KRX+NXT+SOR) / `KRX` / `NXT` / `SOR`.
     """
     from datetime import date as _date
     if not target_date:
@@ -113,6 +117,7 @@ async def get_daily_orders(target_date: str = "") -> list[dict]:
         "ODNO": "",
         "INQR_DVSN_3": "00",
         "INQR_DVSN_1": "",
+        "EXCG_ID_DVSN_CD": exchange,
         "CTX_AREA_FK100": "",
         "CTX_AREA_NK100": "",
     }

@@ -15,7 +15,8 @@ class WeightsRequest(BaseModel):
 
 
 class ParamsRequest(BaseModel):
-    params: dict[str, float | int | str]
+    # tradable_boards (list[str]) / exchange (str) / k_value_* (float) / 기타 수치 모두 허용
+    params: dict[str, float | int | str | list[str] | None]
 
 
 @router.get("", response_model=ApiResponse)

@@ -10,11 +10,12 @@ python -m src.main                      # 직접 실행
 
 ## 모듈 의존 관계
 ```
-config.py ← (모든 모듈���� settings import)
+config.py ← (모든 모듈에서 settings import)
 auth/ ← api/base.py, realtime/websocket.py
 api/base.py ← api/order.py, api/balance.py, api/condition.py
 api/ ← engine/, routes/
-realtime/ ← engine/strategy.py (시세 콜백)
+realtime/handler.py ← engine/risk.py(on_tick) + engine/order_engine.py(체결통보) + engine/session.py(보드 전환)
+engine/session.py ← engine/risk.py, engine/scheduler.py, engine/strategies/* (현재 보드 query)
 engine/ ← routes/trading.py (시작/정지)
 db/ ← engine/, routes/
 models/ ← (모든 모듈에서 사용)
@@ -52,6 +53,14 @@ tr_id = settings.get_tr_id("TTTC0012U")  # 실전: TTTC0012U, 모의: VTTC0012U
 - 체결통보(H0STCNI0): 실전 환경에서 AES-256-CBC 복호화 필요
 - 메시지 포맷: 파이프(|) 구분, 첫 필드가 암호화 여부
 - Heartbeat 30초 미수신 시 자동 재연결 (최대 5회)
+- **시세 채널**: `H0UNCNT0`(KRX+NXT 통합) — `scanner.TICK_TR_ID`. 메시지 포맷은 `H0STCNT0`(KRX 단독)/`H0NXCNT0`(NXT 단독)와 동일 → `handler.dispatch_message`가 셋 다 동일 파서로 처리
+- **NXT 장운영정보**: `H0NXMKO0` 실전 한정 구독 → `register_board_handler`로 `SessionTracker.on_h0nxmko0` 콜백 등록 (보드 전환 코드 수신, 명세 미확정으로 현재는 코드 기록만)
+
+### NXT/SOR 통합 (engine/session.py)
+- `MarketBoard` enum: `pre_nxt`(NXT 프리 08:00~09:00) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00)
+- `SessionTracker`: 시각 기반 + H0NXMKO0 입력으로 활성 보드 추적. `_session_loop`(scheduler.py 30초 주기)에서 `tick()` 호출
+- `is_tradable(strategy_id, params)`: 활성 보드 ∩ 전략 `tradable_boards` ≠ ∅ 인지 — `RiskManager.on_tick`에서 매수 신호 평가 전 가드
+- 주문 라우팅: `place_order(..., exchange="KRX"|"NXT"|"SOR")` body에 `EXCG_ID_DVSN_CD`. 모의(VTS)는 KRX만
 
 ## 새 KIS API 추가 시 절차
 1. `docs/kis/README.md`에서 해당 API의 스펙 파일 확인

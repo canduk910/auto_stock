@@ -1,8 +1,14 @@
-"""매매 스케줄러.
+"""매매 스케줄러 — KRX/NXT 통합 운영(08:00~20:00).
 
-- 08:25 기동: 토큰 갱신, 잔고 동기화
-- 08:30~16:00 매매 프로세스 가동
-- 16:10 정산: daily_performance 기록, 프로세스 정리
+- 07:45 자동 시작 / 07:50 부팅 / 07:55 사전 구독
+- 08:00 NXT 프리 진입 → 익일 청산 + VB/LTV PRE_NXT 매매 시작 (Q2=B)
+- 09:00:05 KRX 메인 시가 확정 → VB/LTV MAIN 보드 매매 (Q1=C 보드별 분리)
+- 09:30 모멘텀 스캔
+- 15:20 KRX 메인 신규 매수 중단 + KRX 메인 종목 강제 청산 (POST_NXT 활성 종목은 유지)
+- 15:30 KRX 메인 마감 → NXT 애프터 진입
+- 19:50 NXT 애프터 신규 매수 중단 + 16:00 AI자문 → 19:50으로 이동
+- 20:00 NXT 애프터 종료, unsubscribe
+- 20:10 정산: daily_performance 기록, 일일 로그 분석
 """
 
 import asyncio
@@ -16,29 +22,45 @@ from src.db.system_logs import write_log
 from src.engine.order_engine import OrderEngine
 from src.engine.risk import RiskManager
 from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscribe_all
+from src.engine.session import MarketBoard, session_tracker
 from src.engine.strategy_base import Signal, StrategyConfig
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.strategies.momentum import MomentumStrategy
 from src.engine.strategies.donchian_swing import DonchianSwingStrategy
 from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
-from src.realtime.handler import dispatch_message, register_execution_handler, register_tick_handler
+from src.realtime.handler import (
+    dispatch_message,
+    register_board_handler,
+    register_execution_handler,
+    register_tick_handler,
+)
 from src.realtime.websocket import kis_ws
 
 logger = logging.getLogger(__name__)
 
-TIME_AUTO_START = time(8, 20)
-TIME_BOOT = time(8, 25)
-TIME_MARKET_OPEN = time(8, 30)
-TIME_PRESUBSCRIBE = time(8, 55)
-TIME_NEXT_DAY_CLEAR = time(9, 0)
-TIME_VB_OPEN_CONFIRM = time(9, 0, 5)
-TIME_SCAN_START = time(9, 30)
-TIME_BUY_STOP = time(15, 20)
-TIME_MARKET_CLOSE = time(15, 30)
-TIME_RECOMMENDATION = time(16, 0)
-TIME_SETTLEMENT = time(16, 10)
-SCAN_INTERVAL = 300  # 5분마다 스캔
+# 시간 상수 — NXT 통합 운영 (08:00~20:00)
+TIME_AUTO_START = time(7, 45)
+TIME_BOOT = time(7, 50)
+TIME_PRESUBSCRIBE = time(7, 55)
+TIME_PRE_NXT_OPEN = time(8, 0)             # NXT 프리 진입 (익일 청산 + VB/LTV PRE_NXT 시작)
+TIME_KRX_OPEN_CONFIRM = time(9, 0, 5)      # KRX 메인 시가 확정 → VB/LTV MAIN 매매
+TIME_SCAN_START = time(9, 30)              # 모멘텀 스캔
+TIME_KRX_MAIN_BUY_STOP = time(15, 20)      # KRX 메인 신규 매수 중단 + 강제 청산
+TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 → NXT 애프터 전환
+TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단
+TIME_RECOMMENDATION = time(19, 50)         # AI자문 (NXT 애프터 종료 직전)
+TIME_NXT_POST_CLOSE = time(20, 0)          # NXT 애프터 종료, unsubscribe
+TIME_SETTLEMENT = time(20, 10)             # 정산 + 일일 로그 분석
+SCAN_INTERVAL = 300                         # 5분마다 스캔
+SESSION_TICK_INTERVAL = 30                  # 보드 전환 감시 주기 (초)
+NEXT_DAY_STABILIZE_SECS = 30                # 익일 청산 시가 안정화 (Q2=B 단축)
+
+# Backwards-compat aliases — 기존 코드 참조 호환
+TIME_NEXT_DAY_CLEAR = TIME_PRE_NXT_OPEN
+TIME_VB_OPEN_CONFIRM = TIME_KRX_OPEN_CONFIRM
+TIME_BUY_STOP = TIME_KRX_MAIN_BUY_STOP
+TIME_MARKET_CLOSE = TIME_KRX_MAIN_CLOSE
 
 
 class TradingScheduler:
@@ -86,6 +108,8 @@ class TradingScheduler:
         self._config_loaded = False
         # 익일 청산 백그라운드 task 추적 (좀비 task 방지 — start() finally에서 cancel)
         self._next_day_task: asyncio.Task | None = None
+        # 보드 전환 감시 background task
+        self._session_task: asyncio.Task | None = None
 
     async def _load_strategy_config(self) -> None:
         """DB에서 전략 설정(비중/파라미터)을 로드하여 적용한다."""
@@ -131,13 +155,13 @@ class TradingScheduler:
             return settings.auto_start
 
     async def start(self) -> None:
-        """매매 프로세스를 시작한다.
+        """매매 프로세스를 시작한다 — KRX/NXT 통합 운영(08:00~20:00).
 
         현재 시각에 따라 적절한 단계부터 시작한다:
-        - 08:25 이전: 08:25까지 대기 후 전체 스케줄 실행
-        - 08:25~15:20: 즉시 부팅 + 현재 시각 이후 스케줄부터 실행
-        - 15:20~16:10: 매수 중단 상태로 진입, 정산만 대기
-        - 16:10 이후: 장 종료, 시작 불가
+        - 07:50 이전: 07:50까지 대기 후 전체 스케줄 실행
+        - 07:50~15:20: 즉시 부팅 + 현재 시각 이후 스케줄부터 실행
+        - 15:20~20:10: NXT 애프터 단계, 신규 매수는 보드별 정책에 따름
+        - 20:10 이후: 장 종료, 시작 불가
         """
         if self._running:
             logger.warning("이미 실행 중")
@@ -159,6 +183,7 @@ class TradingScheduler:
             await self._boot()
             register_tick_handler(self.risk_manager.on_tick)
             register_execution_handler(self.order_engine.handle_execution_notice)
+            register_board_handler(session_tracker.on_h0nxmko0)
 
             # WebSocket 연결 (별도 태스크)
             ws_task = asyncio.create_task(
@@ -180,16 +205,25 @@ class TradingScheduler:
             await kis_ws.subscribe(cni_tr_id, cni_tr_key)
             logger.info("체결통보 구독: %s / %s", cni_tr_id, cni_tr_key)
 
+            # NXT 장운영정보(H0NXMKO0) 구독 — 보드 전환 이벤트용 (실전 한정)
+            if _cfg.is_production:
+                try:
+                    await kis_ws.subscribe("H0NXMKO0", "")
+                    logger.info("NXT 장운영정보 구독: H0NXMKO0")
+                except Exception:
+                    logger.warning("NXT 장운영정보 구독 실패 — 시각 기반 보드 매핑으로 동작")
+
+            # 세션 트래커 background task — 1분 주기 보드 전환 감시
+            self._session_task = asyncio.create_task(self._session_loop())
+
             now = datetime.now().time()
 
-            # 08:55 사전 구독: 돌파 종목 + 보유 포지션
-            # → 09:00:00 시가를 WebSocket으로 즉시 수신 가능하게 함
+            # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
             if now < TIME_PRESUBSCRIBE:
                 self._phase = "presubscribe_wait"
                 await self._wait_until(TIME_PRESUBSCRIBE)
-            if now <= TIME_VB_OPEN_CONFIRM:
-                # 08:25 boot 시점의 prepare에서 KIS API 미준비로 유니버스 0종목인 경우 재실행
-                # (KIS inquire-price가 장 시작 전 부정확 → 시총/거래대금 필터 실패 사례)
+            if now <= TIME_KRX_OPEN_CONFIRM:
+                # boot 시점의 prepare 실패 시 재실행 (KIS API 미준비 사례)
                 if not self._collect_breakout_tickers():
                     logger.info("돌파 전략 유니버스 비어있음 → prepare 재실행")
                     await write_log("INFO", "돌파 유니버스 비어있어 prepare 재실행")
@@ -200,7 +234,6 @@ class TradingScheduler:
                                 await strategy.prepare()
                             except Exception:
                                 logger.exception("재 prepare 실패: %s", sid)
-                # 스윙 전략도 동일 안전망 — 보유 포지션이 없으면 _scanned_tickers가 곧 후보
                 ds = self.registry.get("donchian_swing")
                 if ds and ds.config.enabled and not ds.get_scanned_tickers():
                     logger.info("스윙 전략 유니버스 비어있음 → prepare 재실행")
@@ -210,91 +243,111 @@ class TradingScheduler:
                     except Exception:
                         logger.exception("재 prepare 실패: donchian_swing")
 
-                # 09:00:05 이전 진입 시 항상 사전구독 (kis_ws.subscribe는 set 기반이라 중복 안전)
                 presub = self._collect_presubscribe_tickers()
                 if presub:
                     await subscribe_filtered_stocks([], extra_tickers=presub)
-                    logger.info("사전 구독: %d종목 (돌파 + 보유)", len(presub))
+                    logger.info("사전 구독: %d종목 (돌파 + 스윙 + 보유)", len(presub))
                     await write_log("INFO", f"사전 구독 {len(presub)}종목")
 
-            # 09:00 익일 청산은 백그라운드로 (내부 60초 sleep) + 동시에 시가 확정
-            if now < TIME_NEXT_DAY_CLEAR:
-                self._phase = "next_day_clear"
-                await self._wait_until(TIME_NEXT_DAY_CLEAR)
-            if now <= TIME_VB_OPEN_CONFIRM:
-                # self._next_day_task로 보존 — finally/_settle/stop 시점에 lifecycle 추적 (좀비 task 방지)
+            # 08:00 NXT 프리 진입 — 익일 청산(NEXT_DAY_STABILIZE_SECS 후) + VB/LTV PRE_NXT 매매 시작
+            if now < TIME_PRE_NXT_OPEN:
+                self._phase = "pre_nxt_wait"
+                await self._wait_until(TIME_PRE_NXT_OPEN)
+            if now <= TIME_KRX_OPEN_CONFIRM:
+                # 익일 청산: PRE_NXT 첫 거래 시가에서 청산 (Q2=B)
                 self._next_day_task = asyncio.create_task(self._execute_next_day_clear())
-                # 5초 폴링으로 돌파 시가 확정 → 09:00:05 매매 진입
+                # 시가 확정 폴링 — 1차 시가는 NXT 프리 첫 거래
                 await self._confirm_breakout_open_prices()
                 if self._collect_breakout_tickers():
-                    self._phase = "vb_trading"
-                    logger.info("돌파 전략 매매 시작 (09:00:05 전후)")
-                    await write_log("INFO", "돌파 전략 매매 시작")
+                    self._phase = "pre_nxt_trading"
+                    logger.info("VB/LTV PRE_NXT 매매 시작 (08:00~)")
+                    await write_log("INFO", "NXT 프리 매매 시작")
+
+                # KRX 메인 시가 확정(09:00:05) 까지 대기
+                await self._wait_until(TIME_KRX_OPEN_CONFIRM)
+                # KRX 메인 시가 재확정 (NXT 프리 시가와 별도, Phase 5 보드별 분리)
+                await self._confirm_breakout_open_prices()
+                self._phase = "main_trading"
+                logger.info("KRX 메인 시가 확정 — VB/LTV MAIN 매매 진입")
+                await write_log("INFO", "KRX 메인 매매 시작")
             elif now <= TIME_SCAN_START:
-                # 09:00:05 이후 중간 부팅 — 사전구독 + 시가 확정 즉시 실행
+                # 중간 부팅 (KRX 메인 시간대)
                 presub = self._collect_presubscribe_tickers()
                 if presub:
                     await subscribe_filtered_stocks([], extra_tickers=presub)
                 await self._confirm_breakout_open_prices()
                 if self._collect_breakout_tickers():
-                    self._phase = "vb_trading"
-                    logger.info("돌파 전략 매매 시작 (중간 부팅): %d종목", len(presub))
+                    self._phase = "main_trading"
+                    logger.info("KRX 메인 매매 시작 (중간 부팅): %d종목", len(presub))
 
-            # 09:30~ 종목 스캔 + 매매
+            # 09:30~ 모멘텀 스캔 + 매매
             if now < TIME_SCAN_START:
                 self._phase = "scanning"
                 await self._wait_until(TIME_SCAN_START)
 
-            if now < TIME_BUY_STOP:
-                # 스캔 + 매매 모드 진입
+            if now < TIME_KRX_MAIN_BUY_STOP:
                 tickers = await scan_stocks()
                 extra = self._collect_breakout_tickers() + self._collect_swing_tickers()
                 await subscribe_filtered_stocks(tickers, extra_tickers=extra)
 
-                # 09:00:05 이후 시작이면 시가 확정 재시도 (KIS API 조회)
-                if now > TIME_VB_OPEN_CONFIRM:
+                # 09:00:05 이후 시작이면 시가 확정 재시도
+                if now > TIME_KRX_OPEN_CONFIRM:
                     await self._confirm_breakout_open_prices()
 
                 self._phase = "trading"
                 scan_task = asyncio.create_task(self._scan_loop())
-                logger.info("매매 모드 진입")
+                logger.info("매매 모드 진입 (KRX 메인 + NXT)")
 
-                # 15:20까지 대기
-                await self._wait_until(TIME_BUY_STOP)
+                await self._wait_until(TIME_KRX_MAIN_BUY_STOP)
                 scan_task.cancel()
             else:
-                logger.info("15:20 이후 시작 — 매수 중단 상태로 진입")
+                scan_task = None
+                logger.info("15:20 이후 시작 — KRX 메인 매수 중단 상태로 진입")
 
-            # 15:20 신규 매수 중단 + 당일 청산 전략 강제 청산
-            self._phase = "buy_stopped"
+            # 15:20 KRX 메인 신규 매수 중단 + KRX 메인 종목 강제 청산
+            # POST_NXT 활성 종목(VB/LTV)은 유지 — Phase 8 tradable_boards에서 보드 가드
+            self._phase = "krx_main_stopped"
+            await self._force_clear_main_only()
+            await write_log("INFO", "15:20 KRX 메인 매수 중단 + 강제 청산")
+
+            # 15:30 KRX 메인 마감 — NXT 애프터로 전환. 구독은 유지(POST_NXT 종목 시세 필요)
+            await self._wait_until(TIME_KRX_MAIN_CLOSE)
+            self._phase = "post_nxt_trading"
+            await write_log("INFO", "15:30 KRX 메인 마감 → NXT 애프터 전환")
+
+            # NXT 애프터에서도 _scan_loop 유지 (재구독은 보드별 화이트리스트로 결정 — Phase 8)
+            if scan_task is None or scan_task.done():
+                scan_task = asyncio.create_task(self._scan_loop())
+
+            # 19:50 NXT 애프터 신규 매수 중단 + AI자문
+            await self._wait_until(TIME_NXT_POST_BUY_STOP)
+            self._phase = "post_nxt_stopped"
             for s in self.registry.enabled():
                 s.state.buy_disabled = True
-            await self._force_clear_intraday_strategies()
-            await write_log("INFO", "15:20 신규 매수 중단")
+            await write_log("INFO", "19:50 NXT 애프터 매수 중단")
 
-            # 15:30 장 마감, 구독 해제
-            await self._wait_until(TIME_MARKET_CLOSE)
-            self._phase = "closing"
-            await unsubscribe_all()
-            await write_log("INFO", "15:30 WebSocket 구독 해제")
-
-            # 16:00 전략수정 AI자문 생성
-            await self._wait_until(TIME_RECOMMENDATION)
-            self._phase = "recommending"
             try:
                 from src.engine.recommendation_engine import generate_recommendations
                 await generate_recommendations()
-                await write_log("INFO", "16:00 전략수정 AI자문 생성 완료")
+                await write_log("INFO", "19:50 전략수정 AI자문 생성 완료")
             except Exception:
                 logger.exception("전략수정 AI자문 생성 실패")
                 await write_log("ERROR", "전략수정 AI자문 생성 실패")
 
-            # 16:10 정산
+            # 20:00 NXT 애프터 종료, unsubscribe
+            await self._wait_until(TIME_NXT_POST_CLOSE)
+            self._phase = "closing"
+            if scan_task and not scan_task.done():
+                scan_task.cancel()
+            await unsubscribe_all()
+            await write_log("INFO", "20:00 NXT 애프터 종료, 구독 해제")
+
+            # 20:10 정산
             await self._wait_until(TIME_SETTLEMENT)
             self._phase = "settling"
             await self._settle()
 
-            # 정산 직후: 일일 로그 분석 리포트 생성 (실패해도 정산엔 영향 없음)
+            # 정산 직후: 일일 로그 분석 리포트 (실패해도 정산엔 영향 없음)
             self._phase = "log_analysis"
             try:
                 from src.engine.log_analysis_engine import generate_daily_log_report
@@ -314,14 +367,16 @@ class TradingScheduler:
             logger.exception("매매 프로세스 오류")
             await write_log("ERROR", "매매 프로세스 비정상 종료")
         finally:
-            # next_day_task lifecycle — 비정상 종료 시 좀비 task 방지
-            if self._next_day_task and not self._next_day_task.done():
-                self._next_day_task.cancel()
-                try:
-                    await self._next_day_task
-                except (asyncio.CancelledError, Exception):
-                    pass
-            self._next_day_task = None
+            # 백그라운드 task lifecycle — 비정상 종료 시 좀비 task 방지
+            for task_attr in ("_next_day_task", "_session_task"):
+                task = getattr(self, task_attr, None)
+                if task and not task.done():
+                    task.cancel()
+                    try:
+                        await task
+                    except (asyncio.CancelledError, Exception):
+                        pass
+                setattr(self, task_attr, None)
             self._running = False
             self._phase = "idle"
             await write_log("INFO", "매매 시스템 종료")
@@ -405,17 +460,28 @@ class TradingScheduler:
     async def stop(self) -> None:
         """매매 프로세스를 중지한다."""
         self._running = False
-        # 익일 청산 백그라운드 task 즉시 취소 (60초 sleep 도중에도)
-        if self._next_day_task and not self._next_day_task.done():
-            self._next_day_task.cancel()
-            try:
-                await self._next_day_task
-            except (asyncio.CancelledError, Exception):
-                pass
-        self._next_day_task = None
+        # 백그라운드 task 즉시 취소 (sleep 도중에도)
+        for task_attr in ("_next_day_task", "_session_task"):
+            task = getattr(self, task_attr, None)
+            if task and not task.done():
+                task.cancel()
+                try:
+                    await task
+                except (asyncio.CancelledError, Exception):
+                    pass
+            setattr(self, task_attr, None)
         await unsubscribe_all()
         await kis_ws.disconnect()
         await write_log("INFO", "매매 시스템 수동 중지")
+
+    async def _session_loop(self) -> None:
+        """SessionTracker 1분 주기 tick — 보드 진입/종료 콜백 발화."""
+        while self._running:
+            try:
+                await session_tracker.tick()
+            except Exception:
+                logger.exception("session_tracker.tick 실패")
+            await asyncio.sleep(SESSION_TICK_INTERVAL)
 
     def get_status(self) -> dict:
         """현재 상태를 반환한다."""
@@ -535,8 +601,8 @@ class TradingScheduler:
         for ticker, _, _ in all_next_day:
             await kis_ws.subscribe(TICK_TR_ID, ticker)
 
-        # 시가 안정화 대기 (09:01까지 60초 — on_tick의 NEXT_DAY_CLEAR 억제 구간)
-        await asyncio.sleep(60)
+        # 시가 안정화 대기 — Q2=B (NXT 프리 첫 거래 후 짧은 안정화)
+        await asyncio.sleep(NEXT_DAY_STABILIZE_SECS)
 
         # 대기 완료 — on_tick 가드 해제
         for _, strategy in overnight_strategies:
@@ -584,40 +650,69 @@ class TradingScheduler:
         logger.info("익일 청산 실행 완료")
 
     async def _confirm_breakout_open_prices(
-        self, *, max_wait_s: float = 5.0, interval_s: float = 0.5,
+        self, *, max_wait_s: float = 5.0, interval_s: float = 0.5, board: str | None = None,
     ) -> None:
-        """돌파 전략(VB, MB)의 시가를 확정한다.
+        """돌파 전략(VB, LTV)의 보드별 시가를 확정한다.
 
         1차: WebSocket ticker_prices 캐시를 max_wait_s 동안 interval_s 간격으로 폴링
-            (사전구독되어 있으면 09:00:00 시가가 즉시 들어옴)
         2차: 폴링 종료 시점에도 미확정인 종목만 KIS 개별시세 API로 폴백 조회
+
+        `board` 미지정 시 SessionTracker의 활성 보드 중 우선순위(main → post_nxt → pre_nxt)로 결정.
         """
         from src.engine.scanner import ticker_prices
 
-        # 대상 전략 + 종목 수집
-        targets: list[tuple[str, object, list[str]]] = []  # (sid, strategy, ticker_list)
+        # 호출 시점의 활성 보드 결정 (board 인자가 없으면 SessionTracker에서)
+        if board is None:
+            from src.engine.session import session_tracker, MarketBoard
+            active = session_tracker.active
+            for candidate in ("main", "post_nxt", "pre_nxt"):
+                if MarketBoard(candidate) in active:
+                    board = candidate
+                    break
+            if board is None:
+                # 활성 보드 없음 — 시각 기반 fallback
+                now_t = datetime.now().time()
+                if now_t < time(9, 0):
+                    board = "pre_nxt"
+                elif now_t < time(15, 30):
+                    board = "main"
+                else:
+                    board = "post_nxt"
+
+        # 대상 전략 + 종목 수집 — 해당 board를 활성화한 전략만
+        from src.engine.session import get_tradable_boards, MarketBoard
+        targets: list[tuple[str, object, list[str]]] = []
         for sid in ("volatility_breakout", "long_tail_volatility"):
             strategy = self.registry.get(sid)
             if not strategy or not strategy.config.enabled:
                 continue
             if not hasattr(strategy, '_targets') or not hasattr(strategy, 'on_open_price_confirmed'):
                 continue
+            allowed = get_tradable_boards(sid, strategy.config.params)
+            if MarketBoard(board) not in allowed:
+                continue
             targets.append((sid, strategy, list(strategy._targets.keys())))
 
         if not targets:
             return
 
-        # 1차: WebSocket 폴링 (max_wait_s 동안)
+        def _is_confirmed(strategy, ticker: str) -> bool:
+            states = strategy._open_confirmed.get(ticker)
+            if isinstance(states, dict):
+                return states.get(board, False)
+            return bool(states)
+
+        # 1차: WebSocket 폴링
         elapsed = 0.0
         while elapsed < max_wait_s:
             all_done = True
             for _, strategy, tickers in targets:
                 for ticker in tickers:
-                    if strategy._open_confirmed.get(ticker, False):
+                    if _is_confirmed(strategy, ticker):
                         continue
                     price_info = ticker_prices.get(ticker)
                     if price_info and price_info.get("open_price", 0) > 0:
-                        strategy.on_open_price_confirmed(ticker, price_info["open_price"])
+                        strategy.on_open_price_confirmed(ticker, price_info["open_price"], board=board)
                     else:
                         all_done = False
             if all_done:
@@ -628,18 +723,18 @@ class TradingScheduler:
         # 2차: 미확정 종목만 KIS API 폴백
         from src.api.condition import fetch_stock_detail
         for sid, strategy, tickers in targets:
-            unconfirmed = [t for t in tickers if not strategy._open_confirmed.get(t, False)]
+            unconfirmed = [t for t in tickers if not _is_confirmed(strategy, t)]
             for ticker in unconfirmed:
                 try:
                     detail = await fetch_stock_detail(ticker)
                     open_price = int(detail.get("stck_oprc", "0"))
                     if open_price > 0:
-                        strategy.on_open_price_confirmed(ticker, open_price)
+                        strategy.on_open_price_confirmed(ticker, open_price, board=board)
                 except Exception:
                     logger.debug("%s 시가 조회 실패: %s", sid, ticker)
 
-            confirmed = sum(1 for t in tickers if strategy._open_confirmed.get(t, False))
-            logger.info("%s 시가 확정: %d/%d종목", strategy.config.name, confirmed, len(tickers))
+            confirmed = sum(1 for t in tickers if _is_confirmed(strategy, t))
+            logger.info("%s 시가 확정 [%s]: %d/%d종목", strategy.config.name, board, confirmed, len(tickers))
 
     def _collect_breakout_tickers(self) -> list[str]:
         """돌파 전략(VB, MB)의 스캔 종목을 합산한다."""
@@ -703,8 +798,17 @@ class TradingScheduler:
             return 0
 
     async def _force_clear_intraday_strategies(self) -> None:
-        """15:20 당일 청산 전략(VB, MB)의 강제 청산."""
+        """[Backwards-compat] 호출자가 남아있을 경우 main 전용 강제 청산으로 위임."""
+        await self._force_clear_main_only()
+
+    async def _force_clear_main_only(self) -> None:
+        """15:20 KRX 메인 강제 청산 — `tradable_boards`에 POST_NXT가 없는 전략의 종목만 청산.
+
+        VB/LTV가 POST_NXT를 활성화하고 있으면 NXT 애프터까지 보유 유지. POST_NXT 미활성
+        전략(또는 momentum 익일청산 후보가 아닌 당일청산 종목)만 즉시 청산한다.
+        """
         from src.engine.scanner import t
+        from src.engine.session import MarketBoard, get_tradable_boards
 
         for sid in ("volatility_breakout", "long_tail_volatility"):
             strategy = self.registry.get(sid)
@@ -713,11 +817,17 @@ class TradingScheduler:
             if not hasattr(strategy, 'check_force_clear'):
                 continue
 
+            allowed = get_tradable_boards(sid, strategy.config.params)
+            keeps_post_nxt = MarketBoard.POST_NXT in allowed
+            if keeps_post_nxt:
+                logger.info("%s POST_NXT 활성 — 15:20 강제 청산 보류, 19:50 매수 중단까지 유지", strategy.config.name)
+                continue
+
             clear_tickers = strategy.check_force_clear()
             if not clear_tickers:
                 continue
 
-            await write_log("INFO", f"{strategy.config.name} 강제 청산 대상: {clear_tickers}")
+            await write_log("INFO", f"{strategy.config.name} 15:20 강제 청산 대상: {clear_tickers}")
             for ticker in clear_tickers:
                 if ticker in strategy.state.positions:
                     await self.order_engine.execute_sell(ticker, Signal.FORCE_CLEAR, sid)

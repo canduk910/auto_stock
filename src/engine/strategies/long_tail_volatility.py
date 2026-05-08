@@ -18,10 +18,19 @@ logger = logging.getLogger(__name__)
 class LongTailVolatilityStrategy(StrategyBase):
     """롱테일 변동성 돌파 전략."""
 
+    # 매매 가능 보드 (Phase 8) — Q3=A 야간 매매 활성화
+    DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main", "post_nxt")
+
     DEFAULT_PARAMS = {
+        "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         # 진입 조건
         "k_period": 20,
         "min_prdy_rate": 5.0,                        # 전일대비 최소 등락률
+        # 보드별 K값 곱 (Phase 5 Q1=C: 보드별 분리)
+        "k_value_krx_main": 1.0,
+        "k_value_nxt_pre": 1.0,
+        "k_value_nxt_post": 1.0,
+        "exchange": "KRX",
         # 종목 필터
         "min_market_cap": 100_000_000_000,            # 시총 1,000억
         "min_trade_amount": 20_000_000_000,           # 거래대금 200억
@@ -44,10 +53,10 @@ class LongTailVolatilityStrategy(StrategyBase):
         merged = {**self.DEFAULT_PARAMS, **config.params}
         config.params = merged
         super().__init__(config)
-        # VB와 동일 — 종목별 타겟 가격/K값
+        # VB와 동일 — 종목별 타겟 가격/K값 (Phase 5: 보드별 분리)
         self._targets: dict[str, dict] = {}
-        self._open_confirmed: dict[str, bool] = {}
-        self._prev_price: dict[str, int] = {}
+        self._open_confirmed: dict[str, dict[str, bool]] = {}
+        self._prev_price: dict[str, dict[str, int]] = {}
         self._scanned_tickers: list[str] = []
         # 상한가 도달 → 익일 청산 모드 종목
         self._limit_up_reached: set[str] = set()
@@ -135,11 +144,15 @@ class LongTailVolatilityStrategy(StrategyBase):
                 self._targets[ticker] = {
                     "k": round(k, 4),
                     "prev_range": prev_range,
+                    "target_offset_base": target_offset,
+                    # backwards-compat
                     "target_offset": target_offset,
                     "target_price": 0,
                     "open_price": 0,
+                    # 보드별 시가/타겟 (Phase 5)
+                    "boards": {},
                 }
-                self._open_confirmed[ticker] = False
+                self._open_confirmed[ticker] = {}
 
                 # 09:30 scan_stocks() 이전에도 등락률 필터(min_prdy_rate)가 동작하도록 전일종가 사전 등록
                 from src.engine.scanner import ticker_prev_close
@@ -277,32 +290,71 @@ class LongTailVolatilityStrategy(StrategyBase):
         return self._scanned_tickers
 
     def get_targets_status(self) -> dict[str, dict]:
-        """종목별 타겟 가격 정보를 반환한다 (VB와 동일한 형식)."""
-        return {
-            ticker: {
-                "k": info["k"],
-                "target_price": info["target_price"],
-                "open_price": info["open_price"],
-                "target_offset": info["target_offset"],
-                "open_confirmed": self._open_confirmed.get(ticker, False),
+        """종목별 타겟 가격 정보 (보드별 분리 노출 — VB와 동일 형식)."""
+        result = {}
+        for ticker, info in self._targets.items():
+            board_states = self._open_confirmed.get(ticker, {})
+            result[ticker] = {
+                "k": info.get("k", 0),
+                "target_price": info.get("target_price", 0),
+                "open_price": info.get("open_price", 0),
+                "target_offset": info.get("target_offset", 0),
                 "limit_up_reached": ticker in self._limit_up_reached,
+                "boards": {
+                    board: {
+                        "open_price": b.get("open_price", 0),
+                        "target_price": b.get("target_price", 0),
+                        "target_offset": b.get("target_offset", 0),
+                        "confirmed": board_states.get(board, False),
+                    }
+                    for board, b in info.get("boards", {}).items()
+                },
+                "open_confirmed": board_states,
             }
-            for ticker, info in self._targets.items()
-        }
+        return result
 
-    def on_open_price_confirmed(self, ticker: str, open_price: int) -> None:
-        """시가 확정 시 Target Price를 계산한다."""
+    _BOARD_K_KEY = {
+        "main": "k_value_krx_main",
+        "pre_nxt": "k_value_nxt_pre",
+        "post_nxt": "k_value_nxt_post",
+    }
+
+    def _resolve_active_board(self) -> str | None:
+        from src.engine.session import session_tracker, MarketBoard
+
+        active = session_tracker.active
+        if not active:
+            return None
+        allowed = self.config.params.get("tradable_boards") or list(self.DEFAULT_TRADABLE_BOARDS)
+        for candidate in ("main", "post_nxt", "pre_nxt"):
+            if candidate in allowed and MarketBoard(candidate) in active:
+                return candidate
+        return None
+
+    def on_open_price_confirmed(self, ticker: str, open_price: int, board: str = "main") -> None:
+        """보드별 시가 확정 + Target 계산."""
         info = self._targets.get(ticker)
-        if not info:
+        if not info or open_price <= 0:
             return
-        info["open_price"] = open_price
-        info["target_price"] = open_price + info["target_offset"]
-        self._open_confirmed[ticker] = True
+        base = info.get("target_offset_base", info.get("target_offset", 0))
+        k_key = self._BOARD_K_KEY.get(board, "k_value_krx_main")
+        k_mult = float(self.config.params.get(k_key, 1.0))
+        target_offset = max(int(base * k_mult), 0)
+        info.setdefault("boards", {})[board] = {
+            "open_price": open_price,
+            "target_price": open_price + target_offset,
+            "target_offset": target_offset,
+        }
+        self._open_confirmed.setdefault(ticker, {})[board] = True
+        if not info.get("open_price"):
+            info["open_price"] = open_price
+            info["target_price"] = open_price + target_offset
+            info["target_offset"] = target_offset
 
     def check_buy_signal(
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:
-        """변동성 돌파 방식 매수: 현재가 >= Target Price 돌파 순간."""
+        """현재 활성 보드의 Target Price 돌파 시 매수."""
         from src.engine.scanner import t, ticker_names, ticker_prev_close
 
         if self.state.buy_disabled:
@@ -318,15 +370,23 @@ class LongTailVolatilityStrategy(StrategyBase):
         if not info:
             return Signal.NONE
 
-        # 시가 미확정 시 현재가를 시가로 사용하여 확정
-        if not self._open_confirmed.get(ticker, False) and open_price > 0:
-            self.on_open_price_confirmed(ticker, open_price)
+        board = self._resolve_active_board()
+        if board is None:
+            return Signal.NONE
 
-        target = info.get("target_price", 0)
+        confirmed = self._open_confirmed.get(ticker, {}).get(board, False)
+        if not confirmed and open_price > 0:
+            self.on_open_price_confirmed(ticker, open_price, board=board)
+
+        board_info = info.get("boards", {}).get(board)
+        if not board_info:
+            return Signal.NONE
+
+        target = board_info.get("target_price", 0)
         if target <= 0:
             return Signal.NONE
 
-        # 전일대비 등락률 필터
+        # 전일대비 등락률 필터 (보드 무관)
         prev_close = ticker_prev_close.get(ticker, 0)
         if prev_close > 0:
             prdy_rate = (current_price - prev_close) / prev_close * 100
@@ -334,17 +394,19 @@ class LongTailVolatilityStrategy(StrategyBase):
             if prdy_rate < min_rate:
                 return Signal.NONE
 
-        prev = self._prev_price.get(ticker, 0)
-        self._prev_price[ticker] = current_price
+        prev = self._prev_price.setdefault(ticker, {}).get(board, 0)
+        self._prev_price[ticker][board] = current_price
 
         if prev == 0:
             return Signal.NONE
 
         # 돌파 순간 감지
         if prev < target and current_price >= target:
+            board_open = board_info.get("open_price", 0)
+            change_rate = round((current_price - board_open) / board_open * 100, 1) if board_open > 0 else 0
             logger.info(
-                "롱테일 변동성 돌파 매수 신호: %s 현재가(%d) >= 목표가(%d), K=%.4f",
-                t(ticker), current_price, target, info["k"],
+                "롱테일 변동성 돌파 매수 신호 [%s]: %s 현재가(%d) >= 목표가(%d), K=%.4f",
+                board, t(ticker), current_price, target, info["k"],
             )
             self.state.buy_signals.append({
                 "ticker": ticker,
@@ -352,7 +414,8 @@ class LongTailVolatilityStrategy(StrategyBase):
                 "price": current_price,
                 "target_price": target,
                 "k": info["k"],
-                "change_rate": round((current_price - info["open_price"]) / info["open_price"] * 100, 1) if info["open_price"] > 0 else 0,
+                "board": board,
+                "change_rate": change_rate,
                 "time": datetime.now().strftime("%H:%M:%S"),
             })
             if len(self.state.buy_signals) > 20:
@@ -434,6 +497,14 @@ class LongTailVolatilityStrategy(StrategyBase):
         ]
 
     def calc_buy_quantity(self, current_price: int) -> int:
+        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 1주 살 수 있으면 1주 매수."""
+        if current_price <= 0:
+            return 0
         ratio = self.config.params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        return amount // current_price if current_price > 0 else 0
+        qty = amount // current_price
+        if qty > 0:
+            return qty
+        if self.state.total_investment >= current_price:
+            return 1
+        return 0

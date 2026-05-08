@@ -74,13 +74,16 @@ src/
 ├── engine/              # 매매 엔진 코어
 │   ├── strategy_base.py     # StrategyBase(ABC), Signal, Position, StrategyState
 │   ├── strategy_registry.py # StrategyRegistry (등록/비중/자금분배/중복방지)
+│   ├── session.py           # MarketBoard enum + SessionTracker (KRX/NXT 보드 추적, tradable_boards)
 │   ├── strategies/
-│   │   ├── momentum.py          # 상한가 모멘텀 전략
-│   │   └── volatility_breakout.py  # 변동성 돌파 전략
-│   ├── risk.py              # RiskManager (on_tick → 전략별 신호 순회)
+│   │   ├── momentum.py              # 상한가 모멘텀 (KRX_OPEN+MAIN)
+│   │   ├── volatility_breakout.py   # 변동성 돌파 (보드별 K값 분리)
+│   │   ├── long_tail_volatility.py  # 롱테일 변동성 돌파 (VB+상한가 합성)
+│   │   └── donchian_swing.py        # 20일 신고가 스윙 (MAIN만, 멀티데이)
+│   ├── risk.py              # RiskManager (on_tick → 보드 가드 → 전략별 신호 순회)
 │   ├── order_engine.py      # OrderEngine (주문/체결/포지션 관리)
-│   ├── scheduler.py         # TradingScheduler (일일 스케줄/부팅/정산)
-│   └── scanner.py           # 종목 스캔 + 공용 시세 캐시
+│   ├── scheduler.py         # TradingScheduler (KRX/NXT 통합 운영 08:00~20:00)
+│   └── scanner.py           # 종목 스캔 + 공용 시세 캐시 (TICK_TR_ID = H0UNCNT0)
 │
 ├── db/                  # Supabase CRUD
 │   ├── supabase.py          # 클라이언트 초기화
@@ -162,13 +165,25 @@ src/
 TradingScheduler (scheduler.py)
 │
 ├── StrategyRegistry
-│   ├── MomentumStrategy
-│   │   ├── StrategyConfig (id, name, weight, params)
-│   │   └── StrategyState (positions, pending_buys, sold_today, pnl)
-│   └── VolatilityBreakoutStrategy
-│       ├── StrategyConfig
-│       ├── StrategyState
-│       └── _targets (K값, target_price, open_price)
+│   ├── MomentumStrategy             (tradable_boards: krx_open + main)
+│   │   ├── StrategyConfig (id, name, weight, params{tradable_boards, exchange, ...})
+│   │   └── StrategyState (positions, pending_buys, sold_today, pnl,
+│   │                       cached_buyable_*, buy_blocked_until, low_funds_tickers)
+│   ├── VolatilityBreakoutStrategy   (tradable_boards: pre_nxt + main + post_nxt)
+│   │   ├── StrategyConfig (k_value_krx_main / k_value_nxt_pre / k_value_nxt_post)
+│   │   ├── StrategyState
+│   │   └── _targets (K, prev_range, target_offset_base,
+│   │                  boards: {board: {open_price, target_price, target_offset}})
+│   ├── LongTailVolatilityStrategy   (tradable_boards: pre_nxt + main + post_nxt)
+│   │   └── + _limit_up_reached set (상한가 모드 전환 종목)
+│   └── DonchianSwingStrategy        (tradable_boards: main)
+│       └── _candidates / _bought_today / _scan_stats
+│
+├── SessionTracker (session.py — Phase 3 신설)
+│   ├── _active: frozenset[MarketBoard]
+│   ├── tick(now) → 시각 기반 보드 매핑 + 진입/종료 콜백 발화
+│   ├── on_h0nxmko0(tr_key, code, payload) → NXT 보드 코드 기록
+│   └── is_tradable(strategy_id, params) → 활성 보드 ∩ tradable_boards ≠ ∅
 │
 ├── OrderEngine
 │   ├── _order_ticker   {order_no → ticker}     # 체결통보 종목 보정
@@ -179,21 +194,26 @@ TradingScheduler (scheduler.py)
 │   └── _completed_orders set[order_no]          # 체결통보 선행 race 가드
 │
 └── RiskManager
-    └── on_tick() → registry.enabled() 순회 → 신호 체크
+    └── on_tick() → ticker_prices 갱신 → registry.enabled() 순회
+        ├─ check_exit_signal()
+        ├─ session_tracker.is_tradable(strategy)  ← 보드 가드 (Phase 8)
+        ├─ registry.is_ticker_blocked_for_buy()
+        └─ check_buy_signal() → execute_buy()
 ```
 
 ---
 
-## 5. 일일 매매 스케줄 시퀀스
+## 5. 일일 매매 스케줄 시퀀스 — KRX/NXT 통합 (08:00~20:00)
 
 ```
 시각     Scheduler          WebSocket         OrderEngine       KIS API
 ─────────────────────────────────────────────────────────────────────────
-08:20  run_daily() 기상
+07:45  run_daily() 기상       (TIME_AUTO_START)
        │
-08:25  _boot()
+07:50  _boot()                 (TIME_BOOT)
        ├─ get_token() ──────────────────────────────────────→ POST /oauth2/tokenP
        ├─ _load_strategy_config() ←── DB strategy_config
+       │   (tradable_boards / k_value_* / exchange 포함)
        ├─ get_balance() ────────────────────────────────────→ GET inquire-balance
        ├─ allocate_funds()
        ├─ strategy.prepare() ───────────────────────────────→ GET daily-price (일봉)
@@ -201,36 +221,45 @@ TradingScheduler (scheduler.py)
        ├─ DB positions 복구 ←── DB positions
        └─ KIS 잔고 교차검증
        │
-08:30  connect() ──────────→ WebSocket 연결
-       │                    └─ subscribe(H0STCNI0/9, 체결통보)
-       │                         │
-08:55  _collect_presubscribe_tickers()  (TIME_PRESUBSCRIBE)
-       │  └─ 돌파 전략 스캔 종목 + 보유 포지션 사전 구독 →
-       │     subscribe(H0STCNT0, 종목들)
+07:55  connect() ──────────→ WebSocket 연결        (TIME_PRESUBSCRIBE)
+       │  ├─ subscribe(H0STCNI0/9, 체결통보)
+       │  └─ subscribe(H0NXMKO0, "")  (실전 한정 — NXT 장운영정보)
+       │  + register_board_handler(SessionTracker.on_h0nxmko0)
+       │  + _session_loop() task — 30초 주기 SessionTracker.tick()
+       │  _collect_presubscribe_tickers() →
+       │     subscribe(H0UNCNT0, 종목들)  (KRX+NXT 통합 시세)
        │  유니버스 비어있으면 prepare() 재실행 (KIS API 일시장애 대비)
        │                         │
-09:00  asyncio.create_task(_execute_next_day_clear())  ← 비차단(60초 안정화)
-       │  + _confirm_breakout_open_prices() ── 0.5초 폴링/5초
-       │     (WebSocket 시가 → KIS API 폴백)
+08:00  PRE_NXT 보드 진입       (TIME_PRE_NXT_OPEN)
+       │  asyncio.create_task(_execute_next_day_clear())
+       │     ← 비차단 (NEXT_DAY_STABILIZE_SECS=30s 안정화)
+       │     ← 다음 영업일 NXT 프리 시가에서 청산 (Q2=B)
+       │  + _confirm_breakout_open_prices(board="pre_nxt") — 0.5초/5초 폴링
+       │  _phase = "pre_nxt_trading"
+       │  VB + LTV PRE_NXT 매매 시작 (k_value_nxt_pre 적용)
        │                         │
-09:00:05 _phase = "vb_trading"  (TIME_VB_OPEN_CONFIRM)
-       │  VB + LTV 매매 시작 (시가 확정 직후)
+09:00:05 KRX 메인 시가 확정    (TIME_KRX_OPEN_CONFIRM)
+       │  _confirm_breakout_open_prices(board="main")  ← 보드별 별도 시가
+       │  _phase = "main_trading"
+       │  VB + LTV MAIN 매매 진입 (k_value_krx_main 적용)
        │                         │
 09:30  scan_stocks() ───────────────────────────────────────→ GET fluctuation-rank
        │  subscribe_filtered_stocks()                        GET inquire-price
        │  _phase = "trading"  (모멘텀 매수 감시 시작)
-       │
-       ├─ _scan_loop() 시작 (5분 주기)
+       │  ├─ _scan_loop() 시작 (5분 주기)
        │                         │
-       │         ←───────────────┤ H0STCNT0 실시간 체결가
+       │         ←───────────────┤ H0UNCNT0 실시간 체결가 (KRX+NXT 통합)
        │                         │
        │  RiskManager.on_tick()  │
+       │  ├─ session_tracker.is_tradable(strategy)  ← Phase 8 보드 가드
        │  ├─ check_exit_signal() │
        │  │  └─ execute_sell() ──┼──────────────────────────→ POST order (매도)
+       │  │                                              EXCG_ID_DVSN_CD = exchange
        │  └─ check_buy_signal()  │
+       │     ├─ _resolve_active_board()  ← 활성 보드 결정 (main 우선)
        │     └─ execute_buy() ───┼──────────────────────────→ POST order (매수)
        │                         │
-       │         ←───────────────┤ H0STCNI0 체결통보
+       │         ←───────────────┤ H0STCNI0 체결통보 (KRX/NXT/SOR 통합)
        │                         │
        │  handle_execution_notice()
        │  ├─ _order_ticker[order_no] → 정확한 ticker
@@ -242,23 +271,32 @@ TradingScheduler (scheduler.py)
        │     ├─ delete_position() → DB
        │     └─ sold_today.add(ticker)
        │
-15:20  buy_disabled = True
-       │  _force_clear_volatility_breakout()
+15:20  KRX 메인 신규 매수 중단 + 강제 청산  (TIME_KRX_MAIN_BUY_STOP)
+       │  _force_clear_main_only()
+       │     ← tradable_boards에 POST_NXT가 있는 전략 종목은 보유 유지
        │  └─ execute_sell(FORCE_CLEAR) ─────────────────────→ POST order
        │
-15:30  unsubscribe_all() ──→ WebSocket 구독 해제
+15:30  KRX 메인 마감 → NXT 애프터 전환       (TIME_KRX_MAIN_CLOSE)
+       │  _phase = "post_nxt_trading"  (구독 유지, POST_NXT 종목 시세 필요)
+       │  VB + LTV POST_NXT 매매 계속 (k_value_nxt_post 적용)
        │
-16:00  generate_recommendations()  (전략수정 AI자문)
+19:50  NXT 애프터 신규 매수 중단              (TIME_NXT_POST_BUY_STOP)
+       │  buy_disabled = True (모든 활성 전략)
+       │  generate_recommendations()  (전략수정 AI자문)
        │  ├─ collect_metrics() ──────────────────→ DB trade_history 집계
        │  ├─ OpenAI Chat Completion ─────────────→ 외부 API
        │  └─ insert_recommendation() → DB parameter_recommendations (status: pending)
        │
-16:10  _settle()
+20:00  NXT 애프터 종료, unsubscribe_all() ──→ WebSocket 구독 해제
+       │                                       (TIME_NXT_POST_CLOSE)
+       │
+20:10  _settle()                              (TIME_SETTLEMENT)
        │  ├─ get_balance() ─────────────────────────────────→ GET inquire-balance
        │  ├─ upsert_daily_performance() → DB (전략별 + total)
+       │  ├─ generate_daily_log_report() → DB daily_log_reports (OpenAI)
        │  └─ disconnect() ─────→ WebSocket 종료
        │
-       └── 익일 08:20까지 대기 (주말 자동 건너뜀)
+       └── 익일 07:45까지 대기 (주말 자동 건너뜀)
 ```
 
 ---
@@ -377,7 +415,7 @@ on_tick(ticker, current_price)
 └─ Signal.BUY → execute_buy(시장가)
 ```
 
-### 8.2 변동성 돌파
+### 8.2 변동성 돌파 (보드별 분리 — Phase 5 Q1=C)
 
 ```
 prepare() 단계:
@@ -389,16 +427,28 @@ prepare() 단계:
 │    └─ 0종목 확정 시 ERROR 로그 + system_logs 기록
 ├─ fetch_daily_candles(): 21일 일봉
 ├─ K값 = avg(노이즈 비율) = avg(1 - |종가-시가| / (고가-저가))
-├─ target_offset = 전일 Range × K
-├─ ticker_prev_close[ticker] = candles[0].stck_clpr  (전일 종가 사전 등록)
-└─ 09:00:05 시가 확정 → target_price = 시가 + offset (VB/LTV 동일)
+├─ target_offset_base = 전일 Range × K                  ← 보드별 K 곱 전 기본값
+├─ ticker_prev_close[ticker] = candles[0].stck_clpr     (전일 종가 사전 등록)
+└─ _targets[ticker] = {target_offset_base, k, prev_range, boards: {}}
+
+보드별 시가 확정 (on_open_price_confirmed(ticker, open_price, board)):
+│
+├─ k_mult = params[f"k_value_{board}"]   # main / nxt_pre / nxt_post
+├─ target_offset = target_offset_base × k_mult
+└─ _targets[ticker]["boards"][board] = {open_price, target_price, target_offset}
+
+08:00 NXT 프리 진입:  _confirm_breakout_open_prices(board="pre_nxt")
+09:00:05 KRX 메인 시가: _confirm_breakout_open_prices(board="main")  ← 보드별 별도 시가
+15:30 NXT 애프터 진입: _confirm_breakout_open_prices(board="post_nxt")  (필요 시)
 
 on_tick(ticker, current_price)
 │
-├─ prev_price = _prev_price[ticker]
+├─ session_tracker.is_tradable(strategy)  ← Phase 8 보드 가드 (RiskManager)
+├─ board = _resolve_active_board()         ← main 우선 → post_nxt → pre_nxt
+├─ prev_price = _prev_price[ticker][board]   (보드별 이전 틱)
 │
-├─ 조건: prev_price < target_price AND current_price >= target_price
-│         ↑ 돌파 순간 (아래→위)
+├─ 조건: prev_price < boards[board].target_price AND current_price >= target_price
+│         ↑ 보드별 돌파 순간
 │
 ├─ 동일 체크: position, pending, sold_today, max_positions
 │

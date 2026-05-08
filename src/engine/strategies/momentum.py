@@ -17,7 +17,11 @@ logger = logging.getLogger(__name__)
 class MomentumStrategy(StrategyBase):
     """상한가 모멘텀 전략 (기존 전략)."""
 
+    # 매매 가능 보드 (Phase 8) — momentum은 KRX 동시호가/메인만. 상한가 +29% 신호는 KRX 기준
+    DEFAULT_TRADABLE_BOARDS = ("krx_open", "main")
+
     DEFAULT_PARAMS = {
+        "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         "buy_threshold": 29.0,
         "stop_loss_rate": -7.5,
         "gap_up_threshold": 10.0,
@@ -146,6 +150,14 @@ class MomentumStrategy(StrategyBase):
         return Signal.NONE
 
     def calc_buy_quantity(self, current_price: int) -> int:
+        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 1주 살 수 있으면 1주 매수."""
+        if current_price <= 0:
+            return 0
         ratio = self.config.params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        return amount // current_price if current_price > 0 else 0
+        qty = amount // current_price
+        if qty > 0:
+            return qty
+        if self.state.total_investment >= current_price:
+            return 1
+        return 0
