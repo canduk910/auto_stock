@@ -249,7 +249,7 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | 항목 | 사용 |
 |------|------|
 | 시세 채널 | `H0UNCNT0` (KRX+NXT 통합 체결가) — `H0STCNT0`과 메시지 포맷 동일. NXT 거래도 같은 콜백으로 즉시 흘러옴 |
-| NXT 장운영정보 | `H0NXMKO0` (실전 한정) — `SessionTracker.on_h0nxmko0`로 보드 전환 코드 수신 (필드 명세 미확정으로 코드 기록만, 향후 정확도 보강용) |
+| NXT 장운영정보 | `H0NXMKO0` 구독은 **보류** — 명세상 `tr_key` Required(length 12)지만 형식 미확정으로 빈 키 거절. SessionTracker는 시각 기반 fallback으로 동작. `handler.register_board_handler` 인프라는 유지(향후 KIS 측 정확한 tr_key 확인 후 활성) |
 | 주문 라우팅 | `place_order(..., exchange=...)` body에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS)는 KRX만 허용 — SOR/NXT는 실전 한정 |
 | 조회 거래소 옵션 | `get_balance(afhr_flpr=...)` — `N`(정규장)/`Y`(시간외)/`X`(NXT 정규장). `get_daily_orders(exchange="ALL")` — KRX+NXT+SOR 합산 |
 | 보드 추상화 | `src/engine/session.py` `MarketBoard` enum: `pre_nxt`(NXT 프리 08:00~09:00) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00) + `SessionTracker` 30초 주기 tick + `register_board_handler` 콜백 |

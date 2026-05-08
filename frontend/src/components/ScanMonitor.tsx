@@ -61,14 +61,22 @@ const SWING_GAP_SKIP_PCT = 3.0              // donchian DEFAULT_PARAMS.gap_skip_
 const PHASE_LABELS: Record<string, { label: string; color: string }> = {
   idle: { label: '대기', color: 'bg-gray-100 text-gray-700' },
   booting: { label: '기동 중', color: 'bg-yellow-100 text-yellow-700' },
+  presubscribe_wait: { label: '사전 구독 대기', color: 'bg-sky-100 text-sky-700' },
+  pre_nxt_wait: { label: 'NXT 프리 대기', color: 'bg-sky-100 text-sky-700' },
   next_day_clear: { label: '익일 청산', color: 'bg-orange-100 text-orange-700' },
+  pre_nxt_trading: { label: 'NXT 프리 매매', color: 'bg-teal-100 text-teal-700' },
+  vb_trading: { label: '돌파 매매 중', color: 'bg-teal-100 text-teal-700' },
+  main_trading: { label: 'KRX 메인 매매', color: 'bg-green-100 text-green-700' },
   scanning: { label: '종목 스캔', color: 'bg-blue-100 text-blue-700' },
   trading: { label: '매매 중', color: 'bg-green-100 text-green-700' },
   buy_stopped: { label: '매수 중단', color: 'bg-amber-100 text-amber-700' },
+  krx_main_stopped: { label: 'KRX 메인 매수 중단', color: 'bg-amber-100 text-amber-700' },
+  post_nxt_trading: { label: 'NXT 애프터 매매', color: 'bg-violet-100 text-violet-700' },
+  post_nxt_stopped: { label: 'NXT 애프터 매수 중단', color: 'bg-amber-100 text-amber-700' },
+  recommending: { label: 'AI자문 생성', color: 'bg-fuchsia-100 text-fuchsia-700' },
   closing: { label: '장 마감', color: 'bg-purple-100 text-purple-700' },
   settling: { label: '정산 중', color: 'bg-indigo-100 text-indigo-700' },
-  vb_trading: { label: '돌파 매매 중', color: 'bg-teal-100 text-teal-700' },
-  presubscribe_wait: { label: '사전 구독 대기', color: 'bg-sky-100 text-sky-700' },
+  log_analysis: { label: '로그 분석', color: 'bg-indigo-100 text-indigo-700' },
 }
 
 const BREAKOUT_KEYS = ['volatility_breakout', 'long_tail_volatility'] as const
@@ -171,7 +179,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               if (!c) return null
               return (
                 <div key={k} className="mb-2 px-2 py-1.5 bg-indigo-50 rounded text-xs text-indigo-700">
-                  {BREAKOUT_LABELS[k]} 스캔: {c}종목 (09:00:05~ 매매)
+                  {BREAKOUT_LABELS[k]} 스캔: {c}종목 (NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~ 매매)
                 </div>
               )
             })}
@@ -187,10 +195,10 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               </div>
             )}
 
-            {/* 돌파 탭(VB/LTV): 운영시각 안내 */}
+            {/* 돌파 탭(VB/LTV): 운영시각 안내 — NXT 통합 (보드별 분리) */}
             {isBreakout && (
               <div className="mb-3 px-2 py-1.5 bg-teal-50 rounded text-xs text-teal-700 flex items-center justify-between">
-                <span>매매 시간: 09:00:05 ~ 15:20 (시가 확정 직후 시작)</span>
+                <span>매매 시간: NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~19:50 (보드별 K값 분리)</span>
                 <span className="text-teal-500">
                   {selectedBreakoutCount > 0 ? `${selectedBreakoutCount}종목 감시 중` : ''}
                 </span>
@@ -381,7 +389,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
 
                       <div>
                         <div className="font-semibold text-emerald-700 mb-1">3. 청산 — 언제 파는가</div>
-                        <p className="mb-2">donchian은 추세 끝까지 따라가는 전략이라 정해진 청산 시간이 없습니다(VB는 15:20 강제 청산, momentum은 익일청산이지만 donchian은 둘 다 없음). 두 가지 중 하나만 맞으면 매도.</p>
+                        <p className="mb-2">donchian은 추세 끝까지 따라가는 전략이라 정해진 청산 시간이 없습니다(VB는 KRX 메인 15:20 강제 청산—POST_NXT 활성 시 19:50까지 보유, momentum은 익일 NXT 프리 08:00 청산이지만 donchian은 모두 해당 없음). 두 가지 중 하나만 맞으면 매도.</p>
 
                         <div className="mb-2">
                           <div className="font-medium mb-0.5">A. ATR 트레일링 스탑 (= Chandelier Exit)</div>

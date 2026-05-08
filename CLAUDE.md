@@ -65,7 +65,7 @@ src/engine/
 
 ### NXT/SOR 통합 운영 (08:00~20:00)
 - **시세**: WebSocket `H0UNCNT0` (KRX+NXT 통합 체결가) 단일 구독 — 메시지 포맷은 `H0STCNT0`과 동일
-- **NXT 장운영정보**: `H0NXMKO0` 실시간 구독 → `SessionTracker.on_h0nxmko0` (실전 한정)
+- **NXT 장운영정보**: `H0NXMKO0` 구독은 **보류** — 명세상 `tr_key` Required(length 12)지만 형식 미확정으로 KIS가 거절. SessionTracker는 시각 기반 fallback으로 동작. `handler.register_board_handler` 인프라는 유지(향후 명세 명확화 후 활성)
 - **주문 라우팅**: `place_order(..., exchange="KRX"|"NXT"|"SOR")` body에 `EXCG_ID_DVSN_CD`. 모의(VTS)는 KRX만 (SOR/NXT 미지원)
 - **MarketBoard**: `pre_nxt`(NXT 프리 08:00~) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00)
 - **시간 가드 (`scheduler.TIME_*`)**: 자동시작 07:45 / 부트 07:50 / 사전 구독 07:55 / NXT 프리 진입 08:00 / KRX 시가 확정 09:00:05 / 모멘텀 스캔 09:30 / KRX 메인 매수 중단 + 강제 청산 15:20 / KRX 메인 마감 15:30 / NXT 애프터 매수 중단 + AI자문 19:50 / NXT 애프터 종료 20:00 / 정산 + 일일 로그 분석 20:10

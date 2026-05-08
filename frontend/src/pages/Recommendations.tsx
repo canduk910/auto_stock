@@ -233,7 +233,7 @@ export default function Recommendations() {
       {/* 안내 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
-          매일 장마감 후 16:00에 OpenAI가 전략 성과를 분석해 파라미터 수정안을 자동 생성합니다. 전략별로 원하는 항목만 선택해 적용할 수 있고, 처리된 자문은 이력 탭에서 확인할 수 있습니다.
+          매일 NXT 애프터 종료 직전(19:50) OpenAI가 전략 성과를 분석해 파라미터 수정안을 자동 생성합니다. 전략별로 원하는 항목만 선택해 적용할 수 있고, 처리된 자문은 이력 탭에서 확인할 수 있습니다.
         </p>
       </div>
 
@@ -301,7 +301,7 @@ export default function Recommendations() {
             <>
               표시할 신규 자문이 없습니다.
               <br />
-              <span className="text-sm">매일 장마감 후 16:00에 자문이 생성됩니다.</span>
+              <span className="text-sm">매일 NXT 애프터 종료 직전(19:50)에 자문이 생성됩니다.</span>
             </>
           ) : (
             <>이력에 표시할 자문이 없습니다.</>

@@ -54,6 +54,11 @@ src/
 - 모의: 상단 녹색 배너 "모의투자 환경"
 - `/api/trading/status` 응답의 환경 정보로 결정
 
+## NXT/SOR 통합 운영 — UI 반영
+- **ScanMonitor phase 라벨**(`PHASE_LABELS`): 새 phase 추가 — `pre_nxt_wait`(NXT 프리 대기) / `pre_nxt_trading`(NXT 프리 매매) / `main_trading`(KRX 메인 매매) / `krx_main_stopped`(KRX 메인 매수 중단) / `post_nxt_trading`(NXT 애프터 매매) / `post_nxt_stopped`(NXT 애프터 매수 중단) / `recommending`(AI자문) / `log_analysis`(로그 분석)
+- **하드코딩 시간 문구 갱신**: ScanMonitor / Settings / strategyInfo / LogReports / Recommendations에서 "09:30~15:20", "16:00", "16:10" 등 옛 KRX 단독 시간을 NXT 통합 시간(자동시작 07:45 / NXT 프리 08:00 / KRX 메인 09:00:05 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 20:10)으로 갱신
+- **응답 호환성**: 백엔드 `_targets[ticker]`에 보드별 `boards` dict 추가됐지만 top-level `target_price`/`open_price`도 backwards-compat로 유지 → 프론트 화면 깨짐 0. 보드별 시각화는 향후 별도 작업
+
 ## ScanMonitor — 20일 신고가 스윙 깔때기
 - `donchian_swing` 탭 선택 시 단계별 통과 카운트(코스피200+코스닥150 → 시총 → 일봉 → 신고가 → EMA → 거래량 → ATR → 최종)를 막대 + 숫자로 시각화. 0이 되는 첫 단계가 탈락 원인.
 - 데이터 소스: `status.strategies.donchian_swing.scan_stats` (백엔드 `DonchianSwingStrategy.get_scan_stats()`)

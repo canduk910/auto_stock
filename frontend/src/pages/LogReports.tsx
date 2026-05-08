@@ -314,7 +314,7 @@ export default function LogReports() {
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
-          매일 정산(16:10) 직후 OpenAI가 당일 시스템 로그와 거래 내역을 분석해 운영 개선 리포트를 자동 생성합니다.
+          매일 정산(20:10) 직후 OpenAI가 당일 시스템 로그와 거래 내역을 분석해 운영 개선 리포트를 자동 생성합니다.
           {' '}
           오늘 리포트가 아직 없다면 우상단 버튼으로 즉시 실행할 수 있습니다(영업일당 1건).
         </p>
@@ -335,7 +335,7 @@ export default function LogReports() {
         <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
           저장된 리포트가 없습니다.
           <br />
-          <span className="text-sm">매일 정산(16:10) 후 자동 생성되거나 위 버튼으로 즉시 실행 가능합니다.</span>
+          <span className="text-sm">매일 정산(20:10) 후 자동 생성되거나 위 버튼으로 즉시 실행 가능합니다.</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">

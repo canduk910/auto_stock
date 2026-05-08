@@ -205,13 +205,11 @@ class TradingScheduler:
             await kis_ws.subscribe(cni_tr_id, cni_tr_key)
             logger.info("체결통보 구독: %s / %s", cni_tr_id, cni_tr_key)
 
-            # NXT 장운영정보(H0NXMKO0) 구독 — 보드 전환 이벤트용 (실전 한정)
-            if _cfg.is_production:
-                try:
-                    await kis_ws.subscribe("H0NXMKO0", "")
-                    logger.info("NXT 장운영정보 구독: H0NXMKO0")
-                except Exception:
-                    logger.warning("NXT 장운영정보 구독 실패 — 시각 기반 보드 매핑으로 동작")
+            # NXT 장운영정보(H0NXMKO0) 구독은 보류 — 명세상 tr_key Required(length 12)지만
+            # 정확한 형식(시장구분/종목코드) 미확정으로 빈 키 송신 시 KIS가 거절
+            # ("SUBSCRIBE ERROR : mci send failed"). SessionTracker는 시각 기반 fallback으로
+            # 정상 동작하므로 H0NXMKO0 구독은 향후 KIS 명세 명확화 후 재시도.
+            # (handler.py의 register_board_handler 인프라는 그대로 유지)
 
             # 세션 트래커 background task — 1분 주기 보드 전환 감시
             self._session_task = asyncio.create_task(self._session_loop())

@@ -157,13 +157,13 @@ export default function Settings() {
                 </div>
                 <div className="text-sm text-gray-600">
                   {isVB ? (
-                    <span>09:00:05 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(시가 확정 직후)</span></span>
+                    <span>NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~19:50 <span className="text-xs text-gray-400 ml-1">(보드별 시가·K값 분리)</span></span>
                   ) : isLTV ? (
-                    <span>09:00:05 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(시가 확정 직후, 상한가 도달 시 익일 청산)</span></span>
+                    <span>NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~19:50 <span className="text-xs text-gray-400 ml-1">(상한가 도달 시 다음 영업일 NXT 08:00 청산)</span></span>
                   ) : isDS ? (
-                    <span>09:05 ~ 추세 종료 <span className="text-xs text-gray-400 ml-1">(멀티데이 보유, ATR 트레일링)</span></span>
+                    <span>09:05 ~ 추세 종료 <span className="text-xs text-gray-400 ml-1">(KRX 메인만, 멀티데이 ATR 트레일링)</span></span>
                   ) : (
-                    <span>09:30 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(익일 청산 09:00)</span></span>
+                    <span>09:30 ~ 15:20 <span className="text-xs text-gray-400 ml-1">(KRX 메인, 익일 NXT 프리 08:00 청산)</span></span>
                   )}
                 </div>
               </div>
@@ -171,7 +171,7 @@ export default function Settings() {
           })}
         </div>
         <p className="text-xs text-gray-400 mt-3">
-          시스템 기동 08:20 / 마켓 오픈 08:30 / 정산 16:10
+          자동 시작 07:45 / 부트 07:50 / NXT 프리 08:00 / KRX 메인 09:00 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 20:10
         </p>
       </div>
 
