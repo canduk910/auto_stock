@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBalance } from '../api/balance'
-import { getTradingStatus, manualSell } from '../api/trading'
+import { manualSell } from '../api/trading'
+import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import ConfirmModal from './ConfirmModal'
 
@@ -50,11 +51,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
     refetchInterval: 10000,
   })
 
-  const { data: status } = useQuery({
-    queryKey: ['tradingStatus'],
-    queryFn: getTradingStatus,
-    refetchInterval: 5000,
-  })
+  const { data: status } = useTradingStatus()
 
   const sellMutation = useMutation({
     mutationFn: ({ ticker, quantity }: { ticker: string; quantity: number }) =>

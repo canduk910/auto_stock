@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { getTradingStatus } from '../api/trading'
+import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import { STRATEGY_INFO, ALL_STRATEGIES_INFO } from '../utils/strategyInfo'
 import ControlPanel from '../components/ControlPanel'
@@ -16,11 +15,7 @@ export default function Dashboard() {
   const [showTabTooltip, setShowTabTooltip] = useState(false)
   const tabsBoxRef = useRef<HTMLDivElement>(null)
 
-  const { data: status } = useQuery({
-    queryKey: ['tradingStatus'],
-    queryFn: getTradingStatus,
-    refetchInterval: 5000,
-  })
+  const { data: status } = useTradingStatus()
 
   const strategies = status?.strategies ?? {}
   const strategyKeys = Object.keys(strategies)

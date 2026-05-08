@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, NavLink } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { getTradingStatus } from './api/trading'
+import { TradingStatusProvider, useTradingStatus } from './contexts/TradingStatusContext'
 import Dashboard from './pages/Dashboard'
 
 // 비메인 페이지는 동적 import — 초기 번들 분리(Recharts/TanStack Table 페이지 단위로 떨어져 나감)
@@ -31,23 +30,22 @@ function PageFallback() {
   )
 }
 
-export default function App() {
-  const { data: status } = useQuery({
-    queryKey: ['tradingStatus'],
-    queryFn: getTradingStatus,
-    refetchInterval: 5000,
-    retry: false,
-  })
+function EnvBanner() {
+  const { data: status } = useTradingStatus()
+  if (!status) return null
+  return (
+    <div className={`text-center text-white text-sm font-medium py-1 ${
+      status.env === 'real' ? 'bg-red-600' : 'bg-green-600'
+    }`}>
+      {status.env === 'real' ? '실전 매매 환경' : '모의투자 환경'}
+    </div>
+  )
+}
 
+function AppShell() {
   return (
     <div className="min-h-screen bg-gray-100">
-      {status && (
-        <div className={`text-center text-white text-sm font-medium py-1 ${
-          status.env === 'real' ? 'bg-red-600' : 'bg-green-600'
-        }`}>
-          {status.env === 'real' ? '실전 매매 환경' : '모의투자 환경'}
-        </div>
-      )}
+      <EnvBanner />
 
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
@@ -87,5 +85,13 @@ export default function App() {
         </Suspense>
       </main>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <TradingStatusProvider>
+      <AppShell />
+    </TradingStatusProvider>
   )
 }

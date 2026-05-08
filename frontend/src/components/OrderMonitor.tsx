@@ -1,5 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
-import { getTradingStatus } from '../api/trading'
+import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { TradingStatusData, StrategyInfo, PositionDetail, OrderStatus } from '../types/trading'
 
@@ -21,11 +20,7 @@ interface Props {
 }
 
 export default function OrderMonitor({ selectedStrategy }: Props) {
-  const { data: status } = useQuery({
-    queryKey: ['tradingStatus'],
-    queryFn: getTradingStatus,
-    refetchInterval: 5000,
-  })
+  const { data: status } = useTradingStatus()
 
   const strategies = status?.strategies ?? {}
   const isAll = selectedStrategy === 'all'

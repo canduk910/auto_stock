@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { getTradingStatus } from '../api/trading'
+import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { BuySignal, ScanStats } from '../types/trading'
 
@@ -87,11 +86,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
   const [swingExpanded, setSwingExpanded] = useState(false)
   const [swingHelpOpen, setSwingHelpOpen] = useState(false)
 
-  const { data: status } = useQuery({
-    queryKey: ['tradingStatus'],
-    queryFn: getTradingStatus,
-    refetchInterval: 5000,
-  })
+  const { data: status } = useTradingStatus()
 
   const phase = status?.phase ?? 'idle'
   const scan = status?.scan

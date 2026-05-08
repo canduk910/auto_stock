@@ -10,6 +10,12 @@ npm run build      # 프로덕션 빌드 (타입 체크 포함)
 npm run lint       # ESLint
 ```
 
+## TradingStatus Context (단일 polling owner)
+- `src/contexts/TradingStatusContext.tsx` `TradingStatusProvider`가 `/api/trading/status`를 5초 폴링하는 단일 owner
+- App.tsx 최상위에서 wrap, 자식(Dashboard/BalanceTable/OrderMonitor/ScanMonitor)은 `useTradingStatus()` hook으로 공유
+- 이전엔 5개 컴포넌트가 각각 useQuery → 같은 응답 5번씩 받던 낭비 차단(분당 250KB → 50KB)
+- main.tsx QueryClient defaults: `staleTime: 3000`, `gcTime: 5*60*1000`, `retry: 1`, `refetchOnWindowFocus: false`
+
 ## 페이지 lazy 로딩
 - `App.tsx`에서 Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `React.lazy()` + Suspense fallback(skeleton)로 동적 import
 - 초기 번들 ~163kB 감소 (819kB → 656kB), 페이지별 chunk 분리(History 56kB, Recommendations 13kB 등)
