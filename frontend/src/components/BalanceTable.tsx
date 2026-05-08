@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBalance } from '../api/balance'
 import { getTradingStatus, manualSell } from '../api/trading'
@@ -30,6 +30,19 @@ export default function BalanceTable({ selectedStrategy }: Props) {
   const queryClient = useQueryClient()
   const [sellTarget, setSellTarget] = useState<{ ticker: string; name: string; quantity: number } | null>(null)
   const [sellResult, setSellResult] = useState<string | null>(null)
+  // setTimeout id 보존 — unmount 시 cleanup으로 고아 setState 경고 방지
+  const sellResultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (sellResultTimerRef.current) clearTimeout(sellResultTimerRef.current)
+    }
+  }, [])
+
+  const scheduleResultClear = () => {
+    if (sellResultTimerRef.current) clearTimeout(sellResultTimerRef.current)
+    sellResultTimerRef.current = setTimeout(() => setSellResult(null), 5000)
+  }
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['balance'],
@@ -51,52 +64,59 @@ export default function BalanceTable({ selectedStrategy }: Props) {
       setSellResult(result.message)
       queryClient.invalidateQueries({ queryKey: ['balance'] })
       queryClient.invalidateQueries({ queryKey: ['tradingStatus'] })
-      setTimeout(() => setSellResult(null), 5000)
+      scheduleResultClear()
     },
     onError: (err: Error) => {
       setSellTarget(null)
       setSellResult(`매도 실패: ${err.message}`)
-      setTimeout(() => setSellResult(null), 5000)
+      scheduleResultClear()
     },
   })
+
+  // 종목→전략 매핑 — status.strategies 변경 시에만 재계산
+  const tickerStrategyMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    if (status?.strategies) {
+      for (const [key, strat] of Object.entries(status.strategies)) {
+        for (const ticker of strat.position_tickers) {
+          map[ticker] = key
+        }
+      }
+    }
+    return map
+  }, [status?.strategies])
+
+  // WebSocket 실시간 시세로 현재가/평가 덮어쓰기 — holdings/시세 변경 시에만
+  const enrichedHoldings = useMemo(() => {
+    const realtimePrices = status?.scan?.ticker_prices ?? {}
+    const holdings = data?.holdings ?? []
+    return holdings.map((h) => {
+      const rt = realtimePrices[h.ticker]
+      if (!rt || !rt.current_price) return h
+      const currentPrice = rt.current_price
+      const evalAmount = currentPrice * h.quantity
+      const evalProfitLoss = evalAmount - h.purchase_amount
+      const evalProfitRate = h.purchase_amount > 0
+        ? (evalProfitLoss / h.purchase_amount) * 100
+        : 0
+      return { ...h, current_price: currentPrice, eval_amount: evalAmount, eval_profit_loss: evalProfitLoss, eval_profit_rate: evalProfitRate }
+    })
+  }, [data?.holdings, status?.scan?.ticker_prices])
+
+  const isAll = selectedStrategy === 'all'
+
+  const filteredHoldings = useMemo(() => {
+    const isValidTicker = (t: string) => /^[0-9A-Z]{6}$/.test(t)
+    return isAll
+      ? enrichedHoldings.filter((h) => isValidTicker(h.ticker))
+      : enrichedHoldings.filter((h) => isValidTicker(h.ticker) && tickerStrategyMap[h.ticker] === selectedStrategy)
+  }, [enrichedHoldings, isAll, tickerStrategyMap, selectedStrategy])
 
   if (isLoading) return <div className="p-6 text-gray-500">잔고 로딩 중...</div>
   if (isError) return <div className="p-6 text-red-500">잔고를 불러올 수 없습니다.</div>
   if (!data) return null
 
-  const { summary, holdings } = data
-
-  // 종목→전략 매핑
-  const tickerStrategyMap: Record<string, string> = {}
-  if (status?.strategies) {
-    for (const [key, strat] of Object.entries(status.strategies)) {
-      for (const ticker of strat.position_tickers) {
-        tickerStrategyMap[ticker] = key
-      }
-    }
-  }
-
-  const isAll = selectedStrategy === 'all'
-
-  // WebSocket 실시간 시세로 현재가/평가 덮어쓰기
-  const realtimePrices = status?.scan?.ticker_prices ?? {}
-  const enrichedHoldings = holdings.map((h) => {
-    const rt = realtimePrices[h.ticker]
-    if (!rt || !rt.current_price) return h
-    const currentPrice = rt.current_price
-    const evalAmount = currentPrice * h.quantity
-    const evalProfitLoss = evalAmount - h.purchase_amount
-    const evalProfitRate = h.purchase_amount > 0
-      ? (evalProfitLoss / h.purchase_amount) * 100
-      : 0
-    return { ...h, current_price: currentPrice, eval_amount: evalAmount, eval_profit_loss: evalProfitLoss, eval_profit_rate: evalProfitRate }
-  })
-
-  const isValidTicker = (t: string) => /^[0-9A-Z]{6}$/.test(t)
-
-  const filteredHoldings = isAll
-    ? enrichedHoldings.filter((h) => isValidTicker(h.ticker))
-    : enrichedHoldings.filter((h) => isValidTicker(h.ticker) && tickerStrategyMap[h.ticker] === selectedStrategy)
+  const { summary } = data
 
   return (
     <div className="space-y-4">

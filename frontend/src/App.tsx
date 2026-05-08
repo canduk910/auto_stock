@@ -1,11 +1,14 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getTradingStatus } from './api/trading'
 import Dashboard from './pages/Dashboard'
-import History from './pages/History'
-import Recommendations from './pages/Recommendations'
-import LogReports from './pages/LogReports'
-import Settings from './pages/Settings'
+
+// 비메인 페이지는 동적 import — 초기 번들 분리(Recharts/TanStack Table 페이지 단위로 떨어져 나감)
+const History = lazy(() => import('./pages/History'))
+const Recommendations = lazy(() => import('./pages/Recommendations'))
+const LogReports = lazy(() => import('./pages/LogReports'))
+const Settings = lazy(() => import('./pages/Settings'))
 
 const navItems = [
   { to: '/', label: '대시보드' },
@@ -14,6 +17,19 @@ const navItems = [
   { to: '/log-reports', label: '일일 로그 분석' },
   { to: '/settings', label: '설정' },
 ]
+
+function PageFallback() {
+  return (
+    <div className="bg-white rounded-lg shadow p-8 animate-pulse">
+      <div className="h-6 bg-gray-200 rounded w-1/3 mb-4" />
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-100 rounded" />
+        <div className="h-4 bg-gray-100 rounded w-5/6" />
+        <div className="h-4 bg-gray-100 rounded w-4/6" />
+      </div>
+    </div>
+  )
+}
 
 export default function App() {
   const { data: status } = useQuery({
@@ -60,13 +76,15 @@ export default function App() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/log-reports" element={<LogReports />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/recommendations" element={<Recommendations />} />
+            <Route path="/log-reports" element={<LogReports />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   )

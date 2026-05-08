@@ -10,6 +10,10 @@ npm run build      # 프로덕션 빌드 (타입 체크 포함)
 npm run lint       # ESLint
 ```
 
+## 페이지 lazy 로딩
+- `App.tsx`에서 Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `React.lazy()` + Suspense fallback(skeleton)로 동적 import
+- 초기 번들 ~163kB 감소 (819kB → 656kB), 페이지별 chunk 분리(History 56kB, Recommendations 13kB 등)
+
 ## 핵심 라이브러리
 - TanStack Query: 서버 상태 관리 + 자동 리페치
 - TanStack Table: 데이터 그리드 (거래 내역)
