@@ -61,7 +61,9 @@ src/
 - **Settings 야간 매매 경고 배너**: 어느 전략이든 `tradable_boards`에 `post_nxt`가 활성이면 상단에 amber 경고 배너 노출 (사용자 부재 시간대 사고 위험 안내)
 - **PARAM_LABELS k_value_***: `k_value_krx_main` / `k_value_nxt_pre` / `k_value_nxt_post` (배 단위 step 0.1) 추가 — 전략 파라미터 카드에 자동 노출 + InfoTooltip
 - **하드코딩 시간 문구 갱신**: ScanMonitor / Settings / strategyInfo / LogReports / Recommendations에서 "09:30~15:20", "16:00", "16:10" 등 옛 KRX 단독 시간을 NXT 통합 시간(자동시작 07:45 / NXT 프리 08:00 / KRX 메인 09:00:05 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 20:10)으로 갱신
-- **응답 호환성**: 백엔드 `_targets[ticker]`에 보드별 `boards` dict 추가됐지만 top-level `target_price`/`open_price`도 backwards-compat로 유지 → 프론트 화면 깨짐 0. 보드별 시가/타겟가 분리 시각화(VB/LTV)는 향후 별도 작업
+- **응답 호환성**: 백엔드 `_targets[ticker]`에 보드별 `boards` dict + `open_confirmed` dict 추가, top-level `target_price`/`open_price`도 backwards-compat 유지 → 프론트 화면 깨짐 0
+- **ScanMonitor 보드별 시가/타겟가 시각화**(VB/LTV 탭): `BreakoutTarget.boards: Record<string, BoardTarget>` 구조 활용. 시가/타겟가 셀이 멀티라인으로 보드별 행 노출 (chip + 값) — 활성 보드는 `font-semibold` + `ring`, 비활성/미확정 보드는 톤다운/opacity-50. 정렬·돌파 판정·근접 % 계산 모두 활성 보드 기준. 헤더 우측에 사용 중 보드 칩 (활성 보드 ●) 노출. `BOARD_META`로 한글 라벨 + 색상 매핑 (메인/프리/애프터/동시호가/시간외)
+- **OrderMonitor**(보유 포지션 행): 매수 완료된 종목이라 단일 매수가 중심이 적합 — top-level `target_price`/`open_price` 그대로 backwards-compat 사용 (보드 분리 미적용)
 - **API**: `updateStrategyParams(strategyId, params)` `params` 타입을 `Record<string, StrategyParamValue>`(`number | string | string[] | null`)로 확장. tradable_boards(list) / exchange(string) / k_value_*(number) 모두 한 호출로 송신
 
 ## ScanMonitor — 20일 신고가 스윙 깔때기

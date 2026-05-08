@@ -3,13 +3,32 @@ import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { BuySignal, ScanStats } from '../types/trading'
 
+interface BoardTarget {
+  open_price: number
+  target_price: number
+  target_offset: number
+  confirmed: boolean
+}
+
 interface BreakoutTarget {
   k: number
+  // backwards-compat (첫 확정 보드값)
   target_price: number
   open_price: number
   target_offset: number
-  open_confirmed: boolean
+  // Phase 5 보드별 분리
+  boards?: Record<string, BoardTarget>
+  open_confirmed?: boolean | Record<string, boolean>
   limit_up_reached?: boolean
+}
+
+// 보드별 시각 메타 — chip 색상 + 한글 라벨
+const BOARD_META: Record<string, { label: string; chipCls: string }> = {
+  main: { label: '메인', chipCls: 'bg-blue-100 text-blue-700' },
+  pre_nxt: { label: '프리', chipCls: 'bg-teal-100 text-teal-700' },
+  post_nxt: { label: '애프터', chipCls: 'bg-violet-100 text-violet-700' },
+  krx_open: { label: '동시호가', chipCls: 'bg-sky-100 text-sky-700' },
+  krx_after: { label: '시간외', chipCls: 'bg-purple-100 text-purple-700' },
 }
 
 interface SwingTarget {
@@ -661,12 +680,43 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                   </div>
                 )
               }
+              // 활성 보드 우선순위 — main > post_nxt > pre_nxt (전략 _resolve_active_board와 동일)
+              const activeBoardCode = (() => {
+                const codes = activeBoards.map((b) => b.code)
+                for (const c of ['main', 'post_nxt', 'pre_nxt']) {
+                  if (codes.includes(c)) return c
+                }
+                return null
+              })()
+              // 어떤 종목이든 사용된 보드 키 합집합 — 컬럼 헤더용
+              const usedBoards = (() => {
+                const set = new Set<string>()
+                for (const [, t] of targetEntries) {
+                  for (const b of Object.keys(t.boards ?? {})) set.add(b)
+                }
+                if (set.size === 0) set.add('main') // backwards-compat
+                return ['main', 'pre_nxt', 'post_nxt'].filter((b) => set.has(b))
+              })()
               return (
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-medium text-gray-700">
                       타겟 가격 ({targetEntries.length}종목)
                     </h4>
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <span className="text-gray-500">보드별 시가/타겟가:</span>
+                      {usedBoards.map((b) => (
+                        <span
+                          key={b}
+                          className={`px-1.5 py-0.5 rounded ${BOARD_META[b]?.chipCls ?? 'bg-gray-100 text-gray-600'} ${
+                            b === activeBoardCode ? 'ring-1 ring-offset-1 ring-current' : ''
+                          }`}
+                        >
+                          {BOARD_META[b]?.label ?? b}
+                          {b === activeBoardCode && ' ●'}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
@@ -674,8 +724,8 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                         <tr className="text-left text-gray-500 border-b">
                           <th className="pb-1 pr-2">종목</th>
                           <th className="pb-1 pr-2 text-right">K값</th>
-                          <th className="pb-1 pr-2 text-right">시가</th>
-                          <th className="pb-1 pr-2 text-right">타겟가</th>
+                          <th className="pb-1 pr-2 text-right">시가 (보드별)</th>
+                          <th className="pb-1 pr-2 text-right">타겟가 (보드별)</th>
                           <th className="pb-1 pr-2 text-right">현재가</th>
                           <th className="pb-1 text-center">상태</th>
                         </tr>
@@ -683,43 +733,119 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                       <tbody>
                         {targetEntries
                           .sort(([, a], [, b]) => {
-                            if (a.open_confirmed !== b.open_confirmed) return a.open_confirmed ? -1 : 1
-                            return (b.target_price || 0) - (a.target_price || 0)
+                            // 활성 보드의 target_price 우선 정렬, 없으면 top-level fallback
+                            const aTarget = (activeBoardCode && a.boards?.[activeBoardCode]?.target_price) || a.target_price || 0
+                            const bTarget = (activeBoardCode && b.boards?.[activeBoardCode]?.target_price) || b.target_price || 0
+                            const aConfirmed = activeBoardCode
+                              ? !!a.boards?.[activeBoardCode]?.confirmed
+                              : !!a.open_confirmed
+                            const bConfirmed = activeBoardCode
+                              ? !!b.boards?.[activeBoardCode]?.confirmed
+                              : !!b.open_confirmed
+                            if (aConfirmed !== bConfirmed) return aConfirmed ? -1 : 1
+                            return bTarget - aTarget
                           })
                           .map(([ticker, t]) => {
                             const name = scan?.ticker_names?.[ticker] ?? ''
                             const curPrice = scan?.ticker_prices?.[ticker]?.current_price ?? 0
-                            const pct = t.target_price > 0 && curPrice > 0
-                              ? ((curPrice / t.target_price - 1) * 100).toFixed(1)
+                            // 활성 보드의 타겟가로 pct 계산 (없으면 top-level)
+                            const activeTarget = activeBoardCode
+                              ? (t.boards?.[activeBoardCode]?.target_price ?? 0) || t.target_price
+                              : t.target_price
+                            const pct = activeTarget > 0 && curPrice > 0
+                              ? ((curPrice / activeTarget - 1) * 100).toFixed(1)
                               : null
                             const nearTarget = pct !== null && parseFloat(pct) >= -2
+                            // 보드별 표시할 셀 컨텐츠 (확정된 보드만, 또는 backwards-compat)
+                            const boardRows = (() => {
+                              const rows: { board: string; openPrice: number; targetPrice: number; confirmed: boolean }[] = []
+                              if (t.boards && Object.keys(t.boards).length > 0) {
+                                for (const b of usedBoards) {
+                                  const info = t.boards[b]
+                                  if (!info) continue
+                                  rows.push({
+                                    board: b,
+                                    openPrice: info.open_price,
+                                    targetPrice: info.target_price,
+                                    confirmed: info.confirmed,
+                                  })
+                                }
+                              }
+                              if (rows.length === 0) {
+                                // backwards-compat — 단일 행
+                                rows.push({
+                                  board: activeBoardCode ?? 'main',
+                                  openPrice: t.open_price,
+                                  targetPrice: t.target_price,
+                                  confirmed: typeof t.open_confirmed === 'boolean' ? t.open_confirmed : false,
+                                })
+                              }
+                              return rows
+                            })()
                             return (
                               <tr key={ticker} className={`border-b border-gray-50 ${nearTarget ? 'bg-yellow-50' : ''}`}>
-                                <td className="py-1 pr-2 font-medium">
+                                <td className="py-1 pr-2 font-medium align-top">
                                   {name ? `${name}(${ticker})` : ticker}
                                 </td>
-                                <td className="py-1 pr-2 text-right text-gray-600">{t.k.toFixed(3)}</td>
-                                <td className="py-1 pr-2 text-right">
-                                  {t.open_price > 0 ? t.open_price.toLocaleString() : '-'}
+                                <td className="py-1 pr-2 text-right text-gray-600 align-top">{t.k.toFixed(3)}</td>
+                                <td className="py-1 pr-2 text-right align-top">
+                                  <div className="flex flex-col items-end gap-0.5">
+                                    {boardRows.map((row) => {
+                                      const meta = BOARD_META[row.board]
+                                      const isActive = row.board === activeBoardCode
+                                      return (
+                                        <div key={row.board} className="flex items-center gap-1">
+                                          <span className={`text-[10px] px-1 rounded ${meta?.chipCls ?? 'bg-gray-100 text-gray-600'}`}>
+                                            {meta?.label ?? row.board}
+                                          </span>
+                                          <span className={`tabular-nums ${isActive ? 'font-semibold' : 'text-gray-500'} ${row.confirmed ? '' : 'opacity-50'}`}>
+                                            {row.openPrice > 0 ? row.openPrice.toLocaleString() : '-'}
+                                          </span>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
                                 </td>
-                                <td className="py-1 pr-2 text-right font-medium text-indigo-600">
-                                  {t.target_price > 0 ? t.target_price.toLocaleString() : '-'}
+                                <td className="py-1 pr-2 text-right align-top">
+                                  <div className="flex flex-col items-end gap-0.5">
+                                    {boardRows.map((row) => {
+                                      const isActive = row.board === activeBoardCode
+                                      return (
+                                        <span
+                                          key={row.board}
+                                          className={`tabular-nums ${isActive ? 'font-semibold text-indigo-600' : 'text-indigo-400'} ${row.confirmed ? '' : 'opacity-50'}`}
+                                        >
+                                          {row.targetPrice > 0 ? row.targetPrice.toLocaleString() : '-'}
+                                        </span>
+                                      )
+                                    })}
+                                  </div>
                                 </td>
-                                <td className="py-1 pr-2 text-right">
+                                <td className="py-1 pr-2 text-right align-top">
                                   {curPrice > 0 ? curPrice.toLocaleString() : '-'}
                                 </td>
-                                <td className="py-1 text-center">
-                                  {t.limit_up_reached ? (
-                                    <span className="px-1.5 py-0.5 rounded text-xs bg-amber-100 text-amber-700 font-medium">상한가 모드</span>
-                                  ) : !t.open_confirmed ? (
-                                    <span className="px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-500">시가 대기</span>
-                                  ) : curPrice >= t.target_price ? (
-                                    <span className="px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-700 font-medium">돌파</span>
-                                  ) : nearTarget ? (
-                                    <span className="px-1.5 py-0.5 rounded text-xs bg-yellow-100 text-yellow-700">근접 {pct}%</span>
-                                  ) : (
-                                    <span className="px-1.5 py-0.5 rounded text-xs bg-blue-50 text-blue-600">{pct}%</span>
-                                  )}
+                                <td className="py-1 text-center align-top">
+                                  {(() => {
+                                    // 활성 보드 기준 confirmed/target 판정
+                                    const activeRow = activeBoardCode
+                                      ? boardRows.find((r) => r.board === activeBoardCode)
+                                      : boardRows[0]
+                                    const confirmed = activeRow?.confirmed ?? false
+                                    const targetPrice = activeRow?.targetPrice ?? 0
+                                    if (t.limit_up_reached) {
+                                      return <span className="px-1.5 py-0.5 rounded text-xs bg-amber-100 text-amber-700 font-medium">상한가 모드</span>
+                                    }
+                                    if (!confirmed) {
+                                      return <span className="px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-500">시가 대기</span>
+                                    }
+                                    if (curPrice >= targetPrice && targetPrice > 0) {
+                                      return <span className="px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-700 font-medium">돌파</span>
+                                    }
+                                    if (nearTarget) {
+                                      return <span className="px-1.5 py-0.5 rounded text-xs bg-yellow-100 text-yellow-700">근접 {pct}%</span>
+                                    }
+                                    return <span className="px-1.5 py-0.5 rounded text-xs bg-blue-50 text-blue-600">{pct}%</span>
+                                  })()}
                                 </td>
                               </tr>
                             )
