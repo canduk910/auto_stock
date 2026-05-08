@@ -22,6 +22,9 @@ class MomentumStrategy(StrategyBase):
 
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
+        # 거래소 라우팅 — 익일 청산이 08:00 NXT 프리 시점에 실행되므로 SOR/NXT 권장(실전).
+        # 모의(vts)는 KRX만 허용 — UI가 환경별로 SOR/NXT 선택지 차단.
+        "exchange": "KRX",
         "buy_threshold": 29.0,
         "stop_loss_rate": -7.5,
         "gap_up_threshold": 10.0,

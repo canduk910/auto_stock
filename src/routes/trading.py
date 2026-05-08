@@ -117,12 +117,18 @@ async def manual_sell(req: ManualSellRequest):
     pos = strategy.state.positions.get(req.ticker) if strategy else None
     buy_price = pos.buy_price if pos else 0
 
+    # 전략의 exchange 라우팅(KRX/NXT/SOR) 반영 — 미설정 시 KRX
+    exchange = "KRX"
+    if strategy:
+        exchange = str(strategy.config.params.get("exchange", "KRX")).upper()
+
     try:
         result = await place_order(
             ticker=req.ticker,
             side=OrderSide.SELL,
             quantity=req.quantity,
             price=0,  # 시장가
+            exchange=exchange,
         )
 
         # 주문 추적 매핑 등록 — `place_order` 응답 직후 동기 영역에서 수행해야

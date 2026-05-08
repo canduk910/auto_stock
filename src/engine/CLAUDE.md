@@ -41,7 +41,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 매수가 대비 -7.5% 손절
 - 익일 청산: 갭상승 +10% → 트레일링 스탑 -2% / 그 외 즉시 매도
 - `_next_day_clear_pending`: 익일 청산 시가 안정화 대기 플래그 (check_exit_signal에서 NEXT_DAY_CLEAR 억제, 손절은 유지)
-- 파라미터: DEFAULT_PARAMS 딕셔너리
+- 파라미터: DEFAULT_PARAMS 딕셔너리. **`exchange`(KRX/NXT/SOR)** 포함 — 익일 청산이 08:00 NXT 프리 시점에 실행되므로 실전에서는 SOR 권장. 모의(vts)는 KRX 강제(UI에서 차단)
 
 ### strategies/volatility_breakout.py — 변동성 돌파 (KRX+NXT 보드별 분리)
 - _scan_universe(): 거래량순위 API(`FHPST01710000`) 응답 1건으로 후보 + 시총·전일 거래대금 산출. `prdy_vol × (stck_prpr - prdy_vrss)`로 전일 거래대금 추정 → 시간 의존 제거. 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
@@ -91,6 +91,7 @@ TradingScheduler (registry 기반 boot/run/settle)
 - 매도 체결 시 sold_today에 등록 (당일 재매수 차단)
 - 체결통보 처리 실패 시 안전장치: ticker 매핑 실패 → pending_buys 제거, strategy 미발견 → _selling 해제
 - **퍼널 카운터**: `place_order` 호출 직전 `state.order_attempt_today += 1`, `_handle_buy_fill` 첫 체결(신규 포지션 등록) 시 `state.fill_count_today += 1` — risk.py의 `signal_count_today`와 함께 일일 로그 분석 `metrics.strategy_funnel`로 노출(전략별 신호→주문→체결 단계 추적)
+- **거래소 라우팅 (`exchange` 파라미터, 2026-05-08)**: 모든 `place_order` / `cancel_order` 호출에 전략의 `exchange`(KRX/NXT/SOR) 전달. 헬퍼 `_strategy_exchange(strategy_id)`가 `strategy.config.params["exchange"]` 조회(미설정 시 KRX). 적용 지점: `execute_buy` / `execute_sell` / `_schedule_cancel` / `_schedule_cancel_and_reorder`(취소 + 손절 잔여 재주문) / `cancel_remaining`. 이전엔 모든 주문이 KRX 기본값으로 라우팅돼 전략의 exchange 파라미터가 사실상 무시되던 결함(VB/LTV/donchian의 `exchange="KRX"` 설정도 의미 없었음) 수정. **모멘텀 익일 청산이 SOR로 라우팅되면 KIS가 NXT 프리 시간(08:00~09:00)에 NXT 거래소로 자동 분배 → KRX 메인 시작 전 청산 가능**
 
 ### session.py — 세션/보드 추상화 (Phase 3)
 - `MarketBoard` enum: `pre_nxt`(NXT 프리 08:00~) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00)

@@ -57,7 +57,7 @@ src/
 ## NXT/SOR 통합 운영 — UI 반영
 - **ScanMonitor phase 라벨**(`PHASE_LABELS`): 새 phase 추가 — `pre_nxt_wait`(NXT 프리 대기) / `pre_nxt_trading`(NXT 프리 매매) / `main_trading`(KRX 메인 매매) / `krx_main_stopped`(KRX 메인 매수 중단) / `post_nxt_trading`(NXT 애프터 매매) / `post_nxt_stopped`(NXT 애프터 매수 중단) / `recommending`(AI자문) / `log_analysis`(로그 분석)
 - **ScanMonitor 활성 보드 배지**: 헤더 직하단에 KST 시각 기반으로 현재 활성 보드(NXT 프리/KRX 동시호가/KRX 메인/KRX 시간외/NXT 애프터)를 색상 칩으로 노출. SessionTracker `_BOARD_SCHEDULE`과 동일 매핑 (08:00/08:30/09:00/15:30/18:00/20:00 경계). 장 외 시간이면 "장 외 (08:00~20:00 외)"
-- **Settings 거래소·보드 토글** (`ExchangeBoardRow`): 전략별 `exchange`(KRX/NXT/SOR 라디오 — VTS는 KRX만 동작 안내) + `tradable_boards`(5개 보드 체크박스, post_nxt 선택 시 amber 강조). 저장 시 `updateStrategyParams` 한 번에 전송. 0개 선택 차단(매매 비활성 방지)
+- **Settings 거래소·보드 토글** (`ExchangeBoardRow`): 전략별 `exchange`(KRX/NXT/SOR 라디오) + `tradable_boards`(5개 보드 체크박스, post_nxt 선택 시 amber 강조). 저장 시 `updateStrategyParams` 한 번에 전송. 0개 선택 차단(매매 비활성 방지). **환경 가드**: `useTradingStatus().env`로 환경 인식 — 모의(`env !== 'real'`)이면 NXT/SOR 라디오를 disabled + 회색 처리("(모의 불가)" 라벨) + 저장 시 추가 검증으로 차단. 안내 문구도 환경별 분기(모의: 빨간 ⛔ / 실전: 황색 ⚠️)
 - **Settings 야간 매매 경고 배너**: 어느 전략이든 `tradable_boards`에 `post_nxt`가 활성이면 상단에 amber 경고 배너 노출 (사용자 부재 시간대 사고 위험 안내)
 - **PARAM_LABELS k_value_***: `k_value_krx_main` / `k_value_nxt_pre` / `k_value_nxt_post` (배 단위 step 0.1) 추가 — 전략 파라미터 카드에 자동 노출 + InfoTooltip
 - **하드코딩 시간 문구 갱신**: ScanMonitor / Settings / strategyInfo / LogReports / Recommendations에서 "09:30~15:20", "16:00", "16:10" 등 옛 KRX 단독 시간을 NXT 통합 시간(자동시작 07:45 / NXT 프리 08:00 / KRX 메인 09:00:05 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 20:10)으로 갱신

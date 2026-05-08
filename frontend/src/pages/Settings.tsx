@@ -8,6 +8,7 @@ import ConfirmModal from '../components/ConfirmModal'
 import InfoTooltip from '../components/InfoTooltip'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
 import { STRATEGY_INFO } from '../utils/strategyInfo'
+import { useTradingStatus } from '../contexts/TradingStatusContext'
 
 const EXCHANGE_OPTIONS: { value: string; label: string; description: string }[] = [
   { value: 'KRX', label: 'KRX', description: '한국거래소 단일 — 안전, 모의(VTS)도 지원' },
@@ -425,6 +426,8 @@ type StrategyRowProps = {
 
 function ExchangeBoardRow({ strategy }: StrategyRowProps) {
   const queryClient = useQueryClient()
+  const { data: status } = useTradingStatus()
+  const isVts = status?.env !== 'real'   // 실전이 아니면 모의로 간주 (보수적)
   const params = strategy.params ?? {}
   const initialExchange = ((params.exchange as string) ?? 'KRX').toUpperCase()
   const initialBoards = ((params.tradable_boards as string[] | undefined) ?? []) as string[]
@@ -464,11 +467,21 @@ function ExchangeBoardRow({ strategy }: StrategyRowProps) {
       setConfirm(false)
       return
     }
+    if (isVts && exchange !== 'KRX') {
+      setError(`모의(VTS) 환경에서는 ${exchange}를 선택할 수 없습니다. KRX만 가능합니다.`)
+      setConfirm(false)
+      return
+    }
     mutation.mutate({ exchange, tradable_boards: boards })
   }
 
   const exchangeNote = (() => {
     if (exchange === 'KRX') return null
+    if (isVts) {
+      return (
+        <span className="text-xs text-red-700">⛔ 현재 모의(VTS) 환경 — {exchange} 주문은 KIS가 거절합니다. KRX로 변경하세요</span>
+      )
+    }
     return (
       <span className="text-xs text-amber-700">⚠️ {exchange} 주문은 실전 환경에서만 동작 — 모의(VTS)에서는 거절됩니다</span>
     )
@@ -525,32 +538,40 @@ function ExchangeBoardRow({ strategy }: StrategyRowProps) {
 
       {editing ? (
         <div className="space-y-3">
-          {/* 거래소 라디오 */}
+          {/* 거래소 라디오 — 모의(vts) 환경에선 NXT/SOR 차단 */}
           <div>
             <div className="text-xs font-medium text-gray-700 mb-1">거래소 (EXCG_ID_DVSN_CD)</div>
             <div className="flex gap-2">
-              {EXCHANGE_OPTIONS.map((opt) => (
-                <label
-                  key={opt.value}
-                  className={`flex-1 px-2 py-1.5 text-xs border rounded cursor-pointer ${
-                    exchange === opt.value
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  title={opt.description}
-                >
-                  <input
-                    type="radio"
-                    name={`exchange-${strategy.key}`}
-                    value={opt.value}
-                    checked={exchange === opt.value}
-                    onChange={() => setExchange(opt.value)}
-                    className="mr-1"
-                  />
-                  <strong>{opt.label}</strong>
-                  <div className="text-[10px] text-gray-500 mt-0.5">{opt.description}</div>
-                </label>
-              ))}
+              {EXCHANGE_OPTIONS.map((opt) => {
+                const blocked = isVts && opt.value !== 'KRX'
+                const checked = exchange === opt.value
+                return (
+                  <label
+                    key={opt.value}
+                    className={`flex-1 px-2 py-1.5 text-xs border rounded ${
+                      blocked
+                        ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+                        : checked
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 cursor-pointer'
+                          : 'border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer'
+                    }`}
+                    title={blocked ? `모의(VTS)에서는 ${opt.label} 선택 불가 — KIS가 거절합니다` : opt.description}
+                  >
+                    <input
+                      type="radio"
+                      name={`exchange-${strategy.key}`}
+                      value={opt.value}
+                      checked={checked}
+                      onChange={() => !blocked && setExchange(opt.value)}
+                      disabled={blocked}
+                      className="mr-1"
+                    />
+                    <strong>{opt.label}</strong>
+                    {blocked && <span className="text-[10px] ml-1">(모의 불가)</span>}
+                    <div className="text-[10px] text-gray-500 mt-0.5">{opt.description}</div>
+                  </label>
+                )
+              })}
             </div>
             {exchangeNote && <div className="mt-1">{exchangeNote}</div>}
           </div>

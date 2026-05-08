@@ -48,6 +48,15 @@ class OrderEngine:
         # 뒤늦게 도착한 execute_buy/execute_sell이 PENDING row를 추가 INSERT하는 것을 막기 위함.
         self._completed_orders: set[str] = set()
 
+    def _strategy_exchange(self, strategy_id: str | None) -> str:
+        """전략의 exchange 파라미터(KRX/NXT/SOR) 조회. 미지정 시 KRX."""
+        if not strategy_id:
+            return "KRX"
+        strategy = self.registry.get(strategy_id)
+        if not strategy:
+            return "KRX"
+        return str(strategy.config.params.get("exchange", "KRX")).upper()
+
     async def execute_buy(self, ticker: str, current_price: int, strategy: StrategyBase) -> None:
         """매수 주문을 실행한다."""
         state = strategy.state
@@ -134,6 +143,7 @@ class OrderEngine:
                 side=OrderSide.BUY,
                 quantity=quantity,
                 price=0,  # 시장가
+                exchange=self._strategy_exchange(strategy.strategy_id),
             )
 
             # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
@@ -218,6 +228,7 @@ class OrderEngine:
                     side=OrderSide.SELL,
                     quantity=pos.quantity,
                     price=0,  # 시장가
+                    exchange=self._strategy_exchange(strategy_id),
                 )
 
                 # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
@@ -494,7 +505,7 @@ class OrderEngine:
         async def _cancel_after_wait():
             try:
                 await asyncio.sleep(PARTIAL_FILL_WAIT)
-                await cancel_order(order_no, 0, cancel_all=True)
+                await cancel_order(order_no, 0, cancel_all=True, exchange=self._strategy_exchange(strategy_id))
                 await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id)
                 logger.info("부분 체결 잔여 취소: %s (주문번호: %s)", t(ticker), order_no)
             except asyncio.CancelledError:
@@ -518,8 +529,9 @@ class OrderEngine:
         async def _cancel_and_reorder():
             try:
                 await asyncio.sleep(PARTIAL_FILL_WAIT)
-                await cancel_order(order_no, 0, cancel_all=True)
                 strategy_id = self._order_strategy.get(order_no, "momentum")
+                ex = self._strategy_exchange(strategy_id)
+                await cancel_order(order_no, 0, cancel_all=True, exchange=ex)
                 await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id)
                 logger.info("매도 잔여 취소: %s %d주", t(ticker), remaining)
 
@@ -530,6 +542,7 @@ class OrderEngine:
                         side=OrderSide.SELL,
                         quantity=remaining,
                         price=0,
+                        exchange=ex,
                     )
                     logger.info("손절 잔여 재주문: %s %d주", t(ticker), remaining)
             except asyncio.CancelledError:
@@ -552,7 +565,7 @@ class OrderEngine:
         if not pos:
             return
         try:
-            await cancel_order(pos.order_no, pos.quantity, cancel_all=True)
+            await cancel_order(pos.order_no, pos.quantity, cancel_all=True, exchange=self._strategy_exchange(strategy_id))
             logger.info("미체결 취소: %s (주문번호: %s)", t(ticker), pos.order_no)
         except Exception:
             logger.exception("미체결 취소 실패: %s", ticker)
