@@ -42,10 +42,53 @@ async def restart_trading():
     return ApiResponse(success=True, message="매매 재기동")
 
 
+# `?include=` 파라미터로 응답을 슬림화 — 분리된 sub-section만 직렬화/송신
+# 미지정 또는 'all' 포함 시 기존 전체 응답 (하위 호환)
+_INCLUDE_KEY_MAP: dict[str, tuple[str, ...]] = {
+    "system": ("running", "env", "phase", "positions", "pending_buys", "strategy"),
+    "holdings": ("position_tickers", "positions_detail"),
+    "orders": ("orders",),
+    "scan": ("scan",),
+    "strategies": ("strategies",),
+}
+
+
 @router.get("/status")
-async def get_status():
-    """현재 매매 상태를 반환한다."""
-    return ApiResponse(success=True, data=trading_scheduler.get_status())
+async def get_status(include: str = ""):
+    """현재 매매 상태를 반환한다.
+
+    `?include=system,holdings`처럼 콤마 구분 sub-section만 명시 시 응답 슬림화.
+    미지정 또는 `?include=all`은 전체 응답(하위 호환).
+    """
+    full = trading_scheduler.get_status()
+    keys = {k.strip() for k in include.split(",") if k.strip()} if include else set()
+
+    if not keys or "all" in keys:
+        return ApiResponse(success=True, data=full)
+
+    sliced: dict = {}
+    for inc in keys:
+        for field in _INCLUDE_KEY_MAP.get(inc, ()):
+            if field in full:
+                sliced[field] = full[field]
+    return ApiResponse(success=True, data=sliced)
+
+
+@router.get("/positions", response_model=ApiResponse)
+async def get_positions():
+    """보유 포지션 상세만 반환 (BalanceTable 전용 — status 분리)."""
+    full = trading_scheduler.get_status()
+    return ApiResponse(success=True, data={
+        "position_tickers": full.get("position_tickers", []),
+        "positions_detail": full.get("positions_detail", {}),
+    })
+
+
+@router.get("/orders", response_model=ApiResponse)
+async def get_orders():
+    """주문 추적 상태만 반환 (OrderMonitor 전용)."""
+    full = trading_scheduler.get_status()
+    return ApiResponse(success=True, data=full.get("orders", {}))
 
 
 class ManualSellRequest(BaseModel):

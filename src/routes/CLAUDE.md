@@ -10,7 +10,9 @@
 | POST | `/api/trading/stop` | trading.py | 자동매매 정지 |
 | POST | `/api/trading/restart` | trading.py | 자동매매 재기동 |
 | POST | `/api/trading/manual-sell` | trading.py | 수동 매도 (시장가) |
-| GET | `/api/trading/status` | trading.py | 현재 상태 |
+| GET | `/api/trading/status` | trading.py | 현재 상태. `?include=system,holdings,orders,scan,strategies` csv로 sub-section만 슬림 응답 (미지정/`all`은 전체) |
+| GET | `/api/trading/positions` | trading.py | 보유 포지션 상세만(BalanceTable 전용 분리) |
+| GET | `/api/trading/orders` | trading.py | 주문 추적(pending_buys/fills/pending_cancels)만 분리 |
 | GET | `/api/balance` | balance.py | 잔고 (예수금 + 보유종목, 0수량 제외) |
 | GET | `/api/balance/buyable` | balance.py | 매수 가능 금액 |
 | GET | `/api/history?page=&size=` | history.py | 거래 내역 (페이징, 종목명/주문번호 포함) |
