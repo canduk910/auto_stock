@@ -17,9 +17,6 @@ __pycache__/
 node_modules/
 frontend/dist/
 
-# 임시
-_workspace/
-
 # 원본 엑셀
 *.xlsx
 
