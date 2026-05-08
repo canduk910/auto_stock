@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import date, datetime, timezone, timedelta
 
@@ -34,7 +35,9 @@ async def insert_recommendation(
         "status": "pending",
     }
     try:
-        result = supabase.table("parameter_recommendations").insert(data).execute()
+        result = await asyncio.to_thread(
+            lambda: supabase.table("parameter_recommendations").insert(data).execute()
+        )
         if result.data:
             logger.info(
                 "파라미터 추천 INSERT: %s (%s, 추천 %d개)",
@@ -56,8 +59,8 @@ async def insert_recommendation(
 async def list_recommendations(days: int = 30) -> list[dict]:
     """최근 N일의 추천 목록을 created_at 내림차순으로 반환."""
     cutoff = (date.today() - timedelta(days=days)).isoformat()
-    result = (
-        supabase.table("parameter_recommendations")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("parameter_recommendations")
         .select("*")
         .gte("target_date", cutoff)
         .order("created_at", desc=True)
@@ -68,8 +71,8 @@ async def list_recommendations(days: int = 30) -> list[dict]:
 
 async def get_recommendation(rec_id: str) -> dict | None:
     """단일 추천 레코드를 조회한다."""
-    result = (
-        supabase.table("parameter_recommendations")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("parameter_recommendations")
         .select("*")
         .eq("id", rec_id)
         .limit(1)
@@ -98,8 +101,8 @@ async def update_recommendation_status(
     elif status == "rejected":
         update_data["rejected_at"] = now_iso
 
-    result = (
-        supabase.table("parameter_recommendations")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("parameter_recommendations")
         .update(update_data)
         .eq("id", rec_id)
         .execute()
@@ -114,8 +117,8 @@ async def expire_pending_before(target_date: date) -> int:
     Returns:
         만료 처리된 레코드 수.
     """
-    result = (
-        supabase.table("parameter_recommendations")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("parameter_recommendations")
         .update({"status": "expired"})
         .eq("status", "pending")
         .lt("target_date", target_date.isoformat())

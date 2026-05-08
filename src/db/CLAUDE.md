@@ -43,5 +43,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 - parameter_recommendations.status: pending → applied / partial / rejected / expired
 
 ## 주의사항
-- Supabase SDK는 동기 호출이므로 I/O-bound 작업은 `asyncio.to_thread` 고려
+- **Supabase SDK는 동기 client → 모든 `.execute()` 호출이 `asyncio.to_thread()`로 thread pool에 위임**(이벤트 루프 블로킹 차단). `lambda` 또는 inner function 패턴 사용. PR3에서 일괄 적용됨
+- `_DbLogHandler`(main.py)도 동기 `logging.Handler.emit`이라 to_thread 불가 → `ThreadPoolExecutor(max_workers=2)`에 fire-and-forget submit
+- 매핑 등록(`_order_qty/_order_strategy/_order_ticker`)은 **반드시 to_thread 진입 전 동기 영역**에서 완료 (CLAUDE.md 안전장치 — 시장가 즉시체결 시 race 차단)
 - status ENUM 값 변경 시 DB CHECK 제약조건도 함께 수정 (migration 추가)

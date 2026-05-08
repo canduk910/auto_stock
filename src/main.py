@@ -6,6 +6,7 @@ import os
 import time
 import tracemalloc
 from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 
@@ -93,20 +94,33 @@ error_handler.suffix = "%Y-%m-%d"
 root_logger.addHandler(error_handler)
 
 # DB 로그 핸들러 — src.* 모듈의 INFO 이상 로그를 system_logs 테이블에 기록
+# logger.info() 호출이 동기 supabase INSERT를 직접 트리거하면 호출자가 블로킹된다.
+# 단일 워커 ThreadPoolExecutor에 fire-and-forget으로 위임 → logger 호출은 즉시 반환.
+_LOG_DB_EXECUTOR = ThreadPoolExecutor(max_workers=2, thread_name_prefix="db-log")
+
+
+def _insert_log_to_db(level: str, message: str) -> None:
+    try:
+        from src.db.supabase import supabase
+        supabase.table("system_logs").insert({
+            "log_level": level,
+            "message": message,
+        }).execute()
+    except Exception:
+        pass  # DB 기록 실패는 무시 (무한 재귀 방지)
+
+
 class _DbLogHandler(logging.Handler):
-    """로그를 Supabase system_logs 테이블에 비동기로 기록한다."""
+    """로그를 Supabase system_logs 테이블에 비동기로 기록한다(executor 위임)."""
 
     def emit(self, record: logging.LogRecord) -> None:
         if not record.name.startswith("src."):
             return
         try:
-            from src.db.supabase import supabase
-            supabase.table("system_logs").insert({
-                "log_level": record.levelname,
-                "message": f"[{record.name}] {record.getMessage()}"[:500],
-            }).execute()
-        except Exception:
-            pass  # DB 기록 실패는 무시 (무한 재귀 방지)
+            message = f"[{record.name}] {record.getMessage()}"[:500]
+            _LOG_DB_EXECUTOR.submit(_insert_log_to_db, record.levelname, message)
+        except RuntimeError:
+            pass  # 인터프리터 셧다운 중 등 executor 사용 불가 시 무시
 
 _db_handler = _DbLogHandler()
 _db_handler.setLevel(logging.INFO)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import date
 
@@ -30,7 +31,9 @@ async def insert_log_report(
         "model": model,
     }
     try:
-        result = supabase.table("daily_log_reports").insert(payload).execute()
+        result = await asyncio.to_thread(
+            lambda: supabase.table("daily_log_reports").insert(payload).execute()
+        )
         return result.data[0] if result.data else None
     except Exception as e:
         msg = str(e)
@@ -43,8 +46,8 @@ async def insert_log_report(
 
 async def list_log_reports(days: int = 30) -> list[dict]:
     """최근 N일치 리포트를 신규순으로 조회한다."""
-    result = (
-        supabase.table("daily_log_reports")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("daily_log_reports")
         .select("*")
         .order("target_date", desc=True)
         .limit(days)
@@ -55,8 +58,8 @@ async def list_log_reports(days: int = 30) -> list[dict]:
 
 async def get_log_report(target_date: date) -> dict | None:
     """단일 영업일 리포트를 조회한다."""
-    result = (
-        supabase.table("daily_log_reports")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("daily_log_reports")
         .select("*")
         .eq("target_date", target_date.isoformat())
         .limit(1)

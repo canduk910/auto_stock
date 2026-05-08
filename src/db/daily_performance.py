@@ -1,5 +1,6 @@
 """daily_performance CRUD."""
 
+import asyncio
 import logging
 from datetime import date
 
@@ -34,7 +35,9 @@ async def upsert_daily_performance(
         "deposit": deposit,
         "cumulative_return_rate": cumulative_return_rate,
     }
-    supabase.table("daily_performance").upsert(data).execute()
+    await asyncio.to_thread(
+        lambda: supabase.table("daily_performance").upsert(data).execute()
+    )
     logger.info(
         "일일 실적 저장: %s 전략=%s (실현 %.2f%%, 누적 %.2f%%, 외부입출금 %.0f)",
         target_date, strategy, daily_profit_rate, cumulative_return_rate, net_external_cashflow,
@@ -43,8 +46,8 @@ async def upsert_daily_performance(
 
 async def get_performance(days: int = 30, strategy: str = "total") -> list[dict]:
     """최근 N일 실적을 조회한다."""
-    result = (
-        supabase.table("daily_performance")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("daily_performance")
         .select("*")
         .eq("strategy", strategy)
         .order("date", desc=True)
@@ -59,8 +62,8 @@ async def get_latest_performance(strategy: str = "total") -> dict | None:
 
     TWR 누적 baseline + Δ예수금 계산용.
     """
-    result = (
-        supabase.table("daily_performance")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("daily_performance")
         .select("*")
         .eq("strategy", strategy)
         .order("date", desc=True)
@@ -82,7 +85,9 @@ async def recompute_from_trades() -> bool:
     3) cumulative_return_rate = TWR 복리 누적
     """
     try:
-        supabase.rpc("recompute_daily_performance", {}).execute()
+        await asyncio.to_thread(
+            lambda: supabase.rpc("recompute_daily_performance", {}).execute()
+        )
         logger.info("daily_performance 일괄 재계산 완료 (recompute_daily_performance)")
         return True
     except Exception:
