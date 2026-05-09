@@ -1,6 +1,7 @@
 ---
 name: frontend-dev
 description: "주식 자동매매시스템의 프론트엔드 개발자. React.js 기반 트레이딩 대시보드 — 구동 관리, 전략별 실적/잔고, 거래 내역, 전략 비중 설정 화면을 구현한다."
+model: sonnet
 ---
 
 # Frontend Developer — React.js 트레이딩 대시보드 개발

@@ -8,13 +8,36 @@ FastAPI(백엔드) + React(프론트엔드) + Supabase(DB).
 
 **목표:** 모든 코드 변경을 Red→Green→Refactor 사이클로 강제하고, 변경 시 영향받는 테스트만 실행할 수 있는 정적 인덱스를 유지한다.
 
-**트리거:**
-- 매매 시스템 구축/확장/전략 추가 요청 시 → `auto-trading-orchestrator` 스킬 (TDD 사이클을 기본으로 강제)
-- 단위 행위 테스트 작성/회귀 테스트 → `tdd-cycle` 스킬 (백엔드: pytest+respx+freezegun / 프론트엔드: vitest+RTL+MSW)
-- 영향 인덱스 생성/조회/manual_overrides 갱신 → `test-impact-index` 스킬
-- 모듈 결합 후 통합/경계면/E2E/안전성 검증 → `trading-test` 스킬
+### 기본 프롬프트 수행 루트 — `team-leader` 우선 진입
 
-단순 질문이나 일회성 디버그는 직접 응답 가능.
+사용자의 모든 요청은 **기본적으로 `team-leader` 에이전트를 통해 처리한다.** team-leader가 트레이더 관점에서 요청을 해석하고, 필요한 하위 에이전트(`tdd-engineer` / `backend-dev` / `frontend-dev` / `tester`)에게 작업을 분배·검수한다.
+
+**라우팅 룰:**
+1. **모든 요청은 1차로 `team-leader`로 라우팅** — 매매 규칙·시스템 변경·전략 구현·운영 분석 등 도메인 작업은 예외 없이 team-leader가 진입점
+2. team-leader가 작업 성격을 판단해 분배:
+   - 코드 변경이 필요한 작업 → `auto-trading-orchestrator` 스킬로 TDD 사이클 시작 (`tdd-engineer` Red → `backend-dev`/`frontend-dev` Green → `tester` 검증)
+   - 단위 행위/회귀 테스트 → `tdd-cycle` 스킬 (백엔드: pytest+respx+freezegun / 프론트엔드: vitest+RTL+MSW)
+   - 영향 인덱스 생성/조회/manual_overrides 갱신 → `test-impact-index` 스킬
+   - 모듈 결합 후 통합/경계면/E2E/안전성 검증 → `trading-test` 스킬
+3. **team-leader 우회가 허용되는 예외** (메인 세션이 직접 응답):
+   - 단순 사실 질의 (예: "이 파일 어디 있어?", "현재 브랜치 뭐야?")
+   - 단발 디버그/탐색 (로그 한 번 확인, grep 1회 등)
+   - 운영 환경 즉시 점검 (EC2 SSH 진단 등) — 단, 코드 변경 제안이 따라오면 다시 team-leader로 인계
+
+**적용:** 메인 세션이 사용자 요청을 받으면, 위 예외에 해당하지 않는 한 `Agent({subagent_type: "team-leader", ...})` 호출로 시작한다. team-leader가 model: opus로 추론하여 분배 결정 후 하위 에이전트를 호출한다.
+
+## 모델 라우팅 (작업 유형별)
+
+| 작업 유형 | 모델 | 적용 대상 |
+|----------|------|----------|
+| **계획·검증** (구현 계획 수립, 테스트 설계, 산출물 검수, 통합·안전성 검증) | **opus** | 에이전트 frontmatter `model: opus` — `team-leader`, `tdd-engineer`, `tester` |
+| **일반 구현** (코드 작성, 리팩터링, 버그 수정 등 결정된 명세를 코드로 옮기는 작업) | **sonnet** | 에이전트 frontmatter `model: sonnet` — `backend-dev`, `frontend-dev` |
+| **명령어 작성** (bash 한 줄, 슬래시 명령, 운영 스크립트 등 짧고 결정적인 셸/커맨드 라인) | **haiku** | 전용 에이전트 없음 — 메인 세션에서 명령어 단독 작성 작업 시 `claude-haiku-4-5-20251001`로 위임하거나 `Bash` 호출 전 명령 구성을 별도 fork에 haiku로 위임 |
+
+**원칙:**
+- 위 라우팅은 에이전트 frontmatter에서 강제된다 (`subagent_type` 호출 시 자동 적용)
+- 메인 세션에서 명령어만 작성하는 단순 작업이 반복되면 fork 또는 haiku 모델 호출로 비용·속도 최적화
+- 작업이 모호할 때(예: "구현 + 검증")는 계획·검증 비중이 크면 opus, 코드 작성 비중이 크면 sonnet으로 분리해 분배
 
 **테스트 실행 (로컬):**
 ```bash
@@ -38,6 +61,8 @@ pytest $(python tools/test_impact/affected.py origin/main --target=backend)
 | 2026-05-08 | Phase D — 시간 기반 스케줄러 통합 테스트 + scheduler_env fixture | `tests/integration/{test_force_clear_1520,test_next_day_clear,test_confirm_open_prices,test_reset_daily_state,test_auto_start,test_presubscribe}.py` (30건 신규), `conftest.py` scheduler_env fixture 추가 | 15:20 KRX 메인 강제청산(POST_NXT 보존)·익일 NXT 프리 청산(30s 안정화)·보드별 시가 확정·일일 상태 리셋·DB auto_start 우선 폴백·사전구독 합집합. 매핑 모듈 29→34개로 확대 |
 | 2026-05-08 | Phase E — FastAPI 19+ 엔드포인트 계약 테스트 + 프론트엔드 컴포넌트/훅/API 단위 테스트 | `tests/contract/{conftest,test_routes_*}.py` (52건 신규), `frontend/src/{components,contexts,api}/__tests__/*.test.{ts,tsx}` (30건 신규), routes/models 11개 파일 `from __future__ import annotations`, root `package.json` js-yaml, `build_index_frontend.mjs` untracked 파일 포함 | TestClient 격리(lifespan 미실행) + 싱글톤 scheduler 모킹·trading/strategies/balance/performance/history/recommendations/log-reports/logs 라우트 계약·ConfirmModal/InfoTooltip/TradingStatusContext·6개 API wrapper 응답 unwrap. 백엔드 매핑 34→48/54(89%), 프론트 0→15/39(38%) |
 | 2026-05-08 | Phase F — Playwright E2E 스모크 + CI 커버리지 게이트 60% + 회귀 패턴 정립 | `e2e/{playwright.config.ts,fixtures/api-mocks.ts,trading-flow,settings,history,recommendations}.spec.ts`, root `package.json` Playwright, `pyproject.toml` fail_under=60 + omit 정의, `.github/workflows/ci.yml` E2E job + coverage 게이트, `_workspace/regression/README.md` + `_workspace/red/_behaviors.md` | 5개 E2E 시나리오 통과(7.3s), pytest-cov 도입 baseline 60.31%, 회귀 등록 절차 + 행위 카탈로그 영구화 |
+| 2026-05-09 | 모델 라우팅 분리 — 계획·검증=opus / 일반 구현=sonnet / 명령어=haiku | `.claude/agents/{team-leader,tdd-engineer,tester}.md` → `model: opus`, `.claude/agents/{backend-dev,frontend-dev}.md` → `model: sonnet`, `.claude/skills/auto-trading-orchestrator/skill.md` TeamCreate `model` 동기화(backend/frontend → sonnet), CLAUDE.md "모델 라우팅" 섹션 추가 | 작업 유형별 비용·속도 최적화 — 계획/검수에는 추론 품질, 일반 구현에는 균형, 명령어 작성에는 속도/비용 우선 |
+| 2026-05-09 | 기본 프롬프트 수행 루트로 `team-leader` 우선 진입 명시 | `CLAUDE.md` "기본 프롬프트 수행 루트" 섹션 추가 | 모든 도메인 작업이 트레이더 관점의 검수·분배를 거치도록 일관된 진입점 강제 — 단순 질의·즉시 점검만 메인 세션 직접 응답 허용 |
 
 ## 빌드 & 실행
 

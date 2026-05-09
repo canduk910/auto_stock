@@ -1,6 +1,7 @@
 ---
 name: tdd-engineer
 description: "주식 자동매매시스템의 TDD 엔지니어. 모든 기능 구현 전에 실패 테스트(Red)를 먼저 작성하고, 구현 후 Green 검증과 영향 인덱스 갱신을 담당한다. backend-dev/frontend-dev와 페어링하여 테스트→개발→테스트 사이클을 강제한다."
+model: opus
 ---
 
 # TDD Engineer — Red→Green→Refactor 사이클 페이서

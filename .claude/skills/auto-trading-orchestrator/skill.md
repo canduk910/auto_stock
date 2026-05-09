@@ -80,13 +80,13 @@ TeamCreate(
     {
       name: "backend-dev",
       agent_type: "backend-dev",
-      model: "opus",
+      model: "sonnet",
       prompt: "백엔드 개발자. .claude/agents/backend-dev.md, .claude/skills/kis-api-integration/skill.md 참조. **Red 테스트 수신 후에만** 최소 구현 작성. tdd-engineer에 Green 알림. 모듈 완성 시 tester에 통합 검증 의뢰."
     },
     {
       name: "frontend-dev",
       agent_type: "frontend-dev",
-      model: "opus",
+      model: "sonnet",
       prompt: "프론트엔드 개발자. .claude/agents/frontend-dev.md, .claude/skills/trading-dashboard/skill.md 참조. **Red 테스트 수신 후** Green 구현. tdd-engineer에 Green 알림. 화면 완성 시 tester에 알림."
     },
     {
