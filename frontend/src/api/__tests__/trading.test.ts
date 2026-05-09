@@ -10,12 +10,12 @@ describe("trading API wrapper", () => {
     server.use(
       http.get("/api/trading/status", () =>
         HttpResponse.json(
-          wrap({ is_running: true, env: "vts", board: "main", strategies: {} }),
+          wrap({ running: true, env: "vts", board: "main", strategies: {} }),
         ),
       ),
     );
     const status = await getTradingStatus();
-    expect(status.is_running).toBe(true);
+    expect(status.running).toBe(true);
     expect(status.env).toBe("vts");
   });
 

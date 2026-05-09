@@ -966,15 +966,18 @@ backend:
       - tests/contract/test_routes_trading.py
 frontend:
   frontend/src/App.tsx:
-    direct_tests: []
+    direct_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
     transitive_tests: []
   frontend/src/api/balance.ts:
     direct_tests:
       - frontend/src/api/__tests__/balance.test.ts
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/api/client.ts:
     direct_tests: []
     transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/api/__tests__/balance.test.ts
       - frontend/src/api/__tests__/history.test.ts
       - frontend/src/api/__tests__/log_reports.test.ts
@@ -991,43 +994,53 @@ frontend:
   frontend/src/api/performance.ts:
     direct_tests:
       - frontend/src/api/__tests__/performance.test.ts
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/api/recommendations.ts:
     direct_tests: []
     transitive_tests: []
   frontend/src/api/trading.ts:
     direct_tests:
       - frontend/src/api/__tests__/trading.test.ts
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/BalanceTable.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/ConfirmModal.tsx:
     direct_tests:
       - frontend/src/components/__tests__/ConfirmModal.test.tsx
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/ControlPanel.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/InfoTooltip.tsx:
     direct_tests:
       - frontend/src/components/__tests__/InfoTooltip.test.tsx
     transitive_tests: []
   frontend/src/components/LogViewer.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/OrderMonitor.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/PerformanceCard.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/ProfitChart.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/ScanMonitor.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/TradeHistoryGrid.tsx:
     direct_tests: []
     transitive_tests: []
@@ -1036,13 +1049,15 @@ frontend:
     transitive_tests: []
   frontend/src/contexts/TradingStatusContext.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/main.tsx:
     direct_tests: []
     transitive_tests: []
   frontend/src/pages/Dashboard.tsx:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/pages/History.tsx:
     direct_tests: []
     transitive_tests: []
@@ -1057,6 +1072,7 @@ frontend:
     transitive_tests: []
   frontend/src/test/factories.ts:
     direct_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/api/__tests__/balance.test.ts
       - frontend/src/api/__tests__/history.test.ts
       - frontend/src/api/__tests__/log_reports.test.ts
@@ -1069,6 +1085,7 @@ frontend:
   frontend/src/test/handlers.ts:
     direct_tests: []
     transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/api/__tests__/balance.test.ts
       - frontend/src/api/__tests__/history.test.ts
       - frontend/src/api/__tests__/log_reports.test.ts
@@ -1081,6 +1098,7 @@ frontend:
     transitive_tests: []
   frontend/src/test/server.ts:
     direct_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/api/__tests__/balance.test.ts
       - frontend/src/api/__tests__/history.test.ts
       - frontend/src/api/__tests__/log_reports.test.ts
@@ -1095,10 +1113,12 @@ frontend:
   frontend/src/types/balance.ts:
     direct_tests: []
     transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/api/__tests__/balance.test.ts
   frontend/src/types/common.ts:
     direct_tests: []
     transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/api/__tests__/balance.test.ts
       - frontend/src/api/__tests__/history.test.ts
       - frontend/src/api/__tests__/log_reports.test.ts
@@ -1113,10 +1133,12 @@ frontend:
     transitive_tests: []
   frontend/src/types/strategy.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/types/trading.ts:
     direct_tests: []
     transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/api/__tests__/history.test.ts
       - frontend/src/api/__tests__/trading.test.ts
   frontend/src/utils/paramLabels.ts:
@@ -1124,15 +1146,17 @@ frontend:
     transitive_tests: []
   frontend/src/utils/strategyInfo.ts:
     direct_tests: []
-    transitive_tests: []
-generated_at: '2026-05-09T01:31:30.399Z'
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
+generated_at: '2026-05-09T01:53:21.326Z'
 stats:
   backend_modules: 54
   backend_tests: 29
   frontend_modules: 39
-  frontend_tests: 10
+  frontend_tests: 11
   unmapped_modules:
     - frontend/src/App.tsx
+    - frontend/src/api/recommendations.ts
     - frontend/src/api/recommendations.ts
     - frontend/src/components/BalanceTable.tsx
     - frontend/src/components/ControlPanel.tsx
@@ -1142,18 +1166,29 @@ stats:
     - frontend/src/components/ProfitChart.tsx
     - frontend/src/components/ScanMonitor.tsx
     - frontend/src/components/TradeHistoryGrid.tsx
+    - frontend/src/components/TradeHistoryGrid.tsx
+    - frontend/src/components/TradePnLGrid.tsx
     - frontend/src/components/TradePnLGrid.tsx
     - frontend/src/contexts/TradingStatusContext.tsx
     - frontend/src/main.tsx
+    - frontend/src/main.tsx
     - frontend/src/pages/Dashboard.tsx
     - frontend/src/pages/History.tsx
+    - frontend/src/pages/History.tsx
+    - frontend/src/pages/LogReports.tsx
     - frontend/src/pages/LogReports.tsx
     - frontend/src/pages/Recommendations.tsx
+    - frontend/src/pages/Recommendations.tsx
+    - frontend/src/pages/Settings.tsx
     - frontend/src/pages/Settings.tsx
     - frontend/src/test/providers.tsx
+    - frontend/src/test/providers.tsx
+    - frontend/src/test/setup.ts
     - frontend/src/test/setup.ts
     - frontend/src/types/recommendations.ts
+    - frontend/src/types/recommendations.ts
     - frontend/src/types/strategy.ts
+    - frontend/src/utils/paramLabels.ts
     - frontend/src/utils/paramLabels.ts
     - frontend/src/utils/strategyInfo.ts
     - src/__init__.py

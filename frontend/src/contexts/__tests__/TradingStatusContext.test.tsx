@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { http, HttpResponse } from "msw";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import {
   TradingStatusProvider,
@@ -30,7 +30,7 @@ describe("TradingStatusContext", () => {
       http.get("/api/trading/status", () =>
         HttpResponse.json(
           wrap({
-            is_running: true,
+            running: true,
             env: "vts",
             board: "main",
             strategies: { momentum: { enabled: true } },
@@ -44,7 +44,7 @@ describe("TradingStatusContext", () => {
     });
 
     await waitFor(() => expect(result.current.data).toBeDefined());
-    expect(result.current.data?.is_running).toBe(true);
+    expect(result.current.data?.running).toBe(true);
     expect(result.current.isLoading).toBe(false);
   });
 
