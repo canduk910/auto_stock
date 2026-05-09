@@ -1,45 +1,37 @@
 # CLAUDE.md — 프로젝트 루트
 
-## 프로젝트 개요
-KIS OpenAPI 기반 주식 자동매매시스템. 다중 전략 아키텍처.
-FastAPI(백엔드) + React(프론트엔드) + Supabase(DB).
+KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프론트엔드) + Supabase(DB). 다중 전략 아키텍처.
+
+> 디렉토리별 상세는 각 하위 `CLAUDE.md`가 진실의 원천:
+> `src/CLAUDE.md` · `src/engine/CLAUDE.md` · `src/api/CLAUDE.md` · `src/realtime/CLAUDE.md` · `src/db/CLAUDE.md` · `src/routes/CLAUDE.md` · `frontend/CLAUDE.md`
 
 ## 하네스: TDD-First Trading Team
 
 **목표:** 모든 코드 변경을 Red→Green→Refactor 사이클로 강제하고, 변경 시 영향받는 테스트만 실행할 수 있는 정적 인덱스를 유지한다.
 
-### 기본 프롬프트 수행 루트 — `team-leader` 우선 진입
+### 기본 진입점 — `team-leader` 우선
 
-사용자의 모든 요청은 **기본적으로 `team-leader` 에이전트를 통해 처리한다.** team-leader가 트레이더 관점에서 요청을 해석하고, 필요한 하위 에이전트(`tdd-engineer` / `backend-dev` / `frontend-dev` / `tester`)에게 작업을 분배·검수한다.
+사용자의 모든 요청은 1차로 `Agent({subagent_type: "team-leader"})`로 라우팅한다. team-leader가 트레이더 관점에서 해석 후 하위 에이전트에 분배한다.
 
-**라우팅 룰:**
-1. **모든 요청은 1차로 `team-leader`로 라우팅** — 매매 규칙·시스템 변경·전략 구현·운영 분석 등 도메인 작업은 예외 없이 team-leader가 진입점
-2. team-leader가 작업 성격을 판단해 분배:
-   - 코드 변경이 필요한 작업 → `auto-trading-orchestrator` 스킬로 TDD 사이클 시작 (`tdd-engineer` Red → `backend-dev`/`frontend-dev` Green → `tester` 검증)
-   - 단위 행위/회귀 테스트 → `tdd-cycle` 스킬 (백엔드: pytest+respx+freezegun / 프론트엔드: vitest+RTL+MSW)
-   - 영향 인덱스 생성/조회/manual_overrides 갱신 → `test-impact-index` 스킬
-   - 모듈 결합 후 통합/경계면/E2E/안전성 검증 → `trading-test` 스킬
-3. **team-leader 우회가 허용되는 예외** (메인 세션이 직접 응답):
-   - 단순 사실 질의 (예: "이 파일 어디 있어?", "현재 브랜치 뭐야?")
-   - 단발 디버그/탐색 (로그 한 번 확인, grep 1회 등)
-   - 운영 환경 즉시 점검 (EC2 SSH 진단 등) — 단, 코드 변경 제안이 따라오면 다시 team-leader로 인계
+- 코드 변경 → `auto-trading-orchestrator` 스킬 (TDD 사이클: `tdd-engineer` Red → `backend-dev`/`frontend-dev` Green → `tester` 검증)
+- 단위/회귀 테스트 → `tdd-cycle` (백엔드 pytest+respx+freezegun / 프론트엔드 vitest+RTL+MSW)
+- 영향 인덱스 → `test-impact-index`
+- 통합/경계면/E2E/안전성 → `trading-test`
 
-**적용:** 메인 세션이 사용자 요청을 받으면, 위 예외에 해당하지 않는 한 `Agent({subagent_type: "team-leader", ...})` 호출로 시작한다. team-leader가 model: opus로 추론하여 분배 결정 후 하위 에이전트를 호출한다.
+**우회 허용 (메인 세션 직접 응답):** 단순 사실 질의, 단발 디버그/grep, 운영 환경 즉시 점검(EC2 SSH 등). 코드 변경 제안이 따라오면 다시 team-leader로 인계.
 
-## 모델 라우팅 (작업 유형별)
+### 모델 라우팅
 
-| 작업 유형 | 모델 | 적용 대상 |
-|----------|------|----------|
-| **계획·검증** (구현 계획 수립, 테스트 설계, 산출물 검수, 통합·안전성 검증) | **opus** | 에이전트 frontmatter `model: opus` — `team-leader`, `tdd-engineer`, `tester` |
-| **일반 구현** (코드 작성, 리팩터링, 버그 수정 등 결정된 명세를 코드로 옮기는 작업) | **sonnet** | 에이전트 frontmatter `model: sonnet` — `backend-dev`, `frontend-dev` |
-| **명령어 작성** (bash 한 줄, 슬래시 명령, 운영 스크립트 등 짧고 결정적인 셸/커맨드 라인) | **haiku** | 전용 에이전트 없음 — 메인 세션에서 명령어 단독 작성 작업 시 `claude-haiku-4-5-20251001`로 위임하거나 `Bash` 호출 전 명령 구성을 별도 fork에 haiku로 위임 |
+| 작업 유형 | 모델 | 적용 |
+|----------|------|------|
+| 계획·검증 (구현 계획, 테스트 설계, 검수, 안전성 검증) | **opus** | `team-leader`, `tdd-engineer`, `tester` |
+| 일반 구현 (코드 작성·리팩터·버그 수정) | **sonnet** | `backend-dev`, `frontend-dev` |
+| 명령어 작성 (bash/슬래시/스크립트) | **haiku** | 메인 세션 단발 작업 — fork 또는 `claude-haiku-4-5-20251001` 위임 |
 
-**원칙:**
-- 위 라우팅은 에이전트 frontmatter에서 강제된다 (`subagent_type` 호출 시 자동 적용)
-- 메인 세션에서 명령어만 작성하는 단순 작업이 반복되면 fork 또는 haiku 모델 호출로 비용·속도 최적화
-- 작업이 모호할 때(예: "구현 + 검증")는 계획·검증 비중이 크면 opus, 코드 작성 비중이 크면 sonnet으로 분리해 분배
+라우팅은 에이전트 frontmatter에서 강제된다. 모호하면(예: 구현+검증) 비중 큰 쪽으로 분리 분배.
 
-**테스트 실행 (로컬):**
+### 테스트 실행
+
 ```bash
 pip install -r requirements-dev.txt          # 1회
 python -m pytest -q                          # 백엔드 전체
@@ -52,193 +44,102 @@ node  tools/test_impact/build_index_frontend.mjs
 pytest $(python tools/test_impact/affected.py origin/main --target=backend)
 ```
 
-**변경 이력:**
-| 날짜 | 변경 내용 | 대상 | 사유 |
-|------|----------|------|------|
-| 2026-05-08 | TDD 하네스 초기 구성 — tdd-engineer 에이전트 + tdd-cycle/test-impact-index 스킬 + pytest/vitest/Playwright 인프라 + AST 기반 영향 인덱스 | `.claude/agents/`, `.claude/skills/`, `tests/`, `frontend/src/test/`, `e2e/`, `tools/test_impact/`, CI workflow | 사후 검증만 있던 기존 하네스에 Red→Green 사이클을 강제해 매매 시스템 회귀 위험을 차단 |
-| 2026-05-08 | Phase B — 전략 엔진 단위 테스트 + Python 3.9 호환 패치 | `tests/unit/engine/**` (107건 신규), `src/api/base.py` 등 7개 파일에 `from __future__ import annotations` | 4개 전략(momentum/VB/LTV/donchian) + strategy_base/registry + session 의 신호·청산·가드 회귀 테스트 영구화. 영향 인덱스 매핑 모듈 5→19개로 확대 |
-| 2026-05-08 | Phase C — order_engine + risk 통합 테스트 + 인덱스 conftest 전파 | `tests/integration/{conftest,test_buy_flow,test_sell_flow,test_chegyeol_race,test_buy_block_low_funds,test_risk_on_tick,test_multi_strategy_block}.py` (26건 신규), 추가 `from __future__ import annotations` 11개 파일, `eval_type_backport` dev 의존성, `tools/test_impact/build_index.py` conftest 전파 | 매수/매도 흐름·체결통보 race·잔고부족 락·on_tick 보드/자금 가드·전략 간 중복차단 회귀 테스트. 매핑 모듈 19→29개로 확대 |
-| 2026-05-08 | Phase D — 시간 기반 스케줄러 통합 테스트 + scheduler_env fixture | `tests/integration/{test_force_clear_1520,test_next_day_clear,test_confirm_open_prices,test_reset_daily_state,test_auto_start,test_presubscribe}.py` (30건 신규), `conftest.py` scheduler_env fixture 추가 | 15:20 KRX 메인 강제청산(POST_NXT 보존)·익일 NXT 프리 청산(30s 안정화)·보드별 시가 확정·일일 상태 리셋·DB auto_start 우선 폴백·사전구독 합집합. 매핑 모듈 29→34개로 확대 |
-| 2026-05-08 | Phase E — FastAPI 19+ 엔드포인트 계약 테스트 + 프론트엔드 컴포넌트/훅/API 단위 테스트 | `tests/contract/{conftest,test_routes_*}.py` (52건 신규), `frontend/src/{components,contexts,api}/__tests__/*.test.{ts,tsx}` (30건 신규), routes/models 11개 파일 `from __future__ import annotations`, root `package.json` js-yaml, `build_index_frontend.mjs` untracked 파일 포함 | TestClient 격리(lifespan 미실행) + 싱글톤 scheduler 모킹·trading/strategies/balance/performance/history/recommendations/log-reports/logs 라우트 계약·ConfirmModal/InfoTooltip/TradingStatusContext·6개 API wrapper 응답 unwrap. 백엔드 매핑 34→48/54(89%), 프론트 0→15/39(38%) |
-| 2026-05-08 | Phase F — Playwright E2E 스모크 + CI 커버리지 게이트 60% + 회귀 패턴 정립 | `e2e/{playwright.config.ts,fixtures/api-mocks.ts,trading-flow,settings,history,recommendations}.spec.ts`, root `package.json` Playwright, `pyproject.toml` fail_under=60 + omit 정의, `.github/workflows/ci.yml` E2E job + coverage 게이트, `_workspace/regression/README.md` + `_workspace/red/_behaviors.md` | 5개 E2E 시나리오 통과(7.3s), pytest-cov 도입 baseline 60.31%, 회귀 등록 절차 + 행위 카탈로그 영구화 |
-| 2026-05-09 | 모델 라우팅 분리 — 계획·검증=opus / 일반 구현=sonnet / 명령어=haiku | `.claude/agents/{team-leader,tdd-engineer,tester}.md` → `model: opus`, `.claude/agents/{backend-dev,frontend-dev}.md` → `model: sonnet`, `.claude/skills/auto-trading-orchestrator/skill.md` TeamCreate `model` 동기화(backend/frontend → sonnet), CLAUDE.md "모델 라우팅" 섹션 추가 | 작업 유형별 비용·속도 최적화 — 계획/검수에는 추론 품질, 일반 구현에는 균형, 명령어 작성에는 속도/비용 우선 |
-| 2026-05-09 | 기본 프롬프트 수행 루트로 `team-leader` 우선 진입 명시 | `CLAUDE.md` "기본 프롬프트 수행 루트" 섹션 추가 | 모든 도메인 작업이 트레이더 관점의 검수·분배를 거치도록 일관된 진입점 강제 — 단순 질의·즉시 점검만 메인 세션 직접 응답 허용 |
+**변경 이력**은 [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)로 분리.
 
 ## 빌드 & 실행
 
-### Docker Compose (권장)
 ```bash
-# 개발 환경 (hot-reload, 볼륨 마운트)
-docker compose up --build
+# Docker (권장)
+docker compose up --build                                 # 개발: 프론트 :3000, 백엔드 :8002
+docker compose -f docker-compose.prod.yml up --build -d   # 프로덕션: Nginx :80
 
-# 프로덕션 환경 (Nginx + 최적화 빌드)
-docker compose -f docker-compose.prod.yml up --build -d
-```
-- 개발: 프론트 `http://localhost:3000`, 백엔드 `http://localhost:8002`
-- 프로덕션: `http://localhost:80` (Nginx가 정적파일 + API 프록시 통합)
-
-### 로컬 직접 실행
-```bash
-# 백엔드
-pip install -r requirements.txt
-uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload
-
-# 프론트엔드
+# 로컬
+pip install -r requirements.txt && uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload
 cd frontend && npm install && npm run dev
-
-# 프론트엔드 빌드 확인
-cd frontend && npm run build
 ```
 
 ## 환경 변수
-`.env` 파일 필수. `.env.example` 참고.
-- `KIS_ENV`: `vts`(모의) 또는 `real`(실전)
-- `KIS_APP_KEY_REAL/VTS`, `KIS_APP_SECRET_REAL/VTS`, `KIS_ACCOUNT_NO_REAL/VTS`: KIS 인증 (환경별 분리)
-- `KIS_HTS_ID`: 실전 체결통보(H0STCNI0) 구독에 필요한 HTS ID
-- `SUPABASE_URL`, `SUPABASE_KEY`: DB 연결
-- `AUTO_START`: `true`이면 서버 기동 시 자동 매매 시작 (DB `system_config.auto_start`가 우선, 매일 시작 전 DB 재확인)
+`.env` 필수 (`.env.example` 참고).
+- `KIS_ENV`: `vts`(모의) | `real`(실전)
+- `KIS_APP_KEY_REAL/VTS`, `KIS_APP_SECRET_REAL/VTS`, `KIS_ACCOUNT_NO_REAL/VTS`
+- `KIS_HTS_ID`: 실전 체결통보(H0STCNI0) 구독 키
+- `SUPABASE_URL`, `SUPABASE_KEY`
+- `AUTO_START`: 서버 기동 시 자동 매매 시작 (DB `system_config.auto_start`가 우선, 매일 시작 전 재확인)
 
-## 다중 전략 아키텍처
+## 다중 전략 (요약)
 
-### 전략 구성
-- **상한가 모멘텀** (`momentum`): 전일종가 대비 +29% 돌파 매수, -7.5% 손절, 익일 청산 (다음 영업일 08:00 NXT 프리 진입 시점). 거래소 파라미터 `exchange`(KRX/NXT/SOR) 지원 — 실전에서 SOR 선택 시 익일 청산이 NXT 프리 시간(08:00~09:00)에 NXT 거래소로 자동 라우팅됨
-- **변동성 돌파** (`volatility_breakout`): 노이즈 비율 기반 K값 → Target_Price 돌파 매수, -3% 손절, 15:20 강제 청산
-- **롱테일 변동성 돌파** (`long_tail_volatility`): 변동성 돌파 방식 조기 진입 + 상한가 도달 시 익일 청산 모드 전환(롱테일 추구). 당일 손절 -3%, 상한가 모드 손절 -5%, 15:20 강제 청산(상한가 미도달 종목만)
-- **20일 신고가 스윙** (`donchian_swing`): 추세추종 멀티데이 스윙. 유니버스는 코스피200 + 코스닥150 고정(거래량순위 API 미사용). 일봉 종가가 20일 신고가 돌파 + 60일 EMA 우상향 + 거래대금 1.5배 → 익일 09:05 시장가 매수(갭 +3%↑ 스킵). 청산은 ATR(14)×2 트레일링 / 하드 손절 -7% / 시간·15:20 강제 청산 없음. 평균 5~15 영업일 보유.
+| 전략 ID | 매수 | 청산 |
+|---------|------|------|
+| `momentum` | 전일종가 +29% 돌파 (KRX_OPEN+MAIN) | -7.5% 손절, 익일 NXT 프리 청산. `exchange`(KRX/NXT/SOR) |
+| `volatility_breakout` | 보드별 K값 × 전일Range 돌파 (PRE_NXT/MAIN/POST_NXT) | -3% 손절, 15:20 KRX 메인 청산 |
+| `long_tail_volatility` | VB 방식 + 상한가 도달 시 익일 청산 모드 전환 | 당일 -3% / 상한가 모드 -5%, 15:20(상한가 미도달만) |
+| `donchian_swing` | 코스피200+코스닥150 고정 유니버스, 20일 신고가+60일 EMA+거래대금 1.5×, 익일 09:05 시장가 (MAIN만) | ATR(14)×2 트레일링 / -7% 하드. 시간 청산 없음, 멀티데이 보유 |
 
-### 핵심 파일 구조
-```
-src/engine/
-├── strategy_base.py       # StrategyBase 추상 클래스, Signal, Position, StrategyState
-├── strategy_registry.py   # StrategyRegistry (전략 등록/비중/중복 방지)
-├── session.py             # MarketBoard enum + SessionTracker (KRX/NXT 보드 추적, tradable_boards)
-├── strategies/
-│   ├── momentum.py        # 상한가 모멘텀 (KRX_OPEN+MAIN)
-│   ├── volatility_breakout.py  # 변동성 돌파 (보드별 K값 분리, PRE_NXT/MAIN/POST_NXT)
-│   ├── long_tail_volatility.py # 롱테일 변동성 돌파 (보드별 K값 분리)
-│   └── donchian_swing.py  # 20일 신고가 스윙 (MAIN만, 추세추종 멀티데이)
-├── risk.py               # RiskManager (registry 순회, 보드 가드, 전략별 신호 체크)
-├── order_engine.py        # OrderEngine (strategy_id 태깅, 전략별 포지션)
-├── scheduler.py           # TradingScheduler (KRX/NXT 통합 운영 08:00~20:00)
-└── scanner.py             # 종목 스캔 (TICK_TR_ID = H0UNCNT0 KRX+NXT 통합)
-```
+전략 동작·보드별 K값 분리·익일 청산 안정화·자금 락·라우팅 등 상세는 **`src/engine/CLAUDE.md`**.
 
-### NXT/SOR 통합 운영 (08:00~20:00)
-- **시세**: WebSocket `H0UNCNT0` (KRX+NXT 통합 체결가) 단일 구독 — 메시지 포맷은 `H0STCNT0`과 동일
-- **통합 장운영정보**: `H0UNMKO0` / 대표 종목 `005930` 구독 (실전 한정, 모의 미지원). 종목 단위 구독이지만 `MKOP_CLS_CODE`(110/112/121/129...)는 시장 전체 공통이라 1종목으로 보드 전환 수신 → SessionTracker.on_h0nxmko0 콜백
-- **주문 라우팅**: `place_order(..., exchange="KRX"|"NXT"|"SOR")` body에 `EXCG_ID_DVSN_CD`. 모의(VTS)는 KRX만 (SOR/NXT 미지원)
-- **MarketBoard**: `pre_nxt`(NXT 프리 08:00~) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00)
-- **시간 가드 (`scheduler.TIME_*`)**: 자동시작 07:45 / 부트 07:50 / 사전 구독 07:55 / NXT 프리 진입 08:00 / KRX 시가 확정 09:00:05 / 모멘텀 스캔 09:30 / KRX 메인 매수 중단 + 강제 청산 15:20 / KRX 메인 마감 15:30 / NXT 애프터 매수 중단 + AI자문 19:50 / NXT 애프터 종료 20:00 / 정산 + 일일 로그 분석 20:10
-- **전략별 매매 가능 보드** (`DEFAULT_PARAMS["tradable_boards"]`):
-  - `momentum`: KRX_OPEN + MAIN (상한가 +29% KRX 기준)
-  - `volatility_breakout` / `long_tail_volatility`: PRE_NXT + MAIN + POST_NXT (Q3=A 야간 매매 활성)
-  - `donchian_swing`: MAIN (추세추종은 일중 변동성 필요)
-- **VB/LTV 시가/타겟가** (Q1=C 보드별 분리): 보드별 시가 확정 → 보드별 K값(`k_value_krx_main`/`k_value_nxt_pre`/`k_value_nxt_post`) × 전일Range = 보드별 target_price. `_targets[ticker]["boards"][board]` dict에 보드별 분리 저장. `_open_confirmed[ticker]`도 `{board: bool}` dict
-- **익일 청산** (Q2=B): 다음 영업일 NXT 프리 첫 거래(08:00 부근) + `NEXT_DAY_STABILIZE_SECS=30`초 안정화 후 즉시 청산. 60초→30초 단축
-- **15:20 강제 청산**: KRX 메인 종목만 (`_force_clear_main_only` — `tradable_boards`에 POST_NXT가 있는 전략은 19:50 매수 중단까지 보유 유지)
-- **calc_buy_quantity 1주 fallback**: 비중 기준 0주여도 자금이 1주는 살 수 있으면 1주 매수 — 매수 신호가 비중 가드에 막혀 무산되는 누락 방지
+### 새 전략 추가
+1. `src/engine/strategies/`에 StrategyBase 서브클래스 (prepare/check_buy_signal/check_exit_signal/calc_buy_quantity)
+2. `src/engine/scheduler.py` `__init__`에서 `registry.register()`
+3. 필요 시 `scanner.py`에 스캔 함수 추가
+4. `_workspace/00_leader_trading_rules.md`에 명세 추가
 
-### 새 전략 추가 방법
-1. `src/engine/strategies/` 에 StrategyBase 서브클래스 작성
-2. `src/engine/scheduler.py` 의 `__init__`에서 `registry.register()` 호출
-3. 필요 시 스캔 로직 추가 (scanner.py)
+### 자금 관리
+- 프론트 Settings → `PUT /api/strategies/weights` → `StrategyRegistry.allocate_funds()`
+- `position_ratio`는 **전략 할당 자금 기준** (순자산 × 전략비중 × position_ratio = 종목당 매수금액)
+- 전략 간 동일 종목 중복 매수 방지: `registry.is_ticker_blocked_for_buy()` (보유/주문중/당일매도 통합 차단)
 
-### 전략별 자금 관리
-- 프론트 Settings 페이지에서 비중 조절 → `PUT /api/strategies/weights`
-- StrategyRegistry.allocate_funds()로 총 자산을 비중에 따라 분배
-- 각 전략은 할당된 자금 내에서만 매매
-- **`position_ratio`는 전략 할당 자금 기준** (순자산 × 전략비중 × position_ratio = 종목당 매수금액)
-- Settings 페이지에서 예상 종목당 매수 금액 표시
-- 전략 간 동일 종목 중복 매수 방지 (registry.is_ticker_blocked_for_buy) — 보유/주문중/당일매도 모두 가로질러 차단
+## 핵심 안전 규칙 (절대 깨지 말 것)
 
-## 핵심 규칙
+상세 메커니즘은 `src/engine/CLAUDE.md`·`src/realtime/CLAUDE.md` 참조. 여기서는 **금기**만:
 
-### 매매 파라미터 변경 시 반드시 확인
-- 전략 파라미터는 `strategies/momentum.py`, `strategies/volatility_breakout.py`의 `DEFAULT_PARAMS` 딕셔너리
-- 또는 프론트 Settings 페이지에서 런타임 변경 가능 (`PUT /api/strategies/{id}/params`)
-- 변경 시 `_workspace/00_leader_trading_rules.md`도 동기화
-
-### 체결통보 (매우 중요)
-- WebSocket 연결 후 **체결통보(H0STCNI0/H0STCNI9) 구독 필수**
-- 체결통보를 못 받으면 포지션이 등록되지 않아 손절 감시가 불가능
-- 실전: H0STCNI0 (구독 키: HTS ID), 모의: H0STCNI9 (구독 키: 계좌번호)
-- scheduler.py에서 WebSocket 연결 직후 자동 구독
-- 체결통보 종목코드는 `fields[8]` (단, `_order_ticker[order_no]` 매핑이 우선)
-- **체결통보가 매수/매도 REST 응답보다 먼저 도착하는 race 대비**: `_handle_*_fill`에서 `update_trade_status` 영향 row 0이면 `COMPLETED` 상태로 직접 INSERT하고 `_completed_orders`에 order_no 등록. `execute_buy/sell`은 응답 직후 set 체크해 PENDING INSERT를 생략 → trade_history 단일 COMPLETED row 보장
-- **주문번호 매핑(_order_qty/_order_strategy/_order_ticker) 등록은 `place_order` 응답 직후 동기 영역에서**: `await insert_trade` 진입 전. 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 올바른 전략으로 라우팅 — 누락 시 기본값 "momentum"으로 잘못 INSERT되어 손익 0 사례 발생. **자동매매(OrderEngine.execute_buy/sell)뿐 아니라 수동 매도(`/api/trading/manual-sell`)도 동일 순서 준수** (3개 매핑 + `_selling` 모두 동기 등록 후 `await insert_trade`)
-
-### 포지션 관리
-- DB `positions` 테이블이 포지션의 진실의 원천 (매수가/전략/매수일 정확)
-- 체결통보 수신 시 DB 저장 (`save_position`) / 매도 시 DB 삭제 (`delete_position`)
-- 재기동 시: DB positions 우선 복구 → KIS 잔고 API 교차 검증 (DB에 없는 종목 보완)
-- 당일 매도 종목 재매수 차단 (`sold_today`)
-- **`_boot` 당일 BUY 시드**: trade_history의 당일 BUY 종목을 해당 strategy의 `sold_today`에 시드 — 서버 빈번 재시작 시 모멘텀 `_prev_prdy_rate` 휘발 + 보유 가드 race로 같은 종목이 짧은 시간에 여러 번 매수되던 결함 차단(092220 KEC 사례). 의미적으론 매도가 아니지만 check_buy_signal 가드 재활용으로 같은 영업일 재매수 즉시 차단
-- **정산(16:10) 후 `_reset_daily_state()`**: 전략별 positions/pending_buys/sold_today + OrderEngine 추적 상태 + scanner 글로벌 dict(ticker_prices/ticker_prev_close/ticker_market_info/ticker_names → STATIC_TICKER_NAMES로 재시드) 전체 초기화 → 다음 날 `_boot()`에서 DB 기반 재구성
-
-### 매수/매도 안전장치
-- `is_max_positions()`: 보유 포지션 + 매수 대기(pending_buys) 합산으로 최대 종목 수 제한
-- `_selling` set: 매도 진행 중 종목 중복 매도 차단
-- 돌파 순간 감지: 이전 틱 < 기준가 AND 현재 틱 >= 기준가 (매 틱 반복 매수 방지)
-- 비중 변경 시: 매수금액 이하로 비중 축소 차단
-- 익일 청산 시가 안정화: `_next_day_clear_pending` 플래그로 60초 대기 중 on_tick 즉시 청산 방지 (손절은 유지)
-- **매수가능 캐시(60초 TTL)**: `StrategyState.cached_buyable_qty/at` — `get_buyable()` KIS 호출을 매 틱 → 분당 1회로 축소
-- **잔고부족 매수 락(900초)**: `state.block_buy()` — `max_buy_quantity<=0` 또는 KIS 응답이 `is_insufficient_cash`이면 다음 잔고 sync까지 매수 차단. `_sync_positions_from_balance()` 종료 시 `unblock_buy()`로 일괄 해제
-- **per-ticker 매수 수량 0 cooldown(900초)**: `state.block_low_funds(ticker)` — `calc_buy_quantity()<=0`인 종목을 다음 잔고 sync까지 차단. 매 틱 같은 종목에서 "매수 수량 0" 경고가 반복되던 로그 스팸/무의미 호출 차단. `_sync_positions_from_balance()` + `_reset_daily_state()`에서 `clear_low_funds()`로 해제
-- **자금 사전 가드 (RiskManager.on_tick, 2026-05-08)**: `state.is_low_funds_blocked(ticker)` + `current_price > state.total_investment`(1주 매수 자금 미달)이면 `check_buy_signal` 호출 자체 skip — OrderEngine 진입 후 cooldown 등록되던 사후 차단을 사전 차단으로 전환. 자금 회복 시 다음 틱에 즉시 재평가 (universe에서 영구 제외 아님)
-- **매도 잔고부족 즉시 break**: `is_insufficient_quantity` 응답 시 3회 재시도 생략 + 메모리 포지션 + DB positions 정리(다음 sync에서 보정)
-- 체결통보 처리 실패 안전장치: ticker 매핑 실패 시 `pending_buys` 제거, strategy 미발견 시 `_selling` 해제
-- 체결통보 선행 race 가드: `_completed_orders` set + `update_trade_status` 영향 row 0건 보정 INSERT (위 "체결통보" 섹션 참조)
-- **종목코드 형식 비대칭 정책**: 진입 단계는 6자리 숫자만 허용(`scanner.scan_stocks`, VB/LTV `_scan_universe` `ticker.isdigit()`) — ETF·ETN·신주인수권 등 알파벳 포함 코드 자동매매 차단. 사후처리(체결통보 핸들러, 잔고 sync, 보완 복구)는 6자리 영숫자(`isalnum`) 허용 — 예외 경로로 매수가 발생하더라도 좀비 포지션 방지. 신규 ETF 브랜드(RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS 등) 키워드는 `scanner.ETF_KEYWORDS`
+- **체결통보 구독(H0STCNI0/H0STCNI9) 제거 금지** — 미구독 시 포지션 등록·손절 불가
+- **uvicorn 단일 워커 필수** — `--workers` 금지 (스케줄/포지션/WebSocket 중복)
+- **주문번호 매핑(`_order_qty/_order_strategy/_order_ticker/_pending_buy_orders`)은 `place_order` 응답 직후 동기 영역에서 등록**, `await insert_trade` 진입 전 — 시장가 즉시체결 race 시 매핑 누락하면 기본값 "momentum"으로 잘못 INSERT됨. 자동매매·수동 매도(`/api/trading/manual-sell`) 모두 동일 순서
+- **체결통보 선행 race 가드(`_completed_orders` set + UPDATE 0건 보정 INSERT) 제거 금지** — 시장가 즉시체결 + REST 응답 지연 시 trade_history가 PENDING으로 영구 잔존
+- **`_reset_daily_state()` 제거 금지** — 정산 후 미초기화 시 pending_buys/positions/sold_today가 다음 날까지 잔류
+- **익일 청산은 scheduler에서 30s 안정화 후 처리** (`_next_day_clear_pending` 가드) — on_tick 즉시 청산 금지
+- **종목코드 형식 비대칭**: 진입은 6자리 숫자만(`ticker.isdigit()`), 사후처리는 6자리 영숫자(`isalnum()`) — ETF·신주인수권 자동매매 차단 + 좀비 포지션 방지
+- 매매 파라미터(`DEFAULT_PARAMS`) 변경 시 `_workspace/00_leader_trading_rules.md` 동기화
 
 ### 코딩 컨벤션
-- Python: pydantic 모델로 데이터 검증, async/await 사용
-- TypeScript: 모든 API 응답은 `types/` 디렉토리의 타입 정의 사용
-- API 응답: 공통 래퍼 `{ success: bool, data: T, message: str }`
-- KIS API 호출: 반드시 `src/api/base.py`의 공통 래퍼를 통해 호출 (Rate Limit 관리)
-- 모든 TR_ID는 `settings.get_tr_id()` 사용 (하드코딩 금지)
-
-### 모의/실전 분리
-- `.env`에서 `KIS_ENV`에 따라 `_REAL` / `_VTS` 접미사 인증 정보 자동 선택
-- `config.py`의 `get_tr_id()`로 TR_ID 자동 변환 (실전 T→모의 V 접두사)
-- 등락률 순위/현재가 시세/일봉 API(FH 접두사)는 모의/실전 동일 TR_ID
+- Python: pydantic + async/await
+- TS: 모든 API 응답은 `frontend/src/types/` 정의 사용
+- API 응답 래퍼: `{ success: bool, data: T, message: str }` (`models/response.py` `ApiResponse`)
+- KIS 호출은 반드시 `src/api/base.py::kis_request()` 경유 (Rate Limit·재시도·메트릭)
+- TR_ID는 `settings.get_tr_id()` 사용 — 하드코딩 금지 (실전 T → 모의 V 자동 변환, FH 접두사는 동일)
 
 ## DB 스키마 (Supabase)
-- `trade_history`: 거래 내역 (id, timestamp, ticker, ticker_name, trade_type, price, quantity, profit_loss, status, strategy, order_no)
-- `daily_performance`: 일일 실적 (date + strategy 복합PK, total_asset, daily_profit_rate=실현손익 기반, daily_realized_pnl, net_external_cashflow=외부 입출금 추정, deposit, cumulative_return_rate=TWR 복리 누적)
-- `positions`: 보유 포지션 영속화 (ticker PK, buy_price, quantity, strategy_id, buy_date, high_since_buy)
-- `strategy_config`: 전략 설정 영속화 (strategy_id PK, enabled, weight, params JSONB)
-- `system_config`: 시스템 설정 (key PK, value JSONB) — auto_start 등
-- `system_logs`: 시스템 로그 (timestamp, log_level, message)
-- `parameter_recommendations`: 전략수정 AI자문 이력 (id, target_date+strategy_id unique, current_params, recommended_params, applied_params, reasoning, metrics, status, created_at/applied_at/rejected_at)
-- `daily_log_reports`: 매일 정산(20:10) 직후 system_logs+trade_history 메트릭을 OpenAI로 분석한 개선 리포트 (id, target_date unique, summary, findings JSONB, metrics JSONB, model, created_at). metrics에는 로그 패턴/거래 통계 외에 `api_metrics`(KIS 호출 5xx/4xx/network/retries), `strategy_funnel`(전략별 신호→주문→체결), `trades.by_ticker_pnl` / `trades.by_hour_pnl` 포함
-- status ENUM: PENDING, COMPLETED, PARTIAL, CANCELLED (trade_history) / pending, applied, partial, rejected, expired (parameter_recommendations)
 
-## Docker 구성
-- `Dockerfile` — 백엔드 멀티스테이지 (dev: hot-reload / prod: non-root, 단일 워커)
-- `frontend/Dockerfile` — 프론트엔드 멀티스테이지 (dev: Vite / prod: Nginx)
-- `frontend/nginx.conf` — 프로덕션 Nginx (정적파일 서빙 + `/api` 리버스 프록시 → backend:8000)
-- `docker-compose.yml` — 개발 환경 (소스 볼륨 마운트, hot-reload)
-- `docker-compose.prod.yml` — 프로덕션 환경 (restart: unless-stopped, 소스 수정 영향 없음)
-- **주의**: 매매 시스템은 반드시 단일 워커로 실행 (`--workers` 금지 — 다중 워커 시 스케줄/포지션 중복)
-- vite 프록시 타겟: `VITE_API_URL` 환경변수로 분기 (Docker: `http://backend:8000`, 로컬: `http://localhost:8001`)
-- 타임존: `TZ=Asia/Seoul` (Dockerfile + docker-compose에 설정)
+마이그레이션: `supabase/migrations/`. CRUD 모듈 상세: `src/db/CLAUDE.md`.
 
-## 배포 환경 (AWS EC2)
-- **인스턴스**: EC2 t4g.small (ARM, 서울 리전 `ap-northeast-2`)
-- **접속**: `ssh -i ~/.ssh/auto-stock-key.pem ubuntu@<EC2_IP>`
-- **서비스 경로**: `~/auto_stock/` (git clone)
-- **실행**: `docker compose -f docker-compose.prod.yml up --build -d`
-- **자동 배포**: `git push origin main` → GitHub Actions가 EC2에 SSH 접속 → `git pull` + 빌드 + 재시작
-- **CI/CD**: `.github/workflows/deploy.yml` (Docker Hub 미사용, EC2 직접 빌드)
-- **GitHub Secrets**: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
-- **주의**: 로컬과 EC2에서 동시 실행 금지 (KIS API 동일 계정 동시 접속 충돌)
+| 테이블 | 용도 |
+|--------|------|
+| `trade_history` | 거래 내역 (status: PENDING/COMPLETED/PARTIAL/CANCELLED) |
+| `daily_performance` | 일일 실적 (date+strategy 복합PK, TWR 누적) |
+| `positions` | 보유 포지션 영속화 (ticker PK) |
+| `strategy_config` | 전략 설정 (strategy_id PK, params JSONB) |
+| `system_config` | 시스템 설정 (auto_start 등) |
+| `system_logs` | 시스템 로그 |
+| `parameter_recommendations` | 19:50 AI자문 (target_date+strategy_id unique) |
+| `daily_log_reports` | 20:10 일일 로그 분석 (target_date unique, metrics에 api_metrics/strategy_funnel/by_ticker_pnl/by_hour_pnl 포함) |
+
+## Docker / 배포
+
+- `Dockerfile` / `frontend/Dockerfile` 멀티스테이지(dev: hot-reload, prod: non-root + Nginx)
+- `docker-compose.yml`(개발 hot-reload) / `docker-compose.prod.yml`(prod)
+- `frontend/nginx.conf`: 정적파일 + `/api` → backend:8000 프록시
+- 타임존 `TZ=Asia/Seoul`, vite 프록시 타겟은 `VITE_API_URL` 분기
+- **EC2 t4g.small (ARM, ap-northeast-2)** 서비스 경로 `~/auto_stock/`
+- 자동 배포: `git push origin main` → GitHub Actions가 EC2 SSH → `git pull` + 재빌드 (`.github/workflows/deploy.yml`)
+- GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
+- **로컬과 EC2 동시 실행 금지** — KIS 동일 계정 동시 접속 충돌
 
 ## 디렉토리 역할
-- `src/auth/` — KIS OAuth 인증/토큰 관리
-- `src/api/` — KIS REST API 호출 (주문, 잔고, 조건검색, 일봉)
-- `src/realtime/` — KIS WebSocket (시세 구독, 체결통보)
-- `src/engine/` — 매매 핵심 (전략 베이스/레지스트리/개별 전략/주문/리스크/스케줄러, 19:50 AI자문 생성 엔진 `recommendation_engine.py`, 20:10 정산 직후 일일 로그 분석 엔진 `log_analysis_engine.py`)
-- `src/db/` — Supabase CRUD (`parameter_recommendations`, `log_reports` 포함)
-- `src/routes/` — FastAPI 엔드포인트 (trading, balance, history, performance, logs, strategies, **recommendations**, **log-reports**)
-- `src/models/` — Pydantic 데이터 모델
-- `frontend/` — React 대시보드 (대시보드/거래 내역/전략수정 AI자문/설정)
+- `src/auth/` — KIS OAuth 인증/토큰
+- `src/api/` — KIS REST (주문·잔고·조건검색·일봉)
+- `src/realtime/` — KIS WebSocket (시세·체결통보·H0NXMKO0)
+- `src/engine/` — 매매 핵심 (전략·레지스트리·주문·리스크·스케줄러, 19:50 AI자문 `recommendation_engine.py`, 20:10 일일 로그 분석 `log_analysis_engine.py`)
+- `src/db/` — Supabase CRUD
+- `src/routes/` — FastAPI 엔드포인트
+- `src/models/` — Pydantic 모델
+- `frontend/` — React 대시보드

@@ -1,110 +1,75 @@
 # CLAUDE.md — frontend/ (React 대시보드)
 
-React + TypeScript + Vite 기반 트레이딩 대시보드.
+React + TypeScript + Vite 트레이딩 대시보드.
 
 ## 실행
 ```bash
-npm install        # 의존성 설치
-npm run dev        # 개발 서버 (http://localhost:5173)
-npm run build      # 프로덕션 빌드 (타입 체크 포함)
-npm run lint       # ESLint
+npm install
+npm run dev    # http://localhost:5173
+npm run build  # 타입 체크 포함
+npm run lint
 ```
 
-## TradingStatus Context (단일 polling owner)
-- `src/contexts/TradingStatusContext.tsx` `TradingStatusProvider`가 `/api/trading/status`를 5초 폴링하는 단일 owner
-- App.tsx 최상위에서 wrap, 자식(Dashboard/BalanceTable/OrderMonitor/ScanMonitor)은 `useTradingStatus()` hook으로 공유
-- 이전엔 5개 컴포넌트가 각각 useQuery → 같은 응답 5번씩 받던 낭비 차단(분당 250KB → 50KB)
-- main.tsx QueryClient defaults: `staleTime: 3000`, `gcTime: 5*60*1000`, `retry: 1`, `refetchOnWindowFocus: false`
-
-## 페이지 lazy 로딩
-- `App.tsx`에서 Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `React.lazy()` + Suspense fallback(skeleton)로 동적 import
-- 초기 번들 ~163kB 감소 (819kB → 656kB), 페이지별 chunk 분리(History 56kB, Recommendations 13kB 등)
-
-## 핵심 라이브러리
-- TanStack Query: 서버 상태 관리 + 자동 리페치
-- TanStack Table: 데이터 그리드 (거래 내역)
-- Recharts: 차트 (일별/월별 실적)
-- Tailwind CSS v4: 스타일링
-- React Router: 페이지 라우팅
-
-## 디렉토리 구조
+## 디렉토리
 ```
 src/
-├── api/           # 백엔드 API 호출 함수 (axios 기반)
-│   └── client.ts  # axios 인스턴스 (baseURL, 인터셉터)
-├── components/    # UI 컴포넌트
-├── pages/         # 페이지 (라우트 단위)
-└── types/         # TypeScript 타입 정의
+├── api/       # axios 호출 (client.ts: baseURL, 인터셉터)
+├── components/
+├── contexts/  # TradingStatusContext 등
+├── pages/
+└── types/     # 백엔드 src/models/ pydantic 1:1 매핑
 ```
 
-## 백엔드 연동
-- 모든 API 호출은 `api/client.ts`의 axios 인스턴스를 통해 수행
-- 응답은 `types/common.ts`의 `ApiResponse<T>` 래퍼로 파싱
-- 백엔드 응답 필드명 = TypeScript 타입 속성명 (일치 필수)
+## 핵심 라이브러리
+TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트) · Tailwind v4 · React Router
+
+## 단일 polling owner
+- `contexts/TradingStatusContext.tsx::TradingStatusProvider`가 `/api/trading/status`를 5초 폴링하는 단일 소스. 자식은 `useTradingStatus()` hook 공유 (이전 5개 컴포넌트 중복 폴링 → 분당 250KB→50KB)
+- App.tsx 최상위 wrap
+- QueryClient defaults: `staleTime: 3000`, `gcTime: 5*60*1000`, `retry: 1`, `refetchOnWindowFocus: false`
+
+## 페이지 lazy 로딩
+Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `React.lazy()` + Suspense skeleton (초기 번들 819→656kB)
 
 ## 시각적 컨벤션
-- 이익: `#FF3333` (빨강)
-- 손실: `#3366FF` (파랑)
-- 보합: `#333333` (검정)
-- 금액: 천 단위 콤마
-- 수익률: 소수점 2자리 + %
+- 이익 `#FF3333` (빨강) / 손실 `#3366FF` (파랑) / 보합 `#333333`
+- 금액: 천 단위 콤마 / 수익률: 소수 2자리 + %
+- 환경 배너: 실전=빨강 "실전 매매 환경" / 모의=녹색 "모의투자 환경" (`/api/trading/status` 응답)
 
-## 환경 표시
-- 실전: 상단 빨간 배너 "실전 매매 환경"
-- 모의: 상단 녹색 배너 "모의투자 환경"
-- `/api/trading/status` 응답의 환경 정보로 결정
+## NXT/SOR UI
 
-## NXT/SOR 통합 운영 — UI 반영
-- **ScanMonitor phase 라벨**(`PHASE_LABELS`): 새 phase 추가 — `pre_nxt_wait`(NXT 프리 대기) / `pre_nxt_trading`(NXT 프리 매매) / `main_trading`(KRX 메인 매매) / `krx_main_stopped`(KRX 메인 매수 중단) / `post_nxt_trading`(NXT 애프터 매매) / `post_nxt_stopped`(NXT 애프터 매수 중단) / `recommending`(AI자문) / `log_analysis`(로그 분석)
-- **ScanMonitor 활성 보드 배지**: 헤더 직하단에 KST 시각 기반으로 현재 활성 보드(NXT 프리/KRX 동시호가/KRX 메인/KRX 시간외/NXT 애프터)를 색상 칩으로 노출. SessionTracker `_BOARD_SCHEDULE`과 동일 매핑 (08:00/08:30/09:00/15:30/18:00/20:00 경계). 장 외 시간이면 "장 외 (08:00~20:00 외)"
-- **Settings 거래소·보드 토글** (`ExchangeBoardRow`): 전략별 `exchange`(KRX/NXT/SOR 라디오) + `tradable_boards`(5개 보드 체크박스, post_nxt 선택 시 amber 강조). 저장 시 `updateStrategyParams` 한 번에 전송. 0개 선택 차단(매매 비활성 방지). **환경 가드**: `useTradingStatus().env`로 환경 인식 — 모의(`env !== 'real'`)이면 NXT/SOR 라디오를 disabled + 회색 처리("(모의 불가)" 라벨) + 저장 시 추가 검증으로 차단. 안내 문구도 환경별 분기(모의: 빨간 ⛔ / 실전: 황색 ⚠️)
-- **Settings 야간 매매 경고 배너**: 어느 전략이든 `tradable_boards`에 `post_nxt`가 활성이면 상단에 amber 경고 배너 노출 (사용자 부재 시간대 사고 위험 안내)
-- **PARAM_LABELS k_value_***: `k_value_krx_main` / `k_value_nxt_pre` / `k_value_nxt_post` (배 단위 step 0.1) 추가 — 전략 파라미터 카드에 자동 노출 + InfoTooltip
-- **하드코딩 시간 문구 갱신**: ScanMonitor / Settings / strategyInfo / LogReports / Recommendations에서 "09:30~15:20", "16:00", "16:10" 등 옛 KRX 단독 시간을 NXT 통합 시간(자동시작 07:45 / NXT 프리 08:00 / KRX 메인 09:00:05 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 20:10)으로 갱신
-- **응답 호환성**: 백엔드 `_targets[ticker]`에 보드별 `boards` dict + `open_confirmed` dict 추가, top-level `target_price`/`open_price`도 backwards-compat 유지 → 프론트 화면 깨짐 0
-- **ScanMonitor 보드별 시가/타겟가 시각화**(VB/LTV 탭): `BreakoutTarget.boards: Record<string, BoardTarget>` 구조 활용. 시가/타겟가 셀이 멀티라인으로 보드별 행 노출 (chip + 값) — 활성 보드는 `font-semibold` + `ring`, 비활성/미확정 보드는 톤다운/opacity-50. 정렬·돌파 판정·근접 % 계산 모두 활성 보드 기준. 헤더 우측에 사용 중 보드 칩 (활성 보드 ●) 노출. `BOARD_META`로 한글 라벨 + 색상 매핑 (메인/프리/애프터/동시호가/시간외)
-- **OrderMonitor**(보유 포지션 행): 매수 완료된 종목이라 단일 매수가 중심이 적합 — top-level `target_price`/`open_price` 그대로 backwards-compat 사용 (보드 분리 미적용)
-- **매수 신호 이력 보드 컬럼**: ScanMonitor "최근 매수 신호" 표에 `보드` + `타겟가` 컬럼 추가 — 어느 보드(메인/프리/애프터)에서 어느 타겟가를 돌파해 신호가 떴는지 즉시 식별. `BuySignal.board?: string` / `target_price?: number` / `k?: number` 필드 추가, `BOARD_META`로 chip 색상 매핑
-- **API**: `updateStrategyParams(strategyId, params)` `params` 타입을 `Record<string, StrategyParamValue>`(`number | string | string[] | null`)로 확장. tradable_boards(list) / exchange(string) / k_value_*(number) 모두 한 호출로 송신
+- **ScanMonitor**
+  - phase 라벨(`PHASE_LABELS`): pre_nxt_wait / pre_nxt_trading / main_trading / krx_main_stopped / post_nxt_trading / post_nxt_stopped / recommending / log_analysis
+  - 헤더 직하단 활성 보드 배지: KST 시각 → SessionTracker `_BOARD_SCHEDULE`과 동일 매핑(08:00/08:30/09:00/15:30/18:00/20:00). 장 외 시간이면 "장 외 (08:00~20:00 외)"
+  - VB/LTV 탭 보드별 시가/타겟가: `BreakoutTarget.boards: Record<string, BoardTarget>` 활용. 활성 보드는 `font-semibold + ring`, 비활성은 톤다운. 정렬·돌파 판정·근접 % 모두 활성 보드 기준. `BOARD_META`로 한글 라벨/색상 매핑
+  - "최근 매수 신호" 표에 `보드` + `타겟가` 컬럼 (`BuySignal.board?` / `target_price?` / `k?`)
+  - donchian_swing 탭: 단계별 통과 카운트(`scan_stats`) 막대 + 후보 테이블에 갭률·진입 상태 컬럼 (`Asia/Seoul` `Intl.DateTimeFormat` 사용). 진입 상태: 보유 중/갭 스킵/장 시작 전/진입 시간 종료/진입 대기. "도움말 펼치기" 토글로 4섹션 안내, `gap_skip_threshold`는 백엔드 params 동적 반영
 
-## ScanMonitor — 20일 신고가 스윙 깔때기
-- `donchian_swing` 탭 선택 시 단계별 통과 카운트(코스피200+코스닥150 → 시총 → 일봉 → 신고가 → EMA → 거래량 → ATR → 최종)를 막대 + 숫자로 시각화. 0이 되는 첫 단계가 탈락 원인.
-- 데이터 소스: `status.strategies.donchian_swing.scan_stats` (백엔드 `DonchianSwingStrategy.get_scan_stats()`)
-- "전체" 탭에서는 한 줄 요약(`유니버스 N1/N → 최종 K`)만 노출, 세부 깔때기는 swing 탭 전용
-- **후보 테이블 컬럼**: 종목 / 전일종가 / 20일 신고가 / EMA60 / ATR(14) / 현재가 / **갭률** / **진입 상태**
-  - 갭률 = `(open_price - prev_close) / prev_close × 100` (양수 빨강 / 음수 파랑). 데이터 부재 시 `-`
-  - 진입 상태(KST 기준 `Intl.DateTimeFormat('Asia/Seoul')` 사용):
-    - **보유 중** (`positions_detail`에 ticker, emerald)
-    - **갭 스킵** (갭 ≥ `params.gap_skip_threshold` 기본 3.0, gray)
-    - **장 시작 전** (KST < 09:05, slate)
-    - **진입 시간 종료** (KST ≥ 09:30, amber) — 오늘 진입창 만료, 다음 영업일 대기
-    - **진입 대기** (09:05~09:30, blue)
-- **도움말 펼치기 토글**: 안내 박스 우상단 버튼으로 4섹션(요약/진입/갭률/청산/화면 컬럼) 친절 설명 노출. `gap_skip_threshold`는 백엔드 params에서 동적으로 채워 일관성 유지
+- **Settings — `ExchangeBoardRow`**
+  - 전략별 `exchange`(KRX/NXT/SOR 라디오) + `tradable_boards`(5개 체크박스, post_nxt 선택 시 amber 강조). 0개 선택 차단
+  - **환경 가드**: `useTradingStatus().env`로 모의(`!== 'real'`) 시 NXT/SOR 라디오 disabled + 회색 처리("(모의 불가)") + 저장 시 추가 검증
+  - 어느 전략이든 `post_nxt` 활성이면 상단 amber 야간 매매 경고 배너 (사용자 부재 시간대 사고 위험)
 
-## History 페이지 (`/history`)
-- 두 탭: **주문체결내역**(기존 `TradeHistoryGrid` — 매수/매도 raw 행) / **매매손익**(신규 `TradePnLGrid` — 매수·매도 페어 1행)
-- 매매손익 탭은 백엔드 `/api/history/pnl` 응답을 그대로 표시 (포지션 0 사이클 = closed, 잔여 보유 = open)
-- 12 컬럼: 매수일/매수체결시각/매도일/매도체결시각/종목코드/종목명/매수체결가/매수체결수량/매도체결가/매도체결수량/매매손익/손익율 + 전략 뱃지
-- open 행은 매도 4컬럼 "—", 매매손익/손익율은 "(미실현)" 라벨, 행 배경 emerald-50으로 구분. 시세 미수신이면 "(미실현 시세 대기)"
-- 색상 컨벤션: 이익 빨강(#FF3333) / 손실 파랑(#3366FF) — 기존 TradeHistoryGrid 패턴
+- **PARAM_LABELS**: `k_value_krx_main / k_value_nxt_pre / k_value_nxt_post` (step 0.1) 자동 노출 + InfoTooltip
+- **시간 문구**: ScanMonitor/Settings/strategyInfo/LogReports/Recommendations 통합 시간으로 갱신 (자동시작 07:45 / NXT 프리 08:00 / KRX 09:00:05 / KRX 마감 15:30 / NXT 종료 20:00 / 정산 20:10)
+- **응답 호환성**: top-level `target_price`/`open_price` 유지 + `boards` dict 추가 → 화면 깨짐 0. OrderMonitor 보유 행은 매수가 중심이라 top-level만 사용
+- **`updateStrategyParams`**: `params` 타입 `Record<string, StrategyParamValue>`(`number | string | string[] | null`) — tradable_boards/exchange/k_value_* 한 호출로 송신
 
-## LogReports 페이지 (`/log-reports`)
-- 매일 정산 직후 OpenAI가 생성한 일일 로그 분석 리포트 조회 (백엔드 `/api/log-reports`)
-- 좌측: 영업일 리스트(최근 30일, 신규순) — 클릭 시 상세 표시
-- 우측: 총평(summary) + findings 카드(severity high/medium/low + category 칩) + 원본 메트릭(접기/펼치기)
-- 우상단 "지금 분석 실행" 버튼 — `POST /api/log-reports/run` (영업일당 1건 UNIQUE)
+## 페이지 노트
 
-## Settings 페이지
-- 전략 비중 슬라이더: 하한선(빨간 선) = 보유 포지션 매수금액 비율 (`min_weight`, `invested_amount` 필드)
-- 파라미터 편집: 각 전략의 `params` 중 number 타입 + PARAM_LABELS에 정의된 키만 표시
-- `position_ratio`: "전략 내 종목당 비중" — 전략 할당 자금 기준 (순자산 전체 아님), 예상 매수 금액 헬퍼 텍스트 표시
-- `getStrategies` API 매퍼: `total_investment`, `invested_amount`, `min_weight` 필드 포함 필수
+- **History (`/history`)** — 두 탭
+  - 주문체결내역: `TradeHistoryGrid` (raw 행)
+  - 매매손익: `TradePnLGrid` (`/api/history/pnl` — 매수·매도 페어 1행, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)" 라벨, emerald-50 배경. 시세 미수신은 "(미실현 시세 대기)"
+
+- **LogReports (`/log-reports`)**: 좌측 영업일 리스트(최근 30일) / 우측 summary + findings 카드(severity + category 칩) + 원본 메트릭 접기. "지금 분석 실행" 버튼 → `POST /api/log-reports/run` (영업일당 1건 UNIQUE)
+
+- **Settings**: 비중 슬라이더 하한선 = 보유 포지션 매수금액 비율(`min_weight`, `invested_amount`). 파라미터 편집은 PARAM_LABELS 정의된 number 키만. `position_ratio`는 "전략 내 종목당 비중" — 전략 할당 자금 기준 (순자산 전체 아님), 예상 매수 금액 헬퍼 표시. `getStrategies` 매퍼는 `total_investment`/`invested_amount`/`min_weight` 필수
 
 ## 주문 안전성
-- 시작/정지 버튼: ConfirmModal로 이중 확인 필수
-- 주문 관련 버튼은 항상 확인 단계 포함 (오발주 방지)
+- 시작/정지/매도 등 주문 관련 버튼은 ConfirmModal 이중 확인 필수
 
-## 타입 수정 시 주의
-- `types/` 디렉토리의 타입은 백엔드 `src/models/` pydantic 모델과 1:1 매핑
-- 백엔드 응답 구조가 변경되면 여기도 반드시 동기화
-- `npm run build`로 타입 체크 확인
+## 백엔드 연동
+- 모든 API 호출은 `api/client.ts` axios 인스턴스 경유
+- 응답은 `types/common.ts::ApiResponse<T>`로 파싱
+- 백엔드 응답 필드명 = TypeScript 속성명 (1:1, 변경 시 동기화)
+- 페이징 응답에 `total`/`total_pages` 필드 필수
