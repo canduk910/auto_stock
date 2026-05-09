@@ -6,6 +6,8 @@
 - NXT 장운영정보 (H0NXMKO0): 보드 전환 이벤트 (Phase 3 SessionTracker에서 활용)
 """
 
+from __future__ import annotations
+
 import base64
 import logging
 from typing import Callable, Awaitable

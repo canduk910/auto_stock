@@ -1,5 +1,7 @@
 """주문 데이터 모델."""
 
+from __future__ import annotations
+
 from enum import Enum
 
 from pydantic import BaseModel

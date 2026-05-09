@@ -1,0 +1,15 @@
+{
+  "name": "auto-stock-tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "프로젝트 루트의 dev 도구용 package.json — tools/test_impact/build_index_frontend.mjs (js-yaml) 와 e2e/ Playwright 실행용.",
+  "scripts": {
+    "e2e": "playwright test --config=e2e/playwright.config.ts",
+    "e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "js-yaml": "^4.1.0"
+  }
+}

@@ -1,5 +1,7 @@
 """시스템 로그 라우트: /api/logs/*"""
 
+from __future__ import annotations
+
 from fastapi import APIRouter, Query
 
 from src.db.system_logs import get_logs

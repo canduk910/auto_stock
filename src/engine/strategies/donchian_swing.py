@@ -14,6 +14,8 @@
 - 시간 손절 / 15:20 강제 청산 모두 없음 (추세 끝까지 보유)
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime, time, timezone, timedelta
 

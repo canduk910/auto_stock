@@ -11,6 +11,8 @@
 - 20:10 정산: daily_performance 기록, 일일 로그 분석
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from datetime import date, datetime, time, timedelta

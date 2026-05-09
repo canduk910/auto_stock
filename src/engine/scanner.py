@@ -7,6 +7,8 @@
 후보군으로 잡아 29.5% 도달을 감시한다.
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 

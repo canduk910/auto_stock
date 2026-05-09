@@ -1,5 +1,7 @@
 """전략 관리 라우트: /api/strategies/*"""
 
+from __future__ import annotations
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 

@@ -3,6 +3,8 @@
 전략의 등록/조회/비중 관리/전략 간 중복 매수 방지를 담당한다.
 """
 
+from __future__ import annotations
+
 import logging
 
 from src.engine.strategy_base import StrategyBase

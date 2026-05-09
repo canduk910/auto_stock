@@ -6,6 +6,8 @@
 - 익일 청산: 시가 갭 +10% → 트레일링 스탑 -2% / 그 외 즉시 매도
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 

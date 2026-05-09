@@ -1,0 +1,42 @@
+# 정적 import 분석으로 잡히지 않는 동적 의존성을 보강한다.
+# 키: 변경 파일 경로 또는 fnmatch glob
+# 값: 추가로 실행할 테스트 경로 또는 glob 리스트
+# 각 항목 위에 한 줄 코멘트로 이유 명시 필수.
+
+# 매매 규칙 텍스트가 바뀌면 모든 전략 단위/통합 테스트를 다시 돌린다.
+"_workspace/00_leader_trading_rules.md":
+  - "tests/unit/engine/strategies/*"
+  - "tests/integration/*"
+
+# CLAUDE.md 변경은 도메인 규칙 변경 신호 — 통합 테스트 풀
+"CLAUDE.md":
+  - "tests/integration/*"
+
+# session.py의 시각 상수는 import만으로는 의존성이 정확히 안 잡힘
+"src/engine/session.py":
+  - "tests/integration/test_force_clear_1520.py"
+  - "tests/integration/test_next_day_clear.py"
+  - "tests/integration/test_board_transition.py"
+
+# scheduler 시간 분기는 통합 시나리오 전반에 영향
+"src/engine/scheduler.py":
+  - "tests/integration/*"
+
+# config.py의 TR_ID 매핑은 모든 KIS 호출에 영향
+"src/config.py":
+  - "tests/unit/api/*"
+  - "tests/contract/*"
+
+# DB 마이그레이션 / 스키마 변경은 db/routes 전체에 영향
+"src/db/supabase.py":
+  - "tests/unit/db/*"
+  - "tests/contract/*"
+
+# 프론트엔드 axios client / API wrapper 변경은 모든 컴포넌트/E2E에 영향
+"frontend/src/api/client.ts":
+  - "frontend/src/**/__tests__/**"
+  - "e2e/*.spec.ts"
+
+# Playwright 설정 변경 시 모든 E2E 재실행
+"e2e/playwright.config.ts":
+  - "e2e/*.spec.ts"

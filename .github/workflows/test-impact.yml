@@ -1,0 +1,80 @@
+name: PR Test Impact — affected tests only
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  affected-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # affected.py 가 git diff 를 위해 base 커밋 필요
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Resolve affected tests (backend)
+        id: affected
+        run: |
+          TESTS=$(python tools/test_impact/affected.py origin/${{ github.base_ref }} --target=backend)
+          echo "tests=$TESTS" >> $GITHUB_OUTPUT
+          echo "Affected backend tests:"
+          echo "$TESTS"
+
+      - name: Run affected backend tests
+        if: ${{ steps.affected.outputs.tests != '' }}
+        run: python -m pytest ${{ steps.affected.outputs.tests }} -v
+
+      - name: Skip notice
+        if: ${{ steps.affected.outputs.tests == '' }}
+        run: echo 'No backend tests affected by this PR.'
+
+  affected-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python (for affected.py)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pyyaml
+        run: pip install pyyaml
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Resolve affected tests (frontend)
+        id: affected
+        run: |
+          TESTS=$(python tools/test_impact/affected.py origin/${{ github.base_ref }} --target=frontend)
+          # 프론트엔드 테스트 경로는 frontend/ 접두 — vitest 는 frontend/ 작업 디렉토리에서 실행하므로 제거
+          STRIPPED=$(echo "$TESTS" | tr ' ' '\n' | sed 's|^frontend/||' | tr '\n' ' ')
+          echo "tests=$STRIPPED" >> $GITHUB_OUTPUT
+          echo "Affected frontend tests:"
+          echo "$STRIPPED"
+
+      - name: Run affected frontend tests
+        if: ${{ steps.affected.outputs.tests != '' }}
+        working-directory: frontend
+        run: npx vitest run ${{ steps.affected.outputs.tests }}
+
+      - name: Skip notice
+        if: ${{ steps.affected.outputs.tests == '' }}
+        run: echo 'No frontend tests affected by this PR.'

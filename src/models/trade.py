@@ -1,5 +1,7 @@
 """trade_history 데이터 모델."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
 

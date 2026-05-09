@@ -8,6 +8,8 @@
 - 비중: 할당 자금의 10%
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import date, datetime
 

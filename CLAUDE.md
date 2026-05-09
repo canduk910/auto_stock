@@ -4,6 +4,41 @@
 KIS OpenAPI 기반 주식 자동매매시스템. 다중 전략 아키텍처.
 FastAPI(백엔드) + React(프론트엔드) + Supabase(DB).
 
+## 하네스: TDD-First Trading Team
+
+**목표:** 모든 코드 변경을 Red→Green→Refactor 사이클로 강제하고, 변경 시 영향받는 테스트만 실행할 수 있는 정적 인덱스를 유지한다.
+
+**트리거:**
+- 매매 시스템 구축/확장/전략 추가 요청 시 → `auto-trading-orchestrator` 스킬 (TDD 사이클을 기본으로 강제)
+- 단위 행위 테스트 작성/회귀 테스트 → `tdd-cycle` 스킬 (백엔드: pytest+respx+freezegun / 프론트엔드: vitest+RTL+MSW)
+- 영향 인덱스 생성/조회/manual_overrides 갱신 → `test-impact-index` 스킬
+- 모듈 결합 후 통합/경계면/E2E/안전성 검증 → `trading-test` 스킬
+
+단순 질문이나 일회성 디버그는 직접 응답 가능.
+
+**테스트 실행 (로컬):**
+```bash
+pip install -r requirements-dev.txt          # 1회
+python -m pytest -q                          # 백엔드 전체
+cd frontend && npm install && npm test       # 프론트엔드 전체
+cd .. && npx playwright install && npx playwright test --config=e2e/playwright.config.ts  # E2E
+
+# 영향 테스트만 (PR 빠른 피드백)
+python tools/test_impact/build_index.py
+node  tools/test_impact/build_index_frontend.mjs
+pytest $(python tools/test_impact/affected.py origin/main --target=backend)
+```
+
+**변경 이력:**
+| 날짜 | 변경 내용 | 대상 | 사유 |
+|------|----------|------|------|
+| 2026-05-08 | TDD 하네스 초기 구성 — tdd-engineer 에이전트 + tdd-cycle/test-impact-index 스킬 + pytest/vitest/Playwright 인프라 + AST 기반 영향 인덱스 | `.claude/agents/`, `.claude/skills/`, `tests/`, `frontend/src/test/`, `e2e/`, `tools/test_impact/`, CI workflow | 사후 검증만 있던 기존 하네스에 Red→Green 사이클을 강제해 매매 시스템 회귀 위험을 차단 |
+| 2026-05-08 | Phase B — 전략 엔진 단위 테스트 + Python 3.9 호환 패치 | `tests/unit/engine/**` (107건 신규), `src/api/base.py` 등 7개 파일에 `from __future__ import annotations` | 4개 전략(momentum/VB/LTV/donchian) + strategy_base/registry + session 의 신호·청산·가드 회귀 테스트 영구화. 영향 인덱스 매핑 모듈 5→19개로 확대 |
+| 2026-05-08 | Phase C — order_engine + risk 통합 테스트 + 인덱스 conftest 전파 | `tests/integration/{conftest,test_buy_flow,test_sell_flow,test_chegyeol_race,test_buy_block_low_funds,test_risk_on_tick,test_multi_strategy_block}.py` (26건 신규), 추가 `from __future__ import annotations` 11개 파일, `eval_type_backport` dev 의존성, `tools/test_impact/build_index.py` conftest 전파 | 매수/매도 흐름·체결통보 race·잔고부족 락·on_tick 보드/자금 가드·전략 간 중복차단 회귀 테스트. 매핑 모듈 19→29개로 확대 |
+| 2026-05-08 | Phase D — 시간 기반 스케줄러 통합 테스트 + scheduler_env fixture | `tests/integration/{test_force_clear_1520,test_next_day_clear,test_confirm_open_prices,test_reset_daily_state,test_auto_start,test_presubscribe}.py` (30건 신규), `conftest.py` scheduler_env fixture 추가 | 15:20 KRX 메인 강제청산(POST_NXT 보존)·익일 NXT 프리 청산(30s 안정화)·보드별 시가 확정·일일 상태 리셋·DB auto_start 우선 폴백·사전구독 합집합. 매핑 모듈 29→34개로 확대 |
+| 2026-05-08 | Phase E — FastAPI 19+ 엔드포인트 계약 테스트 + 프론트엔드 컴포넌트/훅/API 단위 테스트 | `tests/contract/{conftest,test_routes_*}.py` (52건 신규), `frontend/src/{components,contexts,api}/__tests__/*.test.{ts,tsx}` (30건 신규), routes/models 11개 파일 `from __future__ import annotations`, root `package.json` js-yaml, `build_index_frontend.mjs` untracked 파일 포함 | TestClient 격리(lifespan 미실행) + 싱글톤 scheduler 모킹·trading/strategies/balance/performance/history/recommendations/log-reports/logs 라우트 계약·ConfirmModal/InfoTooltip/TradingStatusContext·6개 API wrapper 응답 unwrap. 백엔드 매핑 34→48/54(89%), 프론트 0→15/39(38%) |
+| 2026-05-08 | Phase F — Playwright E2E 스모크 + CI 커버리지 게이트 60% + 회귀 패턴 정립 | `e2e/{playwright.config.ts,fixtures/api-mocks.ts,trading-flow,settings,history,recommendations}.spec.ts`, root `package.json` Playwright, `pyproject.toml` fail_under=60 + omit 정의, `.github/workflows/ci.yml` E2E job + coverage 게이트, `_workspace/regression/README.md` + `_workspace/red/_behaviors.md` | 5개 E2E 시나리오 통과(7.3s), pytest-cov 도입 baseline 60.31%, 회귀 등록 절차 + 행위 카탈로그 영구화 |
+
 ## 빌드 & 실행
 
 ### Docker Compose (권장)

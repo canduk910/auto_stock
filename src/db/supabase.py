@@ -1,5 +1,7 @@
 """Supabase 클라이언트 초기화."""
 
+from __future__ import annotations
+
 from supabase import create_client, Client
 
 from src.config import settings

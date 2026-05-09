@@ -1,5 +1,7 @@
 """strategy_config CRUD — 전략 설정(비중/파라미터) 영속화."""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 

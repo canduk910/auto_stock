@@ -6,6 +6,8 @@
 - 메시지 수신 → handler로 디스패치
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 import logging

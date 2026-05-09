@@ -7,6 +7,8 @@
 - 당일 상한가 도달(+29%): 익일 청산 모드 전환 — 손절(-5%), 갭상승 +10% 트레일링/-2%
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import date, datetime
 

@@ -1,5 +1,7 @@
 """매매 실적 라우트: /api/performance/*"""
 
+from __future__ import annotations
+
 from fastapi import APIRouter
 
 from src.db.daily_performance import get_latest_performance, get_performance, recompute_from_trades

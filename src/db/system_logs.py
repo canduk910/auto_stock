@@ -1,5 +1,7 @@
 """system_logs CRUD."""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 

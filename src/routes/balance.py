@@ -1,5 +1,7 @@
 """잔고 조회 라우트: /api/balance/*"""
 
+from __future__ import annotations
+
 from fastapi import APIRouter
 
 from src.api.balance import get_balance, get_buyable

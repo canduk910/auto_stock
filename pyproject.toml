@@ -1,0 +1,67 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+markers = [
+    "unit: 단일 함수/메서드 단위 테스트",
+    "integration: 모듈 결합 테스트",
+    "contract: FastAPI 엔드포인트/외부 API 계약 테스트",
+    "slow: 1초 이상 걸리는 테스트 (CI 분리 가능)",
+    "safety: 매매 안전성 시나리오 (15:20 강제청산, 체결통보 race 등)",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:supabase.*",
+    "ignore::DeprecationWarning:gotrue.*",
+    "ignore::DeprecationWarning:postgrest.*",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = [
+    "src/main.py",
+    "src/config.py",
+    "*/__init__.py",
+    # WebSocket / scheduler 대부분 / 추천·로그 분석 엔진은 통합 단계가 아니라
+    # 운영 환경 의존성이 강한 영역이라 단위 커버리지 측정에서 제외 (Phase G에서 별도 강화)
+    "src/realtime/websocket.py",
+    "src/engine/scheduler.py",
+    "src/engine/recommendation_engine.py",
+    "src/engine/log_analysis_engine.py",
+    "src/engine/strategy.py",          # 사용 안 하는 구버전 잔재
+    "src/db/log_reports.py",
+    "src/db/parameter_recommendations.py",
+    "src/db/daily_performance.py",
+    "src/db/strategy_config.py",
+    "src/db/system_logs.py",
+    "src/db/positions.py",
+    "src/db/trade_history.py",
+    "src/db/supabase.py",
+    "src/api/condition.py",            # 거래량순위/일봉/휴장일 — 통합 단계
+    "src/api/order.py",                # respx 통합 단계
+    "src/api/balance.py",              # 통합 단계
+    "src/auth/hashkey.py",
+    "src/realtime/handler.py",         # AES 복호화/체결통보 — 통합 단계
+    "src/routes/system.py",            # psutil/tracemalloc 의존
+    "src/routes/log_reports.py",       # 엔진 의존
+    "src/routes/balance.py",           # KIS API 의존
+    "src/routes/performance.py",       # DB 의존
+    "src/routes/logs.py",              # DB 의존
+]
+
+[tool.coverage.report]
+# 60%: Phase F 시점 핵심 영역 baseline. Phase G 에서 omit 항목들을 통합 테스트로 채워가며
+# 게이트를 단계적으로 70 → 80 으로 상향한다.
+# 측정 영역: strategy_base, 4 strategies, registry, session, order_engine, risk,
+# routes(trading/strategies/recommendations/history), api/base, auth/token
+fail_under = 60
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

@@ -6,6 +6,8 @@
 - 전략별 매매 가능 보드(KRX 메인 / NXT 프리 / NXT 애프터) 가드 — Phase 8
 """
 
+from __future__ import annotations
+
 import logging
 import time
 

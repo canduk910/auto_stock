@@ -7,15 +7,28 @@ logs/
 
 # IDE
 .idea/
+.DS_Store
 
 # Python
 __pycache__/
 *.pyc
 .venv/
+.pytest_cache/
+
+# Coverage (pytest-cov / coverage.py)
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 
 # Node
 node_modules/
 frontend/dist/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
 
 # 원본 엑셀
 *.xlsx

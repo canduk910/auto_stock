@@ -1,5 +1,7 @@
 """매매 관리 라우트: /api/trading/*"""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 

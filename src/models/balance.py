@@ -1,5 +1,7 @@
 """잔고 데이터 모델."""
 
+from __future__ import annotations
+
 from pydantic import BaseModel
 
 

@@ -1,5 +1,7 @@
 """거래 내역 라우트: /api/history/*"""
 
+from __future__ import annotations
+
 from fastapi import APIRouter, Query
 
 from src.db.trade_history import get_trade_pairs, get_trades

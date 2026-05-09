@@ -5,6 +5,8 @@
 - 익일 청산: 시가 갭 +10% 이상이면 트레일링 스탑(-2%), 미만이면 즉시 전량 매도
 """
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, field
 from datetime import date, datetime

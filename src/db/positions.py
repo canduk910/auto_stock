@@ -6,6 +6,8 @@ KIS 잔고 API가 아닌 DB가 포지션의 진실의 원천.
 supabase 동기 호출은 모두 asyncio.to_thread()로 위임 — 이벤트 루프 블로킹 차단.
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from datetime import date
