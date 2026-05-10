@@ -13,7 +13,12 @@ import asyncio
 import logging
 import time
 
-from src.api.balance import get_buyable, is_insufficient_cash, is_insufficient_quantity
+from src.api.balance import (
+    get_buyable,
+    is_insufficient_cash,
+    is_insufficient_quantity,
+    is_market_closed_rejection,
+)
 from src.api.base import KisApiError
 from src.api.order import cancel_order, place_order
 from src.db.system_logs import write_log
@@ -21,7 +26,7 @@ from src.db.trade_history import insert_trade, update_trade_status
 from src.engine.strategy_base import Position, Signal, StrategyBase
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.scanner import t
-from src.models.order import OrderSide
+from src.models.order import OrderDivision, OrderSide
 from src.models.trade import TradeRecord, TradeStatus, TradeType
 
 logger = logging.getLogger(__name__)
@@ -201,8 +206,20 @@ class OrderEngine:
             state.pending_buys.discard(ticker)
             raise
 
-    async def execute_sell(self, ticker: str, signal: Signal, strategy_id: str) -> None:
-        """매도 주문을 실행한다. 실패 시 최대 3회 재시도."""
+    async def execute_sell(
+        self,
+        ticker: str,
+        signal: Signal,
+        strategy_id: str,
+        *,
+        limit_price: int = 0,
+    ) -> None:
+        """매도 주문을 실행한다. 실패 시 최대 3회 재시도.
+
+        `limit_price > 0` 이면 지정가(`ORD_DVSN=00`) 매도, 0 이면 시장가(`ORD_DVSN=01`).
+        지정가는 NXT 프리 시간대 익일 청산 등에 사용된다 (P1(B) 옵션 B).
+        호출자가 호가단위 정렬을 책임진다 (`src.engine.util.tick_size.step_down`).
+        """
         # 매도 진행 중 중복 차단
         if ticker in self._selling:
             logger.debug("매도 진행 중 — 중복 차단: %s", t(ticker))
@@ -223,14 +240,24 @@ class OrderEngine:
 
         last_error: Exception | None = None
         insufficient_qty = False
+        # 지정가 매도 분기 (P1(B))
+        order_division = (
+            OrderDivision.LIMIT if limit_price > 0 else OrderDivision.MARKET
+        )
+        order_unpr = limit_price if limit_price > 0 else 0
+        # 지정가 NXT 청산은 거래소도 NXT 로 강제 (전략 기본 exchange 무관)
+        target_exchange = (
+            "NXT" if limit_price > 0 else self._strategy_exchange(strategy_id)
+        )
         for attempt in range(1, SELL_MAX_RETRIES + 1):
             try:
                 result = await place_order(
                     ticker=ticker,
                     side=OrderSide.SELL,
                     quantity=pos.quantity,
-                    price=0,  # 시장가
-                    exchange=self._strategy_exchange(strategy_id),
+                    price=order_unpr,
+                    order_division=order_division,
+                    exchange=target_exchange,
                 )
 
                 # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
@@ -269,8 +296,23 @@ class OrderEngine:
 
             except KisApiError as e:
                 last_error = e
+                # 1) 장운영시간 외 거부 — 재시도 의미 없고 positions 보존해야 함.
+                #    다음 거래 가능 시각(예: 09:00 KRX 시가 확정 후)에 자연 재트리거되도록.
+                if is_market_closed_rejection(e):
+                    logger.warning(
+                        "매도 장운영시간 외 거부 — positions 보존 + 재시도 중단: %s "
+                        "(전략: %s, [%s] %s)",
+                        t(ticker), strategy_id, e.msg_cd, e.msg1,
+                    )
+                    self._selling.discard(ticker)
+                    await write_log(
+                        "WARNING",
+                        f"매도 거부(장운영시간 외) — 포지션 보존: {t(ticker)} "
+                        f"(전략: {strategy_id}, [{e.msg_cd}] {e.msg1})",
+                    )
+                    return  # positions / DB 보존, 다음 trigger 대기
+                # 2) 진짜 보유 부족(APBK1234 등) — 기존 동작 유지
                 if is_insufficient_quantity(e):
-                    # 매도가능수량 부족 — 재시도 의미 없음 (메모리 포지션이 KIS와 어긋난 상태)
                     insufficient_qty = True
                     logger.warning(
                         "매도 매도가능수량 부족 — 재시도 중단: %s (전략: %s, [%s] %s)",

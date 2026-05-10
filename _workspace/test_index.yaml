@@ -7,7 +7,8 @@ backend:
       - tests/unit/api/test_base.py
     transitive_tests: []
   src/api/balance.py:
-    direct_tests: []
+    direct_tests:
+      - tests/unit/api/test_insufficient_classification.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
       - tests/contract/test_routes_history.py
@@ -24,10 +25,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/api/base.py:
     direct_tests:
@@ -39,12 +42,15 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/api/test_base.py
+      - tests/unit/api/test_insufficient_classification.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
       - tests/contract/test_routes_history.py
@@ -76,10 +82,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -104,10 +112,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/auth/__init__.py:
     direct_tests:
@@ -131,10 +141,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/auth/token.py:
     direct_tests:
@@ -155,12 +167,15 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/api/test_base.py
+      - tests/unit/api/test_insufficient_classification.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -184,12 +199,15 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/api/test_base.py
+      - tests/unit/api/test_insufficient_classification.py
       - tests/unit/auth/test_token.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -217,10 +235,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/db/log_reports.py:
     direct_tests: []
@@ -240,10 +260,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/db/parameter_recommendations.py:
     direct_tests: []
@@ -265,10 +287,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -296,10 +320,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/db/supabase.py:
     direct_tests:
@@ -319,10 +345,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -345,10 +373,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -371,10 +401,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/engine/__init__.py:
     direct_tests:
@@ -393,10 +425,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -420,10 +454,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/engine/order_engine.py:
     direct_tests:
@@ -435,10 +471,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -458,10 +496,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -488,10 +528,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -516,10 +558,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
     transitive_tests: []
   src/engine/session.py:
@@ -539,10 +583,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_volatility_breakout.py
@@ -561,10 +607,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_donchian_swing.py
     transitive_tests:
@@ -585,10 +633,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
     transitive_tests:
@@ -609,10 +659,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_momentum.py
     transitive_tests:
@@ -633,10 +685,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_volatility_breakout.py
     transitive_tests:
@@ -661,10 +715,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -689,10 +745,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/test_strategy_registry.py
     transitive_tests:
@@ -703,6 +761,35 @@ backend:
       - tests/contract/test_routes_recommendations.py
       - tests/contract/test_routes_strategies.py
       - tests/contract/test_routes_trading.py
+  src/engine/util/__init__.py:
+    direct_tests: []
+    transitive_tests: []
+  src/engine/util/tick_size.py:
+    direct_tests:
+      - tests/unit/engine/test_tick_size.py
+    transitive_tests:
+      - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_history.py
+      - tests/contract/test_routes_log_reports.py
+      - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_recommendations.py
+      - tests/contract/test_routes_strategies.py
+      - tests/contract/test_routes_trading.py
+      - tests/integration/test_auto_start.py
+      - tests/integration/test_buy_block_low_funds.py
+      - tests/integration/test_buy_flow.py
+      - tests/integration/test_chegyeol_race.py
+      - tests/integration/test_confirm_open_prices.py
+      - tests/integration/test_force_clear_1520.py
+      - tests/integration/test_multi_strategy_block.py
+      - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
+      - tests/integration/test_presubscribe.py
+      - tests/integration/test_reset_daily_state.py
+      - tests/integration/test_risk_on_tick.py
+      - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
+      - tests/integration/test_smoke.py
   src/main.py:
     direct_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -733,12 +820,15 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
-    transitive_tests: []
+    transitive_tests:
+      - tests/unit/api/test_insufficient_classification.py
   src/models/order.py:
     direct_tests:
       - tests/integration/test_auto_start.py
@@ -749,10 +839,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -801,9 +893,11 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
   src/realtime/__init__.py:
     direct_tests: []
@@ -826,10 +920,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -854,10 +950,12 @@ backend:
       - tests/integration/test_force_clear_1520.py
       - tests/integration/test_multi_strategy_block.py
       - tests/integration/test_next_day_clear.py
+      - tests/integration/test_next_day_clear_nxt_eligibility.py
       - tests/integration/test_presubscribe.py
       - tests/integration/test_reset_daily_state.py
       - tests/integration/test_risk_on_tick.py
       - tests/integration/test_sell_flow.py
+      - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -1148,53 +1246,30 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-09T01:53:21.326Z'
+generated_at: '2026-05-10T23:29:08.149Z'
 stats:
-  backend_modules: 54
-  backend_tests: 29
+  backend_modules: 56
+  backend_tests: 33
   frontend_modules: 39
   frontend_tests: 11
   unmapped_modules:
-    - frontend/src/App.tsx
     - frontend/src/api/recommendations.ts
-    - frontend/src/api/recommendations.ts
-    - frontend/src/components/BalanceTable.tsx
-    - frontend/src/components/ControlPanel.tsx
-    - frontend/src/components/LogViewer.tsx
-    - frontend/src/components/OrderMonitor.tsx
-    - frontend/src/components/PerformanceCard.tsx
-    - frontend/src/components/ProfitChart.tsx
-    - frontend/src/components/ScanMonitor.tsx
-    - frontend/src/components/TradeHistoryGrid.tsx
     - frontend/src/components/TradeHistoryGrid.tsx
     - frontend/src/components/TradePnLGrid.tsx
-    - frontend/src/components/TradePnLGrid.tsx
-    - frontend/src/contexts/TradingStatusContext.tsx
     - frontend/src/main.tsx
-    - frontend/src/main.tsx
-    - frontend/src/pages/Dashboard.tsx
-    - frontend/src/pages/History.tsx
     - frontend/src/pages/History.tsx
     - frontend/src/pages/LogReports.tsx
-    - frontend/src/pages/LogReports.tsx
-    - frontend/src/pages/Recommendations.tsx
     - frontend/src/pages/Recommendations.tsx
     - frontend/src/pages/Settings.tsx
-    - frontend/src/pages/Settings.tsx
-    - frontend/src/test/providers.tsx
     - frontend/src/test/providers.tsx
     - frontend/src/test/setup.ts
-    - frontend/src/test/setup.ts
     - frontend/src/types/recommendations.ts
-    - frontend/src/types/recommendations.ts
-    - frontend/src/types/strategy.ts
     - frontend/src/utils/paramLabels.ts
-    - frontend/src/utils/paramLabels.ts
-    - frontend/src/utils/strategyInfo.ts
     - src/__init__.py
     - src/db/__init__.py
     - src/engine/strategies/__init__.py
     - src/engine/strategy.py
+    - src/engine/util/__init__.py
     - src/models/__init__.py
     - src/realtime/__init__.py
 version: 1

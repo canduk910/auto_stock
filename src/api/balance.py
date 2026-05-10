@@ -16,27 +16,80 @@ BALANCE_URL = "/uapi/domestic-stock/v1/trading/inquire-balance"
 PSBL_ORDER_URL = "/uapi/domestic-stock/v1/trading/inquire-psbl-order"
 
 
+# 장운영시간 외 / 매매 불가 시간 거부 키워드.
+# KIS 가 같은 msg_cd(APBK0918)로 보유부족·자금부족·시간외 거부를 모두 내보내기 때문에
+# msg1 키워드로 가드한다. 매칭되면 위 두 분류 모두 False — 매도/매수 모두 락 걸지 않는다.
+_MARKET_CLOSED_KEYWORDS = (
+    "장운영시간",
+    "매매 불가 시간",
+    "매매불가시간",
+    "운영시간이 아",   # "운영시간이 아닙니다" 변형 보존 가드
+    "거래시간 외",
+    "거래시간외",
+    "장시간 외",
+    "장시간외",
+)
+
+
+def is_market_closed_rejection(err: KisApiError) -> bool:
+    """KIS 응답이 '장운영시간 외' 류의 시간 거부인지 판단.
+
+    동일 msg_cd(APBK0918)가 보유부족/자금부족/시간외 거부 모두에 사용되므로
+    msg1 키워드로 분리한다. True 면 `is_insufficient_*` 는 모두 False 로 떨어져야 한다.
+    """
+    msg1 = err.msg1 or ""
+    return any(kw in msg1 for kw in _MARKET_CLOSED_KEYWORDS)
+
+
 def is_insufficient_cash(err: KisApiError) -> bool:
     """KIS 매수 실패 응답이 '주문가능금액 부족'(예수금 부족) 사유인지 판단.
 
     msg_cd가 정확히 일치하지 않을 가능성에 대비해 msg1 키워드도 함께 본다.
+    APBK0918 은 동일 msg_cd 가 시간외 거부에도 쓰이므로 msg1 의 현금부족 키워드를 확인한다.
     """
     msg_cd = (err.msg_cd or "").upper()
     msg1 = err.msg1 or ""
-    if msg_cd in {"APBK0919", "APBK0918", "EGW00120"}:
+
+    # 1) 명시적 시간외 거부면 자금 락 걸지 않는다 (단, msg1 에 현금 키워드가 동반되면 후속 가드에서 True)
+    cash_keyword = "부족" in msg1 and (
+        "주문가능금액" in msg1 or "예수금" in msg1 or "현금" in msg1
+    )
+    if is_market_closed_rejection(err) and not cash_keyword:
+        return False
+
+    if msg_cd in {"APBK0919", "EGW00120"}:
         return True
-    if "부족" in msg1 and ("주문가능금액" in msg1 or "예수금" in msg1 or "현금" in msg1):
+    # APBK0918 은 msg1 에 현금 키워드가 있을 때만 자금 부족으로 분류 (시간외 거부와 분리)
+    if msg_cd == "APBK0918":
+        return cash_keyword
+    if cash_keyword:
         return True
     return False
 
 
 def is_insufficient_quantity(err: KisApiError) -> bool:
-    """KIS 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 판단."""
+    """KIS 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 판단.
+
+    APBK0918 은 동일 msg_cd 가 시간외 거부에도 쓰이므로 msg1 키워드로 분리한다.
+    시간외 거부면 positions 보존을 위해 False 를 반환한다.
+    """
     msg_cd = (err.msg_cd or "").upper()
     msg1 = err.msg1 or ""
-    if msg_cd in {"APBK0918", "APBK1234"}:
+
+    holding_keyword = "부족" in msg1 and (
+        "매도가능" in msg1 or "보유수량" in msg1 or "잔고" in msg1
+    )
+
+    # 1) 시간외 거부 + 보유부족 키워드 없음 → 보유 부족 아님 (positions 보존)
+    if is_market_closed_rejection(err) and not holding_keyword:
+        return False
+
+    if msg_cd == "APBK1234":
         return True
-    if "부족" in msg1 and ("매도가능" in msg1 or "보유수량" in msg1 or "잔고" in msg1):
+    # APBK0918 은 msg1 에 보유부족 키워드가 있을 때만 True (시간외 거부와 분리)
+    if msg_cd == "APBK0918":
+        return holding_keyword
+    if holding_keyword:
         return True
     return False
 

@@ -112,6 +112,10 @@ class TradingScheduler:
         self._next_day_task: asyncio.Task | None = None
         # 보드 전환 감시 background task
         self._session_task: asyncio.Task | None = None
+        # P1(B): NXT 시가 미수신으로 08:00 청산이 보류된 (ticker, strategy_id) 집합.
+        # `_confirm_breakout_open_prices(board="main")` 직후 `_drain_pending_next_day_clear`
+        # 에서 시장가로 정리한다.
+        self._pending_next_day_clear: set[tuple[str, str]] = set()
 
     async def _load_strategy_config(self) -> None:
         """DB에서 전략 설정(비중/파라미터)을 로드하여 적용한다."""
@@ -271,6 +275,8 @@ class TradingScheduler:
                 await self._wait_until(TIME_KRX_OPEN_CONFIRM)
                 # KRX 메인 시가 재확정 (NXT 프리 시가와 별도, Phase 5 보드별 분리)
                 await self._confirm_breakout_open_prices()
+                # P1(B): NXT 시가 미수신으로 보류된 익일 청산을 시장가 정리
+                await self._drain_pending_next_day_clear()
                 self._phase = "main_trading"
                 logger.info("KRX 메인 시가 확정 — VB/LTV MAIN 매매 진입")
                 await write_log("INFO", "KRX 메인 매매 시작")
@@ -280,6 +286,7 @@ class TradingScheduler:
                 if presub:
                     await subscribe_filtered_stocks([], extra_tickers=presub)
                 await self._confirm_breakout_open_prices()
+                await self._drain_pending_next_day_clear()
                 if self._collect_breakout_tickers():
                     self._phase = "main_trading"
                     logger.info("KRX 메인 매매 시작 (중간 부팅): %d종목", len(presub))
@@ -618,6 +625,7 @@ class TradingScheduler:
                 strategy._next_day_clear_pending = False
 
         from src.engine.scanner import t, ticker_prices
+        from src.engine.util.tick_size import step_down
 
         for ticker, pos, strategy_id in all_next_day:
             strategy = self.registry.get(strategy_id)
@@ -626,15 +634,27 @@ class TradingScheduler:
 
             gap_up_threshold = strategy.config.params.get("gap_up_threshold", 10.0)
 
-            # WebSocket에서 수신한 실제 시가 사용 (사전구독되어 있으면 09:00:00에 들어옴)
+            # WebSocket에서 수신한 실제 시가 사용 (사전구독되어 있으면 08:00:00에 들어옴 — NXT 프리)
             price_data = ticker_prices.get(ticker, {})
             today_open = price_data.get("open_price", 0)
             if today_open <= 0:
-                # 60초 대기에도 시가 미수신 → 짧은 폴링 + KIS API 폴백
+                # 30초 대기에도 시가 미수신 → 짧은 폴링 + KIS API 폴백
                 today_open = await self._resolve_open_price(ticker, max_wait_s=2.0)
+
+            # P1(B): NXT 시가 미수신 → NXT 거래 불가 종목으로 추정.
+            # high_since_buy 폴백으로 갭률 0% 즉시 청산하던 위험 경로 제거.
+            # 청산을 09:00 KRX 메인 시가 확정 이후로 보류 (_drain_pending_next_day_clear).
             if today_open <= 0:
-                today_open = pos.high_since_buy
-                logger.warning("시가 미수신, high_since_buy 사용: %s (%d)", t(ticker), today_open)
+                self._pending_next_day_clear.add((ticker, strategy_id))
+                logger.warning(
+                    "NXT 시가 미수신 — 익일 청산 보류 (KRX 시가 확정 후 재시도): %s (전략: %s)",
+                    t(ticker), strategy_id,
+                )
+                await write_log(
+                    "WARNING",
+                    f"NXT 시가 미수신 — 익일 청산 보류: {t(ticker)} ({strategy_id})",
+                )
+                continue
 
             if pos.buy_price > 0:
                 gap_rate = (today_open - pos.buy_price) / pos.buy_price * 100
@@ -648,14 +668,57 @@ class TradingScheduler:
                 )
                 await write_log("INFO", f"트레일링 스탑 모드: {t(ticker)} 갭률 {gap_rate:.1f}% ({strategy_id})")
             else:
+                # NXT 프리에서는 지정가 매도 (직전가 -1호가, KRX 호가단위 적용)
+                limit_price = step_down(int(today_open), steps=1)
                 logger.info(
-                    "익일 즉시 청산: %s 갭률 %.1f%% (전략: %s)",
-                    t(ticker), gap_rate, strategy_id,
+                    "익일 NXT 지정가 청산: %s 갭률 %.1f%% (전략: %s, 지정가: %d)",
+                    t(ticker), gap_rate, strategy_id, limit_price,
                 )
-                await self.order_engine.execute_sell(ticker, Signal.NEXT_DAY_CLEAR, strategy_id)
-                await write_log("INFO", f"익일 즉시 청산 실행: {t(ticker)} 갭률 {gap_rate:.1f}% ({strategy_id})")
+                await self.order_engine.execute_sell(
+                    ticker, Signal.NEXT_DAY_CLEAR, strategy_id, limit_price=limit_price,
+                )
+                await write_log(
+                    "INFO",
+                    f"익일 NXT 지정가 청산 실행: {t(ticker)} 갭률 {gap_rate:.1f}% "
+                    f"({strategy_id}, 지정가: {limit_price})",
+                )
 
         logger.info("익일 청산 실행 완료")
+
+    async def _drain_pending_next_day_clear(self) -> None:
+        """KRX 시가 확정 후 보류된 익일 청산 종목을 시장가로 청산한다.
+
+        P1(B): NXT 거래 불가 종목은 08:00 청산을 보류했다가 09:00 KRX 메인 시가
+        확정 직후(`_confirm_breakout_open_prices(board="main")` 호출 후)에 이 메서드를
+        호출해 시장가 매도로 일괄 정리한다. 정규장 시간대이므로 시장가 OK.
+        """
+        if not self._pending_next_day_clear:
+            return
+
+        from src.engine.scanner import t
+
+        pending = list(self._pending_next_day_clear)
+        logger.info("보류된 익일 청산 처리 시작: %d건", len(pending))
+        await write_log("INFO", f"보류된 익일 청산 처리: {len(pending)}건")
+
+        for ticker, strategy_id in pending:
+            strategy = self.registry.get(strategy_id)
+            if not strategy or ticker not in strategy.state.positions:
+                # 그 사이 손절 등으로 이미 처리됨
+                self._pending_next_day_clear.discard((ticker, strategy_id))
+                continue
+            try:
+                await self.order_engine.execute_sell(
+                    ticker, Signal.NEXT_DAY_CLEAR, strategy_id,
+                )
+                await write_log(
+                    "INFO",
+                    f"보류 익일 청산(시장가) 실행: {t(ticker)} ({strategy_id})",
+                )
+            except Exception:
+                logger.exception("보류 익일 청산 실패: %s (%s)", ticker, strategy_id)
+            finally:
+                self._pending_next_day_clear.discard((ticker, strategy_id))
 
     async def _confirm_breakout_open_prices(
         self, *, max_wait_s: float = 5.0, interval_s: float = 0.5, board: str | None = None,
@@ -1387,6 +1450,9 @@ class TradingScheduler:
         for task in self.order_engine._pending_cancel_tasks.values():
             task.cancel()
         self.order_engine._pending_cancel_tasks.clear()
+
+        # P1(B) 익일 청산 보류 set 도 매일 초기화
+        self._pending_next_day_clear.clear()
 
         # scanner 글로벌 dict 누수 방지 — 정산 후 매일 정리(STATIC_TICKER_NAMES는 모듈 import 시 자동 시드되므로 그대로 유지)
         from src.engine.scanner import (

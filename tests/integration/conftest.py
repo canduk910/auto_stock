@@ -226,9 +226,14 @@ def scheduler_env(monkeypatch):
 
     monkeypatch.setattr("src.engine.scheduler.kis_ws", SimpleNamespace(subscribe=fake_subscribe))
 
-    # OrderEngine.execute_sell 호출 추적
-    async def fake_execute_sell(ticker, signal, strategy_id):
-        calls.execute_sell.append({"ticker": ticker, "signal": signal, "strategy_id": strategy_id})
+    # OrderEngine.execute_sell 호출 추적 — P1(B) 에서 limit_price kwarg 추가됨
+    async def fake_execute_sell(ticker, signal, strategy_id, *, limit_price: int = 0):
+        calls.execute_sell.append({
+            "ticker": ticker,
+            "signal": signal,
+            "strategy_id": strategy_id,
+            "limit_price": limit_price,
+        })
         # 메모리 포지션 제거 (정상 매도 시뮬)
         strat = sched.registry.get(strategy_id)
         if strat:
