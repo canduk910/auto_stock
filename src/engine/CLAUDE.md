@@ -10,6 +10,7 @@ strategies/{momentum, volatility_breakout, long_tail_volatility, donchian_swing}
 session.py(MarketBoard, SessionTracker)
 risk.py(on_tick) → order_engine.py(체결통보·DB persistence) → scheduler.py(시간 가드·boot/run/settle)
 scanner.py(종목 스캔/구독/STATIC_TICKER_NAMES)
+util/tick_size.py(KRX 7구간 호가단위 헬퍼 — `get_tick_size` / `round_to_tick` / `step_down`)
 recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
@@ -65,9 +66,11 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `calc_buy_quantity()<=0` → `block_low_funds(ticker, now+LOW_FUNDS_COOLDOWN=900s)`
 - 락/cooldown은 다음 잔고 sync(15분 주기)에서 `unblock_buy()` + `clear_low_funds()`로 일괄 해제
 
-매도 (`execute_sell`):
+매도 (`execute_sell(..., limit_price=0)`):
 - `_selling` set 중복 매도 차단
+- `limit_price > 0` 이면 `OrderDivision.LIMIT` + `exchange="NXT"` 강제 라우팅 (NXT 지정가). 0 이면 시장가 + 전략 `_strategy_exchange()` 라우팅. 호가단위 정렬은 호출자가 `util.tick_size.step_down`으로 책임
 - `KisApiError(insufficient_quantity)` 시 3회 재시도 생략 + 즉시 break + 메모리 포지션 + DB positions 정리
+- **`is_market_closed_rejection(err)` (장운영시간 외 / 매매 불가 시간 / 거래시간 외)** → 재시도 중단 + `state.positions`·DB `positions`·`_selling` 모두 **보존** + 다음 거래 가능 시각에 자연 재트리거. NXT 프리/애프터가 시장가를 거부할 때 좀비 포지션 방지 (KIS 계좌엔 보유, 시스템엔 삭제되던 결함 차단)
 
 체결통보 race 가드:
 - 주문번호 매핑(`_order_qty / _order_strategy / _order_ticker / _pending_buy_orders`)은 **`place_order` 응답 직후 동기 영역에서 등록** (`await insert_trade` 진입 *전*) — 시장가 즉시체결 시 체결통보가 await 도중 도착해도 올바른 strategy로 라우팅. 누락 시 기본값 "momentum"으로 잘못 INSERT됨
@@ -103,8 +106,8 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 | `TIME_AUTO_START` | 07:45 | DB `auto_start` 우선 폴백 자동 시작 (`_is_auto_start_enabled()`) |
 | `TIME_BOOT` | 07:50 | `_boot()` — DB positions 우선 복구 → KIS 잔고 교차 검증 → 미체결 주문 복구 |
 | `TIME_PRESUBSCRIBE` | 07:55 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독 |
-| `TIME_PRE_NXT_OPEN` | 08:00 | 익일 청산 task(`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30s`) + `_confirm_breakout_open_prices(board="pre_nxt")` |
-| `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | `_confirm_breakout_open_prices(board="main")` — VB/LTV가 KRX 09:00 시가로 보드별 별도 target_price 계산 |
+| `TIME_PRE_NXT_OPEN` | 08:00 | 익일 청산 task(`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30s`) + `_confirm_breakout_open_prices(board="pre_nxt")`. **시가 수신 → 갭률 트레일링 또는 NXT 지정가(`step_down(open,1)`, `EXCG_ID_DVSN_CD=NXT`, `ORD_DVSN=00`). 시가 미수신 → `_pending_next_day_clear` set 등록 후 보류** (NXT 거래불가 종목 추론) |
+| `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | `_confirm_breakout_open_prices(board="main")` — VB/LTV가 KRX 09:00 시가로 보드별 별도 target_price 계산. 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목을 KRX 시장가로 일괄 청산 |
 | `TIME_SCAN_START` | 09:30 | 모멘텀 `scan_stocks()` + 통합 구독 |
 | `TIME_KRX_MAIN_BUY_STOP` | 15:20 | `_force_clear_main_only` — POST_NXT 미활성 전략만 청산, 활성 전략은 19:50까지 보유 |
 | `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감 → NXT 애프터 전환, 구독 유지 |
@@ -119,8 +122,9 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - 중간 시각 시작: 현재 시각 이후 스케줄부터 실행
 - `_scan_loop()`: 09:30 이후 `SCAN_INTERVAL=300s` 주기, **VB+LTV+donchian + 모든 전략 보유** 합집합 재구독 (이전엔 VB만 재구독해 swing/LTV/보유 시세 끊겨 손절 누락)
 - `_sync_positions_from_balance()`: 15분 주기. **strategy 매핑은 trade_history 직전 BUY 행에서 상속** (이전 momentum 하드코딩 결함 차단). 종료 시 `unblock_buy()` + `clear_low_funds()` 일괄 해제
-- `_execute_next_day_clear()`: 다음 영업일 NXT 프리 첫 거래 시가 + 30s 안정화 후 즉시 청산. 시가 미수신 시 `_resolve_open_price()` 폴백
-- `_reset_daily_state()`: 전략별 positions/pending_buys/sold_today + OrderEngine 추적 상태 + scanner 글로벌 dict (ticker_prices/ticker_prev_close/ticker_market_info/ticker_names → STATIC_TICKER_NAMES로 재시드) 전체 초기화
+- `_execute_next_day_clear()`: 다음 영업일 NXT 프리 첫 거래 시가 수신 후 30s 안정화 → 갭률 트레일링 또는 NXT 지정가(`step_down(open,1)`) 매도. **시가 미수신이면 `_pending_next_day_clear` set에 `(ticker, strategy_id)` 등록 후 즉시 청산 보류** — `high_since_buy` 폴백 + 갭률 0% 즉시 청산 경로는 전일 고가 혼입 결함으로 제거. `_resolve_open_price()` 폴백은 NXT 거래가능 종목 추론용으로만 유지
+- `_drain_pending_next_day_clear()`: `_confirm_breakout_open_prices(board="main")` 직후 호출. `_pending_next_day_clear` 종목을 KRX 시장가(`limit_price=0`)로 일괄 청산 → 보류 set 비움
+- `_reset_daily_state()`: 전략별 positions/pending_buys/sold_today + OrderEngine 추적 상태 + scanner 글로벌 dict (ticker_prices/ticker_prev_close/ticker_market_info/ticker_names → STATIC_TICKER_NAMES로 재시드) + `_pending_next_day_clear.clear()` 전체 초기화
 
 ## scanner.py
 
@@ -161,8 +165,9 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - 체결통보(H0STCNI0/9) 구독 제거 금지 — 미구독 시 포지션 등록 불가 → 손절 불가
 - uvicorn 단일 워커 필수 (`--workers` 금지)
 - 매수 신호는 반드시 "돌파 순간" 감지 (이전 틱 < 기준가 AND 현재 틱 ≥ 기준가)
-- 익일 청산은 scheduler에서 30s 안정화 후 처리 (`_next_day_clear_pending` 가드) — on_tick 즉시 청산 금지
-- 익일 청산 갭률은 `ticker_prices[ticker]["open_price"]`(WebSocket 시가) 사용 — `high_since_buy` 사용 금지 (전일 고가 혼입)
+- 익일 청산은 scheduler에서 시가 수신 후 30s 안정화하여 처리 (`_next_day_clear_pending` 전략 가드 + `_pending_next_day_clear` scheduler 보류 set) — on_tick 즉시 청산 금지
+- 익일 청산 갭률은 반드시 `ticker_prices[ticker]["open_price"]`(WebSocket 시가) — `high_since_buy` 폴백 금지 (전일 고가 혼입 → 갭률 0% 즉시 청산 결함). 시가 미수신이면 `_pending_next_day_clear`로 보류 후 09:00 KRX 시장가
+- NXT 프리/애프터 매도 거부(`is_market_closed_rejection`) 시 `execute_sell`이 `state.positions`·DB `positions`·`_selling` 보존 — 좀비 포지션(KIS 보유 / 시스템 미보유) 차단
 - 주문번호 매핑(`_order_qty/_order_strategy/_order_ticker/_pending_buy_orders`) 등록은 **`place_order` 응답 직후 동기 영역에서**, `await insert_trade` 진입 *전*
 - 체결통보 선행 race 가드(`_completed_orders` + UPDATE 0건 보정 INSERT) 매수·매도 양쪽 모두 필수
 - `_reset_daily_state()` / 체결통보 실패 시 `pending_buys`·`_selling` 정리 / 매도 재시도 로직 / `BUYABLE_CACHE_TTL=60s` / `BUY_BLOCK_DURATION=900s` / `LOW_FUNDS_COOLDOWN=900s` ↔ sync 주기(15분) 정합성 — 변경 시 잔고 sync 종료 시 `unblock_buy()` + `clear_low_funds()` 일괄 해제 동작 보존

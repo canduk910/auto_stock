@@ -97,7 +97,8 @@ cd frontend && npm install && npm run dev
 - **주문번호 매핑(`_order_qty/_order_strategy/_order_ticker/_pending_buy_orders`)은 `place_order` 응답 직후 동기 영역에서 등록**, `await insert_trade` 진입 전 — 시장가 즉시체결 race 시 매핑 누락하면 기본값 "momentum"으로 잘못 INSERT됨. 자동매매·수동 매도(`/api/trading/manual-sell`) 모두 동일 순서
 - **체결통보 선행 race 가드(`_completed_orders` set + UPDATE 0건 보정 INSERT) 제거 금지** — 시장가 즉시체결 + REST 응답 지연 시 trade_history가 PENDING으로 영구 잔존
 - **`_reset_daily_state()` 제거 금지** — 정산 후 미초기화 시 pending_buys/positions/sold_today가 다음 날까지 잔류
-- **익일 청산은 scheduler에서 30s 안정화 후 처리** (`_next_day_clear_pending` 가드) — on_tick 즉시 청산 금지
+- **익일 청산은 scheduler에서 시가 수신 후 30s 안정화 처리** — 시가 수신 시 NXT 지정가(`step_down(open,1)`) / 미수신 시 `_pending_next_day_clear`로 보류 후 09:00 KRX 시장가. `high_since_buy` 폴백 금지(갭률 0% 즉시 청산 결함). on_tick 즉시 청산 금지
+- **NXT 프리/애프터 매도 거부 좀비 차단** — `is_market_closed_rejection`(APBK0918 + 장운영시간 외 키워드)이면 `execute_sell`이 positions(메모리/DB) 보존 + 재시도 중단. `is_insufficient_quantity`/`is_insufficient_cash`로 잘못 분류되어 positions 삭제하던 결함 차단
 - **종목코드 형식 비대칭**: 진입은 6자리 숫자만(`ticker.isdigit()`), 사후처리는 6자리 영숫자(`isalnum()`) — ETF·신주인수권 자동매매 차단 + 좀비 포지션 방지
 - 매매 파라미터(`DEFAULT_PARAMS`) 변경 시 `_workspace/00_leader_trading_rules.md` 동기화
 

@@ -24,8 +24,9 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - 매수가능조회: TTTC8908R
 - `get_balance(afhr_flpr="N")`: `AFHR_FLPR_YN` query param. `N`(기본, 정규장) / `Y`(시간외 단일가) / `X`(NXT 정규장) — required
 - `get_daily_orders(target_date="", exchange="ALL")`: TTTC0081R 주식일별주문체결조회. `EXCG_ID_DVSN_CD` query param required — `ALL`(기본, KRX+NXT+SOR 합산) / `KRX` / `NXT` / `SOR`. KIS 명세 갱신(2026-05-08)에서 required로 강제 — NXT 체결 누락 방지 위해 기본값 ALL
-- `is_insufficient_cash(KisApiError) -> bool`: 매수 실패 응답이 '주문가능금액 부족'(예수금 부족) 사유인지 식별. msg_cd 화이트리스트 + msg1 키워드("부족" + "주문가능금액/예수금/현금") 동시 검사. OrderEngine 매수 락 결정용.
-- `is_insufficient_quantity(KisApiError) -> bool`: 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 식별. 매도 즉시 break + 메모리 포지션 정리 결정용.
+- `is_market_closed_rejection(KisApiError) -> bool`: KIS 응답이 '장운영시간 외' / '매매 불가 시간' / '거래시간 외' 류의 시간 거부인지 판단. KIS 가 동일 `msg_cd=APBK0918` 로 보유부족·자금부족·시간외 거부를 모두 내보내므로 msg1 키워드(`_MARKET_CLOSED_KEYWORDS`)로 분리. NXT 프리/애프터에서 시장가 매도가 거부될 때 이 함수가 True 면 `is_insufficient_*` 는 False 로 떨어져 positions 보존 결정에 사용된다.
+- `is_insufficient_cash(KisApiError) -> bool`: 매수 실패 응답이 '주문가능금액 부족'(예수금 부족) 사유인지 식별. msg_cd 화이트리스트(APBK0919/EGW00120) + msg1 키워드("부족" + "주문가능금액/예수금/현금") 동시 검사. `APBK0918` 은 시간외 거부와 공용이라 msg1 현금 키워드가 동반될 때만 True. OrderEngine 매수 락 결정용.
+- `is_insufficient_quantity(KisApiError) -> bool`: 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 식별. msg1 키워드("부족" + "매도가능/보유수량/잔고") 가드 + `APBK0918` 은 보유부족 키워드가 동반될 때만 True. 시간외 거부에서는 False 로 떨어져 메모리/DB positions 보존. 매도 즉시 break 결정용.
 
 ### condition.py — 조건검색 + 영업일 체크
 - 거래량순위 API로 종목 필터링 (FHPST01700000)
