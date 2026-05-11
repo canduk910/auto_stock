@@ -31,6 +31,30 @@ _MARKET_CLOSED_KEYWORDS = (
 )
 
 
+# 시장가 주문 거부 키워드.
+# msg_cd 는 운영 trace 누적 후 화이트리스트화 예정 — 현재는 msg1 키워드 기반.
+# 이 키워드에 해당하면 is_insufficient_cash / is_insufficient_quantity 는 False 를 반환해야
+# 하며(상호 배타), 매수 지정가 폴백 분기를 타게 된다.
+_MARKET_ORDER_DISALLOWED_KEYWORDS = (
+    "시장가매매불가",
+    "시장가 매매 불가",
+    "시장가 주문 불가",
+    "시장가 호가 불가",
+)
+
+
+def is_market_order_disallowed(err: KisApiError) -> bool:
+    """KIS 응답이 '시장가 주문 불가' 류의 거부인지 판단.
+
+    계양전기(012200) "시장가매매불가" 거부 대응 (2026-05-11).
+    msg_cd 는 운영 로그(Phase A1) 누적 후 화이트리스트화 — 현재는 msg1 키워드 기반.
+    기존 3종 분류(is_market_closed_rejection / is_insufficient_cash / is_insufficient_quantity)와
+    상호 배타 — 이 함수가 True 이면 다른 3종은 모두 False 를 반환한다.
+    """
+    msg1 = err.msg1 or ""
+    return any(kw in msg1 for kw in _MARKET_ORDER_DISALLOWED_KEYWORDS)
+
+
 def is_market_closed_rejection(err: KisApiError) -> bool:
     """KIS 응답이 '장운영시간 외' 류의 시간 거부인지 판단.
 

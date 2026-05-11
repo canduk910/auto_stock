@@ -70,3 +70,42 @@ def step_down(price: int, steps: int = 1) -> int:
     base = round_to_tick(price)
     result = base - unit * steps
     return max(result, 0)
+
+
+def step_up(price: int, steps: int = 1) -> int:
+    """직전가에서 N호가 상향 가격을 반환.
+
+    각 step 마다 현재 위치의 호가단위로 올라간다 — step_down 의 대칭 함수.
+
+    구간 전환 시 특례: 상위 구간 단위가 현재 단위의 5배 이상이고,
+    상위 단위 1 step 으로 정확히 구간 경계에 닿는 경우 경계로 snap 한다.
+    (KRX 7구간 테이블에서 비율 5 구간: [5000,20000)→[20000,50000) / [50000,200000)→[200000,500000))
+    이 특례로 step_down → step_up 왕복 대칭이 보장된다.
+
+    0 이하 가격 또는 steps <= 0 이면 0 반환 (안전 가드).
+    시장가 거부 시 매수 지정가 폴백(N호가 위)에 사용된다.
+    """
+    if price <= 0 or steps <= 0:
+        return 0
+    current = round_to_tick(price)
+    for _ in range(steps):
+        current_unit = get_tick_size(current)
+        # 상위 구간 경계와 단위 조회
+        upper_boundary: int | None = None
+        upper_unit: int | None = None
+        for upper, _ in _TICK_BANDS:
+            if current < upper:
+                upper_boundary = upper
+                upper_unit = get_tick_size(upper)
+                break
+        # 상위 단위 / 현재 단위 비율이 5 이상이고 상위 단위로 정확히 경계에 닿는 경우 snap
+        if (
+            upper_boundary is not None
+            and upper_unit is not None
+            and current + upper_unit == upper_boundary
+            and upper_unit // current_unit >= 5
+        ):
+            current = upper_boundary
+        else:
+            current = current + current_unit
+    return current

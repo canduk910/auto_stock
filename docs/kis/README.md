@@ -30,6 +30,12 @@
 | [장내채권] 기본시세 | 8 | [bond-quote.md](bond-quote.md) |
 | [장내채권] 실시간시세 | 3 | [bond-realtime.md](bond-realtime.md) |
 
+## 운영 부속 문서
+
+| 문서 | 설명 |
+|------|------|
+| [error-codes.md](error-codes.md) | KIS 오류 코드 통합 표 (EGW/OPSQ/OPSP + APBK 실측) + 거부 분류·후속 조치 매핑 |
+
 ## 프로젝트 사용 중 API
 
 | TR_ID | API명 | 카테고리 | URL |

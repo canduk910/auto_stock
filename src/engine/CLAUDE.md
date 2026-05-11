@@ -64,6 +64,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - 매수가능 캐시 (`BUYABLE_CACHE_TTL=60s`) — `get_buyable()` KIS 호출 매 틱 → 분당 1회
 - `max_buy_quantity<=0` 또는 `KisApiError(insufficient_cash)` → `block_buy(now+BUY_BLOCK_DURATION=900s)`
 - `calc_buy_quantity()<=0` → `block_low_funds(ticker, now+LOW_FUNDS_COOLDOWN=900s)`
+- **`KisApiError(is_market_order_disallowed)` (msg1 "시장가매매불가" 변형) → 지정가 5호가 폴백 1회** — `step_up(current_price, steps=5)` 가격으로 `OrderDivision.LIMIT` 재호출. 매핑 등록(`_order_qty/_order_strategy/_order_ticker/_pending_buy_orders`) + `_completed_orders` race 가드 + `insert_trade(PENDING, price=fallback_price)`는 시장가 경로와 동일 동기 순서. 폴백도 거부되면 `block_low_funds(ticker, now+LOW_FUNDS_COOLDOWN)` cooldown 등록. 2026-05-11 계양전기 거부 대응 (`docs/kis/error-codes.md` 4-2절). 진짜 원인은 Phase A1(`src/api/base.py`)의 `[kis_rejection]` 영구 로깅으로 다음 거부에서 자동 캡처
 - 락/cooldown은 다음 잔고 sync(15분 주기)에서 `unblock_buy()` + `clear_low_funds()`로 일괄 해제
 
 매도 (`execute_sell(..., limit_price=0)`):
@@ -168,6 +169,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - 익일 청산은 scheduler에서 시가 수신 후 30s 안정화하여 처리 (`_next_day_clear_pending` 전략 가드 + `_pending_next_day_clear` scheduler 보류 set) — on_tick 즉시 청산 금지
 - 익일 청산 갭률은 반드시 `ticker_prices[ticker]["open_price"]`(WebSocket 시가) — `high_since_buy` 폴백 금지 (전일 고가 혼입 → 갭률 0% 즉시 청산 결함). 시가 미수신이면 `_pending_next_day_clear`로 보류 후 09:00 KRX 시장가
 - NXT 프리/애프터 매도 거부(`is_market_closed_rejection`) 시 `execute_sell`이 `state.positions`·DB `positions`·`_selling` 보존 — 좀비 포지션(KIS 보유 / 시스템 미보유) 차단
+- 매수 시장가 거부(`is_market_order_disallowed`) 시 `execute_buy`가 `step_up(current_price, 5)` 지정가 1회 폴백 — 매핑 동기 등록 + 체결통보 race 가드는 시장가 경로와 동일 규약. 폴백 실패 시 `block_low_funds(ticker, 900s)` cooldown. 좀비 pending_buys 차단
 - 주문번호 매핑(`_order_qty/_order_strategy/_order_ticker/_pending_buy_orders`) 등록은 **`place_order` 응답 직후 동기 영역에서**, `await insert_trade` 진입 *전*
 - 체결통보 선행 race 가드(`_completed_orders` + UPDATE 0건 보정 INSERT) 매수·매도 양쪽 모두 필수
 - `_reset_daily_state()` / 체결통보 실패 시 `pending_buys`·`_selling` 정리 / 매도 재시도 로직 / `BUYABLE_CACHE_TTL=60s` / `BUY_BLOCK_DURATION=900s` / `LOW_FUNDS_COOLDOWN=900s` ↔ sync 주기(15분) 정합성 — 변경 시 잔고 sync 종료 시 `unblock_buy()` + `clear_low_funds()` 일괄 해제 동작 보존

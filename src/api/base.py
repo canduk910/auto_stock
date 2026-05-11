@@ -19,6 +19,7 @@ import httpx
 
 from src.auth.token import token_manager
 from src.config import settings
+from src.db import system_logs as _system_logs
 
 logger = logging.getLogger(__name__)
 
@@ -204,6 +205,30 @@ async def _request(
 
         _request_metrics["kis_error"] += 1
         logger.error("KIS API 에러: rt_cd=%s, msg_cd=%s, msg1=%s", rt_cd, msg_cd, msg1)
+
+        # 거부 응답 영구 저장 — 다음 거부부터 원인 즉시 추적 가능 (Phase A1)
+        # fire-and-forget: write_log 실패해도 KisApiError raise 흐름은 보존
+        try:
+            # 민감 키 마스킹: CANO, ACNT_PRDT_CD 제외
+            _LOG_BODY_KEYS = (
+                "PDNO", "ORD_DVSN", "ORD_UNPR", "ORD_QTY",
+                "EXCG_ID_DVSN_CD", "SLL_BUY_DVSN_CD",
+            )
+            _body_ctx: dict = {}
+            if body:
+                for _k in _LOG_BODY_KEYS:
+                    if _k in body:
+                        _body_ctx[_k] = body[_k]
+            import json as _json
+            _log_msg = (
+                f"[kis_rejection] path={path} tr_id={tr_id} "
+                f"msg_cd={msg_cd} msg1={msg1} "
+                f"body={_json.dumps(_body_ctx, ensure_ascii=False)}"
+            )
+            await _system_logs.write_log("ERROR", _log_msg)
+        except Exception:
+            pass  # 로깅 실패는 무시 — 본래 흐름 보존
+
         raise KisApiError(rt_cd, msg_cd, msg1)
 
     # 여기까지 도달하면 안 됨

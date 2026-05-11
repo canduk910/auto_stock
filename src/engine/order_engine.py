@@ -18,7 +18,9 @@ from src.api.balance import (
     is_insufficient_cash,
     is_insufficient_quantity,
     is_market_closed_rejection,
+    is_market_order_disallowed,
 )
+from src.engine.util.tick_size import step_up
 from src.api.base import KisApiError
 from src.api.order import cancel_order, place_order
 from src.db.system_logs import write_log
@@ -201,6 +203,67 @@ class OrderEngine:
                     int(BUY_BLOCK_DURATION), t(ticker), strategy.strategy_id, e.msg_cd, e.msg1,
                 )
                 return
+            if is_market_order_disallowed(e):
+                # 시장가 거부 → 지정가 5호가 폴백 1회 (시장가 의도 보존)
+                fallback_price = step_up(current_price, steps=5)
+                try:
+                    state.pending_buys.add(ticker)  # 폴백 진입 — 재등록
+                    result = await place_order(
+                        ticker=ticker,
+                        side=OrderSide.BUY,
+                        quantity=quantity,
+                        price=fallback_price,
+                        order_division=OrderDivision.LIMIT,
+                        exchange=self._strategy_exchange(strategy.strategy_id),
+                    )
+
+                    # 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
+                    # 시장가 경로와 동일한 순서 (루트 CLAUDE.md 안전 규칙 준수).
+                    self._order_qty[result.order_no] = quantity
+                    self._order_strategy[result.order_no] = strategy.strategy_id
+                    self._order_ticker[result.order_no] = ticker
+                    self._pending_buy_orders[result.order_no] = {
+                        "ticker": ticker,
+                        "price": fallback_price,
+                        "quantity": quantity,
+                        "strategy_id": strategy.strategy_id,
+                    }
+
+                    # 체결통보 선행 race 가드 (기존 시장가 경로 동일)
+                    if result.order_no in self._completed_orders:
+                        self._completed_orders.discard(result.order_no)
+                        logger.warning(
+                            "폴백 응답보다 체결통보 선행 — PENDING INSERT 생략: %s",
+                            t(ticker),
+                        )
+                    else:
+                        ticker_name = t(ticker).split("(")[0] if "(" in t(ticker) else ""
+                        record = TradeRecord(
+                            ticker=ticker,
+                            ticker_name=ticker_name,
+                            trade_type=TradeType.BUY,
+                            price=fallback_price,
+                            quantity=quantity,
+                            status=TradeStatus.PENDING,
+                            strategy=strategy.strategy_id,
+                            order_no=result.order_no,
+                        )
+                        await insert_trade(record)
+
+                    logger.warning(
+                        "시장가 거부 → 지정가 5호가 폴백: %s @ %d (원인 [%s] %s)",
+                        t(ticker), fallback_price, e.msg_cd, e.msg1,
+                    )
+                    state.cached_buyable_at = 0.0
+                    return
+                except KisApiError as e2:
+                    state.pending_buys.discard(ticker)
+                    state.block_low_funds(ticker, time.time() + LOW_FUNDS_COOLDOWN)
+                    logger.error(
+                        "지정가 폴백도 거부 → cooldown: %s ([%s] %s → [%s] %s)",
+                        t(ticker), e.msg_cd, e.msg1, e2.msg_cd, e2.msg1,
+                    )
+                    return
             raise
         except Exception:
             state.pending_buys.discard(ticker)

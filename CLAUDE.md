@@ -99,6 +99,8 @@ cd frontend && npm install && npm run dev
 - **`_reset_daily_state()` 제거 금지** — 정산 후 미초기화 시 pending_buys/positions/sold_today가 다음 날까지 잔류
 - **익일 청산은 scheduler에서 시가 수신 후 30s 안정화 처리** — 시가 수신 시 NXT 지정가(`step_down(open,1)`) / 미수신 시 `_pending_next_day_clear`로 보류 후 09:00 KRX 시장가. `high_since_buy` 폴백 금지(갭률 0% 즉시 청산 결함). on_tick 즉시 청산 금지
 - **NXT 프리/애프터 매도 거부 좀비 차단** — `is_market_closed_rejection`(APBK0918 + 장운영시간 외 키워드)이면 `execute_sell`이 positions(메모리/DB) 보존 + 재시도 중단. `is_insufficient_quantity`/`is_insufficient_cash`로 잘못 분류되어 positions 삭제하던 결함 차단
+- **매수 시장가 거부(`is_market_order_disallowed`) → 지정가 5호가 폴백 1회** — msg1 키워드(`시장가매매불가` 변형) 매칭 시 `execute_buy`가 `step_up(current_price, 5)` 가격으로 지정가(`OrderDivision.LIMIT`) 1회 재시도. 매핑 동기 등록 + 체결통보 선행 race 가드는 시장가 경로와 동일 규약. 폴백 실패 시 `block_low_funds(ticker, 900s)` cooldown 등록. 좀비 pending_buys 차단. 2026-05-11 계양전기 사례 대응 — `docs/kis/error-codes.md`
+- **KIS 거부 응답 영구 저장(Phase A1)** — `_request`가 `rt_cd != "0"` 시 `KisApiError` raise 직전에 `system_logs`에 prefix `[kis_rejection]` + path/tr_id/msg_cd/msg1 + body 주요 키(`PDNO`/`ORD_DVSN`/`ORD_UNPR`/`ORD_QTY`/`EXCG_ID_DVSN_CD`/`SLL_BUY_DVSN_CD`)를 fire-and-forget 저장. 민감 키(`CANO`/`ACNT_PRDT_CD`) 마스킹. 다음 거부 사례의 정확한 msg_cd 즉시 추적 가능
 - **종목코드 형식 비대칭**: 진입은 6자리 숫자만(`ticker.isdigit()`), 사후처리는 6자리 영숫자(`isalnum()`) — ETF·신주인수권 자동매매 차단 + 좀비 포지션 방지
 - 매매 파라미터(`DEFAULT_PARAMS`) 변경 시 `_workspace/00_leader_trading_rules.md` 동기화
 
