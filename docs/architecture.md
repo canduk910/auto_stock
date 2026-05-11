@@ -65,7 +65,8 @@ src/
 │   ├── base.py          # kis_get/kis_post (Rate Limit, 재시도, 토큰갱신)
 │   ├── order.py         # place_order, cancel_order
 │   ├── balance.py       # get_balance, get_buyable, get_daily_orders
-│   └── condition.py     # fetch_rising_stocks, fetch_stock_detail, fetch_daily_candles
+│   └── condition.py     # fetch_rising_stocks, fetch_stock_detail, fetch_daily_candles,
+│                        # inquire_stock_basics(CTPF1002R — NXT 거래가능 사전 판별)
 │
 ├── realtime/            # KIS WebSocket
 │   ├── websocket.py     # KisWebSocket (연결/구독/재연결/Heartbeat)
@@ -91,6 +92,7 @@ src/
 │   ├── positions.py         # 포지션 영속화
 │   ├── daily_performance.py # 일일 실적
 │   ├── strategy_config.py   # 전략 설정 영속화
+│   ├── stock_master.py      # CTPF1002R 캐시 (NXT 거래가능 사전 판별, 24h TTL)
 │   └── system_logs.py       # 시스템 로그
 │
 ├── routes/              # FastAPI 라우트
@@ -105,6 +107,7 @@ src/
     ├── order.py         # OrderSide, OrderResult
     ├── balance.py       # StockHolding, AccountSummary
     ├── trade.py         # TradeRecord, TradeStatus
+    ├── stock.py         # StockBasics (CTPF1002R 응답 + nxt_tradable 파생)
     └── response.py      # ApiResponse 공통 래퍼
 ```
 
@@ -520,6 +523,23 @@ on_tick(ticker, current_price)
 │ updated_at TIMESTAMPTZ   │  │ log_level VARCHAR(10)│
 └──────────────────────────┘  │ message   TEXT       │
                               └──────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│ stock_master (migration 015 — Phase G, 2026-05-11)  │
+├─────────────────────────────────────────────────────┤
+│ ticker       TEXT PK                                │
+│ name         TEXT     DEFAULT ''                    │
+│ excg_dvsn_cd TEXT     DEFAULT ''                    │
+│ nxt_tradable BOOLEAN  NOT NULL                      │
+│   (cptt_trad_tr_psbl_yn==Y AND nxt_tr_stop_yn==N)   │
+│ krx_halted   BOOLEAN  DEFAULT FALSE                 │
+│ admin_item   BOOLEAN  DEFAULT FALSE                 │
+│ raw          JSONB    DEFAULT '{}'::jsonb           │
+│ refreshed_at TIMESTAMPTZ DEFAULT now()              │
+│   (24h 초과 시 stale → CTPF1002R 재조회)            │
+├─────────────────────────────────────────────────────┤
+│ INDEX: refreshed_at                                 │
+└─────────────────────────────────────────────────────┘
 ```
 
 ---

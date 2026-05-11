@@ -21,6 +21,8 @@ STOCK_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-price"
 # 장기 일봉이 필요한 사용처에서 부족하다. 100일까지 응답하는 기간별 시세 API를 사용.
 DAILY_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
 HOLIDAY_URL = "/uapi/domestic-stock/v1/quotations/chk-holiday"
+# CTPF1002R — 주식기본조회 (Phase G, 2026-05-11). NXT 거래종목여부/정지여부 사전 조회.
+STOCK_BASICS_URL = "/uapi/domestic-stock/v1/quotations/search-stock-info"
 
 
 async def is_market_open(target_date) -> bool:
@@ -114,6 +116,43 @@ async def _fetch_fluctuation_rank() -> list[dict]:
     }
     data = await kis_get(FLUCTUATION_RANK_URL, "FHPST01700000", params)
     return data.get("output", [])
+
+
+async def inquire_stock_basics(pdno: str) -> "StockBasics":
+    """KIS CTPF1002R(주식기본조회) — 종목 기본정보 + NXT 거래가능 여부 사전 조회.
+
+    NXT 사전 판별 핵심 필드:
+    - `cptt_trad_tr_psbl_yn`  NXT 거래종목여부 (Y/N)
+    - `nxt_tr_stop_yn`        NXT 거래정지여부 (Y/N)
+    파생값: `nxt_tradable = (cptt=='Y') AND (nxt_stop=='N')`.
+
+    KIS 응답 검증 (KIS MCP 2026-05-11):
+    - 응답 output 은 dict (single-item) — list 가 아님.
+    - 모의/실전 동일 TR_ID (FH 접두사가 아닌 CTPF 도 양쪽 동일).
+    """
+    from src.models.stock import StockBasics
+
+    params = {
+        "PRDT_TYPE_CD": "300",  # 300=국내주식 (KIS CTPF1002R 명세 기본값)
+        "PDNO": pdno,
+    }
+    data = await kis_get(STOCK_BASICS_URL, "CTPF1002R", params)
+    output = data.get("output") or {}
+
+    cptt = (output.get("cptt_trad_tr_psbl_yn") or "").strip().upper()
+    nxt_stop = (output.get("nxt_tr_stop_yn") or "").strip().upper()
+    krx_stop = (output.get("tr_stop_yn") or "").strip().upper()
+    admn = (output.get("admn_item_yn") or "").strip().upper()
+
+    return StockBasics(
+        ticker=output.get("pdno") or pdno,
+        name=output.get("prdt_abrv_name") or output.get("prdt_name") or "",
+        excg_dvsn_cd=output.get("excg_dvsn_cd") or "",
+        nxt_tradable=(cptt == "Y" and nxt_stop == "N"),
+        krx_halted=(krx_stop == "Y"),
+        admin_item=(admn == "Y"),
+        raw=dict(output),
+    )
 
 
 async def fetch_stock_detail(ticker: str) -> dict:

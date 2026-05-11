@@ -22,7 +22,12 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - 프론트엔드 Settings 페이지에서 비중 조절 (예: momentum 25 / VB 35 / LTV 25 / donchian 15)
 - 총 자산을 비중에 따라 분배, 각 전략은 할당된 자금 내에서만 매매
 - 전략 간 동일 종목 중복 매수 방지 (보유 OR 주문중 OR 당일매도 통합 가드)
-- **매수 수량 1주 fallback**: `position_ratio × total_investment // current_price = 0`이라도 자금이 1주 살 수 있으면 1주 매수 (매수 신호 비중 가드 무산 방지)
+- **매수 수량 1주 fallback (전략 잔여 자금 기준, 2026-05-11 P1 격상)**: `position_ratio × total_investment // current_price = 0`이라도 **전략 잔여 자금**이 1주 살 수 있으면 1주 매수. 4개 전략 동일 규칙.
+  - **잔여 자금 = `state.total_investment` − (해당 전략 보유 포지션 `buy_price×qty` 합계 + 해당 전략 `pending_buys` 매수 예정 금액 합계)**
+  - 보유/주문중은 `strategy_id`로 격리 — 다른 전략 포지션은 자기 전략 사용액에 포함하지 않음
+  - 결함 차단: 기존 로직은 `state.total_investment >= current_price`(고정 총액)와 비교 → 동일 전략이 이미 다른 종목에 자금 90% 점유해도 1주 추가 매수 → **전략 한도 초과**. 2026-05-11 운영 사고로 노출
+  - 구현: `StrategyBase._fallback_one_share(current_price)` 공통 헬퍼로 통합 — 4개 전략(`momentum`/`volatility_breakout`/`long_tail_volatility`/`donchian_swing`) 모두 동일 메서드 호출
+  - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
 
 ### 거래소 라우팅 (전략별 `exchange` 파라미터)
 | 값 | 의미 | 비고 |
@@ -72,31 +77,46 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - **주의**: 기준은 반드시 "매수 체결가"이지 시가가 아님
 
 ### 익일 청산 (다음 영업일 NXT 프리 08:00 → NXT 거래가능 여부로 분기)
-다음 영업일 보유 종목에 대해 **NXT 거래가능 여부**로 청산 시점을 분기한다 (2026-05-11 P1(B) 변경).
+다음 영업일 보유 종목에 대해 **NXT 거래가능 여부**로 청산 시점을 분기한다 (2026-05-11 P1(B) → 2026-05-11 P1(C) 격상).
 
-#### 분기 기준 — NXT 시가 수신 여부
-KIS OpenAPI 에는 종목별 NXT 거래가능 여부를 조회하는 명시적 TR 이 확인되지 않는다.
-대안으로 **WebSocket 시가 수신 여부**로 NXT 거래 가능성을 추론한다:
-- `ticker_prices[ticker]["open_price"] > 0` (또는 `_resolve_open_price` 폴링 응답) → NXT 거래 가능 추정
+#### 분기 기준 — KIS CTPF1002R 사전 조회 (Primary) + 시가 수신 (Fallback)
+KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두 필드로 종목별 NXT 등록 여부를 사전 조회 가능**함이 확정됨:
+- `cptt_trad_tr_psbl_yn` — NXT 거래종목여부 (Y/N)
+- `nxt_tr_stop_yn` — NXT 거래정지여부 (Y/N)
+- **파생값**: `nxt_tradable = (cptt_trad_tr_psbl_yn == "Y") AND (nxt_tr_stop_yn == "N")`
+
+**Primary 판별**: `stock_master` 테이블(24h TTL 캐시) → `inquire_stock_basics(ticker)` (CTPF1002R)
+- Lazy: 매수 진입/익일 청산 직전 조회 → miss/stale 시 KIS 호출 후 upsert
+- Eager(향후): 07:50 _boot()에서 후보 일괄 갱신 (1차에서는 Lazy만)
+
+**Fallback**: stock_master 조회 실패 또는 미보강 종목 → 기존 WebSocket 시가 수신 휴리스틱 유지
+- `ticker_prices[ticker]["open_price"] > 0` (또는 `_resolve_open_price` 폴링) → NXT 거래 가능 추정
 - 시가 미수신 → NXT 거래 불가 추정
 
-#### (a) NXT 거래 가능 — 08:00 NXT 프리 지정가 청산
+#### (a) NXT 거래 가능 (`nxt_tradable=True` + 시가 수신) — 08:00 NXT 프리 지정가 청산
 - 매수 체결가 대비 +10% 이상 갭상승 → 고점 -2% 트레일링 스탑 (기존 동작 유지)
 - 갭상승 미달 → **지정가 매도** (직전가 -1호가, KRX 호가단위 적용)
   - `ORD_DVSN = "00"`(지정가), `EXCG_ID_DVSN_CD = "NXT"`
   - 호가단위: `src/engine/util/tick_size.py::step_down(current, steps=1)` — KRX 표준 7구간 (1/5/10/50/100/500/1000원)
   - **시장가 미사용 사유**: NXT 프리 시간대 시장가는 KIS 에서 거부될 수 있음
 
-#### (b) NXT 거래 불가 — 09:00 KRX 메인 시가 확정 후 시장가 청산
+#### (b) NXT 거래 불가 (`nxt_tradable=False` OR 시가 미수신) — 09:00 KRX 메인 시가 확정 후 시장가 청산
 - 08:00 시점에는 **청산 보류** (`_pending_next_day_clear` set 에 등록)
+- **NXT 등록 사전 판별이 False면 30s 안정화도 거치지 않고 즉시 보류** (불필요한 NXT 주문 시도 0)
 - 09:00 KRX 메인 시가 확정(`_confirm_breakout_open_prices(board="main")`) 직후
   `_drain_pending_next_day_clear()` 가 시장가로 일괄 정리
 - 정규장 시간대이므로 시장가 OK
 
-#### 안전성
-- **시가 미수신 시 `high_since_buy` 폴백 + 갭률 0% 즉시 청산 경로는 제거** (전일 고가 혼입으로 좀비 포지션 위험)
+#### 거래소 라우팅 사전 다운그레이드
+- `OrderEngine._strategy_exchange(strategy_id, ticker=...)` — ticker 인자 추가
+- 전략 `exchange`가 NXT/SOR 이지만 `stock_master.get(ticker).nxt_tradable=False`이면 **KRX 강제 다운그레이드**
+- `system_logs`에 `[nxt_downgrade]` prefix 1행 (strategy/ticker/원래 exchange/적용 exchange)
+
+#### 사후 보강
 - 매도 거부 시(KIS `APBK0918` + "장운영시간이 아닙니다" 등) `is_market_closed_rejection()` 가드로
   **메모리 `state.positions` 및 DB `positions` 보존** (재시도하지 않고 다음 거래 가능 시각에 자연 재트리거)
+- 거부 발생 직후 `stock_master.upsert_one(ticker, nxt_tradable=False)` 사후 보강 → 같은 종목 재 NXT 호출 방지
+- **시가 미수신 시 `high_since_buy` 폴백 + 갭률 0% 즉시 청산 경로는 제거** (전일 고가 혼입으로 좀비 포지션 위험)
 
 ### 트레일링 스탑 상세
 - NXT 프리 시가 이후 고점을 실시간 추적

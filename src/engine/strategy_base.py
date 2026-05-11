@@ -61,6 +61,10 @@ class StrategyState:
     # per-ticker 매수 수량 0 cooldown — calc_buy_quantity() == 0인 종목에 대해
     # 매 틱마다 똑같은 경고가 반복되는 로그 스팸 + 무의미 호출 차단. 잔고 sync 시 해제.
     low_funds_tickers: dict[str, float] = field(default_factory=dict)  # ticker -> 만료 epoch
+    # 매수 주문중인 종목의 예정 금액 (ticker -> 가격×수량). pending_buys(set)와 동기 라이프사이클.
+    # 1주 폴백 잔여 자금 계산에 사용 — OrderEngine.execute_buy 에서 pending_buys.add 옆에 동시 등록,
+    # pending_buys.discard 옆에 동시 정리. 시장가/지정가 폴백 양쪽 모두 동일 규약.
+    pending_buy_amounts: dict[str, int] = field(default_factory=dict)
     # 일일 매매 퍼널 — 신호→주문→체결 단계별 카운터. _reset_daily_state에서 0 초기화.
     signal_count_today: int = 0
     order_attempt_today: int = 0
@@ -173,3 +177,36 @@ class StrategyBase(ABC):
             return False
         loss_rate = self.state.daily_realized_pnl / self.state.total_investment * 100
         return loss_rate <= limit
+
+    # ------------------------------------------------------------------
+    # 자금 사용량 / 1주 폴백 공통 헬퍼 (2026-05-11 P1 — 전략 한도 초과 차단)
+    # ------------------------------------------------------------------
+    def _calc_used_funds(self) -> int:
+        """해당 전략이 이미 사용한(또는 예정된) 자금 합계.
+
+        = 보유 포지션 `buy_price × quantity` 합계
+        + 매수 주문중 `pending_buy_amounts` 합계 (pending_buys 와 동기 dict)
+
+        다른 전략의 사용액은 포함하지 않음 — strategy_id 격리.
+        """
+        held = sum(
+            pos.buy_price * pos.quantity for pos in self.state.positions.values()
+        )
+        pending = sum(self.state.pending_buy_amounts.values())
+        return held + pending
+
+    def _fallback_one_share(self, current_price: int) -> int:
+        """비중 기준 0주일 때 1주 폴백 — 전략 잔여 자금 기준.
+
+        잔여 = total_investment - _calc_used_funds()
+        잔여 >= current_price 이면 1주, 아니면 0주.
+
+        결함 차단: 기존 로직은 total_investment(고정 총액)와 직접 비교 →
+        다른 종목에 자금 거의 다 쓴 뒤에도 1주 추가 매수 → 전략 한도 초과.
+        4개 전략(momentum/volatility_breakout/long_tail_volatility/donchian_swing)
+        모두 동일 규약 — calc_buy_quantity 에서 이 메서드 호출.
+        """
+        if current_price <= 0:
+            return 0
+        remaining = self.state.total_investment - self._calc_used_funds()
+        return 1 if remaining >= current_price else 0

@@ -42,3 +42,10 @@
 - 5개 페이지 진입 검증 (route mock 인프라)
 - coverage 게이트 60% baseline (점진적 70 → 80 상향)
 - 회귀 등록/영구화 절차 정립 (`_workspace/regression/`)
+
+## Phase G — NXT 사전 판별 (CTPF1002R) — 2026-05-11
+- `inquire_stock_basics(pdno)` → CTPF1002R 응답 파싱: `cptt_trad_tr_psbl_yn` + `nxt_tr_stop_yn` Y/N 4조합 → `nxt_tradable = (Y AND N)`
+- `stock_master` 테이블 upsert + 24h staleness 판정 (`is_stale`)
+- `OrderEngine._strategy_exchange(strategy_id, ticker=None)` — ticker 인자 시 `stock_master.get(ticker).nxt_tradable=False` 면 NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` 로그 1행
+- scheduler `_execute_next_day_clear` — `nxt_tradable=False`이면 시가 폴링/안정화 거치지 않고 즉시 `_pending_next_day_clear` 등록 (NXT 주문 시도 0)
+- `execute_sell` 거부(`is_market_closed_rejection`) 후 `stock_master.upsert_one(ticker, nxt_tradable=False)` 사후 보강

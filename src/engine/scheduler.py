@@ -627,10 +627,34 @@ class TradingScheduler:
         from src.engine.scanner import t, ticker_prices
         from src.engine.util.tick_size import step_down
 
+        # Phase G (2026-05-11) — stock_master 사전 판별로 NXT 거래 불가 종목은 즉시 보류.
+        # 시가 폴링/안정화 대기를 거치지 않고 09:00 KRX 시장가 청산 경로로 직행.
+        from src.db import stock_master as _stock_master_mod
+
         for ticker, pos, strategy_id in all_next_day:
             strategy = self.registry.get(strategy_id)
             if not strategy or ticker not in strategy.state.positions:
                 continue  # 대기 중 손절로 이미 처리됨
+
+            # Phase G: stock_master 1순위 사전 차단
+            try:
+                basics = await _stock_master_mod.get(ticker)
+            except Exception:
+                basics = None
+                logger.exception("stock_master.get 실패 (시가 휴리스틱 fallback): %s", ticker)
+
+            if basics is not None and not basics.nxt_tradable:
+                # NXT 등록 안 됨 (또는 정지) — 시가 수신 무관 즉시 보류
+                self._pending_next_day_clear.add((ticker, strategy_id))
+                logger.info(
+                    "stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): "
+                    "%s (전략: %s)", t(ticker), strategy_id,
+                )
+                await write_log(
+                    "INFO",
+                    f"NXT 거래 불가 사전 판별 — 익일 청산 보류: {t(ticker)} ({strategy_id})",
+                )
+                continue
 
             gap_up_threshold = strategy.config.params.get("gap_up_threshold", 10.0)
 
@@ -641,7 +665,7 @@ class TradingScheduler:
                 # 30초 대기에도 시가 미수신 → 짧은 폴링 + KIS API 폴백
                 today_open = await self._resolve_open_price(ticker, max_wait_s=2.0)
 
-            # P1(B): NXT 시가 미수신 → NXT 거래 불가 종목으로 추정.
+            # P1(B): NXT 시가 미수신 → NXT 거래 불가 종목으로 추정 (stock_master cache miss fallback).
             # high_since_buy 폴백으로 갭률 0% 즉시 청산하던 위험 경로 제거.
             # 청산을 09:00 KRX 메인 시가 확정 이후로 보류 (_drain_pending_next_day_clear).
             if today_open <= 0:
@@ -1116,12 +1140,15 @@ class TradingScheduler:
             # 미체결 매수 주문 존재 → 해당 전략의 pending_buys에 등록
             strategy_id = db_strategy_map.get(ticker, "momentum")
             target_strategy = self.registry.get(strategy_id) or self.registry.get("momentum")
+            order_unpr = int(order.get("ord_unpr", "0"))
             if target_strategy:
                 target_strategy.state.pending_buys.add(ticker)
+                # 잔여 자금 폴백 계산용 — pending_buys 와 동기 등록 (2026-05-11 P1)
+                target_strategy.state.pending_buy_amounts[ticker] = order_unpr * rmn_qty
             order_no = order.get("odno", "")
             self.order_engine._pending_buy_orders[order_no] = {
                 "ticker": ticker,
-                "price": int(order.get("ord_unpr", "0")),
+                "price": order_unpr,
                 "quantity": rmn_qty,
                 "strategy_id": strategy_id,
             }
@@ -1430,6 +1457,7 @@ class TradingScheduler:
         for strategy in self.registry.all():
             strategy.state.positions.clear()
             strategy.state.pending_buys.clear()
+            strategy.state.pending_buy_amounts.clear()
             strategy.state.sold_today.clear()
             strategy.state.daily_realized_pnl = 0
             strategy.state.total_investment = 0

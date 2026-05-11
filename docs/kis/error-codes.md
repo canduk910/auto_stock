@@ -196,6 +196,45 @@ KIS 공식 문서에 SOR + 시장가가 NXT로 분배되어 미체결 시 NXT �
 
 `SOR`/`NXT`는 실전(real) 한정. VTS에서 `EXCG_ID_DVSN_CD=SOR` 또는 `=NXT`로 호출하면 KIS가 거부할 수 있어, 프론트엔드 Settings는 환경 인식 후 라디오를 disabled 처리한다(`frontend/src/components/Settings/ExchangeBoardRow.tsx`, `ef2993b` 커밋).
 
+### 5-3. NXT 거래가능 사전 조회 — CTPF1002R (Phase G, 2026-05-11)
+
+종목별 NXT 등록/정지 여부를 사전 조회할 수 있는 단건 API. KIS MCP 4질의 결과(2026-05-11) 확정.
+
+| 항목 | 값 |
+|------|-----|
+| TR_ID | `CTPF1002R` (모의/실전 동일 — 첫 글자 `C` 접두사) |
+| Path | `/uapi/domestic-stock/v1/quotations/search-stock-info` |
+| 본 프로젝트 함수 | `src/api/condition.py::inquire_stock_basics(pdno) -> StockBasics` |
+| Pydantic 모델 | `src/models/stock.py::StockBasics` |
+| 캐시 테이블 | `stock_master` (24h TTL, `src/db/stock_master.py`) |
+
+**NXT 사전 판별 핵심 필드 매핑 (50여 개 응답 컬럼 중 6개 사용):**
+
+| KIS 응답 키 | 의미 | 본 프로젝트 사용 |
+|-------------|------|----------------|
+| `pdno` | 종목코드 | `StockBasics.ticker` |
+| `prdt_abrv_name` | 종목약명 | `StockBasics.name` |
+| `excg_dvsn_cd` | 거래소구분코드 (02 KOSPI / 03 KOSDAQ 등) | `StockBasics.excg_dvsn_cd` |
+| `cptt_trad_tr_psbl_yn` | NXT 거래종목여부 (Y/N) | `nxt_tradable` 파생 |
+| `nxt_tr_stop_yn` | NXT 거래정지여부 (Y/N) | `nxt_tradable` 파생 |
+| `tr_stop_yn` | KRX 거래정지여부 (Y/N) | `krx_halted` |
+| `admn_item_yn` | 관리종목여부 (Y/N) | `admin_item` |
+
+**파생 규칙:** `nxt_tradable = (cptt_trad_tr_psbl_yn == "Y") AND (nxt_tr_stop_yn == "N")`
+
+**MCP 4질의 결과 (B안 채택):**
+- (Q1) 종목별 NXT 등록 사전 조회 API 존재? — 존재 (CTPF1002R)
+- (Q2) CTPF1002R / CTPF1604R 응답에 NXT 필드? — **CTPF1002R에만 있음**. CTPF1604R(상품기본조회)는 12개 필드뿐
+- (Q3) NXT 마스터 일괄 다운로드 REST API? — **없음**. 종목별 단건 조회만 → 24h 캐시 운영
+- (Q4) 단일 종목 멀티 거래소(KRX/NXT/SOR) 필드? — 단일 필드 없음. 위 두 필드 조합으로 추론
+
+**호출 경로 (3종):**
+1. **거래소 라우팅 사전 다운그레이드** — `OrderEngine._strategy_exchange_async(strategy_id, ticker=...)` → stock_master miss 시 KIS 호출 후 upsert → `nxt_tradable=False`면 NXT/SOR → KRX 강제 + `[nxt_downgrade]` 로그 1행
+2. **익일 청산 분기 사전 차단** — `scheduler._execute_next_day_clear`: `stock_master.get(ticker).nxt_tradable=False`이면 시가 폴링/안정화 거치지 않고 즉시 `_pending_next_day_clear` 등록 → 09:00 KRX 시장가 청산
+3. **거부 응답 사후 보강** — `execute_sell`이 `is_market_closed_rejection`으로 NXT 거부 받으면 `stock_master.upsert_one(ticker, nxt_tradable=False)` 즉시 반영 (NXT 시간대 한정: 08:00~09:00, 15:30~20:00). 다음 사이클부터 자동 KRX 다운그레이드
+
+**fallback 정책:** stock_master miss + KIS 호출 실패 등 모든 예외 경로는 **전략 기본 exchange 그대로** (보수적 fallback). 시가 수신 휴리스틱은 stock_master 의 2순위 보조 신호로만 유지.
+
 ---
 
 ## 6. 운영 가이드

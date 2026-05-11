@@ -29,6 +29,13 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `get_log_report(target_date)`: 단일 영업일 조회
 - 스키마 컬럼: id(uuid), target_date(unique), summary(text), findings(jsonb 배열), metrics(jsonb), model(varchar), created_at
 
+### stock_master.py — 종목 마스터 캐시 (Phase G, 2026-05-11)
+- `upsert_one(StockBasics)` / `get(ticker) -> Optional[StockBasics]` / `is_stale(ticker, max_age_hours=24) -> bool`
+- 테이블: `stock_master` (migration 015). PK `ticker`, `refreshed_at` 24h TTL
+- NXT 거래가능 사전 판별용 — `OrderEngine._strategy_exchange_async` + `scheduler._execute_next_day_clear` + `execute_sell` 거부 사후 보강 3경로에서 사용
+- 호출: 매수/매도 진입 직전 lazy 조회. miss/stale → `inquire_stock_basics` 호출 후 upsert
+- supabase 동기 호출은 모두 `asyncio.to_thread()` 위임 — 일관 정책
+
 ### parameter_recommendations.py — 전략수정 AI자문 이력
 - `insert_recommendation()`: 16:00 자문 생성 시 INSERT (status: pending). (target_date, strategy_id) unique
 - `list_recommendations(days=30)`: 최근 N일 이력 조회 (신규+처리 완료 통합)

@@ -96,6 +96,8 @@ Supabase SQL Editor에서 `supabase/migrations/` 하위 마이그레이션 파�
 011_register_donchian_swing.sql       # 20일 신고가 스윙 전략 등록
 012_recompute_prev_asset_fallback.sql # 분모 0 함정 차단
 013_daily_log_reports.sql             # 일일 로그 분석 리포트
+014_system_logs_index.sql             # system_logs 조회 인덱스
+015_stock_master.sql                  # KIS CTPF1002R 캐시 (NXT 거래가능 사전 판별, 24h TTL)
 ```
 
 ### 3. Docker Compose로 실행 (권장)
@@ -240,7 +242,8 @@ KIS_APP_SECRET=실전용_시크릿
 | 체결통보 race 가드 | 시장가 즉시체결 시 체결통보가 REST 응답보다 먼저 와도 `_completed_orders` set + 보정 INSERT로 PENDING 잔존 차단 |
 | 진입 차단 | VB/LTV `_scan_universe`의 거래량순위 후보 + `scanner.scan_stocks` 모두 `ticker.isdigit()` 검증 |
 | 보드 가드 | `RiskManager.on_tick`에서 매수 신호 평가 전 `session_tracker.is_tradable(strategy_id, params)`로 현재 활성 보드가 전략 `tradable_boards`에 포함됐는지 확인 — 비활성 보드에서는 신호 평가 자체 skip |
-| 매수 수량 1주 fallback | `position_ratio × total_investment // current_price = 0`이어도 자금이 1주는 살 수 있으면 1주 매수 — 매수 신호가 비중 가드에 막혀 무산되는 누락 방지 |
+| 매수 수량 1주 fallback (전략 잔여 자금 기준) | `position_ratio × total_investment // current_price = 0`이어도 **전략 잔여 자금**(= `total_investment` − 해당 전략 보유 `buy_price×qty` 합 − 해당 전략 `pending_buy_amounts` 합)이 1주 살 수 있으면 1주 매수. 4개 전략 모두 `StrategyBase._fallback_one_share()` 공통 헬퍼 호출. 기존 고정 `total_investment` 직접 비교 → 자금 90% 점유 후 추가 1주 매수로 **전략 한도 초과**하던 결함 차단(2026-05-11 P1) |
+| NXT 거래가능 사전 판별 (Phase G) | KIS `CTPF1002R` 응답 `cptt_trad_tr_psbl_yn=="Y" AND nxt_tr_stop_yn=="N"`로 `nxt_tradable` 파생. `stock_master` 테이블(24h TTL)에 캐시. `OrderEngine._strategy_exchange_async`가 `nxt_tradable=False`면 NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` 로그. `scheduler._execute_next_day_clear`는 1순위 판별로 사용 → 시가 폴링/안정화 거치지 않고 즉시 보류(NXT 주문 시도 0). `execute_sell`이 NXT 시간대 매도 거부 받으면 `stock_master.upsert_one(nxt_tradable=False)` 사후 보강 |
 
 ## NXT/SOR 통합 운영 (08:00~20:00)
 

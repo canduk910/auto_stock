@@ -58,13 +58,55 @@ class OrderEngine:
         self._completed_orders: set[str] = set()
 
     def _strategy_exchange(self, strategy_id: str | None) -> str:
-        """전략의 exchange 파라미터(KRX/NXT/SOR) 조회. 미지정 시 KRX."""
+        """전략의 exchange 파라미터(KRX/NXT/SOR) 조회. 미지정 시 KRX.
+
+        후방호환 동기 버전 — ticker 기반 NXT 사전 차단이 필요한 호출부는
+        `_strategy_exchange_async(strategy_id, ticker=...)` 사용.
+        """
         if not strategy_id:
             return "KRX"
         strategy = self.registry.get(strategy_id)
         if not strategy:
             return "KRX"
         return str(strategy.config.params.get("exchange", "KRX")).upper()
+
+    async def _strategy_exchange_async(
+        self, strategy_id: str | None, *, ticker: str | None = None
+    ) -> str:
+        """전략 exchange + stock_master NXT 사전 차단 (Phase G, 2026-05-11).
+
+        ticker 인자가 주어지고 `stock_master.get(ticker).nxt_tradable=False` 이면
+        NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` system_logs 1행.
+        캐시 miss / KIS 오류 시 전략 기본 exchange 그대로 (보수적 fallback).
+        """
+        base = self._strategy_exchange(strategy_id)
+        if not ticker or base == "KRX":
+            return base
+
+        try:
+            from src.db import stock_master  # lazy — 단위테스트 격리 + circular import 방지
+
+            basics = await stock_master.get(ticker)
+        except Exception:  # supabase 오류 등 — 전략 기본 유지
+            logger.exception("stock_master.get 실패 (전략 기본 exchange 유지): %s", ticker)
+            return base
+
+        if basics is None:
+            return base  # cache miss — 보수적 fallback
+
+        if basics.nxt_tradable:
+            return base
+
+        # nxt_tradable=False — KRX 강제 다운그레이드
+        try:
+            await write_log(
+                "WARNING",
+                f"[nxt_downgrade] {ticker} strategy={strategy_id} "
+                f"from={base} to=KRX reason=nxt_not_tradable",
+            )
+        except Exception:
+            pass  # 로그 실패는 본 흐름 보존
+        return "KRX"
 
     async def execute_buy(self, ticker: str, current_price: int, strategy: StrategyBase) -> None:
         """매수 주문을 실행한다."""
@@ -144,7 +186,14 @@ class OrderEngine:
             return
 
         state.pending_buys.add(ticker)
+        # 1주 폴백 잔여 자금 계산용 — pending_buys 와 동기 라이프사이클 (2026-05-11 P1)
+        state.pending_buy_amounts[ticker] = current_price * quantity
         state.order_attempt_today += 1
+
+        # exchange 결정 — stock_master 사전 차단 (Phase G). place_order 호출 전 await 로 완료.
+        buy_exchange = await self._strategy_exchange_async(
+            strategy.strategy_id, ticker=ticker
+        )
 
         try:
             result = await place_order(
@@ -152,7 +201,7 @@ class OrderEngine:
                 side=OrderSide.BUY,
                 quantity=quantity,
                 price=0,  # 시장가
-                exchange=self._strategy_exchange(strategy.strategy_id),
+                exchange=buy_exchange,
             )
 
             # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
@@ -196,6 +245,7 @@ class OrderEngine:
 
         except KisApiError as e:
             state.pending_buys.discard(ticker)
+            state.pending_buy_amounts.pop(ticker, None)
             if is_insufficient_cash(e):
                 state.block_buy(time.time() + BUY_BLOCK_DURATION)
                 logger.warning(
@@ -208,13 +258,15 @@ class OrderEngine:
                 fallback_price = step_up(current_price, steps=5)
                 try:
                     state.pending_buys.add(ticker)  # 폴백 진입 — 재등록
+                    # 폴백 가격 기준으로 예정 금액 재등록 (시장가 경로와 동일 규약)
+                    state.pending_buy_amounts[ticker] = fallback_price * quantity
                     result = await place_order(
                         ticker=ticker,
                         side=OrderSide.BUY,
                         quantity=quantity,
                         price=fallback_price,
                         order_division=OrderDivision.LIMIT,
-                        exchange=self._strategy_exchange(strategy.strategy_id),
+                        exchange=buy_exchange,
                     )
 
                     # 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
@@ -258,6 +310,7 @@ class OrderEngine:
                     return
                 except KisApiError as e2:
                     state.pending_buys.discard(ticker)
+                    state.pending_buy_amounts.pop(ticker, None)
                     state.block_low_funds(ticker, time.time() + LOW_FUNDS_COOLDOWN)
                     logger.error(
                         "지정가 폴백도 거부 → cooldown: %s ([%s] %s → [%s] %s)",
@@ -267,6 +320,7 @@ class OrderEngine:
             raise
         except Exception:
             state.pending_buys.discard(ticker)
+            state.pending_buy_amounts.pop(ticker, None)
             raise
 
     async def execute_sell(
@@ -308,10 +362,14 @@ class OrderEngine:
             OrderDivision.LIMIT if limit_price > 0 else OrderDivision.MARKET
         )
         order_unpr = limit_price if limit_price > 0 else 0
-        # 지정가 NXT 청산은 거래소도 NXT 로 강제 (전략 기본 exchange 무관)
-        target_exchange = (
-            "NXT" if limit_price > 0 else self._strategy_exchange(strategy_id)
-        )
+        # 지정가 NXT 청산은 거래소도 NXT 로 강제 (전략 기본 exchange 무관).
+        # 시장가 청산은 stock_master 사전 차단(NXT/SOR → KRX) 적용 — Phase G.
+        if limit_price > 0:
+            target_exchange = "NXT"
+        else:
+            target_exchange = await self._strategy_exchange_async(
+                strategy_id, ticker=ticker
+            )
         for attempt in range(1, SELL_MAX_RETRIES + 1):
             try:
                 result = await place_order(
@@ -373,6 +431,40 @@ class OrderEngine:
                         f"매도 거부(장운영시간 외) — 포지션 보존: {t(ticker)} "
                         f"(전략: {strategy_id}, [{e.msg_cd}] {e.msg1})",
                     )
+                    # 사후 보강 (Phase G): NXT 거래 불가 종목으로 추정 → stock_master 에 즉시 반영.
+                    # 다음 사이클에서 _strategy_exchange_async 가 KRX 로 사전 다운그레이드.
+                    # NXT 시간대(08:00~09:00, 15:30~20:00) 거부에서만 적용 — KRX 정규장 거부는 보강하지 않음.
+                    try:
+                        from datetime import datetime, time as _dtime
+                        now_t = datetime.now().time()
+                        is_nxt_window = (
+                            _dtime(8, 0) <= now_t < _dtime(9, 0)
+                            or _dtime(15, 30) <= now_t < _dtime(20, 0)
+                        )
+                        if is_nxt_window:
+                            from src.db import stock_master
+                            existing = await stock_master.get(ticker)
+                            existing_raw = existing.raw if existing else {}
+                            existing_name = existing.name if existing else ""
+                            existing_excg = existing.excg_dvsn_cd if existing else ""
+                            from src.models.stock import StockBasics
+                            await stock_master.upsert_one(
+                                StockBasics(
+                                    ticker=ticker,
+                                    name=existing_name,
+                                    excg_dvsn_cd=existing_excg,
+                                    nxt_tradable=False,
+                                    krx_halted=existing.krx_halted if existing else False,
+                                    admin_item=existing.admin_item if existing else False,
+                                    raw=existing_raw,
+                                )
+                            )
+                            logger.info(
+                                "stock_master 사후 보강: %s nxt_tradable=False (거부 응답 기반)",
+                                ticker,
+                            )
+                    except Exception:
+                        logger.exception("stock_master 사후 보강 실패: %s", ticker)
                     return  # positions / DB 보존, 다음 trigger 대기
                 # 2) 진짜 보유 부족(APBK1234 등) — 기존 동작 유지
                 if is_insufficient_quantity(e):
@@ -444,6 +536,7 @@ class OrderEngine:
                     strat = self.registry.get(sid)
                     if strat:
                         strat.state.pending_buys.discard(pending_info["ticker"])
+                        strat.state.pending_buy_amounts.pop(pending_info["ticker"], None)
                         logger.warning("체결통보 매핑 실패 → pending_buys 제거: %s (전략: %s)", pending_info["ticker"], sid)
                 return
             logger.warning("체결통보: 주문번호 %s에 대한 종목 매핑 없음, payload ticker 사용: %s", order_no, ticker)
@@ -490,8 +583,9 @@ class OrderEngine:
             pos.quantity = total_filled
             pos.buy_price = price
 
-        # pending_buys에서 제거
+        # pending_buys에서 제거 + 예정 금액 정리 (잔여 자금 폴백 계산용 동기 dict)
         state.pending_buys.discard(ticker)
+        state.pending_buy_amounts.pop(ticker, None)
         # _pending_buy_orders 정리
         self._pending_buy_orders.pop(order_no, None)
 

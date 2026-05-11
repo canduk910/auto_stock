@@ -31,12 +31,13 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - `is_insufficient_quantity(KisApiError) -> bool`: 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 식별. msg1 키워드("부족" + "매도가능/보유수량/잔고") 가드 + `APBK0918` 은 보유부족 키워드가 동반될 때만 True. 시간외 거부에서는 False 로 떨어져 메모리/DB positions 보존. 매도 즉시 break 결정용.
 - `is_market_order_disallowed(KisApiError) -> bool`: KIS 응답이 '시장가매매불가' 류의 거부인지 판단. msg1 키워드(`_MARKET_ORDER_DISALLOWED_KEYWORDS`: "시장가매매불가" / "시장가 매매 불가" / "시장가 주문 불가" / "시장가 호가 불가")로 매칭. 기존 3종 분류와 **상호 배타** — 이 함수가 True 이면 다른 3종은 모두 False. `execute_buy`가 이 거부에 대해 `step_up(current_price, 5)` 가격으로 지정가 1회 폴백을 시도한다. msg_cd 는 운영 trace 누적 후 화이트리스트화 예정. 2026-05-11 계양전기 사례 대응 (`docs/kis/error-codes.md` 4-2절).
 
-### condition.py — 조건검색 + 영업일 체크
+### condition.py — 조건검색 + 영업일 체크 + 종목 기본정보
 - 거래량순위 API로 종목 필터링 (FHPST01700000)
 - 시총/거래대금 필터 적용
 - `is_market_open(date)`: KIS chk-holiday API(CTCA0903R)로 개장일 여부 (`opnd_yn == "Y"`)
 - `next_trading_day(after_date)`: 다음 개장일 조회 (휴일 다음날 자동 산정)
 - `fetch_daily_candles(ticker, days)`: 일봉 N영업일치 조회. **`FHKST03010100`(`/quotations/inquire-daily-itemchartprice`, 모의/실전 동일 TR_ID) 사용 — 단일 호출당 최대 100일 응답**. 이전 `FHKST01010400`(`inquire-daily-price`)은 약 30일로만 응답이 제한되어 60일 EMA 사용처(donchian_swing)에서 모든 종목이 길이 컷에 탈락하던 결함을 차단. 응답은 `output2` 배열(최신순), `stck_bsop_date`가 비어있는 placeholder 행은 제거하여 반환. 달력일 윈도우는 영업일/달력일 비율(5/7) + 마진 = `days + days//2 + 10`
+- **`inquire_stock_basics(pdno) -> StockBasics`** (Phase G, 2026-05-11): KIS `CTPF1002R` 주식기본조회 — NXT 거래종목여부(`cptt_trad_tr_psbl_yn`) + NXT 거래정지여부(`nxt_tr_stop_yn`) + KRX 정지(`tr_stop_yn`) + 관리종목(`admn_item_yn`) 파싱 후 `src.models.stock.StockBasics` 반환. 파생값 `nxt_tradable = (cptt=="Y") AND (nxt_stop=="N")`. CTPF 접두사 TR_ID 는 모의/실전 동일. 캐시는 `src.db.stock_master` (24h TTL). `docs/kis/error-codes.md` 5-3절 필드 매핑 표 참조
 
 ## 새 API 추가 절차
 1. `docs/kis/{category}.md`에서 TR_ID, URL, 파라미터 확인

@@ -427,8 +427,9 @@ class VolatilityBreakoutStrategy(StrategyBase):
     def calc_buy_quantity(self, current_price: int) -> int:
         """할당 자금의 position_ratio 비중으로 매수 수량 계산.
 
-        비중 기준 0주이지만 신호가 이미 발생한 상태에서 자금이 1주는 살 수 있으면
+        비중 기준 0주이지만 신호가 이미 발생한 상태에서 잔여 자금이 1주는 살 수 있으면
         1주 매수 — 매수 기회 누락 방지(고가 종목이라 비중 가드에 막혀도 신호 우선).
+        StrategyBase._fallback_one_share 공통 헬퍼 — 4개 전략 동일.
         """
         if current_price <= 0:
             return 0
@@ -437,6 +438,4 @@ class VolatilityBreakoutStrategy(StrategyBase):
         qty = amount // current_price
         if qty > 0:
             return qty
-        if self.state.total_investment >= current_price:
-            return 1
-        return 0
+        return self._fallback_one_share(current_price)

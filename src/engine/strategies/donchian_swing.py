@@ -446,7 +446,7 @@ class DonchianSwingStrategy(StrategyBase):
         return []
 
     def calc_buy_quantity(self, current_price: int) -> int:
-        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 1주 살 수 있으면 1주 매수."""
+        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 잔여 자금이 1주 살 수 있으면 1주."""
         if current_price <= 0:
             return 0
         ratio = self.config.params["position_ratio"]
@@ -454,6 +454,4 @@ class DonchianSwingStrategy(StrategyBase):
         qty = amount // current_price
         if qty > 0:
             return qty
-        if self.state.total_investment >= current_price:
-            return 1
-        return 0
+        return self._fallback_one_share(current_price)

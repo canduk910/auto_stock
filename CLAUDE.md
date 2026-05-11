@@ -101,7 +101,9 @@ cd frontend && npm install && npm run dev
 - **NXT 프리/애프터 매도 거부 좀비 차단** — `is_market_closed_rejection`(APBK0918 + 장운영시간 외 키워드)이면 `execute_sell`이 positions(메모리/DB) 보존 + 재시도 중단. `is_insufficient_quantity`/`is_insufficient_cash`로 잘못 분류되어 positions 삭제하던 결함 차단
 - **매수 시장가 거부(`is_market_order_disallowed`) → 지정가 5호가 폴백 1회** — msg1 키워드(`시장가매매불가` 변형) 매칭 시 `execute_buy`가 `step_up(current_price, 5)` 가격으로 지정가(`OrderDivision.LIMIT`) 1회 재시도. 매핑 동기 등록 + 체결통보 선행 race 가드는 시장가 경로와 동일 규약. 폴백 실패 시 `block_low_funds(ticker, 900s)` cooldown 등록. 좀비 pending_buys 차단. 2026-05-11 계양전기 사례 대응 — `docs/kis/error-codes.md`
 - **KIS 거부 응답 영구 저장(Phase A1)** — `_request`가 `rt_cd != "0"` 시 `KisApiError` raise 직전에 `system_logs`에 prefix `[kis_rejection]` + path/tr_id/msg_cd/msg1 + body 주요 키(`PDNO`/`ORD_DVSN`/`ORD_UNPR`/`ORD_QTY`/`EXCG_ID_DVSN_CD`/`SLL_BUY_DVSN_CD`)를 fire-and-forget 저장. 민감 키(`CANO`/`ACNT_PRDT_CD`) 마스킹. 다음 거부 사례의 정확한 msg_cd 즉시 추적 가능
+- **NXT 거래가능 사전 판별(Phase G, 2026-05-11)** — KIS `CTPF1002R` 응답 `cptt_trad_tr_psbl_yn=="Y" AND nxt_tr_stop_yn=="N"`로 `nxt_tradable` 파생. `stock_master` 테이블(24h TTL) 캐시 → `OrderEngine._strategy_exchange_async(strategy_id, ticker=...)`가 `nxt_tradable=False` 시 NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` 로그. `scheduler._execute_next_day_clear`는 1순위 판별로 사용 → 시가 폴링/안정화 거치지 않고 즉시 `_pending_next_day_clear` 등록(NXT 주문 시도 0). `execute_sell`이 `is_market_closed_rejection` NXT 시간대 거부 받으면 `stock_master.upsert_one(ticker, nxt_tradable=False)` 사후 보강 — 다음 사이클부터 자동 다운그레이드. `docs/kis/error-codes.md` 5-3절
 - **종목코드 형식 비대칭**: 진입은 6자리 숫자만(`ticker.isdigit()`), 사후처리는 6자리 영숫자(`isalnum()`) — ETF·신주인수권 자동매매 차단 + 좀비 포지션 방지
+- **1주 폴백은 전략 잔여 자금 기준(2026-05-11 P1)** — 4개 전략 `calc_buy_quantity()`는 `StrategyBase._fallback_one_share(current_price)` 공통 헬퍼 사용. 잔여 = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`. 결함 차단: 고정 `total_investment`와 직접 비교 → 자금 90% 점유 후 1주 추가 매수 → 전략 한도 초과(2026-05-11 운영 사고). `pending_buy_amounts`는 OrderEngine에서 `pending_buys.add` 옆 동기 등록(시장가/지정가 폴백/boot 복구) + `pending_buys.discard` 옆 동시 정리(체결/거부/실패/체결통보 매핑 실패) + `_reset_daily_state()` clear
 - 매매 파라미터(`DEFAULT_PARAMS`) 변경 시 `_workspace/00_leader_trading_rules.md` 동기화
 
 ### 코딩 컨벤션
@@ -125,6 +127,7 @@ cd frontend && npm install && npm run dev
 | `system_logs` | 시스템 로그 |
 | `parameter_recommendations` | 19:50 AI자문 (target_date+strategy_id unique) |
 | `daily_log_reports` | 20:10 일일 로그 분석 (target_date unique, metrics에 api_metrics/strategy_funnel/by_ticker_pnl/by_hour_pnl 포함) |
+| `stock_master` | KIS CTPF1002R 캐시 (ticker PK, 24h TTL). NXT 거래가능 사전 판별 (migration 015) |
 
 ## Docker / 배포
 

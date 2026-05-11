@@ -287,3 +287,84 @@ async def test_execute_buy_when_insufficient_cash_then_no_fallback_and_block_buy
 
     # PENDING INSERT 없음
     assert mock_insert_trade.await_count == 0
+
+
+# ---------------------------------------------------------------------------
+# 회귀 — pending_buy_amounts 동기 라이프사이클 (2026-05-11 P1 잔여 자금 폴백 가드)
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_execute_buy_when_market_success_then_pending_amount_registered(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """시장가 성공 — pending_buy_amounts[ticker] = current_price × quantity."""
+    mock_place_order.return_value = _success_result("ORDER-PA-1")
+
+    await engine.execute_buy("012200", 4500, strategy)
+
+    # 동기 등록: ticker → 4500 × 10 = 45000
+    assert strategy.state.pending_buy_amounts.get("012200") == 45_000
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_when_fallback_success_then_pending_amount_uses_fallback_price(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """지정가 폴백 성공 — pending_buy_amounts[ticker]는 폴백 가격 기준 재계산."""
+    from src.engine.util.tick_size import step_up
+
+    current_price = 4500
+    expected_fallback = step_up(current_price, steps=5)
+
+    market_reject = KisApiError(rt_cd="1", msg_cd="UNKNOWN", msg1="시장가매매불가 종목입니다.")
+    mock_place_order.side_effect = [market_reject, _success_result("ORDER-PA-2")]
+
+    await engine.execute_buy("012200", current_price, strategy)
+
+    # 폴백 가격 × 수량 으로 재등록
+    assert strategy.state.pending_buy_amounts.get("012200") == expected_fallback * 10
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_when_both_rejected_then_pending_amount_cleared(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """시장가+폴백 모두 거부 — pending_buy_amounts 도 함께 정리 (pending_buys 동기)."""
+    market_reject = KisApiError(rt_cd="1", msg_cd="UNKNOWN", msg1="시장가매매불가 종목입니다.")
+    limit_reject = KisApiError(rt_cd="1", msg_cd="UNKNOWN", msg1="해당 가격으로 매매 불가.")
+    mock_place_order.side_effect = [market_reject, limit_reject]
+
+    await engine.execute_buy("012200", 4500, strategy)
+
+    # pending_buys 회수 시 pending_buy_amounts 도 동시 정리
+    assert "012200" not in strategy.state.pending_buys
+    assert "012200" not in strategy.state.pending_buy_amounts
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_when_insufficient_cash_then_pending_amount_cleared(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """자금부족 거부 — pending_buys 회수와 동시에 pending_buy_amounts 정리."""
+    cash_reject = KisApiError(rt_cd="1", msg_cd="APBK0919", msg1="주문가능금액이 부족합니다.")
+    mock_place_order.side_effect = [cash_reject]
+
+    await engine.execute_buy("012200", 4500, strategy)
+
+    assert "012200" not in strategy.state.pending_buys
+    assert "012200" not in strategy.state.pending_buy_amounts
