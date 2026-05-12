@@ -50,7 +50,25 @@ def _from_row(row: dict) -> StockBasics:
 
 
 async def upsert_one(basics: StockBasics) -> None:
-    """단건 upsert — refreshed_at 은 현재 UTC 시각으로 자동 세팅."""
+    """단건 upsert — refreshed_at 은 현재 UTC 시각으로 자동 세팅.
+
+    Phase G2 (2026-05-13) 이중 안전망: 호출자가 KIS pdno 12자리 형식 (`00000A000100`)
+    을 넘기더라도 6자리 KRX 단축코드로 정규화 후 저장한다. `inquire_stock_basics`
+    경로 외 마이그레이션 스크립트/수동 보강 등에서 잘못된 형식이 들어와도 PK
+    정합성 (positions.ticker = 6자리) 을 보장.
+    """
+    # 6자리 숫자가 아니면 정규화 시도 (defense in depth — 호출자 경로 무관)
+    if basics.ticker and not (len(basics.ticker) == 6 and basics.ticker.isdigit()):
+        from src.api.condition import _normalize_ticker
+
+        normalized = _normalize_ticker(basics.ticker)
+        if normalized and normalized != basics.ticker:
+            logger.warning(
+                "stock_master.upsert: ticker 정규화 %s → %s (KIS pdno 형식 결함 차단)",
+                basics.ticker, normalized,
+            )
+            basics = basics.model_copy(update={"ticker": normalized})
+
     row = _to_row(basics)
     await asyncio.to_thread(
         lambda: supabase.table(TABLE_NAME).upsert(row, on_conflict="ticker").execute()
