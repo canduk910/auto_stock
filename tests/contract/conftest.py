@@ -171,6 +171,9 @@ def contract_env(monkeypatch):
     monkeypatch.setattr(
         "src.routes.recommendations.save_params", fake_save_params, raising=False,
     )
+    monkeypatch.setattr(
+        "src.routes.recommendations.save_weights", fake_save_weights, raising=False,
+    )
 
     # ---- supabase (auto-start 라우트 직접 호출) ----
     class _FakeSupaResult:
@@ -207,15 +210,20 @@ def contract_env(monkeypatch):
             (r for r in state.recommendations if r.get("id") == rec_id), None
         )
 
-    async def fake_update_status(rec_id, status, applied_params=None):
+    async def fake_update_status(rec_id, status, applied_params=None, applied_weight=None):
         calls.update_rec_status.append({
-            "rec_id": rec_id, "status": status, "applied_params": applied_params,
+            "rec_id": rec_id,
+            "status": status,
+            "applied_params": applied_params,
+            "applied_weight": applied_weight,
         })
         for r in state.recommendations:
             if r.get("id") == rec_id:
                 r["status"] = status
                 if applied_params is not None:
                     r["applied_params"] = applied_params
+                if applied_weight is not None:
+                    r["applied_weight"] = applied_weight
                 return r
         return None
 

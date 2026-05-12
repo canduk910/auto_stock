@@ -4,6 +4,7 @@ import { getStrategies, updateStrategyWeights, updateStrategyParams } from '../a
 import type { StrategyParamValue } from '../api/trading'
 import apiClient from '../api/client'
 import { getStrategyColor } from '../types/strategy'
+import CashUsageRatioCard from '../components/CashUsageRatioCard'
 import ConfirmModal from '../components/ConfirmModal'
 import InfoTooltip from '../components/InfoTooltip'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
@@ -86,6 +87,13 @@ export default function Settings() {
 
   const strategies = data.strategies
   const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0)
+  // 가용금액 슬라이더 노출용 — 전략별 total_investment 합산 (registry.allocate_funds 결과).
+  // 정확한 순자산은 `/api/balance::summary.net_asset` 이지만 Settings 페이지에서 새 API 호출을
+  // 추가하지 않고 이미 fetch 한 strategies 응답으로 추정. 0 이면 카드는 카드만 표시.
+  const netAssetEstimate = strategies.reduce(
+    (sum, s) => sum + (s.total_investment ?? 0),
+    0,
+  )
 
   const handleWeightChange = (key: string, value: number) => {
     setWeights((prev) => {
@@ -288,6 +296,9 @@ export default function Settings() {
           </>
         )}
       </div>
+
+      {/* J3 (2026-05-12) — 매매 가용 자금 비율 */}
+      <CashUsageRatioCard netAsset={netAssetEstimate > 0 ? netAssetEstimate : undefined} />
 
       {/* 전략별 파라미터 */}
       <div className="space-y-4">

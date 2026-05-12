@@ -23,4 +23,8 @@ class RecommendationItem(BaseModel):
 
 
 class ApplyRequest(BaseModel):
-    keys: list[str]
+    keys: list[str] = []
+    # Phase J4 (2026-05-12) — recommended_weight 적용 토글.
+    # True 이면 strategy_config.weight 를 recommended_weight 로 갱신.
+    # recommended_weight 가 null 이면 400 반환.
+    apply_weight: bool = False

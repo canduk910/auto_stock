@@ -29,6 +29,12 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `get_log_report(target_date)`: 단일 영업일 조회
 - 스키마 컬럼: id(uuid), target_date(unique), summary(text), findings(jsonb 배열), metrics(jsonb), model(varchar), created_at
 
+### system_config.py — 시스템 설정 키-값 헬퍼
+- `get_cash_usage_ratio() -> float` / `set_cash_usage_ratio(ratio: float) -> None` (J3, 2026-05-12)
+- 키 `cash_usage_ratio`, JSONB 값 `{"value": float}`. 범위 [0.5, 1.0], 5% 단위 자동 보정. 미설정 시 기본 1.0
+- scheduler `_boot()` 가 `summary.net_asset × ratio` 로 `allocate_funds()` 호출 — 변경은 다음 영업일 _boot 부터 반영
+- 범위 외 입력은 ValueError. supabase 동기 호출은 `asyncio.to_thread` 위임
+
 ### stock_master.py — 종목 마스터 캐시 (Phase G, 2026-05-11)
 - `upsert_one(StockBasics)` / `get(ticker) -> Optional[StockBasics]` / `is_stale(ticker, max_age_hours=24) -> bool`
 - 테이블: `stock_master` (migration 015). PK `ticker`, `refreshed_at` 24h TTL
@@ -41,8 +47,9 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `insert_recommendation()`: 16:00 자문 생성 시 INSERT (status: pending). (target_date, strategy_id) unique
 - `list_recommendations(days=30)`: 최근 N일 이력 조회 (신규+처리 완료 통합)
 - `get_recommendation(id)`: 단일 자문 상세
-- `update_recommendation_status(id, status, applied_params=...)`: status 갱신 + applied_at/rejected_at 자동 기록
+- `update_recommendation_status(id, status, applied_params=..., applied_weight=...)`: status 갱신 + applied_at/rejected_at 자동 기록. **J4(2026-05-12)** — `applied_weight` 키워드 추가, applied/partial 상태에서만 페이로드 포함
 - `expire_pending_before(target_date)`: 이전 pending 레코드를 expired로 일괄 마킹
+- **J4 신규 컬럼 (migration 016)**: `recommended_weight` NUMERIC nullable / `code_review_notes` TEXT nullable (≤2000자) / `applied_weight` NUMERIC nullable. INSERT 시점 applied_weight 는 None, apply 라우트가 사용자 명시 토글일 때만 채움
 
 ## DB 스키마
 - `supabase/migrations/001_init.sql`에 정의

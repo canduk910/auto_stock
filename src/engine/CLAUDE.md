@@ -111,7 +111,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 | 상수 | 시각 | 동작 |
 |------|------|------|
 | `TIME_AUTO_START` | 07:45 | DB `auto_start` 우선 폴백 자동 시작 (`_is_auto_start_enabled()`) |
-| `TIME_BOOT` | 07:50 | `_boot()` — DB positions 우선 복구 → KIS 잔고 교차 검증 → 미체결 주문 복구 → **`_eager_refresh_stock_master_for_held_positions()` (I3, 2026-05-12)** 보유 + 익일청산 후보 ticker 를 stock_master 에 eager 갱신. Phase G lazy 한계(캐시 miss → SOR/NXT 그대로 발사) 차단. 2026-05-12 계양전기 NEXT_DAY_CLEAR SOR 거부 사례 대응. 6자리 영숫자 필터, sequential await, 24h TTL fresh 면 skip, 종목별 예외 흡수 |
+| `TIME_BOOT` | 07:50 | `_boot()` — DB positions 우선 복구 → KIS 잔고 교차 검증 → 미체결 주문 복구 → **`_eager_refresh_stock_master_for_held_positions()` (I3, 2026-05-12)** 보유 + 익일청산 후보 ticker 를 stock_master 에 eager 갱신. Phase G lazy 한계(캐시 miss → SOR/NXT 그대로 발사) 차단. 2026-05-12 계양전기 NEXT_DAY_CLEAR SOR 거부 사례 대응. 6자리 영숫자 필터, sequential await, 24h TTL fresh 면 skip, 종목별 예외 흡수. **`cash_usage_ratio` 곱셈 (J3, 2026-05-12)**: `summary.net_asset` 산출 직후 `get_cash_usage_ratio()` 조회 → `int(net_asset × ratio)` 로 `allocate_funds()` 호출. `[cash_usage_ratio]` prefix system_logs 1행. 변경은 다음 영업일 _boot 부터 반영 |
 | `TIME_PRESUBSCRIBE` | 07:55 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독 |
 | `TIME_PRE_NXT_OPEN` | 08:00 | 익일 청산 task(`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30s`) + `_confirm_breakout_open_prices(board="pre_nxt")`. **시가 수신 → 갭률 트레일링 또는 NXT 지정가(`step_down(open,1)`, `EXCG_ID_DVSN_CD=NXT`, `ORD_DVSN=00`). 시가 미수신 → `_pending_next_day_clear` set 등록 후 보류** (NXT 거래불가 종목 추론) |
 | `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | `_confirm_breakout_open_prices(board="main")` — VB/LTV가 KRX 09:00 시가로 보드별 별도 target_price 계산. 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목을 KRX 시장가로 일괄 청산 |
@@ -164,6 +164,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `(target_date, strategy_id)` UNIQUE
 - `/api/recommendations/{id}/apply`: 사용자 키 선택 적용 → `strategy_config.params` 갱신 + status applied/partial
 - `expire_pending_before(target_date)`: 이전 영업일 pending 자동 만료
+- **J4 (2026-05-12) AI자문 고도화** — `_validate_recommendations` 4-tuple 반환 `(validated_params, reasoning, weight, notes)`. user_payload 에 `current_weight` + `peer_weights` + `peer_metrics` 추가해 자산배정 자문(`recommended_weight` 0.0~1.0) + 로직 자유 텍스트 자문(`code_review_notes` ≤ 2000자) 컨텍스트 제공. peer metrics 는 사전 일괄 수집 후 자기 제외 dict 전달 — N²번 API 호출 차단. apply 라우트가 `apply_weight=true` 옵션을 받으면 `save_weights({sid: w})` + `strategy.config.weight` 메모리 반영 + `applied_weight` 트래킹. `allocate_funds()` 즉시 재호출 금지 — 다음 _boot 에서 자연 반영
 
 ## 새 전략 추가
 1. `strategies/` 에 `StrategyBase` 서브클래스 (`prepare/check_buy_signal/check_exit_signal/calc_buy_quantity`)

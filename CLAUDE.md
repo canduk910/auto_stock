@@ -87,6 +87,7 @@ cd frontend && npm install && npm run dev
 - 프론트 Settings → `PUT /api/strategies/weights` → `StrategyRegistry.allocate_funds()`
 - `position_ratio`는 **전략 할당 자금 기준** (순자산 × 전략비중 × position_ratio = 종목당 매수금액)
 - 전략 간 동일 종목 중복 매수 방지: `registry.is_ticker_blocked_for_buy()` (보유/주문중/당일매도 통합 차단)
+- **`cash_usage_ratio` (J3, 2026-05-12)**: `system_config.cash_usage_ratio` 키 — `_boot()` 가 `summary.net_asset × ratio` 로 `allocate_funds()` 호출. 범위 [0.5, 1.0], 5% 단위, 기본 1.0. Settings 슬라이더로 조정, **다음 영업일부터 반영**
 
 ## 핵심 안전 규칙 (절대 깨지 말 것)
 
@@ -129,9 +130,9 @@ cd frontend && npm install && npm run dev
 | `daily_performance` | 일일 실적 (date+strategy 복합PK, TWR 누적) |
 | `positions` | 보유 포지션 영속화 (ticker PK) |
 | `strategy_config` | 전략 설정 (strategy_id PK, params JSONB) |
-| `system_config` | 시스템 설정 (auto_start 등) |
+| `system_config` | 시스템 설정 (auto_start, **cash_usage_ratio** J3 등) |
 | `system_logs` | 시스템 로그 |
-| `parameter_recommendations` | 19:50 AI자문 (target_date+strategy_id unique) |
+| `parameter_recommendations` | 19:50 AI자문 (target_date+strategy_id unique). **J4(2026-05-12)** — `recommended_weight`/`code_review_notes`/`applied_weight` 3컬럼 추가 (migration 016). 자산배정 + 로직 자유 텍스트 자문, 자동 적용 없음 |
 | `daily_log_reports` | 20:10 일일 로그 분석 (target_date unique, metrics에 api_metrics/strategy_funnel/by_ticker_pnl/by_hour_pnl 포함) |
 | `stock_master` | KIS CTPF1002R 캐시 (ticker PK, 24h TTL). NXT 거래가능 사전 판별 (migration 015) |
 

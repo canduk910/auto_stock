@@ -32,4 +32,9 @@ export interface RecommendationItem {
   metrics: RecommendationMetrics | null
   applied_at: string | null
   rejected_at: string | null
+  // Phase J4 (2026-05-12) — AI자문 고도화
+  // 자동 적용 없음 — 모두 운영자 수동 검토 후 명시적 apply
+  recommended_weight?: number | null  // AI 추천 전략 weight (0.0~1.0). null = 변경 권고 없음
+  code_review_notes?: string | null    // 로직/파라미터 자유 텍스트 자문 (최대 2000자)
+  applied_weight?: number | null       // 사용자가 apply 시점에 실제 적용한 weight (트래킹)
 }

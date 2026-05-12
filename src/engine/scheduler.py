@@ -20,6 +20,7 @@ from datetime import date, datetime, time, timedelta
 from src.api.balance import get_balance, get_daily_orders
 from src.auth.token import token_manager
 from src.db.daily_performance import get_latest_performance, recompute_from_trades, upsert_daily_performance
+from src.db.system_config import get_cash_usage_ratio
 from src.db.system_logs import write_log
 from src.engine.order_engine import OrderEngine
 from src.engine.risk import RiskManager
@@ -1055,8 +1056,20 @@ class TradingScheduler:
 
         holdings, summary = await get_balance()
 
-        # 전략별 자금 분배
-        self.registry.allocate_funds(summary.net_asset)
+        # J3 (2026-05-12): 매매 가용 자금 비율 적용 — `system_config.cash_usage_ratio`.
+        # 변경 즉시 적용 안 함, 다음 _boot() 부터 반영. Settings UI 안내 "다음 영업일부터 반영".
+        ratio = await get_cash_usage_ratio()
+        available_for_trading = int(summary.net_asset * ratio)
+        self.registry.allocate_funds(available_for_trading)
+        logger.info(
+            "[cash_usage_ratio] net_asset=%d ratio=%.2f available=%d",
+            summary.net_asset, ratio, available_for_trading,
+        )
+        await write_log(
+            "INFO",
+            f"[cash_usage_ratio] net_asset={summary.net_asset} "
+            f"ratio={ratio:.2f} available={available_for_trading}",
+        )
 
         # 전략별 prepare 호출
         for strategy in self.registry.enabled():

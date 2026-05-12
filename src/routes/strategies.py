@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from src.db.supabase import supabase
+from src.db.system_config import get_cash_usage_ratio, set_cash_usage_ratio
 from src.engine.scheduler import trading_scheduler
 from src.models.response import ApiResponse
 
@@ -125,3 +126,37 @@ async def set_auto_start(req: AutoStartRequest):
         "value": req.enabled,
     }, on_conflict="key").execute()
     return ApiResponse(success=True, message=f"자동 매매 시작 {'활성화' if req.enabled else '비활성화'}")
+
+
+class CashUsageRatioRequest(BaseModel):
+    ratio: float
+
+
+@router.get("/system/cash-usage-ratio", response_model=ApiResponse)
+async def get_cash_usage_ratio_endpoint():
+    """매매 가용 자금 비율을 조회한다 (J3, 2026-05-12).
+
+    `system_config.cash_usage_ratio` 키. 미설정 시 기본 1.0.
+    scheduler `_boot()` 에서 `summary.net_asset × ratio` 로 `allocate_funds()` 호출.
+    """
+    ratio = await get_cash_usage_ratio()
+    return ApiResponse(success=True, data={"ratio": ratio})
+
+
+@router.put("/system/cash-usage-ratio", response_model=ApiResponse)
+async def set_cash_usage_ratio_endpoint(req: CashUsageRatioRequest):
+    """매매 가용 자금 비율을 변경한다 (J3, 2026-05-12).
+
+    범위: [0.5, 1.0], 5% 단위 자동 보정. 다음 영업일 `_boot()` 부터 반영.
+    """
+    try:
+        await set_cash_usage_ratio(req.ratio)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    # 보정된 값을 다시 조회해 응답에 포함
+    actual = await get_cash_usage_ratio()
+    return ApiResponse(
+        success=True,
+        data={"ratio": actual},
+        message=f"가용 자금 비율 {actual:.2f} 저장 — 다음 영업일부터 반영",
+    )

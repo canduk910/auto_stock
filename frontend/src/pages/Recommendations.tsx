@@ -74,6 +74,8 @@ type TabKey = 'pending' | 'history'
 export default function Recommendations() {
   const queryClient = useQueryClient()
   const [selectedKeys, setSelectedKeys] = useState<Record<string, Set<string>>>({})
+  // Phase J4 — recommended_weight 적용 토글 (rec_id 별)
+  const [weightApplyMap, setWeightApplyMap] = useState<Record<string, boolean>>({})
   const [applyTarget, setApplyTarget] = useState<RecommendationItem | null>(null)
   const [rejectTarget, setRejectTarget] = useState<RecommendationItem | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -100,7 +102,8 @@ export default function Recommendations() {
   }, [strategiesData])
 
   const applyMutation = useMutation({
-    mutationFn: ({ id, keys }: { id: string; keys: string[] }) => applyRecommendation(id, keys),
+    mutationFn: ({ id, keys, applyWeight }: { id: string; keys: string[]; applyWeight?: boolean }) =>
+      applyRecommendation(id, keys, { applyWeight }),
     onSuccess: (result, variables) => {
       if (!result.success) {
         setErrors((prev) => ({ ...prev, [variables.id]: result.message || '적용에 실패했습니다.' }))
@@ -111,6 +114,11 @@ export default function Recommendations() {
           return next
         })
         setSelectedKeys((prev) => {
+          const next = { ...prev }
+          delete next[variables.id]
+          return next
+        })
+        setWeightApplyMap((prev) => {
           const next = { ...prev }
           delete next[variables.id]
           return next
@@ -371,6 +379,93 @@ export default function Recommendations() {
                         </div>
                       )}
 
+                      {/* Phase J4 — 자산 배정 카드 (recommended_weight 있을 때만) */}
+                      {rec.recommended_weight !== null && rec.recommended_weight !== undefined && (
+                        <div
+                          data-testid={`weight-card-${rec.id}`}
+                          className="mb-4 rounded-lg border border-blue-200 bg-blue-50/40 p-4"
+                        >
+                          <h4 className="text-sm font-medium text-blue-900 mb-2">자산 배정 자문</h4>
+                          {(() => {
+                            const cur = strategiesData?.strategies?.find((s) => s.key === rec.strategy_id)
+                            const curWeightPct = cur ? Math.round(cur.weight * 100) : null
+                            const recWeightPct = Math.round((rec.recommended_weight ?? 0) * 100)
+                            const diffPct =
+                              curWeightPct !== null ? recWeightPct - curWeightPct : null
+                            const appliedPct =
+                              rec.applied_weight !== null && rec.applied_weight !== undefined
+                                ? Math.round(rec.applied_weight * 100)
+                                : null
+                            return (
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-gray-600">현재 weight</span>
+                                  <span className="font-mono font-medium text-gray-900">
+                                    {curWeightPct !== null ? `${curWeightPct}%` : '-'}
+                                  </span>
+                                  <span className="text-gray-400">→</span>
+                                  <span className="text-gray-600">추천 weight</span>
+                                  <span className="font-mono font-medium text-blue-700">
+                                    {recWeightPct}%
+                                  </span>
+                                  {diffPct !== null && diffPct !== 0 && (
+                                    <span
+                                      className="font-mono text-xs"
+                                      style={{ color: diffPct > 0 ? PROFIT_COLOR : LOSS_COLOR }}
+                                    >
+                                      ({diffPct > 0 ? '+' : ''}{diffPct}%p)
+                                    </span>
+                                  )}
+                                </div>
+                                {appliedPct !== null && (
+                                  <div className="text-xs text-green-700">
+                                    적용됨: {appliedPct}%
+                                  </div>
+                                )}
+                                {actionable && appliedPct === null && (
+                                  <label className="inline-flex items-center gap-2 cursor-pointer mt-1">
+                                    <input
+                                      type="checkbox"
+                                      data-testid={`weight-apply-checkbox-${rec.id}`}
+                                      checked={!!weightApplyMap[rec.id]}
+                                      onChange={(e) =>
+                                        setWeightApplyMap((prev) => ({
+                                          ...prev,
+                                          [rec.id]: e.target.checked,
+                                        }))
+                                      }
+                                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-gray-700">weight 적용</span>
+                                  </label>
+                                )}
+                                <div className="text-xs text-amber-700">
+                                  weight 변경은 다음 영업일부터 반영됩니다 (운영자 수동 적용).
+                                </div>
+                              </div>
+                            )
+                          })()}
+                        </div>
+                      )}
+
+                      {/* Phase J4 — 로직/파라미터 자문 카드 (code_review_notes 있을 때만) */}
+                      {rec.code_review_notes && (
+                        <div
+                          data-testid={`code-review-card-${rec.id}`}
+                          className="mb-4 rounded-lg border border-purple-200 bg-purple-50/40 p-4"
+                        >
+                          <h4 className="text-sm font-medium text-purple-900 mb-2">
+                            로직/파라미터 자문
+                            <span className="ml-2 text-xs font-normal text-purple-700">
+                              (자동 적용 없음 — 운영자 수동 검토용)
+                            </span>
+                          </h4>
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+                            {rec.code_review_notes}
+                          </p>
+                        </div>
+                      )}
+
                       {/* 파라미터 변경 표 */}
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-gray-700 mb-2">권고 파라미터</h4>
@@ -478,25 +573,35 @@ export default function Recommendations() {
                       )}
 
                       {/* 버튼 — 액션 가능 자문에서만 노출 */}
-                      {actionable && (
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => setRejectTarget(rec)}
-                            disabled={rec.status !== 'pending' || rejectMutation.isPending}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            전체 거절
-                          </button>
-                          <button
-                            onClick={() => setApplyTarget(rec)}
-                            disabled={checkedSelectable.length === 0 || applyMutation.isPending}
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            선택 항목 적용
-                            {checkedSelectable.length > 0 && ` (${checkedSelectable.length})`}
-                          </button>
-                        </div>
-                      )}
+                      {actionable && (() => {
+                        const weightCheck = !!weightApplyMap[rec.id]
+                        const applyDisabled =
+                          checkedSelectable.length === 0 && !weightCheck || applyMutation.isPending
+                        return (
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => setRejectTarget(rec)}
+                              disabled={rec.status !== 'pending' || rejectMutation.isPending}
+                              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              전체 거절
+                            </button>
+                            <button
+                              onClick={() => setApplyTarget(rec)}
+                              disabled={applyDisabled}
+                              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              선택 항목 적용
+                              {(checkedSelectable.length > 0 || weightCheck) && (
+                                <>
+                                  {' '}({checkedSelectable.length}
+                                  {weightCheck && '+w'})
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )
+                      })()}
                     </div>
                   )
                 })}
@@ -509,19 +614,25 @@ export default function Recommendations() {
       <ConfirmModal
         open={applyTarget !== null}
         title="AI 자문 적용"
-        message={
-          applyTarget
-            ? `선택한 ${(selectedKeys[applyTarget.id]?.size ?? 0)}개 파라미터를 적용하시겠습니까? 다음 스캔부터 반영됩니다.`
-            : ''
-        }
+        message={(() => {
+          if (!applyTarget) return ''
+          const paramCount = selectedKeys[applyTarget.id]?.size ?? 0
+          const weightOn = !!weightApplyMap[applyTarget.id]
+          const parts: string[] = []
+          if (paramCount > 0) parts.push(`${paramCount}개 파라미터`)
+          if (weightOn) parts.push('weight')
+          if (parts.length === 0) return '적용할 항목이 없습니다.'
+          return `${parts.join(' + ')}을(를) 적용하시겠습니까? 파라미터는 다음 스캔, weight 는 다음 영업일부터 반영됩니다.`
+        })()}
         onConfirm={() => {
           if (!applyTarget) return
           const keys = Array.from(selectedKeys[applyTarget.id] ?? [])
-          if (keys.length === 0) {
+          const applyWeight = !!weightApplyMap[applyTarget.id]
+          if (keys.length === 0 && !applyWeight) {
             setApplyTarget(null)
             return
           }
-          applyMutation.mutate({ id: applyTarget.id, keys })
+          applyMutation.mutate({ id: applyTarget.id, keys, applyWeight })
         }}
         onCancel={() => setApplyTarget(null)}
         loading={applyMutation.isPending}

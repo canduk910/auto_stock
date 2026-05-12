@@ -20,8 +20,15 @@ async def insert_recommendation(
     recommended_params: dict,
     reasoning: str,
     metrics: dict,
+    recommended_weight: float | None = None,
+    code_review_notes: str | None = None,
 ) -> dict | None:
     """파라미터 추천을 INSERT한다.
+
+    Phase J4 (2026-05-12) — 신규 컬럼 3종 지원:
+      - recommended_weight: AI 추천 전략 weight (0.0~1.0), null = 변경 권고 없음
+      - code_review_notes: 로직/파라미터 자유 텍스트 자문, null = 변경 권고 없음
+      - applied_weight: INSERT 시점은 항상 None (apply 시점에 채워짐)
 
     동일 (target_date, strategy_id) 조합이 unique index에 의해 거부되면 None 반환.
     """
@@ -33,6 +40,9 @@ async def insert_recommendation(
         "reasoning": reasoning,
         "metrics": metrics,
         "status": "pending",
+        "recommended_weight": recommended_weight,
+        "code_review_notes": code_review_notes,
+        "applied_weight": None,
     }
     try:
         result = await asyncio.to_thread(
@@ -87,8 +97,11 @@ async def update_recommendation_status(
     rec_id: str,
     status: str,
     applied_params: dict | None = None,
+    applied_weight: float | None = None,
 ) -> dict:
     """추천 레코드의 status를 갱신한다.
+
+    Phase J4 (2026-05-12): `applied_weight` 키워드로 실제 적용된 weight 트래킹.
 
     applied/partial 셋 시 applied_at, rejected 셋 시 rejected_at 자동 기록.
     """
@@ -98,6 +111,8 @@ async def update_recommendation_status(
         update_data["applied_at"] = now_iso
         if applied_params is not None:
             update_data["applied_params"] = applied_params
+        if applied_weight is not None:
+            update_data["applied_weight"] = applied_weight
     elif status == "rejected":
         update_data["rejected_at"] = now_iso
 

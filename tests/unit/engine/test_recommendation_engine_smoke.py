@@ -55,7 +55,7 @@ def test_validate_recommendations_filters_unknown_key():
         "reasoning": "test",
     }
     current = {"buy_threshold": 29.0}
-    validated, reasoning = _validate_recommendations(raw, current)
+    validated, reasoning, _weight, _notes = _validate_recommendations(raw, current)
 
     assert "ghost_param" not in validated
     assert validated["buy_threshold"] == 25.0
@@ -72,7 +72,7 @@ def test_validate_recommendations_clamps_out_of_range():
         "reasoning": "",
     }
     current = {"buy_threshold": 29.0}
-    validated, _ = _validate_recommendations(raw, current)
+    validated, _, _w, _n = _validate_recommendations(raw, current)
     assert "buy_threshold" not in validated
 
 
@@ -85,6 +85,6 @@ def test_validate_recommendations_casts_int_params():
         "reasoning": "",
     }
     current = {"max_positions": 3}
-    validated, _ = _validate_recommendations(raw, current)
+    validated, _, _w, _n = _validate_recommendations(raw, current)
     assert validated["max_positions"] == 5
     assert isinstance(validated["max_positions"], int)

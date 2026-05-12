@@ -271,7 +271,7 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | POST | `/api/trading/restart` | 자동매매 재기동 |
 | POST | `/api/trading/manual-sell` | 수동 매도 (시장가) |
 | GET | `/api/trading/status` | 현재 상태 조회 |
-| GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목) |
+| GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목, 종목별 NXT/KRX 거래시장 정보 join) |
 | GET | `/api/balance/buyable` | 매수 가능 금액 조회 |
 | GET | `/api/history?page=&size=` | 거래 내역 (페이징) |
 | GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | 매매손익 — 매수/매도 페어 1행 (포지션 0 사이클 단위 가중평균). 보유 중은 open 페어 (미실현 손익은 `ticker_prices` 현재가) |
@@ -283,15 +283,18 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | PUT | `/api/strategies/{id}/params` | 전략 파라미터 수정 |
 | GET | `/api/strategies/system/auto-start` | 자동 매매 설정 조회 |
 | PUT | `/api/strategies/system/auto-start` | 자동 매매 설정 변경 |
+| GET | `/api/strategies/system/cash-usage-ratio` | 매매 가용 자금 비율 조회 (J3, 2026-05-12) |
+| PUT | `/api/strategies/system/cash-usage-ratio` | 매매 가용 자금 비율 변경 (50~100% / 5% 단위, 다음 영업일 반영) |
 | GET | `/api/logs` | 시스템 로그 조회 |
 | GET | `/api/recommendations` | 전략수정 AI자문 목록 (최근 30일) |
 | GET | `/api/recommendations/{id}` | 단일 자문 상세 |
-| POST | `/api/recommendations/{id}/apply` | 선택한 키만 전략 파라미터에 적용 |
+| POST | `/api/recommendations/{id}/apply` | 선택한 키만 전략 파라미터에 적용. **J4(2026-05-12)** — body 옵션 `apply_weight: bool=False`. true 면 `recommended_weight` 가 strategy_config.weight 로 반영 (다음 영업일 _boot 부터). 자동 적용 없음, 운영자 명시 토글에서만 |
 | POST | `/api/recommendations/{id}/reject` | 자문 전체 거절 |
 | GET | `/api/log-reports?days=30` | 일일 로그 분석 리포트 목록 |
 | GET | `/api/log-reports/{YYYY-MM-DD}` | 단일 영업일 리포트 상세 |
 | POST | `/api/log-reports/run` | 수동 트리거 — 즉시 분석 실행 (영업일당 1건 UNIQUE) |
 | GET | `/api/realtime/subscriptions` | WebSocket 구독 슬롯 진단 (total/acked/fresh_60s/stale_60s/limit/tickers/reconnect_count/ws_connected). KIS 측 슬롯 조회 API 미존재 → 우리 측 추적 노출 |
+| POST | `/api/realtime/resubscribe` | stale(60s 미수신) TICK 구독 종목 즉시 일괄 재구독 (J2). 응답 `{resubscribed, tickers}`. F1 자동 재구독과 별개의 운영자 수동 트리거 (ScanMonitor 인라인 버튼). WebSocket 끊김 시 400 |
 
 ## 프로젝트 구조
 

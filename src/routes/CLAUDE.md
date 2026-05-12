@@ -13,7 +13,7 @@
 | GET | `/api/trading/status` | trading.py | 현재 상태. `?include=system,holdings,orders,scan,strategies` csv로 sub-section만 슬림 응답 (미지정/`all`은 전체) |
 | GET | `/api/trading/positions` | trading.py | 보유 포지션 상세만(BalanceTable 전용 분리) |
 | GET | `/api/trading/orders` | trading.py | 주문 추적(pending_buys/fills/pending_cancels)만 분리 |
-| GET | `/api/balance` | balance.py | 잔고 (예수금 + 보유종목, 0수량 제외) |
+| GET | `/api/balance` | balance.py | 잔고 (예수금 + 보유종목, 0수량 제외). J1(2026-05-11): 각 holding 에 `stock_master.get(ticker)` join → `nxt_tradable / krx_halted / excg_dvsn_cd` 3필드 노출(Optional, 캐시 miss/예외 시 None) |
 | GET | `/api/balance/buyable` | balance.py | 매수 가능 금액 |
 | GET | `/api/history?page=&size=` | history.py | 거래 내역 (페이징, 종목명/주문번호 포함) |
 | GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | history.py | 매매손익 — 매수/매도 페어 1행 (가중평균). 보유 중은 open 페어 (미실현 손익은 ticker_prices 현재가 사용) |
@@ -25,10 +25,12 @@
 | PUT | `/api/strategies/{id}/params` | strategies.py | 전략 파라미터 수정 (DB 영속화) |
 | GET | `/api/strategies/system/auto-start` | strategies.py | 자동 매매 설정 조회 |
 | PUT | `/api/strategies/system/auto-start` | strategies.py | 자동 매매 설정 변경 |
+| GET | `/api/strategies/system/cash-usage-ratio` | strategies.py | 매매 가용 자금 비율 조회 (J3, 2026-05-12). 응답 `{ratio: float}`, 기본 1.0 |
+| PUT | `/api/strategies/system/cash-usage-ratio` | strategies.py | 매매 가용 자금 비율 변경 (J3, 2026-05-12). body `{ratio: float}` [0.5, 1.0]. 5% 단위 자동 보정, 응답에 보정된 ratio 포함. 다음 영업일 `_boot()` 부터 반영. 범위 외는 400 |
 | GET | `/api/logs` | logs.py | 시스템 로그 조회 |
 | GET | `/api/recommendations` | recommendations.py | 전략수정 AI자문 목록 (최근 30일, 신규+이력 통합) |
 | GET | `/api/recommendations/{id}` | recommendations.py | 단일 자문 상세 |
-| POST | `/api/recommendations/{id}/apply` | recommendations.py | 선택한 키만 전략 파라미터에 적용 (status: pending/partial → applied/partial) |
+| POST | `/api/recommendations/{id}/apply` | recommendations.py | 선택한 키만 전략 파라미터에 적용 (status: pending/partial → applied/partial). **J4(2026-05-12)** — body 신규 옵션 `apply_weight: bool=False` 추가. true 면 `recommended_weight` 가 `strategy_config.weight` 로 반영(`save_weights`) + `applied_weight` 트래킹. recommended_weight=null 인데 apply_weight=true 면 거부. params 없이 weight 단독 적용 가능. `allocate_funds` 즉시 재호출 안 함 (다음 _boot 반영) |
 | POST | `/api/recommendations/{id}/reject` | recommendations.py | 자문 전체 거절 (status → rejected) |
 | GET | `/api/log-reports?days=30` | log_reports.py | 일일 로그 분석 리포트 목록 (신규순) |
 | GET | `/api/log-reports/{YYYY-MM-DD}` | log_reports.py | 단일 영업일 리포트 상세 |
@@ -37,6 +39,7 @@
 | GET | `/api/system/metrics` | system.py | 엔드포인트별 응답시간 분포 p50/p95/p99 (최근 1024개 샘플) |
 | POST | `/api/system/metrics/reset` | system.py | metrics 누적 샘플 초기화 (실험 베이스라인 리셋) |
 | GET | `/api/realtime/subscriptions` | realtime.py | WebSocket 구독 슬롯 사용현황 진단 (G2, 2026-05-12). `total/acked/fresh_60s/stale_60s/limit/tickers(subscribed/acked/fresh/stale, 모두 sorted)/reconnect_count/ws_connected`. KIS 측 슬롯 조회 API 미존재 → 우리 측 추적 노출 |
+| POST | `/api/realtime/resubscribe` | realtime.py | 60s 미수신(stale) TICK 종목 즉시 일괄 재구독 (J2, 2026-05-12). `_subscriptions` 보존 + `_send_subscribe(TICK_TR_ID, t, subscribe=True)` 만 호출(50ms sleep). 응답 `{resubscribed, tickers}` (sorted). WebSocket 끊김 시 400. F1 자동 재구독(재연결 60s 후)과 별개의 운영자 수동 트리거. 영구 로그 `[ws_manual_resubscribe] count=N tickers=[...]` |
 
 ## 응답 형식
 모든 응답은 `models/response.py`의 `ApiResponse` 래퍼 사용:

@@ -377,3 +377,39 @@ VB와 동일.
 3. **야간 매매 모니터링 부재** — 사용자 부재 시간대 사고 위험. POST_NXT는 명시 토글로만 활성
 4. **정산 시각 이동 영향** — daily_performance 'date' 의미, EC2 자동 재시작 정책, 익일 부팅 시각 모두 영향
 5. **종목 적격성** — NXT 거래 가능 종목이 KRX 전 종목인지 일부인지 명세 미기재. 운영 데이터로 검증 필요
+
+### AI자문 고도화 (Phase J4, 2026-05-12)
+
+기존 19:50 AI자문은 `recommended_params` 화이트리스트 키만 권고했으나, **전략별 자산배정(weight)** 과 **로직/파라미터 추가·삭제** 같은 구조적 변경은 권고 채널이 없었다. J4 에서 두 채널을 신설하되 **자동 적용은 절대 없음** — 모두 운영자 수동 검토 후 명시적 apply.
+
+**DB 스키마 확장 (`parameter_recommendations`)**:
+- `recommended_weight NUMERIC` — AI 추천 전략 weight (0.0~1.0). null = 변경 권고 없음
+- `code_review_notes TEXT` — 로직/파라미터 추가·삭제 자유 텍스트 자문. 최대 2000자. 자동 적용 없음
+- `applied_weight NUMERIC` — 사용자가 apply 시점에 실제 적용한 weight (트래킹용)
+
+**recommendation_engine 컨텍스트 확장**:
+- `current_weight` (자기 전략 weight) + `peer_weights` (다른 enabled 전략 weight dict) + `peer_metrics` (다른 전략 최근 성과 dict) 를 user_payload 에 추가
+- 프롬프트에 명시: ① 다른 전략 weight + 성과 종합해 자기 비중 변경 권고 (0.0~1.0). 합계 1.0 근접은 **운영자가 apply 시점에 책임** ② 화이트리스트 외 신규 파라미터 도입 또는 폐기 제안을 자유 텍스트로 (최대 2000자, 코드 자동 변경 없음)
+
+**검증 헬퍼 (`_validate_recommendations` 확장)**:
+- `recommended_weight`: float 캐스트 + `0.0 <= x <= 1.0` 범위 검증. 범위 외면 None 으로 무시 + WARNING 로그
+- `code_review_notes`: str 캐스트 + `len(text) > 2000` 이면 2000자로 잘라냄. 비-str 이면 None
+
+**apply 흐름 (`POST /api/recommendations/{id}/apply`)**:
+- body 신규 옵션: `apply_weight: bool = False`
+  - True 일 때 `recommended_weight == None` 이면 400 (`"적용할 weight 가 없습니다"`)
+  - True + 유효한 weight 면 `strategy_config.weight` 갱신 (`save_weights({strategy_id: recommended_weight})`) + `registry.update_weights()` 메모리 반영 + DB `parameter_recommendations.applied_weight` 갱신
+  - **`allocate_funds()` 즉시 재호출 금지** — 다음 `_boot()` (다음 영업일 07:50) 에서 자연 반영
+- 기존 `apply_keys` 와 `apply_weight` 동시 가능 — 둘 다 처리
+- 응답 데이터에 `applied_weight: float | null` 포함
+
+**프론트엔드 (`Recommendations.tsx`)**:
+- **자산 배정 카드** (recommended_weight 가 null 아닐 때만): 현재 weight → 추천 weight + 변경량(%p) + "weight 적용" 체크박스. 체크 시 apply body 에 `apply_weight: true` 포함. 적용 후 `applied_weight` 표시 + amber 안내 "다음 영업일부터 반영"
+- **로직/파라미터 자문 카드** (code_review_notes 가 null 아닐 때만): 자유 텍스트 (whitespace-pre-wrap, max-height + overflow-y-auto). "검토 완료" 토글은 클라이언트 상태(localStorage 선택)
+- 기존 params 적용 카드는 그대로 유지 — 변경 없음
+
+**안전 불변식**:
+- weights 자동 적용 절대 금지 — `apply_weight=true` 명시 시에만
+- code_review_notes 텍스트 기반 코드 자동 변경 절대 금지 — 정보 표시만
+- `allocate_funds()` 시그니처 그대로, 즉시 재호출 안 함 (다음 _boot 반영)
+- 기존 `apply_keys` 흐름 + J1~J3 + I1~I3 + 다른 Phase 영향 없음
