@@ -1,6 +1,9 @@
 """사전 구독 티커 수집 — `_collect_presubscribe_tickers` 합집합 검증.
 
-- 돌파(VB+LTV) 스캔 종목 + 스윙(donchian) 스캔 종목 + 모든 전략 보유 포지션 합집합
+G안(2026-05-12) 적용: donchian_swing 스캔 후보는 사전 구독 제외 — Pull 폴링(_swing_buy_poll_loop)
+으로 매수 평가. **단 donchian_swing 보유 포지션은 그대로 포함** (청산 위해).
+
+- 돌파(VB+LTV) 스캔 종목 + 모든 전략 보유 포지션 합집합
 - 중복 제거 (set 기반)
 """
 
@@ -27,10 +30,15 @@ async def test_presubscribe_includes_breakout_and_swing_and_held_positions(sched
     ltv.config.enabled = True
     ltv._scanned_tickers = ["035720"]
 
-    # donchian enable + scanned tickers
+    # donchian enable + scanned tickers — G안(2026-05-12)으로 사전 구독 *제외* 대상
     donchian = sched.registry.get("donchian_swing")
     donchian.config.enabled = True
     donchian._scanned_tickers = ["051910"]
+    # 단, donchian 보유 포지션은 청산 위해 그대로 포함
+    donchian.state.positions["005380"] = Position(
+        ticker="005380", buy_price=200000, quantity=1,
+        order_no="O2", strategy_id="donchian_swing",
+    )
 
     # momentum 보유 포지션 (스캔되지 않더라도 사전 구독에 포함되어야 한다)
     momentum = sched.registry.get("momentum")
@@ -40,7 +48,9 @@ async def test_presubscribe_includes_breakout_and_swing_and_held_positions(sched
     )
 
     tickers = sched._collect_presubscribe_tickers()
-    assert set(tickers) == {"005930", "000660", "035720", "051910", "051915"}
+    # G안: donchian 스캔(051910) 제외, 보유(005380) 포함, 돌파 스캔 포함, momentum 보유 포함
+    assert set(tickers) == {"005930", "000660", "035720", "005380", "051915"}
+    assert "051910" not in tickers, "donchian_swing 스캔 후보는 Pull 폴링이므로 사전 구독 제외"
 
 
 @pytest.mark.asyncio

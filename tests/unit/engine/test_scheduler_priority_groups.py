@@ -120,8 +120,10 @@ def test_build_priority_groups_returns_all_five_keys():
     # next_day_clear: ND1, ND2
     assert set(groups["next_day_clear"]) == {"ND1", "ND2"}
 
-    # swing: DS1, DS2, DS3
-    assert set(groups["swing"]) == {"DS1", "DS2", "DS3"}
+    # swing: G안(2026-05-12) — 항상 빈 list. donchian_swing 후보는 Pull 폴링으로 평가.
+    # 보유 종목은 positions HIGH 그룹에 포함되어 청산(ATR/-7%) 보장.
+    assert groups["swing"] == []
+    # donchian_swing 보유(P_DS)는 positions 그룹에 그대로 (위에서 검증됨)
 
     # breakout: VB1, VB2, LTV1
     assert set(groups["breakout"]) == {"VB1", "VB2", "LTV1"}

@@ -25,6 +25,9 @@ class RiskManager:
     def __init__(self, registry: StrategyRegistry, order_engine: OrderEngine) -> None:
         self.registry = registry
         self.order_engine = order_engine
+        # 가설 D (2026-05-12): tradable=False skip 카운터. 1분 1회 INFO 로그 + reset.
+        self._tradable_skip_count: dict[str, int] = {}
+        self._last_tradable_emit_ts: float = 0.0
 
     async def on_tick(
         self,
@@ -81,6 +84,11 @@ class RiskManager:
             # 4. 매수 신호 확인
             # 보드 가드 — 전략의 tradable_boards에 현재 활성 보드 포함 여부 (Phase 8)
             if not session_tracker.is_tradable(strategy.strategy_id, strategy.config.params):
+                # 가설 D (2026-05-12): skip 카운트 누적 + 1분 주기 [tradable_skip] emit
+                self._tradable_skip_count[strategy.strategy_id] = (
+                    self._tradable_skip_count.get(strategy.strategy_id, 0) + 1
+                )
+                self._maybe_emit_tradable_skip()
                 continue
 
             # 전략 간 중복 매수 방지: 보유/주문 중/당일 매도 모두 가로질러 차단
@@ -95,7 +103,47 @@ class RiskManager:
             if state.total_investment > 0 and current_price > state.total_investment:
                 continue
 
+            # G안 (2026-05-12): donchian_swing 매수 평가는 Pull 폴링(_swing_buy_poll_loop)에서만.
+            # WebSocket tick 흐름에서는 skip — 일봉 전략이라 실시간 tick 평가가 구조적 낭비.
+            # 청산(ATR 트레일링/하드 -7%)은 위 check_exit_signal 분기에서 정상 동작 — 영향 없음.
+            if strategy.strategy_id == "donchian_swing":
+                continue
             signal = strategy.check_buy_signal(ticker, current_price, open_price)
             if signal == Signal.BUY:
                 state.signal_count_today += 1
                 await self.order_engine.execute_buy(ticker, current_price, strategy)
+
+    def _maybe_emit_tradable_skip(self) -> None:
+        """가설 D (2026-05-12) — 분당 1회 [tradable_skip] INFO 로그 + 카운터 reset.
+
+        - 60s 미만 경과면 카운터만 누적
+        - 60s 경과 시: 누적 카운트 + 활성 보드를 1행 INFO 로그로 노출 후 카운터/ts 초기화
+        - active_boards 는 `session_tracker.active` 프로퍼티의 정렬된 board.value 리스트
+
+        Codex 추가검토 2 (2026-05-12): `_last_tradable_emit_ts=0.0` 초기화로
+        신규 RiskManager 의 첫 tick 에서 `now - 0.0 > 60` 즉시 emit 되던 결함 차단.
+        첫 호출 시점을 기준점으로 등록만 하고 emit 보류 — 이후 60s 누적 후 첫 emit.
+        """
+        now_ts = time.time()
+        # 첫 호출 가드 — 기준점만 등록하고 reset 없이 카운터는 누적 유지(다음 emit 으로 노출).
+        if self._last_tradable_emit_ts == 0.0:
+            self._last_tradable_emit_ts = now_ts
+            return
+        if now_ts - self._last_tradable_emit_ts < 60.0:
+            return
+        if not self._tradable_skip_count:
+            self._last_tradable_emit_ts = now_ts
+            return
+        try:
+            # Copilot P3 (2026-05-12): private `_active` 직접 접근 대신 `active` 프로퍼티 사용
+            active = sorted(b.value for b in session_tracker.active)
+        except Exception:
+            active = []
+        # 형식: [tradable_skip] momentum=X breakout=Y ltv=Z swing=W active_boards=[...]
+        # 누적된 strategy_id 알파벳 순으로 노출 (테스트 가시성)
+        parts = " ".join(
+            f"{sid}={cnt}" for sid, cnt in sorted(self._tradable_skip_count.items())
+        )
+        logger.info("[tradable_skip] %s active_boards=%s", parts, active)
+        self._tradable_skip_count.clear()
+        self._last_tradable_emit_ts = now_ts

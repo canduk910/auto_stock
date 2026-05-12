@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -29,6 +29,15 @@ from src.engine.strategies.donchian_swing import DonchianSwingStrategy
 from src.engine.strategy_base import Position, StrategyConfig
 
 pytestmark = pytest.mark.unit
+
+# 운영 코드(`donchian_swing.py`)는 `today = datetime.now(KST).date()` 로 평가하므로
+# 테스트도 동일 기준으로 맞춘다. CI/로컬이 UTC 인 환경에서 KST 자정 직후~09시 사이
+# `_today_kst()` 와 1일 어긋나는 결함 차단.
+_KST = timezone(timedelta(hours=9))
+
+
+def _today_kst() -> date:
+    return datetime.now(_KST).date()
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +89,7 @@ async def test_recover_when_yesterday_high_above_buy_price_then_update():
     strat = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="20일 신고가", weight=0.2)
     )
-    today = date.today()
+    today = _today_kst()
     yesterday = today - timedelta(days=1)
     # 매수일은 어제 이전(그제) — buy_date < bsop_date < today 경계 충족 위해
     day_before_yesterday = today - timedelta(days=2)
@@ -108,7 +117,7 @@ async def test_recover_when_yesterday_high_above_buy_price_then_update():
 
 @pytest.mark.asyncio
 async def test_skip_when_buy_date_is_today(donchian):
-    today = date.today()
+    today = _today_kst()
     pos = _add_position(donchian, "005930", buy_price=70000, buy_date=today)
 
     with patch(
@@ -131,7 +140,7 @@ async def test_skip_when_buy_date_is_today(donchian):
 
 @pytest.mark.asyncio
 async def test_skip_when_empty_candles(donchian):
-    yesterday = date.today() - timedelta(days=1)
+    yesterday = _today_kst() - timedelta(days=1)
     pos = _add_position(donchian, "005930", buy_price=70000, buy_date=yesterday)
 
     with patch(
@@ -156,7 +165,7 @@ async def test_when_fetch_raises_then_skip_one_and_continue_others():
     strat = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="20일 신고가", weight=0.2)
     )
-    today = date.today()
+    today = _today_kst()
     yesterday = today - timedelta(days=1)
     day_before = today - timedelta(days=2)
     pos_a = _add_position(strat, "111111", buy_price=10000, buy_date=day_before)
@@ -190,7 +199,7 @@ async def test_when_fetch_raises_then_skip_one_and_continue_others():
 
 @pytest.mark.asyncio
 async def test_when_all_highs_below_buy_price_then_no_change(donchian):
-    today = date.today()
+    today = _today_kst()
     five_days_ago = today - timedelta(days=5)
     yesterday = today - timedelta(days=1)
     pos = _add_position(donchian, "005930", buy_price=70000, buy_date=five_days_ago)
@@ -224,7 +233,7 @@ async def test_boundary_excludes_buy_date_and_today():
     strat = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="20일 신고가", weight=0.2)
     )
-    today = date.today()
+    today = _today_kst()
     buy_day = today - timedelta(days=5)
     pos = _add_position(strat, "005930", buy_price=70000, buy_date=buy_day)
 
@@ -259,7 +268,7 @@ async def test_boundary_excludes_buy_date_and_today():
 @pytest.mark.asyncio
 async def test_skip_when_buy_date_in_future(donchian, caplog):
     import logging
-    future = date.today() + timedelta(days=3)
+    future = _today_kst() + timedelta(days=3)
     pos = _add_position(donchian, "005930", buy_price=70000, buy_date=future)
 
     with patch(
@@ -288,7 +297,7 @@ async def test_multi_positions_sequential_and_partial_failure_isolated():
     strat = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="20일 신고가", weight=0.2)
     )
-    today = date.today()
+    today = _today_kst()
     yesterday = today - timedelta(days=1)
     pos_a = _add_position(strat, "111111", buy_price=50000, buy_date=yesterday)
     pos_b = _add_position(strat, "222222", buy_price=60000, buy_date=yesterday)
@@ -332,7 +341,7 @@ async def test_multi_positions_partial_recovery():
     strat = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="20일 신고가", weight=0.2)
     )
-    today = date.today()
+    today = _today_kst()
     yesterday = today - timedelta(days=1)
     day_before = today - timedelta(days=2)
     pos_a = _add_position(strat, "139480", buy_price=115600, buy_date=day_before)
@@ -370,7 +379,7 @@ async def test_recompute_held_atr_also_recovers_high_since_buy():
     strat = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="20일 신고가", weight=0.2)
     )
-    today = date.today()
+    today = _today_kst()
     yesterday = today - timedelta(days=1)
     # 매수일 5일 전(buy_date < yesterday 경계 충족)
     five_days_ago = today - timedelta(days=5)

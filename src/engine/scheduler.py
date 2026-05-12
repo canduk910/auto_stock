@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time as _time_mod
 from datetime import date, datetime, time, timedelta
 
 from src.api.balance import get_balance, get_daily_orders
@@ -128,6 +129,8 @@ class TradingScheduler:
         self._stale_watcher_task: asyncio.Task | None = None
         # ticker -> 연속 stale 사이클 수 (fresh 회복 시 자동 clear, _reset_daily_state 에서도 clear)
         self._stale_retry_count: dict[str, int] = {}
+        # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
+        self._swing_poll_task: asyncio.Task | None = None
 
     async def _load_strategy_config(self) -> None:
         """DB에서 전략 설정(비중/파라미터)을 로드하여 적용한다."""
@@ -239,6 +242,11 @@ class TradingScheduler:
             # K (2026-05-12) — WebSocket silent inactive 30s 자동 복구 watcher
             # F1(재연결 1회) + `_scan_loop`(5분) + K(30s) 3중 안전망. lifecycle: finally cancel
             self._stale_watcher_task = asyncio.create_task(self._stale_watcher_loop())
+
+            # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
+            # WebSocket tick 흐름에서 매수 평가가 빠진 자리를 1분 주기 REST 폴링으로 채운다.
+            # 보유 종목 청산(ATR 트레일링/-7%)은 risk.on_tick 의 check_exit_signal 그대로 사용.
+            self._swing_poll_task = asyncio.create_task(self._swing_buy_poll_loop())
 
             now = datetime.now().time()
 
@@ -431,7 +439,7 @@ class TradingScheduler:
             await write_log("ERROR", "매매 프로세스 비정상 종료")
         finally:
             # 백그라운드 task lifecycle — 비정상 종료 시 좀비 task 방지
-            for task_attr in ("_next_day_task", "_session_task", "_stale_watcher_task"):
+            for task_attr in ("_next_day_task", "_session_task", "_stale_watcher_task", "_swing_poll_task"):
                 task = getattr(self, task_attr, None)
                 if task and not task.done():
                     task.cancel()
@@ -524,7 +532,7 @@ class TradingScheduler:
         """매매 프로세스를 중지한다."""
         self._running = False
         # 백그라운드 task 즉시 취소 (sleep 도중에도)
-        for task_attr in ("_next_day_task", "_session_task", "_stale_watcher_task"):
+        for task_attr in ("_next_day_task", "_session_task", "_stale_watcher_task", "_swing_poll_task"):
             task = getattr(self, task_attr, None)
             if task and not task.done():
                 task.cancel()
@@ -878,6 +886,44 @@ class TradingScheduler:
 
             confirmed = sum(1 for t in tickers if _is_confirmed(strategy, t))
             logger.info("%s 시가 확정 [%s]: %d/%d종목", strategy.config.name, board, confirmed, len(tickers))
+            # 가설 C (2026-05-12): 보드별 시가 확정 상세 — confirmed/empty/sample 노출
+            self._emit_breakout_open_confirm(board, strategy)
+
+    def _emit_breakout_open_confirm(self, board: str, strategy) -> None:
+        """가설 C (2026-05-12) — `_confirm_breakout_open_prices` 직후 1행 INFO 로그.
+
+        형식: [breakout_open_confirm] board=BOARD strategy=SID confirmed=N empty=M sample={t:open_price,...}
+        - confirmed: open_price > 0 인 후보 수
+        - empty: open_price == 0 (시가 미확정) 후보 수
+        - sample: sorted(ticker) 처음 5개의 {ticker: open_price} dict
+        """
+        try:
+            status = strategy.get_targets_status()
+        except Exception:
+            logger.debug("[breakout_open_confirm] get_targets_status 실패", exc_info=True)
+            return
+        confirmed = 0
+        empty = 0
+        opens: dict[str, int] = {}
+        for ticker, info in (status or {}).items():
+            # 보드별 시가 우선, 없으면 단일 open_price
+            board_info = (info.get("boards") or {}).get(board) if isinstance(info, dict) else None
+            if isinstance(board_info, dict):
+                op = int(board_info.get("open_price") or 0)
+            else:
+                op = int(info.get("open_price") or 0) if isinstance(info, dict) else 0
+            opens[ticker] = op
+            if op > 0:
+                confirmed += 1
+            else:
+                empty += 1
+        sample_keys = sorted(opens.keys())[:5]
+        sample = {t: opens[t] for t in sample_keys}
+        sid = getattr(strategy, "strategy_id", None) or getattr(strategy.config, "strategy_id", "?")
+        logger.info(
+            "[breakout_open_confirm] board=%s strategy=%s confirmed=%d empty=%d sample=%s",
+            board, sid, confirmed, empty, sample,
+        )
 
     def _collect_breakout_tickers(self) -> list[str]:
         """돌파 전략(VB, MB)의 스캔 종목을 합산한다."""
@@ -904,11 +950,13 @@ class TradingScheduler:
         """09:00 시가 수신용 사전 구독 대상.
 
         - 돌파 전략(VB, MB) 스캔 종목
-        - 스윙 전략(donchian_swing) 스캔 종목
         - 모든 전략의 보유 포지션 (모멘텀 익일청산/스윙 트레일링 시가 수신용)
+
+        G안(2026-05-12): donchian_swing 스캔 후보는 제외. Pull 폴링(`_swing_buy_poll_loop`)
+        으로 매수 평가하므로 WebSocket 슬롯 불필요. 보유 종목은 positions 합집합 경로로
+        자동 포함되어 청산 평가(ATR 트레일링/하드 -7%) 보장.
         """
         tickers: set[str] = set(self._collect_breakout_tickers())
-        tickers.update(self._collect_swing_tickers())
         for s in self.registry.all():
             tickers.update(s.state.positions.keys())
         return list(tickers)
@@ -992,10 +1040,13 @@ class TradingScheduler:
         ndc_tickers = [t for (t, _sid) in self._pending_next_day_clear]
         next_day_clear = list(dict.fromkeys(ndc_tickers))
 
+        # G안(2026-05-12): swing 키는 항상 빈 list — donchian_swing 후보는 Pull 폴링으로 평가하므로
+        # WebSocket 구독 미사용. 보유 종목은 positions HIGH 그룹으로 별도 유입되어 청산 평가 보장.
+        # 시그니처 호환을 위해 키 자체는 5개 모두 유지.
         return {
             "positions": positions,
             "next_day_clear": next_day_clear,
-            "swing": self._collect_swing_tickers(),
+            "swing": [],
             "momentum": list(momentum_tickers or []),
             "breakout": self._collect_breakout_tickers(),
         }
@@ -1482,12 +1533,11 @@ class TradingScheduler:
                 break
             try:
                 tickers = await scan_stocks()
-                # 돌파(VB+LTV) + 스윙(donchian) + 모든 전략 보유 포지션 합집합으로 재구독
-                # → 09:30 이후 5분 주기 unsubscribe 시 swing/LTV 시세가 끊겨 대시보드에서
-                #   현재가/갭률이 비고 손절 감시도 누락되던 결함 차단
+                # 돌파(VB+LTV) + 모든 전략 보유 포지션 합집합으로 재구독
+                # G안(2026-05-12): donchian_swing 스캔 후보는 Pull 폴링으로 매수 평가 → WS 구독 제외.
+                # donchian_swing 보유 종목은 positions 합집합 경로로 그대로 유입 → 청산(ATR 트레일링/-7%) 보장.
                 extra = list(set(
                     self._collect_breakout_tickers()
-                    + self._collect_swing_tickers()
                     + [t for s in self.registry.all() for t in s.state.positions.keys()]
                 ))
                 source_counts = self._build_subscription_source_counts(momentum_tickers=tickers)
@@ -1554,6 +1604,157 @@ class TradingScheduler:
                     await write_log("ERROR", f"{sid} 재 prepare 실패")
                 except Exception:
                     logger.debug("write_log ERROR 실패: %s", sid)
+
+    async def _swing_buy_poll_loop(self) -> None:
+        """donchian_swing — 09:05~09:30 KST 1분 주기 매수 평가 폴링 (G안, 2026-05-12).
+
+        donchian_swing 은 일봉 전략이라 실시간 tick 평가가 구조적 낭비.
+        WebSocket 구독을 끊고(작업 2-1) 1분 주기 KIS REST(`fetch_stock_detail`)로 매수 평가.
+        보유 종목 청산(ATR 트레일링/하드 -7%)은 `risk.on_tick` 의 `check_exit_signal` 분기 그대로.
+
+        - 09:05 이전: 1초 폴링하며 대기
+        - 09:30 초과: task 종료
+        - 매 사이클: candidate 종목별 sequential await (KIS Rate Limit 20/s 보호)
+        - 본체 예외는 ERROR 로그 흡수, 다음 사이클 자연 재시도
+        - `[swing_poll] candidates=N filtered=M bought=K elapsed=T.Ts` INFO 로그 1행
+        - sleep 은 1초 단위로 쪼개 `_running=False` 즉시 반응
+        """
+        from datetime import time as _time, datetime as _datetime, timedelta as _timedelta
+        from src.api.condition import fetch_stock_detail
+        from src.engine.scanner import KST_TZ as _KST, TICK_TR_ID as _TICK_TR_ID, kis_ws as _kis_ws
+        from src.engine.strategy_base import Signal as _Signal
+
+        BUY_WINDOW_START = _time(9, 5)
+        BUY_WINDOW_END = _time(9, 30)
+
+        async def _sleep_chunked(total_secs: float, *, chunk_secs: float = 1.0) -> None:
+            """`_running=False` 즉시 반응 위해 chunk 단위로 쪼갠 sleep.
+
+            기본 1초 chunk(매분 sleep 등 짧은 간격용). 09:05 이전 장시간 대기는
+            chunk_secs=2.0 으로 호출 (Codex 추가검토 3, 2026-05-12) — _running=False
+            반응 지연 ≤2s 로 절제하면서 매초 wake-up 결함 차단.
+            """
+            remaining = total_secs
+            while remaining > 0 and self._running:
+                chunk = min(chunk_secs, remaining)
+                await asyncio.sleep(chunk)
+                remaining -= chunk
+
+        while self._running:
+            # 시간 가드: 09:30 이후 task 종료 (KST aware — UTC 서버 환경 일관성)
+            now_dt = _datetime.now(_KST)
+            now_t = now_dt.time()
+            if now_t > BUY_WINDOW_END:
+                logger.info("[swing_poll] window closed (after 09:30)")
+                return
+            # 09:05 이전: chunked sleep (Codex 추가검토 3, 2026-05-12)
+            # 결함: 매초 wake-up → 07:50 시작 시 4400회+ 불필요 wake-up.
+            # 09:05 까지 남은 초 만큼 chunked(_running=False 즉시 반응 보장),
+            # 60s cap 으로 시간 가드 재진입 빈도 유지(시계 변경/sleep 누적 오차 보호).
+            if now_t < BUY_WINDOW_START:
+                target_dt = now_dt.replace(hour=9, minute=5, second=0, microsecond=0)
+                if target_dt < now_dt:  # 자정 넘김 가드 (매수 윈도우는 항상 같은 영업일이지만 방어)
+                    target_dt += _timedelta(days=1)
+                remaining_s = (target_dt - now_dt).total_seconds()
+                # chunk_secs=2.0 — _running=False 반응 지연 ≤2s 로 절제하면서 매초 wake-up 차단.
+                await _sleep_chunked(min(60.0, max(remaining_s, 1.0)), chunk_secs=2.0)
+                continue
+
+            cycle_start = _time_mod.time()
+            strategy = self.registry.get("donchian_swing")
+            if strategy is None or not strategy.config.enabled:
+                # 비활성 — 1분 대기 후 시간 가드 재진입 (`_running=False` 즉시 반응)
+                logger.debug("[swing_poll] donchian_swing not enabled — sleep 60s")
+                await _sleep_chunked(60.0)
+                continue
+
+            try:
+                candidates = list(strategy.get_scanned_tickers())
+            except Exception:
+                logger.exception("[swing_poll] get_scanned_tickers 실패")
+                candidates = []
+
+            filtered: list[str] = []
+            for t in candidates:
+                # _bought_today: 같은 종목 중복 진입 차단
+                if t in getattr(strategy, "_bought_today", set()):
+                    continue
+                # 전략 간 통합 중복 가드: 보유 / 주문중 / 당일매도
+                try:
+                    if self.registry.is_ticker_blocked_for_buy(t):
+                        continue
+                except Exception:
+                    logger.debug("[swing_poll] is_ticker_blocked_for_buy 실패: %s", t, exc_info=True)
+                    continue
+                filtered.append(t)
+
+            bought = 0
+            for t in filtered:
+                if not self._running:
+                    break
+                try:
+                    detail = await fetch_stock_detail(t)
+                except Exception:
+                    logger.debug("[swing_poll] fetch_stock_detail 실패: %s", t, exc_info=True)
+                    continue
+                try:
+                    current_price = int(detail.get("stck_prpr") or 0)
+                    open_price = int(detail.get("stck_oprc") or 0)
+                except (ValueError, TypeError):
+                    continue
+                if current_price <= 0 or open_price <= 0:
+                    # 시가/현재가 0 — KIS 응답 미완성. skip
+                    continue
+
+                try:
+                    signal = strategy.check_buy_signal(t, current_price, open_price)
+                except Exception:
+                    logger.exception("[swing_poll] check_buy_signal 실패: %s", t)
+                    continue
+
+                if signal == _Signal.BUY:
+                    # Codex 추가검토 1 (2026-05-12): 매수 *성공* 시에만 WS subscribe.
+                    # 결함: 기존 코드는 execute_buy raise 후에도 subscribe 호출 →
+                    # 매수 실패 종목까지 HIGH bypass 슬롯 점유 → MAX_SUBSCRIPTIONS=41 압박.
+                    # 매수 성공 판정 = raise 없이 return + ticker 가
+                    # (a) `pending_buys` 등록(place_order 응답 후 동기 등록) 또는
+                    # (b) `positions` 등록(즉시 체결로 pending_buys 비워진 race)
+                    buy_succeeded = False
+                    try:
+                        await self.order_engine.execute_buy(t, current_price, strategy)
+                        buy_succeeded = (
+                            t in strategy.state.pending_buys
+                            or t in strategy.state.positions
+                        )
+                        if buy_succeeded:
+                            bought += 1
+                    except Exception:
+                        logger.exception("[swing_poll] execute_buy 실패: %s", t)
+                    if buy_succeeded:
+                        # 안전 불변식: donchian_swing 보유 종목 ATR 트레일링/-7% 하드 손절 평가 필수.
+                        # 다음 5분 _scan_loop 통합 구독까지 시세 무수신 구간 차단.
+                        # `bypass_limit=True` — positions HIGH 절대 보장 규약과 동일.
+                        try:
+                            await _kis_ws.subscribe(_TICK_TR_ID, t, bypass_limit=True)
+                        except Exception:
+                            logger.debug(
+                                "[swing_poll] 매수 직후 시세 구독 실패: %s (다음 _scan_loop 5분 사이클에서 회복)",
+                                t, exc_info=True,
+                            )
+
+                # KIS Rate Limit 보호 — 종목간 50ms 간격
+                await asyncio.sleep(0.05)
+
+            elapsed = _time_mod.time() - cycle_start
+            logger.info(
+                "[swing_poll] candidates=%d filtered=%d bought=%d elapsed=%.1fs",
+                len(candidates), len(filtered), bought, elapsed,
+            )
+
+            # 다음 분 정각까지 sleep — `_running=False` 즉시 반응 위해 chunked (KST 일관성)
+            now_dt = _datetime.now(_KST)
+            sleep_secs = 60 - (now_dt.second + now_dt.microsecond / 1_000_000)
+            await _sleep_chunked(max(sleep_secs, 1.0))
 
     async def _stale_watcher_loop(self) -> None:
         """30s 주기 stale 감지 + 자동 재구독 (K, 2026-05-12).
@@ -1661,13 +1862,19 @@ class TradingScheduler:
             logger.debug("[stale_watcher] write_log 실패", exc_info=True)
 
     async def _report_tick_coverage(self) -> None:
-        """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D).
+        """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).
 
-        - 5분 주기 `_scan_loop` 사이클당 1행 노출 (`INFO` + `system_logs`, prefix `[tick_coverage]`)
+        - 5분 주기 `_scan_loop` 사이클당 1행 노출 (`INFO`/`WARNING` + `system_logs`)
         - 임계값 60초: SCAN_INTERVAL(300s) 내 1분 미수신은 시장 미체결 정상 가능,
           5분 미수신은 시세 문제 의심. 둘 다 카운트 노출
         - `ticker_last_tick` 키 부재 종목은 stale 로 카운트 (구독 직후 0초 경과 가능)
         - 본체 예외는 `_scan_loop` 흐름 보호 위해 흡수
+
+        확장(가설 B, 2026-05-12):
+        - `ratio=R%` — fresh / subscribed 비율 (1자리 소수)
+        - `stale_sample=[t1,t2,...]` — sorted(stale) 최대 10개
+        - `last_tick_avg_age=Xs` — 전체 평균 마지막 tick 경과시간(초). 키 없으면 -1
+        - stale_ratio > 0.30 이면 WARNING 레벨 (INFO 대신)
         """
         from datetime import datetime as _dt
         from src.engine.scanner import KST_TZ, ticker_last_tick
@@ -1677,21 +1884,40 @@ class TradingScheduler:
             subscribed = kis_ws.get_subscribed_tickers()
             now = _dt.now(KST_TZ)
             fresh_threshold = timedelta(seconds=60)
-            min_dt = datetime.min.replace(tzinfo=KST_TZ)
-            fresh = sum(
-                1 for t in subscribed
-                if (now - ticker_last_tick.get(t, min_dt)) <= fresh_threshold
+            fresh_tickers: set[str] = set()
+            stale_tickers: list[str] = []
+            ages: list[float] = []
+            for t in subscribed:
+                last_tick = ticker_last_tick.get(t)
+                if last_tick is None:
+                    stale_tickers.append(t)
+                    # 키 없음 — 평균 계산에서 제외
+                    continue
+                age_s = (now - last_tick).total_seconds()
+                ages.append(age_s)
+                if (now - last_tick) <= fresh_threshold:
+                    fresh_tickers.add(t)
+                else:
+                    stale_tickers.append(t)
+            fresh = len(fresh_tickers)
+            stale = len(stale_tickers)
+            total = len(subscribed)
+            ratio_pct = round(100.0 * fresh / total, 1) if total > 0 else 0.0
+            stale_ratio = (stale / total) if total > 0 else 0.0
+            avg_age = round(sum(ages) / len(ages), 1) if ages else -1.0
+            stale_sample = sorted(stale_tickers)[:10]
+            msg = (
+                f"[tick_coverage] subscribed={total} fresh={fresh} stale={stale} "
+                f"ratio={ratio_pct}% stale_sample={stale_sample} "
+                f"last_tick_avg_age={avg_age}s"
             )
-            stale = len(subscribed) - fresh
-            logger.info(
-                "[tick_coverage] subscribed=%d fresh=%d stale=%d",
-                len(subscribed), fresh, stale,
-            )
+            level = "WARNING" if stale_ratio > 0.30 else "INFO"
+            if level == "WARNING":
+                logger.warning(msg)
+            else:
+                logger.info(msg)
             try:
-                await write_log(
-                    "INFO",
-                    f"[tick_coverage] subscribed={len(subscribed)} fresh={fresh} stale={stale}",
-                )
+                await write_log(level, msg)
             except Exception:
                 logger.debug("write_log [tick_coverage] 실패")
         except Exception:

@@ -92,7 +92,38 @@ class OrderEngine:
             return base
 
         if basics is None:
+            # 가설 E (2026-05-12) — 캐시 miss 시 1행 INFO 로그. 본 흐름(전략 기본 유지) 영향 없음.
+            try:
+                await write_log(
+                    "INFO",
+                    f"[stock_master_miss] ticker={ticker} strategy={strategy_id} "
+                    f"exchange_keep={base} reason=miss",
+                )
+            except Exception:
+                logger.debug("[stock_master_miss] write_log 실패", exc_info=True)
             return base  # cache miss — 보수적 fallback
+
+        # 가설 E (2026-05-12) — stale 캐시 가시화 (TTL 24h 초과).
+        # Codex 추가검토 4 (2026-05-12): is_stale 은 Supabase round-trip → 주문 경로에서
+        # 직접 await 하면 시장가 매수/매도 latency 증가. asyncio.create_task 로 분리해
+        # 본 흐름은 즉시 반환. task 예외는 내부에서 흡수.
+        async def _log_stale_async(t: str, sid: str | None, exch: str) -> None:
+            try:
+                from src.db import stock_master as _sm
+                if await _sm.is_stale(t):
+                    await write_log(
+                        "INFO",
+                        f"[stock_master_miss] ticker={t} strategy={sid} "
+                        f"exchange_keep={exch} reason=stale",
+                    )
+            except Exception:
+                logger.debug("[stock_master_miss] stale 체크 실패", exc_info=True)
+
+        try:
+            asyncio.create_task(_log_stale_async(ticker, strategy_id, base))
+        except RuntimeError:
+            # 이벤트 루프 없는 컨텍스트(테스트 등) — 본 흐름 보존
+            logger.debug("[stock_master_miss] stale task 등록 실패", exc_info=True)
 
         if basics.nxt_tradable:
             return base

@@ -13,7 +13,7 @@
    - bypass_limit=True 면 한도 검사 skip, 무조건 add
    - bypass_limit=False (기본) 면 기존 분기 유지
 3. `subscribe_filtered_stocks(..., *, priority_groups: dict[str, list[str]] | None = None)`
-   - HIGH→LOW: positions → next_day_clear → swing → momentum → breakout
+   - HIGH→LOW: positions → next_day_clear → **breakout → momentum → swing**
    - positions / next_day_clear 는 bypass_limit=True (한도 무시 절대 보장)
    - 후순위는 잔여 슬롯만큼만 add, drop 카운트 `[priority_drop]` INFO 로그 1행
    - 중복 제거: 같은 종목은 HIGH 순위로 1회만 subscribe
@@ -105,18 +105,21 @@ def _ws_subscribe_spy():
 
 
 # ---------------------------------------------------------------------------
-# Case A: positions=3, next_day_clear=0, swing=23, momentum=10, breakout=30
-#         → 41 가득 채움, breakout 25개 drop, [priority_drop] 로그 1행
+# Case A: positions=3, next_day_clear=0, breakout=5, momentum=10, swing=30
+#         → 41 가득 채움, swing 7개 drop, [priority_drop] 로그 1행
+#
+# 우선순위 재정렬(2026-05-12): LOW 순서가 breakout → momentum → swing 으로 바뀜.
+# swing 이 LOW 마지막이므로 잔여 슬롯 부족 시 swing 이 drop 대상.
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_priority_groups_case_a_overflow_drops_only_low_priority(_ws_subscribe_spy, caplog):
-    """HIGH(보유 3) + swing 23 + momentum 10 + breakout 5 = 41. breakout 25개 drop."""
+    """HIGH(보유 3) + breakout 5 + momentum 10 + swing 23 = 41. swing 7개 drop."""
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
 
-    positions = [f"P{i:03d}" for i in range(3)]   # 3건
-    swing = [f"S{i:03d}" for i in range(23)]      # 23건
-    momentum = [f"M{i:03d}" for i in range(10)]   # 10건
-    breakout = [f"B{i:03d}" for i in range(30)]   # 30건 — 5개만 add, 25개 drop
+    positions = [f"P{i:03d}" for i in range(3)]   # 3건 — HIGH bypass
+    breakout = [f"B{i:03d}" for i in range(5)]    # 5건 — LOW 1순위, 전원 add
+    momentum = [f"M{i:03d}" for i in range(10)]   # 10건 — LOW 2순위, 전원 add
+    swing = [f"S{i:03d}" for i in range(30)]      # 30건 — LOW 3순위, 23개만 add, 7개 drop
 
     await scanner_module.subscribe_filtered_stocks(
         [],
@@ -136,20 +139,20 @@ async def test_priority_groups_case_a_overflow_drops_only_low_priority(_ws_subsc
     # 보유 3개 전원 add — bypass_limit=True 로
     for t in positions:
         assert ("H0UNCNT0", t) in subs, f"보유 종목 {t} 는 절대 보장"
-    # swing 23개 전원
-    for t in swing:
-        assert ("H0UNCNT0", t) in subs, f"swing {t} 잔여 슬롯 충분"
-    # momentum 10개 전원
+    # breakout 5개 전원 — LOW 1순위
+    for t in breakout:
+        assert ("H0UNCNT0", t) in subs, f"breakout {t} 잔여 슬롯 충분"
+    # momentum 10개 전원 — LOW 2순위
     for t in momentum:
         assert ("H0UNCNT0", t) in subs, f"momentum {t} 잔여 슬롯 충분"
-    # breakout: 5개만 add, 25개 drop
-    breakout_in = sum(1 for t in breakout if ("H0UNCNT0", t) in subs)
-    assert breakout_in == 5, f"breakout 은 잔여 슬롯 5개만 add (실제 {breakout_in})"
+    # swing: 23개만 add, 7개 drop (LOW 마지막)
+    swing_in = sum(1 for t in swing if ("H0UNCNT0", t) in subs)
+    assert swing_in == 23, f"swing 은 잔여 슬롯 23개만 add (실제 {swing_in})"
 
     # [priority_drop] 로그 검증
     msg = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" in msg, "drop 발생 시 [priority_drop] 로그 1행 노출 필수"
-    assert "breakout=25" in msg, f"drop 카운트에 breakout=25 노출 (msg={msg!r})"
+    assert "swing=7" in msg, f"drop 카운트에 swing=7 노출 (msg={msg!r})"
 
     # bypass_limit 호출 검증 — positions 3건은 bypass_limit=True 로 호출
     bypass_true_calls = [c for c in _ws_subscribe_spy["calls"] if c["bypass_limit"]]

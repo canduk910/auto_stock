@@ -356,12 +356,16 @@ async def subscribe_filtered_stocks(
     - dict 가 None 이면 기존 "(모멘텀: X, 기타: Y)" fallback (외부 호출자 호환)
     - 누락 키는 0 으로 처리
 
-    `priority_groups` 가 주어지면 우선순위 큐로 변환해 구독한다 (E1, 2026-05-12):
-        positions → next_day_clear → swing → momentum → breakout (HIGH → LOW)
+    `priority_groups` 가 주어지면 우선순위 큐로 변환해 구독한다 (E1, 2026-05-12 + G안 2026-05-12):
+        positions → next_day_clear → breakout → momentum → swing (HIGH → LOW)
     - positions / next_day_clear 는 `bypass_limit=True` 로 한도(MAX_SUBSCRIPTIONS=41) 무시 — 절대 보장
-    - 후순위(swing/momentum/breakout)는 잔여 슬롯만큼만 add
+    - LOW 순서 재정렬 (G안, 2026-05-12): 슬롯 부족 시 swing 이 가장 먼저 잘려도 안전.
+      donchian_swing 은 Pull 폴링(_swing_buy_poll_loop)으로 매수 평가하므로 LOW 슬롯 잃어도 OK.
+      변동성 돌파(VB/LTV) 후보를 우선 보장해 일중 매매 기회 확보.
+    - 후순위(breakout/momentum/swing)는 잔여 슬롯만큼만 add
     - 중복 종목은 HIGH 순위로 1회만 subscribe (후순위에서는 skip, drop 카운트에도 미포함)
-    - drop>0 발생 시 INFO 로그 1행: `[priority_drop] swing=X momentum=Y breakout=Z`
+    - drop>0 발생 시 INFO 로그 1행 + WARNING system_logs 영구 저장 (가설 A — 가시성):
+      `[priority_drop] breakout=X momentum=Y swing=Z total_subscribed=N max=41 high_count=H low_remaining=R`
     - HIGH 단독 합계가 한도 초과 시 ERROR 로그 + system_logs 기록 (운영자 경보)
     - `priority_groups=None` 이면 기존 평탄 처리 (외부 호환). `source_counts` 로그는 priority_groups 와 무관하게 보존
     - 어제·오늘 donchian_swing 조기 손절 사건(보유 종목 시세 누락) 루트 원인 차단
@@ -412,11 +416,13 @@ async def subscribe_filtered_stocks(
             await kis_ws.subscribe(TICK_TR_ID, t, bypass_limit=True)
 
         # 3~5) 후순위 — 잔여 슬롯 계산 + drop 카운트
-        drop_counts: dict[str, int] = {"swing": 0, "momentum": 0, "breakout": 0}
+        # LOW 순서 재정렬 (G안, 2026-05-12): breakout → momentum → swing.
+        # donchian_swing 은 Pull 폴링으로 매수 평가하므로 슬롯 손실 안전.
+        drop_counts: dict[str, int] = {"breakout": 0, "momentum": 0, "swing": 0}
         for label, candidates in (
-            ("swing", swing),
-            ("momentum", momentum),
             ("breakout", breakout),
+            ("momentum", momentum),
+            ("swing", swing),
         ):
             for t in candidates:
                 if t in already:
@@ -431,10 +437,25 @@ async def subscribe_filtered_stocks(
 
         total_dropped = sum(drop_counts.values())
         if total_dropped > 0:
-            logger.info(
-                "[priority_drop] swing=%d momentum=%d breakout=%d",
-                drop_counts["swing"], drop_counts["momentum"], drop_counts["breakout"],
+            # 확장 형식 (가설 A 가시성): total_subscribed/max/high_count/low_remaining 추가.
+            # Copilot P2 (2026-05-12): `low_remaining` 으로 의미 명확화(LOW 그룹 잔여 슬롯) +
+            # HIGH bypass 시 음수 노출 차단(`max(0, ...)`) — 대시보드 해석 혼동 방지.
+            total_subscribed = len(kis_ws._subscriptions)
+            high_count = len(set(positions) | set(next_day_clear))
+            low_remaining = max(0, MAX_SUBSCRIPTIONS - total_subscribed)
+            drop_log = (
+                f"[priority_drop] breakout={drop_counts['breakout']} "
+                f"momentum={drop_counts['momentum']} swing={drop_counts['swing']} "
+                f"total_subscribed={total_subscribed} max={MAX_SUBSCRIPTIONS} "
+                f"high_count={high_count} low_remaining={low_remaining}"
             )
+            logger.info(drop_log)
+            # drop 발생은 운영 가시화 대상 — WARNING 영구 저장 (가설 A)
+            try:
+                from src.db.system_logs import write_log
+                await write_log("WARNING", drop_log)
+            except Exception:
+                logger.debug("[priority_drop] write_log 실패", exc_info=True)
     else:
         # 기존 평탄 처리 (외부 호환 fallback)
         for ticker in all_tickers:
