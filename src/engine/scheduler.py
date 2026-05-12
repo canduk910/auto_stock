@@ -1619,7 +1619,7 @@ class TradingScheduler:
         - `[swing_poll] candidates=N filtered=M bought=K elapsed=T.Ts` INFO 로그 1행
         - sleep 은 1초 단위로 쪼개 `_running=False` 즉시 반응
         """
-        from datetime import time as _time, datetime as _datetime
+        from datetime import time as _time, datetime as _datetime, timedelta as _timedelta
         from src.api.condition import fetch_stock_detail
         from src.engine.scanner import KST_TZ as _KST, TICK_TR_ID as _TICK_TR_ID, kis_ws as _kis_ws
         from src.engine.strategy_base import Signal as _Signal
@@ -1627,11 +1627,16 @@ class TradingScheduler:
         BUY_WINDOW_START = _time(9, 5)
         BUY_WINDOW_END = _time(9, 30)
 
-        async def _sleep_chunked(total_secs: float) -> None:
-            """`_running=False` 즉시 반응 위해 1초 단위로 쪼갠 sleep."""
+        async def _sleep_chunked(total_secs: float, *, chunk_secs: float = 1.0) -> None:
+            """`_running=False` 즉시 반응 위해 chunk 단위로 쪼갠 sleep.
+
+            기본 1초 chunk(매분 sleep 등 짧은 간격용). 09:05 이전 장시간 대기는
+            chunk_secs=2.0 으로 호출 (Codex 추가검토 3, 2026-05-12) — _running=False
+            반응 지연 ≤2s 로 절제하면서 매초 wake-up 결함 차단.
+            """
             remaining = total_secs
             while remaining > 0 and self._running:
-                chunk = min(1.0, remaining)
+                chunk = min(chunk_secs, remaining)
                 await asyncio.sleep(chunk)
                 remaining -= chunk
 
@@ -1642,9 +1647,17 @@ class TradingScheduler:
             if now_t > BUY_WINDOW_END:
                 logger.info("[swing_poll] window closed (after 09:30)")
                 return
-            # 09:05 이전: 1초 폴링 대기 — freeze_time 테스트 안전
+            # 09:05 이전: chunked sleep (Codex 추가검토 3, 2026-05-12)
+            # 결함: 매초 wake-up → 07:50 시작 시 4400회+ 불필요 wake-up.
+            # 09:05 까지 남은 초 만큼 chunked(_running=False 즉시 반응 보장),
+            # 60s cap 으로 시간 가드 재진입 빈도 유지(시계 변경/sleep 누적 오차 보호).
             if now_t < BUY_WINDOW_START:
-                await asyncio.sleep(1.0)
+                target_dt = now_dt.replace(hour=9, minute=5, second=0, microsecond=0)
+                if target_dt < now_dt:  # 자정 넘김 가드 (매수 윈도우는 항상 같은 영업일이지만 방어)
+                    target_dt += _timedelta(days=1)
+                remaining_s = (target_dt - now_dt).total_seconds()
+                # chunk_secs=2.0 — _running=False 반응 지연 ≤2s 로 절제하면서 매초 wake-up 차단.
+                await _sleep_chunked(min(60.0, max(remaining_s, 1.0)), chunk_secs=2.0)
                 continue
 
             cycle_start = _time_mod.time()

@@ -486,6 +486,53 @@ async def test_swing_poll_subscribe_skipped_when_buy_rejected_no_pending():
 
 
 # ---------------------------------------------------------------------------
+# Case 11 (Codex 추가검토 3): 09:05 이전 chunked sleep 사용
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_uses_chunked_sleep_before_window():
+    """09:05 이전 시점에 매초 wake-up 하지 말고 60s 단위 chunked sleep 사용.
+
+    결함: 기존 코드는 09:05 이전 매초 `await asyncio.sleep(1.0)` → 프로세스 시작이
+    07:50 이면 4400회+ 불필요 wake. 60s 단위로 묶어 부하 감소.
+    """
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+
+    sleep_calls: list[float] = []
+    real_sleep = asyncio.sleep
+
+    async def _track_sleep(secs):
+        sleep_calls.append(secs)
+        # 실제 wait 은 짧게 — _stopper 가 _running=False 토글 후 즉시 빠지도록
+        await real_sleep(0.01)
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    # 08:00 — 윈도우(09:05) 진입 전. 1초 sleep 이 아니라 큰 단위로 sleep 호출되어야 함
+    with freeze_time("2026-05-13 08:00:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)), \
+         patch("asyncio.sleep", new=_track_sleep):
+        async def _stopper():
+            await real_sleep(0.15)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    # 1초 단위 sleep 만 반복되면 안 됨 — 1초 초과 sleep 호출이 1회 이상 있어야 함
+    big_sleeps = [s for s in sleep_calls if s > 1.5]
+    assert len(big_sleeps) >= 1, (
+        f"09:05 이전 chunked sleep(>1.5s)이 1회 이상 호출되어야 함. 실제 sleep 호출={sleep_calls}"
+    )
+    # 그리고 어떤 단일 sleep 도 60s 를 넘으면 안 됨 (chunked 단위 cap)
+    too_big = [s for s in sleep_calls if s > 60.0 + 0.001]
+    assert len(too_big) == 0, (
+        f"단일 sleep 호출은 60s cap 이어야 함. 60s 초과 호출={too_big}"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Case 9 (Copilot P2): KST 윈도우 가드 검증 — UTC 서버에서도 KST 기준 동작
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
