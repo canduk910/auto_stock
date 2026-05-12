@@ -324,15 +324,23 @@ async def test_swing_poll_skips_when_strategy_disabled():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_swing_poll_subscribes_ticker_after_buy_signal():
-    """매수 신호 발사 직후 동일 ticker 를 WebSocket TICK 구독에 즉시 추가해야 한다.
+    """매수 *성공* 시 동일 ticker 를 WebSocket TICK 구독에 즉시 추가해야 한다.
 
     안전 불변식: donchian_swing 보유 종목은 ATR 트레일링/-7% 하드 손절 평가가 필수.
     매수 직후 다음 5분 _scan_loop 통합 구독까지 시세 무수신 구간 차단.
     `bypass_limit=True` 로 MAX_SUBSCRIPTIONS=41 한도 무시 (positions HIGH 절대 보장 규약).
+
+    매수 성공 판정 = `place_order` 응답 후 `pending_buys.add(ticker)` 가 동기 영역에서
+    실행됨 → 테스트 mock 도 동일 효과를 시뮬레이션 (state.pending_buys.add).
     """
     sched, strategy = _make_scheduler(
         scanned=["005930"], buy_results={"005930": Signal.BUY},
     )
+
+    # execute_buy 가 실제 OrderEngine 처럼 pending_buys 에 ticker 등록하도록 모킹
+    async def _mock_execute_buy(ticker, current_price, st):
+        st.state.pending_buys.add(ticker)
+    sched.order_engine.execute_buy.side_effect = _mock_execute_buy
 
     fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
 
@@ -372,6 +380,10 @@ async def test_swing_poll_subscribe_failure_does_not_crash_loop():
         buy_results={"005930": Signal.BUY, "000660": Signal.BUY},
     )
 
+    async def _mock_execute_buy(ticker, current_price, st):
+        st.state.pending_buys.add(ticker)
+    sched.order_engine.execute_buy.side_effect = _mock_execute_buy
+
     fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
 
     async def _flaky_subscribe(*args, **kwargs):
@@ -391,6 +403,85 @@ async def test_swing_poll_subscribe_failure_does_not_crash_loop():
     # subscribe 가 raise 해도 execute_buy 는 두 종목 모두 호출되었어야 함
     assert sched.order_engine.execute_buy.call_count == 2, (
         "subscribe 실패가 매수 사이클을 깨면 안 됨"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Case 10 (Codex 추가검토 1): execute_buy 가 raise 하면 subscribe 생략
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_subscribe_skipped_when_buy_raises():
+    """execute_buy 가 예외를 던지면 WS subscribe 를 호출하면 안 된다.
+
+    결함: 기존 코드는 execute_buy raise 후 무조건 subscribe → 매수 실패 종목까지
+    HIGH bypass 슬롯 점유 → MAX_SUBSCRIPTIONS=41 한도 압박, 다음 5분 _scan_loop
+    까지 좀비 구독 잔존.
+    """
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+
+    async def _raise_execute_buy(*args, **kwargs):
+        raise RuntimeError("KIS API 일시 오류")
+    sched.order_engine.execute_buy.side_effect = _raise_execute_buy
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-12 09:05:30"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)), \
+         patch("src.engine.scanner.kis_ws.subscribe", new=AsyncMock()) as mock_subscribe:
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    assert sched.order_engine.execute_buy.call_count == 1
+    matching = [
+        c for c in mock_subscribe.call_args_list
+        if c.args[0] == "H0UNCNT0" and c.args[1] == "005930"
+    ]
+    assert len(matching) == 0, (
+        f"execute_buy raise 시 WS subscribe 호출되면 안 됨. 실제 호출={matching}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_swing_poll_subscribe_skipped_when_buy_rejected_no_pending():
+    """execute_buy 가 return 했지만 pending_buys/positions 양쪽 모두 등록 안 됐으면 skip.
+
+    cooldown / 락 / 자금부족 등으로 OrderEngine 이 조용히 return 하는 케이스.
+    place_order 자체가 호출되지 않아 pending_buys 등록도 없으므로 subscribe 도 생략.
+    """
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+
+    # execute_buy 가 정상 return 하지만 pending_buys/positions 어느 쪽도 등록 안 함
+    async def _silent_reject(*args, **kwargs):
+        return None
+    sched.order_engine.execute_buy.side_effect = _silent_reject
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-12 09:05:30"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)), \
+         patch("src.engine.scanner.kis_ws.subscribe", new=AsyncMock()) as mock_subscribe:
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    assert sched.order_engine.execute_buy.call_count == 1
+    matching = [
+        c for c in mock_subscribe.call_args_list
+        if c.args[0] == "H0UNCNT0" and c.args[1] == "005930"
+    ]
+    assert len(matching) == 0, (
+        "execute_buy 가 pending_buys/positions 등록 없이 return 하면 subscribe 생략 필요"
     )
 
 
