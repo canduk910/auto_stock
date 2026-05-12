@@ -46,7 +46,10 @@ _REJECT_KEYWORDS_UPPER = (
     "LIMIT", "EXCEED", "DUPLICATE",
 )
 _REJECT_KEYWORDS_KO = (
-    "한도", "초과", "이미", "중복", "허용되지", "권한",
+    # N (2026-05-12) — "이미" 제거: ALREADY IN SUBSCRIBE / "이미 구독" / "이미 등록" 은
+    # KIS 측 "이미 활성" 의미로 거절 분기 진입 *전* `_handle_raw` 의 ALREADY 가드가
+    # 흡수한다. "이미" 는 다른 정상 메시지에도 광범위하게 출현하는 위양성 키워드.
+    "한도", "초과", "중복", "허용되지", "권한",
 )
 
 
@@ -339,16 +342,39 @@ class KisWebSocket:
                         await self._ws.send(raw)
                     return
 
-                # 구독 거절 응답 감지 → 해당 구독 제거 (E2, 2026-05-12)
-                # rt_cd != "0" / msg1 키워드(영문 ERROR/FAIL/REJECT/NOT ALLOWED/LIMIT/
-                # EXCEED/DUPLICATE, 한국어 한도/초과/이미/중복/허용되지/권한) 매칭 시
-                # _subscriptions 정합성 회복 + [ws_subscribe_reject] 영구 로그.
-                # 다음 5분 _scan_loop 사이클에서 E1 우선순위 큐로 자연 재시도된다.
                 msg1 = body.get("msg1", "")
                 rt_cd = body.get("rt_cd")
+                msg_cd = body.get("msg_cd", "")
+                tr_key = header.get("tr_key", "")
+
+                # N (2026-05-12) — ALREADY IN SUBSCRIBE 가드 (거절 분기 *전*)
+                # `OPSP0002 ALREADY IN SUBSCRIBE` 응답은 rt_cd=1 이지만 거절이 아니라
+                # "KIS 측 이미 활성" 의미. 거절로 분류해 `_subscriptions.discard` 하면
+                # 다음 `_scan_loop` 가 재구독 → 또 ALREADY → 무한 루프 + tick_coverage
+                # stale 위양성 폭증 (2026-05-12 운영 사고). KIS 측 활성 의미로 받아
+                # 우리 set 정합성을 회복한다.
+                upper_msg1 = msg1.upper()
+                already = (
+                    msg_cd == "OPSP0002"
+                    or "ALREADY" in upper_msg1
+                    or "이미 구독" in msg1
+                    or "이미 등록" in msg1
+                )
+                if already:
+                    self._subscriptions.add((tr_id, tr_key))
+                    self._subscriptions_acked.add((tr_id, tr_key))
+                    logger.info(
+                        "WebSocket 구독 이미 활성(KIS 측): tr_id=%s, tr_key=%s, msg_cd=%s, msg1=%s",
+                        tr_id, tr_key, msg_cd, msg1,
+                    )
+                    return
+
+                # 구독 거절 응답 감지 → 해당 구독 제거 (E2, 2026-05-12)
+                # rt_cd != "0" / msg1 키워드(영문 ERROR/FAIL/REJECT/NOT ALLOWED/LIMIT/
+                # EXCEED/DUPLICATE, 한국어 한도/초과/중복/허용되지/권한) 매칭 시
+                # _subscriptions 정합성 회복 + [ws_subscribe_reject] 영구 로그.
+                # 다음 5분 _scan_loop 사이클에서 E1 우선순위 큐로 자연 재시도된다.
                 if _is_rejection_response(rt_cd, msg1):
-                    tr_key = header.get("tr_key", "")
-                    msg_cd = body.get("msg_cd", "")
                     logger.error(
                         "WebSocket 구독 거절: tr_id=%s, tr_key=%s, rt_cd=%s, msg_cd=%s, msg=%s",
                         tr_id, tr_key, rt_cd, msg_cd, msg1,
@@ -372,8 +398,7 @@ class KisWebSocket:
                 # G1 (2026-05-12) — 정상 SUBSCRIBE SUCCESS 응답 카운트 별도 추적.
                 # KIS REST/WS 어디에도 슬롯 사용현황 조회 API 미존재 → 우리 측 도구로 가시화.
                 # rt_cd=="0" + msg1 에 "SUBSCRIBE SUCCESS" 포함 시 _subscriptions_acked add.
-                if rt_cd == "0" and "SUBSCRIBE SUCCESS" in msg1.upper():
-                    tr_key = header.get("tr_key", "")
+                if rt_cd == "0" and "SUBSCRIBE SUCCESS" in upper_msg1:
                     self._subscriptions_acked.add((tr_id, tr_key))
                     logger.info(
                         "WebSocket 구독 ACK: tr_id=%s, tr_key=%s", tr_id, tr_key,

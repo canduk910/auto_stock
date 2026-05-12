@@ -93,15 +93,17 @@ def ws_with_subscription():
 
 
 # ---------------------------------------------------------------------------
-# Case A — rt_cd != "0" + 한국어 msg1 ("이미 등록된 종목")
+# Case A — rt_cd != "0" + 한국어 msg1 (진짜 거절: "중복 등록")
+# N (2026-05-12) 이후로 "이미 등록"/"이미 구독" 은 ALREADY 가드(거절 분기 *전*)에
+# 흡수되므로 본 케이스는 다른 진짜 거절 키워드(중복)로 재구성.
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_case_a_rt_cd_nonzero_already_registered_discards_and_logs(
+async def test_case_a_rt_cd_nonzero_duplicate_discards_and_logs(
     ws_with_subscription, patched_write_log, caplog
 ):
     raw = _make_reject_raw(
         "H0UNCNT0", "005930", rt_cd="1", msg_cd="OPSP0007",
-        msg1="이미 등록된 종목입니다",
+        msg1="중복 등록된 종목입니다",
     )
     with caplog.at_level(logging.ERROR, logger="src.realtime.websocket"):
         await ws_with_subscription._handle_raw(raw)
@@ -125,7 +127,7 @@ async def test_case_a_rt_cd_nonzero_already_registered_discards_and_logs(
     assert "tr_key=005930" in log_msg
     assert "rt_cd=1" in log_msg
     assert "msg_cd=OPSP0007" in log_msg
-    assert "이미 등록된 종목입니다" in log_msg
+    assert "중복 등록된 종목입니다" in log_msg
 
 
 # ---------------------------------------------------------------------------
@@ -306,9 +308,11 @@ async def test_case_h_pipe_delimited_realtime_data_skips_json_branch(
 async def test_case_i_duplicate_rejection_is_idempotent(
     ws_with_subscription, patched_write_log
 ):
+    # N (2026-05-12) — "이미 등록"은 ALREADY 가드로 흡수되므로 진짜 거절 키워드
+    # ("중복")로 본 멱등 케이스 재구성.
     raw = _make_reject_raw(
         "H0UNCNT0", "005930", rt_cd="1", msg_cd="OPSP0007",
-        msg1="이미 등록된 종목입니다",
+        msg1="중복 등록된 종목입니다",
     )
     await ws_with_subscription._handle_raw(raw)
     # 두 번째 호출 — 예외 없이 멱등
@@ -331,7 +335,7 @@ async def test_write_log_failure_does_not_break_handle_raw(
 
     raw = _make_reject_raw(
         "H0UNCNT0", "005930", rt_cd="1", msg_cd="OPSP0007",
-        msg1="이미 등록",
+        msg1="중복 등록",
     )
     with caplog.at_level(logging.ERROR, logger="src.realtime.websocket"):
         await ws_with_subscription._handle_raw(raw)  # 예외 전파 없어야 함
@@ -339,3 +343,167 @@ async def test_write_log_failure_does_not_break_handle_raw(
     # discard 는 여전히 수행됨 (정합성 회복 우선)
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
     assert failing.await_count == 1
+
+
+# ---------------------------------------------------------------------------
+# Case N1 — OPSP0002 ALREADY IN SUBSCRIBE (N, 2026-05-12)
+# rt_cd=1 이지만 거절이 아니라 "KIS 측 이미 활성" 의미 → 거절 분기 진입 *전* 흡수.
+# _subscriptions / _subscriptions_acked 모두 add, ERROR 로그 없음, write_log 미호출.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_case_n1_already_in_subscribe_opsp0002_is_not_rejection(
+    patched_write_log, caplog
+):
+    ws = KisWebSocket()
+    # 사전 _subscriptions 비어있는 상태에서도 정합성 회복 add 가 수행돼야 함
+    raw = _make_reject_raw(
+        "H0UNCNT0", "005930", rt_cd="1", msg_cd="OPSP0002",
+        msg1="ALREADY IN SUBSCRIBE",
+    )
+    with caplog.at_level(logging.INFO, logger="src.realtime.websocket"):
+        await ws._handle_raw(raw)
+
+    # KIS 측 활성 → 우리 set 정합성 회복
+    assert ("H0UNCNT0", "005930") in ws._subscriptions
+    assert ("H0UNCNT0", "005930") in ws._subscriptions_acked
+    # 거절 ERROR 로그 없음
+    assert not any(
+        rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        for rec in caplog.records
+    ), "ALREADY IN SUBSCRIBE 는 거절 ERROR 로그를 만들지 않아야 함"
+    # write_log [ws_subscribe_reject] 미호출
+    assert patched_write_log.await_count == 0
+    # INFO 로그 "이미 활성" 발생
+    assert any(
+        rec.levelno == logging.INFO and "이미 활성" in rec.getMessage()
+        for rec in caplog.records
+    ), "ALREADY IN SUBSCRIBE 는 INFO '이미 활성' 로그를 남겨야 함"
+
+
+# ---------------------------------------------------------------------------
+# Case N2 — msg_cd 없이 한국어 "이미 구독된 종목입니다" (N, 2026-05-12)
+# 1번 분기(ALREADY/이미 구독/이미 등록 매칭)로 흡수되어 거절 처리 안 됨.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_case_n2_korean_already_subscribed_is_not_rejection(
+    patched_write_log, caplog
+):
+    ws = KisWebSocket()
+    raw = _make_reject_raw(
+        "H0UNCNT0", "005930", rt_cd="1", msg_cd="",
+        msg1="이미 구독된 종목입니다",
+    )
+    with caplog.at_level(logging.INFO, logger="src.realtime.websocket"):
+        await ws._handle_raw(raw)
+
+    assert ("H0UNCNT0", "005930") in ws._subscriptions
+    assert ("H0UNCNT0", "005930") in ws._subscriptions_acked
+    assert not any(
+        rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        for rec in caplog.records
+    )
+    assert patched_write_log.await_count == 0
+
+
+# ---------------------------------------------------------------------------
+# Case N3 — msg_cd 없이 한국어 "이미 등록되어 있습니다" (N, 2026-05-12)
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_case_n3_korean_already_registered_is_not_rejection(
+    patched_write_log, caplog
+):
+    ws = KisWebSocket()
+    raw = _make_reject_raw(
+        "H0UNCNT0", "005930", rt_cd="1", msg_cd="",
+        msg1="이미 등록되어 있습니다",
+    )
+    with caplog.at_level(logging.INFO, logger="src.realtime.websocket"):
+        await ws._handle_raw(raw)
+
+    assert ("H0UNCNT0", "005930") in ws._subscriptions
+    assert ("H0UNCNT0", "005930") in ws._subscriptions_acked
+    assert not any(
+        rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        for rec in caplog.records
+    )
+    assert patched_write_log.await_count == 0
+
+
+# ---------------------------------------------------------------------------
+# Case N4 — _REJECT_KEYWORDS_KO 에서 "이미" 제거 후 기존 ERROR/FAIL/REJECT/
+# 한도/초과/중복/허용되지/권한 키워드는 여전히 거절로 매칭 (회귀 보호)
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    "msg1",
+    [
+        "한도 초과",
+        "중복 등록",
+        "허용되지 않은 요청",
+        "권한 없음",
+        "ERROR something",
+        "FAIL TO SUBSCRIBE",
+        "REJECT",
+        "NOT ALLOWED",
+        "LIMIT EXCEEDED",
+        "DUPLICATE",
+    ],
+)
+def test_case_n4_reject_keywords_after_imi_removed(msg1):
+    from src.realtime.websocket import _is_rejection_response, _REJECT_KEYWORDS_KO
+
+    # "이미" 는 광범위 위양성 키워드이므로 제거됐어야 함
+    assert "이미" not in _REJECT_KEYWORDS_KO
+
+    # rt_cd="0" 으로 키워드 단독 매칭 검증
+    assert _is_rejection_response("0", msg1) is True, (
+        f"키워드 단독 매칭 거절 회귀: msg1={msg1!r}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Case N5 — 진짜 거절 응답 (rt_cd=1 + 다른 msg_cd + "구독 한도 초과") 회귀
+# ALREADY 가드에 흡수되지 않고 기존 거절 분기로 정상 처리.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_case_n5_real_rejection_still_discards(
+    ws_with_subscription, patched_write_log, caplog
+):
+    raw = _make_reject_raw(
+        "H0UNCNT0", "005930", rt_cd="1", msg_cd="OPSP0001",
+        msg1="구독 한도 초과",
+    )
+    with caplog.at_level(logging.ERROR, logger="src.realtime.websocket"):
+        await ws_with_subscription._handle_raw(raw)
+
+    assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
+    assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions_acked
+    assert patched_write_log.await_count == 1
+    log_msg = patched_write_log.await_args.args[1]
+    assert "[ws_subscribe_reject]" in log_msg
+    assert "구독 한도 초과" in log_msg
+
+
+# ---------------------------------------------------------------------------
+# Case N6 — 정상 SUBSCRIBE SUCCESS (rt_cd=0) 회귀
+# ALREADY 가드와 무관하게 기존 G1 ACK 추적 흐름 그대로.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_case_n6_subscribe_success_regression(
+    patched_write_log, caplog
+):
+    ws = KisWebSocket()
+    raw = json.dumps({
+        "header": {"tr_id": "H0UNCNT0", "tr_key": "005930"},
+        "body": {"rt_cd": "0", "msg_cd": "OPSP0000", "msg1": "SUBSCRIBE SUCCESS"},
+    })
+    with caplog.at_level(logging.INFO, logger="src.realtime.websocket"):
+        await ws._handle_raw(raw)
+
+    # G1 ACK
+    assert ("H0UNCNT0", "005930") in ws._subscriptions_acked
+    # 거절 처리 없음
+    assert not any(
+        rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        for rec in caplog.records
+    )
+    assert patched_write_log.await_count == 0

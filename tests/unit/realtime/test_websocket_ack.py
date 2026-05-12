@@ -50,7 +50,7 @@ def _make_success_raw(tr_id: str, tr_key: str, *, msg1: str = "SUBSCRIBE SUCCESS
     })
 
 
-def _make_reject_raw(tr_id: str, tr_key: str, *, rt_cd: str = "1", msg1: str = "이미 등록") -> str:
+def _make_reject_raw(tr_id: str, tr_key: str, *, rt_cd: str = "1", msg1: str = "중복 등록") -> str:
     return json.dumps({
         "header": {"tr_id": tr_id, "tr_key": tr_key},
         "body": {"rt_cd": rt_cd, "msg_cd": "OPSP0007", "msg1": msg1},
@@ -164,7 +164,9 @@ async def test_case_d_rejection_discards_from_acked():
     # 이전 ACK 가 있었다고 가정 (재구독 후 거절 케이스)
     ws._subscriptions_acked = {("H0UNCNT0", "005930")}
 
-    raw = _make_reject_raw("H0UNCNT0", "005930", rt_cd="1", msg1="이미 등록된 종목")
+    # N (2026-05-12) — "이미 등록"은 ALREADY 가드(거절 분기 *전*)에 흡수되므로
+    # 진짜 거절 키워드("중복")로 본 케이스 재구성.
+    raw = _make_reject_raw("H0UNCNT0", "005930", rt_cd="1", msg1="중복 등록된 종목")
     await ws._handle_raw(raw)
 
     # E2 동작: _subscriptions 에서도 discard
