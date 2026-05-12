@@ -107,6 +107,61 @@ async def test_tick_coverage_warning_when_stale_ratio_high(caplog):
 # ===========================================================================
 # 가설 D: [tradable_skip] 분당 1회 emit
 # ===========================================================================
+# ===========================================================================
+# 가설 D: [tradable_skip] 첫 60s 안에 emit 금지 (Codex 추가검토 2)
+# ===========================================================================
+@pytest.mark.asyncio
+async def test_tradable_skip_does_not_emit_on_first_tick_within_60s(caplog):
+    """RiskManager 신규 인스턴스에서 첫 tick 후 60s 미경과면 emit 0회.
+
+    결함: `_last_tradable_emit_ts: float = 0.0` 초기화 → 첫 tradable=False tick 에서
+    `now - 0.0 > 60` 즉시 emit. 60s 누적 가드 무력. 가드를 추가해 첫 emit 도
+    충분한 누적 후 1회만 노출되어야 함.
+    """
+    from src.engine.risk import RiskManager
+    from src.engine.session import MarketBoard, session_tracker
+    from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
+    from src.engine.strategy_registry import StrategyRegistry
+
+    class _StubStrategy(StrategyBase):
+        async def prepare(self):
+            pass
+        def check_buy_signal(self, ticker, current_price, open_price):
+            return Signal.NONE
+        def check_exit_signal(self, ticker, current_price, open_price):
+            return Signal.NONE
+        def calc_buy_quantity(self, current_price):
+            return 0
+
+    registry = StrategyRegistry()
+    momentum = _StubStrategy(StrategyConfig(
+        strategy_id="momentum", name="MOM", weight=1.0, enabled=True,
+        params={"tradable_boards": ["krx_open", "main"]},
+    ))
+    registry.register(momentum)
+
+    with patch.object(session_tracker, "_active", frozenset({MarketBoard.POST_NXT})):
+        order_engine = MagicMock()
+        order_engine.execute_buy = AsyncMock()
+        order_engine.execute_sell = AsyncMock()
+
+        risk = RiskManager(registry, order_engine)
+
+        from src.engine import scanner
+        scanner.ticker_prev_close["005930"] = 70000
+
+        caplog.set_level(logging.INFO, logger="src.engine.risk")
+
+        # 신규 RiskManager — 첫 tick 들. 60s 미경과
+        for _ in range(10):
+            await risk.on_tick("005930", 75000, 70000, 7.14)
+
+    skip_msgs = [r.getMessage() for r in caplog.records if "[tradable_skip]" in r.getMessage()]
+    assert len(skip_msgs) == 0, (
+        f"신규 RiskManager 첫 60s 안에 [tradable_skip] emit 금지. 실제={skip_msgs}"
+    )
+
+
 @pytest.mark.asyncio
 async def test_tradable_skip_emit_per_minute(caplog):
     """is_tradable=False skip 카운트를 분당 1회 [tradable_skip] INFO 로그로 노출."""

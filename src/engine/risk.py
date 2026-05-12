@@ -119,8 +119,16 @@ class RiskManager:
         - 60s 미만 경과면 카운터만 누적
         - 60s 경과 시: 누적 카운트 + 활성 보드를 1행 INFO 로그로 노출 후 카운터/ts 초기화
         - active_boards 는 `session_tracker.active` 프로퍼티의 정렬된 board.value 리스트
+
+        Codex 추가검토 2 (2026-05-12): `_last_tradable_emit_ts=0.0` 초기화로
+        신규 RiskManager 의 첫 tick 에서 `now - 0.0 > 60` 즉시 emit 되던 결함 차단.
+        첫 호출 시점을 기준점으로 등록만 하고 emit 보류 — 이후 60s 누적 후 첫 emit.
         """
         now_ts = time.time()
+        # 첫 호출 가드 — 기준점만 등록하고 reset 없이 카운터는 누적 유지(다음 emit 으로 노출).
+        if self._last_tradable_emit_ts == 0.0:
+            self._last_tradable_emit_ts = now_ts
+            return
         if now_ts - self._last_tradable_emit_ts < 60.0:
             return
         if not self._tradable_skip_count:
