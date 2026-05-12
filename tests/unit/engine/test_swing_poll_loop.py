@@ -320,6 +320,81 @@ async def test_swing_poll_skips_when_strategy_disabled():
 
 
 # ---------------------------------------------------------------------------
+# Case 8 (Codex P1): execute_buy 호출 직후 즉시 WS subscribe 보장
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_subscribes_ticker_after_buy_signal():
+    """매수 신호 발사 직후 동일 ticker 를 WebSocket TICK 구독에 즉시 추가해야 한다.
+
+    안전 불변식: donchian_swing 보유 종목은 ATR 트레일링/-7% 하드 손절 평가가 필수.
+    매수 직후 다음 5분 _scan_loop 통합 구독까지 시세 무수신 구간 차단.
+    `bypass_limit=True` 로 MAX_SUBSCRIPTIONS=41 한도 무시 (positions HIGH 절대 보장 규약).
+    """
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-12 09:05:30"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)), \
+         patch("src.engine.scanner.kis_ws.subscribe", new=AsyncMock()) as mock_subscribe:
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    # execute_buy 1회 호출
+    assert sched.order_engine.execute_buy.call_count == 1
+    # WS subscribe 가 H0UNCNT0 + ticker + bypass_limit=True 로 호출되었는지
+    sub_calls = mock_subscribe.call_args_list
+    matching = [
+        c for c in sub_calls
+        if c.args[0] == "H0UNCNT0" and c.args[1] == "005930"
+        and c.kwargs.get("bypass_limit") is True
+    ]
+    assert len(matching) >= 1, (
+        f"매수 직후 H0UNCNT0/005930 bypass_limit=True subscribe 1회 이상 호출 필요. "
+        f"실제 호출={sub_calls}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_swing_poll_subscribe_failure_does_not_crash_loop():
+    """subscribe 가 예외를 던져도 매수 사이클 자체는 정상 종료.
+
+    매수는 이미 처리됐고, 시세 구독 실패는 다음 _scan_loop 5분 사이클에서 회복.
+    """
+    sched, strategy = _make_scheduler(
+        scanned=["005930", "000660"],
+        buy_results={"005930": Signal.BUY, "000660": Signal.BUY},
+    )
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    async def _flaky_subscribe(*args, **kwargs):
+        raise RuntimeError("WebSocket 일시 단절")
+
+    with freeze_time("2026-05-12 09:05:30"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)), \
+         patch("src.engine.scanner.kis_ws.subscribe", new=AsyncMock(side_effect=_flaky_subscribe)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        # asyncio.wait_for 가 예외 없이 정상 종료해야 함
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    # subscribe 가 raise 해도 execute_buy 는 두 종목 모두 호출되었어야 함
+    assert sched.order_engine.execute_buy.call_count == 2, (
+        "subscribe 실패가 매수 사이클을 깨면 안 됨"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Case 9 (Copilot P2): KST 윈도우 가드 검증 — UTC 서버에서도 KST 기준 동작
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio

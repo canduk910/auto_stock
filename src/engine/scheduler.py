@@ -1621,7 +1621,7 @@ class TradingScheduler:
         """
         from datetime import time as _time, datetime as _datetime
         from src.api.condition import fetch_stock_detail
-        from src.engine.scanner import KST_TZ as _KST
+        from src.engine.scanner import KST_TZ as _KST, TICK_TR_ID as _TICK_TR_ID, kis_ws as _kis_ws
         from src.engine.strategy_base import Signal as _Signal
 
         BUY_WINDOW_START = _time(9, 5)
@@ -1705,6 +1705,18 @@ class TradingScheduler:
                         bought += 1
                     except Exception:
                         logger.exception("[swing_poll] execute_buy 실패: %s", t)
+                    # Codex P1 (2026-05-12): 매수 신호 발사 직후 즉시 WS TICK 구독.
+                    # 안전 불변식: donchian_swing 보유 종목 ATR 트레일링/-7% 하드 손절 평가 필수.
+                    # 다음 5분 _scan_loop 통합 구독까지 시세 무수신 구간 차단.
+                    # `bypass_limit=True` — positions HIGH 절대 보장 규약과 동일.
+                    # 매수 실패 케이스에서도 무해 (다음 _scan_loop 가 자연 정리).
+                    try:
+                        await _kis_ws.subscribe(_TICK_TR_ID, t, bypass_limit=True)
+                    except Exception:
+                        logger.debug(
+                            "[swing_poll] 매수 직후 시세 구독 실패: %s (다음 _scan_loop 5분 사이클에서 회복)",
+                            t, exc_info=True,
+                        )
 
                 # KIS Rate Limit 보호 — 종목간 50ms 간격
                 await asyncio.sleep(0.05)
