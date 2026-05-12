@@ -886,6 +886,44 @@ class TradingScheduler:
 
             confirmed = sum(1 for t in tickers if _is_confirmed(strategy, t))
             logger.info("%s 시가 확정 [%s]: %d/%d종목", strategy.config.name, board, confirmed, len(tickers))
+            # 가설 C (2026-05-12): 보드별 시가 확정 상세 — confirmed/empty/sample 노출
+            self._emit_breakout_open_confirm(board, strategy)
+
+    def _emit_breakout_open_confirm(self, board: str, strategy) -> None:
+        """가설 C (2026-05-12) — `_confirm_breakout_open_prices` 직후 1행 INFO 로그.
+
+        형식: [breakout_open_confirm] board=BOARD strategy=SID confirmed=N empty=M sample={t:open_price,...}
+        - confirmed: open_price > 0 인 후보 수
+        - empty: open_price == 0 (시가 미확정) 후보 수
+        - sample: sorted(ticker) 처음 5개의 {ticker: open_price} dict
+        """
+        try:
+            status = strategy.get_targets_status()
+        except Exception:
+            logger.debug("[breakout_open_confirm] get_targets_status 실패", exc_info=True)
+            return
+        confirmed = 0
+        empty = 0
+        opens: dict[str, int] = {}
+        for ticker, info in (status or {}).items():
+            # 보드별 시가 우선, 없으면 단일 open_price
+            board_info = (info.get("boards") or {}).get(board) if isinstance(info, dict) else None
+            if isinstance(board_info, dict):
+                op = int(board_info.get("open_price") or 0)
+            else:
+                op = int(info.get("open_price") or 0) if isinstance(info, dict) else 0
+            opens[ticker] = op
+            if op > 0:
+                confirmed += 1
+            else:
+                empty += 1
+        sample_keys = sorted(opens.keys())[:5]
+        sample = {t: opens[t] for t in sample_keys}
+        sid = getattr(strategy, "strategy_id", None) or getattr(strategy.config, "strategy_id", "?")
+        logger.info(
+            "[breakout_open_confirm] board=%s strategy=%s confirmed=%d empty=%d sample=%s",
+            board, sid, confirmed, empty, sample,
+        )
 
     def _collect_breakout_tickers(self) -> list[str]:
         """돌파 전략(VB, MB)의 스캔 종목을 합산한다."""
@@ -1787,13 +1825,19 @@ class TradingScheduler:
             logger.debug("[stale_watcher] write_log 실패", exc_info=True)
 
     async def _report_tick_coverage(self) -> None:
-        """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D).
+        """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).
 
-        - 5분 주기 `_scan_loop` 사이클당 1행 노출 (`INFO` + `system_logs`, prefix `[tick_coverage]`)
+        - 5분 주기 `_scan_loop` 사이클당 1행 노출 (`INFO`/`WARNING` + `system_logs`)
         - 임계값 60초: SCAN_INTERVAL(300s) 내 1분 미수신은 시장 미체결 정상 가능,
           5분 미수신은 시세 문제 의심. 둘 다 카운트 노출
         - `ticker_last_tick` 키 부재 종목은 stale 로 카운트 (구독 직후 0초 경과 가능)
         - 본체 예외는 `_scan_loop` 흐름 보호 위해 흡수
+
+        확장(가설 B, 2026-05-12):
+        - `ratio=R%` — fresh / subscribed 비율 (1자리 소수)
+        - `stale_sample=[t1,t2,...]` — sorted(stale) 최대 10개
+        - `last_tick_avg_age=Xs` — 전체 평균 마지막 tick 경과시간(초). 키 없으면 -1
+        - stale_ratio > 0.30 이면 WARNING 레벨 (INFO 대신)
         """
         from datetime import datetime as _dt
         from src.engine.scanner import KST_TZ, ticker_last_tick
@@ -1804,20 +1848,40 @@ class TradingScheduler:
             now = _dt.now(KST_TZ)
             fresh_threshold = timedelta(seconds=60)
             min_dt = datetime.min.replace(tzinfo=KST_TZ)
-            fresh = sum(
-                1 for t in subscribed
-                if (now - ticker_last_tick.get(t, min_dt)) <= fresh_threshold
+            fresh_tickers: set[str] = set()
+            stale_tickers: list[str] = []
+            ages: list[float] = []
+            for t in subscribed:
+                last_tick = ticker_last_tick.get(t)
+                if last_tick is None:
+                    stale_tickers.append(t)
+                    # 키 없음 — 평균 계산에서 제외
+                    continue
+                age_s = (now - last_tick).total_seconds()
+                ages.append(age_s)
+                if (now - last_tick) <= fresh_threshold:
+                    fresh_tickers.add(t)
+                else:
+                    stale_tickers.append(t)
+            fresh = len(fresh_tickers)
+            stale = len(stale_tickers)
+            total = len(subscribed)
+            ratio_pct = round(100.0 * fresh / total, 1) if total > 0 else 0.0
+            stale_ratio = (stale / total) if total > 0 else 0.0
+            avg_age = round(sum(ages) / len(ages), 1) if ages else -1.0
+            stale_sample = sorted(stale_tickers)[:10]
+            msg = (
+                f"[tick_coverage] subscribed={total} fresh={fresh} stale={stale} "
+                f"ratio={ratio_pct}% stale_sample={stale_sample} "
+                f"last_tick_avg_age={avg_age}s"
             )
-            stale = len(subscribed) - fresh
-            logger.info(
-                "[tick_coverage] subscribed=%d fresh=%d stale=%d",
-                len(subscribed), fresh, stale,
-            )
+            level = "WARNING" if stale_ratio > 0.30 else "INFO"
+            if level == "WARNING":
+                logger.warning(msg)
+            else:
+                logger.info(msg)
             try:
-                await write_log(
-                    "INFO",
-                    f"[tick_coverage] subscribed={len(subscribed)} fresh={fresh} stale={stale}",
-                )
+                await write_log(level, msg)
             except Exception:
                 logger.debug("write_log [tick_coverage] 실패")
         except Exception:

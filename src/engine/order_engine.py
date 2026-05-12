@@ -92,7 +92,28 @@ class OrderEngine:
             return base
 
         if basics is None:
+            # 가설 E (2026-05-12) — 캐시 miss 시 1행 INFO 로그. 본 흐름(전략 기본 유지) 영향 없음.
+            try:
+                await write_log(
+                    "INFO",
+                    f"[stock_master_miss] ticker={ticker} strategy={strategy_id} "
+                    f"exchange_keep={base} reason=miss",
+                )
+            except Exception:
+                logger.debug("[stock_master_miss] write_log 실패", exc_info=True)
             return base  # cache miss — 보수적 fallback
+
+        # 가설 E (2026-05-12) — stale 캐시 가시화 (TTL 24h 초과). fire-and-forget.
+        try:
+            from src.db import stock_master as _sm
+            if await _sm.is_stale(ticker):
+                await write_log(
+                    "INFO",
+                    f"[stock_master_miss] ticker={ticker} strategy={strategy_id} "
+                    f"exchange_keep={base} reason=stale",
+                )
+        except Exception:
+            logger.debug("[stock_master_miss] stale 체크 실패", exc_info=True)
 
         if basics.nxt_tradable:
             return base

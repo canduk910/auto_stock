@@ -25,6 +25,9 @@ class RiskManager:
     def __init__(self, registry: StrategyRegistry, order_engine: OrderEngine) -> None:
         self.registry = registry
         self.order_engine = order_engine
+        # 가설 D (2026-05-12): tradable=False skip 카운터. 1분 1회 INFO 로그 + reset.
+        self._tradable_skip_count: dict[str, int] = {}
+        self._last_tradable_emit_ts: float = 0.0
 
     async def on_tick(
         self,
@@ -81,6 +84,11 @@ class RiskManager:
             # 4. 매수 신호 확인
             # 보드 가드 — 전략의 tradable_boards에 현재 활성 보드 포함 여부 (Phase 8)
             if not session_tracker.is_tradable(strategy.strategy_id, strategy.config.params):
+                # 가설 D (2026-05-12): skip 카운트 누적 + 1분 주기 [tradable_skip] emit
+                self._tradable_skip_count[strategy.strategy_id] = (
+                    self._tradable_skip_count.get(strategy.strategy_id, 0) + 1
+                )
+                self._maybe_emit_tradable_skip()
                 continue
 
             # 전략 간 중복 매수 방지: 보유/주문 중/당일 매도 모두 가로질러 차단
@@ -104,3 +112,29 @@ class RiskManager:
             if signal == Signal.BUY:
                 state.signal_count_today += 1
                 await self.order_engine.execute_buy(ticker, current_price, strategy)
+
+    def _maybe_emit_tradable_skip(self) -> None:
+        """가설 D (2026-05-12) — 분당 1회 [tradable_skip] INFO 로그 + 카운터 reset.
+
+        - 60s 미만 경과면 카운터만 누적
+        - 60s 경과 시: 누적 카운트 + 활성 보드를 1행 INFO 로그로 노출 후 카운터/ts 초기화
+        - active_boards 는 `session_tracker._active` 의 정렬된 board.value 리스트
+        """
+        now_ts = time.time()
+        if now_ts - self._last_tradable_emit_ts < 60.0:
+            return
+        if not self._tradable_skip_count:
+            self._last_tradable_emit_ts = now_ts
+            return
+        try:
+            active = sorted(b.value for b in session_tracker._active)
+        except Exception:
+            active = []
+        # 형식: [tradable_skip] momentum=X breakout=Y ltv=Z swing=W active_boards=[...]
+        # 누적된 strategy_id 알파벳 순으로 노출 (테스트 가시성)
+        parts = " ".join(
+            f"{sid}={cnt}" for sid, cnt in sorted(self._tradable_skip_count.items())
+        )
+        logger.info("[tradable_skip] %s active_boards=%s", parts, active)
+        self._tradable_skip_count.clear()
+        self._last_tradable_emit_ts = now_ts
