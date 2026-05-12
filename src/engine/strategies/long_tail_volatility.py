@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import date, datetime
 
@@ -207,15 +208,20 @@ class LongTailVolatilityStrategy(StrategyBase):
         min_trade = self.config.params["min_trade_amount"]
         max_stocks = self.config.params["max_scan_stocks"]
 
+        # KIS 거래량순위는 단일 페이지(~30건). BLNG_CLS_CODE 별로 다른 정렬 기준의
+        # 상위 종목 합집합 → 후보 풀 ~60~90종목으로 확장 (max_scan_stocks=100 활용도 향상)
+        #   0: 평균거래량 / 1: 거래증가율 / 3: 거래금액순 (KIS 표준)
+        BLNG_CODES = ("0", "1", "3")
         rank_items: list[dict] = []
-        for market in ["J"]:
+        seen_tickers: set[str] = set()
+        for blng in BLNG_CODES:
             try:
                 params = {
-                    "FID_COND_MRKT_DIV_CODE": market,
+                    "FID_COND_MRKT_DIV_CODE": "J",
                     "FID_COND_SCR_DIV_CODE": "20171",
                     "FID_INPUT_ISCD": "0000",
                     "FID_DIV_CLS_CODE": "0",
-                    "FID_BLNG_CLS_CODE": "0",
+                    "FID_BLNG_CLS_CODE": blng,
                     "FID_TRGT_CLS_CODE": "111111111",
                     "FID_TRGT_EXLS_CLS_CODE": "000000",
                     "FID_INPUT_PRICE_1": "0",
@@ -228,15 +234,24 @@ class LongTailVolatilityStrategy(StrategyBase):
                     "FHPST01710000",
                     params,
                 )
-                for item in data.get("output", []):
+                for item in data.get("output", []) or []:
                     name = item.get("hts_kor_isnm", "")
                     if any(kw in name for kw in ETF_KEYWORDS):
                         continue
+                    ticker = item.get("mksc_shrn_iscd", "")
+                    if not ticker or ticker in seen_tickers:
+                        continue
+                    seen_tickers.add(ticker)
                     rank_items.append(item)
             except KisApiError:
-                logger.warning("롱테일 변동성 돌파 거래량순위 조회 실패")
+                logger.warning("롱테일 변동성 돌파 거래량순위 조회 실패: blng=%s", blng)
+            # KIS Rate Limit 보호 — 호출간 50ms (kis_get Semaphore 가 20/s 직렬화하지만 burst 회피)
+            await asyncio.sleep(0.05)
 
-        logger.info("롱테일 변동성 돌파 유니버스 후보: %d종목", len(rank_items))
+        logger.info(
+            "롱테일 변동성 돌파 유니버스 후보: %d종목 (blng 0/1/3 합집합 dedupe)",
+            len(rank_items),
+        )
 
         filtered: list[str] = []
         for item in rank_items:
