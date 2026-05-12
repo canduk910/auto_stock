@@ -259,6 +259,65 @@ async def test_stock_master_miss_logs_when_cache_empty():
     assert "strategy=momentum" in msg
 
 
+@pytest.mark.asyncio
+async def test_stock_master_miss_stale_does_not_block_order_path():
+    """Codex 추가검토 4 (2026-05-12): stock_master.is_stale 호출이 주문 경로를 블록하지 않아야 한다.
+
+    결함: 기존 코드는 `_strategy_exchange_async` 안에서 `is_stale` 를 직접 await →
+    Supabase round-trip 1회가 시장가 매수/매도 latency 에 직접 합산됨.
+    수정: stale 체크/로깅을 `asyncio.create_task` 로 fire-and-forget 분리.
+    `_strategy_exchange_async` 호출 자체는 `is_stale` 완료 *전* 반환되어야 함.
+    """
+    import asyncio as _asyncio
+    from src.engine.order_engine import OrderEngine
+    from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
+    from src.engine.strategy_registry import StrategyRegistry
+
+    class _ST(StrategyBase):
+        async def prepare(self): pass
+        def check_buy_signal(self, *a): return Signal.NONE
+        def check_exit_signal(self, *a): return Signal.NONE
+        def calc_buy_quantity(self, p): return 0
+
+    registry = StrategyRegistry()
+    st = _ST(StrategyConfig(
+        strategy_id="momentum", name="M", weight=1.0, enabled=True,
+        params={"exchange": "NXT"},
+    ))
+    registry.register(st)
+    engine = OrderEngine(registry)
+
+    # `is_stale` 가 매우 느린 round-trip (0.3s) 을 시뮬레이션
+    is_stale_completed = _asyncio.Event()
+
+    async def _slow_is_stale(_t):
+        await _asyncio.sleep(0.3)
+        is_stale_completed.set()
+        return True
+
+    # stock_master.get 은 nxt_tradable=True 결과 반환 (stale 분기 진입은 별도 path)
+    class _Basics:
+        nxt_tradable = True
+
+    with patch("src.db.stock_master.get", new=AsyncMock(return_value=_Basics())), \
+         patch("src.db.stock_master.is_stale", new=_slow_is_stale), \
+         patch("src.engine.order_engine.write_log", new=AsyncMock()):
+        # _strategy_exchange_async 호출이 _slow_is_stale 완료 전에 반환되어야 함
+        result = await _asyncio.wait_for(
+            engine._strategy_exchange_async("momentum", ticker="005930"),
+            timeout=0.1,  # is_stale 의 0.3s 보다 짧은 timeout — fire-and-forget 면 통과
+        )
+
+    assert result == "NXT"
+    # 호출 직후 시점에는 is_stale 가 아직 완료 전이어야 함 (fire-and-forget 증거)
+    assert not is_stale_completed.is_set(), (
+        "_strategy_exchange_async 가 is_stale 완료를 기다리면 안 됨 (fire-and-forget 필요)"
+    )
+
+    # cleanup: 백그라운드 task 가 완료될 때까지 대기 (테스트 격리)
+    await _asyncio.sleep(0.4)
+
+
 # ===========================================================================
 # 가설 C: [breakout_open_confirm] — 보드별 시가 확정 후 카운트 노출
 # ===========================================================================
