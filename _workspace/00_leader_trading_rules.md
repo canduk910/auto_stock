@@ -43,7 +43,7 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   3. **swing 후보** — `_collect_swing_tickers()` (donchian_swing 고정 유니버스)
   4. **모멘텀 스캔** — `scan_stocks()` 결과
   5. **VB/LTV 후보** — `_collect_breakout_tickers()`
-- **drop 정책**: 잔여 슬롯(`MAX_SUBSCRIPTIONS - len(_subscriptions)`) 부족 시 후순위(swing → momentum → breakout)만 잘림. drop된 개수는 `[priority_drop] swing=X momentum=Y breakout=Z` INFO 로그 1행으로 노출.
+- **drop 정책**: 잔여 슬롯(`MAX_SUBSCRIPTIONS - len(_subscriptions)`) 부족 시 후순위(**breakout → momentum → swing**, G안 2026-05-12)만 잘림. drop된 개수는 다음 형식의 INFO 로그(+ WARNING system_logs 영구 저장) 1행으로 노출: `[priority_drop] breakout=X momentum=Y swing=Z total_subscribed=N max=41 high_count=H remaining=R` — donchian_swing 은 Pull 폴링(_swing_buy_poll_loop)으로 매수 평가하므로 슬롯 손실 안전. 변동성 돌파(VB/LTV) 후보를 우선 보장해 일중 매매 기회 확보.
 - **중복 제거**: 같은 종목이 여러 그룹에 있으면 HIGH 순위로 1회만 subscribe. 후순위 그룹에서는 이미 구독된 종목 skip.
 - **HIGH 단독 41 초과 시(이상 케이스)**: ERROR 로그 + `system_logs` 기록. 보유는 무조건 add (`bypass_limit=True`), 후순위는 0개. 운영자가 전략 비중을 줄여야 함.
 - **구현 통합 지점**:
@@ -266,6 +266,11 @@ VB와 동일.
 - **동시 보유**: 최대 5종목
 - **매매 보드**: MAIN만 (KRX 메인 한정)
 - **거래소 라우팅**: 기본 KRX
+- **매수 평가 채널 (G안, 2026-05-12)**: WebSocket on_tick 매수 평가 **제거**. `scheduler._swing_buy_poll_loop()` 가 09:05~09:30 KST **1분 주기**로 `fetch_stock_detail`(KIS REST) 폴링하여 매수 평가. 일봉 전략이라 실시간 tick 평가가 구조적 낭비였던 결함 차단 — 후보 50~150개의 WebSocket 슬롯을 변동성 돌파(VB/LTV) 후보에 양보.
+  - **보유 종목은 그대로 WebSocket(positions HIGH 그룹) 구독** → 청산(ATR 트레일링/-7% 하드)은 `risk.on_tick` 의 `check_exit_signal` 그대로 평가
+  - `risk.on_tick` 매수 평가 직전에 `if strategy_id == "donchian_swing": continue` 가드 (이중 안전망)
+  - `donchian_swing.check_buy_signal` 의 09:05~09:30 시간 가드 + `_bought_today` set 그대로 유지 (Pull 폴링도 중복 진입 방지)
+  - `[swing_poll] candidates=N filtered=M bought=K elapsed=T.Ts` INFO 로그 1행 / 사이클
 
 ### 청산
 - **하드 손절**: 매수가 대비 -7%

@@ -1,0 +1,308 @@
+"""donchian_swing — Pull 기반 매수 평가 (G안, 2026-05-12).
+
+배경: donchian_swing 은 일봉 전략이라 실시간 tick 이 구조적 낭비. 50~150개 후보를
+WebSocket 으로 구독해 momentum/breakout 시세 슬롯을 잠식하던 결함을 차단.
+
+새 동작: `_swing_buy_poll_loop()` 가 09:05~09:30 KST 1분 주기로 `fetch_stock_detail` 폴링.
+- 보유 종목은 그대로 WebSocket(positions HIGH 그룹) 으로 구독 → 청산은 on_tick
+- 매수만 Pull (1분 주기 1회)
+
+검증 사항:
+1. 09:05~09:30 사이 1사이클 발화 → execute_buy 1회 호출
+2. _bought_today 가드 — 같은 종목 중복 매수 차단
+3. is_ticker_blocked_for_buy=True → skip
+4. stck_oprc/stck_prpr=0 응답 → skip
+5. INFO 로그 `[swing_poll] candidates=N filtered=M bought=K elapsed=...`
+6. 09:30 이후 task 종료
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import contextlib
+import datetime as _datetime_module
+
+import pytest
+
+from src.engine.scheduler import TradingScheduler
+from src.engine.strategy_base import Position, Signal, StrategyBase, StrategyConfig
+from src.engine.strategy_registry import StrategyRegistry
+
+pytestmark = pytest.mark.unit
+
+
+@contextlib.contextmanager
+def freeze_time(iso: str, tick=False):
+    """freezegun 대안 — `datetime.now` 만 patch.
+
+    freezegun 은 monotonic 까지 freeze 해서 asyncio.sleep 이 절대 진행 안 함.
+    이 테스트에서는 매수 윈도우 시간 가드만 평가하면 되므로 datetime.now 만 patch.
+    """
+    base = _datetime_module.datetime.fromisoformat(iso)
+
+    class _FrozenDateTime(_datetime_module.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return base if tz is None else base.replace(tzinfo=tz)
+
+    real_dt = _datetime_module.datetime
+    _datetime_module.datetime = _FrozenDateTime
+    # 모듈 안에서 `from datetime import datetime` 한 곳에 영향 전파를 위해 직접 patch.
+    # scheduler / strategies 모두 모듈 임포트 시점에 datetime 을 캡쳐했으므로 동시 모킹 필요.
+    from src.engine import scheduler as _sched
+    from src.engine.strategies import donchian_swing as _ds
+
+    sched_dt = getattr(_sched, "datetime", None)
+    ds_dt = getattr(_ds, "datetime", None)
+    if sched_dt is real_dt:
+        _sched.datetime = _FrozenDateTime
+    if ds_dt is real_dt:
+        _ds.datetime = _FrozenDateTime
+    try:
+        yield
+    finally:
+        _datetime_module.datetime = real_dt
+        if sched_dt is real_dt:
+            _sched.datetime = real_dt
+        if ds_dt is real_dt:
+            _ds.datetime = real_dt
+
+
+class _FakeDonchianSwing(StrategyBase):
+    """donchian_swing 의 Pull 폴링 인터페이스만 모킹한 더블."""
+
+    def __init__(self, scanned: list[str], buy_results: dict[str, Signal] | None = None):
+        cfg = StrategyConfig(
+            strategy_id="donchian_swing", name="DS", weight=0.2, enabled=True,
+        )
+        super().__init__(cfg)
+        self._scanned_tickers = list(scanned)
+        self._bought_today: set[str] = set()
+        self._buy_results = buy_results or {}
+        self._candidates: dict[str, dict] = {t: {"prev_close": 10000, "atr": 100, "ema60": 9500, "donchian_high": 11000} for t in scanned}
+
+    async def prepare(self) -> None:
+        pass
+
+    def get_scanned_tickers(self) -> list[str]:
+        return list(self._scanned_tickers)
+
+    def check_buy_signal(self, ticker: str, current_price: int, open_price: int) -> Signal:
+        if ticker in self._bought_today:
+            return Signal.NONE
+        result = self._buy_results.get(ticker, Signal.NONE)
+        if result == Signal.BUY:
+            self._bought_today.add(ticker)
+        return result
+
+    def check_exit_signal(self, ticker, current_price, open_price):
+        return Signal.NONE
+
+    def calc_buy_quantity(self, current_price: int) -> int:
+        return 1
+
+
+def _make_scheduler(scanned: list[str], buy_results: dict[str, Signal]):
+    """TradingScheduler 인스턴스 + donchian_swing 더블 + order_engine mock."""
+    sched = TradingScheduler.__new__(TradingScheduler)
+    sched.registry = StrategyRegistry()
+    sched._pending_next_day_clear = set()
+    sched._running = True
+
+    strategy = _FakeDonchianSwing(scanned, buy_results)
+    sched.registry.register(strategy)
+
+    sched.order_engine = MagicMock()
+    sched.order_engine.execute_buy = AsyncMock()
+
+    return sched, strategy
+
+
+# ---------------------------------------------------------------------------
+# Case 1: 09:05~09:30 사이 1사이클 발화 + execute_buy 호출
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_executes_buy_in_window():
+    """09:05:30 시점에 BUY 신호 종목이 execute_buy 호출되어야 한다."""
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-12 09:05:30"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        # 1사이클만 발화 후 종료 시키기 위해 _running=False 토글하는 헬퍼 task
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    # execute_buy 가 정확히 1회 호출
+    assert sched.order_engine.execute_buy.call_count == 1
+    call = sched.order_engine.execute_buy.call_args
+    # 위치 인자: (ticker, current_price, strategy)
+    args = call.args
+    assert args[0] == "005930"
+    assert args[1] == 60000  # stck_prpr
+    assert args[2] is strategy
+
+
+# ---------------------------------------------------------------------------
+# Case 2: _bought_today 중복 가드 — 동일 종목 한 사이클 후 두 번째 사이클 skip
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_bought_today_prevents_duplicate():
+    """첫 사이클에서 매수한 종목은 두 번째 사이클에서 다시 매수하지 않는다."""
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    # _bought_today 에 이미 있으면 폴링이 skip 해야 함 — 그 사이클은 execute_buy 호출 0회
+    strategy._bought_today.add("005930")
+
+    with freeze_time("2026-05-12 09:10:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    assert sched.order_engine.execute_buy.call_count == 0, "_bought_today 가드로 skip 되어야 함"
+
+
+# ---------------------------------------------------------------------------
+# Case 3: is_ticker_blocked_for_buy=True → skip
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_skips_blocked_tickers():
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+
+    # registry.is_ticker_blocked_for_buy 가 True 반환하도록 패치
+    sched.registry.is_ticker_blocked_for_buy = MagicMock(return_value=True)
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+    with freeze_time("2026-05-12 09:10:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    assert sched.order_engine.execute_buy.call_count == 0, "is_ticker_blocked_for_buy=True → skip"
+
+
+# ---------------------------------------------------------------------------
+# Case 4: stck_oprc/stck_prpr=0 → skip
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_skips_zero_prices():
+    """fetch_stock_detail 가 0 또는 빈 값 반환 시 해당 종목 skip."""
+    sched, strategy = _make_scheduler(
+        scanned=["005930", "000660"],
+        buy_results={"005930": Signal.BUY, "000660": Signal.BUY},
+    )
+
+    def _detail_side_effect(ticker):
+        if ticker == "005930":
+            return {"stck_prpr": "0", "stck_oprc": "0"}
+        return {"stck_prpr": "180000", "stck_oprc": "179000"}
+
+    with freeze_time("2026-05-12 09:10:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(side_effect=_detail_side_effect)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    # 005930 skip, 000660 만 매수
+    calls = sched.order_engine.execute_buy.call_args_list
+    assert len(calls) == 1
+    assert calls[0].args[0] == "000660"
+
+
+# ---------------------------------------------------------------------------
+# Case 5: [swing_poll] INFO 로그 형식
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_emits_info_log(caplog):
+    sched, strategy = _make_scheduler(
+        scanned=["005930", "000660"],
+        buy_results={"005930": Signal.BUY, "000660": Signal.NONE},
+    )
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    caplog.set_level(logging.INFO, logger="src.engine.scheduler")
+
+    with freeze_time("2026-05-12 09:10:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    log_text = "\n".join(r.message for r in caplog.records)
+    assert "[swing_poll]" in log_text
+    assert "candidates=2" in log_text  # 전체 후보 2개
+    assert "bought=" in log_text  # 매수 발생 수
+    assert "elapsed=" in log_text
+
+
+# ---------------------------------------------------------------------------
+# Case 6: 09:30:01 이후 task 즉시 종료
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_terminates_after_window():
+    """09:30 초과 시 더 이상 폴링하지 않고 즉시 종료한다."""
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-12 09:31:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        # 명시적 stopper 없이도 즉시 종료해야 함 (5s 안에)
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+
+    # 매수 없음 — 윈도우 밖이므로
+    assert sched.order_engine.execute_buy.call_count == 0
+
+
+# ---------------------------------------------------------------------------
+# Case 7: disabled donchian_swing → poll 즉시 종료
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_skips_when_strategy_disabled():
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+    strategy.config.enabled = False
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+    with freeze_time("2026-05-12 09:10:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    assert sched.order_engine.execute_buy.call_count == 0

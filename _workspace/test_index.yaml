@@ -42,13 +42,17 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/api/base.py:
@@ -97,14 +101,19 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -152,16 +161,21 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -201,13 +215,17 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/auth/__init__.py:
@@ -248,13 +266,17 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/auth/token.py:
@@ -302,16 +324,21 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -366,16 +393,21 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -429,16 +461,21 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
@@ -477,10 +514,13 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/db/log_reports.py:
@@ -516,10 +556,13 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/db/parameter_recommendations.py:
@@ -556,10 +599,13 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/db/positions.py:
@@ -598,13 +644,17 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/db/stock_master.py:
@@ -642,12 +692,16 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/db/strategy_config.py:
@@ -683,10 +737,13 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/db/supabase.py:
@@ -736,16 +793,21 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -786,10 +848,13 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/db/system_logs.py:
@@ -836,16 +901,21 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -887,13 +957,17 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/__init__.py:
     direct_tests:
@@ -931,11 +1005,15 @@ backend:
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_metrics_smoke.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_priority.py
@@ -974,10 +1052,13 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/order_engine.py:
@@ -1003,6 +1084,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -1018,8 +1100,11 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/recommendation_engine.py:
@@ -1057,8 +1142,11 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/recommendation_metrics.py:
@@ -1095,10 +1183,13 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/risk.py:
@@ -1124,6 +1215,8 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_tick_coverage.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
@@ -1139,6 +1232,8 @@ backend:
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
   src/engine/scanner.py:
     direct_tests:
@@ -1176,7 +1271,10 @@ backend:
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_subscription_source_counts.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
@@ -1193,9 +1291,11 @@ backend:
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
   src/engine/scheduler.py:
     direct_tests:
@@ -1229,8 +1329,11 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     transitive_tests:
@@ -1270,17 +1373,22 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
+    - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_session.py
     transitive_tests:
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_fallback_budget.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/strategies/__init__.py:
-    direct_tests: []
+    direct_tests:
+    - tests/unit/engine/test_swing_poll_loop.py
     transitive_tests: []
   src/engine/strategies/donchian_swing.py:
     direct_tests:
@@ -1308,6 +1416,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_strategy_fallback_budget.py
+    - tests/unit/engine/test_swing_poll_loop.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_history.py
@@ -1318,10 +1427,12 @@ backend:
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/strategies/long_tail_volatility.py:
@@ -1359,10 +1470,13 @@ backend:
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/strategies/momentum.py:
@@ -1400,10 +1514,13 @@ backend:
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/strategies/volatility_breakout.py:
@@ -1441,10 +1558,13 @@ backend:
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/engine/strategy.py:
@@ -1479,14 +1599,18 @@ backend:
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_base.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
+    - tests/unit/engine/test_swing_poll_loop.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_history.py
@@ -1523,12 +1647,16 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_registry.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_tick_coverage.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
@@ -1582,11 +1710,15 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/main.py:
@@ -1639,12 +1771,16 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     transitive_tests:
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/models/order.py:
@@ -1682,11 +1818,15 @@ backend:
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/models/recommendation.py:
@@ -1756,15 +1896,20 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -1805,13 +1950,17 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
   src/realtime/__init__.py:
@@ -1862,16 +2011,21 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -1882,6 +2036,8 @@ backend:
     direct_tests:
     - tests/contract/test_routes_realtime.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
+    - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
@@ -1928,12 +2084,15 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
   src/routes/__init__.py:
     direct_tests: []
@@ -2325,15 +2484,14 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-12T17:43:11.718830+09:00'
+generated_at: '2026-05-13T05:46:21.732461+09:00'
 stats:
   backend_modules: 62
-  backend_tests: 65
+  backend_tests: 70
   frontend_modules: 41
   frontend_tests: 18
   unmapped_modules:
   - src/__init__.py
-  - src/engine/strategies/__init__.py
   - src/engine/strategy.py
   - src/engine/util/__init__.py
   - src/models/__init__.py

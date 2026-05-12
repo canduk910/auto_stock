@@ -95,6 +95,11 @@ class RiskManager:
             if state.total_investment > 0 and current_price > state.total_investment:
                 continue
 
+            # G안 (2026-05-12): donchian_swing 매수 평가는 Pull 폴링(_swing_buy_poll_loop)에서만.
+            # WebSocket tick 흐름에서는 skip — 일봉 전략이라 실시간 tick 평가가 구조적 낭비.
+            # 청산(ATR 트레일링/하드 -7%)은 위 check_exit_signal 분기에서 정상 동작 — 영향 없음.
+            if strategy.strategy_id == "donchian_swing":
+                continue
             signal = strategy.check_buy_signal(ticker, current_price, open_price)
             if signal == Signal.BUY:
                 state.signal_count_today += 1
