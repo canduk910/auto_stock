@@ -117,7 +117,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 | `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | `_confirm_breakout_open_prices(board="main")` — VB/LTV가 KRX 09:00 시가로 보드별 별도 target_price 계산. 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목을 KRX 시장가로 일괄 청산 |
 | `TIME_SCAN_START` | 09:30 | 모멘텀 `scan_stocks()` + 통합 구독 |
 | `TIME_KRX_MAIN_BUY_STOP` | 15:20 | `_force_clear_main_only` — POST_NXT 미활성 전략만 청산, 활성 전략은 19:50까지 보유 |
-| `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감 → NXT 애프터 전환, 구독 유지 |
+| `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감 → NXT 애프터 전환, 구독 유지. **`_confirm_breakout_open_prices(board="post_nxt")` 명시 호출 (M, 2026-05-12)** — POST_NXT 시점엔 자동 결정(main 우선)이 SessionTracker 전환 race 가능. 누락 시 VB/LTV 후보의 `_targets[t]["boards"]["post_nxt"]["open_price"]` 영영 비어 "시가 대기" 좀비 잠복 (2026-05-12 사용자 보고 6종목 사례) |
 | `TIME_NXT_POST_BUY_STOP` / `TIME_RECOMMENDATION` | 19:50 | `buy_disabled = True` + `generate_recommendations()` |
 | `TIME_NXT_POST_CLOSE` | 20:00 | `unsubscribe_all()` |
 | `TIME_SETTLEMENT` | 20:10 | `_settle()` → `generate_daily_log_report()` → `_reset_daily_state()` 순서. **퍼널 카운터 초기화는 분석 *후*** (분석이 0을 수집하지 않도록 분리) |

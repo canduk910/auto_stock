@@ -356,6 +356,11 @@ class TradingScheduler:
             await self._wait_until(TIME_KRX_MAIN_CLOSE)
             self._phase = "post_nxt_trading"
             await write_log("INFO", "15:30 KRX 메인 마감 → NXT 애프터 전환")
+            # Phase 5 보드별 분리 (M, 2026-05-12) — POST_NXT 시가 확정 폴링.
+            # board="post_nxt" 명시: 자동 결정은 main 우선이라 SessionTracker 전환 race 회피.
+            # 누락 시 VB/LTV 후보의 `_targets[t]["boards"]["post_nxt"]["open_price"]` 영영 비어
+            # 사용자 화면에 "시가 대기" 종목 잠복 (2026-05-12 운영 사고).
+            await self._confirm_breakout_open_prices(board="post_nxt")
 
             # NXT 애프터에서도 _scan_loop 유지 (재구독은 보드별 화이트리스트로 결정 — Phase 8)
             if scan_task is None or scan_task.done():
