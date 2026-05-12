@@ -437,15 +437,17 @@ async def subscribe_filtered_stocks(
 
         total_dropped = sum(drop_counts.values())
         if total_dropped > 0:
-            # 확장 형식 (가설 A 가시성): total_subscribed/max/high_count/remaining 추가
+            # 확장 형식 (가설 A 가시성): total_subscribed/max/high_count/low_remaining 추가.
+            # Copilot P2 (2026-05-12): `low_remaining` 으로 의미 명확화(LOW 그룹 잔여 슬롯) +
+            # HIGH bypass 시 음수 노출 차단(`max(0, ...)`) — 대시보드 해석 혼동 방지.
             total_subscribed = len(kis_ws._subscriptions)
             high_count = len(set(positions) | set(next_day_clear))
-            remaining = MAX_SUBSCRIPTIONS - total_subscribed
+            low_remaining = max(0, MAX_SUBSCRIPTIONS - total_subscribed)
             drop_log = (
                 f"[priority_drop] breakout={drop_counts['breakout']} "
                 f"momentum={drop_counts['momentum']} swing={drop_counts['swing']} "
                 f"total_subscribed={total_subscribed} max={MAX_SUBSCRIPTIONS} "
-                f"high_count={high_count} remaining={remaining}"
+                f"high_count={high_count} low_remaining={low_remaining}"
             )
             logger.info(drop_log)
             # drop 발생은 운영 가시화 대상 — WARNING 영구 저장 (가설 A)

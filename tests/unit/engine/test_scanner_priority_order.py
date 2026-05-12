@@ -93,7 +93,10 @@ async def test_low_priority_drop_order_breakout_kept_swing_dropped(_fresh_ws_sub
     assert "total_subscribed=" in log_text
     assert "max=41" in log_text
     assert "high_count=0" in log_text
-    assert "remaining=" in log_text
+    # Copilot P2 (2026-05-12): low_remaining 으로 의미 명확화 + 음수 차단
+    assert "low_remaining=0" in log_text, "한도 소진 후 LOW 잔여 슬롯 0"
+    # 음수 노출 차단 검증
+    assert "low_remaining=-" not in log_text, "low_remaining 음수 노출 금지"
 
 
 # ---------------------------------------------------------------------------
@@ -167,6 +170,9 @@ async def test_priority_drop_writes_warning_to_system_logs(_fresh_ws_subscriptio
     assert "total_subscribed=" in drop_msg
     assert "max=41" in drop_msg
     assert "high_count=" in drop_msg
+    # Copilot P2: low_remaining 도 system_logs 영구 저장 메시지에 동기화
+    assert "low_remaining=" in drop_msg
+    assert "low_remaining=-" not in drop_msg, "low_remaining 음수 노출 금지"
 
 
 # ---------------------------------------------------------------------------
@@ -194,6 +200,52 @@ async def test_no_drop_no_warning_log(_fresh_ws_subscriptions):
 # ---------------------------------------------------------------------------
 # Case 5: HIGH 그룹(positions/next_day_clear) bypass_limit=True 절대 보장 회귀
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Case 6 (Copilot P2): HIGH bypass 시 low_remaining 음수 차단
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_priority_drop_log_low_remaining_never_negative_when_high_overflow(
+    _fresh_ws_subscriptions, caplog,
+):
+    """HIGH 50개(MAX_SUBSCRIPTIONS=41 초과) + LOW drop 발생 시 low_remaining=0 노출.
+
+    이전 `remaining = MAX - total_subscribed` 는 음수 노출 가능 → 대시보드 해석 혼동.
+    Copilot 피드백: `max(0, ...)` 로 clamp + `low_remaining` 로 의미 명확화.
+    """
+    caplog.set_level(logging.INFO, logger="src.engine.scanner")
+
+    positions = [f"P{i:03d}" for i in range(50)]  # HIGH 50개 (bypass_limit=True)
+    # LOW 그룹에 drop 발생을 유도해 로그 노출
+    swing = [f"S{i:03d}" for i in range(3)]
+    priority_groups = {
+        "positions": positions,
+        "next_day_clear": [],
+        "swing": swing,
+        "momentum": [],
+        "breakout": [],
+    }
+
+    with patch("src.db.system_logs.write_log", new=AsyncMock()) as mock_write:
+        await scanner_module.subscribe_filtered_stocks(
+            [], extra_tickers=[], priority_groups=priority_groups,
+        )
+
+    # 로그에서 low_remaining 값 검증 — 음수 불가, 0 으로 clamp
+    log_text = "\n".join(r.message for r in caplog.records)
+    assert "[priority_drop]" in log_text, "drop 발생 → priority_drop 로그 노출"
+    assert "low_remaining=0" in log_text, (
+        f"HIGH overflow 시에도 low_remaining=0 으로 clamp 필요. log={log_text}"
+    )
+    assert "low_remaining=-" not in log_text, "음수 노출 금지"
+
+    # system_logs 영구 저장 메시지도 동일 검증
+    drop_calls = [c for c in mock_write.call_args_list if "[priority_drop]" in str(c)]
+    assert len(drop_calls) >= 1
+    persisted = drop_calls[0].args[1]
+    assert "low_remaining=0" in persisted
+    assert "low_remaining=-" not in persisted
+
+
 @pytest.mark.asyncio
 async def test_high_group_bypass_limit_preserved(_fresh_ws_subscriptions):
     """positions 50개 + next_day_clear 10개 → 모두 add (한도 41 무시)."""
