@@ -1860,7 +1860,6 @@ class TradingScheduler:
             subscribed = kis_ws.get_subscribed_tickers()
             now = _dt.now(KST_TZ)
             fresh_threshold = timedelta(seconds=60)
-            min_dt = datetime.min.replace(tzinfo=KST_TZ)
             fresh_tickers: set[str] = set()
             stale_tickers: list[str] = []
             ages: list[float] = []
