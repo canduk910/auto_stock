@@ -19,26 +19,32 @@ logger = logging.getLogger(__name__)
 # Phase G2 (2026-05-13): KIS 표준코드(12자리, 예 "00000A000100") 마지막
 # 6자리 = KRX 단축코드(상장변경/병합 시 prefix 만 바뀜). stock_master 캐시
 # 의 PK 는 운영 시스템 전체와 동일한 6자리 KRX 코드로 통일한다.
-_TICKER_TAIL_RE = re.compile(r"(\d{6})$")
+_TICKER_TAIL_RE = re.compile(r"([A-Za-z0-9]{6})$")
 
 
 def _normalize_ticker(pdno: str | None) -> str:
     """KIS 표준코드(`00000A000100`)에서 KRX 6자리 단축코드 추출.
 
-    - 12자리 표준코드: 마지막 6자리 숫자만 추출
-    - 6자리 그대로: 변환 없이 반환
-    - None / 빈 문자열 / 6자리 숫자 미포함: 빈 문자열 반환
+    - 6자리 영숫자 입력: 변환 없이 그대로 보존 (KRX REIT/ETN/신주인수권 등 영문자 가능 — `scheduler._eager_refresh_stock_master_for_held_positions` 가드와 일관)
+    - 12자리 표준코드: 마지막 6자리(영숫자) 추출
+    - None / 빈 문자열 / 6자리 영숫자 미포함: 빈 문자열 반환
 
     결함 배경 (Phase G2, 2026-05-13):
     - 운영 DB stock_master.ticker = `00000A000100` (KIS pdno 그대로)
     - positions.ticker = `000100` (KRX 6자리)
     - `stock_master.get(ticker)` 항상 miss → Phase G NXT 사전 차단 무력화
+
+    Codex P2 (2026-05-13):
+    - 초기 구현은 `(\\d{6})$` 라 `K12345` 같은 6자리 영숫자 ticker 가 빈 문자열로 변환되어 동일 결함 재발 위험. 6자리 영숫자 단락 + 정규식 영숫자 확장으로 차단.
     """
     if not pdno:
         return ""
     s = str(pdno).strip()
     if not s:
         return ""
+    # 이미 6자리 영숫자 ticker 면 그대로 보존
+    if len(s) == 6 and s.isalnum():
+        return s
     m = _TICKER_TAIL_RE.search(s)
     return m.group(1) if m else ""
 
