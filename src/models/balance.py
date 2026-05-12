@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -16,6 +18,11 @@ class StockHolding(BaseModel):
     eval_amount: int           # evlu_amt
     eval_profit_loss: int      # evlu_pfls_amt
     eval_profit_rate: float    # evlu_pfls_rt
+    # J1 (2026-05-11) — stock_master(CTPF1002R 캐시) 조인.
+    # 미캐시/조회 예외 시 None — 프론트는 "확인중" 라벨 노출.
+    nxt_tradable: Optional[bool] = None
+    krx_halted: Optional[bool] = None
+    excg_dvsn_cd: Optional[str] = None
 
 
 class AccountSummary(BaseModel):

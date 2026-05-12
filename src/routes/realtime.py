@@ -1,4 +1,4 @@
-"""실시간 시세 구독 진단 라우트 — /api/realtime/* (G2, 2026-05-12).
+"""실시간 시세 구독 진단 라우트 — /api/realtime/* (G2/J2, 2026-05-12).
 
 KIS REST/WS 어디에도 슬롯 사용현황 조회 API 미존재 → 우리 측 도구로 가시화.
 
@@ -7,16 +7,23 @@ GET /api/realtime/subscriptions:
 - 최근 60초 내 tick 수신 (`fresh_60s`) / 미수신 (`stale_60s`) 카운트
 - `MAX_SUBSCRIPTIONS=41` 한도 + 누적 재연결 횟수 + WebSocket 활성 여부
 
-운영자가 단일 호출로 SEND→ACK→fresh 격차를 인지하고 한도 근접도 확인 가능.
+POST /api/realtime/resubscribe (J2, 2026-05-12):
+- 60초 미수신(stale) TICK 종목을 운영자가 즉시 일괄 재구독
+- F1 자동 재구독(재연결 후 60s)과 별개의 수동 트리거
+- `_subscriptions` set 은 보존 — `_send_subscribe(TICK_TR_ID, t, subscribe=True)` 만 호출
+- 호출 간 50ms sleep (Rate Limit 안전)
+- WebSocket 끊김 시 400 (재구독 메시지 발송 불가)
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
+from src.db.system_logs import write_log
 from src.models.response import ApiResponse
 
 logger = logging.getLogger(__name__)
@@ -78,3 +85,67 @@ async def get_subscriptions() -> ApiResponse:
         "ws_connected": kis_ws._ws is not None,
     }
     return ApiResponse(success=True, data=data, message="")
+
+
+@router.post("/resubscribe", response_model=ApiResponse)
+async def resubscribe_stale() -> ApiResponse:
+    """stale(60s 미수신) TICK 구독 종목을 즉시 일괄 재구독한다 (J2, 2026-05-12).
+
+    운영자가 ScanMonitor 의 끊김 배지를 확인하고 인라인 버튼을 눌러 호출.
+    F1 자동 재구독(재연결 후 60s)이 발화하지 않는 일반 운영 시간대(연결 유지 중)
+    에 stale 이 누적된 경우 즉시 회복.
+
+    안전 불변식:
+    - `_subscriptions` set 직접 수정 금지 — `_send_subscribe` 만 호출
+      (E2 거절 응답이 오면 자동으로 set 에서 discard 됨)
+    - 호출 간 50ms sleep — KIS WS Rate Limit 보호 (F1 메서드와 동일 패턴)
+    - WebSocket `_ws is None` 시 400 — 메시지 발송 불가하므로 조용히 200 반환 금지
+
+    응답:
+        data.resubscribed : 재구독 종목 수
+        data.tickers      : sorted ticker 리스트
+    """
+    # 지연 import — scanner 가 websocket 을 참조하므로 순환 의존 회피
+    from src.engine.scanner import TICK_TR_ID, ticker_last_tick
+    from src.realtime.websocket import VERIFY_FRESHNESS_SECS, kis_ws
+
+    # WebSocket 끊김 → 메시지 발송 불가 → 400 (조용한 200 금지)
+    if kis_ws._ws is None:
+        raise HTTPException(
+            status_code=400,
+            detail="WebSocket 연결 끊김 — 재구독 메시지 발송 불가. 자동 재연결 대기 후 재시도.",
+        )
+
+    # 현재 TICK 구독 집합 (SEND 기준, Phase D `get_subscribed_tickers`)
+    subscribed = kis_ws.get_subscribed_tickers()
+
+    now = datetime.now(_KST_TZ)
+    threshold = timedelta(seconds=VERIFY_FRESHNESS_SECS)
+    min_dt = datetime.min.replace(tzinfo=_KST_TZ)
+
+    # stale 추출 — last_tick 없으면 stale 로 간주 (F1 동일 규약)
+    stale = sorted(
+        t for t in subscribed
+        if (now - ticker_last_tick.get(t, min_dt)) > threshold
+    )
+
+    # 각 stale ticker 재구독 — `_send_subscribe` 만 사용
+    for ticker in stale:
+        await kis_ws._send_subscribe(TICK_TR_ID, ticker, subscribe=True)
+        await asyncio.sleep(0.05)  # Rate Limit 보호
+
+    # 영구 로그 — count=0 도 기록 (운영자가 빈 stale 도 확인 가능)
+    try:
+        await write_log(
+            "INFO",
+            f"[ws_manual_resubscribe] count={len(stale)} tickers={stale}",
+        )
+    except Exception:
+        # fire-and-forget — write_log 실패해도 재구독 응답은 유지
+        logger.debug("[ws_manual_resubscribe] write_log 실패", exc_info=True)
+
+    return ApiResponse(
+        success=True,
+        data={"resubscribed": len(stale), "tickers": stale},
+        message="",
+    )

@@ -14,7 +14,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 
 import { server } from "../../test/server";
@@ -157,5 +158,89 @@ describe("ScanMonitor — tick_coverage 색상 표시 (G3)", () => {
     await screen.findByText(/정상\s*27종목/);
     // 진행바 우측 한도 카운트 노출.
     expect(screen.getByText(/27\s*\/\s*41/)).toBeInTheDocument();
+  });
+});
+
+// ===========================================================================
+// J2 (2026-05-12) — stale 재구독 인라인 버튼
+// ===========================================================================
+describe("ScanMonitor — J2 stale 재구독 버튼", () => {
+  // -------------------------------------------------------------------------
+  // Case J2-F1 — stale > 0 일 때 재구독 버튼 노출
+  // -------------------------------------------------------------------------
+  it("Case J2-F1: stale=3 이면 '재구독' 버튼이 amber 톤으로 노출된다", async () => {
+    await renderScanMonitor(makeStatus({ total: 30, stale: 3, fresh: 27, acked: 26 }));
+
+    const button = await screen.findByRole("button", { name: /재구독/ });
+    expect(button).toBeInTheDocument();
+    // amber 톤 (border-amber 또는 text-amber)
+    expect(button.className).toMatch(/amber/);
+  });
+
+  // -------------------------------------------------------------------------
+  // Case J2-F2 — stale === 0 이면 버튼 미노출
+  // -------------------------------------------------------------------------
+  it("Case J2-F2: stale=0 이면 재구독 버튼이 노출되지 않는다", async () => {
+    await renderScanMonitor(makeStatus({ total: 30, stale: 0, fresh: 30, acked: 28 }));
+
+    // 끊김 0종목 텍스트는 보임 — 회귀 가드
+    await screen.findByText(/끊김\s*0종목/);
+    // 버튼은 절대 없음
+    expect(screen.queryByRole("button", { name: /재구독/ })).toBeNull();
+  });
+
+  // -------------------------------------------------------------------------
+  // Case J2-F3 — 클릭 시 mutation 호출 + 성공 메시지 노출
+  // -------------------------------------------------------------------------
+  it("Case J2-F3: 버튼 클릭 시 POST /api/realtime/resubscribe 호출 + 완료 메시지", async () => {
+    let postCalled = 0;
+    server.use(
+      http.post("/api/realtime/resubscribe", () => {
+        postCalled += 1;
+        return HttpResponse.json(
+          wrap({ resubscribed: 3, tickers: ["000660", "005930", "035720"] })
+        );
+      })
+    );
+
+    await renderScanMonitor(makeStatus({ total: 30, stale: 3, fresh: 27, acked: 26 }));
+
+    const button = await screen.findByRole("button", { name: /재구독/ });
+    const user = userEvent.setup();
+    await user.click(button);
+
+    await waitFor(() => expect(postCalled).toBe(1));
+    // 인라인 성공 메시지
+    await screen.findByText(/3종목 재구독 완료/);
+  });
+
+  // -------------------------------------------------------------------------
+  // Case J2-F4 — pending 중 disabled
+  // -------------------------------------------------------------------------
+  it("Case J2-F4: 호출 진행 중에는 버튼이 disabled 상태가 된다", async () => {
+    let resolveResponse!: () => void;
+    server.use(
+      http.post("/api/realtime/resubscribe", async () => {
+        await new Promise<void>((res) => {
+          resolveResponse = res;
+        });
+        return HttpResponse.json(wrap({ resubscribed: 1, tickers: ["005930"] }));
+      })
+    );
+
+    await renderScanMonitor(makeStatus({ total: 30, stale: 1, fresh: 29, acked: 28 }));
+
+    const button = await screen.findByRole("button", { name: /재구독/ });
+    const user = userEvent.setup();
+    await user.click(button);
+
+    // pending 중 disabled
+    await waitFor(() =>
+      expect((button as HTMLButtonElement).disabled).toBe(true)
+    );
+
+    // 응답 해제 후 정상 활성화 복귀(메시지 노출)
+    resolveResponse();
+    await screen.findByText(/1종목 재구독 완료/);
   });
 });

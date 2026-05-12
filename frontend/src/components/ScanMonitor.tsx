@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { BuySignal, ScanStats } from '../types/trading'
+import { resubscribeStale } from '../api/realtime'
 
 interface BoardTarget {
   open_price: number
@@ -112,8 +114,23 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [swingExpanded, setSwingExpanded] = useState(false)
   const [swingHelpOpen, setSwingHelpOpen] = useState(false)
+  // J2 (2026-05-12) — 수동 재구독 결과 인라인 메시지
+  const [resubMsg, setResubMsg] = useState<string | null>(null)
 
   const { data: status } = useTradingStatus()
+
+  const queryClient = useQueryClient()
+  // J2 — stale 재구독 mutation. 성공 시 trading-status invalidate 로 다음 폴링 fresh 회복 확인
+  const resubMutation = useMutation({
+    mutationFn: resubscribeStale,
+    onSuccess: (data) => {
+      setResubMsg(`${data.resubscribed}종목 재구독 완료`)
+      queryClient.invalidateQueries({ queryKey: ['trading-status'] })
+    },
+    onError: (err: Error) => {
+      setResubMsg(`재구독 실패: ${err.message || '알 수 없는 오류'}`)
+    },
+  })
 
   const phase = status?.phase ?? 'idle'
   const scan = status?.scan
@@ -246,11 +263,25 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
 
               return (
                 <div className="mb-4 space-y-1.5">
-                  <div
-                    data-testid="tick-coverage-badge"
-                    className={`px-2 py-1 rounded text-xs font-medium ${badgeCls}`}
-                  >
-                    정상 {tcFresh}종목 · 끊김 {tcStale}종목 · 등록 {tcAcked}종목
+                  <div className="flex items-center gap-2">
+                    <div
+                      data-testid="tick-coverage-badge"
+                      className={`px-2 py-1 rounded text-xs font-medium ${badgeCls}`}
+                    >
+                      정상 {tcFresh}종목 · 끊김 {tcStale}종목 · 등록 {tcAcked}종목
+                    </div>
+                    {/* J2 (2026-05-12) — stale > 0 일 때만 인라인 재구독 버튼. F1 자동 재구독과
+                        별개의 운영자 수동 트리거. ConfirmModal 없는 read-mostly action. */}
+                    {tcStale > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => resubMutation.mutate()}
+                        disabled={resubMutation.isPending}
+                        className="text-xs px-2 py-0.5 rounded border border-amber-300 text-amber-800 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        재구독
+                      </button>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -264,6 +295,9 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                       {tcTotal} / {tcLimit}
                     </span>
                   </div>
+                  {resubMsg && (
+                    <div className="text-xs text-amber-700">{resubMsg}</div>
+                  )}
                 </div>
               )
             })()}

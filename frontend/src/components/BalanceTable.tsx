@@ -4,6 +4,7 @@ import { getBalance } from '../api/balance'
 import { manualSell } from '../api/trading'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
+import type { Holding } from '../types/balance'
 import ConfirmModal from './ConfirmModal'
 
 const STRATEGY_NAMES: Record<string, string> = {
@@ -11,6 +12,37 @@ const STRATEGY_NAMES: Record<string, string> = {
   volatility_breakout: '변동성돌파',
   long_tail_volatility: '롱테일 변동성',
   donchian_swing: '20일 신고가 스윙',
+}
+
+const MARKET_BADGE_BASE = 'inline-block px-1.5 py-0.5 rounded text-xs font-medium'
+
+/**
+ * 거래시장 배지 라벨/색상 결정 (J1, 2026-05-11).
+ *
+ * stock_master(CTPF1002R 캐시) 의 nxt_tradable/krx_halted 조합에 따라:
+ *   - true  && !halted → KRX+NXT (emerald)
+ *   - true  &&  halted → NXT만   (amber)
+ *   - false && !halted → KRX     (gray)
+ *   - false &&  halted → 정지    (red)
+ *   - 미캐시(null/undefined) → 확인중 (light-gray)
+ */
+function marketBadgeProps(h: Holding): { label: string; cls: string } {
+  const nxt = h.nxt_tradable
+  const halted = h.krx_halted
+  if (nxt == null && halted == null) {
+    return { label: '확인중', cls: `${MARKET_BADGE_BASE} bg-gray-50 text-gray-500` }
+  }
+  if (halted === true && nxt !== true) {
+    return { label: '정지', cls: `${MARKET_BADGE_BASE} bg-red-100 text-red-800` }
+  }
+  if (nxt === true && halted === true) {
+    return { label: 'NXT만', cls: `${MARKET_BADGE_BASE} bg-amber-100 text-amber-800` }
+  }
+  if (nxt === true && halted !== true) {
+    return { label: 'KRX+NXT', cls: `${MARKET_BADGE_BASE} bg-emerald-100 text-emerald-800` }
+  }
+  // nxt=false, !halted (또는 nxt=null && halted=false 등 부분 알려진 경우)
+  return { label: 'KRX', cls: `${MARKET_BADGE_BASE} bg-gray-100 text-gray-700` }
 }
 
 function profitColor(value: number): string {
@@ -151,6 +183,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="px-4 py-3 text-left font-medium text-gray-600">종목명</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600">거래시장</th>
               {isAll && (
                 <th className="px-4 py-3 text-left font-medium text-gray-600">전략</th>
               )}
@@ -166,7 +199,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
           <tbody>
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={isAll ? 9 : 8} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={isAll ? 10 : 9} className="px-4 py-8 text-center text-gray-400">
                   보유 종목이 없습니다.
                 </td>
               </tr>
@@ -174,9 +207,18 @@ export default function BalanceTable({ selectedStrategy }: Props) {
               filteredHoldings.map((h) => {
                 const stratKey = tickerStrategyMap[h.ticker]
                 const color = stratKey ? getStrategyColor(stratKey) : null
+                const market = marketBadgeProps(h)
                 return (
                   <tr key={h.ticker} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-700">{h.name}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        data-testid={`market-badge-${h.ticker}`}
+                        className={market.cls}
+                      >
+                        {market.label}
+                      </span>
+                    </td>
                     {isAll && (
                       <td className="px-4 py-3">
                         {color ? (

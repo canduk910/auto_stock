@@ -22,6 +22,102 @@ def test_balance_returns_holdings_and_summary(contract_env):
     assert "total_eval_amount" in data["summary"]
 
 
+def test_balance_holdings_include_stock_master_fields(contract_env, monkeypatch):
+    """J1: /api/balance Holding 응답에 stock_master 의 NXT/KRX 거래가능 필드가 join 되어야 한다.
+
+    - 보유 종목별 `stock_master.get(ticker)` 조회 결과를 합쳐
+      `nxt_tradable / krx_halted / excg_dvsn_cd` 3필드를 노출.
+    - 미캐시(None) 종목은 None 그대로 유지 (UI 가 "확인중" 표시).
+    - 캐시 조회 예외는 종목별 흡수 — 나머지 종목 계속.
+    """
+    from src.models.balance import AccountSummary, StockHolding
+    from src.models.stock import StockBasics
+
+    async def fake_get_balance():
+        contract_env.calls.get_balance.append({})
+        summary = AccountSummary(
+            deposit=10_000_000,
+            stock_eval_amount=2_160_000,
+            total_eval_amount=12_160_000,
+            net_asset=12_160_000,
+            purchase_total=2_000_000,
+            eval_total=2_160_000,
+            profit_loss_total=160_000,
+        )
+        holdings = [
+            StockHolding(
+                ticker="005930", name="삼성전자", quantity=10,
+                sellable_quantity=10, avg_price=70_000.0, purchase_amount=700_000,
+                current_price=72_000, eval_amount=720_000,
+                eval_profit_loss=20_000, eval_profit_rate=2.86,
+            ),
+            StockHolding(
+                ticker="012200", name="계양전기", quantity=5,
+                sellable_quantity=5, avg_price=8_000.0, purchase_amount=40_000,
+                current_price=8_500, eval_amount=42_500,
+                eval_profit_loss=2_500, eval_profit_rate=6.25,
+            ),
+            StockHolding(
+                ticker="900110", name="확인안된종목", quantity=1,
+                sellable_quantity=1, avg_price=1_000.0, purchase_amount=1_000,
+                current_price=1_100, eval_amount=1_100,
+                eval_profit_loss=100, eval_profit_rate=10.0,
+            ),
+            StockHolding(
+                ticker="999999", name="조회실패종목", quantity=1,
+                sellable_quantity=1, avg_price=1_000.0, purchase_amount=1_000,
+                current_price=1_100, eval_amount=1_100,
+                eval_profit_loss=100, eval_profit_rate=10.0,
+            ),
+        ]
+        return holdings, summary
+
+    async def fake_stock_master_get(ticker):
+        if ticker == "005930":
+            return StockBasics(
+                ticker="005930", name="삼성전자", excg_dvsn_cd="02",
+                nxt_tradable=True, krx_halted=False, admin_item=False,
+            )
+        if ticker == "012200":
+            return StockBasics(
+                ticker="012200", name="계양전기", excg_dvsn_cd="02",
+                nxt_tradable=False, krx_halted=False, admin_item=False,
+            )
+        if ticker == "900110":
+            return None  # 캐시 miss
+        if ticker == "999999":
+            raise RuntimeError("supabase down")
+        return None
+
+    monkeypatch.setattr("src.routes.balance.get_balance", fake_get_balance)
+    monkeypatch.setattr("src.routes.balance.stock_master_get", fake_stock_master_get, raising=False)
+
+    r = contract_env.client.get("/api/balance")
+    assert r.status_code == 200
+    holdings = r.json()["data"]["holdings"]
+    by_ticker = {h["ticker"]: h for h in holdings}
+
+    # 캐시 hit + NXT 가능
+    assert by_ticker["005930"]["nxt_tradable"] is True
+    assert by_ticker["005930"]["krx_halted"] is False
+    assert by_ticker["005930"]["excg_dvsn_cd"] == "02"
+
+    # 캐시 hit + NXT 불가
+    assert by_ticker["012200"]["nxt_tradable"] is False
+    assert by_ticker["012200"]["krx_halted"] is False
+    assert by_ticker["012200"]["excg_dvsn_cd"] == "02"
+
+    # 캐시 miss → None 유지
+    assert by_ticker["900110"]["nxt_tradable"] is None
+    assert by_ticker["900110"]["krx_halted"] is None
+    assert by_ticker["900110"]["excg_dvsn_cd"] is None
+
+    # 조회 예외 흡수 → None 으로 fallback, 응답 정상 (다른 종목 영향 없음)
+    assert by_ticker["999999"]["nxt_tradable"] is None
+    assert by_ticker["999999"]["krx_halted"] is None
+    assert by_ticker["999999"]["excg_dvsn_cd"] is None
+
+
 def test_balance_buyable_with_query_params(contract_env):
     r = contract_env.client.get("/api/balance/buyable?ticker=005930&price=70000")
     assert r.status_code == 200
