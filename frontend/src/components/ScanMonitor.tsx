@@ -250,14 +250,19 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                     data-testid="tick-coverage-badge"
                     className={`px-2 py-1 rounded text-xs font-medium ${badgeCls}`}
                   >
-                    fresh: {tcFresh} / stale: {tcStale} / acked: {tcAcked} / limit: {tcLimit}
+                    정상 {tcFresh}종목 · 끊김 {tcStale}종목 · 등록 {tcAcked}종목
                   </div>
-                  <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      data-testid="tick-coverage-progress"
-                      className={`h-full ${progressCls} transition-all`}
-                      style={{ width: `${tcRatioPct}%` }}
-                    />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        data-testid="tick-coverage-progress"
+                        className={`h-full ${progressCls} transition-all`}
+                        style={{ width: `${tcRatioPct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-500 tabular-nums">
+                      {tcTotal} / {tcLimit}
+                    </span>
                   </div>
                 </div>
               )

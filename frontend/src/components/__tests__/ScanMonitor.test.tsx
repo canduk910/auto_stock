@@ -2,7 +2,7 @@
  * ScanMonitor tick_coverage 색상 표시 (G3 프론트, 2026-05-12).
  *
  * 기존 `구독 중인 종목: N개` 표시 보존 + 옆/하단에 보조 정보 추가:
- *   `fresh: 23 / stale: 4 / acked: 25 / limit: 41`
+ *   `정상 23종목 · 끊김 4종목 · 등록 25종목` + 진행바 우측에 `27 / 41`
  *
  * 색상 규칙(stale 카운트 기반):
  *   stale === 0  → 기본 (회색/검정)
@@ -90,8 +90,8 @@ describe("ScanMonitor — tick_coverage 색상 표시 (G3)", () => {
   it("Case L: stale=0 이면 노란/빨간 배지가 보이지 않는다", async () => {
     await renderScanMonitor(makeStatus({ total: 30, stale: 0, fresh: 30, acked: 28 }));
 
-    // stale 카운트가 텍스트로 노출되어야 함 (보조 정보)
-    const staleText = await screen.findByText(/stale:\s*0/i);
+    // 끊김 카운트가 한글 라벨로 노출되어야 함 (보조 정보)
+    const staleText = await screen.findByText(/끊김\s*0종목/);
     expect(staleText).toBeInTheDocument();
 
     // 색상 배지는 yellow/red 클래스 미포함 — 부모 컨테이너의 className 검증
@@ -109,7 +109,7 @@ describe("ScanMonitor — tick_coverage 색상 표시 (G3)", () => {
   it("Case M: stale=3 이면 yellow 배지가 적용된다", async () => {
     await renderScanMonitor(makeStatus({ total: 30, stale: 3, fresh: 27, acked: 26 }));
 
-    const staleText = await screen.findByText(/stale:\s*3/i);
+    const staleText = await screen.findByText(/끊김\s*3종목/);
     const badge = staleText.closest('[data-testid="tick-coverage-badge"]') as HTMLElement | null;
     expect(badge).not.toBeNull();
     if (badge) {
@@ -124,7 +124,7 @@ describe("ScanMonitor — tick_coverage 색상 표시 (G3)", () => {
   it("Case N: stale=10 이면 red 배지가 적용된다", async () => {
     await renderScanMonitor(makeStatus({ total: 30, stale: 10, fresh: 20, acked: 20 }));
 
-    const staleText = await screen.findByText(/stale:\s*10/i);
+    const staleText = await screen.findByText(/끊김\s*10종목/);
     const badge = staleText.closest('[data-testid="tick-coverage-badge"]') as HTMLElement | null;
     expect(badge).not.toBeNull();
     if (badge) {
@@ -153,8 +153,9 @@ describe("ScanMonitor — tick_coverage 색상 표시 (G3)", () => {
 
     // "구독 중" 레이블이 그대로 노출되어야 함 (기존 표시 보존)
     expect(screen.getByText(/구독 중/)).toBeInTheDocument();
-    // 27 카운트는 텍스트가 분리되어 노출되므로 (예: 'fresh: 27'),
-    // findByText 로 polling 응답 도착 대기 후 검증.
-    await screen.findByText(/fresh:\s*27/i);
+    // 한글 라벨 "정상 N종목" 노출 검증.
+    await screen.findByText(/정상\s*27종목/);
+    // 진행바 우측 한도 카운트 노출.
+    expect(screen.getByText(/27\s*\/\s*41/)).toBeInTheDocument();
   });
 });
