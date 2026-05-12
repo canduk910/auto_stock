@@ -126,6 +126,7 @@ backend:
     - tests/integration/test_boot_eager_refresh.py
     - tests/integration/test_confirm_open_prices.py
     - tests/unit/api/test_condition_stock_basics.py
+    - tests/unit/db/test_stock_master_upsert.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_history.py
@@ -667,6 +668,7 @@ backend:
     - tests/integration/test_boot_eager_refresh.py
     - tests/integration/test_next_day_clear_stock_master.py
     - tests/unit/db/test_stock_master.py
+    - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
