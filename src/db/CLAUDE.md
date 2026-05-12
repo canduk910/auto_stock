@@ -42,6 +42,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 - NXT 거래가능 사전 판별용 — `OrderEngine._strategy_exchange_async` + `scheduler._execute_next_day_clear` + `execute_sell` 거부 사후 보강 3경로에서 사용
 - 호출: 매수/매도 진입 직전 lazy 조회. miss/stale → `inquire_stock_basics` 호출 후 upsert
 - **eager 사전 갱신 (I3, 2026-05-12)**: `scheduler._boot()` 마지막에 `_eager_refresh_stock_master_for_held_positions()` 호출 — 보유 + `_pending_next_day_clear` ticker 합집합을 sequential 로 upsert (24h TTL fresh skip). lazy 갱신 한계(첫 사이클 캐시 miss 시 SOR/NXT 발사 → KIS 거부, 2026-05-12 계양전기 사례) 차단
+- **Phase G2 (2026-05-13)**: ticker 키 형식을 KRX 6자리로 정규화. KIS `pdno` 12자리 표준코드(`00000A000100`)를 그대로 저장하던 결함으로 `get()` 이 항상 miss → Phase G 사전 차단 무력화되던 운영 사고 차단. (1) `inquire_stock_basics` 가 `_normalize_ticker()` 로 응답 `pdno` 마지막 6자리 추출 후 모델 생성, (2) `upsert_one` 이 호출자 무관 이중 안전망으로 6자리 미준수 입력을 동일 헬퍼로 정규화 후 저장 (WARNING 로그), (3) 마이그레이션 017 이 기존 12자리 row 일괄 DELETE → 다음 `_boot` eager_refresh 가 6자리로 재생성. 검증: positions.ticker(6자리)와 PK 형식 일치 보장
 - supabase 동기 호출은 모두 `asyncio.to_thread()` 위임 — 일관 정책
 
 ### parameter_recommendations.py — 전략수정 AI자문 이력
