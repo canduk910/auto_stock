@@ -34,10 +34,16 @@ const CATEGORY_LABEL: Record<FindingCategory, string> = {
   etc: '기타',
 }
 
-function formatDateTime(iso: string | null | undefined): string {
+// KST(Asia/Seoul) 강제 — 백엔드 `_to_kst` 와 동일 컨벤션.
+// `timeZone` 명시 없으면 브라우저 로컬 timezone 의존(도커 빌드 UTC 등에서 시각 어긋남).
+// L3 (2026-05-12) 005930 보완 INSERT 사고 시각 일관성 점검 산물.
+export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '-'
   try {
-    return new Date(iso).toLocaleString('ko-KR', { hour12: false })
+    return new Date(iso).toLocaleString('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      hour12: false,
+    })
   } catch {
     return iso
   }

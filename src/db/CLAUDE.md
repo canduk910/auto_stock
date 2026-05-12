@@ -11,7 +11,8 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `insert_trade()`: 주문 시 INSERT (status: PENDING)
 - `update_trade_status() -> int`: 체결/취소 시 PENDING row를 새 status로 갱신하고 영향받은 row 수를 반환. 호출자(OrderEngine)가 0건이면 체결통보 선행 race로 판단해 COMPLETED 보정 INSERT를 수행한다
 - `get_trades(limit, offset, ticker)`: 페이징 조회 + total count
-- `get_trade_pairs(strategy=None, ticker=None)`: 매매손익 뷰용 매수/매도 페어 리스트. 같은 (ticker, strategy) 그룹 내 timestamp ASC 순회 → 누적 보유수량이 0으로 돌아오는 사이클마다 closed 페어 emit (매수가/매도가 가중평균, Decimal 보존), 잔여 보유는 open 페어로 emit (미실현 손익은 `scanner.ticker_prices` 현재가 fallback). 응답 키: buy_date/buy_time/sell_date/sell_time/ticker/ticker_name/buy_price/buy_qty/sell_price/sell_qty/profit_loss/profit_rate/status('closed'|'open')/strategy
+- `get_trade_pairs(strategy=None, ticker=None)`: 매매손익 뷰용 매수/매도 페어 리스트. 같은 (ticker, strategy) 그룹 내 timestamp ASC 순회 → 누적 보유수량이 0으로 돌아오는 사이클마다 closed 페어 emit (매수가/매도가 가중평균, Decimal 보존), 잔여 보유는 open 페어로 emit (미실현 손익은 `scanner.ticker_prices` 현재가 fallback). 응답 키: buy_date/buy_time/sell_date/sell_time/ticker/ticker_name/buy_price/buy_qty/sell_price/sell_qty/profit_loss/profit_rate/status('closed'|'open')/strategy. **L1(2026-05-12)**: `_to_kst()` 헬퍼로 ISO 타임스탬프(UTC/KST/tz-naive 모두) → `astimezone(KST).strftime()` 명시 변환 후 date/time 추출 — UI 시각 KST 일관성 보장
+- `get_today_buy_trades / get_today_sell_trades / get_today_pending_buys`: today 기준 same-day 매수/매도/PENDING 조회. **L5(2026-05-12)**: 쿼리 기준점 `f"{today}T00:00:00+09:00"` 로 KST timezone 명시 (이전 timezone-naive → PostgreSQL TIMESTAMPTZ UTC 해석 결함 → KST 09시 이전 기록이 same-day 쿼리에서 누락되던 결함 차단. 2026-05-12 005930 보완 INSERT 사고 대응)
 
 ### daily_performance.py — 일일 실적
 - `upsert_daily_performance()`: 16:10 정산 시 당일 실적 기록 (total_asset, daily_profit_rate=실현손익 기반, daily_realized_pnl, net_external_cashflow, deposit, cumulative_return_rate=TWR 복리)

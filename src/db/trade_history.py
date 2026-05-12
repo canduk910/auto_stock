@@ -17,6 +17,38 @@ KST = timezone(timedelta(hours=9))
 # 이벤트 루프 블로킹 차단(on_tick / 체결통보 핸들러가 매 호출 ms 단위로 밀리던 결함).
 
 
+def _to_kst(ts: str | None) -> tuple[str | None, str | None]:
+    """ISO 타임스탬프 → (KST YYYY-MM-DD, KST HH:MM:SS).
+
+    Supabase 가 반환하는 ISO 가 UTC(`+00:00`)인 경우와 KST(`+09:00`)인 경우 모두
+    일관된 KST 출력을 보장한다. tz-naive 는 DB 가 이미 KST 로 저장한 케이스로 간주.
+
+    잘못된 입력(None / 빈 문자열 / 파싱 불가)은 `(None, None)` 반환.
+    """
+    if not ts:
+        return None, None
+    try:
+        # Postgres `Z` suffix → fromisoformat 호환 변환
+        s = ts.replace("Z", "+00:00") if isinstance(ts, str) else ts
+        dt = datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=KST)  # tz-naive 는 KST 가정
+        kst_dt = dt.astimezone(KST)
+        return kst_dt.strftime("%Y-%m-%d"), kst_dt.strftime("%H:%M:%S")
+    except (ValueError, TypeError):
+        return None, None
+
+
+def _today_kst_iso() -> str:
+    """KST 기준 오늘 00:00:00 의 ISO 문자열 (timezone 명시).
+
+    PostgreSQL TIMESTAMPTZ 비교에 TZ-naive 문자열을 사용하면 UTC 로 해석되어
+    KST 09시 이전 매수 기록이 누락된다. `+09:00` 명시로 차단.
+    """
+    today = datetime.now(KST).date()
+    return f"{today.isoformat()}T00:00:00+09:00"
+
+
 async def insert_trade(record: TradeRecord) -> None:
     """거래 기록을 삽입한다."""
     data = {
@@ -74,15 +106,15 @@ async def get_today_trades_for_settlement(strategy: str | None = None) -> list[d
     """정산용 — 당일 체결 거래 전체(중복 dedup 없음, 매수+매도 합산용).
 
     COMPLETED + PARTIAL 상태만 포함. 매매 cashflow / 실현손익 합 계산에 사용.
+    `_today_kst_iso()` 로 PostgreSQL TIMESTAMPTZ 와 timezone 명시 비교.
     """
-    from datetime import date
-    today = date.today().isoformat()
+    today_iso = _today_kst_iso()
 
     def _query():
         q = (
             supabase.table("trade_history")
             .select("*")
-            .gte("timestamp", f"{today}T00:00:00")
+            .gte("timestamp", today_iso)
             .in_("status", ["COMPLETED", "PARTIAL"])
             .order("timestamp", desc=False)
         )
@@ -95,16 +127,19 @@ async def get_today_trades_for_settlement(strategy: str | None = None) -> list[d
 
 
 async def get_today_buy_trades(strategy: str | None = None) -> list[dict]:
-    """당일 매수 기록을 조회한다 (포지션 복구용)."""
-    from datetime import date
-    today = date.today().isoformat()
+    """당일 매수 기록을 조회한다 (포지션 복구용).
+
+    `_today_kst_iso()` 로 timezone 명시 — KST 09시 이전 매수 기록 누락 차단
+    (2026-05-12 005930 보완 INSERT 사고 대응).
+    """
+    today_iso = _today_kst_iso()
 
     def _query():
         q = (
             supabase.table("trade_history")
             .select("*")
             .eq("trade_type", "BUY")
-            .gte("timestamp", f"{today}T00:00:00")
+            .gte("timestamp", today_iso)
             .in_("status", ["PENDING", "COMPLETED", "PARTIAL"])
             .order("timestamp", desc=True)
         )
@@ -124,15 +159,14 @@ async def get_today_buy_trades(strategy: str | None = None) -> list[dict]:
 
 async def get_today_sell_trades(strategy: str | None = None) -> list[dict]:
     """당일 매도 기록을 조회한다 (동기화용)."""
-    from datetime import date
-    today = date.today().isoformat()
+    today_iso = _today_kst_iso()
 
     def _query():
         q = (
             supabase.table("trade_history")
             .select("*")
             .eq("trade_type", "SELL")
-            .gte("timestamp", f"{today}T00:00:00")
+            .gte("timestamp", today_iso)
             .in_("status", ["COMPLETED", "PARTIAL"])
             .order("timestamp", desc=True)
         )
@@ -288,11 +322,13 @@ async def get_trade_pairs(
             rate = ((sell_avg - buy_avg) / buy_avg * 100) if buy_avg else Decimal(0)
             buy_ts = buy_buf[0][0]
             sell_ts = sell_buf[-1][0] if sell_buf else None
+            buy_d, buy_t = _to_kst(buy_ts)
+            sell_d, sell_t = _to_kst(sell_ts)
             pairs.append({
-                "buy_date": buy_ts[:10] if buy_ts else None,
-                "buy_time": buy_ts[11:19] if buy_ts and len(buy_ts) >= 19 else None,
-                "sell_date": sell_ts[:10] if sell_ts else None,
-                "sell_time": sell_ts[11:19] if sell_ts and len(sell_ts) >= 19 else None,
+                "buy_date": buy_d,
+                "buy_time": buy_t,
+                "sell_date": sell_d,
+                "sell_time": sell_t,
                 "ticker": tkr,
                 "ticker_name": ticker_name,
                 "buy_price": float(round(buy_avg, 2)),
@@ -342,9 +378,10 @@ async def get_trade_pairs(
             else:
                 pl_val = None
                 rate_val = None
+            buy_d, buy_t = _to_kst(buy_ts)
             pairs.append({
-                "buy_date": buy_ts[:10] if buy_ts else None,
-                "buy_time": buy_ts[11:19] if buy_ts and len(buy_ts) >= 19 else None,
+                "buy_date": buy_d,
+                "buy_time": buy_t,
                 "sell_date": None,
                 "sell_time": None,
                 "ticker": tkr,

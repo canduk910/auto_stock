@@ -40,12 +40,15 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/api/base.py:
     direct_tests:
@@ -68,6 +71,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_base.py
       - tests/unit/api/test_base_logging.py
       - tests/unit/api/test_condition_stock_basics.py
@@ -84,6 +88,7 @@ backend:
       - tests/contract/test_routes_strategies.py
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -91,12 +96,14 @@ backend:
       - tests/unit/engine/test_get_scan_status_tick_coverage.py
       - tests/unit/engine/test_high_since_buy_recovery.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
@@ -134,6 +141,8 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -143,12 +152,14 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
@@ -185,12 +196,15 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/auth/__init__.py:
     direct_tests:
@@ -228,12 +242,15 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/auth/token.py:
     direct_tests:
@@ -268,9 +285,11 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_base.py
       - tests/unit/api/test_condition_stock_basics.py
       - tests/unit/api/test_insufficient_classification.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -280,12 +299,14 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
@@ -322,13 +343,16 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_base.py
       - tests/unit/api/test_base_logging.py
       - tests/unit/api/test_condition_stock_basics.py
       - tests/unit/api/test_insufficient_classification.py
       - tests/unit/auth/test_token.py
+      - tests/unit/db/test_parameter_recommendations_v2.py
       - tests/unit/db/test_stock_master.py
       - tests/unit/db/test_system_config_cash_ratio.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -338,12 +362,14 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
@@ -353,6 +379,8 @@ backend:
     direct_tests:
       - tests/unit/db/test_stock_master.py
       - tests/unit/db/test_system_config_cash_ratio.py
+      - tests/unit/db/test_trade_history_kst.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
       - tests/contract/test_routes_history.py
@@ -382,6 +410,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_base.py
       - tests/unit/api/test_base_logging.py
       - tests/unit/api/test_condition_stock_basics.py
@@ -395,6 +424,7 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -437,9 +467,12 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/db/log_reports.py:
     direct_tests: []
@@ -472,12 +505,16 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/db/parameter_recommendations.py:
-    direct_tests: []
+    direct_tests:
+      - tests/unit/db/test_parameter_recommendations_v2.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
       - tests/contract/test_routes_history.py
@@ -507,9 +544,12 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/db/positions.py:
     direct_tests:
@@ -532,6 +572,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -547,10 +588,12 @@ backend:
       - tests/unit/engine/test_high_since_buy_recovery.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/db/stock_master.py:
     direct_tests:
@@ -585,11 +628,14 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/db/strategy_config.py:
     direct_tests:
@@ -622,9 +668,12 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/db/supabase.py:
     direct_tests:
@@ -657,12 +706,15 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_base.py
       - tests/unit/api/test_base_logging.py
       - tests/unit/api/test_condition_stock_basics.py
       - tests/unit/api/test_insufficient_classification.py
+      - tests/unit/db/test_parameter_recommendations_v2.py
       - tests/unit/db/test_stock_master.py
       - tests/unit/db/test_system_config_cash_ratio.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -672,12 +724,14 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
@@ -715,9 +769,12 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/db/system_logs.py:
     direct_tests:
@@ -751,9 +808,11 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_base.py
       - tests/unit/api/test_condition_stock_basics.py
       - tests/unit/api/test_insufficient_classification.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -763,19 +822,23 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
   src/db/trade_history.py:
-    direct_tests: []
+    direct_tests:
+      - tests/unit/db/test_trade_history_kst.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
       - tests/contract/test_routes_history.py
@@ -805,9 +868,11 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -842,6 +907,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
       - tests/unit/engine/strategies/test_volatility_breakout.py
@@ -851,6 +917,7 @@ backend:
       - tests/unit/engine/test_recommendation_metrics_smoke.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_priority.py
       - tests/unit/realtime/test_websocket_reverify.py
@@ -886,9 +953,12 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/order_engine.py:
     direct_tests:
@@ -911,6 +981,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -925,12 +996,15 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/recommendation_engine.py:
     direct_tests:
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
       - tests/contract/test_routes_history.py
@@ -960,8 +1034,10 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/recommendation_metrics.py:
     direct_tests:
@@ -995,9 +1071,12 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/risk.py:
     direct_tests:
@@ -1020,6 +1099,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_tick_coverage.py
     transitive_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -1032,8 +1112,10 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
   src/engine/scanner.py:
     direct_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -1064,22 +1146,26 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
       - tests/unit/engine/strategies/test_volatility_breakout.py
       - tests/unit/engine/test_get_scan_status_tick_coverage.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
       - tests/unit/realtime/test_websocket_reverify.py
     transitive_tests:
       - tests/unit/api/test_condition_stock_basics.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/test_high_since_buy_recovery.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -1116,11 +1202,14 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
     transitive_tests:
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
   src/engine/session.py:
     direct_tests:
       - tests/contract/test_routes_balance_perf.py
@@ -1151,14 +1240,17 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_volatility_breakout.py
       - tests/unit/engine/test_session.py
     transitive_tests:
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_fallback_budget.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/strategies/__init__.py:
     direct_tests: []
@@ -1184,6 +1276,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/test_high_since_buy_recovery.py
       - tests/unit/engine/test_strategy_fallback_budget.py
@@ -1198,8 +1291,10 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/strategies/long_tail_volatility.py:
     direct_tests:
@@ -1222,6 +1317,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/test_strategy_fallback_budget.py
     transitive_tests:
@@ -1235,8 +1331,10 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/strategies/momentum.py:
     direct_tests:
@@ -1259,6 +1357,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/strategies/test_momentum.py
       - tests/unit/engine/test_strategy_fallback_budget.py
     transitive_tests:
@@ -1272,8 +1371,10 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/strategies/volatility_breakout.py:
     direct_tests:
@@ -1296,6 +1397,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/strategies/test_volatility_breakout.py
       - tests/unit/engine/test_strategy_fallback_budget.py
     transitive_tests:
@@ -1309,8 +1411,10 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/strategy.py:
     direct_tests: []
@@ -1337,6 +1441,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -1360,6 +1465,8 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/engine/strategy_registry.py:
     direct_tests:
@@ -1382,6 +1489,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1400,6 +1508,8 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
   src/engine/util/__init__.py:
     direct_tests: []
     transitive_tests: []
@@ -1437,10 +1547,13 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/main.py:
     direct_tests:
@@ -1487,14 +1600,17 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
     transitive_tests:
       - tests/unit/api/test_insufficient_classification.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/models/order.py:
     direct_tests:
@@ -1517,6 +1633,7 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
@@ -1530,9 +1647,11 @@ backend:
       - tests/contract/test_routes_strategies_cash_ratio.py
       - tests/contract/test_routes_trading.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/models/recommendation.py:
     direct_tests: []
@@ -1591,7 +1710,9 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_condition_stock_basics.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -1601,11 +1722,13 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
@@ -1642,12 +1765,16 @@ backend:
       - tests/integration/test_scheduler_recommendation_failure.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
   src/realtime/__init__.py:
     direct_tests:
@@ -1687,7 +1814,9 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_condition_stock_basics.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -1697,12 +1826,14 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/realtime/test_websocket_ack.py
       - tests/unit/realtime/test_websocket_priority.py
@@ -1745,7 +1876,9 @@ backend:
       - tests/integration/test_sell_flow.py
       - tests/integration/test_sell_market_closed_preserves_positions.py
       - tests/integration/test_smoke.py
+      - tests/integration/test_stale_watcher.py
       - tests/unit/api/test_condition_stock_basics.py
+      - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_donchian_swing.py
       - tests/unit/engine/strategies/test_long_tail_volatility.py
       - tests/unit/engine/strategies/test_momentum.py
@@ -1754,12 +1887,14 @@ backend:
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
+      - tests/unit/engine/test_recommendation_weights.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_strategy_registry.py
       - tests/unit/engine/test_subscription_source_counts.py
+      - tests/unit/engine/test_sync_orders_to_db_dedup.py
   src/routes/__init__.py:
     direct_tests: []
     transitive_tests:
@@ -1916,10 +2051,13 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/api/history.ts:
     direct_tests:
       - frontend/src/api/__tests__/history.test.ts
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
   frontend/src/api/log_reports.ts:
     direct_tests:
       - frontend/src/api/__tests__/log_reports.test.ts
@@ -1936,7 +2074,8 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
   frontend/src/api/recommendations.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/api/trading.ts:
     direct_tests:
       - frontend/src/api/__tests__/cash_usage_ratio.test.ts
@@ -1946,6 +2085,7 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/components/BalanceTable.tsx:
     direct_tests:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
@@ -1961,6 +2101,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/components/ControlPanel.tsx:
     direct_tests: []
     transitive_tests:
@@ -1968,7 +2109,8 @@ frontend:
   frontend/src/components/InfoTooltip.tsx:
     direct_tests:
       - frontend/src/components/__tests__/InfoTooltip.test.tsx
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/components/LogViewer.tsx:
     direct_tests: []
     transitive_tests:
@@ -1991,7 +2133,8 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
   frontend/src/components/TradeHistoryGrid.tsx:
-    direct_tests: []
+    direct_tests:
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
     transitive_tests: []
   frontend/src/components/TradePnLGrid.tsx:
     direct_tests: []
@@ -2016,7 +2159,8 @@ frontend:
     direct_tests: []
     transitive_tests: []
   frontend/src/pages/Recommendations.tsx:
-    direct_tests: []
+    direct_tests:
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
     transitive_tests: []
   frontend/src/pages/Settings.tsx:
     direct_tests: []
@@ -2034,7 +2178,9 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
       - frontend/src/test/sample.test.ts
     transitive_tests: []
   frontend/src/test/handlers.ts:
@@ -2051,12 +2197,16 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/test/providers.tsx:
     direct_tests:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
     transitive_tests: []
   frontend/src/test/server.ts:
     direct_tests:
@@ -2071,7 +2221,9 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
     transitive_tests: []
   frontend/src/test/setup.ts:
     direct_tests: []
@@ -2095,19 +2247,24 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/types/log_reports.ts:
     direct_tests: []
     transitive_tests:
       - frontend/src/api/__tests__/log_reports.test.ts
   frontend/src/types/recommendations.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/types/strategy.ts:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/types/trading.ts:
     direct_tests: []
     transitive_tests:
@@ -2118,31 +2275,29 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/utils/paramLabels.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
   frontend/src/utils/strategyInfo.ts:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-12T06:26:30.743Z'
+generated_at: '2026-05-12T07:46:12.818Z'
 stats:
   backend_modules: 62
-  backend_tests: 59
+  backend_tests: 64
   frontend_modules: 41
-  frontend_tests: 15
+  frontend_tests: 18
   unmapped_modules:
-    - frontend/src/api/recommendations.ts
-    - frontend/src/components/TradeHistoryGrid.tsx
     - frontend/src/components/TradePnLGrid.tsx
     - frontend/src/main.tsx
     - frontend/src/pages/History.tsx
     - frontend/src/pages/LogReports.tsx
-    - frontend/src/pages/Recommendations.tsx
     - frontend/src/pages/Settings.tsx
     - frontend/src/test/setup.ts
-    - frontend/src/types/recommendations.ts
-    - frontend/src/utils/paramLabels.ts
     - src/__init__.py
     - src/engine/strategies/__init__.py
     - src/engine/strategy.py

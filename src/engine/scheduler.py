@@ -59,6 +59,13 @@ SCAN_INTERVAL = 300                         # 5분마다 스캔
 SESSION_TICK_INTERVAL = 30                  # 보드 전환 감시 주기 (초)
 NEXT_DAY_STABILIZE_SECS = 30                # 익일 청산 시가 안정화 (Q2=B 단축)
 
+# K (2026-05-12) — WebSocket 시세 silent inactive 자동 복구 stale_watcher
+# F1(재연결 1회) + `_scan_loop`(5분) 으로 못 잡는 silent inactive 즉시 회복.
+# 11:48 fresh=1/stale=26 운영 사고(2026-05-12) 대응.
+STALE_WATCHER_INTERVAL_SECS = 30            # task 발화 주기 (sleep 단위)
+STALE_FRESHNESS_SECS = 60                   # 이 시간 내 tick 없으면 stale 판정 (F1 의 VERIFY_FRESHNESS_SECS 동일)
+STALE_FORCE_REREGISTER_AFTER = 3            # 연속 N회 stale 이면 unsubscribe+subscribe 강제 재등록
+
 # Backwards-compat aliases — 기존 코드 참조 호환
 TIME_NEXT_DAY_CLEAR = TIME_PRE_NXT_OPEN
 TIME_VB_OPEN_CONFIRM = TIME_KRX_OPEN_CONFIRM
@@ -117,6 +124,10 @@ class TradingScheduler:
         # `_confirm_breakout_open_prices(board="main")` 직후 `_drain_pending_next_day_clear`
         # 에서 시장가로 정리한다.
         self._pending_next_day_clear: set[tuple[str, str]] = set()
+        # K (2026-05-12) — WebSocket silent inactive 자동 복구 watcher task + 종목별 연속 stale 카운터
+        self._stale_watcher_task: asyncio.Task | None = None
+        # ticker -> 연속 stale 사이클 수 (fresh 회복 시 자동 clear, _reset_daily_state 에서도 clear)
+        self._stale_retry_count: dict[str, int] = {}
 
     async def _load_strategy_config(self) -> None:
         """DB에서 전략 설정(비중/파라미터)을 로드하여 적용한다."""
@@ -224,6 +235,10 @@ class TradingScheduler:
 
             # 세션 트래커 background task — 1분 주기 보드 전환 감시
             self._session_task = asyncio.create_task(self._session_loop())
+
+            # K (2026-05-12) — WebSocket silent inactive 30s 자동 복구 watcher
+            # F1(재연결 1회) + `_scan_loop`(5분) + K(30s) 3중 안전망. lifecycle: finally cancel
+            self._stale_watcher_task = asyncio.create_task(self._stale_watcher_loop())
 
             now = datetime.now().time()
 
@@ -411,7 +426,7 @@ class TradingScheduler:
             await write_log("ERROR", "매매 프로세스 비정상 종료")
         finally:
             # 백그라운드 task lifecycle — 비정상 종료 시 좀비 task 방지
-            for task_attr in ("_next_day_task", "_session_task"):
+            for task_attr in ("_next_day_task", "_session_task", "_stale_watcher_task"):
                 task = getattr(self, task_attr, None)
                 if task and not task.done():
                     task.cancel()
@@ -504,7 +519,7 @@ class TradingScheduler:
         """매매 프로세스를 중지한다."""
         self._running = False
         # 백그라운드 task 즉시 취소 (sleep 도중에도)
-        for task_attr in ("_next_day_task", "_session_task"):
+        for task_attr in ("_next_day_task", "_session_task", "_stale_watcher_task"):
             task = getattr(self, task_attr, None)
             if task and not task.done():
                 task.cancel()
@@ -1374,6 +1389,11 @@ class TradingScheduler:
 
         MTS/HTS에서 수동 매매한 건도 여기서 DB에 반영된다.
         매수/매도를 각각 독립적으로 체크하여 누락 없이 동기화.
+
+        중복 판정은 (ticker, order_no) 페어 기준 — 같은 ticker 다른 order_no
+        주문(분할 매수 / 두 번 매수 등)을 위양성 skip 하지 않는다. 2026-05-12
+        005930 보완 INSERT 사고(같은 ticker 가 다른 가격/strategy 로 중복 INSERT)
+        직접 원인의 다른 한 축.
         """
         from src.db.trade_history import insert_trade, get_today_buy_trades
         from src.models.trade import TradeRecord, TradeStatus, TradeType
@@ -1383,11 +1403,11 @@ class TradingScheduler:
 
         # 기존 DB 기록: 매수/매도 각각 조회
         existing_buys = await get_today_buy_trades()
-        existing_buy_tickers = {row["ticker"] for row in existing_buys}
+        existing_buy_keys = {(row["ticker"], row.get("order_no", "") or "") for row in existing_buys}
 
         from src.db.trade_history import get_today_sell_trades
         existing_sells = await get_today_sell_trades()
-        existing_sell_tickers = {row["ticker"] for row in existing_sells}
+        existing_sell_keys = {(row["ticker"], row.get("order_no", "") or "") for row in existing_sells}
 
         # DB 매수 기록에서 strategy 매핑 (매도 시 참조)
         db_strategy_map = {row["ticker"]: row.get("strategy", "momentum") for row in existing_buys}
@@ -1401,10 +1421,12 @@ class TradingScheduler:
 
             is_buy = order.get("sll_buy_dvsn_cd") == "02"
             avg_price = int(order.get("avg_prvs", "0"))
+            kis_order_no = order.get("odno", "") or ""
+            key = (ticker, kis_order_no)
 
-            if is_buy and ticker in existing_buy_tickers:
+            if is_buy and key in existing_buy_keys:
                 continue
-            if not is_buy and ticker in existing_sell_tickers:
+            if not is_buy and key in existing_sell_keys:
                 continue
 
             # 매도 시 전략/손익 매핑
@@ -1423,7 +1445,6 @@ class TradingScheduler:
                         break
 
             from src.engine.scanner import ticker_names
-            kis_order_no = order.get("odno", "")
             record = TradeRecord(
                 ticker=ticker,
                 ticker_name=ticker_names.get(ticker, order.get("prdt_name", "")),
@@ -1437,9 +1458,9 @@ class TradingScheduler:
             )
             await insert_trade(record)
             if is_buy:
-                existing_buy_tickers.add(ticker)
+                existing_buy_keys.add(key)
             else:
-                existing_sell_tickers.add(ticker)
+                existing_sell_keys.add(key)
             synced += 1
             side_str = "매수" if is_buy else "매도"
             logger.info("DB 동기화: %s %s %d주 @ %d (전략: %s)", side_str, ticker, ccld_qty, avg_price, strategy)
@@ -1528,6 +1549,111 @@ class TradingScheduler:
                     await write_log("ERROR", f"{sid} 재 prepare 실패")
                 except Exception:
                     logger.debug("write_log ERROR 실패: %s", sid)
+
+    async def _stale_watcher_loop(self) -> None:
+        """30s 주기 stale 감지 + 자동 재구독 (K, 2026-05-12).
+
+        KIS WebSocket silent inactive(구독은 됐는데 시세 송신 없음) 즉시 복구.
+        F1(재연결 직후 1회) + `_scan_loop`(5분 주기) + K(30s) 3중 안전망.
+
+        - 매 사이클 `_check_and_resubscribe_stale()` 호출
+        - 본체 예외는 ERROR 로그로 흡수 — 다음 사이클 정상 진행
+        - `_running=False` 진입 시 즉시 break
+        - 좀비 task 방지: `start()` finally 블록에서 cancel + await
+        """
+        while self._running:
+            await asyncio.sleep(STALE_WATCHER_INTERVAL_SECS)
+            if not self._running:
+                break
+            try:
+                await self._check_and_resubscribe_stale()
+            except Exception:
+                logger.exception("[stale_watcher] 사이클 실패")
+
+    async def _check_and_resubscribe_stale(self) -> None:
+        """현재 TICK 구독 종목 중 stale 한 것에 대해 재구독/강제 재등록 (K).
+
+        흐름:
+        1. `kis_ws.get_subscribed_tickers()` 로 TICK 구독 집합 조회
+        2. 비어있으면 즉시 return (retry_count 보존 — 다음 구독 시 자연 회복)
+        3. `scanner.ticker_last_tick` 비교: `STALE_FRESHNESS_SECS` 초과면 stale
+        4. 전체 fresh 시 `_stale_retry_count.clear()` (회복 누적값 초기화)
+        5. stale ticker 별로:
+           - retry > STALE_FORCE_REREGISTER_AFTER*2 (=6) → skip (다음 _scan_loop 사이클에 위임)
+           - retry > STALE_FORCE_REREGISTER_AFTER (=3) → unsubscribe + subscribe(bypass_limit=True) 강제 재등록
+           - 그 외 → `_send_subscribe(subscribe=True)` 1회 재발송
+        6. Rate Limit 보호: 각 종목별 50ms sleep
+
+        안전 불변식:
+        - `_subscriptions` set 직접 수정 금지 — `kis_ws.subscribe/unsubscribe/_send_subscribe` 만
+        - 강제 재등록은 `bypass_limit=True` (보유/익일청산 종목 영향 없음, 한도 검사 skip)
+        - 종목별 예외는 격리해 다른 stale ticker 영향 차단
+        """
+        from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
+
+        subscribed = kis_ws.get_subscribed_tickers()
+        if not subscribed:
+            return
+
+        now = datetime.now(_KST_TZ)
+        threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
+        min_dt = datetime.min.replace(tzinfo=_KST_TZ)
+        stale_tickers = sorted(
+            t for t in subscribed
+            if (now - ticker_last_tick.get(t, min_dt)) > threshold
+        )
+
+        if not stale_tickers:
+            # 모두 fresh — 누적 retry 카운터 리셋 (회복 케이스)
+            self._stale_retry_count.clear()
+            return
+
+        resubscribed = 0
+        force_reregistered = 0
+        skipped_giveup = 0
+
+        for ticker in stale_tickers:
+            retry = self._stale_retry_count.get(ticker, 0) + 1
+            self._stale_retry_count[ticker] = retry
+
+            if retry > STALE_FORCE_REREGISTER_AFTER * 2:
+                # 6회 초과 → 영구 stale 의심 (거래정지·이상 종목 등). skip + 다음 _scan_loop 위임
+                skipped_giveup += 1
+                continue
+
+            if retry > STALE_FORCE_REREGISTER_AFTER:
+                # 4~6회 → unsubscribe + subscribe 강제 재등록 (KIS 측 슬롯 리셋)
+                try:
+                    await kis_ws.unsubscribe(TICK_TR_ID, ticker)
+                    await asyncio.sleep(0.05)
+                    await kis_ws.subscribe(TICK_TR_ID, ticker, bypass_limit=True)
+                    force_reregistered += 1
+                except Exception:
+                    logger.exception("[stale_watcher] 강제 재등록 실패: %s", ticker)
+            else:
+                # 1~3회 → _send_subscribe 재발송만 (`_subscriptions` set 보존)
+                try:
+                    await kis_ws._send_subscribe(TICK_TR_ID, ticker, subscribe=True)
+                    resubscribed += 1
+                except Exception:
+                    logger.exception("[stale_watcher] 재발송 실패: %s", ticker)
+
+            await asyncio.sleep(0.05)  # Rate Limit 보호
+
+        logger.info(
+            "[stale_watcher] subscribed=%d stale=%d resubscribed=%d force_reregistered=%d skipped=%d",
+            len(subscribed), len(stale_tickers), resubscribed, force_reregistered, skipped_giveup,
+        )
+        try:
+            await write_log(
+                "INFO",
+                f"[stale_watcher] subscribed={len(subscribed)} stale={len(stale_tickers)} "
+                f"resubscribed={resubscribed} force_reregistered={force_reregistered} "
+                f"skipped={skipped_giveup}",
+            )
+        except Exception:
+            # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
+            logger.debug("[stale_watcher] write_log 실패", exc_info=True)
 
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D).
@@ -1762,6 +1888,9 @@ class TradingScheduler:
 
         # P1(B) 익일 청산 보류 set 도 매일 초기화
         self._pending_next_day_clear.clear()
+
+        # K (2026-05-12) — stale_watcher 종목별 연속 stale 카운터 매일 초기화
+        self._stale_retry_count.clear()
 
         # scanner 글로벌 dict 누수 방지 — 정산 후 매일 정리(STATIC_TICKER_NAMES는 모듈 import 시 자동 시드되므로 그대로 유지)
         from src.engine.scanner import (

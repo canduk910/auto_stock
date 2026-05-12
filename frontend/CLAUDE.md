@@ -35,6 +35,7 @@ Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `Reac
 - 이익 `#FF3333` (빨강) / 손실 `#3366FF` (파랑) / 보합 `#333333`
 - 금액: 천 단위 콤마 / 수익률: 소수 2자리 + %
 - 환경 배너: 실전=빨강 "실전 매매 환경" / 모의=녹색 "모의투자 환경" (`/api/trading/status` 응답)
+- **시각 표시는 한국시(KST, `Asia/Seoul`) 강제 (L3, 2026-05-12)** — `Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', ... })` 또는 `toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false })` 사용. `new Date(iso).getHours()/getFullYear()` 등 브라우저 로컬타임 추출 금지(도커 빌드 UTC / 다른 TZ 환경에서 시각 어긋남). 적용 대상: `TradeHistoryGrid.formatDate/formatTime` (Intl.DateTimeFormat formatToParts) / `LogReports.formatDateTime` (toLocaleString + timeZone) / 모든 timestamp 필드. 백엔드 `_to_kst` 헬퍼와 동일 컨벤션. 2026-05-12 005930 보완 INSERT 사고 시각 일관성 점검 산물
 
 ## NXT/SOR UI
 

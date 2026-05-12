@@ -12,26 +12,47 @@ import type { TradeRecord } from '../types/trading'
 
 const columnHelper = createColumnHelper<TradeRecord>()
 
-function parseKST(timestamp: string): Date | null {
+// KST(Asia/Seoul) 강제 — 백엔드 `_to_kst` 와 동일 컨벤션.
+// 함수명만 KST 라고 붙이고 실제론 브라우저 로컬타임을 추출하던 결함 차단.
+// `Intl.DateTimeFormat` 의 ko-KR 출력은 `2026. 05. 12.` / `08:05:47` 형태로 안정.
+const KST_DATE_FMT = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  year: '2-digit',
+  month: '2-digit',
+  day: '2-digit',
+})
+const KST_TIME_FMT = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+})
+
+function parseTimestamp(timestamp: string): Date | null {
   if (!timestamp) return null
-  return new Date(timestamp)
+  const d = new Date(timestamp)
+  return Number.isNaN(d.getTime()) ? null : d
 }
 
 function formatDate(timestamp: string): string {
-  const d = parseKST(timestamp)
+  const d = parseTimestamp(timestamp)
   if (!d) return '-'
-  const yy = String(d.getFullYear()).slice(2)
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
+  // ko-KR: "26. 05. 12." → 정규식으로 yy/mm/dd 추출
+  const parts = KST_DATE_FMT.formatToParts(d)
+  const yy = parts.find((p) => p.type === 'year')?.value.padStart(2, '0') ?? '--'
+  const mm = parts.find((p) => p.type === 'month')?.value.padStart(2, '0') ?? '--'
+  const dd = parts.find((p) => p.type === 'day')?.value.padStart(2, '0') ?? '--'
   return `${yy}-${mm}-${dd}`
 }
 
 function formatTime(timestamp: string): string {
-  const d = parseKST(timestamp)
+  const d = parseTimestamp(timestamp)
   if (!d) return '-'
-  const hh = String(d.getHours()).padStart(2, '0')
-  const mi = String(d.getMinutes()).padStart(2, '0')
-  const ss = String(d.getSeconds()).padStart(2, '0')
+  const parts = KST_TIME_FMT.formatToParts(d)
+  const hh = parts.find((p) => p.type === 'hour')?.value.padStart(2, '0') ?? '--'
+  const mi = parts.find((p) => p.type === 'minute')?.value.padStart(2, '0') ?? '--'
+  const ss = parts.find((p) => p.type === 'second')?.value.padStart(2, '0') ?? '--'
   return `${hh}:${mi}:${ss}`
 }
 
