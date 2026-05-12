@@ -1621,6 +1621,7 @@ class TradingScheduler:
         """
         from datetime import time as _time, datetime as _datetime
         from src.api.condition import fetch_stock_detail
+        from src.engine.scanner import KST_TZ as _KST
         from src.engine.strategy_base import Signal as _Signal
 
         BUY_WINDOW_START = _time(9, 5)
@@ -1635,8 +1636,8 @@ class TradingScheduler:
                 remaining -= chunk
 
         while self._running:
-            # 시간 가드: 09:30 이후 task 종료
-            now_dt = _datetime.now()
+            # 시간 가드: 09:30 이후 task 종료 (KST aware — UTC 서버 환경 일관성)
+            now_dt = _datetime.now(_KST)
             now_t = now_dt.time()
             if now_t > BUY_WINDOW_END:
                 logger.info("[swing_poll] window closed (after 09:30)")
@@ -1714,8 +1715,8 @@ class TradingScheduler:
                 len(candidates), len(filtered), bought, elapsed,
             )
 
-            # 다음 분 정각까지 sleep — `_running=False` 즉시 반응 위해 chunked
-            now_dt = _datetime.now()
+            # 다음 분 정각까지 sleep — `_running=False` 즉시 반응 위해 chunked (KST 일관성)
+            now_dt = _datetime.now(_KST)
             sleep_secs = 60 - (now_dt.second + now_dt.microsecond / 1_000_000)
             await _sleep_chunked(max(sleep_secs, 1.0))
 

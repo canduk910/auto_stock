@@ -40,13 +40,24 @@ def freeze_time(iso: str, tick=False):
 
     freezegun 은 monotonic 까지 freeze 해서 asyncio.sleep 이 절대 진행 안 함.
     이 테스트에서는 매수 윈도우 시간 가드만 평가하면 되므로 datetime.now 만 patch.
+
+    `iso` 는 KST 시각으로 해석한다(테스트 가독성).
+    - `now()` (naive): base 그대로 (기존 호환 — naive datetime 사용 코드 회귀 방지)
+    - `now(tz=KST)`: base 에 KST tzinfo 부착 (KST 시각이라 변환 불필요)
+    - `now(tz=other)`: KST aware 로 부착 후 해당 tz 로 astimezone
     """
-    base = _datetime_module.datetime.fromisoformat(iso)
+    base_naive = _datetime_module.datetime.fromisoformat(iso)
+    _KST_TZ = _datetime_module.timezone(_datetime_module.timedelta(hours=9))
+    base_kst = base_naive.replace(tzinfo=_KST_TZ)
 
     class _FrozenDateTime(_datetime_module.datetime):
         @classmethod
         def now(cls, tz=None):
-            return base if tz is None else base.replace(tzinfo=tz)
+            if tz is None:
+                return base_naive
+            if tz is _KST_TZ or getattr(tz, "utcoffset", lambda _x: None)(None) == _KST_TZ.utcoffset(None):
+                return base_kst
+            return base_kst.astimezone(tz)
 
     real_dt = _datetime_module.datetime
     _datetime_module.datetime = _FrozenDateTime
@@ -306,3 +317,61 @@ async def test_swing_poll_skips_when_strategy_disabled():
         await stop_task
 
     assert sched.order_engine.execute_buy.call_count == 0
+
+
+# ---------------------------------------------------------------------------
+# Case 9 (Copilot P2): KST 윈도우 가드 검증 — UTC 서버에서도 KST 기준 동작
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_window_uses_kst_not_naive():
+    """KST 08:50 (윈도우 진입 전) — execute_buy 호출 0회.
+
+    `freeze_time` 헬퍼는 ISO 를 KST 시각으로 취급. `datetime.now(KST_TZ)` 가 정상 동작하면
+    08:50 은 BUY_WINDOW_START(09:05) 이전이므로 매수 0회.
+
+    naive `datetime.now()` 였다면 UTC 서버에서는 시스템 UTC 시각으로 비교해 윈도우가
+    어긋났을 것 — KST aware 비교를 강제해야 한다.
+    """
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-13 08:50:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    assert sched.order_engine.execute_buy.call_count == 0, (
+        "KST 08:50 은 윈도우 진입 전 — execute_buy 호출되면 안 됨"
+    )
+
+
+@pytest.mark.asyncio
+async def test_swing_poll_window_kst_active_when_utc_pre_midnight():
+    """KST 09:10 (윈도우 안) — execute_buy 1회 호출.
+
+    `_datetime.now(KST_TZ)` 사용 시 정상 매수, naive `datetime.now()` 라면 UTC 서버에서
+    KST 09:10 == UTC 00:10 → time 비교가 윈도우 밖으로 잘못 평가될 위험.
+    """
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.BUY},
+    )
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-13 09:10:00"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    assert sched.order_engine.execute_buy.call_count == 1, (
+        "KST 09:10 은 윈도우 안 — execute_buy 1회 호출되어야 함"
+    )
