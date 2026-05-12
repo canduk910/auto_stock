@@ -34,6 +34,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 - 테이블: `stock_master` (migration 015). PK `ticker`, `refreshed_at` 24h TTL
 - NXT 거래가능 사전 판별용 — `OrderEngine._strategy_exchange_async` + `scheduler._execute_next_day_clear` + `execute_sell` 거부 사후 보강 3경로에서 사용
 - 호출: 매수/매도 진입 직전 lazy 조회. miss/stale → `inquire_stock_basics` 호출 후 upsert
+- **eager 사전 갱신 (I3, 2026-05-12)**: `scheduler._boot()` 마지막에 `_eager_refresh_stock_master_for_held_positions()` 호출 — 보유 + `_pending_next_day_clear` ticker 합집합을 sequential 로 upsert (24h TTL fresh skip). lazy 갱신 한계(첫 사이클 캐시 miss 시 SOR/NXT 발사 → KIS 거부, 2026-05-12 계양전기 사례) 차단
 - supabase 동기 호출은 모두 `asyncio.to_thread()` 위임 — 일관 정책
 
 ### parameter_recommendations.py — 전략수정 AI자문 이력

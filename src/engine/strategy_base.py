@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum
+from typing import ClassVar
 
 
 class Signal(str, Enum):
@@ -31,9 +32,21 @@ class Position:
     buy_date: date = field(default_factory=date.today)
     high_since_buy: int = 0
 
+    # 멀티데이 보유 전략 — 시간 청산 개념 없음 (ATR 트레일링/하드 손절만).
+    # is_next_day 프로퍼티에서 항상 False 반환 → OrderMonitor "청산" 배지 노출 차단.
+    # 확장 시 frozenset 멤버만 추가 (Position 시그니처 변경 금지).
+    _MULTIDAY_STRATEGIES: ClassVar[frozenset[str]] = frozenset({"donchian_swing"})
+
     @property
     def is_next_day(self) -> bool:
-        """매수일자가 오늘이 아니면 익일 청산 대상."""
+        """매수일자가 오늘이 아니면 익일 청산 대상.
+
+        멀티데이 보유 전략(`_MULTIDAY_STRATEGIES`)은 시간 청산 개념이 없으므로
+        항상 False — OrderMonitor 화면의 "청산" 배지가 의미 없이 노출되는 결함 차단.
+        (2026-05-12 I2 — donchian_swing 멀티데이 보유)
+        """
+        if self.strategy_id in self._MULTIDAY_STRATEGIES:
+            return False
         return self.buy_date < date.today()
 
     def __post_init__(self):

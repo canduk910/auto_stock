@@ -183,6 +183,15 @@ def _market_disallow_error() -> KisApiError:
     )
 
 
+def _aftermarket_disallow_error() -> KisApiError:
+    """Phase H1 — 2026-05-11 NXT 애프터 매도 거부 원문 (APBK3013)."""
+    return KisApiError(
+        rt_cd="1",
+        msg_cd="APBK3013",
+        msg1="[애프터마켓]지정가 및 최유리/최우선지정가 주문만 가능합니다.",
+    )
+
+
 # ---------------------------------------------------------------------------
 # 시나리오 A — 시장가 매도 + APBK1943 거부 → step_down(5) 지정가 폴백 성공
 # ---------------------------------------------------------------------------
@@ -427,3 +436,55 @@ async def test_execute_sell_when_fallback_and_completion_arrives_first_then_no_p
 
     # PENDING INSERT 생략 — race 가드 동작
     assert mock_insert_trade.await_count == 0
+
+
+# ---------------------------------------------------------------------------
+# 시나리오 H1 — 시장가 매도 + APBK3013 거부 (NXT 애프터) → step_down(5) 폴백 자동 작동
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_execute_sell_when_apbk3013_aftermarket_then_limit_fallback_at_5_ticks_down(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    mock_write_log: AsyncMock,
+    mock_strategy_exchange,
+):
+    """2026-05-11 NXT 애프터 16:05~16:28 APBK3013 매도 거부 → APBK1943과 동일 폴백.
+
+    H1 키워드 확장 회귀 — `_MARKET_ORDER_DISALLOWED_KEYWORDS`에 추가된
+    "최유리/최우선지정가 주문만" / "지정가 및 최유리"가 APBK3013 msg1을 매칭하여
+    `is_market_order_disallowed=True` → `execute_sell` 폴백 분기 자동 진입.
+    """
+    from src.engine import scanner as _scanner
+
+    _scanner.ticker_prices["012200"] = {"current_price": 4500}
+    current_price = 4500
+    expected_fallback = step_down(current_price, steps=5)
+
+    mock_place_order.side_effect = [
+        _aftermarket_disallow_error(),
+        _success_result("ORDER-H1-1"),
+    ]
+
+    try:
+        await engine.execute_sell("012200", Signal.STOP_LOSS, "momentum")
+    finally:
+        _scanner.ticker_prices.pop("012200", None)
+
+    # APBK1943 케이스와 동일 — place_order 2회 (시장가 → 지정가 폴백)
+    assert mock_place_order.await_count == 2
+
+    second_call = mock_place_order.await_args_list[1]
+    assert second_call.kwargs["side"] == OrderSide.SELL
+    assert second_call.kwargs["price"] == expected_fallback
+    assert second_call.kwargs.get("order_division") == OrderDivision.LIMIT
+    assert second_call.kwargs.get("quantity") == 10
+
+    # 매핑 동기 등록 — 시장가 경로와 동일 안전 규약
+    assert engine._order_qty.get("ORDER-H1-1") == 10
+    assert engine._order_strategy.get("ORDER-H1-1") == "momentum"
+    assert engine._order_ticker.get("ORDER-H1-1") == "012200"
+
+    # positions 보존 (체결 전)
+    assert "012200" in strategy.state.positions

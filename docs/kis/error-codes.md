@@ -250,6 +250,25 @@ KIS 공식 문서에 SOR + 시장가가 NXT로 분배되어 미체결 시 NXT �
 **msg1 키워드 변형 (`_MARKET_ORDER_DISALLOWED_KEYWORDS` 전체):**
 - "시장가매매불가" / "시장가 매매 불가" / "시장가 주문 불가" / "시장가 호가 불가"
 - **"시장가호가불가"** ← Phase C 추가 (2026-05-11 계양전기 사고 원문)
+- **"최유리/최우선지정가 주문만"** / **"지정가 및 최유리"** ← Phase H1 추가 (2026-05-11 NXT 애프터 APBK3013, 아래 변형 코드 참조)
+
+**변형 코드: APBK3013 — NXT 애프터마켓 시간대 매도 거부 (Phase H1, 2026-05-11)**
+
+| 항목 | 값 |
+|------|-----|
+| msg_cd | `APBK3013` |
+| msg1 (실측) | "[애프터마켓]지정가 및 최유리/최우선지정가 주문만 가능합니다." |
+| 발생 시각 | 2026-05-11 16:05:59 / 16:10:45 / 16:28:50 KST (NXT 애프터 시간대) ×3 |
+| 거래소 | NXT 애프터 (15:30~20:00) |
+| 분류 | `is_market_order_disallowed(err)` True — 키워드 `최유리/최우선지정가 주문만` 매칭 |
+| 처리 | APBK1943과 동일 — `execute_sell`이 `step_down(current_price, 5)` 지정가 폴백 1회 자동 작동 |
+
+APBK1943(KRX 메인 거부)과 사유는 다르지만(NXT 애프터는 정책상 지정가만 받음) 후속 동작은 동일 — 시장가→지정가 전환이 정확히 KIS가 요구하는 형태. H1 작업은 **키워드 확장만**이며 폴백 로직 변경 없음. H2(NXT 애프터 시간대 시장가 사전 차단)는 별도 단계.
+
+키워드 선정 안전 가드:
+- "지정가" 단독 (X) — 정상 안내 메시지("지정가 주문이 정상 접수")와 충돌
+- "애프터마켓" 단독 (X) — 거부 외 메시지에도 출현
+- "최유리/최우선지정가 주문만" / "지정가 및 최유리" (O) — 특이성 높음, false positive 없음
 
 **후속 동작 (매수와 매도 대칭, 호가 방향만 반대):**
 
@@ -267,7 +286,7 @@ KIS 공식 문서에 SOR + 시장가가 NXT로 분배되어 미체결 시 NXT �
 6. 폴백 실패 → `self._selling.discard(ticker)` + `write_log("WARNING", ...)` + `return` (메모리/DB positions **보존**, 다음 사이클 자연 재트리거)
 7. **stock_master 사후 보강 없음** — APBK1943은 시장가 호가 자체 불가 사유라 NXT 거래가능 여부와 무관(5-3 NXT 사후 보강은 `is_market_closed_rejection` 분기 전용)
 
-**회귀 테스트:** `tests/unit/engine/test_order_engine_sell_fallback.py` (6 케이스: 폴백 성공 / 폴백 실패 보존 / 지정가 미폴백 / 보유부족 미폴백 / 장운영시간 외 미폴백 / 체결통보 선행 race) + `tests/unit/api/test_insufficient_classification.py` (키워드 `시장가호가불가` 분류 + APBK1943 실문 분류 + 상호 배타).
+**회귀 테스트:** `tests/unit/engine/test_order_engine_sell_fallback.py` (6 케이스 + H1 APBK3013 폴백 자동 작동 1건: 폴백 성공 / 폴백 실패 보존 / 지정가 미폴백 / 보유부족 미폴백 / 장운영시간 외 미폴백 / 체결통보 선행 race / **APBK3013 NXT 애프터 폴백**) + `tests/unit/api/test_insufficient_classification.py` (키워드 `시장가호가불가` 분류 + APBK1943 실문 분류 + **APBK3013 실문 분류** + **APBK3013 변형 키워드** + **`지정가` 단독 false positive 가드** + 상호 배타).
 
 ---
 

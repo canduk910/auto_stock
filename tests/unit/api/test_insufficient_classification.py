@@ -135,6 +135,58 @@ def test_is_market_order_disallowed_when_kyungyang_apbk1943_then_true():
     assert is_insufficient_quantity(err) is False
 
 
+# Phase H1 Red — APBK3013 (2026-05-11 NXT 애프터 16시대 매도 거부 ×3 원문 검증)
+def test_is_market_order_disallowed_when_apbk3013_aftermarket_then_true():
+    """2026-05-11 16:05~16:28 NXT 애프터 매도 거부 원문(APBK3013) → True.
+
+    msg1: '[애프터마켓]지정가 및 최유리/최우선지정가 주문만 가능합니다.'
+    → 시장가 거부 → execute_sell의 step_down(5) 지정가 폴백 자동 작동.
+    """
+    err = KisApiError(
+        rt_cd="1",
+        msg_cd="APBK3013",
+        msg1="[애프터마켓]지정가 및 최유리/최우선지정가 주문만 가능합니다.",
+    )
+    assert is_market_order_disallowed(err) is True
+    # 상호 배타 — 기존 3종은 False
+    assert is_market_closed_rejection(err) is False
+    assert is_insufficient_cash(err) is False
+    assert is_insufficient_quantity(err) is False
+
+
+def test_is_market_order_disallowed_when_apbk3013_variant_no_prefix_then_true():
+    """msg_cd 없이 '지정가 및 최유리/최우선지정가 주문만' 변형 → True (KIS 메시지 미세 변경 대비)."""
+    err = KisApiError(
+        rt_cd="1",
+        msg_cd="UNKNOWN",
+        msg1="지정가 및 최유리/최우선지정가 주문만 가능합니다.",
+    )
+    assert is_market_order_disallowed(err) is True
+
+
+def test_is_market_order_disallowed_when_limit_announce_only_then_false():
+    """정상 안내 메시지 '지정가 주문이 정상 접수' → False (단순 '지정가' 단어 매칭 회피).
+
+    H1 안전 가드 — '지정가' 단독 키워드는 추가하지 않아 false positive 방지.
+    """
+    err = KisApiError(
+        rt_cd="0",
+        msg_cd="ANNOUNCE",
+        msg1="지정가 주문이 정상 접수되었습니다.",
+    )
+    assert is_market_order_disallowed(err) is False
+
+
+def test_is_market_closed_rejection_when_apbk3013_then_false():
+    """APBK3013 은 장운영시간 거부가 아니다 — is_market_closed_rejection 상호 배타."""
+    err = KisApiError(
+        rt_cd="1",
+        msg_cd="APBK3013",
+        msg1="[애프터마켓]지정가 및 최유리/최우선지정가 주문만 가능합니다.",
+    )
+    assert is_market_closed_rejection(err) is False
+
+
 @pytest.mark.parametrize("msg1", _MARKET_ORDER_DISALLOWED_MSGS)
 def test_is_market_order_disallowed_when_market_order_keyword_then_true(msg1):
     """'시장가매매불가' 변형 msg1 → True."""

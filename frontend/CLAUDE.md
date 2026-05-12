@@ -38,13 +38,16 @@ Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `Reac
 
 ## NXT/SOR UI
 
+- **OrderMonitor**
+  - `pos.is_next_day=true` 일 때만 "청산" 배지 노출. 백엔드 `Position.is_next_day` 프로퍼티가 `_MULTIDAY_STRATEGIES`(=`{donchian_swing}`) 분기로 항상 False 반환 (2026-05-12 I2) — donchian_swing 멀티데이 보유는 익일 배지 미표시. 다른 전략(momentum/volatility_breakout/long_tail_volatility)은 기존 동작 유지
+
 - **ScanMonitor**
   - phase 라벨(`PHASE_LABELS`): pre_nxt_wait / pre_nxt_trading / main_trading / krx_main_stopped / post_nxt_trading / post_nxt_stopped / recommending / log_analysis
   - 헤더 직하단 활성 보드 배지: KST 시각 → SessionTracker `_BOARD_SCHEDULE`과 동일 매핑(08:00/08:30/09:00/15:30/18:00/20:00). 장 외 시간이면 "장 외 (08:00~20:00 외)"
   - VB/LTV 탭 보드별 시가/타겟가: `BreakoutTarget.boards: Record<string, BoardTarget>` 활용. 활성 보드는 `font-semibold + ring`, 비활성은 톤다운. 정렬·돌파 판정·근접 % 모두 활성 보드 기준. `BOARD_META`로 한글 라벨/색상 매핑
   - "최근 매수 신호" 표에 `보드` + `타겟가` 컬럼 (`BuySignal.board?` / `target_price?` / `k?`)
   - donchian_swing 탭: 단계별 통과 카운트(`scan_stats`) 막대 + 후보 테이블에 갭률·진입 상태 컬럼 (`Asia/Seoul` `Intl.DateTimeFormat` 사용). 진입 상태: 보유 중/갭 스킵/장 시작 전/진입 시간 종료/진입 대기. "도움말 펼치기" 토글로 4섹션 안내, `gap_skip_threshold`는 백엔드 params 동적 반영
-  - **tick_coverage 색상 배지 (G3, 2026-05-12)**: 기존 `구독 중: N개` 옆에 보조 정보 `fresh: A / stale: B / acked: C / limit: 41` 노출. `data-testid="tick-coverage-badge"` 의 클래스가 `tick_coverage_stale` 카운트로 분기 — 0=`bg-gray-50 text-gray-700` / 1~5=`bg-yellow-100 text-yellow-800` / 6+=`bg-red-100 text-red-800`. `data-testid="tick-coverage-progress"` 는 `tick_coverage_total / 41` 비율 진행바 — 80%+ 면 `bg-amber-500`, 그 외 `bg-emerald-500`. 백엔드 `ScanStatus.tick_coverage_*` (optional) 미반영 시점도 0 fallback 으로 무해
+  - **tick_coverage 색상 배지 (G3, 2026-05-12)**: 기존 `구독 중: N개` 옆에 보조 정보 `정상 A종목 · 끊김 B종목 · 등록 C종목` 한글 라벨 노출 + 진행바 우측에 `total / 41` 카운트. `data-testid="tick-coverage-badge"` 의 클래스가 `tick_coverage_stale` 카운트로 분기 — 0=`bg-gray-50 text-gray-700` / 1~5=`bg-yellow-100 text-yellow-800` / 6+=`bg-red-100 text-red-800`. `data-testid="tick-coverage-progress"` 는 `tick_coverage_total / 41` 비율 진행바 — 80%+ 면 `bg-amber-500`, 그 외 `bg-emerald-500`. 라벨 의미: 정상=최근 60초 내 시세 수신(fresh) / 끊김=60초 미수신(stale) / 등록=KIS SUBSCRIBE SUCCESS 확인(acked). 백엔드 `ScanStatus.tick_coverage_*` (optional) 미반영 시점도 0 fallback 으로 무해
 
 - **Settings — `ExchangeBoardRow`**
   - 전략별 `exchange`(KRX/NXT/SOR 라디오) + `tradable_boards`(5개 체크박스, post_nxt 선택 시 amber 강조). 0개 선택 차단

@@ -356,9 +356,15 @@ class TradingScheduler:
                 from src.engine.recommendation_engine import generate_recommendations
                 await generate_recommendations()
                 await write_log("INFO", "19:50 전략수정 AI자문 생성 완료")
-            except Exception:
+            except Exception as e:
+                import traceback
                 logger.exception("전략수정 AI자문 생성 실패")
-                await write_log("ERROR", "전략수정 AI자문 생성 실패")
+                tb = traceback.format_exc()
+                # 1000자 제한 — system_logs 가독성
+                await write_log(
+                    "ERROR",
+                    f"전략수정 AI자문 생성 실패: type={type(e).__name__} msg={e!s} trace={tb[:1000]}",
+                )
 
             # 20:00 NXT 애프터 종료, unsubscribe
             await self._wait_until(TIME_NXT_POST_CLOSE)
@@ -380,9 +386,15 @@ class TradingScheduler:
                 from src.engine.log_analysis_engine import generate_daily_log_report
                 await generate_daily_log_report()
                 await write_log("INFO", "일일 로그 분석 리포트 생성 완료")
-            except Exception:
+            except Exception as e:
+                import traceback
                 logger.exception("일일 로그 분석 리포트 생성 실패")
-                await write_log("ERROR", "일일 로그 분석 리포트 생성 실패")
+                tb = traceback.format_exc()
+                # 1000자 제한 — system_logs 가독성
+                await write_log(
+                    "ERROR",
+                    f"일일 로그 분석 리포트 생성 실패: type={type(e).__name__} msg={e!s} trace={tb[:1000]}",
+                )
 
             # log_analysis가 funnel 카운터를 수집한 후에 일일 상태 초기화
             self._reset_daily_state()
@@ -1269,6 +1281,71 @@ class TradingScheduler:
         logger.info(
             "기동 완료: 순자산 %s, 보유 %d종목 (DB복구: %d, KIS복원: %d, 미체결: %d)",
             summary.net_asset, total_pos, db_restored, kis_only, unfilled_count,
+        )
+
+        # I3 (2026-05-12): 보유 + 익일청산 후보 ticker 의 stock_master 캐시 eager 갱신.
+        # Phase G lazy 한계 — 첫 사이클 캐시 miss 시 SOR/NXT 그대로 발사 → KIS 거부.
+        # 2026-05-12 09:00:12 KST 계양전기(012200) NEXT_DAY_CLEAR SOR 거부 사례 대응.
+        try:
+            await self._eager_refresh_stock_master_for_held_positions()
+        except Exception:
+            logger.exception("[stock_master_eager] _boot 후 eager 갱신 실패 — lazy 경로로 자연 보강")
+
+    async def _eager_refresh_stock_master_for_held_positions(self) -> None:
+        """_boot() 후 보유 종목 + 익일청산 후보 ticker 를 stock_master 에 eager 갱신.
+
+        Phase G(2026-05-11) 의 lazy 갱신은 캐시 miss 시 첫 사이클은 전략 기본
+        exchange(SOR/NXT) 그대로 발사 → KIS 거부. 매수 진입은 매 요청마다 lazy 갱신해도
+        비용이 작지만, 익일청산은 09:00 단발 발사 + 시간 압박이라 캐시 miss 가 사고로
+        직결됨 (2026-05-12 계양전기 사례). _boot 시점에 미리 채워 둠.
+
+        대상:
+        - 모든 전략 보유 포지션 ticker
+        - 익일청산 보류 set `_pending_next_day_clear` 의 ticker
+        - 합집합 dedupe, 6자리 영숫자만 필터(`isalnum()` — 사후처리 규약)
+
+        Rate limit 보호: sequential await (보통 10개 미만이라 parallel 불필요).
+        24h TTL fresh 면 skip 으로 KIS 호출 최소화. 종목별 예외는 흡수.
+        """
+        from src.api.condition import inquire_stock_basics
+        from src.db import stock_master
+
+        tickers: set[str] = set()
+        for strategy in self.registry.all():
+            for ticker in strategy.state.positions.keys():
+                if ticker and len(ticker) == 6 and ticker.isalnum():
+                    tickers.add(ticker)
+        for (t, _sid) in self._pending_next_day_clear:
+            if t and len(t) == 6 and t.isalnum():
+                tickers.add(t)
+
+        if not tickers:
+            return
+
+        refreshed = 0
+        skipped = 0
+        for ticker in sorted(tickers):
+            try:
+                if not await stock_master.is_stale(ticker, max_age_hours=24):
+                    skipped += 1
+                    continue
+                basics = await inquire_stock_basics(ticker)
+                await stock_master.upsert_one(basics)
+                refreshed += 1
+            except Exception:
+                logger.exception("stock_master eager 갱신 실패: %s", ticker)
+                await write_log(
+                    "WARNING",
+                    f"[stock_master_eager] 갱신 실패 ticker={ticker}",
+                )
+
+        logger.info(
+            "[stock_master_eager] 보유+익일청산 %d종목 갱신 완료 (refreshed=%d, skipped=%d)",
+            len(tickers), refreshed, skipped,
+        )
+        await write_log(
+            "INFO",
+            f"[stock_master_eager] total={len(tickers)} refreshed={refreshed} skipped={skipped}",
         )
 
         # 멀티데이 보유 전략(donchian_swing) 보유 종목의 ATR 재계산

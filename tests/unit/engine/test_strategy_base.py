@@ -67,6 +67,64 @@ def test_position_is_not_next_day_when_buy_date_is_today():
 
 
 # ---------------------------------------------------------------------------
+# I2 (2026-05-12) — donchian_swing 멀티데이 보유: is_next_day 항상 False
+#
+# 결함: Position.is_next_day가 buy_date < today만 보고 전략 무관 판정 →
+# donchian_swing(ATR×2 트레일링/-7% 하드 손절 / 시간 청산 없음 / 멀티데이 보유)
+# 둘째 날부터 자동 is_next_day=True 분류 → OrderMonitor "청산" 배지 매일 노출.
+# 멀티데이 보유 전략은 시간 청산 개념이 없으므로 항상 False 반환해야 한다.
+# 다른 전략(momentum/volatility_breakout/long_tail_volatility)은 기존 동작 유지.
+# ---------------------------------------------------------------------------
+def test_position_is_next_day_donchian_swing_yesterday_then_false():
+    """donchian_swing은 멀티데이 보유 — 어제 매수여도 is_next_day=False."""
+    pos = Position(
+        ticker="005930", buy_price=70000, quantity=10,
+        order_no="O1", strategy_id="donchian_swing",
+        buy_date=date.today() - timedelta(days=1),
+    )
+    assert pos.is_next_day is False
+
+
+def test_position_is_next_day_donchian_swing_today_then_false():
+    """donchian_swing은 당일 매수도 당연히 is_next_day=False."""
+    pos = Position(
+        ticker="005930", buy_price=70000, quantity=10,
+        order_no="O1", strategy_id="donchian_swing",
+    )
+    assert pos.is_next_day is False
+
+
+def test_position_is_next_day_donchian_swing_one_week_ago_then_false():
+    """donchian_swing은 1주일 전 매수도 멀티데이 보유 — False 유지."""
+    pos = Position(
+        ticker="005930", buy_price=70000, quantity=10,
+        order_no="O1", strategy_id="donchian_swing",
+        buy_date=date.today() - timedelta(days=7),
+    )
+    assert pos.is_next_day is False
+
+
+def test_position_is_next_day_volatility_breakout_yesterday_then_true():
+    """volatility_breakout은 익일 분류 동작 유지 (당일 매매 전략이지만 정의상 True)."""
+    pos = Position(
+        ticker="005930", buy_price=70000, quantity=10,
+        order_no="O1", strategy_id="volatility_breakout",
+        buy_date=date.today() - timedelta(days=1),
+    )
+    assert pos.is_next_day is True
+
+
+def test_position_is_next_day_long_tail_volatility_yesterday_then_true():
+    """long_tail_volatility는 상한가 모드 시 익일 청산 — True 유지."""
+    pos = Position(
+        ticker="005930", buy_price=70000, quantity=10,
+        order_no="O1", strategy_id="long_tail_volatility",
+        buy_date=date.today() - timedelta(days=1),
+    )
+    assert pos.is_next_day is True
+
+
+# ---------------------------------------------------------------------------
 # StrategyState — 보유/대기/매도 플래그
 # ---------------------------------------------------------------------------
 def test_state_has_position_pending_sold_helpers():

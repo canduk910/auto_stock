@@ -20,6 +20,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - **공통 헬퍼 (2026-05-11 P1)**: `_calc_used_funds()` / `_fallback_one_share(current_price)` — 4개 전략의 `calc_buy_quantity()` 1주 폴백을 통합. 잔여 자금 = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`. 결함 차단: 기존 로직은 고정 `total_investment`와 직접 비교 → 동일 전략 자금 90% 사용 후에도 1주 추가 매수 → **전략 한도 초과**(2026-05-11 운영 사고)
 - `Signal`: NONE / BUY / STOP_LOSS / NEXT_DAY_CLEAR / TRAILING_STOP / FORCE_CLEAR
 - `Position`: ticker, buy_price, quantity, order_no, strategy_id, buy_date, is_next_day(프로퍼티)
+- **`Position.is_next_day` (2026-05-12 I2)**: `buy_date < today` AND `strategy_id not in _MULTIDAY_STRATEGIES`(=`{donchian_swing}`). 멀티데이 보유 전략은 시간 청산 개념 없어 항상 False — OrderMonitor 청산 배지 무의미 표시 차단 (donchian_swing은 둘째 날부터 자동 익일 분류되던 결함). 확장 시 `_MULTIDAY_STRATEGIES` frozenset 멤버만 추가, `Position` 시그니처 변경 금지
 - `StrategyState`: positions, pending_buys, **pending_buy_amounts**(ticker→가격×수량, pending_buys와 동기 dict — 1주 폴백 잔여 자금 계산용), total_investment, daily_realized_pnl, **cached_buyable_qty/at**, **buy_blocked_until**, **low_funds_tickers**, **signal_count_today / order_attempt_today / fill_count_today** + 헬퍼(`is_buy_blocked / block_buy / unblock_buy / is_buyable_cache_fresh / is_low_funds_blocked / block_low_funds / clear_low_funds`)
   - 일일 퍼널 카운터 3종은 `_reset_daily_state()`에서 0 초기화 → `metrics.strategy_funnel`로 노출
   - `pending_buy_amounts`는 OrderEngine `execute_buy` 시장가/지정가 폴백 양쪽에서 `pending_buys.add(ticker)` 옆에 동기 등록 (`current_price × quantity` 또는 `fallback_price × quantity`), 체결/거부/실패/체결통보 정리 시 `pending_buys.discard` 옆에서 동시 정리. `_reset_daily_state()` + `_boot()` 미체결 복구도 동일 규약
@@ -110,7 +111,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 | 상수 | 시각 | 동작 |
 |------|------|------|
 | `TIME_AUTO_START` | 07:45 | DB `auto_start` 우선 폴백 자동 시작 (`_is_auto_start_enabled()`) |
-| `TIME_BOOT` | 07:50 | `_boot()` — DB positions 우선 복구 → KIS 잔고 교차 검증 → 미체결 주문 복구 |
+| `TIME_BOOT` | 07:50 | `_boot()` — DB positions 우선 복구 → KIS 잔고 교차 검증 → 미체결 주문 복구 → **`_eager_refresh_stock_master_for_held_positions()` (I3, 2026-05-12)** 보유 + 익일청산 후보 ticker 를 stock_master 에 eager 갱신. Phase G lazy 한계(캐시 miss → SOR/NXT 그대로 발사) 차단. 2026-05-12 계양전기 NEXT_DAY_CLEAR SOR 거부 사례 대응. 6자리 영숫자 필터, sequential await, 24h TTL fresh 면 skip, 종목별 예외 흡수 |
 | `TIME_PRESUBSCRIBE` | 07:55 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독 |
 | `TIME_PRE_NXT_OPEN` | 08:00 | 익일 청산 task(`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30s`) + `_confirm_breakout_open_prices(board="pre_nxt")`. **시가 수신 → 갭률 트레일링 또는 NXT 지정가(`step_down(open,1)`, `EXCG_ID_DVSN_CD=NXT`, `ORD_DVSN=00`). 시가 미수신 → `_pending_next_day_clear` set 등록 후 보류** (NXT 거래불가 종목 추론) |
 | `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | `_confirm_breakout_open_prices(board="main")` — VB/LTV가 KRX 09:00 시가로 보드별 별도 target_price 계산. 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목을 KRX 시장가로 일괄 청산 |
