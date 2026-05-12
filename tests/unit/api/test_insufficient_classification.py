@@ -114,7 +114,25 @@ _MARKET_ORDER_DISALLOWED_MSGS = (
     "시장가 매매 불가",
     "시장가 주문 불가",
     "시장가 호가 불가",
+    # 2026-05-11 계양전기(012200) 매도 거부 — APBK1943, msg1 "시장가호가불가로 주문이 불가합니다."
+    # 띄어쓰기 없는 변형 — 매수/매도 양쪽 폴백 분기에서 인식되어야 한다.
+    "시장가호가불가",
 )
+
+
+# Phase C Red — APBK1943 실제 msg1 (계양전기 매도 거부 사고 원문 검증)
+def test_is_market_order_disallowed_when_kyungyang_apbk1943_then_true():
+    """2026-05-11 계양전기 09:00:21 매도 거부 원문(APBK1943) → True."""
+    err = KisApiError(
+        rt_cd="1",
+        msg_cd="APBK1943",
+        msg1="시장가호가불가로 주문이 불가합니다.",
+    )
+    assert is_market_order_disallowed(err) is True
+    # 상호 배타 — 기존 3종은 False
+    assert is_market_closed_rejection(err) is False
+    assert is_insufficient_cash(err) is False
+    assert is_insufficient_quantity(err) is False
 
 
 @pytest.mark.parametrize("msg1", _MARKET_ORDER_DISALLOWED_MSGS)

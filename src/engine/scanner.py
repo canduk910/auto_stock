@@ -10,12 +10,15 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from src.api.condition import MIN_CHANGE_RATE, fetch_rising_stocks
 from src.realtime.websocket import kis_ws
 
 logger = logging.getLogger(__name__)
+
+# KST 타임존 (ticker_last_tick 갱신용 — 프로젝트 컨벤션상 각 모듈 로컬 정의)
+KST_TZ = timezone(timedelta(hours=9))
 
 # 스캔 결과 캐시
 _last_scan_result: list[str] = []
@@ -34,6 +37,11 @@ ticker_prev_close: dict[str, int] = {}
 # 종목코드 → 시총/거래대금 (스캔 시 저장, 억 단위)
 ticker_market_info: dict[str, dict] = {}
 # { "market_cap": int(억), "trade_amount": int(억) }
+
+# 종목코드 → 마지막 tick 수신 KST datetime (on_tick에서 갱신, Phase D 가시성 보강)
+# scheduler._report_tick_coverage 가 5분 주기로 미수신 종목 카운트를 노출한다.
+# 2026-05-11 운영 사고(VB/LTV 종일 시세 무수신) 후속 가시성 결함 보완.
+ticker_last_tick: dict[str, datetime] = {}
 
 # 추가 필터 조건
 MIN_MARKET_CAP = 100_000_000_000      # 시총 1000억 이상
@@ -306,17 +314,122 @@ STATIC_TICKER_NAMES: dict[str, str] = _parse_static_ticker_names()
 ticker_names.update(STATIC_TICKER_NAMES)
 
 
-async def subscribe_filtered_stocks(tickers: list[str], extra_tickers: list[str] | None = None) -> None:
+async def subscribe_filtered_stocks(
+    tickers: list[str],
+    extra_tickers: list[str] | None = None,
+    source_counts: dict[str, int] | None = None,
+    *,
+    priority_groups: dict[str, list[str]] | None = None,
+) -> None:
     """필터링된 종목들에 대해 WebSocket 실시간 시세 구독을 등록한다.
 
     모멘텀 후보 + 추가 종목(변동성돌파 등)의 합집합을 구독한다.
+
+    `source_counts` 가 주어지면 출처별 카운터를 로그에 노출한다 (Phase B, 2026-05-12):
+        [scanner] 실시간 시세 구독 완료: total=N (vb=A, ltv=B, swing=C, momentum=D, positions=E)
+    - 출처별 카운트는 합집합 *전* 원본 개수 (중복 가능)
+    - total 은 합집합(dedupe) 후 실제 구독 종목 수
+    - 영문 라벨 유지 (Grafana/Loki 쿼리 안정성)
+    - dict 가 None 이면 기존 "(모멘텀: X, 기타: Y)" fallback (외부 호출자 호환)
+    - 누락 키는 0 으로 처리
+
+    `priority_groups` 가 주어지면 우선순위 큐로 변환해 구독한다 (E1, 2026-05-12):
+        positions → next_day_clear → swing → momentum → breakout (HIGH → LOW)
+    - positions / next_day_clear 는 `bypass_limit=True` 로 한도(MAX_SUBSCRIPTIONS=41) 무시 — 절대 보장
+    - 후순위(swing/momentum/breakout)는 잔여 슬롯만큼만 add
+    - 중복 종목은 HIGH 순위로 1회만 subscribe (후순위에서는 skip, drop 카운트에도 미포함)
+    - drop>0 발생 시 INFO 로그 1행: `[priority_drop] swing=X momentum=Y breakout=Z`
+    - HIGH 단독 합계가 한도 초과 시 ERROR 로그 + system_logs 기록 (운영자 경보)
+    - `priority_groups=None` 이면 기존 평탄 처리 (외부 호환). `source_counts` 로그는 priority_groups 와 무관하게 보존
+    - 어제·오늘 donchian_swing 조기 손절 사건(보유 종목 시세 누락) 루트 원인 차단
     """
     extra = extra_tickers or []
     all_tickers = list(dict.fromkeys(tickers + extra))  # 순서 유지 중복 제거
-    for ticker in all_tickers:
-        await kis_ws.subscribe(TICK_TR_ID, ticker)
-    logger.info("실시간 시세 구독 완료: %d종목 (모멘텀: %d, 기타: %d)",
-                len(all_tickers), len(tickers), len(extra))
+
+    if priority_groups is not None:
+        # 우선순위 큐: HIGH → LOW
+        positions = list(dict.fromkeys(priority_groups.get("positions") or []))
+        next_day_clear = list(dict.fromkeys(priority_groups.get("next_day_clear") or []))
+        swing = list(dict.fromkeys(priority_groups.get("swing") or []))
+        momentum = list(dict.fromkeys(priority_groups.get("momentum") or []))
+        breakout = list(dict.fromkeys(priority_groups.get("breakout") or []))
+
+        from src.realtime.websocket import MAX_SUBSCRIPTIONS
+
+        # HIGH 단독 한도 초과 — 이상 케이스 (운영자 경보)
+        high_total = len(positions) + len(next_day_clear)
+        if high_total > MAX_SUBSCRIPTIONS:
+            logger.error(
+                "HIGH 우선순위 구독 한도 초과: positions=%d next_day_clear=%d limit=%d",
+                len(positions), len(next_day_clear), MAX_SUBSCRIPTIONS,
+            )
+            try:
+                from src.db.system_logs import write_log
+                await write_log(
+                    "ERROR",
+                    f"[priority] HIGH 구독 한도 초과: positions={len(positions)} "
+                    f"next_day_clear={len(next_day_clear)} limit={MAX_SUBSCRIPTIONS}",
+                )
+            except Exception:
+                # DB 로깅 실패는 흡수 — 실제 구독 흐름은 계속
+                logger.debug("HIGH 한도 초과 system_logs 기록 실패", exc_info=True)
+
+        already: set[str] = set()
+        # 1) positions — bypass_limit=True (절대 보장)
+        for t in positions:
+            if t in already:
+                continue
+            already.add(t)
+            await kis_ws.subscribe(TICK_TR_ID, t, bypass_limit=True)
+        # 2) next_day_clear — bypass_limit=True (절대 보장)
+        for t in next_day_clear:
+            if t in already:
+                continue
+            already.add(t)
+            await kis_ws.subscribe(TICK_TR_ID, t, bypass_limit=True)
+
+        # 3~5) 후순위 — 잔여 슬롯 계산 + drop 카운트
+        drop_counts: dict[str, int] = {"swing": 0, "momentum": 0, "breakout": 0}
+        for label, candidates in (
+            ("swing", swing),
+            ("momentum", momentum),
+            ("breakout", breakout),
+        ):
+            for t in candidates:
+                if t in already:
+                    # 중복 제거 — drop 카운트에 포함하지 않음 (이미 구독했으므로)
+                    continue
+                remaining = MAX_SUBSCRIPTIONS - len(kis_ws._subscriptions)
+                if remaining <= 0:
+                    drop_counts[label] += 1
+                    continue
+                already.add(t)
+                await kis_ws.subscribe(TICK_TR_ID, t)  # bypass_limit=False
+
+        total_dropped = sum(drop_counts.values())
+        if total_dropped > 0:
+            logger.info(
+                "[priority_drop] swing=%d momentum=%d breakout=%d",
+                drop_counts["swing"], drop_counts["momentum"], drop_counts["breakout"],
+            )
+    else:
+        # 기존 평탄 처리 (외부 호환 fallback)
+        for ticker in all_tickers:
+            await kis_ws.subscribe(TICK_TR_ID, ticker)
+
+    if source_counts is not None:
+        vb = int(source_counts.get("vb", 0))
+        ltv = int(source_counts.get("ltv", 0))
+        swing_c = int(source_counts.get("swing", 0))
+        momentum_c = int(source_counts.get("momentum", 0))
+        positions_c = int(source_counts.get("positions", 0))
+        logger.info(
+            "실시간 시세 구독 완료: total=%d (vb=%d, ltv=%d, swing=%d, momentum=%d, positions=%d)",
+            len(all_tickers), vb, ltv, swing_c, momentum_c, positions_c,
+        )
+    else:
+        logger.info("실시간 시세 구독 완료: %d종목 (모멘텀: %d, 기타: %d)",
+                    len(all_tickers), len(tickers), len(extra))
 
 
 async def unsubscribe_all() -> None:

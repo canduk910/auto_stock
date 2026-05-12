@@ -1,9 +1,10 @@
 """KIS WebSocket 연결 관리.
 
 - 접속키 발급 후 WebSocket 연결
-- 종목 구독/해제 (최대 40개)
+- 종목 구독/해제 (최대 41건, KIS 공식 한도)
 - Heartbeat 감시, 자동 재연결 (최대 5회 지수 백오프)
 - 메시지 수신 → handler로 디스패치
+- 보유 종목 시세 구독은 `bypass_limit=True` 로 한도 무시 (E1, 2026-05-12)
 """
 
 from __future__ import annotations
@@ -19,15 +20,44 @@ from websockets.asyncio.client import ClientConnection
 
 from src.auth.token import token_manager
 from src.config import settings
+from src.db.system_logs import write_log
 from src.realtime.handler import set_aes_keys
 
 logger = logging.getLogger(__name__)
 
-MAX_SUBSCRIPTIONS = 200  # 모멘텀 + 변동성돌파 합집합 수용
+MAX_SUBSCRIPTIONS = 41  # KIS 공식 한도 41건 (1 세션 당). 보유 종목은 한도 무시하고 우선 보장 (subscribe_filtered_stocks priority_groups)
 MAX_RECONNECT = 5
 HEARTBEAT_TIMEOUT = 30  # 초
 BACKOFF_BASE = 1.0
 MIN_STABLE_SECONDS = 5  # 이 시간 이상 연결 유지해야 안정적 연결로 판단
+
+# 구독 거절 감지 키워드 (E2, 2026-05-12) — msg1 대소문자 무시 substring 매칭.
+# rt_cd != "0" 1순위, 키워드는 보조. 한국어/영문 변형 누적.
+_REJECT_KEYWORDS_UPPER = (
+    "ERROR", "FAIL", "REJECT", "NOT ALLOWED",
+    "LIMIT", "EXCEED", "DUPLICATE",
+)
+_REJECT_KEYWORDS_KO = (
+    "한도", "초과", "이미", "중복", "허용되지", "권한",
+)
+
+
+def _is_rejection_response(rt_cd: str | None, msg1: str) -> bool:
+    """구독 거절 응답 판정 (E2).
+
+    - rt_cd 가 "0" 외 값이면 거절 (KIS REST 와 동일 규약)
+    - rt_cd 가 None/빈문자열이면 (Heartbeat 등) msg1 키워드만 검사
+    - msg1 키워드(대소문자 무시): ERROR/FAIL/REJECT/NOT ALLOWED/LIMIT/EXCEED/DUPLICATE,
+      한도/초과/이미/중복/허용되지/권한
+    """
+    if rt_cd not in (None, "", "0"):
+        return True
+    upper = msg1.upper()
+    if any(kw in upper for kw in _REJECT_KEYWORDS_UPPER):
+        return True
+    if any(kw in msg1 for kw in _REJECT_KEYWORDS_KO):
+        return True
+    return False
 
 
 class KisWebSocket:
@@ -106,9 +136,13 @@ class KisWebSocket:
             self._ws = None
         logger.info("WebSocket 연결 종료")
 
-    async def subscribe(self, tr_id: str, tr_key: str) -> None:
-        """종목 구독을 등록한다."""
-        if len(self._subscriptions) >= MAX_SUBSCRIPTIONS:
+    async def subscribe(self, tr_id: str, tr_key: str, *, bypass_limit: bool = False) -> None:
+        """종목 구독을 등록한다.
+
+        bypass_limit=True 면 MAX_SUBSCRIPTIONS 한도 검사를 skip 한다 (보유 종목·익일청산 등
+        HIGH 우선순위 구독에 사용 — E1, 2026-05-12). 기본 False 는 기존 분기 유지.
+        """
+        if not bypass_limit and len(self._subscriptions) >= MAX_SUBSCRIPTIONS:
             logger.warning("최대 구독 수(%d) 도달, %s/%s 구독 건너뜀", MAX_SUBSCRIPTIONS, tr_id, tr_key)
             return
         self._subscriptions.add((tr_id, tr_key))
@@ -120,6 +154,16 @@ class KisWebSocket:
         self._subscriptions.discard((tr_id, tr_key))
         if self._ws:
             await self._send_subscribe(tr_id, tr_key, subscribe=False)
+
+    def get_subscribed_tickers(self) -> set[str]:
+        """현재 TICK(H0UNCNT0) 구독 종목 집합을 반환한다 (Phase D 가시성 보강).
+
+        scheduler._report_tick_coverage 가 5분 주기로 호출해 미수신 종목 카운트 노출.
+        체결통보(H0STCNI0/H0STCNI9)·장운영정보(H0UNMKO0) 등 비-시세 구독은 제외.
+        """
+        # 지연 import: scanner→websocket 순환 의존 회피 (scanner에서 kis_ws 사용)
+        from src.engine.scanner import TICK_TR_ID
+        return {tr_key for tr_id, tr_key in self._subscriptions if tr_id == TICK_TR_ID}
 
     # -- private --------------------------------------------------------
 
@@ -178,13 +222,32 @@ class KisWebSocket:
                         await self._ws.send(raw)
                     return
 
-                # 구독 에러 응답 감지 → 해당 구독 제거 (무한 재연결 방지)
+                # 구독 거절 응답 감지 → 해당 구독 제거 (E2, 2026-05-12)
+                # rt_cd != "0" / msg1 키워드(영문 ERROR/FAIL/REJECT/NOT ALLOWED/LIMIT/
+                # EXCEED/DUPLICATE, 한국어 한도/초과/이미/중복/허용되지/권한) 매칭 시
+                # _subscriptions 정합성 회복 + [ws_subscribe_reject] 영구 로그.
+                # 다음 5분 _scan_loop 사이클에서 E1 우선순위 큐로 자연 재시도된다.
                 msg1 = body.get("msg1", "")
-                if "ERROR" in msg1.upper():
+                rt_cd = body.get("rt_cd")
+                if _is_rejection_response(rt_cd, msg1):
                     tr_key = header.get("tr_key", "")
-                    logger.error("WebSocket 구독 에러: tr_id=%s, tr_key=%s, msg=%s", tr_id, tr_key, msg1)
-                    # 에러 난 구독을 제거하여 재연결 시 같은 에러 반복 방지
+                    msg_cd = body.get("msg_cd", "")
+                    logger.error(
+                        "WebSocket 구독 거절: tr_id=%s, tr_key=%s, rt_cd=%s, msg_cd=%s, msg=%s",
+                        tr_id, tr_key, rt_cd, msg_cd, msg1,
+                    )
+                    # 거절 난 구독을 제거 (멱등) — 재연결 시 같은 에러 반복 방지
                     self._subscriptions.discard((tr_id, tr_key))
+                    # 운영 trace 영구 저장 — Phase A1 [kis_rejection] 패턴 차용.
+                    # fire-and-forget: write_log 실패해도 본래 흐름 보존 (정합성 회복 우선).
+                    try:
+                        await write_log(
+                            "ERROR",
+                            f"[ws_subscribe_reject] tr_id={tr_id} tr_key={tr_key} "
+                            f"rt_cd={rt_cd} msg_cd={msg_cd} msg1={msg1}",
+                        )
+                    except Exception:
+                        pass
                     return
 
                 # 구독 성공 응답 → AES 키 저장 (체결통보용)

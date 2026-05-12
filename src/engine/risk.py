@@ -34,7 +34,8 @@ class RiskManager:
         change_rate: float,
     ) -> None:
         """실시간 체결가 수신 시 호출된다."""
-        from src.engine.scanner import ticker_prev_close, ticker_prices
+        from datetime import datetime as _dt
+        from src.engine.scanner import KST_TZ, ticker_last_tick, ticker_prev_close, ticker_prices
 
         # 1. 공용 시세 갱신 (1회)
         prev_close = ticker_prev_close.get(ticker, 0)
@@ -45,6 +46,9 @@ class RiskManager:
             "change_rate": round(change_rate, 2),
             "prdy_ctrt": prdy_ctrt,
         }
+        # Phase D: 마지막 tick 수신 시각 추적 (5분 주기 _report_tick_coverage 가 사용)
+        # dict assign 1회 비용 — on_tick은 초당 수십~수백 호출 가능하므로 추가 연산 금지
+        ticker_last_tick[ticker] = _dt.now(KST_TZ)
 
         # PR7(동일가 연속 틱 신호 평가 skip) 롤백 — 회귀 발견:
         # VB/LTV 시가 확정 직후 첫 on_tick에서 _prev_price=0 → check_buy_signal first-tick skip.

@@ -6,12 +6,16 @@ KIS WebSocket 실시간 시세 수신 및 체결통보 처리.
 
 ### websocket.py — 연결 관리
 - WebSocket 접속키 발급 (`/oauth2/Approval`)
-- 종목 시세 구독/해제 (최대 200종목)
+- 종목 시세 구독/해제 (**최대 41건, KIS 공식 한도** — E1, 2026-05-12. 이전 200은 과대 설정으로 silently 거절 차단 못 함)
 - 체결통보 구독 (실전: H0STCNI0 키=HTS ID, 모의: H0STCNI9 키=계좌번호)
 - Heartbeat 감시 (30초 미수신 시 재연결)
 - 자동 재연결 (최대 5회, 지수 백오프)
 - 연결 시 AES 복호화용 iv/key 수신 및 저장
 - 구독 한도 초과 시 에러 대신 경고 + 건너뜀
+- **`subscribe(tr_id, tr_key, *, bypass_limit: bool = False)`**: `bypass_limit=True` 면 `MAX_SUBSCRIPTIONS` 한도 검사를 skip 하고 무조건 add. `subscribe_filtered_stocks(priority_groups=...)` 가 보유·익일청산 종목에 사용 — 보유 시세 누락 시 손절·트레일링 감시 불가하므로 한도보다 우선
+- **구독 거절 감지(E2, 2026-05-12)**: `_handle_raw()` JSON 응답 분기에서 `body.rt_cd != "0"` 또는 `msg1` 키워드(영문 `ERROR/FAIL/REJECT/NOT ALLOWED/LIMIT/EXCEED/DUPLICATE` 대소문자 무시 + 한국어 `한도/초과/이미/중복/허용되지/권한`) 매칭 시 `_subscriptions.discard((tr_id, tr_key))` + ERROR 로그 + `write_log("ERROR", "[ws_subscribe_reject] tr_id=... tr_key=... rt_cd=... msg_cd=... msg1=...")` fire-and-forget. write_log 예외는 swallow — 정합성 회복 우선. 거절 분기 후 조기 return → 정상 SUBSCRIBE SUCCESS AES iv/key 저장 흐름 분리. 다음 5분 `_scan_loop` 사이클에서 E1 우선순위 큐로 자연 재시도 (재시도 큐 별도 미구현)
+- **우선순위 정책**: `scanner.subscribe_filtered_stocks(priority_groups=...)` 가 HIGH→LOW (positions → next_day_clear → swing → momentum → breakout) 순으로 처리. HIGH(보유/익일청산)는 bypass_limit=True 절대 보장, 후순위만 잔여 슬롯 초과 시 drop + `[priority_drop] swing=X momentum=Y breakout=Z` INFO 로그. HIGH 단독 41 초과 시 ERROR + `system_logs`
+- `get_subscribed_tickers() -> set[str]`: 현재 TICK(H0UNCNT0) 구독 종목만 반환 (체결통보·장운영정보 제외). Phase D `scheduler._report_tick_coverage` 가 5분 주기 미수신 카운트 산출에 사용
 
 ### handler.py — 메시지 처리
 - 파이프(|) 구분 메시지 파싱

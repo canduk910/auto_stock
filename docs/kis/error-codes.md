@@ -235,6 +235,40 @@ KIS 공식 문서에 SOR + 시장가가 NXT로 분배되어 미체결 시 NXT �
 
 **fallback 정책:** stock_master miss + KIS 호출 실패 등 모든 예외 경로는 **전략 기본 exchange 그대로** (보수적 fallback). 시가 수신 휴리스틱은 stock_master 의 2순위 보조 신호로만 유지.
 
+### 5-4. APBK1943 "시장가호가불가" — 매수/매도 양방 거부 (Phase C, 2026-05-11)
+
+**발생 사례 (운영 사고):** 2026-05-11 09:00:21 계양전기(012200) 매도 ×3 실패 → 09:24:46 / 10:05:26 수동 매도 재시도 모두 실패. KRX 메인 시작 직후 발생, NXT 시간대 무관. 동일 msg1이 매수 측에도 발생 가능(4-2절과 동일 거부 사유).
+
+| 항목 | 값 |
+|------|-----|
+| msg_cd | `APBK1943` |
+| msg1 (실측) | "시장가호가불가로 주문이 불가합니다." (띄어쓰기 없음) |
+| 발생 시각 | 09:00:21 KST (KRX 메인 시작 16초 후) |
+| 거래소 | KRX (NXT 시간대 아님 — 5-3 NXT 사후 보강과 분리) |
+| 분류 | `is_market_order_disallowed(err)` True — 키워드 `시장가호가불가` 매칭 |
+
+**msg1 키워드 변형 (`_MARKET_ORDER_DISALLOWED_KEYWORDS` 전체):**
+- "시장가매매불가" / "시장가 매매 불가" / "시장가 주문 불가" / "시장가 호가 불가"
+- **"시장가호가불가"** ← Phase C 추가 (2026-05-11 계양전기 사고 원문)
+
+**후속 동작 (매수와 매도 대칭, 호가 방향만 반대):**
+
+| 경로 | 폴백 가격 | 호가 방향 | cooldown |
+|------|----------|----------|---------|
+| `execute_buy` (4-2 / Phase B) | `step_up(current_price, 5)` | 매수호가 ↑ (체결률 ↑) | 폴백 실패 시 `block_low_funds(ticker, 900s)` |
+| `execute_sell` (Phase C, 2026-05-11) | `step_down(current_price, 5)` | 매도호가 ↓ (체결률 ↑) | **등록 안 함** — 매도는 청산 의무, 다음 사이클 자연 재트리거 |
+
+**매도 폴백 분기 동작 규칙 (`src/engine/order_engine.py::execute_sell`):**
+1. `is_market_order_disallowed(err)` True && `order_division == OrderDivision.MARKET` 일 때만 폴백 (지정가 매도는 의미 없으므로 제외 — 기존 3회 재시도 유지)
+2. 현재가는 `src.engine.scanner.ticker_prices[ticker]["current_price"]` 캐시 사용. 캐시 miss(`cur_price<=0`)면 폴백 불가, 일반 재시도 흐름으로 폴백 (매도 의무 보존)
+3. 폴백 호출 인자: `side=SELL`, `order_division=LIMIT`, `price=step_down(cur_price,5)`, `exchange=원래 라우팅`, `quantity=pos.quantity`
+4. 매핑 동기 등록(`_order_qty`/`_order_strategy`/`_order_ticker`) + `_completed_orders` race 가드 + `insert_trade(PENDING, price=fallback_price)`는 시장가 경로·매수 폴백과 동일 동기 순서 (루트 CLAUDE.md 안전 규칙 준수)
+5. 폴백 성공 → `return` (`_selling` 은 체결통보에서 해제)
+6. 폴백 실패 → `self._selling.discard(ticker)` + `write_log("WARNING", ...)` + `return` (메모리/DB positions **보존**, 다음 사이클 자연 재트리거)
+7. **stock_master 사후 보강 없음** — APBK1943은 시장가 호가 자체 불가 사유라 NXT 거래가능 여부와 무관(5-3 NXT 사후 보강은 `is_market_closed_rejection` 분기 전용)
+
+**회귀 테스트:** `tests/unit/engine/test_order_engine_sell_fallback.py` (6 케이스: 폴백 성공 / 폴백 실패 보존 / 지정가 미폴백 / 보유부족 미폴백 / 장운영시간 외 미폴백 / 체결통보 선행 race) + `tests/unit/api/test_insufficient_classification.py` (키워드 `시장가호가불가` 분류 + APBK1943 실문 분류 + 상호 배타).
+
 ---
 
 ## 6. 운영 가이드

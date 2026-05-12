@@ -20,7 +20,7 @@ from src.api.balance import (
     is_market_closed_rejection,
     is_market_order_disallowed,
 )
-from src.engine.util.tick_size import step_up
+from src.engine.util.tick_size import step_down, step_up
 from src.api.base import KisApiError
 from src.api.order import cancel_order, place_order
 from src.db.system_logs import write_log
@@ -474,6 +474,82 @@ class OrderEngine:
                         t(ticker), strategy_id, e.msg_cd, e.msg1,
                     )
                     break
+                # 3) 시장가 호가 불가(APBK1943 등) — 지정가 5호가 폴백 1회 (매수 패턴과 대칭).
+                #    매도는 `step_down(current_price, 5)` 로 호가 깊이로 내려 체결률 확보.
+                #    `limit_price>0` 인 지정가 매도에서는 이미 지정가 → 폴백 의미 없음, 기존 재시도 유지.
+                #    폴백 실패 시 cooldown 등록 안 함 — 매도는 청산 의무, 다음 사이클 자연 재트리거.
+                #    2026-05-11 계양전기 사례 대응 (`docs/kis/error-codes.md` 5-4절).
+                if is_market_order_disallowed(e) and order_division == OrderDivision.MARKET:
+                    from src.engine.scanner import ticker_prices as _ticker_prices
+                    px_info = _ticker_prices.get(ticker) or {}
+                    cur_price = int(px_info.get("current_price") or 0)
+                    if cur_price <= 0:
+                        # 현재가 미확보 — 폴백 불가, 일반 재시도 흐름으로 폴백 (매도 의무 보존)
+                        logger.warning(
+                            "매도 시장가 호가 불가 — 현재가 캐시 미확보로 폴백 불가, 재시도 진행: %s "
+                            "(전략: %s, [%s] %s)",
+                            t(ticker), strategy_id, e.msg_cd, e.msg1,
+                        )
+                    else:
+                        fallback_price = step_down(cur_price, steps=5)
+                        try:
+                            fb_result = await place_order(
+                                ticker=ticker,
+                                side=OrderSide.SELL,
+                                quantity=pos.quantity,
+                                price=fallback_price,
+                                order_division=OrderDivision.LIMIT,
+                                exchange=target_exchange,
+                            )
+
+                            # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역 (매수 패턴 동일).
+                            self._order_qty[fb_result.order_no] = pos.quantity
+                            self._order_strategy[fb_result.order_no] = strategy_id
+                            self._order_ticker[fb_result.order_no] = ticker
+
+                            # 체결통보 선행 race 가드 (매수 폴백·시장가 경로 동일 규약)
+                            if fb_result.order_no in self._completed_orders:
+                                self._completed_orders.discard(fb_result.order_no)
+                                logger.warning(
+                                    "매도 폴백 응답보다 체결통보 선행 — PENDING INSERT 생략: %s "
+                                    "(주문번호: %s)",
+                                    t(ticker), fb_result.order_no,
+                                )
+                            else:
+                                record = TradeRecord(
+                                    ticker=ticker,
+                                    ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
+                                    trade_type=TradeType.SELL,
+                                    price=fallback_price,
+                                    quantity=pos.quantity,
+                                    profit_loss=0,
+                                    status=TradeStatus.PENDING,
+                                    strategy=strategy_id,
+                                    order_no=fb_result.order_no,
+                                )
+                                await insert_trade(record)
+
+                            logger.warning(
+                                "매도 시장가 거부 → 지정가 5호가 폴백: %s @ %d "
+                                "(원인 [%s] %s, 주문번호: %s, 전략: %s)",
+                                t(ticker), fallback_price, e.msg_cd, e.msg1,
+                                fb_result.order_no, strategy_id,
+                            )
+                            return  # 폴백 성공 — _selling 은 체결통보에서 해제
+                        except KisApiError as fb_err:
+                            last_error = fb_err
+                            logger.error(
+                                "매도 지정가 폴백도 거부 — 재시도 중단, 포지션 보존: %s "
+                                "([%s] %s → [%s] %s)",
+                                t(ticker), e.msg_cd, e.msg1, fb_err.msg_cd, fb_err.msg1,
+                            )
+                            self._selling.discard(ticker)
+                            await write_log(
+                                "WARNING",
+                                f"매도 시장가+지정가 폴백 모두 거부 — 포지션 보존: {t(ticker)} "
+                                f"(전략: {strategy_id}, [{fb_err.msg_cd}] {fb_err.msg1})",
+                            )
+                            return  # positions/DB 보존, 다음 사이클 자연 재트리거
                 logger.warning(
                     "매도 주문 실패 (시도 %d/%d): %s — [%s] %s",
                     attempt, SELL_MAX_RETRIES, ticker, e.msg_cd, e.msg1,

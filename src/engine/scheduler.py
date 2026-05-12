@@ -253,7 +253,12 @@ class TradingScheduler:
 
                 presub = self._collect_presubscribe_tickers()
                 if presub:
-                    await subscribe_filtered_stocks([], extra_tickers=presub)
+                    source_counts = self._build_subscription_source_counts(momentum_tickers=None)
+                    priority_groups = self._build_priority_groups(momentum_tickers=None)
+                    await subscribe_filtered_stocks(
+                        [], extra_tickers=presub, source_counts=source_counts,
+                        priority_groups=priority_groups,
+                    )
                     logger.info("사전 구독: %d종목 (돌파 + 스윙 + 보유)", len(presub))
                     await write_log("INFO", f"사전 구독 {len(presub)}종목")
 
@@ -284,7 +289,12 @@ class TradingScheduler:
                 # 중간 부팅 (KRX 메인 시간대)
                 presub = self._collect_presubscribe_tickers()
                 if presub:
-                    await subscribe_filtered_stocks([], extra_tickers=presub)
+                    source_counts = self._build_subscription_source_counts(momentum_tickers=None)
+                    priority_groups = self._build_priority_groups(momentum_tickers=None)
+                    await subscribe_filtered_stocks(
+                        [], extra_tickers=presub, source_counts=source_counts,
+                        priority_groups=priority_groups,
+                    )
                 await self._confirm_breakout_open_prices()
                 await self._drain_pending_next_day_clear()
                 if self._collect_breakout_tickers():
@@ -299,7 +309,12 @@ class TradingScheduler:
             if now < TIME_KRX_MAIN_BUY_STOP:
                 tickers = await scan_stocks()
                 extra = self._collect_breakout_tickers() + self._collect_swing_tickers()
-                await subscribe_filtered_stocks(tickers, extra_tickers=extra)
+                source_counts = self._build_subscription_source_counts(momentum_tickers=tickers)
+                priority_groups = self._build_priority_groups(momentum_tickers=tickers)
+                await subscribe_filtered_stocks(
+                    tickers, extra_tickers=extra, source_counts=source_counts,
+                    priority_groups=priority_groups,
+                )
 
                 # 09:00:05 이후 시작이면 시가 확정 재시도
                 if now > TIME_KRX_OPEN_CONFIRM:
@@ -865,6 +880,93 @@ class TradingScheduler:
             tickers.update(s.state.positions.keys())
         return list(tickers)
 
+    def _build_subscription_source_counts(
+        self, momentum_tickers: list[str] | None = None,
+    ) -> dict[str, int]:
+        """구독 발화 시점의 출처별 카운트(원본 후보 개수, 합집합 *전*) dict 를 산출한다 (Phase B).
+
+        - `vb`         : volatility_breakout.get_scanned_tickers() 개수
+        - `ltv`        : long_tail_volatility.get_scanned_tickers() 개수
+        - `swing`      : donchian_swing.get_scanned_tickers() 개수
+        - `momentum`   : momentum_tickers 인자 길이 (scan_stocks() 결과)
+        - `positions`  : 모든 전략 보유 포지션 합산 (중복 가능)
+
+        합집합 후 실제 구독 개수는 `subscribe_filtered_stocks` 가 자체 계산해 `total=` 로 노출.
+        어제(2026-05-11) "기타 23종목" 표기에서 VB/LTV 0건 식별 불가 결함 보완.
+        """
+        counts: dict[str, int] = {
+            "vb": 0,
+            "ltv": 0,
+            "swing": 0,
+            "momentum": len(momentum_tickers) if momentum_tickers else 0,
+            "positions": 0,
+        }
+        vb = self.registry.get("volatility_breakout")
+        if vb and hasattr(vb, "get_scanned_tickers"):
+            try:
+                counts["vb"] = len(vb.get_scanned_tickers())
+            except Exception:
+                counts["vb"] = 0
+        ltv = self.registry.get("long_tail_volatility")
+        if ltv and hasattr(ltv, "get_scanned_tickers"):
+            try:
+                counts["ltv"] = len(ltv.get_scanned_tickers())
+            except Exception:
+                counts["ltv"] = 0
+        ds = self.registry.get("donchian_swing")
+        if ds and hasattr(ds, "get_scanned_tickers"):
+            try:
+                counts["swing"] = len(ds.get_scanned_tickers())
+            except Exception:
+                counts["swing"] = 0
+        # positions 는 전 전략 합 (중복 가능 — 동일 종목이 두 전략 보유 시 2로 카운트)
+        positions_total = 0
+        for s in self.registry.all():
+            try:
+                positions_total += len(s.state.positions)
+            except Exception:
+                pass
+        counts["positions"] = positions_total
+        return counts
+
+    def _build_priority_groups(
+        self, momentum_tickers: list[str] | None = None,
+    ) -> dict[str, list[str]]:
+        """우선순위 큐 구독용 5개 카테고리 dict 를 산출한다 (E1, 2026-05-12).
+
+        키 (HIGH → LOW):
+        - positions       : 모든 전략 보유 합집합 (dedupe). bypass_limit=True 적용 — 한도 무시 절대 보장
+        - next_day_clear  : `_pending_next_day_clear` set 의 ticker (dedupe). 동일 — 절대 보장
+        - swing           : `_collect_swing_tickers()` (donchian_swing 후보)
+        - momentum        : `momentum_tickers` 인자 그대로 (보통 `scan_stocks()` 결과)
+        - breakout        : `_collect_breakout_tickers()` (volatility_breakout + long_tail_volatility)
+
+        빈 카테고리도 키 자체는 항상 5개 존재 (빈 리스트). `subscribe_filtered_stocks(priority_groups=...)`
+        가 받아 HIGH→LOW 순서로 구독한다. 후순위만 잔여 슬롯 초과 시 drop, HIGH 는 한도 무시.
+
+        어제·오늘 donchian_swing 조기 손절 사건의 루트 원인(보유 종목 시세 누락) 차단.
+        """
+        # positions: 전 전략 합집합 — 순서 보존 dedupe (dict.fromkeys)
+        position_tickers: list[str] = []
+        for s in self.registry.all():
+            try:
+                position_tickers.extend(s.state.positions.keys())
+            except Exception:
+                pass
+        positions = list(dict.fromkeys(position_tickers))
+
+        # next_day_clear: (ticker, strategy_id) 튜플에서 ticker 만
+        ndc_tickers = [t for (t, _sid) in self._pending_next_day_clear]
+        next_day_clear = list(dict.fromkeys(ndc_tickers))
+
+        return {
+            "positions": positions,
+            "next_day_clear": next_day_clear,
+            "swing": self._collect_swing_tickers(),
+            "momentum": list(momentum_tickers or []),
+            "breakout": self._collect_breakout_tickers(),
+        }
+
     async def _resolve_open_price(
         self, ticker: str, *, max_wait_s: float = 5.0, interval_s: float = 0.5,
     ) -> int:
@@ -1272,8 +1374,24 @@ class TradingScheduler:
                     + self._collect_swing_tickers()
                     + [t for s in self.registry.all() for t in s.state.positions.keys()]
                 ))
+                source_counts = self._build_subscription_source_counts(momentum_tickers=tickers)
+                priority_groups = self._build_priority_groups(momentum_tickers=tickers)
                 await unsubscribe_all()
-                await subscribe_filtered_stocks(tickers, extra_tickers=extra)
+                await subscribe_filtered_stocks(
+                    tickers, extra_tickers=extra, source_counts=source_counts,
+                    priority_groups=priority_groups,
+                )
+
+                # VB/LTV 빈 _targets 자동 재 prepare 가드 (KIS 5xx 회복)
+                # 07:50 _boot / 09:00:05 재 prepare 가 일시장애로 실패해 _scanned_tickers 가
+                # 빈 채로 굳으면, 5분 주기 재구독은 후보가 없어 종일 시세 미수신 + 매매 휴면이 된다.
+                # donchian_swing 은 고정 유니버스라 대상 아님.
+                await self._reprepare_breakout_if_empty()
+
+                # Phase D: 구독 종목 중 최근 60초 내 tick 수신 비율 카운트 노출.
+                # "구독은 됐으나 시세가 안 들어오는 종목"을 운영자가 즉시 인지하도록 1행 로그.
+                # 2026-05-11 VB/LTV 종일 시세 무수신 사고 가시성 결함 보완.
+                await self._report_tick_coverage()
             except Exception:
                 logger.exception("종목 스캔 오류")
 
@@ -1284,6 +1402,79 @@ class TradingScheduler:
                     await self._sync_positions_from_balance()
                 except Exception:
                     logger.debug("포지션 동기화 실패")
+
+    async def _reprepare_breakout_if_empty(self) -> None:
+        """VB/LTV 의 `_scanned_tickers` 가 비어있으면 prepare() 를 1회 재시도한다.
+
+        - 매 _scan_loop 사이클 1회 발화 (성공/실패 무관하게 다음 5분 사이클에 자연 재시도)
+        - donchian_swing 은 대상 아님 (고정 유니버스이므로 prepare 실패해도 KOSPI200/KOSDAQ150 사용)
+        - prepare() 가 raise 해도 가드 본체는 예외를 흡수하여 _scan_loop sleep/cancel 흐름을 보존한다
+        """
+        for sid in ("volatility_breakout", "long_tail_volatility"):
+            strategy = self.registry.get(sid)
+            if strategy is None or not strategy.config.enabled:
+                continue
+            if not hasattr(strategy, "get_scanned_tickers"):
+                continue
+            try:
+                scanned = strategy.get_scanned_tickers()
+            except Exception:
+                logger.exception("get_scanned_tickers 실패: %s", sid)
+                continue
+            if scanned:
+                continue
+
+            logger.warning("VB/LTV 후보 비어있음 — 재 prepare 시도: %s", sid)
+            try:
+                await write_log("WARNING", f"{sid} 후보 비어있음 — 재 prepare 시도")
+            except Exception:
+                logger.debug("write_log WARNING 실패: %s", sid)
+
+            try:
+                await strategy.prepare()
+            except Exception:
+                logger.exception("재 prepare 실패: %s", sid)
+                try:
+                    await write_log("ERROR", f"{sid} 재 prepare 실패")
+                except Exception:
+                    logger.debug("write_log ERROR 실패: %s", sid)
+
+    async def _report_tick_coverage(self) -> None:
+        """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D).
+
+        - 5분 주기 `_scan_loop` 사이클당 1행 노출 (`INFO` + `system_logs`, prefix `[tick_coverage]`)
+        - 임계값 60초: SCAN_INTERVAL(300s) 내 1분 미수신은 시장 미체결 정상 가능,
+          5분 미수신은 시세 문제 의심. 둘 다 카운트 노출
+        - `ticker_last_tick` 키 부재 종목은 stale 로 카운트 (구독 직후 0초 경과 가능)
+        - 본체 예외는 `_scan_loop` 흐름 보호 위해 흡수
+        """
+        from datetime import datetime as _dt
+        from src.engine.scanner import KST_TZ, ticker_last_tick
+        from src.realtime.websocket import kis_ws
+
+        try:
+            subscribed = kis_ws.get_subscribed_tickers()
+            now = _dt.now(KST_TZ)
+            fresh_threshold = timedelta(seconds=60)
+            min_dt = datetime.min.replace(tzinfo=KST_TZ)
+            fresh = sum(
+                1 for t in subscribed
+                if (now - ticker_last_tick.get(t, min_dt)) <= fresh_threshold
+            )
+            stale = len(subscribed) - fresh
+            logger.info(
+                "[tick_coverage] subscribed=%d fresh=%d stale=%d",
+                len(subscribed), fresh, stale,
+            )
+            try:
+                await write_log(
+                    "INFO",
+                    f"[tick_coverage] subscribed={len(subscribed)} fresh={fresh} stale={stale}",
+                )
+            except Exception:
+                logger.debug("write_log [tick_coverage] 실패")
+        except Exception:
+            logger.exception("_report_tick_coverage 실패")
 
     async def _sync_positions_from_balance(self) -> None:
         """KIS 잔고를 조회하여 체결통보 누락된 포지션을 보완한다."""
@@ -1484,7 +1675,7 @@ class TradingScheduler:
 
         # scanner 글로벌 dict 누수 방지 — 정산 후 매일 정리(STATIC_TICKER_NAMES는 모듈 import 시 자동 시드되므로 그대로 유지)
         from src.engine.scanner import (
-            STATIC_TICKER_NAMES, ticker_market_info, ticker_names,
+            STATIC_TICKER_NAMES, ticker_last_tick, ticker_market_info, ticker_names,
             ticker_prev_close, ticker_prices,
         )
         ticker_prices.clear()
@@ -1492,6 +1683,7 @@ class TradingScheduler:
         ticker_market_info.clear()
         ticker_names.clear()
         ticker_names.update(STATIC_TICKER_NAMES)  # 정적 시드 재주입
+        ticker_last_tick.clear()  # Phase D — 다른 scanner dict들과 일관성
 
         logger.info("일간 상태 초기화 완료 (scanner 캐시 clear 포함)")
 

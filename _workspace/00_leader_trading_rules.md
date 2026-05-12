@@ -29,6 +29,42 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - 구현: `StrategyBase._fallback_one_share(current_price)` 공통 헬퍼로 통합 — 4개 전략(`momentum`/`volatility_breakout`/`long_tail_volatility`/`donchian_swing`) 모두 동일 메서드 호출
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
 
+### WebSocket 시세 구독 우선순위 (2026-05-12 E1, donchian 조기 손절 사건 대응)
+- **`MAX_SUBSCRIPTIONS = 41` (KIS 공식 한도)** — 기존 200은 과대 설정으로 한도 초과 자체를 차단하지 못해 41 초과분이 KIS 측에서 silently 거절될 수 있었음. 어제·오늘 donchian_swing 보유 종목 시세 무수신으로 ATR 트레일링이 작동 안 한 정황.
+- **우선순위(HIGH → LOW)**:
+  1. **보유 포지션** — `registry.all()` 순회 `state.positions.keys()` 합집합. **한도 무시 절대 보장** (`bypass_limit=True`). 손절·트레일링 감시는 KIS 한도보다 우선
+  2. **익일청산 보류 대상** — `scheduler._pending_next_day_clear` set 의 ticker. **한도 무시 절대 보장**. 09:00 KRX 시장가 청산을 놓치면 위험
+  3. **swing 후보** — `_collect_swing_tickers()` (donchian_swing 고정 유니버스)
+  4. **모멘텀 스캔** — `scan_stocks()` 결과
+  5. **VB/LTV 후보** — `_collect_breakout_tickers()`
+- **drop 정책**: 잔여 슬롯(`MAX_SUBSCRIPTIONS - len(_subscriptions)`) 부족 시 후순위(swing → momentum → breakout)만 잘림. drop된 개수는 `[priority_drop] swing=X momentum=Y breakout=Z` INFO 로그 1행으로 노출.
+- **중복 제거**: 같은 종목이 여러 그룹에 있으면 HIGH 순위로 1회만 subscribe. 후순위 그룹에서는 이미 구독된 종목 skip.
+- **HIGH 단독 41 초과 시(이상 케이스)**: ERROR 로그 + `system_logs` 기록. 보유는 무조건 add (`bypass_limit=True`), 후순위는 0개. 운영자가 전략 비중을 줄여야 함.
+- **구현 통합 지점**:
+  - `src/realtime/websocket.py`: `MAX_SUBSCRIPTIONS = 41`. `subscribe(tr_id, tr_key, *, bypass_limit: bool = False)` 키워드 추가
+  - `src/engine/scanner.py::subscribe_filtered_stocks(..., *, priority_groups: dict[str, list[str]] | None = None)` 키워드 추가 — 키: `positions / next_day_clear / swing / momentum / breakout`. `priority_groups=None` 이면 기존 평탄 처리(외부 호환)
+  - `src/engine/scheduler.py`: `_build_priority_groups()` 헬퍼 신설, 4개 호출부(라인 254-258 / 285-291 / 307-310 / 1316-1338)가 dict 구성해 전달. 기존 `_collect_presubscribe_tickers` / `_build_subscription_source_counts` 보존
+- **불변식**: HIGH 순위(보유 + 익일청산) 어떤 경우에도 drop 금지. 후순위 drop 발생 시 ERROR가 아닌 INFO (정상 운영 흐름)
+
+### WebSocket 구독 거절 감지 (2026-05-12 E2 — 운영 가시성 + `_subscriptions` 정합성)
+어제·오늘 운영 의심: KIS 한도 초과 등으로 일부 종목 구독이 거절되었으나 코드는 `msg1`의 `"ERROR"` 단일 키워드만 매칭 → 거절 사실 자체를 모른 채 `_subscriptions` set에 잔류했을 가능성. 거절 감지를 다층으로 강화해 정합성 회복 + 영구 로그로 다음 사례 추적성 확보.
+
+- **위치**: `src/realtime/websocket.py::_handle_raw()` JSON 응답 분기 (현재 line 196-203)
+- **거절 판정 조건 (하나라도 매칭)**:
+  1. **rt_cd != "0"** (1순위 — KIS REST와 동일 규약). `body.get("rt_cd")` 가 None 이면 skip (Heartbeat 등 응답에는 rt_cd 없음)
+  2. **msg1 키워드 (대소문자 무시, 기존 `"ERROR"` 확장)**: `ERROR / FAIL / REJECT / NOT ALLOWED / LIMIT / EXCEED / DUPLICATE / 한도 / 초과 / 이미 / 중복 / 허용되지 / 권한`
+  3. msg_cd 화이트리스트는 이번 단계에서는 적용 안 함 — 거절 시 msg_cd 영구 로깅 누적되면 다음 단계에서 추가
+- **거절 처리**:
+  - `self._subscriptions.discard((tr_id, tr_key))` — 멱등 (이미 빠진 상태에서도 안전)
+  - ERROR 로그: `"WebSocket 구독 거절: tr_id=%s, tr_key=%s, rt_cd=%s, msg_cd=%s, msg=%s"`
+  - `write_log("ERROR", f"[ws_subscribe_reject] tr_id={tr_id} tr_key={tr_key} rt_cd={rt_cd} msg_cd={msg_cd} msg1={msg1}")` — Phase A1 `[kis_rejection]` 패턴 차용. fire-and-forget (비차단)
+- **호출자 시그널 전달 없음** — `subscribe()` 동기 시그니처 유지. 거절은 비동기 응답으로 처리되며 다음 5분 `_scan_loop` 사이클에서 E1 우선순위 큐로 자연 재시도. **재시도 큐 구현 금지(E2 범위 밖)**
+- **정상 응답 흐름(`SUBSCRIBE SUCCESS` AES iv/key 저장) 불변** — 거절 분기에서 조기 return 만 한다
+- **불변식**:
+  - rt_cd 누락 응답 (Heartbeat PINGPONG / 비-JSON 캐럿 구분 실시간 데이터) → 거절 처리 안 함, `_subscriptions` 영향 없음
+  - 같은 `(tr_id, tr_key)` 에 대해 거절 응답 2회 → discard 멱등 안전
+  - E1 우선순위 큐 / `MAX_SUBSCRIPTIONS=41` / `bypass_limit` 분기 — 영향 없음
+
 ### 거래소 라우팅 (전략별 `exchange` 파라미터)
 | 값 | 의미 | 비고 |
 |---|---|---|
@@ -117,6 +153,7 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
   **메모리 `state.positions` 및 DB `positions` 보존** (재시도하지 않고 다음 거래 가능 시각에 자연 재트리거)
 - 거부 발생 직후 `stock_master.upsert_one(ticker, nxt_tradable=False)` 사후 보강 → 같은 종목 재 NXT 호출 방지
 - **시가 미수신 시 `high_since_buy` 폴백 + 갭률 0% 즉시 청산 경로는 제거** (전일 고가 혼입으로 좀비 포지션 위험)
+- **시장가 호가 불가 거부(`is_market_order_disallowed`, APBK1943 "시장가호가불가" 등) Phase C, 2026-05-11**: 시장가 매도 경로(`limit_price=0`)에서 `step_down(현재가, 5)` 지정가 1회 폴백. 폴백 실패 시 메모리/DB positions 보존, cooldown 등록 안 함(청산 의무) → 다음 사이클 재트리거. 2026-05-11 계양전기(012200) 09:00:21 매도 ×3 + 수동 매도 ×2 실패 사고 대응
 
 ### 트레일링 스탑 상세
 - NXT 프리 시가 이후 고점을 실시간 추적
@@ -229,6 +266,15 @@ VB와 동일.
 - **ATR×2 Chandelier 트레일링**: `high_since_buy − ATR(14) × 2` 이하로 떨어지면 매도
 - **시간 청산 없음**: 15:20 강제 청산 제외 (`check_force_clear()` 빈 리스트)
 - 평균 5~15 영업일 보유 → DB `positions` 영속화로 일자 넘어 유지
+
+#### high_since_buy 일봉 폴백 (E3, 2026-05-12)
+- **`recompute_held_atr()` 직후 또는 함께 `high_since_buy` 일봉 보정** — 매수일 다음 영업일~전영업일까지의 KIS 일봉 high max로 복구. 시세 미수신 누적으로 chandelier 트레일링 손절선이 매수가 부근에 동결되는 결함 차단 (2026-05-12 이마트 사례)
+- 대상: **donchian_swing 보유 포지션만** (chandelier 트레일링 사용 전략). 헬퍼는 일반화하되 호출은 donchian만 — 다른 전략 확장은 별도 단계
+- 보정 조건: `pos.buy_date < today_kst` 인 보유 포지션만. 매수일 당일/미래일은 skip (당일은 `buy_price`가 진실, 미래일은 비정상 → WARNING)
+- 보정값: `max(pos.high_since_buy, max(eligible_daily_highs))` — 일봉 응답 후 매수일 < bsop_date < today 범위 필터 → 일별 `stck_hgpr` max
+- DB 영속화: 보정값이 기존 high_since_buy 초과 시 `update_high(ticker, new_high)` (또는 `save_position`)로 UPDATE + `system_logs` `[high_since_buy_recover]` prefix 1행
+- 안전 가드: 종목별 sequential await (Rate Limit), 일봉 fetch 예외/빈 응답 → 해당 종목 skip + 다른 종목 영향 없음
+- `risk.py:72` 실시간 시세 기반 `high_since_buy` 갱신은 그대로 유지 — 이건 boot 시점 1회 복구만
 
 ### 리스크 관리
 - 종목당 최대 투자: 할당 자금의 20%

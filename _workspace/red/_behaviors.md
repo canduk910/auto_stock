@@ -49,3 +49,15 @@
 - `OrderEngine._strategy_exchange(strategy_id, ticker=None)` — ticker 인자 시 `stock_master.get(ticker).nxt_tradable=False` 면 NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` 로그 1행
 - scheduler `_execute_next_day_clear` — `nxt_tradable=False`이면 시가 폴링/안정화 거치지 않고 즉시 `_pending_next_day_clear` 등록 (NXT 주문 시도 0)
 - `execute_sell` 거부(`is_market_closed_rejection`) 후 `stock_master.upsert_one(ticker, nxt_tradable=False)` 사후 보강
+
+## Phase E3 — high_since_buy 일봉 폴백 (donchian_swing) — 2026-05-12
+시세 미수신 누적으로 chandelier 트레일링 손절선이 매수가 부근에 동결되어 첫 갭다운에 즉시 청산되는 결함 차단. `_boot()` 직후 `donchian_swing.recompute_held_atr()` 시점에 KIS 일봉으로 매수일~전영업일 일별 high max 계산해 `high_since_buy` 보정.
+- A: 매수일=어제, 일봉 어제 high=120000 > buy_price=115600 → `high_since_buy=120000` 보정 + `update_high` DB UPDATE 호출
+- B: 매수일=오늘(buy_date==today_kst) → 보정 skip (당일은 buy_price가 진실, fetch 호출도 안 함)
+- C: 일봉 응답 빈 리스트(`[]`) → 보정 skip, `high_since_buy` 변경 없음
+- D: `fetch_daily_candles` 가 예외 raise → 해당 종목 skip + ERROR/exception 로그, 다른 포지션 보정 정상 진행
+- E: 일별 high 모두 buy_price 미만(매수 후 하락만) → 보정 안 함, `high_since_buy` 변경 없음
+- F: 일봉에 매수일 당일/오늘 데이터 포함 → 매수일 < bsop_date < today 범위만 max 계산 (경계 엄격)
+- G: `pos.buy_date > today_kst` (비정상) → 보정 skip + WARNING 로그
+- H: 다중 보유 3종목, 1종목 fetch 실패 → 나머지 2종목 정상 보정, sequential await (병렬 금지)
+- 회귀: 기존 `recompute_held_atr` ATR 재계산 로직이 깨지지 않음 (high_since_buy 보정이 ATR 계산을 간섭하지 않음)

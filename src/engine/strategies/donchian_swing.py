@@ -301,34 +301,156 @@ class DonchianSwingStrategy(StrategyBase):
 
         prepare()는 _boot에서 positions 복구 전에 실행되므로,
         positions 복구 후 별도로 호출해 보유 종목 ATR을 채워둔다.
+
+        E3 (2026-05-12): 같은 일봉 fetch 응답으로 `high_since_buy` 일봉 폴백 보정도
+        동시 수행 — fetch 비용 절반. 시세 미수신 누적으로 chandelier 트레일링이
+        매수가 부근에 동결되는 결함 차단.
         """
         from src.api.condition import fetch_daily_candles
 
         params = self.config.params
         fetch_days = max(params["long_ma_period"] + 5, params["donchian_period"] + 5)
         atr_period = params["atr_period"]
+        today = datetime.now(KST).date()
 
         for ticker in list(self.state.positions.keys()):
-            if ticker in self._candidates:
-                continue  # 오늘 신호 종목과 겹치면 그대로 사용
+            # high_since_buy 보정 사전 가드 (당일/미래는 fetch 호출도 생략)
+            pos = self.state.positions.get(ticker)
+            pos_needs_high_recover = bool(pos and pos.buy_date < today)
+            if pos and pos.buy_date > today:
+                logger.warning(
+                    "도치안 스윙 high_since_buy 보정 skip — buy_date 비정상(미래): %s buy_date=%s today=%s",
+                    ticker, pos.buy_date, today,
+                )
+
+            # ATR 재계산은 _candidates 미존재 시에만, high_since_buy 보정은 buy_date<today일 때
+            need_atr = ticker not in self._candidates
+            if not need_atr and not pos_needs_high_recover:
+                continue
+
             try:
                 candles = await fetch_daily_candles(ticker, days=fetch_days)
-                if len(candles) < atr_period + 2:
-                    continue
-                highs = [int(c.get("stck_hgpr", "0")) for c in candles]
-                lows = [int(c.get("stck_lwpr", "0")) for c in candles]
-                closes = [int(c.get("stck_clpr", "0")) for c in candles]
-                atr = self._atr(highs, lows, closes, atr_period)
-                if atr > 0:
-                    self._candidates[ticker] = {
-                        "prev_close": closes[0],
-                        "atr": int(atr),
-                        "ema60": 0,
-                        "donchian_high": 0,
-                    }
-                    logger.info("도치안 스윙 보유종목 ATR 재계산: %s ATR=%d", ticker, int(atr))
             except Exception:
-                logger.exception("도치안 스윙 보유종목 ATR 실패: %s", ticker)
+                logger.exception("도치안 스윙 보유종목 일봉 fetch 실패: %s", ticker)
+                continue
+
+            # ATR 재계산
+            if need_atr and len(candles) >= atr_period + 2:
+                try:
+                    highs = [int(c.get("stck_hgpr", "0")) for c in candles]
+                    lows = [int(c.get("stck_lwpr", "0")) for c in candles]
+                    closes = [int(c.get("stck_clpr", "0")) for c in candles]
+                    atr = self._atr(highs, lows, closes, atr_period)
+                    if atr > 0:
+                        self._candidates[ticker] = {
+                            "prev_close": closes[0],
+                            "atr": int(atr),
+                            "ema60": 0,
+                            "donchian_high": 0,
+                        }
+                        logger.info("도치안 스윙 보유종목 ATR 재계산: %s ATR=%d", ticker, int(atr))
+                except Exception:
+                    logger.exception("도치안 스윙 보유종목 ATR 계산 실패: %s", ticker)
+
+            # high_since_buy 일봉 폴백 보정 (E3)
+            if pos_needs_high_recover and candles:
+                await self._apply_high_since_buy_from_candles(pos, candles, today)
+
+    async def recompute_high_since_buy(self) -> None:
+        """보유 종목의 `high_since_buy` 를 매수일~전영업일 KIS 일봉 high max 로 보정.
+
+        시세 미수신이 누적되어 `high_since_buy` 가 매수가 부근에 동결되는 결함을 회복.
+        매수일 당일/미래일 포지션은 보정하지 않음 (당일은 buy_price 가 진실).
+
+        sequential await — KIS Rate Limit 안전(`asyncio.gather` 등 병렬 금지).
+        일봉 fetch 예외/빈 응답은 해당 종목만 skip, 다른 포지션은 계속.
+
+        E3 (2026-05-12) — donchian_swing 전용. 다른 전략 확장은 별도 단계.
+        """
+        from src.api.condition import fetch_daily_candles
+
+        params = self.config.params
+        atr_long = params["long_ma_period"]
+        atr_donchian = params["donchian_period"]
+        today = datetime.now(KST).date()
+
+        for ticker in list(self.state.positions.keys()):
+            pos = self.state.positions.get(ticker)
+            if not pos:
+                continue
+            if pos.buy_date >= today:
+                if pos.buy_date > today:
+                    logger.warning(
+                        "도치안 스윙 high_since_buy 보정 skip — buy_date 비정상(미래): "
+                        "%s buy_date=%s today=%s",
+                        ticker, pos.buy_date, today,
+                    )
+                continue
+
+            days_held = (today - pos.buy_date).days
+            fetch_days = max(days_held + 5, atr_long + 5, atr_donchian + 5, 10)
+            try:
+                candles = await fetch_daily_candles(ticker, days=fetch_days)
+            except Exception:
+                logger.exception("도치안 스윙 high_since_buy 보정 일봉 fetch 실패: %s", ticker)
+                continue
+            if not candles:
+                continue
+            await self._apply_high_since_buy_from_candles(pos, candles, today)
+
+    async def _apply_high_since_buy_from_candles(self, pos, candles: list[dict], today) -> None:
+        """일봉 응답에서 매수일 < bsop_date < today 범위 high max 를 추출해 보정.
+
+        보정값이 기존 high_since_buy 초과일 때만 갱신 + DB UPDATE + system_logs 1행.
+        """
+        from datetime import date as _date
+        eligible_highs: list[int] = []
+        for c in candles:
+            bsop = c.get("stck_bsop_date") or ""
+            if len(bsop) != 8 or not bsop.isdigit():
+                continue
+            try:
+                bd = _date(int(bsop[:4]), int(bsop[4:6]), int(bsop[6:8]))
+            except (ValueError, KeyError):
+                continue
+            # 경계 엄격: 매수일 당일/오늘 모두 제외
+            if not (pos.buy_date < bd < today):
+                continue
+            try:
+                hi = int(c.get("stck_hgpr", "0"))
+            except (TypeError, ValueError):
+                continue
+            if hi > 0:
+                eligible_highs.append(hi)
+
+        if not eligible_highs:
+            return
+        candidate = max(eligible_highs)
+        if candidate <= pos.high_since_buy:
+            return
+
+        prev = pos.high_since_buy
+        pos.high_since_buy = candidate
+        logger.info(
+            "도치안 스윙 high_since_buy 보정: %s %d → %d "
+            "(매수일 %s 이후 %d영업일 일별 high max)",
+            pos.ticker, prev, candidate, pos.buy_date, len(eligible_highs),
+        )
+        # DB 영속화 + system_logs (fire-and-forget — 실패해도 메모리 보정은 유지)
+        try:
+            from src.db.positions import update_high
+            await update_high(pos.ticker, candidate)
+        except Exception:
+            logger.exception("도치안 스윙 high_since_buy DB UPDATE 실패: %s", pos.ticker)
+        try:
+            from src.db.system_logs import write_log
+            await write_log(
+                "INFO",
+                f"[high_since_buy_recover] ticker={pos.ticker} prev={prev} "
+                f"new={candidate} days={len(eligible_highs)} buy_date={pos.buy_date}",
+            )
+        except Exception:
+            pass
 
     def get_scanned_tickers(self) -> list[str]:
         """WebSocket 사전 구독용."""
