@@ -118,7 +118,7 @@ class RiskManager:
 
         - 60s 미만 경과면 카운터만 누적
         - 60s 경과 시: 누적 카운트 + 활성 보드를 1행 INFO 로그로 노출 후 카운터/ts 초기화
-        - active_boards 는 `session_tracker._active` 의 정렬된 board.value 리스트
+        - active_boards 는 `session_tracker.active` 프로퍼티의 정렬된 board.value 리스트
         """
         now_ts = time.time()
         if now_ts - self._last_tradable_emit_ts < 60.0:
@@ -127,7 +127,8 @@ class RiskManager:
             self._last_tradable_emit_ts = now_ts
             return
         try:
-            active = sorted(b.value for b in session_tracker._active)
+            # Copilot P3 (2026-05-12): private `_active` 직접 접근 대신 `active` 프로퍼티 사용
+            active = sorted(b.value for b in session_tracker.active)
         except Exception:
             active = []
         # 형식: [tradable_skip] momentum=X breakout=Y ltv=Z swing=W active_boards=[...]
