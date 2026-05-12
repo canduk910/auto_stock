@@ -82,6 +82,7 @@ backend:
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
@@ -158,6 +159,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -321,6 +323,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -390,6 +393,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -458,6 +462,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -790,6 +795,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -898,6 +904,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1003,6 +1010,7 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_observability_logs.py
@@ -1269,6 +1277,7 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_observability_logs.py
@@ -1377,6 +1386,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_session.py
     transitive_tests:
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1459,6 +1469,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
@@ -1546,6 +1557,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     transitive_tests:
@@ -1597,6 +1609,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_observability_logs.py
@@ -1893,6 +1906,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2008,6 +2022,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2078,6 +2093,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -2484,10 +2500,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-13T05:46:21.732461+09:00'
+generated_at: '2026-05-13T08:30:45.589441+09:00'
 stats:
   backend_modules: 62
-  backend_tests: 70
+  backend_tests: 71
   frontend_modules: 41
   frontend_tests: 18
   unmapped_modules:
