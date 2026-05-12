@@ -13,6 +13,7 @@ import asyncio
 import json
 import logging
 import time
+from datetime import datetime, timedelta, timezone
 from typing import Callable, Awaitable
 
 import websockets
@@ -30,6 +31,13 @@ MAX_RECONNECT = 5
 HEARTBEAT_TIMEOUT = 30  # 초
 BACKOFF_BASE = 1.0
 MIN_STABLE_SECONDS = 5  # 이 시간 이상 연결 유지해야 안정적 연결로 판단
+
+# F1 (2026-05-12) — 재연결 후 자동 시세 검증
+# KIS silent inactive(SUBSCRIBE 응답도 시세도 안 주는 케이스) 차단용.
+# E2 의 거절 감지가 동작하려면 거절 응답이 와야 하므로 silent inactive 는 못 잡음.
+VERIFY_AFTER_SECS = 60        # 재연결 후 검증까지 대기
+VERIFY_FRESHNESS_SECS = 60    # 검증 기준 — 이 시간 내 tick 없으면 미수신으로 판정
+_KST_TZ = timezone(timedelta(hours=9))
 
 # 구독 거절 감지 키워드 (E2, 2026-05-12) — msg1 대소문자 무시 substring 매칭.
 # rt_cd != "0" 1순위, 키워드는 보조. 한국어/영문 변형 누적.
@@ -66,13 +74,18 @@ class KisWebSocket:
     def __init__(self) -> None:
         self._ws: ClientConnection | None = None
         self._approval_key: str = ""
-        self._subscriptions: set[tuple[str, str]] = set()  # (tr_id, tr_key)
+        self._subscriptions: set[tuple[str, str]] = set()  # (tr_id, tr_key) — SEND 기준
+        # G1 (2026-05-12) — KIS 정상 SUBSCRIBE SUCCESS 응답을 받은 구독만 add.
+        # 운영자 가시성: `_subscriptions` 와 분리해 "SEND 후 무응답" 케이스 즉시 식별.
+        self._subscriptions_acked: set[tuple[str, str]] = set()
         self._running = False
         self._reconnect_count = 0
         self._on_message: Callable[[str, str, str, bool], Awaitable[None]] | None = None
         # AES 복호화 키 (체결통보용)
         self.aes_iv: str = ""
         self.aes_key: str = ""
+        # F1 (2026-05-12) — 재연결 후 자동 검증 task 중첩 방지 플래그
+        self._reverify_in_progress: bool = False
 
     async def connect(
         self,
@@ -97,9 +110,15 @@ class KisWebSocket:
                     connected_at = time.monotonic()
                     logger.info("WebSocket 연결 성공")
 
-                    # 기존 구독 복원
-                    for tr_id, tr_key in list(self._subscriptions):
-                        await self._send_subscribe(tr_id, tr_key, subscribe=True)
+                    # 기존 구독 복원 + ACK set 클리어 (G1, 2026-05-12)
+                    # 재연결 시 KIS 측 슬롯도 초기화되므로 모든 구독은 다시 ACK 받아야 함.
+                    await self._restore_subscriptions_after_reconnect()
+
+                    # F1 (2026-05-12) — 재연결인 경우만 검증 task 발화
+                    # 첫 연결(_reconnect_count == 0) 은 정상 흐름이므로 검증 불필요.
+                    # KIS silent inactive(SUBSCRIBE 응답도 시세도 안 주는 케이스) 차단용.
+                    if self._reconnect_count > 0:
+                        asyncio.create_task(self._verify_subscriptions_after_reconnect())
 
                     await self._receive_loop()
 
@@ -146,12 +165,16 @@ class KisWebSocket:
             logger.warning("최대 구독 수(%d) 도달, %s/%s 구독 건너뜀", MAX_SUBSCRIPTIONS, tr_id, tr_key)
             return
         self._subscriptions.add((tr_id, tr_key))
+        # G1: 명시적 (재)구독 호출 시 기존 ACK 무효화 — 새 응답 대기
+        self._subscriptions_acked.discard((tr_id, tr_key))
         if self._ws:
             await self._send_subscribe(tr_id, tr_key, subscribe=True)
 
     async def unsubscribe(self, tr_id: str, tr_key: str) -> None:
         """종목 구독을 해제한다."""
         self._subscriptions.discard((tr_id, tr_key))
+        # G1: 해제 시 ACK set 에서도 동기 제거
+        self._subscriptions_acked.discard((tr_id, tr_key))
         if self._ws:
             await self._send_subscribe(tr_id, tr_key, subscribe=False)
 
@@ -165,7 +188,101 @@ class KisWebSocket:
         from src.engine.scanner import TICK_TR_ID
         return {tr_key for tr_id, tr_key in self._subscriptions if tr_id == TICK_TR_ID}
 
+    def get_acked_tickers(self) -> set[str]:
+        """KIS 정상 SUBSCRIBE SUCCESS 응답을 받은 TICK 구독만 반환 (G1, 2026-05-12).
+
+        `get_subscribed_tickers()` 는 SEND 기준, 이 메서드는 KIS 응답 기준.
+        둘의 차이가 "SEND 후 무응답" 카운트 — 운영자가 즉시 식별 가능.
+        체결통보·장운영정보 등 비-TICK 구독은 동일하게 제외.
+        """
+        from src.engine.scanner import TICK_TR_ID
+        return {tr_key for tr_id, tr_key in self._subscriptions_acked if tr_id == TICK_TR_ID}
+
+    async def _restore_subscriptions_after_reconnect(self) -> None:
+        """재연결 직후 기존 구독을 다시 보내고 ACK set 을 비운다 (G1, 2026-05-12).
+
+        KIS 측 슬롯이 재연결로 초기화되므로 모든 구독은 다시 ACK 받아야 한다.
+        `_subscriptions` set 은 보존 — 단지 ACK 만 클리어 후 send 재전송.
+        """
+        self._subscriptions_acked.clear()
+        for tr_id, tr_key in list(self._subscriptions):
+            await self._send_subscribe(tr_id, tr_key, subscribe=True)
+
     # -- private --------------------------------------------------------
+
+    async def _verify_subscriptions_after_reconnect(self) -> None:
+        """재연결 후 60초 시점에 미수신 TICK 종목 자동 재구독 (F1, 2026-05-12).
+
+        KIS silent inactive(거절도 시세도 없음) 차단용. 1회만 시도하며,
+        부족분은 다음 5분 `_scan_loop` 사이클의 unsubscribe_all + 재구독 자연 회복에 위임.
+
+        가드:
+        - `_reconnect_count == 0` (첫 연결) 이면 발화 안 함
+        - `_reverify_in_progress` True 면 중첩 방지로 즉시 종료
+        - 검증 도중 `_ws is None` / `_running is False` 면 조용히 종료
+        - 검증 중 예외 발생 → ERROR 로그 + 플래그 해제 (다음 재연결 정상 발화)
+        - `_subscriptions` set 직접 수정 금지 — `_send_subscribe` 만 호출
+        """
+        # 첫 연결은 검증 발화 안 함 (가드)
+        if self._reconnect_count == 0:
+            return
+        if self._reverify_in_progress:
+            return
+        self._reverify_in_progress = True
+        try:
+            await asyncio.sleep(VERIFY_AFTER_SECS)
+            if not self._running or not self._ws:
+                return
+
+            # 지연 import: scanner→websocket 순환 의존 회피
+            from src.engine.scanner import TICK_TR_ID, ticker_last_tick
+
+            now = datetime.now(_KST_TZ)
+            threshold = timedelta(seconds=VERIFY_FRESHNESS_SECS)
+            # TICK 구독만 검증 대상 — 체결통보(H0STCNI0/9), 장운영정보(H0UNMKO0) 등 제외.
+            # sorted 로 결정론적 순서 — preview 로그 truncate 가 일관되게 동작.
+            subscribed = sorted(
+                tr_key for tr_id, tr_key in self._subscriptions
+                if tr_id == TICK_TR_ID
+            )
+            min_dt = datetime.min.replace(tzinfo=_KST_TZ)
+            stale = [
+                t for t in subscribed
+                if (now - ticker_last_tick.get(t, min_dt)) > threshold
+            ]
+            if not stale:
+                logger.info(
+                    "[ws_reverify] 재연결 후 %ds — 미수신 종목 없음 (subscribed=%d)",
+                    VERIFY_AFTER_SECS, len(subscribed),
+                )
+                return
+            # 로그 truncate — 처음 10개만 표시 + 전체 카운트 명시
+            preview = stale[:10]
+            logger.warning(
+                "[ws_reverify] 재연결 후 %ds — 미수신 %d종목 자동 재구독 "
+                "(reconnect_count=%d, preview=%s)",
+                VERIFY_AFTER_SECS, len(stale), self._reconnect_count, preview,
+            )
+            try:
+                await write_log(
+                    "WARNING",
+                    f"[ws_reverify] reconnect_count={self._reconnect_count} "
+                    f"stale={len(stale)}/{len(subscribed)} preview={preview}",
+                )
+            except Exception:
+                # fire-and-forget — write_log 실패해도 재구독 흐름 보존
+                logger.debug("[ws_reverify] write_log 실패", exc_info=True)
+
+            for ticker in stale:
+                # SUBSCRIBE 메시지 1회 재전송 — _subscriptions set 은 이미 보유.
+                # 거절 응답이 오면 E2 가 자동으로 _subscriptions.discard 처리.
+                await self._send_subscribe(TICK_TR_ID, ticker, subscribe=True)
+                # KIS Rate Limit 보호 — 짧은 sleep
+                await asyncio.sleep(0.05)
+        except Exception:
+            logger.exception("[ws_reverify] 재연결 후 검증 실패")
+        finally:
+            self._reverify_in_progress = False
 
     async def _send_subscribe(
         self, tr_id: str, tr_key: str, *, subscribe: bool
@@ -238,6 +355,8 @@ class KisWebSocket:
                     )
                     # 거절 난 구독을 제거 (멱등) — 재연결 시 같은 에러 반복 방지
                     self._subscriptions.discard((tr_id, tr_key))
+                    # G1: ACK set 에서도 동기 discard (이전에 ACK 됐다가 재구독 후 거절 케이스)
+                    self._subscriptions_acked.discard((tr_id, tr_key))
                     # 운영 trace 영구 저장 — Phase A1 [kis_rejection] 패턴 차용.
                     # fire-and-forget: write_log 실패해도 본래 흐름 보존 (정합성 회복 우선).
                     try:
@@ -249,6 +368,16 @@ class KisWebSocket:
                     except Exception:
                         pass
                     return
+
+                # G1 (2026-05-12) — 정상 SUBSCRIBE SUCCESS 응답 카운트 별도 추적.
+                # KIS REST/WS 어디에도 슬롯 사용현황 조회 API 미존재 → 우리 측 도구로 가시화.
+                # rt_cd=="0" + msg1 에 "SUBSCRIBE SUCCESS" 포함 시 _subscriptions_acked add.
+                if rt_cd == "0" and "SUBSCRIBE SUCCESS" in msg1.upper():
+                    tr_key = header.get("tr_key", "")
+                    self._subscriptions_acked.add((tr_id, tr_key))
+                    logger.info(
+                        "WebSocket 구독 ACK: tr_id=%s, tr_key=%s", tr_id, tr_key,
+                    )
 
                 # 구독 성공 응답 → AES 키 저장 (체결통보용)
                 output = body.get("output", {})

@@ -142,6 +142,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `KOSPI_200_TICKERS` / `KOSDAQ_150_TICKERS`: donchian_swing 고정 유니버스
 - `STATIC_TICKER_NAMES` / `_parse_static_ticker_names()`: 모듈 import 시 자기 파일을 정규식(`"(\d{6})",\s*#\s*(.+)$`)으로 파싱해 인라인 코멘트의 종목명을 dict로 추출. 모듈 로드 시 `ticker_names.update(STATIC)` — KIS `inquire-price`가 빈 종목명 응답해도 시장명으로 떨어지지 않도록 보강
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info, **ticker_last_tick**(Phase D — `risk.on_tick` 호출 시 KST `datetime`으로 갱신, `_report_tick_coverage` 가 사용)
+- **`get_scan_status()` tick_coverage 4종 키 (G3, 2026-05-12)**: `tick_coverage_total/acked/fresh/stale` 추가. `_subscriptions` TICK 필터 size / `_subscriptions_acked` TICK 필터 size / 최근 60s 내 tick 수신 카운트 / 60s 미수신 카운트. 기존 `subscribed_count` 보존(호환성). `/api/trading/status` 의 `scan` 필드에 그대로 동봉되어 ScanMonitor 가 stale 기반 색상 배지(0=gray / 1~5=yellow / 6+=red) + total/41 진행바(80%+ amber) 노출
 
 ## log_analysis_engine.py — 일일 로그 분석
 

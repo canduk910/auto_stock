@@ -133,6 +133,24 @@ def get_scan_status() -> dict:
     ]
     # 모멘텀 스캔 + 구독 종목 합집합 (VB 종목도 포함)
     all_relevant = set(_last_scan_result) | set(subscribed)
+
+    # G3 (2026-05-12) — tick_coverage 4종 카운트 노출.
+    # 운영자가 status 단일 호출로 SEND/ACK/fresh/stale 격차 즉시 인지.
+    subscribed_set = set(subscribed)
+    acked_set = {
+        tr_key for tr_id, tr_key in kis_ws._subscriptions_acked
+        if tr_id == TICK_TR_ID
+    }
+    # G3: 60s 임계는 Phase D `_report_tick_coverage` 와 동일 — 운영 일관성
+    now = datetime.now(KST_TZ)
+    threshold = timedelta(seconds=60)
+    _min_dt = datetime.min.replace(tzinfo=KST_TZ)
+    fresh_count = sum(
+        1 for t in subscribed_set
+        if (now - ticker_last_tick.get(t, _min_dt)) <= threshold
+    )
+    stale_count = len(subscribed_set) - fresh_count
+
     return {
         "filtered_tickers": _last_scan_result,
         "filtered_count": len(_last_scan_result),
@@ -142,6 +160,11 @@ def get_scan_status() -> dict:
         "ticker_names": {k: v for k, v in ticker_names.items() if k in all_relevant},
         "ticker_prices": {k: v for k, v in ticker_prices.items() if k in all_relevant},
         "ticker_market_info": {k: v for k, v in ticker_market_info.items() if k in all_relevant},
+        # G3 — 운영자 가시화용 보조 카운트
+        "tick_coverage_total": len(subscribed_set),
+        "tick_coverage_acked": len(acked_set),
+        "tick_coverage_fresh": fresh_count,
+        "tick_coverage_stale": stale_count,
     }
 
 

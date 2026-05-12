@@ -291,6 +291,7 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | GET | `/api/log-reports?days=30` | 일일 로그 분석 리포트 목록 |
 | GET | `/api/log-reports/{YYYY-MM-DD}` | 단일 영업일 리포트 상세 |
 | POST | `/api/log-reports/run` | 수동 트리거 — 즉시 분석 실행 (영업일당 1건 UNIQUE) |
+| GET | `/api/realtime/subscriptions` | WebSocket 구독 슬롯 진단 (total/acked/fresh_60s/stale_60s/limit/tickers/reconnect_count/ws_connected). KIS 측 슬롯 조회 API 미존재 → 우리 측 추적 노출 |
 
 ## 프로젝트 구조
 

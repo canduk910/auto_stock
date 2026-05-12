@@ -44,6 +44,7 @@ Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `Reac
   - VB/LTV 탭 보드별 시가/타겟가: `BreakoutTarget.boards: Record<string, BoardTarget>` 활용. 활성 보드는 `font-semibold + ring`, 비활성은 톤다운. 정렬·돌파 판정·근접 % 모두 활성 보드 기준. `BOARD_META`로 한글 라벨/색상 매핑
   - "최근 매수 신호" 표에 `보드` + `타겟가` 컬럼 (`BuySignal.board?` / `target_price?` / `k?`)
   - donchian_swing 탭: 단계별 통과 카운트(`scan_stats`) 막대 + 후보 테이블에 갭률·진입 상태 컬럼 (`Asia/Seoul` `Intl.DateTimeFormat` 사용). 진입 상태: 보유 중/갭 스킵/장 시작 전/진입 시간 종료/진입 대기. "도움말 펼치기" 토글로 4섹션 안내, `gap_skip_threshold`는 백엔드 params 동적 반영
+  - **tick_coverage 색상 배지 (G3, 2026-05-12)**: 기존 `구독 중: N개` 옆에 보조 정보 `fresh: A / stale: B / acked: C / limit: 41` 노출. `data-testid="tick-coverage-badge"` 의 클래스가 `tick_coverage_stale` 카운트로 분기 — 0=`bg-gray-50 text-gray-700` / 1~5=`bg-yellow-100 text-yellow-800` / 6+=`bg-red-100 text-red-800`. `data-testid="tick-coverage-progress"` 는 `tick_coverage_total / 41` 비율 진행바 — 80%+ 면 `bg-amber-500`, 그 외 `bg-emerald-500`. 백엔드 `ScanStatus.tick_coverage_*` (optional) 미반영 시점도 0 fallback 으로 무해
 
 - **Settings — `ExchangeBoardRow`**
   - 전략별 `exchange`(KRX/NXT/SOR 라디오) + `tradable_boards`(5개 체크박스, post_nxt 선택 시 amber 강조). 0개 선택 차단

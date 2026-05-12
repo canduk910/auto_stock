@@ -20,7 +20,7 @@ KST = timezone(timedelta(hours=9))
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config import settings
-from src.routes import trading, balance, history, performance, logs, strategies, recommendations, log_reports, system
+from src.routes import trading, balance, history, performance, logs, strategies, recommendations, log_reports, system, realtime
 from src.auth.token import token_manager
 
 # endpoint별 응답시간 샘플 (ms) — 최근 1024개. /api/system/metrics에서 p50/p95/p99 산출
@@ -208,6 +208,7 @@ app.include_router(strategies.router)
 app.include_router(recommendations.router)
 app.include_router(log_reports.router)
 app.include_router(system.router)
+app.include_router(realtime.router)
 
 
 @app.get("/health")

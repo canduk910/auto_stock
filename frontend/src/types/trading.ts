@@ -77,6 +77,12 @@ export interface ScanStatus {
   ticker_names: Record<string, string>
   ticker_prices: Record<string, TickerPrice>
   ticker_market_info: Record<string, TickerMarketInfo>
+  // G3 (2026-05-12) — tick_coverage 4종. 운영자 가시화용 보조 카운트.
+  // 백엔드 미반영 시점 호환을 위해 optional. ScanMonitor 가 색상 배지로 노출.
+  tick_coverage_total?: number
+  tick_coverage_acked?: number
+  tick_coverage_fresh?: number
+  tick_coverage_stale?: number
 }
 
 export interface TickerMarketInfo {

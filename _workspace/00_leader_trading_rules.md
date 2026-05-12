@@ -29,6 +29,12 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - 구현: `StrategyBase._fallback_one_share(current_price)` 공통 헬퍼로 통합 — 4개 전략(`momentum`/`volatility_breakout`/`long_tail_volatility`/`donchian_swing`) 모두 동일 메서드 호출
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
 
+### WebSocket 구독 가시성 (2026-05-12 G, 운영자 슬롯 추적)
+- KIS REST/WS 어디에도 슬롯 사용현황 조회 API 미존재 → 우리 측 도구 강화로 갈음
+- **G1 SUBSCRIBE ACK 추적**: `KisWebSocket._subscriptions_acked` set 신규. 정상 응답(`rt_cd=="0"` + `msg1` 에 "SUBSCRIBE SUCCESS" 포함) 수신 시 add, `subscribe/unsubscribe/_is_rejection_response/connect 재연결` 시점에 discard/clear. `get_acked_tickers()` 헬퍼는 TICK_TR_ID 필터링한 set 반환
+- **G2 진단 endpoint**: `GET /api/realtime/subscriptions` — `{ total, acked, fresh_60s, stale_60s, limit, tickers:{subscribed/acked/fresh/stale (모두 sorted)}, reconnect_count, ws_connected }`. KST 기준, ws_connected=False 도 200 응답. 인증 가드 없음
+- **G3 status 확장**: `scanner.get_scan_status()` 에 `tick_coverage_total/acked/fresh/stale` 4개 키 추가. 기존 `subscribed_count` 보존. ScanMonitor 는 stale 카운트에 따라 색상 배지(0=기본 / 1~5=yellow / 6+=red). 한도 근접도 진행바(total/41, 80%+ amber) 노출
+
 ### WebSocket 시세 구독 우선순위 (2026-05-12 E1, donchian 조기 손절 사건 대응)
 - **`MAX_SUBSCRIPTIONS = 41` (KIS 공식 한도)** — 기존 200은 과대 설정으로 한도 초과 자체를 차단하지 못해 41 초과분이 KIS 측에서 silently 거절될 수 있었음. 어제·오늘 donchian_swing 보유 종목 시세 무수신으로 ATR 트레일링이 작동 안 한 정황.
 - **우선순위(HIGH → LOW)**:

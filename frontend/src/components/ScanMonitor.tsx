@@ -210,7 +210,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
 
         return (
           <>
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-3 gap-3 mb-2">
               <div className="text-center p-2 bg-gray-50 rounded">
                 <div className="text-lg font-bold text-gray-900">{summaryCount}</div>
                 <div className="text-xs text-gray-500">{summaryLabel}</div>
@@ -224,6 +224,44 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                 <div className="text-xs text-gray-500">마지막 스캔</div>
               </div>
             </div>
+
+            {/* G3 (2026-05-12) — tick_coverage 색상 배지 + 한도 근접도 진행바.
+                KIS 슬롯 사용현황 조회 API 미존재 → 우리 측 추적 가시화. */}
+            {(() => {
+              const tcTotal = scan?.tick_coverage_total ?? 0
+              const tcAcked = scan?.tick_coverage_acked ?? 0
+              const tcFresh = scan?.tick_coverage_fresh ?? 0
+              const tcStale = scan?.tick_coverage_stale ?? 0
+              const tcLimit = 41  // MAX_SUBSCRIPTIONS (KIS 공식 한도) — 백엔드와 동기
+              const tcRatio = tcLimit > 0 ? tcTotal / tcLimit : 0
+              const tcRatioPct = Math.min(100, Math.round(tcRatio * 100))
+
+              // 색상 규칙 — stale 카운트 기반
+              let badgeCls = 'bg-gray-50 text-gray-700'
+              if (tcStale > 5) badgeCls = 'bg-red-100 text-red-800'
+              else if (tcStale > 0) badgeCls = 'bg-yellow-100 text-yellow-800'
+
+              // 진행바 — 80%+ 면 amber, 그 외 emerald
+              const progressCls = tcRatio >= 0.8 ? 'bg-amber-500' : 'bg-emerald-500'
+
+              return (
+                <div className="mb-4 space-y-1.5">
+                  <div
+                    data-testid="tick-coverage-badge"
+                    className={`px-2 py-1 rounded text-xs font-medium ${badgeCls}`}
+                  >
+                    fresh: {tcFresh} / stale: {tcStale} / acked: {tcAcked} / limit: {tcLimit}
+                  </div>
+                  <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      data-testid="tick-coverage-progress"
+                      className={`h-full ${progressCls} transition-all`}
+                      style={{ width: `${tcRatioPct}%` }}
+                    />
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* 전체 탭: 돌파 전략별 카운트 */}
             {isAll && BREAKOUT_KEYS.map((k) => {
