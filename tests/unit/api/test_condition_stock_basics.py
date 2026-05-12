@@ -130,3 +130,67 @@ async def test_inquire_stock_basics_propagates_kis_error(
         await condition.inquire_stock_basics("999999")
 
     assert exc.value.msg_cd == "MCA00001"
+
+
+# ---------------------------------------------------------------------------
+# Phase G2 (2026-05-13) — KIS pdno 12자리 → KRX 6자리 단축코드 정규화
+#
+# 결함 진단: `stock_master.ticker` 가 KIS 표준코드 12자리(`00000A000100`)로
+# 저장돼 `get(ticker)` (6자리 호출) 가 항상 miss. Phase G 사전 차단 무력화.
+# ---------------------------------------------------------------------------
+
+
+def test_normalize_ticker_extracts_6digit_from_kis_pdno_12char():
+    """KIS 표준코드(`00000A000100`) → 마지막 6자리 KRX 단축코드 추출."""
+    from src.api.condition import _normalize_ticker
+
+    assert _normalize_ticker("00000A000100") == "000100"
+
+
+def test_normalize_ticker_preserves_6digit_input():
+    """이미 6자리 KRX 단축코드면 그대로 통과."""
+    from src.api.condition import _normalize_ticker
+
+    assert _normalize_ticker("000100") == "000100"
+    assert _normalize_ticker("012200") == "012200"
+
+
+def test_normalize_ticker_empty_or_none_returns_empty():
+    """None / 빈문자열 / 공백 → 빈 문자열."""
+    from src.api.condition import _normalize_ticker
+
+    assert _normalize_ticker(None) == ""
+    assert _normalize_ticker("") == ""
+    assert _normalize_ticker("   ") == ""
+
+
+def test_normalize_ticker_handles_alpha_prefix_variants():
+    """`00000B005930` / `00000A012200` 등 시장 구분자 prefix 변형도 처리."""
+    from src.api.condition import _normalize_ticker
+
+    assert _normalize_ticker("00000B005930") == "005930"
+    assert _normalize_ticker("00000A012200") == "012200"
+
+
+@pytest.mark.asyncio
+async def test_inquire_stock_basics_returns_6digit_ticker_for_12char_pdno(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """KIS 응답 `pdno=00000A000100` 입력 시 반환 `ticker == "000100"`.
+
+    핵심 회귀 보호: 이 검증이 없으면 stock_master 가 다시 12자리로 저장됨.
+    """
+    from src.api import condition
+
+    mock_get = AsyncMock(
+        return_value=_make_response(
+            cptt="Y", nxt_stop="N", pdno="00000A000100"
+        )
+    )
+    monkeypatch.setattr(condition, "kis_get", mock_get)
+
+    result = await condition.inquire_stock_basics("000100")
+
+    assert result.ticker == "000100"
+    # raw 에는 원본 보존 — 디버깅용
+    assert result.raw.get("pdno") == "00000A000100"

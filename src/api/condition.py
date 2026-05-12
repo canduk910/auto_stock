@@ -9,11 +9,38 @@
 
 import asyncio
 import logging
+import re
 
 from src.api.base import KisApiError, kis_get
 from src.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Phase G2 (2026-05-13): KIS 표준코드(12자리, 예 "00000A000100") 마지막
+# 6자리 = KRX 단축코드(상장변경/병합 시 prefix 만 바뀜). stock_master 캐시
+# 의 PK 는 운영 시스템 전체와 동일한 6자리 KRX 코드로 통일한다.
+_TICKER_TAIL_RE = re.compile(r"(\d{6})$")
+
+
+def _normalize_ticker(pdno: str | None) -> str:
+    """KIS 표준코드(`00000A000100`)에서 KRX 6자리 단축코드 추출.
+
+    - 12자리 표준코드: 마지막 6자리 숫자만 추출
+    - 6자리 그대로: 변환 없이 반환
+    - None / 빈 문자열 / 6자리 숫자 미포함: 빈 문자열 반환
+
+    결함 배경 (Phase G2, 2026-05-13):
+    - 운영 DB stock_master.ticker = `00000A000100` (KIS pdno 그대로)
+    - positions.ticker = `000100` (KRX 6자리)
+    - `stock_master.get(ticker)` 항상 miss → Phase G NXT 사전 차단 무력화
+    """
+    if not pdno:
+        return ""
+    s = str(pdno).strip()
+    if not s:
+        return ""
+    m = _TICKER_TAIL_RE.search(s)
+    return m.group(1) if m else ""
 
 FLUCTUATION_RANK_URL = "/uapi/domestic-stock/v1/ranking/fluctuation"
 STOCK_PRICE_URL = "/uapi/domestic-stock/v1/quotations/inquire-price"
@@ -145,7 +172,9 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
     admn = (output.get("admn_item_yn") or "").strip().upper()
 
     return StockBasics(
-        ticker=output.get("pdno") or pdno,
+        # Phase G2 (2026-05-13): KIS pdno 는 12자리 표준코드("00000A000100").
+        # KRX 6자리 단축코드로 정규화 후 모델에 저장 — stock_master PK 정합성 보장.
+        ticker=_normalize_ticker(output.get("pdno") or pdno),
         name=output.get("prdt_abrv_name") or output.get("prdt_name") or "",
         excg_dvsn_cd=output.get("excg_dvsn_cd") or "",
         nxt_tradable=(cptt == "Y" and nxt_stop == "N"),
