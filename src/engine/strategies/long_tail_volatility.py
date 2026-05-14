@@ -307,26 +307,101 @@ class LongTailVolatilityStrategy(StrategyBase):
         return self._scanned_tickers
 
     def get_targets_status(self) -> dict[str, dict]:
-        """종목별 타겟 가격 정보 (보드별 분리 노출 — VB와 동일 형식)."""
+        """종목별 타겟 가격 정보 (활성 보드 필터링 — VB와 동일 형식 + `limit_up_reached`).
+
+        2026-05-13 작업 1: 활성 보드(`session_tracker.active`) ∩ 전략 `tradable_boards` 에
+        속하는 보드만 노출. 교집합 공집합 → `boards={}` + top-level 0. session 모듈
+        장애 시 fallback → 모든 보드 노출 (외부 호환 + 운영자 시야 보존).
+        `limit_up_reached` 키는 필터링과 무관하게 항상 보존.
+        """
+        # 활성 보드 ∩ tradable_boards = 노출 보드 집합
+        visible: set[str] | None
+        try:
+            from src.engine.session import session_tracker, parse_tradable_boards
+
+            active = session_tracker.active  # frozenset[MarketBoard]
+            tradable_raw = self.config.params.get("tradable_boards")
+            tradable = parse_tradable_boards(tradable_raw) if tradable_raw else None
+            if not tradable:
+                tradable = parse_tradable_boards(list(self.DEFAULT_TRADABLE_BOARDS))
+            visible = {b.value for b in (active & tradable)}
+        except Exception:
+            visible = None
+
+        _BOARD_PRIORITY = ("main", "post_nxt", "pre_nxt")
+
         result = {}
         for ticker, info in self._targets.items():
             board_states = self._open_confirmed.get(ticker, {})
-            result[ticker] = {
-                "k": info.get("k", 0),
-                "target_price": info.get("target_price", 0),
-                "open_price": info.get("open_price", 0),
-                "target_offset": info.get("target_offset", 0),
-                "limit_up_reached": ticker in self._limit_up_reached,
-                "boards": {
+            all_boards = info.get("boards", {})
+            limit_up = ticker in self._limit_up_reached
+
+            if visible is None:
+                # fallback — 기존 모든 보드 노출
+                exposed_boards = {
                     board: {
                         "open_price": b.get("open_price", 0),
                         "target_price": b.get("target_price", 0),
                         "target_offset": b.get("target_offset", 0),
                         "confirmed": board_states.get(board, False),
                     }
-                    for board, b in info.get("boards", {}).items()
-                },
-                "open_confirmed": board_states,
+                    for board, b in all_boards.items()
+                }
+                result[ticker] = {
+                    "k": info.get("k", 0),
+                    "target_price": info.get("target_price", 0),
+                    "open_price": info.get("open_price", 0),
+                    "target_offset": info.get("target_offset", 0),
+                    "limit_up_reached": limit_up,
+                    "boards": exposed_boards,
+                    "open_confirmed": board_states,
+                }
+                continue
+
+            exposed_boards = {
+                board: {
+                    "open_price": b.get("open_price", 0),
+                    "target_price": b.get("target_price", 0),
+                    "target_offset": b.get("target_offset", 0),
+                    "confirmed": board_states.get(board, False),
+                }
+                for board, b in all_boards.items()
+                if board in visible
+            }
+            exposed_confirmed = {b: v for b, v in board_states.items() if b in visible}
+
+            if not exposed_boards:
+                result[ticker] = {
+                    "k": info.get("k", 0),
+                    "target_price": 0,
+                    "open_price": 0,
+                    "target_offset": 0,
+                    "limit_up_reached": limit_up,
+                    "boards": {},
+                    "open_confirmed": {},
+                }
+                continue
+
+            top_board: str | None = None
+            for cand in _BOARD_PRIORITY:
+                if cand in exposed_boards and exposed_boards[cand]["confirmed"]:
+                    top_board = cand
+                    break
+            if top_board is None:
+                for cand in _BOARD_PRIORITY:
+                    if cand in exposed_boards:
+                        top_board = cand
+                        break
+            top = exposed_boards[top_board] if top_board else {}
+
+            result[ticker] = {
+                "k": info.get("k", 0),
+                "target_price": top.get("target_price", 0),
+                "open_price": top.get("open_price", 0),
+                "target_offset": top.get("target_offset", 0),
+                "limit_up_reached": limit_up,
+                "boards": exposed_boards,
+                "open_confirmed": exposed_confirmed,
             }
         return result
 

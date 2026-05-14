@@ -276,31 +276,106 @@ class VolatilityBreakoutStrategy(StrategyBase):
         return self._scanned_tickers
 
     def get_targets_status(self) -> dict[str, dict]:
-        """종목별 타겟 가격 정보를 반환한다.
+        """종목별 타겟 가격 정보를 반환한다 (활성 보드 필터링, 2026-05-13 작업 1).
 
-        Phase 5 보드별 분리 도입 후 응답 호환성:
-        - top-level `target_price/open_price/target_offset`은 기본 보드(첫 확정된 보드, 일반적으로 main)
-        - 추가 `boards`에 보드별 상세 노출
-        - `open_confirmed`는 보드 단위 dict (`{board: bool}`)
+        - 활성 보드(`session_tracker.active`) ∩ 전략 `tradable_boards` 에 속하는 보드만 노출
+        - 교집합 공집합 → `boards={}` + top-level 0 + `open_confirmed={}`
+        - 노출 보드 있음 → 우선순위(main → post_nxt → pre_nxt) 첫 보드 기준 top-level 값
+        - session 모듈 import/접근 예외 → fallback: 기존 모든 보드 노출 (외부 호환 + 운영자 시야 보존)
+
+        Phase 5 응답 스키마 보존 — `boards` 빈 dict 허용, 키 자체는 제거하지 않는다.
         """
+        # 활성 보드 ∩ tradable_boards = 노출 보드 집합
+        visible: set[str] | None
+        try:
+            from src.engine.session import session_tracker, parse_tradable_boards
+
+            active = session_tracker.active  # frozenset[MarketBoard]
+            tradable_raw = self.config.params.get("tradable_boards")
+            tradable = parse_tradable_boards(tradable_raw) if tradable_raw else None
+            if not tradable:
+                # 기본 tradable_boards fallback (전략 클래스 상수)
+                tradable = parse_tradable_boards(list(self.DEFAULT_TRADABLE_BOARDS))
+            visible = {b.value for b in (active & tradable)}
+        except Exception:
+            # session 모듈 장애 시 모든 보드 노출 (운영자 시야 보존)
+            visible = None
+
+        # 우선순위: main → post_nxt → pre_nxt
+        _BOARD_PRIORITY = ("main", "post_nxt", "pre_nxt")
+
         result = {}
         for ticker, info in self._targets.items():
             board_states = self._open_confirmed.get(ticker, {})
-            result[ticker] = {
-                "k": info.get("k", 0),
-                "target_price": info.get("target_price", 0),
-                "open_price": info.get("open_price", 0),
-                "target_offset": info.get("target_offset", 0),
-                "boards": {
+            all_boards = info.get("boards", {})
+
+            if visible is None:
+                # fallback — 기존 모든 보드 노출
+                exposed_boards = {
                     board: {
                         "open_price": b.get("open_price", 0),
                         "target_price": b.get("target_price", 0),
                         "target_offset": b.get("target_offset", 0),
                         "confirmed": board_states.get(board, False),
                     }
-                    for board, b in info.get("boards", {}).items()
-                },
-                "open_confirmed": board_states,
+                    for board, b in all_boards.items()
+                }
+                result[ticker] = {
+                    "k": info.get("k", 0),
+                    "target_price": info.get("target_price", 0),
+                    "open_price": info.get("open_price", 0),
+                    "target_offset": info.get("target_offset", 0),
+                    "boards": exposed_boards,
+                    "open_confirmed": board_states,
+                }
+                continue
+
+            # 노출 보드만 추출 (visible 으로 필터)
+            exposed_boards = {
+                board: {
+                    "open_price": b.get("open_price", 0),
+                    "target_price": b.get("target_price", 0),
+                    "target_offset": b.get("target_offset", 0),
+                    "confirmed": board_states.get(board, False),
+                }
+                for board, b in all_boards.items()
+                if board in visible
+            }
+            exposed_confirmed = {b: v for b, v in board_states.items() if b in visible}
+
+            if not exposed_boards:
+                # 교집합 공집합 — top-level 도 0 으로 가린다
+                result[ticker] = {
+                    "k": info.get("k", 0),
+                    "target_price": 0,
+                    "open_price": 0,
+                    "target_offset": 0,
+                    "boards": {},
+                    "open_confirmed": {},
+                }
+                continue
+
+            # top-level: 노출 보드 중 우선순위 첫 보드 — confirmed 우선
+            top_board: str | None = None
+            for cand in _BOARD_PRIORITY:
+                if cand in exposed_boards and exposed_boards[cand]["confirmed"]:
+                    top_board = cand
+                    break
+            if top_board is None:
+                for cand in _BOARD_PRIORITY:
+                    if cand in exposed_boards:
+                        top_board = cand
+                        break
+            # exposed_boards 비어있지 않으므로 top_board 는 반드시 결정됨
+            top = exposed_boards[top_board] if top_board else {}
+
+            result[ticker] = {
+                "k": info.get("k", 0),
+                "target_price": top.get("target_price", 0),
+                "open_price": top.get("open_price", 0),
+                "target_offset": top.get("target_offset", 0),
+                "boards": exposed_boards,
+                "open_confirmed": exposed_confirmed,
             }
         return result
 
