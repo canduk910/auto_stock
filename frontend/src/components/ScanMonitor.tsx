@@ -833,7 +833,10 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                               ? ((curPrice / activeTarget - 1) * 100).toFixed(1)
                               : null
                             const nearTarget = pct !== null && parseFloat(pct) >= -2
-                            // 보드별 표시할 셀 컨텐츠 (확정된 보드만, 또는 backwards-compat)
+                            // 보드별 표시할 셀 컨텐츠 (활성 보드 필터링 — 2026-05-13 작업 1):
+                            // - boards 비지 않음 → 그대로 (백엔드가 활성 보드만 보냄)
+                            // - boards 빈 dict + activeBoardCode 있음 → backwards-compat 단일 row
+                            // - boards 빈 dict + activeBoardCode 없음(장 외) → row 미렌더 (null 반환)
                             const boardRows = (() => {
                               const rows: { board: string; openPrice: number; targetPrice: number; confirmed: boolean }[] = []
                               if (t.boards && Object.keys(t.boards).length > 0) {
@@ -847,18 +850,22 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                                     confirmed: info.confirmed,
                                   })
                                 }
+                                return rows
                               }
-                              if (rows.length === 0) {
-                                // backwards-compat — 단일 행
+                              // boards 빈 dict — backwards-compat 분기
+                              if (activeBoardCode) {
                                 rows.push({
-                                  board: activeBoardCode ?? 'main',
+                                  board: activeBoardCode,
                                   openPrice: t.open_price,
                                   targetPrice: t.target_price,
                                   confirmed: typeof t.open_confirmed === 'boolean' ? t.open_confirmed : false,
                                 })
+                                return rows
                               }
-                              return rows
+                              // 활성 보드 없음 + boards 빈 dict → row 미렌더
+                              return null
                             })()
+                            if (boardRows === null) return null
                             return (
                               <tr key={ticker} className={`border-b border-gray-50 ${nearTarget ? 'bg-yellow-50' : ''}`}>
                                 <td className="py-1 pr-2 font-medium align-top">

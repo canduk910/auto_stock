@@ -48,6 +48,13 @@ MIN_MARKET_CAP = 100_000_000_000      # 시총 1000억 이상
 MIN_TRADE_AMOUNT = 20_000_000_000     # 거래대금 200억 이상
 MAX_STOCKS = 40                        # 최대 구독 종목 수
 
+# Breakout(VB/LTV) 후순위 슬롯 cap (2026-05-13 작업 2 — momentum 보호).
+# 2026-05-13 08:57:39 운영 로그에서 vb=30+ltv=30 → dedup 28 breakout 점유 후
+# 09:30 momentum 발화 시 41 한도 초과 → momentum drop 위험 노출. breakout 을
+# 25개로 cap 해 잔여 슬롯을 momentum 에 보장한다.
+# 명세: `_workspace/00_leader_trading_rules.md` (2026-05-13) 작업 2.
+BREAKOUT_LOW_CAP = 25
+
 # ETF/ETN 제외 키워드
 ETF_KEYWORDS = ("KODEX", "TIGER", "KBSTAR", "KOSEF", "ARIRANG", "SOL", "ACE",
                 "RISE", "KoAct", "PLUS", "TIMEFOLIO", "WOORI", "FOCUS",
@@ -419,6 +426,13 @@ async def subscribe_filtered_stocks(
         # LOW 순서 재정렬 (G안, 2026-05-12): breakout → momentum → swing.
         # donchian_swing 은 Pull 폴링으로 매수 평가하므로 슬롯 손실 안전.
         drop_counts: dict[str, int] = {"breakout": 0, "momentum": 0, "swing": 0}
+
+        # 작업 2 (2026-05-13): breakout cap 25 — momentum 슬롯 보호.
+        # cap 초과분은 `drop_counts["breakout"]` 에 합산해 기존 priority_drop
+        # 로그 형식(breakout=X)으로 자연 노출. slot 잔여와 무관하게 cap 우선 적용.
+        if len(breakout) > BREAKOUT_LOW_CAP:
+            drop_counts["breakout"] += len(breakout) - BREAKOUT_LOW_CAP
+            breakout = breakout[:BREAKOUT_LOW_CAP]
         for label, candidates in (
             ("breakout", breakout),
             ("momentum", momentum),
