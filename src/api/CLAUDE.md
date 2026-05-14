@@ -31,13 +31,14 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - `is_insufficient_quantity(KisApiError) -> bool`: 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 식별. msg1 키워드("부족" + "매도가능/보유수량/잔고") 가드 + `APBK0918` 은 보유부족 키워드가 동반될 때만 True. 시간외 거부에서는 False 로 떨어져 메모리/DB positions 보존. 매도 즉시 break 결정용.
 - `is_market_order_disallowed(KisApiError) -> bool`: KIS 응답이 '시장가매매불가' 류의 거부인지 판단. msg1 키워드(`_MARKET_ORDER_DISALLOWED_KEYWORDS`: "시장가매매불가" / "시장가 매매 불가" / "시장가 주문 불가" / "시장가 호가 불가" / **"시장가호가불가"** / **"최유리/최우선지정가 주문만"** / **"지정가 및 최유리"**)로 매칭. 기존 3종 분류와 **상호 배타** — 이 함수가 True 이면 다른 3종은 모두 False. `execute_buy`가 이 거부에 대해 `step_up(current_price, 5)` 가격으로 지정가 1회 폴백, `execute_sell`이 시장가 매도일 때 `step_down(current_price, 5)` 지정가 1회 폴백(Phase C, 2026-05-11). 매수와 매도 양쪽 폴백 분기에서 동일 헬퍼 사용. msg_cd 는 운영 trace 누적 후 화이트리스트화 예정 — APBK1943 (2026-05-11 계양전기 매도 ×3 실패 원문) + **APBK3013** (2026-05-11 NXT 애프터 16시대 매도 ×3 실패 원문, Phase H1) 확정 추가. (`docs/kis/error-codes.md` 4-2절 / 5-4절).
 
-### condition.py — 조건검색 + 영업일 체크 + 종목 기본정보
+### condition.py — 조건검색 + 영업일 체크 + 종목 기본정보 + TTL 캐시
 - 거래량순위 API로 종목 필터링 (FHPST01700000)
 - 시총/거래대금 필터 적용
 - `is_market_open(date)`: KIS chk-holiday API(CTCA0903R)로 개장일 여부 (`opnd_yn == "Y"`)
 - `next_trading_day(after_date)`: 다음 개장일 조회 (휴일 다음날 자동 산정)
 - `fetch_daily_candles(ticker, days)`: 일봉 N영업일치 조회. **`FHKST03010100`(`/quotations/inquire-daily-itemchartprice`, 모의/실전 동일 TR_ID) 사용 — 단일 호출당 최대 100일 응답**. 이전 `FHKST01010400`(`inquire-daily-price`)은 약 30일로만 응답이 제한되어 60일 EMA 사용처(donchian_swing)에서 모든 종목이 길이 컷에 탈락하던 결함을 차단. 응답은 `output2` 배열(최신순), `stck_bsop_date`가 비어있는 placeholder 행은 제거하여 반환. 달력일 윈도우는 영업일/달력일 비율(5/7) + 마진 = `days + days//2 + 10`
 - **`inquire_stock_basics(pdno) -> StockBasics`** (Phase G, 2026-05-11): KIS `CTPF1002R` 주식기본조회 — NXT 거래종목여부(`cptt_trad_tr_psbl_yn`) + NXT 거래정지여부(`nxt_tr_stop_yn`) + KRX 정지(`tr_stop_yn`) + 관리종목(`admn_item_yn`) 파싱 후 `src.models.stock.StockBasics` 반환. 파생값 `nxt_tradable = (cptt=="Y") AND (nxt_stop=="N")`. CTPF 접두사 TR_ID 는 모의/실전 동일. 캐시는 `src.db.stock_master` (24h TTL). `docs/kis/error-codes.md` 5-3절 필드 매핑 표 참조. **Phase G2 (2026-05-13)**: 반환 `ticker` 는 KIS `pdno` (12자리 표준코드 `00000A000100`) 를 모듈 헬퍼 `_normalize_ticker()` 로 KRX 6자리 단축코드로 정규화한 값 — `stock_master` PK 정합성 (`positions.ticker` 가 6자리) 을 보장. 정규식 `(\d{6})$` 로 마지막 6자리 추출, 빈/형식불일치는 빈 문자열. 12자리 그대로 저장돼 `stock_master.get(ticker)` 항상 miss → Phase G 사전 차단 무력화되던 운영 결함 차단
+- **TTL 캐시 (PR-C, 2026-05-14)**: 동일 ticker 반복 조회로 인한 KIS 부하 + 5xx 노출 면적 축소. (a) `fetch_stock_detail`: `_PRICE_CACHE_TTL=5s`, 키 = `ticker`. swing pull(1분 주기) 매 호출 신선. (b) `fetch_daily_candles`: `_CANDLE_CACHE_TTL=300s`(5분), 키 = `(ticker, days)` — days 별 분리(60 vs 21 등). 일봉은 장중 분 단위 갱신 — 5분 지연은 일봉 기반 전략 시뮬레이션 정확도 무영향. 두 함수 모두 `asyncio.Lock` + `_inflight_*: dict[key, Future]` 로 **single-flight** — 동시 N 호출 시 첫 호출만 KIS fetch, 나머지는 future 합류로 KIS 호출 정확히 1회. 무효화: TTL 자동 만료 + `clear_caches()` 헬퍼(스케줄러 `_reset_daily_state` 가 매일 20:10 정산 후 호출). **사용 범위 안전 가드**: 스캐닝/조건검사 한정 — `execute_buy/execute_sell` 의 체결가/주문가 결정 경로는 절대 사용 금지(WebSocket tick 또는 직접 호출 유지)
 
 ## 새 API 추가 절차
 1. `docs/kis/{category}.md`에서 TR_ID, URL, 파라미터 확인
