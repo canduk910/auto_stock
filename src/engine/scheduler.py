@@ -2135,6 +2135,14 @@ class TradingScheduler:
         ticker_names.update(STATIC_TICKER_NAMES)  # 정적 시드 재주입
         ticker_last_tick.clear()  # Phase D — 다른 scanner dict들과 일관성
 
+        # PR-C (2026-05-14) — condition.py TTL 캐시(시세/일봉) 일괄 무효화.
+        # 야간 누적 방지 + 다음 영업일 시작 시 신선한 KIS 값으로 재충전.
+        try:
+            from src.api import condition as _cond
+            _cond.clear_caches()
+        except Exception:
+            logger.exception("condition cache clear 실패")
+
         logger.info("일간 상태 초기화 완료 (scanner 캐시 clear 포함)")
 
     async def _wait_until(self, target: time) -> None:
