@@ -1713,6 +1713,12 @@ class TradingScheduler:
                     continue
 
                 if signal == _Signal.BUY:
+                    # PR-A (2026-05-13): swing pull BUY 신호 시 퍼널 카운터 증가.
+                    # 결함: PR #1 swing pull 분리 후 risk.on_tick 의 donchian 매수 평가가 skip
+                    # 되어 `signal_count_today` 가 0 으로 잔존 → metrics.strategy_funnel
+                    # `signals=0 orders=1 fills=1` 비정합 (2026-05-13 운영 metrics).
+                    # `risk.py:on_tick` 의 동일 카운터 증가 규약과 짝.
+                    strategy.state.signal_count_today += 1
                     # Codex 추가검토 1 (2026-05-12): 매수 *성공* 시에만 WS subscribe.
                     # 결함: 기존 코드는 execute_buy raise 후에도 subscribe 호출 →
                     # 매수 실패 종목까지 HIGH bypass 슬롯 점유 → MAX_SUBSCRIPTIONS=41 압박.
