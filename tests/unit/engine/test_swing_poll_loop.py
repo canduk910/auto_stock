@@ -588,3 +588,70 @@ async def test_swing_poll_window_kst_active_when_utc_pre_midnight():
     assert sched.order_engine.execute_buy.call_count == 1, (
         "KST 09:10 은 윈도우 안 — execute_buy 1회 호출되어야 함"
     )
+
+
+# ---------------------------------------------------------------------------
+# PR-A: swing pull BUY 신호 시 signal_count_today 카운터 증가
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_swing_poll_buy_signal_increments_signal_count_today():
+    """donchian_swing pull 폴링에서 BUY 신호가 발생하면 `state.signal_count_today`가 증가해야 한다.
+
+    결함 (2026-05-13 운영 metrics):
+        strategy_funnel: donchian_swing { signals=0, orders=1, fills=1 }
+
+    PR #1(swing pull 분리) 이후 `risk.on_tick`은 donchian 매수 평가를 skip한다.
+    `_swing_buy_poll_loop`에서 `check_buy_signal`을 직접 호출하므로, BUY 신호 발생 시
+    `state.signal_count_today += 1`을 수행해야 한다. `risk.py:113`의 카운터 증가
+    규약과 동일.
+
+    검증: 1사이클 안에서 BUY 신호 종목 1개 → signal_count_today=1.
+    """
+    sched, strategy = _make_scheduler(
+        scanned=["005930", "000660"],
+        buy_results={"005930": Signal.BUY, "000660": Signal.NONE},
+    )
+
+    # 초기값 확인 — 0에서 시작
+    assert strategy.state.signal_count_today == 0
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-12 09:05:30"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    # BUY 신호 1건만 발생 → signal_count_today == 1
+    assert strategy.state.signal_count_today == 1, (
+        f"BUY 신호 1건 발생 시 signal_count_today=1 기대. "
+        f"실제={strategy.state.signal_count_today}. "
+        f"PR #1 swing pull 작업 후 카운터 증가 누락 결함 차단."
+    )
+
+
+@pytest.mark.asyncio
+async def test_swing_poll_no_buy_signal_keeps_signal_count_zero():
+    """BUY 신호가 없으면 signal_count_today는 증가하지 않는다."""
+    sched, strategy = _make_scheduler(
+        scanned=["005930"], buy_results={"005930": Signal.NONE},
+    )
+
+    fake_detail = {"stck_prpr": "60000", "stck_oprc": "59000"}
+
+    with freeze_time("2026-05-12 09:05:30"), \
+         patch("src.api.condition.fetch_stock_detail", new=AsyncMock(return_value=fake_detail)):
+        async def _stopper():
+            await asyncio.sleep(0.3)
+            sched._running = False
+        stop_task = asyncio.create_task(_stopper())
+        await asyncio.wait_for(sched._swing_buy_poll_loop(), timeout=5.0)
+        await stop_task
+
+    assert strategy.state.signal_count_today == 0, (
+        "BUY 신호 미발생 시 signal_count_today=0 유지"
+    )
