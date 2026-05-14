@@ -31,6 +31,17 @@ logger = logging.getLogger(__name__)
 #     (현재가는 WebSocket tick 또는 최신 직접 호출)
 #
 # 무효화: TTL 자동 만료 + `_reset_daily_state()` 가 호출하는 `clear_caches()`
+#
+# PR-C2 (2026-05-14) — Copilot 리뷰 8건 재설계:
+#   1) Future → asyncio.Task + joiner 는 asyncio.shield(task) 로 await
+#      → joiner cancel 전파로 inflight 깨지는 결함 차단 (InvalidStateError)
+#   2) `asyncio.get_event_loop()` 미사용 — Task 패턴은 loop 직접 참조 불필요
+#      (Py 3.12+ deprecation 회피)
+#   3) `except CancelledError` 분리 처리 — Task 기반에선 CancelledError 가
+#      Exception 분기로 잘못 흡수될 여지 자체 제거 (helper 안에 except 없음)
+#   4) `clear_caches()` 가 `_cache_epoch` bump — fetch 완료 시 epoch 일치
+#      검증한 경우만 cache write. 이전 영업일 inflight 결과가 새 영업일
+#      캐시에 stale write 되는 결함 차단
 # ---------------------------------------------------------------------------
 _PRICE_CACHE_TTL = 5.0       # seconds — 5초. swing pull(1분 주기) 매 호출 신선
 _CANDLE_CACHE_TTL = 300.0    # 5분 — 일봉은 장중 분 단위 갱신, 전략 시뮬레이션 정확도 영향 없음
@@ -41,21 +52,36 @@ _price_cache: dict[str, tuple[dict, float]] = {}
 _candle_cache: dict[tuple[str, int], tuple[list[dict], float]] = {}
 
 # race 보호 — 캐시 read/write 는 동기 영역에서만 일어나도록 lock. KIS 호출은
-# lock 밖에서. single-flight 가 필요한 동시 호출은 `_inflight_*` future dict 가
+# lock 밖에서. single-flight 가 필요한 동시 호출은 `_inflight_*` Task dict 가
 # 동일 키 진행 중 호출을 첫 호출의 결과로 합류시킨다.
+# joiner 는 `asyncio.shield(task)` 로 await — 자기 task 가 cancel 돼도 inflight
+# task 자체는 영향 없음 (다른 joiner 와 fetch 담당 모두 정상 진행).
 _cache_lock = asyncio.Lock()
-_inflight_price: dict[str, "asyncio.Future[dict]"] = {}
-_inflight_candle: dict[tuple[str, int], "asyncio.Future[list[dict]]"] = {}
+_inflight_price: dict[str, "asyncio.Task[dict]"] = {}
+_inflight_candle: dict[tuple[str, int], "asyncio.Task[list[dict]]"] = {}
+
+# 캐시 epoch — `clear_caches()` 호출 시 +1. fetch helper 가 완료 시점 epoch 가
+# 시작 시점과 일치할 때만 cache write. clear 후 stale inflight 결과가 새 영업일
+# 캐시에 누수되는 결함 차단 (Copilot 리뷰 #4).
+_cache_epoch: int = 0
 
 
 def clear_caches() -> None:
-    """일일 정산 reset 등 외부 트리거에서 호출 — 캐시 비우기.
+    """일일 정산 reset 등 외부 트리거에서 호출 — 캐시 비우기 + epoch bump.
 
     `scheduler._reset_daily_state()` 가 매일 20:10 정산 후 호출해 야간 누적 방지.
-    inflight future 는 의도적으로 비우지 않음 — 진행 중 호출은 자연히 완료됨.
+
+    PR-C2 (2026-05-14): `_cache_epoch` 를 증가시켜 진행 중 inflight fetch 가
+    완료 시점에 캐시 write 를 skip 하도록 강제 (fetch 결과는 정상 반환). inflight
+    task 자체는 cancel 안 함 — 진행 중 fetch 는 이미 호출자가 await 중이라 cancel
+    시 호출자에게 unexpected CancelledError 전파 위험. 캐시 write 만 막아 다음
+    호출부터 새 fetch 발생.
     """
+    global _cache_epoch
+    _cache_epoch += 1
     _price_cache.clear()
     _candle_cache.clear()
+    logger.info("[condition_cache] cleared (epoch=%d)", _cache_epoch)
 
 # Phase G2 (2026-05-13): KIS 표준코드(12자리, 예 "00000A000100") 마지막
 # 6자리 = KRX 단축코드(상장변경/병합 시 prefix 만 바뀜). stock_master 캐시
@@ -231,6 +257,41 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
     )
 
 
+async def _fetch_stock_detail_and_cache(ticker: str, epoch_at_start: int) -> dict:
+    """KIS 호출 + epoch 일치 시 캐시 write + inflight 정리.
+
+    PR-C2 (2026-05-14):
+    - epoch_at_start 와 현재 `_cache_epoch` 가 다르면(`clear_caches` 호출됨) 캐시
+      write 를 skip — stale inflight 결과 누수 차단. 결과는 호출자(joiner) 에게
+      정상 반환해 caller 동작은 보존.
+    - finally 절에서 inflight 정리 — `_inflight_price[ticker]` 가 자기 task 일
+      때만 pop (다른 task 가 같은 ticker 로 이미 등록한 경우는 보존).
+    - 예외 처리(`except`) 는 두지 않음 — 호출자(joiner) 가 `await shield(task)` 로
+      예외를 정상 회수. CancelledError 분리 분기 불필요(Copilot 리뷰 #2/3 동시 차단).
+    """
+    try:
+        params = {
+            "fid_cond_mrkt_div_code": "J",
+            "fid_input_iscd": ticker,
+        }
+        data = await kis_get(STOCK_PRICE_URL, "FHKST01010100", params)
+        output = data.get("output", {})
+        async with _cache_lock:
+            if _cache_epoch == epoch_at_start:
+                _price_cache[ticker] = (output, time.monotonic() + _PRICE_CACHE_TTL)
+            # else: clear_caches 가 호출됨 → cache write skip (stale 차단)
+        return output
+    finally:
+        # inflight 정리 — race 안전: 자기 task 일 때만 pop
+        current = _inflight_price.get(ticker)
+        try:
+            if current is asyncio.current_task():
+                _inflight_price.pop(ticker, None)
+        except RuntimeError:
+            # current_task() 가 None 이거나 호출 불가한 컨텍스트 — best effort cleanup
+            _inflight_price.pop(ticker, None)
+
+
 async def fetch_stock_detail(ticker: str) -> dict:
     """개별 종목의 현재가/시총/거래대금을 조회한다.
 
@@ -239,86 +300,47 @@ async def fetch_stock_detail(ticker: str) -> dict:
     PR-C (2026-05-14): TTL 캐시 (`_PRICE_CACHE_TTL=5s`) + single-flight. 스캐닝
     경로 한정 — 체결가/주문가 결정에는 사용 금지(`execute_buy/sell` 은 WebSocket
     tick 또는 직접 호출 사용). 5초 TTL 은 swing pull(1분 주기) 매 호출 신선.
-    동시 호출 N 회 시 첫 호출만 KIS fetch, 나머지는 같은 future 결과 공유.
+    동시 호출 N 회 시 첫 호출만 KIS fetch, 나머지는 같은 task 결과 공유.
+
+    PR-C2 (2026-05-14): Future → asyncio.Task 로 전환 + joiner 는
+    `asyncio.shield(task)` 로 await — joiner cancel 시 inflight 자체는 보호되어
+    다른 joiner 가 영향 받지 않음. epoch 가드로 `clear_caches()` race 차단.
     """
     now = time.monotonic()
-    fut: asyncio.Future[dict] | None = None
-    must_fetch = False
+    # double-check cache (lock 밖) — fast path
+    cached = _price_cache.get(ticker)
+    if cached is not None and cached[1] > now:
+        return cached[0]
 
     async with _cache_lock:
+        # double-check cache (lock 안)
         cached = _price_cache.get(ticker)
-        if cached is not None and cached[1] > now:
+        if cached is not None and cached[1] > time.monotonic():
             return cached[0]
-        # 진행 중 fetch 가 있으면 합류
-        fut = _inflight_price.get(ticker)
-        if fut is None:
-            # 본 호출이 fetch 담당
-            loop = asyncio.get_event_loop()
-            fut = loop.create_future()
-            _inflight_price[ticker] = fut
-            must_fetch = True
 
-    if must_fetch:
-        try:
-            params = {
-                "fid_cond_mrkt_div_code": "J",
-                "fid_input_iscd": ticker,
-            }
-            data = await kis_get(STOCK_PRICE_URL, "FHKST01010100", params)
-            output = data.get("output", {})
-            async with _cache_lock:
-                _price_cache[ticker] = (output, time.monotonic() + _PRICE_CACHE_TTL)
-                _inflight_price.pop(ticker, None)
-            fut.set_result(output)
-            return output
-        except BaseException as e:  # 예외도 동일 future 로 전파 — 후속 합류 호출도 같은 실패
-            async with _cache_lock:
-                _inflight_price.pop(ticker, None)
-            fut.set_exception(e)
-            raise
+        # inflight 검사 — 진행 중 task 가 없으면 새로 발화
+        task = _inflight_price.get(ticker)
+        if task is None or task.done():
+            epoch_at_start = _cache_epoch
+            task = asyncio.create_task(
+                _fetch_stock_detail_and_cache(ticker, epoch_at_start)
+            )
+            _inflight_price[ticker] = task
 
-    # 합류 호출 — 첫 호출의 결과 대기
-    return await fut
+    # joiner 는 shield 로 await — 자기 task cancel 시 inflight 보호
+    return await asyncio.shield(task)
 
 
-async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
-    """KIS 기간별시세 API로 최근 N영업일 일봉 데이터를 조회한다.
+async def _fetch_daily_candles_and_cache(
+    ticker: str, days: int, epoch_at_start: int
+) -> list[dict]:
+    """KIS 일봉 호출 + epoch 일치 시 캐시 write + inflight 정리.
 
-    반환: [{"stck_bsop_date", "stck_oprc"(시가), "stck_hgpr"(고가),
-            "stck_lwpr"(저가), "stck_clpr"(종가), "acml_vol", ...}, ...]
-    최신순(idx=0이 가장 최근일).
-
-    구현: `/quotations/inquire-daily-itemchartprice` (FHKST03010100) 사용.
-    이전에는 `inquire-daily-price`(FHKST01010400)를 사용했으나 응답이 약 30일로
-    제한되는 KIS 동작이 있어, 60일 EMA처럼 장기 일봉이 필요한 사용처에서
-    `len(candles) < 61` 컷에 모두 탈락하던 결함이 있었다.
-    FHKST03010100은 단일 호출당 최대 100일 응답 → days=65 사용처도 충분.
+    PR-C2 (2026-05-14): `_fetch_stock_detail_and_cache` 와 동일 패턴.
     """
     from datetime import date, timedelta
 
-    # PR-C (2026-05-14): TTL 캐시 (`_CANDLE_CACHE_TTL=300s`) + single-flight.
-    # 캐시 키는 `(ticker, days)` — days 별 분리 보관(donchian 60일 vs 다른
-    # 사용처 21일 등). 일봉은 장중 분 단위 갱신, 5분 지연은 일봉 기반 전략
-    # (donchian/momentum 시뮬레이션) 정확도에 영향 없음.
     cache_key = (ticker, days)
-    now = time.monotonic()
-    fut: asyncio.Future[list[dict]] | None = None
-    must_fetch = False
-
-    async with _cache_lock:
-        cached = _candle_cache.get(cache_key)
-        if cached is not None and cached[1] > now:
-            return cached[0]
-        fut = _inflight_candle.get(cache_key)
-        if fut is None:
-            loop = asyncio.get_event_loop()
-            fut = loop.create_future()
-            _inflight_candle[cache_key] = fut
-            must_fetch = True
-
-    if not must_fetch:
-        return await fut
-
     try:
         end_date = date.today().strftime("%Y%m%d")
         # 달력일 ≈ 영업일 × 7/5 + 안전 마진 (휴일/공휴일 + 신규상장 일자 부족 등)
@@ -340,15 +362,58 @@ async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
         result = output[:days]
 
         async with _cache_lock:
-            _candle_cache[cache_key] = (result, time.monotonic() + _CANDLE_CACHE_TTL)
-            _inflight_candle.pop(cache_key, None)
-        fut.set_result(result)
+            if _cache_epoch == epoch_at_start:
+                _candle_cache[cache_key] = (result, time.monotonic() + _CANDLE_CACHE_TTL)
         return result
-    except BaseException as e:
-        async with _cache_lock:
+    finally:
+        current = _inflight_candle.get(cache_key)
+        try:
+            if current is asyncio.current_task():
+                _inflight_candle.pop(cache_key, None)
+        except RuntimeError:
             _inflight_candle.pop(cache_key, None)
-        fut.set_exception(e)
-        raise
+
+
+async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
+    """KIS 기간별시세 API로 최근 N영업일 일봉 데이터를 조회한다.
+
+    반환: [{"stck_bsop_date", "stck_oprc"(시가), "stck_hgpr"(고가),
+            "stck_lwpr"(저가), "stck_clpr"(종가), "acml_vol", ...}, ...]
+    최신순(idx=0이 가장 최근일).
+
+    구현: `/quotations/inquire-daily-itemchartprice` (FHKST03010100) 사용.
+    이전에는 `inquire-daily-price`(FHKST01010400)를 사용했으나 응답이 약 30일로
+    제한되는 KIS 동작이 있어, 60일 EMA처럼 장기 일봉이 필요한 사용처에서
+    `len(candles) < 61` 컷에 모두 탈락하던 결함이 있었다.
+    FHKST03010100은 단일 호출당 최대 100일 응답 → days=65 사용처도 충분.
+
+    PR-C (2026-05-14): TTL 캐시 (`_CANDLE_CACHE_TTL=300s`) + single-flight.
+    캐시 키는 `(ticker, days)` — days 별 분리 보관(donchian 60일 vs 다른
+    사용처 21일 등). 일봉은 장중 분 단위 갱신, 5분 지연은 일봉 기반 전략
+    (donchian/momentum 시뮬레이션) 정확도에 영향 없음.
+
+    PR-C2 (2026-05-14): Future → asyncio.Task + asyncio.shield 패턴 + epoch 가드.
+    """
+    cache_key = (ticker, days)
+    now = time.monotonic()
+    cached = _candle_cache.get(cache_key)
+    if cached is not None and cached[1] > now:
+        return cached[0]
+
+    async with _cache_lock:
+        cached = _candle_cache.get(cache_key)
+        if cached is not None and cached[1] > time.monotonic():
+            return cached[0]
+
+        task = _inflight_candle.get(cache_key)
+        if task is None or task.done():
+            epoch_at_start = _cache_epoch
+            task = asyncio.create_task(
+                _fetch_daily_candles_and_cache(ticker, days, epoch_at_start)
+            )
+            _inflight_candle[cache_key] = task
+
+    return await asyncio.shield(task)
 
 
 async def fetch_rising_stocks() -> list[dict]:
