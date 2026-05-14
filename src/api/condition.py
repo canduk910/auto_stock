@@ -18,6 +18,20 @@ from src.config import settings
 logger = logging.getLogger(__name__)
 
 
+def _drain_task_exception(task: "asyncio.Task") -> None:
+    """inflight Task 종료 시 예외 회수 — "Task exception was never retrieved" 차단.
+
+    PR-C2 보강 (Copilot, 2026-05-14): `asyncio.shield(task)` joiner 가 전부 cancel 된
+    상황에서 inflight task 가 예외로 종료되면 회수되지 않아 이벤트 루프가 운영 잡음
+    경고를 남긴다. `add_done_callback` 으로 예외만 조용히 회수 — 취소는 무시.
+    """
+    if task.cancelled():
+        return
+    exc = task.exception()
+    if exc is not None:
+        logger.debug("[condition_cache] inflight task exception (drained): %r", exc)
+
+
 # ---------------------------------------------------------------------------
 # PR-C (2026-05-14) — 시세/일봉 TTL 캐시.
 #
@@ -325,6 +339,8 @@ async def fetch_stock_detail(ticker: str) -> dict:
             task = asyncio.create_task(
                 _fetch_stock_detail_and_cache(ticker, epoch_at_start)
             )
+            # PR-C2 보강: joiner 0명 종료 시 예외 회수 (Task exception 경고 차단)
+            task.add_done_callback(_drain_task_exception)
             _inflight_price[ticker] = task
 
     # joiner 는 shield 로 await — 자기 task cancel 시 inflight 보호
@@ -342,10 +358,13 @@ async def _fetch_daily_candles_and_cache(
 
     cache_key = (ticker, days)
     try:
-        end_date = date.today().strftime("%Y%m%d")
+        # PR-C2 보강 (Copilot, 2026-05-14): `date.today()` 를 한 번만 호출 — 두 번
+        # 호출 시 자정 경계 race 로 end_date/start_date 가 서로 다른 날짜 기준이 될 수 있음.
+        today = date.today()
+        end_date = today.strftime("%Y%m%d")
         # 달력일 ≈ 영업일 × 7/5 + 안전 마진 (휴일/공휴일 + 신규상장 일자 부족 등)
         window_calendar_days = days + (days // 2) + 10
-        start_date = (date.today() - timedelta(days=window_calendar_days)).strftime("%Y%m%d")
+        start_date = (today - timedelta(days=window_calendar_days)).strftime("%Y%m%d")
 
         params = {
             "FID_COND_MRKT_DIV_CODE": "J",
@@ -411,6 +430,8 @@ async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
             task = asyncio.create_task(
                 _fetch_daily_candles_and_cache(ticker, days, epoch_at_start)
             )
+            # PR-C2 보강: joiner 0명 종료 시 예외 회수 (Task exception 경고 차단)
+            task.add_done_callback(_drain_task_exception)
             _inflight_candle[cache_key] = task
 
     return await asyncio.shield(task)

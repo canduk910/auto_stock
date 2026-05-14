@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 from unittest.mock import AsyncMock
 
 import pytest
@@ -571,3 +573,88 @@ async def test_fetch_stock_detail_cancelled_error_does_not_corrupt_inflight(monk
     result = await condition.fetch_stock_detail("005930")
     assert result == {"stck_prpr": "70000"}
     assert call_count[0] == 2
+
+
+# ---------------------------------------------------------------------------
+# PR-C2 보강 (Copilot 2026-05-14)
+# ---------------------------------------------------------------------------
+
+def test_daily_candles_today_called_once_for_midnight_safety():
+    """소스코드 분석으로 `_fetch_daily_candles_and_cache` 가 `date.today()` 를
+    1회만 호출함을 검증 — 두 번 호출 시 자정 경계 race (end_date/start_date 날짜 어긋남).
+    PR-C2 보강 (Copilot, 2026-05-14).
+    """
+    import inspect
+    from src.api import condition
+
+    src = inspect.getsource(condition._fetch_daily_candles_and_cache)
+    # 코멘트 라인 제외 — 실제 함수 호출만 카운트
+    code_lines = [ln for ln in src.splitlines() if "date.today()" in ln and not ln.lstrip().startswith("#")]
+    today_calls = sum(ln.count("date.today()") for ln in code_lines)
+    assert today_calls == 1, (
+        f"date.today() 는 1회만 호출돼야 자정 race 안전 (실제 {today_calls}회)\n"
+        f"매칭 라인: {code_lines}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_stock_detail_task_exception_drained_no_warning(monkeypatch: pytest.MonkeyPatch, caplog):
+    """모든 joiner cancel 후 inflight task 가 예외로 종료해도 'Task exception was never retrieved' 미발생."""
+    import logging as _logging
+    from src.api import condition
+
+    condition.clear_caches()
+
+    async def _failing_get(*args, **kwargs):
+        await asyncio.sleep(0.01)
+        raise RuntimeError("KIS down")
+
+    monkeypatch.setattr(condition, "kis_get", _failing_get)
+
+    # joiner 생성 후 즉시 cancel — task 는 backgrond 에서 계속 실행
+    joiner = asyncio.create_task(condition.fetch_stock_detail("005930"))
+    await asyncio.sleep(0)  # task 발화 기회
+    joiner.cancel()
+    try:
+        await joiner
+    except (asyncio.CancelledError, RuntimeError):
+        pass
+
+    # inflight task 가 예외로 종료될 때까지 대기 + done_callback 발화
+    await asyncio.sleep(0.05)
+
+    # caplog 에 "Task exception was never retrieved" 메시지 없어야 함
+    warning_msgs = [r.getMessage() for r in caplog.records if r.levelno >= _logging.WARNING]
+    assert not any("Task exception was never retrieved" in m for m in warning_msgs), (
+        f"Task exception 회수 안 됨: {warning_msgs}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_daily_candles_task_exception_drained_no_warning(monkeypatch: pytest.MonkeyPatch, caplog):
+    """fetch_daily_candles 동일 — joiner cancel 시 inflight task 예외 회수."""
+    import logging as _logging
+    from src.api import condition
+
+    condition.clear_caches()
+
+    async def _failing_get(*args, **kwargs):
+        await asyncio.sleep(0.01)
+        raise RuntimeError("KIS down")
+
+    monkeypatch.setattr(condition, "kis_get", _failing_get)
+
+    joiner = asyncio.create_task(condition.fetch_daily_candles("005930", days=21))
+    await asyncio.sleep(0)
+    joiner.cancel()
+    try:
+        await joiner
+    except (asyncio.CancelledError, RuntimeError):
+        pass
+
+    await asyncio.sleep(0.05)
+
+    warning_msgs = [r.getMessage() for r in caplog.records if r.levelno >= _logging.WARNING]
+    assert not any("Task exception was never retrieved" in m for m in warning_msgs), (
+        f"Task exception 회수 안 됨: {warning_msgs}"
+    )
