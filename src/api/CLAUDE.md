@@ -13,6 +13,7 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - 토큰 만료 감지 시 자동 갱신 후 재시도
 - 호출 메트릭: `_request_metrics`(전역 dict)에 total/http_5xx/http_4xx/network_err/kis_error/retries + path별 5xx 카운트 누적. `get_request_metrics()` 스냅샷 / `reset_request_metrics()` 리셋. 일일 로그 분석(`log_analysis_engine.py`)이 20:10 INSERT 후 reset 호출
 - **거부 응답 영구 저장(Phase A1)**: `rt_cd != "0"` 시 `KisApiError` raise 직전에 `system_logs.write_log("ERROR", "[kis_rejection] path=... tr_id=... msg_cd=... msg1=... body={PDNO/ORD_DVSN/ORD_UNPR/ORD_QTY/EXCG_ID_DVSN_CD/SLL_BUY_DVSN_CD}")` fire-and-forget 호출. 민감 키(CANO/ACNT_PRDT_CD) 마스킹. `write_log` 예외는 swallow — raise 흐름 보존. 운영 trace를 영구 보존해 새 거부 사례(예: "시장가매매불가") 진단 자료 누적. `docs/kis/error-codes.md` 4절 참조.
+- **재시도 최종 결과 영구 저장(PR-B, 2026-05-14)**: `_request` 재시도 루프가 끝난 직후 다음 두 케이스를 영문 prefix 1행으로 fire-and-forget 저장 + `_request_metrics` 카운터 +1. (a) `attempt > 1` 에서 `rt_cd=0` 성공 → INFO `[api_retry_recovered] path=... tr_id=... attempts=N` + `retry_recovered`. (b) `MAX_RETRIES=3` 모두 5xx/network 실패 후 raise 직전 → ERROR `[api_retry_exhausted] path=... tr_id=... attempts=3 last_status={503|network} last_msg=...` + `retry_exhausted`. 기존 `retries`(중간 시도 카운트)와 분리 — *최종* 결과만 카운트. `reset_request_metrics()` 가 신규 키도 0 으로 초기화. `get_request_metrics()` 스냅샷에 두 키 추가 → `log_analysis_engine` 의 `metrics.api_metrics` 로 그대로 노출.
 
 ### order.py — 주문
 - 현금 매수: TTTC0012U, 매도: TTTC0011U
