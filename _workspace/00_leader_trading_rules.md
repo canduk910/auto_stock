@@ -418,3 +418,103 @@ VB와 동일.
 - code_review_notes 텍스트 기반 코드 자동 변경 절대 금지 — 정보 표시만
 - `allocate_funds()` 시그니처 그대로, 즉시 재호출 안 함 (다음 _boot 반영)
 - 기존 `apply_keys` 흐름 + J1~J3 + I1~I3 + 다른 Phase 영향 없음
+
+---
+
+## (2026-05-13) 작업 1 — 활성 보드만 노출 (VB/LTV `get_targets_status`)
+
+### 결함
+KST 09:09 (PRE_NXT 비활성, MAIN 활성) 시점에도 `get_targets_status()` 가 `_targets[ticker].boards` 의 **모든 보드** target 을 노출 → 프론트엔드가 "프리" 라벨로 표시 → 사용자 혼란. VB(`src/engine/strategies/volatility_breakout.py:278~305`) 및 LTV(`src/engine/strategies/long_tail_volatility.py:309~331`) 동일 결함.
+
+### 백엔드 명세
+- `get_targets_status()` 내부에서 `from src.engine.session import session_tracker` (지연 import — 모듈 순환/테스트 격리)
+- `active_boards = session_tracker.active` (frozenset[MarketBoard])
+- `tradable = parse_tradable_boards(self.config.params.get("tradable_boards"))` 또는 `DEFAULT_TRADABLE_BOARDS` fallback
+- **노출 보드 집합** `visible = {b.value for b in (active_boards & tradable)}`
+- ticker 별 처리:
+  - `visible == set()`: `boards={}`, top-level `target_price/open_price/target_offset=0`, `open_confirmed={}`
+  - `visible != set()`: 기존 `info.get("boards", {})` 중 `b in visible` 만 dict 에 포함. top-level 은 노출 보드 중 우선순위(main → post_nxt → pre_nxt) 첫 `confirmed=True` 보드 기준 → 없으면 우선순위 첫 보드의 값(미확정이면 0). `open_confirmed` 도 노출 보드만 `{board: bool}` 로 필터
+- LTV 동일 변경 (`limit_up_reached` 키는 보존)
+
+### 안전 fallback
+`session_tracker` import/`session_tracker.active` 접근 예외 시 → **기존 모든 보드 노출** (외부 호환 + 장애 시 운영자 시야 보존). `try/except Exception` 으로 흡수.
+
+### 프론트엔드 명세 (`frontend/src/components/ScanMonitor.tsx:769~860`)
+- `usedBoards` 계산: `t.boards` 키 합집합 (변경 없음 — 백엔드가 이미 활성 보드만 보내므로 자연 정리)
+- `boardRows` 빌더:
+  - `t.boards` 가 비어있고 `activeBoardCode` 없음(장 외) → `return null` 후 `filter(Boolean)` 으로 종목 row 자체 제외
+  - `t.boards` 가 비어있고 `activeBoardCode` 있음 → 기존 backwards-compat 단일 row (top-level 사용)
+  - `t.boards` 가 비지 않음 → 기존 로직 그대로 (백엔드 필터링 자연 적용)
+
+### 테스트
+**백엔드 (VB)**: `tests/unit/engine/strategies/test_volatility_breakout.py` 추가 4건
+- `test_get_targets_status_returns_only_active_boards`: session_tracker.active={MAIN} 시 `boards` 키 `["main"]` 만
+- `test_get_targets_status_returns_empty_when_no_active_board_intersection`: active={KRX_AFTER} 시 boards={} + top-level=0
+- `test_get_targets_status_top_level_uses_first_active_confirmed_board`: active={MAIN, POST_NXT} 중 MAIN confirmed=True 면 top-level=main 값
+- `test_get_targets_status_when_session_module_unavailable_falls_back_to_all_boards`: monkeypatch 로 session import 실패 시뮬 → 모든 보드 노출
+
+**백엔드 (LTV)**: `tests/unit/engine/strategies/test_long_tail_volatility.py` 추가 동일 구조 4건 (+ `limit_up_reached` 키 보존 검증)
+
+**프론트엔드**: `frontend/src/components/__tests__/ScanMonitor.boards.test.tsx` 신규 3건
+- `boards 빈 dict + activeBoardCode 없음 → 종목 row 미렌더`
+- `boards={main:...} + activeBoardCode=main → 단일 row 렌더`
+- `boards 빈 dict + activeBoardCode=main(backwards-compat) → top-level 기반 row 렌더`
+
+### 응답 호환성 불변
+- 스키마(필드명/타입) 보존 — boards dict 가 빈 dict 일 뿐, 키 자체 제거 안 함
+- top-level `target_price`/`open_price`/`target_offset`/`open_confirmed` 보존 (필드 누락 없음)
+- OrderMonitor 보유 행은 매수가 중심이라 영향 0
+
+---
+
+## (2026-05-13) 작업 2 — breakout 후순위 cap 25 (momentum 보호)
+
+### 결함
+2026-05-13 08:57:39 로그:
+`사전 구독: total=33 (vb=30, ltv=30, swing=2, momentum=0, positions=3)`
+
+BLNG 다중 호출로 VB/LTV 각 30종목 → dedup 후 28 breakout 슬롯 점유. 09:30 momentum 발화 시 ~10~30 추가 → 41 초과 → momentum drop 위험. 모멘텀 전략은 09:30 신호 발생 직전에 갓 구독해야 돌파 순간 감지 가능 → drop 시 매수 기회 통째로 상실.
+
+### 명세
+- 상수: `BREAKOUT_LOW_CAP = 25` (`src/engine/scanner.py` 모듈 레벨, `MAX_SUBSCRIPTIONS` import 옆)
+- 구현 위치: `subscribe_filtered_stocks` 의 `priority_groups` 분기, **breakout 큐 처리 직전**:
+  ```
+  if len(breakout) > BREAKOUT_LOW_CAP:
+      drop_counts["breakout"] += (len(breakout) - BREAKOUT_LOW_CAP)
+      breakout = breakout[:BREAKOUT_LOW_CAP]
+  ```
+- 이후 기존 `for label, candidates in (("breakout", breakout), ("momentum", momentum), ("swing", swing)):` 루프 그대로 (잔여 슬롯 부족 시 추가 drop 카운트 합산)
+- HIGH 무영향: positions/next_day_clear `bypass_limit=True` 절대 보장 (Phase E1 불변식)
+- 우선순위 순서 유지: breakout(cap 25) → momentum → swing
+- 로그 형식 유지: `[priority_drop] breakout=X momentum=Y swing=Z total_subscribed=N max=41 high_count=H low_remaining=R` — cap 초과 drop 도 `breakout` 카운트에 합산
+
+### slot 분배 시뮬레이션
+- HIGH: positions 3 + next_day_clear 1 = 4 (bypass)
+- LOW 잔여: 41-4 = 37
+- breakout 30 → cap 25 → 25 add + 5 drop
+- momentum 10 → 잔여 12 → 10 add (drop 0)
+- swing 0 (Pull 폴링이므로 WS 미사용 — G안 2026-05-12)
+- total_subscribed = 4+25+10 = 39 (≤ 41), low_remaining = 2
+
+### 테스트
+`tests/unit/engine/test_scanner_priority_cap.py` 신규 4건 (또는 기존 `test_scanner_priority_order.py` 에 추가):
+- `test_breakout_cap_25_applied_when_breakout_exceeds`: breakout 30, cap 25 → 25 add + 5 drop
+- `test_breakout_cap_preserves_momentum_slot`: HIGH 4, breakout 30, momentum 10 → breakout 25 / momentum 10, drop=(breakout=5, momentum=0, swing=0)
+- `test_breakout_cap_no_effect_when_under_cap`: breakout 20 → 20 add + 0 drop
+- `test_breakout_cap_constant_value_is_25`: `assert scanner.BREAKOUT_LOW_CAP == 25`
+
+### 안전 불변식
+- HIGH(positions + next_day_clear) bypass_limit=True 절대 보장
+- `MAX_SUBSCRIPTIONS=41` 초과 절대 금지
+- 매핑 동기 등록 규약(`_order_qty/_order_strategy/_order_ticker/_pending_buy_orders`) 영향 0 — WS 구독 흐름 한정
+
+---
+
+## 커밋 5분할 (squash 금지)
+1. `feat(strategies): VB/LTV get_targets_status returns active boards only`
+2. `feat(scanner): cap breakout to 25 slots in priority queue (protect momentum)`
+3. `feat(frontend): hide non-active board rows in ScanMonitor`
+4. `test(strategies/scanner/frontend): cover active board filter and breakout cap`
+5. `docs(engine/frontend): document active-board filter and breakout cap`
+
+PR #2 (브랜치 `claude/diagram-stock-filtering-IaJ4G`) 위에 push → 자동 갱신.
