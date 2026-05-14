@@ -710,6 +710,12 @@ class TradingScheduler:
                     "INFO",
                     f"NXT 거래 불가 사전 판별 — 익일 청산 보류: {t(ticker)} ({strategy_id})",
                 )
+                # PR-B (2026-05-14): 구조화 로그 prefix — Loki 파싱용 별도 행
+                await write_log(
+                    "INFO",
+                    f"[next_day_clear_deferred] ticker={ticker} strategy={strategy_id} "
+                    f"reason=nxt_not_tradable",
+                )
                 continue
 
             gap_up_threshold = strategy.config.params.get("gap_up_threshold", 10.0)
@@ -733,6 +739,12 @@ class TradingScheduler:
                 await write_log(
                     "WARNING",
                     f"NXT 시가 미수신 — 익일 청산 보류: {t(ticker)} ({strategy_id})",
+                )
+                # PR-B (2026-05-14): 구조화 로그 prefix — Loki 파싱용 별도 행
+                await write_log(
+                    "INFO",
+                    f"[next_day_clear_deferred] ticker={ticker} strategy={strategy_id} "
+                    f"reason=nxt_open_missing",
                 )
                 continue
 
@@ -781,12 +793,17 @@ class TradingScheduler:
         logger.info("보류된 익일 청산 처리 시작: %d건", len(pending))
         await write_log("INFO", f"보류된 익일 청산 처리: {len(pending)}건")
 
+        import time as _time
+
         for ticker, strategy_id in pending:
             strategy = self.registry.get(strategy_id)
             if not strategy or ticker not in strategy.state.positions:
                 # 그 사이 손절 등으로 이미 처리됨
                 self._pending_next_day_clear.discard((ticker, strategy_id))
                 continue
+            # PR-B (2026-05-14): drained 결과 + elapsed_ms 구조화 로그
+            _start = _time.monotonic()
+            _result = "success"
             try:
                 await self.order_engine.execute_sell(
                     ticker, Signal.NEXT_DAY_CLEAR, strategy_id,
@@ -796,9 +813,17 @@ class TradingScheduler:
                     f"보류 익일 청산(시장가) 실행: {t(ticker)} ({strategy_id})",
                 )
             except Exception:
+                _result = "fail"
                 logger.exception("보류 익일 청산 실패: %s (%s)", ticker, strategy_id)
             finally:
                 self._pending_next_day_clear.discard((ticker, strategy_id))
+                _elapsed_ms = int((_time.monotonic() - _start) * 1000)
+                _level = "INFO" if _result == "success" else "WARNING"
+                await write_log(
+                    _level,
+                    f"[next_day_clear_drained] ticker={ticker} strategy={strategy_id} "
+                    f"result={_result} elapsed_ms={_elapsed_ms}",
+                )
 
     async def _confirm_breakout_open_prices(
         self, *, max_wait_s: float = 5.0, interval_s: float = 0.5, board: str | None = None,

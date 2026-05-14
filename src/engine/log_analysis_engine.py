@@ -120,6 +120,32 @@ def _aggregate_logs(logs: list[dict]) -> dict[str, Any]:
     }
 
 
+# PR-B (2026-05-14): 구조화 prefix 카운팅
+_NDC_DEFERRED_RE = re.compile(r"\[next_day_clear_deferred\]")
+_NDC_DRAINED_SUCCESS_RE = re.compile(r"\[next_day_clear_drained\][^\n]*result=success")
+_NDC_DRAINED_FAIL_RE = re.compile(r"\[next_day_clear_drained\][^\n]*result=fail")
+
+
+def _aggregate_next_day_clear(logs: list[dict]) -> dict[str, int]:
+    """`[next_day_clear_*]` prefix 카운터 — Loki 검색 가능 메트릭."""
+    deferred = 0
+    drained_success = 0
+    drained_fail = 0
+    for row in logs:
+        msg = row.get("message") or ""
+        if _NDC_DEFERRED_RE.search(msg):
+            deferred += 1
+        elif _NDC_DRAINED_SUCCESS_RE.search(msg):
+            drained_success += 1
+        elif _NDC_DRAINED_FAIL_RE.search(msg):
+            drained_fail += 1
+    return {
+        "deferred": deferred,
+        "drained_success": drained_success,
+        "drained_fail": drained_fail,
+    }
+
+
 def _aggregate_trades(trades: list[dict]) -> dict[str, Any]:
     """trade_history 메트릭 집계."""
     by_strategy: Counter[str] = Counter()
@@ -302,6 +328,7 @@ async def generate_daily_log_report() -> dict | None:
     trade_metrics = _aggregate_trades(trades)
     api_metrics = get_request_metrics()
     strategy_funnel = _collect_strategy_funnel()
+    next_day_clear_metrics = _aggregate_next_day_clear(logs)
 
     metrics = {
         "target_date": target_date.isoformat(),
@@ -309,6 +336,7 @@ async def generate_daily_log_report() -> dict | None:
         "trades": trade_metrics,
         "api_metrics": api_metrics,
         "strategy_funnel": strategy_funnel,
+        "next_day_clear": next_day_clear_metrics,
     }
 
     logger.info(

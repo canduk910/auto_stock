@@ -41,6 +41,9 @@ _request_metrics: dict = {
     "network_err": 0,
     "kis_error": 0,
     "retries": 0,
+    # PR-B (2026-05-14): 재시도 최종 결과 카운터 (recovered=재시도 후 성공, exhausted=최대 재시도 후 최종 실패)
+    "retry_recovered": 0,
+    "retry_exhausted": 0,
     "by_path_5xx": defaultdict(int),
 }
 
@@ -54,6 +57,8 @@ def get_request_metrics() -> dict:
         "network_err": _request_metrics["network_err"],
         "kis_error": _request_metrics["kis_error"],
         "retries": _request_metrics["retries"],
+        "retry_recovered": _request_metrics["retry_recovered"],
+        "retry_exhausted": _request_metrics["retry_exhausted"],
         "top_5xx_paths": sorted(
             _request_metrics["by_path_5xx"].items(),
             key=lambda x: -x[1],
@@ -63,7 +68,16 @@ def get_request_metrics() -> dict:
 
 def reset_request_metrics() -> None:
     """일일 리포트 INSERT 직후 호출."""
-    for k in ("total", "http_5xx", "http_4xx", "network_err", "kis_error", "retries"):
+    for k in (
+        "total",
+        "http_5xx",
+        "http_4xx",
+        "network_err",
+        "kis_error",
+        "retries",
+        "retry_recovered",
+        "retry_exhausted",
+    ):
         _request_metrics[k] = 0
     _request_metrics["by_path_5xx"].clear()
 
@@ -162,6 +176,19 @@ async def _request(
                     path,
                 )
                 if attempt == MAX_RETRIES:
+                    # PR-B 보강 (Copilot, 2026-05-14): 5xx 한정 — 영구 4xx 는
+                    # exhausted 의미 아님 (retry 자체가 무의미한 클라이언트 에러).
+                    if 500 <= status < 600:
+                        _request_metrics["retry_exhausted"] += 1
+                        try:
+                            _log_msg = (
+                                f"[api_retry_exhausted] path={path} tr_id={tr_id} "
+                                f"attempts={MAX_RETRIES} last_status={status} "
+                                f"last_msg=HTTPStatusError"
+                            )
+                            await _system_logs.write_log("ERROR", _log_msg)
+                        except Exception:
+                            pass
                     raise
                 _request_metrics["retries"] += 1
                 await asyncio.sleep(
@@ -179,6 +206,17 @@ async def _request(
                     e,
                 )
                 if attempt == MAX_RETRIES:
+                    # PR-B (2026-05-14): 최종 실패 카운터 + 영구 로그
+                    _request_metrics["retry_exhausted"] += 1
+                    try:
+                        _log_msg = (
+                            f"[api_retry_exhausted] path={path} tr_id={tr_id} "
+                            f"attempts={MAX_RETRIES} last_status=network "
+                            f"last_msg={type(e).__name__}"
+                        )
+                        await _system_logs.write_log("ERROR", _log_msg)
+                    except Exception:
+                        pass
                     raise
                 _request_metrics["retries"] += 1
                 await asyncio.sleep(
@@ -190,6 +228,17 @@ async def _request(
         # KIS 응답 코드 확인
         rt_cd = data.get("rt_cd", "")
         if rt_cd == "0":
+            # PR-B (2026-05-14): 재시도 후 성공 시 recovered 카운터 + 영구 로그
+            if attempt > 1:
+                _request_metrics["retry_recovered"] += 1
+                try:
+                    _log_msg = (
+                        f"[api_retry_recovered] path={path} tr_id={tr_id} "
+                        f"attempts={attempt}"
+                    )
+                    await _system_logs.write_log("INFO", _log_msg)
+                except Exception:
+                    pass  # fire-and-forget — 본 흐름 보존
             return data
 
         msg_cd = data.get("msg_cd", "")
@@ -202,6 +251,19 @@ async def _request(
             if attempt < MAX_RETRIES:
                 _request_metrics["retries"] += 1
                 continue
+            # PR-B 보강 (Codex, 2026-05-14): 마지막 시도까지 토큰 만료 지속
+            # → KIS-level retry exhaustion. metrics + 영구 로그 누락 차단.
+            _request_metrics["retry_exhausted"] += 1
+            try:
+                _log_msg = (
+                    f"[api_retry_exhausted] path={path} tr_id={tr_id} "
+                    f"attempts={MAX_RETRIES} last_status=token_expired "
+                    f"last_msg={msg1}"
+                )
+                await _system_logs.write_log("ERROR", _log_msg)
+            except Exception:
+                pass
+            # 그대로 떨어져 [kis_rejection] + raise KisApiError 흐름 보존
 
         _request_metrics["kis_error"] += 1
         logger.error("KIS API 에러: rt_cd=%s, msg_cd=%s, msg1=%s", rt_cd, msg_cd, msg1)
