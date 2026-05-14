@@ -249,8 +249,10 @@ async def fetch_stock_detail(ticker: str) -> dict:
         cached = _price_cache.get(ticker)
         if cached is not None and cached[1] > now:
             return cached[0]
+        # 진행 중 fetch 가 있으면 합류
         fut = _inflight_price.get(ticker)
         if fut is None:
+            # 본 호출이 fetch 담당
             loop = asyncio.get_event_loop()
             fut = loop.create_future()
             _inflight_price[ticker] = fut
@@ -269,12 +271,13 @@ async def fetch_stock_detail(ticker: str) -> dict:
                 _inflight_price.pop(ticker, None)
             fut.set_result(output)
             return output
-        except BaseException as e:
+        except BaseException as e:  # 예외도 동일 future 로 전파 — 후속 합류 호출도 같은 실패
             async with _cache_lock:
                 _inflight_price.pop(ticker, None)
             fut.set_exception(e)
             raise
 
+    # 합류 호출 — 첫 호출의 결과 대기
     return await fut
 
 
@@ -293,26 +296,59 @@ async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
     """
     from datetime import date, timedelta
 
-    end_date = date.today().strftime("%Y%m%d")
-    # 달력일 ≈ 영업일 × 7/5 + 안전 마진 (휴일/공휴일 + 신규상장 일자 부족 등)
-    window_calendar_days = days + (days // 2) + 10
-    start_date = (date.today() - timedelta(days=window_calendar_days)).strftime("%Y%m%d")
+    # PR-C (2026-05-14): TTL 캐시 (`_CANDLE_CACHE_TTL=300s`) + single-flight.
+    # 캐시 키는 `(ticker, days)` — days 별 분리 보관(donchian 60일 vs 다른
+    # 사용처 21일 등). 일봉은 장중 분 단위 갱신, 5분 지연은 일봉 기반 전략
+    # (donchian/momentum 시뮬레이션) 정확도에 영향 없음.
+    cache_key = (ticker, days)
+    now = time.monotonic()
+    fut: asyncio.Future[list[dict]] | None = None
+    must_fetch = False
 
-    params = {
-        "FID_COND_MRKT_DIV_CODE": "J",
-        "FID_INPUT_ISCD": ticker,
-        "FID_INPUT_DATE_1": start_date,
-        "FID_INPUT_DATE_2": end_date,
-        "FID_PERIOD_DIV_CODE": "D",
-        "FID_ORG_ADJ_PRC": "0",
-    }
-    # FHKST03010100은 모의/실전 동일 TR_ID (FH 접두사 시세 API 공통)
-    data = await kis_get(DAILY_PRICE_URL, "FHKST03010100", params)
-    # FHKST03010100 응답: output2가 일봉 배열 (최신순), output1은 종목 메타
-    output = data.get("output2") or data.get("output") or []
-    # 빈 캔들(휴장 placeholder, stck_bsop_date 없음 등) 제거 — 일부 응답 말미에 포함됨
-    output = [c for c in output if c.get("stck_bsop_date")]
-    return output[:days]
+    async with _cache_lock:
+        cached = _candle_cache.get(cache_key)
+        if cached is not None and cached[1] > now:
+            return cached[0]
+        fut = _inflight_candle.get(cache_key)
+        if fut is None:
+            loop = asyncio.get_event_loop()
+            fut = loop.create_future()
+            _inflight_candle[cache_key] = fut
+            must_fetch = True
+
+    if not must_fetch:
+        return await fut
+
+    try:
+        end_date = date.today().strftime("%Y%m%d")
+        # 달력일 ≈ 영업일 × 7/5 + 안전 마진 (휴일/공휴일 + 신규상장 일자 부족 등)
+        window_calendar_days = days + (days // 2) + 10
+        start_date = (date.today() - timedelta(days=window_calendar_days)).strftime("%Y%m%d")
+
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": ticker,
+            "FID_INPUT_DATE_1": start_date,
+            "FID_INPUT_DATE_2": end_date,
+            "FID_PERIOD_DIV_CODE": "D",
+            "FID_ORG_ADJ_PRC": "0",
+        }
+        # FHKST03010100은 모의/실전 동일 TR_ID (FH 접두사 시세 API 공통)
+        data = await kis_get(DAILY_PRICE_URL, "FHKST03010100", params)
+        output = data.get("output2") or data.get("output") or []
+        output = [c for c in output if c.get("stck_bsop_date")]
+        result = output[:days]
+
+        async with _cache_lock:
+            _candle_cache[cache_key] = (result, time.monotonic() + _CANDLE_CACHE_TTL)
+            _inflight_candle.pop(cache_key, None)
+        fut.set_result(result)
+        return result
+    except BaseException as e:
+        async with _cache_lock:
+            _inflight_candle.pop(cache_key, None)
+        fut.set_exception(e)
+        raise
 
 
 async def fetch_rising_stocks() -> list[dict]:
