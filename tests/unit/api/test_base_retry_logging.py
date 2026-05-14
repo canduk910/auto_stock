@@ -203,3 +203,79 @@ def test_reset_request_metrics_clears_new_keys():
     metrics = get_request_metrics()
     assert metrics["retry_recovered"] == 0
     assert metrics["retry_exhausted"] == 0
+
+
+# ---------------------------------------------------------------------------
+# 5. Copilot 보강 — 영구 4xx 는 retry_exhausted 미카운트
+#    (4xx 는 클라이언트 에러로 retry 자체가 무의미 — exhausted 의미 아님)
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_when_all_attempts_4xx_then_no_exhausted_count(
+    mock_kis,
+    stub_token,
+    mock_write_log,
+    no_backoff,
+):
+    """3회 모두 404 (영구 4xx) → exhausted 카운터/로그 모두 0 + HTTPStatusError raise."""
+    import re
+
+    mock_kis.post(re.compile(rf".*{re.escape(_PATH)}$")).respond(
+        status_code=404,
+        json={"msg": "not found"},
+    )
+
+    with pytest.raises(httpx.HTTPStatusError):
+        await kis_post(_PATH, _TR_ID, {"PDNO": "005930"})
+
+    exhausted_calls = [
+        c for c in mock_write_log.await_args_list
+        if "[api_retry_exhausted]" in _join_call_args(c)
+    ]
+    assert len(exhausted_calls) == 0, (
+        f"4xx 는 exhausted 의미 아님 — 로그 노출 안 돼야 함: {mock_write_log.await_args_list}"
+    )
+    metrics = get_request_metrics()
+    assert metrics["retry_exhausted"] == 0
+    assert metrics["http_4xx"] == 3  # 4xx 자체 카운트는 유지
+
+
+# ---------------------------------------------------------------------------
+# 6. Codex 보강 — KIS 토큰 만료 3회 지속 시 retry_exhausted 카운트
+#    (KIS-level retry exhaustion 도 관찰성 대상)
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_when_token_expired_persists_then_exhausted_counted(
+    mock_kis,
+    stub_token,
+    mock_write_log,
+    no_backoff,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """3회 모두 KIS 응답 'token expired' → exhausted 카운트 + ERROR 로그 + KisApiError raise."""
+    import re
+
+    # token_manager.issue mock — 재발급 호출이 raise 하지 않도록
+    async def _issue() -> str:
+        return "renewed-token"
+    monkeypatch.setattr(_token_module.token_manager, "issue", _issue)
+
+    mock_kis.post(re.compile(rf".*{re.escape(_PATH)}$")).respond(
+        json={"rt_cd": "1", "msg_cd": "EGW00123", "msg1": "token expired"},
+    )
+
+    with pytest.raises(KisApiError):
+        await kis_post(_PATH, _TR_ID, {"PDNO": "005930"})
+
+    exhausted_calls = [
+        c for c in mock_write_log.await_args_list
+        if "[api_retry_exhausted]" in _join_call_args(c)
+    ]
+    assert len(exhausted_calls) == 1, (
+        f"토큰 만료 지속도 KIS-level exhaustion — 로그 1건 필수: {mock_write_log.await_args_list}"
+    )
+    joined = _join_call_args(exhausted_calls[0])
+    assert "attempts=3" in joined
+    assert "token_expired" in joined
+
+    metrics = get_request_metrics()
+    assert metrics["retry_exhausted"] == 1
