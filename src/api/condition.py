@@ -10,11 +10,52 @@
 import asyncio
 import logging
 import re
+import time
 
 from src.api.base import KisApiError, kis_get
 from src.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# PR-C (2026-05-14) — 시세/일봉 TTL 캐시.
+#
+# 운영 metrics(2026-05-13) 에서 inquire-price 17건 + inquire-daily-itemchartprice
+# 10건이 5xx 재시도로 잡혔다. 동일 ticker 반복 조회 추정. 짧은 TTL 캐시로
+# 외부 부하 감소 + 5xx 노출 면적 축소.
+#
+# 사용 범위 (안전 가드):
+#   - 스캐닝/조건검사 한정 (fetch_rising_stocks, prepare, _scan_loop 등)
+#   - `execute_buy/execute_sell` 의 체결가/주문가 결정 경로는 절대 사용 금지
+#     (현재가는 WebSocket tick 또는 최신 직접 호출)
+#
+# 무효화: TTL 자동 만료 + `_reset_daily_state()` 가 호출하는 `clear_caches()`
+# ---------------------------------------------------------------------------
+_PRICE_CACHE_TTL = 5.0       # seconds — 5초. swing pull(1분 주기) 매 호출 신선
+_CANDLE_CACHE_TTL = 300.0    # 5분 — 일봉은 장중 분 단위 갱신, 전략 시뮬레이션 정확도 영향 없음
+
+# (ticker) -> (output_dict, expires_at_monotonic)
+_price_cache: dict[str, tuple[dict, float]] = {}
+# (ticker, days) -> (output_list, expires_at_monotonic)
+_candle_cache: dict[tuple[str, int], tuple[list[dict], float]] = {}
+
+# race 보호 — 캐시 read/write 는 동기 영역에서만 일어나도록 lock. KIS 호출은
+# lock 밖에서. single-flight 가 필요한 동시 호출은 `_inflight_*` future dict 가
+# 동일 키 진행 중 호출을 첫 호출의 결과로 합류시킨다.
+_cache_lock = asyncio.Lock()
+_inflight_price: dict[str, "asyncio.Future[dict]"] = {}
+_inflight_candle: dict[tuple[str, int], "asyncio.Future[list[dict]]"] = {}
+
+
+def clear_caches() -> None:
+    """일일 정산 reset 등 외부 트리거에서 호출 — 캐시 비우기.
+
+    `scheduler._reset_daily_state()` 가 매일 20:10 정산 후 호출해 야간 누적 방지.
+    inflight future 는 의도적으로 비우지 않음 — 진행 중 호출은 자연히 완료됨.
+    """
+    _price_cache.clear()
+    _candle_cache.clear()
 
 # Phase G2 (2026-05-13): KIS 표준코드(12자리, 예 "00000A000100") 마지막
 # 6자리 = KRX 단축코드(상장변경/병합 시 prefix 만 바뀜). stock_master 캐시
@@ -194,13 +235,47 @@ async def fetch_stock_detail(ticker: str) -> dict:
     """개별 종목의 현재가/시총/거래대금을 조회한다.
 
     FHKST01010100은 모의/실전 동일 TR_ID.
+
+    PR-C (2026-05-14): TTL 캐시 (`_PRICE_CACHE_TTL=5s`) + single-flight. 스캐닝
+    경로 한정 — 체결가/주문가 결정에는 사용 금지(`execute_buy/sell` 은 WebSocket
+    tick 또는 직접 호출 사용). 5초 TTL 은 swing pull(1분 주기) 매 호출 신선.
+    동시 호출 N 회 시 첫 호출만 KIS fetch, 나머지는 같은 future 결과 공유.
     """
-    params = {
-        "fid_cond_mrkt_div_code": "J",
-        "fid_input_iscd": ticker,
-    }
-    data = await kis_get(STOCK_PRICE_URL, "FHKST01010100", params)
-    return data.get("output", {})
+    now = time.monotonic()
+    fut: asyncio.Future[dict] | None = None
+    must_fetch = False
+
+    async with _cache_lock:
+        cached = _price_cache.get(ticker)
+        if cached is not None and cached[1] > now:
+            return cached[0]
+        fut = _inflight_price.get(ticker)
+        if fut is None:
+            loop = asyncio.get_event_loop()
+            fut = loop.create_future()
+            _inflight_price[ticker] = fut
+            must_fetch = True
+
+    if must_fetch:
+        try:
+            params = {
+                "fid_cond_mrkt_div_code": "J",
+                "fid_input_iscd": ticker,
+            }
+            data = await kis_get(STOCK_PRICE_URL, "FHKST01010100", params)
+            output = data.get("output", {})
+            async with _cache_lock:
+                _price_cache[ticker] = (output, time.monotonic() + _PRICE_CACHE_TTL)
+                _inflight_price.pop(ticker, None)
+            fut.set_result(output)
+            return output
+        except BaseException as e:
+            async with _cache_lock:
+                _inflight_price.pop(ticker, None)
+            fut.set_exception(e)
+            raise
+
+    return await fut
 
 
 async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
