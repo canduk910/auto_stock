@@ -247,3 +247,327 @@ async def test_fetch_daily_candles_concurrent_calls_share_first_fetch(monkeypatc
 
     assert all(len(r) == 1 for r in results)
     assert call_count[0] == 1, f"daily single-flight 위반: KIS {call_count[0]}회"
+
+
+# ---------------------------------------------------------------------------
+# PR-C2 (2026-05-14) — Copilot 리뷰 8건 회귀 가드
+#
+# 기존 Future 기반 single-flight 의 결함 4종:
+#  1) `asyncio.get_event_loop()` deprecation (Py 3.12+)
+#  2) `except BaseException` 이 CancelledError 흡수 (cancel 의미 깨짐)
+#  3) joiner cancel 전파로 inflight Future 전체 깨짐 (`InvalidStateError`)
+#  4) `clear_caches()` inflight race — 새 영업일 캐시에 stale write
+#
+# 재설계: `Future` → `asyncio.Task` + joiner 는 `asyncio.shield(task)` 로 await,
+# `clear_caches()` 가 epoch counter bump + fetch 완료 시 epoch 일치할 때만 cache write.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_fetch_stock_detail_cancellation_safe_for_joiners(monkeypatch):
+    """joiner 1 task 가 cancel 돼도 joiner 2 는 정상 결과 받음 (asyncio.shield)."""
+    import asyncio
+
+    from src.api import condition
+
+    call_count = [0]
+    started = asyncio.Event()
+    proceed = asyncio.Event()
+
+    async def _slow_get(*_args, **_kwargs):
+        call_count[0] += 1
+        started.set()
+        await proceed.wait()
+        return {"output": {"stck_prpr": "65000"}}
+
+    monkeypatch.setattr(condition, "kis_get", _slow_get)
+
+    # joiner1 + joiner2 동시에 await — 첫 호출이 fetch 담당, 둘 다 shield 로 합류
+    j1 = asyncio.create_task(condition.fetch_stock_detail("005930"))
+    j2 = asyncio.create_task(condition.fetch_stock_detail("005930"))
+
+    await started.wait()  # fetch 시작 대기
+    await asyncio.sleep(0)  # j1/j2 모두 await fut 진입 보장
+
+    # joiner1 cancel — shield 가 inflight task 자체로의 cancel 전파를 차단해야 함
+    j1.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await j1
+
+    # fetch 완료
+    proceed.set()
+
+    # joiner2 는 정상 결과 수신
+    result2 = await j2
+    assert result2 == {"stck_prpr": "65000"}
+    assert call_count[0] == 1, "single-flight 유지"
+
+
+@pytest.mark.asyncio
+async def test_fetch_stock_detail_clear_caches_during_inflight_skips_cache_write(monkeypatch):
+    """inflight 중 clear_caches() 호출 → 결과 정상 반환되지만 캐시 write 차단 (epoch guard)."""
+    import asyncio
+
+    from src.api import condition
+
+    call_count = [0]
+    started = asyncio.Event()
+    proceed = asyncio.Event()
+
+    async def _slow_get(*_args, **_kwargs):
+        call_count[0] += 1
+        started.set()
+        await proceed.wait()
+        return {"output": {"stck_prpr": "65000"}}
+
+    monkeypatch.setattr(condition, "kis_get", _slow_get)
+
+    task = asyncio.create_task(condition.fetch_stock_detail("005930"))
+    await started.wait()
+
+    # inflight 진행 중 clear_caches 호출 → epoch 증가
+    condition.clear_caches()
+
+    proceed.set()
+    result = await task
+
+    # 결과는 정상 반환
+    assert result == {"stck_prpr": "65000"}
+    # 캐시 write 는 차단 — 다음 호출은 cache miss → 새 KIS fetch
+    assert "005930" not in condition._price_cache, (
+        "clear_caches 가 inflight 중 호출됐으면 결과는 stale → 캐시 write 차단"
+    )
+
+    # 후속 호출이 새 fetch 발생하는지 검증
+    proceed2 = asyncio.Event()
+
+    async def _next_get(*_args, **_kwargs):
+        call_count[0] += 1
+        proceed2.set()
+        return {"output": {"stck_prpr": "70000"}}
+
+    monkeypatch.setattr(condition, "kis_get", _next_get)
+    result2 = await condition.fetch_stock_detail("005930")
+    assert result2 == {"stck_prpr": "70000"}
+    assert call_count[0] == 2, "epoch bump 후 새 fetch 발생"
+
+
+@pytest.mark.asyncio
+async def test_fetch_stock_detail_uses_get_running_loop_not_get_event_loop(monkeypatch):
+    """asyncio.get_event_loop() 미사용 검증 — 호출되면 raise 하도록 monkeypatch."""
+    from src.api import condition
+
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("get_event_loop must not be called")
+
+    monkeypatch.setattr("asyncio.get_event_loop", _boom)
+
+    mock_get = AsyncMock(return_value={"output": {"stck_prpr": "65000"}})
+    monkeypatch.setattr(condition, "kis_get", mock_get)
+
+    result = await condition.fetch_stock_detail("005930")
+    assert result == {"stck_prpr": "65000"}
+
+
+@pytest.mark.asyncio
+async def test_fetch_stock_detail_does_not_emit_future_exception_warning(monkeypatch, caplog):
+    """예외 raise 시 'Future exception was never retrieved' 경고 미발생.
+
+    Task 기반에서 joiner 들이 모두 await 로 예외를 회수하므로 경고 없음.
+    """
+    import asyncio
+    import logging
+
+    from src.api import condition
+
+    async def _failing_get(*_args, **_kwargs):
+        raise RuntimeError("KIS 5xx")
+
+    monkeypatch.setattr(condition, "kis_get", _failing_get)
+
+    with caplog.at_level(logging.WARNING):
+        with pytest.raises(RuntimeError, match="KIS 5xx"):
+            await condition.fetch_stock_detail("005930")
+        # gc 트리거 — Future exception 회수 안 됐으면 경고 발생
+        import gc
+        gc.collect()
+        await asyncio.sleep(0)
+
+    text = " ".join(rec.message for rec in caplog.records)
+    assert "exception was never retrieved" not in text, (
+        "Task await 에서 예외 회수 — Future exception 경고 잔존 시 운영 잡음"
+    )
+
+
+# fetch_daily_candles — 동일 4종 회귀 가드
+
+
+@pytest.mark.asyncio
+async def test_fetch_daily_candles_cancellation_safe_for_joiners(monkeypatch):
+    """daily candle joiner cancel 안전성 — asyncio.shield 검증."""
+    import asyncio
+
+    from src.api import condition
+
+    call_count = [0]
+    started = asyncio.Event()
+    proceed = asyncio.Event()
+
+    async def _slow_get(*_args, **_kwargs):
+        call_count[0] += 1
+        started.set()
+        await proceed.wait()
+        return {
+            "output2": [
+                {"stck_bsop_date": "20260512", "stck_clpr": "65000"},
+            ]
+        }
+
+    monkeypatch.setattr(condition, "kis_get", _slow_get)
+
+    j1 = asyncio.create_task(condition.fetch_daily_candles("005930", days=21))
+    j2 = asyncio.create_task(condition.fetch_daily_candles("005930", days=21))
+
+    await started.wait()
+    await asyncio.sleep(0)
+
+    j1.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await j1
+
+    proceed.set()
+    result2 = await j2
+    assert len(result2) == 1
+    assert call_count[0] == 1
+
+
+@pytest.mark.asyncio
+async def test_fetch_daily_candles_clear_caches_during_inflight_skips_cache_write(monkeypatch):
+    """daily candle inflight 중 clear_caches() → epoch guard 로 cache write 차단."""
+    import asyncio
+
+    from src.api import condition
+
+    call_count = [0]
+    started = asyncio.Event()
+    proceed = asyncio.Event()
+
+    async def _slow_get(*_args, **_kwargs):
+        call_count[0] += 1
+        started.set()
+        await proceed.wait()
+        return {
+            "output2": [
+                {"stck_bsop_date": "20260512", "stck_clpr": "65000"},
+            ]
+        }
+
+    monkeypatch.setattr(condition, "kis_get", _slow_get)
+
+    task = asyncio.create_task(condition.fetch_daily_candles("005930", days=21))
+    await started.wait()
+
+    condition.clear_caches()
+
+    proceed.set()
+    result = await task
+    assert len(result) == 1
+    assert ("005930", 21) not in condition._candle_cache, (
+        "clear_caches inflight 중 → 캐시 write 차단"
+    )
+
+
+@pytest.mark.asyncio
+async def test_fetch_daily_candles_uses_get_running_loop_not_get_event_loop(monkeypatch):
+    """daily candle 도 get_event_loop 미사용."""
+    from src.api import condition
+
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("get_event_loop must not be called")
+
+    monkeypatch.setattr("asyncio.get_event_loop", _boom)
+
+    async def _fake_get(*_args, **_kwargs):
+        return {"output2": [{"stck_bsop_date": "20260512", "stck_clpr": "65000"}]}
+
+    monkeypatch.setattr(condition, "kis_get", _fake_get)
+
+    result = await condition.fetch_daily_candles("005930", days=21)
+    assert len(result) == 1
+
+
+@pytest.mark.asyncio
+async def test_fetch_daily_candles_does_not_emit_future_exception_warning(monkeypatch, caplog):
+    """daily candle 예외 시 'Future exception was never retrieved' 경고 미발생."""
+    import asyncio
+    import logging
+
+    from src.api import condition
+
+    async def _failing_get(*_args, **_kwargs):
+        raise RuntimeError("KIS 5xx")
+
+    monkeypatch.setattr(condition, "kis_get", _failing_get)
+
+    with caplog.at_level(logging.WARNING):
+        with pytest.raises(RuntimeError, match="KIS 5xx"):
+            await condition.fetch_daily_candles("005930", days=21)
+        import gc
+        gc.collect()
+        await asyncio.sleep(0)
+
+    text = " ".join(rec.message for rec in caplog.records)
+    assert "exception was never retrieved" not in text
+
+
+# CancelledError 분리 처리 검증 — fetch helper 내부에서 CancelledError 가
+# Exception 분기로 잘못 잡혀 다른 joiner 에게 전파되지 않아야 함.
+
+
+@pytest.mark.asyncio
+async def test_fetch_stock_detail_cancelled_error_does_not_corrupt_inflight(monkeypatch):
+    """fetch task 가 cancel 됐을 때 inflight 정리 + CancelledError 정상 전파.
+
+    이후 새 호출은 새 task 발화 (이전 cancel 잔존 X).
+    """
+    import asyncio
+
+    from src.api import condition
+
+    call_count = [0]
+    proceed = asyncio.Event()
+
+    async def _slow_get(*_args, **_kwargs):
+        call_count[0] += 1
+        await proceed.wait()
+        return {"output": {"stck_prpr": "65000"}}
+
+    monkeypatch.setattr(condition, "kis_get", _slow_get)
+
+    task = asyncio.create_task(condition.fetch_stock_detail("005930"))
+    await asyncio.sleep(0.01)  # fetch 시작
+
+    # inflight 자체를 직접 cancel (epoch guard 와는 별개로 task lifecycle 검증)
+    inflight = condition._inflight_price.get("005930")
+    assert inflight is not None
+    inflight.cancel()
+
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    # inflight 정리 확인
+    await asyncio.sleep(0)
+    assert "005930" not in condition._inflight_price, "cancel 후 inflight 정리"
+
+    # 새 호출은 새 task 발화
+    proceed2 = asyncio.Event()
+
+    async def _next_get(*_args, **_kwargs):
+        call_count[0] += 1
+        proceed2.set()
+        return {"output": {"stck_prpr": "70000"}}
+
+    monkeypatch.setattr(condition, "kis_get", _next_get)
+    result = await condition.fetch_stock_detail("005930")
+    assert result == {"stck_prpr": "70000"}
+    assert call_count[0] == 2
