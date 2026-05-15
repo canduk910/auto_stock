@@ -2401,6 +2401,14 @@ class TradingScheduler:
         # K (2026-05-12) — stale_watcher 종목별 연속 stale 카운터 매일 초기화
         self._stale_retry_count.clear()
 
+        # Phase 3 (2026-05-16) — 백테스트 폴 루프 진입 가드 set 매일 초기화.
+        # 정상 종료 시 finally 에서 discard 되지만 예외/취소 시 잔재 가능성 차단.
+        try:
+            from src.engine.recommendation_engine import _backtest_poll_loop_running
+            _backtest_poll_loop_running.clear()
+        except Exception:
+            logger.exception("backtest_poll_loop_running clear 실패")
+
         # scanner 글로벌 dict 누수 방지 — 정산 후 매일 정리(STATIC_TICKER_NAMES는 모듈 import 시 자동 시드되므로 그대로 유지)
         from src.engine.scanner import (
             STATIC_TICKER_NAMES, ticker_last_tick, ticker_market_info, ticker_names,

@@ -20,6 +20,13 @@ class RecommendationItem(BaseModel):
     metrics: Optional[dict] = None
     applied_at: Optional[str] = None
     rejected_at: Optional[str] = None
+    # Phase J4 (2026-05-12)
+    recommended_weight: Optional[float] = None
+    code_review_notes: Optional[str] = None
+    applied_weight: Optional[float] = None
+    # Phase 3 (2026-05-16) — 외부 MCP 백테스트 비교 결과 동봉.
+    # null 이면 백테스트 미실행/진행중/실패. UI 가 fallback 처리.
+    backtest_summary: Optional[dict] = None
 
 
 class ApplyRequest(BaseModel):

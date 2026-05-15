@@ -126,6 +126,55 @@ async def update_recommendation_status(
     return result.data[0] if result.data else {}
 
 
+async def update_backtest_summary(
+    rec_id: str,
+    summary: dict,
+) -> dict:
+    """Phase 3 (2026-05-16) — `backtest_summary` JSONB 컬럼 단일 row 갱신.
+
+    `summary` 구조:
+        {
+          "current":     { "<strategy_id>": { 8 metrics } | None, ... },
+          "recommended": { "<strategy_id>": { 8 metrics } | None, ... },
+          "diff":        { "<strategy_id>": { "<key>": <delta>, ... }, ... }
+        }
+
+    적용 row 0건 (미존재 ID) 이면 빈 dict 반환 — 예외 전파 안 함.
+    """
+    update_data = {"backtest_summary": dict(summary or {})}
+    try:
+        result = await asyncio.to_thread(
+            lambda: supabase.table("parameter_recommendations")
+            .update(update_data)
+            .eq("id", rec_id)
+            .execute()
+        )
+    except Exception:
+        logger.exception("backtest_summary 갱신 실패: %s", rec_id)
+        return {}
+    if not result.data:
+        logger.warning("backtest_summary 갱신 대상 미존재: rec_id=%s", rec_id)
+        return {}
+    logger.info("backtest_summary 갱신: rec_id=%s", rec_id)
+    return result.data[0]
+
+
+async def list_recommendations_pending_backtest(target_date: date) -> list[dict]:
+    """Phase 3 폴 루프 진입 가드 — `target_date` 의 `backtest_summary IS NULL` row 만 반환.
+
+    `idx_param_recommendations_backtest_pending` 부분 인덱스(마이그 020) 가
+    매칭되어 EXPLAIN 상 인덱스 스캔이 일어난다.
+    """
+    result = await asyncio.to_thread(
+        lambda: supabase.table("parameter_recommendations")
+        .select("*")
+        .eq("target_date", target_date.isoformat())
+        .is_("backtest_summary", "null")
+        .execute()
+    )
+    return result.data or []
+
+
 async def expire_pending_before(target_date: date) -> int:
     """target_date 이전의 pending 레코드를 expired로 일괄 마킹한다.
 

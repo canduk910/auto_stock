@@ -143,6 +143,22 @@ class _FakeQuery:
         self._filters.append((column, "neq", value))
         return self
 
+    def is_(self, column: str, value: Any) -> "_FakeQuery":
+        """supabase-py 의 `is_("col", "null")` 호환.
+
+        문자열 "null" 입력 시 None 매칭. 기타 값은 동등 비교.
+        """
+        self._filters.append((column, "is_", value))
+        return self
+
+    def gte(self, column: str, value: Any) -> "_FakeQuery":
+        self._filters.append((column, "gte", value))
+        return self
+
+    def lt(self, column: str, value: Any) -> "_FakeQuery":
+        self._filters.append((column, "lt", value))
+        return self
+
     def order(self, *_args: Any, **_kwargs: Any) -> "_FakeQuery":
         return self
 
@@ -157,6 +173,14 @@ class _FakeQuery:
                 result = [r for r in result if r.get(col) == val]
             elif op == "neq":
                 result = [r for r in result if r.get(col) != val]
+            elif op == "is_":
+                # "null" 문자열은 None 매칭, 그 외는 그대로 비교
+                target = None if val in ("null", None) else val
+                result = [r for r in result if r.get(col) == target]
+            elif op == "gte":
+                result = [r for r in result if r.get(col) is not None and r.get(col) >= val]
+            elif op == "lt":
+                result = [r for r in result if r.get(col) is not None and r.get(col) < val]
         if self._limit is not None:
             result = result[: self._limit]
         return type("Resp", (), {"data": result})()
@@ -172,8 +196,18 @@ class _FakeTable:
         return _FakeQuery(self.store[self.name])
 
     def insert(self, row: dict[str, Any] | list[dict[str, Any]]) -> "_FakeTable":
+        import uuid as _uuid
+
         rows = row if isinstance(row, list) else [row]
+        # 운영 Supabase 가 PK uuid 컬럼 DEFAULT gen_random_uuid() 로 자동 부여하는 거동 모사.
+        # 호출자가 id 를 명시했으면 보존, 없으면 fake uuid 부여.
+        for r in rows:
+            if "id" not in r or r["id"] is None:
+                r["id"] = str(_uuid.uuid4())
         self.store[self.name].extend(rows)
+        # 운영 supabase-py 의 INSERT ... RETURNING * 동작 모사:
+        # execute() 가 방금 INSERT 된 row 만 반환하도록 _pending_insert 저장.
+        self._pending_insert = rows
         return self
 
     def update(self, patch: dict[str, Any]) -> "_FakeUpdate":
@@ -193,6 +227,12 @@ class _FakeTable:
         return self
 
     def execute(self) -> Any:
+        # INSERT 직후 호출 시 방금 들어간 row 만 반환 (RETURNING * 동작 모사).
+        # 그 외(upsert 등)는 store 전체.
+        pending = getattr(self, "_pending_insert", None)
+        if pending is not None:
+            self._pending_insert = None
+            return type("Resp", (), {"data": list(pending)})()
         return type("Resp", (), {"data": self.store[self.name]})()
 
 
