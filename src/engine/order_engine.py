@@ -227,17 +227,26 @@ class OrderEngine:
         )
 
         # PR-F (P2, 2026-05-15) — NXT 프리마켓 시장가 사전 차단.
-        # NXT 프리(08:00~09:00) 는 KIS 정책상 지정가만 허용. session_tracker.active 가
-        # `{pre_nxt}` 단독 + exchange in (NXT, SOR) 면 시장가 거부(APBK0918) 100% 예측 →
-        # 사전에 step_up(current_price, 5) 지정가로 변환. 사후 폴백 분기는 보존(다른 사유).
+        # PR-F (P2, 2026-05-15) — NXT 프리마켓 시장가 사전 차단.
+        # NXT 프리(08:00~09:00) 는 KIS 정책상 지정가만 허용. session_tracker.active 에
+        # PRE_NXT 가 포함 + MAIN 미포함 + exchange in (NXT, SOR) 면 시장가 거부(APBK0918)
+        # 100% 예측 → 사전에 step_up(current_price, 5) 지정가로 변환.
+        #
+        # PR #9 Codex P2 (2026-05-15): 08:30~09:00 동안 active={PRE_NXT, KRX_OPEN}
+        # 라 exact equality `== frozenset({PRE_NXT})` 가 false 됨 → 후반 30분 NXT
+        # 프리마켓 시간대에도 시장가 거부+폴백 사이클 반복하던 결함 차단.
+        # membership 체크로 PRE_NXT 시간대 전체 커버. MAIN 동시 활성(09:00 이후)은 제외.
         # 결함 (운영 로그 2026-05-15 08:00:34): 064400 [APBK0918] [프리마켓] 시장가 매매 불가
         order_division = OrderDivision.MARKET
         order_price = 0
         try:
             from src.engine.session import MarketBoard, session_tracker
             active_boards = session_tracker.active
-            is_pre_nxt_only = active_boards == frozenset({MarketBoard.PRE_NXT})
-            if is_pre_nxt_only and buy_exchange in ("NXT", "SOR"):
+            is_pre_nxt_period = (
+                MarketBoard.PRE_NXT in active_boards
+                and MarketBoard.MAIN not in active_boards
+            )
+            if is_pre_nxt_period and buy_exchange in ("NXT", "SOR"):
                 order_price = step_up(current_price, steps=5)
                 order_division = OrderDivision.LIMIT
                 logger.info(

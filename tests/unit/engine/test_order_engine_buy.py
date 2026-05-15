@@ -400,22 +400,10 @@ def _patch_session_active(monkeypatch):
     _session.session_tracker._active = frozenset()
 
 
-@pytest.fixture
-def _patch_strategy_exchange(monkeypatch):
-    """OrderEngine._strategy_exchange_async 를 결정론적으로 패치 (stock_master 의존 차단)."""
-    from src.engine import order_engine as _oe
-
-    async def _make(exchange: str):
-        async def _fake(self, strategy_id, *, ticker=None):
-            return exchange
-        return _fake
-
-    def _patch(exchange: str):
-        import asyncio
-        monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async",
-                             asyncio.run(_make(exchange)))
-
-    return _patch
+# NOTE: 미사용 + asyncio.run() 이 @pytest.mark.asyncio 안에서 호출되면
+# `RuntimeError: asyncio.run() cannot be called from a running event loop`
+# 발생하던 결함 fixture 제거 (PR #9 Copilot 리뷰 2026-05-15).
+# 본 테스트들은 mock_kis_order_engine fixture 의 `_strategy_exchange_async` mock 으로 충분.
 
 
 @pytest.mark.asyncio
@@ -465,6 +453,49 @@ async def test_execute_buy_preconverts_market_to_limit_in_pre_nxt_only_window(
     assert mock_insert_trade.await_count == 1
     record_arg = mock_insert_trade.await_args.args[0]
     assert record_arg.price == expected_fallback
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_preconverts_when_pre_nxt_and_krx_open_both_active(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    monkeypatch,
+    _patch_session_active,
+):
+    """08:30~09:00 시간대 = active={PRE_NXT, KRX_OPEN} — 시장가 변환 적용 필요.
+
+    PR #9 Codex P2 회귀 차단:
+    - 초기 구현은 `active == frozenset({PRE_NXT})` exact equality 라
+      KRX_OPEN 이 함께 활성인 후반 30분(08:30~09:00)에 false → 시장가 거부+폴백
+      사이클 반복. membership 체크(`PRE_NXT in active and MAIN not in active`)
+      로 NXT 프리마켓 전체 시간대 커버.
+    """
+    from src.engine.util.tick_size import step_up
+    from src.engine import order_engine as _oe
+
+    set_active, MarketBoard = _patch_session_active
+    # 08:30~09:00 시나리오: PRE_NXT + KRX_OPEN 동시 활성
+    set_active({MarketBoard.PRE_NXT, MarketBoard.KRX_OPEN})
+
+    async def _fake_exchange(self, strategy_id, *, ticker=None):
+        return "SOR"
+    monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
+
+    mock_place_order.return_value = _success_result("ORDER-PRECONV-2")
+    current_price = 91800
+    expected_fallback = step_up(current_price, steps=5)
+
+    await engine.execute_buy("064400", current_price, strategy)
+
+    assert mock_place_order.await_count == 1
+    call = mock_place_order.await_args
+    assert call.kwargs["price"] == expected_fallback, (
+        "PRE_NXT + KRX_OPEN 동시 활성도 사전 변환 적용 (membership 체크)"
+    )
+    assert call.kwargs.get("order_division") == OrderDivision.LIMIT
 
 
 @pytest.mark.asyncio
