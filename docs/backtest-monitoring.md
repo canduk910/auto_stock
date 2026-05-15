@@ -281,6 +281,34 @@ metrics.trading: { win_rate, profit_loss_ratio, total_orders }
 - `src/models/backtest.py::BacktestMetrics` 정합성 보존
 - 회귀 가드: `tests/unit/engine/test_backtest_engine.py` 에 케이스 추가
 
+### 5-6. Phase 6 실측 검증 결과 (2026-05-16)
+
+`KIS_MCP_ENABLED=true python scripts/verify_mcp_response_schema.py` 실행으로 외부 서버 응답 확정. `sma_crossover` preset × 005930 × 90일 백테스트 응답 raw 캡처 결과:
+
+| 항목 | 실측 값 / 위치 | 우리 매핑 |
+|------|---------------|----------|
+| 응답 위치 | `data.result.metrics.{basic,risk,trading}` 3단 중첩 | `_extract_metrics` 가 `data.metrics` → `data.result.metrics` 폴 |
+| `max_drawdown` 부호 | **양수 (16.1)** — 절대값 컨벤션 | `BacktestComparisonCard.signInverted: true` 권장 |
+| `basic.total_return` | `-7.447` (percent) | → `total_return_pct` |
+| `basic.annual_return` | `-27.468` (percent) | → `cagr` |
+| `risk.sharpe_ratio` | `-0.796` | → `sharpe_ratio` (직매핑) |
+| `trading.profit_loss_ratio` | `1.18` | → `profit_factor` (명명 차이 매핑) |
+| `trading.total_orders` | `6` | → `total_trades` (명명 차이 매핑) |
+| `trading.win_rate` | `33.0` (percent) | → `win_rate` (직매핑) |
+
+**Phase 6 평탄화 검증** — verify 스크립트 Section [6] 결과: 8/8 키 모두 채집 성공:
+```
+total_return_pct=-7.447  cagr=-27.468  sharpe_ratio=-0.796  sortino_ratio=-0.42
+max_drawdown=16.1  win_rate=33.0  profit_factor=1.18  total_trades=6
+```
+
+**donchian_swing YAML 외부 호환** — verify 스크립트 Section [7]: `validate_yaml_tool` 응답 `{"valid":true,"errors":[],"warnings":[]}` → **(a) 분류 유지**, `_FALLBACK_STRATEGIES` 변경 불필요.
+
+회귀 가드:
+- `tests/unit/engine/test_backtest_engine_nested_metrics.py` 4 케이스 — 실측 응답 fixture 그대로 평탄화 검증
+- `tests/unit/services/test_mcp_client_unwrap.py` 9 케이스 — MCP content 2겹 래핑 unwrap
+- `tests/unit/engine/test_backtest_yaml_donchian_compat.py` 6 케이스 — donchian YAML 외부 DSL 정합성
+
 ---
 
 ## 6. 핵심 안전 규칙 (자동매매와의 격리)

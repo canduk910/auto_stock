@@ -121,7 +121,9 @@ class MCPClient:
         if session_id:
             logger.info("[mcp] 세션 초기화 완료: %s", session_id[:8])
         else:
-            logger.warning("[mcp] initialize 응답에 mcp-session-id 헤더 없음")
+            # Phase 6 결함 C: stock-manager 외부 서버는 stateless 모드 — session-id 미반환이 정상.
+            # WARNING 노이즈 다운그레이드. tools/call 은 헤더 미부착으로 진행.
+            logger.debug("[mcp] initialize 응답에 mcp-session-id 헤더 없음 (stateless 모드)")
         return session_id
 
     def _parse_response(self, resp: httpx.Response) -> dict:
@@ -153,6 +155,52 @@ class MCPClient:
             msg = err.get("message", str(err)) if isinstance(err, dict) else str(err)
             raise ExternalAPIError(msg)
         return body.get("result", {}) or {}
+
+    def _extract_mcp_content(self, result: Any) -> Any:
+        """MCP Streamable HTTP 2겹 래핑 unwrap (Phase 6 결함 A).
+
+        외부 서버 (stock-manager 패턴) 는 ``tools/call`` 결과를 항상 다음 구조로 감싼다::
+
+            {"content": [{"type": "text", "text": "<JSON 문자열>"}]}
+
+        본 헬퍼는:
+        1. ``content`` 키 없으면 → 입력 그대로 반환 (회귀 보존, Phase 1 케이스).
+        2. ``content[0].type != "text"`` 또는 ``text`` 누락 → 원본 그대로 반환.
+        3. ``content[0].text`` JSON 파싱 실패 → 원본 그대로 + warning 로그.
+        4. 파싱 OK + ``success: false`` → ``ExternalAPIError(error_msg)`` raise.
+        5. 파싱 OK + ``success: true`` + ``data`` 존재 → ``data`` 평탄화 반환.
+        6. 파싱 OK + ``data`` 없음 → parsed 전체 반환 (graceful).
+
+        여러 ``content`` 항목이 있으면 첫 번째 text 만 사용 (외부 서버 컨벤션).
+        """
+        if not isinstance(result, dict):
+            return result
+        content = result.get("content")
+        if not isinstance(content, list) or not content:
+            return result
+        first = content[0]
+        if not isinstance(first, dict) or first.get("type") != "text":
+            return result
+        text = first.get("text")
+        if not isinstance(text, str):
+            return result
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError:
+            logger.warning(
+                "[mcp] content.text JSON 파싱 실패 — 원본 result 반환: %s",
+                text[:200],
+            )
+            return result
+        if isinstance(parsed, dict):
+            success = parsed.get("success")
+            if success is False:
+                err = parsed.get("error") or parsed.get("message") or "MCP tool error"
+                raise ExternalAPIError(str(err))
+            if success is True and "data" in parsed:
+                return parsed["data"]
+            return parsed
+        return parsed
 
     async def _post_tool_call(self, name: str, params: dict) -> httpx.Response:
         """tools/call 1회 POST. 421 처리는 호출자 책임."""
@@ -209,7 +257,11 @@ class MCPClient:
                 raise ExternalAPIError(
                     f"MCP tools/call HTTP {resp.status_code}: tool={name}"
                 )
-            return self._parse_response(resp)
+            result = self._parse_response(resp)
+            # Phase 6 결함 A: MCP Streamable HTTP 2겹 래핑 자동 unwrap.
+            # 외부 서버 응답이 ``{"content":[{"type":"text","text":"<JSON>"}]}`` 인 경우
+            # 안쪽 JSON 의 ``data`` 를 평탄화. 일반 응답은 그대로 반환 (회귀 보존).
+            return self._extract_mcp_content(result)
         except ExternalAPIError:
             raise
         except httpx.TimeoutException as e:

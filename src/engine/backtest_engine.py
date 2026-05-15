@@ -253,9 +253,88 @@ def _extract_status(resp: Any) -> str:
     return str(data.get("status", "unknown"))
 
 
+# Phase 6 (보강) — 외부 서버 metrics 중첩 응답 평탄화 키 매핑.
+#
+# 실측 응답 (sma_crossover, 005930):
+#   data.result.metrics = {
+#       "basic":   {total_return, annual_return, max_drawdown, ...},
+#       "risk":    {sharpe_ratio, sortino_ratio},
+#       "trading": {total_orders, win_rate, profit_loss_ratio, ...}
+#   }
+#
+# 우리 BacktestMetrics 8 키와 외부 서버 키 매핑 (sub_section, 외부_key → 내부_key).
+# 평탄(8키) 응답도 호환 — `_normalize_metrics` 가 평탄 키 우선 채택.
+_NESTED_METRIC_MAP: dict[str, dict[str, str]] = {
+    "basic": {
+        "total_return": "total_return_pct",
+        "annual_return": "cagr",
+        "max_drawdown": "max_drawdown",  # 양수 = 절대값
+    },
+    "risk": {
+        "sharpe_ratio": "sharpe_ratio",
+        "sortino_ratio": "sortino_ratio",
+    },
+    "trading": {
+        "win_rate": "win_rate",
+        "profit_loss_ratio": "profit_factor",  # 외부 명명 차이
+        "profit_factor": "profit_factor",      # 외부 서버 향후 명명 변경 대비
+        "total_orders": "total_trades",        # 외부 명명 차이
+        "total_trades": "total_trades",        # 평탄 호환
+    },
+}
+
+
+def _normalize_metrics(metrics: dict) -> dict:
+    """외부 서버 중첩 metrics 를 BacktestMetrics 8 키 평탄 dict 로 정규화.
+
+    동작:
+    - 평탄 키(total_return_pct 등)가 이미 있으면 그대로 채택 (예전 응답 호환).
+    - 중첩(``basic`` / ``risk`` / ``trading``) 키만 있으면 매핑 표대로 평탄화.
+    - 양쪽 다 있으면 평탄 키 우선 (외부 서버가 향후 평탄화 했을 때를 대비).
+    """
+    if not isinstance(metrics, dict):
+        return {}
+    flat: dict[str, Any] = {}
+    # 1) 평탄 키부터 채집 (BacktestMetrics 8 키 직접 매칭)
+    flat_keys = (
+        "total_return_pct",
+        "cagr",
+        "sharpe_ratio",
+        "sortino_ratio",
+        "max_drawdown",
+        "win_rate",
+        "profit_factor",
+        "total_trades",
+    )
+    for k in flat_keys:
+        if k in metrics:
+            flat[k] = metrics[k]
+    # 2) 중첩 키 평탄화 (평탄 키가 우선 — 이미 있으면 overwrite 안 함)
+    for sub_name, mapping in _NESTED_METRIC_MAP.items():
+        sub = metrics.get(sub_name)
+        if not isinstance(sub, dict):
+            continue
+        for ext_key, int_key in mapping.items():
+            if ext_key in sub and int_key not in flat:
+                flat[int_key] = sub[ext_key]
+    return flat
+
+
 def _extract_metrics(resp: Any) -> dict:
+    """외부 서버 응답에서 8 키 평탄 metrics dict 추출.
+
+    응답 위치 우선순위:
+    1. ``data.metrics`` (평탄/중첩 모두 _normalize_metrics 통과)
+    2. ``data.result.metrics`` (실측 — Phase 6 보강 시 확인된 중첩 구조)
+    """
     data = _unwrap(resp)
-    return data.get("metrics") or {}
+    metrics = data.get("metrics")
+    if not metrics:
+        # 한 단계 더 들어간 ``result.metrics`` 경로 (실측 위치)
+        result_obj = data.get("result")
+        if isinstance(result_obj, dict):
+            metrics = result_obj.get("metrics")
+    return _normalize_metrics(metrics or {})
 
 
 def _extract_error_message(resp: Any) -> Optional[str]:

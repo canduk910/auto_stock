@@ -163,6 +163,23 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   4. `max_drawdown` 부호 SQL 확인 후 `BacktestComparisonCard` `signInverted` 결정
   5. 응답 키 매핑 결함 발견 시 별도 사이클 발의
 
+#### Phase 6 (2026-05-16) — 보강 (사후 검증으로 발견된 결함 3건 fix)
+- **결함 A (Critical) — MCP content 2겹 래핑 unwrap**: `MCPClient.call_tool()` 마지막에 `_extract_mcp_content()` 호출 추가. 외부 응답이 `{"content":[{"type":"text","text":"<JSON>"}]}` 인 stock-manager 컨벤션이면 안쪽 JSON 의 `data` 평탄화 반환. `success:false` 시 `ExternalAPIError(error_msg)` raise. 일반 응답(`{"result":{...}}`) 은 그대로 통과 — Phase 1 16 케이스 회귀 보존. 회귀 가드 `tests/unit/services/test_mcp_client_unwrap.py` 9 케이스
+- **결함 D' (Critical, 사후 발견) — metrics 중첩 평탄화**: 실측 외부 응답이 `data.result.metrics.{basic,risk,trading}` 3단 중첩. `_extract_metrics()` 가 `data.metrics` 와 `data.result.metrics` 두 경로 모두 검사 후 `_normalize_metrics()` 로 8 키 평탄화. 키 매핑: `basic.total_return → total_return_pct` / `basic.annual_return → cagr` / `basic.max_drawdown → max_drawdown (양수 = 절대값)` / `risk.sharpe_ratio/sortino_ratio` 그대로 / `trading.win_rate` 그대로 / `trading.profit_loss_ratio → profit_factor` (외부 명명 차이) / `trading.total_orders → total_trades`. 평탄 키(향후 외부 서버가 평탄화 했을 때 대비) 우선. 회귀 가드 `tests/unit/engine/test_backtest_engine_nested_metrics.py` 4 케이스 — verify_mcp_response_schema.py 실측 응답 그대로 fixture
+- **결함 B (확인) — donchian_swing YAML 외부 호환**: 외부 preset 10 개에 donchian 미포함 → YAML 커스텀 경로(`run_backtest_tool`) 가 정상 동작 확인. `validate_yaml_tool` 응답 `{"valid":true,"errors":[],"warnings":[]}` — **(a) 분류 유지**. 회귀 가드 `tests/unit/engine/test_backtest_yaml_donchian_compat.py` 6 케이스 (정적 YAML 구조 검증, 외부 호출 안 함). `_FALLBACK_STRATEGIES` 변경 없음
+- **결함 C (Low) — initialize session-id 누락 로그 다운그레이드**: stateless 외부 서버는 `mcp-session-id` 헤더 미반환이 정상. 매 호출 WARNING 노이즈 → DEBUG 다운그레이드 + "stateless 모드" 명시. 회귀 가드 `tests/unit/services/test_mcp_client_session_log.py` 2 케이스 (caplog 로 WARNING 없음 검증)
+- **응답 키 확정**:
+  - **`max_drawdown` 부호**: 양수 (실측 `16.1`) — 절대값 컨벤션. `BacktestComparisonCard` `signInverted: true` 토글 권장
+  - **`profit_loss_ratio` → `profit_factor`**: 외부 서버 명명 차이. `_NESTED_METRIC_MAP` 매핑 처리
+  - **`total_orders` → `total_trades`**: 거래 횟수 단위 동일
+  - **`annual_return` → `cagr`**: 둘 다 percent 단위
+- **실측 검증 도구** — `scripts/verify_mcp_response_schema.py` Phase 6 보강:
+  - Section [6] `_extract_metrics + BacktestMetrics 평탄화 결과` — 실시간 외부 응답에 Phase 6 평탄화 적용해 8/8 키 채집 확인
+  - Section [7] `donchian_swing YAML → validate_yaml_tool` — 외부 서버 호환성 사후 확인
+  - 다음 실서버 변경 시 재실행으로 즉시 검증 가능
+- **운영 영향 0 검증**: `KIS_MCP_ENABLED=false` 그대로 유지 → Phase 6 패치가 EC2 배포돼도 백테스트 호출 0건. Phase 5b 토글 시점에 자동으로 결함 fix 적용된 상태로 첫 발화. 백엔드 888 passed (Phase 5 862 → +26) / 프론트엔드 85 passed 회귀 0
+- **Phase 5b 진입 게이트 통과** — 2026-05-18(월) 20:00 토글 안전
+
 ### 거래소 라우팅 (전략별 `exchange` 파라미터)
 | 값 | 의미 | 비고 |
 |---|---|---|
