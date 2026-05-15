@@ -58,8 +58,11 @@ def test_default_params_includes_board_k_values():
     p = VolatilityBreakoutStrategy.DEFAULT_PARAMS
     assert p["k_value_krx_main"] == 1.0
     assert p["k_value_nxt_pre"] == 1.0
+    # k_value_nxt_post 키는 보존 — DB 마이그레이션 + AI자문 응답 호환성 위해 유지
+    # (실제로 사용되지 않지만 컬럼/필드 호환 보존, 2026-05-15 결함 D)
     assert p["k_value_nxt_post"] == 1.0
-    assert p["tradable_boards"] == ["pre_nxt", "main", "post_nxt"]
+    # 2026-05-15 결함 D — VB 당일 15:20 일괄매도 정책 → POST_NXT 제외
+    assert p["tradable_boards"] == ["pre_nxt", "main"]
     assert p["stop_loss_rate"] == -3.0
 
 

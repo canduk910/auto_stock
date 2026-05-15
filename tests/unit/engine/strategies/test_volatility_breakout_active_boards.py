@@ -106,23 +106,25 @@ def test_get_targets_status_returns_empty_when_no_active_board_intersection(vb):
 # 3. top-level 은 활성 보드 중 우선순위 첫 confirmed 보드 기준
 # ---------------------------------------------------------------------------
 def test_get_targets_status_top_level_uses_first_active_confirmed_board(vb):
-    # MAIN + POST_NXT 활성, 두 보드 모두 confirmed → 우선순위 main 채택
-    session_tracker._active = frozenset({MarketBoard.MAIN, MarketBoard.POST_NXT})
+    # MAIN + PRE_NXT 활성, 두 보드 모두 confirmed → 우선순위 main 채택.
+    # 2026-05-15 결함 D — VB DEFAULT_TRADABLE_BOARDS 에서 POST_NXT 제거됨에 따라
+    # 다중 보드 동시 활성 케이스는 PRE_NXT + MAIN (08:30~09:00 KRX_OPEN 구간) 으로 검증.
+    session_tracker._active = frozenset({MarketBoard.MAIN, MarketBoard.PRE_NXT})
     _seed_with_boards(
         vb,
         "005930",
         boards={
             "main": {"open_price": 80000, "target_price": 80500, "target_offset": 500},
-            "post_nxt": {"open_price": 81000, "target_price": 81400, "target_offset": 400},
+            "pre_nxt": {"open_price": 79000, "target_price": 79400, "target_offset": 400},
         },
-        confirmed={"main": True, "post_nxt": True},
+        confirmed={"main": True, "pre_nxt": True},
     )
 
     status = vb.get_targets_status()
 
-    # 노출 보드 키 2개
-    assert set(status["005930"]["boards"].keys()) == {"main", "post_nxt"}
-    # top-level 은 main 우선
+    # 노출 보드 키 2개 — VB tradable_boards 가 {pre_nxt, main} 이고 둘 다 활성
+    assert set(status["005930"]["boards"].keys()) == {"main", "pre_nxt"}
+    # top-level 은 main 우선 (우선순위 main → post_nxt → pre_nxt)
     assert status["005930"]["target_price"] == 80500
     assert status["005930"]["open_price"] == 80000
     assert status["005930"]["target_offset"] == 500

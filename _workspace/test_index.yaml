@@ -53,6 +53,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/api/balance.py:
     direct_tests:
     - tests/unit/api/test_insufficient_classification.py
@@ -105,6 +106,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/api/base.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -177,6 +179,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -249,6 +252,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -304,6 +308,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/auth/__init__.py:
     direct_tests:
     - tests/unit/api/test_base_logging.py
@@ -361,6 +366,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/auth/token.py:
     direct_tests:
     - tests/unit/api/test_base_logging.py
@@ -434,6 +440,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -513,6 +520,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -590,6 +598,7 @@ backend:
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -641,6 +650,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/db/log_reports.py:
     direct_tests: []
     transitive_tests:
@@ -688,6 +698,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/db/parameter_recommendations.py:
     direct_tests:
     - tests/unit/db/test_parameter_recommendations_v2.py
@@ -736,6 +747,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/db/positions.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -790,6 +802,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/db/stock_master.py:
     direct_tests:
     - tests/integration/test_boot_eager_refresh.py
@@ -843,6 +856,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/db/strategy_config.py:
     direct_tests:
     - tests/contract/test_routes_balance_perf.py
@@ -890,6 +904,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/db/supabase.py:
     direct_tests:
     - tests/contract/test_routes_balance_perf.py
@@ -964,6 +979,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -1016,6 +1032,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/db/system_logs.py:
     direct_tests:
     - tests/unit/api/test_base_logging.py
@@ -1088,6 +1105,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -1144,6 +1162,7 @@ backend:
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/__init__.py:
     direct_tests:
     - tests/contract/test_routes_balance_perf.py
@@ -1248,6 +1267,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/order_engine.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -1299,6 +1319,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/recommendation_engine.py:
     direct_tests:
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -1346,6 +1367,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/recommendation_metrics.py:
     direct_tests:
     - tests/unit/engine/test_recommendation_metrics_smoke.py
@@ -1394,6 +1416,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/risk.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -1442,6 +1465,7 @@ backend:
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/scanner.py:
     direct_tests:
     - tests/contract/test_routes_balance_perf.py
@@ -1513,6 +1537,7 @@ backend:
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_swing_poll_loop.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
   src/engine/scheduler.py:
     direct_tests:
@@ -1557,6 +1582,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     transitive_tests:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -1616,6 +1642,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/strategies/__init__.py:
     direct_tests:
     - tests/unit/engine/test_swing_poll_loop.py
@@ -1670,6 +1697,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/strategies/long_tail_volatility.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -1721,6 +1749,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/strategies/momentum.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -1770,6 +1799,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/strategies/volatility_breakout.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -1798,6 +1828,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/test_strategy_fallback_budget.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_history.py
@@ -1870,6 +1901,7 @@ backend:
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     transitive_tests:
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_history.py
@@ -1938,6 +1970,7 @@ backend:
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/engine/util/__init__.py:
     direct_tests: []
     transitive_tests: []
@@ -1993,6 +2026,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/main.py:
     direct_tests:
     - tests/contract/test_routes_balance_perf.py
@@ -2060,6 +2094,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/models/order.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -2111,6 +2146,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/models/recommendation.py:
     direct_tests: []
     transitive_tests:
@@ -2203,6 +2239,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -2259,6 +2296,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/realtime/__init__.py:
     direct_tests:
     - tests/unit/realtime/test_websocket_ack.py
@@ -2334,6 +2372,7 @@ backend:
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -2410,6 +2449,7 @@ backend:
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
   src/routes/__init__.py:
     direct_tests: []
     transitive_tests:
@@ -2800,10 +2840,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-15T15:12:54.127452+09:00'
+generated_at: '2026-05-15T15:35:01.452348+09:00'
 stats:
   backend_modules: 62
-  backend_tests: 80
+  backend_tests: 81
   frontend_modules: 41
   frontend_tests: 18
   unmapped_modules:

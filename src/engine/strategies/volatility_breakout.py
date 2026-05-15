@@ -22,8 +22,12 @@ logger = logging.getLogger(__name__)
 class VolatilityBreakoutStrategy(StrategyBase):
     """변동성 돌파 전략."""
 
-    # 매매 가능 보드 (Phase 8) — Q3=A 야간 매매 활성화. PRE_NXT/MAIN/POST_NXT 모두 활성
-    DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main", "post_nxt")
+    # 매매 가능 보드 — PRE_NXT(08:00~09:00) + MAIN(09:00~15:20) 만 활성.
+    # 결정 (2026-05-15, 결함 D): VB 는 당일 15:20 일괄매도 정책 — NXT 애프터(15:30~20:00)
+    # 매매 비활성. POST_NXT 포함 시 `_force_clear_main_only` 가 keeps_post_nxt=True 분기로
+    # 15:20 청산을 스킵하는데, 19:50 청산 코드는 누락되어 OVERNIGHT 보유 결함 발생
+    # (5/13~5/15 005930 멀티데이 보유 후 손절 사고). VB OVERNIGHT 거부 원칙 회복.
+    DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main")
 
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
