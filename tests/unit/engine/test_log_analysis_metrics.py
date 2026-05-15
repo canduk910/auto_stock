@@ -84,7 +84,10 @@ async def test_generate_daily_log_report_exposes_next_day_clear_in_metrics(monke
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
 
     # _collect_strategy_funnel 도 무력화 — registry 없는 환경에서도 통과
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", lambda: {})
+    # PR-D (2026-05-14): async 변환 — coroutine 반환 필요
+    async def _empty_funnel() -> dict:
+        return {}
+    monkeypatch.setattr(lae, "_collect_strategy_funnel", _empty_funnel)
 
     await lae.generate_daily_log_report()
 
