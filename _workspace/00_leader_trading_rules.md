@@ -299,6 +299,46 @@ VB와 동일.
 - 안전 가드: 종목별 sequential await (Rate Limit), 일봉 fetch 예외/빈 응답 → 해당 종목 skip + 다른 종목 영향 없음
 - `risk.py:72` 실시간 시세 기반 `high_since_buy` 갱신은 그대로 유지 — 이건 boot 시점 1회 복구만
 
+#### 일중 시세 REST 폴링 보강 (2026-05-15, 결함 B 대응)
+- **배경**: donchian_swing은 멀티데이 보유 + ATR×2 Chandelier 트레일링 + 하드 -7% 손절 전략이라 일중 시세에 100% 의존. 2026-05-15 운영 중 `[tick_coverage] fresh 4~16 / stale 22~32 / ratio 11~45%`가 종일 지속, `[stale_watcher]`도 KIS silent inactive로 6회 retry 초과 후 skip → **보유·후보 시세 둘 다 누락 → 손절 평가 불가** 운영 위험. UI(ScanMonitor 최종 후보)에서도 종목명/현재가 빈칸 다수.
+- **해결 접근**: WebSocket을 보강하는 **REST 폴링 레이어** 추가. WS 정상이면 그대로, stale이면 REST가 메꿈. KIS Rate Limit(20req/s) 대비 1req/s 수준이라 안전 마진 충분.
+- **위치**: `src/engine/scheduler.py` — `_swing_rest_poll_loop()` 신설 (기존 `_swing_buy_poll_loop`와 별개의 시세 보강 loop. 기존 G안의 `_swing_buy_poll_loop`는 09:05~09:30 매수 평가 전용으로 보존).
+- **운영 시간**: 09:30 ~ 15:20 KRX 메인 시간대 (매수 진입 종료 후에도 보유 평가는 계속). `scan_task`처럼 `asyncio.create_task`로 발화하고 종료 시 cancel.
+- **주기**: **60초**. 1차 구현은 단일 주기로 단순화. 향후 보유 30s / 후보 60s 분리는 운영 데이터 보고 결정.
+- **대상 ticker 수집** (사이클 시작 시 합집합 산출, 6자리 영숫자 필터 + dedupe):
+  1. `donchian._scanned_tickers` — donchian 최종 후보(매수 평가 대상)
+  2. `donchian.state.positions.keys()` — donchian 보유 포지션 (손절·트레일링 평가 대상)
+  3. `donchian.state.pending_buys` — 매수 주문 진행 중인 ticker (체결가 추정)
+- **동작 (종목별 sequential await)**:
+  1. KIS `inquire_stock_basics` 또는 `fetch_stock_detail` 단건 호출 (택1, backend-dev 판단 — 응답에 `current_price/open_price/change_rate/prdy_ctrt`가 포함되는 쪽)
+  2. Rate Limit 보호: 종목 사이 `await asyncio.sleep(0.05)` (50ms)
+  3. 응답으로 `scanner.ticker_prices[ticker]` dict 갱신 (`current_price` / `open_price` / `change_rate` / `prdy_ctrt`)
+  4. `scanner.ticker_last_tick[ticker] = datetime.now(KST_TZ)` touch — stale_watcher가 자연스럽게 fresh 인식
+  5. `ticker_names[ticker]` 비어있으면 응답 종목명 또는 `STATIC_TICKER_NAMES`에서 보강 (UI "최종 후보" 종목명 표시 복구)
+  6. **보유 종목 한정**: REST 응답 직후 `RiskManager.on_tick(ticker, price)` 직접 호출 — 기존 트레일링/하드 손절 코드 재사용 (별도 청산 경로 신설 금지)
+- **예외 격리**: KIS 5xx/timeout/`KisApiError`는 종목 단위 try/except로 흡수 (다음 종목 진행). loop 본체 예외는 `ERROR` 로그 + 다음 사이클 자연 회복. `_swing_rest_poll_task` 같은 보일러플레이트는 backend-dev 재량.
+- **구조화 로그** (사이클당 1행, INFO + `system_logs`):
+  ```
+  [swing_rest_poll] candidates=N held=M pending=P updated=U failed=F elapsed_ms=X
+  ```
+  - `candidates` = `_scanned_tickers` 개수
+  - `held` = donchian positions 개수
+  - `pending` = donchian pending_buys 개수
+  - `updated` = 이번 사이클에서 ticker_prices 갱신 성공 종목 수
+  - `failed` = KIS 호출 실패 종목 수
+  - `elapsed_ms` = 사이클 전체 소요 시간
+- **WebSocket과 협업**: 같은 ticker가 WS로도 들어오면 `ticker_last_tick`을 양쪽이 갱신해도 무해 (멱등 갱신). stale_watcher(60s 신선도)가 두 경로 통합 인식. **`RiskManager.on_tick` 중복 호출도 무해** — 멱등 설계됨 (가격 같으면 신호 변화 없음).
+- **불변식**:
+  - 매수 평가는 폴링이 **트리거하지 않는다** — donchian 매수는 `_swing_buy_poll_loop`(09:05~09:30 1분 주기) 전용. 이 신설 loop는 **시세 갱신 + 보유 평가만** 책임.
+  - `risk.py`의 donchian_swing 매수 스킵 가드(`if strategy_id == "donchian_swing": continue`) 그대로 보존.
+  - WS 우선순위 큐(E1)와 무관 — 이 폴링은 WS 슬롯 사용 안 함.
+- **Red 테스트 의무**: pytest+respx+freezegun으로 09:30 시각 고정 + donchian `_scanned_tickers`에 3종목 + `state.positions`에 1종목 등록. KIS `inquire-price` 응답을 respx mock. 폴링 loop 1사이클 후:
+  1. `scanner.ticker_prices`에 4종목 모두 `current_price` 갱신 assert
+  2. `ticker_last_tick`에 4종목 모두 timestamp 갱신 assert
+  3. 보유 종목 1개에 대해 `RiskManager.on_tick` 호출 흔적 assert
+  4. 보유 종목 응답을 매수가 -7% 미만 가격으로 mock한 별도 케이스에서 `OrderEngine.execute_sell(STOP_LOSS)` 호출 흔적 assert (손절 트리거 회로 검증)
+  - 결함 상태(폴링 미구현)에선 `ticker_prices`가 비어 있으니 Red 성립.
+
 ### 리스크 관리
 - 종목당 최대 투자: 할당 자금의 20%
 - 일일 최대 손실 한도: 할당 자금의 8%
