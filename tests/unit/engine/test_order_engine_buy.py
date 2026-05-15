@@ -368,3 +368,275 @@ async def test_execute_buy_when_insufficient_cash_then_pending_amount_cleared(
 
     assert "012200" not in strategy.state.pending_buys
     assert "012200" not in strategy.state.pending_buy_amounts
+
+
+# ---------------------------------------------------------------------------
+# PR-F (P2, 2026-05-15) — NXT 프리마켓 시장가 사전 차단 (preconvert)
+#
+# 결함 (운영 로그 2026-05-15 08:00:34):
+#   LTV 매수 신호 [pre_nxt]: 064400 ...
+#   BUY 주문 완료: 064400 1주 @ 0  (시장가)
+#   WARNING 시장가 거부 → 지정가 5호가 폴백: 064400 @ 92300
+#     (원인 [APBK0918] 장운영시간이 아닙니다.([프리마켓] 시장가 매매 불가 시간))
+# - NXT 프리(08:00~09:00) 는 KIS 정책상 지정가만 허용
+# - 매번 시장가 → 거부 → 5호가 폴백 패턴 (폴백 자체는 정상이지만 운영 노이즈)
+#
+# Fix 사양 (PR #9 Codex P2 보강):
+#   `place_order` 직전, `MarketBoard.PRE_NXT in session_tracker.active`
+#   AND `MarketBoard.MAIN not in session_tracker.active`
+#   AND `exchange in (NXT, SOR)` 면 사전에 `step_up(current_price, 5)` 지정가로
+#   변환해 발사 — APBK0918 거부 자체를 차단. exact equality 대신 membership
+#   체크로 08:30~09:00 KRX_OPEN 동시 활성 시간대도 커버.
+#   기존 사후 폴백 분기는 보존(다른 거부 사유 대응).
+# ---------------------------------------------------------------------------
+@pytest.fixture
+def _patch_session_active():
+    """src.engine.session.session_tracker._active 를 강제 설정 + 이전 값 복원.
+
+    PR #9 Copilot 보강: teardown 시 이전 값 capture/restore — 다른 테스트가
+    이미 _active 를 변경했어도 안전하게 원복.
+    """
+    from src.engine import session as _session
+    from src.engine.session import MarketBoard
+
+    prev_active = _session.session_tracker._active
+
+    def _set(boards: set[MarketBoard]) -> None:
+        _session.session_tracker._active = frozenset(boards)
+
+    yield _set, MarketBoard
+    # 테스트 종료 후 이전 값으로 복원 — frozenset() 강제 reset 안 함
+    _session.session_tracker._active = prev_active
+
+
+# NOTE: 미사용 + asyncio.run() 이 @pytest.mark.asyncio 안에서 호출되면
+# `RuntimeError: asyncio.run() cannot be called from a running event loop`
+# 발생하던 결함 fixture 제거 (PR #9 Copilot 리뷰 2026-05-15).
+# 본 테스트들은 mock_kis_order_engine fixture 의 `_strategy_exchange_async` mock 으로 충분.
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_preconverts_market_to_limit_in_pre_nxt_only_window(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    monkeypatch,
+    _patch_session_active,
+    caplog,
+):
+    """pre_nxt 단독 활성 + exchange=SOR → place_order 직전 LIMIT(step_up(price,5)) 변환."""
+    import logging
+    from src.engine.util.tick_size import step_up
+    from src.engine import order_engine as _oe
+
+    set_active, MarketBoard = _patch_session_active
+    set_active({MarketBoard.PRE_NXT})
+
+    # _strategy_exchange_async 가 SOR 반환하도록 패치
+    async def _fake_exchange(self, strategy_id, *, ticker=None):
+        return "SOR"
+    monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
+
+    mock_place_order.return_value = _success_result("ORDER-PRECONV-1")
+
+    current_price = 91800
+    expected_fallback = step_up(current_price, steps=5)
+
+    caplog.set_level(logging.INFO, logger="src.engine.order_engine")
+    await engine.execute_buy("064400", current_price, strategy)
+
+    # place_order 1회 호출 — 시장가 거부 → 폴백 시퀀스 *없음*
+    assert mock_place_order.await_count == 1
+    call = mock_place_order.await_args
+    assert call.kwargs["price"] == expected_fallback, (
+        f"사전 변환된 폴백 가격으로 발사: 기대 {expected_fallback}, 실제 {call.kwargs['price']}"
+    )
+    assert call.kwargs.get("order_division") == OrderDivision.LIMIT, (
+        "pre_nxt 단독 + NXT/SOR 면 LIMIT 으로 변환"
+    )
+    assert call.kwargs.get("exchange") == "SOR", "exchange 는 그대로 유지"
+
+    # PENDING INSERT — 폴백 가격으로 기록
+    assert mock_insert_trade.await_count == 1
+    record_arg = mock_insert_trade.await_args.args[0]
+    assert record_arg.price == expected_fallback
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_preconverts_when_pre_nxt_and_krx_open_both_active(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    monkeypatch,
+    _patch_session_active,
+):
+    """08:30~09:00 시간대 = active={PRE_NXT, KRX_OPEN} — 시장가 변환 적용 필요.
+
+    PR #9 Codex P2 회귀 차단:
+    - 초기 구현은 `active == frozenset({PRE_NXT})` exact equality 라
+      KRX_OPEN 이 함께 활성인 후반 30분(08:30~09:00)에 false → 시장가 거부+폴백
+      사이클 반복. membership 체크(`PRE_NXT in active and MAIN not in active`)
+      로 NXT 프리마켓 전체 시간대 커버.
+    """
+    from src.engine.util.tick_size import step_up
+    from src.engine import order_engine as _oe
+
+    set_active, MarketBoard = _patch_session_active
+    # 08:30~09:00 시나리오: PRE_NXT + KRX_OPEN 동시 활성
+    set_active({MarketBoard.PRE_NXT, MarketBoard.KRX_OPEN})
+
+    async def _fake_exchange(self, strategy_id, *, ticker=None):
+        return "SOR"
+    monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
+
+    mock_place_order.return_value = _success_result("ORDER-PRECONV-2")
+    current_price = 91800
+    expected_fallback = step_up(current_price, steps=5)
+
+    await engine.execute_buy("064400", current_price, strategy)
+
+    assert mock_place_order.await_count == 1
+    call = mock_place_order.await_args
+    assert call.kwargs["price"] == expected_fallback, (
+        "PRE_NXT + KRX_OPEN 동시 활성도 사전 변환 적용 (membership 체크)"
+    )
+    assert call.kwargs.get("order_division") == OrderDivision.LIMIT
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_keeps_market_order_in_main_board(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    monkeypatch,
+    _patch_session_active,
+):
+    """MAIN 보드 활성 → 시장가(price=0) 그대로 — 사전 변환 안 함."""
+    from src.engine import order_engine as _oe
+
+    set_active, MarketBoard = _patch_session_active
+    set_active({MarketBoard.MAIN})
+
+    async def _fake_exchange(self, strategy_id, *, ticker=None):
+        return "SOR"
+    monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
+
+    mock_place_order.return_value = _success_result("ORDER-MAIN-1")
+
+    await engine.execute_buy("064400", 91800, strategy)
+
+    assert mock_place_order.await_count == 1
+    call = mock_place_order.await_args
+    assert call.kwargs["price"] == 0, "MAIN 보드면 시장가 유지"
+    # MARKET 은 OrderDivision 기본값 — order_division 키워드 자체가 빠질 수 있음.
+    # 명시되었다면 MARKET 이어야 함.
+    if "order_division" in call.kwargs:
+        assert call.kwargs["order_division"] == OrderDivision.MARKET
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_keeps_market_order_for_krx_exchange_in_pre_nxt(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    monkeypatch,
+    _patch_session_active,
+):
+    """exchange=KRX 이면 pre_nxt 활성이어도 시장가 유지 — KRX 는 시장가 받음."""
+    from src.engine import order_engine as _oe
+
+    set_active, MarketBoard = _patch_session_active
+    set_active({MarketBoard.PRE_NXT})
+
+    async def _fake_exchange(self, strategy_id, *, ticker=None):
+        return "KRX"
+    monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
+
+    mock_place_order.return_value = _success_result("ORDER-KRX-1")
+
+    await engine.execute_buy("064400", 91800, strategy)
+
+    assert mock_place_order.await_count == 1
+    call = mock_place_order.await_args
+    assert call.kwargs["price"] == 0, "exchange=KRX 면 pre_nxt 활성이어도 시장가 유지"
+    assert call.kwargs.get("exchange") == "KRX"
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_market_preconvert_emits_log(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    monkeypatch,
+    _patch_session_active,
+    caplog,
+):
+    """변환 시 [market_order_preconvert_pre_nxt] INFO 로그 1행 노출."""
+    import logging
+    from src.engine import order_engine as _oe
+
+    set_active, MarketBoard = _patch_session_active
+    set_active({MarketBoard.PRE_NXT})
+
+    async def _fake_exchange(self, strategy_id, *, ticker=None):
+        return "NXT"
+    monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
+
+    mock_place_order.return_value = _success_result("ORDER-LOG-1")
+
+    caplog.set_level(logging.INFO, logger="src.engine.order_engine")
+    await engine.execute_buy("064400", 91800, strategy)
+
+    msgs = "\n".join(r.message for r in caplog.records)
+    assert "[market_order_preconvert_pre_nxt]" in msgs, (
+        f"사전 변환 시 영문 prefix 로그 노출 필수, msgs={msgs!r}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_execute_buy_post_fallback_still_works_for_apbk1943(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    monkeypatch,
+    _patch_session_active,
+):
+    """기존 사후 폴백(예: MAIN 시간대 시장가 거부) 은 그대로 작동.
+
+    MAIN 활성 + 시장가 → 1차 거부 → 사후 폴백 → 2차 LIMIT 성공.
+    PR-F 의 사전 변환은 pre_nxt 단독 케이스에만 적용되므로 MAIN 에서는 기존 분기 사용.
+    """
+    from src.engine import order_engine as _oe
+    from src.engine.util.tick_size import step_up
+
+    set_active, MarketBoard = _patch_session_active
+    set_active({MarketBoard.MAIN})
+
+    async def _fake_exchange(self, strategy_id, *, ticker=None):
+        return "SOR"
+    monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
+
+    market_reject = KisApiError(rt_cd="1", msg_cd="APBK1943", msg1="시장가호가불가 종목입니다.")
+    mock_place_order.side_effect = [market_reject, _success_result("ORDER-POST-2")]
+
+    current_price = 4500
+    expected_fallback = step_up(current_price, steps=5)
+    await engine.execute_buy("012200", current_price, strategy)
+
+    # 1차 시장가 → 2차 사후 폴백 (기존 분기) = 2회 호출
+    assert mock_place_order.await_count == 2
+    second_call = mock_place_order.await_args_list[1]
+    assert second_call.kwargs["price"] == expected_fallback
+    assert second_call.kwargs.get("order_division") == OrderDivision.LIMIT
