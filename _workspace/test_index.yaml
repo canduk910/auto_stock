@@ -42,6 +42,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -91,6 +92,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -162,6 +164,7 @@ backend:
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -233,6 +236,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -296,6 +300,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -355,6 +360,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -424,6 +430,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -505,6 +512,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -585,6 +593,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -647,6 +656,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -696,6 +706,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -746,6 +757,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -797,6 +809,7 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/strategies/test_donchian_swing.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -854,6 +867,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -906,6 +920,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -972,6 +987,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -1036,6 +1052,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -1100,6 +1117,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -1165,6 +1183,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -1276,6 +1295,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_weights.py
@@ -1327,6 +1347,7 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -1378,6 +1399,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -1426,6 +1448,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -1478,6 +1501,7 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -1548,6 +1572,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_donchian_swing.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1598,6 +1623,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1656,6 +1682,7 @@ backend:
     transitive_tests:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -1713,6 +1740,7 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -1765,6 +1793,7 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -1816,6 +1845,7 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -1871,6 +1901,7 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -1918,6 +1949,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -1996,6 +2028,7 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -2045,6 +2078,7 @@ backend:
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -2113,6 +2147,7 @@ backend:
     transitive_tests:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -2167,6 +2202,7 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -2254,6 +2290,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -2317,6 +2354,7 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
@@ -2388,6 +2426,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -2470,6 +2509,7 @@ backend:
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2880,10 +2920,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-15T15:57:09.997995+09:00'
+generated_at: '2026-05-15T16:13:58.844643+09:00'
 stats:
   backend_modules: 62
-  backend_tests: 82
+  backend_tests: 83
   frontend_modules: 41
   frontend_tests: 18
   unmapped_modules:

@@ -26,12 +26,21 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.scheduler import TradingScheduler
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine.strategy_base import Position, Signal
 
 pytestmark = pytest.mark.unit
+
+
+# 2026-05-15 hot fix — `_force_clear_main_only` KRX 메인 마감 후 skip 가드 추가에 따라
+# 정상 호출 시각(15:20:30) 으로 freeze.
+@pytest.fixture(autouse=True)
+def _freeze_at_force_clear_time():
+    with freeze_time("2026-05-15 15:20:30"):
+        yield
 
 
 def test_vb_default_tradable_boards_excludes_post_nxt():

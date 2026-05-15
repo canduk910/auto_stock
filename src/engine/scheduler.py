@@ -1141,7 +1141,32 @@ class TradingScheduler:
 
         VB/LTV가 POST_NXT를 활성화하고 있으면 NXT 애프터까지 보유 유지. POST_NXT 미활성
         전략(또는 momentum 익일청산 후보가 아닌 당일청산 종목)만 즉시 청산한다.
+
+        시간 가드 (2026-05-15 hot fix, 5/15 16:04 사고 대응):
+            KRX 메인 마감(15:30) 이후 호출이면 즉시 skip. 재시작 시점이 15:30 이후면
+            scheduler.start() 의 line 380 호출이 무조건 발동되어 VB 보유를 SOR 시장가로
+            청산 시도 → KRX 애프터 시간대 APBK3013 ([애프터마켓]지정가 및 최유리/최우선
+            지정가 주문만 가능합니다.) 거부 × 3회 재시도 모두 실패 + 시세 캐시 미확보로
+            `step_down(가격, 5)` 폴백 불발 → CRITICAL 매도 실패. 본 가드로 차단하고
+            다음 영업일 `_execute_next_day_clear` 안전망(VB 포함, 결함 D 잔여 fix) 에 위임.
         """
+        now_t = datetime.now().time()
+        if now_t >= TIME_KRX_MAIN_CLOSE:
+            logger.info(
+                "KRX 메인 마감(15:30) 이후 호출 — _force_clear_main_only skip "
+                "(현재 %s, 익일 청산 안전망에 위임)",
+                now_t.strftime("%H:%M:%S"),
+            )
+            try:
+                await write_log(
+                    "INFO",
+                    f"_force_clear_main_only skip — 현재 {now_t.strftime('%H:%M:%S')} "
+                    f"≥ 15:30 (KRX 메인 마감 후, 익일 청산 안전망 위임)",
+                )
+            except Exception:
+                pass
+            return
+
         from src.engine.scanner import t
         from src.engine.session import MarketBoard, get_tradable_boards
 

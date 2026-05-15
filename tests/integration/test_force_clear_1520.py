@@ -10,10 +10,20 @@
 from __future__ import annotations
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.strategy_base import Position, Signal
 
 pytestmark = pytest.mark.integration
+
+
+# 2026-05-15 hot fix — `_force_clear_main_only` 가 KRX 메인 마감(15:30) 이후 호출 시
+# skip 하도록 시간 가드 추가. 본 모듈 모든 테스트는 15:20 정상 호출 시점을 검증하므로
+# autouse fixture 로 시각을 15:20:30 으로 고정.
+@pytest.fixture(autouse=True)
+def _freeze_at_force_clear_time():
+    with freeze_time("2026-05-15 15:20:30"):
+        yield
 
 
 def _seed_pos(strategy, ticker, buy_price=80000, qty=10):
