@@ -305,7 +305,11 @@ def test_breakout_cap_constant_value_is_25():
 
 @pytest.mark.asyncio
 async def test_breakout_cap_25_applied_when_breakout_exceeds(_fresh_ws_subscriptions, caplog):
-    """breakout 30개 → cap 25 → 25 add + 5 drop (slot 충분해도 cap 우선)."""
+    """breakout 30개 (cap 25 → overflow 5) — slot 충분하면 PR-E 2-pass 가 overflow 흡수.
+
+    PR-E (2026-05-15): cap 만 add 하고 잔여 슬롯이 있으면 overflow 를 흡수.
+    HIGH 0 + breakout 30 + 다른 그룹 0 → 1차 25 + 2차 5(overflow) = 30, drop=0.
+    """
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
     mock_subscribe, _ = _fresh_ws_subscriptions
 
@@ -323,27 +327,26 @@ async def test_breakout_cap_25_applied_when_breakout_exceeds(_fresh_ws_subscript
 
     called = [c.args[1] for c in mock_subscribe.call_args_list]
     breakout_subscribed = [t for t in called if t.startswith("B")]
-    assert len(breakout_subscribed) == 25, (
-        f"breakout 25개만 add (cap 25 적용), 실제={len(breakout_subscribed)}"
+    assert len(breakout_subscribed) == 30, (
+        f"PR-E 2-pass: 잔여 슬롯에 overflow 5 흡수 → 30 add, 실제={len(breakout_subscribed)}"
     )
 
-    # drop 카운트 = 5 (30 - 25)
+    # drop=0 → priority_drop 로그 미노출
     log_text = "\n".join(r.message for r in caplog.records)
-    assert "[priority_drop]" in log_text
-    assert "breakout=5" in log_text, f"breakout=5 drop 필요, log={log_text}"
+    assert "[priority_drop]" not in log_text, (
+        f"PR-E 2-pass 흡수 후 drop=0 → 로그 미노출, log={log_text}"
+    )
 
 
 @pytest.mark.asyncio
 async def test_breakout_cap_preserves_momentum_slot(_fresh_ws_subscriptions, caplog):
-    """HIGH 4 + breakout 30 + momentum 10 → breakout 25 / momentum 10, drop=(b=5,m=0,s=0).
+    """momentum 슬롯 보호 정책 — 1차 cap 25 가 momentum 보다 먼저 처리되어 momentum 슬롯 점유 안 함.
 
-    명세 slot 분배 시뮬레이션:
-    - HIGH: positions 3 + next_day_clear 1 = 4 (bypass)
-    - LOW 잔여: 41-4 = 37
-    - breakout 30 → cap 25 → 25 add + 5 drop
-    - momentum 10 → 잔여 12 → 10 add (drop 0)
-    - swing 0
-    - total_subscribed = 4+25+10 = 39 (≤ 41), low_remaining = 2
+    PR-E (2026-05-15): cap 정책의 핵심 의도(momentum 보호)는 1-pass 단계에서 보존.
+    HIGH 4 + breakout 30 + momentum 10:
+      - 1차: HIGH 4 + cap 25 + momentum 10 + swing 0 = 39 → 잔여 2
+      - 2차: overflow 5 중 2 흡수 → 41 사용, 흡수 못 한 3 만 drop
+    momentum 은 cap 정책으로 1차에서 100% 보호 (이게 핵심) — overflow 가 momentum 슬롯 침범 안 함.
     """
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
     mock_subscribe, _ = _fresh_ws_subscriptions
@@ -370,12 +373,19 @@ async def test_breakout_cap_preserves_momentum_slot(_fresh_ws_subscriptions, cap
     momentum_subscribed = [t for t in called if t.startswith("M")]
 
     assert len(high_subscribed) == 4, f"HIGH 4개 모두 add, 실제={len(high_subscribed)}"
-    assert len(breakout_subscribed) == 25, f"breakout cap 25 적용, 실제={len(breakout_subscribed)}"
-    assert len(momentum_subscribed) == 10, f"momentum 10개 모두 add 보호, 실제={len(momentum_subscribed)}"
+    # 핵심 — momentum 슬롯 100% 보호 (cap 의 본래 의도)
+    assert len(momentum_subscribed) == 10, (
+        f"momentum 10개 모두 add 보호 (cap 의 본래 의도), 실제={len(momentum_subscribed)}"
+    )
+    # PR-E 2-pass: cap 25 + 잔여 2 슬롯에 overflow 2 흡수 = 27
+    assert len(breakout_subscribed) == 27, (
+        f"PR-E 2-pass: cap 25 + overflow 2 흡수 = 27 (잔여 슬롯 활용), 실제={len(breakout_subscribed)}"
+    )
 
     log_text = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" in log_text
-    assert "breakout=5" in log_text
+    # overflow 5 - 흡수 2 = 3 drop
+    assert "breakout=3" in log_text, f"overflow 5 - 흡수 2 = drop 3, log={log_text}"
     assert "momentum=0" in log_text
     assert "swing=0" in log_text
 

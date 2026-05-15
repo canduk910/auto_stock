@@ -422,19 +422,35 @@ async def subscribe_filtered_stocks(
             already.add(t)
             await kis_ws.subscribe(TICK_TR_ID, t, bypass_limit=True)
 
-        # 3~5) 후순위 — 잔여 슬롯 계산 + drop 카운트
-        # LOW 순서 재정렬 (G안, 2026-05-12): breakout → momentum → swing.
+        # 3~5) 후순위 — 2-pass 슬롯 흡수 (PR-E P1, 2026-05-15)
+        # LOW 순서 (G안, 2026-05-12): breakout → momentum → swing.
         # donchian_swing 은 Pull 폴링으로 매수 평가하므로 슬롯 손실 안전.
+        #
+        # PR-E (P1, 2026-05-15) — 2-pass 슬롯 흡수:
+        #   1차: positions(bypass) → next_day_clear(bypass) → breakout[:cap] → momentum → swing
+        #   2차: 잔여 슬롯 (MAX - len(_subscriptions)) > 0 이면
+        #        breakout cap 초과분(overflow) 에서 추가 add
+        #   최종 drop = max(0, len(overflow) - actually_added_in_2nd_pass)
+        # 결함 (운영 로그 2026-05-15 07:55:08):
+        #   [priority_drop] breakout=3 ... total_subscribed=30 max=41 ... low_remaining=11
+        #   → 11 슬롯 미사용인데도 breakout overflow 3 종목이 silently drop 되어 운영 슬롯 낭비.
+        # 2-pass 로 잔여 슬롯에 overflow 를 흡수해 슬롯 낭비 + 부당 drop 동시 차단.
         drop_counts: dict[str, int] = {"breakout": 0, "momentum": 0, "swing": 0}
 
         # 작업 2 (2026-05-13): breakout cap 25 — momentum 슬롯 보호.
-        # cap 초과분은 `drop_counts["breakout"]` 에 합산해 기존 priority_drop
-        # 로그 형식(breakout=X)으로 자연 노출. slot 잔여와 무관하게 cap 우선 적용.
+        # 1차에서는 cap 만 add, overflow 는 2차에서 잔여 슬롯에 흡수.
+        breakout_primary: list[str]
+        breakout_overflow: list[str]
         if len(breakout) > BREAKOUT_LOW_CAP:
-            drop_counts["breakout"] += len(breakout) - BREAKOUT_LOW_CAP
-            breakout = breakout[:BREAKOUT_LOW_CAP]
+            breakout_primary = breakout[:BREAKOUT_LOW_CAP]
+            breakout_overflow = breakout[BREAKOUT_LOW_CAP:]
+        else:
+            breakout_primary = breakout
+            breakout_overflow = []
+
+        # 1-pass: cap 적용된 breakout + momentum + swing 순서로 add
         for label, candidates in (
-            ("breakout", breakout),
+            ("breakout", breakout_primary),
             ("momentum", momentum),
             ("swing", swing),
         ):
@@ -448,6 +464,32 @@ async def subscribe_filtered_stocks(
                     continue
                 already.add(t)
                 await kis_ws.subscribe(TICK_TR_ID, t)  # bypass_limit=False
+
+        # 2-pass: breakout overflow 잔여 슬롯 흡수
+        # 흡수에 성공한 만큼 drop 에서 차감. 흡수 실패분만 최종 drop["breakout"] 에 합산.
+        # Codex P2 / Copilot (2026-05-15) — 중복(이미 구독된 종목) skip 분리 카운트:
+        # `t in already` 로 skip 된 ticker 는 실제로 다른 그룹에 의해 이미 구독 중이라
+        # drop 아님. `skipped_already` 카운터로 분리해 최종 drop 계산에서 차감.
+        # 미차감 시 false `[priority_drop] breakout=...` 영구 WARNING 발생.
+        absorbed_overflow = 0
+        skipped_already = 0
+        for t in breakout_overflow:
+            if t in already:
+                # 다른 그룹(positions/next_day_clear/breakout_primary/momentum/swing)
+                # 이 이미 구독한 종목 — drop 아닌 중복
+                skipped_already += 1
+                continue
+            remaining = MAX_SUBSCRIPTIONS - len(kis_ws._subscriptions)
+            if remaining <= 0:
+                # 잔여 0 — 더 이상 흡수 불가
+                break
+            already.add(t)
+            absorbed_overflow += 1
+            await kis_ws.subscribe(TICK_TR_ID, t)  # bypass_limit=False
+        # 흡수 못 한 overflow 만 최종 drop 에 합산 (중복 skip 차감).
+        drop_counts["breakout"] += max(
+            0, len(breakout_overflow) - absorbed_overflow - skipped_already
+        )
 
         total_dropped = sum(drop_counts.values())
         if total_dropped > 0:
