@@ -303,7 +303,11 @@ async def test_priority_groups_no_drop_no_drop_log(_ws_subscribe_spy, caplog):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_breakout_overflow_absorbs_unused_slots(_ws_subscribe_spy, caplog):
-    """결함 시나리오 재현: breakout=28 momentum=0 swing=10 + HIGH=5 → 28 add + drop=0."""
+    """잔여 슬롯 1개 시나리오: HIGH 5 + breakout 28 + swing 10 → breakout cap 25 + overflow 1 흡수 + 2 drop.
+
+    실제 산수: HIGH 5 + cap 25 + swing 10 = 40 → 잔여 1 → overflow 3 중 1 흡수 → 총 41, drop=2.
+    (PR #8 Copilot 리뷰: 이 docstring 의 'drop=0' 주장이 assertion(`drop=2`) 과 불일치하던 결함 정정)
+    """
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
 
     positions = [f"P{i:03d}" for i in range(5)]    # HIGH 5
@@ -324,18 +328,8 @@ async def test_breakout_overflow_absorbs_unused_slots(_ws_subscribe_spy, caplog)
     )
 
     subs = _ws_subscribe_spy["subs"]
-    # HIGH 5 + breakout 25 + swing 10 = 40 (1차) + breakout overflow 3 (2차) = 43?
-    # 잔여 = MAX(41) - (5+25+10) = 1 → overflow 3 중 1만 흡수 가능 → 총 41
-    # NOTE: 실제 시나리오에서는 breakout=28 < cap 25 가 아니라 "breakout=28 → cap 25 적용 → 3 drop" 이므로
-    # cap 25 + 잔여 슬롯 흡수 = breakout 이 잔여 슬롯에 의해 결정되어야 함.
-    #
-    # HIGH 5 + cap 25 + momentum 0 + swing 10 = 40 → 잔여 1 → overflow 3 중 1 흡수 → drop=2
-    # 또 다른 케이스(잔여가 더 크면): drop=0 가능
-    #
-    # 결함 로그의 정확 재현: total_subscribed=30 had 11 slot unused — 그 운영 케이스를 재현하려면
-    # 보유/swing 적은 구성. 본 테스트는 "잔여 슬롯이 있으면 overflow 가 흡수된다" 를 검증.
-    # HIGH 5 + breakout 25 (cap) + swing 10 = 40 → 잔여 1 → overflow 1 add → 41 사용 + drop=2
-    assert len(subs) == 41, f"잔여 슬롯이 overflow 로 흡수되어 41 가득 (실제 {len(subs)})"
+    # HIGH 5 + cap 25 + swing 10 = 40 → 잔여 1 → overflow 1 흡수 + 2 drop → 총 41
+    assert len(subs) == 41, f"잔여 슬롯이 overflow 1 흡수로 41 가득 (실제 {len(subs)})"
 
     # breakout overflow 3 중 1 add — drop=2
     breakout_in = sum(1 for t in breakout if ("H0UNCNT0", t) in subs)
@@ -349,8 +343,11 @@ async def test_breakout_overflow_absorbs_unused_slots(_ws_subscribe_spy, caplog)
 
 @pytest.mark.asyncio
 async def test_breakout_overflow_fully_absorbed_when_unused_slots_sufficient(_ws_subscribe_spy, caplog):
-    """결함 케이스 정확 재현: HIGH 5 + breakout 28 + momentum 0 + swing 10 → 결함은 30 사용/11 미사용/3 drop.
-    Fix 후: 잔여 슬롯이 충분(11)하면 overflow 3 모두 흡수 → 28 + drop=0.
+    """잔여 슬롯 충분 시나리오: HIGH 5 + breakout 28 + momentum 0 + swing 3 → 잔여 8 → overflow 3 모두 흡수 → drop=0.
+
+    (PR #8 Copilot 리뷰: docstring 의 'swing 10' 표기가 실제 시나리오 'swing 3' 과 불일치하던 결함 정정.
+    이 케이스는 "잔여 슬롯이 overflow 보다 많으면 drop=0" 검증용 — 운영 결함 케이스의 정확 재현은
+    위 `test_breakout_overflow_absorbs_unused_slots` 가 담당.)
     """
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
 
@@ -454,3 +451,52 @@ async def test_priority_drop_log_omitted_when_2pass_clears_all_drops(_ws_subscri
 
     msg = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" not in msg, "2-pass 후 drop=0 이면 [priority_drop] 로그 생략"
+
+
+# ---------------------------------------------------------------------------
+# PR #8 Codex P2 / Copilot 보강 (2026-05-15) — 중복 종목은 drop 아님
+#
+# 결함: 2-pass overflow loop 에서 `if t in already: continue` 로 skip 된
+# ticker (다른 그룹에 의해 이미 구독됨) 가 drop 카운트에 잘못 포함됨.
+# 결과: 실제로 구독된 종목인데 false [priority_drop] WARNING + system_logs.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_breakout_overflow_skipped_duplicate_not_counted_as_drop(_ws_subscribe_spy, caplog):
+    """breakout overflow 가 positions 와 중복되는 경우 — 그 중복분은 drop 아닌 skip."""
+    caplog.set_level(logging.INFO, logger="src.engine.scanner")
+
+    # positions 에 005930 포함, breakout overflow(cap 25 초과분) 에도 005930 포함
+    positions = ["005930"] + [f"P{i:03d}" for i in range(2)]    # HIGH 3 (005930 포함)
+    momentum: list[str] = []
+    swing: list[str] = []
+    # breakout 28 = cap 25(B000~B024) + overflow 3 = "005930" + B025 + B026
+    breakout = [f"B{i:03d}" for i in range(25)] + ["005930", "B025", "B026"]
+
+    await scanner_module.subscribe_filtered_stocks(
+        [],
+        extra_tickers=None,
+        priority_groups={
+            "positions": positions,
+            "next_day_clear": [],
+            "swing": swing,
+            "momentum": momentum,
+            "breakout": breakout,
+        },
+    )
+
+    subs = _ws_subscribe_spy["subs"]
+    # HIGH 3 + cap 25 = 28 → 잔여 13 → overflow 3 중 005930(이미 positions로 구독) skip + B025/B026 흡수
+    # 005930 은 1번만 구독 → 총 30
+    assert ("H0UNCNT0", "005930") in subs
+    assert ("H0UNCNT0", "B025") in subs
+    assert ("H0UNCNT0", "B026") in subs
+    # 005930 중복 구독 호출은 1번만 (positions 단계, bypass_limit=True)
+    calls_005930 = [c for c in _ws_subscribe_spy["calls"] if c["tr_key"] == "005930"]
+    assert len(calls_005930) == 1, f"005930 은 1회만 subscribe (실제 {len(calls_005930)}회)"
+
+    # 핵심 검증: drop_counts["breakout"] == 0 — 중복 skip 은 drop 아님
+    msg = "\n".join(r.message for r in caplog.records)
+    assert "[priority_drop]" not in msg, (
+        f"overflow 모두 흡수됐고 중복 skip 1건은 drop 아님 — [priority_drop] 로그 미발생 필요\n"
+        f"실제: {msg!r}"
+    )

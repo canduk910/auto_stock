@@ -467,10 +467,17 @@ async def subscribe_filtered_stocks(
 
         # 2-pass: breakout overflow 잔여 슬롯 흡수
         # 흡수에 성공한 만큼 drop 에서 차감. 흡수 실패분만 최종 drop["breakout"] 에 합산.
+        # Codex P2 / Copilot (2026-05-15) — 중복(이미 구독된 종목) skip 분리 카운트:
+        # `t in already` 로 skip 된 ticker 는 실제로 다른 그룹에 의해 이미 구독 중이라
+        # drop 아님. `skipped_already` 카운터로 분리해 최종 drop 계산에서 차감.
+        # 미차감 시 false `[priority_drop] breakout=...` 영구 WARNING 발생.
         absorbed_overflow = 0
+        skipped_already = 0
         for t in breakout_overflow:
             if t in already:
-                # 다른 그룹(positions/next_day_clear/breakout_primary 자체 중복)에 이미 add 됨
+                # 다른 그룹(positions/next_day_clear/breakout_primary/momentum/swing)
+                # 이 이미 구독한 종목 — drop 아닌 중복
+                skipped_already += 1
                 continue
             remaining = MAX_SUBSCRIPTIONS - len(kis_ws._subscriptions)
             if remaining <= 0:
@@ -479,8 +486,10 @@ async def subscribe_filtered_stocks(
             already.add(t)
             absorbed_overflow += 1
             await kis_ws.subscribe(TICK_TR_ID, t)  # bypass_limit=False
-        # 흡수 못 한 overflow 만 최종 drop 에 합산 — 0 흡수면 기존 결함 로그와 동일 카운트.
-        drop_counts["breakout"] += max(0, len(breakout_overflow) - absorbed_overflow)
+        # 흡수 못 한 overflow 만 최종 drop 에 합산 (중복 skip 차감).
+        drop_counts["breakout"] += max(
+            0, len(breakout_overflow) - absorbed_overflow - skipped_already
+        )
 
         total_dropped = sum(drop_counts.values())
         if total_dropped > 0:
