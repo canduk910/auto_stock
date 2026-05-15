@@ -23,7 +23,7 @@ from src.api.base import get_request_metrics, reset_request_metrics
 from src.config import settings
 from src.db.log_reports import insert_log_report
 from src.db.supabase import supabase
-from src.db.trade_history import get_today_buy_trades, get_trades_in_range
+from src.db.trade_history import get_today_buy_trades_for_funnel, get_trades_in_range
 
 logger = logging.getLogger(__name__)
 
@@ -386,6 +386,10 @@ async def _collect_strategy_funnel() -> dict[str, dict[str, int]]:
     - orders = max(in_memory, all-status count: PENDING+COMPLETED+PARTIAL+CANCELLED)
     - signals = max(in_memory, orders)   # 단조성 signals ≥ orders ≥ fills
 
+    PR-D 보강 (Copilot/Codex, 2026-05-14): `get_today_buy_trades_for_funnel()` 사용 —
+    `get_today_buy_trades()` 는 포지션 복구용으로 ticker 별 dedupe + CANCELLED 제외라
+    multi-BUY/multi-strategy/CANCELLED 시나리오를 under-count 하여 본래 목적 달성 못 함.
+
     in-memory 가 더 크면 그대로 사용 (재시작 없이 정상 수집된 케이스).
     DB 조회 실패 시 in-memory 만 사용 (예외 흡수).
     """
@@ -398,7 +402,7 @@ async def _collect_strategy_funnel() -> dict[str, dict[str, int]]:
     by_strategy_completed: dict[str, int] = {}
     by_strategy_all: dict[str, int] = {}
     try:
-        today_buys = await get_today_buy_trades()
+        today_buys = await get_today_buy_trades_for_funnel()
         for row in today_buys or []:
             sid = row.get("strategy") or "unknown"
             status = (row.get("status") or "").upper()

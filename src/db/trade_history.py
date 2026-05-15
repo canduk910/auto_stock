@@ -157,6 +157,36 @@ async def get_today_buy_trades(strategy: str | None = None) -> list[dict]:
     return list(seen.values())
 
 
+async def get_today_buy_trades_for_funnel() -> list[dict]:
+    """funnel cross-check 전용 — dedupe 없음 + CANCELLED 포함 모든 BUY row 반환.
+
+    PR-D 보강 (Copilot/Codex, 2026-05-14):
+    - `get_today_buy_trades()` 는 포지션 복구용 (ticker 별 dedupe + CANCELLED 필터).
+      → funnel 카운트에 부적합: (1) 같은 ticker 재진입/DCA/partial fills 시
+      under-count, (2) 두 전략이 같은 ticker 매수 시 최신 row 의 strategy 만
+      반영 (다른 전략 funnel 0 잔존), (3) CANCELLED 매수는 orders 미반영.
+    - 이 함수는 raw 모든 BUY row 를 반환 — strategy_funnel cross-check 가
+      EC2 재시작 시 in-memory 카운터 회복하려던 본래 목적 달성.
+
+    `status in (PENDING, COMPLETED, PARTIAL, CANCELLED)` 전부 포함.
+    """
+    today_iso = _today_kst_iso()
+
+    def _query():
+        return (
+            supabase.table("trade_history")
+            .select("*")
+            .eq("trade_type", "BUY")
+            .gte("timestamp", today_iso)
+            .in_("status", ["PENDING", "COMPLETED", "PARTIAL", "CANCELLED"])
+            .order("timestamp", desc=True)
+            .execute()
+        )
+
+    result = await asyncio.to_thread(_query)
+    return result.data or []
+
+
 async def get_today_sell_trades(strategy: str | None = None) -> list[dict]:
     """당일 매도 기록을 조회한다 (동기화용)."""
     today_iso = _today_kst_iso()

@@ -95,7 +95,7 @@ async def test_funnel_async_callable(monkeypatch):
     async def _empty(*_a, **_kw):
         return []
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _empty, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _empty, raising=False)
     result = await lae._collect_strategy_funnel()
     assert result == {}
 
@@ -116,7 +116,7 @@ async def test_funnel_uses_in_memory_when_higher(monkeypatch):
     async def _trades(*_a, **_kw):
         return [_trade("005930", "momentum", "COMPLETED")]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _trades, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
     funnel = await lae._collect_strategy_funnel()
     assert funnel["momentum"] == {"signals": 5, "orders": 3, "fills": 2}
@@ -137,7 +137,7 @@ async def test_funnel_uses_db_when_in_memory_zero(monkeypatch):
     async def _trades(*_a, **_kw):
         return [_trade("066570", "long_tail_volatility", "COMPLETED")]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _trades, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
     funnel = await lae._collect_strategy_funnel()
     # DB 보강: fills=1, orders=1, signals≥orders=1
@@ -163,7 +163,7 @@ async def test_funnel_handles_pending_in_orders_not_fills(monkeypatch):
             _trade("000004", "volatility_breakout", "PARTIAL"),
         ]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _trades, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
     funnel = await lae._collect_strategy_funnel()
     assert funnel["volatility_breakout"]["orders"] == 4  # 모든 상태
@@ -191,7 +191,7 @@ async def test_funnel_signal_monotonic_ge_orders(monkeypatch):
             _trade("000003", "momentum", "PENDING"),
         ]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _trades, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
     funnel = await lae._collect_strategy_funnel()
     assert funnel["momentum"]["orders"] == 3
@@ -216,7 +216,7 @@ async def test_funnel_unknown_strategy_skipped_or_grouped(monkeypatch):
             _trade("000003", "ghost_strategy", "COMPLETED"),
         ]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _trades, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
     funnel = await lae._collect_strategy_funnel()
     # momentum 만 등록 → momentum=1, ghost/null 은 funnel 키로 노출 안 됨
@@ -240,7 +240,7 @@ async def test_funnel_db_failure_falls_back_to_in_memory(monkeypatch):
     async def _raise(*_a, **_kw):
         raise RuntimeError("supabase connection lost")
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _raise, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _raise, raising=False)
 
     funnel = await lae._collect_strategy_funnel()
     assert funnel["donchian_swing"] == {"signals": 2, "orders": 1, "fills": 1}
@@ -266,7 +266,7 @@ async def test_funnel_multiple_strategies_isolated(monkeypatch):
             _trade("005930", "momentum", "COMPLETED"),  # in-memory 가 더 큼
         ]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _trades, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
     funnel = await lae._collect_strategy_funnel()
     # momentum: in-memory 우선
@@ -317,7 +317,7 @@ async def test_generate_daily_log_report_awaits_funnel(monkeypatch):
     async def _today_buys(*_a, **_kw):
         return [_trade("066570", "long_tail_volatility", "COMPLETED")]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades", _today_buys, raising=False)
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _today_buys, raising=False)
 
     row = await lae.generate_daily_log_report()
     assert row == {"id": "row-x"}
@@ -325,3 +325,79 @@ async def test_generate_daily_log_report_awaits_funnel(monkeypatch):
     metrics = captured["metrics"]
     assert "strategy_funnel" in metrics
     assert metrics["strategy_funnel"]["long_tail_volatility"]["fills"] == 1
+
+
+# ---------------------------------------------------------------------------
+# PR-D 보강 (Copilot/Codex, 2026-05-14)
+# `get_today_buy_trades` 의 ticker dedupe + CANCELLED 필터 결함이
+# funnel cross-check 본래 목적을 깨던 회귀 케이스
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_funnel_counts_multiple_buys_of_same_ticker(monkeypatch):
+    """같은 ticker 의 BUY 두 번(재진입/DCA) → orders=2, fills=2 — dedupe 없음."""
+    from src.engine import log_analysis_engine as lae
+
+    sched = _install_scheduler(monkeypatch, [
+        _FakeStrategy(strategy_id="momentum", state=_FakeState()),  # in-memory 0 (재시작 시나리오)
+    ])
+    monkeypatch.setattr(lae, "trading_scheduler", sched, raising=False)
+    monkeypatch.setattr("src.engine.scheduler.trading_scheduler", sched, raising=False)
+
+    async def _trades():
+        return [
+            _trade("005930", "momentum", "COMPLETED"),
+            _trade("005930", "momentum", "COMPLETED"),  # 같은 ticker 두 번째
+        ]
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+
+    funnel = await lae._collect_strategy_funnel()
+    assert funnel["momentum"]["fills"] == 2, "multi-BUY 시 fills=2 (dedupe 없음)"
+    assert funnel["momentum"]["orders"] == 2
+
+
+@pytest.mark.asyncio
+async def test_funnel_counts_same_ticker_different_strategies(monkeypatch):
+    """두 전략이 같은 ticker 매수 → 각 전략 funnel 에 1씩 카운트."""
+    from src.engine import log_analysis_engine as lae
+
+    sched = _install_scheduler(monkeypatch, [
+        _FakeStrategy(strategy_id="momentum", state=_FakeState()),
+        _FakeStrategy(strategy_id="volatility_breakout", state=_FakeState()),
+    ])
+    monkeypatch.setattr(lae, "trading_scheduler", sched, raising=False)
+    monkeypatch.setattr("src.engine.scheduler.trading_scheduler", sched, raising=False)
+
+    async def _trades():
+        return [
+            _trade("005930", "momentum", "COMPLETED"),
+            _trade("005930", "volatility_breakout", "COMPLETED"),  # 같은 ticker 다른 strategy
+        ]
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+
+    funnel = await lae._collect_strategy_funnel()
+    assert funnel["momentum"]["fills"] == 1, "momentum strategy 1건"
+    assert funnel["volatility_breakout"]["fills"] == 1, "VB strategy 1건 — 다른 전략 흡수 X"
+
+
+@pytest.mark.asyncio
+async def test_funnel_includes_cancelled_in_orders(monkeypatch):
+    """CANCELLED BUY 도 orders 에 포함 — `get_today_buy_trades_for_funnel` 가 CANCELLED 반환."""
+    from src.engine import log_analysis_engine as lae
+
+    sched = _install_scheduler(monkeypatch, [
+        _FakeStrategy(strategy_id="momentum", state=_FakeState()),
+    ])
+    monkeypatch.setattr(lae, "trading_scheduler", sched, raising=False)
+    monkeypatch.setattr("src.engine.scheduler.trading_scheduler", sched, raising=False)
+
+    async def _trades():
+        return [
+            _trade("005930", "momentum", "CANCELLED"),
+            _trade("000660", "momentum", "COMPLETED"),
+        ]
+    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+
+    funnel = await lae._collect_strategy_funnel()
+    assert funnel["momentum"]["orders"] == 2, "CANCELLED + COMPLETED = orders 2"
+    assert funnel["momentum"]["fills"] == 1, "COMPLETED 만 fills 1"
