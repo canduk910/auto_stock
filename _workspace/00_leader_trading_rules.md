@@ -78,6 +78,27 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - 같은 `(tr_id, tr_key)` 에 대해 거절 응답 2회 → discard 멱등 안전
   - E1 우선순위 큐 / `MAX_SUBSCRIPTIONS=41` / `bypass_limit` 분기 — 영향 없음
 
+### 외부 백테스트 서버 통합 (2026-05-15 Phase 1 — MCP 클라이언트 + 헬스체크)
+20:00 AI 자문 단계에 OpenAI 제안값을 외부 백테스트 서버로 검증하는 사이클의 기반 인프라. Phase 1 은 클라이언트 + 헬스체크만, Phase 2 이후 백테스트 엔진/DB/UI 확장.
+
+- **외부 서버**: `http://43.202.187.5:3846/mcp` (AWS EC2 ap-northeast-2, stock-manager 운영). 프로토콜 JSON-RPC 2.0 over Streamable HTTP/SSE (MCP 2025-03-26). 인증 없음 — IP 화이트리스트만 (auto_stock 운영 EC2 IP 이미 허용)
+- **운영 토글**: `KIS_MCP_ENABLED=false` (기본) 면 모든 외부 호출 차단. 운영 EC2 `.env` 에서 `true` 로 켤 때만 백테스트 발화. **자동매매 핵심 흐름(scheduler/order_engine/risk) 격리** — 본 모듈 다운/네트워크 단절 시 graceful degrade, 운영 영향 0
+- **graceful degrade 규약**:
+  - `KIS_MCP_ENABLED=false` 면 `MCPClient.call_tool()` 은 `ConfigError` raise — 자문 단계는 OpenAI 결과만 INSERT, `backtest_summary=null` 로 자연 처리
+  - `health_check()` 은 어떤 경우에도 예외 raise 안 함 — `False` 반환 (서버 다운/타임아웃/HTTP 5xx/네트워크 단절 통합 처리)
+  - `GET /api/backtest/mcp/health` 는 HTTP 200 으로 `{enabled, reachable, tools_count, error}` 반환. 5xx 절대 안 냄
+- **세션 관리**: stock-manager 패턴 async 이식. 모듈 레벨 싱글톤 `_client_instance` + 세션 ID 재사용. 421 (세션 만료) → 1회 자동 재초기화 후 재시도. 동시 호출 race 대비 `asyncio.Lock` 으로 initialize 중복 방지
+- **타임아웃**: connect=5s / read=`BACKTEST_TIMEOUT_SECS` (기본 300s) / write=10s / pool=10s. 외부 서버 backtest 단일 호출 90일 × 6전략 시 60~90s 소요 가능 — 300s 헤드룸
+- **에러 분류**: `ConfigError` (설정) vs `ExternalAPIError` (네트워크/타임아웃/HTTP/JSON-RPC error). 호출자는 `try/except ExternalAPIError` 로 자문 INSERT 보존 + summary null
+- **회귀 가드**:
+  - `tests/unit/services/test_mcp_client.py` 16 케이스 (A1~A12 + 싱글톤) — respx 모킹
+  - `tests/contract/test_routes_backtest.py` 3 케이스 — `/api/backtest/mcp/health` enabled/reachable/error 분기
+  - `tests/contract/test_backtest_mcp_health.py` 2 케이스 — 실제 외부 서버 호출 (CI skip, 로컬 `KIS_MCP_ENABLED=true pytest` 로 수동 검증)
+- **검증 결과**: 2026-05-15 로컬 헬스체크 통과 — 실제 서버에 `tools/list` 응답 정상, 백테스트 도구 노출 확인. Phase 2 진입 게이트 통과
+- **사후 보호 의무 (Phase 2+ 에 인계)**:
+  - 백테스트 결과를 자동매매 파라미터에 **자동 반영 절대 금지** — 운영자가 Settings 에서 명시 적용(`apply_weight` J4 패턴 차용) 만 허용
+  - 백테스트 task 가 settlement 20:10 와 race 가능 — fire-and-forget 별도 task + 자체 폴링. settlement 의 `_reset_daily_state()` 에서 task cancel 의무
+
 ### 거래소 라우팅 (전략별 `exchange` 파라미터)
 | 값 | 의미 | 비고 |
 |---|---|---|

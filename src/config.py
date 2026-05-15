@@ -45,6 +45,12 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_recommend_model: str = "gpt-5.4"
 
+    # 외부 백테스트 서버 (MCP) — Phase 1
+    # 운영 EC2 → AWS EC2 backtest 서버. KIS_MCP_ENABLED=true 일 때만 호출.
+    kis_mcp_url: str = "http://43.202.187.5:3846/mcp"
+    kis_mcp_enabled: bool = False
+    backtest_timeout_secs: int = 300
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     @computed_field
