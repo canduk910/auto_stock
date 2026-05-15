@@ -172,12 +172,13 @@ TradingScheduler (scheduler.py)
 │   │   ├── StrategyConfig (id, name, weight, params{tradable_boards, exchange, ...})
 │   │   └── StrategyState (positions, pending_buys, sold_today, pnl,
 │   │                       cached_buyable_*, buy_blocked_until, low_funds_tickers)
-│   ├── VolatilityBreakoutStrategy   (tradable_boards: pre_nxt + main + post_nxt)
-│   │   ├── StrategyConfig (k_value_krx_main / k_value_nxt_pre / k_value_nxt_post)
+│   ├── VolatilityBreakoutStrategy   (tradable_boards: pre_nxt + main, 2026-05-15 결함 D)
+│   │   ├── StrategyConfig (k_value_krx_main / k_value_nxt_pre / k_value_nxt_post[보존])
 │   │   ├── StrategyState
-│   │   └── _targets (K, prev_range, target_offset_base,
-│   │                  boards: {board: {open_price, target_price, target_offset}})
-│   ├── LongTailVolatilityStrategy   (tradable_boards: pre_nxt + main + post_nxt)
+│   │   ├── _targets (K, prev_range, target_offset_base,
+│   │   │              boards: {board: {open_price, target_price, target_offset}})
+│   │   └── _next_day_clear_pending (안전망: 15:20 청산 누락 시 익일 NXT 프리 청산)
+│   ├── LongTailVolatilityStrategy   (tradable_boards: pre_nxt + main, 2026-05-15 결함 D)
 │   │   └── + _limit_up_reached set (상한가 모드 전환 종목)
 │   └── DonchianSwingStrategy        (tradable_boards: main)
 │       └── _candidates / _bought_today / _scan_stats
@@ -276,12 +277,19 @@ TradingScheduler (scheduler.py)
        │
 15:20  KRX 메인 신규 매수 중단 + 강제 청산  (TIME_KRX_MAIN_BUY_STOP)
        │  _force_clear_main_only()
-       │     ← tradable_boards에 POST_NXT가 있는 전략 종목은 보유 유지
+       │     ← 시간 가드 (2026-05-15 hotfix): 진입 시 >=15:30 이면 즉시 skip
+       │        → 익일 청산 안전망 위임 (재시작 시점이 15:30 이후일 때 KRX 애프터
+       │           SOR 시장가가 APBK3013 거부되던 사고 차단)
+       │     ← VB/LTV 둘 다 POST_NXT 매수 비활성이라 keeps_post_nxt=False
+       │     ← LTV check_force_clear()는 _limit_up_reached 제외 (상한가 모드 보유)
        │  └─ execute_sell(FORCE_CLEAR) ─────────────────────→ POST order
        │
 15:30  KRX 메인 마감 → NXT 애프터 전환       (TIME_KRX_MAIN_CLOSE)
-       │  _phase = "post_nxt_trading"  (구독 유지, POST_NXT 종목 시세 필요)
-       │  VB + LTV POST_NXT 매매 계속 (k_value_nxt_post 적용)
+       │  _phase = "post_nxt_trading"
+       │  _confirm_breakout_open_prices(board="post_nxt")  ← LTV 상한가 모드 보유 +
+       │                                                      donchian 보유 시세 확정용
+       │  구독 유지: VB/LTV 보유 종목 + donchian 보유 (positions HIGH 그룹)
+       │  매수는 VB/LTV 둘 다 POST_NXT 비활성 — 손절 평가만 risk.on_tick 청산 분기로 작동
        │
 19:50  NXT 애프터 신규 매수 중단              (TIME_NXT_POST_BUY_STOP)
        │  buy_disabled = True (모든 활성 전략)
@@ -497,12 +505,18 @@ on_tick(ticker, current_price)
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
-│ daily_performance                                   │
+│ daily_performance  (실현손익 기준 — 2026-05-15 명시화) │
 ├─────────────────────────────────────────────────────┤
 │ date              DATE        ─┐ 복합 PK            │
 │ strategy          VARCHAR(30) ─┘                    │
 │ total_asset       NUMERIC                           │
-│ daily_profit_rate NUMERIC                           │
+│ daily_realized_pnl NUMERIC    ← SUM(SELL profit_loss)│
+│ daily_profit_rate NUMERIC    ← realized/prev_asset*100│
+│ cumulative_return_rate NUMERIC ← TWR 복리 누적       │
+│ net_external_cashflow NUMERIC                       │
+│ deposit            NUMERIC                          │
+│ (매도 0건인 날은 daily_realized_pnl=daily_profit_rate=0 정상 │
+│  보유 평가손익은 BalanceTable.eval_profit_loss 로 별도 표시)│
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐

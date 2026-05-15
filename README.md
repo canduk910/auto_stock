@@ -202,21 +202,21 @@ KIS_APP_SECRET=실전용_시크릿
 | 구분 | 규칙 |
 |------|------|
 | 종목군 | 코스피+코스닥 전체, 시총/거래대금 필터, 노이즈 비율 기반 동적 K값 |
-| 매매 가능 보드 | PRE_NXT(08:00~) + MAIN(09:00:05~15:20) + POST_NXT(15:30~20:00) — 보드별 별도 시가 + 별도 K값 (`k_value_nxt_pre`/`k_value_krx_main`/`k_value_nxt_post`, 기본 1.0) |
+| 매매 가능 보드 | PRE_NXT(08:00~) + MAIN(09:00:05~15:20) — 보드별 별도 시가 + 별도 K값 (`k_value_nxt_pre`/`k_value_krx_main`, 기본 1.0). **POST_NXT 매수 비활성** (2026-05-15 결함 D — 당일 15:20 일괄 매도 정책으로 환원) |
 | 매수 | 보드별 시가 + (전일 Range × K값) 돌파 순간, 할당 자금 10% 비중 |
 | 손절 | 매수가 대비 -3% |
-| 청산 | KRX 메인은 15:20 강제 청산 보류 (POST_NXT 활성 시) → 19:50 NXT 매수 중단까지 보유, 그 외 전략 종료 시 청산 |
+| 청산 | **15:20 KRX 메인 일괄 청산** (OVERNIGHT 거부). 익일 청산 안전망: 15:20 청산이 누락된 비상 상황(시세 미수신/시장가 거부/재시작 race)에서만 다음 영업일 `_execute_next_day_clear`로 NXT 프리 청산 — WARNING 로그 노출 |
 | 재매수 | 당일 매도 종목 재매수 차단 |
 
 ### 전략 C: 롱테일 변동성 돌파 (`long_tail_volatility`)
 | 구분 | 규칙 |
 |------|------|
 | 종목군 | 변동성 돌파와 동일 + 연속상한가 종목 제외 |
-| 매매 가능 보드 | PRE_NXT + MAIN + POST_NXT (VB와 동일 — 보드별 별도 시가/K값) |
+| 매매 가능 보드 | PRE_NXT + MAIN (VB와 동일, **POST_NXT 매수 비활성**, 2026-05-15 결함 D). 상한가 모드 종목의 POST_NXT 시간대 손절 모니터링은 `risk.on_tick` 청산 평가가 보드 가드 무관하게 작동 |
 | 매수 | 변동성 돌파 + 전일대비 ≥ `min_prdy_rate` (기본 5%) |
-| 당일 청산 | 손절 -3%, 15:20 강제 청산 보류 가능 (POST_NXT 활성 + 상한가 미도달) |
-| 모드 전환 | 당일 +29% 도달 → 익일 청산 모드로 전환 |
-| 익일 청산 | 손절 -5%, 다음 영업일 NXT 프리 시가(08:00) 갭상승 +10% → 트레일링 -2% / 그 외 즉시 매도 (30초 안정화) |
+| 당일 청산 | 손절 -3%, **15:20 일괄 청산** (상한가 미도달 종목, `check_force_clear()`가 `_limit_up_reached` 제외) |
+| 모드 전환 | 당일 +29% 도달 → 익일 청산 모드(`_limit_up_reached` set 등록) |
+| 익일 청산 | 손절 -5%, 다음 영업일 NXT 프리 시가(08:00) 갭상승 +10% → 트레일링 -2% / 그 외 즉시 매도 (30초 안정화). POST_NXT 시간대 시세 모니터링 손절 평가는 그대로 작동 |
 
 ### 전략 D: 20일 신고가 스윙 (`donchian_swing`)
 | 구분 | 규칙 |
@@ -256,10 +256,11 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | 주문 라우팅 | `place_order(..., exchange=...)` body에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS)는 KRX만 허용 — SOR/NXT는 실전 한정 |
 | 조회 거래소 옵션 | `get_balance(afhr_flpr=...)` — `N`(정규장)/`Y`(시간외)/`X`(NXT 정규장). `get_daily_orders(exchange="ALL")` — KRX+NXT+SOR 합산 |
 | 보드 추상화 | `src/engine/session.py` `MarketBoard` enum: `pre_nxt`(NXT 프리 08:00~09:00) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00) + `SessionTracker` 30초 주기 tick + `register_board_handler` 콜백 |
-| 전략별 매매 가능 보드 | `DEFAULT_PARAMS["tradable_boards"]` — `momentum`: KRX_OPEN+MAIN / `volatility_breakout`·`long_tail_volatility`: PRE_NXT+MAIN+POST_NXT / `donchian_swing`: MAIN |
-| VB/LTV 보드별 K값 | `k_value_krx_main` / `k_value_nxt_pre` / `k_value_nxt_post` (기본 1.0). 보드별로 별도 시가/타겟 저장 (`_targets[ticker]["boards"][board]`) |
-| 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 즉시 청산 (`NEXT_DAY_STABILIZE_SECS=30`) |
-| 15:20 강제 청산 | KRX 메인 종목만 — `tradable_boards`에 POST_NXT가 있는 전략은 19:50 매수 중단까지 보유 유지 |
+| 전략별 매매 가능 보드 | `DEFAULT_PARAMS["tradable_boards"]` — `momentum`: KRX_OPEN+MAIN / `volatility_breakout`·`long_tail_volatility`: PRE_NXT+MAIN (2026-05-15 결함 D, POST_NXT 매수 비활성) / `donchian_swing`: MAIN |
+| VB/LTV 보드별 K값 | `k_value_krx_main` / `k_value_nxt_pre` (기본 1.0). `k_value_nxt_post` 키는 DB/AI자문 응답 호환 보존만, 실제 사용 안 함. 보드별 별도 시가/타겟 저장 (`_targets[ticker]["boards"][board]`) |
+| 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 즉시 청산 (`NEXT_DAY_STABILIZE_SECS=30`). 대상: `momentum`, `long_tail_volatility` 상한가 모드, `volatility_breakout` 안전망 |
+| 15:20 강제 청산 | `_force_clear_main_only` — `tradable_boards`에 POST_NXT가 있는 전략은 보유 유지 (현재는 해당 없음). **시간 가드 (2026-05-15 hotfix)**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 — 재시작 시점이 15:30 이후일 때 KRX 애프터 SOR 시장가 매도가 APBK3013 거부되던 사고 차단 |
+| donchian 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — 09:30~15:20 KRX 메인 시간대 60s 주기로 donchian `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
 
 ## API 엔드포인트
 
@@ -452,8 +453,8 @@ docker compose -f docker-compose.prod.yml up --build -d
 | 09:00:05 | KRX 메인 시가 확정 — VB/LTV `board="main"` 별도 시가 확정 → KRX 09:00 시가 + (전일Range × `k_value_krx_main`) target_price로 MAIN 매매 진입 |
 | 09:05~09:30 | 도치안 스윙(donchian) 진입창 — 시장가 1주문/종목, 갭 +3%↑ 스킵 |
 | 09:30 | 모멘텀(상한가) 종목 스캔 시작, 매수 감시. 5분 주기 `_scan_loop` 시작 — 모멘텀+돌파+스윙+보유 합집합 시세 재구독 |
-| 15:20 | KRX 메인 신규 매수 중단 + KRX 메인 강제 청산 (`_force_clear_main_only`) — `tradable_boards`에 POST_NXT가 있는 전략은 보유 유지. 도치안은 강제 청산 없음 |
-| 15:30 | KRX 메인 마감 → NXT 애프터(POST_NXT) 전환. 구독 유지 (POST_NXT 종목 시세 필요), VB/LTV가 POST_NXT에서 매매 계속 |
+| 15:20 | KRX 메인 신규 매수 중단 + KRX 메인 강제 청산 (`_force_clear_main_only`) — VB 전체 + LTV 상한가 미도달 청산. 도치안은 강제 청산 없음. 함수에 시간 가드(2026-05-15 hotfix) — 15:30 이후 재시작 시 호출 skip + 익일 청산 안전망 위임 |
+| 15:30 | KRX 메인 마감 → NXT 애프터(POST_NXT) 전환. 구독 유지 (LTV 상한가 모드 + donchian 보유 시세 필요). `_confirm_breakout_open_prices(board="post_nxt")` 호출 — VB/LTV POST_NXT 매수는 비활성이지만 보유 종목 손절 평가용 시가 확정 |
 | 19:50 | NXT 애프터 신규 매수 중단 + 전략수정 AI자문 생성 (OpenAI → `parameter_recommendations`) |
 | 20:00 | NXT 애프터 종료, WebSocket 구독 해제 |
 | 20:10 | 전략별 + 합산 일일 정산, DB 실적 기록. 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`) |
