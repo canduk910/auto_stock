@@ -30,9 +30,11 @@ from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscri
 from src.engine.session import MarketBoard, session_tracker
 from src.engine.strategy_base import Signal, StrategyConfig
 from src.engine.strategy_registry import StrategyRegistry
+from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
 from src.engine.strategies.momentum import MomentumStrategy
 from src.engine.strategies.donchian_swing import DonchianSwingStrategy
 from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
+from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.realtime.handler import (
     dispatch_message,
@@ -120,6 +122,22 @@ class TradingScheduler:
             weight=0.0,
         ))
         self.registry.register(ds)
+
+        bull = BullFlagBreakoutStrategy(StrategyConfig(
+            strategy_id="bull_flag_breakout",
+            name="눌림목 돌파",
+            enabled=False,
+            weight=0.0,
+        ))
+        self.registry.register(bull)
+
+        vcp = VcpBreakoutStrategy(StrategyConfig(
+            strategy_id="vcp_breakout",
+            name="변동성 수축 돌파",
+            enabled=False,
+            weight=0.0,
+        ))
+        self.registry.register(vcp)
 
         self.order_engine = OrderEngine(self.registry)
         self.risk_manager = RiskManager(self.registry, self.order_engine)

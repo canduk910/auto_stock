@@ -18,15 +18,22 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 ### 전략 D: 20일 신고가 스윙 (strategy_id: donchian_swing)
 일봉 종가가 20일 신고가 돌파 + 60일 EMA 우상향 + 거래대금 1.5배 → 다음 영업일 09:05 시장가 매수. ATR(14)×2 트레일링 청산 / 하드 -7% / 시간 청산 없음 / 평균 5~15 영업일 보유. **KRX 메인만 활성**(추세추종은 일중 변동성 필요).
 
+### 전략 E: 눌림목 돌파 (strategy_id: bull_flag_breakout)
+강한 상승(폴) 후 짧은 횡보·완만한 조정(플래그) 종목을 추적, 플래그 상단 재돌파 시 매수. **KRX 메인 09:05~13:00 한정**(`tradable_boards=("main",)`). "측정된 이동(measured move)" 익절 — 폴 폭만큼 가면 절반 청산, 잔여 ATR×2 트레일링. 손절 -5% 또는 플래그 하단 이탈. 모멘텀(+29% 폭발) 후속 진입로.
+
+### 전략 F: 변동성 수축 돌파 (strategy_id: vcp_breakout)
+미네르비니식 VCP(Volatility Contraction Pattern) — 추세 + Stage 2 확인 + 2~4회 pullback 점진 수축 + 거래량 수축 후 베이스 상단 돌파 시 매수. **KRX 메인 09:05~14:30 한정**. ATR(14)×2 트레일링 + 50일 EMA 이탈 청산. 손절 -7% 또는 베이스 하단 이탈. 시간 청산 없음(멀티데이). donchian_swing 정공법 보강(신고가 직진 추격 → VCP 는 베이스 + 변동성 수축 확인).
+
 ### 전략별 자금 비중
-- 프론트엔드 Settings 페이지에서 비중 조절 (예: momentum 25 / VB 35 / LTV 25 / donchian 15)
+- 프론트엔드 Settings 페이지에서 비중 조절 (예: momentum 25 / VB 35 / LTV 25 / donchian 15 / bull_flag 0 / vcp 0)
 - 총 자산을 비중에 따라 분배, 각 전략은 할당된 자금 내에서만 매매
 - 전략 간 동일 종목 중복 매수 방지 (보유 OR 주문중 OR 당일매도 통합 가드)
-- **매수 수량 1주 fallback (전략 잔여 자금 기준, 2026-05-11 P1 격상)**: `position_ratio × total_investment // current_price = 0`이라도 **전략 잔여 자금**이 1주 살 수 있으면 1주 매수. 4개 전략 동일 규칙.
+- **신규 2종(bull_flag_breakout / vcp_breakout) 디폴트 weight=0 + enabled=false**: 기존 4개 합계 1.0 유지, 운영자가 Settings 에서 수동 활성화 + 비중 재조정(`donchian_swing` 011 마이그레이션과 동일 패턴)
+- **매수 수량 1주 fallback (전략 잔여 자금 기준, 2026-05-11 P1 격상)**: `position_ratio × total_investment // current_price = 0`이라도 **전략 잔여 자금**이 1주 살 수 있으면 1주 매수. **6개 전략 동일 규칙**.
   - **잔여 자금 = `state.total_investment` − (해당 전략 보유 포지션 `buy_price×qty` 합계 + 해당 전략 `pending_buys` 매수 예정 금액 합계)**
   - 보유/주문중은 `strategy_id`로 격리 — 다른 전략 포지션은 자기 전략 사용액에 포함하지 않음
   - 결함 차단: 기존 로직은 `state.total_investment >= current_price`(고정 총액)와 비교 → 동일 전략이 이미 다른 종목에 자금 90% 점유해도 1주 추가 매수 → **전략 한도 초과**. 2026-05-11 운영 사고로 노출
-  - 구현: `StrategyBase._fallback_one_share(current_price)` 공통 헬퍼로 통합 — 4개 전략(`momentum`/`volatility_breakout`/`long_tail_volatility`/`donchian_swing`) 모두 동일 메서드 호출
+  - 구현: `StrategyBase._fallback_one_share(current_price)` 공통 헬퍼로 통합 — 6개 전략(`momentum`/`volatility_breakout`/`long_tail_volatility`/`donchian_swing`/`bull_flag_breakout`/`vcp_breakout`) 모두 동일 메서드 호출
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
 
 ### WebSocket 구독 가시성 (2026-05-12 G, 운영자 슬롯 추적)
@@ -87,7 +94,7 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 |---|---|---|
 | `pre_nxt` | NXT 프리 08:00~09:00 | VB / LTV |
 | `krx_open` | KRX 동시호가 08:30~09:00 | momentum |
-| `main` | KRX+NXT 메인 09:00~15:20 | momentum / VB / LTV / donchian_swing |
+| `main` | KRX+NXT 메인 09:00~15:20 | momentum / VB / LTV / donchian_swing / bull_flag_breakout / vcp_breakout |
 | `krx_after` | KRX 시간외 단일가 15:30~18:00 | (현재 미사용) |
 | `post_nxt` | NXT 애프터 15:30~20:00 | VB / LTV |
 
@@ -344,6 +351,235 @@ VB와 동일.
 ### 리스크 관리
 - 종목당 최대 투자: 할당 자금의 20%
 - 일일 최대 손실 한도: 할당 자금의 8%
+
+---
+
+## 6-E. 전략 E: 눌림목 돌파 (bull_flag_breakout) 상세
+
+### 개념
+강한 상승(폴, flag pole) 직후 짧은 횡보·완만한 조정(플래그) 후 플래그 상단을 재돌파하는 클래식 셋업.
+모멘텀 전략이 +29% 폭발 순간을 잡는다면, 본 전략은 그 후속 정리(소형 조정) 후 2차 상승 진입로를 담당한다.
+
+### 종목군
+- KOSPI + KOSDAQ 전체에서 사후 필터 (모멘텀과 동일한 등락률/거래량 순위 API 또는 일봉 사후 필터, backend-dev 판단)
+- **시가총액 ≥ 500억** (`min_market_cap`, 기본 50_000_000_000)
+- **20일 평균 거래대금 ≥ 20억** (`min_trade_amount`, 기본 2_000_000_000)
+- ETF/ETN 제외 (기존 키워드 컨벤션 재사용 — KODEX/TIGER/RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS/인버스/레버리지)
+- 최대 100종목 (`max_scan_stocks`)
+
+### 데이터 준비 (07:50 prepare)
+- 종목별 일봉 30일치(폴 10일 + 플래그 10일 + 여유 10일) — `fetch_daily_candles(ticker, days=30)`
+- `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드, VB/LTV/donchian 컨벤션 재사용)
+
+### 셋업 검증 (단계별 필터, prepare 시 통과 종목만 `_candidates`에 등록)
+**폴(Pole) 조건 — `pole_lookback_days=3~10`**:
+1. 직전 N영업일(3~10) 사이에 **누적 상승률 ≥ +20%** (`pole_min_return`, 기본 20.0)
+2. 같은 구간 **음봉 비율 ≤ 30%** (`pole_max_red_ratio`, 기본 0.30) — `close < open`인 일수 / 구간 길이
+3. 폴 구간 내 최고가 = `pole_high`, 폴 시작가 = `pole_start`, **폴 폭 = `pole_high - pole_start`**
+
+**플래그(Flag) 조건 — `flag_lookback_days=3~10`** (폴 종료 직후 N영업일):
+1. 플래그 구간 최고가 = `flag_high`, 최저가 = `flag_low`
+2. **조정 폭 ≤ 폴 폭의 38.2%** (`flag_retracement_max=0.382`, 피보 retracement) — `(pole_high - flag_low) <= (pole_high - pole_start) × 0.382`
+3. **플래그 평균 거래량 < 폴 평균 거래량 × 60%** (`flag_volume_ratio=0.60`) — 거래량 수축 확인
+4. 플래그 종가 추세는 강한 우하향이 아니어야 함 (마지막 종가가 flag_low 보다 0.5×ATR 이상 멀지 않을 것 — 일종의 sanity check, 정밀한 회귀선 검사는 1차에서 생략)
+
+검증 통과 시 `_candidates[ticker] = {pole_high, pole_low, pole_start, flag_high, flag_low, flag_avg_volume, atr14, prev_close}` 등록.
+
+### 매수 규칙
+- **진입 조건**: 현재가가 `flag_high`(플래그 상단) 돌파 순간 + 당일 거래량 ≥ `flag_avg_volume × 2.0` (`breakout_volume_mult=2.0`)
+  - 돌파 순간: `이전 틱 < flag_high AND 현재 틱 ≥ flag_high` (VB 컨벤션 — `_prev_price[ticker]` 추적)
+  - 거래량 컷: WebSocket tick 의 `acml_vol` 또는 분당 누적치 사용 — `scanner.ticker_prices[ticker]` 의 누적 거래량 필드 활용
+- **진입 시간대**: **09:05 ~ 13:00 KRX 메인** (`entry_start=09:05` / `entry_end=13:00`, 시간 가드)
+  - `tradable_boards=("main",)` — KRX 메인만, NXT 비활성(눌림목 패턴이 NXT 거래대금 부족으로 신뢰성 낮음)
+- **거래소 라우팅**: 기본 `KRX` (모의 호환). 실전에서 SOR 권장은 backend-dev 판단
+- **주문 방식**: 시장가
+- **투자 비중**: 할당 자금의 25% (`position_ratio=0.25`) — 1주 폴백 `_fallback_one_share()` 호출
+- **동시 보유**: 최대 4종목 (`max_positions=4`)
+- **종목당 1회만**: `_bought_today` set (donchian 컨벤션 재사용) — 진입 시도 즉시 add (체결 여부 무관)
+- **쿨다운**: 청산 후 **3영업일** (`reentry_cooldown_days=3`). DB `positions` 또는 `trade_history` 마지막 매도일 + 3 < today 면 재진입 허용. 1차 구현은 메모리 `_cooldown_until[ticker] = date` 로 단순화 가능 — 영속화는 backend-dev 판단
+
+### 청산 (3단계 — `check_exit_signal`)
+1. **하드 손절**: 매수가 -5% (`stop_loss_rate=-5.0`) → 즉시 시장가 매도 (Signal.STOP_LOSS)
+2. **플래그 하단 이탈 손절**: `current_price < flag_low` → Signal.STOP_LOSS
+3. **측정된 이동(measured move) — 절반 익절**:
+   - **타겟가** = `flag_high + (pole_high - pole_start)` (플래그 상단에서 폴 폭만큼 상승)
+   - 현재가 ≥ 타겟가 도달 순간 → **보유 수량의 50% 시장가 매도** (Signal.TRAILING_STOP 으로 보고 + 별도 부분 매도 라우팅)
+   - **부분 매도 미지원 시 1차 구현 단순화**: 전량 매도로 처리 후 향후 부분 매도 헬퍼 도입. backend-dev 판단 — `Position.quantity` 분할 매도 로직은 `order_engine.execute_sell(ticker, quantity=N)` 호출 시 `state.positions[ticker].quantity` 차감이 일관성 있게 처리되는지 검증 필요. **본 단계 디폴트는 전량 매도** (한 종목 = 한 청산)
+   - 절반 익절 처리 시 `_partial_exit[ticker]=True` 로 마킹 → 잔여 ATR 트레일링
+4. **잔여 ATR×2 트레일링**: `_partial_exit[ticker]==True` 분기에서 `current_price <= high_since_buy - ATR×2` → Signal.TRAILING_STOP (donchian 컨벤션 재사용)
+5. **시간 청산**: 진입 후 **5영업일 경과** 시 잔량 시장가 (`max_hold_days=5`) — `pos.buy_date + 5영업일 ≤ today` 판정 (KIS chk-holiday 활용 또는 단순 캘린더일 ±2 보정. 1차 구현은 단순 캘린더일 + 7 보정 가능, backend-dev 판단)
+
+### 매수 회전
+- 종목당 진입 1회 (`_bought_today` set)
+- 청산 후 **3영업일 쿨다운**
+- 신규 매수 차단 조건: `is_max_positions()` / `is_daily_loss_exceeded()` / `state.buy_disabled` / `registry.is_ticker_blocked_for_buy()`
+
+### 리스크 관리
+- 종목당 최대 투자: 할당 자금의 25%
+- 일일 최대 손실 한도: 할당 자금의 6% (`daily_loss_limit=-6.0`)
+- 동시 보유 종목 수: 최대 4종목
+
+### 기본 파라미터 (`DEFAULT_PARAMS`)
+```python
+DEFAULT_PARAMS = {
+    "tradable_boards": ["main"],
+    "exchange": "KRX",
+    # 폴
+    "pole_lookback_min": 3,
+    "pole_lookback_max": 10,
+    "pole_min_return": 20.0,
+    "pole_max_red_ratio": 0.30,
+    # 플래그
+    "flag_lookback_min": 3,
+    "flag_lookback_max": 10,
+    "flag_retracement_max": 0.382,
+    "flag_volume_ratio": 0.60,
+    # 매수
+    "breakout_volume_mult": 2.0,
+    "entry_start": "09:05",
+    "entry_end": "13:00",
+    "position_ratio": 0.25,
+    "max_positions": 4,
+    # 청산
+    "stop_loss_rate": -5.0,
+    "atr_period": 14,
+    "atr_trail_mult": 2.0,
+    "max_hold_days": 5,
+    "reentry_cooldown_days": 3,
+    # 유니버스
+    "min_market_cap": 50_000_000_000,
+    "min_trade_amount": 2_000_000_000,
+    "max_scan_stocks": 100,
+    # 일반
+    "daily_loss_limit": -6.0,
+}
+```
+
+### 운영 노트
+- VTS(모의) 검증 가능 — KRX 메인 한정이므로 SOR/NXT 의존성 없음
+- 셋업이 빈번하지 않은 패턴 — prepare 결과 0종목이 정상일 수도 있음. 0종목 ERROR 로그는 조건 완화 검토 신호로 사용
+- `_workspace/00_leader_trading_rules.md` 변경 시 `src/engine/CLAUDE.md`·`CLAUDE.md` 다중 전략 표 동기화
+
+---
+
+## 6-F. 전략 F: 변동성 수축 돌파 (vcp_breakout) 상세
+
+### 개념
+미네르비니식 VCP(Volatility Contraction Pattern). 상승 후 변동성이 단계적으로 축소되는 베이스(2~4회 pullback, 점진 수축) → 거래량 폭증 베이스 상단 돌파 시 매수.
+donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추종 보조 전략. VCP 는 베이스 + 변동성 수축 확인으로 후핵폐기를 줄인다.
+
+### 종목군
+- **코스피200 + 코스닥150 고정 유니버스 권장** (donchian 컨벤션 재사용 — `scanner.KOSPI_200_TICKERS + KOSDAQ_150_TICKERS`)
+- **시가총액 ≥ 1,000억** (`min_market_cap`, 기본 100_000_000_000)
+- **60일 평균 거래대금 ≥ 30억** (`min_trade_amount`, 기본 3_000_000_000)
+- ETF/ETN 제외
+- 최대 200종목 (`max_scan_stocks`)
+
+### 데이터 준비 (07:50 prepare)
+- 종목별 일봉 **220일** 가져오기 (200일 EMA + 여유 20일) — `fetch_daily_candles(ticker, days=220)`
+- `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드)
+
+### 추세 필터 (Stage 2 confirmation, prepare 시 단계별 검사)
+1. **종가 > 50일 EMA > 150일 EMA > 200일 EMA** (`ema_short=50`, `ema_mid=150`, `ema_long=200`)
+2. **200일 EMA 우상향 1개월 이상** — 현재 200일 EMA > 1개월 전(20영업일 전) 200일 EMA (`long_ema_uptrend_days=20`)
+3. 통과 종목만 다음 단계 검사
+
+### 베이스 정의 (`base_lookback_weeks=5~15` → 일봉 25~75영업일)
+1. 베이스 시작·종료 자동 검출: 최근 N영업일(75일) 내에서 `(highest_close - lowest_close) / lowest_close ≤ 0.25` 인 최장 연속 구간을 베이스로 인식 (`base_depth_max=0.25`)
+2. **베이스 깊이** = `(base_high - base_low) / base_high ≤ 30%` (`base_depth_pct=0.30`)
+3. 베이스 길이 = 25~75영업일 (`base_min_days=25`, `base_max_days=75`)
+
+### 조정 시퀀스 (Pullback Sequence, 점진 수축)
+1. 베이스 구간 내 pullback 자동 검출: 직전 swing high → swing low 까지의 하락 폭 → 다음 swing high 까지의 상승. `pullback_count_min=2`, `pullback_count_max=4`
+2. 각 pullback 폭 = `(swing_high - swing_low) / swing_high` (%)
+3. **각 pullback 폭이 직전 pullback 보다 작아야 함** (점진 수축, 변동성 contraction)
+4. **마지막 pullback ≤ 8%** (`last_pullback_max=0.08`)
+
+### 거래량 수축
+- 베이스 형성 중 **마지막 5일 평균 거래량 < 베이스 직전 20일 평균 거래량 × 70%** (`volume_contraction_ratio=0.70`)
+- 베이스 직전 20일 = 베이스 시작 직전 영업일들
+
+검증 통과 시 `_candidates[ticker] = {base_high, base_low, last_pullback_pct, atr14, ema50, ema150, ema200, prev_close}` 등록.
+
+### 매수 규칙
+- **진입 조건**: 현재가가 `base_high`(베이스 상단, `pivot_high`) 돌파 순간 + 당일 거래량 ≥ 20일 평균 × 1.5 (`breakout_volume_mult=1.5`)
+  - 돌파 순간: `이전 틱 < base_high AND 현재 틱 ≥ base_high` (VB 컨벤션)
+- **진입 시간대**: **09:05 ~ 14:30 KRX 메인** (`entry_start=09:05` / `entry_end=14:30`)
+  - `tradable_boards=("main",)`
+- **거래소 라우팅**: 기본 `KRX`
+- **주문 방식**: 시장가
+- **투자 비중**: 할당 자금의 20% (`position_ratio=0.20`) — 1주 폴백 `_fallback_one_share()`
+- **동시 보유**: 최대 5종목 (`max_positions=5`) — donchian 과 동일 수준
+- **종목당 1회만**: `_bought_today` set
+- **쿨다운**: 청산 후 **7영업일** (`reentry_cooldown_days=7`)
+
+### 청산 (멀티데이, 시간 청산 없음)
+1. **하드 손절**: 매수가 -7% (`stop_loss_rate=-7.0`) → Signal.STOP_LOSS
+2. **베이스 하단 이탈**: `current_price < base_low` → Signal.STOP_LOSS
+3. **ATR×2 트레일링 (Chandelier)**: `current_price <= high_since_buy - ATR×2` → Signal.TRAILING_STOP (donchian 컨벤션 재사용 — `_atr()` 헬퍼)
+4. **50일 EMA 이탈**: `current_price < ema50` (일봉 기준으로 매일 재계산되지만 1차 구현은 prepare 시점 `ema50` 그대로 사용 + 향후 매일 갱신 검토. backend-dev 판단) → Signal.TRAILING_STOP
+5. **시간 청산 없음 + 15:20 강제 청산 없음** — `check_force_clear() = []` (donchian 컨벤션, 멀티데이 보유)
+
+### 멀티데이 보유 영속화
+- `Position._MULTIDAY_STRATEGIES` frozenset 에 `vcp_breakout` 추가 — `is_next_day` 항상 False 반환 (OrderMonitor "청산" 배지 미표시, donchian I2 컨벤션)
+- DB `positions` 영속화로 일자 넘어 유지
+- `recompute_held_atr()` + `recompute_high_since_buy()` 동등 메커니즘 적용 (boot 시 일봉 fetch 로 ATR 재계산 + high_since_buy 폴백) — backend-dev 가 donchian 헬퍼 재사용 또는 vcp 별도 메서드 판단
+
+### 매수 회전
+- 종목당 진입 1회 (`_bought_today` set)
+- 청산 후 **7영업일 쿨다운**
+- 신규 매수 차단 조건: `is_max_positions()` / `is_daily_loss_exceeded()` / `state.buy_disabled` / `registry.is_ticker_blocked_for_buy()`
+
+### 리스크 관리
+- 종목당 최대 투자: 할당 자금의 20%
+- 일일 최대 손실 한도: 할당 자금의 8% (`daily_loss_limit=-8.0`)
+- 동시 보유 종목 수: 최대 5종목
+
+### 기본 파라미터 (`DEFAULT_PARAMS`)
+```python
+DEFAULT_PARAMS = {
+    "tradable_boards": ["main"],
+    "exchange": "KRX",
+    # 추세 필터
+    "ema_short": 50,
+    "ema_mid": 150,
+    "ema_long": 200,
+    "long_ema_uptrend_days": 20,
+    # 베이스
+    "base_min_days": 25,
+    "base_max_days": 75,
+    "base_depth_pct": 0.30,
+    # 조정 시퀀스
+    "pullback_count_min": 2,
+    "pullback_count_max": 4,
+    "last_pullback_max": 0.08,
+    # 거래량 수축
+    "volume_contraction_ratio": 0.70,
+    # 매수
+    "breakout_volume_mult": 1.5,
+    "entry_start": "09:05",
+    "entry_end": "14:30",
+    "position_ratio": 0.20,
+    "max_positions": 5,
+    # 청산
+    "stop_loss_rate": -7.0,
+    "atr_period": 14,
+    "atr_trail_mult": 2.0,
+    "reentry_cooldown_days": 7,
+    # 유니버스
+    "min_market_cap": 100_000_000_000,
+    "min_trade_amount": 3_000_000_000,
+    "max_scan_stocks": 200,
+    # 일반
+    "daily_loss_limit": -8.0,
+}
+```
+
+### 운영 노트
+- 미네르비니식 셋업은 빈번하지 않음 — 정상 운영에서도 일일 후보 0~5 종목이 정상
+- 멀티데이 보유 — donchian_swing 과 동일 부류, `_MULTIDAY_STRATEGIES` 멤버 등록 필수
+- VTS(모의) 검증 가능 — KRX 메인 한정
+- 추후 200일 EMA 갱신 빈도, base 자동 검출 알고리즘 정밀도는 운영 데이터 기반으로 튜닝
 
 ---
 

@@ -56,12 +56,16 @@ def contract_env(monkeypatch):
     from src.engine import scanner
 
     trading_scheduler._running = False
+    # 신규 추가된 전략은 마이그레이션상 enabled=false / weight=0 / 자금 0 으로 시작.
+    # 컨트랙트 테스트의 4-전략 시나리오(`total_asset = 100M × 4 = 400M` 가정)를 유지하기 위해
+    # 본 픽스처는 등록은 보존하되 자금 0 으로 격리한다 (운영 마이그레이션 011/018 컨벤션).
+    _INACTIVE_STRATEGY_IDS = {"bull_flag_breakout", "vcp_breakout"}
     for s in trading_scheduler.registry.all():
         s.state.positions.clear()
         s.state.pending_buys.clear()
         s.state.sold_today.clear()
         s.state.daily_realized_pnl = 0
-        s.state.total_investment = 100_000_000
+        s.state.total_investment = 0 if s.strategy_id in _INACTIVE_STRATEGY_IDS else 100_000_000
         s.state.buy_disabled = False
         s.state.buy_signals.clear()
         s.state.low_funds_tickers.clear()

@@ -61,6 +61,8 @@ const STRATEGY_NAMES: Record<string, string> = {
   volatility_breakout: '변동성돌파',
   long_tail_volatility: '롱테일 변동성',
   donchian_swing: '20일 신고가 스윙',
+  bull_flag_breakout: '눌림목 돌파',
+  vcp_breakout: '변동성 수축 돌파',
 }
 
 const columns = [
