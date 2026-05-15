@@ -757,8 +757,25 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                   </div>
                 )
               }
-              // 활성 보드 우선순위 — main > post_nxt > pre_nxt (전략 _resolve_active_board와 동일)
+              // 활성 보드 자동 결정 (PR-G P3, 2026-05-15):
+              // 1. 백엔드 응답 boards keys 가 1개면 그 키를 자동 활성 보드로 결정
+              //    — 시각 매핑 무관, 백엔드 의도 우선 (서버가 어느 보드 데이터를 보내는지가 진실)
+              // 2. boards keys 가 여러 개면 KST 시각 매핑 (기존: main > post_nxt > pre_nxt)
+              // 3. boards 빈 dict 또는 fallback 시에도 KST 시각 매핑 (기존 동작 보존)
+              // 결함 (사용자 화면 KST 19:40): POST_NXT 활성 시간인데 백엔드는 {post_nxt} 만
+              // 응답하는데 UI 가 시각 매핑으로 main 시도 → main 데이터 없어 "시가 대기" 종목 22개.
+              // 백엔드 응답 단일 키를 1순위로 인정해 자동 전환.
               const activeBoardCode = (() => {
+                // 종목 전체에서 사용된 boards 키 합집합 — 백엔드가 어떤 보드를 보내고 있는지 식별
+                const respBoardSet = new Set<string>()
+                for (const [, t] of targetEntries) {
+                  for (const b of Object.keys(t.boards ?? {})) respBoardSet.add(b)
+                }
+                // 응답이 단일 보드만 포함 → 자동 그 보드 선택 (시각 무관)
+                if (respBoardSet.size === 1) {
+                  return Array.from(respBoardSet)[0]
+                }
+                // 응답이 여러 보드 또는 빈 dict → KST 시각 매핑 fallback
                 const codes = activeBoards.map((b) => b.code)
                 for (const c of ['main', 'post_nxt', 'pre_nxt']) {
                   if (codes.includes(c)) return c
