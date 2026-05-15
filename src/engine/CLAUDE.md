@@ -63,6 +63,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 매수/매도 실행 + 체결통보 처리 + DB positions 영속화.
 
 매수 (`execute_buy`):
+- **PR-F (P2, 2026-05-15) — NXT 프리마켓 시장가 사전 차단 (preconvert)**: `place_order` 호출 *직전*, `session_tracker.active == frozenset({MarketBoard.PRE_NXT})` AND `buy_exchange in ("NXT", "SOR")` 면 시장가 거부(APBK0918 [프리마켓] 시장가 매매 불가) 100% 예측 → 사전에 `step_up(current_price, 5)` 지정가(`OrderDivision.LIMIT`) 로 변환해 발사. 변환 시 `state.pending_buy_amounts[ticker] = order_price * quantity` 동기 갱신, `record_price = order_price` 로 trade_history PENDING / `_pending_buy_orders` price 기록 — 정합성 유지. INFO 로그 `[market_order_preconvert_pre_nxt] ticker=... exchange=... current_price=... converted_to_limit_price=...` 1행. session_tracker 접근 예외는 swallow → 기존 사후 폴백(`is_market_order_disallowed`) 분기에서 자연 회복. MAIN 보드 / KRX 거래소 / 다른 보드 동시 활성 케이스는 시장가 그대로 (변환 안 함). 2026-05-15 08:00:34 064400 LTV 매수 사례 — 매번 시장가 거부 → 5호가 폴백 패턴의 운영 노이즈 사전 차단
 - 진입 시 `is_buy_blocked()` + `is_low_funds_blocked(ticker)` → 차단
 - 매수가능 캐시 (`BUYABLE_CACHE_TTL=60s`) — `get_buyable()` KIS 호출 매 틱 → 분당 1회
 - `max_buy_quantity<=0` 또는 `KisApiError(insufficient_cash)` → `block_buy(now+BUY_BLOCK_DURATION=900s)`
