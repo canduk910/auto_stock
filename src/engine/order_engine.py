@@ -227,7 +227,6 @@ class OrderEngine:
         )
 
         # PR-F (P2, 2026-05-15) — NXT 프리마켓 시장가 사전 차단.
-        # PR-F (P2, 2026-05-15) — NXT 프리마켓 시장가 사전 차단.
         # NXT 프리(08:00~09:00) 는 KIS 정책상 지정가만 허용. session_tracker.active 에
         # PRE_NXT 가 포함 + MAIN 미포함 + exchange in (NXT, SOR) 면 시장가 거부(APBK0918)
         # 100% 예측 → 사전에 step_up(current_price, 5) 지정가로 변환.

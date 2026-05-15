@@ -381,23 +381,32 @@ async def test_execute_buy_when_insufficient_cash_then_pending_amount_cleared(
 # - NXT 프리(08:00~09:00) 는 KIS 정책상 지정가만 허용
 # - 매번 시장가 → 거부 → 5호가 폴백 패턴 (폴백 자체는 정상이지만 운영 노이즈)
 #
-# Fix 사양:
-#   `place_order` 직전, `session_tracker.active == {pre_nxt}` AND `exchange in (NXT, SOR)` 면
-#   사전에 `step_up(current_price, 5)` 지정가로 변환해 발사 — APBK0918 거부 자체를 차단.
+# Fix 사양 (PR #9 Codex P2 보강):
+#   `place_order` 직전, `MarketBoard.PRE_NXT in session_tracker.active`
+#   AND `MarketBoard.MAIN not in session_tracker.active`
+#   AND `exchange in (NXT, SOR)` 면 사전에 `step_up(current_price, 5)` 지정가로
+#   변환해 발사 — APBK0918 거부 자체를 차단. exact equality 대신 membership
+#   체크로 08:30~09:00 KRX_OPEN 동시 활성 시간대도 커버.
 #   기존 사후 폴백 분기는 보존(다른 거부 사유 대응).
 # ---------------------------------------------------------------------------
 @pytest.fixture
-def _patch_session_active(monkeypatch):
-    """src.engine.session.session_tracker._active 를 강제 설정하는 fixture factory."""
+def _patch_session_active():
+    """src.engine.session.session_tracker._active 를 강제 설정 + 이전 값 복원.
+
+    PR #9 Copilot 보강: teardown 시 이전 값 capture/restore — 다른 테스트가
+    이미 _active 를 변경했어도 안전하게 원복.
+    """
     from src.engine import session as _session
     from src.engine.session import MarketBoard
+
+    prev_active = _session.session_tracker._active
 
     def _set(boards: set[MarketBoard]) -> None:
         _session.session_tracker._active = frozenset(boards)
 
     yield _set, MarketBoard
-    # 테스트 종료 후 원복
-    _session.session_tracker._active = frozenset()
+    # 테스트 종료 후 이전 값으로 복원 — frozenset() 강제 reset 안 함
+    _session.session_tracker._active = prev_active
 
 
 # NOTE: 미사용 + asyncio.run() 이 @pytest.mark.asyncio 안에서 호출되면
