@@ -24,8 +24,13 @@ async def upsert_daily_performance(
 ) -> None:
     """일일 실적을 저장(upsert)한다.
 
-    daily_profit_rate: 평가손익 기반 일별 수익률 (호환성 유지).
-    cumulative_return_rate: TWR 복리 누적 수익률 (실현손익 기반).
+    daily_realized_pnl: **실현손익 기준** — `SUM(trade_history.SELL.profit_loss)` 매도 실현분만.
+        매도가 없는 날은 0 (보유 평가손익은 포함하지 않음). 운영 보고도 동일 기준.
+    daily_profit_rate: **실현손익 기준** — `daily_realized_pnl / 직전 영업일 total_asset * 100`.
+        매도 0건이면 0% 정상 동작 (평가손익 변동은 반영되지 않음). 컬럼명에 "평가"가
+        들어가지 않은 이유는 실제 RPC `recompute_daily_performance()`가 실현분만 산출하기
+        때문 (2026-05-15 정책 결정 — 컬럼 의미 명시화).
+    cumulative_return_rate: TWR 복리 누적 수익률 (실현손익 기반, daily_profit_rate 사용).
     """
     data = {
         "date": target_date.isoformat(),

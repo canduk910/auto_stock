@@ -15,7 +15,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 - `get_today_buy_trades / get_today_sell_trades / get_today_pending_buys`: today 기준 same-day 매수/매도/PENDING 조회. **L5(2026-05-12)**: 쿼리 기준점 `f"{today}T00:00:00+09:00"` 로 KST timezone 명시 (이전 timezone-naive → PostgreSQL TIMESTAMPTZ UTC 해석 결함 → KST 09시 이전 기록이 same-day 쿼리에서 누락되던 결함 차단. 2026-05-12 005930 보완 INSERT 사고 대응)
 
 ### daily_performance.py — 일일 실적
-- `upsert_daily_performance()`: 16:10 정산 시 당일 실적 기록 (total_asset, daily_profit_rate=실현손익 기반, daily_realized_pnl, net_external_cashflow, deposit, cumulative_return_rate=TWR 복리)
+- `upsert_daily_performance()`: 16:10 정산 시 당일 실적 기록. `daily_realized_pnl`/`daily_profit_rate` 모두 **실현손익 기준**(SELL 매도 실현분만 합산). 매도 0건인 날은 둘 다 0 정상 — 보유 평가손익 변동은 포함 안 함(2026-05-15 정책 명시화). 평가손익은 `BalanceTable.eval_profit_loss`(실시간 KIS 잔고 응답) 으로 별도 표시. 컬럼: total_asset, daily_profit_rate, daily_realized_pnl, net_external_cashflow, deposit, cumulative_return_rate(TWR 복리, 실현손익 누적)
 - `get_performance(days)`: 최근 N일 실적 조회 (날짜 오름차순)
 - `get_latest_performance(strategy)`: 가장 최근 영업일 1행 — TWR 누적/Δ예수금 baseline
 - `recompute_from_trades()`: PostgreSQL 함수 `recompute_daily_performance()` RPC 호출 — trade_history 기반 일괄 재계산 (멱등). _settle() 끝에서 자동 호출되어 누락된 영업일/cumulative 정합성을 보정한다. daily_profit_rate 분모(prev_asset)는 직전 영업일이 아니라 **가장 가까운 0이 아닌 이전 영업일 total_asset**(correlated subquery, migration 012). 정산 시점 state.total_investment=0이라 total_asset=0이 기록된 row가 있어도 그 다음 영업일 비율 계산이 깨지지 않는다.
