@@ -6,6 +6,7 @@ import { getStrategyColor } from '../types/strategy'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
 import InfoTooltip from '../components/InfoTooltip'
 import ConfirmModal from '../components/ConfirmModal'
+import BacktestComparisonCard from '../components/recommendations/BacktestComparisonCard'
 import type { RecommendationItem, RecommendationStatus, RecommendationMetrics } from '../types/recommendations'
 
 const STATUS_LABEL: Record<RecommendationStatus, string> = {
@@ -351,6 +352,12 @@ export default function Recommendations() {
                           {STATUS_LABEL[rec.status]}
                         </span>
                       </div>
+
+                      {/* Phase 4 (2026-05-16) — 백테스트 비교 카드. summary 없으면 placeholder, 자기 전략 폴백이면 안내 */}
+                      <BacktestComparisonCard
+                        strategyId={rec.strategy_id}
+                        summary={rec.backtest_summary ?? null}
+                      />
 
                       {/* 분석 통계 */}
                       {rec.metrics && (

@@ -1,3 +1,5 @@
+import type { BacktestSummary } from './backtest'
+
 export type RecommendationStatus = 'pending' | 'applied' | 'rejected' | 'partial' | 'expired'
 
 export interface RecommendationMetrics {
@@ -37,4 +39,8 @@ export interface RecommendationItem {
   recommended_weight?: number | null  // AI 추천 전략 weight (0.0~1.0). null = 변경 권고 없음
   code_review_notes?: string | null    // 로직/파라미터 자유 텍스트 자문 (최대 2000자)
   applied_weight?: number | null       // 사용자가 apply 시점에 실제 적용한 weight (트래킹)
+  // Phase 4 (2026-05-16) — 백테스트 검증
+  // null 인 경우: KIS_MCP_ENABLED=false / 진행중 / 폴 실패 / 24h timeout
+  // 자기 전략 두 row(current/recommended) 모두 종료 상태일 때만 동봉
+  backtest_summary?: BacktestSummary | null
 }
