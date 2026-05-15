@@ -226,23 +226,57 @@ class OrderEngine:
             strategy.strategy_id, ticker=ticker
         )
 
+        # PR-F (P2, 2026-05-15) — NXT 프리마켓 시장가 사전 차단.
+        # NXT 프리(08:00~09:00) 는 KIS 정책상 지정가만 허용. session_tracker.active 가
+        # `{pre_nxt}` 단독 + exchange in (NXT, SOR) 면 시장가 거부(APBK0918) 100% 예측 →
+        # 사전에 step_up(current_price, 5) 지정가로 변환. 사후 폴백 분기는 보존(다른 사유).
+        # 결함 (운영 로그 2026-05-15 08:00:34): 064400 [APBK0918] [프리마켓] 시장가 매매 불가
+        order_division = OrderDivision.MARKET
+        order_price = 0
         try:
-            result = await place_order(
+            from src.engine.session import MarketBoard, session_tracker
+            active_boards = session_tracker.active
+            is_pre_nxt_only = active_boards == frozenset({MarketBoard.PRE_NXT})
+            if is_pre_nxt_only and buy_exchange in ("NXT", "SOR"):
+                order_price = step_up(current_price, steps=5)
+                order_division = OrderDivision.LIMIT
+                logger.info(
+                    "[market_order_preconvert_pre_nxt] ticker=%s exchange=%s "
+                    "current_price=%d converted_to_limit_price=%d",
+                    ticker, buy_exchange, current_price, order_price,
+                )
+                # pending_buy_amounts 도 변환된 가격 기준으로 동기 갱신 (1주 폴백 잔여 자금 정합성)
+                state.pending_buy_amounts[ticker] = order_price * quantity
+        except Exception:
+            # 사전 차단 실패는 swallow — 기존 사후 폴백 분기에서 자연 회복.
+            # session import / session_tracker 접근 예외가 매수 흐름 자체를 막으면 안 됨.
+            logger.debug("[market_order_preconvert_pre_nxt] 사전 변환 평가 실패", exc_info=True)
+            order_division = OrderDivision.MARKET
+            order_price = 0
+
+        try:
+            # order_division 키워드는 MARKET 일 때 생략 가능하지만 LIMIT 일 때 명시 필수.
+            place_kwargs = dict(
                 ticker=ticker,
                 side=OrderSide.BUY,
                 quantity=quantity,
-                price=0,  # 시장가
+                price=order_price,
                 exchange=buy_exchange,
             )
+            if order_division == OrderDivision.LIMIT:
+                place_kwargs["order_division"] = OrderDivision.LIMIT
+            result = await place_order(**place_kwargs)
 
             # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
             # 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 매핑이 보장된다.
+            # PR-F: 사전 변환된 경우 record_price 는 변환 가격(order_price), 시장가 경로면 current_price.
+            record_price = order_price if order_division == OrderDivision.LIMIT else current_price
             self._order_qty[result.order_no] = quantity
             self._order_strategy[result.order_no] = strategy.strategy_id
             self._order_ticker[result.order_no] = ticker
             self._pending_buy_orders[result.order_no] = {
                 "ticker": ticker,
-                "price": current_price,
+                "price": record_price,
                 "quantity": quantity,
                 "strategy_id": strategy.strategy_id,
             }
@@ -261,7 +295,7 @@ class OrderEngine:
                     ticker=ticker,
                     ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
                     trade_type=TradeType.BUY,
-                    price=current_price,
+                    price=record_price,
                     quantity=quantity,
                     status=TradeStatus.PENDING,
                     strategy=strategy.strategy_id,
@@ -270,7 +304,7 @@ class OrderEngine:
                 await insert_trade(record)
 
             logger.info("매수 주문 접수: %s %d주 @ %d (주문번호: %s, 전략: %s)",
-                         t(ticker), quantity, current_price, result.order_no, strategy.strategy_id)
+                         t(ticker), quantity, record_price, result.order_no, strategy.strategy_id)
             # 매수 접수 직후 캐시 무효화 — 다음 매수 호출 시 fresh 조회로 가용액 재산정
             state.cached_buyable_at = 0.0
 
