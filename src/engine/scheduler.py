@@ -907,6 +907,24 @@ class TradingScheduler:
                 return states.get(board, False)
             return bool(states)
 
+        # PR-H (P4, 2026-05-15) — idempotent 강화: 모든 종목이 이미 해당 board 로 confirmed 면
+        # 1차 폴링 / 2차 KIS API 폴백 / 종합 INFO 로그 / `_emit_breakout_open_confirm` 모두 skip.
+        # 결함: 운영 로그 15:30~16:39 동안 LTV 만 4번 시가 재확정 (VB 1회) — 진단 결과
+        # `_scanned_tickers` 빈 케이스에서 `_reprepare_breakout_if_empty` 가 LTV 만 발화
+        # → prepare 가 `_open_confirmed[ticker]={}` reset → 시가 재확정 호출 → 매번 INFO 로그.
+        # 모두 confirmed 인 호출은 KIS Rate Limit + 운영 가시성 노이즈 모두 차단.
+        all_already_confirmed = all(
+            _is_confirmed(strategy, ticker)
+            for _, strategy, tickers in targets
+            for ticker in tickers
+        )
+        if all_already_confirmed:
+            logger.debug(
+                "[confirm_open_prices_skip] board=%s — 모든 대상 종목이 이미 confirmed (idempotent)",
+                board,
+            )
+            return
+
         # 1차: WebSocket 폴링
         elapsed = 0.0
         while elapsed < max_wait_s:
