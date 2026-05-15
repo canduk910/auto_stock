@@ -55,9 +55,9 @@ TIME_KRX_OPEN_CONFIRM = time(9, 0, 5)      # KRX 메인 시가 확정 → VB/LTV
 TIME_SCAN_START = time(9, 30)              # 모멘텀 스캔
 TIME_KRX_MAIN_BUY_STOP = time(15, 20)      # KRX 메인 신규 매수 중단 + 강제 청산
 TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 → NXT 애프터 전환
-TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단
-TIME_RECOMMENDATION = time(19, 50)         # AI자문 (NXT 애프터 종료 직전)
-TIME_NXT_POST_CLOSE = time(20, 0)          # NXT 애프터 종료, unsubscribe
+TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
+TIME_RECOMMENDATION = time(20, 0)          # AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동 — 백테스트 검증 정합성)
+TIME_NXT_POST_CLOSE = time(20, 0)          # NXT 애프터 종료, unsubscribe (자문과 동시 발화, 백그라운드 task 분리)
 TIME_SETTLEMENT = time(20, 10)             # 정산 + 일일 로그 분석
 SCAN_INTERVAL = 300                         # 5분마다 스캔
 SESSION_TICK_INTERVAL = 30                  # 보드 전환 감시 주기 (초)
@@ -412,17 +412,28 @@ class TradingScheduler:
             if scan_task is None or scan_task.done():
                 scan_task = asyncio.create_task(self._scan_loop())
 
-            # 19:50 NXT 애프터 신규 매수 중단 + AI자문
+            # 19:50 NXT 애프터 신규 매수 중단 (자문 호출은 20:00 으로 이동 — Phase 0, 2026-05-15)
             await self._wait_until(TIME_NXT_POST_BUY_STOP)
             self._phase = "post_nxt_stopped"
             for s in self.registry.enabled():
                 s.state.buy_disabled = True
             await write_log("INFO", "19:50 NXT 애프터 매수 중단")
 
+            # 20:00 NXT 애프터 종료 + AI자문 (둘 다 동시 발화, 백그라운드 task 로 race 회피)
+            await self._wait_until(TIME_NXT_POST_CLOSE)
+            self._phase = "closing"
+            if scan_task and not scan_task.done():
+                scan_task.cancel()
+            await unsubscribe_all()
+            await write_log("INFO", "20:00 NXT 애프터 종료, 구독 해제")
+
+            # 20:00 전략수정 AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동)
+            # - 백테스트 검증 정합성 사전 확보 (Phase 3 에서 외부 MCP 백테스트 enqueue)
+            # - settlement(20:10) 와 10분 간격 — OpenAI 호출(전략당 30s × 6 = 3분) 수용 마진
             try:
                 from src.engine.recommendation_engine import generate_recommendations
                 await generate_recommendations()
-                await write_log("INFO", "19:50 전략수정 AI자문 생성 완료")
+                await write_log("INFO", "20:00 전략수정 AI자문 생성 완료")
             except Exception as e:
                 import traceback
                 logger.exception("전략수정 AI자문 생성 실패")
@@ -432,14 +443,6 @@ class TradingScheduler:
                     "ERROR",
                     f"전략수정 AI자문 생성 실패: type={type(e).__name__} msg={e!s} trace={tb[:1000]}",
                 )
-
-            # 20:00 NXT 애프터 종료, unsubscribe
-            await self._wait_until(TIME_NXT_POST_CLOSE)
-            self._phase = "closing"
-            if scan_task and not scan_task.done():
-                scan_task.cancel()
-            await unsubscribe_all()
-            await write_log("INFO", "20:00 NXT 애프터 종료, 구독 해제")
 
             # 20:10 정산
             await self._wait_until(TIME_SETTLEMENT)

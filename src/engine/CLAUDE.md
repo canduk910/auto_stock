@@ -11,7 +11,7 @@ session.py(MarketBoard, SessionTracker)
 risk.py(on_tick) → order_engine.py(체결통보·DB persistence) → scheduler.py(시간 가드·boot/run/settle)
 scanner.py(종목 스캔/구독/STATIC_TICKER_NAMES)
 util/tick_size.py(KRX 7구간 호가단위 헬퍼 — `get_tick_size` / `round_to_tick` / `step_down`)
-recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
+recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
 ## strategy_base.py
@@ -121,8 +121,8 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 | `TIME_SCAN_START` | 09:30 | 모멘텀 `scan_stocks()` + 통합 구독 |
 | `TIME_KRX_MAIN_BUY_STOP` | 15:20 | `_force_clear_main_only` — POST_NXT 미활성 전략만 청산, 활성 전략은 19:50까지 보유 |
 | `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감 → NXT 애프터 전환, 구독 유지. **`_confirm_breakout_open_prices(board="post_nxt")` 명시 호출 (M, 2026-05-12)** — POST_NXT 시점엔 자동 결정(main 우선)이 SessionTracker 전환 race 가능. 누락 시 VB/LTV 후보의 `_targets[t]["boards"]["post_nxt"]["open_price"]` 영영 비어 "시가 대기" 좀비 잠복 (2026-05-12 사용자 보고 6종목 사례) |
-| `TIME_NXT_POST_BUY_STOP` / `TIME_RECOMMENDATION` | 19:50 | `buy_disabled = True` + `generate_recommendations()` |
-| `TIME_NXT_POST_CLOSE` | 20:00 | `unsubscribe_all()` |
+| `TIME_NXT_POST_BUY_STOP` | 19:50 | `buy_disabled = True` (NXT 애프터 신규 매수 중단 안전 마감, 변경 금지) |
+| `TIME_NXT_POST_CLOSE` / `TIME_RECOMMENDATION` | 20:00 | `unsubscribe_all()` + `generate_recommendations()` — 동기 await 순차 (자문 ~3분, settlement 20:10 까지 7분 여유). **Phase 0 (2026-05-15)**: 자문 시점 19:50 → 20:00 이동 — Phase 3 백테스트 검증 정합성 사전 확보 |
 | `TIME_SETTLEMENT` | 20:10 | `_settle()` → `generate_daily_log_report()` → `_reset_daily_state()` 순서. **퍼널 카운터 초기화는 분석 *후*** (분석이 0을 수집하지 않도록 분리) |
 
 기타:
@@ -164,7 +164,7 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 
 출력 스키마: `{summary, findings: [{category, severity, title, detail, suggestion}]}`. `(target_date)` UNIQUE → 동일 영업일 재실행 시 None. OpenAI 타임아웃 60s, 실패 시 메트릭만 보존 INSERT.
 
-## recommendation_engine.py / recommendation_metrics.py — 19:50 AI자문
+## recommendation_engine.py / recommendation_metrics.py — 20:00 AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동)
 
 - 전략별 metrics(승률/평균손익/손절률/누적수익률) → OpenAI → `parameter_recommendations` INSERT (status: pending)
 - `(target_date, strategy_id)` UNIQUE

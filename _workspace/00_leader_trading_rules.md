@@ -622,8 +622,8 @@ DEFAULT_PARAMS = {
 | 09:30 | 모멘텀 종목 스캔 시작. 5분 주기 `_scan_loop` 시작(돌파+스윙+보유 합집합 재구독) |
 | 15:20 | KRX 메인 신규 매수 중단 + KRX 메인 강제 청산(`_force_clear_main_only`) — POST_NXT 활성 전략 종목은 보유 유지 |
 | 15:30 | KRX 메인 마감 → NXT 애프터 전환. VB/LTV는 POST_NXT에서 매매 계속 |
-| 19:50 | NXT 애프터 신규 매수 중단 + 전략수정 AI자문 생성(OpenAI → `parameter_recommendations`) |
-| 20:00 | NXT 애프터 종료, WebSocket 구독 해제 |
+| 19:50 | NXT 애프터 신규 매수 중단 (`buy_disabled = True`. 자문은 20:00 으로 이동, Phase 0/2026-05-15) |
+| 20:00 | NXT 애프터 종료(WebSocket 구독 해제) + 전략수정 AI자문 생성(OpenAI → `parameter_recommendations`). 동기 순차 실행 — 자문 ~3분, settlement 20:10 까지 7분 여유 |
 | 20:10 | 전략별 + 합산 일일 정산, daily_performance 기록, 일일 로그 분석 리포트 생성(OpenAI → `daily_log_reports`), 프로세스 Sleep |
 
 ### 야간 매매(POST_NXT 15:30~20:00) 운용 원칙 — Q3=A 활성
@@ -659,9 +659,9 @@ DEFAULT_PARAMS = {
 | `TIME_SCAN_START` | 09:30 | 모멘텀 스캔 |
 | `TIME_KRX_MAIN_BUY_STOP` | 15:20 | KRX 메인 매수 중단 + 강제 청산 |
 | `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감 → NXT 애프터 전환 |
-| `TIME_NXT_POST_BUY_STOP` | 19:50 | NXT 애프터 매수 중단 |
-| `TIME_RECOMMENDATION` | 19:50 | AI자문 생성 |
+| `TIME_NXT_POST_BUY_STOP` | 19:50 | NXT 애프터 매수 중단 (안전 마감, 변경 금지) |
 | `TIME_NXT_POST_CLOSE` | 20:00 | NXT 애프터 종료, unsubscribe |
+| `TIME_RECOMMENDATION` | 20:00 | AI자문 생성 (Phase 0, 2026-05-15: 19:50 → 20:00 이동, 백테스트 검증 정합성) |
 | `TIME_SETTLEMENT` | 20:10 | 정산 + 일일 로그 분석 |
 | `NEXT_DAY_STABILIZE_SECS` | 30 | 익일 청산 NXT 프리 시가 안정화 |
 | `SESSION_TICK_INTERVAL` | 30 | SessionTracker 보드 전환 감시 주기 |
@@ -675,7 +675,7 @@ DEFAULT_PARAMS = {
 
 ### AI자문 고도화 (Phase J4, 2026-05-12)
 
-기존 19:50 AI자문은 `recommended_params` 화이트리스트 키만 권고했으나, **전략별 자산배정(weight)** 과 **로직/파라미터 추가·삭제** 같은 구조적 변경은 권고 채널이 없었다. J4 에서 두 채널을 신설하되 **자동 적용은 절대 없음** — 모두 운영자 수동 검토 후 명시적 apply.
+기존 AI자문(Phase 0 이후 20:00 발화)은 `recommended_params` 화이트리스트 키만 권고했으나, **전략별 자산배정(weight)** 과 **로직/파라미터 추가·삭제** 같은 구조적 변경은 권고 채널이 없었다. J4 에서 두 채널을 신설하되 **자동 적용은 절대 없음** — 모두 운영자 수동 검토 후 명시적 apply.
 
 **DB 스키마 확장 (`parameter_recommendations`)**:
 - `recommended_weight NUMERIC` — AI 추천 전략 weight (0.0~1.0). null = 변경 권고 없음
