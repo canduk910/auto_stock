@@ -23,6 +23,18 @@ export const STRATEGY_COLORS: Record<string, { bg: string; text: string; badge: 
     badge: 'bg-emerald-100 text-emerald-700',
     hex: '#10B981',
   },
+  bull_flag_breakout: {
+    bg: 'bg-pink-50',
+    text: 'text-pink-700',
+    badge: 'bg-pink-100 text-pink-700',
+    hex: '#EC4899',
+  },
+  vcp_breakout: {
+    bg: 'bg-cyan-50',
+    text: 'text-cyan-700',
+    badge: 'bg-cyan-100 text-cyan-700',
+    hex: '#06B6D4',
+  },
 }
 
 const DEFAULT_COLOR = {
