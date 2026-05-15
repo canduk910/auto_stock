@@ -79,6 +79,9 @@ cd frontend && npm install && npm run dev
 
 전략 동작·보드별 K값 분리·익일 청산 안정화·자금 락·라우팅 등 상세는 **`src/engine/CLAUDE.md`**.
 
+### 외부 백테스트 서버 통합 사이클 (2026-05-16 Phase 0~5)
+20:00 AI 자문 INSERT 직후 외부 MCP 백테스트 서버(`http://43.202.187.5:3846/mcp`)에 6 전략 × 2 kind=12 job 을 fire-and-forget 으로 제출하여 `parameter_recommendations.backtest_summary` JSONB 에 동봉. (a) 외부 YAML DSL 표현 가능 3종(momentum/VB/donchian) / (b) 폴백 대기 3종(LTV/bull_flag/vcp). `KIS_MCP_ENABLED=false` 또는 외부 서버 다운 시 graceful degrade — 자문 INSERT 보존, summary=null. 운영 가이드는 [`docs/backtest-monitoring.md`](docs/backtest-monitoring.md).
+
 ### 새 전략 추가
 1. `src/engine/strategies/`에 StrategyBase 서브클래스 (prepare/check_buy_signal/check_exit_signal/calc_buy_quantity)
 2. `src/engine/scheduler.py` `__init__`에서 `registry.register()`

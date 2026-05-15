@@ -78,8 +78,10 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - 같은 `(tr_id, tr_key)` 에 대해 거절 응답 2회 → discard 멱등 안전
   - E1 우선순위 큐 / `MAX_SUBSCRIPTIONS=41` / `bypass_limit` 분기 — 영향 없음
 
-### 외부 백테스트 서버 통합 (2026-05-15 Phase 1 — MCP 클라이언트 + 헬스체크)
-20:00 AI 자문 단계에 OpenAI 제안값을 외부 백테스트 서버로 검증하는 사이클의 기반 인프라. Phase 1 은 클라이언트 + 헬스체크만, Phase 2 이후 백테스트 엔진/DB/UI 확장.
+### 외부 백테스트 서버 통합 (2026-05-15 ~ 2026-05-16 Phase 0~5)
+20:00 AI 자문 단계에 OpenAI 제안값을 외부 백테스트 서버로 검증하는 사이클. Phase 0(시간 이동) → 1(클라이언트) → 2(엔진+YAML+마이그 019) → 3(자문 합류+마이그 020) → 4(UI 카드) → 5(회귀 가드+모니터링 가이드) 완료. 운영 모니터링 진단 절차는 [`docs/backtest-monitoring.md`](../docs/backtest-monitoring.md).
+
+#### Phase 1 (2026-05-15) — MCP 클라이언트 + 헬스체크
 
 - **외부 서버**: `http://43.202.187.5:3846/mcp` (AWS EC2 ap-northeast-2, stock-manager 운영). 프로토콜 JSON-RPC 2.0 over Streamable HTTP/SSE (MCP 2025-03-26). 인증 없음 — IP 화이트리스트만 (auto_stock 운영 EC2 IP 이미 허용)
 - **운영 토글**: `KIS_MCP_ENABLED=false` (기본) 면 모든 외부 호출 차단. 운영 EC2 `.env` 에서 `true` 로 켤 때만 백테스트 발화. **자동매매 핵심 흐름(scheduler/order_engine/risk) 격리** — 본 모듈 다운/네트워크 단절 시 graceful degrade, 운영 영향 0
@@ -98,6 +100,68 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - **사후 보호 의무 (Phase 2+ 에 인계)**:
   - 백테스트 결과를 자동매매 파라미터에 **자동 반영 절대 금지** — 운영자가 Settings 에서 명시 적용(`apply_weight` J4 패턴 차용) 만 허용
   - 백테스트 task 가 settlement 20:10 와 race 가능 — fire-and-forget 별도 task + 자체 폴링. settlement 의 `_reset_daily_state()` 에서 task cancel 의무
+
+#### Phase 2 (2026-05-15) — BacktestEngine + 6 전략 YAML DSL + 마이그 019
+- **`BacktestEngine`** (`src/engine/backtest_engine.py`): submit(`run_for_strategy`) → poll(`poll(job_id)` / `wait_for_result`) 분리. 응답 unwrap 헬퍼로 `{success, data}` 또는 직접 dict 모두 지원. 모듈 레벨 싱글톤 `get_backtest_engine()`
+- **6 전략 분류** (`src/engine/backtest_yaml.py::build_yaml`):
+  - **(a) 외부 YAML DSL 표현 가능 3종** — `momentum`(ROC1 > 임계) / `volatility_breakout`(ATR(k) + close cross_above prev_high) / `donchian_swing`(maximum(high,20) + EMA(60) + ATR 트레일링)
+  - **(b) 표현 불가 3종 — `BacktestNotSupportedError` raise** — `long_tail_volatility`(상한가 모드 전환 미표현) / `bull_flag_breakout`(폴/플래그 자동 검출) / `vcp_breakout`(베이스 + 변동성 수축 + swing high/low). Phase 4-bis 로컬 어댑터 위임
+- **DB 영속화** — `supabase/migrations/019_backtest_runs.sql`: `(target_date, strategy_id, params_kind=current|recommended)` UNIQUE. `params_snapshot JSONB`, `metrics JSONB`, `status` ∈ {queued, running, completed, failed, skipped}, `mcp_job_id`, `error_message`. `src/db/backtest_runs.py` CRUD (`insert_run / update_status / list_by_date`)
+- **디폴트 universe** — 코스피200 대표 5 종목 (`005930` 삼성전자 / `000660` SK하이닉스 / `035420` NAVER / `005380` 현대차 / `051910` LG화학) — 외부 서버 캐시 적중률 + 다양성 확보
+- **백테스트 기간 90일** — 통계 충분 + 외부 서버 부하 균형
+- **회귀 가드**: `tests/unit/engine/test_backtest_engine.py` + `test_backtest_yaml.py` + `tests/unit/db/test_backtest_runs.py`
+
+#### Phase 3 (2026-05-15) — 20:00 자문 ↔ 백테스트 통합 + 마이그 020
+- **흐름** (`src/engine/recommendation_engine.py::generate_recommendations`):
+  1. 자문 INSERT 6 row (기존 OpenAI 결과)
+  2. `_enqueue_backtest_jobs(target_date, inserted)` 동기 await — 12 backtest_runs INSERT (6 전략 × 2 kind)
+  3. (a) 전략은 `engine.run_for_strategy` 호출 → `mcp_job_id` 받아 `running` 전이
+  4. (b) 전략은 즉시 `skipped` + 사유 "YAML DSL 미지원 (Phase 4-bis 로컬 어댑터 대기)"
+  5. `KIS_MCP_ENABLED=false` 면 (a) 도 즉시 `skipped` + 사유 "MCP 비활성"
+  6. submit_success ≥ 1 시 `_spawn_backtest_poll_task(target_date)` fire-and-forget 발화
+- **폴 루프** (`_backtest_poll_loop`):
+  - 60s 주기로 `running` row 의 `engine.poll(job_id)` 호출 → completed → metrics 저장. `ExternalAPIError`/`ConfigError`/unexpected → `failed` + error_message
+  - 종료 조건: 모든 row 가 terminal 상태({completed, failed, skipped}) + summary 동봉 완료 → exit
+  - **24h timeout**: 미완료 running/queued row 를 `failed` + "Timeout (>24h)" 으로 마킹 후 exit
+  - 중복 task 가드: `_backtest_poll_loop_running` set 멤버십 체크
+- **summary 동봉** (`_emit_pending_summaries`): 완료된 (a) 전략 6 row 가 모이면 `parameter_recommendations.backtest_summary` JSONB 에 `{compared_strategies, current, recommended, diff}` 형태로 UPDATE. (b) 전략은 키만 존재 + value=null 로 UI 가 폴백 분기로 인식
+- **DB 영속화** — `supabase/migrations/020_parameter_recommendations_backtest.sql`: `parameter_recommendations.backtest_summary JSONB` nullable
+- **race 안전성**:
+  - 자문 INSERT 와 backtest enqueue 는 `try/except` 분리 — enqueue 예외 시 자문 INSERT 보존
+  - settlement 20:10 시점에 폴 task 미완료여도 자문 row 영속 (자문은 20:00 동기 완료)
+  - settlement `_reset_daily_state()` 의 task cancel 책임 (현재 구현 확인 필요 — Phase 5b 모니터링)
+- **회귀 가드**:
+  - `tests/integration/test_recommendation_backtest_flow.py` 2 케이스 — full flow / settlement race
+  - `tests/unit/engine/test_recommendation_backtest_hook.py` + `test_backtest_poll_loop.py`
+  - `tests/unit/db/test_parameter_recommendations_backtest.py`
+
+#### Phase 4 (2026-05-15) — Recommendations UI 백테스트 카드
+- **`BacktestComparisonCard`** (`frontend/src/components/recommendations/BacktestComparisonCard.tsx`): 자산 배정 카드 *위* 에 `backtest_summary != null` 일 때만 조건부 노출
+- **(a) 전략 분기**: 8 메트릭(`total_return_pct / annual_return / sharpe_ratio / sortino_ratio / max_drawdown / win_rate / profit_factor / total_trades`) 좌(현재) / 우(추천) 비교 + 차이값 컬러 칩(이익색 빨강 / 손실색 파랑 컨벤션)
+- **(b) 전략 분기**: `compared_strategies[id] === null` 면 "외부 백테스트 서버 미지원 (Phase 4-bis 대기)" 안내 라벨
+- **로딩 분기**: `status=running` 시 스피너 표시
+- **`max_drawdown` 부호 컨벤션 future-proof**: `metricDefinitions[i].signInverted: boolean` 옵션 매개변수화. 실측 음수면 false 그대로 / 양수면 true 로 토글 — Phase 5b 검증 후 확정
+- **회귀 가드**: `frontend/src/components/__tests__/BacktestComparisonCard.test.tsx` RTL 케이스
+
+#### Phase 5 (2026-05-16) — 회귀 가드 + 운영 모니터링 가이드
+- **graceful 통합 가드** (`tests/integration/test_backtest_disabled_and_graceful.py` 3 케이스):
+  - `KIS_MCP_ENABLED=false` 재시작 → 자문 6 INSERT 보존 + backtest_runs 12 row 모두 skipped + 폴 task 발화 0회
+  - 외부 서버 다운(`ExternalAPIError`) → (a) 6 row failed + 자문 INSERT 보존
+  - 24h timeout → 미완료 running row failed + 자문 INSERT 보존
+- **운영 모니터링 가이드** — `docs/backtest-monitoring.md` 신규:
+  - Section 1: 운영 활성화 절차 (Case A `KIS_MCP_ENABLED=true` 토글 / Case B Phase 4-bis 진입 placeholder)
+  - Section 2: Phase 5b 사용자 검증 절차 (20:00 직후 system_logs/backtest_runs/parameter_recommendations SQL 진단)
+  - Section 3: 트러블슈팅 체크리스트 (헬스체크 / 좀비 task / UI 카드 미표시 분기)
+  - Section 4: `max_drawdown` 부호 컨벤션 확정 절차
+  - Section 5: 응답 키 검증 체크리스트 (`max_drawdown` 부호 / `profit_loss_ratio` 매핑 / `total_orders` 단위 / `annual_return` vs `cagr`)
+  - Section 6: 자동매매 격리 안전 규칙 + 회귀 가드 매트릭스
+  - Section 7: 후속 작업 (MDD 확정 / 응답 키 매핑 검증 / Phase 4-bis / historical 누적 페이지)
+- **Phase 5b 사용자 책임** — 2026-05-18(월) 20:00 첫 실 발화 후 운영자가 직접:
+  1. `[backtest_enqueue]` / `[backtest_poll]` 로그 확인
+  2. backtest_runs 12 row INSERT + summary 동봉 전이 확인
+  3. UI 카드 (a)/(b) 분기 검증
+  4. `max_drawdown` 부호 SQL 확인 후 `BacktestComparisonCard` `signInverted` 결정
+  5. 응답 키 매핑 결함 발견 시 별도 사이클 발의
 
 ### 거래소 라우팅 (전략별 `exchange` 파라미터)
 | 값 | 의미 | 비고 |
