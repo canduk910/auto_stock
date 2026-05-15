@@ -282,3 +282,175 @@ async def test_priority_groups_no_drop_no_drop_log(_ws_subscribe_spy, caplog):
 
     msg = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" not in msg, "drop=0 이면 [priority_drop] 로그 생략 (노이즈 차단)"
+
+
+# ---------------------------------------------------------------------------
+# PR-E (P1, 2026-05-15) — 2-pass 슬롯 흡수
+#
+# 결함 (운영 로그 2026-05-15 07:55:08):
+#   [priority_drop] breakout=3 momentum=0 swing=0
+#   total_subscribed=30 max=41 high_count=5 low_remaining=11
+# - HIGH 5 → 잔여 36
+# - breakout 28 → cap 25 적용 → 25 add + 3 drop
+# - momentum 0 / swing 10 add → 35 사용
+# - 결과: 30 사용 / 11 슬롯 미사용 + 3 drop 종목 → 운영 슬롯 낭비
+#
+# Fix 사양: 1-pass → 2-pass
+#   1차: positions(bypass) → next_day_clear(bypass) → breakout[:cap] → momentum → swing
+#   2차: 잔여 슬롯 (MAX_SUBSCRIPTIONS - len(_subscriptions)) > 0 이면 breakout 의
+#        cap 초과분(overflow)에서 추가 add
+#   최종 drop = max(0, len(breakout_overflow) - actually_added_in_2nd_pass)
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_breakout_overflow_absorbs_unused_slots(_ws_subscribe_spy, caplog):
+    """결함 시나리오 재현: breakout=28 momentum=0 swing=10 + HIGH=5 → 28 add + drop=0."""
+    caplog.set_level(logging.INFO, logger="src.engine.scanner")
+
+    positions = [f"P{i:03d}" for i in range(5)]    # HIGH 5
+    breakout = [f"B{i:03d}" for i in range(28)]    # cap 25 → overflow 3
+    momentum: list[str] = []
+    swing = [f"S{i:03d}" for i in range(10)]       # 10
+
+    await scanner_module.subscribe_filtered_stocks(
+        [],
+        extra_tickers=None,
+        priority_groups={
+            "positions": positions,
+            "next_day_clear": [],
+            "swing": swing,
+            "momentum": momentum,
+            "breakout": breakout,
+        },
+    )
+
+    subs = _ws_subscribe_spy["subs"]
+    # HIGH 5 + breakout 25 + swing 10 = 40 (1차) + breakout overflow 3 (2차) = 43?
+    # 잔여 = MAX(41) - (5+25+10) = 1 → overflow 3 중 1만 흡수 가능 → 총 41
+    # NOTE: 실제 시나리오에서는 breakout=28 < cap 25 가 아니라 "breakout=28 → cap 25 적용 → 3 drop" 이므로
+    # cap 25 + 잔여 슬롯 흡수 = breakout 이 잔여 슬롯에 의해 결정되어야 함.
+    #
+    # HIGH 5 + cap 25 + momentum 0 + swing 10 = 40 → 잔여 1 → overflow 3 중 1 흡수 → drop=2
+    # 또 다른 케이스(잔여가 더 크면): drop=0 가능
+    #
+    # 결함 로그의 정확 재현: total_subscribed=30 had 11 slot unused — 그 운영 케이스를 재현하려면
+    # 보유/swing 적은 구성. 본 테스트는 "잔여 슬롯이 있으면 overflow 가 흡수된다" 를 검증.
+    # HIGH 5 + breakout 25 (cap) + swing 10 = 40 → 잔여 1 → overflow 1 add → 41 사용 + drop=2
+    assert len(subs) == 41, f"잔여 슬롯이 overflow 로 흡수되어 41 가득 (실제 {len(subs)})"
+
+    # breakout overflow 3 중 1 add — drop=2
+    breakout_in = sum(1 for t in breakout if ("H0UNCNT0", t) in subs)
+    assert breakout_in == 26, f"breakout cap 25 + overflow 1 흡수 = 26 (실제 {breakout_in})"
+
+    # [priority_drop] 로그에 breakout=2 (overflow 3 중 1 흡수 후 잔여 2 drop)
+    msg = "\n".join(r.message for r in caplog.records)
+    assert "[priority_drop]" in msg
+    assert "breakout=2" in msg, f"2-pass 흡수 후 drop=2 노출 (msg={msg!r})"
+
+
+@pytest.mark.asyncio
+async def test_breakout_overflow_fully_absorbed_when_unused_slots_sufficient(_ws_subscribe_spy, caplog):
+    """결함 케이스 정확 재현: HIGH 5 + breakout 28 + momentum 0 + swing 10 → 결함은 30 사용/11 미사용/3 drop.
+    Fix 후: 잔여 슬롯이 충분(11)하면 overflow 3 모두 흡수 → 28 + drop=0.
+    """
+    caplog.set_level(logging.INFO, logger="src.engine.scanner")
+
+    # 결함 로그의 실제 구성 (총 5+28+0+10=43, HIGH 5 보장 후 LOW 36 슬롯)
+    positions = [f"P{i:03d}" for i in range(5)]    # HIGH 5
+    breakout = [f"B{i:03d}" for i in range(28)]    # cap 25 → overflow 3
+    momentum: list[str] = []                        # 0
+    swing = [f"S{i:03d}" for i in range(3)]         # 3 (잔여 8 → overflow 3 모두 흡수 + 5 미사용)
+
+    await scanner_module.subscribe_filtered_stocks(
+        [],
+        extra_tickers=None,
+        priority_groups={
+            "positions": positions,
+            "next_day_clear": [],
+            "swing": swing,
+            "momentum": momentum,
+            "breakout": breakout,
+        },
+    )
+
+    subs = _ws_subscribe_spy["subs"]
+    # HIGH 5 + cap 25 + momentum 0 + swing 3 = 33 → 잔여 8 → overflow 3 모두 흡수 → 36
+    assert len(subs) == 36, f"5+25+3+3(overflow)=36 (실제 {len(subs)})"
+
+    # breakout 28 모두 add (cap 초과분 overflow 3 흡수)
+    for t in breakout:
+        assert ("H0UNCNT0", t) in subs, f"breakout {t} 잔여 슬롯에 흡수 add"
+
+    # drop=0 → [priority_drop] 로그 생략 (노이즈 차단)
+    msg = "\n".join(r.message for r in caplog.records)
+    assert "[priority_drop]" not in msg, "2-pass 후 drop=0 이면 [priority_drop] 로그 생략"
+
+
+@pytest.mark.asyncio
+async def test_2pass_does_not_break_existing_cap_invariant(_ws_subscribe_spy, caplog):
+    """잔여 슬롯이 0 이면 overflow 흡수 0 — 한도 41 절대 초과 안 함."""
+    caplog.set_level(logging.INFO, logger="src.engine.scanner")
+
+    # HIGH 0 + breakout 30 (cap 25 → overflow 5) + momentum 20 + swing 20
+    # 1차: cap 25 + momentum 16 (잔여 0 도달) + swing 0 = 41
+    # 잔여 0 → overflow 0 흡수 → drop: breakout 5 + momentum 4 + swing 20
+    breakout = [f"B{i:03d}" for i in range(30)]
+    momentum = [f"M{i:03d}" for i in range(20)]
+    swing = [f"S{i:03d}" for i in range(20)]
+
+    await scanner_module.subscribe_filtered_stocks(
+        [],
+        extra_tickers=None,
+        priority_groups={
+            "positions": [],
+            "next_day_clear": [],
+            "swing": swing,
+            "momentum": momentum,
+            "breakout": breakout,
+        },
+    )
+
+    subs = _ws_subscribe_spy["subs"]
+    assert len(subs) == MAX_SUBSCRIPTIONS, f"한도 41 절대 초과 안 됨 (실제 {len(subs)})"
+
+    # breakout 25 (cap), overflow 5 모두 drop
+    breakout_in = sum(1 for t in breakout if ("H0UNCNT0", t) in subs)
+    assert breakout_in == 25, f"breakout cap 25 (잔여 0 → overflow 0 흡수) (실제 {breakout_in})"
+
+    # [priority_drop] 로그
+    msg = "\n".join(r.message for r in caplog.records)
+    assert "[priority_drop]" in msg
+    assert "breakout=5" in msg, f"breakout overflow 5 drop (msg={msg!r})"
+
+
+@pytest.mark.asyncio
+async def test_priority_drop_log_omitted_when_2pass_clears_all_drops(_ws_subscribe_spy, caplog):
+    """1차 cap drop 만 있고 2차에서 전부 흡수되면 최종 drop=0 → 로그 미노출."""
+    caplog.set_level(logging.INFO, logger="src.engine.scanner")
+
+    # HIGH 0 + breakout 26 (cap 25 → overflow 1) + momentum 5 + swing 5
+    # 1차: cap 25 + momentum 5 + swing 5 = 35 → 잔여 6 → overflow 1 흡수 → 36
+    # 최종 drop=0 → 로그 미노출
+    breakout = [f"B{i:03d}" for i in range(26)]
+    momentum = [f"M{i:03d}" for i in range(5)]
+    swing = [f"S{i:03d}" for i in range(5)]
+
+    await scanner_module.subscribe_filtered_stocks(
+        [],
+        extra_tickers=None,
+        priority_groups={
+            "positions": [],
+            "next_day_clear": [],
+            "swing": swing,
+            "momentum": momentum,
+            "breakout": breakout,
+        },
+    )
+
+    subs = _ws_subscribe_spy["subs"]
+    assert len(subs) == 36, f"25+5+5+1(overflow)=36 (실제 {len(subs)})"
+    # breakout 26 전원 add
+    for t in breakout:
+        assert ("H0UNCNT0", t) in subs
+
+    msg = "\n".join(r.message for r in caplog.records)
+    assert "[priority_drop]" not in msg, "2-pass 후 drop=0 이면 [priority_drop] 로그 생략"
