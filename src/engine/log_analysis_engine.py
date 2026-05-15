@@ -23,7 +23,7 @@ from src.api.base import get_request_metrics, reset_request_metrics
 from src.config import settings
 from src.db.log_reports import insert_log_report
 from src.db.supabase import supabase
-from src.db.trade_history import get_trades_in_range
+from src.db.trade_history import get_today_buy_trades_for_funnel, get_trades_in_range
 
 logger = logging.getLogger(__name__)
 
@@ -327,7 +327,7 @@ async def generate_daily_log_report() -> dict | None:
     log_metrics = _aggregate_logs(logs)
     trade_metrics = _aggregate_trades(trades)
     api_metrics = get_request_metrics()
-    strategy_funnel = _collect_strategy_funnel()
+    strategy_funnel = await _collect_strategy_funnel()
     next_day_clear_metrics = _aggregate_next_day_clear(logs)
 
     metrics = {
@@ -377,18 +377,53 @@ async def generate_daily_log_report() -> dict | None:
     return row
 
 
-def _collect_strategy_funnel() -> dict[str, dict[str, int]]:
-    """전략별 신호→주문→체결 카운터 수집 — 정산 후 _reset_daily_state 직전에 호출됨."""
+async def _collect_strategy_funnel() -> dict[str, dict[str, int]]:
+    """전략별 신호→주문→체결 카운터 수집 — 정산 후 _reset_daily_state 직전에 호출됨.
+
+    PR-D (2026-05-14): EC2 재시작으로 in-memory 카운터가 휘발된 경우를 위해
+    `trade_history` 당일 KST BUY 행으로 cross-check 보강한다.
+    - fills  = max(in_memory, COMPLETED count)
+    - orders = max(in_memory, all-status count: PENDING+COMPLETED+PARTIAL+CANCELLED)
+    - signals = max(in_memory, orders)   # 단조성 signals ≥ orders ≥ fills
+
+    PR-D 보강 (Copilot/Codex, 2026-05-14): `get_today_buy_trades_for_funnel()` 사용 —
+    `get_today_buy_trades()` 는 포지션 복구용으로 ticker 별 dedupe + CANCELLED 제외라
+    multi-BUY/multi-strategy/CANCELLED 시나리오를 under-count 하여 본래 목적 달성 못 함.
+
+    in-memory 가 더 크면 그대로 사용 (재시작 없이 정상 수집된 케이스).
+    DB 조회 실패 시 in-memory 만 사용 (예외 흡수).
+    """
     try:
         from src.engine.scheduler import trading_scheduler
     except ImportError:
         return {}
+
+    # 당일 KST BUY trade 집계 — DB 실패 시 빈 dict 로 fallback
+    by_strategy_completed: dict[str, int] = {}
+    by_strategy_all: dict[str, int] = {}
+    try:
+        today_buys = await get_today_buy_trades_for_funnel()
+        for row in today_buys or []:
+            sid = row.get("strategy") or "unknown"
+            status = (row.get("status") or "").upper()
+            by_strategy_all[sid] = by_strategy_all.get(sid, 0) + 1
+            if status == "COMPLETED":
+                by_strategy_completed[sid] = by_strategy_completed.get(sid, 0) + 1
+    except Exception:
+        logger.exception(
+            "[funnel_crosscheck] get_today_buy_trades 실패 — in-memory 카운터만 사용"
+        )
+
     funnel: dict[str, dict[str, int]] = {}
     for strategy in trading_scheduler.registry.all():
         s = strategy.state
-        funnel[strategy.strategy_id] = {
-            "signals": s.signal_count_today,
-            "orders": s.order_attempt_today,
-            "fills": s.fill_count_today,
-        }
+        sid = strategy.strategy_id
+        db_fills = by_strategy_completed.get(sid, 0)
+        db_orders = by_strategy_all.get(sid, 0)
+        # in-memory vs DB 중 큰 값 — 재시작 시 in-memory=0 이면 DB 보강
+        fills = max(s.fill_count_today, db_fills)
+        orders = max(s.order_attempt_today, db_orders)
+        # signal 단조성: signals ≥ orders ≥ fills
+        signals = max(s.signal_count_today, orders)
+        funnel[sid] = {"signals": signals, "orders": orders, "fills": fills}
     return funnel
