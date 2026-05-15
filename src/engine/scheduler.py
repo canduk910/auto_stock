@@ -293,8 +293,10 @@ class TradingScheduler:
             if now <= TIME_KRX_OPEN_CONFIRM:
                 # 익일 청산: PRE_NXT 첫 거래 시가에서 청산 (Q2=B)
                 self._next_day_task = asyncio.create_task(self._execute_next_day_clear())
-                # 시가 확정 폴링 — 1차 시가는 NXT 프리 첫 거래
-                await self._confirm_breakout_open_prices()
+                # 시가 확정 폴링 — 1차 시가는 NXT 프리 첫 거래.
+                # 보드 경계 정각 호출은 board 명시 (2026-05-15, 결함 A): SessionTracker
+                # `_session_loop` 30초 race 로 자동 결정 분기가 잘못된 보드로 폴백되는 결함 차단.
+                await self._confirm_breakout_open_prices(board="pre_nxt")
                 if self._collect_breakout_tickers():
                     self._phase = "pre_nxt_trading"
                     logger.info("VB/LTV PRE_NXT 매매 시작 (08:00~)")
@@ -302,8 +304,11 @@ class TradingScheduler:
 
                 # KRX 메인 시가 확정(09:00:05) 까지 대기
                 await self._wait_until(TIME_KRX_OPEN_CONFIRM)
-                # KRX 메인 시가 재확정 (NXT 프리 시가와 별도, Phase 5 보드별 분리)
-                await self._confirm_breakout_open_prices()
+                # KRX 메인 시가 재확정 (NXT 프리 시가와 별도, Phase 5 보드별 분리).
+                # board="main" 명시 (2026-05-15, 결함 A): 09:00:05 시점 SessionTracker 가
+                # 아직 main 진입 미반영이라 자동 결정은 pre_nxt 폴백 → boards["main"] 영영 비어
+                # 5/14·5/15 KRX 메인 시간대 매수 신호 0건 사고 회귀 차단.
+                await self._confirm_breakout_open_prices(board="main")
                 # P1(B): NXT 시가 미수신으로 보류된 익일 청산을 시장가 정리
                 await self._drain_pending_next_day_clear()
                 self._phase = "main_trading"

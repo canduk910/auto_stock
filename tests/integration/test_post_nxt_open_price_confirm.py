@@ -190,11 +190,22 @@ def test_post_nxt_confirm_is_reachable_in_restart_path(start_ast):
 
 
 # ---------------------------------------------------------------------------
-# Case C — MAIN 시가 확정 호출(board="main") 회귀 보호
+# Case C — MAIN 시가 확정 호출은 반드시 board="main" 명시 (2026-05-15, 결함 A)
 # ---------------------------------------------------------------------------
-def test_main_board_confirm_call_still_exists(start_ast):
-    """기존 09:00:05 KRX 메인 시가 확정 호출은 그대로 존재해야 한다.
-    명시 `board="main"` 또는 board 인자 없음(자동 결정 = main 우선) 둘 다 허용.
+def test_main_board_confirm_call_must_specify_board_main(start_ast):
+    """09:00:05 KRX 메인 시가 확정 호출은 반드시 `board="main"` 명시여야 한다.
+
+    결함 배경 (2026-05-15):
+        `_confirm_breakout_open_prices()` 자동 결정 분기는 SessionTracker.active 를
+        main → post_nxt → pre_nxt 우선순위로 검색하는데, SessionTracker `_session_loop`
+        가 30초 주기라 09:00:05 호출 시점에 아직 main 진입을 반영 못 한 race 가 있다.
+        → pre_nxt 만 active → `board="pre_nxt"` 폴백 → `_targets[t]["boards"]["main"]`
+        키가 영영 안 채워져 5/14, 5/15 KRX 메인 시간대 VB/LTV 매수 신호 0건 사고.
+
+    회귀 가드:
+        TIME_KRX_OPEN_CONFIRM 대기 직후 ~ TIME_KRX_MAIN_CLOSE 사이의
+        `_confirm_breakout_open_prices` 호출 중 **첫 번째** 호출이 반드시
+        `board="main"` 명시 인자여야 한다. board 인자 없음은 결함.
     """
     confirms = _collect_confirm_calls(start_ast)
     waits = _collect_wait_until_calls(start_ast)
@@ -203,29 +214,40 @@ def test_main_board_confirm_call_still_exists(start_ast):
     assert open_confirm_lines, "TIME_KRX_OPEN_CONFIRM 대기 라인 없음 — 회귀"
     open_confirm_line = open_confirm_lines[0]
 
-    # KRX 메인 마감 대기까지의 범위 안에 main(또는 인자없음) 호출이 최소 1개
     main_close_lines = [ln for ln, name in waits if name == "TIME_KRX_MAIN_CLOSE"]
-    assert main_close_lines
+    assert main_close_lines, "TIME_KRX_MAIN_CLOSE 대기 라인 없음 — 회귀"
     end_line = main_close_lines[0]
 
-    main_calls = [
+    in_window = [
         (ln, kw)
         for ln, kw in confirms
         if open_confirm_line < ln < end_line
-        and (kw.get("board") == repr("main") or "board" not in kw)
     ]
-    assert main_calls, (
-        "09:00:05 ~ 15:30 구간에 `_confirm_breakout_open_prices` (main 또는 자동결정) "
-        "호출이 없음 — 기존 MAIN 시가 확정 회귀."
+    assert in_window, (
+        "TIME_KRX_OPEN_CONFIRM ~ TIME_KRX_MAIN_CLOSE 구간에 "
+        "`_confirm_breakout_open_prices` 호출 자체가 없음 — MAIN 시가 확정 회귀."
+    )
+    # 가장 먼저 등장하는 호출 = TIME_KRX_OPEN_CONFIRM 대기 직후 KRX MAIN 확정 호출
+    first_ln, first_kw = min(in_window, key=lambda t: t[0])
+    assert first_kw.get("board") == repr("main"), (
+        f"09:00:05 KRX 메인 시가 확정 호출(line {first_ln})에 board=\"main\" 명시가 "
+        f"누락됨. 실제 인자: {first_kw!r}. "
+        "SessionTracker 30초 race 로 board=\"pre_nxt\" 폴백 → boards[\"main\"] 영영 "
+        "비어 KRX 메인 시간대 매수 신호 0건 사고 회귀."
     )
 
 
 # ---------------------------------------------------------------------------
-# Case D — PRE_NXT 시가 확정 호출(자동 결정) 회귀 보호
+# Case D — PRE_NXT 시가 확정 호출은 반드시 board="pre_nxt" 명시 (2026-05-15, 결함 A 일관성)
 # ---------------------------------------------------------------------------
-def test_pre_nxt_board_confirm_call_still_exists(start_ast):
-    """기존 08:00 NXT 프리 진입 시 시가 확정 호출은 그대로 존재해야 한다.
-    PRE_NXT 시점엔 board 인자 없음(자동 결정) 호출이 정상 동작.
+def test_pre_nxt_board_confirm_call_must_specify_board_pre_nxt(start_ast):
+    """08:00 NXT 프리 진입 시 시가 확정 호출은 반드시 `board="pre_nxt"` 명시여야 한다.
+
+    의도:
+        결함 A 의 대칭 케이스. PRE_NXT 정각 호출도 SessionTracker race 가 있을 수 있고,
+        모든 보드 경계 정각 호출(`pre_nxt`/`main`/`post_nxt`)을 동일하게 명시 인자로
+        강제해 자동 결정에 의존하지 않는다. `_workspace/00_leader_trading_rules.md`
+        "보드별 시가 확정 호출 — `board` 인자 명시 의무" 명세 직접 반영.
     """
     confirms = _collect_confirm_calls(start_ast)
     waits = _collect_wait_until_calls(start_ast)
@@ -237,13 +259,15 @@ def test_pre_nxt_board_confirm_call_still_exists(start_ast):
     start_line = pre_nxt_open_lines[0]
     end_line = open_confirm_lines[0]
 
-    # PRE_NXT 진입 ~ MAIN 시가 확정 대기 사이에 board 인자 없는 호출 1개 이상
-    pre_nxt_calls = [
-        (ln, kw)
-        for ln, kw in confirms
-        if start_line < ln < end_line and "board" not in kw
+    in_window = [
+        (ln, kw) for ln, kw in confirms if start_line < ln < end_line
     ]
-    assert pre_nxt_calls, (
-        "08:00 PRE_NXT 진입 시 `_confirm_breakout_open_prices()` (board 인자 없음 = 자동결정) "
-        "호출이 없음 — 기존 PRE_NXT 시가 확정 회귀."
+    assert in_window, (
+        "TIME_PRE_NXT_OPEN ~ TIME_KRX_OPEN_CONFIRM 구간에 "
+        "`_confirm_breakout_open_prices` 호출이 없음 — PRE_NXT 시가 확정 회귀."
+    )
+    first_ln, first_kw = min(in_window, key=lambda t: t[0])
+    assert first_kw.get("board") == repr("pre_nxt"), (
+        f"08:00 PRE_NXT 시가 확정 호출(line {first_ln})에 board=\"pre_nxt\" 명시가 "
+        f"누락됨. 실제 인자: {first_kw!r}. 보드 경계 정각 호출은 자동 결정 의존 금지."
     )

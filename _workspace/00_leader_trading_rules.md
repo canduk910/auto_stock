@@ -210,6 +210,18 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 - **매매 보드**: PRE_NXT + MAIN + POST_NXT (Q3=A 야간 매매 활성)
 - **거래소 라우팅**: 기본 KRX. SOR 권장(NXT/KRX 자동 분배)
 
+### 보드별 시가 확정 호출 — `board` 인자 명시 의무 (2026-05-15, 결함 A 대응)
+- `_confirm_breakout_open_prices()` 자동 결정 분기는 `SessionTracker.active`를 main → post_nxt → pre_nxt 우선순위로 검색해 보드를 추론한다. SessionTracker의 `_session_loop`는 **30초 주기**라 보드 경계(08:00 / 09:00 / 15:30) 정각 호출과 race가 발생할 수 있다.
+- **2026-05-14 사고**: 09:00:05 `TIME_KRX_OPEN_CONFIRM` 시점에 SessionTracker가 아직 main 진입을 반영 못 한 상태에서 `_confirm_breakout_open_prices()`가 호출됨 → pre_nxt만 active → `board="pre_nxt"` 폴백 → `_targets[ticker]["boards"]["main"]` 키가 영영 안 채워져 **5/14, 5/15 KRX 메인 시간대 VB/LTV 매수 신호 0건**.
+- **불변식**: 보드 경계 정각 호출은 반드시 `board="..."`를 **명시 인자로** 전달한다. 자동 결정에 의존하지 않는다.
+  - `TIME_PRE_NXT_OPEN` (08:00) → `board="pre_nxt"` 명시
+  - `TIME_KRX_OPEN_CONFIRM` (09:00:05) → `board="main"` 명시
+  - `TIME_KRX_MAIN_CLOSE` (15:30) → `board="post_nxt"` 명시 (이미 적용됨, 2026-05-12 M)
+- **자동 결정 허용 호출** (시점이 가변이라 명시가 부적절):
+  - 중간 부팅(09:00:05 이전 다른 시각 시작) 호출
+  - `now > TIME_KRX_OPEN_CONFIRM` 조건의 스캔 시작 직전 재확정
+- **Red 테스트 의무**: pytest+freezegun으로 09:00:05 시각 고정 + SessionTracker `_active`를 의도적으로 `{PRE_NXT}`만 활성 → `_confirm_breakout_open_prices()` 호출 후 `strategy._targets[t]["boards"]`에 `"main"` 키가 반드시 존재해야 함을 assert. 결함 상태에선 `"pre_nxt"`만 존재하므로 Red 성립 → `board="main"` 명시로 Green.
+
 ### 손절
 - **조건**: 매수 체결가 대비 -3%
 - **주문**: 즉시 시장가 전량 매도

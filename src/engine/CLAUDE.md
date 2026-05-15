@@ -191,3 +191,4 @@ recommendation_engine.py(19:50 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `Position`에 `strategy_id` 필수 (체결통보 → 올바른 전략 라우팅)
 - `position_ratio`는 **전략 할당 자금 기준** (순자산 × 전략비중 × position_ratio)
 - TR_ID는 `settings.get_tr_id()` 사용
+- **`_confirm_breakout_open_prices` 보드 경계 정각 호출은 `board=...` 명시 의무 (2026-05-15, 결함 A)** — `SessionTracker._session_loop` 30초 주기 race 로 자동 결정 분기가 잘못된 보드로 폴백되는 결함 차단. (a) 08:00 PRE_NXT 진입 → `board="pre_nxt"` 명시. (b) 09:00:05 KRX MAIN 진입 → `board="main"` 명시. (c) 15:30 POST_NXT 진입 → `board="post_nxt"` 명시 (2026-05-12 M 기적용). 자동 결정 허용은 중간 부팅 / `now > TIME_KRX_OPEN_CONFIRM` 스캔 시작 직전 재확정 등 시점 가변 호출에 한정. 2026-05-14, 5/15 운영 사고 — 자동 결정 분기가 09:00 시점 SessionTracker 미반영(pre_nxt만 active) 으로 `board="pre_nxt"` 폴백 → `_targets[t]["boards"]["main"]` 영영 비어 KRX 메인 시간대 VB/LTV 매수 신호 0건. 회귀 가드: `tests/integration/test_post_nxt_open_price_confirm.py` Case C/D
