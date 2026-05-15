@@ -58,6 +58,11 @@ class VolatilityBreakoutStrategy(StrategyBase):
         self._open_confirmed: dict[str, dict[str, bool]] = {}
         # ticker -> 보드별 이전 틱 가격 (보드별 돌파 순간 감지용)
         self._prev_price: dict[str, dict[str, int]] = {}
+        # 익일 청산 안전망 (2026-05-15, 결함 D 잔여) — `_execute_next_day_clear` 의
+        # 30s 시가 안정화 중 on_tick 청산 race 차단용 플래그. momentum 패턴과 동일.
+        # VB 정책은 당일 15:20 일괄 매도지만 그게 누락되면 본 플래그 + check_exit_signal
+        # 익일 청산 분기로 다음 영업일 NXT 프리 청산 안전망 발동.
+        self._next_day_clear_pending = False
         # 스캔된 종목 리스트 (subscribe용)
         self._scanned_tickers: list[str] = []
 
@@ -497,11 +502,17 @@ class VolatilityBreakoutStrategy(StrategyBase):
     def check_exit_signal(
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:
-        """손절: 매수가 대비 -3%."""
+        """손절: 매수가 대비 -3%. 익일 보유 종목은 NEXT_DAY_CLEAR 안전망 발동.
+
+        VB 정책상 당일 15:20 일괄 청산이 정상 경로 — 본 함수의 익일 청산 분기는
+        15:20 청산이 누락된 비상 상황(POST_NXT 설정 오류, 시세 미수신, 시장가 거부,
+        프로세스 재시작 race 등)에서만 발동. 2026-05-15 결함 D 잔여.
+        """
         pos = self.state.positions.get(ticker)
         if not pos:
             return Signal.NONE
 
+        # 1. 손절 — 가장 우선. 익일 청산 대기 중에도 손절은 즉시 발동.
         loss_rate = (current_price - pos.buy_price) / pos.buy_price * 100
         stop_loss = self.config.params["stop_loss_rate"]
         if loss_rate <= stop_loss:
@@ -511,6 +522,17 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 t(ticker), pos.buy_price, loss_rate, current_price,
             )
             return Signal.STOP_LOSS
+
+        # 2. 익일 청산 안전망 (2026-05-15, 결함 D 잔여) — 전일 매수 종목이 남아 있으면
+        # 즉시 청산 신호. 단 scheduler 가 시가 안정화 중(_next_day_clear_pending=True)
+        # 이면 보류 — scheduler 가 직접 처리 중이라 race 차단.
+        if pos.is_next_day and not self._next_day_clear_pending:
+            from src.engine.scanner import t
+            logger.warning(
+                "변동성돌파 익일 청산 안전망 발동: %s (매수일: %s, 정상은 당일 15:20 청산)",
+                t(ticker), pos.buy_date,
+            )
+            return Signal.NEXT_DAY_CLEAR
 
         return Signal.NONE
 

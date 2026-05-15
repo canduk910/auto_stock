@@ -228,9 +228,10 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 
 ### 강제 청산 — 보드별 분리
 - **15:20 KRX 메인 매수 중단 + 강제 청산**: `tradable_boards`에 POST_NXT가 **없는** 전략의 종목만 청산. POST_NXT 활성 전략은 19:50까지 보유 유지
-- **VB는 15:20 일괄 청산 (2026-05-15 결함 D)**: VB `DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main")` — POST_NXT 제외. `_force_clear_main_only` 의 keeps_post_nxt 분기에서 False → 15:20 모든 VB 보유 종목 시장가 청산. OVERNIGHT 거부 원칙 회복. **사고 원인**: 기존엔 VB가 POST_NXT 활성이라 15:20 청산이 "19:50까지 유지"로 보류되었는데, 19:50 시점엔 `buy_disabled=True` + AI자문 호출만 있고 강제 청산 코드가 없어 OVERNIGHT 자연 보유 → 5/13~5/15 005930 멀티데이 보유 후 -3.17% 손절. VB가 사실상 donchian처럼 동작하던 결함.
-- **19:50 NXT 애프터 매수 중단**: 모든 활성 전략 `buy_disabled = True`. **LTV(POST_NXT 활성)는 19:50 청산 코드 부재 결함이 남아 있음** — 별도 정책 결정 대기(롱테일 모드는 익일 청산 의도일 수 있어 분리 검토)
-- **20:00 NXT 애프터 종료**: 보유 종목은 다음 영업일까지 자동 이월 — VB는 본 정책 변경으로 OVERNIGHT 보유 없음
+- **VB·LTV는 15:20 일괄 청산 (2026-05-15 결함 D)**: VB/LTV 둘 다 `DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main")` — POST_NXT 매수 비활성. `_force_clear_main_only` 의 keeps_post_nxt 분기에서 False → 15:20 청산 호출. VB는 모든 보유 청산, LTV 는 `_limit_up_reached` 제외(상한가 모드만 익일 보유). LTV 상한가 모드의 POST_NXT 손절 모니터링은 `risk.on_tick` 청산 평가가 보드 가드 무관하게 작동.
+- **VB 익일 청산 안전망 (2026-05-15 결함 D 잔여 fix)**: VB `_execute_next_day_clear` 대상 포함. 당일 15:20 청산이 어떤 비상 상황으로 누락되면 다음 영업일 NXT 프리 시가에서 자동 청산. `check_exit_signal` 익일 청산 분기 추가(STOP_LOSS 우선 → pending 가드 → NEXT_DAY_CLEAR). 5/15 LG전자 사고 회복용.
+- **19:50 NXT 애프터 매수 중단**: 모든 활성 전략 `buy_disabled = True`. POST_NXT 매수가 VB/LTV 에서 비활성이라 19:50 강제 청산 코드 부재 결함은 실질 영향 없음 (LTV 상한가 모드 종목은 정책상 익일 청산 의도).
+- **20:00 NXT 애프터 종료**: VB 는 정상 경로상 OVERNIGHT 보유 없음 (15:20 청산). LTV 상한가 모드 종목 + 안전망 발동 VB 종목만 다음 영업일 NXT 프리 청산 대기.
 
 ### 리스크 관리
 - 종목당 최대 투자: 할당 자금의 10%

@@ -658,16 +658,22 @@ class TradingScheduler:
     async def _execute_next_day_clear(self) -> None:
         """09:00 익일 청산 로직.
 
-        익일 청산을 지원하는 전략(momentum, long_tail_volatility)의 is_next_day 포지션을 처리한다.
+        익일 청산을 지원하는 전략(momentum, long_tail_volatility, volatility_breakout)
+        의 is_next_day 포지션을 처리한다.
+
+        - momentum / LTV: 정책상 익일 청산 정상 경로
+        - VB: 안전망 (2026-05-15, 결함 D 잔여) — VB 정책은 당일 15:20 일괄 매도이나
+          그게 누락되면 본 경로로 다음 영업일 NXT 프리 청산. 5/15 LG전자(066570) 사고 대응.
+
         1. 전일 매수 보유 종목 목록 조회
         2. 각 종목의 당일 시가 확인 (WebSocket 시세 구독으로 수신)
         3. 60초 대기하여 시가 안정화 (대기 중 on_tick의 NEXT_DAY_CLEAR 억제)
         4. 시가가 매수가 대비 gap_up_threshold 이상 → 트레일링 스탑 모드
         5. gap_up_threshold 미만 → 즉시 시장가 전량 매도
         """
-        # 익일 청산 대상 전략 수집 (momentum + long_tail_volatility)
+        # 익일 청산 대상 전략 수집 (momentum + long_tail_volatility + volatility_breakout 안전망)
         overnight_strategies: list[tuple[str, object]] = []
-        for sid in ("momentum", "long_tail_volatility"):
+        for sid in ("momentum", "long_tail_volatility", "volatility_breakout"):
             s = self.registry.get(sid)
             if s and s.config.enabled:
                 overnight_strategies.append((sid, s))
