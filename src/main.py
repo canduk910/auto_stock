@@ -191,6 +191,13 @@ async def lifespan(app: FastAPI):
         await token_manager.revoke()
     except Exception:
         logger.exception("토큰 폐기 실패")
+    # Phase 2 — MCP 클라이언트(외부 백테스트 서버) 정리. 인스턴스 미생성 시 NoOp.
+    try:
+        from src.services import mcp_client as _mc
+        if _mc._client_instance is not None:
+            await _mc._client_instance.close()
+    except Exception:
+        logger.exception("MCP 클라이언트 정리 실패")
 
 
 app = FastAPI(
