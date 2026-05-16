@@ -17,13 +17,15 @@ import { render, screen, within } from "@testing-library/react";
 import BacktestComparisonCard from "../BacktestComparisonCard";
 import type { BacktestSummary } from "../../../types/backtest";
 
+// Phase 6.1 (2026-05-17) — 외부 MCP 실측 검증으로 MDD 양수(절대값) 컨벤션 확정.
+// 픽스처는 양수형 MDD 를 사용한다 (예: 8.5 — 절대값). 추천 MDD 가 더 크면 손실 악화.
 function makeMetrics(over: Partial<Record<string, number>> = {}) {
   return {
     total_return_pct: 12.34,
     cagr: 8.1,
     sharpe_ratio: 1.23,
     sortino_ratio: 1.5,
-    max_drawdown: -8.5,
+    max_drawdown: 8.5,
     win_rate: 0.55,
     profit_factor: 1.8,
     total_trades: 42,
@@ -45,7 +47,7 @@ function makeSummary(over: Partial<BacktestSummary> = {}): BacktestSummary {
       momentum: makeMetrics({
         total_return_pct: 15.0,
         sharpe_ratio: 1.4,
-        max_drawdown: -10.0, // 더 큰 손실 (절대값 증가)
+        max_drawdown: 10.0, // 양수 컨벤션 — 추천 MDD 가 더 크면 손실 악화 (10.0 > 8.5)
         win_rate: 0.6,
         profit_factor: 2.0,
         total_trades: 50,
@@ -60,7 +62,7 @@ function makeSummary(over: Partial<BacktestSummary> = {}): BacktestSummary {
       momentum: {
         total_return_pct: 2.66,
         sharpe_ratio: 0.17,
-        max_drawdown: -1.5,
+        max_drawdown: 1.5, // 양수 diff — 추천 MDD 더 큼 → 손실 악화 → 파랑
         win_rate: 0.05,
         profit_factor: 0.2,
         total_trades: 8,
@@ -124,7 +126,7 @@ describe("BacktestComparisonCard — Phase 4", () => {
     }
   });
 
-  it("D: diff 양수 = 이익색(#FF3333), 음수 = 손실색(#3366FF). max_drawdown 부호 역전.", () => {
+  it("D: diff 양수 = 이익색(#FF3333), 음수 = 손실색(#3366FF). max_drawdown 부호 역전 (양수 컨벤션).", () => {
     const summary = makeSummary();
     render(<BacktestComparisonCard strategyId="momentum" summary={summary} />);
     const card = screen.getByTestId("backtest-comparison-card-momentum");
@@ -137,7 +139,7 @@ describe("BacktestComparisonCard — Phase 4", () => {
     const sharpeDiff = within(card).getByTestId("metric-diff-sharpe_ratio");
     expect(sharpeDiff.getAttribute("style") ?? "").toMatch(/#FF3333|rgb\(255,\s*51,\s*51\)/i);
 
-    // max_drawdown diff -1.5 → 부호 역전 (실제로는 손실 증가) → 손실색 파랑
+    // Phase 6.1 양수 컨벤션: max_drawdown diff +1.5 → 추천 MDD 더 큼 → 손실 증가 → 손실색 파랑 (signInverted)
     const mddDiff = within(card).getByTestId("metric-diff-max_drawdown");
     expect(mddDiff.getAttribute("style") ?? "").toMatch(/#3366FF|rgb\(51,\s*102,\s*255\)/i);
   });
@@ -198,6 +200,55 @@ describe("BacktestComparisonCard — Phase 4", () => {
     // total_trades 1,234 콤마
     expect(within(card).getByTestId("metric-current-total_trades").textContent).toContain("1,234");
     expect(within(card).getByTestId("metric-recommended-total_trades").textContent).toContain("2,500");
+  });
+
+  // Phase 6.1 (2026-05-17) — MDD 양수(절대값) 컨벤션 회귀 가드.
+  // 외부 MCP 실측 검증 결과 max_drawdown 은 양수형 절대값(예: 16.1) 으로 반환됨.
+  // 추천 MDD 가 현재보다 크면(절대값 증가 = 손실 더 깊어짐) diff 양수 → 손실 악화 → 파랑.
+  // signInverted=true 가 spec 에 적용되어 있어야 통과.
+  it("H: MDD 양수 컨벤션 — recommended MDD(15.0) 가 current(10.0) 보다 크면 손실 악화 = 파랑", () => {
+    const summary: BacktestSummary = {
+      current: {
+        momentum: makeMetrics({ max_drawdown: 10.0 }),
+      },
+      recommended: {
+        momentum: makeMetrics({ max_drawdown: 15.0 }),
+      },
+      diff: {
+        // diff = recommended - current = +5.0 → 양수
+        // 양수 컨벤션에선 MDD 값 증가 = 손실 절대값 증가 = 악화 → 파랑
+        momentum: { max_drawdown: 5.0 },
+      },
+    };
+    render(<BacktestComparisonCard strategyId="momentum" summary={summary} />);
+    const card = screen.getByTestId("backtest-comparison-card-momentum");
+
+    const mddDiff = within(card).getByTestId("metric-diff-max_drawdown");
+    expect(mddDiff.getAttribute("style") ?? "").toMatch(/#3366FF|rgb\(51,\s*102,\s*255\)/i);
+    // 표시 텍스트는 양수 그대로 (+5.00%)
+    expect(mddDiff.textContent).toMatch(/\+5\.00/);
+
+    // 반대 케이스: 추천 MDD 가 더 작으면(11.0 → 8.0) diff 음수(-3.0) → 손실 감소 = 개선 = 빨강
+    const summary2: BacktestSummary = {
+      current: {
+        momentum: makeMetrics({ max_drawdown: 11.0 }),
+      },
+      recommended: {
+        momentum: makeMetrics({ max_drawdown: 8.0 }),
+      },
+      diff: {
+        momentum: { max_drawdown: -3.0 },
+      },
+    };
+    const { rerender: _r } = render(
+      <BacktestComparisonCard strategyId="momentum" summary={summary2} />,
+      { container: document.body.appendChild(document.createElement("div")) },
+    );
+    void _r;
+    const cards = screen.getAllByTestId("backtest-comparison-card-momentum");
+    const lastCard = cards[cards.length - 1];
+    const mddDiff2 = within(lastCard).getByTestId("metric-diff-max_drawdown");
+    expect(mddDiff2.getAttribute("style") ?? "").toMatch(/#FF3333|rgb\(255,\s*51,\s*51\)/i);
   });
 
   it("G: data-testid 일관성 — backtest-comparison-card-{strategy_id} 루트 + 메트릭 testid", () => {

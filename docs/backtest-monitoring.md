@@ -195,10 +195,12 @@ curl -X POST http://43.202.187.5:3846/mcp \
 
 ---
 
-## 4. MDD 부호 컨벤션 확정 절차 (Phase 5b 작업)
+## 4. MDD 부호 컨벤션 확정 절차 (Phase 6.1 — 2026-05-17 확정 완료)
 
 `BacktestComparisonCard.tsx` 가 차이값 컬러 칩(이익색 빨강 / 손실색 파랑)을 표시할 때
 `max_drawdown` 의 부호 컨벤션에 의존한다. 외부 서버 응답 데이터로 확정 후 코드 반영.
+
+**최종 결론 (Phase 6.1)**: 외부 MCP 서버는 `max_drawdown` 을 **양수 절대값** 으로 반환 (`16.1`, `8.5` 등). `BacktestComparisonCard.tsx::METRIC_SPECS.max_drawdown.diffSignInverted = true` 적용 완료 — 양수 diff(추천 MDD 더 큼) = 손실 악화 = 파랑(`#3366FF`), 음수 diff = 손실 완화 = 빨강(`#FF3333`). 회귀 가드 `BacktestComparisonCard.test.tsx::Phase 4 > H` 1 케이스.
 
 ### 4-1. 첫 실 데이터 부호 확인
 ```sql
@@ -216,24 +218,22 @@ order by strategy_id, params_kind;
 - `mdd` 가 **음수** (예: `-12.34`): "최대 낙폭은 음수로 표시" 컨벤션 (현재 구현 가정)
 - `mdd` 가 **양수** (예: `12.34`): "절대값 양수" 컨벤션 — 별도 처리 필요
 
-### 4-2. 부호별 처리
+### 4-2. 부호별 처리 (Phase 6.1 — Case B 확정 적용 완료)
 
-**Case A — 음수 (현재 구현 그대로 유지)**:
-- 추천 mdd 가 현재 mdd 보다 크면(예: -5% → -3%) 추천이 더 좋음 → 빨강 칩 (이익)
-- `BacktestComparisonCard.tsx` 현재 `diffValue > 0` 분기로 정상 작동
+**Case A — 음수 (가정 폐기)**:
+- ~~추천 mdd 가 현재 mdd 보다 크면(예: -5% → -3%) 추천이 더 좋음~~
+- 실측 검증 결과 외부 MCP 는 양수 절대값으로만 반환. 본 케이스는 미사용.
 
-**Case B — 양수 (절대값)**:
-- 추천 mdd 가 현재 mdd 보다 작으면(예: 5% → 3%) 추천이 더 좋음 → 빨강 칩
-- `BacktestComparisonCard.tsx` 의 `diffSignInverted` future-proof spec 활용 (Phase 4 에서 이미 매개변수화)
-- 변경 위치: `metricDefinitions` 의 `max_drawdown` 항목에 `signInverted: true` 추가
+**Case B — 양수 (절대값) — 적용 완료**:
+- 추천 mdd 가 현재 mdd 보다 작으면(예: 10.0 → 8.0) 추천이 더 좋음 → diff 음수 → 빨강 칩
+- 추천 mdd 가 현재 mdd 보다 크면(예: 10.0 → 15.0) 추천이 더 나쁨 → diff 양수 → 파랑 칩
+- `BacktestComparisonCard.tsx::METRIC_SPECS.max_drawdown.diffSignInverted = true` 적용됨 (Phase 6.1).
 
-### 4-3. 컨벤션 영구 명시
+### 4-3. 컨벤션 영구 명시 (Phase 6.1 완료)
 
-확정 후 다음 위치에 컨벤션 1행 추가:
-- `_workspace/00_leader_trading_rules.md` — "외부 백테스트 서버 통합" 섹션 하단
-- `src/engine/CLAUDE.md` — 모듈 맵 "backtest_yaml" 항목 옆 컨벤션 표
-
-본 Phase 5 에서는 placeholder 만. 실측 후 사용자가 별도 사이클로 확정.
+- `frontend/CLAUDE.md` — `BacktestComparisonCard` 라인 갱신 (양수 컨벤션 확정 명시)
+- `docs/backtest-monitoring.md` Section 4 — 본 섹션 (확정 완료 표기)
+- 컴포넌트 헤더 주석 — Phase 6.1 양수 컨벤션 + signInverted 의미 명시
 
 ---
 

@@ -1,13 +1,15 @@
 /**
  * Phase 4 (2026-05-16) — Recommendations 페이지의 백테스트 비교 카드.
+ * Phase 6.1 (2026-05-17) — MDD 양수(절대값) 컨벤션 확정 (외부 MCP 실측 검증 산출).
  *
  * 백엔드 `parameter_recommendations.backtest_summary` JSONB 를 렌더.
  * 8개 메트릭을 좌(current) / 우(recommended) / diff 칩 형태로 표시.
  *
  * 컬러 컨벤션 (frontend/CLAUDE.md):
  * - 이익(개선) = #FF3333 빨강 / 손실(악화) = #3366FF 파랑 / 보합 = #333333
- * - max_drawdown 은 메트릭 값 자체가 음수 형태 (예: -8.5%). diff 부호 해석은 일반 메트릭과 동일:
- *   양수 diff = MDD 절대값 감소 = 개선 = 빨강 / 음수 diff = MDD 더 깊어짐 = 악화 = 파랑
+ * - max_drawdown 은 외부 MCP 서버가 **양수 절대값**(예: 8.5, 16.1) 으로 반환 (Phase 6 실측 확정).
+ *   diff = recommended - current. 양수 diff = MDD 절대값 증가 = 손실 악화 → 파랑 (signInverted: true).
+ *   음수 diff = MDD 절대값 감소 = 손실 완화 → 빨강.
  *
  * null 가드:
  * - props.summary == null → placeholder (백테스트 미실행/진행중 안내)
@@ -103,13 +105,13 @@ const METRIC_SPECS: Record<keyof BacktestMetrics, MetricFormatSpec> = {
     diffSignInverted: false,
   },
   max_drawdown: {
-    // 메트릭 값은 음수(예: -8.5%). diff 부호 해석은 일반 메트릭과 동일:
-    // 양수 diff (예: +2 = -8.5 → -6.5) = MDD 절대값 감소 = 개선 = 빨강
-    // 음수 diff (예: -1.5 = -8.5 → -10.0) = MDD 더 깊어짐 = 악화 = 파랑
+    // Phase 6.1: 외부 MCP 양수 절대값 컨벤션 확정 (예: 8.5%, 16.1%).
+    // diff = recommended - current. 양수 diff = MDD 증가 = 손실 악화 → 파랑.
+    // 음수 diff = MDD 감소 = 손실 완화 → 빨강. signInverted=true 로 부호 해석 역전.
     label: 'MDD',
     formatValue: fmtPct,
     formatDiff: fmtPctSigned,
-    diffSignInverted: false,
+    diffSignInverted: true,
   },
   win_rate: {
     label: '승률',
