@@ -829,6 +829,24 @@ DEFAULT_PARAMS = {
 
 **Phase A 별건 — LTV `stop_loss_hits=0` metrics 결함**: 5/15 자문 metrics 분석에서 `stop_loss_hits=0` 과 `max_loss_pct=-7.554%` 모순 발견. root cause 는 `recommendation_metrics.compute_metrics()` 가 `current_params.get("stop_loss_rate")` 단일 키만 참조하는데 LTV 만 `intraday_stop_loss`/`overnight_stop_loss` 분리 키 사용 → `None` 폴백 → 분기 영영 skip. 본 사이클에서는 진단만, fix 는 별도 사이클로 분리(`_workspace/red/phase-a-ltv-stop-loss-hits.md`).
 
+### LTV stop_loss_hits 결함 fix (Phase A2, 2026-05-17)
+
+Phase A 진단 후속. `src/engine/recommendation_metrics.py` 에 `_normalize_stop_loss_rate(params: dict) -> float` 헬퍼 도입:
+
+| 입력 케이스 | 후보 수집 | 반환 | 사용 전략 |
+|------------|-----------|------|-----------|
+| `{"stop_loss_rate": -7.5}` | `[-7.5]` | `-7.5` | momentum/VB/donchian/bull_flag/vcp |
+| `{"intraday_stop_loss": -2.5, "overnight_stop_loss": -2.0}` | `[-2.5, -2.0]` | `-2.5` (절대값 큰) | LTV |
+| `{"intraday_stop_loss": -3.0}` | `[-3.0]` | `-3.0` | LTV (overnight 부재) |
+| `{}` | `[]` | `0.0` | compute_metrics 분기 skip 보존 |
+| `{"stop_loss_rate": 2.0}` | `[]` (양수 skip) | `0.0` | 잘못된 양수 임계 보호 |
+
+알고리즘: 3 키(`stop_loss_rate`/`intraday_stop_loss`/`overnight_stop_loss`) 후보 수집 → `_safe_float` 변환 → 음수만 인정 → `min(candidates)` 반환 (절대값 큰 = 가장 보수적 = "확실히 손절 도달"). `compute_metrics()` 의 단일 키 참조 1줄을 헬퍼 호출로 교체. 다른 5 전략은 후보 그대로 단일 반환 → 회귀 0건.
+
+**적용 시점**: 5/15 발화된 LTV `parameter_recommendations.metrics.stop_loss_hits=0` 은 소급 재계산 안 함. **5/18 월 20:00 첫 자문부터 정상**. 운영 자동매매 흐름은 metrics 계산만 영향 — 자문/매매 흐름 미침범.
+
+회귀 가드: `tests/unit/engine/test_recommendation_metrics_ltv_stop_loss.py` 8 케이스 (Case A LTV 분리 키 / Case B 단일 키 / Case C 부재 0.0 / Case D 5/15 LTV 064400 -3.030% 통합 / Case E intraday only / Case F 혼합 + 양수/None edge).
+
 ---
 
 ## (2026-05-13) 작업 1 — 활성 보드만 노출 (VB/LTV `get_targets_status`)

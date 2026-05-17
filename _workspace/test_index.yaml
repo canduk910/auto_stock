@@ -1874,6 +1874,7 @@ backend:
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
   src/engine/recommendation_metrics.py:
     direct_tests:
+    - tests/unit/engine/test_recommendation_metrics_ltv_stop_loss.py
     - tests/unit/engine/test_recommendation_metrics_smoke.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -4047,10 +4048,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-17T09:53:06.353352+09:00'
+generated_at: '2026-05-17T10:06:52.300819+09:00'
 stats:
   backend_modules: 72
-  backend_tests: 104
+  backend_tests: 105
   frontend_modules: 44
   frontend_tests: 22
   unmapped_modules:

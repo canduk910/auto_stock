@@ -1,5 +1,7 @@
 # Phase A — LTV `stop_loss_hits=0` 결함 진단 보고서 (2026-05-17)
 
+> **Resolved by Phase A2 (2026-05-17, 커밋 TBD)** — `recommendation_metrics.py::_normalize_stop_loss_rate()` 헬퍼 도입 + `compute_metrics()` 단일 키 참조 교체. 5/18 월 20:00 첫 자문부터 정상. 회귀 가드: `tests/unit/engine/test_recommendation_metrics_ltv_stop_loss.py` 8 케이스. 5/15 발화된 metrics 소급 재계산 안 함.
+>
 > **본 문서는 진단만**입니다. fix 코드는 작성하지 않았고, 후속 fix 사이클 인계가 필요합니다.
 
 ## 1. 배경

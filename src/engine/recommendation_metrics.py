@@ -20,6 +20,47 @@ def _safe_float(v: Any, default: float = 0.0) -> float:
         return default
 
 
+def _normalize_stop_loss_rate(params: dict) -> float:
+    """전략별 손절 임계 정규화 (Phase A2, 2026-05-17).
+
+    LTV(`long_tail_volatility`) 만 `intraday_stop_loss`/`overnight_stop_loss`
+    분리 키 사용. 다른 5 전략(momentum/VB/donchian/bull_flag/vcp) 은
+    `stop_loss_rate` 단일 키. 두 케이스 모두 *가장 보수적인* (절대값 큰)
+    단일 임계로 정규화하여 `compute_metrics()` 의 `stop_loss_hits` 계산이
+    LTV 에서도 정상 작동하도록.
+
+    알고리즘:
+      1. `stop_loss_rate` / `intraday_stop_loss` / `overnight_stop_loss` 세 키
+         모두 후보로 수집.
+      2. 각 값을 `_safe_float` 로 변환 (None/문자열 → 0.0 폴백).
+      3. 음수 값만 손절 임계로 인정 (양수/0 은 무의미 — skip).
+      4. 후보 비어있으면 0.0 반환 (`compute_metrics` 분기 skip 보존).
+      5. `min(candidates)` 반환 — 절대값 큰 = 가장 보수적 = "확실히 손절 도달".
+
+    Args:
+      params: 전략 현재 파라미터 dict.
+
+    Returns:
+      음수 손절 임계값(예: -3.5). 유효 후보 없으면 0.0.
+
+    Examples:
+      >>> _normalize_stop_loss_rate({"stop_loss_rate": -7.5})
+      -7.5
+      >>> _normalize_stop_loss_rate({"intraday_stop_loss": -2.5, "overnight_stop_loss": -2.0})
+      -2.5
+      >>> _normalize_stop_loss_rate({})
+      0.0
+    """
+    candidates = []
+    for key in ("stop_loss_rate", "intraday_stop_loss", "overnight_stop_loss"):
+        val = _safe_float(params.get(key))
+        if val < 0:  # 음수만 손절 임계로 인정
+            candidates.append(val)
+    if not candidates:
+        return 0.0
+    return min(candidates)  # 절대값 큰 = 가장 보수적
+
+
 def compute_metrics(
     trades: list[dict],
     performance: list[dict],
@@ -94,7 +135,8 @@ def compute_metrics(
     max_loss_pct = min(loss_pcts) if loss_pcts else 0.0
 
     # 손절 도달 건수 — 손실률(%)이 stop_loss_rate에 근접/도달한 매도
-    stop_loss_rate = _safe_float(current_params.get("stop_loss_rate"))
+    # Phase A2 (2026-05-17): _normalize_stop_loss_rate() 로 LTV 분리 키 흡수.
+    stop_loss_rate = _normalize_stop_loss_rate(current_params)
     stop_loss_hits = 0
     if stop_loss_rate < 0 and loss_pcts:
         # stop_loss_rate(예: -7.5)보다 손실이 더 큰 (= 더 음수) 케이스
