@@ -66,9 +66,16 @@ NEXT_DAY_STABILIZE_SECS = 30                # 익일 청산 시가 안정화 (Q2
 # K (2026-05-12) — WebSocket 시세 silent inactive 자동 복구 stale_watcher
 # F1(재연결 1회) + `_scan_loop`(5분) 으로 못 잡는 silent inactive 즉시 회복.
 # 11:48 fresh=1/stale=26 운영 사고(2026-05-12) 대응.
-STALE_WATCHER_INTERVAL_SECS = 30            # task 발화 주기 (sleep 단위)
+#
+# 사이클 9 (2026-05-18) — KIS 차단 회피 안전망
+# KIS Open API 공지: 무한 연결/종료, 검증 없는 무한 등록/해제 반복 → IP/앱키
+# 일시 차단. K stale watcher × 보조 세션 5개 트래픽 1.5배 수준 회복.
+# - 30s → 120s (분당 발화 1/4)
+# - 3 → 10 (10회 × 120s = 20분 stale 누적 후 강제 재등록 — 단발 끊김 즉시 unsub/sub 차단)
+# - FRESHNESS 60 보존 (5/12 운영 사고 대응 의도 그대로)
+STALE_WATCHER_INTERVAL_SECS = 120           # task 발화 주기 (사이클 9: 30 → 120)
 STALE_FRESHNESS_SECS = 60                   # 이 시간 내 tick 없으면 stale 판정 (F1 의 VERIFY_FRESHNESS_SECS 동일)
-STALE_FORCE_REREGISTER_AFTER = 3            # 연속 N회 stale 이면 unsubscribe+subscribe 강제 재등록
+STALE_FORCE_REREGISTER_AFTER = 10           # 연속 N회 stale 이면 unsubscribe+subscribe 강제 재등록 (사이클 9: 3 → 10)
 
 # B (2026-05-15) — donchian_swing 일중 시세 REST 폴링 보강
 # WS stale 시에도 보유 종목의 ATR×2 트레일링/하드 -7% 손절 평가가 끊기지 않도록
@@ -2198,13 +2205,15 @@ class TradingScheduler:
             self._stale_retry_count[ticker] = retry
 
             if retry > STALE_FORCE_REREGISTER_AFTER * 2:
-                # 6회 초과 → 영구 stale 의심 (거래정지·이상 종목 등). skip + 다음 _scan_loop 위임
+                # 20회 초과 → 영구 stale 의심 (거래정지·이상 종목 등). skip + 다음 _scan_loop 위임
+                # (사이클 9: 임계 3 → 10 변경 따라 6 → 20 자동 확장)
                 skipped_giveup += 1
                 continue
 
             if retry > STALE_FORCE_REREGISTER_AFTER:
-                # 4~6회 → 풀의 unsubscribe_in_pool + subscribe(priority=HIGH, bypass_limit=True)
+                # 11~20회 → 풀의 unsubscribe_in_pool + subscribe(priority=HIGH, bypass_limit=True)
                 # 강제 재등록 — 분배 추적 정합성 유지 + 라운드로빈 재선택 가능
+                # (사이클 9: 임계 3 → 10. 10 × 120s = 20분 stale 누적 후에만 강제 재등록)
                 try:
                     await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
                     await asyncio.sleep(0.05)
@@ -2216,7 +2225,7 @@ class TradingScheduler:
                 except Exception:
                     logger.exception("[stale_watcher] 강제 재등록 실패: %s", ticker)
             else:
-                # 1~3회 → 풀의 resend_subscribe_for_ticker 사용
+                # 1~10회 → 풀의 resend_subscribe_for_ticker 사용
                 # 분배 추적된 세션에서 _send_subscribe (`_subscriptions` set 보존)
                 try:
                     await kis_ws_pool.resend_subscribe_for_ticker(TICK_TR_ID, ticker)

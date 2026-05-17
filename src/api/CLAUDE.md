@@ -54,6 +54,18 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 
 **운영 점진 활성화**: 사이클 7-A (보조 계좌 DB) + 7-B (WS 풀) 완료 후 본 사이클이 REST 마무리. 보조 0개 시 메인 only 동작 (회귀 0).
 
+**사이클 9 (2026-05-18) — KIS 차단 회피 health_monitor 통합**:
+- `_request_via_quote_pool` 가 응답 분기에서 `src.services.quote_session_health.health_monitor` 호출
+- 성공 (`rt_cd=="0"`) + `actual_label != "main"` → `record_success(label)` (consecutive reset + window total +=1)
+- 5xx HTTPStatusError → `record_failure(label, reason=f"http_{status}")` (보조 라벨만)
+- 보조 매니저 발급 실패 (`get_token_manager` 예외) → `record_failure(label, reason="token_issue_fail")`
+- KIS rt_cd!=0 비즈니스 거부 → 기록 안 함 (헬스와 무관)
+- 네트워크 에러 (`RequestError`) → 기록 안 함 (클라이언트 측 이슈 가능, 보조 헬스와 별개)
+- 임계 초과 시 health_monitor 가 `kis_quote_accounts.update_account(active=False)` + `kis_ws_pool.disable_quote_session(label)` + `system_logs` `[quote_session_disabled]` 영구 1행 발화. DB 실패 graceful — 메모리만 비활성 + WARNING 로그
+- 메인 라벨 "main" 은 자동 비활성 절대 금지 (안전 가드)
+- 자동 비활성 발생 시 운영자 대응: Settings UI 보조 계좌 카드에서 `active=true` 토글 → **다음 영업일** `_boot()` (07:50) 부터 풀에 재참여
+- 회귀 가드: `tests/unit/services/test_quote_session_health.py` 10 케이스 + `tests/contract/test_quote_session_auto_disable.py` 4 케이스
+
 ### order.py — 주문
 - 현금 매수: TTTC0012U, 매도: TTTC0011U
 - 정정/취소: TTTC0013U

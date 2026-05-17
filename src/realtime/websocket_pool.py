@@ -367,6 +367,64 @@ class WebsocketPool:
         except Exception:
             logger.debug("[pool_unsubscribe_in_pool] 실패: %s", tr_key, exc_info=True)
 
+    async def disable_quote_session(self, label: str) -> None:
+        """보조 세션 1개를 풀에서 제거 — 사이클 9 (2026-05-18) 자동 비활성용.
+
+        호출자: ``src.services.quote_session_health.QuoteSessionHealthMonitor``
+        가 5회 연속 실패 / 5분 50% 실패율 감지 시 호출.
+
+        흐름:
+        1. label → ``_quotes`` 인덱스 매칭 (``quote-N`` 1-based)
+        2. 해당 세션 ``disconnect()`` (예외 swallow)
+        3. ``_quotes`` 에서 제거
+        4. ``_ticker_to_session`` 에서 해당 세션 담당 ticker 모두 제거
+
+        안전 가드:
+        - 메인 라벨 (``"main"``) → noop. 메인 세션은 자동 비활성 절대 금지.
+        - 없는 label → noop (idempotent — 두 번째 호출 안전)
+
+        다음 ``subscribe`` 호출은 자동 라운드로빈으로 남은 보조 또는 메인 fallback.
+        """
+        if label == "main":
+            # 메인 세션 자동 비활성 절대 금지 — 안전 가드
+            logger.debug("[pool_disable] 메인 라벨 noop")
+            return
+
+        # label "quote-N" → 1-based index
+        if not label.startswith("quote-"):
+            logger.debug("[pool_disable] unknown label format: %s", label)
+            return
+        try:
+            idx = int(label.split("-", 1)[1]) - 1
+        except (ValueError, IndexError):
+            logger.debug("[pool_disable] label parse 실패: %s", label)
+            return
+
+        if idx < 0 or idx >= len(self._quotes):
+            # 없는 인덱스 — idempotent noop
+            logger.debug("[pool_disable] %s 이미 제거됨 또는 미존재 (quotes=%d)",
+                         label, len(self._quotes))
+            return
+
+        target = self._quotes[idx]
+
+        # 해당 세션 담당 ticker 정리
+        for tr_key in list(self._ticker_to_session.keys()):
+            if self._ticker_to_session[tr_key] is target:
+                del self._ticker_to_session[tr_key]
+
+        # disconnect — 예외 swallow (정합성 유지)
+        try:
+            await target.disconnect()
+        except Exception:
+            logger.debug("[pool_disable] disconnect 실패: %s", label, exc_info=True)
+
+        # _quotes 에서 제거 — 라운드로빈 idx 도 보수적 reset
+        del self._quotes[idx]
+        self._round_robin_idx = 0
+
+        logger.info("[pool_disable] %s 비활성 완료 — quotes=%d", label, len(self._quotes))
+
     # -- 통합 조회 / 진단 -----------------------------------------------
 
     def get_subscribed_tickers(self) -> set[str]:

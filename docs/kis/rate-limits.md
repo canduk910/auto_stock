@@ -148,3 +148,55 @@ LIMIT 50;
 - WebSocket 구독 우선순위: `src/realtime/CLAUDE.md` (E1 / E2 / F1 / K)
 - KIS 거부 응답 영구 저장: 메인 `CLAUDE.md` "핵심 안전 규칙" 의 Phase A1
 - 에러 코드 분류: [docs/kis/error-codes.md](error-codes.md) (APBK0918 / APBK1943 / APBK3013 등)
+
+---
+
+## 6. KIS 차단 회피 안전망 (사이클 9, 2026-05-18)
+
+### KIS Open API 담당자 공지 (2026-05-18)
+
+> 무한으로 연결 접속, 종료 반복 / 데이터 구독 후 검증 없이 무한 등록/해제 반복 → IP/앱키 일시 차단 예정
+
+본 시스템 다층 점검 결과:
+
+| 메커니즘 | 상태 | 근거 |
+|---------|------|------|
+| Reconnect 백오프 | ✅ 안전 | `MAX_RECONNECT=5` + 지수 백오프 |
+| F1 재연결 검증 | ✅ 안전 | 60s 1회 + `_reverify_in_progress` 중첩 방지 |
+| E2 거절 응답 처리 | ✅ 안전 | `_subscriptions.discard` + 5분 `_scan_loop` 위임 |
+| K stale watcher × 보조 5개 | 🔴 **위험** | 30s 주기 × 강제 임계 3 → 분당 800 unsubscribe/subscribe |
+
+### 사이클 9 안전망 4 항목
+
+1. **stale watcher 트래픽 완화** (`src/engine/scheduler.py`)
+   - `STALE_WATCHER_INTERVAL_SECS`: 30 → **120** (분당 발화 1/4)
+   - `STALE_FORCE_REREGISTER_AFTER`: 3 → **10** (20분 stale 누적 후에만 강제 재등록)
+   - `STALE_FRESHNESS_SECS`: 60 보존 (5/12 사고 대응 의도)
+   - 최악 시나리오 분당 트래픽 800 → 200 미만 (강제 임계 분기로 실제 1/10 이하)
+
+2. **`QuoteSessionHealthMonitor`** (`src/services/quote_session_health.py`)
+   - 보조 세션별 토큰 발급 실패 / 5xx 응답 누적 추적
+   - 5회 연속 실패 또는 5분 50% 실패율 (min_calls 10) → 자동 비활성
+   - DB `kis_quote_accounts.active=false` + 풀 제거 + `[quote_session_disabled]` 영구 로그
+   - 메인 라벨 "main" 은 자동 비활성 절대 금지
+
+3. **`base.py::_request_via_quote_pool` 통합**
+   - 성공 → `record_success(label)` / 5xx → `record_failure(label, "http_503")` / 토큰 발급 실패 → `record_failure(label, "token_issue_fail")`
+
+4. **`WebsocketPool.disable_quote_session(label)`**
+   - 보조 세션 1개 disconnect + 풀 제거 + ticker 추적 정리
+   - 메인 / 없는 라벨 / 두 번째 호출 모두 noop (idempotent)
+
+### 운영자 가이드
+
+자동 비활성 발생 시:
+1. `system_logs` 에서 `[quote_session_disabled]` 사유 확인
+2. 외부 원인 (KIS 측 장애, 토큰 만료, 계정 issue) 진단
+3. Settings UI 에서 해당 보조 계좌 `active=true` 토글
+4. **다음 영업일** `_boot()` (07:50) 부터 풀 재참여 (당일 즉시 재참여 미지원)
+
+### 회귀 가드 (24 신규)
+- `tests/unit/engine/test_stale_watcher_thresholds.py` 7 케이스
+- `tests/unit/services/test_quote_session_health.py` 10 케이스
+- `tests/unit/realtime/test_websocket_pool_disable.py` 5 케이스
+- `tests/contract/test_quote_session_auto_disable.py` 4 케이스

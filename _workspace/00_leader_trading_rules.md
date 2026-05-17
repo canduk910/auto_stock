@@ -1813,3 +1813,68 @@ ON CONFLICT (key) DO NOTHING;
 - 미적용 시에도 코드 디폴트 (HARD + 기본 임계) 작동 → 회귀 0
 - 적용 후 Settings UI 에서 즉시 조정 가능
 
+## 사이클 9 — KIS 차단 회피 안전망 보강 (2026-05-18)
+
+### 배경
+KIS Open API 담당자 공지 (2026-05-18): 무한 연결/종료 반복, 검증 없는 무한 등록/해제 반복 → IP/앱키 일시 차단 예정.
+
+자체 점검 결과 K stale watcher 가 보조 세션 5개와 결합 시 분당 800 unsubscribe/subscribe 요청을 KIS 에 던질 수 있어 비정상 케이스 2 (무한 등록/해제) 에 직접 매핑됨. 운영 매매 흐름 무관한 시세 안전망만 보강.
+
+### 4 항목 변경
+
+1. **stale watcher 발화 주기 완화** (`src/engine/scheduler.py`)
+   - `STALE_WATCHER_INTERVAL_SECS`: 30 → **120** (분당 발화 1/4)
+   - `STALE_FORCE_REREGISTER_AFTER`: 3 → **10** (10회 × 120s = 20분 stale 누적 후 강제 재등록)
+   - `STALE_FRESHNESS_SECS`: 60 그대로 (5/12 운영 사고 대응 의도 보존)
+   - 분기 자동 확장: 21회 초과 skip (기존 6회 초과 → 사이클 9 임계 20)
+
+2. **`QuoteSessionHealthMonitor` 신규** (`src/services/quote_session_health.py`)
+   - 보조 시세 세션 헬스 추적 + 자동 비활성 의사결정 (메인 라벨 "main" 은 제외 — 안전 가드)
+   - 상수: `MAX_CONSECUTIVE_FAILURES=5` / `WINDOW_SECS=300` / `MAX_FAILURE_RATE=0.5` / `MIN_CALLS_FOR_RATE=10`
+   - 비활성 트리거: (a) 5회 연속 실패 (b) 5분 sliding window total ≥ 10 + failure_rate ≥ 0.5
+   - 트리거 시 (1) `kis_quote_accounts.update_account(active=False)` (2) `kis_ws_pool.disable_quote_session(label)` (3) `system_logs` `[quote_session_disabled]` 영구 1행
+   - DB update 실패 graceful — 메모리는 비활성 그대로 + WARNING 로그 `[quote_session_health_db_fail]`
+   - `_disabled_labels` set 으로 두 번째 호출 idempotent
+   - 성공 시점에도 sliding window 평가 (`_evaluate_rate_only`) — 누적 비율 임계 race 차단
+
+3. **`base.py::_request_via_quote_pool` 통합**
+   - 성공(`rt_cd=="0"`) + actual_label != "main" → `record_success(label)`
+   - 5xx HTTPStatusError → `record_failure(label, reason=f"http_{status}")`
+   - 보조 매니저 발급 실패 → `record_failure(label, reason="token_issue_fail")`
+   - KIS rt_cd!=0 비즈니스 거부 → 기록 안 함
+   - 네트워크 에러 → 기록 안 함 (클라이언트 측 이슈 가능)
+
+4. **`WebsocketPool.disable_quote_session(label)` 신규** (`src/realtime/websocket_pool.py`)
+   - "quote-N" 라벨 → 1-based index 변환 → 해당 세션 `disconnect()` + `_quotes` 제거
+   - `_ticker_to_session` 에서 해당 세션 담당 ticker 정리
+   - 메인 라벨 "main" → noop (안전 가드)
+   - 없는 label / 형식 불일치 → noop (idempotent)
+   - 다음 ``subscribe`` 호출은 자동 라운드로빈 → 남은 보조 또는 메인 fallback
+
+### 운영자 가이드
+자동 비활성된 보조 세션 복귀 절차:
+1. Settings UI 보조 계좌 카드 진입
+2. 비활성된 라벨의 `active=true` 토글
+3. **다음 영업일** `_boot()` (07:50) 부터 풀에 재참여
+   - 당일 즉시 재참여는 미지원 (보안: 동일 토큰 패턴 차단 + 운영자 진단 시간 확보)
+   - 긴급 복구가 필요하면 컨테이너 재기동 시점에 즉시 반영됨
+
+영구 로그 추적:
+```bash
+# 비활성 사건
+SELECT * FROM system_logs WHERE message LIKE '[quote_session_disabled]%' ORDER BY created_at DESC;
+
+# DB 실패 graceful 사례
+SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' ORDER BY created_at DESC;
+```
+
+### 회귀 가드 (24 신규)
+- `tests/unit/engine/test_stale_watcher_thresholds.py` 7 케이스 (사양 A~F)
+- `tests/unit/services/test_quote_session_health.py` 10 케이스 (사양 A~J)
+- `tests/unit/realtime/test_websocket_pool_disable.py` 5 케이스
+- `tests/contract/test_quote_session_auto_disable.py` 4 케이스
+- 기존 `tests/integration/test_stale_watcher{,_pool}.py` 임계 가정 동기 갱신 (3→10, 6→20)
+
+### 베이스라인
+- 1221 (commit edba27b) → 1245 (+24 사이클 9, -0 회귀)
+

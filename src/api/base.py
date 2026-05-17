@@ -493,6 +493,12 @@ async def _request_via_quote_pool(
                 "[quote_pool] 보조 매니저 발급 실패: label=%s — 메인 fallback",
                 label, exc_info=True,
             )
+            # 사이클 9 (2026-05-18) — 토큰 발급 실패 카운팅 (KIS 차단 회피)
+            try:
+                from src.services.quote_session_health import health_monitor as _hm
+                await _hm.record_failure(label, reason="token_issue_fail")
+            except Exception:
+                logger.debug("[quote_pool] health_monitor 호출 실패", exc_info=True)
             manager = None
             label = None  # 메인 fallback
 
@@ -529,6 +535,21 @@ async def _request_via_quote_pool(
                 status = e.response.status_code
                 if 500 <= status < 600:
                     _quote_request_metrics["http_5xx"] += 1
+                    # 사이클 9 (2026-05-18) — 5xx 카운팅 (KIS 차단 회피)
+                    # 보조 라벨만 추적 (메인은 안전 가드로 noop)
+                    if actual_label != "main":
+                        try:
+                            from src.services.quote_session_health import (
+                                health_monitor as _hm,
+                            )
+                            await _hm.record_failure(
+                                actual_label, reason=f"http_{status}",
+                            )
+                        except Exception:
+                            logger.debug(
+                                "[quote_pool] health_monitor 5xx 호출 실패",
+                                exc_info=True,
+                            )
                 elif 400 <= status < 500:
                     _quote_request_metrics["http_4xx"] += 1
                 logger.warning(
@@ -566,6 +587,17 @@ async def _request_via_quote_pool(
         if rt_cd == "0":
             if attempt > 1:
                 _quote_request_metrics["retry_recovered"] += 1
+            # 사이클 9 (2026-05-18) — 성공 카운팅 (KIS 차단 회피 — consecutive reset)
+            if actual_label != "main":
+                try:
+                    from src.services.quote_session_health import (
+                        health_monitor as _hm,
+                    )
+                    await _hm.record_success(actual_label)
+                except Exception:
+                    logger.debug(
+                        "[quote_pool] health_monitor 성공 호출 실패", exc_info=True,
+                    )
             return data
 
         msg_cd = data.get("msg_cd", "")
