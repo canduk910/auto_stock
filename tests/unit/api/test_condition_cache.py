@@ -40,7 +40,7 @@ async def test_fetch_stock_detail_hits_cache_within_ttl(monkeypatch):
     from src.api import condition
 
     mock_get = AsyncMock(return_value={"output": {"stck_prpr": "65000"}})
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     r1 = await condition.fetch_stock_detail("005930")
     r2 = await condition.fetch_stock_detail("005930")
@@ -59,7 +59,7 @@ async def test_fetch_stock_detail_miss_after_ttl(monkeypatch):
     from src.api import condition
 
     mock_get = AsyncMock(return_value={"output": {"stck_prpr": "65000"}})
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     # monotonic 을 monkeypatch — 시간 흐름 시뮬
     current_time = [1000.0]
@@ -99,7 +99,7 @@ async def test_fetch_stock_detail_separate_cache_per_ticker(monkeypatch):
         return responses[params["fid_input_iscd"]]
 
     mock = AsyncMock(side_effect=_fake_get)
-    monkeypatch.setattr(condition, "kis_get", mock)
+    monkeypatch.setattr(condition, "kis_get_quote", mock)
 
     r1 = await condition.fetch_stock_detail("005930")
     r2 = await condition.fetch_stock_detail("000660")
@@ -134,7 +134,7 @@ async def test_fetch_daily_candles_caches_per_days_key(monkeypatch):
             ]
         }
 
-    monkeypatch.setattr(condition, "kis_get", _fake_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _fake_get)
 
     await condition.fetch_daily_candles("005930", days=21)
     await condition.fetch_daily_candles("005930", days=21)  # 캐시 hit
@@ -156,7 +156,7 @@ async def test_fetch_stock_detail_cache_cleared_on_clear_caches(monkeypatch):
     from src.api import condition
 
     mock_get = AsyncMock(return_value={"output": {"stck_prpr": "65000"}})
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     await condition.fetch_stock_detail("005930")
     await condition.fetch_stock_detail("005930")
@@ -178,7 +178,7 @@ async def test_reset_daily_state_clears_condition_caches(monkeypatch):
     from src.engine.scheduler import TradingScheduler
 
     mock_get = AsyncMock(return_value={"output": {"stck_prpr": "65000"}})
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     # 캐시 시드
     await condition.fetch_stock_detail("005930")
@@ -212,7 +212,7 @@ async def test_fetch_stock_detail_concurrent_calls_share_first_fetch(monkeypatch
         await asyncio.sleep(0.01)
         return {"output": {"stck_prpr": "65000"}}
 
-    monkeypatch.setattr(condition, "kis_get", _slow_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _slow_get)
 
     results = await asyncio.gather(*(
         condition.fetch_stock_detail("005930") for _ in range(10)
@@ -241,7 +241,7 @@ async def test_fetch_daily_candles_concurrent_calls_share_first_fetch(monkeypatc
             ]
         }
 
-    monkeypatch.setattr(condition, "kis_get", _slow_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _slow_get)
 
     results = await asyncio.gather(*(
         condition.fetch_daily_candles("005930", days=21) for _ in range(8)
@@ -282,7 +282,7 @@ async def test_fetch_stock_detail_cancellation_safe_for_joiners(monkeypatch):
         await proceed.wait()
         return {"output": {"stck_prpr": "65000"}}
 
-    monkeypatch.setattr(condition, "kis_get", _slow_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _slow_get)
 
     # joiner1 + joiner2 동시에 await — 첫 호출이 fetch 담당, 둘 다 shield 로 합류
     j1 = asyncio.create_task(condition.fetch_stock_detail("005930"))
@@ -322,7 +322,7 @@ async def test_fetch_stock_detail_clear_caches_during_inflight_skips_cache_write
         await proceed.wait()
         return {"output": {"stck_prpr": "65000"}}
 
-    monkeypatch.setattr(condition, "kis_get", _slow_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _slow_get)
 
     task = asyncio.create_task(condition.fetch_stock_detail("005930"))
     await started.wait()
@@ -348,7 +348,7 @@ async def test_fetch_stock_detail_clear_caches_during_inflight_skips_cache_write
         proceed2.set()
         return {"output": {"stck_prpr": "70000"}}
 
-    monkeypatch.setattr(condition, "kis_get", _next_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _next_get)
     result2 = await condition.fetch_stock_detail("005930")
     assert result2 == {"stck_prpr": "70000"}
     assert call_count[0] == 2, "epoch bump 후 새 fetch 발생"
@@ -365,7 +365,7 @@ async def test_fetch_stock_detail_uses_get_running_loop_not_get_event_loop(monke
     monkeypatch.setattr("asyncio.get_event_loop", _boom)
 
     mock_get = AsyncMock(return_value={"output": {"stck_prpr": "65000"}})
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     result = await condition.fetch_stock_detail("005930")
     assert result == {"stck_prpr": "65000"}
@@ -385,7 +385,7 @@ async def test_fetch_stock_detail_does_not_emit_future_exception_warning(monkeyp
     async def _failing_get(*_args, **_kwargs):
         raise RuntimeError("KIS 5xx")
 
-    monkeypatch.setattr(condition, "kis_get", _failing_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _failing_get)
 
     with caplog.at_level(logging.WARNING):
         with pytest.raises(RuntimeError, match="KIS 5xx"):
@@ -425,7 +425,7 @@ async def test_fetch_daily_candles_cancellation_safe_for_joiners(monkeypatch):
             ]
         }
 
-    monkeypatch.setattr(condition, "kis_get", _slow_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _slow_get)
 
     j1 = asyncio.create_task(condition.fetch_daily_candles("005930", days=21))
     j2 = asyncio.create_task(condition.fetch_daily_candles("005930", days=21))
@@ -464,7 +464,7 @@ async def test_fetch_daily_candles_clear_caches_during_inflight_skips_cache_writ
             ]
         }
 
-    monkeypatch.setattr(condition, "kis_get", _slow_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _slow_get)
 
     task = asyncio.create_task(condition.fetch_daily_candles("005930", days=21))
     await started.wait()
@@ -492,7 +492,7 @@ async def test_fetch_daily_candles_uses_get_running_loop_not_get_event_loop(monk
     async def _fake_get(*_args, **_kwargs):
         return {"output2": [{"stck_bsop_date": "20260512", "stck_clpr": "65000"}]}
 
-    monkeypatch.setattr(condition, "kis_get", _fake_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _fake_get)
 
     result = await condition.fetch_daily_candles("005930", days=21)
     assert len(result) == 1
@@ -509,7 +509,7 @@ async def test_fetch_daily_candles_does_not_emit_future_exception_warning(monkey
     async def _failing_get(*_args, **_kwargs):
         raise RuntimeError("KIS 5xx")
 
-    monkeypatch.setattr(condition, "kis_get", _failing_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _failing_get)
 
     with caplog.at_level(logging.WARNING):
         with pytest.raises(RuntimeError, match="KIS 5xx"):
@@ -544,7 +544,7 @@ async def test_fetch_stock_detail_cancelled_error_does_not_corrupt_inflight(monk
         await proceed.wait()
         return {"output": {"stck_prpr": "65000"}}
 
-    monkeypatch.setattr(condition, "kis_get", _slow_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _slow_get)
 
     task = asyncio.create_task(condition.fetch_stock_detail("005930"))
     await asyncio.sleep(0.01)  # fetch 시작
@@ -569,7 +569,7 @@ async def test_fetch_stock_detail_cancelled_error_does_not_corrupt_inflight(monk
         proceed2.set()
         return {"output": {"stck_prpr": "70000"}}
 
-    monkeypatch.setattr(condition, "kis_get", _next_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _next_get)
     result = await condition.fetch_stock_detail("005930")
     assert result == {"stck_prpr": "70000"}
     assert call_count[0] == 2
@@ -609,7 +609,7 @@ async def test_stock_detail_task_exception_drained_no_warning(monkeypatch: pytes
         await asyncio.sleep(0.01)
         raise RuntimeError("KIS down")
 
-    monkeypatch.setattr(condition, "kis_get", _failing_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _failing_get)
 
     # joiner 생성 후 즉시 cancel — task 는 backgrond 에서 계속 실행
     joiner = asyncio.create_task(condition.fetch_stock_detail("005930"))
@@ -642,7 +642,7 @@ async def test_daily_candles_task_exception_drained_no_warning(monkeypatch: pyte
         await asyncio.sleep(0.01)
         raise RuntimeError("KIS down")
 
-    monkeypatch.setattr(condition, "kis_get", _failing_get)
+    monkeypatch.setattr(condition, "kis_get_quote", _failing_get)
 
     joiner = asyncio.create_task(condition.fetch_daily_candles("005930", days=21))
     await asyncio.sleep(0)

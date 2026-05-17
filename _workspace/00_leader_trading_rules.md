@@ -1505,3 +1505,73 @@ PR #2 (브랜치 `claude/diagram-stock-filtering-IaJ4G`) 위에 push → 자동 
 - **체결통보 메인 단일 절대 보장** — 코드 가드 `RuntimeError` + 문서 (`src/realtime/CLAUDE.md` 사이클 7-B 섹션).
 - **보조 세션 0개 시 기존 동작 회귀 보존** — 5/18 자문 영향 0.
 - 점진 활성화 — 사용자가 보조 계좌 등록할 때까지 메인 only.
+
+## 자문 시스템 개선 사이클 7-C — REST 시세성 호출 풀 + scanner 분배 명시화 (2026-05-18)
+
+사이클 7-A(DB+토큰 multi-account) + 7-B(WebsocketPool 시세 분배) 완료 후, REST 시세성 호출도 보조 계좌 라운드로빈으로 분산 + scanner/stale watcher 가 풀 명시 호출로 전환. 본 사이클 완료 후 KIS 다중 계좌 인프라 전체가 일관된 분배 정책으로 동작.
+
+### 자금 안전 절대 원칙 (변경 0)
+
+- 매매(`place_order`/`cancel_order`) / 잔고(`get_balance`/`get_buyable`) / 체결조회(`get_daily_orders`) / 체결통보 → **영원히 메인 단일** (사이클 7-A/7-B 가드 그대로)
+- REST 시세성 호출(`fetch_daily_candles`, `fetch_stock_detail`, `_fetch_fluctuation_rank`, `inquire_stock_basics`, `is_market_open`, `next_trading_day`) 만 본 사이클 풀에 라우트
+- `QuotePoolPathError` raise — 시세 풀에서 매매/잔고 path 진입 시 즉시 거부 (defense-in-depth)
+- 코드 + 문서 + 테스트 3중 가드 (`tests/unit/api/test_condition_quote_routing.py::test_order_module_never_imports_quote_pool` + `test_balance_module_never_imports_quote_pool`)
+
+### 변경 요약
+
+1. **`src/api/base.py` 확장 (~200 LOC)**
+   - `kis_get_quote` / `kis_post_quote` 신규 함수 + `_request_via_quote_pool` 본체
+   - `_QUOTE_ALLOWED_PATHS` 화이트리스트 (5 path) — 외 경로 즉시 `QuotePoolPathError`
+   - `_select_quote_label()` 라운드로빈 — `(idx+1) % len(active_labels)` + `asyncio.Lock`
+   - Per-label `_quote_semaphores[label] = Semaphore(18)` (메인 20 보다 보수적)
+   - `_quote_request_metrics` 격리 dict + `get_quote_request_metrics` / `reset_quote_request_metrics`
+   - 보조 토큰 매니저 발급 실패 (`ValueError`) → 메인 fallback (graceful)
+
+2. **`src/api/condition.py` 6 함수 위임 (~6 LOC)**
+   - `is_market_open` / `next_trading_day` / `_fetch_fluctuation_rank` / `inquire_stock_basics` / `_fetch_stock_detail_and_cache` / `_fetch_daily_candles_and_cache` 모두 `kis_get` → `kis_get_quote`
+   - import: `from src.api.base import KisApiError, kis_get_quote` (메인 `kis_get` import 제거)
+   - 시그니처 변경 0 — 외부 호출자(`scanner`, `strategies`) 영향 없음
+
+3. **`src/engine/scanner.py` (~25 LOC)**
+   - `from src.realtime.websocket_pool import kis_ws_pool` 추가
+   - `subscribe_filtered_stocks` priority_groups 분기에서 `kis_ws.subscribe(...)` → `kis_ws_pool.subscribe(tr_id, t, priority='HIGH'|'LOW', bypass_limit=True|False)` 위임
+     - `positions`/`next_day_clear` → priority='HIGH' + bypass_limit=True (메인 절대 보장)
+     - `breakout`/`momentum`/`swing` → priority='LOW' + bypass_limit=False (보조 라운드로빈 우선)
+   - 평탄 처리 분기(`priority_groups=None`)는 기존 `kis_ws.subscribe` 그대로 (외부 호환)
+
+4. **`src/realtime/websocket_pool.py` 확장 (~120 LOC)**
+   - `WebsocketPool.start(dispatch_message=None)` — DB 활성 보조 계좌 lazy connect (멱등 `_started`)
+   - `WebsocketPool.stop()` — 보조 disconnect + task cancel + 추적 dict clear
+   - `WebsocketPool.unsubscribe_in_pool(tr_id, tr_key)` — 강제 재등록용 (분배 추적 제거 + 세션 unsubscribe)
+   - 보조 세션 KisWebSocket 인스턴스에 `token_manager=<보조 매니저>` 주입
+
+5. **`src/realtime/websocket.py` 최소 변경 (~3 LOC)**
+   - `KisWebSocket.__init__(*, token_manager=None)` 선택적 주입
+   - `connect()` 의 approval_key 발급을 `self._token_manager.get_approval_key()` 로 분기 (메인 기본값 보존)
+
+6. **`src/engine/scheduler.py` (~10 LOC)**
+   - `start()` 메인 `kis_ws.connect()` 직후 `await kis_ws_pool.start(dispatch_message=...)` 호출
+   - `_check_and_resubscribe_stale()` 가 단일 세션 직접 호출 → 풀 헬퍼(`resend_subscribe_for_ticker` / `unsubscribe_in_pool` / `subscribe(priority='HIGH')`) 위임
+
+### 회귀 가드 (42 신규)
+
+| 파일 | 케이스 |
+|------|-------|
+| `tests/unit/api/test_quote_pool.py` | 18 — 보조 0개 fallback / 라운드로빈 / 토큰 매니저 lazy / 매니저 실패 graceful / path 가드 (5 forbidden + 5 allowed) / 위임 / 메트릭 격리 / 5xx 재시도 / 매매·잔고 가드 |
+| `tests/unit/api/test_condition_quote_routing.py` | 7 — 6 함수 위임 + order/balance 모듈 import 가드 |
+| `tests/unit/engine/test_scanner_priority_dispatch.py` | 8 — HIGH/LOW 명시 / bypass_limit / 중복 dedup |
+| `tests/integration/test_stale_watcher_pool.py` | 5 — 풀 헬퍼 경유 / 분배 추적 활용 / 강제 재등록 / >6 skip / fresh 회복 clear |
+| `tests/integration/test_scheduler_boot_quote_sessions.py` | 4 — 보조 0개 회귀 / N개 connect / 실패 graceful / 체결통보 메인 단일 |
+
+### 운영 점진 활성화
+
+1. 사이클 7-C 배포 후 보조 세션 DB 0개 → 메인 only 동작 (회귀 0, 5/18 자문 영향 0)
+2. 운영자가 1~5개 보조 계좌 등록 → 자동으로 시세 풀에 분배 (재기동 없이 다음 `_boot` 사이클부터 반영)
+3. 메트릭 분리 — `get_quote_request_metrics().by_label` 로 `main` / `quote-N` 분배 현황 가시화 (대시보드 노출은 별도 사이클)
+
+### 안전 원칙
+
+- **자금 안전 절대 원칙**: 매매/잔고/체결통보 메인 단일 영구 보장 — 코드 가드 (`QuotePoolPathError`) + 문서 + 모듈 import 가드 테스트
+- **외부 호출자 인터페이스 보존** — `fetch_daily_candles` 등 시그니처 변경 0
+- **보조 토큰 매니저 실패 graceful** — `ValueError` 또는 connect 실패 시 메인 fallback / 해당 세션 skip
+- **점진 활성화** — 보조 등록 전까지 메인 only 회귀 0

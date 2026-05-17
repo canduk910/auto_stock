@@ -72,9 +72,18 @@ def _is_rejection_response(rt_cd: str | None, msg1: str) -> bool:
 
 
 class KisWebSocket:
-    """KIS WebSocket 연결 매니저."""
+    """KIS WebSocket 연결 매니저.
 
-    def __init__(self) -> None:
+    사이클 7-C — 보조 시세 세션 지원을 위해 선택적으로 `token_manager` 주입 가능.
+    인자 미지정 시 메인 글로벌 `token_manager` 사용 (기존 동작 100% 보존).
+    """
+
+    def __init__(self, *, token_manager=None) -> None:
+        # 사이클 7-C — 메인이면 None, 보조면 외부 매니저 주입
+        # `connect()` / approval_key 발급 시 이 매니저 사용
+        from src.auth.token import token_manager as _main_tm
+        self._token_manager = token_manager if token_manager is not None else _main_tm
+
         self._ws: ClientConnection | None = None
         self._approval_key: str = ""
         self._subscriptions: set[tuple[str, str]] = set()  # (tr_id, tr_key) — SEND 기준
@@ -104,7 +113,8 @@ class KisWebSocket:
 
         while self._running and self._reconnect_count <= MAX_RECONNECT:
             try:
-                self._approval_key = await token_manager.get_approval_key()
+                # 사이클 7-C — 메인이면 글로벌 매니저, 보조면 주입된 매니저
+                self._approval_key = await self._token_manager.get_approval_key()
                 async with websockets.connect(
                     settings.kis_ws_url,
                     ping_interval=None,

@@ -62,8 +62,37 @@ def _make_kis_ws_double(subscribed: set[str]):
 
 
 def _patch_kis_ws(scheduler_env, subscribed: set[str]):
+    """사이클 7-C — stale watcher 가 풀(`kis_ws_pool`) 헬퍼를 사용하므로 풀도 패치.
+
+    풀의 `resend_subscribe_for_ticker` / `unsubscribe_in_pool` / `subscribe` 가
+    fake double 의 `_send_subscribe` / `unsubscribe` / `subscribe` 호출을 그대로 기록하도록
+    위임한다.
+    """
     double, calls = _make_kis_ws_double(subscribed)
     scheduler_env.monkeypatch.setattr("src.engine.scheduler.kis_ws", double)
+
+    # 사이클 7-C — 풀 헬퍼도 동일 calls 객체에 위임
+    async def fake_resend(tr_id, tr_key):
+        await double._send_subscribe(tr_id, tr_key, subscribe=True)
+
+    async def fake_unsub_in_pool(tr_id, tr_key):
+        await double.unsubscribe(tr_id, tr_key)
+
+    async def fake_subscribe(tr_id, tr_key, *, priority="LOW", bypass_limit=False):
+        await double.subscribe(tr_id, tr_key, bypass_limit=bypass_limit)
+
+    scheduler_env.monkeypatch.setattr(
+        "src.realtime.websocket_pool.kis_ws_pool.resend_subscribe_for_ticker",
+        fake_resend,
+    )
+    scheduler_env.monkeypatch.setattr(
+        "src.realtime.websocket_pool.kis_ws_pool.unsubscribe_in_pool",
+        fake_unsub_in_pool,
+    )
+    scheduler_env.monkeypatch.setattr(
+        "src.realtime.websocket_pool.kis_ws_pool.subscribe",
+        fake_subscribe,
+    )
     return calls
 
 

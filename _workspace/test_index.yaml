@@ -8,7 +8,9 @@ backend:
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/engine/test_log_analysis_metrics.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -50,11 +52,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -79,6 +83,7 @@ backend:
   src/api/balance.py:
     direct_tests:
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_routes_backtest.py
@@ -119,11 +124,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -178,17 +185,21 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -244,6 +255,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -268,6 +280,7 @@ backend:
     - tests/integration/test_boot_eager_refresh.py
     - tests/integration/test_confirm_open_prices.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -307,11 +320,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
@@ -351,6 +366,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -371,7 +387,8 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
   src/api/order.py:
-    direct_tests: []
+    direct_tests:
+    - tests/unit/api/test_quote_pool.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_routes_backtest.py
@@ -412,11 +429,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -448,8 +467,10 @@ backend:
   src/auth/__init__.py:
     direct_tests:
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_manager_multi.py
     transitive_tests: []
@@ -495,13 +516,16 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -531,8 +555,10 @@ backend:
   src/auth/token.py:
     direct_tests:
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_manager_multi.py
     transitive_tests:
@@ -579,9 +605,11 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
     - tests/unit/db/test_stock_master.py
@@ -622,6 +650,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -684,18 +713,22 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
@@ -746,6 +779,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -829,18 +863,22 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/auth/test_token.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -877,6 +915,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -938,11 +977,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -1008,11 +1049,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -1080,18 +1123,22 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/auth/test_token.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
@@ -1131,6 +1178,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1192,11 +1240,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -1263,11 +1313,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -1339,11 +1391,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -1393,11 +1447,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
@@ -1496,11 +1552,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -1570,11 +1628,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -1640,18 +1700,22 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
@@ -1703,6 +1767,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1776,11 +1841,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine.py
@@ -1859,16 +1926,20 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
@@ -1907,6 +1978,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1970,11 +2042,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -2043,11 +2117,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -2071,6 +2147,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_subscription_source_counts.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2126,11 +2203,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -2198,11 +2277,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine.py
@@ -2274,11 +2355,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -2345,11 +2428,13 @@ backend:
     - tests/integration/test_recommendation_time_change.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -2399,11 +2484,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -2498,11 +2585,13 @@ backend:
     - tests/integration/test_recommendation_time_change.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -2563,11 +2652,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -2617,11 +2708,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -2704,11 +2797,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -2722,6 +2817,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_subscription_source_counts.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -2732,6 +2828,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     transitive_tests:
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
@@ -2811,11 +2908,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -2881,11 +2980,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -2976,11 +3077,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -3030,11 +3133,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -3109,11 +3214,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -3183,11 +3290,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -3278,11 +3387,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -3332,11 +3443,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
@@ -3417,11 +3530,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -3511,11 +3626,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -3609,11 +3726,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -3706,11 +3825,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine.py
@@ -3778,16 +3899,19 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_order_engine_buy.py
     transitive_tests:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -3855,18 +3979,22 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_kis_quote_accounts.py
@@ -3908,6 +4036,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3972,11 +4101,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -3997,6 +4128,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_quote_pool.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -4104,13 +4236,16 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
@@ -4148,6 +4283,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4228,10 +4364,12 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/db/test_trade_history_kst.py
@@ -4264,6 +4402,9 @@ backend:
   src/realtime/__init__.py:
     direct_tests:
     - tests/contract/test_routes_subscriptions_pool.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
+    - tests/integration/test_stale_watcher_pool.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_priority.py
@@ -4312,13 +4453,16 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
@@ -4358,6 +4502,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4429,13 +4574,16 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
@@ -4473,6 +4621,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -4488,8 +4637,13 @@ backend:
     direct_tests:
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/integration/test_pool_distribution.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
+    - tests/integration/test_stale_watcher_pool.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
+    - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_pool.py
+    - tests/unit/realtime/test_websocket_priority.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_routes_backtest.py
@@ -4505,7 +4659,91 @@ backend:
     - tests/contract/test_routes_strategies_cash_ratio.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
+    - tests/integration/test_auto_start.py
+    - tests/integration/test_backtest_disabled_and_graceful.py
+    - tests/integration/test_boot_cash_usage_ratio.py
+    - tests/integration/test_boot_eager_refresh.py
+    - tests/integration/test_boot_market_regime.py
+    - tests/integration/test_buy_block_low_funds.py
+    - tests/integration/test_buy_flow.py
+    - tests/integration/test_chegyeol_race.py
+    - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_next_day_clear.py
+    - tests/integration/test_next_day_clear_nxt_eligibility.py
+    - tests/integration/test_next_day_clear_observability.py
+    - tests/integration/test_next_day_clear_stock_master.py
+    - tests/integration/test_post_nxt_open_price_confirm.py
+    - tests/integration/test_presubscribe.py
+    - tests/integration/test_recommendation_backtest_flow.py
+    - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
+    - tests/integration/test_reset_daily_state.py
+    - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_recommendation_failure.py
+    - tests/integration/test_sell_flow.py
+    - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_smoke.py
+    - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
+    - tests/unit/api/test_condition_stock_basics.py
+    - tests/unit/db/test_stock_master.py
+    - tests/unit/db/test_stock_master_upsert.py
+    - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_donchian_swing.py
+    - tests/unit/engine/strategies/test_long_tail_volatility.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
+    - tests/unit/engine/strategies/test_vcp_breakout.py
+    - tests/unit/engine/strategies/test_volatility_breakout.py
+    - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/test_backtest_engine.py
+    - tests/unit/engine/test_backtest_engine_db_toggle.py
+    - tests/unit/engine/test_backtest_engine_nested_metrics.py
+    - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_backtest_yaml.py
+    - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_force_clear_time_guard.py
+    - tests/unit/engine/test_get_scan_status_tick_coverage.py
+    - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
+    - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_order_engine_buy.py
+    - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_recommendation_backtest_hook.py
+    - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
+    - tests/unit/engine/test_recommendation_weight_reasoning.py
+    - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
+    - tests/unit/engine/test_strategy_fallback_budget.py
+    - tests/unit/engine/test_strategy_registry.py
+    - tests/unit/engine/test_subscription_source_counts.py
+    - tests/unit/engine/test_swing_poll_loop.py
+    - tests/unit/engine/test_swing_rest_poll.py
+    - tests/unit/engine/test_sync_orders_to_db_dedup.py
+    - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
+    - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/realtime/test_websocket_ack.py
+    - tests/unit/realtime/test_websocket_reverify.py
+    - tests/unit/realtime/test_websocket_subscribe_rejection.py
   src/routes/__init__.py:
     direct_tests:
     - tests/contract/test_routes_system_integrations.py
@@ -4861,11 +5099,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -4942,11 +5182,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -5025,11 +5267,13 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine.py
@@ -5468,10 +5712,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-17T23:24:44.683683+09:00'
+generated_at: '2026-05-18T00:20:53.188773+09:00'
 stats:
   backend_modules: 83
-  backend_tests: 133
+  backend_tests: 138
   frontend_modules: 53
   frontend_tests: 28
   unmapped_modules:

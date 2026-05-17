@@ -87,6 +87,93 @@ class WebsocketPool:
         self._ticker_to_session: dict[str, KisWebSocket] = {}
         # 라운드로빈 인덱스 (보조 세션 회전용)
         self._round_robin_idx: int = 0
+        # 사이클 7-C — 보조 세션 connect task (graceful per-session 보장)
+        self._quote_connect_tasks: list = []
+        self._started: bool = False
+
+    # -- 라이프사이클 (사이클 7-C) -----------------------------------------
+
+    async def start(self, dispatch_message=None) -> None:
+        """DB 활성 보조 계좌 조회 → 각 보조 KisWebSocket 인스턴스 생성 + connect.
+
+        - 보조 세션 0개 → ``_quotes`` 빈 리스트 (메인 only 동작, 회귀 0)
+        - 보조 N개 → 각 라벨별로 ``KisWebSocket`` 인스턴스 생성 → ``connect()`` task 발화
+        - 보조 토큰 매니저 발급 실패 (`ValueError` 등) → 해당 세션만 skip (graceful)
+        - ``dispatch_message`` 가 주어지면 보조 세션의 ``connect()`` 에 전달 (메인과 동일)
+        - 같은 풀에 두 번째 호출은 noop (멱등) — 재기동 시점에 호출자가 reset 책임
+        """
+        if self._started:
+            logger.debug("[pool_start] already started — noop")
+            return
+        self._started = True
+
+        try:
+            from src.db import kis_quote_accounts as kqa
+            accounts = await kqa.list_accounts(active_only=True)
+        except Exception:
+            logger.warning("[pool_start] kis_quote_accounts 조회 실패 — 메인 only", exc_info=True)
+            return
+
+        if not accounts:
+            logger.info("[pool_start] 보조 시세 계좌 0개 — 메인 only 동작")
+            return
+
+        from src.auth.token import get_token_manager
+
+        for acct in accounts:
+            label = getattr(acct, "label", None)
+            if not label:
+                continue
+            try:
+                manager = await get_token_manager(label)
+            except Exception:
+                logger.warning(
+                    "[pool_start] 보조 토큰 매니저 발급 실패: label=%s — skip",
+                    label, exc_info=True,
+                )
+                continue
+            try:
+                # 보조 세션 KisWebSocket 인스턴스 생성. token_manager 주입.
+                ws = KisWebSocket(token_manager=manager)
+                self._quotes.append(ws)
+                if dispatch_message is not None:
+                    # connect 는 별도 task — 메인 흐름 차단 안 함
+                    import asyncio as _asyncio
+                    task = _asyncio.create_task(ws.connect(dispatch_message))
+                    self._quote_connect_tasks.append(task)
+                logger.info("[pool_start] 보조 세션 등록: label=%s", label)
+            except Exception:
+                logger.warning(
+                    "[pool_start] 보조 세션 생성 실패: label=%s — skip",
+                    label, exc_info=True,
+                )
+
+        logger.info(
+            "[pool_start] 완료: main=1 quotes=%d total_slots=%d",
+            len(self._quotes), MAX_SUBSCRIPTIONS * (1 + len(self._quotes)),
+        )
+
+    async def stop(self) -> None:
+        """모든 보조 세션 disconnect + connect task cancel.
+
+        메인 세션은 호출자(scheduler) 책임으로 별도 disconnect — 본 메서드는
+        보조만 정리. 풀의 ``_started`` flag 재설정해 다음 ``start()`` 호출 시 재초기화.
+        """
+        for task in self._quote_connect_tasks:
+            try:
+                task.cancel()
+            except Exception:
+                pass
+        self._quote_connect_tasks.clear()
+
+        for ws in self._quotes:
+            try:
+                await ws.disconnect()
+            except Exception:
+                logger.debug("[pool_stop] 보조 세션 disconnect 실패", exc_info=True)
+        self._quotes.clear()
+        self._ticker_to_session.clear()
+        self._started = False
 
     # -- 세션 분배 --------------------------------------------------------
 
@@ -263,6 +350,22 @@ class WebsocketPool:
             await chosen._send_subscribe(tr_id, tr_key, subscribe=True)
         except Exception:
             logger.debug("[pool_resend_subscribe] 실패: %s", tr_key, exc_info=True)
+
+    async def unsubscribe_in_pool(self, tr_id: str, tr_key: str) -> None:
+        """K stale watcher 헬퍼 — 분배 추적된 세션에서 강제 unsubscribe (재등록 전 정리).
+
+        ``_ticker_to_session`` 추적 dict 에서도 제거 — 이어지는 ``subscribe`` 가
+        새로 분배할 수 있게 한다. ``unsubscribe`` 와 분리한 이유: 강제 재등록 시점에는
+        ticker 가 다른 세션으로 라운드로빈 될 수 있음을 명시.
+        """
+        chosen = self._ticker_to_session.pop(tr_key, None)
+        if chosen is None:
+            # 추적 없는 ticker — 메인에서 시도 (안전 디폴트)
+            chosen = self._main
+        try:
+            await chosen.unsubscribe(tr_id, tr_key)
+        except Exception:
+            logger.debug("[pool_unsubscribe_in_pool] 실패: %s", tr_key, exc_info=True)
 
     # -- 통합 조회 / 진단 -----------------------------------------------
 

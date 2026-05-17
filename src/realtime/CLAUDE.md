@@ -2,6 +2,50 @@
 
 KIS WebSocket 실시간 시세 수신 및 체결통보 처리.
 
+## 사이클 7-C (2026-05-18) — 풀 라이프사이클 + scanner/stale watcher 통합
+
+7-B 의 `WebsocketPool` 인프라 위에 boot/start, scanner priority 명시, K stale watcher 풀 헬퍼를 통합.
+
+### `WebsocketPool.start(dispatch_message=None)` (사이클 7-C)
+
+- DB `kis_quote_accounts.list_accounts(active_only=True)` 조회 → 각 라벨별 `KisWebSocket` 인스턴스 생성 + `connect(dispatch_message)` task 발화
+- 보조 토큰 매니저 발급 실패 (`ValueError` 등) → 해당 세션만 skip (graceful), `_quotes` 에서 제외
+- 보조 0개 → noop + INFO `[pool_start] 보조 시세 계좌 0개 — 메인 only 동작`
+- `_started` flag 멱등 가드 — 두 번째 호출은 noop. `stop()` 호출 시 reset
+- 호출 시점: `scheduler.start()` 에서 메인 `kis_ws.connect()` 직후 `await kis_ws_pool.start(dispatch_message=...)` — 보조 connect 는 별도 task 라 메인 흐름 차단 안 함
+
+### `WebsocketPool.stop()` (사이클 7-C)
+
+- 보조 connect task cancel + 각 보조 `ws.disconnect()` 호출
+- `_quotes` / `_ticker_to_session` / `_started` clear
+- 메인 세션은 호출자 책임 (scheduler `kis_ws.disconnect()` 별도)
+
+### `WebsocketPool.unsubscribe_in_pool(tr_id, tr_key)` (사이클 7-C, K stale watcher 헬퍼)
+
+- 분배 추적 dict 에서 ticker 제거 + 해당 세션 `unsubscribe()` 호출
+- 추적 없는 ticker → 메인에서 시도 (안전 디폴트)
+- `unsubscribe()` 와 분리: 강제 재등록 시점에는 라운드로빈 재선택 의도 명시
+
+### `KisWebSocket.__init__(*, token_manager=None)` (사이클 7-C)
+
+- 보조 세션은 외부 `TokenManager` (사이클 7-A `get_token_manager(label)`) 주입 가능
+- 미지정 시 글로벌 `token_manager` (메인) 사용 — 기존 동작 100% 보존
+- `connect()` 안의 approval_key 발급도 `self._token_manager.get_approval_key()` 로 분기
+
+### scheduler 통합 (사이클 7-C)
+
+- `scheduler.start()` 메인 `kis_ws.connect()` 직후 `kis_ws_pool.start(dispatch_message=...)` 호출 — 실패 시 메인 only graceful
+- `scheduler._check_and_resubscribe_stale()` 가 `kis_ws._send_subscribe` 직접 호출 → `kis_ws_pool.resend_subscribe_for_ticker(tr_id, ticker)` 위임. 강제 재등록(`retry > 3`)도 `pool.unsubscribe_in_pool` + `pool.subscribe(priority='HIGH', bypass_limit=True)` 로 위임 — 보유 종목 우선순위 보장
+- `scanner.subscribe_filtered_stocks(priority_groups=...)` 가 `kis_ws_pool.subscribe(..., priority='HIGH'|'LOW', bypass_limit=...)` 명시 전달
+
+### 회귀 가드 (사이클 7-C, 42 신규)
+
+- `tests/unit/api/test_quote_pool.py` (18) — 시세 풀 라우팅 + path 가드 + 라운드로빈 + 매니저 fallback + 메트릭 격리
+- `tests/unit/api/test_condition_quote_routing.py` (7) — condition 6 함수 → `kis_get_quote` 라우팅 + order/balance 모듈 가드
+- `tests/unit/engine/test_scanner_priority_dispatch.py` (8) — priority='HIGH'/'LOW' 명시 분배 + 중복 dedup + bypass_limit
+- `tests/integration/test_stale_watcher_pool.py` (5) — 풀 헬퍼 경유 + 강제 재등록 + 분배 추적
+- `tests/integration/test_scheduler_boot_quote_sessions.py` (4) — `pool.start()` 라이프사이클 + graceful
+
 ## 사이클 7-B (2026-05-17) — WebsocketPool 시세 분배
 
 단일 ``KisWebSocket`` 인스턴스 → 메인 + 보조 N 세션 풀. 외부 호출자(scanner/risk/scheduler)

@@ -12,7 +12,7 @@ import logging
 import re
 import time
 
-from src.api.base import KisApiError, kis_get
+from src.api.base import KisApiError, kis_get_quote
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -148,7 +148,8 @@ async def is_market_open(target_date) -> bool:
     """
     yyyymmdd = target_date.strftime("%Y%m%d")
     try:
-        data = await kis_get(
+        # 사이클 7-C — 시세성 호출 풀로 위임 (보조 계좌 라운드로빈 + 메인 fallback)
+        data = await kis_get_quote(
             HOLIDAY_URL,
             "CTCA0903R",
             {"BASS_DT": yyyymmdd, "CTX_AREA_NK": "", "CTX_AREA_FK": ""},
@@ -172,7 +173,8 @@ async def next_trading_day(after_date) -> "date":
     from datetime import timedelta
     yyyymmdd = (after_date + timedelta(days=1)).strftime("%Y%m%d")
     try:
-        data = await kis_get(
+        # 사이클 7-C — 시세성 호출 풀
+        data = await kis_get_quote(
             HOLIDAY_URL,
             "CTCA0903R",
             {"BASS_DT": yyyymmdd, "CTX_AREA_NK": "", "CTX_AREA_FK": ""},
@@ -228,7 +230,8 @@ async def _fetch_fluctuation_rank() -> list[dict]:
         "fid_rsfl_rate1": "",
         "fid_rsfl_rate2": "",
     }
-    data = await kis_get(FLUCTUATION_RANK_URL, "FHPST01700000", params)
+    # 사이클 7-C — 시세성 호출 풀
+    data = await kis_get_quote(FLUCTUATION_RANK_URL, "FHPST01700000", params)
     return data.get("output", [])
 
 
@@ -250,7 +253,8 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
         "PRDT_TYPE_CD": "300",  # 300=국내주식 (KIS CTPF1002R 명세 기본값)
         "PDNO": pdno,
     }
-    data = await kis_get(STOCK_BASICS_URL, "CTPF1002R", params)
+    # 사이클 7-C — 시세성 호출 풀
+    data = await kis_get_quote(STOCK_BASICS_URL, "CTPF1002R", params)
     output = data.get("output") or {}
 
     cptt = (output.get("cptt_trad_tr_psbl_yn") or "").strip().upper()
@@ -288,7 +292,8 @@ async def _fetch_stock_detail_and_cache(ticker: str, epoch_at_start: int) -> dic
             "fid_cond_mrkt_div_code": "J",
             "fid_input_iscd": ticker,
         }
-        data = await kis_get(STOCK_PRICE_URL, "FHKST01010100", params)
+        # 사이클 7-C — 시세성 호출 풀 (보조 라운드로빈 + 메인 fallback)
+        data = await kis_get_quote(STOCK_PRICE_URL, "FHKST01010100", params)
         output = data.get("output", {})
         async with _cache_lock:
             if _cache_epoch == epoch_at_start:
@@ -375,7 +380,8 @@ async def _fetch_daily_candles_and_cache(
             "FID_ORG_ADJ_PRC": "0",
         }
         # FHKST03010100은 모의/실전 동일 TR_ID (FH 접두사 시세 API 공통)
-        data = await kis_get(DAILY_PRICE_URL, "FHKST03010100", params)
+        # 사이클 7-C — 시세성 호출 풀
+        data = await kis_get_quote(DAILY_PRICE_URL, "FHKST03010100", params)
         output = data.get("output2") or data.get("output") or []
         output = [c for c in output if c.get("stck_bsop_date")]
         result = output[:days]

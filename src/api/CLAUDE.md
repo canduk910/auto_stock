@@ -15,16 +15,57 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - **거부 응답 영구 저장(Phase A1)**: `rt_cd != "0"` 시 `KisApiError` raise 직전에 `system_logs.write_log("ERROR", "[kis_rejection] path=... tr_id=... msg_cd=... msg1=... body={PDNO/ORD_DVSN/ORD_UNPR/ORD_QTY/EXCG_ID_DVSN_CD/SLL_BUY_DVSN_CD}")` fire-and-forget 호출. 민감 키(CANO/ACNT_PRDT_CD) 마스킹. `write_log` 예외는 swallow — raise 흐름 보존. 운영 trace를 영구 보존해 새 거부 사례(예: "시장가매매불가") 진단 자료 누적. `docs/kis/error-codes.md` 4절 참조.
 - **재시도 최종 결과 영구 저장(PR-B, 2026-05-14)**: `_request` 재시도 루프가 끝난 직후 다음 두 케이스를 영문 prefix 1행으로 fire-and-forget 저장 + `_request_metrics` 카운터 +1. (a) `attempt > 1` 에서 `rt_cd=0` 성공 → INFO `[api_retry_recovered] path=... tr_id=... attempts=N` + `retry_recovered`. (b) `MAX_RETRIES=3` 모두 5xx/network 실패 후 raise 직전 → ERROR `[api_retry_exhausted] path=... tr_id=... attempts=3 last_status={503|network} last_msg=...` + `retry_exhausted`. 기존 `retries`(중간 시도 카운트)와 분리 — *최종* 결과만 카운트. `reset_request_metrics()` 가 신규 키도 0 으로 초기화. `get_request_metrics()` 스냅샷에 두 키 추가 → `log_analysis_engine` 의 `metrics.api_metrics` 로 그대로 노출.
 
+### base.py — REST 시세성 호출 풀 (사이클 7-C, 2026-05-18)
+
+시세성 KIS REST 호출만 보조 계좌(`kis_quote_accounts`) 라운드로빈으로 분산. 매매/잔고/체결조회는 영원히 메인 단일.
+
+**자금 안전 절대 원칙**:
+- 매매 (`place_order`/`cancel_order`) / 잔고 (`get_balance`/`get_buyable`) / 체결조회 (`get_daily_orders`) / 체결통보 → 메인 단일 (`kis_request` 그대로)
+- 시세성 호출만 본 풀에 라우트: `fetch_daily_candles`, `fetch_stock_detail`, `_fetch_fluctuation_rank`, `inquire_stock_basics`, `is_market_open`, `next_trading_day`
+
+**Public API**:
+- `kis_get_quote(path, tr_id, params, *, hashkey="")` — 시세 GET (보조 라운드로빈 + 메인 fallback)
+- `kis_post_quote(path, tr_id, body, *, hashkey="")` — 시세 POST (인터페이스 대칭)
+- `get_quote_request_metrics() -> dict` — 격리 스냅샷 (total/http_5xx/4xx/network_err/kis_error/retries/recovered/exhausted/by_label)
+- `reset_quote_request_metrics() -> None` — 메인 reset 과 분리
+
+**Path 가드** (`QuotePoolPathError` raise — `ValueError` 서브클래스):
+- 화이트리스트 5 path 만 허용: `/quotations/inquire-price`, `/quotations/inquire-daily-itemchartprice`, `/ranking/fluctuation`, `/quotations/search-stock-info`, `/quotations/chk-holiday`
+- 매매/잔고/체결조회 path(`/trading/order-cash`, `/trading/order-rvsecncl`, `/trading/inquire-balance`, `/trading/inquire-psbl-order`, `/trading/inquire-daily-ccld`) 진입 시 즉시 raise — 자금 안전 정책 위반 사전 차단
+
+**라운드로빈**:
+- 모듈 변수 `_quote_request_index: int` + `asyncio.Lock` 로 동기화
+- `_select_quote_label()` 가 매 호출마다 `(idx + 1) % len(active_labels)` — 라벨 순환
+- 보조 0개 또는 모든 active=false → `None` 반환 → 메인 fallback (`token_manager` + `_semaphore=20` 그대로)
+- 보조 토큰 매니저 발급 실패 (`ValueError` 등) → 메인 fallback (graceful)
+
+**Per-label 격리 Rate Limit**:
+- `_quote_semaphores: dict[label, Semaphore(18)]` — 매니저별 18 (메인 20 보다 보수적 여유)
+- `_get_quote_semaphore(label)` lazy 생성 + `_quote_semaphores_lock` 동기화
+- 메인 fallback 은 메인 `_semaphore` 그대로 사용
+
+**메트릭 격리**:
+- `_quote_request_metrics` dict — 메인 `_request_metrics` 와 완전 분리. 시세 풀 호출이 메인 카운터에 누출되지 않음
+- `by_label: defaultdict(int)` — `"main"`(fallback) / `"quote-1"` / `"quote-2"` ... 별 호출 카운트
+
+**거부 응답 로깅 분리**:
+- 시세 풀 거부는 `[kis_rejection_quote]` prefix — 메인 `[kis_rejection]` 과 구분 가능
+- 메인의 body 마스킹/주요 키 추출은 본 풀에서 미적용 (시세 호출은 민감 식별자 미포함)
+
+**운영 점진 활성화**: 사이클 7-A (보조 계좌 DB) + 7-B (WS 풀) 완료 후 본 사이클이 REST 마무리. 보조 0개 시 메인 only 동작 (회귀 0).
+
 ### order.py — 주문
 - 현금 매수: TTTC0012U, 매도: TTTC0011U
 - 정정/취소: TTTC0013U
 - `settings.get_tr_id()`로 모의/실전 자동 변환
+- **자금 안전 (사이클 7-C, 2026-05-18)**: 본 모듈은 `kis_post` (메인 단일) 만 사용. `kis_post_quote` / `kis_get_quote` 절대 import 안 함 — `tests/unit/api/test_condition_quote_routing.py::test_order_module_never_imports_quote_pool` 가드
 - `place_order(..., exchange="KRX")` / `cancel_order(..., exchange="KRX")`: 거래소ID 구분(`EXCG_ID_DVSN_CD`) body 필드. `KRX`(기본) / `NXT` / `SOR`. 모의투자(VTS)는 KRX만 허용 — SOR/NXT는 실전 한정. 호출자 미지정 시 KRX로 동작(후방 호환)
 - **매수 지정가 분기**: 그동안 매수는 항상 시장가(`price=0`)로 호출됐으나, `order_engine.execute_buy`가 "시장가매매불가" 거부 폴백 시 `place_order(side=BUY, price=fallback_price>0, order_division=LIMIT, exchange=...)` 조합으로 호출. body는 `ORD_DVSN=order_division.value`, `ORD_UNPR=str(price)`로 그대로 직렬화 — 매도 지정가와 동일 경로, 추가 보정 불필요.
 
 ### balance.py — 잔고/조회
 - 잔고조회: TTTC8434R
 - 매수가능조회: TTTC8908R
+- **자금 안전 (사이클 7-C, 2026-05-18)**: 본 모듈은 `kis_get` (메인 단일) 만 사용. 보조 시세 풀 함수 절대 import 안 함 — `test_condition_quote_routing.py::test_balance_module_never_imports_quote_pool` 가드
 - `get_balance(afhr_flpr="N")`: `AFHR_FLPR_YN` query param. `N`(기본, 정규장) / `Y`(시간외 단일가) / `X`(NXT 정규장) — required
 - `get_daily_orders(target_date="", exchange="ALL")`: TTTC0081R 주식일별주문체결조회. `EXCG_ID_DVSN_CD` query param required — `ALL`(기본, KRX+NXT+SOR 합산) / `KRX` / `NXT` / `SOR`. KIS 명세 갱신(2026-05-08)에서 required로 강제 — NXT 체결 누락 방지 위해 기본값 ALL
 - `is_market_closed_rejection(KisApiError) -> bool`: KIS 응답이 '장운영시간 외' / '매매 불가 시간' / '거래시간 외' 류의 시간 거부인지 판단. KIS 가 동일 `msg_cd=APBK0918` 로 보유부족·자금부족·시간외 거부를 모두 내보내므로 msg1 키워드(`_MARKET_CLOSED_KEYWORDS`)로 분리. NXT 프리/애프터에서 시장가 매도가 거부될 때 이 함수가 True 면 `is_insufficient_*` 는 False 로 떨어져 positions 보존 결정에 사용된다.
@@ -33,6 +74,7 @@ KIS OpenAPI REST 호출 모��. 모든 호출은 base.py의 공통 래퍼를 
 - `is_market_order_disallowed(KisApiError) -> bool`: KIS 응답이 '시장가매매불가' 류의 거부인지 판단. msg1 키워드(`_MARKET_ORDER_DISALLOWED_KEYWORDS`: "시장가매매불가" / "시장가 매매 불가" / "시장가 주문 불가" / "시장가 호가 불가" / **"시장가호가불가"** / **"최유리/최우선지정가 주문만"** / **"지정가 및 최유리"**)로 매칭. 기존 3종 분류와 **상호 배타** — 이 함수가 True 이면 다른 3종은 모두 False. `execute_buy`가 이 거부에 대해 `step_up(current_price, 5)` 가격으로 지정가 1회 폴백, `execute_sell`이 시장가 매도일 때 `step_down(current_price, 5)` 지정가 1회 폴백(Phase C, 2026-05-11). 매수와 매도 양쪽 폴백 분기에서 동일 헬퍼 사용. msg_cd 는 운영 trace 누적 후 화이트리스트화 예정 — APBK1943 (2026-05-11 계양전기 매도 ×3 실패 원문) + **APBK3013** (2026-05-11 NXT 애프터 16시대 매도 ×3 실패 원문, Phase H1) 확정 추가. (`docs/kis/error-codes.md` 4-2절 / 5-4절).
 
 ### condition.py — 조건검색 + 영업일 체크 + 종목 기본정보 + TTL 캐시
+- **사이클 7-C (2026-05-18) — 시세성 호출 풀 라우팅**: 본 모듈의 모든 KIS REST 호출(6 함수)이 `kis_get_quote` 로 변경. 보조 계좌 라운드로빈 + 메인 fallback. 시그니처 변경 0 — 외부 호출자 영향 없음. 매매/잔고와의 격리: `from src.api.base import kis_get_quote` (메인 `kis_get` import 제거)
 - 거래량순위 API로 종목 필터링 (FHPST01700000)
 - 시총/거래대금 필터 적용
 - `is_market_open(date)`: KIS chk-holiday API(CTCA0903R)로 개장일 여부 (`opnd_yn == "Y"`)

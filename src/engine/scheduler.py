@@ -238,6 +238,15 @@ class TradingScheduler:
                 kis_ws.connect(dispatch_message)
             )
 
+            # 사이클 7-C — 보조 시세 세션 풀 시작 (graceful: 보조 0개면 noop)
+            # 메인 connect 직후 호출 — 보조 세션은 각자 별도 task 에서 connect.
+            # 보조 토큰 매니저 발급/connect 실패는 해당 세션만 skip (메인 흐름 영향 0)
+            try:
+                from src.realtime.websocket_pool import kis_ws_pool
+                await kis_ws_pool.start(dispatch_message=dispatch_message)
+            except Exception:
+                logger.warning("[pool_start] 풀 시작 실패 — 메인 only 동작", exc_info=True)
+
             # 체결통보 구독 (실전: H0STCNI0 + HTS ID, 모의: H0STCNI9 + 계좌번호)
             await asyncio.sleep(2)  # WebSocket 연결 대기
             from src.config import settings as _cfg
@@ -2160,6 +2169,8 @@ class TradingScheduler:
         - 종목별 예외는 격리해 다른 stale ticker 영향 차단
         """
         from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
+        # 사이클 7-C — 풀의 분배 추적을 활용한 stale watcher
+        from src.realtime.websocket_pool import kis_ws_pool
 
         subscribed = kis_ws.get_subscribed_tickers()
         if not subscribed:
@@ -2192,18 +2203,23 @@ class TradingScheduler:
                 continue
 
             if retry > STALE_FORCE_REREGISTER_AFTER:
-                # 4~6회 → unsubscribe + subscribe 강제 재등록 (KIS 측 슬롯 리셋)
+                # 4~6회 → 풀의 unsubscribe_in_pool + subscribe(priority=HIGH, bypass_limit=True)
+                # 강제 재등록 — 분배 추적 정합성 유지 + 라운드로빈 재선택 가능
                 try:
-                    await kis_ws.unsubscribe(TICK_TR_ID, ticker)
+                    await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
                     await asyncio.sleep(0.05)
-                    await kis_ws.subscribe(TICK_TR_ID, ticker, bypass_limit=True)
+                    await kis_ws_pool.subscribe(
+                        TICK_TR_ID, ticker,
+                        priority="HIGH", bypass_limit=True,
+                    )
                     force_reregistered += 1
                 except Exception:
                     logger.exception("[stale_watcher] 강제 재등록 실패: %s", ticker)
             else:
-                # 1~3회 → _send_subscribe 재발송만 (`_subscriptions` set 보존)
+                # 1~3회 → 풀의 resend_subscribe_for_ticker 사용
+                # 분배 추적된 세션에서 _send_subscribe (`_subscriptions` set 보존)
                 try:
-                    await kis_ws._send_subscribe(TICK_TR_ID, ticker, subscribe=True)
+                    await kis_ws_pool.resend_subscribe_for_ticker(TICK_TR_ID, ticker)
                     resubscribed += 1
                 except Exception:
                     logger.exception("[stale_watcher] 재발송 실패: %s", ticker)

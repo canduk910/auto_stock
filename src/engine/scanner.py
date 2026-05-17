@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 from src.api.condition import MIN_CHANGE_RATE, fetch_rising_stocks
 from src.realtime.websocket import kis_ws
+from src.realtime.websocket_pool import kis_ws_pool
 
 logger = logging.getLogger(__name__)
 
@@ -409,18 +410,24 @@ async def subscribe_filtered_stocks(
                 logger.debug("HIGH 한도 초과 system_logs 기록 실패", exc_info=True)
 
         already: set[str] = set()
-        # 1) positions — bypass_limit=True (절대 보장)
+        # 사이클 7-C — 풀로 위임. priority="HIGH"/"LOW" + bypass_limit 명시 전달.
+        # 보조 세션 0개 시 풀이 메인으로 fallback (회귀 0).
+        # 1) positions — priority='HIGH', bypass_limit=True (절대 보장)
         for t in positions:
             if t in already:
                 continue
             already.add(t)
-            await kis_ws.subscribe(TICK_TR_ID, t, bypass_limit=True)
-        # 2) next_day_clear — bypass_limit=True (절대 보장)
+            await kis_ws_pool.subscribe(
+                TICK_TR_ID, t, priority="HIGH", bypass_limit=True,
+            )
+        # 2) next_day_clear — priority='HIGH', bypass_limit=True (절대 보장)
         for t in next_day_clear:
             if t in already:
                 continue
             already.add(t)
-            await kis_ws.subscribe(TICK_TR_ID, t, bypass_limit=True)
+            await kis_ws_pool.subscribe(
+                TICK_TR_ID, t, priority="HIGH", bypass_limit=True,
+            )
 
         # 3~5) 후순위 — 2-pass 슬롯 흡수 (PR-E P1, 2026-05-15)
         # LOW 순서 (G안, 2026-05-12): breakout → momentum → swing.
@@ -449,6 +456,7 @@ async def subscribe_filtered_stocks(
             breakout_overflow = []
 
         # 1-pass: cap 적용된 breakout + momentum + swing 순서로 add
+        # 사이클 7-C — 풀로 위임. priority='LOW' (보조 세션 라운드로빈 우선, 메인 fallback).
         for label, candidates in (
             ("breakout", breakout_primary),
             ("momentum", momentum),
@@ -463,7 +471,9 @@ async def subscribe_filtered_stocks(
                     drop_counts[label] += 1
                     continue
                 already.add(t)
-                await kis_ws.subscribe(TICK_TR_ID, t)  # bypass_limit=False
+                await kis_ws_pool.subscribe(
+                    TICK_TR_ID, t, priority="LOW", bypass_limit=False,
+                )
 
         # 2-pass: breakout overflow 잔여 슬롯 흡수
         # 흡수에 성공한 만큼 drop 에서 차감. 흡수 실패분만 최종 drop["breakout"] 에 합산.
@@ -485,7 +495,10 @@ async def subscribe_filtered_stocks(
                 break
             already.add(t)
             absorbed_overflow += 1
-            await kis_ws.subscribe(TICK_TR_ID, t)  # bypass_limit=False
+            # 사이클 7-C — overflow 도 LOW priority 로 풀에 위임
+            await kis_ws_pool.subscribe(
+                TICK_TR_ID, t, priority="LOW", bypass_limit=False,
+            )
         # 흡수 못 한 overflow 만 최종 drop 에 합산 (중복 skip 차감).
         drop_counts["breakout"] += max(
             0, len(breakout_overflow) - absorbed_overflow - skipped_already

@@ -26,7 +26,14 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture
 def _fresh_ws_subscriptions():
-    """kis_ws._subscriptions 를 빈 set 으로 격리. subscribe 호출 시 실제 add 흉내."""
+    """kis_ws._subscriptions 를 빈 set 으로 격리. subscribe 호출 시 실제 add 흉내.
+
+    사이클 7-C — 풀의 `_ticker_to_session` 도 매 테스트마다 초기화. 풀이
+    `kis_ws_pool.subscribe` 진입 시 추적 dict 에 ticker 가 있으면 dedup 으로
+    `_main.subscribe` 재호출 안 함 → mock 호출 누락 결함.
+    """
+    from src.realtime.websocket_pool import kis_ws_pool
+
     real_subs: set[tuple[str, str]] = set()
 
     async def _fake_subscribe(tr_id: str, tr_key: str, *, bypass_limit: bool = False) -> None:
@@ -37,10 +44,16 @@ def _fresh_ws_subscriptions():
             return
         real_subs.add((tr_id, tr_key))
 
+    # 풀의 분배 추적 dict 초기화 (이전 테스트 잔재 차단)
+    kis_ws_pool._ticker_to_session.clear()
+
     # _subscriptions 도 함께 노출해 scanner 내부 잔여 슬롯 계산이 동작하도록 한다
     with patch.object(scanner_module.kis_ws, "_subscriptions", real_subs), \
          patch.object(scanner_module.kis_ws, "subscribe", new=AsyncMock(side_effect=_fake_subscribe)) as mock:
         yield mock, real_subs
+
+    # 테스트 종료 후에도 정리
+    kis_ws_pool._ticker_to_session.clear()
 
 
 # ---------------------------------------------------------------------------

@@ -16,7 +16,7 @@ KIS MCP 4질의 결과(2026-05-11) `CTPF1002R` 응답의 두 필드로 종목별
 5. `raw` 필드에 원본 dict 보존 (디버깅용).
 
 테스트 더블:
-- `src.api.condition.kis_get` 을 monkeypatch 로 AsyncMock 교체 → CTPF1002R 응답 반환.
+- `src.api.condition.kis_get_quote` 을 monkeypatch 로 AsyncMock 교체 → CTPF1002R 응답 반환.
 """
 
 from __future__ import annotations
@@ -77,7 +77,7 @@ async def test_inquire_stock_basics_parses_nxt_fields(
     from src.api import condition
 
     mock_get = AsyncMock(return_value=_make_response(cptt=cptt, nxt_stop=nxt_stop))
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     result = await condition.inquire_stock_basics("012200")
 
@@ -104,7 +104,7 @@ async def test_inquire_stock_basics_carries_krx_halt_and_admin_flags(
             cptt="Y", nxt_stop="N", krx_stop="Y", admn="Y"
         )
     )
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     result = await condition.inquire_stock_basics("012200")
 
@@ -124,7 +124,7 @@ async def test_inquire_stock_basics_propagates_kis_error(
     from src.api.base import KisApiError
 
     mock_get = AsyncMock(side_effect=KisApiError("1", "MCA00001", "조회 실패"))
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     with pytest.raises(KisApiError) as exc:
         await condition.inquire_stock_basics("999999")
@@ -210,7 +210,7 @@ async def test_inquire_stock_basics_returns_6digit_ticker_for_12char_pdno(
             cptt="Y", nxt_stop="N", pdno="00000A000100"
         )
     )
-    monkeypatch.setattr(condition, "kis_get", mock_get)
+    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
 
     result = await condition.inquire_stock_basics("000100")
 

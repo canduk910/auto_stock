@@ -84,7 +84,11 @@ def _ws_subscribe_spy():
 
     실제 _subscriptions set 도 함께 패치해 사양 시뮬레이션이 가능하다.
     bypass_limit=True 면 한도 무시, False 면 한도 초과 시 add 거부 — 실 사양과 동일.
+
+    사이클 7-C — 풀의 `_ticker_to_session` 도 초기화 (이전 테스트 잔재 차단).
     """
+    from src.realtime import websocket_pool as wp_mod
+
     subs: set[tuple[str, str]] = set()
     calls: list[dict] = []
 
@@ -94,6 +98,9 @@ def _ws_subscribe_spy():
             return
         subs.add((tr_id, tr_key))
 
+    # 풀 분배 추적 dict 초기화 (테스트 간 격리)
+    wp_mod.kis_ws_pool._ticker_to_session.clear()
+
     with patch.object(scanner_module.kis_ws, "subscribe", side_effect=fake_subscribe) as mock_sub:
         # _subscriptions 도 동일 set 으로 연결 — subscribe_filtered_stocks 가 잔여 슬롯 계산에 사용
         original_subs = scanner_module.kis_ws._subscriptions
@@ -102,6 +109,8 @@ def _ws_subscribe_spy():
             yield {"mock": mock_sub, "subs": subs, "calls": calls}
         finally:
             scanner_module.kis_ws._subscriptions = original_subs
+            # cleanup
+            wp_mod.kis_ws_pool._ticker_to_session.clear()
 
 
 # ---------------------------------------------------------------------------
