@@ -499,10 +499,53 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
         return Signal.NONE
 
+    @staticmethod
+    def _get_stop_loss_for_board(params: dict, board: str | None) -> float:
+        """보드별 손절 임계 우선순위 조회 (사이클 3, 2026-05-17).
+
+        우선순위:
+          1. `params[f"stop_loss_{board}"]` — 음수면 채택 (보드별 차별화)
+          2. `params["stop_loss_rate"]` — top-level fallback
+
+        `board` 가 None 이면(테스트 환경 / SessionTracker 미동작) 보드별 키 건너뛰고
+        top-level fallback. 운영자가 5/15 운영값(`stop_loss_rate=-3.5`) 그대로 두면
+        보드별 키 부재 → top-level 적용 → 동작 회귀 보존.
+
+        Args:
+          params: 전략 params (DEFAULT_PARAMS 머지 후 dict)
+          board: 활성 보드 문자열 ("main"/"pre_nxt"/"post_nxt") 또는 None
+
+        Returns:
+          음수 손절 임계값(예: -3.5). 모든 후보 부재 시 0.0(손절 분기 skip).
+        """
+        if board:
+            board_key = f"stop_loss_{board}"
+            board_val = params.get(board_key)
+            if board_val is not None:
+                try:
+                    bv = float(board_val)
+                except (TypeError, ValueError):
+                    bv = 0.0
+                if bv < 0:
+                    return bv
+                # 양수/0 은 무의미 — top-level fallback 으로
+        # top-level fallback
+        top = params.get("stop_loss_rate")
+        if top is None:
+            return 0.0
+        try:
+            tv = float(top)
+        except (TypeError, ValueError):
+            return 0.0
+        return tv if tv < 0 else 0.0
+
     def check_exit_signal(
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:
-        """손절: 매수가 대비 -3%. 익일 보유 종목은 NEXT_DAY_CLEAR 안전망 발동.
+        """손절: 보드별 손절 임계 우선 (사이클 3, 2026-05-17) — 활성 보드의
+        `stop_loss_{board}` 키 있으면 그것, 부재/None 이면 top-level `stop_loss_rate`.
+
+        익일 보유 종목은 NEXT_DAY_CLEAR 안전망 발동.
 
         VB 정책상 당일 15:20 일괄 청산이 정상 경로 — 본 함수의 익일 청산 분기는
         15:20 청산이 누락된 비상 상황(POST_NXT 설정 오류, 시세 미수신, 시장가 거부,
@@ -514,7 +557,13 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
         # 1. 손절 — 가장 우선. 익일 청산 대기 중에도 손절은 즉시 발동.
         loss_rate = (current_price - pos.buy_price) / pos.buy_price * 100
-        stop_loss = self.config.params["stop_loss_rate"]
+        # 사이클 3 — 활성 보드별 손절 임계. SessionTracker 미동작 시(테스트 환경)
+        # `_resolve_active_board()` 가 None 반환 → top-level fallback.
+        try:
+            active_board = self._resolve_active_board()
+        except Exception:
+            active_board = None
+        stop_loss = self._get_stop_loss_for_board(self.config.params, active_board)
         if loss_rate <= stop_loss:
             from src.engine.scanner import t
             logger.info(

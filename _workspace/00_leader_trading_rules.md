@@ -1041,6 +1041,122 @@ BLNG 다중 호출로 VB/LTV 각 30종목 → dedup 후 28 breakout 슬롯 점�
 
 ---
 
+## (2026-05-17) 자문 시스템 개선 사이클 3 — VB 보드별 손절 분리
+
+### 배경
+
+5/15 첫 자문 발화의 VB `code_review_notes` 권고:
+> "보드별(kospi/krx main, pre/open 구간 등) 개별 손절·진입시간 파라미터 분리"
+
+VB 의 K값은 이미 보드별 분리(`k_value_krx_main` / `k_value_nxt_pre` / `k_value_nxt_post`,
+사이클 1 PARAM_RANGES 등록) — 손절도 같은 패턴으로 확장.
+
+근거: PRE_NXT (08:00~09:00) 의 변동성이 KRX MAIN 과 다름 (NXT 프리는 거래대금 작아
+변동성 큼, 노이즈 많음). 동일 -3.5% 손절이 PRE_NXT 에서 너무 빨리 발동되는
+가능성 차단.
+
+LTV 는 본 사이클 범위 외 — 이미 시간 모드 분리(`intraday_stop_loss` /
+`overnight_stop_loss`). 보드 × 모드 = 4 조합 복잡도라 사이클 3-B 로 분리
+(`_workspace/cycle3b_ltv_board_stop_loss_spec.md` 참조).
+
+### 신규 파라미터
+
+```python
+# DEFAULT_PARAMS / strategy_config.params (VB 한정)
+"stop_loss_main": -3.0,       # KRX MAIN 시간대 손절 임계 (본격 변동성 수용)
+"stop_loss_pre_nxt": -4.0,    # PRE_NXT 시간대 손절 임계 (노이즈 흡수, 더 관대)
+
+# 기존 키 (호환성, deprecated 권고)
+"stop_loss_rate": -3.5,       # 보드별 키 부재 시 fallback (5/15 운영값)
+```
+
+### fallback 우선순위 (`_get_stop_loss_for_board`)
+
+1. **활성 보드 키**: `params.get(f"stop_loss_{board}")` 음수면 채택. 활성 보드는
+   `_resolve_active_board()` 가 `SessionTracker.active` 에서 조회 (main → post_nxt → pre_nxt 우선순위)
+2. **top-level fallback**: 부재/None/0/양수 시 `params.get("stop_loss_rate")`
+3. **둘 다 부재**: 0.0 반환 → 손절 분기 skip
+
+테스트 환경 / SessionTracker 미동작 시 `_resolve_active_board() = None` → 보드별 키 건너뛰고 top-level fallback.
+
+### 자율 결정 — `active_board` 전달 방식
+
+옵션 1(risk.on_tick 시그니처 변경) / 옵션 2(VB 내부 조회) / 옵션 3(`check_exit_signal` 시그니처 확장) 중 **옵션 2 채택**.
+
+이유:
+1. VB 에 이미 `_resolve_active_board()` 헬퍼 존재 — 재활용 가능
+2. `check_exit_signal(ticker, current_price, open_price)` 시그니처는 6 전략 공통 + 5+ 테스트 mock 광범위 사용 → 변경 시 회귀 영향 큼
+3. 보드별 손절 분리는 VB 단독 — 다른 전략에 인자 전달 불필요
+4. `risk.py` 변경 0건 (옵션 1 회피)
+
+### 변경 파일
+
+| 파일 | LOC | 변경 |
+|------|-----|------|
+| `src/engine/recommendation_engine.py` | +5 | PARAM_RANGES `stop_loss_main` / `stop_loss_pre_nxt` 추가 |
+| `src/engine/recommendation_metrics.py` | +10/-3 | `_normalize_stop_loss_rate` 5 키 후보 (`stop_loss_main`/`stop_loss_pre_nxt` 추가) |
+| `src/engine/strategies/volatility_breakout.py` | +52 | `_get_stop_loss_for_board` 헬퍼 + `check_exit_signal` 분기 갱신 |
+| `supabase/migrations/024_vb_board_stop_loss_defaults.sql` | +29 | 멱등 자동 복사 SQL (적용 보류) |
+
+### 회귀 가드
+
+- `tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py` — 6 케이스 (A~F)
+  - A: stop_loss_main 단독 → MAIN 활성 시 -3% 발동
+  - B: stop_loss_pre_nxt 단독 → PRE_NXT 활성 시 -4% 발동
+  - C: top-level only → 모든 보드 fallback
+  - D: 보드별 + top-level → 보드별 우선
+  - E: 활성 보드 미감지 → top-level fallback
+  - F: 5/15 운영값 (`stop_loss_rate=-3.5`) 회귀 보존
+- `tests/unit/engine/test_recommendation_metrics_board_stop_loss.py` — 9 케이스 (G~I)
+  - G/H: VB 보드별 키 정규화 + 혼합 회귀
+  - 회귀 5: LTV/단일/없음/양수/None
+  - I: compute_metrics 통합 stop_loss_hits 정상 카운트
+- `tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py` — 4 케이스 (J~L)
+  - J: PARAM_RANGES 등록 + 범위
+  - K: 정상 추천값 통과
+  - L: 범위 밖 무시 + WARNING
+- `tests/integration/test_vb_board_stop_loss_fallback.py` — 3 케이스 (M~O)
+  - M: 마이그 024 적용 전 (5/18 첫 발화 직전 회귀)
+  - N: 마이그 024 적용 후 + 운영자 미갱신
+  - O: 마이그 024 적용 후 + 운영자 차별화
+
+총 22 케이스 신규.
+
+### 안전 불변식
+
+- **VB `check_exit_signal` 시그니처 보존** — `(ticker, current_price, open_price)`. 6 전략 공통 + 테스트 mock 5+ 영향 0
+- **활성 보드 미감지 시 graceful fallback** — `_resolve_active_board()` 예외 흡수 + None 반환 시 top-level `stop_loss_rate` 사용 (테스트 환경 / 부팅 직후 race 안전)
+- **STOP_LOSS 우선순위 보존** — 보드별 손절 > 익일 청산 안전망 (NEXT_DAY_CLEAR). 손절은 `_next_day_clear_pending` 가드 영향 받지 않음 (결함 D 잔여 fix 보존)
+- **`risk.on_tick` 시그니처 보존** — 옵션 2 채택으로 호출부 0 변경
+- **LTV / momentum / donchian / bull_flag / vcp 영향 0** — VB 단독 변경
+
+### 운영 활성화 절차
+
+1. **사전 검증** (5/18 월 20:00): 사이클 1+2+3 동시 발화 정상 동작 확인
+   - 사이클 1: `weight_reasoning` 자동 분리 표시
+   - 사이클 2: 시장 레짐 fetch + auto_regime_adjust 동작
+   - 사이클 3: 코드 변경만 적용된 상태 — VB 운영 fallback 정상 (마이그 미적용 = 기존 동작)
+2. **마이그 024 적용** (선택):
+   ```bash
+   # 운영 EC2 Supabase CLI
+   supabase migration up
+   # 또는 Dashboard SQL Editor 에서 supabase/migrations/024_vb_board_stop_loss_defaults.sql 실행
+   ```
+   - VB `strategy_config.params` 에 `stop_loss_main` / `stop_loss_pre_nxt` 자동 추가 (값은 기존 `stop_loss_rate` 와 동일)
+   - 운영자가 Settings 갱신 안 해도 동작 회귀 0건
+3. **운영자 차별화** (선택, 마이그 적용 후):
+   - Settings → VB → `stop_loss_main` -3.0 / `stop_loss_pre_nxt` -4.0 등 별도 조정
+   - 다음 사이클부터 보드별 차별 손절 적용
+4. **AI 자문 활용** (5/19 화 20:00 이후):
+   - PARAM_RANGES 등록으로 OpenAI 가 `stop_loss_main` / `stop_loss_pre_nxt` 추천 가능
+   - `_validate_recommendations` 가 범위 (-15.0, 0.0) 검증 + 정상값 통과
+
+### 사이클 3-B (LTV 보드별 손절) 명세
+
+`_workspace/cycle3b_ltv_board_stop_loss_spec.md` 별도 작성. 본 사이클 회귀 검증 후 발의.
+
+---
+
 ## 커밋 5분할 (squash 금지)
 1. `feat(strategies): VB/LTV get_targets_status returns active boards only`
 2. `feat(scanner): cap breakout to 25 slots in priority queue (protect momentum)`

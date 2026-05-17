@@ -50,6 +50,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -57,6 +58,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -111,6 +113,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -122,6 +125,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -165,6 +169,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
@@ -199,6 +204,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -213,6 +219,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -279,6 +286,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
@@ -291,6 +299,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -308,6 +317,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -372,6 +382,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -383,6 +394,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -446,6 +458,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -457,6 +470,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -516,6 +530,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_condition_stock_basics.py
@@ -532,6 +547,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -549,6 +565,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -614,6 +631,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
@@ -640,6 +658,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -657,6 +676,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -734,6 +754,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
@@ -749,6 +770,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -767,6 +789,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -831,6 +854,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -840,6 +864,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -893,6 +918,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -902,6 +928,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -955,6 +982,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -964,6 +992,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1018,6 +1047,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1028,6 +1058,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -1086,6 +1117,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1095,6 +1127,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1135,6 +1168,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -1166,6 +1200,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -1226,6 +1261,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1237,6 +1273,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -1292,6 +1329,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1301,6 +1339,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1354,6 +1393,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
@@ -1379,6 +1419,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -1397,6 +1438,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -1463,6 +1505,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1472,6 +1515,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1527,6 +1571,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_base.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_condition_stock_basics.py
@@ -1543,6 +1588,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -1560,6 +1606,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -1626,6 +1673,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1637,6 +1685,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -1691,6 +1740,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -1766,6 +1816,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1775,6 +1826,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1830,6 +1882,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -1842,6 +1895,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1897,6 +1951,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1904,6 +1959,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1959,6 +2015,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1968,6 +2025,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -2009,6 +2067,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -2034,6 +2093,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -2055,6 +2115,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     transitive_tests:
@@ -2095,6 +2156,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -2111,6 +2173,7 @@ backend:
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
   src/engine/recommendation_metrics.py:
     direct_tests:
+    - tests/unit/engine/test_recommendation_metrics_board_stop_loss.py
     - tests/unit/engine/test_recommendation_metrics_ltv_stop_loss.py
     - tests/unit/engine/test_recommendation_metrics_smoke.py
     transitive_tests:
@@ -2153,6 +2216,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -2162,6 +2226,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2202,6 +2267,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
@@ -2227,6 +2293,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2278,6 +2345,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -2305,6 +2373,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_donchian_swing.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -2319,6 +2388,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_regime_guard.py
@@ -2373,6 +2443,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -2392,6 +2463,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
   src/engine/session.py:
@@ -2435,10 +2507,12 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -2459,6 +2533,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_regime_guard.py
@@ -2520,6 +2595,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -2529,6 +2605,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2569,6 +2646,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -2600,6 +2678,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2639,6 +2718,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
@@ -2665,6 +2745,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2705,6 +2786,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     transitive_tests:
@@ -2734,6 +2816,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2788,6 +2871,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -2797,6 +2881,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2837,9 +2922,11 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
@@ -2870,6 +2957,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2912,6 +3000,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -2921,6 +3010,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_observability_logs.py
@@ -2963,6 +3053,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -2996,6 +3087,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -3028,6 +3120,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_regime_guard.py
@@ -3083,6 +3176,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -3092,6 +3186,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -3169,6 +3264,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -3180,6 +3276,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3232,6 +3329,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_order_engine_buy.py
     transitive_tests:
     - tests/unit/api/test_condition_cache.py
@@ -3245,6 +3343,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -3304,6 +3403,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
@@ -3328,6 +3428,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -3419,6 +3520,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/db/test_trade_history_kst.py
@@ -3431,6 +3533,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -3448,6 +3551,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -3511,6 +3615,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -3523,6 +3628,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -3586,6 +3692,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/db/test_stock_master.py
@@ -3600,6 +3707,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -3617,6 +3725,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -3689,6 +3798,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_condition_stock_basics.py
     - tests/unit/db/test_stock_master.py
@@ -3703,6 +3813,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -3718,6 +3829,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -4007,6 +4119,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -4017,6 +4130,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -4079,6 +4193,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -4090,6 +4205,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -4151,6 +4267,7 @@ backend:
     - tests/integration/test_sell_market_closed_preserves_positions.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -4161,6 +4278,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -4541,10 +4659,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-17T19:33:31.194159+09:00'
+generated_at: '2026-05-17T19:47:17.080036+09:00'
 stats:
   backend_modules: 77
-  backend_tests: 114
+  backend_tests: 118
   frontend_modules: 47
   frontend_tests: 25
   unmapped_modules:

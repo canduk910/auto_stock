@@ -21,17 +21,22 @@ def _safe_float(v: Any, default: float = 0.0) -> float:
 
 
 def _normalize_stop_loss_rate(params: dict) -> float:
-    """전략별 손절 임계 정규화 (Phase A2, 2026-05-17).
+    """전략별 손절 임계 정규화 (Phase A2, 2026-05-17 / 사이클 3 확장).
 
-    LTV(`long_tail_volatility`) 만 `intraday_stop_loss`/`overnight_stop_loss`
-    분리 키 사용. 다른 5 전략(momentum/VB/donchian/bull_flag/vcp) 은
-    `stop_loss_rate` 단일 키. 두 케이스 모두 *가장 보수적인* (절대값 큰)
-    단일 임계로 정규화하여 `compute_metrics()` 의 `stop_loss_hits` 계산이
-    LTV 에서도 정상 작동하도록.
+    전략별 손절 키 분기:
+      - LTV(`long_tail_volatility`): `intraday_stop_loss`/`overnight_stop_loss` 시간 모드 분리
+      - VB(`volatility_breakout`, 사이클 3): `stop_loss_main`/`stop_loss_pre_nxt` 보드 분리
+      - 그 외 5 전략(momentum/donchian/bull_flag/vcp): `stop_loss_rate` 단일 키
+
+    모든 케이스 *가장 보수적인* (절대값 큰) 단일 임계로 정규화하여
+    `compute_metrics()` 의 `stop_loss_hits` 계산이 어떤 전략에서도 정상 작동하도록.
 
     알고리즘:
-      1. `stop_loss_rate` / `intraday_stop_loss` / `overnight_stop_loss` 세 키
-         모두 후보로 수집.
+      1. 5 키 모두 후보로 수집:
+         - stop_loss_rate (top-level, 회귀)
+         - intraday_stop_loss / overnight_stop_loss (LTV)
+         - stop_loss_main / stop_loss_pre_nxt (VB 사이클 3)
+         (stop_loss_post_nxt 는 VB POST_NXT 미사용 — 사이클 3-B 에서 재검토)
       2. 각 값을 `_safe_float` 로 변환 (None/문자열 → 0.0 폴백).
       3. 음수 값만 손절 임계로 인정 (양수/0 은 무의미 — skip).
       4. 후보 비어있으면 0.0 반환 (`compute_metrics` 분기 skip 보존).
@@ -48,11 +53,19 @@ def _normalize_stop_loss_rate(params: dict) -> float:
       -7.5
       >>> _normalize_stop_loss_rate({"intraday_stop_loss": -2.5, "overnight_stop_loss": -2.0})
       -2.5
+      >>> _normalize_stop_loss_rate({"stop_loss_main": -3.0, "stop_loss_pre_nxt": -4.0})
+      -4.0
       >>> _normalize_stop_loss_rate({})
       0.0
     """
     candidates = []
-    for key in ("stop_loss_rate", "intraday_stop_loss", "overnight_stop_loss"):
+    for key in (
+        "stop_loss_rate",
+        "intraday_stop_loss",
+        "overnight_stop_loss",
+        "stop_loss_main",      # 사이클 3 — VB 보드별
+        "stop_loss_pre_nxt",   # 사이클 3 — VB 보드별
+    ):
         val = _safe_float(params.get(key))
         if val < 0:  # 음수만 손절 임계로 인정
             candidates.append(val)

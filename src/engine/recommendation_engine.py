@@ -80,6 +80,11 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "limit_up_threshold": (15.0, 30.0),
     "intraday_stop_loss": (-15.0, 0.0),
     "overnight_stop_loss": (-15.0, 0.0),
+    # ↓ 2026-05-17 사이클 3 — VB 보드별 손절 분리 (PRE_NXT 노이즈 흡수 / KRX MAIN
+    # 본격 변동성 수용). stop_loss_post_nxt 는 VB POST_NXT 미사용이라 제외 —
+    # 사이클 3-B (LTV 보드 × 시간 모드 매트릭스) 에서 재검토.
+    "stop_loss_main": (-15.0, 0.0),
+    "stop_loss_pre_nxt": (-15.0, 0.0),
     # ↓ 2026-05-17 Phase B 확장 (VB/LTV/donchian_swing 권고 반영)
     "k_value_krx_main": (0.5, 2.0),
     "k_value_nxt_pre": (0.5, 2.0),
