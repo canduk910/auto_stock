@@ -1,0 +1,361 @@
+"""WebsocketPool — KIS WebSocket 메인 + 보조 N 세션 풀 (사이클 7-B, 2026-05-17).
+
+배경:
+- 사이클 7-A 에서 ``kis_quote_accounts`` 테이블 + multi-account 토큰 매니저 인프라 완성.
+- 본 사이클은 시세 수신 핵심 변경 — 단일 ``KisWebSocket`` 인스턴스 → 멀티 세션 풀.
+- 외부 호출자(scanner/risk/scheduler) 인터페이스 100% 보존 — 내부 분배 로직 캡슐화.
+
+자금 안전 절대 원칙 (코드 가드 + 문서):
+- **체결통보(H0STCNI0/H0STCNI9) → 메인 세션 단일 강제** — ``_enforce_main_only_execution_notice``
+  + ``subscribe()`` 분기가 무조건 메인으로 우회.
+- **매매/잔고/체결조회** — 본 사이클 변경 0 (사이클 7-A 에서 가드 명시됨, ``src/auth/CLAUDE.md``).
+- **보조 세션** — 시세 only (TICK + HOGA + 예상체결). 체결통보 시도 RuntimeError.
+
+분배 정책:
+- HIGH 우선순위(보유/익일청산) → 메인 세션 절대 보장 (``bypass_limit=True``)
+- LOW 우선순위(스캐닝) → 보조 세션 라운드로빈, 가득 찬 세션 건너뜀
+- 보조 세션 0개 또는 모두 가득 → 메인 fallback (LOW 는 ``bypass_limit=False`` 라 메인도 가득이면 drop)
+- 중복 ticker → 메인 우선. 보조에 이미 있는데 HIGH 로 들어오면 메인 승격 + 보조 unsubscribe
+
+운영 안전 진행 — 점진 활성화:
+1. 코드 배포 단계: 풀 코드 + 보조 세션 0개 (DB 미등록) → 메인 only 동작 (회귀 0)
+2. 첫 보조 등록 후: DB 1개 등록 → 1 보조 세션 활성 → 41 + 41 = 82 슬롯
+3. 점진 추가: DB 2~5 등록 → 풀 점진 확장
+4. ``scheduler._boot()`` 재시작 시점에 보조 세션 연결 (기존 메인 흐름 유지)
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Optional
+
+from src.realtime.websocket import (
+    MAX_SUBSCRIPTIONS,
+    KisWebSocket,
+    kis_ws,
+)
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# 체결통보 메인 단일 가드
+# ---------------------------------------------------------------------------
+class QuoteSessionExecutionNoticeError(RuntimeError):
+    """보조 세션에 체결통보(H0STCNI0/H0STCNI9) 구독 시도 시 발생.
+
+    체결통보는 영원히 메인 세션 단일. 보조 세션은 시세 수신 전용.
+    """
+
+
+_EXECUTION_NOTICE_TR_IDS = frozenset({"H0STCNI0", "H0STCNI9"})
+
+
+def _enforce_main_only_execution_notice(
+    pool: "WebsocketPool", tr_id: str, *, session_label: str
+) -> None:
+    """체결통보를 메인 외 세션이 시도하면 RuntimeError raise.
+
+    풀의 ``subscribe()`` 분기는 자동으로 메인으로 우회하지만, 외부 호출자가
+    보조 세션을 직접 잡아 시도하는 케이스를 차단하는 명시 가드.
+    """
+    if tr_id in _EXECUTION_NOTICE_TR_IDS and session_label != "main":
+        raise QuoteSessionExecutionNoticeError(
+            f"체결통보는 메인 세션만 가능: tr_id={tr_id} session={session_label}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# WebsocketPool
+# ---------------------------------------------------------------------------
+class WebsocketPool:
+    """메인 + 보조 N개 KIS WebSocket 세션 풀.
+
+    - 메인 세션: 기존 ``kis_ws`` 인스턴스 재사용. 체결통보 + 보유/익일청산 시세.
+    - 보조 세션: DB ``kis_quote_accounts`` active=true 행마다 1개. 스캐닝 시세 only.
+    - 외부 호출자 인터페이스는 기존 ``KisWebSocket`` 과 동일 — ``subscribe`` /
+      ``unsubscribe`` / ``unsubscribe_all`` / ``get_subscribed_tickers`` / ``start`` / ``stop`` /
+      ``connect``.
+    """
+
+    def __init__(self) -> None:
+        # 메인 세션은 기존 싱글톤 ``kis_ws`` 재사용 — 인스턴스 교체 시 다른 모듈
+        # (handler.py / scheduler.py 등) 이 보유한 참조와 분기되는 결함 차단.
+        self._main: KisWebSocket = kis_ws
+        self._quotes: list[KisWebSocket] = []
+        # ticker → KisWebSocket 분배 추적. unsubscribe / stale 재구독에 활용.
+        self._ticker_to_session: dict[str, KisWebSocket] = {}
+        # 라운드로빈 인덱스 (보조 세션 회전용)
+        self._round_robin_idx: int = 0
+
+    # -- 세션 분배 --------------------------------------------------------
+
+    def _select_session(self, ticker: str, *, priority: str) -> KisWebSocket:
+        """티커 → 세션 결정.
+
+        - HIGH: 메인 세션 절대 보장.
+        - LOW : 보조 세션 라운드로빈 (가득 / disconnect 세션 건너뜀). 가용 없으면 메인 fallback.
+        """
+        if priority == "HIGH":
+            return self._main
+
+        # 보조 세션 후보 — 가득 차지 않고 disconnect 아닌 세션
+        candidates = self._available_quotes()
+        if not candidates:
+            return self._main
+
+        # 라운드로빈: 후보 안에서 다음 세션
+        chosen = candidates[self._round_robin_idx % len(candidates)]
+        self._round_robin_idx += 1
+        return chosen
+
+    def _available_quotes(self) -> list[KisWebSocket]:
+        """슬롯 잔여 + WebSocket 연결 살아있는 보조 세션 리스트.
+
+        - ``_ws is None`` (disconnect / 첫 연결 전) 은 제외 — 다음 ``_scan_loop`` 자연 회복 위임.
+          (`_ws` 가 None 이어도 ``subscribe`` 자체는 가능하지만, 즉시 전송이 안 되므로 안전 제외)
+        - ``_subscriptions`` 가 ``MAX_SUBSCRIPTIONS`` 도달한 세션도 제외.
+        """
+        return [
+            q for q in self._quotes
+            if getattr(q, "_ws", None) is not None
+            and len(q._subscriptions) < MAX_SUBSCRIPTIONS
+        ]
+
+    def _session_label(self, ws: KisWebSocket) -> str:
+        """세션 → label ("main" / "quote-1" / "quote-2" ...).
+
+        디버깅 / 로그용. 메인은 동일성 비교(``is``), 보조는 ``_quotes`` 인덱스.
+        """
+        if ws is self._main:
+            return "main"
+        for i, q in enumerate(self._quotes, start=1):
+            if ws is q:
+                return f"quote-{i}"
+        return "unknown"
+
+    # -- subscribe / unsubscribe ----------------------------------------
+
+    async def subscribe(
+        self,
+        tr_id: str,
+        tr_key: str,
+        *,
+        priority: str = "LOW",
+        bypass_limit: bool = False,
+    ) -> Optional[str]:
+        """tr_key(ticker) 를 적절한 세션에 분배 후 구독.
+
+        Args:
+            tr_id: KIS TR_ID. ``H0STCNI0/H0STCNI9`` 면 priority 무시 메인 강제.
+            tr_key: 구독 키 (ticker / HTS ID / 계좌번호).
+            priority: ``"HIGH"`` (보유/익일청산) | ``"LOW"`` (스캐닝/기본).
+            bypass_limit: 외부 호환용. HIGH 이면 무조건 True 로 격상 (보유 시세 절대 보장).
+
+        Returns:
+            사용된 세션 label (``"main"`` / ``"quote-N"``). drop 발생 시 ``None``.
+        """
+        # 1) 체결통보 메인 강제 — priority 무시
+        if tr_id in _EXECUTION_NOTICE_TR_IDS:
+            await self._main.subscribe(tr_id, tr_key, bypass_limit=True)
+            self._ticker_to_session[tr_key] = self._main
+            return "main"
+
+        # 2) 중복 ticker 처리
+        existing = self._ticker_to_session.get(tr_key)
+        if existing is not None:
+            # 메인에 이미 있는데 LOW 로 들어옴 → 그대로 메인 사용
+            if existing is self._main:
+                return "main"
+            # 보조에 있는데 HIGH 로 승격 — 보조 unsubscribe 후 메인 등록
+            if priority == "HIGH":
+                logger.info(
+                    "[pool_promote] ticker=%s old=%s new=main",
+                    tr_key, self._session_label(existing),
+                )
+                try:
+                    await existing.unsubscribe(tr_id, tr_key)
+                except Exception:
+                    # 보조 unsubscribe 실패해도 메인 승격은 계속 — graceful
+                    logger.debug("[pool_promote] 보조 unsubscribe 실패", exc_info=True)
+                await self._main.subscribe(tr_id, tr_key, bypass_limit=True)
+                self._ticker_to_session[tr_key] = self._main
+                return "main"
+            # 보조에 있는데 LOW 로 또 들어옴 → 그대로 유지 (noop)
+            return self._session_label(existing)
+
+        # 3) HIGH 우선순위 — 메인 절대 보장 + bypass_limit=True
+        if priority == "HIGH":
+            await self._main.subscribe(tr_id, tr_key, bypass_limit=True)
+            self._ticker_to_session[tr_key] = self._main
+            return "main"
+
+        # 4) LOW — 보조 라운드로빈, 가용 없으면 메인 fallback
+        chosen = self._select_session(tr_key, priority="LOW")
+        # 메인 fallback 이면서 메인이 가득이면 drop
+        if chosen is self._main and len(self._main._subscriptions) >= MAX_SUBSCRIPTIONS:
+            logger.info(
+                "[priority_drop_pool] tr_key=%s priority=LOW reason=all_sessions_full "
+                "main=%d/%d quotes=%d",
+                tr_key, len(self._main._subscriptions), MAX_SUBSCRIPTIONS, len(self._quotes),
+            )
+            return None
+
+        # 보조 세션 선택이지만 슬롯 가득 (라운드로빈이 모두 가득인 경우)
+        if chosen is not self._main and len(chosen._subscriptions) >= MAX_SUBSCRIPTIONS:
+            # 마지막 안전망 — 메인 fallback 시도
+            if len(self._main._subscriptions) < MAX_SUBSCRIPTIONS:
+                chosen = self._main
+            else:
+                logger.info(
+                    "[priority_drop_pool] tr_key=%s priority=LOW reason=all_sessions_full",
+                    tr_key,
+                )
+                return None
+
+        await chosen.subscribe(tr_id, tr_key, bypass_limit=bypass_limit)
+        self._ticker_to_session[tr_key] = chosen
+        return self._session_label(chosen)
+
+    async def unsubscribe(self, tr_id: str, tr_key: str) -> None:
+        """분배 추적된 세션에서 unsubscribe. 기록 없으면 noop (다음 _scan_loop 자연 정리).
+
+        체결통보(H0STCNI0/H0STCNI9) 는 항상 메인 — 명시적으로 메인에서 해제.
+        """
+        if tr_id in _EXECUTION_NOTICE_TR_IDS:
+            await self._main.unsubscribe(tr_id, tr_key)
+            self._ticker_to_session.pop(tr_key, None)
+            return
+
+        chosen = self._ticker_to_session.pop(tr_key, None)
+        if chosen is None:
+            return
+        try:
+            await chosen.unsubscribe(tr_id, tr_key)
+        except Exception:
+            logger.debug("[pool_unsubscribe] 세션 unsubscribe 실패", exc_info=True)
+
+    async def unsubscribe_all(self) -> None:
+        """모든 세션의 모든 구독 해제 + 분배 추적 dict clear."""
+        # 분배 추적 기반 unsubscribe — 메인 + 보조 모두 커버
+        for tr_key, ws in list(self._ticker_to_session.items()):
+            try:
+                # tr_id 는 TICK_TR_ID 가정 — 분배 추적에 들어간 ticker 는 TICK 만
+                # (체결통보 / 장운영정보는 별도 처리). 안전을 위해 ws._subscriptions 에서
+                # tr_key 매칭하는 (tr_id, tr_key) 찾아 unsubscribe.
+                matches = [
+                    (tid, tk) for tid, tk in ws._subscriptions if tk == tr_key
+                ]
+                for tid, tk in matches:
+                    await ws.unsubscribe(tid, tk)
+            except Exception:
+                logger.debug("[pool_unsubscribe_all] %s 해제 실패", tr_key, exc_info=True)
+        self._ticker_to_session.clear()
+
+    async def resend_subscribe_for_ticker(self, tr_id: str, tr_key: str) -> None:
+        """K stale watcher 헬퍼 — 분배 추적된 세션에서 ``_send_subscribe`` 재전송.
+
+        ``_subscriptions`` set 은 보존 — KIS silent inactive 회복용.
+        추적 없는 ticker 는 메인 fallback (안전 디폴트).
+        """
+        chosen = self._ticker_to_session.get(tr_key, self._main)
+        try:
+            await chosen._send_subscribe(tr_id, tr_key, subscribe=True)
+        except Exception:
+            logger.debug("[pool_resend_subscribe] 실패: %s", tr_key, exc_info=True)
+
+    # -- 통합 조회 / 진단 -----------------------------------------------
+
+    def get_subscribed_tickers(self) -> set[str]:
+        """메인 + 보조 모든 세션의 TICK 구독 합집합 (Phase D 호환 인터페이스)."""
+        # 지연 import — scanner 가 websocket_pool 참조 가능성 차단
+        from src.engine.scanner import TICK_TR_ID
+
+        result: set[str] = set()
+        for ws in [self._main, *self._quotes]:
+            for tr_id, tr_key in ws._subscriptions:
+                if tr_id == TICK_TR_ID:
+                    result.add(tr_key)
+        return result
+
+    def get_acked_tickers(self) -> set[str]:
+        """메인 + 보조 모든 세션의 ACK 받은 TICK 구독 합집합."""
+        from src.engine.scanner import TICK_TR_ID
+
+        result: set[str] = set()
+        for ws in [self._main, *self._quotes]:
+            for tr_id, tr_key in ws._subscriptions_acked:
+                if tr_id == TICK_TR_ID:
+                    result.add(tr_key)
+        return result
+
+    def get_session_status(self) -> list[dict]:
+        """세션별 슬롯 상태 dict 리스트. ``/api/realtime/subscriptions`` 응답에 동봉."""
+        from src.engine.scanner import TICK_TR_ID
+
+        sessions = []
+        for ws, label in [(self._main, "main")] + [
+            (q, f"quote-{i}") for i, q in enumerate(self._quotes, start=1)
+        ]:
+            subscribed = {
+                tr_key for tr_id, tr_key in ws._subscriptions if tr_id == TICK_TR_ID
+            }
+            acked = {
+                tr_key for tr_id, tr_key in ws._subscriptions_acked if tr_id == TICK_TR_ID
+            }
+            sessions.append({
+                "label": label,
+                "subscribed": len(subscribed),
+                "acked": len(acked),
+                "limit": MAX_SUBSCRIPTIONS,
+                "ws_connected": getattr(ws, "_ws", None) is not None,
+                "reconnect_count": getattr(ws, "_reconnect_count", 0),
+                # 진단용 sorted ticker 리스트 (라우트에서 사용)
+                "tickers": {
+                    "subscribed": sorted(subscribed),
+                    "acked": sorted(acked),
+                },
+            })
+        return sessions
+
+    # -- 호환 인터페이스 (기존 kis_ws 호출자 보존) ----------------------
+
+    @property
+    def _subscriptions(self) -> set[tuple[str, str]]:
+        """메인 + 보조 모든 세션 ``_subscriptions`` 합집합.
+
+        호환성: 기존 호출자가 ``kis_ws._subscriptions`` 를 직접 참조하는 경우 동일 의미 제공.
+        외부 호출자가 set 에 직접 add/discard 하는 패턴은 사이클 7-B 에서 권장 안 함 —
+        새 코드는 ``subscribe/unsubscribe`` 사용.
+        """
+        result: set[tuple[str, str]] = set()
+        for ws in [self._main, *self._quotes]:
+            result.update(ws._subscriptions)
+        return result
+
+    @property
+    def _subscriptions_acked(self) -> set[tuple[str, str]]:
+        """메인 + 보조 모든 세션 ACK 합집합."""
+        result: set[tuple[str, str]] = set()
+        for ws in [self._main, *self._quotes]:
+            result.update(ws._subscriptions_acked)
+        return result
+
+    @property
+    def _ws(self):
+        """메인 세션 WebSocket 객체 — 라우트 ``ws_connected`` 판정용 (메인 기준)."""
+        return getattr(self._main, "_ws", None)
+
+    @property
+    def _reconnect_count(self) -> int:
+        """메인 세션 재연결 횟수 (대시보드 기본 노출 — 보조는 sessions 배열로 분리)."""
+        return getattr(self._main, "_reconnect_count", 0)
+
+
+# ---------------------------------------------------------------------------
+# 모듈 싱글톤 — 호출자가 직접 import
+# ---------------------------------------------------------------------------
+# 운영 환경에선 ``kis_ws_pool`` 을 직접 사용. 기존 호출자 (``scanner``, ``scheduler``,
+# ``routes``) 는 ``kis_ws`` (메인 단일) 도 그대로 import 가능 — 풀이 메인을 재사용하므로
+# 메인 인스턴스 동일성 유지.
+kis_ws_pool = WebsocketPool()

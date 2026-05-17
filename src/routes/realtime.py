@@ -39,26 +39,32 @@ _FRESHNESS_SECS = 60
 async def get_subscriptions() -> ApiResponse:
     """현재 WebSocket 구독 슬롯 사용현황을 반환한다.
 
+    사이클 7-B (2026-05-17) — 멀티 세션 풀 지원:
+    - 메인 + 보조 세션 합집합으로 ``total/acked/fresh_60s/stale_60s`` 산출
+    - ``sessions`` 배열로 세션별 ``label/subscribed/acked/fresh/stale/limit/ws_connected/reconnect_count`` 노출
+    - ``limit`` 전체값 = ``MAX_SUBSCRIPTIONS × (1 + 보조 세션 수)``
+    - 보조 0개 시 sessions 길이 1 (main only) — 기존 호환 보존
+
     응답 data 스키마:
-        total            — _subscriptions TICK 필터 size (SEND 기준)
-        acked            — _subscriptions_acked TICK 필터 size (KIS 응답 기준)
+        total            — 합집합 TICK 구독 (SEND 기준)
+        acked            — 합집합 ACK (KIS 응답 기준)
         fresh_60s        — 최근 60s 내 tick 수신 카운트
-        stale_60s        — 60s 미수신 카운트 (= total - fresh_60s)
-        limit            — MAX_SUBSCRIPTIONS (KIS 공식 한도 41)
-        tickers.subscribed / acked / fresh / stale — 모두 sorted 리스트
-        reconnect_count  — 누적 재연결 횟수 (오늘 _reset_daily_state 까지)
-        ws_connected     — WebSocket 활성 여부 (`_ws is not None`)
+        stale_60s        — 60s 미수신 카운트
+        limit            — 41 × (1 + 보조 세션 수)
+        tickers.subscribed / acked / fresh / stale — 합집합 sorted
+        reconnect_count  — 메인 세션 재연결 횟수 (보조는 sessions[*] 에 별도 노출)
+        ws_connected     — 메인 세션 활성 (보조는 sessions[*] 에 별도 노출)
+        sessions         — [{label, subscribed, acked, fresh, stale, limit, ws_connected, reconnect_count}, ...]
     """
     # 지연 import — scanner 가 websocket 을 참조하므로 순환 의존 회피
     from src.engine.scanner import TICK_TR_ID, ticker_last_tick
-    from src.realtime.websocket import MAX_SUBSCRIPTIONS, kis_ws
+    from src.realtime.websocket import MAX_SUBSCRIPTIONS
+    from src.realtime.websocket_pool import kis_ws_pool
 
-    subscribed_set = {
-        tr_key for tr_id, tr_key in kis_ws._subscriptions if tr_id == TICK_TR_ID
-    }
-    acked_set = {
-        tr_key for tr_id, tr_key in kis_ws._subscriptions_acked if tr_id == TICK_TR_ID
-    }
+    pool = kis_ws_pool
+    # 합집합 (메인 + 보조)
+    subscribed_set = pool.get_subscribed_tickers()
+    acked_set = pool.get_acked_tickers()
 
     now = datetime.now(_KST_TZ)
     threshold = timedelta(seconds=_FRESHNESS_SECS)
@@ -69,20 +75,34 @@ async def get_subscriptions() -> ApiResponse:
     }
     stale_set = subscribed_set - fresh_set
 
+    # 세션별 분해 + freshness 카운트 추가
+    sessions = pool.get_session_status()
+    for session in sessions:
+        # session.tickers.subscribed 에 sorted ticker 리스트 보유 — freshness 계산
+        ticker_list = session.get("tickers", {}).get("subscribed", [])
+        ticker_set = set(ticker_list)
+        s_fresh = {
+            t for t in ticker_set
+            if (now - ticker_last_tick.get(t, _min_dt)) <= threshold
+        }
+        session["fresh"] = len(s_fresh)
+        session["stale"] = len(ticker_set) - len(s_fresh)
+
     data = {
         "total": len(subscribed_set),
         "acked": len(acked_set),
         "fresh_60s": len(fresh_set),
         "stale_60s": len(stale_set),
-        "limit": MAX_SUBSCRIPTIONS,
+        "limit": MAX_SUBSCRIPTIONS * len(sessions),
         "tickers": {
             "subscribed": sorted(subscribed_set),
             "acked": sorted(acked_set),
             "fresh": sorted(fresh_set),
             "stale": sorted(stale_set),
         },
-        "reconnect_count": kis_ws._reconnect_count,
-        "ws_connected": kis_ws._ws is not None,
+        "reconnect_count": pool._reconnect_count,
+        "ws_connected": pool._ws is not None,
+        "sessions": sessions,
     }
     return ApiResponse(success=True, data=data, message="")
 

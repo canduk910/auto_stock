@@ -1431,3 +1431,77 @@ PR #2 (브랜치 `claude/diagram-stock-filtering-IaJ4G`) 위에 push → 자동 
 - 본 사이클 후에도 모든 KIS REST/WebSocket 호출은 메인 매니저(`token_manager`) 사용 — 보조 매니저는 노출만 되어 있을 뿐 실제 호출 경로 0.
 - 보조 매니저 예외(`ValueError` 미등록 / DB 장애)는 메인 흐름에 영향 0 — 호출자가 try/except 흡수.
 - app_secret 평문은 응답 모델 필드 자체 부재 + DB 호출 함수 분리(`get_credentials_for_token_manager`) 로 이중 차단.
+
+
+## 자문 시스템 개선 사이클 7-B — WebsocketPool 시세 분배 (2026-05-17)
+
+### 배경
+사이클 7-A 에서 KIS 다중 계좌 인프라(DB + 토큰 매니저 + 라우트) 완성. 본 사이클은 **시세 수신 핵심 변경** — 단일 `KisWebSocket` 인스턴스를 메인 + 보조 N 세션 풀로 확장. 외부 호출자(`scanner`, `risk`, `scheduler`) 인터페이스는 100% 보존하며 내부 분배 로직만 캡슐화.
+
+### 자금 안전 절대 원칙 (불변)
+- **체결통보(H0STCNI0/H0STCNI9) → 메인 세션 단일 강제.** `WebsocketPool.subscribe()` 분기가 `tr_id in {H0STCNI0, H0STCNI9}` 면 priority 무시하고 무조건 메인 우회. `_enforce_main_only_execution_notice` 헬퍼가 보조 세션 직접 호출 시 `QuoteSessionExecutionNoticeError` raise.
+- **매매/잔고/체결조회** → 본 사이클 변경 0 (사이클 7-A 가드 그대로). `src/api/order.py` / `src/api/balance.py` / `src/realtime/handler.py` 의 체결통보 핸들러 무수정.
+- **보조 세션 0개 시 메인 only 회귀 보존** → DB `kis_quote_accounts` 미등록이면 기존 단일 세션 동작과 동일. 5/18 자문 영향 0.
+
+### 분배 정책
+- **HIGH 우선순위** (보유 / 익일청산) → 메인 세션 절대 보장 + `bypass_limit=True`. E1 규칙(2026-05-12) 유지.
+- **LOW 우선순위** (스캐닝: VB/LTV/donchian/breakout/bull_flag/vcp) → 보조 세션 라운드로빈. 가득 / disconnect 세션 건너뜀. 모두 가용 없으면 메인 fallback (LOW 도 메인이 가득이면 drop).
+- **중복 ticker 처리** — 메인 우선:
+  - 메인에 이미 등록된 ticker 가 LOW 로 다시 들어오면 그대로 메인 유지
+  - 보조에 등록된 ticker 가 HIGH 로 들어오면 → 보조 `unsubscribe` + 메인 `subscribe(bypass_limit=True)` 승격 + `[pool_promote] ticker=... old=quote-N new=main` INFO 로그
+- **모든 세션 가득** → drop + `[priority_drop_pool] tr_key=... priority=LOW reason=all_sessions_full main=N/41 quotes=M` INFO 로그. drop 시 `subscribe()` 가 `None` 반환.
+- **총 슬롯** = `MAX_SUBSCRIPTIONS × (1 + N)`. 메인 + 보조 5 = 246 슬롯.
+
+### 백엔드 모듈
+1. **`src/realtime/websocket_pool.py`** 신규 (~280 LOC):
+   - `WebsocketPool` 클래스 — `_main: KisWebSocket` (기존 `kis_ws` 재사용), `_quotes: list[KisWebSocket]`, `_ticker_to_session: dict[str, KisWebSocket]` 분배 추적, `_round_robin_idx: int`
+   - `subscribe(tr_id, tr_key, *, priority="LOW", bypass_limit=False) -> Optional[str]` — 사용된 세션 label 반환 (`"main"` / `"quote-N"`). drop 시 `None`
+   - `unsubscribe(tr_id, tr_key)` — 분배 추적 dict 기반 정확한 세션에서 해제. 추적 없으면 noop (다음 `_scan_loop` 자연 정리). 체결통보는 메인 강제
+   - `unsubscribe_all()` — 추적 dict 순회 + 모든 세션 매칭 해제 + dict clear
+   - `resend_subscribe_for_ticker(tr_id, tr_key)` — K stale watcher 헬퍼. 추적 없는 ticker 는 메인 fallback
+   - `get_subscribed_tickers() -> set[str]` / `get_acked_tickers() -> set[str]` — 메인 + 보조 합집합 (Phase D 호환)
+   - `get_session_status() -> list[dict]` — 세션별 `{label, subscribed, acked, limit, ws_connected, reconnect_count, tickers}` 노출
+   - 호환 property `_subscriptions` / `_subscriptions_acked` / `_ws` / `_reconnect_count` — 합집합 또는 메인 기준
+   - `kis_ws_pool` 모듈 싱글톤
+   - `QuoteSessionExecutionNoticeError` exception + `_enforce_main_only_execution_notice(pool, tr_id, *, session_label)` 헬퍼
+2. **`src/routes/realtime.py::GET /api/realtime/subscriptions` 확장** — `kis_ws_pool` 호출로 변경:
+   - 응답에 `sessions: [{label, subscribed, acked, fresh, stale, limit, ws_connected, reconnect_count, tickers}, ...]` 배열 추가
+   - `total/acked/fresh_60s/stale_60s` 는 합집합 카운트
+   - `limit` = `MAX_SUBSCRIPTIONS × len(sessions)` (총 슬롯 용량)
+   - 보조 0개 시 sessions 길이 1 (main only) — 기존 호환 보존
+
+### 자율 결정 사항
+1. **옵션 2 채택 — `kis_ws` 메인 인스턴스 재사용** (옵션 1 = `kis_ws` 자체를 `WebsocketPool` 으로 교체 거부). 풀의 `_main` 을 기존 `kis_ws` 모듈 변수 그대로 재사용해 인스턴스 동일성 유지. 이유: `handler.py` / `scheduler.py` / `scanner.py` 등 다른 모듈이 `kis_ws` 참조를 보유한 채 풀이 별도 인스턴스로 교체되면 참조 분기 결함 발생. 옵션 2 는 기존 호출자가 `kis_ws._subscriptions` 등 set 직접 참조하는 패턴도 회귀 0건 (메인 단독 view).
+2. **분배 추적 dict 가 KisWebSocket 인스턴스 참조 보유** (label 비교 대신 `is` 비교 사용). 라벨 변경에 안전.
+3. **중복 ticker 처리: 보조 → HIGH 승격 시 보조 unsubscribe + 메인 add**. 양쪽에 동시 등록되면 동일 tick 메시지 중복 처리 위험 + 슬롯 낭비. 명시 승격으로 차단.
+4. **라우트 `limit` 의미 확장** — `MAX_SUBSCRIPTIONS × 세션 수` (총 용량 표현). 메인 단독 41 의미는 `sessions[0].limit` 로 분리.
+5. **`get_session_status` 의 `tickers` 키는 sorted subscribed/acked 만**. fresh/stale 카운트는 라우트 레벨에서 `ticker_last_tick` 비교 후 산출 — 시간 의존 로직을 풀 코어에서 분리 (테스트 격리성).
+
+### 안전 규칙 멀티 세션 지원
+- **E1 (보유·익일청산 우선)** — `subscribe(priority="HIGH")` 가 메인 bypass_limit=True 절대 보장
+- **E2 (거절 응답 감지)** — 각 세션의 `_handle_raw()` 자체 동작. 풀이 거절 처리 재구현 안 함 (KisWebSocket 책임 유지)
+- **F1 (재연결 후 자동 검증)** — 각 세션의 `_verify_subscriptions_after_reconnect()` 가 `connect()` 안에서 독립 발화
+- **K (stale watcher)** — `pool.resend_subscribe_for_ticker(tr_id, tr_key)` 가 `_ticker_to_session` 추적 활용해 정확한 세션에 재전송. 추적 없으면 메인 fallback
+
+### 회귀 가드 (총 46 신규)
+- `tests/unit/realtime/test_websocket_pool.py` — 25 케이스 (분배 알고리즘 / 중복 / 체결통보 강제 / drop / get_subscribed_tickers / get_session_status / unsubscribe / 보조 0개 회귀)
+- `tests/unit/realtime/test_pool_safety_rules.py` — 8 케이스 (E1 / E2 / F1 / K 멀티 세션 지원 + 메인 단일 체결통보 가드)
+- `tests/integration/test_pool_distribution.py` — 6 케이스 (5 세션 100 종목 / 246 슬롯 drop / disconnect graceful / HIGH bypass 메인 가득 / 보조 0개 회귀 / 100 종목 통합 조회)
+- `tests/contract/test_routes_subscriptions_pool.py` — 7 케이스 (sessions 배열 / 보조 0개 길이 1 / 보조 3개 길이 4 / 필수 키 / total=sum / acked=sum / limit 확장)
+
+### 운영 점진 활성화 절차
+1. **코드 배포 단계 (현재)**: 풀 코드 + 보조 세션 0개 → 메인 only 동작 (회귀 0). 5/18 자문 영향 0.
+2. **첫 보조 등록** (5/20 이후): DB 1개 등록 → 1 보조 세션 활성. 사이클 7-C 에서 `scheduler._boot()` 가 보조 세션 connect() 호출 통합 후 효력 발생. 슬롯 41 + 41 = 82.
+3. **점진 추가**: DB 2~5 등록 → 풀 점진 확장. 매번 운영 안정성 모니터링.
+4. **`scheduler._boot()` 재시작 시점에 보조 세션 연결** — 기존 메인 흐름 유지.
+
+### 후속 사이클 7-C 진입 전 확인 항목
+- (a) `scheduler._boot()` 가 풀의 보조 세션 `connect()` 호출 추가 (시세 흐름 변경 시작 시점)
+- (b) `scanner.subscribe_filtered_stocks` 가 풀의 `subscribe(priority=...)` 로 명시 분기 (현재는 `kis_ws.subscribe` 호출이 풀 메인으로 자연 routing — 보조 세션 활용은 안 됨)
+- (c) K stale watcher (`scheduler._stale_watcher_loop`) 가 `kis_ws_pool.resend_subscribe_for_ticker` 사용으로 갈아끼움 — 분배 추적 정합성 유지
+
+### 안전 원칙
+- **외부 호출자 인터페이스 보존** — `scanner` / `risk` / `scheduler` 변경 0 (사이클 7-B). 보조 세션 활용은 사이클 7-C 에서 명시 분기.
+- **체결통보 메인 단일 절대 보장** — 코드 가드 `RuntimeError` + 문서 (`src/realtime/CLAUDE.md` 사이클 7-B 섹션).
+- **보조 세션 0개 시 기존 동작 회귀 보존** — 5/18 자문 영향 0.
+- 점진 활성화 — 사용자가 보조 계좌 등록할 때까지 메인 only.

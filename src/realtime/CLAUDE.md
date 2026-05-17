@@ -2,6 +2,80 @@
 
 KIS WebSocket 실시간 시세 수신 및 체결통보 처리.
 
+## 사이클 7-B (2026-05-17) — WebsocketPool 시세 분배
+
+단일 ``KisWebSocket`` 인스턴스 → 메인 + 보조 N 세션 풀. 외부 호출자(scanner/risk/scheduler)
+인터페이스 100% 보존, 내부 분배 로직 캡슐화.
+
+### 자금 안전 절대 원칙
+
+- **체결통보(H0STCNI0/H0STCNI9) → 메인 세션 단일 강제** — ``_enforce_main_only_execution_notice``
+  + ``WebsocketPool.subscribe`` 분기가 무조건 메인 우회. 보조 세션 시도 시 ``QuoteSessionExecutionNoticeError``
+- **매매/잔고/체결조회** → 본 사이클 변경 0 (사이클 7-A 가드 ``src/auth/CLAUDE.md``)
+- **보조 세션** → 시세 only. ``kis_quote_accounts`` DB 등록 후 ``scheduler._boot()`` 재시작 시점에 연결
+
+### 분배 정책
+
+- **HIGH 우선순위**(보유 / 익일청산) → 메인 세션 절대 보장 (``bypass_limit=True``). E1 규칙 유지
+- **LOW 우선순위**(스캐닝) → 보조 세션 라운드로빈. 가득 / disconnect 세션 건너뜀. 모두 가용 없으면 메인 fallback
+- **중복 ticker** → 메인 우선. 보조에 있는데 HIGH 로 들어오면 메인 승격 + 보조 unsubscribe + ``[pool_promote]`` 로그
+- **모든 세션 가득** → drop + ``[priority_drop_pool] tr_key=... priority=LOW reason=all_sessions_full main=N/41 quotes=M`` INFO 로그
+- **총 슬롯 = 41 × (1 + N)** (메인 + 보조 N). 보조 0 → 41, 보조 5 → 246
+
+### 운영 점진 활성화
+
+1. **코드 배포 단계**: 풀 코드 + 보조 세션 0개 (DB 미등록) → 메인 only 동작 (회귀 0)
+2. **첫 보조 등록**: DB 1개 → 1 보조 활성 → 41 + 41 = 82 슬롯
+3. **점진 추가**: DB 2~5 등록 → 풀 점진 확장
+4. ``scheduler._boot()`` 재시작 시점에 보조 세션 연결 (기존 메인 흐름 유지)
+
+### 모듈
+
+- ``src/realtime/websocket_pool.py::WebsocketPool`` — 메인(``kis_ws`` 재사용) + ``_quotes: list[KisWebSocket]`` + ``_ticker_to_session: dict[str, KisWebSocket]`` + ``_round_robin_idx: int``
+- ``WebsocketPool.subscribe(tr_id, tr_key, *, priority="LOW", bypass_limit=False) -> Optional[str]`` — 세션 label 반환 ("main" / "quote-N"). drop → None
+- ``WebsocketPool.unsubscribe(tr_id, tr_key)`` — 분배 추적된 세션에서 해제. 추적 없으면 noop. 체결통보는 메인 강제
+- ``WebsocketPool.unsubscribe_all()`` — 분배 추적 dict 순회 + 모든 세션 매칭 해제
+- ``WebsocketPool.resend_subscribe_for_ticker(tr_id, tr_key)`` — K stale watcher 헬퍼. 추적 없는 ticker 는 메인 fallback
+- ``WebsocketPool.get_subscribed_tickers() -> set[str]`` — 메인 + 보조 TICK 합집합 (Phase D 호환)
+- ``WebsocketPool.get_acked_tickers() -> set[str]`` — 합집합 ACK
+- ``WebsocketPool.get_session_status() -> list[dict]`` — 세션별 label/subscribed/acked/limit/ws_connected/reconnect_count + tickers.subscribed/acked
+- 호환 property: ``_subscriptions`` / ``_subscriptions_acked`` / ``_ws`` / ``_reconnect_count`` — 메인 단독이 아닌 합집합 또는 메인 기준 반환 (기존 호출자 의미 보존)
+- 모듈 싱글톤: ``kis_ws_pool``. 기존 ``kis_ws`` 도 메인 단일로 보존 (풀이 그를 재사용)
+
+### 안전 규칙 멀티 세션 지원
+
+- **E1 (보유·익일청산 우선)** — ``subscribe(priority="HIGH")`` 가 메인 세션 bypass_limit=True 절대 보장
+- **E2 (거절 응답 감지)** — 각 세션의 ``_handle_raw()`` 독립 작동. 풀이 거절 처리 재구현 안 함
+- **F1 (재연결 후 자동 검증)** — 각 세션의 ``_verify_subscriptions_after_reconnect()`` 가 ``connect()`` 안에서 독립 발화
+- **K (stale watcher)** — ``pool.resend_subscribe_for_ticker(tr_id, tr_key)`` 가 ``_ticker_to_session`` 추적 dict 활용해 정확한 세션에 재전송. 추적 없으면 메인 fallback
+
+### 라우트 응답 확장
+
+``/api/realtime/subscriptions`` 응답에 ``sessions`` 배열 추가:
+
+```json
+{
+  "total": 123, "acked": 100, "fresh_60s": 95, "stale_60s": 5, "limit": 246,
+  "sessions": [
+    {"label": "main", "subscribed": 41, "acked": 41, "fresh": 40, "stale": 1, "limit": 41, "ws_connected": true, "reconnect_count": 0, "tickers": {"subscribed": [...], "acked": [...]}},
+    {"label": "quote-1", "subscribed": 41, ...},
+    ...
+  ],
+  ...
+}
+```
+
+- ``total/acked`` 는 합집합 카운트, 세션별 분해는 ``sessions[*].subscribed/acked``
+- ``limit`` 은 ``MAX_SUBSCRIPTIONS × len(sessions)`` (메인 + 보조 합산 용량)
+- 보조 0개 시 ``sessions`` 길이 1 (main only) — 기존 호환
+
+### 회귀 가드 (46 신규)
+
+- ``tests/unit/realtime/test_websocket_pool.py`` (25) — 분배 알고리즘 / 중복 / 체결통보 강제 / drop / get_subscribed_tickers / get_session_status / unsubscribe / 보조 0개 회귀
+- ``tests/unit/realtime/test_pool_safety_rules.py`` (8) — E1 / E2 / F1 / K 멀티 세션 지원 + 메인 단일 체결통보 가드
+- ``tests/integration/test_pool_distribution.py`` (6) — 5 세션 분배 / 총 슬롯 / disconnect graceful / HIGH bypass / 보조 0개 회귀 / 100 종목 통합 조회
+- ``tests/contract/test_routes_subscriptions_pool.py`` (7) — sessions 배열 / 필수 키 / 집계 정합 / limit 확장
+
 ## 모듈별 역할
 
 ### websocket.py — 연결 관리
