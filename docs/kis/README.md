@@ -35,6 +35,7 @@
 | 문서 | 설명 |
 |------|------|
 | [error-codes.md](error-codes.md) | KIS 오류 코드 통합 표 (EGW/OPSQ/OPSP + APBK 실측) + 거부 분류·후속 조치 매핑 |
+| [rate-limits.md](rate-limits.md) | KIS API 호출 유량 정책 (2026-04-20 기준 REST 18건/초 + WS 41건) + 본 시스템 적용 현황 + 잠재 결함 3건 |
 
 ## 프로젝트 사용 중 API
 

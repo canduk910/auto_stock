@@ -43,6 +43,16 @@ Supabase(PostgreSQL) CRUD 모듈.
 - scheduler `_boot()` 가 `summary.net_asset × ratio` 로 `allocate_funds()` 호출 — 변경은 다음 영업일 _boot 부터 반영
 - 범위 외 입력은 ValueError. supabase 동기 호출은 `asyncio.to_thread` 위임
 
+### kis_quote_accounts.py — 보조 KIS 시세 수신 계좌 풀 (사이클 7-A, 2026-05-17)
+- `list_accounts(active_only=False)` / `get_account(id)` / `get_account_by_label(label)` — 응답은 `KisQuoteAccount` (`app_secret_masked` 만, 평문 절대 노출 안 함)
+- `insert_account(label, app_key, app_secret, kis_env)` — label UNIQUE 충돌 시 `LabelConflictError`, 빈 값 / kis_env 부적합 시 `ValueError`
+- `update_account(id, active=None, label=None)` — 부분 갱신. app_key/app_secret 수정은 본 사이클 미지원(보안 감사 추적성 위해 삭제 후 재등록 패턴)
+- `delete_account(id)` — 존재 시 True, 미존재 False
+- `get_credentials_for_token_manager(label)` — **토큰 매니저 전용 평문 노출 함수**. `src/auth/token.py::get_token_manager(label)` lazy 초기화에서만 호출. API 응답/로그 절대 노출 금지
+- 테이블: `kis_quote_accounts` (migration 026, UUID PK, label UNIQUE, active=true 부분 인덱스)
+- 자금 안전: 본 모듈 응답은 **시세 수신 한정**. order.py / balance.py / 체결통보 구독은 메인 계좌만 — 코드 리뷰 시 보조 계좌 변수 전달 차단 확인
+- supabase 동기 SDK 호출은 모두 `asyncio.to_thread()` 위임
+
 ### stock_master.py — 종목 마스터 캐시 (Phase G, 2026-05-11)
 - `upsert_one(StockBasics)` / `get(ticker) -> Optional[StockBasics]` / `is_stale(ticker, max_age_hours=24) -> bool`
 - 테이블: `stock_master` (migration 015). PK `ticker`, `refreshed_at` 24h TTL

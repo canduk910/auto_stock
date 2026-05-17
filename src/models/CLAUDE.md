@@ -19,6 +19,12 @@ Pydantic 기반 데이터 모델. API 요청/응답, DB 레코드, 내부 데이
 - `TradeStatus`: PENDING, COMPLETED, PARTIAL, CANCELLED
 - `TradeRecord`: trade_history 테이블 매핑
 
+### kis_quote_account.py — 보조 시세 계좌 모델 (사이클 7-A, 2026-05-17)
+- `KisQuoteAccount`: `kis_quote_accounts` row 응답 — `id`(UUID), `label`, `app_key`, `app_secret_masked`("****1234" 형식), `kis_env`("real"/"vts"), `active`, `created_at`, `updated_at`. **app_secret 평문 필드 자체가 없음** — `from_row()` 가 항상 마스킹 변환
+- `KisQuoteAccountCreate`: POST 요청 본문 — `{label, app_key, app_secret, kis_env}`. 빈 값 거부 (`field_validator` strip)
+- `KisQuoteAccountUpdate`: PUT 요청 본문 — `{active?, label?}`. app_key/app_secret 수정 미지원
+- `mask_secret(secret)`: 마지막 4자리만 노출 헬퍼 (8자리 미만은 `****` 로 통일 — 길이 정보 누출 차단)
+
 ### stock.py — 종목 기본정보 (Phase G, 2026-05-11)
 - `StockBasics`: KIS `CTPF1002R`(주식기본조회) 응답 캐시 모델 — `ticker`, `name`, `excg_dvsn_cd`, `nxt_tradable`(파생: `cptt_trad_tr_psbl_yn=="Y" AND nxt_tr_stop_yn=="N"`), `krx_halted`(파생: `tr_stop_yn=="Y"`), `admin_item`(파생: `admn_item_yn=="Y"`), `raw`(원본 dict), `refreshed_at`
 - `stock_master` 테이블(migration 015) 매핑 — NXT 거래가능 사전 판별용. 24h TTL

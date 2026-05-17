@@ -34,6 +34,7 @@ from src.routes import (
     backtest,
     market_regime,
     system_integrations,
+    kis_quote_accounts,
 )
 from src.auth.token import token_manager
 
@@ -233,6 +234,7 @@ app.include_router(realtime.router)
 app.include_router(backtest.router)
 app.include_router(market_regime.router)
 app.include_router(system_integrations.router)
+app.include_router(kis_quote_accounts.router)
 
 
 @app.get("/health")

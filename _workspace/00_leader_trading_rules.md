@@ -1369,3 +1369,65 @@ risk_on_tick 등 후속 테스트의 buy_blocked 가드 오염 차단.
 5. `docs(engine/frontend): document active-board filter and breakout cap`
 
 PR #2 (브랜치 `claude/diagram-stock-filtering-IaJ4G`) 위에 push → 자동 갱신.
+
+---
+
+## 자문 시스템 개선 사이클 7-A — KIS 다중 계좌 인프라 (2026-05-17)
+
+### 배경
+2026-04-20 KIS API rate limit 정책 변경(실전 18건/초)으로 단일 계좌 시 시세성 호출 + 매매 호출이 같은 quota 를 소모. 보조 계좌 5개를 시세 수신 전용으로 활용해 시세 처리량을 확장하되, **매매/잔고/체결통보는 메인 계좌 단일 보장** 원칙을 절대 깨지 않는다.
+
+### 분할 사이클 (7-A → 7-B → 7-C → 7-D)
+- **7-A (본 사이클)**: 인프라만 — DB 테이블 + 라우트 + 토큰 매니저 multi-account. 시세/매매 흐름 변경 0.
+- 7-B (후속): WebSocketPool — 멀티 세션 시세 분배.
+- 7-C (후속): REST 시세성 호출 라운드로빈.
+- 7-D (후속): Settings UI.
+
+### 자금 안전 원칙 (불변)
+- **매매 주문(`src/api/order.py`)·잔고(`src/api/balance.py`)·체결통보(`H0STCNI0`) 구독은 영원히 메인 계좌만 사용.** 본 사이클은 해당 코드 경로 무수정.
+- 보조 계좌(`kis_quote_accounts`) 는 **시세 수신 전용** — 자금 무관, 매매 절대 금지.
+- 코드 리뷰 시 보조 계좌 변수(label, account_id) 가 매매/잔고 함수로 전달되는지 반드시 확인.
+
+### DB 스키마 (migration 026, 적용 보류)
+- `kis_quote_accounts` (UUID PK, label UNIQUE, app_key TEXT, app_secret TEXT 평문 1차 — Supabase RLS 의존, kis_env CHECK in('real','vts'), active BOOL DEFAULT true, created_at / updated_at TIMESTAMPTZ).
+- `idx_kis_quote_accounts_active` 부분 인덱스 (`WHERE active = true`).
+- COMMENT 로 시세 수신 전용 + 후속 KMS 보강 예정 명시.
+
+### 백엔드 모듈
+1. **`src/models/kis_quote_account.py`** — `KisQuoteAccount` (응답 모델, `app_secret_masked` 만 — 평문 필드 자체 부재) / `KisQuoteAccountCreate` / `KisQuoteAccountUpdate` / `mask_secret()` (마지막 4자리만, 8자리 미만은 `****` 통일 — 길이 정보 누출 차단).
+2. **`src/db/kis_quote_accounts.py`** — `list_accounts(active_only)` / `get_account(id)` / `get_account_by_label(label)` / `insert_account(label, app_key, app_secret, kis_env)` / `update_account(id, active?, label?)` / `delete_account(id)` / `get_credentials_for_token_manager(label)` (토큰 매니저 전용 평문 노출 — API 응답/로그 절대 노출 금지) / `LabelConflictError` exception. 모든 함수 `asyncio.to_thread` 위임.
+3. **`src/auth/token.py` 확장** — `TokenManager.__init__(*, app_key, app_secret, base_url, cache_path, label)` 키워드 주입 + 미지정 시 `settings.kis_*` fallback (메인 흐름 100% 보존). `_quote_token_managers: dict[str, TokenManager]` + `asyncio.Lock` 싱글톤. `get_token_manager(label=None)` async lazy 발급 — `label=None` 은 기존 `token_manager` 동일 인스턴스, label 지정 시 DB 자격증명 로드 + 격리 캐시(`_safe_cache_filename(label)`). `reset_quote_token_managers()` 테스트 헬퍼. `_resolve_base_url('real'/'vts')` 도메인 분기.
+4. **`src/routes/kis_quote_accounts.py`** — `/api/integrations/quote-accounts/*` 4 라우트. GET 목록 / POST 등록 (201/409/422/500) / PUT active+label 부분 갱신 (200/404/409/422) / DELETE (200/404). 모든 응답 app_secret 평문 절대 노출 안 함.
+
+### 토큰 매니저 multi-account 정책
+- 메인 매니저(`token_manager`) — 기존 모듈 전역 인스턴스 보존. 매매·잔고·체결통보 사용.
+- 보조 매니저 — `get_token_manager(label)` lazy. DB `kis_quote_accounts.app_key/app_secret/kis_env` 로드 후 격리 캐시 파일 사용. 같은 label 두 번째 호출 → 동일 인스턴스 (싱글톤).
+- 미등록 label / `active=False` → `ValueError` raise — 호출자가 흡수해야 메인 흐름 영향 0.
+- **보조 매니저의 `build_headers()` 는 시세 수신 한정** — 매매 헤더 구성에 사용 금지 (호출 경로 검토 시 차단).
+
+### 자율 결정 사항
+1. **app_secret 마스킹 형식**: `****` + 마지막 4자리. 8자리 미만 secret 은 `****` 통일 (길이 정보 누출 차단). 평문 필드 자체를 응답 모델에 부재로 처리해 직렬화 누출 사고 차단.
+2. **토큰 매니저 싱글톤 위치**: 모듈 전역 `_quote_token_managers: dict[str, TokenManager]` + `asyncio.Lock` — 기존 `token_manager` 모듈 전역 인스턴스 패턴과 일관. 클래스 staticmethod 보관 회피(테스트 격리성 우선).
+3. **PUT 라우트는 active/label 만 수정 허용**: app_key/app_secret 수정은 본 사이클 미지원 — 보안 감사 추적성 위해 삭제 후 재등록 패턴 강제. 후속 사이클에서 KMS 통합 시 재검토.
+4. **`get_credentials_for_token_manager(label)` 평문 노출 함수 분리**: `list_accounts` / `get_account` 등 일반 조회 함수는 항상 마스킹 모델 반환. 토큰 매니저 lazy 초기화 외 호출 경로 차단 + 코드 리뷰 grep 추적 용이.
+
+### 회귀 가드 (총 24 신규)
+- `tests/unit/db/test_kis_quote_accounts.py` — 8 케이스 (insert+list / active_only / get_by_*/update active false / delete / label 중복 / kis_env CHECK / 빈 값).
+- `tests/unit/auth/test_token_manager_multi.py` — 6 케이스 (메인 매니저 동일 인스턴스 / DB 자격증명 로드 / 싱글톤 / 미등록 ValueError / 메인·보조 격리 / 메인 매니저 회귀 보존).
+- `tests/contract/test_routes_kis_quote_accounts.py` — 10 케이스 (빈 목록 / POST 201 마스킹 / 409 label 중복 / 422 빈 label / 422 빈 app_key / GET 마스킹 보존 / PUT active 토글 / DELETE / PUT 404 / DELETE 404).
+
+### 운영 활성화 절차
+1. **마이그 026 Supabase 콘솔 수동 적용** — 사용자 명시 승인 후 진행.
+2. **Supabase RLS 정책 활성화 권장** — service_role / authenticated 외 SELECT 차단 (app_secret 평문 보호).
+3. **보조 계좌 KIS Developers 발급** — 메인 계좌와 별개 앱 등록. 시세 권한만 있는 계좌면 충분 (매매 권한 불필요).
+4. **`.gitignore` 갱신** — `.token_cache_quote_*.json` 패턴 추가 권장 (라벨별 캐시 파일 발생).
+5. **계좌 등록 방법** (UI 는 7-D 사이클):
+   - curl POST: `curl -X POST <host>/api/integrations/quote-accounts -d '{"label":"quote-1","app_key":"...","app_secret":"...","kis_env":"real"}'`
+   - Supabase SQL: `INSERT INTO kis_quote_accounts (label, app_key, app_secret, kis_env) VALUES (...)`
+6. **7-B WebSocketPool 사이클 진입 후 실제 시세 분배 시작** — 본 사이클은 등록 인프라만.
+
+### 안전 원칙
+- **시세/매매 흐름 변경 0** — `src/engine/`, `src/realtime/`, `src/api/order.py`, `src/api/balance.py` 무수정.
+- 본 사이클 후에도 모든 KIS REST/WebSocket 호출은 메인 매니저(`token_manager`) 사용 — 보조 매니저는 노출만 되어 있을 뿐 실제 호출 경로 0.
+- 보조 매니저 예외(`ValueError` 미등록 / DB 장애)는 메인 흐름에 영향 0 — 호출자가 try/except 흡수.
+- app_secret 평문은 응답 모델 필드 자체 부재 + DB 호출 함수 분리(`get_credentials_for_token_manager`) 로 이중 차단.
