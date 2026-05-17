@@ -319,7 +319,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         1차 구현: 모멘텀 등락률 순위 API + 시총 사후 컷.
         VTS 호환을 위해 fetch_stock_detail 으로 1종목씩 검증.
         """
-        from src.api.condition import fetch_stock_detail, scan_volume_rank
+        from src.api.condition import _fetch_fluctuation_rank, fetch_stock_detail
         from src.engine.scanner import STATIC_TICKER_NAMES, ticker_names
 
         p = self.config.params
@@ -328,7 +328,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         max_stocks = p["max_scan_stocks"]
 
         try:
-            ranked = await scan_volume_rank()
+            ranked = await _fetch_fluctuation_rank()
         except Exception as e:
             logger.warning("눌림목 유니버스 스캔 실패: %s", e)
             return []
