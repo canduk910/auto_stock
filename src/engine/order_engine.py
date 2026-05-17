@@ -139,8 +139,21 @@ class OrderEngine:
             pass  # 로그 실패는 본 흐름 보존
         return "KRX"
 
-    async def execute_buy(self, ticker: str, current_price: int, strategy: StrategyBase) -> None:
-        """매수 주문을 실행한다."""
+    async def execute_buy(
+        self,
+        ticker: str,
+        current_price: int,
+        strategy: StrategyBase,
+        *,
+        soft_multiplier: float = 1.0,
+    ) -> None:
+        """매수 주문을 실행한다.
+
+        **사이클 8 (2026-05-18)** — ``soft_multiplier`` (기본 1.0):
+        - risk.on_tick 이 BuyBlockState 가 SOFT 모드 + 가드 발동 시 0.5 를 전달한다.
+        - calc_buy_quantity 결과에 곱하고 ``max(1, int(...))`` 로 최소 1주 보장.
+        - 1.0 인 경우 기존 동작 100% 보존 (회귀 0).
+        """
         state = strategy.state
         if state.has_position(ticker) or state.is_buy_pending(ticker):
             logger.warning("중복 매수 차단: %s (전략: %s)", t(ticker), strategy.strategy_id)
@@ -188,6 +201,18 @@ class OrderEngine:
             cache_hit = False
 
         quantity = strategy.calc_buy_quantity(current_price)
+
+        # 사이클 8 (2026-05-18) — SOFT 모드 수량 축소.
+        # multiplier=1.0 이면 no-op (회귀 보존). 1.0 미만이면 max(1, ...) 로 최소 1주 보장.
+        # 본 적용은 calc_buy_quantity 의 1주 폴백 이후라 잔여 자금 검증을 거친 수량을 축소.
+        if soft_multiplier < 1.0 and quantity > 0:
+            adjusted = max(1, int(quantity * soft_multiplier))
+            if adjusted != quantity:
+                logger.info(
+                    "[buy_block_soft] %s: quantity %d → %d (multiplier=%.2f, 전략=%s)",
+                    t(ticker), quantity, adjusted, soft_multiplier, strategy.strategy_id,
+                )
+                quantity = adjusted
 
         if quantity <= 0:
             # per-ticker cooldown 등록 — 다음 잔고 sync 또는 LOW_FUNDS_COOLDOWN 만료까지 같은 종목 매수 시도 차단

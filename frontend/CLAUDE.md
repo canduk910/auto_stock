@@ -87,7 +87,7 @@ Dashboard만 즉시 import. History/Recommendations/Logs/Settings는 `React.lazy
     - **app_secret 평문 잔존 차단**: 등록 성공 시 `setForm` 빈 값으로 secret state 즉시 클리어 (회귀 가드 `7D-I`). UI 는 `app_secret_masked` 만 참조 (회귀 가드 `7D-H`).
     - 에러 메시지 분기: `axios.isAxiosError` status 코드 별 한글 메시지 (`409: label 중복` / `422: 검증 실패` / 그 외).
     - API: `frontend/src/api/kis-quote-accounts.ts`(`listAccounts/createAccount/updateAccount/deleteAccount`) + `frontend/src/types/kis-quote-accounts.ts`. 백엔드 사이클 7-A 라우트 `/api/integrations/quote-accounts/*` 4종 활용 (변경 0). queryKey `['kis-quote-accounts']`, staleTime 30s. 회귀 가드: `frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx` 10 케이스 (A 빈목록 / B 1개행+마스킹 / C 폼+POST / D 409 / E 빈값 / F 토글 / G 삭제 / H 평문 부재 / I 폼 클리어 / J password type).
-  - **`IntegrationToggleCard` (사이클 5, 2026-05-17)**: `CashUsageRatioCard` 직하 신설 카드. 3 토글 통합(단일 카드 + 분리 행 구조):
+  - **`IntegrationToggleCard` (사이클 5, 2026-05-17 / 사이클 8 확장 2026-05-18)**: `CashUsageRatioCard` 직하 신설 카드. 3 토글 통합(단일 카드 + 분리 행 구조):
     - `data-testid="toggle-dkstock-regime"`: 외부 매크로 서버(dkstock.cloud) 활성. 활성화 후 3s 동안 `data-testid="fetch-progress-dkstock-regime"` 인라인 진행 표시 + marketRegime queryKey invalidate.
     - `data-testid="toggle-kis-mcp"`: 외부 백테스트 서버 활성. 즉시 fetch 없음 (자문 시점에만 사용).
     - `data-testid="toggle-auto-regime-adjust"`: 매크로 레짐 → cash_usage_ratio 자동 갱신 (사이클 2 키 통합 위치).
@@ -95,7 +95,17 @@ Dashboard만 즉시 import. History/Recommendations/Logs/Settings는 `React.lazy
     - 각 토글 클릭 → `ConfirmModal` 이중 확인 (`매크로 레짐 활성화` heading + 안내 메시지). 활성화 / 비활성화 분기 별 안내 분리.
     - API: `getDkstockRegime / setDkstockRegime` (`frontend/src/api/integrations.ts`) + 동일 패턴 2종. queryKey `['integration', '{key}']`, staleTime 30s, `refetchOnWindowFocus: false`. mutation onSuccess 에서 invalidate.
     - API 에러 graceful: `data-testid="toggle-error-{key}"` 빨간 박스 + "잠시 후 재시도하세요".
-    - DB 우선 / .env fallback — 운영자가 DB 토글 후에도 환경변수 그대로 두면 안전망 (Phase 1 / 사이클 2 운영자 영향 0). 회귀 가드: `frontend/src/components/__tests__/IntegrationToggleCard.test.tsx` 6 케이스
+    - DB 우선 / .env fallback — 운영자가 DB 토글 후에도 환경변수 그대로 두면 안전망 (Phase 1 / 사이클 2 운영자 영향 0)
+    - **사이클 8 (2026-05-18) 매수 가드 4 모드 + 4 임계값 영역** (`BuyBlockSection`): 3 토글 하단 분리 영역. queryKey `['integration', 'buy-block']`, staleTime 30s.
+      - 모드 select `data-testid="buy-block-mode-select"` (OFF/WARN/SOFT/HARD, 기본 HARD). 변경 시 `ConfirmModal` 이중 확인 (각 모드별 안내 메시지 분리: 매매 흐름 영향 명시)
+      - 4 슬라이더: `buy-block-vix-slider` (10~50, step 1, 기본 25) / `buy-block-fg-high-slider` (50~100, step 1, 기본 85) / `buy-block-fg-low-slider` (0~50, step 1, 기본 15)
+      - `buy-block-defensive-toggle` 체크박스 (regime=defensive 차단 활성, 기본 ON)
+      - `buy-block-thresholds-save` 저장 버튼 — 4 슬라이더+체크박스를 한 번에 PUT (ConfirmModal 없이 즉시 — 모드 변경보다 덜 위험)
+      - `buy-block-reasons` 사유 리스트 (현재 발동 사유 4건까지 list-disc + amber 배경). HARD 모드 + blocked=true 시 "매수 차단 중" 강조
+      - SOFT 모드 시 `buy-block-soft-multiplier` 안내 ("현재 multiplier: 0.50 (가드 발동 시 비중 절반 축소)")
+      - GET 500 시 `buy-block-error` graceful 메시지
+      - API: `getBuyBlock / setBuyBlock` (`frontend/src/api/integrations.ts`). 백엔드 `/api/integrations/buy-block` GET/PUT
+    - 회귀 가드: `frontend/src/components/__tests__/IntegrationToggleCard.test.tsx` 13 케이스 (사이클 5: 6 + 사이클 8: 7 — I8-A select+4 슬라이더 / I8-B reasons 표시 / I8-C 모드 변경 ConfirmModal+PUT / I8-D 임계 슬라이더 PUT / I8-E defensive 체크박스 PUT / I8-F SOFT multiplier 표시 / I8-G 500 graceful)
 
 ## BalanceTable
 - **거래시장 배지 (J1, 2026-05-11)**: 보유 종목 헤더 "종목명" 옆 "거래시장" 컬럼. `Holding.nxt_tradable / krx_halted` 조합으로 5가지 배지 노출 — `KRX+NXT`(emerald-100/800) / `NXT만`(amber-100/800) / `KRX`(gray-100/700) / `정지`(red-100/800) / `확인중`(gray-50/500, 모든 필드 null/undefined). `data-testid="market-badge-{ticker}"`. 배지 클래스 베이스 `inline-block px-1.5 py-0.5 rounded text-xs font-medium`(전략 배지 패턴 재사용)

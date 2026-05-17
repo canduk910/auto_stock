@@ -16,6 +16,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -88,6 +89,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -147,6 +149,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -208,6 +211,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -252,6 +256,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -286,6 +291,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -363,6 +369,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -393,6 +400,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -452,6 +460,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -480,6 +489,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -540,6 +550,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -565,6 +576,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -647,6 +659,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -681,6 +694,7 @@ backend:
     transitive_tests:
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -740,6 +754,7 @@ backend:
       - tests/unit/db/test_stock_master.py
       - tests/unit/db/test_stock_master_upsert.py
       - tests/unit/db/test_system_config_auto_regime.py
+      - tests/unit/db/test_system_config_buy_block.py
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
       - tests/unit/db/test_system_logs_filter.py
@@ -767,6 +782,7 @@ backend:
       - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_market_regime.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -776,6 +792,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -807,6 +824,7 @@ backend:
       - tests/unit/services/test_mcp_client_unwrap.py
   src/db/__init__.py:
     direct_tests:
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_system_integrations.py
@@ -818,6 +836,7 @@ backend:
       - tests/unit/db/test_stock_master.py
       - tests/unit/db/test_stock_master_upsert.py
       - tests/unit/db/test_system_config_auto_regime.py
+      - tests/unit/db/test_system_config_buy_block.py
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
       - tests/unit/db/test_system_logs_filter.py
@@ -902,6 +921,7 @@ backend:
       - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_market_regime.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -912,6 +932,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -941,6 +962,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1013,6 +1035,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1088,6 +1111,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
@@ -1175,6 +1199,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1204,6 +1229,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1278,6 +1304,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1327,6 +1354,7 @@ backend:
       - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_market_regime.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_recommendation_backtest_hook.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -1335,6 +1363,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1355,6 +1384,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1460,6 +1490,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1494,6 +1525,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1519,6 +1551,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1575,6 +1608,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1591,6 +1625,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1663,6 +1698,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1727,6 +1763,7 @@ backend:
       - tests/unit/db/test_stock_master.py
       - tests/unit/db/test_stock_master_upsert.py
       - tests/unit/db/test_system_config_auto_regime.py
+      - tests/unit/db/test_system_config_buy_block.py
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
       - tests/unit/db/test_system_logs_filter.py
@@ -1754,6 +1791,7 @@ backend:
       - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_market_regime.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -1764,6 +1802,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1795,12 +1834,15 @@ backend:
       - tests/unit/services/test_mcp_client_unwrap.py
   src/db/system_config.py:
     direct_tests:
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_system_integrations.py
       - tests/unit/db/test_system_config_auto_regime.py
+      - tests/unit/db/test_system_config_buy_block.py
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
       - tests/unit/engine/test_backtest_engine_db_toggle.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/services/test_dkstock_client_db_toggle.py
       - tests/unit/services/test_mcp_client_db_toggle.py
     transitive_tests:
@@ -1866,6 +1908,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1890,6 +1933,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -1975,6 +2019,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2006,6 +2051,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2065,6 +2111,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2081,6 +2128,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2137,6 +2185,7 @@ backend:
       - tests/unit/engine/test_get_scan_status_tick_coverage.py
       - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
       - tests/unit/engine/test_log_analysis_metrics.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -2144,6 +2193,7 @@ backend:
       - tests/unit/engine/test_recommendation_engine_smoke.py
       - tests/unit/engine/test_recommendation_market_regime_payload.py
       - tests/unit/engine/test_recommendation_metrics_smoke.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2167,6 +2217,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2241,6 +2292,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2319,6 +2371,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2385,11 +2438,14 @@ backend:
       - tests/unit/engine/test_vb_next_day_clear_safety_net.py
   src/engine/market_regime.py:
     direct_tests:
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_market_regime.py
       - tests/integration/test_boot_market_regime.py
       - tests/integration/test_recommendation_with_market_regime.py
       - tests/unit/engine/test_market_regime.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_recommendation_market_regime_payload.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_regime_guard.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -2500,6 +2556,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2524,6 +2581,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2552,6 +2610,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2616,6 +2675,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2717,6 +2777,7 @@ backend:
       - tests/integration/test_stale_watcher_pool.py
       - tests/integration/test_vb_board_stop_loss_fallback.py
       - tests/unit/engine/test_observability_logs.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_tick_coverage.py
@@ -2724,6 +2785,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2761,6 +2823,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2854,6 +2917,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2872,6 +2936,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -2944,6 +3009,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3018,6 +3084,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
       - tests/unit/engine/test_scheduler_priority_groups.py
@@ -3041,6 +3108,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3149,6 +3217,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3230,6 +3299,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3304,6 +3374,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3351,6 +3422,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3462,6 +3534,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3553,6 +3626,7 @@ backend:
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3570,6 +3644,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3649,6 +3724,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3673,6 +3749,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_swing_rest_poll.py
       - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -3690,6 +3767,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3747,6 +3825,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3764,6 +3843,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3791,6 +3871,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3863,6 +3944,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -3925,6 +4007,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3944,6 +4027,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
@@ -4033,6 +4117,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -4062,6 +4147,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4115,6 +4201,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4141,6 +4228,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -4159,6 +4247,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4178,6 +4267,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4203,6 +4293,7 @@ backend:
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4280,6 +4371,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -4308,6 +4400,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4330,6 +4423,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4387,6 +4481,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -4417,6 +4512,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4499,6 +4595,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -4541,6 +4638,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4618,6 +4716,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -4648,6 +4747,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4726,6 +4826,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -4751,6 +4852,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4769,6 +4871,7 @@ backend:
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4788,6 +4891,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4807,6 +4911,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4826,6 +4931,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4845,6 +4951,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4864,6 +4971,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4883,6 +4991,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4902,6 +5011,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4923,6 +5033,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4940,6 +5051,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4959,6 +5071,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4978,6 +5091,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -4998,6 +5112,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -5016,6 +5131,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -5043,6 +5159,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -5063,6 +5180,7 @@ backend:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -5113,6 +5231,7 @@ backend:
       - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_market_regime.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_recommendation_backtest_hook.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -5121,6 +5240,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -5148,6 +5268,7 @@ backend:
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -5198,6 +5319,7 @@ backend:
       - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_market_regime.py
+      - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_recommendation_engine_smoke.py
       - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -5205,6 +5327,7 @@ backend:
       - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
       - tests/unit/engine/test_recommendation_weight_reasoning.py
       - tests/unit/engine/test_recommendation_weights.py
+      - tests/unit/engine/test_risk_buy_block_modes.py
       - tests/unit/engine/test_risk_donchian_skip_buy.py
       - tests/unit/engine/test_risk_regime_guard.py
       - tests/unit/engine/test_scan_loop_reprepare.py
@@ -5232,6 +5355,7 @@ backend:
     transitive_tests:
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
@@ -5677,8 +5801,7 @@ frontend:
       - frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx
   frontend/src/types/integrations.ts:
     direct_tests: []
-    transitive_tests:
-      - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
+    transitive_tests: []
   frontend/src/types/kis-quote-accounts.ts:
     direct_tests: []
     transitive_tests: []
@@ -5742,10 +5865,10 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-17T15:35:03.125Z'
+generated_at: '2026-05-17T21:40:49.349Z'
 stats:
   backend_modules: 83
-  backend_tests: 138
+  backend_tests: 142
   frontend_modules: 57
   frontend_tests: 30
   unmapped_modules:
@@ -5758,6 +5881,7 @@ stats:
     - frontend/src/pages/History.tsx
     - frontend/src/pages/Settings.tsx
     - frontend/src/test/setup.ts
+    - frontend/src/types/integrations.ts
     - frontend/src/types/kis-quote-accounts.ts
     - src/__init__.py
     - src/engine/strategy.py

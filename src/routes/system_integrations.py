@@ -27,6 +27,9 @@ from src.config import settings
 from src.db import system_config as sc
 from src.models.response import ApiResponse
 from src.models.system_integrations import (
+    BuyBlockStatusResponse,
+    BuyBlockThresholdsModel,
+    BuyBlockUpdateRequest,
     IntegrationToggleRequest,
     IntegrationToggleStatus,
 )
@@ -232,5 +235,96 @@ async def set_auto_regime_adjust(req: IntegrationToggleRequest):
             "자동 조정 활성 — 다음 _boot 부터 매크로 레짐 cash_min 기반 cash_usage_ratio 자동 갱신."
             if req.enabled
             else "수동 모드 — 운영자 cash_usage_ratio 보존."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# 사이클 8 (2026-05-18) — 매수 가드 4 모드 + 4 임계값
+# ---------------------------------------------------------------------------
+async def _build_buy_block_status() -> BuyBlockStatusResponse:
+    """현재 모드 + 임계 + 메모리 regime 평가 결과 → 응답 빌더.
+
+    `get_current_regime().get_buy_block_state()` 가 진실의 원천 — DB 조회 1회 + 메모리 regime
+    평가 1회로 구성. empty regime / fetch 실패 graceful.
+    """
+    from src.engine import market_regime as mr_mod
+
+    mode = await sc.get_buy_block_mode()
+    thresholds_db = await sc.get_buy_block_thresholds()
+    regime = mr_mod.get_current_regime()
+    try:
+        state = await regime.get_buy_block_state()
+    except Exception:
+        logger.exception("[buy_block] state 조회 실패 — HARD/기본 fallback")
+        state = mr_mod.BuyBlockState(
+            mode=mode, blocked=False, soft_multiplier=1.0, reasons=[],
+        )
+
+    return BuyBlockStatusResponse(
+        mode=state.mode,  # type: ignore[arg-type]
+        thresholds=BuyBlockThresholdsModel(
+            vix_threshold=thresholds_db.vix_threshold,
+            fg_high_threshold=thresholds_db.fg_high_threshold,
+            fg_low_threshold=thresholds_db.fg_low_threshold,
+            defensive_enabled=thresholds_db.defensive_enabled,
+        ),
+        blocked=state.blocked,
+        reasons=list(state.reasons),
+        soft_multiplier=state.soft_multiplier,
+    )
+
+
+@router.get("/buy-block", response_model=ApiResponse)
+async def get_buy_block():
+    """매수 가드 현재 상태 조회 (사이클 8, 2026-05-18).
+
+    응답:
+    - mode: OFF/WARN/SOFT/HARD
+    - thresholds: VIX/FG_high/FG_low/defensive_enabled
+    - blocked: 현재 가드 발동 여부 (mode 무관, 임계 OR 평가)
+    - reasons: 발동 사유 (UI 표시용 — defensive/vix/fg_high/fg_low)
+    - soft_multiplier: SOFT 시 0.5, 그 외 1.0
+    """
+    status = await _build_buy_block_status()
+    return ApiResponse(success=True, data=status.model_dump())
+
+
+@router.put("/buy-block", response_model=ApiResponse)
+async def set_buy_block(req: BuyBlockUpdateRequest):
+    """매수 가드 모드/임계 부분 갱신 (사이클 8, 2026-05-18).
+
+    body 의 None 필드는 기존 값 보존. Pydantic 이 mode literal + 임계 ge/le 검증을
+    수행하므로 잘못된 값은 422 자동. 갱신 후 전체 상태를 응답.
+    """
+    try:
+        if req.mode is not None:
+            await sc.set_buy_block_mode(req.mode)
+        if (
+            req.vix_threshold is not None
+            or req.fg_high_threshold is not None
+            or req.fg_low_threshold is not None
+            or req.defensive_enabled is not None
+        ):
+            await sc.set_buy_block_thresholds(
+                vix_threshold=req.vix_threshold,
+                fg_high_threshold=req.fg_high_threshold,
+                fg_low_threshold=req.fg_low_threshold,
+                defensive_enabled=req.defensive_enabled,
+            )
+    except ValueError as e:
+        # set_buy_block_mode 가 4 모드 외 값을 거부할 수 있음 (이중 안전망)
+        logger.warning("[buy_block] PUT 검증 실패: %s", e)
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        logger.exception("[buy_block] DB 갱신 실패: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+    status = await _build_buy_block_status()
+    return ApiResponse(
+        success=True,
+        data=status.model_dump(),
+        message=(
+            f"매수 가드 모드 '{status.mode}' 적용. 다음 매수 신호부터 즉시 반영됩니다."
         ),
     )

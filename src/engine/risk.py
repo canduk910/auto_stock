@@ -97,18 +97,43 @@ class RiskManager:
                 self._maybe_emit_tradable_skip()
                 continue
 
-            # 사이클 2 (2026-05-17): 시장 레짐 매수 가드 (1b).
-            # regime=defensive OR vix>25 OR fear_greed>85 OR fear_greed<15 → 매수 차단.
-            # 매도/손절은 위 check_exit_signal 분기에서 무관 → 보유 종목 청산 정상.
-            # 외부 fetch 실패 / DKSTOCK_REGIME_ENABLED=false 면 empty regime → is_buy_allowed=True
-            # (graceful — 기존 동작 유지).
+            # 사이클 2 (2026-05-17) + **사이클 8 (2026-05-18)** — 매수 가드 4 모드 분기.
+            # `get_buy_block_state()` 가 DB 모드+임계 조회 후 BuyBlockState 반환:
+            # - HARD blocked → 매수 skip (사이클 2 회귀)
+            # - WARN blocked → 매수 허용 + WARNING 로그
+            # - SOFT blocked → 매수 허용 + soft_multiplier=0.5 (OrderEngine 에서 수량 축소)
+            # - OFF → 가드 자체 비활성
+            # 매도/손절은 check_exit_signal 분기에서 무관 → 보유 종목 청산 정상.
+            # 외부 fetch 실패 / DKSTOCK_REGIME_ENABLED=false 면 empty regime → reasons=[] (graceful).
             regime = get_current_regime()
-            if not regime.is_buy_allowed(strategy.strategy_id):
+            try:
+                buy_block_state = await regime.get_buy_block_state()
+            except Exception:
+                logger.exception(
+                    "[buy_block_state] 조회 실패 — HARD fallback (안전)"
+                )
+                from src.engine.market_regime import BuyBlockState
+                buy_block_state = BuyBlockState(
+                    mode="HARD", blocked=False, soft_multiplier=1.0, reasons=[],
+                )
+
+            soft_multiplier = 1.0
+            if buy_block_state.mode == "HARD" and buy_block_state.blocked:
+                # 사이클 2 회귀 — 매수 차단
                 self._regime_block_count[strategy.strategy_id] = (
                     self._regime_block_count.get(strategy.strategy_id, 0) + 1
                 )
                 self._maybe_emit_regime_block(regime)
                 continue
+            if buy_block_state.mode == "WARN" and buy_block_state.reasons:
+                # WARN 모드 — 매수 허용 + WARNING 로그 (감사용)
+                logger.warning(
+                    "[buy_block_warn] strategy=%s reasons=%s",
+                    strategy.strategy_id, buy_block_state.reasons,
+                )
+            elif buy_block_state.mode == "SOFT" and buy_block_state.reasons:
+                # SOFT 모드 — 매수 허용 + 수량 ×0.5 (OrderEngine 에 kwarg 전달)
+                soft_multiplier = buy_block_state.soft_multiplier
 
             # 전략 간 중복 매수 방지: 보유/주문 중/당일 매도 모두 가로질러 차단
             if self.registry.is_ticker_blocked_for_buy(ticker):
@@ -130,7 +155,11 @@ class RiskManager:
             signal = strategy.check_buy_signal(ticker, current_price, open_price)
             if signal == Signal.BUY:
                 state.signal_count_today += 1
-                await self.order_engine.execute_buy(ticker, current_price, strategy)
+                # 사이클 8 (2026-05-18) — SOFT 모드 시 OrderEngine 이 수량 ×0.5
+                await self.order_engine.execute_buy(
+                    ticker, current_price, strategy,
+                    soft_multiplier=soft_multiplier,
+                )
 
     def _maybe_emit_tradable_skip(self) -> None:
         """가설 D (2026-05-12) — 분당 1회 [tradable_skip] INFO 로그 + 카운터 reset.

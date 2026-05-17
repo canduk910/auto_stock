@@ -56,19 +56,25 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 
 매수 신호 평가 *전* 가드 (순서):
 - **보드 가드**: `session_tracker.is_tradable(strategy_id, params)` — 비활성 보드는 신호 평가 자체 skip
-- **시장 레짐 매수 가드 (사이클 2, 2026-05-17)**: `get_current_regime().is_buy_allowed(strategy_id)` — `regime=defensive` OR `vix>25` OR `fear_greed_score>85` OR `<15` 시 모든 전략 매수 차단. **매도/손절은 본 분기 진입 전 `check_exit_signal` 에서 평가 → 영향 없음.** 외부 fetch 실패 / `DKSTOCK_REGIME_ENABLED=false` → `MarketRegime.empty()` → `is_buy_allowed=True` (graceful 기존 동작 유지). 분당 1회 `[regime_block]` INFO 로그 (`_maybe_emit_regime_block`)
+- **시장 레짐 매수 가드 (사이클 2, 2026-05-17 + 사이클 8 4 모드 확장, 2026-05-18)**: `get_current_regime().get_buy_block_state()` (async) — DB `buy_block_mode` + 4 임계값 조회 후 4 모드 분기:
+  - `HARD blocked` → 매수 skip + `[regime_block]` 1분 주기 INFO (사이클 2 회귀)
+  - `WARN blocked` → 매수 허용 + `[buy_block_warn] strategy=... reasons=...` WARNING 로그 1행
+  - `SOFT blocked` → 매수 허용 + `execute_buy(soft_multiplier=0.5)` kwarg 전달 → OrderEngine 이 수량 `max(1, int(qty * 0.5))` 축소
+  - `OFF` → 가드 평가 자체 비활성
+  - 4 임계 OR: `regime=defensive` (defensive_enabled=true 시) / `vix>vix_threshold` / `fear_greed_score>fg_high_threshold` / `<fg_low_threshold`. **매도/손절은 본 분기 진입 전 `check_exit_signal` 에서 평가 → 영향 없음.** 외부 fetch 실패 / `DKSTOCK_REGIME_ENABLED=false` → `MarketRegime.empty()` → reasons=[], blocked=False (graceful). DB 조회 실패 시 HARD + 기본 임계 안전 fallback. **기본값**: mode=HARD, vix=25/fg_high=85/fg_low=15/defensive_enabled=true — DB 미설정 시 사이클 2 동작 100% 회귀
 - **중복 가드**: `registry.is_ticker_blocked_for_buy()`
 - **자금 사전 가드**: `state.is_low_funds_blocked(ticker)` 또는 `current_price > state.total_investment`(1주 매수 자금 미달)이면 skip — OrderEngine 진입 후 cooldown 등록 사후처리에서 매 틱 발생하던 "매수 수량 0 → 900s cooldown" 노이즈 제거
 - BUY 신호 발생 시 `state.signal_count_today += 1` (퍼널 카운터)
 
-## market_regime.py (사이클 2, 2026-05-17)
+## market_regime.py (사이클 2, 2026-05-17 / 사이클 8 확장 2026-05-18)
 
 `dkstock.cloud` 매크로 기반 시장 레짐 + 매수 가드 + cash_usage_ratio 자동 조정.
 
 - `MarketRegime` dataclass: regime/regime_desc/cycle_phase/vix/fear_greed_score/buffett_ratio/cash_min/raw
 - `MarketRegime.empty()` — 외부 fetch 실패 graceful 폴백 (`is_buy_allowed=True`)
 - `MarketRegime.from_macro_cycle(macro)` — dkstock.cloud `/api/macro/macro-cycle` 응답 파싱
-- `is_buy_allowed(strategy_id) -> bool` — 복합 임계 OR (defensive/VIX>25/FG>85/FG<15)
+- `is_buy_allowed(strategy_id) -> bool` — 복합 임계 OR (defensive/VIX>25/FG>85/FG<15) **하드코딩 임계**. 회귀 가드용 동기 API. `to_advisor_dict.buy_blocked` 필드 호환성
+- **사이클 8 (2026-05-18) `get_buy_block_state() -> BuyBlockState` (async)** — DB `buy_block_mode` + `buy_block_*_threshold` 4 키 조회 후 4 모드 분기. 발동 사유 다수 수집. `BuyBlockState{mode, blocked, soft_multiplier, reasons}` dataclass 반환. risk.on_tick 가 매수 신호 직전 호출. DB 조회 실패 시 HARD + 기본 임계 fallback (안전)
 - `cash_usage_ratio_from_regime(cash_min)` — `clamp((100 - cash_min)/100, 0.0, 1.0)`
 - `refresh_from_dkstock()` — dkstock_client → MarketRegime. 모든 예외 흡수 → empty
 - `persist_snapshot(regime, target_date)` — `market_regime_snapshots` 1행 INSERT. empty 는 skip

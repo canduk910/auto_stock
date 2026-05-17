@@ -10,15 +10,55 @@ graceful fallback:
 - 외부 fetch 실패/timeout/토큰 만료 시 ``MarketRegime.empty()`` 반환 → 매수 가드 비활성
   (기존 동작 유지). ``is_buy_allowed()`` 는 항상 True.
 - ``DKSTOCK_REGIME_ENABLED=false`` 면 refresh() 가 즉시 empty 반환.
+
+**사이클 8 (2026-05-18)** — 4 모드(OFF/WARN/SOFT/HARD) + 4 임계값 운영자 조정:
+- ``get_buy_block_state()`` async 메서드가 DB 모드+임계 조회 후 BuyBlockState 반환
+- ``is_buy_allowed()`` 동기 API 는 보존 — 하드코딩 임계로 평가 (회귀 가드)
 """
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# 사이클 8 (2026-05-18) — DB 헬퍼 위임 (단위 테스트 monkeypatch 진입점)
+# ---------------------------------------------------------------------------
+async def _db_get_buy_block_mode() -> str:
+    """`src.db.system_config.get_buy_block_mode` 위임. 테스트에서 monkeypatch."""
+    from src.db.system_config import get_buy_block_mode
+
+    return await get_buy_block_mode()
+
+
+async def _db_get_buy_block_thresholds():
+    """`src.db.system_config.get_buy_block_thresholds` 위임. 테스트에서 monkeypatch."""
+    from src.db.system_config import get_buy_block_thresholds
+
+    return await get_buy_block_thresholds()
+
+
+@dataclass
+class BuyBlockState:
+    """사이클 8 (2026-05-18) — 매수 가드 현재 상태.
+
+    risk.on_tick 의 매수 분기가 본 객체로 4 모드별 행동 분기:
+    - mode=HARD + blocked=True → execute_buy skip
+    - mode=WARN + blocked=True → execute_buy 발사 + WARNING 로그
+    - mode=SOFT + blocked=True → execute_buy 발사 + soft_multiplier 전달 (수량 ×0.5)
+    - mode=OFF → blocked 평가 자체 안 함 (reasons=[], blocked=False)
+
+    UI/로그 표시용으로 `reasons` 에 모든 발동 사유 수집 (HARD/WARN/SOFT 공통).
+    """
+
+    mode: str
+    blocked: bool
+    soft_multiplier: float
+    reasons: List[str] = field(default_factory=list)
 
 
 # 복합 임계 (사용자 확정 옵션 1b)
@@ -154,8 +194,121 @@ class MarketRegime:
         """전략 무관 매수 허용 여부. 차단 사유 1개 이상 → False.
 
         매도/손절은 본 결정 무관 — 호출자는 ``check_exit_signal`` 분기는 가드하지 않음.
+
+        **사이클 8 보존**: 본 동기 API 는 하드코딩 임계 평가 — DB 미설정 시 회귀 가드
+        + 매크로 자문 user_payload(``to_advisor_dict``) 내 ``buy_blocked`` 필드 호환.
+        4 모드 분기는 ``get_buy_block_state()`` 비동기 메서드 + risk.on_tick 사용.
         """
         return not self.buy_blocked
+
+    # ------------------------------------------------------------------
+    # 사이클 8 (2026-05-18) — 매수 가드 4 모드 + 4 임계 조정
+    # ------------------------------------------------------------------
+    def _collect_reasons(self, *, vix_thr: float, fg_high_thr: float,
+                         fg_low_thr: float, defensive_enabled: bool) -> List[str]:
+        """4 임계 OR 평가 — 발동 사유 모두 수집 (사이클 2 의 `block_reason` 단일과 다름).
+
+        OFF 모드는 본 함수 호출하지 않음 (가드 평가 자체 비활성).
+        """
+        reasons: List[str] = []
+        # 1) regime=defensive (defensive_enabled 토글)
+        if defensive_enabled and self.regime == "defensive":
+            reasons.append(
+                f"regime=defensive ({self.regime_desc or '방어 (공포 현금)'})"
+            )
+        # 2) VIX
+        if self.vix is not None and self.vix > vix_thr:
+            reasons.append(f"vix={self.vix:.2f} > {vix_thr:.2f}")
+        # 3) Fear & Greed 고/저
+        if self.fear_greed_score is not None:
+            if self.fear_greed_score > fg_high_thr:
+                reasons.append(
+                    f"fear_greed_score={self.fear_greed_score:.2f} > "
+                    f"{fg_high_thr:.2f} (극도 탐욕)"
+                )
+            if self.fear_greed_score < fg_low_thr:
+                reasons.append(
+                    f"fear_greed_score={self.fear_greed_score:.2f} < "
+                    f"{fg_low_thr:.2f} (극도 공포)"
+                )
+        return reasons
+
+    async def get_buy_block_state(self) -> "BuyBlockState":
+        """DB 모드+임계 조회 후 4 모드 분기로 매수 가드 상태 결정.
+
+        - mode=OFF: 가드 평가 자체 비활성 (reasons=[], blocked=False, multiplier=1.0)
+        - mode=HARD + reasons 있음: blocked=True (매수 차단), multiplier=1.0
+        - mode=WARN + reasons 있음: blocked=False (매수 허용), multiplier=1.0 (로그만)
+        - mode=SOFT + reasons 있음: blocked=False (매수 허용), multiplier=0.5
+        - reasons 없음(empty regime / 모든 임계 미발동): blocked=False, multiplier=1.0
+
+        외부 fetch 실패 시 empty regime — 모든 모드에서 reasons=[], blocked=False (graceful).
+        DB 미설정 → HARD + 기본 임계 (현재 동작 회귀 보존).
+        """
+        try:
+            mode = await _db_get_buy_block_mode()
+        except Exception:
+            logger.exception("[buy_block_state] mode 조회 실패 — HARD fallback")
+            mode = "HARD"
+
+        # OFF 모드는 임계 조회 skip (DB 쿼리 1회 절약)
+        if mode == "OFF":
+            return BuyBlockState(
+                mode="OFF",
+                blocked=False,
+                soft_multiplier=1.0,
+                reasons=[],
+            )
+
+        try:
+            thresholds = await _db_get_buy_block_thresholds()
+        except Exception:
+            logger.exception(
+                "[buy_block_state] thresholds 조회 실패 — 기본 25/85/15/true fallback"
+            )
+            from src.db.system_config import BuyBlockThresholds
+            thresholds = BuyBlockThresholds()
+
+        reasons = self._collect_reasons(
+            vix_thr=thresholds.vix_threshold,
+            fg_high_thr=thresholds.fg_high_threshold,
+            fg_low_thr=thresholds.fg_low_threshold,
+            defensive_enabled=thresholds.defensive_enabled,
+        )
+
+        triggered = len(reasons) > 0
+        if mode == "HARD":
+            return BuyBlockState(
+                mode="HARD",
+                blocked=triggered,
+                soft_multiplier=1.0,
+                reasons=reasons,
+            )
+        if mode == "WARN":
+            # 매수 허용 + WARNING 로그 (risk.on_tick 책임)
+            return BuyBlockState(
+                mode="WARN",
+                blocked=False,
+                soft_multiplier=1.0,
+                reasons=reasons,
+            )
+        if mode == "SOFT":
+            return BuyBlockState(
+                mode="SOFT",
+                blocked=False,
+                soft_multiplier=0.5 if triggered else 1.0,
+                reasons=reasons,
+            )
+        # 알 수 없는 mode — 안전 fallback HARD
+        logger.warning(
+            "[buy_block_state] unknown mode=%r — HARD fallback", mode,
+        )
+        return BuyBlockState(
+            mode="HARD",
+            blocked=triggered,
+            soft_multiplier=1.0,
+            reasons=reasons,
+        )
 
     # ------------------------------------------------------------------
     # 직렬화 (프론트 + DB)

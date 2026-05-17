@@ -1703,3 +1703,113 @@ PR #2 (브랜치 `claude/diagram-stock-filtering-IaJ4G`) 위에 push → 자동 
 - **app_secret 평문 노출 차단** — 입력 즉시 백엔드 전송, 응답에는 마스킹만. UI state 도 제출 후 클리어
 - **ConfirmModal 이중 확인 의무** — 등록 / 토글 / 삭제 모두 (사이클 5 컨벤션 동일)
 - **즉시 분배 변경 없음** — 등록·삭제는 다음 _boot 부터 효력. 운영자가 의도적으로 재기동 시점 통제
+
+## 자문 시스템 개선 사이클 8 — 매수 가드 4 모드 + 임계 조정 Settings UI (2026-05-18)
+
+### 배경
+
+5/17 사용자 실측: `regime=defensive vix=18.43 fg=76.0 buy_blocked=True cash_min=75`. 사이클 2 매수 가드는 4 임계(defensive / VIX>25 / FG>85 / FG<15) **OR** 단일 HARD 분기 — `regime=defensive` 단독 조건만으로 모든 전략 매수 전면 차단됐다. VIX/FG 자체는 normal / 탐욕 정상 범위인데도 잠금. 사용자 피드백: "강제 매수 잠금이 너무 가혹함, 컨트롤 가능하게".
+
+### 4 모드 + 4 임계값 (1c + 2a + 3a + 4a)
+
+| 모드 | 가드 발동 시 동작 | 용도 |
+|-----|------------------|-----|
+| `OFF` | 가드 평가 자체 비활성 | 진성 회복기 / 백테스트 |
+| `WARN` | 매수 허용 + WARNING 로그 | 감사용 (영향 분석) |
+| `SOFT` | 매수 허용 + `position_ratio × 0.5` (최소 1주) | 5/17 사용자 케이스 권장 — 보수적 진입 |
+| `HARD` | 완전 차단 (기본값, 사이클 2 동작) | 진성 위기 (VIX>30 + defensive) |
+
+| 임계 | DB 키 | 기본값 | 범위 |
+|-----|------|-------|-----|
+| VIX | `buy_block_vix_threshold` | 25.0 | [10, 50] |
+| Fear & Greed 상한 | `buy_block_fg_high_threshold` | 85.0 | [50, 100] |
+| Fear & Greed 하한 | `buy_block_fg_low_threshold` | 15.0 | [0, 50] |
+| regime defensive 차단 ON | `buy_block_regime_defensive_enabled` | true | bool |
+
+**모드 키**: `buy_block_mode` (기본 `HARD` — 본 사이클 배포 후에도 현재 동작 회귀 보존).
+
+### 구현 위치
+
+| 영역 | 파일 / 함수 |
+|------|------------|
+| DB 마이그레이션 | `supabase/migrations/027_buy_block_mode.sql` (적용 보류, 멱등 INSERT) |
+| DB 헬퍼 | `src/db/system_config.py` — `get_buy_block_mode / set_buy_block_mode / get_buy_block_thresholds / set_buy_block_thresholds` + `BuyBlockThresholds` Pydantic |
+| 엔진 | `src/engine/market_regime.py::MarketRegime.get_buy_block_state() -> BuyBlockState` async (사이클 2 `is_buy_allowed` 동기 API 는 회귀 가드용 보존) |
+| 매매 분기 | `src/engine/risk.py::on_tick` — `BuyBlockState.mode` 분기로 HARD skip / WARN log / SOFT multiplier / OFF 비활성 |
+| 수량 적용 | `src/engine/order_engine.py::execute_buy(soft_multiplier=...)` kwarg — `quantity = max(1, int(qty * multiplier))` |
+| 라우트 | `src/routes/system_integrations.py` — `GET /api/integrations/buy-block` / `PUT /api/integrations/buy-block` |
+| 모델 | `src/models/system_integrations.py` — `BuyBlockMode / BuyBlockThresholdsModel / BuyBlockStatusResponse / BuyBlockUpdateRequest` |
+| 프론트엔드 | `frontend/src/components/IntegrationToggleCard.tsx::BuyBlockSection` — 모드 select + 4 슬라이더 + defensive 체크박스 + 저장 버튼 + 사유 표시 |
+
+### 핵심 안전 원칙
+
+- **기본값 HARD + 기본 임계** — DB 미설정 / 마이그 027 미적용 / 새 운영 환경에서도 사이클 2 동작 100% 회귀 보존
+- **SOFT 모드 최소 1주 보장** — `max(1, int(quantity * 0.5))` 로 position_ratio 0 으로 떨어지는 결함 차단
+- **DB 우선 + .env fallback 없음** — 본 키 5개는 운영 가변 설정 (DB 미설정 시 코드 디폴트로 fallback)
+- **모드 변경은 ConfirmModal 이중 확인** — 매매 흐름 직접 영향. 임계값 변경은 ConfirmModal 없이 즉시 (덜 위험)
+- **사이클 2 `is_buy_allowed()` 동기 API 보존** — `to_advisor_dict()` 의 `buy_blocked` 필드 호환성. 4 모드 분기는 `get_buy_block_state()` async 신규 메서드가 책임
+- **매도/손절은 모든 모드에서 무관** — `check_exit_signal` 분기는 가드 진입 전. 청산 의무는 시장 상황과 무관해야 함
+
+### API 컨트랙트
+
+| Method | URL | 동작 |
+|--------|-----|------|
+| GET | `/api/integrations/buy-block` | `{mode, thresholds:{vix_threshold, fg_high_threshold, fg_low_threshold, defensive_enabled}, blocked, reasons:[], soft_multiplier}` |
+| PUT | `/api/integrations/buy-block` | body 부분 갱신 `{mode?, vix_threshold?, fg_high_threshold?, fg_low_threshold?, defensive_enabled?}` → 갱신된 전체 상태 / 422(범위 외 / 모드 외) / 500(DB 실패) |
+
+### 회귀 가드 (사이클 8 신규 47 + 프론트 7)
+
+| 파일 | 케이스 | 비고 |
+|------|--------|------|
+| `tests/unit/db/test_system_config_buy_block.py` | 17 | 모드 4종 round-trip / 모드 외 ValueError × 8 / 임계 부분 갱신 / 전체 갱신 / defensive 단독 / 기본값 |
+| `tests/unit/engine/test_market_regime_buy_block_state.py` | 10 | DB 미설정 HARD / HARD blocked / SOFT 0.5 / WARN allow / OFF disable / defensive_enabled=false / 4 사유 수집 / 임계 적용 / empty graceful / `is_buy_allowed` 회귀 |
+| `tests/unit/engine/test_risk_buy_block_modes.py` | 11 | HARD skip / HARD allow / WARN 로그 / SOFT multiplier kwarg / OFF 비활성 / 4 모드 청산 무관 (parametrize 4) / 사이클 2 회귀 |
+| `tests/contract/test_routes_buy_block.py` | 9 | GET 응답 구조 / SOFT 응답 / PUT mode-only / PUT thresholds-only / defensive=false / 422 모드 / 422 VIX / 422 FG_high / 422 FG_low |
+| `frontend/src/components/__tests__/IntegrationToggleCard.test.tsx` | +7 | I8-A select+4 슬라이더 / I8-B reasons 표시 / I8-C 모드 변경 ConfirmModal+PUT / I8-D 임계 슬라이더 PUT / I8-E defensive 체크박스 PUT / I8-F SOFT multiplier 표시 / I8-G 500 graceful |
+
+### 운영자 사용 가이드
+
+**상황별 권장 모드**:
+
+| 시장 상황 | 5/17 실측 예 | 권장 모드 | 비고 |
+|----------|-----------|----------|-----|
+| defensive 단독, VIX/FG 정상 | `regime=defensive vix=18.43 fg=76.0` | **SOFT** 또는 `defensive_enabled=false` | 5/17 사용자 케이스. SOFT 면 비중 절반 진입, defensive_enabled=false 면 regime 가드만 끄고 VIX/FG 유지 |
+| neutral/aggressive, VIX 정상 | VIX <25, FG 30~70 | OFF (자동 진입 불필요) | 정상 시장 |
+| defensive + VIX 30+ | VIX>30 + defensive | **HARD** | 진성 위기 — 완전 차단 |
+| 자동매매 잠시 중단 | 시스템 점검 / 사고 직후 | OFF (수동 매수만) | 임시 |
+
+**임계값 조정 권장값**:
+
+- VIX `25` (기본) → `20` (예민) / `30` (보수) — VIX 평균 15~25 에서 25 컷이 보통
+- FG 상한 `85` (기본) → `90` (예민) / `80` (보수) — 5/17 FG=76 케이스에서 85 컷은 정상
+- FG 하한 `15` (기본) → `20` (보수, 더 일찍 차단) — 극도 공포 진입가 평소 매수 기회
+
+**모드 전환 절차**:
+1. Settings 페이지 → 외부 통합 카드 하단 "매수 가드" 영역
+2. 모드 select 클릭 → ConfirmModal 안내 메시지 확인 → "확인"
+3. 응답 즉시 반영 — 다음 매수 신호부터 새 모드로 평가 (재기동 불필요)
+4. 임계값은 슬라이더 조정 후 "임계값 저장" 버튼 → 즉시 적용
+
+**관측 포인트**:
+- `system_logs` `[buy_block_warn]` — WARN 모드 시 매 매수 신호당 1행
+- `system_logs` `[buy_block_soft]` — SOFT 모드 시 수량 축소 1행
+- `[regime_block]` (1분 주기 INFO) — HARD 모드 차단 카운트
+
+### 마이그레이션 적용 절차
+
+```sql
+-- Supabase 콘솔에서 수동 실행
+-- supabase/migrations/027_buy_block_mode.sql
+INSERT INTO system_config (key, value) VALUES
+  ('buy_block_mode', '{"value": "HARD"}'::jsonb),
+  ('buy_block_vix_threshold', '{"value": 25.0}'::jsonb),
+  ('buy_block_fg_high_threshold', '{"value": 85.0}'::jsonb),
+  ('buy_block_fg_low_threshold', '{"value": 15.0}'::jsonb),
+  ('buy_block_regime_defensive_enabled', '{"value": true}'::jsonb)
+ON CONFLICT (key) DO NOTHING;
+```
+
+- 멱등 (`ON CONFLICT DO NOTHING`) — 재실행 안전
+- 미적용 시에도 코드 디폴트 (HARD + 기본 임계) 작동 → 회귀 0
+- 적용 후 Settings UI 에서 즉시 조정 가능
+

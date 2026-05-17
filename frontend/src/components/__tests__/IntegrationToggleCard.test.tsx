@@ -228,4 +228,257 @@ describe('IntegrationToggleCard', () => {
       expect(screen.getByTestId('fetch-progress-dkstock-regime')).toBeTruthy()
     })
   })
+
+  // -------------------------------------------------------------------------
+  // 사이클 8 (2026-05-18) — 매수 가드 4 모드 + 4 임계값
+  // -------------------------------------------------------------------------
+  const buyBlockHardDefault = {
+    mode: 'HARD' as const,
+    thresholds: {
+      vix_threshold: 25.0,
+      fg_high_threshold: 85.0,
+      fg_low_threshold: 15.0,
+      defensive_enabled: true,
+    },
+    blocked: false,
+    reasons: [] as string[],
+    soft_multiplier: 1.0,
+  }
+
+  const buyBlockHardBlocked = {
+    ...buyBlockHardDefault,
+    blocked: true,
+    reasons: ['regime=defensive (방어 (공포 현금))'],
+  }
+
+  // 사이클 5 토글 3종 mock 헬퍼 — 사이클 8 테스트가 함께 GET 들을 받아야 함
+  const setupToggleStubs = () => {
+    server.use(
+      http.get('/api/integrations/dkstock-regime', () =>
+        HttpResponse.json(wrap(dkstockEnvFalse)),
+      ),
+      http.get('/api/integrations/kis-mcp', () =>
+        HttpResponse.json(wrap(mcpEnvFalse)),
+      ),
+      http.get('/api/integrations/auto-regime-adjust', () =>
+        HttpResponse.json(wrap(autoRegimeOn)),
+      ),
+    )
+  }
+
+  it('I8-A: 매수 가드 모드 select + 4 임계값 슬라이더 노출', async () => {
+    setupToggleStubs()
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        HttpResponse.json(wrap(buyBlockHardDefault)),
+      ),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    // 모드 select
+    const modeSelect = await screen.findByTestId('buy-block-mode-select')
+    expect((modeSelect as HTMLSelectElement).value).toBe('HARD')
+
+    // 4 임계 슬라이더
+    expect(screen.getByTestId('buy-block-vix-slider')).toBeTruthy()
+    expect(screen.getByTestId('buy-block-fg-high-slider')).toBeTruthy()
+    expect(screen.getByTestId('buy-block-fg-low-slider')).toBeTruthy()
+    // defensive_enabled 체크박스
+    expect(screen.getByTestId('buy-block-defensive-toggle')).toBeTruthy()
+  })
+
+  it('I8-B: 발동 사유 표시 (defensive 발동 시 reasons 리스트)', async () => {
+    setupToggleStubs()
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        HttpResponse.json(wrap(buyBlockHardBlocked)),
+      ),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    const reasonsArea = await screen.findByTestId('buy-block-reasons')
+    expect(reasonsArea.textContent).toMatch(/defensive/)
+  })
+
+  it('I8-C: 모드 변경 → ConfirmModal → PUT 호출', async () => {
+    setupToggleStubs()
+    let putBody: any = {}
+    let putCount = 0
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        HttpResponse.json(wrap(buyBlockHardDefault)),
+      ),
+      http.put('/api/integrations/buy-block', async ({ request }) => {
+        putCount += 1
+        putBody = await request.json()
+        return HttpResponse.json(
+          wrap({
+            ...buyBlockHardDefault,
+            mode: 'SOFT' as const,
+            soft_multiplier: 1.0,
+          }),
+        )
+      }),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    const modeSelect = (await screen.findByTestId(
+      'buy-block-mode-select',
+    )) as HTMLSelectElement
+
+    fireEvent.change(modeSelect, { target: { value: 'SOFT' } })
+
+    // ConfirmModal heading 노출 — 다수 h3 가능성 회피, 텍스트 검색
+    await waitFor(() => {
+      expect(screen.getByText(/매수 가드 모드 변경/)).toBeTruthy()
+    })
+
+    const confirmBtn = await screen.findByText('확인')
+    fireEvent.click(confirmBtn)
+
+    await waitFor(() => {
+      expect(putCount).toBe(1)
+      expect(putBody.mode).toBe('SOFT')
+    })
+  })
+
+  it('I8-D: 임계값 슬라이더 변경 → PUT 호출 (ConfirmModal 없이 즉시)', async () => {
+    setupToggleStubs()
+    let putBody: any = {}
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        HttpResponse.json(wrap(buyBlockHardDefault)),
+      ),
+      http.put('/api/integrations/buy-block', async ({ request }) => {
+        putBody = await request.json()
+        return HttpResponse.json(
+          wrap({
+            ...buyBlockHardDefault,
+            thresholds: {
+              ...buyBlockHardDefault.thresholds,
+              vix_threshold: 30.0,
+            },
+          }),
+        )
+      }),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    const vixSlider = (await screen.findByTestId(
+      'buy-block-vix-slider',
+    )) as HTMLInputElement
+
+    fireEvent.change(vixSlider, { target: { value: '30' } })
+    // 저장 버튼 클릭 (슬라이더 commit)
+    const saveBtn = await screen.findByTestId('buy-block-thresholds-save')
+    fireEvent.click(saveBtn)
+
+    await waitFor(() => {
+      expect(putBody.vix_threshold).toBe(30)
+    })
+  })
+
+  it('I8-E: defensive_enabled 체크박스 토글 → PUT 호출', async () => {
+    setupToggleStubs()
+    let putBody: any = {}
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        HttpResponse.json(wrap(buyBlockHardDefault)),
+      ),
+      http.put('/api/integrations/buy-block', async ({ request }) => {
+        putBody = await request.json()
+        return HttpResponse.json(
+          wrap({
+            ...buyBlockHardDefault,
+            thresholds: {
+              ...buyBlockHardDefault.thresholds,
+              defensive_enabled: false,
+            },
+          }),
+        )
+      }),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    const checkbox = (await screen.findByTestId(
+      'buy-block-defensive-toggle',
+    )) as HTMLInputElement
+
+    fireEvent.click(checkbox) // ON → OFF
+    const saveBtn = await screen.findByTestId('buy-block-thresholds-save')
+    fireEvent.click(saveBtn)
+
+    await waitFor(() => {
+      expect(putBody.defensive_enabled).toBe(false)
+    })
+  })
+
+  it('I8-F: SOFT 모드 — multiplier 표시', async () => {
+    setupToggleStubs()
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        HttpResponse.json(
+          wrap({
+            ...buyBlockHardDefault,
+            mode: 'SOFT' as const,
+            soft_multiplier: 0.5,
+            reasons: ['regime=defensive (방어)'],
+          }),
+        ),
+      ),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    const indicator = await screen.findByTestId('buy-block-soft-multiplier')
+    expect(indicator.textContent).toMatch(/0\.5|50%|비중 절반/)
+  })
+
+  it('I8-G: GET 에러 시 graceful fallback', async () => {
+    setupToggleStubs()
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        new HttpResponse(null, { status: 500 }),
+      ),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('buy-block-error')).toBeTruthy()
+    })
+  })
 })
