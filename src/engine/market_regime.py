@@ -26,6 +26,19 @@ _VIX_BLOCK_THRESHOLD = 25.0
 _FEAR_GREED_GREED_THRESHOLD = 85.0  # > 85 극도 탐욕
 _FEAR_GREED_FEAR_THRESHOLD = 15.0   # < 15 극도 공포
 
+# ---------------------------------------------------------------------------
+# 사이클 4 (2026-05-17) — OpenAI 자문 user_payload 용 정량 분류 임계
+# ---------------------------------------------------------------------------
+# VIX 임계: low(<15) / normal(15~25) / elevated(25~35) / high(>=35)
+_VIX_LOW_MAX = 15.0
+_VIX_NORMAL_MAX = 25.0
+_VIX_ELEVATED_MAX = 35.0
+# Fear & Greed 임계: 극공포(<15) / 공포(15~35) / 중립(35~65) / 탐욕(65~85) / 극탐욕(>=85)
+_FG_EXTREME_FEAR_MAX = 15.0
+_FG_FEAR_MAX = 35.0
+_FG_NEUTRAL_MAX = 65.0
+_FG_GREED_MAX = 85.0
+
 
 def cash_usage_ratio_from_regime(cash_min: int | float) -> float:
     """레짐 ``cash_min`` (현금 최소 비중 %, 0~100) → ``cash_usage_ratio`` 산출.
@@ -165,6 +178,90 @@ class MarketRegime:
         if self.cash_min is None:
             return None
         return cash_usage_ratio_from_regime(self.cash_min)
+
+    # ------------------------------------------------------------------
+    # 사이클 4 (2026-05-17) — OpenAI 자문 user_payload 통합
+    # ------------------------------------------------------------------
+    def is_empty(self) -> bool:
+        """현재 인스턴스가 empty 상태인지 — 모든 핵심 필드가 None 이면 True.
+
+        클래스메소드 ``MarketRegime.empty()`` (팩토리) 와 이름 충돌 회피를 위해
+        ``is_empty()`` 로 분리. 외부 호출자는 ``regime.is_empty()`` 로 graceful 판정.
+        ``regime.regime is None`` 단독 판정과 동치 (다른 필드들도 None 인 경우만 empty).
+        """
+        return (
+            self.regime is None
+            and self.regime_desc is None
+            and self.cycle_phase is None
+            and self.vix is None
+            and self.fear_greed_score is None
+            and self.buffett_ratio is None
+            and self.cash_min is None
+        )
+
+    def _classify_vix(self) -> Optional[str]:
+        """VIX 정성 분류 — low/normal/elevated/high. vix=None 이면 None."""
+        if self.vix is None:
+            return None
+        if self.vix < _VIX_LOW_MAX:
+            return "low"
+        if self.vix < _VIX_NORMAL_MAX:
+            return "normal"
+        if self.vix < _VIX_ELEVATED_MAX:
+            return "elevated"
+        return "high"
+
+    def _classify_fear_greed(self) -> Optional[str]:
+        """Fear & Greed 정성 분류 — 극공포/공포/중립/탐욕/극탐욕. score=None 이면 None."""
+        if self.fear_greed_score is None:
+            return None
+        if self.fear_greed_score < _FG_EXTREME_FEAR_MAX:
+            return "극공포"
+        if self.fear_greed_score < _FG_FEAR_MAX:
+            return "공포"
+        if self.fear_greed_score < _FG_NEUTRAL_MAX:
+            return "중립"
+        if self.fear_greed_score < _FG_GREED_MAX:
+            return "탐욕"
+        return "극탐욕"
+
+    def to_advisor_dict(self) -> dict[str, Any]:
+        """OpenAI 자문 user_payload 용 정량+정성 컨텍스트 dict.
+
+        raw / raw_response / 원본 cash_min 같은 내부·대용량 필드는 제외.
+        cash_min 은 ``cash_min_recommended`` 키명으로 노출하고,
+        ``raw.regime.params.stock_max`` 가 있으면 ``stock_max_recommended`` 로 함께.
+
+        Returns 11+1 = 12 키 dict:
+            regime / regime_desc / cycle_phase / vix / vix_level /
+            fear_greed_score / fear_greed_label / buffett_ratio /
+            buy_blocked / block_reason /
+            cash_min_recommended / stock_max_recommended
+        """
+        stock_max: Optional[int] = None
+        try:
+            stock_max_raw = (
+                (self.raw or {}).get("regime", {}).get("params", {}).get("stock_max")
+            )
+            if stock_max_raw is not None:
+                stock_max = int(stock_max_raw)
+        except (TypeError, ValueError, AttributeError):
+            stock_max = None
+
+        return {
+            "regime": self.regime,
+            "regime_desc": self.regime_desc,
+            "cycle_phase": self.cycle_phase,
+            "vix": self.vix,
+            "vix_level": self._classify_vix(),
+            "fear_greed_score": self.fear_greed_score,
+            "fear_greed_label": self._classify_fear_greed(),
+            "buffett_ratio": self.buffett_ratio,
+            "buy_blocked": self.buy_blocked,
+            "block_reason": self.block_reason,
+            "cash_min_recommended": self.cash_min,
+            "stock_max_recommended": stock_max,
+        }
 
 
 # ---------------------------------------------------------------------------

@@ -27,6 +27,7 @@ from src.db.backtest_runs import (
     update_status as _db_update_status,
 )
 from src.db.trade_history import get_trades_in_range
+from src.engine.market_regime import get_current_regime
 from src.engine.recommendation_metrics import compute_metrics
 from src.models.backtest import COMPARE_METRIC_KEYS, compute_metric_diff
 from src.services.exceptions import (
@@ -127,7 +128,17 @@ SYSTEM_PROMPT = (
     '  "weight_reasoning": "<최대 1000자>" | null,\n'
     '  "code_review_notes": "<최대 2000자>" | null\n'
     '}\n'
-    "키는 반드시 현재 파라미터에 있는 키여야 하며, 허용 범위를 벗어나지 마라."
+    "키는 반드시 현재 파라미터에 있는 키여야 하며, 허용 범위를 벗어나지 마라.\n"
+    "\n"
+    "시장 매크로 컨텍스트 활용 (user_payload 에 market_regime 가 있을 때만):\n"
+    "- regime=defensive (현금 권고, VIX 25↑, 공포지수 극단): 손절률을 더 보수적으로 (절대값 작게) 조정,"
+    " position_ratio 축소, daily_loss_limit 강화 권고\n"
+    "- regime=neutral: 기존 파라미터 유지 또는 미세 조정\n"
+    "- regime=aggressive (확장기, 낮은 VIX, 적정 fear_greed): 진입 임계 완화 또는 position_ratio 확대 가능"
+    " (단, 변동성 큰 모멘텀류는 신중)\n"
+    "- buy_blocked=True: 모든 전략 매수 차단된 상태. 매수 임계 변경 권고 무용 — 손절·청산·트레일링 파라미터만 권고\n"
+    "- weight_reasoning 에 매크로 영향 (예: \"defensive 레짐 + VIX 28 → 보수적 비중\") 명시 권장\n"
+    "- code_review_notes 에 매크로 의존 로직 도입 제안 가능 (예: VIX 25↑ 시 자동 매수 중단)"
 )
 
 NOTES_MAX_LEN = 2000
@@ -286,6 +297,19 @@ async def _call_openai(
         "peer_weights": peer_weights or {},
         "peer_metrics": peer_metrics or {},
     }
+
+    # 사이클 4 (2026-05-17) — 매크로 레짐 → AI 자문 통합
+    # graceful: 싱글톤이 None/empty 면 키 자체 미포함 → 사이클 1 8 필드 회귀 보존
+    try:
+        regime = get_current_regime()
+    except Exception:
+        logger.exception("get_current_regime 호출 실패 — market_regime 미포함")
+        regime = None
+    if regime is not None and not regime.is_empty():
+        try:
+            user_payload["market_regime"] = regime.to_advisor_dict()
+        except Exception:
+            logger.exception("to_advisor_dict 변환 실패 — market_regime 미포함")
 
     user_msg = (
         "아래는 전략 정보, 현재 파라미터, 최근 통계, 각 파라미터의 허용 범위,\n"

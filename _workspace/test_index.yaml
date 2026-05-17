@@ -43,6 +43,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -57,6 +58,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -106,6 +108,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -124,6 +127,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -162,6 +166,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -218,6 +223,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -279,6 +285,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -316,6 +323,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -375,6 +383,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -393,6 +402,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -451,6 +461,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -469,6 +480,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -523,6 +535,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -564,6 +577,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -624,6 +638,7 @@ backend:
     - tests/integration/test_post_nxt_open_price_confirm.py
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -675,6 +690,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -747,6 +763,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -788,6 +805,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -847,6 +865,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -863,6 +882,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -911,6 +931,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -927,6 +948,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -975,6 +997,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -991,6 +1014,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1040,6 +1064,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1057,6 +1082,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1110,6 +1136,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1126,6 +1153,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1161,6 +1189,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1199,6 +1228,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1254,6 +1284,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1272,6 +1303,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1322,6 +1354,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1338,6 +1371,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1386,6 +1420,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1437,6 +1472,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1498,6 +1534,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1514,6 +1551,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1564,6 +1602,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1605,6 +1644,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1666,6 +1706,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1684,6 +1725,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1733,6 +1775,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1758,6 +1801,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_metrics_smoke.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
@@ -1809,6 +1853,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1825,6 +1870,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1875,6 +1921,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1894,6 +1941,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1944,6 +1992,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -1958,6 +2007,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -1975,7 +2025,9 @@ backend:
     direct_tests:
     - tests/contract/test_routes_market_regime.py
     - tests/integration/test_boot_market_regime.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_risk_regime_guard.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -2060,6 +2112,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2092,6 +2145,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2111,9 +2165,11 @@ backend:
     direct_tests:
     - tests/integration/test_backtest_disabled_and_graceful.py
     - tests/integration/test_recommendation_backtest_flow.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2209,6 +2265,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2225,6 +2282,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2260,6 +2318,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2292,6 +2351,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2338,6 +2398,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2387,6 +2448,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2436,6 +2498,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2462,6 +2525,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2500,6 +2564,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2532,6 +2597,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2588,6 +2654,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2604,6 +2671,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2639,6 +2707,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2677,6 +2746,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2711,6 +2781,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2744,6 +2815,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2779,6 +2851,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2815,6 +2888,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2864,6 +2938,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2880,6 +2955,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2915,6 +2991,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -2956,6 +3033,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -2993,6 +3071,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3052,6 +3131,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3080,6 +3160,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3119,6 +3200,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3169,6 +3251,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3185,6 +3268,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3257,6 +3341,7 @@ backend:
     - tests/integration/test_post_nxt_open_price_confirm.py
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3275,6 +3360,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3322,6 +3408,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3342,6 +3429,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3396,6 +3484,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3427,6 +3516,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3513,6 +3603,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3550,6 +3641,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3609,6 +3701,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3627,6 +3720,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3685,6 +3779,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3724,6 +3819,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -3791,6 +3887,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -3828,6 +3925,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -4112,6 +4210,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -4129,6 +4228,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -4186,6 +4286,7 @@ backend:
     - tests/integration/test_post_nxt_open_price_confirm.py
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -4204,6 +4305,7 @@ backend:
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -4260,6 +4362,7 @@ backend:
     - tests/integration/test_presubscribe.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
     - tests/integration/test_reset_daily_state.py
     - tests/integration/test_risk_on_tick.py
     - tests/integration/test_scheduler_recommendation_failure.py
@@ -4277,6 +4380,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
@@ -4659,10 +4763,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-17T19:47:17.080036+09:00'
+generated_at: '2026-05-17T20:05:49.050003+09:00'
 stats:
   backend_modules: 77
-  backend_tests: 118
+  backend_tests: 120
   frontend_modules: 47
   frontend_tests: 25
   unmapped_modules:

@@ -1157,6 +1157,109 @@ LTV 는 본 사이클 범위 외 — 이미 시간 모드 분리(`intraday_stop_
 
 ---
 
+## (2026-05-17) 자문 시스템 개선 사이클 4 — 매크로 레짐 → AI 자문 user_payload 통합
+
+### 배경
+사이클 2 도입으로 `_boot()` 시점 dkstock.cloud 매크로 fetch + `set_current_regime()` 모듈 싱글톤 갱신 가능.
+그러나 OpenAI 자문(`_call_openai()`) user_payload 에는 매크로 컨텍스트 무전달 → 자문이 "통계만 보고" 손절률 조정.
+defensive 레짐(VIX>25, 공포지수 극단) 일 때 손절률 더 보수적 권고 필요. aggressive 레짐일 땐 진입 임계 완화 가능.
+buy_blocked=True 일 땐 매수 임계 변경 권고 무용 — 손절·청산 파라미터만.
+
+### 구현 (TDD Red → Green, 30 케이스)
+
+#### A. `MarketRegime.to_advisor_dict()` 신규 메소드 (`src/engine/market_regime.py`)
+
+12 키 dict 반환:
+- `regime` / `regime_desc` / `cycle_phase` / `vix` / `fear_greed_score` / `buffett_ratio` / `buy_blocked` / `block_reason` (기존 필드)
+- `vix_level`: `_classify_vix()` — low(<15) / normal(15~25) / elevated(25~35) / high(≥35)
+- `fear_greed_label`: `_classify_fear_greed()` — 극공포(<15) / 공포(15~35) / 중립(35~65) / 탐욕(65~85) / 극탐욕(≥85)
+- `cash_min_recommended`: 원본 `cash_min` 값을 advisor 키명으로 노출
+- `stock_max_recommended`: `raw.regime.params.stock_max` 가 있으면 그 값, 없으면 None
+
+raw/raw_response/원본 cash_min 같은 내부·대용량 필드는 제외.
+
+`MarketRegime.is_empty()` 인스턴스 메소드 신규 — 클래스메소드 `MarketRegime.empty()` 팩토리와 이름 충돌 회피.
+모든 핵심 필드가 None 이면 True. 외부 호출자(`_call_openai`) 가 graceful 판정용.
+
+#### B. `_call_openai()` user_payload 분기 (`src/engine/recommendation_engine.py`)
+
+```python
+from src.engine.market_regime import get_current_regime
+
+try:
+    regime = get_current_regime()
+except Exception:
+    regime = None
+if regime is not None and not regime.is_empty():
+    try:
+        user_payload["market_regime"] = regime.to_advisor_dict()
+    except Exception:
+        logger.exception("to_advisor_dict 변환 실패 — market_regime 미포함")
+```
+
+graceful:
+- regime is None → 키 추가 안 함 (싱글톤 미설정 / 명시적 None 분기)
+- `regime.is_empty()` (모든 필드 None) → 키 추가 안 함 (사이클 2 empty 폴백)
+- `to_advisor_dict()` 예외 → 키 추가 안 함 + WARNING 로그
+
+#### C. SYSTEM_PROMPT 매크로 가이드 1 문단 추가
+
+```
+시장 매크로 컨텍스트 활용 (user_payload 에 market_regime 가 있을 때만):
+- regime=defensive (현금 권고, VIX 25↑, 공포지수 극단): 손절률을 더 보수적으로 (절대값 작게) 조정, position_ratio 축소, daily_loss_limit 강화 권고
+- regime=neutral: 기존 파라미터 유지 또는 미세 조정
+- regime=aggressive (확장기, 낮은 VIX, 적정 fear_greed): 진입 임계 완화 또는 position_ratio 확대 가능 (단, 변동성 큰 모멘텀류는 신중)
+- buy_blocked=True: 모든 전략 매수 차단된 상태. 매수 임계 변경 권고 무용 — 손절·청산·트레일링 파라미터만 권고
+- weight_reasoning 에 매크로 영향 (예: "defensive 레짐 + VIX 28 → 보수적 비중") 명시 권장
+- code_review_notes 에 매크로 의존 로직 도입 제안 가능 (예: VIX 25↑ 시 자동 매수 중단)
+```
+
+#### D. 회귀 가드 (총 30 케이스)
+
+- `tests/unit/engine/test_recommendation_market_regime_payload.py` 27 케이스
+  - A: empty regime 시 user_payload 에 `market_regime` 키 미포함
+  - B: `get_current_regime()=None` 시 user_payload 에 키 미포함
+  - C: defensive 활성 시 user_payload["market_regime"] dict 포함
+  - D: 12 키 검증 (regime/regime_desc/cycle_phase/vix/vix_level/fear_greed_score/fear_greed_label/buffett_ratio/buy_blocked/block_reason/cash_min_recommended/stock_max_recommended)
+  - E: `_classify_vix()` parametrize 9 케이스 + None
+  - F: `_classify_fear_greed()` parametrize 10 케이스 + None
+  - G: `to_advisor_dict()` 가 raw/raw_response/cash_min 원본 제외
+  - H: SYSTEM_PROMPT 에 `market_regime`/`defensive`/`aggressive`/`buy_blocked` 키워드 포함
+  - I: regime 비활성 시 user_payload 가 사이클 1 의 8 필드 그대로
+- `tests/integration/test_recommendation_with_market_regime.py` 3 케이스
+  - A: DKSTOCK_REGIME_ENABLED=false (empty regime) → 자문 정상 + market_regime 미포함
+  - B: 활성 + defensive → market_regime 포함 + vix_level/fear_greed_label/buy_blocked 검증
+  - C: get_current_regime()=None (fetch 실패 reset 시뮬레이션) → graceful
+
+autouse fixture 로 모듈 싱글톤 `set_current_regime(MarketRegime.empty())` 매 테스트 후 reset.
+risk_on_tick 등 후속 테스트의 buy_blocked 가드 오염 차단.
+
+### 자율 결정 사항
+
+- **VIX 분류 임계**: 명세의 권고(15/25/35) 그대로 채택 — CBOE VIX 통상 운영 임계와 일치
+- **Fear & Greed 분류 임계**: 명세의 권고(15/35/65/85) 그대로 채택 — CNN Fear & Greed Index 5단계 표준과 일치
+- **`to_advisor_dict()` 키 선정**: 명세 11 키 + `stock_max_recommended` 1 = 12 키
+  - `cash_min` 원본 키명 대신 `cash_min_recommended` 로 의도 명확화 (운영자 권고치임을 명시)
+  - `stock_max_recommended` 는 raw.regime.params 에서 추출 — 사이클 2 에 없던 필드지만 매크로 응답에 포함되어 자문 활용도 높음
+- **`is_empty()` 인스턴스 메소드 신설**: 명세는 `regime.empty()` 호출이지만 dataclass `@classmethod` `empty()` 와 이름 충돌. `is_empty()` 로 분리 — 외부 호출자는 `regime.is_empty()` 사용
+- **autouse fixture 추가**: 단위/통합 양쪽 모두에 추가해 모듈 싱글톤 격리 보호. Red 단계에서 1009/1010 일시 깨짐을 감지 → 즉시 보완
+
+### 안전 원칙
+- **graceful fallback**: regime 비활성/empty/None 시 분기 skip → 사이클 1 8 필드 회귀 보존
+- **5/18 자문 첫 발화 안전**: DKSTOCK_REGIME_ENABLED=false 운영 상태 → user_payload 에 market_regime 미포함
+- **운영 매매 흐름 미침범**: recommendation_engine 만 변경 — scheduler/risk/order_engine 영향 0
+- **5/15 자문 row 영향 없음**: 소급 재계산 안 함
+- **마이그 없음**: 코드 + SYSTEM_PROMPT 변경만, DB 스키마 영향 0
+
+### 운영 활성화 절차
+
+1. **5/18 월 20:00 첫 발화 사전 검증**: DKSTOCK_REGIME_ENABLED=false 상태에서 자문이 정상 발화하는지 확인 — 사이클 4 변경은 user_payload 분기만 추가, 비활성 상태에선 기존 동작
+2. **DKSTOCK_REGIME_ENABLED=true 토글** (사이클 2 와 동시 또는 별도 시점): 매크로 fetch 가 정상 동작하기 시작하면 자동으로 자문 user_payload 에 market_regime 동봉
+3. **5/19 화 20:00 이후 첫 매크로 자문 발화**: OpenAI 가 defensive/neutral/aggressive 레짐 + vix_level + fear_greed_label + buy_blocked 인지 → 손절률·position_ratio·daily_loss_limit·매수 임계 동적 권고
+4. **자문 검수**: `weight_reasoning` 에 매크로 영향 명시 여부 / `code_review_notes` 의 매크로 의존 로직 제안 검토
+
+---
+
 ## 커밋 5분할 (squash 금지)
 1. `feat(strategies): VB/LTV get_targets_status returns active boards only`
 2. `feat(scanner): cap breakout to 25 slots in priority queue (protect momentum)`
