@@ -79,6 +79,14 @@ Dashboard만 즉시 import. History/Recommendations/Logs/Settings는 `React.lazy
 
 - **Settings**: 비중 슬라이더 하한선 = 보유 포지션 매수금액 비율(`min_weight`, `invested_amount`). 파라미터 편집은 PARAM_LABELS 정의된 number 키만. `position_ratio`는 "전략 내 종목당 비중" — 전략 할당 자금 기준 (순자산 전체 아님), 예상 매수 금액 헬퍼 표시. `getStrategies` 매퍼는 `total_investment`/`invested_amount`/`min_weight` 필수
   - **`CashUsageRatioCard` (J3, 2026-05-12)**: 비중 슬라이더 하단 신설 카드. range 50~100, step 5 슬라이더 + 우측 `data-testid="cash-usage-ratio-percent"` % 표시. GET `/api/strategies/system/cash-usage-ratio` 초기 로드, 저장 버튼 클릭 시 PUT 호출 (debounce 없음 — 명시 commit). 응답 ratio(서버 5% 보정) 로 슬라이더 동기화. 안내 문구 "다음 영업일부터 반영"(text-amber-700). `netAsset` prop(strategies.total_investment 합산 추정) 주어지면 예상 가용액 표시. `useTradingStatus` 의존 안 함 → 단독 렌더 가능. queryKey `['cashUsageRatio']`
+  - **`KisQuoteAccountsCard` (사이클 7-D, 2026-05-18)**: `IntegrationToggleCard` 직하 신설 카드. 보조 KIS 시세 계좌 등록/제거/활성화 토글 UI.
+    - 표 컬럼: label / 환경 배지(`real`=red / `vts`=emerald) / app_key 마스킹(마지막 4자리만) / app_secret_masked(`****1234`) / 등록일(KST `Intl.DateTimeFormat`) / `quote-account-toggle-{id}` active 토글 / `quote-account-delete-{id}` 삭제 버튼.
+    - 빈 목록 시 `quote-accounts-empty` 안내 "등록된 보조 계좌 없음. 추가하면 시세 풀 슬롯이 41 × (1 + N) 으로 확대".
+    - 등록 폼: `quote-account-input-label` / `quote-account-input-kis-env-real|vts` 라디오 / `quote-account-input-app-key` / `quote-account-input-app-secret`(**`type=password`** + `autocomplete=new-password`). 클라이언트 검증: 빈값 거부 + label 형식 `^[A-Za-z0-9\-]+$` 거부 → `quote-account-form-error` 노출 + POST 미발사.
+    - `quote-account-submit` 클릭 → `ConfirmModal` 이중 확인 — 등록·active 토글·삭제 모두 안내 메시지 분기.
+    - **app_secret 평문 잔존 차단**: 등록 성공 시 `setForm` 빈 값으로 secret state 즉시 클리어 (회귀 가드 `7D-I`). UI 는 `app_secret_masked` 만 참조 (회귀 가드 `7D-H`).
+    - 에러 메시지 분기: `axios.isAxiosError` status 코드 별 한글 메시지 (`409: label 중복` / `422: 검증 실패` / 그 외).
+    - API: `frontend/src/api/kis-quote-accounts.ts`(`listAccounts/createAccount/updateAccount/deleteAccount`) + `frontend/src/types/kis-quote-accounts.ts`. 백엔드 사이클 7-A 라우트 `/api/integrations/quote-accounts/*` 4종 활용 (변경 0). queryKey `['kis-quote-accounts']`, staleTime 30s. 회귀 가드: `frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx` 10 케이스 (A 빈목록 / B 1개행+마스킹 / C 폼+POST / D 409 / E 빈값 / F 토글 / G 삭제 / H 평문 부재 / I 폼 클리어 / J password type).
   - **`IntegrationToggleCard` (사이클 5, 2026-05-17)**: `CashUsageRatioCard` 직하 신설 카드. 3 토글 통합(단일 카드 + 분리 행 구조):
     - `data-testid="toggle-dkstock-regime"`: 외부 매크로 서버(dkstock.cloud) 활성. 활성화 후 3s 동안 `data-testid="fetch-progress-dkstock-regime"` 인라인 진행 표시 + marketRegime queryKey invalidate.
     - `data-testid="toggle-kis-mcp"`: 외부 백테스트 서버 활성. 즉시 fetch 없음 (자문 시점에만 사용).
@@ -91,6 +99,16 @@ Dashboard만 즉시 import. History/Recommendations/Logs/Settings는 `React.lazy
 
 ## BalanceTable
 - **거래시장 배지 (J1, 2026-05-11)**: 보유 종목 헤더 "종목명" 옆 "거래시장" 컬럼. `Holding.nxt_tradable / krx_halted` 조합으로 5가지 배지 노출 — `KRX+NXT`(emerald-100/800) / `NXT만`(amber-100/800) / `KRX`(gray-100/700) / `정지`(red-100/800) / `확인중`(gray-50/500, 모든 필드 null/undefined). `data-testid="market-badge-{ticker}"`. 배지 클래스 베이스 `inline-block px-1.5 py-0.5 rounded text-xs font-medium`(전략 배지 패턴 재사용)
+
+## KisAccountPoolCard (사이클 7-D, 2026-05-18)
+- **Dashboard `MarketRegimeCard` 직하** 신설 카드 (시장 상태 → 인프라 상태 위계). WebsocketPool 세션 상태 + 슬롯 사용률 + 분배 모니터링.
+- 노출 정보:
+  - 우측 상단 `pool-refresh-button` 새로고침 버튼 (`invalidateQueries({queryKey:['realtime-subscriptions']})`)
+  - 총 슬롯 사용률 패널 — `pool-used-slots / pool-total-slots` (41 × N) + `pool-usage-progress` 진행바 (80%+ amber / 미만 emerald) + fresh/stale/ACK 카운트 인라인
+  - 세션별 표 — `pool-session-row-{label}` (main / quote-1 / quote-2 ...) / label 배지(main=blue 강조 + `(체결통보)` 표기) / `pool-session-status-{label}` 연결 배지(connected=emerald / disconnected=red) / subscribed/limit + `pool-session-progress-{label}` 미니 진행바 / fresh / stale / reconnect_count
+- 보조 0개 시 `pool-no-secondary-note` 안내 "보조 세션 없음 (메인 only). Settings > 보조 KIS 시세 계좌에서 등록하면 다음 _boot(07:50) 부터 슬롯이 41 × (1 + N) 으로 확장"
+- API: `getSubscriptions()` (`frontend/src/api/realtime.ts`), 사이클 7-B `/api/realtime/subscriptions` sessions 배열 활용. queryKey `['realtime-subscriptions']`, `staleTime: 5_000`, `refetchInterval: 30_000` (자동 30s 폴링 — Trading Status 5s 와 별개 queryKey 로 부하 격리). 에러 시 `pool-error-message` graceful
+- 회귀 가드: `frontend/src/components/__tests__/KisAccountPoolCard.test.tsx` 6 케이스 (PA 메인 only + 안내 / PB 메인+보조 2 3행 / PC disconnect red 배지 / PD 슬롯 100% / PE 500 graceful / PF 새로고침 즉시 재조회)
 
 ## MarketRegimeCard (사이클 2, 2026-05-17)
 - **Dashboard 환경 배너 직하, 전략 탭 위** 신설 카드 (`frontend/src/pages/Dashboard.tsx` `<ControlPanel />` 직후 `<MarketRegimeCard />` 삽입).

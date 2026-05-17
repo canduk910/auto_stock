@@ -23,3 +23,63 @@ export const resubscribeStale = async (): Promise<ResubscribeResult> => {
   )
   return data.data ?? { resubscribed: 0, tickers: [] }
 }
+
+/**
+ * 사이클 7-B/7-D (2026-05-17/18) — WebSocket 구독 슬롯 진단 + 세션별 분해.
+ *
+ * 백엔드 `GET /api/realtime/subscriptions` 응답:
+ * - 합집합 카운트 (메인 + 보조 N)
+ * - sessions 배열로 세션별 분해 (label/subscribed/acked/fresh/stale/limit/ws_connected/reconnect_count)
+ * - 보조 0개 시 sessions 길이 1 (main only)
+ */
+export interface SubscriptionSessionTickers {
+  subscribed: string[]
+  acked: string[]
+}
+
+export interface SubscriptionSession {
+  label: string
+  subscribed: number
+  acked: number
+  fresh: number
+  stale: number
+  limit: number
+  ws_connected: boolean
+  reconnect_count: number
+  tickers?: SubscriptionSessionTickers
+}
+
+export interface SubscriptionsResponse {
+  total: number
+  acked: number
+  fresh_60s: number
+  stale_60s: number
+  limit: number
+  reconnect_count: number
+  ws_connected: boolean
+  sessions: SubscriptionSession[]
+  tickers?: {
+    subscribed: string[]
+    acked: string[]
+    fresh: string[]
+    stale: string[]
+  }
+}
+
+export const getSubscriptions = async (): Promise<SubscriptionsResponse> => {
+  const { data } = await apiClient.get<ApiResponse<SubscriptionsResponse>>(
+    '/realtime/subscriptions',
+  )
+  return (
+    data.data ?? {
+      total: 0,
+      acked: 0,
+      fresh_60s: 0,
+      stale_60s: 0,
+      limit: 0,
+      reconnect_count: 0,
+      ws_connected: false,
+      sessions: [],
+    }
+  )
+}

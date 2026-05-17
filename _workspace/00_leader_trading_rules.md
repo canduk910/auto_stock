@@ -1575,3 +1575,131 @@ PR #2 (브랜치 `claude/diagram-stock-filtering-IaJ4G`) 위에 push → 자동 
 - **외부 호출자 인터페이스 보존** — `fetch_daily_candles` 등 시그니처 변경 0
 - **보조 토큰 매니저 실패 graceful** — `ValueError` 또는 connect 실패 시 메인 fallback / 해당 세션 skip
 - **점진 활성화** — 보조 등록 전까지 메인 only 회귀 0
+
+## 자문 시스템 개선 사이클 7-D — Settings UI 보조 계좌 관리 (2026-05-18)
+
+사이클 7-A/B/C 에서 백엔드 인프라(DB + 토큰 + WebSocket 풀 + REST 풀) 완성. 본 사이클은 **운영자가 SSH/SQL 없이 UI 만으로 보조 계좌 관리 + 분배 가시화**. 프론트엔드 only, 백엔드 변경 0 — 사이클 7-A 의 기존 라우트 활용.
+
+### 산출물 (프론트엔드)
+
+| 영역 | 파일 | LOC | 비고 |
+|------|------|-----|------|
+| 타입 | `frontend/src/types/kis-quote-accounts.ts` | 35 | `KisQuoteAccount` / `KisEnv` / Create·Update Input — 백엔드 1:1, **app_secret 평문 필드 부재** |
+| API 클라이언트 | `frontend/src/api/kis-quote-accounts.ts` | 50 | `listAccounts` / `createAccount` / `updateAccount` / `deleteAccount` — 사이클 7-A 라우트 4종 |
+| API 확장 | `frontend/src/api/realtime.ts` | +60 | `SubscriptionsResponse` + `SubscriptionSession` 타입 + `getSubscriptions()` — 사이클 7-B sessions 배열 활용 |
+| 컴포넌트 | `frontend/src/components/KisQuoteAccountsCard.tsx` | 340 | Settings 카드 — 표 / 등록 폼 / ConfirmModal 이중 확인 |
+| 컴포넌트 | `frontend/src/components/KisAccountPoolCard.tsx` | 200 | Dashboard 카드 — 세션 표 / 슬롯 사용률 진행바 / 새로고침 / 자동 30s 폴링 |
+| 페이지 통합 | `frontend/src/pages/Settings.tsx` | +3 | `IntegrationToggleCard` 직하 `KisQuoteAccountsCard` 삽입 |
+| 페이지 통합 | `frontend/src/pages/Dashboard.tsx` | +4 | `MarketRegimeCard` 직하 `KisAccountPoolCard` 삽입 |
+
+### KisQuoteAccountsCard — Settings 페이지 (보조 계좌 관리)
+
+**위치**: `IntegrationToggleCard` 직하 (외부 통합 → KIS 보조 계좌 위계)
+
+**조회 영역**:
+- 표 컬럼: label / 환경 배지(real=red / vts=emerald) / app_key 마스킹(`****1234`, 마지막 4자리만) / app_secret_masked(`****7890`) / 등록일(KST `Intl.DateTimeFormat`) / active 토글 / 삭제 버튼
+- 빈 목록 시 `quote-accounts-empty` 안내 — "등록된 보조 계좌 없음. 추가하면 시세 풀 슬롯이 41 × (1 + N) 으로 확대"
+- 로드 에러 시 `quote-accounts-load-error` 빨간 박스 + "잠시 후 재시도하세요"
+
+**등록 폼**:
+- label (text, 영문/숫자/하이픈만 `^[A-Za-z0-9\-]+$`)
+- kis_env (radio: real / vts)
+- app_key (text, autocomplete="off")
+- app_secret (**type=password**, autocomplete="new-password", 평문 잔존 차단)
+- 클라이언트 검증: 빈 값 거부 / label 형식 위반 거부 → `quote-account-form-error` 노출 + POST 미발사
+
+**ConfirmModal 이중 확인** (등록 / active 토글 / 삭제 모두):
+- 등록: "보조 계좌 \"{label}\" ({env}) 를 등록합니다. 다음 _boot(07:50) 부터 시세 풀에 분배됩니다 — 41 × (1 + N) 슬롯 확장"
+- 활성화: "다음 _boot 부터 시세 풀에 포함"
+- 비활성화: "다음 _boot 부터 시세 풀에서 제외"
+- 삭제: "영구 삭제. 시세 풀에서 즉시 제외"
+
+**안전 원칙**:
+- **app_secret 평문 잔존 시간 최소화** — 폼 제출 성공 시 secret state 즉시 클리어 (`setForm` 빈 값). 회귀 가드 `7D-I`
+- **app_secret input type=password 강제** — DOM 노출 차단. 회귀 가드 `7D-J`
+- **응답 마스킹 의존 0** — UI 가 `app_secret_masked` 만 참조 (백엔드 실수로 평문이 와도 표시 안 됨). 회귀 가드 `7D-H`
+- **에러 메시지 분기** — axios 인터셉터 status 코드별 한글 메시지 (`409: label 중복` / `422: 검증 실패` / 그 외)
+
+### KisAccountPoolCard — Dashboard (시세 풀 모니터링)
+
+**위치**: `MarketRegimeCard` 직하 (시장 상태 → 인프라 상태 위계)
+
+**상단**:
+- 카드 제목 "KIS 시세 풀 (WebsocketPool)" + 설명
+- 우측 상단 `pool-refresh-button` 새로고침 버튼 → `invalidateQueries({queryKey: ['realtime-subscriptions']})`
+
+**총 슬롯 사용률 패널** (회색 박스):
+- `pool-used-slots` / `pool-total-slots` — `41 × (1 + N)` 산출
+- `pool-usage-progress` 진행바 — 80% 미만 emerald / 80% 이상 amber (위험 색)
+- fresh / stale / ACK 카운트 인라인
+
+**세션별 표**:
+- `pool-session-row-{label}` — main / quote-1 / quote-2 ...
+- label 배지 (main=blue 강조 + "(체결통보)" 표기) / `pool-session-status-{label}` 연결 배지 (connected=emerald / disconnected=red)
+- 구독 카운트 (`subscribed / limit`) + `pool-session-progress-{label}` 미니 진행바
+- fresh / stale / 재연결 카운트
+
+**보조 0개 fallback**:
+- `pool-no-secondary-note` 안내 — "보조 세션 없음 (메인 only). Settings > 보조 KIS 시세 계좌에서 등록하면 다음 _boot(07:50) 부터 슬롯이 41 × (1 + N) 으로 확장"
+
+**자동 폴링**:
+- `refetchInterval: 30_000` (30초) — 운영자가 새로고침 안 눌러도 자동 갱신
+- `staleTime: 5_000` — 단시간 중복 호출 방지
+- 새로고침 버튼 클릭 = 즉시 재조회 (다른 카드 폴링 영향 없음, 단독 queryKey)
+
+### API 라우트 (사이클 7-A 의 기존 라우트 — 변경 0)
+
+| Method | URL | 응답 / Body |
+|--------|-----|------------|
+| GET | `/api/integrations/quote-accounts?active_only=false` | `{accounts: KisQuoteAccount[]}` |
+| POST | `/api/integrations/quote-accounts` | body: `{label, app_key, app_secret, kis_env}` → 201 `KisQuoteAccount` / 409 / 422 / 500 |
+| PUT | `/api/integrations/quote-accounts/{id}` | body: `{active?, label?}` → 200 / 404 / 409 / 422 |
+| DELETE | `/api/integrations/quote-accounts/{id}` | 200 / 404 |
+| GET | `/api/realtime/subscriptions` | 사이클 7-B 응답: `{total, acked, fresh_60s, stale_60s, limit, ws_connected, reconnect_count, sessions: [...]}` |
+
+### 회귀 가드 (16 신규, 프론트 119 → 135)
+
+| 파일 | 케이스 | 비고 |
+|------|--------|------|
+| `frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx` | 10 | A 빈 목록 / B 1개 행+마스킹 / C 폼 제출+ConfirmModal+POST / D 409 / E 클라이언트 검증 / F 토글 PUT / G 삭제 DELETE / H 평문 부재 / I secret 폼 클리어 / J password type |
+| `frontend/src/components/__tests__/KisAccountPoolCard.test.tsx` | 6 | PA 메인 only 안내 / PB 메인+보조 2 3행 / PC disconnect red 배지 / PD 슬롯 100% / PE 500 graceful / PF 새로고침 즉시 재조회 |
+
+### 운영자 사용 가이드 (보조 5 계좌 등록부터 분배 시작까지)
+
+**1. KIS Developers 보조 계좌 발급 (5개)**
+- https://apiportal.koreainvestment.com/ 로그인
+- "내 API 키 관리" → "신청" 5회 반복 (계좌당 1세트, 동일 HTS ID 가능)
+- 발급 즉시 app_key (PSxx...) + app_secret 메모 (1회 표시 후 재발급 불가)
+
+**2. Settings UI 에서 등록 (계좌당 ~30초)**
+- 좌측 메뉴 Settings → 페이지 하단 "보조 KIS 시세 계좌" 카드
+- 신규 등록 폼:
+  - label: `quote-1` ~ `quote-5` (영문/숫자/하이픈)
+  - 환경: real 선택 (실전 5종 권장)
+  - app_key 붙여넣기
+  - app_secret 붙여넣기 (password 마스킹)
+- "등록" 버튼 → ConfirmModal "확인" → 표 1행 추가 (등록 후 폼 자동 클리어)
+- 5회 반복 → 표 5행
+
+**3. 활성화 (다음 _boot 자동 — 재기동 불필요)**
+- 등록 직후는 시세 풀에 반영 안 됨 (active=true 상태로 DB 저장만)
+- 다음 영업일 07:50 `_boot()` 가 `kis_quote_accounts.list_accounts(active_only=True)` 조회 → 보조 5 세션 connect
+- 즉시 활성화하려면: 시스템 정지(`POST /api/trading/stop`) 후 재기동(`POST /api/trading/start`) — 운영자 판단
+
+**4. 분배 확인 (Dashboard "KIS 시세 풀" 카드)**
+- 메인 0/41 → 1+5=6 행 표 (메인 + quote-1~5)
+- 총 슬롯 41 → 41 × 6 = 246
+- 각 세션 connected 배지 / 구독 카운트 진행바 / 재연결 횟수 확인
+- 30초 자동 폴링 + 새로고침 버튼
+
+**5. 트러블슈팅**
+- disconnect 배지(red): KIS 토큰 발급 실패 가능 — `system_logs` 에서 `[pool_start]` / `[token]` 로그 확인
+- 슬롯 사용률 80%+ amber: 종목 풀 확장 가능 — 메인 단독 41 제한 → 보조 분산으로 100~200+ 종목 지원
+- 등록 시 409 (label 중복): 기존 label 변경 또는 PUT 으로 기존 행 label 갱신
+
+### 안전 원칙 (사이클 7-D 한정)
+
+- **운영 매매 흐름 무관** — 프론트엔드 UI 만 변경, 백엔드 라우트는 7-A 기존. 회귀 0 (백엔드 1172 변경 없음)
+- **app_secret 평문 노출 차단** — 입력 즉시 백엔드 전송, 응답에는 마스킹만. UI state 도 제출 후 클리어
+- **ConfirmModal 이중 확인 의무** — 등록 / 토글 / 삭제 모두 (사이클 5 컨벤션 동일)
+- **즉시 분배 변경 없음** — 등록·삭제는 다음 _boot 부터 효력. 운영자가 의도적으로 재기동 시점 통제
