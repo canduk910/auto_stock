@@ -23,7 +23,7 @@ test.describe("자동매매 대시보드", () => {
   test("네비게이션 메뉴 5개가 보인다", async ({ page }) => {
     await installApiMocks(page);
     await page.goto("/");
-    for (const label of ["대시보드", "거래 내역", "전략수정 AI자문", "일일 로그 분석", "설정"]) {
+    for (const label of ["대시보드", "거래 내역", "전략수정 AI자문", "로그", "설정"]) {
       await expect(page.getByRole("link", { name: label })).toBeVisible();
     }
   });
