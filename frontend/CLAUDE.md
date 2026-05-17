@@ -75,6 +75,15 @@ Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `Reac
 
 - **Settings**: 비중 슬라이더 하한선 = 보유 포지션 매수금액 비율(`min_weight`, `invested_amount`). 파라미터 편집은 PARAM_LABELS 정의된 number 키만. `position_ratio`는 "전략 내 종목당 비중" — 전략 할당 자금 기준 (순자산 전체 아님), 예상 매수 금액 헬퍼 표시. `getStrategies` 매퍼는 `total_investment`/`invested_amount`/`min_weight` 필수
   - **`CashUsageRatioCard` (J3, 2026-05-12)**: 비중 슬라이더 하단 신설 카드. range 50~100, step 5 슬라이더 + 우측 `data-testid="cash-usage-ratio-percent"` % 표시. GET `/api/strategies/system/cash-usage-ratio` 초기 로드, 저장 버튼 클릭 시 PUT 호출 (debounce 없음 — 명시 commit). 응답 ratio(서버 5% 보정) 로 슬라이더 동기화. 안내 문구 "다음 영업일부터 반영"(text-amber-700). `netAsset` prop(strategies.total_investment 합산 추정) 주어지면 예상 가용액 표시. `useTradingStatus` 의존 안 함 → 단독 렌더 가능. queryKey `['cashUsageRatio']`
+  - **`IntegrationToggleCard` (사이클 5, 2026-05-17)**: `CashUsageRatioCard` 직하 신설 카드. 3 토글 통합(단일 카드 + 분리 행 구조):
+    - `data-testid="toggle-dkstock-regime"`: 외부 매크로 서버(dkstock.cloud) 활성. 활성화 후 3s 동안 `data-testid="fetch-progress-dkstock-regime"` 인라인 진행 표시 + marketRegime queryKey invalidate.
+    - `data-testid="toggle-kis-mcp"`: 외부 백테스트 서버 활성. 즉시 fetch 없음 (자문 시점에만 사용).
+    - `data-testid="toggle-auto-regime-adjust"`: 매크로 레짐 → cash_usage_ratio 자동 갱신 (사이클 2 키 통합 위치).
+    - 각 토글에 `data-testid="source-badge-{key}"` 배지: source='db' 면 파란 `DB` / source='env' 면 회색 `env` (DB 미설정 → 환경변수 fallback 가시화).
+    - 각 토글 클릭 → `ConfirmModal` 이중 확인 (`매크로 레짐 활성화` heading + 안내 메시지). 활성화 / 비활성화 분기 별 안내 분리.
+    - API: `getDkstockRegime / setDkstockRegime` (`frontend/src/api/integrations.ts`) + 동일 패턴 2종. queryKey `['integration', '{key}']`, staleTime 30s, `refetchOnWindowFocus: false`. mutation onSuccess 에서 invalidate.
+    - API 에러 graceful: `data-testid="toggle-error-{key}"` 빨간 박스 + "잠시 후 재시도하세요".
+    - DB 우선 / .env fallback — 운영자가 DB 토글 후에도 환경변수 그대로 두면 안전망 (Phase 1 / 사이클 2 운영자 영향 0). 회귀 가드: `frontend/src/components/__tests__/IntegrationToggleCard.test.tsx` 6 케이스
 
 ## BalanceTable
 - **거래시장 배지 (J1, 2026-05-11)**: 보유 종목 헤더 "종목명" 옆 "거래시장" 컬럼. `Holding.nxt_tradable / krx_halted` 조합으로 5가지 배지 노출 — `KRX+NXT`(emerald-100/800) / `NXT만`(amber-100/800) / `KRX`(gray-100/700) / `정지`(red-100/800) / `확인중`(gray-50/500, 모든 필드 null/undefined). `data-testid="market-badge-{ticker}"`. 배지 클래스 베이스 `inline-block px-1.5 py-0.5 rounded text-xs font-medium`(전략 배지 패턴 재사용)

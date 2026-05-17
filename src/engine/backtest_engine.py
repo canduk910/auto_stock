@@ -82,6 +82,29 @@ class BacktestEngine:
     # ------------------------------------------------------------------
     # 공개 API
     # ------------------------------------------------------------------
+    async def is_enabled_async(self) -> bool:
+        """DB 우선 / .env fallback 활성 여부 평가 (사이클 5, 2026-05-17).
+
+        결정 순서:
+        1. ``system_config.get_kis_mcp_enabled()`` → True/False → DB 채택.
+        2. None (키 부재) 또는 예외 → 생성자 주입 ``self._enabled`` (= .env) fallback.
+
+        예외 흡수 — DB 다운 시에도 .env fallback 으로 graceful 동작. 본 메서드는
+        ``run_for_strategy`` / ``poll`` / ``wait_for_result`` 의 활성 분기 평가용.
+        """
+        try:
+            from src.db.system_config import get_kis_mcp_enabled
+
+            db_value = await get_kis_mcp_enabled()
+            if db_value is not None:
+                return bool(db_value)
+        except Exception:
+            logger.exception(
+                "[backtest] DB toggle 조회 실패 — .env fallback 사용 (enabled=%s)",
+                self._enabled,
+            )
+        return bool(self._enabled)
+
     async def run_for_strategy(
         self,
         strategy_id: str,
@@ -99,7 +122,8 @@ class BacktestEngine:
             BacktestNotSupportedError: 외부 YAML 표현 불가 전략 (Phase 4-bis 로컬 어댑터 위임).
             ExternalAPIError: MCP 통신 오류 / validate_yaml 실패 / job_id 누락.
         """
-        if not self._enabled:
+        # 사이클 5 (2026-05-17): DB 우선 분기로 비활성 가드 (ctor _enabled 만 보지 않음).
+        if not await self.is_enabled_async():
             raise ConfigError(
                 "KIS_MCP_ENABLED=false — 외부 백테스트 서버가 비활성. "
                 "운영 자문은 backtest_summary=null 로 graceful degrade."
@@ -160,10 +184,10 @@ class BacktestEngine:
             running → None
             completed → BacktestMetrics
         Raises:
-            ConfigError: enabled=False
+            ConfigError: enabled=False (DB/.env 모두 비활성)
             ExternalAPIError: failed status / 통신 오류
         """
-        if not self._enabled:
+        if not await self.is_enabled_async():
             raise ConfigError("KIS_MCP_ENABLED=false")
 
         resp = await self._client.call_tool(
@@ -187,7 +211,7 @@ class BacktestEngine:
 
         외부 서버가 timeout 까지 폴링을 서버측에서 수행 후 결과 반환.
         """
-        if not self._enabled:
+        if not await self.is_enabled_async():
             raise ConfigError("KIS_MCP_ENABLED=false")
 
         resp = await self._client.call_tool(

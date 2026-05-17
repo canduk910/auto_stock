@@ -10,6 +10,11 @@
   0.5 미만 값이 정상 입력될 수 있어 범위 확장.
 - `auto_regime_adjust` (사이클 2, 2026-05-17): `{"value": bool}` — 매크로 레짐 기반
   cash_usage_ratio 자동 조정 활성 여부. 기본 True. False 면 운영자 수동 설정 보존.
+- `dkstock_regime_enabled` (사이클 5, 2026-05-17): `{"value": bool}` — 외부 매크로
+  서버(dkstock.cloud) 활성 여부. **키 부재 시 `None` 반환** — 호출자가 settings.* 환경
+  변수로 fallback. .env 의존도 최소화 + 운영자 즉시 ON/OFF 보장.
+- `kis_mcp_enabled` (사이클 5, 2026-05-17): `{"value": bool}` — 외부 백테스트 서버
+  활성 여부. dkstock_regime_enabled 와 동일 패턴(DB 우선, .env fallback).
 
 supabase 동기 SDK 호출은 모두 `asyncio.to_thread` 위임 (이벤트 루프 블로킹 차단).
 """
@@ -152,3 +157,87 @@ async def set_auto_regime_adjust(value: bool) -> None:
         )
 
     await asyncio.to_thread(_upsert)
+
+
+# ---------------------------------------------------------------------------
+# 사이클 5 (2026-05-17) — 외부 통합 토글 헬퍼
+# ---------------------------------------------------------------------------
+# 기존 패턴(cash_usage_ratio / auto_regime_adjust) 과 다른 점:
+# **키 부재 시 `None` 반환** — 호출자가 .env 환경변수로 fallback 결정.
+# 이로써 운영 환경에서 DB 갱신 안 하면 기존 .env 동작 100% 보존(하위 호환).
+_DKSTOCK_REGIME_ENABLED_KEY = "dkstock_regime_enabled"
+_KIS_MCP_ENABLED_KEY = "kis_mcp_enabled"
+
+
+async def _get_bool_or_none(key: str) -> bool | None:
+    """system_config 의 bool JSONB 값을 안전하게 조회. 키 부재 → None."""
+
+    def _query():
+        return (
+            supabase.table("system_config")
+            .select("value")
+            .eq("key", key)
+            .execute()
+        )
+
+    try:
+        result = await asyncio.to_thread(_query)
+        rows = result.data or []
+        if not rows:
+            return None
+        raw = rows[0].get("value")
+        if isinstance(raw, dict):
+            v = raw.get("value")
+            if v is None:
+                return None
+            return bool(v)
+        if isinstance(raw, bool):
+            return raw
+        # 문자열 'true'/'false' 호환 (마이그레이션 텍스트 INSERT 대비)
+        if isinstance(raw, str):
+            normalized = raw.strip().lower()
+            if normalized == "true":
+                return True
+            if normalized == "false":
+                return False
+        return None
+    except Exception:
+        logger.exception("[system_config] get %s 실패 — None 반환 (호출자 fallback)", key)
+        return None
+
+
+async def _set_bool(key: str, value: bool) -> None:
+    """system_config bool 값 upsert. JSONB 표준 형태 `{"value": bool}`."""
+    payload = {
+        "key": key,
+        "value": {"value": bool(value)},
+    }
+
+    def _upsert():
+        return (
+            supabase.table("system_config")
+            .upsert(payload, on_conflict="key")
+            .execute()
+        )
+
+    await asyncio.to_thread(_upsert)
+
+
+async def get_dkstock_regime_enabled() -> bool | None:
+    """외부 매크로 서버 활성 여부 조회. 키 부재 → None (호출자 .env fallback)."""
+    return await _get_bool_or_none(_DKSTOCK_REGIME_ENABLED_KEY)
+
+
+async def set_dkstock_regime_enabled(value: bool) -> None:
+    """외부 매크로 서버 활성 여부 저장. bool 강제 변환."""
+    await _set_bool(_DKSTOCK_REGIME_ENABLED_KEY, value)
+
+
+async def get_kis_mcp_enabled() -> bool | None:
+    """외부 백테스트 서버 활성 여부 조회. 키 부재 → None (호출자 .env fallback)."""
+    return await _get_bool_or_none(_KIS_MCP_ENABLED_KEY)
+
+
+async def set_kis_mcp_enabled(value: bool) -> None:
+    """외부 백테스트 서버 활성 여부 저장. bool 강제 변환."""
+    await _set_bool(_KIS_MCP_ENABLED_KEY, value)

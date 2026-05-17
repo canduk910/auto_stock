@@ -74,6 +74,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `persist_snapshot(regime, target_date)` — `market_regime_snapshots` 1행 INSERT. empty 는 skip
 - `get_current_regime()` / `set_current_regime()` — 모듈 싱글톤 (단일 워커 가정)
 - 운영 graceful: `DKSTOCK_REGIME_ENABLED=false` 기본 → 외부 호출 0건, 매수 가드 비활성
+- **사이클 5 (2026-05-17) DB 우선 토글**: `src/services/dkstock_client.py::_check_enabled_async` + `src/services/mcp_client.py::_check_enabled_async` + `src/engine/backtest_engine.py::is_enabled_async()` 가 `system_config.get_dkstock_regime_enabled` / `get_kis_mcp_enabled` 먼저 조회 → DB True/False 면 DB 채택, None 또는 예외 시 `settings.*` (.env) fallback. 매 호출마다 DB 조회(캐시 없음) — 운영자 즉시 ON/OFF 보장. 호출 진입점: dkstock_client(login/refresh/_get) / mcp_client(initialize/call_tool/list_tools/health_check) / backtest_engine(run_for_strategy/poll/wait_for_result). Settings UI 의 IntegrationToggleCard 에서 토글 시 즉시 반영 — 컨테이너 재시작 불필요. `_refresh_market_regime_and_persist_safely` (`src/routes/system_integrations.py`) 가 dkstock-regime PUT enabled=true 직후 `asyncio.create_task` 백그라운드 fetch 발화 — toggle 응답은 즉시 반환
 
 `scheduler._boot()` 가 매크로 fetch + snapshot INSERT + cash_usage_ratio 자동 조정 통합 수행. 자세한 흐름은 아래 scheduler.py 섹션.
 

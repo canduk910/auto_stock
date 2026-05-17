@@ -32,7 +32,13 @@ Supabase(PostgreSQL) CRUD 모듈.
 
 ### system_config.py — 시스템 설정 키-값 헬퍼
 - `get_cash_usage_ratio() -> float` / `set_cash_usage_ratio(ratio: float) -> None` (J3, 2026-05-12)
-- 키 `cash_usage_ratio`, JSONB 값 `{"value": float}`. 범위 [0.5, 1.0], 5% 단위 자동 보정. 미설정 시 기본 1.0
+- 키 `cash_usage_ratio`, JSONB 값 `{"value": float}`. **사이클 2 (2026-05-17)** 범위 확장: [0.5, 1.0] → **[0.0, 1.0]** (defensive 레짐 0.25 수용). 5% 단위 자동 보정. 미설정 시 기본 1.0
+- `get_auto_regime_adjust() -> bool` / `set_auto_regime_adjust(value: bool) -> None` (사이클 2, 2026-05-17). 키 `auto_regime_adjust`. 미설정 시 기본 True
+- **사이클 5 (2026-05-17) 외부 통합 토글 4 헬퍼 추가**:
+  - `get_dkstock_regime_enabled() -> bool | None` / `set_dkstock_regime_enabled(value: bool) -> None` (키 `dkstock_regime_enabled`)
+  - `get_kis_mcp_enabled() -> bool | None` / `set_kis_mcp_enabled(value: bool) -> None` (키 `kis_mcp_enabled`)
+  - **기본값이 `None`** — 호출자가 `settings.dkstock_regime_enabled` / `settings.kis_mcp_enabled` 환경변수로 fallback 결정. cash_usage_ratio (기본 1.0) / auto_regime_adjust (기본 True) 와 다른 점 — DB 미설정 시 .env 호환 보존
+  - 내부 헬퍼 `_get_bool_or_none(key)` / `_set_bool(key, value)` 가 JSONB `{"value": bool}` + 과거 호환(직저장 bool / 'true'/'false' 문자열) 모두 흡수
 - scheduler `_boot()` 가 `summary.net_asset × ratio` 로 `allocate_funds()` 호출 — 변경은 다음 영업일 _boot 부터 반영
 - 범위 외 입력은 ValueError. supabase 동기 호출은 `asyncio.to_thread` 위임
 

@@ -83,11 +83,41 @@ class DkstockClient:
     # 내부 헬퍼
     # ------------------------------------------------------------------
     def _check_enabled(self) -> None:
+        """sync 가드 — 생성자 시점 enabled 값(폴백) 만 확인.
+
+        **사이클 5 (2026-05-17)** 부터는 가능하면 `_check_enabled_async()` 가 DB 우선
+        분기를 수행한 뒤 가드를 통과시킨다. 본 sync 헬퍼는 비동기 context 가 없는 곳
+        (raise 전 가벼운 가드)에서만 사용. login/refresh/_get 진입점은 모두 async
+        헬퍼로 갈아끼움.
+        """
         if not self._enabled:
             raise ConfigError(
                 "dkstock.cloud 매크로 클라이언트가 비활성화되어 있습니다. "
                 "DKSTOCK_REGIME_ENABLED=true 로 설정하세요."
             )
+
+    async def _check_enabled_async(self) -> bool:
+        """DB 우선 / .env fallback 활성 여부 평가 (사이클 5, 2026-05-17).
+
+        결정 순서:
+        1. `system_config.get_dkstock_regime_enabled()` 반환값이 True/False → DB 값 채택.
+        2. None (키 부재) 또는 예외 → 생성자 주입 `self._enabled` (= .env) fallback.
+
+        예외 흡수 — DB 다운 / 네트워크 단절 시에도 .env fallback 으로 graceful 동작.
+        반환값은 호출자가 활성 분기 결정에 사용 (raise 는 호출자 책임).
+        """
+        try:
+            from src.db.system_config import get_dkstock_regime_enabled
+
+            db_value = await get_dkstock_regime_enabled()
+            if db_value is not None:
+                return bool(db_value)
+        except Exception:
+            logger.exception(
+                "[dkstock] DB toggle 조회 실패 — .env fallback 사용 (enabled=%s)",
+                self._enabled,
+            )
+        return bool(self._enabled)
 
     def _get_client(self) -> httpx.AsyncClient:
         if self._http is None:
@@ -114,8 +144,15 @@ class DkstockClient:
         """``POST /api/auth/login`` 으로 access/refresh 토큰 발급.
 
         실패 시 ``ExternalAPIError`` raise. 호출자가 graceful degrade.
+
+        **사이클 5 (2026-05-17)**: DB 우선 / .env fallback 분기로 활성 여부 확인.
+        비활성 시 ``ConfigError`` raise (기존 sync 가드와 동일 메시지).
         """
-        self._check_enabled()
+        if not await self._check_enabled_async():
+            raise ConfigError(
+                "dkstock.cloud 매크로 클라이언트가 비활성화되어 있습니다. "
+                "DKSTOCK_REGIME_ENABLED=true 또는 system_config.dkstock_regime_enabled=true 로 설정하세요."
+            )
 
         url = f"{self._base_url}/api/auth/login"
         payload = {"username": self._username, "password": self._password}
@@ -156,7 +193,11 @@ class DkstockClient:
 
         실패 시 ``ExternalAPIError`` (운영자 SSH 재로그인 안내 포함).
         """
-        self._check_enabled()
+        if not await self._check_enabled_async():
+            raise ConfigError(
+                "dkstock.cloud 매크로 클라이언트가 비활성화되어 있습니다. "
+                "DKSTOCK_REGIME_ENABLED=true 또는 system_config.dkstock_regime_enabled=true 로 설정하세요."
+            )
         if not self._refresh_token:
             raise ExternalAPIError(_REFRESH_EXPIRED_HINT)
 
@@ -196,7 +237,11 @@ class DkstockClient:
     # ------------------------------------------------------------------
     async def _get(self, path: str) -> dict[str, Any]:
         """``GET {base_url}{path}`` + Bearer 헤더. 401 시 refresh 후 1회 재시도."""
-        self._check_enabled()
+        if not await self._check_enabled_async():
+            raise ConfigError(
+                "dkstock.cloud 매크로 클라이언트가 비활성화되어 있습니다. "
+                "DKSTOCK_REGIME_ENABLED=true 또는 system_config.dkstock_regime_enabled=true 로 설정하세요."
+            )
 
         async with self._lock:
             if not self._access_token:

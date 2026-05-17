@@ -35,3 +35,7 @@ playwright/.cache/
 
 # 스크린샷
 *.png
+
+# SSH 키 (절대 commit 금지)
+*.pem
+*.key

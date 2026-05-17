@@ -67,10 +67,38 @@ class MCPClient:
     # 내부 헬퍼
     # ------------------------------------------------------------------
     def _check_enabled(self) -> None:
+        """sync 가드 — 생성자 시점 enabled 값(폴백) 만 확인.
+
+        **사이클 5 (2026-05-17)** 부터는 호출자가 가능하면 `_check_enabled_async()` 로
+        DB 우선 분기를 평가해 raise 한다. 본 sync 헬퍼는 async context 가 없는 곳
+        용 백업.
+        """
         if not self._enabled:
             raise ConfigError(
                 "KIS MCP 서버가 비활성화되어 있습니다. KIS_MCP_ENABLED=true 로 설정하세요."
             )
+
+    async def _check_enabled_async(self) -> bool:
+        """DB 우선 / .env fallback 활성 여부 평가 (사이클 5, 2026-05-17).
+
+        결정 순서:
+        1. `system_config.get_kis_mcp_enabled()` 반환값이 True/False → DB 값 채택.
+        2. None (키 부재) 또는 예외 → 생성자 주입 `self._enabled` (= .env) fallback.
+
+        예외 흡수 — DB 다운 시에도 .env fallback 으로 graceful 동작.
+        """
+        try:
+            from src.db.system_config import get_kis_mcp_enabled
+
+            db_value = await get_kis_mcp_enabled()
+            if db_value is not None:
+                return bool(db_value)
+        except Exception:
+            logger.exception(
+                "[mcp] DB toggle 조회 실패 — .env fallback 사용 (enabled=%s)",
+                self._enabled,
+            )
+        return bool(self._enabled)
 
     def _get_client(self) -> httpx.AsyncClient:
         """lazy 초기화 — 매번 동일 인스턴스 + 커넥션 풀 재사용."""
@@ -88,7 +116,11 @@ class MCPClient:
         호출자는 보통 직접 호출할 필요 없음 — ``call_tool`` 이 lazy 호출.
         명시 호출은 헬스체크/디버그 용.
         """
-        self._check_enabled()
+        if not await self._check_enabled_async():
+            raise ConfigError(
+                "KIS MCP 서버가 비활성화되어 있습니다. "
+                "KIS_MCP_ENABLED=true 또는 system_config.kis_mcp_enabled=true 로 설정하세요."
+            )
         payload = {
             "jsonrpc": "2.0",
             "id": self._next_req_id(),
@@ -230,10 +262,14 @@ class MCPClient:
             ``result`` 키 안의 dict (도구별 스키마 — Phase 2 에서 더 구체화)
 
         Raises:
-            ConfigError: ``KIS_MCP_ENABLED=false``
+            ConfigError: ``KIS_MCP_ENABLED=false`` (DB/.env 모두 비활성)
             ExternalAPIError: 네트워크/타임아웃/HTTP 5xx/421-재시도-실패/JSON-RPC error
         """
-        self._check_enabled()
+        if not await self._check_enabled_async():
+            raise ConfigError(
+                "KIS MCP 서버가 비활성화되어 있습니다. "
+                "KIS_MCP_ENABLED=true 또는 system_config.kis_mcp_enabled=true 로 설정하세요."
+            )
         params = params or {}
         # 세션 초기화 + 1회 호출 — 동시 호출 시 initialize 중복 방지를 위해 lock
         async with self._lock:
@@ -279,7 +315,11 @@ class MCPClient:
         응답 스키마는 서버 구현 따라 ``{tools: [...]}`` 또는 ``[{...}]`` 가능.
         본 메서드는 호출자가 도구명 추출만 쉽게 하도록 list 형태로 정규화한다.
         """
-        self._check_enabled()
+        if not await self._check_enabled_async():
+            raise ConfigError(
+                "KIS MCP 서버가 비활성화되어 있습니다. "
+                "KIS_MCP_ENABLED=true 또는 system_config.kis_mcp_enabled=true 로 설정하세요."
+            )
         async with self._lock:
             if not self._session_id:
                 await self.initialize()
@@ -318,8 +358,9 @@ class MCPClient:
         """헬스체크 — 비활성 시 항상 False. 활성 시 ``tools/list`` 호출 성공 여부.
 
         외부 서버 다운/네트워크 단절 시에도 예외 대신 ``False`` 반환 (graceful).
+        사이클 5 (2026-05-17): 비활성 여부는 `_check_enabled_async()` 가 DB 우선 결정.
         """
-        if not self._enabled:
+        if not await self._check_enabled_async():
             return False
         try:
             tools = await self.list_tools()

@@ -1260,6 +1260,63 @@ risk_on_tick 등 후속 테스트의 buy_blocked 가드 오염 차단.
 
 ---
 
+## (2026-05-17) 자문 시스템 개선 사이클 5 — 외부 통합 토글 Settings UI
+
+### 배경
+
+사이클 2~4 가 .env 환경변수 (`DKSTOCK_REGIME_ENABLED`, `KIS_MCP_ENABLED`) 의존이라 운영자가 토글하려면 SSH 접속 + 컨테이너 재생성이 필요. 5/17 EC2 검증 단계에서 토글 전환 시점이 휴장이라 `_boot()` 미발화 → 메모리 미갱신 → API null 응답. 운영자가 Settings UI 로 즉시 ON/OFF 하고 활성화 시 즉시 fetch 가 발화되어야 운영 유연성 확보.
+
+### 변경 요약
+
+- DB 우선 / .env fallback 패턴 — Phase 1 / 사이클 2 운영자 영향 0 (하위 호환).
+- 3 토글 통합:
+  - `dkstock_regime_enabled` (system_config 신규 키): 외부 매크로 서버.
+  - `kis_mcp_enabled` (system_config 신규 키): 외부 백테스트 서버.
+  - `auto_regime_adjust` (사이클 2 기존 키 활용): 매크로 레짐 → cash_usage_ratio 자동 갱신.
+- `dkstock-regime` 활성화(True) 시 `asyncio.create_task(_refresh_market_regime_and_persist_safely())` 백그라운드 fetch 발화 — API 응답 즉시 반환.
+- `dkstock-regime` 비활성화 시 메모리 regime empty reset — 매수 가드 즉시 해제.
+- `kis_mcp_enabled` 토글은 즉시 fetch 안 함 — 백테스트는 자문 시점(20:00) 발화.
+
+### 기술 결정
+
+| 결정 | 선택 | 사유 |
+|------|------|------|
+| `system_config` 헬퍼 패턴 | `get_*() -> bool \| None` (키 부재 시 None) | 호출자가 .env fallback 분기 — 하위 호환 |
+| 클라이언트 `_check_enabled` | async 신설(`_check_enabled_async`), sync 백업 유지 | 호환성 + 매 호출 DB 조회로 즉시 반영 (캐시 없음) |
+| `BacktestEngine.enabled` | sync 프로퍼티 보존 + `is_enabled_async()` 신설 | 호환성 + 매 호출 DB 조회 |
+| UI 카드 구조 | 단일 카드 + 3 분리 행 | 운영자 시야 집중, 토글 간 관계(매크로 ON ↔ auto-regime ON) 가시화 |
+| 활성화 즉시 fetch | `asyncio.create_task` fire-and-forget | API 응답 지연 방지, fetch 실패도 toggle 성공 유지 |
+
+### 보존 (변경 안 함)
+
+- 운영 매매 흐름: scheduler / order_engine / risk 영역 침범 0.
+- 사이클 1~4 의 user_payload 통합 / weight_reasoning / 보드별 손절 / PARAM_RANGES 확장 모두 그대로.
+- `auto_regime_adjust` 키는 사이클 2 023 마이그레이션에서 이미 추가 — 본 사이클은 신규 추가 안 함.
+
+### 회귀 가드
+
+- 백엔드: `tests/unit/db/test_system_config_integrations.py` 8 케이스 + `tests/unit/services/test_dkstock_client_db_toggle.py` 6 케이스 + `tests/unit/services/test_mcp_client_db_toggle.py` 6 케이스 + `tests/unit/engine/test_backtest_engine_db_toggle.py` 6 케이스 + `tests/contract/test_routes_system_integrations.py` 10 케이스 = 36 신규.
+- 프론트: `frontend/src/components/__tests__/IntegrationToggleCard.test.tsx` 6 케이스.
+- 회귀: 백엔드 1046 passed(1010→+36) / 프론트 106 passed(100→+6).
+
+### 핵심 안전 원칙
+
+- 하위 호환성 — .env fallback 보존: DB 값 미설정 시 기존 환경변수로 작동.
+- 활성화 즉시 fetch 는 백그라운드 task — API 응답은 즉시 반환, fetch 실패도 toggle 성공 유지.
+- 운영 매매 흐름 미침범: toggle 자체는 매크로/백테스트 활성화만 변경, 매매 로직 무관.
+- ConfirmModal 이중 확인 — `dkstock_regime_enabled=true` 는 매수 가드 + cash_usage_ratio 자동 조정 발동 영향 있음.
+- 비활성화 시 메모리 regime empty reset — 매수 가드 즉시 해제 (정합성).
+
+### 운영 활성화 절차
+
+1. **마이그 025 적용**: Supabase 콘솔에서 `supabase/migrations/025_external_integration_toggles.sql` 수동 실행. 멱등(`ON CONFLICT DO NOTHING`).
+2. **Settings UI → 외부 통합 카드 → `매크로 레짐 (dkstock.cloud)` ON 토글** + ConfirmModal 확인. 3초 후 시장 레짐 카드 자동 갱신.
+3. **`레짐 기반 cash_usage_ratio 자동 조정` 토글 검토**: defensive(0.25) / neutral(0.5) / aggressive(0.8) 자동 적용을 원하면 ON, 운영자 수동 관리면 OFF.
+4. **`외부 백테스트 서버` 토글**: 5/18 월 20:00 자문에 백테스트 검증을 포함시키려면 사전 ON.
+5. **`.env` 처리** (선택): DB 토글이 우선이라 환경변수 제거해도 무방. 그대로 두면 DB 갱신 안 한 상태에서도 환경변수 기본값으로 동작 — 안전망 권장.
+
+---
+
 ## 커밋 5분할 (squash 금지)
 1. `feat(strategies): VB/LTV get_targets_status returns active boards only`
 2. `feat(scanner): cap breakout to 25 slots in priority queue (protect momentum)`

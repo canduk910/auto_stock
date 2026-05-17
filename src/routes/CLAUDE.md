@@ -40,6 +40,12 @@
 | POST | `/api/system/metrics/reset` | system.py | metrics 누적 샘플 초기화 (실험 베이스라인 리셋) |
 | GET | `/api/realtime/subscriptions` | realtime.py | WebSocket 구독 슬롯 사용현황 진단 (G2, 2026-05-12). `total/acked/fresh_60s/stale_60s/limit/tickers(subscribed/acked/fresh/stale, 모두 sorted)/reconnect_count/ws_connected`. KIS 측 슬롯 조회 API 미존재 → 우리 측 추적 노출 |
 | POST | `/api/realtime/resubscribe` | realtime.py | 60s 미수신(stale) TICK 종목 즉시 일괄 재구독 (J2, 2026-05-12). `_subscriptions` 보존 + `_send_subscribe(TICK_TR_ID, t, subscribe=True)` 만 호출(50ms sleep). 응답 `{resubscribed, tickers}` (sorted). WebSocket 끊김 시 400. F1 자동 재구독(재연결 60s 후)과 별개의 운영자 수동 트리거. 영구 로그 `[ws_manual_resubscribe] count=N tickers=[...]` |
+| GET | `/api/integrations/dkstock-regime` | system_integrations.py | 외부 매크로 서버 활성 여부 조회 (사이클 5, 2026-05-17). 응답 `{enabled, source: 'db'\|'env', env_value, db_value}` — DB 우선 / .env fallback. db_value=null 이면 source='env' |
+| PUT | `/api/integrations/dkstock-regime` | system_integrations.py | 외부 매크로 서버 활성 토글 (사이클 5). body `{enabled: bool}`. 활성화(true) 시 `asyncio.create_task(_refresh_market_regime_and_persist_safely())` 백그라운드 fetch 발화. 비활성화 시 메모리 regime empty reset(매수 가드 즉시 해제). DB 갱신 실패는 500. 매크로 fetch 실패는 graceful — toggle 자체는 성공 |
+| GET | `/api/integrations/kis-mcp` | system_integrations.py | 외부 백테스트 서버 활성 여부 조회 (사이클 5). 응답 구조 동일 |
+| PUT | `/api/integrations/kis-mcp` | system_integrations.py | 외부 백테스트 서버 활성 토글 (사이클 5). 즉시 fetch 안 함 — 백테스트는 자문 시점(20:00) 발화 |
+| GET | `/api/integrations/auto-regime-adjust` | system_integrations.py | 매크로 레짐 → cash_usage_ratio 자동 갱신 토글 조회 (사이클 5 통합 위치). 사이클 2 의 `auto_regime_adjust` 키 활용 — 라우트만 통합 |
+| PUT | `/api/integrations/auto-regime-adjust` | system_integrations.py | 매크로 레짐 자동 갱신 토글 (사이클 5). 다음 영업일 _boot 부터 반영. 기존 `/api/market-regime/auto-adjust` 와 동일 동작(어느 쪽 사용해도 무방, 새 라우트는 Settings UI 통합 위치) |
 
 ## 응답 형식
 모든 응답은 `models/response.py`의 `ApiResponse` 래퍼 사용:

@@ -5,6 +5,7 @@ import type { StrategyParamValue } from '../api/trading'
 import apiClient from '../api/client'
 import { getStrategyColor } from '../types/strategy'
 import CashUsageRatioCard from '../components/CashUsageRatioCard'
+import IntegrationToggleCard from '../components/IntegrationToggleCard'
 import ConfirmModal from '../components/ConfirmModal'
 import InfoTooltip from '../components/InfoTooltip'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
@@ -299,6 +300,9 @@ export default function Settings() {
 
       {/* J3 (2026-05-12) — 매매 가용 자금 비율 */}
       <CashUsageRatioCard netAsset={netAssetEstimate > 0 ? netAssetEstimate : undefined} />
+
+      {/* 사이클 5 (2026-05-17) — 외부 통합 토글 (dkstock-regime / kis-mcp / auto-regime-adjust) */}
+      <IntegrationToggleCard />
 
       {/* 전략별 파라미터 */}
       <div className="space-y-4">
