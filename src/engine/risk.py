@@ -4,6 +4,8 @@
 - 전략별 포지션 비중 제한
 - 전략 간 중복 매수 방지
 - 전략별 매매 가능 보드(KRX 메인 / NXT 프리 / NXT 애프터) 가드 — Phase 8
+- **사이클 2 (2026-05-17)**: 시장 레짐 매수 가드 (defensive/VIX>25/F&G 극단 시 매수 차단).
+  매도/손절 분기는 무관 — 보유 종목 청산 정상.
 """
 
 from __future__ import annotations
@@ -11,6 +13,7 @@ from __future__ import annotations
 import logging
 import time
 
+from src.engine.market_regime import get_current_regime
 from src.engine.order_engine import OrderEngine
 from src.engine.session import session_tracker
 from src.engine.strategy_base import Signal
@@ -28,6 +31,9 @@ class RiskManager:
         # 가설 D (2026-05-12): tradable=False skip 카운터. 1분 1회 INFO 로그 + reset.
         self._tradable_skip_count: dict[str, int] = {}
         self._last_tradable_emit_ts: float = 0.0
+        # 사이클 2 (2026-05-17): 시장 레짐 매수 가드 skip 카운터. 1분 1회 INFO emit.
+        self._regime_block_count: dict[str, int] = {}
+        self._last_regime_block_emit_ts: float = 0.0
 
     async def on_tick(
         self,
@@ -91,6 +97,19 @@ class RiskManager:
                 self._maybe_emit_tradable_skip()
                 continue
 
+            # 사이클 2 (2026-05-17): 시장 레짐 매수 가드 (1b).
+            # regime=defensive OR vix>25 OR fear_greed>85 OR fear_greed<15 → 매수 차단.
+            # 매도/손절은 위 check_exit_signal 분기에서 무관 → 보유 종목 청산 정상.
+            # 외부 fetch 실패 / DKSTOCK_REGIME_ENABLED=false 면 empty regime → is_buy_allowed=True
+            # (graceful — 기존 동작 유지).
+            regime = get_current_regime()
+            if not regime.is_buy_allowed(strategy.strategy_id):
+                self._regime_block_count[strategy.strategy_id] = (
+                    self._regime_block_count.get(strategy.strategy_id, 0) + 1
+                )
+                self._maybe_emit_regime_block(regime)
+                continue
+
             # 전략 간 중복 매수 방지: 보유/주문 중/당일 매도 모두 가로질러 차단
             if self.registry.is_ticker_blocked_for_buy(ticker):
                 continue
@@ -147,3 +166,29 @@ class RiskManager:
         logger.info("[tradable_skip] %s active_boards=%s", parts, active)
         self._tradable_skip_count.clear()
         self._last_tradable_emit_ts = now_ts
+
+    def _maybe_emit_regime_block(self, regime) -> None:  # type: ignore[no-untyped-def]
+        """사이클 2 (2026-05-17) — 분당 1회 [regime_block] INFO 로그.
+
+        시장 레짐 매수 차단 카운트를 1분 주기로 노출. 첫 호출 시 기준점만 등록하고
+        emit 보류 (tradable_skip 패턴과 동일).
+        """
+        now_ts = time.time()
+        if self._last_regime_block_emit_ts == 0.0:
+            self._last_regime_block_emit_ts = now_ts
+            return
+        if now_ts - self._last_regime_block_emit_ts < 60.0:
+            return
+        if not self._regime_block_count:
+            self._last_regime_block_emit_ts = now_ts
+            return
+        parts = " ".join(
+            f"{sid}={cnt}" for sid, cnt in sorted(self._regime_block_count.items())
+        )
+        try:
+            reason = regime.block_reason or "unknown"
+        except Exception:
+            reason = "unknown"
+        logger.info("[regime_block] %s reason=%s", parts, reason)
+        self._regime_block_count.clear()
+        self._last_regime_block_emit_ts = now_ts

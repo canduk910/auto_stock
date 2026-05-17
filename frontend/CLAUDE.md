@@ -79,6 +79,15 @@ Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `Reac
 ## BalanceTable
 - **거래시장 배지 (J1, 2026-05-11)**: 보유 종목 헤더 "종목명" 옆 "거래시장" 컬럼. `Holding.nxt_tradable / krx_halted` 조합으로 5가지 배지 노출 — `KRX+NXT`(emerald-100/800) / `NXT만`(amber-100/800) / `KRX`(gray-100/700) / `정지`(red-100/800) / `확인중`(gray-50/500, 모든 필드 null/undefined). `data-testid="market-badge-{ticker}"`. 배지 클래스 베이스 `inline-block px-1.5 py-0.5 rounded text-xs font-medium`(전략 배지 패턴 재사용)
 
+## MarketRegimeCard (사이클 2, 2026-05-17)
+- **Dashboard 환경 배너 직하, 전략 탭 위** 신설 카드 (`frontend/src/pages/Dashboard.tsx` `<ControlPanel />` 직후 `<MarketRegimeCard />` 삽입).
+- 노출 정보: regime 배지(defensive=red-100/800 / neutral=gray-100/800 / aggressive=blue-100/800 / 비활성=gray-100/500) + VIX/Fear&Greed/Buffett/cycle 메트릭 grid + cash_usage_ratio + auto_regime_adjust 토글
+- 매수 가드 활성 시(`buy_blocked=true`) `data-testid="market-regime-block-banner"` amber 배너 + block_reason + "보유 종목 청산은 정상 작동합니다. 매수만 차단됩니다." 안내
+- `auto_regime_adjust` 토글 (`data-testid="auto-regime-toggle"`) ON/OFF 클릭 시 ConfirmModal 이중 확인 — ON: "다음 영업일부터 cash_min 기반 자동 갱신" / OFF: "운영자 수동값 보존" 안내
+- API: `getMarketRegimeCurrent()` (queryKey `['marketRegime']`, staleTime 60s) + `setAutoRegimeAdjust(boolean)` + `getMarketRegimeHistory(days)`
+- `enabled=false` (DKSTOCK_REGIME_ENABLED=false) 시 "비활성" gray 배지 + 메트릭은 "—" 표시. 매수 가드 비활성, 토글 변경 의미 없음
+- 회귀 가드: `frontend/src/components/__tests__/MarketRegimeCard.test.tsx` 7 케이스 (defensive 배지 + 배너 / aggressive 배지 / 메트릭 grid / 토글 ConfirmModal / PUT API 호출 / API 에러 graceful / enabled=false 비활성 배지)
+
 ## 주문 안전성
 - 시작/정지/매도 등 주문 관련 버튼은 ConfirmModal 이중 확인 필수
 

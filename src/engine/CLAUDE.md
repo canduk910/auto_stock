@@ -54,11 +54,28 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 
 `on_tick()`: ticker_prices 갱신 1회 → `registry.enabled()` 순회 → 전략별 exit/buy 신호.
 
-매수 신호 평가 *전* 가드:
+매수 신호 평가 *전* 가드 (순서):
 - **보드 가드**: `session_tracker.is_tradable(strategy_id, params)` — 비활성 보드는 신호 평가 자체 skip
-- **자금 사전 가드**: `state.is_low_funds_blocked(ticker)` 또는 `current_price > state.total_investment`(1주 매수 자금 미달)이면 skip — OrderEngine 진입 후 cooldown 등록 사후처리에서 매 틱 발생하던 "매수 수량 0 → 900s cooldown" 노이즈 제거
+- **시장 레짐 매수 가드 (사이클 2, 2026-05-17)**: `get_current_regime().is_buy_allowed(strategy_id)` — `regime=defensive` OR `vix>25` OR `fear_greed_score>85` OR `<15` 시 모든 전략 매수 차단. **매도/손절은 본 분기 진입 전 `check_exit_signal` 에서 평가 → 영향 없음.** 외부 fetch 실패 / `DKSTOCK_REGIME_ENABLED=false` → `MarketRegime.empty()` → `is_buy_allowed=True` (graceful 기존 동작 유지). 분당 1회 `[regime_block]` INFO 로그 (`_maybe_emit_regime_block`)
 - **중복 가드**: `registry.is_ticker_blocked_for_buy()`
+- **자금 사전 가드**: `state.is_low_funds_blocked(ticker)` 또는 `current_price > state.total_investment`(1주 매수 자금 미달)이면 skip — OrderEngine 진입 후 cooldown 등록 사후처리에서 매 틱 발생하던 "매수 수량 0 → 900s cooldown" 노이즈 제거
 - BUY 신호 발생 시 `state.signal_count_today += 1` (퍼널 카운터)
+
+## market_regime.py (사이클 2, 2026-05-17)
+
+`dkstock.cloud` 매크로 기반 시장 레짐 + 매수 가드 + cash_usage_ratio 자동 조정.
+
+- `MarketRegime` dataclass: regime/regime_desc/cycle_phase/vix/fear_greed_score/buffett_ratio/cash_min/raw
+- `MarketRegime.empty()` — 외부 fetch 실패 graceful 폴백 (`is_buy_allowed=True`)
+- `MarketRegime.from_macro_cycle(macro)` — dkstock.cloud `/api/macro/macro-cycle` 응답 파싱
+- `is_buy_allowed(strategy_id) -> bool` — 복합 임계 OR (defensive/VIX>25/FG>85/FG<15)
+- `cash_usage_ratio_from_regime(cash_min)` — `clamp((100 - cash_min)/100, 0.0, 1.0)`
+- `refresh_from_dkstock()` — dkstock_client → MarketRegime. 모든 예외 흡수 → empty
+- `persist_snapshot(regime, target_date)` — `market_regime_snapshots` 1행 INSERT. empty 는 skip
+- `get_current_regime()` / `set_current_regime()` — 모듈 싱글톤 (단일 워커 가정)
+- 운영 graceful: `DKSTOCK_REGIME_ENABLED=false` 기본 → 외부 호출 0건, 매수 가드 비활성
+
+`scheduler._boot()` 가 매크로 fetch + snapshot INSERT + cash_usage_ratio 자동 조정 통합 수행. 자세한 흐름은 아래 scheduler.py 섹션.
 
 ## order_engine.py
 
@@ -114,7 +131,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 | 상수 | 시각 | 동작 |
 |------|------|------|
 | `TIME_AUTO_START` | 07:45 | DB `auto_start` 우선 폴백 자동 시작 (`_is_auto_start_enabled()`) |
-| `TIME_BOOT` | 07:50 | `_boot()` — DB positions 우선 복구 → KIS 잔고 교차 검증 → 미체결 주문 복구 → **`_eager_refresh_stock_master_for_held_positions()` (I3, 2026-05-12)** 보유 + 익일청산 후보 ticker 를 stock_master 에 eager 갱신. Phase G lazy 한계(캐시 miss → SOR/NXT 그대로 발사) 차단. 2026-05-12 계양전기 NEXT_DAY_CLEAR SOR 거부 사례 대응. 6자리 영숫자 필터, sequential await, 24h TTL fresh 면 skip, 종목별 예외 흡수. **`cash_usage_ratio` 곱셈 (J3, 2026-05-12)**: `summary.net_asset` 산출 직후 `get_cash_usage_ratio()` 조회 → `int(net_asset × ratio)` 로 `allocate_funds()` 호출. `[cash_usage_ratio]` prefix system_logs 1행. 변경은 다음 영업일 _boot 부터 반영 |
+| `TIME_BOOT` | 07:50 | `_boot()` — DB positions 우선 복구 → KIS 잔고 교차 검증 → 미체결 주문 복구 → **`_eager_refresh_stock_master_for_held_positions()` (I3, 2026-05-12)** 보유 + 익일청산 후보 ticker 를 stock_master 에 eager 갱신. Phase G lazy 한계(캐시 miss → SOR/NXT 그대로 발사) 차단. **`cash_usage_ratio` 곱셈 (J3, 2026-05-12)**: `summary.net_asset` 산출 직후 `get_cash_usage_ratio()` 조회 → `int(net_asset × ratio)` 로 `allocate_funds()` 호출. **사이클 2 (2026-05-17) — 시장 레짐 fetch 통합**: `_refresh_market_regime_and_persist()` → dkstock.cloud 매크로 → `set_current_regime()` + `market_regime_snapshots` INSERT (graceful — empty 폴백 시 모두 skip). 직후 `_resolve_cash_usage_ratio()` 가 `auto_regime_adjust=true` + `regime.computed_cash_usage_ratio() != None` 일 때 레짐 cash_min 기반 자동 갱신 (DB `set_cash_usage_ratio` + 산출값 반환). `auto_regime_adjust=false` 또는 empty 레짐이면 운영자 수동값 그대로. `[cash_usage_ratio]` + `[market_regime]` 2 prefix system_logs 1행씩 |
 | `TIME_PRESUBSCRIBE` | 07:55 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독 |
 | `TIME_PRE_NXT_OPEN` | 08:00 | 익일 청산 task(`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30s`) + `_confirm_breakout_open_prices(board="pre_nxt")`. **시가 수신 → 갭률 트레일링 또는 NXT 지정가(`step_down(open,1)`, `EXCG_ID_DVSN_CD=NXT`, `ORD_DVSN=00`). 시가 미수신 → `_pending_next_day_clear` set 등록 후 보류** (NXT 거래불가 종목 추론) |
 | `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | `_confirm_breakout_open_prices(board="main")` — VB/LTV가 KRX 09:00 시가로 보드별 별도 target_price 계산. 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목을 KRX 시장가로 일괄 청산. **PR-H idempotent 강화 (2026-05-15)**: 호출 시점에 모든 대상 종목이 이미 `_is_confirmed(strategy, ticker)` 면 1차 폴링 / 2차 KIS API 폴백 / 종합 INFO 로그 / `_emit_breakout_open_confirm` 모두 skip. DEBUG 로그만 1행 (`[confirm_open_prices_skip] board=...`). 부분 확정은 기존 분기 그대로 (안전 보존). 운영 결함 회복: 5번 EC2 재시작 직후 LTV `_scanned_tickers` 빈 케이스로 `_reprepare_breakout_if_empty` 가 LTV 만 발화 → prepare 가 `_open_confirmed[ticker]={}` reset → 시가 재확정 호출 → 매번 INFO 로그 (2026-05-15 15:30~16:39 LTV 4회 사례). KIS Rate Limit + 운영 가시성 노이즈 동시 차단 |

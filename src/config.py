@@ -51,6 +51,14 @@ class Settings(BaseSettings):
     kis_mcp_enabled: bool = False
     backtest_timeout_secs: int = 300
 
+    # 외부 매크로 데이터 (dkstock.cloud) — 사이클 2 (시장 레짐 필터)
+    # JWT Bearer 인증. DKSTOCK_REGIME_ENABLED=true 일 때만 _boot 매크로 fetch + 매수 가드 활성.
+    # false (기본) 면 외부 호출 0건, 매수 가드 비활성 (graceful degrade).
+    dkstock_api_url: str = "https://dkstock.cloud"
+    dkstock_username: str = "autostock"
+    dkstock_password: str = "AUTOSTOCK1"
+    dkstock_regime_enabled: bool = False
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     @computed_field

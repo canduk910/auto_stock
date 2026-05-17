@@ -982,6 +982,65 @@ BLNG 다중 호출로 VB/LTV 각 30종목 → dedup 후 28 breakout 슬롯 점�
 
 ---
 
+## (2026-05-17) 자문 시스템 개선 사이클 2 — 시장 레짐 필터 + dkstock.cloud 매크로 연동
+
+**옵션 1b + 2b + 3a + 4a 확정.** 운영 graceful 우선 — `DKSTOCK_REGIME_ENABLED=false` 기본 비활성.
+
+### 핵심 규칙
+
+1. **매수 가드 (1b — 복합 임계 OR)** — `risk.on_tick()` 매수 신호 평가 *직전*. 다음 중 1개 이상 발동 시 모든 전략 매수 차단:
+   - `regime == "defensive"`
+   - `vix > 25`
+   - `fear_greed_score > 85` (극도 탐욕)
+   - `fear_greed_score < 15` (극도 공포)
+   - **매도/손절 무관** — 보유 종목 청산은 정상 작동 (`check_exit_signal` 분기는 가드 진입 전)
+
+2. **cash_usage_ratio 자동 조정 (2b)** — `_boot()` 가 매크로 fetch 후 결정:
+   - `cash_usage_ratio = clamp((100 - regime.params.cash_min) / 100, 0.0, 1.0)`
+   - 예: defensive(75) → 0.25 / neutral(50) → 0.5 / aggressive(20) → 0.8
+   - 범위 [0.0, 1.0] 으로 확장 (이전 [0.5, 1.0] — 마이그 023)
+   - `auto_regime_adjust=true` (기본) 면 자동 갱신, `false` 면 운영자 수동값 보존
+
+3. **외부 실패 시 graceful** — dkstock.cloud fetch 실패/timeout/토큰 만료/`DKSTOCK_REGIME_ENABLED=false`:
+   - `MarketRegime.empty()` 반환 → `is_buy_allowed=True` (매수 가드 비활성)
+   - `cash_usage_ratio` 자동 갱신 안 함 (운영자 수동값 그대로)
+   - 자동매매 본 흐름 영향 0건
+
+### 운영 활성화 절차 (배포 후)
+
+1. EC2 `.env` 추가:
+   ```
+   DKSTOCK_API_URL=https://dkstock.cloud
+   DKSTOCK_USERNAME=autostock
+   DKSTOCK_PASSWORD=AUTOSTOCK1
+   DKSTOCK_REGIME_ENABLED=false   # 1단계: false 로 코드만 배포 검증
+   ```
+2. Supabase 마이그 022 (market_regime_snapshots) + 023 (cash_usage_ratio 범위 COMMENT) 적용
+3. `DKSTOCK_REGIME_ENABLED=true` 토글 + 서비스 재기동
+4. Dashboard MarketRegimeCard 에서 첫 fetch 확인 (VIX/FG/Buffett 값 표시)
+5. `auto_regime_adjust` Dashboard 토글로 자동 조정 활성/비활성 (ConfirmModal 이중 확인)
+6. 보수 운영 권고: 5/18 월 20:00 사이클 1(weight_reasoning) 자문 검증 완료 후 활성화
+
+### 회귀 가드 (5/18 사이클 1 검증 + 5/19 사이클 2 운영 안전성)
+
+- `tests/unit/services/test_dkstock_client.py` 8 케이스 — JWT/refresh/401/connect_error/graceful
+- `tests/unit/engine/test_market_regime.py` 11 케이스 — 복합 임계 OR/clamp/empty 폴백
+- `tests/unit/db/test_market_regime_snapshots.py` 4 케이스 — INSERT/UNIQUE/get_latest
+- `tests/unit/db/test_system_config_auto_regime.py` 3 케이스 — get/set round-trip
+- `tests/integration/test_boot_market_regime.py` 3 케이스 — defensive 자동 0.25 / manual 0.7 보존 / 외부 실패 graceful
+- `tests/unit/engine/test_risk_regime_guard.py` 4 케이스 — block buy / allow buy / **exit 무관** / empty graceful
+- `tests/contract/test_routes_market_regime.py` 4 케이스 — current/history/auto-adjust
+- `frontend/src/components/__tests__/MarketRegimeCard.test.tsx` 7 케이스 — 배지/배너/메트릭/토글 ConfirmModal/API 에러
+
+### 안전 불변식
+
+- 매수 가드는 `risk.on_tick` 매수 분기 *전*, 보드 가드 *후* 위치 — 보드 가드 통과 → 매수 가드 → 중복 매수 차단 → calc_buy_quantity 순서
+- `get_current_regime()` 모듈 함수는 `_boot()` 1회 호출 가정 — 동시성 lock 없음 (운영 단일 워커)
+- empty regime (외부 fetch 실패) 는 `regime=None` 이라 `to_dict()` 와 DB `persist_snapshot` 모두 None 키 처리 — UI/DB 안전
+- `auto_regime_adjust=true` 시에도 empty regime 이면 `computed_cash_usage_ratio()=None` → 수동값 폴백 (graceful 분기 보존)
+
+---
+
 ## 커밋 5분할 (squash 금지)
 1. `feat(strategies): VB/LTV get_targets_status returns active boards only`
 2. `feat(scanner): cap breakout to 25 slots in priority queue (protect momentum)`

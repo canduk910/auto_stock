@@ -32,6 +32,7 @@ from src.routes import (
     system,
     realtime,
     backtest,
+    market_regime,
 )
 from src.auth.token import token_manager
 
@@ -229,6 +230,7 @@ app.include_router(log_reports.router)
 app.include_router(system.router)
 app.include_router(realtime.router)
 app.include_router(backtest.router)
+app.include_router(market_regime.router)
 
 
 @app.get("/health")

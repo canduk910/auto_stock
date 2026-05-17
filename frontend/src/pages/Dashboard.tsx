@@ -3,6 +3,7 @@ import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import { STRATEGY_INFO, ALL_STRATEGIES_INFO } from '../utils/strategyInfo'
 import ControlPanel from '../components/ControlPanel'
+import MarketRegimeCard from '../components/MarketRegimeCard'
 import ScanMonitor from '../components/ScanMonitor'
 import OrderMonitor from '../components/OrderMonitor'
 import PerformanceCard from '../components/PerformanceCard'
@@ -49,6 +50,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <ControlPanel />
+
+      {/* 사이클 2 (2026-05-17): 시장 레짐 카드 — 환경 배너 직하, 전략 탭 위 */}
+      <MarketRegimeCard />
 
       {/* 전략 선택 탭 */}
       {strategyKeys.length > 0 && (

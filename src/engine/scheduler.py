@@ -1245,9 +1245,15 @@ class TradingScheduler:
 
         holdings, summary = await get_balance()
 
+        # 사이클 2 (2026-05-17): 시장 레짐 fetch + snapshot INSERT + cash_usage_ratio 자동 조정.
+        # `DKSTOCK_REGIME_ENABLED=false` 면 empty regime (graceful, 외부 호출 0건).
+        # 외부 fetch 실패 시에도 empty regime → 매수 가드 비활성 + 운영자 수동 cash_usage_ratio 보존.
+        # `auto_regime_adjust=true` 면 레짐 cash_min 기반 자동 갱신, false 면 수동값 그대로.
+        await self._refresh_market_regime_and_persist()
+        ratio = await self._resolve_cash_usage_ratio()
+
         # J3 (2026-05-12): 매매 가용 자금 비율 적용 — `system_config.cash_usage_ratio`.
         # 변경 즉시 적용 안 함, 다음 _boot() 부터 반영. Settings UI 안내 "다음 영업일부터 반영".
-        ratio = await get_cash_usage_ratio()
         available_for_trading = int(summary.net_asset * ratio)
         self.registry.allocate_funds(available_for_trading)
         logger.info(
@@ -1492,6 +1498,86 @@ class TradingScheduler:
             await self._eager_refresh_stock_master_for_held_positions()
         except Exception:
             logger.exception("[stock_master_eager] _boot 후 eager 갱신 실패 — lazy 경로로 자연 보강")
+
+    async def _refresh_market_regime_and_persist(self) -> None:
+        """사이클 2 (2026-05-17): 매크로 fetch → 메모리 레짐 갱신 → DB snapshot INSERT.
+
+        외부 의존성 (dkstock.cloud) 실패 시 graceful — empty regime 으로 메모리 갱신
+        (매수 가드 비활성 + cash_usage_ratio 자동 조정 비활성 → 운영자 수동값 보존).
+
+        호출 결과 무관 _boot 진행. DB INSERT 실패도 graceful (메모리 레짐 유효).
+        """
+        from src.engine.market_regime import (
+            persist_snapshot, refresh_from_dkstock, set_current_regime,
+        )
+
+        try:
+            regime = await refresh_from_dkstock()
+        except Exception:
+            logger.exception("[market_regime] refresh 예외 — empty 폴백")
+            from src.engine.market_regime import MarketRegime
+            regime = MarketRegime.empty()
+        set_current_regime(regime)
+
+        # DB snapshot INSERT — empty regime 은 persist_snapshot 내부에서 skip
+        try:
+            await persist_snapshot(regime, date.today())
+        except Exception:
+            logger.exception("[market_regime] snapshot INSERT 실패 — 메모리 레짐 유효")
+
+        # 운영 가시성: regime + 매수가드 + 자동조정 결과 1행
+        try:
+            await write_log(
+                "INFO",
+                f"[market_regime] regime={regime.regime} "
+                f"buy_blocked={regime.buy_blocked} "
+                f"block_reason={regime.block_reason} "
+                f"cash_min={regime.cash_min} "
+                f"computed_ratio={regime.computed_cash_usage_ratio()}",
+            )
+        except Exception:
+            pass
+
+    async def _resolve_cash_usage_ratio(self) -> float:
+        """사이클 2 (2026-05-17): `auto_regime_adjust` 토글에 따라 cash_usage_ratio 결정.
+
+        - `auto_regime_adjust=False` (운영자 수동 모드) → `get_cash_usage_ratio()` 그대로.
+        - `auto_regime_adjust=True` (기본) → 레짐 `computed_cash_usage_ratio()` 우선:
+            - 산출 가능 → 자동 갱신 (`set_cash_usage_ratio` 호출, DB 저장).
+            - 산출 불가 (empty regime / cash_min=None) → 수동값 폴백.
+        """
+        from src.db.system_config import get_auto_regime_adjust, set_cash_usage_ratio
+        from src.engine.market_regime import get_current_regime
+
+        manual_ratio = await get_cash_usage_ratio()
+
+        try:
+            auto_enabled = await get_auto_regime_adjust()
+        except Exception:
+            logger.exception("[auto_regime_adjust] 조회 실패 — 수동 모드 폴백")
+            return manual_ratio
+
+        if not auto_enabled:
+            return manual_ratio
+
+        regime = get_current_regime()
+        computed = regime.computed_cash_usage_ratio()
+        if computed is None:
+            # 외부 fetch 실패 / empty regime → 운영자 수동값 보존
+            return manual_ratio
+
+        # 5% step 자동 보정은 set_cash_usage_ratio 가 책임. 음수/1초과 입력은
+        # cash_usage_ratio_from_regime 가 사전 clamp 하므로 안전.
+        try:
+            await set_cash_usage_ratio(computed)
+        except Exception:
+            logger.exception(
+                "[market_regime] cash_usage_ratio 자동 갱신 실패 — 메모리 적용만 진행: %s",
+                computed,
+            )
+        # 산출값 자체를 반환 (5% 보정값보다 의도 명확)
+        # set 직후 다시 get 하면 round-trip 비용 증가 — 호출자가 직접 사용.
+        return computed
 
     async def _eager_refresh_stock_master_for_held_positions(self) -> None:
         """_boot() 후 보유 종목 + 익일청산 후보 ticker 를 stock_master 에 eager 갱신.
