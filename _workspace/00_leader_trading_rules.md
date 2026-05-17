@@ -811,6 +811,24 @@ DEFAULT_PARAMS = {
 - `allocate_funds()` 시그니처 그대로, 즉시 재호출 안 함 (다음 _boot 반영)
 - 기존 `apply_keys` 흐름 + J1~J3 + I1~I3 + 다른 Phase 영향 없음
 
+### PARAM_RANGES 화이트리스트 확장 (Phase B, 2026-05-17)
+
+5/15 첫 자문 발화에서 4 전략의 `code_review_notes` 가 강하게 권고한 키 7 종을 `src/engine/recommendation_engine.py::PARAM_RANGES` 화이트리스트에 추가. 다음 자문 사이클(5/18 월 20:00) 부터 OpenAI 가 자동 튜닝 가능. 신규 키 + 범위:
+
+| 키 | 범위 | 사용 전략 | INT 여부 |
+|----|------|----------|----------|
+| `k_value_krx_main` | (0.5, 2.0) | VB, LTV | float |
+| `k_value_nxt_pre` | (0.5, 2.0) | VB, LTV | float |
+| `k_value_nxt_post` | (0.5, 2.0) | VB(호환), LTV | float |
+| `donchian_period` | (10, 60) | donchian_swing | **INT** (정수 일봉 개수) |
+| `long_ma_period` | (20, 120) | donchian_swing | **INT** (정수 일봉 개수) |
+| `volume_multiplier` | (1.0, 5.0) | donchian_swing | float |
+| `atr_trail_mult` | (1.0, 5.0) | donchian_swing, bull_flag, vcp | float |
+
+`min_prdy_rate` 는 사이클 진입 시점에 이미 등록(`(0.0, 30.0)`)되어 있어 중복 추가하지 않음(요구 명세 8 키 → 실 추가 7 키). `donchian_period` / `long_ma_period` 는 `INT_PARAMS` 에 함께 등록되어 LLM 출력이 25.7 → 26 으로 자동 캐스트.
+
+**Phase A 별건 — LTV `stop_loss_hits=0` metrics 결함**: 5/15 자문 metrics 분석에서 `stop_loss_hits=0` 과 `max_loss_pct=-7.554%` 모순 발견. root cause 는 `recommendation_metrics.compute_metrics()` 가 `current_params.get("stop_loss_rate")` 단일 키만 참조하는데 LTV 만 `intraday_stop_loss`/`overnight_stop_loss` 분리 키 사용 → `None` 폴백 → 분기 영영 skip. 본 사이클에서는 진단만, fix 는 별도 사이클로 분리(`_workspace/red/phase-a-ltv-stop-loss-hits.md`).
+
 ---
 
 ## (2026-05-13) 작업 1 — 활성 보드만 노출 (VB/LTV `get_targets_status`)

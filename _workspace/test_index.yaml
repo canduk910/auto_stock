@@ -54,6 +54,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -115,6 +116,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -201,6 +203,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -291,6 +294,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -361,6 +365,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -430,6 +435,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -517,6 +523,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -616,6 +623,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -717,6 +725,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -785,6 +794,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -843,6 +853,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -901,6 +912,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -961,6 +973,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1028,6 +1041,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1094,6 +1108,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1153,6 +1168,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1241,6 +1257,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1310,6 +1327,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1394,6 +1412,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1466,6 +1485,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1596,6 +1616,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1659,6 +1680,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1717,6 +1739,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1778,6 +1801,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -1796,6 +1820,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -1896,6 +1921,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1956,6 +1982,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2044,6 +2071,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2112,6 +2140,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
   src/engine/session.py:
     direct_tests:
@@ -2175,6 +2204,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2240,6 +2270,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2307,6 +2338,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2368,6 +2400,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2433,6 +2466,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2492,6 +2526,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2561,6 +2596,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2649,6 +2685,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
@@ -2710,6 +2747,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -2769,6 +2807,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2851,6 +2890,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2912,6 +2952,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -2974,6 +3015,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3087,6 +3129,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3157,6 +3200,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3246,6 +3290,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3342,6 +3387,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -3611,6 +3657,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -3676,6 +3723,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -3999,10 +4047,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-16T08:05:41.789098+09:00'
+generated_at: '2026-05-17T09:53:06.353352+09:00'
 stats:
   backend_modules: 72
-  backend_tests: 103
+  backend_tests: 104
   frontend_modules: 44
   frontend_tests: 22
   unmapped_modules:

@@ -60,6 +60,9 @@ _BACKTEST_POLL_TIMEOUT_HOURS: int = 24
 _backtest_poll_loop_running: set[date] = set()
 
 # 파라미터별 허용 범위 — LLM 출력 검증용
+# 2026-05-17 Phase B: 5/15 첫 자문 code_review_notes 권고 반영 — VB/LTV 보드별 K값,
+# donchian_swing 의 기간/거래량/ATR 트레일 등 8 키 화이트리스트 확장
+# (min_prdy_rate 는 사이클 이전부터 등록되어 있어 중복 추가하지 않음).
 PARAM_RANGES: dict[str, tuple[float, float]] = {
     "buy_threshold": (0.0, 30.0),
     "stop_loss_rate": (-15.0, 0.0),
@@ -77,14 +80,25 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "limit_up_threshold": (15.0, 30.0),
     "intraday_stop_loss": (-15.0, 0.0),
     "overnight_stop_loss": (-15.0, 0.0),
+    # ↓ 2026-05-17 Phase B 확장 (VB/LTV/donchian_swing 권고 반영)
+    "k_value_krx_main": (0.5, 2.0),
+    "k_value_nxt_pre": (0.5, 2.0),
+    "k_value_nxt_post": (0.5, 2.0),
+    "donchian_period": (10, 60),
+    "long_ma_period": (20, 120),
+    "volume_multiplier": (1.0, 5.0),
+    "atr_trail_mult": (1.0, 5.0),
 }
 
 # 정수형 파라미터 — 캐스트 대상
+# 2026-05-17 Phase B: donchian_period / long_ma_period 추가 (정수 일봉 개수)
 INT_PARAMS = {
     "max_positions",
     "k_period",
     "max_scan_stocks",
     "exclude_consecutive_limit",
+    "donchian_period",
+    "long_ma_period",
 }
 
 
