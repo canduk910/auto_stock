@@ -31,9 +31,9 @@
                                        │ async CRUD
                                        ▼
                           ┌────────────────────────┐         ┌──────────────┐
-                          │  Supabase (PostgreSQL) │  16:00  │   OpenAI     │
+                          │  Supabase (PostgreSQL) │  20:00  │   OpenAI     │
                           │  trade_history         │ ◀─────→ │  GPT          │
-                          │  positions / strategy  │  16:10  │  (자문 +     │
+                          │  positions / strategy  │  20:10  │  (자문 +     │
                           │  parameter_recommend.  │ ◀─────→ │   로그 분석) │
                           │  daily_log_reports     │         └──────────────┘
                           │  daily_performance     │
@@ -98,6 +98,14 @@ Supabase SQL Editor에서 `supabase/migrations/` 하위 마이그레이션 파�
 013_daily_log_reports.sql             # 일일 로그 분석 리포트
 014_system_logs_index.sql             # system_logs 조회 인덱스
 015_stock_master.sql                  # KIS CTPF1002R 캐시 (NXT 거래가능 사전 판별, 24h TTL)
+016_recommendation_weights_review.sql # 자산배정 + 로직 자문 컬럼 (J4)
+018_register_bull_flag_and_vcp.sql    # 신규 전략 2종 등록 (bull_flag_breakout / vcp_breakout)
+019_backtest_runs.sql                 # 외부 MCP 백테스트 실행 영속화 (Phase 2)
+020_parameter_recommendations_backtest.sql  # parameter_recommendations.backtest_summary JSONB (Phase 3)
+021_weight_reasoning.sql              # parameter_recommendations.weight_reasoning 별도 사유 (사이클 1)
+022_market_regime_snapshots.sql       # dkstock.cloud 매크로 일일 스냅샷 (사이클 2)
+023_cash_usage_ratio_range.sql        # cash_usage_ratio 범위 [0.5, 1.0] → [0.0, 1.0] 확장 (사이클 2)
+024_vb_board_stop_loss_defaults.sql   # VB 보드별 손절 디폴트 자동 복사 (사이클 3)
 ```
 
 ### 3. Docker Compose로 실행 (권장)
@@ -143,8 +151,8 @@ cd frontend && npm install && npm run dev
 |------|------|
 | 메인 대시보드 | 계좌 요약, 보유 종목, 매매 실적 차트, 상태 인디케이터, 조건검색 현황(전략별 스캔/타겟/스윙 깔때기) |
 | 거래 내역 | **두 탭** — 주문체결내역(매수/매도 raw 행, 필터·페이징) / 매매손익(매수·매도 페어 1행, 가중평균. 보유 중은 open 페어로 미실현 손익 표시) |
-| 전략수정 AI자문 | 16:00 OpenAI 자동 생성 자문 — 신규 자문 탭(승인/거절) + 이력 탭(상태/전략 필터) |
-| 일일 로그 분석 | 16:10 정산 직후 OpenAI가 system_logs+trade_history 분석한 운영 개선 리포트 (영업일 리스트 + findings + 메트릭) |
+| 전략수정 AI자문 | 20:00 OpenAI 자동 생성 자문 — 신규 자문 탭(승인/거절) + 이력 탭(상태/전략 필터). 자산 배정/로직 자문/비중 변경 사유(`weight_reasoning`) 별도 카드 + 백테스트 비교 카드(`BacktestComparisonCard`) |
+| 일일 로그 분석 | 20:10 정산 직후 OpenAI가 system_logs+trade_history 분석한 운영 개선 리포트 (영업일 리스트 + findings + 메트릭) |
 | 설정 | 전략 파라미터 조정, 자금 비중, 자동 시작 토글 |
 
 ### 실전 전환

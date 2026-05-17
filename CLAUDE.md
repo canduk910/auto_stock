@@ -79,8 +79,11 @@ cd frontend && npm install && npm run dev
 
 전략 동작·보드별 K값 분리·익일 청산 안정화·자금 락·라우팅 등 상세는 **`src/engine/CLAUDE.md`**.
 
-### 외부 백테스트 서버 통합 사이클 (2026-05-16 Phase 0~5)
-20:00 AI 자문 INSERT 직후 외부 MCP 백테스트 서버(`http://43.202.187.5:3846/mcp`)에 6 전략 × 2 kind=12 job 을 fire-and-forget 으로 제출하여 `parameter_recommendations.backtest_summary` JSONB 에 동봉. (a) 외부 YAML DSL 표현 가능 3종(momentum/VB/donchian) / (b) 폴백 대기 3종(LTV/bull_flag/vcp). `KIS_MCP_ENABLED=false` 또는 외부 서버 다운 시 graceful degrade — 자문 INSERT 보존, summary=null. 운영 가이드는 [`docs/backtest-monitoring.md`](docs/backtest-monitoring.md).
+### 외부 백테스트 + 자문 시스템 개선 사이클 (2026-05-16~17)
+- **백테스트 통합 Phase 0~6.1**: 20:00 AI 자문 INSERT 직후 외부 MCP 백테스트 서버(`http://43.202.187.5:3846/mcp`)에 6 전략 × 2 kind=12 job fire-and-forget → `parameter_recommendations.backtest_summary` JSONB 동봉. (a) 외부 YAML 표현 3종(momentum/VB/donchian) / (b) 폴백 위임 3종(LTV/bull_flag/vcp). Phase 6 MCP content unwrap + 중첩 메트릭(`data.result.metrics.{basic,risk,trading}`) → 8 평탄 키 매핑. Phase 6.1 `max_drawdown` 양수(절대값) 컨벤션 확정 (`signInverted=true`)
+- **자문 시스템 개선 사이클 1~4 (2026-05-17)**: 비중조절 사유 별도 필드(`weight_reasoning` 마이그 021) + UI 자산 배정 카드 최상단 / 시장 레짐 필터(dkstock.cloud 매크로 — `regime/vix/fear_greed` 복합 임계 매수 가드 + `cash_usage_ratio` 자동 조정, 마이그 022/023) / VB 보드별 손절 분리(`stop_loss_main`/`stop_loss_pre_nxt` 마이그 024) / 매크로 레짐 → AI 자문 user_payload 12 키 통합
+- **활성화 토글**: `KIS_MCP_ENABLED=true` (백테스트) + `DKSTOCK_REGIME_ENABLED=true` (매크로) — 둘 다 비활성 기본. 외부 다운 시 graceful — 자문 INSERT 보존, summary=null, 매수 가드 비활성
+- 운영 가이드 [`docs/backtest-monitoring.md`](docs/backtest-monitoring.md)
 
 ### 새 전략 추가
 1. `src/engine/strategies/`에 StrategyBase 서브클래스 (prepare/check_buy_signal/check_exit_signal/calc_buy_quantity)
@@ -92,7 +95,7 @@ cd frontend && npm install && npm run dev
 - 프론트 Settings → `PUT /api/strategies/weights` → `StrategyRegistry.allocate_funds()`
 - `position_ratio`는 **전략 할당 자금 기준** (순자산 × 전략비중 × position_ratio = 종목당 매수금액)
 - 전략 간 동일 종목 중복 매수 방지: `registry.is_ticker_blocked_for_buy()` (보유/주문중/당일매도 통합 차단)
-- **`cash_usage_ratio` (J3, 2026-05-12)**: `system_config.cash_usage_ratio` 키 — `_boot()` 가 `summary.net_asset × ratio` 로 `allocate_funds()` 호출. 범위 [0.5, 1.0], 5% 단위, 기본 1.0. Settings 슬라이더로 조정, **다음 영업일부터 반영**
+- **`cash_usage_ratio` (J3, 2026-05-12 → 사이클 2 확장 2026-05-17)**: `system_config.cash_usage_ratio` 키 — `_boot()` 가 `summary.net_asset × ratio` 로 `allocate_funds()` 호출. 범위 **[0.0, 1.0]** (마이그 023 — 사이클 2 매크로 자동 조정 수용), 5% 단위, 기본 1.0. Settings 슬라이더로 조정, **다음 영업일부터 반영**. `auto_regime_adjust=true` (기본) + `DKSTOCK_REGIME_ENABLED=true` 시 매크로 레짐 `cash_min` 기반 자동 갱신 (`clamp((100-cash_min)/100, 0.0, 1.0)`) — 운영자 Settings 에서 OFF 토글 가능 (수동값 보존)
 
 ## 핵심 안전 규칙 (절대 깨지 말 것)
 
@@ -144,9 +147,11 @@ cd frontend && npm install && npm run dev
 | `strategy_config` | 전략 설정 (strategy_id PK, params JSONB) |
 | `system_config` | 시스템 설정 (auto_start, **cash_usage_ratio** J3 등) |
 | `system_logs` | 시스템 로그 |
-| `parameter_recommendations` | 19:50 AI자문 (target_date+strategy_id unique). **J4(2026-05-12)** — `recommended_weight`/`code_review_notes`/`applied_weight` 3컬럼 추가 (migration 016). 자산배정 + 로직 자유 텍스트 자문, 자동 적용 없음 |
+| `parameter_recommendations` | 20:00 AI자문 (target_date+strategy_id unique). **J4 migration 016** — `recommended_weight`/`code_review_notes`/`applied_weight` 자산배정+로직 자문. **Phase 3 migration 020** `backtest_summary` JSONB. **사이클 1 migration 021** `weight_reasoning` 별도 사유 필드 (≤1000자) |
 | `daily_log_reports` | 20:10 일일 로그 분석 (target_date unique, metrics에 api_metrics/strategy_funnel/by_ticker_pnl/by_hour_pnl 포함) |
 | `stock_master` | KIS CTPF1002R 캐시 (ticker PK, 24h TTL). NXT 거래가능 사전 판별 (migration 015) |
+| `backtest_runs` | 외부 MCP 백테스트 실행 영속화 (migration 019, Phase 2). `(target_date, strategy_id, params_kind)` UNIQUE. 6 전략 × 2 kind = 12 row/사이클, status ∈ queued/running/completed/failed/skipped |
+| `market_regime_snapshots` | dkstock.cloud 매크로 일일 스냅샷 (migration 022, 사이클 2). `_boot()` 시점 1행. `buy_blocked`/`computed_cash_usage_ratio`/`raw_response JSONB` 영구 기록 |
 
 ## Docker / 배포
 
@@ -163,7 +168,8 @@ cd frontend && npm install && npm run dev
 - `src/auth/` — KIS OAuth 인증/토큰
 - `src/api/` — KIS REST (주문·잔고·조건검색·일봉)
 - `src/realtime/` — KIS WebSocket (시세·체결통보·H0NXMKO0)
-- `src/engine/` — 매매 핵심 (전략·레지스트리·주문·리스크·스케줄러, 19:50 AI자문 `recommendation_engine.py`, 20:10 일일 로그 분석 `log_analysis_engine.py`)
+- `src/engine/` — 매매 핵심 (전략·레지스트리·주문·리스크·스케줄러, 20:00 AI자문 `recommendation_engine.py`, 20:10 일일 로그 분석 `log_analysis_engine.py`, 백테스트 엔진 `backtest_engine.py`/`backtest_yaml.py`, 시장 레짐 `market_regime.py`)
+- `src/services/` — 외부 서비스 클라이언트 (`mcp_client.py` 백테스트 MCP, `dkstock_client.py` 매크로)
 - `src/db/` — Supabase CRUD
 - `src/routes/` — FastAPI 엔드포인트
 - `src/models/` — Pydantic 모델
