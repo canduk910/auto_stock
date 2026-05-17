@@ -131,3 +131,54 @@ def test_execute_next_day_clear_includes_volatility_breakout_in_overnight_strate
         "_execute_next_day_clear 의 overnight_strategies 튜플에 volatility_breakout 미포함. "
         "15:20 청산 누락 시 다음 영업일 자동 청산 안전망 미작동 — 5/15 LG전자 사고 회귀 위험."
     )
+
+
+def test_vb_next_day_clear_signal_sets_pending_flag_idempotent():
+    """사이클 10 (2026-05-18 hot fix) — NEXT_DAY_CLEAR 신호 직후 `_next_day_clear_pending=True` 영구 set.
+
+    배경:
+        5/18 08:00 정각 컨테이너 재시작 race 로 `_execute_next_day_clear` task cancel +
+        `_pending_next_day_clear` set 미등록. scheduler 가 그 종목을 영영 처리 못 하면
+        VB `check_exit_signal` 가드(`not self._next_day_clear_pending`) 가 영원히 False →
+        매 on_tick(1초) 마다 NEXT_DAY_CLEAR 신호 발사 → OrderEngine NXT/SOR 시장가 →
+        KIS `KIOK0320 장운영시간이 아닙니다` 거부 → positions 보존 → 다음 on_tick 또 발사 →
+        무한 루프 매초 1회.
+
+    fix:
+        NEXT_DAY_CLEAR 신호 return 직전에 `self._next_day_clear_pending = True` set 하여
+        idempotent 보장. OrderEngine 시장가 거부 후에도 플래그 True 유지 → 다음 on_tick
+        신호 안 보냄. 15:20 `_force_clear_main_only` 가 정규장 KRX 시장가로 청산 흡수.
+        LTV/momentum 의 `_next_day_clear_pending` 패턴과 일관.
+
+    Red 의도:
+        첫 호출: NEXT_DAY_CLEAR 반환 + 플래그 True 로 set
+        두 번째 호출: NONE 반환 (가드에 막힘) — 무한 루프 차단 검증
+    """
+    vb = VolatilityBreakoutStrategy(
+        StrategyConfig(strategy_id="volatility_breakout", name="VB", weight=0.3, enabled=True)
+    )
+    yesterday = date.today() - timedelta(days=1)
+    vb.state.positions["066570"] = Position(
+        ticker="066570", buy_price=237000, quantity=1,
+        order_no="O-TEST", strategy_id="volatility_breakout", buy_date=yesterday,
+    )
+    assert vb._next_day_clear_pending is False, "fixture sanity — 초기값 False"
+
+    # 1st call: NEXT_DAY_CLEAR 신호 + 플래그 True set
+    sig1 = vb.check_exit_signal("066570", current_price=235000, open_price=235000)
+    assert sig1 == Signal.NEXT_DAY_CLEAR, (
+        f"1차 호출에서 NEXT_DAY_CLEAR 신호 미발사: {sig1}"
+    )
+    assert vb._next_day_clear_pending is True, (
+        "NEXT_DAY_CLEAR 신호 발사 직후 `_next_day_clear_pending` 이 True 로 set 되지 않음. "
+        "5/18 운영 사고: scheduler `_pending_next_day_clear` 미등록 race 시 매 on_tick 신호 발사 → "
+        "KIS KIOK0320 거부 무한 루프. 신호 return 직전에 영구 set 필요."
+    )
+
+    # 2nd call: 같은 가격 — 가드에 막혀 NONE
+    sig2 = vb.check_exit_signal("066570", current_price=235000, open_price=235000)
+    assert sig2 == Signal.NONE, (
+        f"2차 호출에서 NEXT_DAY_CLEAR 재발사: {sig2}. "
+        "`_next_day_clear_pending=True` 가드가 작동하지 않아 매초 1회 무한 신호 차단 실패. "
+        "OrderEngine 시장가 거부 → positions 보존 → 다음 on_tick 또 신호 발사 패턴 회귀 위험."
+    )

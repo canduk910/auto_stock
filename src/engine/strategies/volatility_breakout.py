@@ -575,12 +575,20 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 2. 익일 청산 안전망 (2026-05-15, 결함 D 잔여) — 전일 매수 종목이 남아 있으면
         # 즉시 청산 신호. 단 scheduler 가 시가 안정화 중(_next_day_clear_pending=True)
         # 이면 보류 — scheduler 가 직접 처리 중이라 race 차단.
+        #
+        # 사이클 10 (2026-05-18 hot fix) — 무한 신호 발사 차단:
+        # scheduler 가 `_pending_next_day_clear` 미등록(08:00 정각 재시작 race 등)이면
+        # 본 분기가 매 on_tick(1초) NEXT_DAY_CLEAR 발사 → OrderEngine NXT/SOR 시장가 →
+        # KIS KIOK0320 거부 → positions 보존 → 다음 on_tick 또 발사 무한 루프.
+        # 신호 return 직전에 영구 set 하여 idempotent 보장. LTV/momentum 패턴과 일관.
+        # 부수효과: 09:00 KRX 자동 청산은 못 함 — 15:20 `_force_clear_main_only` 가 흡수.
         if pos.is_next_day and not self._next_day_clear_pending:
             from src.engine.scanner import t
             logger.warning(
                 "변동성돌파 익일 청산 안전망 발동: %s (매수일: %s, 정상은 당일 15:20 청산)",
                 t(ticker), pos.buy_date,
             )
+            self._next_day_clear_pending = True
             return Signal.NEXT_DAY_CLEAR
 
         return Signal.NONE
