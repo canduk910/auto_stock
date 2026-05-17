@@ -353,40 +353,12 @@ export default function Recommendations() {
                         </span>
                       </div>
 
-                      {/* Phase 4 (2026-05-16) — 백테스트 비교 카드. summary 없으면 placeholder, 자기 전략 폴백이면 안내 */}
-                      <BacktestComparisonCard
-                        strategyId={rec.strategy_id}
-                        summary={rec.backtest_summary ?? null}
-                      />
+                      {/* 사이클 1 (2026-05-17) — 자산 배정 카드를 최상단으로 이동.
+                          5/18 월 20:00 첫 자문 검수 시 가장 먼저 보이는 운영 의사결정 지점이 비중 변경이기 때문.
+                          순서: 자산 배정 → BacktestComparison → 로직 자문 → 파라미터 */}
 
-                      {/* 분석 통계 */}
-                      {rec.metrics && (
-                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">분석 통계</h4>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2">
-                            {METRIC_FIELDS.map((f) => (
-                              <div key={f.key as string} className="flex justify-between text-sm">
-                                <span className="text-gray-500">{f.label}</span>
-                                <span className="font-medium text-gray-900">
-                                  {rec.metrics ? f.format(rec.metrics) : '-'}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 추천 근거 */}
-                      {rec.reasoning && (
-                        <div className="mb-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-1">추천 근거</h4>
-                          <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
-                            {rec.reasoning}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Phase J4 — 자산 배정 카드 (recommended_weight 있을 때만) */}
+                      {/* Phase J4 — 자산 배정 카드 (recommended_weight 있을 때만)
+                          사이클 1 — weight_reasoning amber 영역 분리 (별도 사유) */}
                       {rec.recommended_weight !== null && rec.recommended_weight !== undefined && (
                         <div
                           data-testid={`weight-card-${rec.id}`}
@@ -446,12 +418,56 @@ export default function Recommendations() {
                                     <span className="text-sm text-gray-700">weight 적용</span>
                                   </label>
                                 )}
+                                {/* 사이클 1 (2026-05-17) — weight_reasoning 별도 amber 영역.
+                                    null 이면 미렌더, 있으면 강조 표시 (max-h-32 + overflow-y-auto) */}
+                                {rec.weight_reasoning && (
+                                  <div
+                                    data-testid={`weight-reasoning-${rec.id}`}
+                                    className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-900 whitespace-pre-wrap leading-relaxed max-h-32 overflow-y-auto"
+                                  >
+                                    <span className="font-medium block mb-1">비중 변경 사유</span>
+                                    {rec.weight_reasoning}
+                                  </div>
+                                )}
                                 <div className="text-xs text-amber-700">
                                   weight 변경은 다음 영업일부터 반영됩니다 (운영자 수동 적용).
                                 </div>
                               </div>
                             )
                           })()}
+                        </div>
+                      )}
+
+                      {/* Phase 4 (2026-05-16) — 백테스트 비교 카드. summary 없으면 placeholder, 자기 전략 폴백이면 안내 */}
+                      <BacktestComparisonCard
+                        strategyId={rec.strategy_id}
+                        summary={rec.backtest_summary ?? null}
+                      />
+
+                      {/* 분석 통계 */}
+                      {rec.metrics && (
+                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">분석 통계</h4>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2">
+                            {METRIC_FIELDS.map((f) => (
+                              <div key={f.key as string} className="flex justify-between text-sm">
+                                <span className="text-gray-500">{f.label}</span>
+                                <span className="font-medium text-gray-900">
+                                  {rec.metrics ? f.format(rec.metrics) : '-'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 추천 근거 */}
+                      {rec.reasoning && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-1">추천 근거</h4>
+                          <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
+                            {rec.reasoning}
+                          </p>
                         </div>
                       )}
 

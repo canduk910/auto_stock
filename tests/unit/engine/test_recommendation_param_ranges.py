@@ -96,7 +96,7 @@ def test_validate_recommendations_accepts_new_float_keys():
         "volume_multiplier": 1.5,
         "atr_trail_mult": 2.0,
     }
-    validated, reasoning, _w, _n = _validate_recommendations(raw, current)
+    validated, reasoning, _w, _n, _wr = _validate_recommendations(raw, current)
 
     assert validated["k_value_krx_main"] == 1.2
     assert validated["k_value_nxt_pre"] == 0.8
@@ -127,7 +127,7 @@ def test_validate_recommendations_rejects_out_of_range_new_keys(caplog):
         "atr_trail_mult": 2.0,
         "donchian_period": 20,
     }
-    validated, _, _w, _n = _validate_recommendations(raw, current)
+    validated, _, _w, _n, _wr = _validate_recommendations(raw, current)
 
     assert "k_value_krx_main" not in validated
     assert "atr_trail_mult" not in validated
@@ -154,7 +154,7 @@ def test_validate_recommendations_casts_donchian_period_to_int():
         "reasoning": "",
     }
     current = {"donchian_period": 20}
-    validated, _, _w, _n = _validate_recommendations(raw, current)
+    validated, _, _w, _n, _wr = _validate_recommendations(raw, current)
 
     assert validated["donchian_period"] == 26
     assert isinstance(validated["donchian_period"], int)
@@ -169,7 +169,7 @@ def test_validate_recommendations_casts_long_ma_period_to_int():
         "reasoning": "",
     }
     current = {"long_ma_period": 60}
-    validated, _, _w, _n = _validate_recommendations(raw, current)
+    validated, _, _w, _n, _wr = _validate_recommendations(raw, current)
 
     assert validated["long_ma_period"] == 60
     assert isinstance(validated["long_ma_period"], int)
@@ -205,7 +205,7 @@ def test_existing_validate_flow_still_works():
         "reasoning": "regression",
     }
     current = {"buy_threshold": 29.0, "position_ratio": 0.2}
-    validated, reasoning, _w, _n = _validate_recommendations(raw, current)
+    validated, reasoning, _w, _n, _wr = _validate_recommendations(raw, current)
 
     assert validated["buy_threshold"] == 25.0
     assert validated["position_ratio"] == 0.3

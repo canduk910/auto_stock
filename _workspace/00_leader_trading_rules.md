@@ -847,6 +847,50 @@ Phase A 진단 후속. `src/engine/recommendation_metrics.py` 에 `_normalize_st
 
 회귀 가드: `tests/unit/engine/test_recommendation_metrics_ltv_stop_loss.py` 8 케이스 (Case A LTV 분리 키 / Case B 단일 키 / Case C 부재 0.0 / Case D 5/15 LTV 064400 -3.030% 통합 / Case E intraday only / Case F 혼합 + 양수/None edge).
 
+### 비중조절 사유 분리 + UI 카드 순서 변경 (사이클 1, 2026-05-17)
+
+J4(2026-05-12) 에서 도입한 통합 `reasoning` 필드에 비중 변경 사유가 다른 분석 텍스트와 섞여 있어, 운영자가 5/18 월 20:00 첫 자문 검수 시 가독성 저하 + 비중 의사결정 흐름이 묻히는 문제 해소.
+
+**DB 마이그레이션 021** (`supabase/migrations/021_weight_reasoning.sql`):
+```sql
+ALTER TABLE parameter_recommendations
+    ADD COLUMN IF NOT EXISTS weight_reasoning TEXT;
+```
+nullable TEXT (≤1000자). `recommended_weight` 가 null 이면 weight_reasoning 도 null.
+
+**백엔드 명세** (`src/engine/recommendation_engine.py`):
+- `SYSTEM_PROMPT` 에 `weight_reasoning` 필드 명시 — `recommended_weight` 변경 권고 시 별도 사유 (최대 1000자, 한국어, 통합 `reasoning` 과 별개)
+- `_validate_recommendations()` 5-tuple 반환 `(validated_params, reasoning, weight, notes, weight_reasoning)`:
+  - `weight is None` → `weight_reasoning = None` 자동 정리
+  - `weight is not None AND raw_weight_reasoning isinstance str AND non-empty` → 그대로 (1000자 초과 시 truncate + WARNING)
+  - `weight is not None AND (raw_weight_reasoning is None | 빈문자열 | 비-str)` → `WEIGHT_REASONING_FALLBACK="(사유 미제공)"` + WARNING 로그
+- `generate_recommendations()` 의 unpacking 5-tuple + `insert_recommendation(weight_reasoning=...)` 호출부 갱신
+
+**DB CRUD 확장** (`src/db/parameter_recommendations.py::insert_recommendation`):
+- 시그니처에 `weight_reasoning: str | None = None` kwarg 추가
+- INSERT data dict 에 `"weight_reasoning"` 키 포함
+
+**모델** (`src/models/recommendation.py::RecommendationItem`):
+- `weight_reasoning: Optional[str] = None` 필드 추가
+- `frontend/src/types/recommendations.ts::RecommendationItem` 에 대응
+
+**프론트엔드 UI 카드 순서 변경** (`frontend/src/pages/Recommendations.tsx`):
+- 변경 전: BacktestComparison → 분석 통계 → 추천 근거 → 자산 배정 → 로직 자문 → 파라미터
+- 변경 후: **자산 배정 (최상단)** → BacktestComparison → 분석 통계 → 추천 근거 → 로직 자문 → 파라미터
+- 자산 배정 카드 내부에 `weight_reasoning` amber 영역(`data-testid="weight-reasoning-{id}"`, `bg-amber-50 border-amber-200 max-h-32 overflow-y-auto whitespace-pre-wrap`) 추가 — `rec.weight_reasoning` truthy 시에만 렌더
+
+**안전 불변식**:
+- 5/15 발화된 row 영향 없음 (소급 재계산 안 함, `weight_reasoning=null` 그대로)
+- weight_reasoning 누락 시 `(사유 미제공)` 자동 fallback — null 미저장
+- 운영 매매 흐름 미침범 (자문 metrics/UI 영역만)
+- 1000자 초과 truncate 시 WARNING 로그로 추적
+
+**회귀 가드**:
+- `tests/unit/engine/test_recommendation_weight_reasoning.py` 11 케이스 (5-tuple 시그니처 / weight+reasoning 정상 / 누락 fallback / null 동시 정리 / 1000자 truncate / 비-str fallback / 빈문자열 fallback / 5/15 LTV fixture / 1000자 이내 보존 / 양쪽 null 정상 / 묵시적 누락 fallback)
+- `tests/unit/db/test_parameter_recommendations_weight_reasoning.py` 4 케이스 (INSERT round-trip / null / J4 시그니처 회귀 / kwarg default)
+- `frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx` 5 케이스 (A amber 영역 / B null 미렌더 / C weight null 시 weight-card 자체 미렌더 / D DOM 순서 / E 1000자 overflow)
+- `frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx` 2 케이스 (모든 카드 노출 시 순서 / weight 카드 없을 때 fallback 순서)
+
 ---
 
 ## (2026-05-13) 작업 1 — 활성 보드만 노출 (VB/LTV `get_targets_status`)

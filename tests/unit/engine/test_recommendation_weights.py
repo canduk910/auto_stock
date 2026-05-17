@@ -25,7 +25,7 @@ def test_validate_returns_weight_in_range():
         "recommended_weight": 0.35,
         "code_review_notes": None,
     }
-    validated, reasoning, weight, notes = _validate_recommendations(raw, {})
+    validated, reasoning, weight, notes, _wr = _validate_recommendations(raw, {})
 
     assert validated == {}
     assert reasoning == "비중을 올리는 것을 추천"
@@ -44,7 +44,7 @@ def test_validate_weight_out_of_range_returns_none_and_warns(caplog):
         "code_review_notes": None,
     }
     with caplog.at_level(logging.WARNING):
-        _, _, weight, _ = _validate_recommendations(raw, {})
+        _, _, weight, _, _ = _validate_recommendations(raw, {})
 
     assert weight is None
     # WARNING 로그 1개 이상에 weight 관련 메시지 존재
@@ -61,7 +61,7 @@ def test_validate_weight_negative_returns_none():
         "recommended_weight": -0.1,
         "code_review_notes": None,
     }
-    _, _, weight, _ = _validate_recommendations(raw, {})
+    _, _, weight, _, _ = _validate_recommendations(raw, {})
     assert weight is None
 
 
@@ -71,7 +71,7 @@ def test_validate_weight_non_numeric_returns_none():
 
     for bad in ["foo", None, [], {}]:
         raw = {"recommended_params": {}, "recommended_weight": bad}
-        _, _, weight, _ = _validate_recommendations(raw, {})
+        _, _, weight, _, _ = _validate_recommendations(raw, {})
         assert weight is None, f"입력 {bad!r} 에서 None 이 아님: {weight!r}"
 
 
@@ -85,7 +85,7 @@ def test_validate_notes_truncates_over_2000_chars():
         "recommended_weight": None,
         "code_review_notes": long_text,
     }
-    _, _, _, notes = _validate_recommendations(raw, {})
+    _, _, _, notes, _ = _validate_recommendations(raw, {})
 
     assert notes is not None
     assert len(notes) == 2000
@@ -100,7 +100,7 @@ def test_validate_notes_preserves_under_2000_chars():
         "recommended_weight": None,
         "code_review_notes": "신규 파라미터 ATR-trailing 도입 권고",
     }
-    _, _, _, notes = _validate_recommendations(raw, {})
+    _, _, _, notes, _ = _validate_recommendations(raw, {})
     assert notes == "신규 파라미터 ATR-trailing 도입 권고"
 
 
@@ -110,8 +110,21 @@ def test_validate_notes_non_string_returns_none():
 
     for bad in [123, [], {"a": 1}]:
         raw = {"recommended_params": {}, "code_review_notes": bad}
-        _, _, _, notes = _validate_recommendations(raw, {})
+        _, _, _, notes, _ = _validate_recommendations(raw, {})
         assert notes is None, f"입력 {bad!r} 에서 None 이 아님: {notes!r}"
+
+
+def test_validate_signature_has_five_return_values_for_weight_reasoning():
+    """사이클 1 (2026-05-17) — 시그니처 5-tuple 확장 회귀 가드.
+
+    `_validate_recommendations` 가 weight_reasoning 을 5번째 요소로 반환.
+    기존 J4 의 4-tuple 시그니처 가정은 invalid.
+    """
+    from src.engine.recommendation_engine import _validate_recommendations
+
+    result = _validate_recommendations({"recommended_params": {}}, {})
+    assert isinstance(result, tuple)
+    assert len(result) == 5
 
 
 def test_validate_both_none_returns_normally():
@@ -119,7 +132,7 @@ def test_validate_both_none_returns_normally():
     from src.engine.recommendation_engine import _validate_recommendations
 
     raw = {"recommended_params": {"buy_threshold": 25.0}, "reasoning": "test"}
-    validated, reasoning, weight, notes = _validate_recommendations(
+    validated, reasoning, weight, notes, weight_reasoning = _validate_recommendations(
         raw, {"buy_threshold": 29.0},
     )
 
@@ -127,12 +140,16 @@ def test_validate_both_none_returns_normally():
     assert reasoning == "test"
     assert weight is None
     assert notes is None
+    assert weight_reasoning is None
 
 
-def test_validate_signature_has_four_return_values():
-    """확장된 시그니처: (validated_params, reasoning, weight, notes) 4-tuple."""
+def test_validate_signature_has_five_return_values_post_cycle1():
+    """사이클 1 (2026-05-17) — J4 4-tuple 에서 weight_reasoning 추가된 5-tuple 로 확장.
+
+    (validated_params, reasoning, weight, notes, weight_reasoning)
+    """
     from src.engine.recommendation_engine import _validate_recommendations
 
     result = _validate_recommendations({"recommended_params": {}}, {})
     assert isinstance(result, tuple)
-    assert len(result) == 4
+    assert len(result) == 5

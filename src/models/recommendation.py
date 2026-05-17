@@ -24,6 +24,9 @@ class RecommendationItem(BaseModel):
     recommended_weight: Optional[float] = None
     code_review_notes: Optional[str] = None
     applied_weight: Optional[float] = None
+    # 사이클 1 (2026-05-17) — 비중조절 사유 분리 필드 (최대 1000자)
+    # recommended_weight 가 null 이면 weight_reasoning 도 null
+    weight_reasoning: Optional[str] = None
     # Phase 3 (2026-05-16) — 외부 MCP 백테스트 비교 결과 동봉.
     # null 이면 백테스트 미실행/진행중/실패. UI 가 fallback 처리.
     backtest_summary: Optional[dict] = None

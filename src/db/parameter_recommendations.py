@@ -22,6 +22,7 @@ async def insert_recommendation(
     metrics: dict,
     recommended_weight: float | None = None,
     code_review_notes: str | None = None,
+    weight_reasoning: str | None = None,
 ) -> dict | None:
     """파라미터 추천을 INSERT한다.
 
@@ -29,6 +30,12 @@ async def insert_recommendation(
       - recommended_weight: AI 추천 전략 weight (0.0~1.0), null = 변경 권고 없음
       - code_review_notes: 로직/파라미터 자유 텍스트 자문, null = 변경 권고 없음
       - applied_weight: INSERT 시점은 항상 None (apply 시점에 채워짐)
+
+    사이클 1 (2026-05-17) — weight_reasoning 추가:
+      - weight_reasoning: 비중 변경 권고 사유 (별도 필드, 최대 1000자).
+        recommended_weight 가 null 이면 weight_reasoning 도 null.
+        J4 의 통합 `reasoning` 에 묻혀 있던 비중 사유를 UI 자산 배정 카드에서
+        amber 배경 영역으로 분리 강조하기 위함.
 
     동일 (target_date, strategy_id) 조합이 unique index에 의해 거부되면 None 반환.
     """
@@ -42,6 +49,7 @@ async def insert_recommendation(
         "status": "pending",
         "recommended_weight": recommended_weight,
         "code_review_notes": code_review_notes,
+        "weight_reasoning": weight_reasoning,
         "applied_weight": None,
     }
     try:

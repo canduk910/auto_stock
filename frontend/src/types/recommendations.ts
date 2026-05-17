@@ -39,6 +39,9 @@ export interface RecommendationItem {
   recommended_weight?: number | null  // AI 추천 전략 weight (0.0~1.0). null = 변경 권고 없음
   code_review_notes?: string | null    // 로직/파라미터 자유 텍스트 자문 (최대 2000자)
   applied_weight?: number | null       // 사용자가 apply 시점에 실제 적용한 weight (트래킹)
+  // 사이클 1 (2026-05-17) — 비중 변경 사유 별도 필드 (최대 1000자)
+  // recommended_weight 가 null 이면 null. 통합 reasoning 과 별개 (UI 자산 배정 카드 amber 영역)
+  weight_reasoning?: string | null
   // Phase 4 (2026-05-16) — 백테스트 검증
   // null 인 경우: KIS_MCP_ENABLED=false / 진행중 / 폴 실패 / 24h timeout
   // 자기 전략 두 row(current/recommended) 모두 종료 상태일 때만 동봉

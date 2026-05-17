@@ -105,37 +105,50 @@ INT_PARAMS = {
 SYSTEM_PROMPT = (
     "너는 한국 주식 자동매매 전략의 파라미터 튜닝을 보조하는 트레이더다.\n"
     "주어진 통계, 현재 파라미터, 그리고 다른 전략들의 자산배정(weight) + 성과를\n"
-    "종합해 다음 3가지를 권고하라:\n"
+    "종합해 다음 4가지를 권고하라:\n"
     "1) 변경이 필요한 파라미터 키만 (필요 없으면 빈 객체)\n"
     "2) 자기 전략의 자산배정 weight 변경 권고 (0.0~1.0 범위, 변경 없으면 null).\n"
     "   다른 전략 weight + 성과를 함께 고려한다. 합계 1.0 정규화는 운영자가 apply 시점에 책임.\n"
-    "3) PARAM_RANGES 화이트리스트 외 신규 파라미터 도입 또는 폐기 자유 텍스트 자문\n"
-    "   (최대 2000자, 변경 없으면 null). 코드 자동 변경 없이 운영자 수동 검토용.\n"
+    "3) weight 변경 권고 시 별도 사유 (weight_reasoning, 최대 1000자, 한국어).\n"
+    "   recommended_weight 가 null 이면 null. 예: \"peer momentum 우수해 본 전략 비중 축소\",\n"
+    "   \"최근 30일 손절률 증가로 보수적 비중 권고\". 통합 `reasoning` 과 별개로 명시.\n"
+    "4) PARAM_RANGES 화이트리스트 외 신규 파라미터 도입 또는 폐기 자유 텍스트 자문\n"
+    "   (code_review_notes, 최대 2000자, 변경 없으면 null). 코드 자동 변경 없이 운영자 수동 검토용.\n"
     "출력은 다음 JSON 스키마만 사용한다:\n"
     '{\n'
     '  "recommended_params": {<key>: <number>, ...},\n'
     '  "reasoning": "<2~4문장>",\n'
     '  "recommended_weight": <number 0.0~1.0> | null,\n'
+    '  "weight_reasoning": "<최대 1000자>" | null,\n'
     '  "code_review_notes": "<최대 2000자>" | null\n'
     '}\n'
     "키는 반드시 현재 파라미터에 있는 키여야 하며, 허용 범위를 벗어나지 마라."
 )
 
 NOTES_MAX_LEN = 2000
+# 사이클 1 (2026-05-17) — weight_reasoning 최대 길이
+WEIGHT_REASONING_MAX_LEN = 1000
+# 사이클 1 (2026-05-17) — weight 있는데 weight_reasoning 누락 시 fallback
+WEIGHT_REASONING_FALLBACK = "(사유 미제공)"
 
 
 def _validate_recommendations(
     raw: dict,
     current_params: dict,
-) -> tuple[dict, str, float | None, str | None]:
+) -> tuple[dict, str, float | None, str | None, str | None]:
     """LLM 응답을 화이트리스트로 검증한다.
 
-    Phase J4 (2026-05-12) — 신규 두 필드 추가:
+    Phase J4 (2026-05-12) — recommended_weight + code_review_notes 도입.
+    사이클 1 (2026-05-17) — weight_reasoning 분리:
       - recommended_weight: float, [0.0, 1.0] 범위. 범위 외/비숫자면 None + WARNING
       - code_review_notes: str, NOTES_MAX_LEN(2000)자 초과 시 자름. 비-str 이면 None
+      - weight_reasoning: str, WEIGHT_REASONING_MAX_LEN(1000)자 초과 시 자름.
+          weight 가 null 이면 자동 null (정리)
+          weight 있는데 weight_reasoning 누락/null/빈문자열/비-str → fallback `(사유 미제공)` + WARNING
 
     Returns:
-        (검증된 recommended_params, reasoning, recommended_weight, code_review_notes)
+        (검증된 recommended_params, reasoning, recommended_weight,
+         code_review_notes, weight_reasoning)
     """
     rec = raw.get("recommended_params") or {}
     reasoning = str(raw.get("reasoning") or "").strip()
@@ -198,7 +211,32 @@ def _validate_recommendations(
     elif raw_notes is not None:
         logger.debug("code_review_notes 비-str 무시: %r", type(raw_notes).__name__)
 
-    return validated, reasoning, weight, notes
+    # ---- weight_reasoning 검증 (사이클 1, 2026-05-17) ----
+    raw_weight_reasoning = raw.get("weight_reasoning")
+    weight_reasoning: str | None = None
+    if weight is None:
+        # weight 가 null 이면 weight_reasoning 도 무조건 null (자동 정리)
+        weight_reasoning = None
+    else:
+        # weight 가 있는 경우 — 사유 필수
+        if isinstance(raw_weight_reasoning, str) and raw_weight_reasoning.strip():
+            if len(raw_weight_reasoning) > WEIGHT_REASONING_MAX_LEN:
+                logger.warning(
+                    "weight_reasoning %d자 → %d자로 자름",
+                    len(raw_weight_reasoning), WEIGHT_REASONING_MAX_LEN,
+                )
+                weight_reasoning = raw_weight_reasoning[:WEIGHT_REASONING_MAX_LEN]
+            else:
+                weight_reasoning = raw_weight_reasoning
+        else:
+            # 누락/null/빈문자열/비-str → fallback + WARNING
+            logger.warning(
+                "weight_reasoning 누락 또는 형식 불일치 (raw=%r) — fallback %r 적용",
+                raw_weight_reasoning, WEIGHT_REASONING_FALLBACK,
+            )
+            weight_reasoning = WEIGHT_REASONING_FALLBACK
+
+    return validated, reasoning, weight, notes, weight_reasoning
 
 
 async def _call_openai(
@@ -323,6 +361,8 @@ async def generate_recommendations() -> list[dict]:
         reasoning = ""
         recommended_weight: float | None = None
         code_review_notes: str | None = None
+        # 사이클 1 (2026-05-17) — 비중조절 사유 분리
+        weight_reasoning: str | None = None
         try:
             current_params = dict(strategy.config.params)
             current_weight = float(strategy.config.weight)
@@ -368,9 +408,13 @@ async def generate_recommendations() -> list[dict]:
                 logger.warning("OpenAI 호출 타임아웃: %s", strategy_id)
                 raw = {}
 
-            recommended_params, reasoning, recommended_weight, code_review_notes = (
-                _validate_recommendations(raw, current_params)
-            )
+            (
+                recommended_params,
+                reasoning,
+                recommended_weight,
+                code_review_notes,
+                weight_reasoning,
+            ) = _validate_recommendations(raw, current_params)
         except Exception as e:
             logger.exception("파라미터 추천 생성 실패: %s", strategy_id)
             # 예외 발생 시에도 빈 자문 INSERT — 신규 탭에 누락 사실을 노출
@@ -387,6 +431,7 @@ async def generate_recommendations() -> list[dict]:
                 metrics=metrics,
                 recommended_weight=recommended_weight,
                 code_review_notes=code_review_notes,
+                weight_reasoning=weight_reasoning,
             )
             if row:
                 inserted.append(row)
