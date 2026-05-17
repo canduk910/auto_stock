@@ -29,7 +29,7 @@ TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트
 - QueryClient defaults: `staleTime: 3000`, `gcTime: 5*60*1000`, `retry: 1`, `refetchOnWindowFocus: false`
 
 ## 페이지 lazy 로딩
-Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `React.lazy()` + Suspense skeleton (초기 번들 819→656kB)
+Dashboard만 즉시 import. History/Recommendations/Logs/Settings는 `React.lazy()` + Suspense skeleton (초기 번들 819→656kB). **사이클 6 (2026-05-17)** — `pages/LogReports.tsx` 는 삭제되고 `/logs` 메뉴 안의 "일일 로그 분석" 탭(`components/DailyReportTab.tsx`)으로 통합. `/log-reports` 라우트는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환 보존
 
 ## 시각적 컨벤션
 - 이익 `#FF3333` (빨강) / 손실 `#3366FF` (파랑) / 보합 `#333333`
@@ -68,7 +68,11 @@ Dashboard만 즉시 import. History/Recommendations/LogReports/Settings는 `Reac
   - 주문체결내역: `TradeHistoryGrid` (raw 행)
   - 매매손익: `TradePnLGrid` (`/api/history/pnl` — 매수·매도 페어 1행, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)" 라벨, emerald-50 배경. 시세 미수신은 "(미실현 시세 대기)"
 
-- **LogReports (`/log-reports`)**: 좌측 영업일 리스트(최근 30일) / 우측 summary + findings 카드(severity + category 칩) + 원본 메트릭 접기. "지금 분석 실행" 버튼 → `POST /api/log-reports/run` (영업일당 1건 UNIQUE)
+- **Logs (`/logs`) — 사이클 6 (2026-05-17) 통합 메뉴**:
+  - 탭 컨테이너 `pages/Logs.tsx` + URL 쿼리 `?tab=system|daily-report` (기본 `system`, 알 수 없는 값은 system fallback). 두 탭 모두 `data-testid="logs-tab-{key}"` + `role="tab"` + `aria-selected` 명시
+  - **시스템 로그 탭** (`components/SystemLogsTab.tsx`): `from_date / to_date` 분리 date input(기본 둘 다 KST 오늘) + 적용 버튼 + 레벨 토글(전체/INFO/WARNING/ERROR/CRITICAL) + 페이징(1-base, size 50). 자동 새로고침 3s 는 **오늘 + page=1** 일 때만 활성(과거 검색·페이징 중에는 비활성). KST 강제 — `Intl.DateTimeFormat('en-CA', timeZone: 'Asia/Seoul')` 으로 today 계산, `toLocaleString('ko-KR', timeZone: 'Asia/Seoul')` 으로 시각 표시. 클라이언트 `from_date>to_date` 가드 → `data-testid="system-logs-date-error"`. API `fetchLogs(filter)` (`api/logs.ts`)
+  - **일일 로그 분석 탭** (`components/DailyReportTab.tsx`): 기존 `pages/LogReports.tsx` 본문 추출(JSX 동일). 좌측 영업일 리스트(최근 30일) / 우측 summary + findings 카드(severity + category 칩) + 원본 메트릭 접기. "지금 분석 실행" 버튼 → `POST /api/log-reports/run` (영업일당 1건 UNIQUE). `formatDateTime` export 유지 — L3 회귀 가드 `LogReports.formatDateTime.test.ts` 가 `../../components/DailyReportTab` 로 import 갱신
+  - Dashboard 하단의 `LogViewer` 제거 — 운영자가 매매 현황 화면과 로그 검토 화면을 분리. `components/LogViewer.tsx` 파일은 보존(사용처 없음)
 
 - **Recommendations (`/recommendations`) — J4(2026-05-12) 자산 배정 + 로직 자문 카드 / 사이클 1(2026-05-17) 카드 순서 + weight_reasoning amber 영역**: 기존 params 적용 카드 위에 두 신규 카드를 조건부 노출. **자산 배정 카드** (`data-testid="weight-card-{id}"`, recommended_weight 가 null 아닐 때만, **최상단** — 사이클 1 에서 BacktestComparison 위로 이동): 현재→추천 weight + 변경량(%p, 빨강/파랑 컨벤션) + `data-testid="weight-apply-checkbox-{id}"` 체크박스. 체크 시 `applyMutation` body 에 `apply_weight: true` 포함. 적용 후 applied_weight 표시 + amber 안내 "다음 영업일부터 반영". **사이클 1 (2026-05-17) `weight_reasoning` 별도 영역** (`data-testid="weight-reasoning-{id}"`, weight-card 내부 `bg-amber-50 border-amber-200 max-h-32 overflow-y-auto whitespace-pre-wrap`): `rec.weight_reasoning` truthy 시에만 렌더 (1000자 이내, 백엔드 truncate). null 시 미렌더(weight-card 자체는 유지). 비중 변경 사유를 통합 `reasoning` 과 분리해 운영자 시야 집중. **로직/파라미터 자문 카드** (`data-testid="code-review-card-{id}"`, code_review_notes 가 null 아닐 때만): 자유 텍스트 (whitespace-pre-wrap, max-h-64 + overflow-y-auto). 자동 적용 없음 안내. 적용 버튼은 params 키 0개여도 weight 체크박스 ON 이면 활성화 — 단독 weight 적용 가능. **카드 DOM 순서 (사이클 1)**: 자산 배정 → BacktestComparison → 분석 통계 → 추천 근거 → 로직 자문 → 파라미터. 회귀 가드: `frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx` 2 케이스 + `Recommendations.weightReasoning.test.tsx` 5 케이스
   - **`BacktestComparisonCard` (Phase 4, 2026-05-15 / Phase 6.1 MDD 양수 컨벤션 확정 2026-05-17)**: 자산 배정 카드 *위* 에 `backtest_summary != null` 일 때만 노출. (a) 외부 MCP YAML DSL 지원 3종(momentum/VB/donchian)은 좌(현재)/우(추천) 메트릭 8종 비교 + 차이값 칩(이익색 빨강 / 손실색 파랑 컨벤션) + `data-testid="backtest-card-{strategy}"`. (b) 폴백 3종(LTV/bull_flag/vcp)은 "외부 백테스트 서버 미지원 (Phase 4-bis 대기)" 안내 라벨. `status=running` 분기 시 로딩 스피너. **`max_drawdown` 양수(절대값) 컨벤션 확정** — 외부 MCP 실측 (Phase 6 verify `max_drawdown=16.1`) 으로 양수 반환 검증, `METRIC_SPECS.max_drawdown.diffSignInverted=true` 적용. 양수 diff(추천 MDD 더 큼) = 손실 악화 → 파랑(`#3366FF`), 음수 diff = 손실 완화 → 빨강(`#FF3333`). 회귀 가드: `BacktestComparisonCard.test.tsx > H`. 운영 진단 절차는 `docs/backtest-monitoring.md`

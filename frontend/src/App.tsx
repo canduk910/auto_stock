@@ -1,19 +1,20 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route, NavLink } from 'react-router-dom'
+import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import { TradingStatusProvider, useTradingStatus } from './contexts/TradingStatusContext'
 import Dashboard from './pages/Dashboard'
 
 // 비메인 페이지는 동적 import — 초기 번들 분리(Recharts/TanStack Table 페이지 단위로 떨어져 나감)
 const History = lazy(() => import('./pages/History'))
 const Recommendations = lazy(() => import('./pages/Recommendations'))
-const LogReports = lazy(() => import('./pages/LogReports'))
+// 사이클 6 (2026-05-17): /log-reports → /logs?tab=daily-report 로 통합. 기존 페이지는 redirect.
+const Logs = lazy(() => import('./pages/Logs'))
 const Settings = lazy(() => import('./pages/Settings'))
 
 const navItems = [
   { to: '/', label: '대시보드' },
   { to: '/history', label: '거래 내역' },
   { to: '/recommendations', label: '전략수정 AI자문' },
-  { to: '/log-reports', label: '일일 로그 분석' },
+  { to: '/logs', label: '로그' },
   { to: '/settings', label: '설정' },
 ]
 
@@ -82,7 +83,12 @@ function AppShell() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/history" element={<History />} />
             <Route path="/recommendations" element={<Recommendations />} />
-            <Route path="/log-reports" element={<LogReports />} />
+            <Route path="/logs" element={<Logs />} />
+            {/* 사이클 6: 기존 북마크 호환 — /log-reports → /logs?tab=daily-report */}
+            <Route
+              path="/log-reports"
+              element={<Navigate to="/logs?tab=daily-report" replace />}
+            />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </Suspense>

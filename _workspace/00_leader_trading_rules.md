@@ -1317,6 +1317,50 @@ risk_on_tick 등 후속 테스트의 buy_blocked 가드 오염 차단.
 
 ---
 
+## 사이클 6 — 로그 메뉴 신설 + 년/월/일 필터 (2026-05-17)
+
+본 사이클은 **매매 코드 침범 0** 의 읽기 전용 UI/조회 재구성. 5/18 자문 사이클 영향 0.
+
+### 목적
+- 대시보드 하단 `LogViewer`(고정 50건 + 자동 폴링) 를 별도 `/logs` 메뉴로 분리 — 운영자가 매매 현황 화면과 로그 검토 화면을 분리
+- 기존 `/log-reports` (일일 로그 분석) 와 통합 → "로그" 단일 메뉴 + 두 탭 구성
+- 시스템 로그에 **년/월/일 기간 필터** + **페이징** 추가 → 5/18 등 특정 영업일 운영 사고 추적이 즉시 가능
+
+### 변경 요약 (변경 파일)
+- **백엔드**: `src/db/system_logs.py::get_logs()` 시그니처 확장 — `from_date / to_date / page / size` 추가, 응답 `{items, total, total_pages}` dict (기존 limit/level 단독 호출 하위 호환 보존). `src/routes/logs.py` 쿼리 파라미터 + 422 가드(`from_date > to_date`, `page < 1`, `size > 200`).
+- **프론트엔드**:
+  - 신규 `pages/Logs.tsx` 탭 컨테이너 + URL 쿼리 `?tab=system|daily-report` 동기화
+  - 신규 `components/SystemLogsTab.tsx` — 날짜 + 레벨 필터 + 페이징(1-base, size 50), KST 강제
+  - 신규 `components/DailyReportTab.tsx` — 기존 `LogReports.tsx` 본문 추출(JSX 동일)
+  - 신규 `api/logs.ts` — `fetchLogs(filter)` 클라이언트
+  - `App.tsx` 메뉴 "/log-reports 일일 로그 분석" → "/logs 로그", `/log-reports` 라우트는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환
+  - `Dashboard.tsx` 에서 `<LogViewer />` 제거(컴포넌트 파일은 보존)
+  - 기존 `pages/LogReports.tsx` 삭제 (DailyReportTab 으로 이전)
+
+### 자율 결정
+1. **기간 검색**: `from_date / to_date` 분리 date input (단일 날짜 아님). 기본값 둘 다 오늘(KST). `from_date > to_date` 시 422.
+2. **URL 쿼리** `?tab=system|daily-report` (기본 `system`).
+3. **컴포넌트 추출**: `LogReports.tsx` → `DailyReportTab.tsx`. `LogReports.tsx` 자체는 **삭제** (App.tsx 라우트에 inline `Navigate`).
+4. **자동 새로고침 (3s polling)** 은 오늘 + page 1 일 때만 활성 — 과거 검색 / 페이징 중에는 비활성.
+5. **KST 강제**: 백엔드 `f"{date}T00:00:00+09:00"` / 프론트 `Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul' })`. 기존 `LogViewer.tsx` 의 KST 누락은 새 `SystemLogsTab` 에서 해결 (LogViewer 파일은 보존이지만 더 이상 사용처 없음).
+6. **페이징**: page 1-base, size 50 고정.
+
+### 회귀 가드 (신규 +1 갱신)
+- `tests/unit/db/test_system_logs_filter.py` — 8 케이스 (KST 기간 필터 / page-size / total_pages / 빈 결과 / 하위 호환)
+- `tests/contract/test_routes_logs.py` — 9 케이스 (신규 파라미터 / 422 / 응답 구조 / 하위 호환)
+- `frontend/src/pages/__tests__/Logs.test.tsx` — 5 케이스 (탭 활성 / URL 쿼리 / fallback)
+- `frontend/src/components/__tests__/SystemLogsTab.test.tsx` — 9 케이스 (날짜 + 레벨 + 페이징 + 422 가드 + 빈 결과 + KST 시각)
+- `frontend/src/__tests__/AppShell.test.tsx` — 메뉴 라벨 "로그" 로 갱신 (회귀)
+- `frontend/src/pages/__tests__/LogReports.formatDateTime.test.ts` — import 경로만 `DailyReportTab` 으로 갱신 (회귀)
+
+### 안전 원칙
+- 매매 코드(`src/engine/`, `src/api/`, `src/realtime/`) 무수정
+- 기존 `?limit=50&level=ERROR` 하위 호환 — `limit` 단독 호출 시에도 `size` 로 흡수되어 dict 응답
+- `/log-reports` 북마크 호환 (Navigate replace)
+- 5/18 자문 흐름(`recommendation_engine` 20:00) 결합점 0 — 본 사이클은 읽기 전용 조회
+
+---
+
 ## 커밋 5분할 (squash 금지)
 1. `feat(strategies): VB/LTV get_targets_status returns active boards only`
 2. `feat(scanner): cap breakout to 25 slots in priority queue (protect momentum)`

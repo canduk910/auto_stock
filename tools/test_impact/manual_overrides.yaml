@@ -40,3 +40,11 @@
 # Playwright 설정 변경 시 모든 E2E 재실행
 "e2e/playwright.config.ts":
   - "e2e/*.spec.ts"
+
+# 사이클 6 (2026-05-17) — /api/logs 라우트의 contract 테스트는 URL 호출이라
+# 정적 import 분석에 안 잡힘
+"src/routes/logs.py":
+  - "tests/contract/test_routes_logs.py"
+"src/db/system_logs.py":
+  - "tests/contract/test_routes_logs.py"
+  - "tests/unit/db/test_system_logs_filter.py"

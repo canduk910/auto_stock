@@ -101,4 +101,9 @@ export const handlers = [
   http.post(`${base}/log-reports/run`, () =>
     HttpResponse.json(wrap({ scheduled: true }))
   ),
+
+  // 사이클 6 — system logs (페이징 + 기간 필터). 기본은 빈 응답, 각 테스트에서 server.use 로 오버라이드.
+  http.get(`${base}/logs`, () =>
+    HttpResponse.json(wrap({ items: [], total: 0, total_pages: 0 }))
+  ),
 ];

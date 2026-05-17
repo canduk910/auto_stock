@@ -50,11 +50,12 @@ describe("AppShell — 상단 메뉴바 sticky", () => {
     render(withProviders(<App />));
 
     const nav = screen.getByRole("navigation");
+    // 사이클 6 (2026-05-17) — "일일 로그 분석" 메뉴는 "/logs 로그" 로 단일화됨.
     for (const label of [
       "대시보드",
       "거래 내역",
       "전략수정 AI자문",
-      "일일 로그 분석",
+      "로그",
       "설정",
     ]) {
       // 메뉴 링크가 nav 안에 있다

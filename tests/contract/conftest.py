@@ -270,9 +270,39 @@ def contract_env(monkeypatch):
     )
 
     # ---- logs ----
-    async def fake_get_logs(limit=50, log_level=None):
-        calls.get_logs.append({"limit": limit, "log_level": log_level})
-        return list(state.logs)
+    # 사이클 6 (2026-05-17) — 신규 keyword(`from_date`/`to_date`/`page`/`size`) 흡수 + dict 응답.
+    # 테스트는 `state.logs` 에 list 또는 dict 둘 다 넣을 수 있다.
+    # - list 면 default total=len(items), total_pages=1(있으면)/0(없으면)
+    # - dict 면 그대로 반환
+    async def fake_get_logs(
+        limit=50,
+        log_level=None,
+        *,
+        from_date=None,
+        to_date=None,
+        page=1,
+        size=None,
+    ):
+        eff_size = size if size is not None else limit
+        calls.get_logs.append({
+            "limit": limit,
+            "log_level": log_level,
+            "from_date": from_date,
+            "to_date": to_date,
+            "page": page,
+            "size": eff_size,
+        })
+        raw = state.logs
+        if isinstance(raw, dict):
+            return {
+                "items": list(raw.get("items", [])),
+                "total": int(raw.get("total", 0)),
+                "total_pages": int(raw.get("total_pages", 0)),
+            }
+        items = list(raw)
+        total = len(items)
+        total_pages = 1 if total else 0
+        return {"items": items, "total": total, "total_pages": total_pages}
 
     monkeypatch.setattr("src.routes.logs.get_logs", fake_get_logs, raising=False)
 

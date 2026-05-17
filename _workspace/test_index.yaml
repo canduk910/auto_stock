@@ -675,6 +675,7 @@ backend:
       - tests/unit/db/test_system_config_auto_regime.py
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
+      - tests/unit/db/test_system_logs_filter.py
       - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_bull_flag_breakout.py
       - tests/unit/engine/strategies/test_donchian_swing.py
@@ -746,6 +747,7 @@ backend:
       - tests/unit/db/test_system_config_auto_regime.py
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
+      - tests/unit/db/test_system_logs_filter.py
       - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/test_backtest_engine_db_toggle.py
       - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -1475,6 +1477,7 @@ backend:
       - tests/unit/db/test_system_config_auto_regime.py
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
+      - tests/unit/db/test_system_logs_filter.py
       - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_bull_flag_breakout.py
       - tests/unit/engine/strategies/test_donchian_swing.py
@@ -1622,6 +1625,7 @@ backend:
     direct_tests:
       - tests/unit/api/test_base_logging.py
       - tests/unit/api/test_base_retry_logging.py
+      - tests/unit/db/test_system_logs_filter.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_routes_backtest.py
@@ -4582,7 +4586,9 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.test.tsx
@@ -4598,7 +4604,13 @@ frontend:
   frontend/src/api/log_reports.ts:
     direct_tests:
       - frontend/src/api/__tests__/log_reports.test.ts
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/pages/__tests__/Logs.test.tsx
+  frontend/src/api/logs.ts:
+    direct_tests: []
+    transitive_tests:
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
   frontend/src/api/market_regime.ts:
     direct_tests: []
     transitive_tests:
@@ -4663,6 +4675,10 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
+  frontend/src/components/DailyReportTab.tsx:
+    direct_tests: []
+    transitive_tests:
+      - frontend/src/pages/__tests__/Logs.test.tsx
   frontend/src/components/InfoTooltip.tsx:
     direct_tests:
       - frontend/src/components/__tests__/InfoTooltip.test.tsx
@@ -4677,8 +4693,7 @@ frontend:
     transitive_tests: []
   frontend/src/components/LogViewer.tsx:
     direct_tests: []
-    transitive_tests:
-      - frontend/src/__tests__/AppShell.test.tsx
+    transitive_tests: []
   frontend/src/components/MarketRegimeCard.tsx:
     direct_tests:
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
@@ -4703,6 +4718,11 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
+  frontend/src/components/SystemLogsTab.tsx:
+    direct_tests:
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
+    transitive_tests:
+      - frontend/src/pages/__tests__/Logs.test.tsx
   frontend/src/components/TradeHistoryGrid.tsx:
     direct_tests:
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
@@ -4737,8 +4757,9 @@ frontend:
   frontend/src/pages/History.tsx:
     direct_tests: []
     transitive_tests: []
-  frontend/src/pages/LogReports.tsx:
-    direct_tests: []
+  frontend/src/pages/Logs.tsx:
+    direct_tests:
+      - frontend/src/pages/__tests__/Logs.test.tsx
     transitive_tests: []
   frontend/src/pages/Recommendations.tsx:
     direct_tests:
@@ -4767,8 +4788,10 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.test.tsx
@@ -4793,8 +4816,10 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.test.tsx
@@ -4808,7 +4833,9 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.test.tsx
@@ -4831,8 +4858,10 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.test.tsx
@@ -4872,7 +4901,9 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.test.tsx
@@ -4885,6 +4916,7 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/api/__tests__/log_reports.test.ts
+      - frontend/src/pages/__tests__/Logs.test.tsx
   frontend/src/types/market_regime.ts:
     direct_tests: []
     transitive_tests:
@@ -4940,19 +4972,19 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-17T13:02:09.588Z'
+generated_at: '2026-05-17T13:40:46.209Z'
 stats:
   backend_modules: 79
-  backend_tests: 125
-  frontend_modules: 50
-  frontend_tests: 26
+  backend_tests: 126
+  frontend_modules: 53
+  frontend_tests: 28
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/integrations.ts
+    - frontend/src/components/LogViewer.tsx
     - frontend/src/components/TradePnLGrid.tsx
     - frontend/src/main.tsx
     - frontend/src/pages/History.tsx
-    - frontend/src/pages/LogReports.tsx
     - frontend/src/pages/Settings.tsx
     - frontend/src/test/setup.ts
     - src/__init__.py

@@ -8,6 +8,13 @@ import type {
   Severity,
 } from '../types/log_reports'
 
+/**
+ * DailyReportTab — 사이클 6 (2026-05-17).
+ *
+ * 기존 `pages/LogReports.tsx` 의 본문을 컴포넌트로 추출. /logs?tab=daily-report 탭이 사용한다.
+ * 데이터 흐름·UI 동일 (운영자 학습 비용 0).
+ */
+
 const SEVERITY_LABEL: Record<Severity, string> = {
   high: '높음',
   medium: '보통',
@@ -35,8 +42,6 @@ const CATEGORY_LABEL: Record<FindingCategory, string> = {
 }
 
 // KST(Asia/Seoul) 강제 — 백엔드 `_to_kst` 와 동일 컨벤션.
-// `timeZone` 명시 없으면 브라우저 로컬 timezone 의존(도커 빌드 UTC 등에서 시각 어긋남).
-// L3 (2026-05-12) 005930 보완 INSERT 사고 시각 일관성 점검 산물.
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '-'
   try {
@@ -108,7 +113,6 @@ function ReportCard({ report }: { report: LogReportItem }) {
 
   return (
     <div className="space-y-6">
-      {/* 총평 */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-gray-900">{report.target_date} 총평</h2>
@@ -122,7 +126,6 @@ function ReportCard({ report }: { report: LogReportItem }) {
         </p>
       </div>
 
-      {/* findings */}
       <div>
         <h3 className="text-base font-semibold text-gray-800 mb-3">
           개선 항목 ({sortedFindings.length}건)
@@ -140,7 +143,6 @@ function ReportCard({ report }: { report: LogReportItem }) {
         )}
       </div>
 
-      {/* metrics */}
       <div className="bg-white rounded-lg shadow">
         <button
           onClick={() => setShowMetrics((v) => !v)}
@@ -151,7 +153,6 @@ function ReportCard({ report }: { report: LogReportItem }) {
         </button>
         {showMetrics && (logs || trades) && (
           <div className="border-t border-gray-100 p-4 space-y-4">
-            {/* 레벨별 카운트 */}
             {logs && (
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 mb-2">로그 레벨별 카운트</h4>
@@ -171,7 +172,6 @@ function ReportCard({ report }: { report: LogReportItem }) {
               </div>
             )}
 
-            {/* 거래 통계 */}
             {trades && (
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 mb-2">거래 통계</h4>
@@ -207,7 +207,6 @@ function ReportCard({ report }: { report: LogReportItem }) {
               </div>
             )}
 
-            {/* 상위 WARNING/ERROR 패턴 */}
             {logs?.top_patterns && (
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 mb-2">상위 WARNING/ERROR 패턴</h4>
@@ -239,7 +238,7 @@ function ReportCard({ report }: { report: LogReportItem }) {
   )
 }
 
-export default function LogReports() {
+export default function DailyReportTab() {
   const queryClient = useQueryClient()
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -250,7 +249,6 @@ export default function LogReports() {
     queryFn: () => listLogReports(30),
   })
 
-  // 첫 로드 시 가장 최근 날짜 자동 선택
   useEffect(() => {
     if (!selectedDate && reports && reports.length > 0) {
       setSelectedDate(reports[0].target_date)
@@ -345,7 +343,6 @@ export default function LogReports() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">
-          {/* 좌측: 날짜 리스트 */}
           <aside className="bg-white rounded-lg shadow p-2 h-fit">
             <ul className="space-y-1">
               {reports?.map((r) => (
@@ -368,7 +365,6 @@ export default function LogReports() {
             </ul>
           </aside>
 
-          {/* 우측: 상세 */}
           <div>
             {selectedReport ? (
               <ReportCard report={selectedReport} />

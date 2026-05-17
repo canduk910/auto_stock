@@ -9,7 +9,7 @@ import OrderMonitor from '../components/OrderMonitor'
 import PerformanceCard from '../components/PerformanceCard'
 import ProfitChart from '../components/ProfitChart'
 import BalanceTable from '../components/BalanceTable'
-import LogViewer from '../components/LogViewer'
+// 사이클 6 (2026-05-17): LogViewer 는 /logs 메뉴로 분리됨. Dashboard 하단 제거.
 
 export default function Dashboard() {
   const [selectedStrategy, setSelectedStrategy] = useState<string>('all')
@@ -118,7 +118,6 @@ export default function Dashboard() {
       <BalanceTable selectedStrategy={selectedStrategy} />
       <PerformanceCard selectedStrategy={selectedStrategy} />
       <ProfitChart selectedStrategy={selectedStrategy} />
-      <LogViewer />
     </div>
   )
 }

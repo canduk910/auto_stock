@@ -23,6 +23,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 ### system_logs.py — 시스템 로그
 - `write_log(level, message)`: 이벤트/에러 기록
 - level: INFO, WARNING, ERROR, CRITICAL
+- `get_logs(limit=100, log_level=None, *, from_date=None, to_date=None, page=1, size=None)`: 페이징 + KST 기간 필터 조회 (사이클 6, 2026-05-17). 반환 `{"items": list[dict], "total": int, "total_pages": int}`. `size` 미지정 시 `limit` 흡수(하위 호환). `from_date`/`to_date` 명시 시 `timestamp >= "{date}T00:00:00+09:00"` / `<= "{date}T23:59:59.999999+09:00"` 비교 — KST 강제. supabase-py `count="exact"` 로 total 동봉, `total_pages = ceil(total / size)`
 
 ### log_reports.py — 일일 로그 분석 리포트
 - `insert_log_report()`: 16:10 정산 직후 분석 결과 INSERT (target_date UNIQUE, 충돌 시 None)

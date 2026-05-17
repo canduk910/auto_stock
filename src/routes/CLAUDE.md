@@ -27,7 +27,7 @@
 | PUT | `/api/strategies/system/auto-start` | strategies.py | 자동 매매 설정 변경 |
 | GET | `/api/strategies/system/cash-usage-ratio` | strategies.py | 매매 가용 자금 비율 조회 (J3, 2026-05-12). 응답 `{ratio: float}`, 기본 1.0 |
 | PUT | `/api/strategies/system/cash-usage-ratio` | strategies.py | 매매 가용 자금 비율 변경 (J3, 2026-05-12). body `{ratio: float}` [0.5, 1.0]. 5% 단위 자동 보정, 응답에 보정된 ratio 포함. 다음 영업일 `_boot()` 부터 반영. 범위 외는 400 |
-| GET | `/api/logs` | logs.py | 시스템 로그 조회 |
+| GET | `/api/logs` | logs.py | 시스템 로그 조회. **사이클 6(2026-05-17)** — 쿼리 파라미터 확장: `?from_date=YYYY-MM-DD&to_date=YYYY-MM-DD&level=ERROR&page=1&size=50`. 응답 `data` 는 `{items, total, total_pages}` dict. 기존 `?limit=50&level=ERROR` 하위 호환 보존(`limit` 단독은 `size` 흡수). 422: `from_date>to_date` / `page<1` / `size>200`. KST 강제 — 백엔드 `f"{date}T00:00:00+09:00"` ~ `T23:59:59.999999+09:00` 범위 비교 |
 | GET | `/api/recommendations` | recommendations.py | 전략수정 AI자문 목록 (최근 30일, 신규+이력 통합) |
 | GET | `/api/recommendations/{id}` | recommendations.py | 단일 자문 상세 |
 | POST | `/api/recommendations/{id}/apply` | recommendations.py | 선택한 키만 전략 파라미터에 적용 (status: pending/partial → applied/partial). **J4(2026-05-12)** — body 신규 옵션 `apply_weight: bool=False` 추가. true 면 `recommended_weight` 가 `strategy_config.weight` 로 반영(`save_weights`) + `applied_weight` 트래킹. recommended_weight=null 인데 apply_weight=true 면 거부. params 없이 weight 단독 적용 가능. `allocate_funds` 즉시 재호출 안 함 (다음 _boot 반영) |
