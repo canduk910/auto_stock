@@ -80,6 +80,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -170,6 +171,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -293,6 +295,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -431,6 +434,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -536,6 +540,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -636,6 +641,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -761,6 +767,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -916,6 +923,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1078,6 +1086,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1177,6 +1186,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1260,6 +1270,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1386,6 +1397,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1485,6 +1497,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1575,6 +1588,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1661,6 +1675,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1757,6 +1772,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1850,6 +1866,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -1933,6 +1950,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2072,6 +2090,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2193,6 +2212,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2320,6 +2340,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2426,6 +2447,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2608,6 +2630,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2697,6 +2720,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2780,6 +2804,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2869,6 +2894,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -2958,6 +2984,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3041,6 +3068,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3127,6 +3155,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3214,6 +3243,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3344,6 +3374,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3425,6 +3456,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3535,6 +3567,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3626,6 +3659,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3719,6 +3753,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3805,6 +3840,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3896,6 +3932,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -3980,6 +4017,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4076,6 +4114,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4192,6 +4231,7 @@ backend:
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
@@ -4280,6 +4320,7 @@ backend:
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
@@ -4369,6 +4410,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4482,6 +4524,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4572,6 +4615,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4699,6 +4743,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4825,6 +4870,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -4991,6 +5037,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -5116,6 +5163,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -5254,6 +5302,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -5400,6 +5449,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -5539,6 +5589,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -5981,6 +6032,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -6079,6 +6131,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -6173,6 +6226,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -6296,6 +6350,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
@@ -6773,10 +6828,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-19T08:10:01.577560+09:00'
+generated_at: '2026-05-19T08:45:32.005831+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 164
+  backend_tests: 165
   frontend_modules: 57
   frontend_tests: 31
   unmapped_modules:

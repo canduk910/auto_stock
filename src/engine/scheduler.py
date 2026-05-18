@@ -406,7 +406,8 @@ class TradingScheduler:
                 logger.info("매매 모드 진입 (KRX 메인 + NXT)")
 
                 await self._wait_until(TIME_KRX_MAIN_BUY_STOP)
-                self._scan_task.cancel()
+                if self._scan_task is not None and not self._scan_task.done():
+                    self._scan_task.cancel()
             else:
                 self._scan_task = None
                 logger.info("15:20 이후 시작 — KRX 메인 매수 중단 상태로 진입")
@@ -489,10 +490,12 @@ class TradingScheduler:
             self._reset_daily_state()
 
             await kis_ws.disconnect()
-            try:
-                await self._ws_task
-            except asyncio.CancelledError:
-                pass
+            _ws_task = self._ws_task
+            if _ws_task is not None:
+                try:
+                    await _ws_task
+                except asyncio.CancelledError:
+                    pass
 
         except Exception:
             logger.exception("매매 프로세스 오류")
