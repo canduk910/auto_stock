@@ -102,12 +102,12 @@ async def test_stale_watcher_uses_ticker_to_session_routing(monkeypatch, reset_s
 
 
 # ---------------------------------------------------------------------------
-# D-3. 강제 재등록 (retry > 10) — unsubscribe_in_pool + subscribe(priority)
-# 사이클 9 (2026-05-18): 임계 STALE_FORCE_REREGISTER_AFTER 3 → 10 갱신
+# D-3. 강제 재등록 (retry > 5) — unsubscribe_in_pool + subscribe(priority)
+# 사이클 13 (2026-05-18): 임계 STALE_FORCE_REREGISTER_AFTER 10 → 5 단축
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_stale_watcher_force_reregister_via_pool(monkeypatch, reset_stale_state):
-    """retry > 10 시 `pool.unsubscribe_in_pool` + `pool.subscribe(priority='HIGH', bypass_limit=True)` 호출."""
+    """retry > 5 시 `pool.unsubscribe_in_pool` + `pool.subscribe(priority='HIGH', bypass_limit=True)` 호출."""
     from src.engine import scheduler as sched_mod
     from src.engine import scanner
     from src.realtime import websocket_pool as wp_mod
@@ -129,8 +129,8 @@ async def test_stale_watcher_force_reregister_via_pool(monkeypatch, reset_stale_
     )
 
     sched = sched_mod.TradingScheduler()
-    # retry 11회로 시작 (사이클 9 임계 10 → 11 진입 force 트리거)
-    sched._stale_retry_count["005930"] = 10
+    # retry 6회로 시작 (사이클 13 임계 5 → 6 진입 force 트리거)
+    sched._stale_retry_count["005930"] = 5
     await sched._check_and_resubscribe_stale()
 
     # pool 의 unsubscribe + subscribe 호출
@@ -139,12 +139,12 @@ async def test_stale_watcher_force_reregister_via_pool(monkeypatch, reset_stale_
 
 
 # ---------------------------------------------------------------------------
-# D-4. retry > 20 → skip
-# 사이클 9 (2026-05-18): 임계 *2 = 6 → 20 갱신
+# D-4. retry > 10 → skip
+# 사이클 13 (2026-05-18): 임계 *2 = 20 → 10 단축
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_stale_watcher_skips_when_retry_exceeds_6(monkeypatch, reset_stale_state):
-    """retry > STALE_FORCE_REREGISTER_AFTER*2 (=20) 시 skip — 호출 0."""
+    """retry > STALE_FORCE_REREGISTER_AFTER*2 (=10) 시 skip — 호출 0."""
     from src.engine import scheduler as sched_mod
     from src.engine import scanner
     from src.realtime import websocket_pool as wp_mod
@@ -170,7 +170,7 @@ async def test_stale_watcher_skips_when_retry_exceeds_6(monkeypatch, reset_stale
     )
 
     sched = sched_mod.TradingScheduler()
-    sched._stale_retry_count["005930"] = 21  # >20 — skip
+    sched._stale_retry_count["005930"] = 11  # >10 — skip
     await sched._check_and_resubscribe_stale()
 
     # 모든 풀 호출이 0

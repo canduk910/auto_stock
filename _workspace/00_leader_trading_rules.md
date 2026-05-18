@@ -1915,3 +1915,41 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 - 1245 (사이클 9) → **1263** (+15 사이클 11, -0 회귀)
 - 분당 DB 쿼리: ~1,800 → ~10 (180배 감소)
 - 운영자 PUT 응답 → 매수 신호 적용 지연: 60s → **즉시** (invalidate hook)
+
+## 사이클 13 — BFB/VCP ScanMonitor 가시화 + stale 회복 강화 (2026-05-18)
+
+### 배경
+
+(1) `bull_flag_breakout` / `vcp_breakout` 두 신규 전략(2026-05-15)이 백엔드에 등록됐는데 ScanMonitor UI 에 `BREAKOUT_KEYS` 2종(`volatility_breakout` / `long_tail_volatility`) 한정으로 노출되지 않던 결함. 운영자가 전체 탭/전략 탭 어디에서도 BFB/VCP 카운트와 타겟 가격을 볼 수 없는 가시성 결함.
+
+(2) 사이클 9 에서 KIS 차단 회피 목적으로 `STALE_FORCE_REREGISTER_AFTER 3→10` 으로 늦췄으나, 10회 × 120s = **20분 stale 누적** 후에야 강제 재등록 발화 — 단발 silent inactive(WS 응답 없음 + tick 끊김) 회복이 너무 느림. 분당 추가 트래픽 ~20 req 수준(KIS 한도 18 req/s = 1080/분 의 2%)이라 무시 가능 → **5회 × 120s = 10분** 으로 단축.
+
+### 변경
+
+| 파일 | 변경 |
+|------|------|
+| `src/engine/scheduler.py` | `STALE_FORCE_REREGISTER_AFTER` 10 → **5** 단축. `STALE_WATCHER_INTERVAL_SECS=120` / `STALE_FRESHNESS_SECS=60` 보존. 분기 자동 축소: `*2` 가드 20 → 10, 6~10회 force, 11회 초과 skip. docstring/주석 동기 갱신 |
+| `frontend/src/components/ScanMonitor.tsx` | `BREAKOUT_KEYS` 4종 확장(`bull_flag_breakout` / `vcp_breakout` 추가). `BREAKOUT_LABELS` 신규 라벨 2종 — "눌림목 돌파" / "VCP 변동성 수축". BFB/VCP 도 `isBreakout` 분기로 운영시간 안내 + 타겟 가격 테이블 자동 재사용(둘 다 MAIN only 단일 보드) |
+
+### 회귀 가드
+
+| 파일 | 케이스 | 비고 |
+|------|--------|------|
+| `tests/unit/engine/test_stale_watcher_thresholds.py` | 7 (의미 갱신) | 임계값 가정 10 → 5. 케이스 수 보존 |
+| `tests/integration/test_stale_watcher.py` | 3 (의미 갱신) | K-3 force `(10→5)`, K-4 skip `(21→11)`, K-6 mixed force `(10→5)` |
+| `tests/integration/test_stale_watcher_pool.py` | 2 (의미 갱신) | D-3 force `(10→5)`, D-4 skip `(21→11)` |
+| `frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx` (신규) | 3 | C13-A 전체 탭 카운트 카드 / C13-B BFB 타겟 가격 / C13-C VCP 타겟 가격 |
+
+### 안전 보장
+
+- **매매 코드 무수정**: `order_engine.py` / `risk.py::on_tick` / 전략 파일(BFB/VCP 포함) 변경 0
+- **응답 키 무변경**: ScanMonitor 는 기존 `strategies[key].scanned_count` / `targets` / `params` 만 사용 (BFB/VCP 도 이미 `get_scan_stats()` 보유)
+- **사이클 9 KIS 차단 회피 정책 보존**: 분당 worst-case 트래픽 200 보존, 실현 트래픽 임계 분기 후 < 50 (이전 < 30, 분기 빠르므로 산술 상한 비율 완화 — 절대 트래픽은 그대로)
+- **사이클 11 `get_buy_block_state` 60s TTL 캐시 무영향**: Risk Manager 호출 경로 무변경
+- **사이클 7-C 풀 통합 무영향**: `kis_ws_pool.subscribe(priority='HIGH', bypass_limit=True)` 호출 시그니처 그대로
+
+### 베이스라인
+
+- 1263 (사이클 11) → **1263** (백엔드 신규 0, stale watcher 의미 갱신만)
+- 프론트 142 → **145** (+3 BFB/VCP)
+- stale 회복 시간: 20분 → **10분** (단발 silent inactive 회복 강화)

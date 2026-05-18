@@ -161,8 +161,8 @@ async def test_single_stale_resends(scheduler_env):
 
 
 # ---------------------------------------------------------------------------
-# K-3: 3종목 stale, retry 이미 10 → 11회 진입 → 강제 재등록
-# 사이클 9 (2026-05-18): 임계 STALE_FORCE_REREGISTER_AFTER 3 → 10 갱신
+# K-3: 3종목 stale, retry 이미 5 → 6회 진입 → 강제 재등록
+# 사이클 13 (2026-05-18): 임계 STALE_FORCE_REREGISTER_AFTER 10 → 5 단축
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_force_reregister_after_3(scheduler_env):
@@ -176,12 +176,12 @@ async def test_force_reregister_after_3(scheduler_env):
         fresh=["B11111"],
         stale=["A00001", "A00002", "A00003"],
     )
-    # 사이클 9: 임계 10 → 진입 시 retry=11 이 되어 force 분기
-    sched._stale_retry_count = {"A00001": 10, "A00002": 10, "A00003": 10}
+    # 사이클 13: 임계 5 → 진입 시 retry=6 이 되어 force 분기
+    sched._stale_retry_count = {"A00001": 5, "A00002": 5, "A00003": 5}
 
     await sched._check_and_resubscribe_stale()
 
-    # retry=11 진입 → unsubscribe + subscribe(bypass_limit=True) 각 3회, _send_subscribe 0회
+    # retry=6 진입 → unsubscribe + subscribe(bypass_limit=True) 각 3회, _send_subscribe 0회
     assert len(calls.unsubscribe) == 3
     assert len(calls.subscribe) == 3
     assert calls.send_subscribe == []
@@ -196,12 +196,12 @@ async def test_force_reregister_after_3(scheduler_env):
     assert all(tr_id == TICK_TR_ID for (tr_id, _k) in calls.unsubscribe)
     assert all(tr_id == TICK_TR_ID for (tr_id, _k, _b) in calls.subscribe)
 
-    assert sched._stale_retry_count == {"A00001": 11, "A00002": 11, "A00003": 11}
+    assert sched._stale_retry_count == {"A00001": 6, "A00002": 6, "A00003": 6}
 
 
 # ---------------------------------------------------------------------------
-# K-4: retry 21회 (=20 초과) → skip
-# 사이클 9 (2026-05-18): 임계 *2 = 6 → 20 갱신
+# K-4: retry 11회 (=10 초과) → skip
+# 사이클 13 (2026-05-18): 임계 *2 = 20 → 10 단축
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_skip_after_6_giveup(scheduler_env):
@@ -210,15 +210,15 @@ async def test_skip_after_6_giveup(scheduler_env):
     calls = _patch_kis_ws(scheduler_env, subscribed)
     _set_last_tick(scheduler_env.monkeypatch, fresh=[], stale=["A00001"])
 
-    # 사이클 9: 임계 *2 = 20 → 진입 시 retry=21 이 되며 STALE_FORCE_REREGISTER_AFTER*2=20 초과
-    sched._stale_retry_count = {"A00001": 20}
+    # 사이클 13: 임계 *2 = 10 → 진입 시 retry=11 이 되며 STALE_FORCE_REREGISTER_AFTER*2=10 초과
+    sched._stale_retry_count = {"A00001": 10}
 
     await sched._check_and_resubscribe_stale()
 
     assert calls.send_subscribe == []
     assert calls.unsubscribe == []
     assert calls.subscribe == []
-    assert sched._stale_retry_count == {"A00001": 21}
+    assert sched._stale_retry_count == {"A00001": 11}
 
 
 # ---------------------------------------------------------------------------
@@ -259,9 +259,9 @@ async def test_mixed_resend_and_force(scheduler_env):
     calls = _patch_kis_ws(scheduler_env, subscribed)
     _set_last_tick(scheduler_env.monkeypatch, fresh=[], stale=["AAAAAA", "BBBBBB"])
 
-    # AAAAAA 첫 진입 (retry 0 → 1), BBBBBB 10 → 11 (force)
-    # 사이클 9 (2026-05-18): force 임계 3 → 10 갱신
-    sched._stale_retry_count = {"BBBBBB": 10}
+    # AAAAAA 첫 진입 (retry 0 → 1), BBBBBB 5 → 6 (force)
+    # 사이클 13 (2026-05-18): force 임계 10 → 5 단축
+    sched._stale_retry_count = {"BBBBBB": 5}
 
     await sched._check_and_resubscribe_stale()
 
@@ -274,7 +274,7 @@ async def test_mixed_resend_and_force(scheduler_env):
     assert len(calls.unsubscribe) == 1
     assert len(calls.subscribe) == 1
 
-    assert sched._stale_retry_count == {"AAAAAA": 1, "BBBBBB": 11}
+    assert sched._stale_retry_count == {"AAAAAA": 1, "BBBBBB": 6}
 
 
 # ---------------------------------------------------------------------------

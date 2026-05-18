@@ -100,10 +100,19 @@ const PHASE_LABELS: Record<string, { label: string; color: string }> = {
   log_analysis: { label: '로그 분석', color: 'bg-indigo-100 text-indigo-700' },
 }
 
-const BREAKOUT_KEYS = ['volatility_breakout', 'long_tail_volatility'] as const
+// 사이클 13 (2026-05-18): BFB / VCP 신규 전략 가시화. 둘 다 MAIN only 단일 보드.
+// VB/LTV 와 동일한 isBreakout 분기로 운영시간 안내 + 타겟 가격 테이블 재사용.
+const BREAKOUT_KEYS = [
+  'volatility_breakout',
+  'long_tail_volatility',
+  'bull_flag_breakout',
+  'vcp_breakout',
+] as const
 const BREAKOUT_LABELS: Record<string, string> = {
   volatility_breakout: '변동성 돌파',
   long_tail_volatility: '롱테일 변동성',
+  bull_flag_breakout: '눌림목 돌파',
+  vcp_breakout: 'VCP 변동성 수축',
 }
 
 interface Props {
