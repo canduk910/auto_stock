@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Any, Optional
 from uuid import UUID
@@ -24,15 +25,33 @@ logger = logging.getLogger(__name__)
 
 TABLE_NAME = "kis_quote_accounts"
 
+# 사이클 14-D (2026-05-18) — list_accounts 60s TTL 메모리 캐시.
+# Settings/Dashboard 폴링(30s) + boot pool_start 호출 race + supabase HTTP/2
+# stale connection 결함으로 list 실패 28회/시간 누적되던 결함 차단.
+# active_only=True/False 키 분리. INSERT/UPDATE/DELETE 직후 invalidate.
+_LIST_CACHE_TTL = 60.0
+_list_cache: dict[bool, list[KisQuoteAccount]] = {}
+_list_cache_expires_at: dict[bool, float] = {}
+
+
+def invalidate_list_cache() -> None:
+    """INSERT/UPDATE/DELETE 직후 호출 — 다음 list_accounts 가 fresh fetch."""
+    _list_cache.clear()
+    _list_cache_expires_at.clear()
+
 
 # ---------------------------------------------------------------------------
 # 조회
 # ---------------------------------------------------------------------------
 async def list_accounts(active_only: bool = False) -> list[KisQuoteAccount]:
-    """전체 또는 활성 계좌 목록 조회 (created_at ASC).
+    """전체 또는 활성 계좌 목록 조회 (created_at ASC). 60s TTL 캐시.
 
     active_only=True 면 active=true 만 반환.
     """
+    now = time.monotonic()
+    expires_at = _list_cache_expires_at.get(active_only)
+    if expires_at is not None and now < expires_at:
+        return _list_cache[active_only]
 
     def _query():
         q = supabase.table(TABLE_NAME).select("*")
@@ -43,9 +62,15 @@ async def list_accounts(active_only: bool = False) -> list[KisQuoteAccount]:
     try:
         result = await asyncio.to_thread(_query)
         rows = result.data or []
-        return [KisQuoteAccount.from_row(r) for r in rows]
+        accounts = [KisQuoteAccount.from_row(r) for r in rows]
+        _list_cache[active_only] = accounts
+        _list_cache_expires_at[active_only] = now + _LIST_CACHE_TTL
+        return accounts
     except Exception:
         logger.exception("[kis_quote_accounts] list 실패")
+        # 사이클 14-D: stale 캐시가 있으면 반환 (graceful). 없으면 빈 리스트.
+        if active_only in _list_cache:
+            return _list_cache[active_only]
         return []
 
 
@@ -176,6 +201,7 @@ async def insert_account(
         raise
 
     rows = result.data or []
+    invalidate_list_cache()  # 사이클 14-D: 다음 list_accounts 즉시 fresh
     if not rows:
         # supabase-py INSERT 가 빈 응답을 주는 경우 fallback 재조회
         fetched = await get_account_by_label(label)
@@ -230,6 +256,7 @@ async def update_account(
             raise LabelConflictError(f"이미 등록된 label: {label}") from e
         raise
 
+    invalidate_list_cache()  # 사이클 14-D: 다음 list_accounts 즉시 fresh
     # 갱신 직후 재조회 (응답 최신화)
     refreshed = await get_account(aid)
     return refreshed
@@ -247,6 +274,7 @@ async def delete_account(account_id: UUID | str) -> bool:
 
     try:
         await asyncio.to_thread(_delete)
+        invalidate_list_cache()  # 사이클 14-D: 다음 list_accounts 즉시 fresh
         return True
     except Exception:
         logger.exception("[kis_quote_accounts] delete(%s) 실패", aid)

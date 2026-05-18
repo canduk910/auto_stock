@@ -51,6 +51,7 @@ Supabase(PostgreSQL) CRUD 모듈.
 
 ### kis_quote_accounts.py — 보조 KIS 시세 수신 계좌 풀 (사이클 7-A, 2026-05-17)
 - `list_accounts(active_only=False)` / `get_account(id)` / `get_account_by_label(label)` — 응답은 `KisQuoteAccount` (`app_secret_masked` 만, 평문 절대 노출 안 함)
+- **사이클 14-D (2026-05-18) `list_accounts` 60s TTL 메모리 캐시**: 모듈 전역 `_list_cache` / `_list_cache_expires_at` + `invalidate_list_cache()` + `_LIST_CACHE_TTL=60.0`. `time.monotonic()` 비교 → TTL 내 호출은 캐시 hit (DB 호출 0). `active_only=True/False` 키 분리. DB 예외 + 캐시 있음 → stale 캐시 반환 (graceful, 운영 안정성), 캐시 없음 → 빈 리스트 (사이클 7-A 회귀 보존). INSERT/UPDATE/DELETE 직후 `invalidate_list_cache()` 즉시 호출 — 운영 토글 다음 호출에서 fresh fetch. 2026-05-18 KST 13:13~14:44 운영 사고: `KisQuoteAccountsCard` + `KisAccountPoolCard` 30s 폴링 + 컨테이너 재시작 race + supabase HTTP/2 stale connection 결함으로 `[kis_quote_accounts] list 실패` ERROR 28회/시간 누적. fix 후 분당 호출 ~2회 → 1회 미만, DB 부하 + ERROR 로그 동시 차단. 회귀 가드: `tests/unit/db/test_kis_quote_accounts_cache.py` 7 케이스(TTL fresh / TTL 만료 / invalidate / 첫 호출 / DB 예외 + stale 반환 / DB 예외 + 빈 리스트 / active_only 키 분리)
 - `insert_account(label, app_key, app_secret, kis_env)` — label UNIQUE 충돌 시 `LabelConflictError`, 빈 값 / kis_env 부적합 시 `ValueError`
 - `update_account(id, active=None, label=None)` — 부분 갱신. app_key/app_secret 수정은 본 사이클 미지원(보안 감사 추적성 위해 삭제 후 재등록 패턴)
 - `delete_account(id)` — 존재 시 True, 미존재 False
