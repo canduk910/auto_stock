@@ -35,6 +35,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.scheduler import TradingScheduler
 
@@ -155,6 +156,7 @@ async def test_manual_stop_pool_exception_does_not_block_shutdown():
 # Test B-3 — 정상 finally 종료 경로에서 pool.stop() 호출
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_normal_shutdown_finally_invokes_pool_stop():
     """정상 종료 finally 블록에서 ``kis_ws_pool.stop()`` 호출 verify.
 
@@ -200,6 +202,7 @@ async def test_normal_shutdown_finally_invokes_pool_stop():
 # Test B-4 — finally 의 pool.stop 예외도 흡수 (비정상 종료 시 종료 메시지 도달)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_normal_shutdown_finally_pool_exception_does_not_block_log():
     """finally 블록의 ``pool.stop()`` 이 예외 raise 해도 ``write_log("INFO", "매매 시스템 종료")``
     가 도달.

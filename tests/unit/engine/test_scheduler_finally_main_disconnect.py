@@ -26,9 +26,11 @@ Red 단계:
 
 from __future__ import annotations
 
+from contextlib import ExitStack
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.scheduler import TradingScheduler
 
@@ -39,6 +41,7 @@ pytestmark = pytest.mark.unit
 # Test E-1 — start() 본문 예외 시 finally 에서 메인 disconnect best-effort 호출
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_start_exception_triggers_main_disconnect_in_finally():
     """Red: ``start()`` 본문이 488 라인 도달 *전* 예외 raise 시 finally 의
     ``kis_ws.disconnect()`` best-effort 호출이 발화해야 한다 — 현재 코드에서 fail 해야 함.
@@ -107,6 +110,7 @@ async def test_start_exception_triggers_main_disconnect_in_finally():
 # Test E-2 — 정상 경로 disconnect 2회 호출이지만 close 부작용 1회만 (idempotent)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_normal_path_main_disconnect_idempotent_two_calls():
     """Red: 정상 경로에서 try 본문 + finally = 메인 disconnect 가 총 2회 호출되지만,
     ``KisWebSocket.disconnect()`` 가 idempotent (`_ws` nullify 후 두 번째 호출은 close skip)
@@ -159,16 +163,35 @@ async def test_normal_path_main_disconnect_idempotent_two_calls():
     async def _wait_noop(*args, **kwargs):
         return None
 
-    with patch.object(sched, "_boot", side_effect=_boot_noop), \
-         patch.object(sched, "_settle", side_effect=_settle_noop), \
-         patch.object(sched, "_wait_until", side_effect=_wait_noop, create=True), \
-         patch("src.engine.scheduler.kis_ws", main_ws), \
-         patch("src.realtime.websocket_pool.kis_ws_pool", fake_pool), \
-         patch("src.engine.scheduler.write_log", new=AsyncMock()), \
-         patch("src.engine.scheduler.register_tick_handler"), \
-         patch("src.engine.scheduler.register_execution_handler"), \
-         patch("src.engine.scheduler.register_board_handler"), \
-         patch("src.engine.scheduler.asyncio.create_task", side_effect=lambda coro: _close_coro(coro)):
+    # 정상 종료 경로 시뮬레이션: scan_stocks 등 외부 호출 차단 + _wait_until noop 으로
+    # start() 본문을 네트워크 호출 없이 끝까지 통과시킨다 (보강 — 10:00 시각 기준 분기).
+    patches = [
+        patch.object(sched, "_boot", side_effect=_boot_noop),
+        patch.object(sched, "_settle", side_effect=_settle_noop),
+        patch.object(sched, "_wait_until", side_effect=_wait_noop, create=True),
+        patch.object(sched, "_confirm_breakout_open_prices", new=AsyncMock(), create=True),
+        patch.object(sched, "_force_clear_main_only", new=AsyncMock(), create=True),
+        patch.object(sched, "_drain_pending_next_day_clear", new=AsyncMock(), create=True),
+        patch.object(sched, "_collect_breakout_tickers", return_value=[]),
+        patch.object(sched, "_collect_swing_tickers", return_value=[]),
+        patch.object(sched, "_build_subscription_source_counts", return_value={}),
+        patch.object(sched, "_build_priority_groups", return_value={}),
+        patch("src.engine.scheduler.scan_stocks", new=AsyncMock(return_value=[])),
+        patch("src.engine.scheduler.subscribe_filtered_stocks", new=AsyncMock()),
+        patch("src.engine.scheduler.unsubscribe_all", new=AsyncMock()),
+        patch("src.engine.scheduler.asyncio.sleep", new=AsyncMock()),
+        patch("src.engine.scheduler.kis_ws", main_ws),
+        patch("src.realtime.websocket_pool.kis_ws_pool", fake_pool),
+        patch("src.engine.scheduler.write_log", new=AsyncMock()),
+        patch("src.engine.scheduler.register_tick_handler"),
+        patch("src.engine.scheduler.register_execution_handler"),
+        patch("src.engine.scheduler.register_board_handler"),
+        patch("src.engine.scheduler.asyncio.create_task",
+              side_effect=lambda coro: _close_coro(coro)),
+    ]
+    with ExitStack() as stack:
+        for p in patches:
+            stack.enter_context(p)
         # start() 가 정상 흐름으로 종료될 수 있도록 _wait_until 가 모두 즉시 반환 →
         # try 본문이 자연 통과되어 488 라인 disconnect 1회 + finally 1회 = 총 2회 기대.
         try:
@@ -209,6 +232,7 @@ def _close_coro(coro):
 # Test E-3 — finally 의 disconnect 가 예외 raise 해도 pool.stop 도달 verify
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_finally_main_disconnect_exception_does_not_block_pool_stop():
     """Red: finally 의 ``kis_ws.disconnect()`` best-effort 가 예외를 raise 해도
     그 *후* 의 ``kis_ws_pool.stop()`` 이 정상 도달해야 한다 — 현재 코드에서 fail 해야 함.

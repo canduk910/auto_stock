@@ -33,6 +33,7 @@ from contextlib import ExitStack
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.scheduler import TradingScheduler
 
@@ -81,6 +82,7 @@ def _close_coro(coro):
 # Test J-1 — line 244 직후 예외 → self._ws_task cancel + self._scan_task None skip
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_exception_after_ws_task_creation_cancels_ws_task_and_skips_scan_task():
     """Red: ``start()`` 본문 line 244 (`ws_task` 생성) 직후 + line 402 (`scan_task` 생성)
     *전* 단계에서 예외 raise 시, finally 가:
@@ -195,6 +197,7 @@ async def test_exception_after_ws_task_creation_cancels_ws_task_and_skips_scan_t
 # Test J-2 — line 402 직후 예외 → ws_task + scan_task 둘 다 cancel + await
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_exception_after_scan_task_creation_cancels_both_tasks():
     """Red: ``start()`` 본문 line 402 (`scan_task` 생성) 직후 ~ line 488 *이전*
     단계에서 예외 raise 시, finally 가:
@@ -326,6 +329,7 @@ async def test_exception_after_scan_task_creation_cancels_both_tasks():
 # Test J-3 — 정상 경로 idempotent (try 본문에서 await ws_task 완료 후 finally 진입)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_normal_path_done_tasks_skip_cancel_but_clear_attr():
     """Red(부분 PASS 가능): 정상 경로에서 try 본문 line 490 ``await self._ws_task`` 완료
     후 finally 진입. 두 task 모두 ``done()=True`` → finally 의
@@ -407,6 +411,7 @@ async def test_normal_path_done_tasks_skip_cancel_but_clear_attr():
 # Test J-4 — 15:20 이후 시작 분기 (self._scan_task = None) finally 안전 처리
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_scan_task_none_branch_finally_skips_safely():
     """Red(부분 PASS 가능): 15:20 이후 시작 분기 (line 408 명세 위치) 에서
     ``self._scan_task = None`` 상태로 진입. 이후 다른 단계에서 예외 raise 시
@@ -480,6 +485,7 @@ async def test_scan_task_none_branch_finally_skips_safely():
 # Test J-5 — done() 인 task 의 cancel skip but setattr None 수행 (Test F-3 패턴)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
+@freeze_time("2026-05-18 10:00:00")
 async def test_already_done_tasks_finally_skip_cancel_but_clear_attrs():
     """Red(부분 PASS 가능): ws_task / scan_task 가 이미 ``done()=True`` 인 상태로
     finally 진입 → cancel skip but setattr None 수행. Test F-3 와 동일 패턴.
