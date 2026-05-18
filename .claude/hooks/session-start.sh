@@ -24,6 +24,11 @@ echo "[session-start] frontend npm deps"
 npm install --silent --no-audit --no-fund --no-progress --prefix frontend
 
 # pytest 가 src/ 를 import 할 때 PYTHONPATH 가 cwd 인지 확인
-echo 'export PYTHONPATH="${PYTHONPATH:-}:."' >> "${CLAUDE_ENV_FILE:-/dev/null}"
+# 13-E-3 — hook 다회 실행 시 동일 라인 중복 누적 방지 (Copilot 리뷰 #2).
+_PYTHONPATH_LINE='export PYTHONPATH="${PYTHONPATH:-}:."'
+_ENV_FILE="${CLAUDE_ENV_FILE:-/dev/null}"
+if [ "${_ENV_FILE}" = "/dev/null" ] || ! grep -qxF "${_PYTHONPATH_LINE}" "${_ENV_FILE}" 2>/dev/null; then
+  echo "${_PYTHONPATH_LINE}" >> "${_ENV_FILE}"
+fi
 
 echo "[session-start] done"

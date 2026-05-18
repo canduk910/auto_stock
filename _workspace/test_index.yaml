@@ -58,6 +58,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -80,6 +81,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -139,6 +141,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -168,6 +171,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -208,6 +212,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -289,6 +294,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -365,6 +371,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -425,6 +432,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -499,6 +507,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -528,6 +537,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -596,6 +606,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -626,6 +637,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -689,6 +701,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -749,6 +762,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -823,6 +837,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -902,6 +917,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -999,6 +1015,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1062,6 +1079,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1135,6 +1153,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1159,6 +1178,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1216,6 +1236,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1240,6 +1261,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1300,6 +1322,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1364,6 +1387,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1437,6 +1461,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1461,6 +1486,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1519,6 +1545,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1549,6 +1576,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1609,6 +1637,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1633,6 +1662,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1672,6 +1702,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1727,6 +1758,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1789,6 +1821,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1818,6 +1851,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1875,6 +1909,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -1899,6 +1934,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -1956,6 +1992,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2036,6 +2073,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2124,6 +2162,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2155,6 +2194,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2219,6 +2259,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2280,6 +2321,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2355,6 +2397,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2384,6 +2427,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2440,6 +2484,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2477,6 +2522,7 @@ backend:
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_subscription_source_counts.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2538,6 +2584,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2562,6 +2609,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2621,6 +2669,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2649,6 +2698,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2708,6 +2758,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2730,6 +2781,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2793,6 +2845,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2817,6 +2870,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2856,6 +2910,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2904,6 +2959,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2969,6 +3025,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -2985,6 +3042,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3045,6 +3103,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3069,6 +3128,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3108,6 +3168,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3154,6 +3215,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3209,6 +3271,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3282,6 +3345,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -3345,6 +3409,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3361,6 +3426,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3426,6 +3492,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3469,6 +3536,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3534,6 +3602,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3558,6 +3627,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3597,6 +3667,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3649,6 +3720,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3687,6 +3759,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3733,6 +3806,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3772,6 +3846,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3822,6 +3897,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3880,6 +3956,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3904,6 +3981,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -3943,6 +4021,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -3998,6 +4077,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -4039,6 +4119,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -4112,6 +4193,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -4146,6 +4228,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -4198,6 +4281,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -4258,6 +4342,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -4285,6 +4370,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -4369,6 +4455,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -4396,6 +4483,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -4452,6 +4540,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -4484,6 +4573,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -4542,6 +4632,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -4609,6 +4700,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -4685,6 +4777,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -4733,6 +4826,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -4836,6 +4930,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -4897,6 +4992,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -4990,6 +5086,7 @@ backend:
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -5020,6 +5117,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -5093,6 +5191,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -5156,6 +5255,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -5241,6 +5341,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -5300,6 +5401,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -5382,6 +5484,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
@@ -5437,6 +5540,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -5847,6 +5951,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -5877,6 +5982,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -5942,6 +6048,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -5973,6 +6080,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -6039,6 +6147,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -6065,6 +6174,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -6123,6 +6233,7 @@ backend:
     - tests/integration/test_scheduler_recommendation_failure.py
     - tests/integration/test_sell_flow.py
     - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
     - tests/integration/test_smoke.py
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
@@ -6186,6 +6297,7 @@ backend:
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -6661,10 +6773,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-19T00:06:44.363646+09:00'
+generated_at: '2026-05-19T07:34:45.183104+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 162
+  backend_tests: 164
   frontend_modules: 57
   frontend_tests: 31
   unmapped_modules:

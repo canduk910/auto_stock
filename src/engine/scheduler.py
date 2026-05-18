@@ -619,12 +619,13 @@ class TradingScheduler:
     async def stop(self) -> None:
         """매매 프로세스를 중지한다."""
         self._running = False
-        # 사이클 13-E-1 리뷰 ② — finally 와 동일한 5종 task cancel.
-        # _swing_rest_poll_task 누락 시 disconnect/pool.stop 이후 REST 폴링이 한 사이클 더
-        # 돌거나 예외 로그가 발생할 수 있어 finally 와 동일 목록·동일 처리로 통일.
+        # 사이클 13-E-3 — finally 블록 (line 500~518) 과 동일한 7종 task cancel.
+        # `_ws_task`/`_scan_task` 누락 시 stop→start 빠른 재시작 race 에서
+        # 좀비 connect 루프 + scan_loop 가 중복 동작 가능 (Copilot 리뷰 #1).
         for task_attr in (
             "_next_day_task", "_session_task", "_stale_watcher_task",
             "_swing_poll_task", "_swing_rest_poll_task",
+            "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
             if task and not task.done():
