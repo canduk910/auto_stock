@@ -2352,10 +2352,13 @@ class TradingScheduler:
         """
         from datetime import datetime as _dt
         from src.engine.scanner import KST_TZ, ticker_last_tick
-        from src.realtime.websocket import kis_ws
+        # 사이클 14-A (2026-05-18) — 메인 단독 → 풀 전체로 확장. 사이클 11 에서
+        # `scanner.get_scan_status()` 만 풀 통합되고 짝궁 메서드 누락되어 운영자가
+        # `[tick_coverage] subscribed=0` 을 보고 "전부 끊김"이라고 오인하던 결함 차단.
+        from src.realtime.websocket_pool import kis_ws_pool
 
         try:
-            subscribed = kis_ws.get_subscribed_tickers()
+            subscribed = kis_ws_pool.get_subscribed_tickers()
             now = _dt.now(KST_TZ)
             fresh_threshold = timedelta(seconds=60)
             fresh_tickers: set[str] = set()

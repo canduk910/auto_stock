@@ -40,7 +40,7 @@ async def test_tick_coverage_includes_ratio_and_stale_sample(caplog):
     """확장 형식: ratio + stale_sample + last_tick_avg_age 필드 노출."""
     from src.engine import scanner as scanner_module
     from src.engine.scheduler import TradingScheduler
-    from src.realtime.websocket import kis_ws
+    from src.realtime.websocket_pool import kis_ws_pool  # 사이클 14-A
 
     now = datetime.now(KST_TZ)
     scanner_module.ticker_last_tick.update({
@@ -51,7 +51,7 @@ async def test_tick_coverage_includes_ratio_and_stale_sample(caplog):
         "000005": now - timedelta(seconds=240),  # stale
     })
 
-    with patch.object(kis_ws, "get_subscribed_tickers",
+    with patch.object(kis_ws_pool, "get_subscribed_tickers",
                       return_value={"000001", "000002", "000003", "000004", "000005"}):
         with patch("src.engine.scheduler.write_log", new=AsyncMock()):
             caplog.set_level(logging.INFO, logger="src.engine.scheduler")
@@ -79,7 +79,7 @@ async def test_tick_coverage_warning_when_stale_ratio_high(caplog):
     """stale 비율 30% 초과 시 WARNING 레벨."""
     from src.engine import scanner as scanner_module
     from src.engine.scheduler import TradingScheduler
-    from src.realtime.websocket import kis_ws
+    from src.realtime.websocket_pool import kis_ws_pool  # 사이클 14-A
 
     # 5종목 중 4종목 stale (80%) → WARNING
     now = datetime.now(KST_TZ)
@@ -88,7 +88,7 @@ async def test_tick_coverage_warning_when_stale_ratio_high(caplog):
         # W2~W5 미등록 → stale
     })
 
-    with patch.object(kis_ws, "get_subscribed_tickers",
+    with patch.object(kis_ws_pool, "get_subscribed_tickers",
                       return_value={"W1", "W2", "W3", "W4", "W5"}):
         with patch("src.engine.scheduler.write_log", new=AsyncMock()) as mock_write_log:
             caplog.set_level(logging.WARNING, logger="src.engine.scheduler")

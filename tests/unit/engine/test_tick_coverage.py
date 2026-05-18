@@ -49,7 +49,7 @@ async def test_report_tick_coverage_fresh_and_stale_mixed(caplog):
     """3종목 fresh + 2종목 stale 분리 카운트."""
     from src.engine import scanner as scanner_module
     from src.engine.scheduler import TradingScheduler
-    from src.realtime.websocket import kis_ws
+    from src.realtime.websocket_pool import kis_ws_pool  # 사이클 14-A
 
     now = datetime.now(KST_TZ)
     scanner_module.ticker_last_tick.update({
@@ -60,7 +60,7 @@ async def test_report_tick_coverage_fresh_and_stale_mixed(caplog):
         "000005": now - timedelta(seconds=600),  # stale
     })
 
-    with patch.object(kis_ws, "get_subscribed_tickers",
+    with patch.object(kis_ws_pool, "get_subscribed_tickers",
                       return_value={"000001", "000002", "000003", "000004", "000005"}):
         with patch("src.engine.scheduler.write_log", new=AsyncMock()) as mock_write_log:
             caplog.set_level(logging.INFO, logger="src.engine.scheduler")
@@ -93,12 +93,12 @@ async def test_report_tick_coverage_all_stale(caplog):
     """모든 종목이 미수신이면 fresh=0, stale=N — 어제(2026-05-11) 운영 사고 패턴."""
     from src.engine import scanner as scanner_module
     from src.engine.scheduler import TradingScheduler
-    from src.realtime.websocket import kis_ws
+    from src.realtime.websocket_pool import kis_ws_pool  # 사이클 14-A
 
     # ticker_last_tick 자체가 비어있는 상태 (구독은 됐으나 tick 무수신)
     assert len(scanner_module.ticker_last_tick) == 0
 
-    with patch.object(kis_ws, "get_subscribed_tickers",
+    with patch.object(kis_ws_pool, "get_subscribed_tickers",
                       return_value={"A1", "A2", "A3", "A4", "A5"}):
         with patch("src.engine.scheduler.write_log", new=AsyncMock()) as mock_write_log:
             caplog.set_level(logging.INFO, logger="src.engine.scheduler")
@@ -128,14 +128,14 @@ async def test_report_tick_coverage_missing_keys_count_as_stale(caplog):
     """
     from src.engine import scanner as scanner_module
     from src.engine.scheduler import TradingScheduler
-    from src.realtime.websocket import kis_ws
+    from src.realtime.websocket_pool import kis_ws_pool  # 사이클 14-A
 
     now = datetime.now(KST_TZ)
     # 구독 3종목 중 1종목만 ticker_last_tick에 등록
     scanner_module.ticker_last_tick["B1"] = now - timedelta(seconds=10)
     # B2, B3 는 missing
 
-    with patch.object(kis_ws, "get_subscribed_tickers",
+    with patch.object(kis_ws_pool, "get_subscribed_tickers",
                       return_value={"B1", "B2", "B3"}):
         with patch("src.engine.scheduler.write_log", new=AsyncMock()):
             caplog.set_level(logging.INFO, logger="src.engine.scheduler")
