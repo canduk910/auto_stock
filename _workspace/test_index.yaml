@@ -81,6 +81,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -168,6 +169,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -288,6 +290,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -423,6 +426,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -525,6 +529,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -622,6 +627,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -744,6 +750,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -896,6 +903,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -1055,6 +1063,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -1151,6 +1160,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -1231,6 +1241,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -1354,6 +1365,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -1450,6 +1462,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -1537,6 +1550,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -1620,6 +1634,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -1713,6 +1728,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -1803,6 +1819,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -1883,6 +1900,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -2019,6 +2037,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -2137,6 +2156,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -2261,6 +2281,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -2364,6 +2385,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2541,6 +2563,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -2627,6 +2650,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -2707,6 +2731,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -2793,6 +2818,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -2879,6 +2905,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -2959,6 +2986,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3042,6 +3070,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3126,6 +3155,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3253,6 +3283,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
@@ -3331,6 +3362,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3438,6 +3470,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -3526,6 +3559,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3616,6 +3650,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -3699,6 +3734,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3787,6 +3823,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3868,6 +3905,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3961,6 +3999,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -4073,6 +4112,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
@@ -4158,6 +4198,7 @@ backend:
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -4245,6 +4286,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -4355,6 +4397,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -4442,6 +4485,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -4566,6 +4610,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -4689,6 +4734,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -4852,6 +4898,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
@@ -4974,6 +5021,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -5109,6 +5157,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -5252,6 +5301,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -5388,6 +5438,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_strategy_registry.py
@@ -5827,6 +5878,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -5922,6 +5974,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -6013,6 +6066,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -6133,6 +6187,7 @@ backend:
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -6606,10 +6661,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-18T23:34:19.875407+09:00'
+generated_at: '2026-05-19T00:06:44.363646+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 161
+  backend_tests: 162
   frontend_modules: 57
   frontend_tests: 31
   unmapped_modules:

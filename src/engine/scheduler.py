@@ -165,6 +165,9 @@ class TradingScheduler:
         self._stale_retry_count: dict[str, int] = {}
         # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
         self._swing_poll_task: asyncio.Task | None = None
+        # 사이클 13-E-2 — start() 본문 로컬 task 를 속성 승격, finally 좀비 차단
+        self._ws_task: asyncio.Task | None = None
+        self._scan_task: asyncio.Task | None = None
 
     async def _load_strategy_config(self) -> None:
         """DB에서 전략 설정(비중/파라미터)을 로드하여 적용한다."""
@@ -241,7 +244,7 @@ class TradingScheduler:
             register_board_handler(session_tracker.on_h0nxmko0)
 
             # WebSocket 연결 (별도 태스크)
-            ws_task = asyncio.create_task(
+            self._ws_task = asyncio.create_task(
                 kis_ws.connect(dispatch_message)
             )
 
@@ -399,13 +402,13 @@ class TradingScheduler:
                     await self._confirm_breakout_open_prices()
 
                 self._phase = "trading"
-                scan_task = asyncio.create_task(self._scan_loop())
+                self._scan_task = asyncio.create_task(self._scan_loop())
                 logger.info("매매 모드 진입 (KRX 메인 + NXT)")
 
                 await self._wait_until(TIME_KRX_MAIN_BUY_STOP)
-                scan_task.cancel()
+                self._scan_task.cancel()
             else:
-                scan_task = None
+                self._scan_task = None
                 logger.info("15:20 이후 시작 — KRX 메인 매수 중단 상태로 진입")
 
             # 15:20 KRX 메인 신규 매수 중단 + KRX 메인 종목 강제 청산
@@ -425,8 +428,8 @@ class TradingScheduler:
             await self._confirm_breakout_open_prices(board="post_nxt")
 
             # NXT 애프터에서도 _scan_loop 유지 (재구독은 보드별 화이트리스트로 결정 — Phase 8)
-            if scan_task is None or scan_task.done():
-                scan_task = asyncio.create_task(self._scan_loop())
+            if self._scan_task is None or self._scan_task.done():
+                self._scan_task = asyncio.create_task(self._scan_loop())
 
             # 19:50 NXT 애프터 신규 매수 중단 (자문 호출은 20:00 으로 이동 — Phase 0, 2026-05-15)
             await self._wait_until(TIME_NXT_POST_BUY_STOP)
@@ -438,8 +441,8 @@ class TradingScheduler:
             # 20:00 NXT 애프터 종료 + AI자문 (둘 다 동시 발화, 백그라운드 task 로 race 회피)
             await self._wait_until(TIME_NXT_POST_CLOSE)
             self._phase = "closing"
-            if scan_task and not scan_task.done():
-                scan_task.cancel()
+            if self._scan_task and not self._scan_task.done():
+                self._scan_task.cancel()
             await unsubscribe_all()
             await write_log("INFO", "20:00 NXT 애프터 종료, 구독 해제")
 
@@ -487,7 +490,7 @@ class TradingScheduler:
 
             await kis_ws.disconnect()
             try:
-                await ws_task
+                await self._ws_task
             except asyncio.CancelledError:
                 pass
 
@@ -495,10 +498,14 @@ class TradingScheduler:
             logger.exception("매매 프로세스 오류")
             await write_log("ERROR", "매매 프로세스 비정상 종료")
         finally:
+            # 사이클 13-E-2 — ws_task / scan_task 도 self.* 속성화 후 동일 cancel 루프 포함.
+            # 정리 순서: 백그라운드 task 7종 cancel → 메인 ws disconnect → pool stop.
+            # ws_task 가 살아있으면 disconnect 가 race 가능 → cancel 을 먼저.
             # 백그라운드 task lifecycle — 비정상 종료 시 좀비 task 방지
             for task_attr in (
                 "_next_day_task", "_session_task", "_stale_watcher_task",
                 "_swing_poll_task", "_swing_rest_poll_task",
+                "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
                 if task and not task.done():
