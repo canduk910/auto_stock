@@ -94,6 +94,8 @@ async def test_force_reregister_fires_after_sixth_consecutive_stale(monkeypatch)
     monkeypatch.setattr(scanner_mod, "ticker_last_tick", {"005930": old})
 
     pool_mock = MagicMock()
+    # 사이클 13-E (2026-05-18) — 진입점이 풀로 변경됨. 메인 mock 의 subscribed 그대로 반환.
+    pool_mock.get_subscribed_tickers = lambda: list(sch_mod.kis_ws.get_subscribed_tickers())
     pool_mock.unsubscribe_in_pool = AsyncMock()
     pool_mock.subscribe = AsyncMock()
     pool_mock.resend_subscribe_for_ticker = AsyncMock()
@@ -141,6 +143,8 @@ async def test_no_force_reregister_until_fifth_stale(monkeypatch):
     monkeypatch.setattr(scanner_mod, "ticker_last_tick", {"005930": old})
 
     pool_mock = MagicMock()
+    # 사이클 13-E (2026-05-18) — 진입점이 풀로 변경됨. 메인 mock 의 subscribed 그대로 반환.
+    pool_mock.get_subscribed_tickers = lambda: list(sch_mod.kis_ws.get_subscribed_tickers())
     pool_mock.unsubscribe_in_pool = AsyncMock()
     pool_mock.subscribe = AsyncMock()
     pool_mock.resend_subscribe_for_ticker = AsyncMock()
@@ -181,6 +185,8 @@ async def test_fresh_recovery_clears_retry_count(monkeypatch):
     )
 
     pool_mock = MagicMock()
+    # 사이클 13-E (2026-05-18) — 진입점이 풀로 변경됨. 메인 mock 의 subscribed 그대로 반환.
+    pool_mock.get_subscribed_tickers = lambda: list(sch_mod.kis_ws.get_subscribed_tickers())
     pool_mock.unsubscribe_in_pool = AsyncMock()
     pool_mock.subscribe = AsyncMock()
     pool_mock.resend_subscribe_for_ticker = AsyncMock()

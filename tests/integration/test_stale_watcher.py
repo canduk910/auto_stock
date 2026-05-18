@@ -71,6 +71,12 @@ def _patch_kis_ws(scheduler_env, subscribed: set[str]):
     double, calls = _make_kis_ws_double(subscribed)
     scheduler_env.monkeypatch.setattr("src.engine.scheduler.kis_ws", double)
 
+    # 사이클 13-E (2026-05-18) — 진입점도 풀 헬퍼 사용. 동일 subscribed 반환.
+    scheduler_env.monkeypatch.setattr(
+        "src.realtime.websocket_pool.kis_ws_pool.get_subscribed_tickers",
+        lambda: list(subscribed),
+    )
+
     # 사이클 7-C — 풀 헬퍼도 동일 calls 객체에 위임
     async def fake_resend(tr_id, tr_key):
         await double._send_subscribe(tr_id, tr_key, subscribe=True)

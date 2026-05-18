@@ -1,9 +1,12 @@
-"""Cycle 7-C Red — K stale watcher 의 풀 통합.
+"""Cycle 7-C + 13-E Red — K stale watcher 의 풀 통합.
 
 `_check_and_resubscribe_stale` 가 단일 세션 직접 호출 대신
 `kis_ws_pool.resend_subscribe_for_ticker` / `kis_ws_pool.unsubscribe_in_pool` 사용.
 
 분배 추적 dict(`_ticker_to_session`) 활용해 정확한 세션에 재전송.
+
+사이클 13-E (2026-05-18): 진입점 `get_subscribed_tickers` 도 풀 전체로 갱신 —
+메인 비어있어도 보조 종목 stale 처리되도록.
 """
 
 from __future__ import annotations
@@ -40,8 +43,8 @@ async def test_stale_watcher_calls_pool_resend(monkeypatch, reset_stale_state):
 
     # subscribed 1개, stale 상태
     monkeypatch.setattr(
-        sched_mod.kis_ws, "get_subscribed_tickers",
-        lambda: {"005930"}, raising=False,
+        wp_mod.kis_ws_pool, "get_subscribed_tickers",
+        lambda: ["005930"], raising=False,
     )
     # 60초 이전 마지막 tick → stale
     from src.engine.scanner import KST_TZ
@@ -76,8 +79,8 @@ async def test_stale_watcher_uses_ticker_to_session_routing(monkeypatch, reset_s
     from src.engine.scanner import KST_TZ
 
     monkeypatch.setattr(
-        sched_mod.kis_ws, "get_subscribed_tickers",
-        lambda: {"005930"}, raising=False,
+        wp_mod.kis_ws_pool, "get_subscribed_tickers",
+        lambda: ["005930"], raising=False,
     )
     scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ) - timedelta(seconds=120)
 
@@ -114,8 +117,8 @@ async def test_stale_watcher_force_reregister_via_pool(monkeypatch, reset_stale_
     from src.engine.scanner import KST_TZ
 
     monkeypatch.setattr(
-        sched_mod.kis_ws, "get_subscribed_tickers",
-        lambda: {"005930"}, raising=False,
+        wp_mod.kis_ws_pool, "get_subscribed_tickers",
+        lambda: ["005930"], raising=False,
     )
     scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ) - timedelta(seconds=120)
 
@@ -151,8 +154,8 @@ async def test_stale_watcher_skips_when_retry_exceeds_6(monkeypatch, reset_stale
     from src.engine.scanner import KST_TZ
 
     monkeypatch.setattr(
-        sched_mod.kis_ws, "get_subscribed_tickers",
-        lambda: {"005930"}, raising=False,
+        wp_mod.kis_ws_pool, "get_subscribed_tickers",
+        lambda: ["005930"], raising=False,
     )
     scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ) - timedelta(seconds=120)
 
@@ -188,10 +191,11 @@ async def test_stale_watcher_clears_retry_when_all_fresh(monkeypatch, reset_stal
     from src.engine import scheduler as sched_mod
     from src.engine import scanner
     from src.engine.scanner import KST_TZ
+    from src.realtime import websocket_pool as wp_mod
 
     monkeypatch.setattr(
-        sched_mod.kis_ws, "get_subscribed_tickers",
-        lambda: {"005930", "000660"}, raising=False,
+        wp_mod.kis_ws_pool, "get_subscribed_tickers",
+        lambda: ["005930", "000660"], raising=False,
     )
     # 모두 fresh (방금 tick)
     scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ)
@@ -204,4 +208,47 @@ async def test_stale_watcher_clears_retry_when_all_fresh(monkeypatch, reset_stal
 
     assert sched._stale_retry_count == {}, (
         f"전체 fresh 시 retry 카운터 clear, 실제={sched._stale_retry_count}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# D-6 (사이클 13-E, 2026-05-18) — 메인 비어있어도 풀 종목 stale 처리
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_stale_watcher_processes_quote_session_when_main_empty(monkeypatch, reset_stale_state):
+    """진입점이 풀(`kis_ws_pool.get_subscribed_tickers`) 사용 — 메인 비어있어도
+    보조 세션 stale 종목 처리. 사이클 7-C 풀 통합 시 진입점 갱신 누락 결함 회귀 가드.
+
+    운영 상황(2026-05-18 14:00): 메인 0, 보조 quote-1 26 종목, stale 18.
+    fix 전: `kis_ws.get_subscribed_tickers()` 가 메인 만 반환 → empty → 즉시 return.
+    fix 후: `kis_ws_pool.get_subscribed_tickers()` 풀 전체 반환 → stale 처리 진입.
+    """
+    from src.engine import scheduler as sched_mod
+    from src.engine import scanner
+    from src.engine.scanner import KST_TZ
+    from src.realtime import websocket_pool as wp_mod
+
+    # 메인 직접 호출은 empty 반환 (현 운영 상황 재현)
+    monkeypatch.setattr(
+        sched_mod.kis_ws, "get_subscribed_tickers",
+        lambda: set(), raising=False,
+    )
+    # 풀은 보조 세션 종목 반환
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "get_subscribed_tickers",
+        lambda: ["005930"], raising=False,
+    )
+    scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ) - timedelta(seconds=120)
+
+    pool_resend_spy = AsyncMock()
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "resend_subscribe_for_ticker", pool_resend_spy, raising=False,
+    )
+
+    sched = sched_mod.TradingScheduler()
+    await sched._check_and_resubscribe_stale()
+
+    # 메인 비어있어도 보조 종목 stale 처리됨 — pool resend 1회 호출 보장
+    assert pool_resend_spy.await_count >= 1, (
+        f"메인 비어있어도 풀 종목 stale 처리되어야 함, 실제={pool_resend_spy.await_count}"
     )

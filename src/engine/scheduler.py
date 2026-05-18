@@ -2189,7 +2189,10 @@ class TradingScheduler:
         # 사이클 7-C — 풀의 분배 추적을 활용한 stale watcher
         from src.realtime.websocket_pool import kis_ws_pool
 
-        subscribed = kis_ws.get_subscribed_tickers()
+        # 사이클 13-E (2026-05-18): 메인 단독 → 풀 전체로 확장. 사이클 7-C 풀 통합 시
+        # 함수 진입점 갱신 누락 결함 — 메인 세션 비어있을 때(보유 0, 시세는 보조에 집중)
+        # 즉시 return 으로 stale_watcher 본체가 영원히 발동 안 하던 결함 차단.
+        subscribed = kis_ws_pool.get_subscribed_tickers()
         if not subscribed:
             return
 
