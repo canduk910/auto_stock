@@ -234,6 +234,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -265,6 +266,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -284,6 +286,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -352,6 +355,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -387,6 +391,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -406,6 +411,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -650,6 +656,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -685,6 +692,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -704,6 +712,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -786,6 +795,7 @@ backend:
     - tests/unit/db/test_system_logs_filter.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -808,6 +818,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -822,6 +833,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -841,6 +853,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -930,6 +943,7 @@ backend:
     - tests/unit/api/test_quote_pool.py
     - tests/unit/auth/test_token.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -951,6 +965,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -966,6 +981,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -984,6 +1000,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -1206,6 +1223,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -1241,6 +1259,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1260,6 +1279,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -1398,6 +1418,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -1823,6 +1844,7 @@ backend:
     - tests/unit/db/test_system_logs_filter.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -1845,6 +1867,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -1860,6 +1883,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -1879,6 +1903,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -1899,6 +1924,7 @@ backend:
     - tests/unit/db/test_system_config_cash_ratio.py
     - tests/unit/db/test_system_config_integrations.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client_db_toggle.py
@@ -2048,6 +2074,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -2083,6 +2110,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -2102,6 +2130,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -2240,6 +2269,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
     - tests/unit/engine/strategies/test_momentum.py
@@ -2251,6 +2281,7 @@ backend:
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -2263,6 +2294,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2516,6 +2548,7 @@ backend:
     - tests/integration/test_boot_market_regime.py
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_risk_buy_block_modes.py
@@ -2953,6 +2986,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
     - tests/unit/engine/strategies/test_momentum.py
@@ -2964,6 +2998,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
@@ -2972,6 +3007,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_websocket_ack.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     transitive_tests:
@@ -3200,6 +3236,7 @@ backend:
   src/engine/strategies/bull_flag_breakout.py:
     direct_tests:
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -3720,6 +3757,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -4206,6 +4244,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -4241,6 +4280,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -4260,6 +4300,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -4474,6 +4515,7 @@ backend:
     - tests/unit/api/test_quote_pool.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -4509,6 +4551,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -4527,6 +4570,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -4710,6 +4754,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -4745,6 +4790,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -4764,6 +4810,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -4775,6 +4822,7 @@ backend:
     - tests/integration/test_pool_distribution.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_pool_safety_rules.py
@@ -4842,6 +4890,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -4889,6 +4938,7 @@ backend:
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/services/test_quote_session_health.py
   src/realtime/websocket_pool.py:
     direct_tests:
@@ -4896,12 +4946,14 @@ backend:
     - tests/integration/test_pool_distribution.py
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_stale_watcher_pool.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -4961,6 +5013,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -5416,6 +5469,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -5506,6 +5560,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -5678,6 +5733,7 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
+    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -5713,6 +5769,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -5732,6 +5789,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
     - tests/unit/realtime/test_websocket_priority.py
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -6174,10 +6232,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-18T07:19:54.522513+09:00'
+generated_at: '2026-05-18T10:31:35.102692+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 146
+  backend_tests: 150
   frontend_modules: 57
   frontend_tests: 30
   unmapped_modules:

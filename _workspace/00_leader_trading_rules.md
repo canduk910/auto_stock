@@ -1878,3 +1878,40 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 ### 베이스라인
 - 1221 (commit edba27b) → 1245 (+24 사이클 9, -0 회귀)
 
+## 사이클 11 — UI 시세 카운트 풀 전체 가시화 + buy_block_state TTL 캐시 (2026-05-18)
+
+### 배경 (운영 점검 — 5/18 KRX 09:00 진입)
+
+2 결함 동시 확인:
+
+1. **결함 A1 — UI 시세 카운트 0 표시**: 대시보드 ScanMonitor 의 `subscribed_count=0` / `tick_coverage_total=0` 표시. 실제로는 보조 세션(ISA, `quote-1`)에 31 종목 정상 구독 중(fresh=12, stale=19). 사이클 7-C 풀 통합 후 `scanner.get_scan_status()` 가 `kis_ws._subscriptions`(메인 단독) 만 카운트해 보조 분산 종목이 가시화되지 않는 결함. 운영자가 "조건검색현황에 현재가가 표시가 되지 않고 있어" 라고 인지한 실 원인.
+
+2. **결함 D — supabase HTTP/2 매 매수 평가마다 5건 ERROR**: `risk.on_tick()` 매수 신호 평가 직전마다 `get_buy_block_state()` 호출 → `system_config` 5 키 fetch → 30 종목 × 10s tick = 분당 ~1,800 DB 쿼리. supabase-py HTTP/2 stale connection 으로 매번 `[buy_block_thresholds] get ... 실패` ERROR. graceful fallback 동작이라 매매 안전성 영향 0 이지만 ERROR 로그 누적 + DB 부하 과다.
+
+### 변경 (단일 PR)
+
+| 파일 | 변경 |
+|------|------|
+| `src/engine/scanner.py` | `get_scan_status()` source 를 `kis_ws._subscriptions` 메인 단독 → `kis_ws_pool.get_subscribed_tickers()` / `get_acked_tickers()` 풀 합집합 위임. 응답 키 4 + tick_coverage 4 = 8 키 모두 보존 |
+| `src/engine/market_regime.py` | `import time` + `BUY_BLOCK_CACHE_TTL=60.0` 상수 + `MarketRegime` dataclass `_buy_block_cache` / `_buy_block_cache_expires_at` 필드(`compare=False, repr=False` — 직렬화·동등성 영향 0) + `invalidate_buy_block_cache()` 메서드 + `get_buy_block_state()` 캐시 hit 분기. **DB 폴백 분기(`db_ok=False`)는 캐시 미저장** — 운영자 임계 갱신 후 폴백 결과 영구 캐시되어 새 임계 미반영되는 결함 차단 |
+| `src/routes/system_integrations.py` | `PUT /api/integrations/buy-block` 응답 끝에 `get_current_regime().invalidate_buy_block_cache()` graceful 호출. 운영 토글 후 60s TTL 만료 기다리지 않고 다음 매수 신호부터 즉시 반영 |
+
+### 안전 보장
+
+- **매매 코드 무수정**: `order_engine.py` / `risk.py::on_tick` 변경 0. `get_buy_block_state()` 인터페이스 동일 (호출자 영향 0)
+- **응답 키 보존**: 프론트 ScanMonitor / Settings UI 영향 0
+- **보조 0개 회귀**: 메인 only 환경(`kis_quote_accounts` DB 미등록 — 현재 운영 기본) 동작 동일 (`WebsocketPool._main` 만 카운트)
+- **사이클 8 4 모드 회귀**: HARD/WARN/SOFT/OFF 모든 모드에서 캐시 hit/miss 결과 동일 (mode/blocked/soft_multiplier/reasons)
+- **DB 예외 안전 fallback**: 캐시 미저장 → 다음 호출에서 폴백 분기 재시도 (안전), 운영 토글 변경은 다음 fetch 성공 시 캐시 갱신
+
+### 회귀 가드 (15 신규)
+
+- `tests/unit/realtime/test_websocket_pool_subscribed_tickers.py` 5 케이스 (메인 only / 보조 only / 합집합 / dedupe / SEND-vs-ACK)
+- `tests/unit/engine/test_scanner_pool_count.py` 4 케이스 (풀 전체 / 메인 only 회귀 / fresh-stale 분류 / 응답 키 회귀)
+- `tests/unit/engine/test_market_regime_buy_block_cache.py` 6 케이스 (TTL fresh / TTL 만료 / invalidate / 첫 호출 / 일관성 / DB 예외 폴백 미저장)
+
+### 베이스라인
+
+- 1245 (사이클 9) → **1263** (+15 사이클 11, -0 회귀)
+- 분당 DB 쿼리: ~1,800 → ~10 (180배 감소)
+- 운영자 PUT 응답 → 매수 신호 적용 지연: 60s → **즉시** (invalidate hook)

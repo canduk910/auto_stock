@@ -18,11 +18,21 @@ graceful fallback:
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, List, Optional
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# 사이클 11 (2026-05-18) — buy_block_state 60s TTL 캐시
+# ---------------------------------------------------------------------------
+# 매수 신호 평가 직전 `get_buy_block_state()` 호출이 매번 supabase 5 키를 fetch 하던
+# 결함(분당 ~1,800 DB 쿼리) 차단. 운영 UI 토글(`PUT /api/integrations/buy-block`) 시
+# `invalidate_buy_block_cache()` 로 즉시 무효화. TTL 60s 는 운영 반영 지연 허용
+# 범위 + DB 부하 180배 감소의 균형점.
+BUY_BLOCK_CACHE_TTL = 60.0
 
 
 # ---------------------------------------------------------------------------
@@ -121,6 +131,15 @@ class MarketRegime:
     buffett_ratio: Optional[float] = None
     cash_min: Optional[int] = None
     raw: dict[str, Any] = field(default_factory=dict)
+
+    # 사이클 11 (2026-05-18) — buy_block_state 60s TTL 캐시 (인스턴스 단위)
+    # dataclass `__eq__` / `__hash__` / 직렬화에는 영향 없음 (compare=False, repr=False).
+    _buy_block_cache: Optional["BuyBlockState"] = field(
+        default=None, compare=False, repr=False,
+    )
+    _buy_block_cache_expires_at: float = field(
+        default=0.0, compare=False, repr=False,
+    )
 
     @classmethod
     def empty(cls) -> "MarketRegime":
@@ -233,6 +252,15 @@ class MarketRegime:
                 )
         return reasons
 
+    def invalidate_buy_block_cache(self) -> None:
+        """캐시 즉시 무효화 — 운영 UI Settings PUT 시 호출.
+
+        `PUT /api/integrations/buy-block` 응답 끝에서 호출되면 운영자 변경이 다음 매수
+        신호부터 즉시 반영. 호출 안 하면 TTL 만료(60s) 까지 캐시된 옛 모드/임계 사용.
+        """
+        self._buy_block_cache = None
+        self._buy_block_cache_expires_at = 0.0
+
     async def get_buy_block_state(self) -> "BuyBlockState":
         """DB 모드+임계 조회 후 4 모드 분기로 매수 가드 상태 결정.
 
@@ -244,21 +272,42 @@ class MarketRegime:
 
         외부 fetch 실패 시 empty regime — 모든 모드에서 reasons=[], blocked=False (graceful).
         DB 미설정 → HARD + 기본 임계 (현재 동작 회귀 보존).
+
+        **사이클 11 (2026-05-18) — 60s TTL 캐시**: 매수 신호 평가 직전 DB 5 키 fetch
+        하던 결함(분당 ~1,800 쿼리) 차단. 캐시 hit 시 DB 호출 0 회 + 즉시 반환.
+        TTL 만료/명시 무효화 시 정상 fetch. **DB 폴백 분기는 캐시 미저장** — 운영
+        UI 가 정상 갱신 후에도 폴백 결과 영구 캐시되어 새 임계 미반영되는 결함 차단.
         """
+        # 캐시 hit — TTL 유효
+        now = time.monotonic()
+        if (
+            self._buy_block_cache is not None
+            and now < self._buy_block_cache_expires_at
+        ):
+            return self._buy_block_cache
+
+        # DB fetch — 예외 시 폴백 분기 (캐시 저장 안 함)
+        db_ok = True
         try:
             mode = await _db_get_buy_block_mode()
         except Exception:
             logger.exception("[buy_block_state] mode 조회 실패 — HARD fallback")
             mode = "HARD"
+            db_ok = False
 
         # OFF 모드는 임계 조회 skip (DB 쿼리 1회 절약)
         if mode == "OFF":
-            return BuyBlockState(
+            state = BuyBlockState(
                 mode="OFF",
                 blocked=False,
                 soft_multiplier=1.0,
                 reasons=[],
             )
+            # OFF 는 DB ok 만 캐시 (모드 fetch 실패 폴백 시 다음 호출에서 재시도)
+            if db_ok:
+                self._buy_block_cache = state
+                self._buy_block_cache_expires_at = now + BUY_BLOCK_CACHE_TTL
+            return state
 
         try:
             thresholds = await _db_get_buy_block_thresholds()
@@ -268,6 +317,7 @@ class MarketRegime:
             )
             from src.db.system_config import BuyBlockThresholds
             thresholds = BuyBlockThresholds()
+            db_ok = False
 
         reasons = self._collect_reasons(
             vix_thr=thresholds.vix_threshold,
@@ -278,37 +328,44 @@ class MarketRegime:
 
         triggered = len(reasons) > 0
         if mode == "HARD":
-            return BuyBlockState(
+            state = BuyBlockState(
                 mode="HARD",
                 blocked=triggered,
                 soft_multiplier=1.0,
                 reasons=reasons,
             )
-        if mode == "WARN":
+        elif mode == "WARN":
             # 매수 허용 + WARNING 로그 (risk.on_tick 책임)
-            return BuyBlockState(
+            state = BuyBlockState(
                 mode="WARN",
                 blocked=False,
                 soft_multiplier=1.0,
                 reasons=reasons,
             )
-        if mode == "SOFT":
-            return BuyBlockState(
+        elif mode == "SOFT":
+            state = BuyBlockState(
                 mode="SOFT",
                 blocked=False,
                 soft_multiplier=0.5 if triggered else 1.0,
                 reasons=reasons,
             )
-        # 알 수 없는 mode — 안전 fallback HARD
-        logger.warning(
-            "[buy_block_state] unknown mode=%r — HARD fallback", mode,
-        )
-        return BuyBlockState(
-            mode="HARD",
-            blocked=triggered,
-            soft_multiplier=1.0,
-            reasons=reasons,
-        )
+        else:
+            # 알 수 없는 mode — 안전 fallback HARD
+            logger.warning(
+                "[buy_block_state] unknown mode=%r — HARD fallback", mode,
+            )
+            state = BuyBlockState(
+                mode="HARD",
+                blocked=triggered,
+                soft_multiplier=1.0,
+                reasons=reasons,
+            )
+
+        # 사이클 11 — DB ok 만 캐시 (폴백 분기 결과는 영구 캐시 오염 차단)
+        if db_ok:
+            self._buy_block_cache = state
+            self._buy_block_cache_expires_at = now + BUY_BLOCK_CACHE_TTL
+        return state
 
     # ------------------------------------------------------------------
     # 직렬화 (프론트 + DB)

@@ -2,6 +2,14 @@
 
 KIS WebSocket 실시간 시세 수신 및 체결통보 처리.
 
+## 사이클 11 (2026-05-18) — scanner 풀 전체 카운트 가시화
+
+`scanner.get_scan_status()` 가 메인 단일(`kis_ws._subscriptions`) 직접 참조에서 풀 합집합(`kis_ws_pool.get_subscribed_tickers()` / `get_acked_tickers()`) 위임으로 전환. 사이클 7-C 풀 통합 후 보조 세션(quote-N) 분배 종목이 ScanMonitor 에 카운트되지 않던 결함(2026-05-18 09:00 KRX 진입 시 보조 31 종목 구독 중인데 UI `subscribed_count=0` 표시) 차단.
+
+- 변경 파일: `src/engine/scanner.py::get_scan_status()` 내부 4 변수(`subscribed_set`/`acked_set` 등)만 source 전환. 응답 키 100% 보존
+- 풀 헬퍼는 7-B 에서 이미 구현됨 — 본 사이클은 호출자(scanner) 만 풀로 위임
+- 회귀 가드: `tests/unit/engine/test_scanner_pool_count.py` 4 케이스 + `tests/unit/realtime/test_websocket_pool_subscribed_tickers.py` 5 케이스(메인 only / 보조 only / 합집합 / dedupe / SEND-vs-ACK 분리)
+
 ## 사이클 7-C (2026-05-18) — 풀 라이프사이클 + scanner/stale watcher 통합
 
 7-B 의 `WebsocketPool` 인프라 위에 boot/start, scanner priority 명시, K stale watcher 풀 헬퍼를 통합.

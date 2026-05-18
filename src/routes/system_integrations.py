@@ -320,6 +320,18 @@ async def set_buy_block(req: BuyBlockUpdateRequest):
         logger.exception("[buy_block] DB 갱신 실패: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
+    # 사이클 11 (2026-05-18) — 메모리 regime 의 buy_block_state 캐시 즉시 무효화.
+    # 운영자 토글 후 60s TTL 만료 기다리지 않고 다음 매수 신호부터 즉시 반영.
+    try:
+        from src.engine import market_regime as mr_mod
+
+        current = mr_mod.get_current_regime()
+        if current is not None:
+            current.invalidate_buy_block_cache()
+    except Exception:
+        # 캐시 무효화 실패는 toggle 성공 자체를 깨뜨리지 않음 — 다음 TTL 만료에 자연 갱신
+        logger.debug("[buy_block] cache invalidate 실패 (graceful)", exc_info=True)
+
     status = await _build_buy_block_status()
     return ApiResponse(
         success=True,

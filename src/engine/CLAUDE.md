@@ -75,6 +75,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `MarketRegime.from_macro_cycle(macro)` — dkstock.cloud `/api/macro/macro-cycle` 응답 파싱
 - `is_buy_allowed(strategy_id) -> bool` — 복합 임계 OR (defensive/VIX>25/FG>85/FG<15) **하드코딩 임계**. 회귀 가드용 동기 API. `to_advisor_dict.buy_blocked` 필드 호환성
 - **사이클 8 (2026-05-18) `get_buy_block_state() -> BuyBlockState` (async)** — DB `buy_block_mode` + `buy_block_*_threshold` 4 키 조회 후 4 모드 분기. 발동 사유 다수 수집. `BuyBlockState{mode, blocked, soft_multiplier, reasons}` dataclass 반환. risk.on_tick 가 매수 신호 직전 호출. DB 조회 실패 시 HARD + 기본 임계 fallback (안전)
+- **사이클 11 (2026-05-18) `get_buy_block_state()` 60s TTL 인스턴스 캐시** — `MarketRegime` dataclass 의 `_buy_block_cache` + `_buy_block_cache_expires_at` 필드(`compare=False, repr=False` — 직렬화·동등성 영향 0). `BUY_BLOCK_CACHE_TTL=60.0`. 첫 호출 시 DB fetch → state 캐시 + 만료시각=`time.monotonic()+60`. TTL 내 호출은 캐시 즉시 반환 (DB 호출 0). 만료 또는 `invalidate_buy_block_cache()` 명시 호출 시 다음 호출에서 재 fetch. **DB fetch 폴백 분기는 캐시 미저장** (`db_ok=False`) — 운영자 임계 갱신 후에도 폴백 결과 영구 캐시되어 새 임계 미반영되는 결함 차단. `PUT /api/integrations/buy-block` 응답 끝에서 `get_current_regime().invalidate_buy_block_cache()` 호출해 운영 토글 즉시 반영. 분당 ~1,800 DB 쿼리(`risk.on_tick` 매수 평가당 5 키 fetch × 30 종목 × 10s tick) → 분당 ~10 쿼리로 180배 감소. 회귀 가드: `tests/unit/engine/test_market_regime_buy_block_cache.py` 6 케이스(TTL fresh/만료 / invalidate / 첫 호출 / 일관성 / 폴백 미저장)
 - `cash_usage_ratio_from_regime(cash_min)` — `clamp((100 - cash_min)/100, 0.0, 1.0)`
 - `refresh_from_dkstock()` — dkstock_client → MarketRegime. 모든 예외 흡수 → empty
 - `persist_snapshot(regime, target_date)` — `market_regime_snapshots` 1행 INSERT. empty 는 skip
@@ -175,6 +176,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `STATIC_TICKER_NAMES` / `_parse_static_ticker_names()`: 모듈 import 시 자기 파일을 정규식(`"(\d{6})",\s*#\s*(.+)$`)으로 파싱해 인라인 코멘트의 종목명을 dict로 추출. 모듈 로드 시 `ticker_names.update(STATIC)` — KIS `inquire-price`가 빈 종목명 응답해도 시장명으로 떨어지지 않도록 보강
 - 공용 데이터: ticker_names, ticker_prices, ticker_prev_close, ticker_market_info, **ticker_last_tick**(Phase D — `risk.on_tick` 호출 시 KST `datetime`으로 갱신, `_report_tick_coverage` 가 사용)
 - **`get_scan_status()` tick_coverage 4종 키 (G3, 2026-05-12)**: `tick_coverage_total/acked/fresh/stale` 추가. `_subscriptions` TICK 필터 size / `_subscriptions_acked` TICK 필터 size / 최근 60s 내 tick 수신 카운트 / 60s 미수신 카운트. 기존 `subscribed_count` 보존(호환성). `/api/trading/status` 의 `scan` 필드에 그대로 동봉되어 ScanMonitor 가 stale 기반 색상 배지(0=gray / 1~5=yellow / 6+=red) + total/41 진행바(80%+ amber) 노출
+- **사이클 11 (2026-05-18) `get_scan_status()` 풀 전체 카운트 전환** — 메인 단일 (`kis_ws._subscriptions` / `_subscriptions_acked`) 직접 참조 → `kis_ws_pool.get_subscribed_tickers()` / `get_acked_tickers()` 풀 합집합 위임. 사이클 7-C 풀 통합 후 보조 세션(quote-1 등) 에 분배된 종목이 ScanMonitor 에 가시화되지 않던 결함(2026-05-18 09:00 KRX 진입 시 보조 31 종목 구독 중인데 `subscribed_count=0` 표시) 차단. 응답 키(`subscribed_tickers`/`subscribed_count`/`tick_coverage_*`) 100% 보존 — 프론트 영향 0. 회귀 가드: `tests/unit/engine/test_scanner_pool_count.py` 4 케이스(풀 전체 / 메인 only fallback / fresh-stale 분류 / 응답 키 회귀)
 
 ## log_analysis_engine.py — 일일 로그 분석
 

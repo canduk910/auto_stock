@@ -134,21 +134,22 @@ async def scan_stocks() -> list[str]:
 
 
 def get_scan_status() -> dict:
-    """스캔 현황을 반환한다. 모멘텀 + 구독 중인 모든 종목의 데이터를 포함."""
-    subscribed = [
-        tr_key for tr_id, tr_key in kis_ws._subscriptions
-        if tr_id == TICK_TR_ID
-    ]
+    """스캔 현황을 반환한다. 모멘텀 + 구독 중인 모든 종목의 데이터를 포함.
+
+    **사이클 11 (2026-05-18) — 풀 전체 카운트**: 메인 세션(`kis_ws._subscriptions`)
+    단독이 아니라 `kis_ws_pool.get_subscribed_tickers()` / `get_acked_tickers()` 합집합
+    으로 카운트한다. 보조 세션(quote-N) 에 분배된 종목도 가시화 — 운영자가 ScanMonitor
+    에서 "subscribed_count=0 / tick_coverage_total=0" 표시를 보던 결함 (2026-05-18
+    09:00 KRX 진입 시 31 종목 보조 세션 구독에도 0 표시) 차단.
+    """
+    subscribed_set = kis_ws_pool.get_subscribed_tickers()
+    subscribed = sorted(subscribed_set)
     # 모멘텀 스캔 + 구독 종목 합집합 (VB 종목도 포함)
-    all_relevant = set(_last_scan_result) | set(subscribed)
+    all_relevant = set(_last_scan_result) | subscribed_set
 
     # G3 (2026-05-12) — tick_coverage 4종 카운트 노출.
     # 운영자가 status 단일 호출로 SEND/ACK/fresh/stale 격차 즉시 인지.
-    subscribed_set = set(subscribed)
-    acked_set = {
-        tr_key for tr_id, tr_key in kis_ws._subscriptions_acked
-        if tr_id == TICK_TR_ID
-    }
+    acked_set = kis_ws_pool.get_acked_tickers()
     # G3: 60s 임계는 Phase D `_report_tick_coverage` 와 동일 — 운영 일관성
     now = datetime.now(KST_TZ)
     threshold = timedelta(seconds=60)
