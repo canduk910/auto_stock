@@ -1774,6 +1774,16 @@ class TradingScheduler:
                 # donchian_swing 은 고정 유니버스라 대상 아님.
                 await self._reprepare_breakout_if_empty()
 
+                # 사이클 13-D (2026-05-18): stale 우선 재구독.
+                # K stale watcher 가 120s 주기로 발화하는데 _scan_loop 는 5분 주기다.
+                # 통합 구독 직후 1행으로 stale 종목을 HIGH 우선순위로 즉시 재구독해
+                # 5분 주기의 자연 회복 경로를 별도 추가한다. cap=10 + 50ms sleep 으로
+                # KIS Rate Limit 보호. 본체 예외는 흡수 — 다음 사이클 자연 재시도.
+                try:
+                    await self._resubscribe_stale_priority(cap=10)
+                except Exception:
+                    logger.exception("_resubscribe_stale_priority 실패 — 다음 사이클 자연 재시도")
+
                 # Phase D: 구독 종목 중 최근 60초 내 tick 수신 비율 카운트 노출.
                 # "구독은 됐으나 시세가 안 들어오는 종목"을 운영자가 즉시 인지하도록 1행 로그.
                 # 2026-05-11 VB/LTV 종일 시세 무수신 사고 가시성 결함 보완.
@@ -2249,6 +2259,78 @@ class TradingScheduler:
         except Exception:
             # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
             logger.debug("[stale_watcher] write_log 실패", exc_info=True)
+
+    async def _resubscribe_stale_priority(self, cap: int = 10) -> list[str]:
+        """`_scan_loop` 통합 구독 직후 stale 종목을 HIGH 우선순위로 즉시 재구독한다.
+
+        K stale watcher 는 120s 주기로 발화하고 (사이클 9 — KIS 차단 회피),
+        `_scan_loop` 는 5분(300s) 주기다. WS silent inactive 발생 시 회복 시간이
+        최대 120s ~ 600s 까지 늘어진다. 본 헬퍼는 5분 주기의 별도 자연 회복 경로
+        — 통합 구독 직후 stale 종목을 HIGH 우선순위로 즉시 재구독한다.
+
+        흐름:
+        1. `scanner.ticker_last_tick` 풀 전체 합집합 사용 (메인+보조 — `risk.on_tick` 단일 진입점)
+        2. 현재시각 - last_tick > `STALE_FRESHNESS_SECS`(=60s) 종목만 수집
+        3. 최대 `cap` 건 (기본 10) — KIS Rate Limit 보호
+        4. 각 종목에 `kis_ws_pool.subscribe(TICK_TR_ID, ticker, priority='HIGH', bypass_limit=True)` 호출
+        5. 종목 간 50ms sleep
+        6. 종목별 예외 격리 (continue, ERROR 로그)
+
+        Returns:
+            재구독한 ticker 리스트 (호출 카운트 + 회귀 검증용)
+
+        안전 불변식:
+        - `_subscriptions` set 직접 수정 금지 — `kis_ws_pool.subscribe` 만 사용
+        - HIGH + bypass_limit=True 로 보유 종목과 동일 우선순위 (메인 fallback 허용)
+        - 종목별 예외는 격리해 다른 stale ticker 영향 차단
+        - 본체 예외는 호출자(`_scan_loop`)가 try/except 로 흡수 — 다음 사이클 자연 재시도
+        """
+        from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
+        from src.realtime.websocket_pool import kis_ws_pool
+
+        now = datetime.now(_KST_TZ)
+        threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
+        min_dt = datetime.min.replace(tzinfo=_KST_TZ)
+
+        # sorted 로 결정적 순서 보장 — cap 적용 시 동일 입력에 동일 출력
+        stale_tickers = sorted(
+            t for t, last in ticker_last_tick.items()
+            if (now - last if isinstance(last, datetime) else now - min_dt) > threshold
+        )
+
+        if not stale_tickers:
+            return []
+
+        targets = stale_tickers[:cap]
+        resubscribed: list[str] = []
+
+        for ticker in targets:
+            try:
+                await kis_ws_pool.subscribe(
+                    TICK_TR_ID, ticker,
+                    priority="HIGH", bypass_limit=True,
+                )
+                resubscribed.append(ticker)
+            except Exception:
+                logger.exception("[stale_priority_resubscribe] 재구독 실패: %s", ticker)
+                continue
+            await asyncio.sleep(0.05)  # Rate Limit 보호
+
+        logger.info(
+            "[stale_priority_resubscribe] count=%d tickers=%s",
+            len(resubscribed), resubscribed,
+        )
+        try:
+            await write_log(
+                "INFO",
+                f"[stale_priority_resubscribe] count={len(resubscribed)} "
+                f"tickers={resubscribed}",
+            )
+        except Exception:
+            # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
+            logger.debug("[stale_priority_resubscribe] write_log 실패", exc_info=True)
+
+        return resubscribed
 
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).
