@@ -76,8 +76,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -161,8 +163,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -278,8 +282,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -410,8 +417,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -510,8 +520,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -605,8 +617,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -724,8 +738,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -873,8 +890,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -1029,8 +1049,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -1123,8 +1146,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -1201,8 +1226,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -1321,8 +1348,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -1415,8 +1445,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -1500,8 +1532,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -1581,8 +1615,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -1672,8 +1708,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -1760,8 +1798,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -1838,8 +1878,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -1971,8 +2013,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -2087,8 +2132,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2208,8 +2255,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -2309,8 +2359,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -2402,6 +2454,7 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_subscription_source_counts.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2483,8 +2536,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2567,8 +2622,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2645,8 +2702,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2729,8 +2788,10 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2813,8 +2874,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2891,8 +2954,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -2972,8 +3037,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -3054,8 +3121,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -3133,6 +3202,7 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_subscription_source_counts.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3178,8 +3248,10 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -3254,8 +3326,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -3359,8 +3433,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -3445,8 +3521,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -3533,8 +3611,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_rest_poll.py
@@ -3614,8 +3694,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -3700,8 +3782,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -3779,8 +3863,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -3870,8 +3956,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -3982,7 +4070,9 @@ backend:
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
@@ -4065,7 +4155,9 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -4148,8 +4240,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -4256,8 +4350,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -4341,8 +4437,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -4462,8 +4560,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -4583,8 +4684,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -4743,8 +4846,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -4863,8 +4969,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -4995,8 +5103,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -5135,8 +5246,11 @@ backend:
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -5268,8 +5382,11 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -5705,8 +5822,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -5798,8 +5917,10 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -5887,8 +6008,10 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_swing_poll_loop.py
@@ -6004,8 +6127,11 @@ backend:
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
@@ -6480,10 +6606,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-18T21:57:36.515152+09:00'
+generated_at: '2026-05-18T23:34:19.875407+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 158
+  backend_tests: 161
   frontend_modules: 57
   frontend_tests: 31
   unmapped_modules:

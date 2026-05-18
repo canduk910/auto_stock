@@ -19,6 +19,12 @@
 
 메인은 정상 종료됐지만 보조 세션이 11건 구독 + WebSocket 연결 유지된 채 잔존.
 
+**리뷰 추가 발견 (PR #12, 2026-05-18)**: Copilot 봇이 3건 지적 — ① `start()` 예외 시
+`finally` 가 메인 disconnect 도달 못함 (`scheduler.py:519`), ② 수동 `stop()` task cancel
+목록에 `_swing_rest_poll_task` 누락 (`scheduler.py:621`), ③ scanner `unsubscribe_all()`
+실패 swallow 후 항상 INFO 성공 로그 — 운영 가시성 오해 (`scanner.py:563`).
+사이클 13-E-1 보강으로 §4 Patch 1/2/3 갱신.
+
 ---
 
 ## 2. 근본 원인 (코드 grep 확정)
@@ -156,38 +162,79 @@ scheduler 종료 finally 시퀀스에서 `kis_ws.disconnect()` *와* `kis_ws_poo
 
 ### Green (backend-dev 최소 변경)
 
-#### Patch 1 — `src/engine/scanner.py:549-554`
+#### Patch 1 — `src/engine/scanner.py:549-563` (사이클 13-E-1 리뷰 ③ 반영)
 
 ```python
 async def unsubscribe_all() -> None:
     """모든 종목 구독을 해제한다 (메인 + 보조 세션 전체)."""
+    # 사이클 13-E-1 리뷰 ③ — 실패 카운터 + 조건부 로그 레벨.
+    # 일부 구독 해제 실패 시 INFO "완료" 로그가 운영자에게 잘못된 신호를 보내지 않도록
+    # 실패 개수를 집계해 WARNING 으로 격상 + 성공은 무실패 시에만 INFO.
+    pool_failures = 0
+    main_failures = 0
+
     # WebsocketPool 위임 — _ticker_to_session 추적까지 일괄 정리
     try:
         await kis_ws_pool.unsubscribe_all()
     except Exception:
+        pool_failures += 1
         logger.warning("[scanner_unsubscribe_all] pool.unsubscribe_all 실패", exc_info=True)
+
     # 보강: pool 분배 추적에 없는 메인 직접 구독 (체결통보 제외 TICK) 잔존 정리
     for tr_id, tr_key in list(kis_ws._subscriptions):
         if tr_id == TICK_TR_ID:
             try:
                 await kis_ws.unsubscribe(tr_id, tr_key)
             except Exception:
+                main_failures += 1
                 logger.debug("[scanner_unsubscribe_all] main 잔여 해제 실패", exc_info=True)
-    logger.info("모든 시세 구독 해제 완료")
+
+    total_failures = pool_failures + main_failures
+    if total_failures > 0:
+        logger.warning(
+            "[scanner_unsubscribe_all] 일부 구독 해제 실패 — pool=%d, main=%d",
+            pool_failures, main_failures,
+        )
+    else:
+        logger.info("모든 시세 구독 해제 완료")
 ```
 
-**중요**: `kis_ws_pool` import 가 scanner.py 상단에 이미 있는지 확인 — 없으면 추가.
+**중요**:
+- `kis_ws_pool` import 가 scanner.py 상단에 이미 있는지 확인 — 없으면 추가.
+- "모든 시세 구독 해제 완료" INFO 는 **무실패 (`total_failures == 0`) 시에만** 출력.
+  실패 발생 시 WARNING `[scanner_unsubscribe_all]` 로 격상 — 운영자 오해 차단.
 
-#### Patch 2 — `src/engine/scheduler.py` 정상 종료 + finally 보강 (중요)
+#### Patch 2 — `src/engine/scheduler.py` 정상 종료 + finally 보강 (사이클 13-E-1 리뷰 ① 반영)
 
 **위치 결정 원칙**: `kis_ws_pool.stop()` 은 반드시 `finally` 블록 안 — 또는 try/except 외부에서
 정상·비정상 종료 둘 다 통과하는 경로 — 에 둬야 한다. `except Exception` 위쪽 (try 본문 마지막)
 에만 두면 매매 프로세스 예외 발생 시 보조 세션이 누수된 채 다음 사이클 진입.
 
-권장 배치: **`finally` 블록 내부**, 백그라운드 task cancel 직전 또는 직후.
+**사이클 13-E-1 리뷰 ① 결정 — (A) 채택 (메인 disconnect best-effort 추가)**:
+직접 코드 검토 결과 `KisWebSocket.disconnect()` (`src/realtime/websocket.py:163-169`) 는
+**idempotent** 임을 확인:
 
 ```python
-# 488~492 라인: 정상 경로 (기존 유지)
+async def disconnect(self) -> None:
+    """연결을 종료한다."""
+    self._running = False         # ← 매번 안전하게 False
+    if self._ws:                  # ← 가드: 이미 None 이면 close 호출 안 함
+        await self._ws.close()
+        self._ws = None           # ← nullify
+    logger.info("WebSocket 연결 종료")
+```
+
+두 번째 호출은 `self._ws is None` → `if` 가드로 close skip + `self._running = False`
+재대입은 무해. 따라서 (A) 안 (메인 idempotent + finally best-effort 추가) 가 최소 변경 +
+정상 경로 동작 100% 보존.
+**(B) 안** (메인 disconnect 자체를 finally 로 이동) 은 정상 경로에서 `ws_task` await 순서가
+달라져 회귀 위험 — 기각.
+
+권장 배치: **`finally` 블록 내부**, 백그라운드 task cancel 직후, `pool.stop()` *전* (메인→보조
+정리 순서 보존).
+
+```python
+# 488~492 라인: 정상 경로 (기존 유지) — 정상 종료 시 메인 disconnect 1차 보장
 await kis_ws.disconnect()
 try:
     await ws_task
@@ -198,7 +245,7 @@ except Exception:
     logger.exception("매매 프로세스 오류")
     await write_log("ERROR", "매매 프로세스 비정상 종료")
 finally:
-    # 백그라운드 task lifecycle (기존 유지)
+    # 백그라운드 task lifecycle (기존 유지) — 5종 cancel + await
     for task_attr in (
         "_next_day_task", "_session_task", "_stale_watcher_task",
         "_swing_poll_task", "_swing_rest_poll_task",
@@ -212,10 +259,20 @@ finally:
                 pass
         setattr(self, task_attr, None)
 
+    # 사이클 13-E-1 리뷰 ① — 비정상 종료 경로에서도 메인 disconnect 보장 (best-effort).
+    # `start()` 본문 488 라인 도달 전 예외 발생 시 `try` 의 `kis_ws.disconnect()` 가
+    # 건너뛰어진 채 `finally` 진입 가능 → 메인 WebSocket 이 연결된 채 잔존 + 다음 부팅
+    # 시 동일 계정 중복 접속 위험. `disconnect()` 는 idempotent (websocket.py:163-169
+    # `if self._ws:` 가드 + `self._ws = None` nullify) — 정상 경로에서 두 번째 호출은
+    # noop. 따라서 항상 호출해도 회귀 0.
+    try:
+        await kis_ws.disconnect()
+    except Exception:
+        logger.warning("[scheduler_shutdown] main disconnect 실패 (best-effort)", exc_info=True)
+
     # 추가: 보조 세션 풀 정리 — 정상·비정상 종료 양쪽 보장
     # _started=False 재설정으로 다음 _boot start() 재초기화 + 24h 토큰 만료 후
-    # silent death 차단. 메인은 try 본문에서 이미 disconnect 처리됨 — 비정상 종료
-    # 시 메인이 disconnect 안 됐을 수 있으나 그건 별도 path (기존 동작 보존).
+    # silent death 차단. 메인→보조 순서 (위 disconnect 후) 보존.
     try:
         await kis_ws_pool.stop()
     except Exception:
@@ -226,21 +283,52 @@ finally:
     await write_log("INFO", "매매 시스템 종료")
 ```
 
-**중요**: `kis_ws.disconnect()` (메인) 는 `try` 본문에 그대로 두고, `kis_ws_pool.stop()` (보조)
-만 `finally` 로 이동. 메인 단일 자금 안전 경로는 정상 종료 흐름에서 명시적 보장.
+**중요**:
+- `kis_ws.disconnect()` (메인) 는 `try` 본문에 그대로 유지 (정상 경로 동작 보존) +
+  `finally` 에 best-effort 1회 추가 (비정상 경로 누수 차단). idempotent 검증 완료.
+- 정상 경로: try `kis_ws.disconnect()` → `self._ws = None` → finally `kis_ws.disconnect()`
+  진입 시 `if self._ws:` False → noop. 회귀 0.
+- 메인→보조 정리 순서: finally 안에서도 `kis_ws.disconnect()` → `kis_ws_pool.stop()` 순서 보존.
 
-#### Patch 3 — `src/engine/scheduler.py:604-606` 사이
+#### Patch 3 — `src/engine/scheduler.py` 수동 `stop()` 보강 (사이클 13-E-1 리뷰 ② 반영)
+
+**리뷰 ② 결정 — `_swing_rest_poll_task` 추가 + finally 와 동일 패턴 정렬**:
+현재 `stop()` 의 task cancel 목록은 4종 (`_next_day_task`, `_session_task`, `_stale_watcher_task`,
+`_swing_poll_task`) 으로 `_swing_rest_poll_task` 가 누락. `start()` 가 생성하는 모든 백그라운드
+task 를 finally 와 동일한 5종 패턴으로 cancel + await 해야 disconnect/pool.stop 이후에도
+REST 폴링이 한 사이클 더 돌거나 예외 로그가 발생하지 않는다.
 
 ```python
-await unsubscribe_all()
-await kis_ws.disconnect()
-# 추가: 수동 중지 시에도 동일 보장
-try:
-    await kis_ws_pool.stop()
-except Exception:
-    logger.warning("[scheduler_stop] pool.stop 실패", exc_info=True)
-await write_log("INFO", "매매 시스템 수동 중지")
+async def stop(self) -> None:
+    """매매 프로세스를 중지한다."""
+    self._running = False
+    # 사이클 13-E-1 리뷰 ② — finally 와 동일한 5종 task cancel.
+    # _swing_rest_poll_task 누락 시 disconnect/pool.stop 이후 REST 폴링이 한 사이클 더
+    # 돌거나 예외 로그가 발생할 수 있어 finally 와 동일 목록·동일 처리로 통일.
+    for task_attr in (
+        "_next_day_task", "_session_task", "_stale_watcher_task",
+        "_swing_poll_task", "_swing_rest_poll_task",
+    ):
+        task = getattr(self, task_attr, None)
+        if task and not task.done():
+            task.cancel()
+            try:
+                await task
+            except (asyncio.CancelledError, Exception):
+                pass
+        setattr(self, task_attr, None)
+    await unsubscribe_all()
+    await kis_ws.disconnect()
+    # 추가: 수동 중지 시에도 동일 보장
+    try:
+        await kis_ws_pool.stop()
+    except Exception:
+        logger.warning("[scheduler_stop] pool.stop 실패", exc_info=True)
+    await write_log("INFO", "매매 시스템 수동 중지")
 ```
+
+**중요**: task cancel 은 `unsubscribe_all()`/`disconnect()`/`pool.stop()` *이전* 에 수행 —
+폴링 task 가 종료된 후 자원 해제 순서 유지.
 
 #### Import 확인
 
@@ -250,6 +338,48 @@ await write_log("INFO", "매매 시스템 수동 중지")
 ### Refactor
 
 본 fix 는 안전 보강이 본질 — 추가 리팩터 금지. 최소 변경 원칙.
+
+---
+
+### 사이클 13-E-1 보강 결정 (PR #12 리뷰 반영)
+
+PR #12 (https://github.com/canduk910/auto_stock/pull/12) 의 Copilot 봇 리뷰 3건 반영본.
+사용자가 "전부 반영" 결정 → §4 Patch 1/2/3 갱신.
+
+#### ① `src/engine/scheduler.py:519` — finally 의 메인 disconnect 누수
+- **채택안**: **(A) `finally` 에 `kis_ws.disconnect()` best-effort 1회 추가**
+- **근거**:
+  - `KisWebSocket.disconnect()` (`src/realtime/websocket.py:163-169`) 직접 검토 결과
+    **완전 idempotent** — `if self._ws:` 가드 + `self._ws = None` nullify. 두 번째 호출은
+    close 자체를 skip + `self._running = False` 재대입은 무해.
+  - (B) 안 (메인 disconnect 를 finally 로 이동) 은 정상 경로의 `ws_task` await 순서를
+    바꿔 회귀 위험 — 기각.
+  - try/except 로 1차 보호 + idempotent 가 검증된 이상, finally best-effort 가
+    "정상 경로 noop / 비정상 경로 자원 회수" 양립 — 최소 변경 원칙 충족.
+- **반영 위치**: §4 Patch 2 finally 블록 내부, `pool.stop()` *전* (메인→보조 순서 보존).
+- **Copilot 코멘트**: https://github.com/canduk910/auto_stock/pull/12 `scheduler.py:519`
+
+#### ② `src/engine/scheduler.py:621` — 수동 `stop()` task cancel 누락
+- **채택안**: **`_swing_rest_poll_task` 추가 + finally 5종 패턴과 동일 정렬**
+- **근거**:
+  - `start()` 가 생성하는 백그라운드 task 5종 중 `_swing_rest_poll_task` 만 누락.
+    disconnect/pool.stop 이후 REST 폴링이 한 사이클 더 돌거나 close 된 자원에 접근하며
+    예외 로그 발생 가능.
+  - finally 의 task cancel 블록과 정확히 동일한 목록·동일 처리 (cancel → await → setattr None)
+    로 통일 — 정상/비정상/수동 종료 3 경로 동작 일치 보장.
+- **반영 위치**: §4 Patch 3 신규 코드 블록.
+- **Copilot 코멘트**: https://github.com/canduk910/auto_stock/pull/12 `scheduler.py:621`
+
+#### ③ `src/engine/scanner.py:563` — INFO 로그 오해
+- **채택안**: **실패 카운터 + 조건부 로그 레벨** (pool/main 실패 개수 집계 → 0 이면 INFO,
+  >0 이면 WARNING `[scanner_unsubscribe_all]` 격상)
+- **근거**:
+  - 현재 코드는 `pool.unsubscribe_all()` / `kis_ws.unsubscribe()` 예외를 swallow 한 뒤
+    항상 INFO "모든 시세 구독 해제 완료" 출력 → 실제 일부 실패해도 운영자는 "성공" 으로 오해.
+  - 실패 개수 집계 (pool_failures / main_failures) → `total_failures > 0` 분기로 WARNING
+    포맷 (`pool=N, main=M`) 출력 + 무실패 시에만 INFO "완료" 출력.
+- **반영 위치**: §4 Patch 1 코드 블록.
+- **Copilot 코멘트**: https://github.com/canduk910/auto_stock/pull/12 `scanner.py:563`
 
 ---
 
@@ -307,6 +437,55 @@ await write_log("INFO", "매매 시스템 수동 중지")
    (Patch 1 로 자연 해결 — pool.unsubscribe_all() 이 _ticker_to_session.clear())
 ```
 
+### 시나리오 G — 비정상 종료 → start() 예외 → finally → 메인 disconnect best-effort (사이클 13-E-1 ①)
+
+```
+1. start() 본문 진입 → kis_ws.connect() 후 488 라인 도달 *전* (예: ws_task 생성
+   직후 또는 settle 중간) 의도적 예외 raise (mock 패치) → except 분기 진입
+2. except 가 ERROR 로그 후 finally 진입
+3. 검증: finally 의 task cancel 5종 정상 수행 (cancel + await + setattr None)
+4. 검증: kis_ws.disconnect() 가 finally 에서 best-effort 호출됨 — 메인 _ws=None, _running=False
+5. 검증: kis_ws_pool.stop() 이 그 *후* 호출됨 (메인→보조 순서)
+6. 검증: write_log("INFO", "매매 시스템 종료") 도달
+7. 회귀 가드 (정상 경로): start() 정상 종료 시 try `kis_ws.disconnect()` 1회 +
+   finally `kis_ws.disconnect()` 2회차 → `if self._ws:` False 분기로 noop 보장
+   (logger.info "WebSocket 연결 종료" 가 2회 출력될 뿐 자원 오작동 없음)
+```
+
+### 시나리오 H — 수동 stop() task 5종 cancel 검증 (사이클 13-E-1 ②)
+
+```
+1. start() 실행 중 (모든 백그라운드 task 5종 active) → scheduler.stop() 호출
+2. 검증: _next_day_task / _session_task / _stale_watcher_task / _swing_poll_task /
+        _swing_rest_poll_task 모두 cancel() 호출 + await 완료
+3. 검증: disconnect/pool.stop *후* 에 REST 폴링 로그가 추가로 발생하지 않음
+   (cancel 누락 시 한 사이클 더 돌며 close 된 자원에 접근 → 예외 로그)
+4. 검증: 모든 task attribute 가 None 으로 재대입됨
+```
+
+### 시나리오 I — scanner.unsubscribe_all 실패 분기 로그 (사이클 13-E-1 ③)
+
+```
+케이스 I-1 (무실패):
+- pool.unsubscribe_all() 정상 + kis_ws.unsubscribe() 정상
+- 검증: INFO "모든 시세 구독 해제 완료" 1회 출력 + WARNING 없음
+
+케이스 I-2 (pool 실패):
+- pool.unsubscribe_all() → RuntimeError mock
+- 검증: WARNING "[scanner_unsubscribe_all] pool.unsubscribe_all 실패" 1회
+- 검증: WARNING "[scanner_unsubscribe_all] 일부 구독 해제 실패 — pool=1, main=0" 1회
+- 검증: INFO "모든 시세 구독 해제 완료" 출력 안 됨
+
+케이스 I-3 (main 잔여 일부 실패):
+- pool 정상 + kis_ws.unsubscribe 2건 중 1건 예외
+- 검증: WARNING "[scanner_unsubscribe_all] 일부 구독 해제 실패 — pool=0, main=1"
+- 검증: INFO "모든 시세 구독 해제 완료" 출력 안 됨
+
+케이스 I-4 (둘 다 실패):
+- 양쪽 모두 예외
+- 검증: WARNING 격상 + INFO "완료" 출력 안 됨
+```
+
 ---
 
 ## 6. 안전 가드 (변경 금지)
@@ -334,42 +513,101 @@ PR 빠른 피드백 가드 — `affected.py` 가 본 fix 의 영향 테스트를
 
 ---
 
-## 8. 작업 분배
+## 8. 작업 분배 (사이클 13-E-1 — PR #12 리뷰 반영본)
 
 | 단계 | 담당 | 모델 | 산출물 |
 |------|------|------|--------|
-| Red 테스트 작성 | tdd-engineer | opus | Test A/B/C/D 4종 테스트 파일 |
-| Green 구현 | backend-dev | sonnet | scanner.py + scheduler.py 두 파일 최소 변경 |
-| 통합 검증 | tester | opus | 시나리오 A~F 회귀, `/api/realtime/subscriptions` 응답 확인 |
+| Red 테스트 작성 (보강) | tdd-engineer | opus | 13-E Test A~D 유지 + 13-E-1 Test E/F/G 신규 |
+| Green 구현 (재실행) | backend-dev | sonnet | scanner.py + scheduler.py 두 파일 갱신 |
+| 통합 검증 | tester | opus | 시나리오 A~I 회귀 (G/H/I 신규), `/api/realtime/subscriptions` 응답 확인 |
 | 영향 인덱스 | (자동) | - | `tools/test_impact/build_index*` 재생성 |
-| 문서 동기화 | (선택) | - | `docs/HARNESS_CHANGELOG.md` 사이클 13-E 1줄 추가 |
+| 문서 동기화 | (선택) | - | `docs/HARNESS_CHANGELOG.md` 사이클 13-E-1 1줄 추가 |
 
-### 분배 메시지 템플릿
+### 13-E-1 신규 Red 테스트 (tdd-engineer 추가 작성)
 
-**→ tdd-engineer (Red 단계)**
-> 사이클 13-E. 본 명세의 §4 Red 섹션 (Test A/B/C/D 4종) 단위 테스트를 작성하라.
-> 핵심 검증: (1) `scanner.unsubscribe_all` 이 보조까지 해제, (2) `scheduler` 종료 시
-> `kis_ws.disconnect()` + `kis_ws_pool.stop()` 둘 다 호출, (3) `pool.stop()` 이
-> `_started=False` 재설정, (4) 보조 0개 회귀.
-> 모든 테스트는 *Red* 상태로 커밋 (현재 코드에서 fail 해야 함).
-> **금지**: 체결통보 분기 / `_subscriptions` 직접 수정 / 메인 disconnect 순서 변경.
+#### Test E — `tests/unit/engine/test_scheduler_finally_main_disconnect.py` (NEW, 리뷰 ①)
 
-**→ backend-dev (Green 단계)**
-> tdd-engineer Red 통과 후 진입. 본 명세의 §4 Green 섹션 Patch 1/2/3 최소 변경 구현.
-> **Patch 2 는 반드시 `finally` 블록 배치** — 비정상 종료에서도 보조 세션 누수 차단.
-> 예외 흡수 try/except 필수 — 보조 stop 실패가 메인 종료 흐름을 막아선 안 됨.
+```
+시나리오:
+1. scheduler.start() 본문 mock 으로 488 라인 도달 전 RuntimeError raise
+2. finally 진입 시 kis_ws.disconnect() 가 호출돼야 함 (best-effort)
+3. kis_ws.disconnect() AsyncMock — finally 에서 1회 호출 verify
+4. pool.stop() 이 disconnect *후* 호출되는 순서 verify (call_order)
+5. write_log("INFO", "매매 시스템 종료") 도달 verify
+회귀 가드:
+6. 정상 종료 경로 — try 본문 disconnect 1회 + finally disconnect 1회 = 총 2회
+   호출이지만 두 번째는 _ws=None 으로 noop 임을 verify (close 는 1회만)
+```
+
+#### Test F — `tests/unit/engine/test_scheduler_stop_task_cancel.py` (NEW, 리뷰 ②)
+
+```
+시나리오:
+1. scheduler._next_day_task / _session_task / _stale_watcher_task /
+   _swing_poll_task / _swing_rest_poll_task 5종을 AsyncMock task 로 주입
+2. await scheduler.stop()
+3. 각 task.cancel() 5회 모두 호출 verify
+4. 각 task 가 await 됐는지 verify
+5. 각 attr 가 None 으로 재대입됐는지 verify
+6. cancel 순서가 unsubscribe_all/disconnect/pool.stop *이전* 인지 call_order verify
+```
+
+#### Test G — `tests/unit/engine/test_scanner_unsubscribe_all_logging.py` (NEW, 리뷰 ③)
+
+```
+시나리오 G-1 (무실패):
+- pool.unsubscribe_all + kis_ws.unsubscribe 정상
+- caplog: INFO "모든 시세 구독 해제 완료" present, WARNING absent
+
+시나리오 G-2 (pool 실패):
+- pool.unsubscribe_all → Exception
+- caplog: WARNING "[scanner_unsubscribe_all] pool.unsubscribe_all 실패" present
+- caplog: WARNING "일부 구독 해제 실패 — pool=1, main=0" present
+- caplog: INFO "모든 시세 구독 해제 완료" *absent*
+
+시나리오 G-3 (main 잔여 실패):
+- 메인 unsubscribe 1건 예외
+- caplog: WARNING "일부 구독 해제 실패 — pool=0, main=1" present
+- caplog: INFO "완료" absent
+```
+
+### 분배 메시지 템플릿 (사이클 13-E-1)
+
+**→ tdd-engineer (Red 단계, 재진입)**
+> 사이클 13-E-1. PR #12 (https://github.com/canduk910/auto_stock/pull/12) Copilot 리뷰
+> 3건 반영 보강. 본 명세의 §4 Patch 1/2/3 + §8 13-E-1 신규 Red 테스트 (Test E/F/G)
+> 를 추가 작성하라. 기존 13-E Test A/B/C/D 는 그대로 유지 (회귀 가드).
+> 핵심 검증 추가:
+> (E) `scheduler` finally 에서 `kis_ws.disconnect()` best-effort 호출 + 정상경로 idempotent,
+> (F) 수동 `stop()` 이 task 5종 (특히 `_swing_rest_poll_task`) cancel + await + None 재대입,
+> (G) `scanner.unsubscribe_all` 이 실패 카운트에 따라 INFO/WARNING 분기.
+> 모든 테스트는 *Red* 상태로 커밋. **금지**: 체결통보 분기 / `_subscriptions` 직접 수정.
+
+**→ backend-dev (Green 단계, 재실행)**
+> tdd-engineer 13-E-1 Red 통과 후 진입. 본 명세 §4 갱신본의 Patch 1/2/3 최소 변경 구현.
+> **Patch 1 (scanner)**: 실패 카운터 pool_failures/main_failures + total_failures > 0 분기
+> WARNING 격상, 무실패 시에만 INFO "완료". 기존 13-E patch 위에 덮어쓰기.
+> **Patch 2 (scheduler finally)**: 기존 `pool.stop()` 호출 *전* 에 `kis_ws.disconnect()`
+> best-effort try/except 추가. 메인→보조 순서 보존.
+> **Patch 3 (scheduler stop)**: task cancel 목록을 finally 와 동일한 5종 (`_swing_rest_poll_task`
+> 추가) + 동일 처리 패턴으로 통일. cancel 은 `unsubscribe_all`/`disconnect`/`pool.stop`
+> *이전*.
 > 변경 파일: `src/engine/scanner.py` + `src/engine/scheduler.py` 두 파일만.
 > 영향 인덱스 재생성: `python tools/test_impact/build_index.py`.
 
 **→ tester (통합 검증)**
-> backend-dev Green 통과 후 진입. 본 명세의 §5 시나리오 A~F 회귀.
-> 특히 시나리오 E (보조 stop 예외 흡수) + 시나리오 B (다음 _boot 재초기화) 가
-> 자금 안전 핵심. 비정상 종료 경로 (run 본문 예외 raise) → finally → pool.stop 도달
-> 도 추가 검증. `/api/realtime/subscriptions` 응답 sessions[*].subscribed 전부 0.
+> backend-dev 13-E-1 Green 통과 후 진입. 본 명세 §5 시나리오 A~I 전체 회귀.
+> 특히 신규 시나리오:
+> - G (비정상 종료 → start() 예외 → finally 메인 disconnect best-effort + 순서)
+> - H (수동 stop task 5종 cancel — REST 폴링 한 사이클 더 도는지 확인)
+> - I-1~I-4 (scanner 로그 분기 4 케이스, caplog 검증)
+> `/api/realtime/subscriptions` 응답 sessions[*].subscribed 전부 0 회귀 유지.
 
 ---
 
 ## 9. 검수 체크리스트 (team-leader 최종 승인)
+
+### 13-E 기본 (유지)
 
 - [ ] 모든 단위 테스트 통과 (`pytest tests/unit/engine/ tests/unit/realtime/`)
 - [ ] 통합 테스트 통과 (`pytest tests/integration/test_scheduler_*`)
@@ -382,3 +620,24 @@ PR 빠른 피드백 가드 — `affected.py` 가 본 fix 의 영향 테스트를
 - [ ] 모의(VTS)에서 1사이클 검증 후 실전 배포
 - [ ] 운영 가이드 — KRX 메인 시간 외 (15:30~ 또는 익일 07:50 _boot 전) 배포
 - [ ] **로컬과 EC2 동시 실행 금지** — KIS 동일 계정 동시 접속 충돌 주의
+
+### 13-E-1 보강 (PR #12 리뷰 ①②③ 반영)
+
+- [ ] **(① 리뷰) 메인 `disconnect()` idempotent 직접 검증** — `src/realtime/websocket.py:163-169`
+      `if self._ws:` 가드 + `self._ws = None` nullify 코드 라인 `git diff` 로 무변경 확인
+- [ ] **(① 리뷰) finally 에서 `kis_ws.disconnect()` best-effort 호출** — try/except 로
+      예외 흡수 + WARNING 로그 prefix `[scheduler_shutdown]`
+- [ ] **(① 리뷰) finally 메인 disconnect 가 `pool.stop()` *전* 위치** — 메인→보조 순서 보존
+- [ ] **(① 리뷰) 정상 종료 경로 회귀 0** — try 본문 disconnect 1회 + finally 2회차 = noop
+      (close 자체는 1회만, "WebSocket 연결 종료" INFO 가 2회 출력될 수 있으나 자원 무관)
+- [ ] **(② 리뷰) 수동 `stop()` task cancel 5종 동일 패턴** — `_next_day_task` / `_session_task`
+      / `_stale_watcher_task` / `_swing_poll_task` / `_swing_rest_poll_task` (특히 마지막 누락 가드)
+- [ ] **(② 리뷰) `stop()` 의 task cancel 이 `unsubscribe_all`/`disconnect`/`pool.stop`
+      *이전* 수행** — 폴링이 close 자원에 접근하지 않음
+- [ ] **(② 리뷰) `stop()` 후 REST 폴링 추가 1사이클 미발생** — caplog 또는 동작 로그로 확인
+- [ ] **(③ 리뷰) `scanner.unsubscribe_all` 실패 카운터 분기** — 무실패 시 INFO "완료",
+      실패 ≥1 시 INFO 출력 안 됨 + WARNING `[scanner_unsubscribe_all]` 격상
+- [ ] **(③ 리뷰) WARNING 포맷에 `pool=N, main=M` 카운트 포함** — 운영자가 어느 경로
+      실패인지 즉시 식별 가능
+- [ ] **(③ 리뷰) pool/main 양쪽 모두 try/except 로 분리** — 한쪽 실패가 다른쪽 처리를
+      막지 않음

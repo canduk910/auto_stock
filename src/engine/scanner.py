@@ -548,11 +548,19 @@ async def subscribe_filtered_stocks(
 
 async def unsubscribe_all() -> None:
     """모든 종목 구독을 해제한다 (메인 + 보조 세션 전체)."""
+    # 사이클 13-E-1 리뷰 ③ — 실패 카운터 + 조건부 로그 레벨.
+    # 일부 구독 해제 실패 시 INFO "완료" 로그가 운영자에게 잘못된 신호를 보내지 않도록
+    # 실패 개수를 집계해 WARNING 으로 격상 + 성공은 무실패 시에만 INFO.
+    pool_failures = 0
+    main_failures = 0
+
     # WebsocketPool 위임 — _ticker_to_session 추적까지 일괄 정리
     try:
         await kis_ws_pool.unsubscribe_all()
     except Exception:
         logger.warning("[scanner_unsubscribe_all] pool.unsubscribe_all 실패", exc_info=True)
+        pool_failures = 1
+
     # 보강: pool 분배 추적에 없는 메인 직접 구독 (체결통보 제외 TICK) 잔존 정리
     for tr_id, tr_key in list(kis_ws._subscriptions):
         if tr_id == TICK_TR_ID:
@@ -560,4 +568,13 @@ async def unsubscribe_all() -> None:
                 await kis_ws.unsubscribe(tr_id, tr_key)
             except Exception:
                 logger.debug("[scanner_unsubscribe_all] main 잔여 해제 실패", exc_info=True)
-    logger.info("모든 시세 구독 해제 완료")
+                main_failures += 1
+
+    total_failures = pool_failures + main_failures
+    if total_failures > 0:
+        logger.warning(
+            "[scanner_unsubscribe_all] 일부 구독 해제 실패 — pool=%d, main=%d",
+            pool_failures, main_failures,
+        )
+    else:
+        logger.info("모든 시세 구독 해제 완료")

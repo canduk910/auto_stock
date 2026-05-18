@@ -509,9 +509,20 @@ class TradingScheduler:
                         pass
                 setattr(self, task_attr, None)
 
+            # 사이클 13-E-1 리뷰 ① — 비정상 종료 경로에서도 메인 disconnect 보장 (best-effort).
+            # `start()` 본문 488 라인 도달 전 예외 발생 시 `try` 의 `kis_ws.disconnect()` 가
+            # 건너뛰어진 채 `finally` 진입 가능 → 메인 WebSocket 이 연결된 채 잔존 + 다음 부팅
+            # 시 동일 계정 중복 접속 위험. `disconnect()` 는 idempotent (websocket.py:163-169
+            # `if self._ws:` 가드 + `self._ws = None` nullify) — 정상 경로에서 두 번째 호출은
+            # noop. 따라서 항상 호출해도 회귀 0.
+            try:
+                await kis_ws.disconnect()
+            except Exception:
+                logger.warning("[scheduler_shutdown] main disconnect 실패 (best-effort)", exc_info=True)
+
             # 추가: 보조 세션 풀 정리 — 정상·비정상 종료 양쪽 보장
             # _started=False 재설정으로 다음 _boot start() 재초기화 + 24h 토큰 만료 후
-            # silent death 차단. 메인은 try 본문에서 이미 disconnect 처리됨.
+            # silent death 차단. 메인→보조 순서 (위 disconnect 후) 보존.
             try:
                 from src.realtime.websocket_pool import kis_ws_pool as _wsp
                 await _wsp.stop()
@@ -601,8 +612,13 @@ class TradingScheduler:
     async def stop(self) -> None:
         """매매 프로세스를 중지한다."""
         self._running = False
-        # 백그라운드 task 즉시 취소 (sleep 도중에도)
-        for task_attr in ("_next_day_task", "_session_task", "_stale_watcher_task", "_swing_poll_task"):
+        # 사이클 13-E-1 리뷰 ② — finally 와 동일한 5종 task cancel.
+        # _swing_rest_poll_task 누락 시 disconnect/pool.stop 이후 REST 폴링이 한 사이클 더
+        # 돌거나 예외 로그가 발생할 수 있어 finally 와 동일 목록·동일 처리로 통일.
+        for task_attr in (
+            "_next_day_task", "_session_task", "_stale_watcher_task",
+            "_swing_poll_task", "_swing_rest_poll_task",
+        ):
             task = getattr(self, task_attr, None)
             if task and not task.done():
                 task.cancel()
