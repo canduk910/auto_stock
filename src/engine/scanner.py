@@ -547,8 +547,17 @@ async def subscribe_filtered_stocks(
 
 
 async def unsubscribe_all() -> None:
-    """모든 종목 구독을 해제한다."""
+    """모든 종목 구독을 해제한다 (메인 + 보조 세션 전체)."""
+    # WebsocketPool 위임 — _ticker_to_session 추적까지 일괄 정리
+    try:
+        await kis_ws_pool.unsubscribe_all()
+    except Exception:
+        logger.warning("[scanner_unsubscribe_all] pool.unsubscribe_all 실패", exc_info=True)
+    # 보강: pool 분배 추적에 없는 메인 직접 구독 (체결통보 제외 TICK) 잔존 정리
     for tr_id, tr_key in list(kis_ws._subscriptions):
         if tr_id == TICK_TR_ID:
-            await kis_ws.unsubscribe(tr_id, tr_key)
+            try:
+                await kis_ws.unsubscribe(tr_id, tr_key)
+            except Exception:
+                logger.debug("[scanner_unsubscribe_all] main 잔여 해제 실패", exc_info=True)
     logger.info("모든 시세 구독 해제 완료")

@@ -508,6 +508,16 @@ class TradingScheduler:
                     except (asyncio.CancelledError, Exception):
                         pass
                 setattr(self, task_attr, None)
+
+            # 추가: 보조 세션 풀 정리 — 정상·비정상 종료 양쪽 보장
+            # _started=False 재설정으로 다음 _boot start() 재초기화 + 24h 토큰 만료 후
+            # silent death 차단. 메인은 try 본문에서 이미 disconnect 처리됨.
+            try:
+                from src.realtime.websocket_pool import kis_ws_pool as _wsp
+                await _wsp.stop()
+            except Exception:
+                logger.warning("[scheduler_shutdown] pool.stop 실패", exc_info=True)
+
             self._running = False
             self._phase = "idle"
             await write_log("INFO", "매매 시스템 종료")
@@ -603,6 +613,12 @@ class TradingScheduler:
             setattr(self, task_attr, None)
         await unsubscribe_all()
         await kis_ws.disconnect()
+        # 추가: 수동 중지 시에도 동일 보장
+        try:
+            from src.realtime.websocket_pool import kis_ws_pool as _wsp
+            await _wsp.stop()
+        except Exception:
+            logger.warning("[scheduler_stop] pool.stop 실패", exc_info=True)
         await write_log("INFO", "매매 시스템 수동 중지")
 
     async def _session_loop(self) -> None:

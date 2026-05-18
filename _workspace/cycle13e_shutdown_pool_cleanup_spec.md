@@ -178,20 +178,56 @@ async def unsubscribe_all() -> None:
 
 **중요**: `kis_ws_pool` import 가 scanner.py 상단에 이미 있는지 확인 — 없으면 추가.
 
-#### Patch 2 — `src/engine/scheduler.py:488-492` 직후
+#### Patch 2 — `src/engine/scheduler.py` 정상 종료 + finally 보강 (중요)
+
+**위치 결정 원칙**: `kis_ws_pool.stop()` 은 반드시 `finally` 블록 안 — 또는 try/except 외부에서
+정상·비정상 종료 둘 다 통과하는 경로 — 에 둬야 한다. `except Exception` 위쪽 (try 본문 마지막)
+에만 두면 매매 프로세스 예외 발생 시 보조 세션이 누수된 채 다음 사이클 진입.
+
+권장 배치: **`finally` 블록 내부**, 백그라운드 task cancel 직전 또는 직후.
 
 ```python
+# 488~492 라인: 정상 경로 (기존 유지)
 await kis_ws.disconnect()
 try:
     await ws_task
 except asyncio.CancelledError:
     pass
-# 추가: 보조 세션 풀 정리 — _started=False 재설정으로 다음 _boot start() 재초기화 보장
-try:
-    await kis_ws_pool.stop()
+
 except Exception:
-    logger.warning("[scheduler_shutdown] pool.stop 실패", exc_info=True)
+    logger.exception("매매 프로세스 오류")
+    await write_log("ERROR", "매매 프로세스 비정상 종료")
+finally:
+    # 백그라운드 task lifecycle (기존 유지)
+    for task_attr in (
+        "_next_day_task", "_session_task", "_stale_watcher_task",
+        "_swing_poll_task", "_swing_rest_poll_task",
+    ):
+        task = getattr(self, task_attr, None)
+        if task and not task.done():
+            task.cancel()
+            try:
+                await task
+            except (asyncio.CancelledError, Exception):
+                pass
+        setattr(self, task_attr, None)
+
+    # 추가: 보조 세션 풀 정리 — 정상·비정상 종료 양쪽 보장
+    # _started=False 재설정으로 다음 _boot start() 재초기화 + 24h 토큰 만료 후
+    # silent death 차단. 메인은 try 본문에서 이미 disconnect 처리됨 — 비정상 종료
+    # 시 메인이 disconnect 안 됐을 수 있으나 그건 별도 path (기존 동작 보존).
+    try:
+        await kis_ws_pool.stop()
+    except Exception:
+        logger.warning("[scheduler_shutdown] pool.stop 실패", exc_info=True)
+
+    self._running = False
+    self._phase = "idle"
+    await write_log("INFO", "매매 시스템 종료")
 ```
+
+**중요**: `kis_ws.disconnect()` (메인) 는 `try` 본문에 그대로 두고, `kis_ws_pool.stop()` (보조)
+만 `finally` 로 이동. 메인 단일 자금 안전 경로는 정상 종료 흐름에서 명시적 보장.
 
 #### Patch 3 — `src/engine/scheduler.py:604-606` 사이
 
@@ -308,6 +344,29 @@ PR 빠른 피드백 가드 — `affected.py` 가 본 fix 의 영향 테스트를
 | 영향 인덱스 | (자동) | - | `tools/test_impact/build_index*` 재생성 |
 | 문서 동기화 | (선택) | - | `docs/HARNESS_CHANGELOG.md` 사이클 13-E 1줄 추가 |
 
+### 분배 메시지 템플릿
+
+**→ tdd-engineer (Red 단계)**
+> 사이클 13-E. 본 명세의 §4 Red 섹션 (Test A/B/C/D 4종) 단위 테스트를 작성하라.
+> 핵심 검증: (1) `scanner.unsubscribe_all` 이 보조까지 해제, (2) `scheduler` 종료 시
+> `kis_ws.disconnect()` + `kis_ws_pool.stop()` 둘 다 호출, (3) `pool.stop()` 이
+> `_started=False` 재설정, (4) 보조 0개 회귀.
+> 모든 테스트는 *Red* 상태로 커밋 (현재 코드에서 fail 해야 함).
+> **금지**: 체결통보 분기 / `_subscriptions` 직접 수정 / 메인 disconnect 순서 변경.
+
+**→ backend-dev (Green 단계)**
+> tdd-engineer Red 통과 후 진입. 본 명세의 §4 Green 섹션 Patch 1/2/3 최소 변경 구현.
+> **Patch 2 는 반드시 `finally` 블록 배치** — 비정상 종료에서도 보조 세션 누수 차단.
+> 예외 흡수 try/except 필수 — 보조 stop 실패가 메인 종료 흐름을 막아선 안 됨.
+> 변경 파일: `src/engine/scanner.py` + `src/engine/scheduler.py` 두 파일만.
+> 영향 인덱스 재생성: `python tools/test_impact/build_index.py`.
+
+**→ tester (통합 검증)**
+> backend-dev Green 통과 후 진입. 본 명세의 §5 시나리오 A~F 회귀.
+> 특히 시나리오 E (보조 stop 예외 흡수) + 시나리오 B (다음 _boot 재초기화) 가
+> 자금 안전 핵심. 비정상 종료 경로 (run 본문 예외 raise) → finally → pool.stop 도달
+> 도 추가 검증. `/api/realtime/subscriptions` 응답 sessions[*].subscribed 전부 0.
+
 ---
 
 ## 9. 검수 체크리스트 (team-leader 최종 승인)
@@ -319,4 +378,7 @@ PR 빠른 피드백 가드 — `affected.py` 가 본 fix 의 영향 테스트를
 - [ ] `_started=False` 재설정 → 다음 `start()` 호출 시 재초기화 발화
 - [ ] `_ticker_to_session` clear 까지 완료 (분배 추적 stale 0)
 - [ ] 체결통보 분기 코드 무변경 verify (`git diff` 로 확인)
+- [ ] **비정상 종료 경로 (run 본문 예외) → finally → pool.stop 도달 verify**
 - [ ] 모의(VTS)에서 1사이클 검증 후 실전 배포
+- [ ] 운영 가이드 — KRX 메인 시간 외 (15:30~ 또는 익일 07:50 _boot 전) 배포
+- [ ] **로컬과 EC2 동시 실행 금지** — KIS 동일 계정 동시 접속 충돌 주의
