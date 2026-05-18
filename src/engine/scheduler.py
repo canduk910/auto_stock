@@ -165,6 +165,9 @@ class TradingScheduler:
         self._stale_retry_count: dict[str, int] = {}
         # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
         self._swing_poll_task: asyncio.Task | None = None
+        # 사이클 13-E-2 — start() 본문 로컬 task 를 속성 승격, finally 좀비 차단
+        self._ws_task: asyncio.Task | None = None
+        self._scan_task: asyncio.Task | None = None
 
     async def _load_strategy_config(self) -> None:
         """DB에서 전략 설정(비중/파라미터)을 로드하여 적용한다."""
@@ -241,7 +244,7 @@ class TradingScheduler:
             register_board_handler(session_tracker.on_h0nxmko0)
 
             # WebSocket 연결 (별도 태스크)
-            ws_task = asyncio.create_task(
+            self._ws_task = asyncio.create_task(
                 kis_ws.connect(dispatch_message)
             )
 
@@ -399,13 +402,14 @@ class TradingScheduler:
                     await self._confirm_breakout_open_prices()
 
                 self._phase = "trading"
-                scan_task = asyncio.create_task(self._scan_loop())
+                self._scan_task = asyncio.create_task(self._scan_loop())
                 logger.info("매매 모드 진입 (KRX 메인 + NXT)")
 
                 await self._wait_until(TIME_KRX_MAIN_BUY_STOP)
-                scan_task.cancel()
+                if self._scan_task is not None and not self._scan_task.done():
+                    self._scan_task.cancel()
             else:
-                scan_task = None
+                self._scan_task = None
                 logger.info("15:20 이후 시작 — KRX 메인 매수 중단 상태로 진입")
 
             # 15:20 KRX 메인 신규 매수 중단 + KRX 메인 종목 강제 청산
@@ -425,8 +429,8 @@ class TradingScheduler:
             await self._confirm_breakout_open_prices(board="post_nxt")
 
             # NXT 애프터에서도 _scan_loop 유지 (재구독은 보드별 화이트리스트로 결정 — Phase 8)
-            if scan_task is None or scan_task.done():
-                scan_task = asyncio.create_task(self._scan_loop())
+            if self._scan_task is None or self._scan_task.done():
+                self._scan_task = asyncio.create_task(self._scan_loop())
 
             # 19:50 NXT 애프터 신규 매수 중단 (자문 호출은 20:00 으로 이동 — Phase 0, 2026-05-15)
             await self._wait_until(TIME_NXT_POST_BUY_STOP)
@@ -438,8 +442,8 @@ class TradingScheduler:
             # 20:00 NXT 애프터 종료 + AI자문 (둘 다 동시 발화, 백그라운드 task 로 race 회피)
             await self._wait_until(TIME_NXT_POST_CLOSE)
             self._phase = "closing"
-            if scan_task and not scan_task.done():
-                scan_task.cancel()
+            if self._scan_task and not self._scan_task.done():
+                self._scan_task.cancel()
             await unsubscribe_all()
             await write_log("INFO", "20:00 NXT 애프터 종료, 구독 해제")
 
@@ -486,19 +490,25 @@ class TradingScheduler:
             self._reset_daily_state()
 
             await kis_ws.disconnect()
-            try:
-                await ws_task
-            except asyncio.CancelledError:
-                pass
+            _ws_task = self._ws_task
+            if _ws_task is not None:
+                try:
+                    await _ws_task
+                except asyncio.CancelledError:
+                    pass
 
         except Exception:
             logger.exception("매매 프로세스 오류")
             await write_log("ERROR", "매매 프로세스 비정상 종료")
         finally:
+            # 사이클 13-E-2 — ws_task / scan_task 도 self.* 속성화 후 동일 cancel 루프 포함.
+            # 정리 순서: 백그라운드 task 7종 cancel → 메인 ws disconnect → pool stop.
+            # ws_task 가 살아있으면 disconnect 가 race 가능 → cancel 을 먼저.
             # 백그라운드 task lifecycle — 비정상 종료 시 좀비 task 방지
             for task_attr in (
                 "_next_day_task", "_session_task", "_stale_watcher_task",
                 "_swing_poll_task", "_swing_rest_poll_task",
+                "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
                 if task and not task.done():
@@ -508,6 +518,27 @@ class TradingScheduler:
                     except (asyncio.CancelledError, Exception):
                         pass
                 setattr(self, task_attr, None)
+
+            # 사이클 13-E-1 리뷰 ① — 비정상 종료 경로에서도 메인 disconnect 보장 (best-effort).
+            # `start()` 본문 488 라인 도달 전 예외 발생 시 `try` 의 `kis_ws.disconnect()` 가
+            # 건너뛰어진 채 `finally` 진입 가능 → 메인 WebSocket 이 연결된 채 잔존 + 다음 부팅
+            # 시 동일 계정 중복 접속 위험. `disconnect()` 는 idempotent (websocket.py:163-169
+            # `if self._ws:` 가드 + `self._ws = None` nullify) — 정상 경로에서 두 번째 호출은
+            # noop. 따라서 항상 호출해도 회귀 0.
+            try:
+                await kis_ws.disconnect()
+            except Exception:
+                logger.warning("[scheduler_shutdown] main disconnect 실패 (best-effort)", exc_info=True)
+
+            # 추가: 보조 세션 풀 정리 — 정상·비정상 종료 양쪽 보장
+            # _started=False 재설정으로 다음 _boot start() 재초기화 + 24h 토큰 만료 후
+            # silent death 차단. 메인→보조 순서 (위 disconnect 후) 보존.
+            try:
+                from src.realtime.websocket_pool import kis_ws_pool as _wsp
+                await _wsp.stop()
+            except Exception:
+                logger.warning("[scheduler_shutdown] pool.stop 실패", exc_info=True)
+
             self._running = False
             self._phase = "idle"
             await write_log("INFO", "매매 시스템 종료")
@@ -591,8 +622,14 @@ class TradingScheduler:
     async def stop(self) -> None:
         """매매 프로세스를 중지한다."""
         self._running = False
-        # 백그라운드 task 즉시 취소 (sleep 도중에도)
-        for task_attr in ("_next_day_task", "_session_task", "_stale_watcher_task", "_swing_poll_task"):
+        # 사이클 13-E-3 — finally 블록 (line 500~518) 과 동일한 7종 task cancel.
+        # `_ws_task`/`_scan_task` 누락 시 stop→start 빠른 재시작 race 에서
+        # 좀비 connect 루프 + scan_loop 가 중복 동작 가능 (Copilot 리뷰 #1).
+        for task_attr in (
+            "_next_day_task", "_session_task", "_stale_watcher_task",
+            "_swing_poll_task", "_swing_rest_poll_task",
+            "_ws_task", "_scan_task",
+        ):
             task = getattr(self, task_attr, None)
             if task and not task.done():
                 task.cancel()
@@ -603,6 +640,12 @@ class TradingScheduler:
             setattr(self, task_attr, None)
         await unsubscribe_all()
         await kis_ws.disconnect()
+        # 추가: 수동 중지 시에도 동일 보장
+        try:
+            from src.realtime.websocket_pool import kis_ws_pool as _wsp
+            await _wsp.stop()
+        except Exception:
+            logger.warning("[scheduler_stop] pool.stop 실패", exc_info=True)
         await write_log("INFO", "매매 시스템 수동 중지")
 
     async def _session_loop(self) -> None:
