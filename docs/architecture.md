@@ -692,3 +692,86 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 ├── docker-compose.prod.yml    # 프로덕션 Compose
 └── (나머지 소스 파일)
 ```
+
+---
+
+## 13. 사이클 5~14 추가 인프라 (2026-05-17 ~ 5/18)
+
+본 절은 본문(1~12 섹션) 작성 이후 도입된 인프라를 요약. 상세는 `docs/HARNESS_CHANGELOG.md` 와 각 디렉토리 CLAUDE.md.
+
+### 13.1 다중 전략 확장 (6 전략)
+
+- 신규: `bull_flag_breakout` (눌림목 돌파, KRX 등락률 순위 → 폴 자동 검출 + 플래그 검출 → 09:05~13:00 돌파 + 거래량 ≥ 평균×2. 5영업일 시간 청산, 3영업일 쿨다운)
+- 신규: `vcp_breakout` (미네르비니식 VCP. 220일 일봉 → 추세 필터 + 베이스 검출 + pullback 점진 수축 + 거래량 수축 → 09:05~14:30 돌파. **멀티데이 보유** — `Position._MULTIDAY_STRATEGIES` 멤버. 7영업일 쿨다운)
+- `_MULTIDAY_STRATEGIES = frozenset({donchian_swing, vcp_breakout})` — `is_next_day` 항상 False
+- 상세: `src/engine/strategies/CLAUDE.md`
+
+### 13.2 다중 KIS 계좌 + WebSocket 풀
+
+- DB 테이블 `kis_quote_accounts` (UUID PK, label UNIQUE) — 보조 KIS 시세 수신 계좌
+- `src/auth/token.py::get_token_manager(label=None)` async lazy 발급 + 격리 캐시 파일
+- `src/realtime/websocket_pool.py::WebsocketPool` — 메인 + 보조 N 세션 풀
+  - HIGH 우선순위 (보유/익일청산) → 메인 절대 보장 (`bypass_limit=True`)
+  - LOW 우선순위 (스캐닝) → 보조 라운드로빈, 보조 가득 시 메인 fallback
+  - 체결통보 (H0STCNI0/H0STCNI9) → **메인 단일 강제** (보조 시도 시 `QuoteSessionExecutionNoticeError`)
+  - 총 슬롯 = 41 × (1 + N). 보조 0개 시 메인 only (회귀 0)
+- `src/api/base.py::kis_get_quote / kis_post_quote` — REST 시세성 호출 풀 (path 화이트리스트 5개)
+- `src/services/quote_session_health.py` — 보조 세션 health monitor (5xx/토큰 발급 실패 누적 → 자동 비활성 + DB `active=false`)
+- 응답 확장: `GET /api/realtime/subscriptions` 에 `sessions[]` 배열 (label/subscribed/acked/fresh/stale/limit/ws_connected/reconnect_count)
+- Frontend: `KisQuoteAccountsCard` (Settings) + `KisAccountPoolCard` (Dashboard) 30s 폴링
+
+### 13.3 시장 레짐 + 매수 가드 (4 모드)
+
+- `src/engine/market_regime.py` — dkstock.cloud 매크로 fetch → `MarketRegime` dataclass (regime/vix/fear_greed/buffett/cash_min)
+- 4 모드 매수 가드 (DB `buy_block_mode`): `OFF` / `WARN` (로그만) / `SOFT` (`execute_buy(soft_multiplier=0.5)` — 수량 절반 축소) / `HARD` (매수 skip)
+- 4 임계 OR: `regime=defensive` (toggle) / `vix > vix_threshold` / `fear_greed_score > fg_high_threshold` / `< fg_low_threshold`
+- `get_buy_block_state()` 60s TTL 인스턴스 캐시 → DB 쿼리 180배 감소
+- `cash_usage_ratio` 자동 조정: `clamp((100-cash_min)/100, 0.0, 1.0)`. `auto_regime_adjust=true` 시 매크로 cash_min 기반 자동 갱신
+- DB `market_regime_snapshots` 일일 스냅샷 (`_boot()` 시점 1행)
+- Frontend: `MarketRegimeCard` (Dashboard) + `IntegrationToggleCard::BuyBlockSection` (Settings)
+
+### 13.4 외부 백테스트 (MCP)
+
+- `src/engine/backtest_engine.py` + `backtest_yaml.py` — 외부 MCP 백테스트 서버 (`http://43.202.187.5:3846/mcp`)
+- 20:00 AI 자문 INSERT 직후 6 전략 × 2 kind = 12 job fire-and-forget
+- DB `backtest_runs` 영속화 (`(target_date, strategy_id, params_kind)` UNIQUE, status: queued/running/completed/failed/skipped)
+- `parameter_recommendations.backtest_summary` JSONB 동봉 (현재 params vs 추천 params 의 8 메트릭 비교)
+- YAML DSL 지원 3종: momentum / volatility_breakout / donchian_swing
+- 폴백 3종: long_tail_volatility / bull_flag_breakout / vcp_breakout — Phase 4-bis 대기
+- 활성화 토글: `KIS_MCP_ENABLED` (기본 false)
+- `max_drawdown` 양수(절대값) 컨벤션 — `signInverted=true`
+- Frontend: `BacktestComparisonCard` (Recommendations)
+
+### 13.5 AI 자문 고도화
+
+- `parameter_recommendations` 신규 컬럼:
+  - `recommended_weight` NUMERIC (자산 배정 자문 — 0.0~1.0)
+  - `weight_reasoning` TEXT (비중 변경 사유, ≤1000자, 한국어, 통합 `reasoning` 과 별개)
+  - `code_review_notes` TEXT (로직 자유 텍스트, ≤2000자)
+  - `applied_weight` NUMERIC (apply 시 사용자 명시 토글)
+  - `backtest_summary` JSONB
+- `_validate_recommendations()` 5-tuple 반환 `(validated_params, reasoning, weight, notes, weight_reasoning)`
+- user_payload 12 키 추가 (current_weight + peer_weights + peer_metrics + market_regime)
+- `PARAM_RANGES` 화이트리스트 확장: `k_value_krx_main/k_value_nxt_pre` (0.5~2.0) + `stop_loss_main/stop_loss_pre_nxt` (-15.0~0.0) + `donchian_period` (10~60) + `long_ma_period` (20~120) + `volume_multiplier`/`atr_trail_mult` (1.0~5.0)
+- `min(candidates)` 손절률 정책 — 5 키 후보 (`stop_loss_rate`/`intraday_stop_loss`/`overnight_stop_loss`/`stop_loss_main`/`stop_loss_pre_nxt`)
+
+### 13.6 운영 안정성 (사이클 9 / 11 / 13 / 14)
+
+- WebSocket stale watcher 임계 보수화 → 회복 강화:
+  - `STALE_WATCHER_INTERVAL_SECS=120` / `STALE_FRESHNESS_SECS=60` / `STALE_FORCE_REREGISTER_AFTER=5` (10분 stale 후 강제 재등록)
+  - 다중 안전망: F1 (재연결 1회) + `_scan_loop` (5분) + K watcher (120s) + `_resubscribe_stale_priority` (5분 우선) = 4중
+- `_subscriptions` 정합성 가드 (in-flight ACK race 차단)
+- `_report_tick_coverage()` 풀 통합 — 사이클 11 짝궁 누락 fix
+- `list_accounts()` 60s TTL 메모리 캐시 — 폴링 race + supabase HTTP/2 stale connection 결함 차단
+- 운영 점진 활성화: 보조 0개 → 1 → 5 (코드 배포 / 첫 등록 / 점진 추가). KRX 메인 시간 중 빈번한 push 자제 (재시작 race), NXT 애프터 또는 익일 boot 전 push 권장
+
+### 13.7 사이클 6 — 로그 메뉴 통합
+
+- 기존 `pages/LogReports.tsx` + Dashboard 의 `LogViewer` → `pages/Logs.tsx` 통합 메뉴 (`?tab=system|daily-report`)
+- 시스템 로그 탭: `from_date`/`to_date` 분리 date input + 레벨 토글 + 페이징 (1-base, size 50)
+- `/api/logs` 응답 확장: `{items, total, total_pages}` dict (기존 `?limit=50&level=ERROR` 하위 호환)
+
+---
+
+> 본 13장은 1~12 섹션 작성 이후 도입된 인프라의 요약. 도식·시퀀스 다이어그램의 갱신 (예: `WebsocketPool` 분배 흐름 / 매수 가드 4 모드 분기 / 백테스트 MCP 호출 시퀀스) 은 별도 사이클로 위임.
+

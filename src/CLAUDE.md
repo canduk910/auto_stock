@@ -14,7 +14,7 @@ config.py ← 모든 모듈 (settings)
 auth/      ← api/base.py, realtime/websocket.py
 api/base.py ← api/order, balance, condition
 api/       ← engine/, routes/
-realtime/websocket.py ← realtime/websocket_pool.py (사이클 7-B — 메인 세션 재사용)
+realtime/websocket.py ← realtime/websocket_pool.py (메인 세션 재사용)
 realtime/handler.py ← engine/risk.py(on_tick) + engine/order_engine.py(체결통보) + engine/session.py(보드 전환)
 engine/session.py ← engine/risk.py, engine/scheduler.py, strategies/* (현재 보드 query)
 engine/    ← routes/trading.py (시작/정지)
