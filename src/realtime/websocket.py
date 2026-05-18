@@ -408,11 +408,22 @@ class KisWebSocket:
                 # G1 (2026-05-12) — 정상 SUBSCRIBE SUCCESS 응답 카운트 별도 추적.
                 # KIS REST/WS 어디에도 슬롯 사용현황 조회 API 미존재 → 우리 측 도구로 가시화.
                 # rt_cd=="0" + msg1 에 "SUBSCRIBE SUCCESS" 포함 시 _subscriptions_acked add.
+                #
+                # 사이클 14-C (2026-05-18) — _subscriptions 정합성 가드.
+                # in-flight ACK race 차단: unsubscribe 직후 도착한 SUBSCRIBE SUCCESS ACK 는
+                # _subscriptions 에 없으면 acked 에도 add 안 함 → 격차(_subscribed=0/_acked=N) 차단.
+                # 2026-05-18 KST ~15:01 운영 endpoint 응답의 _main acked=30/subscribed=0 격차 대응.
                 if rt_cd == "0" and "SUBSCRIBE SUCCESS" in upper_msg1:
-                    self._subscriptions_acked.add((tr_id, tr_key))
-                    logger.info(
-                        "WebSocket 구독 ACK: tr_id=%s, tr_key=%s", tr_id, tr_key,
-                    )
+                    if (tr_id, tr_key) in self._subscriptions:
+                        self._subscriptions_acked.add((tr_id, tr_key))
+                        logger.info(
+                            "WebSocket 구독 ACK: tr_id=%s, tr_key=%s", tr_id, tr_key,
+                        )
+                    else:
+                        logger.debug(
+                            "[ws_ack_orphan] tr_id=%s tr_key=%s — _subscriptions 부재 (in-flight race ACK 무시)",
+                            tr_id, tr_key,
+                        )
 
                 # 구독 성공 응답 → AES 키 저장 (체결통보용)
                 output = body.get("output", {})

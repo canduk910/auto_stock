@@ -492,6 +492,9 @@ async def test_case_n6_subscribe_success_regression(
     patched_write_log, caplog
 ):
     ws = KisWebSocket()
+    # 사이클 14-C (2026-05-18) — 정합성 가드 적용 후 _subscriptions add 선행 필요
+    # (정상 흐름: subscribe()→SEND→KIS ACK 가 _subscriptions 등록 후 도착).
+    ws._subscriptions.add(("H0UNCNT0", "005930"))
     raw = json.dumps({
         "header": {"tr_id": "H0UNCNT0", "tr_key": "005930"},
         "body": {"rt_cd": "0", "msg_cd": "OPSP0000", "msg1": "SUBSCRIBE SUCCESS"},
