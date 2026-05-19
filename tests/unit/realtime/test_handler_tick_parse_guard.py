@@ -20,3 +20,12 @@ async def test_handle_tick_invalid_price_payload_does_not_raise_or_dispatch():
 
     spy.assert_not_awaited()
 
+
+def test_parse_tick_prices_returns_none_for_non_numeric_values():
+    fields = ["005930", "090001", "ABC", "2", "0", "0", "0", "70000", "71000", "69000"]
+    assert handler._parse_tick_prices(fields) is None
+
+
+def test_parse_tick_prices_parses_current_and_open_price():
+    fields = ["005930", "090001", "70100", "2", "0", "0", "0", "70000", "71000", "69000"]
+    assert handler._parse_tick_prices(fields) == (70100, 70000)
