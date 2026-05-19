@@ -97,7 +97,9 @@ def test_near_signal_task_attribute_init(scheduler):
 def test_stop_cancel_loop_includes_near_signal_task():
     """src/engine/scheduler.py stop() 의 task_attr 튜플에 _near_signal_task 포함 — 회귀 가드."""
     from pathlib import Path
-    src = Path("/Users/koscom/Projects/auto_stock/src/engine/scheduler.py").read_text()
+    # 프로젝트 루트 기준 상대 경로 — CI/로컬 환경 무관 동작 (사이클 16-A hot fix)
+    project_root = Path(__file__).resolve().parents[3]
+    src = (project_root / "src" / "engine" / "scheduler.py").read_text()
     # stop() 함수 안의 task_attr 튜플 확인
     # finally cancel + stop() cancel 2 곳 모두 포함되어야 함
     occurrences = src.count('"_near_signal_task"')
