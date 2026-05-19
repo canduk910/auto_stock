@@ -159,6 +159,21 @@ Dashboard `MarketRegimeCard` 직하 신설 (시장 → 인프라 위계). Websoc
 - 보조 0개: `pool-no-secondary-note` 안내
 - API: `getSubscriptions()`, `/api/realtime/subscriptions` sessions 배열. queryKey `['realtime-subscriptions']`, `staleTime: 5_000`, `refetchInterval: 30_000` (Trading Status 5s 와 별개 큐로 부하 격리). 에러 시 `pool-error-message` graceful
 
+## StreamStatus (`/stream`)
+
+사이클 15-C-2 (2026-05-19) 신규 메뉴. REST+WS 혼합 풀 매니저 상태 모니터링 페이지.
+
+- 3 탭 (`data-testid="stream-tab-{rest|ws|dropped}"`):
+  - REST 관찰: REST 폴링 중인 종목 (임박 후보 검사 대상)
+  - WS 활성: WS 풀에 활성 구독 중 + `min_hold_remaining_secs` 컬럼
+  - 탈락 (cooldown): 강등 후 재승격 제한 중 + `cooldown_remaining_secs` 컬럼
+- 탭 라벨에 카운트 표기 — `(N)` 형태
+- 컬럼: 종목 / 전략 (한글 라벨 매핑) / 사유 / 등록 후 경과 / (옵션) 남은시간
+- 빈 카테고리 → `stream-empty-{tab}` 안내
+- `stream-refresh` 새로고침 버튼 → `invalidateQueries`
+- API: `getStreamStatus()` (`frontend/src/api/realtime.ts`), `/api/realtime/stream-status`. queryKey `['stream-status']`, `staleTime: 5_000`, `refetchInterval: 30_000`. 에러 시 `stream-error` graceful
+- 회귀 가드: `frontend/src/pages/__tests__/StreamStatus.test.tsx` 7 케이스 (기본 ws 탭 / REST 탭 / 탈락 탭 cooldown 컬럼 / 빈 카테고리 / 탭 카운트 / 새로고침 / 500 에러)
+
 ## MarketRegimeCard
 
 Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).

@@ -83,3 +83,33 @@ export const getSubscriptions = async (): Promise<SubscriptionsResponse> => {
     }
   )
 }
+
+/**
+ * 사이클 15-C-1 (2026-05-19) — REST+WS 혼합 풀 매니저 상태 조회.
+ *
+ * 백엔드 `GET /api/realtime/stream-status` 응답:
+ * - rest:    REST 관찰 중인 종목
+ * - ws:      WS 활성 종목 (min_hold_remaining_secs 노출)
+ * - dropped: cooldown 중인 종목 (cooldown_remaining_secs 노출)
+ */
+export interface StreamEntry {
+  ticker: string
+  strategy: string
+  reason: string
+  since_secs: number
+  min_hold_remaining_secs?: number
+  cooldown_remaining_secs?: number
+}
+
+export interface StreamStatusResponse {
+  rest: StreamEntry[]
+  ws: StreamEntry[]
+  dropped: StreamEntry[]
+}
+
+export const getStreamStatus = async (): Promise<StreamStatusResponse> => {
+  const { data } = await apiClient.get<ApiResponse<StreamStatusResponse>>(
+    '/realtime/stream-status',
+  )
+  return data.data ?? { rest: [], ws: [], dropped: [] }
+}
