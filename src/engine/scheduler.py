@@ -173,8 +173,6 @@ class TradingScheduler:
         # 사이클 13-E-2 — start() 본문 로컬 task 를 속성 승격, finally 좀비 차단
         self._ws_task: asyncio.Task | None = None
         self._scan_task: asyncio.Task | None = None
-        # 사이클 15-B-2 (2026-05-19) — near-signal monitor task (60s 주기, 09:30~)
-        self._near_signal_task: asyncio.Task | None = None
 
     async def _load_strategy_config(self) -> None:
         """DB에서 전략 설정(비중/파라미터)을 로드하여 적용한다."""
@@ -410,10 +408,6 @@ class TradingScheduler:
 
                 self._phase = "trading"
                 self._scan_task = asyncio.create_task(self._scan_loop())
-                # 사이클 15-B-2 (2026-05-19) — near-signal monitor task 60s 주기.
-                # settings.near_signal_mode=False 시 noop sleep loop. 활성 시 임박 종목 promote/demote.
-                if self._near_signal_task is None or self._near_signal_task.done():
-                    self._near_signal_task = asyncio.create_task(self._near_signal_loop())
                 logger.info("매매 모드 진입 (KRX 메인 + NXT)")
 
                 await self._wait_until(TIME_KRX_MAIN_BUY_STOP)
@@ -520,7 +514,6 @@ class TradingScheduler:
                 "_next_day_task", "_session_task", "_stale_watcher_task",
                 "_swing_poll_task", "_swing_rest_poll_task",
                 "_ws_task", "_scan_task",
-                "_near_signal_task",  # 사이클 15-B-2
             ):
                 task = getattr(self, task_attr, None)
                 if task and not task.done():
@@ -640,7 +633,6 @@ class TradingScheduler:
         for task_attr in (
             "_next_day_task", "_session_task", "_stale_watcher_task",
             "_swing_poll_task", "_swing_rest_poll_task",
-            "_near_signal_task",  # 사이클 15-B-2
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -1208,16 +1200,8 @@ class TradingScheduler:
         # G안(2026-05-12): swing 키는 항상 빈 list — donchian_swing 후보는 Pull 폴링으로 평가하므로
         # WebSocket 구독 미사용. 보유 종목은 positions HIGH 그룹으로 별도 유입되어 청산 평가 보장.
         # 시그니처 호환을 위해 키 자체는 5개 모두 유지.
-        #
-        # 사이클 15-B-2 (2026-05-19): settings.near_signal_mode=true 시 momentum/breakout 도 빈 list.
-        # `_near_signal_loop` 가 60s 주기로 임박 종목만 LOW promote.
-        from src.config import settings as _settings
-        if getattr(_settings, "near_signal_mode", False):
-            momentum_list: list[str] = []
-            breakout_list: list[str] = []
-        else:
-            momentum_list = list(momentum_tickers or [])
-            breakout_list = self._collect_breakout_tickers()
+        momentum_list = list(momentum_tickers or [])
+        breakout_list = self._collect_breakout_tickers()
         return {
             "positions": positions,
             "next_day_clear": next_day_clear,
@@ -2332,106 +2316,6 @@ class TradingScheduler:
         except Exception:
             # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
             logger.debug("[stale_watcher] write_log 실패", exc_info=True)
-
-    async def _near_signal_loop(self) -> None:
-        """60s 주기 임박(near-signal) 모니터 task (사이클 15-B-2, 2026-05-19).
-
-        09:30 이후 시작. `settings.near_signal_mode=False` 면 noop 루프.
-
-        흐름:
-        1. `near_signal_monitor.collect_near_signals(registry)` 호출 → 임박 후보 dict
-        2. `stream_pool_manager.reset_cycle()` — 배치 카운터 초기화
-        3. 임박 종목 promote — `can_promote` 통과 시 `kis_ws_pool.subscribe(LOW)` + `mark_promoted`
-        4. 임박 list 에서 빠진 ws_active 종목 demote — `can_demote` 통과 시
-           `kis_ws_pool.unsubscribe` + `mark_demoted` (positions/next_day_clear 보호)
-        5. `expire_cooldowns()` — cooldown 만료 → rest_watch
-
-        안전:
-        - `near_signal_mode=False` 면 collect 결과 사용 안 함 — 단순 sleep 만
-        - 본체 예외는 try/except 흡수 — 다음 사이클 자연 재시도
-        - momentum 후보는 `scan_stocks()` 결과 사용 (별도 task 와 race 없음 — 읽기 전용)
-        """
-        from src.config import settings as _settings
-        from src.engine.near_signal_monitor import collect_near_signals
-        from src.engine.scanner import TICK_TR_ID, scan_stocks
-        from src.engine.stream_pool_manager import stream_pool_manager
-        from src.realtime.websocket_pool import kis_ws_pool
-
-        INTERVAL_SECS = 60.0
-        # 첫 발화 5s 후 (이전 _scan_loop 와 race 차단)
-        await asyncio.sleep(5)
-
-        while self._running:
-            try:
-                if not getattr(_settings, "near_signal_mode", False):
-                    # 비활성 모드 — 단순 sleep 만 (scheduler stop 까지 idle)
-                    await asyncio.sleep(INTERVAL_SECS)
-                    continue
-
-                # momentum 후보 (scan_stocks 결과)
-                try:
-                    momentum_candidates = await scan_stocks()
-                except Exception:
-                    momentum_candidates = []
-
-                # 임박 후보 수집
-                candidates = await collect_near_signals(
-                    self.registry,
-                    momentum_candidate_tickers=momentum_candidates,
-                )
-
-                stream_pool_manager.reset_cycle()
-                stream_pool_manager.expire_cooldowns()
-
-                # promote — 임박 종목
-                near_tickers: set[str] = set()
-                for strategy_id, entries in candidates.items():
-                    for ticker, reason, _kind in entries:
-                        near_tickers.add(ticker)
-                        slot = stream_pool_manager.get_slot(ticker)
-                        if slot and slot.state == "ws_active":
-                            # 이미 WS — promote 호출 안 함 (idempotent)
-                            continue
-                        ok, why = stream_pool_manager.can_promote(ticker)
-                        if not ok:
-                            continue
-                        try:
-                            await kis_ws_pool.subscribe(
-                                TICK_TR_ID, ticker,
-                                priority="LOW", bypass_limit=False,
-                            )
-                            stream_pool_manager.mark_promoted(ticker, strategy_id, reason)
-                        except Exception:
-                            logger.exception("[near_signal_loop] promote 실패: %s", ticker)
-
-                # demote — 임박 list 에서 빠진 ws_active 종목
-                for slot in stream_pool_manager.list_by_state("ws_active"):
-                    if slot.is_protected_from_demote():
-                        continue
-                    if slot.ticker in near_tickers:
-                        continue
-                    ok, _why = stream_pool_manager.can_demote(slot.ticker)
-                    if not ok:
-                        continue
-                    try:
-                        await kis_ws_pool.unsubscribe(TICK_TR_ID, slot.ticker)
-                        stream_pool_manager.mark_demoted(slot.ticker, "signal_faded")
-                    except Exception:
-                        logger.exception(
-                            "[near_signal_loop] demote 실패: %s", slot.ticker,
-                        )
-
-                snap = stream_pool_manager.snapshot()
-                logger.info(
-                    "[near_signal_loop] ws=%d rest=%d dropped=%d (mode=enabled)",
-                    len(snap["ws"]), len(snap["rest"]), len(snap["dropped"]),
-                )
-            except asyncio.CancelledError:
-                raise
-            except Exception:
-                logger.exception("[near_signal_loop] 본체 예외 — 다음 사이클 자연 재시도")
-
-            await asyncio.sleep(INTERVAL_SECS)
 
     async def _delta_unsubscribe_dropped(self, new_set: set[str]) -> list[str]:
         """`_scan_loop` 의 새 합집합에서 빠진 종목만 unsubscribe (사이클 15-A, 2026-05-19).

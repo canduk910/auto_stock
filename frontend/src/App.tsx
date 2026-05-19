@@ -9,14 +9,11 @@ const Recommendations = lazy(() => import('./pages/Recommendations'))
 // 사이클 6 (2026-05-17): /log-reports → /logs?tab=daily-report 로 통합. 기존 페이지는 redirect.
 const Logs = lazy(() => import('./pages/Logs'))
 const Settings = lazy(() => import('./pages/Settings'))
-// 사이클 15-C-2 (2026-05-19): REST+WS 혼합 풀 매니저 시세수신현황
-const StreamStatus = lazy(() => import('./pages/StreamStatus'))
 
 const navItems = [
   { to: '/', label: '대시보드' },
   { to: '/history', label: '거래 내역' },
   { to: '/recommendations', label: '전략수정 AI자문' },
-  { to: '/stream', label: '시세수신현황' },
   { to: '/logs', label: '로그' },
   { to: '/settings', label: '설정' },
 ]
@@ -92,7 +89,6 @@ function AppShell() {
               path="/log-reports"
               element={<Navigate to="/logs?tab=daily-report" replace />}
             />
-            <Route path="/stream" element={<StreamStatus />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </Suspense>
