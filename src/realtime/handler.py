@@ -86,8 +86,12 @@ async def _handle_tick(payload: str) -> None:
         return
 
     ticker = fields[0]
-    current_price = int(fields[2])
-    open_price = int(fields[7])
+    try:
+        current_price = int(fields[2])
+        open_price = int(fields[7])
+    except (TypeError, ValueError):
+        logger.debug("실시간 체결가 파싱 실패: payload=%s", payload[:140], exc_info=True)
+        return
 
     if open_price > 0:
         change_rate = (current_price - open_price) / open_price * 100

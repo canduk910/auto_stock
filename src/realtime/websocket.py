@@ -466,7 +466,15 @@ class KisWebSocket:
             if not encrypted and "^" in payload:
                 tr_key = payload.split("^")[0]
             if self._on_message:
-                await self._on_message(tr_id, tr_key, payload, encrypted)
+                try:
+                    await self._on_message(tr_id, tr_key, payload, encrypted)
+                except Exception:
+                    logger.exception(
+                        "WebSocket 메시지 핸들러 예외: tr_id=%s tr_key=%s encrypted=%s",
+                        tr_id,
+                        tr_key,
+                        encrypted,
+                    )
 
 
 kis_ws = KisWebSocket()
