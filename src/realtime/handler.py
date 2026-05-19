@@ -75,6 +75,17 @@ async def dispatch_message(tr_id: str, tr_key: str, payload: str, encrypted: boo
         logger.debug("미처리 TR: %s", tr_id)
 
 
+def _parse_tick_prices(fields: list[str]) -> tuple[int, int] | None:
+    """실시간 체결가 payload fields 에서 현재가/시가를 안전 파싱.
+
+    malformed payload 는 None 반환해 상위에서 조용히 스킵한다.
+    """
+    try:
+        return int(fields[2]), int(fields[7])
+    except (TypeError, ValueError):
+        return None
+
+
 async def _handle_tick(payload: str) -> None:
     """실시간 체결가 메시지를 파싱한다.
 
@@ -86,8 +97,11 @@ async def _handle_tick(payload: str) -> None:
         return
 
     ticker = fields[0]
-    current_price = int(fields[2])
-    open_price = int(fields[7])
+    parsed = _parse_tick_prices(fields)
+    if parsed is None:
+        logger.debug("실시간 체결가 파싱 실패: payload=%s", payload[:140])
+        return
+    current_price, open_price = parsed
 
     if open_price > 0:
         change_rate = (current_price - open_price) / open_price * 100
