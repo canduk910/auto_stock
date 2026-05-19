@@ -59,6 +59,13 @@ class Settings(BaseSettings):
     dkstock_password: str = "AUTOSTOCK1"
     dkstock_regime_enabled: bool = False
 
+    # 사이클 15-B-2 (2026-05-19) — REST+WS 혼합 풀 매니저 활성 토글.
+    # false (기본): 사이클 15-A delta-only 흐름 그대로 — 모든 후보 종목 WS 등록
+    # true: priority_groups 의 momentum/breakout/swing 빈 list +
+    #       _near_signal_loop 가 60s 주기로 임박 종목만 promote (LOW priority)
+    # 운영 토글: .env NEAR_SIGNAL_MODE=true → 재기동. KRX 메인 시간 외 권장.
+    near_signal_mode: bool = False
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     @computed_field

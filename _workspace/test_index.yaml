@@ -27,6 +27,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -79,6 +80,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -112,6 +114,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -172,6 +175,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -248,6 +252,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -299,6 +304,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -352,6 +358,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -442,6 +449,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -491,6 +499,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -551,6 +560,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -593,6 +603,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -654,6 +665,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -693,6 +705,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -783,6 +796,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -822,6 +836,7 @@ backend:
     - tests/integration/test_backtest_disabled_and_graceful.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     transitive_tests:
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
@@ -836,6 +851,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_boot_cash_usage_ratio.py
@@ -1016,6 +1032,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_auto_start.py
@@ -1110,6 +1127,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1158,6 +1176,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1212,6 +1231,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1243,6 +1263,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1297,6 +1318,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1331,6 +1353,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1427,6 +1450,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1475,6 +1499,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1529,6 +1554,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1561,6 +1587,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1621,6 +1648,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1655,6 +1683,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1709,6 +1738,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1774,6 +1804,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1808,6 +1839,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1847,6 +1879,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1904,6 +1937,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -1934,6 +1968,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -1989,6 +2024,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2019,6 +2055,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -2132,6 +2169,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2196,6 +2234,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_auto_start.py
@@ -2256,6 +2295,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2294,6 +2334,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -2387,6 +2428,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2437,6 +2479,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -2497,6 +2540,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2527,6 +2571,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -2629,6 +2674,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -2683,6 +2729,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2716,6 +2763,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -2774,6 +2822,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2807,6 +2856,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -2859,6 +2909,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2898,6 +2949,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -2950,6 +3002,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -2967,7 +3020,91 @@ backend:
   src/engine/near_signal_monitor.py:
     direct_tests:
     - tests/unit/engine/test_near_signal_monitor.py
-    transitive_tests: []
+    transitive_tests:
+    - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_quote_session_auto_disable.py
+    - tests/contract/test_routes_backtest.py
+    - tests/contract/test_routes_balance_perf.py
+    - tests/contract/test_routes_buy_block.py
+    - tests/contract/test_routes_history.py
+    - tests/contract/test_routes_kis_quote_accounts.py
+    - tests/contract/test_routes_log_reports.py
+    - tests/contract/test_routes_logs.py
+    - tests/contract/test_routes_market_regime.py
+    - tests/contract/test_routes_realtime.py
+    - tests/contract/test_routes_recommendations.py
+    - tests/contract/test_routes_strategies.py
+    - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
+    - tests/contract/test_routes_subscriptions_pool.py
+    - tests/contract/test_routes_system_integrations.py
+    - tests/contract/test_routes_trading.py
+    - tests/integration/test_auto_start.py
+    - tests/integration/test_backtest_disabled_and_graceful.py
+    - tests/integration/test_boot_cash_usage_ratio.py
+    - tests/integration/test_boot_eager_refresh.py
+    - tests/integration/test_boot_market_regime.py
+    - tests/integration/test_buy_block_low_funds.py
+    - tests/integration/test_buy_flow.py
+    - tests/integration/test_chegyeol_race.py
+    - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_force_clear_1520.py
+    - tests/integration/test_mcp_client_lifecycle.py
+    - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_next_day_clear.py
+    - tests/integration/test_next_day_clear_nxt_eligibility.py
+    - tests/integration/test_next_day_clear_observability.py
+    - tests/integration/test_next_day_clear_stock_master.py
+    - tests/integration/test_pool_distribution.py
+    - tests/integration/test_post_nxt_open_price_confirm.py
+    - tests/integration/test_presubscribe.py
+    - tests/integration/test_recommendation_backtest_flow.py
+    - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
+    - tests/integration/test_reset_daily_state.py
+    - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
+    - tests/integration/test_scheduler_recommendation_failure.py
+    - tests/integration/test_sell_flow.py
+    - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
+    - tests/integration/test_smoke.py
+    - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_force_clear_time_guard.py
+    - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
+    - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_recommendation_backtest_hook.py
+    - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
+    - tests/unit/engine/test_recommendation_weight_reasoning.py
+    - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
+    - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
+    - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
+    - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
+    - tests/unit/engine/test_stale_watcher_thresholds.py
+    - tests/unit/engine/test_swing_poll_loop.py
+    - tests/unit/engine/test_swing_rest_poll.py
+    - tests/unit/engine/test_sync_orders_to_db_dedup.py
+    - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
+    - tests/unit/engine/test_vb_next_day_clear_safety_net.py
   src/engine/order_engine.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -3023,6 +3160,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3046,6 +3184,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3088,6 +3227,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3131,6 +3271,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3165,6 +3306,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3219,6 +3361,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3288,6 +3431,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3308,6 +3452,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3337,6 +3482,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3442,6 +3588,7 @@ backend:
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3480,6 +3627,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3526,6 +3674,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3565,6 +3714,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3639,6 +3789,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3678,6 +3829,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3732,6 +3884,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3800,6 +3953,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3827,6 +3981,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3894,6 +4049,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -3915,6 +4071,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -3981,6 +4138,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4008,6 +4166,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -4040,6 +4199,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4094,6 +4254,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -4165,6 +4326,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4192,6 +4354,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -4264,6 +4427,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_strategy_base.py
@@ -4288,6 +4452,7 @@ backend:
     - tests/contract/test_routes_realtime.py
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4382,6 +4547,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4403,6 +4569,7 @@ backend:
     - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
     - tests/unit/engine/test_scheduler_stop_task_cancel.py
@@ -4415,9 +4582,93 @@ backend:
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
   src/engine/stream_pool_manager.py:
     direct_tests:
+    - tests/contract/test_routes_stream_status.py
     - tests/unit/engine/test_stream_pool_manager.py
     transitive_tests:
+    - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_quote_session_auto_disable.py
+    - tests/contract/test_routes_backtest.py
+    - tests/contract/test_routes_balance_perf.py
+    - tests/contract/test_routes_buy_block.py
+    - tests/contract/test_routes_history.py
+    - tests/contract/test_routes_kis_quote_accounts.py
+    - tests/contract/test_routes_log_reports.py
+    - tests/contract/test_routes_logs.py
+    - tests/contract/test_routes_market_regime.py
+    - tests/contract/test_routes_realtime.py
+    - tests/contract/test_routes_recommendations.py
+    - tests/contract/test_routes_strategies.py
+    - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_subscriptions_pool.py
+    - tests/contract/test_routes_system_integrations.py
+    - tests/contract/test_routes_trading.py
+    - tests/integration/test_auto_start.py
+    - tests/integration/test_backtest_disabled_and_graceful.py
+    - tests/integration/test_boot_cash_usage_ratio.py
+    - tests/integration/test_boot_eager_refresh.py
+    - tests/integration/test_boot_market_regime.py
+    - tests/integration/test_buy_block_low_funds.py
+    - tests/integration/test_buy_flow.py
+    - tests/integration/test_chegyeol_race.py
+    - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_force_clear_1520.py
+    - tests/integration/test_mcp_client_lifecycle.py
+    - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_next_day_clear.py
+    - tests/integration/test_next_day_clear_nxt_eligibility.py
+    - tests/integration/test_next_day_clear_observability.py
+    - tests/integration/test_next_day_clear_stock_master.py
+    - tests/integration/test_pool_distribution.py
+    - tests/integration/test_post_nxt_open_price_confirm.py
+    - tests/integration/test_presubscribe.py
+    - tests/integration/test_recommendation_backtest_flow.py
+    - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
+    - tests/integration/test_reset_daily_state.py
+    - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
+    - tests/integration/test_scheduler_recommendation_failure.py
+    - tests/integration/test_sell_flow.py
+    - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_session_start_hook_idempotent.py
+    - tests/integration/test_smoke.py
+    - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_force_clear_time_guard.py
+    - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
+    - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_near_signal_monitor.py
+    - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_recommendation_backtest_hook.py
+    - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
+    - tests/unit/engine/test_recommendation_weight_reasoning.py
+    - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
+    - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
+    - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
+    - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
+    - tests/unit/engine/test_stale_watcher_thresholds.py
+    - tests/unit/engine/test_swing_poll_loop.py
+    - tests/unit/engine/test_swing_rest_poll.py
+    - tests/unit/engine/test_sync_orders_to_db_dedup.py
+    - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
+    - tests/unit/engine/test_vb_next_day_clear_safety_net.py
   src/engine/util/__init__.py:
     direct_tests: []
     transitive_tests: []
@@ -4441,6 +4692,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4499,6 +4751,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -4530,6 +4783,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4559,6 +4813,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4614,6 +4869,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -4644,6 +4900,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4707,6 +4964,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -4739,6 +4997,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4838,6 +5097,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -4886,6 +5146,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4942,6 +5203,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -4968,6 +5230,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -5000,6 +5263,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5021,6 +5285,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5048,6 +5313,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5138,6 +5404,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -5185,6 +5452,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5209,6 +5477,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5267,6 +5536,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -5316,6 +5586,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5411,6 +5682,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -5473,6 +5745,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_auto_start.py
@@ -5562,6 +5835,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -5625,6 +5899,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_auto_start.py
@@ -5707,6 +5982,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -5746,6 +6022,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5766,6 +6043,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5787,6 +6065,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5808,6 +6087,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5829,6 +6109,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5850,6 +6131,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5871,6 +6153,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5892,6 +6175,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5913,6 +6197,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5935,6 +6220,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5955,6 +6241,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5976,6 +6263,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -5997,6 +6285,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -6019,6 +6308,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6039,6 +6329,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -6069,6 +6360,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -6091,6 +6383,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -6151,6 +6444,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -6192,6 +6486,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -6251,6 +6546,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -6292,6 +6588,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -6347,6 +6644,7 @@ backend:
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -6379,6 +6677,7 @@ backend:
     - tests/contract/test_routes_recommendations.py
     - tests/contract/test_routes_strategies.py
     - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_stream_status.py
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
@@ -6474,6 +6773,7 @@ backend:
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
     - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_near_signal_integration.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
     - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
@@ -6955,10 +7255,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-19T11:29:28.511146+09:00'
+generated_at: '2026-05-19T13:19:53.975121+09:00'
 stats:
   backend_modules: 86
-  backend_tests: 170
+  backend_tests: 172
   frontend_modules: 57
   frontend_tests: 31
   unmapped_modules:

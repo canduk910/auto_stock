@@ -243,7 +243,8 @@ def test_stop_tuple_equals_finally_tuple_members():
         f"명세 §4 Patch A — 두 tuple 멤버 집합 완전 동일 필수 (13-E-2 finally 7종 ≡ 13-E-3 stop 7종)."
     )
 
-    # 추가 강화: 명세가 지정한 7종 멤버 모두 포함 verify (회귀 가드 — 향후 5종/6종 회귀 방지)
+    # 추가 강화: 명세가 지정한 8종 멤버 모두 포함 verify (회귀 가드 — 향후 5종/6종 회귀 방지)
+    # 사이클 15-B-2 (2026-05-19): `_near_signal_task` 8번째 멤버 추가 (60s 주기 임박 모니터).
     expected_members = {
         "_next_day_task",
         "_session_task",
@@ -252,6 +253,7 @@ def test_stop_tuple_equals_finally_tuple_members():
         "_swing_rest_poll_task",
         "_ws_task",
         "_scan_task",
+        "_near_signal_task",  # 사이클 15-B-2
     }
     assert stop_members == expected_members, (
         f"stop() tuple 이 명세 §9 ① 의 7종과 불일치.\n"
