@@ -39,6 +39,11 @@ VERIFY_AFTER_SECS = 60        # 재연결 후 검증까지 대기
 VERIFY_FRESHNESS_SECS = 60    # 검증 기준 — 이 시간 내 tick 없으면 미수신으로 판정
 _KST_TZ = timezone(timedelta(hours=9))
 
+# 사이클 16 (2026-05-19) — AES 키 저장 가드용 체결통보 tr_id 화이트리스트.
+# `_handle_raw` SUBSCRIBE SUCCESS 분기에서 메인 세션 + 이 tr_id 만 모듈 전역 AES 키 저장.
+# 보조 세션 또는 시세 SUBSCRIBE SUCCESS 는 skip — 체결통보 키 덮어쓰기 race 차단.
+_EXECUTION_NOTICE_TR_IDS = frozenset({"H0STCNI0", "H0STCNI9"})
+
 # 구독 거절 감지 키워드 (E2, 2026-05-12) — msg1 대소문자 무시 substring 매칭.
 # rt_cd != "0" 1순위, 키워드는 보조. 한국어/영문 변형 누적.
 _REJECT_KEYWORDS_UPPER = (
@@ -78,11 +83,15 @@ class KisWebSocket:
     인자 미지정 시 메인 글로벌 `token_manager` 사용 (기존 동작 100% 보존).
     """
 
-    def __init__(self, *, token_manager=None) -> None:
+    def __init__(self, *, token_manager=None, is_main: bool = True) -> None:
         # 사이클 7-C — 메인이면 None, 보조면 외부 매니저 주입
         # `connect()` / approval_key 발급 시 이 매니저 사용
         from src.auth.token import token_manager as _main_tm
         self._token_manager = token_manager if token_manager is not None else _main_tm
+        # 사이클 16 (2026-05-19) — 메인/보조 세션 식별자. AES 키 저장 가드용.
+        # 보조 세션은 시세 수신 only — 체결통보 구독 안 함 + AES 키 저장도 skip.
+        # 메인 세션의 체결통보(H0STCNI0/H0STCNI9) AES 키만 모듈 전역 보존.
+        self.is_main: bool = is_main
 
         self._ws: ClientConnection | None = None
         self._approval_key: str = ""
@@ -426,12 +435,22 @@ class KisWebSocket:
                         )
 
                 # 구독 성공 응답 → AES 키 저장 (체결통보용)
+                # 사이클 16 (2026-05-19) — 이중 가드 추가.
+                # 1) 세션 가드: 메인 세션만 모듈 전역 키 저장 (보조 세션 skip)
+                # 2) tr_id 가드: 체결통보(H0STCNI0/H0STCNI9) 만 저장 (시세 SUBSCRIBE SUCCESS 덮어쓰기 차단)
+                # 자체 인스턴스 변수(self.aes_iv/aes_key) 는 보존 (세션별 추적 — 디버깅용)
                 output = body.get("output", {})
                 if "iv" in output and "key" in output:
                     self.aes_iv = output["iv"]
                     self.aes_key = output["key"]
-                    set_aes_keys(self.aes_iv, self.aes_key)
-                    logger.info("AES 키 수신: tr_id=%s", tr_id)
+                    if self.is_main and tr_id in _EXECUTION_NOTICE_TR_IDS:
+                        set_aes_keys(self.aes_iv, self.aes_key)
+                        logger.info("AES 키 수신: tr_id=%s", tr_id)
+                    else:
+                        logger.debug(
+                            "[aes_key_skip] tr_id=%s is_main=%s — 체결통보 외 키 무시 (사이클 16)",
+                            tr_id, self.is_main,
+                        )
                 return
             except json.JSONDecodeError:
                 pass
