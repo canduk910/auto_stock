@@ -316,6 +316,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -455,6 +456,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -788,6 +790,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -944,6 +947,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -1106,6 +1110,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -1418,6 +1423,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -2111,6 +2117,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -2361,6 +2368,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -3389,6 +3397,7 @@ backend:
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
@@ -4764,6 +4773,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -5057,6 +5067,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -5323,6 +5334,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -5465,6 +5477,7 @@ backend:
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -5487,6 +5500,7 @@ backend:
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -6371,6 +6385,7 @@ backend:
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
     - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -6828,10 +6843,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-19T08:45:32.005831+09:00'
+generated_at: '2026-05-19T09:41:54.371995+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 165
+  backend_tests: 166
   frontend_modules: 57
   frontend_tests: 31
   unmapped_modules:

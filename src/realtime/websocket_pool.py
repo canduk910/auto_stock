@@ -37,6 +37,14 @@ from src.realtime.websocket import (
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# 사이클 13-H — pool.start() first-ready await 상수
+# 테스트에서 monkeypatch.setattr("src.realtime.websocket_pool.POOL_START_READY_TIMEOUT_SECS", ...)
+# 로 가속 검증 가능하도록 module-level 선언 필수.
+# ---------------------------------------------------------------------------
+POOL_START_READY_TIMEOUT_SECS: float = 7.0
+POOL_START_READY_POLL_INTERVAL_SECS: float = 0.1
+
 
 # ---------------------------------------------------------------------------
 # 체결통보 메인 단일 가드
@@ -147,6 +155,44 @@ class WebsocketPool:
                     "[pool_start] 보조 세션 생성 실패: label=%s — skip",
                     label, exc_info=True,
                 )
+
+        # 사이클 13-H — 보조 connect first-ready await
+        # 적어도 1개 보조 세션이 _ws 준비될 때까지 POOL_START_READY_TIMEOUT_SECS 까지 대기.
+        # - _ws 폴링 채택: KisWebSocket.connect() 가 무한 루프(재연결+heartbeat)라
+        #   task 자체는 never-complete. _ws 속성 갱신 시점이 "ready" 의 정확한 시그널.
+        # - asyncio.get_event_loop().time() 사용(monotonic): 13-F freezegun 영향 없음.
+        # - 예외 raise 금지: graceful 흐름 보존 — 메인 fallback 유지.
+        # - _started=True 는 위에서 이미 설정됨(line 108) — timeout 시에도 _started=True 유지.
+        if self._quotes and dispatch_message is not None:
+            import asyncio as _asyncio
+            import src.realtime.websocket_pool as _self_mod
+            _timeout = _self_mod.POOL_START_READY_TIMEOUT_SECS
+            _poll = _self_mod.POOL_START_READY_POLL_INTERVAL_SECS
+            _start_t = _asyncio.get_event_loop().time()
+            while True:
+                _elapsed = _asyncio.get_event_loop().time() - _start_t
+                if _elapsed >= _timeout:
+                    # timeout
+                    _ready_count = sum(
+                        1 for q in self._quotes
+                        if getattr(q, "_ws", None) is not None
+                    )
+                    logger.warning(
+                        "[pool_start_ready_timeout] ready=%d/%d timeout=%.1fs — 메인 fallback 활성",
+                        _ready_count, len(self._quotes), _timeout,
+                    )
+                    break
+                _ready_count = sum(
+                    1 for q in self._quotes
+                    if getattr(q, "_ws", None) is not None
+                )
+                if _ready_count >= 1:
+                    logger.info(
+                        "[pool_start_ready] ready=%d/%d elapsed=%.2fs",
+                        _ready_count, len(self._quotes), _elapsed,
+                    )
+                    break
+                await _asyncio.sleep(_poll)
 
         logger.info(
             "[pool_start] 완료: main=1 quotes=%d total_slots=%d",
