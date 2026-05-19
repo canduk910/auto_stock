@@ -1,11 +1,14 @@
 """K — WebSocket 시세 silent inactive 자동 복구 (stale_watcher).
 
 KIS WebSocket 구독은 됐으나 시세가 silent 하게 안 들어오는 종목을
-30s 주기로 감시한다. 60s 미수신이면 `_send_subscribe` 재발송,
-3회 연속 stale이면 unsubscribe + subscribe 강제 재등록.
-6회 누적 stale이면 skip (다음 `_scan_loop` 사이클에 위임).
+120s 주기로 감시한다.
 
-F1(재연결 1회) + `_scan_loop`(5분) + K(30s) 3중 안전망.
+사이클 17 보강 (2026-05-19) — KIS 공식 답변 ("기등록한 사항을 재등록하지 않도록")
+반영. 1~5회 재SEND 분기 폐기 → 첫 stale 즉시 unsubscribe + subscribe(HIGH,
+bypass_limit=True) 강제 재등록 (KIS 정상 "신규 등록" 패턴, 재SEND 0건).
+6회 이상 stale → skip (영구 stale 의심, 다음 `_scan_loop` 위임).
+
+F1(재연결 1회) + `_scan_loop`(5분) + K(120s) 3중 안전망.
 
 2026-05-12 결함 증거 (운영 로그):
 - 11:48 [tick_coverage] subscribed=27 fresh=1 stale=26 (96% silent inactive)
@@ -143,10 +146,15 @@ async def test_all_fresh_noop(scheduler_env):
 
 
 # ---------------------------------------------------------------------------
-# K-2: 1종목 stale, retry=1 → _send_subscribe 1회
+# K-2: 1종목 stale, retry=1 → 즉시 강제 재등록 (사이클 17 보강)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_single_stale_resends(scheduler_env):
+    """사이클 17 보강 (2026-05-19) — KIS 답변 반영. 첫 stale 즉시 강제 재등록.
+
+    1~5회 재SEND 분기 폐기 → unsubscribe + subscribe(HIGH, bypass_limit=True) 만 호출.
+    (이전: `_send_subscribe` 1회. 이름은 보존하나 동작 의미 갱신.)
+    """
     from src.engine.scanner import TICK_TR_ID
 
     sched = scheduler_env.scheduler
@@ -158,22 +166,26 @@ async def test_single_stale_resends(scheduler_env):
 
     await sched._check_and_resubscribe_stale()
 
-    # _send_subscribe 1회 (subscribe=True), unsubscribe 미발생
-    assert len(calls.send_subscribe) == 1
-    assert calls.send_subscribe[0] == (TICK_TR_ID, "005930", True)
-    assert calls.unsubscribe == []
-    assert calls.subscribe == []
+    # 사이클 17 보강: 첫 stale 즉시 강제 재등록 (재SEND 0건)
+    assert calls.send_subscribe == []
+    assert len(calls.unsubscribe) == 1
+    assert len(calls.subscribe) == 1
+    assert calls.unsubscribe[0] == (TICK_TR_ID, "005930")
+    # subscribe 는 bypass_limit=True (HIGH)
+    assert calls.subscribe[0] == (TICK_TR_ID, "005930", True)
     assert sched._stale_retry_count == {"005930": 1}
 
 
 # ---------------------------------------------------------------------------
-# K-3: 3종목 stale, retry 이미 5 → 6회 진입 → 강제 재등록
-# 사이클 13 (2026-05-18): 임계 STALE_FORCE_REREGISTER_AFTER 10 → 5 단축
+# K-3: 3종목 stale, retry 이미 5 → 6회 진입 → skip (사이클 17 보강)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_force_reregister_after_3(scheduler_env):
-    from src.engine.scanner import TICK_TR_ID
+    """사이클 17 보강 (2026-05-19) — KIS 답변 반영. 6회 이상 stale → skip.
 
+    1~5회는 매 사이클 강제 재등록, 6회 이상은 skip (영구 stale 의심).
+    본 케이스는 retry=5 누적 → 6회 진입 → skip 검증.
+    """
     sched = scheduler_env.scheduler
     subscribed = {"A00001", "A00002", "A00003", "B11111"}
     calls = _patch_kis_ws(scheduler_env, subscribed)
@@ -182,41 +194,35 @@ async def test_force_reregister_after_3(scheduler_env):
         fresh=["B11111"],
         stale=["A00001", "A00002", "A00003"],
     )
-    # 사이클 13: 임계 5 → 진입 시 retry=6 이 되어 force 분기
+    # 사이클 17 보강: 임계 MAX_STALE_RETRIES=5 → 진입 시 retry=6 이 되어 skip
     sched._stale_retry_count = {"A00001": 5, "A00002": 5, "A00003": 5}
 
     await sched._check_and_resubscribe_stale()
 
-    # retry=6 진입 → unsubscribe + subscribe(bypass_limit=True) 각 3회, _send_subscribe 0회
-    assert len(calls.unsubscribe) == 3
-    assert len(calls.subscribe) == 3
+    # retry=6 → skip (모든 호출 0건)
+    assert calls.unsubscribe == []
+    assert calls.subscribe == []
     assert calls.send_subscribe == []
-    # 모든 unsubscribe 는 TICK_TR_ID + stale ticker
-    unsub_keys = {tr_key for (tr_id, tr_key) in calls.unsubscribe}
-    sub_keys = {tr_key for (tr_id, tr_key, _b) in calls.subscribe}
-    assert unsub_keys == {"A00001", "A00002", "A00003"}
-    assert sub_keys == {"A00001", "A00002", "A00003"}
-    # subscribe 는 bypass_limit=True
-    assert all(bypass for (_id, _k, bypass) in calls.subscribe)
-    # 모든 TR_ID 는 TICK_TR_ID
-    assert all(tr_id == TICK_TR_ID for (tr_id, _k) in calls.unsubscribe)
-    assert all(tr_id == TICK_TR_ID for (tr_id, _k, _b) in calls.subscribe)
-
+    # retry 카운터는 증가 (skip 도 카운트)
     assert sched._stale_retry_count == {"A00001": 6, "A00002": 6, "A00003": 6}
 
 
 # ---------------------------------------------------------------------------
-# K-4: retry 11회 (=10 초과) → skip
-# 사이클 13 (2026-05-18): 임계 *2 = 20 → 10 단축
+# K-4: 영구 stale (retry 매우 높음) → 영구 skip
+# 사이클 17 보강 (2026-05-19): MAX_STALE_RETRIES=5 → 6회 이상이면 skip
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_skip_after_6_giveup(scheduler_env):
+    """retry 가 MAX_STALE_RETRIES 한참 초과해도 skip 유지 (영구 stale 의심).
+
+    이전: retry=11 진입 시 skip
+    사이클 17 보강: retry>5 모두 skip — 10→11 도 skip (정책 변경)
+    """
     sched = scheduler_env.scheduler
     subscribed = {"A00001"}
     calls = _patch_kis_ws(scheduler_env, subscribed)
     _set_last_tick(scheduler_env.monkeypatch, fresh=[], stale=["A00001"])
 
-    # 사이클 13: 임계 *2 = 10 → 진입 시 retry=11 이 되며 STALE_FORCE_REREGISTER_AFTER*2=10 초과
     sched._stale_retry_count = {"A00001": 10}
 
     await sched._check_and_resubscribe_stale()
@@ -254,10 +260,16 @@ async def test_retry_resets_on_recovery(scheduler_env):
 
 
 # ---------------------------------------------------------------------------
-# K-6: mixed — 첫 회 stale + 4회째 stale 동시 카운트
+# K-6: mixed — 첫 회 stale (강제 재등록) + 6회째 stale (skip)
+# 사이클 17 보강 (2026-05-19): 1~5회 즉시 강제 재등록 / 6회 이상 skip
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_mixed_resend_and_force(scheduler_env):
+    """AAAAAA 첫 진입 (retry 1) 즉시 강제 재등록 / BBBBBB 5→6 (skip).
+
+    사이클 17 보강: 1~5회 분기와 6회 이상 skip 분기를 mixed 케이스로 검증.
+    재SEND (`_send_subscribe` / `resend_subscribe_for_ticker`) 호출 0건 보장.
+    """
     from src.engine.scanner import TICK_TR_ID
 
     sched = scheduler_env.scheduler
@@ -265,20 +277,19 @@ async def test_mixed_resend_and_force(scheduler_env):
     calls = _patch_kis_ws(scheduler_env, subscribed)
     _set_last_tick(scheduler_env.monkeypatch, fresh=[], stale=["AAAAAA", "BBBBBB"])
 
-    # AAAAAA 첫 진입 (retry 0 → 1), BBBBBB 5 → 6 (force)
-    # 사이클 13 (2026-05-18): force 임계 10 → 5 단축
+    # AAAAAA 첫 진입 (retry 0 → 1) → 강제 재등록
+    # BBBBBB 5 → 6 → skip (영구 stale 의심)
     sched._stale_retry_count = {"BBBBBB": 5}
 
     await sched._check_and_resubscribe_stale()
 
-    # AAAAAA: send_subscribe 1회
-    assert (TICK_TR_ID, "AAAAAA", True) in calls.send_subscribe
-    assert len(calls.send_subscribe) == 1
-    # BBBBBB: force (unsubscribe + subscribe)
-    assert any(tr_key == "BBBBBB" for (_id, tr_key) in calls.unsubscribe)
-    assert any(tr_key == "BBBBBB" for (_id, tr_key, _b) in calls.subscribe)
+    # 재SEND 0건 (KIS 답변 반영)
+    assert calls.send_subscribe == []
+    # AAAAAA 만 강제 재등록 (BBBBBB 는 skip)
     assert len(calls.unsubscribe) == 1
     assert len(calls.subscribe) == 1
+    assert calls.unsubscribe[0] == (TICK_TR_ID, "AAAAAA")
+    assert calls.subscribe[0] == (TICK_TR_ID, "AAAAAA", True)
 
     assert sched._stale_retry_count == {"AAAAAA": 1, "BBBBBB": 6}
 

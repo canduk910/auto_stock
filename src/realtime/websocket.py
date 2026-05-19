@@ -103,9 +103,11 @@ class KisWebSocket:
         # 운영자 가시성: `_subscriptions` 와 분리해 "SEND 후 무응답" 케이스 즉시 식별.
         self._subscriptions_acked: set[tuple[str, str]] = set()
         # 사이클 17 (2026-05-19) — OPSP0002 ALREADY IN SUBSCRIBE backoff 사전.
-        # KIS 측 거부를 받으면 (tr_id, tr_key) 별 `now + 60.0` 등록 → subscribe 진입 시
+        # KIS 측 거부를 받으면 (tr_id, tr_key) 별 `now + 300.0` 등록 → subscribe 진입 시
         # 유효 시간 내면 send skip. 무한 재구독 → OPSP0002 → 무한 루프 차단.
         # bypass_limit=True (HIGH 우선순위) 는 검사 skip — 보유 종목 손절 우선 보장.
+        # 사이클 17 보강 (2026-05-19) — 60s → 300s. `_scan_loop` 5분 주기 ≥ backoff 만료
+        # 보장하여 같은 사이클 내 재시도 차단. KIS 답변 인용: "기등록한 사항을 재등록하지 않도록".
         self._opsp_backoff_until: dict[tuple[str, str], float] = {}
         self._running = False
         self._reconnect_count = 0
@@ -405,12 +407,14 @@ class KisWebSocket:
                 if already:
                     self._subscriptions.add((tr_id, tr_key))
                     self._subscriptions_acked.add((tr_id, tr_key))
-                    # 사이클 17 (2026-05-19) — OPSP0002 backoff 60s 등록.
+                    # 사이클 17 (2026-05-19) — OPSP0002 backoff 등록.
                     # KIS 측 ALREADY IN SUBSCRIBE 후 다음 _scan_loop 사이클이 즉시
                     # 재구독 → 또 OPSP0002 → 무한 루프 차단 (2026-05-19 15:15 사고 대응).
-                    self._opsp_backoff_until[(tr_id, tr_key)] = time.time() + 60.0
+                    # 사이클 17 보강 — 60s → 300s. `_scan_loop` 5분 주기 ≥ backoff 만료
+                    # 보장 (KIS 공식 답변: "기등록한 사항을 재등록하지 않도록").
+                    self._opsp_backoff_until[(tr_id, tr_key)] = time.time() + 300.0
                     logger.info(
-                        "WebSocket 구독 이미 활성(KIS 측): tr_id=%s, tr_key=%s, msg_cd=%s, msg1=%s [ws_opsp_backoff until=+60s]",
+                        "WebSocket 구독 이미 활성(KIS 측): tr_id=%s, tr_key=%s, msg_cd=%s, msg1=%s [ws_opsp_backoff until=+300s]",
                         tr_id, tr_key, msg_cd, msg1,
                     )
                     return

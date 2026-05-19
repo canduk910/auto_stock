@@ -75,7 +75,12 @@ NEXT_DAY_STABILIZE_SECS = 30                # 익일 청산 시가 안정화 (Q2
 # - FRESHNESS 60 보존 (5/12 운영 사고 대응 의도 그대로)
 STALE_WATCHER_INTERVAL_SECS = 120           # task 발화 주기 (사이클 9: 30 → 120)
 STALE_FRESHNESS_SECS = 60                   # 이 시간 내 tick 없으면 stale 판정 (F1 의 VERIFY_FRESHNESS_SECS 동일)
-STALE_FORCE_REREGISTER_AFTER = 5            # 연속 N회 stale 이면 unsubscribe+subscribe 강제 재등록 (사이클 13: 10 → 5, 10분 stale 후 발화)
+# 사이클 17 보강 (2026-05-19) — KIS 공식 답변 반영 ("기 요청된 목록 관리하여 기등록한 사항을 재등록하지 않도록").
+# 1~5회 재SEND (`pool.resend_subscribe_for_ticker`) 분기 폐기 → 첫 stale 즉시 unsubscribe + subscribe(HIGH,
+# bypass_limit=True) 강제 재등록. KIS 정상 "신규 등록" 패턴 (재SEND 0건). 5/12 silent inactive 사고
+# 안전망 보존. retry > MAX 면 skip — 다음 _scan_loop 위임 (영구 stale 의심 종목 보호).
+STALE_FORCE_REREGISTER_AFTER = 5            # (deprecated, 호환 보존) — 분기 임계가 아닌 회귀 가드 의미만 유지. 실제 동작은 MAX_STALE_RETRIES.
+MAX_STALE_RETRIES = 5                       # 연속 N회 초과 stale 시 skip (영구 stale 의심). 6회 이상 → 다음 _scan_loop 위임.
 
 # B (2026-05-15) — donchian_swing 일중 시세 REST 폴링 보강
 # WS stale 시에도 보유 종목의 ATR×2 트레일링/하드 -7% 손절 평가가 끊기지 않도록
@@ -2221,23 +2226,30 @@ class TradingScheduler:
                 logger.exception("[stale_watcher] 사이클 실패")
 
     async def _check_and_resubscribe_stale(self) -> None:
-        """현재 TICK 구독 종목 중 stale 한 것에 대해 재구독/강제 재등록 (K).
+        """현재 TICK 구독 종목 중 stale 한 것에 대해 강제 재등록 (K).
+
+        사이클 17 보강 (2026-05-19) — KIS 공식 답변 반영. 1~5회 `resend_subscribe_for_ticker`
+        (같은 종목 재SEND) 분기 완전 폐기. KIS 답변 인용: "기 요청된 목록을 관리하여 기등록한
+        사항을 재등록하지 않도록 부탁드립니다. (다수 요청 시 LMS + 앱정보 이용중지 처리)"
+        첫 stale 즉시 unsubscribe + subscribe(HIGH, bypass_limit=True) 강제 재등록 ←
+        KIS 정상 "신규 등록" 패턴. 5/12 silent inactive 사고 안전망 보존.
 
         흐름:
-        1. `kis_ws.get_subscribed_tickers()` 로 TICK 구독 집합 조회
+        1. `kis_ws_pool.get_subscribed_tickers()` 로 TICK 구독 집합 조회
         2. 비어있으면 즉시 return (retry_count 보존 — 다음 구독 시 자연 회복)
         3. `scanner.ticker_last_tick` 비교: `STALE_FRESHNESS_SECS` 초과면 stale
         4. 전체 fresh 시 `_stale_retry_count.clear()` (회복 누적값 초기화)
-        5. stale ticker 별로 (사이클 13: 임계 10 → 5 단축):
-           - retry > STALE_FORCE_REREGISTER_AFTER*2 (=10) → skip (다음 _scan_loop 사이클에 위임)
-           - retry > STALE_FORCE_REREGISTER_AFTER (=5) → unsubscribe + subscribe(bypass_limit=True) 강제 재등록
-           - 그 외 → `_send_subscribe(subscribe=True)` 1회 재발송
+        5. stale ticker 별로:
+           - retry > MAX_STALE_RETRIES (=5, 6회 이상) → skip (영구 stale 의심, 다음 _scan_loop 위임)
+           - 그 외 (1~5회) → `pool.unsubscribe_in_pool` + `pool.subscribe(priority=HIGH, bypass_limit=True)`
+             강제 재등록 (KIS 정상 패턴, 재SEND 0건)
         6. Rate Limit 보호: 각 종목별 50ms sleep
 
         안전 불변식:
-        - `_subscriptions` set 직접 수정 금지 — `kis_ws.subscribe/unsubscribe/_send_subscribe` 만
+        - `_subscriptions` set 직접 수정 금지 — `pool` 인터페이스만 사용
         - 강제 재등록은 `bypass_limit=True` (보유/익일청산 종목 영향 없음, 한도 검사 skip)
         - 종목별 예외는 격리해 다른 stale ticker 영향 차단
+        - `pool.resend_subscribe_for_ticker` 호출 금지 (KIS 측 부담 + LMS 위험)
         """
         from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
         # 사이클 7-C — 풀의 분배 추적을 활용한 stale watcher
@@ -2263,7 +2275,6 @@ class TradingScheduler:
             self._stale_retry_count.clear()
             return
 
-        resubscribed = 0
         force_reregistered = 0
         skipped_giveup = 0
 
@@ -2271,47 +2282,36 @@ class TradingScheduler:
             retry = self._stale_retry_count.get(ticker, 0) + 1
             self._stale_retry_count[ticker] = retry
 
-            if retry > STALE_FORCE_REREGISTER_AFTER * 2:
-                # 10회 초과 → 영구 stale 의심 (거래정지·이상 종목 등). skip + 다음 _scan_loop 위임
-                # (사이클 9: 임계 3 → 10; 사이클 13: 10 → 5 변경 따라 *2 가드도 20 → 10 자동 축소)
+            if retry > MAX_STALE_RETRIES:
+                # 6회 이상 → 영구 stale 의심 (거래정지·이상 종목 등). skip + 다음 _scan_loop 위임
+                # (사이클 17 보강 — KIS 답변 반영, 재SEND 분기 폐기)
                 skipped_giveup += 1
                 continue
 
-            if retry > STALE_FORCE_REREGISTER_AFTER:
-                # 6~10회 → 풀의 unsubscribe_in_pool + subscribe(priority=HIGH, bypass_limit=True)
-                # 강제 재등록 — 분배 추적 정합성 유지 + 라운드로빈 재선택 가능
-                # (사이클 13: 임계 10 → 5. 5 × 120s = 10분 stale 누적 후 강제 재등록 — 단발 회복 강화)
-                try:
-                    await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
-                    await asyncio.sleep(0.05)
-                    await kis_ws_pool.subscribe(
-                        TICK_TR_ID, ticker,
-                        priority="HIGH", bypass_limit=True,
-                    )
-                    force_reregistered += 1
-                except Exception:
-                    logger.exception("[stale_watcher] 강제 재등록 실패: %s", ticker)
-            else:
-                # 1~5회 → 풀의 resend_subscribe_for_ticker 사용
-                # 분배 추적된 세션에서 _send_subscribe (`_subscriptions` set 보존)
-                try:
-                    await kis_ws_pool.resend_subscribe_for_ticker(TICK_TR_ID, ticker)
-                    resubscribed += 1
-                except Exception:
-                    logger.exception("[stale_watcher] 재발송 실패: %s", ticker)
+            # 1~5회 — 첫 stale 즉시 강제 재등록 (KIS 정상 "신규 등록" 패턴, 재SEND 0건)
+            # KIS 공식 답변: "기등록한 사항을 재등록하지 않도록" (LMS + 앱정보 이용중지 위험)
+            try:
+                await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+                await asyncio.sleep(0.05)
+                await kis_ws_pool.subscribe(
+                    TICK_TR_ID, ticker,
+                    priority="HIGH", bypass_limit=True,
+                )
+                force_reregistered += 1
+            except Exception:
+                logger.exception("[stale_watcher] 강제 재등록 실패: %s", ticker)
 
             await asyncio.sleep(0.05)  # Rate Limit 보호
 
         logger.info(
-            "[stale_watcher] subscribed=%d stale=%d resubscribed=%d force_reregistered=%d skipped=%d",
-            len(subscribed), len(stale_tickers), resubscribed, force_reregistered, skipped_giveup,
+            "[stale_watcher] subscribed=%d stale=%d force_reregistered=%d skipped=%d",
+            len(subscribed), len(stale_tickers), force_reregistered, skipped_giveup,
         )
         try:
             await write_log(
                 "INFO",
                 f"[stale_watcher] subscribed={len(subscribed)} stale={len(stale_tickers)} "
-                f"resubscribed={resubscribed} force_reregistered={force_reregistered} "
-                f"skipped={skipped_giveup}",
+                f"force_reregistered={force_reregistered} skipped={skipped_giveup}",
             )
         except Exception:
             # fire-and-forget — system_logs 실패해도 재구독 흐름 보존

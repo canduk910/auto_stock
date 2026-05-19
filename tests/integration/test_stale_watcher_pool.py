@@ -1,12 +1,13 @@
-"""Cycle 7-C + 13-E Red — K stale watcher 의 풀 통합.
+"""사이클 17 보강 (2026-05-19) Red — K stale watcher 의 풀 통합 + KIS 답변 반영.
 
-`_check_and_resubscribe_stale` 가 단일 세션 직접 호출 대신
-`kis_ws_pool.resend_subscribe_for_ticker` / `kis_ws_pool.unsubscribe_in_pool` 사용.
+`_check_and_resubscribe_stale` 가 단일 세션 직접 호출 대신 풀 인터페이스 사용.
 
-분배 추적 dict(`_ticker_to_session`) 활용해 정확한 세션에 재전송.
-
+사이클 7-C: 풀의 `_ticker_to_session` 활용해 정확한 세션 분배.
 사이클 13-E (2026-05-18): 진입점 `get_subscribed_tickers` 도 풀 전체로 갱신 —
 메인 비어있어도 보조 종목 stale 처리되도록.
+사이클 17 보강 (2026-05-19): KIS 공식 답변 ("기등록한 사항을 재등록하지 않도록") 반영.
+1~5회 `pool.resend_subscribe_for_ticker` 분기 폐기. 첫 stale 즉시 `pool.unsubscribe_in_pool`
++ `pool.subscribe(priority='HIGH', bypass_limit=True)` 강제 재등록. 6회 이상 skip.
 """
 
 from __future__ import annotations
@@ -32,11 +33,14 @@ def reset_stale_state():
 
 
 # ---------------------------------------------------------------------------
-# D-1. 보조 0개 — resend_subscribe_for_ticker 가 메인으로 폴백
+# D-1. 첫 stale 즉시 강제 재등록 (KIS 답변 반영, 재SEND 0건)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_stale_watcher_calls_pool_resend(monkeypatch, reset_stale_state):
-    """stale ticker 1회 → `pool.resend_subscribe_for_ticker(tr_id, ticker)` 호출."""
+    """사이클 17 보강: 첫 stale 즉시 unsubscribe_in_pool + subscribe(HIGH) 호출.
+
+    재SEND (`pool.resend_subscribe_for_ticker`) 호출 0건 — KIS 답변 반영.
+    """
     from src.engine import scheduler as sched_mod
     from src.engine import scanner
     from src.realtime import websocket_pool as wp_mod
@@ -50,67 +54,46 @@ async def test_stale_watcher_calls_pool_resend(monkeypatch, reset_stale_state):
     from src.engine.scanner import KST_TZ
     scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ) - timedelta(seconds=120)
 
+    # 강제 재등록 spy
+    pool_unsub_spy = AsyncMock()
+    pool_sub_spy = AsyncMock()
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "unsubscribe_in_pool", pool_unsub_spy, raising=False,
+    )
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "subscribe", pool_sub_spy, raising=False,
+    )
+    # 재SEND 미호출 보증 spy
     pool_resend_spy = AsyncMock()
     monkeypatch.setattr(
         wp_mod.kis_ws_pool, "resend_subscribe_for_ticker", pool_resend_spy, raising=False,
     )
-    # 일반 _send_subscribe 도 mock (legacy 경로 차단 검증용)
-    legacy_spy = AsyncMock()
-    monkeypatch.setattr(sched_mod.kis_ws, "_send_subscribe", legacy_spy, raising=False)
 
     sched = sched_mod.TradingScheduler()
     await sched._check_and_resubscribe_stale()
 
-    # pool 경로 1회 호출
-    assert pool_resend_spy.await_count >= 1, (
-        f"풀의 resend_subscribe_for_ticker 가 호출되어야 함, 실제={pool_resend_spy.await_count}"
+    # 사이클 17 보강 정책: 첫 stale 즉시 강제 재등록 (재SEND 0건)
+    assert pool_unsub_spy.await_count >= 1, (
+        f"첫 stale 즉시 unsubscribe_in_pool 호출 필요, 실제={pool_unsub_spy.await_count}"
+    )
+    assert pool_sub_spy.await_count >= 1, (
+        f"첫 stale 즉시 subscribe(HIGH) 호출 필요, 실제={pool_sub_spy.await_count}"
+    )
+    assert pool_resend_spy.await_count == 0, (
+        f"재SEND 0건 (KIS 답변 반영), 실제={pool_resend_spy.await_count}"
     )
 
 
 # ---------------------------------------------------------------------------
-# D-2. 분배 추적 활용 — 보조 세션에 등록된 ticker 는 해당 세션으로 재전송
+# D-2. 강제 재등록은 priority=HIGH, bypass_limit=True
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_stale_watcher_uses_ticker_to_session_routing(monkeypatch, reset_stale_state):
-    """`_ticker_to_session[ticker]` 가 quote-1 세션이면 그 세션 `_send_subscribe` 호출."""
-    from src.engine import scheduler as sched_mod
-    from src.engine import scanner
-    from src.realtime import websocket_pool as wp_mod
-    from src.engine.scanner import KST_TZ
+    """사이클 17 보강: pool.subscribe 호출 시 priority=HIGH, bypass_limit=True 보장.
 
-    monkeypatch.setattr(
-        wp_mod.kis_ws_pool, "get_subscribed_tickers",
-        lambda: ["005930"], raising=False,
-    )
-    scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ) - timedelta(seconds=120)
-
-    # 풀 분배 추적 — 005930 은 가짜 quote-1 세션에 등록되었음
-    fake_quote_session = type("FakeWS", (), {})()
-    fake_quote_session._send_subscribe = AsyncMock()
-    fake_quote_session._subscriptions = {("H0UNCNT0", "005930")}
-
-    wp_mod.kis_ws_pool._ticker_to_session = {"005930": fake_quote_session}
-
-    # 실제 resend_subscribe_for_ticker 가 호출되어야
-    sched = sched_mod.TradingScheduler()
-    await sched._check_and_resubscribe_stale()
-
-    # quote-1 의 _send_subscribe 가 호출됨
-    assert fake_quote_session._send_subscribe.await_count >= 1, (
-        "분배 추적된 세션의 _send_subscribe 가 호출되어야 함"
-    )
-
-    # cleanup
-    wp_mod.kis_ws_pool._ticker_to_session.clear()
-
-
-# ---------------------------------------------------------------------------
-# D-3. 강제 재등록 (retry > 5) — unsubscribe_in_pool + subscribe(priority)
-# 사이클 13 (2026-05-18): 임계 STALE_FORCE_REREGISTER_AFTER 10 → 5 단축
-# ---------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_stale_watcher_force_reregister_via_pool(monkeypatch, reset_stale_state):
-    """retry > 5 시 `pool.unsubscribe_in_pool` + `pool.subscribe(priority='HIGH', bypass_limit=True)` 호출."""
+    분배 추적 dict(`_ticker_to_session`) 정합성 유지는 `pool.unsubscribe_in_pool`
+    + `pool.subscribe` 가 모두 책임 — 라운드로빈 재선택 가능.
+    """
     from src.engine import scheduler as sched_mod
     from src.engine import scanner
     from src.realtime import websocket_pool as wp_mod
@@ -132,22 +115,32 @@ async def test_stale_watcher_force_reregister_via_pool(monkeypatch, reset_stale_
     )
 
     sched = sched_mod.TradingScheduler()
-    # retry 6회로 시작 (사이클 13 임계 5 → 6 진입 force 트리거)
-    sched._stale_retry_count["005930"] = 5
     await sched._check_and_resubscribe_stale()
 
-    # pool 의 unsubscribe + subscribe 호출
-    assert pool_unsub_spy.await_count >= 1, "강제 재등록 시 pool.unsubscribe_in_pool 호출 필요"
-    assert pool_sub_spy.await_count >= 1, "강제 재등록 시 pool.subscribe(priority=...) 호출 필요"
+    # 강제 재등록 호출 확인
+    assert pool_unsub_spy.await_count >= 1
+    assert pool_sub_spy.await_count >= 1
+    # priority=HIGH, bypass_limit=True 검증
+    kwargs = pool_sub_spy.await_args.kwargs
+    assert kwargs.get("priority") == "HIGH", (
+        f"강제 재등록은 priority=HIGH 보장, 실제 kwargs={kwargs}"
+    )
+    assert kwargs.get("bypass_limit") is True, (
+        f"강제 재등록은 bypass_limit=True 보장, 실제 kwargs={kwargs}"
+    )
 
 
 # ---------------------------------------------------------------------------
-# D-4. retry > 10 → skip
-# 사이클 13 (2026-05-18): 임계 *2 = 20 → 10 단축
+# D-3. 5회 retry 시에도 매 사이클 강제 재등록 (1~5회 동일 분기)
+# 사이클 17 보강 (2026-05-19): KIS 답변 반영 — 1~5회 모두 즉시 강제 재등록
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_stale_watcher_skips_when_retry_exceeds_6(monkeypatch, reset_stale_state):
-    """retry > STALE_FORCE_REREGISTER_AFTER*2 (=10) 시 skip — 호출 0."""
+async def test_stale_watcher_force_reregister_via_pool(monkeypatch, reset_stale_state):
+    """5회 누적 stale (retry 4 → 5) 에도 강제 재등록 호출.
+
+    사이클 17 보강: 1~5회 모두 같은 분기. retry=5 도 unsubscribe+subscribe 호출.
+    재SEND 0건 보장.
+    """
     from src.engine import scheduler as sched_mod
     from src.engine import scanner
     from src.realtime import websocket_pool as wp_mod
@@ -173,7 +166,52 @@ async def test_stale_watcher_skips_when_retry_exceeds_6(monkeypatch, reset_stale
     )
 
     sched = sched_mod.TradingScheduler()
-    sched._stale_retry_count["005930"] = 11  # >10 — skip
+    # retry 4 → 5 (MAX_STALE_RETRIES=5, 5 이하면 강제 재등록)
+    sched._stale_retry_count["005930"] = 4
+    await sched._check_and_resubscribe_stale()
+
+    assert pool_unsub_spy.await_count >= 1
+    assert pool_sub_spy.await_count >= 1
+    # 재SEND 0건 (KIS 답변 반영)
+    assert pool_resend_spy.await_count == 0
+
+
+# ---------------------------------------------------------------------------
+# D-4. retry > MAX_STALE_RETRIES → skip
+# 사이클 17 보강 (2026-05-19): 6회 이상 stale 시 skip
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_stale_watcher_skips_when_retry_exceeds_6(monkeypatch, reset_stale_state):
+    """retry > MAX_STALE_RETRIES (=5) 시 skip — 모든 풀 호출 0.
+
+    사이클 17 보강: 6회 이상 stale (영구 stale 의심) → skip + 다음 _scan_loop 위임.
+    """
+    from src.engine import scheduler as sched_mod
+    from src.engine import scanner
+    from src.realtime import websocket_pool as wp_mod
+    from src.engine.scanner import KST_TZ
+
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "get_subscribed_tickers",
+        lambda: ["005930"], raising=False,
+    )
+    scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ) - timedelta(seconds=120)
+
+    pool_unsub_spy = AsyncMock()
+    pool_sub_spy = AsyncMock()
+    pool_resend_spy = AsyncMock()
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "unsubscribe_in_pool", pool_unsub_spy, raising=False,
+    )
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "subscribe", pool_sub_spy, raising=False,
+    )
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "resend_subscribe_for_ticker", pool_resend_spy, raising=False,
+    )
+
+    sched = sched_mod.TradingScheduler()
+    sched._stale_retry_count["005930"] = 6  # >5 — skip
     await sched._check_and_resubscribe_stale()
 
     # 모든 풀 호출이 0
@@ -213,6 +251,7 @@ async def test_stale_watcher_clears_retry_when_all_fresh(monkeypatch, reset_stal
 
 # ---------------------------------------------------------------------------
 # D-6 (사이클 13-E, 2026-05-18) — 메인 비어있어도 풀 종목 stale 처리
+# 사이클 17 보강 (2026-05-19): 첫 stale 즉시 강제 재등록 정책 반영
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_stale_watcher_processes_quote_session_when_main_empty(monkeypatch, reset_stale_state):
@@ -222,6 +261,9 @@ async def test_stale_watcher_processes_quote_session_when_main_empty(monkeypatch
     운영 상황(2026-05-18 14:00): 메인 0, 보조 quote-1 26 종목, stale 18.
     fix 전: `kis_ws.get_subscribed_tickers()` 가 메인 만 반환 → empty → 즉시 return.
     fix 후: `kis_ws_pool.get_subscribed_tickers()` 풀 전체 반환 → stale 처리 진입.
+
+    사이클 17 보강: 첫 stale 즉시 강제 재등록 (재SEND 0건). 정책 변경 후에도
+    "메인 empty 시 보조 종목 처리됨" 가드는 보존.
     """
     from src.engine import scheduler as sched_mod
     from src.engine import scanner
@@ -240,7 +282,15 @@ async def test_stale_watcher_processes_quote_session_when_main_empty(monkeypatch
     )
     scanner.ticker_last_tick["005930"] = datetime.now(KST_TZ) - timedelta(seconds=120)
 
+    pool_unsub_spy = AsyncMock()
+    pool_sub_spy = AsyncMock()
     pool_resend_spy = AsyncMock()
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "unsubscribe_in_pool", pool_unsub_spy, raising=False,
+    )
+    monkeypatch.setattr(
+        wp_mod.kis_ws_pool, "subscribe", pool_sub_spy, raising=False,
+    )
     monkeypatch.setattr(
         wp_mod.kis_ws_pool, "resend_subscribe_for_ticker", pool_resend_spy, raising=False,
     )
@@ -248,7 +298,13 @@ async def test_stale_watcher_processes_quote_session_when_main_empty(monkeypatch
     sched = sched_mod.TradingScheduler()
     await sched._check_and_resubscribe_stale()
 
-    # 메인 비어있어도 보조 종목 stale 처리됨 — pool resend 1회 호출 보장
-    assert pool_resend_spy.await_count >= 1, (
-        f"메인 비어있어도 풀 종목 stale 처리되어야 함, 실제={pool_resend_spy.await_count}"
+    # 메인 비어있어도 보조 종목 stale 처리됨 — 강제 재등록 1회 호출 보장 (재SEND 0건)
+    assert pool_unsub_spy.await_count >= 1, (
+        f"메인 비어있어도 풀 종목 stale 처리되어야 함, 실제={pool_unsub_spy.await_count}"
+    )
+    assert pool_sub_spy.await_count >= 1, (
+        f"메인 비어있어도 풀 종목 stale 처리되어야 함, 실제={pool_sub_spy.await_count}"
+    )
+    assert pool_resend_spy.await_count == 0, (
+        f"재SEND 0건 (KIS 답변 반영), 실제={pool_resend_spy.await_count}"
     )
