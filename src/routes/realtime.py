@@ -107,6 +107,30 @@ async def get_subscriptions() -> ApiResponse:
     return ApiResponse(success=True, data=data, message="")
 
 
+@router.get("/stream-status", response_model=ApiResponse)
+async def get_stream_status() -> ApiResponse:
+    """REST+WS 혼합 풀 매니저 상태 조회 (사이클 15-C-1, 2026-05-19).
+
+    REST 관찰 (`rest_watch`) / WS 활성 (`ws_active`) / 강등 후 cooldown (`dropped`)
+    종목 list 반환. 프론트 시세수신현황 UI 가 사용 (사이클 15-C-2).
+
+    응답 data 스키마 (사용자 설계서 제6장):
+        rest: [{ticker, strategy, reason, since_secs}]
+        ws:   [{ticker, strategy, reason, since_secs, min_hold_remaining_secs}]
+        dropped: [{ticker, strategy, reason, since_secs, cooldown_remaining_secs}]
+
+    `stream_pool_manager.snapshot()` 위임. cooldown 만료 종목은 호출 직전 `expire_cooldowns()` 자동 전이.
+    """
+    from src.engine.stream_pool_manager import stream_pool_manager
+    # cooldown 만료 시점 자동 전이 (UI 가 새로고침 시 즉시 반영)
+    try:
+        stream_pool_manager.expire_cooldowns()
+    except Exception:
+        logger.debug("[stream_status] expire_cooldowns 실패", exc_info=True)
+    snap = stream_pool_manager.snapshot()
+    return ApiResponse(success=True, data=snap, message="")
+
+
 @router.post("/resubscribe", response_model=ApiResponse)
 async def resubscribe_stale() -> ApiResponse:
     """stale(60s 미수신) TICK 구독 종목을 즉시 일괄 재구독한다 (J2, 2026-05-12).
