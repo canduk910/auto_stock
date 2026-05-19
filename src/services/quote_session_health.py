@@ -46,6 +46,13 @@ WINDOW_SECS = 300               # 5분 sliding window
 MAX_FAILURE_RATE = 0.5          # window 실패율 임계 (50%)
 MIN_CALLS_FOR_RATE = 10         # 비율 평가 최소 호출 수
 
+# 사이클 18 (2026-05-19) — FAST_WINDOW 1분 80% 임계 추가.
+# 배경: ISA 등 보조 라벨 영구 5xx (80%+) 시 기존 5분 50% 임계 도달 전에 응답 지연 폭주.
+# 1분 윈도우 80%+ 즉시 발화 분기로 결함 라벨 빠른 탈락 + 메인 fallback 우선 트리거.
+FAST_WINDOW_SECS = 60           # 1분 fast window
+FAST_MIN_CALLS = 10             # fast window 임계 평가 최소 호출 수
+FAST_MAX_FAILURE_RATE = 0.8     # fast window 실패율 임계 (80%)
+
 _KST = timezone(timedelta(hours=9))
 
 
@@ -94,6 +101,10 @@ class QuoteSessionHealthMonitor:
         self._window_total: dict[str, int] = {}
         self._window_failures: dict[str, int] = {}
         self._window_start: dict[str, datetime] = {}
+        # 사이클 18 — 1분 fast sliding window 카운터 (80% 임계용)
+        self._fast_window_total: dict[str, int] = {}
+        self._fast_window_failures: dict[str, int] = {}
+        self._fast_window_start: dict[str, datetime] = {}
         # 이미 비활성 처리된 라벨 — idempotent 가드
         self._disabled_labels: set[str] = set()
         # 동시 record 호출 보호 (싱글톤 + 단일 워커지만 record_failure 안에서
@@ -107,6 +118,9 @@ class QuoteSessionHealthMonitor:
         self._window_total.clear()
         self._window_failures.clear()
         self._window_start.clear()
+        self._fast_window_total.clear()
+        self._fast_window_failures.clear()
+        self._fast_window_start.clear()
         self._disabled_labels.clear()
 
     async def record_success(self, label: str) -> None:
@@ -140,18 +154,30 @@ class QuoteSessionHealthMonitor:
             await self._evaluate(label, reason)
 
     def _bump_window(self, label: str, *, failure: bool) -> None:
-        """sliding window 카운터 갱신. window 만료 시 reset 후 1 부터 카운트."""
+        """sliding window 카운터 갱신. 기존 5분 + 사이클 18 신규 1분 fast 윈도우 동시 갱신."""
         now = datetime.now(_KST)
+        # ---- 기존 5분 window ----
         start = self._window_start.get(label)
         if start is None or (now - start) > timedelta(seconds=WINDOW_SECS):
             # window 만료 또는 첫 호출 — reset
             self._window_start[label] = now
             self._window_total[label] = 1
             self._window_failures[label] = 1 if failure else 0
+        else:
+            self._window_total[label] = self._window_total.get(label, 0) + 1
+            if failure:
+                self._window_failures[label] = self._window_failures.get(label, 0) + 1
+
+        # ---- 사이클 18 신규 1분 fast window ----
+        fast_start = self._fast_window_start.get(label)
+        if fast_start is None or (now - fast_start) > timedelta(seconds=FAST_WINDOW_SECS):
+            self._fast_window_start[label] = now
+            self._fast_window_total[label] = 1
+            self._fast_window_failures[label] = 1 if failure else 0
             return
-        self._window_total[label] = self._window_total.get(label, 0) + 1
+        self._fast_window_total[label] = self._fast_window_total.get(label, 0) + 1
         if failure:
-            self._window_failures[label] = self._window_failures.get(label, 0) + 1
+            self._fast_window_failures[label] = self._fast_window_failures.get(label, 0) + 1
 
     async def _evaluate(self, label: str, reason: str) -> None:
         """임계 평가 — consecutive ≥ MAX 또는 window rate 초과 시 자동 비활성."""
@@ -175,6 +201,19 @@ class QuoteSessionHealthMonitor:
                 f"window_failure_rate={rate:.2f} threshold={MAX_FAILURE_RATE} "
                 f"window_total={total} window_failures={failures} last_reason={reason}"
             )
+        else:
+            # 사이클 18 — fast window 1분 80% 임계 추가 평가
+            fast_total = self._fast_window_total.get(label, 0)
+            fast_failures = self._fast_window_failures.get(label, 0)
+            if fast_total >= FAST_MIN_CALLS:
+                fast_rate = fast_failures / fast_total if fast_total > 0 else 0.0
+                if fast_rate >= FAST_MAX_FAILURE_RATE:
+                    trigger_reason = (
+                        f"fast_window_failure_rate={fast_rate:.2f} "
+                        f"threshold={FAST_MAX_FAILURE_RATE} "
+                        f"fast_window_total={fast_total} "
+                        f"fast_window_failures={fast_failures} last_reason={reason}"
+                    )
 
         if trigger_reason is None:
             return
@@ -186,24 +225,53 @@ class QuoteSessionHealthMonitor:
 
         성공 호출에서는 consecutive 임계가 의미 없지만(직전 호출에서 0 reset 됨),
         sliding window 누적 실패율 평가는 진행해야 늦은 비활성 결정 race 차단.
+
+        사이클 18 — fast window 1분 80% 임계도 함께 평가.
         """
         if label in self._disabled_labels:
             return
 
         total = self._window_total.get(label, 0)
         failures = self._window_failures.get(label, 0)
-        if total < MIN_CALLS_FOR_RATE:
-            return
+        if total >= MIN_CALLS_FOR_RATE:
+            rate = failures / total if total > 0 else 0.0
+            if rate >= MAX_FAILURE_RATE:
+                await self._auto_disable(
+                    label,
+                    f"window_failure_rate={rate:.2f} threshold={MAX_FAILURE_RATE} "
+                    f"window_total={total} window_failures={failures} last_reason={reason}",
+                )
+                return
 
-        rate = failures / total if total > 0 else 0.0
-        if rate < MAX_FAILURE_RATE:
-            return
+        # 사이클 18 — fast window 1분 80% 평가
+        fast_total = self._fast_window_total.get(label, 0)
+        fast_failures = self._fast_window_failures.get(label, 0)
+        if fast_total >= FAST_MIN_CALLS:
+            fast_rate = fast_failures / fast_total if fast_total > 0 else 0.0
+            if fast_rate >= FAST_MAX_FAILURE_RATE:
+                await self._auto_disable(
+                    label,
+                    f"fast_window_failure_rate={fast_rate:.2f} "
+                    f"threshold={FAST_MAX_FAILURE_RATE} "
+                    f"fast_window_total={fast_total} "
+                    f"fast_window_failures={fast_failures} last_reason={reason}",
+                )
 
-        await self._auto_disable(
-            label,
-            f"window_failure_rate={rate:.2f} threshold={MAX_FAILURE_RATE} "
-            f"window_total={total} window_failures={failures} last_reason={reason}",
-        )
+    # 사이클 18 — A-3 라벨 선택 분기용 read-only API
+    def get_recent_5xx_ratio(self, label: str) -> tuple[float, int]:
+        """라벨의 fast window (1분) 실패율 + 총 호출 수 반환.
+
+        Returns:
+            (ratio, total) — fast_total < FAST_MIN_CALLS 면 ratio=0.0 (premature decision 차단)
+            비활성된 라벨은 항상 (1.0, FAST_MIN_CALLS) — sanity guard (메인 fallback 트리거)
+        """
+        if label in self._disabled_labels:
+            return (1.0, FAST_MIN_CALLS)
+        total = self._fast_window_total.get(label, 0)
+        failures = self._fast_window_failures.get(label, 0)
+        if total < FAST_MIN_CALLS:
+            return (0.0, total)
+        return (failures / total if total > 0 else 0.0, total)
 
     async def _auto_disable(self, label: str, reason: str) -> None:
         """자동 비활성 — DB + 풀 + 영구 로그. DB 실패 graceful."""

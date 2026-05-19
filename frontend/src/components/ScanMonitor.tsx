@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { BuySignal, ScanStats } from '../types/trading'
-import { resubscribeStale } from '../api/realtime'
+import { getSubscriptions, resubscribeStale } from '../api/realtime'
 
 interface BoardTarget {
   open_price: number
@@ -115,6 +115,23 @@ const BREAKOUT_LABELS: Record<string, string> = {
   vcp_breakout: 'VCP 변동성 수축',
 }
 
+// 사이클 18 (2026-05-19) — 끊김 시간대 컨텍스트 분류.
+// KRX 메인 = 결함 가능 (빨강) / PRE_NXT = 거래량 적음 (노랑) / 그 외 = 자연 휴면 (회색)
+type StaleContext = 'main_critical' | 'pre_open' | 'normal_quiet' | 'unknown'
+
+function getStaleContextByKstMinutes(t: number): StaleContext {
+  if (t >= 9 * 60 && t < 15 * 60 + 30) return 'main_critical'
+  if (t >= 8 * 60 && t < 9 * 60) return 'pre_open'
+  return 'normal_quiet'  // 시간 외 / NXT 애프터 / 새벽
+}
+
+const STALE_CONTEXT_META: Record<StaleContext, { label: string; cls: string }> = {
+  main_critical: { label: 'KRX 메인 — stale 결함 가능', cls: 'text-red-700 bg-red-50' },
+  pre_open: { label: 'NXT 프리 — 거래량 적음, 관찰', cls: 'text-yellow-700 bg-yellow-50' },
+  normal_quiet: { label: '시간 외 한산 시 정상', cls: 'text-gray-600 bg-gray-50' },
+  unknown: { label: '', cls: '' },
+}
+
 interface Props {
   selectedStrategy: string
 }
@@ -123,10 +140,21 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [swingExpanded, setSwingExpanded] = useState(false)
   const [swingHelpOpen, setSwingHelpOpen] = useState(false)
+  // 사이클 18 — 끊김 종목 펼치기 토글
+  const [staleListOpen, setStaleListOpen] = useState(false)
   // J2 (2026-05-12) — 수동 재구독 결과 인라인 메시지
   const [resubMsg, setResubMsg] = useState<string | null>(null)
 
   const { data: status } = useTradingStatus()
+
+  // 사이클 18 (2026-05-19, B-1) — stale 종목별 last_tick_at 표시용.
+  // KisAccountPoolCard 와 동일 큐 ('realtime-subscriptions') 활용 — 동일 캐시 공유.
+  const { data: subscriptions } = useQuery({
+    queryKey: ['realtime-subscriptions'],
+    queryFn: getSubscriptions,
+    staleTime: 5_000,
+    refetchInterval: 30_000,
+  })
 
   const queryClient = useQueryClient()
   // J2 — stale 재구독 mutation. 성공 시 trading-status invalidate 로 다음 폴링 fresh 회복 확인
@@ -270,15 +298,28 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               // 진행바 — 80%+ 면 amber, 그 외 emerald
               const progressCls = tcRatio >= 0.8 ? 'bg-amber-500' : 'bg-emerald-500'
 
+              // 사이클 18 (2026-05-19, B-2) — 시간대별 컨텍스트 메타
+              const kstMin = getKstMinutes()
+              const staleCtx = getStaleContextByKstMinutes(kstMin)
+              const staleCtxMeta = STALE_CONTEXT_META[staleCtx]
               return (
                 <div className="mb-4 space-y-1.5">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <div
                       data-testid="tick-coverage-badge"
                       className={`px-2 py-1 rounded text-xs font-medium ${badgeCls}`}
                     >
                       정상 {tcFresh}종목 · 끊김 {tcStale}종목 · 등록 {tcAcked}종목
                     </div>
+                    {/* 사이클 18 — 끊김 시간대 컨텍스트 라벨 (stale > 0 일 때만 노출) */}
+                    {tcStale > 0 && staleCtxMeta.label && (
+                      <span
+                        data-testid="stale-context-label"
+                        className={`text-[11px] px-1.5 py-0.5 rounded ${staleCtxMeta.cls}`}
+                      >
+                        {staleCtxMeta.label}
+                      </span>
+                    )}
                     {/* J2 (2026-05-12) — stale > 0 일 때만 인라인 재구독 버튼. F1 자동 재구독과
                         별개의 운영자 수동 트리거. ConfirmModal 없는 read-mostly action. */}
                     {tcStale > 0 && (
@@ -306,6 +347,52 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                   </div>
                   {resubMsg && (
                     <div className="text-xs text-amber-700">{resubMsg}</div>
+                  )}
+                  {/* 사이클 18 (B-3) — 끊김 종목 펼치기 + last_tick_at 표시 */}
+                  {tcStale > 0 && subscriptions?.tickers?.stale && subscriptions.tickers.stale.length > 0 && (
+                    <div>
+                      <button
+                        type="button"
+                        data-testid="stale-list-toggle"
+                        onClick={() => setStaleListOpen((v) => !v)}
+                        className="text-xs text-amber-600 hover:underline"
+                      >
+                        {staleListOpen ? '끊김 종목 접기' : `끊김 종목 보기 (${subscriptions.tickers.stale.length}개)`}
+                      </button>
+                      {staleListOpen && (
+                        <div className="mt-1 text-xs text-gray-600 max-h-32 overflow-y-auto border border-gray-100 rounded p-1">
+                          {subscriptions.tickers.stale.map((ticker: string) => {
+                            const lastTick = subscriptions.last_tick_map?.[ticker]
+                            let lastTickLabel = '—'
+                            if (lastTick) {
+                              try {
+                                // KST 강제 + 24시간 콜론 표기 (HH:MM:SS) — `toLocaleTimeString('ko-KR')`
+                                // 가 "오전/오후" 또는 "X시 Y분 Z초" 로 출력될 수 있어 Intl 명시.
+                                lastTickLabel = new Intl.DateTimeFormat('en-GB', {
+                                  timeZone: 'Asia/Seoul',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  second: '2-digit',
+                                  hour12: false,
+                                }).format(new Date(lastTick))
+                              } catch {
+                                lastTickLabel = lastTick
+                              }
+                            }
+                            return (
+                              <div
+                                key={ticker}
+                                data-testid={`stale-row-${ticker}`}
+                                className="flex justify-between py-0.5 border-b border-gray-50 last:border-0"
+                              >
+                                <span className="font-mono">{ticker}</span>
+                                <span className="text-gray-500">마지막: {lastTickLabel}</span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               )
@@ -949,7 +1036,31 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                                       return <span className="px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-500">시가 대기</span>
                                     }
                                     if (curPrice >= targetPrice && targetPrice > 0) {
-                                      return <span className="px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-700 font-medium">돌파</span>
+                                      // 사이클 18 (2026-05-19, C-2) — 활성 보드 ∩ 전략 tradable_boards 검사.
+                                      // 매매 가능 시간대 (교집합 ∋) → 기존 빨강 "돌파".
+                                      // 매매 불가 (교집합 ∅) → 회색 "돌파 (대기 — 보드라벨)" — 운영자가
+                                      // *왜 매수 안 했는지* UI 만으로 즉시 이해.
+                                      const stratBoards: string[] = Array.isArray(strat?.tradable_boards)
+                                        ? (strat.tradable_boards as string[])
+                                        : []
+                                      const activeBoardCodes = activeBoards.map((b) => b.code)
+                                      const tradableNow = stratBoards.filter((b) => activeBoardCodes.includes(b))
+                                      // tradable_boards 미존재 (백엔드 미반영) → 기존 빨강 "돌파" fallback (안전 회귀)
+                                      if (stratBoards.length === 0 || tradableNow.length > 0) {
+                                        return <span className="px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-700 font-medium">돌파</span>
+                                      }
+                                      // 매매 불가 시간대 — 매매 가능 보드 안내
+                                      const tradableLabels = stratBoards
+                                        .map((b) => BOARD_META[b]?.label ?? b)
+                                        .join('/')
+                                      return (
+                                        <span
+                                          className="px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600 font-medium"
+                                          title={`이 전략은 ${tradableLabels} 에서만 매매. 현재 활성 보드 외.`}
+                                        >
+                                          돌파 (대기 — {tradableLabels})
+                                        </span>
+                                      )
                                     }
                                     if (nearTarget) {
                                       return <span className="px-1.5 py-0.5 rounded text-xs bg-yellow-100 text-yellow-700">근접 {pct}%</span>

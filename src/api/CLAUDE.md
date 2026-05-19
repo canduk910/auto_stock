@@ -56,6 +56,13 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - 임계 초과 시 health_monitor 가 `kis_quote_accounts.update_account(active=False)` + `kis_ws_pool.disable_quote_session(label)` + `[quote_session_disabled]` 영구 1행. DB 실패 graceful — 메모리만 비활성 + WARNING
 - 메인 라벨 "main" 자동 비활성 절대 금지 (안전 가드)
 - 운영자 대응: Settings UI 보조 계좌 카드 `active=true` 토글 → **다음 영업일** `_boot()` 부터 풀 재참여
+- **사이클 18 (2026-05-19) FAST_WINDOW 추가**: 기존 임계 (consecutive 5 / 5분 50%) + 1분 80% (`FAST_WINDOW_SECS=60`, `FAST_MIN_CALLS=10`, `FAST_MAX_FAILURE_RATE=0.8`). 영구 결함 라벨 (ISA 등 5xx 80%+) 빠른 탈락. 운영자 안내: 5xx 빈발 보조 라벨은 Settings UI active=false 수동 비활성 권장 — 자동 임계 도달 전 운영자 개입 가능
+
+**사이클 18 (2026-05-19) 5xx 폭주 정리** (A-1, A-3):
+- **WARNING dedupe** (`_record_5xx_for_dedupe(path, label, status) -> bool`): 동일 `(path, label, status)` 키 60s 윈도우 (`_QUOTE_5XX_DEDUPE_WINDOW=60.0`) 내 재발생 시 첫 1회만 WARNING + 카운트만 누적. ISA 같은 영구 5xx 라벨에서 분당 ~30 행 WARNING → 1행 + 60s summary INFO. lock `_quote_5xx_dedupe_lock` (asyncio.Lock) 동시성 보호
+- **60s summary task** (`_emit_5xx_dedupe_summary()`): scheduler `_5xx_dedupe_summary_loop` 가 60s 주기 호출. 윈도우 만료 + 카운트 ≥ 2 인 키 1행 INFO `[quote_pool_5xx_summary] path=... label=... status=500 count=N within=60s` + dedupe state clear
+- **메인 fallback 우선 (A-3)**: `_request_via_quote_pool` 의 라벨 선택 직후 `health_monitor.get_recent_5xx_ratio(label)` 조회. `total>=FAST_MIN_CALLS(10)` AND `ratio>=_LABEL_FALLBACK_5XX_RATIO_THRESHOLD(0.8)` 면 `label=None` 강제 (메인 fallback). 3회 재시도 backoff (수 초) 회피 → 응답 지연 ms 단위. 메트릭 `fast_fallback` 카운터 +1 운영 가시화
+- **메트릭 확장**: `_quote_request_metrics["fast_fallback"]` 신규 — 80%+ 라벨 skip 누적 카운트. `get_quote_request_metrics()` / `reset_quote_request_metrics()` 동기화
 
 ## order.py — 주문
 

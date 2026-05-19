@@ -64,6 +64,9 @@ export interface SubscriptionsResponse {
     fresh: string[]
     stale: string[]
   }
+  // 사이클 18 (2026-05-19, B-1) — stale 종목별 마지막 tick 시각 (ISO KST | null).
+  // ScanMonitor 끊김 펼치기에서 종목별 "마지막: HH:MM:SS" 표시 + 시간대 컨텍스트 톤 분기 근거.
+  last_tick_map?: Record<string, string | null>
 }
 
 export const getSubscriptions = async (): Promise<SubscriptionsResponse> => {

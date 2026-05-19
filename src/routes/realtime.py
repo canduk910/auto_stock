@@ -88,6 +88,17 @@ async def get_subscriptions() -> ApiResponse:
         session["fresh"] = len(s_fresh)
         session["stale"] = len(ticker_set) - len(s_fresh)
 
+    # 사이클 18 (2026-05-19, B-1) — stale 종목별 마지막 tick 시각 노출.
+    # 프론트 ScanMonitor 가 "끊김 N종목" 펼치기 시 종목별 마지막 수신 시각 표시.
+    # KRX 메인 마감 (15:30) 전 = 결함 가능 / 마감 후 = 자연 휴면 톤 분기 근거.
+    last_tick_map: dict[str, str | None] = {}
+    for ticker in sorted(stale_set):
+        last_dt = ticker_last_tick.get(ticker)
+        if last_dt is None or last_dt == _min_dt:
+            last_tick_map[ticker] = None
+        else:
+            last_tick_map[ticker] = last_dt.isoformat()  # KST tz 포함
+
     data = {
         "total": len(subscribed_set),
         "acked": len(acked_set),
@@ -100,6 +111,7 @@ async def get_subscriptions() -> ApiResponse:
             "fresh": sorted(fresh_set),
             "stale": sorted(stale_set),
         },
+        "last_tick_map": last_tick_map,
         "reconnect_count": pool._reconnect_count,
         "ws_connected": pool._ws is not None,
         "sessions": sessions,

@@ -131,11 +131,23 @@ class StrategyRegistry:
             if hasattr(s, 'get_scan_stats'):
                 scan_stats = s.get_scan_stats()
 
+            # 사이클 18 (2026-05-19, C-1) — 전략별 `tradable_boards` 최상위 노출.
+            # 프론트 ScanMonitor 가 활성 보드 ∩ tradable_boards = ∅ 시 "돌파 (대기 — 보드)" 라벨.
+            # 우선순위: DB strategy_config.params["tradable_boards"] > 전략 클래스 DEFAULT_TRADABLE_BOARDS
+            params_boards = s.config.params.get("tradable_boards")
+            if isinstance(params_boards, (list, tuple)) and params_boards:
+                tradable_boards = list(params_boards)
+            elif hasattr(s, "DEFAULT_TRADABLE_BOARDS"):
+                tradable_boards = list(s.DEFAULT_TRADABLE_BOARDS)
+            else:
+                tradable_boards = []
+
             result[sid] = {
                 "name": s.config.name,
                 "enabled": s.config.enabled,
                 "weight": s.config.weight,
                 "params": s.config.params,
+                "tradable_boards": tradable_boards,
                 "positions": len(s.state.positions),
                 "pending_buys": len(s.state.pending_buys),
                 "position_tickers": list(s.state.positions.keys()),

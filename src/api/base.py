@@ -86,6 +86,8 @@ _quote_request_metrics: dict = {
     "retries": 0,
     "retry_recovered": 0,
     "retry_exhausted": 0,
+    # 사이클 18 (2026-05-19) — fast window 80%+ 라벨 skip 카운터 (운영 가시화)
+    "fast_fallback": 0,
     "by_label": defaultdict(int),  # label → 호출 카운트 (메인=fallback 카운트 포함)
 }
 
@@ -101,6 +103,7 @@ def get_quote_request_metrics() -> dict:
         "retries": _quote_request_metrics["retries"],
         "retry_recovered": _quote_request_metrics["retry_recovered"],
         "retry_exhausted": _quote_request_metrics["retry_exhausted"],
+        "fast_fallback": _quote_request_metrics["fast_fallback"],
         "by_label": dict(_quote_request_metrics["by_label"]),
     }
 
@@ -109,10 +112,68 @@ def reset_quote_request_metrics() -> None:
     """시세 풀 메트릭 리셋 — 일일 리포트 INSERT 직후 호출."""
     for k in (
         "total", "http_5xx", "http_4xx", "network_err", "kis_error",
-        "retries", "retry_recovered", "retry_exhausted",
+        "retries", "retry_recovered", "retry_exhausted", "fast_fallback",
     ):
         _quote_request_metrics[k] = 0
     _quote_request_metrics["by_label"].clear()
+
+
+# ---------------------------------------------------------------------------
+# 사이클 18 (2026-05-19) — 5xx WARNING dedupe (60s 윈도우 + summary task)
+# ---------------------------------------------------------------------------
+# 배경: ISA 같은 보조 라벨이 영구 5xx 면 분당 30+ 회 WARNING 폭주. 동일 (path, label, status)
+# 키 60s 윈도우 내 재발생 시 첫 1회만 WARNING + 나머지 카운트만 누적. 윈도우 만료 시점
+# `_emit_5xx_dedupe_summary` 가 count >= 2 인 키 1행 INFO summary 후 state clear.
+_QUOTE_5XX_DEDUPE_WINDOW = 60.0  # seconds
+# key = (path, label, status) → (window_start_loop_ts, count)
+_quote_5xx_dedupe: dict[tuple[str, str, int], tuple[float, int]] = {}
+_quote_5xx_dedupe_lock = asyncio.Lock()
+
+# 사이클 18 (A-3) — 보조 라벨 fast window 5xx 80%+ 즉시 메인 fallback 임계
+_LABEL_FALLBACK_5XX_RATIO_THRESHOLD = 0.8
+
+
+async def _record_5xx_for_dedupe(path: str, label: str, status: int) -> bool:
+    """5xx 기록 후 should_emit (WARNING 출력 여부) 반환.
+
+    - 첫 발생 또는 윈도우 만료 (60s 경과) → True + window reset count=1
+    - 윈도우 내 재발생 → False + count +=1 (WARNING 억제)
+
+    Returns:
+        True 면 호출자가 WARNING 1행 logger.warning 호출. False 면 억제.
+    """
+    now = asyncio.get_event_loop().time()
+    async with _quote_5xx_dedupe_lock:
+        key = (path, label, status)
+        entry = _quote_5xx_dedupe.get(key)
+        if entry is None or (now - entry[0]) > _QUOTE_5XX_DEDUPE_WINDOW:
+            _quote_5xx_dedupe[key] = (now, 1)
+            return True
+        _quote_5xx_dedupe[key] = (entry[0], entry[1] + 1)
+        return False
+
+
+async def _emit_5xx_dedupe_summary() -> None:
+    """60s 주기 background task — 누적된 5xx dedupe 카운트 1행 INFO summary 후 state clear.
+
+    호출 주체: `scheduler._5xx_dedupe_summary_loop` (60s 주기).
+    카운트 ≥ 2 인 (path, label, status) 만 출력. 카운트 1 은 첫 WARNING 으로 이미 표시됨.
+    윈도우 만료 키는 모두 dedupe state 에서 제거 (count 무관) — 다음 발생은 새 WARNING.
+    """
+    now = asyncio.get_event_loop().time()
+    items: list[tuple[tuple[str, str, int], int]] = []
+    async with _quote_5xx_dedupe_lock:
+        for key, (window_start, count) in list(_quote_5xx_dedupe.items()):
+            if (now - window_start) > _QUOTE_5XX_DEDUPE_WINDOW:
+                # 윈도우 만료 — count >= 2 면 summary 출력 대상
+                if count >= 2:
+                    items.append((key, count))
+                del _quote_5xx_dedupe[key]
+    for (path, label, status), count in items:
+        logger.info(
+            "[quote_pool_5xx_summary] path=%s label=%s status=%d count=%d within=%.0fs",
+            path, label, status, count, _QUOTE_5XX_DEDUPE_WINDOW,
+        )
 
 
 async def _get_quote_semaphore(label: str) -> asyncio.Semaphore:
@@ -483,6 +544,29 @@ async def _request_via_quote_pool(
     # 2) 라벨 선택 — 라운드로빈
     label = await _select_quote_label()
 
+    # 사이클 18 (A-3) — 라벨 선택 직후 fast window 5xx 80%+ 즉시 메인 fallback.
+    # 영구 결함 라벨 (ISA 등) 의 3회 재시도 backoff (1+2+4=7s) 누적 회피 → 응답 지연 차단.
+    # health_monitor 자동 비활성 임계 도달 전 운영자 가시화도 제공 (fast_fallback 메트릭).
+    if label is not None:
+        try:
+            from src.services.quote_session_health import (
+                FAST_MIN_CALLS as _FAST_MIN,
+                health_monitor as _hm,
+            )
+            ratio, total = _hm.get_recent_5xx_ratio(label)
+            if total >= _FAST_MIN and ratio >= _LABEL_FALLBACK_5XX_RATIO_THRESHOLD:
+                logger.info(
+                    "[quote_pool] 보조 라벨 fast window 5xx %.0f%% (total=%d) — 메인 fallback (label=%s)",
+                    ratio * 100, total, label,
+                )
+                _quote_request_metrics["fast_fallback"] += 1
+                label = None  # 메인 fallback 강제
+        except Exception:
+            logger.debug(
+                "[quote_pool] get_recent_5xx_ratio 호출 실패 — 라벨 그대로 사용",
+                exc_info=True,
+            )
+
     # 3) 토큰 매니저 결정 (보조 실패 시 메인 fallback)
     manager = None
     if label is not None:
@@ -552,10 +636,24 @@ async def _request_via_quote_pool(
                             )
                 elif 400 <= status < 500:
                     _quote_request_metrics["http_4xx"] += 1
-                logger.warning(
-                    "[quote_pool] HTTP %s (attempt %d/%d): %s label=%s",
-                    status, attempt, MAX_RETRIES, path, actual_label,
-                )
+                # 사이클 18 (A-1) — 5xx WARNING dedupe (동일 (path, label, status) 60s 윈도우)
+                # 첫 발생만 WARNING, 윈도우 내 재발생은 카운트 누적 + 억제. 60s 만료 시점 summary INFO.
+                should_emit_warning = True
+                if 500 <= status < 600:
+                    try:
+                        should_emit_warning = await _record_5xx_for_dedupe(
+                            path, actual_label, status,
+                        )
+                    except Exception:
+                        logger.debug(
+                            "[quote_pool] _record_5xx_for_dedupe 실패 — WARNING 출력 fallback",
+                            exc_info=True,
+                        )
+                if should_emit_warning:
+                    logger.warning(
+                        "[quote_pool] HTTP %s (attempt %d/%d): %s label=%s",
+                        status, attempt, MAX_RETRIES, path, actual_label,
+                    )
                 if attempt == MAX_RETRIES:
                     if 500 <= status < 600:
                         _quote_request_metrics["retry_exhausted"] += 1

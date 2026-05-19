@@ -1953,3 +1953,52 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 - 1263 (사이클 11) → **1263** (백엔드 신규 0, stale watcher 의미 갱신만)
 - 프론트 142 → **145** (+3 BFB/VCP)
 - stale 회복 시간: 20분 → **10분** (단발 silent inactive 회복 강화)
+
+## 사이클 18 — ISA 5xx 결함 정리 + UI 끊김/돌파 컨텍스트 (2026-05-19)
+
+### 배경
+
+사이클 17 옵션 A 안정화 직후 운영 로그 진단:
+1. **ISA HTTP 500 폭주** — `[quote_pool] HTTP 500 (attempt 1/3)` `label=ISA` 가 20분 18건 / 시간당 30+. `inquire-price`/`inquire-daily-itemchartprice`. 메인 fallback 으로 결국 성공하나 로그 폭주 + KIS 부담 + 3회 backoff 응답 지연 s 단위
+2. **UI 끊김 표시 오해 유발** — 조건검색 현황 "끊김 19종목" 이 시스템 결함처럼 보임. 실제 NXT 애프터 거래량 부족 (자연 stale). 운영자 혼란
+3. **"돌파" 라벨 매수 미실행** — 한화에어로스페이스(012450) 16:43 "돌파" 표시되나 매수 0건. VB `DEFAULT_TRADABLE_BOARDS=("pre_nxt","main")` 보드 가드 skip (정상). UI 가 매매 가능 여부 표시 안 함
+
+### 변경 (3 영역 묶음)
+
+| 영역 | 파일 | 변경 |
+|------|------|------|
+| A 백엔드 | `src/api/base.py` | 5xx WARNING dedupe (60s 윈도우, 동일 `(path,label,status)` 키 카운트 누적). 60s summary task `_emit_5xx_dedupe_summary` 1행 INFO. 라벨 선택 직후 fast window 5xx 비율 80%+ 즉시 메인 fallback (재시도 backoff s 절약) |
+| A 백엔드 | `src/services/quote_session_health.py` | FAST_WINDOW (60s, 80%, 최소 10회) 임계 추가. 기존 5분/50%/consecutive 5 보존. `get_recent_5xx_ratio(label) -> (ratio, total)` 신규 API (라벨 선택 분기용) |
+| A 백엔드 | `src/engine/scheduler.py` | `_5xx_dedupe_summary_loop` 60s 주기 background task (`_boot` 끝에 `asyncio.create_task` 1회) |
+| B 프론트 | `src/routes/realtime.py` | `/api/realtime/subscriptions` 응답 `last_tick_map: Record<ticker, ISO_KST\|null>` 추가 (stale 종목별 마지막 tick 시각) |
+| B 프론트 | `frontend/src/components/ScanMonitor.tsx` | 끊김 시간대 컨텍스트 라벨 (KRX 메인=빨강 결함 / PRE_NXT=노랑 관찰 / NXT 애프터·시간 외=회색 정상). 끊김 종목 펼치기 + 종목별 마지막 tick 시각 노출 |
+| C 프론트 | `src/models/response.py` + `engine/scheduler.py::get_trading_status` | `StrategyInfo.tradable_boards: list[str]` 노출 (`DEFAULT_TRADABLE_BOARDS` 또는 `strategy_config.params.tradable_boards`) |
+| C 프론트 | `frontend/src/components/ScanMonitor.tsx` | 활성 보드 ∩ tradable_boards = ∅ 면 회색 "돌파 (대기 — {보드라벨})" 라벨. 교집합 ∋ 면 기존 빨강 "돌파" |
+| 문서 | `src/api/CLAUDE.md` / `frontend/CLAUDE.md` / `src/routes/CLAUDE.md` / `docs/HARNESS_CHANGELOG.md` | 사이클 18 1행 동기화 |
+
+### 회귀 가드 (신규)
+
+| 파일 | 케이스 | 비고 |
+|------|--------|------|
+| `tests/unit/api/test_quote_pool_5xx_dedupe.py` (신규) | 5 | 첫 emit / 윈도우 내 suppress / 윈도우 만료 재emit / summary 1행 / 키별 독립 |
+| `tests/unit/services/test_quote_session_health.py` (확장) | +3 | FAST_WINDOW 1분 80% 발화 / 최소 호출 수 미달 미발화 / 60s 윈도우 리셋 |
+| `tests/unit/api/test_quote_pool_label_skip.py` (신규 또는 확장) | 5 | 80% → 메인 / 50% → 보조 유지 / total<10 → 보조 / disabled → 메인 / 메트릭 카운터 |
+| `frontend/src/components/__tests__/ScanMonitor.stale_context.test.tsx` (신규) | 5 | 메인 빨강 / 애프터 회색 / 프리 노랑 / stale=0 미노출 / 펼치기 last_tick 시각 |
+| `frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx` (신규) | 5 | VB PRE_NXT 빨강 / VB POST_NXT 회색대기 / LTV main 빨강 / BFB POST_NXT 회색 / fallback 빨강 |
+
+### 안전 보장
+
+- **VB DEFAULT_TRADABLE_BOARDS 변경 금지** — 본 사이클은 프론트 UI 라벨 만 분기. 매매 정책은 그대로 (POST_NXT 추가 없음)
+- **매매 코드 무수정**: `risk.on_tick` / `order_engine.py` / 전략 파일 변경 0
+- **사이클 17 옵션 A 보존**: `_REJECT_KEYWORDS_UPPER` / OPSP backoff 300s / K stale watcher 즉시 재등록
+- **사이클 9~11 보존**: AES 키 격리 / delta-only / 60s 캐시
+- **자금 안전 절대 원칙 보존**: 매매·잔고·체결조회 메인 단일
+- **응답 키 추가만 (제거 0)**: `last_tick_map` / `tradable_boards` 모두 신규 필드, 기존 키 보존
+- 프론트 옵셔널 타입 (`?`) — 백엔드 미반영 시점 호환 안전 fallback
+
+### 베이스라인
+
+- 백엔드 1263 (사이클 13) → **1276** (+13 회귀: 5+3+5)
+- 프론트 145 (사이클 13) → **155** (+10 회귀: 5+5)
+- ISA 같은 보조 라벨 5xx 빈발 시 로그 폭주 → **1분 1행 + 60s summary 1행** (분당 ~30행 → 2행)
+- 보조 라벨 fast window 80%+ → 메인 fallback 응답 지연 **3회 backoff (수 초) → 즉시 (ms)**

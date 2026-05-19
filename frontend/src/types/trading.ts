@@ -44,6 +44,10 @@ export interface StrategyInfo {
   params?: Record<string, unknown>
   invested_amount?: number
   min_weight?: number
+  // 사이클 18 (2026-05-19, C-1) — 전략별 매매 가능 보드 (DEFAULT_TRADABLE_BOARDS 또는 params).
+  // 옵셔널 — 백엔드 미반영 시점 호환. ScanMonitor 가 활성 보드 ∩ tradable_boards = ∅ 시
+  // "돌파 (대기 — 보드라벨)" 회색 라벨로 분기.
+  tradable_boards?: string[]
 }
 
 export interface StrategyListItem {

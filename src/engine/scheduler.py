@@ -173,6 +173,8 @@ class TradingScheduler:
         self._stale_watcher_task: asyncio.Task | None = None
         # ticker -> 연속 stale 사이클 수 (fresh 회복 시 자동 clear, _reset_daily_state 에서도 clear)
         self._stale_retry_count: dict[str, int] = {}
+        # 사이클 18 (2026-05-19, A-1) — 5xx WARNING dedupe summary 60s 주기 task
+        self._5xx_dedupe_summary_task: asyncio.Task | None = None
         # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
         self._swing_poll_task: asyncio.Task | None = None
         # 사이클 13-E-2 — start() 본문 로컬 task 를 속성 승격, finally 좀비 차단
@@ -309,6 +311,11 @@ class TradingScheduler:
             # `_swing_buy_poll_loop` 는 매수 평가 전용 (09:05~09:30) 으로 보존, 본 task 는
             # 시세 갱신 + 보유 평가만 책임. 별도 청산 경로 신설 금지 — risk.on_tick 재사용.
             self._swing_rest_poll_task = asyncio.create_task(self._swing_rest_poll_loop())
+
+            # 사이클 18 (2026-05-19, A-1) — 5xx dedupe 60s summary task.
+            # `_record_5xx_for_dedupe` 가 첫 발생만 WARNING, 윈도우 내 재발생은 카운트만 누적.
+            # 본 task 가 60s 주기로 만료된 카운트를 1행 INFO summary 후 dedupe state clear.
+            self._5xx_dedupe_summary_task = asyncio.create_task(self._5xx_dedupe_summary_loop())
 
             now = datetime.now().time()
 
@@ -518,6 +525,7 @@ class TradingScheduler:
             for task_attr in (
                 "_next_day_task", "_session_task", "_stale_watcher_task",
                 "_swing_poll_task", "_swing_rest_poll_task",
+                "_5xx_dedupe_summary_task",
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -638,6 +646,7 @@ class TradingScheduler:
         for task_attr in (
             "_next_day_task", "_session_task", "_stale_watcher_task",
             "_swing_poll_task", "_swing_rest_poll_task",
+            "_5xx_dedupe_summary_task",
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -2224,6 +2233,29 @@ class TradingScheduler:
                 await self._check_and_resubscribe_stale()
             except Exception:
                 logger.exception("[stale_watcher] 사이클 실패")
+
+    async def _5xx_dedupe_summary_loop(self) -> None:
+        """사이클 18 (2026-05-19) — 5xx WARNING dedupe summary 60s 주기 task.
+
+        `src/api/base.py::_record_5xx_for_dedupe` 가 동일 (path, label, status) 키 60s 윈도우 내
+        재발생 시 첫 1회만 WARNING + 나머지 카운트만 누적. 본 task 가 60s 주기로
+        `_emit_5xx_dedupe_summary` 호출 → 만료된 카운트 ≥ 2 인 키를 1행 INFO summary 출력.
+
+        - 윈도우 만료 키는 모두 dedupe state 에서 제거 (count 무관) — 다음 발생은 새 WARNING
+        - 본체 예외는 ERROR 로그로 흡수 — 다음 사이클 정상 진행
+        - `_running=False` 진입 시 즉시 break
+        - 좀비 task 방지: `start()` finally 블록에서 cancel + await
+        """
+        from src.api.base import _QUOTE_5XX_DEDUPE_WINDOW, _emit_5xx_dedupe_summary
+
+        while self._running:
+            await asyncio.sleep(_QUOTE_5XX_DEDUPE_WINDOW)
+            if not self._running:
+                break
+            try:
+                await _emit_5xx_dedupe_summary()
+            except Exception:
+                logger.exception("[5xx_dedupe_summary] 사이클 실패")
 
     async def _check_and_resubscribe_stale(self) -> None:
         """현재 TICK 구독 종목 중 stale 한 것에 대해 강제 재등록 (K).
