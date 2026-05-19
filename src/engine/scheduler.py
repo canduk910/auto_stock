@@ -147,6 +147,11 @@ class TradingScheduler:
         self.registry.register(vcp)
 
         self.order_engine = OrderEngine(self.registry)
+        # 사이클 15-A (2026-05-19) — _handle_sell_fill 의 unsubscribe hook 이
+        # `_pending_next_day_clear` 조회할 수 있도록 provider 주입.
+        self.order_engine._pending_next_day_clear_provider = (
+            lambda: self._pending_next_day_clear
+        )
         self.risk_manager = RiskManager(self.registry, self.order_engine)
         self._running = False
         self._phase: str = "idle"
@@ -1805,7 +1810,11 @@ class TradingScheduler:
                 ))
                 source_counts = self._build_subscription_source_counts(momentum_tickers=tickers)
                 priority_groups = self._build_priority_groups(momentum_tickers=tickers)
-                await unsubscribe_all()
+                # 사이클 15-A (2026-05-19) — KIS 정상 패턴 준수.
+                # 기존 `unsubscribe_all()` (전체 해제) → `_delta_unsubscribe_dropped`(빠진 종목만).
+                # KIS 공지 "비정상 케이스 2" (무한 등록/해제 반복) 패턴 차단.
+                new_set = set(tickers) | set(extra)
+                await self._delta_unsubscribe_dropped(new_set)
                 await subscribe_filtered_stocks(
                     tickers, extra_tickers=extra, source_counts=source_counts,
                     priority_groups=priority_groups,
@@ -2305,6 +2314,58 @@ class TradingScheduler:
         except Exception:
             # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
             logger.debug("[stale_watcher] write_log 실패", exc_info=True)
+
+    async def _delta_unsubscribe_dropped(self, new_set: set[str]) -> list[str]:
+        """`_scan_loop` 의 새 합집합에서 빠진 종목만 unsubscribe (사이클 15-A, 2026-05-19).
+
+        KIS 공지의 "비정상 케이스 2" (무한 등록/해제 반복) 패턴 차단.
+        기존 `unsubscribe_all()` 전체 해제 → 빠진 종목 (delta_remove) 만 unsubscribe.
+
+        흐름:
+        1. 현재 풀 TICK 구독 합집합 `kis_ws_pool.get_subscribed_tickers()` 조회
+        2. `delta_remove = current - new_set` 계산
+        3. 각 종목 `kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)` 호출
+        4. 종목 간 50ms sleep — KIS Rate Limit 보호
+        5. 종목별 예외 격리
+
+        Returns:
+            unsubscribe 한 ticker 리스트 (테스트/모니터링용)
+
+        안전 불변식:
+        - TICK_TR_ID 종목만 처리 — 체결통보(H0STCNI0/9) / 장운영정보(H0UNMKO0) 영향 0
+        - `_subscriptions` set 직접 수정 금지 — `kis_ws_pool.unsubscribe` 만 사용
+        - 본체 예외는 호출자(`_scan_loop`)가 try/except 로 흡수
+        """
+        from src.engine.scanner import TICK_TR_ID
+        from src.realtime.websocket_pool import kis_ws_pool
+
+        current = kis_ws_pool.get_subscribed_tickers()
+        delta_remove = sorted(current - new_set)
+        if not delta_remove:
+            return []
+
+        unsubscribed: list[str] = []
+        for ticker in delta_remove:
+            try:
+                await kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)
+                unsubscribed.append(ticker)
+            except Exception:
+                logger.exception("[delta_unsubscribe] %s 실패", ticker)
+            await asyncio.sleep(0.05)
+
+        logger.info(
+            "[scan_loop_delta] unsubscribed=%d tickers=%s",
+            len(unsubscribed), unsubscribed[:10],
+        )
+        try:
+            await write_log(
+                "INFO",
+                f"[scan_loop_delta] unsubscribed={len(unsubscribed)} "
+                f"tickers={unsubscribed[:10]}",
+            )
+        except Exception:
+            logger.debug("[scan_loop_delta] write_log 실패", exc_info=True)
+        return unsubscribed
 
     async def _resubscribe_stale_priority(self, cap: int = 10) -> list[str]:
         """`_scan_loop` 통합 구독 직후 stale 종목을 HIGH 우선순위로 즉시 재구독한다.

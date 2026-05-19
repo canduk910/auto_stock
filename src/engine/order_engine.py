@@ -56,6 +56,9 @@ class OrderEngine:
         # 체결통보가 place_order 응답보다 먼저 도착해 COMPLETED row를 직접 INSERT한 order_no.
         # 뒤늦게 도착한 execute_buy/execute_sell이 PENDING row를 추가 INSERT하는 것을 막기 위함.
         self._completed_orders: set[str] = set()
+        # 사이클 15-A (2026-05-19) — 매도 체결 후 WS unsubscribe hook 의 pending_next_day_clear 조회 provider.
+        # scheduler 가 setattr 로 주입. 기본은 빈 set 반환 (테스트/단독 사용 안전).
+        self._pending_next_day_clear_provider = lambda: set()
 
     def _strategy_exchange(self, strategy_id: str | None) -> str:
         """전략의 exchange 파라미터(KRX/NXT/SOR) 조회. 미지정 시 KRX.
@@ -727,6 +730,52 @@ class OrderEngine:
         elif side == "SELL":
             await self._handle_sell_fill(ticker, order_no, price, quantity, total_filled, ordered_qty)
 
+    async def _unsubscribe_if_no_other_strategy(self, ticker: str) -> None:
+        """매도 전량 체결 후 WS 구독 정리 (사이클 15-A, 2026-05-19).
+
+        KIS 정상 패턴: 불필요 종목 즉시 구독 해제 (5분 _scan_loop 자연 정리 대신).
+
+        다음 모두 만족 시에만 unsubscribe:
+        - `registry.is_ticker_held_by_any(ticker) == False` (다른 전략 보유 X)
+        - `_pending_next_day_clear` 에 없음 (익일청산 대기 X)
+        - 다른 전략 `get_scanned_tickers()` 에 없음 (스캔 후보 X)
+
+        예외 시 swallow — 매도 체결 흐름 무관.
+        """
+        try:
+            # 1) 다른 전략이 같은 종목 보유 중?
+            if self.registry.is_ticker_held_by_any(ticker):
+                logger.debug("[unsubscribe_skip] %s — 다른 전략 보유 중", ticker)
+                return
+            # 2) 익일청산 대기 set 에 있음?
+            try:
+                pending = self._pending_next_day_clear_provider() or set()
+            except Exception:
+                pending = set()
+            for entry in pending:
+                if isinstance(entry, tuple) and len(entry) >= 1 and entry[0] == ticker:
+                    logger.debug("[unsubscribe_skip] %s — pending_next_day_clear", ticker)
+                    return
+            # 3) 다른 전략 스캔 후보?
+            for strat in self.registry.all():
+                try:
+                    scanned = strat.get_scanned_tickers()
+                except AttributeError:
+                    scanned = []
+                if ticker in scanned:
+                    logger.debug(
+                        "[unsubscribe_skip] %s — strategy=%s 스캔 후보",
+                        ticker, strat.config.strategy_id,
+                    )
+                    return
+            # 모두 통과 → unsubscribe
+            from src.engine.scanner import TICK_TR_ID
+            from src.realtime.websocket_pool import kis_ws_pool
+            await kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)
+            logger.info("[sell_unsubscribe] %s WS 구독 정리", t(ticker))
+        except Exception:
+            logger.exception("[sell_unsubscribe] %s 실패", ticker)
+
     async def _handle_buy_fill(
         self, ticker: str, order_no: str, price: int,
         quantity: int, total_filled: int, ordered_qty: int,
@@ -865,6 +914,9 @@ class OrderEngine:
             self._order_strategy.pop(order_no, None)
             self._order_ticker.pop(order_no, None)
             logger.info("매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s)", t(ticker), total_filled, price, profit_loss, strategy_id)
+            # 사이클 15-A (2026-05-19) — 매도 전량 체결 후 WS 구독 정리 (KIS 정상 패턴).
+            # 다른 전략이 보유하지 않고, 익일청산 대기 X, 다른 전략 스캔 후보 X 인 경우만 unsubscribe.
+            await self._unsubscribe_if_no_other_strategy(ticker)
         else:
             # 부분 체결 → PARTIAL, 30초 후 잔여 취소 + 손절 시 재주문
             await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss)

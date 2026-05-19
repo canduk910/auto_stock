@@ -75,6 +75,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -155,6 +156,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -166,6 +168,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -274,6 +277,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -285,6 +289,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -414,6 +419,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -425,6 +431,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -526,6 +533,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -537,6 +545,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -627,6 +636,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -638,6 +648,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -748,6 +759,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -759,6 +771,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -906,6 +919,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
     - tests/unit/engine/test_recommendation_param_ranges.py
@@ -916,6 +930,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -1069,6 +1084,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -1080,6 +1096,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -1186,6 +1203,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -1270,6 +1288,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -1381,6 +1400,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -1392,6 +1412,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -1498,6 +1519,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -1589,6 +1611,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -1676,6 +1699,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -1762,6 +1786,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -1773,6 +1798,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -1856,6 +1882,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -1867,6 +1894,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -1951,6 +1979,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -2075,6 +2104,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -2086,6 +2116,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -2214,6 +2245,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -2326,6 +2358,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -2337,6 +2370,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -2439,6 +2473,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -2450,6 +2485,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -2545,6 +2581,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -2633,6 +2670,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -2723,6 +2761,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -2807,6 +2846,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -2897,6 +2937,7 @@ backend:
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -2952,6 +2993,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -2987,6 +3029,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3071,6 +3114,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3158,6 +3202,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3246,6 +3291,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3326,8 +3372,10 @@ backend:
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
@@ -3460,6 +3508,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3561,6 +3610,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -3571,6 +3621,7 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3663,6 +3714,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3757,6 +3809,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3844,6 +3897,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -3936,6 +3990,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -4021,6 +4076,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -4118,6 +4174,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -4188,6 +4245,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
@@ -4237,6 +4295,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
@@ -4285,6 +4344,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -4326,6 +4386,7 @@ backend:
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
@@ -4403,6 +4464,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -4414,6 +4476,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -4528,6 +4591,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -4608,6 +4672,7 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -4619,6 +4684,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -4731,6 +4797,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -4742,6 +4809,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -4864,6 +4932,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -4875,6 +4944,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -5026,6 +5096,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -5037,6 +5108,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -5158,6 +5230,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -5169,6 +5242,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -5192,6 +5266,8 @@ backend:
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_stale_watcher_pool.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
@@ -5292,6 +5368,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -5303,6 +5380,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -5443,6 +5521,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -5453,6 +5532,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
@@ -5489,7 +5569,9 @@ backend:
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
     - tests/unit/engine/test_scanner_priority_dispatch.py
@@ -6041,6 +6123,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -6140,6 +6223,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -6235,6 +6319,7 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
@@ -6343,6 +6428,7 @@ backend:
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -6354,6 +6440,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
     - tests/unit/engine/test_scanner_pool_count.py
@@ -6843,10 +6930,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-19T09:41:54.371995+09:00'
+generated_at: '2026-05-19T11:12:40.046995+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 166
+  backend_tests: 168
   frontend_modules: 57
   frontend_tests: 31
   unmapped_modules:

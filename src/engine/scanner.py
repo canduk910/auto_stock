@@ -411,9 +411,13 @@ async def subscribe_filtered_stocks(
                 logger.debug("HIGH 한도 초과 system_logs 기록 실패", exc_info=True)
 
         already: set[str] = set()
+        # 사이클 15-A (2026-05-19) — 이미 풀에 구독 중인 LOW 종목은 SEND skip (KIS 정상 패턴).
+        # HIGH 종목 (positions / next_day_clear) 은 always 호출 — 풀의 _select_session 이
+        # promote (보조→메인 이동) 또는 noop 판단. 사전에 skip 하면 promote 차단됨.
+        already_in_pool: set[str] = set(kis_ws_pool.get_subscribed_tickers())
         # 사이클 7-C — 풀로 위임. priority="HIGH"/"LOW" + bypass_limit 명시 전달.
         # 보조 세션 0개 시 풀이 메인으로 fallback (회귀 0).
-        # 1) positions — priority='HIGH', bypass_limit=True (절대 보장)
+        # 1) positions — priority='HIGH', bypass_limit=True (절대 보장, promote 보존)
         for t in positions:
             if t in already:
                 continue
@@ -458,6 +462,7 @@ async def subscribe_filtered_stocks(
 
         # 1-pass: cap 적용된 breakout + momentum + swing 순서로 add
         # 사이클 7-C — 풀로 위임. priority='LOW' (보조 세션 라운드로빈 우선, 메인 fallback).
+        # 사이클 15-A — 이미 풀에 있는 LOW 종목은 SEND skip (KIS 정상 패턴 준수).
         for label, candidates in (
             ("breakout", breakout_primary),
             ("momentum", momentum),
@@ -466,6 +471,10 @@ async def subscribe_filtered_stocks(
             for t in candidates:
                 if t in already:
                     # 중복 제거 — drop 카운트에 포함하지 않음 (이미 구독했으므로)
+                    continue
+                if t in already_in_pool:
+                    # 사이클 15-A: 이미 풀에 LOW 로 구독 중 — KIS SEND skip
+                    already.add(t)
                     continue
                 remaining = MAX_SUBSCRIPTIONS - len(kis_ws._subscriptions)
                 if remaining <= 0:
@@ -488,6 +497,11 @@ async def subscribe_filtered_stocks(
             if t in already:
                 # 다른 그룹(positions/next_day_clear/breakout_primary/momentum/swing)
                 # 이 이미 구독한 종목 — drop 아닌 중복
+                skipped_already += 1
+                continue
+            if t in already_in_pool:
+                # 사이클 15-A: 이미 풀에 LOW 로 구독 중 — KIS SEND skip (drop 아님)
+                already.add(t)
                 skipped_already += 1
                 continue
             remaining = MAX_SUBSCRIPTIONS - len(kis_ws._subscriptions)
