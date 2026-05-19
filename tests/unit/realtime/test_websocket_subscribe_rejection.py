@@ -510,3 +510,39 @@ async def test_case_n6_subscribe_success_regression(
         for rec in caplog.records
     )
     assert patched_write_log.await_count == 0
+
+
+# ---------------------------------------------------------------------------
+# Case N7 (사이클 17, 2026-05-19) — KIS 공식 41건 한도 초과 메시지 "MAX SUBSCRIBE OVER"
+# 키워드 정확 매칭 회귀. 기존 LIMIT/EXCEED/OVER 단독은 미매칭이라 "MAX SUBSCRIBE"
+# 명시 추가. 위양성 위험 0 (KIS 공식 에러 문구).
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_case_n7_max_subscribe_over_keyword_discards(
+    ws_with_subscription, patched_write_log, caplog
+):
+    raw = _make_reject_raw(
+        "H0UNCNT0", "005930", rt_cd="1", msg_cd="OPSP0003",
+        msg1="MAX SUBSCRIBE OVER",
+    )
+    with caplog.at_level(logging.ERROR, logger="src.realtime.websocket"):
+        await ws_with_subscription._handle_raw(raw)
+
+    assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
+    assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions_acked
+    assert patched_write_log.await_count == 1
+    log_msg = patched_write_log.await_args.args[1]
+    assert "[ws_subscribe_reject]" in log_msg
+    assert "MAX SUBSCRIBE OVER" in log_msg
+
+
+# ---------------------------------------------------------------------------
+# Case N7b (사이클 17, 2026-05-19) — _is_rejection_response 단독 검증.
+# 키워드 매칭만 (rt_cd="0" 으로도 키워드 단독 매칭 보장).
+# ---------------------------------------------------------------------------
+def test_case_n7b_max_subscribe_keyword_in_upper_table():
+    from src.realtime.websocket import _is_rejection_response, _REJECT_KEYWORDS_UPPER
+
+    assert "MAX SUBSCRIBE" in _REJECT_KEYWORDS_UPPER
+    assert _is_rejection_response("0", "MAX SUBSCRIBE OVER") is True
+    assert _is_rejection_response("0", "max subscribe over") is True  # 대소문자 무시

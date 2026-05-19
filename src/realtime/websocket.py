@@ -49,6 +49,9 @@ _EXECUTION_NOTICE_TR_IDS = frozenset({"H0STCNI0", "H0STCNI9"})
 _REJECT_KEYWORDS_UPPER = (
     "ERROR", "FAIL", "REJECT", "NOT ALLOWED",
     "LIMIT", "EXCEED", "DUPLICATE",
+    # 사이클 17 (2026-05-19) — KIS 공식 답변 인용 41건 한도 초과 시 "MAX SUBSCRIBE OVER" 메시지.
+    # 기존 LIMIT/EXCEED/OVER 단독 키워드 모두 미매칭이라 명시 추가.
+    "MAX SUBSCRIBE",
 )
 _REJECT_KEYWORDS_KO = (
     # N (2026-05-12) — "이미" 제거: ALREADY IN SUBSCRIBE / "이미 구독" / "이미 등록" 은
