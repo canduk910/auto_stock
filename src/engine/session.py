@@ -23,36 +23,55 @@ logger = logging.getLogger(__name__)
 
 
 class MarketBoard(str, Enum):
-    """매매 가능 보드 구분."""
+    """매매 가능 보드 구분.
 
-    PRE_NXT = "pre_nxt"          # NXT 프리마켓 (~09:00 직전)
-    KRX_OPEN = "krx_open"        # KRX 동시호가 (08:30~09:00)
-    MAIN = "main"                # KRX+NXT 메인 (09:00~15:20)
-    KRX_AFTER = "krx_after"      # KRX 시간외 단일가 (15:30~18:00)
-    POST_NXT = "post_nxt"        # NXT 애프터마켓 (15:30~20:00)
+    사이클 26 (2026-05-20): KRX_OPEN / KRX_AFTER 보드 비활성화.
+    - KRX_OPEN (08:30~09:00): 제거 — PRE_NXT 단독 구간으로 통합
+    - KRX_AFTER (15:30~18:00): 제거 — 15:30~15:39:59 는 MAIN 유지, 15:40~ 는 POST_NXT
+    enum 값 자체는 호환성을 위해 유지 (DB 파라미터, 외부 참조 코드 영향 0).
+    """
+
+    PRE_NXT = "pre_nxt"          # NXT 프리마켓 (08:00~09:00)
+    KRX_OPEN = "krx_open"        # (사이클 26: 비활성, 호환성 보존) KRX 동시호가
+    MAIN = "main"                # KRX 메인 (09:00~15:39:59)
+    KRX_AFTER = "krx_after"      # (사이클 26: 비활성, 호환성 보존) KRX 시간외
+    POST_NXT = "post_nxt"        # NXT 애프터마켓 (15:40~20:00)
 
 
 # 시각 기반 보드 매핑 — H0NXMKO0 미수신 시 fallback (NXT 통상 시간 기준)
 # (start, end, active_boards) — start <= now < end
+#
+# 사이클 26 (2026-05-20) 변경:
+#   Before: 5 보드 (PRE/KRX_OPEN/MAIN/KRX_AFTER/POST)
+#   After:  3 보드 (PRE/MAIN/POST) — 시간대별 명확화
+#
+# 시각표:
+#   08:00~08:59:59 → PRE_NXT (시세: H0NXCNT0)
+#   09:00~15:39:59 → MAIN    (시세: H0STCNT0, 09:00:05 시가 확정, 15:20 강제 청산)
+#   15:40~19:59:59 → POST_NXT (시세: H0NXCNT0)
+#   20:00~         → 장 종료 (보드 없음)
+#
+# 갭 구간:
+#   15:30~15:39:59 — MAIN 유지 (종가 결정 지연 흡수 10분 마진)
+#   08:59:10 사전 마진 — scheduler 가 H0STCNT0 추가 subscribe 시작 (보드는 PRE_NXT 유지)
+#   15:39:10 사전 마진 — scheduler 가 H0NXCNT0 추가 subscribe 시작 (보드는 MAIN 유지)
 _BOARD_SCHEDULE: list[tuple[time, time, frozenset[MarketBoard]]] = [
-    (time(8, 0), time(8, 30), frozenset({MarketBoard.PRE_NXT})),
-    (time(8, 30), time(9, 0), frozenset({MarketBoard.PRE_NXT, MarketBoard.KRX_OPEN})),
-    (time(9, 0), time(15, 20), frozenset({MarketBoard.MAIN})),
-    (time(15, 20), time(15, 30), frozenset({MarketBoard.MAIN})),  # buy_stop 구간(전략별로 가드)
-    (time(15, 30), time(18, 0), frozenset({MarketBoard.KRX_AFTER, MarketBoard.POST_NXT})),
-    (time(18, 0), time(20, 0), frozenset({MarketBoard.POST_NXT})),
+    # PRE_NXT: 08:00~08:59:59 (KRX_OPEN 구간 통합 — 시세 채널 H0NXCNT0)
+    (time(8, 0), time(9, 0), frozenset({MarketBoard.PRE_NXT})),
+    # MAIN: 09:00~15:39:59 (buy_stop 구간 15:20~15:30 포함, 15:30~15:40 갭 마진 포함)
+    (time(9, 0), time(15, 40), frozenset({MarketBoard.MAIN})),
+    # POST_NXT: 15:40~19:59:59 (사이클 26: 15:30 → 15:40 으로 변경)
+    (time(15, 40), time(20, 0), frozenset({MarketBoard.POST_NXT})),
 ]
 
 
 # 전략별 매매 허용 보드 fallback (DEFAULT_PARAMS["tradable_boards"]가 우선)
+# 사이클 26 (2026-05-20): VB/LTV fallback 을 MAIN 단독으로 변경
 _DEFAULT_TRADABLE_BOARDS: dict[str, frozenset[MarketBoard]] = {
     "momentum": frozenset({MarketBoard.KRX_OPEN, MarketBoard.MAIN}),
-    "volatility_breakout": frozenset({
-        MarketBoard.PRE_NXT, MarketBoard.MAIN, MarketBoard.POST_NXT,
-    }),
-    "long_tail_volatility": frozenset({
-        MarketBoard.PRE_NXT, MarketBoard.MAIN, MarketBoard.POST_NXT,
-    }),
+    # VB/LTV: 사이클 26 — KRX ONLY (PRE_NXT + POST_NXT 제거)
+    "volatility_breakout": frozenset({MarketBoard.MAIN}),
+    "long_tail_volatility": frozenset({MarketBoard.MAIN}),
     "donchian_swing": frozenset({MarketBoard.MAIN}),
 }
 

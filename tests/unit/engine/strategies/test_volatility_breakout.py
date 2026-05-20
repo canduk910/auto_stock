@@ -61,8 +61,8 @@ def test_default_params_includes_board_k_values():
     # k_value_nxt_post 키는 보존 — DB 마이그레이션 + AI자문 응답 호환성 위해 유지
     # (실제로 사용되지 않지만 컬럼/필드 호환 보존, 2026-05-15 결함 D)
     assert p["k_value_nxt_post"] == 1.0
-    # 2026-05-15 결함 D — VB 당일 15:20 일괄매도 정책 → POST_NXT 제외
-    assert p["tradable_boards"] == ["pre_nxt", "main"]
+    # 사이클 26 (2026-05-20) — VB KRX ONLY → PRE_NXT + POST_NXT 제외, MAIN 단독
+    assert p["tradable_boards"] == ["main"]
     assert p["stop_loss_rate"] == -3.0
 
 
@@ -179,21 +179,21 @@ def test_buy_when_above_target_but_no_breakout_moment_then_none(vb):
 
 
 def test_buy_signal_per_board_is_independent(vb):
-    """main 보드에서 first tick 기록 후 pre_nxt 보드 활성화되면 pre_nxt 첫 틱도 기록만."""
+    """main 보드에서 first tick 기록 후 두 번째 틱이 target 미달이면 NONE.
+
+    사이클 26 (2026-05-20): VB KRX ONLY — PRE_NXT 보드 제거.
+    보드별 _prev_price 분리는 MAIN 단일 보드에서 연속 틱으로 검증.
+    """
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
     vb.config.params["k_value_krx_main"] = 1.0
-    vb.config.params["k_value_nxt_pre"] = 1.0
 
     _activate("main")
-    vb.check_buy_signal("005930", 80200, 80000)  # main 첫 틱
+    vb.check_buy_signal("005930", 80200, 80000)  # main 첫 틱 (기록만)
 
-    # 보드 전환
-    _activate("pre_nxt")
-    # pre_nxt 의 첫 틱: 그 보드에서는 기록만 — target도 새로 확정해야 함
-    # 시가 70000 → target 70500
-    assert vb.check_buy_signal("005930", 80000, 70000) == Signal.NONE
-    # 보드별 _prev_price 분리 검증
-    assert vb._prev_price["005930"]["pre_nxt"] == 80000
+    # 두 번째 틱 — 이전 틱(80200)이 target(80500) 미만이므로 돌파 순간 아님
+    assert vb.check_buy_signal("005930", 80300, 80000) == Signal.NONE
+    # main 보드 _prev_price 기록 검증
+    assert vb._prev_price["005930"]["main"] == 80300
 
 
 # ---------------------------------------------------------------------------

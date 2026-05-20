@@ -114,9 +114,10 @@ def test_post_migration_board_keys_same_as_top_level(monkeypatch):
 # O. 마이그 024 적용 후 + 운영자 차별화
 # ---------------------------------------------------------------------------
 def test_post_migration_operator_differentiated(monkeypatch):
-    """마이그 + 운영자 Settings 에서 main -3.0 / pre_nxt -4.0 차별화.
+    """마이그 + 운영자 Settings 에서 main -3.0 차별화. PRE_NXT 는 사이클 26 제거.
 
-    운영자가 PRE_NXT 노이즈 흡수 + KRX MAIN 본격 변동성 수용 의도로 차별화.
+    사이클 26 (2026-05-20): VB tradable_boards=("main",) → _resolve_active_board가
+    PRE_NXT 활성 시 None 반환 → top-level stop_loss_rate 적용.
     """
     params = {
         "stop_loss_rate": -3.5,
@@ -125,7 +126,7 @@ def test_post_migration_operator_differentiated(monkeypatch):
     }
     vb = _make_vb_with_position(params)
 
-    # MAIN — -3.0 임계
+    # MAIN — stop_loss_main=-3.0 임계
     _activate(monkeypatch, MarketBoard.MAIN)
     # -3.01% 손실 → MAIN -3.0% 도달
     signal_main_hard = vb.check_exit_signal("066570", current_price=9_699, open_price=10_000)
@@ -138,15 +139,17 @@ def test_post_migration_operator_differentiated(monkeypatch):
         f"MAIN -2.5% 손실 STOP_LOSS 오발동: got {signal_main_mild}"
     )
 
-    # PRE_NXT — -4.0 임계 (노이즈 흡수)
+    # PRE_NXT — 사이클 26: VB tradable_boards 에서 제거 → board=None → top-level stop_loss_rate=-3.5
     _activate(monkeypatch, MarketBoard.PRE_NXT)
-    # -3.5% 손실 → PRE_NXT -4.0 미달 → NONE
+    # -3.5% 손실 → top-level stop_loss_rate=-3.5 도달 → STOP_LOSS 발동
+    # (stop_loss_pre_nxt=-4.0 는 tradable_boards 에 pre_nxt 없으므로 무시)
     signal_pre_mild = vb.check_exit_signal("066570", current_price=9_650, open_price=10_000)
-    assert signal_pre_mild == Signal.NONE, (
-        f"PRE_NXT 차별화 -4.0 임계인데 -3.5% 손실에 STOP_LOSS 오발동: got {signal_pre_mild}"
+    assert signal_pre_mild == Signal.STOP_LOSS, (
+        "사이클 26: VB PRE_NXT active + tradable_boards=('main',) → _resolve_active_board=None "
+        "→ top-level stop_loss_rate=-3.5 적용 → -3.5% 손실에 STOP_LOSS 발동 기대"
     )
-    # -4.01% 손실 → PRE_NXT -4.0 도달
+    # -4.01% 손실 → 당연히 STOP_LOSS
     signal_pre_hard = vb.check_exit_signal("066570", current_price=9_599, open_price=10_000)
     assert signal_pre_hard == Signal.STOP_LOSS, (
-        f"PRE_NXT -4.01% 손실에 STOP_LOSS 미발동: got {signal_pre_hard}"
+        f"top-level stop_loss_rate=-3.5 대폭 초과(-4.01%) → STOP_LOSS 기대, got {signal_pre_hard}"
     )

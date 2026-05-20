@@ -44,12 +44,12 @@ def _empty_scan_stats() -> dict:
 class VolatilityBreakoutStrategy(StrategyBase):
     """변동성 돌파 전략."""
 
-    # 매매 가능 보드 — PRE_NXT(08:00~09:00) + MAIN(09:00~15:20) 만 활성.
-    # 결정 (2026-05-15, 결함 D): VB 는 당일 15:20 일괄매도 정책 — NXT 애프터(15:30~20:00)
-    # 매매 비활성. POST_NXT 포함 시 `_force_clear_main_only` 가 keeps_post_nxt=True 분기로
-    # 15:20 청산을 스킵하는데, 19:50 청산 코드는 누락되어 OVERNIGHT 보유 결함 발생
-    # (5/13~5/15 005930 멀티데이 보유 후 손절 사고). VB OVERNIGHT 거부 원칙 회복.
-    DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main")
+    # 매매 가능 보드 — MAIN(09:00~15:20) 만 활성 (사이클 26, 2026-05-20: KRX ONLY).
+    # 결정 (2026-05-20, 사이클 26): VB 신규매수 KRX ONLY 정책.
+    # - PRE_NXT(08:00~09:00) 매수 제거: NXT 프리 OVERNIGHT 위험 차단 + SK하이닉스 시가 결함 해소.
+    # - POST_NXT(15:30~20:00) 매수 제거 유지: VB 당일 15:20 일괄매도 정책 보존.
+    # 매도(손절/트레일링/익일청산)는 보드 가드 무관 — risk.on_tick check_exit_signal 직접 평가.
+    DEFAULT_TRADABLE_BOARDS = ("main",)
 
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),

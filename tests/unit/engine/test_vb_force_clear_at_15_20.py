@@ -47,15 +47,19 @@ def test_vb_default_tradable_boards_excludes_post_nxt():
     """VB DEFAULT_TRADABLE_BOARDS 에 post_nxt 가 포함되면 안 됨.
 
     결정 (2026-05-15): VB 는 당일 15:20 일괄매도 정책 — NXT 애프터 매매 비활성.
+    사이클 26 (2026-05-20): PRE_NXT 도 제거 — KRX ONLY (MAIN 단독).
     """
     assert "post_nxt" not in VolatilityBreakoutStrategy.DEFAULT_TRADABLE_BOARDS, (
         "VB DEFAULT_TRADABLE_BOARDS 에 post_nxt 가 포함되어 있음 — "
         "당일 15:20 일괄매도 정책과 충돌. 15:20 _force_clear_main_only 가 "
         "POST_NXT 활성 분기로 빠져 청산 스킵 → OVERNIGHT 보유 결함 회귀."
     )
-    # PRE_NXT + MAIN 만 활성 (08:00~15:20)
-    assert "pre_nxt" in VolatilityBreakoutStrategy.DEFAULT_TRADABLE_BOARDS
+    # 사이클 26: MAIN 단독 (KRX ONLY)
     assert "main" in VolatilityBreakoutStrategy.DEFAULT_TRADABLE_BOARDS
+    # 사이클 26: PRE_NXT 제거됨
+    assert "pre_nxt" not in VolatilityBreakoutStrategy.DEFAULT_TRADABLE_BOARDS, (
+        "사이클 26: VB PRE_NXT 매수 제거 — KRX ONLY 정책"
+    )
 
 
 def test_vb_default_params_tradable_boards_excludes_post_nxt():

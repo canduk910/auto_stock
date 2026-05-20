@@ -67,6 +67,10 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -160,6 +164,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -276,6 +284,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -286,6 +299,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -294,6 +308,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -436,6 +451,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -446,6 +466,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -455,6 +476,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -589,6 +611,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -703,6 +729,10 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_quote_pool.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -819,6 +849,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -829,6 +864,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -838,6 +874,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -1001,6 +1038,11 @@ backend:
     - tests/unit/db/test_system_logs_retention.py
     - tests/unit/db/test_system_logs_search.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -1011,6 +1053,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -1020,6 +1063,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -1195,6 +1239,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -1205,6 +1254,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -1214,6 +1264,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -1348,6 +1399,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -1440,6 +1495,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -1550,6 +1609,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -1560,6 +1624,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -1569,6 +1634,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -1701,6 +1767,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -1794,6 +1864,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -1896,6 +1970,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -1989,6 +2067,10 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
     - tests/unit/engine/strategies/test_donchian_swing_extension_cap.py
@@ -2103,6 +2185,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -2202,6 +2288,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -2324,6 +2414,11 @@ backend:
     - tests/unit/db/test_system_logs_retention.py
     - tests/unit/db/test_system_logs_search.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -2334,6 +2429,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -2343,6 +2439,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -2495,6 +2592,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -2614,6 +2715,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -2624,6 +2730,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -2633,6 +2740,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -2768,6 +2876,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -2865,10 +2977,15 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -2876,6 +2993,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -3000,6 +3118,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -3094,6 +3216,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
@@ -3192,6 +3318,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -3288,6 +3418,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -3386,6 +3520,10 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -3491,6 +3629,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -3576,6 +3718,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -3674,6 +3820,10 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -3762,11 +3912,14 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -3774,6 +3927,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
@@ -3813,6 +3967,9 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_retention.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -3927,6 +4084,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
@@ -4018,11 +4179,14 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/session/test_board_schedule_cycle26.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -4030,6 +4194,10 @@ backend:
     - tests/unit/engine/test_session.py
     transitive_tests:
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
@@ -4146,6 +4314,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -4245,6 +4417,10 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
@@ -4322,8 +4498,10 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -4347,6 +4525,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -4442,6 +4623,10 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
@@ -4542,6 +4727,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -4614,10 +4803,12 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_strategy_fallback_budget.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
@@ -4642,6 +4833,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
@@ -4722,6 +4916,8 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -4732,6 +4928,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -4741,6 +4938,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -4782,6 +4980,8 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
@@ -4851,6 +5051,8 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -4885,6 +5087,8 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -4978,6 +5182,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -5103,6 +5311,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
@@ -5201,6 +5413,10 @@ backend:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_insufficient_classification.py
     - tests/unit/api/test_quote_pool.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -5318,6 +5534,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -5328,6 +5549,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -5337,6 +5559,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -5494,6 +5717,10 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_quote_pool.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -5649,6 +5876,11 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -5659,6 +5891,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -5668,6 +5901,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -5823,6 +6057,10 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -5872,6 +6110,7 @@ backend:
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_stale_watcher_pool.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_scan_loop_delta_only.py
@@ -5957,6 +6196,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -5967,6 +6211,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -5976,6 +6221,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -6135,6 +6381,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -6145,6 +6396,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -6154,6 +6406,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -6222,6 +6475,7 @@ backend:
     - tests/integration/test_pool_distribution.py
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_stale_watcher_pool.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
@@ -6304,6 +6558,10 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -6314,6 +6572,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -6323,6 +6582,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -6799,6 +7059,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -6906,6 +7170,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -7015,6 +7283,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
@@ -7122,6 +7394,11 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -7132,6 +7409,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_krx_only.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
@@ -7141,6 +7419,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_engine.py
@@ -7699,10 +7978,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-20T15:43:28.453176+09:00'
+generated_at: '2026-05-20T17:22:58.822621+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 195
+  backend_tests: 203
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:

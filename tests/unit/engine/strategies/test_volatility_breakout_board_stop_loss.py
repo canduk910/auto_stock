@@ -99,29 +99,35 @@ def test_main_stop_loss_only_triggers_on_main_board(monkeypatch):
 # B. stop_loss_pre_nxt 단독 → PRE_NXT 활성 시 -4% 손절
 # ---------------------------------------------------------------------------
 def test_pre_nxt_stop_loss_only_triggers_on_pre_nxt_board(monkeypatch):
-    """params 에 `stop_loss_pre_nxt=-4.0` 만 있고 활성 보드 pre_nxt → -4% 손절 발동.
+    """사이클 26: VB tradable_boards=("main",) → PRE_NXT 활성 시 board=None fallback.
+
+    VB 는 KRX ONLY (MAIN 단독) → _resolve_active_board() 가 PRE_NXT 활성이어도 None 반환.
+    None → top-level stop_loss_rate (-3.0) 적용.
 
     매수가 10000:
-    - -3.5% (9650): STOP_LOSS 안 함 (pre_nxt 임계 -4% 미만)
-    - -4.01% (9599): STOP_LOSS 발동
+    - -3.5% (9650): STOP_LOSS 발동 (top-level -3.0% 임계 초과, board=None fallback)
+    - params 에 stop_loss_pre_nxt=-4.0 있어도 pre_nxt 가 tradable_boards 에 없으면 무시
     """
     vb = _make_vb({
         "stop_loss_pre_nxt": -4.0,
         # top-level stop_loss_rate 는 DEFAULT_PARAMS 기본값(-3.0)
-        # 보드별 키 우선이므로 pre_nxt 활성 시 -4.0 적용
+        # 사이클 26: pre_nxt 가 tradable_boards 에 없으므로 _resolve_active_board = None
+        # → top-level stop_loss_rate (-3.0) fallback
     })
     _activate_board(monkeypatch, MarketBoard.PRE_NXT)
 
-    # -3.5% 손실 → STOP_LOSS 안 함 (pre_nxt 임계 -4.0 미만)
+    # 사이클 26: board=None → top-level stop_loss_rate=-3.0 적용
+    # -3.5% 손실 → -3.0% 초과이므로 STOP_LOSS 발동
     signal_mild = vb.check_exit_signal("066570", current_price=9_650, open_price=10_000)
-    assert signal_mild == Signal.NONE, (
-        f"pre_nxt 임계 -4.0 인데 -3.5% 손실에 STOP_LOSS 발동 — 보드별 키 무시? got {signal_mild}"
+    assert signal_mild == Signal.STOP_LOSS, (
+        "사이클 26: VB PRE_NXT active + tradable_boards=('main',) → _resolve_active_board=None "
+        "→ top-level stop_loss_rate=-3.0 적용 → -3.5% 손실에 STOP_LOSS 발동 기대"
     )
 
-    # -4.01% 손실 → STOP_LOSS 발동
+    # -4.01% 손실 → 당연히 STOP_LOSS 발동
     signal_hard = vb.check_exit_signal("066570", current_price=9_599, open_price=10_000)
     assert signal_hard == Signal.STOP_LOSS, (
-        f"pre_nxt 임계 -4.0 도달했는데 STOP_LOSS 미발동, got {signal_hard}"
+        f"top-level -3.0% 임계 대폭 초과(-4.01%) → STOP_LOSS 기대, got {signal_hard}"
     )
 
 

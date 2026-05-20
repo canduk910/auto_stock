@@ -85,13 +85,38 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 
 ### get_subscribed_tickers / get_acked_tickers
 
-- `get_subscribed_tickers() -> set[str]` — TICK(H0UNCNT0) 구독만. 체결통보·장운영정보 제외
+- `get_subscribed_tickers() -> set[str]` — TICK(H0STCNT0/H0NXCNT0/H0UNCNT0) 구독 합집합. 체결통보·장운영정보 제외. 사이클 26: H0UNCNT0(통합) 하위 호환 보존 + H0STCNT0/H0NXCNT0 시간대별 분리
 - `get_acked_tickers() -> set[str]` — TICK 필터 ACK set. KIS REST/WS 슬롯 사용현황 조회 API 미존재 → 우리 측 ACK 추적이 "SEND 후 무응답" 가시화의 유일한 길
+
+### 시세 채널 시간대별 전환 (사이클 26, 2026-05-20)
+
+`scanner.get_active_tick_tr_ids(now_t=None) -> set[str]` 로 현재 활성 TR_ID set 결정:
+
+| 구간 | TR_ID | 메서드 |
+|------|-------|--------|
+| 08:00~08:59:09 | {H0NXCNT0} | PRE_NXT 단독 |
+| **08:59:10~08:59:59** | {H0NXCNT0, H0STCNT0} | KRX 사전 마진 (50초) |
+| 09:00~15:30 | {H0STCNT0} | KRX MAIN |
+| 15:30~15:39:09 | {H0STCNT0} | 종가 흡수 마진 (10분) |
+| **15:39:10~15:39:59** | {H0STCNT0, H0NXCNT0} | NXT 사전 마진 (50초) |
+| 15:40~19:59 | {H0NXCNT0} | POST_NXT 단독 |
+
+사전 마진 구간에서 두 채널 동시 활성 — `_board_transition_loop` 가 종목별 원자 전환 진행.
+`on_tick` 중복 호출 안전: `scanner.ticker_prices[ticker]` 마지막 값 채택 + `_selling`/`is_ticker_blocked_for_buy` 중복 매수 차단.
+
+**종목 단위 원자 전환 (`_atomic_board_transition`)**:
+1. `kis_ws_pool.unsubscribe(stale_tr_id, ticker)` 호출
+2. `_subscriptions_acked` 에서 `(stale_tr_id, ticker)` 제거 확인 polling (timeout 2s)
+   - timeout → WARNING `[atomic_transition_ack_timeout]` + 강행
+3. new_tr_id 가 None 아니면 `subscribe(new_tr_id, ticker, priority=HIGH|LOW)` 호출
+4. 50ms sleep (KIS 부담 회피)
+
+`_board_transition_loop`: HIGH (positions/next_day_clear) 우선 처리 → `[board_transition_complete]` INFO
 
 ## handler.py — 메시지 처리
 
 - 파이프(`|`) 구분 메시지 파싱
-- **실시간 체결가** (H0STCNT0/H0UNCNT0/H0NXCNT0): 현재가/시가/등락률 추출 → `RiskManager.on_tick` 콜백 (세 TR_ID 동일 포맷 → 단일 파서)
+- **실시간 체결가** (H0STCNT0/H0NXCNT0/H0UNCNT0): 현재가/시가/등락률 추출 → `RiskManager.on_tick` 콜백 (세 TR_ID 동일 포맷 → 단일 파서). 사이클 26: H0STCNT0(KRX) + H0NXCNT0(NXT) 시간대별 분리
 - **체결통보** (H0STCNI0/H0STCNI9): AES-256-CBC 복호화 → **계좌번호 필터** → `OrderEngine.handle_execution_notice` 콜백
 - **NXT 장운영정보** (H0NXMKO0): 보드 전환 이벤트 → `register_board_handler` 등록 콜백(SessionTracker) 전달. KIS 명세 필드 미기재 → 운영 데이터 기반 확정
 - 체결통보 필드 매핑 (`^` 구분): [0]HTS ID, **[1]계좌번호(8)+상품코드(2)**, [2]주문번호, [3]원주문번호, [4]매도매수구분, [5]정정구분, [6]주문종류, [7]주문조건, **[8]종목코드**, [9]주문수량, [10]체결단가, [11]체결시간, [12]거부여부, [13]체결구분(1:접수,2:체결), [14]?, [15]?, [16]체결수량, [17]고객명, [18]종목명

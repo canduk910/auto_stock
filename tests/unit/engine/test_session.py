@@ -45,9 +45,9 @@ def test_boards_at_pre_nxt_window_only():
 
 
 def test_boards_at_krx_open_overlap_window():
-    # 08:30~09:00 — PRE_NXT + KRX_OPEN 동시
+    # 사이클 26: 08:30~09:00 — PRE_NXT 단독 (KRX_OPEN 구간 제거)
     boards = boards_at(time(8, 45))
-    assert boards == frozenset({MarketBoard.PRE_NXT, MarketBoard.KRX_OPEN})
+    assert boards == frozenset({MarketBoard.PRE_NXT})
 
 
 def test_boards_at_main_window():
@@ -63,9 +63,9 @@ def test_boards_at_buy_stop_window_still_main():
 
 
 def test_boards_at_krx_after_and_post_nxt_overlap():
-    # 15:30~18:00 — KRX_AFTER + POST_NXT
+    # 사이클 26: 15:40~ — POST_NXT 단독 (KRX_AFTER 구간 제거, POST_NXT 전환 15:30 → 15:40)
     boards = boards_at(time(16, 0))
-    assert boards == frozenset({MarketBoard.KRX_AFTER, MarketBoard.POST_NXT})
+    assert boards == frozenset({MarketBoard.POST_NXT})
 
 
 def test_boards_at_post_nxt_only():
@@ -148,11 +148,12 @@ async def test_tracker_enter_exit_callbacks_fire_on_transition():
     assert MarketBoard.MAIN in entered
     assert exited == []
 
-    # 16:00 → KRX_AFTER + POST_NXT 진입, MAIN 종료
+    # 사이클 26: 16:00 → POST_NXT 단독 진입, MAIN 종료 (KRX_AFTER 제거)
     await tracker.tick(now=datetime(2026, 5, 8, 16, 0))
     assert MarketBoard.MAIN in exited
-    assert MarketBoard.KRX_AFTER in entered
     assert MarketBoard.POST_NXT in entered
+    # 사이클 26: KRX_AFTER 는 더 이상 활성화되지 않음
+    assert MarketBoard.KRX_AFTER not in entered
 
 
 @pytest.mark.asyncio
