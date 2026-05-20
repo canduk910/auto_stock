@@ -7,12 +7,24 @@
  * - 총 슬롯 (41 × N) + 사용률 % 진행바
  * - 새로고침 버튼 (수동 트리거)
  *
+ * 사이클 21 (2026-05-20): ScanMonitor 의 사이클 18 끊김 영역 통합.
+ * - stale_60s > 0 시 stale-context-label (KRX 메인/PRE_NXT/그 외)
+ * - pool-resubscribe-button (수동 재구독)
+ * - pool-stale-list-toggle + pool-stale-row-{ticker} (마지막 tick KST HH:MM:SS)
+ *
  * 위치: Dashboard MarketRegimeCard 직하 (시장 상태 → 인프라 상태 위계).
  */
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { getSubscriptions } from '../api/realtime'
+import { getSubscriptions, resubscribeStale } from '../api/realtime'
 import type { SubscriptionSession } from '../api/realtime'
+import {
+  getKstMinutes,
+  getStaleContextByKstMinutes,
+  STALE_CONTEXT_META,
+  formatLastTickKst,
+} from '../utils/stale-context'
 
 function statusBadgeClass(connected: boolean): string {
   return connected
@@ -29,6 +41,9 @@ function sessionLabelBadge(label: string): string {
 
 export default function KisAccountPoolCard() {
   const queryClient = useQueryClient()
+  const [staleListOpen, setStaleListOpen] = useState(false)
+  const [resubMsg, setResubMsg] = useState<string | null>(null)
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['realtime-subscriptions'],
     queryFn: getSubscriptions,
@@ -37,12 +52,33 @@ export default function KisAccountPoolCard() {
     refetchOnWindowFocus: false,
   })
 
+  // 사이클 21 — 수동 재구독 mutation
+  const resubMutation = useMutation({
+    mutationFn: resubscribeStale,
+    onSuccess: (res) => {
+      setResubMsg(`${res.resubscribed}종목 재구독 완료`)
+      queryClient.invalidateQueries({ queryKey: ['realtime-subscriptions'] })
+      queryClient.invalidateQueries({ queryKey: ['trading-status'] })
+    },
+    onError: (err: Error) => {
+      setResubMsg(`재구독 실패: ${err.message || '알 수 없는 오류'}`)
+    },
+  })
+
   const sessions: SubscriptionSession[] = data?.sessions ?? []
   const totalSlots = data?.limit ?? 0
   const totalUsed = data?.total ?? 0
   const usagePct = totalSlots > 0 ? Math.min(100, (totalUsed / totalSlots) * 100) : 0
 
   const hasSecondary = sessions.some((s) => s.label !== 'main')
+
+  // 사이클 21 — 끊김 영역 노출 분기
+  const staleCount = data?.stale_60s ?? 0
+  const staleTickers = data?.tickers?.stale ?? []
+  const lastTickMap = data?.last_tick_map ?? {}
+  const kstMin = getKstMinutes()
+  const staleCtx = getStaleContextByKstMinutes(kstMin)
+  const staleCtxMeta = STALE_CONTEXT_META[staleCtx]
 
   const onRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['realtime-subscriptions'] })
@@ -61,7 +97,7 @@ export default function KisAccountPoolCard() {
             KIS 시세 풀 (WebsocketPool)
           </h2>
           <p className="text-xs text-gray-500 mt-1">
-            메인 + 보조 시세 세션 상태. 매매·잔고·체결통보는 메인 단일 — 본 카드는 시세 분배 모니터링만.
+            메인 + 보조 시세 세션 상태. 매매·잔고·체결통보는 메인 단일 — 본 카드는 시세 분배 + 끊김 모니터링.
           </p>
         </div>
         <button
@@ -106,21 +142,74 @@ export default function KisAccountPoolCard() {
                 style={{ width: `${usagePct}%` }}
               />
             </div>
-            <div className="mt-1 text-[11px] text-gray-500 flex gap-3">
+            <div className="mt-1 text-[11px] text-gray-500 flex gap-3 items-center flex-wrap">
               <span>
                 정상(fresh):{' '}
                 <span className="text-emerald-700 font-medium">{data?.fresh_60s ?? 0}</span>
               </span>
               <span>
                 끊김(stale):{' '}
-                <span className="text-amber-700 font-medium">{data?.stale_60s ?? 0}</span>
+                <span className="text-amber-700 font-medium">{staleCount}</span>
               </span>
               <span>
                 ACK:{' '}
                 <span className="text-blue-700 font-medium">{data?.acked ?? 0}</span>
               </span>
+              {/* 사이클 21 — 시간대 컨텍스트 라벨 + 수동 재구독 (stale > 0 시) */}
+              {staleCount > 0 && staleCtxMeta.label && (
+                <span
+                  data-testid="stale-context-label"
+                  className={`text-[11px] px-1.5 py-0.5 rounded ${staleCtxMeta.cls}`}
+                >
+                  {staleCtxMeta.label}
+                </span>
+              )}
+              {staleCount > 0 && (
+                <button
+                  type="button"
+                  data-testid="pool-resubscribe-button"
+                  onClick={() => resubMutation.mutate()}
+                  disabled={resubMutation.isPending}
+                  className="text-[11px] px-2 py-0.5 rounded border border-amber-300 text-amber-800 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  재구독
+                </button>
+              )}
             </div>
+            {resubMsg && (
+              <div className="mt-1 text-[11px] text-amber-700">{resubMsg}</div>
+            )}
           </div>
+
+          {/* 사이클 21 — 끊김 종목 펼치기 */}
+          {staleCount > 0 && staleTickers.length > 0 && (
+            <div className="mb-4">
+              <button
+                type="button"
+                data-testid="pool-stale-list-toggle"
+                onClick={() => setStaleListOpen((v) => !v)}
+                className="text-xs text-amber-700 hover:underline"
+              >
+                {staleListOpen ? '끊김 종목 접기' : `끊김 종목 보기 (${staleTickers.length}개)`}
+              </button>
+              {staleListOpen && (
+                <div className="mt-1 text-xs text-gray-600 max-h-32 overflow-y-auto border border-gray-100 rounded p-1">
+                  {staleTickers.map((ticker: string) => (
+                    <div
+                      key={ticker}
+                      data-testid={`pool-stale-row-${ticker}`}
+                      className="flex justify-between py-0.5 border-b border-gray-50 last:border-0"
+                    >
+                      <span className="font-mono">{ticker}</span>
+                      <span className="text-gray-500">
+                        마지막: {formatLastTickKst(lastTickMap[ticker])}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 세션별 표 */}
           <div className="overflow-x-auto">

@@ -47,6 +47,15 @@ class MomentumStrategy(StrategyBase):
         """준비 작업 없음 (실시간 스캔 기반)."""
         pass
 
+    def get_scan_stats(self) -> dict:
+        """사이클 21 — 모멘텀 단계별 스캔 통계.
+
+        momentum 은 prepare 없이 09:30 실시간 `scanner.scan_stocks()` 기반.
+        `scanner.scan_filter_stats` 모듈 전역 dict 의 사본을 반환 → ScanMonitor 깔때기.
+        """
+        from src.engine import scanner
+        return dict(scanner.scan_filter_stats)
+
     def check_buy_signal(
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:

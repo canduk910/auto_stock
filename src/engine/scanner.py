@@ -44,6 +44,20 @@ ticker_market_info: dict[str, dict] = {}
 # 2026-05-11 운영 사고(VB/LTV 종일 시세 무수신) 후속 가시성 결함 보완.
 ticker_last_tick: dict[str, datetime] = {}
 
+# 사이클 21 — 모멘텀 단계별 깔때기 카운트 dict (7 키).
+# MomentumStrategy 는 prepare() 가 비어 있고 실시간 scan_stocks() 기반.
+# scan_stocks() 가 각 단계별로 본 dict 를 누적 → MomentumStrategy.get_scan_stats() 가
+# 사본 반환 → ScanMonitor 깔때기 시각화.
+scan_filter_stats: dict = {
+    "universe_candidates": 0,    # fetch_rising_stocks() raw 응답 수
+    "rate_pass": 0,              # 등락률 15%+ 통과
+    "mcap_pass": 0,              # 시총 1000억+ 통과
+    "trade_amount_pass": 0,      # 거래대금 200억+ 통과
+    "limit_up_excluded": 0,      # 상한가 (+30%) 제외 카운트
+    "final_prepared": 0,         # 최종 _last_scan_result 길이
+    "last_run_at": None,
+}
+
 # 추가 필터 조건
 MIN_MARKET_CAP = 100_000_000_000      # 시총 1000억 이상
 MIN_TRADE_AMOUNT = 20_000_000_000     # 거래대금 200억 이상
@@ -73,10 +87,22 @@ async def scan_stocks() -> list[str]:
     1. 등락률 순위 API로 15%+ 상승 종목 조회
     2. ETF/ETN 제외
     3. 시총 1,000억 이상, 거래대금 200억 이상 필터
-    4. 최대 40종목 제한
+    4. 등락률 30%+ (상한가) 제외 — momentum 매수 신호 차단과 일관 (사이클 21)
+    5. 최대 40종목 제한
+
+    사이클 21 — 단계별 카운트는 `scan_filter_stats` 모듈 전역 dict 에 누적.
+    MomentumStrategy.get_scan_stats() 가 그 사본을 반환 → ScanMonitor 깔때기.
     """
     raw_list = await fetch_rising_stocks()
     filtered: list[str] = []
+
+    # 사이클 21 — 카운트 초기화
+    scan_filter_stats["universe_candidates"] = len(raw_list)
+    scan_filter_stats["rate_pass"] = 0
+    scan_filter_stats["mcap_pass"] = 0
+    scan_filter_stats["trade_amount_pass"] = 0
+    scan_filter_stats["limit_up_excluded"] = 0
+    scan_filter_stats["final_prepared"] = 0
 
     for item in raw_list:
         # 등락률 순위 API 필드명: stck_shrn_iscd (거래량 순위는 mksc_shrn_iscd)
@@ -94,6 +120,8 @@ async def scan_stocks() -> list[str]:
         # 등락률 15% 미만 제외
         if change_rate < MIN_CHANGE_RATE:
             continue
+        # 사이클 21 — 등락률 통과 단독 카운트
+        scan_filter_stats["rate_pass"] += 1
 
         # ETF/ETN 제외
         if any(kw in name for kw in ETF_KEYWORDS):
@@ -101,9 +129,22 @@ async def scan_stocks() -> list[str]:
 
         # 시총/거래대금 필터 (데이터 없으면 = 거래량 순위에 미포함 = 소형주 → 제외)
         market_cap = price * listed_shares
-        if market_cap < MIN_MARKET_CAP:
+        mcap_ok = market_cap >= MIN_MARKET_CAP
+        trade_ok = trade_amount >= MIN_TRADE_AMOUNT
+        # 사이클 21 — 시총/거래대금 단독 통과 카운트 (분리)
+        if mcap_ok:
+            scan_filter_stats["mcap_pass"] += 1
+        if trade_ok:
+            scan_filter_stats["trade_amount_pass"] += 1
+
+        if not mcap_ok:
             continue
-        if trade_amount < MIN_TRADE_AMOUNT:
+        if not trade_ok:
+            continue
+
+        # 사이클 21 — 상한가 (등락률 30%+) 제외. momentum 매수 신호 차단(check_buy_signal:73)과 일관.
+        if change_rate >= 30.0:
+            scan_filter_stats["limit_up_excluded"] += 1
             continue
 
         filtered.append(ticker)
@@ -125,6 +166,10 @@ async def scan_stocks() -> list[str]:
     global _last_scan_result, _last_scan_time
     _last_scan_result = filtered
     _last_scan_time = datetime.now().strftime("%H:%M:%S")
+
+    # 사이클 21 — 최종 카운트 + last_run_at
+    scan_filter_stats["final_prepared"] = len(filtered)
+    scan_filter_stats["last_run_at"] = datetime.now(KST_TZ).isoformat()
 
     logger.info(
         "급등종목 스캔: %d종목 통과 (전체 %d종목, 15%%+ 상승 기준)",

@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { BuySignal, ScanStats } from '../types/trading'
-import { getSubscriptions, resubscribeStale } from '../api/realtime'
+import { getKstMinutes } from '../utils/stale-context'
 
 interface BoardTarget {
   open_price: number
@@ -53,6 +52,154 @@ const SWING_STAGES: Array<{ key: keyof ScanStats; label: string }> = [
   { key: 'final_prepared', label: '최종 후보' },
 ]
 
+// 사이클 21 (2026-05-20) — VB/LTV/momentum/BFB/VCP 단계별 깔때기.
+// donchian 의 SWING_STAGES 와 동일 패턴 — ScanFunnelBars 컴포넌트로 5 전략 재사용.
+
+const VB_STAGES: Array<{ key: string; label: string }> = [
+  { key: 'universe_candidates', label: '유니버스 후보 (blng 0/1/3 합집합)' },
+  { key: 'price_filtered', label: '가격/상장주식수 필수값 > 0' },
+  { key: 'mcap_pass', label: '시총 ≥ 1,000억' },
+  { key: 'trade_amount_pass', label: '거래대금 ≥ 200억' },
+  { key: 'universe_filtered', label: '유니버스 확정 (시총+거래대금)' },
+  { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
+  { key: 'k_value_computed', label: 'K값/Target 계산 완료' },
+  { key: 'final_prepared', label: '최종 prepared' },
+]
+
+const LTV_STAGES: Array<{ key: string; label: string }> = [
+  { key: 'universe_candidates', label: '유니버스 후보 (blng 0/1/3 합집합)' },
+  { key: 'price_filtered', label: '가격/상장주식수 필수값 > 0' },
+  { key: 'mcap_pass', label: '시총 ≥ 1,000억' },
+  { key: 'trade_amount_pass', label: '거래대금 ≥ 200억' },
+  { key: 'universe_filtered', label: '유니버스 확정' },
+  { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
+  { key: 'consecutive_limit_pass', label: '연속상한가 제외 통과' },
+  { key: 'k_value_computed', label: 'K값/Target 계산' },
+  { key: 'final_prepared', label: '최종 prepared' },
+]
+
+const MOMENTUM_STAGES: Array<{ key: string; label: string }> = [
+  { key: 'universe_candidates', label: '등락률 순위 응답 (raw)' },
+  { key: 'rate_pass', label: '등락률 ≥ 15% 통과' },
+  { key: 'mcap_pass', label: '시총 ≥ 1,000억' },
+  { key: 'trade_amount_pass', label: '거래대금 ≥ 200억' },
+  { key: 'limit_up_excluded', label: '상한가 (+30%) 제외' },
+  { key: 'final_prepared', label: '최종 후보' },
+]
+
+const BFB_STAGES: Array<{ key: string; label: string }> = [
+  { key: 'universe_candidates', label: '유니버스 후보' },
+  { key: 'universe_filtered', label: '유니버스 필터 통과' },
+  { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
+  { key: 'pole_pass', label: '폴(Pole) 자동 검출' },
+  { key: 'flag_pass', label: '플래그(Flag) 자동 검출' },
+  { key: 'volume_contraction_pass', label: '거래량 수축' },
+  { key: 'atr_pass', label: 'ATR(14) > 0' },
+  { key: 'final_prepared', label: '최종 prepared' },
+]
+
+const VCP_STAGES: Array<{ key: string; label: string }> = [
+  { key: 'universe_candidates', label: '코스피200+코스닥150 합집합' },
+  { key: 'universe_filtered', label: '시총 ≥ 1,000억' },
+  { key: 'candle_fetch_ok', label: '일봉 fetch + 추세필터' },
+  { key: 'trend_pass', label: '50/150/200 EMA 정렬' },
+  { key: 'base_pass', label: '베이스 자동 검출' },
+  { key: 'contraction_pass', label: 'Pullback 점진 수축' },
+  { key: 'volume_contraction_pass', label: '거래량 수축' },
+  { key: 'final_prepared', label: '최종 prepared' },
+]
+
+const FUNNEL_THEME = {
+  emerald: { bar: 'bg-emerald-200', final: 'bg-emerald-400', accent: 'text-emerald-700' },
+  teal: { bar: 'bg-teal-200', final: 'bg-teal-400', accent: 'text-teal-700' },
+  indigo: { bar: 'bg-indigo-200', final: 'bg-indigo-400', accent: 'text-indigo-700' },
+} as const
+
+type FunnelTheme = keyof typeof FUNNEL_THEME
+
+interface ScanFunnelBarsProps {
+  testId: string
+  title: string
+  stages: ReadonlyArray<{ key: string; label: string }>
+  stats: Record<string, unknown> | null | undefined
+  theme?: FunnelTheme
+}
+
+function ScanFunnelBars({ testId, title, stages, stats, theme = 'teal' }: ScanFunnelBarsProps) {
+  const themeMeta = FUNNEL_THEME[theme]
+  if (!stats) {
+    return (
+      <div
+        data-testid={testId}
+        className="border border-gray-200 rounded p-3 mb-3"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-sm font-medium text-gray-700">{title}</h4>
+          <span className="text-xs text-gray-400">아직 스캔 전</span>
+        </div>
+      </div>
+    )
+  }
+  const counts = stages.map((stg) => ({
+    ...stg,
+    value: typeof stats[stg.key] === 'number' ? (stats[stg.key] as number) : 0,
+  }))
+  const maxVal = Math.max(1, ...counts.map((c) => c.value))
+  const lastRun = (stats.last_run_at as string | undefined) ?? null
+  return (
+    <div
+      data-testid={testId}
+      className="border border-gray-200 rounded p-3 mb-3"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-medium text-gray-700">{title}</h4>
+        {lastRun && (
+          <span className={`text-xs ${themeMeta.accent}`}>
+            마지막 {formatRunAt(lastRun)}
+          </span>
+        )}
+      </div>
+      <div className="space-y-1">
+        {counts.map((stg, i) => {
+          const widthPct = Math.round((stg.value / maxVal) * 100)
+          const isZero = stg.value === 0
+          const isFinal = stg.key === 'final_prepared'
+          const barColor = isZero
+            ? 'bg-rose-200'
+            : isFinal
+              ? themeMeta.final
+              : themeMeta.bar
+          return (
+            <div key={stg.key} className="flex items-center gap-2 text-xs">
+              <div className="w-7 text-right text-gray-400 font-mono">{i + 1}.</div>
+              <div className="flex-1">
+                <div className="flex items-baseline justify-between mb-0.5">
+                  <span className={isZero ? 'text-rose-600 font-medium' : 'text-gray-700'}>
+                    {stg.label}
+                  </span>
+                  <span
+                    className={`font-mono font-medium ${
+                      isZero ? 'text-rose-600' : isFinal ? themeMeta.accent : 'text-gray-700'
+                    }`}
+                  >
+                    {stg.value}
+                  </span>
+                </div>
+                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${barColor} transition-all`}
+                    style={{ width: `${widthPct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function formatRunAt(iso?: string | null): string {
   if (!iso) return '-'
   try {
@@ -62,18 +209,7 @@ function formatRunAt(iso?: string | null): string {
   }
 }
 
-function getKstMinutes(): number {
-  // 클라이언트 시간대와 무관하게 KST(Asia/Seoul) 분 단위(0~1439) 반환
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Seoul',
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-  }).formatToParts(new Date())
-  const h = parseInt(parts.find((p) => p.type === 'hour')?.value ?? '0', 10)
-  const m = parseInt(parts.find((p) => p.type === 'minute')?.value ?? '0', 10)
-  return h * 60 + m
-}
+// 사이클 21 — getKstMinutes 는 utils/stale-context 로 이전 (재사용).
 
 const SWING_ENTRY_START_MIN = 9 * 60 + 5    // 09:05
 const SWING_ENTRY_END_MIN = 9 * 60 + 30     // 09:30 (exclusive)
@@ -115,22 +251,9 @@ const BREAKOUT_LABELS: Record<string, string> = {
   vcp_breakout: 'VCP 변동성 수축',
 }
 
-// 사이클 18 (2026-05-19) — 끊김 시간대 컨텍스트 분류.
-// KRX 메인 = 결함 가능 (빨강) / PRE_NXT = 거래량 적음 (노랑) / 그 외 = 자연 휴면 (회색)
-type StaleContext = 'main_critical' | 'pre_open' | 'normal_quiet' | 'unknown'
-
-function getStaleContextByKstMinutes(t: number): StaleContext {
-  if (t >= 9 * 60 && t < 15 * 60 + 30) return 'main_critical'
-  if (t >= 8 * 60 && t < 9 * 60) return 'pre_open'
-  return 'normal_quiet'  // 시간 외 / NXT 애프터 / 새벽
-}
-
-const STALE_CONTEXT_META: Record<StaleContext, { label: string; cls: string }> = {
-  main_critical: { label: 'KRX 메인 — stale 결함 가능', cls: 'text-red-700 bg-red-50' },
-  pre_open: { label: 'NXT 프리 — 거래량 적음, 관찰', cls: 'text-yellow-700 bg-yellow-50' },
-  normal_quiet: { label: '시간 외 한산 시 정상', cls: 'text-gray-600 bg-gray-50' },
-  unknown: { label: '', cls: '' },
-}
+// 사이클 21 — getStaleContextByKstMinutes / STALE_CONTEXT_META 는
+// utils/stale-context 로 이전. ScanMonitor 는 더 이상 끊김 영역을 노출하지 않음
+// (KisAccountPoolCard 로 통합 — 인프라 상태는 한 곳에서만).
 
 interface Props {
   selectedStrategy: string
@@ -140,34 +263,11 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [swingExpanded, setSwingExpanded] = useState(false)
   const [swingHelpOpen, setSwingHelpOpen] = useState(false)
-  // 사이클 18 — 끊김 종목 펼치기 토글
-  const [staleListOpen, setStaleListOpen] = useState(false)
-  // J2 (2026-05-12) — 수동 재구독 결과 인라인 메시지
-  const [resubMsg, setResubMsg] = useState<string | null>(null)
 
   const { data: status } = useTradingStatus()
 
-  // 사이클 18 (2026-05-19, B-1) — stale 종목별 last_tick_at 표시용.
-  // KisAccountPoolCard 와 동일 큐 ('realtime-subscriptions') 활용 — 동일 캐시 공유.
-  const { data: subscriptions } = useQuery({
-    queryKey: ['realtime-subscriptions'],
-    queryFn: getSubscriptions,
-    staleTime: 5_000,
-    refetchInterval: 30_000,
-  })
-
-  const queryClient = useQueryClient()
-  // J2 — stale 재구독 mutation. 성공 시 trading-status invalidate 로 다음 폴링 fresh 회복 확인
-  const resubMutation = useMutation({
-    mutationFn: resubscribeStale,
-    onSuccess: (data) => {
-      setResubMsg(`${data.resubscribed}종목 재구독 완료`)
-      queryClient.invalidateQueries({ queryKey: ['trading-status'] })
-    },
-    onError: (err: Error) => {
-      setResubMsg(`재구독 실패: ${err.message || '알 수 없는 오류'}`)
-    },
-  })
+  // 사이클 21 — 구독 인프라 (tick_coverage / stale-context-label / 끊김 종목 펼치기 /
+  // 수동 재구독) 영역은 KisAccountPoolCard 로 이전됨. ScanMonitor 는 필터링 가시성에 집중.
 
   const phase = status?.phase ?? 'idle'
   const scan = status?.scan
@@ -279,124 +379,10 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               </div>
             </div>
 
-            {/* G3 (2026-05-12) — tick_coverage 색상 배지 + 한도 근접도 진행바.
-                KIS 슬롯 사용현황 조회 API 미존재 → 우리 측 추적 가시화. */}
-            {(() => {
-              const tcTotal = scan?.tick_coverage_total ?? 0
-              const tcAcked = scan?.tick_coverage_acked ?? 0
-              const tcFresh = scan?.tick_coverage_fresh ?? 0
-              const tcStale = scan?.tick_coverage_stale ?? 0
-              const tcLimit = 41  // MAX_SUBSCRIPTIONS (KIS 공식 한도) — 백엔드와 동기
-              const tcRatio = tcLimit > 0 ? tcTotal / tcLimit : 0
-              const tcRatioPct = Math.min(100, Math.round(tcRatio * 100))
-
-              // 색상 규칙 — stale 카운트 기반
-              let badgeCls = 'bg-gray-50 text-gray-700'
-              if (tcStale > 5) badgeCls = 'bg-red-100 text-red-800'
-              else if (tcStale > 0) badgeCls = 'bg-yellow-100 text-yellow-800'
-
-              // 진행바 — 80%+ 면 amber, 그 외 emerald
-              const progressCls = tcRatio >= 0.8 ? 'bg-amber-500' : 'bg-emerald-500'
-
-              // 사이클 18 (2026-05-19, B-2) — 시간대별 컨텍스트 메타
-              const kstMin = getKstMinutes()
-              const staleCtx = getStaleContextByKstMinutes(kstMin)
-              const staleCtxMeta = STALE_CONTEXT_META[staleCtx]
-              return (
-                <div className="mb-4 space-y-1.5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div
-                      data-testid="tick-coverage-badge"
-                      className={`px-2 py-1 rounded text-xs font-medium ${badgeCls}`}
-                    >
-                      정상 {tcFresh}종목 · 끊김 {tcStale}종목 · 등록 {tcAcked}종목
-                    </div>
-                    {/* 사이클 18 — 끊김 시간대 컨텍스트 라벨 (stale > 0 일 때만 노출) */}
-                    {tcStale > 0 && staleCtxMeta.label && (
-                      <span
-                        data-testid="stale-context-label"
-                        className={`text-[11px] px-1.5 py-0.5 rounded ${staleCtxMeta.cls}`}
-                      >
-                        {staleCtxMeta.label}
-                      </span>
-                    )}
-                    {/* J2 (2026-05-12) — stale > 0 일 때만 인라인 재구독 버튼. F1 자동 재구독과
-                        별개의 운영자 수동 트리거. ConfirmModal 없는 read-mostly action. */}
-                    {tcStale > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => resubMutation.mutate()}
-                        disabled={resubMutation.isPending}
-                        className="text-xs px-2 py-0.5 rounded border border-amber-300 text-amber-800 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        재구독
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        data-testid="tick-coverage-progress"
-                        className={`h-full ${progressCls} transition-all`}
-                        style={{ width: `${tcRatioPct}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-gray-500 tabular-nums">
-                      {tcTotal} / {tcLimit}
-                    </span>
-                  </div>
-                  {resubMsg && (
-                    <div className="text-xs text-amber-700">{resubMsg}</div>
-                  )}
-                  {/* 사이클 18 (B-3) — 끊김 종목 펼치기 + last_tick_at 표시 */}
-                  {tcStale > 0 && subscriptions?.tickers?.stale && subscriptions.tickers.stale.length > 0 && (
-                    <div>
-                      <button
-                        type="button"
-                        data-testid="stale-list-toggle"
-                        onClick={() => setStaleListOpen((v) => !v)}
-                        className="text-xs text-amber-600 hover:underline"
-                      >
-                        {staleListOpen ? '끊김 종목 접기' : `끊김 종목 보기 (${subscriptions.tickers.stale.length}개)`}
-                      </button>
-                      {staleListOpen && (
-                        <div className="mt-1 text-xs text-gray-600 max-h-32 overflow-y-auto border border-gray-100 rounded p-1">
-                          {subscriptions.tickers.stale.map((ticker: string) => {
-                            const lastTick = subscriptions.last_tick_map?.[ticker]
-                            let lastTickLabel = '—'
-                            if (lastTick) {
-                              try {
-                                // KST 강제 + 24시간 콜론 표기 (HH:MM:SS) — `toLocaleTimeString('ko-KR')`
-                                // 가 "오전/오후" 또는 "X시 Y분 Z초" 로 출력될 수 있어 Intl 명시.
-                                lastTickLabel = new Intl.DateTimeFormat('en-GB', {
-                                  timeZone: 'Asia/Seoul',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  second: '2-digit',
-                                  hour12: false,
-                                }).format(new Date(lastTick))
-                              } catch {
-                                lastTickLabel = lastTick
-                              }
-                            }
-                            return (
-                              <div
-                                key={ticker}
-                                data-testid={`stale-row-${ticker}`}
-                                className="flex justify-between py-0.5 border-b border-gray-50 last:border-0"
-                              >
-                                <span className="font-mono">{ticker}</span>
-                                <span className="text-gray-500">마지막: {lastTickLabel}</span>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )
-            })()}
+            {/* 사이클 21 (2026-05-20) — tick_coverage 인프라 영역 제거.
+                stale 카운트/배지/진행바/끊김 종목 펼치기/수동 재구독은 모두
+                KisAccountPoolCard 로 통합됨 (Dashboard MarketRegimeCard 직하).
+                ScanMonitor 는 필터링 가시성에 집중 — 전략별 깔때기, 보드별 타겟가, 매수 신호. */}
 
             {/* 전체 탭: 돌파 전략별 카운트 */}
             {isAll && BREAKOUT_KEYS.map((k) => {
@@ -428,6 +414,54 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                   {selectedBreakoutCount > 0 ? `${selectedBreakoutCount}종목 감시 중` : ''}
                 </span>
               </div>
+            )}
+
+            {/* 사이클 21 — 5 전략 깔때기 시각화 (donchian SWING_STAGES 패턴 동일 적용).
+                백엔드 _scan_stats 기반. 미반영 시점 fallback "아직 스캔 전" 표시. */}
+            {selectedStrategy === 'volatility_breakout' && (
+              <ScanFunnelBars
+                testId="vb-scan-funnel"
+                title="변동성 돌파 — 조건 통과 단계별 후보 수"
+                stages={VB_STAGES}
+                stats={strategies['volatility_breakout']?.scan_stats as Record<string, unknown> | null}
+                theme="teal"
+              />
+            )}
+            {selectedStrategy === 'long_tail_volatility' && (
+              <ScanFunnelBars
+                testId="ltv-scan-funnel"
+                title="롱테일 변동성 — 조건 통과 단계별 후보 수"
+                stages={LTV_STAGES}
+                stats={strategies['long_tail_volatility']?.scan_stats as Record<string, unknown> | null}
+                theme="teal"
+              />
+            )}
+            {selectedStrategy === 'bull_flag_breakout' && (
+              <ScanFunnelBars
+                testId="bfb-scan-funnel"
+                title="눌림목 돌파 — 조건 통과 단계별 후보 수"
+                stages={BFB_STAGES}
+                stats={strategies['bull_flag_breakout']?.scan_stats as Record<string, unknown> | null}
+                theme="indigo"
+              />
+            )}
+            {selectedStrategy === 'vcp_breakout' && (
+              <ScanFunnelBars
+                testId="vcp-scan-funnel"
+                title="VCP 변동성 수축 — 조건 통과 단계별 후보 수"
+                stages={VCP_STAGES}
+                stats={strategies['vcp_breakout']?.scan_stats as Record<string, unknown> | null}
+                theme="indigo"
+              />
+            )}
+            {selectedStrategy === 'momentum' && (
+              <ScanFunnelBars
+                testId="momentum-scan-funnel"
+                title="상한가 모멘텀 — 조건 통과 단계별 후보 수"
+                stages={MOMENTUM_STAGES}
+                stats={strategies['momentum']?.scan_stats as Record<string, unknown> | null}
+                theme="emerald"
+              />
             )}
 
             {/* 모멘텀 종목 리스트 */}

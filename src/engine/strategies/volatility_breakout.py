@@ -12,11 +12,33 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
 
+KST = timezone(timedelta(hours=9))
+
 logger = logging.getLogger(__name__)
+
+
+def _empty_scan_stats() -> dict:
+    """사이클 21 — VB 단계별 깔때기 카운트 dict (9 키).
+
+    donchian_swing._empty_scan_stats 와 일관된 패턴. 운영자가 ScanMonitor 의
+    `유니버스 → 가격 필수 → 시총 → 거래대금 → 일봉 fetch → K값` 단계별 통과 수를
+    추적해 "왜 신호 0건인지" 즉시 진단.
+    """
+    return {
+        "universe_candidates": 0,    # blng 0/1/3 합집합 dedupe
+        "universe_filtered": 0,      # 시총+거래대금 동시 통과 (== filtered)
+        "price_filtered": 0,         # 가격/listed/prdy_vol/prdy_close 모두 > 0
+        "mcap_pass": 0,              # 시총 ≥ min_market_cap 단독
+        "trade_amount_pass": 0,      # 거래대금 ≥ min_trade_amount 단독
+        "candle_fetch_ok": 0,        # 일봉 fetch 응답 정상
+        "k_value_computed": 0,       # noise + prev_range > 0 + target_offset > 0 → _targets 등록
+        "final_prepared": 0,         # _scanned_tickers 길이
+        "last_run_at": None,
+    }
 
 
 class VolatilityBreakoutStrategy(StrategyBase):
@@ -65,12 +87,18 @@ class VolatilityBreakoutStrategy(StrategyBase):
         self._next_day_clear_pending = False
         # 스캔된 종목 리스트 (subscribe용)
         self._scanned_tickers: list[str] = []
+        # 사이클 21 — 단계별 카운트 (ScanMonitor 깔때기)
+        self._scan_stats: dict = _empty_scan_stats()
 
     async def prepare(self) -> None:
         """장 시작 전: 시총/거래대금 조건 종목 스캔 → 21일 일봉으로 K값/Target 계산."""
         import asyncio
 
         from src.api.condition import fetch_daily_candles
+
+        # 사이클 21 — 매 prepare 마다 카운트 초기화 (_scan_universe 가 직접 갱신)
+        stats = _empty_scan_stats()
+        self._scan_stats = stats
 
         tickers = await self._scan_universe()
         k_period = self.config.params["k_period"]
@@ -86,6 +114,9 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 return ticker, None
 
         fetched = await asyncio.gather(*[_fetch_one(t) for t in tickers])
+
+        # 사이클 21 — 일봉 fetch 성공 카운트
+        stats["candle_fetch_ok"] = sum(1 for _, c in fetched if c is not None)
 
         for ticker, candles in fetched:
             if candles is None:
@@ -163,6 +194,10 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 continue
 
         self._scanned_tickers = list(self._targets.keys())
+        # 사이클 21 — K값/최종 카운트 + last_run_at
+        stats["k_value_computed"] = prepared
+        stats["final_prepared"] = len(self._scanned_tickers)
+        stats["last_run_at"] = datetime.now(KST).isoformat()
         logger.info("변동성돌파 전략 준비 완료: %d/%d종목 (K값 계산)", prepared, len(tickers))
 
     async def _scan_universe(self) -> list[str]:
@@ -227,6 +262,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
             "변동성돌파 유니버스 후보: %d종목 (blng 0/1/3 합집합 dedupe)",
             len(rank_items),
         )
+        # 사이클 21 — 후보 수
+        self._scan_stats["universe_candidates"] = len(rank_items)
 
         # 거래량순위 응답 데이터로 시총·전일 거래대금 추정 → 필터
         filtered: list[str] = []
@@ -251,10 +288,19 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
             if price <= 0 or listed <= 0 or prdy_vol <= 0 or prdy_close <= 0:
                 continue
+            # 사이클 21 — 가격 필수값 통과 단독 카운트
+            self._scan_stats["price_filtered"] += 1
 
             mcap = price * listed
             prdy_trade_amt = prdy_vol * prdy_close
-            if mcap >= min_mcap and prdy_trade_amt >= min_trade:
+            # 사이클 21 — 시총/거래대금 단독 통과 카운트 (분리)
+            mcap_ok = mcap >= min_mcap
+            trade_ok = prdy_trade_amt >= min_trade
+            if mcap_ok:
+                self._scan_stats["mcap_pass"] += 1
+            if trade_ok:
+                self._scan_stats["trade_amount_pass"] += 1
+            if mcap_ok and trade_ok:
                 name = item.get("hts_kor_isnm", "")
                 if name:
                     ticker_names[ticker] = name
@@ -262,6 +308,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
         logger.info("변동성돌파 유니버스 확정: %d종목 (시총 %d억+, 거래대금 %d억+)",
                      len(filtered), min_mcap // 100_000_000, min_trade // 100_000_000)
+        # 사이클 21 — 최종 universe 필터 통과 카운트
+        self._scan_stats["universe_filtered"] = len(filtered)
 
         if not filtered:
             if not rank_items:
@@ -283,6 +331,14 @@ class VolatilityBreakoutStrategy(StrategyBase):
     def get_scanned_tickers(self) -> list[str]:
         """스캔된 종목 리스트를 반환한다 (WebSocket 구독용)."""
         return self._scanned_tickers
+
+    def get_scan_stats(self) -> dict:
+        """사이클 21 — 단계별 스캔 통계 (ScanMonitor 깔때기 시각화용).
+
+        donchian_swing.get_scan_stats() 와 동일 시그니처.
+        외부 수정 격리를 위해 사본 반환.
+        """
+        return dict(self._scan_stats)
 
     def get_targets_status(self) -> dict[str, dict]:
         """종목별 타겟 가격 정보를 반환한다 (활성 보드 필터링, 2026-05-13 작업 1).

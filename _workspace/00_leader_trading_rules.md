@@ -2054,3 +2054,60 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 - 프론트 145 (사이클 13) → **155** (+10 회귀: 5+5)
 - ISA 같은 보조 라벨 5xx 빈발 시 로그 폭주 → **1분 1행 + 60s summary 1행** (분당 ~30행 → 2행)
 - 보조 라벨 fast window 80%+ → 메인 fallback 응답 지연 **3회 backoff (수 초) → 즉시 (ms)**
+
+## 사이클 21 — UI 정리: 구독현황 KisAccountPoolCard 통합 + 전략별 필터링 단계 강화 (2026-05-20)
+
+### 배경 (사용자 요구)
+
+> "조건검색현황 하단의 구독현황과 끊김 종목은 전략별로 흩어질 필요 없음. 조건검색에는 필터링 부분만 강조. 어떤 조건을 통해 필터링 되었는지 (모범사례: donchian-swing). 전략별 필터링 데이터를 자세하게 정리해서 반영하고 구독현황은 상단의 KIS 시세풀에 겹치는 부분을 제외하고 반영."
+
+### 변경 (4 영역, 매매 코드 변경 0)
+
+| 영역 | 대상 | 변경 |
+|------|------|------|
+| A 백엔드 | `src/engine/strategies/volatility_breakout.py` | `_empty_scan_stats()` 9 키 + `prepare()` 단계 카운트 + `get_scan_stats()` 메서드 |
+| A 백엔드 | `src/engine/strategies/long_tail_volatility.py` | `_empty_scan_stats()` 10 키 (`consecutive_limit_pass` 포함) + 동일 패턴 |
+| A 백엔드 | `src/engine/scanner.py` | `scan_filter_stats` 모듈 전역 dict 7 키 + `scan_stocks()` 단계 카운트 + 상한가 30%+ 분기 추가 (`check_buy_signal` 30% 가드와 이중 안전망) |
+| A 백엔드 | `src/engine/strategies/momentum.py` | `MomentumStrategy.get_scan_stats()` — 모듈 dict 사본 반환 |
+| B 프론트 | `frontend/src/components/ScanMonitor.tsx` | 인프라 영역 제거 (tick-coverage-badge/progress / stale-context-label / stale-list-toggle / 수동 재구독 / 끊김 종목 펼치기) + `useQuery/useMutation` 의존성 제거 |
+| C 프론트 | `frontend/src/utils/stale-context.ts` (신규) | 공용 헬퍼 (`getKstMinutes`/`getStaleContextByKstMinutes`/`STALE_CONTEXT_META`/`formatLastTickKst`) |
+| C 프론트 | `frontend/src/components/KisAccountPoolCard.tsx` | `stale-context-label` / `pool-resubscribe-button` / `pool-stale-list-toggle` / `pool-stale-row-{ticker}` 추가 |
+| D 프론트 | `frontend/src/components/ScanMonitor.tsx` | `ScanFunnelBars` 컴포넌트 추출 + 5 전략 STAGES 정의 (VB 8 / LTV 9 / momentum 6 / BFB 8 / VCP 8) + 각 탭 깔때기 노출 |
+
+### 회귀 가드 (신규 21)
+
+| 파일 | 케이스 |
+|------|--------|
+| `tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py` | 3 (9 키 / 단계 누적 / 사본 반환) |
+| `tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py` | 3 (10 키 / consecutive_limit_pass / 사본) |
+| `tests/unit/engine/strategies/test_momentum_scan_stats.py` | 3 (모듈 dict 7 키 / scan_stocks 누적 / 사본) |
+| `frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx` | 6 (재구독 버튼 / toggle / KST HH:MM:SS / stale-context-label / null "—" / stale=0 미노출) |
+| `frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx` | 6 (VB 깔때기 / 8단계 / LTV 9단계 / momentum 6단계 / null fallback / BFB 깔때기) |
+
+### 제거 (14)
+
+| 파일 | 사유 |
+|------|------|
+| `ScanMonitor.test.tsx` (전체) | tick_coverage/J2 stale 9 케이스 — KisAccountPoolCard 로 이전 |
+| `ScanMonitor.stale_context.test.tsx` | 사이클 18 5 케이스 — KisAccountPoolCard 로 이전 |
+
+### 안전 보장
+
+- **매매 코드 변경 0** — risk.on_tick / order_engine / 전략 매매 분기 무관, prepare() 카운터 추가만
+- **상한가 30%+ scan_stocks 차단은 이중 안전망** — `momentum.check_buy_signal` 의 30% 가드와 일관 (매수 신호 변경 0, 오히려 구독 후보 풀 정리로 더 안전)
+- **응답 키 추가만** — `scan_stats` 키 *추가* 만, 기존 키 제거 0
+- **프론트 옵셔널 타입** — `scan_stats` 미반영 시 fallback "아직 스캔 전" 표시
+- **사이클 17/18/6/19/20 보존** — OPSP backoff 300s / K stale watcher / 5xx dedupe / 토큰 직렬화 / `_selling` 가드
+- **DRY** — `utils/stale-context.ts` 공용 헬퍼로 ScanMonitor 와 KisAccountPoolCard 양쪽 재사용
+- 한글 커밋 메시지
+
+### 베이스라인
+
+- 백엔드 1400 (사이클 20) → **1409** (+9 회귀: 3+3+3)
+- 프론트 ~160 (사이클 18) → **158** (+12 신규: 6+6 / -14 제거: 9+5, net -2)
+- 운영 효과:
+  - **UI 책임 분리** — ScanMonitor 는 필터링 가시성에만 집중, 인프라(끊김 종목/재구독/시간대 컨텍스트)는 KisAccountPoolCard 단독
+  - **5 전략 깔때기** — VB/LTV/momentum/BFB/VCP 모두 단계별 통과 수 노출 → "왜 신호 0건인지" 운영자 즉시 진단
+  - **중복 데이터 경로 제거** — `useQuery(['realtime-subscriptions'])` 호출처 1개로 통합 (KisAccountPoolCard 만)
+  - **공용 헬퍼** — `utils/stale-context.ts` 로 KST 시간대 분류 + last_tick 포맷 단일화
+

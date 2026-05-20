@@ -16,6 +16,11 @@
 ## 공통 패턴
 
 - `prepare()` 단계별 통과 카운트는 `_scan_stats` 누적 → `get_scan_stats()` → `strategies.<id>.scan_stats` 로 프론트 ScanMonitor 깔때기
+- **사이클 21 (2026-05-20) — VB/LTV/momentum 도 깔때기 노출**:
+  - VB: `_empty_scan_stats()` 9 키 (`universe_candidates / universe_filtered / price_filtered / mcap_pass / trade_amount_pass / candle_fetch_ok / k_value_computed / final_prepared / last_run_at`)
+  - LTV: VB 9 키 + `consecutive_limit_pass` (10 키 — 연속상한가 N일 제외 통과)
+  - momentum: prepare 없음 → `scanner.scan_filter_stats` 모듈 전역 dict 7 키 (`universe_candidates / rate_pass / mcap_pass / trade_amount_pass / limit_up_excluded / final_prepared / last_run_at`). `MomentumStrategy.get_scan_stats()` 는 모듈 dict 사본 반환
+  - scan_stocks() 가 등락률 30%+ (상한가) 도 명시 분기 — `limit_up_excluded` 카운트 + 구독 후보 풀에서 제거 (`check_buy_signal` 의 30% 가드와 이중 안전망)
 - VB/LTV `_scan_universe`: 거래량순위 API(`FHPST01710000`) 응답 1건으로 후보 + 시총·전일거래대금 산출(`prdy_vol × (stck_prpr - prdy_vrss)`로 시간 의존 제거)
 - VB/LTV/donchian/bull_flag/vcp 모두 `prev_idx` 분기 동일: `candles[0].stck_bsop_date == 오늘`이면 candles[1] 을 전일로 사용
 - 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록

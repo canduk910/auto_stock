@@ -42,6 +42,8 @@ function isTestFile(p) {
 }
 
 function parseImports(file) {
+  // git ls-files 는 staged 안 된 삭제 파일도 포함할 수 있음 → 안전망
+  if (!existsSync(file)) return [];
   const text = readFileSync(file, "utf-8");
   const out = [];
   let m;

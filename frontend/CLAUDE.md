@@ -58,10 +58,14 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings 는 `React.la
 - **활성 보드 자동 결정** (`activeBoardCode`): (1) 백엔드 응답 boards keys 가 1개면 그 키 자동 선택 (시각 매핑 무관, 백엔드 의도 진실의 원천) / (2) keys 여러 개면 KST 시각 매핑 (main > post_nxt > pre_nxt 우선) / (3) boards 빈 dict → KST 시각 fallback. POST_NXT 시간대처럼 백엔드가 활성 보드만 송신하는 케이스에서 UI 자동 전환
 - "최근 매수 신호" 표: `보드` + `타겟가` 컬럼 (`BuySignal.board?` / `target_price?` / `k?`)
 - donchian_swing 탭: 단계별 통과 카운트 (`scan_stats`) 막대 + 후보 테이블 갭률·진입 상태 컬럼. 진입 상태: 보유 중/갭 스킵/장 시작 전/진입 시간 종료/진입 대기. "도움말 펼치기" 토글, `gap_skip_threshold` 동적 반영
-- **stale 수동 재구독 버튼**: `tick_coverage` 배지 우측 인라인 — `tcStale > 0` 시 노출. 클릭 `useMutation(resubscribeStale)` (`POST /api/realtime/resubscribe`). 성공 시 `invalidateQueries({queryKey:['trading-status']})` + "N종목 재구독 완료" / 실패 시 인라인 에러. `isPending` `disabled`. 클래스 `text-xs px-2 py-0.5 rounded border border-amber-300 text-amber-800 hover:bg-amber-100 disabled:opacity-50`. ConfirmModal 없는 read-mostly action
-- **tick_coverage 색상 배지**: `구독 중: N개` 옆 보조 `정상 A · 끊김 B · 등록 C` 한글 라벨 + 진행바 우측 `total / 41` 카운트. `data-testid="tick-coverage-badge"` 클래스 분기 — 0=`bg-gray-50 text-gray-700` / 1~5=`bg-yellow-100 text-yellow-800` / 6+=`bg-red-100 text-red-800`. `data-testid="tick-coverage-progress"` 80%+ amber / 그 외 emerald. 의미: 정상=60초 내 시세 (fresh) / 끊김=60초 미수신 (stale) / 등록=SUBSCRIBE SUCCESS (acked)
-- **사이클 18 (2026-05-19) 끊김 시간대 컨텍스트** (`data-testid="stale-context-label"`): tick_coverage 배지 옆 `tcStale > 0` 시 노출. `getStaleContextByKstMinutes(t)` 분류: KRX 메인 (09:00~15:30) = "결함 가능" 빨강 / PRE_NXT (08:00~09:00) = "거래량 적음" 노랑 / 그 외 (NXT 애프터 / 시간 외) = "한산 시 정상" 회색. 운영자가 *결함 vs 자연 휴면* 즉시 구분
-- **사이클 18 끊김 종목 펼치기**: 진행바 하단 `data-testid="stale-list-toggle"` 버튼 — `subscriptions.tickers.stale.length > 0` 시 노출. 클릭 시 종목별 `data-testid="stale-row-{ticker}"` + `Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Seoul', hour12:false})` 로 `15:25:43` HH:MM:SS 시각 표시. `last_tick_map[ticker]=null` 이면 "—". `useQuery(['realtime-subscriptions'])` (`getSubscriptions()`, KisAccountPoolCard 와 동일 큐 staleTime 5s + refetchInterval 30s)
+- **사이클 21 (2026-05-20) 5 전략 깔때기 시각화 (`ScanFunnelBars` 컴포넌트)** — donchian SWING_STAGES 패턴을 5 전략에 동일 적용:
+  - `vb-scan-funnel` (VB 8단계 / teal) — universe_candidates → price_filtered → mcap_pass → trade_amount_pass → universe_filtered → candle_fetch_ok → k_value_computed → final_prepared
+  - `ltv-scan-funnel` (LTV 9단계 / teal) — VB + consecutive_limit_pass
+  - `momentum-scan-funnel` (momentum 6단계 / emerald) — universe_candidates → rate_pass → mcap_pass → trade_amount_pass → limit_up_excluded → final_prepared
+  - `bfb-scan-funnel` (BFB 8단계 / indigo) — universe_candidates → universe_filtered → candle_fetch_ok → pole_pass → flag_pass → volume_contraction_pass → atr_pass → final_prepared
+  - `vcp-scan-funnel` (VCP 8단계 / indigo)
+  - `scan_stats` 미반영 시 "아직 스캔 전" fallback. 옵셔널 타입 가드로 백엔드 미배포 환경 호환
+- **사이클 21 인프라 영역 KisAccountPoolCard 로 이전** — `tick-coverage-badge` / `tick-coverage-progress` / `stale-context-label` / `stale-list-toggle` / 수동 재구독 버튼 / 끊김 종목 펼치기 모두 KisAccountPoolCard 로 통합. ScanMonitor 는 필터링 가시성에 집중 (`subscribed_count` 단순 카운트만 보존)
 - **사이클 18 "돌파" 라벨 매매 컨텍스트** (`BREAKOUT_KEYS` 4종 모두): `curPrice >= targetPrice` 분기에서 활성 보드 ∩ 전략 `tradable_boards` 검사. 교집합 ∋ → 기존 빨강 "돌파". 교집합 ∅ → 회색 "돌파 (대기 — {보드라벨})" + `title` 툴팁 "이 전략은 X 에서만 매매". `tradable_boards` 미존재 (백엔드 미반영) → 빨강 "돌파" fallback (안전 회귀). 한화에어로스페이스(012450) 16:43 운영 결함 (VB POST_NXT 보드 가드 skip 정상이나 UI 불명확) 가시화 해소
 
 ## Settings
@@ -155,12 +159,17 @@ Dashboard 의 `LogViewer` 는 제거 — 운영자가 매매 화면과 로그 �
 
 ## KisAccountPoolCard
 
-Dashboard `MarketRegimeCard` 직하 신설 (시장 → 인프라 위계). WebsocketPool 세션 상태 + 슬롯 사용률 + 분배 모니터링.
+Dashboard `MarketRegimeCard` 직하 신설 (시장 → 인프라 위계). WebsocketPool 세션 상태 + 슬롯 사용률 + 분배 모니터링 + **사이클 21 — 끊김 종목 통합**.
 
 - `pool-refresh-button` 새로고침 → `invalidateQueries({queryKey:['realtime-subscriptions']})`
 - 총 슬롯 패널 — `pool-used-slots / pool-total-slots` (41 × N) + `pool-usage-progress` 진행바 (80%+ amber) + fresh/stale/ACK 카운트
 - 세션별 표 — `pool-session-row-{label}` (main / quote-1 ...) / label 배지 (main=blue + `(체결통보)`) / `pool-session-status-{label}` (connected=emerald / disconnected=red) / subscribed/limit + `pool-session-progress-{label}` 미니 진행바 / fresh / stale / reconnect_count
 - 보조 0개: `pool-no-secondary-note` 안내
+- **사이클 21 (2026-05-20) 끊김 영역 통합 (ScanMonitor 에서 이전)**:
+  - `stale-context-label` (`stale_60s > 0` 시) — KRX 메인 (09:00~15:30) 빨강 "결함 가능" / PRE_NXT (08:00~09:00) 노랑 "거래량 적음" / 그 외 (NXT 애프터/시간 외) 회색 "한산 시 정상"
+  - `pool-resubscribe-button` (`stale_60s > 0` 시) — `useMutation(resubscribeStale)` → `POST /api/realtime/resubscribe`. 성공 시 `invalidateQueries({queryKey:['realtime-subscriptions','trading-status']})` + "N종목 재구독 완료" 인라인 메시지
+  - `pool-stale-list-toggle` + 종목별 `pool-stale-row-{ticker}` — `subscriptions.tickers.stale.length > 0` 시 노출. 종목별 마지막 tick 시각 `Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Seoul', hour12:false})` HH:MM:SS. `last_tick_map[ticker]=null` 이면 "—"
+  - 공용 헬퍼 `frontend/src/utils/stale-context.ts` (`getKstMinutes / getStaleContextByKstMinutes / STALE_CONTEXT_META / formatLastTickKst`)
 - API: `getSubscriptions()`, `/api/realtime/subscriptions` sessions 배열. queryKey `['realtime-subscriptions']`, `staleTime: 5_000`, `refetchInterval: 30_000` (Trading Status 5s 와 별개 큐로 부하 격리). 에러 시 `pool-error-message` graceful
 
 > 사이클 17 (2026-05-19) — 사이클 15-C-2 `StreamStatus` (`/stream`) 메뉴 + `getStreamStatus()` API + `GET /api/realtime/stream-status` 백엔드 엔드포인트 전체 롤백. 단순화 원칙(단일 데이터 경로 + 신규 모듈 추가 금지) 위반 + `_near_signal_loop` race 결함 대응.
