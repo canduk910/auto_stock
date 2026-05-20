@@ -1024,16 +1024,11 @@ async def auto_apply_recommendations(target_date: date) -> dict:
     for rec in pending_recs:
         sid = rec.get("strategy_id") or ""
         rec_id = rec.get("id") or ""
-        recommended_weight = rec.get("recommended_weight")
-        recommended_params = rec.get("recommended_params") or {}
+        recommended_weight: float | None = rec.get("recommended_weight")
+        recommended_params: dict = rec.get("recommended_params") or {}
 
         try:
-            strategy = registry.get(sid) if hasattr(registry, "get") else None
-            if strategy is None:
-                # all() 순회로 fallback
-                strategy = next(
-                    (s for s in registry.all() if s.strategy_id == sid), None
-                )
+            strategy = registry.get(sid)
             if strategy is None:
                 logger.warning("[auto_apply] 전략 미발견: %s", sid)
                 skipped += 1
