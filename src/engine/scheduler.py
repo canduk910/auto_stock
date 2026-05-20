@@ -2635,18 +2635,24 @@ class TradingScheduler:
         return unsubscribed
 
     async def _resubscribe_stale_priority(self, cap: int = 10) -> list[str]:
-        """`_scan_loop` 통합 구독 직후 stale 종목을 HIGH 우선순위로 즉시 재구독한다.
+        """`_scan_loop` 통합 구독 직후 stale 종목을 우선순위 분리 재구독한다.
 
         K stale watcher 는 120s 주기로 발화하고 (사이클 9 — KIS 차단 회피),
         `_scan_loop` 는 5분(300s) 주기다. WS silent inactive 발생 시 회복 시간이
         최대 120s ~ 600s 까지 늘어진다. 본 헬퍼는 5분 주기의 별도 자연 회복 경로
-        — 통합 구독 직후 stale 종목을 HIGH 우선순위로 즉시 재구독한다.
+        — 통합 구독 직후 stale 종목을 재구독한다.
+
+        사이클 25-B (2026-05-20) — positions/next_day_clear 는 HIGH, 그 외 후보는 LOW:
+        - 기존: 모든 stale 에 HIGH+bypass_limit=True → VB/LTV 후보가 stale 되면 메인 승격
+          → 메인 과부하 → 2026-05-20 14:58 메인 sub=11 fresh=0 stale=11 silent inactive 사고
+        - 변경: positions/next_day_clear 소속 = HIGH (보유·익일청산 보장 절대 유지)
+                그 외 후보 종목 = LOW (보조 분산, 사이클 24 자동 회복과 시너지)
 
         흐름:
         1. `scanner.ticker_last_tick` 풀 전체 합집합 사용 (메인+보조 — `risk.on_tick` 단일 진입점)
         2. 현재시각 - last_tick > `STALE_FRESHNESS_SECS`(=60s) 종목만 수집
         3. 최대 `cap` 건 (기본 10) — KIS Rate Limit 보호
-        4. 각 종목에 `kis_ws_pool.subscribe(TICK_TR_ID, ticker, priority='HIGH', bypass_limit=True)` 호출
+        4. positions/next_day_clear 소속 여부 판별 → HIGH or LOW 분기
         5. 종목 간 50ms sleep
         6. 종목별 예외 격리 (continue, ERROR 로그)
 
@@ -2655,7 +2661,8 @@ class TradingScheduler:
 
         안전 불변식:
         - `_subscriptions` set 직접 수정 금지 — `kis_ws_pool.subscribe` 만 사용
-        - HIGH + bypass_limit=True 로 보유 종목과 동일 우선순위 (메인 fallback 허용)
+        - positions/next_day_clear 는 HIGH+bypass_limit=True — 손절·트레일링·익일청산 보장
+        - 그 외 후보 종목은 LOW+bypass_limit=False — 보조 세션 분산 (사이클 25-B)
         - 종목별 예외는 격리해 다른 stale ticker 영향 차단
         - 본체 예외는 호출자(`_scan_loop`)가 try/except 로 흡수 — 다음 사이클 자연 재시도
         """
@@ -2675,14 +2682,32 @@ class TradingScheduler:
         if not stale_tickers:
             return []
 
+        # 사이클 25-B: HIGH 보장 대상 집합 — positions + next_day_clear
+        high_tickers: set[str] = set()
+        for s in self.registry.all():
+            try:
+                high_tickers.update(s.state.positions.keys())
+            except Exception:
+                pass
+        ndc_tickers = {t for (t, _sid) in self._pending_next_day_clear}
+        high_tickers.update(ndc_tickers)
+
         targets = stale_tickers[:cap]
         resubscribed: list[str] = []
 
         for ticker in targets:
+            # positions/next_day_clear → HIGH (메인 절대 보장, bypass 한도 무시)
+            # 그 외 후보 → LOW (보조 세션 분산 우선, 사이클 25-B)
+            if ticker in high_tickers:
+                sub_priority = "HIGH"
+                sub_bypass = True
+            else:
+                sub_priority = "LOW"
+                sub_bypass = False
             try:
                 await kis_ws_pool.subscribe(
                     TICK_TR_ID, ticker,
-                    priority="HIGH", bypass_limit=True,
+                    priority=sub_priority, bypass_limit=sub_bypass,
                 )
                 resubscribed.append(ticker)
             except Exception:

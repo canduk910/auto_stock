@@ -32,6 +32,7 @@
 
 ## 안전 규칙
 
+- **VB/LTV 후보 WebSocket 구독 우선순위** — `subscribe_filtered_stocks(priority_groups=...)` 의 `breakout` 그룹: LOW+bypass_limit=False (보조 세션 분산). `_resubscribe_stale_priority` 의 stale 재구독도 positions/next_day_clear 소속이 아닌 후보는 LOW (사이클 25-B, 2026-05-20). 후보 HIGH 메인 집중 → 메인 과부하 → silent inactive 방지
 - **VB `DEFAULT_TRADABLE_BOARDS`에 POST_NXT 추가 금지** — VB 는 당일 15:20 일괄매도 정책. POST_NXT 활성 시 OVERNIGHT 자연 보유 결함. DB `strategy_config.params.tradable_boards` 도 함께 갱신
 - **VB 익일 청산 안전망** — `_execute_next_day_clear` 대상 포함. 비상 상황(POST_NXT 설정 오류, 시세 미수신, 시장가 거부, 재시작 race) 회복용
 - **donchian_swing 일중 시세 REST 폴링 (`_swing_rest_poll_loop`) 제거 금지** — 09:30~15:20 KRX 메인 시간대 60s 주기로 보유+스캔 합집합 폴링 → ticker_prices 갱신 + 보유 손절 평가 재사용. WebSocket stale 보강

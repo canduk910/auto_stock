@@ -63,6 +63,15 @@ async def _run_helper(
         ticker_last_tick[t] = stale_dt
 
     sched = TradingScheduler.__new__(TradingScheduler)
+    # 사이클 25-B: _resubscribe_stale_priority 가 registry + _pending_next_day_clear 를 참조.
+    # 이 헬퍼는 positions/ndc 없는 "후보만 stale" 시나리오를 시뮬레이션하므로 빈 상태로 세팅.
+    sched._pending_next_day_clear = set()
+
+    class _EmptyRegistry:
+        def all(self):
+            return []
+
+    sched.registry = _EmptyRegistry()
 
     # kis_ws_pool.subscribe AsyncMock spy
     subscribe_calls: list[dict] = []
@@ -98,6 +107,7 @@ async def _run_helper(
 
 # ---------------------------------------------------------------------------
 # Case A: stale 5 + fresh 3 → stale 5만 subscribe 호출 (fresh skip)
+# 사이클 25-B: positions/ndc 없는 후보 stale → LOW+bypass_limit=False 재구독
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_stale_only_resubscribed_fresh_skipped():
@@ -120,10 +130,15 @@ async def test_stale_only_resubscribed_fresh_skipped():
     for f in fresh:
         assert f not in called_tickers, f"fresh 종목 {f} 가 호출됨 — 결함"
 
-    # 모든 호출이 priority=HIGH + bypass_limit=True
+    # 사이클 25-B: positions/ndc 없는 후보 → LOW+bypass_limit=False
+    # (_run_helper 의 _EmptyRegistry 로 positions/ndc 모두 빈 상태)
     for call in subscribe_calls:
-        assert call["priority"] == "HIGH", f"priority 'HIGH' 아님: {call}"
-        assert call["bypass_limit"] is True, f"bypass_limit True 아님: {call}"
+        assert call["priority"] == "LOW", (
+            f"후보 stale 종목 {call['tr_key']} 는 LOW (사이클 25-B), got={call['priority']}"
+        )
+        assert call["bypass_limit"] is False, (
+            f"후보 stale 종목 {call['tr_key']} 는 bypass_limit=False (사이클 25-B), got={call['bypass_limit']}"
+        )
 
     # INFO 로그가 system_logs 에 남는다
     assert any(

@@ -81,6 +81,7 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 - `scanner.subscribe_filtered_stocks(priority_groups=...)` 가 HIGH→LOW (positions → next_day_clear → swing → momentum → breakout) 순으로 처리
 - HIGH (보유/익일청산) 는 `bypass_limit=True` 절대 보장
 - 후순위는 잔여 슬롯 초과 시 drop + `[priority_drop] swing=X momentum=Y breakout=Z` INFO. HIGH 단독 41 초과 시 ERROR
+- **사이클 25-B (2026-05-20) `_resubscribe_stale_priority` 분리**: positions/next_day_clear stale → HIGH+bypass_limit=True, 그 외 후보 stale → LOW+bypass_limit=False. 보유/익일청산 보장 절대 유지 + 후보 메인 과부하 방지
 
 ### get_subscribed_tickers / get_acked_tickers
 
