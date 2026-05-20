@@ -7,6 +7,7 @@ services:
       - "8000:8000"
     volumes:
       - ./logs:/app/logs
+      - ./.token_cache:/app/.token_cache  # 사이클 20 — 토큰 캐시 영속화 (분당 1개 한도 대응)
     env_file: .env
     environment:
       - PORT=8000

@@ -67,6 +67,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
@@ -154,6 +155,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -280,6 +282,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -426,6 +429,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -547,6 +551,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -594,7 +599,9 @@ backend:
     - tests/unit/api/test_quote_pool.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
+    - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     transitive_tests: []
   src/auth/hashkey.py:
     direct_tests: []
@@ -653,6 +660,7 @@ backend:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_quote_pool.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -700,7 +708,9 @@ backend:
     - tests/unit/api/test_quote_pool.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
+    - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -908,6 +918,7 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
+    - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_kis_quote_accounts.py
@@ -944,6 +955,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1040,6 +1052,7 @@ backend:
     - tests/unit/db/test_system_logs_search.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client_db_toggle.py
@@ -1102,6 +1115,7 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
+    - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -1242,6 +1256,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1328,6 +1343,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1364,6 +1380,7 @@ backend:
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -1426,6 +1443,7 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
+    - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_kst.py
@@ -1567,6 +1585,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1654,6 +1673,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1750,6 +1770,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1844,6 +1865,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -1942,6 +1964,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2035,6 +2058,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2130,6 +2154,7 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
+    - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_kis_quote_accounts.py
@@ -2166,6 +2191,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2307,6 +2333,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2434,6 +2461,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2556,6 +2584,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2751,6 +2780,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2843,6 +2873,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2931,6 +2962,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -3021,6 +3053,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3113,6 +3146,7 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3209,6 +3243,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3291,6 +3326,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3383,6 +3419,7 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3519,6 +3556,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -3614,6 +3652,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
@@ -3719,6 +3758,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3816,6 +3856,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3912,6 +3953,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4001,6 +4043,7 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4095,6 +4138,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4182,6 +4226,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4281,6 +4326,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4406,6 +4452,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -4496,6 +4543,7 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4584,6 +4632,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4706,6 +4755,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4795,6 +4845,7 @@ backend:
     - tests/unit/api/test_insufficient_classification.py
     - tests/unit/api/test_quote_pool.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4835,6 +4886,7 @@ backend:
   src/models/kis_quote_account.py:
     direct_tests:
     - tests/contract/test_routes_kis_quote_accounts.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -4897,6 +4949,7 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
+    - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
@@ -5066,6 +5119,7 @@ backend:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_quote_pool.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5232,6 +5286,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -5374,6 +5429,7 @@ backend:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5518,6 +5574,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -5681,6 +5738,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -5834,6 +5892,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -6298,6 +6357,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6401,6 +6461,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6504,6 +6565,7 @@ backend:
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6620,6 +6682,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -7158,10 +7221,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-20T10:38:47.872771+09:00'
+generated_at: '2026-05-20T11:11:48.042874+09:00'
 stats:
   backend_modules: 84
-  backend_tests: 178
+  backend_tests: 180
   frontend_modules: 57
   frontend_tests: 33
   unmapped_modules:

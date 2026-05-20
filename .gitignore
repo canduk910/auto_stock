@@ -1,6 +1,9 @@
 # 환경 변수 (인증 정보 포함)
 .env
 .token_cache.json
+# 사이클 20 (2026-05-20) — 디렉토리 단위 토큰 캐시 (Docker 볼륨 마운트)
+.token_cache/
+.token_cache_quote_*.json
 
 # 로그
 logs/

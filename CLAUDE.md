@@ -144,6 +144,7 @@ cd frontend && npm install && npm run dev
 
 - `Dockerfile` / `frontend/Dockerfile` 멀티스테이지 (dev: hot-reload / prod: non-root + Nginx)
 - `docker-compose.yml` (개발 hot-reload) / `docker-compose.prod.yml` (prod)
+- **토큰 캐시 영속화 (사이클 20, 2026-05-20)**: `./.token_cache:/app/.token_cache` 디렉토리 볼륨 양쪽 compose 동일 마운트. KIS `/oauth2/tokenP` 분당 1개 한도 + 컨테이너 재기동 시 토큰 24h 유효 보존. `.gitignore` 등록 (`.token_cache/` + 구 `.token_cache_quote_*.json` 호환). 구 경로 `.token_cache.json` 존재 시 자동 마이그레이션
 - `frontend/nginx.conf`: 정적파일 + `/api` → backend:8000 프록시
 - 타임존 `TZ=Asia/Seoul`, vite 프록시 타겟은 `VITE_API_URL` 분기
 - **EC2 t4g.small (ARM, ap-northeast-2)** 서비스 경로 `~/auto_stock/`

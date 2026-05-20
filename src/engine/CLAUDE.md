@@ -126,7 +126,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 | 상수 | 시각 | 동작 |
 |------|------|------|
 | `TIME_AUTO_START` | 07:45 | DB `auto_start` 우선 폴백 자동 시작 |
-| `TIME_BOOT` | 07:50 | `_boot()` — DB positions 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `_eager_refresh_stock_master_for_held_positions()` (보유 + 익일청산 후보 ticker 를 stock_master eager 갱신) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → `allocate_funds(net_asset × ratio)` |
+| `TIME_BOOT` | 07:50 | `_boot()` — `_preissue_all_tokens()` (사이클 20: 메인+보조 N 매니저 분당 1개 한도 직렬화 사전 발급) → DB positions 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `_eager_refresh_stock_master_for_held_positions()` (보유 + 익일청산 후보 ticker 를 stock_master eager 갱신) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → `allocate_funds(net_asset × ratio)` |
 | `TIME_PRESUBSCRIBE` | 07:55 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독 |
 | `TIME_PRE_NXT_OPEN` | 08:00 | 익일 청산 task (`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30s`) + `_confirm_breakout_open_prices(board="pre_nxt")`. 시가 수신 → 갭률 트레일링 또는 NXT 지정가(`step_down(open,1)`). 시가 미수신 → `_pending_next_day_clear` set 등록 후 보류 |
 | `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | `_confirm_breakout_open_prices(board="main")` — VB/LTV가 KRX 09:00 시가로 보드별 별도 target_price 계산. 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목 KRX 시장가 일괄 청산. 모두 이미 확정이면 idempotent skip (DEBUG `[confirm_open_prices_skip]`) |

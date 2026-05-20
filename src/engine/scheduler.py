@@ -1328,12 +1328,54 @@ class TradingScheduler:
                     await self.order_engine.execute_sell(ticker, Signal.FORCE_CLEAR, sid)
                     logger.info("%s 강제 청산: %s", strategy.config.name, t(ticker))
 
+    async def _preissue_all_tokens(self) -> None:
+        """사이클 20 (2026-05-20) — 모든 매니저 토큰 사전 순차 발급.
+
+        KIS `/oauth2/tokenP` 분당 1개 / 전역 한도 대응.
+        캐시 hit 면 즉시 return. miss 면 모듈 전역 lock 안에서 60s gap 강제 직렬화.
+        보조 매니저 발급 실패는 메인 흐름 보존 (try/except 흡수).
+        """
+        from src.auth.token import token_manager as _token_manager, get_token_manager
+        from src.db import kis_quote_accounts as kqa
+
+        # 1) 메인 매니저
+        try:
+            await _token_manager.get_token()
+        except Exception:
+            logger.exception("[boot_preissue] main 토큰 발급 실패 — 메인 흐름 보존")
+
+        # 2) 보조 매니저 list (active=true)
+        try:
+            accounts = await kqa.list_accounts(active_only=True)
+        except Exception:
+            logger.exception("[boot_preissue] kis_quote_accounts list 실패 — 보조 skip")
+            return
+
+        for account in accounts:
+            try:
+                manager = await get_token_manager(account.label)
+                # 캐시 hit 면 즉시 return, miss 면 lock 안에서 60s 대기
+                await manager.get_token()
+                logger.info("[boot_preissue] label=%s 사전 발급 완료", account.label)
+            except Exception:
+                logger.exception(
+                    "[boot_preissue] label=%s 발급 실패 — 다음 보조로 진행",
+                    account.label,
+                )
+
     async def _boot(self) -> None:
         """시스템 기동: 토큰 갱신, 잔고 동기화 + 포지션 복구.
 
         1차: DB positions 테이블에서 포지션 복구 (정확한 매수가/전략/매수일)
         2차: KIS 잔고 API와 교차 검증 — DB에 없지만 KIS에 있으면 보완 등록
+
+        사이클 20 (2026-05-20) — 진입 초입에 `_preissue_all_tokens()` 호출:
+        - 메인 + 보조 N 매니저 토큰을 분당 1개 한도 직렬화로 사전 발급
+        - 캐시 hit 시 0초 / miss 시 N분 boot 지연 (07:50 라 KRX 영향 0)
         """
+        # 사이클 20 — 모든 매니저 사전 순차 발급 (KIS 분당 1개 한도)
+        await self._preissue_all_tokens()
+
         await token_manager.get_token()
 
         # DB에서 전략 설정(비중/파라미터) 로드

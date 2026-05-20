@@ -3,8 +3,15 @@
 사이클 7-A (2026-05-17) — multi-account 지원:
 - 기존 `token_manager` (메인 계좌) 흐름은 100% 보존. 매매/잔고/체결통보는 메인 단일.
 - `get_token_manager(label)` 로 보조 계좌(`kis_quote_accounts`) 토큰 매니저 lazy 발급.
-- 보조 매니저는 자체 캐시 파일(`.token_cache_quote_<label>.json`)과 격리된 토큰/만료시각 보유.
+- 보조 매니저는 자체 캐시 파일(`.token_cache/quote_<label>.json`)과 격리된 토큰/만료시각 보유.
 - 보조 매니저 예외는 메인 흐름에 영향 0 — try/except 로 분리 호출 권장.
+
+사이클 20 (2026-05-20) — 분당 1개 한도 위반 차단:
+- KIS `/oauth2/tokenP` 는 분당 1개 / 전역 한도. 4 매니저 동시 발급 시 일부 403.
+- 모듈 전역 `_GLOBAL_ISSUE_LOCK` + `_LAST_ISSUE_AT` + `_ISSUE_GAP_SECS=61.0` 으로 직렬화.
+- `issue()` 진입 시 lock 획득 + gap 미달이면 sleep. 캐시 hit 시 `_is_valid()`→`issue()` skip → sleep 0.
+- 캐시 영속화: `_TOKEN_CACHE_DIR=.token_cache/` 디렉토리 단위 (Docker 볼륨 마운트 친화).
+  구 경로 `.token_cache.json` / `.token_cache_quote_<label>.json` 자동 마이그레이션 + 호환 fallback.
 """
 
 from __future__ import annotations
@@ -12,6 +19,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
@@ -22,9 +30,41 @@ from src.config import settings
 
 logger = logging.getLogger(__name__)
 
-_TOKEN_CACHE_PATH = Path(".token_cache.json")
+# 사이클 20 (2026-05-20) — 디렉토리 단위 캐시 (Docker 볼륨 영속화)
+_TOKEN_CACHE_DIR = Path(".token_cache")
+_TOKEN_CACHE_PATH = _TOKEN_CACHE_DIR / "main.json"
+# 구 경로 호환 fallback — 마이그레이션 시 1회 읽고 새 경로로 이동
+_LEGACY_MAIN_CACHE_PATH = Path(".token_cache.json")
 # 사이클 7-A — 보조 계좌 캐시 파일 prefix. 라벨별로 격리.
-_QUOTE_TOKEN_CACHE_PREFIX = ".token_cache_quote_"
+# 사이클 20 — 디렉토리 내 prefix 로 변경. 구 prefix `.token_cache_quote_` 는 fallback.
+_QUOTE_TOKEN_CACHE_PREFIX = "quote_"
+_LEGACY_QUOTE_CACHE_PREFIX = ".token_cache_quote_"
+
+
+# ---------------------------------------------------------------------------
+# 사이클 20 (2026-05-20) — 모듈 전역 발급 직렬화
+# ---------------------------------------------------------------------------
+# KIS `/oauth2/tokenP` 분당 1개 / 전역 한도. 모든 매니저(메인 + 보조) 가 공유.
+# `issue()` 진입 시 lock 획득 → gap 미달이면 sleep → KIS POST → `_LAST_ISSUE_AT` 갱신.
+# 캐시 hit (`_is_valid()=True`) 경로는 `get_token()` 이 `issue()` 호출 안 함 → lock/sleep 0.
+_GLOBAL_ISSUE_LOCK: asyncio.Lock | None = None
+_LAST_ISSUE_AT: float = 0.0  # time.monotonic()
+_ISSUE_GAP_SECS: float = 61.0  # 분당 1개 보장 (1초 마진)
+
+
+def _get_global_issue_lock() -> asyncio.Lock:
+    """모듈 전역 lock — lazy create (이벤트루프 존재 후 안전 생성)."""
+    global _GLOBAL_ISSUE_LOCK
+    if _GLOBAL_ISSUE_LOCK is None:
+        _GLOBAL_ISSUE_LOCK = asyncio.Lock()
+    return _GLOBAL_ISSUE_LOCK
+
+
+def reset_global_issue_state() -> None:
+    """테스트 전용 — 모듈 전역 lock + 마지막 발급 시각 초기화."""
+    global _GLOBAL_ISSUE_LOCK, _LAST_ISSUE_AT
+    _GLOBAL_ISSUE_LOCK = None
+    _LAST_ISSUE_AT = 0.0
 
 
 class TokenManager:
@@ -83,26 +123,43 @@ class TokenManager:
         return self.access_token
 
     async def issue(self) -> None:
-        """POST /oauth2/tokenP 로 접근토큰을 발급받는다."""
-        url = f"{self.base_url}/oauth2/tokenP"
-        body = {
-            "grant_type": "client_credentials",
-            "appkey": self.app_key,
-            "appsecret": self.app_secret,
-        }
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(url, json=body, timeout=10)
-            resp.raise_for_status()
-            data = resp.json()
+        """POST /oauth2/tokenP 로 접근토큰을 발급받는다.
 
-        self.access_token = data["access_token"]
-        self.token_expired = datetime.strptime(
-            data["access_token_token_expired"], "%Y-%m-%d %H:%M:%S"
-        )
-        self._save_cache()
-        logger.info(
-            "토큰 발급 완료(label=%s), 만료: %s", self._label or "main", self.token_expired
-        )
+        사이클 20 (2026-05-20) — 모듈 전역 직렬화 + 60s gap (KIS 분당 1개 한도).
+        Lock 안에서 sleep 이므로 다음 매니저는 자연 대기. KIS 부담 0.
+        `_LAST_ISSUE_AT` 는 HTTP POST 성공 *후* 갱신 — 실패 시 재발급 시도 가능.
+        """
+        global _LAST_ISSUE_AT
+        async with _get_global_issue_lock():
+            elapsed = time.monotonic() - _LAST_ISSUE_AT
+            if _LAST_ISSUE_AT > 0 and elapsed < _ISSUE_GAP_SECS:
+                wait_secs = _ISSUE_GAP_SECS - elapsed
+                logger.info(
+                    "[token] 분당 한도 대기: label=%s wait=%.1fs",
+                    self._label or "main", wait_secs,
+                )
+                await asyncio.sleep(wait_secs)
+
+            url = f"{self.base_url}/oauth2/tokenP"
+            body = {
+                "grant_type": "client_credentials",
+                "appkey": self.app_key,
+                "appsecret": self.app_secret,
+            }
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(url, json=body, timeout=10)
+                resp.raise_for_status()
+                data = resp.json()
+
+            self.access_token = data["access_token"]
+            self.token_expired = datetime.strptime(
+                data["access_token_token_expired"], "%Y-%m-%d %H:%M:%S"
+            )
+            self._save_cache()
+            _LAST_ISSUE_AT = time.monotonic()
+            logger.info(
+                "토큰 발급 완료(label=%s), 만료: %s", self._label or "main", self.token_expired
+            )
 
     async def revoke(self) -> None:
         """POST /oauth2/revokeP 로 접근토큰을 폐기한다."""
@@ -169,13 +226,33 @@ class TokenManager:
             "access_token": self.access_token,
             "token_expired": self.token_expired.isoformat() if self.token_expired else None,
         }
+        # 사이클 20 — 디렉토리 단위. 부모 디렉토리 자동 생성.
+        try:
+            self._cache_path.parent.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            logger.exception("토큰 캐시 디렉토리 생성 실패: %s", self._cache_path.parent)
         self._cache_path.write_text(json.dumps(data), encoding="utf-8")
 
     def _load_cache(self) -> None:
-        if not self._cache_path.exists():
+        """캐시 파일에서 토큰 로드 — 사이클 20 신경로 우선 + 구경로 마이그레이션.
+
+        1) 새 경로 (`/app/.token_cache/main.json` 또는 `.../quote_<label>.json`) 존재 → 로드
+        2) 미존재 + 구 경로 (`.token_cache.json` 또는 `.token_cache_quote_<label>.json`)
+           존재 → 구 경로에서 로드 + 새 경로로 즉시 마이그레이션 + 구 경로 unlink
+        """
+        legacy_path = self._resolve_legacy_path()
+        source_path: Optional[Path] = None
+
+        if self._cache_path.exists():
+            source_path = self._cache_path
+        elif legacy_path is not None and legacy_path.exists():
+            source_path = legacy_path
+
+        if source_path is None:
             return
+
         try:
-            data = json.loads(self._cache_path.read_text(encoding="utf-8"))
+            data = json.loads(source_path.read_text(encoding="utf-8"))
             self.access_token = data.get("access_token", "")
             expired_str = data.get("token_expired")
             if expired_str:
@@ -185,12 +262,38 @@ class TokenManager:
                     "캐시 토큰 로드 완료(label=%s), 만료: %s",
                     self._label or "main", self.token_expired,
                 )
+                # 마이그레이션: 구 경로에서 읽었으면 새 경로로 이동
+                if source_path != self._cache_path:
+                    self._save_cache()
+                    try:
+                        source_path.unlink()
+                        logger.info(
+                            "[token] 캐시 마이그레이션: %s → %s",
+                            source_path, self._cache_path,
+                        )
+                    except OSError:
+                        logger.exception("구 캐시 파일 삭제 실패: %s", source_path)
             else:
                 self.access_token = ""
                 self.token_expired = None
         except (json.JSONDecodeError, KeyError):
             self.access_token = ""
             self.token_expired = None
+
+    def _resolve_legacy_path(self) -> Optional[Path]:
+        """현재 매니저의 구 경로(`.token_cache.json` 또는 `.token_cache_quote_<label>.json`)."""
+        # 메인 매니저는 기본 경로 사용 시에만 구 경로 후보 결정
+        if self._cache_path == _TOKEN_CACHE_PATH:
+            return _LEGACY_MAIN_CACHE_PATH
+        # 보조 매니저: 새 경로가 `.token_cache/quote_<label>.json` 패턴이면 구 경로 추정
+        try:
+            name = self._cache_path.name
+            if name.startswith(_QUOTE_TOKEN_CACHE_PREFIX):
+                label_part = name[len(_QUOTE_TOKEN_CACHE_PREFIX):].removesuffix(".json")
+                return Path(f"{_LEGACY_QUOTE_CACHE_PREFIX}{label_part}.json")
+        except Exception:
+            pass
+        return None
 
     def _delete_cache(self) -> None:
         if self._cache_path.exists():
@@ -212,9 +315,12 @@ _quote_lock = asyncio.Lock()
 
 
 def _safe_cache_filename(label: str) -> Path:
-    """label → 안전한 파일명 변환 (경로 문자/공백 차단)."""
+    """label → 안전한 파일명 변환 (경로 문자/공백 차단).
+
+    사이클 20 — `.token_cache/quote_<safe>.json` 디렉토리 단위 경로 반환.
+    """
     safe = "".join(ch if (ch.isalnum() or ch in ("-", "_")) else "_" for ch in label)
-    return Path(f"{_QUOTE_TOKEN_CACHE_PREFIX}{safe}.json")
+    return _TOKEN_CACHE_DIR / f"{_QUOTE_TOKEN_CACHE_PREFIX}{safe}.json"
 
 
 def _resolve_base_url(kis_env: str) -> str:
