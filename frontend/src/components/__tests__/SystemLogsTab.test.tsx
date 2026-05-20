@@ -221,6 +221,226 @@ describe("SystemLogsTab", () => {
   });
 });
 
+describe("SystemLogsTab — 검색 박스 (사이클 6 통합, 2026-05-20)", () => {
+  it("검색어 입력 + 검색 버튼 → /api/logs/search 호출 + q 인자 전달", async () => {
+    const searchCalls: { q: string; level: string | null }[] = [];
+    server.use(
+      http.get("/api/logs", () =>
+        HttpResponse.json(wrap({ items: [], total: 0, total_pages: 0 })),
+      ),
+      http.get("/api/logs/search", ({ request }) => {
+        const url = new URL(request.url);
+        searchCalls.push({
+          q: url.searchParams.get("q") ?? "",
+          level: url.searchParams.get("level"),
+        });
+        return HttpResponse.json(
+          wrap({
+            logs: [
+              {
+                id: 1,
+                timestamp: "2026-05-20T01:00:00Z",
+                log_level: "ERROR",
+                message: "OPSP0002 폭주",
+              },
+            ],
+            total: 1,
+            has_more: false,
+          }),
+        );
+      }),
+    );
+
+    render(
+      <TestProviders>
+        <SystemLogsTab />
+      </TestProviders>,
+    );
+
+    const input = await screen.findByTestId("system-logs-search-input");
+    fireEvent.change(input, { target: { value: "OPSP" } });
+    fireEvent.click(screen.getByTestId("system-logs-search-button"));
+
+    await waitFor(() => {
+      expect(searchCalls.length).toBeGreaterThan(0);
+    });
+    expect(searchCalls[searchCalls.length - 1].q).toBe("OPSP");
+  });
+
+  it("검색 결과 0건 → '검색 결과가 없습니다.' 메시지", async () => {
+    server.use(
+      http.get("/api/logs", () =>
+        HttpResponse.json(wrap({ items: [], total: 0, total_pages: 0 })),
+      ),
+      http.get("/api/logs/search", () =>
+        HttpResponse.json(wrap({ logs: [], total: 0, has_more: false })),
+      ),
+    );
+
+    render(
+      <TestProviders>
+        <SystemLogsTab />
+      </TestProviders>,
+    );
+
+    const input = await screen.findByTestId("system-logs-search-input");
+    fireEvent.change(input, { target: { value: "nonexistent_xyz" } });
+    fireEvent.click(screen.getByTestId("system-logs-search-button"));
+
+    await waitFor(() => {
+      expect(screen.getByText("검색 결과가 없습니다.")).toBeInTheDocument();
+    });
+  });
+
+  it("검색 결과 행 렌더 + 검색 모드 진입 (초기화 버튼 노출)", async () => {
+    server.use(
+      http.get("/api/logs", () =>
+        HttpResponse.json(wrap({ items: [], total: 0, total_pages: 0 })),
+      ),
+      http.get("/api/logs/search", () =>
+        HttpResponse.json(
+          wrap({
+            logs: [
+              {
+                id: 99,
+                timestamp: "2026-05-20T01:00:00Z",
+                log_level: "ERROR",
+                message: "ERROR_KEY 결함",
+              },
+            ],
+            total: 1,
+            has_more: false,
+          }),
+        ),
+      ),
+    );
+
+    render(
+      <TestProviders>
+        <SystemLogsTab />
+      </TestProviders>,
+    );
+
+    const input = await screen.findByTestId("system-logs-search-input");
+    fireEvent.change(input, { target: { value: "ERROR_KEY" } });
+    fireEvent.click(screen.getByTestId("system-logs-search-button"));
+
+    await waitFor(() => {
+      const body = screen.getByTestId("system-logs-body");
+      expect(body.textContent).toMatch(/ERROR_KEY/);
+    });
+
+    // 초기화 버튼 노출
+    expect(screen.getByTestId("system-logs-search-clear")).toBeInTheDocument();
+  });
+
+  it("초기화 버튼 클릭 → 검색 모드 종료 + /api/logs 페이징 모드 복귀", async () => {
+    const logsCalls: string[] = [];
+    server.use(
+      http.get("/api/logs", ({ request }) => {
+        logsCalls.push(new URL(request.url).search);
+        return HttpResponse.json(
+          wrap({
+            items: [
+              {
+                id: 1,
+                timestamp: "2026-05-20T01:00:00Z",
+                log_level: "INFO",
+                message: "normal log",
+              },
+            ],
+            total: 1,
+            total_pages: 1,
+          }),
+        );
+      }),
+      http.get("/api/logs/search", () =>
+        HttpResponse.json(
+          wrap({
+            logs: [
+              {
+                id: 99,
+                timestamp: "2026-05-20T01:00:00Z",
+                log_level: "ERROR",
+                message: "ERROR_KEY",
+              },
+            ],
+            total: 1,
+            has_more: false,
+          }),
+        ),
+      ),
+    );
+
+    render(
+      <TestProviders>
+        <SystemLogsTab />
+      </TestProviders>,
+    );
+
+    // 1) 검색 모드 진입
+    const input = await screen.findByTestId("system-logs-search-input");
+    fireEvent.change(input, { target: { value: "ERROR_KEY" } });
+    fireEvent.click(screen.getByTestId("system-logs-search-button"));
+
+    const clear = await screen.findByTestId("system-logs-search-clear");
+
+    // 검색 모드에서는 /api/logs 호출 안 함 (페이징 비활성)
+    const callsBeforeClear = logsCalls.length;
+
+    // 2) 초기화 클릭
+    fireEvent.click(clear);
+
+    // 검색 input 비워짐
+    await waitFor(() => {
+      expect(
+        (screen.getByTestId("system-logs-search-input") as HTMLInputElement).value,
+      ).toBe("");
+    });
+
+    // /api/logs 재호출 (페이징 모드 복귀)
+    await waitFor(() => {
+      expect(logsCalls.length).toBeGreaterThan(callsBeforeClear);
+    });
+  });
+
+  it("has_more=true → '키워드를 좁혀주세요' 안내", async () => {
+    server.use(
+      http.get("/api/logs", () =>
+        HttpResponse.json(wrap({ items: [], total: 0, total_pages: 0 })),
+      ),
+      http.get("/api/logs/search", () =>
+        HttpResponse.json(
+          wrap({
+            logs: Array.from({ length: 200 }, (_, i) => ({
+              id: i,
+              timestamp: "2026-05-20T01:00:00Z",
+              log_level: "INFO",
+              message: `msg_${i}`,
+            })),
+            total: 500,
+            has_more: true,
+          }),
+        ),
+      ),
+    );
+
+    render(
+      <TestProviders>
+        <SystemLogsTab />
+      </TestProviders>,
+    );
+
+    const input = await screen.findByTestId("system-logs-search-input");
+    fireEvent.change(input, { target: { value: "msg" } });
+    fireEvent.click(screen.getByTestId("system-logs-search-button"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("system-logs-search-has-more")).toBeInTheDocument();
+    });
+  });
+});
+
 describe("SystemLogsTab — KST 시각 변환 (L3 컨벤션)", () => {
   const ORIG_TZ = process.env.TZ;
   beforeAll(() => {

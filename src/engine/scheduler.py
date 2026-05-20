@@ -503,6 +503,22 @@ class TradingScheduler:
                     f"일일 로그 분석 리포트 생성 실패: type={type(e).__name__} msg={e!s} trace={tb[:1000]}",
                 )
 
+            # 사이클 6 통합 (2026-05-20) — 로그 retention 정리.
+            # INFO 2일 / WARNING+ 30일 cutoff. 실패는 graceful (다음 사이클 재시도).
+            # log_analysis 가 system_logs 를 *읽은 후* 에 호출 (분석 데이터 보존).
+            try:
+                from src.db.system_logs import purge_old_logs
+                await purge_old_logs()
+            except Exception as e:
+                logger.exception("로그 retention 정리 실패")
+                try:
+                    await write_log(
+                        "INFO",
+                        f"[log_retention_skip] reason={type(e).__name__} msg={e!s}",
+                    )
+                except Exception:
+                    pass  # write_log 자체 실패 시 본 흐름 보호
+
             # log_analysis가 funnel 카운터를 수집한 후에 일일 상태 초기화
             self._reset_daily_state()
 

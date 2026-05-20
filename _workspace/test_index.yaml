@@ -24,6 +24,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -109,6 +110,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -247,6 +249,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -353,6 +356,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -496,6 +500,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -599,6 +604,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -700,6 +706,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -846,6 +853,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -909,6 +917,8 @@ backend:
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
       - tests/unit/db/test_system_logs_filter.py
+      - tests/unit/db/test_system_logs_retention.py
+      - tests/unit/db/test_system_logs_search.py
       - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_bull_flag_breakout.py
       - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -1019,6 +1029,8 @@ backend:
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
       - tests/unit/db/test_system_logs_filter.py
+      - tests/unit/db/test_system_logs_retention.py
+      - tests/unit/db/test_system_logs_search.py
       - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/test_backtest_engine_db_toggle.py
       - tests/unit/engine/test_sync_orders_to_db_dedup.py
@@ -1032,6 +1044,7 @@ backend:
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
       - tests/contract/test_routes_strategies.py
@@ -1177,6 +1190,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -1262,6 +1276,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -1350,6 +1365,7 @@ backend:
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -1498,6 +1514,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -1585,6 +1602,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
       - tests/contract/test_routes_strategies.py
@@ -1678,6 +1696,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -1797,6 +1816,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -1870,6 +1890,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -1957,6 +1978,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -2042,6 +2064,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -2110,6 +2133,8 @@ backend:
       - tests/unit/db/test_system_config_cash_ratio.py
       - tests/unit/db/test_system_config_integrations.py
       - tests/unit/db/test_system_logs_filter.py
+      - tests/unit/db/test_system_logs_retention.py
+      - tests/unit/db/test_system_logs_search.py
       - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/strategies/test_bull_flag_breakout.py
       - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -2224,6 +2249,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
       - tests/contract/test_routes_strategies.py
@@ -2311,6 +2337,8 @@ backend:
       - tests/unit/api/test_base_logging.py
       - tests/unit/api/test_base_retry_logging.py
       - tests/unit/db/test_system_logs_filter.py
+      - tests/unit/db/test_system_logs_retention.py
+      - tests/unit/db/test_system_logs_search.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_quote_session_auto_disable.py
@@ -2321,6 +2349,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -2468,6 +2497,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -2558,6 +2588,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -2659,6 +2690,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -2746,6 +2778,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -2837,6 +2870,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -2929,6 +2963,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
       - tests/contract/test_routes_strategies.py
@@ -3049,6 +3084,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3114,6 +3150,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3191,6 +3228,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3314,6 +3352,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3363,6 +3402,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3510,6 +3550,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3595,6 +3636,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3708,6 +3750,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3830,6 +3873,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -3924,6 +3968,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4011,6 +4056,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4070,6 +4116,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4195,6 +4242,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4319,6 +4367,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4412,6 +4461,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4466,6 +4516,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4555,6 +4606,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4584,6 +4636,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4669,6 +4722,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4764,6 +4818,7 @@ backend:
       - tests/contract/test_routes_history.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4915,6 +4970,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -4971,6 +5027,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5029,6 +5086,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5050,6 +5108,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5077,6 +5136,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5218,6 +5278,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5242,6 +5303,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5353,6 +5415,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5517,6 +5580,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_recommendations.py
       - tests/contract/test_routes_strategies.py
@@ -5669,6 +5733,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5794,6 +5859,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5814,6 +5880,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5835,6 +5902,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5856,6 +5924,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5877,6 +5946,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5898,6 +5968,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5919,6 +5990,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5940,6 +6012,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5961,6 +6034,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -5984,6 +6058,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_recommendations.py
       - tests/contract/test_routes_strategies.py
@@ -6003,6 +6078,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6024,6 +6100,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6045,6 +6122,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6067,6 +6145,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6087,6 +6166,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6118,6 +6198,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6140,6 +6221,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6241,6 +6323,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6341,6 +6424,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -6429,6 +6513,7 @@ backend:
       - tests/contract/test_routes_kis_quote_accounts.py
       - tests/contract/test_routes_log_reports.py
       - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
       - tests/contract/test_routes_market_regime.py
       - tests/contract/test_routes_realtime.py
       - tests/contract/test_routes_recommendations.py
@@ -7040,10 +7125,10 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-05-19T08:23:02.956Z'
+generated_at: '2026-05-20T01:07:42.779Z'
 stats:
   backend_modules: 84
-  backend_tests: 174
+  backend_tests: 177
   frontend_modules: 57
   frontend_tests: 33
   unmapped_modules:

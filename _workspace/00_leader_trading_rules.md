@@ -1361,6 +1361,58 @@ risk_on_tick 등 후속 테스트의 buy_blocked 가드 오염 차단.
 
 ---
 
+## 사이클 6 통합 마감 — 검색 박스 + Retention 정책 (2026-05-20)
+
+본 사이클은 위 사이클 6 (2026-05-17) 1차 완료분 위에 사용자 신규 요청 2건을 통합 마감 (옵션 B). 매매 코드 침범 0.
+
+### 목적
+1. **로그 검색 기능** — system_logs 에서 키워드 substring 매칭 (예: `OPSP0002`, `nxt_downgrade`, `[priority_drop]` 등 특정 사고 흔적 추적)
+2. **등급별 retention 정책** — INFO 등급 2일 / WARNING+ 30일 자동 정리 (DB 폭증 차단)
+
+### 변경 요약 (변경 파일)
+- **백엔드**:
+  - `src/db/system_logs.py::search_logs(q, *, level, start, end, limit) -> {logs, total, has_more}` 신규 — `ilike("message", "%q%")` substring + level/start/end 동시 조건 + limit 1~1000 clamp + 빈 q ValueError
+  - `src/db/system_logs.py::purge_old_logs() -> {info_deleted, high_deleted, elapsed_ms}` 신규 — INFO 2일 / HIGH 30일 cutoff 등급별 분리 DELETE + 1회 cap 100,000 + `[log_retention]` INFO 1행
+  - `src/db/system_logs.py::_purge_by_cutoff(cutoff_iso, level_filter)` 내부 헬퍼 — `cutoff_iso=None` 이면 `RuntimeError("cutoff must not be None")` 즉시 raise (WHERE 누락 차단)
+  - 상수: `INFO_RETENTION_DAYS=2` / `HIGH_RETENTION_DAYS=30` / `HIGH_LEVELS=("WARNING","ERROR","CRITICAL")` / `MAX_PURGE_BATCH=100_000` / `SEARCH_DEFAULT_LIMIT=200` / `SEARCH_MAX_LIMIT=1000`
+  - `src/routes/logs.py::GET /api/logs/search` 신규 — `q` `min_length=1` (빈 q 422) / `limit` 1~1000 (외 422) / 응답 ApiResponse `{logs, total, has_more}`
+  - `src/engine/scheduler.py::_run` settlement 흐름 — `_log_analysis_engine` *후* + `_reset_daily_state()` *전* 에 `await purge_old_logs()` 1회 호출. 예외 graceful (`[log_retention_skip]` INFO + 다음 사이클 재시도)
+- **프론트엔드**:
+  - `frontend/src/api/logs.ts::searchLogs(p)` 신규 + `SearchPayload/SearchParams` 타입
+  - `frontend/src/components/SystemLogsTab.tsx` 검색 박스 추가 (필터 바 *위*, `system-logs-search-input` + Enter 키 + `system-logs-search-button` + 검색 모드 진입 시 `system-logs-search-clear`)
+  - 검색 모드 동안 페이징/자동 새로고침 비활성 — 단일 limit 200 응답
+  - 검색 결과 0건 → "검색 결과가 없습니다." (페이징 모드 "로그가 없습니다." 와 분리)
+  - `has_more=true` 시 `system-logs-search-has-more` amber 배너 "검색 결과가 200건을 초과합니다. 키워드를 좁혀주세요."
+
+### 자율 결정
+1. **Retention 시점** = settlement 흐름 통합 (07:50 _boot 아님). `log_analysis_engine` 이 system_logs 를 *읽은 후* 정리해 분석 데이터 보존
+2. **INFO 2일** = 모멘텀/VB 회귀 검토 영업일 + 1일 마진. 운영자가 보통 당일~다음날까지만 INFO 검토
+3. **HIGH (WARNING/ERROR/CRITICAL) 30일** = 사고 추적 + 자문 metrics 영구화 호환 (`parameter_recommendations` 가 30일 윈도우 metrics 사용)
+4. **Cap 100,000** = supabase 단일 트랜잭션 부하 흡수. 잔여분은 다음 사이클 자연 흡수 (영업일 1회 기준 INFO ~5만 / WARNING+ ~수천 — 충분 마진)
+5. **WHERE None RuntimeError** = 전체 DELETE 사고 절대 차단 (방어 코드). cutoff 계산 결함 시 즉시 raise → scheduler graceful 흡수 → 다음 영업일 재시도
+6. **검색 ILIKE substring** = 운영자 익숙한 SQL 패턴 + KIS 거부 코드(APBK0918 등) 부분 매칭. 정규식 안 씀 (escape 복잡도 회피)
+7. **검색 limit 기본 200 / 최대 1000** = 페이징 부재 보완. `has_more` 안내로 키워드 좁히기 유도
+8. **검색 모드 페이징 비활성** = limit 200 1회 응답으로 UI 단순화. 진짜 깊은 검색은 SQL 직접 접근 (운영자 권한)
+
+### 회귀 가드 (신규 +30)
+- `tests/unit/db/test_system_logs_retention.py` — 7 케이스 (A 반환 dict / B INFO 2일 cutoff / C HIGH 30일 + level 필터 / D INFO eq / E cap 100,000 / F cutoff None RuntimeError / G `[log_retention]` 로그)
+- `tests/unit/db/test_system_logs_search.py` — 11 케이스 (A ilike / B level+q / C ALL skip / D None skip / E start/end / F 기본 limit 200 / G limit max 1000 clamp / H 반환 dict / I has_more=true / J has_more=false / K 빈 q ValueError / L whitespace q)
+- `tests/contract/test_routes_logs_search.py` — 7 케이스 (A 정상 200 / B q 누락 422 / C 빈 q 422 / D limit>1000 422 / E limit=0 422 / F ApiResponse 래퍼 / G level/start/end 전달)
+- `frontend/src/components/__tests__/SystemLogsTab.test.tsx` — +5 케이스 (검색 호출 + q 인자 / 0건 메시지 / 결과 렌더 + 초기화 노출 / 초기화 → 페이징 모드 복귀 / has_more 안내)
+
+### 안전 원칙
+- 매매 코드(`src/engine/`, `src/api/`, `src/realtime/`) 무수정 — `risk.on_tick` / `order_engine` / 6 전략 변경 0
+- DB DELETE 안전 가드 — WHERE cutoff None 시 RuntimeError + 1회 cap 100,000 + 영구 로그 1행
+- scheduler 통합부 예외 graceful — `[log_retention_skip]` INFO + 다음 사이클 재시도. settlement 본 흐름 보호
+- 사이클 18 보존 (OPSP backoff / K stale watcher / 5xx dedupe / UI 컨텍스트)
+- KIS API 호출 0 (DB 모듈만)
+
+### 운영 효과 측정
+- Retention 실효 일자: 2026-05-22 (영업일 20:10 첫 _settle 사이클 후. 본 EC2 배포 직후 INFO ~5만건 / HIGH ~수천건 일괄 정리 예상)
+- 검색 응답 시간: limit 200 단일 응답 + ILIKE 인덱스 미지정 (full scan) — 30일 윈도우 100만건 기준 ~500ms~1s 추정 (supabase RTT 포함). PostgreSQL `pg_trgm` 인덱스 추가는 사이클 6-bis 후속 검토
+
+---
+
 ## 커밋 5분할 (squash 금지)
 1. `feat(strategies): VB/LTV get_targets_status returns active boards only`
 2. `feat(scanner): cap breakout to 25 slots in priority queue (protect momentum)`
