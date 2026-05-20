@@ -1,11 +1,13 @@
 /**
  * 사이클 5 (2026-05-17): 외부 통합 토글 카드.
  * 사이클 8 (2026-05-18) 확장: 매수 가드 4 모드 + 4 임계값 조정.
+ * 사이클 23 (2026-05-20) 확장: AI 자문 자동 적용 토글 (4번째 토글).
  *
- * 3 토글 통합 (운영자 시야 집중을 위해 단일 카드 + 분리 행):
+ * 4 토글 통합 (운영자 시야 집중을 위해 단일 카드 + 분리 행):
  * - dkstock-regime: 매크로 레짐 fetch (활성화 시 백그라운드 fetch trigger)
  * - kis-mcp: 외부 백테스트 서버 (자문 시점에만 사용)
  * - auto-regime-adjust: 매크로 레짐 → cash_usage_ratio 자동 갱신
+ * - auto-apply: AI 자문 자동 적용 (감액만 + 50% cap, 기본 OFF)
  *
  * 사이클 8 — 매수 가드 영역:
  * - 모드 select (OFF/WARN/SOFT/HARD) + ConfirmModal 이중 확인
@@ -23,16 +25,19 @@ import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import {
+  getAutoApply,
   getAutoRegimeAdjust,
   getBuyBlock,
   getDkstockRegime,
   getKisMcp,
+  setAutoApply,
   setAutoRegimeAdjustToggle,
   setBuyBlock,
   setDkstockRegime,
   setKisMcp,
 } from '../api/integrations'
 import type {
+  AutoApplyStatus,
   BuyBlockMode,
   BuyBlockState,
   IntegrationKey,
@@ -87,6 +92,19 @@ const TOGGLES: ToggleMeta[] = [
   },
 ]
 
+// 사이클 23 P3-3 — auto-apply 별도 섹션 (DB-only, .env fallback 없음)
+const AUTO_APPLY_META: ToggleMeta = {
+  key: 'auto-apply',
+  label: 'AI 자문 자동 적용 (감액만 + 50% cap)',
+  description:
+    '20:00 AI 자문 직후 weight 감액 권고 + 보수적 파라미터 (stop_loss/position_ratio/daily_loss_limit) 를 자동 적용합니다. 증액 권고는 운영자 명시 적용만 가능합니다.',
+  confirmOnMessage:
+    'AI 자문 자동 적용을 활성화합니다. 매일 20:00 자문 직후 weight 감액 (50% cap) + 보수적 파라미터 가 자동 적용됩니다. 증액은 운영자 명시 적용만 가능합니다. 진행하시겠습니까?',
+  confirmOffMessage:
+    'AI 자문 자동 적용을 비활성화합니다. 모든 자문은 운영자 수동 적용에서만 반영됩니다. 진행하시겠습니까?',
+  envVarName: '— (DB 키 only, 사이클 23)',
+}
+
 function getterFor(key: IntegrationKey) {
   switch (key) {
     case 'dkstock-regime':
@@ -95,6 +113,13 @@ function getterFor(key: IntegrationKey) {
       return getKisMcp
     case 'auto-regime-adjust':
       return getAutoRegimeAdjust
+    case 'auto-apply':
+      return () => getAutoApply().then((s: AutoApplyStatus) => ({
+        enabled: s.enabled,
+        source: 'db' as const,
+        env_value: false,
+        db_value: s.enabled,
+      }))
   }
 }
 
@@ -106,6 +131,8 @@ function setterFor(key: IntegrationKey) {
       return setKisMcp
     case 'auto-regime-adjust':
       return setAutoRegimeAdjustToggle
+    case 'auto-apply':
+      return setAutoApply
   }
 }
 
@@ -124,6 +151,8 @@ export default function IntegrationToggleCard() {
         {TOGGLES.map((meta) => (
           <ToggleRow key={meta.key} meta={meta} />
         ))}
+        {/* 사이클 23 P3-3 — AI 자문 자동 적용 토글 (4번째, DB-only) */}
+        <ToggleRow key={AUTO_APPLY_META.key} meta={AUTO_APPLY_META} />
       </div>
 
       {/* 사이클 8 (2026-05-18) — 매수 가드 4 모드 + 4 임계값 */}

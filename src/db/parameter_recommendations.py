@@ -115,7 +115,8 @@ async def update_recommendation_status(
     """
     update_data: dict = {"status": status}
     now_iso = datetime.now(KST).isoformat()
-    if status in ("applied", "partial"):
+    if status in ("applied", "partial", "applied_auto"):
+        # 사이클 23: applied_auto 는 자동 적용 전용 (운영자 수동 'applied' 와 분리)
         update_data["applied_at"] = now_iso
         if applied_params is not None:
             update_data["applied_params"] = applied_params
@@ -178,6 +179,21 @@ async def list_recommendations_pending_backtest(target_date: date) -> list[dict]
         .select("*")
         .eq("target_date", target_date.isoformat())
         .is_("backtest_summary", "null")
+        .execute()
+    )
+    return result.data or []
+
+
+async def list_pending_by_date(target_date: date) -> list[dict]:
+    """사이클 23 P3-1 — target_date 의 status='pending' 자문 전체 조회.
+
+    auto_apply_recommendations() 에서 자동 적용 대상 조회에 사용.
+    """
+    result = await asyncio.to_thread(
+        lambda: supabase.table("parameter_recommendations")
+        .select("*")
+        .eq("target_date", target_date.isoformat())
+        .eq("status", "pending")
         .execute()
     )
     return result.data or []

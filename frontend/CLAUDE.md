@@ -107,12 +107,13 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings 는 `React.la
 
 ### `IntegrationToggleCard`
 
-`CashUsageRatioCard` 직하 신설. 3 토글 + 매수 가드 4 모드 영역:
+`CashUsageRatioCard` 직하 신설. 4 토글 + 매수 가드 4 모드 영역:
 
-**토글 3종** (`ConfirmModal` 이중 확인):
+**토글 4종** (`ConfirmModal` 이중 확인):
 - `data-testid="toggle-dkstock-regime"`: 외부 매크로 서버 (dkstock.cloud) 활성. 활성화 후 3s `data-testid="fetch-progress-dkstock-regime"` 진행 표시 + marketRegime invalidate
 - `data-testid="toggle-kis-mcp"`: 외부 백테스트 서버 활성 (자문 시점만 사용)
 - `data-testid="toggle-auto-regime-adjust"`: 매크로 레짐 → cash_usage_ratio 자동 갱신
+- **`data-testid="toggle-auto-apply"`** (사이클 23 P3-3): AI 자문 자동 적용. 기본 OFF. ON 시 20:00 자문 직후 weight 감액(50% cap) + 보수적 파라미터 자동 적용. DB-only (`auto_apply_enabled` 키). API: `getAutoApply/setAutoApply` — `/api/integrations/auto-apply`
 - `data-testid="source-badge-{key}"` 배지: source='db' 파란 `DB` / 'env' 회색 `env` (fallback 가시화)
 - API 에러: `data-testid="toggle-error-{key}"` 빨간 박스 + "잠시 후 재시도하세요"
 

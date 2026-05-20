@@ -94,6 +94,17 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "long_ma_period": (20, 120),
     "volume_multiplier": (1.0, 5.0),
     "atr_trail_mult": (1.0, 5.0),
+    # ↓ 사이클 23 — VCP 핵심 진입 품질 4 키
+    "base_depth_pct": (0.10, 0.50),
+    "volume_contraction_ratio": (0.30, 1.00),
+    "breakout_volume_mult": (1.0, 5.0),  # BFB 도 동일 키 — VCP/BFB 공용
+    "last_pullback_max": (0.03, 0.15),
+    # ↓ 사이클 23 — P2 신규 가드/필터 5 키
+    "breakout_retention_minutes": (1, 30),
+    "breakout_fail_n_days": (2, 20),
+    "max_breakout_extension_pct": (0.5, 10.0),
+    "box_contraction_period": (5, 30),
+    "max_box_volatility_pct": (1.0, 15.0),
 }
 
 # 정수형 파라미터 — 캐스트 대상
@@ -105,6 +116,10 @@ INT_PARAMS = {
     "exclude_consecutive_limit",
     "donchian_period",
     "long_ma_period",
+    # ↓ 사이클 23 — 정수 캐스트 대상
+    "breakout_retention_minutes",
+    "breakout_fail_n_days",
+    "box_contraction_period",
 }
 
 
@@ -932,3 +947,173 @@ async def _emit_pending_summaries(
             logger.exception(
                 "[backtest_poll] backtest_summary 갱신 실패: rec_id=%s", rec_id,
             )
+
+
+# ---------------------------------------------------------------------------
+# 사이클 23 P3-1+2 — AI 자문 자동 적용 (감액만 + 50% cap + 보수적 파라미터)
+# ---------------------------------------------------------------------------
+# 보수적 파라미터 키 (자동 적용 허용 목록) — 손절/포지션 비율 계열만
+_CONSERVATIVE_KEYS: frozenset[str] = frozenset({
+    "stop_loss_rate",
+    "position_ratio",
+    "daily_loss_limit",
+    "intraday_stop_loss",
+    "overnight_stop_loss",
+    "stop_loss_main",
+    "stop_loss_pre_nxt",
+})
+
+# 음수 손절 키 — 절대값이 작을수록 보수적 (예: -7 → -5)
+_STOP_LOSS_KEYS: frozenset[str] = frozenset({
+    "stop_loss_rate",
+    "intraday_stop_loss",
+    "overnight_stop_loss",
+    "stop_loss_main",
+    "stop_loss_pre_nxt",
+    "daily_loss_limit",
+})
+
+# 자동 적용 DB 함수
+from src.db.strategy_config import save_weights, save_params
+
+
+async def auto_apply_recommendations(target_date: date) -> dict:
+    """20:00 AI 자문 직후 자동 적용 (감액만 + 50% cap + 보수적 파라미터만).
+
+    사이클 23 P3-1+2. 핵심 안전 원칙:
+    - auto_apply_enabled=False → 즉시 disabled 반환
+    - recommended_weight < current_weight 만 자동 적용 (증액 SKIP)
+    - 한 사이클 내 max 50% 감액 cap: new = max(recommended, current × 0.5)
+    - PARAM_RANGES 화이트리스트 통과된 보수적 파라미터만 자동 적용
+    - 영구 로그: [auto_weight_apply] / [auto_params_apply] /
+                 [auto_apply_skip_increase] / [auto_apply_safeguard_skip]
+    - status='applied_auto' (수동 'applied' 와 분리)
+
+    Returns:
+        {"applied": N, "skipped": M, "errors": [...]}
+    """
+    from src.db.parameter_recommendations import (
+        list_pending_by_date,
+        update_recommendation_status,
+    )
+    from src.db.system_config import get_auto_apply_enabled
+    from src.db.system_logs import write_log
+
+    # 1) 토글 확인
+    enabled = await get_auto_apply_enabled()
+    if not enabled:
+        return {"applied": 0, "skipped": 0, "reason": "disabled"}
+
+    # 2) target_date 의 pending 자문 목록 조회
+    pending_recs = await list_pending_by_date(target_date)
+    if not pending_recs:
+        return {"applied": 0, "skipped": 0, "reason": "no_pending"}
+
+    # 3) registry 에서 전략 객체 조회
+    try:
+        from src.engine.scheduler import trading_scheduler
+        registry = trading_scheduler.registry
+    except Exception as e:
+        logger.exception("[auto_apply] registry 조회 실패")
+        return {"applied": 0, "skipped": 0, "errors": [str(e)]}
+
+    applied = 0
+    skipped = 0
+    errors: list[str] = []
+
+    for rec in pending_recs:
+        sid = rec.get("strategy_id") or ""
+        rec_id = rec.get("id") or ""
+        recommended_weight = rec.get("recommended_weight")
+        recommended_params = rec.get("recommended_params") or {}
+
+        try:
+            strategy = registry.get(sid) if hasattr(registry, "get") else None
+            if strategy is None:
+                # all() 순회로 fallback
+                strategy = next(
+                    (s for s in registry.all() if s.strategy_id == sid), None
+                )
+            if strategy is None:
+                logger.warning("[auto_apply] 전략 미발견: %s", sid)
+                skipped += 1
+                continue
+
+            current_weight = float(strategy.config.weight)
+            applied_weight: float | None = None
+            auto_params: dict = {}
+
+            # ① weight 자동 감액 (감액만, 증액 SKIP)
+            if recommended_weight is not None:
+                rw = float(recommended_weight)
+                if rw >= current_weight:
+                    # 증액 차단
+                    await write_log(
+                        "INFO",
+                        f"[auto_apply_skip_increase] strategy={sid}"
+                        f" recommended={rw} current={current_weight}",
+                    )
+                    skipped += 1
+                    continue  # 이 자문 전체 skip (weight 증액이면 params 도 skip)
+
+                # 50% cap 적용
+                cap = current_weight * 0.5
+                new_weight = max(rw, cap)
+
+                await save_weights({sid: new_weight})
+                strategy.config.weight = new_weight
+                applied_weight = new_weight
+
+                await write_log(
+                    "INFO",
+                    f"[auto_weight_apply] strategy={sid} prev={current_weight}"
+                    f" new={new_weight} reason='recommended<current, cap={cap}'",
+                )
+
+            # ② params 보수적 자동 적용 (P3-2)
+            for k, v in recommended_params.items():
+                if k not in _CONSERVATIVE_KEYS:
+                    continue  # 보수적 키만 처리
+                if k not in PARAM_RANGES:
+                    await write_log(
+                        "INFO",
+                        f"[auto_apply_safeguard_skip] key={k}"
+                        f" reason='out_of_param_ranges'",
+                    )
+                    continue
+                current_v = strategy.config.params.get(k)
+                is_conservative = False
+                if k in _STOP_LOSS_KEYS:
+                    # 음수 키: 절대값 작아질수록 보수적 (예: -7 → -5: float(-5) > float(-7))
+                    if current_v is not None and float(v) > float(current_v):
+                        is_conservative = True
+                elif k == "position_ratio":
+                    # 양수 키: 작아질수록 보수적
+                    if current_v is not None and float(v) < float(current_v):
+                        is_conservative = True
+                if is_conservative:
+                    strategy.config.params[k] = v
+                    auto_params[k] = v
+
+            if auto_params:
+                await save_params(sid, strategy.config.params)
+                await write_log(
+                    "INFO",
+                    f"[auto_params_apply] strategy={sid}"
+                    f" keys={list(auto_params.keys())} values={auto_params}",
+                )
+
+            # ③ status='applied_auto' 마킹
+            await update_recommendation_status(
+                rec_id,
+                "applied_auto",
+                applied_params=auto_params if auto_params else None,
+                applied_weight=applied_weight,
+            )
+            applied += 1
+
+        except Exception as e:
+            logger.exception("[auto_apply] 처리 실패: strategy=%s", sid)
+            errors.append(f"{sid}: {e!s}")
+
+    return {"applied": applied, "skipped": skipped, "errors": errors}

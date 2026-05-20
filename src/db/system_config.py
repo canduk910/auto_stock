@@ -437,6 +437,30 @@ async def _set_float(key: str, value: float) -> None:
     await asyncio.to_thread(_upsert)
 
 
+# ---------------------------------------------------------------------------
+# 사이클 23 (2026-05-20) — AI 자문 자동 적용 토글
+# ---------------------------------------------------------------------------
+# 기본 False — 안전 우선. 운영자가 명시 활성화 후에만 P3 자동 적용 작동.
+_AUTO_APPLY_ENABLED_KEY = "auto_apply_enabled"
+
+
+async def get_auto_apply_enabled() -> bool:
+    """AI 자문 자동 적용 토글. 기본 False — 안전 우선.
+
+    사이클 23 P3-3. 키 부재 시 False (안전 우선, 기존 수동 흐름 보존).
+    """
+    v = await _get_bool_or_none(_AUTO_APPLY_ENABLED_KEY)
+    return bool(v) if v is not None else False
+
+
+async def set_auto_apply_enabled(value: bool) -> None:
+    """AI 자문 자동 적용 토글 저장. bool 강제 변환.
+
+    사이클 23 P3-3.
+    """
+    await _set_bool(_AUTO_APPLY_ENABLED_KEY, value)
+
+
 async def set_buy_block_thresholds(
     vix_threshold: Optional[float] = None,
     fg_high_threshold: Optional[float] = None,

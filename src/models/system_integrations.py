@@ -71,3 +71,18 @@ class BuyBlockUpdateRequest(BaseModel):
     fg_high_threshold: Optional[float] = Field(default=None, ge=50.0, le=100.0)
     fg_low_threshold: Optional[float] = Field(default=None, ge=0.0, le=50.0)
     defensive_enabled: Optional[bool] = None
+
+
+# ---------------------------------------------------------------------------
+# 사이클 23 (2026-05-20) — AI 자문 자동 적용 토글
+# ---------------------------------------------------------------------------
+class AutoApplyRequest(BaseModel):
+    """`PUT /api/integrations/auto-apply` 요청."""
+
+    enabled: bool
+
+
+class AutoApplyStatus(BaseModel):
+    """`GET /api/integrations/auto-apply` 응답."""
+
+    enabled: bool

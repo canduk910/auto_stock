@@ -46,6 +46,7 @@ def _empty_scan_stats() -> dict:
     return {
         "universe_candidates": 0,
         "universe_filtered": 0,
+        "mcap_pass": 0,  # 사이클 23 P1-3 — 시총 컷 통과 카운터
         "candle_fetch_ok": 0,
         "trend_filter_pass": 0,
         "base_pass": 0,
@@ -426,6 +427,7 @@ class VcpBreakoutStrategy(StrategyBase):
                 if name:
                     ticker_names[ticker] = name
                 if mcap >= min_mcap:
+                    self._scan_stats["mcap_pass"] += 1  # 사이클 23 P1-3
                     filtered.append(ticker)
             except Exception:
                 continue

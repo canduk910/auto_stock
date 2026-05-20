@@ -27,6 +27,8 @@ from src.config import settings
 from src.db import system_config as sc
 from src.models.response import ApiResponse
 from src.models.system_integrations import (
+    AutoApplyRequest,
+    AutoApplyStatus,
     BuyBlockStatusResponse,
     BuyBlockThresholdsModel,
     BuyBlockUpdateRequest,
@@ -338,5 +340,41 @@ async def set_buy_block(req: BuyBlockUpdateRequest):
         data=status.model_dump(),
         message=(
             f"매수 가드 모드 '{status.mode}' 적용. 다음 매수 신호부터 즉시 반영됩니다."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# 사이클 23 (2026-05-20) — AI 자문 자동 적용 토글
+# ---------------------------------------------------------------------------
+@router.get("/auto-apply", response_model=ApiResponse)
+async def get_auto_apply():
+    """AI 자문 자동 적용 토글 조회.
+
+    기본 False — 안전 우선. 운영자 명시 활성화 후에만 자동 감액 + 보수적 파라미터 적용.
+    """
+    enabled = await sc.get_auto_apply_enabled()
+    return ApiResponse(success=True, data=AutoApplyStatus(enabled=enabled).model_dump())
+
+
+@router.put("/auto-apply", response_model=ApiResponse)
+async def put_auto_apply(req: AutoApplyRequest):
+    """AI 자문 자동 적용 토글 변경.
+
+    ON: 20:00 AI 자문 직후 weight 감액(50% cap) + 보수적 파라미터 자동 적용.
+    OFF: 기존 수동 흐름 (apply_weight=true 명시) 만 유지.
+    """
+    try:
+        await sc.set_auto_apply_enabled(req.enabled)
+    except Exception as e:
+        logger.exception("[auto_apply] DB 갱신 실패: %s", e)
+        raise HTTPException(status_code=500, detail="DB 저장 실패")
+    return ApiResponse(
+        success=True,
+        data=AutoApplyStatus(enabled=req.enabled).model_dump(),
+        message=(
+            "AI 자문 자동 적용을 활성화했습니다. 매일 20:00 자문 직후 weight 감액(50% cap) + 보수적 파라미터가 자동 적용됩니다."
+            if req.enabled
+            else "AI 자문 자동 적용을 비활성화했습니다. 모든 자문은 운영자 수동 적용에서만 반영됩니다."
         ),
     )

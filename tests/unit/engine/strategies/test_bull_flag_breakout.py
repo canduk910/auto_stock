@@ -36,9 +36,12 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture
 def strat():
-    return BullFlagBreakoutStrategy(
+    s = BullFlagBreakoutStrategy(
         StrategyConfig(strategy_id="bull_flag_breakout", name="눌림목 돌파", weight=0.0)
     )
+    # 사이클 23 P2-1: 기존 테스트 회귀 — retention=0이면 즉시 진입 (기존 동작 보존)
+    s.config.params["breakout_retention_minutes"] = 0
+    return s
 
 
 def _seed_candidate(

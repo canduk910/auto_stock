@@ -1,10 +1,12 @@
 /**
  * 사이클 5 (2026-05-17): 외부 통합 토글 API 클라이언트.
  * 사이클 8 (2026-05-18) 확장: 매수 가드 4 모드 + 4 임계값.
+ * 사이클 23 (2026-05-20) 확장: AI 자문 자동 적용 토글.
  */
 import apiClient from './client'
 import type { ApiResponse } from '../types/common'
 import type {
+  AutoApplyStatus,
   BuyBlockState,
   BuyBlockUpdateRequest,
   IntegrationKey,
@@ -56,6 +58,24 @@ export async function setBuyBlock(
   const { data } = await apiClient.put<ApiResponse<BuyBlockState>>(
     '/integrations/buy-block',
     payload,
+  )
+  return data.data
+}
+
+// ---------------------------------------------------------------------------
+// 사이클 23 (2026-05-20) — AI 자문 자동 적용 토글
+// ---------------------------------------------------------------------------
+export async function getAutoApply(): Promise<AutoApplyStatus> {
+  const { data } = await apiClient.get<ApiResponse<AutoApplyStatus>>(
+    '/integrations/auto-apply',
+  )
+  return data.data
+}
+
+export async function setAutoApply(enabled: boolean): Promise<AutoApplyStatus> {
+  const { data } = await apiClient.put<ApiResponse<AutoApplyStatus>>(
+    '/integrations/auto-apply',
+    { enabled },
   )
   return data.data
 }

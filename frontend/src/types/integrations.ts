@@ -19,9 +19,15 @@ export interface IntegrationToggleRequest {
 }
 
 /**
- * IntegrationToggleCard 가 노출하는 3 토글 키.
+ * IntegrationToggleCard 가 노출하는 4 토글 키.
+ * 사이클 23 (2026-05-20): 'auto-apply' 추가 — AI 자문 자동 적용 토글.
  */
-export type IntegrationKey = 'dkstock-regime' | 'kis-mcp' | 'auto-regime-adjust'
+export type IntegrationKey = 'dkstock-regime' | 'kis-mcp' | 'auto-regime-adjust' | 'auto-apply'
+
+/** 사이클 23 — AI 자문 자동 적용 토글 상태 */
+export interface AutoApplyStatus {
+  enabled: boolean
+}
 
 // ---------------------------------------------------------------------------
 // 사이클 8 (2026-05-18) — 매수 가드 4 모드 + 4 임계값

@@ -37,6 +37,39 @@
 - **donchian_swing 일중 시세 REST 폴링 (`_swing_rest_poll_loop`) 제거 금지** — 09:30~15:20 KRX 메인 시간대 60s 주기로 보유+스캔 합집합 폴링 → ticker_prices 갱신 + 보유 손절 평가 재사용. WebSocket stale 보강
 - 매수 신호는 반드시 "돌파 순간" 감지 (이전 틱 < 기준가 AND 현재 틱 ≥ 기준가)
 
+## 사이클 23 파라미터 확장 (2026-05-20)
+
+### BFB `breakout_retention_minutes` (P2-1)
+- 기본 3분. 첫 돌파 감지 → `_breakout_first_seen[ticker]=now` 등록 + NONE. 경과 후 BUY 발사.
+- 가격 후퇴 시 dict pop. `_reset_daily_state()` 에서 clear.
+- `DEFAULT_PARAMS["breakout_retention_minutes"]=3`. `PARAM_RANGES["breakout_retention_minutes"]=(1,30)`. `INT_PARAMS` 등록.
+- 기존 동작 회귀: `retention_minutes=0` 이면 즉시 BUY (기존 테스트 픽스처 활용).
+
+### BFB `min_trade_amount_failed` scan_stats (P1-2)
+- `_empty_scan_stats()` 키 추가. `_scan_universe`에서 시총 통과 + 거래대금 미달 시 증가.
+
+### VCP `mcap_pass` scan_stats (P1-3)
+- `_empty_scan_stats()` 키 추가. `_scan_universe`에서 시총 통과 시 증가.
+
+### donchian `breakout_fail_n_days` (P2-2)
+- 기본 5일. `check_exit_signal` 에서 보유 N일 + 현재가 < `_breakout_high[ticker]` → STOP_LOSS.
+- `_breakout_high`: 매수 신호 발사 시 donchian_high 등록. graceful skip (0이면 분기 진입 안 함).
+- 기존 ATR 트레일링/하드 손절 보존, 추가 분기만.
+
+### donchian `max_breakout_extension_pct` (P2-3)
+- 기본 3.0%. `check_buy_signal` 갭 스킵 *후*, BUY 확정 *전* 삽입.
+- `daily_high = max(stck_hgpr, high_price, current_price, open_price)`. 초과 시 NONE.
+- 기존 `gap_skip_threshold` 와 별개 (시가 갭 vs 당일 고가 추격).
+
+### donchian `box_contraction_period` + `max_box_volatility_pct` (P2-4)
+- 기본 10일, 5.0%. `prepare()` ATR 통과 후 박스 수축 필터.
+- 직전 N일 (high.max - low.min) / close.mean × 100 > max_box_volatility_pct → skip.
+- `_scan_stats["box_contraction_pass"]` 키 추가.
+
+### VCP PARAM_RANGES 화이트리스트 (P1-1)
+- `base_depth_pct(0.10,0.50)` / `volume_contraction_ratio(0.30,1.00)` / `breakout_volume_mult(1.0,5.0)` / `last_pullback_max(0.03,0.15)` 추가.
+- P2 신규 5 키도 PARAM_RANGES/INT_PARAMS 동시 등록.
+
 ## 새 전략 추가
 1. 본 디렉토리에 `StrategyBase` 서브클래스 (`prepare/check_buy_signal/check_exit_signal/calc_buy_quantity`)
 2. `scheduler.py` `__init__` 에 `registry.register()` 추가

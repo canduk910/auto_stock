@@ -481,6 +481,23 @@ class TradingScheduler:
                     f"전략수정 AI자문 생성 실패: type={type(e).__name__} msg={e!s} trace={tb[:1000]}",
                 )
 
+            # 사이클 23 P3-1 — AI 자문 자동 적용 (감액만 + 50% cap)
+            try:
+                from src.engine.recommendation_engine import auto_apply_recommendations
+                target_date = datetime.now(KST).date()
+                result = await auto_apply_recommendations(target_date)
+                await write_log(
+                    "INFO",
+                    f"20:00 AI 자문 자동 적용: applied={result.get('applied', 0)}"
+                    f" skipped={result.get('skipped', 0)} reason={result.get('reason', '')}",
+                )
+            except Exception as e:
+                logger.exception("AI 자문 자동 적용 실패")
+                await write_log(
+                    "ERROR",
+                    f"AI 자문 자동 적용 실패: {type(e).__name__}: {e!s}",
+                )
+
             # 20:10 정산
             await self._wait_until(TIME_SETTLEMENT)
             self._phase = "settling"

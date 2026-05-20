@@ -43,6 +43,7 @@ def _empty_scan_stats() -> dict:
         "volume_contraction_pass": 0,
         "atr_pass": 0,
         "final_prepared": 0,
+        "min_trade_amount_failed": 0,  # 사이클 23 P1-2 — 거래대금 미달 카운터
         "last_run_at": None,
     }
 
@@ -91,6 +92,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
         "max_scan_stocks": 100,
         # 일반
         "daily_loss_limit": -6.0,
+        # 사이클 23 P2-1 — 돌파 유지시간 조건 (가짜 돌파 차단)
+        "breakout_retention_minutes": 3,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -106,6 +109,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
         self._partial_exit: dict[str, bool] = {}
         # ticker -> 쿨다운 만료일(이날 이전엔 재진입 금지)
         self._cooldown_until: dict[str, date] = {}
+        # 사이클 23 P2-1 — ticker -> 첫 돌파 감지 시각 (retention 대기용)
+        self._breakout_first_seen: dict[str, datetime] = {}
         self._scan_stats: dict = _empty_scan_stats()
 
     # ------------------------------------------------------------------
@@ -356,7 +361,11 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 mcap = price * listed
                 prdy_vol = int(detail.get("prdy_vol", "0"))
                 trade_amt = prdy_vol * price
-                if mcap < min_mcap or trade_amt < min_trade:
+                if mcap < min_mcap:
+                    continue
+                if trade_amt < min_trade:
+                    # 사이클 23 P1-2 — 거래대금 미달 카운터 (시총 통과 후 거래대금 미달)
+                    self._scan_stats["min_trade_amount_failed"] += 1
                     continue
                 if not name:
                     name = (detail.get("hts_kor_isnm") or "").strip() or STATIC_TICKER_NAMES.get(ticker, "")
@@ -435,11 +444,39 @@ class BullFlagBreakoutStrategy(StrategyBase):
         if flag_high <= 0 or current_price <= 0:
             return Signal.NONE
 
-        # 돌파 순간 (prev<flag_high AND now>=flag_high)
+        # 사이클 23 P2-1 — breakout_retention_minutes 유지시간 가드
         prev = self._prev_price.get(ticker, 0)
         self._prev_price[ticker] = current_price
-        if not (prev < flag_high <= current_price):
-            return Signal.NONE
+        now_kst = datetime.now(KST)
+        retention_min = int(self.config.params.get("breakout_retention_minutes", 3))
+
+        first_seen = self._breakout_first_seen.get(ticker)
+        if first_seen is not None:
+            # 이미 돌파 대기 중
+            if current_price < flag_high:
+                # 후퇴 — 대기 종료
+                self._breakout_first_seen.pop(ticker, None)
+                logger.info("BFB 돌파 후퇴(retention 대기 종료): %s", ticker)
+                return Signal.NONE
+            elapsed = (now_kst - first_seen).total_seconds()
+            if elapsed < retention_min * 60:
+                # 아직 대기 중
+                return Signal.NONE
+            # retention 충족 — 정상 흐름 (거래량 컷 등 다음 가드로 진행)
+            self._breakout_first_seen.pop(ticker, None)
+        else:
+            # 첫 돌파 감지 여부 확인 (prev<flag_high AND now>=flag_high)
+            if not (prev < flag_high <= current_price):
+                return Signal.NONE
+            if retention_min > 0:
+                # 첫 돌파 감지 → 대기 등록 + NONE
+                self._breakout_first_seen[ticker] = now_kst
+                logger.info(
+                    "BFB 돌파 1차 감지(retention 대기 시작): %s flag_high(%d) retention=%d분",
+                    ticker, flag_high, retention_min,
+                )
+                return Signal.NONE
+            # retention_min == 0 이면 즉시 진행 (기존 동작 회귀)
 
         # 거래량 컷
         from src.engine.scanner import ticker_prices
@@ -561,4 +598,10 @@ class BullFlagBreakoutStrategy(StrategyBase):
         days = self.config.params["reentry_cooldown_days"]
         today = datetime.now(KST).date()
         self._cooldown_until[ticker] = today + timedelta(days=days)
+        # 사이클 23 P2-1 — 청산 후 retention 대기 상태 정리
+        self._breakout_first_seen.pop(ticker, None)
         # 매수 1회 가드도 함께 해제 (당일 매도 set 이 차단하므로 영향 없음)
+
+    def _reset_daily_state(self) -> None:
+        """사이클 23 P2-1 — 일일 초기화 시 _breakout_first_seen 정리."""
+        self._breakout_first_seen.clear()

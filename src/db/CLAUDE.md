@@ -52,6 +52,8 @@ Supabase (PostgreSQL) CRUD 모듈.
   - `get_buy_block_thresholds() -> BuyBlockThresholds` (Pydantic) / `set_buy_block_thresholds(vix_threshold=, fg_high_threshold=, fg_low_threshold=, defensive_enabled=)` 부분 갱신
   - 4 키: `buy_block_vix_threshold` (25.0) / `buy_block_fg_high_threshold` (85.0) / `buy_block_fg_low_threshold` (15.0) / `buy_block_regime_defensive_enabled` (true)
   - **.env fallback 없음** — 운영 가변 (DB 미설정 → 코드 디폴트)
+- **사이클 23 AI 자문 자동 적용 토글**:
+  - `get_auto_apply_enabled() -> bool` / `set_auto_apply_enabled(value)`: 키 `auto_apply_enabled`. 기본 **False** (안전 우선). .env fallback 없음 — 운영자 명시 활성화 후에만 P3 자동 적용 작동
 - 범위 외 입력은 `ValueError`. supabase 동기 호출은 `asyncio.to_thread` 위임
 
 ## kis_quote_accounts.py — 보조 KIS 시세 수신 계좌 풀
@@ -82,6 +84,7 @@ Supabase (PostgreSQL) CRUD 모듈.
 - `update_recommendation_status(id, status, applied_params=..., applied_weight=...)`: status 갱신 + `applied_at`/`rejected_at` 자동 기록. applied/partial 상태에서만 페이로드 포함
 - `expire_pending_before(target_date)`: 이전 pending 자동 만료
 - 컬럼: `recommended_weight` NUMERIC nullable / `code_review_notes` TEXT nullable (≤2000자) / `applied_weight` NUMERIC nullable / `weight_reasoning` TEXT nullable (≤1000자) / `backtest_summary` JSONB. INSERT 시점 `applied_weight=None`, apply 라우트가 사용자 명시 토글일 때만 채움
+- **사이클 23**: `status='applied_auto'` 추가 — AI 자문 자동 적용 전용 (`migration 028`). 운영자 수동 'applied' 와 분리하여 추적성 확보. `list_pending_by_date(target_date)` 헬퍼 신규 추가
 
 ## DB 스키마
 

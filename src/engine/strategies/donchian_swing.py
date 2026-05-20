@@ -33,6 +33,7 @@ def _empty_scan_stats() -> dict:
         "ema_uptrend_pass": 0,
         "volume_pass": 0,
         "atr_pass": 0,
+        "box_contraction_pass": 0,  # 사이클 23 P2-4 — 박스 수축 통과 카운터
         "final_prepared": 0,
         "last_run_at": None,
     }
@@ -63,6 +64,13 @@ class DonchianSwingStrategy(StrategyBase):
         "position_ratio": 0.20,
         "max_positions": 5,
         "daily_loss_limit": -8.0,
+        # 사이클 23 P2-2 — 시간 기반 청산 (멀티데이 약한 이탈 빠른 정리)
+        "breakout_fail_n_days": 5,
+        # 사이클 23 P2-3 — 돌파폭 과열 상한 (추격 금지)
+        "max_breakout_extension_pct": 3.0,
+        # 사이클 23 P2-4 — 박스 수축 보조 필터
+        "box_contraction_period": 10,
+        "max_box_volatility_pct": 5.0,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -72,6 +80,8 @@ class DonchianSwingStrategy(StrategyBase):
         self._candidates: dict[str, dict] = {}  # ticker -> {prev_close, atr, ...}
         self._scanned_tickers: list[str] = []
         self._bought_today: set[str] = set()  # 당일 진입 시도 종목 (중복 방지)
+        # 사이클 23 P2-2 — ticker -> 진입 시 돌파선 (20일 신고가)
+        self._breakout_high: dict[str, int] = {}
         # 단계별 탈락 통계 — prepare() 실행 시마다 갱신, 프론트 깔때기 시각화용
         self._scan_stats: dict = _empty_scan_stats()
 
@@ -187,6 +197,24 @@ class DonchianSwingStrategy(StrategyBase):
                 if atr <= 0:
                     continue
                 stats["atr_pass"] += 1
+
+                # 사이클 23 P2-4 — 박스 수축 보조 필터 (변동성 축소 후 돌파 패턴 강화)
+                box_period = int(self.config.params.get("box_contraction_period", 10))
+                max_box_vol = float(self.config.params.get("max_box_volatility_pct", 5.0))
+                if len(candles) > box_period:
+                    box_highs = highs[1: box_period + 1]
+                    box_lows = lows[1: box_period + 1]
+                    box_closes = closes[1: box_period + 1]
+                    if box_highs and box_lows and box_closes:
+                        box_range = max(box_highs) - min(box_lows)
+                        box_mean = sum(box_closes) / len(box_closes)
+                        if box_mean > 0:
+                            vol_pct = box_range / box_mean * 100
+                            if vol_pct > max_box_vol:
+                                continue  # 박스 수축 실패 (변동성 너무 큼)
+                            stats["box_contraction_pass"] += 1
+                        else:
+                            continue
 
                 # scanner.ticker_prev_close 사전 등록 (등락률 필터 등)
                 from src.engine.scanner import ticker_prev_close
@@ -514,7 +542,31 @@ class DonchianSwingStrategy(StrategyBase):
                 self._bought_today.add(ticker)
                 return Signal.NONE
 
+        # 사이클 23 P2-3 — 돌파폭 과열 상한 가드 (추격 금지)
+        donchian_high = info["donchian_high"]
+        if donchian_high > 0:
+            max_ext = float(self.config.params.get("max_breakout_extension_pct", 3.0))
+            from src.engine.scanner import ticker_prices as _ticker_prices
+            price_info = _ticker_prices.get(ticker, {})
+            daily_high = max(
+                int(price_info.get("stck_hgpr", 0) or 0),
+                int(price_info.get("high_price", 0) or 0),
+                current_price,
+                open_price,
+            )
+            if daily_high > donchian_high:
+                ext_pct = (daily_high - donchian_high) / donchian_high * 100
+                if ext_pct > max_ext:
+                    logger.info(
+                        "[donchian_extension_skip] ticker=%s daily_high=%d donchian_high=%d"
+                        " ext_pct=%.2f > %.2f",
+                        ticker, daily_high, donchian_high, ext_pct, max_ext,
+                    )
+                    return Signal.NONE
+
         self._bought_today.add(ticker)
+        # 사이클 23 P2-2 — 매수 신호 발사 시 진입 돌파선 등록
+        self._breakout_high[ticker] = info["donchian_high"]
         logger.info(
             "도치안 스윙 매수 신호: %s 현재가(%d) — 신고가(%d) 돌파 + EMA60(%d) 위 + ATR(%d)",
             ticker, current_price, info["donchian_high"], info["ema60"], info["atr"],
@@ -547,6 +599,20 @@ class DonchianSwingStrategy(StrategyBase):
             logger.info("도치안 스윙 손절: %s 매수가(%d) 대비 %.1f%%",
                         ticker, pos.buy_price, loss_rate)
             return Signal.STOP_LOSS
+
+        # 2.5) 사이클 23 P2-2 — 시간 기반 청산 (멀티데이 약한 이탈 빠른 정리)
+        # 기존 ATR 트레일링/하드 손절 보존, 추가 분기만 삽입
+        n_days = int(self.config.params.get("breakout_fail_n_days", 5))
+        breakout_high = self._breakout_high.get(ticker, 0)
+        if breakout_high > 0 and pos.buy_date:
+            today = datetime.now(KST).date()
+            days_held = (today - pos.buy_date).days
+            if days_held >= n_days and current_price < breakout_high:
+                logger.info(
+                    "도치안 시간 기반 청산: %s 보유 %d일 ≥ %d, 현재가(%d) < 돌파선(%d)",
+                    ticker, days_held, n_days, current_price, breakout_high,
+                )
+                return Signal.STOP_LOSS
 
         # 2) ATR 트레일링 — high_since_buy 기준 (RiskManager가 매 tick 갱신)
         info = self._candidates.get(ticker)
