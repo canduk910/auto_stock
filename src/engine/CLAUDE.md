@@ -40,6 +40,8 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 
 `on_tick()`: ticker_prices 갱신 1회 → `registry.enabled()` 순회 → 전략별 exit/buy 신호.
 
+- **사이클 19 (2026-05-20) `_selling` 가드**: `risk.on_tick` 의 보유 분기에서 `check_exit_signal` 호출 *전* `order_engine._selling` 검사 — 매도 발사 후 체결통보 도착 전까지 신호 평가 + 로그 폭주 차단. 042700 7초 18+ 행 운영 결함 대응. 6 전략 공통 적용
+
 매수 신호 평가 *전* 가드 (순서):
 - **보드 가드**: `session_tracker.is_tradable(strategy_id, params)`
 - **시장 레짐 매수 가드 (4 모드)**: `get_current_regime().get_buy_block_state()` async — DB `buy_block_mode` + 4 임계값 조회

@@ -82,6 +82,11 @@ class RiskManager:
 
             # 3. 청산 신호 확인 (보유 중인 경우)
             if state.has_position(ticker):
+                # 사이클 19 (2026-05-20) — 매도 발사 후 체결통보 도착 전까지 check_exit_signal 호출 skip.
+                # `_selling` 은 execute_sell 진입 직후 add, 체결통보 _handle_sell_fill 시 discard.
+                # 매도 1회 보존 + 손절 로그 폭주 차단 (운영 결함: 042700 7초 18+ 행). 6 전략 공통.
+                if ticker in self.order_engine._selling:
+                    continue
                 signal = strategy.check_exit_signal(ticker, current_price, open_price)
                 if signal != Signal.NONE:
                     await self.order_engine.execute_sell(ticker, signal, strategy.strategy_id)
