@@ -132,6 +132,7 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 - **E2 (거절 응답 감지)** — 각 세션 `_handle_raw()` 독립 작동
 - **F1 (재연결 후 자동 검증)** — 각 세션 `_verify_subscriptions_after_reconnect()` 독립 발화
 - **K (stale watcher)** — `pool.resend_subscribe_for_ticker` 가 `_ticker_to_session` 활용해 정확한 세션 재전송
+- **세션 단위 silent inactive 자동 회복 (사이클 24, 2026-05-20)**: 메인/보조 세션의 fresh=0 + subscribed>=5 + 5분 지속 시 K stale watcher 가 `_ws.close()` 강제 발화 → connect() 의 ConnectionClosed catch → 재연결 자동 발화. 시간당 2회 cap.
 
 ## 주의사항
 

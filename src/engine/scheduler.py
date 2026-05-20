@@ -43,6 +43,7 @@ from src.realtime.handler import (
     register_tick_handler,
 )
 from src.realtime.websocket import kis_ws
+from src.realtime.websocket_pool import kis_ws_pool
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +82,16 @@ STALE_FRESHNESS_SECS = 60                   # 이 시간 내 tick 없으면 stal
 # 안전망 보존. retry > MAX 면 skip — 다음 _scan_loop 위임 (영구 stale 의심 종목 보호).
 STALE_FORCE_REREGISTER_AFTER = 5            # (deprecated, 호환 보존) — 분기 임계가 아닌 회귀 가드 의미만 유지. 실제 동작은 MAX_STALE_RETRIES.
 MAX_STALE_RETRIES = 5                       # 연속 N회 초과 stale 시 skip (영구 stale 의심). 6회 이상 → 다음 _scan_loop 위임.
+
+# 사이클 24 (2026-05-20) — 세션 단위 silent inactive 감지 + 강제 reconnect
+# K stale watcher 가 종목별 재등록 외에 세션 자체 결함도 5분 지속 후 _ws.close() 발화.
+# 3중 가드: fresh=0 + subscribed>=5 (위양성 차단) + 5분 지속 (단발 끊김 즉시 close 차단)
+# 시간당 2회 cap — KIS LMS / 앱정보 이용중지 위험 사전 차단.
+# 2026-05-20 14:58 운영 결함: 메인 세션 sub=11 ack=11 fresh=0 stale=11 대응.
+SILENT_INACTIVE_MIN_SUBSCRIBED = 5          # sub < 5 면 거래량 부족 자연 가능 (위양성 차단)
+SILENT_INACTIVE_PERSIST_SECS = 300.0        # 5분 지속 임계 (단발 끊김 즉시 close 차단)
+SILENT_INACTIVE_RECOVERY_CAP_PER_HOUR = 2   # 시간당 reconnect 시도 cap
+SILENT_INACTIVE_RECOVERY_WINDOW_SECS = 3600.0  # cap 윈도우 (60분)
 
 # B (2026-05-15) — donchian_swing 일중 시세 REST 폴링 보강
 # WS stale 시에도 보유 종목의 ATR×2 트레일링/하드 -7% 손절 평가가 끊기지 않도록
@@ -173,6 +184,11 @@ class TradingScheduler:
         self._stale_watcher_task: asyncio.Task | None = None
         # ticker -> 연속 stale 사이클 수 (fresh 회복 시 자동 clear, _reset_daily_state 에서도 clear)
         self._stale_retry_count: dict[str, int] = {}
+        # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적
+        # label -> 첫 silent 감지 시각 (5분 지속 판정용)
+        self._silent_inactive_first_seen: dict[str, datetime] = {}
+        # label -> 시간당 reconnect 시각 리스트 (cap 용, time.monotonic 기준)
+        self._silent_inactive_recovery_count: dict[str, list[float]] = {}
         # 사이클 18 (2026-05-19, A-1) — 5xx WARNING dedupe summary 60s 주기 task
         self._5xx_dedupe_summary_task: asyncio.Task | None = None
         # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
@@ -2290,12 +2306,16 @@ class TradingScheduler:
             await _sleep_chunked(float(SWING_REST_POLL_INTERVAL_SECS))
 
     async def _stale_watcher_loop(self) -> None:
-        """30s 주기 stale 감지 + 자동 재구독 (K, 2026-05-12).
+        """120s 주기 stale 감지 + 자동 재구독 + 세션 단위 silent inactive 감지 (K, 2026-05-12).
 
         KIS WebSocket silent inactive(구독은 됐는데 시세 송신 없음) 즉시 복구.
-        F1(재연결 직후 1회) + `_scan_loop`(5분 주기) + K(30s) 3중 안전망.
+        F1(재연결 직후 1회) + `_scan_loop`(5분 주기) + K(120s) 3중 안전망.
 
-        - 매 사이클 `_check_and_resubscribe_stale()` 호출
+        사이클 24 (2026-05-20) — 세션 단위 silent inactive 감지 + 강제 reconnect 추가:
+        종목별 unsubscribe+subscribe 재등록으로 회복 안 되는 세션 자체 결함을 5분 지속 후
+        `_force_reconnect_session(label)` 으로 처리. 시간당 2회 cap.
+
+        - 매 사이클 `_check_and_resubscribe_stale()` 호출 후 silent inactive 감지
         - 본체 예외는 ERROR 로그로 흡수 — 다음 사이클 정상 진행
         - `_running=False` 진입 시 즉시 break
         - 좀비 task 방지: `start()` finally 블록에서 cancel + await
@@ -2308,6 +2328,14 @@ class TradingScheduler:
                 await self._check_and_resubscribe_stale()
             except Exception:
                 logger.exception("[stale_watcher] 사이클 실패")
+
+            # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 감지 + 강제 reconnect
+            try:
+                silent_labels = self._detect_silent_inactive_sessions()
+                for label in silent_labels:
+                    await self._force_reconnect_session(label)
+            except Exception:
+                logger.exception("[silent_inactive_detect] 실패 — 다음 사이클 자연 재시도")
 
     async def _5xx_dedupe_summary_loop(self) -> None:
         """사이클 18 (2026-05-19) — 5xx WARNING dedupe summary 60s 주기 task.
@@ -2331,6 +2359,136 @@ class TradingScheduler:
                 await _emit_5xx_dedupe_summary()
             except Exception:
                 logger.exception("[5xx_dedupe_summary] 사이클 실패")
+
+    def _detect_silent_inactive_sessions(self) -> list[str]:
+        """세션 단위 silent inactive 감지 (사이클 24, 2026-05-20).
+
+        종목별 unsubscribe+subscribe 재등록(K stale watcher 사이클 17 보강) 으로
+        회복 안 되는 *세션 자체* silent inactive 케이스를 5분 지속 후 강제 reconnect 대상으로 분류.
+
+        판정 (3중):
+        1. fresh == 0 (한 종목도 tick 안 옴)
+        2. subscribed >= SILENT_INACTIVE_MIN_SUBSCRIBED (1~4 종목은 거래량 부족 자연 가능)
+        3. 5분 지속 (first_seen 시각 추적)
+
+        조건 미충족 (fresh > 0 또는 subscribed < min) 시 first_seen pop (리셋).
+        5분 도달 label 만 반환.
+        """
+        from src.engine.scanner import KST_TZ as _KST_TZ, ticker_last_tick
+
+        sessions = kis_ws_pool.get_session_status()
+        now = datetime.now(_KST_TZ)
+        threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
+        min_dt = datetime.min.replace(tzinfo=_KST_TZ)
+        silent_labels: list[str] = []
+
+        for s in sessions:
+            label = s["label"]
+            subscribed_count = s["subscribed"]
+            subscribed_tickers = s["tickers"]["subscribed"]
+
+            # fresh 계산: last_tick 이 threshold 이내인 종목 수
+            fresh_count = sum(
+                1 for t in subscribed_tickers
+                if (now - ticker_last_tick.get(t, min_dt)) <= threshold
+            )
+
+            # 조건 1+2 동시 충족 시 first_seen 등록 (이미 있으면 보존)
+            if fresh_count == 0 and subscribed_count >= SILENT_INACTIVE_MIN_SUBSCRIBED:
+                if label not in self._silent_inactive_first_seen:
+                    self._silent_inactive_first_seen[label] = now
+                # 조건 3 (5분 지속) 검사
+                elapsed = (now - self._silent_inactive_first_seen[label]).total_seconds()
+                if elapsed >= SILENT_INACTIVE_PERSIST_SECS:
+                    silent_labels.append(label)
+            else:
+                # 회복 또는 sub 부족 → first_seen pop (다음 5분 카운트 리셋)
+                self._silent_inactive_first_seen.pop(label, None)
+
+        return silent_labels
+
+    async def _force_reconnect_session(self, label: str) -> bool:
+        """세션 단위 silent inactive 강제 reconnect (사이클 24, 2026-05-20).
+
+        1. 시간당 cap 검사: 60분 이전 시각 제거 후 남은 카운트 >= cap 면 SKIP + WARNING.
+        2. label 분기:
+           - "main" → kis_ws._ws.close() (모듈 레벨 심볼 직접 참조)
+           - "quote-N" → kis_ws_pool._quotes[N-1]._ws.close()
+        3. 영구 로그: INFO + system_logs write_log (fire-and-forget)
+        4. _silent_inactive_first_seen.pop(label) — 다음 5분 카운트 리셋
+        5. _silent_inactive_recovery_count[label].append(time.monotonic())
+
+        Returns:
+            True (reconnect 시도) / False (cap 도달 skip)
+        """
+        import time as _t
+
+        now_mono = _t.time()
+        window = SILENT_INACTIVE_RECOVERY_WINDOW_SECS
+
+        # 1. cap 검사 — 60분 이전 시각 제거 후 카운트 검증
+        history = self._silent_inactive_recovery_count.setdefault(label, [])
+        history[:] = [t for t in history if (now_mono - t) < window]
+        if len(history) >= SILENT_INACTIVE_RECOVERY_CAP_PER_HOUR:
+            logger.warning(
+                "[silent_inactive_recovery_cap] label=%s count=%d/60min — reconnect skip",
+                label, len(history),
+            )
+            try:
+                await write_log(
+                    "WARNING",
+                    f"[silent_inactive_recovery_cap] label={label} "
+                    f"count={len(history)}/60min — KIS 측 무한 재연결 회피",
+                )
+            except Exception:
+                logger.debug("[silent_inactive_recovery_cap] write_log 실패", exc_info=True)
+            return False
+
+        # 2. label 분기 → _ws 객체 조회
+        ws_obj = None
+        if label == "main":
+            ws_obj = getattr(kis_ws, "_ws", None)
+        else:
+            # "quote-N" → idx = N-1 (모듈 레벨 kis_ws_pool 직접 참조 — 테스트 패치 대응)
+            try:
+                idx = int(label.replace("quote-", "")) - 1
+                quotes = getattr(kis_ws_pool, "_quotes", [])
+                if 0 <= idx < len(quotes):
+                    ws_obj = getattr(quotes[idx], "_ws", None)
+            except (ValueError, AttributeError):
+                logger.warning("[silent_inactive_force_reconnect] 알 수 없는 label=%s", label)
+                return False
+
+        if ws_obj is None:
+            logger.warning("[silent_inactive_force_reconnect] label=%s _ws is None — skip", label)
+            return False
+
+        # 3. 영구 로그
+        logger.warning(
+            "[silent_inactive_force_reconnect] label=%s elapsed>=%.0fs — _ws.close() 강제 발화",
+            label, SILENT_INACTIVE_PERSIST_SECS,
+        )
+        try:
+            await write_log(
+                "WARNING",
+                f"[silent_inactive_force_reconnect] label={label} "
+                f"elapsed>={SILENT_INACTIVE_PERSIST_SECS:.0f}s — _ws.close() 발화",
+            )
+        except Exception:
+            logger.debug("[silent_inactive_force_reconnect] write_log 실패", exc_info=True)
+
+        # 4. _ws.close() — connect() 의 ConnectionClosed catch → 재연결 루프
+        try:
+            await ws_obj.close()
+        except Exception:
+            logger.exception("[silent_inactive_force_reconnect] _ws.close() 실패 label=%s", label)
+            return False
+
+        # 5. state 갱신
+        self._silent_inactive_first_seen.pop(label, None)
+        history.append(now_mono)
+
+        return True
 
     async def _check_and_resubscribe_stale(self) -> None:
         """현재 TICK 구독 종목 중 stale 한 것에 대해 강제 재등록 (K).
@@ -2812,6 +2970,10 @@ class TradingScheduler:
 
         # K (2026-05-12) — stale_watcher 종목별 연속 stale 카운터 매일 초기화
         self._stale_retry_count.clear()
+
+        # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적 일일 초기화
+        self._silent_inactive_first_seen.clear()
+        self._silent_inactive_recovery_count.clear()
 
         # Phase 3 (2026-05-16) — 백테스트 폴 루프 진입 가드 set 매일 초기화.
         # 정상 종료 시 finally 에서 discard 되지만 예외/취소 시 잔재 가능성 차단.
