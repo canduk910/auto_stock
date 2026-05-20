@@ -2055,6 +2055,54 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 - ISA 같은 보조 라벨 5xx 빈발 시 로그 폭주 → **1분 1행 + 60s summary 1행** (분당 ~30행 → 2행)
 - 보조 라벨 fast window 80%+ → 메인 fallback 응답 지연 **3회 backoff (수 초) → 즉시 (ms)**
 
+## 사이클 22 — Dockerfile `.token_cache` 디렉토리 권한 영구 보강 (2026-05-20)
+
+### 배경 (운영 결함 → 영구 차단)
+
+- 사이클 20 (35ebe3a) push 후 운영 결함 (2026-05-20 13:20:46):
+  ```
+  PermissionError: [Errno 13] Permission denied: '.token_cache/quote_sub.json'
+  PermissionError: [Errno 13] Permission denied: '.token_cache/quote_gold.json'
+  ```
+- 근본 원인: `docker-compose.prod.yml` 의 `./.token_cache:/app/.token_cache` bind mount 가 호스트에서 디렉토리 신규 생성 시 **root:root** 소유 → `Dockerfile:17-19` 의 `USER appuser` (non-root) 가 쓰기 거부
+- 사이클 20 핫픽스 A 로 `docker exec -u root chown -R appuser:appuser /app/.token_cache` 임시 해결했으나, **재배포 / 신규 EC2 호스트마다 재발 위험**
+- 본 사이클: 빌드 시점에 디렉토리 + 권한 보장으로 영구 차단
+
+### 변경 (1 파일)
+
+| 영역 | 대상 | 변경 |
+|------|------|------|
+| Dockerfile prod | `Dockerfile` 라인 17-19 | `RUN adduser ... && mkdir -p /app/.token_cache && chown -R appuser:appuser /app && chmod 755 /app/.token_cache` (mkdir 가 chown *앞*, USER appuser 는 *뒤*) |
+
+**핵심 순서 불변**:
+1. `mkdir -p /app/.token_cache` (chown *전*)
+2. `chown -R appuser:appuser /app` (디렉토리 + 내부 파일 모두 appuser 소유)
+3. `chmod 755 /app/.token_cache` (권한 명시 확정)
+4. `USER appuser` (마지막)
+
+### 회귀 가드 (신규 3)
+
+| 파일 | 케이스 |
+|------|--------|
+| `tests/integration/test_dockerfile_token_cache_perms.py` | 3 (A: `mkdir -p /app/.token_cache` 정규식 존재 / B: `mkdir` 가 `chown -R appuser:appuser /app` *앞* 순서 / C: `USER appuser` 가 `mkdir`/`chown` *뒤* 순서) |
+
+**도구**: `pathlib.Path.read_text()` + `re` 정규식 매칭. docker build 자체는 회귀 미실행 (CI 부담)
+
+### 안전 보장
+
+- **매매 코드 침범 0** — token.py / scheduler.py / risk.on_tick / order_engine / 6 전략 무관
+- **사이클 20/21 보존** — 토큰 직렬화 + boot 사전 발급 + UI 정리 무영향
+- **컨테이너 측 권한 우선 매칭** — Docker bind mount 가 빌드 시점 디렉토리 권한을 호스트에도 적용 (호스트 root:root 신규 생성 시 자동 매칭)
+- **재배포 안전** — `docker compose up --build` 만으로 권한 보장, `docker exec -u root chown` 핫픽스 불필요
+- 한글 커밋 메시지
+
+### 베이스라인
+
+- 백엔드 1409 (사이클 21) → **1412** (+3 회귀: 3)
+- 운영 효과:
+  - **재배포 PermissionError 영구 차단** — 신규 EC2 / 컨테이너 재기동 / `up --build` 시점에 자동 권한 매칭
+  - **운영 부담 0** — 핫픽스 명령 불필요, 사이클 20 토큰 직렬화 시스템 100% 안정 동작 보장
+
 ## 사이클 21 — UI 정리: 구독현황 KisAccountPoolCard 통합 + 전략별 필터링 단계 강화 (2026-05-20)
 
 ### 배경 (사용자 요구)

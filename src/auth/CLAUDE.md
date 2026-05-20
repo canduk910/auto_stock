@@ -19,6 +19,12 @@ KIS OpenAPI OAuth 인증 및 보안 관련 모듈.
 - **캐시 영속화**: `_TOKEN_CACHE_DIR=.token_cache/` 디렉토리 단위. 메인 `main.json` / 보조 `quote_<safe-label>.json`. Docker 볼륨 마운트 친화 (`./.token_cache:/app/.token_cache`)
 - **호환 fallback**: 구 경로 `.token_cache.json` (`_LEGACY_MAIN_CACHE_PATH`) / `.token_cache_quote_<label>.json` (`_LEGACY_QUOTE_CACHE_PREFIX`) 존재 시 1회 읽고 새 경로로 즉시 마이그레이션 + 구 경로 unlink. 운영 중단 0
 
+#### 사이클 22 (2026-05-20) — Dockerfile 권한 가드 영구화
+- 사이클 20 후 운영 결함: 호스트 `.token_cache/` bind mount 가 root:root 로 생성 → 컨테이너 `appuser` 가 `quote_sub.json` / `quote_gold.json` 쓰기 거부 (`PermissionError [Errno 13]`)
+- `Dockerfile` prod 스테이지 변경: `mkdir -p /app/.token_cache` → `chown -R appuser:appuser /app` → `chmod 755 /app/.token_cache` → `USER appuser` 순서. **mkdir 이 chown 보다 앞** + **USER 가 마지막** 순서 불변
+- 재배포 시 `docker exec -u root chown` 핫픽스 없이 권한 매칭 자동 보장 (Docker bind mount 컨테이너 측 권한 우선 매칭)
+- 회귀 가드: `tests/integration/test_dockerfile_token_cache_perms.py` 3 케이스 (A: mkdir 존재 / B: mkdir↔chown 순서 / C: USER 위치). 정적 텍스트 파싱이라 docker build 미실행
+
 ### hashkey.py — Hashkey 생성
 - POST 요청 바디의 무결성 검증용 해시 ��성 (`/uapi/hashkey`)
 - 주문 API 호출 시 헤더에 포함
