@@ -6,7 +6,7 @@
  * - AC23-B: ConfirmModal 이중 확인 후 PUT /api/integrations/auto-apply 발사
  */
 
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 
