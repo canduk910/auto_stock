@@ -19,7 +19,7 @@
  * - C18-B4: BFB + POST_NXT 시간 → 회색 "돌파 (대기 — 메인)" (BFB tradable=[main])
  * - C18-B5: tradable_boards 미존재 (백엔드 미반영) → 기존 빨강 "돌파" fallback (안전 회귀)
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 

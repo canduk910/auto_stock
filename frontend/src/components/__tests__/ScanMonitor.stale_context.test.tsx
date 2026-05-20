@@ -19,7 +19,7 @@
  * - C18-S4: stale=0 → 컨텍스트 라벨 미노출
  * - C18-S5: 끊김 펼치기 토글 → last_tick_map 기반 종목별 시각 표시
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
