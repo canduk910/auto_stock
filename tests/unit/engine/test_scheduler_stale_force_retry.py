@@ -175,8 +175,10 @@ async def test_force_retry_fires_when_cooldown_elapsed(monkeypatch):
     pool_mock.unsubscribe_in_pool.assert_awaited_once()
     pool_mock.subscribe.assert_awaited_once()
     kwargs = pool_mock.subscribe.await_args.kwargs
-    assert kwargs.get("priority") == "HIGH"
-    assert kwargs.get("bypass_limit") is True
+    # 사이클 29-R3 의미 갱신: positions/next_day_clear 미세팅 minimal scheduler → 후보 → LOW.
+    # 보유 종목 HIGH 보장 시나리오는 신규 test_stale_watcher_priority_split.py 가 검증.
+    assert kwargs.get("priority") == "LOW"
+    assert kwargs.get("bypass_limit") is False
 
     # 핵심: 카운터 리셋 (신규 사이클 시작)
     assert sched._stale_retry_count["005935"] == 0, (

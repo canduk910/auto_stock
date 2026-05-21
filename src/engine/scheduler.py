@@ -2680,6 +2680,10 @@ class TradingScheduler:
         3. `scanner.ticker_last_tick` 비교: `STALE_FRESHNESS_SECS` 초과면 stale
         4. 전체 fresh 시 `_stale_retry_count.clear()` (회복 누적값 초기화)
         5. stale ticker 별로:
+           - **사이클 29-R3 우선순위 분리** (메인 편중 73% 해소):
+             - positions / _pending_next_day_clear → HIGH+bypass_limit=True (메인 절대 보장)
+             - 그 외 후보 → LOW+bypass_limit=False (보조 라운드로빈 분산)
+             - 사이클 25-B `_resubscribe_stale_priority` 와 동일 패턴 K stale watcher 확장
            - retry > MAX_STALE_RETRIES (=5, 6회 이상) → **사이클 29 시간 기반 강제 재시도**:
              a. last_resub_age >= STALE_FORCE_RETRY_AFTER_SECS (=300s, 5분) → 강제 재시도 +
                 `_stale_retry_count[ticker] = 0` 카운터 리셋 (신규 사이클 시작)
@@ -2687,8 +2691,7 @@ class TradingScheduler:
              c. `_stale_last_resubscribe_at` 부재 → 즉시 1회 시도 (영구 stale 의심 첫 진입)
              d. 시간당 STALE_FORCE_RETRY_HOURLY_CAP (=12) 회 초과 → skip +
                 `[stale_force_retry_cap]` WARNING (LMS 위험 추가 가드)
-           - 그 외 (1~5회) → `pool.unsubscribe_in_pool` + `pool.subscribe(priority=HIGH, bypass_limit=True)`
-             강제 재등록 (KIS 정상 패턴, 재SEND 0건)
+           - 그 외 (1~5회) → `pool.unsubscribe_in_pool` + `pool.subscribe(priority=...)` 강제 재등록
         6. Rate Limit 보호: 각 종목별 50ms sleep
 
         안전 불변식:
@@ -2730,9 +2733,38 @@ class TradingScheduler:
         force_retry_count = 0       # 사이클 29 — 영구 stale 시간 기반 강제 재시도 카운트
         force_retry_cap_blocked = 0  # 사이클 29 — 시간당 cap 초과 차단 카운트
 
+        # 사이클 29-R3 (2026-05-21) — 우선순위 분리 (메인 편중 73% 해소)
+        # 사이클 25-B `_resubscribe_stale_priority` 와 동일 패턴:
+        #   - positions / _pending_next_day_clear → HIGH+bypass_limit=True (메인 절대 보장)
+        #   - 그 외 후보 → LOW+bypass_limit=False (보조 라운드로빈 분산)
+        # 사이클 28 실측: main=25 quote-1=3 quote-2=4 quote-3=2 편중 결함 대응.
+        # K stale watcher 120s 주기가 5분 주기 _scan_loop 보다 빈번 → 무차별 HIGH 가 메인 누적.
+        high_tickers: set[str] = set()
+        try:
+            for s in self.registry.all():
+                try:
+                    high_tickers.update(s.state.positions.keys())
+                except Exception:
+                    pass
+        except Exception:
+            # registry 미주입 인스턴스(테스트 __new__) 보호 — 모두 LOW 로 처리
+            pass
+        try:
+            high_tickers.update(t for (t, _sid) in self._pending_next_day_clear)
+        except Exception:
+            pass
+
         for ticker in stale_tickers:
             retry = self._stale_retry_count.get(ticker, 0) + 1
             self._stale_retry_count[ticker] = retry
+
+            # 사이클 29-R3 — 종목별 priority 결정 (HIGH/LOW 분리)
+            if ticker in high_tickers:
+                sub_priority = "HIGH"
+                sub_bypass = True
+            else:
+                sub_priority = "LOW"
+                sub_bypass = False
 
             if retry > MAX_STALE_RETRIES:
                 # 사이클 29 (2026-05-21) — 영구 stale 무한 skip 결함 대응.
@@ -2781,13 +2813,14 @@ class TradingScheduler:
                     continue
 
                 # 강제 재시도 발화
+                # 사이클 29-R3 — sub_priority/sub_bypass 분기 적용 (HIGH/LOW)
                 age_disp = f"{age_secs:.0f}s" if age_secs != float("inf") else "inf"
                 try:
                     await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
                     await asyncio.sleep(0.05)
                     await kis_ws_pool.subscribe(
                         TICK_TR_ID, ticker,
-                        priority="HIGH", bypass_limit=True,
+                        priority=sub_priority, bypass_limit=sub_bypass,
                     )
                     # 핵심: 카운터 0 리셋 (영구 stale 의심 해제 → 신규 사이클 시작).
                     # 다음 사이클부터 다시 1~5회 정상 분기로 자연 회복.
@@ -2819,12 +2852,13 @@ class TradingScheduler:
 
             # 1~5회 — 첫 stale 즉시 강제 재등록 (KIS 정상 "신규 등록" 패턴, 재SEND 0건)
             # KIS 공식 답변: "기등록한 사항을 재등록하지 않도록" (LMS + 앱정보 이용중지 위험)
+            # 사이클 29-R3 — sub_priority/sub_bypass 분기 적용 (사이클 25-B 패턴 K stale watcher 확장)
             try:
                 await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
                 await asyncio.sleep(0.05)
                 await kis_ws_pool.subscribe(
                     TICK_TR_ID, ticker,
-                    priority="HIGH", bypass_limit=True,
+                    priority=sub_priority, bypass_limit=sub_bypass,
                 )
                 force_reregistered += 1
                 # 사이클 28 — 강제 재등록 직후 시각 갱신 (진단 로그 출처).

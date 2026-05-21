@@ -171,8 +171,10 @@ async def test_single_stale_resends(scheduler_env):
     assert len(calls.unsubscribe) == 1
     assert len(calls.subscribe) == 1
     assert calls.unsubscribe[0] == (TICK_TR_ID, "005930")
-    # subscribe 는 bypass_limit=True (HIGH)
-    assert calls.subscribe[0] == (TICK_TR_ID, "005930", True)
+    # 사이클 29-R3 의미 갱신: scheduler_env 의 005930 은 positions/next_day_clear 미포함
+    # → 후보 종목 → LOW + bypass_limit=False (보조 분산). 보유 종목 HIGH 보장은
+    # 신규 test_stale_watcher_priority_split.py 가 검증.
+    assert calls.subscribe[0] == (TICK_TR_ID, "005930", False)
     assert sched._stale_retry_count == {"005930": 1}
 
 
@@ -302,7 +304,8 @@ async def test_mixed_resend_and_force(scheduler_env):
     assert len(calls.unsubscribe) == 1
     assert len(calls.subscribe) == 1
     assert calls.unsubscribe[0] == (TICK_TR_ID, "AAAAAA")
-    assert calls.subscribe[0] == (TICK_TR_ID, "AAAAAA", True)
+    # 사이클 29-R3: AAAAAA 는 positions/next_day_clear 미포함 → 후보 → LOW + bypass_limit=False
+    assert calls.subscribe[0] == (TICK_TR_ID, "AAAAAA", False)
 
     assert sched._stale_retry_count == {"AAAAAA": 1, "BBBBBB": 6}
 

@@ -131,11 +131,13 @@ async def test_force_reregister_fires_on_first_stale(monkeypatch):
     # 첫 stale (retry=1) 즉시 강제 재등록 분기
     pool_mock.unsubscribe_in_pool.assert_awaited_once()
     pool_mock.subscribe.assert_awaited_once()
-    # 강제 재등록은 priority=HIGH bypass_limit=True
+    # 사이클 29-R3 (2026-05-21) 의미 갱신: 005930 은 __new__ scheduler 라 positions/next_day_clear
+    # 미포함 → 후보 종목 → LOW+bypass_limit=False (보조 분산). 보유 종목 HIGH 보장은
+    # 신규 test_stale_watcher_priority_split.py 가 검증.
     kwargs = pool_mock.subscribe.await_args.kwargs
-    assert kwargs.get("priority") == "HIGH"
-    assert kwargs.get("bypass_limit") is True
-    # resend_subscribe_for_ticker 미호출 (KIS 답변 반영: 재SEND 0건)
+    assert kwargs.get("priority") == "LOW"
+    assert kwargs.get("bypass_limit") is False
+    # resend_subscribe_for_ticker 미호출 (KIS 답변 반영: 재SEND 0건) — 사이클 17 보강 보존
     pool_mock.resend_subscribe_for_ticker.assert_not_called()
 
 
@@ -145,6 +147,7 @@ async def test_force_reregister_continues_until_max_retries(monkeypatch):
 
     사이클 17 보강: KIS 답변 반영. 1~5회 모두 unsubscribe+subscribe 강제 재등록 패턴.
     이 케이스는 retry = 5 (5번째 사이클) — MAX_STALE_RETRIES 직전.
+    사이클 29-R3 (2026-05-21): priority 분기 의미 갱신 — 후보 종목 LOW 분산.
     """
     from src.engine import scheduler as sch_mod
     from src.engine.scheduler import TradingScheduler
@@ -178,9 +181,10 @@ async def test_force_reregister_continues_until_max_retries(monkeypatch):
     # 5회 stale 도 동일하게 강제 재등록 (사이클 17 보강)
     pool_mock.unsubscribe_in_pool.assert_awaited_once()
     pool_mock.subscribe.assert_awaited_once()
+    # 사이클 29-R3: 후보 종목 LOW 분산
     kwargs = pool_mock.subscribe.await_args.kwargs
-    assert kwargs.get("priority") == "HIGH"
-    assert kwargs.get("bypass_limit") is True
+    assert kwargs.get("priority") == "LOW"
+    assert kwargs.get("bypass_limit") is False
     # 재SEND 0건 보장 (KIS 답변 반영)
     pool_mock.resend_subscribe_for_ticker.assert_not_called()
 

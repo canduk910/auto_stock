@@ -117,16 +117,18 @@ async def test_stale_watcher_uses_ticker_to_session_routing(monkeypatch, reset_s
     sched = sched_mod.TradingScheduler()
     await sched._check_and_resubscribe_stale()
 
-    # 강제 재등록 호출 확인
+    # 강제 재등록 호출 확인 (재SEND 0건은 사이클 17 보강 보존)
     assert pool_unsub_spy.await_count >= 1
     assert pool_sub_spy.await_count >= 1
-    # priority=HIGH, bypass_limit=True 검증
+    # 사이클 29-R3 (2026-05-21) 의미 갱신:
+    # 005930 은 positions/next_day_clear 미포함 (후보 종목) → LOW + bypass_limit=False
+    # (보조 세션 분산 — 메인 편중 73% 해소). 보유 종목 시나리오는 신규 priority_split 테스트 참조.
     kwargs = pool_sub_spy.await_args.kwargs
-    assert kwargs.get("priority") == "HIGH", (
-        f"강제 재등록은 priority=HIGH 보장, 실제 kwargs={kwargs}"
+    assert kwargs.get("priority") == "LOW", (
+        f"후보 종목 stale 재등록은 LOW 보조 분산, 실제 kwargs={kwargs}"
     )
-    assert kwargs.get("bypass_limit") is True, (
-        f"강제 재등록은 bypass_limit=True 보장, 실제 kwargs={kwargs}"
+    assert kwargs.get("bypass_limit") is False, (
+        f"LOW 는 bypass_limit=False (보조 가득 시 메인 fallback), 실제 kwargs={kwargs}"
     )
 
 
