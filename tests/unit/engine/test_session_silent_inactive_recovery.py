@@ -107,10 +107,14 @@ def test_silent_inactive_5min_reached(scheduler_inst):
 
 
 # ---------------------------------------------------------------------------
-# 3. fresh=1 (일부 tick) → 감지 안 함 + first_seen 리셋
+# 3. fresh_ratio >= 0.2 (일부 tick) → 감지 안 함 + first_seen 리셋
 # ---------------------------------------------------------------------------
 def test_silent_inactive_fresh_partial_no_detect(scheduler_inst):
-    """fresh=1 (일부 tick 존재) → silent 아님 → first_seen 미등록 (리셋)."""
+    """fresh_ratio >= 임계 (정상 tick 흐름) → silent 아님 → first_seen 미등록 (리셋).
+
+    사이클 29-R2 (2026-05-21) 의미 갱신: 기존 `fresh=1/11 (9%)` 는 R2 후 silent 판정됨.
+    본 케이스는 `fresh=4/11 (36%) >= 20%` 임계 *이상* 시나리오로 갱신 — 정상 흐름.
+    """
     from src.engine import scheduler as sch_mod
 
     tickers = [f"00000{i}" for i in range(11)]
@@ -118,9 +122,8 @@ def test_silent_inactive_fresh_partial_no_detect(scheduler_inst):
     # first_seen 사전 등록 → 회복 시 pop 검증
     scheduler_inst._silent_inactive_first_seen["main"] = NOW - timedelta(seconds=100)
 
-    # 1 종목만 fresh (10초 전 tick)
-    fresh_ticker = tickers[0]
-    last_tick_map = {fresh_ticker: NOW - timedelta(seconds=10)}
+    # 4 종목 fresh (36% — 임계 20% 이상, 정상 흐름)
+    last_tick_map = {tickers[i]: NOW - timedelta(seconds=10) for i in range(4)}
 
     with patch.object(sch_mod, "kis_ws_pool") as mock_pool:
         mock_pool.get_session_status = MagicMock(return_value=sessions)
@@ -130,7 +133,7 @@ def test_silent_inactive_fresh_partial_no_detect(scheduler_inst):
                 mock_dt.min = datetime.min
                 result = scheduler_inst._detect_silent_inactive_sessions()
 
-    assert result == [], f"fresh 존재 시 감지 안 함 — got {result}"
+    assert result == [], f"fresh_ratio 정상 시 감지 안 함 — got {result}"
     assert "main" not in scheduler_inst._silent_inactive_first_seen, "first_seen pop 확인"
 
 

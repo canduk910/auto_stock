@@ -104,6 +104,12 @@ SILENT_INACTIVE_MIN_SUBSCRIBED = 5          # sub < 5 면 거래량 부족 자�
 SILENT_INACTIVE_PERSIST_SECS = 300.0        # 5분 지속 임계 (단발 끊김 즉시 close 차단)
 SILENT_INACTIVE_RECOVERY_CAP_PER_HOUR = 2   # 시간당 reconnect 시도 cap
 SILENT_INACTIVE_RECOVERY_WINDOW_SECS = 3600.0  # cap 윈도우 (60분)
+# 사이클 29-R2 (2026-05-21) — silent_inactive 판정 비율 기반 전환
+# 결함: 2026-05-21 13:13~13:29 메인 세션 fresh=2/25 (8%) stale=23 인데 강제 reconnect 0건 발화.
+# 원인: 기존 정의 `fresh == 0` 분기에 `fresh=2 > 0` 이라 미충족.
+# 대응: `fresh_ratio < 0.2 (20%)` 비율 기반 판정으로 완화. fresh=0 케이스 자동 호환.
+# 3중 가드 (비율 + sub>=5 + 5분 지속) + 시간당 2회 cap 절대 보존.
+SILENT_INACTIVE_FRESH_RATIO_THRESHOLD = 0.2  # fresh_ratio < 20% 면 silent 의심 (사이클 24 fresh==0 완화)
 
 # B (2026-05-15) — donchian_swing 일중 시세 REST 폴링 보강
 # WS stale 시에도 보유 종목의 ATR×2 트레일링/하드 -7% 손절 평가가 끊기지 않도록
@@ -2521,11 +2527,13 @@ class TradingScheduler:
         회복 안 되는 *세션 자체* silent inactive 케이스를 5분 지속 후 강제 reconnect 대상으로 분류.
 
         판정 (3중):
-        1. fresh == 0 (한 종목도 tick 안 옴)
+        1. fresh_ratio < SILENT_INACTIVE_FRESH_RATIO_THRESHOLD (=0.2, 20%)
+           — 사이클 29-R2 (2026-05-21): 기존 `fresh == 0` 완화. 메인 fresh=2/25 (8%) 실측
+             결함 대응. fresh=0 케이스는 0.0 < 0.2 자동 호환.
         2. subscribed >= SILENT_INACTIVE_MIN_SUBSCRIBED (1~4 종목은 거래량 부족 자연 가능)
         3. 5분 지속 (first_seen 시각 추적)
 
-        조건 미충족 (fresh > 0 또는 subscribed < min) 시 first_seen pop (리셋).
+        조건 미충족 (fresh_ratio >= 0.2 또는 subscribed < min) 시 first_seen pop (리셋).
         5분 도달 label 만 반환.
         """
         from src.engine.scanner import KST_TZ as _KST_TZ, ticker_last_tick
@@ -2547,8 +2555,21 @@ class TradingScheduler:
                 if (now - ticker_last_tick.get(t, min_dt)) <= threshold
             )
 
+            # 사이클 29-R2 — 비율 기반 판정 (fresh==0 → fresh_ratio<0.2 완화).
+            # subscribed_count=0 인 경우 sub>=5 가드가 먼저 차단 → ZeroDivision 무해.
+            # 사전 안전 가드로 0 분기 명시 처리 (fresh_ratio=0.0 으로 간주).
+            if subscribed_count > 0:
+                fresh_ratio = fresh_count / subscribed_count
+            else:
+                fresh_ratio = 0.0
+
+            silent_suspect = (
+                fresh_ratio < SILENT_INACTIVE_FRESH_RATIO_THRESHOLD
+                and subscribed_count >= SILENT_INACTIVE_MIN_SUBSCRIBED
+            )
+
             # 조건 1+2 동시 충족 시 first_seen 등록 (이미 있으면 보존)
-            if fresh_count == 0 and subscribed_count >= SILENT_INACTIVE_MIN_SUBSCRIBED:
+            if silent_suspect:
                 if label not in self._silent_inactive_first_seen:
                     self._silent_inactive_first_seen[label] = now
                 # 조건 3 (5분 지속) 검사
