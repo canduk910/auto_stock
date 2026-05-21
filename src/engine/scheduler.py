@@ -95,6 +95,13 @@ MAX_STALE_RETRIES = 5                       # 연속 N회 초과 stale 시 skip 
 STALE_FORCE_RETRY_AFTER_SECS = 300          # 영구 stale 의심 종목 최소 재시도 간격 (5분)
 STALE_FORCE_RETRY_HOURLY_CAP = 12           # 시간당 동일 종목 최대 재시도 횟수 (LMS / 앱키 정지 위험 차단)
 
+# 사이클 32 (R4, 2026-05-21) — universe stale 가드 + KIS 최근체결시각 기록
+# 사이클 29-R3 적용 후 stale 종목이 분산만 됐을 뿐 사라지지 않음.
+# 거래량 빈약한 중소형주가 영구 stale 로 41 슬롯 점유 + R1 force_retry 매 5분 KIS Rate Limit 부담.
+# stale > MAX_STALE_RETRIES (=5) + 당일 누적 거래량 < UNIVERSE_LOW_VOLUME_THRESHOLD → 제외.
+# 보유/익일청산은 절대 제외 금지 (손절·시가 race 차단). 매일 _reset_daily_state 동행 clear.
+UNIVERSE_LOW_VOLUME_THRESHOLD = 10_000      # 당일 누적 체결량 임계 (운영 1주 후 조정)
+
 # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 감지 + 강제 reconnect
 # K stale watcher 가 종목별 재등록 외에 세션 자체 결함도 5분 지속 후 _ws.close() 발화.
 # 3중 가드: fresh=0 + subscribed>=5 (위양성 차단) + 5분 지속 (단발 끊김 즉시 close 차단)
@@ -212,6 +219,10 @@ class TradingScheduler:
         # `STALE_FORCE_RETRY_HOURLY_CAP` 초과 시 [stale_force_retry_cap] WARNING + skip.
         # `_reset_daily_state` 동행 clear.
         self._stale_force_retry_history: dict[str, list["datetime"]] = {}
+        # 사이클 32 (R4, 2026-05-21) — universe stale 가드 제외 set.
+        # stale > MAX_STALE_RETRIES + 거래량 빈약 종목 자동 제외. 매일 _reset_daily_state 동행 clear.
+        # 보유/익일청산은 _evaluate_universe_guard 가 사전 차단. WebSocket 슬롯 회수 + Rate Limit 절약.
+        self._universe_excluded_today: set[str] = set()
         # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적
         # label -> 첫 silent 감지 시각 (5분 지속 판정용)
         self._silent_inactive_first_seen: dict[str, datetime] = {}
@@ -1174,12 +1185,20 @@ class TradingScheduler:
         )
 
     def _collect_breakout_tickers(self) -> list[str]:
-        """돌파 전략(VB, MB)의 스캔 종목을 합산한다."""
+        """돌파 전략(VB, MB)의 스캔 종목을 합산한다.
+
+        사이클 32 (R4, 2026-05-21) — `_universe_excluded_today` 종목 필터링.
+        stale > 5 + 거래량 빈약 자동 제외 (매일 reset).
+        """
         tickers: list[str] = []
         for sid in ("volatility_breakout", "long_tail_volatility"):
             strategy = self.registry.get(sid)
             if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):
                 tickers.extend(strategy.get_scanned_tickers())
+        # 사이클 32 — universe 제외 종목 필터링 (사전 init 누락 인스턴스 보호)
+        excluded = getattr(self, "_universe_excluded_today", None) or set()
+        if excluded:
+            tickers = [t for t in tickers if t not in excluded]
         return tickers
 
     def _collect_swing_tickers(self) -> list[str]:
@@ -2111,6 +2130,14 @@ class TradingScheduler:
                     await self._resubscribe_stale_priority(cap=10)
                 except Exception:
                     logger.exception("_resubscribe_stale_priority 실패 — 다음 사이클 자연 재시도")
+
+                # 사이클 32 (R4, 2026-05-21) — universe stale 가드.
+                # stale > MAX_STALE_RETRIES + 거래량 빈약 종목 자동 제외 + WebSocket unsubscribe.
+                # 보유/익일청산은 사전 차단. 본체 예외는 흡수 — 다음 사이클 자연 재시도.
+                try:
+                    await self._evaluate_universe_guard(list(new_set))
+                except Exception:
+                    logger.exception("_evaluate_universe_guard 실패 — 다음 사이클 자연 재시도")
 
                 # Phase D: 구독 종목 중 최근 60초 내 tick 수신 비율 카운트 노출.
                 # "구독은 됐으나 시세가 안 들어오는 종목"을 운영자가 즉시 인지하도록 1행 로그.
@@ -3200,6 +3227,123 @@ class TradingScheduler:
 
         return resubscribed
 
+    async def _evaluate_universe_guard(self, candidate_tickers: list[str]) -> None:
+        """사이클 32 (R4, 2026-05-21) — universe stale 가드 평가 + KIS 최근체결시각 기록.
+
+        stale > MAX_STALE_RETRIES (=5) + KIS 당일 누적 거래량 < UNIVERSE_LOW_VOLUME_THRESHOLD
+        → universe 에서 자동 제외 + WebSocket unsubscribe + INFO 로그 영구 보존.
+
+        안전 가드:
+        - 보유 종목 (`registry.is_ticker_held_by_any`) 절대 제외 금지 (손절·트레일링 우선)
+        - 익일청산 종목 (`_pending_next_day_clear`) 절대 제외 금지 (시가 race 차단)
+        - 이미 제외된 종목 재평가 skip (KIS Rate Limit 절약)
+        - KIS `inquire_ccnl` 응답 None → 제외 보류 (다음 사이클 자연 재시도, graceful)
+        - 종목 간 50ms sleep (Rate Limit 보호)
+        - 본체 예외는 호출자(`_scan_loop`) 가 try/except 흡수 — 다음 사이클 자연 재시도
+
+        Args:
+            candidate_tickers: 평가 대상 후보 리스트 (보통 `_collect_breakout_tickers` 결과 + extras)
+
+        Note:
+            매일 `_reset_daily_state` 가 `_universe_excluded_today.clear()` — 영구 블랙리스트 금지.
+            제외된 종목은 다음 영업일 자동 재진입 가능.
+        """
+        import asyncio
+        from src.api.quotation import inquire_ccnl
+        from src.realtime.websocket_pool import kis_ws_pool
+        from src.engine.scanner import TICK_TR_ID
+
+        # 사전 가드 — 보유 / 익일청산 / 이미 제외된 종목 사전 차단 (KIS 호출 절약)
+        ndc_tickers = {t for (t, _sid) in getattr(self, "_pending_next_day_clear", set())}
+        excluded = getattr(self, "_universe_excluded_today", set())
+
+        # 평가 대상 결정 — stale > MAX_STALE_RETRIES + 보유/익일청산/이미 제외 아님
+        targets: list[str] = []
+        for ticker in candidate_tickers:
+            if ticker in excluded:
+                continue
+            try:
+                if self.registry.is_ticker_held_by_any(ticker):
+                    continue
+            except Exception:
+                # registry 미주입 보호 (테스트 __new__)
+                pass
+            if ticker in ndc_tickers:
+                continue
+            retries = self._stale_retry_count.get(ticker, 0)
+            if retries <= MAX_STALE_RETRIES:
+                continue
+            targets.append(ticker)
+
+        if not targets:
+            return
+
+        for ticker in targets:
+            # KIS 호출 — graceful (실패 시 제외 보류, 다음 사이클 자연 재시도)
+            try:
+                ccnl = await inquire_ccnl(ticker)
+            except Exception:
+                logger.exception(
+                    "[universe_guard] inquire_ccnl 예외 ticker=%s — 제외 보류", ticker
+                )
+                continue
+
+            if ccnl is None:
+                # 빈 응답 (오프장 / 거래 없음) → 제외 보류
+                logger.debug(
+                    "[universe_guard] inquire_ccnl None ticker=%s — 제외 보류",
+                    ticker,
+                )
+                await asyncio.sleep(0.05)
+                continue
+
+            today_volume = ccnl.get("today_volume", 0)
+            if today_volume >= UNIVERSE_LOW_VOLUME_THRESHOLD:
+                # 거래량 충분 → 제외 안 함 (가드 미발화)
+                await asyncio.sleep(0.05)
+                continue
+
+            # 제외 결정 — 카운터 + last_resub_age 계산
+            retries = self._stale_retry_count.get(ticker, 0)
+            last_at = self._stale_last_resubscribe_at.get(ticker)
+            if last_at is not None:
+                from src.engine.scanner import KST_TZ as _KST_TZ
+                age_secs = (datetime.now(_KST_TZ) - last_at).total_seconds()
+                age_disp = f"{age_secs:.0f}s"
+            else:
+                age_disp = "-"
+
+            # 제외 set 등록 + WebSocket unsubscribe
+            self._universe_excluded_today.add(ticker)
+            try:
+                await kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)
+            except Exception:
+                logger.exception(
+                    "[universe_excluded] unsubscribe 실패 ticker=%s", ticker
+                )
+
+            # INFO 로그 + system_logs 영구 보존
+            logger.info(
+                "[universe_excluded] ticker=%s reason=stale_6plus_low_volume "
+                "retries=%d last_resub_age=%s last_cntg_hour=%s today_volume=%d",
+                ticker, retries, age_disp,
+                ccnl.get("last_cntg_hour", ""),
+                today_volume,
+            )
+            try:
+                await write_log(
+                    "INFO",
+                    f"[universe_excluded] ticker={ticker} "
+                    f"reason=stale_6plus_low_volume retries={retries} "
+                    f"last_resub_age={age_disp} "
+                    f"last_cntg_hour={ccnl.get('last_cntg_hour', '')} "
+                    f"today_volume={today_volume}",
+                )
+            except Exception:
+                logger.debug("[universe_excluded] write_log 실패", exc_info=True)
+
+            await asyncio.sleep(0.05)  # Rate Limit 보호
+
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).
 
@@ -3501,6 +3645,10 @@ class TradingScheduler:
         except AttributeError:
             # 회귀 가드 — 사전 init 누락 인스턴스 (테스트 __new__ 등) 보호
             pass
+
+        # 사이클 32 (R4, 2026-05-21) — universe stale 가드 제외 set 매일 초기화
+        # 영구 블랙리스트 절대 금지 — 다음 영업일 재진입 허용.
+        self._universe_excluded_today.clear()
 
         # Phase 3 (2026-05-16) — 백테스트 폴 루프 진입 가드 set 매일 초기화.
         # 정상 종료 시 finally 에서 discard 되지만 예외/취소 시 잔재 가능성 차단.
