@@ -106,6 +106,10 @@ Supabase SQL Editor에서 `supabase/migrations/` 하위 마이그레이션 파�
 022_market_regime_snapshots.sql       # dkstock.cloud 매크로 일일 스냅샷 (사이클 2)
 023_cash_usage_ratio_range.sql        # cash_usage_ratio 범위 [0.5, 1.0] → [0.0, 1.0] 확장 (사이클 2)
 024_vb_board_stop_loss_defaults.sql   # VB 보드별 손절 디폴트 자동 복사 (사이클 3)
+025_external_integration_toggles.sql  # dkstock-regime / kis-mcp 외부 통합 DB-only 토글 (사이클 5)
+026_kis_quote_accounts.sql            # 보조 KIS 시세 수신 계좌 (사이클 7-A, 풀 슬롯 41 × (1 + N) 확장)
+027_buy_block_mode.sql                # 매수 가드 4 모드 (OFF/WARN/SOFT/HARD) + 4 임계값 (사이클 8)
+028_auto_apply_status.sql             # parameter_recommendations.status 에 'applied_auto' 분리 (사이클 23 P3, AI 자문 자동 적용)
 ```
 
 ### 3. Docker Compose로 실행 (권장)
@@ -210,8 +214,8 @@ KIS_APP_SECRET=실전용_시크릿
 | 구분 | 규칙 |
 |------|------|
 | 종목군 | 코스피+코스닥 전체, 시총/거래대금 필터, 노이즈 비율 기반 동적 K값 |
-| 매매 가능 보드 | PRE_NXT(08:00~) + MAIN(09:00:05~15:20) — 보드별 별도 시가 + 별도 K값 (`k_value_nxt_pre`/`k_value_krx_main`, 기본 1.0). **POST_NXT 매수 비활성** (2026-05-15 결함 D — 당일 15:20 일괄 매도 정책으로 환원) |
-| 매수 | 보드별 시가 + (전일 Range × K값) 돌파 순간, 할당 자금 10% 비중 |
+| 매매 가능 보드 | **MAIN only (09:00:05~15:20)** — 사이클 26 (2026-05-20) KRX ONLY 정책. KRX 09:00 시가 + (전일 Range × `k_value_krx_main`, 기본 1.0). PRE_NXT/POST_NXT 매수 비활성 (보유 종목 손절/트레일링 매도는 보드 가드 무관 작동). `k_value_nxt_pre`/`k_value_nxt_post` 키는 DB/AI 자문 호환 보존만 |
+| 매수 | KRX 09:00 시가 + (전일 Range × K값) 돌파 순간, 할당 자금 10% 비중 |
 | 손절 | 매수가 대비 -3% |
 | 청산 | **15:20 KRX 메인 일괄 청산** (OVERNIGHT 거부). 익일 청산 안전망: 15:20 청산이 누락된 비상 상황(시세 미수신/시장가 거부/재시작 race)에서만 다음 영업일 `_execute_next_day_clear`로 NXT 프리 청산 — WARNING 로그 노출 |
 | 재매수 | 당일 매도 종목 재매수 차단 |
@@ -220,7 +224,7 @@ KIS_APP_SECRET=실전용_시크릿
 | 구분 | 규칙 |
 |------|------|
 | 종목군 | 변동성 돌파와 동일 + 연속상한가 종목 제외 |
-| 매매 가능 보드 | PRE_NXT + MAIN (VB와 동일, **POST_NXT 매수 비활성**, 2026-05-15 결함 D). 상한가 모드 종목의 POST_NXT 시간대 손절 모니터링은 `risk.on_tick` 청산 평가가 보드 가드 무관하게 작동 |
+| 매매 가능 보드 | **MAIN only (09:00:05~15:20)** — 사이클 26 KRX ONLY. PRE_NXT/POST_NXT 매수 비활성. 상한가 모드 종목의 POST_NXT 시간대 손절 모니터링은 `risk.on_tick` 청산 평가가 보드 가드 무관 작동 |
 | 매수 | 변동성 돌파 + 전일대비 ≥ `min_prdy_rate` (기본 5%) |
 | 당일 청산 | 손절 -3%, **15:20 일괄 청산** (상한가 미도달 종목, `check_force_clear()`가 `_limit_up_reached` 제외) |
 | 모드 전환 | 당일 +29% 도달 → 익일 청산 모드(`_limit_up_reached` set 등록) |
@@ -275,22 +279,24 @@ KIS_APP_SECRET=실전용_시크릿
 | 매수 수량 1주 fallback (전략 잔여 자금 기준) | `position_ratio × total_investment // current_price = 0`이어도 **전략 잔여 자금**(= `total_investment` − 해당 전략 보유 `buy_price×qty` 합 − 해당 전략 `pending_buy_amounts` 합)이 1주 살 수 있으면 1주 매수. 4개 전략 모두 `StrategyBase._fallback_one_share()` 공통 헬퍼 호출. 기존 고정 `total_investment` 직접 비교 → 자금 90% 점유 후 추가 1주 매수로 **전략 한도 초과**하던 결함 차단(2026-05-11 P1) |
 | NXT 거래가능 사전 판별 (Phase G) | KIS `CTPF1002R` 응답 `cptt_trad_tr_psbl_yn=="Y" AND nxt_tr_stop_yn=="N"`로 `nxt_tradable` 파생. `stock_master` 테이블(24h TTL)에 캐시. `OrderEngine._strategy_exchange_async`가 `nxt_tradable=False`면 NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` 로그. `scheduler._execute_next_day_clear`는 1순위 판별로 사용 → 시가 폴링/안정화 거치지 않고 즉시 보류(NXT 주문 시도 0). `execute_sell`이 NXT 시간대 매도 거부 받으면 `stock_master.upsert_one(nxt_tradable=False)` 사후 보강 |
 
-## NXT/SOR 통합 운영 (08:00~20:00)
+## NXT/KRX 통합 운영 (08:00~20:00)
 
-KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 따라 KRX 메인장 외 NXT 프리/애프터 시간대까지 매매 가능하도록 확장.
+KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 따라 KRX 메인장 외 NXT 프리/애프터 시간대까지 매매 가능. **사이클 26 (2026-05-20) — 매매 정책 KRX ONLY + 시세 채널 시간대별 전환**: 신규 매수는 KRX 메인 09:00~15:20 단독, PRE_NXT/POST_NXT 는 보유 종목 매도(손절/트레일링)만. 보드 단순화 5→3 + 시세 채널 시간대별 분리 + 종목별 원자 전환.
 
 | 항목 | 사용 |
 |------|------|
-| 시세 채널 | `H0UNCNT0` (KRX+NXT 통합 체결가) — `H0STCNT0`과 메시지 포맷 동일. NXT 거래도 같은 콜백으로 즉시 흘러옴 |
-| 통합 장운영정보 | `H0UNMKO0` / 대표 종목 `005930` 구독 (실전 한정). 종목 단위 구독이지만 `MKOP_CLS_CODE`(110 장전동시호가 / 112 장개시 / 121 장후동시호가 / 129 장마감 / 130-139 장개시전시간외 / 140-149 시간외종가 / 150-159 시간외단일가)는 시장 전체 공통이라 1종목으로 보드 전환 수신. SessionTracker가 시각 기반 tick + H0UNMKO0 코드 동시 사용 |
-| 주문 라우팅 | `place_order(..., exchange=...)` body에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS)는 KRX만 허용 — SOR/NXT는 실전 한정 |
+| 시세 채널 (시간대별, 사이클 26) | `H0STCNT0` (KRX 단독) + `H0NXCNT0` (NXT 단독) — `scanner.get_active_tick_tr_ids(now_t)` 가 6 구간 분기: PRE_NXT 08:00~08:59:09 {H0NXCNT0} / **KRX 사전 마진 08:59:10~08:59:59 {H0NXCNT0, H0STCNT0}** / MAIN 09:00~15:30 {H0STCNT0} / 종가 흡수 15:30~15:39:09 {H0STCNT0} / **NXT 사전 마진 15:39:10~15:39:59 {H0STCNT0, H0NXCNT0}** / POST_NXT 15:40~19:59 {H0NXCNT0}. `H0UNCNT0` (통합) TR_ID 는 하위 호환 보존만 |
+| 통합 장운영정보 | `H0UNMKO0` / 대표 종목 `005930` 구독 (실전 한정). `MKOP_CLS_CODE`(110/112/121/129/130~159) 시장 전체 공통이라 1종목으로 보드 전환 수신. SessionTracker 가 시각 기반 tick + H0UNMKO0 코드 동시 사용 |
+| 주문 라우팅 | `place_order(..., exchange=...)` body 에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS) 는 KRX 만 허용 — SOR/NXT 는 실전 한정. 사이클 26 신규 매수는 전략 `tradable_boards=("main",)` 로 KRX 만 유효 |
 | 조회 거래소 옵션 | `get_balance(afhr_flpr=...)` — `N`(정규장)/`Y`(시간외)/`X`(NXT 정규장). `get_daily_orders(exchange="ALL")` — KRX+NXT+SOR 합산 |
-| 보드 추상화 | `src/engine/session.py` `MarketBoard` enum: `pre_nxt`(NXT 프리 08:00~09:00) / `krx_open`(08:30~09:00) / `main`(09:00~15:20) / `krx_after`(15:30~18:00) / `post_nxt`(NXT 애프터 15:30~20:00) + `SessionTracker` 30초 주기 tick + `register_board_handler` 콜백 |
-| 전략별 매매 가능 보드 | `DEFAULT_PARAMS["tradable_boards"]` — `momentum`: KRX_OPEN+MAIN / `volatility_breakout`·`long_tail_volatility`: PRE_NXT+MAIN (2026-05-15 결함 D, POST_NXT 매수 비활성) / `donchian_swing`: MAIN |
-| VB/LTV 보드별 K값 | `k_value_krx_main` / `k_value_nxt_pre` (기본 1.0). `k_value_nxt_post` 키는 DB/AI자문 응답 호환 보존만, 실제 사용 안 함. 보드별 별도 시가/타겟 저장 (`_targets[ticker]["boards"][board]`) |
-| 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 즉시 청산 (`NEXT_DAY_STABILIZE_SECS=30`). 대상: `momentum`, `long_tail_volatility` 상한가 모드, `volatility_breakout` 안전망 |
-| 15:20 강제 청산 | `_force_clear_main_only` — `tradable_boards`에 POST_NXT가 있는 전략은 보유 유지 (현재는 해당 없음). **시간 가드 (2026-05-15 hotfix)**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 — 재시작 시점이 15:30 이후일 때 KRX 애프터 SOR 시장가 매도가 APBK3013 거부되던 사고 차단 |
-| donchian 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — 09:30~15:20 KRX 메인 시간대 60s 주기로 donchian `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
+| 보드 추상화 (사이클 26, 3 보드) | `src/engine/session.py::MarketBoard` enum 활성 3 보드: `pre_nxt` (08:00~09:00) / `main` (09:00~15:40) / `post_nxt` (15:40~20:00). `_BOARD_SCHEDULE` 도 3 구간. `krx_open`/`krx_after` enum 값은 *호환성 보존* (실제 스케줄 미사용). `SessionTracker` 30s 주기 tick + `register_board_handler` 콜백 |
+| 전략별 매매 가능 보드 | `DEFAULT_TRADABLE_BOARDS` — `momentum`: KRX_OPEN+MAIN (코드 enum 유지, 활성 보드는 MAIN) / **`volatility_breakout`·`long_tail_volatility`: MAIN only (사이클 26 KRX ONLY)** / `donchian_swing`·`bull_flag_breakout`·`vcp_breakout`: MAIN only |
+| VB/LTV K값 | `k_value_krx_main` (기본 1.0) — KRX 09:00 시가 기준 단독 사용. `k_value_nxt_pre`/`k_value_nxt_post` 키는 DB/AI 자문 응답 호환 보존만 (사이클 26 PRE_NXT 매수 제거) |
+| 종목 단위 원자 전환 (사이클 26) | `TradingScheduler._atomic_board_transition(ticker, stale_tr_id, new_tr_id, ack_timeout_secs=2.0)` — (1) unsubscribe (2) `_subscriptions_acked` 에서 (stale_tr_id, ticker) 제거 polling (timeout 2s) (3) new_tr_id 가 None 아니면 subscribe (4) 50ms sleep. `_board_transition_loop(stale, new, tickers, priority_groups)` — HIGH (positions / next_day_clear) 우선, 전체 순회, `[board_transition_complete]` INFO |
+| 사전 구독 마진 (사이클 26) | `TIME_KRX_MAIN_OPEN_PRESUBSCRIBE=08:59:10` (KRX 채널 50초 사전 마진) / `TIME_POST_NXT_OPEN_PRESUBSCRIBE=15:39:10` (NXT 채널 50초 사전 마진). 보유 + 익일청산 + 매수 후보 합집합 사전 구독 → 09:00 KRX 첫 체결 tick 즉시 수신 보장 |
+| 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 청산 (`NEXT_DAY_STABILIZE_SECS=30`). 대상: `momentum`, `long_tail_volatility` 상한가 모드, `volatility_breakout` 안전망 |
+| 15:20 강제 청산 | `_force_clear_main_only` — `tradable_boards` 에 POST_NXT 가 있는 전략은 보유 유지 (현재 해당 없음). **시간 가드 (2026-05-15 hotfix)**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 |
+| donchian 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — 09:30~15:20 KRX 메인 시간대 60s 주기로 `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
 
 ## API 엔드포인트
 
@@ -350,8 +356,8 @@ auto_stock/
 ├── supabase/migrations/     # DB 마이그레이션
 ├── docs/kis/                # KIS API 스펙 문서
 ├── .claude/                 # Claude Code 하네스 (에이전트팀 + 스킬)
-│   ├── agents/              # 4개 전문 에이전트 정의
-│   └── skills/              # 4개 도메인 스킬
+│   ├── agents/              # 7개 전문 에이전트 정의 (사이클 27, 2026-05-21)
+│   └── skills/              # 9개 도메인 스킬
 ├── Dockerfile               # 백엔드 Docker (dev/prod 멀티스테이지)
 ├── docker-compose.yml       # 개발 환경 Docker Compose
 ├── docker-compose.prod.yml  # 프로덕션 환경 Docker Compose
@@ -363,68 +369,38 @@ auto_stock/
 
 이 프로젝트는 Claude Code의 서브에이전트 + 스킬 시스템을 활용한 **다중 에이전트 협업 구조**로 개발·운영된다. 사용자 요청 유형에 따라 오케스트레이터 스킬이 적합한 에이전트와 스킬을 자동 호출한다.
 
-### 구성도
+### 에이전트 (`.claude/agents/`) — 7명 (사이클 27, 2026-05-21 확장)
 
-```
-                    ┌─────────────────────────────────────────┐
-                    │  사용자 요청 (자연어)                   │
-                    │  "전략 추가해줘" / "버그 수정" / "테스트"│
-                    └──────────────────┬──────────────────────┘
-                                       ▼
-                  ┌────────────────────────────────────────────┐
-                  │  auto-trading-orchestrator (스킬)          │
-                  │  요청 분류 → 적합한 에이전트/스킬 호출     │
-                  └─┬──────────────┬──────────────┬──────────┬─┘
-                    │              │              │          │
-                    ▼              ▼              ▼          ▼
-           ┌──────────────┐ ┌──────────────┐ ┌──────────┐ ┌────────┐
-           │ team-leader  │ │ backend-dev  │ │ frontend │ │ tester │
-           │ (트레이더    │ │ (FastAPI +   │ │ -dev     │ │  (QA)  │
-           │  출신 팀장)  │ │  KIS 엔진)   │ │ (React)  │ │        │
-           │ 매매 규칙    │ │              │ │          │ │ E2E /  │
-           │ 검수·지시    │ │              │ │          │ │ 정합성 │
-           └──────┬───────┘ └──────┬───────┘ └────┬─────┘ └───┬────┘
-                  │                │              │           │
-                  └────────────────┼──────────────┼───────────┘
-                                   ▼              ▼
-                  ┌────────────────────────────────────────────┐
-                  │  도메인 스킬 (재사용 지식 모듈)            │
-                  │  ┌──────────────────┐ ┌─────────────────┐ │
-                  │  │ kis-api-         │ │ trading-        │ │
-                  │  │ integration      │ │ dashboard       │ │
-                  │  │ (OAuth, REST,    │ │ (React 화면 +   │ │
-                  │  │  WebSocket,      │ │  TanStack Query)│ │
-                  │  │  TR_ID 변환)     │ └─────────────────┘ │
-                  │  └──────────────────┘ ┌─────────────────┐ │
-                  │                       │ trading-test    │ │
-                  │                       │ (E2E + DB 정합) │ │
-                  │                       └─────────────────┘ │
-                  └────────────────────────────────────────────┘
-```
+| 에이전트 | 역할 | 모델 | 호출 시점 |
+|---------|------|------|---------|
+| **team-leader** | 트레이더 출신 팀장 — 매매 규칙 *정의 + 감독*, 작업 분배, 산출물 검수. 모든 사용자 요청의 1차 진입점 | opus | 전체 요청 |
+| **domain-expert** *(신규 사이클 27)* | 데이/스윙 트레이더 출신 *깊이있는 자문* — 신규 전략, 파라미터 결정, 시장 미시구조, 보드 행태, 시장 레짐, KIS 거부 해석 | opus | Phase 2.5 명세 분해 *전* + 사이클 중 행위 영향 평가 |
+| **tdd-engineer** | Red 테스트 선작성 + Green 검증 + 영향 인덱스 갱신 (KIS MCP 응답 시리즈 합성 포함) | opus | 모든 코드 변경의 TDD 사이클 입구 |
+| **backend-dev** | FastAPI + KIS OpenAPI + 매매 엔진 + WebSocket + Supabase. 신규 API 통합 시 KIS MCP 정본 확인 | sonnet | Red 테스트 수신 후 Green 구현 |
+| **frontend-dev** | React 트레이딩 대시보드 (구동 관리, 실적/잔고, 거래 내역, Settings) | sonnet | UI Red 테스트 수신 후 Green 구현 |
+| **tester** | 사후 통합/경계면/E2E/안전성. KIS MCP 응답을 정본으로 양쪽 동시 읽기 | opus | 모듈 완성 후 통합 검증 |
+| **refactor-expert** *(신규 사이클 27)* | *주기적* 코드 품질 검토 — 중복/명명/모듈 비대화/dead code/아키텍처 드리프트. 카드 단위 분할 + 위험 등급 + 회귀 가드 동반 | opus | Phase 4.5 — 사이클 5회 누적 또는 명시 요청 |
 
-### 에이전트 (`.claude/agents/`)
-
-| 에이전트 | 역할 | 호출 시점 |
-|----------|------|-----------|
-| **team-leader** | 트레이더 출신 팀장 — 매매 전략·리스크 규칙·주문 흐름을 현업 관점에서 지시·검수 | 트레이딩 시스템 전체 구축/확장, 신 전략 추가, 매매 규칙 변경 |
-| **backend-dev** | FastAPI 기반 REST API + KIS OpenAPI 연동 + 매매 엔진 + WebSocket + Supabase | API 추가, 전략 구현, 주문/잔고 로직, DB CRUD |
-| **frontend-dev** | React 트레이딩 대시보드 — 구동 관리, 실적/잔고, 거래 내역, Settings | 화면 추가/수정, 차트, 폼, 상태 관리 |
-| **tester** | KIS 연동 정합성, FastAPI↔React 경계면, Supabase 스키마, 주문 흐름 E2E, 매매 안전성 | 통합 테스트, 회귀 검증, 정합성 점검 |
-
-### 스킬 (`.claude/skills/`)
+### 스킬 (`.claude/skills/`) — 9개
 
 | 스킬 | 용도 | 트리거 키워드 |
-|------|------|----------------|
-| **auto-trading-orchestrator** | 4개 에이전트를 조율해 시스템 전체 구축/확장 | "자동매매 시스템 구축", "전략 추가", "트레이딩 시스템 개발" |
-| **kis-api-integration** | OAuth/REST/WebSocket/TR_ID 변환 등 KIS OpenAPI 연동 코드 | "KIS API", "주식 주문", "잔고 조회", "실시간 시세", "토큰 발급" |
-| **trading-dashboard** | React 대시보드 화면 구현 (시작/정지·실적·잔고·차트) | "대시보드", "화면", "UI", "차트", "프론트엔드" |
-| **trading-test** | KIS 연동/주문 흐름/DB 정합성 통합 테스트 | "테스트", "검증", "QA", "버그", "정합성 확인" |
+|------|------|--------------|
+| **auto-trading-orchestrator** | 7명 에이전트 조율 — TDD 사이클 + 도메인 자문 + 리팩토링 검토 통합 | "자동매매 시스템 구축", "전략 추가", "리팩토링", "도메인 자문" |
+| **tdd-cycle** | Red→Green→Refactor 사이클 표준화 (pytest+respx+freezegun / vitest+RTL+MSW) | "TDD", "테스트 먼저", "Red/Green", "회귀 테스트" |
+| **test-impact-index** | source↔test 정적 의존성 인덱스 (백엔드 Python AST + 프론트엔드 TS imports) | "영향 테스트", "변경 영향 분석", "인덱스 재생성" |
+| **kis-api-integration** | KIS OAuth/REST/WebSocket/TR_ID 변환 등 연동 코드 | "KIS API", "주식 주문", "잔고 조회", "실시간 시세" |
+| **trading-dashboard** | React 대시보드 화면 구현 | "대시보드", "화면", "UI", "차트" |
+| **trading-test** | KIS 연동/주문 흐름/DB 정합성 통합 테스트 + Playwright E2E | "테스트", "검증", "QA", "정합성 확인" |
+| **domain-consult** *(신규 사이클 27)* | domain-expert 자문 요청 흐름 — 매매 의사결정 깊이 자문 | "도메인 자문", "트레이더 시각", "파라미터 근거", "시장 미시구조" |
+| **refactor-review** *(신규 사이클 27)* | refactor-expert 주기적 검토 흐름 — 행위 보존 카드 단위 권고 | "리팩토링", "코드 정리", "중복 제거", "구조 개선", "모듈 분해" |
+| **kis-mcp-query** *(신규 사이클 27)* | KIS Code Assistant MCP (`mcp__kis-code-assistant__*`) 활용 가이드 — 공식 저장소 `koreainvestment/open-trading-api` 기반. backend-dev / tdd-engineer / tester / refactor-expert 공유 | "KIS 응답 재확인", "TR_ID 확인", "KIS 스펙 정본" |
 
 ### 협업 규약
 
-- **CLAUDE.md 계층**: 루트 `CLAUDE.md` + 디렉토리별 `CLAUDE.md`(`src/`, `src/engine/`, `src/api/`, `src/db/`, `src/routes/`, `src/realtime/`, `frontend/` 등)에 모듈별 코딩 컨벤션·금지사항·연동 규칙을 명시. 모든 에이전트가 작업 전 해당 컨텍스트를 자동 로드.
-- **단일 책임**: 각 에이전트는 자신의 역할 범위 안에서만 파일 수정. 경계면 변경(예: API 응답 스키마)은 backend-dev가 정의 → frontend-dev가 타입 동기화.
-- **검수 흐름**: 매매 규칙 변경은 team-leader가 사양 결정 → backend-dev 구현 → tester 검증.
+- **CLAUDE.md 계층**: 루트 `CLAUDE.md` + 디렉토리별 `CLAUDE.md` (`src/`, `src/engine/`, `src/api/`, `src/db/`, `src/routes/`, `src/realtime/`, `src/auth/`, `frontend/`) 가 모듈별 컨벤션·금지사항·연동 규칙의 진실의 원천
+- **단일 책임**: 각 에이전트는 자신의 역할 범위 안에서만 파일 수정. 경계면 변경(API 응답 스키마 등)은 backend-dev 가 정의 → frontend-dev 가 타입 동기화
+- **검수 흐름**: 매매 규칙 변경 → (선택) domain-expert 자문 → team-leader 명세 → tdd-engineer Red → backend-dev/frontend-dev Green → tester 검증 → (사이클 5회 누적) refactor-expert 검토
+- **KIS MCP 통합**: 신규 API 통합 / 응답 분기 / 회귀 시나리오 합성 / 응답 처리 통일 시 `kis-mcp-query` 스킬 — `docs/kis/` 로컬 캐시와 MCP 응답 불일치 시 *MCP 가 정본*
 
 ## 배포 (AWS EC2)
 
@@ -477,17 +453,20 @@ docker compose -f docker-compose.prod.yml up --build -d
 | 시각 | 동작 |
 |------|------|
 | 07:45 | 자동 매매 시작 (AUTO_START 활성 시, 주말+공휴일 자동 건너뜀 — KIS chk-holiday API) |
-| 07:50 | 프로세스 기동, 토큰 갱신, DB 포지션/설정 복구, 전략 prepare(일봉/K값/전일종가/도치안 단계별 통계) |
-| 07:55 | 사전 구독 — 돌파(VB/LTV) + 스윙(donchian) 스캔 종목 + 보유 포지션. WebSocket 연결 + 체결통보 + (실전) `H0NXMKO0` 구독. 유니버스 비어있으면 prepare 재실행 |
-| 08:00 | NXT 프리 진입 — 익일 청산 백그라운드(`NEXT_DAY_STABILIZE_SECS=30`초 안정화 후 NXT 시가에서 청산) + 돌파 시가 확정(`board="pre_nxt"`) + VB/LTV PRE_NXT 매매 시작 |
-| 09:00:05 | KRX 메인 시가 확정 — VB/LTV `board="main"` 별도 시가 확정 → KRX 09:00 시가 + (전일Range × `k_value_krx_main`) target_price로 MAIN 매매 진입 |
-| 09:05~09:30 | 도치안 스윙(donchian) 진입창 — 시장가 1주문/종목, 갭 +3%↑ 스킵 |
+| 07:50 | `_boot()` — 토큰 사전 순차 발급 (사이클 20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전략 prepare |
+| 07:55 | 사전 구독 — 돌파(VB/LTV) + 스윙(donchian) 스캔 종목 + 보유 포지션. WebSocket 연결 + 체결통보 + (실전) `H0UNMKO0` 구독. 유니버스 비어있으면 prepare 재실행 |
+| 08:00 | NXT 프리 진입 — 익일 청산 백그라운드 (`NEXT_DAY_STABILIZE_SECS=30s` 안정화 후 NXT 시가 청산). 사이클 26: VB/LTV PRE_NXT 매수 제거됨 (`tradable_boards=("main",)`) — `_confirm_breakout_open_prices(board="pre_nxt")` 호출 안 함 |
+| **08:59:10** | **사이클 26 신규 — KRX 채널 사전 구독 마진 (50초)**: `_board_transition_loop("H0NXCNT0", "H0STCNT0", 보유+익일청산)` 종목별 원자 전환 + 매수 후보 신규 KRX subscribe. 09:00 KRX 첫 체결 tick 즉시 수신 보장 |
+| 09:00:05 | KRX 메인 시가 확정 — `_confirm_breakout_open_prices(board="main")` VB/LTV target_price 계산 (KRX 09:00 시가 + 전일Range × `k_value_krx_main`). 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목 KRX 시장가 일괄 청산 |
+| 09:05~09:30 | donchian 스윙 진입창 — 시장가 1주문/종목, 갭 +3%↑ 스킵 |
 | 09:30 | 모멘텀(상한가) 종목 스캔 시작, 매수 감시. 5분 주기 `_scan_loop` 시작 — 모멘텀+돌파+스윙+보유 합집합 시세 재구독 |
-| 15:20 | KRX 메인 신규 매수 중단 + KRX 메인 강제 청산 (`_force_clear_main_only`) — VB 전체 + LTV 상한가 미도달 청산. 도치안은 강제 청산 없음. 함수에 시간 가드(2026-05-15 hotfix) — 15:30 이후 재시작 시 호출 skip + 익일 청산 안전망 위임 |
-| 15:30 | KRX 메인 마감 → NXT 애프터(POST_NXT) 전환. 구독 유지 (LTV 상한가 모드 + donchian 보유 시세 필요). `_confirm_breakout_open_prices(board="post_nxt")` 호출 — VB/LTV POST_NXT 매수는 비활성이지만 보유 종목 손절 평가용 시가 확정 |
-| 19:50 | NXT 애프터 신규 매수 중단 + 전략수정 AI자문 생성 (OpenAI → `parameter_recommendations`) |
+| 15:20 | KRX 메인 신규 매수 중단 + 강제 청산 (`_force_clear_main_only`) — VB 전체 + LTV 상한가 미도달 청산. 시간 가드(2026-05-15 hotfix): `>=15:30` 진입 시 skip + 익일 청산 안전망 위임 |
+| 15:30 | KRX 메인 마감 (15:30~15:39:59 종가 흡수 마진 — MAIN 보드 유지). 사이클 26: `_confirm_breakout_open_prices(board="post_nxt")` 호출 제거 (VB/LTV `tradable_boards` 에 post_nxt 없음 → 시가 확정 대상 없음) |
+| **15:39:10** | **사이클 26 신규 — NXT 채널 사전 구독 마진 (50초)**: `_board_transition_loop("H0STCNT0", "H0NXCNT0", 보유+익일청산)` 종목별 원자 전환 + 매수 후보 KRX unsubscribe |
+| **15:40** | **사이클 26 — POST_NXT 진입** (기존 15:30 → 15:40 변경). 매도만 (VB/LTV `tradable_boards=("main",)`) |
+| 19:50 | NXT 애프터 신규 매수 중단 + 전략수정 AI 자문 생성 (OpenAI → `parameter_recommendations`) + 직후 `auto_apply_recommendations()` (사이클 23, 감액만 + 50% cap, `auto_apply_enabled=true` 시) |
 | 20:00 | NXT 애프터 종료, WebSocket 구독 해제 |
-| 20:10 | 전략별 + 합산 일일 정산, DB 실적 기록. 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`) |
+| 20:10 | 전략별 + 합산 일일 정산, DB 실적 기록. 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`). 직후 `purge_old_logs()` (INFO 2일 / WARNING+ 30일 retention 자동 정리, 사이클 6) |
 
 **중간 시각 시작 시**: 현재 시각 이후 스케줄부터 실행 (20:10 이후 시작 거부)
 

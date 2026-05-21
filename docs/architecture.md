@@ -84,7 +84,7 @@ src/
 │   ├── risk.py              # RiskManager (on_tick → 보드 가드 → 전략별 신호 순회)
 │   ├── order_engine.py      # OrderEngine (주문/체결/포지션 관리)
 │   ├── scheduler.py         # TradingScheduler (KRX/NXT 통합 운영 08:00~20:00)
-│   └── scanner.py           # 종목 스캔 + 공용 시세 캐시 (TICK_TR_ID = H0UNCNT0)
+│   └── scanner.py           # 종목 스캔 + 공용 시세 캐시 (사이클 26: get_active_tick_tr_ids(now_t) 시간대별 H0STCNT0/H0NXCNT0 분기, TICK_TR_ID=H0UNCNT0 하위 호환 보존)
 │
 ├── db/                  # Supabase CRUD
 │   ├── supabase.py          # 클라이언트 초기화
@@ -172,13 +172,13 @@ TradingScheduler (scheduler.py)
 │   │   ├── StrategyConfig (id, name, weight, params{tradable_boards, exchange, ...})
 │   │   └── StrategyState (positions, pending_buys, sold_today, pnl,
 │   │                       cached_buyable_*, buy_blocked_until, low_funds_tickers)
-│   ├── VolatilityBreakoutStrategy   (tradable_boards: pre_nxt + main, 2026-05-15 결함 D)
-│   │   ├── StrategyConfig (k_value_krx_main / k_value_nxt_pre / k_value_nxt_post[보존])
+│   ├── VolatilityBreakoutStrategy   (tradable_boards: main, 사이클 26 KRX ONLY)
+│   │   ├── StrategyConfig (k_value_krx_main / k_value_nxt_pre[호환] / k_value_nxt_post[호환])
 │   │   ├── StrategyState
 │   │   ├── _targets (K, prev_range, target_offset_base,
 │   │   │              boards: {board: {open_price, target_price, target_offset}})
 │   │   └── _next_day_clear_pending (안전망: 15:20 청산 누락 시 익일 NXT 프리 청산)
-│   ├── LongTailVolatilityStrategy   (tradable_boards: pre_nxt + main, 2026-05-15 결함 D)
+│   ├── LongTailVolatilityStrategy   (tradable_boards: main, 사이클 26 KRX ONLY)
 │   │   └── + _limit_up_reached set (상한가 모드 전환 종목)
 │   └── DonchianSwingStrategy        (tradable_boards: main)
 │       └── _candidates / _bought_today / _scan_stats

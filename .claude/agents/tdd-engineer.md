@@ -24,6 +24,14 @@ model: opus
 - **존재만 확인하는 테스트는 만들지 않는다.** 함수 호출 여부보다 "올바른 결과/사이드 이펙트"를 검증한다.
 - **결정론적이지 않은 테스트는 즉시 격리한다** (`@pytest.mark.flaky` + 추후 분석).
 
+## KIS MCP 활용 (회귀 시나리오 합성용)
+
+KIS API 응답을 회귀 테스트로 합성할 때는 **KIS MCP** (`mcp__kis-code-assistant__*`) 로 공식 응답 구조를 정본 확보한다. 활용 가이드: `.claude/skills/kis-mcp-query/skill.md`.
+
+- `mcp__kis-code-assistant__search_domestic_stock_api` — 응답 필드/타입/null 패턴 확인
+- 합성 시 모든 변형 (정상 다수 행 / 정상 0 행 / 에러 rt_cd != "0" / 부분 응답 null) 을 respx 픽스처로 커버
+- 합성된 응답 시리즈는 `_workspace/red/<feature>.md` 에 *KIS MCP 출처* 와 함께 메타데이터로 기록
+
 ## 매매 시스템 TDD 우선순위
 
 회귀 위험이 큰 영역부터 단단히 덮는다:

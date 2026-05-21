@@ -1,6 +1,6 @@
 ---
 name: auto-trading-orchestrator
-description: "KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하는 오케스트레이터. 팀장(트레이더)이 리더로서 TDD 엔지니어, 백엔드(FastAPI), 프론트엔드(React), 테스터를 지휘한다. **TDD(Red→Green→Refactor) 사이클을 기본 워크플로우로 강제**하며, tdd-engineer가 Red 테스트를 먼저 작성한 뒤 개발자가 Green 구현을 한다. '자동매매 시스템 구축해줘', '트레이딩 시스템 개발', '매매 시스템 만들어줘', '전략 추가해줘', '기능 추가/수정' 등 시스템 전체 구축/확장 요청 시 이 스킬을 사용할 것. 개별 모듈만 요청하는 경우에는 해당 개별 스킬을 사용한다."
+description: "KIS OpenAPI 기반 주식 자동매매시스템 개발 팀을 조율하는 오케스트레이터. 팀장(트레이더)이 리더로서 도메인 전문가(데이/스윙 트레이더), TDD 엔지니어, 백엔드(FastAPI), 프론트엔드(React), 테스터, 리팩토링 전문가를 지휘한다. **TDD(Red→Green→Refactor) 사이클을 기본 워크플로우로 강제**하며, tdd-engineer가 Red 테스트를 먼저 작성한 뒤 개발자가 Green 구현을 한다. 매매 의사결정·파라미터·시장 행태 자문은 domain-expert 가 *깊이있는 권고* 를 제공하고, 사이클 5회 누적 또는 명시 요청 시 refactor-expert 가 *행위 보존 리팩토링* 을 검토한다. '자동매매 시스템 구축해줘', '트레이딩 시스템 개발', '매매 시스템 만들어줘', '전략 추가해줘', '기능 추가/수정', '리팩토링', '코드 정리', '도메인 자문' 등 시스템 전체 구축/확장/유지보수 요청 시 이 스킬을 사용할 것. 개별 모듈만 요청하는 경우에는 해당 개별 스킬을 사용한다."
 ---
 
 # Auto Trading System Orchestrator (TDD-First)
@@ -37,15 +37,24 @@ TradingScheduler ← registry 기반 boot/run/settle
 
 매매 전략의 구체적 규칙은 `_workspace/00_leader_trading_rules.md`에 정의한다.
 
-## 에이전트 구성 (TDD 통합 후)
+## 에이전트 구성 (TDD + 도메인 자문 + 리팩토링 통합 후)
 
 | 팀원 | 에이전트 | 역할 | 스킬 | 출력 |
 |------|---------|------|------|------|
-| team-leader (리더) | team-leader | 매매 규칙 정의, 작업 감독 | — | 매매 규칙 명세 |
-| **tdd-engineer** | tdd-engineer | **Red 테스트 선작성 + Green 검증 + 영향 인덱스 갱신** | **tdd-cycle, test-impact-index** | `tests/`, `frontend/**/__tests__/`, `e2e/`, `_workspace/red/` |
-| backend-dev | backend-dev | FastAPI + KIS API + 매매 엔진 | kis-api-integration | `src/` |
+| team-leader (리더) | team-leader | 매매 규칙 *정의 + 감독*, 작업 분배, 산출물 검수 | — | 매매 규칙 명세 |
+| **domain-expert** | domain-expert | 데이/스윙 트레이더 출신 *깊이있는 자문* — 신규 전략, 파라미터 결정, 시장 미시구조, 보드 행태, 시장 레짐 | **domain-consult** | `_workspace/domain_consult/` |
+| **tdd-engineer** | tdd-engineer | **Red 테스트 선작성 + Green 검증 + 영향 인덱스 갱신** | **tdd-cycle, test-impact-index, kis-mcp-query** | `tests/`, `frontend/**/__tests__/`, `e2e/`, `_workspace/red/` |
+| backend-dev | backend-dev | FastAPI + KIS API + 매매 엔진 | kis-api-integration, **kis-mcp-query** | `src/` |
 | frontend-dev | frontend-dev | React.js 대시보드 | trading-dashboard | `frontend/` |
-| tester | tester | 사후 통합/경계면/안전성 검증 | trading-test | 테스트 리포트 |
+| tester | tester | 사후 통합/경계면/안전성 검증 | trading-test, **kis-mcp-query** | 테스트 리포트 |
+| **refactor-expert** | refactor-expert | *주기적* 코드 품질 검토 — 중복/명명/모듈 비대화/아키텍처 드리프트 | **refactor-review, kis-mcp-query** | `_workspace/refactor/` |
+
+### 호출 시점
+
+- **team-leader**: 모든 요청의 1차 진입
+- **domain-expert**: Phase 2.5 명세 분해 *직전* (선택적, 매매 의사결정 자문이 필요할 때) + 사이클 중 *행위 영향 평가* 가 필요할 때
+- **tdd-engineer / backend-dev / frontend-dev / tester**: Phase 3~4 표준 TDD 사이클
+- **refactor-expert**: Phase 4.5 — 사이클 5회 누적 또는 사용자 명시 요청 시
 
 ## 워크플로우
 
@@ -67,6 +76,8 @@ TradingScheduler ← registry 기반 boot/run/settle
 
 ### Phase 2: 팀 구성
 
+기본 팀 = 5 명 (team-leader 는 오케스트레이터 자신). domain-expert / refactor-expert 는 *필요 시 합류* (Phase 2.5 / Phase 4.5).
+
 ```
 TeamCreate(
   team_name: "trading-tdd-team",
@@ -75,13 +86,13 @@ TeamCreate(
       name: "tdd-engineer",
       agent_type: "tdd-engineer",
       model: "opus",
-      prompt: "TDD 엔지니어. .claude/agents/tdd-engineer.md 역할, .claude/skills/tdd-cycle/skill.md + .claude/skills/test-impact-index/skill.md 참조. 명세 수신 시 Red 테스트 선작성 → backend-dev/frontend-dev에 SendMessage. Green 검증 후 영향 인덱스 갱신."
+      prompt: "TDD 엔지니어. .claude/agents/tdd-engineer.md 역할, .claude/skills/tdd-cycle/skill.md + .claude/skills/test-impact-index/skill.md + .claude/skills/kis-mcp-query/skill.md 참조. 명세 수신 시 Red 테스트 선작성 → backend-dev/frontend-dev에 SendMessage. KIS 응답 합성 시 KIS MCP 인용. Green 검증 후 영향 인덱스 갱신."
     },
     {
       name: "backend-dev",
       agent_type: "backend-dev",
       model: "sonnet",
-      prompt: "백엔드 개발자. .claude/agents/backend-dev.md, .claude/skills/kis-api-integration/skill.md 참조. **Red 테스트 수신 후에만** 최소 구현 작성. tdd-engineer에 Green 알림. 모듈 완성 시 tester에 통합 검증 의뢰."
+      prompt: "백엔드 개발자. .claude/agents/backend-dev.md, .claude/skills/kis-api-integration/skill.md + .claude/skills/kis-mcp-query/skill.md 참조. **Red 테스트 수신 후에만** 최소 구현 작성. KIS 신규/응답 의문 시 KIS MCP 로 정본 확인. tdd-engineer에 Green 알림. 모듈 완성 시 tester에 통합 검증 의뢰."
     },
     {
       name: "frontend-dev",
@@ -93,20 +104,52 @@ TeamCreate(
       name: "tester",
       agent_type: "tester",
       model: "opus",
-      prompt: "QA 테스터. .claude/agents/tester.md, .claude/skills/trading-test/skill.md 참조. Red/Green 사이클은 tdd-engineer 담당. tester는 모듈 결합 후 통합/경계면/E2E 검증. 결함은 tdd-engineer에 회귀 테스트 의뢰."
+      prompt: "QA 테스터. .claude/agents/tester.md, .claude/skills/trading-test/skill.md + .claude/skills/kis-mcp-query/skill.md 참조. Red/Green 사이클은 tdd-engineer 담당. tester는 모듈 결합 후 통합/경계면/E2E 검증. KIS 경계면은 MCP 응답을 정본으로 양쪽 동시 읽기. 결함은 tdd-engineer에 회귀 테스트 의뢰."
     }
   ]
 )
 ```
 
+**선택적 합류 — Phase 2.5 (도메인 자문 필요 시)**
+
+```
+Agent(
+  subagent_type: "domain-expert",
+  model: "opus",
+  prompt: "도메인 전문가 (데이/스윙 트레이더). .claude/agents/domain-expert.md + .claude/skills/domain-consult/skill.md 참조. 자문 요청 1 건 처리 후 `_workspace/domain_consult/{topic}.md` 산출. 권고는 *3 안 정렬* + *반례 동반* + *CLAUDE.md 안전 규칙 우선*."
+)
+```
+
+자문이 짧으면 Agent 직접 호출, 사이클 전반에 걸쳐 자주 요청되면 팀에 정식 합류 (`TeamDelete` 후 `TeamCreate` 로 재구성).
+
+**선택적 합류 — Phase 4.5 (주기적 리팩토링 검토)**
+
+```
+Agent(
+  subagent_type: "refactor-expert",
+  model: "opus",
+  prompt: "리팩토링 전문가. .claude/agents/refactor-expert.md + .claude/skills/refactor-review/skill.md + .claude/skills/kis-mcp-query/skill.md 참조. 검토 범위 = {team-leader 가 지정 또는 사이클 N 회 누적 범위}. 산출물 `_workspace/refactor/{YYYY-MM-DD}_review.md`. 카드 단위 분할 + 위험 등급 + 회귀 가드 명시. HIGH 카드는 domain-expert 행위 영향 평가 의뢰."
+)
+```
+
 ### Phase 2.5: 명세 → 행위 분해 (TDD 사이클의 입력)
 
-이 단계가 TDD를 강제하는 핵심이다. **개발자에게 작업을 분배하기 전에** team-leader와 tdd-engineer가 함께 명세를 검증 가능한 행위 단위로 분해한다.
+이 단계가 TDD를 강제하는 핵심이다. **개발자에게 작업을 분배하기 전에** team-leader와 tdd-engineer가 함께 명세를 검증 가능한 행위 단위로 분해한다. *매매 의사결정의 깊이* 가 필요한 명세는 domain-expert 자문을 선행한다.
 
-1. team-leader가 매매 규칙/기능 명세를 `_workspace/00_leader_trading_rules.md`에 작성
-2. tdd-engineer가 명세를 읽고 검증 가능한 행위 목록을 `_workspace/red/_behaviors.md`에 작성
-3. 모호한 항목은 team-leader에 SendMessage로 즉시 확인
-4. team-leader 승인 후 Phase 3 사이클 시작
+1. team-leader 가 사용자 요청 분석
+2. **(선택) domain-expert 자문 — `domain-consult` 스킬** — 다음 중 하나라도 해당하면 명세 작성 *전* 에 자문 의뢰:
+   - 신규 전략 발의 또는 기존 전략의 *행위 변경*
+   - 파라미터 (K값/돌파 임계/익절/트레일링/position_ratio/cash_usage_ratio 등) 변경
+   - 보드 가드 (tradable_boards) 변경
+   - 시장 레짐 임계 조정 또는 매수 가드 모드 변경
+   - KIS 거부 코드 / 호가 두께 / 슬리피지 등 *시장 미시구조* 가 결정에 개입
+   - 운영 결함이 *시장 행태 vs 코드 결함* 판단을 요구
+3. team-leader 가 자문 메모 (`_workspace/domain_consult/{topic}.md`) 를 참조하여 매매 규칙/기능 명세를 `_workspace/00_leader_trading_rules.md` 에 확정
+4. tdd-engineer 가 명세를 읽고 검증 가능한 행위 목록을 `_workspace/red/_behaviors.md` 에 작성
+5. 모호한 항목은 team-leader / domain-expert 에 SendMessage 로 즉시 확인
+6. team-leader 승인 후 Phase 3 사이클 시작
+
+**도메인 자문 결과 채택 흐름**: 자문은 *권고* 다. team-leader 가 채택/보류/폐기 결정. 채택 시 매매 규칙 명세에 자문 메모 경로 + 채택 항목 명시.
 
 행위 분해 예시 (전략 추가 요청):
 ```
@@ -156,11 +199,36 @@ TeamCreate(
 ### Phase 4: 통합 및 안전성 검증
 
 1. tester가 모듈 완성 알림을 받으면 즉시 시작
-2. 양쪽 동시 읽기로 경계면 검증 (KIS 스펙↔구현, FastAPI↔React, DB↔모델)
-3. 매매 안전성 시나리오 실행 (중복 매수, 부분 체결, 체결통보 race, 강제청산, Rate Limit)
+2. 양쪽 동시 읽기로 경계면 검증 (KIS 스펙 + **KIS MCP** ↔ 구현, FastAPI↔React, DB↔모델)
+3. 매매 안전성 시나리오 실행 (중복 매수, 부분 체결, 체결통보 race, 강제청산, Rate Limit, 보드 가드, NXT 좀비 차단)
 4. Playwright E2E 4개 시나리오 실행
-5. 결함 발견 시 → tdd-engineer에 회귀 테스트 의뢰 → Phase 3 사이클로 복귀
+5. 결함 발견 시:
+   - *시장 행태* 의심 → domain-expert 1 차 자문 → 코드 결함이면 tdd-engineer 에 회귀 테스트 의뢰
+   - *코드 결함* 확정 → tdd-engineer 에 회귀 테스트 의뢰 → Phase 3 사이클로 복귀
 6. 최종 통합 리포트: `_workspace/test_report.md`
+
+### Phase 4.5: 주기적 리팩토링 검토 (선택적)
+
+**트리거** (다음 중 하나라도 해당):
+- 사이클 5 회 누적 (오케스트레이터가 `_workspace/red/` 파일 수로 자동 감지)
+- 사용자가 "리팩토링", "코드 정리", "중복 제거", "구조 개선" 키워드 요청
+- tdd-engineer 가 *드리프트 신호* 보고 (같은 패턴 3 곳 이상 등장)
+- 단일 파일 > 800 라인 또는 단일 함수 > 80 라인 발견
+
+**흐름**:
+1. team-leader 가 검토 범위 확정 (디렉토리 / 사이클 번호 / 모듈)
+2. refactor-expert 합류 (`Agent(subagent_type: "refactor-expert", model: "opus")`)
+3. refactor-expert 가 `refactor-review` 스킬 흐름 따라 검토:
+   - 코드 정독 + grep 통계 + 모듈 라인 수 분석
+   - KIS API 영역이면 KIS MCP 로 정본 재확인
+   - 카드 후보 식별 + 위험 등급 (LOW/MEDIUM/HIGH) 분류
+   - HIGH 카드 → domain-expert 행위 영향 평가 의뢰 (`domain-consult` 스킬)
+   - 회귀 가드 부재 영역 → tdd-engineer 회귀 테스트 선행 의뢰
+4. 리뷰 메모 `_workspace/refactor/{YYYY-MM-DD}_review.md` 산출
+5. team-leader 가 카드별 채택 / 보류 / 폐기 결정
+6. 채택 카드는 Phase 3 사이클로 흡수 (Red→Green→tester 통합 검증)
+
+**Phase 4.5 는 Phase 4 완료 후 또는 별도 세션으로 실행** — 운영 시간 (KRX 메인 09:00~15:30) 중 push 자제 권고 (CLAUDE.md 운영 가이드).
 
 ### Phase 5: 정리
 
@@ -174,25 +242,44 @@ TeamCreate(
    - 알려진 제한사항
    - 실행 방법
 
-## 데이터 흐름 (TDD 통합 후)
+## 데이터 흐름 (TDD + 도메인 자문 + 리팩토링 통합 후)
 
 ```
+[사용자 요청]
+    │
+    ▼
 [team-leader/리더]
-    │ 매매 규칙
+    │ (1) 매매 의사결정 자문 필요 시 ──→ [domain-expert] ──→ _workspace/domain_consult/
+    │                                              │
+    │←─────────────────── 자문 메모 한 줄 요약 ─────┘
+    │
+    │ (2) 매매 규칙 명세 (자문 채택 항목 반영)
     ▼
 [tdd-engineer] ←──── 명세 검증/행위 분해 ────→ [team-leader]
+    │ (필요 시 KIS MCP 응답 합성)
     │ Red 준비
     ▼
 [backend-dev / frontend-dev]
+    │ (backend-dev 는 KIS MCP 로 정본 재확인)
     │ Green 구현
     ▼
 [tdd-engineer] ── 인덱스 갱신 ──→ _workspace/test_index.yaml
     │ 모듈 완성 알림
     ▼
 [tester]
-    │ 통합/경계면/E2E
-    ├── 결함 발견 시 ──→ [tdd-engineer] (회귀 테스트로)
+    │ KIS MCP 인용 양쪽 동시 읽기 + 통합/경계면/E2E
+    ├── 결함 발견 (시장 행태 의심) ──→ [domain-expert] 1차 자문
+    ├── 결함 발견 (코드 결함 확정) ──→ [tdd-engineer] (회귀 테스트로)
     └── 안전성 이슈 ──→ [team-leader] (작업 중단 판단)
+    │
+    │ 사이클 5회 누적 또는 명시 요청 시
+    ▼
+[refactor-expert] (Phase 4.5)
+    │ 리뷰 메모 → _workspace/refactor/
+    │ HIGH 카드 ──→ [domain-expert] 행위 영향 평가
+    │ 회귀 가드 부재 ──→ [tdd-engineer] 선행 의뢰
+    │
+    └── 채택 카드 ──→ Phase 3 사이클 (Red→Green→tester 회귀 0)
 ```
 
 ## 에러 핸들링
@@ -204,6 +291,11 @@ TeamCreate(
 | Green 후 다른 테스트 깨짐 | 회귀 발생 — 원인 모듈 식별 후 같은 사이클에서 함께 Green 만들기 |
 | 인덱스 정확도 의심 | manual_overrides.yaml 보강 + main 브랜치 풀 실행으로 안전망 |
 | 매매 안전성 이슈 | tester → team-leader 즉시 → 작업 중단 판단 |
+| 매매 의사결정 모호 | team-leader → domain-expert 자문 (`domain-consult` 스킬) → 3 안 정렬 후 결정 |
+| KIS 응답 의문 | backend-dev / tdd-engineer / tester 가 KIS MCP 정본 확인 (`kis-mcp-query` 스킬) |
+| 시장 행태 vs 코드 결함 판단 모호 | tester → domain-expert 1차 자문 → 결과에 따라 코드 수정 또는 시장 행태 수용 |
+| 리팩토링 카드의 행위 영향 불확실 | refactor-expert → domain-expert 행위 영향 평가 의뢰 → 평가 후 카드 채택/폐기 |
+| 회귀 가드 부재 영역 리팩토링 요청 | refactor-expert 가 카드 발의 보류 + tdd-engineer 회귀 테스트 선행 의뢰 |
 | 팀원 1명 실패 | 리더가 SendMessage 상태 확인 → 재시작 또는 작업 재할당 |
 | 타임아웃 | 산출물 보존, 미완료 항목 목록화 |
 
@@ -231,8 +323,11 @@ TeamCreate(
 ## 후속 작업 키워드 (재실행/부분 수정)
 
 이 스킬은 다음 표현에서도 트리거된다:
-- "다시 실행", "재실행", "업데이트"
+- "다시 실행", "재실행", "업데이트", "수정", "보완"
 - "{전략명}만 다시 테스트 작성"
 - "이전 결과 기반으로 ~ 보강"
 - "~ 회귀 테스트 추가"
 - "~ 영향 인덱스 갱신"
+- "리팩토링", "코드 정리", "중복 제거", "구조 개선", "모듈 분해"
+- "도메인 자문", "트레이더 시각", "파라미터 근거", "시장 미시구조"
+- "KIS 응답 재확인", "TR_ID 확인", "KIS 스펙 정본"

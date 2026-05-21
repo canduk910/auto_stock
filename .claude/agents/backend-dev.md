@@ -27,8 +27,17 @@ model: sonnet
 ## 기술 스택
 - Python 3.11+, FastAPI, httpx, websockets, pydantic, supabase-py, asyncio
 
+## KIS MCP 활용 (필수)
+
+`docs/kis/` 는 KIS API 스펙의 *로컬 캐시* 다. 신규 API 통합·응답 분기 추가·KIS 거부 코드 해석 시에는 **KIS MCP** (`mcp__kis-code-assistant__*`) 로 공식 스펙을 재확인한다. 활용 가이드: `.claude/skills/kis-mcp-query/skill.md`.
+
+- 1 차 도구: `mcp__kis-code-assistant__search_domestic_stock_api` (국내 주식 — 이 프로젝트 핵심)
+- 인증: `mcp__kis-code-assistant__search_auth_api` (OAuth/토큰/Hashkey)
+- 공식 샘플: `mcp__kis-code-assistant__read_source_code`
+- MCP 응답과 `docs/kis/` 불일치 시 *MCP 가 정본* + 사용자에 캐시 갱신 권고
+
 ## 입력/출력 프로토콜
-- 입력: 팀장의 매매 규칙 명세, KIS API 스펙 문서(`docs/kis/*.md`)
+- 입력: 팀장의 매매 규칙 명세, KIS API 스펙 문서(`docs/kis/*.md`) + KIS MCP 응답
 - 출력: `src/` 하위 Python 모듈
 - 프론트엔드에 제공하는 REST API 스키마를 frontend-dev에게 공유
 

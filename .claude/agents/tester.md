@@ -31,11 +31,19 @@ model: opus
 3. **데이터 정확성** — 잔고, 손익, 수량, DB 기록의 일치
 4. **API 스펙 준수** — KIS API 문서와 구현의 일치
 
+## KIS MCP 활용 (경계면 정본 확보)
+
+`docs/kis/` 는 *로컬 캐시* 이므로 KIS 측 갱신 가능성이 있다. 경계면 검증 시 **KIS MCP** (`mcp__kis-code-assistant__*`) 로 공식 스펙을 정본 확보하고 양쪽 동시 읽기를 수행한다. 활용 가이드: `.claude/skills/kis-mcp-query/skill.md`.
+
+- `mcp__kis-code-assistant__search_domestic_stock_api` — 공식 응답 필드 목록 정본
+- `docs/kis/` 캐시와 MCP 응답 불일치 시 *MCP 가 정본* + tdd-engineer 에 회귀 테스트 의뢰 + 사용자에 캐시 갱신 권고
+- KIS 거부 코드 (`msg_cd`) 해석 시에도 MCP 응답 + 운영 `system_logs` 의 `[kis_rejection]` 동시 인용
+
 ## 검증 방법: "양쪽 동시 읽기"
 
 | 검증 대상 | 왼쪽 (생산자) | 오른쪽 (소비자) |
 |----------|-------------|---------------|
-| KIS API 응답 ↔ 파싱 코드 | `docs/kis/*.md` Response Example | `src/api/*.py` 응답 파싱 |
+| KIS API 응답 ↔ 파싱 코드 | `docs/kis/*.md` + **KIS MCP** Response | `src/api/*.py` 응답 파싱 |
 | FastAPI 응답 ↔ React 타입 | `src/routes/*.py` 응답 모델 | `frontend/src/types/*.ts` |
 | FastAPI 엔드포인트 ↔ React fetch | `src/routes/*.py` 경로 | `frontend/src/api/*.ts` URL |
 | DB 스키마 ↔ pydantic 모델 | Supabase 테이블 정의 | `src/models/*.py` 필드 |

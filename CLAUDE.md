@@ -10,16 +10,19 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 ## 하네스: TDD-First Trading Team
 
-**목표:** 모든 코드 변경을 Red→Green→Refactor 사이클로 강제하고, 변경 시 영향받는 테스트만 실행할 수 있는 정적 인덱스를 유지한다.
+**목표:** 모든 코드 변경을 Red→Green→Refactor 사이클로 강제하고, 변경 시 영향받는 테스트만 실행할 수 있는 정적 인덱스를 유지한다. *매매 의사결정의 깊이* 는 도메인 전문가의 사전 자문으로 보완하고, *코드 품질 드리프트* 는 리팩토링 전문가의 주기적 검토로 흡수한다.
 
 ### 기본 진입점 — `team-leader` 우선
 
 사용자의 모든 요청은 1차로 `Agent({subagent_type: "team-leader"})` 로 라우팅한다. team-leader 가 트레이더 관점에서 해석 후 하위 에이전트에 분배한다.
 
 - 코드 변경 → `auto-trading-orchestrator` 스킬 (TDD 사이클: `tdd-engineer` Red → `backend-dev`/`frontend-dev` Green → `tester` 검증)
+- 매매 의사결정 자문 (신규 전략·파라미터·보드 행태·시장 레짐·KIS 거부 해석) → `domain-consult` 스킬 (`domain-expert` 에이전트) — Phase 2.5 명세 분해 *전* 또는 사이클 중 행위 영향 평가 시
+- 주기적 리팩토링 검토 (사이클 5회 누적 또는 명시 요청) → `refactor-review` 스킬 (`refactor-expert` 에이전트) — Phase 4.5
 - 단위/회귀 테스트 → `tdd-cycle` (백엔드 pytest+respx+freezegun / 프론트엔드 vitest+RTL+MSW)
 - 영향 인덱스 → `test-impact-index`
 - 통합/경계면/E2E/안전성 → `trading-test`
+- KIS API 정본 스펙 (TR_ID·응답 구조·거부 코드) → `kis-mcp-query` 스킬 (backend-dev / tdd-engineer / tester / refactor-expert 공유)
 
 **우회 허용 (메인 세션 직접 응답):** 단순 사실 질의, 단발 디버그/grep, 운영 환경 즉시 점검(EC2 SSH 등). 코드 변경 제안이 따라오면 다시 team-leader 로 인계.
 
@@ -27,9 +30,17 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 작업 유형 | 모델 | 적용 |
 |----------|------|------|
-| 계획·검증 (구현 계획, 테스트 설계, 검수, 안전성 검증) | **opus** | `team-leader`, `tdd-engineer`, `tester` |
+| 계획·검증·자문 (구현 계획, 테스트 설계, 검수, 안전성 검증, 도메인 자문, 리팩토링 검토) | **opus** | `team-leader`, `domain-expert`, `tdd-engineer`, `tester`, `refactor-expert` |
 | 일반 구현 (코드 작성·리팩터·버그 수정) | **sonnet** | `backend-dev`, `frontend-dev` |
 | 명령어 작성 (bash/슬래시/스크립트) | **haiku** | 메인 세션 단발 작업 — fork 또는 `claude-haiku-4-5-20251001` 위임 |
+
+### 하네스 변경 이력
+
+| 날짜 | 변경 내용 | 대상 | 사유 |
+|------|----------|------|------|
+| 2026-04-22 | 초기 구성 (team-leader / backend-dev / frontend-dev / tdd-engineer / tester) | 전체 | TDD-First Trading Team 출범 |
+| 2026-05-21 | `domain-expert` (데이/스윙 트레이더 자문) + `refactor-expert` (주기적 리팩토링) 합류, KIS MCP 접근 명시 (backend-dev / tdd-engineer / tester / refactor-expert) | 에이전트 7명 / 스킬 9개 | 매매 의사결정 깊이 보강 + 코드 품질 드리프트 흡수 + KIS 스펙 정본 통일 |
+| 2026-05-21 | `kis-mcp-query` 스킬에 KIS 공식 저장소 경로 + 설치 가이드 + 공식 프롬프트 도구 (`kis_easy_code`/`kis_detailed_code`) 활용 안내 추가 | skills/kis-mcp-query | 공식 저장소 (koreainvestment/open-trading-api) 가 정본임을 명시, 비공식 fork 사용 차단 |
 
 ### 테스트 실행
 
