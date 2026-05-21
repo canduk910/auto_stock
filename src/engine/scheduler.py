@@ -3494,6 +3494,14 @@ class TradingScheduler:
         self._silent_inactive_first_seen.clear()
         self._silent_inactive_recovery_count.clear()
 
+        # 사이클 31 (R6, 2026-05-21) — risk.py 사전 가드 침묵 가시화 emit cap 일일 초기화.
+        # `(ticker, strategy_id)` 페어 1회/일 INFO emit cap. 익일 첫 호출 시 재 emit 가능.
+        try:
+            self.risk_manager._risk_silent_skip_logged_today.clear()
+        except AttributeError:
+            # 회귀 가드 — 사전 init 누락 인스턴스 (테스트 __new__ 등) 보호
+            pass
+
         # Phase 3 (2026-05-16) — 백테스트 폴 루프 진입 가드 set 매일 초기화.
         # 정상 종료 시 finally 에서 discard 되지만 예외/취소 시 잔재 가능성 차단.
         try:

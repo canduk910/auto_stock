@@ -34,6 +34,11 @@ class RiskManager:
         # 사이클 2 (2026-05-17): 시장 레짐 매수 가드 skip 카운터. 1분 1회 INFO emit.
         self._regime_block_count: dict[str, int] = {}
         self._last_regime_block_emit_ts: float = 0.0
+        # 사이클 31 (R6, 2026-05-21): `risk.py:152` 사전 가드 침묵 가시화.
+        # `current_price > state.total_investment` skip 분기에서 1회/(ticker, strategy)/일
+        # INFO emit cap. 매 틱 폭주 차단 + scheduler `_reset_daily_state` 동행 clear.
+        # 2026-05-21 09:13 VB 미매수 사고 디버깅 곤란의 근본 원인 (skip 침묵).
+        self._risk_silent_skip_logged_today: set[tuple[str, str]] = set()
 
     async def on_tick(
         self,
@@ -150,6 +155,18 @@ class RiskManager:
             if state.is_low_funds_blocked(ticker, now_ts):
                 continue
             if state.total_investment > 0 and current_price > state.total_investment:
+                # 사이클 31 (R6, 2026-05-21) — 사전 가드 침묵 가시화.
+                # 1회/(ticker, strategy)/일 emit cap — 매 틱 폭주 차단 + scheduler
+                # `_reset_daily_state` 동행 clear. 2026-05-21 09:13 VB 미매수 사고
+                # 디버깅 곤란의 근본 원인 (skip 침묵) 대응.
+                emit_key = (ticker, strategy.strategy_id)
+                if emit_key not in self._risk_silent_skip_logged_today:
+                    self._risk_silent_skip_logged_today.add(emit_key)
+                    logger.info(
+                        "[risk_silent_skip] ticker=%s strategy=%s "
+                        "reason=price_gt_total_investment price=%d total=%d",
+                        ticker, strategy.strategy_id, current_price, state.total_investment,
+                    )
                 continue
 
             # G안 (2026-05-12): donchian_swing 매수 평가는 Pull 폴링(_swing_buy_poll_loop)에서만.
