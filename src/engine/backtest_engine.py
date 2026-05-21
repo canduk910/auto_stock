@@ -181,11 +181,11 @@ class BacktestEngine:
         """``get_backtest_result_tool(wait=False)`` 1회 호출.
 
         Returns:
-            running → None
+            running / pending → None (큐 대기, 정상 진행 중)
             completed → BacktestMetrics
         Raises:
             ConfigError: enabled=False (DB/.env 모두 비활성)
-            ExternalAPIError: failed status / 통신 오류
+            ExternalAPIError: failed / unknown status / 통신 오류
         """
         if not await self.is_enabled_async():
             raise ConfigError("KIS_MCP_ENABLED=false")
@@ -194,7 +194,11 @@ class BacktestEngine:
             "get_backtest_result_tool", {"job_id": job_id, "wait": False}
         )
         status = _extract_status(resp)
-        if status == "running":
+        # 사이클 36 (긴급, 2026-05-21) — 'pending' status 도 큐 대기 (running 동일) 처리.
+        # 외부 백테스트 서버 (43.202.187.5:3846) 가 작업 큐 대기 중 'pending' 반환 — 정상 진행.
+        # 기존 코드는 'running' 만 None 처리 → 'pending' 이 unknown 분기로 진입 → ExternalAPIError →
+        # backtest_runs status=failed 잘못 기록 (2026-05-21 17:40 운영 사고).
+        if status in ("running", "pending"):
             return None
         if status == "completed":
             metrics_dict = _extract_metrics(resp)
@@ -210,6 +214,9 @@ class BacktestEngine:
         """완료까지 외부 서버 내부 대기 (``wait=True``). Phase 3 자문 통합 사용.
 
         외부 서버가 timeout 까지 폴링을 서버측에서 수행 후 결과 반환.
+
+        사이클 36 (긴급, 2026-05-21) — `wait=True` 인데도 timeout 초과로 'pending' 반환 시
+        ExternalAPIError 메시지에 'pending' 명시 (호출자가 timeout vs 진짜 실패 구분 가능).
         """
         if not await self.is_enabled_async():
             raise ConfigError("KIS_MCP_ENABLED=false")
@@ -222,6 +229,12 @@ class BacktestEngine:
         if status == "completed":
             metrics_dict = _extract_metrics(resp)
             return BacktestMetrics.model_validate(metrics_dict)
+        # 사이클 36 — 'pending' 은 서버측 timeout 초과 — 호출자가 timeout 인식 가능하도록 명시
+        if status in ("pending", "running"):
+            raise ExternalAPIError(
+                f"백테스트 timeout — job_id={job_id}: status={status!r} "
+                f"(외부 서버 wait={timeout}s 초과, 다음 사이클 재시도 가능)"
+            )
         err = _extract_error_message(resp) or f"unknown status: {status!r}"
         raise ExternalAPIError(f"백테스트 실패 — job_id={job_id}: {err}")
 

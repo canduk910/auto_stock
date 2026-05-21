@@ -537,9 +537,12 @@ class TradingScheduler:
                 )
 
             # 사이클 23 P3-1 — AI 자문 자동 적용 (감액만 + 50% cap)
+            # 사이클 36 (긴급, 2026-05-21) — `KST` 미정의 NameError 시정.
+            # scheduler 다른 함수들 (line 2209, 2362, 2575, 2739) 과 일관되게 `KST_TZ` 사용.
             try:
                 from src.engine.recommendation_engine import auto_apply_recommendations
-                target_date = datetime.now(KST).date()
+                from src.engine.scanner import KST_TZ as _AUTO_APPLY_KST_TZ
+                target_date = datetime.now(_AUTO_APPLY_KST_TZ).date()
                 result = await auto_apply_recommendations(target_date)
                 await write_log(
                     "INFO",
