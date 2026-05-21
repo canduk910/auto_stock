@@ -359,8 +359,11 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 price = int(detail.get("stck_prpr", "0"))
                 listed = int(detail.get("lstn_stcn", "0"))
                 mcap = price * listed
-                prdy_vol = int(detail.get("prdy_vol", "0"))
-                trade_amt = prdy_vol * price
+                # 사이클 33 (2026-05-21) — KIS FHKST01010100 응답에 `prdy_vol` 필드 없음.
+                # `acml_vol` (당일 누적거래량) 사용 — 5/21 funnel 30→0 사고 원인 (전일거래량 항상 0).
+                # KIS 정본 응답 필드: stck_prpr, lstn_stcn, acml_vol, prdy_vrss_vol_rate (전일대비 비율, 거래량 아님)
+                acml_vol = int(detail.get("acml_vol", "0"))
+                trade_amt = acml_vol * price
                 if mcap < min_mcap:
                     continue
                 if trade_amt < min_trade:

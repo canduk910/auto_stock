@@ -128,7 +128,14 @@ class VcpBreakoutStrategy(StrategyBase):
         p = self.config.params
         ema_long = p["ema_long"]
         base_max = p["base_max_days"]
-        fetch_days = ema_long + base_max + 10
+        # 사이클 33 (2026-05-21) — KIS `fetch_daily_candles` 단일 호출 최대 100일 한도
+        # (`src/api/CLAUDE.md` 명시). 기존 `fetch_days = ema_long + base_max + 10 = 285`
+        # 요청 시 KIS 가 100일만 반환 → `len(candles) <= prev_idx + ema_long + 5 = 205`
+        # 항상 True → 113→0 candle_fetch_ok 결함 (5/21 운영 사고).
+        # 시정: KIS 한도 인식 cap + 가용 길이 기반 effective ema_long 자동 조정.
+        # ema_long 파라미터 DB 값 (200) 변경 없음 — 런타임 가드만 추가.
+        KIS_DAILY_CANDLES_MAX = 100
+        fetch_days = min(ema_long + base_max + 10, KIS_DAILY_CANDLES_MAX)
 
         self._candidates = {}
         stats = _empty_scan_stats()
@@ -152,18 +159,30 @@ class VcpBreakoutStrategy(StrategyBase):
 
         fetched = await asyncio.gather(*[_fetch_one(t) for t in tickers])
 
+        # 사이클 33 (2026-05-21) — KIS 한도 인식 effective ema_long.
+        # uptrend_days 까지 포함한 trend filter 가용 길이로 자동 축소.
+        # 가용 길이 = fetch_days - prev_idx - 5 (안전 마진). uptrend_days=20.
+        # effective_ema_long = min(ema_long, 가용길이 - uptrend_days)
+        uptrend_days = p.get("long_ema_uptrend_days", 20)
+
         for ticker, candles in fetched:
             if candles is None or not candles:
                 continue
             try:
                 prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
-                if len(candles) <= prev_idx + ema_long + 5:
+                # 사이클 33 — KIS 한도 대응: 가용 길이 기반 effective ema_long
+                available_len = len(candles) - prev_idx
+                effective_ema_long = min(ema_long, available_len - uptrend_days - 5)
+                if effective_ema_long < 30:
+                    # 최소 30일 EMA 도 못 만들면 추세 필터 무의미 → skip
+                    continue
+                if available_len < effective_ema_long + uptrend_days + 5:
                     continue
                 if prev_idx:
                     candles = candles[prev_idx:]
                 stats["candle_fetch_ok"] += 1
 
-                trend = self._check_trend_filter(candles)
+                trend = self._check_trend_filter(candles, effective_ema_long=effective_ema_long)
                 if not trend:
                     continue
                 stats["trend_filter_pass"] += 1
@@ -223,12 +242,22 @@ class VcpBreakoutStrategy(StrategyBase):
             stats["pullback_pass"], stats["volume_contraction_pass"],
         )
 
-    def _check_trend_filter(self, candles: list[dict]) -> dict | None:
-        """추세 필터: 종가 > 50EMA > 150EMA > 200EMA + 200EMA 우상향 1개월."""
+    def _check_trend_filter(self, candles: list[dict], *,
+                             effective_ema_long: int | None = None) -> dict | None:
+        """추세 필터: 종가 > 50EMA > 150EMA > 200EMA + 200EMA 우상향 1개월.
+
+        사이클 33 (2026-05-21) — KIS 100일 한도 대응: `effective_ema_long` 파라미터로
+        가용 길이 기반 자동 축소 가능. None 이면 params["ema_long"] 사용 (기본 200).
+        ema_mid 도 effective_ema_long 보다 크면 자동 축소.
+        """
         p = self.config.params
         ema_short = p["ema_short"]
         ema_mid = p["ema_mid"]
-        ema_long = p["ema_long"]
+        # 사이클 33 — KIS 100일 한도 대응: effective_ema_long 명시 시 우선
+        ema_long = effective_ema_long if effective_ema_long is not None else p["ema_long"]
+        # ema_mid 가 ema_long 보다 크면 의미 없음 — 자동 축소 (50/150/200 정렬 의미 보존)
+        if ema_mid >= ema_long:
+            ema_mid = max(ema_short + 1, ema_long - 10)
         uptrend_days = p["long_ema_uptrend_days"]
 
         try:

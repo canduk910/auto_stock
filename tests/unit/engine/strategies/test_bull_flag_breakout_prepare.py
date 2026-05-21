@@ -43,11 +43,15 @@ def _rank_item(ticker: str, name: str = "샘플전자") -> dict[str, Any]:
 
 def _detail_response(price: int = 50_000, listed: int = 50_000_000,
                      prdy_vol: int = 5_000_000) -> dict[str, Any]:
-    """fetch_stock_detail 응답 모사 (시총 · 전일거래량 컷 통과용)."""
+    """fetch_stock_detail 응답 모사 (시총 · 거래대금 컷 통과용).
+
+    사이클 33 (2026-05-21) — KIS FHKST01010100 응답 정합. `prdy_vol` 필드는 KIS 응답에
+    없음 → `acml_vol` (당일 누적거래량) 사용. 인자명은 기존 호환 보존, 매핑만 변경.
+    """
     return {
         "stck_prpr": str(price),
         "lstn_stcn": str(listed),
-        "prdy_vol": str(prdy_vol),
+        "acml_vol": str(prdy_vol),  # 사이클 33: prdy_vol 인자 → acml_vol 필드로 매핑
         "hts_kor_isnm": "샘플전자",
     }
 
