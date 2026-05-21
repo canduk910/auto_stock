@@ -42,6 +42,10 @@ export interface SubscriptionSessionTickers {
  *
  * 백엔드 `/api/realtime/subscriptions` 응답의 `sessions[*].tickers_detail` 신규 필드.
  * stale 종목 우선 정렬 + cap 200 (세션당, 응답 크기 보호).
+ *
+ * 사이클 37 (2026-05-21) — KIS 실제 last_cntg_hour / today_volume 추가.
+ * - `last_tick` (WS 수신) 과 `last_cntg_hour` (KIS 실제) 비교 → WS 구독 문제 진단.
+ * - 캐시 미스 (TTL 5분 / cap 20) → null.
  */
 export interface SubscriptionTickerDetail {
   ticker: string
@@ -53,6 +57,10 @@ export interface SubscriptionTickerDetail {
   retries: number
   // 사이클 28: 마지막 강제 재구독 시각 (ISO KST | null)
   last_resub: string | null
+  // 사이클 37: KIS 실제 체결시각 (HHMMSS 형식 문자열), 캐시 미스 시 null
+  last_cntg_hour: string | null
+  // 사이클 37: KIS 당일 누적 거래량, 캐시 미스 시 null
+  today_volume: number | null
 }
 
 export interface SubscriptionSession {

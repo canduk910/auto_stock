@@ -39,6 +39,59 @@ function sessionLabelBadge(label: string): string {
   return 'bg-gray-100 text-gray-700 border border-gray-300'
 }
 
+/**
+ * 사이클 37 (2026-05-21) — KIS 체결시각 HHMMSS → HH:MM:SS 표시.
+ */
+function formatCntgHour(hhmmss: string | null): string {
+  if (!hhmmss || hhmmss.length !== 6) return '—'
+  return `${hhmmss.slice(0, 2)}:${hhmmss.slice(2, 4)}:${hhmmss.slice(4, 6)}`
+}
+
+/**
+ * 사이클 37 — WS 구독 의심 판정.
+ *
+ * last_tick (WS 수신 ISO) 와 last_cntg_hour (KIS 실제 HHMMSS, KST 가정) 비교.
+ * 차이가 5분(300초) 이상이면 WS 구독 문제 의심 (KIS 정상 송출 중인데 우리만 못 받음).
+ *
+ * 둘 중 하나라도 없으면 판정 불가 → false (정상 톤).
+ */
+function isWsSubscriptionSuspect(
+  lastTickIso: string | null,
+  lastCntgHour: string | null,
+): boolean {
+  if (!lastTickIso || !lastCntgHour || lastCntgHour.length !== 6) {
+    return false
+  }
+  // last_tick ISO → KST HHMMSS 추출
+  // Intl.DateTimeFormat 사용 (브라우저 로컬타임 추출 금지 컨벤션 준수)
+  try {
+    const tickDate = new Date(lastTickIso)
+    if (Number.isNaN(tickDate.getTime())) return false
+    const fmt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Seoul',
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    const tickHms = fmt.format(tickDate).replace(/:/g, '')
+    if (tickHms.length !== 6) return false
+    // HHMMSS 문자열 비교는 분 단위로 차이 계산 (당일 KST 기준)
+    const tickSecs =
+      parseInt(tickHms.slice(0, 2), 10) * 3600 +
+      parseInt(tickHms.slice(2, 4), 10) * 60 +
+      parseInt(tickHms.slice(4, 6), 10)
+    const ccnlSecs =
+      parseInt(lastCntgHour.slice(0, 2), 10) * 3600 +
+      parseInt(lastCntgHour.slice(2, 4), 10) * 60 +
+      parseInt(lastCntgHour.slice(4, 6), 10)
+    // KIS 체결시각이 WS 수신 시각보다 5분 이상 최신 → WS 구독 의심
+    return ccnlSecs - tickSecs >= 300
+  } catch {
+    return false
+  }
+}
+
 export default function KisAccountPoolCard() {
   const queryClient = useQueryClient()
   const [staleListOpen, setStaleListOpen] = useState(false)
@@ -326,44 +379,81 @@ export default function KisAccountPoolCard() {
                               <th className="py-1 px-2 font-medium">종목</th>
                               <th className="py-1 px-2 font-medium">이름</th>
                               <th className="py-1 px-2 font-medium">상태</th>
-                              <th className="py-1 px-2 font-medium">마지막 tick</th>
+                              <th className="py-1 px-2 font-medium">WS tick</th>
+                              {/* 사이클 37 (2026-05-21) — KIS 실제 체결시각 + 거래량 컬럼 */}
+                              <th className="py-1 px-2 font-medium">KIS 체결</th>
+                              <th className="py-1 px-2 font-medium">KIS 거래량</th>
                               <th className="py-1 px-2 font-medium">retries</th>
                               <th className="py-1 px-2 font-medium">강제 재구독</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {detail.map((row) => (
-                              <tr
-                                key={row.ticker}
-                                data-testid={`pool-ticker-row-${s.label}-${row.ticker}`}
-                                className="border-b border-gray-50 last:border-0"
-                              >
-                                <td className="py-1 px-2 font-mono">{row.ticker}</td>
-                                <td className="py-1 px-2 text-gray-700">
-                                  {row.ticker_name || '—'}
-                                </td>
-                                <td className="py-1 px-2">
-                                  {row.stale ? (
-                                    <span className="inline-block px-1 rounded text-[10px] bg-amber-100 text-amber-800 border border-amber-300">
-                                      끊김
-                                    </span>
-                                  ) : (
-                                    <span className="inline-block px-1 rounded text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                      정상
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="py-1 px-2 font-mono text-gray-600">
-                                  {formatLastTickKst(row.last_tick)}
-                                </td>
-                                <td className="py-1 px-2 font-mono text-gray-700">
-                                  {row.retries > 0 ? row.retries : '—'}
-                                </td>
-                                <td className="py-1 px-2 font-mono text-gray-500">
-                                  {formatLastTickKst(row.last_resub)}
-                                </td>
-                              </tr>
-                            ))}
+                            {detail.map((row) => {
+                              // 사이클 37 — WS 구독 의심 판정 (KIS 체결 - WS tick ≥ 5분)
+                              const wsSuspect = isWsSubscriptionSuspect(
+                                row.last_tick,
+                                row.last_cntg_hour,
+                              )
+                              return (
+                                <tr
+                                  key={row.ticker}
+                                  data-testid={`pool-ticker-row-${s.label}-${row.ticker}`}
+                                  className={
+                                    wsSuspect
+                                      ? 'border-b border-gray-50 last:border-0 bg-amber-50'
+                                      : 'border-b border-gray-50 last:border-0'
+                                  }
+                                >
+                                  <td className="py-1 px-2 font-mono">{row.ticker}</td>
+                                  <td className="py-1 px-2 text-gray-700">
+                                    {row.ticker_name || '—'}
+                                  </td>
+                                  <td className="py-1 px-2">
+                                    {row.stale ? (
+                                      <span className="inline-block px-1 rounded text-[10px] bg-amber-100 text-amber-800 border border-amber-300">
+                                        끊김
+                                      </span>
+                                    ) : (
+                                      <span className="inline-block px-1 rounded text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        정상
+                                      </span>
+                                    )}
+                                    {wsSuspect && (
+                                      <span
+                                        data-testid={`pool-ws-suspect-${s.label}-${row.ticker}`}
+                                        title="KIS 가 더 최근 체결을 보고하는데 우리 WS 가 못 받음 (5분+ 차이). WS 구독 문제 의심."
+                                        className="ml-1 inline-block px-1 rounded text-[10px] bg-amber-200 text-amber-900 border border-amber-400"
+                                      >
+                                        WS 의심
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="py-1 px-2 font-mono text-gray-600">
+                                    {formatLastTickKst(row.last_tick)}
+                                  </td>
+                                  <td
+                                    className={
+                                      wsSuspect
+                                        ? 'py-1 px-2 font-mono text-amber-800 font-semibold'
+                                        : 'py-1 px-2 font-mono text-gray-700'
+                                    }
+                                  >
+                                    {formatCntgHour(row.last_cntg_hour)}
+                                  </td>
+                                  <td className="py-1 px-2 font-mono text-gray-600">
+                                    {row.today_volume != null
+                                      ? row.today_volume.toLocaleString()
+                                      : '—'}
+                                  </td>
+                                  <td className="py-1 px-2 font-mono text-gray-700">
+                                    {row.retries > 0 ? row.retries : '—'}
+                                  </td>
+                                  <td className="py-1 px-2 font-mono text-gray-500">
+                                    {formatLastTickKst(row.last_resub)}
+                                  </td>
+                                </tr>
+                              )
+                            })}
                           </tbody>
                         </table>
                       </div>

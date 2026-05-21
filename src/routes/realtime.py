@@ -81,14 +81,18 @@ async def get_subscriptions() -> ApiResponse:
     # 사이클 35 (2026-05-21) — 세션별 종목 상세 정보 (UI 노출용).
     # scheduler._stale_retry_count / _stale_last_resubscribe_at 접근 — 부재 시 graceful.
     # ticker_names 매핑 + ticker cap 200 (응답 크기 보호).
+    # 사이클 37 (2026-05-21) — KIS 실제 last_cntg_hour 캐시 매핑 (`_last_ccnl_cache`).
     from src.engine.scanner import ticker_names
     try:
         from src.engine.scheduler import trading_scheduler
         stale_retry_count = getattr(trading_scheduler, "_stale_retry_count", {}) or {}
         stale_last_resubscribe_at = getattr(trading_scheduler, "_stale_last_resubscribe_at", {}) or {}
+        # 사이클 37 — KIS 체결시각 캐시 (UI last_cntg_hour / today_volume 노출)
+        last_ccnl_cache = getattr(trading_scheduler, "_last_ccnl_cache", {}) or {}
     except Exception:
         stale_retry_count = {}
         stale_last_resubscribe_at = {}
+        last_ccnl_cache = {}
 
     SESSION_TICKERS_DETAIL_CAP = 200
 
@@ -117,6 +121,10 @@ async def get_subscriptions() -> ApiResponse:
             last_resub_at = stale_last_resubscribe_at.get(ticker)
             last_resub_iso = last_resub_at.isoformat() if last_resub_at else None
             is_stale = ticker not in s_fresh
+            # 사이클 37 — KIS 캐시 매핑 (TTL 5분 + cap 20). 미스 → null
+            ccnl_entry = last_ccnl_cache.get(ticker)
+            last_cntg_hour = ccnl_entry.get("last_cntg_hour") if ccnl_entry else None
+            today_volume = ccnl_entry.get("today_volume") if ccnl_entry else None
             details.append({
                 "ticker": ticker,
                 "ticker_name": ticker_names.get(ticker, ""),
@@ -124,6 +132,9 @@ async def get_subscriptions() -> ApiResponse:
                 "last_tick": last_tick_iso,
                 "retries": int(stale_retry_count.get(ticker, 0)),
                 "last_resub": last_resub_iso,
+                # 사이클 37 신규
+                "last_cntg_hour": last_cntg_hour,
+                "today_volume": today_volume,
             })
         session["tickers_detail"] = details
 

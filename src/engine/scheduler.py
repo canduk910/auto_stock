@@ -223,6 +223,11 @@ class TradingScheduler:
         # stale > MAX_STALE_RETRIES + 거래량 빈약 종목 자동 제외. 매일 _reset_daily_state 동행 clear.
         # 보유/익일청산은 _evaluate_universe_guard 가 사전 차단. WebSocket 슬롯 회수 + Rate Limit 절약.
         self._universe_excluded_today: set[str] = set()
+        # 사이클 37 (2026-05-21) — KIS 실제 마지막 체결시각 캐시 (UI 노출용).
+        # 구조: {ticker: {fetched_at: datetime, last_cntg_hour: str, today_volume: int}}
+        # TTL 5분 + 사이클당 cap 20 (KIS Rate Limit 보호). _reset_daily_state 동행 clear.
+        # `last_tick` (WS 수신) vs `last_cntg_hour` (KIS 실제 체결) 비교 → WS 구독 문제 진단.
+        self._last_ccnl_cache: dict[str, dict] = {}
         # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적
         # label -> 첫 silent 감지 시각 (5분 지속 판정용)
         self._silent_inactive_first_seen: dict[str, datetime] = {}
@@ -2142,6 +2147,15 @@ class TradingScheduler:
                 except Exception:
                     logger.exception("_evaluate_universe_guard 실패 — 다음 사이클 자연 재시도")
 
+                # 사이클 37 (2026-05-21) — KIS 실제 last_cntg_hour 캐시 갱신.
+                # stale r≥2 종목 대상 inquire_ccnl 호출 + TTL 5분 + cap 20.
+                # UI 에서 last_tick vs last_cntg_hour 비교로 WS 구독 문제 진단.
+                # R4 와 동일 사이클에서 호출되어도 캐시 TTL 로 중복 호출 자연 차단.
+                try:
+                    await self._refresh_stale_ccnl_cache(list(new_set))
+                except Exception:
+                    logger.exception("_refresh_stale_ccnl_cache 실패 — 다음 사이클 자연 재시도")
+
                 # Phase D: 구독 종목 중 최근 60초 내 tick 수신 비율 카운트 노출.
                 # "구독은 됐으나 시세가 안 들어오는 종목"을 운영자가 즉시 인지하도록 1행 로그.
                 # 2026-05-11 VB/LTV 종일 시세 무수신 사고 가시성 결함 보완.
@@ -3347,6 +3361,89 @@ class TradingScheduler:
 
             await asyncio.sleep(0.05)  # Rate Limit 보호
 
+    async def _refresh_stale_ccnl_cache(
+        self, candidate_tickers: list[str], *, cap: int = 20,
+    ) -> None:
+        """사이클 37 (2026-05-21) — stale 종목의 KIS 실제 last_cntg_hour 갱신.
+
+        UI 에서 `last_tick` (WS 수신) 과 `last_cntg_hour` (KIS 실제) 비교 → WS 구독 문제 진단 가능.
+
+        조건:
+        - `_stale_retry_count[ticker] >= 2` (1회 stale 은 일시적 — KIS 호출 과다 차단)
+        - 캐시 TTL 5분 — 5분 이내 hit 시 재호출 skip
+        - 사이클당 cap 20 (KIS Rate Limit 보호)
+        - 보유 종목 우선순위 (cap 도달해도 보유는 반드시 처리)
+
+        안전 가드:
+        - KIS None / 예외 → 캐시 미저장 (다음 사이클 자연 재시도, graceful)
+        - 종목 간 50ms sleep
+        - 본체 예외는 호출자(`_scan_loop`) 가 흡수
+        - R4 `_evaluate_universe_guard` 와 같은 사이클에서 동시 호출되어도 race 무해
+          (캐시 + TTL 로 중복 호출 자동 차단)
+        """
+        import asyncio
+        from src.api.quotation import inquire_ccnl
+        from src.engine.scanner import KST_TZ as _KST_TZ
+
+        if not candidate_tickers:
+            return
+
+        # 1차 필터 — stale r>=2 만 평가 + 캐시 TTL 5분 hit 차단
+        TTL_SECS = 300
+        now = datetime.now(_KST_TZ)
+        eligible: list[str] = []
+        for ticker in candidate_tickers:
+            if self._stale_retry_count.get(ticker, 0) < 2:
+                continue
+            cached = self._last_ccnl_cache.get(ticker)
+            if cached:
+                age = (now - cached["fetched_at"]).total_seconds()
+                if age < TTL_SECS:
+                    continue  # TTL 이내 hit
+            eligible.append(ticker)
+
+        if not eligible:
+            return
+
+        # 사이클 37 — 보유 종목 우선순위 (cap 도달해도 보유는 반드시 처리)
+        try:
+            held: set[str] = set()
+            for s in self.registry.all():
+                try:
+                    held.update(s.state.positions.keys())
+                except Exception:
+                    pass
+        except Exception:
+            held = set()
+
+        # 보유 종목 먼저, 그 다음 후보 — cap 적용
+        held_first = [t for t in eligible if t in held]
+        others = [t for t in eligible if t not in held]
+        targets = (held_first + others)[:cap]
+
+        for ticker in targets:
+            try:
+                ccnl = await inquire_ccnl(ticker)
+            except Exception:
+                logger.debug(
+                    "[ccnl_cache] inquire_ccnl 예외 ticker=%s — 캐시 미스 (다음 사이클 재시도)",
+                    ticker, exc_info=True,
+                )
+                await asyncio.sleep(0.05)
+                continue
+
+            if ccnl is None:
+                # 캐시 미저장 — 다음 사이클 자연 재시도
+                await asyncio.sleep(0.05)
+                continue
+
+            self._last_ccnl_cache[ticker] = {
+                "fetched_at": datetime.now(_KST_TZ),
+                "last_cntg_hour": str(ccnl.get("last_cntg_hour", "")),
+                "today_volume": int(ccnl.get("today_volume", 0)),
+            }
+            await asyncio.sleep(0.05)
+
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).
 
@@ -3652,6 +3749,8 @@ class TradingScheduler:
         # 사이클 32 (R4, 2026-05-21) — universe stale 가드 제외 set 매일 초기화
         # 영구 블랙리스트 절대 금지 — 다음 영업일 재진입 허용.
         self._universe_excluded_today.clear()
+        # 사이클 37 (2026-05-21) — KIS 체결시각 캐시 매일 초기화
+        self._last_ccnl_cache.clear()
 
         # Phase 3 (2026-05-16) — 백테스트 폴 루프 진입 가드 set 매일 초기화.
         # 정상 종료 시 finally 에서 discard 되지만 예외/취소 시 잔재 가능성 차단.
