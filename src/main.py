@@ -33,6 +33,7 @@ from src.routes import (
     realtime,
     backtest,
     market_regime,
+    strategy_funnel,
     system_integrations,
     kis_quote_accounts,
 )
@@ -233,6 +234,7 @@ app.include_router(system.router)
 app.include_router(realtime.router)
 app.include_router(backtest.router)
 app.include_router(market_regime.router)
+app.include_router(strategy_funnel.router)
 app.include_router(system_integrations.router)
 app.include_router(kis_quote_accounts.router)
 

@@ -77,6 +77,21 @@ async def get_subscriptions() -> ApiResponse:
 
     # 세션별 분해 + freshness 카운트 추가
     sessions = pool.get_session_status()
+
+    # 사이클 35 (2026-05-21) — 세션별 종목 상세 정보 (UI 노출용).
+    # scheduler._stale_retry_count / _stale_last_resubscribe_at 접근 — 부재 시 graceful.
+    # ticker_names 매핑 + ticker cap 200 (응답 크기 보호).
+    from src.engine.scanner import ticker_names
+    try:
+        from src.engine.scheduler import trading_scheduler
+        stale_retry_count = getattr(trading_scheduler, "_stale_retry_count", {}) or {}
+        stale_last_resubscribe_at = getattr(trading_scheduler, "_stale_last_resubscribe_at", {}) or {}
+    except Exception:
+        stale_retry_count = {}
+        stale_last_resubscribe_at = {}
+
+    SESSION_TICKERS_DETAIL_CAP = 200
+
     for session in sessions:
         # session.tickers.subscribed 에 sorted ticker 리스트 보유 — freshness 계산
         ticker_list = session.get("tickers", {}).get("subscribed", [])
@@ -87,6 +102,30 @@ async def get_subscriptions() -> ApiResponse:
         }
         session["fresh"] = len(s_fresh)
         session["stale"] = len(ticker_set) - len(s_fresh)
+
+        # 사이클 35 — tickers_detail: 종목별 (ticker, ticker_name, stale, last_tick, retries, last_resub)
+        # cap 200 적용 (세션당). stale 먼저 정렬 → fresh 순 (운영자 우선 노출 순서).
+        sorted_tickers = sorted(
+            ticker_list,
+            key=lambda t: (t not in (ticker_set - s_fresh), t),  # stale 먼저
+        )[:SESSION_TICKERS_DETAIL_CAP]
+
+        details = []
+        for ticker in sorted_tickers:
+            last_dt = ticker_last_tick.get(ticker)
+            last_tick_iso = last_dt.isoformat() if last_dt and last_dt != _min_dt else None
+            last_resub_at = stale_last_resubscribe_at.get(ticker)
+            last_resub_iso = last_resub_at.isoformat() if last_resub_at else None
+            is_stale = ticker not in s_fresh
+            details.append({
+                "ticker": ticker,
+                "ticker_name": ticker_names.get(ticker, ""),
+                "stale": is_stale,
+                "last_tick": last_tick_iso,
+                "retries": int(stale_retry_count.get(ticker, 0)),
+                "last_resub": last_resub_iso,
+            })
+        session["tickers_detail"] = details
 
     # 사이클 18 (2026-05-19, B-1) — stale 종목별 마지막 tick 시각 노출.
     # 프론트 ScanMonitor 가 "끊김 N종목" 펼치기 시 종목별 마지막 수신 시각 표시.

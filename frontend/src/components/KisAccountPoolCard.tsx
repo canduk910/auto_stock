@@ -18,7 +18,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { getSubscriptions, resubscribeStale } from '../api/realtime'
-import type { SubscriptionSession } from '../api/realtime'
+import type { SubscriptionSession, SubscriptionTickerDetail } from '../api/realtime'
 import {
   getKstMinutes,
   getStaleContextByKstMinutes,
@@ -43,6 +43,8 @@ export default function KisAccountPoolCard() {
   const queryClient = useQueryClient()
   const [staleListOpen, setStaleListOpen] = useState(false)
   const [resubMsg, setResubMsg] = useState<string | null>(null)
+  // 사이클 35 (2026-05-21) — 세션별 종목 expand
+  const [expandedSession, setExpandedSession] = useState<string | null>(null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['realtime-subscriptions'],
@@ -281,6 +283,95 @@ export default function KisAccountPoolCard() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* 사이클 35 (2026-05-21) — 세션별 종목 expand */}
+          <div className="mt-4">
+            <div className="text-xs font-medium text-gray-600 mb-1">
+              세션별 종목 상세
+            </div>
+            <div className="space-y-2">
+              {sessions.map((s) => {
+                const isOpen = expandedSession === s.label
+                const detail: SubscriptionTickerDetail[] = s.tickers_detail ?? []
+                if (detail.length === 0) {
+                  return null
+                }
+                return (
+                  <div key={s.label} className="border border-gray-200 rounded">
+                    <button
+                      type="button"
+                      data-testid={`pool-session-expand-${s.label}`}
+                      onClick={() =>
+                        setExpandedSession((cur) => (cur === s.label ? null : s.label))
+                      }
+                      className="w-full px-2 py-1.5 flex justify-between items-center text-xs hover:bg-gray-50"
+                    >
+                      <span>
+                        <span className="font-mono">{s.label}</span>
+                        <span className="ml-2 text-gray-500">
+                          {detail.length}종목 ({s.stale} 끊김)
+                        </span>
+                      </span>
+                      <span className="text-gray-400">{isOpen ? '▲' : '▼'}</span>
+                    </button>
+                    {isOpen && (
+                      <div
+                        data-testid={`pool-session-tickers-${s.label}`}
+                        className="border-t border-gray-100 max-h-64 overflow-y-auto"
+                      >
+                        <table className="min-w-full text-[11px]">
+                          <thead className="bg-gray-50">
+                            <tr className="text-gray-500 text-left">
+                              <th className="py-1 px-2 font-medium">종목</th>
+                              <th className="py-1 px-2 font-medium">이름</th>
+                              <th className="py-1 px-2 font-medium">상태</th>
+                              <th className="py-1 px-2 font-medium">마지막 tick</th>
+                              <th className="py-1 px-2 font-medium">retries</th>
+                              <th className="py-1 px-2 font-medium">강제 재구독</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {detail.map((row) => (
+                              <tr
+                                key={row.ticker}
+                                data-testid={`pool-ticker-row-${s.label}-${row.ticker}`}
+                                className="border-b border-gray-50 last:border-0"
+                              >
+                                <td className="py-1 px-2 font-mono">{row.ticker}</td>
+                                <td className="py-1 px-2 text-gray-700">
+                                  {row.ticker_name || '—'}
+                                </td>
+                                <td className="py-1 px-2">
+                                  {row.stale ? (
+                                    <span className="inline-block px-1 rounded text-[10px] bg-amber-100 text-amber-800 border border-amber-300">
+                                      끊김
+                                    </span>
+                                  ) : (
+                                    <span className="inline-block px-1 rounded text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                      정상
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-1 px-2 font-mono text-gray-600">
+                                  {formatLastTickKst(row.last_tick)}
+                                </td>
+                                <td className="py-1 px-2 font-mono text-gray-700">
+                                  {row.retries > 0 ? row.retries : '—'}
+                                </td>
+                                <td className="py-1 px-2 font-mono text-gray-500">
+                                  {formatLastTickKst(row.last_resub)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
           {!hasSecondary && (

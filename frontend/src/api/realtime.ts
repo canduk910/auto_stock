@@ -37,6 +37,24 @@ export interface SubscriptionSessionTickers {
   acked: string[]
 }
 
+/**
+ * 사이클 35 (2026-05-21) — 세션별 종목 상세 정보 (UI 노출용).
+ *
+ * 백엔드 `/api/realtime/subscriptions` 응답의 `sessions[*].tickers_detail` 신규 필드.
+ * stale 종목 우선 정렬 + cap 200 (세션당, 응답 크기 보호).
+ */
+export interface SubscriptionTickerDetail {
+  ticker: string
+  ticker_name: string
+  stale: boolean
+  // ISO KST tz, null=수신 이력 없음
+  last_tick: string | null
+  // 사이클 28: 연속 stale 사이클 수
+  retries: number
+  // 사이클 28: 마지막 강제 재구독 시각 (ISO KST | null)
+  last_resub: string | null
+}
+
 export interface SubscriptionSession {
   label: string
   subscribed: number
@@ -47,6 +65,8 @@ export interface SubscriptionSession {
   ws_connected: boolean
   reconnect_count: number
   tickers?: SubscriptionSessionTickers
+  // 사이클 35 — 종목별 상세 정보 (UI expand 용, cap 200)
+  tickers_detail?: SubscriptionTickerDetail[]
 }
 
 export interface SubscriptionsResponse {
