@@ -76,6 +76,17 @@ def patched_db(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(th, "get_today_sell_trades", _fake_get_sells)
     monkeypatch.setattr(th, "insert_trade", _fake_insert)
 
+    # 사이클 30 (긴급, 2026-05-21) — 신규 `_for_sync` 함수 mock (042700 핑퐁 사고 대응).
+    # `_sync_orders_to_db` 가 본 함수로 교체되어 호출하므로 미패치 시 실제 supabase 호출 → ConnectError.
+    async def _fake_get_buys_for_sync(ticker=None):
+        return list(existing_buys)
+
+    async def _fake_get_sells_for_sync(ticker=None):
+        return list(existing_sells)
+
+    monkeypatch.setattr(th, "get_today_buy_trades_for_sync", _fake_get_buys_for_sync, raising=False)
+    monkeypatch.setattr(th, "get_today_sell_trades_for_sync", _fake_get_sells_for_sync, raising=False)
+
     # ticker_names 도 import 됨 → 빈 dict 으로 충분
     from src.engine import scanner
     monkeypatch.setattr(scanner, "ticker_names", {}, raising=False)

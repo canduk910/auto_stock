@@ -127,10 +127,15 @@ async def get_today_trades_for_settlement(strategy: str | None = None) -> list[d
 
 
 async def get_today_buy_trades(strategy: str | None = None) -> list[dict]:
-    """당일 매수 기록을 조회한다 (포지션 복구용).
+    """당일 매수 기록을 조회한다 (포지션 복구용 — ticker 별 dedupe).
 
     `_today_kst_iso()` 로 timezone 명시 — KST 09시 이전 매수 기록 누락 차단
     (2026-05-12 005930 보완 INSERT 사고 대응).
+
+    사이클 30 (긴급, 2026-05-21) — 본 함수의 ticker dedupe 는 의도된 동작 (포지션
+    복구용 — 매수 시점 매핑 잔존). `_sync_orders_to_db` 중복 판정용으로는 부적합
+    (같은 ticker 다른 order_no 가 가려져 핑퐁 INSERT — 042700 사고). sync 용은
+    신규 `get_today_buy_trades_for_sync()` 사용.
     """
     today_iso = _today_kst_iso()
 
@@ -188,7 +193,13 @@ async def get_today_buy_trades_for_funnel() -> list[dict]:
 
 
 async def get_today_sell_trades(strategy: str | None = None) -> list[dict]:
-    """당일 매도 기록을 조회한다 (동기화용)."""
+    """당일 매도 기록을 조회한다 (포지션/손익 매핑용 — ticker 별 dedupe).
+
+    사이클 30 (긴급, 2026-05-21) — 본 함수의 ticker dedupe 는 의도된 동작 (포지션
+    복구·손익 매핑용). `_sync_orders_to_db` 중복 판정용으로는 부적합 (같은 ticker
+    다른 order_no 가 가려져 핑퐁 INSERT 결함 — 042700 사고). sync 용은 신규
+    `get_today_sell_trades_for_sync()` 사용.
+    """
     today_iso = _today_kst_iso()
 
     def _query():
@@ -211,6 +222,79 @@ async def get_today_sell_trades(strategy: str | None = None) -> list[dict]:
         if ticker not in seen:
             seen[ticker] = row
     return list(seen.values())
+
+
+# ---------------------------------------------------------------------------
+# 사이클 30 (긴급, 2026-05-21) — `_sync_orders_to_db` 중복 판정용 신규 함수.
+#
+# 결함 배경:
+# - 2026-05-20 042700 한미반도체 trade_history 19건 중 15건 중복 (실거래 4건).
+# - `_sync_orders_to_db` (scheduler.py:1996-2001) 가 `get_today_buy_trades()` 호출
+#   → ticker 별 dedupe 결과 1건만 반환 → 같은 ticker 다른 order_no 가 가려져 신규
+#   판정 → INSERT. 매 재기동마다 누적 (무한 핑퐁).
+#
+# 본 함수 (`_for_sync`) 의 차이점:
+# - `get_today_buy_trades()` (포지션 복구용): ticker dedupe O / CANCELLED 제외 X
+# - `get_today_buy_trades_for_funnel()` (funnel cross-check): dedupe X / CANCELLED **포함**
+# - `get_today_buy_trades_for_sync()` (본 함수, sync 중복 판정): dedupe X / CANCELLED 제외
+#   + optional ticker filter
+# ---------------------------------------------------------------------------
+
+
+async def get_today_buy_trades_for_sync(ticker: str | None = None) -> list[dict]:
+    """`_sync_orders_to_db` 중복 판정 전용 — dedupe 없음 + CANCELLED 제외 + optional ticker filter.
+
+    사이클 30 (긴급, 2026-05-21) — 042700 무한 핑퐁 사고 대응.
+    `(ticker, order_no)` 페어 정확 추적이 필요한 sync 경로 전용 (PR 명시 분리).
+
+    Args:
+        ticker: 단일 ticker 만 조회 (옵션). None 이면 당일 전체.
+
+    Returns:
+        raw row list. 같은 ticker 의 모든 order_no 보존 (dedupe 없음).
+        status in (PENDING, COMPLETED, PARTIAL) — CANCELLED 제외 (sync 무관 row 차단).
+    """
+    today_iso = _today_kst_iso()
+
+    def _query():
+        q = (
+            supabase.table("trade_history")
+            .select("*")
+            .eq("trade_type", "BUY")
+            .gte("timestamp", today_iso)
+            .in_("status", ["PENDING", "COMPLETED", "PARTIAL"])
+            .order("timestamp", desc=True)
+        )
+        if ticker:
+            q = q.eq("ticker", ticker)
+        return q.execute()
+
+    result = await asyncio.to_thread(_query)
+    return result.data or []
+
+
+async def get_today_sell_trades_for_sync(ticker: str | None = None) -> list[dict]:
+    """`_sync_orders_to_db` 중복 판정 전용 (매도) — dedupe 없음 + CANCELLED 제외 + optional ticker filter.
+
+    사이클 30 (긴급, 2026-05-21) — 042700 무한 핑퐁 사고 대응. 매수 동일 패턴.
+    """
+    today_iso = _today_kst_iso()
+
+    def _query():
+        q = (
+            supabase.table("trade_history")
+            .select("*")
+            .eq("trade_type", "SELL")
+            .gte("timestamp", today_iso)
+            .in_("status", ["PENDING", "COMPLETED", "PARTIAL"])
+            .order("timestamp", desc=True)
+        )
+        if ticker:
+            q = q.eq("ticker", ticker)
+        return q.execute()
+
+    result = await asyncio.to_thread(_query)
+    return result.data or []
 
 
 async def get_trades(

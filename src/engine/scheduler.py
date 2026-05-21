@@ -1986,22 +1986,31 @@ class TradingScheduler:
         005930 보완 INSERT 사고(같은 ticker 가 다른 가격/strategy 로 중복 INSERT)
         직접 원인의 다른 한 축.
         """
-        from src.db.trade_history import insert_trade, get_today_buy_trades
+        # 사이클 30 (긴급, 2026-05-21) — 042700 무한 핑퐁 사고 대응.
+        # `get_today_buy_trades()` (ticker dedupe) → `get_today_buy_trades_for_sync()`
+        # (dedupe 없음 + CANCELLED 제외) 호출 교체. 같은 ticker 다른 order_no 정확 추적.
+        # 매수 strategy 매핑은 별도 dedupe 된 `get_today_buy_trades()` 사용 (포지션 복구 시 의도).
+        from src.db.trade_history import (
+            get_today_buy_trades,
+            get_today_buy_trades_for_sync,
+            get_today_sell_trades_for_sync,
+            insert_trade,
+        )
         from src.models.trade import TradeRecord, TradeStatus, TradeType
 
         if not orders:
             return
 
-        # 기존 DB 기록: 매수/매도 각각 조회
-        existing_buys = await get_today_buy_trades()
-        existing_buy_keys = {(row["ticker"], row.get("order_no", "") or "") for row in existing_buys}
+        # 사이클 30: sync 중복 판정용 — dedupe 없음 (raw 모든 (ticker, order_no) 페어)
+        existing_buys_raw = await get_today_buy_trades_for_sync()
+        existing_buy_keys = {(row["ticker"], row.get("order_no", "") or "") for row in existing_buys_raw}
 
-        from src.db.trade_history import get_today_sell_trades
-        existing_sells = await get_today_sell_trades()
-        existing_sell_keys = {(row["ticker"], row.get("order_no", "") or "") for row in existing_sells}
+        existing_sells_raw = await get_today_sell_trades_for_sync()
+        existing_sell_keys = {(row["ticker"], row.get("order_no", "") or "") for row in existing_sells_raw}
 
-        # DB 매수 기록에서 strategy 매핑 (매도 시 참조)
-        db_strategy_map = {row["ticker"]: row.get("strategy", "momentum") for row in existing_buys}
+        # DB 매수 기록에서 strategy 매핑 (매도 시 참조) — ticker 별 1건만 필요하므로 dedupe 함수 사용
+        existing_buys_for_strategy = await get_today_buy_trades()
+        db_strategy_map = {row["ticker"]: row.get("strategy", "momentum") for row in existing_buys_for_strategy}
 
         synced = 0
         for order in orders:
