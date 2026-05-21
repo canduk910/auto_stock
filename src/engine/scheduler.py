@@ -188,6 +188,11 @@ class TradingScheduler:
         self._stale_watcher_task: asyncio.Task | None = None
         # ticker -> 연속 stale 사이클 수 (fresh 회복 시 자동 clear, _reset_daily_state 에서도 clear)
         self._stale_retry_count: dict[str, int] = {}
+        # 사이클 28 (2026-05-21) — ticker -> 마지막 강제 재구독 시도 시각 (KST aware datetime).
+        # `_check_and_resubscribe_stale` 와 `_resubscribe_stale_priority` 의 강제 재등록
+        # 직후 갱신. 진단 로그 `[stale_watcher_detail]` 의 `@HH:MM:SS` 필드 출처.
+        # `_stale_retry_count` cleanup 분기(fresh 회복 / _reset_daily_state) 와 동행 clear.
+        self._stale_last_resubscribe_at: dict[str, "datetime"] = {}
         # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적
         # label -> 첫 silent 감지 시각 (5분 지속 판정용)
         self._silent_inactive_first_seen: dict[str, datetime] = {}
@@ -2674,6 +2679,10 @@ class TradingScheduler:
         if not stale_tickers:
             # 모두 fresh — 누적 retry 카운터 리셋 (회복 케이스)
             self._stale_retry_count.clear()
+            # 사이클 28 — _stale_last_resubscribe_at 동행 clear (G5 cleanup 동행).
+            # getattr 폴백으로 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
+            if hasattr(self, "_stale_last_resubscribe_at"):
+                self._stale_last_resubscribe_at.clear()
             return
 
         force_reregistered = 0
@@ -2699,6 +2708,10 @@ class TradingScheduler:
                     priority="HIGH", bypass_limit=True,
                 )
                 force_reregistered += 1
+                # 사이클 28 — 강제 재등록 직후 시각 갱신 (진단 로그 출처).
+                # 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
+                if hasattr(self, "_stale_last_resubscribe_at"):
+                    self._stale_last_resubscribe_at[ticker] = datetime.now(_KST_TZ)
             except Exception:
                 logger.exception("[stale_watcher] 강제 재등록 실패: %s", ticker)
 
@@ -2717,6 +2730,160 @@ class TradingScheduler:
         except Exception:
             # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
             logger.debug("[stale_watcher] write_log 실패", exc_info=True)
+
+        # 사이클 28 — [stale_watcher_detail] 세션별 분포 + 종목 cap 20 (별도 행, G1 호환)
+        self._emit_stale_session_detail(stale_tickers, now)
+
+    # -----------------------------------------------------------------
+    # 사이클 28 (2026-05-21) — 진단 로그 강화 헬퍼
+    # 트리거: 2026-05-21 09:13 VB 돌파 미매수 진단 — stale 16/30 (53%) 의 종목별/세션별
+    # 분포·last_resub 시각·세션 부하 가시화. 안전 가드:
+    #   G1 기존 prefix 보존 / G3 stale>0 세션만 + cap 20 / G4 보조 미등록 OK
+    # -----------------------------------------------------------------
+
+    _STALE_DETAIL_TICKER_CAP = 20  # G3 — detail 행 종목 리스트 최대치 (로그 폭주 차단)
+
+    def _build_session_subscription_view(self) -> list[dict]:
+        """세션별 분포 dict 리스트 (label / subscribed_count / fresh / stale / capacity_used / stale_tickers).
+
+        - ``stale_tickers`` 는 ``(ticker, retries, last_resub_hhmmss_or_'-')`` 튜플 리스트
+          (입력 ``ticker_last_tick`` 기준 정렬, cap 적용은 호출자 책임)
+        - 헬퍼 자체는 cap 적용 안 함 — caller (`_emit_stale_session_detail` / `_report_tick_coverage`)
+          가 G3 cap 20 적용
+        - 풀 헬퍼 ``get_subscriptions_by_session`` + ``_main._subscriptions`` 길이 활용
+        """
+        from datetime import datetime as _dt
+        from src.engine.scanner import KST_TZ as _KST_TZ, ticker_last_tick
+        from src.realtime.websocket import MAX_SUBSCRIPTIONS as _MAX_SUB
+        from src.realtime.websocket_pool import kis_ws_pool
+
+        # 시세 채널 TR_ID 집합 — H0UNCNT0(통합 deprecated) + H0STCNT0(KRX) + H0NXCNT0(NXT).
+        # 사이클 26 시간대별 분리 이후 동적이므로 set 으로 한 번에 매칭.
+        _TICK_TR_IDS = frozenset({"H0UNCNT0", "H0STCNT0", "H0NXCNT0"})
+
+        groups = kis_ws_pool.get_subscriptions_by_session()
+        if not groups:
+            return []
+
+        now = _dt.now(_KST_TZ)
+        fresh_threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
+
+        # 세션별 capacity (시세 채널만 카운트, 체결통보/MKOP 제외). 보조 세션은 인덱스 → 객체 매핑.
+        sessions_view: list[dict] = []
+        label_order = ["main"] + [
+            f"quote-{i}" for i in range(1, len(kis_ws_pool._quotes) + 1)
+        ]
+        # unknown 라벨 (race 대응) 도 포함
+        if "unknown" in groups and "unknown" not in label_order:
+            label_order.append("unknown")
+        # groups 에 있는데 label_order 누락 케이스 보강
+        for lbl in groups:
+            if lbl not in label_order:
+                label_order.append(lbl)
+
+        for label in label_order:
+            tickers = groups.get(label, set())
+            if not tickers and label not in groups:
+                # detail 출력에서 빈 세션은 호출자가 필터링
+                continue
+
+            # capacity 계산
+            ws_obj = None
+            if label == "main":
+                ws_obj = kis_ws_pool._main
+            elif label.startswith("quote-"):
+                try:
+                    idx = int(label.split("-", 1)[1]) - 1
+                    if 0 <= idx < len(kis_ws_pool._quotes):
+                        ws_obj = kis_ws_pool._quotes[idx]
+                except (ValueError, IndexError):
+                    ws_obj = None
+
+            if ws_obj is not None:
+                cap_used = sum(
+                    1 for tr_id, _tk in getattr(ws_obj, "_subscriptions", set())
+                    if tr_id in _TICK_TR_IDS
+                )
+            else:
+                cap_used = len(tickers)
+
+            # fresh / stale 분리
+            stale_entries: list[tuple[str, int, str]] = []
+            fresh_count = 0
+            for t in sorted(tickers):
+                last = ticker_last_tick.get(t)
+                if last is not None and (now - last) <= fresh_threshold:
+                    fresh_count += 1
+                else:
+                    # stale — 진단 행 출력 후보. getattr 폴백으로 사전 init 누락 인스턴스 보호.
+                    retry = getattr(self, "_stale_retry_count", {}).get(t, 0)
+                    last_resub_dt = getattr(
+                        self, "_stale_last_resubscribe_at", {}
+                    ).get(t)
+                    if last_resub_dt is None:
+                        last_resub_s = "-"
+                    else:
+                        last_resub_s = last_resub_dt.strftime("%H:%M:%S")
+                    stale_entries.append((t, retry, last_resub_s))
+
+            sub_count = len(tickers)
+            stale_count = len(stale_entries)
+            ratio = round(stale_count / sub_count, 2) if sub_count > 0 else 0.0
+
+            sessions_view.append({
+                "label": label,
+                "subscribed_count": sub_count,
+                "capacity_used": cap_used,
+                "capacity_max": _MAX_SUB,
+                "fresh": fresh_count,
+                "stale": stale_count,
+                "stale_ratio": ratio,
+                "stale_tickers": stale_entries,
+            })
+        return sessions_view
+
+    def _emit_stale_session_detail(
+        self, stale_tickers: list[str], now: datetime
+    ) -> None:
+        """``[stale_watcher_detail]`` 세션별 분포 행 출력 (G1: 별도 prefix, G3: cap 적용).
+
+        - stale_count==0 인 세션은 detail 행 생략 (로그 폭주 차단)
+        - 종목 리스트는 ``_STALE_DETAIL_TICKER_CAP`` (=20) 까지, 초과는 ``...+N`` 표시
+        - 본 함수 예외는 호출자(`_check_and_resubscribe_stale`) 흐름 보호 위해 흡수
+        """
+        try:
+            view = self._build_session_subscription_view()
+        except Exception:
+            logger.debug("[stale_watcher_detail] view 빌드 실패", exc_info=True)
+            return
+
+        cap = self._STALE_DETAIL_TICKER_CAP
+        for s in view:
+            if s["stale"] == 0:
+                continue
+            entries = s["stale_tickers"]
+            displayed = entries[:cap]
+            overflow = max(0, len(entries) - cap)
+            tickers_repr_parts = [
+                f"({t},r={r},@{ts})" for (t, r, ts) in displayed
+            ]
+            if overflow > 0:
+                tickers_repr_parts.append(f"...+{overflow}")
+            tickers_repr = "[" + ", ".join(tickers_repr_parts) + "]"
+            msg = (
+                f"[stale_watcher_detail] session={s['label']} "
+                f"sub={s['capacity_used']}/{s['capacity_max']} "
+                f"fresh={s['fresh']} stale={s['stale']} "
+                f"ratio={s['stale_ratio']:.2f} stale={tickers_repr}"
+            )
+            logger.info(msg)
+            try:
+                # write_log 는 async — 호출 컨텍스트(async 함수)에서 task 로 발화
+                # 호출자가 이미 async 컨텍스트이므로 직접 await 대신 fire-and-forget
+                # 동일 prefix 별도 행으로 system_logs 보존
+                asyncio.create_task(write_log("INFO", msg))
+            except Exception:
+                logger.debug("[stale_watcher_detail] write_log 실패", exc_info=True)
 
     async def _delta_unsubscribe_dropped(self, new_set: set[str]) -> list[str]:
         """`_scan_loop` 의 새 합집합에서 빠진 종목만 unsubscribe (사이클 15-A, 2026-05-19).
@@ -2846,6 +3013,10 @@ class TradingScheduler:
                     priority=sub_priority, bypass_limit=sub_bypass,
                 )
                 resubscribed.append(ticker)
+                # 사이클 28 — 강제 재구독 시각 갱신 (진단 로그 출처).
+                # 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
+                if hasattr(self, "_stale_last_resubscribe_at"):
+                    self._stale_last_resubscribe_at[ticker] = datetime.now(_KST_TZ)
             except Exception:
                 logger.exception("[stale_priority_resubscribe] 재구독 실패: %s", ticker)
                 continue
@@ -2929,6 +3100,27 @@ class TradingScheduler:
                 await write_log(level, msg)
             except Exception:
                 logger.debug("write_log [tick_coverage] 실패")
+
+            # 사이클 28 (2026-05-21) — [tick_coverage_session] 세션별 분포 신규 행
+            # 기존 [tick_coverage] 보존 (G1) + 별도 prefix 1행 추가. subscribed=0 → skip
+            if total > 0:
+                try:
+                    view = self._build_session_subscription_view()
+                    if view:
+                        parts = [
+                            f"{s['label']} sub={s['capacity_used']}/{s['capacity_max']} "
+                            f"fresh={s['fresh']} stale={s['stale']} "
+                            f"({s['stale_ratio']:.2f})"
+                            for s in view
+                        ]
+                        sess_msg = "[tick_coverage_session] " + " | ".join(parts)
+                        logger.info(sess_msg)
+                        try:
+                            await write_log("INFO", sess_msg)
+                        except Exception:
+                            logger.debug("write_log [tick_coverage_session] 실패")
+                except Exception:
+                    logger.debug("[tick_coverage_session] 빌드 실패", exc_info=True)
         except Exception:
             logger.exception("_report_tick_coverage 실패")
 
@@ -3131,6 +3323,8 @@ class TradingScheduler:
 
         # K (2026-05-12) — stale_watcher 종목별 연속 stale 카운터 매일 초기화
         self._stale_retry_count.clear()
+        # 사이클 28 (2026-05-21) — 강제 재구독 시각 추적도 매일 초기화 (G5 cleanup 동행)
+        self._stale_last_resubscribe_at.clear()
 
         # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적 일일 초기화
         self._silent_inactive_first_seen.clear()

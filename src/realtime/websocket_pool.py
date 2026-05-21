@@ -498,6 +498,25 @@ class WebsocketPool:
                     result.add(tr_key)
         return result
 
+    def get_subscriptions_by_session(self) -> dict[str, set[str]]:
+        """label → set[ticker] 역인덱싱 (사이클 28, 2026-05-21).
+
+        ``_ticker_to_session`` 역방향 — 세션별 stale 분포 추적 / 진단 로그 강화 용.
+        신규 영속 dict 추가 *없음* (호출 시 그때그때 계산).
+
+        규칙:
+        - 메인 세션은 항상 "main" 라벨
+        - 보조 세션은 ``_quotes`` 인덱스 기반 "quote-N" (1-based)
+        - 매핑된 세션 객체가 풀(``_main``/``_quotes``)에서 사라진 경우 "unknown" 라벨로 묶음
+          (race / disable_quote_session 잔재 대응)
+        - 매핑 0건 → 빈 dict
+        """
+        result: dict[str, set[str]] = {}
+        for ticker, ws in self._ticker_to_session.items():
+            label = self._session_label(ws)
+            result.setdefault(label, set()).add(ticker)
+        return result
+
     def get_session_status(self) -> list[dict]:
         """세션별 슬롯 상태 dict 리스트. ``/api/realtime/subscriptions`` 응답에 동봉."""
         from src.engine.scanner import TICK_TR_ID
