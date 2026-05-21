@@ -2159,3 +2159,223 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
   - **중복 데이터 경로 제거** — `useQuery(['realtime-subscriptions'])` 호출처 1개로 통합 (KisAccountPoolCard 만)
   - **공용 헬퍼** — `utils/stale-context.ts` 로 KST 시간대 분류 + last_tick 포맷 단일화
 
+## 사이클 23 — 3 전략 (BFB / VCP / donchian) 파라미터/UI 최적화 + AI 자문 자동 적용 (2026-05-20)
+
+운영자 보고: 3 전략 거래 0건 또는 신호 부족 + 운영 개선 요구. **P1 + P2 + P3 본 사이클 묶음** (단순 추가 + 로직 추가 + AI 자문 자동 적용 한 번에). 사용자 결정: **자동 weight 감액 = AI 자문 자동 적용** (`apply_weight=true` 자동화, 단 *감액만* + 50% cap + 운영자 명시 토글 ON 후 작동).
+
+### 변경 9 영역
+
+#### P1 — 단순 추가 (위험 0)
+
+**P1-1. VCP PARAM_RANGES 4 키 + P2 신규 5 키 추가** — `src/engine/recommendation_engine.py`:
+- VCP 4 키: `base_depth_pct (0.10, 0.50)` / `volume_contraction_ratio (0.30, 1.00)` / `breakout_volume_mult (1.0, 5.0)` / `last_pullback_max (0.03, 0.15)`
+- P2 신규 5 키: `breakout_retention_minutes (1, 30)` / `breakout_fail_n_days (2, 20)` / `max_breakout_extension_pct (0.5, 10.0)` / `box_contraction_period (5, 30)` / `max_box_volatility_pct (1.0, 15.0)`
+- `INT_PARAMS` 정수 캐스트 대상 확장: `breakout_retention_minutes` / `breakout_fail_n_days` / `box_contraction_period`
+- **목적**: AI 자문이 VCP 진입 품질 + BFB/donchian 신규 가드 9 키를 자동 권고 가능
+
+**P1-2. BFB `min_trade_amount_failed` 카운터** — `src/engine/strategies/bull_flag_breakout.py`:
+- `_empty_scan_stats()` 에 `"min_trade_amount_failed": 0` 키 추가 (총 10 키)
+- `_scan_universe` 의 `trade_amt < min_trade` 분기에서 카운터 +1
+- `_scan_universe` 의 `mcap < min_mcap` 분기에서도 별개 카운터 (선택) — 단순 보강
+- `src/engine/log_analysis_engine.py` 일일 리포트에 BFB scan_stats 포함 (`_collect_strategy_funnel` 이 이미 funnel 카운터 제공 → BFB scan_stats 도 metrics 키에 추가)
+- **목적**: BFB 0건 일자 원인 (거래대금 미달 N종목) 운영자 즉시 진단
+
+**P1-3. VCP `mcap_pass` scan_stats 1단계 추가** — `src/engine/strategies/vcp_breakout.py`:
+- `_empty_scan_stats()` 에 `"mcap_pass": 0` 키 추가 (총 9 키)
+- `_scan_universe` 의 시총 컷 통과 시 `self._scan_stats["mcap_pass"] += 1`
+- 프론트 `ScanMonitor` 의 `vcp-scan-funnel` STAGES 8 → 9 단계 (mcap_pass 추가)
+- **목적**: VCP 유니버스 깔때기 세분화 (VB/LTV 컨벤션 동기화)
+
+#### P2 — 로직 추가 (위험 중, 매매 코드 *추가 가드/필터만*)
+
+**P2-1. BFB `breakout_retention_minutes` (유지시간 조건)** — `src/engine/strategies/bull_flag_breakout.py`:
+- `DEFAULT_PARAMS["breakout_retention_minutes"]: int = 3` (기본 3분)
+- 신규 인스턴스 변수 `_breakout_first_seen: dict[str, datetime]` (ticker → 첫 돌파 감지 시각)
+- `check_buy_signal` 의 "돌파 순간" 분기 변경:
+  - 첫 돌파 감지 (`prev < flag_high <= current_price`) → `_breakout_first_seen[ticker] = now_kst` 등록 + 신호 NONE (대기)
+  - 다음 tick 부터 `now_kst - _breakout_first_seen[ticker] >= timedelta(minutes=retention)` AND 현재가 ≥ flag_high → BUY 신호
+  - 현재가 < flag_high 떨어지면 `_breakout_first_seen.pop(ticker, None)` (실패, 대기 종료)
+- `_reset_daily_state()` 에 `_breakout_first_seen.clear()` 추가 — 단, BFB 는 `StrategyBase._reset_daily_state` override 없음. 등록 자체는 `_bought_today` 와 같은 라이프사이클 (당일 한정). 사이클 23 에서는 *진입 분기에 등록 + clear* 명시 (`bought_today.clear()` 동일 위치 가정), `StrategyBase` 수정 없이 BFB 인스턴스 변수만 추가
+- 회귀 가드 4 케이스 (`tests/unit/engine/strategies/test_bull_flag_breakout_retention.py`)
+- **목적**: 장중 돌파 후 즉시 후퇴하는 가짜 돌파 차단 (현업 — 슬리피지 흡수)
+- **안전 보장**: 기존 매수 분기 *대체가 아니라 보강* — 0분 (기본 3분) 모두 회귀 보존. 시뮬레이션 시작 직후 진입은 retention 가드로 3분 후 발사 (당일 09:05~12:57 가능, 13:00 까지는 충분)
+
+**P2-2. donchian `breakout_fail_n_days` (시간 기반 청산)** — `src/engine/strategies/donchian_swing.py`:
+- `DEFAULT_PARAMS["breakout_fail_n_days"]: int = 5` (기본 5일)
+- 신규 인스턴스 변수 `_breakout_high: dict[str, int]` (ticker → 진입 시 20일 돌파선)
+- 매수 신호 발사 시 (`check_buy_signal` BUY 분기) `_breakout_high[ticker] = info["donchian_high"]` 등록. **체결통보 도착 전이라도 매수 신호 발사 시점에 등록** (메모리 한정, DB 영속화 X)
+- `check_exit_signal` 신규 분기 (3 번째, ATR 트레일링 *직전*):
+  - `pos.buy_date` 가 None 또는 미래 → skip
+  - `days_held = (today - pos.buy_date).days`
+  - `days_held >= breakout_fail_n_days` AND `current_price < _breakout_high.get(ticker, 0)` → STOP_LOSS
+  - `_breakout_high[ticker] == 0` (등록 누락) → skip (영향 0)
+- `_reset_daily_state()` 보존 — `_breakout_high` 는 *멀티데이 보유* 정보이므로 일일 초기화 금지 (포지션 종료 시 `pop`)
+- 매도 체결 후 (또는 청산 후) `_breakout_high.pop(ticker, None)` — `register_cooldown_after_exit` 와 같은 위치 (없으면 그냥 `check_exit_signal` 분기 통과 시점에 종료, 다음 매수 시 재등록)
+- 회귀 가드 3 케이스 (`tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py`)
+- **목적**: 멀티데이 보유 중 약한 이탈 빠른 정리. 기존 ATR/하드 -7% 보존 + *추가* 분기
+- **안전 보장**: 멀티데이 컨벤션 보존 — 시간/15:20 강제 청산 없음 그대로, `breakout_fail_n_days` 는 일중 평가 가능 (위에서 `STOP_LOSS` 반환). risk.on_tick 의 호출 순서 변경 없음
+
+**P2-3. donchian 돌파폭 과열 상한** — `src/engine/strategies/donchian_swing.py`:
+- `DEFAULT_PARAMS["max_breakout_extension_pct"]: float = 3.0` (기본 3%)
+- `check_buy_signal` 진입 분기 추가 (시간 가드 직후):
+  - `daily_high = max(open_price, current_price)` 또는 `ticker_prices[ticker]["high_price"]` 가용 시 사용
+  - `donchian_high = info["donchian_high"]`
+  - `(daily_high - donchian_high) / donchian_high * 100 > max_breakout_extension_pct` → 추격 금지 (신호 NONE) + INFO 로그 `[donchian_extension_skip] ticker={t} high={h} dh={dh} ext_pct={p:.2f}`
+- 회귀 가드 2 케이스 (`tests/unit/engine/strategies/test_donchian_swing_extension_cap.py`)
+- **목적**: 돌파선 대비 과도하게 추격하지 않도록 (gap_skip_threshold 와 별개 — 갭 vs 당일 고가 추격)
+- **안전 보장**: 기본 3% 컷이 너무 빡빡할 수 있으나 백테스트로 조정. 기본 컷 발동 시에도 추격 안 하는 게 안전
+
+**P2-4. donchian 박스 수축 보조 필터** — `src/engine/strategies/donchian_swing.py`:
+- `DEFAULT_PARAMS["box_contraction_period"]: int = 10` / `max_box_volatility_pct: float = 5.0`
+- `prepare()` 의 신고가 + EMA + 거래량 + ATR 4단계 *직후* (또는 ATR 직후) 추가:
+  - 직전 N일 (`box_contraction_period`) 일봉의 `(high.max - low.min) / close.mean × 100 ≤ max_box_volatility_pct` 통과 종목만 유니버스 확정
+  - 통과 카운트 `self._scan_stats["box_contraction_pass"] += 1`
+- `_empty_scan_stats()` 에 `"box_contraction_pass": 0` 키 추가
+- 프론트 `swing-scan-funnel` STAGES 에 `box_contraction_pass` 추가 (donchian SWING_STAGES 가 이미 정의되어 있다면)
+- 회귀 가드 3 케이스 (`tests/unit/engine/strategies/test_donchian_swing_box_contraction.py`)
+- **목적**: 박스 수축 후 신고가 돌파 (변동성 축소 + 거래량 동반) 패턴 강화. 가짜 돌파 감소
+
+#### P3 — AI 자문 자동 적용 (위험 고, 안전 가드 필수)
+
+**P3-1. AI 자문 자동 적용 함수 + scheduler 통합** — `src/engine/recommendation_engine.py`:
+- 신규 함수 `auto_apply_recommendations(target_date: date) -> dict`:
+  1. `system_config.get_auto_apply_enabled()` 가 False (또는 None) 면 즉시 return `{applied: 0, skipped: 0, reason: "disabled"}`
+  2. `parameter_recommendations` 에서 `status='pending'` AND `target_date=오늘` 6 전략 조회 (별도 헬퍼 `list_pending_by_date(target_date)` — `parameter_recommendations.py` 에 추가)
+  3. 각 전략 별로:
+     - `recommended_weight` 가 None 이면 SKIP (weight 권고 없음)
+     - `current_weight = strategy.config.weight` 조회
+     - `recommended_weight >= current_weight` 면 SKIP (증액 — 운영자 명시 필요) + `[auto_apply_skip_increase] strategy={s} prev={p} new={n}` 로그
+     - `new_weight = max(recommended_weight, current_weight * 0.5)` — 50% cap 안전 가드
+     - `save_weights({sid: new_weight})` + `strategy.config.weight = new_weight` 메모리 반영
+     - `update_recommendation_status(rec_id, status="applied_auto", applied_weight=new_weight, applied_params=auto_params)` — 신규 status 값 `"applied_auto"` (수동 'applied' 와 분리)
+     - 영구 로그: `await write_log("INFO", f"[auto_weight_apply] strategy={s} prev={p} new={n} reason='recommended<current, capped={c}'")`
+  4. 반환 dict `{applied: N, skipped: M, errors: [...]}`
+- `scheduler.py` 의 `run_loop` 에서 `generate_recommendations()` 호출 *직후* (`await write_log("INFO", "20:00 전략수정 AI자문 생성 완료")` 다음):
+  ```python
+  try:
+      from src.engine.recommendation_engine import auto_apply_recommendations
+      target_date = datetime.now(KST).date()
+      result = await auto_apply_recommendations(target_date)
+      await write_log("INFO", f"20:00 AI 자문 자동 적용: applied={result['applied']} skipped={result['skipped']}")
+  except Exception as e:
+      logger.exception("AI 자문 자동 적용 실패")
+      await write_log("ERROR", f"AI 자문 자동 적용 실패: {type(e).__name__}: {e!s}")
+  ```
+- DB CHECK 제약: `parameter_recommendations.status` ENUM 에 `applied_auto` 추가 — 마이그레이션 신규 (`supabase/migrations/0XX_auto_apply_status.sql`) 필요
+- 회귀 가드 5 케이스 (`tests/unit/engine/test_auto_apply_recommendations.py`)
+
+**P3-2. AI 자문 자동 적용 — params 자동 적용 (보수적 변경만)** — `src/engine/recommendation_engine.py`:
+- P3-1 의 자동 적용 함수 내부에서 `recommended_params` 도 자동 적용 (이미 화이트리스트 검증 통과 → 안전):
+  - **보수적 키만 자동 적용**:
+    - `stop_loss_rate` 더 음수 (예: -7% → -5%) — 보수적 (절대값 감소 = 손절 더 빨리)
+    - `position_ratio` 감소 (예: 0.3 → 0.2) — 보수적 (포지션 축소)
+    - `daily_loss_limit` 더 음수 (예: -8% → -10%) — 보수적
+    - `intraday_stop_loss` / `overnight_stop_loss` / `stop_loss_main` / `stop_loss_pre_nxt` 동일 보수적 분기
+  - **그 외 (k_value_*, 매수 임계, donchian_period 등) → 수동 적용 유지** (`_validate_recommendations` 통과해도 자동 적용 안 함)
+  - PARAM_RANGES 외 키 발견 시 `[auto_apply_safeguard_skip] key={k} reason='out_of_param_ranges'` 로그 + 해당 키만 skip (전체 중단 X — 다른 키는 진행)
+- 영구 로그 `[auto_params_apply] strategy={s} keys={list} values={dict}` 1행
+- `strategy.config.params.update(applied_params)` + `save_params(sid, strategy.config.params)` 메모리/DB 동기 반영
+- 회귀 가드 P3-1 5 케이스에 통합 (별도 파일 안 만들고 같은 파일에 추가)
+
+**P3-3. 운영자 수동 override (Settings UI 가드)**:
+- `src/db/system_config.py` 에 `auto_apply_enabled` 키 + 헬퍼 함수:
+  ```python
+  _AUTO_APPLY_ENABLED_KEY = "auto_apply_enabled"
+
+  async def get_auto_apply_enabled() -> bool:
+      """기본 False — 안전 우선."""
+      v = await _get_bool_or_none(_AUTO_APPLY_ENABLED_KEY)
+      return bool(v) if v is not None else False  # 기본 False
+
+  async def set_auto_apply_enabled(value: bool) -> None:
+      await _set_bool(_AUTO_APPLY_ENABLED_KEY, value)
+  ```
+- `src/routes/system_integrations.py` 신규 GET/PUT:
+  - `GET /api/integrations/auto-apply` — 응답 `{enabled: bool}` (기본 false)
+  - `PUT /api/integrations/auto-apply` — body `{enabled: bool}`. DB 저장 실패 500
+- `frontend/src/api/integrations.ts` 에 `getAutoApply / setAutoApply` 추가
+- `frontend/src/components/IntegrationToggleCard.tsx` 에 4번째 토글 추가 (`data-testid="toggle-auto-apply"`):
+  - 라벨: "AI 자문 자동 적용 (감액만 + 50% cap)"
+  - 설명: "20:00 AI 자문 직후 weight 감액 권고 + 보수적 파라미터 변경을 자동 적용합니다 (감액만, 50% cap, 보수적 파라미터만)."
+  - `confirmOnMessage`: "AI 자문 자동 적용을 활성화합니다. 매일 20:00 자문 직후 weight 감액(50% cap) + 보수적 파라미터(stop_loss/position_ratio/daily_loss_limit) 가 자동 적용됩니다. 증액은 운영자 명시 적용만 가능합니다. 진행하시겠습니까?"
+  - `confirmOffMessage`: "AI 자문 자동 적용을 비활성화합니다. 모든 자문은 운영자 수동 적용 (`apply_weight=true` 토글) 에서만 반영됩니다. 진행하시겠습니까?"
+  - **기본 false** — 안전 우선. 운영자가 명시 활성화 후에만 P3-1/P3-2 작동
+- `source-badge-auto-apply` 배지 — 기존 패턴 동일
+- 프론트 vitest 2 케이스 (토글 렌더 / ConfirmModal 이중 확인)
+- 백엔드 회귀 2 케이스 (`tests/unit/db/test_system_config_auto_apply.py` — get 기본 False / set/get round-trip)
+
+**P3-4. 시장 레짐 → 파라미터 동적 조정 (별도 코드 없음)**:
+- P3-1 + P3-2 자동 적용으로 *이미* 시장 레짐 반영 (AI 자문 PROMPT 에 12 키 매크로 동봉됨 — 사이클 4)
+- 즉 시장 레짐 → AI 자문 → 자동 적용 흐름으로 동적 조정 자연 달성
+- 별도 코드 추가 X — Plan 확인 통과
+
+### 변경 대상 파일 (총 ~10개)
+
+| 영역 | 파일 | 변경 |
+|------|------|------|
+| P1-1 | `src/engine/recommendation_engine.py` | `PARAM_RANGES` 9 키 + `INT_PARAMS` 3 키 |
+| P1-2 | `src/engine/strategies/bull_flag_breakout.py` | `_scan_stats["min_trade_amount_failed"]` 카운터 |
+| P1-2 | `src/engine/log_analysis_engine.py` | BFB scan_stats 노출 |
+| P1-3 | `src/engine/strategies/vcp_breakout.py` | `_scan_stats["mcap_pass"]` 카운터 |
+| P2-1 | `src/engine/strategies/bull_flag_breakout.py` | `_breakout_first_seen` + retention 가드 |
+| P2-2 | `src/engine/strategies/donchian_swing.py` | `_breakout_high` + `breakout_fail_n_days` 청산 분기 |
+| P2-3 | `src/engine/strategies/donchian_swing.py` | `max_breakout_extension_pct` 추격 금지 |
+| P2-4 | `src/engine/strategies/donchian_swing.py` | `prepare` 박스 수축 필터 + `box_contraction_pass` |
+| P3-1 | `src/engine/recommendation_engine.py` | `auto_apply_recommendations` + 50% cap |
+| P3-1 | `src/engine/scheduler.py` | `generate_recommendations` 직후 `auto_apply_recommendations` 호출 |
+| P3-1 | `src/db/parameter_recommendations.py` | `list_pending_by_date` 헬퍼 + status='applied_auto' DB CHECK 허용 |
+| P3-1 | `supabase/migrations/0XX_auto_apply_status.sql` | `status` CHECK 제약 `applied_auto` 추가 |
+| P3-2 | `src/engine/recommendation_engine.py` | params 보수적 자동 적용 (P3-1 내부) |
+| P3-3 | `src/db/system_config.py` | `auto_apply_enabled` 헬퍼 |
+| P3-3 | `src/routes/system_integrations.py` | GET/PUT `/api/integrations/auto-apply` |
+| P3-3 | `frontend/src/api/integrations.ts` | `getAutoApply / setAutoApply` |
+| P3-3 | `frontend/src/components/IntegrationToggleCard.tsx` | 4번째 토글 |
+| P3-3 | `frontend/src/types/integrations.ts` | `IntegrationKey` 'auto-apply' 추가 |
+
+### 회귀 가드 (신규 25 케이스)
+
+| 영역 | 파일 | 케이스 |
+|------|------|--------|
+| P1-1 | `tests/unit/engine/test_param_ranges_vcp.py` (신규) | 5 (VCP 4 키 범위 + P2 신규 5 키 범위 + INT_PARAMS 캐스트 + validate 통과 + validate 거부) |
+| P1-2 | `tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py` (신규) | 3 (카운터 증가 / 통과 시 0 / 사본) |
+| P1-3 | `tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py` (신규) | 2 (카운터 / scan_stats 키) |
+| P2-1 | `tests/unit/engine/strategies/test_bull_flag_breakout_retention.py` (신규) | 4 (첫 돌파 NONE / N분 후 BUY / 후퇴 시 pop / 0분 즉시 BUY 회귀) |
+| P2-2 | `tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py` (신규) | 3 (N일+종가<돌파선 STOP_LOSS / N일 미달 NONE / `_breakout_high` 등록 누락 graceful) |
+| P2-3 | `tests/unit/engine/strategies/test_donchian_swing_extension_cap.py` (신규) | 2 (3% 초과 NONE / 미만 BUY) |
+| P2-4 | `tests/unit/engine/strategies/test_donchian_swing_box_contraction.py` (신규) | 3 (수축 통과 / 미통과 skip / `box_contraction_pass` 카운터) |
+| P3-1+2 | `tests/unit/engine/test_auto_apply_recommendations.py` (신규) | 5 (감액만 자동 / 증액 skip / 50% cap / status='applied_auto' / 보수적 params 분기) |
+| P3-3 | `tests/unit/db/test_system_config_auto_apply.py` (신규) | 2 (기본 False / round-trip) |
+| P3-3 | `frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx` (신규) | 2 (토글 렌더 + ConfirmModal 이중 확인) |
+
+총 신규: 25 + 2 = 27. **사용자 plan 기준 25 + 프론트 2 = 27**
+
+### 안전 보장
+
+- **자금 안전 절대 원칙** — P3-1 자동 적용은 *감액만* + 50% cap + PARAM_RANGES 검증 통과 + status='applied_auto' 마킹
+- **자동 적용 기본 false** — 운영자 명시 활성화 후에만 P3 작동. 기존 운영자 수동 적용 흐름 100% 보존
+- **AI 자문 화이트리스트 검증 (`_validate_recommendations`) 보존** — P3-1/P3-2 모두 검증 통과한 결과만 자동 적용
+- **사이클 17/18/6/19/20/21/22 보존** — OPSP backoff 300s / K stale watcher / 토큰 직렬화 / Dockerfile 권한 / scan_stats 깔때기 / `_selling` 가드 등 전부 변경 0
+- **매매 코드 신호 평가 본체 변경 0** — P2 는 *추가 가드/필터* 만, 기존 매수/매도 로직 보존
+- **donchian 멀티데이 컨벤션 보존** — P2-2 의 `breakout_fail_n_days` 는 *추가* 청산 분기 (기존 ATR/하드 -7% 그대로). `Position._MULTIDAY_STRATEGIES` 변경 0
+- **VB `DEFAULT_TRADABLE_BOARDS` 변경 0** — POST_NXT 추가 금지 정책 유지
+- **donchian `_swing_rest_poll_loop` 제거 금지** — 09:30~15:20 60s REST 폴링 보존
+- **응답 키 *추가만*** — `_scan_stats` / `PARAM_RANGES` / `system_config` 모두 키 추가만, 기존 키 제거 0
+- **DB CHECK 제약 안전 변경** — `parameter_recommendations.status` ENUM 에 `applied_auto` *추가*. 기존 `applied`/`partial`/`rejected`/`expired`/`pending` 보존
+- TDD — tdd-engineer Red → backend-dev + frontend-dev Green → tester 검증
+- 한글 커밋 메시지 (prefix 영문)
+- push 사용자 별도 명시 승인 — KRX 메인 시간 외 권장 (15:30+ 또는 익일 07:50 전)
+
+### 베이스라인
+
+- 백엔드 1412 (사이클 22) → **1437** (+25 회귀: 5+3+2+4+3+2+3+5+2 = 29 → 27, plan 보정 25)
+- 프론트 158 (사이클 21) → **160** (+2 신규: IntegrationToggleCard auto_apply 2 케이스)
+- 운영 효과:
+  - **VCP 진입 품질 자동 튜닝**: 4 키 자동 권고 가능 (이전엔 DEFAULT 만)
+  - **BFB 가짜 돌파 진입 감소**: retention N분 유지 후 진입 (즉시 진입 → 3분 대기)
+  - **BFB 거래대금 미달 가시성**: 일일 리포트에 "거래대금 미달 N종목" 노출
+  - **donchian 약한 이탈 청산**: ATR + 하드 + N일 시간 청산 3중 안전망
+  - **donchian 과열 추격 차단**: 당일 고가 N% 초과 매수 skip
+  - **donchian 가짜 돌파 감소**: 박스 수축 보조 필터로 진입 품질 강화
+  - **AI 자문 weight 자동 적용**: 거래 부진 전략 자동 보호 (감액만 50% cap)
+  - **시장 레짐 → 파라미터 동적 조정**: AI 자문 → 자동 적용으로 보수적 파라미터 자연 조정 (별도 코드 없음)
+
