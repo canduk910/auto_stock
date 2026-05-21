@@ -214,27 +214,31 @@ async def test_stale_watcher_detail_caps_at_20_tickers(monkeypatch, caplog):
 
 @pytest.mark.asyncio
 async def test_stale_watcher_detail_last_resub_dash_when_missing(monkeypatch, caplog):
-    """`last_resub` 가 미존재한 첫 stale → `@-` 표시 (B3-6).
+    """`last_resub` 가 미존재한 stale → `@-` 표시 (B3-6).
 
-    실제로는 강제 재등록 직후 갱신되므로 동일 사이클 내 detail 행은 `@-` 가 안 나옴.
-    이 케이스는 retry > MAX_STALE_RETRIES (skip) 종목이 last_resub 갱신 없이 detail 에
-    들어가는 시나리오 — 초기 race 또는 영구 stale.
+    사이클 29 (2026-05-21) — 의미 갱신: r>5 분기는 시간 기반 강제 재시도로 last_resub_at
+    갱신됨. 본 케이스는 *시간당 cap 도달로 차단된 영구 stale* 종목이 last_resub_at 미갱신
+    상태로 detail 에 들어가는 시나리오 — `@-` 표시 폴백 검증.
     """
     from src.engine import scheduler as sch_mod
     from src.engine.scheduler import TradingScheduler
 
     sched = TradingScheduler.__new__(TradingScheduler)
-    # retry 가 이미 6회 누적 (다음 호출에서 7 → skip)
+    # retry 가 이미 6회 누적 (다음 호출에서 7)
     sched._stale_retry_count = {"Z": 6}
-    sched._stale_last_resubscribe_at = {}  # 사이클 28 이전부터 stale 이었던 종목 시뮬레이션
+    sched._stale_last_resubscribe_at = {}  # 부재 — 영구 stale 사전 진입
+    # 사이클 29: 시간당 cap 도달 시나리오 — force_retry 발화 차단 → last_resub_at 미갱신
+    now_dt = datetime.now(KST)
+    sched._stale_force_retry_history = {
+        "Z": [now_dt - timedelta(minutes=50 - i * 4) for i in range(12)]
+    }
     sched._running = True
 
     import src.engine.scanner as scanner_mod
-    now = datetime.now(KST)
     monkeypatch.setattr(
         scanner_mod,
         "ticker_last_tick",
-        {"Z": now - timedelta(seconds=300)},
+        {"Z": now_dt - timedelta(seconds=300)},
     )
 
     _setup_pool_mock(

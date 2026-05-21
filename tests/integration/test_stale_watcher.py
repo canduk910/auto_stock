@@ -181,10 +181,10 @@ async def test_single_stale_resends(scheduler_env):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_force_reregister_after_3(scheduler_env):
-    """사이클 17 보강 (2026-05-19) — KIS 답변 반영. 6회 이상 stale → skip.
+    """사이클 17 보강 (2026-05-19) — KIS 답변 반영. 6회 이상 + cooldown 미경과 → skip.
 
-    1~5회는 매 사이클 강제 재등록, 6회 이상은 skip (영구 stale 의심).
-    본 케이스는 retry=5 누적 → 6회 진입 → skip 검증.
+    1~5회는 매 사이클 강제 재등록, 6회 이상은 시간 기반 분기 (사이클 29 갱신).
+    본 케이스는 retry=5 누적 → 6회 진입 + last_resub_age<300s → skip 검증.
     """
     sched = scheduler_env.scheduler
     subscribed = {"A00001", "A00002", "A00003", "B11111"}
@@ -196,10 +196,17 @@ async def test_force_reregister_after_3(scheduler_env):
     )
     # 사이클 17 보강: 임계 MAX_STALE_RETRIES=5 → 진입 시 retry=6 이 되어 skip
     sched._stale_retry_count = {"A00001": 5, "A00002": 5, "A00003": 5}
+    # 사이클 29: cooldown 미경과 (100s < 300s) → skip 보존
+    now = datetime.now(_KST)
+    sched._stale_last_resubscribe_at = {
+        "A00001": now - timedelta(seconds=100),
+        "A00002": now - timedelta(seconds=100),
+        "A00003": now - timedelta(seconds=100),
+    }
 
     await sched._check_and_resubscribe_stale()
 
-    # retry=6 → skip (모든 호출 0건)
+    # retry=6 + cooldown 미경과 → skip (모든 호출 0건)
     assert calls.unsubscribe == []
     assert calls.subscribe == []
     assert calls.send_subscribe == []
@@ -213,10 +220,12 @@ async def test_force_reregister_after_3(scheduler_env):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_skip_after_6_giveup(scheduler_env):
-    """retry 가 MAX_STALE_RETRIES 한참 초과해도 skip 유지 (영구 stale 의심).
+    """retry 가 MAX_STALE_RETRIES 한참 초과 + cooldown 미경과 → skip 유지.
 
     이전: retry=11 진입 시 skip
-    사이클 17 보강: retry>5 모두 skip — 10→11 도 skip (정책 변경)
+    사이클 17 보강: retry>5 모두 skip — 10→11 도 skip
+    사이클 29 (2026-05-21): r>5 분기는 시간 기반. 본 케이스는 cooldown 미경과로 skip 보존.
+    (last_resub_age=100s < STALE_FORCE_RETRY_AFTER_SECS=300s)
     """
     sched = scheduler_env.scheduler
     subscribed = {"A00001"}
@@ -224,6 +233,8 @@ async def test_skip_after_6_giveup(scheduler_env):
     _set_last_tick(scheduler_env.monkeypatch, fresh=[], stale=["A00001"])
 
     sched._stale_retry_count = {"A00001": 10}
+    # 사이클 29: cooldown 미경과 시나리오로 의미 갱신
+    sched._stale_last_resubscribe_at = {"A00001": datetime.now(_KST) - timedelta(seconds=100)}
 
     await sched._check_and_resubscribe_stale()
 
@@ -279,13 +290,15 @@ async def test_mixed_resend_and_force(scheduler_env):
 
     # AAAAAA 첫 진입 (retry 0 → 1) → 강제 재등록
     # BBBBBB 5 → 6 → skip (영구 stale 의심)
+    # 사이클 29: BBBBBB cooldown 미경과 시나리오로 의미 갱신 (skip 보존)
     sched._stale_retry_count = {"BBBBBB": 5}
+    sched._stale_last_resubscribe_at = {"BBBBBB": datetime.now(_KST) - timedelta(seconds=100)}
 
     await sched._check_and_resubscribe_stale()
 
     # 재SEND 0건 (KIS 답변 반영)
     assert calls.send_subscribe == []
-    # AAAAAA 만 강제 재등록 (BBBBBB 는 skip)
+    # AAAAAA 만 강제 재등록 (BBBBBB 는 cooldown 미경과로 skip)
     assert len(calls.unsubscribe) == 1
     assert len(calls.subscribe) == 1
     assert calls.unsubscribe[0] == (TICK_TR_ID, "AAAAAA")

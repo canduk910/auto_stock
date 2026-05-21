@@ -87,6 +87,14 @@ STALE_FRESHNESS_SECS = 60                   # 이 시간 내 tick 없으면 stal
 STALE_FORCE_REREGISTER_AFTER = 5            # (deprecated, 호환 보존) — 분기 임계가 아닌 회귀 가드 의미만 유지. 실제 동작은 MAX_STALE_RETRIES.
 MAX_STALE_RETRIES = 5                       # 연속 N회 초과 stale 시 skip (영구 stale 의심). 6회 이상 → 다음 _scan_loop 위임.
 
+# 사이클 29 (2026-05-21) — 영구 stale 무한 skip → 시간 기반 강제 재시도 전환
+# 결함: `r > MAX_STALE_RETRIES` 분기가 무한 skip 으로 작동, 22개 종목 12분 이상 영구 stale 잔류
+# (2026-05-21 13:13~13:29 운영 로그 — 보유 종목 005935 손절 평가 지연 위험).
+# 대응: 종목 단위 5분 cooldown + 시간당 12회 cap 으로 강제 재시도 발화.
+#       카운터 리셋 시 신규 사이클 시작 → 다시 1~5회 정상 분기로 자연 회복.
+STALE_FORCE_RETRY_AFTER_SECS = 300          # 영구 stale 의심 종목 최소 재시도 간격 (5분)
+STALE_FORCE_RETRY_HOURLY_CAP = 12           # 시간당 동일 종목 최대 재시도 횟수 (LMS / 앱키 정지 위험 차단)
+
 # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 감지 + 강제 reconnect
 # K stale watcher 가 종목별 재등록 외에 세션 자체 결함도 5분 지속 후 _ws.close() 발화.
 # 3중 가드: fresh=0 + subscribed>=5 (위양성 차단) + 5분 지속 (단발 끊김 즉시 close 차단)
@@ -193,6 +201,11 @@ class TradingScheduler:
         # 직후 갱신. 진단 로그 `[stale_watcher_detail]` 의 `@HH:MM:SS` 필드 출처.
         # `_stale_retry_count` cleanup 분기(fresh 회복 / _reset_daily_state) 와 동행 clear.
         self._stale_last_resubscribe_at: dict[str, "datetime"] = {}
+        # 사이클 29 (2026-05-21) — 영구 stale 시간 기반 강제 재시도 (시간당 cap 추적).
+        # ticker -> 60분 슬라이딩 윈도우 내 강제 재시도 시각 list (KST aware datetime).
+        # `STALE_FORCE_RETRY_HOURLY_CAP` 초과 시 [stale_force_retry_cap] WARNING + skip.
+        # `_reset_daily_state` 동행 clear.
+        self._stale_force_retry_history: dict[str, list["datetime"]] = {}
         # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적
         # label -> 첫 silent 감지 시각 (5분 지속 판정용)
         self._silent_inactive_first_seen: dict[str, datetime] = {}
@@ -2646,7 +2659,13 @@ class TradingScheduler:
         3. `scanner.ticker_last_tick` 비교: `STALE_FRESHNESS_SECS` 초과면 stale
         4. 전체 fresh 시 `_stale_retry_count.clear()` (회복 누적값 초기화)
         5. stale ticker 별로:
-           - retry > MAX_STALE_RETRIES (=5, 6회 이상) → skip (영구 stale 의심, 다음 _scan_loop 위임)
+           - retry > MAX_STALE_RETRIES (=5, 6회 이상) → **사이클 29 시간 기반 강제 재시도**:
+             a. last_resub_age >= STALE_FORCE_RETRY_AFTER_SECS (=300s, 5분) → 강제 재시도 +
+                `_stale_retry_count[ticker] = 0` 카운터 리셋 (신규 사이클 시작)
+             b. last_resub_age < 300s → skip (기존 동작 보존, LMS 위험 차단)
+             c. `_stale_last_resubscribe_at` 부재 → 즉시 1회 시도 (영구 stale 의심 첫 진입)
+             d. 시간당 STALE_FORCE_RETRY_HOURLY_CAP (=12) 회 초과 → skip +
+                `[stale_force_retry_cap]` WARNING (LMS 위험 추가 가드)
            - 그 외 (1~5회) → `pool.unsubscribe_in_pool` + `pool.subscribe(priority=HIGH, bypass_limit=True)`
              강제 재등록 (KIS 정상 패턴, 재SEND 0건)
         6. Rate Limit 보호: 각 종목별 50ms sleep
@@ -2687,15 +2706,94 @@ class TradingScheduler:
 
         force_reregistered = 0
         skipped_giveup = 0
+        force_retry_count = 0       # 사이클 29 — 영구 stale 시간 기반 강제 재시도 카운트
+        force_retry_cap_blocked = 0  # 사이클 29 — 시간당 cap 초과 차단 카운트
 
         for ticker in stale_tickers:
             retry = self._stale_retry_count.get(ticker, 0) + 1
             self._stale_retry_count[ticker] = retry
 
             if retry > MAX_STALE_RETRIES:
-                # 6회 이상 → 영구 stale 의심 (거래정지·이상 종목 등). skip + 다음 _scan_loop 위임
-                # (사이클 17 보강 — KIS 답변 반영, 재SEND 분기 폐기)
-                skipped_giveup += 1
+                # 사이클 29 (2026-05-21) — 영구 stale 무한 skip 결함 대응.
+                # 종목 단위 5분 cooldown + 시간당 12회 cap 으로 강제 재시도 발화.
+                # 13:21:41 마지막 시도 후 8분 영구 잔류 결함 (보유 005935 손절 평가 지연) 차단.
+                last_at = None
+                if hasattr(self, "_stale_last_resubscribe_at"):
+                    last_at = self._stale_last_resubscribe_at.get(ticker)
+
+                if last_at is not None:
+                    age_secs = (datetime.now(_KST_TZ) - last_at).total_seconds()
+                    if age_secs < STALE_FORCE_RETRY_AFTER_SECS:
+                        # cooldown 미경과 — 기존 skip 동작 보존 (LMS 위험 차단, 카운터는 누적)
+                        skipped_giveup += 1
+                        continue
+                else:
+                    # `_stale_last_resubscribe_at` 부재 = 영구 stale 의심 첫 진입.
+                    # age=infinity 로 간주 → 즉시 1회 시도.
+                    age_secs = float("inf")
+
+                # 시간당 cap 가드 — 60분 슬라이딩 윈도우
+                if not hasattr(self, "_stale_force_retry_history"):
+                    self._stale_force_retry_history = {}
+                history = self._stale_force_retry_history.setdefault(ticker, [])
+                hour_ago = datetime.now(_KST_TZ) - timedelta(hours=1)
+                # 만료 항목 evict (60분 이전)
+                history[:] = [t for t in history if t > hour_ago]
+
+                if len(history) >= STALE_FORCE_RETRY_HOURLY_CAP:
+                    # 시간당 cap 초과 — LMS / 앱키 정지 위험 차단
+                    force_retry_cap_blocked += 1
+                    logger.warning(
+                        "[stale_force_retry_cap] ticker=%s attempts_in_hour=%d "
+                        "— LMS 위험 차단 skip",
+                        ticker, len(history),
+                    )
+                    try:
+                        await write_log(
+                            "WARNING",
+                            f"[stale_force_retry_cap] ticker={ticker} "
+                            f"attempts_in_hour={len(history)} — LMS 위험 차단 skip",
+                        )
+                    except Exception:
+                        logger.debug("[stale_force_retry_cap] write_log 실패", exc_info=True)
+                    skipped_giveup += 1
+                    continue
+
+                # 강제 재시도 발화
+                age_disp = f"{age_secs:.0f}s" if age_secs != float("inf") else "inf"
+                try:
+                    await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+                    await asyncio.sleep(0.05)
+                    await kis_ws_pool.subscribe(
+                        TICK_TR_ID, ticker,
+                        priority="HIGH", bypass_limit=True,
+                    )
+                    # 핵심: 카운터 0 리셋 (영구 stale 의심 해제 → 신규 사이클 시작).
+                    # 다음 사이클부터 다시 1~5회 정상 분기로 자연 회복.
+                    self._stale_retry_count[ticker] = 0
+                    # 시각 갱신 + history 등록
+                    if hasattr(self, "_stale_last_resubscribe_at"):
+                        self._stale_last_resubscribe_at[ticker] = datetime.now(_KST_TZ)
+                    history.append(datetime.now(_KST_TZ))
+                    force_retry_count += 1
+
+                    logger.info(
+                        "[stale_force_retry] ticker=%s retries=%d last_resub_age=%s "
+                        "— 강제 재시도 + 카운터 리셋",
+                        ticker, retry, age_disp,
+                    )
+                    try:
+                        await write_log(
+                            "INFO",
+                            f"[stale_force_retry] ticker={ticker} retries={retry} "
+                            f"last_resub_age={age_disp} — 강제 재시도 + 카운터 리셋",
+                        )
+                    except Exception:
+                        logger.debug("[stale_force_retry] write_log 실패", exc_info=True)
+                except Exception:
+                    logger.exception("[stale_force_retry] 강제 재시도 실패: %s", ticker)
+
+                await asyncio.sleep(0.05)  # Rate Limit 보호
                 continue
 
             # 1~5회 — 첫 stale 즉시 강제 재등록 (KIS 정상 "신규 등록" 패턴, 재SEND 0건)
@@ -3325,6 +3423,8 @@ class TradingScheduler:
         self._stale_retry_count.clear()
         # 사이클 28 (2026-05-21) — 강제 재구독 시각 추적도 매일 초기화 (G5 cleanup 동행)
         self._stale_last_resubscribe_at.clear()
+        # 사이클 29 (2026-05-21) — 영구 stale 시간당 cap 추적도 매일 초기화 (G5 cleanup 동행)
+        self._stale_force_retry_history.clear()
 
         # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적 일일 초기화
         self._silent_inactive_first_seen.clear()

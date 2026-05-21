@@ -187,15 +187,20 @@ async def test_force_reregister_continues_until_max_retries(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_skip_after_max_stale_retries(monkeypatch):
-    """retry > 5 회 (= 6회째) stale 시 skip — 재등록 호출 0건.
+    """retry > 5 회 (= 6회째) stale + cooldown 미경과 시 skip — 재등록 호출 0건.
 
-    사이클 17 보강: 영구 stale 의심 종목 보호. 다음 `_scan_loop` 가 자연 위임.
+    사이클 17 보강: 영구 stale 의심 종목 보호.
+    사이클 29 (2026-05-21) — 의미 갱신: r>5 분기는 시간 기반 (5분 cooldown).
+    본 케이스는 last_resub_age < 300s 시나리오로 기존 skip 동작 보존 검증.
     """
     from src.engine import scheduler as sch_mod
     from src.engine.scheduler import TradingScheduler
 
     sched = TradingScheduler.__new__(TradingScheduler)
     sched._stale_retry_count = {"005930": 5}  # 5 +1 = 6 (> MAX_STALE_RETRIES)
+    # 사이클 29: cooldown 미경과 (100s < 300s) → skip 보존
+    sched._stale_last_resubscribe_at = {"005930": datetime.now(KST) - timedelta(seconds=100)}
+    sched._stale_force_retry_history = {}
     sched._running = True
 
     monkeypatch.setattr(
@@ -220,7 +225,7 @@ async def test_skip_after_max_stale_retries(monkeypatch):
     await sched._check_and_resubscribe_stale()
 
     assert sched._stale_retry_count["005930"] == 6
-    # 6회 stale → skip (재등록 0건)
+    # 6회 stale + cooldown 미경과 → skip (재등록 0건)
     pool_mock.unsubscribe_in_pool.assert_not_called()
     pool_mock.subscribe.assert_not_called()
     pool_mock.resend_subscribe_for_ticker.assert_not_called()

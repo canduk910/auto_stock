@@ -212,9 +212,12 @@ async def test_stale_watcher_skips_when_retry_exceeds_6(monkeypatch, reset_stale
 
     sched = sched_mod.TradingScheduler()
     sched._stale_retry_count["005930"] = 6  # >5 — skip
+    # 사이클 29 (2026-05-21): r>5 분기는 시간 기반 — cooldown 미경과 시 기존 skip 동작 보존
+    # last_resub_age=100s (< STALE_FORCE_RETRY_AFTER_SECS=300s) → skip 보존
+    sched._stale_last_resubscribe_at["005930"] = datetime.now(KST_TZ) - timedelta(seconds=100)
     await sched._check_and_resubscribe_stale()
 
-    # 모든 풀 호출이 0
+    # 모든 풀 호출이 0 (cooldown 미경과로 skip)
     assert pool_unsub_spy.await_count == 0
     assert pool_sub_spy.await_count == 0
     assert pool_resend_spy.await_count == 0
