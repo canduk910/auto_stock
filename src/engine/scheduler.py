@@ -3401,12 +3401,23 @@ class TradingScheduler:
         from src.api.quotation import inquire_ccnl
         from src.engine.scanner import KST_TZ as _KST_TZ
 
-        if not candidate_tickers:
-            return
-
         # 1차 필터 — stale r>=2 만 평가 + 캐시 TTL 5분 hit 차단
         TTL_SECS = 300
         now = datetime.now(_KST_TZ)
+
+        # 사이클 45 (2026-05-22, refactor-review 카드 #5) — TTL 만료 항목 자동 evict.
+        # 영업일 중 stale watcher 가 더 이상 평가 안 하는 종목 (회복/R4 제외) 의 캐시 영구
+        # 잔존 메모리 누수 차단. `_reset_daily_state` 동행 clear 와 이중 안전망.
+        try:
+            evicted = self._evict_expired_ccnl(now, ttl_secs=TTL_SECS)
+            if evicted > 0:
+                logger.debug("[ccnl_cache_evict] expired=%d remaining=%d",
+                             evicted, len(self._last_ccnl_cache))
+        except Exception:
+            logger.debug("[ccnl_cache_evict] 실패 — 다음 사이클 자연 재시도", exc_info=True)
+
+        if not candidate_tickers:
+            return
         eligible: list[str] = []
         for ticker in candidate_tickers:
             if self._stale_retry_count.get(ticker, 0) < 2:
@@ -3459,6 +3470,65 @@ class TradingScheduler:
                 "today_volume": int(ccnl.get("today_volume", 0)),
             }
             await asyncio.sleep(0.05)
+
+    def _evict_expired_ccnl(self, now: datetime, ttl_secs: float = 300) -> int:
+        """사이클 45 (2026-05-22, refactor-review 카드 #5) — `_last_ccnl_cache` TTL 만료 항목 자동 제거.
+
+        사이클 37 `_refresh_stale_ccnl_cache` 의 TTL hit 판정만으로는 stale watcher 가
+        더 이상 평가 안 하는 종목 (회복/R4 제외 등) 의 캐시가 영구 잔존 → 영업일 중 dict
+        size 증가 메모리 누수. 본 헬퍼가 진입 시점에 일괄 evict.
+
+        Args:
+            now: 현재 KST datetime (호출자가 단일 시각 보장 — race 차단).
+            ttl_secs: TTL 만료 임계 (기본 300s = 5분, 사이클 37 정의 보존).
+
+        Returns:
+            제거된 항목 수.
+
+        Note:
+            본체 예외 graceful — `_refresh_stale_ccnl_cache` 호출자가 try/except 흡수.
+            `_reset_daily_state` 동행 clear 와 이중 안전망.
+        """
+        from datetime import timedelta as _td
+        cutoff = now - _td(seconds=ttl_secs)
+        expired: list[str] = []
+        for ticker, entry in list(self._last_ccnl_cache.items()):
+            fetched_at = entry.get("fetched_at")
+            if fetched_at is None or fetched_at <= cutoff:
+                expired.append(ticker)
+        for ticker in expired:
+            self._last_ccnl_cache.pop(ticker, None)
+        return len(expired)
+
+    def _prune_force_retry_history(
+        self, ticker: str, now: datetime, window_secs: float = 3600
+    ) -> None:
+        """사이클 45 (2026-05-22, refactor-review 카드 #5) — `_stale_force_retry_history` 빈 list 제거.
+
+        사이클 29-R1 `_check_and_resubscribe_stale` 의 sliding window 60분 in-place evict
+        는 정상 동작하나, 빈 list 가 dict 에 영구 잔존하는 메모리 누수가 있음. 본 헬퍼가
+        해당 ticker history 를 sliding window 외 항목 제거 + 빈 list 시 dict 에서 자동 제거.
+
+        Args:
+            ticker: 평가 대상 ticker.
+            now: 현재 KST datetime.
+            window_secs: sliding window 임계 (기본 3600s = 60분).
+
+        Note:
+            cap 비교 직전 호출 권장. 호출되지 않는 ticker 는 `_reset_daily_state` 가 일괄 clear.
+            본체 예외 graceful — 호출자 분기 보호.
+        """
+        from datetime import timedelta as _td
+        if ticker not in self._stale_force_retry_history:
+            return
+        cutoff = now - _td(seconds=window_secs)
+        history = self._stale_force_retry_history[ticker]
+        pruned = [ts for ts in history if ts > cutoff]
+        if pruned:
+            self._stale_force_retry_history[ticker] = pruned
+        else:
+            # 빈 list — dict 에서 제거 (메모리 누수 차단)
+            self._stale_force_retry_history.pop(ticker, None)
 
     async def _auto_capture_funnel_snapshots(self) -> None:
         """사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot.
