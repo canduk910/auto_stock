@@ -156,7 +156,10 @@ class StrategyConfig:
 def _resolve_ticker_name(ticker: str) -> str:
     """사이클 41 (2026-05-22) — funnel 단계별 캡처용 종목명 lookup 헬퍼.
 
-    우선순위:
+    사이클 44 (2026-05-22, refactor-review 카드 #7) — `scanner.resolve_ticker_name` 위임.
+    호환 layer 보존 (사이클 41 호출처 BFB/VCP/donchian 그대로 동작).
+
+    우선순위 (scanner.resolve_ticker_name 동일):
     1. `scanner.ticker_names` (KIS 동적 매핑, 운영 중 갱신)
     2. `scanner.STATIC_TICKER_NAMES` (정적 시드, scanner.py 모듈 자체 파싱)
     3. "" (빈 문자열, lookup miss — 예외 전파 금지, graceful)
@@ -164,15 +167,9 @@ def _resolve_ticker_name(ticker: str) -> str:
     `StrategyBase._record_funnel_step` 가 string 입력 시 자동 호출.
     호출자가 직접 dict 로 입력하면 본 헬퍼 우회 가능.
     """
-    if not ticker:
-        return ""
     try:
         from src.engine import scanner as _scanner
-        name = _scanner.ticker_names.get(ticker) if hasattr(_scanner, "ticker_names") else None
-        if name:
-            return name
-        static = _scanner.STATIC_TICKER_NAMES if hasattr(_scanner, "STATIC_TICKER_NAMES") else {}
-        return static.get(ticker, "") or ""
+        return _scanner.resolve_ticker_name(ticker)
     except Exception:
         # scanner import 실패 / 다른 예외 — 빈 문자열 폴백 (호출자 prepare 보호)
         return ""

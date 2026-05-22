@@ -293,6 +293,41 @@ def t(ticker: str) -> str:
     return f"{name}({ticker})" if name else ticker
 
 
+def resolve_ticker_name(ticker: str | None) -> str:
+    """종목명 단일 lookup — 사이클 44 (2026-05-22, refactor-review 카드 #7).
+
+    기존 4 경로 (ticker_names / STATIC_TICKER_NAMES / strategy_base._resolve_ticker_name / t())
+    통합. 단일 진입점 — 폴백 순서 고정:
+
+    1. `ticker_names` (동적, WS 시세 수신 시 갱신) — 1순위
+    2. `STATIC_TICKER_NAMES` (정적, scanner.py 자기 파일 정규식 파싱) — 2순위
+    3. `""` (빈 문자열, lookup miss — 예외 전파 금지, graceful)
+
+    Args:
+        ticker: 6자리 종목코드 (또는 None/빈 문자열 — graceful).
+
+    Returns:
+        종목명 또는 빈 문자열 (lookup miss).
+
+    Note:
+        본 함수는 lookup only — `ticker_names` 갱신은 WebSocket `_handle_raw` 또는
+        `subscribe_filtered_stocks` 가 담당. 호출 시 dict snapshot 보장 안 됨
+        (동시성 무해 — 빈 문자열 폴백).
+    """
+    if not ticker:
+        return ""
+    try:
+        # 1차: 동적 매핑 (WS 시세 수신 시 갱신)
+        name = ticker_names.get(ticker)
+        if name:
+            return name
+        # 2차: 정적 매핑 (scanner.py 모듈 시드)
+        return STATIC_TICKER_NAMES.get(ticker, "") or ""
+    except (AttributeError, TypeError):
+        # graceful — dict 접근 예외 (모듈 import 순서 / mock 등)
+        return ""
+
+
 # KOSPI 200 대표 종목 (하드코딩, 향후 API 조회로 변경 가능) — 시총 상위 위주
 KOSPI_200_TICKERS = [
     "005930",  # 삼성전자
