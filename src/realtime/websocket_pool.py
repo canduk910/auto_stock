@@ -259,15 +259,23 @@ class WebsocketPool:
         ]
 
     def _session_label(self, ws: KisWebSocket) -> str:
-        """세션 → label ("main" / "quote-1" / "quote-2" ...).
+        """세션 → label ("main" / DB 라벨 — 사이클 43 통일).
 
-        디버깅 / 로그용. 메인은 동일성 비교(``is``), 보조는 ``_quotes`` 인덱스.
+        사이클 43 (2026-05-22): 1-based index ("quote-1"/"quote-2") → DB 라벨 (ISA/sub/gold).
+        보조 세션은 생성 시 pool 이 `KisWebSocket(label=label)` 주입 (사이클 42).
+        풀에 등록된 보조 세션 인스턴스가 맞으면 `ws._label` 반환, 아니면 "unknown".
+
+        디버깅 / 로그용. 메인은 동일성 비교(``is``).
+        호환: `[tick_coverage_session]` / `[stale_watcher_detail]` / `[priority_drop_pool]` /
+        `/api/realtime/subscriptions` / `KisAccountPoolCard` 자동 동기.
         """
         if ws is self._main:
             return "main"
-        for i, q in enumerate(self._quotes, start=1):
+        for q in self._quotes:
             if ws is q:
-                return f"quote-{i}"
+                # 사이클 43 — `ws._label` 직접 반환 (DB 라벨)
+                # graceful — `_label` 미설정 시 빈 문자열 폴백 차단 (legacy 호환)
+                return getattr(q, "_label", "") or "unknown"
         return "unknown"
 
     # -- subscribe / unsubscribe ----------------------------------------
@@ -439,23 +447,21 @@ class WebsocketPool:
             logger.debug("[pool_disable] 메인 라벨 noop")
             return
 
-        # label "quote-N" → 1-based index
-        if not label.startswith("quote-"):
-            logger.debug("[pool_disable] unknown label format: %s", label)
-            return
-        try:
-            idx = int(label.split("-", 1)[1]) - 1
-        except (ValueError, IndexError):
-            logger.debug("[pool_disable] label parse 실패: %s", label)
-            return
+        # 사이클 43 (2026-05-22) — 1-based index ("quote-N") → DB 라벨 매칭.
+        # 보조 세션 생성 시 `_label` 주입 (사이클 42). label 일치 보조 세션 검색.
+        target = None
+        target_idx = -1
+        for idx, q in enumerate(self._quotes):
+            if getattr(q, "_label", None) == label:
+                target = q
+                target_idx = idx
+                break
 
-        if idx < 0 or idx >= len(self._quotes):
-            # 없는 인덱스 — idempotent noop
+        if target is None:
+            # 없는 라벨 — idempotent noop (두 번째 호출 안전)
             logger.debug("[pool_disable] %s 이미 제거됨 또는 미존재 (quotes=%d)",
                          label, len(self._quotes))
             return
-
-        target = self._quotes[idx]
 
         # 해당 세션 담당 ticker 정리
         for tr_key in list(self._ticker_to_session.keys()):
@@ -469,7 +475,8 @@ class WebsocketPool:
             logger.debug("[pool_disable] disconnect 실패: %s", label, exc_info=True)
 
         # _quotes 에서 제거 — 라운드로빈 idx 도 보수적 reset
-        del self._quotes[idx]
+        # 사이클 43 — target_idx (label 매칭 후 찾은 인덱스)
+        del self._quotes[target_idx]
         self._round_robin_idx = 0
 
         logger.info("[pool_disable] %s 비활성 완료 — quotes=%d", label, len(self._quotes))
@@ -519,12 +526,17 @@ class WebsocketPool:
         return result
 
     def get_session_status(self) -> list[dict]:
-        """세션별 슬롯 상태 dict 리스트. ``/api/realtime/subscriptions`` 응답에 동봉."""
+        """세션별 슬롯 상태 dict 리스트. ``/api/realtime/subscriptions`` 응답에 동봉.
+
+        사이클 43 (2026-05-22) — 라벨 통일: 1-based index ("quote-N") → DB 라벨 (ISA/sub/gold).
+        보조 세션 `KisWebSocket.__init__(label=...)` 주입값 직접 반환.
+        """
         from src.engine.scanner import TICK_TR_ID
 
+        # 사이클 43 — 보조 세션 label = ws._label (DB 라벨). graceful 폴백 "unknown".
         sessions = []
         for ws, label in [(self._main, "main")] + [
-            (q, f"quote-{i}") for i, q in enumerate(self._quotes, start=1)
+            (q, getattr(q, "_label", "") or "unknown") for q in self._quotes
         ]:
             subscribed = {
                 tr_key for tr_id, tr_key in ws._subscriptions if tr_id == TICK_TR_ID

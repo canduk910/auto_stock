@@ -63,6 +63,7 @@ def test_get_subscriptions_by_session_main_and_quote(fresh_pool):
     """메인 + 보조 1개 → 라벨별 분리 set."""
     pool = fresh_pool
     quote1 = MagicMock(name="quote-1")
+    quote1._label = "quote-1"  # 사이클 43 (2026-05-22) — label 매칭
     pool._quotes.append(quote1)
 
     pool._ticker_to_session["005930"] = pool._main

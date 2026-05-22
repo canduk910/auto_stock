@@ -27,12 +27,16 @@ pytestmark = pytest.mark.contract
 
 
 def _build_session_mock(label: str, subscribed_tickers: list[str], acked_tickers: list[str], connected: bool = True, reconnect: int = 0):
-    """Mock KisWebSocket session — `_subscriptions` set + `_ws` 객체."""
+    """Mock KisWebSocket session — `_subscriptions` set + `_ws` 객체.
+
+    사이클 43 (2026-05-22) — `_label` 명시 주입 (`_session_label` 가 ws._label 반환).
+    """
     ws = MagicMock(name=label)
     ws._subscriptions = {("H0UNCNT0", t) for t in subscribed_tickers}
     ws._subscriptions_acked = {("H0UNCNT0", t) for t in acked_tickers}
     ws._ws = object() if connected else None
     ws._reconnect_count = reconnect
+    ws._label = label  # 사이클 43 — DB 라벨 / 테스트는 "quote-1" 등 호환 라벨
     return ws
 
 

@@ -166,6 +166,8 @@ async def test_subscribe_low_priority_calls_quote_session():
     quote1 = MagicMock()
     quote1._subscriptions = set()
     quote1.subscribe = AsyncMock()
+    # 사이클 43 (2026-05-22) — label 매칭으로 변경
+    quote1._label = "quote-1"
     pool._quotes = [quote1]
 
     label = await pool.subscribe("H0UNCNT0", "AAA", priority="LOW")
@@ -413,6 +415,7 @@ def test_get_session_status_returns_main_and_quotes_breakdown():
     quote1._subscriptions_acked = {("H0UNCNT0", f"Q{i:03d}") for i in range(3)}
     quote1._reconnect_count = 1
     quote1._ws = object()
+    quote1._label = "quote-1"  # 사이클 43 (2026-05-22) — label 매칭
     pool._quotes = [quote1]
 
     status = pool.get_session_status()

@@ -28,12 +28,15 @@ def pool_with_two_quotes():
 
     pool = WebsocketPool()
     # 보조 세션 2개 mock — disconnect AsyncMock
+    # 사이클 43 (2026-05-22) — label 매칭으로 변경: "quote-1"/"quote-2" 명시 주입
     q1 = MagicMock()
     q1.disconnect = AsyncMock()
     q1._subscriptions = set()
+    q1._label = "quote-1"
     q2 = MagicMock()
     q2.disconnect = AsyncMock()
     q2._subscriptions = set()
+    q2._label = "quote-2"
     pool._quotes = [q1, q2]
     return pool, q1, q2
 
