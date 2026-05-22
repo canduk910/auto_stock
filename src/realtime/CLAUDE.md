@@ -45,13 +45,14 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
   "total": 123, "acked": 100, "fresh_60s": 95, "stale_60s": 5, "limit": 246,
   "sessions": [
     {"label": "main", "subscribed": 41, "acked": 41, "fresh": 40, "stale": 1, "limit": 41, "ws_connected": true, "reconnect_count": 0, "tickers": {"subscribed": [...], "acked": [...]}},
-    {"label": "quote-1", "subscribed": 41, ...}
+    {"label": "ISA", "subscribed": 12, ...}
   ]
 }
 ```
 
 - `total/acked` = 합집합 카운트, 세션별 분해는 `sessions[*]`
 - `limit = MAX_SUBSCRIPTIONS × len(sessions)` (메인 + 보조 합산 용량)
+- **사이클 43 (2026-05-22) — 세션 라벨 통일**: 보조 세션 라벨 `quote-1/quote-2/quote-3` 1-based index → DB `kis_quote_accounts.label` (ISA/sub/gold 등 사용자 등록 라벨) 직접 사용. `_session_label(ws)` / `get_session_status()` / `disable_quote_session(label)` / `[tick_coverage_session]` / `[stale_watcher_detail]` / `[priority_drop_pool]` / `[silent_inactive_force_reconnect]` / 사이클 42 `[ws_heartbeat]` / UI `KisAccountPoolCard` 모두 동일 라벨. 메인 라벨 `"main"` 절대 보존. `_quotes[idx]` 인덱스 자체는 변경 0
 - 보조 0개 → `sessions` 길이 1 (main only, 기존 호환)
 
 ## websocket.py — KisWebSocket 연결 관리
@@ -63,7 +64,8 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 - 자동 재연결 (최대 5회, 지수 백오프)
 - 연결 시 AES iv/key 수신 + 저장
 - 구독 한도 초과 시 에러 대신 경고 + skip
-- `__init__(*, token_manager=None)` — 보조 세션은 외부 매니저 주입 (사이클 7-A `get_token_manager(label)`). 미지정 시 글로벌 메인 매니저
+- `__init__(*, token_manager=None, is_main=True, label=None)` — 보조 세션은 외부 매니저 주입 (사이클 7-A `get_token_manager(label)`). **사이클 42 (2026-05-22)**: `label` kwarg 신규 — 메인은 `"main"` / 보조는 DB `kis_quote_accounts.label` 직접 (예: ISA/sub/gold). 미지정 시 `is_main` 기반 자동 결정
+- **PINGPONG 가시성** (사이클 42, 2026-05-22): KIS 가 메인 세션에 약 11~14s 간격 PINGPONG JSON 송신 → `_handle_raw` `tr_id=="PINGPONG"` 분기에서 즉시 echo-back + `_pingpong_recv_count` / `_pingpong_last_at` 갱신. **L1 DEBUG**: `[ws_pingpong_echo] label=...` (운영 INFO 미노출, LOG_LEVEL=DEBUG 일시만). **L2 INFO 5분 통계**: `_heartbeat_metrics_loop` 가 `HEARTBEAT_METRICS_INTERVAL_SECS=300` 주기로 `[ws_heartbeat] label=... window=300s pingpong_recv=N avg_interval=Xs last_age=Ys heartbeat_timeout=Z` emit + write_log 영구 보존 + 카운터 reset. `_receive_loop` `asyncio.TimeoutError` 분기에 `_heartbeat_timeout_count += 1`. Task lifecycle: `connect()` 진입 직후 1회 발화 + `disconnect()` cancel + await 정리 (좀비 task 방지, asyncio.CancelledError graceful). 메인+보조 인스턴스별 독립 카운터. **운영 관찰** (5/22): 메인 PINGPONG 22~27건/5분 (avg 11~14s 간격, last_age 3~7s — 정상). 보조 시세 세션은 PINGPONG 0건 — KIS 가 시세 전용 세션엔 PINGPONG 미송신 정책 추정 (heartbeat_timeout 0 = 시세 송수신 활발로 연결 유지)
 
 ### subscribe / 거절 감지 / ACK 추적
 

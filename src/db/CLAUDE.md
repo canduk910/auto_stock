@@ -71,12 +71,12 @@ Supabase (PostgreSQL) CRUD 모듈.
 
 ## strategy_funnel.py — 조건검색 단계별 추적 (사이클 34, 2026-05-21)
 
-- `insert_snapshot(target_date, strategy_id, step_no, step_name, survived_count, survived_tickers, excluded_count, excluded_sample)`: 단일 단계 snapshot INSERT. `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE — 같은 영업일 다회 trigger 가능
+- `insert_snapshot(target_date, strategy_id, step_no, step_name, survived_count, survived_tickers, excluded_count, excluded_sample, step_conditions=None)`: 단일 단계 snapshot INSERT. `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE — 같은 영업일 다회 trigger 가능. **사이클 41 (2026-05-22)**: `survived_tickers: list[str \| dict]` 호환 (string 사이클 34 형식 + dict `{ticker, name}` 사이클 41 형식), `excluded_sample: list[dict]` (`{ticker, name, reason}` 수치 포함 사유), `step_conditions` 옵셔널 (단계 조건 명시 — UI 툴팁). DB JSONB 스키마는 변경 없음 (native dict 지원)
 - `list_snapshots(target_date, strategy_id)`: 특정 영업일 + 전략 의 모든 단계 (`step_no` ASC)
 - `list_recent_by_strategy(strategy_id, days=7)`: 최근 N영업일 추이
 - **JSONB cap**: `survived_tickers` 200건 / `excluded_sample` 20건 자동 적용 (응답·저장 크기 보호)
 - 테이블: `strategy_funnel_snapshots` (UUID PK + 인덱스 2: `target_date DESC` / `(strategy_id, target_date DESC)`)
-- 호출: `POST /api/strategy-funnel/snapshot` 수동 trigger 가 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 로 최종 단계 `step_no=99` 만 기록. 자동 hook (단계별 ticker 캡처) 은 후속 사이클
+- 호출: `POST /api/strategy-funnel/snapshot` 수동 trigger + **사이클 39 자동 hook** (`scheduler._auto_capture_funnel_snapshots`, 09:30 `_scan_loop` 첫 진입 시 일일 1회 자동 발화). **사이클 39+41**: BFB/VCP/donchian `prepare()` 가 8단계 `_record_funnel_step` hook 으로 각 단계 통과/탈락 ticker + 수치 포함 사유 (`reason="음봉 비율 35% > 30%"` 등) 캡처 → 단계별 + 최종 (`step_no=99`) DB row 모두 저장. `_reset_daily_state` 동행 reset
 
 ## stock_master.py — 종목 마스터 캐시
 

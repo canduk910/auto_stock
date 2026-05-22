@@ -27,6 +27,7 @@
 - VB/LTV/donchian/bull_flag/vcp 모두 `prev_idx` 분기 동일: `candles[0].stck_bsop_date == 오늘`이면 candles[1] 을 전일로 사용
 - 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
 - 1주 폴백 (모든 전략): `StrategyBase._fallback_one_share(current_price)` 잔여 = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`
+- **사이클 39+41 (2026-05-22) — funnel 단계별 자동 hook**: BFB/VCP/donchian `prepare()` 가 `StrategyBase._record_funnel_step(step_no, step_name, survived, excluded=None, *, step_conditions=None)` 호출로 8단계 통과/탈락 종목 캡처. **사이클 41**: `survived: list[str \| dict]` (자동 dict 변환 — `_resolve_ticker_name` 종목명 lookup) + `excluded: list[{ticker, name, reason}]` (수치 포함 사유 — "음봉 비율 35% > 30%" / "마지막 폭 12% > 8%" / "신고가 미달 52000 < 55000" 등) + `step_conditions` (UI 단계 조건 툴팁용). cap 200/20 자동 적용. 9:30 `_scan_loop` 첫 진입 시 `scheduler._auto_capture_funnel_snapshots` 자동 발화 → DB `strategy_funnel_snapshots` 단계별 INSERT. `_reset_daily_state` 동행 reset
 
 ## 멀티데이 보유 전략
 
