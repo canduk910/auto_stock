@@ -160,60 +160,42 @@ def test_heartbeat_timeout_count_field_initialized():
 
 
 # ===========================================================================
-# P-5: _heartbeat_metrics_loop 5분 주기 emit + 카운터 reset
+# P-5: 단발 emit + 카운터 reset (사이클 46 의미 갱신 — loop → emit_once)
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_heartbeat_metrics_loop_emits_and_resets(monkeypatch, caplog):
-    """_heartbeat_metrics_loop 1회 사이클 → [ws_heartbeat] INFO emit + 카운터 reset."""
+    """사이클 46: `_heartbeat_metrics_emit_once` 단발 호출 → [ws_heartbeat] INFO emit + 카운터 reset."""
     import logging
     from src.realtime import websocket as ws_mod
     from src.realtime.websocket import KisWebSocket
 
     ws = KisWebSocket()
-    ws._running = True
     ws._label = "main"
     ws._pingpong_recv_count = 10
     ws._pingpong_last_at = datetime.now(KST) - timedelta(seconds=15)
     ws._pingpong_window_start_at = datetime.now(KST) - timedelta(seconds=300)
     ws._heartbeat_timeout_count = 0
 
-    # write_log mock
     async def _fake_wl(level, msg, *a, **kw):
         return None
     monkeypatch.setattr(ws_mod, "write_log", _fake_wl, raising=False)
 
-    # 5분 sleep 우회 — 첫 sleep 직후 _running=False 로 강제 종료 (1회 emit 확인)
-    sleep_calls = {"n": 0}
-    real_sleep = asyncio.sleep
-
-    async def _fake_sleep(secs):
-        sleep_calls["n"] += 1
-        if sleep_calls["n"] == 1:
-            return
-        # 2번째 sleep 진입 — emit 후 다음 사이클 진입 직전
-        ws._running = False
-        await real_sleep(0)
-
-    monkeypatch.setattr(asyncio, "sleep", _fake_sleep)
-
     caplog.set_level(logging.INFO, logger="src.realtime.websocket")
-    await ws._heartbeat_metrics_loop()
+    await ws._heartbeat_metrics_emit_once()
 
-    # [ws_heartbeat] INFO 로그
     info_msgs = [r.message for r in caplog.records if "[ws_heartbeat]" in r.message]
-    assert len(info_msgs) >= 1, f"INFO emit 누락 — records={[r.message for r in caplog.records]}"
+    assert len(info_msgs) >= 1
     msg = info_msgs[0]
     assert "label=main" in msg
     assert "pingpong_recv=10" in msg
-    assert "heartbeat_timeout=0" in msg
 
-    # 카운터 reset
-    assert ws._pingpong_recv_count == 0, "emit 후 카운터 reset 안 됨"
+    # 카운터 reset 정책 보존 (사이클 42)
+    assert ws._pingpong_recv_count == 0
     assert ws._heartbeat_timeout_count == 0
 
 
 # ===========================================================================
-# P-6: 로그 포맷 검증 (label/window/recv/avg/last_age/timeout)
+# P-6: 로그 포맷 검증 (사이클 46 의미 갱신 — 단발 헬퍼 사용)
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_heartbeat_metrics_log_format(monkeypatch, caplog):
@@ -223,7 +205,6 @@ async def test_heartbeat_metrics_log_format(monkeypatch, caplog):
     from src.realtime.websocket import KisWebSocket
 
     ws = KisWebSocket()
-    ws._running = True
     ws._label = "quote-1"
     ws._pingpong_recv_count = 5
     ws._pingpong_last_at = datetime.now(KST) - timedelta(seconds=20)
@@ -234,25 +215,12 @@ async def test_heartbeat_metrics_log_format(monkeypatch, caplog):
         return None
     monkeypatch.setattr(ws_mod, "write_log", _fake_wl, raising=False)
 
-    real_sleep = asyncio.sleep
-    call_n = {"n": 0}
-
-    async def _fake_sleep(secs):
-        call_n["n"] += 1
-        # 첫 sleep 후 정상 emit 진입 (running=True 유지) → 두번째 sleep 직전 종료
-        if call_n["n"] >= 2:
-            ws._running = False
-        await real_sleep(0)
-
-    monkeypatch.setattr(asyncio, "sleep", _fake_sleep)
-
     caplog.set_level(logging.INFO, logger="src.realtime.websocket")
-    await ws._heartbeat_metrics_loop()
+    await ws._heartbeat_metrics_emit_once()  # 사이클 46 — 단발 헬퍼
 
     info_msgs = [r.message for r in caplog.records if "[ws_heartbeat]" in r.message]
     assert len(info_msgs) >= 1
     msg = info_msgs[0]
-    # 필수 필드
     for keyword in ("label=", "window=", "pingpong_recv=", "avg_interval=",
                     "last_age=", "heartbeat_timeout="):
         assert keyword in msg, f"필수 필드 누락: {keyword}\nactual: {msg}"
@@ -261,28 +229,19 @@ async def test_heartbeat_metrics_log_format(monkeypatch, caplog):
 # ===========================================================================
 # P-7: disconnect 시 metrics task cancel
 # ===========================================================================
-@pytest.mark.asyncio
-async def test_disconnect_cancels_metrics_task():
-    """disconnect() 호출 시 _heartbeat_metrics_task cancel — 좀비 task 방지."""
+def test_disconnect_cancels_metrics_task():
+    """사이클 46 (refactor-review 카드 #6) — `_heartbeat_metrics_task` 필드 자체 제거.
+
+    사이클 42 인스턴스별 task → scheduler `_session_health_loop` 통합. 좀비 task 방지를
+    scheduler `_emit_heartbeat_metrics_all_sessions` 통합 호출로 단순화.
+    """
     from src.realtime.websocket import KisWebSocket
 
     ws = KisWebSocket()
-    ws._running = True
-
-    # 영원히 sleep 하는 fake task
-    async def _idle():
-        try:
-            await asyncio.sleep(3600)
-        except asyncio.CancelledError:
-            raise
-
-    ws._heartbeat_metrics_task = asyncio.create_task(_idle())
-
-    # disconnect 호출 후 task cancel 확인
-    await ws.disconnect()
-
-    # task 가 cancel 됨
-    assert ws._heartbeat_metrics_task is None or ws._heartbeat_metrics_task.cancelled() or ws._heartbeat_metrics_task.done()
+    # 사이클 46 — task 필드 자체 제거 (좀비 위험 자체가 사라짐)
+    assert not hasattr(ws, "_heartbeat_metrics_task"), (
+        "사이클 46 — `_heartbeat_metrics_task` 필드 제거됨 (scheduler 통합)"
+    )
 
 
 # ===========================================================================

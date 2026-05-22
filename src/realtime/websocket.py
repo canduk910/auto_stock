@@ -132,8 +132,9 @@ class KisWebSocket:
         _KST_TZ_INIT = timezone(timedelta(hours=9))
         self._pingpong_window_start_at: datetime = datetime.now(_KST_TZ_INIT)
         self._heartbeat_timeout_count: int = 0
-        # metrics task lifecycle (connect 직후 생성 / disconnect 에서 cancel)
-        self._heartbeat_metrics_task: asyncio.Task | None = None
+        # 사이클 46 (2026-05-22, refactor-review 카드 #6) — task lifecycle 제거.
+        # scheduler `_session_health_loop` 가 5분마다 `_heartbeat_metrics_emit_once` 호출.
+        # 좀비 task 방지 + 메인+보조 일관성 + 카운터 reset 동작 보존 (사이클 42 정책).
         # AES 복호화 키 (체결통보용)
         self.aes_iv: str = ""
         self.aes_key: str = ""
@@ -152,11 +153,9 @@ class KisWebSocket:
         self._running = True
         self._reconnect_count = 0
 
-        # 사이클 42 (2026-05-22) — 5분 주기 [ws_heartbeat] INFO emit task 발화.
-        # connect() 진입 직후 단 1회 — 재연결 루프 내부가 아닌 본 위치 (task lifecycle 1회).
-        # disconnect() 에서 cancel.
-        if self._heartbeat_metrics_task is None or self._heartbeat_metrics_task.done():
-            self._heartbeat_metrics_task = asyncio.create_task(self._heartbeat_metrics_loop())
+        # 사이클 46 (2026-05-22, refactor-review 카드 #6) — heartbeat metrics task 폐기.
+        # scheduler `_session_health_loop` 가 5분마다 모든 세션 `_heartbeat_metrics_emit_once` 호출.
+        # 사이클 42 카운터 reset 정책 그대로 보존 (`_heartbeat_metrics_emit_once` 가 reset 책임).
 
         while self._running and self._reconnect_count <= MAX_RECONNECT:
             try:
@@ -210,25 +209,18 @@ class KisWebSocket:
     async def disconnect(self) -> None:
         """연결을 종료한다."""
         self._running = False
-        # 사이클 42 (2026-05-22) — heartbeat metrics task cancel (좀비 task 방지)
-        task = self._heartbeat_metrics_task
-        if task is not None and not task.done():
-            task.cancel()
-            try:
-                await task
-            except (asyncio.CancelledError, Exception):
-                pass
-        self._heartbeat_metrics_task = None
+        # 사이클 46 (2026-05-22) — heartbeat metrics task lifecycle 제거.
+        # scheduler `_session_health_loop` 가 통합 호출 → 본 함수에서 cancel 불필요.
         if self._ws:
             await self._ws.close()
             self._ws = None
         logger.info("WebSocket 연결 종료")
 
-    async def _heartbeat_metrics_loop(self) -> None:
-        """사이클 42 (2026-05-22) — 5분 주기 [ws_heartbeat] INFO emit + 카운터 reset.
+    async def _heartbeat_metrics_emit_once(self) -> None:
+        """사이클 46 (2026-05-22, refactor-review 카드 #6) — 단발 [ws_heartbeat] emit + 카운터 reset.
 
-        ping-pong 송수신 빈도 + heartbeat timeout 누적 카운트 운영 가시화.
-        Layer 1 (DEBUG echo) + Layer 2 (5분 INFO 통계) 통합 추가.
+        사이클 42 `_heartbeat_metrics_loop` 의 emit 로직 추출. 5분 주기 호출은 scheduler
+        `_session_health_loop` 가 메인 + 보조 일괄 담당 → 좀비 task 방지 + 메인+보조 일관성.
 
         출력 예:
             [ws_heartbeat] label=main window=300s pingpong_recv=10
@@ -239,52 +231,43 @@ class KisWebSocket:
         - avg_interval 이 비정상 (예: 60s+) → KIS 측 변경 또는 네트워크 지연
         - heartbeat_timeout 누적 → 5분 윈도우 내 timeout 발생 빈도
 
-        본체 예외는 catch — 다음 사이클 자연 재시도.
+        본체 예외는 호출자 (`scheduler._emit_heartbeat_metrics_all_sessions`) 가 격리.
         """
         from datetime import timezone as _tz, timedelta as _td
         _KST = _tz(_td(hours=9))
-        while self._running:
-            try:
-                await asyncio.sleep(HEARTBEAT_METRICS_INTERVAL_SECS)
-                if not self._running:
-                    break
 
-                now = datetime.now(_KST)
-                window_secs = (now - self._pingpong_window_start_at).total_seconds()
-                recv = self._pingpong_recv_count
-                timeouts = self._heartbeat_timeout_count
-                avg_interval = window_secs / max(recv, 1) if recv else 0.0
-                last_age = (
-                    (now - self._pingpong_last_at).total_seconds()
-                    if self._pingpong_last_at else None
-                )
-                last_age_disp = f"{last_age:.0f}s" if last_age is not None else "none"
+        now = datetime.now(_KST)
+        window_secs = (now - self._pingpong_window_start_at).total_seconds()
+        recv = self._pingpong_recv_count
+        timeouts = self._heartbeat_timeout_count
+        avg_interval = window_secs / max(recv, 1) if recv else 0.0
+        last_age = (
+            (now - self._pingpong_last_at).total_seconds()
+            if self._pingpong_last_at else None
+        )
+        last_age_disp = f"{last_age:.0f}s" if last_age is not None else "none"
 
-                logger.info(
-                    "[ws_heartbeat] label=%s window=%.0fs pingpong_recv=%d "
-                    "avg_interval=%.1fs last_age=%s heartbeat_timeout=%d",
-                    self._label, window_secs, recv, avg_interval,
-                    last_age_disp, timeouts,
-                )
-                try:
-                    await write_log(
-                        "INFO",
-                        f"[ws_heartbeat] label={self._label} window={window_secs:.0f}s "
-                        f"pingpong_recv={recv} avg_interval={avg_interval:.1f}s "
-                        f"last_age={last_age_disp} heartbeat_timeout={timeouts}",
-                    )
-                except Exception:
-                    # graceful — system_logs 실패해도 다음 사이클 재시도
-                    logger.debug("[ws_heartbeat] write_log 실패", exc_info=True)
+        logger.info(
+            "[ws_heartbeat] label=%s window=%.0fs pingpong_recv=%d "
+            "avg_interval=%.1fs last_age=%s heartbeat_timeout=%d",
+            self._label, window_secs, recv, avg_interval,
+            last_age_disp, timeouts,
+        )
+        try:
+            await write_log(
+                "INFO",
+                f"[ws_heartbeat] label={self._label} window={window_secs:.0f}s "
+                f"pingpong_recv={recv} avg_interval={avg_interval:.1f}s "
+                f"last_age={last_age_disp} heartbeat_timeout={timeouts}",
+            )
+        except Exception:
+            # graceful — system_logs 실패해도 다음 사이클 재시도
+            logger.debug("[ws_heartbeat] write_log 실패", exc_info=True)
 
-                # 카운터 + 윈도우 시작 reset
-                self._pingpong_recv_count = 0
-                self._heartbeat_timeout_count = 0
-                self._pingpong_window_start_at = now
-            except asyncio.CancelledError:
-                break
-            except Exception:
-                logger.exception("[ws_heartbeat_metrics] 사이클 실패 — 다음 사이클 재시도")
+        # 카운터 + 윈도우 시작 reset (사이클 42 정책 보존)
+        self._pingpong_recv_count = 0
+        self._heartbeat_timeout_count = 0
+        self._pingpong_window_start_at = now
 
     async def subscribe(self, tr_id: str, tr_key: str, *, bypass_limit: bool = False) -> None:
         """종목 구독을 등록한다.

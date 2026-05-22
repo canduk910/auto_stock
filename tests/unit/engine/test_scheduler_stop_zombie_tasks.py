@@ -250,6 +250,7 @@ def test_stop_tuple_equals_finally_tuple_members():
         "_next_day_task",
         "_session_task",
         "_stale_watcher_task",
+        "_session_health_task",  # 사이클 46 (2026-05-22) — refactor-review 카드 #6
         "_swing_poll_task",
         "_swing_rest_poll_task",
         "_5xx_dedupe_summary_task",
@@ -257,7 +258,7 @@ def test_stop_tuple_equals_finally_tuple_members():
         "_scan_task",
     }
     assert stop_members == expected_members, (
-        f"stop() tuple 이 명세 §9 ① 의 8종과 불일치.\n"
+        f"stop() tuple 이 명세 §9 ① 의 9종과 불일치.\n"
         f"  실제 : {sorted(stop_members)}\n"
         f"  기대 : {sorted(expected_members)}\n"
         f"명세 §4 Patch A 코드 블록 참조."

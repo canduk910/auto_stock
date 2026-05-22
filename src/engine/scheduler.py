@@ -207,6 +207,9 @@ class TradingScheduler:
         self._pending_next_day_clear: set[tuple[str, str]] = set()
         # K (2026-05-12) — WebSocket silent inactive 자동 복구 watcher task + 종목별 연속 stale 카운터
         self._stale_watcher_task: asyncio.Task | None = None
+        # 사이클 46 (2026-05-22, refactor-review 카드 #6) — 세션 헬스 통합 5분 주기 task.
+        # 사이클 42 KisWebSocket._heartbeat_metrics_loop 세션별 분산 task → 통합. 메인+보조 일관성.
+        self._session_health_task: asyncio.Task | None = None
         # ticker -> 연속 stale 사이클 수 (fresh 회복 시 자동 clear, _reset_daily_state 에서도 clear)
         self._stale_retry_count: dict[str, int] = {}
         # 사이클 28 (2026-05-21) — ticker -> 마지막 강제 재구독 시도 시각 (KST aware datetime).
@@ -364,6 +367,11 @@ class TradingScheduler:
             # K (2026-05-12) — WebSocket silent inactive 30s 자동 복구 watcher
             # F1(재연결 1회) + `_scan_loop`(5분) + K(30s) 3중 안전망. lifecycle: finally cancel
             self._stale_watcher_task = asyncio.create_task(self._stale_watcher_loop())
+
+            # 사이클 46 (2026-05-22, refactor-review 카드 #6) — 세션 헬스 통합 5분 주기 task.
+            # 사이클 42 KisWebSocket._heartbeat_metrics_loop 세션별 분산 task → scheduler 통합.
+            # 메인 + 보조 일관성 + 좀비 task 방지. _stale_watcher_loop(120s) 와 별도 보존.
+            self._session_health_task = asyncio.create_task(self._session_health_loop())
 
             # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
             # WebSocket tick 흐름에서 매수 평가가 빠진 자리를 1분 주기 REST 폴링으로 채운다.
@@ -624,6 +632,7 @@ class TradingScheduler:
             # 백그라운드 task lifecycle — 비정상 종료 시 좀비 task 방지
             for task_attr in (
                 "_next_day_task", "_session_task", "_stale_watcher_task",
+                "_session_health_task",  # 사이클 46
                 "_swing_poll_task", "_swing_rest_poll_task",
                 "_5xx_dedupe_summary_task",
                 "_ws_task", "_scan_task",
@@ -745,6 +754,7 @@ class TradingScheduler:
         # 좀비 connect 루프 + scan_loop 가 중복 동작 가능 (Copilot 리뷰 #1).
         for task_attr in (
             "_next_day_task", "_session_task", "_stale_watcher_task",
+            "_session_health_task",  # 사이클 46
             "_swing_poll_task", "_swing_rest_poll_task",
             "_5xx_dedupe_summary_task",
             "_ws_task", "_scan_task",
@@ -3529,6 +3539,72 @@ class TradingScheduler:
         else:
             # 빈 list — dict 에서 제거 (메모리 누수 차단)
             self._stale_force_retry_history.pop(ticker, None)
+
+    # ------------------------------------------------------------------------
+    # 사이클 46 (2026-05-22, refactor-review 카드 #6) — 세션 헬스 통합 5분 주기
+    # ------------------------------------------------------------------------
+    async def _session_health_loop(self) -> None:
+        """5분 주기 세션 헬스 통합 task.
+
+        사이클 42 `KisWebSocket._heartbeat_metrics_loop` 세션별 분산 task (메인 + 보조 N) →
+        scheduler 통합 호출로 일원화. 메인+보조 일관성 + 좀비 task 방지 + 단순화.
+
+        담당:
+        - `_emit_heartbeat_metrics_all_sessions` — 메인 + 보조 세션 일괄 `_heartbeat_metrics_emit_once`
+
+        보존 정책:
+        - `_stale_watcher_loop` (120s) 별도 보존 — 재시도 빈도 우선 (사이클 24/29-R1/29-R3 안전망)
+        - `_report_tick_coverage` 는 `_scan_loop` (5분) 안에서 호출 — 중복 발화 차단
+
+        본체 예외 graceful — 다음 사이클 자연 재시도.
+        """
+        # 사이클 42 `HEARTBEAT_METRICS_INTERVAL_SECS=300` 정합
+        INTERVAL_SECS = 300
+        while self._running:
+            try:
+                await asyncio.sleep(INTERVAL_SECS)
+                if not self._running:
+                    break
+                try:
+                    await self._emit_heartbeat_metrics_all_sessions()
+                except Exception:
+                    logger.exception("[session_health] heartbeat_metrics 실패 — 다음 사이클 재시도")
+            except asyncio.CancelledError:
+                break
+            except Exception:
+                logger.exception("[session_health_loop] 사이클 실패")
+
+    async def _emit_heartbeat_metrics_all_sessions(self) -> None:
+        """메인 + 보조 모든 KisWebSocket 세션 [ws_heartbeat] 단발 emit 통합.
+
+        사이클 42 인스턴스별 task → scheduler 일괄 호출. 메인 + 보조 일관성.
+        한 세션 실패 → 다른 세션 계속 (graceful).
+        """
+        from src.realtime import websocket as _ws_mod
+        from src.realtime import websocket_pool as _wp_mod
+
+        # 메인 세션
+        main_ws = getattr(_ws_mod, "kis_ws", None)
+        sessions = []
+        if main_ws is not None:
+            sessions.append(main_ws)
+        # 보조 세션 (사이클 43 DB 라벨 — ISA/sub/gold)
+        pool = getattr(_wp_mod, "kis_ws_pool", None)
+        if pool is not None:
+            quotes = getattr(pool, "_quotes", None) or []
+            sessions.extend(quotes)
+
+        for ws in sessions:
+            emit_fn = getattr(ws, "_heartbeat_metrics_emit_once", None)
+            if not callable(emit_fn):
+                continue
+            try:
+                await emit_fn()
+            except Exception:
+                label = getattr(ws, "_label", "unknown")
+                logger.exception(
+                    "[session_health] %s _heartbeat_metrics_emit_once 실패 — 격리", label
+                )
 
     async def _auto_capture_funnel_snapshots(self) -> None:
         """사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot.
