@@ -29,6 +29,8 @@ logger = logging.getLogger(__name__)
 MAX_SUBSCRIPTIONS = 41  # KIS 공식 한도 41건 (1 세션 당). 보유 종목은 한도 무시하고 우선 보장 (subscribe_filtered_stocks priority_groups)
 MAX_RECONNECT = 5
 HEARTBEAT_TIMEOUT = 30  # 초
+# 사이클 42 (2026-05-22) — PINGPONG 가시성 + 5분 주기 [ws_heartbeat] 통계 emit 주기
+HEARTBEAT_METRICS_INTERVAL_SECS = 300  # 5분
 BACKOFF_BASE = 1.0
 MIN_STABLE_SECONDS = 5  # 이 시간 이상 연결 유지해야 안정적 연결로 판단
 
@@ -86,7 +88,13 @@ class KisWebSocket:
     인자 미지정 시 메인 글로벌 `token_manager` 사용 (기존 동작 100% 보존).
     """
 
-    def __init__(self, *, token_manager=None, is_main: bool = True) -> None:
+    def __init__(
+        self,
+        *,
+        token_manager=None,
+        is_main: bool = True,
+        label: str | None = None,  # 사이클 42 (2026-05-22) — pool 주입 (메인=main / 보조=quote-N)
+    ) -> None:
         # 사이클 7-C — 메인이면 None, 보조면 외부 매니저 주입
         # `connect()` / approval_key 발급 시 이 매니저 사용
         from src.auth.token import token_manager as _main_tm
@@ -95,6 +103,9 @@ class KisWebSocket:
         # 보조 세션은 시세 수신 only — 체결통보 구독 안 함 + AES 키 저장도 skip.
         # 메인 세션의 체결통보(H0STCNI0/H0STCNI9) AES 키만 모듈 전역 보존.
         self.is_main: bool = is_main
+        # 사이클 42 (2026-05-22) — PINGPONG 가시성 + 5분 주기 [ws_heartbeat] 통계 label.
+        # pool 주입 (메인=main / 보조=quote-1/quote-2/...). 미지정 시 is_main 기반 자동 결정.
+        self._label: str = label if label is not None else ("main" if is_main else "quote-?")
 
         self._ws: ClientConnection | None = None
         self._approval_key: str = ""
@@ -112,6 +123,17 @@ class KisWebSocket:
         self._running = False
         self._reconnect_count = 0
         self._on_message: Callable[[str, str, str, bool], Awaitable[None]] | None = None
+        # 사이클 42 (2026-05-22) — PINGPONG 송수신 통계 (5분 주기 [ws_heartbeat] INFO emit)
+        # ping-pong 메커니즘 자체는 정상 동작 (Layer 1/2/3 검증 완료) — 가시성 강화 도구.
+        # 운영자가 5분 주기 INFO 로 송수신 빈도 + heartbeat timeout 누적 카운트 검증.
+        self._pingpong_recv_count: int = 0
+        self._pingpong_last_at: datetime | None = None
+        from datetime import timezone, timedelta
+        _KST_TZ_INIT = timezone(timedelta(hours=9))
+        self._pingpong_window_start_at: datetime = datetime.now(_KST_TZ_INIT)
+        self._heartbeat_timeout_count: int = 0
+        # metrics task lifecycle (connect 직후 생성 / disconnect 에서 cancel)
+        self._heartbeat_metrics_task: asyncio.Task | None = None
         # AES 복호화 키 (체결통보용)
         self.aes_iv: str = ""
         self.aes_key: str = ""
@@ -129,6 +151,12 @@ class KisWebSocket:
         self._on_message = on_message
         self._running = True
         self._reconnect_count = 0
+
+        # 사이클 42 (2026-05-22) — 5분 주기 [ws_heartbeat] INFO emit task 발화.
+        # connect() 진입 직후 단 1회 — 재연결 루프 내부가 아닌 본 위치 (task lifecycle 1회).
+        # disconnect() 에서 cancel.
+        if self._heartbeat_metrics_task is None or self._heartbeat_metrics_task.done():
+            self._heartbeat_metrics_task = asyncio.create_task(self._heartbeat_metrics_loop())
 
         while self._running and self._reconnect_count <= MAX_RECONNECT:
             try:
@@ -182,10 +210,81 @@ class KisWebSocket:
     async def disconnect(self) -> None:
         """연결을 종료한다."""
         self._running = False
+        # 사이클 42 (2026-05-22) — heartbeat metrics task cancel (좀비 task 방지)
+        task = self._heartbeat_metrics_task
+        if task is not None and not task.done():
+            task.cancel()
+            try:
+                await task
+            except (asyncio.CancelledError, Exception):
+                pass
+        self._heartbeat_metrics_task = None
         if self._ws:
             await self._ws.close()
             self._ws = None
         logger.info("WebSocket 연결 종료")
+
+    async def _heartbeat_metrics_loop(self) -> None:
+        """사이클 42 (2026-05-22) — 5분 주기 [ws_heartbeat] INFO emit + 카운터 reset.
+
+        ping-pong 송수신 빈도 + heartbeat timeout 누적 카운트 운영 가시화.
+        Layer 1 (DEBUG echo) + Layer 2 (5분 INFO 통계) 통합 추가.
+
+        출력 예:
+            [ws_heartbeat] label=main window=300s pingpong_recv=10
+              avg_interval=30.0s last_age=15s heartbeat_timeout=0
+
+        운영자 분석:
+        - pingpong_recv 가 5분 윈도우 내 0 → ping-pong 결함
+        - avg_interval 이 비정상 (예: 60s+) → KIS 측 변경 또는 네트워크 지연
+        - heartbeat_timeout 누적 → 5분 윈도우 내 timeout 발생 빈도
+
+        본체 예외는 catch — 다음 사이클 자연 재시도.
+        """
+        from datetime import timezone as _tz, timedelta as _td
+        _KST = _tz(_td(hours=9))
+        while self._running:
+            try:
+                await asyncio.sleep(HEARTBEAT_METRICS_INTERVAL_SECS)
+                if not self._running:
+                    break
+
+                now = datetime.now(_KST)
+                window_secs = (now - self._pingpong_window_start_at).total_seconds()
+                recv = self._pingpong_recv_count
+                timeouts = self._heartbeat_timeout_count
+                avg_interval = window_secs / max(recv, 1) if recv else 0.0
+                last_age = (
+                    (now - self._pingpong_last_at).total_seconds()
+                    if self._pingpong_last_at else None
+                )
+                last_age_disp = f"{last_age:.0f}s" if last_age is not None else "none"
+
+                logger.info(
+                    "[ws_heartbeat] label=%s window=%.0fs pingpong_recv=%d "
+                    "avg_interval=%.1fs last_age=%s heartbeat_timeout=%d",
+                    self._label, window_secs, recv, avg_interval,
+                    last_age_disp, timeouts,
+                )
+                try:
+                    await write_log(
+                        "INFO",
+                        f"[ws_heartbeat] label={self._label} window={window_secs:.0f}s "
+                        f"pingpong_recv={recv} avg_interval={avg_interval:.1f}s "
+                        f"last_age={last_age_disp} heartbeat_timeout={timeouts}",
+                    )
+                except Exception:
+                    # graceful — system_logs 실패해도 다음 사이클 재시도
+                    logger.debug("[ws_heartbeat] write_log 실패", exc_info=True)
+
+                # 카운터 + 윈도우 시작 reset
+                self._pingpong_recv_count = 0
+                self._heartbeat_timeout_count = 0
+                self._pingpong_window_start_at = now
+            except asyncio.CancelledError:
+                break
+            except Exception:
+                logger.exception("[ws_heartbeat_metrics] 사이클 실패 — 다음 사이클 재시도")
 
     async def subscribe(self, tr_id: str, tr_key: str, *, bypass_limit: bool = False) -> None:
         """종목 구독을 등록한다.
@@ -362,7 +461,12 @@ class KisWebSocket:
                     self._ws.recv(), timeout=HEARTBEAT_TIMEOUT
                 )
             except asyncio.TimeoutError:
-                logger.warning("Heartbeat 타임아웃 (%ds), 재연결 시도", HEARTBEAT_TIMEOUT)
+                # 사이클 42 (2026-05-22) — heartbeat timeout 카운트 (5분 주기 통계용)
+                self._heartbeat_timeout_count += 1
+                logger.warning(
+                    "Heartbeat 타임아웃 (%ds), 재연결 시도 — label=%s timeout_count=%d",
+                    HEARTBEAT_TIMEOUT, self._label, self._heartbeat_timeout_count,
+                )
                 return
             except websockets.ConnectionClosed:
                 logger.warning("WebSocket 연결 닫힘")
@@ -379,11 +483,18 @@ class KisWebSocket:
                 header = data.get("header", {})
                 body = data.get("body", {})
 
-                # Heartbeat(PINGPONG)
+                # Heartbeat(PINGPONG) — 사이클 42 (2026-05-22) 가시성 강화
                 tr_id = header.get("tr_id", "")
                 if tr_id == "PINGPONG":
                     if self._ws:
+                        # L1: PINGPONG echo 추적 (DEBUG — 운영 INFO 미노출, 폭주 방지)
+                        logger.debug("[ws_pingpong_echo] label=%s", self._label)
                         await self._ws.send(raw)
+                    # L2: 송수신 카운터 + 시각 갱신 (5분 주기 [ws_heartbeat] 통계용)
+                    from datetime import timezone as _tz, timedelta as _td
+                    _KST = _tz(_td(hours=9))
+                    self._pingpong_recv_count += 1
+                    self._pingpong_last_at = datetime.now(_KST)
                     return
 
                 msg1 = body.get("msg1", "")

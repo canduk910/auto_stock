@@ -144,7 +144,8 @@ class WebsocketPool:
                 # 보조 세션 KisWebSocket 인스턴스 생성. token_manager 주입.
                 # 사이클 16 (2026-05-19) — `is_main=False` 명시. `_handle_raw` SUBSCRIBE SUCCESS
                 # AES 키 저장 가드 (메인 + 체결통보 tr_id 만 저장 — 보조는 skip).
-                ws = KisWebSocket(token_manager=manager, is_main=False)
+                # 사이클 42 (2026-05-22) — label 주입 (보조 세션 [ws_heartbeat] INFO 식별)
+                ws = KisWebSocket(token_manager=manager, is_main=False, label=label)
                 self._quotes.append(ws)
                 if dispatch_message is not None:
                     # connect 는 별도 task — 메인 흐름 차단 안 함
