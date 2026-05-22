@@ -210,36 +210,17 @@ class TradingScheduler:
         # 사이클 46 (2026-05-22, refactor-review 카드 #6) — 세션 헬스 통합 5분 주기 task.
         # 사이클 42 KisWebSocket._heartbeat_metrics_loop 세션별 분산 task → 통합. 메인+보조 일관성.
         self._session_health_task: asyncio.Task | None = None
-        # ticker -> 연속 stale 사이클 수 (fresh 회복 시 자동 clear, _reset_daily_state 에서도 clear)
-        self._stale_retry_count: dict[str, int] = {}
-        # 사이클 28 (2026-05-21) — ticker -> 마지막 강제 재구독 시도 시각 (KST aware datetime).
-        # `_check_and_resubscribe_stale` 와 `_resubscribe_stale_priority` 의 강제 재등록
-        # 직후 갱신. 진단 로그 `[stale_watcher_detail]` 의 `@HH:MM:SS` 필드 출처.
-        # `_stale_retry_count` cleanup 분기(fresh 회복 / _reset_daily_state) 와 동행 clear.
-        self._stale_last_resubscribe_at: dict[str, "datetime"] = {}
-        # 사이클 29 (2026-05-21) — 영구 stale 시간 기반 강제 재시도 (시간당 cap 추적).
-        # ticker -> 60분 슬라이딩 윈도우 내 강제 재시도 시각 list (KST aware datetime).
-        # `STALE_FORCE_RETRY_HOURLY_CAP` 초과 시 [stale_force_retry_cap] WARNING + skip.
-        # `_reset_daily_state` 동행 clear.
-        self._stale_force_retry_history: dict[str, list["datetime"]] = {}
-        # 사이클 32 (R4, 2026-05-21) — universe stale 가드 제외 set.
-        # stale > MAX_STALE_RETRIES + 거래량 빈약 종목 자동 제외. 매일 _reset_daily_state 동행 clear.
-        # 보유/익일청산은 _evaluate_universe_guard 가 사전 차단. WebSocket 슬롯 회수 + Rate Limit 절약.
-        self._universe_excluded_today: set[str] = set()
+        # 사이클 48 (2026-05-22, refactor-review 카드 #2) — Stale 추적 7 필드 통합.
+        # 사이클 17/24/28/29-R1/32/37/45 누적된 7 dict/set 필드 → 단일 데이터클래스.
+        # 호환 layer (7 property, 본 클래스 메서드 정의 영역) 가 기존 `self._stale_*` 직접 접근
+        # 패턴 모두 보존. `_reset_daily_state` 동행 clear 의무 → `_stale_state.reset_daily()` 위임.
+        # 사이클 45 TTL evict 정책 보존 (`last_ccnl_cache` 5분 + `force_retry_history` 60분).
+        from src.engine.stale_tracker import StaleTrackerState
+        self._stale_state = StaleTrackerState()
         # 사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot 일일 1회 가드.
         # `_scan_loop` 첫 진입 시 활성 전략의 `_funnel_steps` 를 DB strategy_funnel_snapshots 에
         # 단계별 row 로 INSERT. `_reset_daily_state` 동행 reset (매일 1회).
         self._auto_funnel_snapshot_done_today: bool = False
-        # 사이클 37 (2026-05-21) — KIS 실제 마지막 체결시각 캐시 (UI 노출용).
-        # 구조: {ticker: {fetched_at: datetime, last_cntg_hour: str, today_volume: int}}
-        # TTL 5분 + 사이클당 cap 20 (KIS Rate Limit 보호). _reset_daily_state 동행 clear.
-        # `last_tick` (WS 수신) vs `last_cntg_hour` (KIS 실제 체결) 비교 → WS 구독 문제 진단.
-        self._last_ccnl_cache: dict[str, dict] = {}
-        # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적
-        # label -> 첫 silent 감지 시각 (5분 지속 판정용)
-        self._silent_inactive_first_seen: dict[str, datetime] = {}
-        # label -> 시간당 reconnect 시각 리스트 (cap 용, time.monotonic 기준)
-        self._silent_inactive_recovery_count: dict[str, list[float]] = {}
         # 사이클 18 (2026-05-19, A-1) — 5xx WARNING dedupe summary 60s 주기 task
         self._5xx_dedupe_summary_task: asyncio.Task | None = None
         # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
@@ -290,6 +271,90 @@ class TradingScheduler:
         except Exception:
             from src.config import settings
             return settings.auto_start
+
+    # ------------------------------------------------------------------
+    # 사이클 48 (2026-05-22, refactor-review 카드 #2) — Stale 추적 호환 layer.
+    # 사이클 17/24/28/29-R1/32/37/45 누적 7 필드 → `StaleTrackerState` 통합.
+    # 본 7 property (getter + setter) 가 기존 `self._stale_*` 직접 접근/할당 패턴 모두 호환 보존.
+    # - getter: dict 인스턴스 동일성 보장 (매번 동일 객체 반환 — race 차단)
+    # - setter: 외부 코드 (test 등) 의 `__new__ + sched._stale_retry_count = {}` 패턴 지원
+    # _stale_state 미설정 인스턴스 보호 — setter 진입 시 자동 init (graceful)
+    # ------------------------------------------------------------------
+    def _ensure_stale_state(self) -> None:
+        """`_stale_state` 미설정 시 자동 init (graceful — `__new__` 인스턴스 보호)."""
+        if not hasattr(self, "_stale_state"):
+            from src.engine.stale_tracker import StaleTrackerState
+            object.__setattr__(self, "_stale_state", StaleTrackerState())
+
+    @property
+    def _stale_retry_count(self) -> dict[str, int]:
+        self._ensure_stale_state()
+        return self._stale_state.retry_count
+
+    @_stale_retry_count.setter
+    def _stale_retry_count(self, value: dict[str, int]) -> None:
+        self._ensure_stale_state()
+        self._stale_state.retry_count = value
+
+    @property
+    def _stale_last_resubscribe_at(self) -> dict[str, datetime]:
+        self._ensure_stale_state()
+        return self._stale_state.last_resubscribe_at
+
+    @_stale_last_resubscribe_at.setter
+    def _stale_last_resubscribe_at(self, value: dict[str, datetime]) -> None:
+        self._ensure_stale_state()
+        self._stale_state.last_resubscribe_at = value
+
+    @property
+    def _stale_force_retry_history(self) -> dict[str, list[datetime]]:
+        self._ensure_stale_state()
+        return self._stale_state.force_retry_history
+
+    @_stale_force_retry_history.setter
+    def _stale_force_retry_history(self, value: dict[str, list[datetime]]) -> None:
+        self._ensure_stale_state()
+        self._stale_state.force_retry_history = value
+
+    @property
+    def _silent_inactive_first_seen(self) -> dict[str, datetime]:
+        self._ensure_stale_state()
+        return self._stale_state.silent_inactive_first_seen
+
+    @_silent_inactive_first_seen.setter
+    def _silent_inactive_first_seen(self, value: dict[str, datetime]) -> None:
+        self._ensure_stale_state()
+        self._stale_state.silent_inactive_first_seen = value
+
+    @property
+    def _silent_inactive_recovery_count(self) -> dict[str, list[float]]:
+        self._ensure_stale_state()
+        return self._stale_state.silent_inactive_recovery_count
+
+    @_silent_inactive_recovery_count.setter
+    def _silent_inactive_recovery_count(self, value: dict[str, list[float]]) -> None:
+        self._ensure_stale_state()
+        self._stale_state.silent_inactive_recovery_count = value
+
+    @property
+    def _universe_excluded_today(self) -> set[str]:
+        self._ensure_stale_state()
+        return self._stale_state.universe_excluded_today
+
+    @_universe_excluded_today.setter
+    def _universe_excluded_today(self, value: set[str]) -> None:
+        self._ensure_stale_state()
+        self._stale_state.universe_excluded_today = value
+
+    @property
+    def _last_ccnl_cache(self) -> dict[str, dict]:
+        self._ensure_stale_state()
+        return self._stale_state.last_ccnl_cache
+
+    @_last_ccnl_cache.setter
+    def _last_ccnl_cache(self, value: dict[str, dict]) -> None:
+        self._ensure_stale_state()
+        self._stale_state.last_ccnl_cache = value
 
     async def start(self) -> None:
         """매매 프로세스를 시작한다 — KRX/NXT 통합 운영(08:00~20:00).
@@ -3983,16 +4048,15 @@ class TradingScheduler:
         # P1(B) 익일 청산 보류 set 도 매일 초기화
         self._pending_next_day_clear.clear()
 
-        # K (2026-05-12) — stale_watcher 종목별 연속 stale 카운터 매일 초기화
-        self._stale_retry_count.clear()
-        # 사이클 28 (2026-05-21) — 강제 재구독 시각 추적도 매일 초기화 (G5 cleanup 동행)
-        self._stale_last_resubscribe_at.clear()
-        # 사이클 29 (2026-05-21) — 영구 stale 시간당 cap 추적도 매일 초기화 (G5 cleanup 동행)
-        self._stale_force_retry_history.clear()
-
-        # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 추적 일일 초기화
-        self._silent_inactive_first_seen.clear()
-        self._silent_inactive_recovery_count.clear()
+        # 사이클 48 (2026-05-22, refactor-review 카드 #2) — Stale 추적 7 필드 통합 reset.
+        # 사이클 17/24/28/29-R1/32/37/45 누적 7 dict/set 일괄 clear:
+        #   - retry_count (사이클 17 이전, K) — stale_watcher 종목별 연속 stale 카운터
+        #   - last_resubscribe_at (사이클 28) — 강제 재구독 시각 추적 (G5 cleanup 동행)
+        #   - force_retry_history (사이클 29-R1) — 영구 stale 시간당 cap 60분 sliding window
+        #   - silent_inactive_first_seen + recovery_count (사이클 24) — 세션 reconnect cap
+        #   - universe_excluded_today (사이클 32 R4) — 영구 블랙리스트 금지 (다음 영업일 재진입)
+        #   - last_ccnl_cache (사이클 37) — KIS 체결시각 캐시 (사이클 45 TTL evict 와 이중 안전망)
+        self._stale_state.reset_daily()
 
         # 사이클 31 (R6, 2026-05-21) — risk.py 사전 가드 침묵 가시화 emit cap 일일 초기화.
         # `(ticker, strategy_id)` 페어 1회/일 INFO emit cap. 익일 첫 호출 시 재 emit 가능.
@@ -4001,12 +4065,6 @@ class TradingScheduler:
         except AttributeError:
             # 회귀 가드 — 사전 init 누락 인스턴스 (테스트 __new__ 등) 보호
             pass
-
-        # 사이클 32 (R4, 2026-05-21) — universe stale 가드 제외 set 매일 초기화
-        # 영구 블랙리스트 절대 금지 — 다음 영업일 재진입 허용.
-        self._universe_excluded_today.clear()
-        # 사이클 37 (2026-05-21) — KIS 체결시각 캐시 매일 초기화
-        self._last_ccnl_cache.clear()
         # 사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot 일일 1회 가드 reset
         self._auto_funnel_snapshot_done_today = False
 

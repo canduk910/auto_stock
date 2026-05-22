@@ -258,13 +258,17 @@ async def test_next_day_clear_ticker_never_excluded(monkeypatch):
 # U-7: `_universe_excluded_today` 신규 필드 초기화 (__init__)
 # ===========================================================================
 def test_universe_excluded_today_field_initialized_in_init():
-    """`TradingScheduler.__init__` 가 `_universe_excluded_today: set` 초기화."""
+    """`TradingScheduler.__init__` 가 `_universe_excluded_today: set` 초기화.
+
+    사이클 48 (2026-05-22) 의미 갱신: `_stale_state` 통합 (universe_excluded_today 포함).
+    """
     import inspect
     from src.engine.scheduler import TradingScheduler
 
     src = inspect.getsource(TradingScheduler.__init__)
-    assert "_universe_excluded_today" in src, (
-        "TradingScheduler.__init__ 에 _universe_excluded_today 초기화 누락"
+    # 사이클 48: 통합 _stale_state 또는 기존 직접 필드
+    assert "_stale_state" in src or "_universe_excluded_today" in src, (
+        "TradingScheduler.__init__ 에 _universe_excluded_today (또는 통합 _stale_state) 초기화 누락"
     )
 
 
@@ -272,13 +276,21 @@ def test_universe_excluded_today_field_initialized_in_init():
 # U-8: `_reset_daily_state` 동행 clear (영구 블랙리스트 금지)
 # ===========================================================================
 def test_reset_daily_state_clears_universe_excluded():
-    """`_reset_daily_state` 가 `_universe_excluded_today` 도 clear."""
+    """`_reset_daily_state` 가 `_universe_excluded_today` 도 clear.
+
+    사이클 48 의미 갱신: `_stale_state.reset_daily()` 위임 (7 필드 일괄 clear).
+    """
     import inspect
     from src.engine.scheduler import TradingScheduler
 
     src = inspect.getsource(TradingScheduler._reset_daily_state)
-    assert "_universe_excluded_today" in src and ".clear()" in src, (
-        f"_reset_daily_state 가 _universe_excluded_today 미 clear (영구 블랙리스트 금지 위반)"
+    # 사이클 48: 통합 reset 위임 또는 기존 .clear() 패턴
+    assert (
+        "_stale_state.reset_daily()" in src
+        or ("_universe_excluded_today" in src and ".clear()" in src)
+    ), (
+        f"_reset_daily_state 가 _universe_excluded_today (또는 통합 _stale_state.reset_daily()) 미 clear "
+        f"(영구 블랙리스트 금지 위반)"
     )
 
 

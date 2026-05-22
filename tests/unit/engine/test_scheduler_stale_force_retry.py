@@ -136,18 +136,26 @@ def test_stale_force_retry_history_field_initialized_in_constructor():
     # (전체 __init__ 호출은 통합 테스트가 담당)
     import inspect
     src = inspect.getsource(TradingScheduler.__init__)
-    assert "_stale_force_retry_history" in src, (
-        "TradingScheduler.__init__ 에 _stale_force_retry_history 초기화 누락"
+    # 사이클 48 (2026-05-22) 의미 갱신: `_stale_state` 통합 (force_retry_history 포함)
+    assert "_stale_state" in src or "_stale_force_retry_history" in src, (
+        "TradingScheduler.__init__ 에 _stale_force_retry_history (또는 통합 _stale_state) 초기화 누락"
     )
 
 
 def test_reset_daily_state_clears_stale_force_retry_history():
-    """``_reset_daily_state`` 가 ``_stale_force_retry_history`` 도 clear."""
+    """``_reset_daily_state`` 가 ``_stale_force_retry_history`` 도 clear.
+
+    사이클 48 의미 갱신: `_stale_state.reset_daily()` 위임 (7 필드 일괄 clear).
+    """
     from src.engine.scheduler import TradingScheduler
 
     src = __import__("inspect").getsource(TradingScheduler._reset_daily_state)
-    assert "_stale_force_retry_history" in src and ".clear()" in src, (
-        "_reset_daily_state 에 _stale_force_retry_history.clear() 누락"
+    # 사이클 48: 통합 reset 위임 또는 기존 .clear() 패턴 호환
+    assert (
+        "_stale_state.reset_daily()" in src
+        or ("_stale_force_retry_history" in src and ".clear()" in src)
+    ), (
+        "_reset_daily_state 에 _stale_force_retry_history.clear() (또는 통합 _stale_state.reset_daily()) 누락"
     )
 
 

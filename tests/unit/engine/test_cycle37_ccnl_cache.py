@@ -66,23 +66,35 @@ def _make_sched(*, held_tickers: list[str] | None = None):
 # C-1: _last_ccnl_cache 필드 초기화 + _reset_daily_state 동행 clear
 # ===========================================================================
 def test_last_ccnl_cache_field_initialized_in_init():
-    """`TradingScheduler.__init__` 에 `_last_ccnl_cache: dict[str, dict]` 초기화."""
+    """`TradingScheduler.__init__` 에 `_last_ccnl_cache: dict[str, dict]` 초기화.
+
+    사이클 48 (2026-05-22) 의미 갱신: `_stale_state` 통합 (`StaleTrackerState.last_ccnl_cache`)
+    + 호환 layer property — 동일 인터페이스 보존.
+    """
     import inspect
     from src.engine.scheduler import TradingScheduler
 
     src = inspect.getsource(TradingScheduler.__init__)
-    assert "_last_ccnl_cache" in src, (
-        "TradingScheduler.__init__ 에 _last_ccnl_cache 필드 누락"
+    # 사이클 48: `_stale_state` 가 7 필드 통합 (last_ccnl_cache 포함)
+    assert "_stale_state" in src or "_last_ccnl_cache" in src, (
+        "TradingScheduler.__init__ 에 _last_ccnl_cache (또는 통합 _stale_state) 필드 누락"
     )
 
 
 def test_reset_daily_state_clears_ccnl_cache():
-    """`_reset_daily_state` 가 `_last_ccnl_cache.clear()` 호출."""
+    """`_reset_daily_state` 가 `_last_ccnl_cache.clear()` 호출.
+
+    사이클 48 의미 갱신: `_stale_state.reset_daily()` 위임 (7 필드 일괄 clear).
+    """
     import inspect
     from src.engine.scheduler import TradingScheduler
 
     src = inspect.getsource(TradingScheduler._reset_daily_state)
-    assert "_last_ccnl_cache" in src and ".clear()" in src, (
+    # 사이클 48: 통합 reset 위임 또는 기존 .clear() 패턴 호환
+    assert (
+        "_stale_state.reset_daily()" in src
+        or ("_last_ccnl_cache" in src and ".clear()" in src)
+    ), (
         "_reset_daily_state 에 _last_ccnl_cache.clear() 누락"
     )
 
