@@ -3500,7 +3500,7 @@ class TradingScheduler:
                 logger.exception("[funnel_snapshot] %s _funnel_steps 접근 실패", sid)
                 continue
 
-            # 단계별 row INSERT
+            # 단계별 row INSERT — 사이클 41 step_conditions 전달
             for step in funnel_steps:
                 try:
                     row = await insert_snapshot(
@@ -3512,6 +3512,7 @@ class TradingScheduler:
                         excluded_sample=list(step.get("excluded", []) or []),
                         survived_count=int(step.get("survived_count", 0)),
                         excluded_count=int(step.get("excluded_count", 0)),
+                        step_conditions=step.get("step_conditions"),  # 사이클 41
                     )
                     if row:
                         saved_count += 1

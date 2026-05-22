@@ -40,10 +40,11 @@ async def insert_snapshot(
     strategy_id: str,
     step_no: int,
     step_name: str,
-    survived_tickers: list[str] | None = None,
+    survived_tickers: list | None = None,  # list[str | dict] 모두 허용 (사이클 41)
     excluded_sample: list[dict[str, Any]] | None = None,
     survived_count: int | None = None,
     excluded_count: int = 0,
+    step_conditions: str | None = None,  # 사이클 41 — 단계 조건 (UI 툴팁)
 ) -> dict | None:
     """1단계 snapshot INSERT.
 
@@ -52,10 +53,17 @@ async def insert_snapshot(
         strategy_id: 전략 ID (donchian_swing / bull_flag_breakout / vcp_breakout / momentum / ...).
         step_no: 단계 번호 (1, 2, 3, ...).
         step_name: 단계 이름 (UI 명세와 정확히 일치).
-        survived_tickers: 단계 통과 종목 리스트. cap 200 자동 적용.
-        excluded_sample: 탈락 종목 sample [{"ticker": str, "reason": str}, ...]. cap 20 자동 적용.
+        survived_tickers: 단계 통과 종목 리스트.
+            - 사이클 34: list[str] (`["005930", ...]`).
+            - 사이클 41 (2026-05-22): list[dict] (`[{"ticker": "...", "name": "..."}]`) 도 허용.
+            JSONB cap 200 자동 적용. 하위 호환 — DB 응답 시 호출자가 형식 분기 처리.
+        excluded_sample: 탈락 종목 sample.
+            - 사이클 34: `[{"ticker": str, "reason": str}, ...]`.
+            - 사이클 41: `[{"ticker": str, "name": str, "reason": str}, ...]` 권장 (종목명 추가).
+            cap 20 자동 적용.
         survived_count: 통과 카운트 (None 이면 len(survived_tickers) 사용).
         excluded_count: 탈락 카운트.
+        step_conditions: 단계 필터 조건 (UI 툴팁용, 사이클 41). DB 저장 안 함 (API 응답만).
 
     Returns:
         삽입된 row dict (id 포함) 또는 None (실패 시).

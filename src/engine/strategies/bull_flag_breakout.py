@@ -138,13 +138,19 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # `_scan_universe` 내부에서 ranked → filtered 분리. `_scan_stats` 가 이미 양쪽 카운트.
         # 단계별 ticker 정확 캡처는 `_scan_universe` 가 후보 리스트와 통과 리스트 둘 다 반환해야
         # 가능. 현재는 통과 리스트만 반환 → 1단계는 통과 카운트 (raw ranked 는 미보유).
+        # 사이클 41 (2026-05-22) — step_conditions 추가 (UI 툴팁)
         self._record_funnel_step(
             step_no=1, step_name="유니버스 후보",
-            survived=tickers,  # 후보 (사이클 33 acml_vol fix 후 통과 종목)
+            survived=tickers,
+            step_conditions="KRX 등락률 순위 상위 + ETF/ETN 키워드 제외",
         )
         self._record_funnel_step(
             step_no=2, step_name="유니버스 필터 통과 (시총·거래대금)",
-            survived=tickers,  # 동일 — 통과 종목 = 필터 통과 종목
+            survived=tickers,
+            step_conditions=(
+                f"시총 ≥ {params['min_market_cap']/100_000_000:.0f}억 "
+                f"+ 거래대금 ≥ {params['min_trade_amount']/100_000_000:.0f}억"
+            ),
         )
 
         if not tickers:
@@ -165,18 +171,35 @@ class BullFlagBreakoutStrategy(StrategyBase):
         fetched = await asyncio.gather(*[_fetch_one(t) for t in tickers])
 
         # 사이클 39 — 단계별 ticker 캡처 (회귀 가드 — 결과 무변경)
+        # 사이클 41 (2026-05-22) — 탈락 사유 (수치 포함) 캡처 추가
         candle_fetch_ok_tickers: list[str] = []
         pole_pass_tickers: list[str] = []
         atr_pass_tickers: list[str] = []
         final_prepared_tickers: list[str] = []
+        # 사이클 41 — 단계별 탈락 sample (수치 포함)
+        candle_fetch_excluded: list[dict] = []
+        pole_excluded: list[dict] = []
+        atr_excluded: list[dict] = []
 
         for ticker, candles in fetched:
+            from src.engine.strategy_base import _resolve_ticker_name
+            ticker_name = _resolve_ticker_name(ticker)
             if candles is None or not candles:
+                # 사이클 41 — 일봉 fetch 실패 사유 캡처
+                candle_fetch_excluded.append({
+                    "ticker": ticker, "name": ticker_name,
+                    "reason": "KIS 일봉 응답 빈/None",
+                })
                 continue
             try:
                 # 부분봉 가드 — candles[0] 이 오늘이면 [1] 부터 사용
                 prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
-                if len(candles) <= prev_idx + pole_max + flag_max + 2:
+                required_len = prev_idx + pole_max + flag_max + 2
+                if len(candles) <= required_len:
+                    candle_fetch_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": f"일봉 길이 {len(candles)} < 필요 {required_len+1}",
+                    })
                     continue
                 if prev_idx:
                     candles = candles[prev_idx:]
@@ -185,6 +208,23 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
                 result = self._detect_pole_and_flag(candles)
                 if not result:
+                    # 사이클 41 — 폴 검출 실패 사유 (수치 포함)
+                    closes = [int(c.get("stck_clpr", "0")) for c in candles]
+                    # 5~10일 누적 등락률 best 계산 (참고 수치)
+                    best_return = 0.0
+                    for n in range(3, min(11, len(closes))):
+                        if closes[n] > 0:
+                            ret = (max(closes[:n]) - closes[n-1]) / closes[n-1] * 100
+                            best_return = max(best_return, ret)
+                    pole_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"폴 검출 실패 (3~10일 best_return ≈ {best_return:.1f}% < "
+                            f"임계 {params['pole_min_return']:.0f}% 또는 "
+                            f"음봉 비율 > {params['pole_max_red_ratio']*100:.0f}% 또는 "
+                            f"플래그 조정 폭 미달)"
+                        ),
+                    })
                     continue
                 stats["pole_pass"] += 1
                 stats["flag_pass"] += 1
@@ -201,6 +241,10 @@ class BullFlagBreakoutStrategy(StrategyBase):
                     atr_period,
                 )
                 if atr <= 0:
+                    atr_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": "ATR 계산 실패 (값 ≤ 0)",
+                    })
                     continue
                 stats["atr_pass"] += 1
                 atr_pass_tickers.append(ticker)  # 사이클 39
@@ -221,19 +265,40 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 logger.warning("눌림목 prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 39 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
-        self._record_funnel_step(step_no=3, step_name="일봉 fetch 성공",
-                                  survived=candle_fetch_ok_tickers)
-        self._record_funnel_step(step_no=4, step_name="폴(Pole) 자동 검출",
-                                  survived=pole_pass_tickers)
-        self._record_funnel_step(step_no=5, step_name="플래그(Flag) 자동 검출",
-                                  survived=pole_pass_tickers)  # 폴/플래그 한 분기
-        self._record_funnel_step(step_no=6, step_name="거래량 수축",
-                                  survived=pole_pass_tickers)  # 폴/플래그 통과 시 자동
-        self._record_funnel_step(step_no=7, step_name="ATR(14) > 0",
-                                  survived=atr_pass_tickers)
-        self._record_funnel_step(step_no=8, step_name="최종 prepared",
-                                  survived=final_prepared_tickers)
+        # 사이클 39+41 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
+        self._record_funnel_step(
+            step_no=3, step_name="일봉 fetch 성공",
+            survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
+            step_conditions=f"KIS 일봉 ≥ {pole_max + flag_max + 3}일",
+        )
+        self._record_funnel_step(
+            step_no=4, step_name="폴(Pole) 자동 검출",
+            survived=pole_pass_tickers, excluded=pole_excluded,
+            step_conditions=(
+                f"3~10영업일 누적 +{params['pole_min_return']:.0f}%↑ + "
+                f"음봉 비율 ≤ {params['pole_max_red_ratio']*100:.0f}%"
+            ),
+        )
+        self._record_funnel_step(
+            step_no=5, step_name="플래그(Flag) 자동 검출",
+            survived=pole_pass_tickers,
+            step_conditions=f"3~10영업일 조정 폭 ≤ 폴 폭 × {params['flag_retracement_max']*100:.1f}%",
+        )
+        self._record_funnel_step(
+            step_no=6, step_name="거래량 수축",
+            survived=pole_pass_tickers,
+            step_conditions=f"플래그 평균 거래량 < 폴 평균 × {params['flag_volume_ratio']*100:.0f}%",
+        )
+        self._record_funnel_step(
+            step_no=7, step_name="ATR(14) > 0",
+            survived=atr_pass_tickers, excluded=atr_excluded,
+            step_conditions="ATR(14) > 0 (변동성 측정 가능)",
+        )
+        self._record_funnel_step(
+            step_no=8, step_name="최종 prepared",
+            survived=final_prepared_tickers,
+            step_conditions="모든 단계 통과 — 매수 후보 등록",
+        )
 
         self._scanned_tickers = list(self._candidates.keys())
         self._bought_today.clear()

@@ -212,8 +212,11 @@ async def test_vcp_prepare_handles_kis_100_day_limit(monkeypatch):
         "base_min_days": 25,
         "base_max_days": 75,
         "base_max_depth": 0.25,
+        "base_depth_pct": 0.30,  # 사이클 41 — VCP DEFAULT_PARAMS 정합
         "pullback_min": 2,
         "pullback_max": 4,
+        "pullback_count_min": 2,  # 사이클 41 — VCP DEFAULT_PARAMS 정합
+        "pullback_count_max": 4,
         "last_pullback_max": 0.08,
         "volume_contraction_ratio": 0.70,
         "breakout_volume_mult": 1.5,

@@ -107,13 +107,17 @@ class DonchianSwingStrategy(StrategyBase):
 
         tickers = await self._scan_universe()
         # 사이클 39 — 1단계: 코스피200+코스닥150 + 2단계: 시총 통과
+        # 사이클 41 (2026-05-22) — step_conditions 추가
+        min_mcap_billion = params["min_market_cap"] / 100_000_000
         self._record_funnel_step(
             step_no=1, step_name="코스피200+코스닥150 합집합",
             survived=tickers,
+            step_conditions="코스피200 + 코스닥150 고정 유니버스",
         )
         self._record_funnel_step(
             step_no=2, step_name="시총 컷 통과",
-            survived=tickers,  # _scan_universe 가 시총 통과 종목만 반환
+            survived=tickers,
+            step_conditions=f"시총 ≥ {min_mcap_billion:.0f}억",
         )
 
         if not tickers:
@@ -140,15 +144,29 @@ class DonchianSwingStrategy(StrategyBase):
         fetched = await asyncio.gather(*[_fetch_one(t) for t in tickers])
 
         # 사이클 39 — 단계별 ticker 캡처 (회귀 가드 — 결과 무변경)
+        # 사이클 41 (2026-05-22) — 탈락 사유 캡처 (H-4 시장 자연 vs 코드 결함 진단)
         candle_fetch_ok_tickers: list[str] = []
         donchian_pass_tickers: list[str] = []
         ema_uptrend_pass_tickers: list[str] = []
         volume_pass_tickers: list[str] = []
         atr_pass_tickers: list[str] = []
         final_prepared_tickers: list[str] = []
+        # 사이클 41 — 탈락 사유
+        candle_fetch_excluded: list[dict] = []
+        donchian_excluded: list[dict] = []
+        ema_excluded: list[dict] = []
+        volume_excluded: list[dict] = []
+        atr_excluded: list[dict] = []
+
+        from src.engine.strategy_base import _resolve_ticker_name
 
         for ticker, candles in fetched:
+            ticker_name = _resolve_ticker_name(ticker)
             if candles is None:
+                candle_fetch_excluded.append({
+                    "ticker": ticker, "name": ticker_name,
+                    "reason": "KIS 일봉 응답 None",
+                })
                 continue
             try:
                 # candles 변수는 fetch 결과를 그대로 사용 (await 제거)
@@ -194,6 +212,14 @@ class DonchianSwingStrategy(StrategyBase):
                 # 1) 20일 신고가 돌파 검증 — 어제 종가가 그 이전 20일 최고가 초과
                 prior_high = max(highs[1: donchian_period + 1])
                 if prev_close <= prior_high:
+                    # 사이클 41 — 신고가 미달 사유 (수치 포함, H-4 진단)
+                    donchian_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"전일 종가 {prev_close:,} ≤ "
+                            f"직전 {donchian_period}일 신고가 {prior_high:,}"
+                        ),
+                    })
                     continue
                 stats["donchian_pass"] += 1
                 donchian_pass_tickers.append(ticker)  # 사이클 39
@@ -202,8 +228,22 @@ class DonchianSwingStrategy(StrategyBase):
                 ema_today = self._ema(list(reversed(closes[:long_ma_period])), long_ma_period)
                 ema_yesterday = self._ema(list(reversed(closes[1: long_ma_period + 1])), long_ma_period)
                 if ema_today <= ema_yesterday:
+                    ema_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"{long_ma_period}일 EMA 우상향 미충족 "
+                            f"(오늘 {int(ema_today):,} ≤ 어제 {int(ema_yesterday):,})"
+                        ),
+                    })
                     continue
                 if prev_close <= ema_today:
+                    ema_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"전일 종가 {prev_close:,} ≤ {long_ma_period}일 EMA "
+                            f"{int(ema_today):,}"
+                        ),
+                    })
                     continue
                 stats["ema_uptrend_pass"] += 1
                 ema_uptrend_pass_tickers.append(ticker)  # 사이클 39
@@ -212,6 +252,19 @@ class DonchianSwingStrategy(StrategyBase):
                 today_turnover = closes[0] * vols[0]
                 avg_turnover = sum(closes[i] * vols[i] for i in range(1, volume_period + 1)) / volume_period
                 if avg_turnover <= 0 or today_turnover < avg_turnover * volume_mult:
+                    if avg_turnover > 0:
+                        ratio = today_turnover / avg_turnover
+                        volume_excluded.append({
+                            "ticker": ticker, "name": ticker_name,
+                            "reason": (
+                                f"거래대금 비율 {ratio:.2f}× < 임계 {volume_mult:.1f}×"
+                            ),
+                        })
+                    else:
+                        volume_excluded.append({
+                            "ticker": ticker, "name": ticker_name,
+                            "reason": f"{volume_period}일 평균 거래대금 = 0",
+                        })
                     continue
                 stats["volume_pass"] += 1
                 volume_pass_tickers.append(ticker)  # 사이클 39
@@ -219,6 +272,10 @@ class DonchianSwingStrategy(StrategyBase):
                 # 4) ATR(14) — Wilder 단순화: 평균 True Range
                 atr = self._atr(highs, lows, closes, atr_period)
                 if atr <= 0:
+                    atr_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": "ATR 계산 실패 (값 ≤ 0)",
+                    })
                     continue
                 stats["atr_pass"] += 1
                 atr_pass_tickers.append(ticker)  # 사이클 39
@@ -257,19 +314,37 @@ class DonchianSwingStrategy(StrategyBase):
                 logger.warning("도치안 스윙 prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 39 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
-        self._record_funnel_step(step_no=3, step_name="일봉 fetch + 전일종가>0",
-                                  survived=candle_fetch_ok_tickers)
-        self._record_funnel_step(step_no=4, step_name="20일 신고가 돌파",
-                                  survived=donchian_pass_tickers)
-        self._record_funnel_step(step_no=5, step_name="60일 EMA 우상향 + 종가>EMA",
-                                  survived=ema_uptrend_pass_tickers)
-        self._record_funnel_step(step_no=6, step_name="거래대금 ≥ 20일평균×1.5",
-                                  survived=volume_pass_tickers)
-        self._record_funnel_step(step_no=7, step_name="ATR(14) > 0",
-                                  survived=atr_pass_tickers)
-        self._record_funnel_step(step_no=8, step_name="최종 후보",
-                                  survived=final_prepared_tickers)
+        # 사이클 39+41 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
+        self._record_funnel_step(
+            step_no=3, step_name="일봉 fetch + 전일종가>0",
+            survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
+            step_conditions=f"KIS 일봉 ≥ {long_ma_period + 1}일 + 전일 종가 > 0",
+        )
+        self._record_funnel_step(
+            step_no=4, step_name=f"{donchian_period}일 신고가 돌파",
+            survived=donchian_pass_tickers, excluded=donchian_excluded,
+            step_conditions=f"전일 종가 > 직전 {donchian_period}일 최고가",
+        )
+        self._record_funnel_step(
+            step_no=5, step_name=f"{long_ma_period}일 EMA 우상향 + 종가>EMA",
+            survived=ema_uptrend_pass_tickers, excluded=ema_excluded,
+            step_conditions=f"오늘 EMA > 어제 EMA + 전일 종가 > EMA",
+        )
+        self._record_funnel_step(
+            step_no=6, step_name=f"거래대금 ≥ {volume_period}일평균×{volume_mult:.1f}",
+            survived=volume_pass_tickers, excluded=volume_excluded,
+            step_conditions=f"당일 거래대금 ≥ {volume_period}일 평균 × {volume_mult:.1f}",
+        )
+        self._record_funnel_step(
+            step_no=7, step_name="ATR(14) > 0",
+            survived=atr_pass_tickers, excluded=atr_excluded,
+            step_conditions="ATR(14) > 0 (변동성 측정 가능)",
+        )
+        self._record_funnel_step(
+            step_no=8, step_name="최종 후보",
+            survived=final_prepared_tickers,
+            step_conditions="모든 단계 통과 — 멀티데이 보유 매수 후보",
+        )
 
         self._scanned_tickers = list(self._candidates.keys())
         self._bought_today.clear()

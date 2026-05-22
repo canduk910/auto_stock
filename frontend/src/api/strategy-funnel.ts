@@ -6,9 +6,21 @@
 import apiClient from './client'
 import type { ApiResponse } from '../types/common'
 
+/**
+ * 사이클 41 (2026-05-22) — 종목명 + 탈락 사유 정밀 추적 확장.
+ * 사이클 34 string 배열은 하위 호환 (`SurvivedItem = string | dict`).
+ */
+export interface SurvivedTickerRow {
+  ticker: string
+  name?: string  // 사이클 41 — 종목명 자동 lookup
+}
+
+export type SurvivedItem = string | SurvivedTickerRow
+
 export interface ExcludedSampleRow {
   ticker: string
-  reason: string
+  name?: string  // 사이클 41 — 종목명 자동 lookup
+  reason: string  // 사이클 41 — 수치 포함 사유
 }
 
 export interface FunnelSnapshot {
@@ -18,9 +30,10 @@ export interface FunnelSnapshot {
   strategy_id: string
   step_no: number
   step_name: string
+  step_conditions?: string | null  // 사이클 41 — UI 툴팁용 단계 조건
   survived_count: number
   excluded_count: number
-  survived_tickers: string[] | null
+  survived_tickers: SurvivedItem[] | null
   excluded_sample: ExcludedSampleRow[] | null
 }
 

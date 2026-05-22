@@ -189,7 +189,19 @@ export default function StrategyFunnel() {
                       <td className="py-2 px-3 font-mono text-gray-500">
                         {row.step_no}
                       </td>
-                      <td className="py-2 px-3 text-gray-800">{row.step_name}</td>
+                      <td className="py-2 px-3 text-gray-800">
+                        {row.step_name}
+                        {/* 사이클 41 — step_conditions 툴팁 (UI 표시 + title hover) */}
+                        {row.step_conditions && (
+                          <span
+                            data-testid={`funnel-step-conditions-${sid}-${row.step_no}`}
+                            title={row.step_conditions}
+                            className="ml-2 inline-block text-[10px] text-blue-600 cursor-help underline decoration-dotted"
+                          >
+                            조건
+                          </span>
+                        )}
+                      </td>
                       <td className="py-2 px-3 text-right font-mono text-emerald-700">
                         {row.survived_count}
                       </td>
@@ -215,27 +227,38 @@ export default function StrategyFunnel() {
                       <tr key={`${row.id}-expand`}>
                         <td colSpan={5} className="py-2 px-3 bg-gray-50">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {/* 통과 종목 */}
+                            {/* 통과 종목 — 사이클 41: dict 형식 (ticker + name) 또는 string 호환 */}
                             <div>
                               <div className="text-xs font-medium text-gray-600 mb-1">
                                 통과 ({(row.survived_tickers ?? []).length}건)
                               </div>
-                              <div className="text-[11px] text-gray-700 font-mono max-h-32 overflow-y-auto bg-white border border-gray-100 rounded p-1">
+                              <div className="text-[11px] text-gray-700 max-h-32 overflow-y-auto bg-white border border-gray-100 rounded p-1">
                                 {(row.survived_tickers ?? []).length === 0 ? (
                                   <span className="text-gray-400">—</span>
                                 ) : (
-                                  (row.survived_tickers ?? []).map((t) => (
-                                    <span
-                                      key={t}
-                                      className="inline-block mr-2 mb-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200"
-                                    >
-                                      {t}
-                                    </span>
-                                  ))
+                                  (row.survived_tickers ?? []).map((item, idx) => {
+                                    // 사이클 41 — dict | string 둘 다 호환
+                                    const ticker = typeof item === 'string' ? item : item.ticker
+                                    const name = typeof item === 'string' ? '' : (item.name ?? '')
+                                    return (
+                                      <span
+                                        key={`${ticker}-${idx}`}
+                                        data-testid={`funnel-survived-${sid}-${row.step_no}-${ticker}`}
+                                        className="inline-block mr-2 mb-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200"
+                                      >
+                                        <span className="font-mono">{ticker}</span>
+                                        {name && (
+                                          <span className="ml-1 text-emerald-700">
+                                            {name}
+                                          </span>
+                                        )}
+                                      </span>
+                                    )
+                                  })
                                 )}
                               </div>
                             </div>
-                            {/* 탈락 sample */}
+                            {/* 탈락 sample — 사이클 41: 종목명 + 수치 포함 사유 */}
                             <div>
                               <div className="text-xs font-medium text-gray-600 mb-1">
                                 탈락 sample ({(row.excluded_sample ?? []).length}건)
@@ -244,13 +267,21 @@ export default function StrategyFunnel() {
                                 {(row.excluded_sample ?? []).length === 0 ? (
                                   <span className="text-gray-400">—</span>
                                 ) : (
-                                  (row.excluded_sample ?? []).map((ex) => (
+                                  (row.excluded_sample ?? []).map((ex, idx) => (
                                     <div
-                                      key={ex.ticker}
-                                      className="flex justify-between border-b border-gray-50 last:border-0 py-0.5"
+                                      key={`${ex.ticker}-${idx}`}
+                                      data-testid={`funnel-excluded-${sid}-${row.step_no}-${ex.ticker}`}
+                                      className="flex justify-between border-b border-gray-50 last:border-0 py-0.5 gap-2"
                                     >
-                                      <span className="font-mono">{ex.ticker}</span>
-                                      <span className="text-amber-700">
+                                      <span className="flex-shrink-0">
+                                        <span className="font-mono">{ex.ticker}</span>
+                                        {ex.name && (
+                                          <span className="ml-1 text-gray-700">
+                                            {ex.name}
+                                          </span>
+                                        )}
+                                      </span>
+                                      <span className="text-amber-700 text-right">
                                         {ex.reason}
                                       </span>
                                     </div>

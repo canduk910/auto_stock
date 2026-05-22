@@ -153,6 +153,31 @@ class StrategyConfig:
     params: dict = field(default_factory=dict)
 
 
+def _resolve_ticker_name(ticker: str) -> str:
+    """사이클 41 (2026-05-22) — funnel 단계별 캡처용 종목명 lookup 헬퍼.
+
+    우선순위:
+    1. `scanner.ticker_names` (KIS 동적 매핑, 운영 중 갱신)
+    2. `scanner.STATIC_TICKER_NAMES` (정적 시드, scanner.py 모듈 자체 파싱)
+    3. "" (빈 문자열, lookup miss — 예외 전파 금지, graceful)
+
+    `StrategyBase._record_funnel_step` 가 string 입력 시 자동 호출.
+    호출자가 직접 dict 로 입력하면 본 헬퍼 우회 가능.
+    """
+    if not ticker:
+        return ""
+    try:
+        from src.engine import scanner as _scanner
+        name = _scanner.ticker_names.get(ticker) if hasattr(_scanner, "ticker_names") else None
+        if name:
+            return name
+        static = _scanner.STATIC_TICKER_NAMES if hasattr(_scanner, "STATIC_TICKER_NAMES") else {}
+        return static.get(ticker, "") or ""
+    except Exception:
+        # scanner import 실패 / 다른 예외 — 빈 문자열 폴백 (호출자 prepare 보호)
+        return ""
+
+
 class StrategyBase(ABC):
     """모든 전략의 추상 베이스 클래스.
 
@@ -182,26 +207,50 @@ class StrategyBase(ABC):
         self,
         step_no: int,
         step_name: str,
-        survived: list[str],
+        survived: list,  # list[str | dict] — 사이클 41 (2026-05-22)
         excluded: list[dict] | None = None,
+        *,
+        step_conditions: str | None = None,  # 사이클 41 — 단계 조건 명시 (UI 툴팁)
     ) -> None:
         """사이클 39 (2026-05-22) — 단계별 통과/탈락 ticker 캡처.
+
+        사이클 41 (2026-05-22) — 종목명 + 탈락 사유 정밀 추적 확장:
+        - survived: string 입력 시 `_resolve_ticker_name` 으로 자동 dict 변환
+          (`[{"ticker": "...", "name": "..."}]`). dict 입력은 그대로 보존.
+        - excluded: `[{"ticker", "name", "reason"}]` — reason 은 수치 포함 정확 사유.
+        - step_conditions: UI 툴팁용 단계 조건 명시 (예: "VCP: 2~4회 회수 + ...").
 
         Args:
             step_no: 단계 번호 (1, 2, 3, ...).
             step_name: 단계 이름 (UI/DB 명세와 일치).
-            survived: 단계 통과 ticker 리스트.
-            excluded: 단계 탈락 sample [{"ticker": str, "reason": str}, ...] (선택).
+            survived: 단계 통과 ticker 리스트 (string or dict).
+            excluded: 단계 탈락 sample [{"ticker", "name", "reason"}, ...] (선택).
+            step_conditions: 단계 필터 조건 명시 (선택, UI 툴팁용).
 
         Note:
             survived/excluded cap 자동 적용 (200/20). 원본 카운트는 보존 (cap 이전).
             본체 예외는 호출자 prepare() 가 try/except 흡수 — 회귀 가드.
         """
-        survived_list = list(survived or [])
+        survived_raw = list(survived or [])
+        # 사이클 41 — string 입력 → dict 자동 변환 (종목명 lookup)
+        survived_list: list[dict] = []
+        for item in survived_raw:
+            if isinstance(item, dict):
+                # dict 입력 — 그대로 보존 (호출자 직접 종목명/추가 필드 지정 가능)
+                survived_list.append(item)
+            else:
+                # string 입력 — 종목명 자동 lookup
+                ticker_str = str(item)
+                survived_list.append({
+                    "ticker": ticker_str,
+                    "name": _resolve_ticker_name(ticker_str),
+                })
+
         excluded_list = list(excluded or [])
         self._funnel_steps.append({
             "step_no": int(step_no),
             "step_name": str(step_name),
+            "step_conditions": step_conditions,  # 사이클 41 — None or str
             "survived": survived_list[: self._FUNNEL_SURVIVED_CAP],
             "survived_count": len(survived_list),
             "excluded": excluded_list[: self._FUNNEL_EXCLUDED_CAP],

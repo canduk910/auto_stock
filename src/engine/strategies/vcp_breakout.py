@@ -145,13 +145,16 @@ class VcpBreakoutStrategy(StrategyBase):
 
         tickers = await self._scan_universe()
         # 사이클 39 — 1단계: 코스피200+코스닥150 + 2단계: 시총 통과 (universe_filtered)
+        # 사이클 41 (2026-05-22) — step_conditions 추가
         self._record_funnel_step(
             step_no=1, step_name="코스피200+코스닥150 합집합",
             survived=tickers,
+            step_conditions="코스피200 + 코스닥150 고정 유니버스",
         )
         self._record_funnel_step(
             step_no=2, step_name="시총 ≥ 1,000억",
-            survived=tickers,  # _scan_universe 가 시총 통과 종목만 반환
+            survived=tickers,
+            step_conditions=f"시총 ≥ {p['min_market_cap']/100_000_000:.0f}억",
         )
 
         if not tickers:
@@ -178,15 +181,29 @@ class VcpBreakoutStrategy(StrategyBase):
         uptrend_days = p.get("long_ema_uptrend_days", 20)
 
         # 사이클 39 — 단계별 ticker 캡처 (회귀 가드 — 결과 무변경)
+        # 사이클 41 (2026-05-22) — 탈락 사유 캡처 (Pullback 9→0 새 결함 진단)
         candle_fetch_ok_tickers: list[str] = []
         trend_filter_pass_tickers: list[str] = []
         base_pass_tickers: list[str] = []
         pullback_pass_tickers: list[str] = []
         volume_contraction_pass_tickers: list[str] = []
         final_prepared_tickers: list[str] = []
+        # 사이클 41 — 탈락 사유
+        candle_fetch_excluded: list[dict] = []
+        trend_filter_excluded: list[dict] = []
+        base_excluded: list[dict] = []
+        pullback_excluded: list[dict] = []
+        volume_contraction_excluded: list[dict] = []
+
+        from src.engine.strategy_base import _resolve_ticker_name
 
         for ticker, candles in fetched:
+            ticker_name = _resolve_ticker_name(ticker)
             if candles is None or not candles:
+                candle_fetch_excluded.append({
+                    "ticker": ticker, "name": ticker_name,
+                    "reason": "KIS 일봉 응답 빈/None",
+                })
                 continue
             try:
                 prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
@@ -194,9 +211,19 @@ class VcpBreakoutStrategy(StrategyBase):
                 available_len = len(candles) - prev_idx
                 effective_ema_long = min(ema_long, available_len - uptrend_days - 5)
                 if effective_ema_long < 30:
-                    # 최소 30일 EMA 도 못 만들면 추세 필터 무의미 → skip
+                    candle_fetch_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": f"가용 EMA 길이 {effective_ema_long} < 30 (KIS 한도)",
+                    })
                     continue
                 if available_len < effective_ema_long + uptrend_days + 5:
+                    candle_fetch_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"일봉 길이 {available_len} < 필요 "
+                            f"{effective_ema_long + uptrend_days + 5}"
+                        ),
+                    })
                     continue
                 if prev_idx:
                     candles = candles[prev_idx:]
@@ -205,24 +232,58 @@ class VcpBreakoutStrategy(StrategyBase):
 
                 trend = self._check_trend_filter(candles, effective_ema_long=effective_ema_long)
                 if not trend:
+                    trend_filter_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"EMA 정렬 미충족 (종가 / {p['ema_short']}EMA / "
+                            f"{p['ema_mid']}EMA / {effective_ema_long}EMA 정렬 또는 "
+                            f"{uptrend_days}일 우상향)"
+                        ),
+                    })
                     continue
                 stats["trend_filter_pass"] += 1
                 trend_filter_pass_tickers.append(ticker)  # 사이클 39
 
                 base = self._detect_base(candles)
                 if not base:
+                    base_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"베이스 자동 검출 실패 "
+                            f"(길이 {p['base_min_days']}~{p['base_max_days']}일 + "
+                            f"깊이 ≤ {p['base_depth_pct']*100:.0f}%)"
+                        ),
+                    })
                     continue
                 stats["base_pass"] += 1
                 base_pass_tickers.append(ticker)  # 사이클 39
 
                 pullbacks_ok = self._check_pullback_sequence(candles, base)
                 if not pullbacks_ok:
+                    # 사이클 41 — Pullback 9→0 새 결함 진단용 정밀 사유 (사용자 5/22 보고)
+                    last_pct = base.get("last_pullback_pct", 0)
+                    pullback_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"Pullback 점진 수축 미충족 "
+                            f"(회수 {p['pullback_count_min']}~{p['pullback_count_max']}회 + "
+                            f"직전 대비 폭 감소 + 마지막 폭 ≤ {p['last_pullback_max']*100:.0f}%) "
+                            f"— 마지막 폭 ≈ {last_pct*100:.1f}%"
+                        ),
+                    })
                     continue
                 stats["pullback_pass"] += 1
                 pullback_pass_tickers.append(ticker)  # 사이클 39
 
                 vol_ok = self._check_volume_contraction(candles, base)
                 if not vol_ok:
+                    volume_contraction_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"거래량 수축 미충족 (마지막 5일 평균 < "
+                            f"베이스 직전 20일 평균 × {p['volume_contraction_ratio']*100:.0f}%)"
+                        ),
+                    })
                     continue
                 stats["volume_contraction_pass"] += 1
                 volume_contraction_pass_tickers.append(ticker)  # 사이클 39
@@ -258,19 +319,43 @@ class VcpBreakoutStrategy(StrategyBase):
                 logger.warning("VCP prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 39 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
-        self._record_funnel_step(step_no=3, step_name="일봉 fetch + 추세필터",
-                                  survived=candle_fetch_ok_tickers)
-        self._record_funnel_step(step_no=4, step_name="50/150/200 EMA 정렬",
-                                  survived=trend_filter_pass_tickers)
-        self._record_funnel_step(step_no=5, step_name="베이스 자동 검출",
-                                  survived=base_pass_tickers)
-        self._record_funnel_step(step_no=6, step_name="Pullback 점진 수축",
-                                  survived=pullback_pass_tickers)
-        self._record_funnel_step(step_no=7, step_name="거래량 수축",
-                                  survived=volume_contraction_pass_tickers)
-        self._record_funnel_step(step_no=8, step_name="최종 prepared",
-                                  survived=final_prepared_tickers)
+        # 사이클 39+41 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
+        self._record_funnel_step(
+            step_no=3, step_name="일봉 fetch + 추세필터",
+            survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
+            step_conditions=f"KIS 일봉 ≥ effective_ema_long(min {ema_long},100-25) + 우상향 {uptrend_days}일 + 5",
+        )
+        self._record_funnel_step(
+            step_no=4, step_name="50/150/200 EMA 정렬",
+            survived=trend_filter_pass_tickers, excluded=trend_filter_excluded,
+            step_conditions=(
+                f"종가 > {p['ema_short']}EMA > {p['ema_mid']}EMA > {ema_long}EMA + "
+                f"{ema_long}EMA {uptrend_days}일 우상향"
+            ),
+        )
+        self._record_funnel_step(
+            step_no=5, step_name="베이스 자동 검출",
+            survived=base_pass_tickers, excluded=base_excluded,
+            step_conditions=f"베이스 길이 {p['base_min_days']}~{p['base_max_days']}일 + 깊이 ≤ {p['base_depth_pct']*100:.0f}%",
+        )
+        self._record_funnel_step(
+            step_no=6, step_name="Pullback 점진 수축",
+            survived=pullback_pass_tickers, excluded=pullback_excluded,
+            step_conditions=(
+                f"{p['pullback_count_min']}~{p['pullback_count_max']}회 회수 + "
+                f"직전 대비 폭 감소 + 마지막 폭 ≤ {p['last_pullback_max']*100:.0f}%"
+            ),
+        )
+        self._record_funnel_step(
+            step_no=7, step_name="거래량 수축",
+            survived=volume_contraction_pass_tickers, excluded=volume_contraction_excluded,
+            step_conditions=f"마지막 5일 평균 < 베이스 직전 20일 평균 × {p['volume_contraction_ratio']*100:.0f}%",
+        )
+        self._record_funnel_step(
+            step_no=8, step_name="최종 prepared",
+            survived=final_prepared_tickers,
+            step_conditions="모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
+        )
 
         self._scanned_tickers = list(self._candidates.keys())
         self._bought_today.clear()

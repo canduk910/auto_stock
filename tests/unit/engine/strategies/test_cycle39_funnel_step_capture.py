@@ -81,7 +81,12 @@ def test_record_funnel_step_captures_survived_and_excluded():
     step = strat._funnel_steps[0]
     assert step["step_no"] == 1
     assert step["step_name"] == "유니버스 후보"
-    assert step["survived"] == ["005930", "000660"]
+    # 사이클 41 (2026-05-22) — string 입력 자동 dict 변환 (종목명 lookup)
+    survived = step["survived"]
+    assert len(survived) == 2
+    assert survived[0]["ticker"] == "005930"
+    assert survived[1]["ticker"] == "000660"
+    assert "name" in survived[0]  # 종목명 자동 lookup (운영 환경 기준 "" 가능)
     assert step["survived_count"] == 2
     assert step["excluded"] == [{"ticker": "EXCLUDE1", "reason": "test"}]
 
@@ -214,6 +219,9 @@ async def test_vcp_prepare_records_funnel_steps(monkeypatch):
     async def _fake_fetch(ticker, days):
         return _make_candles(days=min(days, 100))
 
+    # VCP prepare() 도 함수 본문에서 from src.api.condition import fetch_daily_candles 호출
+    from src.api import condition as cond_mod
+    monkeypatch.setattr(cond_mod, "fetch_daily_candles", _fake_fetch, raising=False)
     monkeypatch.setattr(vcp_mod, "fetch_daily_candles", _fake_fetch, raising=False)
 
     fake_config = MagicMock()
