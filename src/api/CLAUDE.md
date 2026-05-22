@@ -31,7 +31,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - `reset_quote_request_metrics() -> None` — 메인 reset 과 분리
 
 **Path 가드** (`QuotePoolPathError` raise — `ValueError` 서브클래스):
-- 화이트리스트 5 path 만 허용: `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday`
+- 화이트리스트 6 path 만 허용 (사이클 32 추가): `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl`
 - 매매/잔고/체결조회 path (`/trading/order-cash` / `/trading/order-rvsecncl` / `/trading/inquire-balance` / `/trading/inquire-psbl-order` / `/trading/inquire-daily-ccld`) 진입 시 즉시 raise — 자금 안전 정책 위반 사전 차단
 
 **라운드로빈**:
@@ -85,6 +85,14 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - `is_insufficient_cash(KisApiError) -> bool`: 예수금 부족 매수 실패. msg_cd 화이트리스트 (APBK0919/EGW00120) + msg1 키워드 ("부족" + "주문가능금액/예수금/현금") 동시 검사. `APBK0918` 은 현금 키워드 동반 시만 True. OrderEngine 매수 락 결정용
 - `is_insufficient_quantity(KisApiError) -> bool`: 보유 부족 매도 실패. msg1 키워드 ("부족" + "매도가능/보유수량/잔고") + `APBK0918` 은 보유 키워드 동반 시만 True. 매도 즉시 break 결정용
 - `is_market_order_disallowed(KisApiError) -> bool`: 시장가 거부. msg1 키워드 `_MARKET_ORDER_DISALLOWED_KEYWORDS`: `시장가매매불가` / `시장가 매매 불가` / `시장가 주문 불가` / `시장가 호가 불가` / `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리`. 기존 3종과 **상호 배타** — True 면 다른 3종 False. msg_cd 누적: APBK1943 (계양전기 매도) + APBK3013 (NXT 애프터 매도). `docs/kis/error-codes.md` 4-2절 / 5-4절
+
+## quotation.py — 주식현재가 체결 (사이클 32, 2026-05-21)
+
+- `inquire_ccnl(ticker: str, market: str = "J") -> dict | None`: KIS `FHKST01010100` 주식현재가 시세. `kis_get_quote` 경유 (시세성 풀 라우팅 + Rate Limit + 메트릭)
+- 응답: output 첫 row (가장 최근 체결) + today_volume 합산. 키: `last_cntg_hour`(HHMMSS) / `last_price` / `last_volume` / `last_relative_strength` / `today_volume` / `prev_compared_rate`
+- graceful: 빈 응답 / KIS 오류 / 예외 → None (호출자 보호)
+- 6자리 ticker 사전 가드 (`ValueError`)
+- 호출처: `scheduler._evaluate_universe_guard` (사이클 32, universe 제외 판단) + `scheduler._refresh_stale_ccnl_cache` (사이클 37, stale 종목 UI 표시용 TTL 5분 캐시)
 
 ## condition.py — 조건검색 + 영업일 + 종목 기본정보 + TTL 캐시
 

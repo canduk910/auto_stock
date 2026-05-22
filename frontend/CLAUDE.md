@@ -36,7 +36,11 @@ TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트
 
 ## 페이지 lazy 로딩
 
-Dashboard 만 즉시 import. History/Recommendations/Logs/Settings 는 `React.lazy()` + Suspense skeleton (초기 번들 819→656kB). `/log-reports` 라우트는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환 보존.
+Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFunnel** 는 `React.lazy()` + Suspense skeleton (초기 번들 819→656kB). `/log-reports` 라우트는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환 보존.
+
+## StrategyFunnel (`/strategy-funnel`, 사이클 34, 2026-05-21)
+
+전략별 조건검색 단계별 후보/탈락 종목 추적 페이지. 전략 dropdown + 날짜 picker + 단계별 expand 가능한 테이블 + 수동 trigger 버튼 (`POST /api/strategy-funnel/snapshot`). 단계 클릭 시 `survived_tickers` 리스트 + `excluded_sample` 탈락 사유 표시. API: `getFunnel / getRecentFunnel / triggerFunnelSnapshot` (`frontend/src/api/strategy-funnel.ts`). queryKey `['strategy-funnel', strategy_id, target_date]`. 현재 백엔드는 최종 단계 `step_no=99` 만 저장 — 단계별 ticker 캡처는 후속 사이클에서 각 전략 `prepare()` hook 추가 예정.
 
 ## 시각적 컨벤션
 
@@ -172,6 +176,8 @@ Dashboard `MarketRegimeCard` 직하 신설 (시장 → 인프라 위계). Websoc
   - `pool-stale-list-toggle` + 종목별 `pool-stale-row-{ticker}` — `subscriptions.tickers.stale.length > 0` 시 노출. 종목별 마지막 tick 시각 `Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Seoul', hour12:false})` HH:MM:SS. `last_tick_map[ticker]=null` 이면 "—"
   - 공용 헬퍼 `frontend/src/utils/stale-context.ts` (`getKstMinutes / getStaleContextByKstMinutes / STALE_CONTEXT_META / formatLastTickKst`)
 - API: `getSubscriptions()`, `/api/realtime/subscriptions` sessions 배열. queryKey `['realtime-subscriptions']`, `staleTime: 5_000`, `refetchInterval: 30_000` (Trading Status 5s 와 별개 큐로 부하 격리). 에러 시 `pool-error-message` graceful
+- **사이클 35 (2026-05-21) — 세션별 종목 expand 토글**: `pool-session-expand-{label}` 클릭 시 종목 테이블 표시. 종목당 `pool-ticker-row-{label}-{ticker}` (ticker / 이름 / stale 배지 / WS tick 시각 / retries / 마지막 강제 재구독 시각). 응답 `sessions[*].tickers_detail` (cap 200, stale 우선 정렬) 활용
+- **사이클 37 (2026-05-21) — "KIS 체결" / "KIS 거래량" 컬럼 추가**: 종목 expand 테이블에 KIS `inquire_ccnl` 캐시 데이터 (`last_cntg_hour` HH:MM:SS / `today_volume`) 노출. `formatCntgHour` / `isWsSubscriptionSuspect` 헬퍼 — WS tick 시각과 KIS 실제 체결시각 차이 5분(300초) 이상이면 amber "WS 의심" 배지 (`Intl.DateTimeFormat('en-GB', timeZone:'Asia/Seoul')` HHMMSS 파싱). 캐시 미스 → "—"
 
 > 사이클 17 (2026-05-19) — 사이클 15-C-2 `StreamStatus` (`/stream`) 메뉴 + `getStreamStatus()` API + `GET /api/realtime/stream-status` 백엔드 엔드포인트 전체 롤백. 단순화 원칙(단일 데이터 경로 + 신규 모듈 추가 금지) 위반 + `_near_signal_loop` race 결함 대응.
 

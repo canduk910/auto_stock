@@ -41,6 +41,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-04-22 | 초기 구성 (team-leader / backend-dev / frontend-dev / tdd-engineer / tester) | 전체 | TDD-First Trading Team 출범 |
 | 2026-05-21 | `domain-expert` (데이/스윙 트레이더 자문) + `refactor-expert` (주기적 리팩토링) 합류, KIS MCP 접근 명시 (backend-dev / tdd-engineer / tester / refactor-expert) | 에이전트 7명 / 스킬 9개 | 매매 의사결정 깊이 보강 + 코드 품질 드리프트 흡수 + KIS 스펙 정본 통일 |
 | 2026-05-21 | `kis-mcp-query` 스킬에 KIS 공식 저장소 경로 + 설치 가이드 + 공식 프롬프트 도구 (`kis_easy_code`/`kis_detailed_code`) 활용 안내 추가 | skills/kis-mcp-query | 공식 저장소 (koreainvestment/open-trading-api) 가 정본임을 명시, 비공식 fork 사용 차단 |
+| 2026-05-21 | 사이클 28~37 (운영 진단 + 결함 시정 11 사이클) — 상세는 `docs/HARNESS_CHANGELOG.md` 참조. 코드 본체: stale 추적 강화 / force_retry / silent_inactive 비율 / 우선순위 분리 / `_sync_orders_to_db` 핑퐁 수정 / risk_silent_skip 가시화 / universe 가드 + `inquire_ccnl` / BFB acml_vol + VCP fetch 한도 / funnel DB + 세션 UI / KST NameError + backtest pending / KIS 체결시각 UI | `src/engine/scheduler.py` 외 다수 + 신규 라우트 `/api/strategy-funnel` + migration 029/030 | 09:13 VB 미매수 사고 진단을 시작점으로 stale 추적 → 결함 가시화 → 시정 + funnel DB 추적 → UI 강화. 백엔드 1625 PASS / 프론트 160 PASS / 매매 안전성 무영향 |
 
 ### 테스트 실행
 
@@ -116,7 +117,10 @@ cd frontend && npm install && npm run dev
 - **매수/매도 시장가 거부 → 지정가 5호가 폴백 1회** — `is_market_order_disallowed` (msg1 키워드 `시장가매매불가` / `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리` — APBK1943/APBK3013) 매칭 시 `step_up(buy)/step_down(sell)` 으로 `LIMIT` 재시도. 매핑 동기 + race 가드 동일 규약
 - **KIS 거부 응답 영구 저장** — `_request` 가 `rt_cd != "0"` 시 `system_logs` prefix `[kis_rejection]` + path/tr_id/msg_cd/msg1 + body 주요 키 (민감 키 마스킹) fire-and-forget
 - **WebSocket 시세 보유·익일청산 우선 보장** — `MAX_SUBSCRIPTIONS=41` KIS 공식 한도. HIGH (보유/익일청산) `bypass_limit=True` 절대 보장. 후순위 drop 시 `[priority_drop]` INFO + WARNING `system_logs`. HIGH 단독 41 초과 ERROR
-- **WebSocket 다중 안전망** — F1 (재연결 1회) + `_scan_loop` (5분) + K stale watcher (120s, 5회 누적 후 강제 재등록) + `_resubscribe_stale_priority` (5분 우선) 4중. `_subscriptions` ACK 정합성 가드 (orphan ACK race 차단)
+- **WebSocket 다중 안전망** — F1 (재연결 1회) + `_scan_loop` (5분) + K stale watcher (120s, 1~5회 즉시 강제 재등록 + 사이클 29-R1: 6회 초과 시 5분 cooldown 기반 시간 기반 force_retry + 시간당 12회 cap) + `_resubscribe_stale_priority` (5분 우선) 4중. K stale watcher 양쪽 분기에 우선순위 분리 (사이클 29-R3: positions/`_pending_next_day_clear` HIGH+bypass=True, 그 외 후보 LOW+bypass=False — 메인 편중 차단). `_subscriptions` ACK 정합성 가드 (orphan ACK race 차단)
+- **세션 단위 silent inactive 자동 reconnect** — `_detect_silent_inactive_sessions` 3중 가드 (사이클 29-R2): `fresh_ratio < SILENT_INACTIVE_FRESH_RATIO_THRESHOLD(=0.2, 20%)` + `subscribed_count >= 5` + 5분 지속 → `_ws.close()` 강제 reconnect. 시간당 세션당 2회 cap (LMS/앱키 정지 위험 차단)
+- **stale universe 가드** (사이클 32) — `_evaluate_universe_guard`: stale>5 + `today_volume < UNIVERSE_LOW_VOLUME_THRESHOLD(=10_000)` 종목 자동 unsubscribe + `_universe_excluded_today` 등록 + `[universe_excluded]` INFO + `inquire_ccnl` 으로 마지막 체결시각 로그. 보유/익일청산 절대 보호 + `_reset_daily_state` 동행 clear (영구 블랙리스트 금지)
+- **`trade_history` 중복 INSERT 차단** (사이클 30) — `_sync_orders_to_db` 는 `get_today_buy_trades_for_sync()` / `get_today_sell_trades_for_sync()` 사용 (dedupe 없음 + CANCELLED 제외). DB 부분 UNIQUE 인덱스 `(ticker, order_no, trade_type)` 이중 안전망. 기존 `get_today_buy_trades()` 의 ticker dedupe 는 포지션 복구용 — 절대 sync 중복 판정에 사용 금지
 - **NXT 거래가능 사전 판별** — `stock_master.nxt_tradable=False` 면 NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]`. `_boot()` eager 사전 갱신 (보유 + `_pending_next_day_clear` 합집합). 거부 사후 보강 `stock_master.upsert_one(ticker, nxt_tradable=False)`
 - **종목코드 형식 비대칭** — 진입은 6자리 숫자만 (`isdigit()`), 사후처리는 6자리 영숫자 (`isalnum()`) — ETF·신주인수권 자동매매 차단 + 좀비 포지션 방지
 - **1주 폴백은 전략 잔여 자금 기준** — 6 전략 `calc_buy_quantity()` 가 `StrategyBase._fallback_one_share(current_price)` 공통 헬퍼. 잔여 = `total_investment - (positions buy_price×qty + pending_buy_amounts 합)`
@@ -150,6 +154,9 @@ cd frontend && npm install && npm run dev
 | `backtest_runs` | 외부 MCP 백테스트 영속화 (`(target_date, strategy_id, params_kind)` UNIQUE. 6 전략 × 2 kind = 12 row/사이클) |
 | `market_regime_snapshots` | dkstock.cloud 매크로 일일 스냅샷. `_boot()` 시점 1행. `buy_blocked`/`computed_cash_usage_ratio`/`raw_response JSONB` 영구 기록 |
 | `kis_quote_accounts` | 보조 KIS 시세 수신 계좌 (UUID PK, label UNIQUE, active=true 부분 인덱스). `list_accounts()` 60s TTL 메모리 캐시 |
+| `strategy_funnel_snapshots` | 사이클 34 — 전략별 조건검색 단계별 후보/탈락 종목 영구 추적. `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE. `survived_tickers` JSONB cap 200 / `excluded_sample` JSONB cap 20. 수동 trigger `POST /api/strategy-funnel/snapshot` (현재 최종 단계 `step_no=99` 만, 자동 hook 은 후속 사이클) |
+
+> **`trade_history` 부분 UNIQUE 인덱스 (사이클 30, migration 029)**: `uq_trade_history_ticker_order_no_type ON (ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND order_no != ''`. `_sync_orders_to_db` 핑퐁 INSERT 영구 차단 + NULL/빈 order_no (수동 매매 사전 등) 호환.
 
 ## Docker / 배포
 
@@ -167,7 +174,7 @@ cd frontend && npm install && npm run dev
 
 ## 디렉토리 역할
 - `src/auth/` — KIS OAuth 인증/토큰 (메인 + 보조 multi)
-- `src/api/` — KIS REST (주문·잔고·조건검색·일봉) + 시세 풀 (`base.py::_request_via_quote_pool` + path 화이트리스트 가드)
+- `src/api/` — KIS REST (주문·잔고·조건검색·일봉) + 시세 풀 (`base.py::_request_via_quote_pool` + path 화이트리스트 가드). 사이클 32: `quotation.py::inquire_ccnl(ticker, market='J')` 신규 (FHKST01010100 주식현재가 시세, output[0] + today_volume 합산 + graceful None)
 - `src/realtime/` — KIS WebSocket (시세·체결통보·H0NXMKO0) + WebsocketPool 멀티 세션 분배
 - `src/engine/` — 매매 핵심 (전략·레지스트리·주문·리스크·스케줄러). `recommendation_engine.py` 20:00 AI자문 / `log_analysis_engine.py` 20:10 일일 분석 / `backtest_engine.py` + `backtest_yaml.py` / `market_regime.py`
 - `src/engine/strategies/` — 6 전략 명세 (전용 CLAUDE.md)

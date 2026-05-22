@@ -39,7 +39,7 @@
 | GET | `/api/system/memory` | system.py | 프로세스 메모리(psutil RSS/VMS/threads/files) + (옵션) tracemalloc top 20 |
 | GET | `/api/system/metrics` | system.py | 엔드포인트별 응답시간 분포 p50/p95/p99 (최근 1024개 샘플) |
 | POST | `/api/system/metrics/reset` | system.py | metrics 누적 샘플 초기화 (실험 베이스라인 리셋) |
-| GET | `/api/realtime/subscriptions` | realtime.py | WebSocket 구독 슬롯 사용현황 진단 (G2, 2026-05-12). `total/acked/fresh_60s/stale_60s/limit/tickers(subscribed/acked/fresh/stale, 모두 sorted)/reconnect_count/ws_connected/sessions[]`. **사이클 18 (2026-05-19) — `last_tick_map: dict[ticker, ISO_KST\|null]`** 추가 — stale 종목별 마지막 tick 시각. ScanMonitor 끊김 펼치기에서 종목별 "마지막 HH:MM:SS" 표시 + 시간대 톤 분기 근거. KIS 측 슬롯 조회 API 미존재 → 우리 측 추적 노출 |
+| GET | `/api/realtime/subscriptions` | realtime.py | WebSocket 구독 슬롯 사용현황 진단 (G2, 2026-05-12). `total/acked/fresh_60s/stale_60s/limit/tickers(subscribed/acked/fresh/stale, 모두 sorted)/reconnect_count/ws_connected/sessions[]`. **사이클 18 (2026-05-19) — `last_tick_map: dict[ticker, ISO_KST\|null]`** 추가. **사이클 35 (2026-05-21) — `sessions[*].tickers_detail`** 추가 (cap 200, stale 우선 정렬, 종목당 `ticker/ticker_name/stale/last_tick/retries/last_resub`). **사이클 37 (2026-05-21) — `tickers_detail` 에 `last_cntg_hour` / `today_volume` 추가** (KIS `inquire_ccnl` 캐시 TTL 5분 + cap 20, 미스 → null). UI 가 WS tick 시각과 KIS 실제 체결시각 비교하여 "WS 구독 의심" 자동 진단 (5분+ 차이 amber 강조). KIS 측 슬롯 조회 API 미존재 → 우리 측 추적 노출 |
 | POST | `/api/realtime/resubscribe` | realtime.py | 60s 미수신(stale) TICK 종목 즉시 일괄 재구독 (J2, 2026-05-12). `_subscriptions` 보존 + `_send_subscribe(TICK_TR_ID, t, subscribe=True)` 만 호출(50ms sleep). 응답 `{resubscribed, tickers}` (sorted). WebSocket 끊김 시 400. F1 자동 재구독(재연결 60s 후)과 별개의 운영자 수동 트리거. 영구 로그 `[ws_manual_resubscribe] count=N tickers=[...]` |
 | GET | `/api/integrations/dkstock-regime` | system_integrations.py | 외부 매크로 서버 활성 여부 조회 (사이클 5, 2026-05-17). 응답 `{enabled, source: 'db'\|'env', env_value, db_value}` — DB 우선 / .env fallback. db_value=null 이면 source='env' |
 | PUT | `/api/integrations/dkstock-regime` | system_integrations.py | 외부 매크로 서버 활성 토글 (사이클 5). body `{enabled: bool}`. 활성화(true) 시 `asyncio.create_task(_refresh_market_regime_and_persist_safely())` 백그라운드 fetch 발화. 비활성화 시 메모리 regime empty reset(매수 가드 즉시 해제). DB 갱신 실패는 500. 매크로 fetch 실패는 graceful — toggle 자체는 성공 |
@@ -53,6 +53,9 @@
 | POST | `/api/integrations/quote-accounts` | kis_quote_accounts.py | 보조 계좌 등록 (사이클 7-A). body `{label, app_key, app_secret, kis_env:'real'\|'vts'}`. 201/409(label 중복)/422(빈 값)/500. 매매/잔고 활용 0 — 시세 수신 풀에만 등록 |
 | PUT | `/api/integrations/quote-accounts/{id}` | kis_quote_accounts.py | active 토글 / label 수정 (사이클 7-A). body `{active?, label?}`. 200/404/409. app_key/app_secret 수정 미지원(보안 감사 추적성 — 삭제 후 재등록) |
 | DELETE | `/api/integrations/quote-accounts/{id}` | kis_quote_accounts.py | 계좌 제거 (사이클 7-A). 200/404 |
+| GET | `/api/strategy-funnel?strategy_id=&target_date=` | strategy_funnel.py | **사이클 34 (2026-05-21)** — 특정 영업일 + 전략의 단계별 후보/탈락 종목 (`step_no` ASC). 응답: `{strategy_id, target_date, snapshots:[{step_no, step_name, survived_count, excluded_count, survived_tickers, excluded_sample}]}` |
+| GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | strategy_funnel.py | 최근 N영업일 추이 (사이클 34) |
+| POST | `/api/strategy-funnel/snapshot` | strategy_funnel.py | 수동 trigger — 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 호출해 최종 단계 (`step_no=99`) snapshot 즉시 생성 (사이클 34). 단계별 ticker 캡처 자동 hook 은 후속 사이클 |
 
 ## 응답 형식
 모든 응답은 `models/response.py`의 `ApiResponse` 래퍼 사용:

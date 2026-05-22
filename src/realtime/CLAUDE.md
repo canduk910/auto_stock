@@ -31,6 +31,7 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 - `resend_subscribe_for_ticker(tr_id, tr_key)` — K stale watcher 헬퍼. 추적 없으면 메인 fallback
 - `get_subscribed_tickers() -> set[str]` — 메인 + 보조 TICK 합집합
 - `get_acked_tickers() -> set[str]` — 합집합 ACK
+- `get_subscriptions_by_session() -> dict[str, set[str]]` — **사이클 28 (2026-05-21)**: 세션 label → ticker set (역인덱싱, 영속 dict 미추가). scheduler 의 `[stale_watcher_detail]` / `[tick_coverage_session]` prefix + `/api/realtime/subscriptions` 의 `tickers_detail` 응답에 활용
 - `get_session_status() -> list[dict]` — 세션별 label/subscribed/acked/limit/ws_connected/reconnect_count + tickers
 - `start(dispatch_message=None)` — DB `kis_quote_accounts.list_accounts(active_only=True)` 조회 → 각 라벨별 `KisWebSocket` 생성 + `connect()` task 발화. 보조 0개 → noop + `[pool_start]` INFO. `_started` 멱등 가드
 - `stop()` — 보조 connect task cancel + 각 보조 `disconnect()`. `_quotes` / `_ticker_to_session` / `_started` clear

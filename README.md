@@ -110,6 +110,8 @@ Supabase SQL Editor에서 `supabase/migrations/` 하위 마이그레이션 파�
 026_kis_quote_accounts.sql            # 보조 KIS 시세 수신 계좌 (사이클 7-A, 풀 슬롯 41 × (1 + N) 확장)
 027_buy_block_mode.sql                # 매수 가드 4 모드 (OFF/WARN/SOFT/HARD) + 4 임계값 (사이클 8)
 028_auto_apply_status.sql             # parameter_recommendations.status 에 'applied_auto' 분리 (사이클 23 P3, AI 자문 자동 적용)
+029_trade_history_dedupe_unique.sql   # (ticker, order_no, trade_type) 부분 UNIQUE 인덱스 (사이클 30, 042700 핑퐁 INSERT 영구 차단)
+030_strategy_funnel_snapshots.sql     # 조건검색 단계별 후보/탈락 종목 영구 추적 (사이클 34)
 ```
 
 ### 3. Docker Compose로 실행 (권장)
@@ -153,7 +155,8 @@ cd frontend && npm install && npm run dev
 
 | 화면 | 기능 |
 |------|------|
-| 메인 대시보드 | 계좌 요약, 보유 종목, 매매 실적 차트, 상태 인디케이터, 조건검색 현황(전략별 스캔/타겟/스윙 깔때기) |
+| 메인 대시보드 | 계좌 요약, 보유 종목, 매매 실적 차트, 상태 인디케이터, 조건검색 현황(전략별 스캔/타겟/스윙 깔때기), **`KisAccountPoolCard` 세션별 expand** (사이클 35/37 — main/quote-N 종목 테이블 + WS tick / KIS 체결시각 / WS 의심 amber 배지) |
+| 조건검색 추적 (`/strategy-funnel`) | **사이클 34** — 전략 dropdown + 날짜 picker + 단계별 expand 가능한 테이블 (통과/탈락 종목 + 탈락 사유 sample) + 수동 trigger 버튼 |
 | 거래 내역 | **두 탭** — 주문체결내역(매수/매도 raw 행, 필터·페이징) / 매매손익(매수·매도 페어 1행, 가중평균. 보유 중은 open 페어로 미실현 손익 표시) |
 | 전략수정 AI자문 | 20:00 OpenAI 자동 생성 자문 — 신규 자문 탭(승인/거절) + 이력 탭(상태/전략 필터). 자산 배정/로직 자문/비중 변경 사유(`weight_reasoning`) 별도 카드 + 백테스트 비교 카드(`BacktestComparisonCard`) |
 | 일일 로그 분석 | 20:10 정산 직후 OpenAI가 system_logs+trade_history 분석한 운영 개선 리포트 (영업일 리스트 + findings + 메트릭) |
@@ -330,8 +333,11 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | GET | `/api/log-reports?days=30` | 일일 로그 분석 리포트 목록 |
 | GET | `/api/log-reports/{YYYY-MM-DD}` | 단일 영업일 리포트 상세 |
 | POST | `/api/log-reports/run` | 수동 트리거 — 즉시 분석 실행 (영업일당 1건 UNIQUE) |
-| GET | `/api/realtime/subscriptions` | WebSocket 구독 슬롯 진단 (total/acked/fresh_60s/stale_60s/limit/tickers/reconnect_count/ws_connected). KIS 측 슬롯 조회 API 미존재 → 우리 측 추적 노출 |
+| GET | `/api/realtime/subscriptions` | WebSocket 구독 슬롯 진단 (total/acked/fresh_60s/stale_60s/limit/tickers/reconnect_count/ws_connected) + **사이클 35/37**: `sessions[*].tickers_detail` (ticker/ticker_name/stale/last_tick/retries/last_resub/`last_cntg_hour`/`today_volume`). KIS `inquire_ccnl` 캐시(TTL 5분 + cap 20)로 KIS 실제 체결시각 동봉 — WS 구독 의심 진단용 |
 | POST | `/api/realtime/resubscribe` | stale(60s 미수신) TICK 구독 종목 즉시 일괄 재구독 (J2). 응답 `{resubscribed, tickers}`. F1 자동 재구독과 별개의 운영자 수동 트리거 (ScanMonitor 인라인 버튼). WebSocket 끊김 시 400 |
+| GET | `/api/strategy-funnel?strategy_id=&target_date=` | **사이클 34**: 전략별 조건검색 단계별 후보/탈락 종목 (`survived_tickers` cap 200 / `excluded_sample` cap 20) |
+| GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | 최근 N영업일 추이 |
+| POST | `/api/strategy-funnel/snapshot` | 수동 trigger — 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 로 최종 단계 (`step_no=99`) 즉시 snapshot 생성 |
 
 ## 프로젝트 구조
 

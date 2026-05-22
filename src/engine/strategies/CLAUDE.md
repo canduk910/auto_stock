@@ -22,6 +22,8 @@
   - momentum: prepare 없음 → `scanner.scan_filter_stats` 모듈 전역 dict 7 키 (`universe_candidates / rate_pass / mcap_pass / trade_amount_pass / limit_up_excluded / final_prepared / last_run_at`). `MomentumStrategy.get_scan_stats()` 는 모듈 dict 사본 반환
   - scan_stocks() 가 등락률 30%+ (상한가) 도 명시 분기 — `limit_up_excluded` 카운트 + 구독 후보 풀에서 제거 (`check_buy_signal` 의 30% 가드와 이중 안전망)
 - VB/LTV `_scan_universe`: 거래량순위 API(`FHPST01710000`) 응답 1건으로 후보 + 시총·전일거래대금 산출(`prdy_vol × (stck_prpr - prdy_vrss)`로 시간 의존 제거)
+- **BFB `_scan_universe` 거래대금 필드** (사이클 33, 2026-05-21): KIS `FHKST01010100` 주식현재가 시세 응답에 `prdy_vol` 필드 없음 — `acml_vol` (당일 누적 거래량) 사용. `trade_amt = acml_vol × price`. 사용자 5/21 30→0 funnel 결함 시정
+- **VCP `prepare` fetch 한도** (사이클 33, 2026-05-21): KIS `fetch_daily_candles` 단일 호출 최대 100일 한도. `fetch_days = min(ema_long(200) + base_max(75) + 10, 100)` + `effective_ema_long = min(ema_long, available_len - uptrend_days - 5)` 자동 축소 (최소 30). `_check_trend_filter(candles, effective_ema_long=)` 시그니처 확장. 사용자 5/21 113→0 funnel 결함 시정. 미네르비니식 200EMA 의도 일부 양보 — 운영 1주 후 multi-call 분할 fetch 인프라 검토 권고
 - VB/LTV/donchian/bull_flag/vcp 모두 `prev_idx` 분기 동일: `candles[0].stck_bsop_date == 오늘`이면 candles[1] 을 전일로 사용
 - 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
 - 1주 폴백 (모든 전략): `StrategyBase._fallback_one_share(current_price)` 잔여 = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`

@@ -14,7 +14,9 @@ Supabase (PostgreSQL) CRUD 모듈.
 - `update_trade_status() -> int`: 체결/취소 시 PENDING row 새 status 갱신 + 영향 row 수 반환. 0건이면 호출자(OrderEngine) 가 체결통보 선행 race 로 판단해 COMPLETED 보정 INSERT
 - `get_trades(limit, offset, ticker)`: 페이징 조회 + total count
 - `get_trade_pairs(strategy=None, ticker=None)`: 매매손익 뷰용 매수/매도 페어 리스트. 같은 (ticker, strategy) 그룹 내 timestamp ASC 순회 → 누적 보유수량 0 사이클마다 closed 페어 emit (매수가/매도가 가중평균, Decimal 보존), 잔여 보유는 open 페어 emit (미실현 손익은 `scanner.ticker_prices` fallback). 응답 키: buy_date/buy_time/sell_date/sell_time/ticker/ticker_name/buy_price/buy_qty/sell_price/sell_qty/profit_loss/profit_rate/status('closed'|'open')/strategy. `_to_kst()` 헬퍼로 ISO (UTC/KST/tz-naive 모두) → `astimezone(KST).strftime()` 명시 변환
-- `get_today_buy_trades / get_today_sell_trades / get_today_pending_buys`: today 기준 same-day. 쿼리 기준점 `f"{today}T00:00:00+09:00"` KST timezone 명시 (timezone-naive → PostgreSQL TIMESTAMPTZ UTC 해석 결함 차단)
+- `get_today_buy_trades / get_today_sell_trades / get_today_pending_buys`: today 기준 same-day. 쿼리 기준점 `f"{today}T00:00:00+09:00"` KST timezone 명시 (timezone-naive → PostgreSQL TIMESTAMPTZ UTC 해석 결함 차단). **ticker 별 dedupe 적용 (포지션 복구용 — 최신 1건만 반환)**
+- **`get_today_buy_trades_for_sync(ticker=None) / get_today_sell_trades_for_sync(ticker=None)`** (사이클 30, 2026-05-21): **dedupe 없음** + CANCELLED 제외 + optional ticker filter. `_sync_orders_to_db` 중복 판정 키 소스 전용. 절대 포지션 복구용 dedupe 함수를 sync 에 재사용 금지 (5/20 042700 핑퐁 INSERT 사고 — 같은 ticker 의 다른 `order_no` 가 가려져 매 재기동마다 신규 판정)
+- **DB 부분 UNIQUE 인덱스** (사이클 30, migration 029): `uq_trade_history_ticker_order_no_type ON (ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND order_no != ''`. 코드 결함 재발 시 PG 가 INSERT 거부 → 애플리케이션 로직 회귀 보호. NULL/빈 order_no (수동 매매 사전 등) 는 제외
 
 ## daily_performance.py — 일일 실적
 
@@ -67,6 +69,15 @@ Supabase (PostgreSQL) CRUD 모듈.
 - 테이블: `kis_quote_accounts` (UUID PK, label UNIQUE, active=true 부분 인덱스)
 - 자금 안전: 본 모듈 응답은 **시세 수신 한정**. order.py / balance.py / 체결통보 구독은 메인 계좌만
 
+## strategy_funnel.py — 조건검색 단계별 추적 (사이클 34, 2026-05-21)
+
+- `insert_snapshot(target_date, strategy_id, step_no, step_name, survived_count, survived_tickers, excluded_count, excluded_sample)`: 단일 단계 snapshot INSERT. `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE — 같은 영업일 다회 trigger 가능
+- `list_snapshots(target_date, strategy_id)`: 특정 영업일 + 전략 의 모든 단계 (`step_no` ASC)
+- `list_recent_by_strategy(strategy_id, days=7)`: 최근 N영업일 추이
+- **JSONB cap**: `survived_tickers` 200건 / `excluded_sample` 20건 자동 적용 (응답·저장 크기 보호)
+- 테이블: `strategy_funnel_snapshots` (UUID PK + 인덱스 2: `target_date DESC` / `(strategy_id, target_date DESC)`)
+- 호출: `POST /api/strategy-funnel/snapshot` 수동 trigger 가 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 로 최종 단계 `step_no=99` 만 기록. 자동 hook (단계별 ticker 캡처) 은 후속 사이클
+
 ## stock_master.py — 종목 마스터 캐시
 
 - `upsert_one(StockBasics)` / `get(ticker) -> Optional[StockBasics]` / `is_stale(ticker, max_age_hours=24) -> bool`
@@ -91,7 +102,9 @@ Supabase (PostgreSQL) CRUD 모듈.
 - `supabase/migrations/001_init.sql` 정의
 - `trade_history.status`: PENDING → COMPLETED / PARTIAL → CANCELLED
 - `trade_history.trade_type`: BUY / SELL
-- `parameter_recommendations.status`: pending → applied / partial / rejected / expired
+- `trade_history` 부분 UNIQUE 인덱스 `(ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND != ''` (migration 029, 사이클 30)
+- `parameter_recommendations.status`: pending → applied / partial / rejected / expired / applied_auto
+- `strategy_funnel_snapshots` (migration 030, 사이클 34): `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE + JSONB 필드 2개
 
 ## 주의사항
 
