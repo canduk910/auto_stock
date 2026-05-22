@@ -27,10 +27,25 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime, time, timedelta, timezone
 
-from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
+from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
 logger = logging.getLogger(__name__)
+
+
+# 사이클 47 (2026-05-22, refactor-review 카드 #3) — Funnel 단계 정의 모듈 상수.
+# `prepare()` 의 `_record_funnel_pipeline_step(FUNNEL_STAGES[i-1], ...)` 위임 헬퍼와 결합.
+# step_conditions 는 runtime 평가 (f-string) — 호출 시점 별도 인자 전달.
+FUNNEL_STAGES: tuple[FunnelStage, ...] = (
+    FunnelStage(1, "유니버스 후보"),
+    FunnelStage(2, "유니버스 필터 통과 (시총·거래대금)"),
+    FunnelStage(3, "일봉 fetch 성공"),
+    FunnelStage(4, "폴(Pole) 자동 검출"),
+    FunnelStage(5, "플래그(Flag) 자동 검출"),
+    FunnelStage(6, "거래량 수축"),
+    FunnelStage(7, "ATR(14) > 0"),
+    FunnelStage(8, "최종 prepared"),
+)
 
 
 def _empty_scan_stats() -> dict:
@@ -138,14 +153,14 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # `_scan_universe` 내부에서 ranked → filtered 분리. `_scan_stats` 가 이미 양쪽 카운트.
         # 단계별 ticker 정확 캡처는 `_scan_universe` 가 후보 리스트와 통과 리스트 둘 다 반환해야
         # 가능. 현재는 통과 리스트만 반환 → 1단계는 통과 카운트 (raw ranked 는 미보유).
-        # 사이클 41 (2026-05-22) — step_conditions 추가 (UI 툴팁)
-        self._record_funnel_step(
-            step_no=1, step_name="유니버스 후보",
+        # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[0],
             survived=tickers,
             step_conditions="KRX 등락률 순위 상위 + ETF/ETN 키워드 제외",
         )
-        self._record_funnel_step(
-            step_no=2, step_name="유니버스 필터 통과 (시총·거래대금)",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[1],
             survived=tickers,
             step_conditions=(
                 f"시총 ≥ {params['min_market_cap']/100_000_000:.0f}억 "
@@ -265,37 +280,37 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 logger.warning("눌림목 prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 39+41 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
-        self._record_funnel_step(
-            step_no=3, step_name="일봉 fetch 성공",
+        # 사이클 47 (2026-05-22) — FUNNEL_STAGES 위임 (사이클 39+41 hook 동작 동일)
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[2],
             survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
             step_conditions=f"KIS 일봉 ≥ {pole_max + flag_max + 3}일",
         )
-        self._record_funnel_step(
-            step_no=4, step_name="폴(Pole) 자동 검출",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[3],
             survived=pole_pass_tickers, excluded=pole_excluded,
             step_conditions=(
                 f"3~10영업일 누적 +{params['pole_min_return']:.0f}%↑ + "
                 f"음봉 비율 ≤ {params['pole_max_red_ratio']*100:.0f}%"
             ),
         )
-        self._record_funnel_step(
-            step_no=5, step_name="플래그(Flag) 자동 검출",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[4],
             survived=pole_pass_tickers,
             step_conditions=f"3~10영업일 조정 폭 ≤ 폴 폭 × {params['flag_retracement_max']*100:.1f}%",
         )
-        self._record_funnel_step(
-            step_no=6, step_name="거래량 수축",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[5],
             survived=pole_pass_tickers,
             step_conditions=f"플래그 평균 거래량 < 폴 평균 × {params['flag_volume_ratio']*100:.0f}%",
         )
-        self._record_funnel_step(
-            step_no=7, step_name="ATR(14) > 0",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[6],
             survived=atr_pass_tickers, excluded=atr_excluded,
             step_conditions="ATR(14) > 0 (변동성 측정 가능)",
         )
-        self._record_funnel_step(
-            step_no=8, step_name="최종 prepared",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[7],
             survived=final_prepared_tickers,
             step_conditions="모든 단계 통과 — 매수 후보 등록",
         )

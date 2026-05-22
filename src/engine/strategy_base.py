@@ -132,6 +132,23 @@ class StrategyState:
         self.low_funds_tickers.clear()
 
 
+@dataclass(frozen=True)
+class FunnelStage:
+    """단계별 funnel 정의 — 사이클 47 (2026-05-22, refactor-review 카드 #3).
+
+    각 전략 파일 상단의 `FUNNEL_STAGES: tuple[FunnelStage, ...]` 모듈 상수로 사용.
+    `prepare()` 의 `_record_funnel_pipeline_step(FUNNEL_STAGES[i-1], ...)` 위임 헬퍼와 결합.
+
+    step_conditions 는 runtime 평가 가능한 동적 문자열 (f-string 보존) — 호출 시점 별도 인자 전달.
+
+    Attributes:
+        step_no: 단계 번호 (1~8, 또는 99=수동 trigger 최종).
+        step_name: UI 표시명 (사용자 명세와 일치 — `/strategy-funnel` 페이지 노출).
+    """
+    step_no: int
+    step_name: str
+
+
 @dataclass
 class StrategyConfig:
     """전략 설정.
@@ -257,6 +274,38 @@ class StrategyBase(ABC):
     def _reset_funnel_steps(self) -> None:
         """사이클 39 — prepare() 첫 단계 진입 시 호출. 이전 사이클 누적 제거."""
         self._funnel_steps = []
+
+    def _record_funnel_pipeline_step(
+        self,
+        stage: FunnelStage,
+        survived: list,
+        excluded: list[dict] | None = None,
+        *,
+        step_conditions: str | None = None,
+    ) -> None:
+        """사이클 47 (2026-05-22, refactor-review 카드 #3) — FunnelStage 기반 위임 헬퍼.
+
+        `FUNNEL_STAGES` 모듈 상수 + `_record_funnel_step` (사이클 39+41) 호환 layer.
+
+        step_no/step_name 은 `FunnelStage` 에서 추출, step_conditions 는 runtime 평가 결과를
+        별도 인자로 받음 (f-string 동적 문자열 보존).
+
+        Args:
+            stage: 모듈 상수 `FUNNEL_STAGES[i-1]` 또는 직접 `FunnelStage(...)`.
+            survived: 단계 통과 ticker 리스트 (string or dict, 사이클 41 호환).
+            excluded: 단계 탈락 sample [{"ticker", "name", "reason"}, ...] (사이클 41 호환).
+            step_conditions: 단계 필터 조건 (UI 툴팁, runtime 평가).
+
+        Note:
+            사이클 39 _record_funnel_step 의 cap/원본 카운트 보존/예외 격리 모두 위임 보존.
+        """
+        self._record_funnel_step(
+            step_no=stage.step_no,
+            step_name=stage.step_name,
+            survived=survived,
+            excluded=excluded,
+            step_conditions=step_conditions,
+        )
 
     @abstractmethod
     async def prepare(self) -> None:

@@ -30,7 +30,7 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime, time, timedelta, timezone
 
-from src.engine.strategy_base import Position, Signal, StrategyBase, StrategyConfig
+from src.engine.strategy_base import FunnelStage, Position, Signal, StrategyBase, StrategyConfig
 
 # vcp_breakout 도 멀티데이 — Position 의 _MULTIDAY_STRATEGIES 에 등록
 # (frozenset 은 immutable 이므로 새 frozenset 으로 교체)
@@ -40,6 +40,19 @@ Position._MULTIDAY_STRATEGIES = frozenset(
 
 KST = timezone(timedelta(hours=9))
 logger = logging.getLogger(__name__)
+
+
+# 사이클 47 (2026-05-22, refactor-review 카드 #3) — Funnel 단계 정의 모듈 상수.
+FUNNEL_STAGES: tuple[FunnelStage, ...] = (
+    FunnelStage(1, "코스피200+코스닥150 합집합"),
+    FunnelStage(2, "시총 ≥ 1,000억"),
+    FunnelStage(3, "일봉 fetch + 추세필터"),
+    FunnelStage(4, "50/150/200 EMA 정렬"),
+    FunnelStage(5, "베이스 자동 검출"),
+    FunnelStage(6, "Pullback 점진 수축"),
+    FunnelStage(7, "거래량 수축"),
+    FunnelStage(8, "최종 prepared"),
+)
 
 
 def _empty_scan_stats() -> dict:
@@ -144,15 +157,14 @@ class VcpBreakoutStrategy(StrategyBase):
         self._reset_funnel_steps()
 
         tickers = await self._scan_universe()
-        # 사이클 39 — 1단계: 코스피200+코스닥150 + 2단계: 시총 통과 (universe_filtered)
-        # 사이클 41 (2026-05-22) — step_conditions 추가
-        self._record_funnel_step(
-            step_no=1, step_name="코스피200+코스닥150 합집합",
+        # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[0],
             survived=tickers,
             step_conditions="코스피200 + 코스닥150 고정 유니버스",
         )
-        self._record_funnel_step(
-            step_no=2, step_name="시총 ≥ 1,000억",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[1],
             survived=tickers,
             step_conditions=f"시총 ≥ {p['min_market_cap']/100_000_000:.0f}억",
         )
@@ -319,40 +331,40 @@ class VcpBreakoutStrategy(StrategyBase):
                 logger.warning("VCP prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 39+41 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
-        self._record_funnel_step(
-            step_no=3, step_name="일봉 fetch + 추세필터",
+        # 사이클 47 — FUNNEL_STAGES 위임 (사이클 39+41 hook 동작 동일)
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[2],
             survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
             step_conditions=f"KIS 일봉 ≥ effective_ema_long(min {ema_long},100-25) + 우상향 {uptrend_days}일 + 5",
         )
-        self._record_funnel_step(
-            step_no=4, step_name="50/150/200 EMA 정렬",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[3],
             survived=trend_filter_pass_tickers, excluded=trend_filter_excluded,
             step_conditions=(
                 f"종가 > {p['ema_short']}EMA > {p['ema_mid']}EMA > {ema_long}EMA + "
                 f"{ema_long}EMA {uptrend_days}일 우상향"
             ),
         )
-        self._record_funnel_step(
-            step_no=5, step_name="베이스 자동 검출",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[4],
             survived=base_pass_tickers, excluded=base_excluded,
             step_conditions=f"베이스 길이 {p['base_min_days']}~{p['base_max_days']}일 + 깊이 ≤ {p['base_depth_pct']*100:.0f}%",
         )
-        self._record_funnel_step(
-            step_no=6, step_name="Pullback 점진 수축",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[5],
             survived=pullback_pass_tickers, excluded=pullback_excluded,
             step_conditions=(
                 f"{p['pullback_count_min']}~{p['pullback_count_max']}회 회수 + "
                 f"직전 대비 폭 감소 + 마지막 폭 ≤ {p['last_pullback_max']*100:.0f}%"
             ),
         )
-        self._record_funnel_step(
-            step_no=7, step_name="거래량 수축",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[6],
             survived=volume_contraction_pass_tickers, excluded=volume_contraction_excluded,
             step_conditions=f"마지막 5일 평균 < 베이스 직전 20일 평균 × {p['volume_contraction_ratio']*100:.0f}%",
         )
-        self._record_funnel_step(
-            step_no=8, step_name="최종 prepared",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[7],
             survived=final_prepared_tickers,
             step_conditions="모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
         )

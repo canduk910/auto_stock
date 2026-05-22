@@ -19,9 +19,23 @@ from __future__ import annotations
 import logging
 from datetime import datetime, time, timezone, timedelta
 
-from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
+from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
+
+
+# 사이클 47 (2026-05-22, refactor-review 카드 #3) — Funnel 단계 정의 모듈 상수.
+# step_name 은 정적 — 동적 값 (donchian_period, long_ma_period 등) 은 step_conditions 통해 노출.
+FUNNEL_STAGES: tuple[FunnelStage, ...] = (
+    FunnelStage(1, "코스피200+코스닥150 합집합"),
+    FunnelStage(2, "시총 컷 통과"),
+    FunnelStage(3, "일봉 fetch + 전일종가>0"),
+    FunnelStage(4, "신고가 돌파"),
+    FunnelStage(5, "EMA 우상향 + 종가>EMA"),
+    FunnelStage(6, "거래대금 평균 대비 통과"),
+    FunnelStage(7, "ATR(14) > 0"),
+    FunnelStage(8, "최종 후보"),
+)
 
 
 def _empty_scan_stats() -> dict:
@@ -106,16 +120,15 @@ class DonchianSwingStrategy(StrategyBase):
         self._reset_funnel_steps()
 
         tickers = await self._scan_universe()
-        # 사이클 39 — 1단계: 코스피200+코스닥150 + 2단계: 시총 통과
-        # 사이클 41 (2026-05-22) — step_conditions 추가
+        # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
         min_mcap_billion = params["min_market_cap"] / 100_000_000
-        self._record_funnel_step(
-            step_no=1, step_name="코스피200+코스닥150 합집합",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[0],
             survived=tickers,
             step_conditions="코스피200 + 코스닥150 고정 유니버스",
         )
-        self._record_funnel_step(
-            step_no=2, step_name="시총 컷 통과",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[1],
             survived=tickers,
             step_conditions=f"시총 ≥ {min_mcap_billion:.0f}억",
         )
@@ -314,34 +327,35 @@ class DonchianSwingStrategy(StrategyBase):
                 logger.warning("도치안 스윙 prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 39+41 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
-        self._record_funnel_step(
-            step_no=3, step_name="일봉 fetch + 전일종가>0",
+        # 사이클 47 — FUNNEL_STAGES 위임 (사이클 39+41 hook 동작 동일).
+        # step_name 은 정적 (FUNNEL_STAGES 상수), 동적 파라미터 (donchian_period 등) 는 step_conditions 노출.
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[2],
             survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
             step_conditions=f"KIS 일봉 ≥ {long_ma_period + 1}일 + 전일 종가 > 0",
         )
-        self._record_funnel_step(
-            step_no=4, step_name=f"{donchian_period}일 신고가 돌파",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[3],
             survived=donchian_pass_tickers, excluded=donchian_excluded,
             step_conditions=f"전일 종가 > 직전 {donchian_period}일 최고가",
         )
-        self._record_funnel_step(
-            step_no=5, step_name=f"{long_ma_period}일 EMA 우상향 + 종가>EMA",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[4],
             survived=ema_uptrend_pass_tickers, excluded=ema_excluded,
-            step_conditions=f"오늘 EMA > 어제 EMA + 전일 종가 > EMA",
+            step_conditions=f"{long_ma_period}일 EMA 우상향 + 전일 종가 > EMA",
         )
-        self._record_funnel_step(
-            step_no=6, step_name=f"거래대금 ≥ {volume_period}일평균×{volume_mult:.1f}",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[5],
             survived=volume_pass_tickers, excluded=volume_excluded,
             step_conditions=f"당일 거래대금 ≥ {volume_period}일 평균 × {volume_mult:.1f}",
         )
-        self._record_funnel_step(
-            step_no=7, step_name="ATR(14) > 0",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[6],
             survived=atr_pass_tickers, excluded=atr_excluded,
             step_conditions="ATR(14) > 0 (변동성 측정 가능)",
         )
-        self._record_funnel_step(
-            step_no=8, step_name="최종 후보",
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[7],
             survived=final_prepared_tickers,
             step_conditions="모든 단계 통과 — 멀티데이 보유 매수 후보",
         )
