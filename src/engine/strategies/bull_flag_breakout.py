@@ -130,8 +130,23 @@ class BullFlagBreakoutStrategy(StrategyBase):
         self._candidates = {}
         stats = _empty_scan_stats()
         self._scan_stats = stats
+        # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
+        self._reset_funnel_steps()
 
         tickers = await self._scan_universe()
+        # 사이클 39 — 1단계: 유니버스 후보 + 2단계: 유니버스 필터 (시총·거래대금 컷 통과)
+        # `_scan_universe` 내부에서 ranked → filtered 분리. `_scan_stats` 가 이미 양쪽 카운트.
+        # 단계별 ticker 정확 캡처는 `_scan_universe` 가 후보 리스트와 통과 리스트 둘 다 반환해야
+        # 가능. 현재는 통과 리스트만 반환 → 1단계는 통과 카운트 (raw ranked 는 미보유).
+        self._record_funnel_step(
+            step_no=1, step_name="유니버스 후보",
+            survived=tickers,  # 후보 (사이클 33 acml_vol fix 후 통과 종목)
+        )
+        self._record_funnel_step(
+            step_no=2, step_name="유니버스 필터 통과 (시총·거래대금)",
+            survived=tickers,  # 동일 — 통과 종목 = 필터 통과 종목
+        )
+
         if not tickers:
             logger.info("눌림목 돌파 유니버스 0종목")
             self._scanned_tickers = []
@@ -149,6 +164,12 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         fetched = await asyncio.gather(*[_fetch_one(t) for t in tickers])
 
+        # 사이클 39 — 단계별 ticker 캡처 (회귀 가드 — 결과 무변경)
+        candle_fetch_ok_tickers: list[str] = []
+        pole_pass_tickers: list[str] = []
+        atr_pass_tickers: list[str] = []
+        final_prepared_tickers: list[str] = []
+
         for ticker, candles in fetched:
             if candles is None or not candles:
                 continue
@@ -160,12 +181,14 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 if prev_idx:
                     candles = candles[prev_idx:]
                 stats["candle_fetch_ok"] += 1
+                candle_fetch_ok_tickers.append(ticker)  # 사이클 39
 
                 result = self._detect_pole_and_flag(candles)
                 if not result:
                     continue
                 stats["pole_pass"] += 1
                 stats["flag_pass"] += 1
+                pole_pass_tickers.append(ticker)  # 사이클 39
 
                 # 거래량 수축 확인은 _detect_pole_and_flag 내부에서 통과한 것
                 stats["volume_contraction_pass"] += 1
@@ -180,6 +203,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 if atr <= 0:
                     continue
                 stats["atr_pass"] += 1
+                atr_pass_tickers.append(ticker)  # 사이클 39
 
                 from src.engine.scanner import ticker_prev_close
                 prev_close = int(candles[0].get("stck_clpr", "0"))
@@ -192,9 +216,24 @@ class BullFlagBreakoutStrategy(StrategyBase):
                     "prev_close": prev_close,
                 }
                 stats["final_prepared"] += 1
+                final_prepared_tickers.append(ticker)  # 사이클 39
             except Exception as e:
                 logger.warning("눌림목 prepare 실패: %s — %s", ticker, e)
                 continue
+
+        # 사이클 39 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
+        self._record_funnel_step(step_no=3, step_name="일봉 fetch 성공",
+                                  survived=candle_fetch_ok_tickers)
+        self._record_funnel_step(step_no=4, step_name="폴(Pole) 자동 검출",
+                                  survived=pole_pass_tickers)
+        self._record_funnel_step(step_no=5, step_name="플래그(Flag) 자동 검출",
+                                  survived=pole_pass_tickers)  # 폴/플래그 한 분기
+        self._record_funnel_step(step_no=6, step_name="거래량 수축",
+                                  survived=pole_pass_tickers)  # 폴/플래그 통과 시 자동
+        self._record_funnel_step(step_no=7, step_name="ATR(14) > 0",
+                                  survived=atr_pass_tickers)
+        self._record_funnel_step(step_no=8, step_name="최종 prepared",
+                                  survived=final_prepared_tickers)
 
         self._scanned_tickers = list(self._candidates.keys())
         self._bought_today.clear()

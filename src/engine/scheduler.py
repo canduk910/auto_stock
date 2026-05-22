@@ -223,6 +223,10 @@ class TradingScheduler:
         # stale > MAX_STALE_RETRIES + 거래량 빈약 종목 자동 제외. 매일 _reset_daily_state 동행 clear.
         # 보유/익일청산은 _evaluate_universe_guard 가 사전 차단. WebSocket 슬롯 회수 + Rate Limit 절약.
         self._universe_excluded_today: set[str] = set()
+        # 사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot 일일 1회 가드.
+        # `_scan_loop` 첫 진입 시 활성 전략의 `_funnel_steps` 를 DB strategy_funnel_snapshots 에
+        # 단계별 row 로 INSERT. `_reset_daily_state` 동행 reset (매일 1회).
+        self._auto_funnel_snapshot_done_today: bool = False
         # 사이클 37 (2026-05-21) — KIS 실제 마지막 체결시각 캐시 (UI 노출용).
         # 구조: {ticker: {fetched_at: datetime, last_cntg_hour: str, today_volume: int}}
         # TTL 5분 + 사이클당 cap 20 (KIS Rate Limit 보호). _reset_daily_state 동행 clear.
@@ -2156,6 +2160,18 @@ class TradingScheduler:
                 except Exception:
                     logger.exception("_refresh_stale_ccnl_cache 실패 — 다음 사이클 자연 재시도")
 
+                # 사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot.
+                # 첫 _scan_loop 진입 시 활성 전략의 `_funnel_steps` 단계별 row INSERT.
+                # 일일 1회 가드 (`_auto_funnel_snapshot_done_today`) + 본체 예외 흡수.
+                if not self._auto_funnel_snapshot_done_today:
+                    try:
+                        await self._auto_capture_funnel_snapshots()
+                        self._auto_funnel_snapshot_done_today = True
+                    except Exception:
+                        logger.exception(
+                            "_auto_capture_funnel_snapshots 실패 — 다음 사이클 자연 재시도"
+                        )
+
                 # Phase D: 구독 종목 중 최근 60초 내 tick 수신 비율 카운트 노출.
                 # "구독은 됐으나 시세가 안 들어오는 종목"을 운영자가 즉시 인지하도록 1행 로그.
                 # 2026-05-11 VB/LTV 종일 시세 무수신 사고 가시성 결함 보완.
@@ -3444,6 +3460,99 @@ class TradingScheduler:
             }
             await asyncio.sleep(0.05)
 
+    async def _auto_capture_funnel_snapshots(self) -> None:
+        """사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot.
+
+        활성 전략별 `_funnel_steps` (사이클 39 신규 필드) 를 DB `strategy_funnel_snapshots`
+        단계별 row 로 INSERT. 사이클 34 인프라 재활용 (사용자 5/22 funnel 단계별 진단 자동화).
+
+        흐름:
+        1. `registry.all()` 순회 — `_funnel_steps` 가 있는 전략만
+        2. 각 전략 단계별 (`step_no=1..8`) row + 최종 (`step_no=99`) row INSERT
+        3. 한 전략 처리 중 예외 → 다른 전략 계속 (graceful)
+        4. `_funnel_steps` 빈 리스트 → 해당 전략 skip (prepare() 미실행 또는 사이클 38 이전 버전)
+
+        안전 가드:
+        - 본체 예외는 호출자 `_scan_loop` 가 try/except 흡수
+        - DB JSONB cap 200/20 (사이클 34 strategy_funnel.py 자동 적용)
+        - 일일 1회 가드는 호출자 (`_auto_funnel_snapshot_done_today`) 가 보장
+        """
+        from datetime import date as _date
+        from src.db.strategy_funnel import insert_snapshot
+        from src.engine.scanner import KST_TZ as _KST_TZ
+
+        today_kst = datetime.now(_KST_TZ).date()
+        saved_count = 0
+
+        try:
+            strategies = self.registry.all()
+        except Exception:
+            logger.exception("[funnel_snapshot] registry 접근 실패")
+            return
+
+        for strategy in strategies:
+            sid = getattr(strategy, "strategy_id", "")
+            if not sid:
+                continue
+            try:
+                funnel_steps = getattr(strategy, "_funnel_steps", []) or []
+            except Exception:
+                logger.exception("[funnel_snapshot] %s _funnel_steps 접근 실패", sid)
+                continue
+
+            # 단계별 row INSERT
+            for step in funnel_steps:
+                try:
+                    row = await insert_snapshot(
+                        target_date=today_kst,
+                        strategy_id=sid,
+                        step_no=int(step.get("step_no", 0)),
+                        step_name=str(step.get("step_name", "")),
+                        survived_tickers=list(step.get("survived", []) or []),
+                        excluded_sample=list(step.get("excluded", []) or []),
+                        survived_count=int(step.get("survived_count", 0)),
+                        excluded_count=int(step.get("excluded_count", 0)),
+                    )
+                    if row:
+                        saved_count += 1
+                except Exception:
+                    logger.exception(
+                        "[funnel_snapshot] %s step_no=%s INSERT 실패",
+                        sid, step.get("step_no"),
+                    )
+                    continue
+
+            # 최종 단계 (step_no=99) row — 사이클 34 호환 (수동 trigger 형식 유지)
+            try:
+                get_scanned = getattr(strategy, "get_scanned_tickers", None)
+                scanned = list(get_scanned()) if callable(get_scanned) else []
+                row = await insert_snapshot(
+                    target_date=today_kst,
+                    strategy_id=sid,
+                    step_no=99,
+                    step_name="최종 prepared (auto)",
+                    survived_tickers=scanned,
+                    survived_count=len(scanned),
+                    excluded_count=0,
+                    excluded_sample=[],
+                )
+                if row:
+                    saved_count += 1
+            except Exception:
+                logger.exception("[funnel_snapshot] %s 최종 단계 INSERT 실패", sid)
+
+        logger.info(
+            "[funnel_snapshot] 자동 캡처 완료 — target_date=%s saved=%d",
+            today_kst.isoformat(), saved_count,
+        )
+        try:
+            await write_log(
+                "INFO",
+                f"[funnel_snapshot] auto target_date={today_kst.isoformat()} saved={saved_count}",
+            )
+        except Exception:
+            logger.debug("[funnel_snapshot] write_log 실패", exc_info=True)
+
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).
 
@@ -3751,6 +3860,8 @@ class TradingScheduler:
         self._universe_excluded_today.clear()
         # 사이클 37 (2026-05-21) — KIS 체결시각 캐시 매일 초기화
         self._last_ccnl_cache.clear()
+        # 사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot 일일 1회 가드 reset
+        self._auto_funnel_snapshot_done_today = False
 
         # Phase 3 (2026-05-16) — 백테스트 폴 루프 진입 가드 set 매일 초기화.
         # 정상 종료 시 finally 에서 discard 되지만 예외/취소 시 잔재 가능성 차단.

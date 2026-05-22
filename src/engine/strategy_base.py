@@ -162,13 +162,55 @@ class StrategyBase(ABC):
     3. scheduler.py에서 registry.register() 호출
     """
 
+    # 사이클 39 (2026-05-22) — funnel 단계별 ticker 캡처 cap (응답/저장 크기 보호).
+    # 사이클 34 DB JSONB cap 과 정합 (survived 200 / excluded 20).
+    _FUNNEL_SURVIVED_CAP = 200
+    _FUNNEL_EXCLUDED_CAP = 20
+
     def __init__(self, config: StrategyConfig):
         self.config = config
         self.state = StrategyState(strategy_id=config.strategy_id)
+        # 사이클 39 (2026-05-22) — funnel 단계별 ticker 캡처. prepare() 마다 reset.
+        # 09:30 자동 snapshot 이 본 리스트를 DB `strategy_funnel_snapshots` 단계별 row 로 변환.
+        self._funnel_steps: list[dict] = []
 
     @property
     def strategy_id(self) -> str:
         return self.config.strategy_id
+
+    def _record_funnel_step(
+        self,
+        step_no: int,
+        step_name: str,
+        survived: list[str],
+        excluded: list[dict] | None = None,
+    ) -> None:
+        """사이클 39 (2026-05-22) — 단계별 통과/탈락 ticker 캡처.
+
+        Args:
+            step_no: 단계 번호 (1, 2, 3, ...).
+            step_name: 단계 이름 (UI/DB 명세와 일치).
+            survived: 단계 통과 ticker 리스트.
+            excluded: 단계 탈락 sample [{"ticker": str, "reason": str}, ...] (선택).
+
+        Note:
+            survived/excluded cap 자동 적용 (200/20). 원본 카운트는 보존 (cap 이전).
+            본체 예외는 호출자 prepare() 가 try/except 흡수 — 회귀 가드.
+        """
+        survived_list = list(survived or [])
+        excluded_list = list(excluded or [])
+        self._funnel_steps.append({
+            "step_no": int(step_no),
+            "step_name": str(step_name),
+            "survived": survived_list[: self._FUNNEL_SURVIVED_CAP],
+            "survived_count": len(survived_list),
+            "excluded": excluded_list[: self._FUNNEL_EXCLUDED_CAP],
+            "excluded_count": len(excluded_list),
+        })
+
+    def _reset_funnel_steps(self) -> None:
+        """사이클 39 — prepare() 첫 단계 진입 시 호출. 이전 사이클 누적 제거."""
+        self._funnel_steps = []
 
     @abstractmethod
     async def prepare(self) -> None:

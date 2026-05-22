@@ -140,8 +140,20 @@ class VcpBreakoutStrategy(StrategyBase):
         self._candidates = {}
         stats = _empty_scan_stats()
         self._scan_stats = stats
+        # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
+        self._reset_funnel_steps()
 
         tickers = await self._scan_universe()
+        # 사이클 39 — 1단계: 코스피200+코스닥150 + 2단계: 시총 통과 (universe_filtered)
+        self._record_funnel_step(
+            step_no=1, step_name="코스피200+코스닥150 합집합",
+            survived=tickers,
+        )
+        self._record_funnel_step(
+            step_no=2, step_name="시총 ≥ 1,000억",
+            survived=tickers,  # _scan_universe 가 시총 통과 종목만 반환
+        )
+
         if not tickers:
             logger.info("VCP 유니버스 0종목")
             self._scanned_tickers = []
@@ -165,6 +177,14 @@ class VcpBreakoutStrategy(StrategyBase):
         # effective_ema_long = min(ema_long, 가용길이 - uptrend_days)
         uptrend_days = p.get("long_ema_uptrend_days", 20)
 
+        # 사이클 39 — 단계별 ticker 캡처 (회귀 가드 — 결과 무변경)
+        candle_fetch_ok_tickers: list[str] = []
+        trend_filter_pass_tickers: list[str] = []
+        base_pass_tickers: list[str] = []
+        pullback_pass_tickers: list[str] = []
+        volume_contraction_pass_tickers: list[str] = []
+        final_prepared_tickers: list[str] = []
+
         for ticker, candles in fetched:
             if candles is None or not candles:
                 continue
@@ -181,26 +201,31 @@ class VcpBreakoutStrategy(StrategyBase):
                 if prev_idx:
                     candles = candles[prev_idx:]
                 stats["candle_fetch_ok"] += 1
+                candle_fetch_ok_tickers.append(ticker)  # 사이클 39
 
                 trend = self._check_trend_filter(candles, effective_ema_long=effective_ema_long)
                 if not trend:
                     continue
                 stats["trend_filter_pass"] += 1
+                trend_filter_pass_tickers.append(ticker)  # 사이클 39
 
                 base = self._detect_base(candles)
                 if not base:
                     continue
                 stats["base_pass"] += 1
+                base_pass_tickers.append(ticker)  # 사이클 39
 
                 pullbacks_ok = self._check_pullback_sequence(candles, base)
                 if not pullbacks_ok:
                     continue
                 stats["pullback_pass"] += 1
+                pullback_pass_tickers.append(ticker)  # 사이클 39
 
                 vol_ok = self._check_volume_contraction(candles, base)
                 if not vol_ok:
                     continue
                 stats["volume_contraction_pass"] += 1
+                volume_contraction_pass_tickers.append(ticker)  # 사이클 39
 
                 atr = self._atr(
                     [int(c.get("stck_hgpr", "0")) for c in candles],
@@ -228,9 +253,24 @@ class VcpBreakoutStrategy(StrategyBase):
                     "avg_volume_20": base["avg_volume_20"],
                 }
                 stats["final_prepared"] += 1
+                final_prepared_tickers.append(ticker)  # 사이클 39
             except Exception as e:
                 logger.warning("VCP prepare 실패: %s — %s", ticker, e)
                 continue
+
+        # 사이클 39 (2026-05-22) — 단계별 hook 일괄 등록 (loop 종료 후, 결과 무변경)
+        self._record_funnel_step(step_no=3, step_name="일봉 fetch + 추세필터",
+                                  survived=candle_fetch_ok_tickers)
+        self._record_funnel_step(step_no=4, step_name="50/150/200 EMA 정렬",
+                                  survived=trend_filter_pass_tickers)
+        self._record_funnel_step(step_no=5, step_name="베이스 자동 검출",
+                                  survived=base_pass_tickers)
+        self._record_funnel_step(step_no=6, step_name="Pullback 점진 수축",
+                                  survived=pullback_pass_tickers)
+        self._record_funnel_step(step_no=7, step_name="거래량 수축",
+                                  survived=volume_contraction_pass_tickers)
+        self._record_funnel_step(step_no=8, step_name="최종 prepared",
+                                  survived=final_prepared_tickers)
 
         self._scanned_tickers = list(self._candidates.keys())
         self._bought_today.clear()

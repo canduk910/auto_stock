@@ -99,12 +99,16 @@ const BFB_STAGES: Array<{ key: string; label: string }> = [
 ]
 
 const VCP_STAGES: Array<{ key: string; label: string }> = [
+  // 사이클 39 (2026-05-22) — 백엔드 `_scan_stats` 키 매핑 시정.
+  // 기존 `trend_pass`/`contraction_pass` 는 백엔드 키와 불일치 → 항상 0 표시 결함.
+  // 백엔드 vcp_breakout.py `_empty_scan_stats` 정합: trend_filter_pass / base_pass / pullback_pass.
+  // 5/22 사용자 보고 "EMA 0 인데 base 9" 가 단계 순서 결함이 아닌 프론트 키 매핑 결함이었음.
   { key: 'universe_candidates', label: '코스피200+코스닥150 합집합' },
   { key: 'universe_filtered', label: '시총 ≥ 1,000억' },
   { key: 'candle_fetch_ok', label: '일봉 fetch + 추세필터' },
-  { key: 'trend_pass', label: '50/150/200 EMA 정렬' },
+  { key: 'trend_filter_pass', label: '50/150/200 EMA 정렬' },
   { key: 'base_pass', label: '베이스 자동 검출' },
-  { key: 'contraction_pass', label: 'Pullback 점진 수축' },
+  { key: 'pullback_pass', label: 'Pullback 점진 수축' },
   { key: 'volume_contraction_pass', label: '거래량 수축' },
   { key: 'final_prepared', label: '최종 prepared' },
 ]
