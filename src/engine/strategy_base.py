@@ -134,7 +134,18 @@ class StrategyState:
 
 @dataclass
 class StrategyConfig:
-    """전략 설정."""
+    """전략 설정.
+
+    params 핵심 키:
+    - `tradable_boards` (list[str]): **매수 진입 전용** 설정. 사이클 38 (2026-05-22) 명문화.
+      `["pre_nxt", "main", "post_nxt"]` 등. `session_tracker.is_tradable(strategy_id, params)`
+      가 활성 보드 ∩ tradable_boards ≠ ∅ 일 때만 매수 신호 평가 진입.
+      **매도/손절/Trailing/익일청산/15:20 강제청산/상한가 손절 모니터링은
+      어떤 전략에서도 PRE/MAIN/POST 무관 항상 작동** (보드 가드 *없이*).
+      → `risk.on_tick` 의 `check_exit_signal` 분기는 `is_tradable` 검사 전 평가.
+    - `exchange` (str): 주문 거래소 라우팅 (`KRX` / `NXT` / `SOR`).
+    - 그 외 전략별 파라미터 (`k_value_*` / `stop_loss_*` / `donchian_period` 등).
+    """
     strategy_id: str
     name: str
     enabled: bool = True

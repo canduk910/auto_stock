@@ -42,12 +42,17 @@ def _empty_scan_stats() -> dict:
 class LongTailVolatilityStrategy(StrategyBase):
     """롱테일 변동성 돌파 전략."""
 
-    # 매매 가능 보드 — MAIN(09:00~15:20) 만 활성 (사이클 26, 2026-05-20: KRX ONLY).
-    # 결정 (2026-05-20, 사이클 26): LTV 신규매수 KRX ONLY 정책.
-    # - PRE_NXT(08:00~09:00) 매수 제거: NXT 프리 OVERNIGHT 위험 차단 + SK하이닉스 시가 결함 해소.
-    # - POST_NXT(15:30~20:00) 매수 제거 유지: 상한가 미도달 15:20 일괄청산 정책 보존.
-    # 매도(손절/트레일링/익일청산/상한가 손절 모니터링)는 보드 가드 무관 작동.
-    DEFAULT_TRADABLE_BOARDS = ("main",)
+    # 매매 가능 보드 — PRE_NXT + MAIN + POST_NXT 3보드 (사이클 38, 2026-05-22: 사용자 의도 복원).
+    #
+    # 사이클 26 (2026-05-20): KRX ONLY 변경 (`("main",)`) — SK하이닉스 시가 결함 추적 중 도입.
+    # 사이클 38 (2026-05-22): 사용자 운영 의도 복원 — LTV 연속 상한가 익일 청산 모드 + 야간 매수.
+    # - PRE_NXT(08:00~09:00) 매수 가능: 야간 NXT 프리 진입 (사용자 운영 정책).
+    # - MAIN(09:00~15:20) 매수 가능: KRX 메인 시간대.
+    # - POST_NXT(15:40~19:50) 매수 가능: 연속 상한가 종목 익일 청산 모드 진입.
+    #
+    # `tradable_boards` 는 **매수 진입 전용** — 매도/손절/Trailing/익일청산/상한가 손절 모니터링은
+    # 어떤 시간대에서도 보드 가드 *없이* 항상 작동 (`risk.on_tick` 의 `check_exit_signal` 분기).
+    DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main", "post_nxt")
 
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),

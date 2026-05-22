@@ -110,8 +110,9 @@ def test_get_targets_status_returns_empty_when_no_active_board_intersection(ltv)
 # 3. top-level 은 활성 보드 중 우선순위 첫 confirmed 보드 기준
 # ---------------------------------------------------------------------------
 def test_get_targets_status_top_level_uses_first_active_confirmed_board(ltv):
-    # 사이클 26: LTV tradable_boards = ("main",) → MAIN 단독 활성.
-    # PRE_NXT 는 tradable_boards 에서 제거됐으므로 active 에 있어도 visible 에서 제외.
+    # 사이클 38 (2026-05-22): LTV tradable_boards = ("pre_nxt", "main", "post_nxt") 복원.
+    # MAIN + PRE_NXT 동시 활성 + 둘 다 LTV tradable_boards 에 포함 → 둘 다 visible.
+    # top-level 은 우선순위(main → post_nxt → pre_nxt) 첫 confirmed 보드 기준 → main.
     session_tracker._active = frozenset({MarketBoard.MAIN, MarketBoard.PRE_NXT})
     _seed_with_boards(
         ltv,
@@ -125,9 +126,9 @@ def test_get_targets_status_top_level_uses_first_active_confirmed_board(ltv):
 
     status = ltv.get_targets_status()
 
-    # 사이클 26: LTV tradable_boards = ("main",) → main 만 노출 (pre_nxt 교집합 제거)
-    assert list(status["005930"]["boards"].keys()) == ["main"]
-    # top-level 은 main 기준
+    # 사이클 38: LTV tradable_boards = 3 보드 → main + pre_nxt 둘 다 노출
+    assert set(status["005930"]["boards"].keys()) == {"main", "pre_nxt"}
+    # top-level 은 main 기준 (우선순위 첫 confirmed)
     assert status["005930"]["target_price"] == 80500
     assert status["005930"]["open_price"] == 80000
     assert status["005930"]["target_offset"] == 500

@@ -67,11 +67,16 @@ _BOARD_SCHEDULE: list[tuple[time, time, frozenset[MarketBoard]]] = [
 
 # 전략별 매매 허용 보드 fallback (DEFAULT_PARAMS["tradable_boards"]가 우선)
 # 사이클 26 (2026-05-20): VB/LTV fallback 을 MAIN 단독으로 변경
+# 사이클 38 (2026-05-22): LTV fallback 사용자 의도 복원 — PRE_NXT + MAIN + POST_NXT.
+# VB 는 그대로 MAIN 단독 (사용자 정책 부합, 15:20 일괄 청산 + OVERNIGHT 결함 차단).
 _DEFAULT_TRADABLE_BOARDS: dict[str, frozenset[MarketBoard]] = {
     "momentum": frozenset({MarketBoard.KRX_OPEN, MarketBoard.MAIN}),
-    # VB/LTV: 사이클 26 — KRX ONLY (PRE_NXT + POST_NXT 제거)
+    # VB: 사이클 26 — KRX ONLY (POST_NXT OVERNIGHT 결함 + 15:20 일괄 청산 정책)
     "volatility_breakout": frozenset({MarketBoard.MAIN}),
-    "long_tail_volatility": frozenset({MarketBoard.MAIN}),
+    # LTV: 사이클 38 — PRE_NXT + MAIN + POST_NXT (연속 상한가 익일 청산 + 야간 매수)
+    "long_tail_volatility": frozenset(
+        {MarketBoard.PRE_NXT, MarketBoard.MAIN, MarketBoard.POST_NXT}
+    ),
     "donchian_swing": frozenset({MarketBoard.MAIN}),
 }
 

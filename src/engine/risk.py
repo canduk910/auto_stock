@@ -86,6 +86,9 @@ class RiskManager:
                 pos.high_since_buy = max(pos.high_since_buy, current_price)
 
             # 3. 청산 신호 확인 (보유 중인 경우)
+            # 사이클 38 (2026-05-22) — `tradable_boards` 는 **매수 진입 전용** 정책 명문화.
+            # 매도/손절/Trailing/익일청산/15:20 강제청산은 PRE/MAIN/POST 무관 항상 평가 —
+            # 본 분기는 보드 가드 *없이* 진입 (line 102 `is_tradable` 검사 *전*).
             if state.has_position(ticker):
                 # 사이클 19 (2026-05-20) — 매도 발사 후 체결통보 도착 전까지 check_exit_signal 호출 skip.
                 # `_selling` 은 execute_sell 진입 직후 add, 체결통보 _handle_sell_fill 시 discard.
@@ -98,6 +101,7 @@ class RiskManager:
                     continue  # 청산 주문 후 매수 신호 확인 불필요
 
             # 4. 매수 신호 확인
+            # 사이클 38 명문화 — 본 분기 *부터* `tradable_boards` 가드 적용 (매수 전용).
             # 보드 가드 — 전략의 tradable_boards에 현재 활성 보드 포함 여부 (Phase 8)
             if not session_tracker.is_tradable(strategy.strategy_id, strategy.config.params):
                 # 가설 D (2026-05-12): skip 카운트 누적 + 1분 주기 [tradable_skip] emit
