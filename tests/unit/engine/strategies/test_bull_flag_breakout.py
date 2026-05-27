@@ -74,8 +74,9 @@ def test_default_params_thresholds():
     p = BullFlagBreakoutStrategy.DEFAULT_PARAMS
     assert p["tradable_boards"] == ["main"]
     assert p["exchange"] == "KRX"
-    assert p["pole_min_return"] == 20.0
-    assert p["pole_max_red_ratio"] == 0.30
+    # 사이클 48 (2026-05-27) — Pole 검출 0건 결함 완화 (20.0→15.0 / 0.30→0.45)
+    assert p["pole_min_return"] == 15.0
+    assert p["pole_max_red_ratio"] == 0.45
     assert p["flag_retracement_max"] == 0.382
     assert p["flag_volume_ratio"] == 0.60
     assert p["breakout_volume_mult"] == 2.0

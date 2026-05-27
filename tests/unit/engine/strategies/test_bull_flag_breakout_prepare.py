@@ -1,14 +1,17 @@
-"""bull_flag_breakout `_scan_universe()` import 정합성 회귀 가드.
+"""bull_flag_breakout `_scan_universe()` 정합성 회귀 가드.
 
 2026-05-15 사이클(bull_flag_breakout 전략 추가) 시점부터 5/18까지 운영 환경에서
 `prepare()` 매 호출이 `ImportError: cannot import name 'scan_volume_rank'` 로 실패하여
 전략이 완전 비활성(매수 신호 0건, 보유 0건)되던 결함 회귀 가드.
 
+사이클 48 (2026-05-27) — 유니버스 시간무관화. BFB 가 VB/LTV 와 동일하게
+volume-rank(FHPST01710000) prdy_vol 기반으로 교체 (07:50 장 전 acml_vol=0 결함 시정).
+본 테스트도 volume-rank mock 으로 갱신.
+
 검증 포인트:
-- `_scan_universe()` 가 `ImportError` 없이 정상 완료
-- `_fetch_fluctuation_rank` (등락률 순위 API `FHPST01700000`) 응답 스키마와 호환
-  (`mksc_shrn_iscd` 또는 `stck_shrn_iscd` 키, `hts_kor_isnm` 종목명)
-- 시총·거래대금 컷 적용 — `fetch_stock_detail` 로 종목 보강
+- `_scan_universe()` 가 import/호출 오류 없이 정상 완료
+- volume-rank 응답 스키마 호환 (`mksc_shrn_iscd`/`hts_kor_isnm`/`stck_prpr`/`lstn_stcn`/`prdy_vol`/`prdy_vrss`)
+- 시총·전일거래대금 컷 적용 (개별 호출 없이 응답 1건으로 산출)
 - `_scan_stats["universe_candidates"]` / `["universe_filtered"]` 갱신
 """
 
@@ -25,35 +28,36 @@ from src.engine.strategy_base import StrategyConfig
 pytestmark = pytest.mark.unit
 
 
-def _rank_item(ticker: str, name: str = "샘플전자") -> dict[str, Any]:
-    """등락률 순위(FHPST01700000) `output` 단일 항목 모사.
+def _vrank_item(ticker: str, name: str = "샘플전자", price: int = 50_000,
+                listed: int = 50_000_000, prdy_vol: int = 5_000_000,
+                prdy_vrss: int = 0) -> dict[str, Any]:
+    """volume-rank(FHPST01710000) `output` 단일 항목 모사 (시총·거래대금 컷 통과용).
 
-    실제 응답 키:
-    - stck_shrn_iscd (단축종목코드, 6자리)
-    - hts_kor_isnm (종목명)
-    - stck_prpr (현재가), prdy_ctrt (전일대비율) 등
+    50,000 × 50,000,000 = 2.5조 시총 / 50,000 × 5,000,000 = 2,500억 전일거래대금.
     """
     return {
-        "stck_shrn_iscd": ticker,
+        "mksc_shrn_iscd": ticker,
         "hts_kor_isnm": name,
-        "stck_prpr": "50000",
-        "prdy_ctrt": "5.0",
-    }
-
-
-def _detail_response(price: int = 50_000, listed: int = 50_000_000,
-                     prdy_vol: int = 5_000_000) -> dict[str, Any]:
-    """fetch_stock_detail 응답 모사 (시총 · 거래대금 컷 통과용).
-
-    사이클 33 (2026-05-21) — KIS FHKST01010100 응답 정합. `prdy_vol` 필드는 KIS 응답에
-    없음 → `acml_vol` (당일 누적거래량) 사용. 인자명은 기존 호환 보존, 매핑만 변경.
-    """
-    return {
         "stck_prpr": str(price),
         "lstn_stcn": str(listed),
-        "acml_vol": str(prdy_vol),  # 사이클 33: prdy_vol 인자 → acml_vol 필드로 매핑
-        "hts_kor_isnm": "샘플전자",
+        "prdy_vol": str(prdy_vol),
+        "prdy_vrss": str(prdy_vrss),
     }
+
+
+def _patch_vrank(monkeypatch, output: list[dict[str, Any]]):
+    """volume-rank kis_get 을 단일 응답으로 패치. blng 0/1/3 3회 호출 모두 동일 output."""
+    calls = {"count": 0}
+
+    async def _fake_kis_get(path, tr_id, params):
+        calls["count"] += 1
+        return {"output": output}
+
+    import src.engine.strategies.bull_flag_breakout as bfb_mod
+    from src.api import base as base_mod
+    monkeypatch.setattr(bfb_mod, "kis_get", _fake_kis_get, raising=False)
+    monkeypatch.setattr(base_mod, "kis_get", _fake_kis_get, raising=False)
+    return calls
 
 
 @pytest.fixture
@@ -66,27 +70,23 @@ def bfb(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# 1) ImportError 회귀 가드 — `_scan_universe()` 가 정상 import 후 완료
+# 1) 정상 완료 회귀 가드 — `_scan_universe()` 가 오류 없이 후보 산출
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_scan_universe_imports_fluctuation_rank_without_error(bfb):
-    """`_scan_universe()` 가 `_fetch_fluctuation_rank` 를 정상 import + 호출.
+async def test_scan_universe_completes_without_error(bfb, monkeypatch):
+    """`_scan_universe()` 가 volume-rank 호출 + 시총·거래대금 컷 후 list 반환.
 
-    5/15~5/18 운영 결함: `scan_volume_rank` 미존재 함수 import → ImportError →
-    `prepare()` 전체 실패 → 전략 비활성. 본 케이스가 ImportError 자체를 차단.
+    5/15~5/18 운영 결함(ImportError → 전략 비활성) 회귀 가드 + 사이클 48 prdy 시간무관 정합.
     """
-    rank_mock = AsyncMock(return_value=[_rank_item("005930"), _rank_item("000660", "샘플하이닉스")])
-    detail_mock = AsyncMock(return_value=_detail_response())
+    _patch_vrank(monkeypatch, [
+        _vrank_item("005930", "샘플전자"),
+        _vrank_item("000660", "샘플하이닉스"),
+    ])
 
-    with patch("src.api.condition._fetch_fluctuation_rank", rank_mock), \
-         patch("src.api.condition.fetch_stock_detail", detail_mock):
-        result = await bfb._scan_universe()
+    result = await bfb._scan_universe()
 
-    # ImportError 없이 list 반환
     assert isinstance(result, list)
-    # 등락률 순위 API 1회 호출
-    assert rank_mock.call_count == 1
-    # 시총·거래대금 컷 통과한 종목들 (50,000 × 50,000,000 = 2.5조 시총, 50,000 × 5,000,000 = 2,500억 거래대금)
+    # 시총·전일거래대금 컷 통과
     assert "005930" in result
     assert "000660" in result
 
@@ -95,14 +95,12 @@ async def test_scan_universe_imports_fluctuation_rank_without_error(bfb):
 # 2) _scan_stats 갱신 — universe_candidates / universe_filtered 카운트
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_scan_universe_updates_scan_stats(bfb):
+async def test_scan_universe_updates_scan_stats(bfb, monkeypatch):
     """`_scan_universe()` 가 _scan_stats 의 universe_candidates / universe_filtered 를 갱신."""
-    rank_mock = AsyncMock(return_value=[_rank_item("005930")])
-    detail_mock = AsyncMock(return_value=_detail_response())
+    _patch_vrank(monkeypatch, [_vrank_item("005930")])
 
-    with patch("src.api.condition._fetch_fluctuation_rank", rank_mock), \
-         patch("src.api.condition.fetch_stock_detail", detail_mock):
-        await bfb._scan_universe()
+    await bfb._scan_universe()
 
+    # blng 0/1/3 합집합 dedupe → 동일 종목 1건
     assert bfb._scan_stats["universe_candidates"] == 1
     assert bfb._scan_stats["universe_filtered"] == 1

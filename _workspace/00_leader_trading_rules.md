@@ -463,9 +463,10 @@ VB와 동일.
 모멘텀 전략이 +29% 폭발 순간을 잡는다면, 본 전략은 그 후속 정리(소형 조정) 후 2차 상승 진입로를 담당한다.
 
 ### 종목군
-- KOSPI + KOSDAQ 전체에서 사후 필터 (모멘텀과 동일한 등락률/거래량 순위 API 또는 일봉 사후 필터, backend-dev 판단)
+- KOSPI + KOSDAQ 전체에서 사후 필터.
+- **사이클 48 (2026-05-27) 유니버스 소스 교체 — 시간무관화 (운영 결함 시정)**: 기존 `_fetch_fluctuation_rank()` + 종목별 `fetch_stock_detail()`(FHKST01010100) 방식은 응답에 `prdy_vol`(전일거래량) 필드가 없어 `acml_vol`(당일 누적거래량)으로 거래대금을 계산 → BFB `prepare()` 가 07:50 장 전 boot 에서만 호출되므로 `acml_vol=0` → **매일 "유니버스 0종목"** 결함. VB/LTV 와 동일하게 **거래량순위 API(`volume-rank` / FHPST01710000, blng 0/1/3 합집합)** 로 교체 — 응답 1건에 `prdy_vol`/`stck_prpr`/`prdy_vrss`/`lstn_stcn` 포함 → 개별 호출 없이 시총·전일거래대금 산출 + 시간 의존 제거. `trade_amt = prdy_vol × prdy_close` (prdy_close = stck_prpr - prdy_vrss).
 - **시가총액 ≥ 500억** (`min_market_cap`, 기본 50_000_000_000)
-- **20일 평균 거래대금 ≥ 20억** (`min_trade_amount`, 기본 2_000_000_000)
+- **전일 거래대금 ≥ 20억** (`min_trade_amount`, 기본 2_000_000_000) — 전일 확정치(prdy) 기준. 당일 누적(acml) 금지 (시간 편향 → 오후 편중 후보 왜곡)
 - ETF/ETN 제외 (기존 키워드 컨벤션 재사용 — KODEX/TIGER/RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS/인버스/레버리지)
 - 최대 100종목 (`max_scan_stocks`)
 
@@ -475,8 +476,8 @@ VB와 동일.
 
 ### 셋업 검증 (단계별 필터, prepare 시 통과 종목만 `_candidates`에 등록)
 **폴(Pole) 조건 — `pole_lookback_days=3~10`**:
-1. 직전 N영업일(3~10) 사이에 **누적 상승률 ≥ +20%** (`pole_min_return`, 기본 20.0)
-2. 같은 구간 **음봉 비율 ≤ 30%** (`pole_max_red_ratio`, 기본 0.30) — `close < open`인 일수 / 구간 길이
+1. 직전 N영업일(3~10) 사이에 **누적 상승률 ≥ +15%** (`pole_min_return`, 기본 **15.0** — 사이클 48 완화, 기존 20.0 은 음봉 30% 와 교집합이 0 을 만듦. 한국 일일 ±30% 환경에서 3~10일 +15% 도 충분히 강한 깃대 모멘텀)
+2. 같은 구간 **음봉 비율 ≤ 45%** (`pole_max_red_ratio`, 기본 **0.45** — 사이클 48 완화, 기존 0.30. 강한 폴 구간도 보통 1~2일 쉬어가는 음봉이 정상인데 30% 면 5일 중 음봉 2개(40%)에 탈락 → 현실 깃대상승 다수 탈락. 돌파 순간 + 거래량 2배 컷이 여전히 가짜 돌파 거름) — `close < open`인 일수 / 구간 길이
 3. 폴 구간 내 최고가 = `pole_high`, 폴 시작가 = `pole_start`, **폴 폭 = `pole_high - pole_start`**
 
 **플래그(Flag) 조건 — `flag_lookback_days=3~10`** (폴 종료 직후 N영업일):
@@ -526,11 +527,11 @@ VB와 동일.
 DEFAULT_PARAMS = {
     "tradable_boards": ["main"],
     "exchange": "KRX",
-    # 폴
+    # 폴 (사이클 48 — Pole 검출 0건 결함 시정)
     "pole_lookback_min": 3,
     "pole_lookback_max": 10,
-    "pole_min_return": 20.0,
-    "pole_max_red_ratio": 0.30,
+    "pole_min_return": 15.0,    # 사이클 48 — 20.0 → 15.0 완화
+    "pole_max_red_ratio": 0.45, # 사이클 48 — 0.30 → 0.45 완화
     # 플래그
     "flag_lookback_min": 3,
     "flag_lookback_max": 10,
@@ -582,9 +583,10 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 - `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드)
 
 ### 추세 필터 (Stage 2 confirmation, prepare 시 단계별 검사)
-1. **종가 > 50일 EMA > 150일 EMA > 200일 EMA** (`ema_short=50`, `ema_mid=150`, `ema_long=200`)
-2. **200일 EMA 우상향 1개월 이상** — 현재 200일 EMA > 1개월 전(20영업일 전) 200일 EMA (`long_ema_uptrend_days=20`)
+1. **종가 > 단기 EMA > 중기 EMA > 장기 EMA** (`ema_short=50`, `ema_mid=60`, `ema_long=120`)
+2. **장기 EMA 우상향 1개월 이상** — 현재 장기 EMA > 1개월 전(20영업일 전) 장기 EMA (`long_ema_uptrend_days=20`)
 3. 통과 종목만 다음 단계 검사
+4. **사이클 48 (2026-05-27) — 추세필터 0건 결함 시정 (운영 확정)**: KIS `fetch_daily_candles` 단일 호출 최대 100일 한도 때문에 사이클 33 의 `effective_ema_long = min(200, available_len - 25)` 자동 축소가 200EMA 를 사실상 ~75EMA 로 만들고, `ema_mid(150) > effective_ema_long(75)` 이면 다시 `ema_mid = ema_long-10 = 65` 로 축소 → 50/65/75 EMA 가 100일 데이터로 완벽 정배열 + 75EMA 20일 우상향까지 요구 → 한국 중소형주에서 추세필터 항상 0. **시정: `ema_long` DEFAULT 200→120, `ema_mid` 150→60 으로 낮춰 100일 fetch 로 안정 계산 가능한 50/60/120 정배열로 의도 보존.** 미네르비니 원전은 200EMA 이나 KIS 단일호출 한도(100일)로 계산 불가능한 200 을 형식만 두는 것보다 실측 가능한 120 이 정직. 분할 fetch 인프라는 운영 1주 후 별도 검토 (사이클 33 권고 유지). `effective_ema_long` 자동 축소 가드는 fetch 부족 시 안전망으로 유지 (120 도 100일 cap 에 걸리면 축소되나 폭 작음)
 
 ### 베이스 정의 (`base_lookback_weeks=5~15` → 일봉 25~75영업일)
 1. 베이스 시작·종료 자동 검출: 최근 N영업일(75일) 내에서 `(highest_close - lowest_close) / lowest_close ≤ 0.25` 인 최장 연속 구간을 베이스로 인식 (`base_depth_max=0.25`)
@@ -595,7 +597,7 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 1. 베이스 구간 내 pullback 자동 검출: 직전 swing high → swing low 까지의 하락 폭 → 다음 swing high 까지의 상승. `pullback_count_min=2`, `pullback_count_max=4`
 2. 각 pullback 폭 = `(swing_high - swing_low) / swing_high` (%)
 3. **각 pullback 폭이 직전 pullback 보다 작아야 함** (점진 수축, 변동성 contraction)
-4. **마지막 pullback ≤ 8%** (`last_pullback_max=0.08`)
+4. **마지막 pullback ≤ 12%** (`last_pullback_max=0.12` — 사이클 48 완화, 기존 0.08. 한국 중소형주 변동성에 8% 는 빡셈. 점진 수축 조건은 유지)
 
 ### 거래량 수축
 - 베이스 형성 중 **마지막 5일 평균 거래량 < 베이스 직전 20일 평균 거래량 × 70%** (`volume_contraction_ratio=0.70`)
@@ -642,10 +644,10 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 DEFAULT_PARAMS = {
     "tradable_boards": ["main"],
     "exchange": "KRX",
-    # 추세 필터
+    # 추세 필터 (사이클 48 — KIS 100일 한도로 계산 가능한 값으로 하향)
     "ema_short": 50,
-    "ema_mid": 150,
-    "ema_long": 200,
+    "ema_mid": 60,
+    "ema_long": 120,
     "long_ema_uptrend_days": 20,
     # 베이스
     "base_min_days": 25,
@@ -654,7 +656,7 @@ DEFAULT_PARAMS = {
     # 조정 시퀀스
     "pullback_count_min": 2,
     "pullback_count_max": 4,
-    "last_pullback_max": 0.08,
+    "last_pullback_max": 0.12,  # 사이클 48 — 0.08 → 0.12 완화
     # 거래량 수축
     "volume_contraction_ratio": 0.70,
     # 매수
@@ -2378,4 +2380,35 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
   - **donchian 가짜 돌파 감소**: 박스 수축 보조 필터로 진입 품질 강화
   - **AI 자문 weight 자동 적용**: 거래 부진 전략 자동 보호 (감액만 50% cap)
   - **시장 레짐 → 파라미터 동적 조정**: AI 자문 → 자동 적용으로 보수적 파라미터 자연 조정 (별도 코드 없음)
+
+---
+
+## 사이클 48 — BFB/VCP 0건 매매 결함 전면 시정 (2026-05-27, 운영 DB 확정)
+
+### 배경 (운영 DB 검증)
+6개 전략 중 `bull_flag_breakout`(BFB) / `vcp_breakout`(VCP) 가 배포(5/18) 이후 **단 한 건도 매매하지 못함** (BUY 0 / SELL 0, `daily_log_reports.metrics.strategy_funnel` 매일 signals:0). 다른 4개(momentum/VB/LTV/donchian) 정상. 메인 세션이 코드 + Supabase 운영 데이터로 확정.
+
+### 결함 위치 + 시정 (도메인 자문 결론 반영)
+
+**BFB-1. 유니버스 매일 장 전 0종목** — `bull_flag_breakout.py:_scan_universe()`
+- 결함: `_fetch_fluctuation_rank()` + 종목별 `fetch_stock_detail()`(FHKST01010100) → 응답에 `prdy_vol` 없어 `acml_vol`(당일 누적) 으로 거래대금 계산. BFB `prepare()` 는 07:50 장 전 boot 에서만 호출 → `acml_vol=0` → 전원 탈락 → 매일 "눌림목 돌파 유니버스 0종목".
+- 시정: VB/LTV 와 동일하게 `volume-rank`(FHPST01710000, blng 0/1/3 합집합) 로 소스 교체. 응답 1건에 `prdy_vol`/`stck_prpr`/`prdy_vrss`/`lstn_stcn` 포함 → 개별 호출 없이 시총·전일거래대금(`prdy_vol × prdy_close`) 산출 + 시간 의존 제거. `_scan_stats` 키 유지(`universe_candidates`/`universe_filtered`/`min_trade_amount_failed`).
+- 자문 사유: 장중 재prepare(acml 기준) 만으로는 시간 편향(오후 편중) 발생 → 09:05~13:00 진입창과 어긋남. 거래대금 필터는 반드시 전일 확정치.
+
+**BFB-2. Pole 검출 0** — `_detect_pole_and_flag()` 임계
+- `pole_min_return` 20.0 → **15.0** / `pole_max_red_ratio` 0.30 → **0.45**.
+- 자문 사유: 한국 ±30% 환경에서 +20% + 음봉 30% 교집합이 0. 깃대 강도 유지(15%도 강함) + 음봉 허용 현실화. flag_retracement 0.382 / 거래량 2배 컷은 유지(가짜 돌파 방어).
+
+**VCP. 추세필터 0 (주병목)** — `vcp_breakout.py:_check_trend_filter()` + DEFAULT_PARAMS
+- 결함: KIS 단일호출 100일 한도 → `effective_ema_long = min(200, available_len-25)` 가 200EMA 를 ~75 로 축소 + `ema_mid(150) > 75` → `ema_mid = 65` 재축소 → 50/65/75 정배열 + 75EMA 20일 우상향 동시 요구 → 한국 중소형주 항상 0.
+- 시정: `ema_long` DEFAULT 200→**120**, `ema_mid` 150→**60**. 100일 fetch 로 50/60/120 안정 계산. `effective_ema_long` 자동축소 가드는 안전망 유지. `last_pullback_max` 0.08→**0.12** (한국 변동성 현실화).
+- 자문 사유: 계산 불가능한 200 형식 유지보다 실측 가능한 120 이 정직. 분할 fetch 인프라는 운영 1주 후 별도 검토.
+
+**보조 안전망**: BFB/VCP 를 `scheduler._reprepare_breakout_if_empty()` 대상에 추가 (boot 실패/일시 API 오류 회복용 — 주 메커니즘은 prdy 유니버스). KIS rate limit 부담 미미(전략당 5분 1회, 후보 비었을 때만).
+
+**프론트 TZ 버그 (별개)**: `ScanMonitor.tsx:formatRunAt()` 에 `timeZone: 'Asia/Seoul'` 누락 → 비-KST 환경(스위스 등)에서 시각 오표시. 정본 컨벤션(`frontend/CLAUDE.md` "시각 표시 KST 강제") 준수로 시정.
+
+### 회귀 가드 (필수)
+- BFB/VCP 가 "신호 평가 단계까지 도달 가능"함을 입증하는 fixture 테스트 추가 (실제 후보 산출 케이스).
+- 기존 backend 1671 / frontend 160 PASS 회귀 금지. 핵심 안전 규칙(체결통보 구독·단일워커·주문매핑·익일청산) 절대 불변 — 매수 진입 임계만 완화, 매도/손절/청산 로직 무수정.
 

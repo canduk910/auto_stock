@@ -85,10 +85,12 @@ class VcpBreakoutStrategy(StrategyBase):
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         "exchange": "KRX",
-        # 추세 필터
+        # 추세 필터 (사이클 48, 2026-05-27 — KIS 100일 한도로 계산 가능한 값으로 하향)
+        # 기존 50/150/200 은 KIS 단일호출 100일 한도 → effective ~75 축소 + ema_mid 재축소
+        # → 50/65/75 정배열 항상 0 (추세필터 0건 결함). 50/60/120 으로 100일 내 안정 계산.
         "ema_short": 50,
-        "ema_mid": 150,
-        "ema_long": 200,
+        "ema_mid": 60,
+        "ema_long": 120,
         "long_ema_uptrend_days": 20,
         # 베이스
         "base_min_days": 25,
@@ -97,7 +99,7 @@ class VcpBreakoutStrategy(StrategyBase):
         # 조정 시퀀스
         "pullback_count_min": 2,
         "pullback_count_max": 4,
-        "last_pullback_max": 0.08,
+        "last_pullback_max": 0.12,  # 사이클 48 — 0.08→0.12. 한국 중소형주 변동성 현실화
         # 거래량 수축
         "volume_contraction_ratio": 0.70,
         # 매수

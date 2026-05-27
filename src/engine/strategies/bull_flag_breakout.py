@@ -24,6 +24,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import date, datetime, time, timedelta, timezone
 
@@ -79,11 +80,11 @@ class BullFlagBreakoutStrategy(StrategyBase):
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         "exchange": "KRX",
-        # 폴
+        # 폴 (사이클 48, 2026-05-27 — Pole 검출 0건 결함 완화)
         "pole_lookback_min": 3,
         "pole_lookback_max": 10,
-        "pole_min_return": 20.0,
-        "pole_max_red_ratio": 0.30,
+        "pole_min_return": 15.0,    # 사이클 48 — 20.0→15.0. 한국 ±30% 환경 + 음봉 45% 와 교집합 0 차단
+        "pole_max_red_ratio": 0.45,  # 사이클 48 — 0.30→0.45. 강한 폴도 1~2일 음봉 정상
         # 플래그
         "flag_lookback_min": 3,
         "flag_lookback_max": 10,
@@ -440,64 +441,101 @@ class BullFlagBreakoutStrategy(StrategyBase):
     async def _scan_universe(self) -> list[str]:
         """KRX 전체에서 시총·거래대금 컷.
 
-        1차 구현: 모멘텀 등락률 순위 API + 시총 사후 컷.
-        VTS 호환을 위해 fetch_stock_detail 으로 1종목씩 검증.
+        사이클 48 (2026-05-27) — 유니버스 시간무관화 (운영 0종목 결함 시정).
+        기존 `_fetch_fluctuation_rank` + 종목별 `fetch_stock_detail`(FHKST01010100) 방식은
+        응답에 `prdy_vol`(전일거래량) 필드가 없어 `acml_vol`(당일 누적) 으로 거래대금을 계산.
+        BFB `prepare()` 는 07:50 장 전 boot 에서만 호출 → `acml_vol=0` → 매일 "유니버스 0종목".
+
+        VB/LTV 와 동일하게 거래량순위 API(`volume-rank`/FHPST01710000, blng 0/1/3 합집합)로
+        교체. 응답 1건에 `prdy_vol`/`stck_prpr`/`prdy_vrss`/`lstn_stcn` 포함 → 개별 호출 없이
+        시총·전일거래대금(`prdy_vol × prdy_close`) 산출 + 시간 의존 제거.
         """
-        from src.api.condition import _fetch_fluctuation_rank, fetch_stock_detail
-        from src.engine.scanner import STATIC_TICKER_NAMES, ticker_names
+        from src.api.base import KisApiError, kis_get
+        from src.engine.scanner import ETF_KEYWORDS, ticker_names
 
         p = self.config.params
         min_mcap = p["min_market_cap"]
         min_trade = p["min_trade_amount"]
         max_stocks = p["max_scan_stocks"]
 
-        try:
-            ranked = await _fetch_fluctuation_rank()
-        except Exception as e:
-            logger.warning("눌림목 유니버스 스캔 실패: %s", e)
-            return []
+        # KIS 거래량순위는 단일 페이지(~30건). BLNG_CLS_CODE 별로 다른 정렬 기준의 상위
+        # 종목 합집합 → 후보 풀 확장 (0: 평균거래량 / 1: 거래증가율 / 3: 거래금액순)
+        BLNG_CODES = ("0", "1", "3")
+        rank_items: list[dict] = []
+        seen_tickers: set[str] = set()
+        for blng in BLNG_CODES:
+            try:
+                params = {
+                    "FID_COND_MRKT_DIV_CODE": "J",  # 코스피+코스닥 전체
+                    "FID_COND_SCR_DIV_CODE": "20171",
+                    "FID_INPUT_ISCD": "0000",
+                    "FID_DIV_CLS_CODE": "0",
+                    "FID_BLNG_CLS_CODE": blng,
+                    "FID_TRGT_CLS_CODE": "111111111",
+                    "FID_TRGT_EXLS_CLS_CODE": "000000",
+                    "FID_INPUT_PRICE_1": "0",
+                    "FID_INPUT_PRICE_2": "0",
+                    "FID_VOL_CNT": "0",
+                    "FID_INPUT_DATE_1": "0",
+                }
+                data = await kis_get(
+                    "/uapi/domestic-stock/v1/quotations/volume-rank",
+                    "FHPST01710000",
+                    params,
+                )
+                for item in data.get("output", []) or []:
+                    name = item.get("hts_kor_isnm", "")
+                    if any(kw in name for kw in ETF_KEYWORDS):
+                        continue
+                    ticker = item.get("mksc_shrn_iscd", "")
+                    if not ticker or ticker in seen_tickers:
+                        continue
+                    seen_tickers.add(ticker)
+                    rank_items.append(item)
+            except KisApiError:
+                logger.warning("눌림목 거래량순위 조회 실패: blng=%s", blng)
+            except Exception as e:
+                logger.warning("눌림목 유니버스 스캔 실패: blng=%s — %s", blng, e)
+            # KIS Rate Limit 보호 — 호출간 50ms (burst 회피)
+            await asyncio.sleep(0.05)
+
+        self._scan_stats["universe_candidates"] = len(rank_items)
 
         filtered: list[str] = []
-        all_count = 0
-        for item in ranked:
-            ticker = (item.get("mksc_shrn_iscd") or item.get("stck_shrn_iscd") or "").strip()
-            if not ticker or not ticker.isdigit() or len(ticker) != 6:
-                continue
-            name = (item.get("hts_kor_isnm") or "").strip()
-            # ETF/ETN 키워드 제외
-            if any(kw in name for kw in (
-                "KODEX", "TIGER", "RISE", "KoAct", "PLUS", "TIMEFOLIO", "WOORI", "FOCUS",
-                "인버스", "레버리지",
-            )):
-                continue
-            all_count += 1
+        for item in rank_items:
             if len(filtered) >= max_stocks:
                 break
+            ticker = item.get("mksc_shrn_iscd", "")
+            # 종목코드 형식 검증 — ETF·ETN·신주인수권 등 알파벳 포함 코드 차단
+            if not ticker or not (len(ticker) == 6 and ticker.isdigit()):
+                continue
             try:
-                detail = await fetch_stock_detail(ticker)
-                price = int(detail.get("stck_prpr", "0"))
-                listed = int(detail.get("lstn_stcn", "0"))
-                mcap = price * listed
-                # 사이클 33 (2026-05-21) — KIS FHKST01010100 응답에 `prdy_vol` 필드 없음.
-                # `acml_vol` (당일 누적거래량) 사용 — 5/21 funnel 30→0 사고 원인 (전일거래량 항상 0).
-                # KIS 정본 응답 필드: stck_prpr, lstn_stcn, acml_vol, prdy_vrss_vol_rate (전일대비 비율, 거래량 아님)
-                acml_vol = int(detail.get("acml_vol", "0"))
-                trade_amt = acml_vol * price
-                if mcap < min_mcap:
-                    continue
-                if trade_amt < min_trade:
-                    # 사이클 23 P1-2 — 거래대금 미달 카운터 (시총 통과 후 거래대금 미달)
-                    self._scan_stats["min_trade_amount_failed"] += 1
-                    continue
-                if not name:
-                    name = (detail.get("hts_kor_isnm") or "").strip() or STATIC_TICKER_NAMES.get(ticker, "")
-                if name:
-                    ticker_names[ticker] = name
-                filtered.append(ticker)
-            except Exception:
+                price = int(item.get("stck_prpr", "0"))
+                listed = int(item.get("lstn_stcn", "0"))
+                prdy_vol = int(item.get("prdy_vol", "0"))
+                # KIS prdy_vrss 는 부호 포함 정수 (상승=+, 하락=-)
+                prdy_vrss = int(item.get("prdy_vrss", "0"))
+                prdy_close = price - prdy_vrss
+            except (ValueError, TypeError):
                 continue
 
-        self._scan_stats["universe_candidates"] = all_count
+            if price <= 0 or listed <= 0 or prdy_vol <= 0 or prdy_close <= 0:
+                continue
+
+            mcap = price * listed
+            # 전일 확정치 기반 거래대금 — 당일 누적(acml) 금지 (시간 편향 → 오후 편중 왜곡)
+            prdy_trade_amt = prdy_vol * prdy_close
+            if mcap < min_mcap:
+                continue
+            if prdy_trade_amt < min_trade:
+                # 사이클 23 P1-2 — 거래대금 미달 카운터 (시총 통과 후 거래대금 미달)
+                self._scan_stats["min_trade_amount_failed"] += 1
+                continue
+            name = item.get("hts_kor_isnm", "")
+            if name:
+                ticker_names[ticker] = name
+            filtered.append(ticker)
+
         self._scan_stats["universe_filtered"] = len(filtered)
         return filtered
 

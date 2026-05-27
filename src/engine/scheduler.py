@@ -2263,13 +2263,17 @@ class TradingScheduler:
                     logger.debug("포지션 동기화 실패")
 
     async def _reprepare_breakout_if_empty(self) -> None:
-        """VB/LTV 의 `_scanned_tickers` 가 비어있으면 prepare() 를 1회 재시도한다.
+        """VB/LTV/BFB/VCP 의 `_scanned_tickers` 가 비어있으면 prepare() 를 1회 재시도한다.
 
         - 매 _scan_loop 사이클 1회 발화 (성공/실패 무관하게 다음 5분 사이클에 자연 재시도)
         - donchian_swing 은 대상 아님 (고정 유니버스이므로 prepare 실패해도 KOSPI200/KOSDAQ150 사용)
         - prepare() 가 raise 해도 가드 본체는 예외를 흡수하여 _scan_loop sleep/cancel 흐름을 보존한다
+        - 사이클 48 (2026-05-27): bull_flag_breakout / vcp_breakout 추가 — boot 실패/일시 API
+          오류 회복용 안전망 (주 메커니즘은 prdy 기반 시간무관 유니버스). 후보가 비었을 때만
+          호출되므로 KIS rate limit 부담 미미 (전략당 5분 1회)
         """
-        for sid in ("volatility_breakout", "long_tail_volatility"):
+        for sid in ("volatility_breakout", "long_tail_volatility",
+                    "bull_flag_breakout", "vcp_breakout"):
             strategy = self.registry.get(sid)
             if strategy is None or not strategy.config.enabled:
                 continue
@@ -2283,7 +2287,7 @@ class TradingScheduler:
             if scanned:
                 continue
 
-            logger.warning("VB/LTV 후보 비어있음 — 재 prepare 시도: %s", sid)
+            logger.warning("스캔 후보 비어있음 — 재 prepare 시도: %s", sid)
             try:
                 await write_log("WARNING", f"{sid} 후보 비어있음 — 재 prepare 시도")
             except Exception:

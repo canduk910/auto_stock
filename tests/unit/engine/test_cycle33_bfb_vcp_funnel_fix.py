@@ -33,106 +33,79 @@ pytestmark = pytest.mark.unit
 
 
 # ===========================================================================
-# B-1 (H-2): BFB `_scan_universe` — acml_vol 사용 검증
+# B-1 (H-2 → 사이클 48 갱신): BFB `_scan_universe` — prdy 기반 volume-rank 사용
+#
+# 사이클 33 은 acml_vol(당일 누적) 을 썼으나, 07:50 장 전 boot 에서 acml_vol=0 →
+# 매일 "유니버스 0종목" 결함 (운영 DB 확정). 사이클 48 (2026-05-27) 에서 VB/LTV 와
+# 동일하게 volume-rank(FHPST01710000) prdy_vol 기반으로 시간무관화. 본 테스트도 갱신.
 # ===========================================================================
+def _vrank_item(ticker, name, price, listed, prdy_vol, prdy_vrss=0):
+    return {
+        "mksc_shrn_iscd": ticker,
+        "hts_kor_isnm": name,
+        "stck_prpr": str(price),
+        "lstn_stcn": str(listed),
+        "prdy_vol": str(prdy_vol),
+        "prdy_vrss": str(prdy_vrss),
+    }
+
+
 @pytest.mark.asyncio
-async def test_bfb_scan_universe_uses_acml_vol_not_prdy_vol(monkeypatch):
-    """BFB `_scan_universe` 가 `acml_vol` (당일 누적거래량) 사용 — KIS FHKST01010100 정합."""
+async def test_bfb_scan_universe_uses_prdy_volume_rank(monkeypatch):
+    """BFB `_scan_universe` 가 prdy_vol 기반 volume-rank 사용 — 장 전에도 시간무관 동작."""
     from src.engine.strategies import bull_flag_breakout as bfb_mod
+    from src.engine.strategy_base import StrategyConfig
     from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
 
-    # 등락률 순위 1개 종목
-    async def _fake_fluctuation():
-        return [{"mksc_shrn_iscd": "005930", "hts_kor_isnm": "삼성전자"}]
+    async def _fake_kis_get(path, tr_id, params):
+        # 삼성전자: 65000 × 5M(전일거래량) ≈ 325억 거래대금 >> 20억 통과
+        return {"output": [_vrank_item("005930", "삼성전자", 65000, 5_969_782_550,
+                                        prdy_vol=5_000_000, prdy_vrss=0)]}
 
-    # fetch_stock_detail 응답 — KIS 정본: prdy_vol 없음, acml_vol 있음
-    # 삼성전자 가정: 현재가 65000원 / 상장주식 5,969,782,550 / 당일 거래량 5,000,000
-    async def _fake_detail(ticker):
-        return {
-            "stck_prpr": "65000",
-            "lstn_stcn": "5969782550",
-            "acml_vol": "5000000",          # 당일 누적거래량 (KIS 응답 실제 필드)
-            "prdy_vrss_vol_rate": "75.14",  # 전일대비 거래량 비율
-            "hts_kor_isnm": "삼성전자",
-        }
+    monkeypatch.setattr(bfb_mod, "kis_get", _fake_kis_get, raising=False)
+    from src.api import base as base_mod
+    monkeypatch.setattr(base_mod, "kis_get", _fake_kis_get, raising=False)
+    from src.engine import scanner
+    monkeypatch.setattr(scanner, "ticker_names", {})
 
-    from src.api import condition as cond_mod
-    monkeypatch.setattr(cond_mod, "_fetch_fluctuation_rank", _fake_fluctuation)
-    monkeypatch.setattr(cond_mod, "fetch_stock_detail", _fake_detail)
-    monkeypatch.setattr(bfb_mod, "fetch_stock_detail", _fake_detail, raising=False)
-
-    # config 더블
-    fake_config = MagicMock()
-    fake_config.strategy_id = "bull_flag_breakout"
-    fake_config.params = {
-        "min_market_cap": 50_000_000_000,    # 500억
-        "min_trade_amount": 2_000_000_000,   # 20억
-        "max_scan_stocks": 50,
-    }
-    fake_config.enabled = True
-    fake_config.weight = 0.1
-
-    strat = BullFlagBreakoutStrategy.__new__(BullFlagBreakoutStrategy)
-    strat.config = fake_config
-    strat._scan_stats = {"universe_candidates": 0, "universe_filtered": 0,
-                         "min_trade_amount_failed": 0}
-
+    strat = BullFlagBreakoutStrategy(
+        StrategyConfig(strategy_id="bull_flag_breakout", name="눌림목 돌파", weight=0.0)
+    )
     result = await strat._scan_universe()
 
-    # acml_vol(5M) × price(65000) = 325억 → 시총 (65000×5,969,782,550) >> 500억 + 거래대금 325억 >> 20억 → 통과
     assert "005930" in result, (
-        f"BFB acml_vol 으로 trade_amt 계산 정합 — 삼성전자 65000×5M=325억 > min_trade=20억 통과 필요. "
-        f"실제={result}"
+        f"prdy_vol 기반 거래대금 산출로 장 전에도 통과 필요. 실제={result}"
     )
 
 
 @pytest.mark.asyncio
 async def test_bfb_scan_universe_filters_low_trade_amount(monkeypatch):
-    """거래대금 미달 종목은 정상 탈락 (min_trade_amount_failed 카운트)."""
+    """거래대금 미달 종목은 정상 탈락 (min_trade_amount_failed 카운트, prdy 기준)."""
     from src.engine.strategies import bull_flag_breakout as bfb_mod
+    from src.engine.strategy_base import StrategyConfig
     from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
 
-    async def _fake_fluctuation():
-        return [
-            {"mksc_shrn_iscd": "100001", "hts_kor_isnm": "거래량 빈약 종목"},
-            {"mksc_shrn_iscd": "100002", "hts_kor_isnm": "거래량 정상"},
-        ]
+    async def _fake_kis_get(path, tr_id, params):
+        return {"output": [
+            # 빈약: 1000 × 100(전일거래량) = 10만원 << 20억 → 탈락
+            _vrank_item("100001", "빈약", 1000, 100_000_000, prdy_vol=100, prdy_vrss=0),
+            # 정상: 65000 × 5M = 325억 > 20억 통과
+            _vrank_item("100002", "정상", 65000, 5_000_000_000, prdy_vol=5_000_000, prdy_vrss=0),
+        ]}
 
-    async def _fake_detail(ticker):
-        if ticker == "100001":
-            # 가격 1000원 × 거래량 100주 = 10만원 (< 20억)
-            return {"stck_prpr": "1000", "lstn_stcn": "100000000", "acml_vol": "100",
-                    "hts_kor_isnm": "빈약"}
-        # 100002: 65000 × 5,000,000 = 325억 > 20억 통과
-        return {"stck_prpr": "65000", "lstn_stcn": "5000000000", "acml_vol": "5000000",
-                "hts_kor_isnm": "정상"}
+    monkeypatch.setattr(bfb_mod, "kis_get", _fake_kis_get, raising=False)
+    from src.api import base as base_mod
+    monkeypatch.setattr(base_mod, "kis_get", _fake_kis_get, raising=False)
+    from src.engine import scanner
+    monkeypatch.setattr(scanner, "ticker_names", {})
 
-    from src.api import condition as cond_mod
-    monkeypatch.setattr(cond_mod, "_fetch_fluctuation_rank", _fake_fluctuation)
-    monkeypatch.setattr(cond_mod, "fetch_stock_detail", _fake_detail)
-    monkeypatch.setattr(bfb_mod, "fetch_stock_detail", _fake_detail, raising=False)
-
-    fake_config = MagicMock()
-    fake_config.strategy_id = "bull_flag_breakout"
-    fake_config.params = {
-        "min_market_cap": 50_000_000_000,
-        "min_trade_amount": 2_000_000_000,
-        "max_scan_stocks": 50,
-    }
-    fake_config.enabled = True
-    fake_config.weight = 0.1
-
-    strat = BullFlagBreakoutStrategy.__new__(BullFlagBreakoutStrategy)
-    strat.config = fake_config
-    strat._scan_stats = {"universe_candidates": 0, "universe_filtered": 0,
-                         "min_trade_amount_failed": 0}
-
+    strat = BullFlagBreakoutStrategy(
+        StrategyConfig(strategy_id="bull_flag_breakout", name="눌림목 돌파", weight=0.0)
+    )
     result = await strat._scan_universe()
 
-    # 100001 거래대금 미달 → 탈락, 100002 정상 통과
     assert "100001" not in result
     assert "100002" in result
-    # 거래대금 미달 카운트 증가
     assert strat._scan_stats["min_trade_amount_failed"] >= 1
 
 
