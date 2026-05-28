@@ -53,7 +53,7 @@ export const STRATEGY_INFO: Record<string, { tagline: string; description: strin
     tagline: '변동성이 점점 줄어드는 베이스에서 상단 돌파 시 진입',
     description:
       '🌀 미네르비니식 VCP (Volatility Contraction Pattern) — 베이스 + 변동성 수축 확인 후 돌파 진입.\n\n' +
-      '• 추세 필터: 종가 > 50 EMA > 60 EMA > 장기 EMA(설정 120, KIS 일봉 100일 한도로 실효 ~75) + 장기 EMA 1개월 우상향\n' +
+      '• 추세 필터: 종가 > 50일 EMA > 60일 EMA > 장기 EMA(설정 120일, KIS 일봉 100일 한도로 실효 ~75일) + 장기 EMA 1개월 우상향\n' +
       '• 베이스: 5~15주 박스권 (깊이 ≤ 25%, 최대 30%)\n' +
       '• 조정 시퀀스: 2~4회 pullback 점진 수축 (마지막 pullback ≤ 8%)\n' +
       '• 거래량 수축: 마지막 5일 평균 < 베이스 직전 20일 평균 × 70%\n' +
