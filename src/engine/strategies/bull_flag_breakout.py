@@ -538,6 +538,29 @@ class BullFlagBreakoutStrategy(StrategyBase):
             filtered.append(ticker)
 
         self._scan_stats["universe_filtered"] = len(filtered)
+
+        # PR #15 (사이클 48) copilot 재리뷰 ② — 빈 유니버스 시 ERROR 로그 + system_logs.
+        # `strategies/CLAUDE.md` 컨벤션 "0종목 확정 시 ERROR 로그 + system_logs 기록" 준수
+        # (VB/LTV 와 동일 패턴). 이 PR 이 바로 "universe 0" 진단 목적이라 누락 시 동일 결함
+        # 재발견 실패. rank API 0건(rank_items 빈) vs 필터 전부 탈락(rank_items>0 but filtered=0)
+        # 구분 로깅. 빈 유니버스가 아니면 호출되지 않음 (행위 보존).
+        if not filtered:
+            from src.db.system_logs import write_log
+
+            if not rank_items:
+                msg = "눌림목 돌파 유니버스 0종목 — 거래량순위 API 응답이 비어있음"
+            else:
+                msg = (
+                    f"눌림목 돌파 유니버스 0종목 — 후보 {len(rank_items)}종목 중 "
+                    f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
+                    f"{min_trade // 100_000_000}억+ 필터 통과 없음"
+                )
+            logger.error(msg)
+            try:
+                await write_log("ERROR", msg)
+            except Exception:
+                logger.exception("system_logs 기록 실패")
+
         return filtered
 
     # ------------------------------------------------------------------

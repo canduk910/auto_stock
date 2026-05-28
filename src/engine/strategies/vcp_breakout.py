@@ -48,7 +48,9 @@ FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "코스피200+코스닥150 합집합"),
     FunnelStage(2, "시총 ≥ 1,000억"),
     FunnelStage(3, "일봉 fetch + 추세필터"),
-    FunnelStage(4, "단기/중기/장기 EMA 정렬"),  # 사이클 48 — 50/60/120 (기존 50/150/200)
+    # 사이클 48 — config 50/60/120 (기존 50/150/200). PR #15 ①: 장기EMA(120) 는 KIS 100일
+    # 한도 가드로 런타임 effective ~75 로 캡됨 → 실효 정렬 50/60/~75. step_conditions 에 명시.
+    FunnelStage(4, "단기/중기/장기 EMA 정렬"),
     FunnelStage(5, "베이스 자동 검출"),
     FunnelStage(6, "Pullback 점진 수축"),
     FunnelStage(7, "거래량 수축"),
@@ -88,7 +90,13 @@ class VcpBreakoutStrategy(StrategyBase):
         "exchange": "KRX",
         # 추세 필터 (사이클 48, 2026-05-27 — KIS 100일 한도로 계산 가능한 값으로 하향)
         # 기존 50/150/200 은 KIS 단일호출 100일 한도 → effective ~75 축소 + ema_mid 재축소
-        # → 50/65/75 정배열 항상 0 (추세필터 0건 결함). 50/60/120 으로 100일 내 안정 계산.
+        # → 50/65/75 정배열 항상 0 (추세필터 0건 결함). 50/60/120 으로 ema_mid 재축소 회피.
+        #
+        # PR #15 (copilot 재리뷰 ①) 실측 주의: ema_long=120 은 `prepare()` 의 effective 가드
+        # (min(120, 100-uptrend-5)=~75) 로 런타임에는 ~75EMA 로 계산된다 — 진짜 120EMA 가
+        # 아니다. ema_mid=60 < 75 라 중기선 재축소는 발동 안 함 → 실효 정렬 50/60/~75.
+        # config 120 은 "분할 fetch 로 진짜 120 을 계산하게 될 때의 목표값" 의미로 보존
+        # (분할 fetch 인프라는 운영 1주 후 별도 검토, 사용자 승인 대기 — 범위 밖).
         "ema_short": 50,
         "ema_mid": 60,
         "ema_long": 120,
@@ -338,14 +346,25 @@ class VcpBreakoutStrategy(StrategyBase):
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[2],
             survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
-            step_conditions=f"KIS 일봉 ≥ effective_ema_long(min {ema_long},100-25) + 우상향 {uptrend_days}일 + 5",
+            step_conditions=(
+                f"KIS 일봉 ≥ effective_ema_long"
+                f"(config {ema_long}, KIS 100일 한도로 ~{min(ema_long, KIS_DAILY_CANDLES_MAX - uptrend_days - 5)} 캡) "
+                f"+ 우상향 {uptrend_days}일 + 5"
+            ),
+        )
+        # PR #15 (사이클 48) copilot 재리뷰 ① — 표기 정직화. config ema_long=120 은 KIS
+        # 100일 한도 가드로 런타임 effective ~75 로 캡됨 (예: 100일 응답 → min(120,100-20-5)=75).
+        # funnel/step_conditions 가 "120EMA" 만 박으면 실제(~75)와 불일치 → 캡을 명시.
+        _eff_long_label = min(
+            ema_long, KIS_DAILY_CANDLES_MAX - uptrend_days - 5
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[3],
             survived=trend_filter_pass_tickers, excluded=trend_filter_excluded,
             step_conditions=(
-                f"종가 > {p['ema_short']}EMA > {p['ema_mid']}EMA > {ema_long}EMA + "
-                f"{ema_long}EMA {uptrend_days}일 우상향"
+                f"종가 > {p['ema_short']}EMA > {p['ema_mid']}EMA > "
+                f"장기EMA(config {ema_long}, KIS 100일 한도로 effective ~{_eff_long_label}) + "
+                f"effective 장기EMA {uptrend_days}일 우상향"
             ),
         )
         self._record_funnel_pipeline_step(
@@ -393,6 +412,15 @@ class VcpBreakoutStrategy(StrategyBase):
         사이클 33 (2026-05-21) — KIS 한도 대응: `effective_ema_long` 파라미터로
         가용 길이 기반 자동 축소 가능. None 이면 params["ema_long"] 사용.
         ema_mid 도 effective_ema_long 보다 크면 자동 축소.
+
+        PR #15 (사이클 48) copilot 재리뷰 ① — **실측 표기 정직화**: config ema_long=120 은
+        KIS 단일호출 100일 한도 가드(`prepare()` 의 `effective_ema_long =
+        min(ema_long, available_len - uptrend_days - 5)`)로 런타임에는 ~75 로 캡된다
+        (100일 응답 + uptrend_days=20 → min(120, 100-20-5)=75). 즉 실제 장기선은 ~75EMA,
+        ema_mid=60 < 75 라 중기선 자동축소(`ema_mid >= ema_long`)는 발동 안 함 → 실효 정렬은
+        50/60/~75. "진짜 120/200EMA" 는 분할 fetch 인프라(운영 1주 후 별도 검토, 사용자 승인
+        대기) 가 있어야 계산 가능. 본 PR 은 config 값(120)·매매 동작(진입 빈도) 무변경, 표기만
+        실측과 일치(방향 c). uptrend(20일 우상향) 판정은 그대로라 중장기 추세 추종 의도 보존.
         """
         p = self.config.params
         ema_short = p["ema_short"]
