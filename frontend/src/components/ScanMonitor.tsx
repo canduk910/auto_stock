@@ -204,10 +204,12 @@ function ScanFunnelBars({ testId, title, stages, stats, theme = 'teal' }: ScanFu
   )
 }
 
-function formatRunAt(iso?: string | null): string {
+export function formatRunAt(iso?: string | null): string {
   if (!iso) return '-'
   try {
-    return new Date(iso).toLocaleString('ko-KR', { hour12: false })
+    // 시각 표시 KST 강제 (frontend/CLAUDE.md 컨벤션) — timeZone 누락 시 비-KST 환경
+    // (도커 UTC / 해외) 에서 07:48 boot 이 "0:48" 등으로 오표시됨
+    return new Date(iso).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false })
   } catch {
     return iso
   }

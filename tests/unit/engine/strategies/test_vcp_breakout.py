@@ -75,16 +75,17 @@ def test_default_params_thresholds():
     p = VcpBreakoutStrategy.DEFAULT_PARAMS
     assert p["tradable_boards"] == ["main"]
     assert p["exchange"] == "KRX"
+    # 사이클 48 (2026-05-27) — 추세필터 0건 결함 시정 (KIS 100일 한도 계산 가능 값으로 하향)
     assert p["ema_short"] == 50
-    assert p["ema_mid"] == 150
-    assert p["ema_long"] == 200
+    assert p["ema_mid"] == 60
+    assert p["ema_long"] == 120
     assert p["long_ema_uptrend_days"] == 20
     assert p["base_min_days"] == 25
     assert p["base_max_days"] == 75
     assert p["base_depth_pct"] == 0.30
     assert p["pullback_count_min"] == 2
     assert p["pullback_count_max"] == 4
-    assert p["last_pullback_max"] == 0.08
+    assert p["last_pullback_max"] == 0.12
     assert p["volume_contraction_ratio"] == 0.70
     assert p["breakout_volume_mult"] == 1.5
     assert p["entry_start"] == "09:05"

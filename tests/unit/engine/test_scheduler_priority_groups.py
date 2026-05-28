@@ -8,7 +8,8 @@ scheduler 가 산출하는지 검증한다.
 - next_day_clear: `_pending_next_day_clear` set 의 ticker (dedupe)
 - swing: `_collect_swing_tickers()` (donchian_swing)
 - momentum: `momentum_tickers` 인자 그대로
-- breakout: `_collect_breakout_tickers()` (volatility_breakout + long_tail_volatility)
+- breakout: `_collect_breakout_tickers()` (volatility_breakout + long_tail_volatility
+            + bull_flag_breakout + vcp_breakout — 사이클 48. 본 케이스는 VB/LTV 만 등록)
 
 호출 사양:
     `self._build_priority_groups(momentum_tickers: list[str] | None = None) -> dict[str, list[str]]`
@@ -125,7 +126,8 @@ def test_build_priority_groups_returns_all_five_keys():
     assert groups["swing"] == []
     # donchian_swing 보유(P_DS)는 positions 그룹에 그대로 (위에서 검증됨)
 
-    # breakout: VB1, VB2, LTV1
+    # breakout: VB1, VB2, LTV1 (이 케이스는 VB/LTV 만 등록 — 사이클 48 후 BFB/VCP 도
+    # 동일 그룹 대상이며 별도 검증은 test_cycle48_bfb_vcp_subscription_wiring.py)
     assert set(groups["breakout"]) == {"VB1", "VB2", "LTV1"}
 
     # momentum: 인자 그대로
