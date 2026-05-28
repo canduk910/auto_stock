@@ -19,14 +19,11 @@
 from __future__ import annotations
 
 import inspect
-from datetime import date, datetime, timedelta, timezone
-from unittest.mock import MagicMock
+from datetime import date, timedelta
 
 import pytest
 
 pytestmark = pytest.mark.unit
-
-KST = timezone(timedelta(hours=9))
 
 
 # ===========================================================================

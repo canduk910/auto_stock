@@ -685,6 +685,13 @@ DEFAULT_PARAMS = {
 - VTS(모의) 검증 가능 — KRX 메인 한정
 - 추후 200일 EMA 갱신 빈도, base 자동 검출 알고리즘 정밀도는 운영 데이터 기반으로 튜닝
 
+### 사이클 48 (2026-05-27) — BFB/VCP 구독 배선 편입 (P1 후속, PR #15 코드리뷰)
+유니버스 시간무관화 + 임계 완화로 BFB/VCP 가 후보를 *산출* 하게 만들었으나, codex 리뷰가 치명적 갭을 지적했고 코드로 확정함: BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(WebSocket tick) 으로만 평가된다. 그런데 후보가 WebSocket 구독에 들어가는 유일한 경로 `scheduler._collect_breakout_tickers()` 가 VB/LTV 두 전략만 순회했다 → BFB/VCP 후보 미구독 → tick 미수신 → on_tick 매수 평가 영영 안 됨 → 유니버스/임계 완화를 해도 **0건 지속**.
+- **시정**: `_collect_breakout_tickers()` 순회 튜플에 `bull_flag_breakout` / `vcp_breakout` 추가 (VB/LTV/BFB/VCP 4 전략). 이 함수는 (a) `_scan_loop` extra, (b) `_collect_presubscribe_tickers`(07:55 사전구독), (c) `_build_priority_groups()["breakout"]` 세 구독 경로 전부의 소스이므로 한 곳 수정으로 전파.
+- **우선순위 불변**: BFB/VCP 후보는 VB/LTV 와 동일하게 `breakout` 그룹 = **LOW + bypass_limit=False** 로 유입 → `BREAKOUT_LOW_CAP=25` 2-pass cap + graceful `[priority_drop]` 대상(설계대로). HIGH(positions/next_day_clear) `bypass_limit=True` 41슬롯 절대 보장은 무수정. 매도/손절/Trailing/익일청산 경로 무수정.
+- **가시성**: `_build_subscription_source_counts()` 에 `bfb`/`vcp` 카운트 키 + scanner 구독 완료 로그에 `bfb=%d, vcp=%d` 추가.
+- `_universe_excluded_today` 필터는 BFB/VCP 후보에도 동일 적용.
+
 ---
 
 ## 7. 공통 규칙

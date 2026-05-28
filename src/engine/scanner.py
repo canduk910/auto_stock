@@ -693,12 +693,15 @@ async def subscribe_filtered_stocks(
     if source_counts is not None:
         vb = int(source_counts.get("vb", 0))
         ltv = int(source_counts.get("ltv", 0))
+        bfb = int(source_counts.get("bfb", 0))
+        vcp = int(source_counts.get("vcp", 0))
         swing_c = int(source_counts.get("swing", 0))
         momentum_c = int(source_counts.get("momentum", 0))
         positions_c = int(source_counts.get("positions", 0))
         logger.info(
-            "실시간 시세 구독 완료: total=%d (vb=%d, ltv=%d, swing=%d, momentum=%d, positions=%d)",
-            len(all_tickers), vb, ltv, swing_c, momentum_c, positions_c,
+            "실시간 시세 구독 완료: total=%d "
+            "(vb=%d, ltv=%d, bfb=%d, vcp=%d, swing=%d, momentum=%d, positions=%d)",
+            len(all_tickers), vb, ltv, bfb, vcp, swing_c, momentum_c, positions_c,
         )
     else:
         logger.info("실시간 시세 구독 완료: %d종목 (모멘텀: %d, 기타: %d)",

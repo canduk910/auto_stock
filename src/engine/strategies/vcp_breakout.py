@@ -5,7 +5,8 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 멀티데이 보유 — `Position._MULTIDAY_STRATEGIES` 멤버.
 
 진입:
-- 추세 필터: 종가 > 50EMA > 150EMA > 200EMA, 200EMA 1개월 우상향
+- 추세 필터: 종가 > 단기EMA > 중기EMA > 장기EMA, 장기EMA 1개월 우상향
+  (사이클 48 — KIS 100일 한도 내 계산 가능하도록 50/60/120 으로 하향. 기존 50/150/200)
 - 베이스: 5~15주(25~75영업일), 깊이 ≤ 25%, 최대 30%
 - 조정 시퀀스: 2~4회 pullback 점진 수축, 마지막 ≤ 8%
 - 거래량 수축: 마지막 5일 평균 < 베이스 직전 20일 평균 × 70%
@@ -47,7 +48,7 @@ FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "코스피200+코스닥150 합집합"),
     FunnelStage(2, "시총 ≥ 1,000억"),
     FunnelStage(3, "일봉 fetch + 추세필터"),
-    FunnelStage(4, "50/150/200 EMA 정렬"),
+    FunnelStage(4, "단기/중기/장기 EMA 정렬"),  # 사이클 48 — 50/60/120 (기존 50/150/200)
     FunnelStage(5, "베이스 자동 검출"),
     FunnelStage(6, "Pullback 점진 수축"),
     FunnelStage(7, "거래량 수축"),
@@ -383,10 +384,14 @@ class VcpBreakoutStrategy(StrategyBase):
 
     def _check_trend_filter(self, candles: list[dict], *,
                              effective_ema_long: int | None = None) -> dict | None:
-        """추세 필터: 종가 > 50EMA > 150EMA > 200EMA + 200EMA 우상향 1개월.
+        """추세 필터: 종가 > 단기EMA > 중기EMA > 장기EMA + 장기EMA 우상향 1개월.
 
-        사이클 33 (2026-05-21) — KIS 100일 한도 대응: `effective_ema_long` 파라미터로
-        가용 길이 기반 자동 축소 가능. None 이면 params["ema_long"] 사용 (기본 200).
+        사이클 48 (2026-05-27) — KIS 100일 한도 내 계산 가능하도록 EMA 기간을
+        50/60/120 으로 하향 (기존 50/150/200). 리턴 dict 키 `ema150`/`ema200` 은
+        레거시 명칭으로 유지 (실제 값은 ema_mid/ema_long. funnel 표시/테스트 호환 — rename 보류).
+
+        사이클 33 (2026-05-21) — KIS 한도 대응: `effective_ema_long` 파라미터로
+        가용 길이 기반 자동 축소 가능. None 이면 params["ema_long"] 사용.
         ema_mid 도 effective_ema_long 보다 크면 자동 축소.
         """
         p = self.config.params
@@ -423,6 +428,8 @@ class VcpBreakoutStrategy(StrategyBase):
         if ema_long_today <= ema_long_past:
             return None
 
+        # 키 ema150/ema200 은 레거시 명칭 (실제 ema_mid/ema_long=60/120). funnel 표시/테스트
+        # 호환 위해 rename 보류 (사이클 48) — 값은 현재 EMA 기간 기준.
         return {
             "ema50": int(ema_short_today),
             "ema150": int(ema_mid_today),

@@ -19,7 +19,13 @@ beforeAll(() => {
   process.env.TZ = 'UTC'
 })
 afterAll(() => {
-  process.env.TZ = ORIG_TZ
+  // ORIG_TZ 가 undefined 인 환경에서 `process.env.TZ = undefined` 는 문자열 "undefined"
+  // 로 강제되어 후속 테스트의 timezone 을 오염시킨다. undefined 면 키 자체를 삭제한다.
+  if (ORIG_TZ === undefined) {
+    delete process.env.TZ
+  } else {
+    process.env.TZ = ORIG_TZ
+  }
 })
 
 describe('ScanMonitor.formatRunAt — KST 강제 (사이클 48)', () => {

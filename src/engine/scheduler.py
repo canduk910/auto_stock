@@ -1272,13 +1272,24 @@ class TradingScheduler:
         )
 
     def _collect_breakout_tickers(self) -> list[str]:
-        """돌파 전략(VB, MB)의 스캔 종목을 합산한다.
+        """돌파 4 전략(VB / LTV / BFB / VCP)의 스캔 종목을 합산한다.
 
         사이클 32 (R4, 2026-05-21) — `_universe_excluded_today` 종목 필터링.
         stale > 5 + 거래량 빈약 자동 제외 (매일 reset).
+
+        사이클 48 (2026-05-27, PR #15 P1 후속) — bull_flag_breakout / vcp_breakout 편입.
+        BFB/VCP 매수 신호는 폴링 루프 없이 `risk.on_tick`(WebSocket tick) 으로만 평가되므로
+        이 함수(= `_scan_loop` extra / `_collect_presubscribe_tickers` / `_build_priority_groups`
+        breakout 그룹의 유일한 소스)에 포함되어야 구독 → tick 수신 → 매수 평가가 성립한다.
+        미포함 시 유니버스/임계 완화를 해도 BFB/VCP 0건 지속.
         """
         tickers: list[str] = []
-        for sid in ("volatility_breakout", "long_tail_volatility"):
+        for sid in (
+            "volatility_breakout",
+            "long_tail_volatility",
+            "bull_flag_breakout",
+            "vcp_breakout",
+        ):
             strategy = self.registry.get(sid)
             if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):
                 tickers.extend(strategy.get_scanned_tickers())
@@ -1322,6 +1333,8 @@ class TradingScheduler:
 
         - `vb`         : volatility_breakout.get_scanned_tickers() 개수
         - `ltv`        : long_tail_volatility.get_scanned_tickers() 개수
+        - `bfb`        : bull_flag_breakout.get_scanned_tickers() 개수 (사이클 48)
+        - `vcp`        : vcp_breakout.get_scanned_tickers() 개수 (사이클 48)
         - `swing`      : donchian_swing.get_scanned_tickers() 개수
         - `momentum`   : momentum_tickers 인자 길이 (scan_stocks() 결과)
         - `positions`  : 모든 전략 보유 포지션 합산 (중복 가능)
@@ -1332,6 +1345,8 @@ class TradingScheduler:
         counts: dict[str, int] = {
             "vb": 0,
             "ltv": 0,
+            "bfb": 0,
+            "vcp": 0,
             "swing": 0,
             "momentum": len(momentum_tickers) if momentum_tickers else 0,
             "positions": 0,
@@ -1348,6 +1363,18 @@ class TradingScheduler:
                 counts["ltv"] = len(ltv.get_scanned_tickers())
             except Exception:
                 counts["ltv"] = 0
+        bfb = self.registry.get("bull_flag_breakout")
+        if bfb and hasattr(bfb, "get_scanned_tickers"):
+            try:
+                counts["bfb"] = len(bfb.get_scanned_tickers())
+            except Exception:
+                counts["bfb"] = 0
+        vcp = self.registry.get("vcp_breakout")
+        if vcp and hasattr(vcp, "get_scanned_tickers"):
+            try:
+                counts["vcp"] = len(vcp.get_scanned_tickers())
+            except Exception:
+                counts["vcp"] = 0
         ds = self.registry.get("donchian_swing")
         if ds and hasattr(ds, "get_scanned_tickers"):
             try:
@@ -1374,7 +1401,8 @@ class TradingScheduler:
         - next_day_clear  : `_pending_next_day_clear` set 의 ticker (dedupe). 동일 — 절대 보장
         - swing           : `_collect_swing_tickers()` (donchian_swing 후보)
         - momentum        : `momentum_tickers` 인자 그대로 (보통 `scan_stocks()` 결과)
-        - breakout        : `_collect_breakout_tickers()` (volatility_breakout + long_tail_volatility)
+        - breakout        : `_collect_breakout_tickers()` (volatility_breakout + long_tail_volatility
+                            + bull_flag_breakout + vcp_breakout — 사이클 48). LOW + bypass_limit=False.
 
         빈 카테고리도 키 자체는 항상 5개 존재 (빈 리스트). `subscribe_filtered_stocks(priority_groups=...)`
         가 받아 HIGH→LOW 순서로 구독한다. 후순위만 잔여 슬롯 초과 시 drop, HIGH 는 한도 무시.

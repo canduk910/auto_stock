@@ -37,7 +37,7 @@
 
 ## 안전 규칙
 
-- **VB/LTV 후보 WebSocket 구독 우선순위** — `subscribe_filtered_stocks(priority_groups=...)` 의 `breakout` 그룹: LOW+bypass_limit=False (보조 세션 분산). `_resubscribe_stale_priority` 의 stale 재구독도 positions/next_day_clear 소속이 아닌 후보는 LOW (사이클 25-B, 2026-05-20). 후보 HIGH 메인 집중 → 메인 과부하 → silent inactive 방지
+- **VB/LTV/BFB/VCP 후보 WebSocket 구독 우선순위** — `subscribe_filtered_stocks(priority_groups=...)` 의 `breakout` 그룹: LOW+bypass_limit=False (보조 세션 분산). **사이클 48 (2026-05-27)**: `scheduler._collect_breakout_tickers()` 가 4 돌파 전략(VB/LTV + bull_flag_breakout/vcp_breakout)을 순회 → BFB/VCP 후보도 동일 `breakout` LOW 그룹으로 편입. BFB/VCP 는 폴링 루프 없이 `risk.on_tick` 으로만 매수 평가하므로 이 구독 없이는 0건 지속(PR #15 P1). `_resubscribe_stale_priority` 의 stale 재구독도 positions/next_day_clear 소속이 아닌 후보는 LOW (사이클 25-B, 2026-05-20). 후보 HIGH 메인 집중 → 메인 과부하 → silent inactive 방지
 - **VB `DEFAULT_TRADABLE_BOARDS` = ("main",) 유지 (사이클 26)** — KRX ONLY 정책. PRE_NXT 복구 금지 (NXT 갭상승 위험 + SK하이닉스 시가 결함). POST_NXT 추가 금지 (VB OVERNIGHT 보유 결함). DB `strategy_config.params.tradable_boards` 도 함께 갱신
 - **LTV `DEFAULT_TRADABLE_BOARDS` = ("pre_nxt", "main", "post_nxt") 복원 (사이클 38, 2026-05-22)** — 사용자 운영 의도 복원. 연속 상한가 종목 익일 청산 모드 + 야간 매수. 사이클 26 KRX ONLY 정책 폐기. DB `strategy_config` 는 운영 중 보존된 3 보드 유지
 - **`tradable_boards` 는 매수 진입 전용 (사이클 38 명문화)** — 매도/손절/Trailing/익일청산/15:20 강제청산/상한가 손절 모니터링은 보드 가드 *없이* 항상 작동. `risk.on_tick` 의 `check_exit_signal` 분기가 `session_tracker.is_tradable` 검사 *전* 진입 보장. 6 전략 공통 적용
