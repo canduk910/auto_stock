@@ -596,8 +596,18 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 ### 조정 시퀀스 (Pullback Sequence, 점진 수축)
 1. 베이스 구간 내 pullback 자동 검출: 직전 swing high → swing low 까지의 하락 폭 → 다음 swing high 까지의 상승. `pullback_count_min=2`, `pullback_count_max=4`
 2. 각 pullback 폭 = `(swing_high - swing_low) / swing_high` (%)
-3. **각 pullback 폭이 직전 pullback 보다 작아야 함** (점진 수축, 변동성 contraction)
+3. **각 pullback 폭이 직전 pullback 보다 작아야 함** (점진 수축, 변동성 contraction. strict — 동일 폭 거부)
 4. **마지막 pullback ≤ 12%** (`last_pullback_max=0.12` — 사이클 48 완화, 기존 0.08. 한국 중소형주 변동성에 8% 는 빡셈. 점진 수축 조건은 유지)
+5. **사이클 49 (2026-05-31) — Pullback "마지막 폭 0.0%" 결함 시정**:
+   - **결함**: 운영 5/26~5/29 4영업일 누적 33/33 종목이 step 6 에서 "마지막 폭 ≈ 0.0%" 동일 사유로 탈락 (vcp_breakout 30일 연속 0건 매매 원인 중 하나). Root cause 는 2개: (a) `_check_pullback_sequence` 의 단순 swing 검출이 chrono 끝부분 rising 중이면 `j=k=n-1` → `high==low` → `high > low` 가드로 마지막 pullback 누락 → `base["last_pullback_pct"]` 미설정 → funnel reason 의 `base.get("last_pullback_pct", 0)` 디폴트가 "0.0%" 표시 (운영자 오인). (b) 등호 포함 `>=`/`<=` swing 검출이 한국 KRX 평탄 우량주(SK텔레콤/삼성전자우 등)의 1원 단위 미세 변동도 swing 으로 인식 → 회수 2~4회 범위 위반 빈발.
+   - **시정 1 (노이즈 필터, ZigZag 변형)**: 신규 파라미터 `min_swing_atr_mult=0.5`. 베이스 구간 평균 일중 변동폭(`sum(high-low) / N`, ATR 근사) × 0.5 미만 변동은 swing 으로 인정 안 함. ATR 산출 실패 시 종가 평균의 0.3% 폴백. running_max / running_min 추적 + threshold 이상 반전 시에만 swing 확정 (ZigZag indicator 표준 임계).
+   - **시정 2 (마지막 swing 미완성 포함)**: state machine ('undefined' / 'up' / 'down') 으로 끝까지 진행. `state=='down'` 중 끝나면 마지막 pivot_high → running_min 의 진행 중 pullback 도 "마지막 pullback" 으로 포함.
+   - **시정 3 (점진 수축 strict)**: `curr >= prev` → `curr >= prev` 유지하되 의미는 "동일 폭도 거부" 명확화 (등호로 동일 폭이 단조 감소 위반). 노이즈 필터 후엔 동일 폭 swing 거의 발생 안 함.
+   - **시정 4 (funnel reason 정확성)**: False 반환 경로에서도 `base["last_pullback_pct"]` 에 실제 마지막 swing 폭 (또는 swing 0개면 명시적 0.0) 기록. 운영자가 "왜 탈락했는지" 정확한 수치로 진단 가능.
+   - **신규 파라미터**: `min_swing_atr_mult=0.5` (`DEFAULT_PARAMS` 추가). PARAM_RANGES / INT_PARAMS 등록은 후속 AI 자문 튜닝 시 별도 검토.
+   - **회귀 영향 0**: 다른 5 전략 무영향. VCP 외 scan/매매 흐름 변경 없음. 백엔드 1748 PASS / 2 skip.
+   - **회귀 가드**: `tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py` 6 케이스 (마지막 swing 미완성 / 노이즈 필터 파라미터 / 전형적 VCP 3회 점진 수축 통과 / "0.0%" 디폴트 제거 / DEFAULT_PARAMS 신규 키 / strict 점진 수축 회귀).
+   - **운영 관찰 포인트**: 다음 영업일(2026-06-01) 09:30 funnel snapshot 에서 step 6 통과 카운트 > 0 확인. 첫 거래 발생 시 손절(-7%) / 베이스 하단 / ATR 트레일링 / 50일 EMA 이탈 4중 청산 정상 발화 tester 검증.
 
 ### 거래량 수축
 - 베이스 형성 중 **마지막 5일 평균 거래량 < 베이스 직전 20일 평균 거래량 × 70%** (`volume_contraction_ratio=0.70`)
@@ -657,6 +667,7 @@ DEFAULT_PARAMS = {
     "pullback_count_min": 2,
     "pullback_count_max": 4,
     "last_pullback_max": 0.12,  # 사이클 48 — 0.08 → 0.12 완화
+    "min_swing_atr_mult": 0.5,  # 사이클 49 — 노이즈 swing 필터 (베이스 ATR × 0.5)
     # 거래량 수축
     "volume_contraction_ratio": 0.70,
     # 매수
