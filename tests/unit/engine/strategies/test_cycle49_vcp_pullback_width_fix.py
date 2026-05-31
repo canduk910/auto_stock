@@ -234,3 +234,57 @@ def test_strict_contraction_rejects_equal_widths(strat):
         f"점진 수축 3회 (4.76→4.55→4.35%) 통과 안 됨. "
         f"last_pullback_pct={base.get('last_pullback_pct')}"
     )
+
+
+# ---------------------------------------------------------------------------
+# 사이클 49 미세 보강 (2026-05-31, domain-expert Q4 권고) —
+# funnel reason 이 "swing 미검출" 과 "실제 측정 폭" 을 구분
+# ---------------------------------------------------------------------------
+
+
+def test_pullback_count_exposed_for_funnel_reason(strat):
+    """`_check_pullback_sequence` 가 `base["last_pullback_count"]` 를 항상 노출.
+
+    domain-expert Q4 — funnel reason "0.0%" 가 (a) 디폴트값 (b) 진짜 평탄 베이스 swing
+    미검출 (c) 실제 측정 0% 폭 중 어느 것인지 운영자가 구분 가능해야 함. count 노출로
+    호출자가 분기 가능.
+
+    검증:
+    - 평탄 베이스 (모든 종가 동일) → False 반환 + `last_pullback_count == 0`
+    - 정상 점진 수축 → True 반환 + `last_pullback_count > 0`
+    """
+    # 1) 평탄 베이스 — swing 자체 미검출 (variations < min_swing_atr_mult × ATR)
+    flat_chrono = [100] * 30  # 모든 종가 동일 → ATR=0 → 폴백 임계 → 변동 0 미만 → swing 0개
+    flat_candles = _candles_from_chrono(flat_chrono)
+    flat_base = {
+        "length": len(flat_chrono), "high": 100, "low": 100, "avg_volume_20": 100_000
+    }
+    result_flat = strat._check_pullback_sequence(flat_candles, flat_base)
+    assert result_flat is False
+    assert "last_pullback_count" in flat_base, (
+        "평탄 베이스에서 `last_pullback_count` 키 미설정 — "
+        "funnel reason 분기 불가"
+    )
+    assert flat_base["last_pullback_count"] == 0, (
+        f"평탄 베이스 swing 검출 0건 기대. 실제 count={flat_base['last_pullback_count']}"
+    )
+
+    # 2) 정상 점진 수축 — swing 검출 성공
+    ok_chrono = [
+        100, 102, 105,
+        103, 101, 100,
+        103, 107, 110,
+        108, 106, 105,
+        108, 112, 115,
+        113, 111, 110,
+        112, 114, 116, 116,
+    ]
+    ok_candles = _candles_from_chrono(ok_chrono)
+    ok_base = {
+        "length": len(ok_chrono), "high": 116, "low": 100, "avg_volume_20": 100_000
+    }
+    result_ok = strat._check_pullback_sequence(ok_candles, ok_base)
+    assert result_ok is True
+    assert ok_base.get("last_pullback_count", 0) > 0, (
+        f"정상 점진 수축에서 count > 0 기대. 실제 count={ok_base.get('last_pullback_count')}"
+    )

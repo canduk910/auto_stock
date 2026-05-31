@@ -289,15 +289,27 @@ class VcpBreakoutStrategy(StrategyBase):
                 pullbacks_ok = self._check_pullback_sequence(candles, base)
                 if not pullbacks_ok:
                     # 사이클 41 — Pullback 9→0 새 결함 진단용 정밀 사유 (사용자 5/22 보고)
+                    # 사이클 49 — pull_count=0 (평탄 베이스 swing 미검출) 분기 (운영자 혼동 차단)
                     last_pct = base.get("last_pullback_pct", 0)
+                    last_count = base.get("last_pullback_count", 0)
+                    cond_prefix = (
+                        f"Pullback 점진 수축 미충족 "
+                        f"(회수 {p['pullback_count_min']}~{p['pullback_count_max']}회 + "
+                        f"직전 대비 폭 감소 + 마지막 폭 ≤ {p['last_pullback_max']*100:.0f}%)"
+                    )
+                    if last_count == 0:
+                        reason = (
+                            f"{cond_prefix} — 베이스 평탄, swing 미검출 "
+                            f"(변동성 < min_swing_atr_mult × ATR)"
+                        )
+                    else:
+                        reason = (
+                            f"{cond_prefix} — 회수 {last_count}회, "
+                            f"마지막 폭 ≈ {last_pct*100:.1f}%"
+                        )
                     pullback_excluded.append({
                         "ticker": ticker, "name": ticker_name,
-                        "reason": (
-                            f"Pullback 점진 수축 미충족 "
-                            f"(회수 {p['pullback_count_min']}~{p['pullback_count_max']}회 + "
-                            f"직전 대비 폭 감소 + 마지막 폭 ≤ {p['last_pullback_max']*100:.0f}%) "
-                            f"— 마지막 폭 ≈ {last_pct*100:.1f}%"
-                        ),
+                        "reason": reason,
                     })
                     continue
                 stats["pullback_pass"] += 1
@@ -533,9 +545,11 @@ class VcpBreakoutStrategy(StrategyBase):
             lows = [int(c.get("stck_lwpr", "0")) for c in candles[: base["length"]]]
         except (TypeError, ValueError, KeyError):
             base["last_pullback_pct"] = 0.0
+            base["last_pullback_count"] = 0
             return False
         if not closes:
             base["last_pullback_pct"] = 0.0
+            base["last_pullback_count"] = 0
             return False
 
         # 시간순(과거→현재) 으로 reverse
@@ -561,6 +575,7 @@ class VcpBreakoutStrategy(StrategyBase):
         # 초기 방향은 첫 두 봉 비교로 결정
         if n < 2:
             base["last_pullback_pct"] = 0.0
+            base["last_pullback_count"] = 0
             return False
 
         running_max = chrono[0]
@@ -610,8 +625,10 @@ class VcpBreakoutStrategy(StrategyBase):
         if state == "down" and last_pivot_high is not None and last_pivot_high > running_min:
             pullbacks.append((last_pivot_high - running_min) / last_pivot_high)
 
-        # 결함 시정 핵심: 결과와 무관하게 마지막 pullback 폭 기록 (funnel reason 정확성)
+        # 결함 시정 핵심: 결과와 무관하게 마지막 pullback 폭 + 검출 회수 기록
+        # (funnel reason 정확성 — pull_count=0 은 "평탄 베이스 swing 미검출" 의미)
         base["last_pullback_pct"] = pullbacks[-1] if pullbacks else 0.0
+        base["last_pullback_count"] = len(pullbacks)
 
         pull_count = len(pullbacks)
         if pull_count < pull_min or pull_count > pull_max:
