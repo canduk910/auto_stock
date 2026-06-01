@@ -31,6 +31,7 @@
 - 0종목 확정 시 `ERROR` 로그 + `system_logs` 기록
 - 1주 폴백 (모든 전략): `StrategyBase._fallback_one_share(current_price)` 잔여 = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`
 - **사이클 39+41 (2026-05-22) — funnel 단계별 자동 hook**: BFB/VCP/donchian `prepare()` 가 `StrategyBase._record_funnel_step(step_no, step_name, survived, excluded=None, *, step_conditions=None)` 호출로 8단계 통과/탈락 종목 캡처. **사이클 41**: `survived: list[str \| dict]` (자동 dict 변환 — `_resolve_ticker_name` 종목명 lookup) + `excluded: list[{ticker, name, reason}]` (수치 포함 사유 — "음봉 비율 35% > 30%" / "마지막 폭 12% > 8%" / "신고가 미달 52000 < 55000" 등) + `step_conditions` (UI 단계 조건 툴팁용). cap 200/20 자동 적용. 9:30 `_scan_loop` 첫 진입 시 `scheduler._auto_capture_funnel_snapshots` 자동 발화 → DB `strategy_funnel_snapshots` 단계별 INSERT. `_reset_daily_state` 동행 reset
+- **사이클 50 (2026-06-01) — BFB 폴/플래그 단계별 사유 정밀화 (계측 전용)**: `bull_flag_breakout._detect_pole_and_flag` 가 실패 시 `None` 만 반환하던 결함(funnel step 5/6 survived=0 AND excluded=0 → 바인딩 조건 계측 불가) 시정. `_detect_pole_and_flag_detailed(candles) -> (result, fail_stage, detail)` 신규 — fail_stage(`pole_return`/`pole_red_ratio`/`flag_retracement`/`volume_contraction`) + 측정 수치. `_detect_pole_and_flag` 은 result 만 반환하는 thin wrapper (**기존 계약/행위 완전 보존**). `prepare()` funnel hook 이 fail_stage 별로 step 4(폴 상승률+음봉)/5(플래그 조정폭)/6(거래량 수축) 에 수치 사유 분배. 임계값/유니버스/DB params 무변경 (단계 2 보류). 회귀 가드 `test_cycle50_bfb_funnel_stage_detail.py` 6 케이스. 실측 스크립트 `tools/measure_bfb_pole_flag.py` (EC2 실행)
 
 ## 멀티데이 보유 전략
 
