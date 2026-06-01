@@ -77,10 +77,9 @@ def _build_candles(
     """최신순 일봉 리스트 생성. flag(index 0..flag_len-1) → pole → padding."""
     candles: list[dict] = []
 
-    # flag 구간 (최신) — flag_high≈pole_high 근처, flag_low 까지 조정
-    for i in range(flag_len):
-        # 첫 봉(가장 최신)에 flag_low 를 한 번 찍어 조정 폭 확정
-        lo = flag_low if i == 0 else (flag_low + flag_high_offset(pole_high, flag_low))
+    # flag 구간 (최신) — flag_high≈pole_high 근처, 전 봉이 flag_low 까지 조정.
+    # 조정 폭(retracement) = (pole_high - min(flag_lows))/pole_width 는 flag_low 로 확정.
+    for _ in range(flag_len):
         candles.append(_candle(
             close=pole_high - 200, high=pole_high, low=flag_low,
             open_=pole_high - 100, vol=flag_vol,
@@ -108,10 +107,6 @@ def _build_candles(
         candles.append(_flat_candle(pole_start, pole_vol))
 
     return candles
-
-
-def flag_high_offset(pole_high: int, flag_low: int) -> int:
-    return 0
 
 
 # ---------------------------------------------------------------------------
