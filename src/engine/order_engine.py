@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from datetime import datetime, timedelta, timezone
 
 from src.api.balance import (
     get_buyable,
@@ -32,6 +33,26 @@ from src.models.order import OrderDivision, OrderSide
 from src.models.trade import TradeRecord, TradeStatus, TradeType
 
 logger = logging.getLogger(__name__)
+
+# KST timezone — scanner.KST_TZ 와 동일 (circular import 방지용 재정의)
+_KST_TZ = timezone(timedelta(hours=9))
+
+
+def _compute_next_market_open_kst(now: datetime) -> datetime:
+    """now KST 기준 다음 KRX 정규시간 시작 시각 (09:00) 반환.
+
+    now < 09:00 KST → 당일 09:00.
+    now >= 09:00 KST → 다음 영업일 09:00 (주말 스킵, KIS 휴장 처리는 후속 사이클 보류).
+    """
+    today_open = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    if now < today_open:
+        return today_open
+    # 다음 영업일: 주말 스킵 (토→+2일, 일→+1일, 평일→+1일)
+    next_day = now + timedelta(days=1)
+    while next_day.weekday() >= 5:  # 5=토, 6=일
+        next_day += timedelta(days=1)
+    return next_day.replace(hour=9, minute=0, second=0, microsecond=0)
+
 
 PARTIAL_FILL_WAIT = 30  # 부분 체결 후 잔여 취소 대기(초)
 SELL_MAX_RETRIES = 3     # 매도 실패 시 최대 재시도 횟수
@@ -59,6 +80,11 @@ class OrderEngine:
         # 사이클 15-A (2026-05-19) — 매도 체결 후 WS unsubscribe hook 의 pending_next_day_clear 조회 provider.
         # scheduler 가 setattr 로 주입. 기본은 빈 set 반환 (테스트/단독 사용 안전).
         self._pending_next_day_clear_provider = lambda: set()
+        # 사이클 B-1 (2026-06-01) — 장운영시간 외 거부 후 외부 재호출 게이트.
+        # ticker → 다음 KST 09:00 expiry. TTL 만료 전 execute_sell 진입 차단.
+        self._market_closed_blocked: dict[str, datetime] = {}
+        # ticker별 일일 1회 INFO emit cap (사이클 31 R6 _risk_silent_skip_logged_today 동형).
+        self._market_closed_blocked_logged_today: set[str] = set()
 
     def _strategy_exchange(self, strategy_id: str | None) -> str:
         """전략의 exchange 파라미터(KRX/NXT/SOR) 조회. 미지정 시 KRX.
@@ -444,6 +470,28 @@ class OrderEngine:
             return
         self._selling.add(ticker)
 
+        # 사이클 B-1 (2026-06-01) — 장운영시간 외 거부 TTL 게이트.
+        # 이전 거부에서 등록된 expiry 가 미경과면 KIS 호출 없이 조용히 skip (INFO 1줄/ticker/일).
+        now_kst = datetime.now(_KST_TZ)
+        _expiry = self._market_closed_blocked.get(ticker)
+        if _expiry is not None:
+            if now_kst < _expiry:
+                if ticker not in self._market_closed_blocked_logged_today:
+                    self._market_closed_blocked_logged_today.add(ticker)
+                    try:
+                        await write_log(
+                            "INFO",
+                            f"[market_closed_blocked] ticker={ticker} strategy={strategy_id} "
+                            f"expiry={_expiry.isoformat()}",
+                        )
+                    except Exception:
+                        logger.debug("[market_closed_blocked] write_log 실패", exc_info=True)
+                self._selling.discard(ticker)
+                return
+            else:
+                # TTL 자연 만료 — 차단 해제 후 정상 진입
+                del self._market_closed_blocked[ticker]
+
         strategy = self.registry.get(strategy_id)
         if not strategy:
             logger.warning("전략 없음: %s", strategy_id)
@@ -532,12 +580,18 @@ class OrderEngine:
                         f"매도 거부(장운영시간 외) — 포지션 보존: {t(ticker)} "
                         f"(전략: {strategy_id}, [{e.msg_cd}] {e.msg1})",
                     )
+                    # 사이클 B-1 (2026-06-01) — 진입 TTL 게이트 등록.
+                    # 다음 KST 09:00 까지 같은 ticker 의 execute_sell 재호출을 차단.
+                    # emit cap 리셋: 만료 후 재폭주 시 INFO 1줄이 다시 emit 되도록.
+                    _now_kst = datetime.now(_KST_TZ)
+                    self._market_closed_blocked[ticker] = _compute_next_market_open_kst(_now_kst)
+                    self._market_closed_blocked_logged_today.discard(ticker)
                     # 사후 보강 (Phase G): NXT 거래 불가 종목으로 추정 → stock_master 에 즉시 반영.
                     # 다음 사이클에서 _strategy_exchange_async 가 KRX 로 사전 다운그레이드.
                     # NXT 시간대(08:00~09:00, 15:30~20:00) 거부에서만 적용 — KRX 정규장 거부는 보강하지 않음.
                     try:
-                        from datetime import datetime, time as _dtime
-                        now_t = datetime.now().time()
+                        from datetime import time as _dtime
+                        now_t = _now_kst.time()
                         is_nxt_window = (
                             _dtime(8, 0) <= now_t < _dtime(9, 0)
                             or _dtime(15, 30) <= now_t < _dtime(20, 0)
@@ -982,6 +1036,14 @@ class OrderEngine:
                     self._pending_cancel_tasks.pop(ticker, None)
 
         self._pending_cancel_tasks[ticker] = asyncio.create_task(_cancel_and_reorder())
+
+    def reset_daily_state(self) -> None:
+        """일일 차단 게이트 상태 초기화 (scheduler `_reset_daily_state` 가 위임 호출).
+
+        사이클 B-1 (2026-06-01): 장운영시간 외 거부 TTL dict + emit cap set 를 매일 정산 후 clear.
+        """
+        self._market_closed_blocked.clear()
+        self._market_closed_blocked_logged_today.clear()
 
     async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
         """미체결 잔량을 취소한다."""
