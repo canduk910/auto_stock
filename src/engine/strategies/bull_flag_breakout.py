@@ -191,12 +191,17 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # 사이클 41 (2026-05-22) — 탈락 사유 (수치 포함) 캡처 추가
         candle_fetch_ok_tickers: list[str] = []
         pole_pass_tickers: list[str] = []
+        # 사이클 50 (2026-06-01) — 플래그/거래량수축 단계별 생존 추적 (계측 정밀화)
+        flag_pass_tickers: list[str] = []
         atr_pass_tickers: list[str] = []
         final_prepared_tickers: list[str] = []
         # 사이클 41 — 단계별 탈락 sample (수치 포함)
         candle_fetch_excluded: list[dict] = []
         pole_excluded: list[dict] = []
         atr_excluded: list[dict] = []
+        # 사이클 50 — 폴 검출 4 sub-condition 을 funnel step 4/5/6 에 정밀 분배
+        flag_excluded: list[dict] = []           # step 5 (플래그 조정폭)
+        volume_contraction_excluded: list[dict] = []  # step 6 (거래량 수축)
 
         for ticker, candles in fetched:
             from src.engine.strategy_base import _resolve_ticker_name
@@ -223,29 +228,63 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 stats["candle_fetch_ok"] += 1
                 candle_fetch_ok_tickers.append(ticker)  # 사이클 39
 
-                result = self._detect_pole_and_flag(candles)
+                # 사이클 50 (2026-06-01) — 단계별 실패 사유 계측. 검출 결과(result) 무변경,
+                # fail_stage/detail 로 funnel step 4/5/6 정밀 분배 (근본 원인 3 시정).
+                result, fail_stage, detail = self._detect_pole_and_flag_detailed(candles)
                 if not result:
-                    # 사이클 41 — 폴 검출 실패 사유 (수치 포함)
-                    closes = [int(c.get("stck_clpr", "0")) for c in candles]
-                    # 5~10일 누적 등락률 best 계산 (참고 수치)
-                    best_return = 0.0
-                    for n in range(3, min(11, len(closes))):
-                        if closes[n] > 0:
-                            ret = (max(closes[:n]) - closes[n-1]) / closes[n-1] * 100
-                            best_return = max(best_return, ret)
-                    pole_excluded.append({
-                        "ticker": ticker, "name": ticker_name,
-                        "reason": (
-                            f"폴 검출 실패 (3~10일 best_return ≈ {best_return:.1f}% < "
-                            f"임계 {params['pole_min_return']:.0f}% 또는 "
-                            f"음봉 비율 > {params['pole_max_red_ratio']*100:.0f}% 또는 "
-                            f"플래그 조정 폭 미달)"
-                        ),
-                    })
+                    if fail_stage == "flag_retracement":
+                        # step 5 (플래그 조정폭) 바인딩 — 폴(상승률+음봉)은 통과
+                        stats["pole_pass"] += 1
+                        pole_pass_tickers.append(ticker)
+                        flag_excluded.append({
+                            "ticker": ticker, "name": ticker_name,
+                            "reason": (
+                                f"플래그 조정 폭 {detail.get('retracement', 0)*100:.1f}% > "
+                                f"폴 폭 × {params['flag_retracement_max']*100:.1f}% "
+                                f"(폴 +{detail.get('best_return', 0):.1f}%)"
+                            ),
+                        })
+                    elif fail_stage == "volume_contraction":
+                        # step 6 (거래량 수축) 바인딩 — 폴+플래그조정 모두 통과,
+                        # 거래량만 미수축. 06/01 운영 가설 (거래량순위 = 폭발 ⊥ 수축).
+                        stats["pole_pass"] += 1
+                        stats["flag_pass"] += 1
+                        pole_pass_tickers.append(ticker)
+                        flag_pass_tickers.append(ticker)
+                        volume_contraction_excluded.append({
+                            "ticker": ticker, "name": ticker_name,
+                            "reason": (
+                                f"거래량 수축 미달 — 플래그/폴 평균 거래량 비율 "
+                                f"{detail.get('vol_ratio', 0)*100:.0f}% ≥ "
+                                f"임계 {params['flag_volume_ratio']*100:.0f}% "
+                                f"(폴 +{detail.get('best_return', 0):.1f}%, "
+                                f"수축 조건은 비율 < 임계 요구)"
+                            ),
+                        })
+                    else:
+                        # step 4 (폴 상승률/음봉비율) 바인딩 또는 no_candle
+                        if fail_stage == "pole_red_ratio":
+                            reason = (
+                                f"폴 음봉 비율 {detail.get('red_ratio', 0)*100:.0f}% > "
+                                f"임계 {params['pole_max_red_ratio']*100:.0f}% "
+                                f"(폴 상승률 +{detail.get('best_return', 0):.1f}%)"
+                            )
+                        elif fail_stage == "pole_return":
+                            reason = (
+                                f"폴 상승률 +{detail.get('best_return', 0):.1f}% < "
+                                f"임계 +{params['pole_min_return']:.0f}%"
+                            )
+                        else:
+                            reason = detail.get("reason", "폴 검출 실패 (유효 조합 없음)")
+                        pole_excluded.append({
+                            "ticker": ticker, "name": ticker_name,
+                            "reason": reason,
+                        })
                     continue
                 stats["pole_pass"] += 1
                 stats["flag_pass"] += 1
                 pole_pass_tickers.append(ticker)  # 사이클 39
+                flag_pass_tickers.append(ticker)  # 사이클 50
 
                 # 거래량 수축 확인은 _detect_pole_and_flag 내부에서 통과한 것
                 stats["volume_contraction_pass"] += 1
@@ -296,14 +335,23 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 f"음봉 비율 ≤ {params['pole_max_red_ratio']*100:.0f}%"
             ),
         )
+        # 사이클 50 (2026-06-01) — step 5(플래그 조정폭)/6(거래량 수축) 정밀 분배.
+        # 기존엔 둘 다 survived=pole_pass_tickers + excluded=None 이라 어느 조건이
+        # 바인딩인지 계측 불가 (근본 원인 3). 이제 단계별 생존/탈락 분리.
+        # step 6 거래량 수축 생존 = 검출 완전 통과 종목 (flag_pass 중 수축 탈락 제외).
+        vol_excluded_set = {e["ticker"] for e in volume_contraction_excluded}
+        volume_contraction_pass_tickers = [
+            t for t in flag_pass_tickers if t not in vol_excluded_set
+        ]
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[4],
-            survived=pole_pass_tickers,
+            survived=flag_pass_tickers, excluded=flag_excluded,
             step_conditions=f"3~10영업일 조정 폭 ≤ 폴 폭 × {params['flag_retracement_max']*100:.1f}%",
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[5],
-            survived=pole_pass_tickers,
+            survived=volume_contraction_pass_tickers,
+            excluded=volume_contraction_excluded,
             step_conditions=f"플래그 평균 거래량 < 폴 평균 × {params['flag_volume_ratio']*100:.0f}%",
         )
         self._record_funnel_pipeline_step(
@@ -327,14 +375,48 @@ class BullFlagBreakoutStrategy(StrategyBase):
             stats["volume_contraction_pass"], stats["atr_pass"],
         )
 
+    # 사이클 50 (2026-06-01) — 단계별 실패 사유 우선순위 (멀리 도달할수록 큰 값).
+    # `_detect_pole_and_flag_detailed` 가 "가장 멀리 도달한" 조합의 바인딩 단계를
+    # 보고하는 데 사용 (funnel step 4/5/6 사유 분배의 근거).
+    _FAIL_STAGE_ORDER = {
+        "": 99,                    # 통과 (어떤 fail 보다 우선)
+        "no_candle": 0,            # 일봉 파싱/길이 실패
+        "pole_return": 1,          # 폴 상승률 임계 미달
+        "pole_red_ratio": 2,       # 음봉 비율 초과
+        "flag_retracement": 3,     # 플래그 조정 폭 초과
+        "volume_contraction": 4,   # 거래량 수축 미달
+    }
+
     def _detect_pole_and_flag(self, candles: list[dict]) -> dict | None:
-        """일봉(최신순) → 폴/플래그 자동 검출.
+        """일봉(최신순) → 폴/플래그 자동 검출 (기존 계약 유지 — dict | None).
+
+        사이클 50 (2026-06-01): 내부 구현을 `_detect_pole_and_flag_detailed` 로 위임하고
+        result 만 반환하는 thin wrapper. 모든 기존 호출처/테스트 계약 무변경 (행위 보존).
+        """
+        result, _fail_stage, _detail = self._detect_pole_and_flag_detailed(candles)
+        return result
+
+    def _detect_pole_and_flag_detailed(
+        self, candles: list[dict]
+    ) -> tuple[dict | None, str, dict]:
+        """폴/플래그 자동 검출 + 단계별 실패 사유 계측 (사이클 50, 2026-06-01).
 
         candles[0] 이 가장 최근 영업일. flag 종료 = candles[0:flag_len],
         그 이전 = pole 구간 (candles[flag_len:flag_len+pole_len]).
-
         다양한 (pole_len, flag_len) 조합을 시도해 처음 통과하는 셋업을 반환.
-        반환 dict: pole_start / pole_high / flag_high / flag_low / flag_avg_volume
+
+        근본 원인 3 (진단 인프라 결함) 시정 — 실패 시 `None` 만 반환하던 기존 동작을
+        "가장 멀리 도달한 sub-condition" + 측정 수치 보고로 확장. 사이클 49 VCP
+        `last_pullback_pct 항상 기록` 동일 계열. 검출 결과(result) 자체는 무변경.
+
+        Returns:
+            (result, fail_stage, detail)
+            - result: 통과 시 dict (기존과 동일), 실패 시 None
+            - fail_stage: 통과 시 "" / 실패 시 가장 멀리 도달한 조합의 바인딩 단계
+              ("pole_return"/"pole_red_ratio"/"flag_retracement"/"volume_contraction"
+               /"no_candle")
+            - detail: 가장 멀리 도달한 조합의 측정 수치 dict
+              (best_return / red_ratio / retracement / vol_ratio / pole_len / flag_len)
         """
         p = self.config.params
         pole_min, pole_max = p["pole_lookback_min"], p["pole_lookback_max"]
@@ -351,14 +433,26 @@ class BullFlagBreakoutStrategy(StrategyBase):
             opens = [int(c.get("stck_oprc", "0")) for c in candles]
             vols = [int(c.get("acml_vol", "0")) for c in candles]
         except (TypeError, ValueError):
-            return None
+            return None, "no_candle", {"reason": "일봉 파싱 실패"}
+
+        # 가장 멀리 도달한 실패 조합 추적 (사이클 50 — 바인딩 단계 계측)
+        best_fail_stage = "no_candle"
+        best_fail_detail: dict = {"reason": "유효한 (pole_len, flag_len) 조합 없음"}
+        best_fail_rank = -1
+
+        def _note_fail(stage: str, detail: dict) -> None:
+            nonlocal best_fail_stage, best_fail_detail, best_fail_rank
+            rank = self._FAIL_STAGE_ORDER.get(stage, 0)
+            if rank > best_fail_rank:
+                best_fail_rank = rank
+                best_fail_stage = stage
+                best_fail_detail = detail
 
         # 다양한 (flag_len, pole_len) 조합 시도
         # 가장 짧은 셋업 우선 (최근 신호)
         for flag_len in range(flag_min, flag_max + 1):
             if flag_len > len(candles):
                 break
-            flag_slice_closes = closes[:flag_len]
             flag_slice_highs = highs[:flag_len]
             flag_slice_lows = lows[:flag_len]
             flag_slice_vols = vols[:flag_len]
@@ -384,10 +478,18 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 pole_high = max(pole_slice_highs)
                 if pole_start <= 0 or pole_high <= 0:
                     continue
+
+                # (1) 폴 상승률
                 pole_return_pct = (pole_high - pole_start) / pole_start * 100
                 if pole_return_pct < min_return:
+                    _note_fail("pole_return", {
+                        "best_return": round(pole_return_pct, 1),
+                        "min_return": min_return,
+                        "pole_len": pole_len, "flag_len": flag_len,
+                    })
                     continue
 
+                # (2) 음봉 비율
                 red_count = sum(
                     1
                     for o, c in zip(pole_slice_opens, pole_slice_closes)
@@ -395,34 +497,64 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 )
                 red_ratio = red_count / pole_len if pole_len > 0 else 1.0
                 if red_ratio > max_red_ratio:
+                    _note_fail("pole_red_ratio", {
+                        "best_return": round(pole_return_pct, 1),
+                        "red_ratio": round(red_ratio, 2),
+                        "max_red_ratio": max_red_ratio,
+                        "pole_len": pole_len, "flag_len": flag_len,
+                    })
                     continue
 
-                # 플래그 조정 폭 ≤ 폴 폭의 retracement_max
+                # (3) 플래그 조정 폭 ≤ 폴 폭의 retracement_max
                 pole_width = pole_high - pole_start
                 if pole_width <= 0:
                     continue
                 actual_retracement = (pole_high - flag_low) / pole_width
                 if actual_retracement > retracement_max:
+                    _note_fail("flag_retracement", {
+                        "best_return": round(pole_return_pct, 1),
+                        "retracement": round(actual_retracement, 3),
+                        "retracement_max": retracement_max,
+                        "pole_len": pole_len, "flag_len": flag_len,
+                    })
                     continue
 
-                # 거래량 수축
+                # (4) 거래량 수축
                 pole_avg_volume = sum(pole_slice_vols) / pole_len if pole_len > 0 else 0
                 if pole_avg_volume <= 0:
                     continue
+                vol_ratio = flag_avg_volume / pole_avg_volume if pole_avg_volume > 0 else 99.0
                 if flag_avg_volume >= pole_avg_volume * flag_vol_ratio:
+                    _note_fail("volume_contraction", {
+                        "best_return": round(pole_return_pct, 1),
+                        "vol_ratio": round(vol_ratio, 2),
+                        "flag_volume_ratio": flag_vol_ratio,
+                        "pole_len": pole_len, "flag_len": flag_len,
+                    })
                     continue
 
                 # 통과
-                return {
-                    "pole_start": pole_start,
-                    "pole_high": pole_high,
-                    "flag_high": flag_high,
-                    "flag_low": flag_low,
-                    "flag_avg_volume": int(flag_avg_volume),
-                    "pole_len": pole_len,
-                    "flag_len": flag_len,
-                }
-        return None
+                return (
+                    {
+                        "pole_start": pole_start,
+                        "pole_high": pole_high,
+                        "flag_high": flag_high,
+                        "flag_low": flag_low,
+                        "flag_avg_volume": int(flag_avg_volume),
+                        "pole_len": pole_len,
+                        "flag_len": flag_len,
+                    },
+                    "",
+                    {
+                        "best_return": round(pole_return_pct, 1),
+                        "red_ratio": round(red_ratio, 2),
+                        "retracement": round(actual_retracement, 3),
+                        "vol_ratio": round(vol_ratio, 2),
+                        "pole_len": pole_len, "flag_len": flag_len,
+                    },
+                )
+
+        return None, best_fail_stage, best_fail_detail
 
     @staticmethod
     def _atr(highs, lows, closes, period: int) -> float:

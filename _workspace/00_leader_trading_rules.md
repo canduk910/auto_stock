@@ -488,6 +488,18 @@ VB와 동일.
 
 검증 통과 시 `_candidates[ticker] = {pole_high, pole_low, pole_start, flag_high, flag_low, flag_avg_volume, atr14, prev_close}` 등록.
 
+### 사이클 50 (2026-06-01) — funnel 단계별 사유 정밀화 (계측 전용, 임계 무변경)
+
+**배경**: 06/01 대시보드 BFB 퍼널 4단계 "폴 검출"에서 22~25종목 → 0 전멸 (05/29·06/01 2영업일 연속, `strategy_funnel_snapshots` DB 확정). 진단 결과 근본 원인 3개 중첩 — (1) 운영 DB `strategy_config.params` 오버라이드(`pole_min_return:20`/`exchange:SOR`/`max_scan_stocks:250`)가 코드 디폴트(사이클 48 완화값)를 덮어씀, (2) 사이클 48 의 거래량순위 유니버스(거래량 폭발 종목)와 플래그 검출의 거래량 *수축* 요구가 구조적 모순, (3) `_detect_pole_and_flag` 가 4 sub-condition 을 한 함수에서 평가하고 실패 시 `None` 만 반환 → funnel step 5/6 이 survived=0 AND excluded=0 → 어느 조건이 바인딩인지 계측 불가.
+
+**이번 시정 범위 = 근본 원인 3 (진단 인프라)만**. 임계값/유니버스 소스/DB params 는 단계 2 (실측 + domain-expert 자문 후)로 보류 — 본 사이클에서 일절 변경 안 함.
+
+- `_detect_pole_and_flag_detailed(candles) -> (result, fail_stage, detail)` 신규 — 실패 시 "가장 멀리 도달한 sub-condition"(`pole_return`/`pole_red_ratio`/`flag_retracement`/`volume_contraction`) + 측정 수치(`best_return`/`red_ratio`/`retracement`/`vol_ratio`) 보고. 사이클 49 VCP `last_pullback_pct 항상 기록` 동일 계열.
+- `_detect_pole_and_flag(candles) -> dict | None` 은 detailed 의 result 만 반환하는 thin wrapper — **기존 계약/행위 완전 보존** (통과/탈락 종목 무변경, 검출 결과 무변경).
+- `prepare()` funnel hook 이 fail_stage 에 따라 step 4(폴 상승률+음봉) / step 5(플래그 조정폭) / step 6(거래량 수축) 에 탈락 종목을 수치 사유로 분배. 기존엔 step 4 에 "폴 검출 실패" 한 줄로 뭉뚱그려 어느 조건이 바인딩인지 운영자가 알 수 없던 결함 시정.
+- 회귀 가드: `tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py` 6 케이스.
+- 실측 계측 스크립트: `tools/measure_bfb_pole_flag.py` — EC2 운영 환경에서 5종목(009150/011070/242040/000660/005930) 일봉으로 4 sub-condition 조건별 바인딩 단계 집계 (KIS 실호출 필요, 클라우드 샌드박스 불가). `--db` 플래그로 운영 DB params 효과도 측정 가능.
+
 ### 매수 규칙
 - **진입 조건**: 현재가가 `flag_high`(플래그 상단) 돌파 순간 + 당일 거래량 ≥ `flag_avg_volume × 2.0` (`breakout_volume_mult=2.0`)
   - 돌파 순간: `이전 틱 < flag_high AND 현재 틱 ≥ flag_high` (VB 컨벤션 — `_prev_price[ticker]` 추적)
