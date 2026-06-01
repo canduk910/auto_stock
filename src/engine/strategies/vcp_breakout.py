@@ -109,6 +109,11 @@ class VcpBreakoutStrategy(StrategyBase):
         "pullback_count_min": 2,
         "pullback_count_max": 4,
         "last_pullback_max": 0.12,  # 사이클 48 — 0.08→0.12. 한국 중소형주 변동성 현실화
+        # 사이클 49 (2026-05-31) — Pullback "마지막 폭 0.0%" 결함 시정
+        # ATR threshold swing 검출. 베이스 ATR × min_swing_atr_mult 미만 변동은 노이즈로 무시.
+        # 한국 KRX 우량주 평탄 구간(SK텔레콤/삼성전자우 등)의 1원 단위 미세 진동으로
+        # 회수 2~4회 범위 위반 빈발하던 결함 차단. 0.5×ATR 은 ZigZag indicator 표준 임계.
+        "min_swing_atr_mult": 0.5,
         # 거래량 수축
         "volume_contraction_ratio": 0.70,
         # 매수
@@ -284,15 +289,27 @@ class VcpBreakoutStrategy(StrategyBase):
                 pullbacks_ok = self._check_pullback_sequence(candles, base)
                 if not pullbacks_ok:
                     # 사이클 41 — Pullback 9→0 새 결함 진단용 정밀 사유 (사용자 5/22 보고)
+                    # 사이클 49 — pull_count=0 (평탄 베이스 swing 미검출) 분기 (운영자 혼동 차단)
                     last_pct = base.get("last_pullback_pct", 0)
+                    last_count = base.get("last_pullback_count", 0)
+                    cond_prefix = (
+                        f"Pullback 점진 수축 미충족 "
+                        f"(회수 {p['pullback_count_min']}~{p['pullback_count_max']}회 + "
+                        f"직전 대비 폭 감소 + 마지막 폭 ≤ {p['last_pullback_max']*100:.0f}%)"
+                    )
+                    if last_count == 0:
+                        reason = (
+                            f"{cond_prefix} — 베이스 평탄, swing 미검출 "
+                            f"(변동성 < min_swing_atr_mult × ATR)"
+                        )
+                    else:
+                        reason = (
+                            f"{cond_prefix} — 회수 {last_count}회, "
+                            f"마지막 폭 ≈ {last_pct*100:.1f}%"
+                        )
                     pullback_excluded.append({
                         "ticker": ticker, "name": ticker_name,
-                        "reason": (
-                            f"Pullback 점진 수축 미충족 "
-                            f"(회수 {p['pullback_count_min']}~{p['pullback_count_max']}회 + "
-                            f"직전 대비 폭 감소 + 마지막 폭 ≤ {p['last_pullback_max']*100:.0f}%) "
-                            f"— 마지막 폭 ≈ {last_pct*100:.1f}%"
-                        ),
+                        "reason": reason,
                     })
                     continue
                 stats["pullback_pass"] += 1
@@ -503,47 +520,121 @@ class VcpBreakoutStrategy(StrategyBase):
     def _check_pullback_sequence(self, candles: list[dict], base: dict) -> bool:
         """베이스 구간 내 pullback 점진 수축 검증.
 
-        1차 구현은 단순화: 베이스 구간의 swing high/low 를 단순 검출 → pullback 개수와 마지막 pullback 폭만 검증.
+        사이클 49 (2026-05-31) — "마지막 폭 0.0%" 결함 시정:
+        - **ATR threshold swing 검출** (ZigZag 변형). 베이스 ATR × `min_swing_atr_mult` 미만
+          변동은 노이즈로 무시. 한국 KRX 우량주 평탄 구간의 1원 단위 미세 swing 폭주 차단.
+        - **마지막 swing 미완성 포함**: 마지막 swing high 확정 후 현재까지 진행 중인 pullback 도
+          "마지막 pullback" 으로 포함. 기존 단순 검출은 chrono 끝이 rising 이면 마지막 swing 누락
+          → `base["last_pullback_pct"]` 미설정 → funnel reason "0.0%" 디폴트 표시 결함.
+        - **strict 점진 수축**: `curr < prev` (등호 제거, 동일 폭 거부).
+        - **마지막 폭 항상 기록**: False 반환 경로에서도 `base["last_pullback_pct"]` 에 실제 계산값
+          (마지막 swing 폭 또는 0) 기록 → funnel reason 정확성 보장.
+
+        운영 결함 (5/26~5/29 33/33 종목 "0.0%" 사유 탈락) 대응. 자세한 root cause 는
+        `_workspace/00_leader_trading_rules.md` 6-F 사이클 49 참조.
         """
         p = self.config.params
         last_pullback_max = p["last_pullback_max"]
         pull_min = p["pullback_count_min"]
         pull_max = p["pullback_count_max"]
+        min_swing_mult = p.get("min_swing_atr_mult", 0.5)
 
         try:
             closes = [int(c.get("stck_clpr", "0")) for c in candles[: base["length"]]]
+            highs = [int(c.get("stck_hgpr", "0")) for c in candles[: base["length"]]]
+            lows = [int(c.get("stck_lwpr", "0")) for c in candles[: base["length"]]]
         except (TypeError, ValueError, KeyError):
+            base["last_pullback_pct"] = 0.0
+            base["last_pullback_count"] = 0
             return False
         if not closes:
+            base["last_pullback_pct"] = 0.0
+            base["last_pullback_count"] = 0
             return False
 
         # 시간순(과거→현재) 으로 reverse
         chrono = list(reversed(closes))
-        # 간단한 swing 검출: local max → local min → local max ...
-        pullbacks = []
-        i = 0
         n = len(chrono)
-        # local high 시작점 찾기
-        while i < n - 1:
-            # rising 끝점 찾기
-            j = i
-            while j + 1 < n and chrono[j + 1] >= chrono[j]:
-                j += 1
-            high = chrono[j]
-            # falling 끝점 찾기
-            k = j
-            while k + 1 < n and chrono[k + 1] <= chrono[k]:
-                k += 1
-            low = chrono[k]
-            if j < k and high > 0 and high > low:
-                pullbacks.append((high - low) / high)
-            i = k + 1
+
+        # 베이스 ATR 계산 (노이즈 임계) — 베이스 구간 평균 일중 변동폭의 단순 근사
+        # full ATR(14) 는 _atr() 헬퍼가 14봉 한정이라 베이스 전체 평균이 더 안정적.
+        if highs and lows and len(highs) == len(lows):
+            ranges = [h - l for h, l in zip(highs, lows) if h > 0 and l > 0 and h >= l]
+            base_atr = (sum(ranges) / len(ranges)) if ranges else 0
+        else:
+            base_atr = 0
+        # ATR 산출 실패 시 종가 평균의 0.3% 폴백 (의미 있는 변동만 인정)
+        if base_atr <= 0:
+            avg_close = sum(chrono) / n if n > 0 else 0
+            base_atr = max(1, int(avg_close * 0.003))
+        min_swing_threshold = max(1, base_atr * min_swing_mult)
+
+        # ZigZag 변형 — running_max/min 추적 + threshold 이상 반전 시 swing 확정
+        pullbacks: list[float] = []
+        # state: 'up' = 상승 추세 추적 중 (running_max 갱신), 'down' = 하락 추세 (running_min 갱신)
+        # 초기 방향은 첫 두 봉 비교로 결정
+        if n < 2:
+            base["last_pullback_pct"] = 0.0
+            base["last_pullback_count"] = 0
+            return False
+
+        running_max = chrono[0]
+        running_min = chrono[0]
+        # 초기 방향: 'undefined' — 첫 의미 있는 변동에서 결정
+        state = "undefined"
+        last_pivot_high: int | None = None  # 직전 확정된 swing high
+
+        for i in range(1, n):
+            price = chrono[i]
+            if state == "undefined":
+                if price - running_min >= min_swing_threshold:
+                    state = "up"
+                    running_max = price
+                elif running_max - price >= min_swing_threshold:
+                    state = "down"
+                    last_pivot_high = running_max  # 첫 swing high 확정
+                    running_min = price
+                else:
+                    # 임계 미만 — running_max/min 갱신만
+                    running_max = max(running_max, price)
+                    running_min = min(running_min, price)
+            elif state == "up":
+                if price >= running_max:
+                    running_max = price
+                elif running_max - price >= min_swing_threshold:
+                    # swing high 확정 → 'down' 진입
+                    last_pivot_high = running_max
+                    state = "down"
+                    running_min = price
+            elif state == "down":
+                if price <= running_min:
+                    running_min = price
+                elif price - running_min >= min_swing_threshold:
+                    # swing low 확정 → pullback 기록 + 'up' 진입
+                    if last_pivot_high is not None and last_pivot_high > running_min:
+                        pullbacks.append(
+                            (last_pivot_high - running_min) / last_pivot_high
+                        )
+                    state = "up"
+                    running_max = price
+                    last_pivot_high = None
+
+        # 마지막 swing 미완성 처리:
+        # 1) state='down' 중 끝남 → 마지막 pullback (last_pivot_high → running_min) 진행 중
+        # 2) state='up' 중 끝남 → 직전에 확정된 swing low 이후 회복 중 → 추가 pullback 없음
+        if state == "down" and last_pivot_high is not None and last_pivot_high > running_min:
+            pullbacks.append((last_pivot_high - running_min) / last_pivot_high)
+
+        # 결함 시정 핵심: 결과와 무관하게 마지막 pullback 폭 + 검출 회수 기록
+        # (funnel reason 정확성 — pull_count=0 은 "평탄 베이스 swing 미검출" 의미)
+        base["last_pullback_pct"] = pullbacks[-1] if pullbacks else 0.0
+        base["last_pullback_count"] = len(pullbacks)
 
         pull_count = len(pullbacks)
         if pull_count < pull_min or pull_count > pull_max:
             return False
 
-        # 점진 수축
+        # 점진 수축 (strict — 등호 제거. 동일 폭 거부)
         for prev_pb, curr_pb in zip(pullbacks, pullbacks[1:]):
             if curr_pb >= prev_pb:
                 return False
@@ -552,8 +643,6 @@ class VcpBreakoutStrategy(StrategyBase):
         if pullbacks[-1] > last_pullback_max:
             return False
 
-        # base dict 에 마지막 pullback 폭 기록 (caller 가 _candidates 에 저장)
-        base["last_pullback_pct"] = pullbacks[-1]
         return True
 
     def _check_volume_contraction(self, candles: list[dict], base: dict) -> bool:
