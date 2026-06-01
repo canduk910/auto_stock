@@ -39,8 +39,15 @@ def boot_env_regime(scheduler_env, monkeypatch: pytest.MonkeyPatch):
         return "TOKEN"
 
     monkeypatch.setattr(
-        "src.engine.scheduler.token_manager", SimpleNamespace(get_token=fake_get_token)
+        "src.engine.boot_manager.token_manager", SimpleNamespace(get_token=fake_get_token)
     )
+
+    # _preissue_all_tokens 는 src.auth.token 을 fresh import 하므로
+    # 인스턴스 메서드 자체를 no-op 으로 치환 (토큰 캐시 만료 환경 의존 차단)
+    async def fake_preissue():
+        return None
+
+    monkeypatch.setattr(sched, "_preissue_all_tokens", fake_preissue)
 
     async def fake_load_strategy_config():
         return None
@@ -54,7 +61,7 @@ def boot_env_regime(scheduler_env, monkeypatch: pytest.MonkeyPatch):
         )
         return [], summary
 
-    monkeypatch.setattr("src.engine.scheduler.get_balance", fake_get_balance)
+    monkeypatch.setattr("src.engine.boot_manager.get_balance", fake_get_balance)
 
     for s in sched.registry.all():
         async def _noop_prepare():
@@ -69,7 +76,7 @@ def boot_env_regime(scheduler_env, monkeypatch: pytest.MonkeyPatch):
     async def fake_get_daily_orders():
         return []
 
-    monkeypatch.setattr("src.engine.scheduler.get_daily_orders", fake_get_daily_orders)
+    monkeypatch.setattr("src.engine.boot_manager.get_daily_orders", fake_get_daily_orders)
 
     async def fake_sync_orders_to_db(_orders):
         return None

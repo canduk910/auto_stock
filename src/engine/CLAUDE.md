@@ -11,7 +11,7 @@
 strategy_base / strategy_registry → 추상 + 등록/비중/중복 가드
 strategies/{momentum, volatility_breakout, long_tail_volatility, donchian_swing, bull_flag_breakout, vcp_breakout}
 session.py(MarketBoard, SessionTracker)
-risk.py(on_tick) → order_engine.py(체결통보·DB persistence) → scheduler.py(시간 가드·boot/run/settle)
+risk.py(on_tick) → order_engine.py(체결통보·DB persistence) → scheduler.py(시간 가드·run/settle) ← boot_manager.py(_boot 본체, 사이클 51) / stale_tracker.py(StaleTrackerState, 사이클 48)
 scanner.py(종목 스캔/구독/STATIC_TICKER_NAMES)
 util/tick_size.py(KRX 7구간 호가단위 헬퍼 — `get_tick_size` / `round_to_tick` / `step_down` / `step_up`)
 market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
@@ -126,7 +126,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 | 상수 | 시각 | 동작 |
 |------|------|------|
 | `TIME_AUTO_START` | 07:45 | DB `auto_start` 우선 폴백 자동 시작 |
-| `TIME_BOOT` | 07:50 | `_boot()` — `_preissue_all_tokens()` (사이클 20: 메인+보조 N 매니저 분당 1개 한도 직렬화 사전 발급) → DB positions 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `_eager_refresh_stock_master_for_held_positions()` (보유 + 익일청산 후보 ticker 를 stock_master eager 갱신) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → `allocate_funds(net_asset × ratio)` |
+| `TIME_BOOT` | 07:50 | `_boot()` (사이클 51 분해: 본체 `src/engine/boot_manager.py::boot(scheduler)` 위임 — 2 줄 wrapper. 외부 import 경로 영향 0) — `_preissue_all_tokens()` (사이클 20: 메인+보조 N 매니저 분당 1개 한도 직렬화 사전 발급) → DB positions 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `_eager_refresh_stock_master_for_held_positions()` (보유 + 익일청산 후보 ticker 를 stock_master eager 갱신) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → `allocate_funds(net_asset × ratio)` |
 | `TIME_PRESUBSCRIBE` | 07:55 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독 |
 | `TIME_PRE_NXT_OPEN` | 08:00 | 익일 청산 task (`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30s`). 사이클 26: VB/LTV PRE_NXT 매수 제거됨 — `_confirm_breakout_open_prices(board="pre_nxt")` 대상 없음 (tradable_boards=("main",)) |
 | `TIME_KRX_MAIN_OPEN_PRESUBSCRIBE` | 08:59:10 | **사이클 26 신규**: KRX 채널(H0STCNT0) 사전 구독 마진 시작. `_board_transition_loop("H0NXCNT0","H0STCNT0", 보유+익일청산)` — 종목별 원자 전환 + 매수 후보 신규 subscribe |

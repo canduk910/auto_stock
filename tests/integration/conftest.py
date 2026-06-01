@@ -219,6 +219,8 @@ def scheduler_env(monkeypatch):
         calls.write_log.append({"level": level, "message": message})
 
     monkeypatch.setattr("src.engine.scheduler.write_log", fake_write_log)
+    # 사이클 51: boot_manager 분리 — write_log 가 boot_manager 에서도 import 됨
+    monkeypatch.setattr("src.engine.boot_manager.write_log", fake_write_log, raising=False)
 
     # kis_ws.subscribe 호출 추적
     async def fake_subscribe(tr_id, tr_key):
