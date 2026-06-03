@@ -52,7 +52,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
   - 4 임계 OR: `regime=defensive` (defensive_enabled=true) / `vix>vix_threshold` / `fear_greed_score>fg_high_threshold` / `<fg_low_threshold`. 매도/손절은 본 분기 진입 전 평가 → 영향 없음. 외부 fetch 실패 / `DKSTOCK_REGIME_ENABLED=false` → empty 폴백 (blocked=False)
   - 기본값: mode=HARD, vix=25 / fg_high=85 / fg_low=15 / defensive_enabled=true
 - **중복 가드**: `registry.is_ticker_blocked_for_buy()`
-- **자금 사전 가드**: `state.is_low_funds_blocked(ticker)` 또는 `current_price > state.total_investment` skip. **사이클 31 R6 (2026-05-21) 가시화**: `current_price > total_investment` 분기에 `_risk_silent_skip_logged_today: set[tuple[ticker, strategy_id]]` (RiskManager 필드) 기반 1회/페어/일 INFO emit cap — `[risk_silent_skip] ticker=009150 strategy=volatility_breakout reason=price_gt_total_investment price=1186000 total=352217`. 매 틱 폭주 차단. `scheduler._reset_daily_state` 동행 clear + AttributeError 방어 가드. 5/21 09:13 VB 미매수 사고 디버깅 곤란 해소
+- **자금 사전 가드**: `state.is_low_funds_blocked(ticker)` 또는 `current_price > state.total_investment` skip. **사이클 31 R6 (2026-05-21) 가시화**: `current_price > total_investment` 분기에 `_risk_silent_skip_logged_today: DailyEmitCap[tuple[str, str]]` (RiskManager 필드, 사이클 56-D 마이그레이션) 기반 1회/페어/일 INFO emit cap — `[risk_silent_skip] ticker=009150 strategy=volatility_breakout reason=price_gt_total_investment price=1186000 total=352217`. 매 틱 폭주 차단. `scheduler._reset_daily_state` → `RiskManager.reset_daily_state()` 위임 (사이클 56-D 캡슐화 — 사이클 52 OrderEngine 패턴 답습) + AttributeError 후방호환 가드. 5/21 09:13 VB 미매수 사고 디버깅 곤란 해소
 - BUY 신호 발생 시 `state.signal_count_today += 1`
 
 ## market_regime.py

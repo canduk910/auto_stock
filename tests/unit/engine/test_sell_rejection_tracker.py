@@ -418,3 +418,37 @@ def test_compat_4_register_market_closed_resets_logged_today_for_reemit():
     assert "064400" not in tracker._logged_today, (
         "register_market_closed 가 _logged_today.discard 누락 — 재폭주 시 emit 누락"
     )
+
+
+# ===========================================================================
+# 사이클 56-B — _logged_today DailyEmitCap 마이그레이션 회귀 가드 (G-2)
+# ===========================================================================
+def test_logged_today_is_daily_emit_cap_instance():
+    """사이클 56-B 마이그레이션 회귀 가드 — _logged_today 가 DailyEmitCap[str] 인스턴스.
+
+    set 동형 호환 layer 5 메서드 (__contains__ / add / discard / clear / __len__)
+    가 정상 동작하는지 검증. 기존 사이클 55 9 가드 행위 보존 확인.
+    """
+    from src.engine.daily_emit_cap import DailyEmitCap
+    from src.engine.sell_rejection import SellRejectionTracker
+
+    tracker = SellRejectionTracker()
+
+    # 인스턴스 타입 검증 (56-B 핵심)
+    assert isinstance(tracker._logged_today, DailyEmitCap), (
+        "_logged_today 가 DailyEmitCap 인스턴스가 아님 — 56-B 마이그레이션 미수행"
+    )
+
+    # set 동형 호환 layer 검증 (add / __contains__ / discard / clear)
+    tracker._logged_today.add("064400")
+    assert "064400" in tracker._logged_today, "add 후 __contains__ True 실패"
+
+    tracker._logged_today.discard("064400")
+    assert "064400" not in tracker._logged_today, "discard 후 __contains__ False 실패"
+
+    # clear / __len__ 검증
+    tracker._logged_today.add("005930")
+    tracker._logged_today.add("000660")
+    assert len(tracker._logged_today) == 2, "__len__ 불일치"
+    tracker._logged_today.clear()
+    assert len(tracker._logged_today) == 0, "clear 후 __len__ 0 보장 위반"

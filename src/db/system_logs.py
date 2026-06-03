@@ -47,6 +47,38 @@ async def write_log(log_level: str, message: str) -> None:
     )
 
 
+async def safe_write_log(
+    level: str,
+    message: str,
+    *,
+    fallback_debug: str | None = None,
+) -> None:
+    """write_log 의 graceful skip 변형 — 실패 시 logger.debug 만 발화.
+
+    사이클 56-E (2026-06-04): order_engine.py 동형 try/except 패턴 통합.
+    write_log 실패 (Supabase 일시 장애, 네트워크 에러 등) 가 매매 흐름을 막지
+    않도록 graceful skip. logger.debug 는 stdout 에 흔적 보존.
+
+    Args:
+        level: 로그 레벨 (INFO / WARNING / ERROR / CRITICAL).
+        message: 로그 메시지.
+        fallback_debug: 예외 발생 시 logger.debug 에 전달할 메시지.
+            None 이면 기본 메시지 "[safe_write_log] {message[:80]} 실패: level={level}" 사용.
+    """
+    try:
+        await write_log(level, message)
+    except Exception:
+        if fallback_debug:
+            logger.debug(fallback_debug, exc_info=True)
+        else:
+            logger.debug(
+                "[safe_write_log] %s 실패: level=%s",
+                message[:80],
+                level,
+                exc_info=True,
+            )
+
+
 async def get_logs(
     limit: int = 100,
     log_level: str | None = None,

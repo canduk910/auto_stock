@@ -24,8 +24,9 @@ from src.api.balance import (
 from src.engine.util.tick_size import step_down, step_up
 from src.api.base import KisApiError
 from src.api.order import cancel_order, place_order
-from src.db.system_logs import write_log
+from src.db.system_logs import write_log, safe_write_log
 from src.db.trade_history import insert_trade, update_trade_status
+from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.strategy_base import Position, Signal, StrategyBase
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.scanner import t
@@ -85,10 +86,11 @@ class OrderEngine:
         # 를 통합. 호환 layer property 2개 로 기존 참조 보존.
         from src.engine.sell_rejection import SellRejectionTracker
         self._sell_rejection = SellRejectionTracker()
-        # 사이클 54 (2026-06-03) — NXT 다운그레이드 로그 ticker별 1회/일 cap.
+        # 사이클 56-C (2026-06-04) — DailyEmitCap[str] 으로 마이그레이션.
+        # 사이클 54 set[str] → DailyEmitCap[str] 호환 layer 경유 (add/clear/__contains__).
         # 다운그레이드 결정 무영향, 로그만 cap. _reset_daily_state 동행 clear.
-        # R-1 범위 밖 — 사이클 56 emit cap 통합 시 tracker 위임 예정.
-        self._nxt_downgrade_logged_today: set[str] = set()
+        from src.engine.daily_emit_cap import DailyEmitCap
+        self._nxt_downgrade_logged_today: DailyEmitCap[str] = DailyEmitCap[str]()
 
     # ──────────────────────────── 사이클 52 호환 layer (사이클 55 R-1)
 
@@ -102,8 +104,11 @@ class OrderEngine:
         return self._sell_rejection._blocked_until
 
     @property
-    def _market_closed_blocked_logged_today(self) -> set[str]:
-        """사이클 52 emit cap 호환 — SellRejectionTracker._logged_today 직접 노출."""
+    def _market_closed_blocked_logged_today(self) -> "DailyEmitCap[str]":
+        """사이클 52 emit cap 호환 — SellRejectionTracker._logged_today 직접 노출.
+
+        사이클 56-B 마이그레이션 후 DailyEmitCap[str] 반환 (set 동형 호환 layer 보유).
+        """
         return self._sell_rejection._logged_today
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -144,14 +149,12 @@ class OrderEngine:
 
         if basics is None:
             # 가설 E (2026-05-12) — 캐시 miss 시 1행 INFO 로그. 본 흐름(전략 기본 유지) 영향 없음.
-            try:
-                await write_log(
-                    "INFO",
-                    f"[stock_master_miss] ticker={ticker} strategy={strategy_id} "
-                    f"exchange_keep={base} reason=miss",
-                )
-            except Exception:
-                logger.debug("[stock_master_miss] write_log 실패", exc_info=True)
+            await safe_write_log(
+                "INFO",
+                f"[stock_master_miss] ticker={ticker} strategy={strategy_id} "
+                f"exchange_keep={base} reason=miss",
+                fallback_debug="[stock_master_miss] write_log 실패",
+            )
             return base  # cache miss — 보수적 fallback
 
         # 가설 E (2026-05-12) — stale 캐시 가시화 (TTL 24h 초과).
@@ -162,10 +165,11 @@ class OrderEngine:
             try:
                 from src.db import stock_master as _sm
                 if await _sm.is_stale(t):
-                    await write_log(
+                    await safe_write_log(
                         "INFO",
                         f"[stock_master_miss] ticker={t} strategy={sid} "
                         f"exchange_keep={exch} reason=stale",
+                        fallback_debug="[stock_master_miss] stale 체크 실패",
                     )
             except Exception:
                 logger.debug("[stock_master_miss] stale 체크 실패", exc_info=True)
@@ -504,15 +508,13 @@ class OrderEngine:
             if self._sell_rejection.should_emit_block_log(ticker):
                 self._sell_rejection.mark_block_logged(ticker)
                 _expiry_log = self._sell_rejection._blocked_until.get(ticker)
-                try:
-                    await write_log(
-                        "INFO",
-                        f"[market_closed_blocked] ticker={ticker} strategy={strategy_id} "
-                        f"reason={self._sell_rejection._blocked_reason.get(ticker, '')} "
-                        f"expiry={_expiry_log.isoformat() if _expiry_log else '?'}",
-                    )
-                except Exception:
-                    logger.debug("[market_closed_blocked] write_log 실패", exc_info=True)
+                await safe_write_log(
+                    "INFO",
+                    f"[market_closed_blocked] ticker={ticker} strategy={strategy_id} "
+                    f"reason={self._sell_rejection._blocked_reason.get(ticker, '')} "
+                    f"expiry={_expiry_log.isoformat() if _expiry_log else '?'}",
+                    fallback_debug="[market_closed_blocked] write_log 실패",
+                )
             self._selling.discard(ticker)
             return
 
@@ -798,14 +800,12 @@ class OrderEngine:
             # 사이클 55 R-1 Q3 — [positions_reconciliation] + get_balance() 1회.
             # 수동 부분매도 등으로 실제 잔량이 남아있는 경우를 대비해 잔고를 1회 재조회.
             # 실패 graceful — positions 제거는 이미 완료, 재조회는 보호 목적.
-            try:
-                await write_log(
-                    "INFO",
-                    f"[positions_reconciliation] ticker={ticker} strategy={strategy_id} "
-                    f"reason=insufficient_quantity",
-                )
-            except Exception:
-                logger.debug("[positions_reconciliation] write_log 실패", exc_info=True)
+            await safe_write_log(
+                "INFO",
+                f"[positions_reconciliation] ticker={ticker} strategy={strategy_id} "
+                f"reason=insufficient_quantity",
+                fallback_debug="[positions_reconciliation] write_log 실패",
+            )
             try:
                 from src.api.balance import get_balance
                 holdings, _ = await get_balance()

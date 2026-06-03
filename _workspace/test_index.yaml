@@ -1378,6 +1378,7 @@ backend:
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_parameter_recommendations_v2.py
     - tests/unit/db/test_parameter_recommendations_weight_reasoning.py
+    - tests/unit/db/test_safe_write_log.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_strategy_funnel_crud.py
@@ -3191,6 +3192,7 @@ backend:
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_parameter_recommendations_v2.py
     - tests/unit/db/test_parameter_recommendations_weight_reasoning.py
+    - tests/unit/db/test_safe_write_log.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_strategy_funnel_crud.py
@@ -3495,6 +3497,7 @@ backend:
     direct_tests:
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
+    - tests/unit/db/test_safe_write_log.py
     - tests/unit/db/test_system_logs_filter.py
     - tests/unit/db/test_system_logs_retention.py
     - tests/unit/db/test_system_logs_search.py
@@ -4378,6 +4381,139 @@ backend:
     - tests/unit/engine/test_session_silent_inactive_recovery.py
     - tests/unit/engine/test_stale_watcher_priority_split.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
+    - tests/unit/engine/test_swing_poll_loop.py
+    - tests/unit/engine/test_swing_rest_poll.py
+    - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
+    - tests/unit/engine/test_sync_orders_to_db_dedup.py
+    - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_universe_guard.py
+    - tests/unit/engine/test_vb_force_clear_at_15_20.py
+    - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+  src/engine/daily_emit_cap.py:
+    direct_tests:
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_daily_emit_cap.py
+    - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_sell_rejection_tracker.py
+    transitive_tests:
+    - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_quote_session_auto_disable.py
+    - tests/contract/test_routes_backtest.py
+    - tests/contract/test_routes_balance_perf.py
+    - tests/contract/test_routes_buy_block.py
+    - tests/contract/test_routes_history.py
+    - tests/contract/test_routes_kis_quote_accounts.py
+    - tests/contract/test_routes_log_reports.py
+    - tests/contract/test_routes_logs.py
+    - tests/contract/test_routes_logs_search.py
+    - tests/contract/test_routes_market_regime.py
+    - tests/contract/test_routes_realtime.py
+    - tests/contract/test_routes_realtime_ccnl_fields.py
+    - tests/contract/test_routes_realtime_session_details.py
+    - tests/contract/test_routes_recommendations.py
+    - tests/contract/test_routes_strategies.py
+    - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_strategy_funnel.py
+    - tests/contract/test_routes_subscriptions_pool.py
+    - tests/contract/test_routes_system_integrations.py
+    - tests/contract/test_routes_trading.py
+    - tests/integration/test_auto_start.py
+    - tests/integration/test_backtest_disabled_and_graceful.py
+    - tests/integration/test_boot_cash_usage_ratio.py
+    - tests/integration/test_boot_eager_refresh.py
+    - tests/integration/test_boot_market_regime.py
+    - tests/integration/test_buy_block_low_funds.py
+    - tests/integration/test_buy_flow.py
+    - tests/integration/test_chegyeol_race.py
+    - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_dockerfile_token_cache_perms.py
+    - tests/integration/test_force_clear_1520.py
+    - tests/integration/test_mcp_client_lifecycle.py
+    - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_next_day_clear.py
+    - tests/integration/test_next_day_clear_nxt_eligibility.py
+    - tests/integration/test_next_day_clear_observability.py
+    - tests/integration/test_next_day_clear_stock_master.py
+    - tests/integration/test_pool_distribution.py
+    - tests/integration/test_post_nxt_open_price_confirm.py
+    - tests/integration/test_presubscribe.py
+    - tests/integration/test_recommendation_backtest_flow.py
+    - tests/integration/test_recommendation_time_change.py
+    - tests/integration/test_recommendation_with_market_regime.py
+    - tests/integration/test_reset_daily_state.py
+    - tests/integration/test_risk_on_tick.py
+    - tests/integration/test_scheduler_boot_quote_sessions.py
+    - tests/integration/test_scheduler_recommendation_failure.py
+    - tests/integration/test_sell_flow.py
+    - tests/integration/test_sell_market_closed_preserves_positions.py
+    - tests/integration/test_sell_rejection_integration.py
+    - tests/integration/test_session_start_hook_idempotent.py
+    - tests/integration/test_smoke.py
+    - tests/integration/test_stale_watcher.py
+    - tests/integration/test_stale_watcher_pool.py
+    - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/api/test_condition_cache.py
+    - tests/unit/engine/scheduler/test_atomic_board_transition.py
+    - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
+    - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
+    - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
+    - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
+    - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/test_auto_apply_recommendations.py
+    - tests/unit/engine/test_b1_market_closed_zombie_block.py
+    - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_poll_loop.py
+    - tests/unit/engine/test_boot_manager_extraction.py
+    - tests/unit/engine/test_boot_preissue_tokens.py
+    - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
+    - tests/unit/engine/test_cycle37_ccnl_cache.py
+    - tests/unit/engine/test_cycle41_funnel_name_reason.py
+    - tests/unit/engine/test_cycle45_cache_auto_evict.py
+    - tests/unit/engine/test_cycle46_session_health_loop.py
+    - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
+    - tests/unit/engine/test_cycle48_stale_tracker_state.py
+    - tests/unit/engine/test_force_clear_time_guard.py
+    - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
+    - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_order_engine_buy.py
+    - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_param_ranges_vcp.py
+    - tests/unit/engine/test_recommendation_backtest_hook.py
+    - tests/unit/engine/test_recommendation_engine_smoke.py
+    - tests/unit/engine/test_recommendation_market_regime_payload.py
+    - tests/unit/engine/test_recommendation_param_ranges.py
+    - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
+    - tests/unit/engine/test_recommendation_weight_reasoning.py
+    - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_risk_buy_block_modes.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_risk_on_tick_selling_skip.py
+    - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_scan_loop_delta_only.py
+    - tests/unit/engine/test_scan_loop_reprepare.py
+    - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scheduler_finally_main_disconnect.py
+    - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
+    - tests/unit/engine/test_scheduler_priority_groups.py
+    - tests/unit/engine/test_scheduler_stale_force_retry.py
+    - tests/unit/engine/test_scheduler_stale_logging_format.py
+    - tests/unit/engine/test_scheduler_stale_tracking.py
+    - tests/unit/engine/test_scheduler_start_stop_race_cycle13g.py
+    - tests/unit/engine/test_scheduler_stop_task_cancel.py
+    - tests/unit/engine/test_scheduler_stop_zombie_tasks.py
+    - tests/unit/engine/test_scheduler_swing_subscription_removed.py
+    - tests/unit/engine/test_scheduler_tick_coverage_session_view.py
+    - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
+    - tests/unit/engine/test_session_silent_inactive_ratio.py
+    - tests/unit/engine/test_session_silent_inactive_recovery.py
+    - tests/unit/engine/test_stale_watcher_priority_split.py
+    - tests/unit/engine/test_stale_watcher_thresholds.py
+    - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
@@ -10445,10 +10581,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-03T18:22:10.109586+09:00'
+generated_at: '2026-06-04T02:39:25.541057+09:00'
 stats:
-  backend_modules: 90
-  backend_tests: 242
+  backend_modules: 91
+  backend_tests: 244
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:

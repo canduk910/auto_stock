@@ -247,10 +247,11 @@ async def test_stock_master_miss_logs_when_cache_empty():
     engine = OrderEngine(registry)
 
     with patch("src.db.stock_master.get", new=AsyncMock(return_value=None)), \
-         patch("src.engine.order_engine.write_log", new=AsyncMock()) as mock_write_log:
+         patch("src.engine.order_engine.safe_write_log", new=AsyncMock()) as mock_write_log:
         await engine._strategy_exchange_async("momentum", ticker="005930")
 
-    # write_log 가 [stock_master_miss] reason=miss 로그를 호출했는지 확인
+    # safe_write_log 가 [stock_master_miss] reason=miss 로그를 호출했는지 확인
+    # 사이클 56-E: order_engine.write_log → safe_write_log 마이그레이션 (행위 동등)
     miss_calls = [c for c in mock_write_log.call_args_list if "[stock_master_miss]" in str(c)]
     assert len(miss_calls) >= 1, "stock_master.get 결과 None 시 [stock_master_miss] 로그 노출 필요"
     msg = miss_calls[0].args[1]

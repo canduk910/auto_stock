@@ -169,11 +169,16 @@ def mock_delete_position(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
 
 @pytest.fixture
 def mock_write_log(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
-    """write_log AsyncMock — S7 INFO 카운트 검증에도 사용."""
+    """write_log / safe_write_log AsyncMock — S7 INFO 카운트 검증에도 사용.
+
+    사이클 56-E (2026-06-04): safe_write_log 도 동일 mock 으로 패치하여
+    order_engine 내부 write_log → safe_write_log 마이그레이션 후에도 호출 추적 보존.
+    """
     mock = AsyncMock(return_value=None)
     import src.engine.order_engine as _oe
 
     monkeypatch.setattr(_oe, "write_log", mock)
+    monkeypatch.setattr(_oe, "safe_write_log", mock)
     return mock
 
 

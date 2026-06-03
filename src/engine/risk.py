@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 import time
 
+from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.market_regime import get_current_regime
 from src.engine.order_engine import OrderEngine
 from src.engine.session import session_tracker
@@ -38,7 +39,17 @@ class RiskManager:
         # `current_price > state.total_investment` skip 분기에서 1회/(ticker, strategy)/일
         # INFO emit cap. 매 틱 폭주 차단 + scheduler `_reset_daily_state` 동행 clear.
         # 2026-05-21 09:13 VB 미매수 사고 디버깅 곤란의 근본 원인 (skip 침묵).
-        self._risk_silent_skip_logged_today: set[tuple[str, str]] = set()
+        # 사이클 56-D: DailyEmitCap[tuple[str, str]] 마이그레이션. tuple key 호환 보장.
+        # scheduler 외부 직접 clear → reset_daily_state() 캡슐화 위임 (사이클 52 OrderEngine 패턴 답습).
+        self._risk_silent_skip_logged_today: DailyEmitCap[tuple[str, str]] = DailyEmitCap[tuple[str, str]]()
+
+    def reset_daily_state(self) -> None:
+        """사이클 56-D — 일일 RiskManager 상태 초기화 (scheduler 위임).
+
+        사이클 31 R6 _risk_silent_skip_logged_today 일괄 clear.
+        사이클 52 OrderEngine.reset_daily_state() 패턴 답습 (캡슐화).
+        """
+        self._risk_silent_skip_logged_today.clear()
 
     async def on_tick(
         self,

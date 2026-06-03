@@ -14,7 +14,7 @@
     OrderEngine 의 2 property (_market_closed_blocked / _market_closed_blocked_logged_today)
     가 본 데이터클래스 필드 직접 노출.
     사이클 52 회귀 가드 8 시나리오 호환 보장.
-    사이클 54 _nxt_downgrade_logged_today 는 R-1 범위 밖 — 사이클 56 emit cap 통합 예정.
+    사이클 54 _nxt_downgrade_logged_today 는 R-1 범위 밖 — 사이클 56-C 마이그레이션 완료 예정.
 
 안전 가드:
     reset_daily() 가 _blocked_until / _blocked_reason / _logged_today / _history 일괄 clear.
@@ -26,6 +26,8 @@ from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, time as dtime, timedelta, timezone
 from typing import Literal
+
+from src.engine.daily_emit_cap import DailyEmitCap
 
 _KST_TZ = timezone(timedelta(hours=9))
 
@@ -71,8 +73,8 @@ class SellRejectionTracker:
     # 통합 차단 게이트 (Q1+Q2 — 2단계 TTL + 30초 TTL 공용 저장)
     _blocked_until: dict[str, datetime] = field(default_factory=dict)
     _blocked_reason: dict[str, RejectionReason] = field(default_factory=dict)
-    # emit cap (사이클 52 호환 — 사이클 56 통합 후보)
-    _logged_today: set[str] = field(default_factory=set)
+    # emit cap — 사이클 56-B: DailyEmitCap[str] 위임 (set 호환 layer 보존)
+    _logged_today: DailyEmitCap[str] = field(default_factory=DailyEmitCap)
     # V-1 알람 hook 사전 준비 (Q5, 사이클 56+)
     _history: dict[str, deque[RejectionEvent]] = field(default_factory=dict)
 

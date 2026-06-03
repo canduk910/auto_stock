@@ -128,6 +128,9 @@ def mock_write_log(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
     import src.engine.order_engine as _oe
 
     monkeypatch.setattr(_oe, "write_log", mock)
+    # 사이클 56-E (2026-06-04): safe_write_log 도 동일 mock 으로 패치.
+    # order_engine 내 write_log → safe_write_log 마이그레이션 후 호출 추적 보존.
+    monkeypatch.setattr(_oe, "safe_write_log", mock)
     return mock
 
 

@@ -220,3 +220,26 @@ B-3 / B-4 / R-2 / V-1~V-4 는 후속 사이클 또는 도메인 자문 결과에
 
 **권고**: 다음 사이클 진입 *전* **refactor-review 발주** 후 V-1 P1 진입이 정합.
 
+---
+
+## 잔여 카드 우선순위 재정렬 (사이클 56 종결 후 — 2026-06-04)
+
+> 사이클 56 종결 (refactor-review 카드 #1 emit cap 통합 4 단계 + 카드 #5 safe_write_log 헬퍼). 백엔드 1804 → 1819 PASS. 신규 모듈 `src/engine/daily_emit_cap.py` (89L) + `src/db/system_logs.py::safe_write_log`. 3 emit cap set 모두 `DailyEmitCap` 통합 완성. **사이클 49→56 누적 8 사이클 = refactor-review 채택분 진행 완료**.
+
+**V-1 P1 즉시 발주 가능** — 사이클 55 R-1 `deque(maxlen=20)` 인프라 + 사이클 56 `DailyEmitCap` 알람 cap 패턴 *2 종 사전 준비 완성*. V-1 알람 hook 은 (a) `SellRejectionTracker.get_recent_rejections()` 시간당 카운트 + (b) ticker별 알람 발화 cap (`DailyEmitCap[str]` 또는 시간당 cap 신규) 직계 활용 가능.
+
+| 순위 | 카드 | 등급 | 영역 | 메모 |
+|------|------|------|------|------|
+| **1** | **V-1** | **P1** | 가시화 | **R-1 deque + 사이클 56 DailyEmitCap 인프라 직계 활용** — 매도 거부 폭주 실시간 알람. team-leader 우선 권고 |
+| 2 | refactor #2 | HIGH | 리팩토링 | scheduler 분해 1단계 stale_manager 추출 (-1,000L). domain-expert 자문 필수. 사이클 51 boot_manager 패턴 답습 |
+| 3 | V-2 | P2 | 가시화 | daily_log_reports OpenAI 메타 컬럼 |
+| 4 | refactor #3 | HIGH | 리팩토링 | settlement_manager 추출 (-376L), 카드 #2 후속 |
+| 5 | R-2 | MEDIUM | 리팩토링 | momentum/VB/LTV funnel hook |
+| 6 | refactor #4 | MEDIUM | 리팩토링 | swing_manager 추출 (-400L) |
+| 7 | R-3 | MEDIUM | 리팩토링 | api_metrics quote_pool 500 |
+| 8 | refactor #6 | MEDIUM | 리팩토링 | KIS API except 좁히기 (KIS MCP 의존) |
+| 9 | V-3 | P2 | 가시화 | system_logs 컬럼명 일관성 |
+| 10 | V-4 | P3 | 가시화 | strategy_funnel 탈락 사유 sample |
+
+**권고**: 다음 사이클은 **V-1 P1** (R-1 + DailyEmitCap 인프라 직계 활용, 매매 안전성 critical 가시화) 또는 **refactor #2 HIGH** (scheduler 분해 본격 진행) 우선 발주. 사용자 결정 대기.
+

@@ -330,3 +330,22 @@ async def test_s4_when_nxt_tradable_true_then_no_downgrade_and_no_log(
     assert "005930" not in logged, (
         "nxt_tradable=True 종목이 cap set 에 잘못 등록됨 — Green 구현 시 분기 위치 점검"
     )
+
+
+# ===========================================================================
+# G-3 — 사이클 56-C 마이그레이션 회귀 가드: DailyEmitCap[str] 인스턴스 검증
+# ===========================================================================
+def test_g3_nxt_downgrade_logged_today_is_daily_emit_cap_instance(
+    engine: OrderEngine,
+):
+    """사이클 56-C 마이그레이션 회귀 가드 — DailyEmitCap[str] 인스턴스.
+
+    _nxt_downgrade_logged_today 가 set[str] 이 아닌 DailyEmitCap[str] 인스턴스여야 함.
+    사이클 54 → 56-C 마이그레이션 후 타입 드리프트 차단.
+    """
+    from src.engine.daily_emit_cap import DailyEmitCap
+
+    assert isinstance(engine._nxt_downgrade_logged_today, DailyEmitCap), (
+        f"_nxt_downgrade_logged_today 가 DailyEmitCap 인스턴스가 아님: "
+        f"{type(engine._nxt_downgrade_logged_today)!r} — 사이클 56-C 마이그레이션 미완료"
+    )

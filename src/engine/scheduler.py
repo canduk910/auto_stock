@@ -3829,10 +3829,11 @@ class TradingScheduler:
 
         # 사이클 31 (R6, 2026-05-21) — risk.py 사전 가드 침묵 가시화 emit cap 일일 초기화.
         # `(ticker, strategy_id)` 페어 1회/일 INFO emit cap. 익일 첫 호출 시 재 emit 가능.
+        # 사이클 56-D: reset_daily_state() 캡슐화 위임 (사이클 52 OrderEngine 패턴 답습).
         try:
-            self.risk_manager._risk_silent_skip_logged_today.clear()
+            self.risk_manager.reset_daily_state()
         except AttributeError:
-            # 회귀 가드 — 사전 init 누락 인스턴스 (테스트 __new__ 등) 보호
+            # 후방호환 가드 — RiskManager 가 reset_daily_state 메서드 없는 경우 (구버전 호환)
             pass
         # 사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot 일일 1회 가드 reset
         self._auto_funnel_snapshot_done_today = False

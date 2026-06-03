@@ -305,17 +305,29 @@ async def test_no_emit_when_total_investment_sufficient(monkeypatch, caplog):
 
 
 # ===========================================================================
-# S-7: scheduler `_reset_daily_state` 가 `_risk_silent_skip_logged_today` 동행 clear
+# S-7: scheduler `_reset_daily_state` 가 `risk_manager.reset_daily_state()` 위임
+# 사이클 56-D: 외부 직접 clear → 캡슐화 위임 (사이클 52 OrderEngine 패턴 답습)
 # ===========================================================================
 def test_scheduler_reset_daily_state_clears_silent_skip_log():
-    """scheduler `_reset_daily_state` 가 `risk_manager._risk_silent_skip_logged_today` 도 clear."""
+    """scheduler `_reset_daily_state` 가 `risk_manager.reset_daily_state()` 를 위임 호출.
+
+    사이클 56-D 마이그레이션: scheduler 외부 직접 clear →
+    RiskManager.reset_daily_state() 캡슐화 위임. scheduler 소스에서 위임 호출 확인.
+    RiskManager.reset_daily_state 소스에서 _risk_silent_skip_logged_today.clear() 확인.
+    """
     import inspect
+    from src.engine.risk import RiskManager
     from src.engine.scheduler import TradingScheduler
 
-    src = inspect.getsource(TradingScheduler._reset_daily_state)
-    assert "_risk_silent_skip_logged_today" in src and ".clear()" in src, (
-        f"`_reset_daily_state` 가 risk_manager._risk_silent_skip_logged_today 미 clear. "
-        f"코드: {src[:500]}"
+    sched_src = inspect.getsource(TradingScheduler._reset_daily_state)
+    assert "risk_manager.reset_daily_state()" in sched_src, (
+        f"`_reset_daily_state` 가 risk_manager.reset_daily_state() 미 위임. "
+        f"코드: {sched_src[:500]}"
+    )
+    risk_src = inspect.getsource(RiskManager.reset_daily_state)
+    assert "_risk_silent_skip_logged_today" in risk_src and ".clear()" in risk_src, (
+        f"RiskManager.reset_daily_state 가 _risk_silent_skip_logged_today 미 clear. "
+        f"코드: {risk_src}"
     )
 
 
@@ -330,4 +342,60 @@ def test_risk_manager_init_creates_silent_skip_log_set():
     src = inspect.getsource(RiskManager.__init__)
     assert "_risk_silent_skip_logged_today" in src, (
         f"RiskManager.__init__ 에 _risk_silent_skip_logged_today 누락"
+    )
+
+
+# ===========================================================================
+# G-4 (사이클 56-D): DailyEmitCap[tuple] 마이그레이션 회귀 가드
+# ===========================================================================
+
+def test_risk_silent_skip_logged_today_is_daily_emit_cap_instance(monkeypatch):
+    """사이클 56-D 마이그레이션 회귀 가드 — DailyEmitCap[tuple] 인스턴스 + tuple key 호환."""
+    from src.engine.daily_emit_cap import DailyEmitCap
+    from src.engine.risk import RiskManager
+    from unittest.mock import MagicMock
+
+    registry = MagicMock()
+    registry.enabled = MagicMock(return_value=[])
+    order_engine = MagicMock()
+    order_engine._selling = set()
+
+    risk = RiskManager(registry, order_engine)
+
+    # DailyEmitCap 인스턴스 검증
+    assert isinstance(risk._risk_silent_skip_logged_today, DailyEmitCap), (
+        f"_risk_silent_skip_logged_today 가 DailyEmitCap 인스턴스 아님: "
+        f"{type(risk._risk_silent_skip_logged_today)}"
+    )
+
+    # tuple key — __contains__ / add / clear 호환 검증
+    key = ("064400", "momentum")
+    risk._risk_silent_skip_logged_today.add(key)
+    assert key in risk._risk_silent_skip_logged_today, "add 후 __contains__ 실패"
+
+    risk._risk_silent_skip_logged_today.clear()
+    assert key not in risk._risk_silent_skip_logged_today, "clear 후 __contains__ 실패"
+
+
+def test_risk_manager_reset_daily_state_caps(monkeypatch):
+    """사이클 56-D reset 캡슐화 회귀 가드 — reset_daily_state() 호출 시 emit cap clear."""
+    from src.engine.risk import RiskManager
+    from unittest.mock import MagicMock
+
+    registry = MagicMock()
+    registry.enabled = MagicMock(return_value=[])
+    order_engine = MagicMock()
+    order_engine._selling = set()
+
+    risk = RiskManager(registry, order_engine)
+
+    # emit cap 에 항목 등록
+    risk._risk_silent_skip_logged_today.add(("064400", "momentum"))
+    risk._risk_silent_skip_logged_today.add(("005930", "volatility_breakout"))
+    assert len(risk._risk_silent_skip_logged_today) == 2
+
+    # reset_daily_state() 호출 후 모두 clear 확인
+    risk.reset_daily_state()
+    assert len(risk._risk_silent_skip_logged_today) == 0, (
+        "reset_daily_state() 후 _risk_silent_skip_logged_today 가 비어있지 않음"
     )
