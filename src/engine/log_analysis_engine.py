@@ -67,17 +67,32 @@ def _normalize_message(msg: str) -> str:
 
 
 async def _fetch_logs_in_range(start: datetime, end: datetime, limit: int = 5000) -> list[dict]:
-    """기간 내 system_logs를 시간 오름차순으로 가져온다."""
-    result = (
-        supabase.table("system_logs")
-        .select("timestamp, log_level, message")
-        .gte("timestamp", start.isoformat())
-        .lte("timestamp", end.isoformat())
-        .order("timestamp", desc=False)
-        .limit(limit)
-        .execute()
-    )
-    return result.data or []
+    """기간 내 system_logs를 시간 오름차순으로 가져온다.
+
+    PostgREST default 1000 페이지 한도 회피를 위해 .range(offset, offset+999) 루프.
+    `limit` 은 *총* 한도 (예: limit=5000 → 최대 5페이지).
+    빈 페이지 또는 <1000건 페이지 도달 시 종료.
+    """
+    PAGE_SIZE = 1000
+    all_rows: list[dict] = []
+    offset = 0
+    while offset < limit:
+        end_inclusive = min(offset + PAGE_SIZE - 1, limit - 1)
+        result = (
+            supabase.table("system_logs")
+            .select("timestamp, log_level, message")
+            .gte("timestamp", start.isoformat())
+            .lte("timestamp", end.isoformat())
+            .order("timestamp", desc=False)
+            .range(offset, end_inclusive)
+            .execute()
+        )
+        page = result.data or []
+        all_rows.extend(page)
+        if len(page) < PAGE_SIZE:
+            break
+        offset += PAGE_SIZE
+    return all_rows
 
 
 def _aggregate_logs(logs: list[dict]) -> dict[str, Any]:
@@ -303,11 +318,16 @@ async def _call_openai(metrics: dict) -> dict:
         return {}
 
 
-async def generate_daily_log_report() -> dict | None:
+async def generate_daily_log_report(
+    _now_kst: datetime | None = None,
+) -> dict | None:
     """매일 정산(16:10) 직후 호출.
 
     당일 KST 00:00 ~ now 사이의 system_logs + trade_history를 집계해
     OpenAI에 분석 요청 → daily_log_reports INSERT.
+
+    Args:
+        _now_kst: 테스트용 현재 시각 override. None 이면 datetime.now(KST) 사용.
 
     Returns:
         INSERT된 row, 이미 존재하거나 OpenAI 비활성/실패 시 None.
@@ -316,12 +336,14 @@ async def generate_daily_log_report() -> dict | None:
         logger.warning("OPENAI_API_KEY 미설정 — 로그 분석 리포트 건너뜀")
         return None
 
-    now_kst = datetime.now(KST)
+    now_kst = _now_kst if _now_kst is not None else datetime.now(KST)
     target_date = now_kst.date()
     start_kst = datetime.combine(target_date, datetime.min.time(), tzinfo=KST)
 
     # 1. 데이터 수집
-    logs = await _fetch_logs_in_range(start_kst, now_kst)
+    # 사이클 53.1 — 운영 부피 18,000건/일 대비 30,000 (1.6배 마진).
+    # 디폴트 5000 은 부족하여 drained(ASC 7,000+번) 누락 결함.
+    logs = await _fetch_logs_in_range(start_kst, now_kst, limit=30000)
     trades = await get_trades_in_range(target_date, target_date)
 
     log_metrics = _aggregate_logs(logs)

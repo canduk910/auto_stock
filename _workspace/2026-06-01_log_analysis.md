@@ -48,6 +48,8 @@
 
 #### B-2 [HIGH] `next_day_clear_drained` 로그 발화 누락 — drained_success=0 인데 실제 SELL COMPLETED
 
+> **사이클 53/53.1 종결 (2026-06-02)** — `_fetch_logs_in_range` 페이지네이션 (`.range(offset, offset+999)` 루프) + 호출 측 limit=30000 명시. 6/1 재집계 metrics: drained_success=1 정확 산출 (운영 부피 18,435건 fetch). 재집계 사고로 row 임시 손상 → 메인 세션이 metrics-only 복구. 상세: HARNESS_CHANGELOG 2026-06-02 행.
+
 **근거**:
 - 자동 리포트 metrics `next_day_clear = {deferred:1, drained_success:0, drained_fail:0}`.
 - `trade_history` 에 064400 SELL 2026-05-31T23:20:00 UTC (= 6/1 08:20 KST) COMPLETED, +30,100원. *실제로는 익일청산이 성공*.
@@ -77,6 +79,8 @@
 3. 회귀 가드: 첫 호출에서 nxt 거부 → upsert_one 호출 → 다음 호출은 *사전 판별로 KRX 직행* 검증.
 
 #### B-4 [MEDIUM] 자동 리포트 trade_metrics 1건 누락 — 064400 SELL 미집계
+
+> **사이클 53 종결 (2026-06-02)** — `get_trades_in_range` 의 timestamp 문자열에 `+09:00` KST suffix 명시. 6/1 재집계 metrics: trades_total=5 + realized_pnl=56,100 (064400 SELL UTC 23:20 포함 정합). 상세: HARNESS_CHANGELOG 2026-06-02 행.
 
 **근거**:
 - 자동 리포트 `trade_metrics.trades_total=4 / by_strategy={volatility_breakout:4}`.
@@ -171,3 +175,23 @@
 3. **R-1 (HIGH)** — B-1 시정 직후 구조 정리. domain-expert 자문 (매매 행위 영향 평가) 동반 권장.
 
 B-3 / B-4 / R-2 / V-1~V-4 는 후속 사이클 또는 도메인 자문 결과에 따라.
+
+---
+
+## 잔여 카드 우선순위 재정렬 (사이클 53/53.1 종결 후 — 2026-06-02)
+
+사이클 52 (B-1) + 53 (B-2/B-4) + 53.1 (운영 부피 cap) 종결로 CRITICAL/HIGH 버그 카드 소진. 다음 사이클 후보 우선순위:
+
+| 순위 | 카드 | 등급 | 영역 | 메모 |
+|------|------|------|------|------|
+| 1 | **B-3** | MEDIUM | 버그 | NXT 다운그레이드 폭주 — `_boot()` eager 갱신 누락 검증. 115건 반복 = 사후 보강 작동 안 함 신호. 매매 안전성 보조 (이미 다운그레이드 폴백 작동) |
+| 2 | **R-1** | HIGH | 리팩토링 | `SellRejectionTracker` 단일 정책 객체 — 사이클 52 B-1 시정 직후 *구조 정리*. order_engine sell 경로의 거부 분류 + 차단 플래그 + 폴백 통일. domain-expert 자문 (매매 행위 영향 평가) 동반 필수. 매매 hot path 라 risk: HIGH |
+| 3 | **V-1** | P1 | 가시화 | 매도 거부 폭주 실시간 알람 — `[kis_rejection]` per-ticker 시간당 5건 초과 시 CRITICAL system_logs + (추후 외부 채널). B-1 의 10분 500건 폭주 *실시간 감지* 안전망 |
+| 4 | **V-2** | P2 | 가시화 | `daily_log_reports` OpenAI 모델/토큰/비용 메타 컬럼 추가 (migration). 운영 비용 추적 + 사이클 53.1 재집계 사고 같은 시나리오에서 OPENAI_API_KEY 부재/실패 사유 정량 기록 가능 |
+| 5 | **R-2** | MEDIUM | 리팩토링 | momentum/VB/LTV funnel 단계 hook 추가 (사이클 39 의 3 전략 누락 보완). 사이클 47 FUNNEL_STAGES + `_record_funnel_pipeline_step` 위임 패턴 재활용 |
+| 6 | **R-3** | MEDIUM | 리팩토링 | `_request_via_quote_pool` api_metrics 계측 추가 (quote_pool 500 누락) |
+| 7 | **V-3** | P2 | 가시화 | system_logs 컬럼명 일관성 (`level` vs `log_level`) — 분석 도구 측 결함 동시 해소 |
+| 8 | **V-4** | P3 | 가시화 | strategy_funnel_snapshots 탈락 사유 sample 활용도 (BFB/VCP step 6/7 직후 후보 종목 inspect API) |
+
+**권고**: 다음 사이클은 (1) B-3 (단순 진단·1 메서드 시정) 으로 운영 진단 카드 소진을 마무리하거나, (2) R-1 (사이클 52 B-1 구조 정리, domain-expert 자문 동반) 중 사용자 우선순위에 따라 발주.
+

@@ -12,6 +12,7 @@ Supabase (PostgreSQL) CRUD 모듈.
 
 - `insert_trade()`: 주문 시 INSERT (status: PENDING)
 - `update_trade_status() -> int`: 체결/취소 시 PENDING row 새 status 갱신 + 영향 row 수 반환. 0건이면 호출자(OrderEngine) 가 체결통보 선행 race 로 판단해 COMPLETED 보정 INSERT
+- **`get_trades_in_range(start_date, end_date, strategy=None)`**: `[start_date, end_date]` KST 범위 inclusive 조회. `start_iso = f"{date}T00:00:00+09:00"` / `end_iso = f"{date}T23:59:59.999999+09:00"` — **`+09:00` timezone 명시 필수** (TZ 없으면 PostgREST UTC 해석 → KST 00:00~09:00 거래 누락). `recommendation_engine` + `log_analysis_engine` 공유. 사이클 53 B-4 시정.
 - `get_trades(limit, offset, ticker)`: 페이징 조회 + total count
 - `get_trade_pairs(strategy=None, ticker=None)`: 매매손익 뷰용 매수/매도 페어 리스트. 같은 (ticker, strategy) 그룹 내 timestamp ASC 순회 → 누적 보유수량 0 사이클마다 closed 페어 emit (매수가/매도가 가중평균, Decimal 보존), 잔여 보유는 open 페어 emit (미실현 손익은 `scanner.ticker_prices` fallback). 응답 키: buy_date/buy_time/sell_date/sell_time/ticker/ticker_name/buy_price/buy_qty/sell_price/sell_qty/profit_loss/profit_rate/status('closed'|'open')/strategy. `_to_kst()` 헬퍼로 ISO (UTC/KST/tz-naive 모두) → `astimezone(KST).strftime()` 명시 변환
 - `get_today_buy_trades / get_today_sell_trades / get_today_pending_buys`: today 기준 same-day. 쿼리 기준점 `f"{today}T00:00:00+09:00"` KST timezone 명시 (timezone-naive → PostgreSQL TIMESTAMPTZ UTC 해석 결함 차단). **ticker 별 dedupe 적용 (포지션 복구용 — 최신 1건만 반환)**

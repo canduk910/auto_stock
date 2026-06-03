@@ -342,8 +342,8 @@ async def get_trades_in_range(
 
     파라미터 추천 모듈 등에서 N영업일치 통계 산출에 사용한다.
     """
-    start_iso = f"{start_date.isoformat()}T00:00:00"
-    end_iso = f"{end_date.isoformat()}T23:59:59.999999"
+    start_iso = f"{start_date.isoformat()}T00:00:00+09:00"
+    end_iso = f"{end_date.isoformat()}T23:59:59.999999+09:00"
 
     def _query():
         q = (
