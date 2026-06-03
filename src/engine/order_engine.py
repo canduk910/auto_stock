@@ -85,6 +85,9 @@ class OrderEngine:
         self._market_closed_blocked: dict[str, datetime] = {}
         # ticker별 일일 1회 INFO emit cap (사이클 31 R6 _risk_silent_skip_logged_today 동형).
         self._market_closed_blocked_logged_today: set[str] = set()
+        # 사이클 54 (2026-06-03) — NXT 다운그레이드 로그 ticker별 1회/일 cap.
+        # 다운그레이드 결정 무영향, 로그만 cap. _reset_daily_state 동행 clear.
+        self._nxt_downgrade_logged_today: set[str] = set()
 
     def _strategy_exchange(self, strategy_id: str | None) -> str:
         """전략의 exchange 파라미터(KRX/NXT/SOR) 조회. 미지정 시 KRX.
@@ -158,14 +161,17 @@ class OrderEngine:
             return base
 
         # nxt_tradable=False — KRX 강제 다운그레이드
-        try:
-            await write_log(
-                "WARNING",
-                f"[nxt_downgrade] {ticker} strategy={strategy_id} "
-                f"from={base} to=KRX reason=nxt_not_tradable",
-            )
-        except Exception:
-            pass  # 로그 실패는 본 흐름 보존
+        # 사이클 54: 로그만 ticker별 1회/일 cap — 다운그레이드 결정(return "KRX")은 cap 밖
+        if ticker not in self._nxt_downgrade_logged_today:
+            try:
+                await write_log(
+                    "WARNING",
+                    f"[nxt_downgrade] {ticker} strategy={strategy_id} "
+                    f"from={base} to=KRX reason=nxt_not_tradable",
+                )
+                self._nxt_downgrade_logged_today.add(ticker)
+            except Exception:
+                logger.debug("[nxt_downgrade] write_log 실패", exc_info=True)
         return "KRX"
 
     async def execute_buy(
@@ -1041,9 +1047,11 @@ class OrderEngine:
         """일일 차단 게이트 상태 초기화 (scheduler `_reset_daily_state` 가 위임 호출).
 
         사이클 B-1 (2026-06-01): 장운영시간 외 거부 TTL dict + emit cap set 를 매일 정산 후 clear.
+        사이클 54 (2026-06-03): NXT 다운그레이드 로그 cap set 동행 clear.
         """
         self._market_closed_blocked.clear()
         self._market_closed_blocked_logged_today.clear()
+        self._nxt_downgrade_logged_today.clear()
 
     async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
         """미체결 잔량을 취소한다."""

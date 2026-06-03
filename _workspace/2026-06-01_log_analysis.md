@@ -66,6 +66,8 @@
 
 #### B-3 [MEDIUM] NXT 다운그레이드 폭주 — `stock_master.nxt_tradable=False` 사후 보강 누락
 
+> **사이클 54 종결 (2026-06-03)** — 분석 메모 가설 (사후 보강 누락) *반증* 후 실질 결함 시정. 064400 stock_master `nxt_tradable=False` 이미 저장 확인 (사후 보강 정상). 115건 폭주는 B-1 매도 좀비 부작용 — 사이클 52 가드로 외부 재호출 자동 차단 + 사이클 54 의 `_nxt_downgrade_logged_today` ticker별 1행/일 cap 으로 이중 안전망. 다운그레이드 결정 (`return "KRX"`) 무영향, 로그만 cap. 회귀 가드 4 시나리오 (`tests/unit/engine/test_b3_nxt_downgrade_log_cap.py`). 백엔드 1776 PASS (1772→+4). 상세: `docs/HARNESS_CHANGELOG.md` 사이클 54 행.
+
 **근거**:
 - `[nxt_downgrade] 064400 strategy=momentum from=SOR to=KRX reason=nxt_not_tradable` **115건** (자동 리포트 finding 3).
 - 사후 보강 (`stock_master.upsert_one(ticker, nxt_tradable=False)`) 이 1회만 작동하면 다음 호출부터 사전 판별로 다운그레이드 자체가 발생하지 않아야 함. 115건 반복은 사후 보강이 *작동 안 함* 또는 *boot 시 캐시 갱신 안 됨* 의 신호.
@@ -178,20 +180,19 @@ B-3 / B-4 / R-2 / V-1~V-4 는 후속 사이클 또는 도메인 자문 결과에
 
 ---
 
-## 잔여 카드 우선순위 재정렬 (사이클 53/53.1 종결 후 — 2026-06-02)
+## 잔여 카드 우선순위 재정렬 (사이클 54 종결 후 — 2026-06-03)
 
-사이클 52 (B-1) + 53 (B-2/B-4) + 53.1 (운영 부피 cap) 종결로 CRITICAL/HIGH 버그 카드 소진. 다음 사이클 후보 우선순위:
+사이클 52 (B-1) + 53 (B-2/B-4) + 53.1 (운영 부피 cap) + 54 (B-3) 종결로 **버그 카드 전량 소진**. 다음 사이클 후보 우선순위:
 
 | 순위 | 카드 | 등급 | 영역 | 메모 |
 |------|------|------|------|------|
-| 1 | **B-3** | MEDIUM | 버그 | NXT 다운그레이드 폭주 — `_boot()` eager 갱신 누락 검증. 115건 반복 = 사후 보강 작동 안 함 신호. 매매 안전성 보조 (이미 다운그레이드 폴백 작동) |
-| 2 | **R-1** | HIGH | 리팩토링 | `SellRejectionTracker` 단일 정책 객체 — 사이클 52 B-1 시정 직후 *구조 정리*. order_engine sell 경로의 거부 분류 + 차단 플래그 + 폴백 통일. domain-expert 자문 (매매 행위 영향 평가) 동반 필수. 매매 hot path 라 risk: HIGH |
-| 3 | **V-1** | P1 | 가시화 | 매도 거부 폭주 실시간 알람 — `[kis_rejection]` per-ticker 시간당 5건 초과 시 CRITICAL system_logs + (추후 외부 채널). B-1 의 10분 500건 폭주 *실시간 감지* 안전망 |
-| 4 | **V-2** | P2 | 가시화 | `daily_log_reports` OpenAI 모델/토큰/비용 메타 컬럼 추가 (migration). 운영 비용 추적 + 사이클 53.1 재집계 사고 같은 시나리오에서 OPENAI_API_KEY 부재/실패 사유 정량 기록 가능 |
-| 5 | **R-2** | MEDIUM | 리팩토링 | momentum/VB/LTV funnel 단계 hook 추가 (사이클 39 의 3 전략 누락 보완). 사이클 47 FUNNEL_STAGES + `_record_funnel_pipeline_step` 위임 패턴 재활용 |
-| 6 | **R-3** | MEDIUM | 리팩토링 | `_request_via_quote_pool` api_metrics 계측 추가 (quote_pool 500 누락) |
-| 7 | **V-3** | P2 | 가시화 | system_logs 컬럼명 일관성 (`level` vs `log_level`) — 분석 도구 측 결함 동시 해소 |
-| 8 | **V-4** | P3 | 가시화 | strategy_funnel_snapshots 탈락 사유 sample 활용도 (BFB/VCP step 6/7 직후 후보 종목 inspect API) |
+| 1 | **R-1** | HIGH | 리팩토링 | `SellRejectionTracker` 단일 정책 객체 — 사이클 52 B-1 + 사이클 54 B-3 시정 직후 *구조 정리*. order_engine sell 경로의 거부 분류 + 차단 플래그 + 폴백 통일. 3개 emit cap set (`_risk_silent_skip_logged_today` 사이클 31 / `_market_closed_blocked_logged_today` 사이클 52 / `_nxt_downgrade_logged_today` 사이클 54) 동형 패턴 누적 → 통합 추상화 후보. domain-expert 자문 (매매 행위 영향 평가) 동반 필수. 매매 hot path 라 risk: HIGH |
+| 2 | **V-1** | P1 | 가시화 | 매도 거부 폭주 실시간 알람 — `[kis_rejection]` per-ticker 시간당 5건 초과 시 CRITICAL system_logs + (추후 외부 채널). B-1 의 10분 500건 폭주 *실시간 감지* 안전망 |
+| 3 | **V-2** | P2 | 가시화 | `daily_log_reports` OpenAI 모델/토큰/비용 메타 컬럼 추가 (migration). 운영 비용 추적 + 사이클 53.1 재집계 사고 같은 시나리오에서 OPENAI_API_KEY 부재/실패 사유 정량 기록 가능 |
+| 4 | **R-2** | MEDIUM | 리팩토링 | momentum/VB/LTV funnel 단계 hook 추가 (사이클 39 의 3 전략 누락 보완). 사이클 47 FUNNEL_STAGES + `_record_funnel_pipeline_step` 위임 패턴 재활용 |
+| 5 | **R-3** | MEDIUM | 리팩토링 | `_request_via_quote_pool` api_metrics 계측 추가 (quote_pool 500 누락) |
+| 6 | **V-3** | P2 | 가시화 | system_logs 컬럼명 일관성 (`level` vs `log_level`) — 분석 도구 측 결함 동시 해소 |
+| 7 | **V-4** | P3 | 가시화 | strategy_funnel_snapshots 탈락 사유 sample 활용도 (BFB/VCP step 6/7 직후 후보 종목 inspect API) |
 
-**권고**: 다음 사이클은 (1) B-3 (단순 진단·1 메서드 시정) 으로 운영 진단 카드 소진을 마무리하거나, (2) R-1 (사이클 52 B-1 구조 정리, domain-expert 자문 동반) 중 사용자 우선순위에 따라 발주.
+**권고**: 다음 사이클은 (1) **R-1** (사이클 52/54 emit cap 패턴 통합 + B-1 구조 정리, domain-expert 자문 동반) 우선 발주가 정합. 또는 (2) **refactor-review 트리거** (사이클 49→54 누적 6회, 3개 emit cap set 통합 추상화 + scheduler 분해 후속 단계 동반 검토) 사용자 결정.
 

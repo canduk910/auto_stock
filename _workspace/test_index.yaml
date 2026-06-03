@@ -206,6 +206,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -378,6 +379,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -583,6 +585,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -750,6 +753,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -1013,6 +1017,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -1185,6 +1190,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -1411,6 +1417,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -1651,6 +1658,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
@@ -2101,6 +2109,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -2642,6 +2651,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -2718,6 +2728,7 @@ backend:
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -3207,6 +3218,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -3568,6 +3580,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -3740,6 +3753,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -3943,6 +3957,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -4626,6 +4641,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -5226,6 +5242,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -5494,6 +5511,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -6526,6 +6544,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -6664,6 +6683,7 @@ backend:
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_observability_logs.py
@@ -6830,6 +6850,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -7112,6 +7133,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -7285,6 +7307,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -7480,6 +7503,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -7697,6 +7721,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -7891,6 +7916,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -8192,6 +8218,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -8416,6 +8443,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -8634,6 +8662,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -9642,6 +9671,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -10222,10 +10252,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-02T08:21:05.138243+09:00'
+generated_at: '2026-06-03T14:02:32.431204+09:00'
 stats:
   backend_modules: 89
-  backend_tests: 239
+  backend_tests: 240
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:
