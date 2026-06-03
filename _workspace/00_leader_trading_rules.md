@@ -270,6 +270,31 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 - **시가 미수신 시 `high_since_buy` 폴백 + 갭률 0% 즉시 청산 경로는 제거** (전일 고가 혼입으로 좀비 포지션 위험)
 - **시장가 호가 불가 거부(`is_market_order_disallowed`, APBK1943 "시장가호가불가" 등) Phase C, 2026-05-11**: 시장가 매도 경로(`limit_price=0`)에서 `step_down(현재가, 5)` 지정가 1회 폴백. 폴백 실패 시 메모리/DB positions 보존, cooldown 등록 안 함(청산 의무) → 다음 사이클 재트리거. 2026-05-11 계양전기(012200) 09:00:21 매도 ×3 + 수동 매도 ×2 실패 사고 대응
 
+#### 매도 거부 정책 — `SellRejectionTracker` (사이클 55 R-1, 2026-06-03)
+
+`src/engine/sell_rejection.py::SellRejectionTracker` 단일 정책 객체가 4 분류 (market_closed / market_order_disallowed / insufficient_quantity / insufficient_cash) 통합 관리. `OrderEngine.execute_sell` 진입 직후 `is_blocked(ticker)` 게이트로 KIS 호출 전 차단. **행위 변경 3종** (domain-expert Q1/Q2/Q3 RECOMMEND 채택):
+
+**Q1 — `market_closed_rejection` 2단계 TTL** (사이클 52 단일 09:00 TTL 에서 분기)
+- KRX 메인 시간대(09:00~15:30 KST) 거부 = **5분 TTL** (일시 장애 가정 — KIS 일시 거부 후 자연 복구 시나리오 빠른 재진입 보장)
+- NXT 시간대(08:00~09:00 / 15:40~20:00 KST) 거부 = **다음 KST 09:00 TTL** (장운영시간 외 명확 — KRX 메인 개장까지 차단 유지)
+- TTL 미경과 시 INFO `[market_closed_blocked] ticker=... reason=...` 1줄/ticker/일 cap → 동일 종목 재시도 폭주 차단
+
+**Q2 — `market_order_disallowed` 30초 TTL + NXT 폴백 실패 익일 청산 전환**
+- 시장가 매도 폴백(`step_down(현재가, 5)` 지정가 1회) 결과(성공/실패) 무관 **30초 TTL** 등록 (동일 tick 폭주 차단)
+- NXT 시간대 폴백 실패 시(`is_nxt_session=True AND fallback_succeeded=False`) → `_pending_next_day_clear.add((ticker, strategy_id))` 자동 등록 + `[next_day_clear_deferred]` WARNING → 다음 영업일 09:00 KRX 시장가 일괄 청산 자연 전환
+- 지정가 매도(`limit_price>0`)는 폴백/TTL 등록 모두 안 함 (운영자 명시 지정가 의도 보존)
+
+**Q3 — `insufficient_quantity` reconciliation**
+- 거부 발생 시 tracker history 적재(차단 X — positions 메모리/DB 제거가 자연 차단)
+- 즉시 `[positions_reconciliation] ticker=... strategy=... reason=insufficient_quantity` INFO 1행
+- 1회 `get_balance()` 호출 → 실제 잔량 > 0 인 경우 (수동 부분매도 보호 시나리오) INFO `실제 잔량 확인: ... qty=N — positions 재등록 권고` (자동 재등록 미구현 — 운영자 수동 확인 권고)
+- `get_balance()` 실패 graceful (DEBUG 로그만, positions 제거는 이미 완료)
+
+**호환 layer + reset 정책**
+- `OrderEngine._market_closed_blocked` / `_market_closed_blocked_logged_today` 2 property 보존 (사이클 52 테스트 코드 무수정, dict/set 인스턴스 동일성 보장)
+- `OrderEngine.reset_daily_state()` → `self._sell_rejection.reset_daily()` 4 필드 (`_blocked_until` / `_blocked_reason` / `_logged_today` / `_history`) 일괄 위임 + `_nxt_downgrade_logged_today.clear()` 보존
+- ticker별 history `deque(maxlen=20)` 사전 도입 — V-1 (시간당 5건 초과 실시간 알람) hook 준비 완료
+
 ### 트레일링 스탑 상세
 - NXT 프리 시가 이후 고점을 실시간 추적
 - 현재가가 고점 대비 -2% 이하로 떨어지면 시장가 매도 트리거

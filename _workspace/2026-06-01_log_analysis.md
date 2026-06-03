@@ -102,6 +102,8 @@
 
 #### R-1 [HIGH] OrderEngine sell 분기 — 거부 분류 + 차단 플래그 + 폴백 통일
 
+> **사이클 55 종결 (2026-06-03)** — `SellRejectionTracker` 단일 정책 객체 도입 (`src/engine/sell_rejection.py` 271L) + `OrderEngine` 4 분기 위임 + 호환 layer property (`_market_closed_blocked` / `_market_closed_blocked_logged_today`). domain-expert 자문 Q1~Q5 RECOMMEND 전부 적용 — 행위 변경 3종 (Q1 2단계 TTL / Q2 NXT 폴백 실패 익일 청산 전환 / Q3 `[positions_reconciliation]` + get_balance 1회). 회귀 가드 36 시나리오 (신규 27 + 사이클 52 보존 9). 백엔드 1776 → 1804 PASS (+28). tester 프로덕션 배포 가능 판정. 사이클 52/54 후속 + V-1 history deque 인프라 사전 도입. 상세: `docs/HARNESS_CHANGELOG.md` 사이클 55 행 + `_workspace/cycle55_R1_design_card.md`.
+
 **근거**: order_engine.py 의 sell 경로에 분류 분기 (is_market_closed_rejection / is_insufficient_quantity / is_insufficient_cash / is_market_order_disallowed) 가 각각 *호출 내* 가드만 가짐. B-1 이 드러난 후 *외부 재호출* 까지 책임지는 단일 *차단 정책 객체* (`SellRejectionTracker`) 가 필요.
 
 **행위 보존**: 기존 가드의 *호출 내* 행위 유지 + 진입 직후 tracker 검사 추가. 매매 hot path 라 risk: HIGH.
@@ -195,4 +197,26 @@ B-3 / B-4 / R-2 / V-1~V-4 는 후속 사이클 또는 도메인 자문 결과에
 | 7 | **V-4** | P3 | 가시화 | strategy_funnel_snapshots 탈락 사유 sample 활용도 (BFB/VCP step 6/7 직후 후보 종목 inspect API) |
 
 **권고**: 다음 사이클은 (1) **R-1** (사이클 52/54 emit cap 패턴 통합 + B-1 구조 정리, domain-expert 자문 동반) 우선 발주가 정합. 또는 (2) **refactor-review 트리거** (사이클 49→54 누적 6회, 3개 emit cap set 통합 추상화 + scheduler 분해 후속 단계 동반 검토) 사용자 결정.
+
+---
+
+## 잔여 카드 우선순위 재정렬 (사이클 55 R-1 종결 후 — 2026-06-03)
+
+사이클 52 (B-1) + 53 (B-2/B-4) + 53.1 (운영 부피 cap) + 54 (B-3) + 55 (R-1) 종결로 **버그 카드 + R-1 HIGH 소진**. R-1 제거 후 다음 사이클 후보 우선순위:
+
+| 순위 | 카드 | 등급 | 영역 | 메모 |
+|------|------|------|------|------|
+| 1 | **V-1** | P1 | 가시화 | 매도 거부 폭주 실시간 알람 — `SellRejectionTracker.get_recent_rejections()` deque(maxlen=20) **사이클 55 사전 도입** 인프라 위에 알람 hook 추가. `[kis_rejection]` per-ticker 시간당 5건 초과 시 CRITICAL system_logs + (추후 외부 채널). B-1 의 10분 500건 폭주 *실시간 감지* 안전망. R-1 종결로 즉시 발주 가능 |
+| 2 | **V-2** | P2 | 가시화 | `daily_log_reports` OpenAI 모델/토큰/비용 메타 컬럼 추가 (migration). 운영 비용 추적 + 사이클 53.1 재집계 사고 같은 시나리오에서 OPENAI_API_KEY 부재/실패 사유 정량 기록 가능 |
+| 3 | **R-2** | MEDIUM | 리팩토링 | momentum/VB/LTV funnel 단계 hook 추가 (사이클 39 의 3 전략 누락 보완). 사이클 47 FUNNEL_STAGES + `_record_funnel_pipeline_step` 위임 패턴 재활용 |
+| 4 | **R-3** | MEDIUM | 리팩토링 | `_request_via_quote_pool` api_metrics 계측 추가 (quote_pool 500 누락) |
+| 5 | **V-3** | P2 | 가시화 | system_logs 컬럼명 일관성 (`level` vs `log_level`) — 분석 도구 측 결함 동시 해소 |
+| 6 | **V-4** | P3 | 가시화 | strategy_funnel_snapshots 탈락 사유 sample 활용도 (BFB/VCP step 6/7 직후 후보 종목 inspect API) |
+
+**refactor-review 트리거 권고 (사이클 49→55 누적 7회 — 임계 5회 *2배 초과*)**:
+- 3개 emit cap set (`_risk_silent_skip_logged_today` 사이클 31 / `_market_closed_blocked_logged_today` 사이클 52→55 tracker 흡수 / `_nxt_downgrade_logged_today` 사이클 54) → `DailyEmitCap` 제네릭 추상화 (사이클 56 후보 — `_nxt_downgrade_logged_today` 잔존 1건 흡수)
+- scheduler 분해 후속 단계 (`stale_manager` / `swing_manager` / `settlement_manager`) — 사이클 51 boot_manager 추출 후속
+- 광범위 예외절 누적 (`order_engine.py:1059` 사이클 52 식별 + `:1150` 사이클 55 새 식별) — refactor 카드 누적
+
+**권고**: 다음 사이클 진입 *전* **refactor-review 발주** 후 V-1 P1 진입이 정합.
 

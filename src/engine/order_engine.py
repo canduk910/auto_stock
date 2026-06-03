@@ -80,14 +80,33 @@ class OrderEngine:
         # 사이클 15-A (2026-05-19) — 매도 체결 후 WS unsubscribe hook 의 pending_next_day_clear 조회 provider.
         # scheduler 가 setattr 로 주입. 기본은 빈 set 반환 (테스트/단독 사용 안전).
         self._pending_next_day_clear_provider = lambda: set()
-        # 사이클 B-1 (2026-06-01) — 장운영시간 외 거부 후 외부 재호출 게이트.
-        # ticker → 다음 KST 09:00 expiry. TTL 만료 전 execute_sell 진입 차단.
-        self._market_closed_blocked: dict[str, datetime] = {}
-        # ticker별 일일 1회 INFO emit cap (사이클 31 R6 _risk_silent_skip_logged_today 동형).
-        self._market_closed_blocked_logged_today: set[str] = set()
+        # 사이클 55 R-1 (2026-06-03) — SellRejectionTracker 단일 정책 객체.
+        # 사이클 52 B-1 의 2 필드 (_market_closed_blocked / _market_closed_blocked_logged_today)
+        # 를 통합. 호환 layer property 2개 로 기존 참조 보존.
+        from src.engine.sell_rejection import SellRejectionTracker
+        self._sell_rejection = SellRejectionTracker()
         # 사이클 54 (2026-06-03) — NXT 다운그레이드 로그 ticker별 1회/일 cap.
         # 다운그레이드 결정 무영향, 로그만 cap. _reset_daily_state 동행 clear.
+        # R-1 범위 밖 — 사이클 56 emit cap 통합 시 tracker 위임 예정.
         self._nxt_downgrade_logged_today: set[str] = set()
+
+    # ──────────────────────────── 사이클 52 호환 layer (사이클 55 R-1)
+
+    @property
+    def _market_closed_blocked(self) -> dict[str, datetime]:
+        """사이클 52 호환 — SellRejectionTracker._blocked_until 직접 노출 (is 동일성).
+
+        기존 테스트/코드의 `_market_closed_blocked[ticker]` 직접 접근 보존.
+        사이클 48 stale_tracker 패턴 답습.
+        """
+        return self._sell_rejection._blocked_until
+
+    @property
+    def _market_closed_blocked_logged_today(self) -> set[str]:
+        """사이클 52 emit cap 호환 — SellRejectionTracker._logged_today 직접 노출."""
+        return self._sell_rejection._logged_today
+
+    # ─────────────────────────────────────────────────────────────────────────
 
     def _strategy_exchange(self, strategy_id: str | None) -> str:
         """전략의 exchange 파라미터(KRX/NXT/SOR) 조회. 미지정 시 KRX.
@@ -476,27 +495,26 @@ class OrderEngine:
             return
         self._selling.add(ticker)
 
-        # 사이클 B-1 (2026-06-01) — 장운영시간 외 거부 TTL 게이트.
-        # 이전 거부에서 등록된 expiry 가 미경과면 KIS 호출 없이 조용히 skip (INFO 1줄/ticker/일).
+        # 사이클 55 R-1 (2026-06-03) — SellRejectionTracker 진입 게이트 위임.
+        # 사이클 52 B-1 단일 TTL → 4 분류 통합 정책 객체 (2단계 TTL + 30초 TTL).
+        # 진입 게이트 순서 (사이클 52 보존): selling.add → 게이트 → discard + return.
+        from src.engine.sell_rejection import is_krx_main_hours, is_nxt_session_hours
         now_kst = datetime.now(_KST_TZ)
-        _expiry = self._market_closed_blocked.get(ticker)
-        if _expiry is not None:
-            if now_kst < _expiry:
-                if ticker not in self._market_closed_blocked_logged_today:
-                    self._market_closed_blocked_logged_today.add(ticker)
-                    try:
-                        await write_log(
-                            "INFO",
-                            f"[market_closed_blocked] ticker={ticker} strategy={strategy_id} "
-                            f"expiry={_expiry.isoformat()}",
-                        )
-                    except Exception:
-                        logger.debug("[market_closed_blocked] write_log 실패", exc_info=True)
-                self._selling.discard(ticker)
-                return
-            else:
-                # TTL 자연 만료 — 차단 해제 후 정상 진입
-                del self._market_closed_blocked[ticker]
+        if self._sell_rejection.is_blocked(ticker, now_kst):
+            if self._sell_rejection.should_emit_block_log(ticker):
+                self._sell_rejection.mark_block_logged(ticker)
+                _expiry_log = self._sell_rejection._blocked_until.get(ticker)
+                try:
+                    await write_log(
+                        "INFO",
+                        f"[market_closed_blocked] ticker={ticker} strategy={strategy_id} "
+                        f"reason={self._sell_rejection._blocked_reason.get(ticker, '')} "
+                        f"expiry={_expiry_log.isoformat() if _expiry_log else '?'}",
+                    )
+                except Exception:
+                    logger.debug("[market_closed_blocked] write_log 실패", exc_info=True)
+            self._selling.discard(ticker)
+            return
 
         strategy = self.registry.get(strategy_id)
         if not strategy:
@@ -586,12 +604,13 @@ class OrderEngine:
                         f"매도 거부(장운영시간 외) — 포지션 보존: {t(ticker)} "
                         f"(전략: {strategy_id}, [{e.msg_cd}] {e.msg1})",
                     )
-                    # 사이클 B-1 (2026-06-01) — 진입 TTL 게이트 등록.
-                    # 다음 KST 09:00 까지 같은 ticker 의 execute_sell 재호출을 차단.
-                    # emit cap 리셋: 만료 후 재폭주 시 INFO 1줄이 다시 emit 되도록.
+                    # 사이클 55 R-1 (2026-06-03) — tracker.register_market_closed 위임.
+                    # Q1 2단계 TTL: KRX 메인(09:00~15:30) = 5분, NXT 시간대 = 다음 09:00.
+                    # emit cap 리셋(_logged_today.discard) 은 register_market_closed 내부에서 수행.
                     _now_kst = datetime.now(_KST_TZ)
-                    self._market_closed_blocked[ticker] = _compute_next_market_open_kst(_now_kst)
-                    self._market_closed_blocked_logged_today.discard(ticker)
+                    self._sell_rejection.register_market_closed(
+                        ticker, _now_kst, in_krx_main_hours=is_krx_main_hours(_now_kst)
+                    )
                     # 사후 보강 (Phase G): NXT 거래 불가 종목으로 추정 → stock_master 에 즉시 반영.
                     # 다음 사이클에서 _strategy_exchange_async 가 KRX 로 사전 다운그레이드.
                     # NXT 시간대(08:00~09:00, 15:30~20:00) 거부에서만 적용 — KRX 정규장 거부는 보강하지 않음.
@@ -627,13 +646,15 @@ class OrderEngine:
                     except Exception:
                         logger.exception("stock_master 사후 보강 실패: %s", ticker)
                     return  # positions / DB 보존, 다음 trigger 대기
-                # 2) 진짜 보유 부족(APBK1234 등) — 기존 동작 유지
+                # 2) 진짜 보유 부족(APBK1234 등) — 기존 동작 유지 + Q3 history 적재
                 if is_insufficient_quantity(e):
                     insufficient_qty = True
                     logger.warning(
                         "매도 매도가능수량 부족 — 재시도 중단: %s (전략: %s, [%s] %s)",
                         t(ticker), strategy_id, e.msg_cd, e.msg1,
                     )
+                    # 사이클 55 R-1 Q3 — history 적재 (차단 X: positions 제거가 자연 차단)
+                    self._sell_rejection.register_insufficient_quantity(ticker, now_kst)
                     break
                 # 3) 시장가 호가 불가(APBK1943 등) — 지정가 5호가 폴백 1회 (매수 패턴과 대칭).
                 #    매도는 `step_down(current_price, 5)` 로 호가 깊이로 내려 체결률 확보.
@@ -696,6 +717,15 @@ class OrderEngine:
                                 t(ticker), fallback_price, e.msg_cd, e.msg1,
                                 fb_result.order_no, strategy_id,
                             )
+                            # 사이클 55 R-1 Q2 — 폴백 성공 시에도 30초 TTL 등록 (동일 tick 폭주 차단).
+                            # KRX/NXT 무관. next_day_clear_required = is_nxt AND NOT fallback_succeeded
+                            # → 성공이므로 False.
+                            _now_kst_fb = datetime.now(_KST_TZ)
+                            self._sell_rejection.register_market_order_disallowed(
+                                ticker, _now_kst_fb,
+                                is_nxt_session=is_nxt_session_hours(_now_kst_fb),
+                                fallback_succeeded=True,
+                            )
                             return  # 폴백 성공 — _selling 은 체결통보에서 해제
                         except KisApiError as fb_err:
                             last_error = fb_err
@@ -710,6 +740,31 @@ class OrderEngine:
                                 f"매도 시장가+지정가 폴백 모두 거부 — 포지션 보존: {t(ticker)} "
                                 f"(전략: {strategy_id}, [{fb_err.msg_cd}] {fb_err.msg1})",
                             )
+                            # 사이클 55 R-1 Q2 — 폴백 실패 30초 TTL + NXT 시 익일 청산 전환.
+                            _now_kst_fb = datetime.now(_KST_TZ)
+                            _is_nxt = is_nxt_session_hours(_now_kst_fb)
+                            _result = self._sell_rejection.register_market_order_disallowed(
+                                ticker, _now_kst_fb,
+                                is_nxt_session=_is_nxt,
+                                fallback_succeeded=False,
+                            )
+                            if _result.next_day_clear_required:
+                                # NXT 폴백 실패 → 익일 09:00 KRX 시장가 청산 큐 등록
+                                try:
+                                    _pending = self._pending_next_day_clear_provider()
+                                    if _pending is not None:
+                                        _pending.add((ticker, strategy_id))
+                                        await write_log(
+                                            "WARNING",
+                                            f"[next_day_clear_deferred] ticker={ticker} "
+                                            f"strategy={strategy_id} "
+                                            f"reason=market_order_disallowed_nxt_fallback_fail",
+                                        )
+                                except Exception:
+                                    logger.debug(
+                                        "[next_day_clear_deferred] _pending_next_day_clear 등록 실패: %s",
+                                        ticker, exc_info=True,
+                                    )
                             return  # positions/DB 보존, 다음 사이클 자연 재트리거
                 logger.warning(
                     "매도 주문 실패 (시도 %d/%d): %s — [%s] %s",
@@ -740,6 +795,33 @@ class OrderEngine:
                 "WARNING",
                 f"매도가능수량 부족 — 메모리 포지션 정리: {t(ticker)} (전략: {strategy_id})",
             )
+            # 사이클 55 R-1 Q3 — [positions_reconciliation] + get_balance() 1회.
+            # 수동 부분매도 등으로 실제 잔량이 남아있는 경우를 대비해 잔고를 1회 재조회.
+            # 실패 graceful — positions 제거는 이미 완료, 재조회는 보호 목적.
+            try:
+                await write_log(
+                    "INFO",
+                    f"[positions_reconciliation] ticker={ticker} strategy={strategy_id} "
+                    f"reason=insufficient_quantity",
+                )
+            except Exception:
+                logger.debug("[positions_reconciliation] write_log 실패", exc_info=True)
+            try:
+                from src.api.balance import get_balance
+                holdings, _ = await get_balance()
+                actual_qty = next(
+                    (h.quantity for h in holdings if h.ticker == ticker), 0
+                )
+                if actual_qty > 0:
+                    logger.info(
+                        "[positions_reconciliation] 실제 잔량 확인: %s qty=%d — positions 재등록 권고",
+                        ticker, actual_qty,
+                    )
+            except Exception:
+                logger.debug(
+                    "[positions_reconciliation] get_balance 조회 실패: %s",
+                    ticker, exc_info=True,
+                )
             return
         error_msg = f"매도 주문 최종 실패: {ticker} {signal.value} — {last_error}"
         logger.critical(error_msg)
@@ -1048,10 +1130,11 @@ class OrderEngine:
 
         사이클 B-1 (2026-06-01): 장운영시간 외 거부 TTL dict + emit cap set 를 매일 정산 후 clear.
         사이클 54 (2026-06-03): NXT 다운그레이드 로그 cap set 동행 clear.
+        사이클 55 R-1 (2026-06-03): _market_closed_blocked* 2 필드 직접 clear →
+            self._sell_rejection.reset_daily() 4 필드 일괄 위임 (사이클 48 stale_tracker 패턴).
         """
-        self._market_closed_blocked.clear()
-        self._market_closed_blocked_logged_today.clear()
-        self._nxt_downgrade_logged_today.clear()
+        self._sell_rejection.reset_daily()  # 4 필드 (_blocked_until / _blocked_reason / _logged_today / _history) 일괄 clear
+        self._nxt_downgrade_logged_today.clear()  # 사이클 54 유지 (사이클 56 통합 예정)
 
     async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
         """미체결 잔량을 취소한다."""

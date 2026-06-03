@@ -1,4 +1,4 @@
-"""사이클 B-1 Red — 매도 좀비 폭주 차단 (시장 closed 거부 후 외부 재호출 게이트).
+"""사이클 B-1 (사이클 52) — 매도 좀비 폭주 차단 + 사이클 55 R-1 갱신 (2단계 TTL).
 
 배경 (운영 실측, 2026-06-01):
     - 종목 064400 (LG씨엔에스, momentum) KST 08:00~08:09 10분간 500+ 매도 거부
@@ -7,11 +7,16 @@
       분기는 *호출 내* 재시도만 차단하고 *외부 재진입* (risk.on_tick 매 tick
       check_exit_signal → execute_sell) 을 막지 못함.
 
-결정:
+결정 (사이클 52 — 단일 TTL):
     `OrderEngine._market_closed_blocked: dict[str, datetime]` ticker별 TTL 게이트 도입.
-    TTL = 다음 KST 09:00 단순 만료 (domain-expert 자문 불필요 — 폭주 차단 단일 책임).
-    차단 등록 위치: `is_market_closed_rejection(e)` True 분기 내. 차단 검사 위치:
-    `execute_sell()` 진입 직후. `_reset_daily_state` 동행 clear.
+    TTL = 다음 KST 09:00 단순 만료.
+
+갱신 (사이클 55 R-1, 2026-06-03 — SellRejectionTracker 통합):
+    `OrderEngine._market_closed_blocked` 가 `SellRejectionTracker._blocked_until` 위임 property.
+    2단계 TTL — KRX 메인(09:00~15:30) 거부 = 5분 TTL,
+                NXT 시간대(08:00~09:00 / 15:30~20:00) 거부 = 다음 KST 09:00.
+    market_order_disallowed 폴백 = 30초 TTL (동일 tick 폭주 차단).
+    호환 layer 보존 — 본 파일 S1/S2/S3a/S3b/S5/S6/S7 사이클 52 회귀 가드 모두 PASS 유지.
 
 회귀 가드 시나리오 (총 6+1):
     S1: 100회 연속 호출 → KIS API 호출 정확히 1회
@@ -349,11 +354,11 @@ async def test_s3a_when_insufficient_quantity_then_not_registered_in_block_set(
 
 
 # ===========================================================================
-# S3b — is_market_order_disallowed 는 차단 set 미등록 (회귀 가드)
+# S3b — is_market_order_disallowed: 폴백 정상 흐름 보존 (회귀 가드, 사이클 55 좁힘)
 # ===========================================================================
 @pytest.mark.asyncio
 @freeze_time("2026-06-01 09:00:30", tz_offset=-9)  # KST 09:00:30 (정규장 직후)
-async def test_s3b_when_market_order_disallowed_then_fallback_runs_and_block_set_clean(
+async def test_s3b_when_market_order_disallowed_then_fallback_runs(
     engine: OrderEngine,
     strategy: StrategyBase,
     mock_insert_trade: AsyncMock,
@@ -362,8 +367,11 @@ async def test_s3b_when_market_order_disallowed_then_fallback_runs_and_block_set
     mock_strategy_exchange,
     mock_stock_master,
 ):
-    """회귀 가드: APBK1943 시장가 호가 불가 → step_down 5호가 지정가 폴백 (기존 동작).
-    차단 set 미등록 — 본 가드는 시장 closed 거부에만 작동.
+    """회귀 가드: APBK1943 시장가 호가 불가 → step_down 5호가 지정가 폴백 (기존 동작 보존).
+
+    사이클 55 R-1 갱신 (2026-06-03): 폴백 성공 후 30초 TTL 차단 등록은
+    `test_sell_rejection_integration.py::C-3` 가 검증. 본 가드는 *폴백 호출 자체*
+    회귀 검증으로 좁힘 — `_market_closed_blocked` 등록 여부 검증 제거.
     """
     from src.engine import scanner as _scanner
 
@@ -379,22 +387,66 @@ async def test_s3b_when_market_order_disallowed_then_fallback_runs_and_block_set
     finally:
         _scanner.ticker_prices.pop("064400", None)
 
-    # 폴백 1회 발생 — place_order 정확히 2회
+    # 폴백 1회 발생 — place_order 정확히 2회 (시장가 거부 + 지정가 폴백)
     assert mock_place_order.await_count == 2, (
         "기존 시장가→지정가 폴백 회귀 — 폴백 호출 누락"
     )
-    # 차단 set 미등록
+
+
+# ===========================================================================
+# S3c (사이클 55 신규) — market_order_disallowed 도 30초 TTL 차단 등록
+# ===========================================================================
+@pytest.mark.asyncio
+@freeze_time("2026-06-01 10:00:00", tz_offset=-9)  # KRX 메인 시간 (도메인 Q2)
+async def test_s3c_when_market_order_disallowed_then_30s_ttl_registered(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    mock_write_log: AsyncMock,
+    mock_strategy_exchange,
+    mock_stock_master,
+):
+    """사이클 55 R-1 (2026-06-03) 신규: market_order_disallowed 거부 후 폴백 성공해도
+    30초 TTL 차단 등록 (동일 tick 폭주 차단 — domain-expert Q2 권고).
+
+    Q2 핵심 — 사이클 52 단일 TTL 정책에서는 market_order_disallowed 는 차단 set 등록 안 함.
+    사이클 55 후엔 폴백 성공/실패 무관 30초 TTL 등록 (다음 30초간 같은 ticker execute_sell
+    진입 시 KIS 호출 없이 skip).
+    """
+    from src.engine import scanner as _scanner
+
+    _scanner.ticker_prices["064400"] = {"current_price": 10_000}
+    try:
+        mock_place_order.side_effect = [
+            _market_disallow_error_apbk1943(),
+            _success_result("ORDER-S3C-1"),
+        ]
+        await engine.execute_sell("064400", Signal.STOP_LOSS, "momentum")
+    finally:
+        _scanner.ticker_prices.pop("064400", None)
+
+    # 폴백 정상 호출
+    assert mock_place_order.await_count == 2, "폴백 호출 누락"
+
+    # 30초 TTL 차단 등록 검증 — 사이클 55 신규 행위
     blocked = getattr(engine, "_market_closed_blocked", {})
-    assert "064400" not in blocked, (
-        "is_market_order_disallowed 가 차단 set 에 잘못 등록됨 — 회귀 위반"
+    assert "064400" in blocked, (
+        "사이클 55 R-1: market_order_disallowed 폴백 후 30초 TTL 차단 미등록"
+    )
+    expiry = blocked["064400"]
+    expected = datetime(2026, 6, 1, 10, 0, 30, tzinfo=KST_TZ)
+    assert expiry == expected, (
+        f"30초 TTL 불일치: {expiry} != {expected} (KRX 10:00 + 30s = 10:00:30 기대)"
     )
 
 
 # ===========================================================================
-# S4 — TTL 만료 후 재진입 가능 (08:30 차단 → 09:01 재호출)
+# S4 — TTL 만료 후 재진입 가능 (NXT: 08:30 차단 → 09:01 재호출)
+#       사이클 55 R-1 (2026-06-03): NXT 시간대 정책 보존 — 다음 09:00 TTL
 # ===========================================================================
 @pytest.mark.asyncio
-async def test_s4_when_ttl_expired_then_can_reinvoke_place_order(
+async def test_s4_when_nxt_ttl_expired_then_can_reinvoke_place_order(
     engine: OrderEngine,
     strategy: StrategyBase,
     mock_insert_trade: AsyncMock,
@@ -440,6 +492,55 @@ async def test_s4_when_ttl_expired_then_can_reinvoke_place_order(
     assert "064400" not in blocked, (
         "TTL 만료 후 차단 set 에서 ticker 자동 제거 안 됨"
     )
+
+
+# ===========================================================================
+# S4_KRX (사이클 55 R-1 신규) — KRX 메인 5분 TTL 만료 후 재진입
+# ===========================================================================
+@pytest.mark.asyncio
+async def test_s4_krx_when_5min_ttl_expired_then_can_reinvoke_place_order(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    mock_write_log: AsyncMock,
+    mock_strategy_exchange,
+    mock_stock_master,
+):
+    """사이클 55 R-1: KRX 메인 시간(09:00~15:30) 거부 = 5분 TTL.
+
+    11:00 거부 등록 → 11:04 차단 유지 → 11:05:01 만료 후 재진입.
+    NXT 시간대(다음 09:00 TTL) 정책과 분기 확인 — domain-expert Q1 권고.
+    """
+    mock_place_order.side_effect = [
+        _market_closed_error_apbk0918(),  # KRX 11:00 거부 → 5분 TTL 등록
+        _success_result("ORDER-S4KRX-1"),  # 11:05:01 성공
+    ]
+
+    # 1차: KST 11:00 거부 → 5분 TTL
+    with freeze_time("2026-06-01 11:00:00", tz_offset=-9):
+        engine._selling.discard("064400")
+        await engine.execute_sell("064400", Signal.STOP_LOSS, "momentum")
+
+        assert "064400" in engine._market_closed_blocked
+        # 차단 미경과 — 4분 후 추가 호출 시 차단
+    with freeze_time("2026-06-01 11:04:00", tz_offset=-9):
+        engine._selling.discard("064400")
+        await engine.execute_sell("064400", Signal.STOP_LOSS, "momentum")
+        assert mock_place_order.await_count == 1, (
+            "KRX 5분 TTL 미만료 구간 — 추가 호출 차단 위반"
+        )
+
+    # 2차: 11:05:01 — TTL 만료 후 재진입
+    with freeze_time("2026-06-01 11:05:01", tz_offset=-9):
+        engine._selling.discard("064400")
+        await engine.execute_sell("064400", Signal.STOP_LOSS, "momentum")
+
+    assert mock_place_order.await_count == 2, (
+        f"KRX 5분 TTL 만료 후 재진입 안 됨: place_order {mock_place_order.await_count}회"
+    )
+    blocked = getattr(engine, "_market_closed_blocked", {})
+    assert "064400" not in blocked, "KRX 5분 TTL 만료 후 lazy clear 누락"
 
 
 # ===========================================================================
@@ -501,6 +602,10 @@ async def test_s6_when_reset_daily_state_then_block_set_cleared(
     """결함 차단: `_reset_daily_state` 동행 clear — 차단 set/로그 cap 모두 비워짐.
 
     Green 명세: `OrderEngine.reset_daily_state()` 헬퍼 추가 (캡슐화) — scheduler 가 호출.
+
+    사이클 55 R-1 (2026-06-03) 갱신: `reset_daily_state` 가 `_sell_rejection.reset_daily()`
+    위임 호출로 변경. property `_market_closed_blocked` / `_market_closed_blocked_logged_today`
+    는 tracker 내부 dict/set 직접 노출 → reset 후 빈 상태 동일 보장.
     """
     # 차단 등록
     mock_place_order.side_effect = [_market_closed_error_apbk0918()]
@@ -516,11 +621,11 @@ async def test_s6_when_reset_daily_state_then_block_set_cleared(
     )
     engine.reset_daily_state()
 
-    # 차단 set 비워짐
+    # 차단 set 비워짐 (사이클 55 호환 layer — tracker._blocked_until 동기 clear)
     assert engine._market_closed_blocked == {}, (
         "reset_daily_state 후 _market_closed_blocked 비어있지 않음"
     )
-    # 로그 cap 도 비워짐
+    # 로그 cap 도 비워짐 (사이클 55 호환 layer — tracker._logged_today 동기 clear)
     logged = getattr(engine, "_market_closed_blocked_logged_today", set())
     assert logged == set(), (
         "reset_daily_state 후 _market_closed_blocked_logged_today 비어있지 않음"
@@ -545,6 +650,10 @@ async def test_s7_when_100_blocked_calls_then_info_log_emitted_only_once(
 
     사이클 31 R6 의 `_risk_silent_skip_logged_today` 동형 패턴 —
     `_market_closed_blocked_logged_today: set[str]` (ticker only).
+
+    사이클 55 R-1 (2026-06-03) 호환: prefix `[market_closed_blocked]` 유지
+    (설계 카드 D-1 권고 — 운영 Grafana/Loki grep 호환). emit cap 은 tracker
+    `should_emit_block_log/mark_block_logged` 위임으로 보존.
     """
     # 1회 거부 + 99회 차단
     mock_place_order.side_effect = [_market_closed_error_apbk0918()] * 100
