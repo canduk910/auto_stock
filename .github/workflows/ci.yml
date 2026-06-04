@@ -25,6 +25,9 @@ jobs:
 
   backend-test:
     runs-on: ubuntu-latest
+    # 사이클 59 hotfix: GitHub Actions 기본 6시간 cancel 대신 15분 강제 종료.
+    # pytest-timeout 60s 가드 와 이중 안전망.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 

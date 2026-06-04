@@ -209,6 +209,21 @@ def mock_stock_master(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(_sm, "upsert_one", AsyncMock(return_value=None))
 
 
+@pytest.fixture
+def mock_get_balance(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
+    """사이클 55 R-1 Q3 reconciliation — get_balance() 1회 호출 의존성 분리.
+
+    insufficient_quantity 거부 분기 (`order_engine.py:807`) 가 lazy import 로
+    `src.api.balance.get_balance` 호출 → 실제 KIS REST 호출되면 .env 미설정 CI
+    환경에서 무한 hang (사이클 59 cycle hotfix). mock 누락 시 backend-test job
+    이 GitHub Actions 6시간 timeout 으로 cancel.
+    """
+    mock = AsyncMock(return_value=([], None))
+    import src.api.balance as _balance
+    monkeypatch.setattr(_balance, "get_balance", mock)
+    return mock
+
+
 def _market_closed_error_apbk0918() -> KisApiError:
     """KST 08:00~09:00 NXT 프리/KRX 진입 전 매도 거부 원문."""
     return KisApiError(
@@ -341,6 +356,7 @@ async def test_s3a_when_insufficient_quantity_then_not_registered_in_block_set(
     mock_write_log: AsyncMock,
     mock_strategy_exchange,
     mock_stock_master,
+    mock_get_balance: AsyncMock,
 ):
     """회귀 가드: 보유 부족 거부는 기존 즉시 break + positions 삭제 동작 보존, 차단 set 미등록."""
     mock_place_order.side_effect = [_insufficient_qty_error()]

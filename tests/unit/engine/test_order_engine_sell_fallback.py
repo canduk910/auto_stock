@@ -170,6 +170,21 @@ def mock_strategy_exchange(monkeypatch: pytest.MonkeyPatch):
     return _fake
 
 
+@pytest.fixture
+def mock_get_balance(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
+    """사이클 55 R-1 Q3 reconciliation — get_balance() 1회 호출 의존성 분리.
+
+    insufficient_quantity 거부 분기 (`order_engine.py:807`) 가 lazy import 로
+    `src.api.balance.get_balance` 호출 → 실제 KIS REST 호출되면 .env 미설정 CI
+    환경에서 무한 hang (사이클 59 cycle hotfix). mock 누락 시 backend-test job
+    이 GitHub Actions 6시간 timeout 으로 cancel.
+    """
+    mock = AsyncMock(return_value=([], None))
+    import src.api.balance as _balance
+    monkeypatch.setattr(_balance, "get_balance", mock)
+    return mock
+
+
 def _success_result(order_no: str) -> OrderResult:
     return OrderResult(order_no=order_no, order_time="090022", krx_org_no="")
 
@@ -342,6 +357,7 @@ async def test_execute_sell_when_insufficient_quantity_then_no_fallback_and_posi
     mock_delete_position: AsyncMock,
     mock_write_log: AsyncMock,
     mock_strategy_exchange,
+    mock_get_balance: AsyncMock,
 ):
     """`is_insufficient_quantity` True → 폴백 분기 진입 *안 함*, 즉시 break + DB 삭제."""
     qty_reject = KisApiError(

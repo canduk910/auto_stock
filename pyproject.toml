@@ -3,6 +3,10 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
+# 사이클 59 hotfix (2026-06-04): 테스트당 60s 강제 timeout — mock 누락으로 인한
+# 외부 호출 (KIS REST / supabase) 무한 hang 즉시 FAIL 전환. backend-test job
+# 의 GitHub Actions 6시간 cancel 사고 (사이클 55+) 영구 차단.
+timeout = 60
 markers = [
     "unit: 단일 함수/메서드 단위 테스트",
     "integration: 모듈 결합 테스트",
