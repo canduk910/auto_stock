@@ -37,10 +37,10 @@ Supabase (PostgreSQL) CRUD 모듈.
 
 ## log_reports.py — 일일 로그 분석 리포트
 
-- `insert_log_report()`: 20:10 정산 직후 INSERT. `target_date` UNIQUE (충돌 시 None)
+- `insert_log_report()`: 20:10 정산 직후 INSERT. `target_date` UNIQUE (충돌 시 None). **사이클 58 V-2 (2026-06-04)**: `input_tokens / output_tokens / total_tokens / latency_ms / cost_estimate_usd` 5 keyword 추가 (모두 기본 None — NULL INSERT). `cost_estimate_usd` 는 `Decimal | None` → DB 저장 시 `float` 변환.
 - `list_log_reports(days=30)`: 최근 N일 신규순
 - `get_log_report(target_date)`: 단일 영업일
-- 스키마: id(uuid) / target_date(unique) / summary(text) / findings(jsonb 배열) / metrics(jsonb) / model(varchar) / created_at
+- 스키마: id(uuid) / target_date(unique) / summary(text) / findings(jsonb 배열) / metrics(jsonb) / model(varchar) / created_at / **input_tokens(int, NULL)** / **output_tokens(int, NULL)** / **total_tokens(int, NULL)** / **latency_ms(int, NULL)** / **cost_estimate_usd(decimal(10,6), NULL)** (migration 031, 사이클 58)
 
 ## system_config.py — 시스템 설정 키-값 헬퍼
 

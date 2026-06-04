@@ -99,6 +99,7 @@ backend:
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -223,6 +224,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -406,6 +408,7 @@ backend:
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -613,6 +616,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -773,6 +777,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -903,6 +908,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -1039,6 +1045,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -1223,6 +1230,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -1374,6 +1382,7 @@ backend:
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
+    - tests/unit/db/test_log_reports_openai_meta.py
     - tests/unit/db/test_market_regime_snapshots.py
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_parameter_recommendations_v2.py
@@ -1453,6 +1462,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -1694,6 +1704,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -1852,6 +1863,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -1972,6 +1984,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -2150,6 +2163,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -2225,7 +2239,8 @@ backend:
     - tests/unit/realtime/test_ws_subscribe_backoff.py
     - tests/unit/services/test_quote_session_health.py
   src/db/log_reports.py:
-    direct_tests: []
+    direct_tests:
+    - tests/unit/db/test_log_reports_openai_meta.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -2306,6 +2321,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -2428,6 +2444,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -2558,6 +2575,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -2694,6 +2712,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
@@ -2828,6 +2847,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -2955,6 +2975,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -3076,6 +3097,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -3190,6 +3212,7 @@ backend:
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
+    - tests/unit/db/test_log_reports_openai_meta.py
     - tests/unit/db/test_market_regime_snapshots.py
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_parameter_recommendations_v2.py
@@ -3269,6 +3292,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -3450,6 +3474,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -3636,6 +3661,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -3801,6 +3827,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -4006,6 +4033,7 @@ backend:
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_param_ranges.py
@@ -4111,6 +4139,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -4237,6 +4266,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -4357,6 +4387,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -4483,6 +4514,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -4534,6 +4566,7 @@ backend:
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -4739,6 +4772,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -4867,6 +4901,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -4998,6 +5033,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
@@ -5113,6 +5149,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -5241,6 +5278,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -5441,6 +5479,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -5598,6 +5637,7 @@ backend:
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -5692,6 +5732,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -5845,6 +5886,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -5969,6 +6011,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -6108,6 +6151,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -6242,6 +6286,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -6367,6 +6412,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -6496,6 +6542,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -6622,6 +6669,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -6758,6 +6806,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -6935,6 +6984,7 @@ backend:
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -7064,6 +7114,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -7188,6 +7239,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -7347,6 +7399,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -7473,6 +7526,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
@@ -7658,6 +7712,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -7845,6 +7900,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -8075,6 +8131,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -8260,6 +8317,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -8403,6 +8461,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -8575,6 +8634,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -8799,6 +8859,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -9019,6 +9080,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -9585,6 +9647,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -9723,6 +9786,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -9860,6 +9924,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -10034,6 +10099,7 @@ backend:
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
+    - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -10589,10 +10655,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-04T07:57:31.749701+09:00'
+generated_at: '2026-06-04T10:09:17.368380+09:00'
 stats:
   backend_modules: 91
-  backend_tests: 245
+  backend_tests: 247
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import date
+from decimal import Decimal
 
 from src.db.supabase import supabase
 
@@ -18,10 +19,19 @@ async def insert_log_report(
     findings: list[dict],
     metrics: dict,
     model: str | None,
+    # 사이클 58 V-2 (2026-06-04) — OpenAI 메타 컬럼
+    input_tokens: int | None = None,
+    output_tokens: int | None = None,
+    total_tokens: int | None = None,
+    latency_ms: int | None = None,
+    cost_estimate_usd: Decimal | None = None,
 ) -> dict | None:
     """일일 로그 분석 리포트를 INSERT한다.
 
     (target_date) UNIQUE — 동일 영업일 재실행 시 None 반환.
+
+    사이클 58 V-2: OpenAI 호출 메타(tokens/latency/cost)를 함께 기록한다.
+    모두 NULL 허용 — 기존 row 자연 보존.
     """
     payload = {
         "target_date": target_date.isoformat(),
@@ -29,6 +39,14 @@ async def insert_log_report(
         "findings": findings,
         "metrics": metrics,
         "model": model,
+        # 사이클 58 V-2 — 메타 필드 (None → NULL INSERT)
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": total_tokens,
+        "latency_ms": latency_ms,
+        "cost_estimate_usd": (
+            float(cost_estimate_usd) if cost_estimate_usd is not None else None
+        ),
     }
     try:
         result = await asyncio.to_thread(

@@ -15,8 +15,11 @@ import asyncio
 import json
 import logging
 import re
+import time
 from collections import Counter
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal
 from typing import Any
 
 from src.api.base import get_request_metrics, reset_request_metrics
@@ -28,6 +31,42 @@ from src.db.trade_history import get_today_buy_trades_for_funnel, get_trades_in_
 logger = logging.getLogger(__name__)
 
 KST = timezone(timedelta(hours=9))
+
+# 사이클 58 V-2 (2026-06-04) — OpenAI 모델별 토큰 단가 (USD per 1K tokens)
+# (input_per_1k, output_per_1k)
+# 미등록 모델 → cost_estimate_usd=None + WARNING [openai_pricing_miss]
+_OPENAI_PRICING: dict[str, tuple[float, float]] = {
+    "gpt-5.4": (0.0050, 0.0150),
+    "gpt-4o": (0.0025, 0.0100),
+    "gpt-4o-mini": (0.00015, 0.00060),
+    "gpt-4-turbo": (0.0100, 0.0300),
+    "gpt-4": (0.0300, 0.0600),
+    "gpt-3.5-turbo": (0.0005, 0.0015),
+}
+
+
+@dataclass
+class _OpenAIMeta:
+    """OpenAI 호출 메타 — tokens / latency / cost."""
+
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    total_tokens: int | None = None
+    latency_ms: int | None = None
+    cost_estimate_usd: Decimal | None = None
+
+
+def _compute_cost_usd(model: str, input_tokens: int, output_tokens: int) -> Decimal | None:
+    """모델·토큰 수 → 추정 비용(USD).
+
+    미등록 모델은 None 반환 (호출자가 [openai_pricing_miss] 로그 처리).
+    """
+    pricing = _OPENAI_PRICING.get(model)
+    if pricing is None:
+        return None
+    input_per_1k, output_per_1k = pricing
+    cost = (input_tokens / 1000 * input_per_1k) + (output_tokens / 1000 * output_per_1k)
+    return Decimal(str(round(cost, 6)))
 
 ALLOWED_SEVERITIES = {"high", "medium", "low"}
 ALLOWED_CATEGORIES = {
@@ -282,15 +321,19 @@ def _validate_report(raw: dict) -> tuple[str, list[dict]]:
     return summary, findings
 
 
-async def _call_openai(metrics: dict) -> dict:
-    """OpenAI에 분석 요청. 실패 시 빈 dict."""
-    try:
-        from openai import AsyncOpenAI
-    except ImportError:
-        logger.error("openai 패키지가 설치되지 않았습니다")
-        return {}
+async def _call_openai(
+    client: Any,
+    metrics: dict,
+    model: str,
+) -> tuple[dict | None, _OpenAIMeta]:
+    """OpenAI에 분석 요청 — (parsed_result, meta) 반환.
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    사이클 58 V-2: client/model 을 호출자에서 주입받아 메타 수집 후 반환한다.
+    예외 발생 시 result=None + latency_ms 만 채워진 meta 반환 (graceful).
+    """
+    meta = _OpenAIMeta()
+    start = time.monotonic()
+
     user_msg = (
         "아래는 당일 시스템 로그 집계와 거래 통계다.\n"
         "이를 보고 운영 개선 리포트를 위 스키마에 맞춰 JSON으로 작성하라.\n\n"
@@ -299,23 +342,38 @@ async def _call_openai(metrics: dict) -> dict:
 
     try:
         response = await client.chat.completions.create(
-            model=settings.openai_recommend_model,
+            model=model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_msg},
             ],
             response_format={"type": "json_object"},
         )
-    except Exception:
-        logger.exception("OpenAI 호출 실패 (log analysis)")
-        return {}
+        meta.latency_ms = int((time.monotonic() - start) * 1000)
 
-    try:
+        # 사용량 메타 수집
+        usage = getattr(response, "usage", None)
+        if usage is not None:
+            meta.input_tokens = getattr(usage, "prompt_tokens", None)
+            meta.output_tokens = getattr(usage, "completion_tokens", None)
+            meta.total_tokens = getattr(usage, "total_tokens", None)
+            if meta.input_tokens is not None and meta.output_tokens is not None:
+                meta.cost_estimate_usd = _compute_cost_usd(
+                    model, meta.input_tokens, meta.output_tokens
+                )
+                if meta.cost_estimate_usd is None:
+                    logger.warning(
+                        "[openai_pricing_miss] model=%s — cost_estimate_usd=None", model
+                    )
+
+        # 응답 파싱
         content = response.choices[0].message.content or "{}"
-        return json.loads(content)
-    except (json.JSONDecodeError, IndexError, AttributeError):
-        logger.exception("OpenAI 응답 파싱 실패 (log analysis)")
-        return {}
+        return json.loads(content), meta
+
+    except Exception:
+        meta.latency_ms = int((time.monotonic() - start) * 1000)
+        logger.exception("[openai_call_failed] model=%s", model)
+        return None, meta
 
 
 async def generate_daily_log_report(
@@ -334,6 +392,12 @@ async def generate_daily_log_report(
     """
     if not settings.openai_api_key:
         logger.warning("OPENAI_API_KEY 미설정 — 로그 분석 리포트 건너뜀")
+        return None
+
+    try:
+        from openai import AsyncOpenAI
+    except ImportError:
+        logger.error("openai 패키지가 설치되지 않았습니다")
         return None
 
     now_kst = _now_kst if _now_kst is not None else datetime.now(KST)
@@ -370,11 +434,19 @@ async def generate_daily_log_report(
         trade_metrics["trades_total"],
     )
 
-    # 2. OpenAI 호출 (60초 타임아웃)
+    # 2. OpenAI 호출 (60초 타임아웃) — 사이클 58 V-2: client/model 주입 + meta 수집
+    model = settings.openai_recommend_model
+    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    meta = _OpenAIMeta()
     try:
-        raw = await asyncio.wait_for(_call_openai(metrics), timeout=60)
+        raw, meta = await asyncio.wait_for(
+            _call_openai(client, metrics, model), timeout=60
+        )
     except asyncio.TimeoutError:
         logger.warning("OpenAI 호출 타임아웃 (log analysis)")
+        raw = None
+
+    if raw is None:
         raw = {}
 
     summary, findings = _validate_report(raw)
@@ -382,12 +454,18 @@ async def generate_daily_log_report(
         summary = "AI 분석 응답을 받지 못했거나 빈 결과입니다 — 입력 메트릭만 보존합니다."
 
     # 3. INSERT (UNIQUE 충돌 시 None — 재실행 안전)
+    # 사이클 58 V-2: OpenAI 메타(tokens/latency/cost) 함께 저장
     row = await insert_log_report(
         target_date=target_date,
         summary=summary,
         findings=findings,
         metrics=metrics,
-        model=settings.openai_recommend_model,
+        model=model,
+        input_tokens=meta.input_tokens,
+        output_tokens=meta.output_tokens,
+        total_tokens=meta.total_tokens,
+        latency_ms=meta.latency_ms,
+        cost_estimate_usd=meta.cost_estimate_usd,
     )
     if row:
         logger.info(

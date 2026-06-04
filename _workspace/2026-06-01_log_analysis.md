@@ -140,6 +140,8 @@
 
 #### V-2 [P2] daily_log_reports OpenAI 모델/토큰 비용 메타 표시
 
+> **사이클 58 종결 (2026-06-04)** — `daily_log_reports` 5 메타 컬럼 추가 (input_tokens / output_tokens / total_tokens / latency_ms / cost_estimate_usd). USD 저장, KRW 환산은 조회 시점. 단가 dict 6 모델 (gpt-5.4 / gpt-4o / gpt-4o-mini / gpt-4-turbo / gpt-4 / gpt-3.5-turbo). 미등록 모델 → cost None + WARNING `[openai_pricing_miss]`. 사이클 53.1 재집계 사고의 정량 진단 인프라 도입. 회귀 가드 10 시나리오. 백엔드 1834 → 1844 PASS (+10). migration 031 사용자 수동 실행 필요. 상세: `docs/HARNESS_CHANGELOG.md` 사이클 58 행.
+
 **근거**: model=gpt-5.4 만 기록. 사용 토큰/비용/소요시간 미기록. 운영 비용 추적 불가.
 
 **제안**: `daily_log_reports` 컬럼 `usage_tokens int, latency_ms int, cost_estimate_krw decimal` 추가 — migration 새 사이클.
@@ -273,4 +275,46 @@ B-3 / B-4 / R-2 / V-1~V-4 는 후속 사이클 또는 도메인 자문 결과에
 - 평가 결과 따라 사이클 58+ 에서 domain-expert 자문 + 임계 조정 (`ALARM_WINDOW_SECONDS` / `ALARM_THRESHOLD` 상수 단순 변경).
 
 **권고**: 다음 사이클은 (a) **V-2 P2** (단일 migration, 운영 비용 추적 즉시 가용) 또는 (b) **refactor #2 HIGH** (scheduler 분해 본격 진행, domain-expert 자문 동반). V-2 가 *최소 본질 단일 책임 카드* 라 사이클 58 우선 권고. 사용자 결정 대기.
+
+---
+
+## 잔여 카드 우선순위 재정렬 (사이클 58 V-2 종결 후 — 2026-06-04)
+
+> 사이클 58 종결 (V-2 P2 `daily_log_reports` OpenAI 메타 컬럼). migration 031 + `_OpenAIMeta` dataclass + `_OPENAI_PRICING_USD_PER_1K_TOKENS` 6 모델 단가 dict + `_compute_cost_usd` + `_call_openai` 시그너처 확장 (`-> tuple[dict, _OpenAIMeta]`) + `insert_log_report` 5 keyword. 회귀 가드 10 시나리오 (`tests/unit/engine/test_log_analysis_openai_meta.py` 8 + `tests/unit/db/test_log_reports_openai_meta.py` 2). 백엔드 1834 → 1844 PASS (+10). **V-2 P2 카드 소진** — 사이클 52~58 운영 진단 + 인프라 정형화 7 사이클 완결 (52 B-1 → 53/53.1 B-2/B-4 → 54 B-3 → 55 R-1 → 56 refactor #1+#5 → 57 V-1 → 58 V-2).
+
+**refactor #2 HIGH 1순위 승격** — V-2 종결 후 잔여 카드 최고 우선. scheduler 분해 1단계 stale_manager 추출 (-1,000L), 사이클 51 boot_manager 패턴 답습. domain-expert 자문 *필수* (매매 hot path 영향 평가).
+
+| 순위 | 카드 | 등급 | 영역 | 메모 |
+|------|------|------|------|------|
+| **1** | **refactor #2** | **HIGH** | 리팩토링 | **V-2 종결 후 1순위** — scheduler 분해 1단계 stale_manager 추출 (-1,000L). domain-expert 자문 필수 (사이클 29-R1~R3 stale watcher 누적 정책 행위 보존 검증). 사이클 51 boot_manager 패턴 답습. 본 사이클 진입 시 사이클 49→58 누적 10 사이클 = refactor-review 임계 5회 *2배 초과* 도달 — refactor-review 동시 또는 별도 결정 |
+| 2 | refactor #3 | HIGH | 리팩토링 | settlement_manager 추출 (-376L), 카드 #2 후속 |
+| 3 | R-2 | MEDIUM | 리팩토링 | momentum/VB/LTV funnel 단계 hook (사이클 39 의 3 전략 누락 보완). 사이클 47 FUNNEL_STAGES + `_record_funnel_pipeline_step` 위임 패턴 재활용 |
+| 4 | refactor #4 | MEDIUM | 리팩토링 | swing_manager 추출 (-400L) |
+| 5 | R-3 | MEDIUM | 리팩토링 | `_request_via_quote_pool` api_metrics 계측 추가 (quote_pool 500 누락) |
+| 6 | refactor #6 | MEDIUM | 리팩토링 | KIS API except 좁히기 (KIS MCP 의존) |
+| 7 | V-3 | P2 | 가시화 | system_logs 컬럼명 일관성 (`level` vs `log_level`) — 분석 도구 측 결함 동시 해소 |
+| 8 | V-4 | P3 | 가시화 | strategy_funnel_snapshots 탈락 사유 sample 활용도 (BFB/VCP step 6/7 직후 후보 종목 inspect API) |
+| 후속 | V-2 후속 UI | P3 | 가시화 | `daily_log_reports` 페이지 신규 5 컬럼 (input_tokens / output_tokens / total_tokens / latency_ms / cost_estimate_usd) 표시 + KRW 환산 (조회 시점). 별 사이클로 분리. 프론트엔드 단일 책임 카드 |
+| 후속 | V-1 임계 점검 | (관찰) | 운영 점검 | 사이클 57 V-1 알람 발화 임계 (10분 5건) 1~2 영업일 실측 후 과민/둔감 평가. 사이클 59~60 진입 *전* 평가 권고 |
+
+**운영 액션 (사용자 필수)**:
+- migration 031 Supabase Dashboard SQL Editor 수동 실행:
+  ```sql
+  ALTER TABLE daily_log_reports
+      ADD COLUMN IF NOT EXISTS input_tokens INT NULL,
+      ADD COLUMN IF NOT EXISTS output_tokens INT NULL,
+      ADD COLUMN IF NOT EXISTS total_tokens INT NULL,
+      ADD COLUMN IF NOT EXISTS latency_ms INT NULL,
+      ADD COLUMN IF NOT EXISTS cost_estimate_usd DECIMAL(10, 6) NULL;
+  ```
+- 검증 쿼리: `SELECT column_name FROM information_schema.columns WHERE table_name='daily_log_reports' AND column_name IN ('input_tokens', 'output_tokens', 'total_tokens', 'latency_ms', 'cost_estimate_usd')` → 5 row 반환 확인.
+- 미실행 시 다음 20:10 일일 분석 `insert_log_report` 가 `column does not exist` 에러 (자동 리포트 INSERT 실패 → row 누락).
+- 사이클 53.1 row (`model='cycle53.1-metrics-only'`) 자연 보존 — NULL 허용으로 무영향.
+
+**refactor-review 트리거 평가**:
+- 사이클 49→58 누적 10 사이클 = 임계 5회 *2배 초과*.
+- refactor #2 (stale_manager) 진입 *시* refactor-review 동시 실행 또는 별도 사이클 결정 — domain-expert 자문 동반 필수성 동일.
+- 사이클 49 (VCP) → 52~58 (운영 진단 + 인프라 정형화 7 사이클) 누적 동안 refactor #1+#5 (사이클 56) 만 처리 — 잔여 refactor 카드 #2/#3/#4/#6 4종 누적 *재검토 시점*.
+
+**권고**: 다음 사이클은 **refactor #2 HIGH** (scheduler 분해 1단계 stale_manager, domain-expert 자문 필수). 또는 refactor-review *재실행* (잔여 4 refactor 카드 재우선순위화 + V-2 후속 / V-1 임계 점검 정책 카드 흡수). 사용자 결정 대기.
 
