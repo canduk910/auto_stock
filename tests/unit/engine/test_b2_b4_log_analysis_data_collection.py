@@ -565,9 +565,11 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
     # --- OpenAI / insert mock ---
     captured_metrics: dict = {}
 
-    async def _fake_call_openai(metrics: dict) -> dict:
+    from src.engine.log_analysis_engine import _OpenAIMeta
+
+    async def _fake_call_openai(client, metrics, model):
         captured_metrics["metrics"] = metrics
-        return {"summary": "test", "findings": []}
+        return ({"summary": "test", "findings": []}, _OpenAIMeta())
 
     async def _fake_insert(*_args, **_kwargs):
         return {"id": "row-1"}
@@ -729,9 +731,11 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
     # --- OpenAI / insert / strategy_funnel / api_metrics mock ---
     captured_metrics: dict = {}
 
-    async def _fake_call_openai(metrics: dict) -> dict:
+    from src.engine.log_analysis_engine import _OpenAIMeta
+
+    async def _fake_call_openai(client, metrics, model):
         captured_metrics["metrics"] = metrics
-        return {"summary": "test", "findings": []}
+        return ({"summary": "test", "findings": []}, _OpenAIMeta())
 
     async def _fake_insert(*_args, **_kwargs):
         return {"id": "row-1"}

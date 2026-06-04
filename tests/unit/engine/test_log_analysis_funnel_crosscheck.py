@@ -294,9 +294,11 @@ async def test_generate_daily_log_report_awaits_funnel(monkeypatch):
     async def _fake_trades(*_a, **_kw):
         return []
 
-    async def _fake_call(metrics):
+    from src.engine.log_analysis_engine import _OpenAIMeta
+
+    async def _fake_call(client, metrics, model):
         captured["metrics"] = metrics
-        return {"summary": "ok", "findings": []}
+        return ({"summary": "ok", "findings": []}, _OpenAIMeta())
 
     async def _fake_insert(*_a, **_kw):
         return {"id": "row-x"}

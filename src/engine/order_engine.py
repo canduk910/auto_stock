@@ -27,6 +27,7 @@ from src.api.order import cancel_order, place_order
 from src.db.system_logs import write_log, safe_write_log
 from src.db.trade_history import insert_trade, update_trade_status
 from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.sell_rejection import SellRejectionTracker, is_krx_main_hours, is_nxt_session_hours
 from src.engine.strategy_base import Position, Signal, StrategyBase
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.scanner import t
@@ -84,12 +85,10 @@ class OrderEngine:
         # 사이클 55 R-1 (2026-06-03) — SellRejectionTracker 단일 정책 객체.
         # 사이클 52 B-1 의 2 필드 (_market_closed_blocked / _market_closed_blocked_logged_today)
         # 를 통합. 호환 layer property 2개 로 기존 참조 보존.
-        from src.engine.sell_rejection import SellRejectionTracker
         self._sell_rejection = SellRejectionTracker()
         # 사이클 56-C (2026-06-04) — DailyEmitCap[str] 으로 마이그레이션.
         # 사이클 54 set[str] → DailyEmitCap[str] 호환 layer 경유 (add/clear/__contains__).
         # 다운그레이드 결정 무영향, 로그만 cap. _reset_daily_state 동행 clear.
-        from src.engine.daily_emit_cap import DailyEmitCap
         self._nxt_downgrade_logged_today: DailyEmitCap[str] = DailyEmitCap[str]()
 
     # ──────────────────────────── 사이클 52 호환 layer (사이클 55 R-1)
@@ -502,7 +501,6 @@ class OrderEngine:
         # 사이클 55 R-1 (2026-06-03) — SellRejectionTracker 진입 게이트 위임.
         # 사이클 52 B-1 단일 TTL → 4 분류 통합 정책 객체 (2단계 TTL + 30초 TTL).
         # 진입 게이트 순서 (사이클 52 보존): selling.add → 게이트 → discard + return.
-        from src.engine.sell_rejection import is_krx_main_hours, is_nxt_session_hours
         now_kst = datetime.now(_KST_TZ)
         if self._sell_rejection.is_blocked(ticker, now_kst):
             if self._sell_rejection.should_emit_block_log(ticker):
@@ -1134,7 +1132,7 @@ class OrderEngine:
             self._sell_rejection.reset_daily() 4 필드 일괄 위임 (사이클 48 stale_tracker 패턴).
         """
         self._sell_rejection.reset_daily()  # 4 필드 (_blocked_until / _blocked_reason / _logged_today / _history) 일괄 clear
-        self._nxt_downgrade_logged_today.clear()  # 사이클 54 유지 (사이클 56 통합 예정)
+        self._nxt_downgrade_logged_today.clear()  # 사이클 54 유지 (사이클 56-C 통합 완료)
 
     async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
         """미체결 잔량을 취소한다."""

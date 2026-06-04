@@ -70,9 +70,11 @@ async def test_generate_daily_log_report_exposes_next_day_clear_in_metrics(monke
     async def _fake_get_trades(*_args, **_kwargs):
         return []
 
-    async def _fake_call_openai(metrics):
+    from src.engine.log_analysis_engine import _OpenAIMeta
+
+    async def _fake_call_openai(client, metrics, model):
         captured["metrics"] = metrics
-        return {"summary": "test", "findings": []}
+        return ({"summary": "test", "findings": []}, _OpenAIMeta())
 
     async def _fake_insert(*_args, **_kwargs):
         return {"id": "row-1"}
