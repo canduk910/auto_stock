@@ -1493,6 +1493,7 @@ backend:
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_tick_coverage_session_view.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
+    - tests/unit/engine/test_sell_rejection_tracker.py
     - tests/unit/engine/test_session_silent_inactive_ratio.py
     - tests/unit/engine/test_session_silent_inactive_recovery.py
     - tests/unit/engine/test_stale_watcher_priority_split.py
@@ -1508,6 +1509,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_universe_guard.py
+    - tests/unit/engine/test_v1_rejection_alarm.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     - tests/unit/realtime/test_ack_orphan_guard.py
@@ -3308,6 +3310,7 @@ backend:
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_tick_coverage_session_view.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
+    - tests/unit/engine/test_sell_rejection_tracker.py
     - tests/unit/engine/test_session_silent_inactive_ratio.py
     - tests/unit/engine/test_session_silent_inactive_recovery.py
     - tests/unit/engine/test_stale_watcher_priority_split.py
@@ -3323,6 +3326,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_universe_guard.py
+    - tests/unit/engine/test_v1_rejection_alarm.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     - tests/unit/realtime/test_ack_orphan_guard.py
@@ -3670,6 +3674,7 @@ backend:
     - tests/unit/engine/test_scheduler_swing_subscription_removed.py
     - tests/unit/engine/test_scheduler_tick_coverage_session_view.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
+    - tests/unit/engine/test_sell_rejection_tracker.py
     - tests/unit/engine/test_session_silent_inactive_ratio.py
     - tests/unit/engine/test_session_silent_inactive_recovery.py
     - tests/unit/engine/test_stale_watcher_priority_split.py
@@ -3685,6 +3690,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_universe_guard.py
+    - tests/unit/engine/test_v1_rejection_alarm.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     - tests/unit/realtime/test_ack_orphan_guard.py
@@ -4520,6 +4526,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_universe_guard.py
+    - tests/unit/engine/test_v1_rejection_alarm.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
   src/engine/log_analysis_engine.py:
@@ -5601,6 +5608,7 @@ backend:
   src/engine/sell_rejection.py:
     direct_tests:
     - tests/unit/engine/test_sell_rejection_tracker.py
+    - tests/unit/engine/test_v1_rejection_alarm.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -10581,10 +10589,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-04T02:39:25.541057+09:00'
+generated_at: '2026-06-04T07:57:31.749701+09:00'
 stats:
   backend_modules: 91
-  backend_tests: 244
+  backend_tests: 245
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:

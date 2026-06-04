@@ -17,19 +17,33 @@
     사이클 54 _nxt_downgrade_logged_today 는 R-1 범위 밖 — 사이클 56-C 마이그레이션 완료 예정.
 
 안전 가드:
-    reset_daily() 가 _blocked_until / _blocked_reason / _logged_today / _history 일괄 clear.
-    record_rejection() 은 항상 history 적재 (V-1 사이클 56+ 알람 hook 사전 준비).
+    reset_daily() 가 _blocked_until / _blocked_reason / _logged_today / _history /
+    _alarm_last_emitted 일괄 clear (사이클 57 V-1 추가).
+    record_rejection() 은 항상 history 적재 + V-1 알람 임계 자동 검사.
+
+사이클 57 V-1 (2026-06-04):
+    _append_history → _maybe_emit_burst_alarm 자동 발화.
+    10분 윈도우 5건 초과 시 CRITICAL system_logs INSERT (fire-and-forget).
+    30분 cooldown per-ticker (알람 폭주 차단).
+    사이클 52 B-1 실측 (10분 500건) 기반 임계 결정.
 """
 from __future__ import annotations
 
+import asyncio
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, time as dtime, timedelta, timezone
-from typing import Literal
+from typing import ClassVar, Literal
 
+from src.db.system_logs import safe_write_log
 from src.engine.daily_emit_cap import DailyEmitCap
 
 _KST_TZ = timezone(timedelta(hours=9))
+
+# 사이클 57 V-1 — 알람 상수
+ALARM_WINDOW_SECONDS: int = 600    # 10분 윈도우
+ALARM_THRESHOLD: int = 5           # 5건 초과 (6건째 발화)
+ALARM_COOLDOWN_SECONDS: int = 1800  # 30분 cooldown per-ticker
 
 RejectionReason = Literal[
     "market_closed",
@@ -67,6 +81,7 @@ class SellRejectionTracker:
     """Sell 거부 4 분류 통합 정책 객체.
 
     사이클 52 (B-1) 단일 TTL → 사이클 55 (R-1) 4 분류 통합.
+    사이클 57 V-1: _append_history → 10분 5건 초과 CRITICAL 알람 자동 발화.
     설계 카드 §1.2 인터페이스 명세 준수.
     """
 
@@ -77,6 +92,13 @@ class SellRejectionTracker:
     _logged_today: DailyEmitCap[str] = field(default_factory=DailyEmitCap)
     # V-1 알람 hook 사전 준비 (Q5, 사이클 56+)
     _history: dict[str, deque[RejectionEvent]] = field(default_factory=dict)
+    # 사이클 57 V-1 — per-ticker 알람 cooldown 시각
+    _alarm_last_emitted: dict[str, datetime] = field(default_factory=dict)
+
+    # 사이클 57 V-1 — class-level 상수 (모듈 상수와 동기화)
+    _ALARM_WINDOW_SECONDS: ClassVar[int] = ALARM_WINDOW_SECONDS
+    _ALARM_THRESHOLD: ClassVar[int] = ALARM_THRESHOLD
+    _ALARM_COOLDOWN_SECONDS: ClassVar[int] = ALARM_COOLDOWN_SECONDS
 
     # ──────────────────────────── public 게이트
 
@@ -211,7 +233,7 @@ class SellRejectionTracker:
     # ──────────────────────────── 일일 reset
 
     def reset_daily(self) -> None:
-        """_reset_daily_state 동행. 4 필드 일괄 clear.
+        """_reset_daily_state 동행. 5 필드 일괄 clear (사이클 57 V-1 추가).
 
         사이클 48 stale_tracker.reset_daily() 패턴 답습.
         """
@@ -219,16 +241,89 @@ class SellRejectionTracker:
         self._blocked_reason.clear()
         self._logged_today.clear()
         self._history.clear()
+        self._alarm_last_emitted.clear()  # 사이클 57 V-1
 
     # ──────────────────────────── internal
 
     def _append_history(self, ticker: str, event: RejectionEvent) -> None:
-        """history deque 에 이벤트 적재. 없으면 maxlen=20 deque 생성."""
+        """history deque 에 이벤트 적재 + V-1 알람 임계 자동 검사 (사이클 57).
+
+        사이클 55 R-1 의 4 채널 (register_market_closed / register_market_order_disallowed /
+        register_insufficient_quantity / record_rejection) 모두 이 메서드 경유.
+        """
         dq = self._history.get(ticker)
         if dq is None:
             dq = deque(maxlen=20)
             self._history[ticker] = dq
         dq.append(event)
+        # 사이클 57 V-1 — 10분 5건 초과 시 CRITICAL system_logs 발화
+        self._maybe_emit_burst_alarm(ticker, event.occurred_at)
+
+    def _maybe_emit_burst_alarm(self, ticker: str, now_kst: datetime) -> None:
+        """10분 윈도우 거부 횟수 > ALARM_THRESHOLD 시 CRITICAL system_logs 발화.
+
+        30분 cooldown per-ticker — 알람 폭주 차단.
+        fire-and-forget (asyncio.create_task) — 매매 hot path 블로킹 없음.
+
+        사이클 57 V-1 (2026-06-04).
+        """
+        # cooldown 검사 (lazy clear)
+        last_emit = self._alarm_last_emitted.get(ticker)
+        if last_emit is not None:
+            if (now_kst - last_emit).total_seconds() < self._ALARM_COOLDOWN_SECONDS:
+                return  # cooldown 중 — skip
+            self._alarm_last_emitted.pop(ticker, None)
+
+        # 10분 윈도우 거부 횟수
+        dq = self._history.get(ticker)
+        if not dq:
+            return
+        window_start = now_kst - timedelta(seconds=self._ALARM_WINDOW_SECONDS)
+        recent_events = [e for e in dq if e.occurred_at >= window_start]
+        if len(recent_events) <= self._ALARM_THRESHOLD:
+            return
+
+        # 임계 초과 — cooldown 등록 + CRITICAL 알람 발화
+        self._alarm_last_emitted[ticker] = now_kst
+        self._emit_burst_alarm(ticker, recent_events, now_kst)
+
+    def _emit_burst_alarm(
+        self,
+        ticker: str,
+        recent_events: list[RejectionEvent],
+        now_kst: datetime,
+    ) -> None:
+        """알람 메시지 포맷 + safe_write_log CRITICAL fire-and-forget (사이클 57 V-1).
+
+        reason 분포 집계 + 마지막 이벤트 정보 포함.
+        safe_write_log 실패 시 graceful skip (매매 흐름 무영향).
+        """
+        # reason 분포 집계
+        reason_counts: dict[str, int] = {}
+        for e in recent_events:
+            reason_counts[e.reason] = reason_counts.get(e.reason, 0) + 1
+        reasons_str = ", ".join(f"{k}:{v}" for k, v in sorted(reason_counts.items()))
+        last_event = recent_events[-1]
+        message = (
+            f"[매도거부폭주] ticker={ticker} window=10min "
+            f"count={len(recent_events)} threshold={self._ALARM_THRESHOLD}\n"
+            f"  reasons={reasons_str}\n"
+            f"  last_msg_cd={last_event.msg_cd} last_msg1={last_event.msg1[:60]}\n"
+            f"  occurred_at_kst={now_kst.isoformat()}"
+        )
+        # fire-and-forget — 매매 hot path 블로킹 없음.
+        # asyncio.create_task 는 running event loop 필수 — 테스트/초기화 환경
+        # (loop 없음) 에서는 graceful skip (coroutine 즉시 close).
+        coro = safe_write_log(
+            "CRITICAL",
+            message,
+            fallback_debug=f"[매도거부폭주] write_log 실패 ticker={ticker}",
+        )
+        try:
+            asyncio.create_task(coro)
+        except RuntimeError:
+            # no running event loop — 코루틴 정리 후 graceful skip
+            coro.close()
 
 
 # ──────────────────────────── module-level helpers

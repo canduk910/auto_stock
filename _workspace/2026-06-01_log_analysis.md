@@ -132,6 +132,8 @@
 
 #### V-1 [P1] 매도 거부 폭주 알람 — 시간당 거부 N건 이상 즉시 알림
 
+> **사이클 57 종결 (2026-06-04)** — `SellRejectionTracker._append_history` 공통 진입점 + `_maybe_emit_burst_alarm` 10분 5건 임계 + 30분 cooldown per-ticker + CRITICAL safe_write_log fire-and-forget. 메시지 포맷 = tracker 독립 최소 (KST + ticker + 거부 코드 분포 + 마지막 메시지). R-1 (사이클 55) deque(maxlen=20) + 56 DailyEmitCap 2 종 사전 인프라 직계 활용 — 사이클 52 B-1 10분 500건 폭주의 *실시간 감지 안전망* 완성. 회귀 가드 15 시나리오 (`tests/unit/engine/test_v1_rejection_alarm.py`). 백엔드 1819 → 1834 PASS (+15) / 회귀 0. 상세: `docs/HARNESS_CHANGELOG.md` 사이클 57 행.
+
 **근거**: B-1 의 10분 500건 폭주가 *실시간 운영자 알람 없이* 다음 날 20:10 자동 리포트에서야 발견됨. CLAUDE.md 의 "stale_silent_inactive 시간당 cap" 패턴 같은 *우선 알림* 필요.
 
 **제안**: `[kis_rejection]` per-ticker 시간당 5건 초과 시 CRITICAL 레벨 system_logs INSERT + `system_config.notification_enabled` 시 외부 채널 (Slack/email — 추후).
@@ -242,4 +244,33 @@ B-3 / B-4 / R-2 / V-1~V-4 는 후속 사이클 또는 도메인 자문 결과에
 | 10 | V-4 | P3 | 가시화 | strategy_funnel 탈락 사유 sample |
 
 **권고**: 다음 사이클은 **V-1 P1** (R-1 + DailyEmitCap 인프라 직계 활용, 매매 안전성 critical 가시화) 또는 **refactor #2 HIGH** (scheduler 분해 본격 진행) 우선 발주. 사용자 결정 대기.
+
+---
+
+## 잔여 카드 우선순위 재정렬 (사이클 57 V-1 종결 후 — 2026-06-04)
+
+> 사이클 57 종결 (V-1 P1 매도 거부 폭주 실시간 알람). `src/engine/sell_rejection.py` +97L (`_append_history` 공통 진입점 + `_maybe_emit_burst_alarm` 10분 5건 임계 + 30분 cooldown + CRITICAL safe_write_log fire-and-forget). 회귀 가드 15 시나리오 (`tests/unit/engine/test_v1_rejection_alarm.py`). 백엔드 1819 → 1834 PASS (+15). **V-1 P1 카드 소진** — sell rejection 4 사이클 완결 (52 진입 차단 → 55 분류 통합 + TTL → 56 cap 추상화 → 57 실시간 알람).
+
+**V-2 P2 가시화 카드 1순위 승격** — V-1 종결 후 분석 메모 잔여 가시화 카드 최고 우선순위. `daily_log_reports` 운영 비용 메타 (OpenAI 모델/토큰/cost_estimate_krw + latency_ms) 컬럼 추가 = migration 단일 카드. 사이클 53.1 재집계 사고 같은 시나리오에서 OPENAI_API_KEY 부재/실패 사유 정량 기록 가능.
+
+| 순위 | 카드 | 등급 | 영역 | 메모 |
+|------|------|------|------|------|
+| **1** | **V-2** | **P2** | 가시화 | **V-1 종결 후 가시화 카드 최고 우선** — `daily_log_reports` OpenAI 모델/토큰/cost_estimate_krw/latency_ms 컬럼 migration. 운영 비용 추적 + 사이클 53.1 재집계 사고 같은 OPENAI_API_KEY 결함 정량 기록 |
+| 2 | refactor #2 | HIGH | 리팩토링 | scheduler 분해 1단계 stale_manager 추출 (-1,000L). domain-expert 자문 필수. 사이클 51 boot_manager 패턴 답습 |
+| 3 | refactor #3 | HIGH | 리팩토링 | settlement_manager 추출 (-376L), 카드 #2 후속 |
+| 4 | R-2 | MEDIUM | 리팩토링 | momentum/VB/LTV funnel hook (사이클 39 의 3 전략 누락 보완). 사이클 47 FUNNEL_STAGES + `_record_funnel_pipeline_step` 위임 패턴 재활용 |
+| 5 | refactor #4 | MEDIUM | 리팩토링 | swing_manager 추출 (-400L) |
+| 6 | R-3 | MEDIUM | 리팩토링 | `_request_via_quote_pool` api_metrics 계측 추가 (quote_pool 500 누락) |
+| 7 | refactor #6 | MEDIUM | 리팩토링 | KIS API except 좁히기 (KIS MCP 의존) |
+| 8 | V-3 | P2 | 가시화 | system_logs 컬럼명 일관성 (`level` vs `log_level`) — 분석 도구 측 결함 동시 해소 |
+| 9 | V-4 | P3 | 가시화 | strategy_funnel_snapshots 탈락 사유 sample 활용도 (BFB/VCP step 6/7 직후 후보 종목 inspect API) |
+
+**운영 모니터링 권고 (사이클 58 진입 전 점검)**:
+- V-1 알람 발화 임계 (10분 5건) 가 운영 1~2 영업일 후 *과민/둔감* 여부 평가.
+- **과민** (정상 운영에서 알람 빈번 발화) → 임계 상향 (10분 10건) 검토.
+- **둔감** (사이클 52 같은 사고에서 알람 늦게 발화) → 임계 하향 또는 윈도우 단축 (5분).
+- 평가 SQL: `SELECT COUNT(*), MIN(occurred_at_kst), MAX(occurred_at_kst) FROM system_logs WHERE level='CRITICAL' AND message LIKE '[매도거부폭주]%' AND occurred_at >= now()-interval '7 days'`.
+- 평가 결과 따라 사이클 58+ 에서 domain-expert 자문 + 임계 조정 (`ALARM_WINDOW_SECONDS` / `ALARM_THRESHOLD` 상수 단순 변경).
+
+**권고**: 다음 사이클은 (a) **V-2 P2** (단일 migration, 운영 비용 추적 즉시 가용) 또는 (b) **refactor #2 HIGH** (scheduler 분해 본격 진행, domain-expert 자문 동반). V-2 가 *최소 본질 단일 책임 카드* 라 사이클 58 우선 권고. 사용자 결정 대기.
 
