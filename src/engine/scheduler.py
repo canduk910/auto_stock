@@ -634,6 +634,11 @@ class TradingScheduler:
             # 20:10 정산
             await self._wait_until(TIME_SETTLEMENT)
             self._phase = "settling"
+            # 사이클 62 (2026-06-05) — 가격 필터 일일 집계 (_settle 직전, Q6 자문)
+            try:
+                await self.risk_manager._emit_price_filter_daily_summary()
+            except Exception:
+                logger.debug("[price_filter_daily_summary] scheduler emit 실패", exc_info=True)
             await self._settle()
 
             # 정산 직후: 일일 로그 분석 리포트 (실패해도 정산엔 영향 없음)

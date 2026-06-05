@@ -27,6 +27,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -56,6 +57,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -107,6 +109,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -156,6 +159,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -185,6 +189,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -242,6 +247,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -302,6 +314,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -350,6 +363,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -435,6 +449,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -526,6 +547,7 @@ backend:
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -553,6 +575,7 @@ backend:
     - tests/integration/test_buy_block_low_funds.py
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -653,6 +676,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -738,6 +768,7 @@ backend:
     - tests/unit/api/test_quote_pool.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -767,6 +798,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -826,6 +858,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -884,6 +923,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -913,6 +953,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -968,6 +1009,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1026,6 +1068,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -1055,6 +1098,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1115,6 +1159,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1179,6 +1230,7 @@ backend:
     - tests/unit/engine/test_boot_preissue_tokens.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -1208,6 +1260,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_multi_strategy_block.py
@@ -1309,6 +1362,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1398,6 +1458,7 @@ backend:
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     transitive_tests:
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -1424,6 +1485,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1464,6 +1526,7 @@ backend:
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
+    - tests/unit/db/test_cycle62_price_filter_system_config.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_log_reports_openai_meta.py
@@ -1552,6 +1615,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1645,12 +1715,14 @@ backend:
     - tests/unit/services/test_quote_session_health.py
   src/db/__init__.py:
     direct_tests:
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_routes_buy_block.py
     - tests/contract/test_routes_kis_quote_accounts.py
     - tests/contract/test_routes_market_regime.py
     - tests/contract/test_routes_system_integrations.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
+    - tests/unit/db/test_cycle62_price_filter_system_config.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_market_regime_snapshots.py
@@ -1704,6 +1776,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1805,6 +1878,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1891,6 +1971,7 @@ backend:
     - tests/unit/db/test_backtest_runs.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -1920,6 +2001,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1976,6 +2058,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2022,6 +2105,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -2051,6 +2135,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2107,6 +2192,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2158,6 +2244,7 @@ backend:
     - tests/unit/engine/test_boot_preissue_tokens.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -2186,6 +2273,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2295,6 +2383,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2380,6 +2475,7 @@ backend:
     - tests/unit/db/test_log_reports_openai_meta.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -2409,6 +2505,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2465,6 +2562,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2513,6 +2611,7 @@ backend:
     - tests/unit/db/test_market_regime_snapshots.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -2541,6 +2640,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2598,6 +2698,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2654,6 +2761,7 @@ backend:
     - tests/unit/db/test_parameter_recommendations_weight_reasoning.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -2683,6 +2791,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2739,6 +2848,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2792,6 +2902,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2822,6 +2933,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -2885,6 +2997,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -2949,6 +3068,7 @@ backend:
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -2977,6 +3097,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3031,6 +3152,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3083,6 +3211,7 @@ backend:
   src/db/strategy_config.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -3113,6 +3242,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3169,6 +3299,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3218,6 +3349,7 @@ backend:
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -3247,6 +3379,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3301,6 +3434,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3346,6 +3480,7 @@ backend:
   src/db/supabase.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -3376,6 +3511,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3417,6 +3553,7 @@ backend:
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
+    - tests/unit/db/test_cycle62_price_filter_system_config.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_log_reports_openai_meta.py
@@ -3505,6 +3642,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -3598,15 +3742,24 @@ backend:
     - tests/unit/services/test_quote_session_health.py
   src/db/system_config.py:
     direct_tests:
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_routes_buy_block.py
     - tests/contract/test_routes_market_regime.py
     - tests/contract/test_routes_system_integrations.py
+    - tests/integration/test_cycle62_price_filter_integration.py
+    - tests/unit/db/test_cycle62_price_filter_system_config.py
     - tests/unit/db/test_system_config_auto_apply.py
     - tests/unit/db/test_system_config_auto_regime.py
     - tests/unit/db/test_system_config_buy_block.py
     - tests/unit/db/test_system_config_cash_ratio.py
     - tests/unit/db/test_system_config_integrations.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
@@ -3699,6 +3852,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3760,6 +3914,7 @@ backend:
     - tests/unit/db/test_system_logs_search.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -3789,6 +3944,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3895,6 +4051,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -3986,6 +4149,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -4015,6 +4179,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4073,6 +4238,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4124,6 +4296,7 @@ backend:
   src/engine/__init__.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -4153,6 +4326,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4219,6 +4393,10 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4291,6 +4469,9 @@ backend:
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle61_phase2A2_constants.py
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -4322,6 +4503,7 @@ backend:
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -4351,6 +4533,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4406,6 +4589,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4454,6 +4638,7 @@ backend:
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -4483,6 +4668,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4543,6 +4729,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4590,6 +4777,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -4619,6 +4807,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4674,6 +4863,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4724,6 +4914,7 @@ backend:
     - tests/unit/engine/test_sell_rejection_tracker.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -4753,6 +4944,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4811,6 +5003,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4869,6 +5068,7 @@ backend:
     - tests/unit/engine/test_log_analysis_openai_meta.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -4898,6 +5098,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4953,6 +5154,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -4997,8 +5199,13 @@ backend:
     - tests/contract/test_routes_buy_block.py
     - tests/contract/test_routes_market_regime.py
     - tests/integration/test_boot_market_regime.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -5008,6 +5215,7 @@ backend:
     - tests/unit/engine/test_risk_silent_skip_emit.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -5089,6 +5297,9 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5142,6 +5353,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5170,6 +5382,13 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -5177,6 +5396,7 @@ backend:
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -5291,6 +5511,7 @@ backend:
     - tests/unit/engine/test_recommendation_weights.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -5319,6 +5540,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5370,6 +5592,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5411,6 +5634,7 @@ backend:
     - tests/unit/engine/test_recommendation_metrics_smoke.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -5440,6 +5664,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5496,6 +5721,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5549,6 +5775,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5576,6 +5803,13 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -5585,6 +5819,7 @@ backend:
     - tests/unit/engine/test_tick_coverage.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -5677,6 +5912,7 @@ backend:
   src/engine/scanner.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -5706,6 +5942,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5756,6 +5993,10 @@ backend:
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -5846,6 +6087,9 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -5898,6 +6142,7 @@ backend:
   src/engine/scheduler.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -5927,6 +6172,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5981,6 +6227,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
@@ -6032,6 +6279,7 @@ backend:
     - tests/unit/engine/test_v1_rejection_alarm.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -6061,6 +6309,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6120,6 +6369,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6173,6 +6429,7 @@ backend:
   src/engine/session.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -6202,6 +6459,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6284,6 +6542,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6344,6 +6609,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -6373,6 +6639,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6420,6 +6687,7 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6476,6 +6744,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -6505,6 +6774,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6552,6 +6822,7 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle61_phase2A2_constants.py
     - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6619,6 +6890,7 @@ backend:
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -6648,6 +6920,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6702,6 +6975,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6755,6 +7029,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6792,6 +7067,7 @@ backend:
     - tests/unit/engine/test_swing_poll_loop.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -6847,6 +7123,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6899,6 +7176,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6934,6 +7212,7 @@ backend:
     - tests/unit/engine/test_strategy_fallback_budget.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -6983,6 +7262,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7036,6 +7316,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7067,6 +7348,7 @@ backend:
     - tests/unit/engine/test_strategy_fallback_budget.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -7123,6 +7405,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7177,6 +7460,7 @@ backend:
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -7206,6 +7490,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7260,6 +7545,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7313,6 +7599,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7352,6 +7639,7 @@ backend:
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -7407,6 +7695,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7462,6 +7751,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7524,6 +7814,10 @@ backend:
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_observability_logs.py
@@ -7547,6 +7841,7 @@ backend:
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -7596,6 +7891,9 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -7640,6 +7938,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7672,6 +7971,13 @@ backend:
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -7688,6 +7994,7 @@ backend:
     - tests/unit/engine/test_tick_coverage.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -7782,6 +8089,7 @@ backend:
     - tests/unit/engine/test_tick_size.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -7811,6 +8119,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7870,6 +8179,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7921,6 +8237,7 @@ backend:
   src/main.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -7954,6 +8271,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -7982,6 +8300,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8040,6 +8359,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8085,6 +8405,7 @@ backend:
   src/models/balance.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -8114,6 +8435,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8177,6 +8499,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8232,6 +8561,7 @@ backend:
     - tests/unit/engine/test_boot_preissue_tokens.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -8260,6 +8590,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8372,6 +8703,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -8456,6 +8794,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -8488,6 +8827,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8519,6 +8859,7 @@ backend:
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -8572,6 +8913,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8624,6 +8972,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -8649,6 +8998,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -8681,6 +9031,7 @@ backend:
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_buy_block.py
@@ -8708,6 +9059,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8812,6 +9164,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -8895,6 +9254,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -8923,6 +9283,7 @@ backend:
     - tests/integration/test_sell_flow.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -8950,6 +9311,7 @@ backend:
     - tests/integration/test_boot_market_regime.py
     - tests/integration/test_buy_block_low_funds.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9010,6 +9372,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9087,6 +9456,7 @@ backend:
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -9113,6 +9483,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9164,6 +9535,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9209,6 +9581,7 @@ backend:
     - tests/unit/realtime/test_handler_tick_parse_guard.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -9238,6 +9611,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9346,6 +9720,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -9452,6 +9833,7 @@ backend:
     - tests/unit/realtime/test_ws_subscribe_backoff.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -9477,6 +9859,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9583,6 +9966,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -9686,6 +10076,7 @@ backend:
     - tests/unit/realtime/test_websocket_priority.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -9712,6 +10103,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9814,6 +10206,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -9873,6 +10272,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -9897,6 +10297,7 @@ backend:
     - tests/contract/test_routes_backtest.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_buy_block.py
@@ -9921,6 +10322,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -9946,6 +10348,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -9971,6 +10374,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -9996,6 +10400,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10021,6 +10426,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10046,6 +10452,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10071,6 +10478,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10100,6 +10508,7 @@ backend:
     - tests/contract/test_routes_subscriptions_pool.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10121,6 +10530,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10146,6 +10556,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10172,6 +10583,7 @@ backend:
     - tests/contract/test_routes_strategy_funnel.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10196,6 +10608,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10222,6 +10635,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10246,6 +10660,7 @@ backend:
     direct_tests: []
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10282,6 +10697,7 @@ backend:
     - tests/unit/services/test_quote_session_health.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_buy_block.py
@@ -10307,6 +10723,7 @@ backend:
     - tests/unit/services/test_dkstock_client_db_toggle.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10336,6 +10753,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10393,6 +10811,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10457,6 +10882,7 @@ backend:
     - tests/unit/services/test_mcp_client_unwrap.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_buy_block.py
@@ -10484,6 +10910,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10542,6 +10969,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10604,6 +11038,7 @@ backend:
     - tests/unit/services/test_mcp_client_session_log.py
     - tests/unit/services/test_mcp_client_unwrap.py
     transitive_tests:
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_quote_session_auto_disable.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
@@ -10633,6 +11068,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_multi_strategy_block.py
@@ -10690,6 +11126,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10739,6 +11176,7 @@ backend:
     - tests/unit/services/test_quote_session_health.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle62_routes_price_filter.py
     - tests/contract/test_routes_backtest.py
     - tests/contract/test_routes_balance_perf.py
     - tests/contract/test_routes_buy_block.py
@@ -10767,6 +11205,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle62_price_filter_integration.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10874,6 +11313,13 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle62_price_filter_cache.py
+    - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle62_price_filter_q2_fallback.py
+    - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
+    - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -11435,10 +11881,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-05T11:19:16.745788+09:00'
+generated_at: '2026-06-05T15:34:59.475177+09:00'
 stats:
   backend_modules: 92
-  backend_tests: 260
+  backend_tests: 270
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:

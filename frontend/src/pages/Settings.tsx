@@ -7,6 +7,7 @@ import { getStrategyColor } from '../types/strategy'
 import CashUsageRatioCard from '../components/CashUsageRatioCard'
 import IntegrationToggleCard from '../components/IntegrationToggleCard'
 import KisQuoteAccountsCard from '../components/KisQuoteAccountsCard'
+import PriceFilterCard from '../components/PriceFilterCard'
 import ConfirmModal from '../components/ConfirmModal'
 import InfoTooltip from '../components/InfoTooltip'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
@@ -307,6 +308,9 @@ export default function Settings() {
 
       {/* 사이클 7-D (2026-05-18) — 보조 KIS 시세 계좌 관리 */}
       <KisQuoteAccountsCard />
+
+      {/* 사이클 62 (2026-06-05) — 가격 필터 (매수 진입 전용) */}
+      <PriceFilterCard />
 
       {/* 전략별 파라미터 */}
       <div className="space-y-4">

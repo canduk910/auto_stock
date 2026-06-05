@@ -58,6 +58,13 @@ Supabase (PostgreSQL) CRUD 모듈.
   - **.env fallback 없음** — 운영 가변 (DB 미설정 → 코드 디폴트)
 - **사이클 23 AI 자문 자동 적용 토글**:
   - `get_auto_apply_enabled() -> bool` / `set_auto_apply_enabled(value)`: 키 `auto_apply_enabled`. 기본 **False** (안전 우선). .env fallback 없음 — 운영자 명시 활성화 후에만 P3 자동 적용 작동
+- **사이클 62 가격 필터 (2026-06-05)** — 매수 진입 전용 가격대 차단 (사이클 38 명문화 답습):
+  - `get_price_filter() -> PriceFilter` (Pydantic) / `set_price_filter(*, min_price=None, max_price=None, mode=None)` 부분 갱신
+  - 3 키: `price_filter_min` (int, default 0 = 비활성) / `price_filter_max` (int, default 0 = 비활성) / `price_filter_mode` (str, default `OFF`, 3 모드 HARD/WARN/OFF)
+  - **3 모드 의미** (domain-expert Q4 자문 옵션 A): HARD = 매수 차단 + INFO 로그 / WARN = 매수 진행 + WARNING 로그 (운영자 임계 조정 기간 1주 권고) / OFF = 분기 미진입
+  - 범위 외 ValueError (음수 / `min_price > max_price` 단 둘 다 >0 일 때 / 잘못된 mode 문자열)
+  - **.env fallback 없음** — 운영 가변 (DB 미설정 → 코드 디폴트 OFF). `RiskManager._get_price_filter_cached()` 60s TTL 캐시 (사이클 56-E `buy_block` 패턴 답습)
+  - **매수 진입 전용** — 매도/익일청산/손절/15:20 강제청산 영향 0 (사이클 38 명문화 답습 + Q3 추가 가드: `order_engine.py` 시장가 거부 5호가 폴백 시 필터 재평가 금지, E-4 AST 정적 회귀 가드)
 - 범위 외 입력은 `ValueError`. supabase 동기 호출은 `asyncio.to_thread` 위임
 
 ## kis_quote_accounts.py — 보조 KIS 시세 수신 계좌 풀
