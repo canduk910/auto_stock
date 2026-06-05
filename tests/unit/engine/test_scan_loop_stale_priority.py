@@ -90,6 +90,11 @@ async def _run_helper(
         write_log_calls.append({"level": level, "message": message})
 
     scheduler_module.write_log = fake_write_log
+    # 사이클 63 A3 이주 후 write_log 는 stale_manager 내부에서 직접 import —
+    # src.db.system_logs 모듈 속성 자체를 패치해야 capture 가능
+    import src.db.system_logs as _syslog_mod
+    original_syslog_write_log = _syslog_mod.write_log
+    _syslog_mod.write_log = fake_write_log
 
     from src.realtime import websocket_pool as wp_module
     original_subscribe = wp_module.kis_ws_pool.subscribe
@@ -99,6 +104,7 @@ async def _run_helper(
         await sched._resubscribe_stale_priority(cap=cap)
     finally:
         scheduler_module.write_log = original_write_log
+        _syslog_mod.write_log = original_syslog_write_log
         wp_module.kis_ws_pool.subscribe = original_subscribe
         ticker_last_tick.clear()
 

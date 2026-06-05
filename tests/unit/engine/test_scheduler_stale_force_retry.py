@@ -75,6 +75,10 @@ def _setup_env(monkeypatch, *, tickers: list[str], stale_age_secs: int = 300):
         return None
 
     monkeypatch.setattr(sch_mod, "write_log", _wl)
+    # 사이클 63 A3 이주 후 write_log 는 stale_manager 내부에서 직접 import —
+    # src.db.system_logs 모듈 속성 자체를 패치해야 capture 가능
+    import src.db.system_logs as _syslog_mod
+    monkeypatch.setattr(_syslog_mod, "write_log", _wl)
 
     return pool_mock, log_calls
 

@@ -110,6 +110,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -254,6 +262,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -456,6 +472,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -683,6 +709,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -865,6 +901,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1010,6 +1054,16 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1166,6 +1220,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1369,6 +1431,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1622,6 +1694,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1885,6 +1967,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2059,6 +2151,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2193,6 +2293,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2390,6 +2498,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2563,6 +2681,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2705,6 +2831,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2849,6 +2983,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3004,6 +3146,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -3159,6 +3309,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3300,6 +3458,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3435,6 +3601,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3649,6 +3823,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -3853,6 +4037,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4058,6 +4250,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -4245,6 +4447,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4397,6 +4607,15 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4472,6 +4691,7 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_cache.py
     - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
     - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -4590,6 +4810,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4730,6 +4958,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4864,6 +5100,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5010,6 +5254,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5155,6 +5407,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -5300,6 +5560,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_cache.py
     - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
     - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5448,6 +5716,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5593,6 +5869,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5722,6 +6006,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5870,6 +6162,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6090,6 +6390,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_cache.py
     - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
     - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -6228,6 +6538,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
@@ -6376,6 +6694,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6549,6 +6875,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6607,6 +6941,15 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle62_routes_price_filter.py
@@ -6688,6 +7031,7 @@ backend:
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6742,6 +7086,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle63_phase2A3_dataclass_completeness.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle62_routes_price_filter.py
@@ -6823,6 +7175,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_constants.py
     - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6976,6 +7329,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7124,6 +7485,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7263,6 +7632,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7406,6 +7783,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7546,6 +7931,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7696,6 +8089,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7894,6 +8295,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_cache.py
     - tests/unit/engine/test_cycle62_price_filter_daily_summary.py
     - tests/unit/engine/test_cycle62_price_filter_emit_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -8042,6 +8451,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8186,6 +8603,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8360,6 +8785,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8506,6 +8939,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8710,6 +9151,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -8920,6 +9371,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9171,6 +9630,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -9379,6 +9848,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9536,6 +10013,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9727,6 +10212,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -9973,6 +10468,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -10213,6 +10718,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -10818,6 +11333,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10976,6 +11499,14 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11127,6 +11658,14 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11320,6 +11859,16 @@ backend:
     - tests/unit/engine/test_cycle62_price_filter_risk_on_tick.py
     - tests/unit/engine/test_cycle62_price_filter_sell_unaffected.py
     - tests/unit/engine/test_cycle62_price_filter_warn_mode.py
+    - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
+    - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
+    - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
+    - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
+    - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
+    - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -11881,10 +12430,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-05T15:34:59.475177+09:00'
+generated_at: '2026-06-05T17:34:40.594154+09:00'
 stats:
   backend_modules: 92
-  backend_tests: 270
+  backend_tests: 282
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:
