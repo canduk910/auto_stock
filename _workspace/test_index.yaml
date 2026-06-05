@@ -98,6 +98,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -224,6 +233,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -407,6 +425,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -615,6 +643,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -779,6 +817,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -911,6 +958,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1049,6 +1106,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1233,6 +1299,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1466,6 +1542,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1709,6 +1795,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1871,6 +1967,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1993,6 +2098,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2171,6 +2285,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2332,6 +2456,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2456,6 +2589,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2588,6 +2730,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2725,6 +2876,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -2862,6 +3022,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2991,6 +3160,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3114,6 +3292,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3308,6 +3495,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -3493,6 +3690,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3679,6 +3885,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -3848,6 +4064,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3986,6 +4211,14 @@ backend:
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4056,6 +4289,8 @@ backend:
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -4162,6 +4397,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4290,6 +4534,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4412,6 +4665,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4540,6 +4802,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4673,6 +4944,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -4800,6 +5080,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4930,6 +5219,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5063,6 +5361,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5180,6 +5487,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5310,6 +5626,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5511,6 +5836,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -5637,6 +5972,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
@@ -5767,6 +6111,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5922,6 +6275,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5971,6 +6333,15 @@ backend:
   src/engine/stale_manager.py:
     direct_tests:
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -6048,6 +6419,7 @@ backend:
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6094,6 +6466,14 @@ backend:
     direct_tests:
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_quote_session_auto_disable.py
@@ -6170,6 +6550,8 @@ backend:
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6311,6 +6693,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6447,6 +6838,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6574,6 +6974,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6705,6 +7114,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6833,6 +7251,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6971,6 +7398,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7151,6 +7587,15 @@ backend:
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -7281,6 +7726,15 @@ backend:
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7407,6 +7861,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7568,6 +8031,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7696,6 +8168,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7881,6 +8362,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -8072,6 +8563,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8302,6 +8802,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -8491,6 +9001,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8636,6 +9155,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8808,6 +9336,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -9035,6 +9573,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -9256,6 +9804,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -9826,6 +10384,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9966,6 +10533,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10105,6 +10681,15 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10279,6 +10864,16 @@ backend:
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
+    - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
+    - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_delegation.py
+    - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
+    - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
+    - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
+    - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -10840,10 +11435,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-04T17:09:10.510485+09:00'
+generated_at: '2026-06-05T11:19:16.745788+09:00'
 stats:
   backend_modules: 92
-  backend_tests: 248
+  backend_tests: 260
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:

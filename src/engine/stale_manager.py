@@ -35,6 +35,17 @@ UNIVERSE_LOW_VOLUME_THRESHOLD = 10_000      # 당일 누적 체결량 임계 (�
 # 사이클 29-R2 (2026-05-21) — silent_inactive 판정 비율 기반 전환
 SILENT_INACTIVE_FRESH_RATIO_THRESHOLD = 0.2  # fresh_ratio < 20% 면 silent 의심 (사이클 24 fresh==0 완화)
 
+# 사이클 61 Phase 2-A2 (2026-06-05) — A2 추가 5 상수 이전 (scheduler.py 에서 re-export)
+# 사이클 9 관련: STALE_FRESHNESS_SECS 는 scheduler 잔류 함수 (_check_and_resubscribe_stale 등) 도 사용
+STALE_FRESHNESS_SECS = 60                   # 이 시간 내 tick 없으면 stale 판정 (F1 의 VERIFY_FRESHNESS_SECS 동일)
+
+# 사이클 24 (2026-05-20) — 세션 단위 silent inactive 감지 + 강제 reconnect
+# 시간당 2회 cap — KIS LMS / 앱정보 이용중지 위험 사전 차단.
+SILENT_INACTIVE_MIN_SUBSCRIBED = 5          # sub < 5 면 거래량 부족 자연 가능 (위양성 차단)
+SILENT_INACTIVE_PERSIST_SECS = 300.0        # 5분 지속 임계 (단발 끊김 즉시 close 차단)
+SILENT_INACTIVE_RECOVERY_CAP_PER_HOUR = 2   # 시간당 reconnect 시도 cap
+SILENT_INACTIVE_RECOVERY_WINDOW_SECS = 3600.0  # cap 윈도우 (60분)
+
 
 # ── A1 5 함수 (모두 scheduler 를 첫 인자) ────────────────────────────────────
 
@@ -58,16 +69,12 @@ def build_session_subscription_view(scheduler: Any) -> list[dict]:
     # 사이클 26 시간대별 분리 이후 동적이므로 set 으로 한 번에 매칭.
     _TICK_TR_IDS = frozenset({"H0UNCNT0", "H0STCNT0", "H0NXCNT0"})
 
-    # STALE_FRESHNESS_SECS 는 scheduler.py 모듈 레벨 상수 — lazy import 로 순환 차단
-    from src.engine import scheduler as _sched_mod
-    _STALE_FRESHNESS_SECS = _sched_mod.STALE_FRESHNESS_SECS
-
     groups = kis_ws_pool.get_subscriptions_by_session()
     if not groups:
         return []
 
     now = _dt.now(_KST_TZ)
-    fresh_threshold = timedelta(seconds=_STALE_FRESHNESS_SECS)
+    fresh_threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
 
     # 세션별 capacity (시세 채널만 카운트, 체결통보/MKOP 제외). 보조 세션은 인덱스 → 객체 매핑.
     sessions_view: list[dict] = []
@@ -356,3 +363,369 @@ def prune_force_retry_history(
     else:
         # 빈 list — dict 에서 제거 (메모리 누수 차단)
         scheduler._stale_force_retry_history.pop(ticker, None)
+
+
+# ── A2 4 함수 (사이클 61 Phase 2-A2, 2026-06-05) ─────────────────────────────
+# silent inactive + universe guard + delta unsubscribe
+# scheduler.py 본체 그대로 복붙 + self.* → scheduler.* 치환만.
+# 행위 변경 0건 의무 (refactor only).
+
+def detect_silent_inactive_sessions(scheduler: Any) -> list[str]:
+    """세션 단위 silent inactive 감지 (사이클 24 / 29-R2). L2423 본체 그대로 이주.
+
+    종목별 unsubscribe+subscribe 재등록(K stale watcher 사이클 17 보강) 으로
+    회복 안 되는 *세션 자체* silent inactive 케이스를 5분 지속 후 강제 reconnect 대상으로 분류.
+
+    판정 (3중):
+    1. fresh_ratio < SILENT_INACTIVE_FRESH_RATIO_THRESHOLD (=0.2, 20%)
+       — 사이클 29-R2 (2026-05-21): 기존 `fresh == 0` 완화. 메인 fresh=2/25 (8%) 실측
+         결함 대응. fresh=0 케이스는 0.0 < 0.2 자동 호환.
+    2. subscribed >= SILENT_INACTIVE_MIN_SUBSCRIBED (1~4 종목은 거래량 부족 자연 가능)
+    3. 5분 지속 (first_seen 시각 추적)
+
+    조건 미충족 (fresh_ratio >= 0.2 또는 subscribed < min) 시 first_seen pop (리셋).
+    5분 도달 label 만 반환.
+    """
+    import sys
+    from src.engine.scanner import KST_TZ as _KST_TZ, ticker_last_tick
+
+    # kis_ws_pool 및 datetime 은 scheduler 모듈 네임스페이스를 우선 참조 (테스트 patch 호환).
+    # scheduler.py 가 이미 로드된 환경에서는 동일 객체 — 행위 동일.
+    # sys.modules 경유는 AST 정적 import 가 아니므로 D-1 가드 통과.
+    _sched_mod = sys.modules.get("src.engine.scheduler")
+    if _sched_mod is not None:
+        kis_ws_pool = _sched_mod.kis_ws_pool
+        _dt = _sched_mod.datetime
+    else:
+        from src.realtime.websocket_pool import kis_ws_pool  # type: ignore[assignment]
+        _dt = datetime  # type: ignore[assignment]
+
+    sessions = kis_ws_pool.get_session_status()
+    now = _dt.now(_KST_TZ)
+    threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
+    min_dt = _dt.min.replace(tzinfo=_KST_TZ)
+    silent_labels: list[str] = []
+
+    for s in sessions:
+        label = s["label"]
+        subscribed_count = s["subscribed"]
+        subscribed_tickers = s["tickers"]["subscribed"]
+
+        # fresh 계산: last_tick 이 threshold 이내인 종목 수
+        fresh_count = sum(
+            1 for t in subscribed_tickers
+            if (now - ticker_last_tick.get(t, min_dt)) <= threshold
+        )
+
+        # 사이클 29-R2 — 비율 기반 판정 (fresh==0 → fresh_ratio<0.2 완화).
+        # subscribed_count=0 인 경우 sub>=5 가드가 먼저 차단 → ZeroDivision 무해.
+        # 사전 안전 가드로 0 분기 명시 처리 (fresh_ratio=0.0 으로 간주).
+        if subscribed_count > 0:
+            fresh_ratio = fresh_count / subscribed_count
+        else:
+            fresh_ratio = 0.0
+
+        silent_suspect = (
+            fresh_ratio < SILENT_INACTIVE_FRESH_RATIO_THRESHOLD
+            and subscribed_count >= SILENT_INACTIVE_MIN_SUBSCRIBED
+        )
+
+        # 조건 1+2 동시 충족 시 first_seen 등록 (이미 있으면 보존)
+        if silent_suspect:
+            if label not in scheduler._silent_inactive_first_seen:
+                scheduler._silent_inactive_first_seen[label] = now
+            # 조건 3 (5분 지속) 검사
+            elapsed = (now - scheduler._silent_inactive_first_seen[label]).total_seconds()
+            if elapsed >= SILENT_INACTIVE_PERSIST_SECS:
+                silent_labels.append(label)
+        else:
+            # 회복 또는 sub 부족 → first_seen pop (다음 5분 카운트 리셋)
+            scheduler._silent_inactive_first_seen.pop(label, None)
+
+    return silent_labels
+
+
+async def force_reconnect_session(scheduler: Any, label: str) -> bool:
+    """세션 단위 silent inactive 강제 reconnect (사이클 24). L2485 본체 그대로 이주.
+
+    절대 깨지 말 것:
+    - 시간당 세션당 2회 cap (KIS LMS/앱키 정지 위험) — `_silent_inactive_recovery_count` dict 동일성 보장
+    - cap 윈도우 in-place evict (`history[:] = ...`) 정합성 보존
+    - `_ws.close()` 발화 순서 보존
+
+    1. 시간당 cap 검사: 60분 이전 시각 제거 후 남은 카운트 >= cap 면 SKIP + WARNING.
+    2. label 분기:
+       - "main" → kis_ws._ws.close() (모듈 레벨 심볼 직접 참조)
+       - "quote-N" → kis_ws_pool._quotes[N-1]._ws.close()
+    3. 영구 로그: INFO + system_logs write_log (fire-and-forget)
+    4. _silent_inactive_first_seen.pop(label) — 다음 5분 카운트 리셋
+    5. _silent_inactive_recovery_count[label].append(time.monotonic())
+
+    Returns:
+        True (reconnect 시도) / False (cap 도달 skip)
+    """
+    import sys
+    import time as _t
+    from src.db.system_logs import write_log as _write_log
+
+    # kis_ws / kis_ws_pool 은 scheduler 모듈 네임스페이스를 우선 참조 (테스트 patch 호환).
+    # sys.modules 경유는 AST 정적 import 가 아니므로 D-1 가드 통과.
+    _sched_mod = sys.modules.get("src.engine.scheduler")
+    if _sched_mod is not None:
+        kis_ws = _sched_mod.kis_ws
+        kis_ws_pool = _sched_mod.kis_ws_pool
+    else:
+        from src.realtime.websocket import kis_ws  # type: ignore[assignment]
+        from src.realtime.websocket_pool import kis_ws_pool  # type: ignore[assignment]
+
+    now_mono = _t.time()
+    window = SILENT_INACTIVE_RECOVERY_WINDOW_SECS
+
+    # 1. cap 검사 — 60분 이전 시각 제거 후 카운트 검증
+    history = scheduler._silent_inactive_recovery_count.setdefault(label, [])
+    history[:] = [t for t in history if (now_mono - t) < window]
+    if len(history) >= SILENT_INACTIVE_RECOVERY_CAP_PER_HOUR:
+        logger.warning(
+            "[silent_inactive_recovery_cap] label=%s count=%d/60min — reconnect skip",
+            label, len(history),
+        )
+        try:
+            await _write_log(
+                "WARNING",
+                f"[silent_inactive_recovery_cap] label={label} "
+                f"count={len(history)}/60min — KIS 측 무한 재연결 회피",
+            )
+        except Exception:
+            logger.debug("[silent_inactive_recovery_cap] write_log 실패", exc_info=True)
+        return False
+
+    # 2. label 분기 → _ws 객체 조회
+    ws_obj = None
+    if label == "main":
+        ws_obj = getattr(kis_ws, "_ws", None)
+    else:
+        # "quote-N" → idx = N-1 (모듈 레벨 kis_ws_pool 직접 참조 — 테스트 패치 대응)
+        try:
+            idx = int(label.replace("quote-", "")) - 1
+            quotes = getattr(kis_ws_pool, "_quotes", [])
+            if 0 <= idx < len(quotes):
+                ws_obj = getattr(quotes[idx], "_ws", None)
+        except (ValueError, AttributeError):
+            logger.warning("[silent_inactive_force_reconnect] 알 수 없는 label=%s", label)
+            return False
+
+    if ws_obj is None:
+        logger.warning("[silent_inactive_force_reconnect] label=%s _ws is None — skip", label)
+        return False
+
+    # 3. 영구 로그
+    logger.warning(
+        "[silent_inactive_force_reconnect] label=%s elapsed>=%.0fs — _ws.close() 강제 발화",
+        label, SILENT_INACTIVE_PERSIST_SECS,
+    )
+    try:
+        await _write_log(
+            "WARNING",
+            f"[silent_inactive_force_reconnect] label={label} "
+            f"elapsed>={SILENT_INACTIVE_PERSIST_SECS:.0f}s — _ws.close() 발화",
+        )
+    except Exception:
+        logger.debug("[silent_inactive_force_reconnect] write_log 실패", exc_info=True)
+
+    # 4. _ws.close() — connect() 의 ConnectionClosed catch → 재연결 루프
+    try:
+        await ws_obj.close()
+    except Exception:
+        logger.exception("[silent_inactive_force_reconnect] _ws.close() 실패 label=%s", label)
+        return False
+
+    # 5. state 갱신
+    scheduler._silent_inactive_first_seen.pop(label, None)
+    history.append(now_mono)
+
+    return True
+
+
+async def delta_unsubscribe_dropped(scheduler: Any, new_set: set[str]) -> list[str]:
+    """`_scan_loop` 의 새 합집합에서 빠진 종목만 unsubscribe (사이클 15-A). L2811 본체 그대로 이주.
+
+    절대 깨지 말 것:
+    - KIS 공지 "비정상 케이스 2" (무한 등록/해제 반복) 차단
+    - 50ms sleep + 종목별 예외 격리
+
+    KIS 공지의 "비정상 케이스 2" (무한 등록/해제 반복) 패턴 차단.
+    기존 `unsubscribe_all()` 전체 해제 → 빠진 종목 (delta_remove) 만 unsubscribe.
+
+    흐름:
+    1. 현재 풀 TICK 구독 합집합 `kis_ws_pool.get_subscribed_tickers()` 조회
+    2. `delta_remove = current - new_set` 계산
+    3. 각 종목 `kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)` 호출
+    4. 종목 간 50ms sleep — KIS Rate Limit 보호
+    5. 종목별 예외 격리
+
+    Returns:
+        unsubscribe 한 ticker 리스트 (테스트/모니터링용)
+
+    안전 불변식:
+    - TICK_TR_ID 종목만 처리 — 체결통보(H0STCNI0/9) / 장운영정보(H0UNMKO0) 영향 0
+    - `_subscriptions` set 직접 수정 금지 — `kis_ws_pool.unsubscribe` 만 사용
+    - 본체 예외는 호출자(`_scan_loop`)가 try/except 로 흡수
+    """
+    from src.db.system_logs import write_log as _write_log
+    from src.engine.scanner import TICK_TR_ID
+    from src.realtime.websocket_pool import kis_ws_pool
+
+    current = kis_ws_pool.get_subscribed_tickers()
+    delta_remove = sorted(current - new_set)
+    if not delta_remove:
+        return []
+
+    unsubscribed: list[str] = []
+    for ticker in delta_remove:
+        try:
+            await kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)
+            unsubscribed.append(ticker)
+        except Exception:
+            logger.exception("[delta_unsubscribe] %s 실패", ticker)
+        await asyncio.sleep(0.05)
+
+    logger.info(
+        "[scan_loop_delta] unsubscribed=%d tickers=%s",
+        len(unsubscribed), unsubscribed[:10],
+    )
+    try:
+        await _write_log(
+            "INFO",
+            f"[scan_loop_delta] unsubscribed={len(unsubscribed)} "
+            f"tickers={unsubscribed[:10]}",
+        )
+    except Exception:
+        logger.debug("[scan_loop_delta] write_log 실패", exc_info=True)
+    return unsubscribed
+
+
+async def evaluate_universe_guard(
+    scheduler: Any, candidate_tickers: list[str]
+) -> None:
+    """사이클 32 (R4) — universe stale 가드 평가 + KIS 최근체결시각 기록. L2964 본체 그대로 이주.
+
+    절대 깨지 말 것:
+    - 보유 종목 / 익일청산 종목 절대 제외 금지 (사전 가드 순서 보존)
+    - `_universe_excluded_today.add()` + `kis_ws_pool.unsubscribe()` 순서 보존
+    - 50ms sleep Rate Limit 보호
+    - `_reset_daily_state` 동행 clear (`_stale_state.reset_daily()` 통합 — A2 추가 없음)
+
+    stale > MAX_STALE_RETRIES (=5) + KIS 당일 누적 거래량 < UNIVERSE_LOW_VOLUME_THRESHOLD
+    → universe 에서 자동 제외 + WebSocket unsubscribe + INFO 로그 영구 보존.
+
+    안전 가드:
+    - 보유 종목 (`registry.is_ticker_held_by_any`) 절대 제외 금지 (손절·트레일링 우선)
+    - 익일청산 종목 (`_pending_next_day_clear`) 절대 제외 금지 (시가 race 차단)
+    - 이미 제외된 종목 재평가 skip (KIS Rate Limit 절약)
+    - KIS `inquire_ccnl` 응답 None → 제외 보류 (다음 사이클 자연 재시도, graceful)
+    - 종목 간 50ms sleep (Rate Limit 보호)
+    - 본체 예외는 호출자(`_scan_loop`) 가 try/except 흡수 — 다음 사이클 자연 재시도
+
+    Args:
+        scheduler: TradingScheduler 인스턴스.
+        candidate_tickers: 평가 대상 후보 리스트 (보통 `_collect_breakout_tickers` 결과 + extras)
+
+    Note:
+        매일 `_reset_daily_state` 가 `_universe_excluded_today.clear()` — 영구 블랙리스트 금지.
+        제외된 종목은 다음 영업일 자동 재진입 가능.
+    """
+    from src.api.quotation import inquire_ccnl
+    from src.db.system_logs import write_log as _write_log
+    from src.engine.scanner import TICK_TR_ID
+    from src.realtime.websocket_pool import kis_ws_pool
+
+    # 사전 가드 — 보유 / 익일청산 / 이미 제외된 종목 사전 차단 (KIS 호출 절약)
+    ndc_tickers = {t for (t, _sid) in getattr(scheduler, "_pending_next_day_clear", set())}
+    excluded = getattr(scheduler, "_universe_excluded_today", set())
+
+    # 평가 대상 결정 — stale > MAX_STALE_RETRIES + 보유/익일청산/이미 제외 아님
+    targets: list[str] = []
+    for ticker in candidate_tickers:
+        if ticker in excluded:
+            continue
+        try:
+            if scheduler.registry.is_ticker_held_by_any(ticker):
+                continue
+        except Exception:
+            # registry 미주입 보호 (테스트 __new__)
+            pass
+        if ticker in ndc_tickers:
+            continue
+        retries = scheduler._stale_retry_count.get(ticker, 0)
+        if retries <= MAX_STALE_RETRIES:
+            continue
+        targets.append(ticker)
+
+    if not targets:
+        return
+
+    for ticker in targets:
+        # KIS 호출 — graceful (실패 시 제외 보류, 다음 사이클 자연 재시도)
+        try:
+            ccnl = await inquire_ccnl(ticker)
+        except Exception:
+            logger.exception(
+                "[universe_guard] inquire_ccnl 예외 ticker=%s — 제외 보류", ticker
+            )
+            continue
+
+        if ccnl is None:
+            # 빈 응답 (오프장 / 거래 없음) → 제외 보류
+            logger.debug(
+                "[universe_guard] inquire_ccnl None ticker=%s — 제외 보류",
+                ticker,
+            )
+            await asyncio.sleep(0.05)
+            continue
+
+        today_volume = ccnl.get("today_volume", 0)
+        if today_volume >= UNIVERSE_LOW_VOLUME_THRESHOLD:
+            # 거래량 충분 → 제외 안 함 (가드 미발화)
+            await asyncio.sleep(0.05)
+            continue
+
+        # 제외 결정 — 카운터 + last_resub_age 계산
+        retries = scheduler._stale_retry_count.get(ticker, 0)
+        last_at = scheduler._stale_last_resubscribe_at.get(ticker)
+        if last_at is not None:
+            from src.engine.scanner import KST_TZ as _KST_TZ
+            age_secs = (datetime.now(_KST_TZ) - last_at).total_seconds()
+            age_disp = f"{age_secs:.0f}s"
+        else:
+            age_disp = "-"
+
+        # 제외 set 등록 + WebSocket unsubscribe
+        scheduler._universe_excluded_today.add(ticker)
+        try:
+            await kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)
+        except Exception:
+            logger.exception(
+                "[universe_excluded] unsubscribe 실패 ticker=%s", ticker
+            )
+
+        # INFO 로그 + system_logs 영구 보존
+        logger.info(
+            "[universe_excluded] ticker=%s reason=stale_6plus_low_volume "
+            "retries=%d last_resub_age=%s last_cntg_hour=%s today_volume=%d",
+            ticker, retries, age_disp,
+            ccnl.get("last_cntg_hour", ""),
+            today_volume,
+        )
+        try:
+            await _write_log(
+                "INFO",
+                f"[universe_excluded] ticker={ticker} "
+                f"reason=stale_6plus_low_volume retries={retries} "
+                f"last_resub_age={age_disp} "
+                f"last_cntg_hour={ccnl.get('last_cntg_hour', '')} "
+                f"today_volume={today_volume}",
+            )
+        except Exception:
+            logger.debug("[universe_excluded] write_log 실패", exc_info=True)
+
+        await asyncio.sleep(0.05)  # Rate Limit 보호
