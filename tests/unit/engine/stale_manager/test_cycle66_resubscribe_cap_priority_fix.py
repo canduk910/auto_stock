@@ -508,11 +508,27 @@ def test_AST_priority_split_before_cap_application_static_guard():
 
     Red 단계: 시정 안 됨 → 결함 substring 잔존 → FAIL.
     Green 단계: 시정 안 적용 → 결함 substring 제거 + 시정 substring 존재 → PASS.
-    """
-    src_path = Path(__file__).parent.parent.parent.parent.parent / "src/engine/stale_manager.py"
-    assert src_path.exists(), f"stale_manager.py 경로 확인: {src_path}"
 
-    source = src_path.read_text()
+    사이클 67 보강: 분해 후 stale_watcher_core.py 가 진실의 원천 (fallback: stale_manager.py).
+    G-17 (사이클 67 신규) 이 분해 후 위치 변경 대비 검증 담당 — 본 가드는 행위 보존 영속.
+    """
+    # 사이클 67 분해 후 stale_watcher_core.py 가 진실의 원천.
+    # G-10/G-11/G-12/G-15 패턴 답습 — candidate_paths 으로 두 경로 모두 허용.
+    engine_root = Path(__file__).parent.parent.parent.parent.parent / "src/engine"
+    candidate_paths = [
+        engine_root / "stale_watcher_core.py",
+        engine_root / "stale_manager.py",
+    ]
+    source = None
+    chosen_path = None
+    for p in candidate_paths:
+        if p.exists():
+            source = p.read_text()
+            chosen_path = p
+            break
+
+    assert source is not None, "stale_watcher_core.py / stale_manager.py 모두 미존재"
+
     tree = ast.parse(source)
 
     target_func = None
@@ -522,7 +538,8 @@ def test_AST_priority_split_before_cap_application_static_guard():
             break
 
     assert target_func is not None, (
-        "`resubscribe_stale_priority` async 함수 발견 의무 (사이클 63 Phase 2-A3 이주 영속)"
+        f"{chosen_path}: `resubscribe_stale_priority` async 함수 발견 의무 "
+        "(사이클 63 Phase 2-A3 이주 + 사이클 67 분해 영속)"
     )
 
     func_source = ast.unparse(target_func)

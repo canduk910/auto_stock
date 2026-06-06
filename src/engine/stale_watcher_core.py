@@ -1,0 +1,399 @@
+"""사이클 67 = stale_manager.py 1,099L sub-module 분해 (Q1=A facade) — K stale watcher 본체.
+
+사이클 63 Phase 2-A3 (2026-06-05): scheduler.py L2442~L2789 K stale watcher 핵심 2 함수 이주.
+사이클 66 (2026-06-06): cap=10 결함 시정 영속 (Q3 옵션 A WARNING 로그).
+사이클 67 (2026-06-06): sub-module 분해 후 stale_diagnostics 직접 import (Q2 옵션 P1).
+
+절대 깨지 말 것:
+- WebSocket 4 중 안전망 행위 보존 (F1 + scan_loop + K stale watcher + resubscribe)
+- 사이클 29 005935 사고 패턴 영구 차단 (HIGH 종목 cap 밖 잘림 0건)
+- Q4=B 영속 (사이클 60 답습하지 않는 유일 영역) — `emit_stale_session_detail` 직접 호출
+- 사이클 66 시정 본체 영속 (priority 분리 *먼저* + cap 적용 *나중*)
+- try/except 4중 가드 영속 (사이클 66 Q2)
+- `sys.modules.get("src.engine.scheduler")` 패턴 영속 (D-1 AST 가드 + freezegun patch 호환)
+- 함수 본체 변경 0 (라인 단위 동일, self.* → scheduler.* 치환만)
+
+의존성 방향 (옵션 A 단방향, G-7 AST 가드 영속):
+    stale_watcher_core → stale_diagnostics (단방향, Q2 옵션 P1 모듈-레벨 정적 import)
+    stale_watcher_core → 외부 모듈 (scheduler / scanner / websocket_pool)
+    역방향 (diagnostics/session_recovery/universe_guard → watcher_core) 금지
+"""
+from __future__ import annotations
+
+import asyncio
+import logging
+from datetime import datetime, timedelta
+from typing import Any
+
+# 사이클 67 Q2 옵션 P1 — cross-module 모듈-레벨 정적 import
+# (Q4=B 영속, hot path 360 회/일 — 가독성 + AST G-7 가드 검증 명시성)
+from src.engine.stale_diagnostics import (
+    MAX_STALE_RETRIES,
+    STALE_FORCE_RETRY_AFTER_SECS,
+    STALE_FORCE_RETRY_HOURLY_CAP,
+    STALE_FRESHNESS_SECS,
+    emit_stale_session_detail,
+)
+
+logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (caplog 호환)
+
+
+# ── A3 2 함수 — K stale watcher 핵심 (사이클 63 Phase 2-A3, 2026-06-05) ────────────
+
+async def check_and_resubscribe_stale(scheduler: Any) -> None:
+    """K stale watcher 본체 — 120s 주기 (사이클 17/28/29-R1/R3 영속).
+
+    사이클 63 Phase 2-A3 (2026-06-05): scheduler.py L2442~L2663 그대로 이주.
+    self.* → scheduler.* 치환만. 행위 변경 0건 (refactor).
+
+    Q4=B (사이클 60 답습하지 않는 유일 영역):
+    본체 마지막 `self._emit_stale_session_detail(stale_tickers, now)` 호출 →
+    `emit_stale_session_detail(scheduler, stale_tickers, now)` 직접 호출 (1 hop 단축).
+    scheduler.py L2678 wrapper 자체는 외부 호환 보존 (삭제 안 함).
+
+    Q2 RECOMMEND — `try/except` 4 중 가드 그대로 보존:
+    - `registry.all()` / `s.state.positions.keys()` / `_pending_next_day_clear` 4 중
+    - `getattr(scheduler, "registry", None)` 폴백 도입 금지 (silent 실패 위험)
+
+    사이클 29-R3 우선순위 분리 (메인 편중 73% → 5% 해소) 영속:
+    - positions / _pending_next_day_clear → HIGH+bypass_limit=True (메인 절대 보장)
+    - 그 외 후보 → LOW+bypass_limit=False (보조 라운드로빈 분산)
+
+    사이클 29-R1 force_retry (영구 stale 무한 skip 결함 대응) 영속:
+    - 1~5회: 즉시 unsubscribe + subscribe (KIS 정상 신규 등록 패턴)
+    - 6회 초과: 5분 cooldown + 시간당 12회 cap (LMS / 앱키 정지 위험 차단)
+    """
+    import sys as _sys
+
+    # 사이클 61 패턴 답습 — D-1 AST 가드 + D-2 sys.modules.get 출현 수 가드.
+    # datetime 접근은 scheduler 모듈 네임스페이스 우선 참조 (freezegun patch 호환).
+    # kis_ws_pool 은 src.realtime.websocket_pool 모듈 직접 참조 (테스트 patch 호환):
+    #   `patch("src.realtime.websocket_pool.kis_ws_pool")` 패치 작동 보장.
+    _sched_mod = _sys.modules.get("src.engine.scheduler")
+    if _sched_mod is not None and hasattr(_sched_mod, "datetime"):
+        _dt_mod = _sched_mod.datetime
+    else:
+        from datetime import datetime as _dt_mod  # type: ignore[assignment]
+
+    # kis_ws_pool — websocket_pool 모듈에서 직접 접근 (테스트 patch 경로 호환)
+    _wsp_mod = _sys.modules.get("src.realtime.websocket_pool")
+    if _wsp_mod is not None:
+        kis_ws_pool = _wsp_mod.kis_ws_pool
+    else:
+        from src.realtime.websocket_pool import kis_ws_pool  # type: ignore[assignment]
+
+    from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
+    from src.db.system_logs import write_log
+
+    # 사이클 13-E (2026-05-18): 메인 단독 → 풀 전체로 확장
+    subscribed = kis_ws_pool.get_subscribed_tickers()
+    if not subscribed:
+        return
+
+    now = _dt_mod.now(_KST_TZ)
+    threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
+    min_dt = _dt_mod.min.replace(tzinfo=_KST_TZ)
+    stale_tickers = sorted(
+        t for t in subscribed
+        if (now - ticker_last_tick.get(t, min_dt)) > threshold
+    )
+
+    if not stale_tickers:
+        # 모두 fresh — 누적 retry 카운터 리셋 (회복 케이스)
+        scheduler._stale_retry_count.clear()
+        # 사이클 28 — _stale_last_resubscribe_at 동행 clear (G5 cleanup 동행).
+        # getattr 폴백으로 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
+        if hasattr(scheduler, "_stale_last_resubscribe_at"):
+            scheduler._stale_last_resubscribe_at.clear()
+        return
+
+    force_reregistered = 0
+    skipped_giveup = 0
+    force_retry_count = 0       # 사이클 29 — 영구 stale 시간 기반 강제 재시도 카운트
+    force_retry_cap_blocked = 0  # 사이클 29 — 시간당 cap 초과 차단 카운트
+
+    # 사이클 29-R3 (2026-05-21) — 우선순위 분리 (메인 편중 73% 해소)
+    # 사이클 25-B `_resubscribe_stale_priority` 와 동일 패턴:
+    #   - positions / _pending_next_day_clear → HIGH+bypass_limit=True (메인 절대 보장)
+    #   - 그 외 후보 → LOW+bypass_limit=False (보조 라운드로빈 분산)
+    # Q2 RECOMMEND — try/except 4 중 가드 그대로 보존
+    high_tickers: set[str] = set()
+    try:
+        for s in scheduler.registry.all():
+            try:
+                high_tickers.update(s.state.positions.keys())
+            except Exception:
+                pass
+    except Exception:
+        # registry 미주입 인스턴스(테스트 __new__) 보호 — 모두 LOW 로 처리
+        pass
+    try:
+        high_tickers.update(t for (t, _sid) in scheduler._pending_next_day_clear)
+    except Exception:
+        pass
+
+    for ticker in stale_tickers:
+        retry = scheduler._stale_retry_count.get(ticker, 0) + 1
+        scheduler._stale_retry_count[ticker] = retry
+
+        # 사이클 29-R3 — 종목별 priority 결정 (HIGH/LOW 분리)
+        if ticker in high_tickers:
+            sub_priority = "HIGH"
+            sub_bypass = True
+        else:
+            sub_priority = "LOW"
+            sub_bypass = False
+
+        if retry > MAX_STALE_RETRIES:
+            # 사이클 29 (2026-05-21) — 영구 stale 무한 skip 결함 대응.
+            # 종목 단위 5분 cooldown + 시간당 12회 cap 으로 강제 재시도 발화.
+            # 13:21:41 마지막 시도 후 8분 영구 잔류 결함 (보유 005935 손절 평가 지연) 차단.
+            last_at = None
+            if hasattr(scheduler, "_stale_last_resubscribe_at"):
+                last_at = scheduler._stale_last_resubscribe_at.get(ticker)
+
+            if last_at is not None:
+                age_secs = (_dt_mod.now(_KST_TZ) - last_at).total_seconds()
+                if age_secs < STALE_FORCE_RETRY_AFTER_SECS:
+                    # cooldown 미경과 — 기존 skip 동작 보존 (LMS 위험 차단, 카운터는 누적)
+                    skipped_giveup += 1
+                    continue
+            else:
+                # `_stale_last_resubscribe_at` 부재 = 영구 stale 의심 첫 진입.
+                # age=infinity 로 간주 → 즉시 1회 시도.
+                age_secs = float("inf")
+
+            # 시간당 cap 가드 — 60분 슬라이딩 윈도우
+            if not hasattr(scheduler, "_stale_force_retry_history"):
+                scheduler._stale_force_retry_history = {}
+            history = scheduler._stale_force_retry_history.setdefault(ticker, [])
+            hour_ago = _dt_mod.now(_KST_TZ) - timedelta(hours=1)
+            # 만료 항목 evict (60분 이전)
+            history[:] = [t for t in history if t > hour_ago]
+
+            if len(history) >= STALE_FORCE_RETRY_HOURLY_CAP:
+                # 시간당 cap 초과 — LMS / 앱키 정지 위험 차단
+                force_retry_cap_blocked += 1
+                logger.warning(
+                    "[stale_force_retry_cap] ticker=%s attempts_in_hour=%d "
+                    "— LMS 위험 차단 skip",
+                    ticker, len(history),
+                )
+                try:
+                    await write_log(
+                        "WARNING",
+                        f"[stale_force_retry_cap] ticker={ticker} "
+                        f"attempts_in_hour={len(history)} — LMS 위험 차단 skip",
+                    )
+                except Exception:
+                    logger.debug("[stale_force_retry_cap] write_log 실패", exc_info=True)
+                skipped_giveup += 1
+                continue
+
+            # 강제 재시도 발화
+            # 사이클 29-R3 — sub_priority/sub_bypass 분기 적용 (HIGH/LOW)
+            age_disp = f"{age_secs:.0f}s" if age_secs != float("inf") else "inf"
+            try:
+                await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+                await asyncio.sleep(0.05)
+                await kis_ws_pool.subscribe(
+                    TICK_TR_ID, ticker,
+                    priority=sub_priority, bypass_limit=sub_bypass,
+                )
+                # 핵심: 카운터 0 리셋 (영구 stale 의심 해제 → 신규 사이클 시작).
+                # 다음 사이클부터 다시 1~5회 정상 분기로 자연 회복.
+                scheduler._stale_retry_count[ticker] = 0
+                # 시각 갱신 + history 등록
+                if hasattr(scheduler, "_stale_last_resubscribe_at"):
+                    scheduler._stale_last_resubscribe_at[ticker] = _dt_mod.now(_KST_TZ)
+                history.append(_dt_mod.now(_KST_TZ))
+                force_retry_count += 1
+
+                logger.info(
+                    "[stale_force_retry] ticker=%s retries=%d last_resub_age=%s "
+                    "— 강제 재시도 + 카운터 리셋",
+                    ticker, retry, age_disp,
+                )
+                try:
+                    await write_log(
+                        "INFO",
+                        f"[stale_force_retry] ticker={ticker} retries={retry} "
+                        f"last_resub_age={age_disp} — 강제 재시도 + 카운터 리셋",
+                    )
+                except Exception:
+                    logger.debug("[stale_force_retry] write_log 실패", exc_info=True)
+            except Exception:
+                logger.exception("[stale_force_retry] 강제 재시도 실패: %s", ticker)
+
+            await asyncio.sleep(0.05)  # Rate Limit 보호
+            continue
+
+        # 1~5회 — 첫 stale 즉시 강제 재등록 (KIS 정상 "신규 등록" 패턴, 재SEND 0건)
+        # KIS 공식 답변: "기등록한 사항을 재등록하지 않도록" (LMS + 앱정보 이용중지 위험)
+        # 사이클 29-R3 — sub_priority/sub_bypass 분기 적용 (사이클 25-B 패턴 K stale watcher 확장)
+        try:
+            await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+            await asyncio.sleep(0.05)
+            await kis_ws_pool.subscribe(
+                TICK_TR_ID, ticker,
+                priority=sub_priority, bypass_limit=sub_bypass,
+            )
+            force_reregistered += 1
+            # 사이클 28 — 강제 재등록 직후 시각 갱신 (진단 로그 출처).
+            # 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
+            if hasattr(scheduler, "_stale_last_resubscribe_at"):
+                scheduler._stale_last_resubscribe_at[ticker] = _dt_mod.now(_KST_TZ)
+        except Exception:
+            logger.exception("[stale_watcher] 강제 재등록 실패: %s", ticker)
+
+        await asyncio.sleep(0.05)  # Rate Limit 보호
+
+    logger.info(
+        "[stale_watcher] subscribed=%d stale=%d force_reregistered=%d skipped=%d",
+        len(subscribed), len(stale_tickers), force_reregistered, skipped_giveup,
+    )
+    try:
+        await write_log(
+            "INFO",
+            f"[stale_watcher] subscribed={len(subscribed)} stale={len(stale_tickers)} "
+            f"force_reregistered={force_reregistered} skipped={skipped_giveup}",
+        )
+    except Exception:
+        # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
+        logger.debug("[stale_watcher] write_log 실패", exc_info=True)
+
+    # 사이클 28 — [stale_watcher_detail] 세션별 분포 + 종목 cap 20 (별도 행, G1 호환)
+    # Q4=B (사이클 60 답습하지 않는 유일 영역) — 직접 호출 (1 hop 단축, wrapper 우회)
+    emit_stale_session_detail(scheduler, stale_tickers, now)
+
+
+async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]:
+    """`_scan_loop` 5분 stale 우선순위 재구독 (사이클 25-B 우선순위 분리 영속).
+
+    사이클 63 Phase 2-A3 (2026-06-05): scheduler.py L2690~L2789 그대로 이주.
+    self.* → scheduler.* 치환만. 행위 변경 0건 (refactor).
+
+    사이클 66 (2026-06-06) — cap=10 결함 시정 (카드 #5 HIGH):
+    - 사이클 63 K-2 결함 confirm → 사이클 66 K-2 시정 confirm (Q6-4 의미 전환).
+    - `targets = stale_tickers[: cap]` 결함 패턴 (priority 분리 *전* cap 적용) 영구 제거.
+    - HIGH (positions ∪ next_day_clear) 절대 보장 + LOW 잔여 cap 채움.
+    - HIGH > cap 시 cap 위반 허용 + WARNING 로그 (Q3 옵션 A 운영 가시화).
+    - try/except 4중 가드 통일 — `_check_and_resubscribe_stale` L820-833 본체 패턴 답습 (Q2).
+    - 사이클 29 005935 사고 패턴 (HIGH 종목 cap 밖 잘림 8분 영구 잔류 + LMS chain) 영구 차단.
+
+    사이클 25-B (2026-05-20) — positions/next_day_clear 는 HIGH, 그 외 후보는 LOW:
+    - 기존: 모든 stale 에 HIGH+bypass_limit=True → VB/LTV 후보 stale → 메인 승격
+      → 2026-05-20 14:58 메인 sub=11 fresh=0 stale=11 silent inactive 사고
+    - 변경: positions/next_day_clear = HIGH (보유·익일청산 보장 절대 유지)
+            그 외 후보 = LOW (보조 분산, 사이클 24 자동 회복과 시너지)
+
+    Returns:
+        재구독한 ticker 리스트 (호출 카운트 + 회귀 검증용)
+    """
+    import sys as _sys
+
+    # 사이클 61 패턴 답습 — D-1 AST 가드 + D-2 sys.modules.get 출현 수 가드.
+    # datetime 접근은 scheduler 모듈 네임스페이스 우선 참조 (freezegun patch 호환).
+    # kis_ws_pool 은 src.realtime.websocket_pool 모듈 직접 참조 (테스트 patch 호환):
+    #   `patch("src.realtime.websocket_pool.kis_ws_pool")` 패치 작동 보장.
+    _sched_mod = _sys.modules.get("src.engine.scheduler")
+    if _sched_mod is not None and hasattr(_sched_mod, "datetime"):
+        _dt_mod = _sched_mod.datetime
+    else:
+        from datetime import datetime as _dt_mod  # type: ignore[assignment]
+
+    # kis_ws_pool — websocket_pool 모듈에서 직접 접근 (테스트 patch 경로 호환)
+    _wsp_mod = _sys.modules.get("src.realtime.websocket_pool")
+    if _wsp_mod is not None:
+        kis_ws_pool = _wsp_mod.kis_ws_pool
+    else:
+        from src.realtime.websocket_pool import kis_ws_pool  # type: ignore[assignment]
+
+    from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
+
+    now = _dt_mod.now(_KST_TZ)
+    threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
+    min_dt = _dt_mod.min.replace(tzinfo=_KST_TZ)
+
+    # sorted 로 결정적 순서 보장 — cap 적용 시 동일 입력에 동일 출력
+    stale_tickers = sorted(
+        t for t, last in ticker_last_tick.items()
+        if (now - last if isinstance(last, datetime) else now - min_dt) > threshold
+    )
+
+    if not stale_tickers:
+        return []
+
+    # 사이클 25-B + 사이클 66 (2026-06-06) — HIGH 보장 대상 집합 (try/except 4중 가드 통일 Q2)
+    # Q6-4 의미 전환: 사이클 63 K-2 결함 confirm → 사이클 66 K-2 시정 confirm.
+    # 사이클 29 005935 사고 패턴 (HIGH 종목 cap 밖 잘림 8분 영구 잔류 + LMS chain) 영구 차단.
+    high_tickers: set[str] = set()
+    try:
+        for s in scheduler.registry.all():
+            try:
+                high_tickers.update(s.state.positions.keys())
+            except Exception:
+                pass
+    except Exception:
+        # registry 미주입 인스턴스(테스트 __new__) 보호 — 모두 LOW 로 처리
+        pass
+    try:
+        high_tickers.update(t for (t, _sid) in scheduler._pending_next_day_clear)
+    except Exception:
+        pass
+
+    # Q1 시정: priority 분리 *먼저*, cap 적용 *나중* (HIGH 절대 우선)
+    high_targets = [t for t in stale_tickers if t in high_tickers]
+    low_targets = [t for t in stale_tickers if t not in high_tickers]
+
+    # Q3 시정: HIGH > cap 시 cap 위반 허용 + WARNING 로그 (운영 가시화)
+    if len(high_targets) > cap:
+        logger.warning(
+            "[stale_priority_resubscribe_cap_exceeded] high_count=%d cap=%d "
+            "tickers=%s — HIGH 종목 cap 위반 허용 (보유/익일청산 절대 보장)",
+            len(high_targets), cap, high_targets,
+        )
+
+    targets = high_targets + low_targets[: max(0, cap - len(high_targets))]
+    resubscribed: list[str] = []
+
+    for ticker in targets:
+        # positions/next_day_clear → HIGH (메인 절대 보장, bypass 한도 무시)
+        # 그 외 후보 → LOW (보조 세션 분산 우선, 사이클 25-B)
+        if ticker in high_tickers:
+            sub_priority = "HIGH"
+            sub_bypass = True
+        else:
+            sub_priority = "LOW"
+            sub_bypass = False
+        try:
+            await kis_ws_pool.subscribe(
+                TICK_TR_ID, ticker,
+                priority=sub_priority, bypass_limit=sub_bypass,
+            )
+            resubscribed.append(ticker)
+            # 사이클 28 — 강제 재구독 시각 갱신 (진단 로그 출처).
+            # 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
+            if hasattr(scheduler, "_stale_last_resubscribe_at"):
+                scheduler._stale_last_resubscribe_at[ticker] = _dt_mod.now(_KST_TZ)
+        except Exception:
+            logger.exception("[stale_priority_resubscribe] 재구독 실패: %s", ticker)
+            continue
+        await asyncio.sleep(0.05)  # Rate Limit 보호
+
+    logger.info(
+        "[stale_priority_resubscribe] count=%d tickers=%s",
+        len(resubscribed), resubscribed,
+    )
+    try:
+        from src.db.system_logs import write_log
+        await write_log(
+            "INFO",
+            f"[stale_priority_resubscribe] count={len(resubscribed)} "
+            f"tickers={resubscribed}",
+        )
+    except Exception:
+        # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
+        logger.debug("[stale_priority_resubscribe] write_log 실패", exc_info=True)
+
+    return resubscribed

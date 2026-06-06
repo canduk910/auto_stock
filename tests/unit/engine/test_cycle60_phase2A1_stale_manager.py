@@ -224,7 +224,10 @@ async def test_C1_refresh_calls_evict_before_fetch():
         call_order.append(f"ccnl:{ticker}")
         return None
 
-    with patch.object(stale_manager, "evict_expired_ccnl", side_effect=fake_evict), \
+    # 사이클 67 분해 후: refresh_stale_ccnl_cache 본체는 stale_diagnostics 에 위치.
+    # 본체가 evict_expired_ccnl 을 동일 모듈 네임스페이스에서 직접 호출하므로
+    # patch 경로도 stale_diagnostics 로 지정해야 인터셉트된다 (facade 패치 비효과).
+    with patch("src.engine.stale_diagnostics.evict_expired_ccnl", side_effect=fake_evict), \
          patch("src.api.quotation.inquire_ccnl", new=AsyncMock(side_effect=fake_ccnl)):
         await stale_manager.refresh_stale_ccnl_cache(sched, ["005930"], cap=20)
 

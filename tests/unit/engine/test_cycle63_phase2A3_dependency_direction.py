@@ -70,19 +70,36 @@ def test_D2_a3_functions_use_sys_modules_get_pattern():
     Red: A3 미이주 → 함수 부재 → AttributeError 또는 패턴 grep 0건.
     Green: `check_and_resubscribe_stale` / `resubscribe_stale_priority` 본체에
            `sys.modules.get("src.engine.scheduler")` 1회 이상 호출 의무.
+
+    사이클 67 분해 후:
+    - A2 함수 (detect_silent_inactive_sessions + force_reconnect_session) →
+      stale_session_recovery.py 로 이주
+    - A3 함수 (check_and_resubscribe_stale + resubscribe_stale_priority) →
+      stale_watcher_core.py 로 이주
+    stale_manager.py 는 facade (re-export only) — 직접 grep 대신 sub-module 합산.
     """
-    path = Path("src/engine/stale_manager.py")
-    source = path.read_text(encoding="utf-8")
+    # 사이클 67 분해 후: 함수 본체는 각 sub-module 에 위치.
+    # stale_session_recovery.py = A2 (2건), stale_watcher_core.py = A3 (2건 이상).
+    # stale_manager.py (facade) 는 re-export only — 패턴 0건 정상.
+    candidate_paths = [
+        Path("src/engine/stale_watcher_core.py"),   # A3 함수 본체
+        Path("src/engine/stale_session_recovery.py"),  # A2 함수 본체
+    ]
+
+    pattern = 'sys.modules.get("src.engine.scheduler")'
+    count = 0
+    for p in candidate_paths:
+        if p.exists():
+            count += p.read_text(encoding="utf-8").count(pattern)
 
     # 함수 본문 전체에서 `sys.modules.get("src.engine.scheduler")` 패턴 출현 수
-    # 사이클 61 A2 = 2건 (detect_silent_inactive_sessions + force_reconnect_session).
+    # 사이클 61 A2 = 2건 이상 (detect_silent_inactive_sessions + force_reconnect_session).
     # 사이클 63 A3 추가 2건 이상 의무 (check_and_resubscribe_stale +
     # resubscribe_stale_priority) → 총 ≥ 4건.
-    count = source.count('sys.modules.get("src.engine.scheduler")')
-
     assert count >= 4, (
         f"`sys.modules.get(\"src.engine.scheduler\")` 패턴 출현 수 {count} < 4. "
-        f"사이클 61 A2 기존 2건 + 사이클 63 A3 신규 2건 이상 의무. "
+        f"사이클 61 A2 기존 2건 (stale_session_recovery.py) + "
+        f"사이클 63 A3 신규 2건 이상 (stale_watcher_core.py) 의무. "
         f"A3 2 함수가 scheduler 네임스페이스 우회 시 테스트 patch 호환 깨짐 + "
         f"운영 객체 동일성 깨짐 위험."
     )
