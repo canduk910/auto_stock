@@ -16,13 +16,13 @@ from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 from src.api.condition import MIN_CHANGE_RATE, fetch_rising_stocks
-from src.db.system_config import get_price_filter
+from src.db.system_config import get_price_filter, get_trade_amount_filter
 from src.engine.daily_emit_cap import DailyEmitCap
 from src.realtime.websocket import kis_ws
 from src.realtime.websocket_pool import kis_ws_pool
 
 if TYPE_CHECKING:
-    from src.db.system_config import PriceFilter
+    from src.db.system_config import PriceFilter, TradeAmountFilter
 
 logger = logging.getLogger(__name__)
 
@@ -256,6 +256,197 @@ async def emit_price_filter_scanner_daily_summary() -> None:
     except Exception:
         logger.debug("[price_filter_scanner_daily_summary] emit 실패", exc_info=True)
 
+# ---------------------------------------------------------------------------
+# 사이클 65 (2026-06-06) — 거래대금 필터 (scanner 단계, Q3 순차 hook)
+# ---------------------------------------------------------------------------
+# 적용 위치: subscribe_filtered_stocks 진입 직후 _apply_price_filter 다음 (Q3 순차).
+# Q1 옵션 D 3중 안전망: (1) 공통 헬퍼 (2) early-return (3) protected_tickers keyword 의무.
+# Q7-1: invalidate_trade_amount_filter_cache_scanner 는 unsubscribe 발화 0건 의무.
+# Q6-1: acml_tr_pbmn=0 (09:00 직후 race) → graceful 통과 영속.
+
+_trade_amount_filter_cache: "TradeAmountFilter | None" = None
+_trade_amount_filter_cache_expires_at: float = 0.0
+_TRADE_AMOUNT_FILTER_CACHE_TTL: float = 60.0  # 사이클 56-E 답습
+
+# DailyEmitCap — 1회/ticker/일 skip 로그 cap (매 스캔 폭주 차단, 사이클 64 답습)
+_trade_amount_filter_scanner_skip_logged_today: DailyEmitCap[str] = DailyEmitCap()
+
+# 일일 집계 카운터 (H 카테고리 — _settle() 직전 emit)
+_trade_amount_filter_scanner_skip_count_today: dict[str, int] = {"total": 0}
+
+
+async def _get_trade_amount_filter_for_scanner() -> "TradeAmountFilter":
+    """60s TTL 캐시 (사이클 56-E 답습, time.monotonic).
+
+    Q4 별도 캐시: 사이클 64 가격 필터와 무효화 시점 다름 + 단일 책임 분리.
+    """
+    global _trade_amount_filter_cache, _trade_amount_filter_cache_expires_at
+    now = _monotonic_time.monotonic()
+    if _trade_amount_filter_cache is not None and now < _trade_amount_filter_cache_expires_at:
+        return _trade_amount_filter_cache
+    taf = await get_trade_amount_filter()
+    _trade_amount_filter_cache = taf
+    _trade_amount_filter_cache_expires_at = now + _TRADE_AMOUNT_FILTER_CACHE_TTL
+    return taf
+
+
+def invalidate_trade_amount_filter_cache_scanner() -> None:
+    """즉시 무효화 — 캐시만, unsubscribe 발화 0건 의무 (Q7-1).
+
+    Settings PUT 직후 즉시 반영. 다음 _scan_loop 5분 자연 delta 로 처리.
+    KIS LMS chain 차단 (사이클 17 OPSP0002 + 사이클 64 D-2 답습).
+    """
+    global _trade_amount_filter_cache, _trade_amount_filter_cache_expires_at
+    _trade_amount_filter_cache = None
+    _trade_amount_filter_cache_expires_at = 0.0
+    # ★ kis_ws_pool.unsubscribe 호출 0건 의무 (D-2 가드)
+
+
+def reset_trade_amount_filter_daily_state() -> None:
+    """매일 자정 reset — scheduler._reset_daily_state 가 호출 의무 (사이클 56-D 답습)."""
+    _trade_amount_filter_scanner_skip_logged_today.clear()
+    for k in _trade_amount_filter_scanner_skip_count_today:
+        _trade_amount_filter_scanner_skip_count_today[k] = 0
+
+
+async def _get_acml_tr_pbmn(ticker: str) -> int:
+    """누적 거래대금 조회 — Q2 옵션 C 통합 폴백 (사이클 65, 2026-06-06).
+
+    1순위: ticker_market_info["trade_amount_raw"] (scanner 가 이미 fetch_rising_stocks + acml_tr_pbmn 보강)
+    2순위: stock_master.raw.acml_tr_pbmn (24h TTL 캐시 — CTPF1002R 응답)
+    둘 다 miss: 0 반환 → _apply_trade_amount_filter 가 graceful 통과 처리
+
+    단위: 원(₩) — scanner.py MIN_TRADE_AMOUNT 패턴 답습.
+    Q6-1 09:00 race 영속: scanner 1순위 0 (장 시작 직후 누적 미반영) → graceful 통과 보장.
+    """
+    # 1순위 — scanner ticker_market_info["trade_amount_raw"] (원 단위 정밀값)
+    info = ticker_market_info.get(ticker, {})
+    if isinstance(info, dict):
+        raw = info.get("trade_amount_raw", 0)
+        if isinstance(raw, (int, float)):
+            raw_int = int(raw)
+            if raw_int > 0:
+                return raw_int
+
+    # 2순위 — stock_master.raw.acml_tr_pbmn (CTPF1002R 24h TTL 캐시)
+    try:
+        from src.db.stock_master import get as _sm_get
+        basics = await _sm_get(ticker)
+        if basics and basics.raw:
+            raw_sm = basics.raw.get("acml_tr_pbmn", 0)
+            # 문자열 숫자 포함 처리 (KIS 응답이 문자열로 내려오는 경우)
+            if isinstance(raw_sm, str) and raw_sm.isdigit():
+                raw_int = int(raw_sm)
+                if raw_int > 0:
+                    return raw_int
+            elif isinstance(raw_sm, (int, float)):
+                raw_int = int(raw_sm)
+                if raw_int > 0:
+                    return raw_int
+    except Exception:
+        logger.debug("[trade_amount_filter] stock_master 조회 실패 graceful: %s", ticker, exc_info=True)
+
+    # 둘 다 miss → 0 반환 (Q6-1 graceful 통과 위임)
+    return 0
+
+
+async def _apply_trade_amount_filter(
+    candidates: list[str],
+    *,
+    protected_tickers: set[str],  # keyword-only 강제 (Q1 옵션 D + G-1 AST 가드)
+) -> list[str]:
+    """거래대금 필터 적용 — 후보 풀에서 임계 미만 종목 제거.
+
+    사이클 65 (2026-06-06) — 작전주 차단 유일 메커니즘 (사이클 64 갭상승 폐기 보강).
+    Q1 옵션 D 3중 안전망:
+    (1) _collect_protected_tickers_for_scanner 공통 헬퍼 (호출자 제공)
+    (2) 최상단 early-return — 보유/익일청산 절대 보호
+    (3) protected_tickers= keyword 의무 (G-1 AST 가드)
+    Q2 옵션 C: ticker_market_info["trade_amount_raw"] 1순위 + stock_master 2순위 + miss=graceful.
+    Q6-1: acml_tr_pbmn=0 (09:00 race) → graceful 통과 영속.
+    """
+    taf = await _get_trade_amount_filter_for_scanner()
+    if not taf.is_active:
+        return candidates  # 비활성 (min_amount=0) → 전체 통과
+
+    survivors: list[str] = []
+    excluded: list[tuple[str, int]] = []  # (ticker, acml_tr_pbmn)
+
+    for ticker in candidates:
+        # ★ early-return — 보유/익일청산 절대 보호 (Q1 옵션 D 핵심)
+        if ticker in protected_tickers:
+            survivors.append(ticker)
+            continue
+
+        # Q2 옵션 C 통합 폴백
+        acml_tr_pbmn = await _get_acml_tr_pbmn(ticker)
+
+        # Q6-1: 미확보 (0) → graceful 통과 (09:00 race 영속)
+        if acml_tr_pbmn <= 0:
+            survivors.append(ticker)
+            continue
+
+        # 임계 평가
+        if acml_tr_pbmn < taf.min_amount:
+            excluded.append((ticker, acml_tr_pbmn))
+            # DailyEmitCap 1회/ticker/일 (매 스캔 폭주 차단)
+            if _trade_amount_filter_scanner_skip_logged_today.should_emit(ticker):
+                _trade_amount_filter_scanner_skip_logged_today.mark_emitted(ticker)
+                logger.info(
+                    "[trade_amount_filter_scanner_skip] ticker=%s "
+                    "acml_tr_pbmn=%d reason=below_min min=%d",
+                    ticker, acml_tr_pbmn, taf.min_amount,
+                )
+                try:
+                    from src.db.system_logs import write_log
+                    await write_log(
+                        "INFO",
+                        f"[trade_amount_filter_scanner_skip] ticker={ticker} "
+                        f"acml_tr_pbmn={acml_tr_pbmn} reason=below_min "
+                        f"min={taf.min_amount}",
+                    )
+                except Exception:
+                    logger.debug("[trade_amount_filter_scanner_skip] write_log 실패", exc_info=True)
+            _trade_amount_filter_scanner_skip_count_today["total"] += 1
+        else:
+            survivors.append(ticker)
+
+    # Q7-4 funnel step_no=97 hook (graceful — 실패 시 매수 흐름 영향 0)
+    try:
+        from src.db.strategy_funnel import insert_snapshot
+        today_kst = datetime.now(KST_TZ).date().isoformat()
+        await insert_snapshot(
+            target_date=today_kst,
+            strategy_id="ALL",
+            step_no=97,
+            step_name="trade_amount_filter_scanner",
+            survived_count=len(survivors),
+            survived_tickers=[{"ticker": t} for t in survivors[:200]],
+            excluded_count=len(excluded),
+            excluded_sample=[
+                {"ticker": t, "acml_tr_pbmn": a, "reason": "below_min"}
+                for (t, a) in excluded[:20]
+            ],
+        )
+    except Exception:
+        logger.debug("[trade_amount_filter_scanner_funnel] hook 실패 graceful", exc_info=True)
+
+    return survivors
+
+
+async def emit_trade_amount_filter_scanner_daily_summary() -> None:
+    """일일 집계 emit — scheduler._settle() 진입 직전 호출 (사이클 65, Q5 별도 prefix).
+
+    H-2 NO_TRY: scheduler 가 try/except 없이 직접 호출 — AttributeError 가 silent skip 되면
+    운영 가시화 무력화 (사이클 64 hotfix 영구 패턴 답습).
+    """
+    from src.db.system_logs import write_log
+    total = _trade_amount_filter_scanner_skip_count_today.get("total", 0)
+    msg = f"[trade_amount_filter_scanner_daily_summary] block_count={total}"
+    logger.info(msg)
+    await write_log("INFO", msg)
+
+
 # 스캔 결과 캐시
 _last_scan_result: list[str] = []
 _last_scan_time: str | None = None
@@ -413,7 +604,21 @@ async def scan_stocks() -> list[str]:
         listed_shares = int(item.get("lstn_stcn", "0"))
         trade_amount = int(item.get("acml_tr_pbmn", "0"))
 
+        # 시총/거래대금 계산 (ticker format 검증 전 — market data cache Q2 옵션 C 1순위)
+        market_cap = price * listed_shares
+
+        # 사이클 65 — ticker_market_info 는 raw market data cache (진입 가드 X).
+        # isdigit() 검증 전에 저장하여 _get_acml_tr_pbmn Q2 옵션 C 1순위 폴백 보장.
+        # 진입(filtered 추가/구독)은 아래 isdigit() 가드가 별도 통제.
+        if ticker:
+            ticker_market_info[ticker] = {
+                "market_cap": round(market_cap / 1e8),
+                "trade_amount": round(trade_amount / 1e8),       # 억 단위 반올림 (기존 호환)
+                "trade_amount_raw": trade_amount,                # 사이클 65 신규 — 원 단위 정밀값 (Q2 옵션 C 1순위)
+            }
+
         # 종목코드 형식 검증 — 6자리 숫자만 허용 (ETF·ETN·신주인수권 등 알파벳 포함 코드 차단)
+        # ★ "진입은 6자리 숫자만 (isdigit())" 안전 규칙 — CLAUDE.md 절대 규칙
         if not (len(ticker) == 6 and ticker.isdigit()):
             continue
 
@@ -428,7 +633,6 @@ async def scan_stocks() -> list[str]:
             continue
 
         # 시총/거래대금 필터 (데이터 없으면 = 거래량 순위에 미포함 = 소형주 → 제외)
-        market_cap = price * listed_shares
         mcap_ok = market_cap >= MIN_MARKET_CAP
         trade_ok = trade_amount >= MIN_TRADE_AMOUNT
         # 사이클 21 — 시총/거래대금 단독 통과 카운트 (분리)
@@ -450,10 +654,6 @@ async def scan_stocks() -> list[str]:
         filtered.append(ticker)
         if name:
             ticker_names[ticker] = name
-        ticker_market_info[ticker] = {
-            "market_cap": round(market_cap / 1e8),
-            "trade_amount": round(trade_amount / 1e8),
-        }
 
         logger.debug(
             "스캔 통과: %s 등락률=+%.1f%% 시총=%.0f억 거래대금=%.0f억",
@@ -760,7 +960,8 @@ async def subscribe_filtered_stocks(
     - 어제·오늘 donchian_swing 조기 손절 사건(보유 종목 시세 누락) 루트 원인 차단
 
     사이클 64 (2026-06-06) — 진입 직후 가격 필터 단일 hook (Q4 옵션 A).
-    Q1 옵션 D: `_apply_price_filter` 는 `protected_tickers=` keyword 의무 (G-2 AST 가드).
+    사이클 65 (2026-06-06) — 가격 필터 직후 거래대금 필터 순차 hook (Q3 옵션 A).
+    Q1 옵션 D: `_apply_price_filter` / `_apply_trade_amount_filter` 양쪽 `protected_tickers=` keyword 의무.
     """
     # ★ 사이클 64 — 가격 필터 단일 hook (Q4 옵션 A)
     _protected = _collect_protected_tickers_for_scanner()
@@ -773,6 +974,23 @@ async def subscribe_filtered_stocks(
                 priority_groups[_pkey] = await _apply_price_filter(
                     priority_groups[_pkey], protected_tickers=_protected,
                 )
+
+    # ★ 사이클 65 — 거래대금 필터 순차 hook (Q3 옵션 A, AND 결합)
+    # G-1 AST 가드: 4 호출 의무 = tickers(1) + extra_tickers(1) + priority_groups 3 키 명시(2)
+    # (priority_groups 3 key 중 breakout/swing 쌍을 for loop 대신 직접 2 호출로 카운팅)
+    tickers = await _apply_trade_amount_filter(tickers, protected_tickers=_protected)  # (1)
+    if extra_tickers:
+        extra_tickers = await _apply_trade_amount_filter(extra_tickers, protected_tickers=_protected)  # (2)
+    if priority_groups:
+        for _taf_pkey in ("breakout", "momentum"):
+            if priority_groups.get(_taf_pkey):
+                priority_groups[_taf_pkey] = await _apply_trade_amount_filter(
+                    priority_groups[_taf_pkey], protected_tickers=_protected,
+                )  # (3) — for loop 1 AST node (breakout + momentum)
+        if priority_groups.get("swing"):
+            priority_groups["swing"] = await _apply_trade_amount_filter(
+                priority_groups["swing"], protected_tickers=_protected,
+            )  # (4) — swing 명시 분리
 
     extra = extra_tickers or []
     all_tickers = list(dict.fromkeys(tickers + extra))  # 순서 유지 중복 제거

@@ -645,3 +645,60 @@ async def _set_int(key: str, value: int) -> None:
 
 
 # _set_str 제거 (사이클 64 — price_filter_mode 폐기로 사용처 0)
+
+
+# ---------------------------------------------------------------------------
+# 사이클 65 (2026-06-06) — 거래대금 필터 (scanner 단계, Q1 옵션 A)
+# ---------------------------------------------------------------------------
+# 매수 후보 풀에서 누적 거래대금 임계 미만 종목 제거.
+# 작전주/저유동성 차단 = 사이클 64 갭상승 회피 폐기의 *유일 보강 메커니즘*.
+# 디폴트 0 (비활성) — 운영자 명시 활성화 없이 push 즉시 회귀 0.
+# 보유/익일청산 종목은 절대 제외 안 됨 (Q1 옵션 D 3 중 안전망, 사이클 64 답습).
+# 단위: 원(₩) — scanner.py MIN_TRADE_AMOUNT 패턴 답습.
+
+_TRADE_AMOUNT_FILTER_MIN_KEY = "trade_amount_filter_min"
+_TRADE_AMOUNT_FILTER_MIN_DEFAULT = 0
+
+
+class TradeAmountFilter(BaseModel):
+    """거래대금 필터 설정 (사이클 65, 2026-06-06).
+
+    scanner.subscribe_filtered_stocks 진입 직전 적용 (사이클 38 명문화 보존 — 매수 후보 전용).
+    보유/익일청산 종목은 절대 제외 안 됨 (사이클 32 R4 universe guard + 사이클 64 Q1 옵션 D).
+    작전주/저유동성 차단 = 사이클 64 갭상승 회피 폐기의 *유일 보강 메커니즘*.
+    """
+
+    min_amount: int = 0  # 원 단위, 0 = 비활성
+
+    @property
+    def is_active(self) -> bool:
+        """min_amount > 0 이면 활성 (0 = 비활성, 전체 통과)."""
+        return self.min_amount > 0
+
+
+async def get_trade_amount_filter() -> TradeAmountFilter:
+    """거래대금 필터 설정 조회.
+
+    사이클 65 (2026-06-06). 키 부재 시 TradeAmountFilter(min_amount=0) 반환 (비활성 디폴트).
+    `get_price_filter` 패턴 답습 — `_get_int_or_default` 헬퍼 재사용.
+    """
+    min_amount = await _get_int_or_default(
+        _TRADE_AMOUNT_FILTER_MIN_KEY, _TRADE_AMOUNT_FILTER_MIN_DEFAULT
+    )
+    return TradeAmountFilter(min_amount=min_amount)
+
+
+async def set_trade_amount_filter(
+    *,
+    min_amount: Optional[int] = None,
+) -> None:
+    """거래대금 필터 설정 부분 갱신. 생략된 키는 기존 값 보존.
+
+    사이클 65 (2026-06-06).
+    - min_amount 음수 → ValueError (작동 방지 안전 가드)
+    - None 인 키는 보존 (부분 갱신 패턴 — `set_price_filter` 답습)
+    """
+    if min_amount is not None:
+        if min_amount < 0:
+            raise ValueError(f"min_amount 음수 불가: {min_amount}")
+        await _set_int(_TRADE_AMOUNT_FILTER_MIN_KEY, min_amount)

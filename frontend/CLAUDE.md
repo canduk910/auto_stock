@@ -133,6 +133,21 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 - GET 500: `buy-block-error` graceful
 - API: `getBuyBlock / setBuyBlock`. 백엔드 `/api/integrations/buy-block` GET/PUT. queryKey `['integration', 'buy-block']`, staleTime 30s
 
+### `TradeAmountFilterCard` (사이클 65, 2026-06-06)
+
+**거래대금 동행 필터** (사이클 62 갭상승 회피 효과 폐기 보강 — Q7-5 사이클 64 자문 인계). `PriceFilterCard` 옆 배치 (Settings 화면 "WebSocket 구독 대상 필터" 영역). 사이클 64 PriceFilterCard 패턴 100% 답습.
+
+- **4 testid**: `trade-amount-filter-card` 카드 컨테이너 / `trade-amount-filter-min-slider` 단일 슬라이더 (0~100억원 = 0~10_000_000_000, step 1억원 = 100_000_000) / `trade-amount-filter-save-button` 저장 / `trade-amount-filter-save-toast` 성공 안내
+- **권장값 마커 3 버튼**: "1억" (100_000_000) / "5억" (500_000_000) / "10억" (1_000_000_000) — 슬라이더 value 직접 갱신 (domain-expert Q1 자문)
+- **즉시 반영** (사이클 64 답습): 저장 클릭 → `updateTradeAmountFilter()` PUT → 백엔드 `scanner.invalidate_trade_amount_filter_cache_scanner()` 즉시 호출 → 60s 캐시 도중 사용자 토글 즉시 반영. **Q7-1 자동 unsubscribe 0 발화** (다음 `_scan_loop` 5분 자연 delta, KIS LMS chain 차단)
+- API: `getTradeAmountFilter / updateTradeAmountFilter` (`frontend/src/api/trade-amount-filter.ts` 신규 35L + `frontend/src/types/trade-amount-filter.ts` 신규 20L). 백엔드 `/api/system/trade-amount-filter` GET/PUT, `ApiResponse<TradeAmountFilter>` 래퍼 → 프론트 `data.data` 추출 (사이클 64 답습). queryKey `['tradeAmountFilter']`. PUT body 에 extra key 전달 시 422 (`ConfigDict(extra="forbid")`) + 음수 → 400 (`ValueError`)
+- **안내 배너 (Q6-1 명시 의무)**:
+  - "**거래대금 동행 필터** — 임계 미만 종목은 WebSocket 구독 자체 차단"
+  - "보유/익일청산 종목은 절대 제외 안 됨" (사이클 64 Q1 옵션 D 답습 + 사이클 32 R4 universe guard 보호 영속)
+  - "**09:00 직후 거래대금 미반영 종목은 graceful 통과**" (Q6-1 시스템 매매 무용 차단)
+- 회귀 가드 4 vitest 케이스 (`TradeAmountFilterCard.test.tsx`): F-FE-1 fetch 후 렌더 / F-FE-2 슬라이더 조작 + 저장 PUT body 검증 / F-FE-3 권장값 마커 갱신 / F-FE-4 안내 배너 보유/익일청산 + 09:00 graceful 텍스트
+- MSW handler (`handlers.ts` +14L): `GET /api/system/trade-amount-filter` → `{ min_amount: 0 }` + `PUT` 요청 body 반영
+
 ### `PriceFilterCard` (사이클 62 신설 → 사이클 64 단순화, 2026-06-06)
 
 **WebSocket 구독 대상 필터** (사이클 64 사용자 의도 재정의 — 사이클 62 매수 신호 판단용 위치 폐기 + 단순화). `BuyBlockSection` 직하 (Settings 화면 위계). 사이클 38 명문화 답습 — 매도/익일청산/손절 영향 0.

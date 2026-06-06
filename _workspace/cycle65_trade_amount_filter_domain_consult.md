@@ -238,12 +238,30 @@
 
 ---
 
-## 8. KIS MCP 검증 의무 (Q2 사전 작업)
+## 8. KIS MCP 검증 의무 (Q2 사전 작업) — **team-leader 사전 수행 결과 (2026-06-06)**
 
-자문 발주 *전* 또는 *직후* KIS MCP 호출 의무:
-- `mcp__kis-code-assistant__search_domestic_stock_api(query="CTPF1002R")` — 응답 필드에 `acml_tr_pbmn` 존재 확인
-- `mcp__kis-code-assistant__read_source_code` — 단위 확인 (원/백만원/억)
-- `docs/kis/` 로컬 캐시 검증 (사이클 32 R4 답습)
+자문 발주 *직전* KIS MCP 호출 결과:
+- ✅ `mcp__kis-code-assistant__search_domestic_stock_api(query="주식기본조회")` — `search_stock_info` (CTPF1002R) 단건 검색 결과 확인
+- ✅ `mcp__kis-code-assistant__read_source_code` — `search_stock_info.py` 소스 검증:
+  - CTPF1002R 의 응답 `output` 은 **dict (single-item)** — 종목 메타 필드 위주
+  - **시세 필드 (`acml_tr_pbmn` / `prdy_clpr` 등) 의 출력 여부 코드만으로는 확정 불가**
+  - 본문 명세에 응답 필드 명세 부재 (`stocks_info` 파이썬 정제코드 별도 참조 권고만)
+- ✅ 로컬 검증:
+  - `docs/kis/domestic-stock-industry.md` 의 `acml_tr_pbmn` 예시 50건 → **숫자 단위 = 원 (₩)** 확정 (예: 130953 = 약 13만원이 아니라 시계열 미세 값 — KIS 등락률 순위 응답과 단위 동일성 검증 필요)
+  - `src/engine/scanner.py:414` (`MIN_TRADE_AMOUNT = 20_000_000_000`) = 등락률 순위 응답 `acml_tr_pbmn` 200억 컷오프 → **단위 = 원 (₩) 확정**
+  - `src/engine/strategies/donchian_swing.py:410` 주석: "`acml_tr_pbmn`(당일 누적 거래대금)이 장 시작 전 0이라" → **장중 누적값 = 원 단위 확정**
+- ⚠️ **CTPF1002R 응답의 `acml_tr_pbmn` 필드 존재 확정 불가** — `inquire_price` (FHKST01010100) 또는 등락률 순위 API 응답에서만 검증됨
+  - **자문 Q2 의 데이터 소스 결정 = HIGH 의제 격상 의무**
+  - graceful 통과 (미확보 시) 가 운영 안전 보장 → 임계 미설정 시 사이클 65 = no-op 보장
+
+### 검증 결과 자문 인계 사항
+
+| 항목 | 발견 | 자문 인계 |
+|---|---|---|
+| CTPF1002R `acml_tr_pbmn` | 코드만으로는 미확정 | Q2 옵션 A 채택 시 graceful 통과 운영 안전 + 임계 미설정 시 no-op 확정 |
+| 등락률 순위 API `acml_tr_pbmn` | **원 (₩) 단위 확정** | Q2 옵션 B 채택 시 momentum scan_stocks 응답 캐시 도입 필요 (별도 모듈 신규) |
+| `inquire_price` FHKST01010100 | 단건 조회 — Rate Limit 부담 | Q2 옵션 C 비채택 (사이클 64 Q2 답습 — Rate Limit 회피) |
+| 사이클 64 `prdy_clpr` | 동일 의문 — graceful 통과로 운영 안전 처리 | 사이클 64 답습 = 운영 안전 보장 검증됨 |
 
 ---
 

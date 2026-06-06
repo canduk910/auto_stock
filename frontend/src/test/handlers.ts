@@ -106,4 +106,22 @@ export const handlers = [
   http.get(`${base}/logs`, () =>
     HttpResponse.json(wrap({ items: [], total: 0, total_pages: 0 }))
   ),
+
+  // 사이클 64 — 가격 필터. 기본은 비활성, 각 테스트에서 server.use 로 오버라이드.
+  http.get(`${base}/system/price-filter`, () =>
+    HttpResponse.json(wrap({ min_price: 0, max_price: 0 }))
+  ),
+  http.put(`${base}/system/price-filter`, async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(wrap({ min_price: body.min_price ?? 0, max_price: body.max_price ?? 0 }))
+  }),
+
+  // 사이클 65 — 거래대금 필터. 기본은 비활성, 각 테스트에서 server.use 로 오버라이드.
+  http.get(`${base}/system/trade-amount-filter`, () =>
+    HttpResponse.json(wrap({ min_amount: 0 }))
+  ),
+  http.put(`${base}/system/trade-amount-filter`, async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(wrap({ min_amount: body.min_amount ?? 0 }))
+  }),
 ];

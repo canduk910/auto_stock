@@ -16,7 +16,13 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict
 
-from src.db.system_config import PriceFilter, get_price_filter, set_price_filter
+import src.db.system_config as _system_config_mod
+from src.db.system_config import (
+    PriceFilter,
+    TradeAmountFilter,
+    get_price_filter,
+    set_price_filter,
+)
 from src.models.response import ApiResponse
 
 logger = logging.getLogger(__name__)
@@ -164,4 +170,56 @@ async def set_price_filter_endpoint(req: PriceFilterUpdateRequest):
         success=True,
         data=pf.model_dump(),
         message="가격 필터가 즉시 반영되었습니다.",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 사이클 65 (2026-06-06) — 거래대금 필터 GET/PUT
+# ---------------------------------------------------------------------------
+
+class TradeAmountFilterUpdateRequest(BaseModel):
+    """거래대금 필터 부분 갱신 요청 (None = 보존).
+
+    사이클 65 — extra="forbid" (C-R-1-A: 외부 키 전달 시 422 반환).
+    """
+    model_config = ConfigDict(extra="forbid")
+    min_amount: Optional[int] = None
+
+
+@router.get("/trade-amount-filter", response_model=ApiResponse)
+async def get_trade_amount_filter_endpoint():
+    """현재 거래대금 필터 설정 조회.
+
+    응답 data: {min_amount}
+    - min_amount=0 = 비활성 (전체 통과)
+    사이클 65 (2026-06-06) — 작전주/저유동성 차단.
+    """
+    taf = await _system_config_mod.get_trade_amount_filter()
+    return ApiResponse(success=True, data=taf.model_dump(), message="ok")
+
+
+@router.put("/trade-amount-filter", response_model=ApiResponse)
+async def set_trade_amount_filter_endpoint(req: TradeAmountFilterUpdateRequest):
+    """거래대금 필터 설정 부분 갱신.
+
+    None 인 키는 기존 값 보존. 음수 입력은 400.
+    사이클 65 — scanner invalidate (Q7-1: unsubscribe 0건 의무).
+    """
+    try:
+        kwargs: dict = {}
+        if req.min_amount is not None:
+            kwargs["min_amount"] = req.min_amount
+        await _system_config_mod.set_trade_amount_filter(**kwargs)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    # 사이클 65 — scanner 영역 invalidate (Q7-1: unsubscribe 발화 0건)
+    from src.engine import scanner
+    scanner.invalidate_trade_amount_filter_cache_scanner()
+
+    taf = await _system_config_mod.get_trade_amount_filter()
+    return ApiResponse(
+        success=True,
+        data=taf.model_dump(),
+        message="거래대금 필터가 즉시 반영되었습니다.",
     )

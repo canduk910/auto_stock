@@ -8,6 +8,7 @@ import CashUsageRatioCard from '../components/CashUsageRatioCard'
 import IntegrationToggleCard from '../components/IntegrationToggleCard'
 import KisQuoteAccountsCard from '../components/KisQuoteAccountsCard'
 import PriceFilterCard from '../components/PriceFilterCard'
+import TradeAmountFilterCard from '../components/TradeAmountFilterCard'
 import ConfirmModal from '../components/ConfirmModal'
 import InfoTooltip from '../components/InfoTooltip'
 import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
@@ -310,7 +311,11 @@ export default function Settings() {
       <KisQuoteAccountsCard />
 
       {/* 사이클 62 (2026-06-05) — 가격 필터 (매수 진입 전용) */}
+      {/* 사이클 64 (2026-06-06) — WebSocket 구독 대상 필터 단순화 */}
       <PriceFilterCard />
+
+      {/* 사이클 65 (2026-06-06) — 거래대금 동행 필터 (WebSocket 구독 대상 필터 순차 hook) */}
+      <TradeAmountFilterCard />
 
       {/* 전략별 파라미터 */}
       <div className="space-y-4">

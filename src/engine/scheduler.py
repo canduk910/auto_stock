@@ -2911,6 +2911,12 @@ class TradingScheduler:
             logger.exception("정산 오류")
             await write_log("ERROR", "일일 정산 실패")
 
+        # 사이클 65 (2026-06-06) — 거래대금 필터 daily_summary 직접 호출 (H-2 NO_TRY).
+        # ★ try/except 금지 (H-2 AST 가드) — AttributeError 가 silent 되면 운영 가시화 무력화.
+        # 사이클 64 hotfix 영구 패턴 답습.
+        from src.engine import scanner as _scanner_settle_mod
+        await _scanner_settle_mod.emit_trade_amount_filter_scanner_daily_summary()
+
         # 일간 상태 초기화는 _settle 호출자(run loop)에서 log_analysis 후 별도 호출 — funnel 카운터 보존을 위해
 
     def _reset_daily_state(self) -> None:
@@ -3001,6 +3007,10 @@ class TradingScheduler:
             _scanner_mod.reset_price_filter_daily_state()
         except Exception:
             logger.exception("scanner.reset_price_filter_daily_state 실패")
+
+        # 사이클 65 (2026-06-06) — 거래대금 필터 daily_state reset 동행
+        from src.engine import scanner as _scanner_mod
+        _scanner_mod.reset_trade_amount_filter_daily_state()
 
         logger.info("일간 상태 초기화 완료 (scanner 캐시 clear 포함)")
 

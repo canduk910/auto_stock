@@ -58,6 +58,16 @@ Supabase (PostgreSQL) CRUD 모듈.
   - **.env fallback 없음** — 운영 가변 (DB 미설정 → 코드 디폴트)
 - **사이클 23 AI 자문 자동 적용 토글**:
   - `get_auto_apply_enabled() -> bool` / `set_auto_apply_enabled(value)`: 키 `auto_apply_enabled`. 기본 **False** (안전 우선). .env fallback 없음 — 운영자 명시 활성화 후에만 P3 자동 적용 작동
+- **사이클 65 거래대금 동행 필터 (2026-06-06) — scanner 단계 작전주 차단 보강 (사이클 64 가격 필터 답습 + Q7-5 갭상승 회피 효과 보강)**:
+  - `get_trade_amount_filter() -> TradeAmountFilter` (Pydantic) / `set_trade_amount_filter(*, min_amount=None)` 부분 갱신
+  - **단일 키**: `trade_amount_filter_min` (int, default 0 = 비활성, 원 단위)
+  - 범위 외 ValueError (음수)
+  - **.env fallback 없음** — 운영 가변 (DB 미설정 → 디폴트 0)
+  - **적용 위치**: `src/engine/scanner.py::subscribe_filtered_stocks` 진입점 hook (사이클 64 `_apply_price_filter` 직후 순차 — Q3 자문)
+  - **Q2 옵션 C 통합 폴백** (자문 핵심): `scanner.ticker_market_info["trade_amount_raw"]` (신규 키, 원 단위) 1순위 + `stock_master.raw.acml_tr_pbmn` 2순위 + graceful (KIS 호출 0건 추가)
+  - 60s TTL 캐시 (`src/engine/scanner.py::_get_trade_amount_filter_for_scanner` 모듈 전역) + `invalidate_trade_amount_filter_cache_scanner()` (Q7-1 KIS LMS chain 차단 — unsubscribe 발화 0건)
+  - **Q6-1 09:00 race graceful**: `acml_tr_pbmn=0` (양쪽 miss) = graceful 통과 (시스템 매매 무용 차단 영속)
+  - **매수 진입 전용** (사이클 38 명문화) + **보유/익일청산 절대 보호** (사이클 64 Q1 옵션 D 3 중 안전망 헬퍼 재사용)
 - **사이클 64 가격 필터 (2026-06-06) — scanner 단계 종목 필터 (사이클 62 단순화 + 위치 변경)**:
   - `get_price_filter() -> PriceFilter` (Pydantic) / `set_price_filter(*, min_price=None, max_price=None)` 부분 갱신
   - **2 키** (사이클 62 mode 폐기): `price_filter_min` (int, default 0 = 비활성) / `price_filter_max` (int, default 0 = 비활성)

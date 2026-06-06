@@ -58,6 +58,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -158,6 +160,7 @@ backend:
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/api/balance.py:
     direct_tests:
     - tests/integration/test_sell_rejection_integration.py
@@ -198,6 +201,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -313,6 +318,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/api/base.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -325,6 +331,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -399,6 +407,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -550,6 +563,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/api/condition.py:
     direct_tests:
@@ -594,6 +608,8 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -632,6 +648,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -788,6 +809,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/api/order.py:
     direct_tests:
@@ -825,6 +847,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -943,6 +967,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/api/quotation.py:
     direct_tests:
     - tests/unit/api/test_inquire_ccnl.py
@@ -982,6 +1007,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1089,6 +1116,7 @@ backend:
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/auth/__init__.py:
     direct_tests:
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1137,6 +1165,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1256,6 +1286,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/auth/token.py:
     direct_tests:
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1301,6 +1332,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_multi_strategy_block.py
@@ -1336,6 +1369,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -1496,6 +1534,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/config.py:
     direct_tests:
@@ -1534,6 +1573,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1575,6 +1616,7 @@ backend:
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
+    - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_log_reports_openai_meta.py
@@ -1596,6 +1638,11 @@ backend:
     - tests/unit/db/test_system_logs_search.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -1762,6 +1809,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_dkstock_client.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client.py
@@ -1779,6 +1827,7 @@ backend:
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
+    - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_market_regime_snapshots.py
@@ -1803,6 +1852,7 @@ backend:
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client_db_toggle.py
     transitive_tests:
@@ -1833,6 +1883,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1872,6 +1924,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2066,6 +2123,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2173,6 +2232,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/db/daily_performance.py:
     direct_tests: []
     transitive_tests:
@@ -2208,6 +2268,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2315,6 +2377,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/db/kis_quote_accounts.py:
     direct_tests:
     - tests/contract/test_routes_kis_quote_accounts.py
@@ -2354,6 +2417,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2397,6 +2462,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2557,6 +2627,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/db/log_reports.py:
     direct_tests:
@@ -2594,6 +2665,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2701,6 +2774,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/db/market_regime_snapshots.py:
     direct_tests:
     - tests/contract/test_routes_market_regime.py
@@ -2737,6 +2811,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2852,6 +2928,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/db/parameter_recommendations.py:
     direct_tests:
     - tests/unit/db/test_parameter_recommendations_backtest.py
@@ -2890,6 +2967,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2997,6 +3076,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/db/positions.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -3009,6 +3089,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3163,6 +3245,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/db/stock_master.py:
     direct_tests:
     - tests/integration/test_boot_eager_refresh.py
@@ -3206,6 +3289,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3242,6 +3327,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -3400,6 +3490,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/db/strategy_config.py:
     direct_tests:
@@ -3436,6 +3527,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3543,6 +3636,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/db/strategy_funnel.py:
     direct_tests:
     - tests/unit/db/test_strategy_funnel_crud.py
@@ -3581,6 +3675,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3622,6 +3718,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -3781,6 +3882,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/db/supabase.py:
     direct_tests:
@@ -3817,6 +3919,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3859,6 +3963,7 @@ backend:
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
+    - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_log_reports_openai_meta.py
@@ -3880,6 +3985,11 @@ backend:
     - tests/unit/db/test_system_logs_search.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4046,6 +4156,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_dkstock_client.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client.py
@@ -4060,12 +4171,18 @@ backend:
     - tests/contract/test_routes_market_regime.py
     - tests/contract/test_routes_system_integrations.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
+    - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_system_config_auto_apply.py
     - tests/unit/db/test_system_config_auto_regime.py
     - tests/unit/db/test_system_config_buy_block.py
     - tests/unit/db/test_system_config_cash_ratio.py
     - tests/unit/db/test_system_config_integrations.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_cache.py
@@ -4074,6 +4191,7 @@ backend:
     - tests/unit/engine/test_cycle64_price_filter_scanner_protected.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client_db_toggle.py
     transitive_tests:
@@ -4145,6 +4263,8 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4349,6 +4469,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4388,6 +4510,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4549,6 +4676,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/db/trade_history.py:
     direct_tests:
@@ -4590,6 +4718,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4705,6 +4835,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/__init__.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -4739,6 +4870,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4765,6 +4898,11 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4914,6 +5052,7 @@ backend:
     - tests/unit/engine/test_strategy_registry.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/backtest_engine.py:
     direct_tests:
     - tests/unit/engine/test_backtest_engine.py
@@ -4954,6 +5093,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5060,6 +5201,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/backtest_yaml.py:
     direct_tests:
     - tests/unit/engine/test_backtest_yaml.py
@@ -5097,6 +5239,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5208,6 +5352,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/boot_manager.py:
     direct_tests:
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -5244,6 +5389,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5350,6 +5497,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/daily_emit_cap.py:
     direct_tests:
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
@@ -5389,6 +5537,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5430,6 +5580,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5590,6 +5745,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/engine/log_analysis_engine.py:
     direct_tests:
@@ -5630,6 +5786,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5733,6 +5891,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/market_regime.py:
     direct_tests:
     - tests/contract/test_routes_buy_block.py
@@ -5777,6 +5936,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5883,6 +6044,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/order_engine.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -5895,6 +6057,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6036,6 +6200,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/recommendation_engine.py:
     direct_tests:
     - tests/integration/test_backtest_disabled_and_graceful.py
@@ -6084,6 +6249,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6178,6 +6345,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/recommendation_metrics.py:
     direct_tests:
     - tests/unit/engine/test_recommendation_metrics_board_stop_loss.py
@@ -6216,6 +6384,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6323,6 +6493,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/risk.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -6335,6 +6506,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6470,6 +6643,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/scanner.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -6504,6 +6678,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6530,6 +6706,11 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
@@ -6707,6 +6888,7 @@ backend:
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/engine/scheduler.py:
     direct_tests:
@@ -6742,6 +6924,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6850,6 +7034,7 @@ backend:
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/sell_rejection.py:
     direct_tests:
     - tests/unit/engine/test_sell_rejection_tracker.py
@@ -6887,6 +7072,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7005,6 +7192,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/session.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -7039,6 +7227,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7176,6 +7366,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/stale_manager.py:
     direct_tests:
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
@@ -7230,6 +7421,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7321,6 +7514,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/stale_tracker.py:
     direct_tests:
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -7374,6 +7568,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7465,6 +7661,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/strategies/__init__.py:
     direct_tests:
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -7521,6 +7718,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7626,6 +7825,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/strategies/donchian_swing.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -7638,6 +7838,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7781,6 +7983,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/strategies/long_tail_volatility.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -7793,6 +7996,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7929,6 +8134,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/strategies/momentum.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -7941,6 +8147,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8080,6 +8288,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/strategies/vcp_breakout.py:
     direct_tests:
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -8123,6 +8332,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8228,6 +8439,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/strategies/volatility_breakout.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -8240,6 +8452,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8384,6 +8598,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_universe_guard.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/strategy.py:
     direct_tests: []
     transitive_tests: []
@@ -8400,6 +8615,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8577,6 +8794,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_universe_guard.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/strategy_registry.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -8589,6 +8807,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8731,6 +8951,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/engine/util/__init__.py:
     direct_tests: []
     transitive_tests: []
@@ -8772,6 +8993,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8888,6 +9111,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/main.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -8913,6 +9137,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     transitive_tests: []
   src/models/__init__.py:
     direct_tests: []
@@ -8955,6 +9180,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9064,6 +9291,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/models/balance.py:
     direct_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -9098,6 +9326,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9219,6 +9449,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/models/kis_quote_account.py:
     direct_tests:
     - tests/contract/test_routes_kis_quote_accounts.py
@@ -9255,6 +9486,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9301,6 +9534,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -9461,6 +9699,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/models/market_regime.py:
     direct_tests: []
@@ -9488,6 +9727,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/models/order.py:
     direct_tests:
     - tests/integration/test_auto_start.py
@@ -9500,6 +9740,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9642,6 +9884,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/models/recommendation.py:
     direct_tests: []
     transitive_tests:
@@ -9668,6 +9911,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/models/response.py:
     direct_tests: []
     transitive_tests:
@@ -9694,11 +9938,13 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/models/stock.py:
     direct_tests:
     - tests/contract/test_routes_balance_perf.py
     - tests/integration/test_boot_eager_refresh.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_next_day_clear_observability.py
     - tests/integration/test_next_day_clear_stock_master.py
     - tests/unit/db/test_stock_master.py
@@ -9737,6 +9983,7 @@ backend:
     - tests/integration/test_buy_flow.py
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9774,6 +10021,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -9931,6 +10183,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/models/system_integrations.py:
     direct_tests: []
@@ -9958,6 +10211,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/models/trade.py:
     direct_tests:
     - tests/integration/test_buy_flow.py
@@ -9994,6 +10248,8 @@ backend:
     - tests/integration/test_buy_block_low_funds.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10113,6 +10369,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/realtime/__init__.py:
     direct_tests:
     - tests/contract/test_routes_realtime_ccnl_fields.py
@@ -10168,6 +10425,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10267,6 +10526,7 @@ backend:
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/realtime/handler.py:
     direct_tests:
     - tests/unit/realtime/test_aes_keys_main_only.py
@@ -10304,6 +10564,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10345,6 +10607,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -10505,6 +10772,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/realtime/websocket.py:
     direct_tests:
@@ -10560,6 +10828,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10600,6 +10870,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -10743,6 +11018,7 @@ backend:
     - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
     - tests/unit/realtime/test_websocket_pool_stop_reset.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/realtime/websocket_pool.py:
     direct_tests:
@@ -10812,6 +11088,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10850,6 +11128,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -10981,6 +11264,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_quote_session_health.py
   src/routes/__init__.py:
     direct_tests:
@@ -11008,6 +11292,7 @@ backend:
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/backtest.py:
     direct_tests:
     - tests/contract/test_routes_backtest.py
@@ -11034,6 +11319,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/balance.py:
     direct_tests: []
     transitive_tests:
@@ -11060,6 +11346,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/history.py:
     direct_tests: []
     transitive_tests:
@@ -11086,6 +11373,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/kis_quote_accounts.py:
     direct_tests: []
     transitive_tests:
@@ -11112,6 +11400,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/log_reports.py:
     direct_tests: []
     transitive_tests:
@@ -11138,6 +11427,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/logs.py:
     direct_tests: []
     transitive_tests:
@@ -11164,6 +11454,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/market_regime.py:
     direct_tests: []
     transitive_tests:
@@ -11190,6 +11481,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/performance.py:
     direct_tests: []
     transitive_tests:
@@ -11216,6 +11508,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/realtime.py:
     direct_tests:
     - tests/contract/test_routes_realtime.py
@@ -11242,6 +11535,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/recommendations.py:
     direct_tests: []
     transitive_tests:
@@ -11268,6 +11562,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/strategies.py:
     direct_tests: []
     transitive_tests:
@@ -11294,6 +11589,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/strategy_funnel.py:
     direct_tests:
     - tests/contract/test_routes_strategy_funnel.py
@@ -11320,6 +11616,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/system.py:
     direct_tests: []
     transitive_tests:
@@ -11346,6 +11643,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/system_integrations.py:
     direct_tests:
     - tests/contract/test_routes_system_integrations.py
@@ -11372,6 +11670,7 @@ backend:
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/routes/trading.py:
     direct_tests: []
     transitive_tests:
@@ -11398,6 +11697,7 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/services/__init__.py:
     direct_tests:
     - tests/contract/test_quote_session_auto_disable.py
@@ -11433,6 +11733,7 @@ backend:
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/services/dkstock_client.py:
     direct_tests:
     - tests/unit/services/test_dkstock_client.py
@@ -11470,6 +11771,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -11585,6 +11888,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/services/exceptions.py:
     direct_tests:
     - tests/contract/test_routes_backtest.py
@@ -11629,6 +11933,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -11744,6 +12050,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client_db_toggle.py
     - tests/unit/services/test_mcp_client_session_log.py
@@ -11789,6 +12096,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_multi_strategy_block.py
@@ -11897,6 +12206,7 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
   src/services/quote_session_health.py:
     direct_tests:
     - tests/contract/test_quote_session_auto_disable.py
@@ -11934,6 +12244,8 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
+    - tests/integration/test_cycle65_trade_amount_filter_e2e.py
+    - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -11974,6 +12286,11 @@ backend:
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -12135,6 +12452,7 @@ backend:
     - tests/unit/realtime/test_websocket_reverify.py
     - tests/unit/realtime/test_websocket_subscribe_rejection.py
     - tests/unit/realtime/test_ws_subscribe_backoff.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
 frontend:
   frontend/src/App.tsx:
     direct_tests:
@@ -12617,10 +12935,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-06T01:48:45.532838+09:00'
+generated_at: '2026-06-06T11:14:55.153925+09:00'
 stats:
   backend_modules: 92
-  backend_tests: 281
+  backend_tests: 292
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:
