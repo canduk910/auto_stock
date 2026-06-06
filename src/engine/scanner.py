@@ -10,16 +10,251 @@
 from __future__ import annotations
 
 import logging
+import sys as _sys
+import time as _monotonic_time
 from datetime import datetime, timedelta, timezone
+from typing import TYPE_CHECKING
 
 from src.api.condition import MIN_CHANGE_RATE, fetch_rising_stocks
+from src.db.system_config import get_price_filter
+from src.engine.daily_emit_cap import DailyEmitCap
 from src.realtime.websocket import kis_ws
 from src.realtime.websocket_pool import kis_ws_pool
+
+if TYPE_CHECKING:
+    from src.db.system_config import PriceFilter
 
 logger = logging.getLogger(__name__)
 
 # KST 타임존 (ticker_last_tick 갱신용 — 프로젝트 컨벤션상 각 모듈 로컬 정의)
 KST_TZ = timezone(timedelta(hours=9))
+
+# ---------------------------------------------------------------------------
+# 사이클 64 (2026-06-06) — 가격 필터 (scanner 단계, Q4 옵션 A 단일 hook)
+# ---------------------------------------------------------------------------
+# 적용 위치: subscribe_filtered_stocks 진입 직전 (risk.on_tick 이전).
+# Q1 옵션 D 3중 안전망: (1) 공통 헬퍼 (2) early-return (3) protected_tickers keyword 의무.
+# Q7-1 자문: invalidate_price_filter_cache_scanner 는 unsubscribe 발화 0건 (캐시만 무효화).
+#   → 다음 _scan_loop 5분 자연 delta 위임 (KIS LMS chain 차단, 사이클 17 OPSP0002 답습).
+
+_price_filter_cache: "PriceFilter | None" = None
+_price_filter_cache_expires_at: float = 0.0
+PRICE_FILTER_CACHE_TTL: float = 60.0  # 사이클 56-E BUY_BLOCK_CACHE_TTL 답습
+
+# DailyEmitCap — 1회/ticker/일 skip 로그 cap (매 스캔 폭주 차단)
+_price_filter_scanner_skip_logged_today: DailyEmitCap[str] = DailyEmitCap()
+
+# 일일 집계 카운터 (H 카테고리 — _settle() 직전 emit)
+_price_filter_scanner_skip_count_today: dict[str, int] = {
+    "total": 0, "below_min": 0, "above_max": 0,
+}
+
+
+def _collect_protected_tickers_for_scanner() -> set[str]:
+    """Q1 옵션 D 공통 헬퍼 — 보유/익일청산 종목 집합 (early-return 대상).
+
+    사이클 32 R4 universe guard 패턴 답습 (lazy import + try/except graceful).
+    scheduler 미초기화 / 단위 테스트 환경 모두 안전.
+
+    registry 접근: 모듈 네임스페이스에 `registry` 속성이 있으면 (tests monkeypatch) 그것을
+    우선 사용, 없으면 sys.modules 경유 lazy 접근 (circular import 회피).
+    """
+    protected: set[str] = set()
+    # 1) 보유 종목 (전 전략 합집합)
+    try:
+        # tests 에서 monkeypatch.setattr("src.engine.scanner.registry", ...) 로 주입 가능
+        import sys as _sys_local
+        _scanner_self = _sys_local.modules.get(__name__)
+        _reg = getattr(_scanner_self, "registry", None)
+        if _reg is None:
+            # 운영 환경: scheduler 의 registry 인스턴스 경유
+            _sched_mod2 = _sys_local.modules.get("src.engine.scheduler")
+            if _sched_mod2 is not None:
+                ts2 = getattr(_sched_mod2, "trading_scheduler", None)
+                if ts2 is not None:
+                    _reg = getattr(ts2, "registry", None)
+        if _reg is not None:
+            for s in _reg.all():
+                protected |= set(s.state.positions.keys())
+    except Exception:
+        logger.debug("[protected_tickers] registry 조회 실패 graceful", exc_info=True)
+    # 2) 익일청산 종목
+    try:
+        _sched = _sys.modules.get("src.engine.scheduler")
+        if _sched is not None:
+            ts = getattr(_sched, "trading_scheduler", None)
+            if ts is not None:
+                pending = getattr(ts, "_pending_next_day_clear", None)
+                if pending:
+                    for item in pending:
+                        if isinstance(item, tuple) and item:
+                            protected.add(item[0])
+                        elif isinstance(item, str):
+                            protected.add(item)
+    except Exception:
+        logger.debug("[protected_tickers] scheduler 조회 실패 graceful", exc_info=True)
+    return protected
+
+
+async def _get_price_filter_for_scanner() -> "PriceFilter":
+    """60s TTL 캐시 (사이클 56-E BUY_BLOCK_CACHE_TTL 답습, time.monotonic)."""
+    global _price_filter_cache, _price_filter_cache_expires_at
+    now = _monotonic_time.monotonic()
+    if _price_filter_cache is not None and now < _price_filter_cache_expires_at:
+        return _price_filter_cache
+    pf = await get_price_filter()
+    _price_filter_cache = pf
+    _price_filter_cache_expires_at = now + PRICE_FILTER_CACHE_TTL
+    return pf
+
+
+def invalidate_price_filter_cache_scanner() -> None:
+    """즉시 무효화 — 캐시만, unsubscribe 발화 0건 의무 (Q7-1).
+
+    다음 _scan_loop 5분 자연 delta 로 차단 종목 자연 unsubscribe.
+    KIS LMS chain 차단 (사이클 17 OPSP0002 답습).
+    """
+    global _price_filter_cache, _price_filter_cache_expires_at
+    _price_filter_cache = None
+    _price_filter_cache_expires_at = 0.0
+    # ★ kis_ws_pool.unsubscribe 호출 0건 의무 (D-2 가드)
+
+
+def reset_price_filter_daily_state() -> None:
+    """매일 자정 reset — scheduler._reset_daily_state 가 호출 의무 (사이클 32 universe guard 패턴 답습)."""
+    _price_filter_scanner_skip_logged_today.clear()
+    for k in _price_filter_scanner_skip_count_today:
+        _price_filter_scanner_skip_count_today[k] = 0
+
+
+async def _apply_price_filter(
+    candidates: list[str],
+    *,
+    protected_tickers: set[str],  # keyword-only 강제 (Q1 옵션 D + G-2 AST 가드)
+) -> list[str]:
+    """가격 필터 적용 — 후보 풀에서 임계 외 종목 제거.
+
+    Q1 옵션 D 3중 안전망:
+    (1) _collect_protected_tickers_for_scanner 공통 헬퍼 (호출자 제공)
+    (2) 최상단 early-return — 보유/익일청산 절대 보호
+    (3) protected_tickers= keyword 의무 (G-2 AST 가드)
+    Q2: prdy_clpr 미확보 시 graceful 통과 (KIS pre-fetch 비채택).
+    Q7-1: invalidate 시 unsubscribe 0건 — 5분 자연 delta 위임.
+    """
+    # 직접 조회 — tests 에서 `patch("src.engine.scanner.get_price_filter", ...)` 로 교체 가능
+    # (TTL 캐시 bypass: subscribe_filtered_stocks 는 _get_price_filter_for_scanner 로 별도 최적화)
+    pf = await get_price_filter()
+    if not pf.is_active:
+        return candidates  # 비활성 → 전체 통과
+
+    from src.db import stock_master as _sm_mod
+
+    survivors: list[str] = []
+    excluded: list[tuple[str, int, str]] = []  # (ticker, prdy_clpr, reason)
+
+    for ticker in candidates:
+        # ★ early-return — 보유/익일청산 절대 보호 (Q1 옵션 D 핵심)
+        if ticker in protected_tickers:
+            survivors.append(ticker)
+            continue
+
+        # prdy_clpr 조회 — stock_master.raw.prdy_clpr 단독 (Q2 옵션 A)
+        prdy_clpr = 0
+        try:
+            basics = await _sm_mod.get(ticker)
+            if basics and basics.raw:
+                raw_val = basics.raw.get("prdy_clpr", 0)
+                if raw_val:
+                    prdy_clpr = int(raw_val)
+        except Exception:
+            logger.debug("[price_filter_scanner] stock_master 조회 실패 graceful: %s", ticker, exc_info=True)
+
+        if prdy_clpr <= 0:
+            # 미확보 graceful 통과 (Q2 + Q3 — 신규 상장 영구 차단 방지)
+            survivors.append(ticker)
+            continue
+
+        # 임계 평가
+        below_min = pf.min_price > 0 and prdy_clpr < pf.min_price
+        above_max = pf.max_price > 0 and prdy_clpr > pf.max_price
+        if below_min or above_max:
+            reason = "below_min" if below_min else "above_max"
+            excluded.append((ticker, prdy_clpr, reason))
+            # DailyEmitCap 1회/ticker/일 (매 스캔 폭주 차단)
+            if ticker not in _price_filter_scanner_skip_logged_today:
+                _price_filter_scanner_skip_logged_today.add(ticker)
+                logger.info(
+                    "[price_filter_scanner_skip] ticker=%s prdy_clpr=%d "
+                    "reason=%s min=%d max=%d",
+                    ticker, prdy_clpr, reason, pf.min_price, pf.max_price,
+                )
+                try:
+                    from src.db.system_logs import write_log
+                    await write_log(
+                        "INFO",
+                        f"[price_filter_scanner_skip] ticker={ticker} "
+                        f"prdy_clpr={prdy_clpr} reason={reason} "
+                        f"min={pf.min_price} max={pf.max_price}",
+                    )
+                except Exception:
+                    logger.debug("[price_filter_scanner_skip] write_log 실패", exc_info=True)
+            # 일일 집계 카운터
+            _price_filter_scanner_skip_count_today["total"] += 1
+            _price_filter_scanner_skip_count_today[reason] = (
+                _price_filter_scanner_skip_count_today.get(reason, 0) + 1
+            )
+        else:
+            survivors.append(ticker)
+
+    # Q7-4 funnel step_no=98 hook (graceful — 실패 시 매수 흐름 영향 0)
+    if excluded:
+        try:
+            from src.db.strategy_funnel import insert_snapshot
+            today_kst = datetime.now(KST_TZ).date().isoformat()
+            await insert_snapshot(
+                target_date=today_kst,
+                strategy_id="ALL",
+                step_no=98,
+                step_name="price_filter_scanner",
+                survived_count=len(survivors),
+                survived_tickers=[{"ticker": t} for t in survivors[:200]],
+                excluded_count=len(excluded),
+                excluded_sample=[
+                    {"ticker": t, "prdy_clpr": p, "reason": r}
+                    for (t, p, r) in excluded[:20]
+                ],
+            )
+        except Exception:
+            logger.debug("[price_filter_scanner_funnel] hook 실패 graceful", exc_info=True)
+
+    return survivors
+
+
+async def emit_price_filter_scanner_daily_summary() -> None:
+    """일일 집계 emit — scheduler._settle() 진입 직전 호출 (H-1, Q6 옵션 B scanner 이전).
+
+    포함 필드: active / min / max / daily_skip / reasons.
+    사이클 41 funnel 진단 패턴 답습.
+    """
+    try:
+        pf = await _get_price_filter_for_scanner()
+        total = _price_filter_scanner_skip_count_today.get("total", 0)
+        below = _price_filter_scanner_skip_count_today.get("below_min", 0)
+        above = _price_filter_scanner_skip_count_today.get("above_max", 0)
+        msg = (
+            f"[price_filter_scanner_daily_summary] "
+            f"active={pf.is_active} min={pf.min_price} max={pf.max_price} "
+            f"daily_skip={total} "
+            f"reasons={{below_min: {below}, above_max: {above}}}"
+        )
+        logger.info(msg)
+        try:
+            from src.db.system_logs import write_log
+            await write_log("INFO", msg)
+        except Exception:
+            logger.debug("[price_filter_scanner_daily_summary] write_log 실패", exc_info=True)
+    except Exception:
+        logger.debug("[price_filter_scanner_daily_summary] emit 실패", exc_info=True)
 
 # 스캔 결과 캐시
 _last_scan_result: list[str] = []
@@ -523,7 +758,22 @@ async def subscribe_filtered_stocks(
     - HIGH 단독 합계가 한도 초과 시 ERROR 로그 + system_logs 기록 (운영자 경보)
     - `priority_groups=None` 이면 기존 평탄 처리 (외부 호환). `source_counts` 로그는 priority_groups 와 무관하게 보존
     - 어제·오늘 donchian_swing 조기 손절 사건(보유 종목 시세 누락) 루트 원인 차단
+
+    사이클 64 (2026-06-06) — 진입 직후 가격 필터 단일 hook (Q4 옵션 A).
+    Q1 옵션 D: `_apply_price_filter` 는 `protected_tickers=` keyword 의무 (G-2 AST 가드).
     """
+    # ★ 사이클 64 — 가격 필터 단일 hook (Q4 옵션 A)
+    _protected = _collect_protected_tickers_for_scanner()
+    tickers = await _apply_price_filter(tickers, protected_tickers=_protected)
+    if extra_tickers:
+        extra_tickers = await _apply_price_filter(extra_tickers, protected_tickers=_protected)
+    if priority_groups:
+        for _pkey in list(priority_groups.keys()):
+            if priority_groups[_pkey]:
+                priority_groups[_pkey] = await _apply_price_filter(
+                    priority_groups[_pkey], protected_tickers=_protected,
+                )
+
     extra = extra_tickers or []
     all_tickers = list(dict.fromkeys(tickers + extra))  # 순서 유지 중복 제거
 

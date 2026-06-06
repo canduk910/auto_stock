@@ -1,21 +1,27 @@
 /**
- * 사이클 62 (2026-06-05) Red — F-FE 카테고리: PriceFilterCard (5 케이스).
+ * 사이클 64 (2026-06-06) Red — F-FE 카테고리: PriceFilterCard 단순화 (4 케이스).
  *
- * 선행 명세: _workspace/red/cycle62_price_filter.md (§F-FE)
- * 설계 카드: §4.1 PriceFilterCard 신규 컴포넌트
+ * 선행 명세: _workspace/red/cycle64_price_filter_scanner.md (§F-FE)
+ * 설계 카드: _workspace/cycle64_price_filter_scanner_design_card.md §4
  *
- * 요구 행위 (Red 단계 모두 import 실패 / element 미존재):
- * - F-1: fetch 후 렌더 (mode + min + max 표시)
- * - F-2: 슬라이더 변경 → state 갱신
- * - F-3: 저장 버튼 → PUT 호출 + toast (즉시 반영)
- * - F-4: 범위 가드 (음수 / max<min UI 검증)
- * - F-5: mode 토글 (HARD / WARN / OFF) — 3 모드 (Q4 자문 확정)
+ * 사이클 62 → 사이클 64 변화:
+ * - mode select 폐기 (사이클 62 F-5 테스트 케이스 폐기)
+ * - 안내 배너 갱신 — "WebSocket 구독 대상 필터" + "보유/익일청산 종목 절대 제외 안 됨"
+ * - PUT body 에 mode 미포함
+ * - PriceFilterMode 타입 폐기
+ *
+ * 요구 행위 (Red 단계 — 컴포넌트 갱신 전 일부 케이스 FAIL):
+ * - F-1: fetch 후 렌더 (min + max 표시) — mode 검증 폐기
+ * - F-2: 슬라이더 변경 → state 갱신 (변경 0)
+ * - F-3: 저장 버튼 → PUT 호출 + toast (mode 미포함 검증)
+ * - F-4: 범위 가드 (max<min UI 검증) (변경 0)
+ * - (F-5 mode 토글 폐기 — 사이클 64 mode 단순화)
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 
-// Red 단계: 컴포넌트 미존재 → import error 정답
+// Red 단계: 컴포넌트가 사이클 62 mode select 보존 시 일부 케이스 FAIL
 import PriceFilterCard from '../PriceFilterCard'
 import { TestProviders } from '../../test/providers'
 import { wrap } from '../../test/factories'
@@ -24,20 +30,18 @@ import { server } from '../../test/server'
 const defaultFilter = {
   min_price: 0,
   max_price: 0,
-  mode: 'OFF' as const,
 }
 
-const activeHardFilter = {
+const activeFilter = {
   min_price: 5000,
   max_price: 1_000_000,
-  mode: 'HARD' as const,
 }
 
-describe('PriceFilterCard', () => {
-  it('F-1: fetch 후 렌더 (mode + min + max 표시)', async () => {
+describe('PriceFilterCard (사이클 64 단순화)', () => {
+  it('F-1: fetch 후 렌더 (min + max 표시) — mode select 폐기', async () => {
     server.use(
       http.get('/api/system/price-filter', () =>
-        HttpResponse.json(wrap(activeHardFilter)),
+        HttpResponse.json(wrap(activeFilter)),
       ),
     )
     render(
@@ -49,17 +53,16 @@ describe('PriceFilterCard', () => {
     // 카드 렌더 검증
     await screen.findByTestId('price-filter-card')
 
-    // 3 필드 표시 (mode + min + max)
-    await waitFor(() => {
-      const modeEl = screen.getByTestId('price-filter-mode-select')
-      expect((modeEl as HTMLSelectElement).value).toBe('HARD')
-    })
-
+    // 2 슬라이더 표시 (min + max) — mode select 폐기
     const minSlider = await screen.findByTestId('price-filter-min-slider')
     expect((minSlider as HTMLInputElement).value).toBe('5000')
 
     const maxSlider = await screen.findByTestId('price-filter-max-slider')
     expect((maxSlider as HTMLInputElement).value).toBe('1000000')
+
+    // 사이클 64 — mode select 폐기 검증
+    const modeSelect = screen.queryByTestId('price-filter-mode-select')
+    expect(modeSelect).toBeNull()
   })
 
   it('F-2: 슬라이더 변경 → state 갱신', async () => {
@@ -89,7 +92,7 @@ describe('PriceFilterCard', () => {
     })
   })
 
-  it('F-3: 저장 버튼 → PUT 호출 + toast (즉시 반영)', async () => {
+  it('F-3: 저장 버튼 → PUT 호출 (mode 미포함) + toast (즉시 반영)', async () => {
     let putBody: unknown = null
     server.use(
       http.get('/api/system/price-filter', () =>
@@ -112,10 +115,6 @@ describe('PriceFilterCard', () => {
     const minSlider = await screen.findByTestId('price-filter-min-slider')
     fireEvent.change(minSlider, { target: { value: '5000' } })
 
-    // 모드 변경 (OFF → HARD)
-    const modeSelect = await screen.findByTestId('price-filter-mode-select')
-    fireEvent.change(modeSelect, { target: { value: 'HARD' } })
-
     // 저장 버튼 클릭
     const saveBtn = await screen.findByTestId('price-filter-save-button')
     fireEvent.click(saveBtn)
@@ -124,8 +123,11 @@ describe('PriceFilterCard', () => {
     await waitFor(() => {
       expect(putBody).not.toBeNull()
     })
-    expect((putBody as Record<string, unknown>).min_price).toBe(5000)
-    expect((putBody as Record<string, unknown>).mode).toBe('HARD')
+    const body = putBody as Record<string, unknown>
+    expect(body.min_price).toBe(5000)
+    // 사이클 64 — PUT body 에 mode 미포함 검증
+    expect(body.mode).toBeUndefined()
+    expect('mode' in body).toBe(false)
 
     // toast / 안내 표시 ("즉시 반영" 문구)
     await waitFor(() => {
@@ -134,7 +136,7 @@ describe('PriceFilterCard', () => {
     })
   })
 
-  it('F-4: 범위 가드 (음수 / max<min UI 검증)', async () => {
+  it('F-4: 범위 가드 (max<min UI 검증)', async () => {
     server.use(
       http.get('/api/system/price-filter', () =>
         HttpResponse.json(wrap(defaultFilter)),
@@ -163,33 +165,5 @@ describe('PriceFilterCard', () => {
     })
   })
 
-  it('F-5: mode 토글 (HARD / WARN / OFF 3 모드)', async () => {
-    server.use(
-      http.get('/api/system/price-filter', () =>
-        HttpResponse.json(wrap(defaultFilter)),
-      ),
-    )
-    render(
-      <TestProviders>
-        <PriceFilterCard />
-      </TestProviders>,
-    )
-
-    const modeSelect = await screen.findByTestId('price-filter-mode-select')
-
-    // 3 모드 옵션 모두 존재
-    const options = Array.from(
-      (modeSelect as HTMLSelectElement).options,
-    ).map((o) => o.value)
-    expect(options).toEqual(expect.arrayContaining(['HARD', 'WARN', 'OFF']))
-    expect(options.length).toBe(3) // Q4 자문 — SOFT 모드 없음
-
-    // 토글 전환 검증
-    for (const mode of ['HARD', 'WARN', 'OFF']) {
-      fireEvent.change(modeSelect, { target: { value: mode } })
-      await waitFor(() => {
-        expect((modeSelect as HTMLSelectElement).value).toBe(mode)
-      })
-    }
-  })
+  // F-5 mode 토글 — 사이클 64 폐기 (mode 필드 자체 폐기)
 })

@@ -636,9 +636,10 @@ class TradingScheduler:
             self._phase = "settling"
             # 사이클 62 (2026-06-05) — 가격 필터 일일 집계 (_settle 직전, Q6 자문)
             try:
-                await self.risk_manager._emit_price_filter_daily_summary()
+                from src.engine import scanner as _scanner_mod
+                await _scanner_mod.emit_price_filter_scanner_daily_summary()
             except Exception:
-                logger.debug("[price_filter_daily_summary] scheduler emit 실패", exc_info=True)
+                logger.debug("[price_filter_scanner_daily_summary] scheduler emit 실패", exc_info=True)
             await self._settle()
 
             # 정산 직후: 일일 로그 분석 리포트 (실패해도 정산엔 영향 없음)
@@ -2992,6 +2993,14 @@ class TradingScheduler:
             _cond.clear_caches()
         except Exception:
             logger.exception("condition cache clear 실패")
+
+        # 사이클 64 (2026-06-06) — scanner 가격 필터 emit cap + 일일 카운터 동행 reset.
+        # E-2 회귀 가드 의무 — CLAUDE.md `_reset_daily_state` 동행 reset.
+        try:
+            from src.engine import scanner as _scanner_mod
+            _scanner_mod.reset_price_filter_daily_state()
+        except Exception:
+            logger.exception("scanner.reset_price_filter_daily_state 실패")
 
         logger.info("일간 상태 초기화 완료 (scanner 캐시 clear 포함)")
 

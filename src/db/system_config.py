@@ -484,84 +484,61 @@ async def set_buy_block_thresholds(
 
 
 # ---------------------------------------------------------------------------
-# 사이클 62 (2026-06-05) — 가격 필터 (매수 진입 전용, 3 모드)
+# 사이클 62 (2026-06-05) → 사이클 64 (2026-06-06) 단순화 — 가격 필터 (scanner 단계 이동)
 # ---------------------------------------------------------------------------
-# Q1 자문: 디폴트 0/0 (비활성) + 권장값 툴팁 저 5,000원 / 고 1,000,000원
-# Q4 자문: 3 모드 HARD / WARN / OFF + 디폴트 OFF
-# Q5 자문: 즉시 반영 (60s TTL 캐시는 RiskManager 영역)
-#
-# 키 3종:
+# 사이클 64 변경: mode 폐기 (HARD/WARN/OFF 제거), 단순 min/max 필터링만.
+# 적용 위치: risk.on_tick → scanner.subscribe_filtered_stocks (Q4 옵션 A).
+# 키 2종 (price_filter_mode 키는 DB row 잔존 허용, 코드 미참조):
 _PRICE_FILTER_MIN_KEY = "price_filter_min"    # 정수(원). 0 = 비활성
 _PRICE_FILTER_MAX_KEY = "price_filter_max"    # 정수(원). 0 = 비활성(무한대 의미)
-_PRICE_FILTER_MODE_KEY = "price_filter_mode"  # "HARD" / "WARN" / "OFF"
 
 # 디폴트 — 비활성 (운영 시작 안전성 우선)
 _PRICE_FILTER_MIN_DEFAULT = 0
 _PRICE_FILTER_MAX_DEFAULT = 0
-_PRICE_FILTER_MODE_DEFAULT = "OFF"
-
-# 유효 모드 (Q4 자문 — 3 모드)
-_PRICE_FILTER_VALID_MODES = ("HARD", "WARN", "OFF")
-
-# 슬라이더 bound (Q1 자문)
-_PRICE_FILTER_MIN_UPPER = 50_000      # min 상한 5만원
-_PRICE_FILTER_MAX_UPPER = 2_000_000   # max 상한 200만원
 
 
 class PriceFilter(BaseModel):
-    """가격 필터 설정 (사이클 62, 2026-06-05).
+    """가격 필터 설정 (사이클 64, 2026-06-06 단순화).
 
-    매수 진입 전용 — 매도/익일청산/손절 영향 0 (사이클 38 명문화).
+    scanner.subscribe_filtered_stocks 진입 직전 적용 (사이클 38 명문화 보존 — 매수 후보 전용).
+    보유/익일청산 종목은 절대 제외 안 됨 (사이클 32 R4 universe guard + 사이클 64 Q1 옵션 D).
     """
 
     min_price: int = 0   # 0 = 비활성
     max_price: int = 0   # 0 = 비활성 (무한대 의미)
-    mode: str = "OFF"    # "HARD" / "WARN" / "OFF"
+    # mode 필드 제거 (사이클 64 — HARD/WARN/OFF 폐기)
 
     @property
     def is_active(self) -> bool:
-        """OFF 또는 임계값 0/0 이면 비활성. HARD/WARN + 값 > 0 이면 활성."""
-        if self.mode == "OFF":
-            return False
+        """min 또는 max 가 > 0 이면 활성."""
         return self.min_price > 0 or self.max_price > 0
 
 
 async def get_price_filter() -> PriceFilter:
     """현재 가격 필터 설정 조회.
 
-    3 키(price_filter_min / price_filter_max / price_filter_mode) 를 각각 조회 후 병합.
-    키 부재 시 디폴트 PriceFilter(min=0, max=0, mode='OFF') 반환.
+    2 키(price_filter_min / price_filter_max) 조회 후 PriceFilter 반환.
+    키 부재 시 디폴트 PriceFilter(min=0, max=0) 반환.
     buy_block_mode 패턴 답습 — JSONB {"value": ...} 형태.
     """
     min_price = await _get_int_or_default(_PRICE_FILTER_MIN_KEY, _PRICE_FILTER_MIN_DEFAULT)
     max_price = await _get_int_or_default(_PRICE_FILTER_MAX_KEY, _PRICE_FILTER_MAX_DEFAULT)
-    mode = await _get_str_or_default(
-        _PRICE_FILTER_MODE_KEY,
-        _PRICE_FILTER_MODE_DEFAULT,
-        _PRICE_FILTER_VALID_MODES,
-    )
-    return PriceFilter(min_price=min_price, max_price=max_price, mode=mode)
-
-
-#: 내부 sentinel — `mode` 파라미터 생략(부분 갱신) 과 `mode=None` 명시 전달(잘못된 타입) 구별
-_PRICE_FILTER_MODE_UNSET: object = object()
+    return PriceFilter(min_price=min_price, max_price=max_price)
 
 
 async def set_price_filter(
     *,
     min_price: Optional[int] = None,
     max_price: Optional[int] = None,
-    mode: object = _PRICE_FILTER_MODE_UNSET,
 ) -> None:
     """가격 필터 설정 부분 갱신. 생략된 키는 기존 값 보존.
 
     - min_price 음수 → ValueError
     - max_price 음수 → ValueError
     - min/max 둘 다 명시 + max < min (단 둘 다 > 0) → ValueError
-    - mode 가 ("HARD", "WARN", "OFF") 외 (None 포함 잘못된 타입) → ValueError / TypeError
 
-    부분 갱신: set_price_filter(min_price=5000) — mode 인자 자체를 생략.
-    Q5 자문: 라우트에서 set_price_filter 직후 invalidate_price_filter_cache() 호출 의무.
+    부분 갱신: set_price_filter(min_price=5000) — max 기존 값 보존.
+    사이클 64 — mode 인자 자체 제거 (HARD/WARN/OFF 폐기).
     """
     if min_price is not None:
         if min_price < 0:
@@ -578,30 +555,14 @@ async def set_price_filter(
                 f"max_price({max_price}) < min_price({min_price}) 불가"
             )
 
-    # mode 유효성 검사 — _PRICE_FILTER_MODE_UNSET(생략) 이면 보존, 그 외 타입 검증
-    mode_to_set: Optional[str] = None
-    if mode is not _PRICE_FILTER_MODE_UNSET:
-        if not isinstance(mode, str) or mode not in _PRICE_FILTER_VALID_MODES:
-            if isinstance(mode, str):
-                raise ValueError(
-                    f"price_filter_mode 는 {_PRICE_FILTER_VALID_MODES} 중 하나, got {mode!r}"
-                )
-            else:
-                raise TypeError(
-                    f"price_filter_mode 는 str 이어야 함, got {type(mode).__name__}"
-                )
-        mode_to_set = str(mode)
-
     if min_price is not None:
         await _set_int(_PRICE_FILTER_MIN_KEY, min_price)
     if max_price is not None:
         await _set_int(_PRICE_FILTER_MAX_KEY, max_price)
-    if mode_to_set is not None:
-        await _set_str(_PRICE_FILTER_MODE_KEY, mode_to_set)
 
 
 # ---------------------------------------------------------------------------
-# 내부 헬퍼 — int / str 조회/저장 (사이클 62 신규)
+# 내부 헬퍼 — int 조회/저장 (사이클 62 신규, 사이클 64: str 헬퍼 폐기)
 # ---------------------------------------------------------------------------
 
 async def _get_int_or_default(key: str, default: int) -> int:
@@ -633,8 +594,11 @@ async def _get_int_or_default(key: str, default: int) -> int:
         return default
 
 
-async def _get_str_or_default(key: str, default: str, valid: tuple) -> str:
-    """JSONB {"value": str} 조회. 키 부재/유효값 외 시 default."""
+async def _get_str_or_default_UNUSED(key: str, default: str, valid: tuple) -> str:  # noqa: N802
+    """JSONB {"value": str} 조회 (사이클 64 미사용 — price_filter_mode 폐기).
+
+    참고: 하위 코드 잔재 방지용 더미 선언. 실제 호출처 없음.
+    """
 
     def _query():
         return (
@@ -680,15 +644,4 @@ async def _set_int(key: str, value: int) -> None:
     await asyncio.to_thread(_upsert)
 
 
-async def _set_str(key: str, value: str) -> None:
-    """JSONB {"value": str} upsert."""
-    payload = {"key": key, "value": {"value": str(value)}}
-
-    def _upsert():
-        return (
-            supabase.table("system_config")
-            .upsert(payload, on_conflict="key")
-            .execute()
-        )
-
-    await asyncio.to_thread(_upsert)
+# _set_str 제거 (사이클 64 — price_filter_mode 폐기로 사용처 0)

@@ -133,18 +133,18 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 - GET 500: `buy-block-error` graceful
 - API: `getBuyBlock / setBuyBlock`. 백엔드 `/api/integrations/buy-block` GET/PUT. queryKey `['integration', 'buy-block']`, staleTime 30s
 
-### `PriceFilterCard` (사이클 62, 2026-06-05)
+### `PriceFilterCard` (사이클 62 신설 → 사이클 64 단순화, 2026-06-06)
 
-매수 진입 전용 가격대 차단. `BuyBlockSection` 직하 신설 (Settings 화면 위계). 사이클 38 명문화 답습 — 매도/익일청산/손절 영향 0 안내 배너 명시.
+**WebSocket 구독 대상 필터** (사이클 64 사용자 의도 재정의 — 사이클 62 매수 신호 판단용 위치 폐기 + 단순화). `BuyBlockSection` 직하 (Settings 화면 위계). 사이클 38 명문화 답습 — 매도/익일청산/손절 영향 0.
 
-- **9 testid**: `price-filter-card` 카드 컨테이너 / `price-filter-mode-select` 3 모드 select (HARD/WARN/OFF, 디폴트 OFF) / `price-filter-min-slider` 최소가 슬라이더 (0~20,000원, step 1,000) / `price-filter-max-slider` 최대가 슬라이더 (0~2,000,000원, step 50,000) / `price-filter-save-button` 저장 / `price-filter-save-toast` 성공 안내 / `price-filter-validation-error` max<min 클라이언트 에러
-- **권장값 툴팁** (domain-expert Q1 자문): 저 5,000원 / 고 1,000,000원. 디폴트 0/0 = 비활성
-- **3 모드 의미** (Q4 자문): HARD = 매수 차단 + INFO 로그 / WARN = 매수 진행 + WARNING 로그 (운영자 임계 조정 1주 권고) / OFF = 분기 미진입
-- **즉시 반영** (Q5 자문): 저장 클릭 → `updatePriceFilter()` PUT → 백엔드 `risk_manager.invalidate_price_filter_cache()` 즉시 호출 → 60s 캐시 도중 사용자 토글 즉시 매수 신호 반영 (5분 grace 금지)
+- **7 testid** (사이클 62 9 → 사이클 64 7, mode-select 폐기): `price-filter-card` 카드 컨테이너 / `price-filter-min-slider` 최소가 슬라이더 (0~20,000원, step 1,000) / `price-filter-max-slider` 최대가 슬라이더 (0~2,000,000원, step 50,000) / `price-filter-save-button` 저장 / `price-filter-save-toast` 성공 안내 / `price-filter-validation-error` max<min 클라이언트 에러
+- **모드 폐기** (사이클 64 Q4 자문 옵션 A — 단순 필터링만): 사이클 62 HARD/WARN/OFF 3 모드 → 사이클 64 단일 필터 (`min=0 or max=0` 비활성). `PriceFilterMode` 타입 + `mode` 필드 전부 제거
+- **권장값 툴팁** (domain-expert 사이클 62 Q1 자문): 저 5,000원 / 고 1,000,000원. 디폴트 0/0 = 비활성
+- **즉시 반영** (Q5 자문): 저장 클릭 → `updatePriceFilter()` PUT → 백엔드 `scanner.invalidate_price_filter_cache_scanner()` 즉시 호출 (사이클 62 `risk_manager.invalidate_price_filter_cache` 폐기) → 60s 캐시 도중 사용자 토글 즉시 반영. **Q7-1 자동 unsubscribe 0 발화** (다음 `_scan_loop` 5분 자연 delta, KIS LMS chain 차단)
 - **클라이언트 검증**: 음수 / `min_price > max_price` (단 둘 다 >0 일 때) → `price-filter-validation-error` 표시 + PUT 미발사
-- API: `getPriceFilter / updatePriceFilter`. 백엔드 `/api/system/price-filter` GET/PUT, `ApiResponse<PriceFilter>` 래퍼 → 프론트 `data.data` 추출. queryKey `['system', 'price-filter']`
-- **매수 진입 전용 안내 배너**: "매도/익일청산/손절은 본 필터 영향 없음 — 매수 신호만 차단" (사이클 38 명문화 운영자 인지)
-- 회귀 가드 5 vitest 케이스 (`PriceFilterCard.test.tsx`): F-1 fetch 후 렌더 / F-2 슬라이더 변경 / F-3 저장 + toast / F-4 max<min 가드 / F-5 mode 토글
+- API: `getPriceFilter / updatePriceFilter` (사이클 64 `PriceFilterUpdate` body 에서 mode 필드 제거). 백엔드 `/api/system/price-filter` GET/PUT, `ApiResponse<PriceFilter>` 래퍼 → 프론트 `data.data` 추출. queryKey `['system', 'price-filter']`. PUT body 에 mode 전달 시 422 (`ConfigDict(extra="forbid")`)
+- **안내 배너 갱신** (사이클 64): "**WebSocket 구독 대상 필터** — 임계 외 종목은 시세 구독 자체 차단. 보유/익일청산 종목은 절대 제외 안 됨" (사이클 62 "매수 신호 차단" 표현 폐기 + 사이클 32 R4 universe guard 보호 영속 명시)
+- 회귀 가드 4 vitest 케이스 (사이클 62 5 → 사이클 64 4, mode 토글 F-5 폐기): F-1 fetch 후 렌더 + mode select 미존재 검증 / F-2 슬라이더 변경 / F-3 저장 + toast (body 에 mode 미포함) / F-4 max<min 가드
 
 ## History (`/history`)
 

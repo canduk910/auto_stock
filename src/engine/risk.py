@@ -6,8 +6,9 @@
 - 전략별 매매 가능 보드(KRX 메인 / NXT 프리 / NXT 애프터) 가드 — Phase 8
 - **사이클 2 (2026-05-17)**: 시장 레짐 매수 가드 (defensive/VIX>25/F&G 극단 시 매수 차단).
   매도/손절 분기는 무관 — 보유 종목 청산 정상.
-- **사이클 62 (2026-06-05)**: 가격 필터 (매수 진입 전용, 3 모드 HARD/WARN/OFF).
-  check_exit_signal 분기 *후*, check_buy_signal 분기 *전* 가드 (사이클 38 명문화 보존).
+- **사이클 62 → 사이클 64 (2026-06-06)**: 가격 필터 risk.on_tick 영역 전면 이전.
+  scanner.subscribe_filtered_stocks 진입 직전 단일 hook (Q4 옵션 A) 으로 재배치.
+  risk.py 내 가격 필터 코드 완전 제거 (G-1 AST 가드 영속).
 """
 
 from __future__ import annotations
@@ -16,7 +17,6 @@ import logging
 import time
 from typing import Optional
 
-from src.db.system_config import PriceFilter, get_price_filter
 from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.market_regime import get_current_regime
 from src.engine.order_engine import OrderEngine
@@ -25,10 +25,6 @@ from src.engine.strategy_base import Signal
 from src.engine.strategy_registry import StrategyRegistry
 
 logger = logging.getLogger(__name__)
-
-# 사이클 62 — 60s TTL 캐시 상수 (사이클 56-E BUY_BLOCK_CACHE_TTL 답습)
-PRICE_FILTER_CACHE_TTL: float = 60.0
-
 
 class RiskManager:
     """실시간 시세를 감시하며 전략별 매매 신호에 따라 주문을 실행한다."""
@@ -49,33 +45,16 @@ class RiskManager:
         # 사이클 56-D: DailyEmitCap[tuple[str, str]] 마이그레이션. tuple key 호환 보장.
         # scheduler 외부 직접 clear → reset_daily_state() 캡슐화 위임 (사이클 52 OrderEngine 패턴 답습).
         self._risk_silent_skip_logged_today: DailyEmitCap[tuple[str, str]] = DailyEmitCap[tuple[str, str]]()
-        # 사이클 62 (2026-06-05) — 가격 필터 emit cap (1회/(ticker, strategy)/일)
-        # HARD 차단 emit + WARN 경고 emit 각각 별도 cap (G 카테고리)
-        self._price_filter_skip_logged_today: DailyEmitCap[tuple[str, str]] = DailyEmitCap[tuple[str, str]]()
-        self._price_filter_warn_logged_today: DailyEmitCap[tuple[str, str]] = DailyEmitCap[tuple[str, str]]()
-        # 사이클 62 — 60s TTL 캐시 (사이클 56-E BUY_BLOCK_CACHE_TTL 답습)
-        self._price_filter_cache: Optional[PriceFilter] = None
-        self._price_filter_cache_expires_at: float = 0.0
-        # 사이클 62 — 일일 집계 카운터 (H 카테고리 — _settle() 직전 emit)
-        self._price_filter_skip_count_today: int = 0
-        self._price_filter_warn_count_today: int = 0
-        self._price_filter_skip_reasons_today: dict[str, int] = {}
+        # 사이클 62 → 사이클 64 (2026-06-06): 가격 필터 필드 전면 제거 (scanner 이전)
 
     def reset_daily_state(self) -> None:
         """사이클 56-D — 일일 RiskManager 상태 초기화 (scheduler 위임).
 
         사이클 31 R6 _risk_silent_skip_logged_today 일괄 clear.
         사이클 52 OrderEngine.reset_daily_state() 패턴 답습 (캡슐화).
-        사이클 62 — 가격 필터 emit cap 2종 + 일일 집계 카운터 3 필드 reset 추가.
+        사이클 64 — 가격 필터 필드 scanner 이전으로 본 영역에서 제거.
         """
         self._risk_silent_skip_logged_today.clear()
-        # 사이클 62 — emit cap 2 종 reset (C-2 회귀 가드 의무)
-        self._price_filter_skip_logged_today.clear()
-        self._price_filter_warn_logged_today.clear()
-        # 사이클 62 — 일일 집계 카운터 3 필드 reset (H 카테고리)
-        self._price_filter_skip_count_today = 0
-        self._price_filter_warn_count_today = 0
-        self._price_filter_skip_reasons_today.clear()
 
     async def on_tick(
         self,
@@ -210,40 +189,8 @@ class RiskManager:
                     )
                 continue
 
-            # 사이클 62 (2026-06-05) — 가격 필터 가드 (매수 진입 전용)
-            # **사이클 38 명문화 보존**: check_exit_signal 분기 *후* 위치 의무.
-            # 매도/손절/Trailing/익일청산/15:20 강제청산 영향 0.
-            # Q2 자문: prev_close 우선 + current_price fallback + 양쪽 0 graceful 통과
-            # Q4 자문: HARD(차단) / WARN(경고+허용) / OFF(비활성)
-            price_filter = await self._get_price_filter_cached()
-            if price_filter.is_active:
-                from src.engine.scanner import ticker_prev_close as _prev_close_dict
-                ref_price = _prev_close_dict.get(ticker, 0)
-                if ref_price <= 0:
-                    ref_price = int(current_price) if current_price and current_price > 0 else 0
-                if ref_price > 0:
-                    below_min = price_filter.min_price > 0 and ref_price < price_filter.min_price
-                    above_max = price_filter.max_price > 0 and ref_price > price_filter.max_price
-                    if below_min or above_max:
-                        reason = "below_min" if below_min else "above_max"
-                        if price_filter.mode == "HARD":
-                            await self._emit_price_filter_skip(
-                                ticker=ticker,
-                                strategy_id=strategy.strategy_id,
-                                reason=reason,
-                                ref_price=ref_price,
-                                price_filter=price_filter,
-                            )
-                            continue  # 매수 신호 평가 skip
-                        elif price_filter.mode == "WARN":
-                            await self._emit_price_filter_warn(
-                                ticker=ticker,
-                                strategy_id=strategy.strategy_id,
-                                reason=reason,
-                                ref_price=ref_price,
-                                price_filter=price_filter,
-                            )
-                            # WARN 모드 — 매수 허용 (continue 안 함)
+            # 사이클 64 (2026-06-06) — 가격 필터 분기 scanner 이전 (G-1 AST 가드 영속).
+            # 본 위치(on_tick)에 가격 필터 코드 없음 — scanner.subscribe_filtered_stocks 에서만 적용.
 
             # G안 (2026-05-12): donchian_swing 매수 평가는 Pull 폴링(_swing_buy_poll_loop)에서만.
             # WebSocket tick 흐름에서는 skip — 일봉 전략이라 실시간 tick 평가가 구조적 낭비.
@@ -260,125 +207,10 @@ class RiskManager:
                 )
 
     # ---------------------------------------------------------------------------
-    # 사이클 62 — 가격 필터 헬퍼 메서드
+    # 사이클 64 (2026-06-06) — 가격 필터 헬퍼 메서드 전면 제거 (scanner 이전)
+    # G-1 AST 가드: risk.py 에 price_filter 관련 문자열 0건 의무
+    # (scanner.py::_apply_price_filter 가 단일 책임 — Q4 옵션 A)
     # ---------------------------------------------------------------------------
-
-    async def _get_price_filter_cached(self) -> PriceFilter:
-        """60s TTL 캐시. invalidate 토글 시 즉시 무효화 (Q5 자문).
-
-        사이클 56-E BUY_BLOCK_CACHE_TTL 답습. `time.monotonic()` 사용 (datetime.now() 금지).
-        """
-        now = time.monotonic()
-        if self._price_filter_cache is not None and now < self._price_filter_cache_expires_at:
-            return self._price_filter_cache
-        pf = await get_price_filter()
-        self._price_filter_cache = pf
-        self._price_filter_cache_expires_at = now + PRICE_FILTER_CACHE_TTL
-        return pf
-
-    def invalidate_price_filter_cache(self) -> None:
-        """Settings PUT 직후 즉시 반영 (Q5 자문 — 5분 grace 금지)."""
-        self._price_filter_cache = None
-        self._price_filter_cache_expires_at = 0.0
-
-    async def _emit_price_filter_skip(
-        self,
-        *,
-        ticker: str,
-        strategy_id: str,
-        reason: str,
-        ref_price: int,
-        price_filter: PriceFilter,
-    ) -> None:
-        """HARD 모드 매수 차단 로그 emit. 1회/(ticker, strategy)/일 cap.
-
-        사이클 31 R6 `_risk_silent_skip_logged_today` 패턴 답습.
-        """
-        emit_key = (ticker, strategy_id)
-        if emit_key not in self._price_filter_skip_logged_today:
-            self._price_filter_skip_logged_today.add(emit_key)
-            logger.info(
-                "[price_filter_skip] ticker=%s strategy=%s reason=%s "
-                "ref_price=%d min=%d max=%d mode=%s",
-                ticker, strategy_id, reason, ref_price,
-                price_filter.min_price, price_filter.max_price, price_filter.mode,
-            )
-            try:
-                from src.db.system_logs import write_log
-                await write_log(
-                    "INFO",
-                    f"[price_filter_skip] ticker={ticker} strategy={strategy_id} "
-                    f"reason={reason} ref_price={ref_price} "
-                    f"min={price_filter.min_price} max={price_filter.max_price} "
-                    f"mode={price_filter.mode}",
-                )
-            except Exception:
-                logger.debug("[price_filter_skip] write_log 실패", exc_info=True)
-        # 일일 집계 카운터 (H-1 — cap 밖에서 매 차단 누적)
-        self._price_filter_skip_count_today += 1
-        self._price_filter_skip_reasons_today[reason] = (
-            self._price_filter_skip_reasons_today.get(reason, 0) + 1
-        )
-
-    async def _emit_price_filter_warn(
-        self,
-        *,
-        ticker: str,
-        strategy_id: str,
-        reason: str,
-        ref_price: int,
-        price_filter: PriceFilter,
-    ) -> None:
-        """WARN 모드 경고 로그 emit. 1회/(ticker, strategy)/일 cap (skip cap 과 별도).
-
-        G 카테고리 — 매수 허용 + 사후 가시화 (사이클 8 buy_block WARN 답습).
-        """
-        emit_key = (ticker, strategy_id)
-        if emit_key not in self._price_filter_warn_logged_today:
-            self._price_filter_warn_logged_today.add(emit_key)
-            logger.warning(
-                "[price_filter_warn] ticker=%s strategy=%s reason=%s "
-                "ref_price=%d min=%d max=%d mode=%s",
-                ticker, strategy_id, reason, ref_price,
-                price_filter.min_price, price_filter.max_price, price_filter.mode,
-            )
-            try:
-                from src.db.system_logs import write_log
-                await write_log(
-                    "WARNING",
-                    f"[price_filter_warn] ticker={ticker} strategy={strategy_id} "
-                    f"reason={reason} ref_price={ref_price} "
-                    f"min={price_filter.min_price} max={price_filter.max_price} "
-                    f"mode={price_filter.mode}",
-                )
-            except Exception:
-                logger.debug("[price_filter_warn] write_log 실패", exc_info=True)
-        # 일일 집계 카운터
-        self._price_filter_warn_count_today += 1
-
-    async def _emit_price_filter_daily_summary(self) -> None:
-        """`_settle()` 직전 호출. 일일 집계 1행 INFO emit (Q6 자문).
-
-        포함 필드: skip_count (HARD 차단) / warn_count (WARN 경고) / mode.
-        사이클 41 funnel 진단 패턴 답습.
-        """
-        try:
-            pf = await self._get_price_filter_cached()
-            msg = (
-                f"[price_filter_daily_summary] "
-                f"skip_count={self._price_filter_skip_count_today} "
-                f"warn_count={self._price_filter_warn_count_today} "
-                f"reasons={dict(self._price_filter_skip_reasons_today)} "
-                f"mode={pf.mode} min={pf.min_price} max={pf.max_price}"
-            )
-            logger.info(msg)
-            try:
-                from src.db.system_logs import write_log
-                await write_log("INFO", msg)
-            except Exception:
-                logger.debug("[price_filter_daily_summary] write_log 실패", exc_info=True)
-        except Exception:
-            logger.debug("[price_filter_daily_summary] emit 실패", exc_info=True)
 
     def _maybe_emit_tradable_skip(self) -> None:
         """가설 D (2026-05-12) — 분당 1회 [tradable_skip] INFO 로그 + 카운터 reset.

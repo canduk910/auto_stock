@@ -2,7 +2,7 @@
 
 - memory: 프로세스 RSS/VMS + (선택) tracemalloc top 20
 - metrics: endpoint별 호출 횟수 + 응답시간 분포 (p50/p95/p99)
-- price-filter: 가격 필터 GET/PUT (사이클 62, 2026-06-05)
+- price-filter: 가격 필터 GET/PUT (사이클 62 → 사이클 64, 2026-06-06 단순화 — mode 폐기)
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import tracemalloc
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.db.system_config import PriceFilter, get_price_filter, set_price_filter
 from src.models.response import ApiResponse
@@ -108,24 +108,28 @@ async def reset_metrics():
 
 
 # ---------------------------------------------------------------------------
-# 사이클 62 (2026-06-05) — 가격 필터 GET/PUT
+# 사이클 62 (2026-06-05) → 사이클 64 (2026-06-06) — 가격 필터 GET/PUT (mode 폐기)
 # ---------------------------------------------------------------------------
 
 class PriceFilterUpdateRequest(BaseModel):
-    """가격 필터 부분 갱신 요청 (None = 보존)."""
+    """가격 필터 부분 갱신 요청 (None = 보존).
+
+    사이클 64 — mode 필드 제거 (HARD/WARN/OFF 폐기).
+    extra="forbid" — mode 키 전달 시 422 반환 (CR-2 가드).
+    """
+    model_config = ConfigDict(extra="forbid")
     min_price: Optional[int] = None
     max_price: Optional[int] = None
-    mode: Optional[str] = None
+    # mode 필드 제거 (사이클 64)
 
 
 @router.get("/price-filter", response_model=ApiResponse)
 async def get_price_filter_endpoint():
     """현재 가격 필터 설정 조회.
 
-    응답 data: {min_price, max_price, mode}
+    응답 data: {min_price, max_price}
     - min_price=0 / max_price=0 = 비활성
-    - mode: "HARD" / "WARN" / "OFF"
-    Q1 자문: 디폴트 0/0/OFF (비활성)
+    사이클 64 — mode 필드 폐기.
     """
     pf = await get_price_filter()
     return ApiResponse(success=True, data=pf.model_dump(), message="ok")
@@ -136,28 +140,24 @@ async def set_price_filter_endpoint(req: PriceFilterUpdateRequest):
     """가격 필터 설정 부분 갱신.
 
     None 인 키는 기존 값 보존. 범위 외 입력은 400.
-    Q5 자문: 즉시 반영 + 60s TTL 캐시 invalidate.
+    사이클 64 — scanner invalidate (risk_manager 이전, Q7-1 unsubscribe 0건 의무).
     """
     try:
-        # sentinel 방식이므로 None 을 명시 전달하면 안 됨 — 값이 있는 키만 전달
         kwargs: dict = {}
         if req.min_price is not None:
             kwargs["min_price"] = req.min_price
         if req.max_price is not None:
             kwargs["max_price"] = req.max_price
-        if req.mode is not None:
-            kwargs["mode"] = req.mode
         await set_price_filter(**kwargs)
     except (ValueError, TypeError) as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
-    # Q5 즉시 반영 — 60s TTL 캐시 invalidate
+    # 사이클 64 — scanner 영역 invalidate (risk_manager → scanner 변경, Q7-1)
     try:
-        from src.engine.scheduler import trading_scheduler
-        if trading_scheduler is not None and hasattr(trading_scheduler, "risk_manager"):
-            trading_scheduler.risk_manager.invalidate_price_filter_cache()
+        from src.engine import scanner
+        scanner.invalidate_price_filter_cache_scanner()
     except Exception:
-        logger.debug("[price_filter] invalidate 실패 — 60s 후 자동 만료", exc_info=True)
+        logger.debug("[price_filter] scanner invalidate 실패 — 60s 후 자동 만료", exc_info=True)
 
     pf = await get_price_filter()
     return ApiResponse(

@@ -1,27 +1,34 @@
 /**
- * 가격 필터 카드 (사이클 62, 2026-06-05).
+ * 가격 필터 카드 (사이클 64, 2026-06-06 — mode 단순화).
+ *
+ * 사이클 62 → 64 변경:
+ * - mode select 제거 (HARD/WARN/OFF 모드 폐기)
+ * - state mode 제거
+ * - mutation body 의 mode 필드 제거
+ * - 안내 배너 갱신 — "WebSocket 구독 대상 필터" + "보유/익일청산 절대 제외 안 됨"
  *
  * 기능:
- * - 매수 진입 전 가격 필터 설정 (저가주 차단 + 초고가주 차단)
- * - 3 모드: HARD (차단) / WARN (경고만) / OFF (비활성)
+ * - scanner 단계 WebSocket 구독 대상 가격 필터 설정 (저가주 차단 + 초고가주 차단)
+ * - 임계 외 종목은 시세 구독 자체 차단
+ * - 보유/익일청산 종목은 절대 제외 안 됨 (사이클 32 R4 universe guard + 사이클 64 Q1 옵션 D)
  * - 저장 즉시 반영 (백엔드 60s TTL 캐시 invalidate)
- * - 보유 종목 매도 / 익일청산 / 손절 영향 0 (매수 진입 전용)
  *
  * testid 매트릭스 (Red 명세 §F-FE 기준):
  *   price-filter-card          — 카드 컨테이너
- *   price-filter-mode-select   — HARD/WARN/OFF 셀렉트
  *   price-filter-min-slider    — 최소가 슬라이더 (0~20,000원, step 1,000)
  *   price-filter-max-slider    — 최대가 슬라이더 (0~2,000,000원, step 50,000)
  *   price-filter-save-button   — 저장 버튼
  *   price-filter-save-toast    — 저장 성공 안내
  *   price-filter-validation-error — max < min 에러
  *
+ * 폐기 (사이클 64):
+ *   price-filter-mode-select   — HARD/WARN/OFF 셀렉트 (mode 필드 자체 폐기)
+ *
  * 패턴 답습: CashUsageRatioCard (슬라이더 + 명시 저장 버튼)
  */
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getPriceFilter, updatePriceFilter } from '../api/price-filter'
-import type { PriceFilterMode } from '../types/price-filter'
 
 // 권장값 (자문 Q1 확정 — UI 툴팁만, DB 디폴트 아님)
 const RECOMMENDED_MIN = 5_000
@@ -33,12 +40,6 @@ const MIN_SLIDER_STEP = 1_000
 const MAX_SLIDER_MAX = 2_000_000
 const MAX_SLIDER_STEP = 50_000
 
-const MODE_LABELS: Record<PriceFilterMode, string> = {
-  HARD: 'HARD (차단)',
-  WARN: 'WARN (경고만)',
-  OFF: 'OFF (비활성)',
-}
-
 function formatPrice(value: number): string {
   if (value === 0) return '0 (비활성)'
   return `${value.toLocaleString('ko-KR')}원`
@@ -49,7 +50,6 @@ export default function PriceFilterCard() {
 
   const [minPrice, setMinPrice] = useState<number>(0)
   const [maxPrice, setMaxPrice] = useState<number>(0)
-  const [mode, setMode] = useState<PriceFilterMode>('OFF')
   const [dirty, setDirty] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const [saveToast, setSaveToast] = useState<string | null>(null)
@@ -63,7 +63,6 @@ export default function PriceFilterCard() {
     if (data) {
       setMinPrice(data.min_price)
       setMaxPrice(data.max_price)
-      setMode(data.mode)
       setDirty(false)
     }
   }, [data])
@@ -73,7 +72,6 @@ export default function PriceFilterCard() {
     onSuccess: (saved) => {
       setMinPrice(saved.min_price)
       setMaxPrice(saved.max_price)
-      setMode(saved.mode)
       setDirty(false)
       setValidationError(null)
       setSaveToast('가격 필터가 즉시 반영되었습니다.')
@@ -97,13 +95,6 @@ export default function PriceFilterCard() {
     setValidationError(null)
   }
 
-  const onModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setMode(e.target.value as PriceFilterMode)
-    setDirty(true)
-    setSaveToast(null)
-    setValidationError(null)
-  }
-
   const onSave = () => {
     // 클라이언트 검증: max < min (단 둘 다 > 0 일 때만)
     if (minPrice > 0 && maxPrice > 0 && maxPrice < minPrice) {
@@ -117,7 +108,8 @@ export default function PriceFilterCard() {
       return
     }
     setValidationError(null)
-    mutation.mutate({ min_price: minPrice, max_price: maxPrice, mode })
+    // 사이클 64 — mode 필드 미포함 (PriceFilterUpdate 에서 mode 제거)
+    mutation.mutate({ min_price: minPrice, max_price: maxPrice })
   }
 
   if (isLoading) {
@@ -137,36 +129,14 @@ export default function PriceFilterCard() {
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-semibold text-gray-900">가격 필터</h2>
         <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-          매수 진입 전용
+          WebSocket 구독 대상 필터
         </span>
       </div>
-      <p className="text-sm text-gray-500 mb-4">
-        매수 진입 시 참조 가격이 [최소, 최대] 범위를 벗어나면 모드에 따라
-        차단(HARD) 또는 경고(WARN) 합니다. 보유 종목 매도·손절·익일청산 영향
-        0.
-      </p>
 
-      {/* 운영 모드 셀렉트 */}
-      <div className="mb-5">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          운영 모드
-        </label>
-        <select
-          data-testid="price-filter-mode-select"
-          value={mode}
-          onChange={onModeChange}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {(['HARD', 'WARN', 'OFF'] as PriceFilterMode[]).map((m) => (
-            <option key={m} value={m}>
-              {MODE_LABELS[m]}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1 text-xs text-gray-400">
-          HARD: 범위 벗어난 종목 매수 차단 / WARN: 경고 로그만 기록, 매수
-          허용 / OFF: 필터 비활성
-        </p>
+      {/* 사이클 64 안내 배너 — "WebSocket 구독 대상 필터" 갱신 */}
+      <div className="mb-4 px-3 py-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+        WebSocket 구독 대상 필터 — 임계 외 종목은 시세 구독 자체 차단.
+        보유/익일청산 종목은 절대 제외 안 됨.
       </div>
 
       {/* 최소 가격 슬라이더 */}
@@ -260,12 +230,6 @@ export default function PriceFilterCard() {
           {saveToast}
         </div>
       )}
-
-      {/* 안내 */}
-      <div className="mb-4 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-3 py-2">
-        본 필터는 매수 진입에만 적용됩니다. 보유 종목 매도 / 익일청산 / 손절
-        / 트레일링 스탑 영향 0.
-      </div>
 
       {/* 저장 버튼 */}
       <div className="flex justify-end">
