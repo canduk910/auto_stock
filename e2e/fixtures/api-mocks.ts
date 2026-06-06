@@ -183,6 +183,17 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope([]) }),
   );
 
+  // 사이클 64 가격 필터 (2026-06-06) — Settings 진입 시 PriceFilterCard 마운트
+  // 와일드카드 `**/api/system/**` *전* 구체 라우트 등록 의무 (envelope({}) 가 min_price 미정의 → React controlled input 결함)
+  await page.route("**/api/system/price-filter", (route) =>
+    route.fulfill({ json: envelope({ min_price: 0, max_price: 0 }) }),
+  );
+
+  // 사이클 65 거래대금 동행 필터 (2026-06-06) — TradeAmountFilterCard 마운트
+  await page.route("**/api/system/trade-amount-filter", (route) =>
+    route.fulfill({ json: envelope({ min_amount: 0 }) }),
+  );
+
   await page.route("**/api/system/**", (route) =>
     route.fulfill({ json: envelope({}) }),
   );
