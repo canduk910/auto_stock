@@ -6,6 +6,7 @@ import asyncio
 import logging
 from datetime import date, datetime, timezone, timedelta
 
+from src.db._kst import KST, now_kst_iso, today_kst
 from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
@@ -51,6 +52,7 @@ async def insert_recommendation(
         "code_review_notes": code_review_notes,
         "weight_reasoning": weight_reasoning,
         "applied_weight": None,
+        "created_at": now_kst_iso(),
     }
     try:
         result = await asyncio.to_thread(
@@ -76,7 +78,7 @@ async def insert_recommendation(
 
 async def list_recommendations(days: int = 30) -> list[dict]:
     """최근 N일의 추천 목록을 created_at 내림차순으로 반환."""
-    cutoff = (date.today() - timedelta(days=days)).isoformat()
+    cutoff = (today_kst() - timedelta(days=days)).isoformat()
     result = await asyncio.to_thread(
         lambda: supabase.table("parameter_recommendations")
         .select("*")

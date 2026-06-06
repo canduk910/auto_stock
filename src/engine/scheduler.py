@@ -1720,7 +1720,8 @@ class TradingScheduler:
 
         # DB snapshot INSERT — empty regime 은 persist_snapshot 내부에서 skip
         try:
-            await persist_snapshot(regime, date.today())
+            from src.engine.scanner import KST_TZ as _KST_TZ_REGIME
+            await persist_snapshot(regime, datetime.now(_KST_TZ_REGIME).date())
         except Exception:
             logger.exception("[market_regime] snapshot INSERT 실패 — 메모리 레짐 유효")
 
@@ -2829,7 +2830,8 @@ class TradingScheduler:
 
         try:
             _, summary = await get_balance()
-            today = date.today()
+            from src.engine.scanner import KST_TZ as _KST_TZ_SETTLE
+            today = datetime.now(_KST_TZ_SETTLE).date()
 
             # 전체('total') 정산
             prev_total = await get_latest_performance(strategy="total")

@@ -102,7 +102,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
         tickers = await self._scan_universe()
         k_period = self.config.params["k_period"]
-        today_str = date.today().strftime("%Y%m%d")
+        today_str = datetime.now(timezone(timedelta(hours=9))).date().strftime("%Y%m%d")
         prepared = 0
 
         # 일봉 fetch 병렬화 (KIS Rate Limit semaphore가 자동 직렬화)

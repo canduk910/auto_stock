@@ -359,13 +359,15 @@ async def _fetch_daily_candles_and_cache(
 
     PR-C2 (2026-05-14): `_fetch_stock_detail_and_cache` 와 동일 패턴.
     """
-    from datetime import date, timedelta
+    from datetime import datetime, timedelta, timezone
 
     cache_key = (ticker, days)
+    _KST_TZ = timezone(timedelta(hours=9))
     try:
         # PR-C2 보강 (Copilot, 2026-05-14): `date.today()` 를 한 번만 호출 — 두 번
         # 호출 시 자정 경계 race 로 end_date/start_date 가 서로 다른 날짜 기준이 될 수 있음.
-        today = date.today()
+        # 사이클 68 G-12 — `date.today()` UTC naive 폐기, KST 명시
+        today = datetime.now(_KST_TZ).date()
         end_date = today.strftime("%Y%m%d")
         # 달력일 ≈ 영업일 × 7/5 + 안전 마진 (휴일/공휴일 + 신규상장 일자 부족 등)
         window_calendar_days = days + (days // 2) + 10

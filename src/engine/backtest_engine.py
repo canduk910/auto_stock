@@ -31,7 +31,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Optional
 
 from src.engine.backtest_yaml import build_yaml
@@ -149,7 +149,7 @@ class BacktestEngine:
 
         # 3) run_backtest_tool 호출
         target_symbols = list(symbols) if symbols else self._default_symbols
-        end = end_date or date.today()
+        end = end_date or datetime.now(timezone(timedelta(hours=9))).date()
         start = end - timedelta(days=days)
 
         run_resp = await self._client.call_tool(

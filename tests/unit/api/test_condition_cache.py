@@ -580,19 +580,22 @@ async def test_fetch_stock_detail_cancelled_error_does_not_corrupt_inflight(monk
 # ---------------------------------------------------------------------------
 
 def test_daily_candles_today_called_once_for_midnight_safety():
-    """소스코드 분석으로 `_fetch_daily_candles_and_cache` 가 `date.today()` 를
-    1회만 호출함을 검증 — 두 번 호출 시 자정 경계 race (end_date/start_date 날짜 어긋남).
+    """소스코드 분석으로 `_fetch_daily_candles_and_cache` 가 today 날짜 계산을
+    1회만 수행함을 검증 — 두 번 호출 시 자정 경계 race (end_date/start_date 날짜 어긋남).
+
     PR-C2 보강 (Copilot, 2026-05-14).
+    사이클 68 G-12 (2026-06-06): `date.today()` → `datetime.now(_KST_TZ).date()` KST 교체 반영.
+    패턴: `.date()` 호출이 비-주석 라인에서 정확히 1회.
     """
     import inspect
     from src.api import condition
 
     src = inspect.getsource(condition._fetch_daily_candles_and_cache)
-    # 코멘트 라인 제외 — 실제 함수 호출만 카운트
-    code_lines = [ln for ln in src.splitlines() if "date.today()" in ln and not ln.lstrip().startswith("#")]
-    today_calls = sum(ln.count("date.today()") for ln in code_lines)
+    # 코멘트 라인 제외 — 실제 함수 호출만 카운트 (.date() 패턴 — KST 대응)
+    code_lines = [ln for ln in src.splitlines() if ".date()" in ln and not ln.lstrip().startswith("#")]
+    today_calls = sum(ln.count(".date()") for ln in code_lines)
     assert today_calls == 1, (
-        f"date.today() 는 1회만 호출돼야 자정 race 안전 (실제 {today_calls}회)\n"
+        f"today 날짜 계산은 1회만 수행돼야 자정 race 안전 (실제 {today_calls}회)\n"
         f"매칭 라인: {code_lines}"
     )
 

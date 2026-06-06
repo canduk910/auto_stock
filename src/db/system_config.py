@@ -35,6 +35,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from src.db._kst import now_kst_iso
 from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
@@ -105,6 +106,7 @@ async def set_cash_usage_ratio(ratio: float) -> None:
     payload = {
         "key": _CASH_USAGE_RATIO_KEY,
         "value": {"value": adjusted},
+        "updated_at": now_kst_iso(),
     }
 
     def _upsert():
@@ -158,6 +160,7 @@ async def set_auto_regime_adjust(value: bool) -> None:
     payload = {
         "key": _AUTO_REGIME_ADJUST_KEY,
         "value": {"value": bool(value)},
+        "updated_at": now_kst_iso(),
     }
 
     def _upsert():
@@ -222,6 +225,7 @@ async def _set_bool(key: str, value: bool) -> None:
     payload = {
         "key": key,
         "value": {"value": bool(value)},
+        "updated_at": now_kst_iso(),
     }
 
     def _upsert():
@@ -338,6 +342,7 @@ async def set_buy_block_mode(mode: str) -> None:
     payload = {
         "key": _BUY_BLOCK_MODE_KEY,
         "value": {"value": mode},
+        "updated_at": now_kst_iso(),
     }
 
     def _upsert():
@@ -425,7 +430,7 @@ async def get_buy_block_thresholds() -> BuyBlockThresholds:
 
 
 async def _set_float(key: str, value: float) -> None:
-    payload = {"key": key, "value": {"value": float(value)}}
+    payload = {"key": key, "value": {"value": float(value)}, "updated_at": now_kst_iso()}
 
     def _upsert():
         return (
@@ -632,7 +637,7 @@ async def _get_str_or_default_UNUSED(key: str, default: str, valid: tuple) -> st
 
 async def _set_int(key: str, value: int) -> None:
     """JSONB {"value": int} upsert."""
-    payload = {"key": key, "value": {"value": int(value)}}
+    payload = {"key": key, "value": {"value": int(value)}, "updated_at": now_kst_iso()}
 
     def _upsert():
         return (

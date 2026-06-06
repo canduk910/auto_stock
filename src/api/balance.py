@@ -185,9 +185,10 @@ async def get_daily_orders(target_date: str = "", exchange: str = "ALL") -> list
     KIS 주식일별주문체결조회 API (TTTC0081R).
     `exchange`: `ALL`(기본, KRX+NXT+SOR) / `KRX` / `NXT` / `SOR`.
     """
-    from datetime import date as _date
+    from datetime import datetime as _datetime, timedelta as _timedelta, timezone as _timezone
     if not target_date:
-        target_date = _date.today().strftime("%Y%m%d")
+        _KST = _timezone(_timedelta(hours=9))
+        target_date = _datetime.now(_KST).date().strftime("%Y%m%d")
 
     params = {
         "CANO": settings.kis_account_no,

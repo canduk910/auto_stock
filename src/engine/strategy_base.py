@@ -6,9 +6,11 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from enum import Enum
 from typing import ClassVar
+
+_KST = timezone(timedelta(hours=9))
 
 
 class Signal(str, Enum):
@@ -47,7 +49,7 @@ class Position:
         """
         if self.strategy_id in self._MULTIDAY_STRATEGIES:
             return False
-        return self.buy_date < date.today()
+        return self.buy_date < datetime.now(_KST).date()
 
     def __post_init__(self):
         if self.high_since_buy == 0:

@@ -8,6 +8,19 @@ Supabase (PostgreSQL) CRUD 모듈.
 
 - `settings.supabase_url` + `settings.supabase_key` 로 클라이언트 생성
 
+## _kst.py — KST 공용 헬퍼 (사이클 68, 2026-06-07)
+
+- `KST = timezone(timedelta(hours=9))` — KST aware tzinfo 단일 진입점
+- `now_kst_iso() -> str` — `datetime.now(KST).isoformat()`. DB INSERT/UPSERT payload 의 시각 컬럼 (`created_at` / `updated_at` / `refreshed_at` / `completed_at` / `timestamp` 등) 의무 사용
+- `today_kst() -> date` — `datetime.now(KST).date()`. 서버 timezone 의존 (`date.today()`) 회피 — Q1 LOW 결함 차단
+- **결정 2-B (사이클 68)**: 사이클 65 hotfix H2/H2-bis (`system_logs.py:44` + `main.py:126`) 인라인 패턴 → 본 헬퍼로 통일. 8 DB 모듈 (stock_master / parameter_recommendations / log_reports / system_config / strategy_config / kis_quote_accounts / market_regime_snapshots / backtest_runs) + 9 engine/api 모듈 (api/balance / api/condition / engine/strategy_base / engine/strategy / engine/backtest_engine / engine/scheduler / engine/boot_manager / engine/strategies/long_tail_volatility / engine/strategies/volatility_breakout) 사용. AST 영구 가드 5 케이스 (`tests/unit/db/test_cycle68_*.py`):
+  - G-1 헬퍼 모듈 export 검증 (3 sub-case)
+  - G-2~G-9 8 DB 모듈 KST 명시 (8 케이스)
+  - G-10 AST 정적 가드: `datetime.utcnow()` 0건 + `src/db/` payload `datetime.now(timezone.utc)` 0건 (2 sub-case)
+  - G-11 `stock_master.is_stale()` KST 비교 통일 (Q3, 1 케이스)
+  - G-12 `date.today()` 일괄 → `today_kst()` 교체 (Q1 LOW, 1 케이스)
+- 사이클 65 H2/H2-bis 영속 (변경 0) — `system_logs.py:44` + `main.py:126` 은 인라인 `datetime.now(KST).isoformat()` 유지 (행위 동일, 헬퍼 통일은 후속 사이클 인계 가능)
+
 ## trade_history.py — 거래 내역
 
 - `insert_trade()`: 주문 시 INSERT (status: PENDING)

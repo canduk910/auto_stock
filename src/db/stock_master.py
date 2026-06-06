@@ -14,6 +14,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+from src.db._kst import KST, now_kst_iso
 from src.db.supabase import supabase
 from src.models.stock import StockBasics
 
@@ -32,7 +33,7 @@ def _to_row(basics: StockBasics, *, refreshed_at: datetime | None = None) -> dic
         "krx_halted": bool(basics.krx_halted),
         "admin_item": bool(basics.admin_item),
         "raw": dict(basics.raw or {}),
-        "refreshed_at": (refreshed_at or datetime.now(timezone.utc)).isoformat(),
+        "refreshed_at": refreshed_at.isoformat() if refreshed_at is not None else now_kst_iso(),
     }
 
 
@@ -50,7 +51,7 @@ def _from_row(row: dict) -> StockBasics:
 
 
 async def upsert_one(basics: StockBasics) -> None:
-    """단건 upsert — refreshed_at 은 현재 UTC 시각으로 자동 세팅.
+    """단건 upsert — refreshed_at 은 현재 KST 시각으로 자동 세팅.
 
     Phase G2 (2026-05-13) 이중 안전망: 호출자가 KIS pdno 12자리 형식 (`00000A000100`)
     을 넘기더라도 6자리 KRX 단축코드로 정규화 후 저장한다. `inquire_stock_basics`
@@ -69,7 +70,10 @@ async def upsert_one(basics: StockBasics) -> None:
             )
             basics = basics.model_copy(update={"ticker": normalized})
 
-    row = _to_row(basics)
+    row = {
+        **_to_row(basics),
+        "refreshed_at": now_kst_iso(),
+    }
     await asyncio.to_thread(
         lambda: supabase.table(TABLE_NAME).upsert(row, on_conflict="ticker").execute()
     )
@@ -118,5 +122,5 @@ async def is_stale(ticker: str, max_age_hours: int = 24) -> bool:
             ticker, refreshed_at_raw,
         )
         return True
-    age = datetime.now(timezone.utc) - refreshed_at
+    age = datetime.now(KST) - refreshed_at
     return age > timedelta(hours=max_age_hours)

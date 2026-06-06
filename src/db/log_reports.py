@@ -7,6 +7,7 @@ import logging
 from datetime import date
 from decimal import Decimal
 
+from src.db._kst import now_kst_iso
 from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
@@ -47,6 +48,8 @@ async def insert_log_report(
         "cost_estimate_usd": (
             float(cost_estimate_usd) if cost_estimate_usd is not None else None
         ),
+        # 사이클 68 G-4 — KST timestamp 명시 (DB DEFAULT UTC 폐기)
+        "created_at": now_kst_iso(),
     }
     try:
         result = await asyncio.to_thread(

@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from enum import Enum
+
+_KST = timezone(timedelta(hours=9))
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +40,13 @@ class Position:
     buy_price: int
     quantity: int
     order_no: str
-    buy_date: date = field(default_factory=date.today)  # 매수일자
+    buy_date: date = field(default_factory=lambda: datetime.now(_KST).date())  # 매수일자
     high_since_buy: int = 0       # 매수 이후 고가 (트레일링용)
 
     @property
     def is_next_day(self) -> bool:
         """매수일자가 오늘이 아니면 익일 청산 대상."""
-        return self.buy_date < date.today()
+        return self.buy_date < datetime.now(_KST).date()
 
     def __post_init__(self):
         self.high_since_buy = self.buy_price

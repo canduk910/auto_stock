@@ -23,6 +23,7 @@ import uuid
 from datetime import date, datetime, timezone
 from typing import Any, Optional
 
+from src.db._kst import now_kst_iso
 from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,8 @@ TABLE_NAME = "backtest_runs"
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    """사이클 68 G-9 — KST ISO 문자열 반환 (UTC 폐기)."""
+    return now_kst_iso()
 
 
 async def insert_run(
@@ -76,7 +78,7 @@ async def insert_run(
         "status": "queued",
         "mcp_job_id": None,
         "error_message": None,
-        "created_at": _now_iso(),
+        "created_at": now_kst_iso(),
         "completed_at": None,
     }
     try:
@@ -153,7 +155,7 @@ async def update_status(
     if metrics is not None:
         patch["metrics"] = dict(metrics)
     if status in ("completed", "failed", "skipped"):
-        patch["completed_at"] = _now_iso()
+        patch["completed_at"] = now_kst_iso()
 
     result = await asyncio.to_thread(
         lambda: supabase.table(TABLE_NAME).update(patch).eq("id", run_id).execute()

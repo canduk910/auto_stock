@@ -19,6 +19,7 @@ import uuid
 from datetime import date, datetime, timezone
 from typing import Any, Optional
 
+from src.db._kst import now_kst_iso
 from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,8 @@ TABLE_NAME = "market_regime_snapshots"
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    """사이클 68 G-8 — KST ISO 문자열 반환 (UTC 폐기)."""
+    return now_kst_iso()
 
 
 async def insert_snapshot(
@@ -71,7 +73,7 @@ async def insert_snapshot(
         "computed_cash_usage_ratio": computed_cash_usage_ratio,
         "buy_blocked": bool(buy_blocked),
         "block_reason": block_reason,
-        "created_at": _now_iso(),
+        "created_at": now_kst_iso(),
     }
     try:
         result = await asyncio.to_thread(

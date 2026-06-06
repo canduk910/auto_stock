@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
+from src.db._kst import now_kst_iso
 from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ async def save(strategy_id: str, enabled: bool, weight: float, params: dict) -> 
         "enabled": enabled,
         "weight": float(weight),
         "params": params,
+        "updated_at": now_kst_iso(),
     }
     await asyncio.to_thread(
         lambda: supabase.table("strategy_config").upsert(data, on_conflict="strategy_id").execute()

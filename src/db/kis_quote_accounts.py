@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 from uuid import UUID
 
+from src.db._kst import now_kst_iso
 from src.db.supabase import supabase
 from src.models.kis_quote_account import KisQuoteAccount, mask_secret
 
@@ -175,7 +176,6 @@ async def insert_account(
     if existing is not None:
         raise LabelConflictError(f"이미 등록된 label: {label}")
 
-    now_iso = datetime.now(timezone.utc).isoformat()
     payload = {
         "label": label,
         "app_key": app_key,
@@ -184,8 +184,9 @@ async def insert_account(
         "active": True,
         # 운영 DB 는 DEFAULT NOW() 로 자동 채워지지만 응답 직후 RETURNING 일관성
         # + 인메모리 fake 호환을 위해 명시 세팅.
-        "created_at": now_iso,
-        "updated_at": now_iso,
+        # 사이클 68 G-7 — KST timestamp 명시 (UTC 폐기)
+        "created_at": now_kst_iso(),
+        "updated_at": now_kst_iso(),
     }
 
     def _insert():
@@ -228,7 +229,7 @@ async def update_account(
     if current is None:
         return None
 
-    patch: dict[str, Any] = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    patch: dict[str, Any] = {"updated_at": now_kst_iso()}
     if active is not None:
         patch["active"] = bool(active)
     if label is not None:

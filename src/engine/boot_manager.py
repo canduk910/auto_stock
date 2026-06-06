@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 from src.api.balance import get_balance, get_daily_orders
@@ -81,7 +81,8 @@ async def boot(scheduler: "TradingScheduler") -> None:
     from src.engine.strategy_base import Position
     from src.engine.scanner import ticker_names
 
-    today = date.today()
+    _KST = timezone(timedelta(hours=9))
+    today = datetime.now(_KST).date()
     yesterday = today - timedelta(days=1)
 
     # 1차: DB positions 테이블에서 포지션 복구
