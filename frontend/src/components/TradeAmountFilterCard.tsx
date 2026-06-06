@@ -59,6 +59,7 @@ export default function TradeAmountFilterCard() {
   const { data, isLoading } = useQuery({
     queryKey: ['tradeAmountFilter'],
     queryFn: getTradeAmountFilter,
+    retry: 1,  // 사이클 65 hotfix H1 — e2e ECONNREFUSED 빠른 실패 (기본 3 → 1)
   })
 
   useEffect(() => {

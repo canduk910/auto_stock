@@ -41,6 +41,7 @@ async def write_log(log_level: str, message: str) -> None:
     data = {
         "log_level": log_level,
         "message": message,
+        "timestamp": datetime.now(KST).isoformat(),  # 사이클 65 hotfix H2 — KST 강제 (사이클 53 패턴 답습)
     }
     await asyncio.to_thread(
         lambda: supabase.table("system_logs").insert(data).execute()

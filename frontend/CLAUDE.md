@@ -146,6 +146,7 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
   - "보유/익일청산 종목은 절대 제외 안 됨" (사이클 64 Q1 옵션 D 답습 + 사이클 32 R4 universe guard 보호 영속)
   - "**09:00 직후 거래대금 미반영 종목은 graceful 통과**" (Q6-1 시스템 매매 무용 차단)
 - 회귀 가드 4 vitest 케이스 (`TradeAmountFilterCard.test.tsx`): F-FE-1 fetch 후 렌더 / F-FE-2 슬라이더 조작 + 저장 PUT body 검증 / F-FE-3 권장값 마커 갱신 / F-FE-4 안내 배너 보유/익일청산 + 09:00 graceful 텍스트
+- **사이클 65 hotfix H1 (2026-06-06)** `useQuery({ retry: 1, ... })` 명시: 사이클 64 PriceFilterCard + 사이클 65 TradeAmountFilterCard 양쪽에 `retry: 1` 옵션 *명시 추가*. `main.tsx` 전역 `defaultOptions.queries.retry: 1` 와 일관 (3 중: 전역 + 카드 1 + 카드 2). 원인: 사이클 65 카드 추가로 카드 수 임계 초과 → e2e 환경 (백엔드 미실행) ECONNREFUSED 시 React Query 기본 retry 3회 누적 → settings.spec.ts 5.7s timeout 초과. **AST 영구 가드** (`frontend/src/components/__tests__/_ast_useQuery_retry_required.test.ts` 2 케이스): PriceFilterCard + TradeAmountFilterCard 의 useQuery `retry` 옵션 명시 의무 (정규식 기반 정적 검증). 향후 신규 카드 useQuery 추가 시 retry 누락 영구 차단. 기타 카드 (`CashUsageRatioCard` / `IntegrationToggleCard` / `KisQuoteAccountsCard` 등) 는 전역 default 상속 — 카드 단위 명시는 별개 사이클 인계 (e2e api-mocks.ts 개별 라우트 모킹이라 현재 timeout 위험 0)
 - MSW handler (`handlers.ts` +14L): `GET /api/system/trade-amount-filter` → `{ min_amount: 0 }` + `PUT` 요청 body 반영
 
 ### `PriceFilterCard` (사이클 62 신설 → 사이클 64 단순화, 2026-06-06)

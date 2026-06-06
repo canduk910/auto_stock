@@ -123,6 +123,7 @@ def _insert_log_to_db(level: str, message: str) -> None:
         supabase.table("system_logs").insert({
             "log_level": level,
             "message": message,
+            "timestamp": datetime.now(KST).isoformat(),  # 사이클 65 hotfix H2-bis — KST 강제 (사이클 53 패턴)
         }).execute()
     except Exception:
         pass  # DB 기록 실패는 무시 (무한 재귀 방지)

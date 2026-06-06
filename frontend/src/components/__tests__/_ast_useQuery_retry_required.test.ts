@@ -1,0 +1,68 @@
+/**
+ * 사이클 65 hotfix H3 — useQuery `retry` 옵션 명시 의무 영구 가드.
+ *
+ * > **선례**: 사이클 60 hotfix G-3 / 사이클 64 hotfix G-3 AST 정적 가드 패턴 답습.
+ * > **결함 배경**: 사이클 65 e2e (settings.spec.ts) FAIL —
+ * >   PriceFilterCard / TradeAmountFilterCard 의 useQuery 에 `retry` 옵션 미설정 →
+ * >   e2e 환경 ECONNREFUSED 시 React Query 기본 retry (3회 × exponential backoff) 누적 →
+ * >   페이지 렌더 5s 초과 → settings.spec.ts FAIL.
+ * >   QueryClient defaults `retry: 1` 이 있지만 컴포넌트 useQuery 옵션이 누락되어도
+ * >   silent 결함화 (defaults 가 적용은 되지만, 명시적 retry 선언이 없으면
+ * >   future 회귀 시 다시 누락될 수 있음 — 영구 명시 가드 의무).
+ *
+ * 요구 행위:
+ * - PriceFilterCard.tsx + TradeAmountFilterCard.tsx 의 `useQuery({...})` 호출에
+ *   `retry:` 옵션 명시 (값: false / 0 / 1 / 2 / 3 중 하나).
+ *
+ * 위험 등급 HIGH — e2e timeout 영구 차단 + 다른 외부 호출 카드 회귀 가드.
+ *
+ * 검증 방법:
+ * - 소스 파일 텍스트 정적 파싱 (regex 기반 — TS AST 라이브러리 의존 회피).
+ * - useQuery 호출 블록 추출 → `retry:` 키 존재 검증.
+ */
+import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'fs'
+import path from 'path'
+
+const TARGET_FILES = [
+  'PriceFilterCard.tsx',
+  'TradeAmountFilterCard.tsx',
+]
+
+describe('사이클 65 hotfix H3 — useQuery retry 옵션 영구 가드', () => {
+  it.each(TARGET_FILES)(
+    '%s 의 useQuery 호출은 `retry:` 옵션 명시 의무 (e2e timeout 차단)',
+    (filename) => {
+      const filepath = path.join(__dirname, '..', filename)
+      const source = readFileSync(filepath, 'utf-8')
+
+      // useQuery({ ... }) 블록 추출 (multiline 지원).
+      // 단일 인자 객체 리터럴 형태만 검증 — useQuery(options) 패턴.
+      const useQueryRegex = /useQuery\(\s*\{([\s\S]*?)\}\s*\)/g
+      const matches = [...source.matchAll(useQueryRegex)]
+
+      expect(
+        matches.length,
+        `${filename}: useQuery 호출 0건 — 컴포넌트 fetch 누락 의심`,
+      ).toBeGreaterThanOrEqual(1)
+
+      const violations: string[] = []
+      matches.forEach((match, idx) => {
+        const optionsBlock = match[1]
+        // `retry:` 키 존재 확인. 값은 false / 0 / 1 / 2 / 3 중 하나.
+        if (!/\bretry\s*:\s*(false|0|1|2|3)\b/.test(optionsBlock)) {
+          violations.push(
+            `[#${idx + 1}] useQuery 옵션에 \`retry:\` 누락:\n${optionsBlock.slice(0, 200)}`,
+          )
+        }
+      })
+
+      expect(
+        violations,
+        `${filename} 의 useQuery 호출 ${violations.length}건 retry 옵션 누락 — ` +
+          `사이클 65 hotfix H1 영구 가드 위반 (e2e ECONNREFUSED 시 페이지 렌더 timeout 위험):\n` +
+          violations.join('\n---\n'),
+      ).toEqual([])
+    },
+  )
+})
