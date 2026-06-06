@@ -80,6 +80,14 @@ async def test_K1_cap_10_limits_resubscribe_targets_with_sorted_determinism():
 # K-2: Q5-3 cap=10 결함 가능성 — HIGH 005935 cap 밖 잘림 시나리오 (현재 결함 confirm)
 # ===========================================================================
 @pytest.mark.asyncio
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 66 시정 완료 — K-2 의미 전환: 결함 confirm PASS → 시정 confirm (XFAIL expected). "
+        "HIGH 005930 이 이제 cap 우선 보장되어 'not in result' assertion 이 자연히 FAIL. "
+        "본 파일은 사이클 63 당시 결함 영속 기록으로 보존 (삭제 금지)."
+    ),
+)
 async def test_K2_cap_10_defect_high_ticker_excluded_by_sorted_order_currently_buggy():
     """K-2 (Q5-3 결함 confirm): HIGH 005930 이 sorted "0..." 우선 LOW 10건에 밀려 cap 밖.
 

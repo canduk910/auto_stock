@@ -973,9 +973,13 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
     사이클 63 Phase 2-A3 (2026-06-05): scheduler.py L2690~L2789 그대로 이주.
     self.* → scheduler.* 치환만. 행위 변경 0건 (refactor).
 
-    Q5-3 결함 영속 (사이클 64+ 카드 #5 별도 발의):
-    `targets = stale_tickers[:cap]` — priority 분리 *전* cap 적용.
-    stale 30 종목 중 sorted "0..." 우선 LOW 후보 10건 cap 채우면 HIGH 종목 cap 밖.
+    사이클 66 (2026-06-06) — cap=10 결함 시정 (카드 #5 HIGH):
+    - 사이클 63 K-2 결함 confirm → 사이클 66 K-2 시정 confirm (Q6-4 의미 전환).
+    - `targets = stale_tickers[: cap]` 결함 패턴 (priority 분리 *전* cap 적용) 영구 제거.
+    - HIGH (positions ∪ next_day_clear) 절대 보장 + LOW 잔여 cap 채움.
+    - HIGH > cap 시 cap 위반 허용 + WARNING 로그 (Q3 옵션 A 운영 가시화).
+    - try/except 4중 가드 통일 — `_check_and_resubscribe_stale` L820-833 본체 패턴 답습 (Q2).
+    - 사이클 29 005935 사고 패턴 (HIGH 종목 cap 밖 잘림 8분 영구 잔류 + LMS chain) 영구 차단.
 
     사이클 25-B (2026-05-20) — positions/next_day_clear 는 HIGH, 그 외 후보는 LOW:
     - 기존: 모든 stale 에 HIGH+bypass_limit=True → VB/LTV 후보 stale → 메인 승격
@@ -1020,18 +1024,37 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
     if not stale_tickers:
         return []
 
-    # 사이클 25-B: HIGH 보장 대상 집합 — positions + next_day_clear
+    # 사이클 25-B + 사이클 66 (2026-06-06) — HIGH 보장 대상 집합 (try/except 4중 가드 통일 Q2)
+    # Q6-4 의미 전환: 사이클 63 K-2 결함 confirm → 사이클 66 K-2 시정 confirm.
+    # 사이클 29 005935 사고 패턴 (HIGH 종목 cap 밖 잘림 8분 영구 잔류 + LMS chain) 영구 차단.
     high_tickers: set[str] = set()
-    for s in scheduler.registry.all():
-        try:
-            high_tickers.update(s.state.positions.keys())
-        except Exception:
-            pass
-    ndc_tickers = {t for (t, _sid) in scheduler._pending_next_day_clear}
-    high_tickers.update(ndc_tickers)
+    try:
+        for s in scheduler.registry.all():
+            try:
+                high_tickers.update(s.state.positions.keys())
+            except Exception:
+                pass
+    except Exception:
+        # registry 미주입 인스턴스(테스트 __new__) 보호 — 모두 LOW 로 처리
+        pass
+    try:
+        high_tickers.update(t for (t, _sid) in scheduler._pending_next_day_clear)
+    except Exception:
+        pass
 
-    # Q5-3 결함 영속 — priority 분리 *전* cap 적용 (사이클 64+ 카드 #5 별도 발의)
-    targets = stale_tickers[:cap]
+    # Q1 시정: priority 분리 *먼저*, cap 적용 *나중* (HIGH 절대 우선)
+    high_targets = [t for t in stale_tickers if t in high_tickers]
+    low_targets = [t for t in stale_tickers if t not in high_tickers]
+
+    # Q3 시정: HIGH > cap 시 cap 위반 허용 + WARNING 로그 (운영 가시화)
+    if len(high_targets) > cap:
+        logger.warning(
+            "[stale_priority_resubscribe_cap_exceeded] high_count=%d cap=%d "
+            "tickers=%s — HIGH 종목 cap 위반 허용 (보유/익일청산 절대 보장)",
+            len(high_targets), cap, high_targets,
+        )
+
+    targets = high_targets + low_targets[: max(0, cap - len(high_targets))]
     resubscribed: list[str] = []
 
     for ticker in targets:
