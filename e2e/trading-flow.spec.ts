@@ -24,7 +24,8 @@ test.describe("자동매매 대시보드", () => {
     await installApiMocks(page);
     await page.goto("/");
     for (const label of ["대시보드", "거래 내역", "전략수정 AI자문", "로그", "설정"]) {
-      await expect(page.getByRole("link", { name: label })).toBeVisible();
+      // 사이클 65 hotfix #3 — toBeVisible default 5s 대신 명시 (e2e *.spec.ts 일관성)
+      await expect(page.getByRole("link", { name: label })).toBeVisible({ timeout: 10000 });
     }
   });
 });
