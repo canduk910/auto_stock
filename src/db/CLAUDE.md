@@ -138,6 +138,23 @@ Supabase (PostgreSQL) CRUD 모듈.
 - `parameter_recommendations.status`: pending → applied / partial / rejected / expired / applied_auto
 - `strategy_funnel_snapshots` (migration 030, 사이클 34): `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE + JSONB 필드 2개
 
+## TIMESTAMPTZ 사실 명문화 (사이클 69, 2026-06-08)
+
+**카드 #18 (UTC 잔존 데이터 백필 migration) 영구 폐기 — 사실: 백필 불필요**.
+
+모든 시각 컬럼은 PostgreSQL `TIMESTAMPTZ` (timestamp with time zone) 모델:
+- **내부 저장 = UTC instant** (timezone 정보 분리)
+- **표시 시점 = 세션 timezone 변환** (PostgREST 응답은 `+00:00` ISO 기본)
+- **instant 자체는 timezone 무관 절대 시점** — UTC 로 저장한 instant 와 KST 로 변환한 instant 는 *동일 시점*
+
+DB DEFAULT `now()` (Supabase PG 서버 timezone = UTC) INSERT instant ≡ Python `datetime.now()` (컨테이너 `TZ=Asia/Seoul`) INSERT instant = **절대 시점 동일**.
+
+사이클 65 hotfix H2/H2-bis + 사이클 68 17 모듈 시정 (`src/db/_kst.py` 헬퍼) = **표시 형식 (`+09:00` ISO) 일관화** + 호출자 정합성 보장 — *instant 정정이 아님*. 백필 migration 불필요.
+
+조회 영역 (`get_trades_in_range` / `get_logs` / `_fetch_logs_in_range`) 의 KST `+09:00` 명시 (사이클 53 B-4) = TIMESTAMPTZ 비교 timezone 정합성 100% 보장.
+
+미래 오해 차단 의무 — *"UTC 저장 = 결함"* 가정 시 본 명문화 인용. 진실의 원천: `docs/HARNESS_CHANGELOG.md` 사이클 69 행.
+
 ## 주의사항
 
 - **Supabase SDK 는 동기 client → 모든 `.execute()` 호출이 `asyncio.to_thread()` 로 thread pool 위임** (이벤트 루프 블로킹 차단). `lambda` 또는 inner function 패턴 사용
