@@ -16,7 +16,9 @@ NXT 거래가능성을 추론했다. 이제 KIS CTPF1002R 응답에서 파생된
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone, datetime
+
+_KST_TEST = timezone(timedelta(hours=9))  # 사이클 68 hotfix
 
 import pytest
 
@@ -32,7 +34,7 @@ def _seed_next_day_pos(strategy, ticker, buy_price=15000, qty=6):
         quantity=qty,
         order_no="ORIG-NEXT",
         strategy_id=strategy.strategy_id,
-        buy_date=date.today() - timedelta(days=1),
+        buy_date=datetime.now(_KST_TEST).date() - timedelta(days=1),
         high_since_buy=buy_price,
     )
     strategy.state.positions[ticker] = pos

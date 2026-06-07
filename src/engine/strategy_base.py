@@ -31,7 +31,7 @@ class Position:
     quantity: int
     order_no: str
     strategy_id: str
-    buy_date: date = field(default_factory=date.today)
+    buy_date: date = field(default_factory=lambda: datetime.now(_KST).date())
     high_since_buy: int = 0
 
     # 멀티데이 보유 전략 — 시간 청산 개념 없음 (ATR 트레일링/하드 손절만).

@@ -19,7 +19,9 @@
 from __future__ import annotations
 
 import inspect
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone, datetime
+
+_KST_TEST = timezone(timedelta(hours=9))  # 사이클 68 hotfix
 
 import pytest
 
@@ -237,7 +239,7 @@ async def test_vcp_trend_filter_reaches_base_detection_within_100_days(monkeypat
         return ["005930"]
 
     # 100일 우상향 추세 일봉 (오늘 제외, 어제부터 과거). 완만한 우상향.
-    today = date.today()
+    today = datetime.now(_KST_TEST).date()
     candles: list[dict] = []
     for i in range(100):
         d = today - timedelta(days=i + 1)

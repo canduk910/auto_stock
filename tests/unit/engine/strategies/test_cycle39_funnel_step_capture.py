@@ -134,8 +134,8 @@ async def test_bfb_prepare_records_funnel_steps(monkeypatch):
         return ["005930", "000660"]
 
     # 일봉 mock — pole/flag 검출 통과하도록 합성
-    from datetime import date as _date, timedelta as _td
-    today = _date.today()
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    today = _dt.now(_tz(_td(hours=9))).date()
 
     def _make_candles(ticker_idx, days=30):
         candles = []
@@ -198,8 +198,8 @@ async def test_vcp_prepare_records_funnel_steps(monkeypatch):
     async def _fake_scan():
         return ["005930"]
 
-    from datetime import date as _date, timedelta as _td
-    today = _date.today()
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    today = _dt.now(_tz(_td(hours=9))).date()
 
     def _make_candles(days=100):
         candles = []
@@ -259,8 +259,8 @@ async def test_donchian_prepare_records_funnel_steps(monkeypatch):
     async def _fake_scan():
         return ["005930"]
 
-    from datetime import date as _date, timedelta as _td
-    today = _date.today()
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    today = _dt.now(_tz(_td(hours=9))).date()
 
     def _make_candles(days=66):
         candles = []

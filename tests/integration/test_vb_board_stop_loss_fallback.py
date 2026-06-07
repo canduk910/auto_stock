@@ -21,7 +21,14 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import datetime, timedelta, timezone
+
+_KST = timezone(timedelta(hours=9))
+
+
+def _today_kst():
+    """사이클 68 hotfix — CI UTC 자정 너머 KST 어긋남 차단 (production 일관)."""
+    return datetime.now(_KST).date()
 
 import pytest
 
@@ -44,7 +51,7 @@ def _make_vb_with_position(params: dict) -> VolatilityBreakoutStrategy:
         quantity=1,
         order_no="O-TEST",
         strategy_id="volatility_breakout",
-        buy_date=date.today(),  # 당일 매수 — is_next_day=False
+        buy_date=_today_kst(),  # 당일 매수 — is_next_day=False
     )
     return vb
 

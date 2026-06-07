@@ -23,7 +23,9 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
+
+_KST_TEST = timezone(timedelta(hours=9))  # 사이클 68 hotfix
 from unittest.mock import patch
 
 import pytest
@@ -40,7 +42,7 @@ def _seed_next_day_pos(strategy, ticker, buy_price=15000, qty=6, high=None):
         quantity=qty,
         order_no="ORIG-NEXT",
         strategy_id=strategy.strategy_id,
-        buy_date=date.today() - timedelta(days=1),
+        buy_date=datetime.now(_KST_TEST).date() - timedelta(days=1),
         high_since_buy=high if high is not None else buy_price,
     )
     strategy.state.positions[ticker] = pos

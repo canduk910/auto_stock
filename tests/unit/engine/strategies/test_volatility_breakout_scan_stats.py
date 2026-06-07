@@ -12,9 +12,12 @@ Red 단계 (사이클 21):
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
+_KST_TEST = timezone(timedelta(hours=9))  # 사이클 68 hotfix
 
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine.strategy_base import StrategyConfig
@@ -135,8 +138,8 @@ async def test_prepare_accumulates_counts_through_pipeline(vb, monkeypatch):
             raise RuntimeError("daily fetch fail")
         # candles[0] = 오늘 부분봉, candles[1] = 전일, candles[2:] = 전일 이전
         # K값 계산 위해 noise > 0 + prev_range > 0 필요
-        from datetime import date
-        today = date.today().strftime("%Y%m%d")
+        from datetime import datetime as _dt
+        today = _dt.now(_KST_TEST).date().strftime("%Y%m%d")
         return [
             {"stck_bsop_date": today, "stck_hgpr": "51000", "stck_lwpr": "50000", "stck_oprc": "50500", "stck_clpr": "50800"},
             # 전일

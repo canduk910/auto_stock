@@ -10,7 +10,14 @@ LTV 는 VB 진입 + 모멘텀 익일 청산을 합성한다. 검증 포인트:
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import datetime, timedelta, timezone
+
+_KST = timezone(timedelta(hours=9))
+
+
+def _today_kst():
+    """사이클 68 hotfix — CI UTC 자정 너머 KST 어긋남 차단 (production 일관)."""
+    return datetime.now(_KST).date()
 
 import pytest
 
@@ -55,7 +62,7 @@ def _make_position(strategy, ticker="005930", buy_price=80000, *, next_day=False
     pos = Position(
         ticker=ticker, buy_price=buy_price, quantity=1,
         order_no="O1", strategy_id=strategy.strategy_id,
-        buy_date=(date.today() - timedelta(days=1)) if next_day else date.today(),
+        buy_date=(_today_kst() - timedelta(days=1)) if next_day else _today_kst(),
     )
     strategy.state.positions[ticker] = pos
     return pos

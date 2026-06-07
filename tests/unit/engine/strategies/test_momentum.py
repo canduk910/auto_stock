@@ -8,7 +8,14 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import datetime, timedelta, timezone
+
+_KST = timezone(timedelta(hours=9))
+
+
+def _today_kst():
+    """사이클 68 hotfix — CI UTC 자정 너머 KST 어긋남 차단 (production 일관)."""
+    return datetime.now(_KST).date()
 
 import pytest
 
@@ -148,7 +155,7 @@ def _make_next_day_position(strategy, ticker="005930", buy_price=100000):
     pos = Position(
         ticker=ticker, buy_price=buy_price, quantity=1,
         order_no="O1", strategy_id=strategy.strategy_id,
-        buy_date=date.today() - timedelta(days=1),
+        buy_date=_today_kst() - timedelta(days=1),
     )
     strategy.state.positions[ticker] = pos
     return pos

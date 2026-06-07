@@ -100,8 +100,9 @@ async def test_prepare_excludes_consecutive_limit_up_from_pass_count(ltv, monkey
         return {"output": []}
 
     async def fake_fetch_daily_candles(ticker, days):
-        from datetime import date
-        today = date.today().strftime("%Y%m%d")
+        from datetime import datetime, timedelta, timezone
+        # 사이클 68 hotfix — CI UTC 자정 너머 KST 어긋남 차단
+        today = datetime.now(timezone(timedelta(hours=9))).date().strftime("%Y%m%d")
         if ticker == "222222":
             # 연속상한가 — open 대비 close 가 +28% 이상 (>25%) 2일 연속
             return [

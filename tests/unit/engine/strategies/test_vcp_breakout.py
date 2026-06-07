@@ -23,7 +23,9 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone, datetime
+
+_KST_TEST = timezone(timedelta(hours=9))  # 사이클 68 hotfix
 
 import pytest
 from freezegun import freeze_time
@@ -110,7 +112,7 @@ def test_position_is_next_day_false_for_vcp_breakout():
     `Position._MULTIDAY_STRATEGIES` frozenset 에 'vcp_breakout' 추가 검증.
     OrderMonitor "청산" 배지 미표시(donchian I2 컨벤션).
     """
-    yesterday = date.today() - timedelta(days=1)
+    yesterday = datetime.now(_KST_TEST).date() - timedelta(days=1)
     pos = Position(
         ticker="005930", buy_price=12_000, quantity=10,
         order_no="O1", strategy_id="vcp_breakout",

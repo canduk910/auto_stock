@@ -19,7 +19,9 @@ I3 요구 행위:
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
+
+_KST_TEST = timezone(timedelta(hours=9))  # 사이클 68 hotfix
 from types import SimpleNamespace
 
 import pytest
@@ -35,7 +37,7 @@ pytestmark = pytest.mark.integration
 # ---------------------------------------------------------------------------
 def _seed_position(strategy, ticker, *, is_next_day: bool = False):
     """전략에 단일 포지션 시드."""
-    buy_dt = date.today() - timedelta(days=1) if is_next_day else date.today()
+    buy_dt = datetime.now(_KST_TEST).date() - timedelta(days=1) if is_next_day else datetime.now(_KST_TEST).date()
     strategy.state.positions[ticker] = Position(
         ticker=ticker,
         buy_price=10_000,

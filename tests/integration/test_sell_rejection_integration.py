@@ -23,6 +23,8 @@ Red 상태:
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
+
+_KST_TEST = timezone(timedelta(hours=9))  # 사이클 68 hotfix
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -84,7 +86,7 @@ def registry() -> StrategyRegistry:
         quantity=1,
         order_no="ORDER-PRE-064400",
         strategy_id="momentum",
-        buy_date=date.today(),
+        buy_date=datetime.now(_KST_TEST).date(),
     )
     reg.register(strat)
     return reg
