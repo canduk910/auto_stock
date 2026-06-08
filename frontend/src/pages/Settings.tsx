@@ -43,6 +43,7 @@ export default function Settings() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['strategies'],
     queryFn: getStrategies,
+    retry: 1,  // 사이클 80 hotfix — 사이클 65 H1 답습 + 사이클 79 e2e flaky 영구 차단
   })
 
   const weightMutation = useMutation({
@@ -695,6 +696,7 @@ function AutoStartToggle() {
       const { data } = await apiClient.get('/strategies/system/auto-start')
       return data.data?.auto_start ?? false
     },
+    retry: 1,  // 사이클 80 hotfix — 사이클 65 H1 답습
   })
 
   const mutation = useMutation({

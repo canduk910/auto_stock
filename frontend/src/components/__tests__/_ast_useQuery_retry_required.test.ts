@@ -34,6 +34,11 @@ const TARGET_FILES = [
   'KisQuoteAccountsCard.tsx',
 ]
 
+// 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e
+// 1차 + 재실행 모두 fail 확정, 페이지 어셈블 timeout 영구 차단). 컴포넌트가 아닌 페이지
+// 영역이라 별도 path 처리.
+const TARGET_PAGES = ['Settings.tsx']
+
 describe('사이클 65 hotfix H3 + 사이클 75 Q4 확장 — useQuery retry 옵션 영구 가드', () => {
   it.each(TARGET_FILES)(
     '%s 의 useQuery 호출은 `retry:` 옵션 명시 의무 (e2e timeout 차단)',
@@ -66,6 +71,40 @@ describe('사이클 65 hotfix H3 + 사이클 75 Q4 확장 — useQuery retry 옵
         violations,
         `${filename} 의 useQuery 호출 ${violations.length}건 retry 옵션 누락 — ` +
           `사이클 65 hotfix H1 영구 가드 위반 (e2e ECONNREFUSED 시 페이지 렌더 timeout 위험):\n` +
+          violations.join('\n---\n'),
+      ).toEqual([])
+    },
+  )
+
+  // 사이클 80 hotfix — Settings.tsx 페이지 useQuery retry:1 영구 가드
+  it.each(TARGET_PAGES)(
+    'pages/%s 의 useQuery 호출은 `retry:` 옵션 명시 의무 (사이클 80 hotfix, 사이클 79 e2e flaky 영구 차단)',
+    (filename) => {
+      const filepath = path.join(__dirname, '..', '..', 'pages', filename)
+      const source = readFileSync(filepath, 'utf-8')
+
+      const useQueryRegex = /useQuery(?:<[^>]+>)?\(\s*\{([\s\S]*?)\}\s*\)/g
+      const matches = [...source.matchAll(useQueryRegex)]
+
+      expect(
+        matches.length,
+        `pages/${filename}: useQuery 호출 0건`,
+      ).toBeGreaterThanOrEqual(1)
+
+      const violations: string[] = []
+      matches.forEach((match, idx) => {
+        const optionsBlock = match[1]
+        if (!/\bretry\s*:\s*(false|0|1|2|3)\b/.test(optionsBlock)) {
+          violations.push(
+            `[#${idx + 1}] useQuery 옵션에 \`retry:\` 누락:\n${optionsBlock.slice(0, 200)}`,
+          )
+        }
+      })
+
+      expect(
+        violations,
+        `pages/${filename} 의 useQuery 호출 ${violations.length}건 retry 옵션 누락 — ` +
+          `사이클 80 hotfix 영구 가드 위반 (사이클 79 e2e 1차 + 재실행 모두 fail 확정):\n` +
           violations.join('\n---\n'),
       ).toEqual([])
     },
