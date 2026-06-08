@@ -247,6 +247,8 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   // 사이클 77 hotfix — Dashboard 영역 endpoint 추가 (settings.spec.ts 진입 시 react-router prefetch
   // 또는 lazy import 트리거로 MarketRegimeCard / ScanMonitor 컴포넌트 useQuery 발화. 사이클 75 G-AST1
   // 가드 영역 (Settings 한정) 한계 노출 → 사이클 77 = Dashboard 영역 매핑 확장)
+  // 사이클 77 hotfix #2 — MarketRegimeCurrent interface 정확 매칭 (frontend/src/types/market_regime.ts)
+  // 5 필수 필드 (buy_blocked / block_reason / auto_regime_adjust / cash_usage_ratio / enabled) 추가
   await page.route("**/api/market-regime/current", (route) =>
     route.fulfill({
       json: envelope({
@@ -257,8 +259,11 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
         fear_greed_score: 50,
         buffett_ratio: 100.0,
         cash_min: 30,
-        is_buy_allowed: true,
-        raw: {},
+        buy_blocked: false,
+        block_reason: null,
+        auto_regime_adjust: true,
+        cash_usage_ratio: 1.0,
+        enabled: false,
       }),
     }),
   );
