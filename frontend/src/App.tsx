@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react'
-import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
+import { lazy, Suspense, useState } from 'react'
+import { Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom'
 import { TradingStatusProvider, useTradingStatus } from './contexts/TradingStatusContext'
 import Dashboard from './pages/Dashboard'
 
@@ -46,25 +46,41 @@ function EnvBanner() {
   )
 }
 
+// 모바일 햄버거 메뉴 — 현재 경로를 표시하기 위해 useLocation 사용
+function MobileMenuLabel() {
+  const { pathname } = useLocation()
+  const current = navItems.find((item) =>
+    item.to === '/' ? pathname === '/' : pathname.startsWith(item.to)
+  )
+  return (
+    <span className="text-sm font-medium text-gray-700">
+      {current?.label ?? '메뉴'}
+    </span>
+  )
+}
+
 function AppShell() {
+  const [mobileOpen, setMobileOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* 상단 환경 배너 + 네비게이션 — 스크롤해도 항상 화면 최상단에 고정 */}
-      <div className="sticky top-0 z-50">
+      <div className="sticky top-0 z-50" data-testid="nav-sticky-wrapper">
         <EnvBanner />
 
-        <nav className="bg-white shadow-sm">
+        <nav className="bg-white shadow-sm" aria-label="기본 네비게이션">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center h-14 gap-8">
-              <span className="font-bold text-gray-900">AutoStock</span>
-              <div className="flex gap-4">
+            {/* PC (sm 이상): 한 줄 가로 메뉴 */}
+            <div className="hidden sm:flex items-center h-14 gap-8">
+              <span className="font-bold text-gray-900 shrink-0">AutoStock</span>
+              <div className="flex gap-1 flex-wrap">
                 {navItems.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     end={item.to === '/'}
                     className={({ isActive }) =>
-                      `text-sm font-medium px-3 py-2 rounded-md ${
+                      `text-sm font-medium px-3 py-2 rounded-md whitespace-nowrap ${
                         isActive
                           ? 'bg-gray-100 text-gray-900'
                           : 'text-gray-600 hover:text-gray-900'
@@ -76,7 +92,59 @@ function AppShell() {
                 ))}
               </div>
             </div>
+
+            {/* 모바일 (sm 미만): 로고 + 현재 메뉴명 + 햄버거 버튼 */}
+            <div className="flex sm:hidden items-center justify-between h-14">
+              <span className="font-bold text-gray-900">AutoStock</span>
+              <MobileMenuLabel />
+              <button
+                data-testid="mobile-menu-button"
+                aria-label="메뉴 열기"
+                aria-expanded={mobileOpen}
+                onClick={() => setMobileOpen((prev) => !prev)}
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                {/* 햄버거 / X 아이콘 */}
+                {mobileOpen ? (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
+
+          {/* 모바일 드롭다운 메뉴 */}
+          {mobileOpen && (
+            <div
+              data-testid="mobile-menu-drawer"
+              className="sm:hidden border-t border-gray-100 bg-white shadow-md"
+            >
+              <div className="px-2 py-2 space-y-1">
+                {navItems.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.to === '/'}
+                    onClick={() => setMobileOpen(false)}
+                    className={({ isActive }) =>
+                      `block text-sm font-medium px-3 py-2 rounded-md ${
+                        isActive
+                          ? 'bg-gray-100 text-gray-900'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          )}
         </nav>
       </div>
 
