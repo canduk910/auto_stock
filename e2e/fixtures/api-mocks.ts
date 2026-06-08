@@ -183,8 +183,16 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope([]) }),
   );
 
+  // 사이클 80 hotfix #3 — Playwright route 매칭 규칙은 **LIFO** ("latest registered route wins").
+  // 따라서 wildcard `**/api/system/**` 를 다른 system/ 라우트 *전* 에 먼저 등록 = fallback 역할.
+  // 사이클 65 hotfix #2 주석 의도 ("구체 라우트를 와일드카드 보다 앞에 등록") 는 FIFO 가정이었으나,
+  // 실제 Playwright 는 LIFO → 구체 라우트가 *나중* 등록되어야 wildcard 보다 우선 매칭. 영역 재배치.
+  await page.route("**/api/system/**", (route) =>
+    route.fulfill({ json: envelope({}) }),
+  );
+
   // 사이클 64 가격 필터 (2026-06-06) — Settings 진입 시 PriceFilterCard 마운트
-  // 와일드카드 `**/api/system/**` *전* 구체 라우트 등록 의무 (envelope({}) 가 min_price 미정의 → React controlled input 결함)
+  // 와일드카드 *후* 구체 라우트 등록 (LIFO 우선 매칭) — envelope({}) min_price 미정의 → React controlled input throw 차단
   await page.route("**/api/system/price-filter", (route) =>
     route.fulfill({ json: envelope({ min_price: 0, max_price: 0 }) }),
   );
@@ -245,6 +253,9 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   );
 
   // 사이클 77 hotfix — Dashboard 영역 endpoint 추가 (settings.spec.ts 진입 시 react-router prefetch
+  // 또는 lazy import 로 MarketRegimeCard / ScanMonitor (Dashboard 컴포넌트) useQuery 발화 →
+  // /api/market-regime/current + /api/realtime/subscriptions ECONNREFUSED.
+  // 사이클 75 G-AST1~AST3 (Settings 한정) 영역 한계 노출 → 사이클 77 = Dashboard 영역 확장.
   // 또는 lazy import 트리거로 MarketRegimeCard / ScanMonitor 컴포넌트 useQuery 발화. 사이클 75 G-AST1
   // 가드 영역 (Settings 한정) 한계 노출 → 사이클 77 = Dashboard 영역 매핑 확장)
   // 사이클 77 hotfix #2 — MarketRegimeCurrent interface 정확 매칭 (frontend/src/types/market_regime.ts)
@@ -277,7 +288,8 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope({ sessions: [], total_count: 0 }) }),
   );
 
-  await page.route("**/api/system/**", (route) =>
-    route.fulfill({ json: envelope({}) }),
-  );
+  // 사이클 80 hotfix #3 — 함수 끝 wildcard `**/api/system/**` 제거 (LIFO 라 가장 우선 매칭되어
+  // L196 price-filter / L201 trade-amount-filter 구체 라우트 무효화 → PriceFilterCard 가 envelope({}) 응답
+  // 받아 min_price undefined → React controlled input throw → Error Boundary 없음 → 전체 페이지 unmount).
+  // Wildcard fallback 은 L190 (구체 라우트 *전* 등록) 만 유지 — LIFO 라 fallback 역할 정확.
 }
