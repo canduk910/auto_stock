@@ -44,11 +44,16 @@ def test_e2e_api_mocks_includes_trade_amount_filter_specific_route():
     )
 
 
-def test_e2e_api_mocks_specific_routes_registered_before_wildcard():
-    """구체 라우트가 와일드카드 `**/api/system/**` *전* 등록 의무.
+def test_e2e_api_mocks_specific_routes_registered_after_wildcard():
+    """구체 라우트가 와일드카드 `**/api/system/**` *뒤* 등록 의무 (Playwright LIFO).
 
-    Playwright route 매칭 = 등록 순서대로. 와일드카드 먼저 등록 시 구체 라우트
-    매칭 안 됨 → envelope({}) 반환 → 결함.
+    사이클 80 hotfix #3 (2026-06-08) 시정 결과 = Playwright route 매칭 규칙은 **LIFO**
+    ("latest registered route wins"). 사이클 65 hotfix #2 시점 가드는 FIFO 가정 (구체 라우트 *전*)
+    이었으나 실제 동작 = LIFO. 사이클 79~80 5회 e2e fail (wildcard 가 구체 라우트 무효화) 의
+    근본 원인. 사이클 80 hotfix #3 시정 후 영구 가드 = 구체 라우트가 wildcard *후* 등록.
+
+    Wildcard 가 fallback 역할 (구체 라우트 미매칭 시 envelope({}) 반환) — LIFO 라
+    먼저 등록되어야 가장 *후순위* 매칭됨.
     """
     mocks_path = Path(__file__).parent.parent.parent.parent / "e2e/fixtures/api-mocks.ts"
     source = mocks_path.read_text()
@@ -61,11 +66,13 @@ def test_e2e_api_mocks_specific_routes_registered_before_wildcard():
     assert trade_amount_filter_pos > 0, "trade-amount-filter 구체 라우트 등록 누락"
     assert wildcard_pos > 0, "와일드카드 `**/api/system/**` 라우트 누락"
 
-    assert price_filter_pos < wildcard_pos, (
+    # 사이클 80 hotfix #3 — Playwright LIFO 영구 가드 (구체 라우트가 wildcard *후* 등록)
+    assert price_filter_pos > wildcard_pos, (
         f"price-filter 구체 라우트 (pos={price_filter_pos}) 가 와일드카드 "
-        f"(pos={wildcard_pos}) *뒤* 등록 — Playwright 매칭 순서 위반"
+        f"(pos={wildcard_pos}) *전* 등록 — Playwright LIFO 위반 (wildcard 가 우선 매칭되어 "
+        f"구체 라우트 무효화). 사이클 80 hotfix #3 시정 의도 위반."
     )
-    assert trade_amount_filter_pos < wildcard_pos, (
+    assert trade_amount_filter_pos > wildcard_pos, (
         f"trade-amount-filter 구체 라우트 (pos={trade_amount_filter_pos}) 가 와일드카드 "
-        f"(pos={wildcard_pos}) *뒤* 등록 — Playwright 매칭 순서 위반"
+        f"(pos={wildcard_pos}) *전* 등록 — Playwright LIFO 위반."
     )
