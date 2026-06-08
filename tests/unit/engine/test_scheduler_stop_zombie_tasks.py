@@ -204,7 +204,8 @@ def test_stop_tuple_equals_finally_tuple_members():
     명세 §4 Patch A — 13-E-2 finally(7종) 와 13-E-3 stop(7종) 통일.
     명세 §9 검수 ① — `("_next_day_task", "_session_task", "_stale_watcher_task",
                           "_swing_poll_task", "_swing_rest_poll_task",
-                          "_ws_task", "_scan_task")` 동일.
+                          "_api_recovered_collector_task",
+                          "_ws_task", "_scan_task")` 동일 (10종, 사이클 79 갱신).
 
     Red 상태: 현재 stop() tuple 은 5종, finally tuple 은 7종 → 차집합 `{_ws_task, _scan_task}` 발견 → fail.
 
@@ -254,11 +255,12 @@ def test_stop_tuple_equals_finally_tuple_members():
         "_swing_poll_task",
         "_swing_rest_poll_task",
         "_5xx_dedupe_summary_task",
+        "_api_recovered_collector_task",  # 사이클 79 추가 (사이클 76 도입, cancel 누락 시정)
         "_ws_task",
         "_scan_task",
     }
     assert stop_members == expected_members, (
-        f"stop() tuple 이 명세 §9 ① 의 9종과 불일치.\n"
+        f"stop() tuple 이 명세 §9 ① 의 10종과 불일치.\n"
         f"  실제 : {sorted(stop_members)}\n"
         f"  기대 : {sorted(expected_members)}\n"
         f"명세 §4 Patch A 코드 블록 참조."

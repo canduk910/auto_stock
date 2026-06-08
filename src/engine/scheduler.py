@@ -739,6 +739,7 @@ class TradingScheduler:
                 "_session_health_task",  # 사이클 46
                 "_swing_poll_task", "_swing_rest_poll_task",
                 "_5xx_dedupe_summary_task",
+                "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -862,6 +863,7 @@ class TradingScheduler:
             "_session_health_task",  # 사이클 46
             "_swing_poll_task", "_swing_rest_poll_task",
             "_5xx_dedupe_summary_task",
+            "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
