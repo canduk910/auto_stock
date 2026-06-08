@@ -28,11 +28,12 @@ def _make_pf(min_price=0, max_price=0):
 
 
 def _make_basics(ticker: str, prdy_clpr: int):
+    """사이클 81 시정 — bfdy_clpr 정본 키 사용 (파라미터명 호환 보존)."""
     from src.models.stock import StockBasics
     return StockBasics(
         ticker=ticker, name="", excg_dvsn_cd="",
         nxt_tradable=True, krx_halted=False, admin_item=False,
-        raw={"prdy_clpr": str(prdy_clpr)},
+        raw={"bfdy_clpr": str(prdy_clpr)},  # 사이클 81 시정 — CTPF1002R 정본 키
     )
 
 

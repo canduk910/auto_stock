@@ -69,13 +69,27 @@ async def test_get_acml_tr_pbmn_scanner_first_hit(monkeypatch):
 
 # ---------------------------------------------------------------------------
 # B-5-2: scanner miss → stock_master.raw.acml_tr_pbmn 2순위 hit
+# 사이클 81 시정 — 2순위 폴백 폐기 (CTPF1002R 응답에 acml_tr_pbmn 키 없음).
+# @xfail(strict=False): 사이클 65 시점 2순위 폴백 존재 확인 영속 보존 (사이클 66 K-2 패턴 답습).
 # ---------------------------------------------------------------------------
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 81 시정 — 2순위 stock_master.raw.acml_tr_pbmn 폴백 폐기 "
+        "(CTPF1002R 응답에 acml_tr_pbmn 키 없음 domain-expert 확정). "
+        "사이클 65 시점 결함 영속 보존 (사이클 66 K-2 xfail 패턴 답습). "
+        "시정 완료로 자동 XFAIL 전환 확인."
+    ),
+)
 @pytest.mark.asyncio
 async def test_get_acml_tr_pbmn_scanner_miss_stock_master_hit(monkeypatch):
     """2순위 — scanner miss 후 stock_master.raw.acml_tr_pbmn hit.
 
     stock_master 는 24h TTL 캐시 (CTPF1002R 응답).
     문자열 "15000000000" → int 150억 변환 검증.
+
+    [사이클 81 의미 전환] 2순위 폴백 폐기 → scanner miss 시 0 반환 (graceful).
+    xfail(strict=False): 결함 영속 보존 + 시정 완료 자동 XFAIL 가시화.
     """
     from src.engine import scanner
 

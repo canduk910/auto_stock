@@ -158,12 +158,13 @@ async def _apply_price_filter(
             survivors.append(ticker)
             continue
 
-        # prdy_clpr 조회 — stock_master.raw.prdy_clpr 단독 (Q2 옵션 A)
+        # bfdy_clpr 조회 — stock_master.raw.bfdy_clpr 단독 (Q2 옵션 A)
+        # 사이클 81 시정 — CTPF1002R 정본 키 (사이클 64 prdy_clpr 명명 오류)
         prdy_clpr = 0
         try:
             basics = await _sm_mod.get(ticker)
             if basics and basics.raw:
-                raw_val = basics.raw.get("prdy_clpr", 0)
+                raw_val = basics.raw.get("bfdy_clpr", 0)
                 if raw_val:
                     prdy_clpr = int(raw_val)
         except Exception:
@@ -184,7 +185,7 @@ async def _apply_price_filter(
             if ticker not in _price_filter_scanner_skip_logged_today:
                 _price_filter_scanner_skip_logged_today.add(ticker)
                 logger.info(
-                    "[price_filter_scanner_skip] ticker=%s prdy_clpr=%d "
+                    "[price_filter_scanner_skip] ticker=%s bfdy_clpr=%d "
                     "reason=%s min=%d max=%d",
                     ticker, prdy_clpr, reason, pf.min_price, pf.max_price,
                 )
@@ -193,7 +194,7 @@ async def _apply_price_filter(
                     await write_log(
                         "INFO",
                         f"[price_filter_scanner_skip] ticker={ticker} "
-                        f"prdy_clpr={prdy_clpr} reason={reason} "
+                        f"bfdy_clpr={prdy_clpr} reason={reason} "
                         f"min={pf.min_price} max={pf.max_price}",
                     )
                 except Exception:
@@ -220,7 +221,7 @@ async def _apply_price_filter(
                 survived_tickers=[{"ticker": t} for t in survivors[:200]],
                 excluded_count=len(excluded),
                 excluded_sample=[
-                    {"ticker": t, "prdy_clpr": p, "reason": r}
+                    {"ticker": t, "bfdy_clpr": p, "reason": r}
                     for (t, p, r) in excluded[:20]
                 ],
             )
@@ -318,8 +319,11 @@ async def _get_acml_tr_pbmn(ticker: str) -> int:
 
     단위: 원(₩) — scanner.py MIN_TRADE_AMOUNT 패턴 답습.
     Q6-1 09:00 race 영속: scanner 1순위 0 (장 시작 직후 누적 미반영) → graceful 통과 보장.
+    사이클 81 시정 — 2순위 stock_master.raw.acml_tr_pbmn 폴백 폐기 (CTPF1002R 응답에 acml_tr_pbmn 키 없음).
     """
-    # 1순위 — scanner ticker_market_info["trade_amount_raw"] (원 단위 정밀값)
+    # 1순위 단독: scanner.ticker_market_info["trade_amount_raw"] (사이클 65 등락률 15%+ 보강)
+    # 사이클 81 시정 — 2순위 stock_master.raw.acml_tr_pbmn 폴백 폐기 (CTPF1002R 응답에 acml_tr_pbmn 키 없음).
+    # 사이클 65 Q6-1 09:00 race graceful 영속 (miss = 0 반환).
     info = ticker_market_info.get(ticker, {})
     if isinstance(info, dict):
         raw = info.get("trade_amount_raw", 0)
@@ -328,25 +332,7 @@ async def _get_acml_tr_pbmn(ticker: str) -> int:
             if raw_int > 0:
                 return raw_int
 
-    # 2순위 — stock_master.raw.acml_tr_pbmn (CTPF1002R 24h TTL 캐시)
-    try:
-        from src.db.stock_master import get as _sm_get
-        basics = await _sm_get(ticker)
-        if basics and basics.raw:
-            raw_sm = basics.raw.get("acml_tr_pbmn", 0)
-            # 문자열 숫자 포함 처리 (KIS 응답이 문자열로 내려오는 경우)
-            if isinstance(raw_sm, str) and raw_sm.isdigit():
-                raw_int = int(raw_sm)
-                if raw_int > 0:
-                    return raw_int
-            elif isinstance(raw_sm, (int, float)):
-                raw_int = int(raw_sm)
-                if raw_int > 0:
-                    return raw_int
-    except Exception:
-        logger.debug("[trade_amount_filter] stock_master 조회 실패 graceful: %s", ticker, exc_info=True)
-
-    # 둘 다 miss → 0 반환 (Q6-1 graceful 통과 위임)
+    # miss → 0 반환 (Q6-1 graceful 통과 위임)
     return 0
 
 

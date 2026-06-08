@@ -31,13 +31,16 @@ def _make_pf(min_price=0, max_price=0):
 
 
 def _make_basics(ticker: str, prdy_clpr: int):
-    """StockBasics mock — raw.prdy_clpr 만 검증."""
+    """StockBasics mock — raw.bfdy_clpr 정본 키 사용 (사이클 81 시정).
+
+    파라미터명 prdy_clpr 는 호환성 보존 (호출부 변경 없이 값만 bfdy_clpr 로 주입).
+    """
     from src.models.stock import StockBasics
     return StockBasics(
         ticker=ticker, name=f"종목{ticker}",
         excg_dvsn_cd="1", nxt_tradable=True,
         krx_halted=False, admin_item=False,
-        raw={"prdy_clpr": str(prdy_clpr)},
+        raw={"bfdy_clpr": str(prdy_clpr)},  # 사이클 81 시정 — CTPF1002R 정본 키
     )
 
 
@@ -162,7 +165,7 @@ async def test_B4_missing_prdy_clpr_graceful_pass(monkeypatch):
          patch("src.db.system_logs.write_log", AsyncMock()):
         result = await scanner._apply_price_filter(candidates, protected_tickers=set())
 
-    # 3 종목 모두 graceful 통과 (`prdy_clpr=0` 미확보 → 필터 skip)
+    # 3 종목 모두 graceful 통과 (`bfdy_clpr=0` 미확보 → 필터 skip)
     assert set(result) == {"005930", "000660", "035720"}, (
         f"graceful 통과 실패 — 미확보 종목 영구 차단 위험: result={result}"
     )
