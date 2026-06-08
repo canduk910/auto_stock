@@ -872,6 +872,17 @@ class TradingScheduler:
                 except (asyncio.CancelledError, Exception):
                     pass
             setattr(self, task_attr, None)
+        # 사이클 78 hotfix: 잔존 collector 마지막 flush (Q5 사이클 74 G-SP4 답습)
+        # 운영 종료 직전 부분 누적 잔존 카운터 손실 방지
+        try:
+            flush_swing_rest_poll_collector()
+        except Exception:
+            logger.exception("[swing_rest_poll_collector] shutdown flush 실패")
+        try:
+            from src.engine.stale_watcher_core import flush_stale_watcher_collector
+            flush_stale_watcher_collector()
+        except Exception:
+            logger.exception("[stale_watcher_collector] shutdown flush 실패")
         await unsubscribe_all()
         await kis_ws.disconnect()
         # 추가: 수동 중지 시에도 동일 보장
@@ -2466,10 +2477,12 @@ class TradingScheduler:
             _flush_quote_recovered_collector,
         )
 
+        from src.engine.stale_watcher_core import flush_stale_watcher_collector
+
         while self._running:
             await asyncio.sleep(_API_RECOVERED_COLLECTOR_WINDOW)
-            if not self._running:
-                break
+            # `if not self._running: break` 가드 제거 — flush 는 _running=False 후에도
+            # 최종 1회 실행 보장 (잔존 카운터 손실 방지, 사이클 78 hotfix 의도)
             try:
                 await _flush_api_recovered_collector()
             except Exception:
@@ -2478,6 +2491,17 @@ class TradingScheduler:
                 await _flush_quote_recovered_collector()
             except Exception:
                 logger.exception("[api_recovered_collector] 풀 flush 실패")
+            # 사이클 78 hotfix: 사이클 74 도입 누락 (flush 호출 사이트 0건, 메모리 leak HIGH) 시정
+            try:
+                flush_swing_rest_poll_collector()
+            except Exception:
+                logger.exception("[swing_rest_poll_collector] flush 실패")
+            try:
+                flush_stale_watcher_collector()
+            except Exception:
+                logger.exception("[stale_watcher_collector] flush 실패")
+            if not self._running:
+                break
 
     def _detect_silent_inactive_sessions(self) -> list[str]:
         """세션 단위 silent inactive 감지 — 사이클 61 Phase 2-A2 stale_manager 위임."""
