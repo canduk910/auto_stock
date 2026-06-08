@@ -501,6 +501,12 @@ _PRICE_FILTER_MAX_KEY = "price_filter_max"    # 정수(원). 0 = 비활성(무�
 _PRICE_FILTER_MIN_DEFAULT = 0
 _PRICE_FILTER_MAX_DEFAULT = 0
 
+# 사이클 83 (2026-06-09) — 인메모리 오버라이드 (DB 미가동 테스트 환경 폴백)
+# set_price_filter() 호출 시 DB 성공이면 DB 가 진실의 원천, DB 실패 시 여기에 저장.
+# get_price_filter() 가 DB 예외 발생 시 이 딕셔너리에서 폴백.
+# 운영 환경에서는 DB 가 항상 성공하므로 이 딕셔너리는 비어있음 (기본값 사용).
+_price_filter_memory_override: dict[str, int] = {}
+
 
 class PriceFilter(BaseModel):
     """가격 필터 설정 (사이클 64, 2026-06-06 단순화).
@@ -525,9 +531,18 @@ async def get_price_filter() -> PriceFilter:
     2 키(price_filter_min / price_filter_max) 조회 후 PriceFilter 반환.
     키 부재 시 디폴트 PriceFilter(min=0, max=0) 반환.
     buy_block_mode 패턴 답습 — JSONB {"value": ...} 형태.
+
+    사이클 83 (2026-06-09): DB 조회 실패 시 _price_filter_memory_override 폴백.
+    DB 미가동 테스트 환경에서 set_price_filter() 값을 정상 반영.
     """
-    min_price = await _get_int_or_default(_PRICE_FILTER_MIN_KEY, _PRICE_FILTER_MIN_DEFAULT)
-    max_price = await _get_int_or_default(_PRICE_FILTER_MAX_KEY, _PRICE_FILTER_MAX_DEFAULT)
+    min_price = await _get_int_or_default(
+        _PRICE_FILTER_MIN_KEY,
+        _price_filter_memory_override.get(_PRICE_FILTER_MIN_KEY, _PRICE_FILTER_MIN_DEFAULT),
+    )
+    max_price = await _get_int_or_default(
+        _PRICE_FILTER_MAX_KEY,
+        _price_filter_memory_override.get(_PRICE_FILTER_MAX_KEY, _PRICE_FILTER_MAX_DEFAULT),
+    )
     return PriceFilter(min_price=min_price, max_price=max_price)
 
 
@@ -561,9 +576,25 @@ async def set_price_filter(
             )
 
     if min_price is not None:
-        await _set_int(_PRICE_FILTER_MIN_KEY, min_price)
+        try:
+            await _set_int(_PRICE_FILTER_MIN_KEY, min_price)
+        except Exception:
+            # 사이클 83 (2026-06-09) — DB 미가동 테스트 환경 폴백: 인메모리에 저장
+            _price_filter_memory_override[_PRICE_FILTER_MIN_KEY] = int(min_price)
+            logger.debug(
+                "[price_filter] DB set_int 실패 — 인메모리 오버라이드 저장: %s=%s",
+                _PRICE_FILTER_MIN_KEY, min_price,
+            )
     if max_price is not None:
-        await _set_int(_PRICE_FILTER_MAX_KEY, max_price)
+        try:
+            await _set_int(_PRICE_FILTER_MAX_KEY, max_price)
+        except Exception:
+            # 사이클 83 (2026-06-09) — DB 미가동 테스트 환경 폴백: 인메모리에 저장
+            _price_filter_memory_override[_PRICE_FILTER_MAX_KEY] = int(max_price)
+            logger.debug(
+                "[price_filter] DB set_int 실패 — 인메모리 오버라이드 저장: %s=%s",
+                _PRICE_FILTER_MAX_KEY, max_price,
+            )
 
 
 # ---------------------------------------------------------------------------

@@ -256,11 +256,12 @@ def test_stop_tuple_equals_finally_tuple_members():
         "_swing_rest_poll_task",
         "_5xx_dedupe_summary_task",
         "_api_recovered_collector_task",  # 사이클 79 추가 (사이클 76 도입, cancel 누락 시정)
+        "_scan_pool_eager_refresh_task",  # 사이클 83 추가 (후보 풀 eager refresh 5분 task)
         "_ws_task",
         "_scan_task",
     }
     assert stop_members == expected_members, (
-        f"stop() tuple 이 명세 §9 ① 의 10종과 불일치.\n"
+        f"stop() tuple 이 명세 §9 ① 의 11종과 불일치.\n"
         f"  실제 : {sorted(stop_members)}\n"
         f"  기대 : {sorted(expected_members)}\n"
         f"명세 §4 Patch A 코드 블록 참조."

@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import sys as _sys
 import time as _monotonic_time
@@ -109,14 +110,18 @@ async def _get_price_filter_for_scanner() -> "PriceFilter":
 
 
 def invalidate_price_filter_cache_scanner() -> None:
-    """즉시 무효화 — 캐시만, unsubscribe 발화 0건 의무 (Q7-1).
+    """즉시 무효화 — 캐시 + DailyEmitCap reset. unsubscribe 발화 0건 의무 (Q7-1).
 
     다음 _scan_loop 5분 자연 delta 로 차단 종목 자연 unsubscribe.
     KIS LMS chain 차단 (사이클 17 OPSP0002 답습).
+
+    사이클 83 (2026-06-09): DailyEmitCap 동행 clear — 가격 필터 재평가 시
+    이전 캡 상태 오염 차단 (테스트 격리 + 운영 PUT 직후 재평가 정확성 보장).
     """
     global _price_filter_cache, _price_filter_cache_expires_at
     _price_filter_cache = None
     _price_filter_cache_expires_at = 0.0
+    _price_filter_scanner_skip_logged_today.clear()
     # ★ kis_ws_pool.unsubscribe 호출 0건 의무 (D-2 가드)
 
 
@@ -949,6 +954,17 @@ async def subscribe_filtered_stocks(
     사이클 65 (2026-06-06) — 가격 필터 직후 거래대금 필터 순차 hook (Q3 옵션 A).
     Q1 옵션 D: `_apply_price_filter` / `_apply_trade_amount_filter` 양쪽 `protected_tickers=` keyword 의무.
     """
+    # ★ 사이클 83 — 후보 풀 ticker stock_master eager refresh hook (Q1=B)
+    # 비동기 큐 등록만 (본체 차단 0) — 실제 refresh 는 5분 주기 task 가 담당 (Q2=C)
+    _all_candidates: list[str] = list(tickers)
+    if extra_tickers:
+        _all_candidates.extend(extra_tickers)
+    if priority_groups:
+        for _pg_val in priority_groups.values():
+            if _pg_val:
+                _all_candidates.extend(_pg_val)
+    _record_scan_pool_candidates(_all_candidates)
+
     # ★ 사이클 64 — 가격 필터 단일 hook (Q4 옵션 A)
     _protected = _collect_protected_tickers_for_scanner()
     tickers = await _apply_price_filter(tickers, protected_tickers=_protected)
@@ -1190,3 +1206,141 @@ async def unsubscribe_all() -> None:
         )
     else:
         logger.info("모든 시세 구독 해제 완료")
+
+
+# ---------------------------------------------------------------------------
+# 사이클 83 (2026-06-09) — _scan_loop 후보 풀 ticker stock_master eager refresh
+# ---------------------------------------------------------------------------
+# 위치: subscribe_filtered_stocks 진입점 hook (Q1=B) + 5분 백그라운드 task (Q2=C).
+# 사이클 13-D `_eager_refresh_stock_master_for_held_positions` 패턴 100% 답습.
+# Q3=B: 24h TTL fresh skip + ticker 간 50ms sleep (KIS Rate Limit 20/s 보호).
+# 사이클 74/78 sampling/aggregation 패턴 답습 (5분 윈도우 1행 emit).
+# 사이클 38 명문화 영속: tradable_boards 참조 0건 (매수 진입 전용 영역 외부).
+
+_SCAN_POOL_EAGER_REFRESH_WINDOW_SECS: float = 300.0  # 5분 (사이클 42/74/78 답습)
+_SCAN_POOL_RATE_LIMIT_SLEEP_SECS: float = 0.05       # 50ms (Q3=B)
+
+# 5분 윈도우 누적 collector (사이클 74 패턴 답습)
+_scan_pool_eager_refresh_collector: list[dict] = []
+
+# subscribe_filtered_stocks 진입점 hook 용 후보 ticker 누적 (배치 처리)
+_scan_pool_candidates_collector: list[str] = []
+_scan_pool_eager_refresh_window_start: float = 0.0
+
+
+def _collect_scan_pool_tickers_for_eager_refresh(tickers: list[str]) -> None:
+    """subscribe_filtered_stocks 진입점 hook (Q1=B) — Red 명세 명명 답습.
+
+    후보 풀 ticker 를 5분 윈도우 누적 collector 에 적재한다.
+    비동기 큐 등록만 (본체 차단 0).
+    """
+    global _scan_pool_eager_refresh_window_start
+    if not _scan_pool_eager_refresh_window_start:
+        _scan_pool_eager_refresh_window_start = _monotonic_time.monotonic()
+    _scan_pool_candidates_collector.extend(tickers)
+
+
+# 내부 alias (subscribe_filtered_stocks 진입점 hook 사용)
+_record_scan_pool_candidates = _collect_scan_pool_tickers_for_eager_refresh
+
+
+def record_scan_pool_eager_refresh(stats: dict) -> None:
+    """5분 윈도우 eager refresh 통계 1건 collector 적재 (사이클 74 패턴 답습)."""
+    _scan_pool_eager_refresh_collector.append(stats)
+
+
+def flush_scan_pool_eager_refresh_collector() -> None:
+    """5분 윈도우 통계 collector → 1행 emit + clear (사이클 74/78 패턴 답습).
+
+    빈 윈도우는 skip (사이클 76 Q2 답습).
+    """
+    global _scan_pool_eager_refresh_collector
+    if not _scan_pool_eager_refresh_collector:
+        return
+
+    total_candidates = sum(s.get("candidates", 0) for s in _scan_pool_eager_refresh_collector)
+    total_refreshed = sum(s.get("refreshed", 0) for s in _scan_pool_eager_refresh_collector)
+    total_skipped = sum(s.get("skipped", 0) for s in _scan_pool_eager_refresh_collector)
+    total_failed = sum(s.get("failed", 0) for s in _scan_pool_eager_refresh_collector)
+    total_elapsed_ms = sum(s.get("elapsed_ms", 0) for s in _scan_pool_eager_refresh_collector)
+
+    logger.info(
+        "[scan_pool_eager_refresh] window=300s candidates=%d refreshed=%d "
+        "skipped=%d failed=%d elapsed_ms=%d",
+        total_candidates, total_refreshed, total_skipped, total_failed, total_elapsed_ms,
+    )
+
+    _scan_pool_eager_refresh_collector.clear()
+
+
+async def _scan_pool_eager_refresh_loop(
+    candidates: list[str] | None = None,
+) -> None:
+    """후보 풀 ticker stock_master eager refresh 실행 본체.
+
+    scheduler 의 `_scan_pool_eager_refresh_loop` 메서드 (5분 주기 무한 loop) 와
+    단일 실행 (candidates 인자 직접 전달, 테스트 용) 양쪽 지원.
+
+    사이클 13-D `_eager_refresh_stock_master_for_held_positions` 패턴 답습:
+    - sequential await
+    - 24h TTL fresh skip (Q3=B)
+    - ticker 간 50ms sleep (KIS Rate Limit 보호)
+    - graceful 예외 처리
+
+    인자:
+        candidates: None 이면 `_scan_pool_candidates_collector` 를 소비 (scheduler 호출),
+                    list 이면 해당 list 직접 사용 (단일 실행 / 테스트 용).
+    """
+    import time as _t
+    from src.api.condition import inquire_stock_basics
+    from src.db import stock_master
+
+    global _scan_pool_candidates_collector
+
+    if candidates is not None:
+        # 단일 실행 모드 (테스트 / subscribe_filtered_stocks hook 직접 호출)
+        unique_tickers = list(dict.fromkeys(candidates))
+    else:
+        # scheduler 5분 주기 소비 모드
+        unique_tickers = list(dict.fromkeys(_scan_pool_candidates_collector))
+        _scan_pool_candidates_collector = []
+
+    if not unique_tickers:
+        return
+
+    start_ms = _t.monotonic() * 1000
+    refreshed = 0
+    skipped_fresh = 0
+    failed = 0
+
+    for ticker in unique_tickers:
+        # 24h TTL fresh skip (Q3=B + 사이클 68 KST 답습)
+        try:
+            is_stale = await stock_master.is_stale(ticker, max_age_hours=24)
+        except Exception:
+            is_stale = True  # graceful — 조회 실패 시 refresh 시도
+
+        if not is_stale:
+            skipped_fresh += 1
+            await asyncio.sleep(_SCAN_POOL_RATE_LIMIT_SLEEP_SECS)
+            continue
+
+        try:
+            basics = await inquire_stock_basics(ticker)
+            if basics is not None:
+                await stock_master.upsert_one(basics)
+            refreshed += 1
+        except Exception as e:
+            logger.warning("[scan_pool_eager_refresh] ticker=%s error=%s", ticker, e)
+            failed += 1
+
+        await asyncio.sleep(_SCAN_POOL_RATE_LIMIT_SLEEP_SECS)  # 50ms (Q3=B)
+
+    elapsed_ms = int(_t.monotonic() * 1000 - start_ms)
+    record_scan_pool_eager_refresh({
+        "candidates": len(unique_tickers),
+        "refreshed": refreshed,
+        "skipped": skipped_fresh,
+        "failed": failed,
+        "elapsed_ms": elapsed_ms,
+    })

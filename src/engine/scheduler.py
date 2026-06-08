@@ -487,6 +487,13 @@ class TradingScheduler:
                 self._api_recovered_collector_loop()
             )
 
+            # 사이클 83 (2026-06-09) — 후보 풀 ticker stock_master eager refresh 5분 task.
+            # `subscribe_filtered_stocks` 진입점 hook (Q1=B) 이 누적한 후보 ticker 를
+            # 5분 주기로 stock_master upsert (24h TTL skip + 50ms sleep, Q3=B).
+            self._scan_pool_eager_refresh_task = asyncio.create_task(
+                self._scan_pool_eager_refresh_loop()
+            )
+
             now = datetime.now().time()
 
             # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
@@ -740,6 +747,7 @@ class TradingScheduler:
                 "_swing_poll_task", "_swing_rest_poll_task",
                 "_5xx_dedupe_summary_task",
                 "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
+                "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -846,7 +854,29 @@ class TradingScheduler:
 
             # 매매 시작
             logger.info("=== 자동 매매 시작 (%s) ===", now.strftime("%Y-%m-%d %H:%M"))
-            await self.start()
+            try:
+                await self.start()
+            finally:
+                # 사이클 83 (2026-06-09) — 비정상 종료 경로 task cancel 보강 (사이클 13-E-2 패턴 답습).
+                # start() 내부 finally 가 이미 정리하나 run_daily 레벨에서도 동일 task_attrs 튜플로
+                # 이중 보장 (이미 None 인 경우 getattr None → skip 분기 — idempotent).
+                for task_attr in (
+                    "_next_day_task", "_session_task", "_stale_watcher_task",
+                    "_session_health_task",
+                    "_swing_poll_task", "_swing_rest_poll_task",
+                    "_5xx_dedupe_summary_task",
+                    "_api_recovered_collector_task",  # 사이클 79 영속
+                    "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
+                    "_ws_task", "_scan_task",
+                ):
+                    task = getattr(self, task_attr, None)
+                    if task and not task.done():
+                        task.cancel()
+                        try:
+                            await task
+                        except (asyncio.CancelledError, Exception):
+                            pass
+                    setattr(self, task_attr, None)
 
             # start()가 종료되면 (정산 완료 또는 에러) 다음 날 대기
             logger.info("금일 매매 종료, 익일 자동 시작 대기")
@@ -864,6 +894,7 @@ class TradingScheduler:
             "_swing_poll_task", "_swing_rest_poll_task",
             "_5xx_dedupe_summary_task",
             "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
+            "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -885,6 +916,12 @@ class TradingScheduler:
             flush_stale_watcher_collector()
         except Exception:
             logger.exception("[stale_watcher_collector] shutdown flush 실패")
+        # 사이클 83 hotfix: 잔존 eager refresh collector 마지막 flush (사이클 78 답습)
+        try:
+            from src.engine.scanner import flush_scan_pool_eager_refresh_collector
+            flush_scan_pool_eager_refresh_collector()
+        except Exception:
+            logger.exception("[scan_pool_eager_refresh_collector] shutdown flush 실패")
         await unsubscribe_all()
         await kis_ws.disconnect()
         # 추가: 수동 중지 시에도 동일 보장
@@ -2502,6 +2539,35 @@ class TradingScheduler:
                 flush_stale_watcher_collector()
             except Exception:
                 logger.exception("[stale_watcher_collector] flush 실패")
+            if not self._running:
+                break
+
+    async def _scan_pool_eager_refresh_loop(self) -> None:
+        """사이클 83 (2026-06-09) — _scan_loop 후보 풀 ticker stock_master 5분 eager refresh task.
+
+        `subscribe_filtered_stocks` 진입점 hook (Q1=B) 이 5분 윈도우 누적한
+        후보 ticker 를 순차적으로 stock_master upsert.
+        - 24h TTL fresh skip (Q3=B) → KIS 호출 최소화
+        - ticker 간 50ms sleep (Q3=B) → Rate Limit 20/s 보호
+        - 사이클 42 `_heartbeat_metrics_loop` 5분 주기 패턴 답습
+        - 사이클 78 flush 전 `_running` 재검사 패턴 답습 (마지막 1회 flush 보장)
+        """
+        from src.engine.scanner import (
+            _scan_pool_eager_refresh_loop as _scanner_eager_refresh,
+            flush_scan_pool_eager_refresh_collector,
+            _SCAN_POOL_EAGER_REFRESH_WINDOW_SECS,
+        )
+
+        while self._running:
+            await asyncio.sleep(_SCAN_POOL_EAGER_REFRESH_WINDOW_SECS)
+            try:
+                await _scanner_eager_refresh()
+            except Exception:
+                logger.exception("[scan_pool_eager_refresh] refresh 실패")
+            try:
+                flush_scan_pool_eager_refresh_collector()
+            except Exception:
+                logger.exception("[scan_pool_eager_refresh_collector] flush 실패")
             if not self._running:
                 break
 

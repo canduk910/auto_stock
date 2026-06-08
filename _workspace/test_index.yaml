@@ -127,6 +127,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -283,6 +285,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -515,6 +520,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -773,6 +785,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -968,6 +987,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1135,6 +1157,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1303,6 +1327,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1536,6 +1563,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1821,6 +1855,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1949,6 +1990,8 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
@@ -2117,6 +2160,11 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2397,6 +2445,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2598,6 +2653,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2750,6 +2807,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -2977,6 +3036,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -3169,6 +3235,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3323,6 +3391,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3485,6 +3556,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3652,6 +3725,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -3884,6 +3960,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -4074,6 +4157,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4297,6 +4382,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -4581,6 +4673,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -4703,6 +4802,8 @@ backend:
     - tests/unit/engine/test_cycle64_price_filter_scanner_daily_summary.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_emit_cap.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_protected.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
@@ -4865,6 +4966,11 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -5135,6 +5241,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -5334,6 +5447,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5515,6 +5631,10 @@ backend:
     - tests/unit/engine/test_cycle74_stale_watcher_aggregation.py
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5589,6 +5709,7 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -5725,6 +5846,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -5883,6 +6006,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6035,6 +6160,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6260,6 +6387,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -6454,6 +6588,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -6611,6 +6747,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6771,6 +6910,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6934,6 +7076,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7081,6 +7225,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7167,6 +7313,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -7241,6 +7388,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7382,6 +7531,12 @@ backend:
     - tests/unit/engine/test_cycle64_price_filter_scanner_daily_summary.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_emit_cap.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_protected.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -7491,6 +7646,7 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -7648,6 +7804,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
@@ -7808,6 +7966,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7993,6 +8154,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8154,6 +8318,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8310,6 +8476,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8466,6 +8634,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8620,6 +8790,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8776,6 +8948,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8933,6 +9107,8 @@ backend:
     - tests/unit/engine/test_cycle64_price_filter_scanner_emit_cap.py
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9104,6 +9280,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9270,6 +9448,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9427,6 +9607,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9588,6 +9770,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9746,6 +9930,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9914,6 +10100,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10124,6 +10312,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -10284,6 +10475,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10440,6 +10634,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10635,6 +10832,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10793,6 +10992,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11027,6 +11229,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -11253,6 +11462,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11540,6 +11752,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -11764,6 +11983,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11939,6 +12161,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -12160,6 +12384,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -12438,6 +12669,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -12708,6 +12946,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -13377,6 +13622,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -13547,6 +13795,9 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -13716,6 +13967,8 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -13939,6 +14192,13 @@ backend:
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
+    - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -14504,10 +14764,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-08T20:20:12.292122+09:00'
+generated_at: '2026-06-09T07:32:43.863469+09:00'
 stats:
   backend_modules: 97
-  backend_tests: 339
+  backend_tests: 349
   frontend_modules: 58
   frontend_tests: 34
   unmapped_modules:
