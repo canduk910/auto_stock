@@ -24,6 +24,7 @@ export default function CashUsageRatioCard({ netAsset }: Props) {
   const { data: ratio, isLoading } = useQuery({
     queryKey: ['cashUsageRatio'],
     queryFn: getCashUsageRatio,
+    retry: 1, // 사이클 75 Q4 — e2e ECONNREFUSED 시 timeout 차단 (사이클 65 H1 패턴)
   })
 
   useEffect(() => {

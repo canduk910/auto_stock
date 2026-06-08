@@ -84,6 +84,7 @@ export default function KisQuoteAccountsCard() {
     queryFn: () => listAccounts(false),
     staleTime: 30_000,
     refetchOnWindowFocus: false,
+    retry: 1, // 사이클 75 Q4 — e2e ECONNREFUSED 시 timeout 차단 (사이클 65 H1 패턴)
   })
 
   const accounts: KisQuoteAccount[] = data ?? []

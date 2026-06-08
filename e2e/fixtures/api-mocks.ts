@@ -194,6 +194,56 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope({ min_amount: 0 }) }),
   );
 
+  // 사이클 75 카드 #19' (2026-06-08) — 7 endpoint group 누락 → settings.spec.ts timeout 차단.
+  // 사이클 65 hotfix #2 패턴 답습: 구체 라우트를 와일드카드 `**/api/system/**` 보다 앞에 등록.
+
+  // CashUsageRatioCard — /api/strategies/system/cash-usage-ratio
+  await page.route("**/api/strategies/system/cash-usage-ratio", (route) =>
+    route.fulfill({ json: envelope({ ratio: 1.0 }) }),
+  );
+
+  // IntegrationToggleCard 4 토글
+  await page.route("**/api/integrations/dkstock-regime", (route) =>
+    route.fulfill({ json: envelope({ enabled: false, source: "env" }) }),
+  );
+  await page.route("**/api/integrations/kis-mcp", (route) =>
+    route.fulfill({ json: envelope({ enabled: false, source: "env" }) }),
+  );
+  await page.route("**/api/integrations/auto-regime-adjust", (route) =>
+    route.fulfill({ json: envelope({ enabled: true, source: "db" }) }),
+  );
+  await page.route("**/api/integrations/auto-apply", (route) =>
+    route.fulfill({ json: envelope({ enabled: false, source: "db" }) }),
+  );
+
+  // BuyBlockSection — /api/integrations/buy-block (GET) + /api/integrations/buy-block/thresholds
+  await page.route("**/api/integrations/buy-block/thresholds", (route) =>
+    route.fulfill({
+      json: envelope({ vix: 25, fg_high: 85, fg_low: 15, defensive: true }),
+    }),
+  );
+  await page.route("**/api/integrations/buy-block", (route) =>
+    route.fulfill({
+      json: envelope({
+        mode: "HARD",
+        blocked: false,
+        reasons: [],
+        soft_multiplier: 0.5,
+        thresholds: {
+          vix_threshold: 25,
+          fg_high_threshold: 85,
+          fg_low_threshold: 15,
+          defensive_enabled: true,
+        },
+      }),
+    }),
+  );
+
+  // KisQuoteAccountsCard — /api/integrations/quote-accounts (와일드카드 suffix)
+  await page.route("**/api/integrations/quote-accounts*", (route) =>
+    route.fulfill({ json: envelope([]) }),
+  );
+
   await page.route("**/api/system/**", (route) =>
     route.fulfill({ json: envelope({}) }),
   );

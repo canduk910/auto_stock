@@ -187,6 +187,7 @@ function BuyBlockSection() {
     queryFn: getBuyBlock,
     staleTime: 30_000,
     refetchOnWindowFocus: false,
+    retry: 1, // 사이클 75 Q4 — e2e ECONNREFUSED 시 timeout 차단 (사이클 65 H1 패턴)
   })
 
   // ConfirmModal — 모드 변경
@@ -465,6 +466,7 @@ function ToggleRow({ meta }: ToggleRowProps) {
     queryFn: getterFor(meta.key),
     staleTime: 30_000,
     refetchOnWindowFocus: false,
+    retry: 1, // 사이클 75 Q4 — e2e ECONNREFUSED 시 timeout 차단 (사이클 65 H1 패턴)
   })
 
   const mutation = useMutation({

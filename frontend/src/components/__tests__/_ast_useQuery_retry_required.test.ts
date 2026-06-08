@@ -27,18 +27,23 @@ import path from 'path'
 const TARGET_FILES = [
   'PriceFilterCard.tsx',
   'TradeAmountFilterCard.tsx',
+  // 사이클 75 Q4 확장 (HIGH) — IntegrationToggleCard/CashUsageRatioCard/
+  // KisQuoteAccountsCard 영역 retry 명시 의무. 사이클 73/74 flaky 결함 영속 차단.
+  'IntegrationToggleCard.tsx',
+  'CashUsageRatioCard.tsx',
+  'KisQuoteAccountsCard.tsx',
 ]
 
-describe('사이클 65 hotfix H3 — useQuery retry 옵션 영구 가드', () => {
+describe('사이클 65 hotfix H3 + 사이클 75 Q4 확장 — useQuery retry 옵션 영구 가드', () => {
   it.each(TARGET_FILES)(
     '%s 의 useQuery 호출은 `retry:` 옵션 명시 의무 (e2e timeout 차단)',
     (filename) => {
       const filepath = path.join(__dirname, '..', filename)
       const source = readFileSync(filepath, 'utf-8')
 
-      // useQuery({ ... }) 블록 추출 (multiline 지원).
-      // 단일 인자 객체 리터럴 형태만 검증 — useQuery(options) 패턴.
-      const useQueryRegex = /useQuery\(\s*\{([\s\S]*?)\}\s*\)/g
+      // useQuery({ ... }) 블록 추출 (multiline + generic 지원).
+      // 단일 인자 객체 리터럴 형태만 검증 — useQuery(options) / useQuery<T>(options) 패턴.
+      const useQueryRegex = /useQuery(?:<[^>]+>)?\(\s*\{([\s\S]*?)\}\s*\)/g
       const matches = [...source.matchAll(useQueryRegex)]
 
       expect(

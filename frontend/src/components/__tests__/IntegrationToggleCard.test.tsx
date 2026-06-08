@@ -252,6 +252,8 @@ describe('IntegrationToggleCard', () => {
   }
 
   // 사이클 5 토글 3종 mock 헬퍼 — 사이클 8 테스트가 함께 GET 들을 받아야 함
+  // 사이클 75 Q4: retry:1 추가로 인해 auto-apply 핸들러 없으면 waitFor timeout 초과 위험
+  //   → setupToggleStubs 에 auto-apply 핸들러 추가 (기존 3 + 신규 1 = 4 토글 완전 커버)
   const setupToggleStubs = () => {
     server.use(
       http.get('/api/integrations/dkstock-regime', () =>
@@ -262,6 +264,10 @@ describe('IntegrationToggleCard', () => {
       ),
       http.get('/api/integrations/auto-regime-adjust', () =>
         HttpResponse.json(wrap(autoRegimeOn)),
+      ),
+      // 사이클 23 P3-3 auto-apply 4번째 토글 — retry:1 도입 후 미등록 시 waitFor timeout
+      http.get('/api/integrations/auto-apply', () =>
+        HttpResponse.json(wrap({ enabled: false, source: 'db' as const })),
       ),
     )
   }
@@ -477,8 +483,10 @@ describe('IntegrationToggleCard', () => {
       </TestProviders>,
     )
 
+    // 사이클 75 Q4: retry:1 추가로 인해 BuyBlockSection 이 500 에러 수신 후 1회 재시도 →
+    //   에러 상태 전환까지 시간 증가 → waitFor timeout 3000ms 로 상향 (재시도 대기 포함)
     await waitFor(() => {
       expect(screen.getByTestId('buy-block-error')).toBeTruthy()
-    })
+    }, { timeout: 3000 })
   })
 })
