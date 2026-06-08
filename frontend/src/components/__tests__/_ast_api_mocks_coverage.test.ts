@@ -140,6 +140,30 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
     })
   })
 
+  describe('G-AST5 (사이클 77 hotfix): Dashboard 영역 endpoint 등록 (settings.spec.ts react-router prefetch 차단)', () => {
+    // 사이클 76 CI fail 발견 — settings.spec.ts 진입 시 react-router prefetch /
+    // lazy import 로 MarketRegimeCard / ScanMonitor (Dashboard 컴포넌트) useQuery 발화 →
+    // /api/market-regime/current + /api/realtime/subscriptions ECONNREFUSED.
+    // 사이클 75 G-AST1~AST3 (Settings 한정) 영역 한계 노출 → 사이클 77 = Dashboard 영역 확장.
+    const REQUIRED_DASHBOARD_ENDPOINTS = [
+      '/api/market-regime/current',
+      '/api/realtime/subscriptions',
+    ]
+
+    it.each(REQUIRED_DASHBOARD_ENDPOINTS)(
+      'api-mocks.ts 에 %s 라우트 등록 의무 (Dashboard 컴포넌트 prefetch 차단)',
+      (endpoint) => {
+        const source = loadApiMocksSource()
+        expect(
+          isRouteRegistered(source, endpoint),
+          `e2e api-mocks.ts 에 ${endpoint} 라우트 누락 — ` +
+            `사이클 76 CI fail 결함 영속 (vite proxy → ECONNREFUSED → settings.spec.ts fail). ` +
+            `사이클 75 hotfix Settings 영역 한정 한계 노출, 사이클 77 = Dashboard 영역 확장 의무.`,
+        ).toBe(true)
+      },
+    )
+  })
+
   describe('G-AST4: 3 컴포넌트 useQuery `retry:` 옵션 명시 (Q4 확장)', () => {
     const TARGET_COMPONENTS = [
       'IntegrationToggleCard.tsx',

@@ -244,6 +244,34 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope([]) }),
   );
 
+  // 사이클 77 hotfix — Dashboard 영역 endpoint 추가 (settings.spec.ts 진입 시 react-router prefetch
+  // 또는 lazy import 트리거로 MarketRegimeCard / ScanMonitor 컴포넌트 useQuery 발화. 사이클 75 G-AST1
+  // 가드 영역 (Settings 한정) 한계 노출 → 사이클 77 = Dashboard 영역 매핑 확장)
+  await page.route("**/api/market-regime/current", (route) =>
+    route.fulfill({
+      json: envelope({
+        regime: "neutral",
+        regime_desc: "중립",
+        cycle_phase: null,
+        vix: 18.0,
+        fear_greed_score: 50,
+        buffett_ratio: 100.0,
+        cash_min: 30,
+        is_buy_allowed: true,
+        raw: {},
+      }),
+    }),
+  );
+  await page.route("**/api/market-regime/history*", (route) =>
+    route.fulfill({ json: envelope([]) }),
+  );
+  await page.route("**/api/market-regime/auto-adjust", (route) =>
+    route.fulfill({ json: envelope({ enabled: true }) }),
+  );
+  await page.route("**/api/realtime/subscriptions", (route) =>
+    route.fulfill({ json: envelope({ sessions: [], total_count: 0 }) }),
+  );
+
   await page.route("**/api/system/**", (route) =>
     route.fulfill({ json: envelope({}) }),
   );
