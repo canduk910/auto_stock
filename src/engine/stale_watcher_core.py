@@ -38,6 +38,42 @@ from src.engine.stale_diagnostics import (
 logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (caplog 호환)
 
 
+# ── 사이클 74 옵션 C 조건부 — [stale_watcher] 5분 aggregation collector ─────────────
+
+_stale_watcher_collector: list[dict] = []
+
+
+def record_stale_watcher_check(stats: dict) -> None:
+    """5분 윈도우 누적 (사이클 74 옵션 C 조건부 aggregation).
+
+    stats keys: subscribed / stale / force_reregistered / skipped_giveup /
+                force_retried / cap_blocked
+    stale_count > 0 인 경우 `emit_stale_session_detail` 를 통한 individual
+    `[stale_watcher_detail]` 는 별도 보존 (사이클 73 영속, 변경 0).
+    """
+    _stale_watcher_collector.append(stats)
+
+
+def flush_stale_watcher_collector() -> None:
+    """5분 윈도우 종료 시 `[stale_watcher_summary]` 1행 emit + collector 초기화.
+
+    scheduler disconnect / cancel 직전 마지막 flush 1회 호출 의무 (Q5 옵션 A).
+    collector 비어 있으면 emit skip (no-op).
+    """
+    if not _stale_watcher_collector:
+        return
+    checks = len(_stale_watcher_collector)
+    stale_total = sum(s.get("stale", 0) for s in _stale_watcher_collector)
+    retried = sum(s.get("force_reregistered", 0) for s in _stale_watcher_collector)
+    cap_blocked = sum(s.get("cap_blocked", 0) for s in _stale_watcher_collector)
+    force_retried = sum(s.get("force_retried", 0) for s in _stale_watcher_collector)
+    logger.info(
+        "[stale_watcher_summary] checks=%d stale_total=%d retried=%d cap_blocked=%d force_retried=%d",
+        checks, stale_total, retried, cap_blocked, force_retried,
+    )
+    _stale_watcher_collector.clear()
+
+
 # ── A3 2 함수 — K stale watcher 핵심 (사이클 63 Phase 2-A3, 2026-06-05) ────────────
 
 async def check_and_resubscribe_stale(scheduler: Any) -> None:
@@ -234,11 +270,18 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
 
         await asyncio.sleep(0.05)  # Rate Limit 보호
 
-    logger.info(
-        "[stale_watcher] subscribed=%d stale=%d force_reregistered=%d skipped=%d",
-        len(subscribed), len(stale_tickers), force_reregistered, skipped_giveup,
-    )
+    # 사이클 74 옵션 C 조건부 aggregation: [stale_watcher] 정상 흐름 INFO → 5분 collector 흡수
+    record_stale_watcher_check({
+        "subscribed": len(subscribed),
+        "stale": len(stale_tickers),
+        "force_reregistered": force_reregistered,
+        "skipped_giveup": skipped_giveup,
+        "force_retried": force_retry_count,
+        "cap_blocked": force_retry_cap_blocked,
+    })
     # 사이클 72 hotfix A3: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
+    # 사이클 74: 직접 logger.info("[stale_watcher] subscribed=...") 제거 → collector 흡수
+    # stale_count > 0 시 individual [stale_watcher_detail] 보존 (사이클 73 영속, 하단 분기)
 
     # 사이클 28 — [stale_watcher_detail] 세션별 분포 + 종목 cap 20 (별도 행, G1 호환)
     # Q4=B (사이클 60 답습하지 않는 유일 영역) — 직접 호출 (1 hop 단축, wrapper 우회)

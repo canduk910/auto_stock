@@ -377,11 +377,17 @@ async def test_case_n1_already_in_subscribe_opsp0002_is_not_rejection(
     ), "ALREADY IN SUBSCRIBE 는 거절 ERROR 로그를 만들지 않아야 함"
     # write_log [ws_subscribe_reject] 미호출
     assert patched_write_log.await_count == 0
-    # INFO 로그 "이미 활성" 발생
-    assert any(
+    # 사이클 74 Q2-D 옵션 A: OPSP0002 ALREADY INFO 직접 emit 제거 → collector 흡수
+    # 직접 "이미 활성" INFO 0건 + collector OPSP_ALREADY 흡수 검증
+    assert not any(
         rec.levelno == logging.INFO and "이미 활성" in rec.getMessage()
         for rec in caplog.records
-    ), "ALREADY IN SUBSCRIBE 는 INFO '이미 활성' 로그를 남겨야 함"
+    ), "사이클 74: ALREADY IN SUBSCRIBE 직접 INFO 0건 의무 (collector 흡수)"
+    collector = getattr(ws, "_ws_action_collector", {})
+    h0un = collector.get("H0UNCNT0", {})
+    assert "005930" in h0un.get("OPSP_ALREADY", []), (
+        "사이클 74: OPSP0002 ALREADY → collector OPSP_ALREADY 흡수 의무"
+    )
 
 
 # ---------------------------------------------------------------------------

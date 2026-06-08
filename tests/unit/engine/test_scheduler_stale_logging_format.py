@@ -96,13 +96,13 @@ async def test_stale_watcher_emits_legacy_and_detail_lines(monkeypatch, caplog):
     await sched._check_and_resubscribe_stale()
 
     msgs = [r.message for r in caplog.records]
+    # 사이클 74 옵션 C 조건부: [stale_watcher] 직접 INFO → collector 흡수
+    # B3-1: 사이클 74 이후 직접 emit 0건 (aggregation 흡수)
     legacy = [m for m in msgs if m.startswith("[stale_watcher] subscribed=")]
+    assert len(legacy) == 0, (
+        f"사이클 74 옵션 C: [stale_watcher] 직접 INFO 0건 의무 — actual={len(legacy)}: {legacy}"
+    )
     detail = [m for m in msgs if m.startswith("[stale_watcher_detail] ")]
-
-    # B3-1: 기존 1행 보존
-    assert len(legacy) == 1, f"기존 [stale_watcher] 1행이 정확히 1회 출력되어야 함: {legacy}"
-    assert "subscribed=5" in legacy[0]
-    assert "stale=2" in legacy[0]
 
     # B3-2: detail 1행
     assert len(detail) == 1, f"[stale_watcher_detail] 1행 필요 — main 세션 stale>0: {detail}"

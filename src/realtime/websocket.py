@@ -140,6 +140,14 @@ class KisWebSocket:
         self.aes_key: str = ""
         # F1 (2026-05-12) — 재연결 후 자동 검증 task 중첩 방지 플래그
         self._reverify_in_progress: bool = False
+        # 사이클 74 (2026-06-08) 옵션 E-1 — WS 구독/ACK/해제 tr_id별 aggregation collector.
+        # subscribe/unsubscribe/SUBSCRIBE SUCCESS ACK/OPSP0002 정상 흐름 INFO → 5분 1행 흡수.
+        # 구조: tr_id → {"SUBSCRIBE": [tickers], "UNSUBSCRIBE": [tickers], "ACK": [tickers],
+        #                "OPSP_ALREADY": [tickers]}
+        # [ws_subscribe_reject] logger.error / [ws_reverify] WARNING 은 individual 보존 (변경 0).
+        self._ws_action_collector: dict[str, dict[str, list[str]]] = {}
+        # 5분 주기 flush task handle (사이클 42 _heartbeat_metrics_loop 패턴 답습)
+        self._ws_action_flush_task: asyncio.Task | None = None
 
     async def connect(
         self,
@@ -152,6 +160,12 @@ class KisWebSocket:
         self._on_message = on_message
         self._running = True
         self._reconnect_count = 0
+
+        # 사이클 74 — _ws_action_flush_loop task 시작 (사이클 42 _heartbeat_metrics_loop 패턴 답습)
+        # 좀비 task 방지: 기존 task 잔존 시 cancel + 새 task 발화
+        if self._ws_action_flush_task and not self._ws_action_flush_task.done():
+            self._ws_action_flush_task.cancel()
+        self._ws_action_flush_task = asyncio.create_task(self._ws_action_metrics_loop())
 
         # 사이클 46 (2026-05-22, refactor-review 카드 #6) — heartbeat metrics task 폐기.
         # scheduler `_session_health_loop` 가 5분마다 모든 세션 `_heartbeat_metrics_emit_once` 호출.
@@ -209,6 +223,17 @@ class KisWebSocket:
     async def disconnect(self) -> None:
         """연결을 종료한다."""
         self._running = False
+        # 사이클 74 — disconnect cancel *전* 마지막 flush 1회 (Q5 옵션 A — 잔여 카운터 손실 방지)
+        # 운영 환경 매일 20:00 unsubscribe_all() 직후 disconnect → 정산 *직전* 데이터 보존.
+        self._flush_ws_action_collector()
+        # flush task cancel + await 정리 (좀비 task 방지, 사이클 42 heartbeat task 패턴 답습)
+        if self._ws_action_flush_task and not self._ws_action_flush_task.done():
+            self._ws_action_flush_task.cancel()
+            try:
+                await self._ws_action_flush_task
+            except asyncio.CancelledError:
+                pass
+        self._ws_action_flush_task = None
         # 사이클 46 (2026-05-22) — heartbeat metrics task lifecycle 제거.
         # scheduler `_session_health_loop` 가 통합 호출 → 본 함수에서 cancel 불필요.
         if self._ws:
@@ -258,6 +283,58 @@ class KisWebSocket:
         self._pingpong_recv_count = 0
         self._heartbeat_timeout_count = 0
         self._pingpong_window_start_at = now
+
+    # -- 사이클 74 옵션 E-1 — WS action aggregation --------------------------------
+
+    def _record_action(self, tr_id: str, tr_key: str, action: str) -> None:
+        """tr_id 별 action aggregation 누적 (사이클 74 옵션 E-1).
+
+        action: "SUBSCRIBE" / "UNSUBSCRIBE" / "ACK" / "OPSP_ALREADY"
+        5분 윈도우 후 `_flush_ws_action_collector` 가 `[ws_action_summary]` 1행 emit.
+        [ws_subscribe_reject] ERROR / [ws_reverify] WARNING 은 individual 보존 (변경 0).
+        """
+        bucket = self._ws_action_collector.setdefault(tr_id, {})
+        lst = bucket.setdefault(action, [])
+        lst.append(tr_key)
+
+    def _flush_ws_action_collector(self) -> None:
+        """5분 윈도우 종료 시 tr_id별 누적 통계 1행 emit + collector 초기화.
+
+        collector 비어 있으면 emit skip (no-op).
+        종목 cap 20 + overflow `...+N` (사이클 28 [stale_watcher_detail] 패턴 답습).
+        """
+        if not self._ws_action_collector:
+            return
+        for tr_id, actions in self._ws_action_collector.items():
+            parts: list[str] = []
+            for action_name in ("SUBSCRIBE", "UNSUBSCRIBE", "ACK", "OPSP_ALREADY"):
+                tickers = actions.get(action_name, [])
+                if not tickers:
+                    continue
+                count = len(tickers)
+                preview = sorted(tickers)[:20]
+                overflow = max(0, count - 20)
+                suffix = f"...+{overflow}" if overflow > 0 else ""
+                parts.append(f"{action_name}={count} {preview}{suffix}")
+            if not parts:
+                continue
+            logger.info(
+                "[ws_action_summary] label=%s tr_id=%s window=300s %s",
+                self._label, tr_id, " ".join(parts),
+            )
+        self._ws_action_collector.clear()
+
+    async def _ws_action_metrics_loop(self) -> None:
+        """5분 주기 ws_action collector flush (사이클 74, 사이클 42 _heartbeat_metrics_loop 패턴 답습).
+
+        connect() 진입 직후 1회 task 시작. disconnect() 에서 cancel + await 정리.
+        disconnect cancel *전* `_flush_ws_action_collector()` 1회 마지막 flush 의무 (Q5 옵션 A).
+        """
+        while self._running:
+            await asyncio.sleep(HEARTBEAT_METRICS_INTERVAL_SECS)  # 5분 (300s)
+            self._flush_ws_action_collector()
+
+    # -- subscribe / unsubscribe / restore / verify --------------------------------
 
     async def subscribe(self, tr_id: str, tr_key: str, *, bypass_limit: bool = False) -> None:
         """종목 구독을 등록한다.
@@ -413,8 +490,9 @@ class KisWebSocket:
             },
         }
         await self._ws.send(json.dumps(msg))
-        action = "구독" if subscribe else "해제"
-        logger.info("WebSocket %s: %s / %s", action, tr_id, tr_key)
+        # 사이클 74 옵션 E-1: 직접 logger.info 제거 → _record_action aggregation 흡수
+        action = "SUBSCRIBE" if subscribe else "UNSUBSCRIBE"
+        self._record_action(tr_id, tr_key, action)
 
     async def _receive_loop(self) -> None:
         """메시지 수신 루프. Heartbeat 타임아웃 감시 포함."""
@@ -487,10 +565,9 @@ class KisWebSocket:
                     # 사이클 17 보강 — 60s → 300s. `_scan_loop` 5분 주기 ≥ backoff 만료
                     # 보장 (KIS 공식 답변: "기등록한 사항을 재등록하지 않도록").
                     self._opsp_backoff_until[(tr_id, tr_key)] = time.time() + 300.0
-                    logger.info(
-                        "WebSocket 구독 이미 활성(KIS 측): tr_id=%s, tr_key=%s, msg_cd=%s, msg1=%s [ws_opsp_backoff until=+300s]",
-                        tr_id, tr_key, msg_cd, msg1,
-                    )
+                    # 사이클 74 Q2-D 옵션 A: OPSP0002 ALREADY aggregation 흡수 (사이클 17 backoff 정책 영속)
+                    # 직접 logger.info 제거 → _record_action collector 흡수 + 5분 주기 1행 emit
+                    self._record_action(tr_id, tr_key, "OPSP_ALREADY")
                     return
 
                 # 구독 거절 응답 감지 → 해당 구독 제거 (E2, 2026-05-12)
@@ -521,9 +598,9 @@ class KisWebSocket:
                 if rt_cd == "0" and "SUBSCRIBE SUCCESS" in upper_msg1:
                     if (tr_id, tr_key) in self._subscriptions:
                         self._subscriptions_acked.add((tr_id, tr_key))
-                        logger.info(
-                            "WebSocket 구독 ACK: tr_id=%s, tr_key=%s", tr_id, tr_key,
-                        )
+                        # 사이클 74 옵션 E-1: 직접 logger.info 제거 → _record_action ACK 흡수
+                        # "WebSocket 구독 ACK: tr_id=... tr_key=..." 직접 emit 0건 (G-7 AST 가드)
+                        self._record_action(tr_id, tr_key, "ACK")
                     else:
                         logger.debug(
                             "[ws_ack_orphan] tr_id=%s tr_key=%s — _subscriptions 부재 (in-flight race ACK 무시)",

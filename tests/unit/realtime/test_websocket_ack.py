@@ -86,13 +86,21 @@ async def test_case_a_subscribe_success_adds_to_acked_and_logs_info(
     assert ("H0UNCNT0", "005930") in ws._subscriptions_acked, (
         "rt_cd=0 + msg1 'SUBSCRIBE SUCCESS' 면 _subscriptions_acked 에 add 되어야 함"
     )
-    ack_logs = [
+    # 사이클 74 옵션 E-1: 직접 logger.info("WebSocket 구독 ACK: ...") 제거 → _record_action ACK 흡수
+    # 직접 INFO 로그 0건 검증 + collector ACK 흡수 검증
+    direct_ack_logs = [
         rec for rec in caplog.records
-        if "구독 ACK" in rec.getMessage() and rec.levelno == logging.INFO
+        if "WebSocket 구독 ACK:" in rec.getMessage() and rec.levelno == logging.INFO
     ]
-    assert ack_logs, "INFO 로그 '구독 ACK' 미발생"
-    msg = ack_logs[0].getMessage()
-    assert "H0UNCNT0" in msg and "005930" in msg
+    assert not direct_ack_logs, (
+        f"사이클 74 G-7: SUBSCRIBE SUCCESS 직접 logger.info 0건 의무 — actual={direct_ack_logs}"
+    )
+    # collector 에 ACK 흡수 확인
+    collector = getattr(ws, "_ws_action_collector", {})
+    h0un = collector.get("H0UNCNT0", {})
+    assert "005930" in h0un.get("ACK", []), (
+        "사이클 74: collector ACK 005930 흡수 의무"
+    )
 
 
 # ---------------------------------------------------------------------------

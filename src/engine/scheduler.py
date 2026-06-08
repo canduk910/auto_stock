@@ -126,6 +126,40 @@ TIME_BUY_STOP = TIME_KRX_MAIN_BUY_STOP
 TIME_MARKET_CLOSE = TIME_KRX_MAIN_CLOSE
 
 
+# ── 사이클 74 옵션 C — [swing_rest_poll] 5분 aggregation collector ─────────────────
+_swing_rest_poll_collector: list[dict] = []
+
+
+def record_swing_rest_poll(stats: dict) -> None:
+    """5분 윈도우 누적 (사이클 74 옵션 C aggregation).
+
+    stats keys: candidates / held / pending / updated / failed / elapsed_ms
+    5분 윈도우 내 ~5 회 poll 을 1 행으로 합산 (80% 감소).
+    """
+    _swing_rest_poll_collector.append(stats)
+
+
+def flush_swing_rest_poll_collector() -> None:
+    """5분 윈도우 종료 시 `[swing_rest_poll_summary]` 1행 emit + collector 초기화.
+
+    scheduler shutdown / _swing_rest_poll_loop cancel 직전 마지막 flush 1회 호출 의무
+    (Q5 옵션 A — 잔여 카운터 손실 방지, 정산 *직전* 데이터 보존).
+    collector 비어 있으면 emit skip (no-op).
+    """
+    if not _swing_rest_poll_collector:
+        return
+    polls = len(_swing_rest_poll_collector)
+    candidates_avg = sum(s["candidates"] for s in _swing_rest_poll_collector) / polls
+    candidates_max = max(s["candidates"] for s in _swing_rest_poll_collector)
+    total_held = _swing_rest_poll_collector[-1]["held"]
+    elapsed_ms_avg = sum(s["elapsed_ms"] for s in _swing_rest_poll_collector) / polls
+    logger.info(
+        "[swing_rest_poll_summary] polls=%d candidates_avg=%.1f max=%d total_held=%d elapsed_ms_avg=%.1f",
+        polls, candidates_avg, candidates_max, total_held, elapsed_ms_avg,
+    )
+    _swing_rest_poll_collector.clear()
+
+
 class TradingScheduler:
     """매매 스케줄러."""
 
@@ -2316,11 +2350,9 @@ class TradingScheduler:
             "failed": failed,
             "elapsed_ms": elapsed_ms,
         }
-        logger.info(
-            "[swing_rest_poll] candidates=%d held=%d pending=%d updated=%d failed=%d elapsed_ms=%d",
-            stats["candidates"], stats["held"], stats["pending"],
-            stats["updated"], stats["failed"], stats["elapsed_ms"],
-        )
+        # 사이클 74 옵션 C aggregation: [swing_rest_poll] INFO → 5분 collector 흡수
+        # 직접 logger.info("[swing_rest_poll] ...") 제거 → record_swing_rest_poll 위임
+        record_swing_rest_poll(stats)
         # _DbLogHandler 위임 단일 INSERT — write_log 직접 호출 제거 (사이클 73 S-1)
         return stats
 
