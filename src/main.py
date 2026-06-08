@@ -116,6 +116,11 @@ root_logger.addHandler(error_handler)
 # 단일 워커 ThreadPoolExecutor에 fire-and-forget으로 위임 → logger 호출은 즉시 반환.
 _LOG_DB_EXECUTOR = ThreadPoolExecutor(max_workers=2, thread_name_prefix="db-log")
 
+# 사이클 72 hotfix — 500ms TTL dedupe 캐시 (옵션 D).
+# 동일 메시지가 logger.* 경로로 500ms 내 중복 emit 되면 두 번째 INSERT skip.
+# 옵션 A' (write_log 호출 제거) 와 함께 이중 INSERT 안전망 역할.
+_DEDUPE_TTL_SECS = 0.5  # 500ms 동일 메시지 dedupe
+
 
 def _insert_log_to_db(level: str, message: str) -> None:
     try:
@@ -130,13 +135,36 @@ def _insert_log_to_db(level: str, message: str) -> None:
 
 
 class _DbLogHandler(logging.Handler):
-    """로그를 Supabase system_logs 테이블에 비동기로 기록한다(executor 위임)."""
+    """로그를 Supabase system_logs 테이블에 비동기로 기록한다(executor 위임).
+
+    사이클 72 hotfix — 500ms TTL dedupe 캐시 (옵션 D):
+    동일 메시지가 500ms 내 중복 emit 되면 두 번째는 INSERT skip.
+    옵션 A' (write_log 직접 호출 제거) 의 안전망으로 추가.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._dedupe_cache: dict[str, float] = {}  # message → last_emit_monotonic
 
     def emit(self, record: logging.LogRecord) -> None:
         if not record.name.startswith("src."):
             return
         try:
             message = f"[{record.name}] {record.getMessage()}"[:500]
+            # 500ms TTL dedupe — 동일 메시지 중복 INSERT 차단
+            last = self._dedupe_cache.get(message)
+            now = time.monotonic()
+            if last is not None and (now - last) < _DEDUPE_TTL_SECS:
+                return  # 중복 INSERT 차단
+            # 캐시 저장 — 현재 시각 재측정 (dedupe 비교 후 시점 기록)
+            self._dedupe_cache[message] = time.monotonic()
+            # lazy evict — TTL 경과 항목 정리 (~100 항목 cap, 메모리 폭주 차단)
+            if len(self._dedupe_cache) > 100:
+                evict_now = time.monotonic()
+                self._dedupe_cache = {
+                    k: v for k, v in self._dedupe_cache.items()
+                    if (evict_now - v) < _DEDUPE_TTL_SECS
+                }
             _LOG_DB_EXECUTOR.submit(_insert_log_to_db, record.levelname, message)
         except RuntimeError:
             pass  # 인터프리터 셧다운 중 등 executor 사용 불가 시 무시

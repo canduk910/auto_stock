@@ -15,7 +15,8 @@
 - 종목별 예외 격리 (continue, ERROR 로그)
 - 반환: 재구독한 ticker 리스트
 - INFO 로그 `[stale_priority_resubscribe] count=N tickers=[...]`
-- `write_log("INFO", ...)` fire-and-forget
+
+사이클 72 hotfix: write_log 제거 → logger.info 단독 → 로그 검증은 caplog 로 전환.
 
 세 케이스로 의미체계 고정:
 - Case A: stale 5 / fresh 3 → stale 5만 subscribe 호출됨
@@ -46,7 +47,7 @@ async def _run_helper(
 
     반환: (subscribe_calls, write_log_calls)
     - subscribe_calls: kis_ws_pool.subscribe 호출 인자 dict 리스트
-    - write_log_calls: write_log 호출 (level, message)
+    - write_log_calls: 하위 호환 빈 리스트 (사이클 72: write_log 제거 → caplog 전환)
     """
     from src.engine import scheduler as scheduler_module
     from src.engine.scheduler import STALE_FRESHNESS_SECS, TradingScheduler
@@ -82,20 +83,6 @@ async def _run_helper(
         )
         return "main"
 
-    # write_log fake
-    write_log_calls: list[dict] = []
-    original_write_log = scheduler_module.write_log
-
-    async def fake_write_log(level: str, message: str) -> None:
-        write_log_calls.append({"level": level, "message": message})
-
-    scheduler_module.write_log = fake_write_log
-    # 사이클 63 A3 이주 후 write_log 는 stale_manager 내부에서 직접 import —
-    # src.db.system_logs 모듈 속성 자체를 패치해야 capture 가능
-    import src.db.system_logs as _syslog_mod
-    original_syslog_write_log = _syslog_mod.write_log
-    _syslog_mod.write_log = fake_write_log
-
     from src.realtime import websocket_pool as wp_module
     original_subscribe = wp_module.kis_ws_pool.subscribe
     wp_module.kis_ws_pool.subscribe = fake_subscribe
@@ -103,12 +90,11 @@ async def _run_helper(
     try:
         await sched._resubscribe_stale_priority(cap=cap)
     finally:
-        scheduler_module.write_log = original_write_log
-        _syslog_mod.write_log = original_syslog_write_log
         wp_module.kis_ws_pool.subscribe = original_subscribe
         ticker_last_tick.clear()
 
-    return subscribe_calls, write_log_calls
+    # 사이클 72: write_log 제거 → 빈 리스트 반환 (하위 호환, 로그 검증은 caplog 로 전환)
+    return subscribe_calls, []
 
 
 # ---------------------------------------------------------------------------
@@ -116,11 +102,13 @@ async def _run_helper(
 # 사이클 25-B: positions/ndc 없는 후보 stale → LOW+bypass_limit=False 재구독
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_stale_only_resubscribed_fresh_skipped():
+async def test_stale_only_resubscribed_fresh_skipped(caplog):
+    import logging
     fresh = ["100001", "100002", "100003"]
     stale = ["200001", "200002", "200003", "200004", "200005"]
 
-    subscribe_calls, write_log_calls = await _run_helper(fresh, stale, cap=10)
+    caplog.set_level(logging.INFO, logger="src.engine.scheduler")
+    subscribe_calls, _ = await _run_helper(fresh, stale, cap=10)
 
     # stale 5건만 subscribe 호출
     assert len(subscribe_calls) == 5, (
@@ -146,11 +134,11 @@ async def test_stale_only_resubscribed_fresh_skipped():
             f"후보 stale 종목 {call['tr_key']} 는 bypass_limit=False (사이클 25-B), got={call['bypass_limit']}"
         )
 
-    # INFO 로그가 system_logs 에 남는다
-    assert any(
-        c["level"] == "INFO" and "stale_priority_resubscribe" in c["message"]
-        for c in write_log_calls
-    ), f"`[stale_priority_resubscribe]` INFO 로그 누락. logs={write_log_calls}"
+    # INFO 로그 검증 — 사이클 72: write_log 제거 → caplog 로 전환
+    log_text = "\n".join(r.message for r in caplog.records)
+    assert "stale_priority_resubscribe" in log_text, (
+        f"`[stale_priority_resubscribe]` INFO 로그 누락. caplog={log_text!r}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -180,12 +168,14 @@ async def test_all_fresh_skipped():
 # Case C: stale 15 → cap=10 적용으로 10건만 처리, 11~15 는 다음 사이클 위임
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_stale_capped_at_ten():
+async def test_stale_capped_at_ten(caplog):
+    import logging
     fresh: list[str] = []
     # stale 15개 (정렬 안정성 위해 sortable id)
     stale = [f"30000{i:02d}" for i in range(15)]
 
-    subscribe_calls, write_log_calls = await _run_helper(fresh, stale, cap=10)
+    caplog.set_level(logging.INFO, logger="src.engine.scheduler")
+    subscribe_calls, _ = await _run_helper(fresh, stale, cap=10)
 
     assert len(subscribe_calls) == 10, (
         f"cap=10 적용으로 10건만 처리되어야 함, got={len(subscribe_calls)}"
@@ -197,9 +187,11 @@ async def test_stale_capped_at_ten():
         f"호출 종목이 stale set 부분집합이어야 함, got={called_tickers}"
     )
 
-    # INFO 로그에 count=10 명시
-    matched = [c for c in write_log_calls if "stale_priority_resubscribe" in c["message"]]
-    assert matched, f"`[stale_priority_resubscribe]` INFO 로그 누락. logs={write_log_calls}"
-    assert any("count=10" in c["message"] for c in matched), (
-        f"cap 적용 시 count=10 명시 필요, got={matched}"
+    # INFO 로그에 count=10 명시 — 사이클 72: write_log 제거 → caplog 로 전환
+    log_text = "\n".join(r.message for r in caplog.records)
+    assert "stale_priority_resubscribe" in log_text, (
+        f"`[stale_priority_resubscribe]` INFO 로그 누락. caplog={log_text!r}"
+    )
+    assert "count=10" in log_text, (
+        f"cap 적용 시 count=10 명시 필요. caplog={log_text!r}"
     )

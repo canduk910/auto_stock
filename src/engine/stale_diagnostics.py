@@ -182,13 +182,7 @@ def emit_stale_session_detail(
             f"ratio={s['stale_ratio']:.2f} stale={tickers_repr}"
         )
         logger.info(msg)
-        try:
-            # write_log 는 async — 호출 컨텍스트(async 함수)에서 task 로 발화
-            # 호출자가 이미 async 컨텍스트이므로 직접 await 대신 fire-and-forget
-            # 동일 prefix 별도 행으로 system_logs 보존
-            asyncio.create_task(_write_log("INFO", msg))
-        except Exception:
-            logger.debug("[stale_watcher_detail] write_log 실패", exc_info=True)
+        # 사이클 72 hotfix A6: asyncio.create_task(_write_log) 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
 
 async def refresh_stale_ccnl_cache(

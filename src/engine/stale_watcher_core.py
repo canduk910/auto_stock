@@ -179,14 +179,7 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
                     "— LMS 위험 차단 skip",
                     ticker, len(history),
                 )
-                try:
-                    await write_log(
-                        "WARNING",
-                        f"[stale_force_retry_cap] ticker={ticker} "
-                        f"attempts_in_hour={len(history)} — LMS 위험 차단 skip",
-                    )
-                except Exception:
-                    logger.debug("[stale_force_retry_cap] write_log 실패", exc_info=True)
+                # 사이클 72 hotfix A4: write_log 제거 — logger.warning → _DbLogHandler 위임 단일 INSERT
                 skipped_giveup += 1
                 continue
 
@@ -214,14 +207,7 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
                     "— 강제 재시도 + 카운터 리셋",
                     ticker, retry, age_disp,
                 )
-                try:
-                    await write_log(
-                        "INFO",
-                        f"[stale_force_retry] ticker={ticker} retries={retry} "
-                        f"last_resub_age={age_disp} — 강제 재시도 + 카운터 리셋",
-                    )
-                except Exception:
-                    logger.debug("[stale_force_retry] write_log 실패", exc_info=True)
+                # 사이클 72 hotfix A2: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
             except Exception:
                 logger.exception("[stale_force_retry] 강제 재시도 실패: %s", ticker)
 
@@ -252,15 +238,7 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         "[stale_watcher] subscribed=%d stale=%d force_reregistered=%d skipped=%d",
         len(subscribed), len(stale_tickers), force_reregistered, skipped_giveup,
     )
-    try:
-        await write_log(
-            "INFO",
-            f"[stale_watcher] subscribed={len(subscribed)} stale={len(stale_tickers)} "
-            f"force_reregistered={force_reregistered} skipped={skipped_giveup}",
-        )
-    except Exception:
-        # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
-        logger.debug("[stale_watcher] write_log 실패", exc_info=True)
+    # 사이클 72 hotfix A3: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
     # 사이클 28 — [stale_watcher_detail] 세션별 분포 + 종목 cap 20 (별도 행, G1 호환)
     # Q4=B (사이클 60 답습하지 않는 유일 영역) — 직접 호출 (1 hop 단축, wrapper 우회)
@@ -385,15 +363,6 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
         "[stale_priority_resubscribe] count=%d tickers=%s",
         len(resubscribed), resubscribed,
     )
-    try:
-        from src.db.system_logs import write_log
-        await write_log(
-            "INFO",
-            f"[stale_priority_resubscribe] count={len(resubscribed)} "
-            f"tickers={resubscribed}",
-        )
-    except Exception:
-        # fire-and-forget — system_logs 실패해도 재구독 흐름 보존
-        logger.debug("[stale_priority_resubscribe] write_log 실패", exc_info=True)
+    # 사이클 72 hotfix A5: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
     return resubscribed

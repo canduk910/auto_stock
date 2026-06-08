@@ -1146,13 +1146,9 @@ async def subscribe_filtered_stocks(
                 f"total_subscribed={total_subscribed} max={MAX_SUBSCRIPTIONS} "
                 f"high_count={high_count} low_remaining={low_remaining}"
             )
-            logger.info(drop_log)
-            # drop 발생은 운영 가시화 대상 — WARNING 영구 저장 (가설 A)
-            try:
-                from src.db.system_logs import write_log
-                await write_log("WARNING", drop_log)
-            except Exception:
-                logger.debug("[priority_drop] write_log 실패", exc_info=True)
+            logger.warning(drop_log)
+            # 사이클 72 hotfix A11: write_log 제거 — logger.warning → _DbLogHandler 위임 단일 INSERT
+            # (drop 발생은 WARNING 레벨로 격상 — 운영 가시화 보존)
     else:
         # 기존 평탄 처리 (외부 호환 fallback)
         for ticker in all_tickers:

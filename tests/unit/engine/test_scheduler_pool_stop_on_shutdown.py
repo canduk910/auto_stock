@@ -106,16 +106,17 @@ async def test_manual_stop_invokes_pool_stop_after_main_disconnect():
 # Test B-2 — 수동 중지 시 pool.stop 예외가 main disconnect 흐름 중단 안 함
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_manual_stop_pool_exception_does_not_block_shutdown():
-    """``kis_ws_pool.stop()`` 이 예외 raise 해도 ``write_log("INFO", "매매 시스템 수동 중지")``
-    도달 verify.
+async def test_manual_stop_pool_exception_does_not_block_shutdown(caplog):
+    """``kis_ws_pool.stop()`` 이 예외 raise 해도 종료 로그 도달 verify.
 
     명세 시나리오 E (보조 stop 예외 흡수):
     > 보조 stop() 실패가 메인 종료 흐름을 막아선 안 됨.
-    > write_log("INFO", "매매 시스템 종료") 가 도달 가능.
+    > logger.info("매매 시스템 수동 중지") 가 도달 가능.
 
+    사이클 72 hotfix: write_log → logger.info 변경 → caplog 검증으로 전환.
     Green Patch 3 의 try/except 흡수 가드 필수.
     """
+    import logging
     sched = TradingScheduler()
     sched._running = True
 
@@ -128,12 +129,11 @@ async def test_manual_stop_pool_exception_does_not_block_shutdown():
     fake_pool = MagicMock()
     fake_pool.stop = AsyncMock(side_effect=RuntimeError("보조 세션 disconnect 실패"))
 
-    write_log_mock = AsyncMock()
+    caplog.set_level(logging.INFO, logger="src.engine.scheduler")
 
     with patch("src.engine.scheduler.kis_ws", main_ws), \
          patch("src.engine.scheduler.unsubscribe_all", new=AsyncMock()), \
-         patch("src.realtime.websocket_pool.kis_ws_pool", fake_pool), \
-         patch("src.engine.scheduler.write_log", write_log_mock):
+         patch("src.realtime.websocket_pool.kis_ws_pool", fake_pool):
         # 예외가 stop() 흐름을 중단시키면 안 됨
         await sched.stop()
 
@@ -141,14 +141,11 @@ async def test_manual_stop_pool_exception_does_not_block_shutdown():
     main_ws.disconnect.assert_awaited_once()
     # 풀 stop 도 호출 시도됐어야 함
     fake_pool.stop.assert_awaited_once()
-    # write_log("INFO", "매매 시스템 수동 중지") 도달 verify
-    write_log_calls = [c.args for c in write_log_mock.await_args_list]
-    assert any(
-        len(args) >= 2 and args[0] == "INFO" and "수동 중지" in args[1]
-        for args in write_log_calls
-    ), (
+    # 종료 로그 도달 verify — 사이클 72: caplog 검증
+    log_text = "\n".join(r.message for r in caplog.records)
+    assert "수동 중지" in log_text, (
         f"수동 중지 종료 로그 미도달 — pool.stop 예외가 종료 흐름을 중단시킴. "
-        f"write_log 호출 인자들: {write_log_calls}"
+        f"caplog={log_text!r}"
     )
 
 
@@ -203,9 +200,8 @@ async def test_normal_shutdown_finally_invokes_pool_stop():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 @freeze_time("2026-05-18 10:00:00")
-async def test_normal_shutdown_finally_pool_exception_does_not_block_log():
-    """finally 블록의 ``pool.stop()`` 이 예외 raise 해도 ``write_log("INFO", "매매 시스템 종료")``
-    가 도달.
+async def test_normal_shutdown_finally_pool_exception_does_not_block_log(caplog):
+    """finally 블록의 ``pool.stop()`` 이 예외 raise 해도 종료 로그가 도달.
 
     명세 §4 Green Patch 2:
     > try:
@@ -213,9 +209,11 @@ async def test_normal_shutdown_finally_pool_exception_does_not_block_log():
     > except Exception:
     >     logger.warning("[scheduler_shutdown] pool.stop 실패", exc_info=True)
 
-    회귀 가드: try/except 흡수 누락 시 finally 마지막 라인 ``write_log("INFO", "매매 시스템 종료")``
+    사이클 72 hotfix: write_log → logger.info 변경 → caplog 검증으로 전환.
+    회귀 가드: try/except 흡수 누락 시 finally 마지막 라인 logger.info("매매 시스템 종료")
     가 도달 안 함 → 정상 종료 추적 가시성 손실.
     """
+    import logging
     sched = TradingScheduler()
 
     fake_pool = MagicMock()
@@ -227,15 +225,15 @@ async def test_normal_shutdown_finally_pool_exception_does_not_block_log():
     main_ws.connect = AsyncMock()
     main_ws.subscribe = AsyncMock()
 
-    write_log_mock = AsyncMock()
-
     async def _boot_raises():
         raise RuntimeError("boot 실패 (시뮬레이션)")
+
+    caplog.set_level(logging.INFO, logger="src.engine.scheduler")
 
     with patch.object(sched, "_boot", side_effect=_boot_raises), \
          patch("src.engine.scheduler.kis_ws", main_ws), \
          patch("src.realtime.websocket_pool.kis_ws_pool", fake_pool), \
-         patch("src.engine.scheduler.write_log", write_log_mock), \
+         patch("src.engine.scheduler.write_log", new=AsyncMock()), \
          patch("src.engine.scheduler.register_tick_handler"), \
          patch("src.engine.scheduler.register_execution_handler"), \
          patch("src.engine.scheduler.register_board_handler"):
@@ -244,12 +242,9 @@ async def test_normal_shutdown_finally_pool_exception_does_not_block_log():
 
     # pool.stop 호출 시도됐어야 함
     fake_pool.stop.assert_awaited_once()
-    # write_log("INFO", "매매 시스템 종료") 도달 verify
-    write_log_calls = [c.args for c in write_log_mock.await_args_list]
-    assert any(
-        len(args) >= 2 and args[0] == "INFO" and "매매 시스템 종료" in args[1]
-        for args in write_log_calls
-    ), (
+    # 종료 로그 도달 verify — 사이클 72: caplog 검증
+    log_text = "\n".join(r.message for r in caplog.records)
+    assert "매매 시스템 종료" in log_text, (
         f"finally 의 매매 시스템 종료 로그 미도달 — pool.stop 예외가 finally 흐름을 중단시킴. "
-        f"write_log 호출 인자들: {write_log_calls}"
+        f"caplog={log_text!r}"
     )

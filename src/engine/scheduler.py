@@ -732,7 +732,8 @@ class TradingScheduler:
 
             self._running = False
             self._phase = "idle"
-            await write_log("INFO", "매매 시스템 종료")
+            logger.info("매매 시스템 종료")
+            # 사이클 72 hotfix: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
     async def run_daily(self) -> None:
         """매일 08:20에 자동 시작하는 무한 루프.
@@ -839,7 +840,8 @@ class TradingScheduler:
             await _wsp.stop()
         except Exception:
             logger.warning("[scheduler_stop] pool.stop 실패", exc_info=True)
-        await write_log("INFO", "매매 시스템 수동 중지")
+        logger.info("매매 시스템 수동 중지")
+        # 사이클 72 hotfix: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
     async def _session_loop(self) -> None:
         """SessionTracker 1분 주기 tick — 보드 진입/종료 콜백 발화."""
@@ -1726,17 +1728,13 @@ class TradingScheduler:
             logger.exception("[market_regime] snapshot INSERT 실패 — 메모리 레짐 유효")
 
         # 운영 가시성: regime + 매수가드 + 자동조정 결과 1행
-        try:
-            await write_log(
-                "INFO",
-                f"[market_regime] regime={regime.regime} "
-                f"buy_blocked={regime.buy_blocked} "
-                f"block_reason={regime.block_reason} "
-                f"cash_min={regime.cash_min} "
-                f"computed_ratio={regime.computed_cash_usage_ratio()}",
-            )
-        except Exception:
-            pass
+        # 사이클 72 hotfix: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
+        logger.info(
+            "[market_regime] regime=%s buy_blocked=%s block_reason=%s "
+            "cash_min=%s computed_ratio=%s",
+            regime.regime, regime.buy_blocked, regime.block_reason,
+            regime.cash_min, regime.computed_cash_usage_ratio(),
+        )
 
     async def _resolve_cash_usage_ratio(self) -> float:
         """사이클 2 (2026-05-17): `auto_regime_adjust` 토글에 따라 cash_usage_ratio 결정.
@@ -1821,20 +1819,14 @@ class TradingScheduler:
                 await stock_master.upsert_one(basics)
                 refreshed += 1
             except Exception:
-                logger.exception("stock_master eager 갱신 실패: %s", ticker)
-                await write_log(
-                    "WARNING",
-                    f"[stock_master_eager] 갱신 실패 ticker={ticker}",
-                )
+                logger.exception("[stock_master_eager] 갱신 실패: %s", ticker)
+                # 사이클 72 hotfix: write_log 제거 — logger.exception → _DbLogHandler 위임 단일 INSERT
 
         logger.info(
             "[stock_master_eager] 보유+익일청산 %d종목 갱신 완료 (refreshed=%d, skipped=%d)",
             len(tickers), refreshed, skipped,
         )
-        await write_log(
-            "INFO",
-            f"[stock_master_eager] total={len(tickers)} refreshed={refreshed} skipped={skipped}",
-        )
+        # 사이클 72 hotfix: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
         # 멀티데이 보유 전략(donchian_swing) 보유 종목의 ATR 재계산
         ds = self.registry.get("donchian_swing")
@@ -2653,13 +2645,7 @@ class TradingScheduler:
             "[funnel_snapshot] 자동 캡처 완료 — target_date=%s saved=%d",
             today_kst.isoformat(), saved_count,
         )
-        try:
-            await write_log(
-                "INFO",
-                f"[funnel_snapshot] auto target_date={today_kst.isoformat()} saved={saved_count}",
-            )
-        except Exception:
-            logger.debug("[funnel_snapshot] write_log 실패", exc_info=True)
+        # 사이클 72 hotfix: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).

@@ -163,35 +163,39 @@ async def test_low_priority_breakout_before_swing(_fresh_ws_subscriptions):
 # Case 3: drop 발생 시 system_logs WARNING 영구 저장 (가설 A — 가시성)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_priority_drop_writes_warning_to_system_logs(_fresh_ws_subscriptions):
-    """drop>0 시 write_log("WARNING", "[priority_drop] ...") fire-and-forget 호출.
+async def test_priority_drop_writes_warning_to_system_logs(
+    _fresh_ws_subscriptions, caplog,
+):
+    """drop>0 시 logger.warning("[priority_drop] ...") 호출 + caplog 검증.
 
     작업 2 (2026-05-13) cap 25 도입 후 시나리오 — HIGH 11 + breakout 38 + momentum 5
     + swing 10 → breakout cap drop 13 + swing 한도 drop 10.
-    """
-    with patch("src.db.system_logs.write_log", new=AsyncMock()) as mock_write:
-        positions = [f"H{i:03d}" for i in range(11)]
-        breakout = [f"B{i:03d}" for i in range(38)]
-        momentum = [f"M{i:03d}" for i in range(5)]
-        swing = [f"S{i:03d}" for i in range(10)]
-        priority_groups = {
-            "positions": positions,
-            "next_day_clear": [],
-            "swing": swing,
-            "momentum": momentum,
-            "breakout": breakout,
-        }
-        await scanner_module.subscribe_filtered_stocks(
-            [], extra_tickers=[], priority_groups=priority_groups,
-        )
 
-    # write_log 가 drop>0 시 호출되었는지 + 메시지 형식 확인
-    write_calls = mock_write.call_args_list
-    drop_calls = [c for c in write_calls if "[priority_drop]" in str(c)]
-    assert len(drop_calls) >= 1, "drop>0 시 write_log WARNING 호출되어야 함"
-    drop_args = drop_calls[0].args
-    assert drop_args[0] == "WARNING", f"WARNING 레벨이어야 함, 실제={drop_args[0]}"
-    drop_msg = drop_args[1]
+    사이클 72 hotfix: write_log → logger.warning 변경 → caplog 검증으로 전환.
+    """
+    caplog.set_level(logging.WARNING, logger="src.engine.scanner")
+    positions = [f"H{i:03d}" for i in range(11)]
+    breakout = [f"B{i:03d}" for i in range(38)]
+    momentum = [f"M{i:03d}" for i in range(5)]
+    swing = [f"S{i:03d}" for i in range(10)]
+    priority_groups = {
+        "positions": positions,
+        "next_day_clear": [],
+        "swing": swing,
+        "momentum": momentum,
+        "breakout": breakout,
+    }
+    await scanner_module.subscribe_filtered_stocks(
+        [], extra_tickers=[], priority_groups=priority_groups,
+    )
+
+    # caplog 에서 [priority_drop] WARNING 검증 (사이클 72: write_log 제거 → logger.warning 단독)
+    drop_records = [
+        r for r in caplog.records
+        if r.levelno >= logging.WARNING and "[priority_drop]" in r.message
+    ]
+    assert len(drop_records) >= 1, "drop>0 시 [priority_drop] WARNING 로그 없음"
+    drop_msg = drop_records[0].message
     assert "breakout=13" in drop_msg, f"breakout cap drop 13건, msg={drop_msg}"
     assert "momentum=0" in drop_msg
     assert "swing=10" in drop_msg
@@ -238,8 +242,10 @@ async def test_priority_drop_log_low_remaining_never_negative_when_high_overflow
 
     이전 `remaining = MAX - total_subscribed` 는 음수 노출 가능 → 대시보드 해석 혼동.
     Copilot 피드백: `max(0, ...)` 로 clamp + `low_remaining` 로 의미 명확화.
+
+    사이클 72 hotfix: write_log → logger.warning 변경 → caplog 검증으로 전환.
     """
-    caplog.set_level(logging.INFO, logger="src.engine.scanner")
+    caplog.set_level(logging.WARNING, logger="src.engine.scanner")
 
     positions = [f"P{i:03d}" for i in range(50)]  # HIGH 50개 (bypass_limit=True)
     # LOW 그룹에 drop 발생을 유도해 로그 노출
@@ -252,25 +258,17 @@ async def test_priority_drop_log_low_remaining_never_negative_when_high_overflow
         "breakout": [],
     }
 
-    with patch("src.db.system_logs.write_log", new=AsyncMock()) as mock_write:
-        await scanner_module.subscribe_filtered_stocks(
-            [], extra_tickers=[], priority_groups=priority_groups,
-        )
+    await scanner_module.subscribe_filtered_stocks(
+        [], extra_tickers=[], priority_groups=priority_groups,
+    )
 
-    # 로그에서 low_remaining 값 검증 — 음수 불가, 0 으로 clamp
+    # caplog 에서 low_remaining 값 검증 — 음수 불가, 0 으로 clamp
     log_text = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" in log_text, "drop 발생 → priority_drop 로그 노출"
     assert "low_remaining=0" in log_text, (
         f"HIGH overflow 시에도 low_remaining=0 으로 clamp 필요. log={log_text}"
     )
     assert "low_remaining=-" not in log_text, "음수 노출 금지"
-
-    # system_logs 영구 저장 메시지도 동일 검증
-    drop_calls = [c for c in mock_write.call_args_list if "[priority_drop]" in str(c)]
-    assert len(drop_calls) >= 1
-    persisted = drop_calls[0].args[1]
-    assert "low_remaining=0" in persisted
-    assert "low_remaining=-" not in persisted
 
 
 @pytest.mark.asyncio

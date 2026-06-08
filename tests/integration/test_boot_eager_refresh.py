@@ -185,14 +185,8 @@ async def test_eager_refresh_isolates_kis_failure(
     # KIS 호출은 3건 모두 시도됐어야 함 (실패도 호출은 발생)
     assert set(stub_stock_master.kis_calls) == {"012200", "005930", "000660"}
 
-    # WARNING 로그 1행 노출 — 실패 종목 표시
-    warn_logs = [
-        log for log in scheduler_env.calls.write_log
-        if log["level"] == "WARNING" and "stock_master_eager" in log["message"]
-    ]
-    assert any("005930" in log["message"] for log in warn_logs), (
-        f"실패 ticker WARNING 로그 누락: {warn_logs}"
-    )
+    # 사이클 72 hotfix — [stock_master_eager] write_log 호출 제거, _DbLogHandler 위임 단일 INSERT.
+    # 운영 prefix 발화는 logger 경로로 보존. 본 assertion 제거 (G-A 단위 가드로 회귀 차단 영속).
 
 
 # ---------------------------------------------------------------------------

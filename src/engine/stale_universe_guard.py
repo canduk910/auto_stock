@@ -142,16 +142,6 @@ async def evaluate_universe_guard(
             ccnl.get("last_cntg_hour", ""),
             today_volume,
         )
-        try:
-            await _write_log(
-                "INFO",
-                f"[universe_excluded] ticker={ticker} "
-                f"reason=stale_6plus_low_volume retries={retries} "
-                f"last_resub_age={age_disp} "
-                f"last_cntg_hour={ccnl.get('last_cntg_hour', '')} "
-                f"today_volume={today_volume}",
-            )
-        except Exception:
-            logger.debug("[universe_excluded] write_log 실패", exc_info=True)
+        # 사이클 72 hotfix A10: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
         await asyncio.sleep(0.05)  # Rate Limit 보호

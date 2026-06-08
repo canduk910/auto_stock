@@ -65,11 +65,7 @@ async def boot(scheduler: "TradingScheduler") -> None:
         "[cash_usage_ratio] net_asset=%d ratio=%.2f available=%d",
         summary.net_asset, ratio, available_for_trading,
     )
-    await write_log(
-        "INFO",
-        f"[cash_usage_ratio] net_asset={summary.net_asset} "
-        f"ratio={ratio:.2f} available={available_for_trading}",
-    )
+    # 사이클 72 hotfix G-6: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
     # 전략별 prepare 호출
     for strategy in scheduler.registry.enabled():

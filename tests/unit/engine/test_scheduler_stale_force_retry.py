@@ -291,11 +291,14 @@ async def test_stale_force_retry_log_format(monkeypatch, caplog):
 # F-7: 시간당 cap 12회 초과 → skip + [stale_force_retry_cap] WARNING
 # ===========================================================================
 @pytest.mark.asyncio
-async def test_hourly_cap_blocks_13th_attempt(monkeypatch):
+async def test_hourly_cap_blocks_13th_attempt(monkeypatch, caplog):
     """시간당 12회 강제 재시도 후 13번째는 skip + WARNING.
 
     60분 슬라이딩 윈도우 내 12회 누적 → 13번째 시도는 차단.
+
+    사이클 72 hotfix: write_log 제거 → logger.warning 단독 → caplog 검증으로 전환.
     """
+    import logging
     pool_mock, log_calls = _setup_env(monkeypatch, tickers=["005935"])
     sched = _make_sched()
     sched._stale_retry_count = {"005935": 8}  # +1 → 9, r > 5 분기
@@ -309,18 +312,19 @@ async def test_hourly_cap_blocks_13th_attempt(monkeypatch):
         "005935": [now - timedelta(minutes=55 - i * 4) for i in range(12)]
     }
 
+    caplog.set_level(logging.WARNING, logger="src.engine.scheduler")
     await sched._check_and_resubscribe_stale()
 
     # cap 초과 → 강제 재시도 호출 0건
     pool_mock.unsubscribe_in_pool.assert_not_called()
     pool_mock.subscribe.assert_not_called()
 
-    # [stale_force_retry_cap] WARNING 노출
-    cap_logs = [msg for level, msg in log_calls if "[stale_force_retry_cap]" in msg]
-    assert len(cap_logs) >= 1, (
-        f"시간당 cap 초과 시 [stale_force_retry_cap] WARNING 누락. log_calls={log_calls!r}"
+    # [stale_force_retry_cap] WARNING 노출 — 사이클 72: caplog 로 검증 (write_log 제거)
+    cap_log_text = "\n".join(r.message for r in caplog.records if r.levelno >= logging.WARNING)
+    assert "[stale_force_retry_cap]" in cap_log_text, (
+        f"시간당 cap 초과 시 [stale_force_retry_cap] WARNING 누락. "
+        f"caplog={cap_log_text!r}"
     )
-    assert any(level == "WARNING" for level, msg in log_calls if "[stale_force_retry_cap]" in msg)
 
 
 @pytest.mark.asyncio

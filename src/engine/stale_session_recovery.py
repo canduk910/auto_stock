@@ -159,14 +159,7 @@ async def force_reconnect_session(scheduler: Any, label: str) -> bool:
             "[silent_inactive_recovery_cap] label=%s count=%d/60min — reconnect skip",
             label, len(history),
         )
-        try:
-            await _write_log(
-                "WARNING",
-                f"[silent_inactive_recovery_cap] label={label} "
-                f"count={len(history)}/60min — KIS 측 무한 재연결 회피",
-            )
-        except Exception:
-            logger.debug("[silent_inactive_recovery_cap] write_log 실패", exc_info=True)
+        # 사이클 72 hotfix A7: write_log 제거 — logger.warning → _DbLogHandler 위임 단일 INSERT
         return False
 
     # 2. label 분기 → _ws 객체 조회
@@ -193,14 +186,7 @@ async def force_reconnect_session(scheduler: Any, label: str) -> bool:
         "[silent_inactive_force_reconnect] label=%s elapsed>=%.0fs — _ws.close() 강제 발화",
         label, SILENT_INACTIVE_PERSIST_SECS,
     )
-    try:
-        await _write_log(
-            "WARNING",
-            f"[silent_inactive_force_reconnect] label={label} "
-            f"elapsed>={SILENT_INACTIVE_PERSIST_SECS:.0f}s — _ws.close() 발화",
-        )
-    except Exception:
-        logger.debug("[silent_inactive_force_reconnect] write_log 실패", exc_info=True)
+    # 사이클 72 hotfix A8: write_log 제거 — logger.warning → _DbLogHandler 위임 단일 INSERT
 
     # 4. _ws.close() — connect() 의 ConnectionClosed catch → 재연결 루프
     try:
@@ -263,12 +249,5 @@ async def delta_unsubscribe_dropped(scheduler: Any, new_set: set[str]) -> list[s
         "[scan_loop_delta] unsubscribed=%d tickers=%s",
         len(unsubscribed), unsubscribed[:10],
     )
-    try:
-        await _write_log(
-            "INFO",
-            f"[scan_loop_delta] unsubscribed={len(unsubscribed)} "
-            f"tickers={unsubscribed[:10]}",
-        )
-    except Exception:
-        logger.debug("[scan_loop_delta] write_log 실패", exc_info=True)
+    # 사이클 72 hotfix A9: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
     return unsubscribed

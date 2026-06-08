@@ -253,17 +253,7 @@ class KisWebSocket:
             self._label, window_secs, recv, avg_interval,
             last_age_disp, timeouts,
         )
-        try:
-            await write_log(
-                "INFO",
-                f"[ws_heartbeat] label={self._label} window={window_secs:.0f}s "
-                f"pingpong_recv={recv} avg_interval={avg_interval:.1f}s "
-                f"last_age={last_age_disp} heartbeat_timeout={timeouts}",
-            )
-        except Exception:
-            # graceful — system_logs 실패해도 다음 사이클 재시도
-            logger.debug("[ws_heartbeat] write_log 실패", exc_info=True)
-
+        # 사이클 72 hotfix A1: write_log 직접 호출 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
         # 카운터 + 윈도우 시작 reset (사이클 42 정책 보존)
         self._pingpong_recv_count = 0
         self._heartbeat_timeout_count = 0

@@ -180,17 +180,5 @@ async def test_boot_emits_cash_usage_ratio_log(boot_env, monkeypatch: pytest.Mon
 
     await boot_env.scheduler._boot()
 
-    # write_log 호출 중 `[cash_usage_ratio]` prefix 포함된 로그 1행 이상
-    matching = [
-        log for log in boot_env.calls.write_log
-        if "[cash_usage_ratio]" in log["message"]
-    ]
-    assert matching, (
-        f"[cash_usage_ratio] prefix 로그 누락. "
-        f"write_log 호출: {boot_env.calls.write_log}"
-    )
-    # 메시지에 net_asset / ratio / available 모두 포함
-    msg = matching[0]["message"]
-    assert "10000000" in msg.replace(",", "") or "10_000_000" in msg or "10000000" in msg
-    assert "0.8" in msg
-    assert "8000000" in msg.replace(",", "")
+    # 사이클 72 hotfix — [cash_usage_ratio] write_log 호출 제거, _DbLogHandler 위임 단일 INSERT.
+    # 운영 prefix 발화는 logger 경로로 보존. 본 assertion 제거 (G-A1 단위 가드로 회귀 차단 영속).

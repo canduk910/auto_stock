@@ -233,9 +233,9 @@ def _close_coro(coro):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 @freeze_time("2026-05-18 10:00:00")
-async def test_finally_main_disconnect_exception_does_not_block_pool_stop():
+async def test_finally_main_disconnect_exception_does_not_block_pool_stop(caplog):
     """Red: finally 의 ``kis_ws.disconnect()`` best-effort 가 예외를 raise 해도
-    그 *후* 의 ``kis_ws_pool.stop()`` 이 정상 도달해야 한다 — 현재 코드에서 fail 해야 함.
+    그 *후* 의 ``kis_ws_pool.stop()`` 이 정상 도달해야 한다.
 
     명세 §4 Patch 2:
     > try:
@@ -243,12 +243,11 @@ async def test_finally_main_disconnect_exception_does_not_block_pool_stop():
     > except Exception:
     >     logger.warning("[scheduler_shutdown] main disconnect 실패 (best-effort)", exc_info=True)
 
-    try/except 흡수가 누락되면 finally 의 ``write_log("INFO", "매매 시스템 종료")`` 와
+    사이클 72 hotfix: write_log → logger.info 변경 → caplog 검증으로 전환.
+    try/except 흡수가 누락되면 finally 의 ``logger.info("매매 시스템 종료")`` 와
     ``kis_ws_pool.stop()`` 모두 도달 불가 → 보조 세션 잔존 + 종료 가시성 손실.
-
-    Red 상태: 현재 finally 에 메인 disconnect 호출 자체가 없음 → 예외 흡수 가드 미존재 →
-    Green Patch 2 추가 후 try/except 로 흡수해야 통과.
     """
+    import logging
     sched = TradingScheduler()
 
     main_ws = MagicMock()
@@ -260,16 +259,16 @@ async def test_finally_main_disconnect_exception_does_not_block_pool_stop():
     fake_pool.stop = AsyncMock()
     fake_pool.start = AsyncMock()
 
-    write_log_mock = AsyncMock()
-
     # _boot 가 raise → finally 진입
     async def _boot_raises():
         raise RuntimeError("boot 실패")
 
+    caplog.set_level(logging.INFO, logger="src.engine.scheduler")
+
     with patch.object(sched, "_boot", side_effect=_boot_raises), \
          patch("src.engine.scheduler.kis_ws", main_ws), \
          patch("src.realtime.websocket_pool.kis_ws_pool", fake_pool), \
-         patch("src.engine.scheduler.write_log", write_log_mock), \
+         patch("src.engine.scheduler.write_log", new=AsyncMock()), \
          patch("src.engine.scheduler.register_tick_handler"), \
          patch("src.engine.scheduler.register_execution_handler"), \
          patch("src.engine.scheduler.register_board_handler"):
@@ -280,12 +279,9 @@ async def test_finally_main_disconnect_exception_does_not_block_pool_stop():
     main_ws.disconnect.assert_awaited()
     # 그 후 pool.stop 도 도달했어야 함
     fake_pool.stop.assert_awaited_once()
-    # 정상 종료 로그 도달 (try/except 가드 정상 동작)
-    write_log_calls = [c.args for c in write_log_mock.await_args_list]
-    assert any(
-        len(args) >= 2 and args[0] == "INFO" and "매매 시스템 종료" in args[1]
-        for args in write_log_calls
-    ), (
+    # 정상 종료 로그 도달 — 사이클 72: caplog 검증
+    log_text = "\n".join(r.message for r in caplog.records)
+    assert "매매 시스템 종료" in log_text, (
         f"finally 의 메인 disconnect 예외가 종료 흐름을 중단시킴 — "
-        f"try/except 흡수 가드 누락. write_log 호출 인자들: {write_log_calls}"
+        f"try/except 흡수 가드 누락. caplog={log_text!r}"
     )
