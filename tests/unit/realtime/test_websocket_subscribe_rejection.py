@@ -14,9 +14,8 @@
 
 2. 거절 처리:
    - `self._subscriptions.discard((tr_id, tr_key))` (멱등)
-   - ERROR 로그
-   - `write_log("ERROR", "[ws_subscribe_reject] tr_id=... tr_key=... rt_cd=... msg_cd=... msg1=...")`
-     fire-and-forget — 예외 발생해도 본래 흐름 보존
+   - ERROR 로그 (`logger.error("[ws_subscribe_reject] ..."`) — `_DbLogHandler` 위임 단일 INSERT
+   - 사이클 73 R-2: `write_log` 직접 호출 제거 → `_DbLogHandler` 위임 단일 INSERT
    - 거절 분기 후 조기 return — 정상 SUBSCRIBE SUCCESS AES iv/key 저장 흐름 분리
 
 3. 정상 응답(SUBSCRIBE SUCCESS) 흐름 영향 없음 — output 의 iv/key 가 AES 저장
@@ -111,23 +110,20 @@ async def test_case_a_rt_cd_nonzero_duplicate_discards_and_logs(
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions, (
         "rt_cd!=0 거절 응답이면 _subscriptions 에서 discard 되어야 함"
     )
-    # ERROR 로그
+    # ERROR 로그 — 사이클 73 R-2: logger.error 에 [ws_subscribe_reject] prefix 추가
     reject_logs = [
         rec for rec in caplog.records
-        if rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        if rec.levelno == logging.ERROR and "[ws_subscribe_reject]" in rec.getMessage()
     ]
-    assert reject_logs, "ERROR 로그 '구독 거절' 미발생"
-    # write_log fire-and-forget — prefix [ws_subscribe_reject]
-    assert patched_write_log.await_count == 1
-    args, _kwargs = patched_write_log.await_args
-    assert args[0] == "ERROR"
-    log_msg = args[1]
-    assert "[ws_subscribe_reject]" in log_msg
-    assert "tr_id=H0UNCNT0" in log_msg
-    assert "tr_key=005930" in log_msg
-    assert "rt_cd=1" in log_msg
-    assert "msg_cd=OPSP0007" in log_msg
-    assert "중복 등록된 종목입니다" in log_msg
+    assert reject_logs, "ERROR 로그 '[ws_subscribe_reject]' 미발생"
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임 단일 INSERT
+    assert patched_write_log.await_count == 0, (
+        "사이클 73 R-2: write_log 직접 호출은 0건이어야 함 (_DbLogHandler 위임)"
+    )
+    # logger.error 메시지에 주요 필드 포함 확인
+    log_msg = reject_logs[0].getMessage()
+    assert "H0UNCNT0" in log_msg
+    assert "005930" in log_msg
 
 
 # ---------------------------------------------------------------------------
@@ -145,10 +141,8 @@ async def test_case_b_rt_cd_nonzero_limit_exceeded_discards_and_logs(
         await ws_with_subscription._handle_raw(raw)
 
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
-    assert patched_write_log.await_count == 1
-    log_msg = patched_write_log.await_args.args[1]
-    assert "[ws_subscribe_reject]" in log_msg
-    assert "구독 한도 초과" in log_msg
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임 단일 INSERT
+    assert patched_write_log.await_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -185,9 +179,9 @@ async def test_case_c_subscribe_success_stores_aes_keys_and_does_not_discard(
     )]
     # 거절 로그 없음
     assert not any(
-        "구독 거절" in rec.getMessage() for rec in caplog.records
+        "[ws_subscribe_reject]" in rec.getMessage() for rec in caplog.records
     ), "정상 응답은 거절 로그를 만들지 않아야 함"
-    # write_log 호출 없음
+    # write_log 호출 없음 (사이클 73 R-2 이전과 동일)
     assert patched_write_log.await_count == 0
 
 
@@ -209,7 +203,8 @@ async def test_case_d_msg1_error_keyword_uppercase_regression(
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions, (
         "msg1 의 ERROR 키워드 단독 매칭으로도 거절 처리되어야 함 (회귀 보호)"
     )
-    assert patched_write_log.await_count == 1
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임
+    assert patched_write_log.await_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -226,7 +221,8 @@ async def test_case_e_msg1_fail_keyword_discards(
     await ws_with_subscription._handle_raw(raw)
 
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
-    assert patched_write_log.await_count == 1
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임
+    assert patched_write_log.await_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -243,9 +239,8 @@ async def test_case_f_msg1_korean_limit_exceeded_discards(
     await ws_with_subscription._handle_raw(raw)
 
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
-    assert patched_write_log.await_count == 1
-    log_msg = patched_write_log.await_args.args[1]
-    assert "한도 초과" in log_msg
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임
+    assert patched_write_log.await_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -267,7 +262,7 @@ async def test_case_g_pingpong_does_not_affect_subscriptions(
     # echo 호출 확인 (PINGPONG 정상 흐름)
     ws_with_subscription._ws.send.assert_awaited_once_with(raw)
     # 거절 처리 없음
-    assert not any("구독 거절" in rec.getMessage() for rec in caplog.records)
+    assert not any("[ws_subscribe_reject]" in rec.getMessage() for rec in caplog.records)
     assert patched_write_log.await_count == 0
 
 
@@ -297,7 +292,7 @@ async def test_case_h_pipe_delimited_realtime_data_skips_json_branch(
     assert received[0][0] == "H0UNCNT0"
     assert received[0][1] == "005930"
     # 거절 처리 없음
-    assert not any("구독 거절" in rec.getMessage() for rec in caplog.records)
+    assert not any("[ws_subscribe_reject]" in rec.getMessage() for rec in caplog.records)
     assert patched_write_log.await_count == 0
 
 
@@ -319,17 +314,20 @@ async def test_case_i_duplicate_rejection_is_idempotent(
     await ws_with_subscription._handle_raw(raw)
 
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
-    # write_log 는 2회 모두 호출 (운영 trace 영구 보존 정책)
-    assert patched_write_log.await_count == 2
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임 (2회 → 0회)
+    assert patched_write_log.await_count == 0
 
 
 # ---------------------------------------------------------------------------
-# 추가 안전성 — write_log 가 예외를 던져도 _handle_raw 정상 종료 (fire-and-forget)
+# 추가 안전성 — 사이클 73 R-2: write_log 제거 후에도 discard + logger.error 영속
+# (기존 fire-and-forget 검증 → _DbLogHandler 위임 단일 INSERT 패턴으로 갱신)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_write_log_failure_does_not_break_handle_raw(
     ws_with_subscription, monkeypatch, caplog
 ):
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임.
+    # write_log mock 을 주입해도 호출 0건 — 정합성 회복(discard) + logger.error 영속이 핵심.
     failing = AsyncMock(side_effect=RuntimeError("supabase down"))
     monkeypatch.setattr(websocket_module, "write_log", failing, raising=False)
 
@@ -342,7 +340,13 @@ async def test_write_log_failure_does_not_break_handle_raw(
 
     # discard 는 여전히 수행됨 (정합성 회복 우선)
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
-    assert failing.await_count == 1
+    # 사이클 73 R-2: write_log 직접 호출 0건 (_DbLogHandler 위임)
+    assert failing.await_count == 0
+    # logger.error [ws_subscribe_reject] 영속
+    assert any(
+        rec.levelno == logging.ERROR and "[ws_subscribe_reject]" in rec.getMessage()
+        for rec in caplog.records
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -368,7 +372,7 @@ async def test_case_n1_already_in_subscribe_opsp0002_is_not_rejection(
     assert ("H0UNCNT0", "005930") in ws._subscriptions_acked
     # 거절 ERROR 로그 없음
     assert not any(
-        rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        rec.levelno == logging.ERROR and "[ws_subscribe_reject]" in rec.getMessage()
         for rec in caplog.records
     ), "ALREADY IN SUBSCRIBE 는 거절 ERROR 로그를 만들지 않아야 함"
     # write_log [ws_subscribe_reject] 미호출
@@ -399,7 +403,7 @@ async def test_case_n2_korean_already_subscribed_is_not_rejection(
     assert ("H0UNCNT0", "005930") in ws._subscriptions
     assert ("H0UNCNT0", "005930") in ws._subscriptions_acked
     assert not any(
-        rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        rec.levelno == logging.ERROR and "[ws_subscribe_reject]" in rec.getMessage()
         for rec in caplog.records
     )
     assert patched_write_log.await_count == 0
@@ -423,7 +427,7 @@ async def test_case_n3_korean_already_registered_is_not_rejection(
     assert ("H0UNCNT0", "005930") in ws._subscriptions
     assert ("H0UNCNT0", "005930") in ws._subscriptions_acked
     assert not any(
-        rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        rec.levelno == logging.ERROR and "[ws_subscribe_reject]" in rec.getMessage()
         for rec in caplog.records
     )
     assert patched_write_log.await_count == 0
@@ -477,10 +481,8 @@ async def test_case_n5_real_rejection_still_discards(
 
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions_acked
-    assert patched_write_log.await_count == 1
-    log_msg = patched_write_log.await_args.args[1]
-    assert "[ws_subscribe_reject]" in log_msg
-    assert "구독 한도 초과" in log_msg
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임
+    assert patched_write_log.await_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -506,7 +508,7 @@ async def test_case_n6_subscribe_success_regression(
     assert ("H0UNCNT0", "005930") in ws._subscriptions_acked
     # 거절 처리 없음
     assert not any(
-        rec.levelno == logging.ERROR and "구독 거절" in rec.getMessage()
+        rec.levelno == logging.ERROR and "[ws_subscribe_reject]" in rec.getMessage()
         for rec in caplog.records
     )
     assert patched_write_log.await_count == 0
@@ -530,10 +532,8 @@ async def test_case_n7_max_subscribe_over_keyword_discards(
 
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions
     assert ("H0UNCNT0", "005930") not in ws_with_subscription._subscriptions_acked
-    assert patched_write_log.await_count == 1
-    log_msg = patched_write_log.await_args.args[1]
-    assert "[ws_subscribe_reject]" in log_msg
-    assert "MAX SUBSCRIBE OVER" in log_msg
+    # 사이클 73 R-2: write_log 직접 호출 제거 → _DbLogHandler 위임
+    assert patched_write_log.await_count == 0
 
 
 # ---------------------------------------------------------------------------

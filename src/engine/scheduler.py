@@ -2321,16 +2321,7 @@ class TradingScheduler:
             stats["candidates"], stats["held"], stats["pending"],
             stats["updated"], stats["failed"], stats["elapsed_ms"],
         )
-        try:
-            await write_log(
-                "INFO",
-                f"[swing_rest_poll] candidates={stats['candidates']} held={stats['held']} "
-                f"pending={stats['pending']} updated={stats['updated']} failed={stats['failed']} "
-                f"elapsed_ms={stats['elapsed_ms']}",
-            )
-        except Exception:
-            # system_logs 실패는 swallow — 본체 흐름 보존
-            pass
+        # _DbLogHandler 위임 단일 INSERT — write_log 직접 호출 제거 (사이클 73 S-1)
         return stats
 
     async def _swing_rest_poll_loop(self) -> None:

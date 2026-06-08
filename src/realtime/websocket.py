@@ -382,16 +382,6 @@ class KisWebSocket:
                 "(reconnect_count=%d, preview=%s)",
                 VERIFY_AFTER_SECS, len(stale), self._reconnect_count, preview,
             )
-            try:
-                await write_log(
-                    "WARNING",
-                    f"[ws_reverify] reconnect_count={self._reconnect_count} "
-                    f"stale={len(stale)}/{len(subscribed)} preview={preview}",
-                )
-            except Exception:
-                # fire-and-forget — write_log 실패해도 재구독 흐름 보존
-                logger.debug("[ws_reverify] write_log 실패", exc_info=True)
-
             for ticker in stale:
                 # SUBSCRIBE 메시지 1회 재전송 — _subscriptions set 은 이미 보유.
                 # 거절 응답이 오면 E2 가 자동으로 _subscriptions.discard 처리.
@@ -510,23 +500,14 @@ class KisWebSocket:
                 # 다음 5분 _scan_loop 사이클에서 E1 우선순위 큐로 자연 재시도된다.
                 if _is_rejection_response(rt_cd, msg1):
                     logger.error(
-                        "WebSocket 구독 거절: tr_id=%s, tr_key=%s, rt_cd=%s, msg_cd=%s, msg=%s",
+                        "[ws_subscribe_reject] tr_id=%s, tr_key=%s, rt_cd=%s, msg_cd=%s, msg=%s",
                         tr_id, tr_key, rt_cd, msg_cd, msg1,
                     )
                     # 거절 난 구독을 제거 (멱등) — 재연결 시 같은 에러 반복 방지
                     self._subscriptions.discard((tr_id, tr_key))
                     # G1: ACK set 에서도 동기 discard (이전에 ACK 됐다가 재구독 후 거절 케이스)
                     self._subscriptions_acked.discard((tr_id, tr_key))
-                    # 운영 trace 영구 저장 — Phase A1 [kis_rejection] 패턴 차용.
-                    # fire-and-forget: write_log 실패해도 본래 흐름 보존 (정합성 회복 우선).
-                    try:
-                        await write_log(
-                            "ERROR",
-                            f"[ws_subscribe_reject] tr_id={tr_id} tr_key={tr_key} "
-                            f"rt_cd={rt_cd} msg_cd={msg_cd} msg1={msg1}",
-                        )
-                    except Exception:
-                        pass
+                    # _DbLogHandler 위임 단일 INSERT — write_log 직접 호출 제거 (사이클 73 R-2)
                     return
 
                 # G1 (2026-05-12) — 정상 SUBSCRIBE SUCCESS 응답 카운트 별도 추적.

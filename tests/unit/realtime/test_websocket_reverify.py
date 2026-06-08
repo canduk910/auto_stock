@@ -167,13 +167,8 @@ async def test_case_b_partial_stale_resubscribes_only_stale(
     warning_logs = [r for r in caplog.records if r.levelno == logging.WARNING and "ws_reverify" in r.getMessage()]
     assert warning_logs, "stale 발생 시 WARNING 로그 1행 필수"
 
-    # write_log fire-and-forget
-    assert patched_write_log.await_count == 1
-    args, _ = patched_write_log.await_args
-    assert args[0] == "WARNING"
-    assert "[ws_reverify]" in args[1]
-    assert "reconnect_count=1" in args[1]
-    assert "stale=3" in args[1]
+    # 사이클 73 R-1: write_log 직접 호출 제거 → _DbLogHandler 위임 단일 INSERT
+    assert patched_write_log.await_count == 0
 
     # _subscriptions set 직접 수정 금지 — 그대로 유지
     assert ws._subscriptions == {("H0UNCNT0", t) for t in stale_tickers + fresh_tickers}
