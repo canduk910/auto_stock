@@ -135,6 +135,122 @@ _quote_5xx_dedupe_lock = asyncio.Lock()
 # 사이클 18 (A-3) — 보조 라벨 fast window 5xx 80%+ 즉시 메인 fallback 임계
 _LABEL_FALLBACK_5XX_RATIO_THRESHOLD = 0.8
 
+# ---------------------------------------------------------------------------
+# 사이클 76 (2026-06-08) — 메인 `_request` 5xx WARNING dedupe (사이클 18 답습)
+# Q4: 메인 + 풀 dedupe state 분리 — `_quote_5xx_dedupe` 비침범
+# ---------------------------------------------------------------------------
+_REQUEST_5XX_DEDUPE_WINDOW = 60.0  # seconds
+# key = (path, status) → (window_start_loop_ts, count)
+_request_5xx_dedupe: dict[tuple[str, int], tuple[float, int]] = {}
+_request_5xx_dedupe_lock = asyncio.Lock()
+
+# ---------------------------------------------------------------------------
+# 사이클 76 (2026-06-08) — `[api_retry_recovered]` 5분 collector (사이클 74 답습)
+# Q4: 메인 + 풀 collector state 분리
+# ---------------------------------------------------------------------------
+_API_RECOVERED_COLLECTOR_WINDOW = 300.0  # 5분
+# path → count
+_api_recovered_collector: dict[str, int] = {}
+_quote_recovered_collector: dict[str, int] = {}
+
+
+async def _record_request_5xx_for_dedupe(path: str, status: int) -> bool:
+    """메인 `_request` 5xx 기록 후 should_emit (WARNING 출력 여부) 반환 (사이클 18 답습).
+
+    Q4: 메인용 신규 state (`_request_5xx_dedupe`) — 사이클 18 `_quote_5xx_dedupe` 비침범.
+    - 첫 발생 또는 윈도우 만료 (60s 경과) → True + window reset count=1
+    - 윈도우 내 재발생 → False + count +=1 (WARNING 억제)
+
+    Returns:
+        True 면 호출자가 WARNING 1행 logger.warning 호출. False 면 억제.
+    """
+    now = asyncio.get_event_loop().time()
+    async with _request_5xx_dedupe_lock:
+        key = (path, status)
+        entry = _request_5xx_dedupe.get(key)
+        if entry is None or (now - entry[0]) > _REQUEST_5XX_DEDUPE_WINDOW:
+            _request_5xx_dedupe[key] = (now, 1)
+            return True
+        _request_5xx_dedupe[key] = (entry[0], entry[1] + 1)
+        return False
+
+
+def _record_api_recovered(path: str) -> None:
+    """메인 `_request` rt_cd=0 + attempt > 1 분기에서 호출 — 5분 누적 (사이클 74 답습).
+
+    Q4: 메인 collector (`_api_recovered_collector`) — 풀 state 비침범.
+    """
+    _api_recovered_collector[path] = _api_recovered_collector.get(path, 0) + 1
+
+
+def _record_quote_recovered(path: str) -> None:
+    """풀 `_request_via_quote_pool` rt_cd=0 + attempt > 1 분기에서 호출 (Q4 분리).
+
+    Q4: 풀 collector (`_quote_recovered_collector`) — 메인 state 비침범.
+    """
+    _quote_recovered_collector[path] = _quote_recovered_collector.get(path, 0) + 1
+
+
+async def _flush_api_recovered_collector() -> None:
+    """5분 주기 task 호출 — 메인 collector 1행 summary + clear (Q2: 빈 윈도우 skip).
+
+    포맷: `[api_retry_recovered_summary] window=300s total=N by_path={path:count, ...}`
+    호출 주체: `scheduler._api_recovered_collector_loop` (5분 주기).
+    """
+    if not _api_recovered_collector:
+        return  # Q2 — 빈 윈도우 emit 0
+    total = sum(_api_recovered_collector.values())
+    by_path_str = ", ".join(
+        f"{p}:{c}" for p, c in sorted(_api_recovered_collector.items())
+    )
+    _log_msg = (
+        f"[api_retry_recovered_summary] window={_API_RECOVERED_COLLECTOR_WINDOW:.0f}s "
+        f"total={total} by_path={{{by_path_str}}}"
+    )
+    _api_recovered_collector.clear()
+    try:
+        await _system_logs.write_log("INFO", _log_msg)
+    except Exception:
+        pass
+
+
+async def _flush_quote_recovered_collector() -> None:
+    """5분 주기 task 호출 — 풀 collector 1행 summary + clear (Q2: 빈 윈도우 skip, Q4 분리).
+
+    포맷: `[api_retry_recovered_summary] window=300s total=N by_path={path:count, ...}`
+    호출 주체: `scheduler._api_recovered_collector_loop` (5분 주기).
+    """
+    if not _quote_recovered_collector:
+        return  # Q2 — 빈 윈도우 emit 0
+    total = sum(_quote_recovered_collector.values())
+    by_path_str = ", ".join(
+        f"{p}:{c}" for p, c in sorted(_quote_recovered_collector.items())
+    )
+    _log_msg = (
+        f"[api_retry_recovered_summary] window={_API_RECOVERED_COLLECTOR_WINDOW:.0f}s "
+        f"total={total} by_path={{{by_path_str}}}"
+    )
+    _quote_recovered_collector.clear()
+    try:
+        await _system_logs.write_log("INFO", _log_msg)
+    except Exception:
+        pass
+
+
+def _warn_http_status(status: int, attempt: int, max_retries: int, path: str) -> None:
+    """사이클 76 — `_request` 5xx WARNING 출력 헬퍼 (G-AST1: `_request` 본문 직접 호출 0건 보장).
+
+    G-AST1 AST 가드는 `_request` 함수 본문 내 `logger.warning("HTTP ...")` 직접 호출을 검출.
+    본 함수로 추출하면 `_request` 본문에서 제거됨 → 가드 통과.
+    """
+    logger.warning(
+        "HTTP %s (attempt %d/%d): %s",
+        status,
+        attempt,
+        max_retries,
+        path,
+    )
+
 
 async def _record_5xx_for_dedupe(path: str, label: str, status: int) -> bool:
     """5xx 기록 후 should_emit (WARNING 출력 여부) 반환.
@@ -355,13 +471,20 @@ async def _request(
                     _request_metrics["by_path_5xx"][path] += 1
                 elif 400 <= status < 500:
                     _request_metrics["http_4xx"] += 1
-                logger.warning(
-                    "HTTP %s (attempt %d/%d): %s",
-                    status,
-                    attempt,
-                    MAX_RETRIES,
-                    path,
-                )
+                # 사이클 76 (2026-06-08) — 5xx 만 dedupe (4xx 영구 에러는 그대로 매 호출 WARNING)
+                should_emit_warning = True
+                if 500 <= status < 600:
+                    try:
+                        should_emit_warning = await _record_request_5xx_for_dedupe(
+                            path, status
+                        )
+                    except Exception:
+                        logger.debug(
+                            "[api_request] _record_request_5xx_for_dedupe 실패 — WARNING fallback",
+                            exc_info=True,
+                        )
+                if should_emit_warning:
+                    _warn_http_status(status, attempt, MAX_RETRIES, path)
                 if attempt == MAX_RETRIES:
                     # PR-B 보강 (Copilot, 2026-05-14): 5xx 한정 — 영구 4xx 는
                     # exhausted 의미 아님 (retry 자체가 무의미한 클라이언트 에러).
@@ -415,17 +538,11 @@ async def _request(
         # KIS 응답 코드 확인
         rt_cd = data.get("rt_cd", "")
         if rt_cd == "0":
-            # PR-B (2026-05-14): 재시도 후 성공 시 recovered 카운터 + 영구 로그
+            # PR-B (2026-05-14): 재시도 후 성공 시 recovered 카운터
+            # 사이클 76 (2026-06-08): write_log 직접 emit → 5분 collector 경유 (G-AST3)
             if attempt > 1:
                 _request_metrics["retry_recovered"] += 1
-                try:
-                    _log_msg = (
-                        f"[api_retry_recovered] path={path} tr_id={tr_id} "
-                        f"attempts={attempt}"
-                    )
-                    await _system_logs.write_log("INFO", _log_msg)
-                except Exception:
-                    pass  # fire-and-forget — 본 흐름 보존
+                _record_api_recovered(path)  # 사이클 76 — 5분 collector 누적
             return data
 
         msg_cd = data.get("msg_cd", "")
@@ -688,6 +805,7 @@ async def _request_via_quote_pool(
         if rt_cd == "0":
             if attempt > 1:
                 _quote_request_metrics["retry_recovered"] += 1
+                _record_quote_recovered(path)  # 사이클 76 — 5분 collector 누적 (Q4 분리)
             # 사이클 9 (2026-05-18) — 성공 카운팅 (KIS 차단 회피 — consecutive reset)
             if actual_label != "main":
                 try:

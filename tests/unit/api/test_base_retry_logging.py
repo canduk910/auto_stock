@@ -99,8 +99,19 @@ async def test_when_first_attempt_5xx_then_second_success_emits_recovered(
     mock_write_log,
     no_backoff,
 ):
-    """5xx → 200(rt_cd=0) 순서로 응답 시 `[api_retry_recovered]` INFO 로그 + 카운터 +1."""
+    """5xx → 200(rt_cd=0) 순서로 응답 시 recovered collector 누적 + 카운터 +1.
+
+    사이클 76 (2026-06-08): `[api_retry_recovered]` 직접 write_log 제거 →
+    `_record_api_recovered(path)` 5분 collector 경유 (G-AST3 영속 의무).
+    직접 write_log 대신 `_api_recovered_collector` state 누적 확인.
+    """
     import re
+
+    # 사이클 76: collector state 초기화
+    from src.api import base as _b
+    collector = getattr(_b, "_api_recovered_collector", None)
+    if collector is not None:
+        collector.clear()
 
     route = mock_kis.post(re.compile(rf".*{re.escape(_PATH)}$"))
     route.side_effect = [
@@ -111,18 +122,24 @@ async def test_when_first_attempt_5xx_then_second_success_emits_recovered(
     data = await kis_post(_PATH, _TR_ID, {"PDNO": "005930"})
     assert data["rt_cd"] == "0"
 
-    # write_log 호출 중 [api_retry_recovered] prefix 메시지가 정확히 1회 등장
-    recovered_calls = [
+    # 사이클 76: [api_retry_recovered] 직접 write_log 0건 (collector 경유로 이전)
+    direct_recovered_calls = [
         c for c in mock_write_log.await_args_list
         if "[api_retry_recovered]" in _join_call_args(c)
+        and "[api_retry_recovered_summary]" not in _join_call_args(c)
     ]
-    assert len(recovered_calls) == 1, f"recovered 로그 누락: {mock_write_log.await_args_list}"
-    joined = _join_call_args(recovered_calls[0])
-    assert _PATH in joined
-    assert _TR_ID in joined
-    assert "attempts=2" in joined
+    assert len(direct_recovered_calls) == 0, (
+        f"사이클 76: [api_retry_recovered] 직접 write_log 금지 (G-AST3) — "
+        f"collector 경유 의무: {direct_recovered_calls}"
+    )
 
-    # 메트릭 카운터
+    # 사이클 76: collector 에 path 누적 확인
+    assert collector is not None, "사이클 76: `_api_recovered_collector` 모듈 변수 의무"
+    assert collector.get(_PATH, 0) == 1, (
+        f"사이클 76: collector path={_PATH} count=1 의무, got {collector}"
+    )
+
+    # 메트릭 카운터 (사이클 76에서도 유지)
     metrics = get_request_metrics()
     assert metrics["retry_recovered"] == 1
     assert metrics["retry_exhausted"] == 0

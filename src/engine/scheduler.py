@@ -481,6 +481,12 @@ class TradingScheduler:
             # 본 task 가 60s 주기로 만료된 카운트를 1행 INFO summary 후 dedupe state clear.
             self._5xx_dedupe_summary_task = asyncio.create_task(self._5xx_dedupe_summary_loop())
 
+            # 사이클 76 (2026-06-08) — recovered 5분 collector flush task.
+            # `_record_api_recovered` / `_record_quote_recovered` 가 5분 누적 → 1행 summary.
+            self._api_recovered_collector_task = asyncio.create_task(
+                self._api_recovered_collector_loop()
+            )
+
             now = datetime.now().time()
 
             # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
@@ -2445,6 +2451,33 @@ class TradingScheduler:
                 await _emit_5xx_dedupe_summary()
             except Exception:
                 logger.exception("[5xx_dedupe_summary] 사이클 실패")
+
+    async def _api_recovered_collector_loop(self) -> None:
+        """사이클 76 (2026-06-08) — [api_retry_recovered] 5분 collector flush task.
+
+        `_record_api_recovered` / `_record_quote_recovered` 가 `_request` / `_request_via_quote_pool`
+        retry 성공 시 5분 윈도우 누적 → flush 시 `[api_retry_recovered_summary]` 1행 emit.
+        사이클 18 `_5xx_dedupe_summary_loop` 패턴 답습 (60s → 300s 주기).
+        Q2: 빈 윈도우 skip (헬퍼 내부 처리). Q4: 메인 + 풀 각각 별도 flush.
+        """
+        from src.api.base import (
+            _API_RECOVERED_COLLECTOR_WINDOW,
+            _flush_api_recovered_collector,
+            _flush_quote_recovered_collector,
+        )
+
+        while self._running:
+            await asyncio.sleep(_API_RECOVERED_COLLECTOR_WINDOW)
+            if not self._running:
+                break
+            try:
+                await _flush_api_recovered_collector()
+            except Exception:
+                logger.exception("[api_recovered_collector] 메인 flush 실패")
+            try:
+                await _flush_quote_recovered_collector()
+            except Exception:
+                logger.exception("[api_recovered_collector] 풀 flush 실패")
 
     def _detect_silent_inactive_sessions(self) -> list[str]:
         """세션 단위 silent inactive 감지 — 사이클 61 Phase 2-A2 stale_manager 위임."""
