@@ -93,6 +93,107 @@ async def get(ticker: str) -> Optional[StockBasics]:
     return _from_row(rows[0])
 
 
+async def list_all(limit: int = 100, offset: int = 0) -> list[dict]:
+    """페이징 list (UI list 영역). limit ∈ [1, 1000], offset ≥ 0.
+
+    refreshed_at DESC 정렬. raw row dict 그대로 반환 (StockBasics 변환 없음 — UI 직접 표시용).
+    """
+    result = await asyncio.to_thread(
+        lambda: (
+            supabase.table(TABLE_NAME)
+            .select("*")
+            .order("refreshed_at", desc=True)
+            .range(offset, offset + limit - 1)
+            .execute()
+        )
+    )
+    return result.data or []
+
+
+async def get_stats() -> dict:
+    """집계 — count_all / bfdy_clpr_present / nxt_tradable_count / top_10_recent.
+
+    UI 사이클 85 상태 영역용. 전체 rows 1회 조회 후 Python 집계.
+    """
+    result = await asyncio.to_thread(
+        lambda: (
+            supabase.table(TABLE_NAME)
+            .select("ticker, name, nxt_tradable, raw, refreshed_at")
+            .order("refreshed_at", desc=True)
+            .execute()
+        )
+    )
+    rows = result.data or []
+
+    count_all = len(rows)
+    bfdy_clpr_present = sum(
+        1 for r in rows
+        if r.get("raw") and r["raw"].get("bfdy_clpr") not in (None, "", "0", 0)
+    )
+    nxt_tradable_count = sum(1 for r in rows if r.get("nxt_tradable"))
+    top_10_recent = [
+        {
+            "ticker": r.get("ticker", ""),
+            "name": r.get("name", ""),
+            "refreshed_at": r.get("refreshed_at", ""),
+        }
+        for r in rows[:10]
+    ]
+
+    return {
+        "count_all": count_all,
+        "bfdy_clpr_present": bfdy_clpr_present,
+        "nxt_tradable_count": nxt_tradable_count,
+        "top_10_recent": top_10_recent,
+    }
+
+
+async def list_history(ticker: str, limit: int = 100) -> list[dict]:
+    """ticker 별 변경 이력 (changed_at DESC). stock_master_history 테이블 조회.
+
+    migration 032 적용 의무 — 테이블 미존재 시 Supabase 400 에러.
+    """
+    result = await asyncio.to_thread(
+        lambda: (
+            supabase.table("stock_master_history")
+            .select("*")
+            .eq("ticker", ticker)
+            .order("changed_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+    )
+    return result.data or []
+
+
+async def count_eager_refresh_today() -> int:
+    """사이클 83 [scan_pool_eager_refresh] 오늘 KST 발생 카운트.
+
+    system_logs ilike `%[scan_pool_eager_refresh]%` + 오늘 KST 범위.
+    사이클 68 KST 영속 (`today_kst()` 사용).
+    """
+    from src.db._kst import today_kst
+
+    today = today_kst()
+    start = f"{today}T00:00:00+09:00"
+    end = f"{today}T23:59:59.999999+09:00"
+
+    result = await asyncio.to_thread(
+        lambda: (
+            supabase.table("system_logs")
+            .select("id", count="exact")
+            .ilike("message", "%[scan_pool_eager_refresh]%")
+            .gte("timestamp", start)
+            .lte("timestamp", end)
+            .execute()
+        )
+    )
+    # supabase-py count 응답은 result.count 또는 len(result.data)
+    if hasattr(result, "count") and result.count is not None:
+        return int(result.count)
+    return len(result.data or [])
+
+
 async def is_stale(ticker: str, max_age_hours: int = 24) -> bool:
     """24h 초과 또는 미존재 시 True — KIS 재조회 필요."""
     result = await asyncio.to_thread(

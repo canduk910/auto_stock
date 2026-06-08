@@ -37,6 +37,7 @@ from src.routes import (
     system_integrations,
     kis_quote_accounts,
 )
+from src.routes.stock_master import router as stock_master_router
 from src.auth.token import token_manager
 
 # endpoint별 응답시간 샘플 (ms) — 최근 1024개. /api/system/metrics에서 p50/p95/p99 산출
@@ -266,6 +267,7 @@ app.include_router(market_regime.router)
 app.include_router(strategy_funnel.router)
 app.include_router(system_integrations.router)
 app.include_router(kis_quote_accounts.router)
+app.include_router(stock_master_router, prefix="/api/stock-master", tags=["stock-master"])
 
 
 @app.get("/health")

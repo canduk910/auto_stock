@@ -56,6 +56,11 @@
 | GET | `/api/strategy-funnel?strategy_id=&target_date=` | strategy_funnel.py | **사이클 34 (2026-05-21)** — 특정 영업일 + 전략의 단계별 후보/탈락 종목 (`step_no` ASC). 응답: `{strategy_id, target_date, snapshots:[{step_no, step_name, survived_count, excluded_count, survived_tickers, excluded_sample}]}` |
 | GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | strategy_funnel.py | 최근 N영업일 추이 (사이클 34) |
 | POST | `/api/strategy-funnel/snapshot` | strategy_funnel.py | 수동 trigger — 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 호출해 최종 단계 (`step_no=99`) snapshot 즉시 생성 (사이클 34). 단계별 ticker 캡처 자동 hook 은 후속 사이클 |
+| GET | `/api/stock-master/stats` | stock_master.py | **사이클 84 (2026-06-09)** — stock_master 집계. 응답 `{count_all, bfdy_clpr_present, nxt_tradable_count, top_10_recent:[{ticker,name,refreshed_at}]}` |
+| GET | `/api/stock-master/list?limit=100&offset=0` | stock_master.py | **사이클 84** — 페이징 list (refreshed_at DESC). limit ∈ [1,1000], offset ≥ 0. 422: 범위 외 |
+| GET | `/api/stock-master/scan-pool/summary` | stock_master.py | **사이클 84** — 사이클 83 `[scan_pool_eager_refresh]` 오늘 KST 발생 카운트. 응답 `{eager_refresh_today: int}` |
+| GET | `/api/stock-master/{ticker}/history?limit=100` | stock_master.py | **사이클 84** — ticker 별 변경 이력 (changed_at DESC). migration 032 `stock_master_history` 조회. 응답 `[{id, ticker, change_type, before_raw, after_raw, changed_at}]` |
+| GET | `/api/stock-master/{ticker}` | stock_master.py | **사이클 84** — 단건 조회. 미존재 시 404. 응답 StockBasics dict |
 
 ## 응답 형식
 모든 응답은 `models/response.py`의 `ApiResponse` 래퍼 사용:
