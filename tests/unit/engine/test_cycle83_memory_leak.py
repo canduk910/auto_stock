@@ -108,12 +108,17 @@ async def test_g_ml1_periodic_task_clears_eager_refresh_collector(monkeypatch):
     # CI sandbox 는 openapivts.koreainvestment.com 에 접근 불가 → 60s timeout.
     # `is_stale()` 를 False 로 mock = TTL fresh skip 분기 진입 → KIS 호출 0 → collector clear 만 검증
     # (테스트 의도 = collector len == 0, KIS 실제 호출 검증 아님).
-    from src.db import stock_master as _stock_master_mod
+    # 사이클 85 hotfix #2 — CI sandbox 환경 KIS API DNS race 영구 차단 (운영 무영향).
+    # scheduler._scan_pool_eager_refresh_loop 는 매 윈도우마다 (1) scanner._scan_pool_eager_refresh_loop
+    # async 호출 (KIS API stock_master.upsert_one), (2) flush_scan_pool_eager_refresh_collector sync 호출.
+    # CI sandbox 는 openapivts.koreainvestment.com 접근 불가 → 60s timeout.
+    # 시정: scanner async refresh 함수를 no-op 으로 교체 → KIS 호출 0 + flush 는 정상 호출 (collector clear).
+    async def _noop_scanner_refresh(*_args, **_kwargs):
+        pass
 
-    def _always_fresh(ticker):  # is_stale=False 영구 = TTL fresh skip
-        return False
-
-    monkeypatch.setattr(_stock_master_mod, "is_stale", _always_fresh)
+    monkeypatch.setattr(
+        _scanner_mod, "_scan_pool_eager_refresh_loop", _noop_scanner_refresh
+    )
 
     # Green 시점에 사용 가능한 함수 호출 시도
     loop_fn = getattr(
