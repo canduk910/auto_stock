@@ -164,6 +164,33 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
     )
   })
 
+  // 사이클 85 G-AST-MOCK (2026-06-09) — Stock Master 영역 5 endpoint 확장.
+  // StockMaster.tsx 신규 페이지 마운트 시 5 useQuery (fetchStats / fetchList /
+  // fetchScanPoolSummary / fetchDetail / fetchHistory) 호출. 사이클 75 G-AST5
+  // (Dashboard 영역 확장) 패턴 100% 답습.
+  describe('G-AST6 (사이클 85): Stock Master 영역 endpoint 등록', () => {
+    const REQUIRED_STOCK_MASTER_ENDPOINTS = [
+      '/api/stock-master/stats',
+      '/api/stock-master/list',
+      '/api/stock-master/scan-pool/summary',
+      // detail / history 는 dynamic path (`/{ticker}`) — wildcard `/api/stock-master/*` 형태 등록
+      '/api/stock-master/',
+    ]
+
+    it.each(REQUIRED_STOCK_MASTER_ENDPOINTS)(
+      'api-mocks.ts 에 %s 라우트 등록 의무 (StockMaster.tsx 마운트 차단 방지)',
+      (endpoint) => {
+        const source = loadApiMocksSource()
+        expect(
+          isRouteRegistered(source, endpoint),
+          `e2e api-mocks.ts 에 ${endpoint} 라우트 누락 — ` +
+            `사이클 85 StockMaster 페이지 진입 시 ECONNREFUSED 위험. ` +
+            `사이클 75 G-AST5 (Dashboard 영역 확장) 패턴 답습 의무.`,
+        ).toBe(true)
+      },
+    )
+  })
+
   describe('G-AST4: 3 컴포넌트 useQuery `retry:` 옵션 명시 (Q4 확장)', () => {
     const TARGET_COMPONENTS = [
       'IntegrationToggleCard.tsx',

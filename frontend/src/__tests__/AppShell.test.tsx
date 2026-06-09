@@ -39,7 +39,7 @@ describe("AppShell — 상단 메뉴바 sticky", () => {
     expect(stickyWrapper.className).toMatch(/z-\d+/);
   });
 
-  it("PC viewport: 네비게이션 메뉴 6개가 nav 안에 렌더링된다", () => {
+  it("PC viewport: 네비게이션 메뉴 7개가 nav 안에 렌더링된다 (사이클 85 종목마스터 추가)", () => {
     server.use(
       http.get("/api/trading/status", () =>
         HttpResponse.json(wrap({ env: "vts", running: false })),
@@ -49,12 +49,13 @@ describe("AppShell — 상단 메뉴바 sticky", () => {
     render(withProviders(<App />));
 
     const nav = screen.getByRole("navigation", { name: "기본 네비게이션" });
-    // 사이클 34 (2026-05-21) — "조건검색 추적" 메뉴 포함 6개
+    // 사이클 85 (2026-06-09) — "종목마스터" 메뉴 포함 7개 (사이클 81 6 → 7 압축)
     for (const label of [
       "대시보드",
       "거래 내역",
       "전략수정 AI자문",
       "조건검색 추적",
+      "종목마스터",
       "로그",
       "설정",
     ]) {
@@ -63,6 +64,23 @@ describe("AppShell — 상단 메뉴바 sticky", () => {
       expect(links.length).toBeGreaterThanOrEqual(1);
       expect(links.some((l) => nav.contains(l))).toBe(true);
     }
+  });
+
+  // 사이클 85 L-MENU — 7번째 메뉴 `/stock-master` → `종목마스터` 라우트 존재
+  it("L-MENU (사이클 85): /stock-master 라우트가 종목마스터 라벨로 navItems 에 등록된다", () => {
+    server.use(
+      http.get("/api/trading/status", () =>
+        HttpResponse.json(wrap({ env: "vts", running: false })),
+      ),
+    );
+    render(withProviders(<App />));
+
+    // 명시적으로 href="/stock-master" 와 텍스트 "종목마스터" 모두 검증
+    const links = screen.getAllByRole("link", { name: "종목마스터" });
+    expect(links.length).toBeGreaterThanOrEqual(1);
+    expect(
+      links.some((l) => l.getAttribute("href") === "/stock-master"),
+    ).toBe(true);
   });
 });
 
@@ -103,15 +121,17 @@ describe("AppShell — 모바일 햄버거 메뉴 (사이클 81)", () => {
     expect(btn.getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("M-5: 드로어 안에 메뉴 6개 링크가 모두 존재한다", () => {
+  it("M-5: 드로어 안에 메뉴 7개 링크가 모두 존재한다 (사이클 85 종목마스터 추가)", () => {
     setup();
     fireEvent.click(screen.getByTestId("mobile-menu-button"));
     const drawer = screen.getByTestId("mobile-menu-drawer");
+    // 사이클 85 — 6 → 7 압축. "종목마스터" 신규 추가 (사이클 81 G-M5 영속 패턴 답습)
     for (const label of [
       "대시보드",
       "거래 내역",
       "전략수정 AI자문",
       "조건검색 추적",
+      "종목마스터",
       "로그",
       "설정",
     ]) {
@@ -120,6 +140,36 @@ describe("AppShell — 모바일 햄버거 메뉴 (사이클 81)", () => {
       );
       expect(links.length).toBeGreaterThanOrEqual(1);
     }
+  });
+
+  // 사이클 85 M-9 — `종목마스터` 라벨 모바일 드로어 클릭 후 close (사이클 81 M-6 답습)
+  it("M-9 (사이클 85): 종목마스터 메뉴 클릭 시 드로어가 닫힌다", () => {
+    setup();
+    fireEvent.click(screen.getByTestId("mobile-menu-button"));
+    const drawer = screen.getByTestId("mobile-menu-drawer");
+    const stockMasterLink = Array.from(drawer.querySelectorAll("a")).find(
+      (a) => a.textContent?.trim() === "종목마스터",
+    );
+    expect(stockMasterLink).toBeDefined();
+    if (stockMasterLink) fireEvent.click(stockMasterLink);
+    expect(screen.queryByTestId("mobile-menu-drawer")).toBeNull();
+  });
+
+  // 사이클 85 L-CYCLE81-MOBILE — 사이클 81 햄버거 메뉴 영속 (7개 메뉴 + main 독립 DOM)
+  it("L-CYCLE81-MOBILE (사이클 85): 7개 메뉴 압축 후에도 nav-sticky-wrapper 와 main 별도 영역", () => {
+    setup();
+    fireEvent.click(screen.getByTestId("mobile-menu-button"));
+    const drawer = screen.getByTestId("mobile-menu-drawer");
+    const stickyWrapper = screen.getByTestId("nav-sticky-wrapper");
+    const main = document.querySelector("main");
+
+    // drawer 안에 메뉴 7개 모두 존재 (사이클 85 종목마스터 포함)
+    const allLinks = Array.from(drawer.querySelectorAll("a"));
+    expect(allLinks.length).toBeGreaterThanOrEqual(7);
+
+    // main 이 sticky wrapper 의 자식이 아닌지 (사이클 81 M-8 영속)
+    expect(main).not.toBeNull();
+    expect(stickyWrapper.contains(main)).toBe(false);
   });
 
   it("M-6: 드로어 메뉴 링크 클릭 시 드로어가 닫힌다", () => {

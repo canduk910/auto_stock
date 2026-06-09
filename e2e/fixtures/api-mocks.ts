@@ -292,4 +292,47 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   // L196 price-filter / L201 trade-amount-filter 구체 라우트 무효화 → PriceFilterCard 가 envelope({}) 응답
   // 받아 min_price undefined → React controlled input throw → Error Boundary 없음 → 전체 페이지 unmount).
   // Wildcard fallback 은 L190 (구체 라우트 *전* 등록) 만 유지 — LIFO 라 fallback 역할 정확.
+
+  // 사이클 85 (2026-06-09) — StockMaster 페이지 5 endpoint.
+  // Playwright route 매칭 = LIFO ("latest registered route wins").
+  // wildcard 를 *먼저* 등록 (fallback 역할) → 구체 라우트를 *후* 등록 (LIFO 우선 매칭).
+  // 사이클 80 hotfix #3 LIFO 정합 패턴 100% 답습.
+  await page.route("**/api/stock-master/**", (route) =>
+    route.fulfill({ json: envelope({}) }),
+  );
+
+  // 5 구체 라우트 — wildcard 후 등록 (LIFO 라 우선 매칭)
+  await page.route("**/api/stock-master/stats", (route) =>
+    route.fulfill({
+      json: envelope({
+        count_all: 29,
+        bfdy_clpr_present: 27,
+        nxt_tradable_count: 12,
+        top_10_recent: [],
+      }),
+    }),
+  );
+  await page.route("**/api/stock-master/list*", (route) =>
+    route.fulfill({ json: envelope([]) }),
+  );
+  await page.route("**/api/stock-master/scan-pool/summary", (route) =>
+    route.fulfill({ json: envelope({ eager_refresh_today: 0 }) }),
+  );
+  await page.route("**/api/stock-master/*/history*", (route) =>
+    route.fulfill({ json: envelope([]) }),
+  );
+  await page.route("**/api/stock-master/*", (route) =>
+    route.fulfill({
+      json: envelope({
+        ticker: "005930",
+        name: "삼성전자",
+        excg_dvsn_cd: "01",
+        nxt_tradable: true,
+        krx_halted: false,
+        admin_item: false,
+        refreshed_at: "2026-06-09T09:00:00+09:00",
+        raw: {},
+      }),
+    }),
+  );
 }

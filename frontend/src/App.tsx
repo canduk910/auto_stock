@@ -11,12 +11,15 @@ const Logs = lazy(() => import('./pages/Logs'))
 const Settings = lazy(() => import('./pages/Settings'))
 // 사이클 34 (2026-05-21) — 조건검색 단계별 추적 신규 페이지
 const StrategyFunnel = lazy(() => import('./pages/StrategyFunnel'))
+// 사이클 85 (2026-06-09) — stock_master UI 신규 페이지 (Q2=A 7번째 메뉴)
+const StockMaster = lazy(() => import('./pages/StockMaster'))
 
 const navItems = [
   { to: '/', label: '대시보드' },
   { to: '/history', label: '거래 내역' },
   { to: '/recommendations', label: '전략수정 AI자문' },
   { to: '/strategy-funnel', label: '조건검색 추적' },
+  { to: '/stock-master', label: '종목마스터' },
   { to: '/logs', label: '로그' },
   { to: '/settings', label: '설정' },
 ]
@@ -155,6 +158,8 @@ function AppShell() {
             <Route path="/history" element={<History />} />
             <Route path="/recommendations" element={<Recommendations />} />
             <Route path="/strategy-funnel" element={<StrategyFunnel />} />
+            {/* 사이클 85 (2026-06-09) — stock_master UI */}
+            <Route path="/stock-master" element={<StockMaster />} />
             <Route path="/logs" element={<Logs />} />
             {/* 사이클 6: 기존 북마크 호환 — /log-reports → /logs?tab=daily-report */}
             <Route

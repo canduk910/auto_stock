@@ -37,7 +37,12 @@ const TARGET_FILES = [
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e
 // 1차 + 재실행 모두 fail 확정, 페이지 어셈블 timeout 영구 차단). 컴포넌트가 아닌 페이지
 // 영역이라 별도 path 처리.
-const TARGET_PAGES = ['Settings.tsx']
+//
+// 사이클 85 (2026-06-09) G-AST-RT — StockMaster.tsx 신규 페이지 추가.
+// 5 useQuery (fetchStats / fetchList / fetchScanPoolSummary / fetchDetail / fetchHistory)
+// 모두 retry:1 명시 의무 (e2e 환경 ECONNREFUSED 빠른 실패 + 사이클 65 H3 + 사이클 80
+// hotfix #1 영속 패턴 답습).
+const TARGET_PAGES = ['Settings.tsx', 'StockMaster.tsx']
 
 describe('사이클 65 hotfix H3 + 사이클 75 Q4 확장 — useQuery retry 옵션 영구 가드', () => {
   it.each(TARGET_FILES)(

@@ -124,4 +124,65 @@ export const handlers = [
     const body = await request.json() as Record<string, unknown>
     return HttpResponse.json(wrap({ min_amount: body.min_amount ?? 0 }))
   }),
+
+  // 사이클 85 — stock_master (READ-ONLY 5 GET 라우트).
+  http.get(`${base}/stock-master/stats`, () =>
+    HttpResponse.json(
+      wrap({
+        count_all: 29,
+        bfdy_clpr_present: 27,
+        nxt_tradable_count: 12,
+        top_10_recent: [
+          { ticker: '005930', name: '삼성전자', refreshed_at: '2026-06-09T09:00:00+09:00' },
+        ],
+      })
+    )
+  ),
+  http.get(`${base}/stock-master/list`, () =>
+    HttpResponse.json(
+      wrap([
+        {
+          ticker: '005930',
+          name: '삼성전자',
+          excg_dvsn_cd: '01',
+          nxt_tradable: true,
+          krx_halted: false,
+          admin_item: false,
+          refreshed_at: '2026-06-09T09:00:00+09:00',
+          raw: { bfdy_clpr: 75000 },
+        },
+      ])
+    )
+  ),
+  http.get(`${base}/stock-master/scan-pool/summary`, () =>
+    HttpResponse.json(wrap({ eager_refresh_today: 5 }))
+  ),
+  http.get(`${base}/stock-master/:ticker/history`, () =>
+    HttpResponse.json(
+      wrap([
+        {
+          id: 1,
+          ticker: '005930',
+          change_type: 'INSERT',
+          before_raw: null,
+          after_raw: { bfdy_clpr: 75000 },
+          changed_at: '2026-06-09T09:00:00+09:00',
+        },
+      ])
+    )
+  ),
+  http.get(`${base}/stock-master/:ticker`, ({ params }) =>
+    HttpResponse.json(
+      wrap({
+        ticker: params.ticker,
+        name: '삼성전자',
+        excg_dvsn_cd: '01',
+        nxt_tradable: true,
+        krx_halted: false,
+        admin_item: false,
+        refreshed_at: '2026-06-09T09:00:00+09:00',
+        raw: { bfdy_clpr: 75000, acml_vol: 1000000, nxt_tradable: true, krx_halted: false, admin_item: false },
+      })
+    )
+  ),
 ];
