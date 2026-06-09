@@ -15621,7 +15621,7 @@ frontend:
 generated_at: '2026-06-09T00:33:25.311Z'
 stats:
   backend_modules: 98
-  backend_tests: 367
+  backend_tests: 370
   frontend_modules: 66
   frontend_tests: 41
   unmapped_modules:

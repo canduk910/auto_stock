@@ -172,3 +172,36 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 - 구독 종목 변경 시 기존 해제 → 새 등록 순서
 - WebSocket URL 은 REST 와 다름 (`ops.koreainvestment.com`)
 - **실전 체결통보 (H0STCNI0)** 는 HTS ID 단위 푸시 — 동일 HTS ID 묶인 타 계좌 통보 함께 들어옴. handler `fields[1]` 계좌 필터링 필수
+
+## §외부 LLM 검토 영구 기록 (사이클 88, 2026-06-09)
+
+타 LLM 제출 "시세 수신 오류 + 구조 단순화" 의견서 검토 완료. 양 agent (refactor-expert + domain-expert) 일치 결론 = *구조 관찰 객관, 영속 시정 18 사이클 도메인 지식 부재*.
+
+### 영속 보장 매트릭스 (단순 통합 추천 영구 거부)
+
+- WebSocket 4중 안전망 시간 척도 (F1 + `_scan_loop` + K stale watcher + `_resubscribe_stale_priority`)
+- 종목 + 세션 2 계층 stale 하이브리드 (사이클 29 R1 + R2)
+- 4 dict 분리 (`_subscriptions` / `_subscriptions_acked` / `_ticker_to_session` / `ticker_last_tick`)
+- HIGH `bypass_limit=True` + 보유/익일청산 절대 보호 (사이클 32 R4)
+- 사이클 38 명문화 (`tradable_boards` 매수 진입 전용)
+
+### 영구 차단 영역 3 (AST 가드)
+
+`tests/unit/ast/test_external_llm_reject_patterns.py` 영구 차단:
+
+1. **G-REJECT-1**: 단일 restore 도입 차단 (4중 안전망 영속) — 외부 추천 R4 반려. 4중 안전망 함수 4종 (`_verify_subscriptions_after_reconnect` / `_scan_loop` / `check_and_resubscribe_stale` / `resubscribe_stale_priority`) 영속 검증
+2. **G-REJECT-2**: stale 전체 WS 단독 판정 차단 (사이클 29 005935 재현 방지) — 외부 추천 R5 반려. `ticker_last_tick` + `STALE_FRESHNESS_SECS` 종목 단위 영속 검증
+3. **G-REJECT-3**: SubscriptionRegistry 단일 dict 통합 차단 (orphan ACK race / 41 한도 분산 영속) — 외부 추천 R2 반려. 4 dict 분리 (`_subscriptions` / `_subscriptions_acked` / `_ticker_to_session` / `ticker_last_tick`) 전수 영속 검증
+
+### 채택 가능 후속 카드
+
+| 카드 | 등급 | 내용 |
+|-----|------|------|
+| **#E1** | MEDIUM | `subscription_registry.py` read-only view 모듈 신설 (~80L) — 사이클 89+ |
+| **#E2** | LOW | 4 계층 명명 매핑 docstring 보강 (코드 변경 0) |
+| **#E3** | LOW | 운영 실증 측정 (사이클 74 `[stale_watcher_summary]` 인프라 재사용) |
+
+### 참조
+
+- `_workspace/external_llm_reviews/2026-06-09_realtime_review.md` (통합 영구 기록)
+- 사이클 96 재평가 (2026-06-13 이후, 1주 운영 실증 후)
