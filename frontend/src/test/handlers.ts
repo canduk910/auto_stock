@@ -171,6 +171,15 @@ export const handlers = [
       ])
     )
   ),
+  // 사이클 90 — POST refresh-universe MSW mock (Q24=B 수동 trigger).
+  // Q25=A asyncio.Lock + 409 Conflict 가드는 백엔드 영역.
+  // Q27=A [stock_master_bulk_refresh] emit 영속 (백엔드 영역).
+  http.post(`${base}/stock-master/refresh-universe`, () =>
+    HttpResponse.json(
+      wrap({ universe: 500, elapsed_ms: 25000 }),
+    )
+  ),
+
   http.get(`${base}/stock-master/:ticker`, ({ params }) =>
     HttpResponse.json(
       wrap({

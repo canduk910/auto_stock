@@ -18,6 +18,7 @@ import {
   fetchScanPoolSummary,
   fetchDetail,
   fetchHistory,
+  refreshUniverseNow,
 } from "../stock-master";
 import { wrap } from "../../test/factories";
 import { server } from "../../test/server";
@@ -176,5 +177,46 @@ describe("사이클 85 — stock-master API 에러 처리 (H-404 + H-422)", () =
       ),
     );
     await expect(fetchList(100, -1)).rejects.toThrow();
+  });
+});
+
+describe("사이클 90 H-5 (HIGH) — refreshUniverseNow API 정합", () => {
+  it("H-5: refreshUniverseNow 가 POST 호출 + ApiResponse<RefreshUniverseResult> data 추출", async () => {
+    let receivedMethod = "";
+    server.use(
+      http.post("/api/stock-master/refresh-universe", ({ request }) => {
+        receivedMethod = request.method;
+        return HttpResponse.json(
+          wrap({ universe: 487, elapsed_ms: 24823 }),
+        );
+      }),
+    );
+    const result = await refreshUniverseNow();
+    expect(result.universe).toBe(487);
+    expect(result.elapsed_ms).toBe(24823);
+    expect(receivedMethod).toBe("POST");
+  });
+
+  it("H-5-conflict: refreshUniverseNow 가 409 Conflict 응답 시 axios error throw", async () => {
+    server.use(
+      http.post("/api/stock-master/refresh-universe", () =>
+        HttpResponse.json(
+          { detail: "universe refresh 진행 중 — 잠시 후 재시도" },
+          { status: 409 },
+        ),
+      ),
+    );
+    await expect(refreshUniverseNow()).rejects.toThrow();
+  });
+
+  it("H-5-empty: refreshUniverseNow 가 universe=0 graceful 응답 처리", async () => {
+    server.use(
+      http.post("/api/stock-master/refresh-universe", () =>
+        HttpResponse.json(wrap({ universe: 0, elapsed_ms: 120 })),
+      ),
+    );
+    const result = await refreshUniverseNow();
+    expect(result.universe).toBe(0);
+    expect(result.elapsed_ms).toBe(120);
   });
 });

@@ -335,4 +335,17 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
       }),
     }),
   );
+
+  // 사이클 90 (2026-06-09) — POST refresh-universe.
+  // LIFO 정합: wildcard (**/api/stock-master/**) 보다 *후* 등록 → 우선 매칭.
+  // 사이클 80 hotfix #3 Playwright LIFO 정합 패턴 영속.
+  // Q25=A asyncio.Lock + 409 Conflict 가드는 백엔드 영역 (여기서는 200 mock).
+  await page.route("**/api/stock-master/refresh-universe", (route) => {
+    if (route.request().method() === "POST") {
+      return route.fulfill({
+        json: envelope({ universe: 500, elapsed_ms: 25000 }),
+      });
+    }
+    return route.continue();
+  });
 }

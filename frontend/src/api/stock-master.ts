@@ -19,6 +19,7 @@ import type {
   StockMasterDetail,
   StockMasterHistoryItem,
   ScanPoolSummary,
+  RefreshUniverseResult,
 } from '../types/stock-master'
 
 export async function fetchStats(): Promise<StockMasterStats> {
@@ -60,6 +61,22 @@ export async function fetchHistory(
   const { data } = await apiClient.get<ApiResponse<StockMasterHistoryItem[]>>(
     `/stock-master/${ticker}/history`,
     { params: { limit } },
+  )
+  return data.data
+}
+
+/**
+ * 사이클 90 — POST /api/stock-master/refresh-universe (Q24=B 수동 trigger).
+ *
+ * Q25=A: asyncio.Lock + 409 Conflict 동시 호출 가드 (백엔드 영역).
+ * Q26=A: stats 카드 상단 우측 "지금 새로고침" 버튼.
+ * Q27=A: 사이클 89 [stock_master_bulk_refresh] emit 영속 활용.
+ * 사이클 75 G-RT 영속: useMutation retry:1 명시 의무 (StockMaster.tsx 영역).
+ * 사이클 84 L-2 영속: POST 1개 예외 허용 (백엔드 AST 가드 갱신 영역).
+ */
+export async function refreshUniverseNow(): Promise<RefreshUniverseResult> {
+  const { data } = await apiClient.post<ApiResponse<RefreshUniverseResult>>(
+    '/stock-master/refresh-universe',
   )
   return data.data
 }

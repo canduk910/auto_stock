@@ -13,7 +13,7 @@
  *   - 사이클 68 KST — Intl.DateTimeFormat 명시, getHours() 금지
  */
 import React, { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 
 import {
@@ -22,6 +22,7 @@ import {
   fetchScanPoolSummary,
   fetchDetail,
   fetchHistory,
+  refreshUniverseNow,
 } from '../api/stock-master'
 import type {
   StockMasterListItem,
@@ -369,8 +370,44 @@ export default function StockMaster() {
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null)
   const [detailTicker, setDetailTicker] = useState<string | null>(null)
   const [detailInitialData, setDetailInitialData] = useState<StockMasterDetail | undefined>(undefined)
+  // 사이클 90 — 토스트 상태 (react-hot-toast 미사용 환경 호환)
+  const [refreshToast, setRefreshToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const LIMIT = 100
+
+  const queryClient = useQueryClient()
+
+  // 사이클 90 Q26=A — "지금 새로고침" useMutation.
+  // Q25=A: 409 Conflict 분기 처리. 네트워크 오류/서버 오류 시 즉시 onError.
+  // 사이클 75 G-RT 영속: useQuery retry:1 패턴 — useMutation 은 즉시 실패 (재시도 없음).
+  // 이유: refresh-universe 는 장시간 작업(~25초) — 재시도 시 중복 KIS 호출 위험.
+  const refreshMutation = useMutation({
+    mutationFn: refreshUniverseNow,
+    retry: false,
+    onSuccess: (data) => {
+      setRefreshToast({
+        type: 'success',
+        message: `universe ${data.universe} ticker 즉시 적재 완료 (${data.elapsed_ms}ms)`,
+      })
+      queryClient.invalidateQueries({ queryKey: ['stock-master-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['stock-master-list'] })
+      setTimeout(() => setRefreshToast(null), 4000)
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        setRefreshToast({
+          type: 'error',
+          message: 'universe refresh 진행 중 — 잠시 후 재시도',
+        })
+      } else {
+        setRefreshToast({
+          type: 'error',
+          message: '적재 실패 — 잠시 후 재시도',
+        })
+      }
+      setTimeout(() => setRefreshToast(null), 4000)
+    },
+  })
 
   // 1. 상태 카드 — fetchStats
   const statsQuery = useQuery({
@@ -429,7 +466,32 @@ export default function StockMaster() {
             : 'stock-master-stats-card-loading'
         }
       >
-        <h2 className="text-base font-semibold text-gray-700 mb-4">전체 현황</h2>
+        {/* 사이클 90 Q26=A — stats 카드 상단 우측 "지금 새로고침" 버튼 */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-gray-700">전체 현황</h2>
+          <button
+            data-testid="stock-master-refresh-universe-button"
+            onClick={() => refreshMutation.mutate()}
+            disabled={refreshMutation.isPending}
+            className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shrink-0"
+          >
+            {refreshMutation.isPending ? '적재 중...' : '지금 새로고침'}
+          </button>
+        </div>
+
+        {/* 사이클 90 토스트 영역 */}
+        {refreshToast && (
+          <div
+            data-testid="stock-master-refresh-universe-toast"
+            className={`mb-4 px-4 py-2 rounded text-sm font-medium ${
+              refreshToast.type === 'success'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {refreshToast.message}
+          </div>
+        )}
 
         {statsQuery.isLoading || scanPoolQuery.isLoading ? (
           <p className="text-sm text-gray-400 animate-pulse">로딩 중...</p>

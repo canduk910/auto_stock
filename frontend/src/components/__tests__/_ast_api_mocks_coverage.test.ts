@@ -191,6 +191,38 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
     )
   })
 
+  // 사이클 90 M-5 (MEDIUM, 2026-06-09) — POST refresh-universe 영구 가드.
+  // StockMaster 페이지 "지금 새로고침" 버튼 클릭 시 POST refresh-universe 발화.
+  // 사이클 75 G-AST5 + 사이클 85 G-AST6 패턴 100% 답습.
+  describe('G-AST7 (사이클 90): POST refresh-universe endpoint 등록', () => {
+    it('api-mocks.ts 에 /api/stock-master/refresh-universe 라우트 등록 의무 (Q24=B + Q26=A)', () => {
+      const source = loadApiMocksSource()
+      expect(
+        isRouteRegistered(source, '/api/stock-master/refresh-universe'),
+        'e2e api-mocks.ts 에 /api/stock-master/refresh-universe 라우트 누락 — ' +
+          '사이클 90 H-6 "지금 새로고침" 버튼 클릭 시 ECONNREFUSED 위험. ' +
+          '사이클 80 hotfix #3 LIFO 정합 의무 (wildcard `**/api/stock-master/**` *후* 등록).',
+      ).toBe(true)
+    })
+
+    it('refreshUniverseNow 가 frontend/src/api/stock-master.ts 에서 호출 의무 (방어 가드)', () => {
+      const apiSource = readFileSync(
+        path.join(FRONTEND_API_DIR, 'stock-master.ts'),
+        'utf-8',
+      )
+      expect(
+        apiSource.includes('refresh-universe'),
+        '방어 가드: stock-master.ts 가 refresh-universe endpoint 를 더 이상 호출하지 않음 — ' +
+          '본 가드 갱신 의무 (사이클 90 영역 변경 시).',
+      ).toBe(true)
+      expect(
+        apiSource.includes('refreshUniverseNow'),
+        '방어 가드: stock-master.ts 에 refreshUniverseNow export 누락 — ' +
+          '사이클 90 H-5 위반.',
+      ).toBe(true)
+    })
+  })
+
   describe('G-AST4: 3 컴포넌트 useQuery `retry:` 옵션 명시 (Q4 확장)', () => {
     const TARGET_COMPONENTS = [
       'IntegrationToggleCard.tsx',

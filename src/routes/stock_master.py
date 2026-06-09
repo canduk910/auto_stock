@@ -1,17 +1,23 @@
-"""stock_master READ-ONLY 라우트 (사이클 84).
+"""stock_master READ-ONLY 라우트 (사이클 84) + 수동 trigger (사이클 90).
 
-5 엔드포인트 (GET only — Q9=B 결정, L-2 AST 영구 가드):
+5 GET 엔드포인트 (Q9=B 결정, L-2 AST 영구 가드):
 - GET /api/stock-master/stats
 - GET /api/stock-master/list
 - GET /api/stock-master/scan-pool/summary
 - GET /api/stock-master/{ticker}/history
 - GET /api/stock-master/{ticker}
 
-라우트 순서 의무: 정적 경로 (stats / list / scan-pool) 를 동적 ({ticker}) 보다 먼저 등록.
+1 POST 엔드포인트 (사이클 90 Q24=B 예외 허용, L-2 화이트리스트):
+- POST /api/stock-master/refresh-universe
+
+라우트 순서 의무: 정적 경로 (stats / list / scan-pool / refresh-universe) 를 동적 ({ticker}) 보다 먼저 등록.
 /{ticker}/history 도 /{ticker} 보다 먼저 등록 (FastAPI LIFO 정합).
 """
 
 from __future__ import annotations
+
+import asyncio
+import time
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -19,6 +25,47 @@ from src.db import stock_master
 from src.models.response import ApiResponse
 
 router = APIRouter()
+
+# Q25=A in-flight 가드 — 동시 호출 시 두 번째 호출 즉시 409 Conflict.
+# KIS Rate Limit 폭주 차단 + 25초 작업 중복 차단 (사이클 90 사용자 결정).
+_refresh_universe_lock = asyncio.Lock()
+
+
+@router.post("/refresh-universe", response_model=ApiResponse)
+async def refresh_universe_now():
+    """사이클 90 — universe 500+ 즉시 trigger (수동 발화).
+
+    장 종료 후 또는 scheduler idle 상태에서 사용자 즉시 실행.
+    Q25=A 단일 in-flight 가드 = 동시 호출 시 두 번째 호출 즉시 409 Conflict.
+    Q27=A 사이클 89 [stock_master_bulk_refresh] 영속 활용 (자동/수동 구분 0).
+
+    사이클 84 L-2 AST 영구 가드 영역 = POST 1개 예외 허용 (refresh-universe 단독).
+    라우트 본문에서 logger.* 직접 emit 0건 — fetch 함수 내부 emit 만 활용 (L-3 영속).
+    """
+    if _refresh_universe_lock.locked():
+        raise HTTPException(
+            status_code=409,
+            detail="universe refresh 진행 중 — 잠시 후 재시도",
+        )
+
+    async with _refresh_universe_lock:
+        from src.engine.scanner import fetch_top_500_universe
+
+        start_time = time.monotonic()
+        try:
+            tickers = await fetch_top_500_universe()
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+        elapsed_ms = int((time.monotonic() - start_time) * 1000)
+
+        return ApiResponse(
+            success=True,
+            data={
+                "universe": len(tickers),
+                "elapsed_ms": elapsed_ms,
+            },
+            message=f"universe {len(tickers)} ticker 즉시 적재 완료",
+        )
 
 
 @router.get("/stats")
@@ -61,7 +108,16 @@ async def get_stock_master_history(
 
 @router.get("/{ticker}")
 async def get_stock_master_detail(ticker: str):
-    """단건 조회. 미존재 시 404."""
+    """단건 조회. 미존재 시 404.
+
+    사이클 90 라우팅 가드: `refresh-universe` 는 POST only 경로 — GET 요청 시 405.
+    동적 {ticker} 가 POST only 경로를 잡아버리는 FastAPI 라우팅 특성 영구 차단.
+    """
+    # 사이클 90 — POST only 경로 보호: GET 요청이 동적 {ticker} 로 라우팅되는 경우 차단
+    _POST_ONLY_PATHS = {"refresh-universe"}
+    if ticker in _POST_ONLY_PATHS:
+        raise HTTPException(status_code=405, detail=f"Method Not Allowed — {ticker} 은 POST only")
+
     data = await stock_master.get(ticker)
     if data is None:
         raise HTTPException(status_code=404, detail=f"ticker={ticker} not found")

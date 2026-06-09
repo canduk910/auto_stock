@@ -43,3 +43,12 @@ export interface StockMasterHistoryItem {
 export interface ScanPoolSummary {
   eager_refresh_today: number  // 사이클 83 [scan_pool_eager_refresh] emit 카운트
 }
+
+/**
+ * 사이클 90 — POST /api/stock-master/refresh-universe 응답 타입 (Q25=A + Q26=A).
+ * universe: 즉시 적재된 ticker 수, elapsed_ms: KIS 조회 소요 시간.
+ */
+export interface RefreshUniverseResult {
+  universe: number
+  elapsed_ms: number
+}

@@ -76,3 +76,39 @@ def test_e2e_api_mocks_specific_routes_registered_after_wildcard():
         f"trade-amount-filter 구체 라우트 (pos={trade_amount_filter_pos}) 가 와일드카드 "
         f"(pos={wildcard_pos}) *전* 등록 — Playwright LIFO 위반."
     )
+
+
+def test_e2e_api_mocks_refresh_universe_route_after_wildcard():
+    """사이클 90 M-6 — POST `**/api/stock-master/refresh-universe` LIFO 정합 영구 가드.
+
+    사이클 80 hotfix #3 (Playwright LIFO) 답습 + 사이클 90 신규 POST 라우트 영역 확장:
+    - StockMaster 페이지 "지금 새로고침" 버튼 클릭 → POST refresh-universe 발화
+    - `**/api/stock-master/**` wildcard (사이클 85 영속) *후* 구체 라우트 등록 의무
+    - LIFO 위반 시 wildcard 가 우선 매칭되어 구체 라우트 무효화 → 응답 envelope({})
+      → universe/elapsed_ms undefined → UI 토스트 분기 결함
+
+    영속 의무:
+    - 사이클 80 hotfix #3 LIFO 영속 (wildcard *후* 구체 라우트)
+    - 사이클 85 stock-master wildcard 영속 (변경 0)
+    - 사이클 90 Q24=B + Q25=A POST 1개 예외 허용 (사이클 84 H-3 영역)
+    """
+    mocks_path = Path(__file__).parent.parent.parent.parent / "e2e/fixtures/api-mocks.ts"
+    source = mocks_path.read_text()
+
+    refresh_universe_pos = source.find("/api/stock-master/refresh-universe")
+    stock_master_wildcard_pos = source.find('"**/api/stock-master/**"')
+
+    assert refresh_universe_pos > 0, (
+        "사이클 90 M-6 위반 — POST `/api/stock-master/refresh-universe` mock 라우트 등록 누락. "
+        "frontend-dev Green 단계 의무: `await page.route(\"**/api/stock-master/refresh-universe\", ...)`"
+    )
+    assert stock_master_wildcard_pos > 0, (
+        "사이클 85 영속 위반 — wildcard `**/api/stock-master/**` 부재"
+    )
+
+    # 사이클 80 hotfix #3 LIFO 영구 가드 — 구체 라우트가 wildcard *후* 등록
+    assert refresh_universe_pos > stock_master_wildcard_pos, (
+        f"사이클 90 M-6 위반 — refresh-universe 구체 라우트 (pos={refresh_universe_pos}) 가 "
+        f"wildcard (pos={stock_master_wildcard_pos}) *전* 등록 — Playwright LIFO 위반 "
+        f"(wildcard 가 우선 매칭되어 구체 라우트 무효화). 사이클 80 hotfix #3 시정 의도 위반."
+    )

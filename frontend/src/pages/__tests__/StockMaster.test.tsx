@@ -270,3 +270,147 @@ describe("사이클 85 H-POLLING (MEDIUM) — 5 useQuery refetchInterval: 60_000
     ).toBe(true);
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────
+// 사이클 90 H-6 (HIGH) + M-4 (MEDIUM) — "지금 새로고침" 버튼 + useMutation
+// ────────────────────────────────────────────────────────────────────────
+describe('사이클 90 H-6 (HIGH) — "지금 새로고침" 버튼 + useMutation 호출', () => {
+  it("H-6: stats 카드 상단 우측에 testid `stock-master-refresh-universe-button` 버튼 존재 (Q26=A)", async () => {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-stats-card")).toBeDefined();
+    });
+
+    const button = screen.getByTestId("stock-master-refresh-universe-button");
+    expect(button).toBeDefined();
+    // 버튼 텍스트 영속 의무 — "지금 새로고침"
+    expect(button.textContent).toMatch(/지금 새로고침|새로고침/);
+  });
+
+  it("H-6: 버튼 클릭 시 POST refresh-universe 발화 + 성공 토스트 노출", async () => {
+    let postCalled = false;
+    setupHappyPathHandlers();
+    server.use(
+      http.post("/api/stock-master/refresh-universe", () => {
+        postCalled = true;
+        return HttpResponse.json(wrap({ universe: 487, elapsed_ms: 24823 }));
+      }),
+    );
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-refresh-universe-button")).toBeDefined();
+    });
+
+    fireEvent.click(screen.getByTestId("stock-master-refresh-universe-button"));
+
+    await waitFor(() => {
+      expect(postCalled).toBe(true);
+    });
+
+    // 성공 토스트 영역 — testid `stock-master-refresh-universe-toast`
+    await waitFor(() => {
+      const toast = screen.getByTestId("stock-master-refresh-universe-toast");
+      expect(toast).toBeDefined();
+      // 성공 토스트는 universe 결과 노출
+      expect(toast.textContent).toMatch(/487/);
+    });
+  });
+
+  it("H-6: 409 Conflict 응답 시 에러 토스트 노출 (in-flight 가드)", async () => {
+    setupHappyPathHandlers();
+    server.use(
+      http.post("/api/stock-master/refresh-universe", () =>
+        HttpResponse.json(
+          { detail: "universe refresh 진행 중 — 잠시 후 재시도" },
+          { status: 409 },
+        ),
+      ),
+    );
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-refresh-universe-button")).toBeDefined();
+    });
+    fireEvent.click(screen.getByTestId("stock-master-refresh-universe-button"));
+
+    await waitFor(() => {
+      const toast = screen.getByTestId("stock-master-refresh-universe-toast");
+      expect(toast).toBeDefined();
+      // 409 토스트는 "진행 중" 메시지 노출
+      expect(toast.textContent).toMatch(/진행 중|409|재시도/);
+    });
+  });
+
+  it("H-6: 500 응답 시 실패 토스트 노출", async () => {
+    setupHappyPathHandlers();
+    server.use(
+      http.post("/api/stock-master/refresh-universe", () =>
+        HttpResponse.json({ detail: "internal error" }, { status: 500 }),
+      ),
+    );
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-refresh-universe-button")).toBeDefined();
+    });
+    fireEvent.click(screen.getByTestId("stock-master-refresh-universe-button"));
+
+    await waitFor(() => {
+      const toast = screen.getByTestId("stock-master-refresh-universe-toast");
+      expect(toast).toBeDefined();
+      // 실패 토스트는 에러 메시지 노출
+      expect(toast.textContent).toMatch(/실패|오류|에러|error/i);
+    });
+  });
+});
+
+describe("사이클 90 M-4 (MEDIUM) — 버튼 위치 + disabled 상태", () => {
+  it("M-4: 버튼이 stats 카드 영역 내부에 위치 (Q26=A stats 카드 상단 우측)", async () => {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-stats-card")).toBeDefined();
+    });
+
+    const statsCard = screen.getByTestId("stock-master-stats-card");
+    const button = screen.getByTestId("stock-master-refresh-universe-button");
+
+    // 버튼이 stats 카드의 자손 의무 (Q26=A 영속)
+    expect(statsCard.contains(button)).toBe(true);
+  });
+
+  it("M-4: 클릭 후 isPending 상태에서 버튼 disabled (useMutation 로딩 인디케이터)", async () => {
+    setupHappyPathHandlers();
+    // 응답을 지연시키는 mock — 짧은 delay 후 응답
+    server.use(
+      http.post("/api/stock-master/refresh-universe", async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return HttpResponse.json(wrap({ universe: 487, elapsed_ms: 24823 }));
+      }),
+    );
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-refresh-universe-button")).toBeDefined();
+    });
+
+    const button = screen.getByTestId("stock-master-refresh-universe-button") as HTMLButtonElement;
+    fireEvent.click(button);
+
+    // 클릭 직후 disabled 상태 (useMutation isPending=true)
+    await waitFor(() => {
+      const btnNow = screen.getByTestId("stock-master-refresh-universe-button") as HTMLButtonElement;
+      expect(btnNow.disabled).toBe(true);
+    });
+
+    // 응답 후 disabled 해제
+    await waitFor(() => {
+      const btnNow = screen.getByTestId("stock-master-refresh-universe-button") as HTMLButtonElement;
+      expect(btnNow.disabled).toBe(false);
+    });
+  });
+});
