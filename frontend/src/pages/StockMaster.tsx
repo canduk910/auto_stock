@@ -110,7 +110,7 @@ function DetailModal({
 
     const result: [string, unknown][] = []
     for (const k of rawKeys) {
-      result.push([k, (detail as Record<string, unknown>)[k]])
+      result.push([k, (detail as unknown as Record<string, unknown>)[k]])
     }
     for (const k of rawDataKeys) {
       if (k in (detail.raw ?? {})) {

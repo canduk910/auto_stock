@@ -103,6 +103,18 @@ async def test_g_ml1_periodic_task_clears_eager_refresh_collector(monkeypatch):
 
     monkeypatch.setattr("src.engine.scheduler.asyncio.sleep", _fast_sleep)
 
+    # 사이클 85 hotfix — CI sandbox 환경 KIS API DNS resolve fail 차단 (운영 무영향).
+    # `flush_scan_pool_eager_refresh_collector` 가 `stock_master.upsert_from_kis` 를 호출하나
+    # CI sandbox 는 openapivts.koreainvestment.com 에 접근 불가 → 60s timeout.
+    # `is_stale()` 를 False 로 mock = TTL fresh skip 분기 진입 → KIS 호출 0 → collector clear 만 검증
+    # (테스트 의도 = collector len == 0, KIS 실제 호출 검증 아님).
+    from src.db import stock_master as _stock_master_mod
+
+    def _always_fresh(ticker):  # is_stale=False 영구 = TTL fresh skip
+        return False
+
+    monkeypatch.setattr(_stock_master_mod, "is_stale", _always_fresh)
+
     # Green 시점에 사용 가능한 함수 호출 시도
     loop_fn = getattr(
         scheduler_instance, "_scan_pool_eager_refresh_loop", None
