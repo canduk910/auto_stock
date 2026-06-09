@@ -494,6 +494,14 @@ class TradingScheduler:
                 self._scan_pool_eager_refresh_loop()
             )
 
+            # 사이클 89 (2026-06-09) — universe 500+ 개장 전 1회 + 5분 주기 refresh task.
+            # 사용자 결정 Q20=D: 개장 전 1회(boot 직후) + 사이클 83 5분 주기 결합.
+            # `fetch_top_500_universe()` 가 KOSPI 250 + KOSDAQ 250 volume_rank 호출 후
+            # stock_master upsert. 사이클 74/78/79 답습.
+            self._universe_eager_refresh_task = asyncio.create_task(
+                self._universe_eager_refresh_loop()
+            )
+
             now = datetime.now().time()
 
             # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
@@ -748,6 +756,7 @@ class TradingScheduler:
                 "_5xx_dedupe_summary_task",
                 "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
                 "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
+                "_universe_eager_refresh_task",  # 사이클 89 추가 — universe 500+ refresh task
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -867,6 +876,7 @@ class TradingScheduler:
                     "_5xx_dedupe_summary_task",
                     "_api_recovered_collector_task",  # 사이클 79 영속
                     "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
+                    "_universe_eager_refresh_task",  # 사이클 89 추가 — universe 500+ refresh task
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -895,6 +905,7 @@ class TradingScheduler:
             "_5xx_dedupe_summary_task",
             "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
             "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
+            "_universe_eager_refresh_task",  # 사이클 89 추가 — universe 500+ refresh task
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -922,6 +933,12 @@ class TradingScheduler:
             flush_scan_pool_eager_refresh_collector()
         except Exception:
             logger.exception("[scan_pool_eager_refresh_collector] shutdown flush 실패")
+        # 사이클 89 hotfix: universe collector 마지막 flush (사이클 78 G-SP4 답습)
+        try:
+            from src.engine.stock_master_metrics import flush_universe_collector
+            flush_universe_collector()
+        except Exception:
+            logger.exception("[universe_collector] shutdown flush 실패")
         await unsubscribe_all()
         await kis_ws.disconnect()
         # 추가: 수동 중지 시에도 동일 보장
@@ -2568,6 +2585,59 @@ class TradingScheduler:
                 flush_scan_pool_eager_refresh_collector()
             except Exception:
                 logger.exception("[scan_pool_eager_refresh_collector] flush 실패")
+            if not self._running:
+                break
+
+    async def _universe_eager_refresh_loop(self) -> None:
+        """사이클 89 (2026-06-09) — universe 500+ 개장 전 1회 + 5분 주기 eager refresh task.
+
+        사용자 결정 영속 (사이클 89):
+        - Q20=D: 개장 전 1회(boot 직후) 적재 + 사이클 83 5분 주기 결합
+        - Q21=A: KIS volume_rank (FHPST01710000) 사용
+        - Q22=A: 90일 영속 (사이클 84 history trigger 영속)
+        - 24h TTL fresh skip (사이클 83 Q3=B 답습) → KIS 호출 최소화
+        - ticker 간 50ms sleep (사이클 83 Q3=B 답습) → Rate Limit 20/s 보호
+
+        lifecycle (사이클 78/79 답습):
+        - `start()` 에서 task 시작 → `_scan_pool_eager_refresh_task` 직후 생성
+        - `stop()` task_attrs 튜플 + `run_daily.finally` 양쪽 cancel 보장
+        - `stop()` lifecycle hook 에서 마지막 flush 1회 (사이클 78 G-SP4 답습)
+
+        emit (사이클 74 collector 패턴 답습):
+        - [stock_master_bulk_refresh] — 개장 전 1회 INFO (fetch_top_500_universe 내부 emit)
+        - [stock_master_universe_summary] — 5분 윈도우 summary flush
+        """
+        from src.engine.scanner import fetch_top_500_universe
+        from src.engine.stock_master_metrics import flush_universe_collector
+        from src.db.stock_master import upsert_one as _sm_upsert, get_one as _sm_get
+
+        _UNIVERSE_REFRESH_WINDOW_SECS = 300.0  # 5분 (사이클 42 패턴 답습)
+
+        # 개장 전 1회 즉시 실행 (Q20=D: boot 직후 적재)
+        try:
+            tickers = await fetch_top_500_universe()
+            logger.info(
+                "[universe_eager_refresh] 개장 전 1회 적재 완료 universe=%d",
+                len(tickers),
+            )
+        except Exception:
+            logger.exception("[universe_eager_refresh] 개장 전 1회 적재 실패")
+
+        # 5분 주기 반복 (사이클 42/83 패턴 답습)
+        while self._running:
+            await asyncio.sleep(_UNIVERSE_REFRESH_WINDOW_SECS)
+            try:
+                tickers = await fetch_top_500_universe()
+                logger.info(
+                    "[universe_eager_refresh] 5분 주기 적재 완료 universe=%d",
+                    len(tickers),
+                )
+            except Exception:
+                logger.exception("[universe_eager_refresh] 5분 주기 적재 실패")
+            try:
+                flush_universe_collector()
+            except Exception:
+                logger.exception("[universe_collector] flush 실패")
             if not self._running:
                 break
 

@@ -68,6 +68,9 @@ _QUOTE_ALLOWED_PATHS: frozenset[str] = frozenset({
     # 사이클 32 (R4, 2026-05-21) — universe stale 가드용 당일 체결 조회 (FHKST01010300)
     # 시세성 호출 + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합
     "/uapi/domestic-stock/v1/quotations/inquire-ccnl",
+    # 사이클 89 (2026-06-09) — universe 500+ volume_rank (FHPST01710000) 거래금액순 상위
+    # 시세성 호출 + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합
+    "/uapi/domestic-stock/v1/quotations/volume-rank",
 })
 
 # 보조 매니저별 격리된 Rate Limit 세마포어 (메인 20, 보조 18 보수적)

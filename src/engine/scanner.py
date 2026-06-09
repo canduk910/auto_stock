@@ -1344,3 +1344,267 @@ async def _scan_pool_eager_refresh_loop(
         "failed": failed,
         "elapsed_ms": elapsed_ms,
     })
+
+
+# ---------------------------------------------------------------------------
+# 사이클 89 (2026-06-09) — stock_master 500+ universe 확장
+# Q19=B 거래대금/거래량 상위 500 / Q21=A KIS volume_rank (FHPST01710000)
+# A1 거래대금 (전일) 단독 정렬 + A2 KOSPI 250 + KOSDAQ 250 분리 호출
+# ETF/리츠/우선주/SPAC 자동 제외 (_universe_filter_securities_only)
+# ---------------------------------------------------------------------------
+# 영속 의무:
+# - 사이클 38 명문화: tradable_boards 매수 진입 전용 (매도 hot path 영향 0)
+# - 사이클 64 protected_tickers: 영역 분리 (영향 0)
+# - 사이클 81 bfdy_clpr: 영역 분리 (영향 0)
+# - 사이클 83 scan_pool eager refresh: candidates=12 영역 영속 (영역 분리)
+# ---------------------------------------------------------------------------
+
+# KIS `volume_rank` (FHPST01710000) API 파라미터
+_VOLUME_RANK_URL = "/uapi/domestic-stock/v1/quotations/volume-rank"
+_VOLUME_RANK_TR_ID = "FHPST01710000"
+
+# A2: KOSPI(업종코드 0001) / KOSDAQ(업종코드 0002) 분리 호출
+# fid_input_iscd "0001" = KOSPI 전체, "0002" = KOSDAQ 전체 (FID_COND_MRKT_DIV_CODE="J" 고정)
+_MARKET_INPUT_ISCD: dict[str, str] = {
+    "1": "0001",  # KOSPI
+    "2": "0002",  # KOSDAQ
+}
+
+# A2: ETF/리츠/SPAC 제외 — `prdt_type_cd` 기반
+# "300" = 보통주 (통과), "301" = ETF (제외), "302" = 리츠 (제외), "309" = SPAC (제외)
+# 기타 코드(ETN=310 등)도 제외 (보통주 "300" 만 통과)
+_ALLOWED_PRODUCT_TYPE_CD = {"300"}  # 보통주만 통과
+
+
+def _universe_filter_securities_only(rows: list[dict]) -> list[dict]:
+    """ETF/리츠/우선주/SPAC 자동 제외 헬퍼 (A2 권고).
+
+    사이클 89 (2026-06-09) 신규. KIS `volume_rank` 응답 rows 에서
+    `prdt_type_cd` 기반으로 보통주("300") 만 통과시킨다.
+
+    종목코드 형식 검증 병행: 6자리 숫자가 아닌 코드 차단 (ETF/ETN 알파벳 코드).
+    prdt_type_cd 키가 없거나 빈 경우 → 종목코드 패턴으로 fallback (6자리 숫자 = 통과).
+
+    Args:
+        rows: KIS volume_rank output list (각 item 은 dict)
+
+    Returns:
+        보통주만 필터링된 rows 리스트
+    """
+    result: list[dict] = []
+    for row in rows:
+        ticker = row.get("mksc_shrn_iscd", "")
+        # 종목코드 형식 검증 — ETF·ETN·신주인수권 알파벳 코드 차단 (사이클 64 패턴 답습)
+        if not (len(ticker) == 6 and ticker.isdigit()):
+            continue
+
+        # prdt_type_cd 기반 제외 (KIS CTPF1002R 호환 키)
+        prdt_type = row.get("prdt_type_cd", "")
+        if prdt_type:
+            # prdt_type_cd 존재 시 보통주("300") 만 통과
+            if prdt_type not in _ALLOWED_PRODUCT_TYPE_CD:
+                continue
+        # prdt_type_cd 없을 때는 종목코드 6자리 숫자 패턴 통과 (graceful)
+
+        result.append(row)
+    return result
+
+
+def _trade_amount_key(row: dict) -> float:
+    """거래대금 재정렬 key — `prdy_vol × (stck_prpr - prdy_vrss)`.
+
+    사이클 48 BFB `trade_amt = prdy_vol × (stck_prpr - prdy_vrss)` 패턴 직답습.
+    시간 의존 제거 (당일 acml_vol 금지, 전일 확정치 기반).
+
+    Args:
+        row: KIS volume_rank output 1건
+
+    Returns:
+        전일 거래대금 추정값 (float). 계산 실패 시 0.0 반환 (graceful).
+    """
+    try:
+        prdy_vol = int(row.get("prdy_vol", 0))
+        stck_prpr = int(row.get("stck_prpr", 0))
+        prdy_vrss = int(row.get("prdy_vrss", 0))
+        prdy_close = stck_prpr - prdy_vrss
+        if prdy_close <= 0:
+            return 0.0
+        return float(prdy_vol * prdy_close)
+    except (ValueError, TypeError):
+        return 0.0
+
+
+async def _fetch_volume_rank(market: str, top_n: int = 250) -> list[dict]:
+    """KIS `volume_rank` (FHPST01710000) 호출 — 거래금액순 상위 `top_n` 건.
+
+    사이클 89 (2026-06-09) 신규 헬퍼.
+
+    Args:
+        market: "1" = KOSPI, "2" = KOSDAQ (A2 분리 정렬)
+        top_n: 최대 반환 건수 (기본 250)
+
+    Returns:
+        KIS output list (dict). API 실패 시 [] 반환 (graceful).
+
+    KIS 파라미터:
+        FID_COND_MRKT_DIV_CODE = "J"  (KRX 전체)
+        FID_COND_SCR_DIV_CODE  = "20171"
+        FID_INPUT_ISCD         = "0001" (KOSPI) / "0002" (KOSDAQ)
+        FID_DIV_CLS_CODE       = "1"  (보통주만 — 우선주 제외)
+        FID_BLNG_CLS_CODE      = "3"  (거래금액순 A1 정렬)
+        FID_TRGT_CLS_CODE      = "111111111"
+        FID_TRGT_EXLS_CLS_CODE = "0000001101"  (ETF(7)+ETN(8)+SPAC(10) 제외)
+        FID_INPUT_PRICE_1/2    = "0" / "0"  (전체 가격대)
+        FID_VOL_CNT            = "0"  (전체 거래량)
+        FID_INPUT_DATE_1       = ""
+    """
+    from src.api.base import kis_get_quote, KisApiError
+
+    input_iscd = _MARKET_INPUT_ISCD.get(market, "0001")
+    params = {
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_COND_SCR_DIV_CODE": "20171",
+        "FID_INPUT_ISCD": input_iscd,
+        "FID_DIV_CLS_CODE": "1",       # 보통주만 (우선주 제외)
+        "FID_BLNG_CLS_CODE": "3",       # A1: 거래금액순
+        "FID_TRGT_CLS_CODE": "111111111",
+        "FID_TRGT_EXLS_CLS_CODE": "0000001101",  # ETF(7)+ETN(8)+SPAC(10) 제외
+        "FID_INPUT_PRICE_1": "0",
+        "FID_INPUT_PRICE_2": "0",
+        "FID_VOL_CNT": "0",
+        "FID_INPUT_DATE_1": "",
+    }
+    try:
+        data = await kis_get_quote(_VOLUME_RANK_URL, _VOLUME_RANK_TR_ID, params)
+        output = data.get("output", []) or []
+        return list(output[:top_n])
+    except KisApiError as e:
+        logger.warning(
+            "[fetch_volume_rank] KIS API 실패 market=%s error=%s (graceful [])",
+            market, e,
+        )
+        return []
+    except Exception as e:
+        logger.warning(
+            "[fetch_volume_rank] 예외 market=%s error=%s (graceful [])",
+            market, e,
+        )
+        return []
+
+
+async def fetch_top_500_universe() -> list[str]:
+    """KOSPI 250 + KOSDAQ 250 거래대금 상위 합집합 (ETF/리츠/SPAC 자동 제외).
+
+    사이클 89 (2026-06-09) 신규. 사용자 결정 영속 (Q19=B, Q21=A, A1, A2):
+    - Q19=B: 거래대금/거래량 상위 500
+    - Q21=A: KIS volume_rank API (FHPST01710000)
+    - A1: 거래대금 (전일) 단독 정렬 1순위 (`prdy_vol × (stck_prpr - prdy_vrss)`)
+    - A2: mrkt_div_cls_code=1 (KOSPI) + 2 (KOSDAQ) 분리 호출
+
+    개장 전 1회 적재 (Q20=D + 사이클 83 5분 주기 결합).
+    ETF/리츠/SPAC 자동 제외 (`_universe_filter_securities_only`).
+
+    Returns:
+        종목코드 list (최대 500건, 보통주만). API 실패 시 [] (graceful).
+
+    영속 의무:
+    - 사이클 38 명문화 (tradable_boards 매수 진입 전용 — 영향 0)
+    - 사이클 48 BFB 거래대금 재정렬 패턴 답습
+    - 사이클 64 protected_tickers (영역 분리, 영향 0)
+    - 사이클 83 scan_pool eager refresh 영속 (영역 분리)
+    """
+    import time as _t
+    from src.engine.stock_master_metrics import record_universe_refresh, flush_universe_collector
+
+    start_ms = _t.monotonic() * 1000
+
+    # A2: KOSPI 250 + KOSDAQ 250 분리 호출
+    kospi_raw = await _fetch_volume_rank(market="1", top_n=250)
+    kosdaq_raw = await _fetch_volume_rank(market="2", top_n=250)
+
+    # A2: ETF/리츠/SPAC 자동 제외 (헬퍼 적용)
+    kospi_filtered = _universe_filter_securities_only(kospi_raw)
+    kosdaq_filtered = _universe_filter_securities_only(kosdaq_raw)
+
+    # A1: 각 시장 내부 거래대금 desc 재정렬 (사이클 48 BFB 패턴 답습)
+    kospi_sorted = sorted(kospi_filtered, key=_trade_amount_key, reverse=True)[:250]
+    kosdaq_sorted = sorted(kosdaq_filtered, key=_trade_amount_key, reverse=True)[:250]
+
+    # 합집합 (순서 보존 — KOSPI 먼저)
+    universe_rows = kospi_sorted + kosdaq_sorted
+
+    etf_excluded_total = (len(kospi_raw) - len(kospi_filtered)) + (
+        len(kosdaq_raw) - len(kosdaq_filtered)
+    )
+
+    # 종목코드 추출
+    tickers = [row["mksc_shrn_iscd"] for row in universe_rows if row.get("mksc_shrn_iscd")]
+    tickers = tickers[:500]
+
+    elapsed_ms = int(_t.monotonic() * 1000 - start_ms)
+    securities_count = len(tickers)
+    universe_size = len(tickers)
+
+    # [stock_master_bulk_refresh] 개장 전 1회 emit (A6 권고)
+    logger.info(
+        "[stock_master_bulk_refresh] universe=%d kospi=%d kosdaq=%d "
+        "securities=%d etf_excluded=%d elapsed_ms=%d",
+        universe_size,
+        len(kospi_sorted),
+        len(kosdaq_sorted),
+        securities_count,
+        etf_excluded_total,
+        elapsed_ms,
+    )
+
+    # collector 적재 (5분 윈도우 통계용, M-7 emit visibility)
+    record_universe_refresh({
+        "universe": universe_size,
+        "kospi": len(kospi_sorted),
+        "kosdaq": len(kosdaq_sorted),
+        "securities": securities_count,
+        "etf_excluded": etf_excluded_total,
+        "fetched": 0,        # stock_master upsert 는 별도 loop 에서 집계
+        "skipped_fresh": 0,
+        "failed": 0,
+        "elapsed_ms": elapsed_ms,
+    })
+
+    # 개장 전 1회 즉시 flush (bulk_refresh 완료 후 1행 emit 보장, 사이클 78 답습)
+    flush_universe_collector()
+
+    return tickers
+
+
+async def _universe_eager_refresh_loop(candidates: list[str]) -> None:
+    """사이클 89 (2026-06-09) — universe 500 ticker stock_master 순차 upsert 루프.
+
+    사이클 83 `_scan_pool_eager_refresh_loop` + 사이클 13-D `_eager_refresh_stock_master_for_held_positions`
+    패턴 직답습.
+
+    - 24h TTL fresh skip (사이클 83 Q3=B): `stock_master.is_stale(ticker, max_age_hours=24)` False → skip
+    - ticker 간 50ms sleep (사이클 83 Q3=B): Rate Limit 20/s 보호
+    - graceful: `inquire_stock_basics` 실패 시 continue (로그 없음, 사이클 83 답습)
+
+    Args:
+        candidates: universe ticker list (최대 500건). `fetch_top_500_universe()` 반환값.
+    """
+    import asyncio as _asyncio
+    from src.db.stock_master import is_stale as _sm_is_stale, upsert_one as _sm_upsert
+    from src.api.condition import inquire_stock_basics as _inquire_basics
+
+    for ticker in candidates:
+        # 24h TTL fresh skip (사이클 83 Q3=B + 사이클 13-D 패턴 답습)
+        stale = await _sm_is_stale(ticker, max_age_hours=24)
+        if not stale:
+            continue
+
+        # KIS CTPF1002R 호출 + upsert (graceful — 실패 시 continue)
+        try:
+            basics = await _inquire_basics(ticker)
+            await _sm_upsert(basics)
+        except Exception:
+            pass  # graceful (사이클 83 답습 — stale 종목 쉐도우 skip)
+
+        # 50ms Rate Limit 보호 (사이클 83 Q3=B 답습, KIS Rate Limit 20/s)
+        await _asyncio.sleep(0.05)

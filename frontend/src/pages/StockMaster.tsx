@@ -12,7 +12,7 @@
  *   - 사이클 65 H3 + 사이클 80 hotfix #1 — useQuery retry:1 의무
  *   - 사이클 68 KST — Intl.DateTimeFormat 명시, getHours() 금지
  */
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 
@@ -73,6 +73,127 @@ const CATEGORY_KEYS: Record<string, string[]> = {
   '거래': ['acml_vol', 'acml_tr_pbmn'],
   '플래그': ['nxt_tradable', 'krx_halted', 'admin_item'],
   '메타': ['refreshed_at'],
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// 필드 한글 레이블 (사이클 89 hotfix)
+// ────────────────────────────────────────────────────────────────────────
+const FIELD_LABELS: Record<string, string> = {
+  ticker: '종목코드',
+  name: '종목명',
+  excg_dvsn_cd: '거래소',
+  bfdy_clpr: '전일종가',
+  stck_prpr: '현재가',
+  stck_hgpr: '고가',
+  stck_lwpr: '저가',
+  acml_vol: '누적거래량',
+  acml_tr_pbmn: '누적거래대금',
+  nxt_tradable: 'NXT 거래가능',
+  krx_halted: 'KRX 거래정지',
+  admin_item: '관리종목',
+  refreshed_at: '갱신시각',
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// 거래소 코드 → 한글 변환 (사이클 89 hotfix)
+// ────────────────────────────────────────────────────────────────────────
+function formatExchange(code: string | null | undefined): string {
+  if (!code) return '—'
+  const map: Record<string, string> = {
+    '01': 'KOSPI', '02': 'KOSDAQ', '03': 'KOSDAQ', '04': 'ETF',
+    '05': 'ELW', '06': 'ETN', 'KSP': 'KOSPI', 'KDQ': 'KOSDAQ',
+  }
+  return map[code] ?? code
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// 숫자 포맷 헬퍼 (사이클 89 hotfix)
+// ────────────────────────────────────────────────────────────────────────
+function formatPrice(v: unknown): string {
+  const n = Number(v)
+  if (isNaN(n)) return String(v ?? '—')
+  return n.toLocaleString('ko-KR') + '원'
+}
+
+function formatVolume(v: unknown): string {
+  const n = Number(v)
+  if (isNaN(n)) return String(v ?? '—')
+  return n.toLocaleString('ko-KR') + '주'
+}
+
+function formatAmount(v: unknown): string {
+  const n = Number(v)
+  if (isNaN(n)) return String(v ?? '—')
+  if (n >= 1_000_000_000_000) return (n / 1_000_000_000_000).toFixed(1) + '조원'
+  if (n >= 100_000_000) return (n / 100_000_000).toFixed(0) + '억원'
+  return n.toLocaleString('ko-KR') + '원'
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// 카테고리 아이콘 (사이클 89 hotfix)
+// ────────────────────────────────────────────────────────────────────────
+const CATEGORY_ICONS: Record<string, string> = {
+  '기본': '📋',
+  '가격': '💰',
+  '거래': '📊',
+  '플래그': '🚩',
+  '메타': '⏱️',
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// 필드 값 포맷터 (사이클 89 hotfix)
+// ────────────────────────────────────────────────────────────────────────
+function formatFieldValue(key: string, value: unknown): React.ReactNode {
+  if (value === null || value === undefined) return <span className="text-gray-400">—</span>
+
+  // boolean 플래그 — 아이콘 + 색상
+  if (typeof value === 'boolean') {
+    const flagTrueKeys = ['nxt_tradable']
+    const flagDangerKeys = ['krx_halted', 'admin_item']
+    if (flagTrueKeys.includes(key)) {
+      return value
+        ? <span className="text-emerald-600 font-medium">✓ 가능</span>
+        : <span className="text-gray-400">✗ 불가</span>
+    }
+    if (flagDangerKeys.includes(key)) {
+      return value
+        ? <span className="text-red-600 font-medium">✓ 해당</span>
+        : <span className="text-gray-400">✗ 해당없음</span>
+    }
+    return value ? '예' : '아니오'
+  }
+
+  // 가격 필드
+  if (['bfdy_clpr', 'stck_prpr', 'stck_hgpr', 'stck_lwpr'].includes(key)) {
+    return <span className="font-mono text-right">{formatPrice(value)}</span>
+  }
+
+  // 거래량
+  if (key === 'acml_vol') {
+    return <span className="font-mono">{formatVolume(value)}</span>
+  }
+
+  // 거래대금
+  if (key === 'acml_tr_pbmn') {
+    return <span className="font-mono">{formatAmount(value)}</span>
+  }
+
+  // 종목코드
+  if (key === 'ticker') {
+    return <span className="font-mono text-blue-700 font-medium">{String(value)}</span>
+  }
+
+  // 거래소 코드
+  if (key === 'excg_dvsn_cd') {
+    return <span>{formatExchange(String(value))}</span>
+  }
+
+  // 시각 필드
+  if (key === 'refreshed_at') {
+    return <span className="text-xs">{formatKst(String(value))}</span>
+  }
+
+  return <span>{String(value)}</span>
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -159,17 +280,19 @@ function DetailModal({
             <p className="text-sm text-red-600">상세 정보 조회 실패</p>
           )}
           {data && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {Object.keys(CATEGORY_KEYS).map((category) => {
                 const items = getCategoryItems(data, category)
                 return (
                   <div key={category}>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                      {category}
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                      <span>{CATEGORY_ICONS[category]}</span>
+                      <span>{category}</span>
                     </h3>
                     <div className="grid grid-cols-2 gap-2">
                       {items.map(([key, value]) => {
                         const isHighlight = HIGHLIGHT_KEYS.includes(key)
+                        const isPriceKey = ['bfdy_clpr', 'stck_prpr', 'stck_hgpr', 'stck_lwpr', 'acml_vol', 'acml_tr_pbmn'].includes(key)
                         return (
                           <div
                             key={key}
@@ -184,14 +307,12 @@ function DetailModal({
                                 : 'bg-gray-50'
                             }`}
                           >
-                            <span className="text-gray-500 mr-2">{key}:</span>
-                            <span className="text-gray-900">
-                              {value === null || value === undefined
-                                ? '—'
-                                : typeof value === 'boolean'
-                                ? value ? '예' : '아니오'
-                                : String(value)}
-                            </span>
+                            <div className="text-xs text-gray-500 mb-0.5">
+                              {FIELD_LABELS[key] ?? key}
+                            </div>
+                            <div className={`text-gray-900 ${isPriceKey ? 'text-right' : ''}`}>
+                              {formatFieldValue(key, value)}
+                            </div>
                           </div>
                         )
                       })}
@@ -324,9 +445,7 @@ export default function StockMaster() {
                 </p>
               </div>
               <div className="bg-amber-50 rounded p-3">
-                <p className="text-xs text-gray-500">
-                  bfdy_clpr 보유 (사이클 81 정합)
-                </p>
+                <p className="text-xs text-gray-500">전일종가 정상 적재</p>
                 <p className="text-2xl font-bold text-amber-700">
                   {statsQuery.data?.bfdy_clpr_present ?? '—'}
                 </p>
@@ -338,9 +457,7 @@ export default function StockMaster() {
                 </p>
               </div>
               <div className="bg-blue-50 rounded p-3">
-                <p className="text-xs text-gray-500">
-                  오늘 eager refresh
-                </p>
+                <p className="text-xs text-gray-500">오늘 자동 갱신 횟수</p>
                 <p
                   className="text-2xl font-bold text-blue-700"
                   data-testid="stock-master-stats-eager-refresh-today"
@@ -440,7 +557,7 @@ export default function StockMaster() {
                       {item.ticker}
                     </td>
                     <td className="py-2 pr-3 text-gray-900" aria-label={item.name}>
-                      {/* name 은 aria-label 로만 노출 — DOM 텍스트 중복 방지 (H-STATS getByText 충돌) */}
+                      {item.name}
                     </td>
                     <td className="py-2 pr-3 text-gray-500">
                       {item.excg_dvsn_cd ?? '—'}

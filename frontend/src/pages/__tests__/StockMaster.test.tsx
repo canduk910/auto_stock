@@ -131,9 +131,9 @@ describe("사이클 85 — StockMaster 페이지 (H-STATS + L-CYCLE83-EMIT)", ()
       "7",
     );
 
-    // top_10_recent 2종 종목명 표시
-    expect(screen.getByText("삼성전자")).toBeDefined();
-    expect(screen.getByText("SK스퀘어")).toBeDefined();
+    // top_10_recent 2종 종목명 표시 (사이클 89 hotfix: list 테이블도 name 렌더 → getAllByText)
+    expect(screen.getAllByText("삼성전자").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("SK스퀘어").length).toBeGreaterThanOrEqual(1);
   });
 
   it("L-CYCLE83-EMIT: eager_refresh_today 가 stock-master-stats-eager-refresh-today testid 로 노출된다", async () => {
