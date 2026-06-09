@@ -613,14 +613,20 @@ async def kis_get_quote(
     params: dict | None = None,
     *,
     hashkey: str = "",
+    tr_cont: str = "",
 ) -> dict:
     """시세성 KIS REST GET 요청 — 보조 풀 라운드로빈 + 메인 fallback.
 
     `_QUOTE_ALLOWED_PATHS` 화이트리스트 외 path 는 `QuotePoolPathError` raise.
     매매/잔고/체결조회는 `kis_get`/`kis_post` (메인 단일) 그대로 사용.
+
+    Args:
+        tr_cont: KIS 연속 조회 구분 (사이클 91). 첫 호출 = "" (빈 문자열),
+            후속 페이지 = "N" (Next). 응답 헤더 tr_cont == "M" 이면 다음 페이지 존재.
+            응답 본문 `_response_headers["tr_cont"]` 에서 추출.
     """
     return await _request_via_quote_pool(
-        "GET", path, tr_id, params=params, hashkey=hashkey
+        "GET", path, tr_id, params=params, hashkey=hashkey, tr_cont=tr_cont
     )
 
 
@@ -630,10 +636,11 @@ async def kis_post_quote(
     body: dict | None = None,
     *,
     hashkey: str = "",
+    tr_cont: str = "",
 ) -> dict:
     """시세성 KIS REST POST 요청 (현재 시세 함수 중엔 미사용, 인터페이스 대칭용)."""
     return await _request_via_quote_pool(
-        "POST", path, tr_id, body=body, hashkey=hashkey
+        "POST", path, tr_id, body=body, hashkey=hashkey, tr_cont=tr_cont
     )
 
 
@@ -645,6 +652,7 @@ async def _request_via_quote_pool(
     params: dict | None = None,
     body: dict | None = None,
     hashkey: str = "",
+    tr_cont: str = "",
 ) -> dict:
     """시세 풀 요청 본체.
 
@@ -726,6 +734,10 @@ async def _request_via_quote_pool(
         async with semaphore:
             token = await manager.get_token()
             headers = manager.build_headers(tr_id, hashkey=hashkey)
+            # 사이클 91 (2026-06-09) — KIS 페이징 헤더 (volume_rank 등 연속 조회 API)
+            # tr_cont="" (첫 페이지) / "N" (다음 페이지). 빈 문자열 시 헤더 추가 안 함.
+            if tr_cont:
+                headers["tr_cont"] = tr_cont
             try:
                 async with httpx.AsyncClient() as client:
                     if method == "GET":
@@ -738,6 +750,26 @@ async def _request_via_quote_pool(
                         )
                     resp.raise_for_status()
                     data = resp.json()
+                    # 사이클 91 (2026-06-09) — 응답 헤더 tr_cont 주입
+                    # 호출자가 data["_response_headers"]["tr_cont"] 로 다음 페이지 존재 여부 확인.
+                    # "M" = 다음 페이지 존재 (Multi), "" / "D" / "E" = 마지막 페이지.
+                    # 키 이름 언더스코어 prefix (_response_headers) = KIS 응답 필드 충돌 방지.
+                    # graceful: 실제 httpx.Response.headers 는 동기 MutableHeaders — 정상 str.
+                    #           unawaited coroutine 방지: iscoroutine() 감지 후 close + 폴백.
+                    try:
+                        _hdrs = getattr(resp, "headers", None)
+                        if _hdrs is not None and hasattr(_hdrs, "get") and not asyncio.iscoroutine(_hdrs):
+                            _raw = _hdrs.get("tr_cont", "")
+                            if asyncio.iscoroutine(_raw):
+                                _raw.close()
+                                _tr_cont_val = ""
+                            else:
+                                _tr_cont_val = _raw if isinstance(_raw, str) else ""
+                        else:
+                            _tr_cont_val = ""
+                    except Exception:
+                        _tr_cont_val = ""
+                    data["_response_headers"] = {"tr_cont": _tr_cont_val}
             except httpx.HTTPStatusError as e:
                 status = e.response.status_code
                 if 500 <= status < 600:

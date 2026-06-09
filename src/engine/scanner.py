@@ -1434,17 +1434,29 @@ def _trade_amount_key(row: dict) -> float:
         return 0.0
 
 
-async def _fetch_volume_rank(market: str, top_n: int = 250) -> list[dict]:
-    """KIS `volume_rank` (FHPST01710000) 호출 — 거래금액순 상위 `top_n` 건.
+async def _fetch_volume_rank(
+    market: str,
+    top_n: int = 250,
+    max_pages: int = 15,
+) -> list[dict]:
+    """KIS `volume_rank` (FHPST01710000) 페이징 누적 호출 — 거래금액순 상위 `top_n` 건.
 
     사이클 89 (2026-06-09) 신규 헬퍼.
+    사이클 91 (2026-06-09) 페이징 누락 silent 결함 시정.
 
     Args:
         market: "1" = KOSPI, "2" = KOSDAQ (A2 분리 정렬)
         top_n: 최대 반환 건수 (기본 250)
+        max_pages: 무한 루프 차단 (기본 15, KIS 표준 한도 + 안전 마진)
 
     Returns:
-        KIS output list (dict). API 실패 시 [] 반환 (graceful).
+        KIS output list (dict). API 실패 시 누적분 반환 (graceful). 빈 경우 [].
+
+    KIS 페이징 패턴 (정본 `open-trading-api/examples_llm/.../volume_rank.py`):
+        - 첫 호출: tr_cont = "" (빈 문자열)
+        - 응답 헤더 tr_cont == "M" → 다음 페이지 존재 (Multi)
+        - 재호출: tr_cont = "N" (Next)
+        - 종료 조건: tr_cont == "" / "D" / "E" 또는 max_pages 도달
 
     KIS 파라미터:
         FID_COND_MRKT_DIV_CODE = "J"  (KRX 전체)
@@ -1458,38 +1470,63 @@ async def _fetch_volume_rank(market: str, top_n: int = 250) -> list[dict]:
         FID_VOL_CNT            = "0"  (전체 거래량)
         FID_INPUT_DATE_1       = ""
     """
-    from src.api.base import kis_get_quote, KisApiError
+    import asyncio as _asyncio
+
+    from src.api.base import KisApiError, kis_get_quote
 
     input_iscd = _MARKET_INPUT_ISCD.get(market, "0001")
-    params = {
-        "FID_COND_MRKT_DIV_CODE": "J",
-        "FID_COND_SCR_DIV_CODE": "20171",
-        "FID_INPUT_ISCD": input_iscd,
-        "FID_DIV_CLS_CODE": "1",       # 보통주만 (우선주 제외)
-        "FID_BLNG_CLS_CODE": "3",       # A1: 거래금액순
-        "FID_TRGT_CLS_CODE": "111111111",
-        "FID_TRGT_EXLS_CLS_CODE": "0000001101",  # ETF(7)+ETN(8)+SPAC(10) 제외
-        "FID_INPUT_PRICE_1": "0",
-        "FID_INPUT_PRICE_2": "0",
-        "FID_VOL_CNT": "0",
-        "FID_INPUT_DATE_1": "",
-    }
-    try:
-        data = await kis_get_quote(_VOLUME_RANK_URL, _VOLUME_RANK_TR_ID, params)
-        output = data.get("output", []) or []
-        return list(output[:top_n])
-    except KisApiError as e:
-        logger.warning(
-            "[fetch_volume_rank] KIS API 실패 market=%s error=%s (graceful [])",
-            market, e,
-        )
-        return []
-    except Exception as e:
-        logger.warning(
-            "[fetch_volume_rank] 예외 market=%s error=%s (graceful [])",
-            market, e,
-        )
-        return []
+    accumulated: list[dict] = []
+    tr_cont = ""  # 초기 호출 (KIS 표준 — 빈 문자열 = 첫 페이지)
+
+    for page in range(max_pages):
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_COND_SCR_DIV_CODE": "20171",
+            "FID_INPUT_ISCD": input_iscd,
+            "FID_DIV_CLS_CODE": "1",       # 보통주만 (우선주 제외)
+            "FID_BLNG_CLS_CODE": "3",       # A1: 거래금액순
+            "FID_TRGT_CLS_CODE": "111111111",
+            "FID_TRGT_EXLS_CLS_CODE": "0000001101",  # ETF(7)+ETN(8)+SPAC(10) 제외
+            "FID_INPUT_PRICE_1": "0",
+            "FID_INPUT_PRICE_2": "0",
+            "FID_VOL_CNT": "0",
+            "FID_INPUT_DATE_1": "",
+        }
+        try:
+            data = await kis_get_quote(
+                _VOLUME_RANK_URL,
+                _VOLUME_RANK_TR_ID,
+                params,
+                tr_cont=tr_cont,  # 사이클 91 신규 — base.py 시그너처 확장
+            )
+            output = data.get("output", []) or []
+            accumulated.extend(output)
+
+            # 누적 건수가 top_n 초과 시 조기 종료 (효율)
+            if len(accumulated) >= top_n:
+                break
+
+            # 응답 헤더 tr_cont 추출 (다음 페이지 존재 여부)
+            next_tr_cont = data.get("_response_headers", {}).get("tr_cont", "")
+            if next_tr_cont != "M":
+                break  # 마지막 페이지 (D / E / "" 또는 헤더 미존재 — legacy 환경 호환)
+
+            tr_cont = "N"  # 다음 페이지 호출 (KIS 표준 — "N" = Next)
+            await _asyncio.sleep(0.05)  # Rate Limit 보호 (사이클 83 답습)
+        except KisApiError as e:
+            logger.warning(
+                "[fetch_volume_rank] KIS API 실패 market=%s page=%d error=%s (graceful 누적분 반환)",
+                market, page, e,
+            )
+            break  # M-2 graceful — 누적분 반환
+        except Exception as e:
+            logger.warning(
+                "[fetch_volume_rank] 예외 market=%s page=%d error=%s (graceful 누적분 반환)",
+                market, page, e,
+            )
+            break  # M-2 graceful — 누적분 반환
+
+    return list(accumulated[:top_n])
 
 
 async def fetch_top_500_universe() -> list[str]:
