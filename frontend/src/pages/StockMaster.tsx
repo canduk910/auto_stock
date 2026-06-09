@@ -289,8 +289,11 @@ export default function StockMaster() {
     refetchInterval: 60_000,
   })
 
-  const listItems: StockMasterListItem[] = listQuery.data ?? []
-  const historyItems: StockMasterHistoryItem[] = historyQuery.data ?? []
+  // Array.isArray 가드 — e2e mock 환경에서 api-mocks wildcard 라우트가
+  // /list* 보다 우선 매칭되어 단일 객체 응답이 내려올 수 있음 (LIFO 경계).
+  // 운영 환경에서 배열 응답이 보장되므로 행위 변경 0.
+  const listItems: StockMasterListItem[] = Array.isArray(listQuery.data) ? listQuery.data : []
+  const historyItems: StockMasterHistoryItem[] = Array.isArray(historyQuery.data) ? historyQuery.data : []
 
   return (
     <div className="space-y-6">
