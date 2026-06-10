@@ -1494,7 +1494,9 @@ async def _fetch_fluctuation(
         FID_COND_MRKT_DIV_CODE = "J"     (KRX 전체)
         FID_COND_SCR_DIV_CODE  = "20170" (강제 검증 — KIS ValueError 방지)
         FID_INPUT_ISCD         = "0001" (KOSPI) / "0002" (KOSDAQ)
-        FID_RANK_SORT_CLS_CODE = "0000"  (등락률순)
+        FID_RANK_SORT_CLS_CODE = "0"     (등락률순, KIS chk_fluctuation.py main 호출 영역 정본 영속)
+                                          (KIS fluctuation.py docstring "0000" = 거짓 안내 — 무시 의무)
+                                          (사이클 98 — OPSQ2002 INVALID INPUT_FILED_SIZE [FID_RANK_SORT_CLS_CODE] [4] 영구 차단)
         FID_INPUT_CNT_1        = str(top_n)  (사용자 제어 영역 — 핵심)
         FID_PRC_CLS_CODE       = "0"     (전체)
         FID_INPUT_PRICE_1/2    = ""      (전체 가격대)
@@ -1526,7 +1528,7 @@ async def _fetch_fluctuation(
             "FID_COND_MRKT_DIV_CODE": "J",
             "FID_COND_SCR_DIV_CODE": "20170",   # KIS 정본 강제 검증 영역
             "FID_INPUT_ISCD": input_iscd,
-            "FID_RANK_SORT_CLS_CODE": "0000",   # 등락률순
+            "FID_RANK_SORT_CLS_CODE": "0",   # 등락률순 (사이클 98 — KIS chk_fluctuation.py main 정본 1자리, OPSQ2002 영구 차단)
             "FID_INPUT_CNT_1": str(top_n),       # 사이클 97 핵심: 사용자 영구 제어
             "FID_PRC_CLS_CODE": "0",
             "FID_INPUT_PRICE_1": "",
