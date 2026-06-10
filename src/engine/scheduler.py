@@ -2606,10 +2606,15 @@ class TradingScheduler:
         emit (사이클 74 collector 패턴 답습):
         - [stock_master_bulk_refresh] — 개장 전 1회 INFO (fetch_top_500_universe 내부 emit)
         - [stock_master_universe_summary] — 5분 윈도우 summary flush
+
+        사이클 93 (2026-06-10) — 호출 chain broken 영구 시정.
+        사이클 89 도입 시 `_scanner_upsert_loop(tickers)` 호출 누락 = silent 결함 21회 누적.
         """
-        from src.engine.scanner import fetch_top_500_universe
+        from src.engine.scanner import (
+            fetch_top_500_universe,
+            _universe_eager_refresh_loop as _scanner_upsert_loop,  # 사이클 93 신규 alias
+        )
         from src.engine.stock_master_metrics import flush_universe_collector
-        from src.db.stock_master import upsert_one as _sm_upsert, get_one as _sm_get
 
         _UNIVERSE_REFRESH_WINDOW_SECS = 300.0  # 5분 (사이클 42 패턴 답습)
 
@@ -2620,6 +2625,12 @@ class TradingScheduler:
                 "[universe_eager_refresh] 개장 전 1회 적재 완료 universe=%d",
                 len(tickers),
             )
+            # 사이클 93 — stock_master upsert chain
+            try:
+                await _scanner_upsert_loop(tickers)
+                logger.info("[universe_eager_refresh] stock_master upsert 완료")
+            except Exception:
+                logger.exception("[universe_eager_refresh] stock_master upsert 실패 graceful")
         except Exception:
             logger.exception("[universe_eager_refresh] 개장 전 1회 적재 실패")
 
@@ -2632,6 +2643,12 @@ class TradingScheduler:
                     "[universe_eager_refresh] 5분 주기 적재 완료 universe=%d",
                     len(tickers),
                 )
+                # 사이클 93 — stock_master upsert chain
+                try:
+                    await _scanner_upsert_loop(tickers)
+                    logger.info("[universe_eager_refresh] stock_master upsert 완료")
+                except Exception:
+                    logger.exception("[universe_eager_refresh] stock_master upsert 실패 graceful")
             except Exception:
                 logger.exception("[universe_eager_refresh] 5분 주기 적재 실패")
             try:

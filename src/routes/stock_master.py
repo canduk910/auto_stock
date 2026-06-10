@@ -49,13 +49,23 @@ async def refresh_universe_now():
         )
 
     async with _refresh_universe_lock:
-        from src.engine.scanner import fetch_top_500_universe
+        from src.engine.scanner import (
+            fetch_top_500_universe,
+            _universe_eager_refresh_loop as _scanner_upsert_loop,  # 사이클 93 신규
+        )
 
         start_time = time.monotonic()
         try:
             tickers = await fetch_top_500_universe()
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+        # 사이클 93 — stock_master upsert chain (graceful — 사이클 89 emit 영속)
+        try:
+            await _scanner_upsert_loop(tickers)
+        except Exception:
+            pass  # graceful 흡수 — 사이클 89 [stock_master_bulk_refresh] 영속 (Q27=A 영속)
+
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
 
         return ApiResponse(
