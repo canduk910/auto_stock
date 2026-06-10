@@ -167,9 +167,12 @@ async def list_history(ticker: str, limit: int = 100) -> list[dict]:
 
 
 async def count_eager_refresh_today() -> int:
-    """사이클 83 [scan_pool_eager_refresh] 오늘 KST 발생 카운트.
+    """사이클 100 — 3 prefix OR 통합 카운트.
 
-    system_logs ilike `%[scan_pool_eager_refresh]%` + 오늘 KST 범위.
+    사이클 89 [universe_eager_refresh] (244건 영속) + 사이클 83 [scan_pool_eager_refresh]
+    (230건 영속) + 사이클 95 [stock_master_bulk_refresh] (140건 영속) 통합.
+
+    사용자 결정 Q65=C-1 (3 prefix OR 합산).
     사이클 68 KST 영속 (`today_kst()` 사용).
     """
     from src.db._kst import today_kst
@@ -178,20 +181,30 @@ async def count_eager_refresh_today() -> int:
     start = f"{today}T00:00:00+09:00"
     end = f"{today}T23:59:59.999999+09:00"
 
-    result = await asyncio.to_thread(
-        lambda: (
-            supabase.table("system_logs")
-            .select("id", count="exact")
-            .ilike("message", "%[scan_pool_eager_refresh]%")
-            .gte("timestamp", start)
-            .lte("timestamp", end)
-            .execute()
-        )
+    PREFIXES = (
+        "%[universe_eager_refresh]%",     # 사이클 89, 244건 영속
+        "%[scan_pool_eager_refresh]%",    # 사이클 83, 230건 영속 (기존 유지)
+        "%[stock_master_bulk_refresh]%",  # 사이클 95, 140건 영속
     )
-    # supabase-py count 응답은 result.count 또는 len(result.data)
-    if hasattr(result, "count") and result.count is not None:
-        return int(result.count)
-    return len(result.data or [])
+
+    total = 0
+    for pattern in PREFIXES:
+        result = await asyncio.to_thread(
+            lambda p=pattern: (
+                supabase.table("system_logs")
+                .select("id", count="exact")
+                .ilike("message", p)
+                .gte("timestamp", start)
+                .lte("timestamp", end)
+                .execute()
+            )
+        )
+        # supabase-py count 응답은 result.count 또는 len(result.data)
+        if hasattr(result, "count") and result.count is not None:
+            total += int(result.count)
+        else:
+            total += len(result.data or [])
+    return total
 
 
 async def is_stale(ticker: str, max_age_hours: int = 24) -> bool:
