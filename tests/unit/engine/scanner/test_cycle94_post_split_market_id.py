@@ -29,6 +29,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — post-split chain (`stock_master.get` + `_classify_market`) 폐기 계약. "
+        "사이클 96 영역 복원 = 2회 분리 호출 (KOSPI/KOSDAQ 업종코드 = KIS API 자체 분류). "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h3_post_split_uses_stock_master_cache():
     """H-3: `fetch_top_500_universe()` 가 post-split 시 `stock_master.get()` 호출 (Q42=A).

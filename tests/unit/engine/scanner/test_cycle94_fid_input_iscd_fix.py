@@ -25,6 +25,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 89 영역 복원 (`'0001'`/`'0002'`) + 사이클 91 페이징 결합. "
+        "사이클 94 단일화 (`'0000'` 단일) 폐기 계약 — KIS 운영 실측 '0000' = 단일 페이지 30 한도 + 페이징 미지원 silent 결함. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 def test_h1_market_input_iscd_only_contains_0000():
     """H-1.a: `_MARKET_INPUT_ISCD` value 영역에 `"0000"` 만 포함 + 업종코드 부재.
 
@@ -56,6 +64,14 @@ def test_h1_market_input_iscd_only_contains_0000():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 89 영역 복원 (`'0001'`/`'0002'`). "
+        "사이클 94 H-1.b 영역 (업종코드 부재 가드) 폐기 계약 = 사이클 96 영역 복원 후 업종코드 영속 정상. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 def test_h1_market_input_iscd_no_industry_codes():
     """H-1.b: `_MARKET_INPUT_ISCD` 에 `"0001"` / `"0002"` 업종코드 부재 영구 가드.
 

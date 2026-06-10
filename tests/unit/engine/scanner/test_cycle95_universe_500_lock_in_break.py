@@ -91,6 +91,14 @@ async def test_h2_universe_500_break_lock_in():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 94 post-split chain 폐기 계약. "
+        "사이클 96 영역 복원 = 2회 분리 호출 (각 top_n=250 ceiling 독립 적용). "
+        "사이클 95 post-split 결과 cap 가정 = 폐기 계약. 사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h2_universe_500_cap_with_full_kospi_kosdaq():
     """H-2.b: KOSPI 300 + KOSDAQ 300 적재 시 500 cap 영속 (사이클 89 영속).

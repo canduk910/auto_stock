@@ -28,6 +28,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 89 영역 복원 (2회 호출). "
+        "사이클 94 H-4 영역 (단일 호출 + post-split) 폐기 계약 = 사이클 96 영역 복원 후 2회 호출 영속 정상. "
+        "KIS 운영 실측 '0000' = 단일 페이지 30 한도 + 페이징 미지원 silent 결함. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h4_single_call_kospi_250_kosdaq_250_split():
     """H-4: 단일 호출 (600 ticker mock) → post-split → KOSPI 250 + KOSDAQ 250 = 500.

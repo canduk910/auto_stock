@@ -46,6 +46,14 @@ def _make_stock_basics(ticker: str, excg_dvsn_cd: str):
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 94 post-split chain 폐기 계약. "
+        "사이클 96 영역 복원 = unknown=0 정상 (2회 분리 호출 = KIS API 분류 자체). "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m2_unknown_tickers_in_universe_chain_input():
     """M-2.a: `fetch_top_500_universe()` 가 unknown ticker 도 universe 영역에 포함하여 반환.

@@ -44,6 +44,14 @@ def _make_stock_basics(ticker: str, excg_dvsn_cd: str):
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 94 post-split chain 폐기 계약. "
+        "사이클 96 영역 복원 = unknown=0 정상 (2회 분리 호출). "
+        "사이클 95 unknown>0 emit 가정 = 폐기 계약. 사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m1_emit_visibility_includes_unknown_count(caplog):
     """M-1.a: `[stock_master_bulk_refresh]` emit 에 `unknown=%d` 영역 영속.
@@ -100,6 +108,14 @@ async def test_m1_emit_visibility_includes_unknown_count(caplog):
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 94 post-split chain 폐기 계약. "
+        "사이클 96 영역 복원 = unknown=0 정상. "
+        "사이클 95 unknown>0 collector 가정 = 폐기 계약. 사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m1_collector_includes_unknown_key():
     """M-1.b: `record_universe_refresh` collector 에 `unknown` 키 영역 영속.

@@ -47,6 +47,14 @@ def _make_stock_basics(ticker: str, excg_dvsn_cd: str):
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 94 post-split chain (`_classify_market` + `stock_master.get`) 폐기 계약. "
+        "사이클 96 영역 복원 = 2회 분리 호출 (KIS API 업종코드 분류 자체 = unknown 불필요). "
+        "사이클 95 unknown 합집합 graceful = unknown=0 정상 영속. 사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h1_unknown_split_appends_when_stock_master_absent():
     """H-1.a: stock_master 부재 종목 = unknown 영역 합집합 진입.

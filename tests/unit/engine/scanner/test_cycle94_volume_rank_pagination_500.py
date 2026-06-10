@@ -30,6 +30,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 89 영역 복원 (`'0001'`/`'0002'`) + 사이클 91 페이징 결합. "
+        "사이클 94 `market='all'`/`'0000'` 단일화 폐기 계약 — KIS 운영 실측 `'0000'` = 단일 페이지 30 한도 + 페이징 미지원 silent 결함. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h2_pagination_accumulates_500_tickers():
     """H-2: `_fetch_volume_rank(market="all", top_n=500)` 가 17 페이지 누적 500+ ticker 반환.

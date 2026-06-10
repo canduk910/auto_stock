@@ -60,6 +60,14 @@ def _extract_market_input_iscd_values() -> list[str]:
     return values
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 89 영역 복원 (`'0001'` KOSPI 영속). "
+        "사이클 94 H-6.a 영역 (업종코드 0001 부재 AST 가드) 폐기 계약 = 사이클 96 영역 복원 후 '0001' 영속 정상. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 def test_h6_no_industry_code_0001():
     """H-6.a: `_MARKET_INPUT_ISCD` value 영역에 `"0001"` 영속 부재.
 
@@ -83,6 +91,14 @@ def test_h6_no_industry_code_0001():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 89 영역 복원 (`'0002'` KOSDAQ 영속). "
+        "사이클 94 H-6.b 영역 (업종코드 0002 부재 AST 가드) 폐기 계약 = 사이클 96 영역 복원 후 '0002' 영속 정상. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 def test_h6_no_industry_code_0002():
     """H-6.b: `_MARKET_INPUT_ISCD` value 영역에 `"0002"` 영속 부재.
 
@@ -104,6 +120,15 @@ def test_h6_no_industry_code_0002():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 89 영역 복원 ('0000' 부재 영속). "
+        "사이클 94 H-6.c 영역 ('0000' 영속 AST 가드) 폐기 계약 = 사이클 96 영역 복원 후 '0000' 부재 영속 정상. "
+        "KIS 운영 실측 '0000' = 단일 페이지 30 한도 + 페이징 미지원 silent 결함. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 def test_h6_market_input_iscd_contains_0000():
     """H-6.c: `_MARKET_INPUT_ISCD` value 영역에 `"0000"` 영속.
 

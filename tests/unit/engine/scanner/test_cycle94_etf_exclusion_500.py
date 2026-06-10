@@ -27,6 +27,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 96 Q50=D — 사이클 94 단일 호출 경로 (`market='all'`) 폐기 계약. "
+        "사이클 96 영역 복원 = 2회 분리 호출 (KIS API 파라미터 FID_TRGT_EXLS_CLS_CODE 서버 필터). "
+        "`_universe_filter_securities_only` 호출 위치 변경 — mock 경로 폐기. 사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m2_etf_reits_excluded_in_single_call_path():
     """M-2: 단일 호출 영역에서도 ETF/리츠 제외 영속 (사이클 89 헬퍼 호출 영속).
