@@ -457,6 +457,19 @@ export default function StockMaster() {
     <div className="space-y-6">
       <h1 className="text-xl font-bold text-gray-900">종목마스터</h1>
 
+      {/* 사이클 94 — 사용자 혼동 영역 해소 안내 배너 (영역 영속 의무) */}
+      <div
+        className="bg-blue-50 border border-blue-200 rounded p-3 text-sm text-blue-800"
+        data-testid="stock-master-info-banner"
+      >
+        <p className="font-medium mb-1">참고용 종목 마스터 데이터</p>
+        <p className="text-xs text-blue-700">
+          이 화면은 한국투자증권 종목 기본정보 (전일종가, NXT 거래가능 여부, 관리종목 등) 의 적재 현황입니다.
+          실시간 매매 신호 (모멘텀, 변동성 돌파, 스윙 등) 와는 별개 영역이며,
+          각 전략의 후보 종목은 매 사이클 한국투자증권 시세 API 직접 조회를 통해 별도 평가됩니다.
+        </p>
+      </div>
+
       {/* ── 카드 1: 상태 ── */}
       <div
         className="bg-white rounded-lg shadow p-6"

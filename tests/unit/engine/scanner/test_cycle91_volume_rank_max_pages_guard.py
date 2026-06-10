@@ -24,6 +24,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 94 Q37=C — `_fetch_volume_rank` 디폴트 max_pages=15 → max_pages=17 로 변경됨 "
+        "(KIS '0000' 전체 영역 17+ 페이지 정본 반영). 사이클 91 시점 디폴트 max_pages=15 계약 폐기. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h3_volume_rank_max_pages_infinite_loop_guard():
     """H-3: max_pages=15 무한 루프 차단 가드.

@@ -1363,11 +1363,11 @@ async def _scan_pool_eager_refresh_loop(
 _VOLUME_RANK_URL = "/uapi/domestic-stock/v1/quotations/volume-rank"
 _VOLUME_RANK_TR_ID = "FHPST01710000"
 
-# A2: KOSPI(업종코드 0001) / KOSDAQ(업종코드 0002) 분리 호출
-# fid_input_iscd "0001" = KOSPI 전체, "0002" = KOSDAQ 전체 (FID_COND_MRKT_DIV_CODE="J" 고정)
+# 사이클 94 — KIS 정본 일치 ("0000" 전체 영역 17+ 페이징 정상 작동)
+# KIS MCP 정본 재검증 (2026-06-10): FID_INPUT_ISCD "0000" = 전체, 기타 = 업종코드 (30건 한도)
+# 사이클 89/91 silent 결함: "0001"/"0002" 업종코드 → 단일 페이지 30건 한도 (페이징 미지원)
 _MARKET_INPUT_ISCD: dict[str, str] = {
-    "1": "0001",  # KOSPI
-    "2": "0002",  # KOSDAQ
+    "all": "0000",  # KOSPI/KOSDAQ 통합 (전체) — 응답 post-split (Q42=A stock_master 캐시 join)
 }
 
 # A2: ETF/리츠/SPAC 제외 — `prdt_type_cd` 기반
@@ -1410,6 +1410,33 @@ def _universe_filter_securities_only(rows: list[dict]) -> list[dict]:
     return result
 
 
+def _classify_market(sm_data: object) -> "str | None":
+    """KIS CTPF1002R excg_dvsn_cd 기반 KOSPI/KOSDAQ 분류 (사이클 94 Q42=A 옵션 A).
+
+    "02" = KOSPI / "03" = KOSDAQ / 기타 = None (graceful)
+
+    추가 KIS 호출 0건 — stock_master 캐시 활용 (Q42=A 채택).
+    stock_master 부재 종목 = None (사이클 88 G-REJECT 영속 + 사이클 32 R4 universe guard 답습).
+
+    Args:
+        sm_data: StockBasics 인스턴스 (또는 None)
+
+    Returns:
+        "KOSPI" / "KOSDAQ" / None (graceful — 분류 불가)
+    """
+    if not sm_data:
+        return None
+    code = getattr(sm_data, "excg_dvsn_cd", None)
+    if not code:
+        return None
+    code = code.strip()
+    if code == "02":
+        return "KOSPI"
+    if code == "03":
+        return "KOSDAQ"
+    return None
+
+
 def _trade_amount_key(row: dict) -> float:
     """거래대금 재정렬 key — `prdy_vol × (stck_prpr - prdy_vrss)`.
 
@@ -1435,19 +1462,20 @@ def _trade_amount_key(row: dict) -> float:
 
 
 async def _fetch_volume_rank(
-    market: str,
-    top_n: int = 250,
-    max_pages: int = 15,
+    market: str = "all",
+    top_n: int = 500,
+    max_pages: int = 17,
 ) -> list[dict]:
     """KIS `volume_rank` (FHPST01710000) 페이징 누적 호출 — 거래금액순 상위 `top_n` 건.
 
     사이클 89 (2026-06-09) 신규 헬퍼.
     사이클 91 (2026-06-09) 페이징 누락 silent 결함 시정.
+    사이클 94 (2026-06-10) FID_INPUT_ISCD "0000" 단일화 + top_n=500 + max_pages=17.
 
     Args:
-        market: "1" = KOSPI, "2" = KOSDAQ (A2 분리 정렬)
-        top_n: 최대 반환 건수 (기본 250)
-        max_pages: 무한 루프 차단 (기본 15, KIS 표준 한도 + 안전 마진)
+        market: "all" = 전체 (사이클 94 기본값, KIS "0000" 전체 영역 페이징 정상)
+        top_n: 최대 반환 건수 (기본 500 — 사이클 94 단일 호출 영역)
+        max_pages: 무한 루프 차단 (기본 17, KIS 표준 한도 + 안전 마진 — 사이클 94 확장)
 
     Returns:
         KIS output list (dict). API 실패 시 누적분 반환 (graceful). 빈 경우 [].
@@ -1474,7 +1502,7 @@ async def _fetch_volume_rank(
 
     from src.api.base import KisApiError, kis_get_quote
 
-    input_iscd = _MARKET_INPUT_ISCD.get(market, "0001")
+    input_iscd = _MARKET_INPUT_ISCD.get(market, "0000")  # 사이클 94 — fallback 도 "0000" 전체 영역
     accumulated: list[dict] = []
     tr_cont = ""  # 초기 호출 (KIS 표준 — 빈 문자열 = 첫 페이지)
 
@@ -1496,7 +1524,7 @@ async def _fetch_volume_rank(
             data = await kis_get_quote(
                 _VOLUME_RANK_URL,
                 _VOLUME_RANK_TR_ID,
-                params,
+                params=params,   # keyword arg — H-2 테스트 mock 호환 (kwargs["params"])
                 tr_cont=tr_cont,  # 사이클 91 신규 — base.py 시그너처 확장
             )
             output = data.get("output", []) or []
@@ -1551,28 +1579,44 @@ async def fetch_top_500_universe() -> list[str]:
     - 사이클 83 scan_pool eager refresh 영속 (영역 분리)
     """
     import time as _t
+    from src.db import stock_master as _sm_mod
     from src.engine.stock_master_metrics import record_universe_refresh, flush_universe_collector
 
     start_ms = _t.monotonic() * 1000
 
-    # A2: KOSPI 250 + KOSDAQ 250 분리 호출
-    kospi_raw = await _fetch_volume_rank(market="1", top_n=250)
-    kosdaq_raw = await _fetch_volume_rank(market="2", top_n=250)
+    # 사이클 94 — 단일 호출 (KIS "0000" 전체 영역 = 17+ 페이징 정상 작동)
+    # 사이클 89 2회 호출 ("0001"/"0002" 업종코드) 폐기 — KIS API 호출 수 절반 감소
+    all_raw = await _fetch_volume_rank(market="all", top_n=500)
 
-    # A2: ETF/리츠/SPAC 자동 제외 (헬퍼 적용)
-    kospi_filtered = _universe_filter_securities_only(kospi_raw)
-    kosdaq_filtered = _universe_filter_securities_only(kosdaq_raw)
+    # ETF/리츠/SPAC 자동 제외 (사이클 89 영속)
+    all_filtered = _universe_filter_securities_only(all_raw)
 
-    # A1: 각 시장 내부 거래대금 desc 재정렬 (사이클 48 BFB 패턴 답습)
-    kospi_sorted = sorted(kospi_filtered, key=_trade_amount_key, reverse=True)[:250]
-    kosdaq_sorted = sorted(kosdaq_filtered, key=_trade_amount_key, reverse=True)[:250]
+    # 거래대금 desc 재정렬 (사이클 48 BFB 패턴 답습)
+    all_sorted = sorted(all_filtered, key=_trade_amount_key, reverse=True)
 
-    # 합집합 (순서 보존 — KOSPI 먼저)
+    etf_excluded_total = len(all_raw) - len(all_filtered)
+
+    # Q42=A post-split: stock_master 캐시 활용 (추가 KIS 호출 0)
+    # excg_dvsn_cd "02"=KOSPI / "03"=KOSDAQ (KIS CTPF1002R 정본)
+    # 사이클 88 G-REJECT 영속 (graceful — stock_master 부재 종목 = 자연 skip)
+    kospi: list[dict] = []
+    kosdaq: list[dict] = []
+    for row in all_sorted:
+        ticker = row.get("mksc_shrn_iscd", "")
+        if not ticker:
+            continue
+        sm_data = await _sm_mod.get(ticker)
+        market_class = _classify_market(sm_data)
+        if market_class == "KOSPI":
+            kospi.append(row)
+        elif market_class == "KOSDAQ":
+            kosdaq.append(row)
+        # None (분류 불가) = graceful skip (사이클 88 G-REJECT 영속)
+
+    # KOSPI 250 + KOSDAQ 250 = 500 ticker 영속 (사이클 89 의도 답습)
+    kospi_sorted = kospi[:250]
+    kosdaq_sorted = kosdaq[:250]
     universe_rows = kospi_sorted + kosdaq_sorted
-
-    etf_excluded_total = (len(kospi_raw) - len(kospi_filtered)) + (
-        len(kosdaq_raw) - len(kosdaq_filtered)
-    )
 
     # 종목코드 추출
     tickers = [row["mksc_shrn_iscd"] for row in universe_rows if row.get("mksc_shrn_iscd")]

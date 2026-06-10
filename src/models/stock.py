@@ -24,7 +24,7 @@ class StockBasics(BaseModel):
     name: str = Field("", description="종목약명 (prdt_abrv_name)")
     excg_dvsn_cd: str = Field("", description="거래소구분코드 — 02: KOSPI, 03: KOSDAQ 등")
     nxt_tradable: bool = Field(
-        ...,
+        False,
         description="NXT 거래 가능 여부 — (cptt_trad_tr_psbl_yn=='Y') AND (nxt_tr_stop_yn=='N')",
     )
     krx_halted: bool = Field(False, description="KRX 거래정지 여부 (tr_stop_yn=='Y')")

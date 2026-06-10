@@ -414,3 +414,61 @@ describe("사이클 90 M-4 (MEDIUM) — 버튼 위치 + disabled 상태", () => 
     });
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────
+// 사이클 94 H-5 (HIGH) — UI 안내 가이드 배너 (사용자 혼동 영역 해소)
+// ────────────────────────────────────────────────────────────────────────
+// 명세: _workspace/red/cycle94_fid_input_iscd_fix.md §4 H-5
+//
+// 영속 의무:
+//   - testid: stock-master-info-banner
+//   - 한글 친숙 용어 (사이클 89 UI hotfix 답습)
+//   - 사이클 언급 0 (영문 사이클 코드/번호 노출 금지)
+//   - "참고용 종목 마스터 데이터" 영속 (사용자 결정 채택 영역)
+//   - 매매 신호 별개 영역 명시 (사용자 혼동 영역 해소)
+// ────────────────────────────────────────────────────────────────────────
+
+describe("사이클 94 H-5 (HIGH) — StockMaster UI 안내 가이드 배너", () => {
+  it("H-5: data-testid `stock-master-info-banner` 가 페이지 마운트 시 즉시 렌더된다", async () => {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-info-banner")).toBeDefined();
+    });
+  });
+
+  it("H-5: 배너에 '참고용 종목 마스터 데이터' 한글 헤더 영속", async () => {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      const banner = screen.getByTestId("stock-master-info-banner");
+      expect(banner.textContent).toContain("참고용 종목 마스터 데이터");
+    });
+  });
+
+  it("H-5: 배너에 매매 신호 별개 영역 안내 (사용자 혼동 해소)", async () => {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      const banner = screen.getByTestId("stock-master-info-banner");
+      // 매매 신호 영역 별개 명시 (사이클 94 사용자 결정 영속)
+      expect(banner.textContent).toMatch(/실시간 매매 신호|별개 영역|시세 API/);
+    });
+  });
+
+  it("H-5: 배너에 영문 '사이클' / cycle 번호 노출 0건 (한글 친숙 용어 영속)", async () => {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      const banner = screen.getByTestId("stock-master-info-banner");
+      const text = banner.textContent || "";
+      // 사이클 89 UI hotfix 답습 — 영문/cycle 코드 노출 금지
+      expect(text).not.toMatch(/cycle\s*\d+/i);
+      expect(text).not.toMatch(/사이클\s*\d+/);
+    });
+  });
+});

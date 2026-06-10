@@ -29,6 +29,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 94 Q37=C — `_fetch_volume_rank` 단일 호출 (`market='all'`, `FID_INPUT_ISCD='0000'`) "
+        "로 변경됨. 사이클 89 시점 2회 호출 (`market='1'/'2'`) + 호출 횟수=2 + market 인자 {'1','2'} 계약 폐기. "
+        "사이클 66 K-2 의미 전환 패턴."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h3_kospi_kosdaq_separated_2_calls():
     """H-3: `fetch_top_500_universe()` 가 `_fetch_volume_rank` 2회 호출 (KOSPI + KOSDAQ).
