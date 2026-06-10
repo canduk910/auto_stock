@@ -26,6 +26,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 99 — 페이지 사이 sleep 영역 영구 폐기 (단일 호출 = sleep 불요). "
+        "사이클 97 시점 Rate Limit sleep 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습). "
+        "KIS API 페이징 미지원 영구 확정 → _asyncio.sleep(0.05) 페이징 영역 영구 폐기."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m2_rate_limit_sleep_between_pages():
     """M-2.a: `_fetch_fluctuation` 페이지 사이 50ms sleep 영속.

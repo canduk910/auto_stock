@@ -63,6 +63,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -238,6 +239,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -401,6 +403,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -480,6 +483,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -544,6 +549,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -794,6 +801,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -836,6 +844,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -901,6 +911,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -1149,6 +1161,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1342,6 +1355,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1535,6 +1549,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -1735,6 +1750,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_multi_strategy_block.py
@@ -1774,6 +1790,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -1839,6 +1857,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2092,6 +2112,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2136,6 +2157,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -2224,6 +2247,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2533,6 +2558,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2578,6 +2604,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
@@ -2632,6 +2660,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2876,6 +2906,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -2921,6 +2952,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -3002,6 +3035,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -3265,6 +3300,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3442,6 +3478,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3623,6 +3660,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -3668,6 +3706,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -3735,6 +3775,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -3987,6 +4029,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4165,6 +4208,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4354,6 +4398,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4508,6 +4553,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4752,6 +4798,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -4794,6 +4841,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
@@ -4850,6 +4899,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5095,6 +5146,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5275,6 +5327,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5320,6 +5373,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -5385,6 +5440,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5635,6 +5692,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -5680,6 +5738,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -5768,6 +5828,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -6056,6 +6118,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6101,6 +6164,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -6161,6 +6226,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -6417,6 +6484,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6459,6 +6527,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -6524,6 +6594,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -6782,6 +6854,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -6967,6 +7040,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7245,6 +7319,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7423,6 +7498,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7605,6 +7681,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7785,6 +7862,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -7830,6 +7908,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -7895,6 +7975,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -8150,6 +8232,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8332,6 +8415,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8486,6 +8570,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8711,6 +8796,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -8878,6 +8964,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9032,6 +9119,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9237,6 +9325,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9269,6 +9358,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -9323,6 +9414,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
@@ -9599,6 +9692,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9779,6 +9873,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -9967,6 +10062,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10175,6 +10271,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10381,6 +10478,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10540,6 +10638,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10742,6 +10841,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -10902,6 +11002,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -11085,6 +11186,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -11271,6 +11373,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -11316,6 +11419,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -11380,6 +11485,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -11650,6 +11757,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -11802,6 +11910,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -11992,6 +12101,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -12175,6 +12285,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -12392,6 +12503,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -12544,6 +12656,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -12739,6 +12852,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -12964,6 +13078,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -13183,6 +13298,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -13417,6 +13533,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -13595,6 +13712,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -13788,6 +13906,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -13833,6 +13952,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -13903,6 +14024,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -14172,6 +14295,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -14489,6 +14613,7 @@ backend:
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -14532,6 +14657,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -14582,6 +14709,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -14871,6 +15000,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -15084,6 +15214,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -15255,6 +15386,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -15300,6 +15432,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -15365,6 +15499,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -15643,6 +15779,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -15687,6 +15824,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -15752,6 +15891,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -16011,6 +16152,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -16053,6 +16195,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -16118,6 +16262,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -17089,6 +17235,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -17284,6 +17431,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -17480,6 +17628,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_multi_strategy_block.py
@@ -17660,6 +17809,7 @@ backend:
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
+    - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
@@ -17704,6 +17854,8 @@ backend:
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
     - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -17769,6 +17921,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -18518,10 +18672,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-10T16:55:15.829043+09:00'
+generated_at: '2026-06-10T17:33:42.081394+09:00'
 stats:
   backend_modules: 99
-  backend_tests: 463
+  backend_tests: 468
   frontend_modules: 69
   frontend_tests: 41
   unmapped_modules:

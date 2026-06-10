@@ -28,6 +28,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 99 — 페이징 영역 영구 폐기 (KIS API 본질 한계 영구 확정). "
+        "사이클 97 시점 페이징 누적 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습). "
+        "tr_cont 'M' 영구 비반환 운영 실증 (사이클 96 + 98) → 페이징 영역 영구 무용 확정."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h2_fluctuation_pagination_accumulates_kospi():
     """H-2.a: `_fetch_fluctuation(market="kospi")` 페이징 누적 9 페이지 × 30 = 270 → top_n=250 절단.

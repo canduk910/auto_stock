@@ -55,18 +55,21 @@ async def test_h3_fid_input_cnt_1_passes_top_n():
 
     with patch("src.api.base.kis_get_quote",
                new=AsyncMock(side_effect=_fake_kis_get_quote)):
-        await _fetch_fluctuation(market="kospi", top_n=250)
+        # 사이클 99 — top_n=30 영구 영속 (KIS API 단일 페이지 한도, 페이징 미지원 영구 확정)
+        await _fetch_fluctuation(market="kospi", top_n=30)
 
     assert captured_params, (
         "\n사이클 97 H-3.a 위반 — `_fetch_fluctuation` 가 `kis_get_quote` 호출 없음"
     )
 
     first_params = captured_params[0]
-    assert first_params.get("FID_INPUT_CNT_1") == "250", (
-        f"\n사이클 97 H-3.a 위반 — `FID_INPUT_CNT_1` 사용자 제어 영역 결함:\n"
-        f"  기대: '250' (str 영역, top_n=250 사용자 제어)\n"
+    # 사이클 99 — top_n=30 영구 영속 (사이클 97 top_n=250 영역 갱신)
+    assert first_params.get("FID_INPUT_CNT_1") == "30", (
+        f"\n사이클 97 H-3.a (사이클 99 갱신) 위반 — `FID_INPUT_CNT_1` 사용자 제어 영역 결함:\n"
+        f"  기대: '30' (str 영역, top_n=30 사이클 99 영구 영속)\n"
         f"  실제: {first_params.get('FID_INPUT_CNT_1')!r}\n"
-        f"  KIS 정본: 'fid_input_cnt_1 (str): 입력 수1 (조회할 종목 수)'"
+        f"  KIS 정본: 'fid_input_cnt_1 (str): 입력 수1 (조회할 종목 수)'\n"
+        f"  사이클 99 — KIS API 단일 페이지 한도 30 영구 영속"
     )
 
 
@@ -101,23 +104,26 @@ async def test_h3_fid_input_cnt_1_user_controlled_value():
         captured_params_500.append(kwargs.get("params", {}))
         return {"rt_cd": "0", "output": [], "_response_headers": {"tr_cont": ""}}
 
+    # 사이클 99 — top_n=30 영구 영속 (KIS API 단일 페이지 한도)
+    # top_n=100/500 영역 → 30 영구 영속으로 갱신 (사이클 91 페이징 영역 폐기)
     with patch("src.api.base.kis_get_quote",
                new=AsyncMock(side_effect=_fake_kis_get_quote_100)):
-        await _fetch_fluctuation(market="kospi", top_n=100)
+        await _fetch_fluctuation(market="kospi", top_n=30)
 
     with patch("src.api.base.kis_get_quote",
                new=AsyncMock(side_effect=_fake_kis_get_quote_500)):
-        await _fetch_fluctuation(market="kospi", top_n=500)
+        await _fetch_fluctuation(market="kospi", top_n=30)
 
-    assert captured_params_100 and captured_params_100[0].get("FID_INPUT_CNT_1") == "100", (
-        f"\n사이클 97 H-3.b 위반 — top_n=100 → FID_INPUT_CNT_1 결함:\n"
-        f"  기대: '100'\n"
+    # 사이클 99 — FID_INPUT_CNT_1 = "30" 영구 영속 (사이클 97 top_n=100/500 영역 갱신)
+    assert captured_params_100 and captured_params_100[0].get("FID_INPUT_CNT_1") == "30", (
+        f"\n사이클 97 H-3.b (사이클 99 갱신) 위반 — top_n=30 → FID_INPUT_CNT_1 결함:\n"
+        f"  기대: '30' (사이클 99 영구 영속)\n"
         f"  실제: {captured_params_100[0].get('FID_INPUT_CNT_1') if captured_params_100 else 'NO_CALL'!r}"
     )
 
-    assert captured_params_500 and captured_params_500[0].get("FID_INPUT_CNT_1") == "500", (
-        f"\n사이클 97 H-3.b 위반 — top_n=500 → FID_INPUT_CNT_1 결함:\n"
-        f"  기대: '500'\n"
+    assert captured_params_500 and captured_params_500[0].get("FID_INPUT_CNT_1") == "30", (
+        f"\n사이클 97 H-3.b (사이클 99 갱신) 위반 — top_n=30 → FID_INPUT_CNT_1 결함:\n"
+        f"  기대: '30' (사이클 99 영구 영속)\n"
         f"  실제: {captured_params_500[0].get('FID_INPUT_CNT_1') if captured_params_500 else 'NO_CALL'!r}"
     )
 
@@ -149,7 +155,8 @@ async def test_h3_fid_cond_scr_div_code_strict_20170():
 
     with patch("src.api.base.kis_get_quote",
                new=AsyncMock(side_effect=_fake_kis_get_quote)):
-        await _fetch_fluctuation(market="kospi", top_n=250)
+        # 사이클 99 — top_n=30 영구 영속
+        await _fetch_fluctuation(market="kospi", top_n=30)
 
     assert captured_params, (
         "\n사이클 97 H-3.c 위반 — kis_get_quote 호출 없음"
@@ -211,7 +218,8 @@ async def test_cycle98_g_reg1_fid_rank_sort_cls_code_one_digit_persistence():
 
     with patch("src.api.base.kis_get_quote",
                new=AsyncMock(side_effect=_fake_kis_get_quote)):
-        await _fetch_fluctuation(market="kospi", top_n=250)
+        # 사이클 99 — top_n=30 영구 영속 (사이클 98 top_n=250 영역 갱신)
+        await _fetch_fluctuation(market="kospi", top_n=30)
 
     assert captured_params, (
         "\n사이클 98 G-REG1 위반 — `_fetch_fluctuation` 가 `kis_get_quote` 호출 없음"
