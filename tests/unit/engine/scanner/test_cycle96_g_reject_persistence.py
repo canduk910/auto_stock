@@ -20,7 +20,17 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+            "사이클 96 G-REJECT 영역 = 사이클 97 L-1 가드로 영역 흡수 + 확장. "
+            "사이클 66 K-2 의미 전환 패턴 영속."
+        ),
+    ),
+]
 
 
 def _scanner_module_path() -> Path:

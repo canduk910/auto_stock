@@ -26,6 +26,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "KIS fluctuation API (`_fetch_fluctuation`) 영역 신규 도입으로 영역 전환. "
+        "사이클 96 2회 분리 호출 영역 = 사이클 97 H-2 (fluctuation 2회 호출) 가드로 영역 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h4_two_call_kospi_kosdaq_separated():
     """H-4: `fetch_top_500_universe()` 가 `_fetch_volume_rank` 2회 호출 (KOSPI + KOSDAQ).
@@ -79,6 +88,15 @@ async def test_h4_two_call_kospi_kosdaq_separated():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "KIS fluctuation API (`_fetch_fluctuation`) 영역 신규 도입으로 영역 전환. "
+        "사이클 96 2회 분리 호출 영역 = 사이클 97 H-2 (fluctuation 2회 호출) 가드로 영역 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h4_market_argument_names_kospi_kosdaq():
     """H-4.b: 호출 인자 = {"kospi", "kosdaq"} (사이클 96 명명 갱신).

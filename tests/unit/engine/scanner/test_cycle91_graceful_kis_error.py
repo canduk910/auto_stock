@@ -21,6 +21,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "KIS fluctuation API (`_fetch_fluctuation`) 영역 신규 도입으로 영역 전환. "
+        "fluctuation 영역 graceful 영역은 사이클 97 신규 가드 영역에서 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m2_graceful_kis_error_mid_pagination():
     """M-2: 중간 페이지 KIS 실패 시 graceful 누적분 반환.

@@ -25,7 +25,18 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+            "KIS fluctuation API (`_fetch_fluctuation`) 영역 신규 도입으로 영역 전환. "
+            "사이클 96 페이징 누적 500 영역 = 사이클 97 H-2 (fluctuation 페이징) 가드로 영역 흡수. "
+            "사이클 66 K-2 의미 전환 패턴 영속."
+        ),
+    ),
+]
 
 
 def _make_volume_rank_row(ticker: str) -> dict:

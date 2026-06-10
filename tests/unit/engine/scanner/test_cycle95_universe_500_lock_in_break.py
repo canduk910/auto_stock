@@ -46,6 +46,14 @@ def _make_stock_basics(ticker: str, excg_dvsn_cd: str):
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` + post-split 영역 전수 폐기. "
+        "사이클 95 unknown lock-in 차단 = 사이클 97 2회 분리 호출 (fluctuation) 로 unknown=0 정상. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h2_universe_500_break_lock_in():
     """H-2.a: 500 ticker 응답 + stock_master 78건만 적재 → universe 500 (lock-in 차단).
@@ -142,6 +150,14 @@ async def test_h2_universe_500_cap_with_full_kospi_kosdaq():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` + post-split 영역 전수 폐기. "
+        "사이클 95 unknown overflow 영역 = 사이클 97 fluctuation 2회 분리 호출로 unknown=0 정상. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h2_universe_500_cap_with_overflow_unknown():
     """H-2.c: KOSPI 250 + KOSDAQ 250 + unknown 100 → universe 500 (cap), unknown overflow 폐기.

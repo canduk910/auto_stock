@@ -23,6 +23,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "KIS fluctuation API (`_fetch_fluctuation`) 영역 신규 도입으로 영역 전환. "
+        "사이클 91 top_n early break 영역 = 사이클 97 H-2 (fluctuation 페이징 top_n 절단) 가드로 영역 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h2_volume_rank_top_n_early_break_efficiency():
     """H-2: top_n=250 초과 시 추가 페이지 호출 skip (효율).

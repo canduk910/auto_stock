@@ -21,6 +21,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "KIS fluctuation API (`_fetch_fluctuation`) 영역 신규 도입으로 영역 전환. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m3_no_response_headers_key_graceful_terminate():
     """M-3: `_response_headers` 키 없는 mock 응답 = 단일 호출 + graceful 종료.

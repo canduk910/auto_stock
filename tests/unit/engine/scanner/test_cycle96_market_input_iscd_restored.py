@@ -22,7 +22,18 @@ from __future__ import annotations
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 97 Q53=A — `_MARKET_INPUT_ISCD` 영역 폐기 + `_FLUCTUATION_MARKET_INPUT_ISCD` 영역 전환. "
+            "KIS fluctuation API 영역 신규 도입 (key 영역 = 'kospi'/'kosdaq' 영속, value 영역 = '0001'/'0002' 영속). "
+            "사이클 97 H-1.c (FLUCTUATION dict) 가드로 영역 흡수. "
+            "사이클 66 K-2 의미 전환 패턴 영속."
+        ),
+    ),
+]
 
 
 def test_h1_market_input_iscd_contains_restored_industry_codes():

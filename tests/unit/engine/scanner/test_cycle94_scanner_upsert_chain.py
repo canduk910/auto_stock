@@ -58,6 +58,15 @@ def test_m4_scanner_module_fetch_top_500_universe_exists():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "사이클 94 post-split chain 영역 폐기. "
+        "사이클 97 M-3 (`scanner_upsert_chain`) 이 영역 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m4_fetch_500_results_compatible_with_universe_loop():
     """M-4.c: `fetch_top_500_universe()` 결과 ticker list 가 `_universe_eager_refresh_loop`

@@ -97,6 +97,14 @@ async def test_h1_unknown_split_appends_when_stock_master_absent():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` + post-split 영역 전수 폐기. "
+        "사이클 95 unknown 합집합 = 사이클 97 fluctuation 2회 분리 호출로 unknown=0 정상. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h1_unknown_subset_includes_absent_tickers():
     """H-1.b: unknown 합집합 영역에 stock_master 부재 ticker 전수 포함.

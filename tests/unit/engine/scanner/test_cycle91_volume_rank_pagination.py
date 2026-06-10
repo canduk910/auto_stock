@@ -31,6 +31,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "KIS fluctuation API (`_fetch_fluctuation`) 영역 신규 도입으로 영역 전환. "
+        "사이클 91 페이징 영역 = 사이클 97 H-2 (fluctuation 페이징) 가드로 영역 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속 (과거 결함 confirm 영구 보존)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h1_volume_rank_pagination_accumulates_across_pages():
     """H-1: `_fetch_volume_rank` 가 KIS `tr_cont == "M"` 응답 시 다음 페이지 호출 +

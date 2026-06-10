@@ -28,6 +28,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "사이클 94 단일 호출 + post-split 영역 폐기. "
+        "사이클 97 M-1 (`emit_visibility_fluctuation`) 이 영역 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m1_bulk_refresh_emit_universe_500(caplog):
     """M-1: `fetch_top_500_universe()` 가 `[stock_master_bulk_refresh] universe=500` emit.

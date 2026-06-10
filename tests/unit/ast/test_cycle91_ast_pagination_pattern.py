@@ -24,7 +24,17 @@ import inspect
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+            "사이클 91 AST 가드는 `_fetch_fluctuation` 영역으로 영역 흡수. "
+            "사이클 66 K-2 의미 전환 패턴 영속."
+        ),
+    ),
+]
 
 
 def _get_function_source(func_name: str) -> str:

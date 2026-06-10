@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import asyncio
+import asyncio as _asyncio  # 사이클 97 — _fetch_fluctuation Rate Limit sleep patch 호환
 import logging
 import sys as _sys
 import time as _monotonic_time
@@ -1347,29 +1348,28 @@ async def _scan_pool_eager_refresh_loop(
 
 
 # ---------------------------------------------------------------------------
-# 사이클 89 (2026-06-09) — stock_master 500+ universe 확장
-# Q19=B 거래대금/거래량 상위 500 / Q21=A KIS volume_rank (FHPST01710000)
-# A1 거래대금 (전일) 단독 정렬 + A2 KOSPI 250 + KOSDAQ 250 분리 호출
-# ETF/리츠/우선주/SPAC 자동 제외 (_universe_filter_securities_only)
+# 사이클 97 (2026-06-10) — KIS fluctuation API (FHPST01700000) 영역 신규 도입
+# 사이클 89/91/94/96 volume_rank 영역 전수 폐기 (KIS 단일 페이지 30 한도 + 페이징 미지원)
+# fluctuation 영역 = fid_input_cnt_1 사용자 제어 + tr_cont 페이징 영속
 # ---------------------------------------------------------------------------
 # 영속 의무:
 # - 사이클 38 명문화: tradable_boards 매수 진입 전용 (매도 hot path 영향 0)
 # - 사이클 64 protected_tickers: 영역 분리 (영향 0)
 # - 사이클 81 bfdy_clpr: 영역 분리 (영향 0)
 # - 사이클 83 scan_pool eager refresh: candidates=12 영역 영속 (영역 분리)
+# - 사이클 89 ETF 제외 + 거래대금 정렬: fluctuation 영역으로 흡수
+# - 사이클 91 페이징: fluctuation 영역 적용 (tr_cont "" → "N")
+# - 사이클 96 KOSPI/KOSDAQ 분리 호출: fluctuation 영역으로 흡수
 # ---------------------------------------------------------------------------
 
-# KIS `volume_rank` (FHPST01710000) API 파라미터
-_VOLUME_RANK_URL = "/uapi/domestic-stock/v1/quotations/volume-rank"
-_VOLUME_RANK_TR_ID = "FHPST01710000"
+# 사이클 97 — KIS fluctuation API (FHPST01700000) 상수
+_FLUCTUATION_URL = "/uapi/domestic-stock/v1/ranking/fluctuation"
+_FLUCTUATION_TR_ID = "FHPST01700000"
 
-# 사이클 96 — KIS API "0000" 단일 페이지 30 한도 + 페이징 미지원 silent 결함 영구 시정
-# 사이클 89 영역 복원 ("0001" KOSPI 업종 + "0002" KOSDAQ 업종) + 사이클 91 페이징 영역 결합
-# KIS 운영 실측: "0000" = 단일 페이지 30건 + 페이징 미지원 (docstring 영역 불일치)
-#               "0001"/"0002" = 페이징 정상 + 각 ~17 페이지 누적 가능
-_MARKET_INPUT_ISCD: dict[str, str] = {
-    "kospi": "0001",   # KOSPI 업종 (사이클 89 영역 복원, 페이징 17 페이지 정상)
-    "kosdaq": "0002",  # KOSDAQ 업종 (사이클 89 영역 복원, 페이징 17 페이지 정상)
+# fid_input_iscd 매핑 (KIS 정본: "0001" = KOSPI 업종, "0002" = KOSDAQ 업종)
+_FLUCTUATION_MARKET_INPUT_ISCD: dict[str, str] = {
+    "kospi": "0001",
+    "kosdaq": "0002",
 }
 
 # A2: ETF/리츠/SPAC 제외 — `prdt_type_cd` 기반
@@ -1395,7 +1395,9 @@ def _universe_filter_securities_only(rows: list[dict]) -> list[dict]:
     """
     result: list[dict] = []
     for row in rows:
-        ticker = row.get("mksc_shrn_iscd", "")
+        # 사이클 97 — fluctuation 응답 키: stck_shrn_iscd (volume_rank mksc_shrn_iscd 와 영역 차별)
+        # KIS chk_fluctuation.py COLUMN_MAPPING 정본 영속
+        ticker = row.get("stck_shrn_iscd") or row.get("mksc_shrn_iscd", "")
         # 종목코드 형식 검증 — ETF·ETN·신주인수권 알파벳 코드 차단 (사이클 64 패턴 답습)
         if not (len(ticker) == 6 and ticker.isdigit()):
             continue
@@ -1463,124 +1465,126 @@ def _trade_amount_key(row: dict) -> float:
         return 0.0
 
 
-async def _fetch_volume_rank(
+async def _fetch_fluctuation(
     market: str = "kospi",
     top_n: int = 250,
     max_pages: int = 17,
 ) -> list[dict]:
-    """KIS `volume_rank` (FHPST01710000) 페이징 누적 호출 — 거래금액순 상위 `top_n` 건.
+    """KIS fluctuation API (FHPST01700000) 페이징 누적 호출 (사이클 97 영역 신규).
 
-    사이클 89 (2026-06-09) 신규 헬퍼.
-    사이클 91 (2026-06-09) 페이징 누락 silent 결함 시정.
-    사이클 96 (2026-06-10) 사이클 89 영역 복원 — market="kospi"/"kosdaq" + top_n=250.
-    KIS "0000" 단일 페이지 30 한도 silent 결함 영구 시정.
+    사이클 97 (2026-06-10) — KIS volume_rank (사이클 89/91/94/96) 영역 전수 폐기 영구 시정.
+    fluctuation 영역 = fid_input_cnt_1 사용자 제어 + tr_cont 페이징 영속.
 
     Args:
-        market: "kospi" or "kosdaq" (사이클 96 영역 복원, "all"/"0000" 폐기)
-        top_n: 최대 반환 건수 (기본 250 — 각 업종별 호출, KOSPI 250 + KOSDAQ 250 = 500)
-        max_pages: 무한 루프 차단 (기본 17, KIS 표준 한도 + 안전 마진 — 사이클 91 영속)
+        market: "kospi" or "kosdaq" (사이클 96 명명 영속)
+        top_n: 각 업종 최대 ticker (기본 250, 사이클 89 영속)
+        max_pages: 페이지 안전 마진 (기본 17, 사이클 91 영속)
 
     Returns:
-        KIS output list (dict). API 실패 시 누적분 반환 (graceful). 빈 경우 [].
+        KIS output list (dict). API 실패 시 누적분 graceful 반환. 빈 경우 [].
 
-    KIS 페이징 패턴 (정본 `open-trading-api/examples_llm/.../volume_rank.py`):
-        - 첫 호출: tr_cont = "" (빈 문자열)
-        - 응답 헤더 tr_cont == "M" → 다음 페이지 존재 (Multi)
-        - 재호출: tr_cont = "N" (Next)
-        - 종료 조건: tr_cont == "" / "D" / "E" 또는 max_pages 도달
+    영속 의무:
+    - 사이클 89 거래대금 정렬 (_trade_amount_key) + ETF 제외 (_universe_filter_securities_only) 영속
+    - 사이클 91 페이징 누적 (tr_cont "" → "N") 영속
+    - 사이클 95 unknown=0 graceful 영속 (KIS API 분류 자체)
+    - 사이클 83 Rate Limit 50ms sleep
+    - KIS 정본 페이징 패턴 (open-trading-api/examples_llm/.../fluctuation.py)
 
-    KIS 파라미터:
-        FID_COND_MRKT_DIV_CODE = "J"  (KRX 전체)
-        FID_COND_SCR_DIV_CODE  = "20171"
+    KIS fluctuation 파라미터 (정본 FHPST01700000):
+        FID_COND_MRKT_DIV_CODE = "J"     (KRX 전체)
+        FID_COND_SCR_DIV_CODE  = "20170" (강제 검증 — KIS ValueError 방지)
         FID_INPUT_ISCD         = "0001" (KOSPI) / "0002" (KOSDAQ)
-        FID_DIV_CLS_CODE       = "1"  (보통주만 — 우선주 제외)
-        FID_BLNG_CLS_CODE      = "3"  (거래금액순 A1 정렬)
-        FID_TRGT_CLS_CODE      = "111111111"
-        FID_TRGT_EXLS_CLS_CODE = "0000001101"  (ETF(7)+ETN(8)+SPAC(10) 제외)
-        FID_INPUT_PRICE_1/2    = "0" / "0"  (전체 가격대)
-        FID_VOL_CNT            = "0"  (전체 거래량)
-        FID_INPUT_DATE_1       = ""
-    """
-    import asyncio as _asyncio
+        FID_RANK_SORT_CLS_CODE = "0000"  (등락률순)
+        FID_INPUT_CNT_1        = str(top_n)  (사용자 제어 영역 — 핵심)
+        FID_PRC_CLS_CODE       = "0"     (전체)
+        FID_INPUT_PRICE_1/2    = ""      (전체 가격대)
+        FID_VOL_CNT            = ""      (전체 거래량)
+        FID_TRGT_CLS_CODE      = "0"     (대상 구분)
+        FID_TRGT_EXLS_CLS_CODE = "0"     (대상 제외)
+        FID_DIV_CLS_CODE       = "0"     (전체)
+        FID_RSFL_RATE1/2       = ""      (전체 등락률)
 
+    응답 키 (KIS chk_fluctuation.py COLUMN_MAPPING 정본):
+        stck_shrn_iscd  — 주식 단축 종목코드 (volume_rank mksc_shrn_iscd 와 영역 차별)
+        stck_prpr / prdy_vrss / prdy_ctrt / acml_vol / prdy_vol / ...
+    """
     from src.api.base import KisApiError, kis_get_quote
 
-    # 사이클 96 — "kospi" → "0001", "kosdaq" → "0002" (fallback = "0001" KOSPI 보수적)
-    # "0000" fallback 금지 (KIS 운영 실측 = 단일 페이지 30 한도 + 페이징 미지원)
-    input_iscd = _MARKET_INPUT_ISCD.get(market)
+    # "kospi" → "0001", "kosdaq" → "0002" (fallback = "0001" KOSPI 보수적)
+    input_iscd = _FLUCTUATION_MARKET_INPUT_ISCD.get(market)
     if not input_iscd:
         logger.warning(
-            "[_fetch_volume_rank] unknown market: %s, fallback to kospi", market
+            "[_fetch_fluctuation] unknown market: %s, fallback to kospi", market
         )
-        input_iscd = _MARKET_INPUT_ISCD["kospi"]
+        input_iscd = _FLUCTUATION_MARKET_INPUT_ISCD["kospi"]
+
     accumulated: list[dict] = []
     tr_cont = ""  # 초기 호출 (KIS 표준 — 빈 문자열 = 첫 페이지)
 
     for page in range(max_pages):
         params = {
             "FID_COND_MRKT_DIV_CODE": "J",
-            "FID_COND_SCR_DIV_CODE": "20171",
+            "FID_COND_SCR_DIV_CODE": "20170",   # KIS 정본 강제 검증 영역
             "FID_INPUT_ISCD": input_iscd,
-            "FID_DIV_CLS_CODE": "1",       # 보통주만 (우선주 제외)
-            "FID_BLNG_CLS_CODE": "3",       # A1: 거래금액순
-            "FID_TRGT_CLS_CODE": "111111111",
-            "FID_TRGT_EXLS_CLS_CODE": "0000001101",  # ETF(7)+ETN(8)+SPAC(10) 제외
-            "FID_INPUT_PRICE_1": "0",
-            "FID_INPUT_PRICE_2": "0",
-            "FID_VOL_CNT": "0",
-            "FID_INPUT_DATE_1": "",
+            "FID_RANK_SORT_CLS_CODE": "0000",   # 등락률순
+            "FID_INPUT_CNT_1": str(top_n),       # 사이클 97 핵심: 사용자 영구 제어
+            "FID_PRC_CLS_CODE": "0",
+            "FID_INPUT_PRICE_1": "",
+            "FID_INPUT_PRICE_2": "",
+            "FID_VOL_CNT": "",
+            "FID_TRGT_CLS_CODE": "0",
+            "FID_TRGT_EXLS_CLS_CODE": "0",
+            "FID_DIV_CLS_CODE": "0",
+            "FID_RSFL_RATE1": "",
+            "FID_RSFL_RATE2": "",
         }
         try:
             data = await kis_get_quote(
-                _VOLUME_RANK_URL,
-                _VOLUME_RANK_TR_ID,
-                params=params,   # keyword arg — H-2 테스트 mock 호환 (kwargs["params"])
-                tr_cont=tr_cont,  # 사이클 91 신규 — base.py 시그너처 확장
+                _FLUCTUATION_URL,
+                _FLUCTUATION_TR_ID,
+                params=params,
+                tr_cont=tr_cont,
             )
             output = data.get("output", []) or []
             accumulated.extend(output)
 
-            # 누적 건수가 top_n 초과 시 조기 종료 (효율)
+            # 누적 건수가 top_n 이상이면 조기 종료 (효율)
             if len(accumulated) >= top_n:
                 break
 
             # 응답 헤더 tr_cont 추출 (다음 페이지 존재 여부)
             next_tr_cont = data.get("_response_headers", {}).get("tr_cont", "")
             if next_tr_cont != "M":
-                break  # 마지막 페이지 (D / E / "" 또는 헤더 미존재 — legacy 환경 호환)
+                break  # 마지막 페이지
 
             tr_cont = "N"  # 다음 페이지 호출 (KIS 표준 — "N" = Next)
-            await _asyncio.sleep(0.05)  # Rate Limit 보호 (사이클 83 답습)
+            await _asyncio.sleep(0.05)  # 사이클 83 Rate Limit 50ms sleep 영속
         except KisApiError as e:
             logger.warning(
-                "[fetch_volume_rank] KIS API 실패 market=%s page=%d error=%s (graceful 누적분 반환)",
+                "[fetch_fluctuation] KIS API 실패 market=%s page=%d error=%s (graceful 누적분 반환)",
                 market, page, e,
             )
-            break  # M-2 graceful — 누적분 반환
+            break
         except Exception as e:
             logger.warning(
-                "[fetch_volume_rank] 예외 market=%s page=%d error=%s (graceful 누적분 반환)",
+                "[fetch_fluctuation] 예외 market=%s page=%d error=%s (graceful 누적분 반환)",
                 market, page, e,
             )
-            break  # M-2 graceful — 누적분 반환
+            break
 
     return list(accumulated[:top_n])
 
 
 async def fetch_top_500_universe() -> list[str]:
-    """KOSPI 250 + KOSDAQ 250 = 500 ticker 적재 (사이클 96 영역 복원).
+    """KOSPI 250 + KOSDAQ 250 = 500 ticker 적재 (사이클 97 fluctuation 영역 신규 도입).
 
-    사이클 89 (2026-06-09) 신규. 사이클 96 (2026-06-10) 영역 복원:
-    - 사이클 94 단일 호출 ("0000" 전체) 폐기 — KIS 운영 실측 단일 페이지 30 한도 silent 결함
-    - 사이클 89 2회 분리 호출 복원 ("0001" KOSPI + "0002" KOSDAQ 업종코드, 페이징 정상)
-    - 사이클 91 페이징 결합 (각 17 페이지 × 30 = 510 → 250 ceiling)
-    - 사이클 95 unknown graceful 영속 — 2회 분리 호출 = unknown=0 정상 (KIS API 분류 자체)
+    사이클 97 (2026-06-10) — KIS fluctuation API (FHPST01700000) 영역 신규 도입.
+    사이클 89/91/94/96 volume_rank 영역 전수 폐기 (단일 페이지 30 한도 + 페이징 미지원).
 
-    사용자 결정 영속 (Q19=B, Q21=A, A1, A2):
-    - Q19=B: 거래대금/거래량 상위 500
-    - Q21=A: KIS volume_rank API (FHPST01710000)
-    - A1: 거래대금 (전일) 단독 정렬 1순위 (`prdy_vol × (stck_prpr - prdy_vrss)`)
-    - A2: KOSPI ("0001") + KOSDAQ ("0002") 분리 호출 (사이클 89 영속 + 사이클 96 복원)
+    사용자 결정 영속:
+    - Q52=A: KIS fluctuation API (FHPST01700000) 신규 도입
+    - Q53=A: 사이클 89/91/94/96 전수 폐기
+    - KOSPI 250 + KOSDAQ 250 분리 호출 (사이클 96 영속, fluctuation 영역으로 흡수)
 
     개장 전 1회 적재 (Q20=D + 사이클 83 5분 주기 결합).
     ETF/리츠/SPAC 자동 제외 (`_universe_filter_securities_only`).
@@ -1590,48 +1594,52 @@ async def fetch_top_500_universe() -> list[str]:
 
     영속 의무:
     - 사이클 38 명문화 (tradable_boards 매수 진입 전용 — 영향 0)
-    - 사이클 48 BFB 거래대금 재정렬 패턴 답습
+    - 사이클 48 BFB 거래대금 재정렬 패턴 답습 (_trade_amount_key)
     - 사이클 64 protected_tickers (영역 분리, 영향 0)
     - 사이클 83 scan_pool eager refresh 영속 (영역 분리)
     - 사이클 88 G-REJECT 영속 (외부 LLM 영구 차단 AST 가드 3)
-    - 사이클 91 페이징 영속 (각 업종별 페이징, tr_cont 영역)
+    - 사이클 89 ETF 제외 + 거래대금 정렬 (fluctuation 영역으로 흡수)
+    - 사이클 91 페이징 영속 (fluctuation 영역 적용, tr_cont)
     - 사이클 93 chain 영속 (호출 chain 변경 0)
-    - 사이클 95 unknown 합집합 graceful 영속 (unknown=0 = 사이클 96 정상, 2회 분리 호출 효과)
+    - 사이클 95 unknown=0 영속 (2회 분리 호출 = unknown 불필요)
+    - 사이클 96 KOSPI/KOSDAQ 분리 호출 (fluctuation 영역으로 흡수)
     """
     import time as _t
     from src.engine.stock_master_metrics import record_universe_refresh, flush_universe_collector
 
     start_ms = _t.monotonic() * 1000
 
-    # 사이클 96 영역 복원 — 2회 분리 호출 (KIS "0001"/"0002" 업종코드 = 페이징 정상)
-    # 사이클 94 단일 호출 ("0000") 폐기 — 운영 실측 단일 페이지 30 한도 silent 결함
-    # _fetch_volume_rank 내부에서 _universe_filter_securities_only 적용 (사이클 89 영속)
-    kospi_rows = await _fetch_volume_rank(market="kospi", top_n=250)
-    kosdaq_rows = await _fetch_volume_rank(market="kosdaq", top_n=250)
+    # 사이클 97 — fluctuation API 2회 분리 호출 (KOSPI + KOSDAQ)
+    # 사이클 89/91/94/96 volume_rank 영역 전수 폐기
+    kospi_raw = await _fetch_fluctuation(market="kospi", top_n=250)
+    kosdaq_raw = await _fetch_fluctuation(market="kosdaq", top_n=250)
 
-    # 거래대금 desc 재정렬 (사이클 48 BFB 패턴 답습)
-    # _fetch_volume_rank 가 이미 filter 적용 완료 (ETF/리츠/SPAC 제외 영속)
-    kospi_sorted = sorted(kospi_rows, key=_trade_amount_key, reverse=True)[:250]
-    kosdaq_sorted = sorted(kosdaq_rows, key=_trade_amount_key, reverse=True)[:250]
+    # 사이클 89 ETF 제외 영속 — fluctuation 영역으로 흡수
+    kospi_filtered = _universe_filter_securities_only(kospi_raw)
+    kosdaq_filtered = _universe_filter_securities_only(kosdaq_raw)
 
-    # etf_excluded: _fetch_volume_rank 가 내부 filter 적용 → 별도 추산 영역 0
-    # (사이클 96 영역 = KIS FID_TRGT_EXLS_CLS_CODE 서버 필터 + 내부 _universe_filter_securities_only 결합)
-    etf_excluded_total = 0
+    # 사이클 89 거래대금 desc 재정렬 영속 (사이클 48 BFB 패턴 답습)
+    kospi_sorted = sorted(kospi_filtered, key=_trade_amount_key, reverse=True)[:250]
+    kosdaq_sorted = sorted(kosdaq_filtered, key=_trade_amount_key, reverse=True)[:250]
 
-    # 사이클 96 post-split 불요 — 업종별 분리 호출 = KOSPI/KOSDAQ 분류 KIS API 자체
-    # 사이클 95 unknown 영역 영속 (unknown=0 = 사이클 96 영역 복원 정상, graceful 호환)
+    etf_excluded_total = (
+        (len(kospi_raw) - len(kospi_filtered)) +
+        (len(kosdaq_raw) - len(kosdaq_filtered))
+    )
+
+    # 사이클 95 unknown=0 영속 — 2회 분리 호출 = unknown 분류 불필요
     universe_rows = kospi_sorted + kosdaq_sorted
 
-    # 종목코드 추출
-    tickers = [row["mksc_shrn_iscd"] for row in universe_rows if row.get("mksc_shrn_iscd")]
+    # 사이클 97 — 응답 ticker 키: stck_shrn_iscd (KIS chk_fluctuation.py 정본)
+    # volume_rank mksc_shrn_iscd 와 영역 차별 — 영구 시정
+    tickers = [row["stck_shrn_iscd"] for row in universe_rows if row.get("stck_shrn_iscd")]
     tickers = tickers[:500]
 
     elapsed_ms = int(_t.monotonic() * 1000 - start_ms)
     securities_count = len(tickers)
     universe_size = len(tickers)
 
-    # [stock_master_bulk_refresh] 개장 전 1회 emit
-    # 사이클 96 — unknown=0 영속 명시 (사이클 95 키 호환, 2회 분리 호출 = unknown=0 정상)
+    # [stock_master_bulk_refresh] 개장 전 1회 emit (사이클 95 unknown=0 영속)
     logger.info(
         "[stock_master_bulk_refresh] universe=%d kospi=%d kosdaq=%d unknown=0 "
         "securities=%d etf_excluded=%d elapsed_ms=%d",
@@ -1643,22 +1651,21 @@ async def fetch_top_500_universe() -> list[str]:
         elapsed_ms,
     )
 
-    # collector 적재 (5분 윈도우 통계용)
-    # 사이클 96 — unknown=0 영속 (사이클 95 키 호환, 분리 호출 = 분류 영역 없음)
+    # collector 적재 (5분 윈도우 통계용, 사이클 95 키 호환)
     record_universe_refresh({
         "universe": universe_size,
         "kospi": len(kospi_sorted),
         "kosdaq": len(kosdaq_sorted),
-        "unknown": 0,  # 사이클 96 — 영역 복원 결과 정상 (2회 분리 호출 = unknown 불필요)
+        "unknown": 0,  # 사이클 97 — 2회 분리 호출 = unknown 불필요 (사이클 95 영속)
         "securities": securities_count,
         "etf_excluded": etf_excluded_total,
-        "fetched": 0,        # stock_master upsert 는 별도 loop 에서 집계
+        "fetched": 0,
         "skipped_fresh": 0,
         "failed": 0,
         "elapsed_ms": elapsed_ms,
     })
 
-    # 개장 전 1회 즉시 flush (bulk_refresh 완료 후 1행 emit 보장, 사이클 78 답습)
+    # 개장 전 1회 즉시 flush (사이클 78 답습)
     flush_universe_collector()
 
     return tickers

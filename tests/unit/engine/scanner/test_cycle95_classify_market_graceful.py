@@ -75,6 +75,15 @@ def test_h3_classify_market_kospi_kosdaq_unknown_partition():
     assert _classify_market(None) is None                                  # 부재 → unknown
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` + post-split 영역 전수 폐기. "
+        "사이클 95 unknown 합집합 영역 = 2회 분리 호출 (fluctuation API) 로 unknown=0 정상. "
+        "사이클 97 M-1 unknown=0 영속 가드가 영역 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h3_classify_market_unknown_appends_in_fetch_top_500_universe():
     """H-3.c: `fetch_top_500_universe` 가 `_classify_market` None 결과를 unknown 영역으로 분리.

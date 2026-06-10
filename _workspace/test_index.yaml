@@ -474,6 +474,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -528,6 +529,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -816,6 +826,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -871,6 +882,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -1737,6 +1757,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -1792,6 +1813,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2085,6 +2115,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -2163,6 +2194,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2513,6 +2553,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
@@ -2557,6 +2598,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2842,6 +2892,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -2913,6 +2964,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -3573,6 +3633,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -3630,6 +3691,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4681,6 +4751,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
@@ -4727,6 +4798,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5192,6 +5272,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -5247,6 +5328,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5538,6 +5628,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -5616,6 +5707,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5945,6 +6045,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -5995,6 +6096,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -6289,6 +6399,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -6344,6 +6455,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -7641,6 +7761,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -7696,6 +7817,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -9060,6 +9190,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -9104,6 +9235,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
@@ -11084,6 +11224,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -11138,6 +11279,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -13576,6 +13726,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -13636,6 +13787,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -14260,6 +14420,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -14300,6 +14461,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -15012,6 +15182,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -15067,6 +15238,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -15385,6 +15565,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -15440,6 +15621,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -15737,6 +15927,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -15792,6 +15983,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -17371,6 +17571,7 @@ backend:
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -17426,6 +17627,15 @@ backend:
     - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
     - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
     - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -18175,10 +18385,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-10T15:12:29.199205+09:00'
+generated_at: '2026-06-10T16:09:27.795857+09:00'
 stats:
   backend_modules: 99
-  backend_tests: 449
+  backend_tests: 459
   frontend_modules: 69
   frontend_tests: 41
   unmapped_modules:

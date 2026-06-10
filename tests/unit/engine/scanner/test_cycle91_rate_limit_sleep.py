@@ -21,6 +21,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 97 Q53=A — `_fetch_volume_rank` 영역 전수 폐기. "
+        "KIS fluctuation API (`_fetch_fluctuation`) 영역 신규 도입으로 영역 전환. "
+        "Rate Limit 50ms 영역 = 사이클 97 M-2 (fluctuation rate limit) 가드로 영역 흡수. "
+        "사이클 66 K-2 의미 전환 패턴 영속."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m1_page_interval_sleep_50ms():
     """M-1: 페이지 간 50ms sleep 보장 (KIS Rate Limit 보호).

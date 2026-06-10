@@ -26,7 +26,18 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 97 Q53=A — `_MARKET_INPUT_ISCD` 영역 폐기 (사이클 97 H-4.d 가드로 영역 흡수). "
+            "신규 영역 `_FLUCTUATION_MARKET_INPUT_ISCD` 는 사이클 97 H-1.c 가드로 영역 영속. "
+            "사이클 97 H-5 AST 가드 = volume-rank URL + FHPST01710000 TR_ID 영역 영구 차단으로 영역 흡수. "
+            "사이클 66 K-2 의미 전환 패턴 영속."
+        ),
+    ),
+]
 
 
 def _scanner_module_path() -> Path:
