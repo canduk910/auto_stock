@@ -49,8 +49,8 @@ logger = logging.getLogger(__name__)
 
 # 시간 상수 — NXT 통합 운영 (08:00~20:00)
 TIME_AUTO_START = time(7, 45)
-TIME_BOOT = time(7, 50)
-TIME_PRESUBSCRIBE = time(7, 55)
+TIME_BOOT = time(7, 55)          # 사이클 92 (2026-06-10) — KIS 07:50 강제 중단 후 5분 마진 (Q28=E)
+TIME_PRESUBSCRIBE = time(7, 59)  # 사이클 92 (2026-06-10) — _boot 완료 후 4분 마진, race 회피 (Q32=B)
 TIME_PRE_NXT_OPEN = time(8, 0)             # NXT 프리 진입 (익일 청산)
 TIME_KRX_OPEN_CONFIRM = time(9, 0, 5)      # KRX 메인 시가 확정 → VB/LTV MAIN 매매
 # 사이클 26 (2026-05-20): 보드 전환 사전 구독 마진 — 50초 선행

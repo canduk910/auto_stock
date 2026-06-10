@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import time
+import time as _time
 from datetime import datetime, timedelta, timezone
 from typing import Callable, Awaitable
 
@@ -40,6 +40,14 @@ MIN_STABLE_SECONDS = 5  # 이 시간 이상 연결 유지해야 안정적 연결
 VERIFY_AFTER_SECS = 60        # 재연결 후 검증까지 대기
 VERIFY_FRESHNESS_SECS = 60    # 검증 기준 — 이 시간 내 tick 없으면 미수신으로 판정
 _KST_TZ = timezone(timedelta(hours=9))
+
+# 사이클 92 (2026-06-10) — MAX_RECONNECT 도달 시 자동 재기동 (KIS 07:50 강제 중단 충돌 영구 시정)
+# Q28=E (TIME_BOOT 07:55) + Q30=A (자동 재기동 idempotent) 동반 시정.
+# 60s cooldown (사이클 13-E-2 답습) + 시간당 3회 cap (LMS chain 차단, 사이클 24 silent_inactive 답습)
+# 4중 안전망 *추가* 영역 (G-REJECT-1 위반 0, 사이클 88 영속)
+_AUTO_RESTART_COOLDOWN_SECS = 60.0   # idempotent 재호출 간 cooldown
+_AUTO_RESTART_HOURLY_CAP = 3          # 시간당 cap (KIS LMS chain 차단)
+_AUTO_RESTART_WINDOW_SECS = 3600.0    # 1시간 슬라이딩 윈도우
 
 # 사이클 16 (2026-05-19) — AES 키 저장 가드용 체결통보 tr_id 화이트리스트.
 # `_handle_raw` SUBSCRIBE SUCCESS 분기에서 메인 세션 + 이 tr_id 만 모듈 전역 AES 키 저장.
@@ -148,6 +156,9 @@ class KisWebSocket:
         self._ws_action_collector: dict[str, dict[str, list[str]]] = {}
         # 5분 주기 flush task handle (사이클 42 _heartbeat_metrics_loop 패턴 답습)
         self._ws_action_flush_task: asyncio.Task | None = None
+        # 사이클 92 (2026-06-10) — 자동 재기동 cooldown + 슬라이딩 윈도우 cap 추적
+        self._auto_restart_last_at: float = 0.0
+        self._auto_restart_history: list[float] = []
 
     async def connect(
         self,
@@ -180,7 +191,7 @@ class KisWebSocket:
                     ping_interval=None,
                 ) as ws:
                     self._ws = ws
-                    connected_at = time.monotonic()
+                    connected_at = _time.monotonic()
                     logger.info("WebSocket 연결 성공")
 
                     # 기존 구독 복원 + ACK set 클리어 (G1, 2026-05-12)
@@ -196,7 +207,7 @@ class KisWebSocket:
                     await self._receive_loop()
 
                     # 안정적 연결(MIN_STABLE_SECONDS 이상 유지)이었으면 카운트 리셋
-                    if time.monotonic() - connected_at >= MIN_STABLE_SECONDS:
+                    if _time.monotonic() - connected_at >= MIN_STABLE_SECONDS:
                         self._reconnect_count = 0
 
             except (
@@ -207,6 +218,9 @@ class KisWebSocket:
                 self._reconnect_count += 1
                 if self._reconnect_count > MAX_RECONNECT:
                     logger.error("최대 재연결 횟수 초과, 종료")
+                    # 사이클 92 (2026-06-10) — 자동 재기동 트리거 (KIS 07:50 강제 중단 충돌 영구 시정)
+                    # 4중 안전망 *추가* 영역 (G-REJECT-1 위반 0, 사이클 88 영속)
+                    await self._trigger_auto_restart()
                     break
                 wait = BACKOFF_BASE * (2 ** (self._reconnect_count - 1))
                 logger.warning(
@@ -240,6 +254,75 @@ class KisWebSocket:
             await self._ws.close()
             self._ws = None
         logger.info("WebSocket 연결 종료")
+
+    async def stop(self) -> None:
+        """사이클 92 (2026-06-10) — disconnect() 래퍼. idempotent 재기동 진입점.
+
+        _trigger_auto_restart 의 stop() → start() 시퀀스에서 사용.
+        disconnect() 와 동일 행위 — 기존 상태 정리 (task cancel + _ws.close()).
+        """
+        await self.disconnect()
+
+    async def start(self) -> None:
+        """사이클 92 (2026-06-10) — idempotent 재기동 진입점.
+
+        _trigger_auto_restart 의 stop() → start() 시퀀스에서 사용.
+        _on_message 가 등록되어 있는 경우 백그라운드 task 로 connect() 재발화.
+        외부 scheduler 에서 connect() 를 직접 호출하는 경우와 구분.
+        """
+        if self._on_message is not None:
+            asyncio.create_task(self.connect(self._on_message))
+
+    async def _trigger_auto_restart(self) -> bool:
+        """사이클 92 (2026-06-10) — MAX_RECONNECT 도달 시 자동 재기동.
+
+        KIS 07:50 강제 중단 충돌 영구 시정. 4중 안전망 *추가* 영역 (G-REJECT-1 위반 0, 사이클 88 영속).
+
+        영속 의무:
+        - 60s cooldown (사이클 13-E-2 답습)
+        - 시간당 3회 cap (사이클 24 silent_inactive 답습 + LMS chain 차단)
+        - idempotent (stop() → start() 순차, 기존 상태 정리 → 정상 재시작)
+        - 사이클 88 G-REJECT-1 영속 (4중 안전망 대체 X, 추가만)
+
+        Returns:
+            True = 재기동 발화 / False = cooldown 또는 cap 도달
+        """
+        now = _time.monotonic()
+
+        # 60s cooldown (사이클 13-E-2 답습)
+        if self._auto_restart_last_at > 0 and now - self._auto_restart_last_at < _AUTO_RESTART_COOLDOWN_SECS:
+            logger.warning(
+                "[ws_auto_restart_cooldown] 60s cooldown 미경과 (last=%.1fs ago)",
+                now - self._auto_restart_last_at,
+            )
+            return False
+
+        # 1시간 슬라이딩 윈도우 prune (사이클 24 sliding window 패턴 답습)
+        self._auto_restart_history = [
+            t for t in self._auto_restart_history if now - t < _AUTO_RESTART_WINDOW_SECS
+        ]
+
+        # 시간당 cap (KIS LMS chain 차단)
+        if len(self._auto_restart_history) >= _AUTO_RESTART_HOURLY_CAP:
+            logger.error(
+                "[ws_auto_restart_cap_exceeded] 시간당 %d회 cap 도달 (KIS LMS chain 차단)",
+                _AUTO_RESTART_HOURLY_CAP,
+            )
+            return False
+
+        # 발화 (idempotent: stop() → start() 순차)
+        self._auto_restart_last_at = now
+        self._auto_restart_history.append(now)
+        logger.warning("[ws_auto_restart] MAX_RECONNECT 도달 → 자동 재기동 발화 (stop → start)")
+
+        try:
+            # idempotent: 기존 상태 정리 후 정상 재시작
+            await self.stop()
+            await self.start()
+            return True
+        except Exception as e:
+            logger.exception("[ws_auto_restart_failed] error=%s", e)
+            return False
 
     async def _heartbeat_metrics_emit_once(self) -> None:
         """사이클 46 (2026-05-22, refactor-review 카드 #6) — 단발 [ws_heartbeat] emit + 카운터 reset.
@@ -350,7 +433,7 @@ class KisWebSocket:
         """
         if not bypass_limit:
             until = self._opsp_backoff_until.get((tr_id, tr_key), 0.0)
-            now = time.time()
+            now = _time.time()
             if now < until:
                 logger.debug(
                     "[ws_subscribe_backoff] tr_id=%s tr_key=%s remain=%.1fs",
@@ -564,7 +647,7 @@ class KisWebSocket:
                     # 재구독 → 또 OPSP0002 → 무한 루프 차단 (2026-05-19 15:15 사고 대응).
                     # 사이클 17 보강 — 60s → 300s. `_scan_loop` 5분 주기 ≥ backoff 만료
                     # 보장 (KIS 공식 답변: "기등록한 사항을 재등록하지 않도록").
-                    self._opsp_backoff_until[(tr_id, tr_key)] = time.time() + 300.0
+                    self._opsp_backoff_until[(tr_id, tr_key)] = _time.time() + 300.0
                     # 사이클 74 Q2-D 옵션 A: OPSP0002 ALREADY aggregation 흡수 (사이클 17 backoff 정책 영속)
                     # 직접 logger.info 제거 → _record_action collector 흡수 + 5분 주기 1행 emit
                     self._record_action(tr_id, tr_key, "OPSP_ALREADY")

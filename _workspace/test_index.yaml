@@ -132,6 +132,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -305,6 +309,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -581,6 +589,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -646,6 +658,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -883,6 +902,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -951,6 +974,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -1095,6 +1125,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1279,6 +1313,10 @@ backend:
     - tests/unit/engine/test_cycle89_r4_universe_guard_persistence.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1464,6 +1502,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -1741,6 +1783,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -1809,6 +1855,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -2070,6 +2123,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2142,6 +2199,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_handler_tick_parse_guard.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
@@ -2414,6 +2478,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2483,6 +2551,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -2735,6 +2810,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -2806,6 +2885,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -2952,6 +3038,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3120,6 +3210,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3391,6 +3485,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -3459,6 +3557,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -3599,6 +3704,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3770,6 +3879,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -3948,6 +4061,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4132,6 +4249,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -4412,6 +4533,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -4479,6 +4604,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -4614,6 +4746,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4881,6 +5017,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -4949,6 +5089,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -5209,6 +5356,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -5282,6 +5433,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -5537,6 +5695,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -5606,6 +5768,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -5851,6 +6020,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -5920,6 +6093,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -6067,6 +6247,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6351,6 +6535,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -6496,6 +6684,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6670,6 +6862,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -6838,6 +7034,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7107,6 +7307,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -7175,6 +7379,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -7317,6 +7528,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -7491,6 +7706,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7668,6 +7887,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -7847,6 +8070,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8010,6 +8237,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8187,6 +8418,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -8488,6 +8723,10 @@ backend:
     - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_r4_universe_guard_persistence.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -8529,6 +8768,13 @@ backend:
     - tests/unit/realtime/test_aes_keys_main_only.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
     - tests/unit/realtime/test_websocket_pool.py
@@ -8654,6 +8900,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_observability_logs.py
@@ -8831,6 +9081,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9033,6 +9287,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9211,6 +9469,10 @@ backend:
     - tests/unit/engine/test_cycle89_r4_universe_guard_persistence.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9384,6 +9646,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9557,6 +9823,10 @@ backend:
     - tests/unit/engine/test_cycle89_r4_universe_guard_persistence.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9727,6 +9997,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -9900,6 +10174,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10074,6 +10352,10 @@ backend:
     - tests/unit/engine/test_cycle89_r4_universe_guard_persistence.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10341,6 +10623,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -10409,6 +10695,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -10567,6 +10860,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10749,6 +11046,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -10922,6 +11223,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11099,6 +11404,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11273,6 +11582,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11457,6 +11770,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -11684,6 +12001,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
@@ -11861,6 +12182,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -12034,6 +12359,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -12256,6 +12585,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -12431,6 +12764,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -12709,6 +13046,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -12777,6 +13118,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -12963,6 +13311,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -13317,6 +13669,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -13384,6 +13740,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -13568,6 +13931,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -13651,6 +14018,9 @@ backend:
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_handler_tick_parse_guard.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool.py
@@ -13759,6 +14129,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -14024,6 +14398,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -14091,6 +14469,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -14136,6 +14521,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -14346,6 +14738,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -14660,6 +15056,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -14710,6 +15110,13 @@ backend:
     - tests/unit/realtime/test_aes_keys_main_only.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
     - tests/unit/realtime/test_websocket_reverify.py
@@ -15573,6 +15980,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -15760,6 +16171,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -15945,6 +16360,10 @@ backend:
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -16212,6 +16631,10 @@ backend:
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
     - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
+    - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
+    - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
+    - tests/unit/engine/test_cycle92_time_boot_moved.py
+    - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
@@ -16280,6 +16703,13 @@ backend:
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_on_message_guard.py
@@ -16842,10 +17272,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-09T23:15:00.000000+09:00'
+generated_at: '2026-06-10T09:42:15.146774+09:00'
 stats:
   backend_modules: 99
-  backend_tests: 410
+  backend_tests: 416
   frontend_modules: 69
   frontend_tests: 41
   unmapped_modules:
