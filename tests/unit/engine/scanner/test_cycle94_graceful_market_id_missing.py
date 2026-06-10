@@ -29,9 +29,20 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 95 의미 전환: stock_master miss → unknown 합집합 (chicken-and-egg 시정). "
+        "사이클 94 시점 '보수적 skip' 의도 영속 보존 (사이클 66 K-2 패턴 답습). "
+        "시정 확인: 사이클 95 H-1/H-2/H-3 PASS + 본 케이스 XFAIL 자동 전환."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m3_graceful_missing_market_id_skips_ticker():
     """M-3: stock_master miss 시 graceful skip 영역 영속 (사이클 88 G-REJECT 답습).
+
+    [사이클 95 의미 전환] 사이클 94 시점 '보수적 skip' 의도 → 사이클 95 'unknown 합집합'
+    로 행위 변경. 과거 결함 확인 보존 (사이클 66 K-2 패턴 답습, xfail strict=False).
 
     검증 매트릭스:
     - mock 응답 6 ticker

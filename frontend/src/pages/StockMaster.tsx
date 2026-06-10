@@ -96,13 +96,21 @@ const FIELD_LABELS: Record<string, string> = {
 }
 
 // ────────────────────────────────────────────────────────────────────────
-// 거래소 코드 → 한글 변환 (사이클 89 hotfix)
+// 거래소 코드 → 한글 변환 (사이클 89 hotfix + 사이클 95 KIS CTPF1002R 정본 일치)
 // ────────────────────────────────────────────────────────────────────────
 function formatExchange(code: string | null | undefined): string {
   if (!code) return '—'
   const map: Record<string, string> = {
-    '01': 'KOSPI', '02': 'KOSDAQ', '03': 'KOSDAQ', '04': 'ETF',
-    '05': 'ELW', '06': 'ETN', 'KSP': 'KOSPI', 'KDQ': 'KOSDAQ',
+    '01': 'KOSPI',  // 사이클 89 hotfix 영속 — KIS LMS 코드
+    '02': 'KOSPI',  // 사이클 95 — KIS CTPF1002R 정본
+    '03': 'KOSDAQ', // 사이클 95 — KIS CTPF1002R 정본
+    '04': 'ETF',
+    '05': 'ELW',
+    '06': 'ETN',
+    'STK': 'KOSPI',  // 사이클 94 backward compat
+    'KSQ': 'KOSDAQ', // 사이클 94 backward compat
+    'KSP': 'KOSPI',
+    'KDQ': 'KOSDAQ',
   }
   return map[code] ?? code
 }
@@ -611,6 +619,7 @@ export default function StockMaster() {
                   <th className="text-left py-2 pr-3 font-medium">종목코드</th>
                   <th className="text-left py-2 pr-3 font-medium">종목명</th>
                   <th className="text-left py-2 pr-3 font-medium">시장</th>
+                  <th className="text-right py-2 pr-3 font-medium">전일종가</th>
                   <th className="text-center py-2 pr-3 font-medium">NXT</th>
                   <th className="text-center py-2 pr-3 font-medium">거래정지</th>
                   <th className="text-center py-2 pr-3 font-medium">관리종목</th>
@@ -635,7 +644,10 @@ export default function StockMaster() {
                       {item.name}
                     </td>
                     <td className="py-2 pr-3 text-gray-500">
-                      {item.excg_dvsn_cd ?? '—'}
+                      {formatExchange(item.excg_dvsn_cd)}
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-right text-gray-900">
+                      {formatPrice(item.raw?.bfdy_clpr)}
                     </td>
                     <td className="py-2 pr-3 text-center">
                       {item.nxt_tradable ? (

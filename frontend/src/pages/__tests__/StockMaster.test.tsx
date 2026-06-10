@@ -472,3 +472,227 @@ describe("사이클 94 H-5 (HIGH) — StockMaster UI 안내 가이드 배너", (
     });
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────
+// 사이클 95 H-4 (HIGH) — list 테이블 전일종가 컬럼 + formatPrice 영역 정합
+// 사이클 95 H-5 (HIGH) — list 테이블 시장 한글 변환 (`"02"` → KOSPI 등)
+// 사이클 95 M-3 (MEDIUM) — formatExchange 헬퍼 5+ 코드 분류 영속
+// ────────────────────────────────────────────────────────────────────────
+// 명세: _workspace/red/cycle95_chicken_and_egg_fix_ui.md §2 영역 1/2
+//
+// 영속 의무:
+//   - formatPrice 헬퍼 (L113~L117) 변경 0 → list 테이블 raw.bfdy_clpr 렌더
+//   - formatExchange 헬퍼 (L101~L108) 변경 0 → "02" / "03" → KOSPI / KOSDAQ
+//   - 사이클 89 hotfix 답습 (한글 친숙 용어)
+//   - 사이클 85 G-KST + H-POLLING + H-DETAIL 영속 (변경 0)
+// ────────────────────────────────────────────────────────────────────────
+
+// list 테이블 검증용 SAMPLE_LIST 확장 — 다중 시장 코드 (KOSPI/KOSDAQ/ETF)
+const SAMPLE_LIST_MULTI_MARKET = [
+  {
+    ticker: "005930",
+    name: "삼성전자",
+    excg_dvsn_cd: "02",
+    nxt_tradable: true,
+    krx_halted: false,
+    admin_item: false,
+    refreshed_at: "2026-06-09T09:00:00+09:00",
+    raw: { bfdy_clpr: 70000, acml_vol: 1000000 },
+  },
+  {
+    ticker: "035720",
+    name: "카카오",
+    excg_dvsn_cd: "03",
+    nxt_tradable: true,
+    krx_halted: false,
+    admin_item: false,
+    refreshed_at: "2026-06-09T09:00:00+09:00",
+    raw: { bfdy_clpr: 42500, acml_vol: 500000 },
+  },
+  {
+    ticker: "069500",
+    name: "KODEX 200",
+    excg_dvsn_cd: "04",
+    nxt_tradable: false,
+    krx_halted: false,
+    admin_item: false,
+    refreshed_at: "2026-06-09T09:00:00+09:00",
+    raw: { bfdy_clpr: 38000, acml_vol: 200000 },
+  },
+];
+
+function setupMultiMarketHandlers() {
+  server.use(
+    http.get("/api/stock-master/stats", () =>
+      HttpResponse.json(wrap(SAMPLE_STATS)),
+    ),
+    http.get("/api/stock-master/list", () =>
+      HttpResponse.json(wrap(SAMPLE_LIST_MULTI_MARKET)),
+    ),
+    http.get("/api/stock-master/scan-pool/summary", () =>
+      HttpResponse.json(wrap({ eager_refresh_today: 7 })),
+    ),
+  );
+}
+
+describe("사이클 95 H-4 (HIGH) — list 테이블 전일종가 컬럼", () => {
+  it("H-4.a: list 테이블 thead 에 '전일종가' 컬럼 영역 영속", async () => {
+    setupMultiMarketHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-list-card")).toBeDefined();
+    });
+
+    // thead 영역에 '전일종가' 헤더 추가 (사이클 95 H-4)
+    const listCard = screen.getByTestId("stock-master-list-card");
+    expect(
+      listCard.textContent?.includes("전일종가"),
+      "list 테이블 thead 에 '전일종가' 컬럼 누락 — 사이클 95 H-4 위반",
+    ).toBe(true);
+  });
+
+  it("H-4.b: tbody 에 raw.bfdy_clpr formatPrice 적용 렌더", async () => {
+    setupMultiMarketHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByText("005930")).toBeDefined();
+    });
+
+    // formatPrice 헬퍼 결과 (사이클 89 hotfix 영속) — 70000원 = "70,000원"
+    await waitFor(() => {
+      expect(
+        screen.getAllByText(/70,?000\s*원/).length,
+        "list 테이블 tbody 에 bfdy_clpr formatPrice 렌더 누락 — H-4.b 위반",
+      ).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  it("H-4.c: 다중 종목 전일종가 동시 렌더 (KOSPI/KOSDAQ/ETF 3 행)", async () => {
+    setupMultiMarketHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByText("005930")).toBeDefined();
+      expect(screen.getByText("035720")).toBeDefined();
+      expect(screen.getByText("069500")).toBeDefined();
+    });
+
+    // 3 종목 전일종가 모두 렌더 (70,000 / 42,500 / 38,000)
+    await waitFor(() => {
+      expect(screen.getAllByText(/70,?000\s*원/).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/42,?500\s*원/).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/38,?000\s*원/).length).toBeGreaterThanOrEqual(1);
+    });
+  });
+});
+
+describe("사이클 95 H-5 (HIGH) — list 테이블 시장 한글 변환", () => {
+  it("H-5.a: KOSPI 코드 '02' → '코스피' / KOSDAQ '03' → '코스닥' 한글 렌더", async () => {
+    setupMultiMarketHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByText("005930")).toBeDefined();
+    });
+
+    // formatExchange 헬퍼 결과 (L101~L108 영속): '02' → 'KOSPI' / '03' → 'KOSDAQ'
+    // (헬퍼 매핑은 영문 KOSPI/KOSDAQ — 사이클 89 hotfix 영속)
+    await waitFor(() => {
+      const listCard = screen.getByTestId("stock-master-list-card");
+      const text = listCard.textContent || "";
+
+      // KOSPI 한글 변환 (formatExchange 적용 영속)
+      expect(
+        /KOSPI/.test(text),
+        "list 테이블 시장 컬럼에 'KOSPI' 한글 변환 누락 — H-5.a 위반 (사이클 95 formatExchange 적용 의무)",
+      ).toBe(true);
+
+      // KOSDAQ 한글 변환
+      expect(
+        /KOSDAQ/.test(text),
+        "list 테이블 시장 컬럼에 'KOSDAQ' 한글 변환 누락 — H-5.a 위반",
+      ).toBe(true);
+    });
+  });
+
+  it("H-5.b: 시장 컬럼에 raw 코드 '02' / '03' 노출 0건 (formatExchange 적용 후)", async () => {
+    setupMultiMarketHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByText("005930")).toBeDefined();
+    });
+
+    // list 테이블 행에서 raw 코드 ('02' / '03') 직접 노출 0건
+    // (formatExchange 적용 후 KOSPI/KOSDAQ 만 노출)
+    const rows = screen.getAllByText("005930");
+    for (const row of rows) {
+      const tr = row.closest("tr");
+      if (!tr) continue;
+      const tds = tr.querySelectorAll("td");
+      // 시장 컬럼 (3번째 td, 0-based index 2) 텍스트 검증
+      if (tds.length >= 3) {
+        const marketCellText = tds[2].textContent || "";
+        expect(
+          marketCellText.trim() === "02" || marketCellText.trim() === "03",
+          `시장 컬럼에 raw 코드 '${marketCellText.trim()}' 직접 노출 — H-5.b 위반`,
+        ).toBe(false);
+      }
+    }
+  });
+});
+
+describe("사이클 95 M-3 (MEDIUM) — formatExchange 헬퍼 영역 영속", () => {
+  it("M-3.a: ETF 코드 '04' → 'ETF' 분류 영속 (사이클 89 hotfix 영역 영속)", async () => {
+    setupMultiMarketHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByText("069500")).toBeDefined();
+    });
+
+    // formatExchange "04" → "ETF" (사이클 89 영속)
+    await waitFor(() => {
+      const listCard = screen.getByTestId("stock-master-list-card");
+      expect(
+        /ETF/.test(listCard.textContent || ""),
+        "list 테이블 시장 컬럼에 ETF 한글 변환 누락 — M-3.a 위반",
+      ).toBe(true);
+    });
+  });
+
+  it("M-3.b: formatExchange 헬퍼 AST 영속 (KOSPI/KOSDAQ/ETF 매핑 0건 결함 차단)", () => {
+    // 사이클 89 영속 formatExchange 헬퍼 정적 검증
+    const source = readFileSync(
+      path.join(__dirname, "..", "StockMaster.tsx"),
+      "utf-8",
+    );
+
+    // formatExchange 함수 정의 영속
+    expect(
+      /function\s+formatExchange\s*\(/.test(source),
+      "formatExchange 함수 정의 누락 — M-3.b 위반 (사이클 89 영속 위반)",
+    ).toBe(true);
+
+    // '02': 'KOSPI' 매핑 영속
+    expect(
+      source.includes("'02': 'KOSPI'") || source.includes('"02": "KOSPI"'),
+      "formatExchange '02' → KOSPI 매핑 누락 — M-3.b 위반",
+    ).toBe(true);
+
+    // '03': 'KOSDAQ' 매핑 영속
+    expect(
+      source.includes("'03': 'KOSDAQ'") || source.includes('"03": "KOSDAQ"'),
+      "formatExchange '03' → KOSDAQ 매핑 누락 — M-3.b 위반",
+    ).toBe(true);
+
+    // list 테이블 영역에서 formatExchange 호출 영속 (사이클 95 시정 의무)
+    // 기존 `{item.excg_dvsn_cd ?? '—'}` → `{formatExchange(item.excg_dvsn_cd)}` 1줄 교체
+    expect(
+      /formatExchange\s*\(\s*item\.excg_dvsn_cd\s*\)/.test(source),
+      "list 테이블 시장 컬럼에 formatExchange(item.excg_dvsn_cd) 호출 누락 — 사이클 95 M-3.b 위반",
+    ).toBe(true);
+  });
+});

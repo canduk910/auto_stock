@@ -1598,9 +1598,13 @@ async def fetch_top_500_universe() -> list[str]:
 
     # Q42=A post-split: stock_master 캐시 활용 (추가 KIS 호출 0)
     # excg_dvsn_cd "02"=KOSPI / "03"=KOSDAQ (KIS CTPF1002R 정본)
-    # 사이클 88 G-REJECT 영속 (graceful — stock_master 부재 종목 = 자연 skip)
+    # 사이클 95 — chicken-and-egg lock-in 시정:
+    #   stock_master 부재 종목(sm_data=None) = unknown 합집합 진입
+    #   → 첫 호출에서 ~500 ticker upsert chain trigger 자연 회복
+    #   KIS 호출 0건 증가 (사이클 94 영역 3 패턴 답습)
     kospi: list[dict] = []
     kosdaq: list[dict] = []
+    unknown: list[dict] = []  # 사이클 95 신규 — chicken-and-egg lock-in 차단
     for row in all_sorted:
         ticker = row.get("mksc_shrn_iscd", "")
         if not ticker:
@@ -1611,12 +1615,16 @@ async def fetch_top_500_universe() -> list[str]:
             kospi.append(row)
         elif market_class == "KOSDAQ":
             kosdaq.append(row)
-        # None (분류 불가) = graceful skip (사이클 88 G-REJECT 영속)
+        else:
+            unknown.append(row)  # 사이클 95 — graceful None 영역 합집합 (continue 금지)
 
     # KOSPI 250 + KOSDAQ 250 = 500 ticker 영속 (사이클 89 의도 답습)
+    # 사이클 95 unknown 영역 합산 — lock-in 차단 (첫 사이클 stock_master 비어있어도 500 ticker 확보)
     kospi_sorted = kospi[:250]
     kosdaq_sorted = kosdaq[:250]
-    universe_rows = kospi_sorted + kosdaq_sorted
+    remaining = max(0, 500 - len(kospi_sorted) - len(kosdaq_sorted))
+    unknown_sorted = unknown[:remaining]
+    universe_rows = kospi_sorted + kosdaq_sorted + unknown_sorted
 
     # 종목코드 추출
     tickers = [row["mksc_shrn_iscd"] for row in universe_rows if row.get("mksc_shrn_iscd")]
@@ -1627,22 +1635,26 @@ async def fetch_top_500_universe() -> list[str]:
     universe_size = len(tickers)
 
     # [stock_master_bulk_refresh] 개장 전 1회 emit (A6 권고)
+    # 사이클 95 — unknown=%d 카운트 추가 (M-1 운영 가시화)
     logger.info(
-        "[stock_master_bulk_refresh] universe=%d kospi=%d kosdaq=%d "
+        "[stock_master_bulk_refresh] universe=%d kospi=%d kosdaq=%d unknown=%d "
         "securities=%d etf_excluded=%d elapsed_ms=%d",
         universe_size,
         len(kospi_sorted),
         len(kosdaq_sorted),
+        len(unknown_sorted),
         securities_count,
         etf_excluded_total,
         elapsed_ms,
     )
 
     # collector 적재 (5분 윈도우 통계용, M-7 emit visibility)
+    # 사이클 95 — "unknown" 키 추가
     record_universe_refresh({
         "universe": universe_size,
         "kospi": len(kospi_sorted),
         "kosdaq": len(kosdaq_sorted),
+        "unknown": len(unknown_sorted),  # 사이클 95 신규
         "securities": securities_count,
         "etf_excluded": etf_excluded_total,
         "fetched": 0,        # stock_master upsert 는 별도 loop 에서 집계

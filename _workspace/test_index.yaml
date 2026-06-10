@@ -518,6 +518,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -849,6 +856,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -1768,6 +1782,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2127,6 +2148,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2392,6 +2420,7 @@ backend:
       - tests/unit/db/test_trade_history_for_sync.py
       - tests/unit/db/test_trade_history_kst.py
       - tests/unit/engine/scanner/test_cycle94_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
       - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
       - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
       - tests/unit/engine/test_backtest_engine_db_toggle.py
@@ -2509,6 +2538,12 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -2720,6 +2755,7 @@ backend:
     direct_tests:
       - tests/unit/db/test_cycle68_kst_helper_module_g1.py
       - tests/unit/engine/scanner/test_cycle94_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle64_routes_price_filter.py
@@ -2853,6 +2889,12 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -3564,6 +3606,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4661,6 +4710,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5172,6 +5228,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5529,6 +5592,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5896,6 +5966,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -6233,6 +6310,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -6720,6 +6804,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_g_reject_persistence.py
       - tests/unit/engine/scanner/test_cycle94_kst_persistence.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -7581,6 +7672,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -8995,6 +9093,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
       - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
       - tests/unit/engine/strategies/test_bull_flag_breakout.py
@@ -10929,6 +11034,7 @@ backend:
       - tests/unit/routes/test_cycle93_route_upsert_chain.py
   src/engine/stock_master_metrics.py:
     direct_tests:
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
       - tests/unit/engine/test_cycle89_emit_visibility.py
       - tests/unit/engine/test_cycle93_scheduler_5min_upsert_chain.py
       - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
@@ -11049,6 +11155,12 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -13568,6 +13680,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -14118,6 +14237,11 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_kospi_kosdaq_split_500.py
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_emit_cap.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_protected.py
@@ -14223,6 +14347,8 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_g_reject_persistence.py
       - tests/unit/engine/scanner/test_cycle94_kst_persistence.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -14984,6 +15110,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -15345,6 +15478,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -15685,6 +15825,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
       - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -17316,6 +17463,13 @@ backend:
       - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
       - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
       - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+      - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+      - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+      - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+      - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+      - tests/unit/engine/scanner/test_cycle95_unknown_split.py
       - tests/unit/engine/scheduler/test_atomic_board_transition.py
       - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
       - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -18087,10 +18241,10 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-10T02:38:21.034Z'
+generated_at: '2026-06-10T03:27:45.981Z'
 stats:
   backend_modules: 99
-  backend_tests: 432
+  backend_tests: 439
   frontend_modules: 69
   frontend_tests: 41
   unmapped_modules:
