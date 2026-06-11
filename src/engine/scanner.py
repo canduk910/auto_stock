@@ -10,7 +10,7 @@
 from __future__ import annotations
 
 import asyncio
-import asyncio as _asyncio  # 사이클 97 — Rate Limit sleep patch 호환 (_universe_eager_refresh_loop 영속)
+import asyncio as _asyncio  # 사이클 101 — Rate Limit sleep patch 호환 (asyncio.sleep 직접 patch 지원)
 import logging
 import sys as _sys
 import time as _monotonic_time
@@ -1360,21 +1360,40 @@ async def _scan_pool_eager_refresh_loop(
 # - 사이클 81 bfdy_clpr: 영역 분리 (영향 0)
 # - 사이클 83 scan_pool eager refresh: candidates=12 영역 영속 (영역 분리)
 # - 사이클 88 G-REJECT: 외부 LLM 영구 차단 AST 가드 3 영속
-# - 사이클 89 ETF 제외 + 거래대금 정렬: fluctuation 영역으로 흡수
+# - 사이클 89 ETF 제외 + 거래대금 정렬: fluctuation 영역 (Q68=A 사이클 101 영구 폐기)
 # - 사이클 91 페이징: 영구 폐기 (KIS API 본질 한계 영구 수용)
-# - 사이클 96 KOSPI/KOSDAQ 분리 호출: fluctuation 영역으로 흡수
-# - 사이클 98 G-DOC1: chk_fluctuation.py 정본 인용 의무
+# - 사이클 96 KOSPI/KOSDAQ 분리 호출: fluctuation 영역 (Q68=A 사이클 101 영구 폐기)
+# - 사이클 98 G-DOC1: chk_fluctuation.py 정본 인용 의무 (Q68=A 폐기로 해제)
+# - 사이클 101 (2026-06-11): market_cap (FHPST01740000) 신규 + fluctuation 영구 폐기 (Q68=A)
+#   + universe_eager_refresh_loop 영구 폐기 (Q69=B) + 매일 20:00:05 일괄 적재
 # ---------------------------------------------------------------------------
 
-# 사이클 97 — KIS fluctuation API (FHPST01700000) 상수
-_FLUCTUATION_URL = "/uapi/domestic-stock/v1/ranking/fluctuation"
-_FLUCTUATION_TR_ID = "FHPST01700000"
+# ---------------------------------------------------------------------------
+# 사이클 101 (2026-06-11) — KIS market_cap API (FHPST01740000) 상수
+# KIS 정본 인용 (chk_market_cap.py main 호출 영역 정본):
+#   URL = /uapi/domestic-stock/v1/ranking/market-cap
+#   fid_cond_mrkt_div_code = "J" (KRX 전체, ValueError if not)
+#   fid_cond_scr_div_code  = "20174" (정본 강제 검증)
+#   fid_input_iscd: "0001" = 거래소(KOSPI) / "1001" = 코스닥(KOSDAQ) / "0000" = 전체
+#   tr_cont "M" → 재귀 호출 + "N" 영속 (정본 L107~120)
+# ---------------------------------------------------------------------------
+_MARKET_CAP_URL = "/uapi/domestic-stock/v1/ranking/market-cap"
+_MARKET_CAP_TR_ID = "FHPST01740000"
 
-# fid_input_iscd 매핑 (KIS 정본: "0001" = KOSPI 업종, "0002" = KOSDAQ 업종)
-_FLUCTUATION_MARKET_INPUT_ISCD: dict[str, str] = {
-    "kospi": "0001",
-    "kosdaq": "0002",
+# KIS 정본 fid_input_iscd 매핑 (chk_market_cap.py 정본)
+# 주의: fluctuation "0002"(KOSDAQ 업종) 와 완전 다름 — "1001" 이 코스닥 정본 (KIS MCP 확인)
+_MARKET_CAP_INPUT_ISCD: dict[str, str] = {
+    "kospi": "0001",   # 거래소 (KOSPI)
+    "kosdaq": "1001",  # 코스닥 (KOSDAQ) — fluctuation "0002" 와 차별
 }
+
+# 환경 분리 Rate Limit (domain-expert A3 영속)
+# 실전: KIS 20건/s = 50ms sleep → 2,800 / 20 = 140s (2분 20초, 20:00:05~20:02:25)
+# 모의: KIS 5건/s = 200ms sleep → 2,800 / 5 = 560s → 20:09:25 종료, 20:10 정산 race 차단
+_FULL_UNIVERSE_SLEEP_REAL: float = 0.050  # 50ms = 1/20s (실전 20건/s)
+_FULL_UNIVERSE_SLEEP_VTS: float = 0.200   # 200ms = 1/5s (모의 5건/s)
+_FULL_UNIVERSE_MAX_LOAD_SECONDS_REAL: int = 300   # 5분 (실전 안전 마진)
+_FULL_UNIVERSE_MAX_LOAD_SECONDS_VTS: int = 600    # 10분 (모의, 정산 직전 차단)
 
 # A2: ETF/리츠/SPAC 제외 — `prdt_type_cd` 기반
 # "300" = 보통주 (통과), "301" = ETF (제외), "302" = 리츠 (제외), "309" = SPAC (제외)
@@ -1469,246 +1488,250 @@ def _trade_amount_key(row: dict) -> float:
         return 0.0
 
 
-async def _fetch_fluctuation(
+async def _fetch_market_cap_page(
     market: str = "kospi",
-    top_n: int = 30,  # 사이클 99 — KIS API 단일 페이지 한도 영구 영속 (페이징 미지원 영구 확정)
+    max_pages: int = 100,
 ) -> list[dict]:
-    """KIS fluctuation API (FHPST01700000) 단일 호출 (사이클 99 영구 영속).
+    """KIS market_cap API (FHPST01740000) tr_cont M/N 페이징 누적 (사이클 101).
 
-    사이클 99 (2026-06-10) — 페이징 영역 영구 폐기 + 60 ticker 영구 영속 명문화.
+    KIS 156 API 중 유일 페이징 지원 (사이클 100 Phase 1 영속).
+    KIS 정본 인용 (chk_market_cap.py main 호출 영역 정본 L107~120):
+      - tr_cont "M" → 재귀 호출 with tr_cont="N"
+      - tr_cont "N" or 기타 → 종료
 
-    KIS API 본질 한계 영구 확정 매트릭스 (사이클 96 + 98 운영 실증 누적):
-    - volume_rank API: 단일 페이지 30 한도 + tr_cont "M" 영구 비반환
-      (사이클 89/91/94/96 페이징 영역 영구 폐기)
-    - fluctuation API (FHPST01700000): 단일 페이지 30 한도 + tr_cont "M" 영구 비반환
-      (사이클 97/98 영속 + 사이클 99 페이징 영역 영구 폐기)
-    - KIS API 전체 영역 = 페이징 미지원 영구 확정
+    사이클 38 명문화 영속: tradable_boards 매수 진입 전용 — scanner 단계 영역 한정.
+    사이클 88 G-REJECT 영속: rt_cd != "0" → graceful continue (로그만).
+    사이클 91 max_pages 무한 루프 차단 패턴 답습.
 
-    60 ticker 영구 영속 수용:
-    - KOSPI 30 + KOSDAQ 30 = 60 ticker (KIS API 본질 한계 영구 수용)
-    - stock_master 적재 점진 증가 (사이클 95 unknown 합집합 + 사이클 93 chain 영속)
-
-    KIS 정본 인용 영속 (사이클 98 G-DOC1):
-    - FID_RANK_SORT_CLS_CODE = "0" (1자리): KIS chk_fluctuation.py main 호출 영역 정본
-      (KIS fluctuation.py docstring "0000" = 거짓 안내 — 무시 의무, OPSQ2002 영구 차단)
-
-    영속 의무:
-    - 사이클 88 G-REJECT: 외부 LLM 영구 차단 AST 가드 3 영속
-    - 사이클 89 ETF 제외 + 거래대금 정렬: 호출자 `fetch_top_500_universe()` 영속
-    - 사이클 95 unknown=0 영속: 2회 분리 호출 = unknown 분류 불필요
-    - 사이클 98 G-DOC1: chk_fluctuation.py 정본 인용 의무 영속
-    - 매매 hot path 영향 0 (사이클 38 명문화 + 사이클 64 protected_tickers + 사이클 81 영속)
-
-    KIS fluctuation 파라미터 (정본 FHPST01700000):
-        FID_COND_MRKT_DIV_CODE = "J"     (KRX 전체)
-        FID_COND_SCR_DIV_CODE  = "20170" (강제 검증 — KIS ValueError 방지)
-        FID_INPUT_ISCD         = "0001" (KOSPI) / "0002" (KOSDAQ)
-        FID_RANK_SORT_CLS_CODE = "0"     (등락률순, KIS chk_fluctuation.py main 1자리 정본)
-        FID_INPUT_CNT_1        = str(top_n)  (기본 30, KIS 단일 페이지 한도 영속)
-        FID_PRC_CLS_CODE       = "0"     (전체)
-        FID_INPUT_PRICE_1/2    = ""      (전체 가격대)
-        FID_VOL_CNT            = ""      (전체 거래량)
-        FID_TRGT_CLS_CODE      = "0"     (대상 구분)
-        FID_TRGT_EXLS_CLS_CODE = "0"     (대상 제외)
-        FID_DIV_CLS_CODE       = "0"     (전체)
-        FID_RSFL_RATE1/2       = ""      (전체 등락률)
-
-    응답 키 (KIS chk_fluctuation.py COLUMN_MAPPING 정본):
-        stck_shrn_iscd  — 주식 단축 종목코드 (volume_rank mksc_shrn_iscd 와 영역 차별)
-        stck_prpr / prdy_vrss / prdy_ctrt / acml_vol / prdy_vol / ...
+    KIS market_cap 파라미터 (정본 FHPST01740000):
+        fid_cond_mrkt_div_code = "J" (정본 강제 검증 — ValueError if not)
+        fid_cond_scr_div_code  = "20174" (정본 강제 검증)
+        fid_input_iscd: "0001" = KOSPI(거래소) / "1001" = KOSDAQ
+        응답 키: mksc_shrn_iscd (종목코드), data_rank, hts_kor_isnm, stck_avls ...
 
     Args:
-        market: "kospi" or "kosdaq" (사이클 96 명명 영속)
-        top_n: 결과 절단 한도 (기본 30, KIS API 단일 페이지 한도 영속)
+        market: "kospi" 또는 "kosdaq"
+        max_pages: 최대 페이지 수 (무한 루프 차단 — 사이클 91 답습). 기본 100.
 
     Returns:
-        KIS output list (dict, 최대 30건). API 실패 시 [] (graceful).
+        누적 ticker 행 list (dict). API 실패 시 [] (graceful, 사이클 88 G-REJECT).
     """
-    from src.api.base import KisApiError, kis_get_quote
+    from src.api.base import kis_get_quote
 
-    # "kospi" → "0001", "kosdaq" → "0002" (fallback = "0001" KOSPI 보수적)
-    input_iscd = _FLUCTUATION_MARKET_INPUT_ISCD.get(market)
+    input_iscd = _MARKET_CAP_INPUT_ISCD.get(market)
     if not input_iscd:
         logger.warning(
-            "[_fetch_fluctuation] unknown market: %s, fallback to kospi", market
+            "[_fetch_market_cap_page] unknown market: %s, fallback to kospi", market
         )
-        input_iscd = _FLUCTUATION_MARKET_INPUT_ISCD["kospi"]
+        input_iscd = _MARKET_CAP_INPUT_ISCD["kospi"]
 
     params = {
-        "FID_COND_MRKT_DIV_CODE": "J",
-        "FID_COND_SCR_DIV_CODE": "20170",   # KIS 정본 강제 검증 영역
-        "FID_INPUT_ISCD": input_iscd,
-        "FID_RANK_SORT_CLS_CODE": "0",   # 등락률순 (사이클 98 — KIS chk_fluctuation.py main 정본 1자리, OPSQ2002 영구 차단)
-        "FID_INPUT_CNT_1": str(top_n),       # KIS 단일 페이지 한도 30 영속 (사이클 99 영구 확정)
-        "FID_PRC_CLS_CODE": "0",
-        "FID_INPUT_PRICE_1": "",
-        "FID_INPUT_PRICE_2": "",
-        "FID_VOL_CNT": "",
-        "FID_TRGT_CLS_CODE": "0",
-        "FID_TRGT_EXLS_CLS_CODE": "0",
-        "FID_DIV_CLS_CODE": "0",
-        "FID_RSFL_RATE1": "",
-        "FID_RSFL_RATE2": "",
+        "fid_cond_mrkt_div_code": "J",      # 정본 강제 검증
+        "fid_cond_scr_div_code": "20174",   # 정본 강제 검증
+        "fid_input_iscd": input_iscd,
+        "fid_div_cls_code": "0",
+        "fid_blng_cls_code": "0",
+        "fid_trgt_cls_code": "0",
+        "fid_trgt_exls_cls_code": "0",
+        "fid_input_price_1": "",
+        "fid_input_price_2": "",
+        "fid_vol_cnt": "",
+        "fid_input_date_1": "",
     }
+
+    accumulated: list[dict] = []
+    tr_cont = ""
     try:
-        data = await kis_get_quote(
-            _FLUCTUATION_URL,
-            _FLUCTUATION_TR_ID,
-            params=params,
-        )
-        output = data.get("output", []) or []
-        return list(output[:top_n])
-    except KisApiError as e:
-        logger.warning(
-            "[fetch_fluctuation] KIS API 실패 market=%s error=%s (graceful)",
-            market, e,
-        )
-        return []
+        for _page in range(max_pages):
+            data = await kis_get_quote(
+                _MARKET_CAP_URL,
+                _MARKET_CAP_TR_ID,
+                params=params,
+                tr_cont=tr_cont,
+            )
+            if data.get("rt_cd") != "0":
+                logger.warning(
+                    "[_fetch_market_cap_page] KIS 거부 market=%s rt_cd=%s msg=%s (graceful)",
+                    market, data.get("rt_cd"), data.get("msg1"),
+                )
+                break
+
+            output = data.get("output", []) or []
+            accumulated.extend(output)
+
+            # KIS 정본 L107~120: tr_cont "M" → 재호출 with tr_cont="N" / 그 외 → 종료
+            next_tr_cont = data.get("tr_cont", "N")
+            if next_tr_cont != "M":
+                break
+            tr_cont = "N"
+            # max_pages 도달 시 break (사이클 91 답습)
+            # — 루프 상단 range(max_pages) 가드로 자동 차단
+
     except Exception as e:
         logger.warning(
-            "[fetch_fluctuation] 예외 market=%s error=%s (graceful)",
+            "[_fetch_market_cap_page] 예외 market=%s error=%s (graceful)",
             market, e,
         )
-        return []
+
+    return accumulated
 
 
-async def fetch_top_500_universe() -> list[str]:
-    """KOSPI 30 + KOSDAQ 30 = 60 ticker 단일 호출 영구 영속 (사이클 99 영구 명문화).
+async def _full_universe_load_once() -> dict:
+    """사이클 101 (2026-06-11) — market_cap FHPST01740000 기반 전체 유니버스 일괄 적재.
 
-    사이클 97 (2026-06-10) — KIS fluctuation API (FHPST01700000) 영역 신규 도입.
-    사이클 89/91/94/96 volume_rank 영역 전수 폐기 (단일 페이지 30 한도 + 페이징 미지원).
-    사이클 99 (2026-06-10) — 페이징 영역 영구 폐기 + 60 ticker 영구 영속 명문화.
+    매일 20:00:05 scheduler 에서 1회 호출 (Q67=B). KOSPI + KOSDAQ market_cap 페이징
+    누적 → 종목별 CTPF1002R 67컬럼 조회 → stock_master upsert. 사이클 97/99
+    fluctuation 영구 폐기 (Q68=A) + _universe_eager_refresh_loop 영구 폐기 (Q69=B)
+    이후 단일 대체 영역.
 
-    KIS API 본질 한계 영구 확정:
-    - volume_rank + fluctuation 모두 단일 페이지 30 한도 + tr_cont "M" 영구 비반환
-    - 60 ticker 영구 영속 수용 (KOSPI 30 + KOSDAQ 30, KIS API 본질 한계 영구 수용)
-    - 사이클 91 페이징 영역 영구 폐기 (KIS API 페이징 미지원 영구 확정)
+    KIS 정본 인용 (chk_market_cap.py + chk_search_stock_info.py / CTPF1002R):
+    - FHPST01740000: tr_cont "M"→"N" 페이징 누적 (_fetch_market_cap_page 참조)
+    - CTPF1002R: 67컬럼 응답 dict (단일 종목, output은 dict not list)
+      bfdy_clpr (전일종가, 사이클 81 정본 키 영속)
 
-    사용자 결정 영속:
-    - Q52=A: KIS fluctuation API (FHPST01700000) 신규 도입
-    - Q53=A: 사이클 89/91/94/96 전수 폐기
-    - Q58=C: 60 ticker 영구 영속 수용 + 사이클 91 페이징 영구 폐기
-    - Q59=A: 60 ticker 영구 영속 명문화
-    - KOSPI 30 + KOSDAQ 30 분리 호출 (사이클 96 영속, fluctuation 영역으로 흡수)
+    사이클 38 명문화 영속: tradable_boards 매수 진입 전용.
+    사이클 88 G-REJECT 영속: 개별 ticker 실패 → continue + failed++.
+    사이클 84 history trigger 영속: upsert_one 호출 → DB trigger 자동.
+    사이클 83 24h TTL fresh skip (is_stale 호출).
 
-    개장 전 1회 적재 (Q20=D + 사이클 83 5분 주기 결합).
-    ETF/리츠/SPAC 자동 제외 (`_universe_filter_securities_only`).
+    환경 분리 Rate Limit (domain-expert A3):
+    - 실전(real): _FULL_UNIVERSE_SLEEP_REAL(50ms) + max _FULL_UNIVERSE_MAX_LOAD_SECONDS_REAL(300s)
+    - 모의(vts): _FULL_UNIVERSE_SLEEP_VTS(200ms) + max _FULL_UNIVERSE_MAX_LOAD_SECONDS_VTS(600s)
 
     Returns:
-        종목코드 list (최대 60건, 보통주만). API 실패 시 [] (graceful).
+        summary dict 9 키 (사이클 74/89 collector 패턴 답습):
+        total / kospi / kosdaq / securities / etf / fetched / skipped_ttl / failed / elapsed_ms
 
     영속 의무:
-    - 사이클 38 명문화 (tradable_boards 매수 진입 전용 — 영향 0)
-    - 사이클 48 BFB 거래대금 재정렬 패턴 답습 (_trade_amount_key)
-    - 사이클 64 protected_tickers (영역 분리, 영향 0)
-    - 사이클 83 scan_pool eager refresh 영속 (영역 분리)
-    - 사이클 88 G-REJECT 영속 (외부 LLM 영구 차단 AST 가드 3)
-    - 사이클 89 ETF 제외 + 거래대금 정렬 (fluctuation 영역으로 흡수)
-    - 사이클 91 페이징 영역 영구 폐기 (KIS API 페이징 미지원 영구 확정)
-    - 사이클 93 chain 영속 (호출 chain 변경 0)
-    - 사이클 95 unknown=0 영속 (2회 분리 호출 = unknown 불필요)
-    - 사이클 96 KOSPI/KOSDAQ 분리 호출 (fluctuation 영역으로 흡수)
-    - 사이클 98 G-DOC1 chk_fluctuation.py 정본 인용 의무 (영속)
+    - 사이클 38 명문화 (tradable_boards 매수 진입 전용 — scanner 단계 영역만)
+    - 사이클 83 24h TTL fresh skip 영속 (is_stale 호출)
+    - 사이클 84 history trigger 영속 (upsert_one 호출)
+    - 사이클 88 G-REJECT 영속 (개별 실패 graceful continue)
+    - 사이클 101 KIS 정본 인용 (chk_market_cap.py + CTPF1002R)
     """
     import time as _t
-    from src.engine.stock_master_metrics import record_universe_refresh, flush_universe_collector
+    from src.config import settings as _settings
 
-    start_ms = _t.monotonic() * 1000
+    # 환경 분리 Rate Limit (domain-expert A3)
+    is_real = getattr(_settings, "kis_env", "vts").lower() == "real"
+    _sleep_secs = _FULL_UNIVERSE_SLEEP_REAL if is_real else _FULL_UNIVERSE_SLEEP_VTS
+    _max_secs = _FULL_UNIVERSE_MAX_LOAD_SECONDS_REAL if is_real else _FULL_UNIVERSE_MAX_LOAD_SECONDS_VTS
 
-    # 사이클 99 — 단일 호출 영구 영속 (KOSPI 30 + KOSDAQ 30 = 60 ticker)
-    # 사이클 91 페이징 영역 영구 폐기 (KIS API 페이징 미지원 영구 확정)
-    # 사이클 97 fluctuation API 2회 분리 호출 (사이클 96 영속, fluctuation 영역으로 흡수)
-    kospi_raw = await _fetch_fluctuation(market="kospi", top_n=30)
-    kosdaq_raw = await _fetch_fluctuation(market="kosdaq", top_n=30)
+    start_ts = _t.monotonic()
 
-    # 사이클 89 ETF 제외 영속 — fluctuation 영역으로 흡수
-    kospi_filtered = _universe_filter_securities_only(kospi_raw)
-    kosdaq_filtered = _universe_filter_securities_only(kosdaq_raw)
+    # --- Phase 1: market_cap 페이징 누적 (KOSPI + KOSDAQ) ---
+    kospi_rows = await _fetch_market_cap_page(market="kospi", max_pages=100)
+    kosdaq_rows = await _fetch_market_cap_page(market="kosdaq", max_pages=100)
+    all_rows = kospi_rows + kosdaq_rows
 
-    # 사이클 89 거래대금 desc 재정렬 영속 (사이클 48 BFB 패턴 답습)
-    # 사이클 99 — top_n=30 영구 영속 (KIS API 단일 페이지 한도, 페이징 미지원 영구 확정)
-    kospi_sorted = sorted(kospi_filtered, key=_trade_amount_key, reverse=True)[:30]
-    kosdaq_sorted = sorted(kosdaq_filtered, key=_trade_amount_key, reverse=True)[:30]
+    # ETF/리츠/SPAC 분류 (prdt_type_cd 기반 보통주 "300" 만 통과)
+    # CTPF1002R 조회 전 단계 — market_cap 응답은 prdt_type_cd 없을 수 있으므로 graceful
+    securities_rows = _universe_filter_securities_only(all_rows)
+    etf_count = len(all_rows) - len(securities_rows)
 
-    etf_excluded_total = (
-        (len(kospi_raw) - len(kospi_filtered)) +
-        (len(kosdaq_raw) - len(kosdaq_filtered))
-    )
+    total = len(all_rows)
+    kospi_count = len(kospi_rows)
+    kosdaq_count = len(kosdaq_rows)
+    securities_count = len(securities_rows)
+    fetched = 0
+    skipped_ttl = 0
+    failed = 0
 
-    # 사이클 95 unknown=0 영속 — 2회 분리 호출 = unknown 분류 불필요
-    # 사이클 99 — 60 ticker 영구 영속 (KOSPI 30 + KOSDAQ 30)
-    universe_rows = kospi_sorted + kosdaq_sorted
-
-    # 사이클 97 — 응답 ticker 키: stck_shrn_iscd (KIS chk_fluctuation.py 정본)
-    # volume_rank mksc_shrn_iscd 와 영역 차별 — 영구 시정
-    # 사이클 99 — 60 ticker 영구 영속 (tickers[:500] 영역 폐기, 최대 60건)
-    tickers = [row["stck_shrn_iscd"] for row in universe_rows if row.get("stck_shrn_iscd")]
-
-    elapsed_ms = int(_t.monotonic() * 1000 - start_ms)
-    securities_count = len(tickers)
-    universe_size = len(tickers)
-
-    # [stock_master_bulk_refresh] 개장 전 1회 emit (사이클 95 unknown=0 영속)
-    logger.info(
-        "[stock_master_bulk_refresh] universe=%d kospi=%d kosdaq=%d unknown=0 "
-        "securities=%d etf_excluded=%d elapsed_ms=%d",
-        universe_size,
-        len(kospi_sorted),
-        len(kosdaq_sorted),
-        securities_count,
-        etf_excluded_total,
-        elapsed_ms,
-    )
-
-    # collector 적재 (5분 윈도우 통계용, 사이클 95 키 호환)
-    record_universe_refresh({
-        "universe": universe_size,
-        "kospi": len(kospi_sorted),
-        "kosdaq": len(kosdaq_sorted),
-        "unknown": 0,  # 사이클 97 — 2회 분리 호출 = unknown 불필요 (사이클 95 영속)
-        "securities": securities_count,
-        "etf_excluded": etf_excluded_total,
-        "fetched": 0,
-        "skipped_fresh": 0,
-        "failed": 0,
-        "elapsed_ms": elapsed_ms,
-    })
-
-    # 개장 전 1회 즉시 flush (사이클 78 답습)
-    flush_universe_collector()
-
-    return tickers
-
-
-async def _universe_eager_refresh_loop(candidates: list[str]) -> None:
-    """사이클 89 (2026-06-09) — universe 500 ticker stock_master 순차 upsert 루프.
-
-    사이클 83 `_scan_pool_eager_refresh_loop` + 사이클 13-D `_eager_refresh_stock_master_for_held_positions`
-    패턴 직답습.
-
-    - 24h TTL fresh skip (사이클 83 Q3=B): `stock_master.is_stale(ticker, max_age_hours=24)` False → skip
-    - ticker 간 50ms sleep (사이클 83 Q3=B): Rate Limit 20/s 보호
-    - graceful: `inquire_stock_basics` 실패 시 continue (로그 없음, 사이클 83 답습)
-
-    Args:
-        candidates: universe ticker list (최대 500건). `fetch_top_500_universe()` 반환값.
-    """
-    import asyncio as _asyncio
+    # --- Phase 2: 종목별 CTPF1002R + stock_master upsert ---
     from src.db.stock_master import is_stale as _sm_is_stale, upsert_one as _sm_upsert
     from src.api.condition import inquire_stock_basics as _inquire_basics
 
-    for ticker in candidates:
-        # 24h TTL fresh skip (사이클 83 Q3=B + 사이클 13-D 패턴 답습)
-        stale = await _sm_is_stale(ticker, max_age_hours=24)
-        if not stale:
+    for row in all_rows:
+        # 시간 초과 가드 (정산 race 차단)
+        if _t.monotonic() - start_ts > _max_secs:
+            logger.warning(
+                "[_full_universe_load_once] max_load_seconds=%d 초과 — 중단 (fetched=%d, remaining=%d)",
+                _max_secs, fetched, len(all_rows) - fetched - skipped_ttl - failed,
+            )
+            break
+
+        ticker = row.get("mksc_shrn_iscd", "")
+        if not (len(ticker) == 6 and ticker.isdigit()):
             continue
 
-        # KIS CTPF1002R 호출 + upsert (graceful — 실패 시 continue)
+        # 24h TTL fresh skip (사이클 83 Q3=B 답습)
+        try:
+            stale = await _sm_is_stale(ticker, max_age_hours=24)
+        except Exception:
+            stale = True  # graceful — 판별 실패 시 갱신 시도
+
+        if not stale:
+            skipped_ttl += 1
+            await _asyncio.sleep(0)  # yield
+            continue
+
+        # KIS CTPF1002R 호출 → upsert (사이클 88 G-REJECT 영속)
         try:
             basics = await _inquire_basics(ticker)
             await _sm_upsert(basics)
-        except Exception:
-            pass  # graceful (사이클 83 답습 — stale 종목 쉐도우 skip)
+            fetched += 1
+        except Exception as e:
+            logger.warning(
+                "[_full_universe_load_once] CTPF1002R 실패 ticker=%s error=%s (graceful)",
+                ticker, e,
+            )
+            failed += 1
 
-        # 50ms Rate Limit 보호 (사이클 83 Q3=B 답습, KIS Rate Limit 20/s)
-        await _asyncio.sleep(0.05)
+        # 환경 분리 Rate Limit sleep (domain-expert A3)
+        await _asyncio.sleep(_sleep_secs)
+
+    elapsed_ms = int((_t.monotonic() - start_ts) * 1000)
+
+    summary = {
+        "total": total,
+        "kospi": kospi_count,
+        "kosdaq": kosdaq_count,
+        "securities": securities_count,
+        "etf": etf_count,
+        "fetched": fetched,
+        "skipped_ttl": skipped_ttl,
+        "failed": failed,
+        "elapsed_ms": elapsed_ms,
+    }
+    return summary
+
+
+def _emit_stock_master_age_warning(ticker: str, age_days: int) -> None:
+    """사이클 101 domain-expert A5 — 7일 이상 stale WARNING emit.
+
+    사이클 89 적시성 손실 보강: 매일 20:00:05 단독 적재 영역 = 신규 IPO 영역 부재 위험.
+    7일 이상 stock_master 미갱신 종목 → 운영자 알림.
+
+    Args:
+        ticker: 종목코드
+        age_days: stock_master 마지막 적재 이후 경과 일수
+
+    emit prefix: [stock_master_age_warning] ticker=X age_days=Z
+    """
+    if age_days < 7:
+        return
+    logger.warning(
+        "[stock_master_age_warning] ticker=%s age_days=%d (사이클 101 domain-expert A5 영속)",
+        ticker, age_days,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Q68=A (사이클 101) 영구 폐기: fetch_top_500_universe + _universe_eager_refresh_loop
+# KIS fluctuation API (FHPST01700000) 영역 전수 폐기 — 사이클 97/99 이전 영역.
+# 사이클 97~99 테스트 = xfail 의미 전환 (과거 영속 보존, 사이클 66 K-2 패턴 답습).
+# ---------------------------------------------------------------------------
+# NOTE: fetch_top_500_universe() 와 _universe_eager_refresh_loop() 는
+# 사이클 101 Q68=A/Q69=B 에 의해 영구 폐기. 해당 테스트는 xfail 마킹.
+# ---------------------------------------------------------------------------
+
+# (아래 영역은 사이클 101 이전 fetch_top_500_universe() 과 _universe_eager_refresh_loop()
+# 가 위치했던 자리. Q68=A + Q69=B 폐기 완료.)
+
+
+# ---------------------------------------------------------------------------
+# 사이클 89 이하: _universe_filter_securities_only (사이클 95 영속) 이하 기존 영역
+# ---------------------------------------------------------------------------
+
+# (사이클 101 Q68=A+Q69=B 에 의해 fetch_top_500_universe/
+# _universe_eager_refresh_loop 영구 폐기 완료.)

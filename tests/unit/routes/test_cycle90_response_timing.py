@@ -27,6 +27,14 @@ from fastapi.testclient import TestClient
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `fetch_top_500_universe` 영구 폐기 "
+        "(POST /refresh-universe 라우트 대상 함수). "
+        "사이클 90 시점 elapsed_ms timing 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_m2_elapsed_ms_reflects_actual_timing(monkeypatch):
     """M-2: 100ms 대기 mock → elapsed_ms >= 100 응답 반영.
 

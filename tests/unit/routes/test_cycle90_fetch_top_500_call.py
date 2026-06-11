@@ -29,6 +29,14 @@ from fastapi.testclient import TestClient
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `fetch_top_500_universe` 영구 폐기 "
+        "(POST /refresh-universe 라우트 대상 함수). "
+        "사이클 90 시점 1회 호출 정합 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_h4_fetch_top_500_universe_called_once_with_count_reflected(monkeypatch):
     """H-4: POST 호출 시 fetch_top_500_universe 1회 await + universe = len(result).
 
@@ -60,6 +68,14 @@ def test_h4_fetch_top_500_universe_called_once_with_count_reflected(monkeypatch)
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `fetch_top_500_universe` 영구 폐기 "
+        "(POST /refresh-universe 라우트 대상 함수). "
+        "사이클 90 시점 빈 universe graceful 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_h4_empty_universe_graceful_returns_zero(monkeypatch):
     """H-4-bis: KIS 실패 시 [] graceful 영속 → universe=0 응답.
 

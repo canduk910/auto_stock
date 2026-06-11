@@ -24,6 +24,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` 영구 폐기 "
+        "(scanner.py + scheduler.py 양쪽). "
+        "사이클 96 시점 시그너처 영속 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_m3_universe_eager_refresh_loop_signature_unchanged():
     """M-3.a: `_universe_eager_refresh_loop` 시그너처 = `(candidates)` 영속.
 
@@ -46,6 +54,13 @@ def test_m3_universe_eager_refresh_loop_signature_unchanged():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A+Q69=B — `fetch_top_500_universe` 영구 폐기. "
+        "사이클 96 시점 시그너처 영속 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_m3_fetch_top_500_universe_signature_unchanged():
     """M-3.b: `fetch_top_500_universe()` 시그너처 영속 (인자 없음).
 

@@ -159,6 +159,10 @@ class KisWebSocket:
         # 사이클 92 (2026-06-10) — 자동 재기동 cooldown + 슬라이딩 윈도우 cap 추적
         self._auto_restart_last_at: float = 0.0
         self._auto_restart_history: list[float] = []
+        # 사이클 102 (2026-06-11) — 세션별 마지막 메시지 수신 시각 (보조 가시화)
+        # 책임 분리: 종목별 ticker_last_tick (사이클 88 G-REJECT-2 영속) ↔ 세션별 _last_ws_message_at
+        # 사이클 16 _aes_iv 인스턴스 변수 패턴 답습 (__init__ + _handle_raw 양쪽 영역 분리)
+        self._last_ws_message_at: dict[str, datetime] = {}
 
     async def connect(
         self,
@@ -600,6 +604,9 @@ class KisWebSocket:
 
     async def _handle_raw(self, raw: str) -> None:
         """수신 메시지를 파싱하여 핸들러로 전달한다."""
+        # 사이클 102 (2026-06-11) — 세션별 마지막 메시지 수신 시각 갱신 (보조 가시화)
+        # 사이클 68 KST 일관성 영속 (datetime.now(KST_TZ) 사용)
+        self._last_ws_message_at[self._label] = datetime.now(_KST_TZ)
         # JSON 응답 (구독 확인, Heartbeat 등)
         if raw.startswith("{"):
             try:

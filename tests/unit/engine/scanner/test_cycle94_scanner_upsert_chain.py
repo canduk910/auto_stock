@@ -27,6 +27,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` 영구 폐기 "
+        "(scanner.py + scheduler.py 양쪽). "
+        "사이클 94 시점 chain 영속 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_m4_scanner_module_universe_eager_refresh_loop_exists():
     """M-4.a: scanner module 의 `_universe_eager_refresh_loop` 모듈 함수 영역 영속.
 
@@ -45,6 +53,13 @@ def test_m4_scanner_module_universe_eager_refresh_loop_exists():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A+Q69=B — `fetch_top_500_universe` 영구 폐기. "
+        "사이클 94 시점 함수 존재 영속 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_m4_scanner_module_fetch_top_500_universe_exists():
     """M-4.b: scanner module 의 `fetch_top_500_universe()` 함수 영역 영속.
 

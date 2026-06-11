@@ -116,6 +116,14 @@ async def test_m2_rate_limit_sleep_between_pages():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A+Q69=B — `fetch_top_500_universe` + `_fetch_fluctuation` 영구 폐기. "
+        "2회 분리 호출 패턴은 `_fetch_market_cap_page` 기반 `_full_universe_load_once`로 전환. "
+        "사이클 97 시점 분리 호출 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m2_two_separated_market_calls():
     """M-2.b: `fetch_top_500_universe` 2회 분리 호출 영역 영속 (KOSPI + KOSDAQ).

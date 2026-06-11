@@ -27,8 +27,9 @@ logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (ca
 MAX_STALE_RETRIES = 5                       # 연속 N회 초과 stale 시 skip (영구 stale 의심). 6회 이상 → 다음 _scan_loop 위임.
 
 # 사이클 29 (2026-05-21) — 영구 stale 무한 skip → 시간 기반 강제 재시도 전환
-STALE_FORCE_RETRY_AFTER_SECS = 300          # 영구 stale 의심 종목 최소 재시도 간격 (5분)
-STALE_FORCE_RETRY_HOURLY_CAP = 12           # 시간당 동일 종목 최대 재시도 횟수 (LMS / 앱키 정지 위험 차단)
+# 사이클 102 (2026-06-11) Q73=B — 임계 상향 (LMS chain 안전 마진 증가)
+STALE_FORCE_RETRY_AFTER_SECS = 600          # 영구 stale 의심 종목 최소 재시도 간격 (10분, 사이클 29 5분 → 사이클 102 10분)
+STALE_FORCE_RETRY_HOURLY_CAP = 6            # 시간당 동일 종목 최대 재시도 횟수 (사이클 29 12회 → 사이클 102 6회, LMS / 앱키 정지 위험 차단)
 
 # 사이클 61 Phase 2-A2 (2026-06-05) — STALE_FRESHNESS_SECS 이전
 # 사이클 9 관련: STALE_FRESHNESS_SECS 는 scheduler 잔류 함수도 사용

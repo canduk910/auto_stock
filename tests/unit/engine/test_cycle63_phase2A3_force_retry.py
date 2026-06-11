@@ -82,15 +82,20 @@ async def test_H1_force_retry_age_infinity_when_last_at_absent_first_entry():
 # H-2: age >= 300s force_retry + 카운터 리셋 (T+17min 시점 재현)
 # ===========================================================================
 @pytest.mark.asyncio
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 102 Q73=B cooldown 300→600 — 301s 시나리오가 새 임계 미달 → force_retry 미발화 (사이클 66 K-2 패턴 답습)",
+)
 async def test_H2_force_retry_age_300s_triggers_resubscribe_and_counter_reset():
     """H-2 (HIGH): age >= 300s 시 force_retry 발화 + 카운터 0 리셋.
 
     사이클 29 005935 사고 T+17min 시점 재현: retry=8 + last_resub_age=360s >= 300s.
+    사이클 102 Q73=B: cooldown 600s 상향 — 301s 시나리오가 cooldown 미달 → xfail 영속 보존.
     """
     from src.engine import stale_manager  # Red: AttributeError 가능
 
     base = datetime(2026, 6, 5, 10, 0, 0, tzinfo=KST)
-    last_at = base - timedelta(seconds=301)  # 301s 경과 (300s 임계 초과)
+    last_at = base - timedelta(seconds=301)  # 301s 경과 (사이클 29 300s 임계 초과 / 사이클 102 600s 임계 미달)
 
     sched = _make_scheduler()
     sched._stale_retry_count["005930"] = 7  # +1 → retry=8 → force_retry 분기

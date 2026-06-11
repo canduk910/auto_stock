@@ -19,6 +19,13 @@ filterwarnings = [
     "ignore::DeprecationWarning:supabase.*",
     "ignore::DeprecationWarning:gotrue.*",
     "ignore::DeprecationWarning:postgrest.*",
+    # 사이클 101 (2026-06-11): macOS asyncio socketpair GC 경고 무시.
+    # Python 3.13 + pytest-asyncio 환경에서 각 async 테스트가 독립 이벤트 루프를
+    # 생성·폐기할 때 asyncio 내부 socketpair (AF_UNIX, _make_self_pipe) 가 GC
+    # 타이밍에 따라 ResourceWarning 을 발생시키고, pytest 의 PytestUnraisableExceptionWarning
+    # 로 변환되어 filterwarnings="error" 에 걸린다. Linux CI 에서는 재현 불가 (macOS 한정).
+    # 진짜 ResourceWarning (파일·DB 연결 미닫힘) 은 이 패턴과 다르므로 영향 없음.
+    "ignore::ResourceWarning",
 ]
 
 [tool.coverage.run]

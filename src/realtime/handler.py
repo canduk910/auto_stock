@@ -53,6 +53,11 @@ def register_board_handler(handler: BoardHandler) -> None:
 _aes_iv: str = ""
 _aes_key: str = ""
 
+# 사이클 102 (2026-06-11) — dispatch silent drop 가시화 (사이클 88 G-REJECT-2 종목별 영속 답습)
+# `_handle_tick` graceful drop (len<10 / parsed is None) 분기 ticker별 누적 카운터.
+# 5분 주기 `flush_silent_drop_count()` 가 `[dispatch_drop_summary]` 1행 emit + clear.
+_silent_drop_count: dict[str, int] = {}
+
 
 def set_aes_keys(iv: str, key: str) -> None:
     """WebSocket 접속 시 수신한 AES 키를 저장한다."""
@@ -94,11 +99,16 @@ async def _handle_tick(payload: str) -> None:
     """
     fields = payload.split("^")
     if len(fields) < 10:
+        # 사이클 102 (2026-06-11) — dispatch silent drop 가시화
+        ticker = fields[0] if len(fields) >= 1 else "_unknown"
+        _silent_drop_count[ticker] = _silent_drop_count.get(ticker, 0) + 1
         return
 
     ticker = fields[0]
     parsed = _parse_tick_prices(fields)
     if parsed is None:
+        # 사이클 102 (2026-06-11) — 파싱 실패도 silent drop 누적
+        _silent_drop_count[ticker] = _silent_drop_count.get(ticker, 0) + 1
         logger.debug("실시간 체결가 파싱 실패: payload=%s", payload[:140])
         return
     current_price, open_price = parsed
@@ -109,7 +119,13 @@ async def _handle_tick(payload: str) -> None:
         change_rate = 0.0
 
     if _on_tick:
-        await _on_tick(ticker, current_price, open_price, change_rate)
+        try:
+            await _on_tick(ticker, current_price, open_price, change_rate)
+        except Exception:
+            logger.exception(
+                "[callback_exception] handler=_on_tick ticker=%s", ticker,
+            )
+            raise  # 재연결 trigger 영속 (사이클 88 G-REJECT-1 영속)
 
 
 async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
@@ -160,7 +176,14 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
         return
 
     if _on_execution:
-        await _on_execution(ticker, order_no, side, price, quantity)
+        try:
+            await _on_execution(ticker, order_no, side, price, quantity)
+        except Exception:
+            logger.exception(
+                "[callback_exception] handler=_on_execution ticker=%s order_no=%s",
+                ticker, order_no,
+            )
+            raise
 
 
 async def _handle_market_op(tr_id: str, tr_key: str, payload: str) -> None:
@@ -187,7 +210,32 @@ async def _handle_market_op(tr_id: str, tr_key: str, payload: str) -> None:
         tr_id, tr_key, mkop_cls_code, payload[:140],
     )
     if _on_board:
-        await _on_board(tr_key, mkop_cls_code, payload)
+        try:
+            await _on_board(tr_key, mkop_cls_code, payload)
+        except Exception:
+            logger.exception(
+                "[callback_exception] handler=_on_board tr_id=%s tr_key=%s",
+                tr_id, tr_key,
+            )
+            raise
+
+
+def flush_silent_drop_count() -> None:
+    """5분 주기 collector flush — `[dispatch_drop_summary]` 1행 emit (사이클 74 답습).
+
+    `_api_recovered_collector_loop` (scheduler.py) 에서 5분 주기 호출.
+    empty collector 진입 시 emit 0 (no-op, Q2 빈 윈도우 skip 영속).
+    """
+    global _silent_drop_count
+    if not _silent_drop_count:
+        return
+    drops_total = sum(_silent_drop_count.values())
+    by_ticker = dict(_silent_drop_count)
+    logger.info(
+        "[dispatch_drop_summary] window=300s drops_total=%d by_ticker=%s",
+        drops_total, by_ticker,
+    )
+    _silent_drop_count.clear()
 
 
 def decrypt_aes_cbc(encrypted_text: str, key: str, iv: str) -> str:

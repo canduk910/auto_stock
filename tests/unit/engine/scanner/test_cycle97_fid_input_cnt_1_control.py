@@ -27,6 +27,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 영구 폐기 (fluctuation API → market_cap FHPST01740000 전환). "
+        "FID_INPUT_CNT_1 파라미터는 market_cap API 의 다른 파라미터로 대체됨. "
+        "사이클 97 시점 FID_INPUT_CNT_1 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h3_fid_input_cnt_1_passes_top_n():
     """H-3.a: `_fetch_fluctuation(top_n=250)` → KIS 요청 `FID_INPUT_CNT_1 == "250"`.
@@ -73,6 +81,13 @@ async def test_h3_fid_input_cnt_1_passes_top_n():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 영구 폐기. "
+        "top_n 파라미터 사용자 제어 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h3_fid_input_cnt_1_user_controlled_value():
     """H-3.b: `_fetch_fluctuation(top_n=N)` → KIS 요청 `FID_INPUT_CNT_1 == str(N)` (사용자 제어).
@@ -128,6 +143,14 @@ async def test_h3_fid_input_cnt_1_user_controlled_value():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 영구 폐기. "
+        "FID_COND_SCR_DIV_CODE='20170' fluctuation 파라미터는 market_cap API에서 불필요. "
+        "사이클 97 시점 파라미터 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h3_fid_cond_scr_div_code_strict_20170():
     """H-3.c: `FID_COND_SCR_DIV_CODE = "20170"` KIS 정본 강제 검증 영역 영속.
@@ -187,6 +210,14 @@ async def test_h3_fid_cond_scr_div_code_strict_20170():
 # ----------------------------------------------------------------------------
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 영구 폐기. "
+        "FID_RANK_SORT_CLS_CODE='0' fluctuation 파라미터는 market_cap API에서 불필요. "
+        "사이클 98 G-REG1 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_cycle98_g_reg1_fid_rank_sort_cls_code_one_digit_persistence():
     """G-REG1: 사이클 97 영역 회귀 가드 갱신 — `FID_RANK_SORT_CLS_CODE == "0"` 영속 검증.

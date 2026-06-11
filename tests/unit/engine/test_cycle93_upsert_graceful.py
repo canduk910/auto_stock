@@ -39,6 +39,14 @@ pytestmark = pytest.mark.unit
 _MOCK_TICKERS = ["005930", "402340"]
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` (scheduler self method) 영구 폐기 "
+        "(`_full_universe_load_task_loop` 으로 전환). "
+        "사이클 93 시점 graceful 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_g_cc4_scheduler_upsert_failure_does_not_break_chain(
     monkeypatch, caplog

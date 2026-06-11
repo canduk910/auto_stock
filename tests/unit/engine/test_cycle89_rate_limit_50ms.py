@@ -29,6 +29,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` 영구 폐기 "
+        "(scanner.py + scheduler.py 양쪽). "
+        "사이클 89 시점 50ms Rate Limit 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h4_rate_limit_50ms_between_500_tickers():
     """H-4: 500 ticker 적재 시 ticker 간 `asyncio.sleep(0.05)` 호출 ≥ 499회.

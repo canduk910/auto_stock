@@ -47,6 +47,14 @@ def slow_fetch_client(monkeypatch):
     return TestClient(app)
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `fetch_top_500_universe` 영구 폐기 "
+        "(POST /refresh-universe 라우트 대상 함수). "
+        "사이클 90 시점 Lock 동시 호출 가드 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_h2_concurrent_post_returns_409_when_locked(slow_fetch_client):
     """H-2: in-flight 중 두번째 POST 호출 시 409 Conflict.
 
@@ -103,6 +111,14 @@ def test_h2_concurrent_post_returns_409_when_locked(slow_fetch_client):
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `fetch_top_500_universe` 영구 폐기 "
+        "(POST /refresh-universe 라우트 대상 함수). "
+        "사이클 90 시점 Lock release 후 정상 복귀 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_h2_post_after_release_returns_200(slow_fetch_client):
     """H-2-bis: Lock release 후 다음 호출은 정상 200.
 

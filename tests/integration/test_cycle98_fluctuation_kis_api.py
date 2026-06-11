@@ -35,6 +35,14 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 함수 자체 영구 폐기 "
+        "(fluctuation API → market_cap FHPST01740000 전환). "
+        "사이클 98 시점 통합 mock 시나리오 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_g_int1_a_normal_response_with_kis_official_params():
     """G-INT1-A: 정상 응답 시나리오 — KIS API 영역 정합 + result ≥1건 영속.
@@ -110,6 +118,14 @@ async def test_g_int1_a_normal_response_with_kis_official_params():
         )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 함수 자체 영구 폐기 "
+        "(fluctuation API → market_cap FHPST01740000 전환). "
+        "사이클 98 시점 OPSQ2002 graceful 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_g_int1_b_opsq2002_rejection_graceful():
     """G-INT1-B: OPSQ2002 거부 시나리오 영역 graceful 영속 검증.

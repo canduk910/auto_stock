@@ -257,7 +257,7 @@ def test_stop_tuple_equals_finally_tuple_members():
         "_5xx_dedupe_summary_task",
         "_api_recovered_collector_task",  # 사이클 79 추가 (사이클 76 도입, cancel 누락 시정)
         "_scan_pool_eager_refresh_task",  # 사이클 83 추가 (후보 풀 eager refresh 5분 task)
-        "_universe_eager_refresh_task",  # 사이클 89 추가 (universe 500+ refresh task)
+        "_full_universe_load_task",  # 사이클 101 추가 (Q68=A+Q69=B — _universe_eager_refresh_task 대체)
         "_ws_task",
         "_scan_task",
     }

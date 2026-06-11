@@ -126,6 +126,49 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 - 체결통보 필드 매핑 (`^` 구분): [0]HTS ID, **[1]계좌번호(8)+상품코드(2)**, [2]주문번호, [3]원주문번호, [4]매도매수구분, [5]정정구분, [6]주문종류, [7]주문조건, **[8]종목코드**, [9]주문수량, [10]체결단가, [11]체결시간, [12]거부여부, [13]체결구분(1:접수,2:체결), [14]?, [15]?, [16]체결수량, [17]고객명, [18]종목명
 - **계좌 필터**: `fields[1]` 이 `settings.kis_account_no` 로 시작하지 않으면 무시 (실전 H0STCNI0 은 동일 HTS ID 묶인 타 계좌 통보 함께 푸시)
 
+### 사이클 102 (2026-06-11) — 시세 구독 영역 전면 재검토 (3 영역 통합 가시화)
+
+사용자 신규 요구 "재구독 로직 자체가 실수가 아닌가 싶어. 시세구독 관련 부분을 전면 새로운 시각에서 재검토" + refactor-expert + domain-expert 병렬 자문 일치 결론 (사이클 88 G-REJECT 영구 영속 + 가시화 강화 + 임계 상향). 사용자 결정 Q72=F+가시화 (`last_ws_message_at` + dispatch + callback 3 영역 통합).
+
+#### (a) `KisWebSocket._last_ws_message_at` 세션별 마지막 메시지 수신 시각
+
+- **위치**: `KisWebSocket.__init__` (`websocket.py:162~165`) + `_handle_raw` (`websocket.py:607~609`)
+- **타입**: `dict[str, datetime]` (세션 label → KST 시각)
+- **갱신 시점**: `_handle_raw` 진입 시 즉시 `self._last_ws_message_at[self._label] = datetime.now(_KST_TZ)` (모든 메시지 — 시세/체결통보/PINGPONG/장운영정보)
+- **책임 분리 영속** (사이클 88 G-REJECT-2 영구 영속): 종목별 `ticker_last_tick` (사이클 88 영속) ↔ 세션별 `_last_ws_message_at` (사이클 102 신규) — 별도 dict 분리, 통합 X
+- **패턴 답습**: 사이클 16 `_aes_iv` 인스턴스 변수 패턴 (`__init__` + `_handle_raw` 양쪽 영역 분리) + 사이클 68 KST timezone 일관성 영속
+- **운영 효과**: 메인 vs 보조 세션별 메시지 수신 빈도 비교 + KIS PINGPONG 미수신 정책 보조 세션 영역 정합 확인 + 추후 진단 영역 확장 가능 (5분 주기 emit 후속 카드 가능)
+
+#### (b) `handler._silent_drop_count` + `flush_silent_drop_count()` dispatch silent drop 가시화
+
+- **위치**: `handler.py:56~59` (모듈 전역) + `handler.py:101~113` (`_handle_tick` 2 분기) + `handler.py:223~238` (신규 함수)
+- **타입**: `dict[str, int]` (ticker → 누적 drop 카운트)
+- **누적 시점 2 영역** (graceful silent drop, 사이클 88 G-REJECT-2 종목별 영속 답습):
+  - `_handle_tick` `len(fields) < 10` 분기 (L101~L105) — payload 영역 비정상 (`fields[0]` 없으면 `"_unknown"` 영역 영속)
+  - `_handle_tick` `parsed is None` 분기 (L109~L113) — `_parse_tick_prices` 파싱 실패 (현재가/시가 int 변환 실패)
+- **flush 함수**: `flush_silent_drop_count()` (L223~L238) — `[dispatch_drop_summary] window=300s drops_total=N by_ticker={...}` 1행 INFO emit + `_silent_drop_count.clear()`. empty collector 진입 시 emit 0 (Q2 빈 윈도우 skip 영속, 사이클 74 답습).
+- **호출 사이트**: `scheduler.py::_api_recovered_collector_loop` (L2567~L2571) 5분 주기 + try/except graceful (사이클 78 G-AST1 영역 답습 — `flush_swing_rest_poll_collector` + `flush_stale_watcher_collector` 와 함께 호출).
+- **운영 효과**: 미래 silent drop silent 결함 영구 차단 (KIS 응답 포맷 변경 / 종목코드 6자리 영문 우선 등 silent 분기 즉시 가시화).
+
+#### (c) 3 콜백 일관 `try/except` + `[callback_exception]` + `raise` 영속 (사이클 88 G-REJECT-1 영구 영속)
+
+- **위치 3 영역** (`handler.py` 동일 패턴):
+  - `_handle_tick` (L121~L128) `await _on_tick(ticker, current_price, open_price, change_rate)` 외부
+  - `_handle_execution` (L178~L186) `await _on_execution(ticker, order_no, side, price, quantity)` 외부
+  - `_handle_market_op` (L212~L220) `await _on_board(tr_key, mkop_cls_code, payload)` 외부
+- **패턴**: `try/except Exception: logger.exception("[callback_exception] handler=... ticker=... order_no=... tr_id=... tr_key=..."); raise` (1줄 컨텍스트 + ERROR + **`raise` 영속**)
+- **`raise` 영속 의무 영구 영속 (사이클 88 G-REJECT-1 영구 영속, 외부 LLM 단순 `swallow` graceful 추천 영구 거부)**: callback 예외 → re-raise → KisWebSocket `_receive_loop` 외부로 전파 → WebSocket 재연결 자연 발화 영속. 단순 swallow 시 = 사이클 29 005935 LMS chain 사고 재현 위험 (callback 침묵 + 재연결 trigger 영역 영구 폐기 + KIS LMS / 앱키 정지 chain).
+- **운영 효과**: 모든 callback 예외 가시화 (silent crash 영구 차단) + 재연결 trigger 영역 영구 보존.
+
+#### 영속 의무 매트릭스 (사이클 102 영구 확인 영역)
+
+- **사이클 88 G-REJECT-1 영구 영속**: 콜백 예외 단순 graceful (swallow) 영구 거부 → `raise` 의무 영속 (재연결 trigger 영역 영구 보존)
+- **사이클 88 G-REJECT-2 영구 영속**: 종목별 `ticker_last_tick` ↔ 세션별 `_last_ws_message_at` 책임 분리 영속 (통합 X)
+- **사이클 88 G-REJECT-3 영구 영속**: 4 dict 분리 (`_subscriptions` / `_subscriptions_acked` / `_ticker_to_session` / `ticker_last_tick`) + `_last_ws_message_at` 신규 추가 — 통합 X
+- **사이클 17 OPSP0002 backoff 300s 영속**: `_opsp_backoff_until` dict 등록 행위 무변경
+- **WebSocket 4중 안전망 영속**: F1 + `_scan_loop` + K stale watcher + `_resubscribe_stale_priority`
+- **AST 영구 가드 5 + 회귀 가드 17 케이스**: G-78-VERIFY-1~5 (영역 1 영구 확인) + G-WS-MSG1/2 + G-DISPATCH1~3 + G-CALLBACK1/2 + G-THRESHOLD1/2/3 + G-LMS1 + G-PERSIST1
+
 ## WebSocket 메시지 포맷
 
 ```

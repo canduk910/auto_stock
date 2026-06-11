@@ -39,6 +39,14 @@ def client(monkeypatch):
     return TestClient(app)
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `fetch_top_500_universe` 영구 폐기 "
+        "(POST /refresh-universe 라우트 대상 함수). "
+        "사이클 90 시점 ApiResponse 래퍼 정합 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_h1_post_refresh_universe_returns_api_response_envelope(client):
     """H-1: POST `/api/stock-master/refresh-universe` 가 ApiResponse 래퍼 응답.
 

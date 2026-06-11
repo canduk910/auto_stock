@@ -60,6 +60,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -91,6 +92,9 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -103,6 +107,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -237,6 +242,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -268,6 +274,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -287,6 +296,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -405,6 +415,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -485,6 +496,11 @@ backend:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -494,6 +510,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -506,6 +523,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -607,6 +629,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -730,6 +757,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -772,6 +800,7 @@ backend:
     direct_tests:
     - tests/integration/test_boot_eager_refresh.py
     - tests/integration/test_confirm_open_prices.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
@@ -854,6 +883,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -863,6 +897,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -875,6 +910,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -980,6 +1020,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1105,6 +1150,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -1179,6 +1225,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -1211,6 +1258,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -1231,6 +1281,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1377,6 +1428,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -1409,6 +1461,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -1424,6 +1479,10 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -1572,6 +1631,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -1605,6 +1665,9 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_quote_pool.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -1625,6 +1688,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1777,6 +1841,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -1817,6 +1882,11 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1826,6 +1896,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -1838,6 +1909,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -1945,6 +2021,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2072,6 +2153,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -2147,6 +2229,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -2192,6 +2275,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2205,6 +2293,7 @@ backend:
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -2236,6 +2325,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -2344,6 +2438,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2475,6 +2574,9 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_callback_exception.py
+    - tests/unit/realtime/test_cycle102_dispatch_drop.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -2530,6 +2632,7 @@ backend:
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -2562,6 +2665,7 @@ backend:
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_boot_preissue_tokens.py
+    - tests/unit/engine/test_cycle101_kst_persistence.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle83_r6_frequency_regression.py
     - tests/unit/engine/test_cycle83_sk_square_fixture.py
@@ -2602,6 +2706,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -2648,6 +2753,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2659,6 +2769,11 @@ backend:
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -2761,6 +2876,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2886,6 +3006,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -2924,6 +3045,7 @@ backend:
     - tests/unit/db/test_cycle68_kst_helper_module_g1.py
     - tests/unit/engine/scanner/test_cycle94_kst_persistence.py
     - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+    - tests/unit/engine/test_cycle101_kst_persistence.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle64_routes_price_filter.py
@@ -2957,6 +3079,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -3003,6 +3126,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -3016,6 +3144,7 @@ backend:
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -3042,6 +3171,12 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_emit_visibility.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -3148,6 +3283,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -3279,6 +3419,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -3359,6 +3500,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -3391,6 +3533,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -3405,6 +3550,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3538,6 +3684,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -3570,6 +3717,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -3584,6 +3734,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3721,6 +3872,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -3767,6 +3919,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -3778,6 +3935,7 @@ backend:
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -3790,6 +3948,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -3897,6 +4060,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -4024,6 +4192,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -4098,6 +4267,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4130,6 +4300,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4144,6 +4317,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4278,6 +4452,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4310,6 +4485,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4325,6 +4503,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4469,6 +4648,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4501,6 +4681,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4515,6 +4698,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4625,6 +4809,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4682,6 +4867,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -4711,6 +4899,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4828,6 +5017,7 @@ backend:
     - tests/integration/test_sell_rejection_integration.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -4876,6 +5066,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4918,6 +5109,11 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4929,6 +5125,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -5035,6 +5236,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5161,6 +5367,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -5230,6 +5437,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -5262,6 +5470,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -5276,6 +5487,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -5412,6 +5624,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -5458,6 +5671,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5467,6 +5685,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -5479,6 +5698,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -5586,6 +5810,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5712,6 +5941,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -5785,6 +6015,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -5831,6 +6062,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5844,6 +6080,7 @@ backend:
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -5875,6 +6112,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -5983,6 +6225,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6115,6 +6362,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -6222,6 +6470,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
     - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_dockerfile_token_cache_perms.py
@@ -6265,6 +6514,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -6274,6 +6528,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -6286,6 +6541,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
     - tests/unit/engine/scanner/test_cycle81_trade_amount_filter_fallback_removal.py
@@ -6388,6 +6648,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6509,6 +6774,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -6593,6 +6859,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -6636,6 +6903,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -6645,6 +6917,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -6657,6 +6930,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -6765,6 +7043,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6893,6 +7176,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -6971,6 +7255,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -7003,6 +7288,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -7022,6 +7310,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7161,6 +7450,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -7193,6 +7483,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -7242,6 +7536,10 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7336,6 +7634,9 @@ backend:
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
     transitive_tests:
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_retention.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -7444,6 +7745,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -7476,6 +7778,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -7490,6 +7795,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7624,6 +7930,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -7656,6 +7963,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -7674,6 +7984,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7808,6 +8119,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -7840,6 +8152,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -7853,6 +8168,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7990,6 +8306,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8036,6 +8353,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -8045,6 +8367,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -8057,6 +8380,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -8164,6 +8492,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -8291,6 +8624,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -8368,6 +8702,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8400,6 +8735,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -8413,6 +8751,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8552,6 +8891,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8583,6 +8923,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -8597,6 +8940,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8708,6 +9052,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8773,6 +9118,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -8788,6 +9136,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8938,6 +9287,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8968,6 +9318,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -8980,6 +9333,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9107,6 +9461,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -9139,6 +9494,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -9153,6 +9511,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -9263,6 +9622,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -9327,6 +9687,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -9341,6 +9704,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -9470,6 +9834,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -9502,6 +9867,10 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9511,6 +9880,11 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -9588,6 +9962,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -9665,7 +10040,9 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -9708,6 +10085,10 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9786,6 +10167,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
     - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
@@ -9845,6 +10227,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -9877,6 +10260,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -9889,6 +10275,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10027,6 +10414,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10059,6 +10447,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -10079,6 +10470,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10220,6 +10612,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10267,6 +10660,9 @@ backend:
     - tests/unit/engine/test_session.py
     transitive_tests:
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -10295,6 +10691,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10399,7 +10796,8 @@ backend:
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
   src/engine/stale_diagnostics.py:
-    direct_tests: []
+    direct_tests:
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle64_routes_price_filter.py
@@ -10433,6 +10831,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10465,6 +10864,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -10480,6 +10882,9 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10588,6 +10993,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
     - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
     - tests/unit/engine/test_cycle61_phase2A2_constants.py
@@ -10641,6 +11047,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10673,6 +11080,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -10685,6 +11095,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10802,6 +11213,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10834,6 +11246,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -10849,6 +11264,8 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -11006,6 +11423,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -11038,6 +11456,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -11050,6 +11471,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -11168,6 +11590,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -11200,6 +11623,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -11215,6 +11641,8 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -11318,6 +11746,7 @@ backend:
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
   src/engine/stale_watcher_core.py:
     direct_tests:
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle74_stale_watcher_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     transitive_tests:
@@ -11353,6 +11782,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -11385,6 +11815,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -11400,6 +11833,8 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -11503,7 +11938,11 @@ backend:
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
   src/engine/stock_master_metrics.py:
     direct_tests:
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/engine/scanner/test_cycle101_emit_visibility.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+    - tests/unit/engine/test_cycle101_kst_persistence.py
     - tests/unit/engine/test_cycle89_emit_visibility.py
     - tests/unit/engine/test_cycle93_scheduler_5min_upsert_chain.py
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
@@ -11541,6 +11980,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -11572,157 +12012,29 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
-    - tests/unit/api/test_base.py
-    - tests/unit/api/test_base_logging.py
-    - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_condition_cache.py
-    - tests/unit/api/test_condition_quote_routing.py
-    - tests/unit/api/test_condition_stock_basics.py
-    - tests/unit/api/test_cycle76_recovered_collector.py
-    - tests/unit/api/test_cycle76_request_5xx_dedupe.py
-    - tests/unit/api/test_inquire_ccnl.py
-    - tests/unit/api/test_insufficient_classification.py
-    - tests/unit/api/test_quote_pool.py
-    - tests/unit/api/test_quote_pool_5xx_dedupe.py
-    - tests/unit/api/test_quote_pool_label_skip.py
-    - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
-    - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
-    - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
-    - tests/unit/ast/test_cycle94_ast_no_industry_code.py
-    - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
-    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
-    - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
-    - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
-    - tests/unit/ast/test_cycle99_default_arg_persistence.py
-    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
-    - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
-    - tests/unit/db/test_cycle84_count_eager_refresh_today.py
-    - tests/unit/db/test_cycle84_get_stats_aggregation.py
-    - tests/unit/db/test_cycle84_list_all_pagination.py
-    - tests/unit/db/test_cycle84_list_history_per_ticker.py
-    - tests/unit/db/test_cycle84_trigger_insert.py
-    - tests/unit/db/test_cycle84_trigger_ttl_refresh.py
-    - tests/unit/db/test_cycle84_trigger_update.py
-    - tests/unit/db/test_stock_master.py
-    - tests/unit/db/test_stock_master_upsert.py
-    - tests/unit/db/test_trade_history_for_sync.py
-    - tests/unit/db/test_trade_history_kst.py
-    - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
-    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
-    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
-    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
-    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
-    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
-    - tests/unit/engine/scanner/test_cycle81_price_filter_key_fix.py
-    - tests/unit/engine/scanner/test_cycle81_real_data_regression.py
-    - tests/unit/engine/scanner/test_cycle81_trade_amount_filter_fallback_removal.py
-    - tests/unit/engine/scanner/test_cycle89_etf_exclusion.py
-    - tests/unit/engine/scanner/test_cycle89_fetch_top_500_universe.py
-    - tests/unit/engine/scanner/test_cycle89_kospi_kosdaq_separation.py
-    - tests/unit/engine/scanner/test_cycle91_fetch_top_500_universe_full.py
-    - tests/unit/engine/scanner/test_cycle91_graceful_kis_error.py
-    - tests/unit/engine/scanner/test_cycle91_no_pagination_legacy.py
-    - tests/unit/engine/scanner/test_cycle91_rate_limit_sleep.py
-    - tests/unit/engine/scanner/test_cycle91_volume_rank_max_pages_guard.py
-    - tests/unit/engine/scanner/test_cycle91_volume_rank_pagination.py
-    - tests/unit/engine/scanner/test_cycle91_volume_rank_top_n_early_break.py
-    - tests/unit/engine/scanner/test_cycle94_emit_visibility.py
-    - tests/unit/engine/scanner/test_cycle94_etf_exclusion_500.py
-    - tests/unit/engine/scanner/test_cycle94_fid_input_iscd_fix.py
-    - tests/unit/engine/scanner/test_cycle94_g_reject_persistence.py
-    - tests/unit/engine/scanner/test_cycle94_graceful_market_id_missing.py
-    - tests/unit/engine/scanner/test_cycle94_kospi_kosdaq_split_500.py
-    - tests/unit/engine/scanner/test_cycle94_kst_persistence.py
-    - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
-    - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
-    - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
-    - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
-    - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
-    - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
-    - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
-    - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
-    - tests/unit/engine/scanner/test_cycle95_unknown_split.py
-    - tests/unit/engine/scanner/test_cycle96_emit_visibility_2call.py
-    - tests/unit/engine/scanner/test_cycle96_g_reject_persistence.py
-    - tests/unit/engine/scanner/test_cycle96_kospi_kosdaq_separation_2call.py
-    - tests/unit/engine/scanner/test_cycle96_kst_persistence.py
-    - tests/unit/engine/scanner/test_cycle96_market_input_iscd_restored.py
-    - tests/unit/engine/scanner/test_cycle96_post_split_removed.py
-    - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
-    - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
-    - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
-    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
-    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
-    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
-    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
-    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
-    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
-    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
-    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
-    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
-    - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
-    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
-    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
-    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
-    - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
-    - tests/unit/engine/strategies/test_bull_flag_breakout.py
-    - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
-    - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
-    - tests/unit/engine/strategies/test_bull_flag_breakout_retention.py
-    - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
-    - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
-    - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
-    - tests/unit/engine/strategies/test_donchian_swing.py
-    - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
-    - tests/unit/engine/strategies/test_donchian_swing_extension_cap.py
-    - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
-    - tests/unit/engine/strategies/test_long_tail_volatility.py
-    - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
-    - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
-    - tests/unit/engine/strategies/test_momentum.py
-    - tests/unit/engine/strategies/test_momentum_scan_stats.py
-    - tests/unit/engine/strategies/test_pr15_review_fixes.py
-    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
-    - tests/unit/engine/strategies/test_vcp_breakout.py
-    - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
-    - tests/unit/engine/strategies/test_volatility_breakout.py
-    - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
-    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
-    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
-    - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
-    - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
-    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
-    - tests/unit/engine/test_backtest_engine.py
-    - tests/unit/engine/test_backtest_engine_db_toggle.py
-    - tests/unit/engine/test_backtest_engine_nested_metrics.py
-    - tests/unit/engine/test_backtest_engine_unwrap.py
     - tests/unit/engine/test_backtest_poll_loop.py
-    - tests/unit/engine/test_backtest_yaml.py
-    - tests/unit/engine/test_backtest_yaml_donchian_compat.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
-    - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
-    - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
-    - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
-    - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
-    - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
-    - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
@@ -11730,7 +12042,6 @@ backend:
     - tests/unit/engine/test_cycle61_phase2A2_constants.py
     - tests/unit/engine/test_cycle61_phase2A2_delegation.py
     - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
-    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
     - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
@@ -11740,50 +12051,28 @@ backend:
     - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
     - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
     - tests/unit/engine/test_cycle63_phase2A3_history_window.py
-    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
-    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
     - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
     - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
     - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
     - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
-    - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
-    - tests/unit/engine/test_cycle64_price_filter_scanner_cache.py
-    - tests/unit/engine/test_cycle64_price_filter_scanner_daily_summary.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_emit_cap.py
-    - tests/unit/engine/test_cycle64_price_filter_scanner_protected.py
-    - tests/unit/engine/test_cycle74_stale_watcher_aggregation.py
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
-    - tests/unit/engine/test_cycle83_emit_visibility.py
     - tests/unit/engine/test_cycle83_memory_leak.py
-    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
-    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
-    - tests/unit/engine/test_cycle83_sk_square_fixture.py
     - tests/unit/engine/test_cycle83_task_lifecycle.py
-    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
-    - tests/unit/engine/test_cycle89_bfdy_clpr_persistence.py
-    - tests/unit/engine/test_cycle89_candidate_pool_protection.py
     - tests/unit/engine/test_cycle89_lifecycle.py
-    - tests/unit/engine/test_cycle89_protected_tickers_integration.py
-    - tests/unit/engine/test_cycle89_r4_universe_guard_persistence.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
-    - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
     - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
     - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
     - tests/unit/engine/test_cycle92_time_boot_moved.py
     - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_force_clear_time_guard.py
-    - tests/unit/engine/test_get_scan_status_tick_coverage.py
-    - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_observability_logs.py
-    - tests/unit/engine/test_order_engine_buy.py
-    - tests/unit/engine/test_order_engine_sell_fallback.py
-    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -11793,19 +12082,10 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
-    - tests/unit/engine/test_risk_buy_block_modes.py
-    - tests/unit/engine/test_risk_donchian_skip_buy.py
-    - tests/unit/engine/test_risk_on_tick_selling_skip.py
-    - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
     - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
-    - tests/unit/engine/test_scanner_pool_count.py
-    - tests/unit/engine/test_scanner_priority_dispatch.py
-    - tests/unit/engine/test_scanner_priority_order.py
-    - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
-    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -11822,11 +12102,6 @@ backend:
     - tests/unit/engine/test_session_silent_inactive_recovery.py
     - tests/unit/engine/test_stale_watcher_priority_split.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
-    - tests/unit/engine/test_strategy_base.py
-    - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
-    - tests/unit/engine/test_strategy_fallback_budget.py
-    - tests/unit/engine/test_strategy_registry.py
-    - tests/unit/engine/test_subscription_source_counts.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
@@ -11837,32 +12112,6 @@ backend:
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
-    - tests/unit/realtime/test_ack_orphan_guard.py
-    - tests/unit/realtime/test_aes_keys_main_only.py
-    - tests/unit/realtime/test_cycle42_pingpong_metrics.py
-    - tests/unit/realtime/test_cycle43_session_label_unified.py
-    - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
-    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
-    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
-    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
-    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
-    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
-    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
-    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
-    - tests/unit/realtime/test_pool_safety_rules.py
-    - tests/unit/realtime/test_websocket_ack.py
-    - tests/unit/realtime/test_websocket_on_message_guard.py
-    - tests/unit/realtime/test_websocket_pool.py
-    - tests/unit/realtime/test_websocket_pool_disable.py
-    - tests/unit/realtime/test_websocket_pool_session_grouping.py
-    - tests/unit/realtime/test_websocket_pool_start_ready.py
-    - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
-    - tests/unit/realtime/test_websocket_pool_stop_reset.py
-    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
-    - tests/unit/realtime/test_websocket_priority.py
-    - tests/unit/realtime/test_websocket_reverify.py
-    - tests/unit/realtime/test_websocket_subscribe_rejection.py
-    - tests/unit/realtime/test_ws_subscribe_backoff.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -11876,7 +12125,6 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
-    - tests/unit/services/test_quote_session_health.py
   src/engine/strategies/__init__.py:
     direct_tests:
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -11933,6 +12181,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -11965,6 +12214,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -11977,6 +12229,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12087,6 +12340,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12151,6 +12405,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -12170,6 +12427,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12279,6 +12537,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12341,6 +12600,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -12354,6 +12616,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12464,6 +12727,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12522,6 +12786,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -12542,6 +12809,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12683,6 +12951,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12715,6 +12984,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -12727,6 +12999,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12837,6 +13110,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12903,6 +13177,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -12922,6 +13199,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13034,6 +13312,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13145,6 +13424,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
@@ -13164,6 +13446,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -13264,6 +13547,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13339,6 +13623,9 @@ backend:
     - tests/contract/test_routes_system_integrations.py
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
@@ -13354,6 +13641,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13488,6 +13776,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13520,6 +13809,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -13540,6 +13832,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13728,6 +14021,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13759,6 +14053,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -13776,6 +14073,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13908,6 +14206,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13944,6 +14243,9 @@ backend:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_insufficient_classification.py
     - tests/unit/api/test_quote_pool.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -13964,6 +14266,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14106,6 +14409,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -14152,6 +14456,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -14164,6 +14473,7 @@ backend:
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -14178,6 +14488,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -14285,6 +14600,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14412,6 +14732,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -14504,6 +14825,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -14563,6 +14885,9 @@ backend:
     - tests/contract/test_routes_trading.py
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_quote_pool.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -14582,6 +14907,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14831,6 +15157,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
     - tests/integration/test_cycle99_fluctuation_single_call.py
@@ -14873,6 +15200,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -14882,6 +15214,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -14892,6 +15225,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -14986,6 +15324,11 @@ backend:
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -15109,6 +15452,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -15224,6 +15568,7 @@ backend:
     - tests/integration/test_buy_block_low_funds.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -15255,6 +15600,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
@@ -15277,6 +15625,7 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15402,6 +15751,8 @@ backend:
     - tests/unit/engine/test_universe_guard.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_callback_exception.py
+    - tests/unit/realtime/test_cycle102_dispatch_drop.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
     - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
@@ -15442,6 +15793,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -15472,6 +15824,9 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -15484,6 +15839,7 @@ backend:
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15581,6 +15937,8 @@ backend:
   src/realtime/handler.py:
     direct_tests:
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_callback_exception.py
+    - tests/unit/realtime/test_cycle102_dispatch_drop.py
     - tests/unit/realtime/test_handler_tick_parse_guard.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -15615,6 +15973,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -15661,6 +16020,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -15670,6 +16034,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -15682,6 +16047,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -15790,6 +16160,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -15916,6 +16291,7 @@ backend:
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -15969,6 +16345,7 @@ backend:
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -16016,6 +16393,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -16061,6 +16439,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -16070,6 +16453,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -16082,6 +16466,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -16190,6 +16579,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16397,6 +16791,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -16440,6 +16835,11 @@ backend:
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -16449,6 +16849,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -16461,6 +16862,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -16567,6 +16973,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16676,6 +17087,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
     - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
@@ -17506,6 +17918,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -17538,6 +17951,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -17553,6 +17969,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17703,6 +18120,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -17734,6 +18152,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -17751,6 +18172,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17901,6 +18323,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -17932,6 +18355,9 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -17948,6 +18374,7 @@ backend:
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18083,6 +18510,7 @@ backend:
     - tests/integration/test_chegyeol_race.py
     - tests/integration/test_confirm_open_prices.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_cycle101_ctpf1002r_integration.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -18128,6 +18556,11 @@ backend:
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_flush_required.py
+    - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
+    - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -18137,6 +18570,7 @@ backend:
     - tests/unit/ast/test_cycle99_default_arg_persistence.py
     - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -18149,6 +18583,11 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -18257,6 +18696,11 @@ backend:
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -18384,6 +18828,7 @@ backend:
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/realtime/test_ack_orphan_guard.py
     - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -18957,10 +19402,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-11T08:36:57.698633+09:00'
+generated_at: '2026-06-11T11:28:32.139604+09:00'
 stats:
   backend_modules: 99
-  backend_tests: 476
+  backend_tests: 500
   frontend_modules: 69
   frontend_tests: 41
   unmapped_modules:

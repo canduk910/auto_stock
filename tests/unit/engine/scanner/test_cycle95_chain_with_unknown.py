@@ -104,6 +104,14 @@ async def test_m2_unknown_tickers_in_universe_chain_input():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` 영구 폐기 "
+        "(scanner.py + scheduler.py 양쪽). "
+        "사이클 95 시점 시그너처 영속 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m2_universe_eager_refresh_loop_signature_unchanged():
     """M-2.b: `_universe_eager_refresh_loop` 시그너처 + 본체 행위 변경 0 영속.
@@ -131,6 +139,14 @@ async def test_m2_universe_eager_refresh_loop_signature_unchanged():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` 영구 폐기 "
+        "(scanner.py + scheduler.py 양쪽). "
+        "사이클 95 시점 unknown ticker upsert chain 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m2_unknown_ticker_enters_upsert_chain():
     """M-2.c: unknown ticker 가 `_universe_eager_refresh_loop` 진입 시 upsert 시도.

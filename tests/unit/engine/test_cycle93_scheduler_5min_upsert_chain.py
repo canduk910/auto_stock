@@ -33,6 +33,14 @@ pytestmark = pytest.mark.unit
 _MOCK_TICKERS = ["005930", "402340", "035720"]
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` (scheduler self method) 영구 폐기 "
+        "(`_full_universe_load_task_loop` 으로 전환). "
+        "사이클 93 시점 5분 주기 chain 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_g_cc2_scheduler_5min_loop_calls_scanner_upsert_per_cycle(monkeypatch):
     """G-CC2: 5분 주기 분기에서도 매 사이클 scanner module upsert chain 호출 의무.

@@ -30,6 +30,14 @@ from fastapi.testclient import TestClient
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `fetch_top_500_universe` 영구 폐기 "
+        "(POST /refresh-universe 라우트 대상 함수). "
+        "사이클 90 시점 Lock release 예외 시도 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_m3_lock_releases_after_exception_in_fetch(monkeypatch):
     """M-3: fetch_top_500_universe 가 예외 raise 시도 Lock release.
 

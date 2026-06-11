@@ -27,6 +27,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` 영구 폐기 (scanner.py + scheduler.py 양쪽). "
+        "역할은 `_full_universe_load_task_loop` + `_full_universe_load_once`로 전환. "
+        "사이클 97 시점 chain 영속 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m3_universe_eager_refresh_loop_chain_persisted():
     """M-3.a: `_universe_eager_refresh_loop` 함수 영역 영속 (사이클 89 영역 영구 보존).

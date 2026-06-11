@@ -31,6 +31,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A+Q69=B — `fetch_top_500_universe` + `_fetch_fluctuation` 영구 폐기 "
+        "(fluctuation API → market_cap FHPST01740000 + `_full_universe_load_once` 전환). "
+        "사이클 99 시점 60 ticker 영구 영속 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_g_persist1_fetch_top_500_universe_returns_60_ticker_persistence():
     """G-PERSIST1: `fetch_top_500_universe()` 결과 = 60 ticker 영구 영속.

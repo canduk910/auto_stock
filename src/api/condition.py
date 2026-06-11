@@ -138,6 +138,9 @@ HOLIDAY_URL = "/uapi/domestic-stock/v1/quotations/chk-holiday"
 # CTPF1002R — 주식기본조회 (Phase G, 2026-05-11). NXT 거래종목여부/정지여부 사전 조회.
 STOCK_BASICS_URL = "/uapi/domestic-stock/v1/quotations/search-stock-info"
 
+# 사이클 101 — StockBasics 모듈 공개 re-export (테스트 + 호출자 직접 import 호환)
+from src.models.stock import StockBasics  # noqa: E402, F401
+
 
 async def is_market_open(target_date) -> bool:
     """KIS 휴장일 API로 해당 일자의 주식시장 개장 여부를 반환한다.

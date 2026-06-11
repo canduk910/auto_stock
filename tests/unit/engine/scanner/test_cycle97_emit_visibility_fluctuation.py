@@ -27,6 +27,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A+Q69=B — `fetch_top_500_universe` + `_fetch_fluctuation` 영구 폐기. "
+        "`[stock_master_bulk_refresh]` emit 은 `_fetch_market_cap_page` 기반 신규 함수로 전환. "
+        "사이클 97 시점 emit 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m1_stock_master_bulk_refresh_emit_present(caplog: pytest.LogCaptureFixture):
     """M-1.a: `fetch_top_500_universe()` 가 `[stock_master_bulk_refresh]` emit 영속.
@@ -102,6 +110,14 @@ async def test_m1_stock_master_bulk_refresh_emit_present(caplog: pytest.LogCaptu
         )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A+Q69=B — `fetch_top_500_universe` + `_fetch_fluctuation` 영구 폐기. "
+        "unknown=0 영속 검증은 `_full_universe_load_once` 기반으로 전환됨. "
+        "사이클 97 시점 unknown 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m1_unknown_zero_persistence():
     """M-1.b: 사이클 95 영속 영역 = unknown=0 (사이클 97 영역 = 2회 분리 호출 정상).

@@ -42,6 +42,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 함수 자체 영구 폐기 "
+        "(fluctuation API → market_cap FHPST01740000 전환). "
+        "사이클 98 시점 FID_RANK_SORT_CLS_CODE 1자리 시정 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_g_fix1_rank_sort_cls_code_one_digit_kis_official():
     """G-FIX1: `_fetch_fluctuation` 호출 시 `FID_RANK_SORT_CLS_CODE == "0"` (1자리, KIS 정본).

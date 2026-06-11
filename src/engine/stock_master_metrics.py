@@ -81,3 +81,66 @@ def flush_universe_collector() -> None:
     )
 
     _universe_collector.clear()
+
+
+# ---------------------------------------------------------------------------
+# 사이클 101 (2026-06-11) — 매일 20:00:05 전체 유니버스 적재 collector (사이클 74 패턴 답습)
+# emit prefix: [full_universe_load_summary]
+# 사이클 78 G-AST1 영속: record_* 에 대응 flush_* 호출 사이트 ≥1 의무
+# ---------------------------------------------------------------------------
+_full_universe_collector: list[dict] = []
+
+
+def record_full_universe_load_summary(stats: dict) -> None:
+    """사이클 101 — 전체 유니버스 적재 결과 1건 collector 적재.
+
+    사이클 74 `record_stale_watcher_check` 패턴 직답습.
+
+    Args:
+        stats: summary dict. 권장 키:
+            - total (int): 전체 ticker 수
+            - kospi (int): KOSPI market_cap 페이징 누적 건수
+            - kosdaq (int): KOSDAQ market_cap 페이징 누적 건수
+            - securities (int): 보통주 필터 통과 건수
+            - etf (int): ETF/리츠/SPAC 제외 건수
+            - fetched (int): CTPF1002R upsert 건수
+            - skipped_ttl (int): 24h TTL fresh skip 건수
+            - failed (int): 실패 건수
+            - elapsed_ms (int): 소요 시간 (ms)
+    """
+    _full_universe_collector.append(stats)
+
+
+def flush_full_universe_load_collector() -> None:
+    """사이클 101 — 전체 유니버스 적재 collector → 1행 emit + clear.
+
+    사이클 74/78/89 패턴 직답습.
+    빈 윈도우는 skip (사이클 76 Q2 답습).
+
+    emit prefix:
+      [full_universe_load_summary] total=N kospi=M kosdaq=K securities=L etf=J
+      fetched=I skipped_ttl=H failed=G elapsed_ms=F
+    """
+    global _full_universe_collector
+    if not _full_universe_collector:
+        return  # 빈 윈도우 skip (사이클 76 Q2)
+
+    # 마지막 stats 단일 행 (매일 1회 적재 = 1건이 정상)
+    last = _full_universe_collector[-1]
+    total = last.get("total", 0)
+    kospi = last.get("kospi", 0)
+    kosdaq = last.get("kosdaq", 0)
+    securities = last.get("securities", 0)
+    etf = last.get("etf", 0)
+    fetched = last.get("fetched", 0)
+    skipped_ttl = last.get("skipped_ttl", 0)
+    failed = last.get("failed", 0)
+    elapsed_ms = last.get("elapsed_ms", 0)
+
+    logger.info(
+        "[full_universe_load_summary] total=%d kospi=%d kosdaq=%d "
+        "securities=%d etf=%d fetched=%d skipped_ttl=%d failed=%d elapsed_ms=%d",
+        total, kospi, kosdaq, securities, etf, fetched, skipped_ttl, failed, elapsed_ms,
+    )
+
+    _full_universe_collector.clear()

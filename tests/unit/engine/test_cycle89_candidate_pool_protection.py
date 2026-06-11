@@ -33,6 +33,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A+Q69=B — `fetch_top_500_universe` 영구 폐기 "
+        "(`_full_universe_load_once` 로 전환). "
+        "사이클 89 시점 후보 풀 폭증 차단 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_h5_candidate_pool_size_bounded_after_500_universe():
     """H-5: 500 universe 적재 후 `subscribe_filtered_stocks` 후보 풀 ≤ 50건 영속.

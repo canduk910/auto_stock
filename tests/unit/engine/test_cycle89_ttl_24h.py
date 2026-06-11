@@ -28,6 +28,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` 영구 폐기 "
+        "(scanner.py + scheduler.py 양쪽). "
+        "사이클 89 시점 24h TTL fresh skip 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m2_24h_ttl_fresh_skip():
     """M-2: 24h TTL fresh ticker 는 eager refresh skip (KIS 호출 0건).

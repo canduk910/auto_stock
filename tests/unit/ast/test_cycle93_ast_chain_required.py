@@ -92,6 +92,14 @@ def _count_upsert_chain_calls(fn_node: ast.AST) -> int:
     return count
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `TradingScheduler._universe_eager_refresh_loop` self method 영구 폐기 "
+        "(`_full_universe_load_task_loop` 으로 전환). "
+        "사이클 93 시점 AST 정적 chain 가드 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_g_ast1_scheduler_upsert_chain_required():
     """G-AST1 (a): scheduler `_universe_eager_refresh_loop` 본체 (self method) 에
     scanner module upsert chain 호출 ≥ 1건 정적 검증 (미래 silent 결함 영구 차단).

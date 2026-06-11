@@ -36,6 +36,14 @@ pytestmark = pytest.mark.unit
 _MOCK_TICKERS = ["005930", "402340", "035720", "000660", "035420"]
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_loop` (scheduler self method + scanner module) 영구 폐기 "
+        "(`_full_universe_load_task_loop` + `_full_universe_load_once` 으로 전환). "
+        "사이클 93 시점 개장 전 chain 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_g_cc1_scheduler_boot_chain_calls_scanner_upsert_with_tickers(monkeypatch):
     """G-CC1: scheduler 개장 전 1회 분기에서 scanner module `_universe_eager_refresh_loop`

@@ -64,6 +64,14 @@ def _fetch_fluctuation_function_node() -> ast.AsyncFunctionDef:
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 함수 자체 영구 폐기 "
+        "(fluctuation API → market_cap FHPST01740000 전환). "
+        "사이클 99 시점 페이징 영역 영구 폐기 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_g_purge1_pagination_legacy_areas_permanently_removed():
     """G-PURGE1: `_fetch_fluctuation` 페이징 영역 5종 영구 폐기 검증 (raw text + AST).
 

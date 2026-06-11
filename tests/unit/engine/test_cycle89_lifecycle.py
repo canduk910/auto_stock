@@ -50,6 +50,14 @@ def _fake_task(*, done: bool = False) -> MagicMock:
 # ---------------------------------------------------------------------------
 # M-1 — stop() 호출 시 _universe_eager_refresh_task cancel + setattr None
 # ---------------------------------------------------------------------------
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q69=B — `_universe_eager_refresh_task` 영구 폐기 "
+        "(`_full_universe_load_task` 로 대체). "
+        "사이클 89 시점 lifecycle cancel 검증 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 @pytest.mark.asyncio
 async def test_m1_stop_cancels_universe_eager_refresh_task():
     """M-1: `stop()` 호출 시 `_universe_eager_refresh_task` 가 cancel() + await

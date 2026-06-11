@@ -53,6 +53,14 @@ def _fetch_fluctuation_function_node() -> ast.AsyncFunctionDef:
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 101 Q68=A — `_fetch_fluctuation` 함수 자체 영구 폐기 "
+        "(fluctuation API → market_cap FHPST01740000 전환). "
+        "사이클 99 시점 시그너처 AST 가드 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_g_default1_top_n_default_30_persistence_and_pagination_args_forbidden():
     """G-DEFAULT1: `_fetch_fluctuation` 시그너처 영역 AST 영구 가드.
 
