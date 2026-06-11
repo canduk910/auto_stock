@@ -13,6 +13,10 @@ const Settings = lazy(() => import('./pages/Settings'))
 const StrategyFunnel = lazy(() => import('./pages/StrategyFunnel'))
 // 사이클 85 (2026-06-09) — stock_master UI 신규 페이지 (Q2=A 7번째 메뉴)
 const StockMaster = lazy(() => import('./pages/StockMaster'))
+// 사이클 103 (2026-06-11) — 실시간 건강 모니터링 신규 페이지 (8번째 메뉴)
+const RealtimeHealth = lazy(() => import('./pages/RealtimeHealth'))
+// 사이클 103 (2026-06-11) — 전략 현황 (손절 임계 가시화) 신규 페이지 (9번째 메뉴)
+const Strategies = lazy(() => import('./pages/Strategies'))
 
 const navItems = [
   { to: '/', label: '대시보드' },
@@ -22,6 +26,8 @@ const navItems = [
   { to: '/stock-master', label: '종목마스터' },
   { to: '/logs', label: '로그' },
   { to: '/settings', label: '설정' },
+  { to: '/realtime-health', label: '실시간 상태' },
+  { to: '/strategies', label: '전략 현황' },
 ]
 
 function PageFallback() {
@@ -167,6 +173,9 @@ function AppShell() {
               element={<Navigate to="/logs?tab=daily-report" replace />}
             />
             <Route path="/settings" element={<Settings />} />
+            {/* 사이클 103 (2026-06-11) — 실시간 건강 + 전략 현황 */}
+            <Route path="/realtime-health" element={<RealtimeHealth />} />
+            <Route path="/strategies" element={<Strategies />} />
           </Routes>
         </Suspense>
       </main>

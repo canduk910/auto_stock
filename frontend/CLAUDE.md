@@ -235,3 +235,62 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
 - 응답은 `types/common.ts::ApiResponse<T>` 로 파싱
 - 백엔드 응답 필드명 = TypeScript 속성명 (1:1, 변경 시 동기화)
 - 페이징 응답에 `total`/`total_pages` 필드 필수
+
+## 사이클 103 (2026-06-11) — RealtimeHealth + Strategies 2 페이지 신규 + navItems 9개 영속
+
+사이클 102.5 회고 결정적 사실 (코미코 STOP_LOSS 운영 가시화 부족) 즉시 시정 4 영역 통합 중 영역 0 + 영역 1 (frontend-dev 영역).
+
+### `RealtimeHealth` (`/realtime-health`, 사이클 103 신규, 2026-06-11)
+
+- 신규 4 파일:
+  - `frontend/src/types/realtime-health.ts` (33L) — `RealtimeHealthSnapshot` interface (dispatch_drop_total + callback_exception_total + stale_force_retry_total + ws_auto_restart_total 4 카드 영역)
+  - `frontend/src/api/realtime-health.ts` (84L) — `fetchRealtimeHealth()` 함수 (`/api/logs/search` 기존 영역 활용 4 prefix grep 통합 영역)
+  - `frontend/src/pages/RealtimeHealth.tsx` (244L) — 4 카드 통합 영역
+  - `frontend/src/test/handlers.ts` 갱신 (MSW handler) + `e2e/fixtures/api-mocks.ts` 갱신 (Playwright LIFO 정합, 사이클 80 hotfix #3 영속)
+- 4 카드 영역:
+  - `[dispatch_drop_summary]` (사이클 102 신규 prefix, dispatch silent drop 5분 주기 emit 영역)
+  - `[callback_exception]` (사이클 102 신규 prefix, callback 예외 전수 가시화 영역)
+  - `[stale_force_retry]` (사이클 102 임계 상향 영역, KIS LMS chain 안전 마진 2 배 확장)
+  - `[ws_auto_restart]` (사이클 92 prefix, WebSocket 자동 재기동 영역)
+- 영속 의무 매트릭스:
+  - `useQuery({retry: 1, refetchInterval: 60_000})` 사이클 65 H3 영속 (AST G-AST-RT 영구 가드)
+  - 한글 라벨 사이클 89 영속 (영문 prefix 인접 한글 친숙 용어 영속)
+  - MSW + Playwright LIFO 정합 사이클 75 G-AST5 + 80 hotfix #3/#4 영속
+
+### `Strategies` (`/strategies`, 사이클 103 신규, 2026-06-11)
+
+- 신규 1 파일:
+  - `frontend/src/pages/Strategies.tsx` (233L) — 6 전략 (momentum + volatility_breakout + long_tail_volatility + donchian_swing + bull_flag_breakout + vcp_breakout) 각 카드 영역 4 임계 영속
+- 4 임계 영역 (영구 영속):
+  - `stop_loss_rate` (손절 비율, 코미코 사례 단일 근본 원인 영역)
+  - `daily_loss_limit` (일일 손실 한도)
+  - `trailing_stop_rate` (Trailing Stop 비율)
+  - `position_ratio` (종목당 매수 비중)
+- 데이터 = 기존 `GET /api/strategies` 영구 영속 (`src/engine/strategy_registry.py:153 params: s.config.params`, 영역 변경 0 = 기존 API 활용)
+- 사용자 오인 영역 영구 차단 (코미코 사례 단일 근본 원인 영역 시각화 — DB 운영 영역 `-2.4%` 영구 영속 가시화)
+- 한글 라벨 영속 (사이클 89 답습) + graceful (`params={}` 시 "—")
+
+### `App.tsx::navItems` 7→9 갱신 (사이클 81 햄버거 + 사이클 85 M-9 영속)
+
+- 추가 메뉴 2:
+  - 실시간 상태 (`/realtime-health`)
+  - 전략 현황 (`/strategies`)
+- PC 메뉴 (sm: ≥640px) 가로 + 모바일 (< sm) 햄버거 Drawer 9개 압축 (사이클 81 G-MOBILE-7 → G-MOBILE-9 갱신)
+- `MobileMenuLabel` 헬퍼 (useLocation 현재 경로 한글 레이블) 영속
+
+### 영속 의무 매트릭스 (사이클 103 영구 확인 영역)
+
+- 사이클 41 StrategyFunnel 4 카드 패턴 답습 (RealtimeHealth 4 카드 영역)
+- 사이클 65 H3 useQuery retry:1 영속 (G-AST-RT TARGET_PAGES 확장)
+- 사이클 68 KST 영속 (timestamp KST 영역)
+- 사이클 75 G-AST5 api-mocks 영속 (MSW handler + AST 가드 영역 확장)
+- 사이클 80 hotfix #3/#4 Playwright LIFO 영속 (e2e 정합 영역)
+- 사이클 85 G-AST-RT + G-AST-MOCK + M-9 영속 (PC 메뉴 + 모바일 햄버거 9개 영속)
+- 사이클 89 한글 친숙 용어 영속 (영문 prefix 인접 한글 라벨 영속)
+- 사이클 102 G-REJECT 영속 (양 agent 일치 영역)
+
+### 운영 효과 (push + EC2 자동 배포 후)
+
+- `/realtime-health` 페이지 = 4 카드 실시간 가시화 (사이클 102 신규 prefix 3 + 사이클 92 prefix 1) — 운영자 즉시 실시간 상태 확인 가능
+- `/strategies` 페이지 = 6 전략 각 4 임계 실시간 가시화 (사용자 오인 영역 영구 차단 = 코미코 사례 단일 근본 원인 영역)
+- 매매 안전성 무영향 (UI 가시화 영역 한정, 매매 hot path 무관)

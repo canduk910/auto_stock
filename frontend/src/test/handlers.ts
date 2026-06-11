@@ -107,6 +107,26 @@ export const handlers = [
     HttpResponse.json(wrap({ items: [], total: 0, total_pages: 0 }))
   ),
 
+  // 사이클 103 영역 0 — 실시간 건강 모니터링 logs/search 핸들러.
+  // 기본은 빈 응답. 각 테스트에서 q 파라미터 분기로 오버라이드.
+  http.get(`${base}/logs/search`, ({ request }) => {
+    const url = new URL(request.url)
+    const q = url.searchParams.get('q') ?? ''
+    if (q.includes('[dispatch_drop_summary]')) {
+      return HttpResponse.json(wrap({ logs: [], total: 0, has_more: false }))
+    }
+    if (q.includes('[callback_exception]')) {
+      return HttpResponse.json(wrap({ logs: [], total: 0, has_more: false }))
+    }
+    if (q.includes('[stale_force_retry]')) {
+      return HttpResponse.json(wrap({ logs: [], total: 0, has_more: false }))
+    }
+    if (q.includes('[ws_auto_restart]')) {
+      return HttpResponse.json(wrap({ logs: [], total: 0, has_more: false }))
+    }
+    return HttpResponse.json(wrap({ logs: [], total: 0, has_more: false }))
+  }),
+
   // 사이클 64 — 가격 필터. 기본은 비활성, 각 테스트에서 server.use 로 오버라이드.
   http.get(`${base}/system/price-filter`, () =>
     HttpResponse.json(wrap({ min_price: 0, max_price: 0 }))

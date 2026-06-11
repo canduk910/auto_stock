@@ -348,4 +348,51 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     }
     return route.continue();
   });
+
+  // 사이클 103 (2026-06-11) — 실시간 건강 모니터링 + 전략 현황 endpoint mock.
+  // Playwright route 매칭 = LIFO ("latest registered route wins").
+  // 사이클 80 hotfix #3 LIFO 정합 패턴 영속: 구체 라우트를 *후* 등록 (LIFO 우선 매칭).
+
+  // logs/search — 실시간 건강 4 카드 기반 endpoint
+  await page.route("**/api/logs/search*", (route) => {
+    const url = new URL(route.request().url());
+    const q = url.searchParams.get("q") ?? "";
+    const emptyLogs = envelope({ logs: [], total: 0, has_more: false });
+    if (
+      q.includes("[dispatch_drop_summary]") ||
+      q.includes("[callback_exception]") ||
+      q.includes("[stale_force_retry]") ||
+      q.includes("[ws_auto_restart]")
+    ) {
+      return route.fulfill({ json: emptyLogs });
+    }
+    return route.fulfill({ json: emptyLogs });
+  });
+
+  // /api/strategies — 전략 현황 (손절 임계 포함)
+  await page.route("**/api/strategies", (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({
+        json: envelope({
+          strategies: {
+            momentum: {
+              name: "상한가 모멘텀",
+              enabled: true,
+              weight: 0.25,
+              params: {
+                stop_loss_rate: -7.5,
+                daily_loss_limit: -5.0,
+                trailing_stop_rate: -2.0,
+                position_ratio: 0.25,
+              },
+              total_investment: 10_000_000,
+              invested_amount: 0,
+              min_weight: 0,
+            },
+          },
+        }),
+      });
+    }
+    return route.continue();
+  });
 }

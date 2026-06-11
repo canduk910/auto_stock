@@ -124,8 +124,8 @@ class MomentumStrategy(StrategyBase):
         stop_loss = self.config.params["stop_loss_rate"]
         if loss_rate <= stop_loss:
             logger.info(
-                "손절 신호: %s 매수가(%d) 대비 %.1f%% (현재가: %d)",
-                t(ticker), pos.buy_price, loss_rate, current_price,
+                "손절 신호: %s 매수가(%d) 대비 %.1f%% (임계: %.1f%%, 현재가: %d)",
+                t(ticker), pos.buy_price, loss_rate, stop_loss, current_price,
             )
             return Signal.STOP_LOSS
 

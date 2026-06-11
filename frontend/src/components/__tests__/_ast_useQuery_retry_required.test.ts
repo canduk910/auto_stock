@@ -42,7 +42,10 @@ const TARGET_FILES = [
 // 5 useQuery (fetchStats / fetchList / fetchScanPoolSummary / fetchDetail / fetchHistory)
 // 모두 retry:1 명시 의무 (e2e 환경 ECONNREFUSED 빠른 실패 + 사이클 65 H3 + 사이클 80
 // hotfix #1 영속 패턴 답습).
-const TARGET_PAGES = ['Settings.tsx', 'StockMaster.tsx']
+//
+// 사이클 103 영역 0 (2026-06-11) G-AST-RT — RealtimeHealth.tsx 신규 페이지 추가.
+// 1 useQuery (fetchRealtimeHealth) retry:1 명시 의무 영구 가드 (사이클 85 패턴 답습).
+const TARGET_PAGES = ['Settings.tsx', 'StockMaster.tsx', 'RealtimeHealth.tsx']
 
 describe('사이클 65 hotfix H3 + 사이클 75 Q4 확장 — useQuery retry 옵션 영구 가드', () => {
   it.each(TARGET_FILES)(

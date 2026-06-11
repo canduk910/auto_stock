@@ -200,4 +200,59 @@ describe("AppShell — 모바일 햄버거 메뉴 (사이클 81)", () => {
     // main 이 sticky wrapper 의 자식이 아니어야 한다 (독립 영역)
     expect(stickyWrapper.contains(main)).toBe(false);
   });
+
+  // 사이클 103 영역 0 M-10 — `실시간 상태` 8번째 메뉴 영구 영속 (사이클 85 M-9 답습)
+  it("M-10 (사이클 103 영역 0): 실시간 상태 메뉴가 navItems 에 등록된다", () => {
+    setup();
+    fireEvent.click(screen.getByTestId("mobile-menu-button"));
+    const drawer = screen.getByTestId("mobile-menu-drawer");
+
+    // 사이클 103 영역 0 = 8번째 메뉴 = `/realtime-health` 영역 영속 의무
+    const realtimeHealthLink = Array.from(drawer.querySelectorAll("a")).find(
+      (a) => a.getAttribute("href") === "/realtime-health",
+    );
+
+    expect(
+      realtimeHealthLink,
+      "[사이클 103 영역 0 M-10 영구 영속 실패] `/realtime-health` 라우트가 " +
+        "navItems 에 영구 등록 영속 의무 영역 (8번째 메뉴 영역).",
+    ).toBeDefined();
+
+    if (realtimeHealthLink) {
+      expect(realtimeHealthLink.textContent?.trim()).toBe("실시간 상태");
+    }
+  });
+
+  // 사이클 103 영역 0 M-11 — 8개 메뉴 영구 영속 + main 독립 DOM 영속 (사이클 85 L-CYCLE81-MOBILE 답습)
+  it("M-11 (사이클 103 영역 0): 모바일 드로어 8개 메뉴 + main 별도 영역 영속", () => {
+    setup();
+    fireEvent.click(screen.getByTestId("mobile-menu-button"));
+    const drawer = screen.getByTestId("mobile-menu-drawer");
+
+    // 사이클 103 영역 0 = 8개 메뉴 영구 영속 (기존 7개 + 실시간 상태)
+    const allLinks = Array.from(drawer.querySelectorAll("a"));
+    expect(
+      allLinks.length,
+      `[8개 메뉴 영구 영속 실패] 모바일 드로어 영역 메뉴 수 = ${allLinks.length} ` +
+        `(사이클 103 영역 0 = 8개 영역 영속 의무).`,
+    ).toBeGreaterThanOrEqual(8);
+  });
+
+  // 사이클 103 영역 1 M-12 — `전략 임계` 9번째 메뉴 영구 영속 (영역 1 통합)
+  it("M-12 (사이클 103 영역 1): 전략 임계 메뉴가 navItems 에 등록된다", () => {
+    setup();
+    fireEvent.click(screen.getByTestId("mobile-menu-button"));
+    const drawer = screen.getByTestId("mobile-menu-drawer");
+
+    // 사이클 103 영역 1 = 9번째 메뉴 = `/strategies` 영역 영속 의무
+    const strategiesLink = Array.from(drawer.querySelectorAll("a")).find(
+      (a) => a.getAttribute("href") === "/strategies",
+    );
+
+    expect(
+      strategiesLink,
+      "[사이클 103 영역 1 M-12 영구 영속 실패] `/strategies` 라우트가 " +
+        "navItems 에 영구 등록 영속 의무 영역 (9번째 메뉴 영역).",
+    ).toBeDefined();
+  });
 });

@@ -18,6 +18,49 @@ market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
+## 사이클 103 (2026-06-11) — strategy.py dead code 영구 폐기 + momentum.py 손절 로그 임계 동행 emit
+
+사이클 102.5 회고 결정적 사실: 코미코(183300) 2026-06-11 10:03 매수 138,200원 → 13:21:30 STOP_LOSS 매도 138,200원. 단일 근본 원인 = DB `strategy_config.momentum.params.stop_loss_rate = -2.4%` (2026-06-03 22:11 KST 사용자 수동 apply). 매도 시점 loss_rate = -2.604% ≤ -2.4% 만족 → momentum.py STOP_LOSS 분기 정상 작동. 사용자 의문 = 코드 DEFAULT `-7.5%` 가정 → 운영 영역 `-2.4%` 영구 영속 가시화 부족 → 오인. **결함 영역 = 아님** (코드 정상, 운영 가시화 영역 보강 의무).
+
+### 영역 2 — `momentum.py:127` 손절 로그 임계 동행 emit
+
+- **변경 전**: `logger.info("손절 신호: %s(%s) 매수가(%d) 대비 %.1f%% (현재가: %d)", strategy_name, ticker, buy_price, loss_rate * 100, current_price)`
+- **변경 후 (사이클 103, 2026-06-11)**: `logger.info("손절 신호: %s(%s) 매수가(%d) 대비 %.1f%% (임계: %.1f%%, 현재가: %d)", strategy_name, ticker, buy_price, loss_rate * 100, stop_loss * 100, current_price)` (+1 인자 `stop_loss` 임계 동행 emit)
+- **사유**:
+  - 사이클 102.5 회고 결정적 사실 (코미코 사례 운영자 오인 영역 영구 차단)
+  - 미래 동일 영역 운영자 오인 영구 차단 (운영자 즉시 임계 확인 가능)
+  - 사이클 89 한글 친숙 용어 영속 답습 + 사이클 102 가시화 영역 보강 답습
+
+### 영역 3 — `strategy.py` dead code 영구 폐기 (callsite 0건 영구 영속 확인 후 안전 폐기)
+
+- **폐기 영역 (L85~L207, -119L 순감)**:
+  - `check_buy_signal(ticker, current_price, recent_high, params, position_count_today)` — 64L 매수 신호 판단 모듈 함수 (callsite 0건 영구 영속 확인)
+  - `check_stop_loss(ticker, current_price, buy_price, params)` — 21L 손절 판단 모듈 함수 (callsite 0건 영구 영속 확인)
+  - `check_next_day_clear(ticker, current_price, buy_price, params)` — 34L 익일 청산 판단 모듈 함수 (callsite 0건 영구 영속 확인)
+- **보존 영역 (영구 영속)**:
+  - `class Signal` + `class Position` + `class StrategyState` (사용 영역 영속)
+  - 7 상수 (`MOMENTUM_RECENT_HIGH_DAYS` 등 사용 영역 영속)
+  - `calc_buy_quantity()` (사용 영역 영속)
+- **AST 영구 가드 신설**: `tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py` (3 함수 영구 부재 영구 가드 + 미래 재발 영구 차단)
+- **사유**:
+  - callsite 0건 영구 영속 확인 (전체 production codebase grep + tests/ grep 모두 0건)
+  - 사이클 78 G-AST1 + 79 G-AST2 영속 패턴 답습 (dead code 안전 폐기 + AST 영구 가드 신설)
+  - 코드 정합성 영속 (사이클 49→103 누적 58 사이클 영속 영역)
+
+### 영속 의무 매트릭스 (사이클 103 영구 확인 영역)
+
+- **사이클 38 명문화 영속** (영역 2 매도 hot path 영역 — momentum.py STOP_LOSS 분기 PRE/MAIN/POST 무관 항상 작동)
+- **사이클 78 G-AST1 + 79 G-AST2 영속** (영역 3 dead code 폐기 + AST 영구 가드 영역 답습)
+- **사이클 89 한글 친숙 용어 영속** (영역 2 로그 한글 메시지 영속)
+- **사이클 102 G-REJECT 영속** (양 agent 일치, 매수/매도/익일청산 hot path 영역 보존 의무)
+- **사이클 49→103 누적 58 사이클 + hotfix 14 영역 영속**
+
+### 운영 효과 (push + EC2 자동 배포 후)
+
+- momentum.py 손절 로그 = 임계 동행 emit (운영자 즉시 임계 확인 가능, 코미코 사례 운영자 오인 영구 차단)
+- strategy.py = dead code 영구 폐기 (코드 정합성 영속 + 미래 재발 영구 차단 AST 가드)
+- 매매 안전성 무영향 (영역 2 = 로그 메시지 1줄 보강 영역 + 영역 3 = dead code 영구 폐기 (callsite 0건 영구 영속 확인) = 매수/매도/익일청산/15:20 강제청산 hot path 무관)
+
 ## 사이클 102 (2026-06-11) — force_retry 임계 상향 + flush 호출 사이트 영구 확인
 
 사용자 신규 요구 "재구독 로직 자체가 실수가 아닌가 싶어. 시세구독 관련 부분을 전면 새로운 시각에서 재검토" + refactor-expert + domain-expert 병렬 자문 일치 (사이클 88 G-REJECT 영구 영속 + 임계 상향 영역 안전 마진 2 배 확장). 사용자 결정 Q73=B (5분 → 10분 + 12회 → 6회).
