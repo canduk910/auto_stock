@@ -32,7 +32,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - `reset_quote_request_metrics() -> None` — 메인 reset 과 분리
 
 **Path 가드** (`QuotePoolPathError` raise — `ValueError` 서브클래스):
-- 화이트리스트 8 path 만 허용 (사이클 32 추가 → 사이클 89 `/quotations/volume-rank` 추가 → **사이클 109 `/ranking/market-cap` 추가**): `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl` / `/quotations/volume-rank` / `/ranking/market-cap` (사이클 109 영구 시정 = 사이클 101 도입 시점 silent 결함 = `_MARKET_CAP_URL` 영역 영구 영속이 화이트리스트 부재 영구 확정 → `_fetch_market_cap_page` → `QuotePoolPathError` raise → `_full_universe_load_once` total=0 영속). 신규 path 영역 영구 영속이 추가 시 AST 영구 가드 의무 (`tests/unit/api/test_cycle109_market_cap_allowlist.py` 답습 패턴 영구 영속이)
+- 화이트리스트 8 path 만 허용 (사이클 32 추가 → 사이클 89 `/quotations/volume-rank` 추가 → **사이클 109 `/ranking/market-cap` 추가**): `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl` / `/quotations/volume-rank` / `/ranking/market-cap`. 사이클 109 시정 = 사이클 101 도입 시점 silent 결함 (`_MARKET_CAP_URL` 화이트리스트 부재 → `_fetch_market_cap_page` → `QuotePoolPathError` raise → `_full_universe_load_once` total=0). 신규 path 추가 시 AST 정적 가드 의무 (`tests/unit/api/test_cycle109_market_cap_allowlist.py` 답습)
 - 매매/잔고/체결조회 path (`/trading/order-cash` / `/trading/order-rvsecncl` / `/trading/inquire-balance` / `/trading/inquire-psbl-order` / `/trading/inquire-daily-ccld`) 진입 시 즉시 raise — 자금 안전 정책 위반 사전 차단
 
 **라운드로빈**:
