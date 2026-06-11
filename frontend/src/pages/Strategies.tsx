@@ -150,9 +150,11 @@ export default function Strategies() {
     staleTime: 15_000,
   })
 
-  // strategies는 dict 또는 배열 양쪽 처리
+  // strategies는 dict 또는 배열 양쪽 처리.
+  // 백엔드 GET /api/strategies 가 플랫 형식 { momentum: {...}, ... } 반환 시
+  // data?.strategies = undefined → data 자체를 플랫 형식으로 fallback.
   const strategiesMap: Record<string, StrategyStatus> = (() => {
-    const raw = data?.strategies
+    const raw = data?.strategies ?? data
     if (!raw) return {}
     if (Array.isArray(raw)) {
       // 배열 형식 (key 필드 사용)

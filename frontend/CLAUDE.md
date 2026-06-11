@@ -294,3 +294,45 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
 - `/realtime-health` 페이지 = 4 카드 실시간 가시화 (사이클 102 신규 prefix 3 + 사이클 92 prefix 1) — 운영자 즉시 실시간 상태 확인 가능
 - `/strategies` 페이지 = 6 전략 각 4 임계 실시간 가시화 (사용자 오인 영역 영구 차단 = 코미코 사례 단일 근본 원인 영역)
 - 매매 안전성 무영향 (UI 가시화 영역 한정, 매매 hot path 무관)
+
+## 사이클 104 (2026-06-11) — E2E spec 신규 (사이클 103 신규 페이지 검증) + silent 결함 2 영구 시정
+
+### 신규 E2E spec
+
+- `e2e/realtime-health.spec.ts` 신규 (8 케이스: H-RH1~H-RH4 HIGH 4 + M-RH5~M-RH6 MEDIUM 2 + L-NAV1 + L-MOB LOW 2)
+- `e2e/strategies.spec.ts` 신규 (9 케이스: H-ST1~H-ST4 HIGH 4 + M-ST5~M-ST7 MEDIUM 3 + L-NAV2 + L-ST8 LOW 2)
+
+### silent 결함 1 — `**/api/logs*` Playwright glob Vite 모듈 intercept
+
+**근본 원인**: `e2e/fixtures/api-mocks.ts` 의 `**/api/logs*` Playwright glob 이 `http://localhost:3000/src/api/logs.ts` Vite 모듈 요청 (resourceType='script') 을 intercept → JSON 반환 → MIME 타입 불일치 → `logs.ts` 모듈 로딩 실패 → `realtime-health.ts` 로딩 실패 → `RealtimeHealth.tsx` 동적 import 실패 → realtime-health.spec.ts 7/8 FAIL.
+
+**시정 (`e2e/fixtures/api-mocks.ts`)**: `**/api/logs*` 핸들러에 resourceType guard 추가.
+
+```javascript
+await page.route("**/api/logs*", (route) => {
+  // Vite 모듈 요청(src/api/logs.ts 등) 통과 — MIME 타입 불일치 차단
+  if (route.request().resourceType() === "script") return route.continue();
+  return route.fulfill({ json: envelope([]) });
+});
+```
+
+**미래 동일 패턴 영구 차단**: Playwright glob 이 Vite 모듈 경로와 충돌하는 경우 resourceType guard 의무 (신규 page.route 추가 시 동일 패턴 적용 의무).
+
+### silent 결함 2 — settings.spec.ts 회귀 (사이클 103 내포 형식 핸들러 LIFO 우선)
+
+**근본 원인**: 사이클 103 api-mocks 에 추가된 `/api/strategies` GET 내포 형식 핸들러 (`{strategies: {momentum: ...}}`) 가 LIFO 우선으로 Settings.tsx 의 `getStrategies()` 에 잘못된 응답 → `name = undefined` → "상한가 모멘텀" 미렌더 → settings.spec.ts 1/13 FAIL.
+
+**시정**:
+1. 사이클 103 내포 형식 핸들러 제거 (`e2e/fixtures/api-mocks.ts`)
+2. 기존 L103 플랫 형식 핸들러에 4 임계 params 추가 (`stop_loss_rate: -7.5` 등)
+3. `frontend/src/pages/Strategies.tsx` 에 `data?.strategies ?? data` fallback 추가 (백엔드 플랫 형식 + 내포 형식 양쪽 처리)
+
+### 검증 결과
+
+- e2e/realtime-health.spec.ts: 8/8 PASS × 3회 반복
+- e2e/strategies.spec.ts: 9/9 PASS × 3회 반복
+- 전체 e2e 30/30 PASS × 3회 반복 (flakiness 0)
+- 기존 spec (settings/dashboard) 회귀 0
+- 사이클 80 hotfix #3/#4 Playwright LIFO 영속
+- 사이클 89 한글 친숙 용어 영속
+- 사이클 81 G-MOBILE-9 영속 (9개 메뉴)

@@ -41,7 +41,14 @@ const defaultStatus = {
       name: "상한가 모멘텀",
       enabled: true,
       weight: 0.5,
-      params: { position_ratio: 0.25, max_positions: 4 },
+      params: {
+        position_ratio: 0.25,
+        max_positions: 4,
+        // 사이클 104 — Strategies.tsx 4 임계 가시화 mock (strategies.spec.ts H-ST2/M-ST5 영속)
+        stop_loss_rate: -7.5,
+        daily_loss_limit: -5.0,
+        trailing_stop_rate: -2.0,
+      },
       total_investment: 50_000_000,
       invested_amount: 0,
       min_weight: 0,
@@ -179,9 +186,13 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope(opts.logReports ?? []) }),
   );
 
-  await page.route("**/api/logs*", (route) =>
-    route.fulfill({ json: envelope([]) }),
-  );
+  // 사이클 104 hotfix — Playwright glob `**/api/logs*` 는 `http://localhost:3000/src/api/logs.ts`
+  // (Vite 모듈 요청, resourceType='script') 도 intercept → JSON 반환 → MIME 타입 불일치 →
+  // `RealtimeHealth.tsx` 동적 import 실패 → 빈 화면. resourceType 가드로 script 요청은 통과.
+  await page.route("**/api/logs*", (route) => {
+    if (route.request().resourceType() === "script") return route.continue();
+    return route.fulfill({ json: envelope([]) });
+  });
 
   // 사이클 80 hotfix #3 — Playwright route 매칭 규칙은 **LIFO** ("latest registered route wins").
   // 따라서 wildcard `**/api/system/**` 를 다른 system/ 라우트 *전* 에 먼저 등록 = fallback 역할.
@@ -369,30 +380,7 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     return route.fulfill({ json: emptyLogs });
   });
 
-  // /api/strategies — 전략 현황 (손절 임계 포함)
-  await page.route("**/api/strategies", (route) => {
-    if (route.request().method() === "GET") {
-      return route.fulfill({
-        json: envelope({
-          strategies: {
-            momentum: {
-              name: "상한가 모멘텀",
-              enabled: true,
-              weight: 0.25,
-              params: {
-                stop_loss_rate: -7.5,
-                daily_loss_limit: -5.0,
-                trailing_stop_rate: -2.0,
-                position_ratio: 0.25,
-              },
-              total_investment: 10_000_000,
-              invested_amount: 0,
-              min_weight: 0,
-            },
-          },
-        }),
-      });
-    }
-    return route.continue();
-  });
+  // 사이클 104 — /api/strategies GET 플랫 형식은 L103 기존 핸들러(status.strategies)가 처리.
+  // Strategies.tsx 는 data?.strategies ?? data fallback 으로 플랫 형식에서도 카드 렌더.
+  // 사이클 103 내포 형식 핸들러 = 사이클 104 에서 삭제 (settings.spec.ts 회귀 차단).
 }

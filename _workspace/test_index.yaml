@@ -19707,7 +19707,7 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-11T04:59:30.943Z'
+generated_at: '2026-06-11T09:00:00.000Z'
 stats:
   backend_modules: 99
   backend_tests: 504
