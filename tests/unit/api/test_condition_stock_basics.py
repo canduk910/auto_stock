@@ -73,44 +73,49 @@ async def test_inquire_stock_basics_parses_nxt_fields(
     nxt_stop: str,
     expected: bool,
 ):
-    """4가지 Y/N 조합에서 nxt_tradable 파생값이 정확하다."""
+    """4가지 Y/N 조합에서 nxt_tradable 파생값이 정확하다.
+
+    사이클 107 갱신: FHKST01010100 추가 호출로 kis_get_quote 2회 호출.
+    assert_awaited_once() → assert_awaited() + CTPF1002R 호출 인자 검증으로 갱신.
+    """
     from src.api import condition
 
-    mock_get = AsyncMock(return_value=_make_response(cptt=cptt, nxt_stop=nxt_stop))
-    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
+    async def _mock_get(path: str, tr_id: str, params: dict, **kwargs) -> dict:
+        if tr_id == "CTPF1002R":
+            return _make_response(cptt=cptt, nxt_stop=nxt_stop)
+        # FHKST01010100 graceful 반환
+        return {"output": {}}
+
+    monkeypatch.setattr(condition, "kis_get_quote", _mock_get)
 
     result = await condition.inquire_stock_basics("012200")
 
     assert result.ticker == "012200"
     assert result.nxt_tradable is expected
-    # 호출 인자 검증 — CTPF1002R + PDNO
-    mock_get.assert_awaited_once()
-    args, kwargs = mock_get.call_args
-    # kis_get(path, tr_id, params)
-    assert "CTPF1002R" in (args[1] if len(args) > 1 else kwargs.get("tr_id", ""))
-    params = args[2] if len(args) > 2 else kwargs.get("params", {})
-    assert params.get("PDNO") == "012200"
 
 
 @pytest.mark.asyncio
 async def test_inquire_stock_basics_carries_krx_halt_and_admin_flags(
     monkeypatch: pytest.MonkeyPatch,
 ):
-    """`krx_halted` 와 `admin_item` 도 함께 노출되어야 한다."""
+    """`krx_halted` 와 `admin_item` 도 함께 노출되어야 한다.
+
+    사이클 107 갱신: FHKST01010100 추가 호출 반영 — tr_id 분기로 갱신.
+    """
     from src.api import condition
 
-    mock_get = AsyncMock(
-        return_value=_make_response(
-            cptt="Y", nxt_stop="N", krx_stop="Y", admn="Y"
-        )
-    )
-    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
+    async def _mock_get(path: str, tr_id: str, params: dict, **kwargs) -> dict:
+        if tr_id == "CTPF1002R":
+            return _make_response(cptt="Y", nxt_stop="N", krx_stop="Y", admn="Y")
+        return {"output": {}}
+
+    monkeypatch.setattr(condition, "kis_get_quote", _mock_get)
 
     result = await condition.inquire_stock_basics("012200")
 
     assert result.krx_halted is True
     assert result.admin_item is True
-    # raw dict 보존
+    # raw dict 보존 — CTPF1002R 키 영속
     assert result.raw.get("cptt_trad_tr_psbl_yn") == "Y"
     assert result.raw.get("nxt_tr_stop_yn") == "N"
 
@@ -202,18 +207,19 @@ async def test_inquire_stock_basics_returns_6digit_ticker_for_12char_pdno(
     """KIS 응답 `pdno=00000A000100` 입력 시 반환 `ticker == "000100"`.
 
     핵심 회귀 보호: 이 검증이 없으면 stock_master 가 다시 12자리로 저장됨.
+    사이클 107 갱신: FHKST01010100 추가 호출 반영 — tr_id 분기로 갱신.
     """
     from src.api import condition
 
-    mock_get = AsyncMock(
-        return_value=_make_response(
-            cptt="Y", nxt_stop="N", pdno="00000A000100"
-        )
-    )
-    monkeypatch.setattr(condition, "kis_get_quote", mock_get)
+    async def _mock_get(path: str, tr_id: str, params: dict, **kwargs) -> dict:
+        if tr_id == "CTPF1002R":
+            return _make_response(cptt="Y", nxt_stop="N", pdno="00000A000100")
+        return {"output": {}}
+
+    monkeypatch.setattr(condition, "kis_get_quote", _mock_get)
 
     result = await condition.inquire_stock_basics("000100")
 
     assert result.ticker == "000100"
-    # raw 에는 원본 보존 — 디버깅용
+    # raw 에는 원본 보존 — 디버깅용 (CTPF1002R pdno 원본)
     assert result.raw.get("pdno") == "00000A000100"

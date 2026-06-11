@@ -805,6 +805,8 @@ backend:
     - tests/unit/api/test_condition_cache.py
     - tests/unit/api/test_condition_quote_routing.py
     - tests/unit/api/test_condition_stock_basics.py
+    - tests/unit/api/test_cycle107_inquire_stock_basics_merge.py
+    - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -19434,7 +19436,7 @@ frontend:
 generated_at: '2026-06-11T15:29:59.251913+09:00'
 stats:
   backend_modules: 99
-  backend_tests: 506
+  backend_tests: 508
   frontend_modules: 69
   frontend_tests: 44
   unmapped_modules:

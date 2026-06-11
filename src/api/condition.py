@@ -239,16 +239,26 @@ async def _fetch_fluctuation_rank() -> list[dict]:
 
 
 async def inquire_stock_basics(pdno: str) -> "StockBasics":
-    """KIS CTPF1002R(주식기본조회) — 종목 기본정보 + NXT 거래가능 여부 사전 조회.
+    """KIS CTPF1002R(주식기본조회) + FHKST01010100(주식현재가) 통합 — 종목 마스터 보강.
 
-    NXT 사전 판별 핵심 필드:
+    NXT 사전 판별 핵심 필드 (CTPF1002R 영속):
     - `cptt_trad_tr_psbl_yn`  NXT 거래종목여부 (Y/N)
     - `nxt_tr_stop_yn`        NXT 거래정지여부 (Y/N)
     파생값: `nxt_tradable = (cptt=='Y') AND (nxt_stop=='N')`.
 
+    사이클 107 (2026-06-11) — FHKST01010100 추가 호출 영역:
+    - CTPF1002R 응답 = 종목 식별/상장/관리 영역 (bfdy_clpr 등 67 컬럼 영속)
+    - FHKST01010100 응답 = 시세/거래 영역 (acml_tr_pbmn + lstn_stcn + acml_vol)
+    - raw JSONB merge = stock_master = 마스터 + 시세 통합 영구 영속
+    - Rate Limit: 50ms sleep (CTPF1002R → FHKST01010100 순차 호출 보호)
+    - KIS chk_inquire_price.py 정본 인용:
+        TR_ID = FHKST01010100, URL = /uapi/domestic-stock/v1/quotations/inquire-price
+        FID_COND_MRKT_DIV_CODE = "J" (주식), FID_INPUT_ISCD = 종목코드
+
     KIS 응답 검증 (KIS MCP 2026-05-11):
-    - 응답 output 은 dict (single-item) — list 가 아님.
-    - 모의/실전 동일 TR_ID (FH 접두사가 아닌 CTPF 도 양쪽 동일).
+    - CTPF1002R 응답 output 은 dict (single-item) — list 가 아님.
+    - 모의/실전 동일 TR_ID (CTPF/FH 접두사 양쪽 모두 동일).
+    - FHKST01010100 응답 output 은 dict (single-item).
     """
     from src.models.stock import StockBasics
 
@@ -256,25 +266,52 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
         "PRDT_TYPE_CD": "300",  # 300=국내주식 (KIS CTPF1002R 명세 기본값)
         "PDNO": pdno,
     }
-    # 사이클 7-C — 시세성 호출 풀
+    # 사이클 7-C — 시세성 호출 풀 (CTPF1002R 1차 호출)
     data = await kis_get_quote(STOCK_BASICS_URL, "CTPF1002R", params)
-    output = data.get("output") or {}
+    ctpf_output = data.get("output") or {}
 
-    cptt = (output.get("cptt_trad_tr_psbl_yn") or "").strip().upper()
-    nxt_stop = (output.get("nxt_tr_stop_yn") or "").strip().upper()
-    krx_stop = (output.get("tr_stop_yn") or "").strip().upper()
-    admn = (output.get("admn_item_yn") or "").strip().upper()
+    # 사이클 107 — FHKST01010100 추가 호출 (Rate Limit 50ms sleep 영속)
+    await asyncio.sleep(0.05)
+
+    try:
+        price_data_raw = await kis_get_quote(
+            STOCK_PRICE_URL,
+            "FHKST01010100",
+            {
+                "fid_cond_mrkt_div_code": "J",
+                "fid_input_iscd": pdno,
+            },
+        )
+        # FHKST01010100 응답 output 은 dict (single-item)
+        price_data = price_data_raw.get("output", {}) if price_data_raw else {}
+    except Exception:
+        logger.exception(
+            "[inquire_stock_basics] FHKST01010100 호출 실패 graceful pdno=%s", pdno
+        )
+        price_data = {}
+
+    # raw merge — CTPF1002R 67 컬럼 영속 + FHKST01010100 시세 3 키 보강
+    # CTPF1002R 영역 우선, FHKST01010100 의 3 키만 추가 병합 (기존 키 덮어쓰기 금지)
+    merged_raw = dict(ctpf_output)
+    for key in ("acml_tr_pbmn", "lstn_stcn", "acml_vol", "prdy_vrss"):
+        if key in price_data:
+            merged_raw[key] = price_data[key]
+
+    cptt = (ctpf_output.get("cptt_trad_tr_psbl_yn") or "").strip().upper()
+    nxt_stop = (ctpf_output.get("nxt_tr_stop_yn") or "").strip().upper()
+    krx_stop = (ctpf_output.get("tr_stop_yn") or "").strip().upper()
+    admn = (ctpf_output.get("admn_item_yn") or "").strip().upper()
 
     return StockBasics(
         # Phase G2 (2026-05-13): KIS pdno 는 12자리 표준코드("00000A000100").
         # KRX 6자리 단축코드로 정규화 후 모델에 저장 — stock_master PK 정합성 보장.
-        ticker=_normalize_ticker(output.get("pdno") or pdno),
-        name=output.get("prdt_abrv_name") or output.get("prdt_name") or "",
-        excg_dvsn_cd=output.get("excg_dvsn_cd") or "",
+        ticker=_normalize_ticker(ctpf_output.get("pdno") or pdno),
+        name=ctpf_output.get("prdt_abrv_name") or ctpf_output.get("prdt_name") or "",
+        excg_dvsn_cd=ctpf_output.get("excg_dvsn_cd") or "",
         nxt_tradable=(cptt == "Y" and nxt_stop == "N"),
         krx_halted=(krx_stop == "Y"),
         admin_item=(admn == "Y"),
-        raw=dict(output),
+        raw=merged_raw,
     )
 
 
