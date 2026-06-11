@@ -71,6 +71,10 @@ _QUOTE_ALLOWED_PATHS: frozenset[str] = frozenset({
     # 사이클 89 (2026-06-09) — universe 500+ volume_rank (FHPST01710000) 거래금액순 상위
     # 시세성 호출 + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합
     "/uapi/domestic-stock/v1/quotations/volume-rank",
+    # 사이클 109 (2026-06-11) — market_cap (FHPST01740000) 전체 유니버스 페이징
+    # 사이클 101 도입 시점 silent 결함 시정 — 화이트리스트 영구 영속이 누락 영구 확정
+    # 시세성 호출 + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합
+    "/uapi/domestic-stock/v1/ranking/market-cap",
 })
 
 # 보조 매니저별 격리된 Rate Limit 세마포어 (메인 20, 보조 18 보수적)
