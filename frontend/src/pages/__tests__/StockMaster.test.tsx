@@ -361,8 +361,65 @@ describe('사이클 90 H-6 (HIGH) — "지금 새로고침" 버튼 + useMutation
     await waitFor(() => {
       const toast = screen.getByTestId("stock-master-refresh-universe-toast");
       expect(toast).toBeDefined();
-      // 실패 토스트는 에러 메시지 노출
-      expect(toast.textContent).toMatch(/실패|오류|에러|error/i);
+      // 실패 토스트는 에러 메시지 노출 (사이클 106 Q3=A: "KIS API 일시 결함" 포함)
+      expect(toast.textContent).toMatch(/실패|오류|에러|error|KIS API/i);
+    });
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────
+// 사이클 106 G-TOAST1 (HIGH) — Q3=A 적재 실패 toast 정밀화
+// ────────────────────────────────────────────────────────────────────────
+// 영속 의무:
+//   - 5xx 에러 toast 에 "KIS API 일시 결함" 명시 (사이클 76 graceful 영역 정합)
+//   - 409 Conflict toast 는 변경 없음 ("진행 중" 영속)
+// ────────────────────────────────────────────────────────────────────────
+
+describe("사이클 106 G-TOAST1 (HIGH) — 적재 실패 toast 정밀화 (Q3=A)", () => {
+  it("G-TOAST1: 5xx 에러 toast 에 'KIS API 일시 결함' 문구 포함", async () => {
+    setupHappyPathHandlers();
+    server.use(
+      http.post("/api/stock-master/refresh-universe", () =>
+        HttpResponse.json({ detail: "internal error" }, { status: 500 }),
+      ),
+    );
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-refresh-universe-button")).toBeDefined();
+    });
+    fireEvent.click(screen.getByTestId("stock-master-refresh-universe-button"));
+
+    await waitFor(() => {
+      const toast = screen.getByTestId("stock-master-refresh-universe-toast");
+      expect(toast).toBeDefined();
+      // Q3=A 정밀화 — "KIS API 일시 결함" 명시 (사이클 106 영속)
+      expect(toast.textContent).toContain("KIS API 일시 결함");
+    });
+  });
+
+  it("G-TOAST1: 409 Conflict toast 는 '진행 중' 메시지 영속 (Q3=A 영향 없음)", async () => {
+    setupHappyPathHandlers();
+    server.use(
+      http.post("/api/stock-master/refresh-universe", () =>
+        HttpResponse.json(
+          { detail: "universe refresh 진행 중 — 잠시 후 재시도" },
+          { status: 409 },
+        ),
+      ),
+    );
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-refresh-universe-button")).toBeDefined();
+    });
+    fireEvent.click(screen.getByTestId("stock-master-refresh-universe-button"));
+
+    await waitFor(() => {
+      const toast = screen.getByTestId("stock-master-refresh-universe-toast");
+      expect(toast).toBeDefined();
+      // 409 분기는 사이클 90 H-6 영속 — 사이클 106 변경 무관
+      expect(toast.textContent).toMatch(/진행 중|재시도/);
     });
   });
 });
@@ -416,20 +473,17 @@ describe("사이클 90 M-4 (MEDIUM) — 버튼 위치 + disabled 상태", () => 
 });
 
 // ────────────────────────────────────────────────────────────────────────
-// 사이클 94 H-5 (HIGH) — UI 안내 가이드 배너 (사용자 혼동 영역 해소)
+// 사이클 106 G-BANNER (HIGH/MEDIUM) — 안내 배너 갱신 회귀 가드
 // ────────────────────────────────────────────────────────────────────────
-// 명세: _workspace/red/cycle94_fid_input_iscd_fix.md §4 H-5
-//
 // 영속 의무:
-//   - testid: stock-master-info-banner
-//   - 한글 친숙 용어 (사이클 89 UI hotfix 답습)
-//   - 사이클 언급 0 (영문 사이클 코드/번호 노출 금지)
-//   - "참고용 종목 마스터 데이터" 영속 (사용자 결정 채택 영역)
-//   - 매매 신호 별개 영역 명시 (사용자 혼동 영역 해소)
+//   - G-BANNER1 (HIGH): testid stock-master-info-banner 영속 존재
+//   - G-BANNER2 (HIGH): 사이클 94 무효 메시지 ("각 전략의 후보 종목은 매 사이클") 부재
+//   - G-BANNER3 (MEDIUM): 신규 메시지 ("매일 20:00 KRX/KOSDAQ 전 종목 일괄 적재") 존재
+//   - 사이클 89 한글 친숙 용어 영속 (영문 cycle 번호 노출 금지)
 // ────────────────────────────────────────────────────────────────────────
 
-describe("사이클 94 H-5 (HIGH) — StockMaster UI 안내 가이드 배너", () => {
-  it("H-5: data-testid `stock-master-info-banner` 가 페이지 마운트 시 즉시 렌더된다", async () => {
+describe("사이클 106 G-BANNER1 (HIGH) — stock-master-info-banner testid 영속", () => {
+  it("G-BANNER1: data-testid `stock-master-info-banner` 가 페이지 마운트 시 즉시 렌더된다", async () => {
     setupHappyPathHandlers();
     render(withProviders(<StockMaster />));
 
@@ -437,29 +491,21 @@ describe("사이클 94 H-5 (HIGH) — StockMaster UI 안내 가이드 배너", (
       expect(screen.getByTestId("stock-master-info-banner")).toBeDefined();
     });
   });
+});
 
-  it("H-5: 배너에 '참고용 종목 마스터 데이터' 한글 헤더 영속", async () => {
+describe("사이클 106 G-BANNER2 (HIGH) — 사이클 94 무효 메시지 영구 부재", () => {
+  it("G-BANNER2: 배너에 사이클 94 영역 메시지 ('각 전략의 후보 종목은 매 사이클') 미존재", async () => {
     setupHappyPathHandlers();
     render(withProviders(<StockMaster />));
 
     await waitFor(() => {
       const banner = screen.getByTestId("stock-master-info-banner");
-      expect(banner.textContent).toContain("참고용 종목 마스터 데이터");
+      // 사이클 94 무효 메시지 영구 제거 확인 (Q2=A 신규 메시지로 대체)
+      expect(banner.textContent).not.toContain("각 전략의 후보 종목은 매 사이클");
     });
   });
 
-  it("H-5: 배너에 매매 신호 별개 영역 안내 (사용자 혼동 해소)", async () => {
-    setupHappyPathHandlers();
-    render(withProviders(<StockMaster />));
-
-    await waitFor(() => {
-      const banner = screen.getByTestId("stock-master-info-banner");
-      // 매매 신호 영역 별개 명시 (사이클 94 사용자 결정 영속)
-      expect(banner.textContent).toMatch(/실시간 매매 신호|별개 영역|시세 API/);
-    });
-  });
-
-  it("H-5: 배너에 영문 '사이클' / cycle 번호 노출 0건 (한글 친숙 용어 영속)", async () => {
+  it("G-BANNER2: 배너에 영문 cycle 번호 노출 0건 (한글 친숙 용어 영속)", async () => {
     setupHappyPathHandlers();
     render(withProviders(<StockMaster />));
 
@@ -469,6 +515,29 @@ describe("사이클 94 H-5 (HIGH) — StockMaster UI 안내 가이드 배너", (
       // 사이클 89 UI hotfix 답습 — 영문/cycle 코드 노출 금지
       expect(text).not.toMatch(/cycle\s*\d+/i);
       expect(text).not.toMatch(/사이클\s*\d+/);
+    });
+  });
+});
+
+describe("사이클 106 G-BANNER3 (MEDIUM) — Q2=A 신규 메시지 존재", () => {
+  it("G-BANNER3: 배너에 '매일 20:00 KRX/KOSDAQ 전 종목 일괄 적재' 메시지 존재", async () => {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      const banner = screen.getByTestId("stock-master-info-banner");
+      // Q2=A 사용자 결정 영속 — 20:00 일괄 적재 안내 메시지
+      expect(banner.textContent).toContain("매일 20:00");
+    });
+  });
+
+  it("G-BANNER3: 배너 제목이 '종목 마스터 데이터' (갱신된 헤더 영속)", async () => {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+
+    await waitFor(() => {
+      const banner = screen.getByTestId("stock-master-info-banner");
+      expect(banner.textContent).toContain("종목 마스터 데이터");
     });
   });
 });

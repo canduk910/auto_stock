@@ -2614,6 +2614,12 @@ class TradingScheduler:
 
         emit (사이클 74 collector 패턴 답습):
         - [full_universe_load_summary] — 적재 완료 후 1행 INFO
+
+        사이클 106 (2026-06-11) — Q1=A start() 직후 즉시 1회 실행 (사이클 78/83 답습):
+        - _wait_until(20:00:05) 대기 전 즉시 1회 실행 → stop() race 영구 차단
+        - is_stale 24h TTL idempotency 영속 활용 = 조기 호출 부수 효과 0
+        - lifecycle race 원인: start() → _wait_until 대기 중 → 20:10 _settle → stop() cancel
+          = 사이클 101 도입 이후 매일 20:00:05 미발화 영속 결함 (191 ticker 영속)
         """
         from src.engine.scanner import _full_universe_load_once as _load_once
         from src.engine.stock_master_metrics import (
@@ -2621,19 +2627,15 @@ class TradingScheduler:
             flush_full_universe_load_collector,
         )
 
-        # TIME_FULL_UNIVERSE_LOAD(20:00:05) 까지 대기 (start 에서 이미 20:00 NXT close 완료)
-        try:
-            await self._wait_until(TIME_FULL_UNIVERSE_LOAD)
-        except asyncio.CancelledError:
-            return
-
-        # 전체 유니버스 일괄 적재 (사이클 101 단일 실행)
+        # 사이클 106 = start() 직후 즉시 1회 실행 (사이클 78/83 lifecycle race 차단 패턴 답습)
+        # is_stale 24h TTL idempotency 영속 — 동일 날짜 2회 호출 = 1회만 KIS 호출 (TTL 영속)
+        # _wait_until 이전 즉시 실행으로 20:10 _settle → stop() cancel race 영구 차단
         try:
             summary = await _load_once()
             record_full_universe_load_summary(summary)
             flush_full_universe_load_collector()
             logger.info(
-                "[full_universe_load] 완료 total=%d kospi=%d kosdaq=%d "
+                "[full_universe_load] 초기 실행 완료 total=%d kospi=%d kosdaq=%d "
                 "fetched=%d skipped_ttl=%d failed=%d elapsed_ms=%d",
                 summary.get("total", 0), summary.get("kospi", 0),
                 summary.get("kosdaq", 0), summary.get("fetched", 0),
@@ -2643,7 +2645,29 @@ class TradingScheduler:
         except asyncio.CancelledError:
             return
         except Exception:
-            logger.exception("[full_universe_load] 전체 유니버스 적재 실패 (graceful)")
+            logger.exception("[full_universe_load] 초기 실행 예외 graceful")
+
+        while self._running:
+            try:
+                await self._wait_until(TIME_FULL_UNIVERSE_LOAD)  # 20:00:05
+                if not self._running:
+                    break
+                summary = await _load_once()
+                record_full_universe_load_summary(summary)
+                flush_full_universe_load_collector()
+                logger.info(
+                    "[full_universe_load] 완료 total=%d kospi=%d kosdaq=%d "
+                    "fetched=%d skipped_ttl=%d failed=%d elapsed_ms=%d",
+                    summary.get("total", 0), summary.get("kospi", 0),
+                    summary.get("kosdaq", 0), summary.get("fetched", 0),
+                    summary.get("skipped_ttl", 0), summary.get("failed", 0),
+                    summary.get("elapsed_ms", 0),
+                )
+            except asyncio.CancelledError:
+                break
+            except Exception:
+                logger.exception("[full_universe_load] task loop 예외 graceful")
+                await asyncio.sleep(60)
 
     def _detect_silent_inactive_sessions(self) -> list[str]:
         """세션 단위 silent inactive 감지 — 사이클 61 Phase 2-A2 stale_manager 위임."""

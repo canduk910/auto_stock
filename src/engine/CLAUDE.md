@@ -18,6 +18,41 @@ market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
+## 사이클 106 (2026-06-11) — `_full_universe_load_task_loop` lifecycle race 영구 차단 (start() 직후 즉시 1회 + while 루프)
+
+사용자 보고 (verbatim): "종목마스터 갱신작업 점검이 금일 내로 완료되어야 할 것 같아. 현재 종목마스터의 상단에 있는 메시지는 이제 무효한거 아닌가? 점검해서 UI에서 지우고 프론트와 백엔드 모두 현행화하길 바래." Phase 1 진단 결정적 발견: stock_master 191 ticker 영구 영속 = 사이클 101 `_full_universe_load_task_loop` 어제 (2026-06-10 수) 20:00:05 **미발화** 영역 영구 영속 확정. root cause = start() 직후 → `_wait_until(20:00:05)` 영역 영구 영속 대기 중 → 20:10 _settle → stop() cancel 발화 = **lifecycle race**.
+
+### `_full_universe_load_task_loop` start() 직후 즉시 1회 + while 루프 영구 영속
+
+- **위치**: `src/engine/scheduler.py::_full_universe_load_task_loop` (+21/-14L 순증 +7L)
+- **변경 전 (사이클 101)**: while 루프 `_wait_until(20:00:05)` 후 호출 → start() 직후 영구 영속 대기 → lifecycle race 영역 영구 영속
+- **변경 후 (사이클 106, 2026-06-11)**:
+  1. **start() 직후 즉시 1회 실행 블록** — `_full_universe_load_once()` 호출 + try/except graceful (CancelledError → return / Exception → graceful `logger.exception("[full_universe_load] 초기 실행 실패 graceful")`)
+  2. **while 루프 블록** — `_wait_until(20:00:05)` 무한 루프 (CancelledError → break / Exception → graceful `logger.exception("[full_universe_load] while 루프 실패 graceful") + asyncio.sleep(60)`)
+- **사유**:
+  - 사이클 101 시점 silent 결함 영구 차단 (start() 직후 영구 영속 대기 → 20:10 _settle → stop() cancel = lifecycle race 영구 차단)
+  - 사이클 78 G-AST1 + 79 G-AST2 영속 (`_full_universe_load_task` stop 튜플 포함 영구 영속, lifecycle 영역 답습)
+  - 사이클 83 `_scan_pool_eager_refresh_task` 영속 답습 (start() 직후 즉시 1회 + while 루프 + asyncio.sleep)
+  - is_stale 24h TTL idempotency 영역 영구 영속 활용 = 동일 영업일 2회 실행 시 24h TTL idempotent 영구 영속 (`stock_master.is_stale()` 영속)
+  - asyncio.sleep(60) = KIS LMS chain 안전 마진 영속 (사이클 17 OPSP0002 backoff 영속 답습)
+
+### 영속 의무 매트릭스 (사이클 106 영구 확인 영역)
+
+- **사이클 32 R4 universe guard 영속** (보유/익일청산 절대 보호)
+- **사이클 38 명문화 영속** (영역 3 = scheduler lifecycle 영역, 매수 진입 전 영역 한정 + 매도/손절/익일청산/15:20 강제청산 hot path 무관)
+- **사이클 78 G-AST1 + 79 G-AST2 영속** (`_full_universe_load_task` stop 튜플 포함 영구 영속, 영역 3 lifecycle 영역 답습 + `_api_recovered_collector_task` cancel 영구 가드 영속)
+- **사이클 88 G-REJECT 영속** (재구독 영역 영구 보존, 영역 3 = lifecycle 영역 차단만, 재구독 영역 변경 0)
+- **사이클 101 영속 영구 확인** (`_full_universe_load_once` 함수 영역 변경 0, lifecycle 영역만 시정)
+- **사이클 102 G-REJECT 영속** (양 agent 일치, 매수/매도/익일청산 hot path 영역 보존 의무)
+- **사이클 49→106 누적 61 사이클 + hotfix 14 영역 영속**
+
+### 운영 효과 (push + EC2 자동 배포 후)
+
+- `[full_universe_load] 초기 실행 완료 total=N kospi=K kosdaq=L` start() 직후 즉시 1회 emit (영구 영속)
+- 매일 20:00:05 while 루프 정기 실행 영역 영구 영속
+- stock_master 191 ticker → **~2,800 ticker 정상화 영역 영구 영속** (KOSPI ~1,400 + KOSDAQ ~1,400, 사이클 99 60 ticker 영역 영구 영속 회복 + 사이클 100 3 prefix OR 영구 영속)
+- 매매 안전성 무영향 (영역 3 = lifecycle race 차단 영역 한정 + 매수/매도/익일청산/15:20 강제청산 hot path 무관)
+
 ## 사이클 103 (2026-06-11) — strategy.py dead code 영구 폐기 + momentum.py 손절 로그 임계 동행 emit
 
 사이클 102.5 회고 결정적 사실: 코미코(183300) 2026-06-11 10:03 매수 138,200원 → 13:21:30 STOP_LOSS 매도 138,200원. 단일 근본 원인 = DB `strategy_config.momentum.params.stop_loss_rate = -2.4%` (2026-06-03 22:11 KST 사용자 수동 apply). 매도 시점 loss_rate = -2.604% ≤ -2.4% 만족 → momentum.py STOP_LOSS 분기 정상 작동. 사용자 의문 = 코드 DEFAULT `-7.5%` 가정 → 운영 영역 `-2.4%` 영구 영속 가시화 부족 → 오인. **결함 영역 = 아님** (코드 정상, 운영 가시화 영역 보강 의무).
