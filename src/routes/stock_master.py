@@ -49,32 +49,40 @@ async def refresh_universe_now():
         )
 
     async with _refresh_universe_lock:
-        from src.engine.scanner import (
-            fetch_top_500_universe,
-            _universe_eager_refresh_loop as _scanner_upsert_loop,  # 사이클 93 신규
-        )
+        # 사이클 110 (2026-06-11) — silent 결함 영역 영구 영속이 영구 시정.
+        # 사이클 101 (Q68=A+Q69=B) 영역에서 fetch_top_500_universe + _universe_eager_refresh_loop
+        # 영구 폐기 완료. 본 라우트 import 영역 동행 시정 누락 silent 결함 (사이클 101~108 발견 0건).
+        # 단일 대체 영역 영구 영속이 = _full_universe_load_once() (사이클 101 영역 영구 영속이
+        # market_cap FHPST01740000 페이징 + CTPF1002R + stock_master upsert 영역 내장).
+        # 사이클 106 lifecycle race 차단 영속 + 사이클 107 raw 보강 영속 + 사이클 109 화이트리스트 영속.
+        from src.engine.scanner import _full_universe_load_once
 
         start_time = time.monotonic()
         try:
-            tickers = await fetch_top_500_universe()
+            summary = await _full_universe_load_once()
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-        # 사이클 93 — stock_master upsert chain (graceful — 사이클 89 emit 영속)
-        try:
-            await _scanner_upsert_loop(tickers)
-        except Exception:
-            pass  # graceful 흡수 — 사이클 89 [stock_master_bulk_refresh] 영속 (Q27=A 영속)
-
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
 
+        # 사이클 110 응답 영역 영구 영속이 — _full_universe_load_once summary 9 키 중
+        # 운영자 관심 7 키 노출. universe ≡ summary["total"] (사이클 89 응답 영속 호환).
         return ApiResponse(
             success=True,
             data={
-                "universe": len(tickers),
+                "universe": summary.get("total", 0),
                 "elapsed_ms": elapsed_ms,
+                "fetched": summary.get("fetched", 0),
+                "skipped_ttl": summary.get("skipped_ttl", 0),
+                "failed": summary.get("failed", 0),
+                "kospi": summary.get("kospi", 0),
+                "kosdaq": summary.get("kosdaq", 0),
             },
-            message=f"universe {len(tickers)} ticker 즉시 적재 완료",
+            message=(
+                f"universe {summary.get('total', 0)} ticker 즉시 적재 완료 "
+                f"(fetched={summary.get('fetched', 0)}, skipped_ttl={summary.get('skipped_ttl', 0)}, "
+                f"failed={summary.get('failed', 0)})"
+            ),
         )
 
 

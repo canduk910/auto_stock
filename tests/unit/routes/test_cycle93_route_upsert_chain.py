@@ -35,6 +35,17 @@ pytestmark = pytest.mark.unit
 _MOCK_TICKERS = ["005930", "402340", "035720", "000660", "035420"]
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 110 (2026-06-11) — 사이클 93 영역 의미 전환 영구 영속이 (사이클 66 K-2 패턴 답습). "
+        "사이클 101 (Q68=A+Q69=B) 영구 폐기 영역 = `fetch_top_500_universe` + "
+        "`_universe_eager_refresh_loop` → 사이클 110 시정 영역 영구 영속이 = "
+        "`_full_universe_load_once` 단일 호출 영역 영구 영속이 (upsert chain 영역 내장 활용). "
+        "사이클 93 silent 결함 영역 영구 영속이 시정 의도는 사이클 110 신규 영역에서 영구 영속 보존 "
+        "(tests/unit/routes/test_cycle110_import_fix.py + test_cycle110_emit_persistence.py)."
+    ),
+)
 def test_g_cc3_route_post_refresh_universe_calls_scanner_upsert_chain(monkeypatch):
     """G-CC3: POST `/refresh-universe` 호출 시 scanner module `_universe_eager_refresh_loop`
     가 정확히 ticker list 인자로 1회 호출되어야 한다.
