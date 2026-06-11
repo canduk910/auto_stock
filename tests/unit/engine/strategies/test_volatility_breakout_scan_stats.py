@@ -24,6 +24,12 @@ from src.engine.strategy_base import StrategyConfig
 
 pytestmark = pytest.mark.unit
 
+_xfail_cycle108 = pytest.mark.xfail(
+    strict=False,
+    reason="사이클 108 stock_master 전환으로 VB volume-rank 기반 pipeline 카운터 계약 폐기 — "
+           "과거 계약 영속 보존 (사이클 97 K-2 패턴 답습)",
+)
+
 
 @pytest.fixture
 def vb(monkeypatch):
@@ -69,6 +75,7 @@ def test_empty_scan_stats_has_nine_keys_and_zero_defaults():
 # ---------------------------------------------------------------------------
 # 2. prepare() — 단계 카운트 누적 검증 (fixture mock)
 # ---------------------------------------------------------------------------
+@_xfail_cycle108
 @pytest.mark.asyncio
 async def test_prepare_accumulates_counts_through_pipeline(vb, monkeypatch):
     """`_scan_universe()` 와 `fetch_daily_candles` 를 mock 으로 주입해

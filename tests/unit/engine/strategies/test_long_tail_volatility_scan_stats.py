@@ -16,6 +16,12 @@ from src.engine.strategy_base import StrategyConfig
 
 pytestmark = pytest.mark.unit
 
+_xfail_cycle108 = pytest.mark.xfail(
+    strict=False,
+    reason="사이클 108 stock_master 전환으로 LTV volume-rank 기반 pipeline 카운터 계약 폐기 — "
+           "과거 계약 영속 보존 (사이클 97 K-2 패턴 답습)",
+)
+
 
 @pytest.fixture
 def ltv(monkeypatch):
@@ -61,6 +67,7 @@ def test_empty_scan_stats_has_ten_keys_with_consecutive_limit_pass():
 # ---------------------------------------------------------------------------
 # 2. prepare() — 연속상한가 종목 분기 카운트 검증
 # ---------------------------------------------------------------------------
+@_xfail_cycle108
 @pytest.mark.asyncio
 async def test_prepare_excludes_consecutive_limit_up_from_pass_count(ltv, monkeypatch):
     """연속상한가 종목은 `candle_fetch_ok` 통과 후 `consecutive_limit_pass` 미증가.

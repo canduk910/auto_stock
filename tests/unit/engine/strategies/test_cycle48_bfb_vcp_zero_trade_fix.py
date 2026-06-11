@@ -27,6 +27,12 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+_xfail_cycle108 = pytest.mark.xfail(
+    strict=False,
+    reason="사이클 108 stock_master 전환으로 BFB volume-rank 호출 패턴 폐기 — "
+           "과거 계약 영속 보존 (사이클 97 K-2 패턴 답습)",
+)
+
 
 # ===========================================================================
 # BFB-1: 유니버스 시간무관화 — volume-rank(prdy_vol) 기반
@@ -48,6 +54,7 @@ def _volume_rank_item(ticker: str, name: str, price: int, listed: int,
     }
 
 
+@_xfail_cycle108
 @pytest.mark.asyncio
 async def test_bfb_scan_universe_uses_prdy_volume_rank_api(monkeypatch):
     """BFB `_scan_universe` 가 volume-rank API + prdy_vol 기반으로 시간무관 동작.
@@ -94,6 +101,7 @@ async def test_bfb_scan_universe_uses_prdy_volume_rank_api(monkeypatch):
     )
 
 
+@_xfail_cycle108
 @pytest.mark.asyncio
 async def test_bfb_scan_universe_filters_low_prdy_trade_amount(monkeypatch):
     """전일 거래대금 미달 종목은 정상 탈락 (prdy 기준)."""

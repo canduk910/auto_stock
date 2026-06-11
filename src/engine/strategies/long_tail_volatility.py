@@ -239,119 +239,59 @@ class LongTailVolatilityStrategy(StrategyBase):
         return count >= threshold
 
     async def _scan_universe(self) -> list[str]:
-        """시총/거래대금 조건으로 종목을 스캔한다 (VB와 동일 로직).
+        """stock_master DB 기반으로 시총·거래대금 조건 종목을 스캔한다 (사이클 108).
 
-        거래량순위 API 응답의 prdy_vol/lstn_stcn/stck_prpr/prdy_vrss를 직접 활용해
-        시총·전일 거래대금을 산출한다. 개별 inquire-price 호출 없음 →
-        휴장 직후 첫 영업일이나 장 시작 전에도 시간 의존 없이 일관된 결과를 보장한다.
+        사이클 108 (Plan Phase A) — 사전 적재된 stock_master (~2,800종목,
+        사이클 101/106 _full_universe_load_task_loop) 를 DB 필터링으로 대체한다.
+        LTV 전용 consecutive_limit_pass 카운터는 prepare() 에서 관리하므로
+        _scan_universe 는 VB 와 동일 구조로 단순화한다.
+        KIS API 직접 호출 0건.
         """
-        from src.api.base import kis_get, KisApiError
-        from src.db.system_logs import write_log
-        from src.engine.scanner import ticker_names, ETF_KEYWORDS
+        from src.db import stock_master as _sm_mod
+        from src.engine.scanner import ETF_KEYWORDS, ticker_names
 
-        min_mcap = self.config.params["min_market_cap"]
-        min_trade = self.config.params["min_trade_amount"]
-        max_stocks = self.config.params["max_scan_stocks"]
+        min_mcap = self.config.params.get("min_market_cap", 100_000_000_000)
+        min_trade = self.config.params.get("min_trade_amount", 20_000_000_000)
+        max_stocks = self.config.params.get("max_scan_stocks", 100)
 
-        # KIS 거래량순위는 단일 페이지(~30건). BLNG_CLS_CODE 별로 다른 정렬 기준의
-        # 상위 종목 합집합 → 후보 풀 ~60~90종목으로 확장 (max_scan_stocks=100 활용도 향상)
-        #   0: 평균거래량 / 1: 거래증가율 / 3: 거래금액순 (KIS 표준)
-        BLNG_CODES = ("0", "1", "3")
-        rank_items: list[dict] = []
-        seen_tickers: set[str] = set()
-        for blng in BLNG_CODES:
-            try:
-                params = {
-                    "FID_COND_MRKT_DIV_CODE": "J",
-                    "FID_COND_SCR_DIV_CODE": "20171",
-                    "FID_INPUT_ISCD": "0000",
-                    "FID_DIV_CLS_CODE": "0",
-                    "FID_BLNG_CLS_CODE": blng,
-                    "FID_TRGT_CLS_CODE": "111111111",
-                    "FID_TRGT_EXLS_CLS_CODE": "000000",
-                    "FID_INPUT_PRICE_1": "0",
-                    "FID_INPUT_PRICE_2": "0",
-                    "FID_VOL_CNT": "0",
-                    "FID_INPUT_DATE_1": "0",
-                }
-                data = await kis_get(
-                    "/uapi/domestic-stock/v1/quotations/volume-rank",
-                    "FHPST01710000",
-                    params,
-                )
-                for item in data.get("output", []) or []:
-                    name = item.get("hts_kor_isnm", "")
-                    if any(kw in name for kw in ETF_KEYWORDS):
-                        continue
-                    ticker = item.get("mksc_shrn_iscd", "")
-                    if not ticker or ticker in seen_tickers:
-                        continue
-                    seen_tickers.add(ticker)
-                    rank_items.append(item)
-            except KisApiError:
-                logger.warning("롱테일 변동성 돌파 거래량순위 조회 실패: blng=%s", blng)
-            # KIS Rate Limit 보호 — 호출간 50ms (kis_get Semaphore 가 20/s 직렬화하지만 burst 회피)
-            await asyncio.sleep(0.05)
-
-        logger.info(
-            "롱테일 변동성 돌파 유니버스 후보: %d종목 (blng 0/1/3 합집합 dedupe)",
-            len(rank_items),
+        rows = await _sm_mod.list_by_filter(
+            min_market_cap=min_mcap,
+            min_trade_amount=min_trade,
+            nxt_tradable=True,
+            limit=max_stocks,
         )
+
         # 사이클 21 — 후보 수
-        self._scan_stats["universe_candidates"] = len(rank_items)
+        self._scan_stats["universe_candidates"] = len(rows)
 
         filtered: list[str] = []
-        for item in rank_items:
-            if len(filtered) >= max_stocks:
-                break
-            ticker = item.get("mksc_shrn_iscd", "")
-            if not ticker:
-                continue
+        for row in rows:
+            ticker = row.get("ticker", "")
             # 종목코드 형식 검증 — ETF·ETN·신주인수권 등 알파벳 포함 코드 차단
-            if not (len(ticker) == 6 and ticker.isdigit()):
+            if not ticker or not (len(ticker) == 6 and ticker.isdigit()):
                 continue
-            try:
-                price = int(item.get("stck_prpr", "0"))
-                listed = int(item.get("lstn_stcn", "0"))
-                prdy_vol = int(item.get("prdy_vol", "0"))
-                prdy_vrss = int(item.get("prdy_vrss", "0"))
-                prdy_close = price - prdy_vrss
-            except (ValueError, TypeError):
+            name = row.get("name", "") or (row.get("raw") or {}).get("prdt_abrv_name", "")
+            if any(kw in name for kw in ETF_KEYWORDS):
                 continue
+            if name:
+                ticker_names[ticker] = name
+            filtered.append(ticker)
 
-            if price <= 0 or listed <= 0 or prdy_vol <= 0 or prdy_close <= 0:
-                continue
-            # 사이클 21 — 가격 필수값 통과 카운트
-            self._scan_stats["price_filtered"] += 1
-
-            mcap = price * listed
-            prdy_trade_amt = prdy_vol * prdy_close
-            mcap_ok = mcap >= min_mcap
-            trade_ok = prdy_trade_amt >= min_trade
-            # 사이클 21 — 시총/거래대금 단독 통과 카운트 (분리)
-            if mcap_ok:
-                self._scan_stats["mcap_pass"] += 1
-            if trade_ok:
-                self._scan_stats["trade_amount_pass"] += 1
-            if mcap_ok and trade_ok:
-                name = item.get("hts_kor_isnm", "")
-                if name:
-                    ticker_names[ticker] = name
-                filtered.append(ticker)
-
-        logger.info("롱테일 변동성 돌파 유니버스 확정: %d종목", len(filtered))
+        logger.info(
+            "롱테일 변동성 돌파 유니버스 확정: %d/%d종목 (stock_master DB, 시총 %d억+, 거래대금 %d억+)",
+            len(filtered), len(rows), min_mcap // 100_000_000, min_trade // 100_000_000,
+        )
         # 사이클 21 — universe 필터 통과
         self._scan_stats["universe_filtered"] = len(filtered)
 
         if not filtered:
-            if not rank_items:
-                msg = "롱테일 변동성 돌파 유니버스 0종목 — 거래량순위 API 응답이 비어있음"
-            else:
-                msg = (
-                    f"롱테일 변동성 돌파 유니버스 0종목 — 후보 {len(rank_items)}종목 중 "
-                    f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
-                    f"{min_trade // 100_000_000}억+ 필터 통과 없음"
-                )
+            from src.db.system_logs import write_log
+
+            msg = (
+                f"롱테일 변동성 돌파 유니버스 0종목 — stock_master {len(rows)}건 중 "
+                f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
+                f"{min_trade // 100_000_000}억+ / ETF 제외 후 통과 없음"
+            )
             logger.error(msg)
             try:
                 await write_log("ERROR", msg)

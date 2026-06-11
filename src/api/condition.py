@@ -290,10 +290,11 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
         )
         price_data = {}
 
-    # raw merge — CTPF1002R 67 컬럼 영속 + FHKST01010100 시세 3 키 보강
-    # CTPF1002R 영역 우선, FHKST01010100 의 3 키만 추가 병합 (기존 키 덮어쓰기 금지)
+    # raw merge — CTPF1002R 67 컬럼 영속 + FHKST01010100 시세 5 키 보강 (사이클 108)
+    # CTPF1002R 영역 우선, FHKST01010100 의 5 키만 추가 병합 (기존 키 덮어쓰기 금지)
+    # hts_avls: 시가총액 (단위: 백만원) — stock_master list_by_filter 시총 필터링에 활용
     merged_raw = dict(ctpf_output)
-    for key in ("acml_tr_pbmn", "lstn_stcn", "acml_vol", "prdy_vrss"):
+    for key in ("acml_tr_pbmn", "lstn_stcn", "acml_vol", "prdy_vrss", "hts_avls"):
         if key in price_data:
             merged_raw[key] = price_data[key]
 

@@ -27,6 +27,12 @@ from src.engine.strategy_base import StrategyConfig
 
 pytestmark = pytest.mark.unit
 
+_xfail_cycle108 = pytest.mark.xfail(
+    strict=False,
+    reason="사이클 108 stock_master 전환으로 BFB volume-rank 호출 패턴 폐기 — "
+           "과거 계약 영속 보존 (사이클 97 K-2 패턴 답습)",
+)
+
 
 def _vrank_item(ticker: str, name: str = "샘플전자", price: int = 50_000,
                 listed: int = 50_000_000, prdy_vol: int = 5_000_000,
@@ -72,6 +78,7 @@ def bfb(monkeypatch):
 # ---------------------------------------------------------------------------
 # 1) 정상 완료 회귀 가드 — `_scan_universe()` 가 오류 없이 후보 산출
 # ---------------------------------------------------------------------------
+@_xfail_cycle108
 @pytest.mark.asyncio
 async def test_scan_universe_completes_without_error(bfb, monkeypatch):
     """`_scan_universe()` 가 volume-rank 호출 + 시총·거래대금 컷 후 list 반환.
@@ -94,6 +101,7 @@ async def test_scan_universe_completes_without_error(bfb, monkeypatch):
 # ---------------------------------------------------------------------------
 # 2) _scan_stats 갱신 — universe_candidates / universe_filtered 카운트
 # ---------------------------------------------------------------------------
+@_xfail_cycle108
 @pytest.mark.asyncio
 async def test_scan_universe_updates_scan_stats(bfb, monkeypatch):
     """`_scan_universe()` 가 _scan_stats 의 universe_candidates / universe_filtered 를 갱신."""

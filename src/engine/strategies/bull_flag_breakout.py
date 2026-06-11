@@ -572,121 +572,57 @@ class BullFlagBreakoutStrategy(StrategyBase):
         return sum(trs) / period
 
     async def _scan_universe(self) -> list[str]:
-        """KRX 전체에서 시총·거래대금 컷.
+        """stock_master DB 기반으로 시총·거래대금 조건 종목을 스캔한다 (사이클 108).
 
-        사이클 48 (2026-05-27) — 유니버스 시간무관화 (운영 0종목 결함 시정).
-        기존 `_fetch_fluctuation_rank` + 종목별 `fetch_stock_detail`(FHKST01010100) 방식은
-        응답에 `prdy_vol`(전일거래량) 필드가 없어 `acml_vol`(당일 누적) 으로 거래대금을 계산.
-        BFB `prepare()` 는 07:50 장 전 boot 에서만 호출 → `acml_vol=0` → 매일 "유니버스 0종목".
-
-        VB/LTV 와 동일하게 거래량순위 API(`volume-rank`/FHPST01710000, blng 0/1/3 합집합)로
-        교체. 응답 1건에 `prdy_vol`/`stck_prpr`/`prdy_vrss`/`lstn_stcn` 포함 → 개별 호출 없이
-        시총·전일거래대금(`prdy_vol × prdy_close`) 산출 + 시간 의존 제거.
+        사이클 108 (Plan Phase A) — 사전 적재된 stock_master (~2,800종목,
+        사이클 101/106 _full_universe_load_task_loop) 를 DB 필터링으로 대체한다.
+        사이클 48 도입 이유였던 "acml_vol=0 시간 의존 결함" 은 stock_master DB 조회로
+        근본 해소된다 (DB는 24h TTL 갱신 기반으로 시간 의존이 없음).
+        KIS API 직접 호출 0건.
+        hts_avls (시가총액, 백만원 단위) 는 사이클 108 inquire_stock_basics 5-key merge 에서
+        stock_master.raw 에 적재됨.
         """
-        from src.api.base import KisApiError, kis_get
+        from src.db import stock_master as _sm_mod
         from src.engine.scanner import ETF_KEYWORDS, ticker_names
 
         p = self.config.params
-        min_mcap = p["min_market_cap"]
-        min_trade = p["min_trade_amount"]
-        max_stocks = p["max_scan_stocks"]
+        min_mcap = p.get("min_market_cap", 100_000_000_000)
+        min_trade = p.get("min_trade_amount", 20_000_000_000)
+        max_stocks = p.get("max_scan_stocks", 100)
 
-        # KIS 거래량순위는 단일 페이지(~30건). BLNG_CLS_CODE 별로 다른 정렬 기준의 상위
-        # 종목 합집합 → 후보 풀 확장 (0: 평균거래량 / 1: 거래증가율 / 3: 거래금액순)
-        BLNG_CODES = ("0", "1", "3")
-        rank_items: list[dict] = []
-        seen_tickers: set[str] = set()
-        for blng in BLNG_CODES:
-            try:
-                params = {
-                    "FID_COND_MRKT_DIV_CODE": "J",  # 코스피+코스닥 전체
-                    "FID_COND_SCR_DIV_CODE": "20171",
-                    "FID_INPUT_ISCD": "0000",
-                    "FID_DIV_CLS_CODE": "0",
-                    "FID_BLNG_CLS_CODE": blng,
-                    "FID_TRGT_CLS_CODE": "111111111",
-                    "FID_TRGT_EXLS_CLS_CODE": "000000",
-                    "FID_INPUT_PRICE_1": "0",
-                    "FID_INPUT_PRICE_2": "0",
-                    "FID_VOL_CNT": "0",
-                    "FID_INPUT_DATE_1": "0",
-                }
-                data = await kis_get(
-                    "/uapi/domestic-stock/v1/quotations/volume-rank",
-                    "FHPST01710000",
-                    params,
-                )
-                for item in data.get("output", []) or []:
-                    name = item.get("hts_kor_isnm", "")
-                    if any(kw in name for kw in ETF_KEYWORDS):
-                        continue
-                    ticker = item.get("mksc_shrn_iscd", "")
-                    if not ticker or ticker in seen_tickers:
-                        continue
-                    seen_tickers.add(ticker)
-                    rank_items.append(item)
-            except KisApiError:
-                logger.warning("눌림목 거래량순위 조회 실패: blng=%s", blng)
-            except Exception as e:
-                logger.warning("눌림목 유니버스 스캔 실패: blng=%s — %s", blng, e)
-            # KIS Rate Limit 보호 — 호출간 50ms (burst 회피)
-            await asyncio.sleep(0.05)
+        rows = await _sm_mod.list_by_filter(
+            min_market_cap=min_mcap,
+            min_trade_amount=min_trade,
+            nxt_tradable=True,
+            limit=max_stocks,
+        )
 
-        self._scan_stats["universe_candidates"] = len(rank_items)
+        self._scan_stats["universe_candidates"] = len(rows)
 
         filtered: list[str] = []
-        for item in rank_items:
-            if len(filtered) >= max_stocks:
-                break
-            ticker = item.get("mksc_shrn_iscd", "")
+        for row in rows:
+            ticker = row.get("ticker", "")
             # 종목코드 형식 검증 — ETF·ETN·신주인수권 등 알파벳 포함 코드 차단
             if not ticker or not (len(ticker) == 6 and ticker.isdigit()):
                 continue
-            try:
-                price = int(item.get("stck_prpr", "0"))
-                listed = int(item.get("lstn_stcn", "0"))
-                prdy_vol = int(item.get("prdy_vol", "0"))
-                # KIS prdy_vrss 는 부호 포함 정수 (상승=+, 하락=-)
-                prdy_vrss = int(item.get("prdy_vrss", "0"))
-                prdy_close = price - prdy_vrss
-            except (ValueError, TypeError):
+            name = row.get("name", "") or (row.get("raw") or {}).get("prdt_abrv_name", "")
+            if any(kw in name for kw in ETF_KEYWORDS):
                 continue
-
-            if price <= 0 or listed <= 0 or prdy_vol <= 0 or prdy_close <= 0:
-                continue
-
-            mcap = price * listed
-            # 전일 확정치 기반 거래대금 — 당일 누적(acml) 금지 (시간 편향 → 오후 편중 왜곡)
-            prdy_trade_amt = prdy_vol * prdy_close
-            if mcap < min_mcap:
-                continue
-            if prdy_trade_amt < min_trade:
-                # 사이클 23 P1-2 — 거래대금 미달 카운터 (시총 통과 후 거래대금 미달)
-                self._scan_stats["min_trade_amount_failed"] += 1
-                continue
-            name = item.get("hts_kor_isnm", "")
             if name:
                 ticker_names[ticker] = name
             filtered.append(ticker)
 
         self._scan_stats["universe_filtered"] = len(filtered)
+        self._scan_stats["last_run_at"] = datetime.now(KST).isoformat()
 
-        # PR #15 (사이클 48) copilot 재리뷰 ② — 빈 유니버스 시 ERROR 로그 + system_logs.
-        # `strategies/CLAUDE.md` 컨벤션 "0종목 확정 시 ERROR 로그 + system_logs 기록" 준수
-        # (VB/LTV 와 동일 패턴). 이 PR 이 바로 "universe 0" 진단 목적이라 누락 시 동일 결함
-        # 재발견 실패. rank API 0건(rank_items 빈) vs 필터 전부 탈락(rank_items>0 but filtered=0)
-        # 구분 로깅. 빈 유니버스가 아니면 호출되지 않음 (행위 보존).
         if not filtered:
             from src.db.system_logs import write_log
 
-            if not rank_items:
-                msg = "눌림목 돌파 유니버스 0종목 — 거래량순위 API 응답이 비어있음"
-            else:
-                msg = (
-                    f"눌림목 돌파 유니버스 0종목 — 후보 {len(rank_items)}종목 중 "
-                    f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
-                    f"{min_trade // 100_000_000}억+ 필터 통과 없음"
-                )
+            msg = (
+                f"눌림목 돌파 유니버스 0종목 — stock_master {len(rows)}건 중 "
+                f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
+                f"{min_trade // 100_000_000}억+ / ETF 제외 후 통과 없음"
+            )
             logger.error(msg)
             try:
                 await write_log("ERROR", msg)

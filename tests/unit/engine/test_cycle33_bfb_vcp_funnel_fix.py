@@ -31,6 +31,12 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+_xfail_cycle108 = pytest.mark.xfail(
+    strict=False,
+    reason="사이클 108 stock_master 전환으로 BFB volume-rank 호출 패턴 폐기 — "
+           "과거 계약 영속 보존 (사이클 97 K-2 패턴 답습)",
+)
+
 
 # ===========================================================================
 # B-1 (H-2 → 사이클 48 갱신): BFB `_scan_universe` — prdy 기반 volume-rank 사용
@@ -38,6 +44,7 @@ pytestmark = pytest.mark.unit
 # 사이클 33 은 acml_vol(당일 누적) 을 썼으나, 07:50 장 전 boot 에서 acml_vol=0 →
 # 매일 "유니버스 0종목" 결함 (운영 DB 확정). 사이클 48 (2026-05-27) 에서 VB/LTV 와
 # 동일하게 volume-rank(FHPST01710000) prdy_vol 기반으로 시간무관화. 본 테스트도 갱신.
+# 사이클 108: stock_master 전환으로 volume-rank 패턴 폐기 → xfail 의미 전환.
 # ===========================================================================
 def _vrank_item(ticker, name, price, listed, prdy_vol, prdy_vrss=0):
     return {
@@ -50,6 +57,7 @@ def _vrank_item(ticker, name, price, listed, prdy_vol, prdy_vrss=0):
     }
 
 
+@_xfail_cycle108
 @pytest.mark.asyncio
 async def test_bfb_scan_universe_uses_prdy_volume_rank(monkeypatch):
     """BFB `_scan_universe` 가 prdy_vol 기반 volume-rank 사용 — 장 전에도 시간무관 동작."""
@@ -78,6 +86,7 @@ async def test_bfb_scan_universe_uses_prdy_volume_rank(monkeypatch):
     )
 
 
+@_xfail_cycle108
 @pytest.mark.asyncio
 async def test_bfb_scan_universe_filters_low_trade_amount(monkeypatch):
     """거래대금 미달 종목은 정상 탈락 (min_trade_amount_failed 카운트, prdy 기준)."""

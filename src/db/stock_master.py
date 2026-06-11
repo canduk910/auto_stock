@@ -207,6 +207,88 @@ async def count_eager_refresh_today() -> int:
     return total
 
 
+async def list_by_filter(
+    *,
+    market: str | None = None,
+    min_market_cap: int = 0,
+    min_trade_amount: int = 0,
+    exclude_tickers: list[str] | None = None,
+    nxt_tradable: bool | None = None,
+    limit: int = 500,
+) -> list[dict]:
+    """시총·거래대금·시장·NXT 거래가능 필터로 stock_master 를 조회한다 (사이클 108).
+
+    KIS volume-rank API 없이 DB 기반으로 VB/LTV/BFB 유니버스를 구성한다 (KIS API 호출 0건).
+
+    NOTE: Supabase PostgREST 는 JSONB 숫자 값 직접 비교를 지원하지 않는다.
+    따라서 DB 에서 limit*2 버퍼 조회 후 Python-side 에서 JSONB raw 키 필터링을 수행한다.
+
+    Args:
+        market: "kospi" (excg_dvsn_cd=02) / "kosdaq" (excg_dvsn_cd=03) / None (전체)
+        min_market_cap: 시가총액 최소값 (원 단위). hts_avls(백만원) × 1_000_000 비교.
+        min_trade_amount: 거래대금 최소값 (원 단위). acml_tr_pbmn 직접 비교.
+        exclude_tickers: 제외 종목 리스트.
+        nxt_tradable: None=전체 / True=NXT 거래가능만 / False=NXT 불가만.
+        limit: 결과 최대 건수 (default 500).
+
+    Returns:
+        [{"ticker": str, "name": str, "excg_dvsn_cd": str, "nxt_tradable": bool, "raw": dict}, ...]
+    """
+    exclude_set: set[str] = set(exclude_tickers or [])
+    # 2× 버퍼 조회 — JSONB Python-side 필터 후 limit 를 충족하도록 여유분 확보
+    fetch_limit = max(limit * 2, 1000)
+
+    query = (
+        supabase.table(TABLE_NAME)
+        .select("ticker, name, excg_dvsn_cd, nxt_tradable, raw")
+        .order("refreshed_at", desc=True)
+        .limit(fetch_limit)
+    )
+    if market == "kospi":
+        query = query.eq("excg_dvsn_cd", "02")
+    elif market == "kosdaq":
+        query = query.eq("excg_dvsn_cd", "03")
+    if nxt_tradable is not None:
+        query = query.eq("nxt_tradable", nxt_tradable)
+
+    result = await asyncio.to_thread(lambda: query.execute())
+    rows = result.data or []
+
+    filtered: list[dict] = []
+    for row in rows:
+        if len(filtered) >= limit:
+            break
+        ticker = row.get("ticker", "")
+        if not ticker:
+            continue
+        if ticker in exclude_set:
+            continue
+
+        raw: dict = row.get("raw") or {}
+
+        # 시가총액 필터 — hts_avls 단위: 백만원 → 원 변환 후 비교
+        if min_market_cap > 0:
+            try:
+                hts_avls = int(raw.get("hts_avls") or 0)
+            except (ValueError, TypeError):
+                hts_avls = 0
+            if hts_avls * 1_000_000 < min_market_cap:
+                continue
+
+        # 거래대금 필터 — acml_tr_pbmn 단위: 원
+        if min_trade_amount > 0:
+            try:
+                acml_tr = int(raw.get("acml_tr_pbmn") or 0)
+            except (ValueError, TypeError):
+                acml_tr = 0
+            if acml_tr < min_trade_amount:
+                continue
+
+        filtered.append(row)
+
+    return filtered
+
+
 async def is_stale(ticker: str, max_age_hours: int = 24) -> bool:
     """24h 초과 또는 미존재 시 True — KIS 재조회 필요."""
     result = await asyncio.to_thread(
