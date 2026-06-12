@@ -1576,7 +1576,7 @@ async def _fetch_market_cap_page(
     return accumulated
 
 
-async def _full_universe_load_once() -> dict:
+async def _full_universe_load_once(force: bool = False) -> dict:
     """사이클 115 (2026-06-12) — KRX 1차 + KIS 자동 폴백 (Q3=C 영속).
 
     사용자 결정 영속: Q3=C (KRX OPEN API 1차 우선 + KrxApiError 시 KIS 자동 폴백).
@@ -1611,7 +1611,7 @@ async def _full_universe_load_once() -> dict:
     from src.api.krx import KrxApiError
 
     try:
-        summary = await _full_universe_load_krx_primary()
+        summary = await _full_universe_load_krx_primary(force=force)
         summary["source"] = "krx"
         return summary
     except KrxApiError as exc:
@@ -1619,12 +1619,12 @@ async def _full_universe_load_once() -> dict:
             "[krx_open_api_fallback] KRX 실패 → KIS market-cap 폴백 (graceful): %s",
             exc,
         )
-        summary = await _full_universe_load_kis_fallback()
+        summary = await _full_universe_load_kis_fallback(force=force)
         summary["source"] = "kis_fallback"
         return summary
 
 
-async def _full_universe_load_krx_primary() -> dict:
+async def _full_universe_load_krx_primary(force: bool = False) -> dict:
     """KRX 정식 OPEN API 1차 우선 영역 (사이클 115 신규).
 
     사용자 결정 영속: Q1=A 양쪽 endpoint 통합 (bydd_trd + isu_base_info).
@@ -1726,16 +1726,18 @@ async def _full_universe_load_krx_primary() -> dict:
         if not (len(ticker) == 6 and ticker.isdigit()):
             continue
 
-        # 24h TTL fresh skip (사이클 83 + 사이클 101 영속)
-        try:
-            stale = await _sm_is_stale(ticker, max_age_hours=24)
-        except Exception:
-            stale = True  # graceful — 판별 실패 시 갱신 시도
+        # 24h TTL fresh skip (사이클 83 + 사이클 101 영속).
+        # 사이클 120: force=True 시 TTL 우회 (사용자 강제 새로고침, 사이클 116/118/119 매핑 영역 즉시 검증).
+        if not force:
+            try:
+                stale = await _sm_is_stale(ticker, max_age_hours=24)
+            except Exception:
+                stale = True  # graceful — 판별 실패 시 갱신 시도
 
-        if not stale:
-            skipped_ttl += 1
-            await _asyncio.sleep(0)  # yield
-            continue
+            if not stale:
+                skipped_ttl += 1
+                await _asyncio.sleep(0)  # yield
+                continue
 
         # KRX bydd_trd + isu_base_info merge → raw JSONB
         # 사이클 81 G-AST1 영속: KIS bfdy_clpr / hts_avls 덮어쓰기 금지 (KRX 키는 신규 영역)
@@ -1856,7 +1858,7 @@ async def _full_universe_load_krx_primary() -> dict:
     return summary
 
 
-async def _full_universe_load_kis_fallback() -> dict:
+async def _full_universe_load_kis_fallback(force: bool = False) -> dict:
     """KIS market-cap 폴백 영역 (사이클 101+109+110 영속, 함수 본체 추출).
 
     사이클 115 (2026-06-12) — 사이클 101+109+110 영역 영구 영속 추출 (행위 변경 0).
@@ -1937,16 +1939,18 @@ async def _full_universe_load_kis_fallback() -> dict:
         if not (len(ticker) == 6 and ticker.isdigit()):
             continue
 
-        # 24h TTL fresh skip (사이클 83 Q3=B 답습)
-        try:
-            stale = await _sm_is_stale(ticker, max_age_hours=24)
-        except Exception:
-            stale = True  # graceful — 판별 실패 시 갱신 시도
+        # 24h TTL fresh skip (사이클 83 Q3=B 답습).
+        # 사이클 120: force=True 시 TTL 우회 (사용자 강제 새로고침 영역).
+        if not force:
+            try:
+                stale = await _sm_is_stale(ticker, max_age_hours=24)
+            except Exception:
+                stale = True  # graceful — 판별 실패 시 갱신 시도
 
-        if not stale:
-            skipped_ttl += 1
-            await _asyncio.sleep(0)  # yield
-            continue
+            if not stale:
+                skipped_ttl += 1
+                await _asyncio.sleep(0)  # yield
+                continue
 
         # KIS CTPF1002R 호출 → upsert (사이클 88 G-REJECT 영속)
         try:

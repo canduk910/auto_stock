@@ -35,7 +35,7 @@ async def test_h3a_krx_primary_success_no_kis_fallback(monkeypatch):
     # KRX 1차 함수 mock — 정상 응답
     krx_called = []
 
-    async def _fake_krx_primary():
+    async def _fake_krx_primary(**_kw):
         krx_called.append(True)
         return {
             "total": 100,
@@ -52,7 +52,7 @@ async def test_h3a_krx_primary_success_no_kis_fallback(monkeypatch):
     # KIS 폴백 함수 mock — 호출 안 됨 검증
     kis_called = []
 
-    async def _fake_kis_fallback():
+    async def _fake_kis_fallback(**_kw):
         kis_called.append(True)
         return {"total": 0}  # 호출되면 결함
 
@@ -79,14 +79,14 @@ async def test_h3b_krx_error_triggers_kis_fallback(monkeypatch):
     # KRX 1차 함수 — KrxApiError raise
     krx_called = []
 
-    async def _fake_krx_primary():
+    async def _fake_krx_primary(**_kw):
         krx_called.append(True)
         raise KrxApiError("KRX 401 unauthorized")
 
     # KIS 폴백 함수 — 정상 응답
     kis_called = []
 
-    async def _fake_kis_fallback():
+    async def _fake_kis_fallback(**_kw):
         kis_called.append(True)
         return {
             "total": 2800,
@@ -122,10 +122,10 @@ async def test_h3c_kis_fallback_failure_propagates(monkeypatch):
     from src.api.krx import KrxApiError
     from src.engine import scanner as _scanner
 
-    async def _fake_krx_primary():
+    async def _fake_krx_primary(**_kw):
         raise KrxApiError("KRX 비활성")
 
-    async def _fake_kis_fallback():
+    async def _fake_kis_fallback(**_kw):
         raise RuntimeError("KIS market_cap API 5xx")
 
     monkeypatch.setattr(_scanner, "_full_universe_load_krx_primary", _fake_krx_primary)

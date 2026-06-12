@@ -32,7 +32,7 @@ _refresh_universe_lock = asyncio.Lock()
 
 
 @router.post("/refresh-universe", response_model=ApiResponse)
-async def refresh_universe_now():
+async def refresh_universe_now(force: bool = True):
     """사이클 90 — universe 500+ 즉시 trigger (수동 발화).
 
     장 종료 후 또는 scheduler idle 상태에서 사용자 즉시 실행.
@@ -59,7 +59,10 @@ async def refresh_universe_now():
 
         start_time = time.monotonic()
         try:
-            summary = await _full_universe_load_once()
+            # 사이클 120 — force 인자 영속 (UI "지금 새로고침" 디폴트 True = 즉시 검증).
+            # 사이클 116/118/119 매핑 영역 영구 영속이 매번 적용 의무 (TTL 우회).
+            # 자동 발화 (사이클 106 영역 매일 20:00:05) = force=False 영속 (TTL 영구 영속이 적용).
+            summary = await _full_universe_load_once(force=force)
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc)) from exc
 
