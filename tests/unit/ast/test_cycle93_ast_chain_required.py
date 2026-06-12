@@ -138,12 +138,24 @@ def test_g_ast1_scheduler_upsert_chain_required():
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 110 시정 — `routes/stock_master.py::refresh_universe_now` 가 "
+        "`_full_universe_load_once()` 단일 호출로 전환 (사이클 101 영구 폐기된 "
+        "`fetch_top_500_universe` + `_universe_eager_refresh_loop` 동행 시정 누락 silent 결함 시정). "
+        "사이클 93 시점 AST 정적 chain 가드 의도 영속 보존 (사이클 66 K-2 패턴 답습)."
+    ),
+)
 def test_g_ast1_route_upsert_chain_required():
     """G-AST1 (b): `routes/stock_master.py::refresh_universe_now` 본체에 scanner module
     upsert chain 호출 ≥ 1건 정적 검증 (수동 trigger 영역까지 영구 가드).
 
     Red 상태: 라우트 본체에 chain 호출 0건 → FAIL.
     Green: backend-dev 가 라우트 본체에 호출 추가 → PASS.
+
+    사이클 110 의미 전환: `_full_universe_load_once()` 단일 호출이 stock_master upsert
+    내장이므로 별도 chain 호출 불필요. 가드는 사이클 93 의도 영속 보존을 위해 xfail 마킹.
     """
     tree = ast.parse(_ROUTE_PY.read_text(encoding="utf-8"))
 

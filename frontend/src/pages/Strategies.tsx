@@ -71,7 +71,7 @@ const THRESHOLD_KEYS = [
   'position_ratio',
 ] as const
 
-type ThresholdKey = typeof THRESHOLD_KEYS[number]
+export type ThresholdKey = typeof THRESHOLD_KEYS[number]
 
 function StrategyCard({
   strategyKey,

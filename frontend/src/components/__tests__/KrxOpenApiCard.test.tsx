@@ -78,14 +78,15 @@ describe('KrxOpenApiCard (사이클 112)', () => {
   })
 
   it('G-UI-3: 저장 클릭 → PUT 호출 + 평문 key state 즉시 클리어', async () => {
-    let putBody: { key?: string; base_url?: string; enabled?: boolean } | null = null
+    type PutBody = { key?: string; base_url?: string; enabled?: boolean }
+    let putBody: PutBody | null = null
 
     server.use(
       http.get('/api/integrations/krx-open-api', () =>
         HttpResponse.json(wrap(initialStatus))
       ),
       http.put('/api/integrations/krx-open-api', async ({ request }) => {
-        putBody = (await request.json()) as typeof putBody
+        putBody = (await request.json()) as PutBody
         return HttpResponse.json(wrap(updatedStatus))
       })
     )
@@ -107,7 +108,7 @@ describe('KrxOpenApiCard (사이클 112)', () => {
     await waitFor(() => {
       expect(putBody).not.toBeNull()
     })
-    expect(putBody?.key).toBe('secret_key_1234')
+    expect((putBody as PutBody | null)?.key).toBe('secret_key_1234')
 
     // 성공 메시지 + 평문 key state 즉시 클리어 (보안 의무)
     await waitFor(() => {

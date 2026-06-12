@@ -20,7 +20,7 @@ const PREFIXES = {
   ws_auto_restart: '[ws_auto_restart]',
 } as const
 
-type CardKey = keyof typeof PREFIXES
+export type CardKey = keyof typeof PREFIXES
 
 function windowToStart(window: TimeWindow): string {
   const now = new Date()
