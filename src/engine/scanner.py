@@ -1757,6 +1757,18 @@ async def _full_universe_load_krx_primary() -> dict:
                     krx_raw["hts_avls"] = mktcap_won // 1_000_000  # 원 → 백만원
             except (ValueError, TypeError):
                 pass  # graceful, MKTCAP raw 만 유지
+        # 사이클 118 — KRX ACC_TRDVAL (원 단위) → KIS acml_tr_pbmn (원 단위, 동일) 매핑.
+        # 사이클 108 list_by_filter (`acml_tr_pbmn ≥ min_trade_amount`) 정합 영속.
+        # 사이클 107 raw 보강 (CTPF1002R + FHKST01010100 merge) 영역의 acml_tr_pbmn 키와 정합.
+        # 사이클 116 답습 패턴 (KRX → KIS 정합 키 매핑).
+        # 운영 실측 (2026-06-12 cycle118 진단): acml_tr_pbmn_present 2.85% → 99%+ 정상화 의무.
+        if "ACC_TRDVAL" in trd_row:
+            try:
+                trdval_won = int(str(trd_row["ACC_TRDVAL"]).replace(",", "") or 0)
+                if trdval_won > 0:
+                    krx_raw["acml_tr_pbmn"] = trdval_won  # 원 단위 동일
+            except (ValueError, TypeError):
+                pass  # graceful, ACC_TRDVAL raw 만 유지
         # isu_base_info 보강 (LIST_DD / SECUGRP_NM / KIND_STKCERT_TP_NM)
         info_row = info_map.get(ticker, {})
         for key in ("LIST_DD", "SECUGRP_NM", "KIND_STKCERT_TP_NM",
