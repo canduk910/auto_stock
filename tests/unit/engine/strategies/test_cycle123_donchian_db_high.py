@@ -19,8 +19,13 @@ pytestmark = pytest.mark.unit
 
 KST = timezone(timedelta(hours=9))
 
-_DONCHIAN_SRC = Path(
-    "/Users/koscom/Projects/auto_stock/src/engine/strategies/donchian_swing.py"
+# 사이클 120 ttl_bypass 답습 — 절대 경로 하드코딩 금지 (CI 환경 정합).
+_DONCHIAN_SRC = (
+    Path(__file__).resolve().parents[4]
+    / "src"
+    / "engine"
+    / "strategies"
+    / "donchian_swing.py"
 )
 
 # ---------------------------------------------------------------------------
