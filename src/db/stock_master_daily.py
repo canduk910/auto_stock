@@ -357,21 +357,35 @@ async def count_by_ticker(ticker: str) -> int:
         return 0
 
 
-async def max_bas_dd(ticker: str) -> Optional[date]:
-    """ticker 의 최신 bas_dd — 점진 적재 시 신규 행 영역 결정.
+async def max_bas_dd(ticker: str | None = None) -> Optional[date]:
+    """최신 bas_dd 조회 — ticker 지정 시 해당 종목, None 시 전체 MAX(bas_dd).
+
+    Args:
+        ticker: 종목코드. None 이면 전체 stock_master_daily 의 MAX(bas_dd) 반환.
 
     Returns:
-        date — 최신 bas_dd. 미존재 시 None (백필 의무 신호).
+        date — 최신 bas_dd. 미존재 시 None.
+
+    사이클 124 확장: ticker=None 지원 (전체 마지막 적재일 조회, 사이클 85 stats 카드용).
     """
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table(TABLE_NAME)
-            .select("bas_dd")
-            .eq("ticker", ticker)
-            .order("bas_dd", desc=True)
-            .limit(1)
-            .execute()
-        )
+        if ticker is None:
+            result = await asyncio.to_thread(
+                lambda: supabase.table(TABLE_NAME)
+                .select("bas_dd")
+                .order("bas_dd", desc=True)
+                .limit(1)
+                .execute()
+            )
+        else:
+            result = await asyncio.to_thread(
+                lambda: supabase.table(TABLE_NAME)
+                .select("bas_dd")
+                .eq("ticker", ticker)
+                .order("bas_dd", desc=True)
+                .limit(1)
+                .execute()
+            )
         rows = result.data or []
         if not rows:
             return None

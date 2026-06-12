@@ -22,12 +22,14 @@ import {
   fetchScanPoolSummary,
   fetchDetail,
   fetchHistory,
+  fetchDaily,
   refreshUniverseNow,
 } from '../api/stock-master'
 import type {
   StockMasterListItem,
   StockMasterDetail,
   StockMasterHistoryItem,
+  StockMasterDailyRow,
 } from '../types/stock-master'
 
 // ────────────────────────────────────────────────────────────────────────
@@ -61,38 +63,48 @@ const CHANGE_TYPE_COLORS: Record<string, string> = {
 }
 
 // ────────────────────────────────────────────────────────────────────────
-// 핵심 5 키 highlight (Q11=B)
+// highlight 키 (Q11=B 기존 5 + 사이클 124 Q2=A 신규 6 = 11 키)
 // ────────────────────────────────────────────────────────────────────────
-const HIGHLIGHT_KEYS = ['bfdy_clpr', 'acml_vol', 'nxt_tradable', 'krx_halted', 'admin_item']
+const HIGHLIGHT_KEYS = [
+  // 기존 5
+  'bfdy_clpr', 'acml_vol', 'nxt_tradable', 'krx_halted', 'admin_item',
+  // 사이클 124 Q2=A 신규 6
+  'hts_avls', 'acml_tr_pbmn', 'lstn_stcn', 'prdy_vrss',
+]
 
 // ────────────────────────────────────────────────────────────────────────
-// 카테고리 분류 (Q11=B)
+// 카테고리 분류 (Q11=B 기존 5 + 사이클 124 Q2=A "시총/주식수" 신규 카테고리)
 // ────────────────────────────────────────────────────────────────────────
 const CATEGORY_KEYS: Record<string, string[]> = {
   '기본': ['ticker', 'name', 'excg_dvsn_cd'],
-  '가격': ['bfdy_clpr', 'stck_prpr', 'stck_hgpr', 'stck_lwpr'],
+  '가격': ['bfdy_clpr', 'prdy_vrss', 'stck_prpr', 'stck_hgpr', 'stck_lwpr'],
+  '시총/주식수': ['hts_avls', 'lstn_stcn'],
   '거래': ['acml_vol', 'acml_tr_pbmn'],
   '플래그': ['nxt_tradable', 'krx_halted', 'admin_item'],
   '메타': ['refreshed_at'],
 }
 
 // ────────────────────────────────────────────────────────────────────────
-// 필드 한글 레이블 (사이클 89 hotfix)
+// 필드 한글 레이블 (사이클 89 hotfix + 사이클 124 Q2=A 6 신규)
 // ────────────────────────────────────────────────────────────────────────
 const FIELD_LABELS: Record<string, string> = {
   ticker: '종목코드',
   name: '종목명',
   excg_dvsn_cd: '거래소',
-  bfdy_clpr: '전일종가',
+  bfdy_clpr: '전일 종가',
+  prdy_vrss: '전일 대비',
   stck_prpr: '현재가',
   stck_hgpr: '고가',
   stck_lwpr: '저가',
-  acml_vol: '누적거래량',
-  acml_tr_pbmn: '누적거래대금',
+  acml_vol: '누적 거래량',
+  acml_tr_pbmn: '누적 거래대금 (원)',
   nxt_tradable: 'NXT 거래가능',
   krx_halted: 'KRX 거래정지',
   admin_item: '관리종목',
   refreshed_at: '갱신시각',
+  // 사이클 124 Q2=A 신규 6
+  hts_avls: '시가총액 (백만원)',
+  lstn_stcn: '상장 주식수',
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -139,11 +151,12 @@ function formatAmount(v: unknown): string {
 }
 
 // ────────────────────────────────────────────────────────────────────────
-// 카테고리 아이콘 (사이클 89 hotfix)
+// 카테고리 아이콘 (사이클 89 hotfix + 사이클 124 "시총/주식수" 신규)
 // ────────────────────────────────────────────────────────────────────────
 const CATEGORY_ICONS: Record<string, string> = {
   '기본': '📋',
   '가격': '💰',
+  '시총/주식수': '🏦',
   '거래': '📊',
   '플래그': '🚩',
   '메타': '⏱️',
@@ -187,6 +200,31 @@ function formatFieldValue(key: string, value: unknown): React.ReactNode {
     return <span className="font-mono">{formatAmount(value)}</span>
   }
 
+  // 시가총액 (백만원 단위)
+  if (key === 'hts_avls') {
+    const n = Number(value)
+    if (isNaN(n)) return <span className="text-gray-400">—</span>
+    if (n >= 1_000_000) return <span className="font-mono">{(n / 1_000_000).toFixed(1) + '조원'}</span>
+    if (n >= 1_000) return <span className="font-mono">{(n / 1_000).toFixed(0) + '십억원'}</span>
+    return <span className="font-mono">{n.toLocaleString('ko-KR') + '백만원'}</span>
+  }
+
+  // 상장 주식수
+  if (key === 'lstn_stcn') {
+    const n = Number(value)
+    if (isNaN(n)) return <span className="text-gray-400">—</span>
+    return <span className="font-mono">{n.toLocaleString('ko-KR') + '주'}</span>
+  }
+
+  // 전일 대비
+  if (key === 'prdy_vrss') {
+    const n = Number(value)
+    if (isNaN(n)) return <span className="text-gray-400">—</span>
+    if (n > 0) return <span className="font-mono text-red-600">+{n.toLocaleString('ko-KR')}원</span>
+    if (n < 0) return <span className="font-mono text-blue-600">{n.toLocaleString('ko-KR')}원</span>
+    return <span className="font-mono text-gray-500">0원</span>
+  }
+
   // 종목코드
   if (key === 'ticker') {
     return <span className="font-mono text-blue-700 font-medium">{String(value)}</span>
@@ -206,7 +244,59 @@ function formatFieldValue(key: string, value: unknown): React.ReactNode {
 }
 
 // ────────────────────────────────────────────────────────────────────────
-// 상세 모달 컴포넌트
+// 일봉 탭 컴포넌트 (사이클 124 Q1=A)
+// ────────────────────────────────────────────────────────────────────────
+function DailyTab({ ticker }: { ticker: string }) {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['stock-master-daily', ticker],
+    queryFn: () => fetchDaily(ticker, 30),
+    retry: 1,
+    staleTime: 60_000,
+    refetchInterval: 60_000,
+  })
+
+  const rows: StockMasterDailyRow[] = Array.isArray(data) ? data : []
+
+  if (isLoading) return <p className="text-sm text-gray-400 animate-pulse py-4">로딩 중...</p>
+  if (isError) return <p className="text-sm text-red-600 py-4">일봉 데이터 조회 실패</p>
+  if (rows.length === 0) return <p className="text-sm text-gray-500 py-4">일봉 데이터가 없습니다.</p>
+
+  return (
+    <div className="overflow-x-auto" data-testid="stock-master-daily-table">
+      <table className="min-w-full text-sm">
+        <thead>
+          <tr className="border-b border-gray-200 text-xs text-gray-500 uppercase">
+            <th className="text-left py-2 pr-3 font-medium">기준일</th>
+            <th className="text-right py-2 pr-3 font-medium">시가</th>
+            <th className="text-right py-2 pr-3 font-medium">고가</th>
+            <th className="text-right py-2 pr-3 font-medium">저가</th>
+            <th className="text-right py-2 pr-3 font-medium">종가</th>
+            <th className="text-right py-2 pr-3 font-medium">거래량</th>
+            <th className="text-right py-2 font-medium">등락률</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {rows.map((row) => (
+            <tr key={row.bas_dd} className="hover:bg-gray-50">
+              <td className="py-1.5 pr-3 font-mono text-gray-700 text-xs">{row.bas_dd}</td>
+              <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{row.open_price.toLocaleString('ko-KR')}</td>
+              <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{row.high_price.toLocaleString('ko-KR')}</td>
+              <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{row.low_price.toLocaleString('ko-KR')}</td>
+              <td className="py-1.5 pr-3 font-mono text-right font-medium text-gray-900">{row.close_price.toLocaleString('ko-KR')}</td>
+              <td className="py-1.5 pr-3 font-mono text-right text-gray-600">{row.volume.toLocaleString('ko-KR')}</td>
+              <td className={`py-1.5 font-mono text-right ${row.change_rate > 0 ? 'text-red-600' : row.change_rate < 0 ? 'text-blue-600' : 'text-gray-500'}`}>
+                {row.change_rate > 0 ? '+' : ''}{row.change_rate.toFixed(2)}%
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// 상세 모달 컴포넌트 (사이클 124 Q1=A — 상세/일봉 탭 추가)
 // ────────────────────────────────────────────────────────────────────────
 function DetailModal({
   ticker,
@@ -217,13 +307,18 @@ function DetailModal({
   onClose: () => void
   initialData?: StockMasterDetail
 }) {
+  // 사이클 124 Q1=A — 탭 상태: 'detail' | 'daily'
+  const [activeTab, setActiveTab] = useState<'detail' | 'daily'>('detail')
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['stock-master-detail', ticker],
     queryFn: () => fetchDetail(ticker),
     retry: 1,
     staleTime: 30_000,
     refetchInterval: 60_000,
-    initialData,
+    // placeholderData 로 변경 — initialData 는 fresh로 간주되어 API 재호출을 막지만
+    // placeholderData 는 항상 stale로 간주되어 fetchDetail 이 반드시 호출됨 (사이클 124)
+    placeholderData: initialData,
   })
 
   const is404 =
@@ -234,9 +329,10 @@ function DetailModal({
     detail: StockMasterDetail,
     category: string,
   ): [string, unknown][] {
+    const topLevelKeys = ['ticker', 'name', 'excg_dvsn_cd', 'nxt_tradable', 'krx_halted', 'admin_item', 'refreshed_at']
     const keys = CATEGORY_KEYS[category] ?? []
-    const rawKeys = keys.filter((k) => ['ticker', 'name', 'excg_dvsn_cd', 'nxt_tradable', 'krx_halted', 'admin_item', 'refreshed_at'].includes(k))
-    const rawDataKeys = keys.filter((k) => !rawKeys.includes(k))
+    const rawKeys = keys.filter((k) => topLevelKeys.includes(k))
+    const rawDataKeys = keys.filter((k) => !topLevelKeys.includes(k))
 
     const result: [string, unknown][] = []
     for (const k of rawKeys) {
@@ -257,10 +353,10 @@ function DetailModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+        className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">
             종목 상세 — {ticker}
           </h2>
@@ -273,63 +369,99 @@ function DetailModal({
           </button>
         </div>
 
-        <div className="px-6 py-4">
-          {isLoading && (
-            <p className="text-sm text-gray-500 animate-pulse">로딩 중...</p>
+        {/* 탭 네비게이션 */}
+        <div className="flex border-b border-gray-200 shrink-0 px-6" data-testid="stock-master-detail-tabs">
+          <button
+            data-testid="stock-master-tab-detail"
+            onClick={() => setActiveTab('detail')}
+            className={`text-sm px-4 py-2 font-medium border-b-2 transition-colors ${
+              activeTab === 'detail'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            상세
+          </button>
+          <button
+            data-testid="stock-master-tab-daily"
+            onClick={() => setActiveTab('daily')}
+            className={`text-sm px-4 py-2 font-medium border-b-2 transition-colors ${
+              activeTab === 'daily'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            일봉 (30일)
+          </button>
+        </div>
+
+        <div className="px-6 py-4 overflow-y-auto flex-1">
+          {/* 일봉 탭 */}
+          {activeTab === 'daily' && (
+            <DailyTab ticker={ticker} />
           )}
-          {is404 && (
-            <p
-              className="text-sm text-red-600"
-              data-testid="stock-master-detail-not-found"
-            >
-              종목을 찾을 수 없습니다 (ticker: {ticker})
-            </p>
-          )}
-          {isError && !is404 && (
-            <p className="text-sm text-red-600">상세 정보 조회 실패</p>
-          )}
-          {data && (
-            <div className="space-y-5">
-              {Object.keys(CATEGORY_KEYS).map((category) => {
-                const items = getCategoryItems(data, category)
-                return (
-                  <div key={category}>
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                      <span>{CATEGORY_ICONS[category]}</span>
-                      <span>{category}</span>
-                    </h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {items.map(([key, value]) => {
-                        const isHighlight = HIGHLIGHT_KEYS.includes(key)
-                        const isPriceKey = ['bfdy_clpr', 'stck_prpr', 'stck_hgpr', 'stck_lwpr', 'acml_vol', 'acml_tr_pbmn'].includes(key)
-                        return (
-                          <div
-                            key={key}
-                            data-testid={
-                              isHighlight
-                                ? `stock-master-detail-highlight-${key}`
-                                : undefined
-                            }
-                            className={`text-sm px-3 py-2 rounded ${
-                              isHighlight
-                                ? 'bg-amber-50 border border-amber-200 font-medium'
-                                : 'bg-gray-50'
-                            }`}
-                          >
-                            <div className="text-xs text-gray-500 mb-0.5">
-                              {FIELD_LABELS[key] ?? key}
-                            </div>
-                            <div className={`text-gray-900 ${isPriceKey ? 'text-right' : ''}`}>
-                              {formatFieldValue(key, value)}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+
+          {/* 상세 탭 */}
+          {activeTab === 'detail' && (
+            <>
+              {isLoading && (
+                <p className="text-sm text-gray-500 animate-pulse">로딩 중...</p>
+              )}
+              {is404 && (
+                <p
+                  className="text-sm text-red-600"
+                  data-testid="stock-master-detail-not-found"
+                >
+                  종목을 찾을 수 없습니다 (ticker: {ticker})
+                </p>
+              )}
+              {isError && !is404 && (
+                <p className="text-sm text-red-600">상세 정보 조회 실패</p>
+              )}
+              {data && (
+                <div className="space-y-5">
+                  {Object.keys(CATEGORY_KEYS).map((category) => {
+                    const items = getCategoryItems(data, category)
+                    return (
+                      <div key={category}>
+                        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                          <span>{CATEGORY_ICONS[category]}</span>
+                          <span>{category}</span>
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {items.map(([key, value]) => {
+                            const isHighlight = HIGHLIGHT_KEYS.includes(key)
+                            const isPriceKey = ['bfdy_clpr', 'stck_prpr', 'stck_hgpr', 'stck_lwpr', 'acml_vol', 'acml_tr_pbmn'].includes(key)
+                            return (
+                              <div
+                                key={key}
+                                data-testid={
+                                  isHighlight
+                                    ? `stock-master-detail-highlight-${key}`
+                                    : undefined
+                                }
+                                className={`text-sm px-3 py-2 rounded ${
+                                  isHighlight
+                                    ? 'bg-amber-50 border border-amber-200 font-medium'
+                                    : 'bg-gray-50'
+                                }`}
+                              >
+                                <div className="text-xs text-gray-500 mb-0.5">
+                                  {FIELD_LABELS[key] ?? key}
+                                </div>
+                                <div className={`text-gray-900 ${isPriceKey ? 'text-right' : ''}`}>
+                                  {formatFieldValue(key, value)}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -520,7 +652,8 @@ export default function StockMaster() {
           <p className="text-sm text-red-600">통계 조회 실패</p>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+            {/* 사이클 124 Q3=A — 4 → 8 카드 확장 */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4" data-testid="stock-master-stats-grid">
               <div className="bg-gray-50 rounded p-3">
                 <p className="text-xs text-gray-500">전체 종목 수</p>
                 <p className="text-2xl font-bold text-gray-900">
@@ -528,7 +661,7 @@ export default function StockMaster() {
                 </p>
               </div>
               <div className="bg-amber-50 rounded p-3">
-                <p className="text-xs text-gray-500">전일종가 정상 적재</p>
+                <p className="text-xs text-gray-500">전일종가 적재</p>
                 <p className="text-2xl font-bold text-amber-700">
                   {statsQuery.data?.bfdy_clpr_present ?? '—'}
                 </p>
@@ -546,6 +679,33 @@ export default function StockMaster() {
                   data-testid="stock-master-stats-eager-refresh-today"
                 >
                   {scanPoolQuery.data?.eager_refresh_today ?? '—'}
+                </p>
+              </div>
+              {/* 사이클 124 Q3=A 신규 4 카드 */}
+              <div className="bg-violet-50 rounded p-3" data-testid="stock-master-stats-with-hts-avls">
+                <p className="text-xs text-gray-500">시가총액 보유</p>
+                <p className="text-2xl font-bold text-violet-700">
+                  {statsQuery.data?.with_hts_avls ?? '—'}
+                </p>
+              </div>
+              <div className="bg-indigo-50 rounded p-3" data-testid="stock-master-stats-with-acml-tr-pbmn">
+                <p className="text-xs text-gray-500">거래대금 보유</p>
+                <p className="text-2xl font-bold text-indigo-700">
+                  {statsQuery.data?.with_acml_tr_pbmn ?? '—'}
+                </p>
+              </div>
+              <div className="bg-sky-50 rounded p-3" data-testid="stock-master-stats-total-daily-rows">
+                <p className="text-xs text-gray-500">일봉 총 행 수</p>
+                <p className="text-2xl font-bold text-sky-700">
+                  {statsQuery.data?.total_daily_rows?.toLocaleString('ko-KR') ?? '—'}
+                </p>
+              </div>
+              <div className="bg-teal-50 rounded p-3" data-testid="stock-master-stats-last-daily-load-at">
+                <p className="text-xs text-gray-500">마지막 일봉 적재</p>
+                <p className="text-sm font-bold text-teal-700">
+                  {statsQuery.data?.last_daily_load_at
+                    ? formatKst(statsQuery.data.last_daily_load_at)
+                    : <span className="text-gray-400 text-sm font-normal">미적재</span>}
                 </p>
               </div>
             </div>

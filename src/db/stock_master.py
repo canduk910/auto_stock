@@ -111,10 +111,18 @@ async def list_all(limit: int = 100, offset: int = 0) -> list[dict]:
 
 
 async def get_stats() -> dict:
-    """집계 — count_all / bfdy_clpr_present / nxt_tradable_count / top_10_recent.
+    """집계 — 8 키 반환.
 
-    UI 사이클 85 상태 영역용. 전체 rows 1회 조회 후 Python 집계.
+    사이클 85 4 키 → 사이클 124 8 키 확장:
+    - count_all / bfdy_clpr_present / nxt_tradable_count / top_10_recent (기존)
+    - with_hts_avls / with_acml_tr_pbmn (사이클 107/108 raw 보강 비율 가시화)
+    - total_daily_rows / last_daily_load_at (stock_master_daily 연동)
+
+    전체 rows 1회 조회 후 Python-side JSONB 집계.
+    stock_master_daily 집계는 별도 2회 호출 (graceful — None/0 fallback).
     """
+    from src.db import stock_master_daily as _smd  # 순환 임포트 방지 local import
+
     result = await asyncio.to_thread(
         lambda: (
             supabase.table(TABLE_NAME)
@@ -131,6 +139,17 @@ async def get_stats() -> dict:
         if r.get("raw") and r["raw"].get("bfdy_clpr") not in (None, "", "0", 0)
     )
     nxt_tradable_count = sum(1 for r in rows if r.get("nxt_tradable"))
+
+    # 사이클 107/108 raw 보강 비율 — hts_avls/acml_tr_pbmn 적재 현황 가시화
+    with_hts_avls = sum(
+        1 for r in rows
+        if r.get("raw") and r["raw"].get("hts_avls") not in (None, "", "0", 0)
+    )
+    with_acml_tr_pbmn = sum(
+        1 for r in rows
+        if r.get("raw") and r["raw"].get("acml_tr_pbmn") not in (None, "", "0", 0)
+    )
+
     top_10_recent = [
         {
             "ticker": r.get("ticker", ""),
@@ -140,11 +159,29 @@ async def get_stats() -> dict:
         for r in rows[:10]
     ]
 
+    # stock_master_daily 연동 집계 (graceful — 테이블 미존재·네트워크 장애 대응)
+    try:
+        total_daily_rows = await _smd.count_all()
+    except Exception:
+        logger.warning("[stock_master] get_stats total_daily_rows 조회 실패 graceful")
+        total_daily_rows = 0
+
+    try:
+        last_daily_date = await _smd.max_bas_dd()  # ticker=None → 전체 MAX
+        last_daily_load_at = str(last_daily_date) if last_daily_date is not None else None
+    except Exception:
+        logger.warning("[stock_master] get_stats last_daily_load_at 조회 실패 graceful")
+        last_daily_load_at = None
+
     return {
         "count_all": count_all,
         "bfdy_clpr_present": bfdy_clpr_present,
         "nxt_tradable_count": nxt_tradable_count,
         "top_10_recent": top_10_recent,
+        "with_hts_avls": with_hts_avls,
+        "with_acml_tr_pbmn": with_acml_tr_pbmn,
+        "total_daily_rows": total_daily_rows,
+        "last_daily_load_at": last_daily_load_at,
     }
 
 

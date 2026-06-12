@@ -1,17 +1,18 @@
 """stock_master READ-ONLY 라우트 (사이클 84) + 수동 trigger (사이클 90).
 
-5 GET 엔드포인트 (Q9=B 결정, L-2 AST 영구 가드):
+6 GET 엔드포인트 (Q9=B 결정, L-2 AST 영구 가드):
 - GET /api/stock-master/stats
 - GET /api/stock-master/list
 - GET /api/stock-master/scan-pool/summary
 - GET /api/stock-master/{ticker}/history
+- GET /api/stock-master/{ticker}/daily  ← 사이클 124 신규
 - GET /api/stock-master/{ticker}
 
 1 POST 엔드포인트 (사이클 90 Q24=B 예외 허용, L-2 화이트리스트):
 - POST /api/stock-master/refresh-universe
 
 라우트 순서 의무: 정적 경로 (stats / list / scan-pool / refresh-universe) 를 동적 ({ticker}) 보다 먼저 등록.
-/{ticker}/history 도 /{ticker} 보다 먼저 등록 (FastAPI LIFO 정합).
+/{ticker}/history 와 /{ticker}/daily 는 /{ticker} 보다 먼저 등록 (FastAPI LIFO 정합).
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ import time
 from fastapi import APIRouter, HTTPException, Query
 
 from src.db import stock_master
+from src.db import stock_master_daily
 from src.models.response import ApiResponse
 
 router = APIRouter()
@@ -130,6 +132,39 @@ async def get_stock_master_history(
     """ticker 별 변경 이력 (changed_at DESC). migration 032 stock_master_history 조회."""
     data = await stock_master.list_history(ticker=ticker, limit=limit)
     return ApiResponse(success=True, data=data, message="")
+
+
+@router.get("/{ticker}/daily")
+async def get_stock_master_daily(
+    ticker: str,
+    days: int = Query(30, ge=1, le=100),
+):
+    """사이클 124 — ticker 일봉 데이터 (최근 days일, stock_master_daily 조회).
+
+    라우트 등록 순서: /{ticker}/history ← /{ticker}/daily ← /{ticker} 순서 의무.
+    FastAPI LIFO 정합 — /daily 가 동적 {ticker} 보다 먼저 등록되어야 /daily 캡처 차단.
+
+    404: ticker 미존재 또는 일봉 데이터 없음.
+    graceful: stock_master_daily 조회 예외 → 500 대신 빈 list 반환 (사이클 88 G-REJECT 패턴).
+    """
+    # 사이클 90 — POST only 경로 보호 (GET 요청이 동적 {ticker} 로 라우팅되는 경우 차단)
+    _POST_ONLY_PATHS = {"refresh-universe"}
+    if ticker in _POST_ONLY_PATHS:
+        raise HTTPException(status_code=405, detail=f"Method Not Allowed — {ticker} 은 POST only")
+
+    try:
+        rows = await stock_master_daily.get_recent_daily(ticker=ticker, days=days)
+    except Exception:
+        rows = []
+
+    if not rows:
+        # ticker 존재 여부와 무관하게 일봉 데이터 없으면 404
+        raise HTTPException(
+            status_code=404,
+            detail=f"ticker={ticker} 일봉 데이터 없음 (days={days})",
+        )
+
+    return ApiResponse(success=True, data=rows, message=f"{len(rows)}일 일봉")
 
 
 @router.get("/{ticker}")

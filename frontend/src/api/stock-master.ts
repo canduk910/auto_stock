@@ -20,6 +20,7 @@ import type {
   StockMasterHistoryItem,
   ScanPoolSummary,
   RefreshUniverseResult,
+  StockMasterDailyRow,
 } from '../types/stock-master'
 
 export async function fetchStats(): Promise<StockMasterStats> {
@@ -61,6 +62,22 @@ export async function fetchHistory(
   const { data } = await apiClient.get<ApiResponse<StockMasterHistoryItem[]>>(
     `/stock-master/${ticker}/history`,
     { params: { limit } },
+  )
+  return data.data
+}
+
+/**
+ * 사이클 124 Q1=A — GET /api/stock-master/{ticker}/daily?days=N
+ * 일봉 데이터 최대 N일치 조회 (기본 30일).
+ * retry:1 의무 (사이클 65 H3 영속).
+ */
+export async function fetchDaily(
+  ticker: string,
+  days = 30,
+): Promise<StockMasterDailyRow[]> {
+  const { data } = await apiClient.get<ApiResponse<StockMasterDailyRow[]>>(
+    `/stock-master/${ticker}/daily`,
+    { params: { days } },
   )
   return data.data
 }

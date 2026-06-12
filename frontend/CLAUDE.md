@@ -164,6 +164,73 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 - **안내 배너 갱신** (사이클 64): "**WebSocket 구독 대상 필터** — 임계 외 종목은 시세 구독 자체 차단. 보유/익일청산 종목은 절대 제외 안 됨" (사이클 62 "매수 신호 차단" 표현 폐기 + 사이클 32 R4 universe guard 보호 영속 명시)
 - 회귀 가드 4 vitest 케이스 (사이클 62 5 → 사이클 64 4, mode 토글 F-5 폐기): F-1 fetch 후 렌더 + mode select 미존재 검증 / F-2 슬라이더 변경 / F-3 저장 + toast (body 에 mode 미포함) / F-4 max<min 가드
 
+## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 확장)
+
+사이클 85 (2026-06-09) 최초 도입: 4 카드 + list 페이징 + detail 모달 + history 테이블.
+
+### 사이클 124 (2026-06-12) — UI 확장 + 영구 가드
+
+사용자 메시지: "UI의 종목마스터 메뉴에서 보여주는 정보가 너무 제한적. 데이터 수집 정확 확인을 위해 관련 내역 조회 UI도 투명하게 보여줘야 함. 전략에서 종목마스터 데이터를 참고하기로 한 만큼 신규 수집 데이터 추가될 때마다 UI에 보여줄 수 있도록 작업 완료 후 지침에도 추가."
+
+**사용자 결정**: Q1=A 일봉 detail 모달 탭 / Q2=A 신규 매핑 6 키 highlight / Q3=A 진단 카드 4 추가 / Q4=A 지침 영구 가드 명문화.
+
+#### 8 카드 영역 (기존 4 + 신규 4)
+
+| 카드 | 출처 | 라벨 |
+|------|------|------|
+| count_all | stock_master | 전체 종목 |
+| bfdy_clpr_present | stock_master.raw.bfdy_clpr | 전일종가 보유 |
+| nxt_tradable_count | stock_master.nxt_tradable | NXT 거래가능 |
+| eager_refresh_today | 사이클 83 emit count | 오늘 자동 갱신 |
+| **with_hts_avls** | stock_master.raw.hts_avls (사이클 116) | 시가총액 보유 |
+| **with_acml_tr_pbmn** | stock_master.raw.acml_tr_pbmn (사이클 118) | 거래대금 보유 |
+| **total_daily_rows** | stock_master_daily.count_all (사이클 122) | 일봉 적재 누적 |
+| **last_daily_load_at** | stock_master_daily.max_bas_dd (사이클 122) | 마지막 일봉 적재일 (KST) |
+
+#### detail 모달 — FIELD_LABELS / CATEGORY_KEYS / HIGHLIGHT_KEYS 확장
+
+- **신규 6 매핑 키 한글 라벨** (사이클 116/118/119): `hts_avls` "시가총액 (백만원)" / `acml_tr_pbmn` "누적 거래대금 (원)" / `bfdy_clpr` "전일 종가" / `lstn_stcn` "상장 주식수" / `acml_vol` "누적 거래량" / `prdy_vrss` "전일 대비"
+- **HIGHLIGHT_KEYS**: 신규 6 키 핵심 highlight 영역 (사용자 결정 Q2=A 영속)
+- **CATEGORY_KEYS** 영역 = 신규 키 적정 카테고리 배치 (사이클 85 5 카테고리 영속)
+
+#### detail 모달 일봉 탭
+
+- 2 탭 분리: "상세 / 일봉"
+- 일봉 탭: `useQuery({queryKey: ['stock-master-daily', selectedTicker], queryFn: () => fetchDaily(selectedTicker!, 30), enabled: !!selectedTicker, retry: 1, refetchInterval: 60_000})` (사이클 65 H3 영속)
+- 마지막 30 영업일 OHLCV 테이블 = `bas_dd / open_price / high_price / low_price / close_price / volume / change_rate`
+- 빈 응답 또는 로딩 처리
+
+#### 핵심 시정 (TanStack Query)
+
+- `DetailModal` `useQuery` = `initialData` → `placeholderData: initialData`. `StockMasterListItem` 을 `initialData` 로 전달 시 TanStack Query 가 fresh 처리 → `fetchDetail` 재호출 차단 → 신규 매핑 6 키 호출 누락. `placeholderData` 는 항상 stale 처리 → `fetchDetail` 정상 호출 + 신규 매핑 6 키 응답 정상
+
+#### 신규 데이터 추가 시 UI 동기화 절차 (영구 가드)
+
+stock_master 컬럼 / raw JSONB 키 / stock_master_daily 컬럼 추가 시 **반드시** 동기화:
+
+1. `frontend/src/types/stock-master.ts` interface 갱신
+2. `frontend/src/api/stock-master.ts` 호출 영역 갱신
+3. `frontend/src/pages/StockMaster.tsx::FIELD_LABELS` 한글 라벨 추가 (사이클 89 친숙 용어 영속)
+4. `CATEGORY_KEYS` 적정 카테고리 배치
+5. 핵심 키면 `HIGHLIGHT_KEYS` 추가
+6. 진단 영역이면 `get_stats()` 응답 + 카드 1개 추가 (8 → 9 카드)
+7. `frontend/src/test/handlers.ts` MSW + `e2e/fixtures/api-mocks.ts` Playwright LIFO 정합 (사이클 80 hotfix #3 답습)
+8. 회귀 가드 추가 (StockMaster.test.tsx)
+
+#### 회귀 가드 (사이클 124 신규)
+
+- G-CARD8 8 카드 표시 + 4 신규 카드 데이터
+- G-LABEL6 detail 모달 신규 6 매핑 키 한글 라벨
+- G-HIGHLIGHT 4 신규 핵심 키 highlight
+- G-STATS-NEW stats 8 키 응답 정합
+- G-TAB-1/2/3 일봉 탭 (존재 + 30 row + retry:1)
+- G-GUIDE 가이드라인 영역 영속
+- e2e_mocks: G-AST-MOCK 등록 영역 + G-AST-LIFO 1/2 정합 (사이클 80 hotfix #3)
+
+#### 영속 의무 매트릭스
+
+사이클 65 H3 useQuery retry:1 / 68 KST 일관성 / 75 G-AST5 api-mocks / 80 hotfix #3 LIFO / 81 G-AST1 raw 영속 / 85 StockMaster.tsx 영역 / 89 한글 친숙 용어 / 90 POST 화이트리스트 / 106 모바일 햄버거 + 안내 배너 / 122 stock_master_daily.
+
 ## History (`/history`)
 
 두 탭:

@@ -146,6 +146,7 @@ export const handlers = [
   }),
 
   // 사이클 85 — stock_master (READ-ONLY 5 GET 라우트).
+  // 사이클 124 Q3=A — stats 4 → 8 키 (with_hts_avls / with_acml_tr_pbmn / total_daily_rows / last_daily_load_at).
   http.get(`${base}/stock-master/stats`, () =>
     HttpResponse.json(
       wrap({
@@ -155,6 +156,10 @@ export const handlers = [
         top_10_recent: [
           { ticker: '005930', name: '삼성전자', refreshed_at: '2026-06-09T09:00:00+09:00' },
         ],
+        with_hts_avls: 2800,
+        with_acml_tr_pbmn: 2700,
+        total_daily_rows: 84000,
+        last_daily_load_at: '2026-06-13T20:00:00+09:00',
       })
     )
   ),
@@ -176,6 +181,23 @@ export const handlers = [
   ),
   http.get(`${base}/stock-master/scan-pool/summary`, () =>
     HttpResponse.json(wrap({ eager_refresh_today: 5 }))
+  ),
+  // 사이클 124 Q1=A — 일봉 데이터 핸들러 (history 보다 먼저 등록해야 LIFO 우선 매칭 정합).
+  http.get(`${base}/stock-master/:ticker/daily`, () =>
+    HttpResponse.json(
+      wrap(
+        Array.from({ length: 5 }, (_, i) => ({
+          bas_dd: `202606${(13 - i).toString().padStart(2, '0')}`,
+          open_price: 74000 + i * 100,
+          high_price: 75500 + i * 100,
+          low_price: 73500 + i * 100,
+          close_price: 75000 + i * 100,
+          volume: 1000000 + i * 50000,
+          trade_value: 75000000000,
+          change_rate: parseFloat((1.2 - i * 0.3).toFixed(2)),
+        }))
+      )
+    )
   ),
   http.get(`${base}/stock-master/:ticker/history`, () =>
     HttpResponse.json(

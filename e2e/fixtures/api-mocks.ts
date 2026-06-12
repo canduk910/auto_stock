@@ -318,6 +318,7 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   // Wildcard fallback 은 L190 (구체 라우트 *전* 등록) 만 유지 — LIFO 라 fallback 역할 정확.
 
   // 사이클 85 (2026-06-09) — StockMaster 페이지 5 endpoint.
+  // 사이클 124 Q1=A / Q3=A — stats 8 키 + 일봉 라우트 신규.
   // Playwright route 매칭 = LIFO ("latest registered route wins").
   // wildcard 를 *먼저* 등록 (fallback 역할) → 구체 라우트를 *후* 등록 (LIFO 우선 매칭).
   // 사이클 80 hotfix #3 LIFO 정합 패턴 100% 답습.
@@ -325,7 +326,8 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope({}) }),
   );
 
-  // 5 구체 라우트 — wildcard 후 등록 (LIFO 라 우선 매칭)
+  // 구체 라우트 — wildcard 후 등록 (LIFO 라 우선 매칭).
+  // 사이클 124 Q3=A: stats 4 → 8 키.
   await page.route("**/api/stock-master/stats", (route) =>
     route.fulfill({
       json: envelope({
@@ -333,6 +335,10 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
         bfdy_clpr_present: 27,
         nxt_tradable_count: 12,
         top_10_recent: [],
+        with_hts_avls: 2800,
+        with_acml_tr_pbmn: 2700,
+        total_daily_rows: 84000,
+        last_daily_load_at: "2026-06-13T20:00:00+09:00",
       }),
     }),
   );
@@ -344,6 +350,23 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   );
   await page.route("**/api/stock-master/*/history*", (route) =>
     route.fulfill({ json: envelope([]) }),
+  );
+  // 사이클 124 Q1=A — 일봉 라우트 (history 후 등록 = LIFO 우선, /*catch-all 보다 앞).
+  await page.route("**/api/stock-master/*/daily*", (route) =>
+    route.fulfill({
+      json: envelope(
+        Array.from({ length: 5 }, (_, i) => ({
+          bas_dd: `202606${(13 - i).toString().padStart(2, "0")}`,
+          open_price: 74000 + i * 100,
+          high_price: 75500 + i * 100,
+          low_price: 73500 + i * 100,
+          close_price: 75000 + i * 100,
+          volume: 1000000 + i * 50000,
+          trade_value: 75000000000,
+          change_rate: parseFloat((1.2 - i * 0.3).toFixed(2)),
+        })),
+      ),
+    }),
   );
   await page.route("**/api/stock-master/*", (route) =>
     route.fulfill({

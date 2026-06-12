@@ -713,6 +713,368 @@ describe("사이클 95 H-5 (HIGH) — list 테이블 시장 한글 변환", () =
   });
 });
 
+// ────────────────────────────────────────────────────────────────────────
+// 사이클 124 — StockMaster UI 확장 회귀 가드
+//
+// 영속 의무:
+//   G-STATS-8 (HIGH): Stats 카드 4 → 8 개 (신규 4 testid 렌더)
+//   G-TAB-1   (HIGH): detail 모달에 탭 네비게이션 (stock-master-detail-tabs)
+//   G-TAB-2   (HIGH): 일봉 탭 전환 시 OHLCV 테이블 렌더 (stock-master-daily-table)
+//   G-HIGHLIGHT-NEW (MEDIUM): 신규 4 키 amber highlight 렌더
+//   G-DAILY-AST     (MEDIUM): DailyTab useQuery retry:1 + refetchInterval:60_000 AST
+//   G-STATS-AST     (MEDIUM): stats 신규 4 키 AST 정적 정합
+// ────────────────────────────────────────────────────────────────────────
+
+const SAMPLE_STATS_124 = {
+  count_all: 2800,
+  bfdy_clpr_present: 2750,
+  nxt_tradable_count: 1200,
+  top_10_recent: [
+    { ticker: '005930', name: '삼성전자', refreshed_at: '2026-06-13T09:00:00+09:00' },
+  ],
+  with_hts_avls: 2800,
+  with_acml_tr_pbmn: 2700,
+  total_daily_rows: 84000,
+  last_daily_load_at: '2026-06-13T20:00:00+09:00',
+}
+
+const SAMPLE_DAILY_ROWS = Array.from({ length: 5 }, (_, i) => ({
+  bas_dd: `202606${(13 - i).toString().padStart(2, '0')}`,
+  open_price: 74000 + i * 100,
+  high_price: 75500 + i * 100,
+  low_price: 73500 + i * 100,
+  close_price: 75000 + i * 100,
+  volume: 1_000_000 + i * 50_000,
+  trade_value: 75_000_000_000,
+  change_rate: parseFloat((1.2 - i * 0.3).toFixed(2)),
+}))
+
+function setup124Handlers() {
+  server.use(
+    http.get('/api/stock-master/stats', () =>
+      HttpResponse.json(wrap(SAMPLE_STATS_124)),
+    ),
+    http.get('/api/stock-master/list', () =>
+      HttpResponse.json(wrap(SAMPLE_LIST)),
+    ),
+    http.get('/api/stock-master/scan-pool/summary', () =>
+      HttpResponse.json(wrap({ eager_refresh_today: 3 })),
+    ),
+    http.get('/api/stock-master/:ticker/daily', () =>
+      HttpResponse.json(wrap(SAMPLE_DAILY_ROWS)),
+    ),
+    http.get('/api/stock-master/005930', () =>
+      HttpResponse.json(
+        wrap({
+          ...SAMPLE_DETAIL,
+          raw: {
+            ...SAMPLE_DETAIL.raw,
+            hts_avls: 500000,
+            acml_tr_pbmn: 70_000_000_000,
+            lstn_stcn: 5_969_782_550,
+            prdy_vrss: 1500,
+          },
+        }),
+      ),
+    ),
+    http.get('/api/stock-master/005930/history', () =>
+      HttpResponse.json(wrap(SAMPLE_HISTORY)),
+    ),
+  )
+}
+
+describe('사이클 124 G-STATS-8 (HIGH) — Stats 카드 8개 렌더', () => {
+  it('G-STATS-8: 신규 4 카드 testid 가 모두 렌더된다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-stats-card')).toBeDefined()
+    })
+
+    // 신규 4 카드 testid 영속
+    for (const testid of [
+      'stock-master-stats-with-hts-avls',
+      'stock-master-stats-with-acml-tr-pbmn',
+      'stock-master-stats-total-daily-rows',
+      'stock-master-stats-last-daily-load-at',
+    ]) {
+      expect(
+        screen.getByTestId(testid),
+        `신규 stats 카드 testid '${testid}' 누락 — 사이클 124 Q3=A 위반`,
+      ).toBeDefined()
+    }
+  })
+
+  it('G-STATS-8: with_hts_avls=2800 / with_acml_tr_pbmn=2700 값이 카드에 표시된다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-stats-with-hts-avls')).toBeDefined()
+    })
+
+    const htsCard = screen.getByTestId('stock-master-stats-with-hts-avls')
+    expect(htsCard.textContent).toContain('2800')
+
+    const trCard = screen.getByTestId('stock-master-stats-with-acml-tr-pbmn')
+    expect(trCard.textContent).toContain('2700')
+  })
+
+  it('G-STATS-8: total_daily_rows=84000 이 쉼표 포함 숫자로 표시된다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-stats-total-daily-rows')).toBeDefined()
+    })
+
+    const totalRowsCard = screen.getByTestId('stock-master-stats-total-daily-rows')
+    // toLocaleString('ko-KR') 적용 → "84,000" 형식
+    expect(totalRowsCard.textContent).toMatch(/84[,.]?000/)
+  })
+
+  it('G-STATS-8: last_daily_load_at 가 KST 포맷으로 마지막 일봉 적재 카드에 표시된다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-stats-last-daily-load-at')).toBeDefined()
+    })
+
+    const lastLoadCard = screen.getByTestId('stock-master-stats-last-daily-load-at')
+    // KST 포맷 (formatKst 적용) — 날짜 포함 텍스트
+    expect(lastLoadCard.textContent).toMatch(/2026|미적재/)
+  })
+})
+
+describe('사이클 124 G-TAB-1 (HIGH) — detail 모달 탭 네비게이션', () => {
+  it('G-TAB-1: ticker 클릭 시 detail 모달에 탭 네비게이션 testid 가 존재한다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => {
+      expect(screen.getByText('005930')).toBeDefined()
+    })
+    fireEvent.click(screen.getByText('005930'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-detail-modal')).toBeDefined()
+    })
+
+    // 탭 컨테이너 + 2개 탭 버튼 testid 영속
+    expect(screen.getByTestId('stock-master-detail-tabs')).toBeDefined()
+    expect(screen.getByTestId('stock-master-tab-detail')).toBeDefined()
+    expect(screen.getByTestId('stock-master-tab-daily')).toBeDefined()
+  })
+
+  it('G-TAB-1: 기본 탭은 "상세" 탭 (detail) 이 활성 상태이다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => expect(screen.getByText('005930')).toBeDefined())
+    fireEvent.click(screen.getByText('005930'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-detail-tabs')).toBeDefined()
+    })
+
+    const detailTab = screen.getByTestId('stock-master-tab-detail')
+    // 상세 탭은 blue border-b-2 활성 스타일 (border-blue-500 클래스)
+    expect(detailTab.className).toContain('border-blue-500')
+  })
+})
+
+describe('사이클 124 G-TAB-2 (HIGH) — 일봉 탭 전환 + OHLCV 테이블', () => {
+  it('G-TAB-2: "일봉 (30일)" 탭 클릭 시 stock-master-daily-table 이 렌더된다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => expect(screen.getByText('005930')).toBeDefined())
+    fireEvent.click(screen.getByText('005930'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-detail-tabs')).toBeDefined()
+    })
+
+    // 일봉 탭 클릭
+    fireEvent.click(screen.getByTestId('stock-master-tab-daily'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-daily-table')).toBeDefined()
+    })
+  })
+
+  it('G-TAB-2: 일봉 테이블에 기준일 / 시가 / 고가 / 저가 / 종가 / 거래량 / 등락률 헤더 존재', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => expect(screen.getByText('005930')).toBeDefined())
+    fireEvent.click(screen.getByText('005930'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-detail-tabs')).toBeDefined()
+    })
+
+    fireEvent.click(screen.getByTestId('stock-master-tab-daily'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-daily-table')).toBeDefined()
+    })
+
+    const table = screen.getByTestId('stock-master-daily-table')
+    const headerText = table.textContent || ''
+    for (const header of ['기준일', '시가', '고가', '저가', '종가', '거래량', '등락률']) {
+      expect(
+        headerText.includes(header),
+        `일봉 테이블 헤더 '${header}' 누락 — G-TAB-2 위반`,
+      ).toBe(true)
+    }
+  })
+
+  it('G-TAB-2: 일봉 테이블에 mock 데이터 행 (bas_dd "20260613") 이 표시된다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => expect(screen.getByText('005930')).toBeDefined())
+    fireEvent.click(screen.getByText('005930'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('stock-master-detail-tabs')).toBeDefined()
+    })
+
+    fireEvent.click(screen.getByTestId('stock-master-tab-daily'))
+
+    await waitFor(() => {
+      // SAMPLE_DAILY_ROWS 기준일 = "20260613" (첫 번째 행, i=0 → 13-0=13)
+      expect(screen.getByText('20260613')).toBeDefined()
+    })
+  })
+})
+
+describe('사이클 124 G-HIGHLIGHT-NEW (MEDIUM) — 신규 4 키 amber highlight', () => {
+  it('G-HIGHLIGHT-NEW: hts_avls / acml_tr_pbmn / lstn_stcn / prdy_vrss 가 amber highlight 로 렌더된다', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => expect(screen.getByText('005930')).toBeDefined())
+    fireEvent.click(screen.getByText('005930'))
+
+    // detail 데이터 로드 완료 대기 (모달 + data 렌더 완료 시점)
+    for (const key of ['hts_avls', 'acml_tr_pbmn', 'lstn_stcn', 'prdy_vrss']) {
+      await waitFor(
+        () =>
+          expect(
+            screen.getByTestId(`stock-master-detail-highlight-${key}`),
+            `신규 highlight 키 '${key}' testid 누락 — 사이클 124 Q2=A 위반`,
+          ).toBeDefined(),
+        { timeout: 3000 },
+      )
+    }
+  })
+
+  it('G-HIGHLIGHT-NEW: 기존 5 키 highlight 도 동시 렌더 (영속 위반 0)', async () => {
+    setup124Handlers()
+    render(withProviders(<StockMaster />))
+
+    await waitFor(() => expect(screen.getByText('005930')).toBeDefined())
+    fireEvent.click(screen.getByText('005930'))
+
+    // 기존 5 키도 영속 (사이클 85 Q11=B) — detail 데이터 로드 완료 대기
+    for (const key of ['bfdy_clpr', 'acml_vol', 'nxt_tradable', 'krx_halted', 'admin_item']) {
+      await waitFor(
+        () =>
+          expect(
+            screen.getByTestId(`stock-master-detail-highlight-${key}`),
+            `기존 highlight 키 '${key}' 누락 — 사이클 85 Q11=B 위반`,
+          ).toBeDefined(),
+        { timeout: 3000 },
+      )
+    }
+  })
+})
+
+describe('사이클 124 G-DAILY-AST (MEDIUM) — DailyTab useQuery retry:1 AST 정적 가드', () => {
+  it('G-DAILY-AST: StockMaster.tsx 에 stock-master-daily-table testid 가 존재한다', () => {
+    const source = readFileSync(
+      path.join(__dirname, '..', 'StockMaster.tsx'),
+      'utf-8',
+    )
+    expect(
+      source.includes('stock-master-daily-table'),
+      "StockMaster.tsx 에 data-testid 'stock-master-daily-table' 누락 — 사이클 124 Q1=A 위반",
+    ).toBe(true)
+  })
+
+  it('G-DAILY-AST: DailyTab useQuery 에 retry: 1 명시 (사이클 65 H3 영속)', () => {
+    const source = readFileSync(
+      path.join(__dirname, '..', 'StockMaster.tsx'),
+      'utf-8',
+    )
+    // DailyTab 함수 내에 retry: 1 + refetchInterval: 60_000 동시 존재
+    expect(
+      /DailyTab[\s\S]{0,600}retry\s*:\s*1/.test(source),
+      'DailyTab useQuery 에 retry: 1 누락 — 사이클 65 H3 영속 위반',
+    ).toBe(true)
+    expect(
+      /DailyTab[\s\S]{0,600}refetchInterval\s*:\s*60_?000/.test(source),
+      'DailyTab useQuery 에 refetchInterval: 60_000 누락 — Q13=B 영속 위반',
+    ).toBe(true)
+  })
+
+  it('G-DAILY-AST: fetchDaily 함수가 stock-master.ts API 클라이언트에 존재한다', () => {
+    const source = readFileSync(
+      path.join(__dirname, '../../api/stock-master.ts'),
+      'utf-8',
+    )
+    expect(
+      source.includes('fetchDaily'),
+      'stock-master.ts 에 fetchDaily 함수 누락 — 사이클 124 Q1=A 위반',
+    ).toBe(true)
+    expect(
+      source.includes('/daily'),
+      'stock-master.ts 에 /daily 경로 누락 — 사이클 124 Q1=A 위반',
+    ).toBe(true)
+  })
+})
+
+describe('사이클 124 G-STATS-AST (MEDIUM) — Stats 신규 4 키 타입 정합 AST', () => {
+  it('G-STATS-AST: stock-master.ts 타입 파일에 StockMasterDailyRow 인터페이스가 존재한다', () => {
+    const source = readFileSync(
+      path.join(__dirname, '../../types/stock-master.ts'),
+      'utf-8',
+    )
+    expect(
+      source.includes('StockMasterDailyRow'),
+      'types/stock-master.ts 에 StockMasterDailyRow 인터페이스 누락 — 사이클 124 Q1=A 위반',
+    ).toBe(true)
+    // 필수 필드 영속
+    for (const field of ['bas_dd', 'open_price', 'close_price', 'volume', 'change_rate']) {
+      expect(
+        source.includes(field),
+        `StockMasterDailyRow 인터페이스에 '${field}' 필드 누락 — 사이클 124 Q1=A 위반`,
+      ).toBe(true)
+    }
+  })
+
+  it('G-STATS-AST: StockMasterStats 에 신규 4 필드가 정의되어 있다', () => {
+    const source = readFileSync(
+      path.join(__dirname, '../../types/stock-master.ts'),
+      'utf-8',
+    )
+    for (const field of ['with_hts_avls', 'with_acml_tr_pbmn', 'total_daily_rows', 'last_daily_load_at']) {
+      expect(
+        source.includes(field),
+        `StockMasterStats 에 '${field}' 필드 누락 — 사이클 124 Q3=A 위반`,
+      ).toBe(true)
+    }
+  })
+})
+
+// ────────────────────────────────────────────────────────────────────────
+// 기존 영속 테스트 계속
+// ────────────────────────────────────────────────────────────────────────
+
 describe("사이클 95 M-3 (MEDIUM) — formatExchange 헬퍼 영역 영속", () => {
   it("M-3.a: ETF 코드 '04' → 'ETF' 분류 영속 (사이클 89 hotfix 영역 영속)", async () => {
     setupMultiMarketHandlers();
