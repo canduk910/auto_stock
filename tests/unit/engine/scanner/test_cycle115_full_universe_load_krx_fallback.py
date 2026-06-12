@@ -272,6 +272,11 @@ async def test_medium1_stock_master_upsert_with_krx_raw_merge(monkeypatch):
     assert basics.raw["LIST_DD"] == "1975/06/11"
     assert basics.raw["SECUGRP_NM"] == "주권"
     assert basics.raw["KIND_STKCERT_TP_NM"] == "보통주"
-    # 사이클 81 G-AST1 영속: KIS bfdy_clpr / hts_avls 덮어쓰기 0 (KRX raw 영역에 부재)
-    assert "bfdy_clpr" not in basics.raw, "사이클 81 G-AST1 위반: bfdy_clpr 덮어쓰기 금지"
-    assert "hts_avls" not in basics.raw, "사이클 81 G-AST1 위반: hts_avls 덮어쓰기 금지"
+    # 사이클 81 G-AST1 영속: KIS bfdy_clpr 부재 (KIS CTPF 호출 0건 = 충돌 0)
+    assert "bfdy_clpr" not in basics.raw, "사이클 81 G-AST1: bfdy_clpr (KIS CTPF 전용 키) 부재 의무"
+    # 사이클 116 의미 전환: hts_avls = KRX MKTCAP 원 단위 → 백만원 환산 값
+    # 사이클 108 list_by_filter (hts_avls × 1_000_000 ≥ min_market_cap) 정합 의무.
+    # 사이클 81 G-AST1 정합 영속: KRX 1차 시점에 KIS market-cap 호출 0건 → 충돌 0.
+    assert basics.raw["hts_avls"] == 418_000_000_000_000 // 1_000_000, (
+        "사이클 116 MKTCAP → hts_avls 환산 정합 (418조원 / 1_000_000 = 418_000_000 백만원)"
+    )

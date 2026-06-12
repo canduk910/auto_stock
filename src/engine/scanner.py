@@ -1718,6 +1718,17 @@ async def _full_universe_load_krx_primary() -> dict:
                     "SECT_TP_NM"):
             if key in trd_row:
                 krx_raw[key] = trd_row[key]
+        # 사이클 116 — KRX MKTCAP (원 단위) → KIS hts_avls (백만원 단위) 환산 매핑.
+        # 사이클 108 list_by_filter (`hts_avls × 1_000_000 ≥ min_market_cap`) 정합 영속.
+        # 사이클 81 G-AST1 영속: KIS market-cap 호출 시점은 KRX 폴백 분기 = 동일 ticker
+        # 양쪽 키 충돌 0 (KRX 1차 성공 시 KIS 호출 부재).
+        if "MKTCAP" in trd_row:
+            try:
+                mktcap_won = int(str(trd_row["MKTCAP"]).replace(",", "") or 0)
+                if mktcap_won > 0:
+                    krx_raw["hts_avls"] = mktcap_won // 1_000_000  # 원 → 백만원
+            except (ValueError, TypeError):
+                pass  # graceful, MKTCAP raw 만 유지
         # isu_base_info 보강 (LIST_DD / SECUGRP_NM / KIND_STKCERT_TP_NM)
         info_row = info_map.get(ticker, {})
         for key in ("LIST_DD", "SECUGRP_NM", "KIND_STKCERT_TP_NM",
