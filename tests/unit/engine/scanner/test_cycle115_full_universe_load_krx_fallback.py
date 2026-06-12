@@ -286,11 +286,14 @@ async def test_medium1_stock_master_upsert_with_krx_raw_merge(monkeypatch):
     assert basics.raw["LIST_DD"] == "1975/06/11"
     assert basics.raw["SECUGRP_NM"] == "주권"
     assert basics.raw["KIND_STKCERT_TP_NM"] == "보통주"
-    # 사이클 81 G-AST1 영속: KIS bfdy_clpr 부재 (KIS CTPF 호출 0건 = 충돌 0)
-    assert "bfdy_clpr" not in basics.raw, "사이클 81 G-AST1: bfdy_clpr (KIS CTPF 전용 키) 부재 의무"
+    # 사이클 119 의미 전환: bfdy_clpr = KRX TDD_CLSPRC 매핑 값 (basDd=어제 종가 = 오늘 전일 종가).
+    # KIS CTPF1002R 호출 부재 → 사이클 119 매핑 추가 → 사용자 보고 "내용 안 채워짐" 해소.
+    # 사이클 81 G-AST1 정합 영속: KIS market-cap 호출 0건 → 충돌 0 (KRX → KIS 정합 키 매핑).
+    assert basics.raw["bfdy_clpr"] == 70_000, (
+        "사이클 119 TDD_CLSPRC → bfdy_clpr 매핑 정합 (basDd=어제 종가 = 오늘 전일 종가)"
+    )
     # 사이클 116 의미 전환: hts_avls = KRX MKTCAP 원 단위 → 백만원 환산 값
     # 사이클 108 list_by_filter (hts_avls × 1_000_000 ≥ min_market_cap) 정합 의무.
-    # 사이클 81 G-AST1 정합 영속: KRX 1차 시점에 KIS market-cap 호출 0건 → 충돌 0.
     assert basics.raw["hts_avls"] == 418_000_000_000_000 // 1_000_000, (
         "사이클 116 MKTCAP → hts_avls 환산 정합 (418조원 / 1_000_000 = 418_000_000 백만원)"
     )

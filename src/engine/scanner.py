@@ -1769,6 +1769,39 @@ async def _full_universe_load_krx_primary() -> dict:
                     krx_raw["acml_tr_pbmn"] = trdval_won  # 원 단위 동일
             except (ValueError, TypeError):
                 pass  # graceful, ACC_TRDVAL raw 만 유지
+        # 사이클 119 — KRX → KIS 정합 키 전수 매핑 확장 (4 키 추가).
+        # 사용자 보고 (2026-06-12 정밀 진단): bfdy_clpr / lstn_stcn / acml_vol / prdy_vrss 영역
+        # KRX 1차 적재 종목 (97%) 부재 → UI / 필터 / 매수 신호 영역 "내용 안 채워짐" 결함.
+        # basDd=어제 (사이클 117) → KRX TDD_CLSPRC = 어제 종가 = 오늘 기준 KIS bfdy_clpr (전일 종가) 정합.
+        # 사이클 116/118 답습 패턴. 사이클 81 G-AST1 영속: KRX 1차 시 KIS 호출 부재 → 충돌 0.
+        if "TDD_CLSPRC" in trd_row:
+            try:
+                clpr_won = int(str(trd_row["TDD_CLSPRC"]).replace(",", "") or 0)
+                if clpr_won > 0:
+                    krx_raw["bfdy_clpr"] = clpr_won  # 원 단위 동일
+            except (ValueError, TypeError):
+                pass  # graceful
+        if "LIST_SHRS" in trd_row:
+            try:
+                shrs = int(str(trd_row["LIST_SHRS"]).replace(",", "") or 0)
+                if shrs > 0:
+                    krx_raw["lstn_stcn"] = shrs  # 정수 동일 (상장 주식수)
+            except (ValueError, TypeError):
+                pass
+        if "ACC_TRDVOL" in trd_row:
+            try:
+                vol = int(str(trd_row["ACC_TRDVOL"]).replace(",", "") or 0)
+                if vol > 0:
+                    krx_raw["acml_vol"] = vol  # 정수 동일 (누적 거래량)
+            except (ValueError, TypeError):
+                pass
+        if "CMPPREVDD_PRC" in trd_row:
+            try:
+                # 사이클 119 — prdy_vrss 영역 = 전일 대비 (음수 허용) — > 0 가드 제외.
+                vrss = int(str(trd_row["CMPPREVDD_PRC"]).replace(",", "") or 0)
+                krx_raw["prdy_vrss"] = vrss  # 원 단위 동일 (음수 가능)
+            except (ValueError, TypeError):
+                pass
         # isu_base_info 보강 (LIST_DD / SECUGRP_NM / KIND_STKCERT_TP_NM)
         info_row = info_map.get(ticker, {})
         for key in ("LIST_DD", "SECUGRP_NM", "KIND_STKCERT_TP_NM",
