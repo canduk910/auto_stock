@@ -1,16 +1,19 @@
 name: Deploy — EC2 Direct Build
 
+# 사이클 114 (2026-06-12) — CI fail 무시 차단 패턴 영구 가드.
+# Before: on push 직접 trigger → CI red 무관 즉시 배포 (사이클 108~112 5 사이클 연속 위험 누적).
+# After: workflow_run trigger + CI conclusion=success 의무 → CI fail 시 Deploy 자동 skip.
 on:
-  push:
+  workflow_run:
+    workflows: ["CI — Build & Test"]
+    types: [completed]
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - "_workspace/**"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # CI success + push event 시에만 진행 (PR/manual trigger 분기 제외).
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     steps:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1

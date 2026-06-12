@@ -3,6 +3,12 @@ name: CI — Build & Test
 on:
   push:
     branches: [main]
+    # 사이클 114 (2026-06-12) — 문서/작업 메모만 변경 시 CI/Deploy 미실행.
+    # workflow_run trigger 의 deploy.yml 정합 + docker rebuild 비효율 차단.
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "_workspace/**"
   pull_request:
     branches: [main]
 
