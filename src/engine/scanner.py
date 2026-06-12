@@ -2022,3 +2022,171 @@ def _emit_stock_master_age_warning(ticker: str, age_days: int) -> None:
 
 # (사이클 101 Q68=A+Q69=B 에 의해 fetch_top_500_universe/
 # _universe_eager_refresh_loop 영구 폐기 완료.)
+
+
+# ---------------------------------------------------------------------------
+# 사이클 122 (2026-06-12) — KIS 일봉 (FHKST03010100) stock_master_daily 적재
+# 사용자 결정 영속:
+#   Q1=A 매일 16:00 KST 일괄 적재
+#   Q2=C T-100일 (KIS 1회 호출 한도 활용)
+#   Q3=B 점진 적재 (사이클 122 백필 + 사이클 123+ 증분)
+#   Q4=B DB 적재만 (전략 전환은 사이클 123+ 별개)
+#
+# 영속 의무:
+# - 사이클 14 fetch_daily_candles 재사용 (신규 KIS API 도입 0건)
+# - 사이클 17 OPSP0002 backoff + Rate Limit 50ms sleep
+# - 사이클 38 명문화 (scanner 매수 진입 전 영역)
+# - 사이클 81 G-AST1 raw JSONB 보존
+# - 사이클 88 G-REJECT graceful (개별 ticker 실패 시 다음 ticker 진행)
+# - 사이클 101 lifecycle 의존성 (stock_master 적재 *후* 일봉 적재)
+# - 사이클 106 lifecycle race 차단 패턴
+# ---------------------------------------------------------------------------
+_DAILY_LOAD_FETCH_DAYS = 100   # KIS 1회 호출 한도 (Q2=C, 사이클 33 KIS_DAILY_CANDLES_MAX)
+_DAILY_LOAD_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 83/91/97/107 답습)
+_DAILY_LOAD_INCREMENTAL_THRESHOLD = 50  # 50일 이상 적재된 ticker 는 증분 적재 (Q3=B)
+
+
+async def _stock_master_daily_load_once(force: bool = False) -> dict:
+    """사이클 122 — stock_master 전체 ticker 의 일봉을 stock_master_daily 에 적재.
+
+    사용자 결정 Q3=B 점진 적재:
+    - max_bas_dd 가 오늘이면 skip (idempotency)
+    - count_by_ticker(ticker) < 50 → 백필 모드 (T-100일 전수, KIS 1회)
+    - count_by_ticker(ticker) >= 50 → 증분 모드 (T-7일만 fetch, 영업일 마진)
+
+    Returns:
+        summary dict: {total, fetched, upserted_rows, skipped_fresh, failed,
+                       elapsed_ms, mode}
+    """
+    import time
+    from src.db import stock_master, stock_master_daily
+
+    start = time.monotonic()
+    summary: dict = {
+        "total": 0,
+        "fetched": 0,
+        "upserted_rows": 0,
+        "skipped_fresh": 0,
+        "failed": 0,
+        "elapsed_ms": 0,
+        "mode": "mixed",  # 백필/증분 혼합
+    }
+
+    # stock_master 전체 ticker 조회 (사이클 106 lifecycle 의존성)
+    # offset 페이징 — limit=1000 단위 (Supabase 기본 한도)
+    all_tickers: list[str] = []
+    page = 0
+    PAGE_SIZE = 1000
+    while True:
+        try:
+            rows = await stock_master.list_all(limit=PAGE_SIZE, offset=page * PAGE_SIZE)
+        except Exception:
+            logger.exception(
+                "[stock_master_daily_load] stock_master.list_all 실패 graceful page=%d",
+                page,
+            )
+            break
+        if not rows:
+            break
+        for row in rows:
+            ticker = row.get("ticker", "")
+            if ticker and len(ticker) == 6 and ticker.isdigit():
+                all_tickers.append(ticker)
+        if len(rows) < PAGE_SIZE:
+            break
+        page += 1
+
+    summary["total"] = len(all_tickers)
+    if not all_tickers:
+        summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+        logger.warning("[stock_master_daily_load] stock_master 빈 영역 — 적재 skip")
+        return summary
+
+    # 오늘 KST 날짜 (점진 적재 fresh skip 기준)
+    from src.db._kst import today_kst
+    today = today_kst()
+
+    backfill_count = 0
+    incremental_count = 0
+
+    for idx, ticker in enumerate(all_tickers):
+        # 1) 점진 적재 idempotency — max_bas_dd 가 오늘이면 skip (force 시 무시)
+        try:
+            latest = await stock_master_daily.max_bas_dd(ticker)
+        except Exception:
+            latest = None
+
+        if not force and latest is not None and latest >= today:
+            summary["skipped_fresh"] += 1
+            continue
+
+        # 2) 백필 vs 증분 결정 (Q3=B 사용자 결정 영속)
+        try:
+            existing_count = await stock_master_daily.count_by_ticker(ticker)
+        except Exception:
+            existing_count = 0
+
+        if existing_count < _DAILY_LOAD_INCREMENTAL_THRESHOLD:
+            fetch_days = _DAILY_LOAD_FETCH_DAYS  # 백필 모드 (T-100일)
+            backfill_count += 1
+        else:
+            fetch_days = 7  # 증분 모드 (T-7일, 영업일 마진)
+            incremental_count += 1
+
+        # 3) KIS fetch_daily_candles 호출 (사이클 14 재사용)
+        try:
+            from src.api.condition import fetch_daily_candles
+            candles = await fetch_daily_candles(ticker, days=fetch_days)
+        except Exception:
+            # 사이클 88 G-REJECT graceful — 다음 ticker 진행
+            logger.exception(
+                "[stock_master_daily_load] KIS fetch_daily_candles 실패 graceful ticker=%s",
+                ticker,
+            )
+            summary["failed"] += 1
+            # Rate Limit sleep 보장 (실패 시도 자체로 KIS 호출 발생)
+            await asyncio.sleep(_DAILY_LOAD_RATE_LIMIT_SLEEP_SECS)
+            continue
+
+        if not candles:
+            summary["failed"] += 1
+            await asyncio.sleep(_DAILY_LOAD_RATE_LIMIT_SLEEP_SECS)
+            continue
+
+        summary["fetched"] += 1
+
+        # 4) DB batch upsert (사이클 88 G-REJECT graceful 내장)
+        try:
+            upserted = await stock_master_daily.upsert_batch(ticker, candles)
+            summary["upserted_rows"] += upserted
+        except Exception:
+            logger.exception(
+                "[stock_master_daily_load] upsert_batch 실패 graceful ticker=%s",
+                ticker,
+            )
+            summary["failed"] += 1
+
+        # 5) Rate Limit sleep (사이클 17/83/91/97/107 답습)
+        await asyncio.sleep(_DAILY_LOAD_RATE_LIMIT_SLEEP_SECS)
+
+        # 진행 상황 emit — 500건마다 (운영 가시화)
+        if (idx + 1) % 500 == 0:
+            elapsed = int((time.monotonic() - start) * 1000)
+            logger.info(
+                "[stock_master_daily_load] 진행 %d/%d fetched=%d upserted=%d "
+                "skipped_fresh=%d failed=%d elapsed_ms=%d",
+                idx + 1, len(all_tickers),
+                summary["fetched"], summary["upserted_rows"],
+                summary["skipped_fresh"], summary["failed"], elapsed,
+            )
+
+    summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+    # mode 결정: 백필 우세 → "full" / 증분 우세 → "incremental" / 혼합 → "mixed"
+    if backfill_count > 0 and incremental_count == 0:
+        summary["mode"] = "full"
+    elif incremental_count > 0 and backfill_count == 0:
+        summary["mode"] = "incremental"
+    else:
+        summary["mode"] = "mixed"
+
+    return summary

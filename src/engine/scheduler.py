@@ -61,6 +61,7 @@ TIME_POST_NXT_OPEN = time(15, 40)          # NXT 애프터 진입 (사이클 26:
 TIME_SCAN_START = time(9, 30)              # 모멘텀 스캔
 TIME_KRX_MAIN_BUY_STOP = time(15, 20)      # KRX 메인 신규 매수 중단 + 강제 청산
 TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 (종가 흡수 마진 시작, _force_clear_main_only 가드 기준)
+TIME_STOCK_MASTER_DAILY_LOAD = time(16, 0) # 사이클 122 — KIS 일봉 일괄 적재 (KRX 메인 종료 30분 후 안전 마진)
 TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
 TIME_RECOMMENDATION = time(20, 0)          # AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동 — 백테스트 검증 정합성)
 TIME_FULL_UNIVERSE_LOAD = time(20, 0, 5)   # 사이클 101 — 전체 유니버스 적재 (AI자문 직후 5초 마진)
@@ -504,6 +505,13 @@ class TradingScheduler:
                 self._full_universe_load_task_loop()
             )
 
+            # 사이클 122 (2026-06-12) — 매일 16:00 KST 일봉 (FHKST03010100) 적재 task.
+            # 사용자 결정 Q1=A 16:00 KST + Q2=C T-100일 + Q3=B 점진 + Q4=B DB 적재만.
+            # 사이클 106 lifecycle race 차단 패턴 답습 (start() 직후 즉시 1회 + while 루프).
+            self._stock_master_daily_load_task = asyncio.create_task(
+                self._stock_master_daily_load_task_loop()
+            )
+
             now = datetime.now().time()
 
             # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
@@ -759,6 +767,7 @@ class TradingScheduler:
                 "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
                 "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
                 "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
+                "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -879,6 +888,7 @@ class TradingScheduler:
                     "_api_recovered_collector_task",  # 사이클 79 영속
                     "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
                     "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
+                    "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -908,6 +918,7 @@ class TradingScheduler:
             "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
             "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
             "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
+            "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -2667,6 +2678,78 @@ class TradingScheduler:
                 break
             except Exception:
                 logger.exception("[full_universe_load] task loop 예외 graceful")
+                await asyncio.sleep(60)
+
+    async def _stock_master_daily_load_task_loop(self) -> None:
+        """사이클 122 (2026-06-12) — 매일 16:00 KST KIS 일봉 적재 task.
+
+        사용자 결정 영속:
+        - Q1=A 매일 16:00 KST 일괄 적재 (KRX 메인 종료 30분 후 안전 마진)
+        - Q2=C T-100일 (KIS 1회 호출 한도)
+        - Q3=B 점진 적재 (백필 + 증분 자동 분기)
+        - Q4=B DB 적재만 (전략 전환은 사이클 123+ 별개)
+
+        lifecycle (사이클 106 race 차단 패턴 답습):
+        - start() 직후 즉시 1회 실행 → 빠른 운영 가시화 + lifecycle race 영구 차단
+          (max_bas_dd idempotency 영속 활용 — 동일 영업일 2회 호출 시 두 번째는 skip)
+        - while 루프 _wait_until(16:00:00) 무한 루프 + asyncio.sleep(60) 안전 마진
+        - stop() task_attrs 튜플에 _stock_master_daily_load_task 포함 (사이클 79 답습)
+
+        emit (사이클 74/101 collector 패턴 답습):
+        - [stock_master_daily_load_summary] — 적재 완료 후 1행 INFO
+
+        영속 의무:
+        - 사이클 14 fetch_daily_candles 재사용 (신규 KIS API 도입 0건)
+        - 사이클 17 OPSP0002 backoff 안전 마진
+        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
+        - 사이클 88 G-REJECT graceful 단위
+        - 사이클 106 lifecycle race 차단
+        """
+        from src.engine.scanner import _stock_master_daily_load_once
+        from src.engine.stock_master_daily_metrics import (
+            record_stock_master_daily_load,
+            flush_stock_master_daily_load_collector,
+        )
+
+        # 사이클 106 패턴 답습 — start() 직후 즉시 1회 실행
+        # (max_bas_dd idempotency 영속으로 동일 영업일 2회 호출 시 skip)
+        try:
+            summary = await _stock_master_daily_load_once()
+            record_stock_master_daily_load(summary)
+            flush_stock_master_daily_load_collector()
+            logger.info(
+                "[stock_master_daily_load] 초기 실행 완료 total=%d fetched=%d "
+                "upserted_rows=%d skipped_fresh=%d failed=%d elapsed_ms=%d mode=%s",
+                summary.get("total", 0), summary.get("fetched", 0),
+                summary.get("upserted_rows", 0), summary.get("skipped_fresh", 0),
+                summary.get("failed", 0), summary.get("elapsed_ms", 0),
+                summary.get("mode", "mixed"),
+            )
+        except asyncio.CancelledError:
+            return
+        except Exception:
+            logger.exception("[stock_master_daily_load] 초기 실행 예외 graceful")
+
+        while self._running:
+            try:
+                await self._wait_until(TIME_STOCK_MASTER_DAILY_LOAD)  # 16:00 KST
+                if not self._running:
+                    break
+                summary = await _stock_master_daily_load_once()
+                record_stock_master_daily_load(summary)
+                flush_stock_master_daily_load_collector()
+                logger.info(
+                    "[stock_master_daily_load] 정기 실행 완료 total=%d fetched=%d "
+                    "upserted_rows=%d skipped_fresh=%d failed=%d elapsed_ms=%d mode=%s",
+                    summary.get("total", 0), summary.get("fetched", 0),
+                    summary.get("upserted_rows", 0), summary.get("skipped_fresh", 0),
+                    summary.get("failed", 0), summary.get("elapsed_ms", 0),
+                    summary.get("mode", "mixed"),
+                )
+            except asyncio.CancelledError:
+                break
+            except Exception:
+                logger.exception("[stock_master_daily_load] task loop 예외 graceful")
                 await asyncio.sleep(60)
 
     def _detect_silent_inactive_sessions(self) -> list[str]:
