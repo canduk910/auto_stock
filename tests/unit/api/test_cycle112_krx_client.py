@@ -52,7 +52,7 @@ async def test_g_ap_2_dynamic_key_load_from_supabase(monkeypatch):
         "src.db.system_config.get_krx_open_api_config", _fake_get
     )
 
-    # httpx AsyncClient mock
+    # 사이클 115 (2026-06-12) — POST → GET 시정 영속
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json = MagicMock(return_value={"OutBlock_1": []})
@@ -60,7 +60,7 @@ async def test_g_ap_2_dynamic_key_load_from_supabase(monkeypatch):
     mock_client = MagicMock()
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
-    mock_client.post = AsyncMock(return_value=mock_response)
+    mock_client.get = AsyncMock(return_value=mock_response)
 
     with patch("src.api.krx.httpx.AsyncClient", return_value=mock_client):
         result = await krx_mod.fetch_krx_open_api(
@@ -104,8 +104,15 @@ async def test_g_ap_3_raise_when_disabled_or_missing_key(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_g_ap_4_auth_key_header_and_json_post(monkeypatch):
-    """G-AP-4: httpx POST + AUTH_KEY header + Content-Type: application/json 전송."""
+async def test_g_ap_4_auth_key_query_param_and_get_method(monkeypatch):
+    """G-AP-4: 사이클 115 시정 — httpx GET + AUTH_KEY query parameter 전송.
+
+    사이클 115 (2026-06-12) — 사이클 112 가정 (POST + AUTH_KEY header + JSON body) 시정.
+    외부 검증 (raccoonyy/pykrx-openapi client.py + seobaeksol/krx-rs 명세):
+    - HTTP method = GET
+    - 인증 위치 = query parameter `AUTH_KEY=`
+    - 파라미터 위치 = query string `params=`
+    """
     from src.api import krx as krx_mod
     from src.models.krx_open_api import KrxOpenApiConfig
 
@@ -128,25 +135,24 @@ async def test_g_ap_4_auth_key_header_and_json_post(monkeypatch):
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
 
-    post_calls = []
+    get_calls = []
 
-    async def _capture_post(url, headers=None, json=None):
-        post_calls.append({"url": url, "headers": headers, "json": json})
+    async def _capture_get(url, params=None):
+        get_calls.append({"url": url, "params": params})
         return mock_response
 
-    mock_client.post = _capture_post
+    mock_client.get = _capture_get
 
     with patch("src.api.krx.httpx.AsyncClient", return_value=mock_client):
         await krx_mod.fetch_krx_open_api("/sto/stk_bydd_trd", {"basDd": "20260612"})
 
-    assert len(post_calls) == 1
-    call = post_calls[0]
+    assert len(get_calls) == 1
+    call = get_calls[0]
     assert call["url"] == "https://data-dbg.krx.co.kr/svc/apis/sto/stk_bydd_trd"
-    # AUTH_KEY header 사용 (Bearer token 영역 아님)
-    assert call["headers"]["AUTH_KEY"] == "header_test_key_1234"
-    assert call["headers"]["Content-Type"] == "application/json"
-    # JSON body
-    assert call["json"] == {"basDd": "20260612"}
+    # 사이클 115 시정: AUTH_KEY query parameter (header 영역 아님)
+    assert call["params"]["AUTH_KEY"] == "header_test_key_1234"
+    # 호출자 params (basDd) 도 query string 에 병합
+    assert call["params"]["basDd"] == "20260612"
 
 
 @pytest.mark.asyncio
@@ -167,11 +173,11 @@ async def test_g_ap_5_httpx_exception_converted_to_krx_api_error(monkeypatch):
         "src.db.system_config.get_krx_open_api_config", _fake_get
     )
 
-    # Timeout 예외
+    # 사이클 115 시정 영속: Timeout 예외 (GET method)
     mock_client = MagicMock()
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
-    mock_client.post = AsyncMock(side_effect=httpx.TimeoutException("timeout"))
+    mock_client.get = AsyncMock(side_effect=httpx.TimeoutException("timeout"))
 
     with patch("src.api.krx.httpx.AsyncClient", return_value=mock_client):
         with pytest.raises(KrxApiError, match="timeout"):
@@ -185,7 +191,7 @@ async def test_g_ap_5_httpx_exception_converted_to_krx_api_error(monkeypatch):
     mock_client2 = MagicMock()
     mock_client2.__aenter__ = AsyncMock(return_value=mock_client2)
     mock_client2.__aexit__ = AsyncMock(return_value=None)
-    mock_client2.post = AsyncMock(return_value=mock_response)
+    mock_client2.get = AsyncMock(return_value=mock_response)
 
     with patch("src.api.krx.httpx.AsyncClient", return_value=mock_client2):
         with pytest.raises(KrxApiError, match="401"):

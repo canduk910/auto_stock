@@ -15,7 +15,7 @@ import logging
 import sys as _sys
 import time as _monotonic_time
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from src.api.condition import MIN_CHANGE_RATE, fetch_rising_stocks
 from src.db.system_config import get_price_filter, get_trade_amount_filter
@@ -1577,7 +1577,206 @@ async def _fetch_market_cap_page(
 
 
 async def _full_universe_load_once() -> dict:
-    """사이클 101 (2026-06-11) — market_cap FHPST01740000 기반 전체 유니버스 일괄 적재.
+    """사이클 115 (2026-06-12) — KRX 1차 + KIS 자동 폴백 (Q3=C 영속).
+
+    사용자 결정 영속: Q3=C (KRX OPEN API 1차 우선 + KrxApiError 시 KIS 자동 폴백).
+
+    Q3=C 폴백 패턴 (사이클 88 G-REJECT 영속):
+    - KRX 정식 OPEN API (openapi.krx.co.kr) 1차 우선 호출
+    - KrxApiError (비활성/401/4xx/5xx/네트워크) 시 KIS market-cap 영역 자동 폴백
+    - 양쪽 모두 실패 시 raise (사이클 110 graceful 패턴 영속)
+
+    KRX 1차 영역 (사이클 115 신규):
+    - 4 호출 (KOSPI/KOSDAQ × bydd_trd/isu_base_info) + 50ms sleep (KIS LMS chain 안전 답습)
+    - bydd_trd: MKTCAP (원 단위, 사이클 108 min_market_cap 직접 정합)
+                + ACC_TRDVAL (원 단위, 사이클 108 min_trade_amount 직접 정합)
+    - isu_base_info: LIST_DD / SECUGRP_NM / KIND_STKCERT_TP_NM 추가 보강
+    - 사이클 81 G-AST1 영속: KIS bfdy_clpr / hts_avls 덮어쓰기 0 (raw JSONB merge)
+
+    KIS 폴백 영역 (사이클 101+109+110 영속):
+    - market_cap FHPST01740000 페이징 누적 + CTPF1002R 67컬럼
+
+    Returns:
+        summary dict (KRX 성공 시 source="krx", KIS 폴백 시 source="kis_fallback").
+
+    영속 의무 매트릭스:
+    - 사이클 38 명문화 (tradable_boards 매수 진입 전용 — scanner 단계 영역만)
+    - 사이클 81 G-AST1 (KIS bfdy_clpr / hts_avls 덮어쓰기 0)
+    - 사이클 88 G-REJECT (KrxApiError graceful 폴백 의무)
+    - 사이클 101 idempotency (24h TTL fresh skip)
+    - 사이클 107/108 raw 보강 의존성
+    - 사이클 109 KIS market-cap 화이트리스트
+    - 사이클 110 graceful 시정 패턴
+    """
+    from src.api.krx import KrxApiError
+
+    try:
+        summary = await _full_universe_load_krx_primary()
+        summary["source"] = "krx"
+        return summary
+    except KrxApiError as exc:
+        logger.warning(
+            "[krx_open_api_fallback] KRX 실패 → KIS market-cap 폴백 (graceful): %s",
+            exc,
+        )
+        summary = await _full_universe_load_kis_fallback()
+        summary["source"] = "kis_fallback"
+        return summary
+
+
+async def _full_universe_load_krx_primary() -> dict:
+    """KRX 정식 OPEN API 1차 우선 영역 (사이클 115 신규).
+
+    사용자 결정 영속: Q1=A 양쪽 endpoint 통합 (bydd_trd + isu_base_info).
+
+    호출 영역 (4 호출 + 50ms sleep × 3건):
+    1. fetch_stk_bydd_trd(today) — KOSPI 일별 매매정보
+    2. fetch_ksq_bydd_trd(today) — KOSDAQ 일별 매매정보
+    3. fetch_stk_isu_base_info(today) — KOSPI 종목 기본정보
+    4. fetch_ksq_isu_base_info(today) — KOSDAQ 종목 기본정보
+
+    Rate Limit: 50ms sleep × 3건 (KIS LMS chain 안전 마진 답습, 사이클 17 영속).
+
+    stock_master upsert 영역 (raw JSONB merge):
+    - bydd_trd → ticker(ISU_CD) / name(ISU_NM) / market(MKT_NM)
+                  raw 추가: MKTCAP(원 단위) + ACC_TRDVAL(원 단위) + LIST_SHRS + TDD_CLSPRC
+    - isu_base_info → 동일 ticker(ISU_SRT_CD) 매핑
+                  raw 추가: LIST_DD + SECUGRP_NM + KIND_STKCERT_TP_NM
+    - 사이클 81 G-AST1 영속: KIS bfdy_clpr / hts_avls 덮어쓰기 0
+
+    Returns:
+        summary dict 9 키 (사이클 89/108 collector 패턴 답습):
+        total / kospi / kosdaq / securities / etf / fetched / skipped_ttl / failed / elapsed_ms
+
+    Raises:
+        KrxApiError: 호출자 (_full_universe_load_once) 가 KIS 폴백 의무.
+    """
+    import time as _t
+
+    from src.api.krx import (
+        fetch_stk_bydd_trd,
+        fetch_ksq_bydd_trd,
+        fetch_stk_isu_base_info,
+        fetch_ksq_isu_base_info,
+    )
+    from src.db._kst import today_kst
+    from src.db.stock_master import is_stale as _sm_is_stale, upsert_one as _sm_upsert
+    from src.models.stock import StockBasics
+
+    start_ts = _t.monotonic()
+    today = today_kst().strftime("%Y%m%d")
+
+    # 4 KRX 호출 + 50ms sleep × 3건 (KIS LMS chain 안전 마진 답습)
+    kospi_trd = await fetch_stk_bydd_trd(today)
+    await _asyncio.sleep(0.05)
+    kosdaq_trd = await fetch_ksq_bydd_trd(today)
+    await _asyncio.sleep(0.05)
+    kospi_info = await fetch_stk_isu_base_info(today)
+    await _asyncio.sleep(0.05)
+    kosdaq_info = await fetch_ksq_isu_base_info(today)
+
+    # isu_base_info → ticker 매핑 dict (KOSPI + KOSDAQ 통합)
+    # ISU_SRT_CD = 단축코드 6자리 (KRX 종목코드 정합)
+    info_map: dict[str, dict] = {}
+    for info_row in kospi_info + kosdaq_info:
+        ticker = info_row.get("ISU_SRT_CD", "")
+        if len(ticker) == 6 and ticker.isdigit():
+            info_map[ticker] = info_row
+
+    # bydd_trd 통합 (KOSPI + KOSDAQ) + 6자리 ticker 가드
+    all_trd_rows = kospi_trd + kosdaq_trd
+    total = len(all_trd_rows)
+    kospi_count = len(kospi_trd)
+    kosdaq_count = len(kosdaq_trd)
+    fetched = 0
+    skipped_ttl = 0
+    failed = 0
+
+    for trd_row in all_trd_rows:
+        # ISU_CD = bydd_trd 의 단축코드 6자리 (KRX 종목코드 정합)
+        ticker = trd_row.get("ISU_CD", "")
+        if not (len(ticker) == 6 and ticker.isdigit()):
+            continue
+
+        # 24h TTL fresh skip (사이클 83 + 사이클 101 영속)
+        try:
+            stale = await _sm_is_stale(ticker, max_age_hours=24)
+        except Exception:
+            stale = True  # graceful — 판별 실패 시 갱신 시도
+
+        if not stale:
+            skipped_ttl += 1
+            await _asyncio.sleep(0)  # yield
+            continue
+
+        # KRX bydd_trd + isu_base_info merge → raw JSONB
+        # 사이클 81 G-AST1 영속: KIS bfdy_clpr / hts_avls 덮어쓰기 금지 (KRX 키는 신규 영역)
+        krx_raw: dict[str, Any] = {}
+        # bydd_trd 추가 (사이클 108 min_market_cap / min_trade_amount 직접 정합 영역)
+        for key in ("MKTCAP", "ACC_TRDVAL", "LIST_SHRS", "TDD_CLSPRC", "TDD_OPNPRC",
+                    "TDD_HGPRC", "TDD_LWPRC", "ACC_TRDVOL", "FLUC_RT", "MKT_NM",
+                    "SECT_TP_NM"):
+            if key in trd_row:
+                krx_raw[key] = trd_row[key]
+        # isu_base_info 보강 (LIST_DD / SECUGRP_NM / KIND_STKCERT_TP_NM)
+        info_row = info_map.get(ticker, {})
+        for key in ("LIST_DD", "SECUGRP_NM", "KIND_STKCERT_TP_NM",
+                    "ISU_ABBRV", "ISU_ENG_NM", "PARVAL", "MKT_TP_NM"):
+            if key in info_row:
+                krx_raw[key] = info_row[key]
+
+        # stock_master upsert (사이클 84 history trigger 영속)
+        # 사이클 88 G-REJECT 영속: 개별 ticker 실패 → continue + failed++
+        try:
+            name = trd_row.get("ISU_NM") or info_row.get("ISU_NM") or ticker
+            # MKT_NM → excg_dvsn_cd 매핑 ("KOSPI" → "02", "KOSDAQ" → "03")
+            mkt_nm = trd_row.get("MKT_NM", "")
+            if "KOSDAQ" in mkt_nm:
+                excg = "03"
+            elif "KOSPI" in mkt_nm or "유가증권" in mkt_nm:
+                excg = "02"
+            else:
+                excg = ""
+
+            basics = StockBasics(
+                ticker=ticker,
+                name=name,
+                excg_dvsn_cd=excg,
+                nxt_tradable=False,  # KRX 영역은 NXT 정보 부재 — 보수적 False (lazy upsert 시 KIS CTPF1002R 보강)
+                krx_halted=False,
+                admin_item=False,
+                raw=krx_raw,
+            )
+            await _sm_upsert(basics)
+            fetched += 1
+        except Exception as e:
+            logger.warning(
+                "[_full_universe_load_krx_primary] upsert 실패 ticker=%s error=%s (graceful)",
+                ticker, e,
+            )
+            failed += 1
+
+    elapsed_ms = int((_t.monotonic() - start_ts) * 1000)
+
+    summary = {
+        "total": total,
+        "kospi": kospi_count,
+        "kosdaq": kosdaq_count,
+        "securities": total,  # KRX bydd_trd 는 prdt_type_cd 부재 — total 영역
+        "etf": 0,  # KRX 영역 ETF 분류 부재 (사이클 116+ isu_base_info SECUGRP_NM 활용 가능)
+        "fetched": fetched,
+        "skipped_ttl": skipped_ttl,
+        "failed": failed,
+        "elapsed_ms": elapsed_ms,
+    }
+    return summary
+
+
+async def _full_universe_load_kis_fallback() -> dict:
+    """KIS market-cap 폴백 영역 (사이클 101+109+110 영속, 함수 본체 추출).
+
+    사이클 115 (2026-06-12) — 사이클 101+109+110 영역 영구 영속 추출 (행위 변경 0).
+    Q3=C 폴백 영역 — KRX 실패 시 _full_universe_load_once 가 자동 호출.
 
     매일 20:00:05 scheduler 에서 1회 호출 (Q67=B). KOSPI + KOSDAQ market_cap 페이징
     누적 → 종목별 CTPF1002R 67컬럼 조회 → stock_master upsert. 사이클 97/99

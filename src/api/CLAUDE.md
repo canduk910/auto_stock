@@ -87,6 +87,82 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - `is_insufficient_quantity(KisApiError) -> bool`: 보유 부족 매도 실패. msg1 키워드 ("부족" + "매도가능/보유수량/잔고") + `APBK0918` 은 보유 키워드 동반 시만 True. 매도 즉시 break 결정용
 - `is_market_order_disallowed(KisApiError) -> bool`: 시장가 거부. msg1 키워드 `_MARKET_ORDER_DISALLOWED_KEYWORDS`: `시장가매매불가` / `시장가 매매 불가` / `시장가 주문 불가` / `시장가 호가 불가` / `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리`. 기존 3종과 **상호 배타** — True 면 다른 3종 False. msg_cd 누적: APBK1943 (계양전기 매도) + APBK3013 (NXT 애프터 매도). `docs/kis/error-codes.md` 4-2절 / 5-4절
 
+## krx.py — KRX 정식 OPEN API 클라이언트 (사이클 112 + 사이클 115)
+
+KRX Data Marketplace (openapi.krx.co.kr) 정식 OPEN API 호출 모듈. KIS OpenAPI 와 완전 분리된 별개 시스템.
+
+### 사이클 115 (2026-06-12) — 4 endpoint 함수 실제 통합 + 사이클 112 추상 결함 3건 시정
+
+사용자 결정 (확정): Q1=양쪽 통합 (bydd_trd + isu_base_info) + Q3=C 폴백 영속 (KRX 1차 + KIS 자동 폴백).
+
+외부 검증 정본 (2건 독립 일치):
+- `seobaeksol/krx-rs/docs/krx-api-reference/KRX_API_Spec.md` (응답 schema 28KB)
+- `raccoonyy/pykrx-openapi/src/pykrx_openapi/client.py` (정본 코드 인용):
+  `response = self.session.get(url, params=params, timeout=self.timeout)`
+  `params = {"AUTH_KEY": self.api_key, "basDd": bas_dd}`
+
+**사이클 112 추상 결함 3건 시정**:
+
+| 항목 | 사이클 112 (결함) | 사이클 115 (정본 영구 영속) |
+|------|------------------|---------------------|
+| HTTP method | POST | **GET** |
+| 인증 위치 | HTTP header `AUTH_KEY:` | **query parameter `AUTH_KEY=`** |
+| 파라미터 위치 | JSON body | **query string `params=`** |
+
+**신규 함수 4종**:
+
+| 함수 | endpoint | 응답 필드 수 | 용도 |
+|------|----------|------------|------|
+| `fetch_stk_bydd_trd(date)` | `/sto/stk_bydd_trd` | 15 | KOSPI 일별 매매정보 (KIS market-cap 영역 대안) |
+| `fetch_ksq_bydd_trd(date)` | `/sto/ksq_bydd_trd` | 15 | KOSDAQ 일별 매매정보 |
+| `fetch_stk_isu_base_info(date)` | `/sto/stk_isu_base_info` | 12 | KOSPI 종목 기본정보 (CTPF1002R 영역 대안) |
+| `fetch_ksq_isu_base_info(date)` | `/sto/ksq_isu_base_info` | 12 | KOSDAQ 종목 기본정보 |
+
+응답 형식: `{"OutBlock_1": [{...}, ...]}` JSON 배열 (누락 시 빈 리스트 graceful).
+
+**bydd_trd 핵심 15 필드** (사이클 108 직접 정합):
+- `ISU_CD` (단축코드 6자리, KRX 종목코드 정합) / `ISU_NM` / `MKT_NM` / `SECT_TP_NM`
+- 가격: `TDD_CLSPRC` / `TDD_OPNPRC` / `TDD_HGPRC` / `TDD_LWPRC` / `CMPPREVDD_PRC` / `FLUC_RT`
+- 거래: `ACC_TRDVOL` / **`ACC_TRDVAL`** (원 단위, 사이클 108 `min_trade_amount` 직접 정합)
+- 시총: **`MKTCAP`** (원 단위, 사이클 108 `min_market_cap` 직접 정합 — KIS `hts_avls` 백만원 단위 차이 영구 영속 주의)
+- 상장: `LIST_SHRS`
+
+**isu_base_info 12 필드** (ticker 정합 영역 영구 영속):
+- `ISU_CD` (12자리 표준코드, **사용 금지** — stock_master PK 영역 비정합)
+- **`ISU_SRT_CD`** (단축코드 6자리, KRX 종목코드 정합 영구 영속)
+- `ISU_NM` / `ISU_ABBRV` / `ISU_ENG_NM` / `LIST_DD` (상장일)
+- `MKT_TP_NM` / `SECUGRP_NM` (증권구분) / `SECT_TP_NM` / `KIND_STKCERT_TP_NM` (보통주/우선주)
+- `PARVAL` (액면가) / `LIST_SHRS`
+
+**Q3=C 폴백 패턴 영구 영속** (호출자 `src/engine/scanner.py::_full_universe_load_once` 영역):
+- KRX 1차 우선 호출 (4 endpoint + 50ms sleep × 3건 = KIS LMS chain 안전 마진 답습)
+- KrxApiError (비활성/401/4xx/5xx/네트워크 예외) 시 KIS market-cap 영역 자동 폴백 (사이클 101+109+110 영역 영구 영속)
+- 양쪽 모두 실패 시 raise (사이클 110 graceful 패턴 영속)
+
+**보안 영구 영속**:
+- 평문 key 는 query parameter 에만 사용 — URL 전체 로그 금지 (endpoint_path 만 로그)
+- KrxApiError 메시지에도 평문 key 노출 0건
+- 사이클 17 KIS 인증 보안 패턴 답습 + 사이클 112 영속
+
+**graceful 정책 영속**: 4 endpoint 모두 `KrxApiError` 전파 → 호출자 (사이클 115 영역 2) Q3=C 폴백 의무. 사이클 88 G-REJECT 영속.
+
+**Rate Limit 영속**: 키당 일일 10,000 호출 (4 호출/일 = 0.04% 영역, 무관).
+
+**회귀 가드 23 케이스 영속 영구 영속**:
+- `tests/unit/api/test_cycle112_krx_client.py` (5, 사이클 115 GET method 시정 영속)
+- `tests/unit/api/test_cycle115_krx_endpoints.py` (6, HIGH-2 4 endpoint + graceful + 전파)
+- `tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py` (5, HIGH-3 폴백 + HIGH-4 Rate Limit + MEDIUM-1 raw merge)
+- `tests/unit/ast/test_cycle115_krx_endpoint_urls.py` (4, AST 영구 가드)
+- `tests/unit/ast/test_cycle115_krx_no_plaintext_key.py` (3, 보안 영구 가드)
+
+### 사이클 112 (2026-06-12) — 인프라 사전 구성 (영속 영구 영속)
+
+KRX 키 관리 인프라 + Supabase 저장 + 마스킹. 본 사이클 = 인프라만 (호출 0건, 호출 사이트는 사이클 115 영역 영구 영속).
+
+- `KrxApiError` 예외 클래스 (사이클 88 G-REJECT 영속)
+- `fetch_krx_open_api(endpoint_path, params)` 추상 (사이클 115 시정 = GET + query params + AUTH_KEY query 영역 영구 영속)
+- Supabase 동적 키 로드 (`get_krx_open_api_config()`)
+
 ## quotation.py — 주식현재가 체결 (사이클 32, 2026-05-21)
 
 - `inquire_ccnl(ticker: str, market: str = "J") -> dict | None`: KIS `FHKST01010100` 주식현재가 시세. `kis_get_quote` 경유 (시세성 풀 라우팅 + Rate Limit + 메트릭)
