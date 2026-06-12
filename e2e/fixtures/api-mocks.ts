@@ -263,6 +263,19 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope([]) }),
   );
 
+  // 사이클 112 (2026-06-12) — KrxOpenApiCard /api/integrations/krx-open-api GET/PUT
+  // LIFO 정합 의무 (사이클 80 hotfix #3 영속) — 구체 라우트는 와일드카드 *후* 등록.
+  // 본 라우트는 wildcard 와 무관 (단일 구체 path) — 등록 순서만 답습.
+  await page.route("**/api/integrations/krx-open-api", (route) =>
+    route.fulfill({
+      json: envelope({
+        enabled: false,
+        base_url: "https://data-dbg.krx.co.kr/svc/apis",
+        key_masked: "****",
+      }),
+    }),
+  );
+
   // 사이클 77 hotfix — Dashboard 영역 endpoint 추가 (settings.spec.ts 진입 시 react-router prefetch
   // 또는 lazy import 로 MarketRegimeCard / ScanMonitor (Dashboard 컴포넌트) useQuery 발화 →
   // /api/market-regime/current + /api/realtime/subscriptions ECONNREFUSED.

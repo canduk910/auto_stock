@@ -7,6 +7,7 @@ import { getStrategyColor } from '../types/strategy'
 import CashUsageRatioCard from '../components/CashUsageRatioCard'
 import IntegrationToggleCard from '../components/IntegrationToggleCard'
 import KisQuoteAccountsCard from '../components/KisQuoteAccountsCard'
+import KrxOpenApiCard from '../components/KrxOpenApiCard'
 import PriceFilterCard from '../components/PriceFilterCard'
 import TradeAmountFilterCard from '../components/TradeAmountFilterCard'
 import ConfirmModal from '../components/ConfirmModal'
@@ -310,6 +311,9 @@ export default function Settings() {
 
       {/* 사이클 7-D (2026-05-18) — 보조 KIS 시세 계좌 관리 */}
       <KisQuoteAccountsCard />
+
+      {/* 사이클 112 (2026-06-12) — KRX 정식 OPEN API 키 관리 (인프라 사전 구성) */}
+      <KrxOpenApiCard />
 
       {/* 사이클 62 (2026-06-05) — 가격 필터 (매수 진입 전용) */}
       {/* 사이클 64 (2026-06-06) — WebSocket 구독 대상 필터 단순화 */}

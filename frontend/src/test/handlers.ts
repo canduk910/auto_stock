@@ -214,4 +214,24 @@ export const handlers = [
       })
     )
   ),
+
+  // 사이클 112 (2026-06-12) — KRX 정식 OPEN API 키 관리 (인프라 사전 구성)
+  http.get(`${base}/integrations/krx-open-api`, () =>
+    HttpResponse.json(
+      wrap({
+        enabled: false,
+        base_url: 'https://data-dbg.krx.co.kr/svc/apis',
+        key_masked: '****',
+      })
+    )
+  ),
+  http.put(`${base}/integrations/krx-open-api`, () =>
+    HttpResponse.json(
+      wrap({
+        enabled: true,
+        base_url: 'https://data-dbg.krx.co.kr/svc/apis',
+        key_masked: '****1234',
+      })
+    )
+  ),
 ];

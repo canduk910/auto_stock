@@ -738,3 +738,123 @@ async def set_trade_amount_filter(
         if min_amount < 0:
             raise ValueError(f"min_amount 음수 불가: {min_amount}")
         await _set_int(_TRADE_AMOUNT_FILTER_MIN_KEY, min_amount)
+
+
+# ---------------------------------------------------------------------------
+# 사이클 112 (2026-06-12) — KRX 정식 OPEN API 키 관리 (인프라 사전 구성)
+# ---------------------------------------------------------------------------
+# openapi.krx.co.kr (KRX Data Marketplace) 정식 OPEN API 키를 Supabase 에 안전 저장.
+# 사용자가 Settings UI 에서 입력 → 평문 DB 저장 → 응답 마스킹 (`****1234`).
+# 사이클 7-A `kis_quote_accounts` 마스킹 패턴 답습.
+#
+# Phase 1 진단 결과:
+# - 인증 방식 = `AUTH_KEY` HTTP header (Bearer token 영역과 별개)
+# - base URL = `https://data-dbg.krx.co.kr/svc/apis/{category}` (디폴트)
+# - 호출 방식 = POST + JSON payload (`Content-Type: application/json`)
+# - Rate Limit = 키당 일일 10,000 호출
+#
+# 본 사이클 (112) = 인프라 사전 구성만 — 호출 0건 (scanner.py 변경 0).
+# 사이클 113+ 별도 사이클에서 실제 endpoint 통합.
+
+_KRX_OPEN_API_KEY_KEY = "krx_open_api_key"
+_KRX_OPEN_API_BASE_URL_KEY = "krx_open_api_base_url"
+_KRX_OPEN_API_ENABLED_KEY = "krx_open_api_enabled"
+
+_KRX_OPEN_API_BASE_URL_DEFAULT = "https://data-dbg.krx.co.kr/svc/apis"
+
+
+async def _get_string_or_none(key: str) -> Optional[str]:
+    """system_config 의 string JSONB 값 조회. 키 부재 → None.
+
+    `_get_bool_or_none` 패턴 답습 + string 타입. JSONB `{"value": str}` 형태.
+    """
+
+    def _query():
+        return (
+            supabase.table("system_config")
+            .select("value")
+            .eq("key", key)
+            .execute()
+        )
+
+    try:
+        result = await asyncio.to_thread(_query)
+        rows = result.data or []
+        if not rows:
+            return None
+        raw = rows[0].get("value")
+        if isinstance(raw, dict):
+            v = raw.get("value")
+            if v is None:
+                return None
+            return str(v)
+        if isinstance(raw, str):
+            return raw
+        return None
+    except Exception:
+        # 보안 의무 (사이클 112) — 평문 key 노출 금지. key 이름만 로그.
+        logger.exception("[system_config] get %s 실패 — None 반환", key)
+        return None
+
+
+async def _set_string(key: str, value: str) -> None:
+    """system_config string 값 upsert. JSONB 표준 `{"value": str}`.
+
+    `_set_bool` 패턴 답습 + string 타입. `now_kst_iso()` 영속 (사이클 68).
+    """
+    payload = {
+        "key": key,
+        "value": {"value": str(value)},
+        "updated_at": now_kst_iso(),
+    }
+
+    def _upsert():
+        return (
+            supabase.table("system_config")
+            .upsert(payload, on_conflict="key")
+            .execute()
+        )
+
+    await asyncio.to_thread(_upsert)
+
+
+async def get_krx_open_api_config():
+    """KRX 정식 OPEN API 키 + base URL + enabled 통합 조회.
+
+    사이클 112 (2026-06-12). 모든 키 부재 시 디폴트 (enabled=False, base_url=디폴트,
+    key="") 반환. 호출자: `src/routes/system_integrations.py` (응답 마스킹 의무) +
+    `src/api/krx.py::fetch_krx_open_api` (호출 시 평문 사용).
+
+    **응답 모델 `KrxOpenApiConfig` 는 평문 key 를 포함** — API 응답에 절대 직접 노출 금지.
+    """
+    # 순환 import 회피 — 함수 내부 import
+    from src.models.krx_open_api import DEFAULT_BASE_URL, KrxOpenApiConfig
+
+    enabled = await _get_bool_or_none(_KRX_OPEN_API_ENABLED_KEY)
+    base_url = await _get_string_or_none(_KRX_OPEN_API_BASE_URL_KEY)
+    key = await _get_string_or_none(_KRX_OPEN_API_KEY_KEY)
+
+    return KrxOpenApiConfig(
+        enabled=bool(enabled) if enabled is not None else False,
+        base_url=base_url if base_url else DEFAULT_BASE_URL,
+        key=key if key else "",
+    )
+
+
+async def set_krx_open_api_config(
+    *,
+    key: Optional[str] = None,
+    base_url: Optional[str] = None,
+    enabled: Optional[bool] = None,
+) -> None:
+    """KRX OPEN API 설정 부분 갱신. None 인 키는 기존 값 보존.
+
+    사이클 112. 빈 문자열 (`""`) 은 명시 삭제 의미 아님 — None 만 보존 신호.
+    호출자는 빈 문자열 차단을 `KrxOpenApiUpdateRequest` Pydantic 검증으로 수행.
+    """
+    if key is not None:
+        await _set_string(_KRX_OPEN_API_KEY_KEY, key)
+    if base_url is not None:
+        await _set_string(_KRX_OPEN_API_BASE_URL_KEY, base_url)
+    if enabled is not None:
+        await _set_bool(_KRX_OPEN_API_ENABLED_KEY, enabled)

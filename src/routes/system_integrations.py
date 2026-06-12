@@ -35,6 +35,11 @@ from src.models.system_integrations import (
     IntegrationToggleRequest,
     IntegrationToggleStatus,
 )
+from src.models.krx_open_api import (
+    KrxOpenApiStatus,
+    KrxOpenApiUpdateRequest,
+    mask_secret as krx_mask_secret,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -376,5 +381,77 @@ async def put_auto_apply(req: AutoApplyRequest):
             "AI 자문 자동 적용을 활성화했습니다. 매일 20:00 자문 직후 weight 감액(50% cap) + 보수적 파라미터가 자동 적용됩니다."
             if req.enabled
             else "AI 자문 자동 적용을 비활성화했습니다. 모든 자문은 운영자 수동 적용에서만 반영됩니다."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# 사이클 112 (2026-06-12) — KRX 정식 OPEN API 키 관리 (인프라 사전 구성)
+# ---------------------------------------------------------------------------
+# openapi.krx.co.kr (KRX Data Marketplace) 키를 안전 저장/조회/토글.
+# 평문 key 응답 절대 노출 금지 — `key_masked` (`****1234`) 단독.
+# 본 사이클은 인프라만 — 실제 호출은 사이클 113+ 별도 사이클.
+async def _build_krx_open_api_status() -> KrxOpenApiStatus:
+    """KRX 키 설정 응답 빌더 — DB 평문 → 마스킹 변환.
+
+    `src/db/system_config.py::get_krx_open_api_config` 가 평문 key 포함 dict 반환.
+    본 함수가 응답 직전 `krx_mask_secret` 호출 → `key_masked` 단독 노출.
+    """
+    config = await sc.get_krx_open_api_config()
+    return KrxOpenApiStatus(
+        enabled=config.enabled,
+        base_url=config.base_url,
+        key_masked=krx_mask_secret(config.key),
+    )
+
+
+@router.get("/krx-open-api", response_model=ApiResponse)
+async def get_krx_open_api():
+    """KRX 정식 OPEN API 설정 조회 (사이클 112, 2026-06-12).
+
+    응답:
+    - enabled: 활성 여부
+    - base_url: 호출 base URL (디폴트 `https://data-dbg.krx.co.kr/svc/apis`)
+    - key_masked: API key 마스킹 (`****1234` 형식, **평문 절대 노출 안 함**)
+
+    DB 미설정 시 디폴트 (enabled=False, key="" → `****` 마스킹).
+    """
+    status = await _build_krx_open_api_status()
+    return ApiResponse(success=True, data=status.model_dump())
+
+
+@router.put("/krx-open-api", response_model=ApiResponse)
+async def set_krx_open_api(req: KrxOpenApiUpdateRequest):
+    """KRX 정식 OPEN API 설정 부분 갱신 (사이클 112).
+
+    body:
+    - key?: 평문 API key (DB 평문 저장 + 응답 마스킹). None 이면 기존 보존.
+    - base_url?: 호출 base URL. None 이면 기존 보존.
+    - enabled?: 활성 토글. None 이면 기존 보존.
+
+    빈 body 도 허용 — 현재 상태 응답.
+
+    **보안**: 평문 key 는 응답/로그 절대 노출 안 함. 백엔드 → 응답 직전 마스킹.
+    DB 갱신 실패 시 500. 사이클 5 패턴 답습.
+    """
+    try:
+        await sc.set_krx_open_api_config(
+            key=req.key,
+            base_url=req.base_url,
+            enabled=req.enabled,
+        )
+    except Exception as e:
+        # 보안: 예외 메시지에 평문 key 노출 차단 — 일반 에러 메시지만
+        logger.exception("[integrations] krx_open_api DB 갱신 실패")
+        raise HTTPException(status_code=500, detail="KRX OPEN API 설정 저장 실패")
+
+    status = await _build_krx_open_api_status()
+    return ApiResponse(
+        success=True,
+        data=status.model_dump(),
+        message=(
+            "KRX 정식 OPEN API 설정을 저장했습니다."
+            if (req.key or req.base_url is not None or req.enabled is not None)
+            else "변경 사항이 없습니다."
         ),
     )
