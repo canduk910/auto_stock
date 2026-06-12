@@ -12,11 +12,65 @@ strategy_base / strategy_registry → 추상 + 등록/비중/중복 가드
 strategies/{momentum, volatility_breakout, long_tail_volatility, donchian_swing, bull_flag_breakout, vcp_breakout}
 session.py(MarketBoard, SessionTracker)
 risk.py(on_tick) → order_engine.py(체결통보·DB persistence) → scheduler.py(시간 가드·run/settle) ← boot_manager.py(_boot 본체, 사이클 51) / stale_tracker.py(StaleTrackerState, 사이클 48) / **stale_manager.py facade 96L** (re-export only, `__all__` 21 — 사이클 67 분해) ⇄ **4 sub-module (사이클 67 카드 #14 분해)**: stale_diagnostics.py 357L (5 함수 + 4 상수 — 진단·CCNL 캐시·force_retry history prune) / stale_session_recovery.py 274L (3 함수 + 5 상수 — silent inactive 감지·세션 강제 reconnect·delta unsubscribe) / stale_universe_guard.py 157L (1 함수 + 1 상수 — 보유/익일청산 절대 보호 universe guard) / stale_watcher_core.py 399L (2 함수 — **K stale watcher 본체 HIGH hot path** `check_and_resubscribe_stale` + `resubscribe_stale_priority` 사이클 66 priority 분리 *후* cap 영속). 사이클 60 Phase 2-A1 + 사이클 61 Phase 2-A2 + **사이클 63 Phase 2-A3 (refactor #2 완료)** + **사이클 67 sub-module 분해 (카드 #14 종결)** / sell_rejection.py(SellRejectionTracker, 사이클 55 R-1 + 사이클 57 V-1 알람)
-scanner.py(종목 스캔/구독/STATIC_TICKER_NAMES)
+scanner.py(종목 스캔/구독/STATIC_TICKER_NAMES + 사이클 122 `_stock_master_daily_load_once`)
+stock_master_daily_metrics.py (사이클 122 — `record_stock_master_daily_load` / `flush_stock_master_daily_load_collector` 페어링)
 util/tick_size.py(KRX 7구간 호가단위 헬퍼 — `get_tick_size` / `round_to_tick` / `step_down` / `step_up`)
 market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
+
+## 사이클 122 (2026-06-12) — KIS 일봉 도입 + `stock_master_daily` 적재 task
+
+사용자 결정 Q1=A + Q2=C + Q3=B + Q4=B (team-leader 권고 채택).
+
+### 핵심 사실
+
+- **신규 KIS API 도입 0건** — `fetch_daily_candles` (사이클 14, `src/api/condition.py`) 100% 재사용
+- **영속화만 추가** — memcache 5분 TTL → DB 적재로 전환
+- DB 적재 단계만 추가, 전략 prepare 영역 전환은 사이클 123+ 별개
+
+### `scanner.py::_stock_master_daily_load_once` (+168L)
+
+- 호출: `_stock_master_daily_load_task_loop` 매일 16:00 KST 1회
+- 분기 로직: `max_bas_dd(ticker)` 사용 — 부재 시 백필 (T-100일), 존재 시 증분 (1일 단위)
+- KIS `fetch_daily_candles(ticker, days=N)` 호출 → `upsert_batch(ticker, rows)` 영속화
+- graceful (사이클 88 G-REJECT 답습) — KIS 거부/타임아웃 시 ticker skip 후 다음 진행
+- emit: `[stock_master_daily_load_summary]` 1행 INFO (tickers_total / inserted / skipped / failed / elapsed_ms)
+
+### `scheduler.py` — 매일 16:00 KST task lifecycle
+
+- `TIME_STOCK_MASTER_DAILY_LOAD = time(16, 0)` (사이클 122 — KRX 메인 종료 30분 후 안전 마진)
+- `_stock_master_daily_load_task_loop`: start() 직후 즉시 1회 + 매일 16:00 KST while 루프 (사이클 106 lifecycle race 패턴 답습)
+- stop() task cancel 3곳 추가 (`_stock_master_daily_load_task` — `expected_members` 13종 갱신, 사이클 79 G-AST2 답습)
+
+### 영속 의무
+
+- 사이클 14 `fetch_daily_candles` 재사용 (신규 KIS API 도입 0건)
+- 사이클 38 명문화 — scanner 단계 매수 진입 전 한정 (매도/익일청산 hot path 무관)
+- 사이클 49 VCP Pullback ATR ZigZag = 캔들 입력만 의존 (행위 영향 0)
+- 사이클 79 G-AST2 task cancel 영속
+- 사이클 81 G-AST1 raw JSONB 덮어쓰기 금지 답습
+- 사이클 106 lifecycle race 차단 패턴 (start() 즉시 1회 + while 루프)
+
+### 운영 효과 (push + EC2 자동 배포 후)
+
+- 16:00 KST start() 직후 1회 백필 — 2,700 종목 × 100ms ≈ 4.5분 소요
+- 매일 16:00 KST D-1 영업일 증분 1행 추가
+- DB 부담: 270K 행 × 80 bytes ≈ 22MB (Supabase 무료 tier 500MB 의 4.4%)
+- donchian/VCP/VB 전략 선시행 데이터 준비 완료 (사이클 123+ 전환)
+
+### 회귀 가드 (사이클 122 격리 34 PASS, flakiness 0)
+
+- `tests/unit/db/test_cycle122_stock_master_daily.py` 15 케이스
+- `tests/unit/engine/test_cycle122_daily_load_task.py` 11 케이스
+- `tests/unit/ast/test_cycle122_kis_tr_id_persistence.py` 4 케이스 (FHKST03010100 TR_ID 영속)
+- `tests/unit/engine/test_scheduler_stop_zombie_tasks.py` expected_members 13종 갱신 (사이클 79 G-AST2 답습)
+
+### 사이클 123+ 인계
+
+- HIGH: donchian/VCP/VB prepare 영역에서 `get_donchian_high` / `get_atr` / `get_recent_daily_with_fallback` 헬퍼 전환
+- LOW: 90일 retention cron (사이클 6 답습)
+- D+1 운영 실측 (다음 영업일 16:00 KST `[stock_master_daily_load_summary]` emit 확인)
 
 ## 사이클 106 (2026-06-11) — `_full_universe_load_task_loop` lifecycle race 영구 차단 (start() 직후 즉시 1회 + while 루프)
 
