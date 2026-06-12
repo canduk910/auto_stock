@@ -147,13 +147,25 @@ async def test_h4_rate_limit_50ms_sleep_between_calls(monkeypatch):
         sleep_calls.append(secs)
 
     # 4 KRX endpoint 함수 mock
-    async def _fake_endpoint(date):
-        return []  # 빈 응답 — upsert loop 진입 0건
+    # 사이클 117 시정 영속: bydd_trd 가 빈 list 시 재시도 → KrxApiError raise.
+    # H4 의도 = 정상 흐름 50ms sleep 3건 발화 검증 → bydd_trd 1건 반환으로 break.
+    async def _fake_bydd_trd(date):
+        # 정상 흐름: 첫 시도에 데이터 1건 반환 → 재시도 영역 미진입
+        return [{"ISU_CD": "999999", "ISU_NM": "테스트", "MKTCAP": "1000000000000"}]
 
-    monkeypatch.setattr("src.api.krx.fetch_stk_bydd_trd", _fake_endpoint)
-    monkeypatch.setattr("src.api.krx.fetch_ksq_bydd_trd", _fake_endpoint)
-    monkeypatch.setattr("src.api.krx.fetch_stk_isu_base_info", _fake_endpoint)
-    monkeypatch.setattr("src.api.krx.fetch_ksq_isu_base_info", _fake_endpoint)
+    async def _fake_info(date):
+        return []  # info 영역 비어도 정상 흐름 (upsert loop 별개 영역)
+
+    monkeypatch.setattr("src.api.krx.fetch_stk_bydd_trd", _fake_bydd_trd)
+    monkeypatch.setattr("src.api.krx.fetch_ksq_bydd_trd", _fake_bydd_trd)
+    monkeypatch.setattr("src.api.krx.fetch_stk_isu_base_info", _fake_info)
+    monkeypatch.setattr("src.api.krx.fetch_ksq_isu_base_info", _fake_info)
+
+    # 사이클 117 시정 영속: Supabase 호출 회피 — _sm_is_stale=False (TTL skip 분기)
+    async def _fake_is_stale(ticker, **kwargs):
+        return False
+
+    monkeypatch.setattr("src.db.stock_master.is_stale", _fake_is_stale)
 
     # asyncio.sleep patch (scanner.py 의 _asyncio.sleep 영역)
     monkeypatch.setattr(_scanner._asyncio, "sleep", _capture_sleep)
@@ -165,17 +177,19 @@ async def test_h4_rate_limit_50ms_sleep_between_calls(monkeypatch):
 
     summary = await _scanner._full_universe_load_krx_primary()
 
-    # 50ms sleep 3건 발화 확인 (KRX 호출 1+2+3, 마지막 호출 후 sleep 없음)
+    # 50ms sleep 3건 발화 확인 (KRX 호출 1+2+3, 마지막 호출 후 sleep 없음).
+    # 사이클 117 시정 영속: 첫 시도 데이터 확보 → 재시도 영역 미진입 → 50ms sleep 3건 영역.
     fifty_ms_sleeps = [s for s in sleep_calls if s == 0.05]
     assert len(fifty_ms_sleeps) == 3, (
         f"HIGH-4 위반: KRX 호출 사이 50ms sleep 3건 발화 영속 위반 "
         f"(실제 {len(fifty_ms_sleeps)}건). KIS LMS chain 안전 마진 답습 의무 영역."
     )
 
-    # 응답 형식 검증
-    assert summary["total"] == 0
-    assert summary["kospi"] == 0
-    assert summary["kosdaq"] == 0
+    # 응답 형식 검증 (사이클 117 시정 영속: 데이터 1건 mock + TTL skip → skipped_ttl=2, total=2)
+    assert summary["total"] == 2  # KOSPI 1 + KOSDAQ 1
+    assert summary["kospi"] == 1
+    assert summary["kosdaq"] == 1
+    assert summary["skipped_ttl"] == 2  # _sm_is_stale=False (TTL fresh)
 
 
 @pytest.mark.asyncio

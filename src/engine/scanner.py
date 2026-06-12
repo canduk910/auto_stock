@@ -1663,17 +1663,45 @@ async def _full_universe_load_krx_primary() -> dict:
     from src.db.stock_master import is_stale as _sm_is_stale, upsert_one as _sm_upsert
     from src.models.stock import StockBasics
 
-    start_ts = _t.monotonic()
-    today = today_kst().strftime("%Y%m%d")
+    from datetime import timedelta
 
-    # 4 KRX 호출 + 50ms sleep × 3건 (KIS LMS chain 안전 마진 답습)
-    kospi_trd = await fetch_stk_bydd_trd(today)
+    from src.api.krx import KrxApiError as _KrxApiError
+
+    start_ts = _t.monotonic()
+
+    # 사이클 117 (2026-06-12) — basDd 전일 영업일 영역 + 빈 응답 시 최대 7일 재시도.
+    # 근본 원인: KRX 일별 매매정보 = 영업일 종료 후 (~16:00 KST) 가용. 금일 영역 호출 시 빈 list.
+    # 시정: today - 1 day 시작 + 빈 응답 시 -1 day 재시도 (공휴일/주말 자동 회피).
+    # max_attempts=7 후 모두 0건 → KrxApiError raise → 호출자 _full_universe_load_once 가 KIS 폴백.
+    base_date = today_kst() - timedelta(days=1)
+    max_attempts = 7
+    basdd = ""
+    kospi_trd: list[dict] = []
+    kosdaq_trd: list[dict] = []
+    for _attempt in range(max_attempts):
+        basdd = base_date.strftime("%Y%m%d")
+        kospi_trd = await fetch_stk_bydd_trd(basdd)
+        await _asyncio.sleep(0.05)
+        kosdaq_trd = await fetch_ksq_bydd_trd(basdd)
+        if kospi_trd or kosdaq_trd:
+            break  # 데이터 확보
+        # 빈 응답 → 직전 영업일 영역 재시도 (사이클 117 사용자 결정 영속)
+        logger.info(
+            "[krx_empty_response] basDd=%s 빈 응답 → 직전 영업일 재시도 (attempt=%d/%d)",
+            basdd, _attempt + 1, max_attempts,
+        )
+        base_date -= timedelta(days=1)
+        await _asyncio.sleep(0.05)
+    else:
+        # 7일 모두 0건 → KIS 폴백 trigger
+        raise _KrxApiError(
+            f"KRX 7일 영역 빈 응답 (최후 basDd={basdd}) — KIS 폴백 의무"
+        )
+
     await _asyncio.sleep(0.05)
-    kosdaq_trd = await fetch_ksq_bydd_trd(today)
+    kospi_info = await fetch_stk_isu_base_info(basdd)
     await _asyncio.sleep(0.05)
-    kospi_info = await fetch_stk_isu_base_info(today)
-    await _asyncio.sleep(0.05)
-    kosdaq_info = await fetch_ksq_isu_base_info(today)
+    kosdaq_info = await fetch_ksq_isu_base_info(basdd)
 
     # isu_base_info → ticker 매핑 dict (KOSPI + KOSDAQ 통합)
     # ISU_SRT_CD = 단축코드 6자리 (KRX 종목코드 정합)

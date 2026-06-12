@@ -67,6 +67,9 @@ async def refresh_universe_now():
 
         # 사이클 110 응답 영역 영구 영속이 — _full_universe_load_once summary 9 키 중
         # 운영자 관심 7 키 노출. universe ≡ summary["total"] (사이클 89 응답 영속 호환).
+        # 사이클 117 (2026-06-12) — source 키 추가 (사이클 110 영역 누락 보강).
+        # 사이클 115 _full_universe_load_once summary["source"] = "krx" 또는 "kis_fallback".
+        source = summary.get("source", "unknown")
         return ApiResponse(
             success=True,
             data={
@@ -77,10 +80,12 @@ async def refresh_universe_now():
                 "failed": summary.get("failed", 0),
                 "kospi": summary.get("kospi", 0),
                 "kosdaq": summary.get("kosdaq", 0),
+                "source": source,
             },
             message=(
                 f"universe {summary.get('total', 0)} ticker 즉시 적재 완료 "
-                f"(fetched={summary.get('fetched', 0)}, skipped_ttl={summary.get('skipped_ttl', 0)}, "
+                f"(source={source}, fetched={summary.get('fetched', 0)}, "
+                f"skipped_ttl={summary.get('skipped_ttl', 0)}, "
                 f"failed={summary.get('failed', 0)})"
             ),
         )
