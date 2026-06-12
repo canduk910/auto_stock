@@ -70,9 +70,20 @@ class DonchianSwingStrategy(StrategyBase):
         "volume_multiplier": 1.5,
         "atr_period": 14,
         "atr_trail_mult": 2.0,
-        "min_market_cap": 300_000_000_000,
-        "min_trade_amount": 5_000_000_000,
+        # 사이클 119 (2026-06-12) — Q2=D 임시 완화 (사이클 118 ACC_TRDVAL 매핑 시정
+        # 효과 검증 *전* 안전 영역). 사이클 121+ D+3/D+7/D+14 점진 복원 권고:
+        #   Step 1 (D+3): min_market_cap 500억 → 1,000억
+        #   Step 2 (D+7): min_trade_amount 10억 → 30억
+        #   Step 3 (D+14): 2,000억 / 30억 정착 (KOSPI200+KOSDAQ150 ~350종목 원본 임계 영역은
+        #     stock_master ~2,800 영역에서 후보 풀 폭축 위험)
+        "min_market_cap": 50_000_000_000,    # 500억 (Q2=D 임시 완화, 원본 3,000억)
+        "min_trade_amount": 1_000_000_000,   # 10억 (Q2=D 임시 완화, 원본 50억)
         "max_scan_stocks": 200,
+        # 사이클 119 (2026-06-12) — Plan Phase C UI 운영자 필터링 호환 영역
+        "exclude_tickers": [],
+        # 사이클 119 (2026-06-12) — Q5=A donchian MAIN 단독 (사이클 26 DEFAULT_TRADABLE_BOARDS
+        # =("main",) 영속 + NXT 의존성 0). None=전체 (KRX 메인 영역 단독 매매).
+        "nxt_tradable": None,
         "gap_skip_threshold": 3.0,
         "stop_loss_rate": -7.0,
         "position_ratio": 0.20,
@@ -403,54 +414,86 @@ class DonchianSwingStrategy(StrategyBase):
         return sum(trs) / period
 
     async def _scan_universe(self) -> list[str]:
-        """코스피200 + 코스닥150 고정 유니버스 + 시총 사후 컷.
+        """stock_master DB 기반으로 시총·거래대금 조건 종목을 스캔한다 (사이클 119).
 
-        추세추종 스윙은 일중 거래량 순위(단기 회전 종목 편향)와 정합성이 낮다.
-        거래대금 컷은 prepare()의 volume_multiplier 1.5×에서 일원화되므로 여기선
-        시총만 검사 — `acml_tr_pbmn`(당일 누적 거래대금)이 장 시작 전 0이라
-        모든 종목이 탈락하던 시점 의존성을 제거한다.
+        사이클 119 (Plan Phase B Step 1) — 사전 적재된 stock_master (~2,800종목,
+        사이클 101/106 _full_universe_load_task_loop) 를 DB 필터링으로 대체한다.
+        KIS API 직접 호출 0건 (기존 fetch_stock_detail 350 호출/일 → 0 호출/일,
+        사이클 17 OPSP0002 backoff + KIS LMS chain 안전 영역 강화).
+
+        사이클 108 답습 패턴 (VB/LTV/BFB stock_master 베이스 전환) 100% 영구 영속.
+        hts_avls (시가총액, 백만원 단위) + acml_tr_pbmn (거래대금) 은 사이클 107
+        inquire_stock_basics 5-key merge + 사이클 118 ACC_TRDVAL 매핑 시정으로
+        stock_master.raw 에 자동 적재된다.
+
+        donchian 특수성 (사이클 119 자문):
+          - 멀티데이 보유 (5~15 영업일) → 사이클 32 R4 universe guard 영속
+            (보유/익일청산 절대 보호) = scanner 영역 시정 영향 0
+          - Q2=D 임시 완화 임계 (500억 / 10억) — 사이클 121+ 점진 복원 권고
+          - nxt_tradable=None — donchian MAIN 단독 (사이클 26 영속)
         """
-        from src.api.condition import fetch_stock_detail
+        from src.db import stock_master as _sm_mod
         from src.db.system_logs import write_log
-        from src.engine.scanner import KOSDAQ_150_TICKERS, KOSPI_200_TICKERS
+        from src.engine.scanner import ETF_KEYWORDS, ticker_names
 
-        min_mcap = self.config.params["min_market_cap"]
-        max_stocks = self.config.params["max_scan_stocks"]
+        p = self.config.params
+        min_mcap = p.get("min_market_cap", 50_000_000_000)
+        min_trade = p.get("min_trade_amount", 1_000_000_000)
+        exclude_tickers = p.get("exclude_tickers") or []
+        nxt_tradable_param = p.get("nxt_tradable", None)
+        max_stocks = p.get("max_scan_stocks", 200)
 
-        all_tickers = list(dict.fromkeys(list(KOSPI_200_TICKERS) + list(KOSDAQ_150_TICKERS)))
-        logger.info("도치안 스윙 유니버스 후보(코스피200+코스닥150): %d종목", len(all_tickers))
-        self._scan_stats["universe_candidates"] = len(all_tickers)
+        try:
+            rows = await _sm_mod.list_by_filter(
+                min_market_cap=min_mcap,
+                min_trade_amount=min_trade,
+                exclude_tickers=exclude_tickers,
+                nxt_tradable=nxt_tradable_param,
+                limit=max_stocks,
+            )
+        except Exception:
+            logger.exception(
+                "도치안 스윙 stock_master.list_by_filter 호출 실패 graceful — 빈 list 반환"
+            )
+            self._scan_stats["universe_candidates"] = 0
+            self._scan_stats["universe_filtered"] = 0
+            self._scan_stats["last_run_at"] = datetime.now(KST).isoformat()
+            return []
+
+        self._scan_stats["universe_candidates"] = len(rows)
 
         filtered: list[str] = []
-        for ticker in all_tickers:
-            if len(filtered) >= max_stocks:
-                break
-            try:
-                detail = await fetch_stock_detail(ticker)
-                price = int(detail.get("stck_prpr", "0"))
-                listed = int(detail.get("lstn_stcn", "0"))
-                mcap = price * listed
-                # `rprs_mrkt_kor_name`은 시장 분류명(KOSPI200/KOSDAQ150)이라 종목명 fallback으로 부적합
-                name = (detail.get("hts_kor_isnm") or "").strip()
-                from src.engine.scanner import STATIC_TICKER_NAMES, ticker_names
-                if not name:
-                    # KIS 응답 비면 정적 dict(KOSPI200/KOSDAQ150 인라인 코멘트 추출본)에서 보강
-                    name = STATIC_TICKER_NAMES.get(ticker, "")
-                if name:
-                    ticker_names[ticker] = name
-                if mcap >= min_mcap:
-                    filtered.append(ticker)
-            except Exception:
+        for row in rows:
+            ticker = row.get("ticker", "")
+            # 종목코드 형식 검증 — ETF·ETN·신주인수권 등 알파벳 포함 코드 차단 (사이클 89 영속)
+            if not ticker or not (len(ticker) == 6 and ticker.isdigit()):
                 continue
+            name = row.get("name", "") or (row.get("raw") or {}).get("prdt_abrv_name", "")
+            if any(kw in name for kw in ETF_KEYWORDS):
+                continue
+            if name:
+                ticker_names[ticker] = name
+            filtered.append(ticker)
 
         self._scan_stats["universe_filtered"] = len(filtered)
-        logger.info("도치안 스윙 유니버스 확정: %d종목 (시총 %d억+)",
-                    len(filtered), min_mcap // 1e8)
+        self._scan_stats["last_run_at"] = datetime.now(KST).isoformat()
+        logger.info(
+            "도치안 스윙 유니버스 확정: %d/%d종목 (stock_master DB, 시총 %d억+, 거래대금 %d억+)",
+            len(filtered), len(rows), min_mcap // 100_000_000, min_trade // 100_000_000,
+        )
+
         if not filtered:
-            await write_log(
-                "ERROR",
-                f"도치안 스윙 유니버스 0종목 확정 (후보 {len(all_tickers)}종목 — 시총 컷 모두 탈락)",
+            msg = (
+                f"도치안 스윙 유니버스 0종목 — stock_master {len(rows)}건 중 "
+                f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
+                f"{min_trade // 100_000_000}억+ / ETF 제외 후 통과 없음"
             )
+            logger.error(msg)
+            try:
+                await write_log("ERROR", msg)
+            except Exception:
+                logger.exception("system_logs 기록 실패")
+
         return filtered
 
     async def recompute_held_atr(self) -> None:
