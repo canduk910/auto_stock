@@ -234,7 +234,18 @@ class DonchianSwingStrategy(StrategyBase):
                 candle_fetch_ok_tickers.append(ticker)  # 사이클 39
 
                 # 1) 20일 신고가 돌파 검증 — 어제 종가가 그 이전 20일 최고가 초과
-                prior_high = max(highs[1: donchian_period + 1])
+                # 사이클 123 — get_donchian_high DB 헬퍼 우선 + KIS 캔들 fallback (사이클 14 영속)
+                from src.db.stock_master_daily import get_donchian_high
+                db_high = await get_donchian_high(ticker, days=donchian_period)
+                kis_high = max(highs[1: donchian_period + 1])
+                if db_high is not None and db_high > 0:
+                    prior_high = db_high
+                    stats.setdefault("db_high_hit", 0)
+                    stats["db_high_hit"] += 1
+                else:
+                    prior_high = kis_high  # 사이클 14 영속 (fetch_daily_candles 활용)
+                    stats.setdefault("db_high_miss", 0)
+                    stats["db_high_miss"] += 1
                 if prev_close <= prior_high:
                     # 사이클 41 — 신고가 미달 사유 (수치 포함, H-4 진단)
                     donchian_excluded.append({
