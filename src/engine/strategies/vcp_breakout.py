@@ -328,12 +328,40 @@ class VcpBreakoutStrategy(StrategyBase):
                 stats["volume_contraction_pass"] += 1
                 volume_contraction_pass_tickers.append(ticker)  # 사이클 39
 
-                atr = self._atr(
+                # 사이클 125 — DB ATR 우선 + ±10% 일치 검증 + KIS 캔들 fallback
+                # (사이클 123 donchian/VB 답습. _atr()는 SMA 기반, get_atr()는 Wilder smoothing)
+                from src.db.stock_master_daily import get_atr as _get_db_atr
+                kis_atr = self._atr(
                     [int(c.get("stck_hgpr", "0")) for c in candles],
                     [int(c.get("stck_lwpr", "0")) for c in candles],
                     [int(c.get("stck_clpr", "0")) for c in candles],
                     p["atr_period"],
                 )
+                db_atr = await _get_db_atr(ticker, days=14)
+                if db_atr is not None and db_atr > 0:
+                    if kis_atr > 0:
+                        diff_pct = abs(db_atr - kis_atr) / kis_atr * 100
+                        if diff_pct <= 10.0:
+                            atr = db_atr
+                            stats.setdefault("db_atr_hit", 0)
+                            stats["db_atr_hit"] += 1
+                        else:
+                            logger.warning(
+                                "[vcp_atr_mismatch] ticker=%s db_atr=%d kis_atr=%d"
+                                " diff_pct=%.2f%% > 10%% (KIS fallback)",
+                                ticker, int(db_atr), int(kis_atr), diff_pct,
+                            )
+                            atr = kis_atr
+                            stats.setdefault("db_atr_mismatch", 0)
+                            stats["db_atr_mismatch"] += 1
+                    else:
+                        atr = db_atr
+                        stats.setdefault("db_atr_hit", 0)
+                        stats["db_atr_hit"] += 1
+                else:
+                    atr = kis_atr
+                    stats.setdefault("db_atr_miss", 0)
+                    stats["db_atr_miss"] += 1
                 if atr <= 0:
                     continue
 
