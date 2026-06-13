@@ -62,6 +62,7 @@ TIME_SCAN_START = time(9, 30)              # 모멘텀 스캔
 TIME_KRX_MAIN_BUY_STOP = time(15, 20)      # KRX 메인 신규 매수 중단 + 강제 청산
 TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 (종가 흡수 마진 시작, _force_clear_main_only 가드 기준)
 TIME_STOCK_MASTER_DAILY_LOAD = time(16, 0) # 사이클 122 — KIS 일봉 일괄 적재 (KRX 메인 종료 30분 후 안전 마진)
+TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF1002R 매스 보강 (일봉 task 직후 10분 마진)
 TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
 TIME_RECOMMENDATION = time(20, 0)          # AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동 — 백테스트 검증 정합성)
 TIME_FULL_UNIVERSE_LOAD = time(20, 0, 5)   # 사이클 101 — 전체 유니버스 적재 (AI자문 직후 5초 마진)
@@ -512,6 +513,14 @@ class TradingScheduler:
                 self._stock_master_daily_load_task_loop()
             )
 
+            # 사이클 126 (2026-06-13) — 매일 16:10 KST KIS CTPF1002R 매스 보강 task.
+            # KRX 1차 폴백 (`_full_universe_load_krx_primary`) 의 NXT/정지/관리종목
+            # 하드코딩 False 결함 시정 — KIS CTPF1002R 호출로 실제 값 보강.
+            # 사이클 122 일봉 task 100% 답습 (lifecycle race 차단 + start() 즉시 1회 + while).
+            self._stock_master_basics_refresh_task = asyncio.create_task(
+                self._stock_master_basics_refresh_task_loop()
+            )
+
             now = datetime.now().time()
 
             # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
@@ -768,6 +777,7 @@ class TradingScheduler:
                 "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
                 "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
                 "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
+                "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -889,6 +899,7 @@ class TradingScheduler:
                     "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
                     "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
                     "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
+                "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -919,6 +930,7 @@ class TradingScheduler:
             "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
             "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
             "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
+            "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -2750,6 +2762,72 @@ class TradingScheduler:
                 break
             except Exception:
                 logger.exception("[stock_master_daily_load] task loop 예외 graceful")
+                await asyncio.sleep(60)
+
+    async def _stock_master_basics_refresh_task_loop(self) -> None:
+        """사이클 126 (2026-06-13) — 매일 16:10 KST KIS CTPF1002R 매스 보강 task.
+
+        KRX 1차 폴백 영역의 NXT/정지/관리종목 하드코딩 False 결함 시정:
+        - KIS CTPF1002R 호출 (사이클 107 raw 보강 영속)
+        - stock_master.upsert_one (사이클 84 history trigger 영속)
+
+        lifecycle (사이클 122 일봉 task 100% 답습):
+        - start() 직후 즉시 1회 실행 → 빠른 운영 가시화 + lifecycle race 영구 차단
+        - while 루프 _wait_until(16:10:00) 무한 루프 + asyncio.sleep(60) 안전 마진
+        - stop() task_attrs 튜플에 _stock_master_basics_refresh_task 포함 (사이클 79 답습)
+
+        emit (사이클 74/101/122 collector 패턴 답습):
+        - [stock_master_basics_refresh_summary] — 적재 완료 후 1행 INFO
+
+        영속 의무:
+        - 사이클 17 KIS LMS chain 안전 마진 (50ms sleep)
+        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
+        - 사이클 88 G-REJECT graceful 단위
+        - 사이클 106 lifecycle race 차단
+        - 사이클 107 CTPF1002R + FHKST01010100 merge 영속
+        """
+        from src.engine.scanner import _stock_master_basics_refresh_once
+        from src.engine.stock_master_basics_metrics import (
+            record_stock_master_basics_refresh,
+            flush_stock_master_basics_refresh_collector,
+        )
+
+        # 사이클 122 패턴 답습 — start() 직후 즉시 1회 실행
+        try:
+            summary = await _stock_master_basics_refresh_once()
+            record_stock_master_basics_refresh(summary)
+            flush_stock_master_basics_refresh_collector()
+            logger.info(
+                "[stock_master_basics_refresh] 초기 실행 완료 total=%d updated=%d "
+                "skipped=%d failed=%d elapsed_ms=%d",
+                summary.get("total", 0), summary.get("updated", 0),
+                summary.get("skipped", 0), summary.get("failed", 0),
+                summary.get("elapsed_ms", 0),
+            )
+        except asyncio.CancelledError:
+            return
+        except Exception:
+            logger.exception("[stock_master_basics_refresh] 초기 실행 예외 graceful")
+
+        while self._running:
+            try:
+                await self._wait_until(TIME_STOCK_MASTER_BASICS_REFRESH)  # 16:10 KST
+                if not self._running:
+                    break
+                summary = await _stock_master_basics_refresh_once()
+                record_stock_master_basics_refresh(summary)
+                flush_stock_master_basics_refresh_collector()
+                logger.info(
+                    "[stock_master_basics_refresh] 정기 실행 완료 total=%d updated=%d "
+                    "skipped=%d failed=%d elapsed_ms=%d",
+                    summary.get("total", 0), summary.get("updated", 0),
+                    summary.get("skipped", 0), summary.get("failed", 0),
+                    summary.get("elapsed_ms", 0),
+                )
+            except asyncio.CancelledError:
+                break
+            except Exception:
+                logger.exception("[stock_master_basics_refresh] task loop 예외 graceful")
                 await asyncio.sleep(60)
 
     def _detect_silent_inactive_sessions(self) -> list[str]:

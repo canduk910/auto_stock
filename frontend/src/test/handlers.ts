@@ -221,6 +221,27 @@ export const handlers = [
       wrap({ universe: 500, elapsed_ms: 25000 }),
     )
   ),
+  // 사이클 126 — POST basics/refresh MSW mock (KIS CTPF1002R 매스 보강)
+  http.post(`${base}/stock-master/basics/refresh`, () =>
+    HttpResponse.json(
+      wrap({ total: 2697, updated: 2697, skipped: 0, failed: 0, elapsed_ms: 270000 }),
+    )
+  ),
+  // 사이클 126 — POST daily/refresh MSW mock (사이클 122 일봉 task 즉시 trigger)
+  http.post(`${base}/stock-master/daily/refresh`, () =>
+    HttpResponse.json(
+      wrap({
+        total: 2697,
+        fetched: 2697,
+        upserted_rows: 270000,
+        skipped_fresh: 0,
+        failed: 0,
+        db_write_failures: 0,
+        elapsed_ms: 270000,
+        mode: 'incremental',
+      }),
+    )
+  ),
 
   http.get(`${base}/stock-master/:ticker`, ({ params }) =>
     HttpResponse.json(

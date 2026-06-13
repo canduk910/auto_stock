@@ -396,6 +396,42 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     return route.continue();
   });
 
+  // 사이클 126 (2026-06-13) — POST basics/refresh + daily/refresh.
+  // LIFO 정합: wildcard (**/api/stock-master/**) 보다 *후* 등록 → 우선 매칭.
+  // 사이클 80 hotfix #3/#4 Playwright LIFO 정합 패턴 영속.
+  await page.route("**/api/stock-master/basics/refresh", (route) => {
+    if (route.request().method() === "POST") {
+      return route.fulfill({
+        json: envelope({
+          total: 2697,
+          updated: 2697,
+          skipped: 0,
+          failed: 0,
+          elapsed_ms: 270000,
+        }),
+      });
+    }
+    return route.continue();
+  });
+
+  await page.route("**/api/stock-master/daily/refresh", (route) => {
+    if (route.request().method() === "POST") {
+      return route.fulfill({
+        json: envelope({
+          total: 2697,
+          fetched: 2697,
+          upserted_rows: 270000,
+          skipped_fresh: 0,
+          failed: 0,
+          db_write_failures: 0,
+          elapsed_ms: 270000,
+          mode: "incremental",
+        }),
+      });
+    }
+    return route.continue();
+  });
+
   // 사이클 103 (2026-06-11) — 실시간 건강 모니터링 + 전략 현황 endpoint mock.
   // Playwright route 매칭 = LIFO ("latest registered route wins").
   // 사이클 80 hotfix #3 LIFO 정합 패턴 영속: 구체 라우트를 *후* 등록 (LIFO 우선 매칭).

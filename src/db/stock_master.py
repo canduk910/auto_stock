@@ -113,27 +113,49 @@ async def list_all(limit: int = 100, offset: int = 0) -> list[dict]:
 async def get_stats() -> dict:
     """집계 — 8 키 반환.
 
-    사이클 85 4 키 → 사이클 124 8 키 확장:
+    사이클 85 4 키 → 사이클 124 8 키 확장 → 사이클 126 count_all 정확도 시정:
     - count_all / bfdy_clpr_present / nxt_tradable_count / top_10_recent (기존)
     - with_hts_avls / with_acml_tr_pbmn (사이클 107/108 raw 보강 비율 가시화)
     - total_daily_rows / last_daily_load_at (stock_master_daily 연동)
 
-    전체 rows 1회 조회 후 Python-side JSONB 집계.
-    stock_master_daily 집계는 별도 2회 호출 (graceful — None/0 fallback).
+    사이클 126 (2026-06-13) — `count_all` PostgREST 1000행 cap 결함 시정:
+    - count="exact" 별도 쿼리 → result.count (트랜잭션 절감)
+    - raw 분석 쿼리 .range(0, 9999) 명시 (현재 2,697 대응 + 1만 마진)
+    - count 쿼리 실패 시 raw len(rows) graceful fallback
     """
     from src.db import stock_master_daily as _smd  # 순환 임포트 방지 local import
 
+    # 사이클 126 영역 1 — count="exact" 별도 쿼리 (정확한 count_all)
+    count_all: int = 0
+    try:
+        count_result = await asyncio.to_thread(
+            lambda: (
+                supabase.table(TABLE_NAME)
+                .select("ticker", count="exact")
+                .limit(0)
+                .execute()
+            )
+        )
+        count_all = int(getattr(count_result, "count", 0) or 0)
+    except Exception:
+        logger.warning("[stock_master] get_stats count='exact' 쿼리 실패 graceful")
+        count_all = 0  # raw 집계 후 fallback 처리
+
+    # raw 분석 쿼리 — .range(0, 9999) 명시 (사이클 126: PostgREST 1000행 cap 회피)
     result = await asyncio.to_thread(
         lambda: (
             supabase.table(TABLE_NAME)
             .select("ticker, name, nxt_tradable, raw, refreshed_at")
             .order("refreshed_at", desc=True)
+            .range(0, 9999)
             .execute()
         )
     )
     rows = result.data or []
 
-    count_all = len(rows)
+    # count 쿼리 실패 시 raw len(rows) graceful fallback
+    if count_all == 0 and rows:
+        count_all = len(rows)
     bfdy_clpr_present = sum(
         1 for r in rows
         if r.get("raw") and r["raw"].get("bfdy_clpr") not in (None, "", "0", 0)

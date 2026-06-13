@@ -24,6 +24,8 @@ import {
   fetchHistory,
   fetchDaily,
   refreshUniverseNow,
+  refreshBasicsNow,
+  refreshDailyNow,
 } from '../api/stock-master'
 import type {
   StockMasterListItem,
@@ -148,6 +150,44 @@ function formatAmount(v: unknown): string {
   if (n >= 1_000_000_000_000) return (n / 1_000_000_000_000).toFixed(1) + '조원'
   if (n >= 100_000_000) return (n / 100_000_000).toFixed(0) + '억원'
   return n.toLocaleString('ko-KR') + '원'
+}
+
+/**
+ * 사이클 126 — 시가총액 백만원 단위 → 억원 환산.
+ * stock_master.raw.hts_avls 는 KIS FHKST01010100 응답으로 백만원 단위.
+ * 100 백만원 = 1억원.
+ */
+function formatMarketCap(v: unknown): string {
+  const n = Number(v)
+  if (isNaN(n) || n === 0) return '—'
+  // 백만원 단위 → 억원 환산 (÷100)
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + '조원'
+  if (n >= 100) return Math.round(n / 100).toLocaleString('ko-KR') + '억원'
+  return n.toLocaleString('ko-KR') + '백만원'
+}
+
+/**
+ * 사이클 126 — 거래대금 원 단위 → 억원 환산.
+ * stock_master.raw.acml_tr_pbmn 는 KIS FHKST01010100 응답으로 원 단위.
+ */
+function formatTradeAmount(v: unknown): string {
+  const n = Number(v)
+  if (isNaN(n) || n === 0) return '—'
+  if (n >= 1_000_000_000_000) return (n / 1_000_000_000_000).toFixed(1) + '조원'
+  if (n >= 100_000_000) return Math.round(n / 100_000_000).toLocaleString('ko-KR') + '억원'
+  return n.toLocaleString('ko-KR') + '원'
+}
+
+/**
+ * 사이클 126 — 전일대비 금액 + 부호 색상 (red/blue/gray).
+ * 양수 = 빨강 (상승), 음수 = 파랑 (하락), 0 = 회색.
+ */
+function formatPriceChange(v: unknown): { text: string; color: string } {
+  const n = Number(v)
+  if (isNaN(n)) return { text: '—', color: 'text-gray-400' }
+  if (n > 0) return { text: '+' + n.toLocaleString('ko-KR'), color: 'text-red-600 font-medium' }
+  if (n < 0) return { text: n.toLocaleString('ko-KR'), color: 'text-blue-600 font-medium' }
+  return { text: '0', color: 'text-gray-500' }
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -512,6 +552,9 @@ export default function StockMaster() {
   const [detailInitialData, setDetailInitialData] = useState<StockMasterDetail | undefined>(undefined)
   // 사이클 90 — 토스트 상태 (react-hot-toast 미사용 환경 호환)
   const [refreshToast, setRefreshToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  // 사이클 126 — 신규 2 mutation toast state (basics/daily refresh)
+  const [basicsToast, setBasicsToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [dailyToast, setDailyToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const LIMIT = 100
 
@@ -547,6 +590,66 @@ export default function StockMaster() {
         })
       }
       setTimeout(() => setRefreshToast(null), 4000)
+    },
+  })
+
+  // 사이클 126 — "기본정보 새로고침" useMutation (사이클 90 패턴 답습).
+  // KIS CTPF1002R 매스 보강 (NXT/정지/관리종목 영역 시정).
+  // ~4.5분 작업 — retry: false 의무 (중복 KIS 호출 방지).
+  const basicsMutation = useMutation({
+    mutationFn: refreshBasicsNow,
+    retry: false,
+    onSuccess: (data) => {
+      setBasicsToast({
+        type: 'success',
+        message: `기본정보 ${data.total} ticker 보강 완료 (updated=${data.updated}, ${data.elapsed_ms}ms)`,
+      })
+      queryClient.invalidateQueries({ queryKey: ['stock-master-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['stock-master-list'] })
+      setTimeout(() => setBasicsToast(null), 6000)
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        setBasicsToast({
+          type: 'error',
+          message: '기본정보 보강 진행 중 — 잠시 후 재시도',
+        })
+      } else {
+        setBasicsToast({
+          type: 'error',
+          message: 'KIS API 일시 결함 — 잠시 후 재시도',
+        })
+      }
+      setTimeout(() => setBasicsToast(null), 6000)
+    },
+  })
+
+  // 사이클 126 — "일봉 새로고침" useMutation (사이클 90 패턴 답습).
+  // 사이클 122 자동 task 와 동일 함수 호출 — 즉시 적재 가시화.
+  const dailyMutation = useMutation({
+    mutationFn: refreshDailyNow,
+    retry: false,
+    onSuccess: (data) => {
+      setDailyToast({
+        type: 'success',
+        message: `일봉 ${data.total} ticker 적재 완료 (fetched=${data.fetched}, rows=${data.upserted_rows}, ${data.elapsed_ms}ms)`,
+      })
+      queryClient.invalidateQueries({ queryKey: ['stock-master-stats'] })
+      setTimeout(() => setDailyToast(null), 6000)
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        setDailyToast({
+          type: 'error',
+          message: '일봉 적재 진행 중 — 잠시 후 재시도',
+        })
+      } else {
+        setDailyToast({
+          type: 'error',
+          message: 'KIS API 일시 결함 — 잠시 후 재시도',
+        })
+      }
+      setTimeout(() => setDailyToast(null), 6000)
     },
   })
 
@@ -619,17 +722,39 @@ export default function StockMaster() {
             : 'stock-master-stats-card-loading'
         }
       >
-        {/* 사이클 90 Q26=A — stats 카드 상단 우측 "지금 새로고침" 버튼 */}
+        {/* 사이클 90 Q26=A — stats 카드 상단 우측 "지금 새로고침" 버튼 (+ 사이클 126 신규 2 버튼) */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-semibold text-gray-700">전체 현황</h2>
-          <button
-            data-testid="stock-master-refresh-universe-button"
-            onClick={() => refreshMutation.mutate()}
-            disabled={refreshMutation.isPending}
-            className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shrink-0"
-          >
-            {refreshMutation.isPending ? '적재 중...' : '지금 새로고침'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              data-testid="stock-master-refresh-universe-button"
+              onClick={() => refreshMutation.mutate()}
+              disabled={refreshMutation.isPending}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shrink-0"
+            >
+              {refreshMutation.isPending ? '적재 중...' : '지금 새로고침'}
+            </button>
+            {/* 사이클 126 — 기본정보 새로고침 (KIS CTPF1002R 매스 보강) */}
+            <button
+              data-testid="stock-master-refresh-basics-button"
+              onClick={() => basicsMutation.mutate()}
+              disabled={basicsMutation.isPending}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shrink-0"
+              title="NXT/정지/관리종목 영역 KIS CTPF1002R 매스 보강 (~4.5분)"
+            >
+              {basicsMutation.isPending ? '보강 중...' : '기본정보 새로고침'}
+            </button>
+            {/* 사이클 126 — 일봉 새로고침 (사이클 122 일봉 task 즉시 trigger) */}
+            <button
+              data-testid="stock-master-refresh-daily-button"
+              onClick={() => dailyMutation.mutate()}
+              disabled={dailyMutation.isPending}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shrink-0"
+              title="KIS 일봉 적재 즉시 trigger (~4.5분)"
+            >
+              {dailyMutation.isPending ? '적재 중...' : '일봉 새로고침'}
+            </button>
+          </div>
         </div>
 
         {/* 사이클 90 토스트 영역 */}
@@ -643,6 +768,34 @@ export default function StockMaster() {
             }`}
           >
             {refreshToast.message}
+          </div>
+        )}
+
+        {/* 사이클 126 — basics 토스트 */}
+        {basicsToast && (
+          <div
+            data-testid="stock-master-refresh-basics-toast"
+            className={`mb-4 px-4 py-2 rounded text-sm font-medium ${
+              basicsToast.type === 'success'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {basicsToast.message}
+          </div>
+        )}
+
+        {/* 사이클 126 — daily 토스트 */}
+        {dailyToast && (
+          <div
+            data-testid="stock-master-refresh-daily-toast"
+            className={`mb-4 px-4 py-2 rounded text-sm font-medium ${
+              dailyToast.type === 'success'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {dailyToast.message}
           </div>
         )}
 
@@ -779,6 +932,10 @@ export default function StockMaster() {
                   <th className="text-left py-2 pr-3 font-medium">종목코드</th>
                   <th className="text-left py-2 pr-3 font-medium">종목명</th>
                   <th className="text-left py-2 pr-3 font-medium">시장</th>
+                  <th className="text-right py-2 pr-3 font-medium">현재가</th>
+                  <th className="text-right py-2 pr-3 font-medium hidden md:table-cell">전일대비</th>
+                  <th className="text-right py-2 pr-3 font-medium hidden md:table-cell">시가총액</th>
+                  <th className="text-right py-2 pr-3 font-medium hidden md:table-cell">거래대금</th>
                   <th className="text-right py-2 pr-3 font-medium">전일종가</th>
                   <th className="text-center py-2 pr-3 font-medium">NXT</th>
                   <th className="text-center py-2 pr-3 font-medium">거래정지</th>
@@ -805,6 +962,32 @@ export default function StockMaster() {
                     </td>
                     <td className="py-2 pr-3 text-gray-500">
                       {formatExchange(item.excg_dvsn_cd)}
+                    </td>
+                    <td
+                      className="py-2 pr-3 font-mono text-right text-gray-900"
+                      data-testid={`stock-master-row-stck-prpr-${item.ticker}`}
+                    >
+                      {formatPrice(item.raw?.stck_prpr)}
+                    </td>
+                    <td
+                      className={`py-2 pr-3 font-mono text-right hidden md:table-cell ${
+                        formatPriceChange(item.raw?.prdy_vrss).color
+                      }`}
+                      data-testid={`stock-master-row-prdy-vrss-${item.ticker}`}
+                    >
+                      {formatPriceChange(item.raw?.prdy_vrss).text}
+                    </td>
+                    <td
+                      className="py-2 pr-3 font-mono text-right text-gray-700 hidden md:table-cell"
+                      data-testid={`stock-master-row-hts-avls-${item.ticker}`}
+                    >
+                      {formatMarketCap(item.raw?.hts_avls)}
+                    </td>
+                    <td
+                      className="py-2 pr-3 font-mono text-right text-gray-700 hidden md:table-cell"
+                      data-testid={`stock-master-row-acml-tr-pbmn-${item.ticker}`}
+                    >
+                      {formatTradeAmount(item.raw?.acml_tr_pbmn)}
                     </td>
                     <td className="py-2 pr-3 font-mono text-right text-gray-900">
                       {formatPrice(item.raw?.bfdy_clpr)}

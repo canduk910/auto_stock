@@ -73,3 +73,30 @@ export interface RefreshUniverseResult {
   universe: number
   elapsed_ms: number
 }
+
+/**
+ * 사이클 126 — POST /api/stock-master/basics/refresh 응답 타입.
+ * KIS CTPF1002R 매스 보강 (NXT/정지/관리종목 영역 시정).
+ */
+export interface BasicsRefreshResult {
+  total: number
+  updated: number
+  skipped: number
+  failed: number
+  elapsed_ms: number
+}
+
+/**
+ * 사이클 126 — POST /api/stock-master/daily/refresh 응답 타입.
+ * 일봉 적재 수동 trigger (사이클 122 자동 task 와 동일 함수 호출).
+ */
+export interface DailyRefreshResult {
+  total: number
+  fetched: number
+  upserted_rows: number
+  skipped_fresh: number
+  failed: number
+  db_write_failures: number
+  elapsed_ms: number
+  mode: string
+}

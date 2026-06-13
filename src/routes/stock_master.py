@@ -32,6 +32,11 @@ router = APIRouter()
 # KIS Rate Limit 폭주 차단 + 25초 작업 중복 차단 (사이클 90 사용자 결정).
 _refresh_universe_lock = asyncio.Lock()
 
+# 사이클 126 — 신규 2 POST 라우트 별도 lock (사이클 90 패턴 100% 답습).
+# KIS Rate Limit 폭주 차단 + 4.5분 작업 중복 차단.
+_refresh_basics_lock = asyncio.Lock()
+_refresh_daily_lock = asyncio.Lock()
+
 
 @router.post("/refresh-universe", response_model=ApiResponse)
 async def refresh_universe_now(force: bool = True):
@@ -96,6 +101,100 @@ async def refresh_universe_now(force: bool = True):
         )
 
 
+@router.post("/basics/refresh", response_model=ApiResponse)
+async def refresh_basics_now(force: bool = True):
+    """사이클 126 영역 3-C — KIS CTPF1002R 매스 보강 즉시 trigger (수동 발화).
+
+    KRX 1차 폴백 시 NXT/정지/관리종목 하드코딩 False 결함을 즉시 시정.
+    asyncio.Lock 단일 in-flight 가드 (4.5분 작업 중복 차단 + KIS Rate Limit 안전).
+
+    사이클 84 L-2 영속: POST 1개 추가 예외 허용 (화이트리스트 갱신).
+    사이클 90 패턴 100% 답습 (refresh_universe_now 영역).
+    """
+    if _refresh_basics_lock.locked():
+        raise HTTPException(
+            status_code=409,
+            detail="basics refresh 진행 중 — 잠시 후 재시도",
+        )
+
+    async with _refresh_basics_lock:
+        from src.engine.scanner import _stock_master_basics_refresh_once
+
+        start_time = time.monotonic()
+        try:
+            summary = await _stock_master_basics_refresh_once(force=force)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+        elapsed_ms = int((time.monotonic() - start_time) * 1000)
+
+        return ApiResponse(
+            success=True,
+            data={
+                "total": summary.get("total", 0),
+                "updated": summary.get("updated", 0),
+                "skipped": summary.get("skipped", 0),
+                "failed": summary.get("failed", 0),
+                "elapsed_ms": elapsed_ms,
+            },
+            message=(
+                f"basics {summary.get('total', 0)} ticker 보강 완료 "
+                f"(updated={summary.get('updated', 0)}, "
+                f"skipped={summary.get('skipped', 0)}, "
+                f"failed={summary.get('failed', 0)})"
+            ),
+        )
+
+
+@router.post("/daily/refresh", response_model=ApiResponse)
+async def refresh_daily_now(force: bool = True):
+    """사이클 126 영역 4-B — KIS 일봉 적재 즉시 trigger (수동 발화).
+
+    사이클 122 `_stock_master_daily_load_task_loop` 자동 task 와 동일 함수 호출.
+    asyncio.Lock 단일 in-flight 가드 (4.5분 작업 중복 차단 + KIS Rate Limit 안전).
+
+    사이클 84 L-2 영속: POST 1개 추가 예외 허용 (화이트리스트 갱신).
+    사이클 90 패턴 100% 답습 (refresh_universe_now 영역).
+    """
+    if _refresh_daily_lock.locked():
+        raise HTTPException(
+            status_code=409,
+            detail="daily refresh 진행 중 — 잠시 후 재시도",
+        )
+
+    async with _refresh_daily_lock:
+        from src.engine.scanner import _stock_master_daily_load_once
+
+        start_time = time.monotonic()
+        try:
+            summary = await _stock_master_daily_load_once(force=force)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+        elapsed_ms = int((time.monotonic() - start_time) * 1000)
+
+        return ApiResponse(
+            success=True,
+            data={
+                "total": summary.get("total", 0),
+                "fetched": summary.get("fetched", 0),
+                "upserted_rows": summary.get("upserted_rows", 0),
+                "skipped_fresh": summary.get("skipped_fresh", 0),
+                "failed": summary.get("failed", 0),
+                "db_write_failures": summary.get("db_write_failures", 0),
+                "elapsed_ms": elapsed_ms,
+                "mode": summary.get("mode", "mixed"),
+            },
+            message=(
+                f"daily {summary.get('total', 0)} ticker 적재 완료 "
+                f"(fetched={summary.get('fetched', 0)}, "
+                f"upserted_rows={summary.get('upserted_rows', 0)}, "
+                f"skipped_fresh={summary.get('skipped_fresh', 0)}, "
+                f"failed={summary.get('failed', 0)})"
+            ),
+        )
+
+
 @router.get("/stats")
 async def get_stock_master_stats():
     """stock_master 집계 — count_all / bfdy_clpr_present / nxt_tradable_count / top_10_recent."""
@@ -148,7 +247,8 @@ async def get_stock_master_daily(
     graceful: stock_master_daily 조회 예외 → 500 대신 빈 list 반환 (사이클 88 G-REJECT 패턴).
     """
     # 사이클 90 — POST only 경로 보호 (GET 요청이 동적 {ticker} 로 라우팅되는 경우 차단)
-    _POST_ONLY_PATHS = {"refresh-universe"}
+    # 사이클 126 — POST only 경로 보호: refresh-universe(사이클 90) + basics/daily(사이클 126)
+    _POST_ONLY_PATHS = {"refresh-universe", "basics", "daily"}
     if ticker in _POST_ONLY_PATHS:
         raise HTTPException(status_code=405, detail=f"Method Not Allowed — {ticker} 은 POST only")
 
@@ -175,7 +275,8 @@ async def get_stock_master_detail(ticker: str):
     동적 {ticker} 가 POST only 경로를 잡아버리는 FastAPI 라우팅 특성 영구 차단.
     """
     # 사이클 90 — POST only 경로 보호: GET 요청이 동적 {ticker} 로 라우팅되는 경우 차단
-    _POST_ONLY_PATHS = {"refresh-universe"}
+    # 사이클 126 — POST only 경로 보호: refresh-universe(사이클 90) + basics/daily(사이클 126)
+    _POST_ONLY_PATHS = {"refresh-universe", "basics", "daily"}
     if ticker in _POST_ONLY_PATHS:
         raise HTTPException(status_code=405, detail=f"Method Not Allowed — {ticker} 은 POST only")
 

@@ -28,10 +28,14 @@ ROUTE_PATH = (
 
 FORBIDDEN_METHODS = {"put", "post", "delete", "patch"}
 
-# 사이클 90 (H-3) 갱신 — POST 1개 예외 화이트리스트.
-# 사용자 결정 Q24=B + Q25=A 채택 영속. 신규 항목 추가 시 별개 사이클 의제 의무
-# (사이클 84 Q9=B READ-ONLY 원칙 영속 — 1건 명시 예외 + 기타 0건).
-_ALLOWED_POST_ROUTES = {"/refresh-universe"}
+# 사이클 90 (H-3) → 사이클 126 갱신 — POST 3개 예외 화이트리스트.
+# 사용자 결정 Q24=B + Q25=A 채택 영속 + 사이클 126 사용자 결정 (basics/daily refresh).
+# 신규 항목 추가 시 별개 사이클 의제 의무 (사이클 84 Q9=B READ-ONLY 원칙 영속).
+_ALLOWED_POST_ROUTES = {
+    "/refresh-universe",       # 사이클 90
+    "/basics/refresh",         # 사이클 126 — KIS CTPF1002R 매스 보강 수동 trigger
+    "/daily/refresh",          # 사이클 126 — 일봉 적재 수동 trigger
+}
 
 
 def _extract_route_path(deco: ast.AST) -> str | None:

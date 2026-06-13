@@ -2068,6 +2068,7 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         "upserted_rows": 0,
         "skipped_fresh": 0,
         "failed": 0,
+        "db_write_failures": 0,  # 사이클 126 영역 4 — upsert_batch 실패 카운터 분리
         "elapsed_ms": 0,
         "mode": "mixed",  # 백필/증분 혼합
     }
@@ -2097,6 +2098,13 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         page += 1
 
     summary["total"] = len(all_tickers)
+
+    # 사이클 126 영역 4 — 진단 강화: 함수 진입 시 candidates 가시화
+    logger.info(
+        "[stock_master_daily_load_begin] candidates=%d force=%s",
+        len(all_tickers), force,
+    )
+
     if not all_tickers:
         summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
         logger.warning("[stock_master_daily_load] stock_master 빈 영역 — 적재 skip")
@@ -2160,11 +2168,12 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             upserted = await stock_master_daily.upsert_batch(ticker, candles)
             summary["upserted_rows"] += upserted
         except Exception:
-            logger.exception(
-                "[stock_master_daily_load] upsert_batch 실패 graceful ticker=%s",
+            # 사이클 126 영역 4 — db_write_failures 분리 카운터 (KIS fetch 실패와 구분)
+            logger.warning(
+                "[stock_master_daily_load_skip] ticker=%s reason=upsert_batch_failed",
                 ticker,
             )
-            summary["failed"] += 1
+            summary["db_write_failures"] += 1
 
         # 5) Rate Limit sleep (사이클 17/83/91/97/107 답습)
         await asyncio.sleep(_DAILY_LOAD_RATE_LIMIT_SLEEP_SECS)
@@ -2188,5 +2197,130 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         summary["mode"] = "incremental"
     else:
         summary["mode"] = "mixed"
+
+    return summary
+
+
+# 사이클 126 영역 3 — basics refresh 상수 (사이클 122 일봉 task 답습)
+_BASICS_REFRESH_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 17 KIS LMS chain 답습)
+
+
+async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
+    """사이클 126 영역 3 — KIS CTPF1002R 매스 보강 자동 task.
+
+    KRX 1차 폴백 (`_full_universe_load_krx_primary`) 의 nxt_tradable/krx_halted/admin_item
+    하드코딩 False 결함을 KIS CTPF1002R 호출로 실제 값 보강.
+
+    매매 hot path lazy 호출 (`_strategy_exchange_async` / `_execute_next_day_clear`)
+    만으론 매매 0 영역 ticker 영원히 False 영속 — 일일 1회 매스 보강 의무.
+
+    Returns:
+        summary dict: {total, updated, skipped, failed, elapsed_ms}
+
+    영속 의무:
+    - 사이클 17 KIS LMS chain 안전 (50ms sleep)
+    - 사이클 38 명문화 (scanner 단계 = 매수 진입 전, 매도 hot path 무관)
+    - 사이클 88 G-REJECT graceful (개별 ticker 실패 → continue + failed++)
+    - 사이클 107 CTPF1002R + FHKST01010100 merge (raw JSONB 5 키 자동 포함)
+    """
+    import time
+    from src.db import stock_master
+
+    start = time.monotonic()
+    summary: dict = {
+        "total": 0,
+        "updated": 0,
+        "skipped": 0,
+        "failed": 0,
+        "elapsed_ms": 0,
+    }
+
+    # stock_master 전체 ticker 페이징 조회 (사이클 122 답습)
+    all_tickers: list[str] = []
+    page = 0
+    PAGE_SIZE = 1000
+    while True:
+        try:
+            rows = await stock_master.list_all(limit=PAGE_SIZE, offset=page * PAGE_SIZE)
+        except Exception:
+            logger.exception(
+                "[stock_master_basics_refresh] stock_master.list_all 실패 graceful page=%d",
+                page,
+            )
+            break
+        if not rows:
+            break
+        for row in rows:
+            ticker = row.get("ticker", "")
+            if ticker and len(ticker) == 6 and ticker.isdigit():
+                all_tickers.append(ticker)
+        if len(rows) < PAGE_SIZE:
+            break
+        page += 1
+
+    summary["total"] = len(all_tickers)
+    logger.info(
+        "[stock_master_basics_refresh_begin] candidates=%d force=%s",
+        len(all_tickers), force,
+    )
+
+    if not all_tickers:
+        summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+        logger.warning("[stock_master_basics_refresh] stock_master 빈 영역 — 보강 skip")
+        return summary
+
+    for idx, ticker in enumerate(all_tickers):
+        # KIS CTPF1002R + FHKST01010100 merge (사이클 107 raw 보강 영속)
+        try:
+            from src.api.condition import inquire_stock_basics
+            basics = await inquire_stock_basics(ticker)
+        except Exception:
+            logger.warning(
+                "[stock_master_basics_refresh_skip] ticker=%s reason=kis_fetch_failed",
+                ticker,
+            )
+            summary["failed"] += 1
+            # Rate Limit sleep 보장 (실패 시도 자체로 KIS 호출 발생)
+            await _asyncio.sleep(_BASICS_REFRESH_RATE_LIMIT_SLEEP_SECS)
+            continue
+
+        if not basics:
+            summary["skipped"] += 1
+            await _asyncio.sleep(_BASICS_REFRESH_RATE_LIMIT_SLEEP_SECS)
+            continue
+
+        # DB upsert (사이클 88 G-REJECT graceful)
+        try:
+            from src.db import stock_master as _sm
+            await _sm.upsert_one(basics)
+            summary["updated"] += 1
+        except Exception:
+            logger.warning(
+                "[stock_master_basics_refresh_skip] ticker=%s reason=upsert_failed",
+                ticker,
+            )
+            summary["failed"] += 1
+
+        # Rate Limit sleep (사이클 17 KIS LMS chain 답습)
+        await _asyncio.sleep(_BASICS_REFRESH_RATE_LIMIT_SLEEP_SECS)
+
+        # 진행 상황 emit — 500건마다 (운영 가시화)
+        if (idx + 1) % 500 == 0:
+            elapsed = int((time.monotonic() - start) * 1000)
+            logger.info(
+                "[stock_master_basics_refresh] 진행 %d/%d updated=%d "
+                "skipped=%d failed=%d elapsed_ms=%d",
+                idx + 1, len(all_tickers),
+                summary["updated"], summary["skipped"],
+                summary["failed"], elapsed,
+            )
+
+    summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+    logger.info(
+        "[stock_master_basics_refresh_summary] total=%d updated=%d "
+        "skipped=%d failed=%d elapsed_ms=%d",
+        summary["total"], summary["updated"],
+        summary["skipped"], summary["failed"], summary["elapsed_ms"],
+    )
 
     return summary

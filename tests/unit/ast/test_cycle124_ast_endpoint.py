@@ -97,7 +97,8 @@ def test_g_ast1_l2_no_extra_post_routes():
     source = _load_source()
     lines = source.splitlines()
 
-    _WHITELIST = {"refresh-universe"}
+    # 사이클 126 갱신 — basics/refresh + daily/refresh 추가 (사이클 84 L-2 화이트리스트 영속)
+    _WHITELIST = {"refresh-universe", "basics/refresh", "daily/refresh"}
 
     extra_mutating = []
     for line in lines:

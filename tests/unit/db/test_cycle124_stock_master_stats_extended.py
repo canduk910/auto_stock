@@ -54,7 +54,11 @@ async def test_g_stats1_with_hts_avls_count():
         patch("src.db.stock_master_daily.count_all", new_callable=AsyncMock, return_value=100),
         patch("src.db.stock_master_daily.max_bas_dd", new_callable=AsyncMock, return_value=date(2026, 6, 12)),
     ):
-        mock_sb.table.return_value.select.return_value.order.return_value.execute.return_value = mock_execute
+        # 사이클 126 영역 1 — count chain (select(count="exact").limit(0).execute()) + raw chain (select.order.range.execute()) 양쪽 호환
+        mock_execute.count = len(rows)
+        mock_sb.table.return_value.select.return_value.order.return_value.range.return_value.execute.return_value = mock_execute
+        # count="exact" chain
+        mock_sb.table.return_value.select.return_value.limit.return_value.execute.return_value = mock_execute
 
         from src.db import stock_master
         result = await stock_master.get_stats()
@@ -88,7 +92,11 @@ async def test_g_stats2_with_acml_tr_pbmn_count():
         patch("src.db.stock_master_daily.count_all", new_callable=AsyncMock, return_value=50),
         patch("src.db.stock_master_daily.max_bas_dd", new_callable=AsyncMock, return_value=None),
     ):
-        mock_sb.table.return_value.select.return_value.order.return_value.execute.return_value = mock_execute
+        # 사이클 126 영역 1 — count chain (select(count="exact").limit(0).execute()) + raw chain (select.order.range.execute()) 양쪽 호환
+        mock_execute.count = len(rows)
+        mock_sb.table.return_value.select.return_value.order.return_value.range.return_value.execute.return_value = mock_execute
+        # count="exact" chain
+        mock_sb.table.return_value.select.return_value.limit.return_value.execute.return_value = mock_execute
 
         from src.db import stock_master
         result = await stock_master.get_stats()
@@ -114,7 +122,11 @@ async def test_g_stats3_total_daily_rows_from_smd():
         patch("src.db.stock_master_daily.count_all", new_callable=AsyncMock, return_value=75000) as mock_count,
         patch("src.db.stock_master_daily.max_bas_dd", new_callable=AsyncMock, return_value=date(2026, 6, 11)),
     ):
-        mock_sb.table.return_value.select.return_value.order.return_value.execute.return_value = mock_execute
+        # 사이클 126 영역 1 — count chain (select(count="exact").limit(0).execute()) + raw chain (select.order.range.execute()) 양쪽 호환
+        mock_execute.count = len(rows)
+        mock_sb.table.return_value.select.return_value.order.return_value.range.return_value.execute.return_value = mock_execute
+        # count="exact" chain
+        mock_sb.table.return_value.select.return_value.limit.return_value.execute.return_value = mock_execute
 
         from src.db import stock_master
         result = await stock_master.get_stats()
@@ -154,7 +166,11 @@ async def test_g_stats4_last_daily_load_at_from_smd():
         patch("src.db.stock_master_daily.count_all", new_callable=AsyncMock, return_value=1000),
         patch("src.db.stock_master_daily.max_bas_dd", new_callable=AsyncMock, return_value=target_date) as mock_max,
     ):
-        mock_sb.table.return_value.select.return_value.order.return_value.execute.return_value = mock_execute
+        # 사이클 126 영역 1 — count chain (select(count="exact").limit(0).execute()) + raw chain (select.order.range.execute()) 양쪽 호환
+        mock_execute.count = len(rows)
+        mock_sb.table.return_value.select.return_value.order.return_value.range.return_value.execute.return_value = mock_execute
+        # count="exact" chain
+        mock_sb.table.return_value.select.return_value.limit.return_value.execute.return_value = mock_execute
 
         from src.db import stock_master
         result = await stock_master.get_stats()

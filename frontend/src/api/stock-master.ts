@@ -21,6 +21,8 @@ import type {
   ScanPoolSummary,
   RefreshUniverseResult,
   StockMasterDailyRow,
+  BasicsRefreshResult,
+  DailyRefreshResult,
 } from '../types/stock-master'
 
 export async function fetchStats(): Promise<StockMasterStats> {
@@ -94,6 +96,30 @@ export async function fetchDaily(
 export async function refreshUniverseNow(): Promise<RefreshUniverseResult> {
   const { data } = await apiClient.post<ApiResponse<RefreshUniverseResult>>(
     '/stock-master/refresh-universe',
+  )
+  return data.data
+}
+
+/**
+ * 사이클 126 — POST /api/stock-master/basics/refresh (KIS CTPF1002R 매스 보강).
+ * KRX 1차 폴백 NXT/정지/관리종목 하드코딩 False 결함 시정.
+ * useMutation retry: false 의무 (장시간 작업, KIS 호출 중복 방지).
+ */
+export async function refreshBasicsNow(): Promise<BasicsRefreshResult> {
+  const { data } = await apiClient.post<ApiResponse<BasicsRefreshResult>>(
+    '/stock-master/basics/refresh',
+  )
+  return data.data
+}
+
+/**
+ * 사이클 126 — POST /api/stock-master/daily/refresh (일봉 적재 수동 trigger).
+ * 사이클 122 자동 task 와 동일 함수 호출. force=true 디폴트.
+ * useMutation retry: false 의무 (장시간 작업, KIS 호출 중복 방지).
+ */
+export async function refreshDailyNow(): Promise<DailyRefreshResult> {
+  const { data } = await apiClient.post<ApiResponse<DailyRefreshResult>>(
+    '/stock-master/daily/refresh',
   )
   return data.data
 }
