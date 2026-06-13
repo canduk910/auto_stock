@@ -33,6 +33,7 @@ import type {
   StockMasterHistoryItem,
   StockMasterDailyRow,
 } from '../types/stock-master'
+import { RefreshProgressBanner } from '../components/RefreshProgressBanner'
 
 // ────────────────────────────────────────────────────────────────────────
 // KST 시각 포맷터 (사이클 68 영속 — getHours() 금지)
@@ -560,27 +561,26 @@ export default function StockMaster() {
 
   const queryClient = useQueryClient()
 
-  // 사이클 90 Q26=A — "지금 새로고침" useMutation.
-  // Q25=A: 409 Conflict 분기 처리. 네트워크 오류/서버 오류 시 즉시 onError.
-  // 사이클 75 G-RT 영속: useQuery retry:1 패턴 — useMutation 은 즉시 실패 (재시도 없음).
-  // 이유: refresh-universe 는 장시간 작업(~25초) — 재시도 시 중복 KIS 호출 위험.
+  // 사이클 127 — fire-and-forget 패턴 (사이클 90/126 동기 대기 → 비동기 trigger).
+  // 백엔드 즉시 202 Accepted 반환 + 백그라운드 task. 진행 상황은 RefreshProgressBanner 5초 폴링.
+  // onSuccess = trigger 성공 (작업 시작) / onError = 409 (이미 진행 중) 또는 네트워크 오류.
+  // retry: false 의무 (중복 trigger 방지). axios timeout 결함 영구 차단.
   const refreshMutation = useMutation({
     mutationFn: refreshUniverseNow,
     retry: false,
-    onSuccess: (data) => {
+    onSuccess: () => {
       setRefreshToast({
         type: 'success',
-        message: `universe ${data.universe} ticker 즉시 적재 완료 (${data.elapsed_ms}ms)`,
+        message: '종목마스터 새로고침 시작 — 진행 상황은 상단 배너 참고',
       })
-      queryClient.invalidateQueries({ queryKey: ['stock-master-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['stock-master-list'] })
+      queryClient.invalidateQueries({ queryKey: ['refresh-progress'] })
       setTimeout(() => setRefreshToast(null), 4000)
     },
     onError: (error) => {
       if (axios.isAxiosError(error) && error.response?.status === 409) {
         setRefreshToast({
           type: 'error',
-          message: 'universe refresh 진행 중 — 잠시 후 재시도',
+          message: '종목마스터 새로고침 이미 진행 중 — 상단 배너 참고',
         })
       } else {
         // 사이클 106 영역 2 — Q3=A 정밀화 (KIS API 일시 결함 영역 명시)
@@ -593,26 +593,23 @@ export default function StockMaster() {
     },
   })
 
-  // 사이클 126 — "기본정보 새로고침" useMutation (사이클 90 패턴 답습).
-  // KIS CTPF1002R 매스 보강 (NXT/정지/관리종목 영역 시정).
-  // ~4.5분 작업 — retry: false 의무 (중복 KIS 호출 방지).
+  // 사이클 127 — basics fire-and-forget (사이클 126 동기 13분 timeout 결함 영구 시정).
   const basicsMutation = useMutation({
     mutationFn: refreshBasicsNow,
     retry: false,
-    onSuccess: (data) => {
+    onSuccess: () => {
       setBasicsToast({
         type: 'success',
-        message: `기본정보 ${data.total} ticker 보강 완료 (updated=${data.updated}, ${data.elapsed_ms}ms)`,
+        message: '기본정보 새로고침 시작 (~13분 소요) — 진행 상황은 상단 배너 참고',
       })
-      queryClient.invalidateQueries({ queryKey: ['stock-master-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['stock-master-list'] })
+      queryClient.invalidateQueries({ queryKey: ['refresh-progress'] })
       setTimeout(() => setBasicsToast(null), 6000)
     },
     onError: (error) => {
       if (axios.isAxiosError(error) && error.response?.status === 409) {
         setBasicsToast({
           type: 'error',
-          message: '기본정보 보강 진행 중 — 잠시 후 재시도',
+          message: '기본정보 새로고침 이미 진행 중 — 상단 배너 참고',
         })
       } else {
         setBasicsToast({
@@ -624,24 +621,23 @@ export default function StockMaster() {
     },
   })
 
-  // 사이클 126 — "일봉 새로고침" useMutation (사이클 90 패턴 답습).
-  // 사이클 122 자동 task 와 동일 함수 호출 — 즉시 적재 가시화.
+  // 사이클 127 — daily fire-and-forget.
   const dailyMutation = useMutation({
     mutationFn: refreshDailyNow,
     retry: false,
-    onSuccess: (data) => {
+    onSuccess: () => {
       setDailyToast({
         type: 'success',
-        message: `일봉 ${data.total} ticker 적재 완료 (fetched=${data.fetched}, rows=${data.upserted_rows}, ${data.elapsed_ms}ms)`,
+        message: '일봉 새로고침 시작 (~13분 소요) — 진행 상황은 상단 배너 참고',
       })
-      queryClient.invalidateQueries({ queryKey: ['stock-master-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['refresh-progress'] })
       setTimeout(() => setDailyToast(null), 6000)
     },
     onError: (error) => {
       if (axios.isAxiosError(error) && error.response?.status === 409) {
         setDailyToast({
           type: 'error',
-          message: '일봉 적재 진행 중 — 잠시 후 재시도',
+          message: '일봉 새로고침 이미 진행 중 — 상단 배너 참고',
         })
       } else {
         setDailyToast({
@@ -700,6 +696,9 @@ export default function StockMaster() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold text-gray-900">종목마스터</h1>
+
+      {/* 사이클 127 — 3 작업 진행 가시화 배너 (running 시 자동 표시, 5초 폴링) */}
+      <RefreshProgressBanner />
 
       {/* 사이클 106 영역 1+4 — 안내 배너 갱신 (Q2=A 신규 메시지 추가) */}
       <div

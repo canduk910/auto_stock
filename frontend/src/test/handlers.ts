@@ -213,32 +213,58 @@ export const handlers = [
       ])
     )
   ),
-  // 사이클 90 — POST refresh-universe MSW mock (Q24=B 수동 trigger).
-  // Q25=A asyncio.Lock + 409 Conflict 가드는 백엔드 영역.
-  // Q27=A [stock_master_bulk_refresh] emit 영속 (백엔드 영역).
+  // 사이클 127 — POST 3 라우트 fire-and-forget (즉시 202 Accepted + 백그라운드 task).
+  // 응답 schema: RefreshStartedResponse { status: 'started', task_key }
   http.post(`${base}/stock-master/refresh-universe`, () =>
-    HttpResponse.json(
-      wrap({ universe: 500, elapsed_ms: 25000 }),
-    )
+    HttpResponse.json(wrap({ status: 'started', task_key: 'universe' }), { status: 202 })
   ),
-  // 사이클 126 — POST basics/refresh MSW mock (KIS CTPF1002R 매스 보강)
   http.post(`${base}/stock-master/basics/refresh`, () =>
-    HttpResponse.json(
-      wrap({ total: 2697, updated: 2697, skipped: 0, failed: 0, elapsed_ms: 270000 }),
-    )
+    HttpResponse.json(wrap({ status: 'started', task_key: 'basics' }), { status: 202 })
   ),
-  // 사이클 126 — POST daily/refresh MSW mock (사이클 122 일봉 task 즉시 trigger)
   http.post(`${base}/stock-master/daily/refresh`, () =>
+    HttpResponse.json(wrap({ status: 'started', task_key: 'daily' }), { status: 202 })
+  ),
+  // 사이클 127 — GET refresh-progress (5초 폴링 + RefreshProgressBanner).
+  // 디폴트 = 3 작업 모두 idle (배너 미표시).
+  http.get(`${base}/stock-master/refresh-progress`, () =>
     HttpResponse.json(
       wrap({
-        total: 2697,
-        fetched: 2697,
-        upserted_rows: 270000,
-        skipped_fresh: 0,
-        failed: 0,
-        db_write_failures: 0,
-        elapsed_ms: 270000,
-        mode: 'incremental',
+        universe: {
+          status: 'idle',
+          total: 0,
+          processed: 0,
+          updated: 0,
+          skipped: 0,
+          failed: 0,
+          started_at: null,
+          finished_at: null,
+          elapsed_ms: 0,
+          error_message: null,
+        },
+        basics: {
+          status: 'idle',
+          total: 0,
+          processed: 0,
+          updated: 0,
+          skipped: 0,
+          failed: 0,
+          started_at: null,
+          finished_at: null,
+          elapsed_ms: 0,
+          error_message: null,
+        },
+        daily: {
+          status: 'idle',
+          total: 0,
+          processed: 0,
+          updated: 0,
+          skipped: 0,
+          failed: 0,
+          started_at: null,
+          finished_at: null,
+          elapsed_ms: 0,
+          error_message: null,
+        },
       }),
     )
   ),

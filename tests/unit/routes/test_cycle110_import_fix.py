@@ -72,6 +72,10 @@ def test_g_import1_post_refresh_universe_calls_full_universe_load_once(
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 127 fire-and-forget BackgroundTasks 전환 — 동기 응답 schema 의미 폐기 (사이클 66 K-2 패턴)",
+)
 def test_g_import1_response_universe_equals_total(mock_full_universe_load_once):
     """G-IMPORT1-bis: universe 응답 키 영역 영구 영속이 = `summary["total"]` (사이클 89 호환 영속).
 

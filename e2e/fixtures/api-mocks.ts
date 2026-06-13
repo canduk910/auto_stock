@@ -383,32 +383,24 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     }),
   );
 
-  // 사이클 90 (2026-06-09) — POST refresh-universe.
+  // 사이클 127 (2026-06-13) — POST 3 라우트 fire-and-forget (202 Accepted).
   // LIFO 정합: wildcard (**/api/stock-master/**) 보다 *후* 등록 → 우선 매칭.
-  // 사이클 80 hotfix #3 Playwright LIFO 정합 패턴 영속.
-  // Q25=A asyncio.Lock + 409 Conflict 가드는 백엔드 영역 (여기서는 200 mock).
+  // 사이클 80 hotfix #3/#4 Playwright LIFO 정합 패턴 영속.
   await page.route("**/api/stock-master/refresh-universe", (route) => {
     if (route.request().method() === "POST") {
       return route.fulfill({
-        json: envelope({ universe: 500, elapsed_ms: 25000 }),
+        status: 202,
+        json: envelope({ status: "started", task_key: "universe" }),
       });
     }
     return route.continue();
   });
 
-  // 사이클 126 (2026-06-13) — POST basics/refresh + daily/refresh.
-  // LIFO 정합: wildcard (**/api/stock-master/**) 보다 *후* 등록 → 우선 매칭.
-  // 사이클 80 hotfix #3/#4 Playwright LIFO 정합 패턴 영속.
   await page.route("**/api/stock-master/basics/refresh", (route) => {
     if (route.request().method() === "POST") {
       return route.fulfill({
-        json: envelope({
-          total: 2697,
-          updated: 2697,
-          skipped: 0,
-          failed: 0,
-          elapsed_ms: 270000,
-        }),
+        status: 202,
+        json: envelope({ status: "started", task_key: "basics" }),
       });
     }
     return route.continue();
@@ -417,15 +409,34 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   await page.route("**/api/stock-master/daily/refresh", (route) => {
     if (route.request().method() === "POST") {
       return route.fulfill({
+        status: 202,
+        json: envelope({ status: "started", task_key: "daily" }),
+      });
+    }
+    return route.continue();
+  });
+
+  // 사이클 127 — GET refresh-progress (5초 폴링, RefreshProgressBanner).
+  // LIFO 정합: wildcard (**/api/stock-master/**) 보다 *후* 등록 → 우선 매칭.
+  const idleProgress = {
+    status: "idle" as const,
+    total: 0,
+    processed: 0,
+    updated: 0,
+    skipped: 0,
+    failed: 0,
+    started_at: null,
+    finished_at: null,
+    elapsed_ms: 0,
+    error_message: null,
+  };
+  await page.route("**/api/stock-master/refresh-progress", (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({
         json: envelope({
-          total: 2697,
-          fetched: 2697,
-          upserted_rows: 270000,
-          skipped_fresh: 0,
-          failed: 0,
-          db_write_failures: 0,
-          elapsed_ms: 270000,
-          mode: "incremental",
+          universe: idleProgress,
+          basics: idleProgress,
+          daily: idleProgress,
         }),
       });
     }

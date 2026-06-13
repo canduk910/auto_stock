@@ -23,6 +23,8 @@ import type {
   StockMasterDailyRow,
   BasicsRefreshResult,
   DailyRefreshResult,
+  AllRefreshProgress,
+  RefreshStartedResponse,
 } from '../types/stock-master'
 
 export async function fetchStats(): Promise<StockMasterStats> {
@@ -85,41 +87,62 @@ export async function fetchDaily(
 }
 
 /**
- * 사이클 90 — POST /api/stock-master/refresh-universe (Q24=B 수동 trigger).
+ * 사이클 90 + 사이클 127 — POST /api/stock-master/refresh-universe (fire-and-forget).
  *
- * Q25=A: asyncio.Lock + 409 Conflict 동시 호출 가드 (백엔드 영역).
- * Q26=A: stats 카드 상단 우측 "지금 새로고침" 버튼.
- * Q27=A: 사이클 89 [stock_master_bulk_refresh] emit 영속 활용.
- * 사이클 75 G-RT 영속: useMutation retry:1 명시 의무 (StockMaster.tsx 영역).
- * 사이클 84 L-2 영속: POST 1개 예외 허용 (백엔드 AST 가드 갱신 영역).
+ * 사이클 127 — fire-and-forget 전환:
+ * - 즉시 202 (status="started", task_key="universe") 응답 — axios timeout silent 결함 영구 차단
+ * - 진행 상황은 fetchRefreshProgress() 5초 폴링으로 조회
+ * - 409 Conflict 시 "이미 진행 중" 토스트
+ *
+ * 사이클 90 영속: 사이클 89 [stock_master_bulk_refresh] emit 영속 활용.
+ * 사이클 75 G-RT 영속: useMutation retry: false 명시 의무.
+ * 사이클 84 L-2 영속: POST 화이트리스트.
  */
-export async function refreshUniverseNow(): Promise<RefreshUniverseResult> {
-  const { data } = await apiClient.post<ApiResponse<RefreshUniverseResult>>(
+export async function refreshUniverseNow(): Promise<RefreshStartedResponse | RefreshUniverseResult> {
+  const { data } = await apiClient.post<ApiResponse<RefreshStartedResponse | RefreshUniverseResult>>(
     '/stock-master/refresh-universe',
   )
   return data.data
 }
 
 /**
- * 사이클 126 — POST /api/stock-master/basics/refresh (KIS CTPF1002R 매스 보강).
+ * 사이클 126 + 사이클 127 — POST /api/stock-master/basics/refresh (fire-and-forget).
  * KRX 1차 폴백 NXT/정지/관리종목 하드코딩 False 결함 시정.
- * useMutation retry: false 의무 (장시간 작업, KIS 호출 중복 방지).
+ *
+ * 사이클 127 — fire-and-forget 전환: 13분 39초 → 즉시 202 응답.
+ * 진행 상황은 fetchRefreshProgress() 5초 폴링.
  */
-export async function refreshBasicsNow(): Promise<BasicsRefreshResult> {
-  const { data } = await apiClient.post<ApiResponse<BasicsRefreshResult>>(
+export async function refreshBasicsNow(): Promise<RefreshStartedResponse | BasicsRefreshResult> {
+  const { data } = await apiClient.post<ApiResponse<RefreshStartedResponse | BasicsRefreshResult>>(
     '/stock-master/basics/refresh',
   )
   return data.data
 }
 
 /**
- * 사이클 126 — POST /api/stock-master/daily/refresh (일봉 적재 수동 trigger).
+ * 사이클 126 + 사이클 127 — POST /api/stock-master/daily/refresh (fire-and-forget).
  * 사이클 122 자동 task 와 동일 함수 호출. force=true 디폴트.
- * useMutation retry: false 의무 (장시간 작업, KIS 호출 중복 방지).
+ *
+ * 사이클 127 — fire-and-forget 전환: 즉시 202 응답.
  */
-export async function refreshDailyNow(): Promise<DailyRefreshResult> {
-  const { data } = await apiClient.post<ApiResponse<DailyRefreshResult>>(
+export async function refreshDailyNow(): Promise<RefreshStartedResponse | DailyRefreshResult> {
+  const { data } = await apiClient.post<ApiResponse<RefreshStartedResponse | DailyRefreshResult>>(
     '/stock-master/daily/refresh',
+  )
+  return data.data
+}
+
+/**
+ * 사이클 127 — GET /api/stock-master/refresh-progress (5초 폴링).
+ *
+ * 3 작업 (universe / basics / daily) 진행 state 통합 조회.
+ * RefreshProgressBanner 컴포넌트가 useQuery refetchInterval: 5000 폴링.
+ *
+ * 사이클 65 H3 retry:1 영속 (useQuery 영역).
+ */
+export async function fetchRefreshProgress(): Promise<AllRefreshProgress> {
+  const { data } = await apiClient.get<ApiResponse<AllRefreshProgress>>(
+    '/stock-master/refresh-progress',
   )
   return data.data
 }

@@ -223,6 +223,49 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
     })
   })
 
+  // 사이클 127 (2026-06-13) — fire-and-forget + 5초 폴링 진행 가시화 영구 가드.
+  // POST 3 라우트 + GET refresh-progress 모두 등록 의무.
+  // 백엔드 13분 작업 axios timeout 영구 차단 패턴.
+  describe('G-AST8 (사이클 127): refresh fire-and-forget 4 endpoint 등록', () => {
+    const CYCLE127_ENDPOINTS = [
+      '/api/stock-master/refresh-universe',  // POST 202
+      '/api/stock-master/basics/refresh',    // POST 202
+      '/api/stock-master/daily/refresh',     // POST 202
+      '/api/stock-master/refresh-progress',  // GET 5초 폴링
+    ]
+
+    it.each(CYCLE127_ENDPOINTS)(
+      'api-mocks.ts 에 %s 라우트 등록 의무',
+      (endpoint) => {
+        const source = loadApiMocksSource()
+        expect(
+          isRouteRegistered(source, endpoint),
+          `e2e api-mocks.ts 에 ${endpoint} 라우트 누락 — 사이클 127 fire-and-forget 위반. ` +
+            '사이클 80 hotfix #3 LIFO 정합 의무 (wildcard `**/api/stock-master/**` *후* 등록).',
+        ).toBe(true)
+      },
+    )
+
+    it('fetchRefreshProgress + 3 refresh 함수 모두 stock-master.ts export 의무', () => {
+      const apiSource = readFileSync(
+        path.join(FRONTEND_API_DIR, 'stock-master.ts'),
+        'utf-8',
+      )
+      const REQUIRED = [
+        'fetchRefreshProgress',
+        'refreshUniverseNow',
+        'refreshBasicsNow',
+        'refreshDailyNow',
+      ]
+      REQUIRED.forEach((fn) => {
+        expect(
+          apiSource.includes(fn),
+          `방어 가드: stock-master.ts 에 ${fn} export 누락 — 사이클 127 fire-and-forget 위반.`,
+        ).toBe(true)
+      })
+    })
+  })
+
   describe('G-AST4: 3 컴포넌트 useQuery `retry:` 옵션 명시 (Q4 확장)', () => {
     const TARGET_COMPONENTS = [
       'IntegrationToggleCard.tsx',

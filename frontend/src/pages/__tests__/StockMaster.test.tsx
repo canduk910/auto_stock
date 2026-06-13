@@ -289,13 +289,16 @@ describe('사이클 90 H-6 (HIGH) — "지금 새로고침" 버튼 + useMutation
     expect(button.textContent).toMatch(/지금 새로고침|새로고침/);
   });
 
-  it("H-6: 버튼 클릭 시 POST refresh-universe 발화 + 성공 토스트 노출", async () => {
+  it("H-6: 버튼 클릭 시 POST refresh-universe 발화 + 시작 토스트 노출 (사이클 127 fire-and-forget)", async () => {
     let postCalled = false;
     setupHappyPathHandlers();
     server.use(
       http.post("/api/stock-master/refresh-universe", () => {
         postCalled = true;
-        return HttpResponse.json(wrap({ universe: 487, elapsed_ms: 24823 }));
+        // 사이클 127 — 202 Accepted + RefreshStartedResponse
+        return HttpResponse.json(wrap({ status: "started", task_key: "universe" }), {
+          status: 202,
+        });
       }),
     );
     render(withProviders(<StockMaster />));
@@ -310,12 +313,11 @@ describe('사이클 90 H-6 (HIGH) — "지금 새로고침" 버튼 + useMutation
       expect(postCalled).toBe(true);
     });
 
-    // 성공 토스트 영역 — testid `stock-master-refresh-universe-toast`
+    // 사이클 127 — 시작 토스트 (fire-and-forget). 결과 카운터는 RefreshProgressBanner 폴링.
     await waitFor(() => {
       const toast = screen.getByTestId("stock-master-refresh-universe-toast");
       expect(toast).toBeDefined();
-      // 성공 토스트는 universe 결과 노출
-      expect(toast.textContent).toMatch(/487/);
+      expect(toast.textContent).toMatch(/시작|상단 배너/);
     });
   });
 

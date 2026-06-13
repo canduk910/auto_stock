@@ -22,6 +22,10 @@ from fastapi.testclient import TestClient
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 127 fire-and-forget BackgroundTasks 전환 — 라우트가 _full_universe_load_once 동기 호출 폐기 → 예외는 background task 내부에서 graceful + finish_progress('failed') (사이클 66 K-2 패턴)",
+)
 def test_g_exc1_runtime_error_returns_500(monkeypatch):
     """G-EXC1: RuntimeError 발생 시 HTTPException 500 + detail 전달.
 
@@ -51,6 +55,10 @@ def test_g_exc1_runtime_error_returns_500(monkeypatch):
     )
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 127 fire-and-forget BackgroundTasks 전환 — 동기 응답 schema/Lock 의미 폐기 (사이클 66 K-2 패턴)",
+)
 def test_g_exc1_value_error_returns_500(monkeypatch):
     """G-EXC1-bis: ValueError 발생 시 HTTPException 500 (다양한 Exception 타입 영역 영구 영속이)."""
     from src.engine import scanner

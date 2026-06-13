@@ -1,198 +1,200 @@
-"""stock_master READ-ONLY 라우트 (사이클 84) + 수동 trigger (사이클 90).
+"""stock_master READ-ONLY 라우트 (사이클 84) + 수동 trigger (사이클 90/126) + 진행 폴링 (사이클 127).
 
-6 GET 엔드포인트 (Q9=B 결정, L-2 AST 영구 가드):
+7 GET 엔드포인트 (Q9=B 결정, L-2 AST 영구 가드):
 - GET /api/stock-master/stats
 - GET /api/stock-master/list
 - GET /api/stock-master/scan-pool/summary
+- GET /api/stock-master/refresh-progress  ← 사이클 127 신규 (5초 폴링)
 - GET /api/stock-master/{ticker}/history
 - GET /api/stock-master/{ticker}/daily  ← 사이클 124 신규
 - GET /api/stock-master/{ticker}
 
-1 POST 엔드포인트 (사이클 90 Q24=B 예외 허용, L-2 화이트리스트):
-- POST /api/stock-master/refresh-universe
+3 POST 엔드포인트 (사이클 90/126 화이트리스트 + 사이클 127 fire-and-forget):
+- POST /api/stock-master/refresh-universe  ← 사이클 90 (사이클 127 fire-and-forget 전환)
+- POST /api/stock-master/basics/refresh    ← 사이클 126 (사이클 127 fire-and-forget 전환)
+- POST /api/stock-master/daily/refresh     ← 사이클 126 (사이클 127 fire-and-forget 전환)
 
-라우트 순서 의무: 정적 경로 (stats / list / scan-pool / refresh-universe) 를 동적 ({ticker}) 보다 먼저 등록.
+사이클 127 (2026-06-13) — fire-and-forget + 5초 폴링 패턴:
+- 사용자 보고: 13분 39초 백엔드 정상 완료 후 axios 클라이언트 디폴트 timeout silent 결함.
+- POST 3 라우트 즉시 202 status + status="started" 응답 (작업 시작) + 백그라운드 task 발화.
+- GET /refresh-progress 5초 폴링으로 상단 배너 + 카운터 가시화.
+- asyncio.Lock 폐기 → refresh_progress.is_running() state 기반 가드 (single source of truth).
+- 백그라운드 task 예외 시 finish_progress("failed") 영속 호출 (UI error_message 표시).
+
+라우트 순서 의무: 정적 경로 (stats / list / scan-pool / refresh-* / refresh-progress) 를
+동적 ({ticker}) 보다 먼저 등록.
 /{ticker}/history 와 /{ticker}/daily 는 /{ticker} 보다 먼저 등록 (FastAPI LIFO 정합).
 """
 
 from __future__ import annotations
 
 import asyncio
-import time
+import logging
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 
 from src.db import stock_master
 from src.db import stock_master_daily
+from src.engine import refresh_progress as _rp
 from src.models.response import ApiResponse
+
+logger = logging.getLogger("src.routes.stock_master")
 
 router = APIRouter()
 
-# Q25=A in-flight 가드 — 동시 호출 시 두 번째 호출 즉시 409 Conflict.
-# KIS Rate Limit 폭주 차단 + 25초 작업 중복 차단 (사이클 90 사용자 결정).
-_refresh_universe_lock = asyncio.Lock()
 
-# 사이클 126 — 신규 2 POST 라우트 별도 lock (사이클 90 패턴 100% 답습).
-# KIS Rate Limit 폭주 차단 + 4.5분 작업 중복 차단.
-_refresh_basics_lock = asyncio.Lock()
-_refresh_daily_lock = asyncio.Lock()
+async def _run_universe_background(force: bool) -> None:
+    """사이클 127 — universe 백그라운드 task.
+
+    once 함수 내부에서 start_progress/update_progress/finish_progress 호출 영속.
+    여기서는 예외만 catch → finish_progress("failed") 안전망.
+    """
+    from src.engine.scanner import _full_universe_load_once
+
+    try:
+        await _full_universe_load_once(force=force)
+    except Exception as exc:
+        logger.exception("[refresh_universe_background] 백그라운드 실패 graceful: %s", exc)
+        # once 함수 내부에서 이미 finish_progress("failed") 처리됨 (안전망).
+        if _rp.is_running("universe"):
+            _rp.finish_progress("universe", "failed", error_message=str(exc))
+
+
+async def _run_basics_background(force: bool) -> None:
+    """사이클 127 — basics 백그라운드 task."""
+    from src.engine.scanner import _stock_master_basics_refresh_once
+
+    try:
+        await _stock_master_basics_refresh_once(force=force)
+    except Exception as exc:
+        logger.exception("[refresh_basics_background] 백그라운드 실패 graceful: %s", exc)
+        if _rp.is_running("basics"):
+            _rp.finish_progress("basics", "failed", error_message=str(exc))
+
+
+async def _run_daily_background(force: bool) -> None:
+    """사이클 127 — daily 백그라운드 task."""
+    from src.engine.scanner import _stock_master_daily_load_once
+
+    try:
+        await _stock_master_daily_load_once(force=force)
+    except Exception as exc:
+        logger.exception("[refresh_daily_background] 백그라운드 실패 graceful: %s", exc)
+        if _rp.is_running("daily"):
+            _rp.finish_progress("daily", "failed", error_message=str(exc))
 
 
 @router.post("/refresh-universe", response_model=ApiResponse)
-async def refresh_universe_now(force: bool = True):
-    """사이클 90 — universe 500+ 즉시 trigger (수동 발화).
+async def refresh_universe_now(background_tasks: BackgroundTasks, force: bool = True):
+    """사이클 90 (2026-06-09) + 사이클 127 (2026-06-13) — fire-and-forget.
 
-    장 종료 후 또는 scheduler idle 상태에서 사용자 즉시 실행.
-    Q25=A 단일 in-flight 가드 = 동시 호출 시 두 번째 호출 즉시 409 Conflict.
-    Q27=A 사이클 89 [stock_master_bulk_refresh] 영속 활용 (자동/수동 구분 0).
+    fire-and-forget 패턴 (사이클 127):
+    - 백그라운드 task 발화 + 즉시 응답 (axios timeout silent 결함 영구 차단).
+    - is_running("universe") 가드 = state 기반 single source of truth.
+    - 진행 상황은 GET /refresh-progress 폴링으로 조회.
+    - FastAPI BackgroundTasks 사용 = response 전송 *후* schedule (TestClient 호환 + asyncio.create_task race 영구 차단).
 
     사이클 84 L-2 AST 영구 가드 영역 = POST 1개 예외 허용 (refresh-universe 단독).
     라우트 본문에서 logger.* 직접 emit 0건 — fetch 함수 내부 emit 만 활용 (L-3 영속).
     """
-    if _refresh_universe_lock.locked():
+    if _rp.is_running("universe"):
         raise HTTPException(
             status_code=409,
             detail="universe refresh 진행 중 — 잠시 후 재시도",
         )
 
-    async with _refresh_universe_lock:
-        # 사이클 110 (2026-06-11) — silent 결함 영역 영구 영속이 영구 시정.
-        # 사이클 101 (Q68=A+Q69=B) 영역에서 fetch_top_500_universe + _universe_eager_refresh_loop
-        # 영구 폐기 완료. 본 라우트 import 영역 동행 시정 누락 silent 결함 (사이클 101~108 발견 0건).
-        # 단일 대체 영역 영구 영속이 = _full_universe_load_once() (사이클 101 영역 영구 영속이
-        # market_cap FHPST01740000 페이징 + CTPF1002R + stock_master upsert 영역 내장).
-        # 사이클 106 lifecycle race 차단 영속 + 사이클 107 raw 보강 영속 + 사이클 109 화이트리스트 영속.
-        from src.engine.scanner import _full_universe_load_once
+    # 사이클 127 — FastAPI BackgroundTasks. response 전송 후 schedule.
+    # 사이클 120 force 인자 영속 (UI "지금 새로고침" 디폴트 True = 즉시 검증).
+    background_tasks.add_task(_run_universe_background, force=force)
 
-        start_time = time.monotonic()
-        try:
-            # 사이클 120 — force 인자 영속 (UI "지금 새로고침" 디폴트 True = 즉시 검증).
-            # 사이클 116/118/119 매핑 영역 영구 영속이 매번 적용 의무 (TTL 우회).
-            # 자동 발화 (사이클 106 영역 매일 20:00:05) = force=False 영속 (TTL 영구 영속이 적용).
-            summary = await _full_universe_load_once(force=force)
-        except Exception as exc:
-            raise HTTPException(status_code=500, detail=str(exc)) from exc
-
-        elapsed_ms = int((time.monotonic() - start_time) * 1000)
-
-        # 사이클 110 응답 영역 영구 영속이 — _full_universe_load_once summary 9 키 중
-        # 운영자 관심 7 키 노출. universe ≡ summary["total"] (사이클 89 응답 영속 호환).
-        # 사이클 117 (2026-06-12) — source 키 추가 (사이클 110 영역 누락 보강).
-        # 사이클 115 _full_universe_load_once summary["source"] = "krx" 또는 "kis_fallback".
-        source = summary.get("source", "unknown")
-        return ApiResponse(
-            success=True,
-            data={
-                "universe": summary.get("total", 0),
-                "elapsed_ms": elapsed_ms,
-                "fetched": summary.get("fetched", 0),
-                "skipped_ttl": summary.get("skipped_ttl", 0),
-                "failed": summary.get("failed", 0),
-                "kospi": summary.get("kospi", 0),
-                "kosdaq": summary.get("kosdaq", 0),
-                "source": source,
-            },
-            message=(
-                f"universe {summary.get('total', 0)} ticker 즉시 적재 완료 "
-                f"(source={source}, fetched={summary.get('fetched', 0)}, "
-                f"skipped_ttl={summary.get('skipped_ttl', 0)}, "
-                f"failed={summary.get('failed', 0)})"
-            ),
-        )
+    return ApiResponse(
+        success=True,
+        data={
+            "status": "started",
+            "task_key": "universe",
+        },
+        message="universe refresh 시작 — 진행 상황은 /api/stock-master/refresh-progress 폴링",
+    )
 
 
 @router.post("/basics/refresh", response_model=ApiResponse)
-async def refresh_basics_now(force: bool = True):
-    """사이클 126 영역 3-C — KIS CTPF1002R 매스 보강 즉시 trigger (수동 발화).
+async def refresh_basics_now(background_tasks: BackgroundTasks, force: bool = True):
+    """사이클 126 영역 3-C + 사이클 127 — fire-and-forget.
 
     KRX 1차 폴백 시 NXT/정지/관리종목 하드코딩 False 결함을 즉시 시정.
-    asyncio.Lock 단일 in-flight 가드 (4.5분 작업 중복 차단 + KIS Rate Limit 안전).
+    fire-and-forget = axios timeout silent 결함 영구 차단 (사이클 126 사용자 보고 사유).
 
     사이클 84 L-2 영속: POST 1개 추가 예외 허용 (화이트리스트 갱신).
-    사이클 90 패턴 100% 답습 (refresh_universe_now 영역).
+    사이클 90 패턴 100% 답습 + 사이클 127 fire-and-forget 전환 (BackgroundTasks).
     """
-    if _refresh_basics_lock.locked():
+    if _rp.is_running("basics"):
         raise HTTPException(
             status_code=409,
             detail="basics refresh 진행 중 — 잠시 후 재시도",
         )
 
-    async with _refresh_basics_lock:
-        from src.engine.scanner import _stock_master_basics_refresh_once
+    background_tasks.add_task(_run_basics_background, force=force)
 
-        start_time = time.monotonic()
-        try:
-            summary = await _stock_master_basics_refresh_once(force=force)
-        except Exception as exc:
-            raise HTTPException(status_code=500, detail=str(exc)) from exc
-
-        elapsed_ms = int((time.monotonic() - start_time) * 1000)
-
-        return ApiResponse(
-            success=True,
-            data={
-                "total": summary.get("total", 0),
-                "updated": summary.get("updated", 0),
-                "skipped": summary.get("skipped", 0),
-                "failed": summary.get("failed", 0),
-                "elapsed_ms": elapsed_ms,
-            },
-            message=(
-                f"basics {summary.get('total', 0)} ticker 보강 완료 "
-                f"(updated={summary.get('updated', 0)}, "
-                f"skipped={summary.get('skipped', 0)}, "
-                f"failed={summary.get('failed', 0)})"
-            ),
-        )
+    return ApiResponse(
+        success=True,
+        data={
+            "status": "started",
+            "task_key": "basics",
+        },
+        message="basics refresh 시작 — 진행 상황은 /api/stock-master/refresh-progress 폴링",
+    )
 
 
 @router.post("/daily/refresh", response_model=ApiResponse)
-async def refresh_daily_now(force: bool = True):
-    """사이클 126 영역 4-B — KIS 일봉 적재 즉시 trigger (수동 발화).
+async def refresh_daily_now(background_tasks: BackgroundTasks, force: bool = True):
+    """사이클 126 영역 4-B + 사이클 127 — fire-and-forget.
 
     사이클 122 `_stock_master_daily_load_task_loop` 자동 task 와 동일 함수 호출.
-    asyncio.Lock 단일 in-flight 가드 (4.5분 작업 중복 차단 + KIS Rate Limit 안전).
+    fire-and-forget = axios timeout silent 결함 영구 차단.
 
     사이클 84 L-2 영속: POST 1개 추가 예외 허용 (화이트리스트 갱신).
-    사이클 90 패턴 100% 답습 (refresh_universe_now 영역).
+    사이클 90 패턴 100% 답습 + 사이클 127 fire-and-forget 전환 (BackgroundTasks).
     """
-    if _refresh_daily_lock.locked():
+    if _rp.is_running("daily"):
         raise HTTPException(
             status_code=409,
             detail="daily refresh 진행 중 — 잠시 후 재시도",
         )
 
-    async with _refresh_daily_lock:
-        from src.engine.scanner import _stock_master_daily_load_once
+    background_tasks.add_task(_run_daily_background, force=force)
 
-        start_time = time.monotonic()
-        try:
-            summary = await _stock_master_daily_load_once(force=force)
-        except Exception as exc:
-            raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return ApiResponse(
+        success=True,
+        data={
+            "status": "started",
+            "task_key": "daily",
+        },
+        message="daily refresh 시작 — 진행 상황은 /api/stock-master/refresh-progress 폴링",
+    )
 
-        elapsed_ms = int((time.monotonic() - start_time) * 1000)
 
-        return ApiResponse(
-            success=True,
-            data={
-                "total": summary.get("total", 0),
-                "fetched": summary.get("fetched", 0),
-                "upserted_rows": summary.get("upserted_rows", 0),
-                "skipped_fresh": summary.get("skipped_fresh", 0),
-                "failed": summary.get("failed", 0),
-                "db_write_failures": summary.get("db_write_failures", 0),
-                "elapsed_ms": elapsed_ms,
-                "mode": summary.get("mode", "mixed"),
-            },
-            message=(
-                f"daily {summary.get('total', 0)} ticker 적재 완료 "
-                f"(fetched={summary.get('fetched', 0)}, "
-                f"upserted_rows={summary.get('upserted_rows', 0)}, "
-                f"skipped_fresh={summary.get('skipped_fresh', 0)}, "
-                f"failed={summary.get('failed', 0)})"
-            ),
-        )
+@router.get("/refresh-progress")
+async def get_refresh_progress():
+    """사이클 127 (2026-06-13) — 3 작업 진행 state 통합 조회.
+
+    5초 주기 폴링 영역 (Q1=A 사용자 결정).
+    프론트 RefreshProgressBanner 컴포넌트가 useQuery refetchInterval: 5000 폴링.
+
+    응답 schema:
+    {
+      "universe": {status, total, processed, updated, skipped, failed,
+                   started_at, finished_at, elapsed_ms, error_message},
+      "basics": {...같은 schema...},
+      "daily": {...같은 schema...}
+    }
+
+    사이클 84 L-2 READ-ONLY GET 정합 (POST 가 아니므로 화이트리스트 무관).
+    """
+    return ApiResponse(
+        success=True,
+        data=_rp.get_all_progress(),
+        message="",
+    )
 
 
 @router.get("/stats")
@@ -246,9 +248,8 @@ async def get_stock_master_daily(
     404: ticker 미존재 또는 일봉 데이터 없음.
     graceful: stock_master_daily 조회 예외 → 500 대신 빈 list 반환 (사이클 88 G-REJECT 패턴).
     """
-    # 사이클 90 — POST only 경로 보호 (GET 요청이 동적 {ticker} 로 라우팅되는 경우 차단)
-    # 사이클 126 — POST only 경로 보호: refresh-universe(사이클 90) + basics/daily(사이클 126)
-    _POST_ONLY_PATHS = {"refresh-universe", "basics", "daily"}
+    # 사이클 90/126/127 — POST only 경로 보호 (GET 요청이 동적 {ticker} 로 라우팅되는 경우 차단)
+    _POST_ONLY_PATHS = {"refresh-universe", "basics", "daily", "refresh-progress"}
     if ticker in _POST_ONLY_PATHS:
         raise HTTPException(status_code=405, detail=f"Method Not Allowed — {ticker} 은 POST only")
 
@@ -271,12 +272,10 @@ async def get_stock_master_daily(
 async def get_stock_master_detail(ticker: str):
     """단건 조회. 미존재 시 404.
 
-    사이클 90 라우팅 가드: `refresh-universe` 는 POST only 경로 — GET 요청 시 405.
-    동적 {ticker} 가 POST only 경로를 잡아버리는 FastAPI 라우팅 특성 영구 차단.
+    사이클 90 라우팅 가드: POST only 경로는 GET 요청 시 405 (사이클 127 refresh-progress 추가).
+    동적 {ticker} 가 POST only 경로 또는 정적 경로를 잡아버리는 FastAPI 라우팅 특성 영구 차단.
     """
-    # 사이클 90 — POST only 경로 보호: GET 요청이 동적 {ticker} 로 라우팅되는 경우 차단
-    # 사이클 126 — POST only 경로 보호: refresh-universe(사이클 90) + basics/daily(사이클 126)
-    _POST_ONLY_PATHS = {"refresh-universe", "basics", "daily"}
+    _POST_ONLY_PATHS = {"refresh-universe", "basics", "daily", "refresh-progress"}
     if ticker in _POST_ONLY_PATHS:
         raise HTTPException(status_code=405, detail=f"Method Not Allowed — {ticker} 은 POST only")
 

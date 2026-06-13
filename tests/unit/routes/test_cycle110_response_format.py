@@ -70,6 +70,10 @@ def test_g_response1_returns_api_response_envelope(mock_full_universe_load_once)
     assert body["success"] is True, f"success=True 의무 (실제 {body['success']})"
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 127 fire-and-forget BackgroundTasks 전환 — 동기 7키 응답 schema 폐기 → {status, task_key} 의미 전환 (사이클 66 K-2 패턴)",
+)
 def test_g_response1_data_contains_7_keys(mock_full_universe_load_once):
     """G-RESPONSE1-bis: data 영역 영구 영속이 7 키 정합성.
 
@@ -108,6 +112,10 @@ def test_g_response1_data_contains_7_keys(mock_full_universe_load_once):
     assert data["elapsed_ms"] >= 0, f"elapsed_ms >= 0 의무 (실제 {data['elapsed_ms']})"
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 127 fire-and-forget BackgroundTasks 전환 — 동기 summary message 폐기 → 시작 안내 의미 전환 (사이클 66 K-2 패턴)",
+)
 def test_g_response1_message_includes_summary_stats(mock_full_universe_load_once):
     """G-RESPONSE1-tris: message 영역 영구 영속이 summary 통계 포함.
 

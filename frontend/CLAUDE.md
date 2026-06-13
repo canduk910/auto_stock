@@ -164,9 +164,66 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 - **안내 배너 갱신** (사이클 64): "**WebSocket 구독 대상 필터** — 임계 외 종목은 시세 구독 자체 차단. 보유/익일청산 종목은 절대 제외 안 됨" (사이클 62 "매수 신호 차단" 표현 폐기 + 사이클 32 R4 universe guard 보호 영속 명시)
 - 회귀 가드 4 vitest 케이스 (사이클 62 5 → 사이클 64 4, mode 토글 F-5 폐기): F-1 fetch 후 렌더 + mode select 미존재 검증 / F-2 슬라이더 변경 / F-3 저장 + toast (body 에 mode 미포함) / F-4 max<min 가드
 
-## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 확장)
+## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 → 사이클 126/127 확장)
 
 사이클 85 (2026-06-09) 최초 도입: 4 카드 + list 페이징 + detail 모달 + history 테이블.
+
+### 사이클 127 (2026-06-13) — 3 작업 fire-and-forget + 5초 폴링 진행 가시화
+
+사이클 126 사용자 보고 = "기본정보 새로고침 클릭 → 13분 39초 후 'KIS API 일시 결함' 토스트". 운영 로그 = 백엔드 정상 완료. 진짜 결함 = axios 디폴트 timeout silent 결함. 사용자 결정 Q1=5초 폴링 / Q2=상단 배너+카운터 / Q3=3 작업 통일.
+
+#### `RefreshProgressBanner.tsx` 신규 (상단 배너 + 진행 카운터)
+
+- `useQuery({queryKey: ['refresh-progress'], queryFn: fetchRefreshProgress, retry: 1, refetchInterval: 동적})` — running 시 5초 / idle 시 60초 (트래픽 절감)
+- 3 작업 (universe/basics/daily) 중 status='running' 이거나 'completed/failed' 직후 3초 이내인 작업만 표시 (자동 fadeout)
+- 작업별 프로그레스 바 (`processed / total × 100%`) + 상세 카운터 (성공/스킵/실패/경과 + 시작/종료 KST 시각)
+- 실패 시 `error_message` 빨강 박스 표시
+- 완료/실패 자동 fadeout 후 `invalidateQueries(['stock-master-stats'])` + `['stock-master-list'])` (즉시 갱신)
+- testid: `refresh-progress-banner` / `refresh-progress-row-{taskKey}` / `refresh-progress-status-{taskKey}` / `refresh-progress-bar-{taskKey}` / `refresh-progress-counter-{taskKey}` / `refresh-progress-error-{taskKey}`
+- KST 강제: `Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul' })` (사이클 68 영속)
+
+#### `StockMaster.tsx` 3 useMutation fire-and-forget 전환
+
+- 사이클 90/126 동기 응답 대기 (universe ~25초 + basics 13분 + daily 13분) → 사이클 127 즉시 시작 토스트 + 백그라운드 위임
+- `onSuccess`: "{작업} 새로고침 시작 — 진행 상황은 상단 배너 참고" (작업 카운터 토스트 폐기, 배너로 위임)
+- `onError`: 409 Conflict → "{작업} 이미 진행 중 — 상단 배너 참고" / 기타 → "KIS API 일시 결함 — 잠시 후 재시도" (사이클 106 영속)
+- `invalidateQueries(['refresh-progress'])` 즉시 호출 (배너 폴링 즉시 활성화)
+- `retry: false` 영속 (중복 trigger 방지)
+
+#### API 함수 (`api/stock-master.ts`)
+
+- `fetchRefreshProgress(): Promise<AllRefreshProgress>` 신규 — GET `/api/stock-master/refresh-progress`
+- `refreshUniverseNow / refreshBasicsNow / refreshDailyNow` 응답 schema 변경 → `RefreshStartedResponse | 기존 동기 결과` union (백엔드 fire-and-forget 전환에 맞춰 frontend 호환 layer)
+
+#### 타입 (`types/stock-master.ts`)
+
+- `RefreshTaskKey = 'universe' | 'basics' | 'daily'`
+- `RefreshStatus = 'idle' | 'running' | 'completed' | 'failed'`
+- `RefreshProgress` (10 키) + `AllRefreshProgress { universe, basics, daily }` + `RefreshStartedResponse { status: 'started', task_key }`
+
+#### 영속 의무 매트릭스
+
+- 사이클 65 H3 useQuery retry:1 (RefreshProgressBanner G-AST-RT 영구 가드)
+- 사이클 68 KST 강제 (Intl.DateTimeFormat timeZone='Asia/Seoul')
+- 사이클 75 G-AST5 api-mocks 영역 확장 → G-AST8 사이클 127 (4 endpoint 등록 영구 가드)
+- 사이클 80 hotfix #3 Playwright LIFO 정합 (4 신규 라우트 wildcard 후 등록)
+- 사이클 89 한글 친숙 용어 (작업명 한글 라벨)
+- 사이클 106 "KIS API 일시 결함" toast 영속 (네트워크 오류 fallback)
+
+### 사이클 126 (2026-06-13) — 종목마스터 UI/데이터 결함 4건 통합 시정 (frontend 영역)
+
+#### 결함 2 시정 — 리스트 테이블 4 컬럼 확장
+
+- 컬럼 추가 (종목명·시장 다음, NXT/정지/관리 *전*): 현재가 (`raw.stck_prpr`) / 전일대비 (`raw.prdy_vrss`, 부호 색상 red/blue/gray) / 시가총액 (`raw.hts_avls` 백만원 → 억원 환산) / 거래대금 (`raw.acml_tr_pbmn` 원 → 억원 환산)
+- 헬퍼: `formatPrice` / `formatMarketCap` / `formatTradeAmount`
+- graceful: 값 없음/0/null → "—" (사이클 89 답습)
+
+#### 결함 3+4 시정 — 2 신규 버튼 (기본정보/일봉 새로고침)
+
+- "기본정보 새로고침" 버튼 (`stock-master-refresh-basics-button`, emerald 톤) — POST `/api/stock-master/basics/refresh`
+- "일봉 새로고침" 버튼 (`stock-master-refresh-daily-button`, amber 톤) — POST `/api/stock-master/daily/refresh`
+- 기존 "지금 새로고침" 버튼 (사이클 90, blue 톤) 옆에 배치 (stats 카드 상단 우측)
+- 사이클 127 fire-and-forget 전환으로 즉시 응답 + 배너 폴링으로 진행 가시화
 
 ### 사이클 124 (2026-06-12) — UI 확장 + 영구 가드
 

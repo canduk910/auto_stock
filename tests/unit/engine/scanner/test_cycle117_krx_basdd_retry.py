@@ -79,6 +79,10 @@ def test_h4_empty_response_emit_visibility():
     assert "basDd=" in source
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 127 fire-and-forget BackgroundTasks 전환 — 라우트 응답 동기 summary 폐기 → {status, task_key} 의미 전환. source 키 노출은 GET /refresh-progress 응답으로 이전 (사이클 66 K-2 패턴)",
+)
 def test_h5_route_response_source_key_present():
     """HIGH-5: 라우트 응답 영역 source 키 추가 (사이클 110 영역 누락 보강)."""
     source = _read_route_source()
@@ -90,6 +94,10 @@ def test_h5_route_response_source_key_present():
     assert 'summary.get("source"' in fn_source or "summary.get('source'" in fn_source
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 127 fire-and-forget 전환 — 동기 message 폐기 → 시작 안내 의미 전환 (사이클 66 K-2 패턴)",
+)
 def test_m1_message_includes_source():
     """MEDIUM-1: 응답 message 영역에 source= 영역 포함 (운영자 즉시 확인)."""
     source = _read_route_source()

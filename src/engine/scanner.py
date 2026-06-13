@@ -1610,18 +1610,40 @@ async def _full_universe_load_once(force: bool = False) -> dict:
     """
     from src.api.krx import KrxApiError
 
+    # 사이클 127 — 진행 state hook (fire-and-forget + 5초 폴링)
+    from src.engine import refresh_progress as _rp
+
+    _rp.start_progress("universe", total=0)
+
     try:
-        summary = await _full_universe_load_krx_primary(force=force)
-        summary["source"] = "krx"
-        return summary
-    except KrxApiError as exc:
-        logger.warning(
-            "[krx_open_api_fallback] KRX 실패 → KIS market-cap 폴백 (graceful): %s",
-            exc,
+        try:
+            summary = await _full_universe_load_krx_primary(force=force)
+            summary["source"] = "krx"
+        except KrxApiError as exc:
+            logger.warning(
+                "[krx_open_api_fallback] KRX 실패 → KIS market-cap 폴백 (graceful): %s",
+                exc,
+            )
+            summary = await _full_universe_load_kis_fallback(force=force)
+            summary["source"] = "kis_fallback"
+
+        # 사이클 127 — 완료 시 finish_progress (정상 종료)
+        _rp.finish_progress(
+            "universe", "completed",
+            total=summary.get("total", 0),
+            processed=summary.get("total", 0),
+            updated=summary.get("fetched", 0),
+            skipped=summary.get("skipped_ttl", 0),
+            failed=summary.get("failed", 0),
         )
-        summary = await _full_universe_load_kis_fallback(force=force)
-        summary["source"] = "kis_fallback"
         return summary
+    except Exception as exc:
+        # 사이클 127 — 실패 시 finish_progress (예외 전파 유지)
+        _rp.finish_progress(
+            "universe", "failed",
+            error_message=str(exc),
+        )
+        raise
 
 
 async def _full_universe_load_krx_primary(force: bool = False) -> dict:
@@ -2073,6 +2095,11 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         "mode": "mixed",  # 백필/증분 혼합
     }
 
+    # 사이클 127 — 진행 state hook (fire-and-forget + 5초 폴링)
+    from src.engine import refresh_progress as _rp
+
+    _rp.start_progress("daily", total=0)
+
     # stock_master 전체 ticker 조회 (사이클 106 lifecycle 의존성)
     # offset 페이징 — limit=1000 단위 (Supabase 기본 한도)
     all_tickers: list[str] = []
@@ -2098,6 +2125,7 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         page += 1
 
     summary["total"] = len(all_tickers)
+    _rp.update_progress("daily", total=len(all_tickers))
 
     # 사이클 126 영역 4 — 진단 강화: 함수 진입 시 candidates 가시화
     logger.info(
@@ -2108,6 +2136,14 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     if not all_tickers:
         summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
         logger.warning("[stock_master_daily_load] stock_master 빈 영역 — 적재 skip")
+        _rp.finish_progress(
+            "daily", "completed",
+            total=summary["total"],
+            processed=0,
+            updated=summary["upserted_rows"],
+            skipped=summary["skipped_fresh"],
+            failed=summary["failed"],
+        )
         return summary
 
     # 오늘 KST 날짜 (점진 적재 fresh skip 기준)
@@ -2178,6 +2214,15 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         # 5) Rate Limit sleep (사이클 17/83/91/97/107 답습)
         await asyncio.sleep(_DAILY_LOAD_RATE_LIMIT_SLEEP_SECS)
 
+        # 사이클 127 — 진행 state 갱신 (매 ticker 처리 후)
+        _rp.update_progress(
+            "daily",
+            processed=idx + 1,
+            updated=summary["upserted_rows"],
+            skipped=summary["skipped_fresh"],
+            failed=summary["failed"] + summary["db_write_failures"],
+        )
+
         # 진행 상황 emit — 500건마다 (운영 가시화)
         if (idx + 1) % 500 == 0:
             elapsed = int((time.monotonic() - start) * 1000)
@@ -2197,6 +2242,16 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         summary["mode"] = "incremental"
     else:
         summary["mode"] = "mixed"
+
+    # 사이클 127 — 완료 시 finish_progress (정상 종료)
+    _rp.finish_progress(
+        "daily", "completed",
+        total=summary["total"],
+        processed=len(all_tickers),
+        updated=summary["upserted_rows"],
+        skipped=summary["skipped_fresh"],
+        failed=summary["failed"] + summary["db_write_failures"],
+    )
 
     return summary
 
@@ -2225,6 +2280,11 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
     """
     import time
     from src.db import stock_master
+
+    # 사이클 127 — 진행 state hook (fire-and-forget + 5초 폴링)
+    from src.engine import refresh_progress as _rp
+
+    _rp.start_progress("basics", total=0)
 
     start = time.monotonic()
     summary: dict = {
@@ -2259,6 +2319,7 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
         page += 1
 
     summary["total"] = len(all_tickers)
+    _rp.update_progress("basics", total=len(all_tickers))
     logger.info(
         "[stock_master_basics_refresh_begin] candidates=%d force=%s",
         len(all_tickers), force,
@@ -2267,6 +2328,10 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
     if not all_tickers:
         summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
         logger.warning("[stock_master_basics_refresh] stock_master 빈 영역 — 보강 skip")
+        _rp.finish_progress(
+            "basics", "completed",
+            total=0, processed=0, updated=0, skipped=0, failed=0,
+        )
         return summary
 
     for idx, ticker in enumerate(all_tickers):
@@ -2304,6 +2369,15 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
         # Rate Limit sleep (사이클 17 KIS LMS chain 답습)
         await _asyncio.sleep(_BASICS_REFRESH_RATE_LIMIT_SLEEP_SECS)
 
+        # 사이클 127 — 진행 state 갱신 (매 ticker 처리 후)
+        _rp.update_progress(
+            "basics",
+            processed=idx + 1,
+            updated=summary["updated"],
+            skipped=summary["skipped"],
+            failed=summary["failed"],
+        )
+
         # 진행 상황 emit — 500건마다 (운영 가시화)
         if (idx + 1) % 500 == 0:
             elapsed = int((time.monotonic() - start) * 1000)
@@ -2321,6 +2395,16 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
         "skipped=%d failed=%d elapsed_ms=%d",
         summary["total"], summary["updated"],
         summary["skipped"], summary["failed"], summary["elapsed_ms"],
+    )
+
+    # 사이클 127 — 완료 시 finish_progress (정상 종료)
+    _rp.finish_progress(
+        "basics", "completed",
+        total=summary["total"],
+        processed=len(all_tickers),
+        updated=summary["updated"],
+        skipped=summary["skipped"],
+        failed=summary["failed"],
     )
 
     return summary

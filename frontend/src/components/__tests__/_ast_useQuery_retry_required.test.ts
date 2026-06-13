@@ -32,6 +32,9 @@ const TARGET_FILES = [
   'IntegrationToggleCard.tsx',
   'CashUsageRatioCard.tsx',
   'KisQuoteAccountsCard.tsx',
+  // 사이클 127 (2026-06-13) — RefreshProgressBanner.tsx 추가.
+  // fetchRefreshProgress useQuery retry:1 명시 의무 (5초/60초 동적 폴링 + ECONNREFUSED 영구 차단).
+  'RefreshProgressBanner.tsx',
 ]
 
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e

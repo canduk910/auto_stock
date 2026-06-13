@@ -100,3 +100,46 @@ export interface DailyRefreshResult {
   elapsed_ms: number
   mode: string
 }
+
+/**
+ * 사이클 127 — fire-and-forget 응답 (3 POST 라우트 공통).
+ *
+ * 배경: 사이클 126 push 후 사용자 보고 = "기본정보 새로고침" 13분 39초 후
+ * "KIS API 일시 결함" 토스트. 진짜 결함 = axios 디폴트 timeout silent 결함.
+ * 시정: POST 라우트 fire-and-forget + GET /refresh-progress 5초 폴링.
+ */
+export type RefreshTaskKey = 'universe' | 'basics' | 'daily'
+export type RefreshStatus = 'idle' | 'running' | 'completed' | 'failed'
+
+export interface RefreshStartedResponse {
+  status: 'started'
+  task_key: RefreshTaskKey
+}
+
+/**
+ * 사이클 127 — 3 작업 진행 state schema (10 키 정확 영속).
+ * 회귀 가드 영속 의무 (G-STATE1 / G-ROUTE-GET1).
+ */
+export interface RefreshProgress {
+  status: RefreshStatus
+  total: number
+  processed: number
+  updated: number
+  skipped: number
+  failed: number
+  started_at: string | null  // KST +09:00 ISO
+  finished_at: string | null
+  elapsed_ms: number
+  error_message: string | null
+}
+
+/**
+ * 사이클 127 — GET /refresh-progress 응답 (3 작업 통합).
+ *
+ * 5초 폴링으로 RefreshProgressBanner 가 상단 가시화.
+ */
+export interface AllRefreshProgress {
+  universe: RefreshProgress
+  basics: RefreshProgress
+  daily: RefreshProgress
+}
