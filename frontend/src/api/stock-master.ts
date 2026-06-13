@@ -16,6 +16,7 @@ import type { ApiResponse } from '../types/common'
 import type {
   StockMasterStats,
   StockMasterListItem,
+  StockMasterListResponse,
   StockMasterDetail,
   StockMasterHistoryItem,
   ScanPoolSummary,
@@ -34,15 +35,61 @@ export async function fetchStats(): Promise<StockMasterStats> {
   return data.data
 }
 
+/**
+ * 사이클 128 — GET /api/stock-master/list 4 필터 + 페이징 + total 응답 schema 확장.
+ *
+ * 사용자 결정 Q2=A — 상단 인라인 4 컨트롤 (시장 select + 시총 min + 거래대금 min + 종목명 substr).
+ * 응답 schema: list[dict] → {items, total, limit, offset} 객체 wrapping (T-1 빈 필터 = 전체 영속).
+ *
+ * 호환 layer (사이클 128 hotfix 안전 영속):
+ * - 백엔드 fire-and-forget 미반영 영역 호환 (Array 직접 반환 시 items/total 추출).
+ *
+ * 단위 변환 의무 (T-2):
+ * - minMarketCapEok / minTradeAmountEok 는 억원 단위 (프론트 UI 친숙)
+ * - 백엔드 /list 라우트가 _eok_to_won 헬퍼로 원 단위 변환 후 list_paged_by_filter 호출
+ */
 export async function fetchList(
-  limit = 100,
-  offset = 0,
-): Promise<StockMasterListItem[]> {
-  const { data } = await apiClient.get<ApiResponse<StockMasterListItem[]>>(
-    '/stock-master/list',
-    { params: { limit, offset } },
-  )
-  return data.data
+  params: {
+    limit?: number
+    offset?: number
+    market?: 'KOSPI' | 'KOSDAQ' | null
+    minMarketCapEok?: number
+    minTradeAmountEok?: number
+    nameSubstr?: string
+  } = {},
+): Promise<StockMasterListResponse> {
+  const queryParams: Record<string, string | number> = {
+    limit: params.limit ?? 100,
+    offset: params.offset ?? 0,
+  }
+  if (params.market) queryParams.market = params.market
+  if (params.minMarketCapEok && params.minMarketCapEok > 0) {
+    queryParams.min_market_cap = params.minMarketCapEok
+  }
+  if (params.minTradeAmountEok && params.minTradeAmountEok > 0) {
+    queryParams.min_trade_amount = params.minTradeAmountEok
+  }
+  if (params.nameSubstr && params.nameSubstr.trim()) {
+    queryParams.name_substr = params.nameSubstr.trim()
+  }
+
+  const { data } = await apiClient.get<
+    ApiResponse<StockMasterListResponse | StockMasterListItem[]>
+  >('/stock-master/list', { params: queryParams })
+
+  const payload = data.data
+  // 사이클 128 신규 envelope 응답
+  if (payload && !Array.isArray(payload) && 'items' in payload) {
+    return payload as StockMasterListResponse
+  }
+  // 백엔드 미배포 환경 graceful fallback (사이클 124 hotfix 패턴 답습)
+  const items = Array.isArray(payload) ? payload : []
+  return {
+    items,
+    total: items.length,
+    limit: queryParams.limit as number,
+    offset: queryParams.offset as number,
+  }
 }
 
 export async function fetchScanPoolSummary(): Promise<ScanPoolSummary> {

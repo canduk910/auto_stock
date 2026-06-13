@@ -164,9 +164,41 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 - **안내 배너 갱신** (사이클 64): "**WebSocket 구독 대상 필터** — 임계 외 종목은 시세 구독 자체 차단. 보유/익일청산 종목은 절대 제외 안 됨" (사이클 62 "매수 신호 차단" 표현 폐기 + 사이클 32 R4 universe guard 보호 영속 명시)
 - 회귀 가드 4 vitest 케이스 (사이클 62 5 → 사이클 64 4, mode 토글 F-5 폐기): F-1 fetch 후 렌더 + mode select 미존재 검증 / F-2 슬라이더 변경 / F-3 저장 + toast (body 에 mode 미포함) / F-4 max<min 가드
 
-## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 → 사이클 126/127 확장)
+## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 → 사이클 126/127/128 확장)
 
 사이클 85 (2026-06-09) 최초 도입: 4 카드 + list 페이징 + detail 모달 + history 테이블.
+
+### 사이클 128 (2026-06-13) — 종목목록 4 필터 신규 + 전체현황 silent cap 시정
+
+사용자 보고 "종목마스터의 종목목록에 필터링 기능을 넣어줘. 그리고 전체현황 산출 로직 점검 — 전체종목수 외 페이징 처리 중 엉망". 단일 근본 원인 = 사이클 126이 `count_all` 만 시정, 나머지 4 카운트는 `.range(0, 9999)` PostgREST 1,000행 silent cap. 사용자 결정 Q1=A count="exact" + filter / Q2=A 상단 인라인 4 컨트롤 / Q3=A team-leader 위임.
+
+#### 4 필터 컨트롤 (상단 인라인)
+
+- 시장 select: 전체 / KOSPI / KOSDAQ
+- 시총 min input: 억원 단위, placeholder "0 = 전체" (사이클 65 TradeAmountFilterCard 답습)
+- 거래대금 min input: 억원 단위, 동일 패턴
+- 종목명 검색 input: 부분 문자열 (한글 IME composition 가드)
+- 초기화 버튼
+
+#### 동작
+
+- 400ms 디바운스 (`useEffect` setTimeout)
+- URL `useSearchParams` 동기화 (새로고침 후 필터 유지 + 공유 가능)
+- 필터 변경 시 offset=0 reset
+- 페이지네이션 = `total` (envelope 응답) 기준 정확도
+
+#### API + 타입 (`api/stock-master.ts` + `types/stock-master.ts`)
+
+- `fetchList(params: StockMasterFilterParams): Promise<StockMasterListResponse>` — params object 시그너처 + 호환 layer
+- `StockMasterListResponse {items, total, limit, offset}` envelope
+- `StockMasterFilterParams {limit, offset, market?, min_market_cap?, min_trade_amount?, name_substr?}`
+
+#### 영속 의무
+
+- 사이클 64/65 UI 컨트롤 패턴 답습 (PriceFilterCard / TradeAmountFilterCard)
+- 사이클 80 hotfix #3 Playwright LIFO 정합 (envelope 응답 mock + wildcard *전* 등록)
+- 사이클 89 한글 친숙 용어 (시장명/필터 라벨)
+- 사이클 127 영속 (RefreshProgressBanner + invalidateQueries 통합 보존)
 
 ### 사이클 127 (2026-06-13) — 3 작업 fire-and-forget + 5초 폴링 진행 가시화
 

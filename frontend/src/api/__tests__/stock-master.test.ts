@@ -68,9 +68,12 @@ describe("사이클 85 — stock-master API 래퍼 (L-API)", () => {
         );
       }),
     );
-    const items = await fetchList(100, 0);
-    expect(items).toHaveLength(1);
-    expect(items[0].ticker).toBe("005930");
+    // 사이클 128 — fetchList 시그너처 변경 (positional → params object).
+    // 응답 schema {items, total, limit, offset} envelope + 호환 layer (Array 직접 반환 시 envelope 정규화).
+    const result = await fetchList({ limit: 100, offset: 0 });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].ticker).toBe("005930");
+    expect(result.total).toBe(1);  // 호환 layer = items.length
     expect(receivedUrl).toContain("limit=100");
     expect(receivedUrl).toContain("offset=0");
   });
@@ -152,7 +155,8 @@ describe("사이클 85 — stock-master API 에러 처리 (H-404 + H-422)", () =
         ),
       ),
     );
-    await expect(fetchList(0, 0)).rejects.toThrow();
+    // 사이클 128 — fetchList 시그너처 (params object).
+    await expect(fetchList({ limit: 0, offset: 0 })).rejects.toThrow();
   });
 
   it("H-422-2: fetchList(1001, 0) (limit > 1000) → 422 axios error throw", async () => {
@@ -164,7 +168,7 @@ describe("사이클 85 — stock-master API 에러 처리 (H-404 + H-422)", () =
         ),
       ),
     );
-    await expect(fetchList(1001, 0)).rejects.toThrow();
+    await expect(fetchList({ limit: 1001, offset: 0 })).rejects.toThrow();
   });
 
   it("H-422-3: fetchList(100, -1) (offset < 0) → 422 axios error throw", async () => {
@@ -176,7 +180,8 @@ describe("사이클 85 — stock-master API 에러 처리 (H-404 + H-422)", () =
         ),
       ),
     );
-    await expect(fetchList(100, -1)).rejects.toThrow();
+    // 사이클 128 — fetchList 시그너처 (params object).
+    await expect(fetchList({ limit: 100, offset: -1 })).rejects.toThrow();
   });
 });
 
@@ -191,9 +196,11 @@ describe("사이클 90 H-5 (HIGH) — refreshUniverseNow API 정합", () => {
         );
       }),
     );
+    // 사이클 127 — RefreshStartedResponse 또는 RefreshUniverseResult union 영역.
+    // 본 테스트는 동기 응답 schema 영역 영속 검증 (mock 동기 응답).
     const result = await refreshUniverseNow();
-    expect(result.universe).toBe(487);
-    expect(result.elapsed_ms).toBe(24823);
+    expect((result as { universe: number }).universe).toBe(487);
+    expect((result as { elapsed_ms: number }).elapsed_ms).toBe(24823);
     expect(receivedMethod).toBe("POST");
   });
 
@@ -216,7 +223,7 @@ describe("사이클 90 H-5 (HIGH) — refreshUniverseNow API 정합", () => {
       ),
     );
     const result = await refreshUniverseNow();
-    expect(result.universe).toBe(0);
-    expect(result.elapsed_ms).toBe(120);
+    expect((result as { universe: number }).universe).toBe(0);
+    expect((result as { elapsed_ms: number }).elapsed_ms).toBe(120);
   });
 });

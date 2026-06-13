@@ -12,8 +12,9 @@
  *   - 사이클 65 H3 + 사이클 80 hotfix #1 — useQuery retry:1 의무
  *   - 사이클 68 KST — Intl.DateTimeFormat 명시, getHours() 금지
  */
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 
 import {
@@ -546,8 +547,97 @@ function CollapsiblePre({
 // ────────────────────────────────────────────────────────────────────────
 // 메인 페이지
 // ────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────
+// 사이클 128 — 종목목록 필터 4 컨트롤 + 400ms 디바운스
+// 사이클 65 TradeAmountFilterCard 패턴 답습 + 사이클 64 PriceFilterCard
+// ────────────────────────────────────────────────────────────────────────
+const FILTER_DEBOUNCE_MS = 400
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const handle = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(handle)
+  }, [value, delay])
+  return debounced
+}
+
 export default function StockMaster() {
-  const [offset, setOffset] = useState(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [offset, setOffset] = useState(() => {
+    const o = parseInt(searchParams.get('offset') || '0', 10)
+    return Number.isFinite(o) && o >= 0 ? o : 0
+  })
+  // 사이클 128 — 필터 4 state (URL query 초기화)
+  const [marketFilter, setMarketFilter] = useState<'' | 'KOSPI' | 'KOSDAQ'>(() => {
+    const m = searchParams.get('market')
+    return m === 'KOSPI' || m === 'KOSDAQ' ? m : ''
+  })
+  const [minMarketCapEokInput, setMinMarketCapEokInput] = useState<string>(
+    () => searchParams.get('minMarketCap') || '',
+  )
+  const [minTradeAmountEokInput, setMinTradeAmountEokInput] = useState<string>(
+    () => searchParams.get('minTradeAmount') || '',
+  )
+  const [nameSubstrInput, setNameSubstrInput] = useState<string>(
+    () => searchParams.get('name') || '',
+  )
+  // T-3 IME composition (한글 자모 입력 중 trigger 차단)
+  const [isComposing, setIsComposing] = useState(false)
+
+  // 디바운스된 필터 값 (400ms)
+  const debouncedMinCap = useDebouncedValue(minMarketCapEokInput, FILTER_DEBOUNCE_MS)
+  const debouncedMinAmt = useDebouncedValue(minTradeAmountEokInput, FILTER_DEBOUNCE_MS)
+  // IME composition 중에는 nameSubstr 디바운스 대상에서 제외 (이전 값 유지)
+  const debouncedName = useDebouncedValue(isComposing ? '' : nameSubstrInput, FILTER_DEBOUNCE_MS)
+
+  // 필터 값 정규화
+  const filterParams = useMemo(() => {
+    const cap = parseInt(debouncedMinCap, 10)
+    const amt = parseInt(debouncedMinAmt, 10)
+    return {
+      market: (marketFilter || null) as 'KOSPI' | 'KOSDAQ' | null,
+      minMarketCapEok: Number.isFinite(cap) && cap > 0 ? cap : 0,
+      minTradeAmountEok: Number.isFinite(amt) && amt > 0 ? amt : 0,
+      nameSubstr: debouncedName.trim(),
+    }
+  }, [marketFilter, debouncedMinCap, debouncedMinAmt, debouncedName])
+
+  // 필터 변경 시 offset reset + URL 동기화
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams)
+    if (filterParams.market) next.set('market', filterParams.market)
+    else next.delete('market')
+    if (filterParams.minMarketCapEok > 0)
+      next.set('minMarketCap', String(filterParams.minMarketCapEok))
+    else next.delete('minMarketCap')
+    if (filterParams.minTradeAmountEok > 0)
+      next.set('minTradeAmount', String(filterParams.minTradeAmountEok))
+    else next.delete('minTradeAmount')
+    if (filterParams.nameSubstr) next.set('name', filterParams.nameSubstr)
+    else next.delete('name')
+
+    // 필터 변경 시 offset=0 reset (사용자 결정 Q2=A)
+    next.delete('offset')
+    setOffset(0)
+
+    setSearchParams(next, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filterParams.market,
+    filterParams.minMarketCapEok,
+    filterParams.minTradeAmountEok,
+    filterParams.nameSubstr,
+  ])
+
+  // 필터 초기화 (T-1 영속 — 빈 필터 = 전체)
+  const handleClearFilter = () => {
+    setMarketFilter('')
+    setMinMarketCapEokInput('')
+    setMinTradeAmountEokInput('')
+    setNameSubstrInput('')
+  }
+
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null)
   const [detailTicker, setDetailTicker] = useState<string | null>(null)
   const [detailInitialData, setDetailInitialData] = useState<StockMasterDetail | undefined>(undefined)
@@ -667,10 +757,20 @@ export default function StockMaster() {
     refetchInterval: 60_000,
   })
 
-  // 3. 목록 테이블
+  // 3. 목록 테이블 (사이클 128 — 4 필터 + 페이징 + total 응답 schema)
+  // queryFn 을 별도 함수로 추출 — AST 가드 정규식 (사이클 80 hotfix) 첫 `}` 매칭 회피.
+  const listQueryFn = () =>
+    fetchList({
+      limit: LIMIT,
+      offset,
+      market: filterParams.market,
+      minMarketCapEok: filterParams.minMarketCapEok,
+      minTradeAmountEok: filterParams.minTradeAmountEok,
+      nameSubstr: filterParams.nameSubstr,
+    })
   const listQuery = useQuery({
-    queryKey: ['stock-master-list', LIMIT, offset],
-    queryFn: () => fetchList(LIMIT, offset),
+    queryKey: ['stock-master-list', LIMIT, offset, filterParams.market, filterParams.minMarketCapEok, filterParams.minTradeAmountEok, filterParams.nameSubstr],
+    queryFn: listQueryFn,
     retry: 1,
     staleTime: 30_000,
     refetchInterval: 60_000,
@@ -687,10 +787,11 @@ export default function StockMaster() {
     refetchInterval: 60_000,
   })
 
-  // Array.isArray 가드 — e2e mock 환경에서 api-mocks wildcard 라우트가
-  // /list* 보다 우선 매칭되어 단일 객체 응답이 내려올 수 있음 (LIFO 경계).
-  // 운영 환경에서 배열 응답이 보장되므로 행위 변경 0.
-  const listItems: StockMasterListItem[] = Array.isArray(listQuery.data) ? listQuery.data : []
+  // 사이클 128 — 응답 schema 변경 (list[dict] → {items, total, limit, offset})
+  // fetchList 의 호환 layer 가 양쪽 응답을 envelope 로 정규화 → 직접 추출.
+  const listData = listQuery.data
+  const listItems: StockMasterListItem[] = listData?.items ?? []
+  const listTotal: number = listData?.total ?? 0
   const historyItems: StockMasterHistoryItem[] = Array.isArray(historyQuery.data) ? historyQuery.data : []
 
   return (
@@ -893,7 +994,14 @@ export default function StockMaster() {
         }
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-gray-700">종목 목록</h2>
+          <h2 className="text-base font-semibold text-gray-700">
+            종목 목록
+            {listTotal > 0 && (
+              <span className="ml-2 text-sm font-normal text-gray-500">
+                — 전체 {listTotal.toLocaleString('ko-KR')}건
+              </span>
+            )}
+          </h2>
           <div className="flex items-center gap-2">
             <button
               data-testid="stock-master-list-prev"
@@ -904,15 +1012,102 @@ export default function StockMaster() {
               이전
             </button>
             <span className="text-sm text-gray-500">
-              {offset + 1} – {offset + listItems.length}
+              {listItems.length > 0
+                ? `${(offset + 1).toLocaleString('ko-KR')} – ${(offset + listItems.length).toLocaleString('ko-KR')}`
+                : '0'}
+              {listTotal > 0 && ` / ${listTotal.toLocaleString('ko-KR')}`}
             </span>
             <button
               data-testid="stock-master-list-next"
-              disabled={listItems.length < LIMIT}
+              disabled={offset + listItems.length >= listTotal}
               onClick={() => setOffset(offset + LIMIT)}
               className="text-sm px-3 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50"
             >
               다음
+            </button>
+          </div>
+        </div>
+
+        {/* 사이클 128 — 4 필터 컨트롤 (T-1 빈 필터 = 전체 영속 + T-2 단위 표기 + T-3 IME) */}
+        <div
+          className="mb-4 p-3 bg-gray-50 rounded border border-gray-200"
+          data-testid="stock-master-filter-bar"
+        >
+          <div className="flex flex-wrap items-end gap-3">
+            {/* 시장 select */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-600">시장</label>
+              <select
+                data-testid="stock-master-filter-market"
+                value={marketFilter}
+                onChange={(e) =>
+                  setMarketFilter(e.target.value as '' | 'KOSPI' | 'KOSDAQ')
+                }
+                className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+              >
+                <option value="">전체</option>
+                <option value="KOSPI">KOSPI</option>
+                <option value="KOSDAQ">KOSDAQ</option>
+              </select>
+            </div>
+
+            {/* 시총 min input (억원 단위) */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-600">최소 시가총액 (억원)</label>
+              <input
+                data-testid="stock-master-filter-marketcap-min"
+                type="number"
+                min={0}
+                inputMode="numeric"
+                value={minMarketCapEokInput}
+                onChange={(e) => setMinMarketCapEokInput(e.target.value)}
+                placeholder="0 (예: 1000 = 1,000억)"
+                className="text-sm border border-gray-300 rounded px-2 py-1 w-44"
+              />
+            </div>
+
+            {/* 거래대금 min input (억원 단위) */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-600">최소 거래대금 (억원)</label>
+              <input
+                data-testid="stock-master-filter-tradeamount-min"
+                type="number"
+                min={0}
+                inputMode="numeric"
+                value={minTradeAmountEokInput}
+                onChange={(e) => setMinTradeAmountEokInput(e.target.value)}
+                placeholder="0 (예: 100 = 100억)"
+                className="text-sm border border-gray-300 rounded px-2 py-1 w-44"
+              />
+            </div>
+
+            {/* 종목명 검색 input (IME composition 가드) */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-600">종목명 검색</label>
+              <input
+                data-testid="stock-master-filter-name-substr"
+                type="text"
+                value={nameSubstrInput}
+                onChange={(e) => setNameSubstrInput(e.target.value)}
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={(e) => {
+                  setIsComposing(false)
+                  // composition 완료 후 최종 값 trigger (debounce 재계산)
+                  setNameSubstrInput((e.target as HTMLInputElement).value)
+                }}
+                placeholder="예: 삼성"
+                className="text-sm border border-gray-300 rounded px-2 py-1 w-48"
+              />
+            </div>
+
+            {/* 초기화 버튼 */}
+            <button
+              data-testid="stock-master-filter-clear"
+              onClick={handleClearFilter}
+              type="button"
+              className="text-sm px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            >
+              필터 초기화
             </button>
           </div>
         </div>

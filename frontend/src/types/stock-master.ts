@@ -50,6 +50,32 @@ export interface StockMasterListItem {
   raw: Record<string, unknown>
 }
 
+/**
+ * 사이클 128 — GET /api/stock-master/list 응답 schema 확장 (list[dict] → 객체 wrapping).
+ * 4 query param 흡수: market / min_market_cap / min_trade_amount / name_substr.
+ * total 필드 = 페이지네이션 정확도 (PostgREST count="exact" 사이클 126 패턴 답습).
+ */
+export interface StockMasterListResponse {
+  items: StockMasterListItem[]
+  total: number
+  limit: number
+  offset: number
+}
+
+/**
+ * 사이클 128 — 종목목록 4 필터 입력 타입.
+ * - market: 'KOSPI' | 'KOSDAQ' | null (전체)
+ * - minMarketCapEok: 억원 단위 (운영자 친숙 — 백엔드 _eok_to_won 변환)
+ * - minTradeAmountEok: 억원 단위
+ * - nameSubstr: 부분 문자열 (대소문자 무시, 한글 IME composition 중 trigger 차단 의무)
+ */
+export interface StockMasterListFilter {
+  market: 'KOSPI' | 'KOSDAQ' | null
+  minMarketCapEok: number  // 0 = 무필터
+  minTradeAmountEok: number
+  nameSubstr: string  // 빈 문자열 = 무필터
+}
+
 export type StockMasterDetail = StockMasterListItem
 
 export interface StockMasterHistoryItem {

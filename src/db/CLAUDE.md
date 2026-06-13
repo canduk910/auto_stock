@@ -140,6 +140,29 @@ Supabase (PostgreSQL) CRUD 모듈.
 - 영속 의무: KST timestamp `_kst.now_kst_iso()` 사용 (사이클 68 G-10b AST) + raw JSONB 덮어쓰기 금지 (사이클 81 G-AST1 답습)
 - **UI 활용 영역 (사이클 124, 2026-06-12)**: `stock_master_daily` 컬럼 추가 시 UI 동기화 의무 영속 — `GET /api/stock-master/{ticker}/daily?days=N` 라우트 (`src/routes/stock_master.py`) + `frontend/src/pages/StockMaster.tsx::DailyTab` 30 row 테이블. `get_stats()` 응답에 `total_daily_rows` + `last_daily_load_at` 노출. 절차 상세는 `frontend/CLAUDE.md` 사이클 124 본문 참조
 
+## stock_master.py — 종목마스터 조회 영역 (사이클 128, 2026-06-13)
+
+사이클 126이 `count_all` 만 `count="exact"` 별도 쿼리로 시정. 나머지 4 카운트는 `.range(0, 9999)` raw 후 Python-side `sum()` 영속 → **Supabase PostgREST `max-rows` 1,000행 silent cap** → 4 카운트 부분 집계 (`nxt_tradable_count` 운영 실측 400 → UI ~150 silent 결함). 사이클 128 시정 = 4 카운트 모두 `count="exact"` + filter 별도 쿼리 (사이클 126 패턴 100% 답습).
+
+### `get_stats()` 4 카운트 시정
+
+- 헬퍼 `_count_exact(filter_callable)` 캡슐화 — 동일 `count="exact"` + `.limit(0)` 패턴 4회 반복 회피
+- `bfdy_clpr_present` / `with_hts_avls` / `with_acml_tr_pbmn`: JSONB 키 존재 + 0 제외 조합. **jsonb operator path 채택** (`raw->'bfdy_clpr'` numeric 비교) — text path (`raw->>'bfdy_clpr'`) gte 자릿수 비교 결함 (1조 이상 실제 332건 vs text 비교 2,696건 silent 결함, Supabase MCP READ-ONLY 검증) 영구 차단
+- `nxt_tradable_count`: `.eq("nxt_tradable", True)` 단순 컬럼 필터
+- `top_10_recent`: 별도 `limit(10)` fetch (전체 raw 의존 영구 폐기)
+- AST 영구 가드 (`tests/unit/ast/test_cycle128_ast_no_range_9999_silent_cap.py`): `src/db/stock_master.py` 본체 `.range(0, 9999)` 잔존 0건 — silent cap 패턴 영구 차단
+
+### `list_paged_by_filter()` 신규
+
+- 시그너처: `list_paged_by_filter(market=None, min_market_cap=None, min_trade_amount=None, name_substr=None, limit=100, offset=0) -> tuple[list[dict], int]`
+- `market`: 'KOSPI' / 'KOSDAQ' / None (전체)
+- `min_market_cap`: int (백만원 단위, `raw->'hts_avls'` jsonb numeric gte)
+- `min_trade_amount`: int (원 단위, `raw->'acml_tr_pbmn'` jsonb numeric gte)
+- `name_substr`: str (대소문자 무시 substring — `ilike("name", "%q%")`)
+- `count="exact"` 동일 쿼리에 동봉 → 정확한 `total_count` 반환 (페이징 정합성 의무)
+- 정렬: `refreshed_at DESC` 영속
+- 호출자: `GET /api/stock-master/list` 라우트만 (UI 페이징 전용). `list_by_filter()` (사이클 108 scanner 전용) 와 영역 분리 영속
+
 ## parameter_recommendations.py — 전략수정 AI자문 이력
 
 - `insert_recommendation()`: 20:00 자문 생성 시 INSERT (status: pending). `(target_date, strategy_id)` unique

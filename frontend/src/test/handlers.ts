@@ -163,22 +163,36 @@ export const handlers = [
       })
     )
   ),
-  http.get(`${base}/stock-master/list`, () =>
-    HttpResponse.json(
-      wrap([
-        {
-          ticker: '005930',
-          name: '삼성전자',
-          excg_dvsn_cd: '01',
-          nxt_tradable: true,
-          krx_halted: false,
-          admin_item: false,
-          refreshed_at: '2026-06-09T09:00:00+09:00',
-          raw: { bfdy_clpr: 75000 },
-        },
-      ])
+  // 사이클 128 — list 응답 schema {items, total, limit, offset} envelope 갱신
+  // + 4 query param (market / min_market_cap / min_trade_amount / name_substr) 흡수
+  http.get(`${base}/stock-master/list`, ({ request }) => {
+    const url = new URL(request.url)
+    const limit = parseInt(url.searchParams.get('limit') || '100', 10)
+    const offset = parseInt(url.searchParams.get('offset') || '0', 10)
+    const nameSubstr = url.searchParams.get('name_substr') || ''
+    const items = [
+      {
+        ticker: '005930',
+        name: '삼성전자',
+        excg_dvsn_cd: '02',
+        nxt_tradable: true,
+        krx_halted: false,
+        admin_item: false,
+        refreshed_at: '2026-06-09T09:00:00+09:00',
+        raw: { bfdy_clpr: 75000 },
+      },
+    ]
+    // 검색어 mismatch 시 빈 응답 (필터 동작 검증용)
+    const filtered = nameSubstr && !items[0].name.includes(nameSubstr) ? [] : items
+    return HttpResponse.json(
+      wrap({
+        items: filtered,
+        total: filtered.length === 0 ? 0 : 2697,
+        limit,
+        offset,
+      }),
     )
-  ),
+  }),
   http.get(`${base}/stock-master/scan-pool/summary`, () =>
     HttpResponse.json(wrap({ eager_refresh_today: 5 }))
   ),

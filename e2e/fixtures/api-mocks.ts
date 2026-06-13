@@ -342,8 +342,12 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
       }),
     }),
   );
+  // 사이클 128 — list 응답 schema {items, total, limit, offset} envelope.
+  // 사이클 80 hotfix #3 Playwright LIFO 정합 (구체 라우트 후 등록).
   await page.route("**/api/stock-master/list*", (route) =>
-    route.fulfill({ json: envelope([]) }),
+    route.fulfill({
+      json: envelope({ items: [], total: 0, limit: 100, offset: 0 }),
+    }),
   );
   await page.route("**/api/stock-master/scan-pool/summary", (route) =>
     route.fulfill({ json: envelope({ eager_refresh_today: 0 }) }),

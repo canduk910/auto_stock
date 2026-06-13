@@ -204,13 +204,47 @@ async def get_stock_master_stats():
     return ApiResponse(success=True, data=data, message="")
 
 
+# 사이클 128 — 억원 단위 → 원 단위 변환 헬퍼 (T-2 단위 변환 캡슐화 의무)
+# 프론트 input 은 억원 단위 (운영자 친숙) / 백엔드 list_paged_by_filter 는 원 단위.
+_HUNDRED_MILLION = 100_000_000  # 1억 원
+
+
+def _eok_to_won(eok: int | None) -> int:
+    """억원 → 원 변환. None 또는 0 이면 0 (무필터)."""
+    if not eok or eok <= 0:
+        return 0
+    return int(eok) * _HUNDRED_MILLION
+
+
 @router.get("/list")
 async def list_stock_master(
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
+    market: str | None = Query(None, description="KOSPI | KOSDAQ | None (전체)"),
+    min_market_cap: int = Query(0, ge=0, description="최소 시가총액 (억원). 0=무필터"),
+    min_trade_amount: int = Query(0, ge=0, description="최소 거래대금 (억원). 0=무필터"),
+    name_substr: str | None = Query(None, description="종목명 부분 문자열 (대소문자 무시)"),
 ):
-    """stock_master 페이징 list. limit ∈ [1, 1000], offset ≥ 0."""
-    data = await stock_master.list_all(limit=limit, offset=offset)
+    """stock_master 페이징 + 4 필터 list (사이클 128).
+
+    limit ∈ [1, 1000], offset ≥ 0.
+
+    4 필터 (모두 optional, 사이클 128 신규 — T-1 빈 필터 = 전체 영속):
+    - market: "KOSPI" | "KOSDAQ" | None
+    - min_market_cap: 억원 단위 (운영자 친숙 — T-2 캡슐화 헬퍼로 원 변환)
+    - min_trade_amount: 억원 단위
+    - name_substr: 종목명 부분 문자열 (ilike 대소문자 무시)
+
+    응답 schema: {items, total, limit, offset} (사이클 128 — 페이지네이션 정확도).
+    """
+    data = await stock_master.list_paged_by_filter(
+        limit=limit,
+        offset=offset,
+        market=market,
+        min_market_cap=_eok_to_won(min_market_cap),
+        min_trade_amount=_eok_to_won(min_trade_amount),
+        name_substr=name_substr,
+    )
     return ApiResponse(success=True, data=data, message="")
 
 

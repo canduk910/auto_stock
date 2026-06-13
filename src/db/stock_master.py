@@ -110,67 +110,102 @@ async def list_all(limit: int = 100, offset: int = 0) -> list[dict]:
     return result.data or []
 
 
+async def _count_exact(query_builder) -> int:
+    """count="exact" 쿼리 graceful 실행 헬퍼 — 사이클 128.
+
+    Supabase PostgREST `count="exact"` + `.limit(0)` 패턴으로 row 미반환 + count int 만 추출.
+    예외 시 0 반환 (graceful — 사이클 126 패턴 답습).
+    """
+    try:
+        result = await asyncio.to_thread(lambda: query_builder().limit(0).execute())
+        return int(getattr(result, "count", 0) or 0)
+    except Exception as exc:
+        logger.warning("[stock_master] count='exact' 쿼리 실패 graceful: %s", exc)
+        return 0
+
+
 async def get_stats() -> dict:
     """집계 — 8 키 반환.
 
-    사이클 85 4 키 → 사이클 124 8 키 확장 → 사이클 126 count_all 정확도 시정:
+    사이클 85 4 키 → 사이클 124 8 키 확장 → 사이클 126 count_all 정확도 시정
+    → 사이클 128 4 카운트 silent cap 완전 시정:
     - count_all / bfdy_clpr_present / nxt_tradable_count / top_10_recent (기존)
     - with_hts_avls / with_acml_tr_pbmn (사이클 107/108 raw 보강 비율 가시화)
     - total_daily_rows / last_daily_load_at (stock_master_daily 연동)
 
-    사이클 126 (2026-06-13) — `count_all` PostgREST 1000행 cap 결함 시정:
-    - count="exact" 별도 쿼리 → result.count (트랜잭션 절감)
-    - raw 분석 쿼리 .range(0, 9999) 명시 (현재 2,697 대응 + 1만 마진)
-    - count 쿼리 실패 시 raw len(rows) graceful fallback
+    사이클 128 (2026-06-13) — 4 카운트 silent cap 영구 폐기:
+    - bfdy_clpr_present / nxt_tradable_count / with_hts_avls / with_acml_tr_pbmn
+      모두 count="exact" 별도 쿼리로 전환 (사이클 126 count_all 패턴 100% 답습)
+    - `.range(0, 9999)` Python-side sum 영역 영구 폐기 (PostgREST 1000행 silent cap)
+    - top_10_recent 는 별도 작은 limit(10) fetch (전체 raw 의존 폐기)
+    - 운영 실측 사이클 126: nxt=400 → UI ~150 잠재 결함 영역 영구 차단
     """
     from src.db import stock_master_daily as _smd  # 순환 임포트 방지 local import
 
-    # 사이클 126 영역 1 — count="exact" 별도 쿼리 (정확한 count_all)
-    count_all: int = 0
+    # 사이클 128 — 5 카운트 모두 count="exact" 별도 쿼리 (사이클 126 패턴 답습)
+    # count_all (필터 없음)
+    count_all = await _count_exact(
+        lambda: supabase.table(TABLE_NAME).select("ticker", count="exact")
+    )
+
+    # nxt_tradable_count — nxt_tradable=True eq 필터
+    nxt_tradable_count = await _count_exact(
+        lambda: (
+            supabase.table(TABLE_NAME)
+            .select("ticker", count="exact")
+            .eq("nxt_tradable", True)
+        )
+    )
+
+    # bfdy_clpr_present — raw->>bfdy_clpr 키 존재 + 0/'0'/'' 제외
+    # PostgREST JSONB text 비교: raw->>bfdy_clpr (text) → null/0/'' 제외
+    bfdy_clpr_present = await _count_exact(
+        lambda: (
+            supabase.table(TABLE_NAME)
+            .select("ticker", count="exact")
+            .not_.is_("raw->>bfdy_clpr", "null")
+            .neq("raw->>bfdy_clpr", "0")
+            .neq("raw->>bfdy_clpr", "")
+        )
+    )
+
+    # with_hts_avls — raw->>hts_avls 비-0
+    with_hts_avls = await _count_exact(
+        lambda: (
+            supabase.table(TABLE_NAME)
+            .select("ticker", count="exact")
+            .not_.is_("raw->>hts_avls", "null")
+            .neq("raw->>hts_avls", "0")
+            .neq("raw->>hts_avls", "")
+        )
+    )
+
+    # with_acml_tr_pbmn — raw->>acml_tr_pbmn 비-0
+    with_acml_tr_pbmn = await _count_exact(
+        lambda: (
+            supabase.table(TABLE_NAME)
+            .select("ticker", count="exact")
+            .not_.is_("raw->>acml_tr_pbmn", "null")
+            .neq("raw->>acml_tr_pbmn", "0")
+            .neq("raw->>acml_tr_pbmn", "")
+        )
+    )
+
+    # top_10_recent — 별도 작은 limit(10) fetch (사이클 128: 전체 raw 의존 폐기)
     try:
-        count_result = await asyncio.to_thread(
+        top_result = await asyncio.to_thread(
             lambda: (
                 supabase.table(TABLE_NAME)
-                .select("ticker", count="exact")
-                .limit(0)
+                .select("ticker, name, refreshed_at")
+                .order("refreshed_at", desc=True)
+                .limit(10)
                 .execute()
             )
         )
-        count_all = int(getattr(count_result, "count", 0) or 0)
+        top_rows = top_result.data or []
     except Exception:
-        logger.warning("[stock_master] get_stats count='exact' 쿼리 실패 graceful")
-        count_all = 0  # raw 집계 후 fallback 처리
-
-    # raw 분석 쿼리 — .range(0, 9999) 명시 (사이클 126: PostgREST 1000행 cap 회피)
-    result = await asyncio.to_thread(
-        lambda: (
-            supabase.table(TABLE_NAME)
-            .select("ticker, name, nxt_tradable, raw, refreshed_at")
-            .order("refreshed_at", desc=True)
-            .range(0, 9999)
-            .execute()
-        )
-    )
-    rows = result.data or []
-
-    # count 쿼리 실패 시 raw len(rows) graceful fallback
-    if count_all == 0 and rows:
-        count_all = len(rows)
-    bfdy_clpr_present = sum(
-        1 for r in rows
-        if r.get("raw") and r["raw"].get("bfdy_clpr") not in (None, "", "0", 0)
-    )
-    nxt_tradable_count = sum(1 for r in rows if r.get("nxt_tradable"))
-
-    # 사이클 107/108 raw 보강 비율 — hts_avls/acml_tr_pbmn 적재 현황 가시화
-    with_hts_avls = sum(
-        1 for r in rows
-        if r.get("raw") and r["raw"].get("hts_avls") not in (None, "", "0", 0)
-    )
-    with_acml_tr_pbmn = sum(
-        1 for r in rows
-        if r.get("raw") and r["raw"].get("acml_tr_pbmn") not in (None, "", "0", 0)
-    )
+        logger.warning("[stock_master] get_stats top_10_recent 조회 실패 graceful")
+        top_rows = []
 
     top_10_recent = [
         {
@@ -178,7 +213,7 @@ async def get_stats() -> dict:
             "name": r.get("name", ""),
             "refreshed_at": r.get("refreshed_at", ""),
         }
-        for r in rows[:10]
+        for r in top_rows
     ]
 
     # stock_master_daily 연동 집계 (graceful — 테이블 미존재·네트워크 장애 대응)
@@ -204,6 +239,118 @@ async def get_stats() -> dict:
         "with_acml_tr_pbmn": with_acml_tr_pbmn,
         "total_daily_rows": total_daily_rows,
         "last_daily_load_at": last_daily_load_at,
+    }
+
+
+async def list_paged_by_filter(
+    *,
+    market: str | None = None,
+    min_market_cap: int = 0,
+    min_trade_amount: int = 0,
+    name_substr: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+) -> dict:
+    """사이클 128 신규 — UI 종목목록 4 필터 + 페이징 + total count.
+
+    필터 (모두 optional, 빈 필터 = list_all 동등 — T-1 영속):
+    - market: "KOSPI" → excg_dvsn_cd="02" / "KOSDAQ" → "03" / None → 전체
+    - min_market_cap: int (원 단위). hts_avls(백만원) × 1_000_000 비교
+    - min_trade_amount: int (원 단위). acml_tr_pbmn 직접 비교
+    - name_substr: str (대소문자 무시 substring, ilike("name", "%substr%"))
+
+    응답:
+        {"items": list[dict], "total": int, "limit": int, "offset": int}
+
+    정렬: refreshed_at DESC 영속 (기존 list_all 답습).
+    total: count="exact" 별도 쿼리 (사이클 126/128 패턴 답습 — PostgREST 1000 cap 회피).
+
+    영속 의무:
+    - 사이클 108 list_by_filter (scanner 전용) 와 분리 — UI list 별개 신규 함수
+    - 사이클 38 명문화 (scanner 단계 매수 진입 전용 무관 — UI READ-ONLY 영역)
+    """
+    # 필터 정규화
+    market_norm = (market or "").upper() if market else None
+    market_eq: tuple[str, str] | None = None
+    if market_norm == "KOSPI":
+        market_eq = ("excg_dvsn_cd", "02")
+    elif market_norm == "KOSDAQ":
+        market_eq = ("excg_dvsn_cd", "03")
+
+    name_pat: str | None = None
+    if name_substr:
+        # ilike 대소문자 무시 substring
+        cleaned = name_substr.strip()
+        if cleaned:
+            name_pat = f"%{cleaned}%"
+
+    # 시총/거래대금 단위 환산
+    # raw.hts_avls 단위 = 백만원 → min_market_cap (원) / 1_000_000 의 ceil 비교
+    hts_avls_threshold: int = 0
+    if min_market_cap and min_market_cap > 0:
+        # 백만원 단위 환산 (정수 ceil)
+        hts_avls_threshold = (min_market_cap + 999_999) // 1_000_000
+
+    acml_tr_pbmn_threshold: int = 0
+    if min_trade_amount and min_trade_amount > 0:
+        acml_tr_pbmn_threshold = int(min_trade_amount)
+
+    def _build_query(*, with_count: bool):
+        """공통 쿼리 빌더 — count 쿼리/데이터 쿼리 양쪽에서 동일 필터 체인 적용."""
+        if with_count:
+            q = supabase.table(TABLE_NAME).select("ticker", count="exact")
+        else:
+            q = (
+                supabase.table(TABLE_NAME)
+                .select("*")
+                .order("refreshed_at", desc=True)
+            )
+
+        if market_eq is not None:
+            q = q.eq(market_eq[0], market_eq[1])
+        if name_pat is not None:
+            q = q.ilike("name", name_pat)
+        # JSONB numeric 비교 — 사이클 128 Supabase MCP READ-ONLY 검증 확정:
+        # - raw->'hts_avls' (jsonb operator, NOT raw->>'hts_avls' text) numeric gte 정확
+        # - raw->>'hts_avls' text gte 는 자릿수 비교 결함 ('999' < '1000' false → 332 vs 2696 부정확)
+        # - KIS 응답 99.96% (2,696/2,697) jsonb number 타입 영속 → 안전
+        # - jsonb string 잔존 1건 영역은 PostgREST 비교 silent skip (graceful)
+        if hts_avls_threshold > 0:
+            q = q.gte("raw->hts_avls", hts_avls_threshold)
+        if acml_tr_pbmn_threshold > 0:
+            q = q.gte("raw->acml_tr_pbmn", acml_tr_pbmn_threshold)
+
+        return q
+
+    # total count 쿼리
+    try:
+        count_result = await asyncio.to_thread(
+            lambda: _build_query(with_count=True).limit(0).execute()
+        )
+        total = int(getattr(count_result, "count", 0) or 0)
+    except Exception as exc:
+        logger.warning("[stock_master] list_paged_by_filter count 쿼리 실패 graceful: %s", exc)
+        total = 0
+
+    # 데이터 쿼리 (range 페이징)
+    try:
+        data_result = await asyncio.to_thread(
+            lambda: (
+                _build_query(with_count=False)
+                .range(offset, offset + limit - 1)
+                .execute()
+            )
+        )
+        items = data_result.data or []
+    except Exception as exc:
+        logger.warning("[stock_master] list_paged_by_filter data 쿼리 실패 graceful: %s", exc)
+        items = []
+
+    return {
+        "items": items,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
     }
 
 
