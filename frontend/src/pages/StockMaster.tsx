@@ -27,6 +27,7 @@ import {
   refreshUniverseNow,
   refreshBasicsNow,
   refreshDailyNow,
+  refreshMasterNow,  // 사이클 129 — KIS 종목 마스터 파일 적재 수동 trigger
 } from '../api/stock-master'
 import type {
   StockMasterListItem,
@@ -74,6 +75,12 @@ const HIGHLIGHT_KEYS = [
   'bfdy_clpr', 'acml_vol', 'nxt_tradable', 'krx_halted', 'admin_item',
   // 사이클 124 Q2=A 신규 6
   'hts_avls', 'acml_tr_pbmn', 'lstn_stcn', 'prdy_vrss',
+  // 사이클 129 — master_raw 1단계 차단 7건 (Q4=A 마스터 우선 영구 영속)
+  'master_raw.trht_yn', 'master_raw.sltr_yn', 'master_raw.mang_issu_yn',
+  'master_raw.ssts_hot_yn', 'master_raw.stange_runup_yn',
+  'master_raw.mrkt_alrm_cls_code', 'master_raw.invt_alrm_yn',
+  // 사이클 129 — master_raw 시총 (Q12 × 100 영역)
+  'master_raw.prdy_avls_scal',
 ]
 
 // ────────────────────────────────────────────────────────────────────────
@@ -85,7 +92,28 @@ const CATEGORY_KEYS: Record<string, string[]> = {
   '시총/주식수': ['hts_avls', 'lstn_stcn'],
   '거래': ['acml_vol', 'acml_tr_pbmn'],
   '플래그': ['nxt_tradable', 'krx_halted', 'admin_item'],
-  '메타': ['refreshed_at'],
+  // 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 3 카테고리
+  '마스터 진입 차단': [
+    'master_raw.trht_yn', 'master_raw.sltr_yn', 'master_raw.mang_issu_yn',
+    'master_raw.ssts_hot_yn', 'master_raw.stange_runup_yn',
+    'master_raw.mrkt_alrm_cls_code', 'master_raw.invt_alrm_yn',
+    'master_raw.short_over_cls_code', 'master_raw.mrkt_alrm_risk_adnt_yn',
+    'master_raw.insn_pbnt_yn', 'master_raw.byps_lstn_yn', 'master_raw.flng_cls_code',
+  ],
+  '마스터 펀더멘털': [
+    'master_raw.prdy_avls_scal', 'master_raw.lstn_stcn',
+    'master_raw.roe', 'master_raw.sale_account', 'master_raw.bsop_prfi',
+    'master_raw.op_prfi', 'master_raw.thtr_ntin', 'master_raw.cpfn',
+    'master_raw.marg_rate', 'master_raw.crdt_able', 'master_raw.stck_fcam',
+    'master_raw.po_prc', 'master_raw.stck_lstn_date', 'master_raw.prst_cls_code',
+  ],
+  '마스터 지수편입': [
+    'master_raw.kospi200_apnt_cls_code', 'master_raw.kospi100_issu_yn',
+    'master_raw.kospi50_issu_yn', 'master_raw.krx300_issu_yn',
+    'master_raw.ksq150_nmix_yn', 'master_raw.kospi_issu_yn',
+    'master_raw.krx_issu_yn', 'master_raw.vntr_issu_yn',
+  ],
+  '메타': ['refreshed_at', 'master_raw_updated_at'],
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -109,6 +137,46 @@ const FIELD_LABELS: Record<string, string> = {
   // 사이클 124 Q2=A 신규 6
   hts_avls: '시가총액 (백만원)',
   lstn_stcn: '상장 주식수',
+  // 사이클 129 — master_raw 영역 한글 라벨 (KIS 종목 마스터 파일 정본 영구 영속)
+  // Q4=A 마스터 우선 영역 + Q12 시총 환산 × 100 영역
+  master_raw_updated_at: '마스터 갱신시각',
+  // 마스터 진입 차단 (1단계 7건 HIGH)
+  'master_raw.trht_yn': '거래정지',
+  'master_raw.sltr_yn': '정리매매',
+  'master_raw.mang_issu_yn': '관리종목',
+  'master_raw.ssts_hot_yn': '공매도과열',
+  'master_raw.stange_runup_yn': '이상급등',
+  'master_raw.mrkt_alrm_cls_code': '시장경고 (00:없음 01:주의 02:경고 03:위험)',
+  'master_raw.invt_alrm_yn': '투자주의환기 (코스닥)',
+  'master_raw.short_over_cls_code': '단기과열 (0:없음 1:예고 2:지정 3:연장)',
+  'master_raw.mrkt_alrm_risk_adnt_yn': '시장경고 예고',
+  'master_raw.insn_pbnt_yn': '불성실공시',
+  'master_raw.byps_lstn_yn': '우회상장',
+  'master_raw.flng_cls_code': '락구분 (00:없음 01:권리락 02:배당락)',
+  // 마스터 펀더멘털 (재무/시총/상장)
+  'master_raw.prdy_avls_scal': '전일 시가총액 (억)',
+  'master_raw.lstn_stcn': '상장주수 (천주)',
+  'master_raw.roe': 'ROE (%)',
+  'master_raw.sale_account': '매출액',
+  'master_raw.bsop_prfi': '영업이익',
+  'master_raw.op_prfi': '경상이익',
+  'master_raw.thtr_ntin': '당기순이익',
+  'master_raw.cpfn': '자본금',
+  'master_raw.marg_rate': '증거금비율 (%)',
+  'master_raw.crdt_able': '신용가능',
+  'master_raw.stck_fcam': '액면가',
+  'master_raw.po_prc': '공모가',
+  'master_raw.stck_lstn_date': '상장일자',
+  'master_raw.prst_cls_code': '우선주구분 (0:보통 1:구형 2:신형)',
+  // 마스터 지수편입
+  'master_raw.kospi200_apnt_cls_code': 'KOSPI200 섹터',
+  'master_raw.kospi100_issu_yn': 'KOSPI100',
+  'master_raw.kospi50_issu_yn': 'KOSPI50',
+  'master_raw.krx300_issu_yn': 'KRX300',
+  'master_raw.ksq150_nmix_yn': 'KOSDAQ150',
+  'master_raw.kospi_issu_yn': 'KOSPI',
+  'master_raw.krx_issu_yn': 'KRX 종목',
+  'master_raw.vntr_issu_yn': '벤처기업 (코스닥)',
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -646,6 +714,8 @@ export default function StockMaster() {
   // 사이클 126 — 신규 2 mutation toast state (basics/daily refresh)
   const [basicsToast, setBasicsToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [dailyToast, setDailyToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  // 사이클 129 — KIS 종목 마스터 파일 새로고침 toast state (master refresh)
+  const [masterToast, setMasterToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const LIMIT = 100
 
@@ -736,6 +806,36 @@ export default function StockMaster() {
         })
       }
       setTimeout(() => setDailyToast(null), 6000)
+    },
+  })
+
+  // 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 수동 trigger.
+  // Q4=A 마스터 우선 + Q6=C master_raw 별도 컬럼 (사이클 81 G-AST1 raw 분리 영속).
+  // 사이클 127 fire-and-forget BackgroundTasks 패턴 100% 답습.
+  const masterMutation = useMutation({
+    mutationFn: refreshMasterNow,
+    retry: false,
+    onSuccess: () => {
+      setMasterToast({
+        type: 'success',
+        message: '종목마스터 일일 갱신 시작 — 진행 상황은 상단 배너 참고',
+      })
+      queryClient.invalidateQueries({ queryKey: ['refresh-progress'] })
+      setTimeout(() => setMasterToast(null), 6000)
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        setMasterToast({
+          type: 'error',
+          message: '종목마스터 갱신 이미 진행 중 — 상단 배너 참고',
+        })
+      } else {
+        setMasterToast({
+          type: 'error',
+          message: 'KIS API 일시 결함 — 잠시 후 재시도',
+        })
+      }
+      setTimeout(() => setMasterToast(null), 6000)
     },
   })
 
@@ -854,6 +954,16 @@ export default function StockMaster() {
             >
               {dailyMutation.isPending ? '적재 중...' : '일봉 새로고침'}
             </button>
+            {/* 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 적재 (16:30 KST 자동 task 수동 trigger) */}
+            <button
+              data-testid="stock-master-refresh-master-button"
+              onClick={() => masterMutation.mutate()}
+              disabled={masterMutation.isPending}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shrink-0"
+              title="KIS 종목 마스터 파일 (KOSPI 70 / KOSDAQ 64 컬럼) 적재 즉시 trigger"
+            >
+              {masterMutation.isPending ? '적재 중...' : '마스터 새로고침'}
+            </button>
           </div>
         </div>
 
@@ -896,6 +1006,20 @@ export default function StockMaster() {
             }`}
           >
             {dailyToast.message}
+          </div>
+        )}
+
+        {/* 사이클 129 — master 토스트 (KIS 종목 마스터 파일 새로고침) */}
+        {masterToast && (
+          <div
+            data-testid="stock-master-refresh-master-toast"
+            className={`mb-4 px-4 py-2 rounded text-sm font-medium ${
+              masterToast.type === 'success'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {masterToast.message}
           </div>
         )}
 

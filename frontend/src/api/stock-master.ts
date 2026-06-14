@@ -180,6 +180,26 @@ export async function refreshDailyNow(): Promise<RefreshStartedResponse | DailyR
 }
 
 /**
+ * 사이클 129 — POST /api/stock-master/master/refresh (fire-and-forget).
+ *
+ * KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 적재 수동 trigger.
+ * 사이클 129 자동 task (`TIME_STOCK_MASTER_MASTER_LOAD=16:30 KST`) 와 동일 함수 호출.
+ *
+ * 사용자 결정 영구 영속:
+ * - Q4=A 마스터 우선 + Q5=C 전수 보존 + Q6=C master_raw 별도 컬럼
+ * - Q12 시정: 시총 환산 × 100 (사용자 verbatim 정합)
+ *
+ * 사이클 127 fire-and-forget BackgroundTasks 패턴 100% 답습.
+ * 사이클 84 L-2 영속: POST 4번째 화이트리스트 (master/refresh).
+ */
+export async function refreshMasterNow(): Promise<RefreshStartedResponse> {
+  const { data } = await apiClient.post<ApiResponse<RefreshStartedResponse>>(
+    '/stock-master/master/refresh',
+  )
+  return data.data
+}
+
+/**
  * 사이클 127 — GET /api/stock-master/refresh-progress (5초 폴링).
  *
  * 3 작업 (universe / basics / daily) 진행 state 통합 조회.

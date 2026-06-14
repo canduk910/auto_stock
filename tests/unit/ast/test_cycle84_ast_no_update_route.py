@@ -35,6 +35,7 @@ _ALLOWED_POST_ROUTES = {
     "/refresh-universe",       # 사이클 90
     "/basics/refresh",         # 사이클 126 — KIS CTPF1002R 매스 보강 수동 trigger
     "/daily/refresh",          # 사이클 126 — 일봉 적재 수동 trigger
+    "/master/refresh",         # 사이클 129 — KIS 종목 마스터 파일 적재 수동 trigger
 }
 
 

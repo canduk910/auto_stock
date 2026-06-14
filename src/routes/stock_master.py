@@ -84,6 +84,22 @@ async def _run_daily_background(force: bool) -> None:
             _rp.finish_progress("daily", "failed", error_message=str(exc))
 
 
+async def _run_master_background(force: bool) -> None:
+    """사이클 129 — master 백그라운드 task (KIS 종목 마스터 파일 적재).
+
+    once 함수 내부에서 start_progress/update_progress/finish_progress 호출 영속.
+    예외만 catch → finish_progress("failed") 안전망 (사이클 127 패턴 답습).
+    """
+    from src.engine.scanner import _stock_master_master_load_once
+
+    try:
+        await _stock_master_master_load_once(force=force)
+    except Exception as exc:
+        logger.exception("[refresh_master_background] 백그라운드 실패 graceful: %s", exc)
+        if _rp.is_running("master"):
+            _rp.finish_progress("master", "failed", error_message=str(exc))
+
+
 @router.post("/refresh-universe", response_model=ApiResponse)
 async def refresh_universe_now(background_tasks: BackgroundTasks, force: bool = True):
     """사이클 90 (2026-06-09) + 사이클 127 (2026-06-13) — fire-and-forget.
@@ -170,6 +186,40 @@ async def refresh_daily_now(background_tasks: BackgroundTasks, force: bool = Tru
             "task_key": "daily",
         },
         message="daily refresh 시작 — 진행 상황은 /api/stock-master/refresh-progress 폴링",
+    )
+
+
+@router.post("/master/refresh", response_model=ApiResponse)
+async def refresh_master_now(background_tasks: BackgroundTasks, force: bool = True):
+    """사이클 129 (2026-06-13) — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 적재 fire-and-forget.
+
+    사용자 결정 영구 영속:
+    - Q4=A 마스터 우선 + Q5=C 전수 보존 + Q6=C master_raw 별도 컬럼
+    - Q12 시정: 시총 환산 × 100 (사용자 verbatim 정합)
+
+    KIS 정본 (kis-mcp-query 검증):
+    - KOSPI: https://new.real.download.dws.co.kr/common/master/kospi_code.mst.zip
+    - KOSDAQ: https://new.real.download.dws.co.kr/common/master/kosdaq_code.mst.zip
+
+    자동 task = scheduler `TIME_STOCK_MASTER_MASTER_LOAD=16:30 KST` + start() 직후 1회.
+    사이클 127 fire-and-forget BackgroundTasks 패턴 100% 답습.
+    사이클 84 L-2 영속: POST 1개 추가 예외 허용 (화이트리스트 갱신).
+    """
+    if _rp.is_running("master"):
+        raise HTTPException(
+            status_code=409,
+            detail="master refresh 진행 중 — 잠시 후 재시도",
+        )
+
+    background_tasks.add_task(_run_master_background, force=force)
+
+    return ApiResponse(
+        success=True,
+        data={
+            "status": "started",
+            "task_key": "master",
+        },
+        message="master refresh 시작 — 진행 상황은 /api/stock-master/refresh-progress 폴링",
     )
 
 

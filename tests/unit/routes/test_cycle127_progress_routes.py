@@ -183,7 +183,7 @@ async def test_g_route_d4_daily_returns_quickly():
 
 @pytest.mark.asyncio
 async def test_g_route_get1_refresh_progress_schema():
-    """G-ROUTE-GET1: 3 작업 통합 응답 + 10 키 schema."""
+    """G-ROUTE-GET1: 4 작업 통합 응답 + 10 키 schema (사이클 129 master 영역 자동 흡수)."""
     _rp.start_progress("universe", total=2700)
     _rp.update_progress("universe", processed=500, updated=450, skipped=30, failed=20)
 
@@ -191,8 +191,8 @@ async def test_g_route_get1_refresh_progress_schema():
     assert resp.success is True
     data = resp.data
 
-    # 3 작업 모두 응답
-    assert set(data.keys()) == {"universe", "basics", "daily"}
+    # 사이클 129 Q10 hotfix — TASK_KEYS 사용으로 4 작업 자동 흡수
+    assert set(data.keys()) == set(_rp.TASK_KEYS)
 
     # 각 작업 10 키 schema
     expected_keys = {

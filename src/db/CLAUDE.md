@@ -140,6 +140,28 @@ Supabase (PostgreSQL) CRUD 모듈.
 - 영속 의무: KST timestamp `_kst.now_kst_iso()` 사용 (사이클 68 G-10b AST) + raw JSONB 덮어쓰기 금지 (사이클 81 G-AST1 답습)
 - **UI 활용 영역 (사이클 124, 2026-06-12)**: `stock_master_daily` 컬럼 추가 시 UI 동기화 의무 영속 — `GET /api/stock-master/{ticker}/daily?days=N` 라우트 (`src/routes/stock_master.py`) + `frontend/src/pages/StockMaster.tsx::DailyTab` 30 row 테이블. `get_stats()` 응답에 `total_daily_rows` + `last_daily_load_at` 노출. 절차 상세는 `frontend/CLAUDE.md` 사이클 124 본문 참조
 
+## stock_master.py — 사이클 129 master_raw 별도 컬럼 (2026-06-14)
+
+KIS 공식 일일 마스터 파일 (`kospi_code.mst` / `kosdaq_code.mst`) 영역 = `master_raw JSONB` 별도 컬럼 영구 영속 (사이클 81 G-AST1 영속 절대 보호 = raw 영역 변경 0). migration 034 `IF NOT EXISTS` idempotent 영속.
+
+### `master_raw` 컬럼 영역 (migration 034)
+
+- 컬럼: `master_raw JSONB NOT NULL DEFAULT '{}'::jsonb` + `master_raw_updated_at TIMESTAMPTZ`
+- 인덱스 2건: GIN (master_raw 키 검색) + DESC NULLS LAST (갱신 시각 진단)
+- 사이클 81 G-AST1 영속 보호: `raw` 영역 변경 0 (`bfdy_clpr` / `hts_avls` 덮어쓰기 0 영속) — AST `tests/unit/ast/test_cycle129_ast_master_raw_separation.py` 영구 가드
+
+### CRUD 함수 영역 (사이클 129, +77L 영속)
+
+- `upsert_master_raw(ticker, master_raw: dict) -> None` — master_raw JSONB upsert + `master_raw_updated_at` KST 강제 (사이클 68 `_kst.now_kst_iso()` 영속)
+- `get_master_raw(ticker) -> Optional[dict]` — 단건 조회 (lazy fallback 없음, 16:30 KST 매스 적재 영역)
+- `count_master_raw_today() -> int` — KST 영업일 기준 master_raw_updated_at 카운트 (운영 진단 영역)
+
+### 호출자 영역
+
+- `src/engine/scanner.py::_stock_master_master_load_once()` (사이클 129) 16:30 KST 매스 적재
+- `src/engine/scanner.py::get_market_cap_millions(ticker)` (사이클 129) master_raw 우선 + raw 폴백 chain
+- `src/engine/scanner.py::_is_master_blocked_for_entry(ticker)` (사이클 129) 1단계 차단 7건 hook
+
 ## stock_master.py — 종목마스터 조회 영역 (사이클 128, 2026-06-13)
 
 사이클 126이 `count_all` 만 `count="exact"` 별도 쿼리로 시정. 나머지 4 카운트는 `.range(0, 9999)` raw 후 Python-side `sum()` 영속 → **Supabase PostgREST `max-rows` 1,000행 silent cap** → 4 카운트 부분 집계 (`nxt_tradable_count` 운영 실측 400 → UI ~150 silent 결함). 사이클 128 시정 = 4 카운트 모두 `count="exact"` + filter 별도 쿼리 (사이클 126 패턴 100% 답습).

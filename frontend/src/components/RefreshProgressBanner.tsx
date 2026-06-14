@@ -11,9 +11,10 @@ const TASK_LABELS: Record<RefreshTaskKey, string> = {
   universe: '종목마스터 새로고침',
   basics: '기본정보 새로고침 (NXT/거래정지/관리종목)',
   daily: '일봉 새로고침 (30일)',
+  master: '종목마스터 일일 갱신 (KIS 마스터 파일)',  // 사이클 129
 }
 
-const TASK_ORDER: RefreshTaskKey[] = ['universe', 'basics', 'daily']
+const TASK_ORDER: RefreshTaskKey[] = ['universe', 'basics', 'daily', 'master']  // 사이클 129 — master 4 확장
 
 function formatElapsed(ms: number): string {
   if (ms <= 0) return '0초'

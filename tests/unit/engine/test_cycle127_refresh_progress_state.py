@@ -37,7 +37,9 @@ def test_g_state1_initial_schema():
         "status", "total", "processed", "updated", "skipped", "failed",
         "started_at", "finished_at", "elapsed_ms", "error_message",
     }
-    for task_key in ("universe", "basics", "daily"):
+    # 사이클 129 Q10 hotfix — hardcode 3개 → TASK_KEYS 의미 전환 (사이클 66 K-2 패턴 답습).
+    # 사이클 129 master TaskKey 4 확장 영역 자동 흡수.
+    for task_key in _rp.TASK_KEYS:
         state = _rp.get_progress(task_key)
         assert set(state.keys()) == expected_keys, (
             f"{task_key} 초기 schema 불일치"
@@ -159,16 +161,18 @@ def test_g_state8_deep_copy_isolation():
 
 
 def test_g_state_get_all_progress():
-    """get_all_progress() 3 작업 통합 응답."""
+    """get_all_progress() 4 작업 통합 응답 (사이클 129 master 영역 자동 흡수)."""
     _rp.start_progress("universe", total=100)
     _rp.start_progress("basics", total=200)
-    # daily 는 idle
+    # daily / master 는 idle
 
     all_state = _rp.get_all_progress()
-    assert set(all_state.keys()) == {"universe", "basics", "daily"}
+    # 사이클 129 Q10 hotfix — TASK_KEYS 사용으로 4 작업 자동 흡수
+    assert set(all_state.keys()) == set(_rp.TASK_KEYS)
     assert all_state["universe"]["status"] == "running"
     assert all_state["basics"]["status"] == "running"
     assert all_state["daily"]["status"] == "idle"
+    assert all_state["master"]["status"] == "idle"
 
 
 def test_g_state_invalid_task_key():

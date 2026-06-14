@@ -87,6 +87,51 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - `is_insufficient_quantity(KisApiError) -> bool`: 보유 부족 매도 실패. msg1 키워드 ("부족" + "매도가능/보유수량/잔고") + `APBK0918` 은 보유 키워드 동반 시만 True. 매도 즉시 break 결정용
 - `is_market_order_disallowed(KisApiError) -> bool`: 시장가 거부. msg1 키워드 `_MARKET_ORDER_DISALLOWED_KEYWORDS`: `시장가매매불가` / `시장가 매매 불가` / `시장가 주문 불가` / `시장가 호가 불가` / `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리`. 기존 3종과 **상호 배타** — True 면 다른 3종 False. msg_cd 누적: APBK1943 (계양전기 매도) + APBK3013 (NXT 애프터 매도). `docs/kis/error-codes.md` 4-2절 / 5-4절
 
+## kis_master.py — KIS 공식 일일 마스터 파일 (사이클 129, 2026-06-14)
+
+KIS 공식 다운로드 (`https://new.real.download.dws.co.kr/common/master/`) 일일 마스터 파일 (`kospi_code.mst.zip` / `kosdaq_code.mst.zip`) cp949 fixed-width 파싱 → DataFrame → upsert. 매일 16:30 KST 자동 갱신 (사이클 122/126 task 패턴 답습 + 사이클 127 fire-and-forget).
+
+### URL 정본 (KIS 공식 저장소 검증 확정)
+
+- KOSPI: `https://new.real.download.dws.co.kr/common/master/kospi_code.mst.zip` (cp949, 70 컬럼, 후미 227 byte)
+- KOSDAQ: `https://new.real.download.dws.co.kr/common/master/kosdaq_code.mst.zip` (cp949, 64 컬럼, 후미 221 byte)
+
+### 함수 영역
+
+- `async def download_kospi_master(target_dir: Path) -> Path` — KOSPI ZIP 다운로드 + 압축 해제
+- `async def download_kosdaq_master(target_dir: Path) -> Path` — KOSDAQ 동일
+- `def parse_kospi_master(mst_file: Path) -> pd.DataFrame` — 70 컬럼 fixed-width 파싱 (제조업 / 지배구조 / KOSPI200섹터 / KOSPI100 / KOSPI50 / SPAC / KRX증권 / KRX선박 / SRI / KOSPI 포함)
+- `def parse_kosdaq_master(mst_file: Path) -> pd.DataFrame` — 64 컬럼 (KOSDAQ 전용 `vntr_issu_yn` 벤처기업 / `invt_alrm_yn` 투자주의환기 / `ksq150_nmix_yn` KOSDAQ150 3건)
+- `async def fetch_all_master() -> pd.DataFrame` — KOSPI + KOSDAQ 통합 (`market` 컬럼 추가)
+
+### SSL 옵션 C (사이클 129 domain-consult 채택)
+
+- httpx + `verify=True` 우선 (운영 보안)
+- 폴백: `verify=False` (KIS 인증서 영역 검증 미통과 그래스풀)
+- `ssl._create_unverified_context` 영역 (사용자 샘플) 영구 폐기
+
+### 매매 활용 키 ~30 (사이클 129 domain-consult 의제 4 확정)
+
+- 진입 차단 7건 (HIGH): `trht_yn` 거래정지 / `mang_issu_yn` 관리종목 / `ssts_hot_yn` 공매도과열 / `stange_runup_yn` 이상급등 / `sltr_yn` 정리매매 / `mrkt_alrm_cls_code` 시장경고 / `invt_alrm_yn` 투자주의환기 (코스닥 전용)
+- 시총: `prdy_avls_scal` 전일 시가총액 (**억 원**, × 100 → 백만원 환산 헬퍼 `scanner.market_cap_master_to_millions`)
+- 재무: `roe` / `sale_account` 매출액 / `bsop_prfi` 영업이익 / `op_prfi` 경상이익 / `thtr_ntin` 당기순이익
+- 지수편입: `kospi200_apnt_cls_code` / `kospi100_issu_yn` / `kospi50_issu_yn` / `ksq150_nmix_yn` / `krx300_issu_yn` / `krx_yn`
+- 시장 영역: `lstn_stcn` 상장주수 (천주) / `cpfn` 자본금 / `marg_rate` 증거금비율 / `crdt_able` 신용가능
+- 기타: `stck_lstn_date` 상장일자 / `po_prc` 공모가 / `prst_cls_code` 우선주 / `byps_lstn_yn` 우회상장 / `flng_cls_code` 락구분 / `short_over_cls_code` 단기과열 / `insn_pbnt_yn` 불성실공시
+
+### 단위 환산 (사이클 129 Q12, × 100)
+
+- `prdy_avls_scal` (KIS 마스터) = **억 원** (1 억 = 100,000,000 원 = 100 백만원)
+- `hts_avls` (KIS API FHKST01010100, 사이클 116) = **백만원**
+- 환산식: `prdy_avls_scal × 100 = hts_avls 단위` (사이클 116 패턴 답습)
+- 정합 검증 임계: ±5% 정상 / ±5%~±20% WARNING + master_raw 우선 / >±20% CRITICAL + raw 폴백 (사이클 88 G-REJECT graceful)
+
+### 호출자
+
+- `src/engine/scanner.py::_stock_master_master_load_once()` — 다운로드 + 파싱 + `stock_master.upsert_master_raw()` 배치 + emit
+- `src/engine/scheduler.py::_stock_master_master_load_task_loop()` — 16:30 KST 자동 task lifecycle
+- `src/routes/stock_master.py::refresh_master_now()` — POST `/api/stock-master/master/refresh` 수동 trigger (BackgroundTasks fire-and-forget)
+
 ## krx.py — KRX 정식 OPEN API 클라이언트 (사이클 112 + 사이클 115)
 
 KRX Data Marketplace (openapi.krx.co.kr) 정식 OPEN API 호출 모듈. KIS OpenAPI 와 완전 분리된 별개 시스템.

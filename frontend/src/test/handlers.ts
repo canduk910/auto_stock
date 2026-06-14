@@ -238,6 +238,10 @@ export const handlers = [
   http.post(`${base}/stock-master/daily/refresh`, () =>
     HttpResponse.json(wrap({ status: 'started', task_key: 'daily' }), { status: 202 })
   ),
+  // 사이클 129 — KIS 종목 마스터 파일 적재 fire-and-forget
+  http.post(`${base}/stock-master/master/refresh`, () =>
+    HttpResponse.json(wrap({ status: 'started', task_key: 'master' }), { status: 202 })
+  ),
   // 사이클 127 — GET refresh-progress (5초 폴링 + RefreshProgressBanner).
   // 디폴트 = 3 작업 모두 idle (배너 미표시).
   http.get(`${base}/stock-master/refresh-progress`, () =>
@@ -268,6 +272,19 @@ export const handlers = [
           error_message: null,
         },
         daily: {
+          status: 'idle',
+          total: 0,
+          processed: 0,
+          updated: 0,
+          skipped: 0,
+          failed: 0,
+          started_at: null,
+          finished_at: null,
+          elapsed_ms: 0,
+          error_message: null,
+        },
+        // 사이클 129 — master 4번째 작업 영역 (KIS 종목 마스터 파일 16:30 KST)
+        master: {
           status: 'idle',
           total: 0,
           processed: 0,

@@ -164,9 +164,48 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 - **안내 배너 갱신** (사이클 64): "**WebSocket 구독 대상 필터** — 임계 외 종목은 시세 구독 자체 차단. 보유/익일청산 종목은 절대 제외 안 됨" (사이클 62 "매수 신호 차단" 표현 폐기 + 사이클 32 R4 universe guard 보호 영속 명시)
 - 회귀 가드 4 vitest 케이스 (사이클 62 5 → 사이클 64 4, mode 토글 F-5 폐기): F-1 fetch 후 렌더 + mode select 미존재 검증 / F-2 슬라이더 변경 / F-3 저장 + toast (body 에 mode 미포함) / F-4 max<min 가드
 
-## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 → 사이클 126/127/128 확장)
+## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 → 사이클 126/127/128/129 확장)
 
 사이클 85 (2026-06-09) 최초 도입: 4 카드 + list 페이징 + detail 모달 + history 테이블.
+
+### 사이클 129 (2026-06-14) — KIS 공식 일일 마스터 파일 4번째 새로고침 버튼
+
+사용자 verbatim "종목마스터 만들 때 아래 소스코드 참고해줘" + KIS 공식 샘플 코드 제공. 사용자 결정 Q4=A 마스터 우선 + Q12=A × 100 단위 환산.
+
+#### 4번째 "마스터 새로고침" 버튼 (deep purple 톤)
+
+- POST `/api/stock-master/master/refresh` fire-and-forget (사이클 127 패턴)
+- `useMutation` + `refreshMasterNow()` API
+- onSuccess: "마스터 새로고침 시작 — 진행 상황은 상단 배너 참고"
+- onError 409 분기: "마스터 이미 진행 중"
+- `invalidateQueries(['refresh-progress'])` 즉시 호출
+- testid: `stock-master-refresh-master-button`
+
+#### TaskKey 4 확장 (RefreshProgressBanner 자동 흡수)
+
+- `TASK_ORDER = ['universe', 'basics', 'daily', 'master']`
+- `TASK_LABELS['master'] = '종목마스터 일일 갱신'` (한글 친숙 용어, 사이클 89 영속)
+- 5초/60초 동적 폴링 영속 (사이클 127)
+
+#### FIELD_LABELS master_raw ~30 키 매핑
+
+CATEGORY_KEYS master 카테고리 추가. master_raw JSONB 키 → 한글 라벨:
+- 진입 차단 7건: 거래정지 / 관리종목 / 공매도과열 / 이상급등 / 정리매매 / 시장경고 / 투자주의환기 (코스닥)
+- 시총: 전일 시가총액 (억)
+- 재무: ROE / 매출액 / 영업이익 / 경상이익 / 당기순이익
+- 지수편입: KOSPI200섹터 / KOSPI100 / KOSPI50 / KOSDAQ150 / KRX300 / KRX
+- 시장 영역: 상장주수 (천주) / 자본금 / 증거금비율 / 신용가능
+- 기타: 상장일자 / 공모가 / 우선주 / 우회상장 / 락구분 / 단기과열 / 불성실공시
+
+#### 영속 의무
+
+- 사이클 65 H3 useQuery retry:1
+- 사이클 68 KST 강제
+- 사이클 80 hotfix #3 Playwright LIFO (master endpoint wildcard *전* 등록)
+- 사이클 89 한글 친숙 용어 ("마스터 새로고침" / "종목마스터 일일 갱신")
+- 사이클 124 UI 동기화 영구 가드 (master_raw 키 추가 = FIELD_LABELS / CATEGORY_KEYS / API / Playwright LIFO 6단계 절차 영속)
+- 사이클 127 RefreshProgressBanner + 동적 폴링 + invalidateQueries
+- 사이클 128 envelope 응답 영속 (master endpoint 미해당)
 
 ### 사이클 128 (2026-06-13) — 종목목록 4 필터 신규 + 전체현황 silent cap 시정
 

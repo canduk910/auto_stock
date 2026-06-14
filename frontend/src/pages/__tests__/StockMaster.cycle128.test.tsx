@@ -88,6 +88,7 @@ function setupEnvelopeHandlers(opts?: {
           universe: { status: 'idle' },
           basics: { status: 'idle' },
           daily: { status: 'idle' },
+          master: { status: 'idle' },  // 사이클 129 — TaskKey 4 확장 영역
         }),
       ),
     ),

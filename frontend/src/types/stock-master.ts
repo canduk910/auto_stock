@@ -48,6 +48,11 @@ export interface StockMasterListItem {
   admin_item: boolean
   refreshed_at: string  // KST +09:00 ISO
   raw: Record<string, unknown>
+  // 사이클 129 — master_raw 별도 컬럼 영역 (Q6=C 영속 + 사이클 81 G-AST1 raw 분리 보호).
+  // KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) record 영역.
+  // KOSPI 70 컬럼 / KOSDAQ 64 컬럼 (전체 ~70 컬럼 영역, Q4=A 마스터 우선).
+  master_raw?: Record<string, unknown> | null
+  master_raw_updated_at?: string | null  // KST +09:00 ISO (16:30 task 갱신 시각)
 }
 
 /**
@@ -134,7 +139,9 @@ export interface DailyRefreshResult {
  * "KIS API 일시 결함" 토스트. 진짜 결함 = axios 디폴트 timeout silent 결함.
  * 시정: POST 라우트 fire-and-forget + GET /refresh-progress 5초 폴링.
  */
-export type RefreshTaskKey = 'universe' | 'basics' | 'daily'
+// 사이클 129 — master TaskKey 4 확장 (universe/basics/daily/master).
+// 백엔드 src/engine/refresh_progress.py L34 Literal + L37 tuple 2 위치 동행 영속.
+export type RefreshTaskKey = 'universe' | 'basics' | 'daily' | 'master'
 export type RefreshStatus = 'idle' | 'running' | 'completed' | 'failed'
 
 export interface RefreshStartedResponse {
@@ -168,4 +175,5 @@ export interface AllRefreshProgress {
   universe: RefreshProgress
   basics: RefreshProgress
   daily: RefreshProgress
+  master: RefreshProgress  // 사이클 129 — KIS 종목 마스터 파일 (16:30 KST) 적재 진행 영역
 }

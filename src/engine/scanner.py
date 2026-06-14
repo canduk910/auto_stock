@@ -2408,3 +2408,274 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
     )
 
     return summary
+
+
+# ============================================================
+# 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst)
+# Q4=A 마스터 우선 + Q5=C 전수 보존 + Q6=C master_raw 별도 컬럼
+# Q12 시정 영구 영속: 시총 환산 × 100 (사용자 verbatim 정합)
+# ============================================================
+
+
+def market_cap_master_to_millions(master_value_eok) -> int:
+    """KIS 마스터 시총 (억) → KIS API hts_avls 단위 (백만원) 환산.
+
+    환산식 영구 영속 (Q12 시정):
+    - 1 억 원 = 100,000,000 원 = 100 백만원 → × 100
+    - 사용자 verbatim "× 100" 정합 검증 후 정정 영속.
+    - 결함 사유: team-leader 자체 자문 영역 초기 "× 10,000" 단위 결함 → "× 100" 정합.
+
+    Args:
+        master_value_eok: 마스터 시총 (억 단위, int 또는 str — 공백 자동 처리)
+
+    Returns:
+        백만원 단위 시총 (raw.hts_avls 영역 정합).
+    """
+    try:
+        val = int(str(master_value_eok).strip() or "0")
+    except (ValueError, TypeError):
+        return 0
+    return val * 100
+
+
+def validate_market_cap_consistency(
+    master_eok: int, raw_millions: int
+) -> tuple[str, float]:
+    """master_raw (억) vs raw.hts_avls (백만원) 정합 검증.
+
+    domain-consult 의제 2 채택 영구 영속:
+    - ±5% 이내 = OK (정상 영역)
+    - ±5% 초과 ~ ±20% 이내 = WARNING (master_raw 우선 + 로그)
+    - ±20% 초과 = ERROR (raw 폴백 + scanner 진입 차단 + G-REJECT graceful)
+
+    0/비결정 영역 = OK (skip — 정합 검증 회피).
+
+    Args:
+        master_eok: master_raw.prdy_avls_scal (억 단위)
+        raw_millions: raw.hts_avls (백만원 단위)
+
+    Returns:
+        (grade, diff_pct) — grade ∈ {"OK", "WARNING", "ERROR"} / diff_pct float
+    """
+    # 0/비결정 영역 회피
+    if not master_eok or not raw_millions:
+        return "OK", 0.0
+
+    master_millions = market_cap_master_to_millions(master_eok)
+    if master_millions == 0:
+        return "OK", 0.0
+
+    diff_ratio = (
+        abs(master_millions - raw_millions) / max(master_millions, raw_millions) * 100
+    )
+
+    if diff_ratio <= 5.0:
+        return "OK", diff_ratio
+    elif diff_ratio <= 20.0:
+        return "WARNING", diff_ratio
+    else:
+        return "ERROR", diff_ratio
+
+
+def _is_master_blocked_for_entry(master_raw: dict) -> tuple[bool, str]:
+    """1단계 차단 영역 — 7건 매수 진입 차단 분기 (domain-consult 의제 4).
+
+    Q4=A 마스터 우선 영역 영구 영속:
+    - trht_yn (거래정지) / sltr_yn (정리매매) / mang_issu_yn (관리종목)
+    - ssts_hot_yn (공매도과열) / stange_runup_yn (이상급등)
+    - mrkt_alrm_cls_code >= "02" (시장경고 경고/위험)
+    - invt_alrm_yn (KOSDAQ 투자주의환기)
+
+    master_raw 부재 시 통과 (raw 폴백 chain 영속).
+
+    Args:
+        master_raw: stock_master.master_raw dict 영역
+
+    Returns:
+        (blocked: bool, reason: str) — blocked True 시 매수 진입 차단
+    """
+    if not master_raw or not isinstance(master_raw, dict):
+        return False, ""
+
+    if master_raw.get("trht_yn") == "Y":
+        return True, "거래정지 (trht_yn=Y)"
+    if master_raw.get("sltr_yn") == "Y":
+        return True, "정리매매 (sltr_yn=Y)"
+    if master_raw.get("mang_issu_yn") == "Y":
+        return True, "관리종목 (mang_issu_yn=Y)"
+    if master_raw.get("ssts_hot_yn") == "Y":
+        return True, "공매도과열 (ssts_hot_yn=Y)"
+    if master_raw.get("stange_runup_yn") == "Y":
+        return True, "이상급등 (stange_runup_yn=Y)"
+
+    # 시장경고 02:경고 / 03:위험 영역 차단
+    mrkt_alrm = master_raw.get("mrkt_alrm_cls_code", "00")
+    if isinstance(mrkt_alrm, str) and mrkt_alrm >= "02":
+        return True, f"시장경고 ({mrkt_alrm})"
+
+    # KOSDAQ 전용 — 투자주의환기
+    if master_raw.get("invt_alrm_yn") == "Y":
+        return True, "투자주의환기 (invt_alrm_yn=Y, KOSDAQ)"
+
+    return False, ""
+
+
+def get_market_cap_millions(master_raw: dict, raw: dict) -> int:
+    """시총 영역 통합 헬퍼 — master_raw 우선 + raw 폴백 (Q4=A 영속).
+
+    domain-consult 의제 3 키별 우선순위 영역 영구 영속:
+    1. master_raw.prdy_avls_scal (억) 우선 → × 100 백만원 환산
+    2. master_raw 부재 시 raw.hts_avls (백만원) 폴백 (사이클 116 패턴)
+    3. 양쪽 부재 → 0 (graceful)
+
+    Args:
+        master_raw: stock_master.master_raw dict
+        raw: stock_master.raw dict (사이클 81 G-AST1 영역, 변경 0)
+
+    Returns:
+        백만원 단위 시총 (스캐너 필터 영역 정합).
+    """
+    # 1순위: master_raw 영역 (Q4=A)
+    if master_raw and isinstance(master_raw, dict):
+        master_eok = master_raw.get("prdy_avls_scal")
+        if master_eok:
+            try:
+                eok_int = int(str(master_eok).strip() or "0")
+                if eok_int > 0:
+                    return market_cap_master_to_millions(eok_int)
+            except (ValueError, TypeError):
+                pass
+
+    # 2순위: raw.hts_avls 폴백 (사이클 116 영속)
+    if raw and isinstance(raw, dict):
+        hts_avls = raw.get("hts_avls")
+        if hts_avls:
+            try:
+                return int(str(hts_avls).strip() or "0")
+            except (ValueError, TypeError):
+                return 0
+
+    # 3순위: 양쪽 부재 → graceful
+    return 0
+
+
+async def _stock_master_master_load_once(force: bool = True) -> dict:
+    """사이클 129 — KIS 종목 마스터 파일 (KOSPI + KOSDAQ) 일괄 적재.
+
+    16:30 KST cron task 영역 영구 영속:
+    - KOSPI master 다운로드 → cp949 fixed-width 파싱 → master_raw upsert
+    - KOSDAQ master 다운로드 → cp949 fixed-width 파싱 → master_raw upsert
+    - raw 영역 변경 0 영속 (사이클 81 G-AST1 보호)
+    - 사이클 127 refresh_progress hook + fire-and-forget 영속
+
+    Args:
+        force: 디폴트 True (사이클 120 force 영속 답습)
+
+    Returns:
+        summary dict: {kospi_count, kosdaq_count, total, updated, failed, elapsed_ms}
+    """
+    import time
+
+    from src.api import kis_master as _kis_master
+    from src.db import stock_master as _sm
+    from src.engine import refresh_progress as _rp
+
+    _rp.start_progress("master", total=0)
+
+    start = time.monotonic()
+    summary: dict = {
+        "kospi_count": 0,
+        "kosdaq_count": 0,
+        "total": 0,
+        "updated": 0,
+        "failed": 0,
+        "elapsed_ms": 0,
+    }
+
+    # KOSPI 다운로드 (graceful)
+    kospi_records: list[dict] = []
+    try:
+        kospi_records = await _kis_master.download_kospi_master()
+        summary["kospi_count"] = len(kospi_records)
+    except Exception as exc:
+        logger.warning(
+            "[stock_master_master_load] KOSPI 다운로드 실패 graceful: %s", exc
+        )
+
+    # KOSDAQ 다운로드 (graceful)
+    kosdaq_records: list[dict] = []
+    try:
+        kosdaq_records = await _kis_master.download_kosdaq_master()
+        summary["kosdaq_count"] = len(kosdaq_records)
+    except Exception as exc:
+        logger.warning(
+            "[stock_master_master_load] KOSDAQ 다운로드 실패 graceful: %s", exc
+        )
+
+    all_records = kospi_records + kosdaq_records
+    summary["total"] = len(all_records)
+    _rp.update_progress("master", total=len(all_records))
+
+    logger.info(
+        "[stock_master_master_load_begin] kospi=%d kosdaq=%d total=%d force=%s",
+        summary["kospi_count"], summary["kosdaq_count"], summary["total"], force,
+    )
+
+    if not all_records:
+        summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+        logger.warning("[stock_master_master_load] 마스터 record 0건 — skip")
+        _rp.finish_progress(
+            "master", "completed",
+            total=0, processed=0, updated=0, skipped=0, failed=0,
+        )
+        return summary
+
+    # master_raw 일괄 upsert (사이클 81 G-AST1 영속 보호 = raw 변경 0)
+    for idx, record in enumerate(all_records):
+        ticker = (record.get("mksc_shrn_iscd") or "").strip()
+        if not ticker or len(ticker) != 6 or not ticker.isdigit():
+            summary["failed"] += 1
+            continue
+
+        try:
+            await _sm.upsert_master_raw(ticker, record)
+            summary["updated"] += 1
+        except Exception as exc:
+            logger.warning(
+                "[stock_master_master_load_skip] ticker=%s reason=upsert_failed err=%s",
+                ticker, exc,
+            )
+            summary["failed"] += 1
+
+        # 사이클 127 — 진행 state 갱신 (500건마다)
+        if (idx + 1) % 500 == 0:
+            _rp.update_progress(
+                "master",
+                processed=idx + 1,
+                updated=summary["updated"],
+                failed=summary["failed"],
+            )
+            elapsed = int((time.monotonic() - start) * 1000)
+            logger.info(
+                "[stock_master_master_load] 진행 %d/%d updated=%d failed=%d elapsed_ms=%d",
+                idx + 1, len(all_records),
+                summary["updated"], summary["failed"], elapsed,
+            )
+
+    summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+    logger.info(
+        "[stock_master_master_load_summary] kospi=%d kosdaq=%d total=%d "
+        "updated=%d failed=%d elapsed_ms=%d",
+        summary["kospi_count"], summary["kosdaq_count"], summary["total"],
+        summary["updated"], summary["failed"], summary["elapsed_ms"],
+    )
+
+    _rp.finish_progress(
+        "master", "completed",
+        total=summary["total"],
+        processed=len(all_records),
+        updated=summary["updated"],
+        failed=summary["failed"],
+    )
+
+    return summary

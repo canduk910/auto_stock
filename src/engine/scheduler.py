@@ -63,6 +63,7 @@ TIME_KRX_MAIN_BUY_STOP = time(15, 20)      # KRX 메인 신규 매수 중단 + �
 TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 (종가 흡수 마진 시작, _force_clear_main_only 가드 기준)
 TIME_STOCK_MASTER_DAILY_LOAD = time(16, 0) # 사이클 122 — KIS 일봉 일괄 적재 (KRX 메인 종료 30분 후 안전 마진)
 TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF1002R 매스 보강 (일봉 task 직후 10분 마진)
+TIME_STOCK_MASTER_MASTER_LOAD = time(16, 30)  # 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 일괄 적재 (basics task 직후 20분 마진, domain-consult 의제 5 옵션 A)
 TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
 TIME_RECOMMENDATION = time(20, 0)          # AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동 — 백테스트 검증 정합성)
 TIME_FULL_UNIVERSE_LOAD = time(20, 0, 5)   # 사이클 101 — 전체 유니버스 적재 (AI자문 직후 5초 마진)
@@ -521,6 +522,14 @@ class TradingScheduler:
                 self._stock_master_basics_refresh_task_loop()
             )
 
+            # 사이클 129 (2026-06-13) — 매일 16:30 KST KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 일괄 적재 task.
+            # Q4=A 마스터 우선 + Q6=C master_raw 별도 컬럼 (사이클 81 G-AST1 raw 분리 영속).
+            # domain-consult 의제 5 옵션 A 채택 — 16:30 KST 단일 task (D-1 영업일 종가 기준 = 17시간 lag 영역 명시 수용).
+            # 사이클 122/126 패턴 100% 답습 (lifecycle race 차단 + start() 즉시 1회 + while).
+            self._stock_master_master_load_task = asyncio.create_task(
+                self._stock_master_master_load_task_loop()
+            )
+
             now = datetime.now().time()
 
             # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
@@ -778,6 +787,7 @@ class TradingScheduler:
                 "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
                 "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
                 "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
+                "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -900,6 +910,7 @@ class TradingScheduler:
                     "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
                     "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
                 "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
+                "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -931,6 +942,7 @@ class TradingScheduler:
             "_full_universe_load_task",       # 사이클 101 추가 — Q68=A+Q69=B 대체 daily 적재 task
             "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
             "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
+            "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -2828,6 +2840,70 @@ class TradingScheduler:
                 break
             except Exception:
                 logger.exception("[stock_master_basics_refresh] task loop 예외 graceful")
+                await asyncio.sleep(60)
+
+    async def _stock_master_master_load_task_loop(self) -> None:
+        """사이클 129 (2026-06-13) — 매일 16:30 KST KIS 종목 마스터 파일 적재 task.
+
+        KIS 정본 (kis-mcp-query 검증 영구 영속):
+        - KOSPI master = kospi_code.mst.zip (cp949, 후미 228 byte, part2 70 컬럼)
+        - KOSDAQ master = kosdaq_code.mst.zip (cp949, 후미 222 byte, part2 64 컬럼)
+
+        사용자 결정 영구 영속:
+        - Q4=A 마스터 우선 + Q5=C 전수 보존 + Q6=C master_raw 별도 컬럼
+        - Q12 시정: 시총 환산 × 100 (사용자 verbatim 정합)
+
+        lifecycle (사이클 122/126 task 100% 답습):
+        - start() 직후 즉시 1회 실행 → 빠른 운영 가시화 + lifecycle race 영구 차단
+        - while 루프 _wait_until(16:30:00) 무한 루프 + asyncio.sleep(60) 안전 마진
+        - stop() task_attrs 튜플에 _stock_master_master_load_task 포함 (사이클 79 G-AST2 영속)
+
+        emit (사이클 122 collector 패턴 답습):
+        - [stock_master_master_load_summary] — 적재 완료 후 1행 INFO
+
+        영속 의무:
+        - 사이클 17 KIS LMS chain 안전 (50ms sleep 영역 영속, kis_master.py 영역)
+        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
+        - 사이클 81 G-AST1 영속 (master_raw 별도 컬럼 = raw 변경 0)
+        - 사이클 88 G-REJECT graceful (KOSPI 또는 KOSDAQ 단독 실패 → 다른 쪽 계속)
+        - 사이클 106 lifecycle race 차단
+        - 사이클 127 fire-and-forget + refresh_progress 영속
+        - domain-consult 의제 5 옵션 A 채택 (16:30 KST 단일 task + 17시간 lag 명시 수용)
+        """
+        from src.engine.scanner import _stock_master_master_load_once
+
+        # 사이클 122 패턴 답습 — start() 직후 즉시 1회 실행
+        try:
+            summary = await _stock_master_master_load_once()
+            logger.info(
+                "[stock_master_master_load] 초기 실행 완료 kospi=%d kosdaq=%d "
+                "total=%d updated=%d failed=%d elapsed_ms=%d",
+                summary.get("kospi_count", 0), summary.get("kosdaq_count", 0),
+                summary.get("total", 0), summary.get("updated", 0),
+                summary.get("failed", 0), summary.get("elapsed_ms", 0),
+            )
+        except asyncio.CancelledError:
+            return
+        except Exception:
+            logger.exception("[stock_master_master_load] 초기 실행 예외 graceful")
+
+        while self._running:
+            try:
+                await self._wait_until(TIME_STOCK_MASTER_MASTER_LOAD)  # 16:30 KST
+                if not self._running:
+                    break
+                summary = await _stock_master_master_load_once()
+                logger.info(
+                    "[stock_master_master_load] 정기 실행 완료 kospi=%d kosdaq=%d "
+                    "total=%d updated=%d failed=%d elapsed_ms=%d",
+                    summary.get("kospi_count", 0), summary.get("kosdaq_count", 0),
+                    summary.get("total", 0), summary.get("updated", 0),
+                    summary.get("failed", 0), summary.get("elapsed_ms", 0),
+                )
+            except asyncio.CancelledError:
+                break
+            except Exception:
+                logger.exception("[stock_master_master_load] task loop 예외 graceful")
                 await asyncio.sleep(60)
 
     def _detect_silent_inactive_sessions(self) -> list[str]:

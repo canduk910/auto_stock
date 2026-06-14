@@ -93,6 +93,75 @@ async def get(ticker: str) -> Optional[StockBasics]:
     return _from_row(rows[0])
 
 
+# ============================================================
+# 사이클 129 — master_raw 영역 영구 영속
+#
+# Q6=C 별도 컬럼 영역 영속 (사이클 81 G-AST1 영속 보호).
+# raw 영역 절대 변경 0 영속 의무.
+# ============================================================
+
+
+async def upsert_master_raw(ticker: str, master_raw: dict) -> None:
+    """KIS 마스터 파일 record 영역 upsert (master_raw 컬럼 단독 영역).
+
+    사이클 81 G-AST1 영속 보호 영역 = raw 영역 변경 0 영구 영속.
+    KST timestamp 영속 의무 (사이클 68 G-10b 답습).
+
+    Args:
+        ticker: 6자리 KRX 단축코드 영역
+        master_raw: KIS 마스터 record (mksc_shrn_iscd + part1 + part2 영역)
+    """
+    payload = {
+        "ticker": ticker,
+        "master_raw": dict(master_raw or {}),
+        "master_raw_updated_at": now_kst_iso(),
+    }
+    await asyncio.to_thread(
+        lambda: (
+            supabase.table(TABLE_NAME)
+            .upsert(payload, on_conflict="ticker")
+            .execute()
+        )
+    )
+
+
+async def get_master_raw(ticker: str) -> Optional[dict]:
+    """master_raw 영역 단건 조회 (NULL/{} 영역 회피)."""
+    result = await asyncio.to_thread(
+        lambda: (
+            supabase.table(TABLE_NAME)
+            .select("master_raw")
+            .eq("ticker", ticker)
+            .limit(1)
+            .execute()
+        )
+    )
+    rows = result.data or []
+    if not rows:
+        return None
+    return rows[0].get("master_raw") or None
+
+
+async def count_master_raw_today() -> int:
+    """오늘 (KST) 갱신된 master_raw 영역 카운트 진단 (16:30 task 영역)."""
+    today_kst_iso = now_kst_iso().split("T")[0]  # YYYY-MM-DD 영역
+    today_start = f"{today_kst_iso}T00:00:00+09:00"
+    try:
+        result = await asyncio.to_thread(
+            lambda: (
+                supabase.table(TABLE_NAME)
+                .select("ticker", count="exact")
+                .gte("master_raw_updated_at", today_start)
+                .limit(0)
+                .execute()
+            )
+        )
+        return int(getattr(result, "count", 0) or 0)
+    except Exception as exc:
+        logger.warning("[stock_master] count_master_raw_today 실패 graceful: %s", exc)
+        return 0
+
+
 async def list_all(limit: int = 100, offset: int = 0) -> list[dict]:
     """페이징 list (UI list 영역). limit ∈ [1, 1000], offset ≥ 0.
 

@@ -14,11 +14,49 @@ session.py(MarketBoard, SessionTracker)
 risk.py(on_tick) → order_engine.py(체결통보·DB persistence) → scheduler.py(시간 가드·run/settle) ← boot_manager.py(_boot 본체, 사이클 51) / stale_tracker.py(StaleTrackerState, 사이클 48) / **stale_manager.py facade 96L** (re-export only, `__all__` 21 — 사이클 67 분해) ⇄ **4 sub-module (사이클 67 카드 #14 분해)**: stale_diagnostics.py 357L (5 함수 + 4 상수 — 진단·CCNL 캐시·force_retry history prune) / stale_session_recovery.py 274L (3 함수 + 5 상수 — silent inactive 감지·세션 강제 reconnect·delta unsubscribe) / stale_universe_guard.py 157L (1 함수 + 1 상수 — 보유/익일청산 절대 보호 universe guard) / stale_watcher_core.py 399L (2 함수 — **K stale watcher 본체 HIGH hot path** `check_and_resubscribe_stale` + `resubscribe_stale_priority` 사이클 66 priority 분리 *후* cap 영속). 사이클 60 Phase 2-A1 + 사이클 61 Phase 2-A2 + **사이클 63 Phase 2-A3 (refactor #2 완료)** + **사이클 67 sub-module 분해 (카드 #14 종결)** / sell_rejection.py(SellRejectionTracker, 사이클 55 R-1 + 사이클 57 V-1 알람)
 scanner.py(종목 스캔/구독/STATIC_TICKER_NAMES + 사이클 122 `_stock_master_daily_load_once` + 사이클 126 `_stock_master_basics_refresh_once`)
 stock_master_daily_metrics.py (사이클 122 — `record_stock_master_daily_load` / `flush_stock_master_daily_load_collector` 페어링)
-refresh_progress.py (사이클 127 — 3 작업 universe/basics/daily 진행 state 통합 메모리 dict + threading.Lock + 헬퍼 `start_progress` / `update_progress` / `finish_progress` / `get_progress` / `get_all_progress` / `is_running` / `reset_progress` / `reset_all_progress`. uvicorn 단일 워커 의무 + KST timestamp 영속)
+refresh_progress.py (사이클 127 — 3 작업 universe/basics/daily 진행 state 통합 메모리 dict + threading.Lock + 헬퍼 `start_progress` / `update_progress` / `finish_progress` / `get_progress` / `get_all_progress` / `is_running` / `reset_progress` / `reset_all_progress`. uvicorn 단일 워커 의무 + KST timestamp 영속. **사이클 129 TaskKey 4 확장** `Literal["universe", "basics", "daily", "master"]` + `TASK_KEYS` tuple 2 위치 동행 — AST 영구 가드)
 util/tick_size.py(KRX 7구간 호가단위 헬퍼 — `get_tick_size` / `round_to_tick` / `step_down` / `step_up`)
 market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
+
+## 사이클 129 (2026-06-14) — KIS 공식 일일 마스터 파일 도입 + master_raw 별도 컬럼 + 16:30 KST 자동 task
+
+사용자 verbatim "종목마스터 만들 때 아래 소스코드 참고해줘" + KIS 공식 샘플 코드 제공. 사용자 결정 Q4=A 마스터 우선 + Q5=C 전수 보존 + Q6=C master_raw 별도 컬럼 + Q12=A × 100 단위 환산 + Q9=B 단계별 분할 진행.
+
+### `scanner.py` 신규 영역 (+289L)
+
+- `market_cap_master_to_millions(prdy_avls_scal: int) -> int: return prdy_avls_scal * 100` — KIS 마스터 시총 (억) → KIS API hts_avls (백만원) 환산. Q12 사용자 verbatim "× 100" 정합 (team-leader 자체 자문 "× 10,000" 결함 자체 발견 + 시정). 사이클 116 단위 환산 패턴 답습.
+- `validate_market_cap_consistency(master_avls_million, hts_avls)` — ±5%/±20% 임계 + WARNING/CRITICAL emit + 사이클 88 G-REJECT graceful
+- `_is_master_blocked_for_entry(ticker)` — **1단계 차단 7건** (master_raw 우선 + raw 폴백 chain): `trht_yn` 거래정지 / `mang_issu_yn` 관리종목 / `ssts_hot_yn` 공매도과열 / `stange_runup_yn` 이상급등 / `sltr_yn` 정리매매 / `mrkt_alrm_cls_code` 시장경고 / `invt_alrm_yn` 투자주의환기 (KOSDAQ 전용)
+- `get_market_cap_millions(ticker)` — master_raw 우선 + raw 폴백 통합 헬퍼 (사이클 81 G-AST1 영속)
+- `_stock_master_master_load_once(force=False)` — KIS 공식 파일 다운로드 (`src/api/kis_master.py`) + `master_raw` 배치 upsert + 진행 emit + graceful (사이클 88) + `refresh_progress` integration (사이클 127)
+
+### `scheduler.py` 신규 16:30 KST task (+86L)
+
+- `TIME_STOCK_MASTER_MASTER_LOAD = time(16, 30)` — 일봉 task 16:00 / basics task 16:10 직후 안전 마진 + KIS 마스터 갱신 시점
+- `_stock_master_master_load_task_loop()` — start() 직후 즉시 1회 + 매일 16:30 KST while 루프 (사이클 106 lifecycle race 차단 답습)
+- `task_attrs` 4 위치 영속 (instance + `connect().finally` + `run_daily.finally` + `stop()`) — 사이클 79 G-AST2 영속 / expected_members 14 → 15
+
+### 매매 안전성 무영향
+
+- scanner 단계 매수 진입 *전* 영역만 (사이클 38 명문화 영속)
+- `risk.on_tick` / `order_engine` / `realtime/` / `auth/` 변경 0
+- 매도/익일청산/15:20 강제청산/손절 hot path 무관
+- 1단계 차단 7건 hook = 매수 진입 *전* 차단 (이미 보유 종목 영향 0)
+
+### 영속 의무 매트릭스 (사이클 129 영구 확인 영역)
+
+- 사이클 17 KIS LMS chain (외부 HTTP 1회 + 사이클 122 50ms sleep 답습)
+- 사이클 38 명문화
+- 사이클 79 G-AST2 task_attrs 4 위치 (`_stock_master_master_load_task`)
+- **사이클 81 G-AST1 raw 영역 영구 보호 (master_raw 별도 컬럼 분리 = 절대 보호)**
+- 사이클 84 L-2 POST 화이트리스트 (4 라우트 영속)
+- 사이클 88 G-REJECT graceful
+- 사이클 106 lifecycle race 차단
+- **사이클 116 단위 환산 패턴 100% 답습 (× 100)**
+- 사이클 122/126 task 패턴 100% 답습
+- 사이클 127 fire-and-forget + refresh_progress TaskKey 4 확장
 
 ## 사이클 127 (2026-06-13) — 3 작업 fire-and-forget + 5초 폴링 진행 가시화
 

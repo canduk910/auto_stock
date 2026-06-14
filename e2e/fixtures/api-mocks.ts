@@ -420,6 +420,18 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     return route.continue();
   });
 
+  // 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 적재
+  // LIFO 정합: wildcard (**/api/stock-master/**) 보다 *후* 등록 → 우선 매칭.
+  await page.route("**/api/stock-master/master/refresh", (route) => {
+    if (route.request().method() === "POST") {
+      return route.fulfill({
+        status: 202,
+        json: envelope({ status: "started", task_key: "master" }),
+      });
+    }
+    return route.continue();
+  });
+
   // 사이클 127 — GET refresh-progress (5초 폴링, RefreshProgressBanner).
   // LIFO 정합: wildcard (**/api/stock-master/**) 보다 *후* 등록 → 우선 매칭.
   const idleProgress = {
@@ -441,6 +453,7 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
           universe: idleProgress,
           basics: idleProgress,
           daily: idleProgress,
+          master: idleProgress,  // 사이클 129 — master 4번째 작업
         }),
       });
     }
