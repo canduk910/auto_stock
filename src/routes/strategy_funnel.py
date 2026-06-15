@@ -1,9 +1,15 @@
-"""사이클 34 (2026-05-21) — 조건검색 단계별 후보 추적 API.
+"""사이클 34 (2026-05-21) — 조건검색 단계별 후보 추적 API + 사이클 132 휴장일 UI 안내.
 
 배경:
 - 사용자 5/21 15:26 funnel 결함 진단 시 단계별 살아남은/탈락 종목을 알 수 없어 디버깅 곤란.
 - 사이클 33 결함 시정 (BFB acml_vol / VCP fetch_days 100 한도) 후에도 운영 중 단계별 추이를
   영구 추적해야 회귀 검증 + 매매 결정 추적 가능.
+
+사이클 132 (2026-06-15) — 휴장일 UI 안내 영역 추가 (사용자 결정 Q3=A 영속):
+- GET 응답 data 영역에 `is_business_day: bool` + `holiday_note: str | None` 영역 추가.
+- KIS `chk-holiday` API (CTCA0903R) `is_market_open(date)` 영구 영속 재사용 (사이클 17 영속).
+- 휴장일 (주말/공휴일) 운영자 UI 접속 시 "데이터 미수신" 영구 영속 오인 차단.
+- 호출 실패 시 graceful 영업일 가정 영속 (사이클 88 G-REJECT 영속).
 
 엔드포인트:
 - GET /api/strategy-funnel?strategy_id=...&target_date=YYYY-MM-DD — 단일 영업일 단계별 후보
@@ -18,6 +24,7 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 
+from src.api.condition import is_market_open  # 사이클 132 — KIS chk-holiday 재사용 (사이클 17 영속)
 from src.db.strategy_funnel import (
     insert_snapshot,
     list_recent_by_strategy,
@@ -40,6 +47,36 @@ def _parse_date(date_str: str | None) -> date:
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=f"target_date 형식 YYYY-MM-DD: {exc}")
+
+
+async def _resolve_business_day(target: date) -> tuple[bool, str | None]:
+    """사이클 132 — 영업일 판정 + holiday_note 한글 안내 (graceful).
+
+    Returns:
+        (is_business_day, holiday_note):
+        - 영업일: (True, None)
+        - 휴장일: (False, "오늘은 휴장일 — 영업일 데이터 미수신")
+        - 조회 실패 (graceful, 사이클 88 G-REJECT): (True, None) — 영업일 가정
+
+    영속 의무:
+    - 사이클 17 KIS chk-holiday 재사용 (신규 KIS 호출 0건)
+    - 사이클 88 G-REJECT graceful (예외 → 영업일 가정 + holiday_note=None)
+    - 사이클 89 한글 친숙 용어 (휴장일 안내 메시지)
+    """
+    try:
+        is_open = await is_market_open(target)
+    except Exception as exc:
+        logger.warning(
+            "[funnel_holiday_check_skip] target=%s reason=%s — graceful 영업일 가정",
+            target.isoformat(),
+            exc,
+        )
+        return True, None
+
+    if is_open:
+        return True, None
+    # 휴장일 한글 안내 (사이클 89 한글 친숙 용어 영속)
+    return False, "오늘은 휴장일 — 영업일 데이터 미수신"
 
 
 @router.get("", response_model=ApiResponse)
@@ -65,6 +102,8 @@ async def get_funnel(
     """
     target = _parse_date(target_date)
     snapshots = await list_snapshots(target_date=target, strategy_id=strategy_id)
+    # 사이클 132 — 휴장일 UI 안내 영역 영구 영속 (Q3=A)
+    is_business_day, holiday_note = await _resolve_business_day(target)
 
     return ApiResponse(
         success=True,
@@ -72,6 +111,9 @@ async def get_funnel(
             "target_date": target.isoformat(),
             "strategy_id": strategy_id,
             "snapshots": snapshots,
+            # 사이클 132 신규 영구 영속 (운영자 휴장일 오인 차단)
+            "is_business_day": is_business_day,
+            "holiday_note": holiday_note,
         },
         message="",
     )

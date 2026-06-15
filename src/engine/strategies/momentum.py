@@ -44,7 +44,20 @@ class MomentumStrategy(StrategyBase):
         self._next_day_clear_pending = False  # 익일 청산 대기 중 플래그 (시가 안정화 대기)
 
     async def prepare(self) -> None:
-        """준비 작업 없음 (실시간 스캔 기반)."""
+        """준비 작업 없음 — 실시간 본질 영역 영구 영속.
+
+        momentum 전략 = 전일종가 +29% 돌파 순간 실시간 감지 영역 영구 영속.
+        prepare() 영역 = empty stub 영속 (실시간 본질 영역 = 사전 준비 불필요 영속).
+
+        사이클 132 (2026-06-15) Q2=C 영구 영속 명시:
+        - funnel 미적재 영구 영속 (사이클 39+41 자동 hook 대상 = BFB/VCP/donchian 한정 영속).
+        - momentum 영역 = funnel snapshot 영역 외 영속 (실시간 본질 영역 영구 영속).
+        - UI 가시화 영역 = "이 전략은 실시간 돌파 기반 — funnel 적재 미적용" 안내 동행 영속.
+
+        사이클 21 (2026-05-20) momentum scan_filter_stats 영역 영속 = scanner 전역 dict
+        7 키 (universe_candidates / rate_pass / mcap_pass / trade_amount_pass / limit_up_excluded
+        / final_prepared / last_run_at) 활용 (`get_scan_stats` 사본 반환 영속).
+        """
         pass
 
     def get_scan_stats(self) -> dict:

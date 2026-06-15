@@ -73,18 +73,29 @@ def test_g_ast3_daily_progress_hooks():
 
 
 def test_g_ast4_background_tasks_3_routes():
-    """G-AST4: routes/stock_master.py 에 BackgroundTasks.add_task 호출 3개 영속.
+    """G-AST4: routes/stock_master.py 에 BackgroundTasks.add_task 호출 ≥ 1 영속 + dispatch helper 영속.
 
     사이클 127 — FastAPI BackgroundTasks 사용 (response 전송 후 schedule).
+    사이클 131 의미 전환 (카드 #22 — refactor-review 권고 채택) — 사이클 66 K-2 패턴 답습:
+    - Red 시점 ≥ 3 (3 wrapper 각각 add_task 호출)
+    - Green 시점 ≥ 1 (헬퍼 `_dispatch_refresh` 단일 add_task 호출, 4 라우트가 dispatch 공유)
+    - 핵심 의도 보존: BackgroundTasks 사용 영속 + asyncio.create_task 0 영속.
+    - 4 라우트 dispatch 영속 검증은 `_dispatch_refresh` 호출 ≥ 5 (정의 1 + 호출 4) 영역.
+
     asyncio.create_task + TestClient anyio portal hang silent 결함 영구 차단.
     """
     src = _read(_ROUTES_SRC)
     add_task_count = src.count("background_tasks.add_task(")
-    assert add_task_count >= 3, (
-        f"G-AST4: background_tasks.add_task 호출 {add_task_count} < 3 — fire-and-forget 영속 위반"
+    # 사이클 131 의미 전환 — 헬퍼 dispatch 후 ≥ 1 영속 (카드 #22)
+    assert add_task_count >= 1, (
+        f"G-AST4: background_tasks.add_task 호출 {add_task_count} < 1 — fire-and-forget 영속 위반"
+    )
+    # 4 라우트 dispatch 영속 영역 (`_dispatch_refresh` 정의 1 + 호출 4 = ≥ 5)
+    dispatch_count = src.count("_dispatch_refresh(")
+    assert dispatch_count >= 5, (
+        f"G-AST4: `_dispatch_refresh` 호출 {dispatch_count} < 5 — 사이클 131 헬퍼 dispatch 4 라우트 영속 위반"
     )
     # asyncio.create_task 라우트 본체 잔존 0건 — TestClient hang 회귀 영구 차단
-    # (`_run_*_background` 함수 본체 내부의 asyncio.* 호출은 무관)
     create_task_in_routes = src.count("asyncio.create_task(")
     assert create_task_in_routes == 0, (
         f"G-AST4: routes/stock_master.py 에 asyncio.create_task 잔존 {create_task_in_routes} — "
@@ -111,17 +122,40 @@ def test_g_ast5_lock_purged():
 
 
 def test_g_ast6_get_refresh_progress_route():
-    """G-AST6: GET /refresh-progress 라우트 영속 (사이클 84 L-2 READ-ONLY GET 정합)."""
+    """G-AST6: GET /refresh-progress 라우트 영속 + is_running 가드 영속 (사이클 84 L-2 READ-ONLY GET 정합).
+
+    사이클 131 의미 전환 (카드 #22) — 사이클 66 K-2 패턴 답습:
+    - Red 시점 = 인라인 `_rp.is_running("X")` 4 회 (4 라우트 각각)
+    - Green 시점 = 헬퍼 `_dispatch_refresh` 내부 `_rp.is_running(task_key)` 단일 호출 + `_TASK_REGISTRY` 4 task_key 영속
+    - 핵심 의도 보존: 4 라우트 모두 409 가드 발화 영속 (헬퍼 dispatch 내부에서 흡수).
+
+    가드 방식 의미 전환:
+    - 인라인 호출 `_rp.is_running("X")` → 헬퍼 호출 `_rp.is_running(task_key)` + `_TASK_REGISTRY` dispatch.
+    """
     src = _read(_ROUTES_SRC)
     assert '@router.get("/refresh-progress")' in src, (
         "G-AST6: GET /refresh-progress 라우트 부재 — 5초 폴링 영역 위반"
     )
-    # is_running 가드 영속 — 409 분기
-    assert '_rp.is_running("universe")' in src, (
-        "G-AST6: is_running(universe) 가드 부재"
+
+    # 사이클 131 의미 전환 — is_running 가드 영속 (인라인 또는 헬퍼 dispatch 흡수)
+    # 헬퍼 dispatch 영속 = `_TASK_REGISTRY` 4 task_key + `_rp.is_running(task_key)` 단일 호출
+    has_dispatch = "_TASK_REGISTRY" in src and "_rp.is_running(task_key)" in src
+    has_inline = (
+        '_rp.is_running("universe")' in src
+        and '_rp.is_running("basics")' in src
+        and '_rp.is_running("daily")' in src
     )
-    assert '_rp.is_running("basics")' in src, "G-AST6: is_running(basics) 가드 부재"
-    assert '_rp.is_running("daily")' in src, "G-AST6: is_running(daily) 가드 부재"
+    assert has_dispatch or has_inline, (
+        "G-AST6: is_running 가드 부재 — 인라인 호출 (사이클 127) 또는 "
+        "헬퍼 dispatch + _TASK_REGISTRY 4 task_key (사이클 131 의미 전환) 영속 의무 위반"
+    )
+
+    # 4 task_key dispatch registry 영속 의무 (헬퍼 영역 진입 시)
+    if has_dispatch:
+        for task_key in ("universe", "basics", "daily", "master"):
+            assert f'"{task_key}":' in src or f"'{task_key}':" in src, (
+                f"G-AST6: _TASK_REGISTRY 에 task_key={task_key!r} 영속 부재 — 사이클 131 4 라우트 영속"
+            )
 
 
 def test_g_ast_progress_module_exists():

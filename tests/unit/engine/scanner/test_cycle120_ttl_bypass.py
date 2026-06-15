@@ -129,12 +129,32 @@ def test_g_ast1_force_arg_propagation_chain():
     """AST 영구 가드: force 인자 영역 영구 영속이 라우트 → load_once → primary/fallback 체인 영속.
 
     사용자 강제 새로고침 의도 영구 영속이 미래 시정 누락 차단 (사이클 78/79 G-AST 답습).
+
+    사이클 131 의미 전환 (카드 #22 — refactor-review 권고 채택) — 사이클 66 K-2 패턴 답습:
+    - Red 시점 (사이클 120/127) = 라우트 본체 `_full_universe_load_once(force=force)` 직접 호출
+    - Green 시점 (사이클 131) = 헬퍼 `_make_background_runner` 영역에서 `once_callable(force=force)` 호출 chain.
+      라우트 본체 → `_dispatch_refresh("universe", background_tasks, force)` → `_make_background_runner` → `once_callable(force=force)` chain.
+    - 핵심 의도 보존: force 인자 chain 영속 (라우트 → load_once chain 영속, 헬퍼 영역 흡수).
+
+    의미 보존 영역:
+    - 사이클 120 force 인자 영구 영속 (사용자 강제 새로고침 의도 영속)
+    - TTL 우회 옵션 영구 영속
+    - 라우트 → load_once force chain 영속 (직접 또는 헬퍼 흡수)
     """
     scanner_source = _SCANNER_PY.read_text(encoding="utf-8")
     route_source = _ROUTE_PY.read_text(encoding="utf-8")
 
-    # 라우트 → load_once 전달
-    assert "_full_universe_load_once(force=force)" in route_source
+    # 사이클 131 의미 전환 — 라우트 영역 force chain 영속 (직접 호출 OR 헬퍼 dispatch chain 흡수)
+    # Green 시점 = `_dispatch_refresh(..., force)` + 헬퍼 `once_callable(force=force)` 영속
+    has_direct_call = "_full_universe_load_once(force=force)" in route_source
+    has_dispatch_chain = (
+        "_dispatch_refresh(" in route_source
+        and "once_callable(force=force)" in route_source
+    )
+    assert has_direct_call or has_dispatch_chain, (
+        "라우트 영역 force chain 영속 부재 — "
+        "라우트 본체 직접 호출 (사이클 120) 또는 헬퍼 dispatch chain (사이클 131) 영속 의무 위반"
+    )
 
     # load_once → primary/fallback 전달 (force=force 인자 영구 영속이)
     assert "_full_universe_load_krx_primary(force=force)" in scanner_source, (

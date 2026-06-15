@@ -87,15 +87,29 @@ def test_g_ast1_full_universe_load_once_called():
     - 또는 `_full_universe_load_once(` 호출 ≥1건
 
     사이클 110 시정 영역 영구 영속이 정합성 영구 검증.
+
+    사이클 131 의미 전환 (카드 #22 — refactor-review 권고 채택) — 사이클 66 K-2 패턴 답습:
+    - Red 시점 (사이클 110/127) = `from src.engine.scanner import _full_universe_load_once` (모듈 상단 import)
+    - Green 시점 (사이클 131) = `_resolve_once_callable("universe")` 헬퍼 영역 내부에서
+      `from src.engine import scanner as _scanner` lazy import + `_scanner._full_universe_load_once` 호출.
+      모듈 상단 import 폐기 + lazy import + 헬퍼 dispatch chain.
+    - 핵심 의도 보존: `_full_universe_load_once` 영역 영속 + 호출 영역 영속.
+      라우트 → (헬퍼 dispatch) → `_full_universe_load_once` chain 영속.
+
+    의미 보존 영역:
+    - 사이클 110 silent 결함 (사이클 101 시정 동행 누락) 영구 차단 의무 영속
+    - 호출 영역 ≥ 1건 영속 (라우트 본체 OR 헬퍼 dispatch 영역 흡수 OR)
     """
     src = _read_routes_stock_master()
     tree = ast.parse(src)
 
     has_import = False
     has_call = False
+    # 사이클 131 — Attribute access `_scanner._full_universe_load_once` 또는 동등 영속 검증
+    has_attr_access = False
 
     for node in ast.walk(tree):
-        # import 영역 영구 영속이 검증
+        # import 영역 영구 영속이 검증 (모듈 상단 또는 헬퍼 내부 lazy import 모두 흡수)
         if isinstance(node, ast.ImportFrom):
             for alias in node.names:
                 if alias.name == "_full_universe_load_once":
@@ -107,12 +121,18 @@ def test_g_ast1_full_universe_load_once_called():
                 has_call = True
             elif isinstance(func, ast.Attribute) and func.attr == "_full_universe_load_once":
                 has_call = True
+        # 사이클 131 — Attribute access (호출 아닌 함수 객체 반환 영역) 검증
+        # `return _scanner._full_universe_load_once` 패턴 영속 의무
+        if isinstance(node, ast.Attribute) and node.attr == "_full_universe_load_once":
+            has_attr_access = True
 
-    assert has_import, (
-        "`from src.engine.scanner import _full_universe_load_once` 영역 영구 영속이 부재 — "
-        "사이클 110 시정 영역 영구 영속이 미적용 (사이클 101 영역 정상 함수 영역 활용 의무)"
+    # 사이클 131 의미 전환 — import OR attr_access (lazy import + 함수 객체 반환 패턴 영속)
+    assert has_import or has_attr_access, (
+        "`_full_universe_load_once` 영역 영구 영속이 부재 — "
+        "사이클 110 시정 영역 영구 영속이 미적용 + 사이클 131 헬퍼 dispatch lazy import 영역 영속 의무 위반"
     )
-    assert has_call, (
+    # 호출 영역 또는 함수 객체 반환 영역 OR (사이클 131 헬퍼 dispatch chain 영속)
+    assert has_call or has_attr_access, (
         "`_full_universe_load_once()` 호출 영역 영구 영속이 부재 — "
-        "사이클 110 시정 영역 영구 영속이 미적용 (단일 호출 의무)"
+        "사이클 110 시정 영역 영구 영속이 미적용 + 사이클 131 헬퍼 dispatch chain 영역 영속 의무 위반"
     )

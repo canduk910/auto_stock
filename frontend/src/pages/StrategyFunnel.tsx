@@ -134,6 +134,37 @@ export default function StrategyFunnel() {
         </div>
       </div>
 
+      {/* 사이클 132 (2026-06-15) — 휴장일 안내 amber 배너 (Q3=A 사용자 결정 영속) */}
+      {data && data.is_business_day === false && (
+        <div
+          data-testid="strategy-funnel-holiday-banner"
+          className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800"
+        >
+          <strong>휴장일 안내</strong>
+          {data.holiday_note && (
+            <span
+              data-testid="strategy-funnel-holiday-note"
+              className="ml-2 text-amber-700"
+            >
+              {data.holiday_note}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* 사이클 132 — 전략별 funnel 적재 정책 안내 (영역 C 사용자 결정 Q2=C + Q1=C 영속) */}
+      <div
+        data-testid="strategy-funnel-policy-notice"
+        className="mb-4 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600"
+      >
+        <div data-testid="strategy-funnel-notice-momentum">
+          • <strong>모멘텀</strong>: 실시간 돌파 기반 — funnel 적재 미적용
+        </div>
+        <div data-testid="strategy-funnel-notice-vb-ltv">
+          • <strong>변동성 돌파 / 롱테일 변동성</strong>: 단계별 funnel 후속 사이클 영역 (사이클 133 인계)
+        </div>
+      </div>
+
       {/* 상태 */}
       {isLoading && (
         <div className="text-sm text-gray-500" data-testid="funnel-loading">

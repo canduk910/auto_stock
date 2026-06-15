@@ -41,6 +41,10 @@ export interface FunnelResponse {
   target_date: string
   strategy_id: string | null
   snapshots: FunnelSnapshot[]
+  // 사이클 132 (2026-06-15) — 휴장일 UI 안내 영역 영구 영속 (Q3=A)
+  // 영업일 = (true, null) / 휴장일 = (false, "오늘은 휴장일 ...") / 조회 실패 graceful = (true, null)
+  is_business_day?: boolean
+  holiday_note?: string | null
 }
 
 export interface FunnelRecentResponse {
@@ -73,6 +77,8 @@ export const getFunnel = async (params: {
       target_date: params.target_date ?? '',
       strategy_id: params.strategy_id ?? null,
       snapshots: [],
+      is_business_day: true,  // 사이클 132 — graceful 영업일 가정
+      holiday_note: null,
     }
   )
 }

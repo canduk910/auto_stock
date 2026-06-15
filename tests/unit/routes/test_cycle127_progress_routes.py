@@ -34,19 +34,30 @@ from src.routes.stock_master import (
 
 @pytest.fixture(autouse=True)
 def _reset_state(monkeypatch):
-    """모든 사이클 127 라우트 테스트 격리:
+    """모든 사이클 127 라우트 테스트 격리 — 사이클 131 의미 전환 영속.
+
     1) refresh_progress state 전수 초기화 (before + after)
-    2) `_run_*_background` 3 함수 모두 awaitable noop 으로 mock
-       — 실제 KIS 호출 영구 차단 (BackgroundTasks 가 response 후 schedule 시점에 _noop 실행)
+    2) **사이클 131 카드 #22 의미 전환**: `_run_*_background` 3 헬퍼 폐기 후
+       `_resolve_once_callable` 헬퍼 monkeypatch 로 영역 전환.
+       헬퍼 추출 후 BackgroundTasks 가 dispatch → runner → once_callable chain 호출 영역.
+       once_callable 영역만 mock 하면 실제 KIS 호출 영구 차단 영속.
+
+    영속 의무 매트릭스:
+    - 사이클 127 fire-and-forget BackgroundTasks 영속
+    - 사이클 131 dispatch 헬퍼 영속
+    - TestClient 의존 폐기 + 라우트 함수 직접 await 호출 영속 (anyio portal hang 차단)
     """
     _rp.reset_all_progress()
 
     async def _noop(*_args, **_kwargs):
-        return None
+        return {"status": "ok"}
 
-    monkeypatch.setattr("src.routes.stock_master._run_universe_background", _noop)
-    monkeypatch.setattr("src.routes.stock_master._run_basics_background", _noop)
-    monkeypatch.setattr("src.routes.stock_master._run_daily_background", _noop)
+    # 사이클 131 의미 전환 — `_resolve_once_callable` 헬퍼 영역 monkeypatch.
+    # dispatch → runner → once_callable chain 에서 once_callable 직접 차단.
+    def _resolve_noop(task_key: str):
+        return _noop
+
+    monkeypatch.setattr("src.routes.stock_master._resolve_once_callable", _resolve_noop)
     yield
     _rp.reset_all_progress()
 
