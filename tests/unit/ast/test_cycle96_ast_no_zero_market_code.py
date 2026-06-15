@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.xfail(
@@ -48,7 +50,7 @@ def _scanner_module_path() -> Path:
 
 def _extract_market_input_iscd_values() -> list[str]:
     """`_MARKET_INPUT_ISCD` dict literal 의 모든 value 추출 (AST 정적)."""
-    source = _scanner_module_path().read_text(encoding="utf-8")
+    source = read_module_source(_scanner_module_path())
     tree = ast.parse(source)
 
     values: list[str] = []

@@ -17,6 +17,8 @@ import ast
 import re
 from pathlib import Path
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 
 _SCHEDULER_PY = (
     Path(__file__).resolve().parents[3] / "src" / "engine" / "scheduler.py"
@@ -48,7 +50,7 @@ def test_g_6_s_no_logger_write_log_pair_in_swing_rest_poll_once() -> None:
 
     사이클 73 옵션 A' 시정 후 영구 가드 — 함수 영역 한정 silent 결함 영구 차단.
     """
-    source = _SCHEDULER_PY.read_text(encoding="utf-8")
+    source = read_module_source(_SCHEDULER_PY)
     start, end = _extract_function_lines(source, "_run_swing_rest_poll_once")
     assert start > 0, "_run_swing_rest_poll_once 함수 미발견"
 

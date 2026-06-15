@@ -30,6 +30,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import find_function_def, read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -41,12 +43,10 @@ def _scanner_module_path() -> Path:
 
 def _fetch_fluctuation_function_node() -> ast.AsyncFunctionDef:
     """`_fetch_fluctuation` AST 함수 노드 추출."""
-    source = _scanner_module_path().read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    for node in ast.walk(tree):
-        if (isinstance(node, ast.AsyncFunctionDef)
-                and node.name == "_fetch_fluctuation"):
-            return node
+    source = read_module_source(_scanner_module_path())
+    node = find_function_def(source, "_fetch_fluctuation")
+    if isinstance(node, ast.AsyncFunctionDef):
+        return node
     pytest.fail(
         "\n사이클 99 G-DEFAULT1 Red 상태 — `_fetch_fluctuation` AST 노드 추출 실패.\n"
         "  사이클 97 영역 = `_fetch_fluctuation` 신규 함수 영속 의무"

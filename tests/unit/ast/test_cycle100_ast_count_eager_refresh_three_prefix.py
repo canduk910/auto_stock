@@ -28,6 +28,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -39,7 +41,7 @@ def _stock_master_module_path() -> Path:
 
 def _stock_master_module_source() -> str:
     """stock_master.py source text."""
-    return _stock_master_module_path().read_text(encoding="utf-8")
+    return read_module_source(_stock_master_module_path())
 
 
 def _get_count_eager_refresh_today_source() -> str | None:

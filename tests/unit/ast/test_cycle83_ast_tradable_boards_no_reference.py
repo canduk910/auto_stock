@@ -30,6 +30,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -56,7 +58,7 @@ def _collect_function_bodies_matching(
 
     반환: dict[fully_qualified_name, ast.unparse(body)]
     """
-    source = py_path.read_text(encoding="utf-8")
+    source = read_module_source(py_path)
     tree = ast.parse(source)
     result: dict[str, str] = {}
 

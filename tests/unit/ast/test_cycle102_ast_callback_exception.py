@@ -21,6 +21,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 
 pytestmark = pytest.mark.unit
 
@@ -119,7 +121,7 @@ def test_g_callback2_three_handlers_consistent_try_except_raise():
     - `_handle_execution` + `_on_execution` 콜백 → try/except + [callback_exception] + raise 영속
     - `_handle_market_op` + `_on_board` 콜백 → try/except + [callback_exception] + raise 영속
     """
-    source = _HANDLER_PY.read_text(encoding="utf-8")
+    source = read_module_source(_HANDLER_PY)
 
     missing: list[str] = []
     for handler_func_name, callback_name in _CALLBACK_HANDLER_MAP.items():

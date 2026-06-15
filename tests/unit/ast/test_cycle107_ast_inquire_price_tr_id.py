@@ -21,6 +21,8 @@ import pathlib
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 _CONDITION_PY = (
@@ -32,7 +34,7 @@ _CONDITION_PY = (
 
 
 def _load_source() -> str:
-    return _CONDITION_PY.read_text(encoding="utf-8")
+    return read_module_source(_CONDITION_PY)
 
 
 def _load_tree() -> ast.Module:

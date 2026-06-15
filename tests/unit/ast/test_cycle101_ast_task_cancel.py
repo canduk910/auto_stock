@@ -26,12 +26,14 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
 def _scheduler_source() -> str:
     import src.engine.scheduler as scheduler_mod
-    return Path(scheduler_mod.__file__).read_text(encoding="utf-8")
+    return read_module_source(Path(scheduler_mod.__file__))
 
 
 def test_g_ast2_a_full_universe_load_task_three_or_more_occurrences() -> None:

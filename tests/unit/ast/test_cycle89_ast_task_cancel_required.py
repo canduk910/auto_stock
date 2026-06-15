@@ -27,6 +27,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -128,7 +130,7 @@ def test_l2_universe_eager_refresh_task_included_in_stop_cancel_tuple():
     - 사이클 42 `_heartbeat_metrics_loop` 좀비 task 영구 차단 패턴 답습
     - 미래 신규 `self._foo_task = asyncio.create_task(...)` 추가 시 자동 검출
     """
-    source = _SCHEDULER_PY.read_text(encoding="utf-8")
+    source = read_module_source(_SCHEDULER_PY)
 
     created_tasks = _collect_create_task_attrs(source)
     stop_tuple = _collect_stop_task_attrs_tuple(source)

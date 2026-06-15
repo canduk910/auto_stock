@@ -24,6 +24,8 @@ import inspect
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source  # noqa: F401  # 사이클 139 카드 #25 영속
+
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.xfail(

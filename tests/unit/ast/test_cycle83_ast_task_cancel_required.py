@@ -35,6 +35,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -140,7 +142,7 @@ def test_g_ast1_scan_pool_eager_refresh_task_in_both_cancel_tuples():
     - 사이클 42 좀비 task 영구 차단
     - 미래 신규 `self._foo_task = asyncio.create_task(...)` 추가 시 자동 검출
     """
-    source = _SCHEDULER_PY.read_text(encoding="utf-8")
+    source = read_module_source(_SCHEDULER_PY)
 
     created_tasks = _collect_create_task_attrs(source)
     stop_tuples = _collect_for_loop_tuple_strings_in_func(

@@ -27,11 +27,13 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
 def _module_source(module_path: Path) -> str:
-    return module_path.read_text(encoding="utf-8")
+    return read_module_source(module_path)
 
 
 def test_g_purge2_a_scanner_universe_eager_refresh_loop_purged() -> None:

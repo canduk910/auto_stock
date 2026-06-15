@@ -23,6 +23,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 
 _REALTIME_ROOT = Path(__file__).resolve().parents[3] / "src" / "realtime"
 
@@ -92,7 +94,7 @@ def test_g_6_r_no_logger_write_log_pair_in_realtime() -> None:
     for py_file in _iter_py_files():
         if py_file.name.startswith("test_"):
             continue
-        source = py_file.read_text(encoding="utf-8")
+        source = read_module_source(py_file)
         violations = _find_violation_sites(source)
         if violations:
             rel = py_file.relative_to(_REALTIME_ROOT.parent.parent)

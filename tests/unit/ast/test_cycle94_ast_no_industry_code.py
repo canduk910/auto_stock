@@ -24,6 +24,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -38,7 +40,7 @@ def _extract_market_input_iscd_values() -> list[str]:
 
     AST 분석 - assign target name == "_MARKET_INPUT_ISCD" + value 가 Dict literal 인 경우.
     """
-    source = _scanner_module_path().read_text(encoding="utf-8")
+    source = read_module_source(_scanner_module_path())
     tree = ast.parse(source)
 
     values: list[str] = []

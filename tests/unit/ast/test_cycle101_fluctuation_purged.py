@@ -28,12 +28,14 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
 def _scanner_source() -> str:
     import src.engine.scanner as scanner_mod
-    return Path(scanner_mod.__file__).read_text(encoding="utf-8")
+    return read_module_source(Path(scanner_mod.__file__))
 
 
 def test_g_purge1_a_fetch_fluctuation_function_purged() -> None:

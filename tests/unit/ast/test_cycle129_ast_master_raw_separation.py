@@ -13,6 +13,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 _STOCK_MASTER_SRC = (
     Path(__file__).resolve().parents[3] / "src/db/stock_master.py"
 )
@@ -24,7 +26,7 @@ def test_g_ast_ms1_upsert_master_raw_no_raw_key():
     사이클 81 G-AST1 영속 보호 영역 확장 — master_raw 별도 컬럼 영역에서
     raw 영역 덮어쓰기 절대 금지.
     """
-    src = _STOCK_MASTER_SRC.read_text(encoding="utf-8")
+    src = read_module_source(_STOCK_MASTER_SRC)
     tree = ast.parse(src)
 
     target_func = None

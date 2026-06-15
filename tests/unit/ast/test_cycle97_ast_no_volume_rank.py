@@ -28,6 +28,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -39,7 +41,7 @@ def _scanner_module_path() -> Path:
 
 def _scanner_module_source() -> str:
     """scanner.py source text."""
-    return _scanner_module_path().read_text(encoding="utf-8")
+    return read_module_source(_scanner_module_path())
 
 
 def test_h5_no_volume_rank_url_literal():

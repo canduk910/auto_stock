@@ -26,13 +26,15 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
 def _scanner_source() -> str:
     """scanner.py source text."""
     import src.engine.scanner as scanner_mod
-    return Path(scanner_mod.__file__).read_text(encoding="utf-8")
+    return read_module_source(Path(scanner_mod.__file__))
 
 
 def _get_docstring(func_name: str) -> str | None:
