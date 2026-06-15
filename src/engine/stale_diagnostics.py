@@ -35,6 +35,19 @@ STALE_FORCE_RETRY_HOURLY_CAP = 6            # 시간당 동일 종목 최대 재
 # 사이클 9 관련: STALE_FRESHNESS_SECS 는 scheduler 잔류 함수도 사용
 STALE_FRESHNESS_SECS = 60                   # 이 시간 내 tick 없으면 stale 판정 (F1 의 VERIFY_FRESHNESS_SECS 동일)
 
+# 사이클 135 (2026-06-15) — WebSocket 구독 ACK grace period 신규 상수.
+# 사용자 결정 Q3=A 영구 영속 + domain-expert 자문 의제 1 채택 영구 영속:
+#   _workspace/domain_consult/cycle135_websocket_grace_period.md
+#   180s = 3.0 × STALE_FRESHNESS_SECS = P95 안전 마진 정합 영구 영속
+#     (KOSPI 대형주 25s / 중형주 55s / KOSDAQ 중형주 75s / 소형주 150s / 10시 이후 480s)
+# 자문 의제 5 영속: D+1 / 1주 / 2주 운영 실측 후 사이클 136+ 재조정 의제 영역.
+#
+# 적용 영역 영구 영속:
+#   stale_watcher_core.check_and_resubscribe_stale + resubscribe_stale_priority
+#   구독 ACK 후 grace 이내 + ticker_last_tick 부재 = stale 판정 skip
+#   첫 시세 입수 후 (ticker_last_tick 존재) = 기존 60s 영속 (사이클 29 005935 보호, G-GRACE-7)
+SUBSCRIBE_GRACE_SECS = 180                  # 구독 ACK 후 grace period (KIS LMS chain 안전 마진 영속)
+
 # CCNL_CACHE_TTL_SECONDS 는 refresh_stale_ccnl_cache 내부 상수 (로컬 변수) — 별도 모듈 전역 상수 불필요
 # stale_manager.py facade 에서 re-export 하지 않는 내부 상수
 

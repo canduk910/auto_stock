@@ -164,6 +164,22 @@ class KisWebSocket:
         # 사이클 16 _aes_iv 인스턴스 변수 패턴 답습 (__init__ + _handle_raw 양쪽 영역 분리)
         self._last_ws_message_at: dict[str, datetime] = {}
 
+        # 사이클 135 (2026-06-15) — 구독 ACK grace period (SUBSCRIBE_GRACE_SECS = 180s).
+        # 사용자 결정 Q1=A 의제 채택 + Q3=A 자문 정합 + Q4=A HIGH 일관 grace.
+        # domain-expert 자문 산출물 _workspace/domain_consult/cycle135_websocket_grace_period.md
+        # 책임 분리 영속 (사이클 88 G-REJECT-3 5 dict 분리):
+        #   _subscriptions / _subscriptions_acked / _ticker_to_session / ticker_last_tick / _subscribed_at
+        # 갱신 사이트 (사이클 17 OPSP0002 ALREADY + SUBSCRIBE SUCCESS 양쪽):
+        #   - SUBSCRIBE SUCCESS 분기: _subscribed_at[(tr_id, tr_key)] = now()
+        #   - OPSP0002 ALREADY 분기: _subscribed_at[(tr_id, tr_key)] = now()  (자문 의제 4 영속)
+        # 정리 사이트:
+        #   - unsubscribe() / E2 거절 / _restore_subscriptions_after_reconnect() = pop
+        # 적용 영역 영구 영속:
+        #   stale_watcher_core (check_and_resubscribe_stale + resubscribe_stale_priority)
+        #   첫 시세 입수 *전* (ticker_last_tick 부재) + grace 이내 = stale 판정 skip
+        #   첫 시세 입수 *후* (ticker_last_tick 존재) = 기존 60s 영속 (사이클 29 005935 보호)
+        self._subscribed_at: dict[tuple[str, str], datetime] = {}
+
     async def connect(
         self,
         on_message: Callable[[str, str, str, bool], Awaitable[None]],
@@ -458,6 +474,8 @@ class KisWebSocket:
         self._subscriptions.discard((tr_id, tr_key))
         # G1: 해제 시 ACK set 에서도 동기 제거
         self._subscriptions_acked.discard((tr_id, tr_key))
+        # 사이클 135 (2026-06-15) — _subscribed_at 동행 pop (G-GRACE-3 영속)
+        self._subscribed_at.pop((tr_id, tr_key), None)
         if self._ws:
             await self._send_subscribe(tr_id, tr_key, subscribe=False)
 
@@ -486,8 +504,13 @@ class KisWebSocket:
 
         KIS 측 슬롯이 재연결로 초기화되므로 모든 구독은 다시 ACK 받아야 한다.
         `_subscriptions` set 은 보존 — 단지 ACK 만 클리어 후 send 재전송.
+
+        사이클 135 (2026-06-15) — 재연결 영역 = _subscribed_at.clear() 동행 (G-GRACE-8 영속).
+        새 ACK 영역 영구 영속 발화 영역 영구 영속 = grace 영역 재시작 영속.
         """
         self._subscriptions_acked.clear()
+        # 사이클 135 — grace 시점 초기화 (재연결 후 새 ACK 영역 영구 영속 영속)
+        self._subscribed_at.clear()
         for tr_id, tr_key in list(self._subscriptions):
             await self._send_subscribe(tr_id, tr_key, subscribe=True)
 
@@ -649,6 +672,12 @@ class KisWebSocket:
                 if already:
                     self._subscriptions.add((tr_id, tr_key))
                     self._subscriptions_acked.add((tr_id, tr_key))
+                    # 사이클 135 (2026-06-15) — OPSP0002 ALREADY = KIS 측 이미 활성
+                    # → 우리 측 grace 시점 갱신 정합 영속 (자문 의제 4 영속, G-GRACE-2).
+                    # ACK 동등 처리 = _subscribed_at[(tr_id, tr_key)] = now() 갱신.
+                    from datetime import timezone as _tz_g, timedelta as _td_g
+                    _KST_G = _tz_g(_td_g(hours=9))
+                    self._subscribed_at[(tr_id, tr_key)] = datetime.now(_KST_G)
                     # 사이클 17 (2026-05-19) — OPSP0002 backoff 등록.
                     # KIS 측 ALREADY IN SUBSCRIBE 후 다음 _scan_loop 사이클이 즉시
                     # 재구독 → 또 OPSP0002 → 무한 루프 차단 (2026-05-19 15:15 사고 대응).
@@ -674,6 +703,8 @@ class KisWebSocket:
                     self._subscriptions.discard((tr_id, tr_key))
                     # G1: ACK set 에서도 동기 discard (이전에 ACK 됐다가 재구독 후 거절 케이스)
                     self._subscriptions_acked.discard((tr_id, tr_key))
+                    # 사이클 135 — E2 거절 시 _subscribed_at 동행 pop (정합성 회복 영속)
+                    self._subscribed_at.pop((tr_id, tr_key), None)
                     # _DbLogHandler 위임 단일 INSERT — write_log 직접 호출 제거 (사이클 73 R-2)
                     return
 
@@ -688,6 +719,11 @@ class KisWebSocket:
                 if rt_cd == "0" and "SUBSCRIBE SUCCESS" in upper_msg1:
                     if (tr_id, tr_key) in self._subscriptions:
                         self._subscriptions_acked.add((tr_id, tr_key))
+                        # 사이클 135 (2026-06-15) — SUBSCRIBE SUCCESS ACK 시점
+                        # _subscribed_at 갱신 (G-GRACE-1 영속). grace 영역 영구 영속 기점.
+                        from datetime import timezone as _tz_ack, timedelta as _td_ack
+                        _KST_ACK = _tz_ack(_td_ack(hours=9))
+                        self._subscribed_at[(tr_id, tr_key)] = datetime.now(_KST_ACK)
                         # 사이클 74 옵션 E-1: 직접 logger.info 제거 → _record_action ACK 흡수
                         # "WebSocket 구독 ACK: tr_id=... tr_key=..." 직접 emit 0건 (G-7 AST 가드)
                         self._record_action(tr_id, tr_key, "ACK")

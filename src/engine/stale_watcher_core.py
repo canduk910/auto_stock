@@ -32,6 +32,7 @@ from src.engine.stale_diagnostics import (
     STALE_FORCE_RETRY_AFTER_SECS,
     STALE_FORCE_RETRY_HOURLY_CAP,
     STALE_FRESHNESS_SECS,
+    SUBSCRIBE_GRACE_SECS,  # 사이클 135 — 구독 ACK grace period (180s, Q3=A 영속)
     emit_stale_session_detail,
 )
 
@@ -129,9 +130,43 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     now = _dt_mod.now(_KST_TZ)
     threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
     min_dt = _dt_mod.min.replace(tzinfo=_KST_TZ)
+
+    # 사이클 135 (2026-06-15) — 구독 ACK grace period (180s).
+    # 사용자 결정 Q1=A + Q2=180s + Q3=A 자문 정합 + Q4=A HIGH 일관 grace.
+    # domain-expert 자문 산출물 _workspace/domain_consult/cycle135_websocket_grace_period.md
+    #
+    # 가드 동작:
+    #   - 첫 시세 입수 후 (`ticker_last_tick[t]` 존재) → 기존 60s 영속 (사이클 29 005935 보호, G-GRACE-7)
+    #   - 첫 시세 입수 *전* (`ticker_last_tick[t]` 부재) + ACK 시점 미확인 → 기존 60s 영속 (race 보호, G-GRACE-6)
+    #   - 첫 시세 입수 *전* + ACK 시점 확인 + grace 이내 → stale 판정 skip
+    #   - 첫 시세 입수 *전* + ACK 시점 확인 + grace 초과 → stale 판정 정상 발화
+    grace = timedelta(seconds=SUBSCRIBE_GRACE_SECS)
+    # 사이클 135 ack_map 영역 영구 영속 — dict 영역 영구 영속만 유효 영속 (MagicMock 등 spec 부재 안전 영속)
+    _ack_map_raw = getattr(kis_ws_pool, "_subscribed_at", None)
+    ack_map = _ack_map_raw if isinstance(_ack_map_raw, dict) else {}
+
+    def _is_within_grace(t: str) -> bool:
+        """grace 영역 영구 영속 판정 영구 영속.
+
+        첫 시세 입수 후 영역 (`ticker_last_tick[t]` 존재) = False (grace 미적용, 기존 60s 영속).
+        첫 시세 입수 *전* + ACK 미확인 = False (race 보호, 기존 60s 영속).
+        첫 시세 입수 *전* + ACK 확인 + grace 이내 = True (stale 판정 skip).
+        """
+        if t in ticker_last_tick:
+            return False  # 첫 시세 입수 후 = grace 미적용 (G-GRACE-7 영속)
+        ack_at = ack_map.get((TICK_TR_ID, t))
+        if not isinstance(ack_at, datetime):
+            return False  # ACK 미확인 = race 보호, 기존 60s 영속 (G-GRACE-6)
+        try:
+            return (now - ack_at) <= grace  # grace 이내 = stale 판정 skip
+        except (TypeError, ValueError):
+            # mock/race 안전 폴백 영역 영구 영속 = 기존 60s 영속 (사이클 29 005935 보호 영속)
+            return False
+
     stale_tickers = sorted(
         t for t in subscribed
         if (now - ticker_last_tick.get(t, min_dt)) > threshold
+        and not _is_within_grace(t)
     )
 
     if not stale_tickers:

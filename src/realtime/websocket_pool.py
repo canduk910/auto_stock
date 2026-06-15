@@ -583,6 +583,23 @@ class WebsocketPool:
         return result
 
     @property
+    def _subscribed_at(self):
+        """사이클 135 (2026-06-15) — 메인 + 보조 모든 세션 _subscribed_at 합집합.
+
+        호환성: 사이클 88 G-REJECT-3 5 dict 분리 영속 (4 → 5).
+        stale_watcher_core 영역 영구 영속에서 `kis_ws_pool._subscribed_at` 직접 참조 영속.
+
+        충돌 시점 (동일 (tr_id, tr_key) 키 영역 영구 영속) = 마지막 ACK 시각 채택 영속
+        (실제 운영 영역 영구 영속 = 동일 ticker 영역 영구 영속 메인 + 보조 동시 등록 영역 영구 영속 부재 영속 = WebsocketPool _ticker_to_session 분배 정합).
+        """
+        result: dict = {}
+        for ws in [self._main, *self._quotes]:
+            sa = getattr(ws, "_subscribed_at", None)
+            if sa:
+                result.update(sa)
+        return result
+
+    @property
     def _ws(self):
         """메인 세션 WebSocket 객체 — 라우트 ``ws_connected`` 판정용 (메인 기준)."""
         return getattr(self._main, "_ws", None)

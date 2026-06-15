@@ -22,13 +22,14 @@ import logging
 # 4 sub-module 모두 동일 logger binding 이므로 stale_diagnostics 에서 re-export
 from src.engine.stale_diagnostics import logger  # noqa: F401
 
-# ── 상수 re-export (10 상수) ─────────────────────────────────────────────────────
-# stale_diagnostics (4 상수)
+# ── 상수 re-export (11 상수, 사이클 135 SUBSCRIBE_GRACE_SECS 추가) ─────────────────
+# stale_diagnostics (5 상수)
 from src.engine.stale_diagnostics import (
     MAX_STALE_RETRIES,
     STALE_FORCE_RETRY_AFTER_SECS,
     STALE_FORCE_RETRY_HOURLY_CAP,
     STALE_FRESHNESS_SECS,
+    SUBSCRIBE_GRACE_SECS,  # 사이클 135 — 구독 ACK grace period (180s, Q3=A 영속)
 )
 
 # stale_session_recovery (5 상수)
@@ -70,11 +71,12 @@ from src.engine.stale_watcher_core import (
 )
 
 __all__ = [
-    # 상수 10
+    # 상수 11 (사이클 135 SUBSCRIBE_GRACE_SECS 추가)
     "MAX_STALE_RETRIES",
     "STALE_FORCE_RETRY_AFTER_SECS",
     "STALE_FORCE_RETRY_HOURLY_CAP",
     "STALE_FRESHNESS_SECS",
+    "SUBSCRIBE_GRACE_SECS",  # 사이클 135 — 구독 ACK grace period (180s)
     "UNIVERSE_LOW_VOLUME_THRESHOLD",
     "SILENT_INACTIVE_FRESH_RATIO_THRESHOLD",
     "SILENT_INACTIVE_MIN_SUBSCRIBED",
