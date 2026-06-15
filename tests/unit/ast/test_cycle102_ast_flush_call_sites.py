@@ -27,30 +27,11 @@ _SCHEDULER_PY = (
 )
 
 
-def _get_function_node(source: str, name: str) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
-    """모듈 전체 (클래스 내부 포함) 에서 `name` 함수/메서드 정의 첫 노드 반환."""
-    tree = ast.parse(source)
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
-            return node
-    return None
-
-
-def _count_calls_in(node: ast.AST, name: str) -> int:
-    """`node` 서브트리 안에서 `name(...)` 호출 사이트 개수.
-
-    매칭: `name(...)` 단순 호출 + `module.name(...)` 속성 호출
-    """
-    count = 0
-    for sub in ast.walk(node):
-        if not isinstance(sub, ast.Call):
-            continue
-        func = sub.func
-        if isinstance(func, ast.Name) and func.id == name:
-            count += 1
-        elif isinstance(func, ast.Attribute) and func.attr == name:
-            count += 1
-    return count
+# 사이클 136 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 영역 영구 영속 마이그레이션.
+from tests.unit.ast._ast_helpers import (
+    find_function_def as _get_function_node,
+    count_function_calls_in_node as _count_calls_in,
+)
 
 
 # ===========================================================================

@@ -28,42 +28,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def _module_source(module_path: Path) -> str:
-    return module_path.read_text(encoding="utf-8")
-
-
-def _find_function_def(source: str, func_name: str) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
-    tree = ast.parse(source)
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            if node.name == func_name:
-                return node
-    return None
-
-
-def _find_function_calls(source: str, func_name: str) -> int:
-    """source 영역에서 `func_name(...)` 호출 횟수 카운트."""
-    tree = ast.parse(source)
-    count = 0
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Call):
-            callee = node.func
-            # `flush_full_universe_load_collector()` 직접 호출
-            if isinstance(callee, ast.Name) and callee.id == func_name:
-                count += 1
-            # `_metrics_mod.flush_full_universe_load_collector()` attribute 호출
-            elif isinstance(callee, ast.Attribute) and callee.attr == func_name:
-                count += 1
-            # `await flush_full_universe_load_collector()` — Call wrap
-        elif isinstance(node, ast.Await):
-            inner = node.value
-            if isinstance(inner, ast.Call):
-                callee = inner.func
-                if isinstance(callee, ast.Name) and callee.id == func_name:
-                    count += 1
-                elif isinstance(callee, ast.Attribute) and callee.attr == func_name:
-                    count += 1
-    return count
+# 사이클 136 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 영역 영구 영속 마이그레이션.
+# ast.walk 영역 영구 영속 = ast.Await 영역 영구 영속 내부 ast.Call 영역 영구 영속 자동 traversal 영속.
+# 헬퍼 영역 영구 영속 = await 영역 영구 영속 자연 흡수 (ast.walk recursive 영속).
+from tests.unit.ast._ast_helpers import (
+    read_module_source as _module_source,
+    find_function_def as _find_function_def,
+    count_function_calls as _find_function_calls,
+)
 
 
 def test_g_ast1_a_record_full_universe_load_summary_exists() -> None:

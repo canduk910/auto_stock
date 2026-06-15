@@ -32,31 +32,11 @@ _SCHEDULER_PY = _SRC_ROOT / "engine" / "scheduler.py"
 _STALE_WATCHER_CORE_PY = _SRC_ROOT / "engine" / "stale_watcher_core.py"
 
 
-def _has_function_def(source: str, name: str) -> bool:
-    """`source` 모듈에 `name` 함수 정의 존재 여부."""
-    tree = ast.parse(source)
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
-            return True
-    return False
-
-
-def _count_calls_to(source: str, name: str) -> int:
-    """`source` 모듈 전체에서 `name(...)` 호출 사이트 개수.
-
-    매칭: `name(...)` 단순 호출 + `module.name(...)` 속성 호출
-    """
-    tree = ast.parse(source)
-    count = 0
-    for sub in ast.walk(tree):
-        if not isinstance(sub, ast.Call):
-            continue
-        func = sub.func
-        if isinstance(func, ast.Name) and func.id == name:
-            count += 1
-        elif isinstance(func, ast.Attribute) and func.attr == name:
-            count += 1
-    return count
+# 사이클 136 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 영역 영구 영속 마이그레이션.
+from tests.unit.ast._ast_helpers import (
+    has_function_def as _has_function_def,
+    count_function_calls as _count_calls_to,
+)
 
 
 # ===========================================================================

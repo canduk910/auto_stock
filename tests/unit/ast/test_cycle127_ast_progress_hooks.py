@@ -17,8 +17,8 @@ _ROUTES_SRC = Path(__file__).resolve().parents[3] / "src/routes/stock_master.py"
 _PROGRESS_SRC = Path(__file__).resolve().parents[3] / "src/engine/refresh_progress.py"
 
 
-def _read(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+# 사이클 136 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 영역 영구 영속 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
 
 
 def test_g_ast1_universe_progress_hooks():

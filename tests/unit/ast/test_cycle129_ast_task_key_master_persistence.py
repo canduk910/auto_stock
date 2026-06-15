@@ -17,8 +17,12 @@ _PROGRESS_SRC = (
 )
 
 
+# 사이클 136 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 영역 영구 영속 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source
+
+
 def _read() -> str:
-    return _PROGRESS_SRC.read_text(encoding="utf-8")
+    return read_module_source(_PROGRESS_SRC)
 
 
 def test_g_ast_tk1_literal_master_present():
