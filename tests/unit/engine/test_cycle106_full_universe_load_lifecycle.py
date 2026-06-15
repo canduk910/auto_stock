@@ -255,15 +255,23 @@ async def test_g_lc5_exception_in_immediate_phase_continues(monkeypatch):
 
     scheduler._wait_until = mock_wait_until
 
+    # 사이클 134 의미 전환 — logger 영역 영구 영속 = scheduler.logger OR task_loop_helper.logger
+    # (헬퍼 위임 후 logger 영역 = task_loop_helper.logger 영속 의무 영구 영속)
     with patch("src.engine.scanner._full_universe_load_once", side_effect=mock_load_once_raise), \
          patch("src.engine.stock_master_metrics.record_full_universe_load_summary"), \
          patch("src.engine.stock_master_metrics.flush_full_universe_load_collector"), \
-         patch("src.engine.scheduler.logger") as mock_logger:
+         patch("src.engine.scheduler.logger") as mock_scheduler_logger, \
+         patch("src.engine.task_loop_helper.logger") as mock_helper_logger:
         await TradingScheduler._full_universe_load_task_loop(scheduler)
 
-    # graceful logger.exception 호출 확인
-    assert mock_logger.exception.called, (
-        "G-LC5 FAIL: 즉시 실행 예외 시 logger.exception 미호출 (graceful 처리 누락)."
+    # graceful logger.exception 호출 확인 — scheduler 영역 또는 task_loop_helper 영역
+    has_exception_call = (
+        mock_scheduler_logger.exception.called
+        or mock_helper_logger.exception.called
+    )
+    assert has_exception_call, (
+        "G-LC5 FAIL: 즉시 실행 예외 시 logger.exception 미호출 (graceful 처리 누락). "
+        "사이클 134 의미 전환 영역 = task_loop_helper.logger 영역 영속 의무"
     )
     # while 루프 진입 확인 (즉시 실행 예외 후에도 while 루프 진입)
     assert wait_call_count["n"] >= 1, (
@@ -356,15 +364,26 @@ async def test_g_lc7_emit_prefix_immediate(monkeypatch):
     def mock_info(msg, *args, **kwargs):
         info_calls.append(msg % args if args else msg)
 
+    # 사이클 134 의미 전환 — logger 영역 영구 영속 = scheduler.logger OR task_loop_helper.logger
+    # (헬퍼 위임 후 logger.info 영역 = task_loop_helper.logger 영역 영속 의무)
+    # emit prefix 영역 영구 영속 = "[full_universe_load]" → "[full_universe_load_summary]" 의미 전환
+    # (사이클 134 헬퍼 영역 영구 영속 = collector 영역 prefix 통일 영역)
     with patch("src.engine.scanner._full_universe_load_once", return_value=mock_summary), \
          patch("src.engine.stock_master_metrics.record_full_universe_load_summary"), \
          patch("src.engine.stock_master_metrics.flush_full_universe_load_collector"), \
-         patch("src.engine.scheduler.logger") as mock_logger:
-        mock_logger.info.side_effect = mock_info
+         patch("src.engine.scheduler.logger") as mock_scheduler_logger, \
+         patch("src.engine.task_loop_helper.logger") as mock_helper_logger:
+        mock_scheduler_logger.info.side_effect = mock_info
+        mock_helper_logger.info.side_effect = mock_info
         await TradingScheduler._full_universe_load_task_loop(scheduler)
 
-    matching = [c for c in info_calls if "[full_universe_load]" in c]
+    # 사이클 134 의미 전환 — `[full_universe_load]` OR `[full_universe_load_summary]` 영속
+    matching = [
+        c for c in info_calls
+        if "[full_universe_load]" in c or "[full_universe_load_summary]" in c
+    ]
     assert matching, (
-        "G-LC7 FAIL: '[full_universe_load]' prefix 를 포함한 logger.info 미발화. "
-        "운영 가시화 누락."
+        "G-LC7 FAIL: '[full_universe_load]' 또는 '[full_universe_load_summary]' prefix 를 포함한 "
+        "logger.info 미발화. 운영 가시화 누락. "
+        "사이클 134 의미 전환 영역 = task_loop_helper.logger 영역 + summary prefix 영속 의무"
     )

@@ -277,14 +277,34 @@ def test_g_sched2_stock_master_daily_load_task_in_cancel_tuples():
 # G-SCHED3 (MEDIUM) — _stock_master_daily_load_task_loop 메서드 존재
 # ---------------------------------------------------------------------------
 def test_g_sched3_task_loop_method_exists():
-    """_stock_master_daily_load_task_loop 메서드 존재 + start() 직후 즉시 1회 실행."""
+    """_stock_master_daily_load_task_loop 메서드 존재 + start() 직후 즉시 1회 실행.
+
+    사이클 134 의미 전환 (카드 #21 — refactor-review 권고 채택) — 사이클 66 K-2 패턴 답습:
+    - Red 시점 (사이클 122) = facade 본체 `while self._running` + `초기 실행 완료` 인라인
+    - Green 시점 (사이클 134) = `run_periodic_task_loop` 헬퍼 위임 + lifecycle 영역 헬퍼 흡수
+    - 핵심 의도 보존: 메서드 영속 + _wait_until 정합 + 즉시 실행 + while 영속 (헬퍼 흡수).
+    """
     sched = scheduler.TradingScheduler()
     assert hasattr(sched, "_stock_master_daily_load_task_loop")
     assert callable(sched._stock_master_daily_load_task_loop)
 
-    # 사이클 106 패턴 답습 — 즉시 실행 + while 루프 양쪽 영역 정적 검증
     src = inspect.getsource(sched._stock_master_daily_load_task_loop)
-    assert "while self._running" in src
-    assert "_wait_until(TIME_STOCK_MASTER_DAILY_LOAD)" in src
-    # 즉시 실행 영역 (사이클 106 답습)
-    assert "초기 실행 완료" in src or "초기 실행 예외" in src
+    # _wait_until 인자 정합 영속 (facade 또는 헬퍼 인자 영역 영구 영속)
+    assert "TIME_STOCK_MASTER_DAILY_LOAD" in src, (
+        "TIME_STOCK_MASTER_DAILY_LOAD 인자 영속 부재 — facade 영속 의무 위반"
+    )
+
+    # 사이클 134 의미 전환 — 헬퍼 위임 OR 인라인 영역 영구 영속
+    has_helper = "run_periodic_task_loop" in src
+    has_inline = "while self._running" in src and ("초기 실행 완료" in src or "초기 실행 예외" in src)
+    assert has_helper or has_inline, (
+        "lifecycle race 차단 패턴 영속 부재 — "
+        "Red 시점 (인라인) 또는 Green 시점 (헬퍼 위임) 영속 의무 위반"
+    )
+
+    if has_helper:
+        # 헬퍼 영역 영구 영속에서 lifecycle 흡수 영속
+        from pathlib import Path
+        helper_src = Path("src/engine/task_loop_helper.py").read_text(encoding="utf-8")
+        assert "while scheduler._running" in helper_src
+        assert "초기 실행" in helper_src

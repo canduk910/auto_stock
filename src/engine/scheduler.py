@@ -2637,144 +2637,77 @@ class TradingScheduler:
                 break
 
     async def _full_universe_load_task_loop(self) -> None:
-        """사이클 101 (2026-06-11) — 매일 20:00:05 전체 유니버스 일괄 적재 task.
+        """사이클 101 + 사이클 106 + 사이클 134 (2026-06-15) — 매일 20:00:05 전체 유니버스 일괄 적재 task facade.
 
-        Q68=A (fluctuation 영구 폐기) + Q69=B (_universe_eager_refresh_loop 영구 폐기)
-        이후 단일 대체 daily 영역.
+        사이클 134 카드 #21 영속: `run_periodic_task_loop` 헬퍼 위임 (사이클 67 facade 답습).
+        lifecycle 영역 영구 영속 = 헬퍼 영역 영구 영속에서 흡수 (사이클 106 race 차단 + 사이클 88 graceful).
 
-        lifecycle (사이클 78/79 답습):
-        - `start()` 에서 task 시작 → `_scan_pool_eager_refresh_task` 직후 생성
-        - `stop()` task_attrs 튜플 + `run_daily.finally` 양쪽 cancel 보장
-        - `stop()` lifecycle hook 에서 마지막 flush 1회 (사이클 78 G-SP4 답습)
-
-        emit (사이클 74 collector 패턴 답습):
-        - [full_universe_load_summary] — 적재 완료 후 1행 INFO
-
-        사이클 106 (2026-06-11) — Q1=A start() 직후 즉시 1회 실행 (사이클 78/83 답습):
-        - _wait_until(20:00:05) 대기 전 즉시 1회 실행 → stop() race 영구 차단
-        - is_stale 24h TTL idempotency 영속 활용 = 조기 호출 부수 효과 0
-        - lifecycle race 원인: start() → _wait_until 대기 중 → 20:10 _settle → stop() cancel
-          = 사이클 101 도입 이후 매일 20:00:05 미발화 영속 결함 (191 ticker 영속)
+        영속 의무 매트릭스:
+        - 사이클 79 G-AST2 영속 (task_attrs 4 위치 영속)
+        - 사이클 78 G-AST1 영속 (record + flush 호출 사이트 영속 = 헬퍼 영역 영구 영속 내부)
+        - 사이클 101 idempotency (24h TTL fresh skip)
+        - 사이클 106 lifecycle race 차단 패턴 영속
         """
         from src.engine.scanner import _full_universe_load_once as _load_once
         from src.engine.stock_master_metrics import (
             record_full_universe_load_summary,
             flush_full_universe_load_collector,
         )
+        from src.engine.task_loop_helper import run_periodic_task_loop
 
-        # 사이클 106 = start() 직후 즉시 1회 실행 (사이클 78/83 lifecycle race 차단 패턴 답습)
-        # is_stale 24h TTL idempotency 영속 — 동일 날짜 2회 호출 = 1회만 KIS 호출 (TTL 영속)
-        # _wait_until 이전 즉시 실행으로 20:10 _settle → stop() cancel race 영구 차단
-        try:
-            summary = await _load_once()
-            record_full_universe_load_summary(summary)
-            flush_full_universe_load_collector()
-            logger.info(
-                "[full_universe_load] 초기 실행 완료 total=%d kospi=%d kosdaq=%d "
-                "fetched=%d skipped_ttl=%d failed=%d elapsed_ms=%d",
-                summary.get("total", 0), summary.get("kospi", 0),
-                summary.get("kosdaq", 0), summary.get("fetched", 0),
-                summary.get("skipped_ttl", 0), summary.get("failed", 0),
-                summary.get("elapsed_ms", 0),
-            )
-        except asyncio.CancelledError:
-            return
-        except Exception:
-            logger.exception("[full_universe_load] 초기 실행 예외 graceful")
-
-        while self._running:
-            try:
-                await self._wait_until(TIME_FULL_UNIVERSE_LOAD)  # 20:00:05
-                if not self._running:
-                    break
-                summary = await _load_once()
-                record_full_universe_load_summary(summary)
-                flush_full_universe_load_collector()
-                logger.info(
-                    "[full_universe_load] 완료 total=%d kospi=%d kosdaq=%d "
-                    "fetched=%d skipped_ttl=%d failed=%d elapsed_ms=%d",
-                    summary.get("total", 0), summary.get("kospi", 0),
-                    summary.get("kosdaq", 0), summary.get("fetched", 0),
-                    summary.get("skipped_ttl", 0), summary.get("failed", 0),
-                    summary.get("elapsed_ms", 0),
-                )
-            except asyncio.CancelledError:
-                break
-            except Exception:
-                logger.exception("[full_universe_load] task loop 예외 graceful")
-                await asyncio.sleep(60)
+        await run_periodic_task_loop(
+            scheduler=self,
+            task_label="full_universe_load",
+            wait_time=TIME_FULL_UNIVERSE_LOAD,  # 20:00:05
+            once_callable=_load_once,
+            record_fn=record_full_universe_load_summary,
+            flush_fn=flush_full_universe_load_collector,
+            summary_log_format=(
+                "[full_universe_load_summary] total=%d kospi=%d kosdaq=%d "
+                "fetched=%d skipped_ttl=%d failed=%d elapsed_ms=%d"
+            ),
+            summary_keys=(
+                "total", "kospi", "kosdaq",
+                "fetched", "skipped_ttl", "failed", "elapsed_ms",
+            ),
+        )
 
     async def _stock_master_daily_load_task_loop(self) -> None:
-        """사이클 122 (2026-06-12) — 매일 16:00 KST KIS 일봉 적재 task.
+        """사이클 122 + 사이클 134 (2026-06-15) — 매일 16:00 KST KIS 일봉 적재 task facade.
 
-        사용자 결정 영속:
-        - Q1=A 매일 16:00 KST 일괄 적재 (KRX 메인 종료 30분 후 안전 마진)
-        - Q2=C T-100일 (KIS 1회 호출 한도)
-        - Q3=B 점진 적재 (백필 + 증분 자동 분기)
-        - Q4=B DB 적재만 (전략 전환은 사이클 123+ 별개)
+        사이클 134 카드 #21 영속: `run_periodic_task_loop` 헬퍼 위임 (사이클 67 facade 답습).
 
-        lifecycle (사이클 106 race 차단 패턴 답습):
-        - start() 직후 즉시 1회 실행 → 빠른 운영 가시화 + lifecycle race 영구 차단
-          (max_bas_dd idempotency 영속 활용 — 동일 영업일 2회 호출 시 두 번째는 skip)
-        - while 루프 _wait_until(16:00:00) 무한 루프 + asyncio.sleep(60) 안전 마진
-        - stop() task_attrs 튜플에 _stock_master_daily_load_task 포함 (사이클 79 답습)
-
-        emit (사이클 74/101 collector 패턴 답습):
-        - [stock_master_daily_load_summary] — 적재 완료 후 1행 INFO
-
-        영속 의무:
+        영속 의무 매트릭스:
         - 사이클 14 fetch_daily_candles 재사용 (신규 KIS API 도입 0건)
         - 사이클 17 OPSP0002 backoff 안전 마진
         - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
-        - 사이클 88 G-REJECT graceful 단위
-        - 사이클 106 lifecycle race 차단
+        - 사이클 79 G-AST2 영속 (task_attrs 4 위치 영속)
+        - 사이클 88 G-REJECT graceful 단위 = 헬퍼 영역 영구 영속 내부
+        - 사이클 106 lifecycle race 차단 = 헬퍼 영역 영구 영속 내부
         """
         from src.engine.scanner import _stock_master_daily_load_once
         from src.engine.stock_master_daily_metrics import (
             record_stock_master_daily_load,
             flush_stock_master_daily_load_collector,
         )
+        from src.engine.task_loop_helper import run_periodic_task_loop
 
-        # 사이클 106 패턴 답습 — start() 직후 즉시 1회 실행
-        # (max_bas_dd idempotency 영속으로 동일 영업일 2회 호출 시 skip)
-        try:
-            summary = await _stock_master_daily_load_once()
-            record_stock_master_daily_load(summary)
-            flush_stock_master_daily_load_collector()
-            logger.info(
-                "[stock_master_daily_load] 초기 실행 완료 total=%d fetched=%d "
-                "upserted_rows=%d skipped_fresh=%d failed=%d elapsed_ms=%d mode=%s",
-                summary.get("total", 0), summary.get("fetched", 0),
-                summary.get("upserted_rows", 0), summary.get("skipped_fresh", 0),
-                summary.get("failed", 0), summary.get("elapsed_ms", 0),
-                summary.get("mode", "mixed"),
-            )
-        except asyncio.CancelledError:
-            return
-        except Exception:
-            logger.exception("[stock_master_daily_load] 초기 실행 예외 graceful")
-
-        while self._running:
-            try:
-                await self._wait_until(TIME_STOCK_MASTER_DAILY_LOAD)  # 16:00 KST
-                if not self._running:
-                    break
-                summary = await _stock_master_daily_load_once()
-                record_stock_master_daily_load(summary)
-                flush_stock_master_daily_load_collector()
-                logger.info(
-                    "[stock_master_daily_load] 정기 실행 완료 total=%d fetched=%d "
-                    "upserted_rows=%d skipped_fresh=%d failed=%d elapsed_ms=%d mode=%s",
-                    summary.get("total", 0), summary.get("fetched", 0),
-                    summary.get("upserted_rows", 0), summary.get("skipped_fresh", 0),
-                    summary.get("failed", 0), summary.get("elapsed_ms", 0),
-                    summary.get("mode", "mixed"),
-                )
-            except asyncio.CancelledError:
-                break
-            except Exception:
-                logger.exception("[stock_master_daily_load] task loop 예외 graceful")
-                await asyncio.sleep(60)
+        await run_periodic_task_loop(
+            scheduler=self,
+            task_label="stock_master_daily_load",
+            wait_time=TIME_STOCK_MASTER_DAILY_LOAD,  # 16:00 KST
+            once_callable=_stock_master_daily_load_once,
+            record_fn=record_stock_master_daily_load,
+            flush_fn=flush_stock_master_daily_load_collector,
+            summary_log_format=(
+                "[stock_master_daily_load_summary] total=%d fetched=%d upserted_rows=%d "
+                "skipped_fresh=%d failed=%d elapsed_ms=%d mode=%s"
+            ),
+            summary_keys=(
+                "total", "fetched", "upserted_rows",
+                "skipped_fresh", "failed", "elapsed_ms", "mode",
+            ),
+        )
 
     async def _stock_master_basics_refresh_task_loop(self) -> None:
         """사이클 126 (2026-06-13) — 매일 16:10 KST KIS CTPF1002R 매스 보강 task.
@@ -2803,44 +2736,23 @@ class TradingScheduler:
             record_stock_master_basics_refresh,
             flush_stock_master_basics_refresh_collector,
         )
+        from src.engine.task_loop_helper import run_periodic_task_loop
 
-        # 사이클 122 패턴 답습 — start() 직후 즉시 1회 실행
-        try:
-            summary = await _stock_master_basics_refresh_once()
-            record_stock_master_basics_refresh(summary)
-            flush_stock_master_basics_refresh_collector()
-            logger.info(
-                "[stock_master_basics_refresh] 초기 실행 완료 total=%d updated=%d "
-                "skipped=%d failed=%d elapsed_ms=%d",
-                summary.get("total", 0), summary.get("updated", 0),
-                summary.get("skipped", 0), summary.get("failed", 0),
-                summary.get("elapsed_ms", 0),
-            )
-        except asyncio.CancelledError:
-            return
-        except Exception:
-            logger.exception("[stock_master_basics_refresh] 초기 실행 예외 graceful")
-
-        while self._running:
-            try:
-                await self._wait_until(TIME_STOCK_MASTER_BASICS_REFRESH)  # 16:10 KST
-                if not self._running:
-                    break
-                summary = await _stock_master_basics_refresh_once()
-                record_stock_master_basics_refresh(summary)
-                flush_stock_master_basics_refresh_collector()
-                logger.info(
-                    "[stock_master_basics_refresh] 정기 실행 완료 total=%d updated=%d "
-                    "skipped=%d failed=%d elapsed_ms=%d",
-                    summary.get("total", 0), summary.get("updated", 0),
-                    summary.get("skipped", 0), summary.get("failed", 0),
-                    summary.get("elapsed_ms", 0),
-                )
-            except asyncio.CancelledError:
-                break
-            except Exception:
-                logger.exception("[stock_master_basics_refresh] task loop 예외 graceful")
-                await asyncio.sleep(60)
+        await run_periodic_task_loop(
+            scheduler=self,
+            task_label="stock_master_basics_refresh",
+            wait_time=TIME_STOCK_MASTER_BASICS_REFRESH,  # 16:10 KST
+            once_callable=_stock_master_basics_refresh_once,
+            record_fn=record_stock_master_basics_refresh,
+            flush_fn=flush_stock_master_basics_refresh_collector,
+            summary_log_format=(
+                "[stock_master_basics_refresh_summary] total=%d updated=%d "
+                "skipped=%d failed=%d elapsed_ms=%d"
+            ),
+            summary_keys=(
+                "total", "updated", "skipped", "failed", "elapsed_ms",
+            ),
+        )
 
     async def _stock_master_master_load_task_loop(self) -> None:
         """사이클 129 (2026-06-13) — 매일 16:30 KST KIS 종목 마스터 파일 적재 task.
@@ -2876,44 +2788,24 @@ class TradingScheduler:
             record_stock_master_master_load,
             flush_stock_master_master_load_collector,
         )
+        from src.engine.task_loop_helper import run_periodic_task_loop
 
-        # 사이클 122 패턴 답습 — start() 직후 즉시 1회 실행
-        try:
-            summary = await _stock_master_master_load_once()
-            record_stock_master_master_load(summary)
-            flush_stock_master_master_load_collector()
-            logger.info(
-                "[stock_master_master_load] 초기 실행 완료 kospi=%d kosdaq=%d "
-                "total=%d updated=%d failed=%d elapsed_ms=%d",
-                summary.get("kospi_count", 0), summary.get("kosdaq_count", 0),
-                summary.get("total", 0), summary.get("updated", 0),
-                summary.get("failed", 0), summary.get("elapsed_ms", 0),
-            )
-        except asyncio.CancelledError:
-            return
-        except Exception:
-            logger.exception("[stock_master_master_load] 초기 실행 예외 graceful")
-
-        while self._running:
-            try:
-                await self._wait_until(TIME_STOCK_MASTER_MASTER_LOAD)  # 16:30 KST
-                if not self._running:
-                    break
-                summary = await _stock_master_master_load_once()
-                record_stock_master_master_load(summary)
-                flush_stock_master_master_load_collector()
-                logger.info(
-                    "[stock_master_master_load] 정기 실행 완료 kospi=%d kosdaq=%d "
-                    "total=%d updated=%d failed=%d elapsed_ms=%d",
-                    summary.get("kospi_count", 0), summary.get("kosdaq_count", 0),
-                    summary.get("total", 0), summary.get("updated", 0),
-                    summary.get("failed", 0), summary.get("elapsed_ms", 0),
-                )
-            except asyncio.CancelledError:
-                break
-            except Exception:
-                logger.exception("[stock_master_master_load] task loop 예외 graceful")
-                await asyncio.sleep(60)
+        await run_periodic_task_loop(
+            scheduler=self,
+            task_label="stock_master_master_load",
+            wait_time=TIME_STOCK_MASTER_MASTER_LOAD,  # 16:30 KST
+            once_callable=_stock_master_master_load_once,
+            record_fn=record_stock_master_master_load,
+            flush_fn=flush_stock_master_master_load_collector,
+            summary_log_format=(
+                "[stock_master_master_load_summary] kospi=%d kosdaq=%d "
+                "total=%d updated=%d failed=%d elapsed_ms=%d"
+            ),
+            summary_keys=(
+                "kospi_count", "kosdaq_count", "total",
+                "updated", "failed", "elapsed_ms",
+            ),
+        )
 
     def _detect_silent_inactive_sessions(self) -> list[str]:
         """세션 단위 silent inactive 감지 — 사이클 61 Phase 2-A2 stale_manager 위임."""

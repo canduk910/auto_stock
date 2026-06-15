@@ -70,20 +70,49 @@ def test_g_ast2_stock_master_daily_table_name_persistence():
 # G-AST3 — lifecycle race 차단 패턴 영속 (사이클 106 답습)
 # ---------------------------------------------------------------------------
 def test_g_ast3_lifecycle_race_pattern_persistence():
-    """_stock_master_daily_load_task_loop 영역 = start() 직후 즉시 1회 + while 루프."""
+    """_stock_master_daily_load_task_loop 영역 = start() 직후 즉시 1회 + while 루프.
+
+    사이클 134 의미 전환 (카드 #21 — refactor-review 권고 채택) — 사이클 66 K-2 패턴 답습:
+    - Red 시점 (사이클 122) = facade 본체에 `while self._running` + `초기 실행` 인라인
+    - Green 시점 (사이클 134) = `run_periodic_task_loop` 헬퍼 위임 + lifecycle 영역 헬퍼 내부 흡수
+    - 핵심 의도 보존: lifecycle race 차단 + while 루프 + graceful + _wait_until 영속 (헬퍼 영역 흡수).
+    """
     src = inspect.getsource(scheduler.TradingScheduler._stock_master_daily_load_task_loop)
-    # while 루프 영속
-    assert "while self._running" in src
-    # _wait_until 정합
-    assert "_wait_until(TIME_STOCK_MASTER_DAILY_LOAD)" in src
-    # graceful (사이클 88 G-REJECT 영속)
-    assert "asyncio.CancelledError" in src
-    assert "logger.exception" in src
-    # 사이클 106 lifecycle race 차단 — 즉시 실행 + while 루프 양쪽
-    immediate_count = src.count("초기 실행")
-    periodic_count = src.count("정기 실행")
-    assert immediate_count >= 1, "사이클 106 답습 — 초기 실행 영역 영구 영속"
-    assert periodic_count >= 1, "while 루프 정기 실행 영역 영구 영속"
+    # _wait_until 정합 (TIME_STOCK_MASTER_DAILY_LOAD 영속) - facade 또는 헬퍼 인자 영역
+    assert "TIME_STOCK_MASTER_DAILY_LOAD" in src, (
+        "TIME_STOCK_MASTER_DAILY_LOAD 영역 영속 부재 — facade 영역 영속 의무 위반"
+    )
+
+    # 사이클 134 의미 전환 — 헬퍼 위임 영역 영구 영속 또는 인라인 영역 영구 영속
+    has_helper = "run_periodic_task_loop" in src
+    has_inline = "while self._running" in src and "초기 실행" in src and "정기 실행" in src
+    assert has_helper or has_inline, (
+        "lifecycle race 차단 패턴 영속 부재 — "
+        "Red 시점 인라인 (while + 초기/정기 실행) 또는 "
+        "Green 시점 헬퍼 (run_periodic_task_loop) 영속 의무 위반"
+    )
+
+    if has_helper:
+        # 헬퍼 위임 영역 영구 영속 = 헬퍼 영역 내부에서 lifecycle 흡수 영구 영속
+        # 헬퍼 모듈 영역 영구 영속 정독 영구 영속
+        from pathlib import Path
+        helper_src = Path("src/engine/task_loop_helper.py").read_text(encoding="utf-8")
+        assert "while scheduler._running" in helper_src, (
+            "헬퍼 영역 while 루프 영속 부재 — 사이클 106 답습 의무"
+        )
+        assert "초기 실행" in helper_src, (
+            "헬퍼 영역 초기 실행 영역 영속 부재 — 사이클 106 답습 의무"
+        )
+        assert "logger.exception" in helper_src, (
+            "헬퍼 영역 graceful 영속 부재 — 사이클 88 G-REJECT 답습 의무"
+        )
+        assert "asyncio.CancelledError" in helper_src, (
+            "헬퍼 영역 CancelledError graceful 영속 부재"
+        )
+    else:
+        # Red 시점 (사이클 122) 인라인 영역 영구 영속 보존
+        assert "asyncio.CancelledError" in src
+        assert "logger.exception" in src
 
 
 # ---------------------------------------------------------------------------
