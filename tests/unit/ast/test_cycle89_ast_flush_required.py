@@ -34,11 +34,30 @@ _STOCK_MASTER_METRICS_PY = _SRC_ROOT / "engine" / "stock_master_metrics.py"
 
 
 def _has_function_def(source: str, name: str) -> bool:
-    """`source` 모듈에 `name` 함수 정의 존재 여부."""
+    """`source` 모듈에 `name` 함수 정의 OR 모듈-레벨 export 존재 여부.
+
+    사이클 133 의미 전환 (카드 #24 — refactor-review 권고 채택) — 사이클 66 K-2 패턴 답습:
+    - Red 시점 (사이클 89) = `def name(...)` 또는 `async def name(...)` 함수 정의
+    - Green 시점 (사이클 133) = `make_metrics_collector` 팩토리 반환값을 모듈-레벨 tuple unpacking 으로 할당 영속.
+      예: `(record_universe_refresh, flush_universe_collector, _collector) = make_metrics_collector(...)`.
+    - 핵심 의도 보존: 모듈-레벨에서 `name` 영역 영속 (정의 또는 export 영속).
+    """
     tree = ast.parse(source)
     for node in ast.walk(tree):
+        # 패턴 1 (사이클 89 Red 시점) — 함수 정의
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
             return True
+        # 패턴 2 (사이클 133 Green 시점) — 모듈-레벨 Assign 영역 tuple unpacking 또는 단일 할당
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                # 단일 할당: name = ...
+                if isinstance(target, ast.Name) and target.id == name:
+                    return True
+                # tuple unpacking: (name, ...) = ...
+                if isinstance(target, ast.Tuple):
+                    for elt in target.elts:
+                        if isinstance(elt, ast.Name) and elt.id == name:
+                            return True
     return False
 
 

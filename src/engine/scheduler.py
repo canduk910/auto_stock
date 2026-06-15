@@ -2871,10 +2871,17 @@ class TradingScheduler:
         - domain-consult 의제 5 옵션 A 채택 (16:30 KST 단일 task + 17시간 lag 명시 수용)
         """
         from src.engine.scanner import _stock_master_master_load_once
+        # 사이클 133 — master metrics collector 통합 영속 (카드 #24 일관성 결함 해소)
+        from src.engine.stock_master_master_metrics import (
+            record_stock_master_master_load,
+            flush_stock_master_master_load_collector,
+        )
 
         # 사이클 122 패턴 답습 — start() 직후 즉시 1회 실행
         try:
             summary = await _stock_master_master_load_once()
+            record_stock_master_master_load(summary)
+            flush_stock_master_master_load_collector()
             logger.info(
                 "[stock_master_master_load] 초기 실행 완료 kospi=%d kosdaq=%d "
                 "total=%d updated=%d failed=%d elapsed_ms=%d",
@@ -2893,6 +2900,8 @@ class TradingScheduler:
                 if not self._running:
                     break
                 summary = await _stock_master_master_load_once()
+                record_stock_master_master_load(summary)
+                flush_stock_master_master_load_collector()
                 logger.info(
                     "[stock_master_master_load] 정기 실행 완료 kospi=%d kosdaq=%d "
                     "total=%d updated=%d failed=%d elapsed_ms=%d",
