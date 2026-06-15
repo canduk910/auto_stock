@@ -1208,11 +1208,26 @@ class TradingScheduler:
                 gap_rate = 0.0
 
             if gap_rate >= gap_up_threshold:
+                # 사이클 142 — 결함 #2 시정: LTV strategy 후성 동기화 (자문 영속 정합).
+                # 후성 093370 운영 사례 (6/12 매수 → 6/15 트레일링 silent 미발화 -5.91% 손실).
+                # check_exit_signal 익일 트레일링 분기 진입 의무 영역 영구 영속:
+                # - _limit_up_reached.add(ticker) = 상한가 모드 영역 영구 영속 진입 보장
+                # - pos.high_since_buy = today_open = 트레일링 기준점 영역 영구 영속 설정
+                # VB 변경 0 영역 영구 영속 (strategy_id 가드).
+                if strategy_id == "long_tail_volatility":
+                    ltv_strategy = self.registry.get(strategy_id)
+                    if ltv_strategy is not None and hasattr(ltv_strategy, "_limit_up_reached"):
+                        ltv_strategy._limit_up_reached.add(ticker)
+                    pos.high_since_buy = today_open
                 logger.info(
-                    "트레일링 스탑 모드: %s 갭률 %.1f%% (전략: %s)",
-                    t(ticker), gap_rate, strategy_id,
+                    "트레일링 스탑 모드: %s 갭률 %.1f%% (전략: %s, 기준가: %d)",
+                    t(ticker), gap_rate, strategy_id, today_open,
                 )
-                await write_log("INFO", f"트레일링 스탑 모드: {t(ticker)} 갭률 {gap_rate:.1f}% ({strategy_id})")
+                await write_log(
+                    "INFO",
+                    f"트레일링 스탑 모드: {t(ticker)} 갭률 {gap_rate:.1f}% "
+                    f"({strategy_id}, 기준가: {today_open})",
+                )
             else:
                 # NXT 프리에서는 지정가 매도 (직전가 -1호가, KRX 호가단위 적용)
                 limit_price = step_down(int(today_open), steps=1)
@@ -1790,15 +1805,23 @@ class TradingScheduler:
             if not hasattr(strategy, 'check_force_clear'):
                 continue
 
-            allowed = get_tradable_boards(sid, strategy.config.params)
-            keeps_post_nxt = MarketBoard.POST_NXT in allowed
-            if keeps_post_nxt:
-                logger.info("%s POST_NXT 활성 — 15:20 강제 청산 보류, 19:50 매수 중단까지 유지", strategy.config.name)
-                continue
-
+            # 사이클 142 — 결함 #1 시정: POST_NXT 활성 여부 무관 check_force_clear() 호출.
+            # 사용자 의도 (사이클 38 명세) + 자문 영속 정합:
+            # - LTV.check_force_clear() 본체가 _limit_up_reached 영역 영구 영속 상한가 모드 종목 제외 영속
+            # - 일반 종목 (상한가 미도달) = 15:20 즉시 청산 의무 영속
+            # - VB.check_force_clear() = 전량 청산 영속 (변경 0, POST_NXT 미포함)
+            # 현행 결함 = keeps_post_nxt 시 continue 분기 영역 영구 영속 → 모든 종목 보류 (의도 위반)
             clear_tickers = strategy.check_force_clear()
             if not clear_tickers:
                 continue
+
+            allowed = get_tradable_boards(sid, strategy.config.params)
+            keeps_post_nxt = MarketBoard.POST_NXT in allowed
+            if keeps_post_nxt:
+                logger.info(
+                    "%s POST_NXT 활성 — 15:20 강제 청산: %d 종목 (상한가 모드 영역 영구 영속 종목 제외)",
+                    strategy.config.name, len(clear_tickers),
+                )
 
             await write_log("INFO", f"{strategy.config.name} 15:20 강제 청산 대상: {clear_tickers}")
             for ticker in clear_tickers:
