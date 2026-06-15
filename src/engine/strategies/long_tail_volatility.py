@@ -13,11 +13,24 @@ import asyncio
 import logging
 from datetime import date, datetime, timedelta, timezone
 
-from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
+from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
 
 logger = logging.getLogger(__name__)
+
+
+# 사이클 143 (2026-06-15) — LTV 6단계 funnel hook (사이클 140 자문 영속)
+# VB 5단계 + 연속 상한가 필터 (LTV 특화 영역 영구 영속).
+# 사이클 47 FUNNEL_STAGES 위임 패턴 답습 (`_record_funnel_pipeline_step(LTV_FUNNEL_STAGES[i-1], ...)`).
+LTV_FUNNEL_STAGES: tuple[FunnelStage, ...] = (
+    FunnelStage(1, "거래량순위 + stock_master 기반 후보"),
+    FunnelStage(2, "시총 + 거래대금 필터 통과"),
+    FunnelStage(3, "일봉 fetch 통과"),
+    FunnelStage(4, "전일 Range > 0 + noise 계산 통과"),
+    FunnelStage(5, "연속 상한가 필터 통과"),
+    FunnelStage(6, "K값 계산 + target_offset > 0"),
+)
 
 
 def _empty_scan_stats() -> dict:
@@ -99,7 +112,11 @@ class LongTailVolatilityStrategy(StrategyBase):
         self._scan_stats: dict = _empty_scan_stats()
 
     async def prepare(self) -> None:
-        """장 시작 전: 종목 스캔 → K값 계산 → 연속상한가 필터링."""
+        """장 시작 전: 종목 스캔 → K값 계산 → 연속상한가 필터링.
+
+        사이클 143 (2026-06-15) — 사이클 140 자문 영속 LTV 6단계 funnel hook 추가.
+        VB 5단계 + 연속 상한가 필터 (LTV 특화 영역 영구 영속).
+        """
         import asyncio
 
         from src.api.condition import fetch_daily_candles
@@ -107,8 +124,32 @@ class LongTailVolatilityStrategy(StrategyBase):
         # 사이클 21 — 매 prepare 마다 카운트 초기화
         stats = _empty_scan_stats()
         self._scan_stats = stats
+        # 사이클 143 — 단계별 ticker 캡처 reset (사이클 39 답습)
+        self._reset_funnel_steps()
 
         tickers = await self._scan_universe()
+        # 사이클 143 — step 1+2 funnel hook (사이클 140 자문 영속)
+        params = self.config.params
+        min_mcap_billion = params.get("min_market_cap", 100_000_000_000) / 100_000_000
+        min_trade_billion = params.get("min_trade_amount", 20_000_000_000) / 100_000_000
+        # step 1: 유니버스 후보 (stock_master 기반)
+        self._record_funnel_pipeline_step(
+            LTV_FUNNEL_STAGES[0],
+            survived=[],
+            step_conditions=(
+                f"stock_master.list_by_filter (nxt_tradable=True, "
+                f"limit={params.get('max_scan_stocks', 100)})"
+            ),
+        )
+        # step 2: 시총 + 거래대금 필터 통과
+        self._record_funnel_pipeline_step(
+            LTV_FUNNEL_STAGES[1],
+            survived=tickers,
+            step_conditions=(
+                f"시총 ≥ {min_mcap_billion:.0f}억 + 거래대금 ≥ {min_trade_billion:.0f}억"
+            ),
+        )
+
         k_period = self.config.params["k_period"]
         consecutive_limit = self.config.params["exclude_consecutive_limit"]
         today_str = datetime.now(timezone(timedelta(hours=9))).date().strftime("%Y%m%d")
@@ -127,9 +168,21 @@ class LongTailVolatilityStrategy(StrategyBase):
         # 사이클 21 — 일봉 fetch 성공 카운트
         stats["candle_fetch_ok"] = sum(1 for _, c in fetched if c is not None)
 
+        # 사이클 143 — 단계별 ticker 캡처 (사이클 39+41 답습)
+        candle_fetch_ok_tickers: list[str] = []
+        range_pass_tickers: list[str] = []
+        consecutive_limit_pass_tickers: list[str] = []
+        final_prepared_tickers: list[str] = []
+        candle_fetch_excluded: list[dict] = []
+        range_excluded: list[dict] = []
+        consecutive_limit_excluded: list[dict] = []
+        target_excluded: list[dict] = []
+
         for ticker, candles in fetched:
             if candles is None:
+                candle_fetch_excluded.append({"ticker": ticker, "reason": "fetch 실패"})
                 continue
+            candle_fetch_ok_tickers.append(ticker)
             try:
                 if len(candles) < 2:
                     continue
@@ -138,15 +191,6 @@ class LongTailVolatilityStrategy(StrategyBase):
                 prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
                 if len(candles) <= prev_idx + 1:
                     continue
-
-                # 연속상한가 체크 (전일 기준 최근 N일 연속 +25% 이상이면 제외)
-                if consecutive_limit > 0 and self._is_consecutive_limit_up(
-                    candles, consecutive_limit, start=prev_idx,
-                ):
-                    logger.debug("연속상한가 제외: %s (%d일 이상)", ticker, consecutive_limit)
-                    continue
-                # 사이클 21 — 연속상한가 통과 카운트 (탈락 종목은 미증가)
-                stats["consecutive_limit_pass"] += 1
 
                 # 노이즈 비율 계산 (전일 이전 k_period일)
                 noise_list = []
@@ -161,6 +205,7 @@ class LongTailVolatilityStrategy(StrategyBase):
                         noise_list.append(noise)
 
                 if not noise_list:
+                    range_excluded.append({"ticker": ticker, "reason": "noise 영역 0"})
                     continue
 
                 k = sum(noise_list) / len(noise_list)
@@ -171,19 +216,41 @@ class LongTailVolatilityStrategy(StrategyBase):
                 prev_low = int(prev.get("stck_lwpr", "0"))
                 prev_range = prev_high - prev_low
                 if prev_range <= 0:
+                    range_excluded.append({"ticker": ticker, "reason": f"prev_range={prev_range} ≤ 0"})
                     logger.debug(
                         "롱테일 prev_range=0 skip: %s (date=%s)",
                         ticker, prev.get("stck_bsop_date"),
                     )
                     continue
+                range_pass_tickers.append(ticker)
+
+                # 연속상한가 체크 (전일 기준 최근 N일 연속 +25% 이상이면 제외)
+                # 사이클 143 — funnel 영역 영구 영속 단계 5 ↔ 단계 4/6 사이 영역 (도메인 정합 영구 영속)
+                if consecutive_limit > 0 and self._is_consecutive_limit_up(
+                    candles, consecutive_limit, start=prev_idx,
+                ):
+                    consecutive_limit_excluded.append({
+                        "ticker": ticker,
+                        "reason": f"연속 상한가 {consecutive_limit}일 이상",
+                    })
+                    logger.debug("연속상한가 제외: %s (%d일 이상)", ticker, consecutive_limit)
+                    continue
+                # 사이클 21 — 연속상한가 통과 카운트 (탈락 종목은 미증가)
+                stats["consecutive_limit_pass"] += 1
+                consecutive_limit_pass_tickers.append(ticker)
 
                 target_offset = int(prev_range * k)
                 if target_offset <= 0:
+                    target_excluded.append({
+                        "ticker": ticker,
+                        "reason": f"target_offset={target_offset} ≤ 0 (k={k:.4f})",
+                    })
                     logger.debug(
                         "롱테일 target_offset=0 skip: %s (k=%.4f, range=%d)",
                         ticker, k, prev_range,
                     )
                     continue
+                final_prepared_tickers.append(ticker)
 
                 self._targets[ticker] = {
                     "k": round(k, 4),
@@ -215,6 +282,33 @@ class LongTailVolatilityStrategy(StrategyBase):
         stats["k_value_computed"] = prepared
         stats["final_prepared"] = len(self._scanned_tickers)
         stats["last_run_at"] = datetime.now(KST).isoformat()
+
+        # 사이클 143 — step 3+4+5+6 funnel hook (사이클 140 자문 영속)
+        self._record_funnel_pipeline_step(
+            LTV_FUNNEL_STAGES[2],
+            survived=candle_fetch_ok_tickers,
+            step_conditions=f"KIS fetch_daily_candles 정상 응답 ({k_period}일)",
+            excluded=candle_fetch_excluded,
+        )
+        self._record_funnel_pipeline_step(
+            LTV_FUNNEL_STAGES[3],
+            survived=range_pass_tickers,
+            step_conditions="전일 Range > 0 + noise 영역 계산 통과",
+            excluded=range_excluded,
+        )
+        self._record_funnel_pipeline_step(
+            LTV_FUNNEL_STAGES[4],
+            survived=consecutive_limit_pass_tickers,
+            step_conditions=f"연속 상한가 {consecutive_limit}일 미만 통과",
+            excluded=consecutive_limit_excluded,
+        )
+        self._record_funnel_pipeline_step(
+            LTV_FUNNEL_STAGES[5],
+            survived=final_prepared_tickers,
+            step_conditions="K값 노이즈 비율 + target_offset > 0",
+            excluded=target_excluded,
+        )
+
         logger.info("롱테일 변동성 돌파 준비 완료: %d/%d종목", prepared, len(tickers))
 
     @staticmethod

@@ -14,11 +14,23 @@ import asyncio
 import logging
 from datetime import date, datetime, timedelta, timezone
 
-from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
+from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
 
 logger = logging.getLogger(__name__)
+
+
+# 사이클 143 (2026-06-15) — VB 5단계 funnel hook (사이클 140 자문 영속)
+# 사이클 39+41 BFB/VCP/donchian 8단계 답습 = VB 단순 영역 = 5단계 적정 영역 영구 영속.
+# 사이클 47 FUNNEL_STAGES 위임 패턴 답습 (`_record_funnel_pipeline_step(VB_FUNNEL_STAGES[i-1], ...)`).
+VB_FUNNEL_STAGES: tuple[FunnelStage, ...] = (
+    FunnelStage(1, "거래량순위 + stock_master 기반 후보"),
+    FunnelStage(2, "시총 + 거래대금 필터 통과"),
+    FunnelStage(3, "일봉 fetch 통과"),
+    FunnelStage(4, "전일 Range > 0 + noise 계산 통과"),
+    FunnelStage(5, "K값 계산 + target_offset > 0"),
+)
 
 
 def _empty_scan_stats() -> dict:
@@ -91,7 +103,11 @@ class VolatilityBreakoutStrategy(StrategyBase):
         self._scan_stats: dict = _empty_scan_stats()
 
     async def prepare(self) -> None:
-        """장 시작 전: 시총/거래대금 조건 종목 스캔 → 21일 일봉으로 K값/Target 계산."""
+        """장 시작 전: 시총/거래대금 조건 종목 스캔 → 21일 일봉으로 K값/Target 계산.
+
+        사이클 143 (2026-06-15) — 사이클 140 자문 영속 VB 5단계 funnel hook 추가.
+        사이클 39+41 BFB/VCP/donchian 패턴 답습. 매매 안전성 무영향 (사이클 38 명문화 영속).
+        """
         import asyncio
 
         from src.api.condition import fetch_daily_candles
@@ -99,8 +115,32 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 사이클 21 — 매 prepare 마다 카운트 초기화 (_scan_universe 가 직접 갱신)
         stats = _empty_scan_stats()
         self._scan_stats = stats
+        # 사이클 143 — 단계별 ticker 캡처 reset (사이클 39 답습)
+        self._reset_funnel_steps()
 
         tickers = await self._scan_universe()
+        # 사이클 143 — step 1+2 funnel hook (사이클 140 자문 영속)
+        params = self.config.params
+        min_mcap_billion = params.get("min_market_cap", 100_000_000_000) / 100_000_000
+        min_trade_billion = params.get("min_trade_amount", 20_000_000_000) / 100_000_000
+        # step 1: 유니버스 후보 (stock_master 기반, _scan_stats["universe_candidates"] 반영)
+        self._record_funnel_pipeline_step(
+            VB_FUNNEL_STAGES[0],
+            survived=[],  # universe_candidates는 _scan_universe에서 stock_master raw 응답 영역
+            step_conditions=(
+                f"stock_master.list_by_filter (nxt_tradable=True, "
+                f"limit={params.get('max_scan_stocks', 100)})"
+            ),
+        )
+        # step 2: 시총 + 거래대금 필터 통과 (사이클 41 답습 — survived list[str] 자동 dict 변환)
+        self._record_funnel_pipeline_step(
+            VB_FUNNEL_STAGES[1],
+            survived=tickers,
+            step_conditions=(
+                f"시총 ≥ {min_mcap_billion:.0f}억 + 거래대금 ≥ {min_trade_billion:.0f}억"
+            ),
+        )
+
         k_period = self.config.params["k_period"]
         today_str = datetime.now(timezone(timedelta(hours=9))).date().strftime("%Y%m%d")
         prepared = 0
@@ -118,9 +158,19 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 사이클 21 — 일봉 fetch 성공 카운트
         stats["candle_fetch_ok"] = sum(1 for _, c in fetched if c is not None)
 
+        # 사이클 143 — 단계별 ticker 캡처 (사이클 39+41 답습)
+        candle_fetch_ok_tickers: list[str] = []
+        range_pass_tickers: list[str] = []
+        final_prepared_tickers: list[str] = []
+        candle_fetch_excluded: list[dict] = []
+        range_excluded: list[dict] = []
+        target_excluded: list[dict] = []
+
         for ticker, candles in fetched:
             if candles is None:
+                candle_fetch_excluded.append({"ticker": ticker, "reason": "fetch 실패"})
                 continue
+            candle_fetch_ok_tickers.append(ticker)
             try:
                 if len(candles) < 2:
                     continue
@@ -143,6 +193,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
                         noise_list.append(noise)
 
                 if not noise_list:
+                    range_excluded.append({"ticker": ticker, "reason": "noise 영역 0"})
                     continue
 
                 k = sum(noise_list) / len(noise_list)
@@ -153,19 +204,26 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 prev_low = int(prev.get("stck_lwpr", "0"))
                 prev_range = prev_high - prev_low
                 if prev_range <= 0:
+                    range_excluded.append({"ticker": ticker, "reason": f"prev_range={prev_range} ≤ 0"})
                     logger.debug(
                         "변동성돌파 prev_range=0 skip: %s (date=%s)",
                         ticker, prev.get("stck_bsop_date"),
                     )
                     continue
+                range_pass_tickers.append(ticker)
 
                 target_offset = int(prev_range * k)
                 if target_offset <= 0:
+                    target_excluded.append({
+                        "ticker": ticker,
+                        "reason": f"target_offset={target_offset} ≤ 0 (k={k:.4f})",
+                    })
                     logger.debug(
                         "변동성돌파 target_offset=0 skip: %s (k=%.4f, range=%d)",
                         ticker, k, prev_range,
                     )
                     continue
+                final_prepared_tickers.append(ticker)
 
                 self._targets[ticker] = {
                     "k": round(k, 4),
@@ -198,6 +256,27 @@ class VolatilityBreakoutStrategy(StrategyBase):
         stats["k_value_computed"] = prepared
         stats["final_prepared"] = len(self._scanned_tickers)
         stats["last_run_at"] = datetime.now(KST).isoformat()
+
+        # 사이클 143 — step 3+4+5 funnel hook (사이클 140 자문 영속)
+        self._record_funnel_pipeline_step(
+            VB_FUNNEL_STAGES[2],
+            survived=candle_fetch_ok_tickers,
+            step_conditions=f"KIS fetch_daily_candles 정상 응답 ({k_period}일)",
+            excluded=candle_fetch_excluded,
+        )
+        self._record_funnel_pipeline_step(
+            VB_FUNNEL_STAGES[3],
+            survived=range_pass_tickers,
+            step_conditions="전일 Range > 0 + noise 영역 계산 통과",
+            excluded=range_excluded,
+        )
+        self._record_funnel_pipeline_step(
+            VB_FUNNEL_STAGES[4],
+            survived=final_prepared_tickers,
+            step_conditions="K값 노이즈 비율 + target_offset > 0",
+            excluded=target_excluded,
+        )
+
         logger.info("변동성돌파 전략 준비 완료: %d/%d종목 (K값 계산)", prepared, len(tickers))
 
     async def _scan_universe(self) -> list[str]:

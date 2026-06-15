@@ -152,16 +152,13 @@ export default function StrategyFunnel() {
         </div>
       )}
 
-      {/* 사이클 132 — 전략별 funnel 적재 정책 안내 (영역 C 사용자 결정 Q2=C + Q1=C 영속) */}
+      {/* 사이클 132 — momentum 정책 안내 영속 / 사이클 143 — VB/LTV 영역 영구 영속 정상 funnel 활성화 후 안내 메시지 영구 제거 */}
       <div
         data-testid="strategy-funnel-policy-notice"
         className="mb-4 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600"
       >
         <div data-testid="strategy-funnel-notice-momentum">
           • <strong>모멘텀</strong>: 실시간 돌파 기반 — funnel 적재 미적용
-        </div>
-        <div data-testid="strategy-funnel-notice-vb-ltv">
-          • <strong>변동성 돌파 / 롱테일 변동성</strong>: 단계별 funnel 후속 사이클 영역 (사이클 133 인계)
         </div>
       </div>
 
