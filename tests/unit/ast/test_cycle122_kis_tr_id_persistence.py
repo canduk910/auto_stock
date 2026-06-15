@@ -19,6 +19,9 @@ from pathlib import Path
 
 import pytest
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
+
 from src.db import stock_master_daily
 from src.engine import scheduler, stock_master_daily_metrics
 
@@ -96,7 +99,7 @@ def test_g_ast3_lifecycle_race_pattern_persistence():
         # 헬퍼 위임 영역 영구 영속 = 헬퍼 영역 내부에서 lifecycle 흡수 영구 영속
         # 헬퍼 모듈 영역 영구 영속 정독 영구 영속
         from pathlib import Path
-        helper_src = Path("src/engine/task_loop_helper.py").read_text(encoding="utf-8")
+        helper_src = _read(Path("src/engine/task_loop_helper.py"))
         assert "while scheduler._running" in helper_src, (
             "헬퍼 영역 while 루프 영속 부재 — 사이클 106 답습 의무"
         )

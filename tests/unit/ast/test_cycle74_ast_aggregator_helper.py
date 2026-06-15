@@ -21,6 +21,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
 
 _SRC_ROOT = Path(__file__).resolve().parents[3] / "src"
 
@@ -43,7 +45,7 @@ def _find_logger_info_calls_in_function(
     py_path: Path, func_name: str
 ) -> list[tuple[int, str]]:
     """함수 본체에서 `logger.info(...)` 호출 사이트 추출 — (line_no, line_text)."""
-    source = py_path.read_text(encoding="utf-8")
+    source = _read(py_path)
     tree = ast.parse(source)
     violations: list[tuple[int, str]] = []
 
@@ -97,7 +99,7 @@ def _find_logger_info_with_prefix_in_function(
     (예: `[swing_rest_poll_summary]`) 로 시작하지 *않는* 호출만 위반.
     `logger.exception` / `logger.debug` / `logger.warning` / `logger.error` 는 제외.
     """
-    source = py_path.read_text(encoding="utf-8")
+    source = _read(py_path)
     tree = ast.parse(source)
     violations: list[tuple[int, str]] = []
     lines = source.splitlines()

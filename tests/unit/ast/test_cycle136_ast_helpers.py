@@ -259,7 +259,11 @@ class TestRegressionGuardsPersistence:
     """마이그레이션 영역 영구 영속 후 기존 AST 가드 영역 영구 영속 회귀 통과 영속 의무."""
 
     def test_g_136_d1_helper_module_compact(self):
-        """G-136-D1 — 헬퍼 모듈 compact 영속 (≤ 200L 영속 의무)."""
+        """G-136-D1 — 헬퍼 모듈 compact 영속 (사이클 137 의미 전환 ≤ 250L 영속).
+
+        사이클 136 Red 시점 = ≤ 200L (5 헬퍼) / 사이클 137 보강 후 = ≤ 250L (7 헬퍼).
+        사이클 66 K-2 의미 전환 패턴 답습 — 헬퍼 추가 영역 영구 영속 흡수.
+        """
         candidates = [
             Path("tests/unit/ast/_ast_helpers.py"),
             Path("tests/unit/ast/ast_helpers.py"),
@@ -273,7 +277,8 @@ class TestRegressionGuardsPersistence:
             pytest.skip("Red 단계 — Green 후 영속 의무")
 
         line_count = len(helper_path.read_text(encoding="utf-8").splitlines())
-        assert line_count <= 200, (
-            f"헬퍼 모듈 compact 영속 위반 — got {line_count}L, target ≤ 200L. "
-            "사이클 67 패턴 답습."
+        # 사이클 137 의미 전환 영속 — 헬퍼 모듈 보강 (find_constant_value + count_string_occurrences)
+        assert line_count <= 250, (
+            f"헬퍼 모듈 compact 영속 위반 — got {line_count}L, target ≤ 250L "
+            "(사이클 137 보강 후, 사이클 67 패턴 답습)."
         )

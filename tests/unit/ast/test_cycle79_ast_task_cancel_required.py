@@ -28,6 +28,9 @@ from pathlib import Path
 
 import pytest
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
+
 pytestmark = pytest.mark.unit
 
 
@@ -130,7 +133,7 @@ def test_g_ast1_all_create_task_attrs_included_in_stop_cancel_tuple():
     - 미래 신규 `self._foo_task = asyncio.create_task(...)` 추가 시 `stop()`
       에 자동으로 cancel 누락 감지 (영구 좀비 task 차단)
     """
-    source = _SCHEDULER_PY.read_text(encoding="utf-8")
+    source = _read(_SCHEDULER_PY)
 
     created_tasks = _collect_create_task_attrs(source)
     stop_tuple = _collect_stop_task_attrs_tuple(source)

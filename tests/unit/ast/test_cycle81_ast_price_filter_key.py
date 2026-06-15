@@ -18,6 +18,9 @@ from pathlib import Path
 
 import pytest
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
+
 pytestmark = pytest.mark.unit
 
 
@@ -27,7 +30,7 @@ pytestmark = pytest.mark.unit
 def _load_scanner_tree() -> tuple[ast.Module, str]:
     scanner_path = Path("src/engine/scanner.py")
     assert scanner_path.exists(), f"scanner.py 경로 결함: {scanner_path.resolve()}"
-    source = scanner_path.read_text(encoding="utf-8")
+    source = _read(scanner_path)
     try:
         tree = ast.parse(source)
     except SyntaxError as e:

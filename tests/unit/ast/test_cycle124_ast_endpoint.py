@@ -11,12 +11,15 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
+
 
 ROUTES_PATH = Path(__file__).parent.parent.parent.parent / "src" / "routes" / "stock_master.py"
 
 
 def _load_source() -> str:
-    return ROUTES_PATH.read_text(encoding="utf-8")
+    return _read(ROUTES_PATH)
 
 
 # ─── G-AST1: /{ticker}/daily 엔드포인트 정적 검증 ─────────────────────────────
@@ -84,7 +87,7 @@ def test_g_ast1_smd_max_bas_dd_global_call():
     ticker=None (전체 MAX) 호출 패턴 정적 확인 — 사이클 124 영역 2 영속.
     """
     sm_path = Path(__file__).parent.parent.parent.parent / "src" / "db" / "stock_master.py"
-    source = sm_path.read_text(encoding="utf-8")
+    source = _read(sm_path)
 
     # max_bas_dd() 인자 없이 호출 (ticker 생략 = default None)
     assert "max_bas_dd()" in source, (

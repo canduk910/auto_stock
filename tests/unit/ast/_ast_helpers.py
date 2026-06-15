@@ -147,6 +147,59 @@ def count_function_calls_in_node(node: ast.AST, name: str) -> int:
     return count
 
 
+def find_constant_value(source: str, name: str) -> Optional[object]:
+    """모듈-레벨 상수 값 영역 영구 영속 반환 (사이클 67/135 답습 + 사이클 137 신규).
+
+    `SUBSCRIBE_GRACE_SECS = 180` 영역 = 180 반환.
+    `_SOME_TUPLE = ("a", "b")` 영역 = ("a", "b") 반환.
+    미존재 영역 = None.
+
+    Args:
+        source: 모듈 source.
+        name: 상수 이름.
+
+    Returns:
+        상수 값 (int / str / tuple / list 등) 또는 None.
+    """
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        for target in node.targets:
+            if not (isinstance(target, ast.Name) and target.id == name):
+                continue
+            # 패턴 1 — ast.Constant (Python 3.8+)
+            if isinstance(node.value, ast.Constant):
+                return node.value.value
+            # 패턴 2 — ast.Tuple / ast.List 영역 영구 영속 (단순 리터럴)
+            if isinstance(node.value, (ast.Tuple, ast.List)):
+                values = []
+                for elt in node.value.elts:
+                    if isinstance(elt, ast.Constant):
+                        values.append(elt.value)
+                    else:
+                        return None  # 비-리터럴 영역 영구 영속 = 분석 불가
+                if isinstance(node.value, ast.Tuple):
+                    return tuple(values)
+                return values
+    return None
+
+
+def count_string_occurrences(source: str, substring: str) -> int:
+    """문자열 출현 횟수 영역 영구 영속 (단순 string count, 사이클 137 신규).
+
+    AST 영역 영구 영속 외 단순 문자열 매칭 영역 영구 영속 (예: 화이트리스트 영역).
+
+    Args:
+        source: 검색 대상 source.
+        substring: 검색 문자열.
+
+    Returns:
+        출현 횟수.
+    """
+    return source.count(substring)
+
+
 def count_imports_from(source: str, module: str, name: Optional[str] = None) -> int:
     """`from {module} import {name}` 영역 영구 영속 카운트.
 
@@ -181,5 +234,7 @@ __all__ = [
     "count_function_calls",
     "count_function_calls_in_node",
     "find_function_def",
+    "find_constant_value",
+    "count_string_occurrences",
     "count_imports_from",
 ]

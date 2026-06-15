@@ -26,6 +26,9 @@ from pathlib import Path
 
 import pytest
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
+
 pytestmark = pytest.mark.unit
 
 
@@ -107,7 +110,7 @@ def test_g_ast1_scheduler_upsert_chain_required():
     Red 상태: scheduler 본체에 chain 호출 0건 → FAIL.
     Green: backend-dev 가 `await _scanner_upsert_loop(tickers)` 호출 추가 → PASS.
     """
-    tree = ast.parse(_SCHEDULER_PY.read_text(encoding="utf-8"))
+    tree = ast.parse(_read(_SCHEDULER_PY))
 
     fn = _find_function(tree, class_name="TradingScheduler", func_name="_universe_eager_refresh_loop")
     assert fn is not None, (
@@ -157,7 +160,7 @@ def test_g_ast1_route_upsert_chain_required():
     사이클 110 의미 전환: `_full_universe_load_once()` 단일 호출이 stock_master upsert
     내장이므로 별도 chain 호출 불필요. 가드는 사이클 93 의도 영속 보존을 위해 xfail 마킹.
     """
-    tree = ast.parse(_ROUTE_PY.read_text(encoding="utf-8"))
+    tree = ast.parse(_read(_ROUTE_PY))
 
     fn = _find_function(tree, class_name=None, func_name="refresh_universe_now")
     assert fn is not None, (

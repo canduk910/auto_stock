@@ -15,13 +15,16 @@ from pathlib import Path
 
 import pytest
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
+
 pytestmark = pytest.mark.unit
 
 
 def _find_range_9999_calls(file_path: Path) -> list[int]:
     """파일 내 `.range(0, 9999)` 호출 라인 번호 리스트."""
     try:
-        src = file_path.read_text(encoding="utf-8")
+        src = _read(file_path)
     except (UnicodeDecodeError, FileNotFoundError):
         return []
 
@@ -77,7 +80,7 @@ def test_g_ast_range2_stock_master_get_stats_no_range_9999():
     src_file = Path("src/db/stock_master.py")
     assert src_file.exists(), "stock_master.py 미존재"
 
-    tree = ast.parse(src_file.read_text(encoding="utf-8"))
+    tree = ast.parse(_read(src_file))
     violations: list[int] = []
 
     for node in ast.walk(tree):

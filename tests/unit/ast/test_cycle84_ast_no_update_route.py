@@ -19,6 +19,9 @@ from pathlib import Path
 
 import pytest
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
+
 pytestmark = pytest.mark.unit
 
 ROUTE_PATH = (
@@ -62,7 +65,7 @@ def test_L2_ast_no_write_decorators_in_stock_master_route():
     assert ROUTE_PATH.exists(), (
         f"라우트 파일 미작성: {ROUTE_PATH} — backend-dev Green 단계 의무"
     )
-    tree = ast.parse(ROUTE_PATH.read_text(encoding="utf-8"))
+    tree = ast.parse(_read(ROUTE_PATH))
     forbidden_hits = []
 
     for node in ast.walk(tree):
@@ -99,7 +102,7 @@ def test_L2_h3_cycle90_post_refresh_universe_whitelisted_only():
     기타 POST 라우트 추가 silent 결함 영구 차단 패턴.
     """
     assert ROUTE_PATH.exists()
-    tree = ast.parse(ROUTE_PATH.read_text(encoding="utf-8"))
+    tree = ast.parse(_read(ROUTE_PATH))
     post_routes = []
 
     for node in ast.walk(tree):

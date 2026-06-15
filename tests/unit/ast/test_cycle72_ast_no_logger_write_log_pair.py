@@ -27,6 +27,9 @@ from pathlib import Path
 
 import pytest
 
+# 사이클 137 (2026-06-15) — 카드 #25 AST DRY 헬퍼 모듈 마이그레이션.
+from tests.unit.ast._ast_helpers import read_module_source as _read
+
 
 _SRC_ROOT = Path(__file__).resolve().parents[3] / "src"
 
@@ -99,7 +102,7 @@ def test_g_6_no_logger_write_log_pair_within_5_lines() -> None:
         # 본 가드 파일 자체는 검사 제외
         if py_file.name.startswith("test_"):
             continue
-        source = py_file.read_text(encoding="utf-8")
+        source = _read(py_file)
         violations = _find_violation_sites(source)
         if violations:
             rel = py_file.relative_to(_SRC_ROOT.parent)
