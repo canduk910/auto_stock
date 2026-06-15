@@ -23,6 +23,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 SRC_DIR = Path(__file__).resolve().parents[3] / "src"
@@ -34,7 +36,7 @@ DB_FILE = SRC_DIR / "db" / "system_config.py"
 def test_g_ast_1_status_model_no_plaintext_key_field():
     """G-AST-1: KrxOpenApiStatus 모델 = key_masked 단독 (평문 key 필드 부재)."""
     assert MODELS_FILE.exists()
-    src = MODELS_FILE.read_text(encoding="utf-8")
+    src = read_module_source(MODELS_FILE)
     tree = ast.parse(src)
 
     found_status = False
@@ -62,7 +64,7 @@ def test_g_ast_2_routes_build_status_calls_mask_secret():
     `_build_krx_open_api_status` 본체에 `mask_secret` (또는 `krx_mask_secret`) 호출 ≥1건.
     """
     assert ROUTES_FILE.exists()
-    src = ROUTES_FILE.read_text(encoding="utf-8")
+    src = read_module_source(ROUTES_FILE)
     tree = ast.parse(src)
 
     found_builder = False
@@ -81,7 +83,7 @@ def test_g_ast_2_routes_build_status_calls_mask_secret():
 def test_g_ast_3_db_get_returns_config_pydantic():
     """G-AST-3: get_krx_open_api_config 반환 = KrxOpenApiConfig (Pydantic, 평문 key 포함)."""
     assert DB_FILE.exists()
-    src = DB_FILE.read_text(encoding="utf-8")
+    src = read_module_source(DB_FILE)
     tree = ast.parse(src)
 
     found_getter = False
@@ -120,7 +122,7 @@ def test_g_sec_1_no_plaintext_logger_calls_for_krx_key():
     for file_path in target_files:
         if not file_path.exists():
             continue
-        text = file_path.read_text(encoding="utf-8")
+        text = read_module_source(file_path)
         for pattern in forbidden_patterns:
             for match in pattern.finditer(text):
                 violations.append(
@@ -150,7 +152,7 @@ def test_g_sec_2_no_plaintext_write_log_for_krx_key():
     for file_path in target_files:
         if not file_path.exists():
             continue
-        text = file_path.read_text(encoding="utf-8")
+        text = read_module_source(file_path)
         for match in forbidden.finditer(text):
             violations.append(f"{file_path.name}: {match.group(0)[:100]}")
 

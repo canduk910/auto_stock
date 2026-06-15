@@ -33,6 +33,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import find_function_def, read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -44,19 +46,16 @@ def _scanner_module_path() -> Path:
 
 def _scanner_module_source() -> str:
     """scanner.py source text."""
-    return _scanner_module_path().read_text(encoding="utf-8")
+    return read_module_source(_scanner_module_path())
 
 
 def _get_fetch_fluctuation_docstring() -> str | None:
     """`_fetch_fluctuation` 함수 docstring 영역 추출 (AST FunctionDef / AsyncFunctionDef)."""
     source = _scanner_module_source()
-    tree = ast.parse(source)
-
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            if node.name == "_fetch_fluctuation":
-                return ast.get_docstring(node)
-    return None
+    node = find_function_def(source, "_fetch_fluctuation")
+    if node is None:
+        return None
+    return ast.get_docstring(node)
 
 
 @pytest.mark.xfail(

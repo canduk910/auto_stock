@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -26,7 +28,7 @@ def test_ast1_krx_endpoint_urls_present():
 
     엔드포인트 변경 시 (예: KRX 측 URL 변경 또는 신규 endpoint 추가) 즉시 검출.
     """
-    source = _KRX_PY.read_text(encoding="utf-8")
+    source = read_module_source(_KRX_PY)
 
     required_endpoints = [
         "/sto/stk_bydd_trd",
@@ -47,7 +49,7 @@ def test_ast2_outblock1_key_present():
 
     KRX 응답 형식 변경 시 (예: OutBlock_1 → OutBlock_2) 즉시 검출.
     """
-    source = _KRX_PY.read_text(encoding="utf-8")
+    source = read_module_source(_KRX_PY)
 
     assert "OutBlock_1" in source, (
         "AST-2 위반: src/api/krx.py 영역에 'OutBlock_1' 키 영구 영속 부재. "
@@ -61,7 +63,7 @@ def test_ast3_get_method_persistence():
     사이클 112 (POST 가정 결함) 시정 후 사이클 115 = GET 영속.
     미래 POST 회귀 영구 차단 (사이클 110 AST 영구 가드 패턴 답습).
     """
-    source = _KRX_PY.read_text(encoding="utf-8")
+    source = read_module_source(_KRX_PY)
 
     # GET method 영속 확인
     assert "client.get(" in source, (
@@ -83,7 +85,7 @@ def test_ast4_auth_key_in_query_params_not_headers():
 
     사이클 112 (header 가정 결함) 시정 후 사이클 115 = query parameter 영속.
     """
-    source = _KRX_PY.read_text(encoding="utf-8")
+    source = read_module_source(_KRX_PY)
 
     # AUTH_KEY 가 params dict (merged_params 또는 params={"AUTH_KEY": ...}) 영역에 존재
     # 사이클 115 정본: merged_params = {"AUTH_KEY": config.key}

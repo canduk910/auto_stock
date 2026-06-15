@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -56,7 +58,7 @@ def test_l5_cycle88_g_reject_test_file_persists():
         f"  영속 의무: 사이클 88 G-REJECT-1/2/3 영속 영구"
     )
 
-    source = _G_REJECT_PY.read_text(encoding="utf-8")
+    source = read_module_source(_G_REJECT_PY)
 
     # G-REJECT-1/2/3 모두 본문에 등장
     for reject_id in ("G-REJECT-1", "G-REJECT-2", "G-REJECT-3"):
@@ -84,7 +86,7 @@ def test_l5_cycle88_ticker_last_tick_persists_in_scanner():
         f"\n사이클 89 L-5 위반 — `src/engine/scanner.py` 부재 (영속 위반)"
     )
 
-    source = scanner_py.read_text(encoding="utf-8")
+    source = read_module_source(scanner_py)
     assert "ticker_last_tick" in source, (
         f"\n사이클 89 L-5 위반 — 사이클 88 `ticker_last_tick` 식별자 누락:\n"
         f"  영속 의무: 사이클 88 G-REJECT-2 (종목별 stale 영속) 영구\n"
@@ -115,8 +117,8 @@ def test_l5_cycle88_4_dict_separation_persists_in_websocket():
         f"\n사이클 89 L-5 위반 — `src/realtime/websocket_pool.py` 부재 (영속 위반)"
     )
 
-    ws_source = websocket_py.read_text(encoding="utf-8")
-    pool_source = websocket_pool_py.read_text(encoding="utf-8")
+    ws_source = read_module_source(websocket_py)
+    pool_source = read_module_source(websocket_pool_py)
 
     # `_subscriptions` / `_subscriptions_acked` 은 websocket.py 영속
     for dict_name in ("_subscriptions", "_subscriptions_acked"):

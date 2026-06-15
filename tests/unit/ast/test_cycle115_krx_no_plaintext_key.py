@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -32,7 +34,7 @@ def test_sec1_no_plaintext_key_in_logger_calls():
     - merged_params = {"AUTH_KEY": config.key} (query parameter 영역, 외부 노출 0)
     - URL 구성 (`url = f"{base}{path}"` — base/path 만, AUTH_KEY 미포함)
     """
-    source = _KRX_PY.read_text(encoding="utf-8")
+    source = read_module_source(_KRX_PY)
     tree = ast.parse(source)
 
     violations = []
@@ -79,7 +81,7 @@ def test_sec2_no_url_full_logging():
     f"{url}" / f"{base}{path}" / f"...{url}..." 등 URL 영역 통째 로그 영구 차단.
     허용 영역: endpoint_path 만 로그.
     """
-    source = _KRX_PY.read_text(encoding="utf-8")
+    source = read_module_source(_KRX_PY)
     tree = ast.parse(source)
 
     violations = []
@@ -115,7 +117,7 @@ def test_sec3_endpoint_path_only_in_logs():
 
     사이클 112 영속: 로그 시 endpoint_path 만 사용 (정본 패턴).
     """
-    source = _KRX_PY.read_text(encoding="utf-8")
+    source = read_module_source(_KRX_PY)
 
     # 최소 1건 endpoint=%s 패턴 영속 영구 확인
     assert "endpoint=%s" in source, (

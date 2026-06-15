@@ -11,6 +11,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 STRATEGY_PY = REPO_ROOT / "src" / "engine" / "strategy.py"
 
@@ -25,7 +27,7 @@ def test_h1_no_dead_module_func_check_stop_loss():
     """
     assert STRATEGY_PY.exists(), f"strategy.py 영역 영속 실패 ({STRATEGY_PY})"
 
-    src = STRATEGY_PY.read_text(encoding="utf-8")
+    src = read_module_source(STRATEGY_PY)
 
     # 정규식 영역 = 모듈 영역 def 영역 (들여쓰기 0건)
     pattern = re.compile(r"^def check_stop_loss\b", re.MULTILINE)
@@ -45,7 +47,7 @@ def test_h1_no_dead_module_func_check_next_day_clear():
     사이클 103 영역 3 시정 의무:
     - `src/engine/strategy.py:174~207` 영역 영구 폐기 영속
     """
-    src = STRATEGY_PY.read_text(encoding="utf-8")
+    src = read_module_source(STRATEGY_PY)
 
     pattern = re.compile(r"^def check_next_day_clear\b", re.MULTILINE)
     matches = pattern.findall(src)
@@ -66,7 +68,7 @@ def test_h1_no_dead_module_func_check_buy_signal():
     - `MomentumStrategy.check_buy_signal` 클래스 메서드 영역과 분리 영속
     - (메서드 영역 = `    def check_buy_signal` 들여쓰기 4 영역, 모듈 영역 영구 영속)
     """
-    src = STRATEGY_PY.read_text(encoding="utf-8")
+    src = read_module_source(STRATEGY_PY)
 
     # 모듈 영역 def (들여쓰기 0건) = 영구 부재 영속
     pattern = re.compile(r"^def check_buy_signal\b", re.MULTILINE)
@@ -93,7 +95,7 @@ def test_h1_persistence_layer_unchanged():
       TRAILING_STOP_RATE / POSITION_RATIO / MAX_POSITIONS / DAILY_LOSS_LIMIT)
     - `calc_buy_quantity` 모듈 함수 영역 영속 (callsite 영역 영속 확인 필요)
     """
-    src = STRATEGY_PY.read_text(encoding="utf-8")
+    src = read_module_source(STRATEGY_PY)
 
     persistence_areas = [
         "class Signal",

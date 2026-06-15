@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import find_function_def, read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -25,28 +27,14 @@ _SRC_ROOT = Path(__file__).resolve().parents[3] / "src"
 _BASE_PY = _SRC_ROOT / "api" / "base.py"
 
 
-def _extract_function_node(
-    source: str, func_name: str
-) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
-    """AST 로 함수 정의 노드 추출. 미발견 시 None."""
-    tree = ast.parse(source)
-    for node in ast.walk(tree):
-        if (
-            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-            and node.name == func_name
-        ):
-            return node
-    return None
-
-
 def _find_logger_warning_with_msg_prefix(
     py_path: Path, func_name: str, msg_prefix: str
 ) -> list[tuple[int, str]]:
     """함수 본문에서 첫 인자가 ``msg_prefix`` 로 시작하는 ``logger.warning(...)``
     호출 사이트 추출 — (line_no, line_text)."""
-    source = py_path.read_text(encoding="utf-8")
+    source = read_module_source(py_path)
     lines = source.splitlines()
-    node = _extract_function_node(source, func_name)
+    node = find_function_def(source, func_name)
     if node is None:
         return []
     violations: list[tuple[int, str]] = []
@@ -76,8 +64,8 @@ def _find_helper_call_sites(
 ) -> list[int]:
     """함수 본문에서 ``helper_name(...)`` 또는 ``await helper_name(...)`` 호출
     사이트 line 추출."""
-    source = py_path.read_text(encoding="utf-8")
-    node = _extract_function_node(source, func_name)
+    source = read_module_source(py_path)
+    node = find_function_def(source, func_name)
     if node is None:
         return []
     sites: list[int] = []
@@ -102,9 +90,9 @@ def _find_write_log_with_msg_prefix_in_function(
     - ``await _system_logs.write_log("INFO", f"[prefix] ...")``
     - 메시지를 변수에 저장 후 write_log 호출: ``_log_msg = f"[prefix] ..."``
     """
-    source = py_path.read_text(encoding="utf-8")
+    source = read_module_source(py_path)
     lines = source.splitlines()
-    node = _extract_function_node(source, func_name)
+    node = find_function_def(source, func_name)
     if node is None:
         return []
     violations: list[tuple[int, str]] = []

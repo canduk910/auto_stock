@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MOMENTUM_PY = REPO_ROOT / "src" / "engine" / "strategies" / "momentum.py"
 
@@ -23,7 +25,7 @@ def test_h2_ast_log_format_includes_threshold():
     """
     assert MOMENTUM_PY.exists(), f"momentum.py 영역 영속 실패 ({MOMENTUM_PY})"
 
-    src = MOMENTUM_PY.read_text(encoding="utf-8")
+    src = read_module_source(MOMENTUM_PY)
 
     # 사이클 103 영역 2 = 임계 영역 명시 영속 (정적 grep)
     expected_pattern = "%.1f%% (임계: %.1f%%, 현재가:"
@@ -43,7 +45,7 @@ def test_h2_ast_legacy_format_removed():
     - momentum.py 영역 = 손절 영역 (L127) + 익일 청산 영역 (L148) + 트레일링 영역 (L158)
     - 손절 영역만 신규 형식 (임계 동행), 익일/트레일링은 기존 형식 유지 영속
     """
-    src = MOMENTUM_PY.read_text(encoding="utf-8")
+    src = read_module_source(MOMENTUM_PY)
 
     # 손절 신호 영역 메시지 (L127) 검색
     # "손절 신호: %s 매수가(%d) 대비 %.1f%%" 영역 = 신규 형식 영역
@@ -68,7 +70,7 @@ def test_h2_ast_stop_loss_arg_present():
     - args 영역 ≥5건 영속
     - `stop_loss` 변수 영역 = `self.config.params["stop_loss_rate"]` (L124) 영역 영속
     """
-    src = MOMENTUM_PY.read_text(encoding="utf-8")
+    src = read_module_source(MOMENTUM_PY)
 
     # logger.info("손절 신호: ...") 영역 = "stop_loss" 변수 영역 영속 영역
     # `stop_loss = self.config.params["stop_loss_rate"]` (L124) 영역 영속

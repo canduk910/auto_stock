@@ -30,6 +30,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 
@@ -56,7 +58,7 @@ def test_h6_cycle88_g_reject_file_persists():
         f"  영속 의무: 사이클 88 G-REJECT-1/2/3 영속 영구"
     )
 
-    source = _G_REJECT_PY.read_text(encoding="utf-8")
+    source = read_module_source(_G_REJECT_PY)
 
     # G-REJECT-1/2/3 모두 본문에 등장
     for reject_id in ("G-REJECT-1", "G-REJECT-2", "G-REJECT-3"):
@@ -84,9 +86,9 @@ def test_h6_g_reject_1_quadruple_safety_net_functions_persist():
     - 사이클 29 005935 사고 패턴 재현 → KIS LMS chain 위험
     - 사이클 92 자동 재기동 도입 시 4중 안전망 *추가* 영역 의무
     """
-    websocket_py = (_SRC_ROOT / "realtime/websocket.py").read_text(encoding="utf-8")
-    stale_watcher_core_py = (_SRC_ROOT / "engine/stale_watcher_core.py").read_text(encoding="utf-8")
-    scheduler_py = (_SRC_ROOT / "engine/scheduler.py").read_text(encoding="utf-8")
+    websocket_py = read_module_source(_SRC_ROOT / "realtime/websocket.py")
+    stale_watcher_core_py = read_module_source(_SRC_ROOT / "engine/stale_watcher_core.py")
+    scheduler_py = read_module_source(_SRC_ROOT / "engine/scheduler.py")
 
     # F1 재연결 verify
     assert "_verify_subscriptions_after_reconnect" in websocket_py, (
@@ -121,8 +123,8 @@ def test_h6_g_reject_2_per_ticker_stale_persists():
     - `STALE_FRESHNESS_SECS` ∈ src/engine/stale_watcher_core.py
     - 사이클 92 자동 재기동 = lifecycle 영역 → ticker_last_tick 영역과 분리 = 영향 0
     """
-    scanner_py = (_SRC_ROOT / "engine/scanner.py").read_text(encoding="utf-8")
-    stale_watcher_core_py = (_SRC_ROOT / "engine/stale_watcher_core.py").read_text(encoding="utf-8")
+    scanner_py = read_module_source(_SRC_ROOT / "engine/scanner.py")
+    stale_watcher_core_py = read_module_source(_SRC_ROOT / "engine/stale_watcher_core.py")
 
     assert "ticker_last_tick" in scanner_py, (
         "\n사이클 92 H-6-3 위반 — 사이클 88 ticker_last_tick 식별자 누락:\n"
@@ -146,9 +148,9 @@ def test_h6_g_reject_3_four_dict_separation_persists():
     - `ticker_last_tick` ∈ src/engine/scanner.py
     - 사이클 92 자동 재기동 = lifecycle 영역 → 4 dict 영역과 분리 = 영향 0
     """
-    websocket_py = (_SRC_ROOT / "realtime/websocket.py").read_text(encoding="utf-8")
-    websocket_pool_py = (_SRC_ROOT / "realtime/websocket_pool.py").read_text(encoding="utf-8")
-    scanner_py = (_SRC_ROOT / "engine/scanner.py").read_text(encoding="utf-8")
+    websocket_py = read_module_source(_SRC_ROOT / "realtime/websocket.py")
+    websocket_pool_py = read_module_source(_SRC_ROOT / "realtime/websocket_pool.py")
+    scanner_py = read_module_source(_SRC_ROOT / "engine/scanner.py")
 
     combined = websocket_py + websocket_pool_py + scanner_py
     required_dicts = [

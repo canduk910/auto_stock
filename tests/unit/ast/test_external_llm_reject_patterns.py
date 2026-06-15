@@ -28,6 +28,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.ast._ast_helpers import read_module_source
+
 pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -52,9 +54,9 @@ def test_g_reject_1_quadruple_safety_net_persistence():
       분기별 복구 영역 마비 → KIS LMS chain 위험
     - 사이클 29 005935 사고 패턴 재현
     """
-    websocket_py = (_REPO_ROOT / "src/realtime/websocket.py").read_text()
-    stale_watcher_core_py = (_REPO_ROOT / "src/engine/stale_watcher_core.py").read_text()
-    scheduler_py = (_REPO_ROOT / "src/engine/scheduler.py").read_text()
+    websocket_py = read_module_source(_REPO_ROOT / "src/realtime/websocket.py")
+    stale_watcher_core_py = read_module_source(_REPO_ROOT / "src/engine/stale_watcher_core.py")
+    scheduler_py = read_module_source(_REPO_ROOT / "src/engine/scheduler.py")
 
     # F1 재연결 verify (사이클 29 R3 영속)
     assert "_verify_subscriptions_after_reconnect" in websocket_py, (
@@ -101,8 +103,8 @@ def test_g_reject_2_per_ticker_stale_persistence():
     """
     # ticker_last_tick 는 src/engine/scanner.py 에 정의 (모듈 전역 dict)
     # stale_tracker.py 는 StaleTrackerState 데이터클래스 (retry_count / force_retry_history 등)
-    scanner_py = (_REPO_ROOT / "src/engine/scanner.py").read_text()
-    stale_watcher_core_py = (_REPO_ROOT / "src/engine/stale_watcher_core.py").read_text()
+    scanner_py = read_module_source(_REPO_ROOT / "src/engine/scanner.py")
+    stale_watcher_core_py = read_module_source(_REPO_ROOT / "src/engine/stale_watcher_core.py")
 
     # ticker_last_tick 종목별 추적 영속 (scanner.py 모듈 전역)
     assert "ticker_last_tick" in scanner_py, (
@@ -139,8 +141,8 @@ def test_g_reject_3_four_dict_separation_persistence():
     - 종목별 tick 추적 영역 마비 → stale 판정 불가
     - 사이클 29 R3 priority 분리 회귀 위험
     """
-    websocket_py = (_REPO_ROOT / "src/realtime/websocket.py").read_text()
-    websocket_pool_py = (_REPO_ROOT / "src/realtime/websocket_pool.py").read_text()
+    websocket_py = read_module_source(_REPO_ROOT / "src/realtime/websocket.py")
+    websocket_pool_py = read_module_source(_REPO_ROOT / "src/realtime/websocket_pool.py")
 
     # 4 dict 전수 영속 검증
     required_dicts = [
