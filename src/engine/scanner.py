@@ -2284,6 +2284,14 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
     # 사이클 127 — 진행 state hook (fire-and-forget + 5초 폴링)
     from src.engine import refresh_progress as _rp
 
+    # 사이클 144 — graceful_failed 카운터 영역 영구 영속 reset (카드 #27 LOW)
+    # 단일 task 영역 영구 영속 측정 의무 영구 영속.
+    from src.api.condition import (
+        get_graceful_failed_counts,
+        reset_graceful_failed_counts,
+    )
+    reset_graceful_failed_counts()
+
     _rp.start_progress("basics", total=0)
 
     start = time.monotonic()
@@ -2292,6 +2300,7 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
         "updated": 0,
         "skipped": 0,
         "failed": 0,
+        "graceful_failed": {"fhkst01010100_failed": 0},  # 사이클 144 — 카드 #27
         "elapsed_ms": 0,
     }
 
@@ -2390,11 +2399,19 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
             )
 
     summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+
+    # 사이클 144 — graceful_failed 카운터 영역 영구 영속 수집 (카드 #27 LOW)
+    graceful_failed_counts = get_graceful_failed_counts()
+    fhkst_failed = graceful_failed_counts.get("fhkst01010100_failed", 0)
+    summary["graceful_failed"] = {"fhkst01010100_failed": fhkst_failed}
+
     logger.info(
         "[stock_master_basics_refresh_summary] total=%d updated=%d "
-        "skipped=%d failed=%d elapsed_ms=%d",
+        "skipped=%d failed=%d graceful_failed_fhkst=%d elapsed_ms=%d",
         summary["total"], summary["updated"],
-        summary["skipped"], summary["failed"], summary["elapsed_ms"],
+        summary["skipped"], summary["failed"],
+        fhkst_failed,
+        summary["elapsed_ms"],
     )
 
     # 사이클 127 — 완료 시 finish_progress (정상 종료)

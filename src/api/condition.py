@@ -18,6 +18,53 @@ from src.config import settings
 logger = logging.getLogger(__name__)
 
 
+# =============================================================================
+# 사이클 144 (2026-06-16) — graceful_failed 카운터 영역 영구 영속 (카드 #27 LOW)
+# =============================================================================
+# inquire_stock_basics FHKST01010100 호출 실패 영역 silent fail 영역 영구 영속 가시화.
+# 사이클 88 G-REJECT graceful 영속 (영역 강화) + 사이클 38 명문화 영속 (logging 영역 한정).
+# 매매 안전성 무영향 (logging 영역 + 카운터 영역 한정, risk/order_engine 변경 0).
+_graceful_failed_counter: dict[str, int] = {
+    "fhkst01010100_failed": 0,  # FHKST01010100 호출 실패 영역 영구 영속
+}
+_graceful_failed_lock = asyncio.Lock()
+
+
+async def _record_graceful_failed(reason: str) -> None:
+    """graceful 분기 fail 카운터 영역 영구 영속 (모듈 전역 영역).
+
+    Args:
+        reason: fail 사유 (등록된 키만 영속, 그 외 무시 영역 영구 영속).
+
+    영속 의무:
+    - asyncio.Lock 동시성 보호 영속 (FastAPI 동시 요청 + BackgroundTasks 영역 영구 영속)
+    - 등록된 키 외 무시 graceful (호출자 영역 영구 영속 보호)
+    - 카운터 영역 영구 영속 = 모듈 전역 (process-local in-memory, uvicorn 단일 워커 영속 의무)
+    """
+    async with _graceful_failed_lock:
+        if reason in _graceful_failed_counter:
+            _graceful_failed_counter[reason] += 1
+
+
+def get_graceful_failed_counts() -> dict[str, int]:
+    """graceful_failed 카운터 영역 영구 영속 스냅샷 반환.
+
+    Returns:
+        카운터 영역 영구 영속 dict 사본 (외부 변경 격리).
+    """
+    return dict(_graceful_failed_counter)
+
+
+def reset_graceful_failed_counts() -> None:
+    """graceful_failed 카운터 영역 영구 영속 reset.
+
+    호출자 (`scanner._stock_master_basics_refresh_once`) 시작 시 reset →
+    단일 task 영역 영구 영속 측정 영역 영구 영속.
+    """
+    for key in _graceful_failed_counter:
+        _graceful_failed_counter[key] = 0
+
+
 def _drain_task_exception(task: "asyncio.Task") -> None:
     """inflight Task 종료 시 예외 회수 — "Task exception was never retrieved" 차단.
 
@@ -288,6 +335,12 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
         logger.exception(
             "[inquire_stock_basics] FHKST01010100 호출 실패 graceful pdno=%s", pdno
         )
+        # 사이클 144 — graceful_failed 카운터 영역 영구 영속 (카드 #27 LOW)
+        # _record_graceful_failed 실패 시에도 graceful (외부 영향 0 영구 영속).
+        try:
+            await _record_graceful_failed("fhkst01010100_failed")
+        except Exception:
+            logger.debug("[_record_graceful_failed] 카운터 갱신 실패 graceful", exc_info=True)
         price_data = {}
 
     # raw merge — CTPF1002R 67 컬럼 영속 + FHKST01010100 시세 5 키 보강 (사이클 108)
