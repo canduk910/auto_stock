@@ -137,7 +137,7 @@ class LongTailVolatilityStrategy(StrategyBase):
             LTV_FUNNEL_STAGES[0],
             survived=[],
             step_conditions=(
-                f"stock_master.list_by_filter (nxt_tradable=True, "
+                f"stock_master.list_by_filter ("
                 f"limit={params.get('max_scan_stocks', 100)})"
             ),
         )
@@ -348,10 +348,10 @@ class LongTailVolatilityStrategy(StrategyBase):
         min_trade = self.config.params.get("min_trade_amount", 20_000_000_000)
         max_stocks = self.config.params.get("max_scan_stocks", 100)
 
+        # 사이클 156 Q0 — nxt_tradable 강제 필터 제거 (주문 시점 분기용으로만 활용).
         rows = await _sm_mod.list_by_filter(
             min_market_cap=min_mcap,
             min_trade_amount=min_trade,
-            nxt_tradable=True,
             limit=max_stocks,
         )
 

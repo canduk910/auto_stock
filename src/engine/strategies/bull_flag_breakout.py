@@ -590,10 +590,10 @@ class BullFlagBreakoutStrategy(StrategyBase):
         min_trade = p.get("min_trade_amount", 20_000_000_000)
         max_stocks = p.get("max_scan_stocks", 100)
 
+        # 사이클 156 Q0 — nxt_tradable 강제 필터 제거 (주문 시점 분기용으로만 활용).
         rows = await _sm_mod.list_by_filter(
             min_market_cap=min_mcap,
             min_trade_amount=min_trade,
-            nxt_tradable=True,
             limit=max_stocks,
         )
 

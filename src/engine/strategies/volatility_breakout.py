@@ -128,8 +128,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
             VB_FUNNEL_STAGES[0],
             survived=[],  # universe_candidates는 _scan_universe에서 stock_master raw 응답 영역
             step_conditions=(
-                f"stock_master.list_by_filter (nxt_tradable=True, "
-                f"limit={params.get('max_scan_stocks', 100)})"
+                f"stock_master.list_by_filter "
+                f"(limit={params.get('max_scan_stocks', 100)})"
             ),
         )
         # step 2: 시총 + 거래대금 필터 통과 (사이클 41 답습 — survived list[str] 자동 dict 변환)
@@ -300,10 +300,12 @@ class VolatilityBreakoutStrategy(StrategyBase):
         min_trade = p.get("min_trade_amount", 20_000_000_000)
         max_stocks = p.get("max_scan_stocks", 100)
 
+        # 사이클 156 Q0 — nxt_tradable 강제 필터 제거.
+        # nxt_tradable 값은 주문 시점 NXT/KRX 분기용 (사이클 54 _strategy_exchange_async).
+        # 유니버스 스캔 영역에서 강제 적용은 후보 풀 83% 영구 축소 silent 결함이었음.
         rows = await _sm_mod.list_by_filter(
             min_market_cap=min_mcap,
             min_trade_amount=min_trade,
-            nxt_tradable=True,
             limit=max_stocks,
         )
 
