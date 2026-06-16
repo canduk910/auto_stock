@@ -60,19 +60,106 @@ class _FakeDeleteQuery:
         return type("R", (), {"data": rows, "count": deleted})()
 
 
+class _FakeSelectQuery:
+    """사이클 150 (2026-06-16) — `_purge_by_cutoff` 시정 = SELECT chain 영역 신규.
+
+    사이클 6 결함 영역 시정 영구 영속 — supabase-py DELETE chain `.limit()` 미지원 →
+    SELECT id LIMIT MAX_PURGE_BATCH + DELETE WHERE id IN (ids) 2-step 영역 영구 영속.
+    """
+
+    def __init__(self, captured: dict[str, Any], group: str):
+        self._captured = captured
+        self._group = group
+
+    def eq(self, col: str, val: Any):
+        # 사이클 150 영역 영속 — SELECT chain 영역으로 이전 후에도 사이클 6 영역 영속 영구 영속
+        # captured["eq"] 영역 = INFO/HIGH 그룹 영구 영속 호환 보존 (사이클 66 K-2 의미 전환 영역)
+        if col == "log_level" and val == "INFO":
+            self._captured["_select_group"] = "info"
+            self._group = "info"
+        self._captured.setdefault("eq", {}).setdefault(self._group, []).append((col, val))
+        return self
+
+    def in_(self, col: str, vals: list[Any]):
+        # 사이클 150 영역 영속 — HIGH 영역 영구 영속 = WARNING/ERROR/CRITICAL 영역 in_
+        if col == "log_level":
+            self._captured["_select_group"] = "high"
+            self._group = "high"
+        self._captured.setdefault("in_", {})[self._group] = (col, list(vals))
+        return self
+
+    def lt(self, col: str, val: Any):
+        # 사이클 150 영역 영속 — SELECT chain 영역에서도 cutoff 캡처 (delete chain 정합)
+        # 사이클 6 영속 영역 = lt 영역에서 group 영역 영구 영속 정합 보존
+        group = self._captured.get("_select_group", self._group)
+        self._captured.setdefault("lt", {})[group] = (col, val)
+        return self
+
+    def limit(self, n: int):
+        group = self._captured.get("_select_group", self._group)
+        self._captured.setdefault("limit", {})[group] = n
+        return self
+
+    def execute(self):
+        group = self._captured.get("_select_group", self._group)
+        # 사이클 150 영역 영속 — SELECT 결과 영역 = info_deleted / high_deleted 값
+        deleted = self._captured.get("_deleted", {}).get(group, 0)
+        rows = [{"id": i + 1} for i in range(deleted)]
+        # 영속 영역 = 다음 DELETE chain 영역 영속 ids 전달 영역 영구 영속
+        self._captured.setdefault("_select_ids", {})[group] = [r["id"] for r in rows]
+        return type("R", (), {"data": rows, "count": deleted})()
+
+
+class _FakeDeleteInQuery:
+    """사이클 150 — DELETE WHERE id IN (ids) chain 영역 영구 영속."""
+
+    def __init__(self, captured: dict[str, Any]):
+        self._captured = captured
+
+    def in_(self, col: str, vals: list[Any]):
+        # 사이클 150 영역 = id 영역 영속 매핑
+        # 호출 영역 영구 영속에서 _select_group 영속 영역 활용
+        group = self._captured.get("_select_group", "info")
+        self._captured.setdefault("delete_in_", {})[group] = (col, list(vals))
+        return self
+
+    def execute(self):
+        group = self._captured.get("_select_group", "info")
+        deleted = self._captured.get("_deleted", {}).get(group, 0)
+        rows = [{"id": i + 1} for i in range(deleted)]
+        return type("R", (), {"data": rows, "count": deleted})()
+
+
 class _FakeTable:
     def __init__(self, captured: dict[str, Any]):
         self._captured = captured
         self._group: str | None = None
 
     def delete(self):
-        # 다음에 어떤 그룹(info/high) 으로 매핑할지 모르므로 captured에 순차 기록
+        # 사이클 150 영역 영속 — 사이클 6 시정 후 DELETE chain 영역 영구 영속 = id IN (ids) 단일
+        # 그룹 매핑 영역 = SELECT chain 영역 영속에서 _select_group 영속 영역 결정
         idx = self._captured.setdefault("_delete_count", 0)
         self._captured["_delete_count"] = idx + 1
-        # 첫 호출=info, 두 번째=high (구현 순서 가정)
+        return _FakeDeleteInQuery(self._captured)
+
+    def select(self, *cols: str):
+        # 사이클 150 영역 신규 — SELECT chain 영역 영구 영속
+        idx = self._captured.setdefault("_select_count", 0)
+        self._captured["_select_count"] = idx + 1
+        # 첫 호출 = info / 두 번째 = high 영역 (사이클 6 영속 영역 영속)
+        # 그룹 영역 영구 영속 = eq/in_ 영역에서 자동 결정 영구 영속
         group = "info" if idx == 0 else "high"
+        self._captured["_select_group"] = group
         self._group = group
-        return _FakeDeleteQuery(self._captured, group)
+        return _FakeSelectQuery(self._captured, group)
+
+    def insert(self, data):
+        # 사이클 150 영역 — write_log 영역 graceful 영구 영속 흡수 영역
+        # ([log_retention] INFO 1행 emit 영역 영구 영속 = mock 영역 흡수 무관)
+        class _Inserted:
+            def execute(self_inner):
+                return type("R", (), {"data": [], "count": 0})()
+        return _Inserted()
 
 
 class _FakeSupabase:

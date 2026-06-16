@@ -235,9 +235,15 @@ async def _purge_by_cutoff(
     if cutoff_iso is None:
         raise RuntimeError("cutoff must not be None (WHERE 누락 차단)")
 
-    def _delete():
-        chain = supabase.table("system_logs").delete()
-        # 등급 필터: 단일이면 eq, 다중이면 in_
+    # 사이클 150 영역 영구 영속 — 사이클 6 도입 (2026-05-20) 24일 silent 결함 시정.
+    # 결함: supabase-py SyncFilterRequestBuilder 영역에서 DELETE chain `.limit()` 미지원
+    #       → AttributeError 'SyncFilterRequestBuilder' object has no attribute 'limit'
+    #       → 매일 graceful skip (`[log_retention_skip]` 24일 연속)
+    # 시정: subquery select(id) LIMIT MAX_PURGE_BATCH + DELETE WHERE id IN (배치) 2-step
+    #       → supabase-py SELECT chain `.limit()` 영속 + DELETE in_ id 영역 영속
+
+    def _select_ids():
+        chain = supabase.table("system_logs").select("id")
         if isinstance(level_filter, str):
             chain = chain.eq("log_level", level_filter)
         else:
@@ -245,11 +251,25 @@ async def _purge_by_cutoff(
         chain = chain.lt("timestamp", cutoff_iso).limit(MAX_PURGE_BATCH)
         return chain.execute()
 
+    select_result = await asyncio.to_thread(_select_ids)
+    select_rows = getattr(select_result, "data", None) or []
+    ids = [row["id"] for row in select_rows if "id" in row]
+
+    if not ids:
+        return 0
+
+    def _delete():
+        return supabase.table("system_logs").delete().in_("id", ids).execute()
+
     result = await asyncio.to_thread(_delete)
     rows = getattr(result, "data", None) or []
     count = getattr(result, "count", None)
     if count is None:
         count = len(rows)
+    # supabase-py DELETE 응답 = 실제 영향 row 수 보장 영속 불일치 가능
+    # → ids 길이 영역 영속 (실제 cutoff 통과 행 수, 명시적 보호 영역)
+    if count <= 0:
+        return len(ids)
     return int(count)
 
 

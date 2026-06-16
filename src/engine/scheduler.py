@@ -64,6 +64,7 @@ TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 (종가 흡수 �
 TIME_STOCK_MASTER_DAILY_LOAD = time(16, 0) # 사이클 122 — KIS 일봉 일괄 적재 (KRX 메인 종료 30분 후 안전 마진)
 TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF1002R 매스 보강 (일봉 task 직후 10분 마진)
 TIME_STOCK_MASTER_MASTER_LOAD = time(16, 30)  # 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 일괄 적재 (basics task 직후 20분 마진, domain-consult 의제 5 옵션 A)
+TIME_STOCK_MASTER_DAILY_PURGE = time(16, 15)  # 사이클 150 — stock_master_daily T-150일 retention cron (일봉 task 16:00 적재 직후 15분 마진)
 TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
 TIME_RECOMMENDATION = time(20, 0)          # AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동 — 백테스트 검증 정합성)
 TIME_FULL_UNIVERSE_LOAD = time(20, 0, 5)   # 사이클 101 — 전체 유니버스 적재 (AI자문 직후 5초 마진)
@@ -530,6 +531,14 @@ class TradingScheduler:
                 self._stock_master_master_load_task_loop()
             )
 
+            # 사이클 150 (2026-06-16) — 매일 16:15 KST stock_master_daily T-150일 retention cron task.
+            # 사용자 결정 Q3=C T-150일 (VCP T-120일 + 30일 안전 마진) + Q5=B 즉시 DROP.
+            # 사이클 122 일봉 task (16:00) 적재 직후 15분 마진 + 보유/익일청산 ticker 절대 보호 (사이클 32 R4 답습).
+            # 사이클 134 task_loop_helper 패턴 답습 (lifecycle race 차단 + start() 즉시 1회 + while).
+            self._stock_master_daily_purge_task = asyncio.create_task(
+                self._stock_master_daily_purge_task_loop()
+            )
+
             now = datetime.now().time()
 
             # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
@@ -811,6 +820,7 @@ class TradingScheduler:
                 "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
                 "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
                 "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
+                "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -934,6 +944,7 @@ class TradingScheduler:
                     "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
                 "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
                 "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
+                "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -966,6 +977,7 @@ class TradingScheduler:
             "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
             "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
             "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
+            "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -2862,6 +2874,82 @@ class TradingScheduler:
                 "kospi_count", "kosdaq_count", "total",
                 "updated", "failed", "elapsed_ms",
             ),
+        )
+
+    async def _stock_master_daily_purge_task_loop(self) -> None:
+        """사이클 150 (2026-06-16) — 매일 16:15 KST stock_master_daily T-150일 retention cron task.
+
+        SUPABASE 용량초과 시정 영구 영속 — 사용자 결정 Q3=C (VCP T-120일 + 30일 안전 마진).
+
+        영속 의무 매트릭스:
+        - 사이클 6 retention 패턴 답습 (purge_old_logs 영역 정합)
+        - 사이클 32 R4 universe guard 보유/익일청산 절대 보호 (protected_tickers 영역 영속)
+        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
+        - 사이클 48 VCP EMA effective_long T-120일 영역 영속 (T-150일 안전 마진 영구 영속)
+        - 사이클 79 G-AST2 영속 (task_attrs 4 위치 영속)
+        - 사이클 88 G-REJECT graceful 단위 = 헬퍼 영역 영구 영속 내부
+        - 사이클 106 lifecycle race 차단 = 헬퍼 영역 영구 영속 내부
+        - 사이클 122 stock_master_daily T-100일 백필 영역 영속 (T-150일 retention 정합)
+        - 사이클 134 task_loop_helper 영속 (run_periodic_task_loop 패턴 답습)
+        """
+        from datetime import timedelta as _timedelta
+        from src.db._kst import today_kst
+        from src.db.stock_master_daily import (
+            DAILY_RETENTION_DAYS,
+            purge_old_rows,
+        )
+        from src.engine.task_loop_helper import run_periodic_task_loop
+
+        async def _purge_once() -> dict:
+            """T-150일 cutoff + 보유/익일청산 protected_tickers 합집합 영역."""
+            # 사이클 32 R4 답습 — 보유 ∪ 익일청산 합집합 영구 영속 보호
+            protected: set[str] = set()
+            try:
+                for strategy in self.registry.all():
+                    state = strategy.state
+                    for ticker in (state.positions or {}).keys():
+                        if ticker:
+                            protected.add(ticker)
+            except Exception:
+                logger.exception("[stock_master_daily_purge] protected tickers 영역 수집 실패 graceful")
+
+            try:
+                for entry in (self._pending_next_day_clear or set()):
+                    # entry 는 (ticker, strategy_id) 튜플 영속
+                    if isinstance(entry, tuple) and entry:
+                        ticker = entry[0]
+                    else:
+                        ticker = entry
+                    if ticker:
+                        protected.add(str(ticker))
+            except Exception:
+                logger.exception("[stock_master_daily_purge] pending_next_day_clear 영역 수집 실패 graceful")
+
+            cutoff = today_kst() - _timedelta(days=DAILY_RETENTION_DAYS)
+            summary = await purge_old_rows(cutoff, protected_tickers=protected or None)
+            # task_loop_helper summary 영역 정합 — cutoff 키 추가
+            summary["cutoff"] = cutoff.isoformat()
+            return summary
+
+        # 사이클 150 영역 = collector 단순화 — record/flush 영역 미사용 (운영 effect = retention 단일)
+        def _noop_record(summary: dict) -> None:  # noqa: ARG001
+            return None
+
+        def _noop_flush() -> None:
+            return None
+
+        await run_periodic_task_loop(
+            scheduler=self,
+            task_label="stock_master_daily_purge",
+            wait_time=TIME_STOCK_MASTER_DAILY_PURGE,  # 16:15 KST
+            once_callable=_purge_once,
+            record_fn=_noop_record,
+            flush_fn=_noop_flush,
+            summary_log_format=(
+                "[stock_master_daily_purge_summary] deleted=%d protected=%d "
+                "elapsed_ms=%d cutoff=%s"
+            ),
+            summary_keys=("deleted", "protected_count", "elapsed_ms", "cutoff"),
         )
 
     def _detect_silent_inactive_sessions(self) -> list[str]:

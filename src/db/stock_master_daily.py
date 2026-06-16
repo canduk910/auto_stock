@@ -437,3 +437,80 @@ async def get_recent_daily_with_fallback(
             ticker,
         )
         return db_rows  # 부족하더라도 DB 결과 반환 (호출자 graceful 통과)
+
+
+# ---------------------------------------------------------------------------
+# 사이클 150 — T-150일 retention (SUPABASE 용량초과 시정)
+# ---------------------------------------------------------------------------
+
+import time as _time  # 사이클 150 — elapsed_ms 측정
+
+
+# 사이클 150 영역 영구 영속 — 사이클 48 VCP EMA effective_long T-120일 + 30일 안전 마진
+DAILY_RETENTION_DAYS = 150
+
+
+async def purge_old_rows(
+    cutoff_date: date,
+    *,
+    protected_tickers: set[str] | None = None,
+) -> dict[str, int]:
+    """T-150일 retention. cutoff_date 이전 row DELETE.
+
+    사용자 결정 Q3=C — VCP T-120일 + 30일 안전 마진 영구 영속.
+
+    Args:
+        cutoff_date: ``bas_dd < cutoff_date`` 인 row DELETE.
+        protected_tickers: 보유/익일청산 ticker (사이클 32 R4 답습) — 절대 보호.
+            None 이면 미적용 (전체 영역 영역 cutoff).
+
+    Returns:
+        ``{"deleted": int, "protected_count": int, "elapsed_ms": int}``
+
+    Side effects:
+        - INFO 로그 1행 ``[stock_master_daily_purge] deleted=N protected=M elapsed_ms=K``
+
+    영속 의무:
+    - 사이클 32 R4 universe guard 보유/익일청산 절대 보호
+    - 사이클 38 명문화 (scanner 매수 진입 전 영역 한정)
+    - 사이클 81 G-AST1 raw 영역 보호 (raw 폐기 미진행)
+    - 사이클 88 graceful (예외 시 0 반환)
+    """
+    started = _time.perf_counter()
+
+    cutoff_iso = cutoff_date.isoformat()
+    protected_count = len(protected_tickers) if protected_tickers else 0
+
+    def _delete():
+        chain = supabase.table(TABLE_NAME).delete().lt("bas_dd", cutoff_iso)
+        if protected_tickers:
+            # 사이클 32 R4 영속 — 보유/익일청산 절대 보호
+            chain = chain.not_.in_("ticker", list(protected_tickers))
+        return chain.execute()
+
+    try:
+        result = await asyncio.to_thread(_delete)
+        rows = getattr(result, "data", None) or []
+        count = getattr(result, "count", None)
+        if count is None:
+            count = len(rows)
+        deleted = int(count)
+    except Exception:
+        logger.exception(
+            "[stock_master_daily_purge] 실패 graceful cutoff=%s protected=%d",
+            cutoff_iso, protected_count,
+        )
+        return {"deleted": 0, "protected_count": protected_count, "elapsed_ms": 0}
+
+    elapsed_ms = int((_time.perf_counter() - started) * 1000)
+
+    logger.info(
+        "[stock_master_daily_purge] deleted=%d protected=%d elapsed_ms=%d cutoff=%s",
+        deleted, protected_count, elapsed_ms, cutoff_iso,
+    )
+
+    return {
+        "deleted": deleted,
+        "protected_count": protected_count,
+        "elapsed_ms": elapsed_ms,
+    }

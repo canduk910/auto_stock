@@ -261,11 +261,12 @@ def test_stop_tuple_equals_finally_tuple_members():
         "_stock_master_daily_load_task",  # 사이클 122 추가 (KIS 일봉 16:00 KST 적재 task)
         "_stock_master_basics_refresh_task",  # 사이클 126 추가 (KIS CTPF1002R 16:10 KST 매스 보강 task)
         "_stock_master_master_load_task",  # 사이클 129 추가 (KIS 종목 마스터 파일 16:30 KST 적재 task)
+        "_stock_master_daily_purge_task",  # 사이클 150 추가 (T-150일 retention cron 16:15 KST task)
         "_ws_task",
         "_scan_task",
     }
     assert stop_members == expected_members, (
-        f"stop() tuple 이 명세 §9 ① 의 15종과 불일치.\n"
+        f"stop() tuple 이 명세 §9 ① 의 16종과 불일치.\n"
         f"  실제 : {sorted(stop_members)}\n"
         f"  기대 : {sorted(expected_members)}\n"
         f"명세 §4 Patch A 코드 블록 참조."
