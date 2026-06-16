@@ -101,11 +101,24 @@ async def get(ticker: str) -> Optional[StockBasics]:
 # ============================================================
 
 
-async def upsert_master_raw(ticker: str, master_raw: dict) -> None:
+async def upsert_master_raw(
+    ticker: str,
+    master_raw: dict,
+    *,
+    is_kospi200: bool = False,
+    is_kosdaq150: bool = False,
+) -> None:
     """KIS 마스터 파일 record 영역 upsert (master_raw 컬럼 단독 영역).
 
     사이클 81 G-AST1 영속 보호 영역 = raw 영역 변경 0 영구 영속.
     KST timestamp 영속 의무 (사이클 68 G-10b 답습).
+
+    사이클 153 (2026-06-16) — is_kospi200 / is_kosdaq150 컬럼 동행 명시 영구 영속:
+    KIS 공식 마스터 source 영역 (Q1=A 사용자 결정 영속) 영구 영속.
+    - is_kospi200: KOSPI 마스터 영역 record["kospi200_apnt_cls_code"].strip() != "" 영구 영속
+    - is_kosdaq150: KOSDAQ 마스터 영역 record["ksq150_nmix_yn"] == "Y" 영구 영속
+    사이클 146 nxt_tradable 명시 영속 답습 = ON CONFLICT DO UPDATE 영역 영구 영속이
+    payload 키 영역만 SET → 신규/기존 ticker 영역 영구 영속 갱신 보장.
 
     사이클 146 (2026-06-16) — 결함 #2 시정 영구 영속:
     운영 사례 = 2026-06-16 09:09:04~09:09:49 KST 45초간 623건 폭주 = 신규 ticker
@@ -132,12 +145,16 @@ async def upsert_master_raw(ticker: str, master_raw: dict) -> None:
         "ticker": ticker,
         "master_raw": dict(master_raw or {}),
         "master_raw_updated_at": now_kst_iso(),
-        # 사이클 146 — 신규 ticker 영역 영구 영속 NOT NULL 위반 영구 차단 (DB DEFAULT 영역 이중 안전망).
-        # 기존 ticker 영역 영구 영속 = on_conflict="ticker" UPDATE 시 nxt_tradable=False 영역 영구 영속이
-        # 덮어쓰기 발생 영역 영구 영속 → 사이클 144 영역 영구 영속 16:10 task `_stock_master_basics_refresh_once`
-        # 영역 영구 영속이 다음 발화 시 KIS CTPF1002R 영역 영구 영속 `inquire_stock_basics()` 호출로
-        # 정확한 nxt_tradable 영역 영구 영속 복구 영구 영속 (사이클 107 영속).
+        # 사이클 146 — 신규 ticker 영역 NOT NULL 위반 영구 차단 (DB DEFAULT 영역 이중 안전망).
+        # 기존 ticker 영역 = on_conflict="ticker" UPDATE 시 nxt_tradable=False 덮어쓰기
+        # → 사이클 144 16:10 task `_stock_master_basics_refresh_once` 다음 발화 시
+        # KIS CTPF1002R `inquire_stock_basics()` 호출로 정확한 nxt_tradable 복구 (사이클 107 영속).
         "nxt_tradable": False,
+        # 사이클 153 — KOSPI200 / KOSDAQ150 지수 편입 여부 동행 명시 영구 영속 (Q1=A).
+        # 사이클 146 nxt_tradable 패턴 답습 영구 영속 = ON CONFLICT DO UPDATE 영역 영구 영속이
+        # payload 키 영역만 SET → 기존 ticker 신규 갱신 시 명시 의무.
+        "is_kospi200": bool(is_kospi200),
+        "is_kosdaq150": bool(is_kosdaq150),
     }
     await asyncio.to_thread(
         lambda: (
@@ -512,14 +529,22 @@ async def list_by_filter(
     min_trade_amount: int = 0,
     exclude_tickers: list[str] | None = None,
     nxt_tradable: bool | None = None,
+    is_kospi200: bool | None = None,
+    is_kosdaq150: bool | None = None,
     limit: int = 500,
 ) -> list[dict]:
-    """시총·거래대금·시장·NXT 거래가능 필터로 stock_master 를 조회한다 (사이클 108).
+    """시총·거래대금·시장·NXT/KOSPI200/KOSDAQ150 필터로 stock_master 를 조회 (사이클 108 + 153).
 
-    KIS volume-rank API 없이 DB 기반으로 VB/LTV/BFB 유니버스를 구성한다 (KIS API 호출 0건).
+    KIS volume-rank API 없이 DB 기반으로 유니버스를 구성한다 (KIS API 호출 0건).
 
     NOTE: Supabase PostgREST 는 JSONB 숫자 값 직접 비교를 지원하지 않는다.
     따라서 DB 에서 limit*2 버퍼 조회 후 Python-side 에서 JSONB raw 키 필터링을 수행한다.
+
+    사이클 153 (2026-06-16) — KOSPI200 / KOSDAQ150 영역 인자 추가 영구 영속 (사이클 108 nxt_tradable 답습):
+    - is_kospi200=True 단독: KOSPI200 종목만
+    - is_kosdaq150=True 단독: KOSDAQ150 종목만
+    - **둘 다 True: OR 합집합** (donchian_swing 영구 영속 의무, FUNNEL_STAGES[0] "코스피200+코스닥150 합집합")
+    - 둘 다 None: 무필터 (회귀 보존)
 
     Args:
         market: "kospi" (excg_dvsn_cd=02) / "kosdaq" (excg_dvsn_cd=03) / None (전체)
@@ -527,10 +552,13 @@ async def list_by_filter(
         min_trade_amount: 거래대금 최소값 (원 단위). acml_tr_pbmn 직접 비교.
         exclude_tickers: 제외 종목 리스트.
         nxt_tradable: None=전체 / True=NXT 거래가능만 / False=NXT 불가만.
+        is_kospi200: None=전체 / True=KOSPI200만 (is_kosdaq150 와 OR 합집합).
+        is_kosdaq150: None=전체 / True=KOSDAQ150만 (is_kospi200 와 OR 합집합).
         limit: 결과 최대 건수 (default 500).
 
     Returns:
-        [{"ticker": str, "name": str, "excg_dvsn_cd": str, "nxt_tradable": bool, "raw": dict}, ...]
+        [{"ticker": str, "name": str, "excg_dvsn_cd": str, "nxt_tradable": bool,
+          "is_kospi200": bool, "is_kosdaq150": bool, "raw": dict}, ...]
     """
     exclude_set: set[str] = set(exclude_tickers or [])
     # 2× 버퍼 조회 — JSONB Python-side 필터 후 limit 를 충족하도록 여유분 확보
@@ -538,7 +566,7 @@ async def list_by_filter(
 
     query = (
         supabase.table(TABLE_NAME)
-        .select("ticker, name, excg_dvsn_cd, nxt_tradable, raw")
+        .select("ticker, name, excg_dvsn_cd, nxt_tradable, is_kospi200, is_kosdaq150, raw")
         .order("refreshed_at", desc=True)
         .limit(fetch_limit)
     )
@@ -548,6 +576,20 @@ async def list_by_filter(
         query = query.eq("excg_dvsn_cd", "03")
     if nxt_tradable is not None:
         query = query.eq("nxt_tradable", nxt_tradable)
+
+    # 사이클 153 — KOSPI200/KOSDAQ150 영역 필터 (Q1=A 영구 영속 + Q2=A OR 합집합 의무).
+    # 단독 인자 = DB-side .eq() 필터 영역 (PostgREST 인덱스 활용 효과). 양쪽 동시 True =
+    # PostgREST .or_() 합집합 (Python-side filter 폴백 회피, 인덱스 idx_stock_master_is_kospi200
+    # + idx_stock_master_is_kosdaq150 영역 활용 영구 영속). False 인자 = .eq(False) 단독 필터.
+    if is_kospi200 is True and is_kosdaq150 is True:
+        query = query.or_("is_kospi200.eq.true,is_kosdaq150.eq.true")
+    elif is_kospi200 is not None and is_kosdaq150 is None:
+        query = query.eq("is_kospi200", is_kospi200)
+    elif is_kosdaq150 is not None and is_kospi200 is None:
+        query = query.eq("is_kosdaq150", is_kosdaq150)
+    elif is_kospi200 is not None and is_kosdaq150 is not None:
+        # 양쪽 모두 명시 (False 영역 포함) = AND 영역 영구 영속
+        query = query.eq("is_kospi200", is_kospi200).eq("is_kosdaq150", is_kosdaq150)
 
     result = await asyncio.to_thread(lambda: query.execute())
     rows = result.data or []
@@ -561,6 +603,32 @@ async def list_by_filter(
             continue
         if ticker in exclude_set:
             continue
+
+        # 사이클 153 — Python-side OR/AND 필터 영역 (mock 환경 + DB-side .or_() 폴백 영역).
+        # is_kospi200=True 단독: row.is_kospi200=True 만 통과
+        # is_kosdaq150=True 단독: row.is_kosdaq150=True 만 통과
+        # 양쪽 True: row.is_kospi200=True OR row.is_kosdaq150=True 통과 (donchian 의무)
+        if is_kospi200 is True and is_kosdaq150 is True:
+            if not (row.get("is_kospi200") or row.get("is_kosdaq150")):
+                continue
+        elif is_kospi200 is True and is_kosdaq150 is None:
+            if not row.get("is_kospi200"):
+                continue
+        elif is_kosdaq150 is True and is_kospi200 is None:
+            if not row.get("is_kosdaq150"):
+                continue
+        elif is_kospi200 is False and is_kosdaq150 is None:
+            if row.get("is_kospi200"):
+                continue
+        elif is_kosdaq150 is False and is_kospi200 is None:
+            if row.get("is_kosdaq150"):
+                continue
+        elif is_kospi200 is not None and is_kosdaq150 is not None:
+            # AND 영역 (양쪽 명시) — row 영역 정확 일치 의무
+            if row.get("is_kospi200") != is_kospi200:
+                continue
+            if row.get("is_kosdaq150") != is_kosdaq150:
+                continue
 
         raw: dict = row.get("raw") or {}
 

@@ -43,7 +43,8 @@ async def test_g_ml1_master_load_once_kospi_kosdaq(monkeypatch):
     # upsert_master_raw mock
     upserted = []
 
-    async def _mock_upsert(ticker, master_raw):
+    # 사이클 153 K-2 의미 전환 — upsert_master_raw 시그너처에 is_kospi200 / is_kosdaq150 추가.
+    async def _mock_upsert(ticker, master_raw, *, is_kospi200=False, is_kosdaq150=False):
         upserted.append((ticker, master_raw))
 
     from src.api import kis_master as _kis_master

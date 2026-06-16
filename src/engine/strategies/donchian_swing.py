@@ -455,11 +455,16 @@ class DonchianSwingStrategy(StrategyBase):
         max_stocks = p.get("max_scan_stocks", 200)
 
         try:
+            # 사이클 153 — KOSPI200 + KOSDAQ150 합집합 필터 영구 영속 (Q1=A + Q2=A 영속).
+            # FUNNEL_STAGES[0] step_name "코스피200+코스닥150 합집합" 영속 의무 정합.
+            # 사이클 121 silent 결함 영구 영속 시정 = 인자 부재로 KOSPI200/KOSDAQ150 필터 누락.
             rows = await _sm_mod.list_by_filter(
                 min_market_cap=min_mcap,
                 min_trade_amount=min_trade,
                 exclude_tickers=exclude_tickers,
                 nxt_tradable=nxt_tradable_param,
+                is_kospi200=True,
+                is_kosdaq150=True,
                 limit=max_stocks,
             )
         except Exception:

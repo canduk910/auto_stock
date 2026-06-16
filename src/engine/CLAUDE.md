@@ -24,6 +24,77 @@ market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
+## 사이클 153 (2026-06-16) — KOSPI200/KOSDAQ150 영역 영구 영속 복원 + stock_master is_kospi200/is_kosdaq150 컬럼 신규
+
+사용자 보고 영역 영구 영속 = donchian step_no=1 "코스피200+코스닥150 합집합" survived 비정상 (실측 KOSPI200 1796 + KOSDAQ150 149 = ~1945 가능 → 영업일 종목 ≤ 5). 근본 원인 = 사이클 121 Plan Phase B silent 결함 (donchian_swing.py::_scan_universe() 영역 변경 시 KOSPI_200_TICKERS + KOSDAQ_150_TICKERS 합집합 → stock_master.list_by_filter(min_market_cap, min_trade_amount) 전환 시점에 KOSPI200/KOSDAQ150 필터 영역 완전 누락 + FUNNEL_STAGES[0] step_name 영속 미동기화). 사이클 122~152 영구 미시정.
+
+### 사용자 결정 영속
+
+- Q1=A KIS 공식 마스터 source (`kospi200_apnt_cls_code != ""` AND `ksq150_nmix_yn == "Y"`)
+- Q2=A `is_kospi200: bool | None = None` + `is_kosdaq150: bool | None = None` 인자 (사이클 108 nxt_tradable 답습)
+- Q3=A TDD 정공
+
+### migration 037 영역
+
+- `is_kospi200 BOOLEAN NOT NULL DEFAULT FALSE` 신규 컬럼
+- `is_kosdaq150 BOOLEAN NOT NULL DEFAULT FALSE` 신규 컬럼
+- 부분 인덱스 2건 (`idx_stock_master_is_kospi200 WHERE is_kospi200=TRUE` / `idx_stock_master_is_kosdaq150 WHERE is_kosdaq150=TRUE`)
+- IF NOT EXISTS idempotent + Supabase MCP apply_migration 운영 DB 즉시 적용 영역 영구 영속
+
+### `_stock_master_master_load_once()` 영역 분기 확장
+
+- `tagged_records: list[tuple[str, dict]]` 영역 = (`source`, `record`) 영역 영구 영속 (KOSPI/KOSDAQ 분리 영구 영속)
+- KOSPI 분기: `record["kospi200_apnt_cls_code"].strip() != ""` → `is_kospi200=True`
+- KOSDAQ 분기: `record["ksq150_nmix_yn"] == "Y"` → `is_kosdaq150=True`
+- `upsert_master_raw(ticker, record, is_kospi200=..., is_kosdaq150=...)` 호출
+
+### `upsert_master_raw()` 영역 확장
+
+- 시그너처 신규 인자: `is_kospi200: bool = False`, `is_kosdaq150: bool = False` (사이클 146 nxt_tradable 패턴 답습)
+- payload 영역 영구 영속에 2 컬럼 동시 명시 (ON CONFLICT DO UPDATE 영역 영구 영속이 명시된 키만 SET 의무)
+
+### `list_by_filter()` 영역 확장 (`src/db/stock_master.py`)
+
+- 신규 인자 `is_kospi200: bool | None = None` + `is_kosdaq150: bool | None = None`
+- 양쪽 True 시 `.or_("is_kospi200.eq.true,is_kosdaq150.eq.true")` OR 합집합 영역 영구 영속 (donchian 의무)
+- 한쪽만 명시 시 `.eq()` 영역 영구 영속 (PostgREST 인덱스 활용)
+- 양쪽 None 시 무필터 (회귀 보존)
+- Python-side mock 환경 영역 폴백 영구 영속
+
+### `donchian_swing.py::_scan_universe()` 영역 시정
+
+- `list_by_filter(..., is_kospi200=True, is_kosdaq150=True, ...)` 호출 영구 영속
+- FUNNEL_STAGES[0] step_name "코스피200+코스닥150 합집합" 영역 영구 영속 (변경 0)
+
+### 매매 안전성 무영향 영구 영속
+
+- scanner 단계 매수 진입 *전* 영역만 (사이클 38 명문화 영속)
+- `risk.on_tick` / `order_engine` / `realtime/` / `auth/` 변경 0
+- 매도/익일청산/15:20 강제청산/손절 hot path 무관
+- 사이클 32 R4 보유/익일청산 절대 보호 영속 (영향 0)
+
+### 영속 의무 매트릭스
+
+- 사이클 32 R4 보유/익일청산 절대 보호
+- 사이클 38 명문화 (scanner 매수 진입 전 한정)
+- 사이클 81 G-AST1 raw JSONB 영역 영구 영속 보호 (신규 컬럼 = raw 영역 외부)
+- 사이클 108 list_by_filter 패턴 답습 (nxt_tradable 영역 정합)
+- 사이클 121 Q2=D 임계 완화 영속 (변경 0)
+- 사이클 129 master_raw 영역 영속 (변경 0)
+- 사이클 143 FUNNEL_STAGES 영속 (donchian step_name 영구 영속)
+- 사이클 146 upsert_master_raw 영역 nxt_tradable 명시 영속 답습
+
+### vcp_breakout 영역 영향 0 (사이클 153 범위 외)
+
+- `vcp_breakout.py:726, 732` 영역 KOSPI_200_TICKERS + KOSDAQ_150_TICKERS hardcoded list 영역 변경 0
+- scanner.py hardcoded list (~124 종목 영역) 폐기는 사이클 154+ 인계 (vcp_breakout 영역 영향 평가 후)
+
+### 회귀 가드 16 케이스 (HIGH 8 = 50%)
+
+- `tests/unit/db/test_cycle153_list_by_filter_index_flags.py` 5 케이스 (G-153-FILTER-1~5)
+- `tests/unit/engine/test_cycle153_master_load_kospi200_kosdaq150.py` 3 케이스 (G-153-MASTER-1~3)
+- `tests/unit/engine/strategies/test_cycle153_donchian_index_filter.py` 5 케이스 (G-153-DONCHIAN-1~3 + G-153-SAFETY-1/3)
+
 ## 사이클 129 (2026-06-14) — KIS 공식 일일 마스터 파일 도입 + master_raw 별도 컬럼 + 16:30 KST 자동 task
 
 사용자 verbatim "종목마스터 만들 때 아래 소스코드 참고해줘" + KIS 공식 샘플 코드 제공. 사용자 결정 Q4=A 마스터 우선 + Q5=C 전수 보존 + Q6=C master_raw 별도 컬럼 + Q12=A × 100 단위 환산 + Q9=B 단계별 분할 진행.

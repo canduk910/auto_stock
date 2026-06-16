@@ -2629,16 +2629,21 @@ async def _stock_master_master_load_once(force: bool = True) -> dict:
             "[stock_master_master_load] KOSDAQ 다운로드 실패 graceful: %s", exc
         )
 
-    all_records = kospi_records + kosdaq_records
-    summary["total"] = len(all_records)
-    _rp.update_progress("master", total=len(all_records))
+    # 사이클 153 — KOSPI/KOSDAQ source 영역 영구 영속 분리
+    # 각 record 영역에 source 키 명시 → upsert_master_raw 영역에서 분기 (사용자 결정 Q1=A 영구 영속)
+    tagged_records: list[tuple[str, dict]] = (
+        [("kospi", r) for r in kospi_records]
+        + [("kosdaq", r) for r in kosdaq_records]
+    )
+    summary["total"] = len(tagged_records)
+    _rp.update_progress("master", total=len(tagged_records))
 
     logger.info(
         "[stock_master_master_load_begin] kospi=%d kosdaq=%d total=%d force=%s",
         summary["kospi_count"], summary["kosdaq_count"], summary["total"], force,
     )
 
-    if not all_records:
+    if not tagged_records:
         summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
         logger.warning("[stock_master_master_load] 마스터 record 0건 — skip")
         _rp.finish_progress(
@@ -2648,14 +2653,29 @@ async def _stock_master_master_load_once(force: bool = True) -> dict:
         return summary
 
     # master_raw 일괄 upsert (사이클 81 G-AST1 영속 보호 = raw 변경 0)
-    for idx, record in enumerate(all_records):
+    for idx, (source, record) in enumerate(tagged_records):
         ticker = (record.get("mksc_shrn_iscd") or "").strip()
         if not ticker or len(ticker) != 6 or not ticker.isdigit():
             summary["failed"] += 1
             continue
 
+        # 사이클 153 — KOSPI200 / KOSDAQ150 지수 편입 판정 영역 영구 영속
+        # KOSPI 분기: kospi200_apnt_cls_code.strip() != "" → is_kospi200=True (Q1=A 영속)
+        # KOSDAQ 분기: ksq150_nmix_yn == "Y" → is_kosdaq150=True (Q1=A 영속)
+        is_kospi200 = False
+        is_kosdaq150 = False
+        if source == "kospi":
+            code_val = (record.get("kospi200_apnt_cls_code") or "").strip()
+            is_kospi200 = bool(code_val)
+        elif source == "kosdaq":
+            is_kosdaq150 = (record.get("ksq150_nmix_yn") or "").strip() == "Y"
+
         try:
-            await _sm.upsert_master_raw(ticker, record)
+            await _sm.upsert_master_raw(
+                ticker, record,
+                is_kospi200=is_kospi200,
+                is_kosdaq150=is_kosdaq150,
+            )
             summary["updated"] += 1
         except Exception as exc:
             logger.warning(
@@ -2675,7 +2695,7 @@ async def _stock_master_master_load_once(force: bool = True) -> dict:
             elapsed = int((time.monotonic() - start) * 1000)
             logger.info(
                 "[stock_master_master_load] 진행 %d/%d updated=%d failed=%d elapsed_ms=%d",
-                idx + 1, len(all_records),
+                idx + 1, len(tagged_records),
                 summary["updated"], summary["failed"], elapsed,
             )
 
@@ -2690,7 +2710,7 @@ async def _stock_master_master_load_once(force: bool = True) -> dict:
     _rp.finish_progress(
         "master", "completed",
         total=summary["total"],
-        processed=len(all_records),
+        processed=len(tagged_records),
         updated=summary["updated"],
         failed=summary["failed"],
     )
