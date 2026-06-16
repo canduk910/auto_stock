@@ -102,6 +102,108 @@ async def update_trade_status(
     return affected
 
 
+async def _lookup_strategy_from_trade_history(
+    ticker: str,
+    order_no: str,
+    trade_type: TradeType,
+) -> str | None:
+    """trade_history PENDING/PARTIAL row 영역에서 strategy 영역 조회 (사이클 147).
+
+    `OrderEngine._handle_sell_fill` + `_handle_buy_fill` 영역의 매핑 dict miss 시
+    잘못된 "momentum" 하드코딩 폴백 영역 영구 차단용 fallback chain.
+
+    005940 NH투자증권 사고 (2026-06-16 08:00 SELL → 09:09 reboot → 09:18 callback exception)
+    재발 영구 차단.
+
+    Args:
+        ticker: 6자리 종목코드 (PostgREST eq filter)
+        order_no: KIS 주문번호 (사이클 30 UNIQUE 인덱스 정합)
+        trade_type: TradeType.BUY / TradeType.SELL
+
+    Returns:
+        strategy str (PENDING/PARTIAL row 1건 매칭) / None (0건 또는 예외 graceful)
+    """
+    try:
+        def _query():
+            return (
+                supabase.table("trade_history")
+                .select("strategy")
+                .eq("ticker", ticker)
+                .eq("order_no", order_no)
+                .eq("trade_type", trade_type.value)
+                .in_("status", [TradeStatus.PENDING.value, TradeStatus.PARTIAL.value])
+                .limit(1)
+                .execute()
+            )
+
+        result = await asyncio.to_thread(_query)
+        rows = result.data or []
+        if not rows:
+            return None
+        return rows[0].get("strategy")
+    except Exception as exc:
+        logger.warning(
+            "[trade_history_strategy_lookup_failed] ticker=%s order_no=%s trade_type=%s err=%r",
+            ticker, order_no, trade_type.value, exc,
+        )
+        return None
+
+
+async def _update_trade_status_by_order_no(
+    order_no: str,
+    trade_type: TradeType,
+    status: TradeStatus,
+    price: int | None = None,
+    profit_loss: float | None = None,
+) -> int:
+    """order_no 단일 키 영역 영구 영속 강제 UPDATE (사이클 147).
+
+    `_handle_sell_fill` 보정 INSERT 영역 UniqueViolation 시 fallback.
+    strategy 필터 영역 폐기 영구 영속 — 사이클 30 부분 UNIQUE 인덱스
+    `(ticker, order_no, trade_type)` 영역 영구 영속 정합.
+
+    Args:
+        order_no: KIS 주문번호 (단일 키 영구 영속)
+        trade_type: TradeType.BUY / TradeType.SELL
+        status: TradeStatus.COMPLETED / PARTIAL / CANCELLED
+        price: 체결가 (옵셔널)
+        profit_loss: 실현손익 (옵셔널)
+
+    Returns:
+        affected row 수
+    """
+    update_data: dict = {"status": status.value}
+    if price is not None:
+        update_data["price"] = float(price)
+    if profit_loss is not None:
+        update_data["profit_loss"] = float(profit_loss)
+
+    def _update():
+        return (
+            supabase.table("trade_history")
+            .update(update_data)
+            .eq("order_no", order_no)
+            .eq("trade_type", trade_type.value)
+            .eq("status", TradeStatus.PENDING.value)
+            .execute()
+        )
+
+    try:
+        result = await asyncio.to_thread(_update)
+        affected = len(result.data or [])
+        logger.info(
+            "[trade_status_update_by_order_no] order_no=%s trade_type=%s status=%s affected=%d",
+            order_no, trade_type.value, status.value, affected,
+        )
+        return affected
+    except Exception as exc:
+        logger.warning(
+            "[trade_status_update_by_order_no_failed] order_no=%s err=%r",
+            order_no, exc,
+        )
+        return 0
+
+
 async def get_today_trades_for_settlement(strategy: str | None = None) -> list[dict]:
     """정산용 — 당일 체결 거래 전체(중복 dedup 없음, 매수+매도 합산용).
 

@@ -25,7 +25,12 @@ from src.engine.util.tick_size import step_down, step_up
 from src.api.base import KisApiError
 from src.api.order import cancel_order, place_order
 from src.db.system_logs import write_log, safe_write_log
-from src.db.trade_history import insert_trade, update_trade_status
+from src.db.trade_history import (
+    insert_trade,
+    update_trade_status,
+    _lookup_strategy_from_trade_history,
+    _update_trade_status_by_order_no,
+)
 from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.sell_rejection import SellRejectionTracker, is_krx_main_hours, is_nxt_session_hours
 from src.engine.strategy_base import Position, Signal, StrategyBase
@@ -920,8 +925,29 @@ class OrderEngine:
         self, ticker: str, order_no: str, price: int,
         quantity: int, total_filled: int, ordered_qty: int,
     ) -> None:
-        """매수 체결 처리 — 체결통보 수신 시 올바른 전략에 포지션 등록."""
-        strategy_id = self._order_strategy.get(order_no, "momentum")
+        """매수 체결 처리 — 체결통보 수신 시 올바른 전략에 포지션 등록.
+
+        사이클 147 (2026-06-16): `_order_strategy.get(order_no, "momentum")` 하드코딩 폴백 폐기.
+        매핑 dict miss 시 trade_history PENDING row 영역 strategy 영구 영속 복구
+        (005940 사고 영역 패턴 답습 — 매수도 동일 race 가능).
+        """
+        strategy_id = self._order_strategy.get(order_no)
+        if strategy_id is None:
+            # 매핑 dict miss — boot/reboot race. trade_history PENDING row 영역 strategy 복구.
+            strategy_id = await _lookup_strategy_from_trade_history(
+                ticker, order_no, TradeType.BUY,
+            )
+            if strategy_id is None:
+                logger.warning(
+                    "[buy_fill_strategy_lookup_fallback] order_no=%s ticker=%s — 매핑 dict miss + trade_history miss → momentum 폴백",
+                    order_no, ticker,
+                )
+                strategy_id = "momentum"
+            else:
+                logger.info(
+                    "[buy_fill_strategy_lookup_recovered] order_no=%s ticker=%s strategy=%s — 매핑 dict miss + trade_history 복구",
+                    order_no, ticker, strategy_id,
+                )
         strategy = self.registry.get(strategy_id)
         if not strategy:
             logger.error("체결통보: 전략 찾을 수 없음: %s (order_no: %s)", strategy_id, order_no)
@@ -999,8 +1025,30 @@ class OrderEngine:
         self, ticker: str, order_no: str, price: int,
         quantity: int, total_filled: int, ordered_qty: int,
     ) -> None:
-        """매도 체결 처리 — 올바른 전략에서 포지션 제거."""
-        strategy_id = self._order_strategy.get(order_no, "momentum")
+        """매도 체결 처리 — 올바른 전략에서 포지션 제거.
+
+        사이클 147 (2026-06-16): `_order_strategy.get(order_no, "momentum")` 하드코딩 폴백 폐기.
+        005940 NH투자증권 LTV SELL trade_history PENDING ~6h 영구 잔존 사고 (2026-06-16 08:00→09:18)
+        영구 차단. 매핑 dict miss 시 trade_history PENDING row 영역 strategy 영구 복구.
+        """
+        strategy_id = self._order_strategy.get(order_no)
+        if strategy_id is None:
+            # 매핑 dict miss — boot/reboot race (005940 사고 영역 정합).
+            # trade_history PENDING row 영역 strategy 복구 → update_trade_status 영역 영구 정합.
+            strategy_id = await _lookup_strategy_from_trade_history(
+                ticker, order_no, TradeType.SELL,
+            )
+            if strategy_id is None:
+                logger.warning(
+                    "[sell_fill_strategy_lookup_fallback] order_no=%s ticker=%s — 매핑 dict miss + trade_history miss → momentum 폴백",
+                    order_no, ticker,
+                )
+                strategy_id = "momentum"
+            else:
+                logger.info(
+                    "[sell_fill_strategy_lookup_recovered] order_no=%s ticker=%s strategy=%s — 매핑 dict miss + trade_history 복구",
+                    order_no, ticker, strategy_id,
+                )
         strategy = self.registry.get(strategy_id)
         if not strategy:
             logger.error("매도 체결: 전략 찾을 수 없음: %s (order_no: %s)", strategy_id, order_no)
@@ -1034,21 +1082,39 @@ class OrderEngine:
                 # → COMPLETED 상태로 직접 INSERT, execute_sell 측에 PENDING INSERT 생략 신호
                 self._completed_orders.add(order_no)
                 from src.engine.scanner import ticker_names as _tn
-                await insert_trade(TradeRecord(
-                    ticker=ticker,
-                    ticker_name=_tn.get(ticker, ""),
-                    trade_type=TradeType.SELL,
-                    price=price,
-                    quantity=total_filled,
-                    profit_loss=profit_loss,
-                    status=TradeStatus.COMPLETED,
-                    strategy=strategy_id,
-                    order_no=order_no,
-                ))
-                logger.warning(
-                    "체결통보 선행 race — COMPLETED 직접 INSERT: 매도 %s (주문번호: %s, 손익: %d)",
-                    t(ticker), order_no, profit_loss,
-                )
+                try:
+                    await insert_trade(TradeRecord(
+                        ticker=ticker,
+                        ticker_name=_tn.get(ticker, ""),
+                        trade_type=TradeType.SELL,
+                        price=price,
+                        quantity=total_filled,
+                        profit_loss=profit_loss,
+                        status=TradeStatus.COMPLETED,
+                        strategy=strategy_id,
+                        order_no=order_no,
+                    ))
+                    logger.warning(
+                        "체결통보 선행 race — COMPLETED 직접 INSERT: 매도 %s (주문번호: %s, 손익: %d)",
+                        t(ticker), order_no, profit_loss,
+                    )
+                except Exception as exc:
+                    # 사이클 147 (2026-06-16): 사이클 30 UNIQUE 인덱스 (ticker, order_no, trade_type)
+                    # 위반 영역 (005940 사고 정합 — PENDING row strategy 불일치 시 매핑 fallback 후에도
+                    # 잔존 PENDING row 영역 충돌). strategy 무관 order_no 단일 키 강제 UPDATE.
+                    logger.warning(
+                        "[sell_fill_correction_unique_violation] ticker=%s order_no=%s strategy_attempted=%s err=%r → strategy 무관 강제 COMPLETED UPDATE",
+                        ticker, order_no, strategy_id, exc,
+                    )
+                    forced_affected = await _update_trade_status_by_order_no(
+                        order_no, TradeType.SELL, TradeStatus.COMPLETED,
+                        price=price, profit_loss=profit_loss,
+                    )
+                    if forced_affected == 0:
+                        logger.error(
+                            "[sell_fill_correction_forced_update_zero] ticker=%s order_no=%s — 강제 UPDATE 영역 0건 (PENDING row 부재 영구 영속 의심)",
+                            ticker, order_no,
+                        )
             self._filled_qty.pop(order_no, None)
             self._order_qty.pop(order_no, None)
             self._order_strategy.pop(order_no, None)
