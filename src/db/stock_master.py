@@ -107,6 +107,23 @@ async def upsert_master_raw(ticker: str, master_raw: dict) -> None:
     사이클 81 G-AST1 영속 보호 영역 = raw 영역 변경 0 영구 영속.
     KST timestamp 영속 의무 (사이클 68 G-10b 답습).
 
+    사이클 146 (2026-06-16) — 결함 #2 시정 영구 영속:
+    운영 사례 = 2026-06-16 09:09:04~09:09:49 KST 45초간 623건 폭주 = 신규 ticker
+    (900xxx ETN / 950xxx 외국기업 / 490xxx 신규 상장) 영역 영구 영속에서 NOT NULL 위반:
+    `null value in column "nxt_tradable" of relation "stock_master"`.
+    근본 원인 = `master_raw` 영역 영구 영속 단독 upsert payload 영역 영구 영속에 `nxt_tradable`
+    부재 → 신규 ticker 영역 영구 영속 INSERT 시 NULL 시도 → NOT NULL 위반.
+    메인 세션 영역 영구 영속 hotfix `ALTER COLUMN nxt_tradable SET DEFAULT FALSE` 적용 완료
+    + 사이클 146 코드 영역 영구 영속 이중 안전망 = 신규 ticker INSERT 시 `nxt_tradable=False`
+    명시 영역 영구 영속 (사이클 81 G-AST1 보수적 폴백 영구 영속 + 사이클 32 R4 universe guard 답습).
+
+    UPSERT 영역 영구 영속 분기 영역 영구 영속:
+    - 신규 ticker (DB 미존재) = INSERT with master_raw + master_raw_updated_at + nxt_tradable=False
+      (보수적 영역 영구 영속 = NXT 매수 차단, 사이클 81 G-AST1 안전 영구 영속)
+    - 기존 ticker (DB 존재) = UPSERT on_conflict="ticker" → master_raw + master_raw_updated_at 만 갱신
+      (PostgreSQL ON CONFLICT DO UPDATE 영역 영구 영속이 payload 키 영역만 SET → nxt_tradable
+       영역 영구 영속 = 기존 값 영구 영속 보존, raw / krx_halted / admin_item 영역 영속 보존)
+
     Args:
         ticker: 6자리 KRX 단축코드 영역
         master_raw: KIS 마스터 record (mksc_shrn_iscd + part1 + part2 영역)
@@ -115,6 +132,12 @@ async def upsert_master_raw(ticker: str, master_raw: dict) -> None:
         "ticker": ticker,
         "master_raw": dict(master_raw or {}),
         "master_raw_updated_at": now_kst_iso(),
+        # 사이클 146 — 신규 ticker 영역 영구 영속 NOT NULL 위반 영구 차단 (DB DEFAULT 영역 이중 안전망).
+        # 기존 ticker 영역 영구 영속 = on_conflict="ticker" UPDATE 시 nxt_tradable=False 영역 영구 영속이
+        # 덮어쓰기 발생 영역 영구 영속 → 사이클 144 영역 영구 영속 16:10 task `_stock_master_basics_refresh_once`
+        # 영역 영구 영속이 다음 발화 시 KIS CTPF1002R 영역 영구 영속 `inquire_stock_basics()` 호출로
+        # 정확한 nxt_tradable 영역 영구 영속 복구 영구 영속 (사이클 107 영속).
+        "nxt_tradable": False,
     }
     await asyncio.to_thread(
         lambda: (

@@ -769,7 +769,30 @@ class TradingScheduler:
                 except asyncio.CancelledError:
                     pass
 
-        except Exception:
+        except Exception as exc:
+            # 사이클 146 (2026-06-16) — 결함 #1 시정 graceful recovery 영구 영속:
+            # 운영 사례 = 2026-06-16 09:01:16~09:07:43 KST KIS `/trading/inquire-balance`
+            # 5xx 6회 retry exhausted → KisApiError 전파 → start() 영역 영구 영속 except
+            # 진입 → 매매 프로세스 영역 영구 영속 비정상 종료 → run_daily 영역 영구 영속이
+            # 다음 영업일 08:20 까지 대기 = 8시간 매매 손실 영역 영구 영속.
+            # 시정 = KIS API 일시 5xx 영역 영구 영속 (잔고/시세/주문 영역) = 매매 hot path
+            # 영역 영구 영속 보존 + WARNING 영역 영구 영속 + finally 영역 영구 영속 진입 안 함
+            # → 다음 _scan_loop / _stale_watcher 영역 영구 영속이 자동 복구 영구 영속.
+            # 기타 Exception 영역 영구 영속 = 기존 동작 영역 영구 영속 보존 (사이클 13-E-2 답습).
+            from src.api.base import KisApiError
+            if isinstance(exc, KisApiError):
+                logger.warning(
+                    "[매매 프로세스] KIS API 일시 장애 graceful 영역 영구 영속 (매매 프로세스 보존): %s",
+                    exc,
+                )
+                await write_log(
+                    "WARNING",
+                    f"[매매 프로세스] KIS API 일시 장애 graceful (매매 프로세스 보존): {exc}",
+                )
+                # graceful = finally 진입 안 함 + 매매 프로세스 영역 영구 영속 보존
+                # 다음 _scan_loop / _stale_watcher 영역 영구 영속 자동 복구 영구 영속.
+                # 사이클 13-E-2 task lifecycle 영역 영구 영속 보존 영구 영속 (좀비 task 0).
+                return
             logger.exception("매매 프로세스 오류")
             await write_log("ERROR", "매매 프로세스 비정상 종료")
         finally:
