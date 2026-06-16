@@ -30,15 +30,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 KST = timezone(timedelta(hours=9))
 
-_VB_SOURCE_PATH = pathlib.Path(
-    "/Users/koscom/Projects/auto_stock/src/engine/strategies/volatility_breakout.py"
-)
-_SCANNER_SOURCE_PATH = pathlib.Path(
-    "/Users/koscom/Projects/auto_stock/src/engine/scanner.py"
-)
-_LIST_BY_FILTER_PATH = pathlib.Path(
-    "/Users/koscom/Projects/auto_stock/src/db/stock_master.py"
-)
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[4]
+_VB_SOURCE_PATH = _REPO_ROOT / "src" / "engine" / "strategies" / "volatility_breakout.py"
+_SCANNER_SOURCE_PATH = _REPO_ROOT / "src" / "engine" / "scanner.py"
+_LIST_BY_FILTER_PATH = _REPO_ROOT / "src" / "db" / "stock_master.py"
 
 
 def _make_strategy(min_price: int = 0, max_price: int = 0):
