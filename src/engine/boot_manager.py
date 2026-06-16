@@ -300,3 +300,16 @@ async def boot(scheduler: "TradingScheduler") -> None:
         await scheduler._eager_refresh_stock_master_for_held_positions()
     except Exception:
         logger.exception("[stock_master_eager] _boot 후 eager 갱신 실패 — lazy 경로로 자연 보강")
+
+    # 사이클 149 (2026-06-16) — 부팅 시점 VI 활성 종목 REST 보조 폴백 seed.
+    # 자문 의제 4 (자문 채택) = inquire_vi_status REST 1회 호출 + graceful.
+    # 부팅 시점 = 07:50 KST = 장 시작 *전* = VI 활성 거의 없음. 결함 시 영향 0.
+    # WebSocket H0UNMKO0 구독 시점 *이전* VI 활성 종목 stale 회피 보장.
+    try:
+        from src.api.market_operation import inquire_vi_status_today
+        from src.engine.market_operation_monitor import seed_vi_active_from_rest
+        vi_seed = await inquire_vi_status_today()
+        seed_vi_active_from_rest(vi_seed)
+        logger.info("[market_op_boot_seed] vi_active=%d", len(vi_seed))
+    except Exception:
+        logger.exception("[market_op_boot_seed] REST 폴백 실패 graceful — WebSocket 수신만으로 충분")

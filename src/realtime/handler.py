@@ -187,7 +187,7 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
 
 
 async def _handle_market_op(tr_id: str, tr_key: str, payload: str) -> None:
-    """장운영정보(H0UNMKO0/H0STMKO0/H0NXMKO0) 메시지 — 보드 전환 이벤트.
+    """장운영정보(H0UNMKO0/H0STMKO0/H0NXMKO0) 메시지 — 보드 전환 + 종목별 VI/거래정지 이벤트.
 
     KIS 명세 기준 응답 필드(공통 — 통합/KRX/NXT 동일 구조):
       [0] TRHT_YN — 거래정지 여부
@@ -201,7 +201,12 @@ async def _handle_market_op(tr_id: str, tr_key: str, payload: str) -> None:
       [8] OVTM_VI_CLS_CODE — 시간외단일가VI적용구분코드
       [9] EXCH_CLS_CODE — 거래소 구분코드 (KRX/NXT)
 
-    SessionTracker가 _on_board 콜백을 통해 소비한다.
+    사이클 26 영속 (대표 종목 005930 보드 전환 SessionTracker 호출) +
+    사이클 149 (2026-06-16) 종목별 H0UNMKO0 구독 확장 시 record_market_op_event 호출.
+    domain-expert 자문 산출물 `_workspace/domain_consult/cycle149_h0unmko0_per_ticker_subscription.md`.
+
+    SessionTracker `_on_board` 콜백 분기 + 종목별 monitor record_market_op_event 분기
+    모두 try/except 4중 영속 (사이클 102 G-REJECT-1 callback 예외 raise 영속).
     """
     fields = payload.split("^")
     mkop_cls_code = fields[2] if len(fields) > 2 else ""
@@ -209,6 +214,23 @@ async def _handle_market_op(tr_id: str, tr_key: str, payload: str) -> None:
         "[%s] tr_key=%s, mkop_cls_code=%s, payload=%s",
         tr_id, tr_key, mkop_cls_code, payload[:140],
     )
+
+    # 사이클 149 (2026-06-16) — 종목별 VI/거래정지 state 갱신.
+    # 사이클 26 영속 = 005930 대표 구독 보드 전환 영역 보존 + 종목별 영역 확장.
+    # 자문 의제 5 채택 = VI/거래정지/종목상태 이상 3 영역 통합.
+    try:
+        from src.api.market_operation import parse_market_op_payload
+        from src.engine.market_operation_monitor import record_market_op_event
+
+        event = parse_market_op_payload(tr_key, payload)
+        record_market_op_event(event)
+    except Exception:
+        # graceful 영속 (사이클 88 G-REJECT 답습) — record 실패 시 보드 전환 영역 보호
+        logger.exception(
+            "[market_op_record_failed] tr_id=%s tr_key=%s graceful",
+            tr_id, tr_key,
+        )
+
     if _on_board:
         try:
             await _on_board(tr_key, mkop_cls_code, payload)

@@ -163,11 +163,40 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
             # mock/race 안전 폴백 영역 영구 영속 = 기존 60s 영속 (사이클 29 005935 보호 영속)
             return False
 
+    # 사이클 149 (2026-06-16) — VI/거래정지 stale 회피 hook.
+    # 의제 5 (자문 채택) = VI 활성 ∪ 거래정지 ∪ 종목상태 이상 ticker stale 판정 지연.
+    # `_is_within_grace` 패턴 답습 (사이클 135) + try/except 안전 폴백.
+    # domain-expert 자문 `_workspace/domain_consult/cycle149_h0unmko0_per_ticker_subscription.md`.
+    try:
+        from src.engine.market_operation_monitor import is_ticker_stale_excluded as _is_market_op_excluded
+    except Exception:
+        def _is_market_op_excluded(t: str) -> bool:  # type: ignore[no-redef]
+            return False
+
+    _excluded_for_log: list[str] = []
+
+    def _market_op_skip(t: str) -> bool:
+        """stale 회피 = True 시 stale 판정 지연 + 로그 emit."""
+        try:
+            if _is_market_op_excluded(t):
+                _excluded_for_log.append(t)
+                return True
+        except Exception:
+            return False
+        return False
+
     stale_tickers = sorted(
         t for t in subscribed
         if (now - ticker_last_tick.get(t, min_dt)) > threshold
         and not _is_within_grace(t)
+        and not _market_op_skip(t)
     )
+
+    if _excluded_for_log:
+        logger.info(
+            "[stale_skip_market_op] count=%d tickers=%s — VI/거래정지 stale 회피",
+            len(_excluded_for_log), _excluded_for_log[:20],
+        )
 
     if not stale_tickers:
         # 모두 fresh — 누적 retry 카운터 리셋 (회복 케이스)
@@ -371,10 +400,24 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
     threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
     min_dt = _dt_mod.min.replace(tzinfo=_KST_TZ)
 
+    # 사이클 149 (2026-06-16) — VI/거래정지 stale 회피 hook (`check_and_resubscribe_stale` 답습).
+    try:
+        from src.engine.market_operation_monitor import is_ticker_stale_excluded as _is_market_op_excluded
+    except Exception:
+        def _is_market_op_excluded(t: str) -> bool:  # type: ignore[no-redef]
+            return False
+
+    def _market_op_skip(t: str) -> bool:
+        try:
+            return bool(_is_market_op_excluded(t))
+        except Exception:
+            return False
+
     # sorted 로 결정적 순서 보장 — cap 적용 시 동일 입력에 동일 출력
     stale_tickers = sorted(
         t for t, last in ticker_last_tick.items()
         if (now - last if isinstance(last, datetime) else now - min_dt) > threshold
+        and not _market_op_skip(t)
     )
 
     if not stale_tickers:

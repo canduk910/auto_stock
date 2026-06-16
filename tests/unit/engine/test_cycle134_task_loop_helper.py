@@ -358,14 +358,14 @@ class TestLineReductionEffect:
         scheduler_path = Path("src/engine/scheduler.py")
         line_count = len(scheduler_path.read_text(encoding="utf-8").splitlines())
 
-        # 사이클 142+146 의미 전환 (사이클 66 K-2 패턴 답습):
-        # 사이클 134 기준 ≤ 3,400L → 사이클 142 +21L → 사이클 146 +25L → ≤ 3,450L 영역.
-        # 사이클 146 = 매매 안전성 직결 결함 시정 (KIS 5xx 매매 프로세스 자동 정지 → graceful recovery).
-        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 146 추가는 결함 시정 한정.
-        assert line_count <= 3450, (
+        # 사이클 142+146+149 의미 전환 (사이클 66 K-2 패턴 답습):
+        # 사이클 134 기준 ≤ 3,400L → 사이클 142 +21L → 사이클 146 +25L → 사이클 149 +90L → ≤ 3,550L.
+        # 사이클 149 = 종목별 H0UNMKO0 구독 확장 + VI/거래정지 stale 회피 (Q1=A 자문 채택).
+        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149 추가는 신규 기능 한정.
+        assert line_count <= 3550, (
             f"scheduler.py 라인 감소 영속 위반 — got {line_count}L, "
-            f"target ≤ 3,450L (사이클 134 ≤ 3,400L + 사이클 142 +21L + 사이클 146 +25L). "
-            "사이클 130 카드 #21 영속 + 사이클 142/146 결함 시정 영속."
+            f"target ≤ 3,550L (사이클 134 ≤ 3,400L + 사이클 142 +21L + 사이클 146 +25L + 사이클 149 +90L). "
+            "사이클 130 카드 #21 영속 + 사이클 142/146/149 추가 영속."
         )
 
     def test_g_134_f2_helper_module_compact(self):

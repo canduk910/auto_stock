@@ -2177,6 +2177,17 @@ class TradingScheduler:
                 except Exception:
                     logger.exception("_evaluate_universe_guard 실패 — 다음 사이클 자연 재시도")
 
+                # 사이클 149 (2026-06-16) — 종목별 H0UNMKO0 구독 확장 5분 delta hook.
+                # 보유/익일청산 (HIGH) + 전략 후보 (LOW cap=20) 합집합 종목별 구독.
+                # 자문 의제 2/3 (자문 채택) = 메인 세션 단일 + bypass_limit=True (HIGH) / cap=20 (LOW).
+                # 본체 예외는 흡수 — 다음 사이클 자연 재시도.
+                try:
+                    await self._subscribe_market_operation_tickers(new_set)
+                except Exception:
+                    logger.exception(
+                        "_subscribe_market_operation_tickers 실패 — 다음 사이클 자연 재시도"
+                    )
+
                 # 사이클 37 (2026-05-21) — KIS 실제 last_cntg_hour 캐시 갱신.
                 # stale r≥2 종목 대상 inquire_ccnl 호출 + TTL 5분 + cap 20.
                 # UI 에서 last_tick vs last_cntg_hour 비교로 WS 구독 문제 진단.
@@ -2904,6 +2915,79 @@ class TradingScheduler:
         from src.engine import stale_manager
         await stale_manager.evaluate_universe_guard(self, candidate_tickers)
 
+    async def _subscribe_market_operation_tickers(
+        self, candidate_tickers: set[str], *, cap: int = 20,
+    ) -> int:
+        """사이클 149 (2026-06-16) — 종목별 H0UNMKO0 구독 확장.
+
+        보유/익일청산 (HIGH) + 전략 후보 (LOW cap=20) 합집합 종목별 구독.
+        메인 세션 단일 + bypass_limit=True (자문 의제 2/3 자문 채택).
+
+        domain-expert 자문 산출물:
+            `_workspace/domain_consult/cycle149_h0unmko0_per_ticker_subscription.md`
+
+        영속 의무:
+        - 의제 2: H0UNMKO0 LMS 한도 41 영역 = bypass_limit=True 가드 의존 (사이클 17 영속)
+        - 의제 3: HIGH 절대 보장 + LOW cap=20 (사이클 66 K-10 패턴 답습)
+        - 사이클 26 005930 대표 구독 영역 보존 (시장 단위 신호 영속)
+
+        매매 안전성 무영향 (사이클 38 명문화 영속):
+        - WebSocket 시세 TICK 영역 변경 0
+        - `risk.on_tick` / `order_engine` / `auth` 변경 0
+        """
+        from src.api.market_operation import MARKET_OP_TR_ID
+        from src.realtime.websocket import kis_ws
+
+        if kis_ws is None or not getattr(kis_ws, "_ws", None):
+            return 0
+
+        # HIGH = 보유 + 익일청산 (절대 보장)
+        high_tickers: set[str] = set()
+        try:
+            for s in self.registry.all():
+                try:
+                    high_tickers.update(s.state.positions.keys())
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        try:
+            high_tickers.update(t for (t, _sid) in self._pending_next_day_clear)
+        except Exception:
+            pass
+
+        # LOW = 전략 후보 (cap=20 sorted 결정적 순서)
+        low_tickers = sorted(set(candidate_tickers) - high_tickers)[:cap]
+
+        # 메인 세션 단일 구독 (보조 세션 절대 금지, 자문 의제 2)
+        subscribed = 0
+        for ticker in sorted(high_tickers):
+            try:
+                # HIGH = bypass_limit=True 강제 (사이클 17 OPSP0002 backoff 영속)
+                await kis_ws.subscribe(MARKET_OP_TR_ID, ticker, bypass_limit=True)
+                subscribed += 1
+                await asyncio.sleep(0.05)  # Rate Limit 보호 (사이클 17 LMS chain)
+            except Exception:
+                logger.exception(
+                    "[market_op_subscribe] HIGH 구독 실패 ticker=%s graceful", ticker,
+                )
+
+        for ticker in low_tickers:
+            try:
+                await kis_ws.subscribe(MARKET_OP_TR_ID, ticker, bypass_limit=False)
+                subscribed += 1
+                await asyncio.sleep(0.05)
+            except Exception:
+                logger.exception(
+                    "[market_op_subscribe] LOW 구독 실패 ticker=%s graceful", ticker,
+                )
+
+        logger.info(
+            "[market_op_subscribe_summary] high=%d low=%d total_subscribed=%d cap=%d",
+            len(high_tickers), len(low_tickers), subscribed, cap,
+        )
+        return subscribed
+
     async def _refresh_stale_ccnl_cache(
         self, candidate_tickers: list[str], *, cap: int = 20,
     ) -> None:
@@ -3429,6 +3513,15 @@ class TradingScheduler:
         # 사이클 65 (2026-06-06) — 거래대금 필터 daily_state reset 동행
         from src.engine import scanner as _scanner_mod
         _scanner_mod.reset_trade_amount_filter_daily_state()
+
+        # 사이클 149 (2026-06-16) — 종목별 H0UNMKO0 state reset 동행.
+        # 사이클 88 G-REJECT 영속 답습 = 모든 dict 일일 0 초기화 의무.
+        # `_vi_active_tickers` + `_halt_active_tickers` + `_market_op_last_event` 3 dict 일괄 clear.
+        try:
+            from src.engine import market_operation_monitor as _market_op_mod
+            _market_op_mod.reset_market_op_state()
+        except Exception:
+            logger.exception("market_operation_monitor.reset_market_op_state 실패 graceful")
 
         logger.info("일간 상태 초기화 완료 (scanner 캐시 clear 포함)")
 
