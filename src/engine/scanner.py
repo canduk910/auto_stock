@@ -2660,13 +2660,14 @@ async def _stock_master_master_load_once(force: bool = True) -> dict:
             continue
 
         # 사이클 153 — KOSPI200 / KOSDAQ150 지수 편입 판정 영역 영구 영속
-        # KOSPI 분기: kospi200_apnt_cls_code.strip() != "" → is_kospi200=True (Q1=A 영속)
-        # KOSDAQ 분기: ksq150_nmix_yn == "Y" → is_kosdaq150=True (Q1=A 영속)
+        # 사이클 154 hotfix (2026-06-16) — kospi200_apnt_cls_code 정본 코드값 시정
+        # 운영 DB 실측: "0"=1,597 미편입 / "1"~"9","A","B"=199 편입 ≈ KOSPI200 정합
+        # 결함: bool("0")=True → 사이클 153 영역 1,596 종목 잘못 편입 (1,796 과대)
         is_kospi200 = False
         is_kosdaq150 = False
         if source == "kospi":
             code_val = (record.get("kospi200_apnt_cls_code") or "").strip()
-            is_kospi200 = bool(code_val)
+            is_kospi200 = code_val not in ("", "0")
         elif source == "kosdaq":
             is_kosdaq150 = (record.get("ksq150_nmix_yn") or "").strip() == "Y"
 
