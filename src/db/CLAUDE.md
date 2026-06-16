@@ -104,7 +104,7 @@ Supabase (PostgreSQL) CRUD 모듈.
 
 ## strategy_funnel.py — 조건검색 단계별 추적 (사이클 34, 2026-05-21)
 
-- `insert_snapshot(target_date, strategy_id, step_no, step_name, survived_count, survived_tickers, excluded_count, excluded_sample, step_conditions=None)`: 단일 단계 snapshot INSERT. `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE — 같은 영업일 다회 trigger 가능. **사이클 41 (2026-05-22)**: `survived_tickers: list[str \| dict]` 호환 (string 사이클 34 형식 + dict `{ticker, name}` 사이클 41 형식), `excluded_sample: list[dict]` (`{ticker, name, reason}` 수치 포함 사유), `step_conditions` 옵셔널 (단계 조건 명시 — UI 툴팁). DB JSONB 스키마는 변경 없음 (native dict 지원)
+- `insert_snapshot(target_date, strategy_id, step_no, step_name, survived_count, survived_tickers, excluded_count, excluded_sample, step_conditions=None)`: 단일 단계 snapshot **UPSERT** (사이클 145 (2026-06-16) — `.upsert(on_conflict="target_date,strategy_id,step_no")` 전환 영구 영속). 사이클 34 시점 = `.insert(row)` + UNIQUE `(target_date, strategy_id, step_no, snapshot_at)` → snapshot_at 매번 갱신 → 중복 INSERT 가능 → 운영 DB 6/15 BFB step_no=1 = 8 row 결함. 사이클 145 시정 = `.upsert(on_conflict=...)` + migration 035 영역 영구 영속 UNIQUE 변경 (snapshot_at 키 폐기) → 같은 `(target_date, strategy_id, step_no)` 영역 영구 영속 = 최신 값 1 row. snapshot_at = supabase DEFAULT now() UPSERT 시 자동 갱신. **사이클 41 (2026-05-22)**: `survived_tickers: list[str \| dict]` 호환 (string 사이클 34 형식 + dict `{ticker, name}` 사이클 41 형식), `excluded_sample: list[dict]` (`{ticker, name, reason}` 수치 포함 사유), `step_conditions` 옵셔널 (단계 조건 명시 — UI 툴팁). DB JSONB 스키마는 변경 없음 (native dict 지원)
 - `list_snapshots(target_date, strategy_id)`: 특정 영업일 + 전략 의 모든 단계 (`step_no` ASC)
 - `list_recent_by_strategy(strategy_id, days=7)`: 최근 N영업일 추이
 - **JSONB cap**: `survived_tickers` 200건 / `excluded_sample` 20건 자동 적용 (응답·저장 크기 보호)
@@ -202,7 +202,7 @@ KIS 공식 일일 마스터 파일 (`kospi_code.mst` / `kosdaq_code.mst`) 영역
 - `trade_history.trade_type`: BUY / SELL
 - `trade_history` 부분 UNIQUE 인덱스 `(ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND != ''` (migration 029, 사이클 30)
 - `parameter_recommendations.status`: pending → applied / partial / rejected / expired / applied_auto
-- `strategy_funnel_snapshots` (migration 030, 사이클 34): `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE + JSONB 필드 2개
+- `strategy_funnel_snapshots` (migration 030, 사이클 34): UNIQUE 영역 영구 영속 변경 — `(target_date, strategy_id, step_no, snapshot_at)` (사이클 34) → `(target_date, strategy_id, step_no)` (**migration 035 사이클 145, snapshot_at 키 폐기**) + JSONB 필드 2개
 
 ## TIMESTAMPTZ 사실 명문화 (사이클 69, 2026-06-08)
 

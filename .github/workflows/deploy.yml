@@ -17,12 +17,35 @@ jobs:
     steps:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: SUPABASE_DB_URL
           script: |
             cd ~/auto_stock
             git pull origin main
+
+            # 사이클 145 (2026-06-16) — Supabase migration 자동 적용 영구 영속 (결함 1 시정).
+            # 사이클 129 commit `df8cf82` = production 배포됐으나 migration 034 미적용 silent
+            # 결함 (6/13~6/16 매일 16:30 KST PGRST204 master_raw 컬럼 부재 결함).
+            # 시정 = 모든 push 후 자동 migration apply (silent 결함 영구 차단).
+            # graceful = SUPABASE_DB_URL secret 부재 시 skip + psql 부재 시 skip
+            #          (운영자 수동 적용 영역 영구 영속 fallback).
+            if [ -n "$SUPABASE_DB_URL" ] && command -v psql >/dev/null 2>&1; then
+              echo "[deploy] Supabase migration 자동 적용 시작"
+              for migration in supabase/migrations/*.sql; do
+                if [ -f "$migration" ]; then
+                  echo "[deploy] apply: $migration"
+                  psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=0 -f "$migration" 2>&1 | tail -3 || true
+                fi
+              done
+              echo "[deploy] Supabase migration 자동 적용 완료"
+            else
+              echo "[deploy] SUPABASE_DB_URL secret 또는 psql 부재 — migration 자동 적용 skip (graceful)"
+            fi
+
             docker compose -f docker-compose.prod.yml up --build -d --remove-orphans
             docker image prune -f

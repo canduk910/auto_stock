@@ -46,7 +46,7 @@ async def insert_snapshot(
     excluded_count: int = 0,
     step_conditions: str | None = None,  # 사이클 41 — 단계 조건 (UI 툴팁)
 ) -> dict | None:
-    """1단계 snapshot INSERT.
+    """1단계 snapshot UPSERT (사이클 145 — UPSERT 전환 영구 영속).
 
     Args:
         target_date: 영업일 (KST).
@@ -66,11 +66,17 @@ async def insert_snapshot(
         step_conditions: 단계 필터 조건 (UI 툴팁용, 사이클 41). DB 저장 안 함 (API 응답만).
 
     Returns:
-        삽입된 row dict (id 포함) 또는 None (실패 시).
+        upsert 된 row dict (id 포함) 또는 None (실패 시).
 
     Note:
-        UNIQUE 충돌 (`target_date + strategy_id + step_no + snapshot_at`) 시 None 반환.
-        snapshot_at 은 supabase 기본값 `now()` — 동일 영업일 다회 trigger 가능.
+        사이클 145 (2026-06-16) — UPSERT 전환 영구 영속 (결함 3 시정).
+        - 사이클 34 시점 = `.insert(row)` + UNIQUE `(target_date, strategy_id, step_no, snapshot_at)`
+          → snapshot_at 매번 갱신 → 중복 INSERT 가능 → 운영 DB 영역 영구 영속 6/15 BFB step_no=1 = 8 row 결함.
+        - 사이클 145 시정 = `.upsert(on_conflict="target_date,strategy_id,step_no")` 전환
+          + migration 035 영역 영구 영속 UNIQUE 변경 (snapshot_at 키 폐기).
+        - 같은 (target_date, strategy_id, step_no) 영역 영구 영속 = 최신 값 영구 영속 1 row.
+        - snapshot_at 영역 영구 영속 = supabase DEFAULT now() (UPSERT 시 자동 갱신).
+        - 매매 안전성 무영향 (진단/추적 영역 한정).
     """
     if not strategy_id:
         raise ValueError("strategy_id 필수")
@@ -81,6 +87,8 @@ async def insert_snapshot(
     if survived_count is None:
         survived_count = len(survived)
 
+    # 사이클 145 — UPSERT 영역 영구 영속 (id 영역 영구 영속 conflict 시 EXCLUDED.id 영구 영속 유지).
+    # snapshot_at = supabase DEFAULT now() (사이클 145 — UPSERT 시 자동 갱신, 최신 시각만 영구 영속).
     row = {
         "id": str(uuid.uuid4()),
         "target_date": target_date.isoformat(),
@@ -94,14 +102,19 @@ async def insert_snapshot(
     }
 
     try:
+        # 사이클 145 — `.upsert(on_conflict="target_date,strategy_id,step_no")` 영역 영구 영속.
+        # migration 035 UNIQUE = (target_date, strategy_id, step_no) 정합 영구 영속.
         result = await asyncio.to_thread(
-            lambda: supabase.table(TABLE_NAME).insert(row).execute()
+            lambda: supabase.table(TABLE_NAME).upsert(
+                row,
+                on_conflict="target_date,strategy_id,step_no",
+            ).execute()
         )
         data = getattr(result, "data", None) or []
         return data[0] if data else None
     except Exception as exc:
         logger.warning(
-            "strategy_funnel insert 실패 — target=%s strategy=%s step=%d err=%s",
+            "strategy_funnel upsert 실패 — target=%s strategy=%s step=%d err=%s",
             target_date, strategy_id, step_no, exc,
         )
         return None

@@ -346,10 +346,29 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
     # raw merge — CTPF1002R 67 컬럼 영속 + FHKST01010100 시세 5 키 보강 (사이클 108)
     # CTPF1002R 영역 우선, FHKST01010100 의 5 키만 추가 병합 (기존 키 덮어쓰기 금지)
     # hts_avls: 시가총액 (단위: 백만원) — stock_master list_by_filter 시총 필터링에 활용
+    #
+    # 사이클 145 (2026-06-16) — 거래량/거래대금 0 덮어쓰기 금지 영구 영속 (결함 2 시정):
+    # 운영 사례 = 2026-06-16 07:54~07:59 KST = boot force=True 시점 (장 시작 *전*).
+    # FHKST01010100 응답 영역 = acml_tr_pbmn=0 + acml_vol=0 정상 (장 시작 전 거래 없음).
+    # 시정 전 = merge 영역에서 0 값 영역 덮어쓰기 → 기존 raw 영역 영구 영속 acml_tr_pbmn 손실
+    #          → list_by_filter (`acml_tr_pbmn ≥ min_trade_amount=20_000_000_000`) 0건 silent.
+    # 시정 후 = 거래량/거래대금 0 값 영역 영구 영속 merge 영역 skip → 기존 raw 키 보존
+    #          (전일 영업일 영역 영구 영속 거래대금 보존 → list_by_filter 정상 작동).
+    # 사이클 81 G-AST1 영구 영속 강화 (raw 덮어쓰기 금지 영역 영구 영속) + 사이클 88 G-REJECT graceful.
     merged_raw = dict(ctpf_output)
     for key in ("acml_tr_pbmn", "lstn_stcn", "acml_vol", "prdy_vrss", "hts_avls"):
         if key in price_data:
-            merged_raw[key] = price_data[key]
+            value = price_data[key]
+            # 사이클 145 — 거래량/거래대금 0 값 영역 영구 영속 = 장 시작 전 영역 영구 영속 보호
+            if key in ("acml_tr_pbmn", "acml_vol"):
+                try:
+                    numeric_value = int(str(value).replace(",", "") or 0)
+                    if numeric_value == 0:
+                        # 0 값 영역 영구 영속 = merge 영역 skip → 기존 raw 키 영역 영구 영속 보존
+                        continue
+                except (ValueError, TypeError):
+                    pass  # 비숫자 영역 = 정상 영역 영구 영속 그대로 merge
+            merged_raw[key] = value
 
     cptt = (ctpf_output.get("cptt_trad_tr_psbl_yn") or "").strip().upper()
     nxt_stop = (ctpf_output.get("nxt_tr_stop_yn") or "").strip().upper()

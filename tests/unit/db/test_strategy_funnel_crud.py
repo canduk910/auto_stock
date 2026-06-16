@@ -43,7 +43,7 @@ def _patch_supabase(monkeypatch, rows_to_return: list[dict] | None = None,
     fluent.order.return_value = fluent
     fluent.limit.return_value = fluent
     # SELECT execute → rows_to_return
-    # INSERT execute → insert_response_data
+    # INSERT/UPSERT execute → insert_response_data (사이클 145 UPSERT 의미 전환 영역 영구 영속)
     insert_call_count = [0]
 
     def _exec():
@@ -56,6 +56,8 @@ def _patch_supabase(monkeypatch, rows_to_return: list[dict] | None = None,
         return fluent
 
     fluent.insert = MagicMock(side_effect=_insert_wrapper, return_value=fluent)
+    # 사이클 145 — UPSERT 영역 영구 영속 의미 전환 (사이클 66 K-2 패턴 답습).
+    fluent.upsert = MagicMock(side_effect=_insert_wrapper, return_value=fluent)
     fluent.execute = MagicMock(side_effect=_exec)
 
     supabase_mock = MagicMock()
@@ -124,7 +126,7 @@ async def test_insert_snapshot_caps_survived_tickers_at_200(monkeypatch):
     )
 
     # insert 호출 args 검증
-    insert_args = fluent.insert.call_args.args[0]
+    insert_args = fluent.upsert.call_args.args[0]
     assert len(insert_args["survived_tickers"]) == 200, (
         f"cap 200 미적용 — {len(insert_args['survived_tickers'])}건 저장"
     )
@@ -151,7 +153,7 @@ async def test_insert_snapshot_caps_excluded_sample_at_20(monkeypatch):
         excluded_count=30,
     )
 
-    insert_args = fluent.insert.call_args.args[0]
+    insert_args = fluent.upsert.call_args.args[0]
     assert len(insert_args["excluded_sample"]) == 20
 
 

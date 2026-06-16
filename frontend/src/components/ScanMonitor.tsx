@@ -364,8 +364,11 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
         const summaryCount = isSwing
           ? swingCount
           : (showMomentumScan ? (scan?.filtered_count ?? 0) : selectedBreakoutCount)
+        // 사이클 145 (2026-06-16) — UI 라벨 명확화 (결함 4 시정).
+        // 사용자 verbatim "단계가 늘어난 것처럼 보여" 영역 영구 영속 = 신고가 후보 카운트 영역이
+        // donchian 후보 영역 영구 영속이나 운영자 오인 발생 → 라벨 영역 영구 영속 명확화.
         const summaryLabel = isSwing
-          ? '신고가 후보'
+          ? '신고가 후보 (donchian)'
           : (isAll ? '모멘텀 필터' : '필터링')
 
         return (
