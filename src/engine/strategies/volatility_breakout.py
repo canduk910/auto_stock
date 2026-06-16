@@ -287,6 +287,10 @@ class VolatilityBreakoutStrategy(StrategyBase):
         KIS API 직접 호출 0건.
         hts_avls (시가총액, 백만원 단위) 는 사이클 108 inquire_stock_basics 5-key merge 에서
         stock_master.raw 에 적재됨.
+
+        사이클 148 (2026-06-16) — PriceFilter 후처리 추가 (사이클 64 scanner 정합).
+        사용자 결정 Q2=C: system_config price_filter_min/max 단일 source 키 재사용.
+        사이클 32 R4 답습 — 보유 종목 절대 보호. 매매 안전성 무영향 (사이클 38 명문화).
         """
         from src.db import stock_master as _sm_mod
         from src.engine.scanner import ETF_KEYWORDS, ticker_names
@@ -319,6 +323,9 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 ticker_names[ticker] = name
             filtered.append(ticker)
 
+        # 사이클 148 — PriceFilter 후처리 (PriceFilter 단일 source, Q2=C 영속)
+        filtered = await self._apply_price_filter_in_prepare(filtered)
+
         logger.info(
             "변동성돌파 유니버스 확정: %d/%d종목 (stock_master DB, 시총 %d억+, 거래대금 %d억+)",
             len(filtered), len(rows), min_mcap // 100_000_000, min_trade // 100_000_000,
@@ -342,6 +349,66 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 logger.exception("system_logs 기록 실패")
 
         return filtered
+
+    async def _apply_price_filter_in_prepare(self, tickers: list[str]) -> list[str]:
+        """VB prepare 영역 가격 필터 후처리 (사이클 148).
+
+        사이클 64 scanner `_apply_price_filter` 패턴 답습 + PriceFilter 단일 source.
+        보유 종목 절대 보호 (사이클 32 R4 답습) + raw.bfdy_clpr miss graceful 통과.
+
+        - PriceFilter 비활성 (min=0, max=0) → 전체 통과 (회귀 보존)
+        - 보유 종목 → 무조건 통과 (사이클 30 005935 매매 안전성 영속)
+        - raw.bfdy_clpr miss → graceful 통과 (사이클 64 답습)
+        - min_price > 0 + bfdy_clpr < min_price → 차단
+        - max_price > 0 + bfdy_clpr > max_price → 차단 (운영 실증 6/16)
+        """
+        from src.db import stock_master as _sm_mod
+        from src.db.system_config import get_price_filter
+
+        pf = await get_price_filter()
+        if not pf.is_active:
+            return tickers
+
+        # 보유 종목 절대 보호 (사이클 32 R4 + 사이클 64 Q1 옵션 D 답습)
+        protected: set[str] = set()
+        try:
+            from src.engine import scanner as _scanner_mod
+            protected = _scanner_mod._collect_protected_tickers_for_scanner()
+        except Exception:
+            logger.debug(
+                "[vb_price_filter_prepare] protected_tickers 조회 실패 graceful",
+                exc_info=True,
+            )
+
+        survivors: list[str] = []
+        for ticker in tickers:
+            if ticker in protected:
+                survivors.append(ticker)
+                continue
+            prdy_clpr = 0
+            try:
+                basics = await _sm_mod.get(ticker)
+                if basics and basics.raw:
+                    raw_val = basics.raw.get("bfdy_clpr", 0)
+                    if raw_val:
+                        prdy_clpr = int(raw_val)
+            except Exception:
+                logger.debug(
+                    "[vb_price_filter_prepare] stock_master 조회 실패 graceful: %s",
+                    ticker, exc_info=True,
+                )
+
+            if prdy_clpr <= 0:
+                # graceful 통과 (사이클 64 Q2 답습 — 신규 상장 영구 차단 방지)
+                survivors.append(ticker)
+                continue
+
+            below_min = pf.min_price > 0 and prdy_clpr < pf.min_price
+            above_max = pf.max_price > 0 and prdy_clpr > pf.max_price
+            if not (below_min or above_max):
+                survivors.append(ticker)
+
+        return survivors
 
     def get_scanned_tickers(self) -> list[str]:
         """스캔된 종목 리스트를 반환한다 (WebSocket 구독용)."""
