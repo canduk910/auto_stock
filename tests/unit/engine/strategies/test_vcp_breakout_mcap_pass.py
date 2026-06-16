@@ -29,27 +29,31 @@ def test_empty_scan_stats_has_mcap_pass_key():
 
 @pytest.mark.asyncio
 async def test_mcap_pass_increments_when_mcap_passes(monkeypatch):
-    """시총 통과 종목이 있을 때 mcap_pass 카운터가 증가해야 한다."""
+    """시총 통과 종목이 있을 때 mcap_pass 카운터가 증가해야 한다.
+
+    사이클 157 (2026-06-17) 의미 전환 영구 영속 — VCP `_scan_universe()` 영역이
+    `list_by_filter(is_kospi200=True, is_kosdaq150=True, min_market_cap=...)` 호출 영구 영속.
+    list_by_filter 가 이미 시총 필터링 → 결과 전체에 mcap_pass = len(rows) 영구 영속.
+    """
     strat = _make_strat()
     strat.config.params["min_market_cap"] = 1  # 최소 시총 기준 (대부분 통과)
     strat.config.params["max_scan_stocks"] = 5
 
-    # KOSPI200/KOSDAQ150 고정 유니버스 중 일부만 fake
-    monkeypatch.setattr(
-        "src.engine.scanner.KOSPI_200_TICKERS", ["005930", "000660"]
-    )
-    monkeypatch.setattr(
-        "src.engine.scanner.KOSDAQ_150_TICKERS", []
-    )
+    # 사이클 157 — list_by_filter mock (사이클 153 donchian 패턴 답습)
+    async def fake_list_by_filter(**kwargs):
+        return [
+            {"ticker": "005930", "name": "삼성전자", "raw": {}},
+            {"ticker": "000660", "name": "SK하이닉스", "raw": {}},
+        ]
 
-    async def fake_detail(ticker):
-        return {
-            "stck_prpr": "80000",
-            "lstn_stcn": "5969782550",  # 충분한 시총
-            "hts_kor_isnm": "삼성전자",
-        }
+    monkeypatch.setattr("src.db.stock_master.list_by_filter", fake_list_by_filter)
 
-    monkeypatch.setattr("src.api.condition.fetch_stock_detail", fake_detail)
+    # 가격 필터 비활성 mock
+    from src.db.system_config import PriceFilter
+    async def fake_get_price_filter():
+        return PriceFilter(min_price=0, max_price=0)
+
+    monkeypatch.setattr("src.db.system_config.get_price_filter", fake_get_price_filter)
 
     await strat._scan_universe()
     assert strat._scan_stats["mcap_pass"] >= 1

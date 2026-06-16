@@ -47,14 +47,16 @@ logger = logging.getLogger(__name__)
 FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "코스피200+코스닥150 합집합"),
     FunnelStage(2, "시총 ≥ 1,000억"),
-    FunnelStage(3, "일봉 fetch + 추세필터"),
+    # 사이클 157 (2026-06-17) — 1단계 진입 차단 13건 step 신규 영구 영속 → 9단계.
+    FunnelStage(3, "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)"),
+    FunnelStage(4, "일봉 fetch + 추세필터"),
     # 사이클 48 — config 50/60/120 (기존 50/150/200). PR #15 ①: 장기EMA(120) 는 KIS 100일
     # 한도 가드로 런타임 effective ~75 로 캡됨 → 실효 정렬 50/60/~75. step_conditions 에 명시.
-    FunnelStage(4, "단기/중기/장기 EMA 정렬"),
-    FunnelStage(5, "베이스 자동 검출"),
-    FunnelStage(6, "Pullback 점진 수축"),
-    FunnelStage(7, "거래량 수축"),
-    FunnelStage(8, "최종 prepared"),
+    FunnelStage(5, "단기/중기/장기 EMA 정렬"),
+    FunnelStage(6, "베이스 자동 검출"),
+    FunnelStage(7, "Pullback 점진 수축"),
+    FunnelStage(8, "거래량 수축"),
+    FunnelStage(9, "최종 prepared"),
 )
 
 
@@ -183,6 +185,17 @@ class VcpBreakoutStrategy(StrategyBase):
             FUNNEL_STAGES[1],
             survived=tickers,
             step_conditions=f"시총 ≥ {p['min_market_cap']/100_000_000:.0f}억",
+        )
+
+        # 사이클 157 — step 3: 1단계 진입 차단 13건 (master_raw 7 + raw 6)
+        tickers, master_block_excluded = await self._apply_master_block_filter_in_prepare(tickers)
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[2],
+            survived=tickers,
+            step_conditions=(
+                "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)"
+            ),
+            excluded=master_block_excluded[:20],
         )
 
         if not tickers:
@@ -387,9 +400,9 @@ class VcpBreakoutStrategy(StrategyBase):
                 logger.warning("VCP prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 47 — FUNNEL_STAGES 위임 (사이클 39+41 hook 동작 동일)
+        # 사이클 47 + 157 — FUNNEL_STAGES 위임 (사이클 157 step 3 master block 후 인덱스 +1)
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[2],
+            FUNNEL_STAGES[3],
             survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
             step_conditions=(
                 f"KIS 일봉 ≥ effective_ema_long"
@@ -404,7 +417,7 @@ class VcpBreakoutStrategy(StrategyBase):
             ema_long, KIS_DAILY_CANDLES_MAX - uptrend_days - 5
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[3],
+            FUNNEL_STAGES[4],
             survived=trend_filter_pass_tickers, excluded=trend_filter_excluded,
             step_conditions=(
                 f"종가 > {p['ema_short']}EMA > {p['ema_mid']}EMA > "
@@ -413,12 +426,12 @@ class VcpBreakoutStrategy(StrategyBase):
             ),
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[4],
+            FUNNEL_STAGES[5],
             survived=base_pass_tickers, excluded=base_excluded,
             step_conditions=f"베이스 길이 {p['base_min_days']}~{p['base_max_days']}일 + 깊이 ≤ {p['base_depth_pct']*100:.0f}%",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[5],
+            FUNNEL_STAGES[6],
             survived=pullback_pass_tickers, excluded=pullback_excluded,
             step_conditions=(
                 f"{p['pullback_count_min']}~{p['pullback_count_max']}회 회수 + "
@@ -426,12 +439,12 @@ class VcpBreakoutStrategy(StrategyBase):
             ),
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[6],
+            FUNNEL_STAGES[7],
             survived=volume_contraction_pass_tickers, excluded=volume_contraction_excluded,
             step_conditions=f"마지막 5일 평균 < 베이스 직전 20일 평균 × {p['volume_contraction_ratio']*100:.0f}%",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[7],
+            FUNNEL_STAGES[8],
             survived=final_prepared_tickers,
             step_conditions="모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
         )
@@ -720,44 +733,89 @@ class VcpBreakoutStrategy(StrategyBase):
         return sum(trs) / period
 
     async def _scan_universe(self) -> list[str]:
-        """코스피200 + 코스닥150 고정 유니버스 (donchian 컨벤션 재사용)."""
-        from src.api.condition import fetch_stock_detail
-        from src.engine.scanner import (
-            KOSDAQ_150_TICKERS, KOSPI_200_TICKERS, STATIC_TICKER_NAMES, ticker_names,
-        )
+        """stock_master DB 기반 KOSPI200 + KOSDAQ150 유니버스 (사이클 157 hardcoded 영역 폐기).
+
+        사이클 157 Q1 (2026-06-17) — KOSPI_200_TICKERS/KOSDAQ_150_TICKERS hardcoded list
+        + fetch_stock_detail (124 KIS 호출/일) 폐기. 사이클 153 donchian 패턴 답습.
+        KIS API 호출 0건 (사이클 17 KIS LMS chain 안전 마진 강화).
+
+        사이클 153 영속 — `list_by_filter(is_kospi200=True, is_kosdaq150=True)`
+        OR 합집합 영역 영구 영속 (FUNNEL_STAGES[0] "코스피200+코스닥150 합집합" 정합).
+        """
+        from src.db import stock_master as _sm_mod
+        from src.engine.scanner import ETF_KEYWORDS, ticker_names
 
         p = self.config.params
         min_mcap = p["min_market_cap"]
         max_stocks = p["max_scan_stocks"]
-        all_tickers = list(dict.fromkeys(list(KOSPI_200_TICKERS) + list(KOSDAQ_150_TICKERS)))
-        self._scan_stats["universe_candidates"] = len(all_tickers)
+
+        try:
+            # 사이클 157 — 사이클 153 패턴 답습 (KOSPI200 + KOSDAQ150 OR 합집합)
+            rows = await _sm_mod.list_by_filter(
+                min_market_cap=min_mcap,
+                min_trade_amount=0,  # VCP 는 거래대금 필터 미사용 (시총 단독)
+                is_kospi200=True,
+                is_kosdaq150=True,
+                limit=max_stocks,
+            )
+        except Exception:
+            logger.exception(
+                "VCP stock_master.list_by_filter 호출 실패 graceful — 빈 list 반환"
+            )
+            self._scan_stats["universe_candidates"] = 0
+            self._scan_stats["universe_filtered"] = 0
+            return []
+
+        self._scan_stats["universe_candidates"] = len(rows)
+        self._scan_stats["mcap_pass"] = len(rows)  # 사이클 23 P1-3 (list_by_filter 가 이미 mcap 컷)
 
         filtered: list[str] = []
-        for ticker in all_tickers:
-            if len(filtered) >= max_stocks:
-                break
-            try:
-                detail = await fetch_stock_detail(ticker)
-                price = int(detail.get("stck_prpr", "0"))
-                listed = int(detail.get("lstn_stcn", "0"))
-                mcap = price * listed
-                name = (detail.get("hts_kor_isnm") or "").strip()
-                if not name:
-                    name = STATIC_TICKER_NAMES.get(ticker, "")
-                if name:
-                    ticker_names[ticker] = name
-                if mcap >= min_mcap:
-                    self._scan_stats["mcap_pass"] += 1  # 사이클 23 P1-3
-                    filtered.append(ticker)
-            except Exception:
+        for row in rows:
+            ticker = row.get("ticker", "")
+            # 종목코드 형식 검증 — ETF·ETN·신주인수권 등 알파벳 포함 코드 차단
+            if not ticker or not (len(ticker) == 6 and ticker.isdigit()):
                 continue
+            name = row.get("name", "") or (row.get("raw") or {}).get("prdt_abrv_name", "")
+            if any(kw in name for kw in ETF_KEYWORDS):
+                continue
+            if name:
+                ticker_names[ticker] = name
+            filtered.append(ticker)
 
         self._scan_stats["universe_filtered"] = len(filtered)
+        logger.info(
+            "VCP 유니버스 확정: %d/%d종목 (stock_master DB, 시총 %d억+)",
+            len(filtered), len(rows), min_mcap // 100_000_000,
+        )
 
         # 사이클 151 — PriceFilter 후처리 (사이클 148 VB 영역 답습, Q2=C 단일 source 영속)
         filtered = await self._apply_price_filter_in_prepare(filtered)
 
         return filtered
+
+    async def _apply_master_block_filter_in_prepare(
+        self, tickers: list[str]
+    ) -> tuple[list[str], list[dict]]:
+        """VCP prepare 영역 1단계 진입 차단 13건 hook (사이클 157 Q2).
+
+        사이클 32 R4 보유/익일청산 절대 보호 + scanner.apply_master_block_filter 위임.
+
+        Returns:
+            (survived, excluded). excluded = [{ticker, name, reason}] (사이클 41 답습).
+        """
+        from src.engine import scanner as _scanner_mod
+
+        protected: set[str] = set()
+        try:
+            protected = _scanner_mod._collect_protected_tickers_for_scanner()
+        except Exception:
+            logger.debug(
+                "[vcp_master_block_prepare] protected_tickers 조회 실패 graceful",
+                exc_info=True,
+            )
+        return await _scanner_mod.apply_master_block_filter(
+            tickers, protected_tickers=protected
+        )
 
     async def _apply_price_filter_in_prepare(self, tickers: list[str]) -> list[str]:
         """VCP prepare 영역 가격 필터 후처리 (사이클 151, 사이클 148 VB 답습).

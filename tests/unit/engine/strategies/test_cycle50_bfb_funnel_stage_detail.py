@@ -224,20 +224,29 @@ async def test_prepare_records_volume_contraction_excluded(strat, monkeypatch):
 
     await strat.prepare()
 
-    # funnel step 6 (거래량 수축) 에 005930 이 excluded 로 기록되어야 함
-    steps = {s["step_no"]: s for s in strat._funnel_steps}
-    assert 6 in steps, "step 6(거래량 수축) funnel 단계가 기록되어야 함"
-    step6 = steps[6]
-    excluded_tickers = [e.get("ticker") for e in step6.get("excluded", [])]
+    # 사이클 157 (2026-06-17) 의미 전환 영구 영속 — BFB FUNNEL_STAGES +1단계
+    # (1단계 진입 차단 13건 step 신규 영구 영속) → "거래량 수축" step_no=6 → 7 영구 이동.
+    # 본 가드 = FunnelStage.step_name 기반 동적 lookup 영구 영속 (인덱스 비의존).
+    steps_by_name = {s["step_name"]: s for s in strat._funnel_steps}
+    # "거래량 수축" 키워드 포함 step 영역 검색 (스냅샷 표현 변화 호환)
+    vol_step = None
+    for sname, sdata in steps_by_name.items():
+        if "거래량 수축" in sname or "volume_contraction" in sname.lower():
+            vol_step = sdata
+            break
+    assert vol_step is not None, (
+        f"step 거래량 수축 funnel 단계가 기록되어야 함. steps={list(steps_by_name.keys())}"
+    )
+    excluded_tickers = [e.get("ticker") for e in vol_step.get("excluded", [])]
     assert "005930" in excluded_tickers, (
-        f"거래량 미수축 종목이 step 6 excluded 에 기록되어야 함. "
-        f"step6 excluded={step6.get('excluded')}"
+        f"거래량 미수축 종목이 거래량 수축 step excluded 에 기록되어야 함. "
+        f"excluded={vol_step.get('excluded')}"
     )
     # 사유에 측정 수치(거래량 비율) 포함
     reason = next(
-        (e.get("reason", "") for e in step6["excluded"] if e.get("ticker") == "005930"),
+        (e.get("reason", "") for e in vol_step["excluded"] if e.get("ticker") == "005930"),
         "",
     )
     assert "거래량" in reason or "vol" in reason.lower(), (
-        f"step 6 사유에 거래량 수축 미달 명시 필요. reason={reason!r}"
+        f"거래량 수축 step 사유에 거래량 수축 미달 명시 필요. reason={reason!r}"
     )

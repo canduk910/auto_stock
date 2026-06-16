@@ -41,12 +41,14 @@ logger = logging.getLogger(__name__)
 FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "유니버스 후보"),
     FunnelStage(2, "유니버스 필터 통과 (시총·거래대금)"),
-    FunnelStage(3, "일봉 fetch 성공"),
-    FunnelStage(4, "폴(Pole) 자동 검출"),
-    FunnelStage(5, "플래그(Flag) 자동 검출"),
-    FunnelStage(6, "거래량 수축"),
-    FunnelStage(7, "ATR(14) > 0"),
-    FunnelStage(8, "최종 prepared"),
+    # 사이클 157 (2026-06-17) — 1단계 진입 차단 13건 step 신규 영구 영속 → 9단계.
+    FunnelStage(3, "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)"),
+    FunnelStage(4, "일봉 fetch 성공"),
+    FunnelStage(5, "폴(Pole) 자동 검출"),
+    FunnelStage(6, "플래그(Flag) 자동 검출"),
+    FunnelStage(7, "거래량 수축"),
+    FunnelStage(8, "ATR(14) > 0"),
+    FunnelStage(9, "최종 prepared"),
 )
 
 
@@ -168,6 +170,17 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 f"시총 ≥ {params['min_market_cap']/100_000_000:.0f}억 "
                 f"+ 거래대금 ≥ {params['min_trade_amount']/100_000_000:.0f}억"
             ),
+        )
+
+        # 사이클 157 — step 3: 1단계 진입 차단 13건 (master_raw 7 + raw 6)
+        tickers, master_block_excluded = await self._apply_master_block_filter_in_prepare(tickers)
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[2],
+            survived=tickers,
+            step_conditions=(
+                "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)"
+            ),
+            excluded=master_block_excluded[:20],
         )
 
         if not tickers:
@@ -321,14 +334,14 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 logger.warning("눌림목 prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 47 (2026-05-22) — FUNNEL_STAGES 위임 (사이클 39+41 hook 동작 동일)
+        # 사이클 47 + 157 — FUNNEL_STAGES 위임 (사이클 157 step 3 master block 후 인덱스 +1)
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[2],
+            FUNNEL_STAGES[3],
             survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
             step_conditions=f"KIS 일봉 ≥ {pole_max + flag_max + 3}일",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[3],
+            FUNNEL_STAGES[4],
             survived=pole_pass_tickers, excluded=pole_excluded,
             step_conditions=(
                 f"3~10영업일 누적 +{params['pole_min_return']:.0f}%↑ + "
@@ -344,23 +357,23 @@ class BullFlagBreakoutStrategy(StrategyBase):
             t for t in flag_pass_tickers if t not in vol_excluded_set
         ]
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[4],
+            FUNNEL_STAGES[5],
             survived=flag_pass_tickers, excluded=flag_excluded,
             step_conditions=f"3~10영업일 조정 폭 ≤ 폴 폭 × {params['flag_retracement_max']*100:.1f}%",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[5],
+            FUNNEL_STAGES[6],
             survived=volume_contraction_pass_tickers,
             excluded=volume_contraction_excluded,
             step_conditions=f"플래그 평균 거래량 < 폴 평균 × {params['flag_volume_ratio']*100:.0f}%",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[6],
+            FUNNEL_STAGES[7],
             survived=atr_pass_tickers, excluded=atr_excluded,
             step_conditions="ATR(14) > 0 (변동성 측정 가능)",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[7],
+            FUNNEL_STAGES[8],
             survived=final_prepared_tickers,
             step_conditions="모든 단계 통과 — 매수 후보 등록",
         )
@@ -633,6 +646,30 @@ class BullFlagBreakoutStrategy(StrategyBase):
         filtered = await self._apply_price_filter_in_prepare(filtered)
 
         return filtered
+
+    async def _apply_master_block_filter_in_prepare(
+        self, tickers: list[str]
+    ) -> tuple[list[str], list[dict]]:
+        """BFB prepare 영역 1단계 진입 차단 13건 hook (사이클 157 Q2).
+
+        사이클 32 R4 보유/익일청산 절대 보호 + scanner.apply_master_block_filter 위임.
+
+        Returns:
+            (survived, excluded). excluded = [{ticker, name, reason}] (사이클 41 답습).
+        """
+        from src.engine import scanner as _scanner_mod
+
+        protected: set[str] = set()
+        try:
+            protected = _scanner_mod._collect_protected_tickers_for_scanner()
+        except Exception:
+            logger.debug(
+                "[bfb_master_block_prepare] protected_tickers 조회 실패 graceful",
+                exc_info=True,
+            )
+        return await _scanner_mod.apply_master_block_filter(
+            tickers, protected_tickers=protected
+        )
 
     async def _apply_price_filter_in_prepare(self, tickers: list[str]) -> list[str]:
         """BFB prepare 영역 가격 필터 후처리 (사이클 151, 사이클 148 VB 답습).

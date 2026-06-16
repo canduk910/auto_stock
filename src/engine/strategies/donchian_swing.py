@@ -29,12 +29,14 @@ KST = timezone(timedelta(hours=9))
 FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "코스피200+코스닥150 합집합"),
     FunnelStage(2, "시총 컷 통과"),
-    FunnelStage(3, "일봉 fetch + 전일종가>0"),
-    FunnelStage(4, "신고가 돌파"),
-    FunnelStage(5, "EMA 우상향 + 종가>EMA"),
-    FunnelStage(6, "거래대금 평균 대비 통과"),
-    FunnelStage(7, "ATR(14) > 0"),
-    FunnelStage(8, "최종 후보"),
+    # 사이클 157 (2026-06-17) — 1단계 진입 차단 13건 step 신규 영구 영속 → 9단계.
+    FunnelStage(3, "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)"),
+    FunnelStage(4, "일봉 fetch + 전일종가>0"),
+    FunnelStage(5, "신고가 돌파"),
+    FunnelStage(6, "EMA 우상향 + 종가>EMA"),
+    FunnelStage(7, "거래대금 평균 대비 통과"),
+    FunnelStage(8, "ATR(14) > 0"),
+    FunnelStage(9, "최종 후보"),
 )
 
 
@@ -142,6 +144,17 @@ class DonchianSwingStrategy(StrategyBase):
             FUNNEL_STAGES[1],
             survived=tickers,
             step_conditions=f"시총 ≥ {min_mcap_billion:.0f}억",
+        )
+
+        # 사이클 157 — step 3: 1단계 진입 차단 13건 (master_raw 7 + raw 6)
+        tickers, master_block_excluded = await self._apply_master_block_filter_in_prepare(tickers)
+        self._record_funnel_pipeline_step(
+            FUNNEL_STAGES[2],
+            survived=tickers,
+            step_conditions=(
+                "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)"
+            ),
+            excluded=master_block_excluded[:20],
         )
 
         if not tickers:
@@ -349,35 +362,35 @@ class DonchianSwingStrategy(StrategyBase):
                 logger.warning("도치안 스윙 prepare 실패: %s — %s", ticker, e)
                 continue
 
-        # 사이클 47 — FUNNEL_STAGES 위임 (사이클 39+41 hook 동작 동일).
+        # 사이클 47 + 157 — FUNNEL_STAGES 위임 (사이클 157 step 3 master block 후 인덱스 +1).
         # step_name 은 정적 (FUNNEL_STAGES 상수), 동적 파라미터 (donchian_period 등) 는 step_conditions 노출.
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[2],
+            FUNNEL_STAGES[3],
             survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
             step_conditions=f"KIS 일봉 ≥ {long_ma_period + 1}일 + 전일 종가 > 0",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[3],
+            FUNNEL_STAGES[4],
             survived=donchian_pass_tickers, excluded=donchian_excluded,
             step_conditions=f"전일 종가 > 직전 {donchian_period}일 최고가",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[4],
+            FUNNEL_STAGES[5],
             survived=ema_uptrend_pass_tickers, excluded=ema_excluded,
             step_conditions=f"{long_ma_period}일 EMA 우상향 + 전일 종가 > EMA",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[5],
+            FUNNEL_STAGES[6],
             survived=volume_pass_tickers, excluded=volume_excluded,
             step_conditions=f"당일 거래대금 ≥ {volume_period}일 평균 × {volume_mult:.1f}",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[6],
+            FUNNEL_STAGES[7],
             survived=atr_pass_tickers, excluded=atr_excluded,
             step_conditions="ATR(14) > 0 (변동성 측정 가능)",
         )
         self._record_funnel_pipeline_step(
-            FUNNEL_STAGES[7],
+            FUNNEL_STAGES[8],
             survived=final_prepared_tickers,
             step_conditions="모든 단계 통과 — 멀티데이 보유 매수 후보",
         )
@@ -514,6 +527,30 @@ class DonchianSwingStrategy(StrategyBase):
         filtered = await self._apply_price_filter_in_prepare(filtered)
 
         return filtered
+
+    async def _apply_master_block_filter_in_prepare(
+        self, tickers: list[str]
+    ) -> tuple[list[str], list[dict]]:
+        """donchian_swing prepare 영역 1단계 진입 차단 13건 hook (사이클 157 Q2).
+
+        사이클 32 R4 보유/익일청산 절대 보호 + scanner.apply_master_block_filter 위임.
+
+        Returns:
+            (survived, excluded). excluded = [{ticker, name, reason}] (사이클 41 답습).
+        """
+        from src.engine import scanner as _scanner_mod
+
+        protected: set[str] = set()
+        try:
+            protected = _scanner_mod._collect_protected_tickers_for_scanner()
+        except Exception:
+            logger.debug(
+                "[dc_master_block_prepare] protected_tickers 조회 실패 graceful",
+                exc_info=True,
+            )
+        return await _scanner_mod.apply_master_block_filter(
+            tickers, protected_tickers=protected
+        )
 
     async def _apply_price_filter_in_prepare(self, tickers: list[str]) -> list[str]:
         """donchian_swing prepare 영역 가격 필터 후처리 (사이클 151, 사이클 148 VB 답습).

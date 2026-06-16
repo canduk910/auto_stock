@@ -21,15 +21,17 @@ logger = logging.getLogger(__name__)
 
 
 # 사이클 143 (2026-06-15) — LTV 6단계 funnel hook (사이클 140 자문 영속)
-# VB 5단계 + 연속 상한가 필터 (LTV 특화 영역 영구 영속).
+# 사이클 157 (2026-06-17) — 1단계 진입 차단 13건 step 추가 영구 영속 → 7단계.
+# VB 6단계 + 연속 상한가 필터 (LTV 특화 영역 영구 영속).
 # 사이클 47 FUNNEL_STAGES 위임 패턴 답습 (`_record_funnel_pipeline_step(LTV_FUNNEL_STAGES[i-1], ...)`).
 LTV_FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "거래량순위 + stock_master 기반 후보"),
     FunnelStage(2, "시총 + 거래대금 필터 통과"),
-    FunnelStage(3, "일봉 fetch 통과"),
-    FunnelStage(4, "전일 Range > 0 + noise 계산 통과"),
-    FunnelStage(5, "연속 상한가 필터 통과"),
-    FunnelStage(6, "K값 계산 + target_offset > 0"),
+    FunnelStage(3, "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)"),
+    FunnelStage(4, "일봉 fetch 통과"),
+    FunnelStage(5, "전일 Range > 0 + noise 계산 통과"),
+    FunnelStage(6, "연속 상한가 필터 통과"),
+    FunnelStage(7, "K값 계산 + target_offset > 0"),
 )
 
 
@@ -148,6 +150,17 @@ class LongTailVolatilityStrategy(StrategyBase):
             step_conditions=(
                 f"시총 ≥ {min_mcap_billion:.0f}억 + 거래대금 ≥ {min_trade_billion:.0f}억"
             ),
+        )
+
+        # 사이클 157 — step 3: 1단계 진입 차단 13건 (master_raw 7 + raw 6)
+        tickers, master_block_excluded = await self._apply_master_block_filter_in_prepare(tickers)
+        self._record_funnel_pipeline_step(
+            LTV_FUNNEL_STAGES[2],
+            survived=tickers,
+            step_conditions=(
+                "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)"
+            ),
+            excluded=master_block_excluded[:20],
         )
 
         k_period = self.config.params["k_period"]
@@ -283,27 +296,27 @@ class LongTailVolatilityStrategy(StrategyBase):
         stats["final_prepared"] = len(self._scanned_tickers)
         stats["last_run_at"] = datetime.now(KST).isoformat()
 
-        # 사이클 143 — step 3+4+5+6 funnel hook (사이클 140 자문 영속)
+        # 사이클 143 + 157 — step 4+5+6+7 funnel hook (사이클 157 step 3 master block 후 인덱스 +1)
         self._record_funnel_pipeline_step(
-            LTV_FUNNEL_STAGES[2],
+            LTV_FUNNEL_STAGES[3],
             survived=candle_fetch_ok_tickers,
             step_conditions=f"KIS fetch_daily_candles 정상 응답 ({k_period}일)",
             excluded=candle_fetch_excluded,
         )
         self._record_funnel_pipeline_step(
-            LTV_FUNNEL_STAGES[3],
+            LTV_FUNNEL_STAGES[4],
             survived=range_pass_tickers,
             step_conditions="전일 Range > 0 + noise 영역 계산 통과",
             excluded=range_excluded,
         )
         self._record_funnel_pipeline_step(
-            LTV_FUNNEL_STAGES[4],
+            LTV_FUNNEL_STAGES[5],
             survived=consecutive_limit_pass_tickers,
             step_conditions=f"연속 상한가 {consecutive_limit}일 미만 통과",
             excluded=consecutive_limit_excluded,
         )
         self._record_funnel_pipeline_step(
-            LTV_FUNNEL_STAGES[5],
+            LTV_FUNNEL_STAGES[6],
             survived=final_prepared_tickers,
             step_conditions="K값 노이즈 비율 + target_offset > 0",
             excluded=target_excluded,
@@ -396,6 +409,30 @@ class LongTailVolatilityStrategy(StrategyBase):
         filtered = await self._apply_price_filter_in_prepare(filtered)
 
         return filtered
+
+    async def _apply_master_block_filter_in_prepare(
+        self, tickers: list[str]
+    ) -> tuple[list[str], list[dict]]:
+        """LTV prepare 영역 1단계 진입 차단 13건 hook (사이클 157 Q2).
+
+        사이클 32 R4 보유/익일청산 절대 보호 + scanner.apply_master_block_filter 위임.
+
+        Returns:
+            (survived, excluded). excluded = [{ticker, name, reason}] (사이클 41 답습).
+        """
+        from src.engine import scanner as _scanner_mod
+
+        protected: set[str] = set()
+        try:
+            protected = _scanner_mod._collect_protected_tickers_for_scanner()
+        except Exception:
+            logger.debug(
+                "[ltv_master_block_prepare] protected_tickers 조회 실패 graceful",
+                exc_info=True,
+            )
+        return await _scanner_mod.apply_master_block_filter(
+            tickers, protected_tickers=protected
+        )
 
     async def _apply_price_filter_in_prepare(self, tickers: list[str]) -> list[str]:
         """LTV prepare 영역 가격 필터 후처리 (사이클 151, 사이클 148 VB 답습).

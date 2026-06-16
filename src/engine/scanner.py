@@ -643,6 +643,27 @@ async def scan_stocks() -> list[str]:
             scan_filter_stats["limit_up_excluded"] += 1
             continue
 
+        # 사이클 157 Q2 — 1단계 진입 차단 hook (momentum 영역, 사이클 132 funnel 미적재 영속).
+        # _is_master_blocked_for_entry 13건 (master_raw 7 + raw 6) — 거래정지/관리종목/단기과열 등.
+        # graceful: stock_master.get / get_master_raw 예외 시 통과 (사이클 88 G-REJECT 답습).
+        try:
+            from src.db import stock_master as _sm_mod
+            basics = await _sm_mod.get(ticker)
+            master_raw_mom: dict = {}
+            raw_mom: dict = dict(basics.raw) if basics and basics.raw else {}
+            try:
+                m_resp = await _sm_mod.get_master_raw(ticker)
+                if m_resp:
+                    master_raw_mom = dict(m_resp)
+            except Exception:
+                pass
+            blocked_mom, _reason_mom = _is_master_blocked_for_entry(master_raw_mom, raw_mom)
+            if blocked_mom:
+                continue
+        except Exception:
+            # graceful — stock_master 미캐시 시 통과 (실시간 본질 영역 영속)
+            pass
+
         filtered.append(ticker)
         if name:
             ticker_names[ticker] = name
@@ -2549,6 +2570,74 @@ def _is_master_blocked_for_entry(
             return True, f"종목상태 비정상 (iscd_stat_cls_code={iscd_stat}, FHKST)"
 
     return False, ""
+
+
+async def apply_master_block_filter(
+    tickers: list[str],
+    *,
+    protected_tickers: set[str] | None = None,
+) -> tuple[list[str], list[dict]]:
+    """1단계 진입 차단 13건 hook 공통 헬퍼 (사이클 157).
+
+    5 전략 (VB/LTV/donchian/BFB/VCP) 의 `_apply_master_block_filter_in_prepare`
+    위임 대상. `_is_master_blocked_for_entry` 13건 (master_raw 7 + raw 6) 차단.
+
+    영속 의무 매트릭스:
+    - 사이클 32 R4 — 보유/익일청산 절대 보호 (protected_tickers 무조건 통과)
+    - 사이클 38 명문화 — 매수 진입 *전* 영역 한정 (check_exit_signal 호출 0)
+    - 사이클 41 — excluded = [{ticker, name, reason}] 한글 사유 영속
+    - 사이클 81 G-AST1 — raw 영역 read-only 영속
+    - 사이클 88 G-REJECT — stock_master.get 예외 graceful 통과
+    - 사이클 129 master_raw 7건 + 사이클 155 raw 6건 = 13건 차단
+
+    Args:
+        tickers: 평가 대상 ticker 리스트.
+        protected_tickers: 보유/익일청산 보호 set. None 시 빈 set (보호 없음).
+
+    Returns:
+        (survived, excluded). survived = list[str]. excluded = list[{ticker, name, reason}].
+    """
+    from src.db import stock_master as _sm_mod
+
+    protected: set[str] = protected_tickers or set()
+    survived: list[str] = []
+    excluded: list[dict] = []
+
+    for ticker in tickers:
+        # 사이클 32 R4 — 보유/익일청산 절대 보호 (사이클 30 005935 매매 안전성 영속)
+        if ticker in protected:
+            survived.append(ticker)
+            continue
+        # stock_master 조회 — 예외 graceful 통과 (사이클 88 G-REJECT 답습)
+        master_raw: dict = {}
+        raw_dict: dict = {}
+        try:
+            basics = await _sm_mod.get(ticker)
+            if basics and basics.raw:
+                raw_dict = dict(basics.raw)
+        except Exception:
+            survived.append(ticker)
+            continue
+        try:
+            master_raw_resp = await _sm_mod.get_master_raw(ticker)
+            if master_raw_resp:
+                master_raw = dict(master_raw_resp)
+        except Exception:
+            # graceful — master_raw 부재 시 raw 단독 평가
+            pass
+
+        blocked, reason = _is_master_blocked_for_entry(master_raw, raw_dict)
+        if blocked:
+            name = ""
+            try:
+                name = ticker_names.get(ticker, "") or ""
+            except Exception:
+                pass
+            excluded.append({"ticker": ticker, "name": name, "reason": reason})
+            continue
+        survived.append(ticker)
+
+    return survived, excluded
 
 
 def get_market_cap_millions(master_raw: dict, raw: dict) -> int:
