@@ -18,49 +18,64 @@ from src.config import settings
 logger = logging.getLogger(__name__)
 
 
-# =============================================================================
-# 사이클 144 (2026-06-16) — graceful_failed 카운터 영역 영구 영속 (카드 #27 LOW)
-# =============================================================================
-# inquire_stock_basics FHKST01010100 호출 실패 영역 silent fail 영역 영구 영속 가시화.
-# 사이클 88 G-REJECT graceful 영속 (영역 강화) + 사이클 38 명문화 영속 (logging 영역 한정).
-# 매매 안전성 무영향 (logging 영역 + 카운터 영역 한정, risk/order_engine 변경 0).
+# 사이클 155 (2026-06-16) — FHKST01010100 merge 키 (5 → 35 키 확장).
+# 사이클 107 5 키 + 사이클 155 HIGH 23 + MEDIUM 7 = 35.
+# KIS 정본: inquire_price COLUMN_MAPPING 88 컬럼.
+_FHKST_MERGE_KEYS: tuple[str, ...] = (
+    # 사이클 107~108 (5)
+    "acml_tr_pbmn", "lstn_stcn", "acml_vol", "prdy_vrss", "hts_avls",
+    # 사이클 155 HIGH (23)
+    "per", "pbr",                                                              # 밸류에이션
+    "hts_frgn_ehrt", "frgn_ntby_qty",                                          # 외국인
+    "stck_mxpr", "stck_llam",                                                  # 상하한가
+    "vol_tnrt", "prdy_vrss_vol_rate",                                          # 거래량
+    "w52_hgpr", "w52_lwpr", "w52_hgpr_date", "d250_hgpr", "d250_lwpr",         # 신고가
+    "mrkt_warn_cls_code", "invt_caful_yn", "short_over_yn", "sltr_yn",         # 진입 차단 (FHKST)
+    "iscd_stat_cls_code", "temp_stop_yn",
+    "new_hgpr_lwpr_cls_code",                                                  # 신고가 코드
+    "eps", "bps", "whol_loan_rmnd_rate",                                       # 실적/신용
+    # 사이클 155 MEDIUM (7)
+    "ssts_yn", "last_ssts_cntg_qty",
+    "vi_cls_code", "ovtm_vi_cls_code",
+    "bstp_kor_isnm",
+)
+
+# 사이클 145 답습 — 0 값 응답 시 기존 raw 키 보존 (장 시작 전 보호).
+# 사이클 155 — 14 키 확장 (per/pbr/vol_tnrt/외국인/신고가/eps/bps/whol_loan).
+# 비숫자 키 (vi_cls_code / w52_hgpr_date / iscd_stat_cls_code 등) 는 정상 merge.
+_ZERO_VALUE_SKIP_KEYS: frozenset[str] = frozenset({
+    "acml_tr_pbmn", "acml_vol",                                  # 사이클 145
+    "per", "pbr",                                                # 사이클 155 밸류에이션
+    "vol_tnrt", "prdy_vrss_vol_rate",                            # 거래량
+    "hts_frgn_ehrt", "frgn_ntby_qty",                            # 외국인
+    "w52_hgpr", "w52_lwpr", "d250_hgpr", "d250_lwpr",            # 신고가
+    "eps", "bps", "whol_loan_rmnd_rate",                         # 실적/신용
+})
+
+
+# 사이클 144 — graceful_failed 카운터 (카드 #27 LOW).
+# inquire_stock_basics FHKST01010100 호출 실패 가시화.
+# 매매 안전성 무영향 (logging + 카운터 한정).
 _graceful_failed_counter: dict[str, int] = {
-    "fhkst01010100_failed": 0,  # FHKST01010100 호출 실패 영역 영구 영속
+    "fhkst01010100_failed": 0,
 }
 _graceful_failed_lock = asyncio.Lock()
 
 
 async def _record_graceful_failed(reason: str) -> None:
-    """graceful 분기 fail 카운터 영역 영구 영속 (모듈 전역 영역).
-
-    Args:
-        reason: fail 사유 (등록된 키만 영속, 그 외 무시 영역 영구 영속).
-
-    영속 의무:
-    - asyncio.Lock 동시성 보호 영속 (FastAPI 동시 요청 + BackgroundTasks 영역 영구 영속)
-    - 등록된 키 외 무시 graceful (호출자 영역 영구 영속 보호)
-    - 카운터 영역 영구 영속 = 모듈 전역 (process-local in-memory, uvicorn 단일 워커 영속 의무)
-    """
+    """graceful 분기 fail 카운터 증가. 등록 키 외 무시."""
     async with _graceful_failed_lock:
         if reason in _graceful_failed_counter:
             _graceful_failed_counter[reason] += 1
 
 
 def get_graceful_failed_counts() -> dict[str, int]:
-    """graceful_failed 카운터 영역 영구 영속 스냅샷 반환.
-
-    Returns:
-        카운터 영역 영구 영속 dict 사본 (외부 변경 격리).
-    """
+    """카운터 스냅샷 사본 반환."""
     return dict(_graceful_failed_counter)
 
 
 def reset_graceful_failed_counts() -> None:
-    """graceful_failed 카운터 영역 영구 영속 reset.
-
-    호출자 (`scanner._stock_master_basics_refresh_once`) 시작 시 reset →
-    단일 task 영역 영구 영속 측정 영역 영구 영속.
-    """
+    """task 시작 시 카운터 reset."""
     for key in _graceful_failed_counter:
         _graceful_failed_counter[key] = 0
 
@@ -335,39 +350,28 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
         logger.exception(
             "[inquire_stock_basics] FHKST01010100 호출 실패 graceful pdno=%s", pdno
         )
-        # 사이클 144 — graceful_failed 카운터 영역 영구 영속 (카드 #27 LOW)
-        # _record_graceful_failed 실패 시에도 graceful (외부 영향 0 영구 영속).
+        # 사이클 144 — graceful_failed 카운터 (카드 #27 LOW).
         try:
             await _record_graceful_failed("fhkst01010100_failed")
         except Exception:
             logger.debug("[_record_graceful_failed] 카운터 갱신 실패 graceful", exc_info=True)
         price_data = {}
 
-    # raw merge — CTPF1002R 67 컬럼 영속 + FHKST01010100 시세 5 키 보강 (사이클 108)
-    # CTPF1002R 영역 우선, FHKST01010100 의 5 키만 추가 병합 (기존 키 덮어쓰기 금지)
-    # hts_avls: 시가총액 (단위: 백만원) — stock_master list_by_filter 시총 필터링에 활용
-    #
-    # 사이클 145 (2026-06-16) — 거래량/거래대금 0 덮어쓰기 금지 영구 영속 (결함 2 시정):
-    # 운영 사례 = 2026-06-16 07:54~07:59 KST = boot force=True 시점 (장 시작 *전*).
-    # FHKST01010100 응답 영역 = acml_tr_pbmn=0 + acml_vol=0 정상 (장 시작 전 거래 없음).
-    # 시정 전 = merge 영역에서 0 값 영역 덮어쓰기 → 기존 raw 영역 영구 영속 acml_tr_pbmn 손실
-    #          → list_by_filter (`acml_tr_pbmn ≥ min_trade_amount=20_000_000_000`) 0건 silent.
-    # 시정 후 = 거래량/거래대금 0 값 영역 영구 영속 merge 영역 skip → 기존 raw 키 보존
-    #          (전일 영업일 영역 영구 영속 거래대금 보존 → list_by_filter 정상 작동).
-    # 사이클 81 G-AST1 영구 영속 강화 (raw 덮어쓰기 금지 영역 영구 영속) + 사이클 88 G-REJECT graceful.
+    # 사이클 155 — raw merge (CTPF1002R 67 + FHKST01010100 35 키 = 총합).
+    # CTPF 우선, FHKST 35 키만 추가 (기존 키 덮어쓰기 금지).
+    # 사이클 145 — _ZERO_VALUE_SKIP_KEYS 의 0 값 응답은 skip → 기존 raw 키 보존
+    # (장 시작 전 acml_tr_pbmn=0 등의 덮어쓰기로 인한 silent 결함 차단).
     merged_raw = dict(ctpf_output)
-    for key in ("acml_tr_pbmn", "lstn_stcn", "acml_vol", "prdy_vrss", "hts_avls"):
+    for key in _FHKST_MERGE_KEYS:
         if key in price_data:
             value = price_data[key]
-            # 사이클 145 — 거래량/거래대금 0 값 영역 영구 영속 = 장 시작 전 영역 영구 영속 보호
-            if key in ("acml_tr_pbmn", "acml_vol"):
+            if key in _ZERO_VALUE_SKIP_KEYS:
                 try:
-                    numeric_value = int(str(value).replace(",", "") or 0)
-                    if numeric_value == 0:
-                        # 0 값 영역 영구 영속 = merge 영역 skip → 기존 raw 키 영역 영구 영속 보존
+                    numeric_value = float(str(value).replace(",", "") or 0)
+                    if numeric_value == 0.0:
                         continue
                 except (ValueError, TypeError):
-                    pass  # 비숫자 영역 = 정상 영역 영구 영속 그대로 merge
+                    pass  # 비숫자는 정상 merge
             merged_raw[key] = value
 
     cptt = (ctpf_output.get("cptt_trad_tr_psbl_yn") or "").strip().upper()

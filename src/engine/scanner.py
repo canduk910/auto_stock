@@ -2494,45 +2494,59 @@ def validate_market_cap_consistency(
         return "ERROR", diff_ratio
 
 
-def _is_master_blocked_for_entry(master_raw: dict) -> tuple[bool, str]:
-    """1단계 차단 영역 — 7건 매수 진입 차단 분기 (domain-consult 의제 4).
+def _is_master_blocked_for_entry(
+    master_raw: dict, raw: dict | None = None
+) -> tuple[bool, str]:
+    """1단계 차단 — 13건 매수 진입 차단 (사이클 129 7 + 사이클 155 6 확장).
 
-    Q4=A 마스터 우선 영역 영구 영속:
-    - trht_yn (거래정지) / sltr_yn (정리매매) / mang_issu_yn (관리종목)
-    - ssts_hot_yn (공매도과열) / stange_runup_yn (이상급등)
-    - mrkt_alrm_cls_code >= "02" (시장경고 경고/위험)
-    - invt_alrm_yn (KOSDAQ 투자주의환기)
+    master_raw + raw OR — 어느 한쪽이라도 매칭되면 차단. 부재 측은 평가 생략.
 
-    master_raw 부재 시 통과 (raw 폴백 chain 영속).
+    사이클 129 (master_raw, 7건):
+    - trht_yn / sltr_yn / mang_issu_yn / ssts_hot_yn / stange_runup_yn
+    - mrkt_alrm_cls_code >= "02" / invt_alrm_yn (KOSDAQ)
 
-    Args:
-        master_raw: stock_master.master_raw dict 영역
-
-    Returns:
-        (blocked: bool, reason: str) — blocked True 시 매수 진입 차단
+    사이클 155 (raw=FHKST01010100, 6건):
+    - mrkt_warn_cls_code >= "01" / invt_caful_yn / short_over_yn
+    - sltr_yn (FHKST) / iscd_stat_cls_code != "55" / temp_stop_yn
     """
-    if not master_raw or not isinstance(master_raw, dict):
-        return False, ""
+    if master_raw and isinstance(master_raw, dict):
+        if master_raw.get("trht_yn") == "Y":
+            return True, "거래정지 (trht_yn=Y)"
+        if master_raw.get("sltr_yn") == "Y":
+            return True, "정리매매 (sltr_yn=Y)"
+        if master_raw.get("mang_issu_yn") == "Y":
+            return True, "관리종목 (mang_issu_yn=Y)"
+        if master_raw.get("ssts_hot_yn") == "Y":
+            return True, "공매도과열 (ssts_hot_yn=Y)"
+        if master_raw.get("stange_runup_yn") == "Y":
+            return True, "이상급등 (stange_runup_yn=Y)"
 
-    if master_raw.get("trht_yn") == "Y":
-        return True, "거래정지 (trht_yn=Y)"
-    if master_raw.get("sltr_yn") == "Y":
-        return True, "정리매매 (sltr_yn=Y)"
-    if master_raw.get("mang_issu_yn") == "Y":
-        return True, "관리종목 (mang_issu_yn=Y)"
-    if master_raw.get("ssts_hot_yn") == "Y":
-        return True, "공매도과열 (ssts_hot_yn=Y)"
-    if master_raw.get("stange_runup_yn") == "Y":
-        return True, "이상급등 (stange_runup_yn=Y)"
+        # 시장경고 02:경고 / 03:위험 영역 차단
+        mrkt_alrm = master_raw.get("mrkt_alrm_cls_code", "00")
+        if isinstance(mrkt_alrm, str) and mrkt_alrm >= "02":
+            return True, f"시장경고 ({mrkt_alrm})"
 
-    # 시장경고 02:경고 / 03:위험 영역 차단
-    mrkt_alrm = master_raw.get("mrkt_alrm_cls_code", "00")
-    if isinstance(mrkt_alrm, str) and mrkt_alrm >= "02":
-        return True, f"시장경고 ({mrkt_alrm})"
+        # KOSDAQ 전용 — 투자주의환기
+        if master_raw.get("invt_alrm_yn") == "Y":
+            return True, "투자주의환기 (invt_alrm_yn=Y, KOSDAQ)"
 
-    # KOSDAQ 전용 — 투자주의환기
-    if master_raw.get("invt_alrm_yn") == "Y":
-        return True, "투자주의환기 (invt_alrm_yn=Y, KOSDAQ)"
+    # 사이클 155 — FHKST01010100 raw 분기 (6 키).
+    if raw and isinstance(raw, dict):
+        mrkt_warn = raw.get("mrkt_warn_cls_code", "00")
+        if isinstance(mrkt_warn, str) and mrkt_warn >= "01" and mrkt_warn != "":
+            return True, f"FHKST 시장경고 ({mrkt_warn})"
+        if (raw.get("invt_caful_yn") or "").strip().upper() == "Y":
+            return True, "투자유의 (invt_caful_yn=Y, FHKST)"
+        if (raw.get("short_over_yn") or "").strip().upper() == "Y":
+            return True, "단기과열 (short_over_yn=Y, FHKST)"
+        if (raw.get("sltr_yn") or "").strip().upper() == "Y":
+            return True, "정리매매 (sltr_yn=Y, FHKST)"
+        if (raw.get("temp_stop_yn") or "").strip().upper() == "Y":
+            return True, "임시 정지 (temp_stop_yn=Y, FHKST)"
+        # iscd_stat_cls_code: KIS 정본 = "55" 정상 거래중. 빈 문자열은 graceful 통과.
+        iscd_stat = (raw.get("iscd_stat_cls_code") or "").strip()
+        if iscd_stat and iscd_stat != "55":
+            return True, f"종목상태 비정상 (iscd_stat_cls_code={iscd_stat}, FHKST)"
 
     return False, ""
 
