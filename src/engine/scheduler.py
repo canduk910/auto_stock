@@ -3614,12 +3614,30 @@ class TradingScheduler:
         logger.info("일간 상태 초기화 완료 (scanner 캐시 clear 포함)")
 
     async def _wait_until(self, target: time) -> None:
-        """지정 시각까지 대기한다."""
+        """지정 시각까지 대기한다 — target 이 오늘 이미 지났으면 다음 날 동일 시각 대기.
+
+        사이클 152 hotfix (2026-06-16) — 폭주 결함 영구 차단:
+        이전 버전은 `now >= target` 시 즉시 break → EC2 배포가 target 이후 시점에
+        시작되면 task_loop_helper 의 while 루프가 즉시 break + once 호출을 반복하여
+        무한 폭주. 6/16 18:00 KST 시점 사이클 122/126/129/150 task 모두 폭주 +
+        Supabase HTTP/2 ConnectionTerminated 폭주 운영 사례.
+        """
         while self._running:
-            now = datetime.now().time()
-            if now >= target:
-                break
-            await asyncio.sleep(10)
+            now_dt = datetime.now()
+            target_dt = now_dt.replace(
+                hour=target.hour, minute=target.minute,
+                second=target.second or 0, microsecond=0,
+            )
+            if now_dt >= target_dt:
+                # 오늘 target 이미 지나감 → 내일 동일 시각 대기
+                target_dt += timedelta(days=1)
+            wait_secs = (target_dt - now_dt).total_seconds()
+            if wait_secs <= 0:
+                # 안전망 (race 보호)
+                await asyncio.sleep(10)
+                continue
+            await asyncio.sleep(min(wait_secs, 60))
+            # 다음 iteration 에서 target_dt 재계산 + 조건 재평가
 
 
 trading_scheduler = TradingScheduler()
