@@ -2778,8 +2778,9 @@ class TradingScheduler:
                 "total", "fetched", "upserted_rows",
                 "skipped_fresh", "failed", "elapsed_ms", "mode",
             ),
-            # 사이클 158 Q3 stagger — full_universe 60초 후 발화
-            initial_delay_secs=60,
+            # 사이클 159 stagger 임계 상향 (refactor-expert 자문 옵션 C)
+            # = full_universe 처리 (~280s) 완료 *직후* 진입 = 0 overlap
+            initial_delay_secs=240,
         )
 
     async def _stock_master_basics_refresh_task_loop(self) -> None:
@@ -2825,8 +2826,10 @@ class TradingScheduler:
             summary_keys=(
                 "total", "updated", "skipped", "failed", "elapsed_ms",
             ),
-            # 사이클 158 Q3 stagger — daily 60초 후 발화 (full_universe 120초 후)
-            initial_delay_secs=120,
+            # 사이클 159 stagger 임계 상향 (refactor-expert 자문 옵션 C)
+            # = full_universe 280s 처리 시간 정합 + 30s overlap 허용
+            # 운영 실측 06-17 = master_skip 992 / basics_skip 1958 / 24h 폭주 영역 시정
+            initial_delay_secs=480,
         )
 
     async def _stock_master_master_load_task_loop(self) -> None:
@@ -2880,8 +2883,9 @@ class TradingScheduler:
                 "kospi_count", "kosdaq_count", "total",
                 "updated", "failed", "elapsed_ms",
             ),
-            # 사이클 158 Q3 stagger — basics 60초 후 발화 (full_universe 180초 후)
-            initial_delay_secs=180,
+            # 사이클 159 stagger 임계 상향 (refactor-expert 자문 옵션 C)
+            # = basics 완료 30초 후 진입 = HTTP/2 race 차단 마진 확보
+            initial_delay_secs=720,
         )
 
     async def _stock_master_daily_purge_task_loop(self) -> None:
