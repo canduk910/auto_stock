@@ -140,12 +140,16 @@ async def test_G_162_E_10_stale_watcher_skip_during_call_auction(monkeypatch):
         f"동시호가 시간대 stale skip WARNING 미발화. 로그: {log_output!r}"
 
 
+import pathlib
+
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
+
+
 def test_G_162_SAFETY_1_no_risk_or_order_engine_import_in_session_module():
-    """G-162-SAFETY-1 (HIGH): session.py 변경 영역 risk/order_engine import 0건 영속."""
+    """G-162-SAFETY-1 (HIGH): session.py 변경 영역 risk/order_engine import 0건."""
     import ast
-    path = "/Users/koscom/Projects/auto_stock/src/engine/session.py"
-    with open(path, "r", encoding="utf-8") as f:
-        tree = ast.parse(f.read())
+    path = _REPO_ROOT / "src" / "engine" / "session.py"
+    tree = ast.parse(path.read_text(encoding="utf-8"))
     bad_modules = {"src.engine.risk", "src.engine.order_engine", "src.realtime.websocket", "src.auth.token"}
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
@@ -156,9 +160,8 @@ def test_G_162_SAFETY_1_no_risk_or_order_engine_import_in_session_module():
 def test_G_162_SAFETY_2_no_risk_or_order_engine_import_in_pending_ndc_db():
     """G-162-SAFETY-2 (HIGH): pending_next_day_clear.py 영역 risk/order_engine import 0건."""
     import ast
-    path = "/Users/koscom/Projects/auto_stock/src/db/pending_next_day_clear.py"
-    with open(path, "r", encoding="utf-8") as f:
-        tree = ast.parse(f.read())
+    path = _REPO_ROOT / "src" / "db" / "pending_next_day_clear.py"
+    tree = ast.parse(path.read_text(encoding="utf-8"))
     bad_modules = {"src.engine.risk", "src.engine.order_engine", "src.realtime.websocket", "src.auth.token"}
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
