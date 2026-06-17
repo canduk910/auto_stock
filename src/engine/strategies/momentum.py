@@ -11,9 +11,27 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 
+from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
 
 logger = logging.getLogger(__name__)
+
+
+# 사이클 158 Q1 (2026-06-17) — momentum 익일 청산 logger 폭주 차단.
+# 운영 사례 = 씨에스윈드(112610) 익일 즉시 청산 logger.info 26회/30초 폭주.
+# 근본 원인 = check_exit_signal 익일 청산 분기 매 tick 발화.
+# 사이클 19 _selling 가드는 KIS 호출 차단만 (신호 평가 미차단).
+# 사이클 31 R6 / 57 V-1 DailyEmitCap 패턴 답습 — ticker 단위 1회/일 cap.
+# 시정 영역 = logger 한정 (Signal.NEXT_DAY_CLEAR 반환 영속 = 사이클 32 R4 보유 절대 보호).
+_next_day_clear_logged_today: DailyEmitCap[str] = DailyEmitCap[str]()
+
+
+def reset_next_day_clear_logged_today() -> None:
+    """사이클 158 Q1 — 일일 reset 헬퍼 (사이클 31 R6 답습).
+
+    `_reset_daily_state()` 또는 매수 진입 전 시점 호출 영역.
+    """
+    _next_day_clear_logged_today.reset_daily()
 
 
 class MomentumStrategy(StrategyBase):
@@ -157,10 +175,14 @@ class MomentumStrategy(StrategyBase):
         gap_rate = (open_price - pos.buy_price) / pos.buy_price * 100 if pos.buy_price > 0 else 0
 
         if gap_rate < gap_threshold:
-            logger.info(
-                "익일 즉시 청산: %s 갭률 %.1f%% (시가: %d, 매수가: %d)",
-                t(ticker), gap_rate, open_price, pos.buy_price,
-            )
+            # 사이클 158 Q1 — DailyEmitCap 1회/ticker/일 cap (logger 영역만).
+            # Signal.NEXT_DAY_CLEAR 반환 영속 (KIS 호출 trigger 보존, 사이클 32 R4 보유 절대 보호).
+            if _next_day_clear_logged_today.should_emit(ticker):
+                logger.info(
+                    "익일 즉시 청산: %s 갭률 %.1f%% (시가: %d, 매수가: %d)",
+                    t(ticker), gap_rate, open_price, pos.buy_price,
+                )
+                _next_day_clear_logged_today.mark_emitted(ticker)
             return Signal.NEXT_DAY_CLEAR
 
         # 갭상승 +10% → 트레일링 스탑

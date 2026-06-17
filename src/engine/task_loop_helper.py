@@ -47,6 +47,7 @@ async def run_periodic_task_loop(
     summary_keys: tuple[str, ...],
     immediate_first_run: bool = True,
     retry_delay_secs: int = 60,
+    initial_delay_secs: int = 0,
 ) -> None:
     """4 task loop 공통 lifecycle 헬퍼 (사이클 134 카드 #21 영속).
 
@@ -71,6 +72,9 @@ async def run_periodic_task_loop(
         summary_keys: summary dict 키 영역 (format args 영속). 키 부재 시 0 디폴트.
         immediate_first_run: start() 직후 즉시 1회 실행 영역 (True 영속, 사이클 106 답습).
         retry_delay_secs: Exception 후 retry 영역 (60s 영속, 사이클 88 G-REJECT 답습).
+        initial_delay_secs: 사이클 158 Q3 stagger 인자 (default 0 = 회귀 보존).
+            > 0 시 immediate_first_run 진입 *전* asyncio.sleep(N) 발화 — 4 task 동시 발화
+            race 차단 (Supabase HTTP/2 풀 ConnectionTerminated 폭주 영역 차단).
 
     영속 의무 매트릭스:
     - 사이클 88 G-REJECT graceful 영속 (CancelledError + Exception 분리).
@@ -84,6 +88,12 @@ async def run_periodic_task_loop(
 
     # 사이클 106 lifecycle race 차단 패턴 답습 — start() 직후 즉시 1회 실행
     if immediate_first_run:
+        # 사이클 158 Q3 stagger — 4 task 동시 발화 race 차단
+        if initial_delay_secs > 0:
+            try:
+                await asyncio.sleep(initial_delay_secs)
+            except asyncio.CancelledError:
+                return
         try:
             summary = await once_callable()
             record_fn(summary)

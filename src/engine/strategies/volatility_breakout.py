@@ -109,6 +109,10 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
         사이클 143 (2026-06-15) — 사이클 140 자문 영속 VB 5단계 funnel hook 추가.
         사이클 39+41 BFB/VCP/donchian 패턴 답습. 매매 안전성 무영향 (사이클 38 명문화 영속).
+
+        사이클 158 Q2 (2026-06-17) — stock_master 0건 race 자동 재시도 hook.
+        운영 사례 = 2026-06-17 08:13~08:16 KST EC2 재시작 직후 _full_universe_load_task_loop
+        적재 ~3분 소요 영역에서 _boot prepare 진입 → 0건 silent. cap 3회 + sleep 30초.
         """
         import asyncio
 
@@ -120,7 +124,22 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 사이클 143 — 단계별 ticker 캡처 reset (사이클 39 답습)
         self._reset_funnel_steps()
 
+        # 사이클 158 Q2 — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
+        # 초기 1회 + 재시도 cap 3회 = 최대 4회 호출 영역.
         tickers = await self._scan_universe()
+        for retry_attempt in range(3):
+            if tickers:
+                break
+            logger.warning(
+                "[vb_prepare_retry] stock_master 0건 — %d초 후 재시도 (cap=%d/3)",
+                30, retry_attempt + 1,
+            )
+            await asyncio.sleep(30)
+            # 사이클 21 카운트 재초기화 (재시도마다 _scan_universe 가 갱신)
+            stats = _empty_scan_stats()
+            self._scan_stats = stats
+            self._reset_funnel_steps()
+            tickers = await self._scan_universe()
         # 사이클 143 — step 1+2 funnel hook (사이클 140 자문 영속)
         params = self.config.params
         min_mcap_billion = params.get("min_market_cap", 100_000_000_000) / 100_000_000

@@ -263,7 +263,12 @@ class TestFunnelStepsIntegration:
         """G-143-INT-1: VB `prepare()` 호출 후 `_funnel_steps` 5건 영속.
 
         시뮬레이션: stock_master mock + fetch_daily_candles mock → prepare() 호출 → _funnel_steps 길이 ≥ 5.
+
+        사이클 158 Q2 의미 전환 (2026-06-17) — prepare 재시도 hook 영역 영속:
+        - 0건 시 자동 재시도 3회 (asyncio.sleep(30) 발화). 본 테스트는 asyncio.sleep mock 추가.
+        - 회귀 가드 의미 = funnel step record 호출 영속 검증 (재시도 hook 영향 영역 외).
         """
+        from unittest.mock import AsyncMock
         from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
         from src.engine.strategy_base import StrategyConfig
 
@@ -292,6 +297,10 @@ class TestFunnelStepsIntegration:
 
         from src.db import stock_master as _sm_mod
         monkeypatch.setattr(_sm_mod, "list_by_filter", _mock_list_by_filter)
+
+        # 사이클 158 Q2 — asyncio.sleep mock (재시도 hook 영역 30초 발화 차단)
+        import asyncio as _asyncio_mod
+        monkeypatch.setattr(_asyncio_mod, "sleep", AsyncMock(return_value=None))
 
         await strategy.prepare()
 

@@ -2739,6 +2739,8 @@ class TradingScheduler:
                 "total", "kospi", "kosdaq",
                 "fetched", "skipped_ttl", "failed", "elapsed_ms",
             ),
+            # 사이클 158 Q3 stagger — 가장 무거운 task = 즉시 발화 (0초)
+            initial_delay_secs=0,
         )
 
     async def _stock_master_daily_load_task_loop(self) -> None:
@@ -2776,6 +2778,8 @@ class TradingScheduler:
                 "total", "fetched", "upserted_rows",
                 "skipped_fresh", "failed", "elapsed_ms", "mode",
             ),
+            # 사이클 158 Q3 stagger — full_universe 60초 후 발화
+            initial_delay_secs=60,
         )
 
     async def _stock_master_basics_refresh_task_loop(self) -> None:
@@ -2821,6 +2825,8 @@ class TradingScheduler:
             summary_keys=(
                 "total", "updated", "skipped", "failed", "elapsed_ms",
             ),
+            # 사이클 158 Q3 stagger — daily 60초 후 발화 (full_universe 120초 후)
+            initial_delay_secs=120,
         )
 
     async def _stock_master_master_load_task_loop(self) -> None:
@@ -2874,6 +2880,8 @@ class TradingScheduler:
                 "kospi_count", "kosdaq_count", "total",
                 "updated", "failed", "elapsed_ms",
             ),
+            # 사이클 158 Q3 stagger — basics 60초 후 발화 (full_universe 180초 후)
+            initial_delay_secs=180,
         )
 
     async def _stock_master_daily_purge_task_loop(self) -> None:
@@ -3559,6 +3567,14 @@ class TradingScheduler:
         except AttributeError:
             # 후방호환 가드 — RiskManager 가 reset_daily_state 메서드 없는 경우 (구버전 호환)
             pass
+
+        # 사이클 158 Q1 — momentum 익일 청산 logger DailyEmitCap 일일 초기화.
+        # 사이클 31 R6 / 57 V-1 패턴 답습 — ticker 단위 1회/일 cap reset.
+        try:
+            from src.engine.strategies.momentum import reset_next_day_clear_logged_today
+            reset_next_day_clear_logged_today()
+        except Exception:
+            logger.exception("momentum reset_next_day_clear_logged_today 실패")
         # 사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot 일일 1회 가드 reset
         self._auto_funnel_snapshot_done_today = False
 

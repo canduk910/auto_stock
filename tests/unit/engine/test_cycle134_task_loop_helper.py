@@ -358,15 +358,14 @@ class TestLineReductionEffect:
         scheduler_path = Path("src/engine/scheduler.py")
         line_count = len(scheduler_path.read_text(encoding="utf-8").splitlines())
 
-        # 사이클 142+146+149+150 의미 전환 (사이클 66 K-2 패턴 답습):
-        # 사이클 134 기준 ≤ 3,400L → 사이클 142 +21L → 사이클 146 +25L → 사이클 149 +90L → 사이클 150 +85L → ≤ 3,650L.
-        # 사이클 149 = 종목별 H0UNMKO0 구독 확장 + VI/거래정지 stale 회피 (Q1=A 자문 채택).
-        # 사이클 150 = stock_master_daily T-150일 retention cron task 추가 (SUPABASE 용량초과 시정).
-        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149/150 추가는 신규 기능 한정.
-        assert line_count <= 3650, (
+        # 사이클 142+146+149+150+158 의미 전환 (사이클 66 K-2 패턴 답습):
+        # 사이클 134 기준 ≤ 3,400L → 142 +21 → 146 +25 → 149 +90 → 150 +85 → 158 +15 (4 task stagger 인자) → ≤ 3,675L.
+        # 사이클 158 Q3 = 4 task wrapper 영역 initial_delay_secs 인자 + reset hook (+9L net + 6L 코멘트).
+        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149/150/158 추가는 신규 기능 한정.
+        assert line_count <= 3675, (
             f"scheduler.py 라인 감소 영속 위반 — got {line_count}L, "
-            f"target ≤ 3,650L (사이클 134 ≤ 3,400L + 사이클 142 +21L + 사이클 146 +25L + 사이클 149 +90L + 사이클 150 +85L). "
-            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150 추가 영속."
+            f"target ≤ 3,675L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L). "
+            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158 추가 영속."
         )
 
     def test_g_134_f2_helper_module_compact(self):
