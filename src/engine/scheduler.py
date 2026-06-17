@@ -3633,14 +3633,26 @@ class TradingScheduler:
 
         logger.info("일간 상태 초기화 완료 (scanner 캐시 clear 포함)")
 
-    async def _wait_until(self, target: time) -> None:
-        """지정 시각까지 대기한다 — target 이 오늘 이미 지났으면 다음 날 동일 시각 대기.
+    async def _wait_until(self, target: time, *, advance_if_passed: bool = False) -> None:
+        """지정 시각까지 대기한다.
 
-        사이클 152 hotfix (2026-06-16) — 폭주 결함 영구 차단:
-        이전 버전은 `now >= target` 시 즉시 break → EC2 배포가 target 이후 시점에
-        시작되면 task_loop_helper 의 while 루프가 즉시 break + once 호출을 반복하여
-        무한 폭주. 6/16 18:00 KST 시점 사이클 122/126/129/150 task 모두 폭주 +
-        Supabase HTTP/2 ConnectionTerminated 폭주 운영 사례.
+        사이클 160 hotfix (2026-06-17) — 사이클 152 hotfix 결정타 결함 시정:
+        사이클 152 가 `_wait_until` 본질을 깨뜨려 target 도달 시에도 break 하지 않고
+        다음 날로 미루는 결함을 도입. 결과 = `run_daily()` 영역 모든 phase 전환
+        (15:20 강제청산 / 15:30 마감 / 19:50 매수중단 / 20:00 자문 / 20:10 정산) 영구
+        누락. 6/17 운영 사례 = 알테오젠 (VB) + 알지노믹스 (LTV) 15:20 매도 누락.
+
+        본질 복원:
+        - 기본 (advance_if_passed=False) = target 도달 즉시 break. `run_daily()` 영역
+          phase 시각 도달 시 즉시 다음 phase 진입 의무 영속.
+        - advance_if_passed=True = target 이 *이미 지났으면* 내일 동일 시각 대기.
+          task_loop_helper 영역 폭주 차단 (사이클 152 hotfix 의도 영속).
+
+        사이클 152 운영 사례 (18:00 KST 시점 task 폭주):
+        - task_loop_helper 가 `advance_if_passed=True` 로 호출하면 18:00 시점 _wait_until(16:30)
+          → target_dt = 내일 16:30 → 86,400s 대기 → 폭주 차단 정상.
+        - run_daily 영역은 advance_if_passed=False (default) 로 호출 → target 도달 시 즉시
+          break → phase 전환 정상.
         """
         while self._running:
             now_dt = datetime.now()
@@ -3649,12 +3661,15 @@ class TradingScheduler:
                 second=target.second or 0, microsecond=0,
             )
             if now_dt >= target_dt:
-                # 오늘 target 이미 지나감 → 내일 동일 시각 대기
+                if not advance_if_passed:
+                    # 본질 = target 도달 즉시 break (run_daily phase 전환 영속)
+                    return
+                # task_loop_helper 영역 = 내일 동일 시각 대기 (폭주 차단 영속)
                 target_dt += timedelta(days=1)
             wait_secs = (target_dt - now_dt).total_seconds()
             if wait_secs <= 0:
                 # 안전망 (race 보호)
-                await asyncio.sleep(10)
+                await asyncio.sleep(1)
                 continue
             await asyncio.sleep(min(wait_secs, 60))
             # 다음 iteration 에서 target_dt 재계산 + 조건 재평가

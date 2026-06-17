@@ -1,5 +1,15 @@
 """사이클 152 hotfix — _wait_until target 이후 시점 폭주 결함 영구 차단.
 
+사이클 160 의미 전환 (2026-06-17):
+사이클 152 hotfix 가 `_wait_until` 본질 (target 도달 즉시 break) 을 깨뜨려
+`run_daily` 영역 모든 phase 전환 누락 결함 도입. 6/17 알테오젠+알지노믹스
+15:20 강제청산 누락 운영 사례. 사이클 160 시정 = 2 모드 분기
+(default=즉시 break, advance_if_passed=True=내일 대기).
+
+본 파일의 사이클 152 케이스 = 사이클 152 의도 자체는 보존하지만 default 모드는
+이제 즉시 return 으로 의미 전환. `advance_if_passed=True` 명시 시점만 사이클 152
+동작 유지. 사이클 66 K-2 의미 전환 패턴 답습.
+
 운영 사례 (verbatim):
 - 2026-06-16 18:00 KST 시점 EC2 자동 배포 후 사이클 122/126/129/150 task 모두 폭주
 - _wait_until(16:00) / (16:10) / (16:30) / (16:15) 모두 즉시 break
@@ -7,10 +17,10 @@
 - Supabase HTTP/2 ConnectionTerminated / Server disconnected / Broken pipe 폭주
 - [stock_master_daily_purge] 실패 graceful 5초 간격 발화
 
-회귀 가드:
-- G-152-PAST-1 (HIGH): target 이미 지난 시점 → 즉시 break 금지 + 다음 날 대기
+회귀 가드 (사이클 152 시점, 사이클 160 의미 전환 반영):
+- G-152-PAST-1 (HIGH): target 이미 지난 시점 → `advance_if_passed=True` 시 다음 날 대기
 - G-152-FUTURE-1: target 미래 시점 → 정상 대기
-- G-152-AST: now >= target: break 패턴 영구 차단 AST
+- G-152-AST: 이전 결함 패턴 (`if now >= target: break` 본체 영역) 영구 차단
 """
 
 from __future__ import annotations
@@ -67,7 +77,8 @@ async def test_g_152_past_1_target_already_passed_no_immediate_break():
 
     with patch("src.engine.scheduler.datetime", _MockDT), \
          patch("asyncio.sleep", _fake_sleep):
-        await sched._wait_until(target_18)
+        # 사이클 160 의미 전환 — `advance_if_passed=True` 명시 시 사이클 152 동작 영속
+        await sched._wait_until(target_18, advance_if_passed=True)
 
     # 즉시 break 금지 = asyncio.sleep 호출 ≥ 1
     assert len(sleep_calls) >= 1, "target 지난 시점 즉시 break 결함 (사이클 152 영구 차단)"

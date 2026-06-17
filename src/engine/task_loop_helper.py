@@ -31,7 +31,9 @@ class _SchedulerLike(Protocol):
 
     _running: bool
 
-    async def _wait_until(self, target_time: time) -> None:  # type: ignore[empty-body]
+    async def _wait_until(
+        self, target_time: time, *, advance_if_passed: bool = False
+    ) -> None:  # type: ignore[empty-body]
         ...
 
 
@@ -105,9 +107,11 @@ async def run_periodic_task_loop(
             logger.exception("[%s] 초기 실행 예외 graceful", task_label)
 
     # while 루프 — _wait_until → once → record + flush + logger
+    # 사이클 160 hotfix — `advance_if_passed=True` 명시 (task_loop_helper 폭주 차단 의무).
+    # `_wait_until` 본질 복원 (run_daily phase 전환은 즉시 break) + helper 영역만 내일 미루기.
     while scheduler._running:
         try:
-            await scheduler._wait_until(wait_time)
+            await scheduler._wait_until(wait_time, advance_if_passed=True)
             if not scheduler._running:
                 break
             summary = await once_callable()

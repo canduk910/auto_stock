@@ -86,7 +86,7 @@ async def test_g_lc1_immediate_call_on_start(monkeypatch):
     scheduler = MagicMock(spec=TradingScheduler)
     scheduler._running = False
 
-    async def mock_wait_until(t):
+    async def mock_wait_until(t, **kwargs):
         pass  # _running=False 이므로 while 진입 자체를 막음
 
     scheduler._wait_until = mock_wait_until
@@ -134,7 +134,7 @@ async def test_g_lc2_while_loop_second_call(monkeypatch):
     scheduler = MagicMock(spec=TradingScheduler)
     scheduler._running = True
 
-    async def mock_wait_until(t):
+    async def mock_wait_until(t, **kwargs):
         wait_call_count["n"] += 1
         # _wait_until 후 _running=False → while 루프 break
         scheduler._running = False
@@ -209,7 +209,7 @@ async def test_g_lc4_cancelled_error_in_while_loop(monkeypatch):
     scheduler = MagicMock(spec=TradingScheduler)
     scheduler._running = True
 
-    async def mock_wait_until(t):
+    async def mock_wait_until(t, **kwargs):
         raise asyncio.CancelledError()
 
     scheduler._wait_until = mock_wait_until
@@ -249,7 +249,7 @@ async def test_g_lc5_exception_in_immediate_phase_continues(monkeypatch):
     async def mock_load_once_raise():
         raise RuntimeError("즉시 실행 실패")
 
-    async def mock_wait_until(t):
+    async def mock_wait_until(t, **kwargs):
         wait_call_count["n"] += 1
         scheduler._running = False  # while 루프 1회 후 종료
 
@@ -316,7 +316,7 @@ async def test_g_lc6_exception_in_while_loop_sleeps(monkeypatch):
 
     type(scheduler)._running = property(lambda self: get_running())
 
-    async def mock_wait_until(t):
+    async def mock_wait_until(t, **kwargs):
         pass
 
     scheduler._wait_until = mock_wait_until
@@ -354,7 +354,7 @@ async def test_g_lc7_emit_prefix_immediate(monkeypatch):
     scheduler = MagicMock(spec=TradingScheduler)
     scheduler._running = False  # while 루프 미진입
 
-    async def mock_wait_until(t):
+    async def mock_wait_until(t, **kwargs):
         pass
 
     scheduler._wait_until = mock_wait_until
