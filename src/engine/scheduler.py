@@ -1191,6 +1191,19 @@ class TradingScheduler:
             if basics is not None and not basics.nxt_tradable:
                 # NXT 등록 안 됨 (또는 정지) — 시가 수신 무관 즉시 보류
                 self._pending_next_day_clear.add((ticker, strategy_id))
+                # 사이클 162 (2026-06-17) — DB 영속화 (의제 D, 메모리 휘발 차단).
+                # EC2 재기동 시 _boot() 영역에서 load_pending_ndc() 로 메모리 복구.
+                try:
+                    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+                    from src.db.pending_next_day_clear import save_pending_ndc
+                    _kst = _tz(_td(hours=9))
+                    _today = _dt.now(_kst).date()
+                    await save_pending_ndc(_today, ticker, strategy_id, reason="nxt_not_tradable")
+                except Exception:
+                    logger.exception(
+                        "[pending_ndc_save_skip] ticker=%s strategy=%s — 메모리 set 보존 graceful",
+                        ticker, strategy_id,
+                    )
                 logger.info(
                     "stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): "
                     "%s (전략: %s)", t(ticker), strategy_id,
@@ -1221,6 +1234,18 @@ class TradingScheduler:
             # 청산을 09:00 KRX 메인 시가 확정 이후로 보류 (_drain_pending_next_day_clear).
             if today_open <= 0:
                 self._pending_next_day_clear.add((ticker, strategy_id))
+                # 사이클 162 (2026-06-17) — DB 영속화 (의제 D).
+                try:
+                    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+                    from src.db.pending_next_day_clear import save_pending_ndc
+                    _kst = _tz(_td(hours=9))
+                    _today = _dt.now(_kst).date()
+                    await save_pending_ndc(_today, ticker, strategy_id, reason="nxt_open_missing")
+                except Exception:
+                    logger.exception(
+                        "[pending_ndc_save_skip] ticker=%s strategy=%s — 메모리 set 보존 graceful",
+                        ticker, strategy_id,
+                    )
                 logger.warning(
                     "NXT 시가 미수신 — 익일 청산 보류 (KRX 시가 확정 후 재시도): %s (전략: %s)",
                     t(ticker), strategy_id,
@@ -1321,6 +1346,18 @@ class TradingScheduler:
                 logger.exception("보류 익일 청산 실패: %s (%s)", ticker, strategy_id)
             finally:
                 self._pending_next_day_clear.discard((ticker, strategy_id))
+                # 사이클 162 (2026-06-17) — DB 영속화 동행 DELETE (의제 D).
+                try:
+                    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+                    from src.db.pending_next_day_clear import delete_pending_ndc
+                    _kst = _tz(_td(hours=9))
+                    _today = _dt.now(_kst).date()
+                    await delete_pending_ndc(_today, ticker, strategy_id)
+                except Exception:
+                    logger.exception(
+                        "[pending_ndc_delete_skip] ticker=%s strategy=%s graceful",
+                        ticker, strategy_id,
+                    )
                 _elapsed_ms = int((_time.monotonic() - _start) * 1000)
                 _level = "INFO" if _result == "success" else "WARNING"
                 await write_log(
@@ -3552,6 +3589,22 @@ class TradingScheduler:
 
         # P1(B) 익일 청산 보류 set 도 매일 초기화
         self._pending_next_day_clear.clear()
+        # 사이클 162 (2026-06-17) — DB 영속화 영역 동행 정리 (의제 D, fire-and-forget).
+        # `_reset_daily_state` 는 sync 함수 → running event loop 존재 시만 schedule.
+        # 다음 영업일 _boot 영역 진입 전 = target_date 이전 영역 일괄 DELETE.
+        try:
+            from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+            from src.db.pending_next_day_clear import purge_pending_ndc_before
+            _kst = _tz(_td(hours=9))
+            _today = _dt.now(_kst).date()
+            try:
+                _loop = asyncio.get_running_loop()
+                _loop.create_task(purge_pending_ndc_before(_today))
+            except RuntimeError:
+                # event loop 부재 (테스트 sync 호출 영역) — graceful skip
+                pass
+        except Exception:
+            logger.exception("[pending_ndc_purge_skip] reset_daily graceful")
 
         # 사이클 48 (2026-05-22, refactor-review 카드 #2) — Stale 추적 7 필드 통합 reset.
         # 사이클 17/24/28/29-R1/32/37/45 누적 7 dict/set 일괄 clear:

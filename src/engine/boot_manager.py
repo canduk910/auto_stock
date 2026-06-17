@@ -313,3 +313,19 @@ async def boot(scheduler: "TradingScheduler") -> None:
         logger.info("[market_op_boot_seed] vi_active=%d", len(vi_seed))
     except Exception:
         logger.exception("[market_op_boot_seed] REST 폴백 실패 graceful — WebSocket 수신만으로 충분")
+
+    # 사이클 162 (2026-06-17) — 익일청산큐 DB 영속화 복구 (의제 D).
+    # 사용자 보고 사고: 알테오젠 (196170, VB) + 알지노믹스 (476830, LTV) 6/17 15:20 강제청산 누락.
+    # 근본 원인 후보 = `_pending_next_day_clear` 메모리 휘발 (EC2 재기동 시).
+    # domain-expert 자문 산출물 `_workspace/domain_consult/cycle162_pending_persist_and_call_auction.md`.
+    # 사이클 149 VI seed 패턴 답습 = 부팅 마지막 단계 + graceful (실패 시 메모리 set 보존).
+    try:
+        from src.db.pending_next_day_clear import load_pending_ndc
+        restored = await load_pending_ndc(today)
+        scheduler._pending_next_day_clear.update(restored)
+        logger.info(
+            "[pending_ndc_boot_restore] count=%d target_date=%s",
+            len(restored), today.isoformat(),
+        )
+    except Exception:
+        logger.exception("[pending_ndc_boot_restore] DB 복구 실패 graceful — 메모리 set 보존")

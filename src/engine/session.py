@@ -182,6 +182,42 @@ class SessionTracker:
                 except Exception:
                     logger.exception("[Session] 종료 콜백 실패: %s", board.value)
 
+    def is_call_auction_now(self, now: datetime | None = None) -> bool:
+        """사이클 162 (2026-06-17) — 동시호가 시간대 판정.
+
+        domain-expert 자문 산출물:
+            `_workspace/domain_consult/cycle162_pending_persist_and_call_auction.md` (의제 E)
+
+        판정 = 코드 기반 OR 시간 기반 (보수적 영역, 미수신 환경 보호):
+
+        코드 기반 (H0UNMKO0 정본, KIS MCP `market_status_total` 검증):
+          - MKOP_CLS_CODE in {"110", "121"}
+          - 110 = 장전 동시호가 (08:30~09:00)
+          - 121 = 장후 동시호가 (15:20~15:30)
+
+        시간 기반 (폴백 + 통합 안전망):
+          - 08:30 ~ 09:00 (장 시작 동시호가)
+          - 15:20 ~ 15:30 (장 종료 동시호가)
+
+        체결 불가 시간대 → stale 회피 (체결 영구 미발생 영역 = 정상)
+        사용 영역: `stale_watcher_core.check_and_resubscribe_stale` _call_auction_skip hook.
+
+        사용자 보고 사고: 6/17 15:21:48 KST stale_watcher = subscribed=10 fresh=0 stale=10
+        ratio=0% → 5분 주기 재구독 시도 반복 = KIS LMS chain 위험.
+        """
+        # 코드 기반 (H0UNMKO0 수신 시점 우선)
+        if self._last_nxt_mkop_code in ("110", "121"):
+            return True
+
+        # 시간 기반 폴백 (H0UNMKO0 미수신 환경 = VTS 모의 영역 + KRX 정본 시간대)
+        now = now or datetime.now()
+        t = now.time()
+        if time(8, 30) <= t < time(9, 0):
+            return True
+        if time(15, 20) <= t < time(15, 30):
+            return True
+        return False
+
     async def on_h0nxmko0(self, tr_key: str, mkop_cls_code: str, payload: str) -> None:
         """장운영정보(H0UNMKO0/H0STMKO0/H0NXMKO0) 메시지 수신.
 

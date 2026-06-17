@@ -185,6 +185,28 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
             return False
         return False
 
+    # 사이클 162 (2026-06-17) — 동시호가 시간대 stale 회피 hook (의제 E).
+    # 사용자 보고 사고: 6/17 15:21:48 KST stale_watcher = subscribed=10 fresh=0 stale=10
+    # ratio=0% → 5분 주기 재구독 시도 반복 = KIS LMS chain 위험.
+    # 근본 원인 = 동시호가 시간대 (15:20~15:30) 체결 부재 = 정상 → stale 오판.
+    # domain-expert 자문 산출물 `_workspace/domain_consult/cycle162_pending_persist_and_call_auction.md`.
+    # 사이클 135 grace + 사이클 149 VI 패턴 답습 = stale 종목 *전체* skip + WARNING 1행.
+    try:
+        from src.engine.session import session_tracker as _session_tracker
+        _is_call_auction = _session_tracker.is_call_auction_now(now)
+    except Exception:
+        _is_call_auction = False
+
+    if _is_call_auction:
+        # 동시호가 시간대 → stale 판정 *전체* 지연 (사이클 38 명문화 영속 — stale 판정 지연만)
+        logger.warning(
+            "[stale_skip_call_auction] subscribed=%d — 동시호가 시간대 stale 회피 "
+            "(체결 부재 정상 영역)",
+            len(subscribed),
+        )
+        # 누적 retry 카운터 보존 (fresh 회복 케이스 분기 미진입 = 정상 영역 영구 영속)
+        return
+
     stale_tickers = sorted(
         t for t in subscribed
         if (now - ticker_last_tick.get(t, min_dt)) > threshold
