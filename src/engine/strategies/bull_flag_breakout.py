@@ -152,7 +152,22 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
         self._reset_funnel_steps()
 
+        # 사이클 163 (2026-06-18) — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
+        # 6/18 08:24:25 운영 사고 영구 차단 (사이클 158 VB 패턴 답습).
         tickers = await self._scan_universe()
+        for retry_attempt in range(3):
+            if tickers:
+                break
+            logger.warning(
+                "[bfb_prepare_retry] stock_master 0건 — %d초 후 재시도 (cap=%d/3)",
+                30, retry_attempt + 1,
+            )
+            await asyncio.sleep(30)
+            self._candidates = {}
+            stats = _empty_scan_stats()
+            self._scan_stats = stats
+            self._reset_funnel_steps()
+            tickers = await self._scan_universe()
         # 사이클 39 — 1단계: 유니버스 후보 + 2단계: 유니버스 필터 (시총·거래대금 컷 통과)
         # `_scan_universe` 내부에서 ranked → filtered 분리. `_scan_stats` 가 이미 양쪽 카운트.
         # 단계별 ticker 정확 캡처는 `_scan_universe` 가 후보 리스트와 통과 리스트 둘 다 반환해야

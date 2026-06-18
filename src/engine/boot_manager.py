@@ -16,6 +16,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import date, datetime, timedelta, timezone
 from typing import TYPE_CHECKING
@@ -28,6 +29,13 @@ if TYPE_CHECKING:
     from src.engine.scheduler import TradingScheduler
 
 logger = logging.getLogger(__name__)
+
+# 사이클 163 (2026-06-18) — prepare 호출 *전* stock_master 적재 대기 cap.
+# 6/18 08:22~08:27 KST 운영 사고 영역 영구 차단.
+# 사이클 134 task_loop_helper stagger (full_universe=0초 / basics=240 / daily=480 / master=720)
+# vs 사이클 158 VB hook (90초) — 본 가드는 적재 본체 완료까지 5분 cap polling.
+BOOT_PREPARE_STOCK_MASTER_WAIT_SECS = 300
+BOOT_PREPARE_STOCK_MASTER_POLL_SECS = 10
 
 
 async def boot(scheduler: "TradingScheduler") -> None:
@@ -66,6 +74,36 @@ async def boot(scheduler: "TradingScheduler") -> None:
         summary.net_asset, ratio, available_for_trading,
     )
     # 사이클 72 hotfix G-6: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
+
+    # 사이클 163 (2026-06-18) — prepare 호출 *전* stock_master 적재 대기 가드.
+    # 6/18 08:22~08:27 운영 사고 (4분 27초 race) 영역 영구 차단.
+    # 사이클 158 VB hook (90초) 한계 보완 — 5분 cap polling.
+    # 사이클 88 G-REJECT graceful 영속 — count_active 예외 시 0 폴백 → 대기 진입.
+    from src.db.stock_master import count_active as _count_active
+
+    waited = 0
+    initial_count = 0
+    while waited < BOOT_PREPARE_STOCK_MASTER_WAIT_SECS:
+        try:
+            cnt = await _count_active()
+        except Exception:
+            logger.exception("[boot_prepare_wait] count_active 예외 graceful")
+            cnt = 0
+        if cnt > 0:
+            if waited > 0:
+                logger.info(
+                    "[boot_prepare_wait] stock_master count=%d (waited=%ds)",
+                    cnt, waited,
+                )
+            initial_count = cnt
+            break
+        await asyncio.sleep(BOOT_PREPARE_STOCK_MASTER_POLL_SECS)
+        waited += BOOT_PREPARE_STOCK_MASTER_POLL_SECS
+    else:
+        logger.warning(
+            "[boot_prepare_wait_timeout] stock_master 0건 — %ds 대기 후 prepare 진행 (graceful)",
+            BOOT_PREPARE_STOCK_MASTER_WAIT_SECS,
+        )
 
     # 전략별 prepare 호출
     for strategy in scheduler.registry.enabled():

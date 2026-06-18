@@ -90,6 +90,12 @@ def boot_env(scheduler_env, monkeypatch: pytest.MonkeyPatch):
             return None
         monkeypatch.setattr(s, "prepare", _noop_prepare)
 
+    # 사이클 163 (2026-06-18) — `_boot()` prepare *전* count_active 가드.
+    # 통합 테스트는 실제 supabase 미접속 → count_active 폴링 영역 5분 cap timeout 차단.
+    async def fake_count_active():
+        return 2768
+    monkeypatch.setattr("src.db.stock_master.count_active", fake_count_active)
+
     # db.positions.load_all
     async def fake_load_all():
         return []

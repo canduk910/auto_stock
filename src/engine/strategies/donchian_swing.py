@@ -132,7 +132,22 @@ class DonchianSwingStrategy(StrategyBase):
         # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
         self._reset_funnel_steps()
 
+        # 사이클 163 (2026-06-18) — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
+        # 6/18 08:24:24 운영 사고 영구 차단 (사이클 158 VB 패턴 답습).
         tickers = await self._scan_universe()
+        for retry_attempt in range(3):
+            if tickers:
+                break
+            logger.warning(
+                "[donchian_prepare_retry] stock_master 0건 — %d초 후 재시도 (cap=%d/3)",
+                30, retry_attempt + 1,
+            )
+            await asyncio.sleep(30)
+            self._candidates = {}
+            stats = _empty_scan_stats()
+            self._scan_stats = stats
+            self._reset_funnel_steps()
+            tickers = await self._scan_universe()
         # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
         min_mcap_billion = params["min_market_cap"] / 100_000_000
         self._record_funnel_pipeline_step(

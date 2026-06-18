@@ -202,6 +202,36 @@ async def count_master_raw_today() -> int:
         return 0
 
 
+async def count_active() -> int:
+    """stock_master 활성 row 카운트 (사이클 163, _boot prepare 가드용).
+
+    `_boot()` 영역 prepare 호출 *전* count 가드 hook 의 진입점.
+    사이클 158 VB 자동 재시도 hook (90초) 한계 보완 (사이클 134
+    task_loop_helper stagger 영속 = full_universe 0초 / basics 240초 /
+    daily 480초 / master 720초). 적재 본체 완료까지 5분 cap polling.
+
+    사이클 128 count="exact" 패턴 답습 (PostgREST 1000행 silent cap 회피).
+    사이클 88 G-REJECT graceful 영속 — supabase 예외 시 0 폴백.
+
+    Returns:
+        활성 row 카운트 (count="exact"). 예외 시 0.
+    """
+    def _query():
+        return (
+            supabase.table(TABLE_NAME)
+            .select("ticker", count="exact")
+            .limit(0)
+            .execute()
+        )
+
+    try:
+        result = await asyncio.to_thread(_query)
+        return int(getattr(result, "count", 0) or 0)
+    except Exception as exc:
+        logger.warning("[stock_master_count_active_failed] err=%r", exc)
+        return 0
+
+
 async def list_all(limit: int = 100, offset: int = 0) -> list[dict]:
     """페이징 list (UI list 영역). limit ∈ [1, 1000], offset ≥ 0.
 

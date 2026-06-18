@@ -76,6 +76,7 @@ async def test_boot_calls_preissue_before_token_and_load_config():
          )), \
          patch("src.engine.boot_manager.get_daily_orders", new=AsyncMock(return_value=[])), \
          patch("src.engine.boot_manager.write_log", new=AsyncMock()), \
+         patch("src.db.stock_master.count_active", new=AsyncMock(return_value=2768)), \
          patch("src.db.positions.load_all", new=AsyncMock(return_value=[])):
         tm.get_token = AsyncMock(side_effect=lambda: call_order.append("token"))
         await boot_manager.boot(scheduler)

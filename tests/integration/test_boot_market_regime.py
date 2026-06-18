@@ -68,6 +68,11 @@ def boot_env_regime(scheduler_env, monkeypatch: pytest.MonkeyPatch):
             return None
         monkeypatch.setattr(s, "prepare", _noop_prepare)
 
+    # 사이클 163 (2026-06-18) — boot prepare *전* count_active 가드 mock.
+    async def fake_count_active():
+        return 2768
+    monkeypatch.setattr("src.db.stock_master.count_active", fake_count_active)
+
     async def fake_load_all():
         return []
 

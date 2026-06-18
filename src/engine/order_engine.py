@@ -984,10 +984,26 @@ class OrderEngine:
             # → trade_history.price 갱신 의무 (사용자 보고 005940 BUY 33,400원 vs HTS 33,350원 +50원 차이 시정).
             # PENDING INSERT 시점 record_price (주문가 LIMIT / scanner current_price MARKET)
             # → COMPLETED UPDATE 시점에 체결단가로 정합 보정.
-            affected = await update_trade_status(
-                ticker, TradeType.BUY, TradeStatus.COMPLETED,
-                strategy=strategy_id, price=price,
-            )
+            #
+            # 사이클 163 (2026-06-18): 3 영역 try/except 분리 + 가시화 강화.
+            # 6/17 12:43:09 알지노믹스 (476830) callback_exception 영구 차단.
+            # 사이클 88 G-REJECT-1 부분 예외 (DB INSERT race 는 재연결로 해결 안 됨).
+            # 메모리 positions 등록은 이미 완료 → DB 영역만 graceful, callback raise 0건.
+            # `_on_tick` / `_on_board` raise 영속 의무 영역 변경 0 (다른 callback 영역 한정).
+
+            # 영역 1: update_trade_status (PENDING → COMPLETED)
+            try:
+                affected = await update_trade_status(
+                    ticker, TradeType.BUY, TradeStatus.COMPLETED,
+                    strategy=strategy_id, price=price,
+                )
+            except Exception as exc:
+                logger.error(
+                    "[buy_fill_db_error] step=update_trade_status ticker=%s order_no=%s err=%r",
+                    ticker, order_no, exc,
+                )
+                affected = 0
+
             if affected == 0:
                 # 체결통보가 execute_buy의 insert_trade(PENDING)보다 먼저 도착한 race
                 # → COMPLETED 상태로 직접 INSERT, execute_buy 측에 PENDING INSERT 생략 신호
@@ -1018,22 +1034,39 @@ class OrderEngine:
                         "[buy_fill_correction_unique_violation] ticker=%s order_no=%s strategy_attempted=%s err=%r → strategy 무관 강제 COMPLETED UPDATE",
                         ticker, order_no, strategy_id, exc,
                     )
-                    forced_affected = await _update_trade_status_by_order_no(
-                        order_no, TradeType.BUY, TradeStatus.COMPLETED,
-                        price=price,
-                    )
-                    if forced_affected == 0:
-                        logger.error(
-                            "[buy_fill_correction_forced_update_zero] ticker=%s order_no=%s — 강제 UPDATE 영역 0건 (PENDING row 부재 의심)",
-                            ticker, order_no,
+                    # 사이클 163 — forced UPDATE 영역도 try/except 분리 + 가시화 강화
+                    try:
+                        forced_affected = await _update_trade_status_by_order_no(
+                            order_no, TradeType.BUY, TradeStatus.COMPLETED,
+                            price=price,
                         )
-            from src.db.positions import save_position
-            from src.engine.scanner import ticker_names
-            await save_position(
-                ticker=ticker, ticker_name=ticker_names.get(ticker, ""),
-                buy_price=price, quantity=total_filled, order_no=order_no,
-                strategy_id=strategy_id, buy_date=state.positions[ticker].buy_date,
-            )
+                        if forced_affected == 0:
+                            logger.error(
+                                "[buy_fill_correction_forced_update_zero] ticker=%s order_no=%s — 강제 UPDATE 영역 0건 (PENDING row 부재 의심)",
+                                ticker, order_no,
+                            )
+                    except Exception as exc2:
+                        logger.error(
+                            "[buy_fill_db_error] step=forced_update ticker=%s order_no=%s err=%r",
+                            ticker, order_no, exc2,
+                        )
+
+            # 영역 3: save_position (positions DB INSERT)
+            # 6/17 12:43:09 알지노믹스 사고 영역 핵심 — DB 미동기화 시 15분 sync 회복 기대.
+            try:
+                from src.db.positions import save_position
+                from src.engine.scanner import ticker_names
+                await save_position(
+                    ticker=ticker, ticker_name=ticker_names.get(ticker, ""),
+                    buy_price=price, quantity=total_filled, order_no=order_no,
+                    strategy_id=strategy_id, buy_date=state.positions[ticker].buy_date,
+                )
+            except Exception as exc:
+                logger.error(
+                    "[buy_fill_db_error] step=save_position ticker=%s order_no=%s err=%r — 메모리 등록 영속, 15분 sync 회복 기대",
+                    ticker, order_no, exc,
+                )
+
             self._filled_qty.pop(order_no, None)
             self._order_qty.pop(order_no, None)
             self._order_strategy.pop(order_no, None)

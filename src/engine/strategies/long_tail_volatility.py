@@ -118,6 +118,9 @@ class LongTailVolatilityStrategy(StrategyBase):
 
         사이클 143 (2026-06-15) — 사이클 140 자문 영속 LTV 6단계 funnel hook 추가.
         VB 5단계 + 연속 상한가 필터 (LTV 특화 영역 영구 영속).
+
+        사이클 163 (2026-06-18) — stock_master 0건 race 자동 재시도 hook.
+        6/18 08:24:24 운영 사고 영역 영구 차단 (cap 3회 + sleep 30초). 사이클 158 VB 패턴 답습.
         """
         import asyncio
 
@@ -129,7 +132,22 @@ class LongTailVolatilityStrategy(StrategyBase):
         # 사이클 143 — 단계별 ticker 캡처 reset (사이클 39 답습)
         self._reset_funnel_steps()
 
+        # 사이클 163 — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
+        # 초기 1회 + 재시도 cap 3회 = 최대 4회 호출 영역.
         tickers = await self._scan_universe()
+        for retry_attempt in range(3):
+            if tickers:
+                break
+            logger.warning(
+                "[ltv_prepare_retry] stock_master 0건 — %d초 후 재시도 (cap=%d/3)",
+                30, retry_attempt + 1,
+            )
+            await asyncio.sleep(30)
+            # 사이클 21 카운트 재초기화 (재시도마다 _scan_universe 가 갱신)
+            stats = _empty_scan_stats()
+            self._scan_stats = stats
+            self._reset_funnel_steps()
+            tickers = await self._scan_universe()
         # 사이클 143 — step 1+2 funnel hook (사이클 140 자문 영속)
         params = self.config.params
         min_mcap_billion = params.get("min_market_cap", 100_000_000_000) / 100_000_000
