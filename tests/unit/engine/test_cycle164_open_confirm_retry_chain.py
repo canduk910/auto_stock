@@ -89,8 +89,20 @@ async def test_open_confirm_if_pending_triggers_retry_when_unconfirmed():
 # G-164-OPEN-2 (HIGH) — 모든 종목 confirmed → silent skip (idempotent)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_open_confirm_if_pending_skip_when_all_confirmed():
-    """`_open_confirmed[main]=True` 전수 → 재시도 호출 0건 (idempotent)."""
+async def test_open_confirm_if_pending_skip_when_all_confirmed(monkeypatch):
+    """`_open_confirmed[main]=True` 전수 → 재시도 호출 0건 (idempotent).
+
+    환경별 active_board 차이 차단 의무 = session_tracker.active 강제 MAIN.
+    """
+    from src.engine.session import MarketBoard, session_tracker
+
+    # active property = setter 부재 → _active 직접 영영 영영 영영 영영 영영
+    # SessionTracker.active 영영 frozenset({MarketBoard.MAIN}) 영영 영영
+    monkeypatch.setattr(
+        type(session_tracker), "active",
+        property(lambda self: frozenset({MarketBoard.MAIN})),
+    )
+
     sched = TradingScheduler()
     vb = _make_strategy_with_targets(
         "volatility_breakout",
