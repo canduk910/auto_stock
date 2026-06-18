@@ -347,6 +347,11 @@ class TestFunnelStepsIntegration:
         from src.db import stock_master as _sm_mod
         monkeypatch.setattr(_sm_mod, "list_by_filter", _mock_list_by_filter)
 
+        # 사이클 163 — LTV 0건 재시도 hook (asyncio.sleep(30) × cap 3) 영영 timeout 차단
+        import asyncio as _asyncio_mod
+        from unittest.mock import AsyncMock
+        monkeypatch.setattr(_asyncio_mod, "sleep", AsyncMock(return_value=None))
+
         await strategy.prepare()
 
         assert len(strategy._funnel_steps) >= 1, (
