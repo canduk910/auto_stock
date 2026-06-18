@@ -2208,6 +2208,19 @@ class TradingScheduler:
                 # donchian_swing 은 고정 유니버스라 대상 아님.
                 await self._reprepare_breakout_if_empty()
 
+                # 사이클 164 (2026-06-18) — VB/LTV 시가 확정 chain 재시도 안전망.
+                # 6/18 11:03 KST EC2 재기동 → prepare 11:17 완료 → _targets 등록되지만
+                # 시가 확정 chain 부재로 UI "시가 대기" 영구 잔존 결함 시정.
+                # `_reprepare_breakout_if_empty` 직후 = prepare 완료된 종목 영역에서 시가
+                # 미확정 종목 자동 재시도. 본체 예외는 흡수 — 다음 사이클 자연 재시도.
+                try:
+                    await self._confirm_breakout_open_prices_if_pending()
+                except Exception:
+                    logger.exception(
+                        "_confirm_breakout_open_prices_if_pending 실패 — "
+                        "다음 사이클 자연 재시도"
+                    )
+
                 # 사이클 13-D (2026-05-18): stale 우선 재구독.
                 # K stale watcher 가 120s 주기로 발화하는데 _scan_loop 는 5분 주기다.
                 # 통합 구독 직후 1행으로 stale 종목을 HIGH 우선순위로 즉시 재구독해
@@ -2272,6 +2285,83 @@ class TradingScheduler:
                     await self._sync_positions_from_balance()
                 except Exception:
                     logger.debug("포지션 동기화 실패")
+
+    async def _confirm_breakout_open_prices_if_pending(self) -> None:
+        """사이클 164 (2026-06-18) — VB/LTV 시가 확정 chain 재시도 안전망.
+
+        근본 원인 (6/18 11:03 KST EC2 재기동 사례):
+        - 09:00:05 KST 정상 시가 확정 후 11:03 EC2 재기동
+        - run_daily 재진입 시 `now > TIME_KRX_OPEN_CONFIRM` 분기에서 L640
+          `_confirm_breakout_open_prices()` 호출되지만, prepare 미완료라 `_targets`
+          비어 silent skip (L1413 `if not targets: return`)
+        - 이후 prepare 완료되어도 시가 확정 재시도 chain 부재 → UI "시가 대기" 영구 잔존
+
+        시정 영역:
+        - `_targets` 에 종목 1개 이상 존재 AND 활성 보드에서 `_open_confirmed` 미확정
+          종목 1개 이상 시 → `_confirm_breakout_open_prices(board=active_board)` 재시도
+        - 모든 종목 confirmed → silent skip (idempotent, 호출 0건)
+        - prepare 미완료 (`_targets` 빈 dict) → 다른 영역 (`_reprepare_breakout_if_empty`) 담당
+        - 예외 graceful — 다음 사이클 자연 재시도 영속
+
+        영속 의무:
+        - 사이클 26 VB MAIN 단독 + 사이클 38 LTV 3보드 영속
+        - 사이클 88 G-REJECT graceful 영속
+        - 사이클 38 명문화 영속 — 매수 진입 *전* 영역 한정 + 매도/익일청산 hot path 무관
+        """
+        from src.engine.session import session_tracker, MarketBoard
+        from datetime import datetime as _dt, time as _t
+
+        # 활성 보드 결정 — SessionTracker 위임 + 시각 기반 fallback
+        # (`_confirm_breakout_open_prices` 영속 패턴 답습, L1382~L1397)
+        active = session_tracker.active
+        active_board: str | None = None
+        for candidate in ("main", "post_nxt", "pre_nxt"):
+            try:
+                if MarketBoard(candidate) in active:
+                    active_board = candidate
+                    break
+            except Exception:
+                continue
+        if active_board is None:
+            now_t = _dt.now().time()
+            if now_t < _t(9, 0):
+                active_board = "pre_nxt"
+            elif now_t < _t(15, 30):
+                active_board = "main"
+            else:
+                active_board = "post_nxt"
+
+        # VB + LTV 합집합 — 한쪽이라도 미확정 종목 존재 시 재시도
+        for sid in ("volatility_breakout", "long_tail_volatility"):
+            strategy = self.registry.get(sid)
+            if strategy is None or not strategy.config.enabled:
+                continue
+            targets = getattr(strategy, "_targets", None) or {}
+            if not targets:
+                # prepare 미완료 — `_reprepare_breakout_if_empty` 담당
+                continue
+            open_confirmed = getattr(strategy, "_open_confirmed", None) or {}
+
+            unconfirmed = [
+                ticker
+                for ticker in targets.keys()
+                if not open_confirmed.get(ticker, {}).get(active_board, False)
+            ]
+            if not unconfirmed:
+                # 모든 종목 confirmed — idempotent skip
+                continue
+
+            logger.info(
+                "[open_confirm_retry] strategy=%s board=%s unconfirmed=%d/%d — 재시도",
+                sid, active_board, len(unconfirmed), len(targets),
+            )
+            try:
+                await self._confirm_breakout_open_prices(board=active_board)
+            except Exception:
+                logger.exception(
+                    "_confirm_breakout_open_prices_if_pending 재시도 실패 — "
+                    "다음 사이클 자연 재시도 (strategy=%s)", sid,
+                )
 
     async def _reprepare_breakout_if_empty(self) -> None:
         """VB/LTV/BFB/VCP 의 `_scanned_tickers` 가 비어있으면 prepare() 를 1회 재시도한다.
