@@ -927,9 +927,26 @@ class OrderEngine:
     ) -> None:
         """매수 체결 처리 — 체결통보 수신 시 올바른 전략에 포지션 등록.
 
-        사이클 147 (2026-06-16): `_order_strategy.get(order_no, "momentum")` 하드코딩 폴백 폐기.
-        매핑 dict miss 시 trade_history PENDING row 영역 strategy 영구 영속 복구
-        (005940 사고 영역 패턴 답습 — 매수도 동일 race 가능).
+        호출 chain (사이클 165 명문화):
+          H0STCNI0 수신 → handler._handle_execution → OrderEngine.handle_execution_notice
+            → _handle_buy_fill (본 함수, exec_type="2" 체결 분기)
+
+        가드 매트릭스:
+          - race: 체결통보가 REST 응답보다 먼저 도착 → `_completed_orders` set 등록 후
+            `update_trade_status` UPDATE 영향 0건 시 보정 INSERT (사이클 30 영속).
+          - strategy 복구 (사이클 147): `_order_strategy` 매핑 dict miss 시
+            trade_history PENDING row 영역 lookup 폴백 → momentum 하드코딩 최후 폴백.
+          - 체결가 정합 (사이클 161): `update_trade_status(..., price=price)` 인자 명시 의무.
+            CNTG_UNPR (handler.py fields[10]) = trade_history.price 영구 정합
+            (005940 6/16 BUY 50원 차이 시정 영속).
+          - UniqueViolation (사이클 161 hotfix): 보정 INSERT 영역 try/except + 강제 UPDATE
+            (`_update_trade_status_by_order_no(price=price)`) 폴백.
+          - 부분 체결: PARTIAL 상태 + price 인자 명시 (잔여 물량 추적).
+
+        영속 의무:
+          사이클 30 trade_history 부분 UNIQUE 인덱스 / 사이클 38 명문화 /
+          사이클 102 G-REJECT-1 callback exception raise / 사이클 147 strategy fallback /
+          사이클 161 price 정합 / 사이클 163 DB 격리 chain.
         """
         strategy_id = self._order_strategy.get(order_no)
         if strategy_id is None:
@@ -1090,9 +1107,27 @@ class OrderEngine:
     ) -> None:
         """매도 체결 처리 — 올바른 전략에서 포지션 제거.
 
-        사이클 147 (2026-06-16): `_order_strategy.get(order_no, "momentum")` 하드코딩 폴백 폐기.
-        005940 NH투자증권 LTV SELL trade_history PENDING ~6h 영구 잔존 사고 (2026-06-16 08:00→09:18)
-        영구 차단. 매핑 dict miss 시 trade_history PENDING row 영역 strategy 영구 복구.
+        호출 chain (사이클 165 명문화):
+          H0STCNI0 수신 → handler._handle_execution → OrderEngine.handle_execution_notice
+            → _handle_sell_fill (본 함수, side=="SELL" + exec_type="2" 체결 분기)
+
+        가드 매트릭스:
+          - strategy 복구 (사이클 147): `_order_strategy` 매핑 dict miss 시
+            trade_history PENDING row 영역 lookup 폴백 → momentum 하드코딩 최후 폴백.
+            005940 NH투자증권 LTV SELL trade_history PENDING ~6h 잔존 사고
+            (2026-06-16 08:00→09:18) 영구 차단.
+          - 체결가 정합: `update_trade_status(SELL, COMPLETED, price=price)` 인자 명시.
+            CNTG_UNPR (handler.py fields[10]) = trade_history.price 정합.
+          - UniqueViolation: 보정 INSERT 영역 try/except + `_update_trade_status_by_order_no`
+            강제 UPDATE 폴백.
+          - WS 구독 정리 (사이클 15-A): `_unsubscribe_if_no_other_strategy(ticker)` —
+            모든 전략에서 보유/익일청산/scanned 부재 시만 unsubscribe.
+          - sold_today 등록: 당일 동일 ticker 재매수 차단 (`is_ticker_blocked_for_buy`).
+
+        영속 의무:
+          사이클 19 `_selling` 가드 / 사이클 30 trade_history 부분 UNIQUE /
+          사이클 38 명문화 / 사이클 102 G-REJECT-1 callback exception raise /
+          사이클 147 strategy fallback / 사이클 161 price 정합 / 사이클 163 DB 격리 chain.
         """
         strategy_id = self._order_strategy.get(order_no)
         if strategy_id is None:

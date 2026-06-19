@@ -63,7 +63,23 @@ class RiskManager:
         open_price: int,
         change_rate: float,
     ) -> None:
-        """실시간 체결가 수신 시 호출된다."""
+        """실시간 체결가 수신 시 호출된다.
+
+        가드 평가 순서 (사이클 165 명문화 — 변경 0):
+          L0. 매도/손절/Trailing/익일청산: 보드 가드 *전* 평가 (사이클 38 명문화 영속).
+              `check_exit_signal` 분기는 PRE/MAIN/POST 무관 항상 작동 — `tradable_boards`
+              는 매수 진입 전용.
+          L1. 보드 가드 (사이클 38): `session_tracker.is_tradable(strategy_id, params)`.
+              매수 신호 평가 진입 전 차단.
+          L2. 시장 레짐 매수 가드 4 모드 (사이클 2/B-1): `get_buy_block_state()`.
+              HARD → skip, WARN → 허용 + 로그, SOFT → 수량 ×0.5, OFF → 비활성.
+          L3. 중복 가드: `registry.is_ticker_blocked_for_buy()`.
+              보유 OR 주문중 OR 당일매도 통합 차단.
+          L4. 자금 사전 가드: `state.is_low_funds_blocked(ticker)` 또는
+              `current_price > state.total_investment` skip (사이클 31 R6 가시화).
+
+        매도/손절/Trailing/익일청산은 L1~L4 *전* 평가 → tradable_boards 무관 항상 작동.
+        """
         from datetime import datetime as _dt
         from src.engine.scanner import KST_TZ, ticker_last_tick, ticker_prev_close, ticker_prices
 

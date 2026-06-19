@@ -36,6 +36,11 @@ _TICKER_PATTERN = re.compile(r"^[A-Za-z0-9]{6}$")
 async def inquire_ccnl(ticker: str, market: str = "J") -> dict | None:
     """KIS 주식현재가 체결 조회 (FHKST01010300) — 당일 체결 내역 (최근순).
 
+    TR_ID: FHKST01010300 (실전/모의 동일, FH 접두사).
+    경로: `kis_get_quote` 시세성 풀 라우팅 (보조 라운드로빈 + 메인 fallback).
+    응답 output 배열: [0] = 가장 최근 체결 (체결시간/체결단가/체결량/상대강도).
+    today_volume = output 배열 cntg_vol 합산 (당일 누적 체결량).
+
     universe 가드 (사이클 32, R4): stale 종목이 실제로 KIS 측 거래가 빈약한지 확인 후
     universe 에서 자동 제외. 보유/익일청산은 호출자가 사전 차단 보장.
 

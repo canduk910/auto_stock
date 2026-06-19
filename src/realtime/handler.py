@@ -94,8 +94,15 @@ def _parse_tick_prices(fields: list[str]) -> tuple[int, int] | None:
 async def _handle_tick(payload: str) -> None:
     """실시간 체결가 메시지를 파싱한다.
 
-    payload 형식 (^ 구분):
-    종목코드^체결시간^현재가^전일대비구분^전일대비^등락률^가중평균^시가^고가^저가^...
+    TR_ID: H0STCNT0 (KRX 단독) / H0NXCNT0 (NXT 단독) / H0UNCNT0 (KRX+NXT 통합) — 동일 포맷.
+    KIS MCP 정본 (`H0STCNT0` 41 컬럼) — 본 함수는 fields[0]~[9] 만 사용.
+
+    payload 형식 (^ 구분, fields[0]~[9]):
+      [0] 종목코드(MKSC_SHRN_ISCD) / [1] 체결시간(STCK_CNTG_HOUR, HHMMSS)
+      [2] 현재가(STCK_PRPR) / [3] 전일대비구분 / [4] 전일대비
+      [5] 등락률(PRDY_CTRT) / [6] 가중평균(WGHN_AVRG_STCK_PRC) / [7] 시가(STCK_OPRC)
+      [8] 고가(STCK_HGPR) / [9] 저가(STCK_LWPR)
+    호출자 (`RiskManager.on_tick`): current_price + open_price + change_rate 만 전달.
     """
     fields = payload.split("^")
     if len(fields) < 10:
@@ -145,12 +152,14 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
     if len(fields) < 15:
         return
 
-    # 필드 매핑 (KIS 체결통보 output 기준)
-    # [0] HTS ID, [1] 계좌번호(8자리)+상품코드(2자리), [2] 주문번호, [3] 원주문번호
-    # [4] 매도매수구분(02:매수,01:매도), [5] 정정구분, [6] 주문종류
-    # [7] 주문조건, [8] 종목코드, [9] 주문수량, [10] 체결단가
-    # [11] 체결시간, [12] 거부여부, [13] 체결구분(1:접수,2:체결)
-    # [14] ?, [15] ?, [16] 체결수량, [17] 고객명, [18] 종목명
+    # 필드 매핑 (KIS 체결통보 H0STCNI0/H0STCNI9 output, KIS MCP 정본 검증 26 컬럼)
+    # [0] HTS ID, [1] 계좌번호(8자리)+상품코드(2자리), [2] 주문번호(ODNO), [3] 원주문번호
+    # [4] 매도매수구분(SLL_BUY_DVSN_CD: 02:매수, 01:매도), [5] 정정구분, [6] 주문종류
+    # [7] 주문조건, [8] 종목코드(STCK_SHRN_ISCD), [9] 주문수량, [10] 체결단가(CNTG_UNPR — 사이클 161 정합)
+    # [11] 체결시간(STCK_CNTG_HOUR), [12] 거부여부, [13] 체결구분(CNTG_YN: 1:접수, 2:체결)
+    # [14] 예약 (KIS 명세), [15] 예약, [16] 체결수량(CNTG_QTY), [17] 고객명, [18] 종목명
+    # 호출자 (`OrderEngine._handle_buy_fill`/`_handle_sell_fill`) 가 trade_history.price = CNTG_UNPR
+    # 영구 정합 (사이클 161 영속 — 005940 6/16 BUY 50원 차이 시정).
 
     # 실전 환경에서 동일 HTS ID에 묶인 다른 계좌의 체결통보가 함께 푸시됨 → 대상 계좌만 처리
     target_account = (settings.kis_account_no or "").strip()

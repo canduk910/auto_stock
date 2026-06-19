@@ -55,9 +55,11 @@ def is_market_order_disallowed(err: KisApiError) -> bool:
     """KIS 응답이 '시장가 주문 불가' 류의 거부인지 판단.
 
     계양전기(012200) "시장가매매불가" 거부 대응 (2026-05-11).
-    msg_cd 는 운영 로그(Phase A1) 누적 후 화이트리스트화 — 현재는 msg1 키워드 기반.
+    msg_cd 누적: APBK1943 (계양전기 매도) + APBK3013 (NXT 애프터 매도).
+    현재는 msg1 키워드 (`_MARKET_ORDER_DISALLOWED_KEYWORDS`) 기반 — 운영 로그 누적 후 화이트리스트화 예정.
     기존 3종 분류(is_market_closed_rejection / is_insufficient_cash / is_insufficient_quantity)와
-    상호 배타 — 이 함수가 True 이면 다른 3종은 모두 False 를 반환한다.
+    **상호 배타** — 이 함수가 True 이면 다른 3종은 모두 False 를 반환한다.
+    호출자: OrderEngine 의 시장가 거부 → 지정가 5호가 폴백 1회 분기.
     """
     msg1 = err.msg1 or ""
     return any(kw in msg1 for kw in _MARKET_ORDER_DISALLOWED_KEYWORDS)
@@ -66,8 +68,11 @@ def is_market_order_disallowed(err: KisApiError) -> bool:
 def is_market_closed_rejection(err: KisApiError) -> bool:
     """KIS 응답이 '장운영시간 외' 류의 시간 거부인지 판단.
 
-    동일 msg_cd(APBK0918)가 보유부족/자금부족/시간외 거부 모두에 사용되므로
-    msg1 키워드로 분리한다. True 면 `is_insufficient_*` 는 모두 False 로 떨어져야 한다.
+    동일 msg_cd(APBK0918) 가 보유부족/자금부족/시간외 거부 모두에 사용되므로
+    msg1 키워드 (`_MARKET_CLOSED_KEYWORDS`) 로 분리한다.
+    True 면 `is_insufficient_*` 는 모두 False 로 떨어져야 한다.
+    호출자: `execute_sell` 이 positions(메모리/DB)·`_selling` 보존 + 재시도 중단 결정.
+    `SellRejectionTracker.is_blocked()` 2단계 TTL (KRX 메인 5분 / NXT 다음 09:00) 가드.
     """
     msg1 = err.msg1 or ""
     return any(kw in msg1 for kw in _MARKET_CLOSED_KEYWORDS)
@@ -76,8 +81,10 @@ def is_market_closed_rejection(err: KisApiError) -> bool:
 def is_insufficient_cash(err: KisApiError) -> bool:
     """KIS 매수 실패 응답이 '주문가능금액 부족'(예수금 부족) 사유인지 판단.
 
-    msg_cd가 정확히 일치하지 않을 가능성에 대비해 msg1 키워드도 함께 본다.
+    msg_cd 화이트리스트: APBK0919 / EGW00120.
+    msg1 키워드 ("부족" + "주문가능금액/예수금/현금") 동시 만족 시도 True.
     APBK0918 은 동일 msg_cd 가 시간외 거부에도 쓰이므로 msg1 의 현금부족 키워드를 확인한다.
+    호출자: OrderEngine 의 `block_buy(now + 900s)` 매수 락 결정.
     """
     msg_cd = (err.msg_cd or "").upper()
     msg1 = err.msg1 or ""
@@ -102,8 +109,11 @@ def is_insufficient_cash(err: KisApiError) -> bool:
 def is_insufficient_quantity(err: KisApiError) -> bool:
     """KIS 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 판단.
 
+    msg_cd 화이트리스트: APBK1234.
+    msg1 키워드 ("부족" + "매도가능/보유수량/잔고") 동시 만족 시도 True.
     APBK0918 은 동일 msg_cd 가 시간외 거부에도 쓰이므로 msg1 키워드로 분리한다.
     시간외 거부면 positions 보존을 위해 False 를 반환한다.
+    호출자: `execute_sell` 이 3회 재시도 생략 + 즉시 break + 메모리/DB positions 정리.
     """
     msg_cd = (err.msg_cd or "").upper()
     msg1 = err.msg1 or ""

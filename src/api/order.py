@@ -32,7 +32,27 @@ async def place_order(
 ) -> OrderResult:
     """현금 매수 또는 매도 주문을 실행한다.
 
-    `exchange`: `KRX`(기본) / `NXT` / `SOR`. 모의투자(VTS)는 KRX만 허용.
+    TR_ID 분기:
+      - 실전 매수: TTTC0012U / 실전 매도: TTTC0011U
+      - 모의 자동 변환: `settings.get_tr_id()` 가 T → V 치환
+        (실전 TTTC0012U → 모의 VTTC0012U)
+
+    ORD_DVSN (주문 구분):
+      - "01" = 시장가 (MARKET, 기본)
+      - "00" = 지정가 (LIMIT). 시장가 거부 폴백 시 사용 — 매수는 `step_up(5)`,
+        매도는 `step_down(5)` 호가 단위 정렬.
+
+    EXCG_ID_DVSN_CD (거래소):
+      - "KRX" = 한국거래소 메인 (기본)
+      - "NXT" = 넥스트 매매 (프리/애프터)
+      - "SOR" = 스마트오더 라우팅
+      - 모의(VTS)는 KRX 만 허용 — NXT/SOR 실전 한정.
+
+    호출자 의무 (사이클 165 명문화):
+      `execute_buy/execute_sell` 가 응답 직후 동기 영역에서 주문번호 매핑
+      (`_order_qty/_order_strategy/_order_ticker/_pending_buy_orders`) 등록 후
+      `await insert_trade(PENDING)` 호출. 매핑은 `await` 진입 *전* 완료 필수
+      (체결통보 race 차단, CLAUDE.md "절대 깨지 말 것" 영속).
     """
     base_tr_id = "TTTC0012U" if side == OrderSide.BUY else "TTTC0011U"
     tr_id = settings.get_tr_id(base_tr_id)
@@ -78,6 +98,8 @@ async def cancel_order(
 ) -> OrderResult:
     """주문 정정 또는 취소를 실행한다.
 
+    TR_ID: TTTC0013U (정정/취소 공용, 실전. 모의 VTTC0013U).
+    `RVSE_CNCL_DVSN_CD`: "01" 정정 / "02" 취소.
     `exchange`: 원주문이 접수된 거래소. `KRX`(기본) / `NXT` / `SOR`.
     """
     tr_id = settings.get_tr_id("TTTC0013U")
