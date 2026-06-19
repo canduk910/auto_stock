@@ -112,6 +112,14 @@ Supabase SQL Editor에서 `supabase/migrations/` 하위 마이그레이션 파�
 028_auto_apply_status.sql             # parameter_recommendations.status 에 'applied_auto' 분리 (사이클 23 P3, AI 자문 자동 적용)
 029_trade_history_dedupe_unique.sql   # (ticker, order_no, trade_type) 부분 UNIQUE 인덱스 (사이클 30, 042700 핑퐁 INSERT 영구 차단)
 030_strategy_funnel_snapshots.sql     # 조건검색 단계별 후보/탈락 종목 영구 추적 (사이클 34)
+031_daily_log_reports_openai_meta.sql # daily_log_reports 토큰/지연/비용 5 컬럼 (input/output/total_tokens, latency_ms, cost_estimate_usd)
+032_stock_master_history.sql          # stock_master 갱신 이력 (사이클 84)
+033_stock_master_daily.sql            # KIS FHKST03010100 일봉 정규화 (PK ticker+bas_dd + OHLCV + raw JSONB, 사이클 122)
+034_stock_master_master_raw.sql       # stock_master.master_raw JSONB + master_raw_updated_at (사이클 129, KIS 공식 일일 마스터 파일)
+035_strategy_funnel_snapshots_upsert.sql  # strategy_funnel UPSERT 전환 (사이클 145, snapshot_at 키 폐기)
+036_stock_master_history_seq.sql      # stock_master_history seq 컬럼 (사이클 150)
+037_stock_master_kospi200_kosdaq150.sql   # is_kospi200/is_kosdaq150 BOOLEAN + 부분 인덱스 (사이클 153)
+038_pending_next_day_clear.sql        # 익일청산큐 DB 영속화 PK(target_date, ticker, strategy_id) (사이클 162, 재기동 보호)
 ```
 
 ### 3. Docker Compose로 실행 (권장)
@@ -160,7 +168,9 @@ cd frontend && npm install && npm run dev
 | 거래 내역 | **두 탭** — 주문체결내역(매수/매도 raw 행, 필터·페이징) / 매매손익(매수·매도 페어 1행, 가중평균. 보유 중은 open 페어로 미실현 손익 표시) |
 | 전략수정 AI자문 | 20:00 OpenAI 자동 생성 자문 — 신규 자문 탭(승인/거절) + 이력 탭(상태/전략 필터). 자산 배정/로직 자문/비중 변경 사유(`weight_reasoning`) 별도 카드 + 백테스트 비교 카드(`BacktestComparisonCard`) |
 | 일일 로그 분석 | 20:10 정산 직후 OpenAI가 system_logs+trade_history 분석한 운영 개선 리포트 (영업일 리스트 + findings + 메트릭) |
-| 설정 | 전략 파라미터 조정, 자금 비중, 자동 시작 토글 |
+| **종목마스터 (`/stock-master`)** | **사이클 84+** — KIS 마스터 (시총/거래대금/NXT가능/거래정지/관리종목/KOSPI200·KOSDAQ150 플래그) + 일봉/시총 분포 카드 + 시장/시총/거래대금/종목명 필터 + 4 작업 수동 trigger 버튼 (유니버스/기본정보/일봉/공식 마스터). 상단 `RefreshProgressBanner` 5초 폴링 진행률 (사이클 127) |
+| **실시간 건강도 (`/realtime-health`)** | **사이클 103+** — WebSocket 구독 슬롯 (total/acked/fresh_60s/stale_60s/limit) + 세션별 종목 expand + KIS `inquire_ccnl` 캐시 (last_cntg_hour/today_volume, TTL 5분) + 수동 재구독 버튼 |
+| 설정 | 전략 파라미터 조정, 자금 비중, 자동 시작 토글, 가격/거래대금 필터, 매수 가드 4모드, 외부 통합 토글 |
 
 ### 실전 전환
 
@@ -339,6 +349,13 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | GET | `/api/strategy-funnel?strategy_id=&target_date=` | **사이클 34**: 전략별 조건검색 단계별 후보/탈락 종목 (`survived_tickers` cap 200 / `excluded_sample` cap 20) |
 | GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | 최근 N영업일 추이 |
 | POST | `/api/strategy-funnel/snapshot` | 수동 trigger — 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 로 최종 단계 (`step_no=99`) 즉시 snapshot 생성 |
+| GET | `/api/stock-master/stats` | **사이클 84+** — KIS 마스터 분포 (전체/거래정지/관리종목/NXT가능/KOSPI200/KOSDAQ150 등) |
+| GET | `/api/stock-master/list?market=&min_market_cap=&min_trade_amount=&ticker_name=&page=&size=` | 종목마스터 페이징 목록 (사이클 128 — 4 필터 + PostgREST 1000행 cap 해소, count="exact") |
+| POST | `/api/stock-master/refresh-universe` | 전체 종목 풀 수동 갱신 (BackgroundTasks, 사이클 90/127) |
+| POST | `/api/stock-master/basics/refresh` | KIS CTPF1002R 매스 보강 수동 trigger (BackgroundTasks, 사이클 126/127) |
+| POST | `/api/stock-master/daily/refresh` | 일봉 적재 수동 trigger (KIS FHKST03010100, 사이클 122/127) |
+| POST | `/api/stock-master/master/refresh` | KIS 공식 일일 마스터 파일 다운로드 + master_raw 갱신 (사이클 129) |
+| GET | `/api/stock-master/refresh-progress` | 4 작업 통합 진행률 (5초 폴링 endpoint, 사이클 127/129) |
 
 ## 프로젝트 구조
 
