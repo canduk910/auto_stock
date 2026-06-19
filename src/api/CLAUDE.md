@@ -89,42 +89,47 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 
 ## kis_master.py — KIS 공식 일일 마스터 파일 (사이클 129, 2026-06-14)
 
-KIS 공식 다운로드 (`https://new.real.download.dws.co.kr/common/master/`) 일일 마스터 파일 (`kospi_code.mst.zip` / `kosdaq_code.mst.zip`) cp949 fixed-width 파싱 → DataFrame → upsert. 매일 16:30 KST 자동 갱신 (사이클 122/126 task 패턴 답습 + 사이클 127 fire-and-forget).
+KIS 공식 다운로드 (`https://new.real.download.dws.co.kr/common/master/`) 일일 마스터 파일 (`kospi_code.mst.zip` / `kosdaq_code.mst.zip`) cp949 fixed-width 파싱 → `list[dict]` → upsert. 매일 16:30 KST 자동 갱신 (사이클 122/126 task 패턴 답습 + 사이클 127 fire-and-forget).
+
+> **구현 방식 (KIS 공식 샘플 대비 의도된 변경)**: KIS 정제 샘플 (`kis_kospi_code_mst.py` / 구조체 `.h`) 의 pandas (`read_csv` + `read_fwf` + Excel 출력) + 디스크 파일 방식을 폐기하고, **`struct.unpack` 순수 파싱 + `httpx.AsyncClient` 메모리 처리 (`io.BytesIO`, 디스크 I/O 0)** 로 이식. field_specs / 필드 순서는 샘플과 100% 일치, 후미 byte 만 정본 정합값(227/221)으로 보정 (샘플 228/222 는 텍스트 모드 줄바꿈 여유분). pandas 의존성 없음.
 
 ### URL 정본 (KIS 공식 저장소 검증 확정)
 
-- KOSPI: `https://new.real.download.dws.co.kr/common/master/kospi_code.mst.zip` (cp949, 70 컬럼, 후미 227 byte)
-- KOSDAQ: `https://new.real.download.dws.co.kr/common/master/kosdaq_code.mst.zip` (cp949, 64 컬럼, 후미 221 byte)
+- KOSPI: `https://new.real.download.dws.co.kr/common/master/kospi_code.mst.zip` (cp949, part2 70 컬럼, 후미 `KOSPI_TAIL_BYTES=227`)
+- KOSDAQ: `https://new.real.download.dws.co.kr/common/master/kosdaq_code.mst.zip` (cp949, part2 64 컬럼, 후미 `KOSDAQ_TAIL_BYTES=221`)
+- part1 = 단축코드 9 byte (`SHORT_CODE_LEN`) + 표준코드 12 byte (`STND_CODE_LEN`) + 한글명 가변
 
-### 함수 영역
+### 함수 영역 (실제 시그니처)
 
-- `async def download_kospi_master(target_dir: Path) -> Path` — KOSPI ZIP 다운로드 + 압축 해제
-- `async def download_kosdaq_master(target_dir: Path) -> Path` — KOSDAQ 동일
-- `def parse_kospi_master(mst_file: Path) -> pd.DataFrame` — 70 컬럼 fixed-width 파싱 (제조업 / 지배구조 / KOSPI200섹터 / KOSPI100 / KOSPI50 / SPAC / KRX증권 / KRX선박 / SRI / KOSPI 포함)
-- `def parse_kosdaq_master(mst_file: Path) -> pd.DataFrame` — 64 컬럼 (KOSDAQ 전용 `vntr_issu_yn` 벤처기업 / `invt_alrm_yn` 투자주의환기 / `ksq150_nmix_yn` KOSDAQ150 3건)
-- `async def fetch_all_master() -> pd.DataFrame` — KOSPI + KOSDAQ 통합 (`market` 컬럼 추가)
+- `async def download_kospi_master() -> list[dict]` — KOSPI ZIP 다운로드 + cp949 파싱 통합 (인자 없음). record 키 = part1 3종 (`mksc_shrn_iscd` 6자리 단축코드 / `stnd_iscd` / `hts_kor_isnm`) + part2 70 컬럼 (`KOSPI_FIELD_NAMES`)
+- `async def download_kosdaq_master() -> list[dict]` — KOSDAQ 동일 (part2 64 컬럼 `KOSDAQ_FIELD_NAMES`, KOSDAQ 전용 `vntr_issu_yn` 벤처기업 / `invt_alrm_yn` 투자주의환기 / `ksq150_nmix_yn` KOSDAQ150 포함)
+- `async def download_master_zip(url: str) -> bytes` — ZIP bytes 다운로드 (SSL 옵션 C)
+- `def _parse_master_records(raw_bytes, tail_bytes, field_specs, field_names) -> list[dict]` — KOSPI/KOSDAQ 공통 fixed-width 파서 (내부 헬퍼). `struct.unpack` + `assert struct_size == tail_bytes` 정합 가드
+- `def decode_korean(raw_bytes: bytes) -> str` — cp949 디코드 (`UnicodeDecodeError` → `errors="replace"` graceful)
+- **통합 함수 없음** — KOSPI/KOSDAQ 각각 호출. 통합·source 태깅은 호출자 `scanner._stock_master_master_load_once()` 가 `tagged_records: list[tuple[str, dict]]` 로 수행
 
 ### SSL 옵션 C (사이클 129 domain-consult 채택)
 
-- httpx + `verify=True` 우선 (운영 보안)
-- 폴백: `verify=False` (KIS 인증서 영역 검증 미통과 그래스풀)
-- `ssl._create_unverified_context` 영역 (사용자 샘플) 영구 폐기
+- `httpx.AsyncClient(verify=True)` 우선 (운영 보안)
+- 폴백: `httpx.ConnectError` + SSL/certificate 키워드 시만 `verify=False` 재시도 + WARNING 로그 (그 외 에러는 전파)
+- `ssl._create_unverified_context` (사용자 샘플 무조건 검증 off) 영구 폐기
 
 ### 매매 활용 키 ~30 (사이클 129 domain-consult 의제 4 확정)
 
 - 진입 차단 7건 (HIGH): `trht_yn` 거래정지 / `mang_issu_yn` 관리종목 / `ssts_hot_yn` 공매도과열 / `stange_runup_yn` 이상급등 / `sltr_yn` 정리매매 / `mrkt_alrm_cls_code` 시장경고 / `invt_alrm_yn` 투자주의환기 (코스닥 전용)
 - 시총: `prdy_avls_scal` 전일 시가총액 (**억 원**, × 100 → 백만원 환산 헬퍼 `scanner.market_cap_master_to_millions`)
 - 재무: `roe` / `sale_account` 매출액 / `bsop_prfi` 영업이익 / `op_prfi` 경상이익 / `thtr_ntin` 당기순이익
-- 지수편입: `kospi200_apnt_cls_code` / `kospi100_issu_yn` / `kospi50_issu_yn` / `ksq150_nmix_yn` / `krx300_issu_yn` / `krx_yn`
+- 지수편입: `kospi200_apnt_cls_code` / `kospi100_issu_yn` / `kospi50_issu_yn` / `ksq150_nmix_yn` / `krx300_issu_yn` / `krx_issu_yn`
 - 시장 영역: `lstn_stcn` 상장주수 (천주) / `cpfn` 자본금 / `marg_rate` 증거금비율 / `crdt_able` 신용가능
 - 기타: `stck_lstn_date` 상장일자 / `po_prc` 공모가 / `prst_cls_code` 우선주 / `byps_lstn_yn` 우회상장 / `flng_cls_code` 락구분 / `short_over_cls_code` 단기과열 / `insn_pbnt_yn` 불성실공시
 
 ### 단위 환산 (사이클 129 Q12, × 100)
 
-- `prdy_avls_scal` (KIS 마스터) = **억 원** (1 억 = 100,000,000 원 = 100 백만원)
+- `prdy_avls_scal` (KIS 마스터) = **억 원** (구조체 `.h` 명세 "전일기준 시가총액 (억)" 기준. 1 억 = 100,000,000 원 = 100 백만원)
 - `hts_avls` (KIS API FHKST01010100, 사이클 116) = **백만원**
 - 환산식: `prdy_avls_scal × 100 = hts_avls 단위` (사이클 116 패턴 답습)
 - 정합 검증 임계: ±5% 정상 / ±5%~±20% WARNING + master_raw 우선 / >±20% CRITICAL + raw 폴백 (사이클 88 G-REJECT graceful)
+- ⚠️ **단위 미확정 (사이클 164 인계, 165+ 검증 대기)**: 운영 실측에서 `prdy_avls_scal` 실제 단위가 백만원일 가능성 제기됨. `validate_market_cap_consistency` ±20% 임계로 감시 중 — 운영 DB 실측으로 ×100 vs ×1 확정 필요
 
 ### 호출자
 
