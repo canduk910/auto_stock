@@ -126,10 +126,11 @@ KIS 공식 다운로드 (`https://new.real.download.dws.co.kr/common/master/`) �
 ### 단위 환산 (사이클 129 Q12, × 100)
 
 - `prdy_avls_scal` (KIS 마스터) = **억 원** (구조체 `.h` 명세 "전일기준 시가총액 (억)" 기준. 1 억 = 100,000,000 원 = 100 백만원)
-- `hts_avls` (KIS API FHKST01010100, 사이클 116) = **백만원**
-- 환산식: `prdy_avls_scal × 100 = hts_avls 단위` (사이클 116 패턴 답습)
+- `hts_avls` (KIS API FHKST01010100, 사이클 116) = 명세상 **백만원** (단위 충돌 의제 — 아래 참조)
+- 환산식: `prdy_avls_scal × 100 = 백만원` (억→백만원, `scanner.market_cap_master_to_millions`)
 - 정합 검증 임계: ±5% 정상 / ±5%~±20% WARNING + master_raw 우선 / >±20% CRITICAL + raw 폴백 (사이클 88 G-REJECT graceful)
-- ⚠️ **단위 미확정 (사이클 164 인계, 165+ 검증 대기)**: 운영 실측에서 `prdy_avls_scal` 실제 단위가 백만원일 가능성 제기됨. `validate_market_cap_consistency` ±20% 임계로 감시 중 — 운영 DB 실측으로 ×100 vs ×1 확정 필요
+- ✅ **단위 확정 (운영 DB 실측 검증 완료, 사이클 164 인계 종결)**: 대형주 6종목 전수에서 `종가 × 상장주수(천주) ÷ prdy_avls_scal = 정확히 100,000` → 실제 시총(원) = `prdy_avls_scal × 10⁸` → **`prdy_avls_scal` = 억원 확정**. `× 100` 환산 정확. **사이클 164 "백만원 의심" = false alarm 기각**.
+- ⚠️ **신규 의제 (hts_avls 단위 충돌)**: 동일 6종목에서 `hts_avls ≈ prdy_avls_scal` (비율 0.97~1.03) → `hts_avls` 실측 단위도 **억원**으로 보임. 명세 "백만원" 과 충돌. `scanner.get_market_cap_millions` 의 raw.hts_avls 폴백 경로(백만원 가정)가 100배 과소 평가할 잠재 결함 — KIS 정본 재확인 + 코드 검증 필요
 
 ### 호출자
 
