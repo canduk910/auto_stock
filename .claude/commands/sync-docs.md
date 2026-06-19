@@ -1,76 +1,139 @@
 ---
-description: 최근 코드 변경을 docs/, 각 디렉토리 CLAUDE.md, 메인 README.md에 반영한 뒤 커밋한다.
-argument-hint: "[추가 컨텍스트(선택)]"
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(find:*), Read, Edit, Write, Grep, Glob
+description: 코드를 분석해 docs/, 각 디렉토리 CLAUDE.md, README.md 를 실제 코드 사실과 정합시킨 뒤 커밋한다. diff 동기화 + 코드 기반 감사 2 모드.
+argument-hint: "[영역/파일 (선택) — 지정 시 코드 기반 감사 모드]"
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(find:*), Bash(grep:*), Bash(ls:*), Bash(wc:*), Read, Edit, Write, Grep, Glob
 ---
 
-너는 이 프로젝트의 코드 변경 사항을 문서에 반영하는 작업을 수행한다.
+너는 이 프로젝트의 문서를 **실제 코드 사실**과 정합시키는 작업을 수행한다. 문서의 진실의 원천은 코드다 — 문서가 코드와 어긋나면 코드를 기준으로 문서를 고친다 (그 반대 아님).
 
-추가 컨텍스트(선택): $ARGUMENTS
+추가 컨텍스트 / 대상 영역(선택): $ARGUMENTS
 
-## 진행 절차
+## 0. 모드 결정 (먼저 판단)
 
-### 1. 변경 사항 수집
-다음을 병렬 실행해서 무엇이 바뀌었는지 파악한다.
+| 모드 | 트리거 | 무엇을 하나 |
+|------|--------|------------|
+| **A. diff 동기화** (기본) | 인자 없음 / "최근 변경" / "방금 작업" | 최근 코드 변경(working tree + 최근 커밋)을 문서에 반영. 빠른 정합. |
+| **B. 코드 기반 감사** | 인자로 영역·파일 지정 ("README", "src/api", "architecture.md", "전체 점검", "감사") | 지정 영역의 **코드를 직접 읽어** 문서와 전수 대조. git diff 와 무관하게 **누적 드리프트**(오래 전 머지됐지만 문서에 안 반영된 불일치)까지 잡는다. |
+
+> 핵심: 모드 A 는 "무엇이 바뀌었나"(diff)를 묻고, 모드 B 는 "지금 코드가 무엇인가"(사실)를 묻는다. git diff 는 *방금 바뀐 것*만 잡으므로, 이미 머지된 코드와 문서의 불일치(예: 함수 시그니처가 초기 설계안 그대로 잔존, 단위 명세 오류)는 모드 B 로만 잡힌다. 사용자가 영역을 주면 항상 모드 B 를 우선한다.
+
+---
+
+## 1. 대상 수집
+
+### 모드 A (diff 동기화)
+다음을 병렬 실행한다.
 - `git status` — 작업 트리 상태
 - `git diff HEAD` — HEAD 대비 unstaged + staged diff
 - `git log -10 --oneline` — 최근 커밋 흐름
-- 필요 시 `git diff origin/main...HEAD` 로 분기 차이 확인
+- 필요 시 `git diff origin/main...HEAD` — 분기 차이
 
-### 2. 영향 영역 매핑
-변경된 파일 경로를 보고 갱신 후보 문서를 정리한다.
+### 모드 B (코드 기반 감사)
+git diff 를 보지 말고 **지정 영역의 코드를 직접 읽는다**.
+- 대상 코드 파일 전수 Read (또는 Explore 에이전트로 구조 파악)
+- 대응 문서(아래 매핑) 전수 Read
+- 코드의 사실과 문서의 기술을 **2단 대조표**로 만든다 (§3 체크리스트)
 
-| 변경 위치 | 갱신 후보 |
+---
+
+## 2. 영향 영역 매핑
+
+변경/감사 위치를 보고 갱신 후보 문서를 정한다.
+
+| 코드 위치 | 갱신 후보 문서 |
 |---|---|
-| `src/api/*` | `src/api/CLAUDE.md`, `src/CLAUDE.md`, `CLAUDE.md` (KIS API 호출 패턴/TR_ID 변경 시) |
+| `src/api/*` | `src/api/CLAUDE.md`, `src/CLAUDE.md`, `CLAUDE.md`(TR_ID/호출 패턴), `README.md`(API 엔드포인트 표) |
 | `src/auth/*` | `src/auth/CLAUDE.md`, `src/CLAUDE.md` |
-| `src/realtime/*` | `src/realtime/CLAUDE.md`, `src/CLAUDE.md` (체결통보·구독 흐름 변경 시 `CLAUDE.md` 핵심 규칙 갱신) |
-| `src/engine/*` (전략·스케줄러·OrderEngine·RiskManager 등) | `src/engine/CLAUDE.md`, `src/CLAUDE.md`, `CLAUDE.md`(전략 추가/규칙 변경 시), `docs/architecture.md`(흐름 변경 시) |
-| `src/db/*` | `src/db/CLAUDE.md`, `src/CLAUDE.md`, `CLAUDE.md`(DB 스키마 섹션) |
+| `src/realtime/*` | `src/realtime/CLAUDE.md`, `src/CLAUDE.md`, `CLAUDE.md`(체결통보·구독 핵심 규칙) |
+| `src/engine/*` (전략·스케줄러·OrderEngine·RiskManager) | `src/engine/CLAUDE.md`, `src/engine/strategies/CLAUDE.md`, `src/CLAUDE.md`, `CLAUDE.md`(전략/규칙), `docs/architecture.md`(흐름), `README.md`(전략 표·스케줄) |
+| `src/db/*` | `src/db/CLAUDE.md`, `src/CLAUDE.md`, `CLAUDE.md`(DB 스키마 섹션), `docs/architecture.md`(9. DB 스키마) |
+| `src/services/*` | `src/CLAUDE.md`(디렉토리 역할), `CLAUDE.md`(외부 통합) — **전용 CLAUDE.md 없음, 누락 주의** |
 | `src/models/*` | `src/models/CLAUDE.md` |
-| `src/routes/*` | `src/routes/CLAUDE.md`, `README.md`(엔드포인트 노출 변경 시) |
-| `frontend/*` | `frontend/CLAUDE.md`, `README.md`(UI 신규 화면/플로우 변경 시) |
-| `Dockerfile`, `docker-compose*.yml`, `.github/workflows/*` | `CLAUDE.md`(Docker 구성, 배포 환경), `README.md`(빌드/실행 안내) |
-| `requirements.txt`, `frontend/package.json` | `README.md`(의존성 안내 영향 있을 때만) |
-| 신규 전략/매매 규칙 변경 | `CLAUDE.md`의 "다중 전략 아키텍처" 섹션 + 해당 전략 명세, `_workspace/00_leader_trading_rules.md` 동기화 여부 함께 안내 |
-| 신규 DB 컬럼/테이블 | `CLAUDE.md`의 "DB 스키마" 섹션 + `src/db/CLAUDE.md` |
+| `src/routes/*` | `src/routes/CLAUDE.md`, `README.md`(API 엔드포인트 표) |
+| `frontend/*` | `frontend/CLAUDE.md`, `README.md`(UI 화면 표), `docs/architecture.md`(10. 프론트엔드 구조) |
+| `supabase/migrations/*` | `CLAUDE.md`(DB 스키마 표), `src/db/CLAUDE.md`, `docs/architecture.md`(9. DB 스키마), `README.md`(마이그레이션 목록) |
+| `Dockerfile`, `docker-compose*.yml`, `.github/workflows/*` | `CLAUDE.md`(Docker/배포), `README.md`(빌드/실행), `docs/architecture.md`(12. 배포) |
+| `requirements.txt`, `frontend/package.json` | `README.md`(의존성 — 영향 있을 때만) |
+| 신규 전략/매매 규칙 | `CLAUDE.md`(다중 전략 섹션) + 전략 명세 + `_workspace/00_leader_trading_rules.md` 동기화 여부 안내 |
+| 사이클 단위 변경 이력 (하네스) | `docs/HARNESS_CHANGELOG.md`(verbatim 상세) + `CLAUDE.md`(하네스 변경 이력 요약 표 1줄) |
 
-`docs/kis/` 하위는 KIS 공식 API 스펙이므로 코드 변경 동기화 대상이 **아니다**. 손대지 않는다.
-`docs/architecture.md`는 시스템 흐름이 실제로 변한 경우에만 갱신한다.
+**손대지 않는 영역**:
+- `docs/kis/` — KIS 공식 API 스펙. 코드 동기화 대상 아님.
+- `docs/architecture.md` — 시스템 흐름이 실제로 변한 경우에만 갱신 (도식·시퀀스 보존).
+- `docs/HARNESS_CHANGELOG.md` — verbatim 누적 이력. 신규 사이클 행 추가만, 기존 행 재작성 금지.
 
-### 3. 갱신 대상 후보 검토
-- 각 후보 파일을 Read로 열어 현재 기술이 실제 코드와 일치하는지 확인한다.
-- 코드의 사실(파일 경로, 함수명, 파라미터, TR_ID, 임계값, 시각, 스키마 컬럼 등)과 어긋난 부분을 모은다.
-- 새로 추가된 모듈·전략·엔드포인트·DB 컬럼은 누락 없이 기재한다.
-- 제거된 개념(삭제된 함수, 폐기된 패턴)은 문서에서도 함께 제거한다.
+---
+
+## 3. 코드 ↔ 문서 대조 체크리스트
+
+각 후보 문서를 Read 하고, **코드에서 다음 사실을 추출해** 문서 기술과 1:1 대조한다. 어긋난 항목을 분류한다.
+
+| # | 사실 유형 | 추출법 | 흔한 드리프트 |
+|---|----------|--------|--------------|
+| 1 | **함수/클래스 시그니처** (이름·인자·반환 타입) | `grep -n "^def \|^async def \|^class "` | 문서가 초기 설계안 그대로 (인자/반환 타입 불일치, 없는 함수 설명, 폐기 함수 잔존) |
+| 2 | **모듈/파일 경로** | `find` / `ls` | 이동·삭제된 파일, 신규 모듈 누락 (예: `src/services/` 전용 문서 부재) |
+| 3 | **상수·임계값** (`TIME_*`, `MAX_*`, TTL 등) | `grep -n "= [0-9]"` | 코드에서 값 바뀐 뒤 문서 미반영 |
+| 4 | **시각** (스케줄) | scheduler `TIME_*` | 시각 변경 후 README 스케줄 표 미갱신 |
+| 5 | **단위** (원/백만원/억원/천주 등) | 코드 주석 + 실제 연산 (`// 1_000_000` 등) | ⚠️ **코드·문서가 함께 틀릴 수 있음 → §4 의미 검증 필수** |
+| 6 | **TR_ID** | `settings.get_tr_id` / `grep TR_ID` | 누락·오타 |
+| 7 | **DB 스키마** (컬럼·PK·인덱스) | `supabase/migrations/*.sql` | 마이그레이션 추가 후 CLAUDE.md DB 표 / README 마이그레이션 목록 미갱신 |
+| 8 | **라우트 경로** | `src/routes/*` `@router` | README API 엔드포인트 표 누락 |
+| 9 | **폐기 잔존** | 문서에 적힌 함수/패턴을 `grep` → 코드 0건이면 잔재 | 삭제된 함수·패턴이 문서에 남음 |
+
+---
+
+## 4. 의미 사실 검증 (코드 텍스트만으로 부족한 것)
+
+단위·임계·스키마 같은 **의미적 사실**은 코드를 읽어도 "선언된 가정"이 맞는지 확인 못 한다. 코드와 문서가 **함께 틀린** 경우(예: 둘 다 "hts_avls=백만원"인데 실제 억원)는 정적 대조로 못 잡는다.
+
+이런 항목은 **외부 사실로 교차검증**한다:
+- **단위/실데이터 분포** → 운영 DB 실측 (Supabase MCP READ-ONLY). 예: `실제시총(원) ÷ 컬럼값 = 10^8 → 억원 확정`.
+- **KIS API 응답 의미** → KIS MCP (`kis-mcp-query` 스킬). 응답 필드 단위·정의 정본 인용.
+
+**중요 — 코드 결함 발견 시**: 의미 검증에서 "문서뿐 아니라 코드도 틀렸다"가 드러나면, **문서만 고치지 말 것**. 이는 sync-docs 범위를 벗어난 코드 결함이다. 문서에는 (a) 확정된 사실을 반영하되, (b) 코드 결함을 **별도로 사용자에게 보고**하고 team-leader 시정 사이클을 권고한다. (sync-docs 가 코드를 직접 고치지 않는다 — §금지)
+
+---
+
+## 5. 문서 수정
 
 원칙:
-- 코드 사실(file_path, line, 함수명, 파라미터, 시각, 임계값, 스키마)과 어긋난 부분을 우선 정정.
+- 코드 사실(경로·시그니처·상수·시각·단위·스키마)과 어긋난 부분을 **코드 기준으로** 정정.
 - 문서가 이미 정확하면 손대지 않는다 (불필요한 리포맷·재배열 금지).
-- 새 개념은 기존 문서 톤·구조에 맞춰 자연스럽게 흡수.
-- 추측·과장 표현 금지. "현재 코드 그대로"의 사실만 기재.
+- 신규 개념은 기존 문서 톤·구조(간결·명사형·표/코드 블록)에 맞춰 흡수.
+- 폐기된 개념은 문서에서도 제거.
+- 추측·미래형 금지. "현재 코드 그대로"의 사실만.
+- 의미 검증 미완(외부 확인 필요)인 항목은 단정하지 말고 ⚠️ 표시 + 검증 대기 명시.
 
-### 4. 문서 수정
-Edit/Write로 정확히 필요한 부분만 갱신한다. 한국어 톤은 기존 문서 스타일을 따른다 (간결·명사형·표/코드 블록 활용).
+Edit/Write 로 필요한 부분만 갱신한다.
 
-### 5. 검증
-수정 후 다음을 실행해 결과를 확인한다.
+---
+
+## 6. 검증 + 분류 보고
+
+수정 후:
 - `git diff -- '*.md'` — 문서 변경 요약
-- 코드 변경과 문서 변경이 paired되어 있는지 짧게 요약 출력 (어느 코드 변경이 어느 문서 라인에 반영됐는지)
+- 코드 사실 ↔ 문서 라인 paired 요약 (어느 코드 사실이 어느 문서 라인에 반영됐는지)
 
-### 6. 커밋
-사용자에게 다음을 요약 보고한다.
-- 갱신한 문서 파일 목록 (각 파일의 핵심 변경 한 줄)
-- 손대지 않은 후보 문서가 있다면 그 이유
-- 추가로 사용자 확인이 필요한 항목 (예: 전략 명세 변경이 `_workspace/00_leader_trading_rules.md`에도 반영되어야 하는지)
+사용자에게 **4분류**로 보고:
+1. **정정** — 코드와 어긋나 고친 항목
+2. **누락 보강** — 코드에 있으나 문서에 없던 것 (신규 모듈·라우트·컬럼·마이그레이션)
+3. **폐기 제거** — 코드에 없는데 문서에 남았던 것
+4. **의미 불일치(검증 필요/완료)** — 단위·임계 등 외부 검증 항목 + **코드 결함 의심 시 별도 플래그**
 
-그 다음 git 커밋을 수행한다. 커밋 시 주의:
-- 코드 변경과 문서 변경을 한 커밋으로 묶을지, 문서만 별도 커밋할지는 현재 working tree 상태에 따라 판단.
-  - 코드가 이미 별도 커밋으로 들어가 있고 문서만 남았다면 문서 단독 커밋.
-  - 코드가 아직 unstaged이면 사용자에게 묶을지 분리할지 짧게 확인.
-- 커밋 메시지: 한국어, 1줄 제목 + 필요 시 상세 본문. 변경의 "왜"가 코드 커밋과 같다면 그것을 반복하지 말고 "코드 변경에 따른 문서 동기화"의 관점으로 작성.
-- 절대 `--no-verify`/`--no-gpg-sign` 사용 금지. 훅 실패 시 원인 진단 후 재시도.
-- 커밋 메시지는 HEREDOC으로 전달해 줄바꿈 보존.
+손대지 않은 후보 문서는 그 이유를, `_workspace/00_leader_trading_rules.md` 등 추가 동기화 필요 항목은 함께 안내.
+
+---
+
+## 7. 커밋
+
+빈 변경(문서 갱신 불필요)이면 커밋하지 말고 보고만 한다.
+
+커밋 주의:
+- 코드가 이미 별도 커밋이고 문서만 남았다면 문서 단독 커밋.
+- 코드가 unstaged 면 묶을지/분리할지 사용자에게 짧게 확인.
+- 메시지: 한국어, 1줄 제목 + 본문. "왜"가 코드 커밋과 같다면 반복 말고 "코드 사실 동기화" 관점으로.
+- `--no-verify` / `--no-gpg-sign` 금지. 훅 실패 시 원인 진단 후 재시도.
+- HEREDOC 으로 줄바꿈 보존.
 
 ```
 git commit -m "$(cat <<'EOF'
@@ -84,11 +147,13 @@ EOF
 )"
 ```
 
-### 7. 마무리
-`git status`로 깨끗한 트리를 확인하고 사용자에게 커밋 해시 + 변경 통계를 짧게 보고한다.
+push 후에는 `gh run list` 로 CI/Deploy 상태 확인 (fail 시 즉시 hotfix — 무시 금지).
+
+---
 
 ## 금지 사항
 - `docs/kis/` 하위 KIS 공식 스펙 md 수정 금지.
-- 사용자 확인 없이 코드 변경을 같이 추가·삭제 금지 (이 커맨드의 범위는 "문서 동기화"이지 코드 수정이 아님).
-- 추측성·미래형 표현으로 문서 채우지 말 것. 현재 코드의 사실만 기록.
-- 빈 변경(작업 트리에 코드 변경이 없거나 문서 갱신이 불필요)이라면 이를 사용자에게 보고하고 커밋하지 말 것.
+- **코드 수정 금지** — 이 커맨드의 범위는 "문서를 코드에 정합"이지 코드 변경이 아니다. 코드 결함을 발견하면 문서에 반영(확정 사실)·플래그하고 **사용자/team-leader 에 보고**, 코드는 손대지 않는다.
+- 추측성·미래형으로 문서 채우지 말 것. 현재 코드의 사실만.
+- 의미 검증(단위·임계)이 안 끝난 항목을 단정 금지 — ⚠️ 검증 대기로 표기.
+- `docs/HARNESS_CHANGELOG.md` 기존 행 재작성 금지 (신규 사이클 행 추가만).
