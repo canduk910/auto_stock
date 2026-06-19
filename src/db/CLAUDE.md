@@ -180,7 +180,7 @@ KIS 공식 일일 마스터 파일 (`kospi_code.mst` / `kosdaq_code.mst`) 영역
 
 - 시그너처: `list_paged_by_filter(market=None, min_market_cap=None, min_trade_amount=None, name_substr=None, limit=100, offset=0) -> tuple[list[dict], int]`
 - `market`: 'KOSPI' / 'KOSDAQ' / None (전체)
-- `min_market_cap`: int (백만원 단위, `raw->'hts_avls'` jsonb numeric gte)
+- `min_market_cap`: int (원 단위). `raw->'hts_avls'`(억원) jsonb numeric gte 임계 = `min_market_cap // 100_000_000` (사이클 166 정정 — 백만원 가정 silent 결함 해소)
 - `min_trade_amount`: int (원 단위, `raw->'acml_tr_pbmn'` jsonb numeric gte)
 - `name_substr`: str (대소문자 무시 substring — `ilike("name", "%q%")`)
 - `count="exact"` 동일 쿼리에 동봉 → 정확한 `total_count` 반환 (페이징 정합성 의무)

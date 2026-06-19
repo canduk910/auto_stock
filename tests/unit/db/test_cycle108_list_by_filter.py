@@ -21,7 +21,7 @@ pytestmark = pytest.mark.unit
 
 def _make_row(
     ticker: str,
-    hts_avls: str = "1000000",   # 1조 (백만원 단위)
+    hts_avls: str = "10000",   # 1조 (억원 단위 — 사이클 166 정정)
     acml_tr_pbmn: str = "50000000000",  # 500억 (원 단위)
     excg_dvsn_cd: str = "02",
     nxt_tradable: bool = True,
@@ -71,10 +71,10 @@ class TestListByFilterHigh1:
     """HIGH-1: 4 필터 (시총/거래대금/nxt_tradable/exclude_tickers) 정확성."""
 
     def test_h1_min_market_cap_filters_correctly(self):
-        """시총 1,000억 미만 종목이 제외된다 (hts_avls 백만원 단위)."""
+        """시총 1,000억 미만 종목이 제외된다 (hts_avls 억원 단위 — 사이클 166 정정)."""
         rows = [
-            _make_row("000001", hts_avls="200000"),   # 2,000억 — 통과
-            _make_row("000002", hts_avls="50000"),    # 500억 — 제외 (1,000억 미만)
+            _make_row("000001", hts_avls="2000"),   # 2,000억 — 통과 (억원 단위)
+            _make_row("000002", hts_avls="500"),    # 500억 — 제외 (1,000억 미만)
         ]
         result_mock = _mock_supabase_result(rows)
 
@@ -160,11 +160,11 @@ class TestListByFilterHigh1:
 # ---------------------------------------------------------------------------
 
 class TestListByFilterHigh5:
-    """HIGH-5: hts_avls 단위 변환 정확성."""
+    """HIGH-5: hts_avls 단위 변환 정확성 (사이클 166 — 억원 단위 정정)."""
 
     def test_h5_hts_avls_unit_conversion_1trillion(self):
-        """hts_avls=1_000_000 (1조 백만원) → 1_000_000_000_000 원 = 1조 통과."""
-        rows = [_make_row("000001", hts_avls="1000000")]  # 1조 백만원
+        """hts_avls=10000 (1조 억원) → 1_000_000_000_000 원 = 1조 통과 (사이클 166)."""
+        rows = [_make_row("000001", hts_avls="10000")]  # 1조 (억원 단위)
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \
@@ -176,8 +176,8 @@ class TestListByFilterHigh5:
         assert any(r["ticker"] == "000001" for r in result)
 
     def test_h5_hts_avls_just_below_threshold_excluded(self):
-        """hts_avls=99_999 (999.99억 백만원) → 1,000억 임계 미달 제외."""
-        rows = [_make_row("000002", hts_avls="99999")]  # 999.99억 백만원
+        """hts_avls=999 (999억 억원) → 1,000억 임계 미달 제외 (사이클 166)."""
+        rows = [_make_row("000002", hts_avls="999")]  # 999억 (억원 단위)
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \

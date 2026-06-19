@@ -135,7 +135,7 @@ const FIELD_LABELS: Record<string, string> = {
   admin_item: '관리종목',
   refreshed_at: '갱신시각',
   // 사이클 124 Q2=A 신규 6
-  hts_avls: '시가총액 (백만원)',
+  hts_avls: '시가총액 (억원)',
   lstn_stcn: '상장 주식수',
   // 사이클 129 — master_raw 영역 한글 라벨 (KIS 종목 마스터 파일 정본 영구 영속)
   // Q4=A 마스터 우선 영역 + Q12 시총 환산 × 100 영역
@@ -223,17 +223,18 @@ function formatAmount(v: unknown): string {
 }
 
 /**
- * 사이클 126 — 시가총액 백만원 단위 → 억원 환산.
- * stock_master.raw.hts_avls 는 KIS FHKST01010100 응답으로 백만원 단위.
- * 100 백만원 = 1억원.
+ * 사이클 126 → 사이클 166 — 시가총액 표시 (억원 단위 정정).
+ * stock_master.raw.hts_avls 는 KIS FHKST01010100 inquire_price "HTS 시가총액" = 억원 단위.
+ * 운영 DB 실측 (2026-06-19): 실제시총(원) / hts_avls ≈ 10^8 → 1단위 = 1억원 확정.
+ * 사이클 126 시점 "백만원" 가정은 silent 결함 (100배 표시 어긋남) → 억원으로 정정.
+ * 10,000억 = 1조원.
  */
 function formatMarketCap(v: unknown): string {
   const n = Number(v)
   if (isNaN(n) || n === 0) return '—'
-  // 백만원 단위 → 억원 환산 (÷100)
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + '조원'
-  if (n >= 100) return Math.round(n / 100).toLocaleString('ko-KR') + '억원'
-  return n.toLocaleString('ko-KR') + '백만원'
+  // 억원 단위 (정정) — 10,000억 = 1조원
+  if (n >= 10_000) return (n / 10_000).toFixed(1) + '조원'
+  return n.toLocaleString('ko-KR') + '억원'
 }
 
 /**
@@ -310,13 +311,12 @@ function formatFieldValue(key: string, value: unknown): React.ReactNode {
     return <span className="font-mono">{formatAmount(value)}</span>
   }
 
-  // 시가총액 (백만원 단위)
+  // 시가총액 (억원 단위 — 사이클 166 정정, 10,000억 = 1조원)
   if (key === 'hts_avls') {
     const n = Number(value)
     if (isNaN(n)) return <span className="text-gray-400">—</span>
-    if (n >= 1_000_000) return <span className="font-mono">{(n / 1_000_000).toFixed(1) + '조원'}</span>
-    if (n >= 1_000) return <span className="font-mono">{(n / 1_000).toFixed(0) + '십억원'}</span>
-    return <span className="font-mono">{n.toLocaleString('ko-KR') + '백만원'}</span>
+    if (n >= 10_000) return <span className="font-mono">{(n / 10_000).toFixed(1) + '조원'}</span>
+    return <span className="font-mono">{n.toLocaleString('ko-KR') + '억원'}</span>
   }
 
   // 상장 주식수

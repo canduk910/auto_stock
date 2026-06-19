@@ -342,8 +342,8 @@ async def test_g_list5_offset_and_total_propagate():
 async def test_g_list6_min_market_cap_filter_applies():
     """G-LIST6: min_market_cap > 0 시 JSONB raw->>hts_avls 비교 필터 적용.
 
-    raw.hts_avls 단위는 백만원 → min_market_cap (원) / 1_000_000 환산 후 비교.
-    예: min_market_cap=1_000_000_000_000 (1조 원) → hts_avls >= 1_000_000 (백만원).
+    raw.hts_avls 단위는 억원 → min_market_cap (원) / 100_000_000 환산 후 비교 (사이클 166).
+    예: min_market_cap=1_000_000_000_000 (1조 원) → hts_avls >= 10_000 (억원).
     """
     from src.db import stock_master
 

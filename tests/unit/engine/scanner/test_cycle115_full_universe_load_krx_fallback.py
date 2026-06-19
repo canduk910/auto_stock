@@ -292,8 +292,8 @@ async def test_medium1_stock_master_upsert_with_krx_raw_merge(monkeypatch):
     assert basics.raw["bfdy_clpr"] == 70_000, (
         "사이클 119 TDD_CLSPRC → bfdy_clpr 매핑 정합 (basDd=어제 종가 = 오늘 전일 종가)"
     )
-    # 사이클 116 의미 전환: hts_avls = KRX MKTCAP 원 단위 → 백만원 환산 값
-    # 사이클 108 list_by_filter (hts_avls × 1_000_000 ≥ min_market_cap) 정합 의무.
-    assert basics.raw["hts_avls"] == 418_000_000_000_000 // 1_000_000, (
-        "사이클 116 MKTCAP → hts_avls 환산 정합 (418조원 / 1_000_000 = 418_000_000 백만원)"
+    # 사이클 116 → 166 의미 전환: hts_avls = KRX MKTCAP 원 단위 → 억원 환산 값
+    # 사이클 108 list_by_filter (hts_avls × 100_000_000 ≥ min_market_cap) 정합 의무.
+    assert basics.raw["hts_avls"] == 418_000_000_000_000 // 100_000_000, (
+        "사이클 166 MKTCAP → hts_avls 억원 환산 정합 (418조원 // 100_000_000 = 4,180,000 억원)"
     )

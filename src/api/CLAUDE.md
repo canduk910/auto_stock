@@ -126,11 +126,11 @@ KIS 공식 다운로드 (`https://new.real.download.dws.co.kr/common/master/`) �
 ### 단위 환산 (사이클 129 Q12, × 100)
 
 - `prdy_avls_scal` (KIS 마스터) = **억 원** (구조체 `.h` 명세 "전일기준 시가총액 (억)" 기준. 1 억 = 100,000,000 원 = 100 백만원)
-- `hts_avls` (KIS API FHKST01010100, 사이클 116) = 명세상 **백만원** (단위 충돌 의제 — 아래 참조)
-- 환산식: `prdy_avls_scal × 100 = 백만원` (억→백만원, `scanner.market_cap_master_to_millions`)
+- `hts_avls` (KIS API FHKST01010100 inquire_price "HTS 시가총액", 사이클 116) = **억원** (사이클 166 확정 — 아래 참조)
+- 환산식: `prdy_avls_scal × 100 = 백만원` (억→백만원, `scanner.market_cap_master_to_millions` — production 미사용, 사이클 167+ 단위 통일 인계)
 - 정합 검증 임계: ±5% 정상 / ±5%~±20% WARNING + master_raw 우선 / >±20% CRITICAL + raw 폴백 (사이클 88 G-REJECT graceful)
 - ✅ **단위 확정 (운영 DB 실측 검증 완료, 사이클 164 인계 종결)**: 대형주 6종목 전수에서 `종가 × 상장주수(천주) ÷ prdy_avls_scal = 정확히 100,000` → 실제 시총(원) = `prdy_avls_scal × 10⁸` → **`prdy_avls_scal` = 억원 확정**. `× 100` 환산 정확. **사이클 164 "백만원 의심" = false alarm 기각**.
-- ⚠️ **신규 의제 (hts_avls 단위 충돌)**: 동일 6종목에서 `hts_avls ≈ prdy_avls_scal` (비율 0.97~1.03) → `hts_avls` 실측 단위도 **억원**으로 보임. 명세 "백만원" 과 충돌. `scanner.get_market_cap_millions` 의 raw.hts_avls 폴백 경로(백만원 가정)가 100배 과소 평가할 잠재 결함 — KIS 정본 재확인 + 코드 검증 필요
+- ✅ **hts_avls 단위 충돌 종결 (사이클 166, 2026-06-19)**: 운영 DB 대형주 9종목 전수 `실제시총(원) / hts_avls ≈ 10⁸` → **`hts_avls` = 억원 확정**. median 933(=933억원) 분포도 한국 상장사 중앙값과 정합. 사이클 108/128 "백만원" 가정은 silent 결함 (100배 어긋남 → min_market_cap=1,000억 시 후보 풀 1,734 → 80, 95.4% 축소). **시정**: `list_by_filter` (python `hts_avls × 100_000_000`) + `list_paged_by_filter` (jsonb `min_market_cap // 100_000_000`) + scanner KRX 폴백 (`// 100_000_000`) + 프론트 `formatMarketCap` 모두 억원 통일. DB 재적재 불필요 (16:10 KIS task 가 억원으로 덮어씀). `get_market_cap_millions` / `validate_market_cap_consistency` 는 production 미사용 → 단위 명문화만 (사이클 167+ 통일 인계). 회귀 가드: `tests/unit/db/test_cycle166_hts_avls_unit_correction.py` + `tests/unit/engine/scanner/test_cycle166_krx_fallback_eok_unit.py` (AST 단위 가드 `1_000_000` 잔존 0건).
 
 ### 호출자
 
@@ -175,7 +175,7 @@ KRX Data Marketplace (openapi.krx.co.kr) 정식 OPEN API 호출 모듈. KIS Open
 - `ISU_CD` (단축코드 6자리, KRX 종목코드 정합) / `ISU_NM` / `MKT_NM` / `SECT_TP_NM`
 - 가격: `TDD_CLSPRC` / `TDD_OPNPRC` / `TDD_HGPRC` / `TDD_LWPRC` / `CMPPREVDD_PRC` / `FLUC_RT`
 - 거래: `ACC_TRDVOL` / **`ACC_TRDVAL`** (원 단위, 사이클 108 `min_trade_amount` 직접 정합)
-- 시총: **`MKTCAP`** (원 단위, 사이클 108 `min_market_cap` 직접 정합 — KIS `hts_avls` 백만원 단위 차이 주의)
+- 시총: **`MKTCAP`** (원 단위) → KIS `hts_avls` (억원) 환산 `// 100_000_000` (사이클 116 → 166 정정, 단위 혼재 제거)
 - 상장: `LIST_SHRS`
 
 **isu_base_info 12 필드** (ticker 정합):

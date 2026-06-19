@@ -1791,15 +1791,17 @@ async def _full_universe_load_krx_primary(force: bool = False) -> dict:
                     "SECT_TP_NM"):
             if key in trd_row:
                 krx_raw[key] = trd_row[key]
-        # 사이클 116 — KRX MKTCAP (원 단위) → KIS hts_avls (백만원 단위) 환산 매핑.
-        # 사이클 108 list_by_filter (`hts_avls × 1_000_000 ≥ min_market_cap`) 정합 영속.
+        # 사이클 116 → 사이클 166 — KRX MKTCAP (원 단위) → KIS hts_avls (억원 단위) 환산.
+        # 사이클 166 정정: KIS 경로 hts_avls 가 억원 단위로 확정 (운영 DB 실측 + KIS 정본)
+        # → KRX 폴백도 억원으로 통일 (단위 혼재 silent 결함 제거). 사이클 108
+        # list_by_filter (`hts_avls × 100_000_000 ≥ min_market_cap`) 정합 영속.
         # 사이클 81 G-AST1 영속: KIS market-cap 호출 시점은 KRX 폴백 분기 = 동일 ticker
         # 양쪽 키 충돌 0 (KRX 1차 성공 시 KIS 호출 부재).
         if "MKTCAP" in trd_row:
             try:
                 mktcap_won = int(str(trd_row["MKTCAP"]).replace(",", "") or 0)
                 if mktcap_won > 0:
-                    krx_raw["hts_avls"] = mktcap_won // 1_000_000  # 원 → 백만원
+                    krx_raw["hts_avls"] = mktcap_won // 100_000_000  # 원 → 억원
             except (ValueError, TypeError):
                 pass  # graceful, MKTCAP raw 만 유지
         # 사이클 118 — KRX ACC_TRDVAL (원 단위) → KIS acml_tr_pbmn (원 단위, 동일) 매핑.
@@ -2456,18 +2458,25 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
 
 
 def market_cap_master_to_millions(master_value_eok) -> int:
-    """KIS 마스터 시총 (억) → KIS API hts_avls 단위 (백만원) 환산.
+    """KIS 마스터 시총 (억) → 백만원 환산 (prdy_avls_scal 전용 헬퍼).
 
     환산식 영구 영속 (Q12 시정):
     - 1 억 원 = 100,000,000 원 = 100 백만원 → × 100
     - 사용자 verbatim "× 100" 정합 검증 후 정정 영속.
     - 결함 사유: team-leader 자체 자문 영역 초기 "× 10,000" 단위 결함 → "× 100" 정합.
 
+    사이클 166 단위 명문화 (Q-B 명칭 변경 보류):
+    - 입력 master_value_eok = master_raw.prdy_avls_scal = **억원 단위** (확정, 6종목 실측).
+    - 본 헬퍼 반환 = 백만원 (× 100). raw.hts_avls (억원) 와 **단위 체계 다름** 주의.
+    - production 호출처 0건 (사이클 166 시점 미연결). 함수명/단위 통일은 사이클 167+
+      행위 보존 리팩토링 인계. 사이클 166 은 list_by_filter / list_paged_by_filter
+      (실제 후보 풀) 단위 정합만 시정.
+
     Args:
         master_value_eok: 마스터 시총 (억 단위, int 또는 str — 공백 자동 처리)
 
     Returns:
-        백만원 단위 시총 (raw.hts_avls 영역 정합).
+        백만원 단위 시총 (prdy_avls_scal × 100).
     """
     try:
         val = int(str(master_value_eok).strip() or "0")
@@ -2645,15 +2654,23 @@ def get_market_cap_millions(master_raw: dict, raw: dict) -> int:
 
     domain-consult 의제 3 키별 우선순위 영역 영구 영속:
     1. master_raw.prdy_avls_scal (억) 우선 → × 100 백만원 환산
-    2. master_raw 부재 시 raw.hts_avls (백만원) 폴백 (사이클 116 패턴)
+    2. master_raw 부재 시 raw.hts_avls (억) 폴백 (사이클 116 → 166 정정)
     3. 양쪽 부재 → 0 (graceful)
+
+    사이클 166 단위 명문화 (Q-B 명칭 변경 보류):
+    - raw.hts_avls = KIS FHKST01010100 inquire_price "HTS 시가총액" = **억원 단위** 확정.
+      운영 DB 실측 (2026-06-19): 실제시총(원) / hts_avls ≈ 10^8 → 1단위 = 1억원.
+    - 1순위 (prdy_avls_scal × 100) 은 백만원, 2순위 (hts_avls) 는 억원 — 단위 체계가
+      다름. production 호출처 0건 (사이클 166 시점 미연결) → 실제 후보 풀 영향 0.
+    - 함수명 `_millions` 잔재 + 단위 통일은 사이클 167+ 행위 보존 리팩토링 인계.
 
     Args:
         master_raw: stock_master.master_raw dict
         raw: stock_master.raw dict (사이클 81 G-AST1 영역, 변경 0)
 
     Returns:
-        백만원 단위 시총 (스캐너 필터 영역 정합).
+        시총 정수. 1순위 = 백만원 (prdy_avls_scal × 100) / 2순위 = 억원 (hts_avls).
+        단위 혼재 — 본 헬퍼는 미사용 (사이클 167+ 통일 인계).
     """
     # 1순위: master_raw 영역 (Q4=A)
     if master_raw and isinstance(master_raw, dict):

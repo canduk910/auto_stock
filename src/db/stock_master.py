@@ -394,7 +394,7 @@ async def list_paged_by_filter(
 
     필터 (모두 optional, 빈 필터 = list_all 동등 — T-1 영속):
     - market: "KOSPI" → excg_dvsn_cd="02" / "KOSDAQ" → "03" / None → 전체
-    - min_market_cap: int (원 단위). hts_avls(백만원) × 1_000_000 비교
+    - min_market_cap: int (원 단위). hts_avls(억원) → min_market_cap // 100_000_000 임계 비교 (사이클 166)
     - min_trade_amount: int (원 단위). acml_tr_pbmn 직접 비교
     - name_substr: str (대소문자 무시 substring, ilike("name", "%substr%"))
 
@@ -423,12 +423,14 @@ async def list_paged_by_filter(
         if cleaned:
             name_pat = f"%{cleaned}%"
 
-    # 시총/거래대금 단위 환산
-    # raw.hts_avls 단위 = 백만원 → min_market_cap (원) / 1_000_000 의 ceil 비교
+    # 시총/거래대금 단위 환산 (사이클 166 정정)
+    # raw.hts_avls 단위 = 억원 → min_market_cap (원) / 100_000_000 의 ceil 비교.
+    # KIS FHKST01010100 hts_avls = "HTS 시가총액" (억원). 사이클 108/128 "백만원" 가정은
+    # silent 결함 (100배 어긋남). UI 페이징 경로도 동일 결함 전파 → 억원으로 통일.
     hts_avls_threshold: int = 0
     if min_market_cap and min_market_cap > 0:
-        # 백만원 단위 환산 (정수 ceil)
-        hts_avls_threshold = (min_market_cap + 999_999) // 1_000_000
+        # 억원 단위 환산 (정수 ceil)
+        hts_avls_threshold = (min_market_cap + 99_999_999) // 100_000_000
 
     acml_tr_pbmn_threshold: int = 0
     if min_trade_amount and min_trade_amount > 0:
@@ -578,7 +580,7 @@ async def list_by_filter(
 
     Args:
         market: "kospi" (excg_dvsn_cd=02) / "kosdaq" (excg_dvsn_cd=03) / None (전체)
-        min_market_cap: 시가총액 최소값 (원 단위). hts_avls(백만원) × 1_000_000 비교.
+        min_market_cap: 시가총액 최소값 (원 단위). hts_avls(억원) × 100_000_000 비교 (사이클 166).
         min_trade_amount: 거래대금 최소값 (원 단위). acml_tr_pbmn 직접 비교.
         exclude_tickers: 제외 종목 리스트.
         nxt_tradable: None=전체 / True=NXT 거래가능만 / False=NXT 불가만.
@@ -662,13 +664,17 @@ async def list_by_filter(
 
         raw: dict = row.get("raw") or {}
 
-        # 시가총액 필터 — hts_avls 단위: 백만원 → 원 변환 후 비교
+        # 시가총액 필터 — hts_avls 단위: 억원 → 원 변환 후 비교 (사이클 166 정정)
+        # KIS FHKST01010100 inquire_price 응답 hts_avls = "HTS 시가총액" (억원 단위).
+        # 운영 DB 실측 (2026-06-19): 실제시총(원) / hts_avls ≈ 10^8 → 1단위 = 1억원 확정.
+        # 사이클 108 도입 시점 "백만원" 가정 (× 1_000_000) 은 silent 결함 — 100배 어긋남
+        # → 후보 풀 95% 축소 (min_market_cap=1,000억 시 1,734 → 80). 억원 단위로 통일.
         if min_market_cap > 0:
             try:
                 hts_avls = int(raw.get("hts_avls") or 0)
             except (ValueError, TypeError):
                 hts_avls = 0
-            if hts_avls * 1_000_000 < min_market_cap:
+            if hts_avls * 100_000_000 < min_market_cap:
                 continue
 
         # 거래대금 필터 — acml_tr_pbmn 단위: 원

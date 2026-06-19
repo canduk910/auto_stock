@@ -149,7 +149,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 
 ### `scanner.py` 신규 영역 (+289L)
 
-- `market_cap_master_to_millions(prdy_avls_scal: int) -> int: return prdy_avls_scal * 100` — KIS 마스터 시총 (억) → KIS API hts_avls (백만원) 환산. Q12 사용자 verbatim "× 100" 정합 (team-leader 자체 자문 "× 10,000" 결함 자체 발견 + 시정). 사이클 116 단위 환산 패턴 답습.
+- `market_cap_master_to_millions(prdy_avls_scal: int) -> int: return prdy_avls_scal * 100` — KIS 마스터 시총 (억) → 백만원 환산. Q12 사용자 verbatim "× 100" 정합. **사이클 166: production 미사용 확인 (호출처 0건) + raw.hts_avls 는 억원 단위로 확정 → 본 헬퍼(백만원 반환)와 단위 체계 다름. 함수명/단위 통일은 사이클 167+ 행위 보존 리팩토링 인계. 실제 후보 풀 필터(list_by_filter/list_paged_by_filter)는 억원 정합 시정 완료.**
 - `validate_market_cap_consistency(master_avls_million, hts_avls)` — ±5%/±20% 임계 + WARNING/CRITICAL emit + 사이클 88 G-REJECT graceful
 - `_is_master_blocked_for_entry(ticker)` — **1단계 차단 7건** (master_raw 우선 + raw 폴백 chain): `trht_yn` 거래정지 / `mang_issu_yn` 관리종목 / `ssts_hot_yn` 공매도과열 / `stange_runup_yn` 이상급등 / `sltr_yn` 정리매매 / `mrkt_alrm_cls_code` 시장경고 / `invt_alrm_yn` 투자주의환기 (KOSDAQ 전용)
 - `get_market_cap_millions(ticker)` — master_raw 우선 + raw 폴백 통합 헬퍼 (사이클 81 G-AST1 영속)
