@@ -556,6 +556,23 @@ on_tick(ticker, current_price)
 └─────────────────────────────────────────────────────┘
 ```
 
+### 9.1 신규 테이블 (사이클 15~165 누적)
+
+| 테이블 | 마이그레이션 | 용도 |
+|--------|-------------|------|
+| `parameter_recommendations` | 007 (+020/021/028) | 20:00 AI 자문 — `(target_date, strategy_id)` UNIQUE + `recommended_weight/code_review_notes/applied_weight/weight_reasoning/backtest_summary JSONB`. status: pending/applied/applied_auto/partial/rejected/expired |
+| `daily_log_reports` | 013 (+031) | 20:10 일일 로그 분석 — `(target_date)` UNIQUE + summary/findings/metrics JSONB + input_tokens/output_tokens/total_tokens/latency_ms/cost_estimate_usd 5 컬럼 (사이클 31) |
+| `system_logs` 인덱스 | 014 | log_level + timestamp 복합 인덱스 (조회 가속) |
+| `backtest_runs` | 019 | 외부 MCP 백테스트 영속화 — `(target_date, strategy_id, params_kind)` UNIQUE. status: queued/running/completed/failed/skipped |
+| `market_regime_snapshots` | 022 | dkstock.cloud 매크로 일일 스냅샷 — `_boot()` 시점 1행 + `buy_blocked/computed_cash_usage_ratio/raw_response JSONB` |
+| `kis_quote_accounts` | 026 | 보조 KIS 시세 수신 계좌 (UUID PK, label UNIQUE, active=true 부분 인덱스). 60s TTL 메모리 캐시 |
+| `trade_history` 부분 UNIQUE | 029 | `(ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND order_no != ''` — 핑퐁 INSERT 영구 차단 (사이클 30) |
+| `strategy_funnel_snapshots` | 030 (+035) | 전략별 조건검색 단계별 후보/탈락 영구 추적 — UPSERT 전환 (사이클 145, snapshot_at 키 폐기) |
+| `stock_master_history` | 032 (+036) | stock_master 갱신 이력 — PK (ticker, seq=0/1) + trigger 재설계 (사이클 150, 92K→4,358 row -96.9%) |
+| `stock_master_daily` | 033 | KIS FHKST03010100 일봉 정규화 — PK (ticker, bas_dd) + OHLCV + change_rate + raw JSONB. 매일 16:00 KST 적재 (T-100 백필 → D-1 증분) |
+| `stock_master.master_raw` | 034 | KIS 공식 일일 마스터 파일 raw JSONB + master_raw_updated_at + is_kospi200/is_kosdaq150 BOOLEAN (037, 사이클 153) |
+| `pending_next_day_clear` | 038 | 익일청산큐 DB 영속화 — PK (target_date, ticker, strategy_id). 재기동 시 메모리 휘발 차단 (사이클 162) |
+
 ---
 
 ## 10. 프론트엔드 구조
@@ -566,8 +583,14 @@ frontend/src/
 │
 ├── pages/
 │   ├── Dashboard.tsx       # 메인 대시보드 (전략 탭 + 컴포넌트 배치)
-│   ├── History.tsx         # 거래 내역 페이지
-│   └── Settings.tsx        # 전략 비중/파라미터/자동시작 설정
+│   ├── History.tsx         # 거래 내역 페이지 (주문체결 / 매매손익 2 탭)
+│   ├── Strategies.tsx      # 전략별 실적/스캔 깔때기
+│   ├── StrategyFunnel.tsx  # 조건검색 단계별 추적 (사이클 34)
+│   ├── StockMaster.tsx     # 종목마스터 (사이클 84+, KIS 마스터/일봉/필터/4 작업 trigger + 진행 배너)
+│   ├── RealtimeHealth.tsx  # WebSocket 구독 슬롯 진단 (사이클 103+, 세션별 expand + CCNL 캐시)
+│   ├── Recommendations.tsx # 전략수정 AI자문 (신규/이력 탭, 백테스트 비교)
+│   ├── Logs.tsx            # 시스템 로그 + 일일 분석 리포트 통합 (사이클 6)
+│   └── Settings.tsx        # 전략 비중/파라미터/자동시작/가격·거래대금 필터/매수 가드 4모드/외부 통합 토글
 │
 ├── components/
 │   ├── ControlPanel.tsx    # 시작/정지/재기동 버튼 + 환경 배너
@@ -773,5 +796,64 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 
 ---
 
-> 본 13장은 1~12 섹션 작성 이후 도입된 인프라의 요약. 도식·시퀀스 다이어그램의 갱신 (예: `WebsocketPool` 분배 흐름 / 매수 가드 4 모드 분기 / 백테스트 MCP 호출 시퀀스) 은 별도 사이클로 위임.
+## 14. 사이클 26~165 추가 인프라 (2026-05-20 ~ 6-19)
+
+상세는 `docs/HARNESS_CHANGELOG.md` 와 각 디렉토리 CLAUDE.md. 본 절은 본문(1~13) 이후 도입된 핵심 사실 요약.
+
+### 14.1 사이클 26 — KRX ONLY 매매 정책 + 3 보드 + 사전 구독 마진
+
+- 매매 정책 = KRX 메인 09:00~15:20 단독. VB/LTV `tradable_boards=("main",)` (PRE_NXT/POST_NXT 매수 비활성)
+- `MarketBoard` 3 보드: `pre_nxt` (08:00~09:00) / `main` (09:00~15:40) / `post_nxt` (15:40~20:00)
+- 시세 채널 6 구간 분기: H0STCNT0 (KRX) + H0NXCNT0 (NXT) 시간대별
+- 사전 구독 마진 (50초): `TIME_KRX_MAIN_OPEN_PRESUBSCRIBE=08:59:10` / `TIME_POST_NXT_OPEN_PRESUBSCRIBE=15:39:10`. `_atomic_board_transition` 종목별 원자 전환 (ack_timeout=2s)
+- 15:20 KRX 메인 강제 청산 (`_force_clear_main_only`) 영속 — VB 전량 + LTV 상한가 미도달
+
+### 14.2 사이클 149 — 종목별 H0UNMKO0 구독 + VI/거래정지 stale 회피
+
+- `src/api/market_operation.py` — `MARKET_OP_TR_ID=H0UNMKO0` + 10 컬럼 (TRHT_YN/VI_CLS_CODE/OVTM_VI_CLS_CODE/ISCD_STAT_CLS_CODE 등). REST 폴백 `inquire_vi_status_today` (FHPST01390000)
+- `src/engine/market_operation_monitor.py` — `is_ticker_stale_excluded()` hook. 보유+익일청산+후보 합집합 (HIGH bypass + LOW cap=20)
+- `stale_watcher_core` VI/halt grace 회피 + REST 폴백 부팅 1회 seed
+
+### 14.3 사이클 150 — SUPABASE 용량 정합
+
+- migration 036 = stock_master_history PK (ticker, seq=0/1) + trigger 재설계 → 92K→4,358 row -96.9%
+- `purge_old_rows()` T-150일 retention cron 매일 16:15 KST + protected_tickers 보호
+- `_purge_by_cutoff` 2-step subquery — supabase-py DELETE chain `.limit()` 미지원 silent 24일 영구 차단
+
+### 14.4 사이클 160 — `_wait_until` 본질 복원 (HIGH 매매 안전성)
+
+- 2 모드 분기: default 즉시 break (run_daily phase 전환) + `advance_if_passed=True` (task_loop_helper 폭주 차단)
+- 사이클 152 hotfix 가 깨뜨린 본질 복원 = 6/17 15:20 강제청산 누락 사고 (알테오젠/알지노믹스) 영속 차단
+
+### 14.5 사이클 161 — `_handle_buy_fill` 체결단가 정합
+
+- BUY trade_history.price = KIS CNTG_UNPR (체결단가) 강제 — 사이클 147 SELL fallback chain 패턴 답습
+- UniqueViolation → 강제 UPDATE chain 영속
+
+### 14.6 사이클 162 — 익일청산큐 DB 영속화 + 동시호가 stale 회피
+
+- migration 038 = `pending_next_day_clear` PK (target_date, ticker, strategy_id) — 재기동 시 메모리 휘발 차단
+- `_boot()` 복구 chain + DB 실패 시 메모리 보존 graceful
+- `SessionTracker.is_call_auction_now()` (08:30~09:00 / 15:20~15:30 = MKOP_CLS_CODE 110/121) → stale 재구독 skip
+
+### 14.7 사이클 163 — 2차 _boot stock_master race 가드 + 5 전략 prepare 재시도 hook
+
+- `count_active()` polling 5분 cap (10초 주기) — 사이클 158 hook 90초 부족 영속 시정
+- 5 전략 (VB/LTV/donchian/BFB/VCP) prepare 0건 시 자동 재시도 hook 통일
+- `_handle_buy_fill` 전량 체결 분기 3 영역 try/except 분리 — DB INSERT 실패 시 callback graceful
+
+### 14.8 사이클 164 — 시가대기 silent 결함 시정
+
+- `_confirm_breakout_open_prices_if_pending` 5분 주기 hook — `_scan_loop` 통합. 미확정 종목 자동 시가 확정 재시도 (idempotent + disabled skip + graceful)
+- 이중 안전망 = VB `check_buy_signal` tick fallback + `_scan_loop` 5분 재시도
+
+### 14.9 사이클 165 — docstring 보강 + CLAUDE.md 반복 단어 정리
+
+- 6 파일 docstring 보강 (+96L) — TR_ID 분기 / msg_cd 누적 / KIS MCP 정본 fields 매핑 / 가드 계층 / 가드 매트릭스 인용
+- 4 CLAUDE.md 반복 단어 30건 → 0건 정리 (의미 보존)
+- 행위 변경 0 / 백엔드 풀 3,040 PASS
+
+---
+
+> 본 14장은 13장 이후 도입된 인프라의 요약. 14.1 (KRX ONLY 보드 전환) 영역 도식 갱신 + 14.6 (동시호가 시각 분기) 시퀀스 다이어그램은 별도 사이클로 위임.
 
