@@ -11,10 +11,12 @@
   - mrkt_alrm_cls_code >= "02" (시장경고 경고/위험)
   - invt_alrm_yn (KOSDAQ 투자주의환기)
 
-회귀 가드 3 케이스:
+회귀 가드 (G-UP1/G-UP2 활성 / G-UP3 = 사이클 167 폐기로 xfail):
 - G-UP1: 1단계 차단 7건 매수 진입 차단 분기
 - G-UP2: master_raw 부재 시 raw 폴백 chain (nxt_tradable 영역)
-- G-UP3: 시총 영역 master_raw 우선 + raw 폴백 (사이클 116 패턴 답습)
+- G-UP3: [사이클 167 폐기 — xfail] get_market_cap_millions dead code 제거 (callsite 0건).
+  헬퍼 존재 계약을 xfail 로 박제 (의미 전환, 사이클 66 K-2). 재도입 차단은 AST 가드
+  tests/unit/ast/test_cycle167_ast_no_dead_market_cap_funcs.py 로 이관.
 """
 from __future__ import annotations
 
@@ -90,9 +92,13 @@ def test_g_up2_master_absent_raw_fallback_nxt():
 def test_g_up3_market_cap_master_first_raw_fallback():
     """G-UP3: 시총 영역 master_raw 우선 + raw 폴백.
 
+    [사이클 167 폐기 — xfail] get_market_cap_millions 는 production callsite 0건
+    dead code 로 제거됨. 아래 우선순위/환산 명세는 역사적 기록 (의미 전환, 사이클 66 K-2).
+    시총 필터 본체는 list_by_filter / list_paged_by_filter 가 직접 수행 (사이클 166 억원 정합).
+
     domain-consult 의제 2 채택 — master_raw.prdy_avls_scal (억) 우선,
     부재 시 raw.hts_avls (백만원) 폴백. 사이클 116 패턴 답습.
-    환산 영역 영구 영속 (Q12 시정): 100 억 × 100 = 10,000 백만원.
+    환산 영역 (Q12 시정 — 역사적 기록): 100 억 × 100 = 10,000 백만원.
     """
     from src.engine import scanner
 

@@ -8,12 +8,15 @@
   - 결함 사유: team-leader 자체 자문 영역 "× 10,000" 단위 곱셈 결함 → "× 100" 정합.
 - 정합 검증 임계: ±5% OK / ±20% WARNING / 초과 ERROR
 
-회귀 가드 5 케이스:
+회귀 가드 (G-ML1/G-ML2 활성 / G-ML3~G-ML5 = 사이클 167 폐기로 xfail):
 - G-ML1: _stock_master_master_load_once() 정상 (KOSPI + KOSDAQ 통합)
 - G-ML2: force=True 영속 (사이클 120 패턴)
-- G-ML3: 시총 환산 헬퍼 정확 (마스터 억 × 100 → 백만원)
-- G-ML4: 정합 검증 임계 ±5% OK / ±20% WARNING / 초과 ERROR
-- G-ML5: 0/비결정 영역 회피 (정합 검증 skip)
+- G-ML3: [사이클 167 폐기 — xfail] market_cap_master_to_millions dead code 제거 (callsite 0건).
+  헬퍼 존재 계약을 xfail 로 박제 (의미 전환, 사이클 66 K-2). 시총 환산 명세는 역사적 기록.
+- G-ML4: [사이클 167 폐기 — xfail] validate_market_cap_consistency dead code 제거 (callsite 0건).
+- G-ML5: [사이클 167 폐기 — xfail] validate_market_cap_consistency dead code 제거 (정합 검증 skip 분기).
+
+재도입 차단은 AST 가드 tests/unit/ast/test_cycle167_ast_no_dead_market_cap_funcs.py 로 이관.
 """
 from __future__ import annotations
 
@@ -90,7 +93,12 @@ async def test_g_ml2_force_true_persistence(monkeypatch):
 def test_g_ml3_market_cap_conversion_helper():
     """G-ML3: 시총 환산 헬퍼 정확 — 마스터 (억) × 100 = raw (백만원).
 
-    환산 영역 영구 영속 (사이클 129 Q12 시정):
+    [사이클 167 폐기 — xfail] market_cap_master_to_millions 는 production callsite 0건
+    dead code 로 제거됨. 아래 환산 명세는 사이클 129 도입 당시 계약의 *역사적 기록* 이며
+    현재 헬퍼는 부재 (의미 전환, 사이클 66 K-2). 시총 필터 본체는 list_by_filter /
+    list_paged_by_filter 가 직접 수행 (사이클 166 억원 정합).
+
+    환산 영역 (사이클 129 Q12 시정 — 역사적 기록):
     - 1 억 원 = 100,000,000 원 = 100 백만원 → × 100
     - 사용자 verbatim "× 100" 정합 검증 후 정정 영속.
     - 결함 사유: team-leader 자체 자문 "× 10,000" 단위 곱셈 결함 차단.
@@ -140,8 +148,11 @@ def test_g_ml3_market_cap_conversion_helper():
 def test_g_ml4_consistency_validation_thresholds():
     """G-ML4: 정합 검증 임계 ±5% OK / ±20% WARNING / 초과 ERROR.
 
+    [사이클 167 폐기 — xfail] validate_market_cap_consistency 는 production callsite 0건
+    dead code 로 제거됨. 아래 임계 명세는 역사적 기록 (의미 전환, 사이클 66 K-2).
+
     domain-consult 의제 2 채택 — 정합 검증 임계 영역.
-    환산 영역 영구 영속 (Q12 시정): 100 억 × 100 = 10,000 백만원.
+    환산 영역 (Q12 시정 — 역사적 기록): 100 억 × 100 = 10,000 백만원.
     """
     from src.engine import scanner
 
@@ -173,6 +184,9 @@ def test_g_ml4_consistency_validation_thresholds():
 )
 def test_g_ml5_consistency_validation_skip_zero():
     """G-ML5: 0/비결정 영역 회피 — 정합 검증 skip = OK 반환.
+
+    [사이클 167 폐기 — xfail] validate_market_cap_consistency 는 production callsite 0건
+    dead code 로 제거됨. 아래 skip 명세는 역사적 기록 (의미 전환, 사이클 66 K-2).
 
     domain-consult 의제 2 채택 — master_raw 0 또는 raw 0 영역 = 정합 검증 skip.
     """
