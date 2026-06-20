@@ -164,9 +164,32 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 - **안내 배너 갱신** (사이클 64): "**WebSocket 구독 대상 필터** — 임계 외 종목은 시세 구독 자체 차단. 보유/익일청산 종목은 절대 제외 안 됨" (사이클 62 "매수 신호 차단" 표현 폐기 + 사이클 32 R4 universe guard 보호 영속 명시)
 - 회귀 가드 4 vitest 케이스 (사이클 62 5 → 사이클 64 4, mode 토글 F-5 폐기): F-1 fetch 후 렌더 + mode select 미존재 검증 / F-2 슬라이더 변경 / F-3 저장 + toast (body 에 mode 미포함) / F-4 max<min 가드
 
-## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 → 사이클 126/127/128/129 확장)
+## StockMaster (`/stock-master`, 사이클 85 → 사이클 124 → 사이클 126/127/128/129/169 확장)
 
 사이클 85 (2026-06-09) 최초 도입: 4 카드 + list 페이징 + detail 모달 + history 테이블.
+
+### 사이클 169 (2026-06-20) — 변경이력 탭 신 스키마 (seq/raw) 동기화 (사이클 150 회귀 시정)
+
+사용자 보고 "변경이력에 내용 안나오는건 지난번 데이터폭주 수정하면서 적용된건가?" → 원인 확정 = **사이클 150 회귀**. 사이클 150 (데이터폭주/Supabase 용량초과 시정) 의 migration 036 이 `stock_master_history` 스키마를 재설계 (`id`/`before_raw`/`after_raw` 제거 → `seq INT`(0/1) + `raw JSONB` 신설, `(ticker, seq)` PK, 92K→7,146 row) 했으나 **프론트 UI 미동기화**. `StockMaster.tsx` 변경이력 탭이 여전히 `item.before_raw`/`after_raw` 를 참조 → 새 스키마엔 부재 → `undefined` → **빈 화면**. 백엔드 `list_history` 는 `select("*")` pass-through 라 정상 (변경 0). 운영 DB 실측 = 7,146행 / distinct ticker 3,573 / seq0 3,573 + seq1 3,573 (데이터 정상 존재).
+
+사용자 결정 = **Option A** (seq0 최신본 / seq1 직전본 2 스냅샷 각각 표시).
+
+#### 변경이력 탭 신 스키마 (`StockMaster.tsx` + `types/stock-master.ts`)
+
+- **타입** `StockMasterHistoryItem`: `{ticker: string, seq: 0 | 1, change_type: 'INSERT' | 'UPDATE' | 'DELETE', raw: Record<string, unknown> | null, changed_at: string}`. 폐기 필드 (`id`/`before_raw`/`after_raw`) + 폐기 change_type (`'TTL_REFRESH'` — 사이클 150 trigger `OLD.raw IS DISTINCT FROM NEW.raw` 조건이라 미발화) 제거
+- **테이블 4 컬럼**: 스냅샷 (`seq===0 ? '최신본' : '직전본'` 배지, seq0=indigo / seq1=gray) / 변경일시 (KST, `formatKst`) / 변경유형 (`CHANGE_TYPE_COLORS` 배지, TTL_REFRESH 항목 제거) / raw 스냅샷 (`<CollapsiblePre label="raw" data={item.raw} />`)
+- **seq ASC 정렬**: `historyItems.sort((a, b) => a.seq - b.seq)` — UPDATE 시 seq0/seq1 의 `changed_at` 이 동일(`now()`)이라 changed_at DESC 정렬만으론 순서 비결정 → 프론트가 seq 기준 재정렬 (최신본 먼저). row `key` = `${ticker}-${seq}`
+- **CollapsiblePre 재사용**: `data: Record<string, unknown> | null` 시그너처 그대로 (`item.raw` null 시 "—")
+
+#### 회귀 가드 (`StockMaster.test.tsx`)
+
+- 기존 H-HISTORY (사이클 85 SAMPLE_HISTORY + 케이스) **의미 전환** (사이클 66 K-2) — 옛 스키마 mock → seq/raw
+- 사이클 169 신규 6 케이스: G-169-1 (최신본/직전본 라벨) / G-169-2 (seq ASC 정렬 순서) / G-169-3 (raw CollapsiblePre 펼침) / G-169-4 (change_type 배지) / G-169-AST (`StockMaster.tsx` before_raw/after_raw 잔존 0) / G-169-TYPE-AST (interface body 폐기 필드 0 + seq/raw 존재)
+
+#### 영속 의무
+
+- 사이클 65 H3 useQuery retry:1 (historyQuery `retry: 1` 영속) / 사이클 68 KST 강제 (`formatKst`) / 사이클 80 hotfix #3 Playwright LIFO (history 라우트 daily/catch-all *전* 등록) / 사이클 89 한글 친숙 용어 (최신본/직전본/변경유형) / 사이클 124 UI 동기화 영구 가드 (raw JSONB 키 추가 시 8 단계 절차 영속)
+- **신 스키마 동기화 회귀 차단**: stock_master_history 스키마 변경 시 (1) `types/stock-master.ts::StockMasterHistoryItem` (2) `StockMaster.tsx` 변경이력 탭 렌더 (3) `test/handlers.ts` MSW + `e2e/fixtures/api-mocks.ts` Playwright LIFO 동기화 의무. 백엔드 `list_history` 만 바꾸고 프론트 누락 시 빈 화면 회귀 (사이클 150→169 교훈)
 
 ### 사이클 129 (2026-06-14) — KIS 공식 일일 마스터 파일 4번째 새로고침 버튼
 

@@ -83,12 +83,20 @@ export interface StockMasterListFilter {
 
 export type StockMasterDetail = StockMasterListItem
 
+/**
+ * 사이클 169 (2026-06-20) — migration 036 (사이클 150) 신 스키마 동기화.
+ *
+ * 사이클 150 데이터폭주/Supabase 용량초과 시정 시 stock_master_history 를
+ * `(ticker, seq)` PK 로 재설계: id/before_raw/after_raw 제거 → seq+raw 신설.
+ * seq=0 최신본 스냅샷 / seq=1 직전본 스냅샷. 92K→7,146 row 용량 절감.
+ * `change_type` 은 INSERT/UPDATE/DELETE 3종 (사이클 150 trigger 가 'TTL_REFRESH'
+ * 미발화 — `OLD.raw IS DISTINCT FROM NEW.raw` 조건).
+ */
 export interface StockMasterHistoryItem {
-  id: number
   ticker: string
-  change_type: 'INSERT' | 'UPDATE' | 'DELETE' | 'TTL_REFRESH'
-  before_raw: Record<string, unknown> | null
-  after_raw: Record<string, unknown> | null
+  seq: 0 | 1
+  change_type: 'INSERT' | 'UPDATE' | 'DELETE'
+  raw: Record<string, unknown> | null
   changed_at: string  // KST +09:00 ISO
 }
 

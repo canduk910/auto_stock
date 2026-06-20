@@ -75,22 +75,24 @@ const SAMPLE_DETAIL = {
   },
 };
 
+// 사이클 169 의미 전환 (사이클 66 K-2) — migration 036 (사이클 150) 신 스키마.
+// 기존 {id, before_raw, after_raw} → {seq, raw}. seq0=최신본 / seq1=직전본.
+// 백엔드 list_history 는 changed_at DESC 정렬이지만 UPDATE 시 seq0/seq1
+// changed_at 이 동일(now())이라 순서 비결정 → 프론트가 seq ASC 재정렬.
 const SAMPLE_HISTORY = [
   {
-    id: 2,
     ticker: "005930",
+    seq: 1,
     change_type: "UPDATE",
-    before_raw: { bfdy_clpr: 70000 },
-    after_raw: { bfdy_clpr: 71500 },
+    raw: { bfdy_clpr: 70000 },
     changed_at: "2026-06-09T09:05:00+09:00",
   },
   {
-    id: 1,
     ticker: "005930",
-    change_type: "INSERT",
-    before_raw: null,
-    after_raw: { bfdy_clpr: 70000 },
-    changed_at: "2026-06-09T09:00:00+09:00",
+    seq: 0,
+    change_type: "UPDATE",
+    raw: { bfdy_clpr: 71500 },
+    changed_at: "2026-06-09T09:05:00+09:00",
   },
 ];
 
@@ -213,7 +215,7 @@ describe("사이클 85 — StockMaster 페이지 (H-DETAIL + Q11=B 카테고리 
 });
 
 describe("사이클 85 — StockMaster 페이지 (H-HISTORY + Q12=A `<pre>` collapsible)", () => {
-  it("H-HISTORY: ticker 선택 시 history 테이블이 changed_at DESC 로 표시된다", async () => {
+  it("H-HISTORY: ticker 선택 시 history 테이블이 표시된다 (사이클 169 신 스키마)", async () => {
     setupHappyPathHandlers();
     render(withProviders(<StockMaster />));
     await waitFor(() => expect(screen.getByText("005930")).toBeDefined());
@@ -223,8 +225,94 @@ describe("사이클 85 — StockMaster 페이지 (H-HISTORY + Q12=A `<pre>` coll
       expect(screen.getByTestId("stock-master-history-card")).toBeDefined();
     });
 
-    // change_type 배지 INSERT / UPDATE 2개 표시 (changed_at DESC = UPDATE 먼저)
-    expect(screen.getAllByText(/UPDATE|INSERT/).length).toBeGreaterThanOrEqual(2);
+    // 사이클 169 의미 전환 — change_type 배지 2개 (seq0/seq1 두 스냅샷)
+    expect(screen.getAllByText("UPDATE").length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────
+// 사이클 169 (2026-06-20) — 변경이력 탭 신 스키마 (seq/raw) 렌더 회귀 가드
+// 근본 원인 = 사이클 150 migration 036 이 stock_master_history 스키마 재설계
+// (id/before_raw/after_raw → seq/raw) 했으나 프론트 UI 미동기화 → 빈 화면.
+// 사용자 결정 Option A = seq0(최신본)/seq1(직전본) 2 스냅샷 각각 표시.
+// ────────────────────────────────────────────────────────────────────────
+describe("사이클 169 — 변경이력 탭 신 스키마 (seq/raw, 최신본/직전본)", () => {
+  async function openHistory() {
+    setupHappyPathHandlers();
+    render(withProviders(<StockMaster />));
+    await waitFor(() => expect(screen.getByText("005930")).toBeDefined());
+    fireEvent.click(screen.getByText("005930"));
+    await waitFor(() => {
+      expect(screen.getByTestId("stock-master-history-card")).toBeDefined();
+    });
+  }
+
+  it("G-169-1: seq0=최신본 / seq1=직전본 라벨이 각각 표시된다", async () => {
+    await openHistory();
+    expect(screen.getByText("최신본")).toBeDefined();
+    expect(screen.getByText("직전본")).toBeDefined();
+  });
+
+  it("G-169-2: seq ASC 정렬 — 최신본 행이 직전본 행보다 먼저 렌더된다", async () => {
+    await openHistory();
+    const card = screen.getByTestId("stock-master-history-card");
+    const text = card.textContent ?? "";
+    const idxLatest = text.indexOf("최신본");
+    const idxPrev = text.indexOf("직전본");
+    expect(idxLatest).toBeGreaterThanOrEqual(0);
+    expect(idxPrev).toBeGreaterThan(idxLatest);
+  });
+
+  it("G-169-3: raw 스냅샷 CollapsiblePre 펼치면 raw JSONB 값이 표시된다", async () => {
+    await openHistory();
+    // 두 행 모두 'raw' 라벨 버튼 (CollapsiblePre label="raw")
+    const rawButtons = screen.getAllByRole("button", { name: "raw" });
+    expect(rawButtons.length).toBe(2);
+    fireEvent.click(rawButtons[0]);
+    // seq0 (최신본) raw = { bfdy_clpr: 71500 }
+    await waitFor(() => {
+      expect(screen.getByText(/71500/)).toBeDefined();
+    });
+  });
+
+  it("G-169-4: change_type 배지가 신 스키마 행마다 렌더된다", async () => {
+    await openHistory();
+    expect(screen.getAllByText("UPDATE").length).toBe(2);
+  });
+
+  it("G-169-AST: StockMaster.tsx 에 before_raw / after_raw 잔존 0건 (사이클 150 회귀 차단)", () => {
+    const source = readFileSync(
+      path.join(__dirname, "..", "StockMaster.tsx"),
+      "utf-8",
+    );
+    expect(
+      source.includes("before_raw"),
+      "StockMaster.tsx 에 before_raw 잔존 — 사이클 150 신 스키마 미동기화 회귀",
+    ).toBe(false);
+    expect(
+      source.includes("after_raw"),
+      "StockMaster.tsx 에 after_raw 잔존 — 사이클 150 신 스키마 미동기화 회귀",
+    ).toBe(false);
+  });
+
+  it("G-169-TYPE-AST: stock-master.ts 타입이 신 스키마 (seq/raw) — 폐기 필드 0건", () => {
+    const source = readFileSync(
+      path.join(__dirname, "..", "..", "types", "stock-master.ts"),
+      "utf-8",
+    );
+    // StockMasterHistoryItem interface body 한정 검사 (docstring 설명 텍스트 제외)
+    const m = source.match(
+      /interface StockMasterHistoryItem\s*\{([\s\S]*?)\}/,
+    );
+    expect(m, "StockMasterHistoryItem interface 누락").not.toBeNull();
+    const body = m?.[1] ?? "";
+    // 폐기 필드 0건
+    expect(body.includes("before_raw")).toBe(false);
+    expect(body.includes("after_raw")).toBe(false);
+    expect(body.includes("TTL_REFRESH")).toBe(false);
+    // 신 스키마 필드 존재
+    expect(body.includes("seq")).toBe(true);
+    expect(/\braw\b/.test(body)).toBe(true);
   });
 });
 

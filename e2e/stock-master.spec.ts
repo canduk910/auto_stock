@@ -105,7 +105,8 @@ test.describe("G-E2E-3 (HIGH) — 모바일 viewport 375px 햄버거 메뉴 7개
 
 test.describe("G-E2E-4 (MEDIUM) — history 카드 선택 전 graceful 메시지", () => {
   test("목록 클릭 전 history 카드 안내 메시지 visible (Q12=A collapsible 영속)", async ({ page }) => {
-    // 사이클 81 Q12=A history 영역 before/after collapsible 영속
+    // 사이클 169 — history 영역 seq/raw 신 스키마 (사이클 150 migration 036).
+    // 본 케이스는 선택 전 graceful 안내만 검증 (history 행 내용 무관).
     await installApiMocks(page);
     await page.goto("/stock-master");
 

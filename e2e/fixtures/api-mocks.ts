@@ -352,8 +352,26 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   await page.route("**/api/stock-master/scan-pool/summary", (route) =>
     route.fulfill({ json: envelope({ eager_refresh_today: 0 }) }),
   );
+  // 사이클 169 — migration 036 (사이클 150) 신 스키마 (seq/raw). seq0 최신본 / seq1 직전본.
   await page.route("**/api/stock-master/*/history*", (route) =>
-    route.fulfill({ json: envelope([]) }),
+    route.fulfill({
+      json: envelope([
+        {
+          ticker: "005930",
+          seq: 0,
+          change_type: "UPDATE",
+          raw: { bfdy_clpr: 75000 },
+          changed_at: "2026-06-09T09:05:00+09:00",
+        },
+        {
+          ticker: "005930",
+          seq: 1,
+          change_type: "UPDATE",
+          raw: { bfdy_clpr: 74000 },
+          changed_at: "2026-06-09T09:05:00+09:00",
+        },
+      ]),
+    }),
   );
   // 사이클 124 Q1=A — 일봉 라우트 (history 후 등록 = LIFO 우선, /*catch-all 보다 앞).
   await page.route("**/api/stock-master/*/daily*", (route) =>

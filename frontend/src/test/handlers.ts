@@ -213,16 +213,24 @@ export const handlers = [
       )
     )
   ),
+  // 사이클 169 — migration 036 (사이클 150) 신 스키마 (seq/raw).
+  // seq0 최신본 / seq1 직전본 2 스냅샷.
   http.get(`${base}/stock-master/:ticker/history`, () =>
     HttpResponse.json(
       wrap([
         {
-          id: 1,
           ticker: '005930',
-          change_type: 'INSERT',
-          before_raw: null,
-          after_raw: { bfdy_clpr: 75000 },
-          changed_at: '2026-06-09T09:00:00+09:00',
+          seq: 0,
+          change_type: 'UPDATE',
+          raw: { bfdy_clpr: 75000 },
+          changed_at: '2026-06-09T09:05:00+09:00',
+        },
+        {
+          ticker: '005930',
+          seq: 1,
+          change_type: 'UPDATE',
+          raw: { bfdy_clpr: 74000 },
+          changed_at: '2026-06-09T09:05:00+09:00',
         },
       ])
     )

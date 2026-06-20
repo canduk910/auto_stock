@@ -60,11 +60,12 @@ function formatKst(isoString: string): string {
 // ────────────────────────────────────────────────────────────────────────
 // change_type 배지 색상
 // ────────────────────────────────────────────────────────────────────────
+// 사이클 169 — migration 036 (사이클 150) trigger 가 'TTL_REFRESH' 미발화
+// (`OLD.raw IS DISTINCT FROM NEW.raw` 조건) → INSERT/UPDATE/DELETE 3종만.
 const CHANGE_TYPE_COLORS: Record<string, string> = {
   INSERT: 'bg-emerald-100 text-emerald-800',
   UPDATE: 'bg-blue-100 text-blue-800',
   DELETE: 'bg-red-100 text-red-800',
-  TTL_REFRESH: 'bg-gray-100 text-gray-700',
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -892,7 +893,12 @@ export default function StockMaster() {
   const listData = listQuery.data
   const listItems: StockMasterListItem[] = listData?.items ?? []
   const listTotal: number = listData?.total ?? 0
-  const historyItems: StockMasterHistoryItem[] = Array.isArray(historyQuery.data) ? historyQuery.data : []
+  // 사이클 169 — migration 036 (사이클 150) 신 스키마. UPDATE 시 seq0/seq1
+  // changed_at 이 동일(now())이라 changed_at 정렬만으론 순서 비결정 →
+  // seq ASC (최신본 0 먼저 / 직전본 1 다음) 명시 정렬.
+  const historyItems: StockMasterHistoryItem[] = (
+    Array.isArray(historyQuery.data) ? [...historyQuery.data] : []
+  ).sort((a, b) => a.seq - b.seq)
 
   return (
     <div className="space-y-6">
@@ -1375,15 +1381,30 @@ export default function StockMaster() {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-xs text-gray-500 uppercase">
+                  <th className="text-left py-2 pr-3 font-medium">스냅샷</th>
                   <th className="text-left py-2 pr-3 font-medium">변경일시 (KST)</th>
                   <th className="text-left py-2 pr-3 font-medium">변경유형</th>
-                  <th className="text-left py-2 pr-3 font-medium">이전 값</th>
-                  <th className="text-left py-2 font-medium">이후 값</th>
+                  <th className="text-left py-2 font-medium">raw 스냅샷</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
+                {/* 사이클 169 — seq0 최신본 / seq1 직전본 2 스냅샷 각각 표시 */}
                 {historyItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
+                  <tr
+                    key={`${item.ticker}-${item.seq}`}
+                    className="hover:bg-gray-50"
+                  >
+                    <td className="py-2 pr-3">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          item.seq === 0
+                            ? 'bg-indigo-100 text-indigo-800'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {item.seq === 0 ? '최신본' : '직전본'}
+                      </span>
+                    </td>
                     <td className="py-2 pr-3 text-gray-500 text-xs">
                       {formatKst(item.changed_at)}
                     </td>
@@ -1397,11 +1418,8 @@ export default function StockMaster() {
                         {item.change_type}
                       </span>
                     </td>
-                    <td className="py-2 pr-3">
-                      <CollapsiblePre label="이전 보기" data={item.before_raw} />
-                    </td>
                     <td className="py-2">
-                      <CollapsiblePre label="이후 보기" data={item.after_raw} />
+                      <CollapsiblePre label="raw" data={item.raw} />
                     </td>
                   </tr>
                 ))}
