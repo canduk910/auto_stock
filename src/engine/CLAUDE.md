@@ -149,10 +149,8 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 
 ### `scanner.py` 신규 영역 (+289L)
 
-- `market_cap_master_to_millions(prdy_avls_scal: int) -> int: return prdy_avls_scal * 100` — KIS 마스터 시총 (억) → 백만원 환산. Q12 사용자 verbatim "× 100" 정합. **사이클 166: production 미사용 확인 (호출처 0건) + raw.hts_avls 는 억원 단위로 확정 → 본 헬퍼(백만원 반환)와 단위 체계 다름. 함수명/단위 통일은 사이클 167+ 행위 보존 리팩토링 인계. 실제 후보 풀 필터(list_by_filter/list_paged_by_filter)는 억원 정합 시정 완료.**
-- `validate_market_cap_consistency(master_avls_million, hts_avls)` — ±5%/±20% 임계 + WARNING/CRITICAL emit + 사이클 88 G-REJECT graceful
+- **사이클 167 폐기 (dead code, callsite 0건)**: `market_cap_master_to_millions` / `validate_market_cap_consistency` / `get_market_cap_millions` 3 시총 헬퍼 영구 폐기. 사이클 129 도입 이후 production 호출 0건 (서로만 호출하는 폐쇄 그래프). 실제 시총 필터는 `list_by_filter` / `list_paged_by_filter` 가 직접 수행 (사이클 166 억원 정합 완료). AST 영구 가드 = `tests/unit/ast/test_cycle167_ast_no_dead_market_cap_funcs.py` (3 함수 부재 + 미래 재발 차단). 사이클 103 strategy.py dead code 폐기 패턴 답습.
 - `_is_master_blocked_for_entry(ticker)` — **1단계 차단 7건** (master_raw 우선 + raw 폴백 chain): `trht_yn` 거래정지 / `mang_issu_yn` 관리종목 / `ssts_hot_yn` 공매도과열 / `stange_runup_yn` 이상급등 / `sltr_yn` 정리매매 / `mrkt_alrm_cls_code` 시장경고 / `invt_alrm_yn` 투자주의환기 (KOSDAQ 전용)
-- `get_market_cap_millions(ticker)` — master_raw 우선 + raw 폴백 통합 헬퍼 (사이클 81 G-AST1 영속)
 - `_stock_master_master_load_once(force=False)` — KIS 공식 파일 다운로드 (`src/api/kis_master.py`) + `master_raw` 배치 upsert + 진행 emit + graceful (사이클 88) + `refresh_progress` integration (사이클 127)
 
 ### `scheduler.py` 신규 16:30 KST task (+86L)

@@ -82,6 +82,11 @@ async def test_g_ml2_force_true_persistence(monkeypatch):
     )
 
 
+@pytest.mark.xfail(
+    reason="사이클 167 — market_cap_master_to_millions dead code 폐기 (callsite 0건). "
+    "사이클 129 시점 헬퍼 존재 계약 영속 보존 (의미 전환, 사이클 66 K-2 패턴).",
+    strict=False,
+)
 def test_g_ml3_market_cap_conversion_helper():
     """G-ML3: 시총 환산 헬퍼 정확 — 마스터 (억) × 100 = raw (백만원).
 
@@ -127,6 +132,11 @@ def test_g_ml3_market_cap_conversion_helper():
     )
 
 
+@pytest.mark.xfail(
+    reason="사이클 167 — validate_market_cap_consistency dead code 폐기 (callsite 0건). "
+    "사이클 129 시점 헬퍼 존재 계약 영속 보존 (의미 전환, 사이클 66 K-2 패턴).",
+    strict=False,
+)
 def test_g_ml4_consistency_validation_thresholds():
     """G-ML4: 정합 검증 임계 ±5% OK / ±20% WARNING / 초과 ERROR.
 
@@ -156,6 +166,11 @@ def test_g_ml4_consistency_validation_thresholds():
     assert grade4 == "ERROR", f"G-ML4: ±50% ERROR 위반 (grade={grade4!r})"
 
 
+@pytest.mark.xfail(
+    reason="사이클 167 — validate_market_cap_consistency dead code 폐기 (callsite 0건). "
+    "사이클 129 시점 헬퍼 존재 계약 영속 보존 (의미 전환, 사이클 66 K-2 패턴).",
+    strict=False,
+)
 def test_g_ml5_consistency_validation_skip_zero():
     """G-ML5: 0/비결정 영역 회피 — 정합 검증 skip = OK 반환.
 

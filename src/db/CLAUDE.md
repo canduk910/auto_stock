@@ -161,8 +161,8 @@ KIS 공식 일일 마스터 파일 (`kospi_code.mst` / `kosdaq_code.mst`) 영역
 ### 호출자 영역
 
 - `src/engine/scanner.py::_stock_master_master_load_once()` (사이클 129) 16:30 KST 매스 적재
-- `src/engine/scanner.py::get_market_cap_millions(ticker)` (사이클 129) master_raw 우선 + raw 폴백 chain
 - `src/engine/scanner.py::_is_master_blocked_for_entry(ticker)` (사이클 129) 1단계 차단 7건 hook
+- ~~`get_market_cap_millions`~~ (사이클 167 폐기 — dead code, callsite 0건. 실제 시총 필터는 `list_by_filter` / `list_paged_by_filter` 직접 수행, 사이클 166 억원 정합)
 
 ## stock_master.py — 종목마스터 조회 영역 (사이클 128, 2026-06-13)
 

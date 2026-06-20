@@ -117,7 +117,7 @@ KIS 공식 다운로드 (`https://new.real.download.dws.co.kr/common/master/`) �
 ### 매매 활용 키 ~30 (사이클 129 domain-consult 의제 4 확정)
 
 - 진입 차단 7건 (HIGH): `trht_yn` 거래정지 / `mang_issu_yn` 관리종목 / `ssts_hot_yn` 공매도과열 / `stange_runup_yn` 이상급등 / `sltr_yn` 정리매매 / `mrkt_alrm_cls_code` 시장경고 / `invt_alrm_yn` 투자주의환기 (코스닥 전용)
-- 시총: `prdy_avls_scal` 전일 시가총액 (**억 원**, × 100 → 백만원 환산 헬퍼 `scanner.market_cap_master_to_millions`)
+- 시총: `prdy_avls_scal` 전일 시가총액 (**억 원**). 시총 필터는 `list_by_filter` / `list_paged_by_filter` 가 `raw.hts_avls`(억원) 기준 직접 수행 (사이클 166 억원 정합)
 - 재무: `roe` / `sale_account` 매출액 / `bsop_prfi` 영업이익 / `op_prfi` 경상이익 / `thtr_ntin` 당기순이익
 - 지수편입: `kospi200_apnt_cls_code` / `kospi100_issu_yn` / `kospi50_issu_yn` / `ksq150_nmix_yn` / `krx300_issu_yn` / `krx_issu_yn`
 - 시장 영역: `lstn_stcn` 상장주수 (천주) / `cpfn` 자본금 / `marg_rate` 증거금비율 / `crdt_able` 신용가능
@@ -127,10 +127,9 @@ KIS 공식 다운로드 (`https://new.real.download.dws.co.kr/common/master/`) �
 
 - `prdy_avls_scal` (KIS 마스터) = **억 원** (구조체 `.h` 명세 "전일기준 시가총액 (억)" 기준. 1 억 = 100,000,000 원 = 100 백만원)
 - `hts_avls` (KIS API FHKST01010100 inquire_price "HTS 시가총액", 사이클 116) = **억원** (사이클 166 확정 — 아래 참조)
-- 환산식: `prdy_avls_scal × 100 = 백만원` (억→백만원, `scanner.market_cap_master_to_millions` — production 미사용, 사이클 167+ 단위 통일 인계)
-- 정합 검증 임계: ±5% 정상 / ±5%~±20% WARNING + master_raw 우선 / >±20% CRITICAL + raw 폴백 (사이클 88 G-REJECT graceful)
+- **사이클 167 — 시총 헬퍼 3개 dead code 폐기**: `market_cap_master_to_millions` / `validate_market_cap_consistency` / `get_market_cap_millions` 영구 폐기 (callsite 0건). 실제 시총 필터는 `list_by_filter` / `list_paged_by_filter` 가 `raw.hts_avls`(억원) 직접 비교 (사이클 166). AST 영구 가드 = `tests/unit/ast/test_cycle167_ast_no_dead_market_cap_funcs.py`.
 - ✅ **단위 확정 (운영 DB 실측 검증 완료, 사이클 164 인계 종결)**: 대형주 6종목 전수에서 `종가 × 상장주수(천주) ÷ prdy_avls_scal = 정확히 100,000` → 실제 시총(원) = `prdy_avls_scal × 10⁸` → **`prdy_avls_scal` = 억원 확정**. `× 100` 환산 정확. **사이클 164 "백만원 의심" = false alarm 기각**.
-- ✅ **hts_avls 단위 충돌 종결 (사이클 166, 2026-06-19)**: 운영 DB 대형주 9종목 전수 `실제시총(원) / hts_avls ≈ 10⁸` → **`hts_avls` = 억원 확정**. median 933(=933억원) 분포도 한국 상장사 중앙값과 정합. 사이클 108/128 "백만원" 가정은 silent 결함 (100배 어긋남 → min_market_cap=1,000억 시 후보 풀 1,734 → 80, 95.4% 축소). **시정**: `list_by_filter` (python `hts_avls × 100_000_000`) + `list_paged_by_filter` (jsonb `min_market_cap // 100_000_000`) + scanner KRX 폴백 (`// 100_000_000`) + 프론트 `formatMarketCap` 모두 억원 통일. DB 재적재 불필요 (16:10 KIS task 가 억원으로 덮어씀). `get_market_cap_millions` / `validate_market_cap_consistency` 는 production 미사용 → 단위 명문화만 (사이클 167+ 통일 인계). 회귀 가드: `tests/unit/db/test_cycle166_hts_avls_unit_correction.py` + `tests/unit/engine/scanner/test_cycle166_krx_fallback_eok_unit.py` (AST 단위 가드 `1_000_000` 잔존 0건).
+- ✅ **hts_avls 단위 충돌 종결 (사이클 166, 2026-06-19)**: 운영 DB 대형주 9종목 전수 `실제시총(원) / hts_avls ≈ 10⁸` → **`hts_avls` = 억원 확정**. median 933(=933억원) 분포도 한국 상장사 중앙값과 정합. 사이클 108/128 "백만원" 가정은 silent 결함 (100배 어긋남 → min_market_cap=1,000억 시 후보 풀 1,734 → 80, 95.4% 축소). **시정**: `list_by_filter` (python `hts_avls × 100_000_000`) + `list_paged_by_filter` (jsonb `min_market_cap // 100_000_000`) + scanner KRX 폴백 (`// 100_000_000`) + 프론트 `formatMarketCap` 모두 억원 통일. DB 재적재 불필요 (16:10 KIS task 가 억원으로 덮어씀). `get_market_cap_millions` / `validate_market_cap_consistency` / `market_cap_master_to_millions` 는 production 미사용 → **사이클 167 dead code 폐기**. 회귀 가드: `tests/unit/db/test_cycle166_hts_avls_unit_correction.py` + `tests/unit/engine/scanner/test_cycle166_krx_fallback_eok_unit.py` (AST 단위 가드 `1_000_000` 잔존 0건) + `tests/unit/ast/test_cycle167_ast_no_dead_market_cap_funcs.py` (3 함수 폐기 가드).
 
 ### 호출자
 

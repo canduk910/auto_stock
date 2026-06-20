@@ -18,6 +18,8 @@
 """
 from __future__ import annotations
 
+import pytest
+
 
 def test_g_up1_block_for_entry_7_keys():
     """G-UP1: 1단계 차단 7건 매수 진입 차단 분기.
@@ -80,6 +82,11 @@ def test_g_up2_master_absent_raw_fallback_nxt():
     )
 
 
+@pytest.mark.xfail(
+    reason="사이클 167 — get_market_cap_millions dead code 폐기 (callsite 0건). "
+    "사이클 129 시점 헬퍼 존재 계약 영속 보존 (의미 전환, 사이클 66 K-2 패턴).",
+    strict=False,
+)
 def test_g_up3_market_cap_master_first_raw_fallback():
     """G-UP3: 시총 영역 master_raw 우선 + raw 폴백.
 

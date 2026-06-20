@@ -9,7 +9,6 @@ domain-expert 자문: 단위 혼재는 사일런트 결함 온상 → 발화 빈
 
 from __future__ import annotations
 
-import ast
 import re
 from pathlib import Path
 
@@ -109,40 +108,8 @@ class TestStockMasterUnitAst:
 
 
 # ===========================================================================
-# G-166-DOC (HIGH) — 헬퍼 반환 단위 docstring 명문화 (Q-B 명칭변경 없음)
+# G-166-DOC 영역 — 사이클 167 폐기 (헬퍼 3개 dead code 제거).
+# 사이클 166 시점 헬퍼 존재 + docstring 억원 명문화 가드 (TestHelperUnitDocumentation)
+# 는 사이클 167 dead code 폐기로 의도 무효화 → 제거. 폐기 영구 가드는
+# tests/unit/ast/test_cycle167_ast_no_dead_market_cap_funcs.py 로 이관.
 # ===========================================================================
-
-class TestHelperUnitDocumentation:
-    """get_market_cap_millions / market_cap_master_to_millions 단위 명문화.
-
-    Q-B: 사이클 166 은 명칭 변경 없이 docstring 으로 단위(억원) 명문화만.
-    함수가 모듈에 존재하고 docstring 에 단위 표기가 있는지 검증.
-    """
-
-    def test_doc_get_market_cap_helper_exists(self):
-        """get_market_cap_millions 헬퍼가 모듈에 존재한다 (호출처 0이나 보존)."""
-        src = _SCANNER_PATH.read_text(encoding="utf-8")
-        tree = ast.parse(src)
-        names = {
-            node.name for node in ast.walk(tree)
-            if isinstance(node, ast.FunctionDef)
-        }
-        assert "get_market_cap_millions" in names
-        assert "market_cap_master_to_millions" in names
-        assert "validate_market_cap_consistency" in names
-
-    def test_doc_hts_avls_eok_unit_documented(self):
-        """get_market_cap_millions 영역 docstring 이 hts_avls 억원 단위를 명시한다."""
-        src = _SCANNER_PATH.read_text(encoding="utf-8")
-        tree = ast.parse(src)
-        target = None
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) and node.name == "get_market_cap_millions":
-                target = node
-                break
-        assert target is not None
-        doc = ast.get_docstring(target) or ""
-        # "억" 단위 표기 의무 (사이클 166 — hts_avls 억원 명문화)
-        assert "억" in doc, (
-            "get_market_cap_millions docstring 에 hts_avls 억원 단위 명문화 누락 (사이클 166)"
-        )

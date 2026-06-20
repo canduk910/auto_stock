@@ -2453,75 +2453,13 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
 # ============================================================
 # 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst)
 # Q4=A 마스터 우선 + Q5=C 전수 보존 + Q6=C master_raw 별도 컬럼
-# Q12 시정 영구 영속: 시총 환산 × 100 (사용자 verbatim 정합)
+#
+# 사이클 167 — 시총 헬퍼 3개 (market_cap_master_to_millions /
+# validate_market_cap_consistency / get_market_cap_millions) dead code 폐기.
+# 사이클 129 도입 이후 production 호출 0건 (서로만 호출하는 폐쇄 그래프). 실제
+# 시총 필터는 list_by_filter / list_paged_by_filter 가 직접 수행 (사이클 166 억원
+# 정합 완료). AST 영구 가드 = tests/unit/ast/test_cycle167_ast_no_dead_market_cap_funcs.py.
 # ============================================================
-
-
-def market_cap_master_to_millions(master_value_eok) -> int:
-    """KIS 마스터 시총 (억) → 백만원 환산 (prdy_avls_scal 전용 헬퍼).
-
-    환산식 영구 영속 (Q12 시정):
-    - 1 억 원 = 100,000,000 원 = 100 백만원 → × 100
-    - 사용자 verbatim "× 100" 정합 검증 후 정정 영속.
-    - 결함 사유: team-leader 자체 자문 영역 초기 "× 10,000" 단위 결함 → "× 100" 정합.
-
-    사이클 166 단위 명문화 (Q-B 명칭 변경 보류):
-    - 입력 master_value_eok = master_raw.prdy_avls_scal = **억원 단위** (확정, 6종목 실측).
-    - 본 헬퍼 반환 = 백만원 (× 100). raw.hts_avls (억원) 와 **단위 체계 다름** 주의.
-    - production 호출처 0건 (사이클 166 시점 미연결). 함수명/단위 통일은 사이클 167+
-      행위 보존 리팩토링 인계. 사이클 166 은 list_by_filter / list_paged_by_filter
-      (실제 후보 풀) 단위 정합만 시정.
-
-    Args:
-        master_value_eok: 마스터 시총 (억 단위, int 또는 str — 공백 자동 처리)
-
-    Returns:
-        백만원 단위 시총 (prdy_avls_scal × 100).
-    """
-    try:
-        val = int(str(master_value_eok).strip() or "0")
-    except (ValueError, TypeError):
-        return 0
-    return val * 100
-
-
-def validate_market_cap_consistency(
-    master_eok: int, raw_millions: int
-) -> tuple[str, float]:
-    """master_raw (억) vs raw.hts_avls (백만원) 정합 검증.
-
-    domain-consult 의제 2 채택 영구 영속:
-    - ±5% 이내 = OK (정상 영역)
-    - ±5% 초과 ~ ±20% 이내 = WARNING (master_raw 우선 + 로그)
-    - ±20% 초과 = ERROR (raw 폴백 + scanner 진입 차단 + G-REJECT graceful)
-
-    0/비결정 영역 = OK (skip — 정합 검증 회피).
-
-    Args:
-        master_eok: master_raw.prdy_avls_scal (억 단위)
-        raw_millions: raw.hts_avls (백만원 단위)
-
-    Returns:
-        (grade, diff_pct) — grade ∈ {"OK", "WARNING", "ERROR"} / diff_pct float
-    """
-    # 0/비결정 영역 회피
-    if not master_eok or not raw_millions:
-        return "OK", 0.0
-
-    master_millions = market_cap_master_to_millions(master_eok)
-    if master_millions == 0:
-        return "OK", 0.0
-
-    diff_ratio = (
-        abs(master_millions - raw_millions) / max(master_millions, raw_millions) * 100
-    )
-
-    if diff_ratio <= 5.0:
-        return "OK", diff_ratio
-    elif diff_ratio <= 20.0:
-        return "WARNING", diff_ratio
-    else:
-        return "ERROR", diff_ratio
 
 
 def _is_master_blocked_for_entry(
@@ -2647,53 +2585,6 @@ async def apply_master_block_filter(
         survived.append(ticker)
 
     return survived, excluded
-
-
-def get_market_cap_millions(master_raw: dict, raw: dict) -> int:
-    """시총 영역 통합 헬퍼 — master_raw 우선 + raw 폴백 (Q4=A 영속).
-
-    domain-consult 의제 3 키별 우선순위 영역 영구 영속:
-    1. master_raw.prdy_avls_scal (억) 우선 → × 100 백만원 환산
-    2. master_raw 부재 시 raw.hts_avls (억) 폴백 (사이클 116 → 166 정정)
-    3. 양쪽 부재 → 0 (graceful)
-
-    사이클 166 단위 명문화 (Q-B 명칭 변경 보류):
-    - raw.hts_avls = KIS FHKST01010100 inquire_price "HTS 시가총액" = **억원 단위** 확정.
-      운영 DB 실측 (2026-06-19): 실제시총(원) / hts_avls ≈ 10^8 → 1단위 = 1억원.
-    - 1순위 (prdy_avls_scal × 100) 은 백만원, 2순위 (hts_avls) 는 억원 — 단위 체계가
-      다름. production 호출처 0건 (사이클 166 시점 미연결) → 실제 후보 풀 영향 0.
-    - 함수명 `_millions` 잔재 + 단위 통일은 사이클 167+ 행위 보존 리팩토링 인계.
-
-    Args:
-        master_raw: stock_master.master_raw dict
-        raw: stock_master.raw dict (사이클 81 G-AST1 영역, 변경 0)
-
-    Returns:
-        시총 정수. 1순위 = 백만원 (prdy_avls_scal × 100) / 2순위 = 억원 (hts_avls).
-        단위 혼재 — 본 헬퍼는 미사용 (사이클 167+ 통일 인계).
-    """
-    # 1순위: master_raw 영역 (Q4=A)
-    if master_raw and isinstance(master_raw, dict):
-        master_eok = master_raw.get("prdy_avls_scal")
-        if master_eok:
-            try:
-                eok_int = int(str(master_eok).strip() or "0")
-                if eok_int > 0:
-                    return market_cap_master_to_millions(eok_int)
-            except (ValueError, TypeError):
-                pass
-
-    # 2순위: raw.hts_avls 폴백 (사이클 116 영속)
-    if raw and isinstance(raw, dict):
-        hts_avls = raw.get("hts_avls")
-        if hts_avls:
-            try:
-                return int(str(hts_avls).strip() or "0")
-            except (ValueError, TypeError):
-                return 0
-
-    # 3순위: 양쪽 부재 → graceful
-    return 0
 
 
 async def _stock_master_master_load_once(force: bool = True) -> dict:
