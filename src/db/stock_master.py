@@ -569,7 +569,8 @@ async def list_by_filter(
     is_kospi200: bool | None = None,
     is_kosdaq150: bool | None = None,
     limit: int = 500,
-) -> list[dict]:
+    return_stage_counts: bool = False,
+) -> list[dict] | tuple[list[dict], dict[str, list[str]]]:
     """시총·거래대금·시장·NXT/KOSPI200/KOSDAQ150 필터로 stock_master 를 조회 (사이클 108 + 153).
 
     KIS volume-rank API 없이 DB 기반으로 유니버스를 구성한다 (KIS API 호출 0건).
@@ -592,10 +593,19 @@ async def list_by_filter(
         is_kospi200: None=전체 / True=KOSPI200만 (is_kosdaq150 와 OR 합집합).
         is_kosdaq150: None=전체 / True=KOSDAQ150만 (is_kospi200 와 OR 합집합).
         limit: 결과 최대 건수 (default 500).
+        return_stage_counts: 사이클 170 카드 A — True 시 단계별 생존 ticker 누적
+            (관찰성 전용, 필터 로직/임계 불변 = 매수 풀 불변). False (기본) = 현행 list.
 
     Returns:
-        [{"ticker": str, "name": str, "excg_dvsn_cd": str, "nxt_tradable": bool,
-          "is_kospi200": bool, "is_kosdaq150": bool, "raw": dict}, ...]
+        return_stage_counts=False (기본): 기존 호출자 회귀 보존.
+            [{"ticker": str, "name": str, "excg_dvsn_cd": str, "nxt_tradable": bool,
+              "is_kospi200": bool, "is_kosdaq150": bool, "raw": dict}, ...]
+        return_stage_counts=True: (filtered, stage) 튜플 (사이클 170 카드 A).
+            stage = {"union_tickers": [...], "mcap_tickers": [...], "trade_tickers": [...]}
+            - union: index/형식/exclude 통과, 시총·거래대금 컷 *전*
+            - mcap: 시총컷 통과 후
+            - trade: 거래대금컷 통과 후 (= 최종 filtered ticker 순서 정합)
+            attrition (예: union 348 → mcap 348 → trade 321) funnel 관찰성 노출용.
     """
     exclude_set: set[str] = set(exclude_tickers or [])
     # 2× 버퍼 조회 — JSONB Python-side 필터 후 limit 를 충족하도록 여유분 확보
@@ -630,6 +640,14 @@ async def list_by_filter(
 
     result = await asyncio.to_thread(lambda: query.execute())
     rows = result.data or []
+
+    # 사이클 170 카드 A — 단계별 생존 ticker 누적 (관찰성 전용).
+    # cap 미적용 — 정확한 count 보존 (소비처 _record_funnel_step 가 survived_count 정확
+    # 기록 + survived 리스트만 _FUNNEL_SURVIVED_CAP 200 자름). rows 는 fetch buffer cap.
+    # 필터 로직/임계/순서/limit break 불변 → filtered 원소·순서 행위 보존 (G-A-1 HIGH).
+    union_tickers: list[str] = []
+    mcap_tickers: list[str] = []
+    trade_tickers: list[str] = []
 
     filtered: list[dict] = []
     for row in rows:
@@ -669,6 +687,13 @@ async def list_by_filter(
 
         raw: dict = row.get("raw") or {}
 
+        # 사이클 170 카드 A — union 단계 (index/형식/exclude 통과, 시총·거래대금 컷 *전*)
+        # cap 미적용 — 정확한 count 보존 (소비처 _record_funnel_step 가 survived_count=
+        # len(survived) 로 정확 기록 + survived 리스트만 _FUNNEL_SURVIVED_CAP 200 자름).
+        # rows 는 list_by_filter fetch_limit (= max(limit*2, 1000)) buffer 로 이미 cap.
+        if return_stage_counts:
+            union_tickers.append(ticker)
+
         # 시가총액 필터 — hts_avls 단위: 억원 → 원 변환 후 비교 (사이클 166 정정)
         # KIS FHKST01010100 inquire_price 응답 hts_avls = "HTS 시가총액" (억원 단위).
         # 운영 DB 실측 (2026-06-19): 실제시총(원) / hts_avls ≈ 10^8 → 1단위 = 1억원 확정.
@@ -682,6 +707,10 @@ async def list_by_filter(
             if hts_avls * 100_000_000 < min_market_cap:
                 continue
 
+        # 사이클 170 카드 A — mcap 단계 (시총컷 통과 후, 거래대금 컷 *전*)
+        if return_stage_counts:
+            mcap_tickers.append(ticker)
+
         # 거래대금 필터 — acml_tr_pbmn 단위: 원
         if min_trade_amount > 0:
             try:
@@ -691,8 +720,18 @@ async def list_by_filter(
             if acml_tr < min_trade_amount:
                 continue
 
+        # 사이클 170 카드 A — trade 단계 (거래대금컷 통과 후 = 최종 filtered, 순서 정합)
+        if return_stage_counts:
+            trade_tickers.append(ticker)
+
         filtered.append(row)
 
+    if return_stage_counts:
+        return filtered, {
+            "union_tickers": union_tickers,
+            "mcap_tickers": mcap_tickers,
+            "trade_tickers": trade_tickers,
+        }
     return filtered
 
 

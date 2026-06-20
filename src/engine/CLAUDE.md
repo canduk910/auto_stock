@@ -444,6 +444,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `StrategyState`: positions, pending_buys, **pending_buy_amounts**(ticker→가격×수량, 1주 폴백 잔여 자금 계산), total_investment, daily_realized_pnl, cached_buyable_qty/at, buy_blocked_until, low_funds_tickers, **signal_count_today / order_attempt_today / fill_count_today** + 헬퍼 (`is_buy_blocked / block_buy / unblock_buy / is_buyable_cache_fresh / is_low_funds_blocked / block_low_funds / clear_low_funds`)
 - 일일 퍼널 카운터는 `_reset_daily_state()` 0 초기화 → `metrics.strategy_funnel` 노출
 - `pending_buy_amounts` 는 OrderEngine `execute_buy` 시장가/지정가 폴백에서 `pending_buys.add(ticker)` 옆 동기 등록. `pending_buys.discard` 옆에서 동시 정리
+- **funnel 단계 캡처** (관찰성 전용 — 메모리 `_funnel_steps` + DB `strategy_funnel_snapshots` + UI): `_record_funnel_step(step_no, step_name, survived, excluded=None, *, step_conditions=None)` + `_record_funnel_pipeline_step(FunnelStage, ...)` 위임 (사이클 47). survived/excluded cap 200/20 자동, survived_count 는 cap *전* 정확 보존. **사이클 170 카드 B — in-place upsert**: 같은 step_no 존재 시 교체 (append-only 누적 차단). `_reset_funnel_steps(stages=None)` — `stages` 전달 시 모든 `FunnelStage` `survived=[]` count=0 0-시드 pre-populate (조기반환/실패 run 도 전 단계 0 일관 → step1=0/step4=7 stale 잔존 영구 차단). `stages=None` = 빈 리스트 (사이클 39 회귀). 5 전략 prepare()+retry 가 각 전략 STAGES 상수 인자 전달 (donchian/BFB/VCP=`FUNNEL_STAGES` / VB=`VB_FUNNEL_STAGES` / LTV=`LTV_FUNNEL_STAGES`). **check_exit_signal/check_buy_signal funnel hook 0건** (매도/매수 hot path 적재 금지, 사이클 143/170 SAFETY). momentum 영구 제외 (사이클 132)
 
 ## strategy_registry.py
 

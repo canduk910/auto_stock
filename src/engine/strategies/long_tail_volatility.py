@@ -106,6 +106,9 @@ class LongTailVolatilityStrategy(StrategyBase):
         self._open_confirmed: dict[str, dict[str, bool]] = {}
         self._prev_price: dict[str, dict[str, int]] = {}
         self._scanned_tickers: list[str] = []
+        # 사이클 170 카드 C — _scan_universe 가 보관한 원천 유니버스 후보 (필터 전).
+        # funnel step1 noise 0 placeholder 제거 — 실제 후보 노출.
+        self._universe_candidate_tickers: list[str] = []
         # 상한가 도달 → 익일 청산 모드 종목
         self._limit_up_reached: set[str] = set()
         # 익일 청산 시가 안정화 대기 플래그
@@ -130,7 +133,7 @@ class LongTailVolatilityStrategy(StrategyBase):
         stats = _empty_scan_stats()
         self._scan_stats = stats
         # 사이클 143 — 단계별 ticker 캡처 reset (사이클 39 답습)
-        self._reset_funnel_steps()
+        self._reset_funnel_steps(LTV_FUNNEL_STAGES)
 
         # 사이클 163 — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
         # 초기 1회 + 재시도 cap 3회 = 최대 4회 호출 영역.
@@ -146,18 +149,18 @@ class LongTailVolatilityStrategy(StrategyBase):
             # 사이클 21 카운트 재초기화 (재시도마다 _scan_universe 가 갱신)
             stats = _empty_scan_stats()
             self._scan_stats = stats
-            self._reset_funnel_steps()
+            self._reset_funnel_steps(LTV_FUNNEL_STAGES)
             tickers = await self._scan_universe()
         # 사이클 143 — step 1+2 funnel hook (사이클 140 자문 영속)
         params = self.config.params
         min_mcap_billion = params.get("min_market_cap", 100_000_000_000) / 100_000_000
         min_trade_billion = params.get("min_trade_amount", 20_000_000_000) / 100_000_000
-        # step 1: 유니버스 후보 (stock_master 기반)
+        # step 1: 원천 유니버스 후보 (필터 전) — 사이클 170 카드 C placeholder 제거
         self._record_funnel_pipeline_step(
             LTV_FUNNEL_STAGES[0],
-            survived=[],
+            survived=self._universe_candidate_tickers,
             step_conditions=(
-                f"stock_master.list_by_filter ("
+                f"stock_master.list_by_filter 원천 유니버스 후보 ("
                 f"limit={params.get('max_scan_stocks', 100)})"
             ),
         )
@@ -425,6 +428,9 @@ class LongTailVolatilityStrategy(StrategyBase):
 
         # 사이클 151 — PriceFilter 후처리 (사이클 148 VB 영역 답습, Q2=C 단일 source 영속)
         filtered = await self._apply_price_filter_in_prepare(filtered)
+
+        # 사이클 170 카드 C — 원천 유니버스 후보 보관 (funnel step1 노출)
+        self._universe_candidate_tickers = list(filtered)
 
         return filtered
 

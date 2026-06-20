@@ -172,7 +172,7 @@ class VcpBreakoutStrategy(StrategyBase):
         stats = _empty_scan_stats()
         self._scan_stats = stats
         # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
-        self._reset_funnel_steps()
+        self._reset_funnel_steps(FUNNEL_STAGES)
 
         # 사이클 163 (2026-06-18) — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
         # 6/18 08:24:25 운영 사고 영구 차단 (사이클 158 VB 패턴 답습).
@@ -188,13 +188,15 @@ class VcpBreakoutStrategy(StrategyBase):
             self._candidates = {}
             stats = _empty_scan_stats()
             self._scan_stats = stats
-            self._reset_funnel_steps()
+            self._reset_funnel_steps(FUNNEL_STAGES)
             tickers = await self._scan_universe()
         # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
+        # 사이클 170 카드 C — step_conditions "고정 유니버스" → 실제 소스 정합.
+        # 사이클 157 부터 stock_master.list_by_filter(is_kospi200, is_kosdaq150) 기반.
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[0],
             survived=tickers,
-            step_conditions="코스피200 + 코스닥150 고정 유니버스",
+            step_conditions="코스피200 + 코스닥150 합집합 원천 유니버스 후보 (필터 전)",
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[1],

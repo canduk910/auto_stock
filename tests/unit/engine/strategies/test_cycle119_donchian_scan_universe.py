@@ -37,6 +37,27 @@ def _make_strategy():
     return DonchianSwingStrategy(config)
 
 
+def _stage_aware_mock(rows):
+    """사이클 170 카드 A — donchian 이 return_stage_counts=True 전달 시 tuple 반환.
+
+    AsyncMock(return_value=rows) 대체 — kwargs 의 return_stage_counts 분기.
+    미지정 호출 → list 그대로 (회귀 보존).
+    """
+    from unittest.mock import AsyncMock
+
+    async def _impl(**kwargs):
+        if kwargs.get("return_stage_counts"):
+            tks = [r.get("ticker", "") for r in rows]
+            return rows, {
+                "union_tickers": tks,
+                "mcap_tickers": tks,
+                "trade_tickers": tks,
+            }
+        return rows
+
+    return AsyncMock(side_effect=_impl)
+
+
 def _make_sm_row(
     ticker: str,
     name: str = "테스트종목",
@@ -106,7 +127,7 @@ class TestDonchianScanUniverseHigh2:
 
         with patch(
             "src.db.stock_master.list_by_filter",
-            new=AsyncMock(return_value=rows),
+            new=_stage_aware_mock(rows),
         ) as mock_lbf:
             asyncio.run(strategy._scan_universe())
 
@@ -128,7 +149,7 @@ class TestDonchianScanUniverseHigh2:
 
         with patch(
             "src.db.stock_master.list_by_filter",
-            new=AsyncMock(return_value=rows),
+            new=_stage_aware_mock(rows),
         ):
             result = asyncio.run(strategy._scan_universe())
 
@@ -150,7 +171,7 @@ class TestDonchianScanStatsHigh3:
 
         with patch(
             "src.db.stock_master.list_by_filter",
-            new=AsyncMock(return_value=rows),
+            new=_stage_aware_mock(rows),
         ):
             asyncio.run(strategy._scan_universe())
 
@@ -167,7 +188,7 @@ class TestDonchianScanStatsHigh3:
 
         with patch(
             "src.db.stock_master.list_by_filter",
-            new=AsyncMock(return_value=rows),
+            new=_stage_aware_mock(rows),
         ):
             asyncio.run(strategy._scan_universe())
 
@@ -181,7 +202,7 @@ class TestDonchianScanStatsHigh3:
 
         with patch(
             "src.db.stock_master.list_by_filter",
-            new=AsyncMock(return_value=rows),
+            new=_stage_aware_mock(rows),
         ):
             asyncio.run(strategy._scan_universe())
 
@@ -244,7 +265,7 @@ class TestDonchianScanUniverseMedium1:
 
         with patch(
             "src.db.stock_master.list_by_filter",
-            new=AsyncMock(return_value=rows),
+            new=_stage_aware_mock(rows),
         ):
             result = asyncio.run(strategy._scan_universe())
 
@@ -262,7 +283,7 @@ class TestDonchianScanUniverseMedium1:
 
         with patch(
             "src.db.stock_master.list_by_filter",
-            new=AsyncMock(return_value=rows),
+            new=_stage_aware_mock(rows),
         ):
             result = asyncio.run(strategy._scan_universe())
 
@@ -285,7 +306,7 @@ class TestDonchianScanUniverseMedium2:
 
         with patch(
             "src.db.stock_master.list_by_filter",
-            new=AsyncMock(return_value=rows),
+            new=_stage_aware_mock(rows),
         ), patch("src.api.condition.fetch_stock_detail") as mock_fsd:
             asyncio.run(strategy._scan_universe())
 

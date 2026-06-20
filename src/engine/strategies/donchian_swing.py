@@ -28,7 +28,9 @@ KST = timezone(timedelta(hours=9))
 # step_name 은 정적 — 동적 값 (donchian_period, long_ma_period 등) 은 step_conditions 통해 노출.
 FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "코스피200+코스닥150 합집합"),
-    FunnelStage(2, "시총 컷 통과"),
+    # 사이클 170 카드 A — step2 = 시총+거래대금 컷 통과 (거래대금 attrition 노출).
+    # list_by_filter 단일 호출 union→mcap→trade 단계 중 trade (최종 filtered) 노출.
+    FunnelStage(2, "시총+거래대금 컷 통과"),
     # 사이클 157 (2026-06-17) — 1단계 진입 차단 13건 step 신규 영구 영속 → 9단계.
     FunnelStage(3, "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)"),
     FunnelStage(4, "일봉 fetch + 전일종가>0"),
@@ -111,6 +113,9 @@ class DonchianSwingStrategy(StrategyBase):
         self._breakout_high: dict[str, int] = {}
         # 단계별 탈락 통계 — prepare() 실행 시마다 갱신, 프론트 깔때기 시각화용
         self._scan_stats: dict = _empty_scan_stats()
+        # 사이클 170 카드 A — list_by_filter 단계별 생존 ticker (관찰성 전용).
+        # {"union_tickers", "mcap_tickers", "trade_tickers"} — prepare step1/step2 노출.
+        self._scan_stage_counts: dict[str, list[str]] = {}
 
     async def prepare(self) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
@@ -130,7 +135,8 @@ class DonchianSwingStrategy(StrategyBase):
         stats = _empty_scan_stats()
         self._scan_stats = stats
         # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
-        self._reset_funnel_steps()
+        # 사이클 170 카드 B — FUNNEL_STAGES 0-시드 (조기반환 시 stale step 잔존 차단)
+        self._reset_funnel_steps(FUNNEL_STAGES)
 
         # 사이클 163 (2026-06-18) — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
         # 6/18 08:24:24 운영 사고 영구 차단 (사이클 158 VB 패턴 답습).
@@ -146,19 +152,32 @@ class DonchianSwingStrategy(StrategyBase):
             self._candidates = {}
             stats = _empty_scan_stats()
             self._scan_stats = stats
-            self._reset_funnel_steps()
+            self._reset_funnel_steps(FUNNEL_STAGES)
             tickers = await self._scan_universe()
         # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
+        # 사이클 170 카드 A — step1=union (필터 전 원천 유니버스), step2=trade (거래대금컷 후).
+        # _scan_stage_counts 가 list_by_filter(return_stage_counts=True) attrition 보관.
+        # donchian step1/step2 collapse (둘 다 survived=tickers) 영구 차단.
         min_mcap_billion = params["min_market_cap"] / 100_000_000
+        min_trade_billion = params["min_trade_amount"] / 100_000_000
+        # getattr 방어 — _scan_universe 가 mock 으로 교체되어 _scan_stage_counts 미설정 시
+        # tickers 로 폴백 (관찰성 graceful, 매매 영향 0).
+        stage_counts = getattr(self, "_scan_stage_counts", None) or {}
+        union_tickers = stage_counts.get("union_tickers", tickers)
+        trade_tickers = stage_counts.get("trade_tickers", tickers)
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[0],
-            survived=tickers,
-            step_conditions="코스피200 + 코스닥150 고정 유니버스",
+            survived=union_tickers,
+            step_conditions="코스피200 + 코스닥150 합집합 (필터 전 원천 유니버스)",
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[1],
-            survived=tickers,
-            step_conditions=f"시총 ≥ {min_mcap_billion:.0f}억",
+            survived=trade_tickers,
+            step_conditions=(
+                f"시총 ≥ {min_mcap_billion:.0f}억 + 거래대금 ≥ {min_trade_billion:.0f}억 컷 통과 "
+                f"(시총 {len(stage_counts.get('mcap_tickers', tickers))} → "
+                f"거래대금 {len(trade_tickers)})"
+            ),
         )
 
         # 사이클 157 — step 3: 1단계 진입 차단 13건 (master_raw 7 + raw 6)
@@ -486,7 +505,8 @@ class DonchianSwingStrategy(StrategyBase):
             # 사이클 153 — KOSPI200 + KOSDAQ150 합집합 필터 영구 영속 (Q1=A + Q2=A 영속).
             # FUNNEL_STAGES[0] step_name "코스피200+코스닥150 합집합" 영속 의무 정합.
             # 사이클 121 silent 결함 영구 영속 시정 = 인자 부재로 KOSPI200/KOSDAQ150 필터 누락.
-            rows = await _sm_mod.list_by_filter(
+            # 사이클 170 카드 A — return_stage_counts=True 로 attrition 노출 (union/mcap/trade).
+            rows, stage = await _sm_mod.list_by_filter(
                 min_market_cap=min_mcap,
                 min_trade_amount=min_trade,
                 exclude_tickers=exclude_tickers,
@@ -494,7 +514,9 @@ class DonchianSwingStrategy(StrategyBase):
                 is_kospi200=True,
                 is_kosdaq150=True,
                 limit=max_stocks,
+                return_stage_counts=True,
             )
+            self._scan_stage_counts = stage
         except Exception:
             logger.exception(
                 "도치안 스윙 stock_master.list_by_filter 호출 실패 graceful — 빈 list 반환"
@@ -502,6 +524,7 @@ class DonchianSwingStrategy(StrategyBase):
             self._scan_stats["universe_candidates"] = 0
             self._scan_stats["universe_filtered"] = 0
             self._scan_stats["last_run_at"] = datetime.now(KST).isoformat()
+            self._scan_stage_counts = {}
             return []
 
         self._scan_stats["universe_candidates"] = len(rows)

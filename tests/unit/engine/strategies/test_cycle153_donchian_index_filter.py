@@ -42,6 +42,9 @@ class TestG153Donchian1:
 
         async def fake_list_by_filter(**kwargs):
             captured_kwargs.update(kwargs)
+            # 사이클 170 카드 A — donchian 이 return_stage_counts=True 전달 → tuple 반환
+            if kwargs.get("return_stage_counts"):
+                return [], {"union_tickers": [], "mcap_tickers": [], "trade_tickers": []}
             return []
 
         with patch("src.db.stock_master.list_by_filter", side_effect=fake_list_by_filter):
@@ -108,6 +111,14 @@ class TestG153Donchian3:
 
         async def fake_list_by_filter(**kwargs):
             # is_kospi200=True OR is_kosdaq150=True 영역 필터 통과 = 3 종목
+            # 사이클 170 카드 A — donchian 이 return_stage_counts=True 전달 → tuple 반환
+            if kwargs.get("return_stage_counts"):
+                tks = [r["ticker"] for r in fake_rows]
+                return fake_rows, {
+                    "union_tickers": tks,
+                    "mcap_tickers": tks,
+                    "trade_tickers": tks,
+                }
             return fake_rows
 
         with patch("src.db.stock_master.list_by_filter", side_effect=fake_list_by_filter):

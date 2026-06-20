@@ -150,7 +150,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         stats = _empty_scan_stats()
         self._scan_stats = stats
         # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
-        self._reset_funnel_steps()
+        self._reset_funnel_steps(FUNNEL_STAGES)
 
         # 사이클 163 (2026-06-18) — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
         # 6/18 08:24:25 운영 사고 영구 차단 (사이클 158 VB 패턴 답습).
@@ -166,17 +166,19 @@ class BullFlagBreakoutStrategy(StrategyBase):
             self._candidates = {}
             stats = _empty_scan_stats()
             self._scan_stats = stats
-            self._reset_funnel_steps()
+            self._reset_funnel_steps(FUNNEL_STAGES)
             tickers = await self._scan_universe()
         # 사이클 39 — 1단계: 유니버스 후보 + 2단계: 유니버스 필터 (시총·거래대금 컷 통과)
         # `_scan_universe` 내부에서 ranked → filtered 분리. `_scan_stats` 가 이미 양쪽 카운트.
         # 단계별 ticker 정확 캡처는 `_scan_universe` 가 후보 리스트와 통과 리스트 둘 다 반환해야
         # 가능. 현재는 통과 리스트만 반환 → 1단계는 통과 카운트 (raw ranked 는 미보유).
         # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
+        # 사이클 170 카드 C — step_conditions 구버전 등락률 순위 문구 → 실제 소스 정합.
+        # 사이클 108 부터 stock_master.list_by_filter 기반 (KIS 거래량순위 API 폐기).
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[0],
             survived=tickers,
-            step_conditions="KRX 등락률 순위 상위 + ETF/ETN 키워드 제외",
+            step_conditions="stock_master.list_by_filter 원천 유니버스 후보 + ETF/ETN 키워드 제외",
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[1],

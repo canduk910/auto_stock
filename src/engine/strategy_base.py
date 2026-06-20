@@ -263,19 +263,51 @@ class StrategyBase(ABC):
                 })
 
         excluded_list = list(excluded or [])
-        self._funnel_steps.append({
-            "step_no": int(step_no),
+        step_no_int = int(step_no)
+        entry = {
+            "step_no": step_no_int,
             "step_name": str(step_name),
             "step_conditions": step_conditions,  # 사이클 41 — None or str
             "survived": survived_list[: self._FUNNEL_SURVIVED_CAP],
             "survived_count": len(survived_list),
             "excluded": excluded_list[: self._FUNNEL_EXCLUDED_CAP],
             "excluded_count": len(excluded_list),
-        })
+        }
+        # 사이클 170 카드 B — atomic 일관성 (in-place upsert).
+        # 같은 step_no 가 이미 존재하면 in-place 교체 (append-only 누적 차단).
+        # `_reset_funnel_steps(stages)` 0-시드와 결합해 조기반환/다중 실행 run 도
+        # 전 단계를 일관 기록 → step1=0/step4=7 stale 잔존 패턴 영구 소멸.
+        for idx, existing in enumerate(self._funnel_steps):
+            if existing.get("step_no") == step_no_int:
+                self._funnel_steps[idx] = entry
+                return
+        self._funnel_steps.append(entry)
 
-    def _reset_funnel_steps(self) -> None:
-        """사이클 39 — prepare() 첫 단계 진입 시 호출. 이전 사이클 누적 제거."""
-        self._funnel_steps = []
+    def _reset_funnel_steps(
+        self, stages: "tuple[FunnelStage, ...] | None" = None
+    ) -> None:
+        """사이클 39 — prepare() 첫 단계 진입 시 호출. 이전 사이클 누적 제거.
+
+        사이클 170 카드 B — `stages` 전달 시 모든 `FunnelStage` 를 `survived=[]`
+        (count=0) 0-시드 pre-populate. 조기반환/실패 run 에서도 전 단계가 0 으로
+        일관 기록되어 이전 성공 run 의 stale 값 (예: step4=7) 영구 차단.
+        `stages=None` (인자 미전달) → 빈 리스트 (사이클 39 회귀 보존).
+        """
+        if stages is None:
+            self._funnel_steps = []
+            return
+        self._funnel_steps = [
+            {
+                "step_no": int(stage.step_no),
+                "step_name": str(stage.step_name),
+                "step_conditions": None,
+                "survived": [],
+                "survived_count": 0,
+                "excluded": [],
+                "excluded_count": 0,
+            }
+            for stage in stages
+        ]
 
     def _record_funnel_pipeline_step(
         self,
