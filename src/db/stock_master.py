@@ -394,8 +394,8 @@ async def list_paged_by_filter(
 
     필터 (모두 optional, 빈 필터 = list_all 동등 — T-1 영속):
     - market: "KOSPI" → excg_dvsn_cd="02" / "KOSDAQ" → "03" / None → 전체
-    - min_market_cap: int (원 단위). hts_avls(억원) → min_market_cap // 100_000_000 임계 비교 (사이클 166)
-    - min_trade_amount: int (원 단위). acml_tr_pbmn 직접 비교
+    - min_market_cap: int (원 단위). 생성 컬럼 hts_avls_eok(억원) ≥ min_market_cap // 100_000_000 (사이클 166/168)
+    - min_trade_amount: int (원 단위). 생성 컬럼 acml_tr_pbmn_won(원) ≥ min_trade_amount 직접 비교 (사이클 168)
     - name_substr: str (대소문자 무시 substring, ilike("name", "%substr%"))
 
     응답:
@@ -423,10 +423,11 @@ async def list_paged_by_filter(
         if cleaned:
             name_pat = f"%{cleaned}%"
 
-    # 시총/거래대금 단위 환산 (사이클 166 정정)
+    # 시총/거래대금 단위 환산 (사이클 166 정정 + 사이클 168 생성 컬럼 전환)
     # raw.hts_avls 단위 = 억원 → min_market_cap (원) / 100_000_000 의 ceil 비교.
     # KIS FHKST01010100 hts_avls = "HTS 시가총액" (억원). 사이클 108/128 "백만원" 가정은
     # silent 결함 (100배 어긋남). UI 페이징 경로도 동일 결함 전파 → 억원으로 통일.
+    # 임계 환산 로직은 사이클 166 그대로 — 생성 컬럼 hts_avls_eok 도 억원 단위라 정합.
     hts_avls_threshold: int = 0
     if min_market_cap and min_market_cap > 0:
         # 억원 단위 환산 (정수 ceil)
@@ -451,15 +452,19 @@ async def list_paged_by_filter(
             q = q.eq(market_eq[0], market_eq[1])
         if name_pat is not None:
             q = q.ilike("name", name_pat)
-        # JSONB numeric 비교 — 사이클 128 Supabase MCP READ-ONLY 검증 확정:
-        # - raw->'hts_avls' (jsonb operator, NOT raw->>'hts_avls' text) numeric gte 정확
-        # - raw->>'hts_avls' text gte 는 자릿수 비교 결함 ('999' < '1000' false → 332 vs 2696 부정확)
-        # - KIS 응답 99.96% (2,696/2,697) jsonb number 타입 영속 → 안전
-        # - jsonb string 잔존 1건 영역은 PostgREST 비교 silent skip (graceful)
+        # 사이클 168 — 생성 컬럼 numeric 비교 (jsonb string 결함 영구 시정):
+        # - 사이클 128 가정 ("raw 가 jsonb *number* 2,696/2,697")이 운영 DB 에서 회귀:
+        #   적재부 condition.py merge 가 KIS 응답 문자열("1503" 등)을 그대로 저장 →
+        #   raw.hts_avls / raw.acml_tr_pbmn 가 전부 jsonb *string* (운영 DB 실측 number=0).
+        # - 종전 jsonb operator path numeric gte 는 PostgreSQL jsonb 정렬에서
+        #   number > string 이라 항상 false → 0건 (필터 무력화). 실측: 종전 0 vs 신규 1,734.
+        # - migration 039 생성 컬럼 (STORED bigint) 으로 정확한 numeric 비교 + 인덱스 활용:
+        #   hts_avls_eok (억원) / acml_tr_pbmn_won (원). 비숫자/null 은 ~ '^[0-9]+$' 가드로
+        #   NULL → .gte 에서 자동 제외 (graceful). raw 읽기만(GENERATED) → 사이클 81 G-AST1 영속.
         if hts_avls_threshold > 0:
-            q = q.gte("raw->hts_avls", hts_avls_threshold)
+            q = q.gte("hts_avls_eok", hts_avls_threshold)
         if acml_tr_pbmn_threshold > 0:
-            q = q.gte("raw->acml_tr_pbmn", acml_tr_pbmn_threshold)
+            q = q.gte("acml_tr_pbmn_won", acml_tr_pbmn_threshold)
 
         return q
 
