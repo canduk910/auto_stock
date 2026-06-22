@@ -138,7 +138,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
     async def prepare(self) -> None:
         import asyncio
 
-        from src.api.condition import fetch_daily_candles
+        # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
+        from src.db.stock_master_daily import get_recent_daily_normalized
 
         params = self.config.params
         pole_max = params["pole_lookback_max"]
@@ -208,9 +209,12 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         today_str = datetime.now(KST).strftime("%Y%m%d")
 
+        # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required=35 명시 (자문 §4).
         async def _fetch_one(ticker: str):
             try:
-                return ticker, await fetch_daily_candles(ticker, days=fetch_days)
+                return ticker, await get_recent_daily_normalized(
+                    ticker, days=fetch_days, min_required=35,
+                )
             except Exception as e:
                 logger.warning("눌림목 일봉 fetch 실패: %s — %s", ticker, e)
                 return ticker, None

@@ -24,12 +24,22 @@ _STRATEGIES = _SRC / "engine" / "strategies"
 
 # ---------------------------------------------------------------------------
 # SAFETY-2 (HIGH) — prepare 미변경 (어댑터 호출처 0 = 172 데이터 plumbing 한정)
+#
+# 사이클 173 (2026-06-22) 의미 전환 (사이클 66 K-2 패턴): 172 docstring 이 명시한
+# "173 전환 시 본 가드 의미 전환 예정" 실현. 173 = 5 전략 prepare 가 어댑터를
+# 연결 (매수 target 행위 보존 + 동등성 게이트). → 호출 발생이 정상.
+# 173 의 호출 검증은 tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+# (AST: 5 전략 get_recent_daily_normalized 호출 + min_required= 명시) 가 영속.
 # ---------------------------------------------------------------------------
+@pytest.mark.xfail(
+    strict=False,
+    reason="사이클 173 — 5 전략 prepare 어댑터 연결 (172 docstring 명시 전환, 호출 발생 정상)",
+)
 def test_safety2_prepare_no_adapter_call():
-    """5 전략 어디에도 get_recent_daily_normalized 호출 0건 (172 = 어댑터 정의만).
+    """[의미 전환 173] 172 = 어댑터 정의만 (호출 0) → 173 = prepare 연결 (호출 발생).
 
-    사이클 173 prepare DB일봉 전환 시점에 호출 추가 → 본 가드 의미 전환 예정.
-    172 단계 = 매수 target 불변 보장 (어댑터 미연결).
+    173 전환으로 5 전략이 get_recent_daily_normalized 호출 → 본 가드 xfail 전환.
+    173 호출 검증 = test_cycle173_prepare_db_equivalence.py (AST min_required 명시).
     """
     strategy_files = list(_STRATEGIES.glob("*.py"))
     assert strategy_files, "strategies 디렉토리 존재 의무"
@@ -50,14 +60,24 @@ def test_safety2_prepare_no_adapter_call():
 # SAFETY-3 — 사이클 81 G-AST1 raw JSONB 분리 (어댑터 raw 그대로 반환)
 # ---------------------------------------------------------------------------
 def test_safety3_adapter_raw_no_mutation():
-    """get_recent_daily_normalized 어댑터 — raw JSONB 변형 0 (그대로 반환)."""
+    """어댑터 경로 — raw JSONB 변형 0 (그대로 추출 반환).
+
+    사이클 173 (2026-06-22): raw 추출이 어댑터 본체 → `_extract_raw` 헬퍼로 위임
+    (락/신선도 게이트 추가 + 추출 DRY). raw 추출/보존 의무는 헬퍼 + 어댑터 경로
+    전체에서 검증 (변형 0 영속).
+    """
     from src.db import stock_master_daily as _smd
 
-    src = inspect.getsource(_smd.get_recent_daily_normalized)
-    # raw 변형 패턴 부재 (덮어쓰기/키 추가 금지 — KIS 원본 키 보존)
-    # 정상 어댑터는 r.get("raw") 또는 r["raw"] 추출만 수행
-    assert ".get(\"raw\")" in src or '["raw"]' in src or ".get('raw')" in src, \
-        "어댑터는 raw JSONB 추출 (KIS 원본 키 보존)"
+    # 어댑터 본체 + raw 추출 헬퍼 (_extract_raw) 합산 — raw 추출 존재 + 변형 0
+    adapter_src = inspect.getsource(_smd.get_recent_daily_normalized)
+    helper_src = inspect.getsource(_smd._extract_raw)
+    combined = adapter_src + "\n" + helper_src
+
+    assert ".get(\"raw\")" in combined or '["raw"]' in combined or ".get('raw')" in combined, \
+        "어댑터 경로는 raw JSONB 추출 (KIS 원본 키 보존, 헬퍼 위임 포함)"
+    # raw 변형 (덮어쓰기/키 주입) 패턴 부재 — KIS 원본 키 보존 (사이클 81 G-AST1)
+    assert 'raw["' not in combined and "raw[" not in combined.replace('r.get("raw")', ''), \
+        "raw JSONB 키 주입/덮어쓰기 금지 (KIS 원본 키 보존)"
 
 
 # ---------------------------------------------------------------------------

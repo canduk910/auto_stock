@@ -127,7 +127,8 @@ class LongTailVolatilityStrategy(StrategyBase):
         """
         import asyncio
 
-        from src.api.condition import fetch_daily_candles
+        # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
+        from src.db.stock_master_daily import get_recent_daily_normalized
 
         # 사이클 21 — 매 prepare 마다 카운트 초기화
         stats = _empty_scan_stats()
@@ -190,9 +191,12 @@ class LongTailVolatilityStrategy(StrategyBase):
         prepared = 0
 
         # 일봉 fetch 병렬화 (KIS Rate Limit semaphore가 자동 직렬화)
+        # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required 명시 (자문 §4).
         async def _fetch_one(ticker: str):
             try:
-                return ticker, await fetch_daily_candles(ticker, days=k_period + 2)
+                return ticker, await get_recent_daily_normalized(
+                    ticker, days=k_period + 2, min_required=22,
+                )
             except Exception as e:
                 logger.warning("롱테일 일봉 fetch 실패: %s — %s", ticker, e)
                 return ticker, None

@@ -121,7 +121,9 @@ class DonchianSwingStrategy(StrategyBase):
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
         import asyncio
 
-        from src.api.condition import fetch_daily_candles
+        # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
+        # 신고가/EMA/거래대금 모두 어댑터 candles 단일 source (락 종목 혼재 차단, 자문 §249).
+        from src.db.stock_master_daily import get_recent_daily_normalized
 
         params = self.config.params
         donchian_period = params["donchian_period"]
@@ -205,9 +207,13 @@ class DonchianSwingStrategy(StrategyBase):
 
         # 일봉 fetch 병렬화 — KIS Rate Limit(20/sec)는 base.py Semaphore에서 직렬화되므로
         # asyncio.gather로 안전하게 묶을 수 있음. 100+ 종목 순차 호출(5~10초) → 1~2초로 단축
+        # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required=63 명시
+        # (필수 lookback 61 = long_ma 60 + 1, 자문 §4 — 절대 하향 금지 silent 왜곡 차단).
         async def _fetch_one(ticker: str):
             try:
-                return ticker, await fetch_daily_candles(ticker, days=fetch_days)
+                return ticker, await get_recent_daily_normalized(
+                    ticker, days=fetch_days, min_required=63,
+                )
             except Exception as e:
                 logger.warning("도치안 일봉 fetch 실패: %s — %s", ticker, e)
                 return ticker, None
@@ -281,18 +287,12 @@ class DonchianSwingStrategy(StrategyBase):
                 candle_fetch_ok_tickers.append(ticker)  # 사이클 39
 
                 # 1) 20일 신고가 돌파 검증 — 어제 종가가 그 이전 20일 최고가 초과
-                # 사이클 123 — get_donchian_high DB 헬퍼 우선 + KIS 캔들 fallback (사이클 14 영속)
-                from src.db.stock_master_daily import get_donchian_high
-                db_high = await get_donchian_high(ticker, days=donchian_period)
-                kis_high = max(highs[1: donchian_period + 1])
-                if db_high is not None and db_high > 0:
-                    prior_high = db_high
-                    stats.setdefault("db_high_hit", 0)
-                    stats["db_high_hit"] += 1
-                else:
-                    prior_high = kis_high  # 사이클 14 영속 (fetch_daily_candles 활용)
-                    stats.setdefault("db_high_miss", 0)
-                    stats["db_high_miss"] += 1
+                # 사이클 173 (2026-06-22) — 신고가 = 어댑터 candles 단일 source.
+                #   사이클 123 별도 DB 신고가 헬퍼 호출 폐기 (자문 §249 혼재 차단):
+                #   candles 가 이미 어댑터 (DB 우선 + 락/신선도 KIS 폴백) 경유 → candles 의
+                #   신고가가 곧 일관된 source. 락 종목은 신고가/EMA 둘 다 KIS (폴백 candles)
+                #   → 혼재 영구 차단. 정상 종목은 candles=DB → 사이클 123 신고가 동일 (행위 보존).
+                prior_high = max(highs[1: donchian_period + 1])
                 if prev_close <= prior_high:
                     # 사이클 41 — 신고가 미달 사유 (수치 포함, H-4 진단)
                     donchian_excluded.append({

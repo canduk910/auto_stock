@@ -4,6 +4,14 @@ G-DB1: DB hit → stats["db_high_hit"] 증가 (get_donchian_high 반환값 사�
 G-DB2: DB miss (None) → stats["db_high_miss"] 증가 (KIS fallback)
 G-DB3: DB hit 시에도 fetch_daily_candles 호출 영속 (사이클 14 EMA/ATR/거래량)
 G-AST1: from src.db.stock_master_daily import get_donchian_high + await 호출 정적 검증
+
+★ 사이클 173 (2026-06-22) 의미 전환 (사이클 66 K-2 패턴):
+donchian prepare 일봉 source 가 어댑터 (get_recent_daily_normalized, DB 우선 + 락/신선도
+KIS 폴백) 단일 source 로 통일. 신고가도 어댑터 candles 단일 source (max(highs[...])) 사용
+→ get_donchian_high 별도 DB 호출 + db_high_hit/db_high_miss 카운터 폐기 (자문 §249 혼재 차단).
+사이클 123 의 "DB 신고가 우선 + 별도 카운터" 설계는 어댑터 (DB 우선) 가 흡수 → 본 모듈 xfail.
+173 신고가 단일 source 검증 = test_cycle173_prepare_db_equivalence.py
+::test_g_eq3_donchian_high_single_source_from_candles 가 영속.
 """
 
 from __future__ import annotations
@@ -15,7 +23,15 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 173 의미 전환 — get_donchian_high 별도 DB 호출 폐기 (candles 단일 source 통일)
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        strict=False,
+        reason="사이클 173 — donchian 신고가 어댑터 candles 단일 source 통일 "
+               "(get_donchian_high 별도 DB 호출 + db_high_hit/miss 카운터 폐기, 자문 §249 혼재 차단)",
+    ),
+]
 
 KST = timezone(timedelta(hours=9))
 

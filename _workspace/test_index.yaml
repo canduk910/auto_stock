@@ -144,6 +144,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -245,6 +246,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -845,6 +847,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -947,6 +950,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -1321,6 +1325,7 @@ backend:
     - tests/unit/db/test_cycle166_hts_avls_unit_correction.py
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -1423,6 +1428,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_momentum_next_day_clear_cap.py
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -1795,6 +1801,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -1900,6 +1907,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2276,6 +2284,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -2380,6 +2389,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2755,6 +2765,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -2860,6 +2871,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -3915,6 +3927,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -4020,6 +4033,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4404,6 +4418,7 @@ backend:
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle171_funnel_provisional.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -4528,6 +4543,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4819,6 +4835,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle171_funnel_provisional.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -5059,6 +5076,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -5434,6 +5452,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -5551,6 +5570,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -6353,6 +6373,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -6458,6 +6479,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -7927,6 +7949,7 @@ backend:
     - tests/unit/db/test_cycle147_trade_history_strategy_lookup.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
@@ -8022,6 +8045,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8272,6 +8296,7 @@ backend:
     - tests/unit/db/test_cycle126_get_stats_exact_count.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/engine/strategies/test_cycle123_donchian_db_high.py
     - tests/unit/engine/strategies/test_cycle125_vcp_atr_db_hit.py
     transitive_tests:
@@ -8493,6 +8518,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9078,6 +9104,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -9183,6 +9210,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -9564,6 +9592,7 @@ backend:
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle171_funnel_provisional.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -9688,6 +9717,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10105,6 +10135,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -10202,6 +10233,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10576,6 +10608,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -10681,6 +10714,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11465,6 +11499,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -11530,6 +11565,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -12399,6 +12435,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -12503,6 +12540,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -13083,6 +13121,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -13188,6 +13227,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -14625,6 +14665,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -14730,6 +14771,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -15477,6 +15519,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -15511,6 +15554,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -16202,6 +16246,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
@@ -19617,6 +19662,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
@@ -19861,6 +19907,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21348,6 +21395,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -21455,6 +21503,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21833,6 +21882,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -21945,6 +21995,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -22731,6 +22782,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -22820,6 +22872,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23693,6 +23746,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -23798,6 +23852,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24195,6 +24250,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -24300,6 +24356,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24676,6 +24733,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -24780,6 +24838,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26715,6 +26774,7 @@ backend:
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -26820,6 +26880,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -27665,10 +27726,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-22T13:51:46.513831+09:00'
+generated_at: '2026-06-22T14:50:47.908583+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 633
+  backend_tests: 635
   frontend_modules: 77
   frontend_tests: 46
   unmapped_modules:

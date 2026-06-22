@@ -440,23 +440,97 @@ async def get_recent_daily_with_fallback(
 
 
 # ---------------------------------------------------------------------------
+# 사이클 173 (2026-06-22) — 락/신선도 게이트 (수정주가 divergence silent 결함 방어)
+#
+# 어댑터 (사이클 172) 에 2 게이트 추가:
+#  - 락 게이트 (G-EQ-3, 최우선 HIGH): DB 윈도우 내 1 row 라도 락 발생
+#    (flng_cls_code not in ("","00") OR prtt_rate 비-0) → KIS 강제 폴백.
+#    근거: 수정주가는 조회 시점 의존값 → DB 박제 과거봉(락 전) vs KIS 재조정(락 후) 어긋남.
+#    KIS 호출은 조회 시점 재조정이라 일관성 보장 → 락 종목만 KIS 폴백이 유일한 silent 방어.
+#  - 신선도 게이트 (G-EQ-4): DB 최신봉(max_bas_dd)이 today - DAILY_STALENESS_DAYS(=4)
+#    보다 오래 → KIS 폴백 (D-1 미적재 race 차단).
+#
+# ★ team-leader 운영 DB 실측 확정 (자문 보정):
+#  - flng_cls_code 기본 = "" / "00" (실측 99.6% "00"). 비기본 (01/02/03/05) = 락.
+#  - prtt_rate 기본 = 0 / "" / None (실측 99.7% "0.0000"). 자문의 != 1.0 은 틀림 (전 종목 폴백).
+#    비-0 = 분할/병합/배당락 조정.
+#  - 검사 = DB row top-level flng_cls_code / prtt_rate 컬럼 (raw 와 별개, migration 033).
+#    KIS 추가 호출 0건 탐지.
+# ---------------------------------------------------------------------------
+
+# 신선도 게이트 임계 — DB 최신봉이 today 보다 이 일수 초과로 오래되면 KIS 폴백.
+# 주말 2 + 공휴일 마진 1 + 1 = 4 보수적 (휴장일/연휴 거짓 폴백 차단).
+DAILY_STALENESS_DAYS = 4
+
+
+def _row_has_lock(row: dict) -> bool:
+    """단일 일봉 row 가 락(액면분할/병합/배당락 등) 표시인지.
+
+    flng_cls_code not in ("", "00") OR abs(float(prtt_rate)) > 0.
+    기본값 ("" / "00" / 0 / None) 은 정상 (락 아님).
+    """
+    flng = row.get("flng_cls_code")
+    if flng is not None and str(flng).strip() not in ("", "00"):
+        return True
+    prtt = row.get("prtt_rate")
+    if prtt is not None and str(prtt).strip() not in ("", "0", "0.0", "0.00", "0.0000"):
+        try:
+            if abs(float(prtt)) > 1e-9:
+                return True
+        except (TypeError, ValueError):
+            # 파싱 불가 비기본 값 → 보수적으로 락 의심
+            return True
+    return False
+
+
+def _extract_raw(db_rows: list[dict]) -> list[dict]:
+    """DB row 들에서 raw JSONB (KIS 원본 키) 추출 — 부재 시 row 자체 graceful."""
+    normalized: list[dict] = []
+    for r in db_rows:
+        raw = r.get("raw")
+        normalized.append(raw if isinstance(raw, dict) and raw else r)
+    return normalized
+
+
+async def _kis_fallback(ticker: str, days: int, db_rows: list[dict], *, reason: str) -> list[dict]:
+    """KIS fetch_daily_candles 폴백 (락/신선도/부족 공통). 실패 시 DB raw graceful."""
+    try:
+        from src.api.condition import fetch_daily_candles
+        kis_rows = await fetch_daily_candles(ticker, days=days)
+        logger.debug(
+            "[prepare_db_fallback] ticker=%s reason=%s db=%d kis=%d",
+            ticker, reason, len(db_rows), len(kis_rows),
+        )
+        return kis_rows
+    except Exception:
+        logger.exception(
+            "[stock_master_daily] get_recent_daily_normalized KIS 폴백 실패 graceful "
+            "ticker=%s reason=%s",
+            ticker, reason,
+        )
+        return _extract_raw(db_rows)
+
+
+# ---------------------------------------------------------------------------
 # 사이클 172 (2026-06-22) — DB일봉 어댑터 (raw JSONB = KIS 원본 키 보존)
+# 사이클 173 (2026-06-22) — 락/신선도 게이트 추가 (위 헬퍼)
 #
 # 사이클 173 prepare DB일봉 전환의 공통 어댑터. DB row 의 raw JSONB (KIS 원본 키
 # stck_clpr / stck_oprc 등 보존) 를 그대로 반환 → 173 prepare 의 c.get("stck_clpr")
-# 무변경 사용. DB 부족 (min_required) 시 KIS fetch_daily_candles 폴백.
-#
-# 172 단계 = 어댑터 정의만 (prepare 미연결 — 매수 target 불변).
-#   prepare 연결은 사이클 173 (각 전략 days / min_required 전달 + 동등성 가드).
+# 무변경 사용. 락/신선도/부족 시 KIS fetch_daily_candles 폴백.
 # ---------------------------------------------------------------------------
 async def get_recent_daily_normalized(
     ticker: str, days: int, *, min_required: int | None = None
 ) -> list[dict]:
-    """DB raw JSONB (KIS 원본 키 보존) 반환 + 부족 시 KIS 폴백.
+    """DB raw JSONB (KIS 원본 키 보존) 반환 + 락/신선도/부족 시 KIS 폴백.
 
-    DB 충분 시 각 row 의 raw JSONB (stck_clpr 등 KIS 원본 키) 를 그대로 반환 —
-    173 prepare 의 `c.get("stck_clpr")` 무변경 사용 보장.
-    DB 부족 (`< min_required`) 시 `fetch_daily_candles` KIS 폴백 (원본 KIS 키 반환).
+    DB 충분 + 락 없음 + 신선 시 각 row 의 raw JSONB (stck_clpr 등 KIS 원본 키) 를
+    그대로 반환 — 173 prepare 의 `c.get("stck_clpr")` 무변경 사용 보장.
+
+    폴백 우선순위 (DB 사용 전 검사):
+      1. 락 게이트 (최우선): 윈도우 내 1 row 라도 락 → KIS 폴백.
+      2. 신선도 게이트: max_bas_dd 가 today-DAILY_STALENESS_DAYS 초과 오래 → KIS 폴백.
+      3. min_required 게이트: len < min_required → KIS 폴백.
 
     Args:
         ticker: KRX 6자리 단축코드.
@@ -471,34 +545,40 @@ async def get_recent_daily_normalized(
         min_required = max(days // 2, 10)
 
     db_rows = await get_recent_daily(ticker, days)
-    if len(db_rows) >= min_required:
-        # raw JSONB (KIS 원본 키 보존) 추출 — 부재 시 row 자체 graceful
-        normalized: list[dict] = []
-        for r in db_rows:
-            raw = r.get("raw")
-            normalized.append(raw if isinstance(raw, dict) and raw else r)
-        return normalized
 
-    # DB 부족 — KIS fetch_daily_candles 폴백 (원본 KIS 키 반환)
+    # 1. 락 게이트 (최우선 HIGH) — 윈도우 내 1 row 라도 락이면 KIS 강제 폴백.
+    #    검사는 DB top-level flng_cls_code / prtt_rate 컬럼 (KIS 추가 호출 0건).
     try:
-        from src.api.condition import fetch_daily_candles
-        kis_rows = await fetch_daily_candles(ticker, days=days)
-        logger.debug(
-            "[stock_master_daily] normalized fallback to KIS ticker=%s db=%d kis=%d",
-            ticker, len(db_rows), len(kis_rows),
-        )
-        return kis_rows
+        if db_rows and any(_row_has_lock(r) for r in db_rows):
+            return await _kis_fallback(ticker, days, db_rows, reason="lock")
     except Exception:
+        # 락 검사 자체 예외 → 보수적으로 KIS 폴백 시도 (안전 우선)
         logger.exception(
-            "[stock_master_daily] get_recent_daily_normalized KIS 폴백 실패 graceful ticker=%s",
-            ticker,
+            "[stock_master_daily] 락 검사 예외 graceful → KIS 폴백 시도 ticker=%s", ticker,
         )
-        # 부족하더라도 DB raw 추출 결과 반환 (호출자 graceful 통과)
-        normalized = []
-        for r in db_rows:
-            raw = r.get("raw")
-            normalized.append(raw if isinstance(raw, dict) and raw else r)
-        return normalized
+        return await _kis_fallback(ticker, days, db_rows, reason="lock")
+
+    # 2. 신선도 게이트 — DB 최신봉이 today-staleness 보다 오래되면 KIS 폴백.
+    #    max_bas_dd None (판정 불가) 은 graceful 통과 (db_rows 충분이면 사용).
+    if db_rows:
+        try:
+            latest = await max_bas_dd(ticker)
+            if latest is not None:
+                from datetime import datetime as _dt
+                today = _dt.now(KST).date()
+                if (today - latest).days > DAILY_STALENESS_DAYS:
+                    return await _kis_fallback(ticker, days, db_rows, reason="stale")
+        except Exception:
+            logger.exception(
+                "[stock_master_daily] 신선도 검사 예외 graceful ticker=%s", ticker,
+            )
+
+    # 3. min_required 게이트 — DB 부족 시 KIS 폴백.
+    if len(db_rows) >= min_required:
+        return _extract_raw(db_rows)
+
+    reason = "miss" if not db_rows else "insufficient"
+    return await _kis_fallback(ticker, days, db_rows, reason=reason)
 
 
 # ---------------------------------------------------------------------------

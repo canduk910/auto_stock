@@ -154,7 +154,11 @@ class VcpBreakoutStrategy(StrategyBase):
     async def prepare(self) -> None:
         import asyncio
 
-        from src.api.condition import fetch_daily_candles
+        # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
+        # ★ VCP days=100 cap 절대 유지 (220 미사용) — effective_ema_long ≈75 불변.
+        #   DB 220일 적재돼 있어도 어댑터 get_recent_daily(days=100) 가 최신 100 DESC 만 반환.
+        #   220 혜택 (EMA 원설계 복원) 은 별도 backtest 사이클 인계.
+        from src.db.stock_master_daily import get_recent_daily_normalized
 
         p = self.config.params
         ema_long = p["ema_long"]
@@ -223,9 +227,14 @@ class VcpBreakoutStrategy(StrategyBase):
 
         today_str = datetime.now(KST).strftime("%Y%m%d")
 
+        # 사이클 173 — DB 우선 어댑터. days=fetch_days(=100 cap) + min_required=100.
+        # 어댑터 get_recent_daily 가 min(100,100)=100 만 반환 → DB 220 있어도 100 만 사용
+        # → effective_ema_long ≈75 불변 (행위 보존, G-VCP-1).
         async def _fetch_one(ticker: str):
             try:
-                return ticker, await fetch_daily_candles(ticker, days=fetch_days)
+                return ticker, await get_recent_daily_normalized(
+                    ticker, days=fetch_days, min_required=100,
+                )
             except Exception as e:
                 logger.warning("VCP 일봉 fetch 실패: %s — %s", ticker, e)
                 return ticker, None
