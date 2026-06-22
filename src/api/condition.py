@@ -562,6 +562,134 @@ async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
     return await asyncio.shield(task)
 
 
+# ---------------------------------------------------------------------------
+# 사이클 172 (2026-06-22) — 분할 fetch (날짜 윈도우 100건 경계) + 220일 backfill
+#
+# VCP 220일 일봉 확보를 위한 날짜 윈도우 페이지네이션. KIS FHKST03010100 은
+# 호출당 최대 100건 → 220일은 100일 윈도우 ×3 순차 호출 + 병합 dedupe.
+#
+# 기존 fetch_daily_candles (사이클 14, memcache 5분 + single-flight) 는 변경 0 —
+# 본 함수들은 별도 함수 (backfill 전용, 16:00 daily task 만 호출, memcache 미사용).
+#
+# 영속 의무:
+# - 사이클 14 fetch_daily_candles 재사용 정신 (별도 함수, 변경 0)
+# - 사이클 17 KIS LMS chain (kis_get_quote 경유 Rate Limit + 윈도우 간 sleep)
+# - 사이클 38 명문화 (scanner 매수 진입 전 영역 — 16:00 task 만)
+# - 사이클 88 G-REJECT graceful (호출자 책임)
+#
+# FID_ORG_ADJ_PRC="0" (수정주가) — 기존 _fetch_daily_candles_and_cache 정합.
+# 사이클 173 prepare DB일봉 전환의 DB-source vs KIS-source 동등성 게이트 보장.
+# ---------------------------------------------------------------------------
+_DAILY_BACKFILL_WINDOW_SLEEP_SECS = 0.05  # 윈도우 간 50ms (사이클 17 KIS LMS chain 답습)
+
+
+async def fetch_daily_candles_ranged(
+    ticker: str, start_yyyymmdd: str, end_yyyymmdd: str
+) -> list[dict]:
+    """KIS 기간별시세 단일 윈도우 조회 (시작일~종료일, 최대 100건).
+
+    KIS MCP 정본 FHKST03010100 (국내주식기간별시세) — 호출당 최대 100건.
+    backfill 전용 — memcache/single-flight 미사용 (16:00 daily task 만 호출).
+
+    Args:
+        ticker: KRX 6자리 단축코드.
+        start_yyyymmdd: 조회 시작일 (YYYYMMDD).
+        end_yyyymmdd: 조회 종료일 (YYYYMMDD).
+
+    Returns:
+        list[dict] — output2 (최신순), stck_bsop_date 빈 placeholder 제거.
+        빈 응답 시 빈 list (graceful).
+
+    Raises:
+        ValueError: ticker 6자리 미준수.
+    """
+    if not (isinstance(ticker, str) and len(ticker) == 6 and ticker.isdigit()):
+        raise ValueError(f"ticker 는 6자리 숫자여야 합니다: {ticker!r}")
+
+    params = {
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_INPUT_ISCD": ticker,
+        "FID_INPUT_DATE_1": start_yyyymmdd,
+        "FID_INPUT_DATE_2": end_yyyymmdd,
+        "FID_PERIOD_DIV_CODE": "D",
+        # 기존 _fetch_daily_candles_and_cache 정합 ("0" 수정주가) — 173 동등성 게이트
+        "FID_ORG_ADJ_PRC": "0",
+    }
+    # FHKST03010100 은 모의/실전 동일 TR_ID (FH 접두사 시세 API 공통)
+    data = await kis_get_quote(DAILY_PRICE_URL, "FHKST03010100", params)
+    output = data.get("output2") or data.get("output") or []
+    return [c for c in output if c.get("stck_bsop_date")]
+
+
+async def fetch_daily_candles_backfill(
+    ticker: str, total_days: int = 220, *, window: int = 100
+) -> list[dict]:
+    """N일 backfill — 날짜 윈도우 ×ceil(N/window) 순차 호출 + 병합 dedupe.
+
+    220일 = 100일 윈도우 ×3 (예: T-230~T-130 / T-130~T-30 / T-30~T) 순차 호출 +
+    중복 bas_dd dedupe (윈도우 경계 겹침 제거) + bas_dd DESC 병합 정렬.
+
+    Args:
+        ticker: KRX 6자리 단축코드.
+        total_days: 총 backfill 일수 (VCP 기본 220).
+        window: 윈도우당 일수 (KIS 한도 100).
+
+    Returns:
+        list[dict] — output2 병합 (bas_dd DESC, 중복 제거). 빈 응답 graceful.
+
+    Raises:
+        ValueError: ticker 6자리 미준수.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    if not (isinstance(ticker, str) and len(ticker) == 6 and ticker.isdigit()):
+        raise ValueError(f"ticker 는 6자리 숫자여야 합니다: {ticker!r}")
+
+    _KST_TZ = timezone(timedelta(hours=9))
+    today = datetime.now(_KST_TZ).date()
+
+    # 윈도우 개수 = ceil(total_days / window)
+    num_windows = max(1, (total_days + window - 1) // window)
+
+    merged: dict[str, dict] = {}
+    for i in range(num_windows):
+        # 윈도우 i: [T - (i+1)*window*달력여유, T - i*window*달력여유]
+        # 달력일 ≈ 영업일 × 7/5 + 마진 (휴일/공휴일 보정)
+        end_offset = i * window
+        start_offset = (i + 1) * window
+        # 달력일 환산 (영업일/달력일 5/7 + 마진)
+        end_cal = int(end_offset * 7 / 5)
+        start_cal = int(start_offset * 7 / 5) + 10
+        win_end = today - timedelta(days=end_cal)
+        win_start = today - timedelta(days=start_cal)
+
+        try:
+            rows = await fetch_daily_candles_ranged(
+                ticker,
+                win_start.strftime("%Y%m%d"),
+                win_end.strftime("%Y%m%d"),
+            )
+        except Exception:
+            # 사이클 88 G-REJECT graceful — 개별 윈도우 실패 시 다음 윈도우 진행
+            logger.exception(
+                "[fetch_daily_candles_backfill] 윈도우 실패 graceful ticker=%s window=%d",
+                ticker, i,
+            )
+            rows = []
+
+        for c in rows:
+            bas_dd = c.get("stck_bsop_date")
+            if bas_dd and bas_dd not in merged:
+                merged[bas_dd] = c
+
+        # 윈도우 간 Rate Limit (사이클 17 KIS LMS chain)
+        if i < num_windows - 1:
+            await asyncio.sleep(_DAILY_BACKFILL_WINDOW_SLEEP_SECS)
+
+    # bas_dd DESC (최신순) 병합 정렬
+    return [merged[k] for k in sorted(merged.keys(), reverse=True)]
+
+
 async def fetch_rising_stocks() -> list[dict]:
     """당일 급등 종목을 등락률 순위로 조회하고, 개별 시세로 시총/거래대금을 보강한다."""
     if not settings.is_production:

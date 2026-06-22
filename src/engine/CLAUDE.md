@@ -26,6 +26,24 @@ market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
+## 사이클 172 (2026-06-22) — stock_master_daily 220일 확보 (LOW~MEDIUM, 데이터 plumbing, 사이클 173 선행)
+
+승인 설계 `/Users/koscom/.claude/plans/funnel-vast-wolf.md` 사이클 172 절. 전략별 최대 일봉 lookback = VCP 220일 (나머지 5전략 ≤65일, 현 retention 충분). 현재 backfill T-100 / retention T-150 → VCP universe (KOSPI200∪KOSDAQ150, 348종목) 220일 부족. **prepare/매수 target 미변경** (데이터 적재/조회만, 173에서 prepare 전환).
+
+### `scanner.py::_stock_master_daily_load_once` VCP universe 220일 backfill 분기
+
+- `vcp_universe_tickers: set[str]` = `list_all` row 의 `is_kospi200 OR is_kosdaq150` (사이클 153 컬럼, `.select("*")` 포함 → 별도 쿼리 0건). 플래그 키 부재 mock/legacy row 는 falsy → 비 VCP 취급 (회귀 0).
+- 분기: VCP universe + `existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS(=220)` → `condition.fetch_daily_candles_backfill(ticker, total_days=220)` (분할 fetch 윈도우 ×3). 그 외 = 현행 (비 VCP `<50` 백필 100일 / `>=50` 증분 7일, 사이클 122 영속). VCP `>=220` → 증분 7일 (재 backfill 금지).
+- graceful (사이클 88 G-REJECT — backfill 실패 → failed++ + 다음 ticker). **장중 자동 실행 금지** — 16:00 daily task (장 마감 후) + 수동 trigger 만 (task lifecycle 변경 0, 사이클 122).
+
+### 매매 안전성 무영향 (데이터 plumbing 한정)
+
+- scanner `_stock_master_daily_load_once` = 16:00 daily task (매수 진입 무관, 사이클 38/122). 어댑터 `get_recent_daily_normalized` (db) = 정의만 (prepare 미연결 → 매수 target 불변, 호출처 0).
+- `git diff -- src/engine/risk.py src/engine/order_engine.py src/realtime/ src/auth/ src/api/order.py` = **0 라인** (직접 검증). 신규 함수 본체 매매 hot path 참조 0.
+- production: `src/api/condition.py` (+128L 분할 fetch — `fetch_daily_candles_ranged` + `fetch_daily_candles_backfill`, `src/api/CLAUDE.md` 참조) / `src/db/stock_master_daily.py` (+70L retention 230 + 어댑터, `src/db/CLAUDE.md` 참조) / `src/engine/scanner.py` (+37L VCP 분기). net +219L.
+- 회귀 가드 27 케이스 (RANGE 4 + BACKFILL 4 + AST 1 / RET 2 + ADAPT 4 / SCAN 5 + SCAN-3b + SAFETY 1 / SAFETY AST 5) + 의미 전환 1 (cycle150 retention 150→230). 백엔드 3,161 PASS × flakiness 0.
+- 사이클 173 인계: 5 전략 prepare `fetch_daily_candles` → `get_recent_daily_normalized(days, min_required)` 전환 (HIGH 동등성 게이트 + domain-expert 자문). VCP 220 DB 충족 후 EMA 원설계 복원 별도 사이클. D+1 운영 DB 220일 실측 (push 후 16:00 task 발화).
+
 ## 사이클 171 (2026-06-22) — 저녁 16:20 잠정 funnel 캡처 + 수동 trigger 단계별 캡처 (MEDIUM 운영자 가치)
 
 자문 `_workspace/domain_consult/cycle171_master_funnel_timing_redesign.md` 의제 4 우선순위 2 + 의제 6 (a) 채택. funnel 은 순수 관찰성 + D-1 일봉 기반 → 장중 불변 → 전날 저녁 미리 생성하면 운영자가 밤에 다음 영업일 후보 확인 가능 (현재 09:30 개장 후 캡처는 늦음).

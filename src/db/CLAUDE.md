@@ -139,6 +139,8 @@ Supabase (PostgreSQL) CRUD 모듈.
   - `count_all()` / `count_by_ticker(ticker)` — 적재 진단
   - `max_bas_dd(ticker)` — 백필 vs 증분 자동 분기 키 (스캐너 사용)
   - `get_recent_daily_with_fallback(ticker, n)` — DB miss 시 `fetch_daily_candles` 폴백 (사이클 14 호환)
+  - **`get_recent_daily_normalized(ticker, days, *, min_required=None)`** (사이클 172, 2026-06-22) — DB일봉 어댑터. DB row 의 `raw` JSONB (KIS 원본 키 `stck_clpr`/`stck_oprc` 등 보존) 를 **그대로 반환** → 사이클 173 prepare 의 `c.get("stck_clpr")` 무변경 사용 보장. DB 부족 (`< min_required`, 기본 None = `max(days//2, 10)`) 시 `fetch_daily_candles` KIS 폴백 (원본 KIS 키 반환). raw 키 부재 row 는 row 자체 반환 (graceful). **172 = 어댑터 정의만** (prepare 미연결 → 매수 target 불변, 호출처 0). prepare 연결은 사이클 173 (각 전략 days/min_required 전달 + 동등성 가드). 사이클 81 G-AST1 raw JSONB 변형 0 영속.
+- **`DAILY_RETENTION_DAYS` (사이클 172) — 150 → 230** (VCP 220일 + 10일 안전 마진). 사이클 173 prepare DB일봉 전환 시 VCP 220일 lookback DB 충족 보장. `purge_old_rows` 로직 불변 (상수만, "230일 지난 것만 삭제"). 사이클 150 (VCP T-120일 + 30일 마진) → 사이클 172 확장. 의미 전환 1건 = `test_cycle150_supabase_capacity.py::TestG150DailyRetentionDays` (`== 150` → `== 230`, 사이클 66 K-2 패턴). 용량 ~22MB → ~34MB (무료 500MB 중 7%).
 - Supabase 동기 SDK 호출은 `asyncio.to_thread()` 위임 (사이클 53 정책 답습)
 - 영속 의무: KST timestamp `_kst.now_kst_iso()` 사용 (사이클 68 G-10b AST) + raw JSONB 덮어쓰기 금지 (사이클 81 G-AST1 답습)
 - **UI 활용 영역 (사이클 124, 2026-06-12)**: `stock_master_daily` 컬럼 추가 시 UI 동기화 의무 영속 — `GET /api/stock-master/{ticker}/daily?days=N` 라우트 (`src/routes/stock_master.py`) + `frontend/src/pages/StockMaster.tsx::DailyTab` 30 row 테이블. `get_stats()` 응답에 `total_daily_rows` + `last_daily_load_at` 노출. 절차 상세는 `frontend/CLAUDE.md` 사이클 124 본문 참조

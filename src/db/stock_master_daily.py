@@ -440,14 +440,80 @@ async def get_recent_daily_with_fallback(
 
 
 # ---------------------------------------------------------------------------
+# 사이클 172 (2026-06-22) — DB일봉 어댑터 (raw JSONB = KIS 원본 키 보존)
+#
+# 사이클 173 prepare DB일봉 전환의 공통 어댑터. DB row 의 raw JSONB (KIS 원본 키
+# stck_clpr / stck_oprc 등 보존) 를 그대로 반환 → 173 prepare 의 c.get("stck_clpr")
+# 무변경 사용. DB 부족 (min_required) 시 KIS fetch_daily_candles 폴백.
+#
+# 172 단계 = 어댑터 정의만 (prepare 미연결 — 매수 target 불변).
+#   prepare 연결은 사이클 173 (각 전략 days / min_required 전달 + 동등성 가드).
+# ---------------------------------------------------------------------------
+async def get_recent_daily_normalized(
+    ticker: str, days: int, *, min_required: int | None = None
+) -> list[dict]:
+    """DB raw JSONB (KIS 원본 키 보존) 반환 + 부족 시 KIS 폴백.
+
+    DB 충분 시 각 row 의 raw JSONB (stck_clpr 등 KIS 원본 키) 를 그대로 반환 —
+    173 prepare 의 `c.get("stck_clpr")` 무변경 사용 보장.
+    DB 부족 (`< min_required`) 시 `fetch_daily_candles` KIS 폴백 (원본 KIS 키 반환).
+
+    Args:
+        ticker: KRX 6자리 단축코드.
+        days: 조회 일수.
+        min_required: 최소 행 수 (이하 시 KIS 폴백). 기본 None = max(days // 2, 10).
+
+    Returns:
+        list[dict] — DB raw JSONB 또는 KIS fetch_daily_candles 응답 (KIS 원본 키).
+        raw 키 부재 row 는 row 자체 반환 (graceful).
+    """
+    if min_required is None:
+        min_required = max(days // 2, 10)
+
+    db_rows = await get_recent_daily(ticker, days)
+    if len(db_rows) >= min_required:
+        # raw JSONB (KIS 원본 키 보존) 추출 — 부재 시 row 자체 graceful
+        normalized: list[dict] = []
+        for r in db_rows:
+            raw = r.get("raw")
+            normalized.append(raw if isinstance(raw, dict) and raw else r)
+        return normalized
+
+    # DB 부족 — KIS fetch_daily_candles 폴백 (원본 KIS 키 반환)
+    try:
+        from src.api.condition import fetch_daily_candles
+        kis_rows = await fetch_daily_candles(ticker, days=days)
+        logger.debug(
+            "[stock_master_daily] normalized fallback to KIS ticker=%s db=%d kis=%d",
+            ticker, len(db_rows), len(kis_rows),
+        )
+        return kis_rows
+    except Exception:
+        logger.exception(
+            "[stock_master_daily] get_recent_daily_normalized KIS 폴백 실패 graceful ticker=%s",
+            ticker,
+        )
+        # 부족하더라도 DB raw 추출 결과 반환 (호출자 graceful 통과)
+        normalized = []
+        for r in db_rows:
+            raw = r.get("raw")
+            normalized.append(raw if isinstance(raw, dict) and raw else r)
+        return normalized
+
+
+# ---------------------------------------------------------------------------
 # 사이클 150 — T-150일 retention (SUPABASE 용량초과 시정)
+# 사이클 172 — 150 → 230 (VCP 220일 + 10일 마진, 상수만 변경)
 # ---------------------------------------------------------------------------
 
 import time as _time  # 사이클 150 — elapsed_ms 측정
 
 
-# 사이클 150 영역 영구 영속 — 사이클 48 VCP EMA effective_long T-120일 + 30일 안전 마진
-DAILY_RETENTION_DAYS = 150
+# 사이클 172 (2026-06-22) — 150 → 230 (VCP 220일 + 10일 안전 마진).
+# 사이클 173 prepare DB일봉 전환 시 VCP 220일 lookback DB 충족 보장.
+# purge_old_rows 로직 불변 (상수만, "230일 지난 것만 삭제").
+# 사이클 150 영역 (사이클 48 VCP EMA effective_long T-120일 + 30일 마진) → 사이클 172 확장.
+DAILY_RETENTION_DAYS = 230
 
 
 async def purge_old_rows(

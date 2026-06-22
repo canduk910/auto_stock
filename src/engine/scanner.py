@@ -2089,6 +2089,9 @@ def _emit_stock_master_age_warning(ticker: str, age_days: int) -> None:
 _DAILY_LOAD_FETCH_DAYS = 100   # KIS 1회 호출 한도 (Q2=C, 사이클 33 KIS_DAILY_CANDLES_MAX)
 _DAILY_LOAD_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 83/91/97/107 답습)
 _DAILY_LOAD_INCREMENTAL_THRESHOLD = 50  # 50일 이상 적재된 ticker 는 증분 적재 (Q3=B)
+# 사이클 172 — VCP universe (KOSPI200 ∪ KOSDAQ150) 220일 backfill 임계.
+# VCP 전략 최대 lookback 220일 (EMA + base + pullback). DB 깊이 < 220 이면 분할 backfill.
+_DAILY_LOAD_VCP_BACKFILL_DAYS = 220
 
 
 async def _stock_master_daily_load_once(force: bool = False) -> dict:
@@ -2126,6 +2129,9 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     # stock_master 전체 ticker 조회 (사이클 106 lifecycle 의존성)
     # offset 페이징 — limit=1000 단위 (Supabase 기본 한도)
     all_tickers: list[str] = []
+    # 사이클 172 — VCP universe (KOSPI200 ∪ KOSDAQ150) ticker set (220일 backfill 분기용).
+    # list_all 의 .select("*") 가 is_kospi200/is_kosdaq150 컬럼 포함 (사이클 153) → 별도 쿼리 0건.
+    vcp_universe_tickers: set[str] = set()
     page = 0
     PAGE_SIZE = 1000
     while True:
@@ -2143,6 +2149,10 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             ticker = row.get("ticker", "")
             if ticker and len(ticker) == 6 and ticker.isdigit():
                 all_tickers.append(ticker)
+                # 사이클 172 — VCP universe = is_kospi200 OR is_kosdaq150
+                # (플래그 키 부재 mock/legacy row 는 falsy → 비 VCP 취급, 회귀 0)
+                if row.get("is_kospi200") or row.get("is_kosdaq150"):
+                    vcp_universe_tickers.add(ticker)
         if len(rows) < PAGE_SIZE:
             break
         page += 1
@@ -2193,22 +2203,37 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         except Exception:
             existing_count = 0
 
-        if existing_count < _DAILY_LOAD_INCREMENTAL_THRESHOLD:
+        # 사이클 172 — VCP universe (KOSPI200 ∪ KOSDAQ150) DB < 220 → 220일 backfill 분기.
+        # 분할 fetch (날짜 윈도우 ×3). 나머지 종목은 현행 100일/증분 유지 (회귀 0).
+        is_vcp_universe = ticker in vcp_universe_tickers
+        use_vcp_backfill = (
+            is_vcp_universe and existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS
+        )
+
+        if use_vcp_backfill:
+            fetch_days = _DAILY_LOAD_VCP_BACKFILL_DAYS  # VCP 220일 backfill
+            backfill_count += 1
+        elif existing_count < _DAILY_LOAD_INCREMENTAL_THRESHOLD:
             fetch_days = _DAILY_LOAD_FETCH_DAYS  # 백필 모드 (T-100일)
             backfill_count += 1
         else:
             fetch_days = 7  # 증분 모드 (T-7일, 영업일 마진)
             incremental_count += 1
 
-        # 3) KIS fetch_daily_candles 호출 (사이클 14 재사용)
+        # 3) KIS 호출 — VCP backfill 은 분할 fetch (사이클 172), 그 외 fetch_daily_candles (사이클 14)
         try:
-            from src.api.condition import fetch_daily_candles
-            candles = await fetch_daily_candles(ticker, days=fetch_days)
+            from src.api import condition as _cond
+            if use_vcp_backfill:
+                candles = await _cond.fetch_daily_candles_backfill(
+                    ticker, total_days=_DAILY_LOAD_VCP_BACKFILL_DAYS
+                )
+            else:
+                candles = await _cond.fetch_daily_candles(ticker, days=fetch_days)
         except Exception:
             # 사이클 88 G-REJECT graceful — 다음 ticker 진행
             logger.exception(
-                "[stock_master_daily_load] KIS fetch_daily_candles 실패 graceful ticker=%s",
-                ticker,
+                "[stock_master_daily_load] KIS 일봉 호출 실패 graceful ticker=%s vcp=%s",
+                ticker, use_vcp_backfill,
             )
             summary["failed"] += 1
             # Rate Limit sleep 보장 (실패 시도 자체로 KIS 호출 발생)
