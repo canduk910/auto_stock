@@ -358,15 +358,16 @@ class TestLineReductionEffect:
         scheduler_path = Path("src/engine/scheduler.py")
         line_count = len(scheduler_path.read_text(encoding="utf-8").splitlines())
 
-        # 사이클 142+146+149+150+158+160+162+164 의미 전환 (사이클 66 K-2 패턴 답습):
+        # 사이클 142+146+149+150+158+160+162+164+171 의미 전환 (사이클 66 K-2 패턴 답습):
         # 사이클 134 기준 ≤ 3,400L → 142 +21 → 146 +25 → 149 +90 → 150 +85 → 158 +15
-        # → 160 +25 → 162 +26 → 164 +85 (시가 확정 chain 재시도 안전망) → ≤ 3,830L.
-        # 사이클 164 = HIGH 시가 확정 chain 영구 영속 (6/18 11:03 KST EC2 재기동 사례 시정).
-        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149/150/158/160/162/164 추가는 신규 기능 한정.
-        assert line_count <= 3830, (
+        # → 160 +25 → 162 +26 → 164 +85 → 171 +145 (저녁 잠정 funnel 캡처: capture 헬퍼 +
+        #   _evening_funnel_capture_once + _evening_funnel_capture_task_loop) → ≤ 3,990L.
+        # 사이클 171 = MEDIUM 운영자 가치 (16:20 저녁 funnel — 전날 밤 후보 확인, domain-consult 의제 4).
+        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149/150/158/160/162/164/171 추가는 신규 기능 한정.
+        assert line_count <= 3990, (
             f"scheduler.py 라인 감소 영속 위반 — got {line_count}L, "
-            f"target ≤ 3,830L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L). "
-            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164 추가 영속."
+            f"target ≤ 3,990L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L). "
+            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164/171 추가 영속."
         )
 
     def test_g_134_f2_helper_module_compact(self):

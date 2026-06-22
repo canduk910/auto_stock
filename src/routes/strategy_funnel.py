@@ -26,7 +26,6 @@ from fastapi import APIRouter, HTTPException, Query
 
 from src.api.condition import is_market_open  # 사이클 132 — KIS chk-holiday 재사용 (사이클 17 영속)
 from src.db.strategy_funnel import (
-    insert_snapshot,
     list_recent_by_strategy,
     list_snapshots,
 )
@@ -137,55 +136,27 @@ async def get_recent_funnel(
 async def trigger_snapshot() -> ApiResponse:
     """모든 활성 전략의 prepare 단계 결과를 즉시 snapshot 으로 기록.
 
-    각 전략의 `get_scan_stats()` 응답을 기반으로 단계별 row INSERT.
-    실제 prepare() 재실행은 하지 않음 — 최근 prepare 결과만 캡처.
+    사이클 171 (2026-06-22) — 단계별 전체 캡처로 전환 (자문 의제 6 (a)).
+    종전 step_no=99 (최종) 단독 → `capture_funnel_snapshots(registry, is_provisional=False)`
+    공통 헬퍼 위임 (09:30 자동 hook 과 동일 단계별 + step_no=99 캡처). 운영자가 "지금 각
+    단계 후보를 보고 싶다" 니즈 충족. is_provisional=False (확정 — 잠정은 16:20 저녁 task).
+
+    실제 prepare() 재실행은 하지 않음 — 최근 prepare 결과(`_funnel_steps`)만 캡처.
     """
-    from src.engine.scheduler import trading_scheduler
+    from src.engine.scheduler import trading_scheduler, capture_funnel_snapshots
 
     today = datetime.now(_KST_TZ).date()
-    saved: list[dict] = []
 
     try:
-        strategies = trading_scheduler.registry.all()
+        registry = trading_scheduler.registry
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"strategy registry 접근 실패: {exc}")
 
-    for strategy in strategies:
-        sid = getattr(strategy, "strategy_id", "")
-        # get_scan_stats 가 있는 전략만 (donchian/BFB/VCP/momentum/VB/LTV 모두 보유)
-        get_scan_stats = getattr(strategy, "get_scan_stats", None)
-        get_scanned = getattr(strategy, "get_scanned_tickers", None)
-        if not callable(get_scan_stats):
-            continue
-        try:
-            stats = get_scan_stats() or {}
-        except Exception:
-            logger.exception("get_scan_stats 실패: %s", sid)
-            continue
-        scanned = []
-        if callable(get_scanned):
-            try:
-                scanned = list(get_scanned())
-            except Exception:
-                scanned = []
-
-        # 마지막 단계 = 최종 prepared (현재 운영 카운트)
-        survived_count = len(scanned)
-        row = await insert_snapshot(
-            target_date=today,
-            strategy_id=sid,
-            step_no=99,  # 99 = 최종 단계 (수동 trigger 식별자)
-            step_name="최종 prepared (수동 trigger)",
-            survived_tickers=scanned,
-            survived_count=survived_count,
-            excluded_count=0,
-            excluded_sample=[],
-        )
-        if row:
-            saved.append({"strategy_id": sid, "id": row.get("id")})
+    # 사이클 171 — 09:30 자동 hook 과 동일 헬퍼 (단계별 + step_no=99, is_provisional=False)
+    saved_count = await capture_funnel_snapshots(registry, is_provisional=False)
 
     return ApiResponse(
         success=True,
-        data={"target_date": today.isoformat(), "saved": saved, "count": len(saved)},
-        message=f"{len(saved)}개 전략 snapshot 저장",
+        data={"target_date": today.isoformat(), "saved_count": saved_count, "count": saved_count},
+        message=f"{saved_count}개 snapshot 저장",
     )

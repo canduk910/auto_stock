@@ -45,6 +45,7 @@ async def insert_snapshot(
     survived_count: int | None = None,
     excluded_count: int = 0,
     step_conditions: str | None = None,  # 사이클 41 — 단계 조건 (UI 툴팁)
+    is_provisional: bool = False,  # 사이클 171 — 저녁 16:20 잠정 캡처 플래그
 ) -> dict | None:
     """1단계 snapshot UPSERT (사이클 145 — UPSERT 전환 영구 영속).
 
@@ -64,6 +65,9 @@ async def insert_snapshot(
         survived_count: 통과 카운트 (None 이면 len(survived_tickers) 사용).
         excluded_count: 탈락 카운트.
         step_conditions: 단계 필터 조건 (UI 툴팁용, 사이클 41). DB 저장 안 함 (API 응답만).
+        is_provisional: 잠정 캡처 여부 (사이클 171, migration 040).
+            - True = 16:20 저녁 잠정 캡처 (전일 마스터 + 16:10 basics 기준, 아침 델타 미반영).
+            - False (기본) = 09:30 자동 / 수동 trigger (확정). 기존 호출자 회귀 0.
 
     Returns:
         upsert 된 row dict (id 포함) 또는 None (실패 시).
@@ -99,6 +103,8 @@ async def insert_snapshot(
         "excluded_count": int(excluded_count),
         "survived_tickers": survived,
         "excluded_sample": excluded,
+        # 사이클 171 — 잠정/확정 플래그 (migration 040 is_provisional BOOLEAN DEFAULT FALSE)
+        "is_provisional": bool(is_provisional),
     }
 
     try:

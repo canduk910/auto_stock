@@ -229,6 +229,16 @@ export default function StrategyFunnel() {
                             조건
                           </span>
                         )}
+                        {/* 사이클 171 — 잠정(provisional) 배지 (16:20 저녁 캡처, 아침 델타 미반영) */}
+                        {row.is_provisional && (
+                          <span
+                            data-testid={`funnel-provisional-badge-${sid}-${row.step_no}`}
+                            title="16:20 저녁 잠정 캡처 — 익일 아침 마스터 델타 반영 전 (후보가 바뀔 수 있음)"
+                            className="ml-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800"
+                          >
+                            잠정
+                          </span>
+                        )}
                       </td>
                       <td className="py-2 px-3 text-right font-mono text-emerald-700">
                         {row.survived_count}

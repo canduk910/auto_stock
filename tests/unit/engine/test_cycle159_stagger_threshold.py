@@ -195,7 +195,12 @@ def test_G_159_SAFETY_2_stagger_only_in_scanner_lifecycle() -> None:
                     if kw.arg == "initial_delay_secs":
                         stagger_call_methods.add(node.name)
 
-    allowed_methods = set(_CYCLE_159_STAGGER.keys())
+    # 사이클 171 (2026-06-22) 의미 전환 — 16:20 저녁 잠정 funnel 캡처 task 도
+    # 매수 진입 전 영역(관찰성 전용, scanner/risk/order 무관)이라 stagger 허용.
+    # basics(16:10) 완료 후 진입 = HTTP/2 race 차단 마진 (사이클 159 답습).
+    allowed_methods = set(_CYCLE_159_STAGGER.keys()) | {
+        "_evening_funnel_capture_task_loop",
+    }
     forbidden_methods = stagger_call_methods - allowed_methods
 
     assert not forbidden_methods, (

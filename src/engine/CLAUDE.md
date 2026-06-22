@@ -26,6 +26,28 @@ market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
+## 사이클 171 (2026-06-22) — 저녁 16:20 잠정 funnel 캡처 + 수동 trigger 단계별 캡처 (MEDIUM 운영자 가치)
+
+자문 `_workspace/domain_consult/cycle171_master_funnel_timing_redesign.md` 의제 4 우선순위 2 + 의제 6 (a) 채택. funnel 은 순수 관찰성 + D-1 일봉 기반 → 장중 불변 → 전날 저녁 미리 생성하면 운영자가 밤에 다음 영업일 후보 확인 가능 (현재 09:30 개장 후 캡처는 늦음).
+
+### 공통 헬퍼 `capture_funnel_snapshots(registry, *, is_provisional)` (모듈 함수)
+
+- `_auto_capture_funnel_snapshots` 의 "registry 순회 → 각 strategy `_funnel_steps` 단계별 + step_no=99 insert_snapshot" 로직을 추출. **3 호출처 공유**: (a) 09:30 자동 (`_auto_capture_funnel_snapshots` 위임, is_provisional=False, 행위 보존) + (b) 16:20 저녁 (`_evening_funnel_capture_once`, is_provisional=True) + (c) 수동 trigger (`routes/strategy_funnel.py::trigger_snapshot`, is_provisional=False).
+- graceful (사이클 88) — 전략별 예외 격리. 사이클 132 momentum funnel 영구 제외 + 사이클 170 in-place upsert 영속. 관찰성 한정 — check_exit/buy funnel hook 0건 + risk/order_engine/realtime/auth 참조 0 (SAFETY 가드).
+
+### 16:20 저녁 task (`TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)`)
+
+- `_evening_funnel_capture_task_loop` — `run_periodic_task_loop` 답습 (`_stock_master_master_load_task_loop` 패턴 100% + no-op record/flush). `initial_delay_secs=600` (basics 16:10 완료 후 진입, HTTP/2 race 마진).
+- `_evening_funnel_capture_once` 본체: (1) 16:00 일봉 적재 완료 대기 — `stock_master_daily.count_all()` 5분 cap polling (사이클 163 boot prepare 가드 패턴, 빈 funnel 영속 방지) (2) 5 전략 `prepare()` (기존 KIS-fetch 그대로 — 16:20 한가, 속도 무관. HIGH DB일봉 전환은 사이클 173) (3) `capture_funnel_snapshots(registry, is_provisional=True)`.
+- `task_attrs` 4 위치 영속 (사이클 79 G-AST2): `self._evening_funnel_capture_task = asyncio.create_task(...)` (start) + cancel 튜플 3 (start finally / run_daily finally / stop). `test_scheduler_stop_zombie_tasks.py::expected_members` 16 → 17종 갱신.
+
+### 매매 안전성 무영향
+
+- 관찰성 한정. scanner/risk.on_tick/order_engine/realtime/auth diff 0. 16:00 일봉 → 16:10 basics → 16:20 funnel → 16:30 마스터 순서 의존성 보장 (count polling 가드).
+- migration `040_funnel_provisional.sql` (additive `is_provisional BOOLEAN NOT NULL DEFAULT FALSE`, 운영 DB 적용 완료).
+- 회귀 가드: DB 4 (insert_snapshot is_provisional) + 헬퍼/16:20 task 14 (`test_cycle171_evening_funnel.py`) + 수동 trigger 2 (`test_cycle171_snapshot_route_steps.py`) + 프론트 3 (`StrategyFunnel.cycle171.test.tsx`) + 의미 전환 (C-3 contract 단계별 / 159 stagger allowlist / 134 라인 임계 ≤3,990 / zombie expected_members 17종).
+- 사이클 174 인계: 아침 08:46 마스터 델타 (잠정 → 확정 전환) + prepare DB일봉 전환 (사이클 173 HIGH 선행).
+
 ## 사이클 161 (2026-06-17) — `_handle_buy_fill` 영역 체결단가 정합 시정 (HIGH 매매 안전성 직결)
 
 사용자 보고 005940 NH투자증권 6/16 BUY trade_history 33,400원 vs HTS 33,350원 (+50원 차이) 시정. 근본 원인 = `_handle_buy_fill` 영역 `update_trade_status(BUY, COMPLETED, strategy=strategy_id)` 호출 시 `price` 인자 누락 → PENDING INSERT 시점 `record_price` (주문가 LIMIT / scanner `current_price` MARKET) 그대로 잔존 → KIS CNTG_UNPR (체결단가) 미반영.
@@ -554,6 +576,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 | `TIME_SCAN_START` | 09:30 | 모멘텀 `scan_stocks()` + 통합 구독 |
 | `TIME_KRX_MAIN_BUY_STOP` | 15:20 | `_force_clear_main_only` — **사이클 142 결함 #1 시정 **: POST_NXT 활성 여부 무관 `check_force_clear()` 호출 영속. VB(`tradable_boards=("main",)` 사이클 26 영속) = 전량 청산. LTV(`("pre_nxt","main","post_nxt")` 사이클 38 복원 영속) = `check_force_clear()` 본체가 `_limit_up_reached` 상한가 모드 종목 제외 → 일반 종목만 15:20 즉시 청산 + 상한가 모드 종목 NXT 익일 청산 모드 보존. *사이클 142 이전 결함*: `keeps_post_nxt=True` 시 `continue` 분기 → LTV 모든 종목 보류 (사이클 38 명세 위반) |
 | `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감. 사이클 26: `_confirm_breakout_open_prices(board="post_nxt")` 제거 (VB/LTV tradable_boards 에 post_nxt 없음). 15:30~15:39:59 = MAIN 유지 (종가 흡수 마진) |
+| `TIME_EVENING_FUNNEL_CAPTURE` | 16:20 | **사이클 171** — 저녁 잠정 funnel 캡처 (`_evening_funnel_capture_task_loop`). 16:00 일봉 → 16:10 basics → **16:20 funnel** → 16:30 마스터 순서. `count_all` 폴링 대기 + 5 전략 prepare → `capture_funnel_snapshots(is_provisional=True)`. 운영자 전날 밤 후보 확인 (관찰성 전용) |
 | `TIME_POST_NXT_OPEN_PRESUBSCRIBE` | 15:39:10 | **사이클 26 신규**: NXT 채널(H0NXCNT0) 사전 구독 마진 시작. `_board_transition_loop("H0STCNT0","H0NXCNT0", 보유+익일청산)` — 종목별 원자 전환 + 매수 후보 KRX unsubscribe |
 | `TIME_POST_NXT_OPEN` | 15:40 | **사이클 26 신규**: NXT 애프터 진입 (기존 15:30 → 15:40 으로 변경). 매도만 (VB/LTV tradable_boards=("main",)) |
 | `TIME_NXT_POST_BUY_STOP` | 19:50 | `buy_disabled = True` (NXT 애프터 신규 매수 중단, 변경 금지) |

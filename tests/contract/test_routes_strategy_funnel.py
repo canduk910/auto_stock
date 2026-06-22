@@ -105,32 +105,42 @@ def test_get_recent_funnel_days_bounds(client):
 
 # ===========================================================================
 # C-3: POST /api/strategy-funnel/snapshot — 수동 trigger
+# 사이클 171 (2026-06-22) — 단계별 캡처 전환 (capture_funnel_snapshots 헬퍼 위임).
+# 종전 step_no=99 단독 (route-local insert_snapshot) → 헬퍼 위임 (단계별 + step_no=99).
+# 헬퍼는 src.db.strategy_funnel.insert_snapshot 호출 → DB 모듈 패치로 의미 전환.
 # ===========================================================================
 def test_post_snapshot_triggers_all_strategies(monkeypatch, client):
-    """수동 trigger — 활성 전략별 insert_snapshot 호출."""
-    from src.routes import strategy_funnel as sf_mod
+    """수동 trigger — 활성 전략별 단계별 + 최종 insert_snapshot 호출 (사이클 171 헬퍼 위임)."""
+    from src.db import strategy_funnel as db_sf
     from unittest.mock import MagicMock
 
-    # registry mock — 2 전략
+    # registry mock — 2 전략 (_funnel_steps 단계별)
     s1 = MagicMock()
     s1.strategy_id = "donchian_swing"
-    s1.get_scan_stats = MagicMock(return_value={"final_prepared": 0})
+    s1._funnel_steps = [
+        {"step_no": 1, "step_name": "코스피200+코스닥150", "survived": [],
+         "survived_count": 0, "excluded": [], "excluded_count": 0},
+    ]
     s1.get_scanned_tickers = MagicMock(return_value=[])
 
     s2 = MagicMock()
     s2.strategy_id = "vcp_breakout"
-    s2.get_scan_stats = MagicMock(return_value={"final_prepared": 5})
+    s2._funnel_steps = [
+        {"step_no": 1, "step_name": "베이스", "survived": ["005930"],
+         "survived_count": 1, "excluded": [], "excluded_count": 0},
+    ]
     s2.get_scanned_tickers = MagicMock(return_value=["005930", "000660"])
 
     fake_scheduler = MagicMock()
     fake_scheduler.registry.all = MagicMock(return_value=[s1, s2])
     monkeypatch.setattr("src.engine.scheduler.trading_scheduler", fake_scheduler)
 
-    spy = AsyncMock(side_effect=lambda **kw: {"id": f"row-{kw['strategy_id']}"})
-    monkeypatch.setattr(sf_mod, "insert_snapshot", spy)
+    spy = AsyncMock(side_effect=lambda **kw: {"id": f"row-{kw['step_no']}"})
+    monkeypatch.setattr(db_sf, "insert_snapshot", spy)
 
     resp = client.post("/api/strategy-funnel/snapshot")
     assert resp.status_code == 200
     data = resp.json()["data"]
-    assert data["count"] == 2
-    assert spy.await_count == 2
+    # 2 전략 × (단계 1 + 최종 99) = 4 row
+    assert data["count"] == 4
+    assert spy.await_count == 4
