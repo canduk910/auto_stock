@@ -297,23 +297,37 @@ async def test_purge_info_uses_level_filter(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# E. 1회 cap 100,000 (limit 또는 range)
+# E. SELECT 배치 cap 적용 (사이클 175 의미 전환 — PostgREST row-cap 정직화)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
 async def test_purge_applies_max_batch_cap(monkeypatch):
-    from src.db.system_logs import purge_old_logs, MAX_PURGE_BATCH
+    """사이클 175 (2026-06-24) 의미 전환 (사이클 66 K-2 패턴).
 
-    assert MAX_PURGE_BATCH == 100_000, f"MAX_PURGE_BATCH 상수 미정의 또는 다름: {MAX_PURGE_BATCH}"
+    사이클 6/150 시점: SELECT limit = MAX_PURGE_BATCH(=100_000) 단정.
+    그러나 Supabase PostgREST `db-max-rows=1000` 기본 cap 이 SELECT 를 1000행으로
+    silent 절단 → limit(100_000) 요청해도 effective 는 1000 → 1회당 최대 1000행만 삭제
+    → INFO 30K+/일 적체 (242MB 비대) silent 결함.
+
+    사이클 175 시정: per-iteration SELECT limit = PURGE_SELECT_BATCH(=1000, 정직)
+    + drained 까지 루프. MAX_PURGE_BATCH(=100_000) 은 *단일 호출 누적 상한 cap* 으로
+    의미 재정의 (상수 보존). 따라서 SELECT limit 단정값이 100_000 → 1000 으로 의미 전환.
+    """
+    from src.db.system_logs import purge_old_logs, MAX_PURGE_BATCH, PURGE_SELECT_BATCH
+
+    # MAX_PURGE_BATCH 상수 보존 (누적 상한 cap 의미 재정의, 값 변경 0)
+    assert MAX_PURGE_BATCH == 100_000, f"MAX_PURGE_BATCH 상수 변경 금지: {MAX_PURGE_BATCH}"
+    # PURGE_SELECT_BATCH = 1000 (PostgREST effective cap 정직 정합)
+    assert PURGE_SELECT_BATCH == 1000, f"PURGE_SELECT_BATCH != 1000: {PURGE_SELECT_BATCH}"
 
     captured = _install(monkeypatch)
     await purge_old_logs()
 
     limit = captured.get("limit", {})
-    # 두 그룹 모두 cap 적용
-    assert limit.get("info") == 100_000, f"info limit 미적용: {limit}"
-    assert limit.get("high") == 100_000, f"high limit 미적용: {limit}"
+    # 두 그룹 모두 per-iteration SELECT 배치 cap 적용 (정직한 1000)
+    assert limit.get("info") == PURGE_SELECT_BATCH, f"info SELECT 배치 미적용: {limit}"
+    assert limit.get("high") == PURGE_SELECT_BATCH, f"high SELECT 배치 미적용: {limit}"
 
 
 # ---------------------------------------------------------------------------

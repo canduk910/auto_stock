@@ -24,8 +24,18 @@ INFO_RETENTION_DAYS = 2
 HIGH_RETENTION_DAYS = 30
 HIGH_LEVELS: tuple[str, ...] = ("WARNING", "ERROR", "CRITICAL")
 
-# 1회 DELETE 안전 cap (단일 트랜잭션 폭주 차단)
+# 단일 purge 호출 누적 삭제 안전 cap (한 번의 settlement 폭주 차단)
 MAX_PURGE_BATCH = 100_000
+
+# 사이클 175 (2026-06-24) — PostgREST row-cap silent 결함 항구 시정 (루프 배치)
+# per-iteration SELECT 배치 크기. Supabase PostgREST `db-max-rows=1000` 기본 cap 이
+# SELECT 를 1000행으로 silent 절단하므로, limit(100_000) 을 요청해도 effective 는 1000.
+# → 정직하게 1000 을 요청하고 drained 까지 루프 (사이클 150 2-step 구조 유지, no-migration).
+PURGE_SELECT_BATCH = 1000
+
+# 루프 런어웨이 차단 (안전 max iterations). 2000 × 1000 = 2M 행 = 충분히 큼.
+# 단일 호출 누적 상한 MAX_PURGE_BATCH(=100_000) 가 먼저 끊으므로 정상 운영에서 도달 불가.
+PURGE_MAX_ITERATIONS = 2000
 
 # 검색 limit clamp
 SEARCH_DEFAULT_LIMIT = 200
@@ -235,42 +245,59 @@ async def _purge_by_cutoff(
     if cutoff_iso is None:
         raise RuntimeError("cutoff must not be None (WHERE 누락 차단)")
 
-    # 사이클 150 영역 영구 영속 — 사이클 6 도입 (2026-05-20) 24일 silent 결함 시정.
+    # 사이클 150 영역 영속 — 사이클 6 도입 (2026-05-20) 24일 silent 결함 시정.
     # 결함: supabase-py SyncFilterRequestBuilder 영역에서 DELETE chain `.limit()` 미지원
     #       → AttributeError 'SyncFilterRequestBuilder' object has no attribute 'limit'
     #       → 매일 graceful skip (`[log_retention_skip]` 24일 연속)
-    # 시정: subquery select(id) LIMIT MAX_PURGE_BATCH + DELETE WHERE id IN (배치) 2-step
+    # 시정: subquery select(id) LIMIT + DELETE WHERE id IN (배치) 2-step
     #       → supabase-py SELECT chain `.limit()` 영속 + DELETE in_ id 영역 영속
+    #
+    # 사이클 175 (2026-06-24) — PostgREST row-cap silent 결함 항구 시정 (루프 배치).
+    # 결함: 사이클 150 의 단발 SELECT(id).limit(MAX_PURGE_BATCH=100_000) 이 Supabase
+    #       PostgREST `db-max-rows=1000` 기본 cap 에 silent 절단 → 1회 호출당 최대 1000행만 삭제.
+    #       purge_old_logs() 하루 1회 호출 + INFO 30K+/일 생성 → 640K+ 적체 → 242MB 비대.
+    #       운영 증거: [log_retention] info_deleted=1000 high_deleted=1000 매일 정확히 1000.
+    # 시정: SELECT(id, limit=PURGE_SELECT_BATCH=1000) + DELETE in_(ids) 를 drained 까지 루프.
+    #       PURGE_MAX_ITERATIONS 런어웨이 차단 + MAX_PURGE_BATCH 누적 상한 cap.
+    #       migration/RPC/PostgREST 설정 변경 0 (2-step 구조 + supabase-py API 유지).
 
-    def _select_ids():
+    def _select_ids_batch():
         chain = supabase.table("system_logs").select("id")
         if isinstance(level_filter, str):
             chain = chain.eq("log_level", level_filter)
         else:
             chain = chain.in_("log_level", list(level_filter))
-        chain = chain.lt("timestamp", cutoff_iso).limit(MAX_PURGE_BATCH)
+        chain = chain.lt("timestamp", cutoff_iso).limit(PURGE_SELECT_BATCH)
         return chain.execute()
 
-    select_result = await asyncio.to_thread(_select_ids)
-    select_rows = getattr(select_result, "data", None) or []
-    ids = [row["id"] for row in select_rows if "id" in row]
+    total_deleted = 0
+    for _ in range(PURGE_MAX_ITERATIONS):
+        select_result = await asyncio.to_thread(_select_ids_batch)
+        select_rows = getattr(select_result, "data", None) or []
+        ids = [row["id"] for row in select_rows if "id" in row]
 
-    if not ids:
-        return 0
+        if not ids:
+            break  # drained — 더 이상 cutoff 통과 행 없음
 
-    def _delete():
-        return supabase.table("system_logs").delete().in_("id", ids).execute()
+        def _delete(_ids=ids):
+            return supabase.table("system_logs").delete().in_("id", _ids).execute()
 
-    result = await asyncio.to_thread(_delete)
-    rows = getattr(result, "data", None) or []
-    count = getattr(result, "count", None)
-    if count is None:
-        count = len(rows)
-    # supabase-py DELETE 응답 = 실제 영향 row 수 보장 영속 불일치 가능
-    # → ids 길이 영역 영속 (실제 cutoff 통과 행 수, 명시적 보호 영역)
-    if count <= 0:
-        return len(ids)
-    return int(count)
+        result = await asyncio.to_thread(_delete)
+        rows = getattr(result, "data", None) or []
+        count = getattr(result, "count", None)
+        if count is None:
+            count = len(rows)
+        # supabase-py DELETE 응답 = 실제 영향 row 수 보장 영속 불일치 가능
+        # → ids 길이 영역 영속 (실제 cutoff 통과 행 수, 명시적 보호 영역)
+        deleted = len(ids) if count <= 0 else int(count)
+        total_deleted += deleted
+
+        if total_deleted >= MAX_PURGE_BATCH:
+            break  # 단일 호출 누적 상한 cap (settlement 폭주 차단)
+        if len(ids) < PURGE_SELECT_BATCH:
+            break  # 마지막 페이지 (다음 SELECT 는 빈 결과 — 1회 호출 절약)
+
+    return total_deleted
 
 
 async def purge_old_logs() -> dict[str, int]:

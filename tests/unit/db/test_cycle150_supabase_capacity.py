@@ -275,12 +275,15 @@ class TestG150PurgeSubqueryPattern:
             "SELECT('id') 영역 영구 영속 의무 (subquery 영역)"
 
     def test_g150_purge_2b_delete_in_id_present(self) -> None:
-        """`DELETE WHERE id IN (...)` 영역 영구 영속."""
+        """`DELETE WHERE id IN (...)` 영역 영구 영속.
+
+        사이클 175 (2026-06-24) 변수명 적응 — 루프 배치 전환으로 closure 변수
+        `ids` → `_ids` (기본값 인자) 사용. DELETE in_ 2-step 본질은 보존 (정규식 `_?ids`).
+        """
         content = _SYSLOG_PY.read_text(encoding="utf-8")
-        # `.delete().in_("id", ids)` 영역 영구 영속
-        assert '.delete().in_("id", ids)' in content or \
-            re.search(r'\.delete\(\)\s*\.in_\(\s*"id"\s*,\s*ids\s*\)', content) is not None, \
-            "DELETE WHERE id IN (ids) 영역 영구 영속 의무"
+        # `.delete().in_("id", ids|_ids)` 영역 영구 영속 (변수명 무관, 2-step 본질 가드)
+        assert re.search(r'\.delete\(\)\s*\.in_\(\s*"id"\s*,\s*_?ids\s*\)', content) is not None, \
+            "DELETE WHERE id IN (ids) 영역 영구 영속 의무 (사이클 175 루프 _ids 변수명 호환)"
 
 
 class TestG150PurgeFunctional:
