@@ -233,6 +233,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 ### `scanner.py::_stock_master_basics_refresh_once()` (사이클 126 추가 영역)
 
 - KRX 1차 폴백의 `nxt_tradable=False`/`krx_halted=False`/`admin_item=False` 하드코딩 결함 시정. KIS `inquire_stock_basics()` (CTPF1002R + FHKST01010100 merge, 사이클 107 영속) 매스 호출 → `stock_master.upsert_one()` 갱신
+- **사이클 176 (2026-06-25) — 기존 raw 머지 보존 (거래대금 결손 시정)**: `list_all` 로드 시 `existing_raw_by_ticker: dict[str, dict]` 에 기존 row 의 `raw` 보관 → upsert *전* `_new_raw = getattr(basics, "raw", None)` 이 dict 이고 `_prev_raw` 비어있지 않으면 `basics = basics.model_copy(update={"raw": {**_prev_raw, **_new_raw}})` 머지. 근본 = `inquire_stock_basics` 가 `merged_raw = dict(ctpf_output)` 로 raw 신규 빌드 (기존 DB raw 미read) + 개장 전 FHKST `acml_tr_pbmn=0` → cycle 145 `_ZERO_VALUE_SKIP_KEYS` skip → 거래대금 부재 + `upsert_one` raw 통째 교체 → 부팅 전 refresh 가 매일 전 종목 거래대금 삭제 (cycle 145 "기존 raw 보존" 은 read-merge 부재로 no-op, 운영 실측 6/3573 → VB/LTV/donchian/BFB universe 0). 머지가 cycle 145 skip 15키 (거래대금/거래량/per/pbr/외국인/신고가/실적) 를 기존 값에서 보존, 새 키 우선. blast radius 최소 (scanner 한정 + 추가 DB read 0, `upsert_one` 전역 의미변경 회피). bare-object (`model_copy`/`raw` 부재) `getattr` graceful (기존 cycle126 테스트 회귀 0). 매매 안전성 무영향 (매수 진입 전, 사이클 38). 회귀 가드 `tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py` (5)
 - 페이징 `stock_master.list_all()` (PAGE_SIZE=1000) + Rate Limit `await asyncio.sleep(_BASICS_REFRESH_RATE_LIMIT_SLEEP_SECS=0.05)` (사이클 17 KIS LMS chain 답습)
 - graceful: KIS 거부 → `[stock_master_basics_refresh_skip] ticker=X reason=Y` WARNING + `failed++` continue (사이클 88 G-REJECT 답습)
 - 500건마다 `[stock_master_basics_refresh]` INFO 진행 emit + 종료 시 `[stock_master_basics_refresh_summary] total=N updated=K skipped=L failed=M elapsed_ms=X` 1행
@@ -288,7 +289,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 
 - 자동 task: `scheduler.TIME_STOCK_MASTER_BASICS_REFRESH=16:10` + `_stock_master_basics_refresh_task_loop()` (start() 즉시 1회 + 매일 16:10 KST)
 - 수동 trigger: `POST /api/stock-master/basics/refresh` (사이클 127 fire-and-forget 전환)
-- 적재 함수: `scanner._stock_master_basics_refresh_once()` — `inquire_stock_basics()` (사이클 107 merge) + `upsert_one()` + Rate Limit 50ms sleep + graceful
+- 적재 함수: `scanner._stock_master_basics_refresh_once()` — `inquire_stock_basics()` (사이클 107 merge) + **사이클 176 기존 raw 머지 보존** (`{**기존, **신규}`, 거래대금 결손 시정) + `upsert_one()` + Rate Limit 50ms sleep + graceful
 - metrics 모듈: `stock_master_basics_metrics.py` (record/flush 페어링, 사이클 122 답습)
 - 운영 실측 (2026-06-13 10:46 KST 시작 → 11:00:22 완료): updated=2697/2697, NXT 가능 400 / 거래정지 60 / 관리종목 57 (이전 0/0/0 영역에서 정상 분포 입수)
 

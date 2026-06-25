@@ -2354,6 +2354,9 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
 
     # stock_master 전체 ticker 페이징 조회 (사이클 122 답습)
     all_tickers: list[str] = []
+    # 사이클 176 — 기존 raw 보관 (거래대금 결손 시정). upsert 전 머지로
+    # cycle 145 _ZERO_VALUE_SKIP_KEYS (개장 전 0 skip = 거래대금/거래량 등) 보존.
+    existing_raw_by_ticker: dict[str, dict] = {}
     page = 0
     PAGE_SIZE = 1000
     while True:
@@ -2371,6 +2374,7 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
             ticker = row.get("ticker", "")
             if ticker and len(ticker) == 6 and ticker.isdigit():
                 all_tickers.append(ticker)
+                existing_raw_by_ticker[ticker] = row.get("raw") or {}
         if len(rows) < PAGE_SIZE:
             break
         page += 1
@@ -2410,6 +2414,20 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
             summary["skipped"] += 1
             await _asyncio.sleep(_BASICS_REFRESH_RATE_LIMIT_SLEEP_SECS)
             continue
+
+        # 사이클 176 — 기존 raw 머지 보존 (거래대금 결손 시정).
+        # 개장 전 FHKST acml_tr_pbmn=0 → inquire_stock_basics 가 cycle 145
+        # _ZERO_VALUE_SKIP_KEYS 를 merged_raw 에서 skip → basics.raw 거래대금 부재.
+        # upsert_one 이 raw 통째 교체하므로, 기존 DB raw 와 머지하여 skip 된 키
+        # (거래대금/거래량 등) 를 기존 값에서 보존. 새 키 우선 ({**기존, **신규}).
+        # bare-object (model_copy/raw 부재) graceful — 머지 skip (기존 테스트 회귀 0).
+        _new_raw = getattr(basics, "raw", None)
+        if isinstance(_new_raw, dict):
+            _prev_raw = existing_raw_by_ticker.get(ticker)
+            if isinstance(_prev_raw, dict) and _prev_raw:
+                basics = basics.model_copy(
+                    update={"raw": {**_prev_raw, **_new_raw}}
+                )
 
         # DB upsert (사이클 88 G-REJECT graceful)
         try:
