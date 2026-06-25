@@ -70,7 +70,7 @@ async def test_g_eq3_lock_flng_cls_code_forces_kis_fallback():
     mock_fetch = AsyncMock(return_value=kis_rows)
 
     with patch.object(_smd, "get_recent_daily", new=AsyncMock(return_value=db_rows)), \
-            patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date(2026, 6, 20))), \
+            patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date.today() - timedelta(days=1))), \
             patch("src.api.condition.fetch_daily_candles", new=mock_fetch):
         rows = await _smd.get_recent_daily_normalized("005930", 22, min_required=22)
 
@@ -90,7 +90,7 @@ async def test_g_eq3_lock_prtt_rate_forces_kis_fallback():
     mock_fetch = AsyncMock(return_value=kis_rows)
 
     with patch.object(_smd, "get_recent_daily", new=AsyncMock(return_value=db_rows)), \
-            patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date(2026, 6, 20))), \
+            patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date.today() - timedelta(days=1))), \
             patch("src.api.condition.fetch_daily_candles", new=mock_fetch):
         rows = await _smd.get_recent_daily_normalized("005930", 22, min_required=22)
 
@@ -107,7 +107,7 @@ async def test_g_eq3_normal_no_lock_uses_db():
     mock_fetch = AsyncMock(return_value=[])
 
     with patch.object(_smd, "get_recent_daily", new=AsyncMock(return_value=db_rows)), \
-            patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date(2026, 6, 20))), \
+            patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date.today() - timedelta(days=1))), \
             patch("src.api.condition.fetch_daily_candles", new=mock_fetch):
         rows = await _smd.get_recent_daily_normalized("005930", 22, min_required=22)
 
@@ -128,7 +128,7 @@ async def test_g_eq3_prtt_rate_zero_variants_not_lock():
         mock_fetch = AsyncMock(return_value=[])
 
         with patch.object(_smd, "get_recent_daily", new=AsyncMock(return_value=db_rows)), \
-                patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date(2026, 6, 20))), \
+                patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date.today() - timedelta(days=1))), \
                 patch("src.api.condition.fetch_daily_candles", new=mock_fetch):
             rows = await _smd.get_recent_daily_normalized("005930", 22, min_required=22)
 
@@ -147,7 +147,7 @@ async def test_g_eq3_flng_cls_code_blank_variants_not_lock():
         mock_fetch = AsyncMock(return_value=[])
 
         with patch.object(_smd, "get_recent_daily", new=AsyncMock(return_value=db_rows)), \
-                patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date(2026, 6, 20))), \
+                patch.object(_smd, "max_bas_dd", new=AsyncMock(return_value=date.today() - timedelta(days=1))), \
                 patch("src.api.condition.fetch_daily_candles", new=mock_fetch):
             rows = await _smd.get_recent_daily_normalized("005930", 22, min_required=22)
 
