@@ -371,7 +371,10 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
                     if numeric_value == 0.0:
                         continue
                 except (ValueError, TypeError):
-                    pass  # 비숫자는 정상 merge
+                    # 사이클 177 — None/비숫자 도 skip (기존 raw 키 보존).
+                    # skip-키(거래대금/거래량/per 등)는 전부 숫자 필드 → 비숫자=junk
+                    # → 덮어쓰지 않고 기존값 보존 (사이클 145 'pass'=merge 의 None-override 갭 시정).
+                    continue
             merged_raw[key] = value
 
     cptt = (ctpf_output.get("cptt_trad_tr_psbl_yn") or "").strip().upper()
