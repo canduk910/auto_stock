@@ -54,7 +54,7 @@ BACKOFF_JITTER = 0.25  # thundering herd 완화
 class QuotePoolPathError(ValueError):
     """매매/잔고/체결조회 path 를 시세 풀에서 호출 시도 시 발생.
 
-    자금 안전 정책 위반 차단용 — 시세 풀은 화이트리스트 6 path 만 허용.
+    자금 안전 정책 위반 차단용 — 시세 풀은 화이트리스트 7 path 만 허용.
     """
 
 
@@ -68,9 +68,10 @@ _QUOTE_ALLOWED_PATHS: frozenset[str] = frozenset({
     # 사이클 32 (R4, 2026-05-21) — universe stale 가드용 당일 체결 조회 (FHKST01010300)
     # 시세성 호출 + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합
     "/uapi/domestic-stock/v1/quotations/inquire-ccnl",
-    # 사이클 89 (2026-06-09) — universe 500+ volume_rank (FHPST01710000) 거래금액순 상위
-    # 시세성 호출 + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합
-    "/uapi/domestic-stock/v1/quotations/volume-rank",
+    # 사이클 179 (2026-06-26) — 거래량순위(volume-rank, FHPST01710000) path 폐기.
+    # 사이클 108 에서 VB/LTV/BFB _scan_universe 가 stock_master.list_by_filter(DB) 로
+    # 전환되며 거래량순위 호출 0건 dead → 화이트리스트 잔존 path 제거 (재도입 영구 차단:
+    # tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py).
     # 사이클 109 (2026-06-11) — market_cap (FHPST01740000) 전체 유니버스 페이징
     # 사이클 101 도입 시점 silent 결함 시정 — 화이트리스트 영구 영속이 누락 영구 확정
     # 시세성 호출 + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합
