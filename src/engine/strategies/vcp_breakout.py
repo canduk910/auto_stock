@@ -62,6 +62,8 @@ FUNNEL_STAGES: tuple[FunnelStage, ...] = (
 
 def _empty_scan_stats() -> dict:
     return {
+        # 사이클 175 — 코스피200∪코스닥150 합집합 (시총 컷 *전* 원천, ScanMonitor "합집합" 정합)
+        "universe_union": 0,
         "universe_candidates": 0,
         "universe_filtered": 0,
         "mcap_pass": 0,  # 사이클 23 P1-3 — 시총 컷 통과 카운터
@@ -777,21 +779,26 @@ class VcpBreakoutStrategy(StrategyBase):
 
         try:
             # 사이클 157 — 사이클 153 패턴 답습 (KOSPI200 + KOSDAQ150 OR 합집합)
-            rows = await _sm_mod.list_by_filter(
+            # 사이클 175 — return_stage_counts 로 합집합(union) 노출 (ScanMonitor "합집합" 정합)
+            rows, stage = await _sm_mod.list_by_filter(
                 min_market_cap=min_mcap,
                 min_trade_amount=0,  # VCP 는 거래대금 필터 미사용 (시총 단독)
                 is_kospi200=True,
                 is_kosdaq150=True,
                 limit=max_stocks,
+                return_stage_counts=True,
             )
         except Exception:
             logger.exception(
                 "VCP stock_master.list_by_filter 호출 실패 graceful — 빈 list 반환"
             )
+            self._scan_stats["universe_union"] = 0
             self._scan_stats["universe_candidates"] = 0
             self._scan_stats["universe_filtered"] = 0
             return []
 
+        # 사이클 175 — 합집합(union) 노출 (시총 컷 전 원천)
+        self._scan_stats["universe_union"] = len(stage.get("union_tickers", rows))
         self._scan_stats["universe_candidates"] = len(rows)
         self._scan_stats["mcap_pass"] = len(rows)  # 사이클 23 P1-3 (list_by_filter 가 이미 mcap 컷)
 

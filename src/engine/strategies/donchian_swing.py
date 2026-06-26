@@ -44,6 +44,9 @@ FUNNEL_STAGES: tuple[FunnelStage, ...] = (
 
 def _empty_scan_stats() -> dict:
     return {
+        # 사이클 175 — 코스피200∪코스닥150 합집합 (시총/거래대금 컷 *전* 원천).
+        # ScanMonitor "합집합" 단계 = DB funnel step1(union_tickers) 정합.
+        "universe_union": 0,
         "universe_candidates": 0,
         "universe_filtered": 0,
         "candle_fetch_ok": 0,
@@ -521,12 +524,15 @@ class DonchianSwingStrategy(StrategyBase):
             logger.exception(
                 "도치안 스윙 stock_master.list_by_filter 호출 실패 graceful — 빈 list 반환"
             )
+            self._scan_stats["universe_union"] = 0
             self._scan_stats["universe_candidates"] = 0
             self._scan_stats["universe_filtered"] = 0
             self._scan_stats["last_run_at"] = datetime.now(KST).isoformat()
             self._scan_stage_counts = {}
             return []
 
+        # 사이클 175 — 합집합(union) 노출 (DB funnel step1 정합, ScanMonitor "합집합" 단계)
+        self._scan_stats["universe_union"] = len(stage.get("union_tickers", rows))
         self._scan_stats["universe_candidates"] = len(rows)
 
         filtered: list[str] = []

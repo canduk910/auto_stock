@@ -42,8 +42,9 @@ interface SwingTarget {
 const SWING_KEY = 'donchian_swing'
 
 const SWING_STAGES: Array<{ key: keyof ScanStats; label: string }> = [
-  { key: 'universe_candidates', label: '코스피200+코스닥150 합집합' },
-  { key: 'universe_filtered', label: '시총 컷 통과' },
+  // 사이클 175 — '합집합' = universe_union (시총/거래대금 컷 전 원천, DB funnel step1 정합)
+  { key: 'universe_union', label: '코스피200+코스닥150 합집합' },
+  { key: 'universe_filtered', label: '시총+거래대금 컷 통과' },
   { key: 'candle_fetch_ok', label: '일봉 fetch + 전일종가>0' },
   { key: 'donchian_pass', label: '20일 신고가 돌파' },
   { key: 'ema_uptrend_pass', label: '60일 EMA 우상향 + 종가>EMA' },
@@ -56,7 +57,8 @@ const SWING_STAGES: Array<{ key: keyof ScanStats; label: string }> = [
 // donchian 의 SWING_STAGES 와 동일 패턴 — ScanFunnelBars 컴포넌트로 5 전략 재사용.
 
 const VB_STAGES: Array<{ key: string; label: string }> = [
-  { key: 'universe_candidates', label: '유니버스 후보 (blng 0/1/3 합집합)' },
+  // 사이클 175 — 폐기 거래량순위(volume-rank) API 라벨 제거 (사이클 108) → stock_master 원천
+  { key: 'universe_candidates', label: 'stock_master 원천 유니버스 후보' },
   { key: 'price_filtered', label: '가격/상장주식수 필수값 > 0' },
   { key: 'mcap_pass', label: '시총 ≥ 1,000억' },
   { key: 'trade_amount_pass', label: '거래대금 ≥ 200억' },
@@ -67,7 +69,8 @@ const VB_STAGES: Array<{ key: string; label: string }> = [
 ]
 
 const LTV_STAGES: Array<{ key: string; label: string }> = [
-  { key: 'universe_candidates', label: '유니버스 후보 (blng 0/1/3 합집합)' },
+  // 사이클 175 — 폐기 거래량순위 라벨 제거 → stock_master 원천
+  { key: 'universe_candidates', label: 'stock_master 원천 유니버스 후보' },
   { key: 'price_filtered', label: '가격/상장주식수 필수값 > 0' },
   { key: 'mcap_pass', label: '시총 ≥ 1,000억' },
   { key: 'trade_amount_pass', label: '거래대금 ≥ 200억' },
@@ -88,7 +91,7 @@ const MOMENTUM_STAGES: Array<{ key: string; label: string }> = [
 ]
 
 const BFB_STAGES: Array<{ key: string; label: string }> = [
-  { key: 'universe_candidates', label: '유니버스 후보' },
+  { key: 'universe_candidates', label: 'stock_master 원천 유니버스 후보' },
   { key: 'universe_filtered', label: '유니버스 필터 통과' },
   { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
   { key: 'pole_pass', label: '폴(Pole) 자동 검출' },
@@ -103,7 +106,8 @@ const VCP_STAGES: Array<{ key: string; label: string }> = [
   // 기존 `trend_pass`/`contraction_pass` 는 백엔드 키와 불일치 → 항상 0 표시 결함.
   // 백엔드 vcp_breakout.py `_empty_scan_stats` 정합: trend_filter_pass / base_pass / pullback_pass.
   // 5/22 사용자 보고 "EMA 0 인데 base 9" 가 단계 순서 결함이 아닌 프론트 키 매핑 결함이었음.
-  { key: 'universe_candidates', label: '코스피200+코스닥150 합집합' },
+  // 사이클 175 — '합집합' = universe_union (시총 컷 전 원천, DB funnel step1 정합)
+  { key: 'universe_union', label: '코스피200+코스닥150 합집합' },
   { key: 'universe_filtered', label: '시총 ≥ 1,000억' },
   { key: 'candle_fetch_ok', label: '일봉 fetch + 추세필터' },
   { key: 'trend_filter_pass', label: '50/150/200 EMA 정렬' },

@@ -40,11 +40,16 @@ async def test_mcap_pass_increments_when_mcap_passes(monkeypatch):
     strat.config.params["max_scan_stocks"] = 5
 
     # 사이클 157 — list_by_filter mock (사이클 153 donchian 패턴 답습)
+    # 사이클 175 — VCP 가 return_stage_counts=True 사용 → (rows, stage) 튜플 반환
     async def fake_list_by_filter(**kwargs):
-        return [
+        rows = [
             {"ticker": "005930", "name": "삼성전자", "raw": {}},
             {"ticker": "000660", "name": "SK하이닉스", "raw": {}},
         ]
+        if kwargs.get("return_stage_counts"):
+            tickers = [r["ticker"] for r in rows]
+            return rows, {"union_tickers": tickers, "mcap_tickers": tickers, "trade_tickers": tickers}
+        return rows
 
     monkeypatch.setattr("src.db.stock_master.list_by_filter", fake_list_by_filter)
 

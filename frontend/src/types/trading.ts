@@ -13,6 +13,8 @@ export interface TradingStatusData {
 }
 
 export interface ScanStats {
+  // 사이클 175 — 코스피200∪코스닥150 합집합 (시총/거래대금 컷 전, DB funnel step1 정합)
+  universe_union?: number
   universe_candidates?: number
   universe_filtered?: number
   candle_fetch_ok?: number

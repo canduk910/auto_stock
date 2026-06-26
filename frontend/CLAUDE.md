@@ -44,6 +44,8 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 
 **사이클 39 (2026-05-22) — `ScanMonitor.tsx` VCP 키 매핑 시정**: VCP_STAGES 의 `trend_pass` → `trend_filter_pass` / `contraction_pass` → `pullback_pass` (백엔드 `_scan_stats` 키와 정합). 사용자 5/22 "EMA 0인데 base 9" 잘못된 표시 본질 원인.
 
+**사이클 175 (2026-06-26) — ScanMonitor scan_stats funnel ↔ DB funnel(StrategyFunnel) 정합**: 사용자 보고 "donchian 합집합이 왜 95?". 진단 = `SWING_STAGES`/`VCP_STAGES` 의 "코스피200+코스닥150 합집합" 단계가 `universe_candidates` 키(= `len(list_by_filter 결과)` = 시총+거래대금 컷 *후* ~95) 에 매핑 = mislabel. 진짜 union(~348)은 `return_stage_counts→union_tickers` 로 DB funnel(조건검색 추적)에만 노출. **시정**: 백엔드 donchian/VCP `_scan_stats["universe_union"]` 신규 노출(union, VCP 는 `return_stage_counts=True` 추가) + 프론트 `ScanStats.universe_union` 타입 + `SWING_STAGES`/`VCP_STAGES` "합집합" 단계 key `universe_candidates` → `universe_union` (DB funnel step1 정합) + donchian "시총 컷 통과" → "시총+거래대금 컷 통과". **VB/LTV/BFB 라벨 시정**: 폐기 "유니버스 후보 (blng 0/1/3 합집합)"(거래량순위 API, 사이클 108 폐기) → "stock_master 원천 유니버스 후보" (숫자=filtered 는 각자 DB funnel step1 과 이미 정합, 라벨만 결함). 회귀 가드 `ScanMonitor.cycle175.test.tsx` (정적 source: 합집합=universe_union 2곳 + blng 0건 + stock_master 원천 3곳, 사이클 132 패턴) + 백엔드 `test_cycle175_universe_union_scan_stats.py` (4). 관찰성 전용 (매매 무관).
+
 ## 시각적 컨벤션
 
 - 이익 `#FF3333` (빨강) / 손실 `#3366FF` (파랑) / 보합 `#333333`
