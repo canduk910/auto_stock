@@ -57,24 +57,20 @@ const SWING_STAGES: Array<{ key: keyof ScanStats; label: string }> = [
 // donchian 의 SWING_STAGES 와 동일 패턴 — ScanFunnelBars 컴포넌트로 5 전략 재사용.
 
 const VB_STAGES: Array<{ key: string; label: string }> = [
-  // 사이클 175 — 폐기 거래량순위(volume-rank) API 라벨 제거 (사이클 108) → stock_master 원천
-  { key: 'universe_candidates', label: 'stock_master 원천 유니버스 후보' },
-  { key: 'price_filtered', label: '가격/상장주식수 필수값 > 0' },
-  { key: 'mcap_pass', label: '시총 ≥ 1,000억' },
-  { key: 'trade_amount_pass', label: '거래대금 ≥ 200억' },
-  { key: 'universe_filtered', label: '유니버스 확정 (시총+거래대금)' },
+  // 사이클 178 — 죽은 단계(price_filtered/mcap_pass/trade_amount_pass = 백엔드 미세팅 0) 제거.
+  // universe_candidates = list_by_filter 결과 = 시총+거래대금 컷 *후* (VB 는 full universe →
+  // union(fetch buffer)이 무의미 → 사이클 175 'stock_master 원천' 오라벨 시정).
+  { key: 'universe_candidates', label: '시총+거래대금 컷 통과' },
+  { key: 'universe_filtered', label: '유니버스 확정 (ETF/가격 제외)' },
   { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
   { key: 'k_value_computed', label: 'K값/Target 계산 완료' },
   { key: 'final_prepared', label: '최종 prepared' },
 ]
 
 const LTV_STAGES: Array<{ key: string; label: string }> = [
-  // 사이클 175 — 폐기 거래량순위 라벨 제거 → stock_master 원천
-  { key: 'universe_candidates', label: 'stock_master 원천 유니버스 후보' },
-  { key: 'price_filtered', label: '가격/상장주식수 필수값 > 0' },
-  { key: 'mcap_pass', label: '시총 ≥ 1,000억' },
-  { key: 'trade_amount_pass', label: '거래대금 ≥ 200억' },
-  { key: 'universe_filtered', label: '유니버스 확정' },
+  // 사이클 178 — 죽은 단계 제거 + universe_candidates 정확 라벨(시총+거래대금 컷 후)
+  { key: 'universe_candidates', label: '시총+거래대금 컷 통과' },
+  { key: 'universe_filtered', label: '유니버스 확정 (ETF/가격 제외)' },
   { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
   { key: 'consecutive_limit_pass', label: '연속상한가 제외 통과' },
   { key: 'k_value_computed', label: 'K값/Target 계산' },
@@ -91,8 +87,9 @@ const MOMENTUM_STAGES: Array<{ key: string; label: string }> = [
 ]
 
 const BFB_STAGES: Array<{ key: string; label: string }> = [
-  { key: 'universe_candidates', label: 'stock_master 원천 유니버스 후보' },
-  { key: 'universe_filtered', label: '유니버스 필터 통과' },
+  // 사이클 178 — universe_candidates = 시총+거래대금 컷 후 (사이클 175 '원천' 오라벨 시정)
+  { key: 'universe_candidates', label: '시총+거래대금 컷 통과' },
+  { key: 'universe_filtered', label: '유니버스 확정 (ETF/가격 제외)' },
   { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
   { key: 'pole_pass', label: '폴(Pole) 자동 검출' },
   { key: 'flag_pass', label: '플래그(Flag) 자동 검출' },

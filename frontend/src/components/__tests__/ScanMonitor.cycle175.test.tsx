@@ -25,9 +25,11 @@ describe('사이클 175 — ScanMonitor scan_stats funnel DB funnel 정합', () 
     expect(src).not.toContain('blng 0/1/3')
   })
 
-  it('VB/LTV/BFB step1 = stock_master 원천 유니버스 후보 (3곳 이상)', () => {
-    const count = (src.match(/stock_master 원천 유니버스 후보/g) || []).length
-    expect(count).toBeGreaterThanOrEqual(3)
+  it('사이클 178 의미 전환 — VB/LTV/BFB 의 "stock_master 원천 유니버스 후보" 오라벨 제거됨', () => {
+    // 사이클 175 는 VB/LTV/BFB step1 을 "stock_master 원천 유니버스 후보" 로 라벨했으나,
+    // VB/LTV/BFB 는 full universe 라 universe_candidates = list_by_filter 결과(시총+거래대금
+    // 컷 *후*) → '원천' 은 오라벨. 사이클 178 에서 "시총+거래대금 컷 통과" 로 시정.
+    expect(src).not.toContain('원천 유니버스 후보')
   })
 
   it('donchian 시총 단계 라벨이 시총+거래대금 컷 통과로 정합', () => {
