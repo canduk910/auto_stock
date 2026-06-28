@@ -61,6 +61,10 @@ class MomentumStrategy(StrategyBase):
         self._prev_prdy_rate: dict[str, float] = {}
         self._next_day_clear_pending = False  # 익일 청산 대기 중 플래그 (시가 안정화 대기)
 
+    def _reset_daily_state(self) -> None:
+        """사이클 185 — cross-day 전일등락율 캐시 초기화. 익일 첫 tick 거짓돌파 차단."""
+        self._prev_prdy_rate.clear()
+
     async def prepare(self) -> None:
         """준비 작업 없음 — 실시간 본질 영역 영구 영속.
 

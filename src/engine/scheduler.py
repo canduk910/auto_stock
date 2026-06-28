@@ -3816,6 +3816,13 @@ class TradingScheduler:
             strategy.state.signal_count_today = 0
             strategy.state.order_attempt_today = 0
             strategy.state.fill_count_today = 0
+            # 사이클 185 클러스터 ① 메커니즘 1 — transient cross-day 상태 정리
+            try:
+                strategy._reset_daily_state()
+            except Exception:
+                logger.exception(
+                    "[strategy_reset_daily_skip] strategy=%s graceful", strategy.strategy_id
+                )
 
         # OrderEngine 추적 상태 초기화
         self.order_engine._selling.clear()

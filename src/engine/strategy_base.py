@@ -361,6 +361,24 @@ class StrategyBase(ABC):
     def calc_buy_quantity(self, current_price: int) -> int:
         """매수 수량 계산."""
 
+    # ------------------------------------------------------------------
+    # 사이클 185 클러스터 ① — 생명주기 훅 (기본 no-op, 서브클래스 override)
+    # ------------------------------------------------------------------
+
+    def _reset_daily_state(self) -> None:
+        """일일 transient cross-day 상태 정리 훅 (기본 no-op).
+
+        scheduler._reset_daily_state(20:10) registry 순회가 전략별 호출.
+        cross-day 잔존 시 익일 거짓돌파/가드 우회 유발 transient dict/set 만 override 에서 clear.
+        보유결합(_limit_up_reached/_partial_exit)은 본 훅 금지 — on_position_closed 담당.
+        """
+
+    def on_position_closed(self, ticker: str) -> None:
+        """포지션 전량 청산(매도 체결) 시 per-ticker 보유결합 상태 정리 훅 (기본 no-op).
+
+        order_engine 매도 체결/reconciliation 에서 호출. 보유 중 유지 · 매도 후 정리.
+        """
+
     def is_max_positions(self) -> bool:
         max_pos = self.config.params.get("max_positions", 4)
         # 보유 포지션 + 매수 대기(체결 전) 합산으로 제한

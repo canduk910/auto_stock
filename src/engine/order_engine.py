@@ -791,6 +791,14 @@ class OrderEngine:
         if insufficient_qty:
             # KIS에 보유 수량이 없으므로 메모리 포지션도 제거. trade_history는 sync 시 보정.
             strategy.state.positions.pop(ticker, None)
+            # 사이클 185 클러스터 ① 메커니즘 2 (secondary) — 보유결합 상태 정리 훅
+            try:
+                strategy.on_position_closed(ticker)
+            except Exception as exc:
+                logger.error(
+                    "[on_position_closed_skip] ticker=%s strategy=%s err=%r",
+                    ticker, strategy_id, exc,
+                )
             from src.db.positions import delete_position
             try:
                 await delete_position(ticker)
@@ -1167,6 +1175,14 @@ class OrderEngine:
             # 전량 체결 → 포지션 제거 + DB 삭제 + 매도 잠금 해제 + 당일 재매수 차단
             if pos:
                 del state.positions[ticker]
+            # 사이클 185 클러스터 ① 메커니즘 2 — 보유결합 상태 정리 훅
+            try:
+                strategy.on_position_closed(ticker)
+            except Exception as exc:
+                logger.error(
+                    "[on_position_closed_skip] ticker=%s strategy=%s err=%r",
+                    ticker, strategy_id, exc,
+                )
             state.sold_today.add(ticker)
             from src.db.positions import delete_position
             await delete_position(ticker)

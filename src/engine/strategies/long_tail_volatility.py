@@ -116,6 +116,10 @@ class LongTailVolatilityStrategy(StrategyBase):
         # 사이클 21 — 단계별 카운트 (ScanMonitor 깔때기)
         self._scan_stats: dict = _empty_scan_stats()
 
+    def on_position_closed(self, ticker: str) -> None:
+        """사이클 185 — 포지션 청산 시 상한가 모드 보유결합 상태 정리."""
+        self._limit_up_reached.discard(ticker)
+
     async def prepare(self) -> None:
         """장 시작 전: 종목 스캔 → K값 계산 → 연속상한가 필터링.
 

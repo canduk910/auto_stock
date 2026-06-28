@@ -978,3 +978,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
     def _reset_daily_state(self) -> None:
         """사이클 23 P2-1 — 일일 초기화 시 _breakout_first_seen 정리."""
         self._breakout_first_seen.clear()
+
+    def on_position_closed(self, ticker: str) -> None:
+        """사이클 185 — 포지션 청산 시 partial_exit 보유결합 상태 정리."""
+        self._partial_exit.pop(ticker, None)
