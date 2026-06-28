@@ -135,6 +135,10 @@ class LongTailVolatilityStrategy(StrategyBase):
         self._scan_stats = stats
         # 사이클 143 — 단계별 ticker 캡처 reset (사이클 39 답습)
         self._reset_funnel_steps(LTV_FUNNEL_STAGES)
+        # 사이클 180 — 전일 stale 종목 누적 차단 (장수 싱글톤, prepare 가 유일 rebuild 지점). _limit_up_reached/_next_day_clear_pending 는 청산 모드 경로용이라 절대 미포함.
+        self._targets.clear()
+        self._open_confirmed.clear()
+        self._prev_price.clear()
 
         # 사이클 163 — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
         # 초기 1회 + 재시도 cap 3회 = 최대 4회 호출 영역.
