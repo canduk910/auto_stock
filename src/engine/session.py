@@ -15,11 +15,14 @@ KRX(09:00~15:30) + NXT(08:00~20:00) 통합 운영 시 어느 보드(세션 단�
 from __future__ import annotations
 
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timedelta, timezone
 from enum import Enum
 from typing import Awaitable, Callable
 
 logger = logging.getLogger(__name__)
+
+# KST 타임존 상수 — scanner 순환 import 회피 (from src.engine.scanner import KST_TZ 금지)
+_KST = timezone(timedelta(hours=9))
 
 
 class MarketBoard(str, Enum):
@@ -204,14 +207,22 @@ class SessionTracker:
 
         사용자 보고 사고: 6/17 15:21:48 KST stale_watcher = subscribed=10 fresh=0 stale=10
         ratio=0% → 5분 주기 재구독 시도 반복 = KIS LMS chain 위험.
-        """
-        # 코드 기반 (H0UNMKO0 수신 시점 우선)
-        if self._last_nxt_mkop_code in ("110", "121"):
-            return True
 
-        # 시간 기반 폴백 (H0UNMKO0 미수신 환경 = VTS 모의 영역 + KRX 정본 시간대)
-        now = now or datetime.now()
+        사이클 182 (2026-06-27) — 시간창 게이트 도입 (stale-1 HIGH + stale-5 LOW):
+          - 코드 기반 분기에 유효 시간창 조건 추가 (code AND time) — 고착 코드 영구 True 차단.
+            110 유효창: 08:25~09:05 (명목 08:30~09:00 ±5분)
+            121 유효창: 15:15~15:35 (명목 15:20~15:30 ±5분)
+          - now=None 경로: datetime.now(_KST) KST 강제 (stale-5 naive KST 위반 시정).
+        """
+        now = now or datetime.now(_KST)  # stale-5: KST 강제 (naive 금지)
         t = now.time()
+        code = self._last_nxt_mkop_code
+        # 코드 기반 + 시간창 게이트 (고착 코드 시간 무관 영구 True 차단)
+        if code == "110" and time(8, 25) <= t < time(9, 5):
+            return True   # 110 유효창 (명목 08:30~09:00 ±5분)
+        if code == "121" and time(15, 15) <= t < time(15, 35):
+            return True   # 121 유효창 (명목 15:20~15:30 ±5분)
+        # 시간 기반 폴백 (H0UNMKO0 미수신 환경 = VTS 모의 영역 + KRX 정본 시간대, 사이클 162 보존)
         if time(8, 30) <= t < time(9, 0):
             return True
         if time(15, 20) <= t < time(15, 30):

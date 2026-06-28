@@ -12,6 +12,7 @@ from __future__ import annotations
 from datetime import datetime, time
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.session import SessionTracker
 
@@ -19,17 +20,43 @@ from src.engine.session import SessionTracker
 # ───────── G-162-E-1 ~ G-162-E-5: SessionTracker.is_call_auction_now ─────────
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 182 의미 전환 (사이클 66 K-2 패턴) — code=110 @ 14:00(MAIN) 은 110 유효창"
+        "(08:25~09:05) 밖 고착(stuck-110-during-MAIN) → 시간창 게이트 도입 후 False 가 정답. "
+        "본 케이스는 사이클 162 시점 결함('시간 무관 코드 즉시 True')을 정상으로 박제한 것. "
+        "Green(시간창 게이트) 완료 시 단언 실패 → 자동 XFAIL 전환. 정답(False) 단언은 "
+        "test_cycle182_call_auction_time_gate.py::G-182-STUCK 가 보유."
+    ),
+)
 def test_G_162_E_1_call_auction_code_110_장전동시호가():
-    """G-162-E-1 (HIGH): MKOP_CLS_CODE=110 (장전 동시호가) → True."""
+    """G-162-E-1 (HIGH → 사이클 182 의미 전환): MKOP_CLS_CODE=110 @ 14:00(MAIN).
+
+    사이클 162 원본 단언 = '시간 무관 코드 즉시 True' = stuck-110-during-MAIN 결함 박제.
+    사이클 182: 14:00 은 110 유효창 밖 → 고착 코드 무시 → 시간 폴백도 False → False 정답.
+    """
     tracker = SessionTracker()
     tracker._last_nxt_mkop_code = "110"
-    # 시간 무관 — 코드 기반 즉시 True
-    now = datetime(2026, 6, 18, 14, 0)  # 14:00 = 정규장
+    now = datetime(2026, 6, 18, 14, 0)  # 14:00 = 정규장(MAIN), 110 유효창 밖
     assert tracker.is_call_auction_now(now) is True
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 182 의미 전환 (사이클 66 K-2 패턴) — code=121 @ 10:00(MAIN) 은 121 유효창"
+        "(15:15~15:35) 밖 고착(stuck-121-during-MAIN) → 시간창 게이트 도입 후 False 가 정답. "
+        "사이클 162 결함 박제 → Green 완료 시 자동 XFAIL 전환. 정답(False) 단언은 "
+        "test_cycle182_call_auction_time_gate.py::G-182-STUCK 가 보유."
+    ),
+)
 def test_G_162_E_2_call_auction_code_121_장후동시호가():
-    """G-162-E-2 (HIGH): MKOP_CLS_CODE=121 (장후 동시호가) → True."""
+    """G-162-E-2 (HIGH → 사이클 182 의미 전환): MKOP_CLS_CODE=121 @ 10:00(MAIN).
+
+    사이클 162 원본 단언 = 코드 즉시 True = stuck-121-during-MAIN 결함 박제.
+    사이클 182: 10:00 은 121 유효창 밖 → 고착 코드 무시 → 시간 폴백도 False → False 정답.
+    """
     tracker = SessionTracker()
     tracker._last_nxt_mkop_code = "121"
     now = datetime(2026, 6, 18, 10, 0)
@@ -92,14 +119,20 @@ def test_G_162_E_9_boundary_15_20_00_enter_call_auction():
 
 @pytest.mark.asyncio
 async def test_G_162_E_10_stale_watcher_skip_during_call_auction(monkeypatch):
-    """G-162-E-10 (HIGH): 동시호가 시간대 = stale 종목 *전체* skip + WARNING 1행.
+    """G-162-E-10 (HIGH → 사이클 182 의미 전환): 동시호가 유효창 내 code 기반 skip + WARNING.
 
     사용자 사고 영역 시정: 6/17 15:21:48 KST stale=10 → 5분 주기 재구독 시도 반복 차단.
+
+    사이클 182 의미 전환: `check_and_resubscribe_stale` 가 `is_call_auction_now(now=실제현재KST)`
+    를 넘기므로, 시간창 게이트(사이클 182) 도입 후 `code="121"` 단독으론 더 이상 시간 무관 True 가
+    아니다 → 실행 시각 의존(flaky, 사이클 176 교훈 위반). E-10 의 *정당한* 의도("진짜 동시호가
+    시간대엔 code 기반 skip 발생")는 보존하되, freezegun 으로 121 유효창(15:15~15:35) 내 KST 시각
+    (15:25)으로 고정 → 게이트 도입 후에도 True → skip 발생 → 단언 그대로 PASS. 날짜는 고정 연도 사용.
     """
     from src.engine import stale_watcher_core as swc
     from src.engine.session import session_tracker
 
-    # 동시호가 코드 강제 (시간 무관)
+    # 동시호가 유효창(15:20~15:30) 내 code 기반 skip (사이클 182 시간창 게이트 정합)
     session_tracker._last_nxt_mkop_code = "121"
 
     # mock scheduler
@@ -130,7 +163,11 @@ async def test_G_162_E_10_stale_watcher_skip_during_call_auction(monkeypatch):
     handler.setLevel(logging.WARNING)
     swc.logger.addHandler(handler)
     try:
-        await swc.check_and_resubscribe_stale(sched)
+        # 사이클 182 — freezegun UTC 06:25 = KST 15:25 (장후 동시호가 121 유효창 내).
+        # stale_watcher_core 내부 `now = datetime.now(KST_TZ)` 가 15:25 KST 로 고정 →
+        # 시간창 게이트(Green) 도입 후에도 code=121 @ 15:25 → True → skip 발생.
+        with freeze_time("2024-06-20 15:25:00+09:00"):
+            await swc.check_and_resubscribe_stale(sched)
     finally:
         swc.logger.removeHandler(handler)
         session_tracker._last_nxt_mkop_code = ""
