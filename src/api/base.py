@@ -34,6 +34,22 @@ MAX_RETRIES = 3
 BACKOFF_BASE = 0.5  # 초
 BACKOFF_JITTER = 0.25  # thundering herd 완화
 
+# 사이클 181 (2026-06-28) — 토큰만료 분기 msg_cd 화이트리스트 (access token 3종)
+# token_manager.issue() 로 복구 가능한 코드만 포함.
+# EGW00120 (예수금부족 변형, "기간이 만료된 code") / EGW00124~126 (session_key) 제외.
+_TOKEN_EXPIRED_MSG_CODES: frozenset[str] = frozenset({
+    "EGW00121",  # access token 만료
+    "EGW00122",  # access token 만료
+    "EGW00123",  # access token 만료 ("기간이 만료된 token" 정형 msg1)
+})
+
+# "token" 폴백에서도 토큰 분기를 배제하는 msg_cd — 예수금부족/시간외 변형
+_TOKEN_BRANCH_EXCLUDE_CODES: frozenset[str] = frozenset({
+    "EGW00120",  # 예수금부족 변형 ("기간이 만료된 code" — token 오발화 뿌리)
+    "APBK0919",  # 예수금 부족
+    "APBK0918",  # 장운영시간 외
+})
+
 # ---------------------------------------------------------------------------
 # 사이클 7-C (2026-05-18) — REST 시세성 호출 풀 (`kis_request_quote`).
 #
@@ -557,7 +573,17 @@ async def _request(
         msg1 = data.get("msg1", "")
 
         # 토큰 만료 에러 시 갱신 후 재시도
-        if "token" in msg1.lower() or "만료" in msg1:
+        # 사이클 181: msg_cd 화이트리스트 우선 + "token" 폴백 (배제코드 + "부족" 제외)
+        # "만료" substring 폐기 — EGW00120 ("기간이 만료된 code") 오발화 뿌리
+        is_token_expired = (
+            (msg_cd or "").upper() in _TOKEN_EXPIRED_MSG_CODES
+            or (
+                "token" in msg1.lower()
+                and (msg_cd or "").upper() not in _TOKEN_BRANCH_EXCLUDE_CODES
+                and "부족" not in msg1
+            )
+        )
+        if is_token_expired:
             logger.info("토큰 만료 감지, 재발급 시도")
             await token_manager.issue()
             if attempt < MAX_RETRIES:
@@ -863,7 +889,17 @@ async def _request_via_quote_pool(
         msg1 = data.get("msg1", "")
 
         # 토큰 만료 → 매니저 재발급 후 재시도
-        if "token" in msg1.lower() or "만료" in msg1:
+        # 사이클 181: msg_cd 화이트리스트 우선 + "token" 폴백 (배제코드 + "부족" 제외)
+        # "만료" substring 폐기 — EGW00120 ("기간이 만료된 code") 오발화 뿌리
+        is_token_expired = (
+            (msg_cd or "").upper() in _TOKEN_EXPIRED_MSG_CODES
+            or (
+                "token" in msg1.lower()
+                and (msg_cd or "").upper() not in _TOKEN_BRANCH_EXCLUDE_CODES
+                and "부족" not in msg1
+            )
+        )
+        if is_token_expired:
             logger.info("[quote_pool] 토큰 만료 감지(label=%s), 재발급 시도", actual_label)
             try:
                 await manager.issue()

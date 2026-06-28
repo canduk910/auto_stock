@@ -19,6 +19,7 @@ backend:
     - tests/unit/api/test_cycle145_raw_preserve.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -110,6 +111,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/api/test_cycle109_market_cap_allowlist.py
     - tests/unit/api/test_cycle149_market_operation.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
     - tests/unit/api/test_insufficient_classification.py
     - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
     - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
@@ -118,6 +120,7 @@ backend:
     - tests/unit/ast/test_cycle101_ast_task_cancel.py
     - tests/unit/ast/test_cycle101_fluctuation_purged.py
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -247,6 +250,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -309,6 +314,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -764,6 +771,8 @@ backend:
     - tests/unit/api/test_cycle107_inquire_stock_basics_merge.py
     - tests/unit/api/test_cycle109_market_cap_allowlist.py
     - tests/unit/api/test_cycle144_graceful_visibility.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -771,6 +780,7 @@ backend:
     - tests/unit/api/test_quote_pool.py
     - tests/unit/api/test_quote_pool_5xx_dedupe.py
     - tests/unit/api/test_quote_pool_label_skip.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/engine/scanner/test_cycle91_graceful_kis_error.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -951,6 +961,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -1013,6 +1025,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1216,6 +1230,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     transitive_tests:
@@ -1286,6 +1301,8 @@ backend:
     - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_cycle109_market_cap_allowlist.py
     - tests/unit/api/test_cycle149_market_operation.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -1300,6 +1317,7 @@ backend:
     - tests/unit/ast/test_cycle101_ast_task_cancel.py
     - tests/unit/ast/test_cycle101_fluctuation_purged.py
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1429,6 +1447,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -1492,6 +1512,7 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1758,6 +1779,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -1775,6 +1798,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1908,6 +1932,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -1973,6 +1999,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2241,6 +2269,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -2258,6 +2288,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2390,6 +2421,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2456,6 +2489,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2722,6 +2757,8 @@ backend:
     - tests/unit/api/test_cycle145_raw_preserve.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -2739,6 +2776,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2872,6 +2910,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2937,6 +2977,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -3568,6 +3610,7 @@ backend:
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_quote_pool.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
@@ -3805,6 +3848,7 @@ backend:
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_quote_pool.py
     - tests/unit/api/test_quote_pool_label_skip.py
     - tests/unit/auth/test_token.py
@@ -3886,6 +3930,7 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -3901,6 +3946,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4034,6 +4080,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4099,6 +4147,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -4367,6 +4417,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -4384,6 +4436,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4419,6 +4472,7 @@ backend:
     - tests/unit/db/test_cycle171_funnel_provisional.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
+    - tests/unit/db/test_cycle175_log_retention_loop.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -4544,6 +4598,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4610,6 +4666,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -4836,6 +4894,7 @@ backend:
     - tests/unit/db/test_cycle171_funnel_provisional.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
+    - tests/unit/db/test_cycle175_log_retention_loop.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -4959,6 +5018,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -4974,6 +5035,7 @@ backend:
     - tests/unit/ast/test_cycle101_fluctuation_purged.py
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5077,6 +5139,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -5137,6 +5201,8 @@ backend:
     - tests/unit/engine/test_cycle163_buy_fill_db_error_isolation.py
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5403,6 +5469,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -5420,6 +5488,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5571,6 +5640,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -5638,6 +5709,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6328,6 +6401,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -6345,6 +6420,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -6480,6 +6556,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -6545,6 +6623,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7655,6 +7735,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle153_donchian_index_filter.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -7921,6 +8002,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -7937,6 +8020,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -8046,6 +8130,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8109,6 +8195,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -8378,6 +8466,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -8393,6 +8483,7 @@ backend:
     - tests/unit/ast/test_cycle101_fluctuation_purged.py
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -8519,6 +8610,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8585,6 +8678,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9061,6 +9156,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -9078,6 +9175,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9211,6 +9309,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -9275,6 +9375,8 @@ backend:
     - tests/unit/engine/test_cycle163_buy_fill_db_error_isolation.py
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9541,6 +9643,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -9558,6 +9662,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9593,6 +9698,7 @@ backend:
     - tests/unit/db/test_cycle171_funnel_provisional.py
     - tests/unit/db/test_cycle172_retention_and_adapter.py
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
+    - tests/unit/db/test_cycle175_log_retention_loop.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -9718,6 +9824,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9784,6 +9892,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10004,6 +10114,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle148_vb_prepare_price_filter.py
     - tests/unit/engine/strategies/test_cycle151_4_strategies_price_filter.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
@@ -10092,6 +10203,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -10109,6 +10222,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10234,6 +10348,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10298,6 +10413,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10483,8 +10600,10 @@ backend:
     direct_tests:
     - tests/unit/api/test_base_logging.py
     - tests/unit/api/test_base_retry_logging.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
+    - tests/unit/db/test_cycle175_log_retention_loop.py
     - tests/unit/db/test_safe_write_log.py
     - tests/unit/db/test_system_logs_filter.py
     - tests/unit/db/test_system_logs_retention.py
@@ -10567,6 +10686,7 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
     - tests/unit/api/test_insufficient_classification.py
@@ -10583,6 +10703,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10715,6 +10836,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10781,6 +10904,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -11343,6 +11468,8 @@ backend:
     - tests/unit/engine/test_cycle163_boot_prepare_guard.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -11458,6 +11585,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -11474,6 +11603,7 @@ backend:
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
@@ -11566,6 +11696,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -12392,6 +12524,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -12409,6 +12543,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -12541,6 +12676,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -12606,6 +12743,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -13078,6 +13217,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -13095,6 +13236,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -13228,6 +13370,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -13293,6 +13437,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14622,6 +14768,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -14639,6 +14787,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -14772,6 +14921,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -14838,6 +14989,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -15409,6 +15562,8 @@ backend:
     - tests/unit/engine/test_cycle153_master_load_kospi200_kosdaq150.py
     - tests/unit/engine/test_cycle162_call_auction_stale_skip.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -15489,6 +15644,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -15501,6 +15658,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
     - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle108_list_by_filter.py
@@ -15555,6 +15713,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -16247,6 +16407,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
@@ -18788,6 +18949,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle153_donchian_index_filter.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -19012,6 +19174,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle151_4_strategies_price_filter.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -19402,6 +19565,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle125_vcp_atr_db_hit.py
     - tests/unit/engine/strategies/test_cycle151_4_strategies_price_filter.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -19663,6 +19827,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
@@ -19908,6 +20073,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21349,6 +21516,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -21366,6 +21535,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -21504,6 +21674,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21569,6 +21741,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -21839,6 +22013,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -21856,6 +22032,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -21996,6 +22173,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -22062,6 +22241,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -22661,6 +22842,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle95_unknown_split.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_emit_cap.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_protected.py
@@ -22739,6 +22921,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -22756,6 +22940,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -22873,6 +23058,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -22938,6 +23125,7 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23703,6 +23891,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -23720,6 +23910,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -23853,6 +24044,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23919,6 +24112,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24207,6 +24402,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -24224,6 +24421,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -24357,6 +24555,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24423,6 +24623,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24690,6 +24892,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -24707,6 +24911,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -24839,6 +25044,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24904,6 +25111,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -26732,6 +26941,8 @@ backend:
     - tests/unit/api/test_cycle149_market_operation.py
     - tests/unit/api/test_cycle155_merge_35_keys.py
     - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
     - tests/unit/api/test_cycle76_recovered_collector.py
     - tests/unit/api/test_cycle76_request_5xx_dedupe.py
     - tests/unit/api/test_inquire_ccnl.py
@@ -26748,6 +26959,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -26881,6 +27093,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
+    - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26947,6 +27161,8 @@ backend:
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
     - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -27726,10 +27942,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-22T14:50:47.908583+09:00'
+generated_at: '2026-06-28T11:12:21.474795+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 635
+  backend_tests: 644
   frontend_modules: 77
   frontend_tests: 46
   unmapped_modules:
