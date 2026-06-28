@@ -121,6 +121,8 @@ backend:
     - tests/unit/ast/test_cycle101_fluctuation_purged.py
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -168,6 +170,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -831,6 +835,8 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -878,6 +884,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -1318,6 +1326,8 @@ backend:
     - tests/unit/ast/test_cycle101_fluctuation_purged.py
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1364,6 +1374,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -1799,6 +1811,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1846,6 +1860,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -2289,6 +2305,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2335,6 +2353,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -2777,6 +2797,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2824,6 +2846,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -3947,6 +3971,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -3994,6 +4020,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -4437,6 +4465,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4512,6 +4542,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -5036,6 +5068,8 @@ backend:
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5058,6 +5092,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -5489,6 +5525,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5556,6 +5594,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -6421,6 +6461,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -6470,6 +6512,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -8021,6 +8065,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -8045,6 +8091,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -8484,6 +8532,8 @@ backend:
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -8526,6 +8576,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -9176,6 +9228,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9223,6 +9277,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -9663,6 +9719,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9738,6 +9796,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -10106,6 +10166,7 @@ backend:
     - tests/unit/db/test_system_config_buy_block.py
     - tests/unit/db/test_system_config_cash_ratio.py
     - tests/unit/db/test_system_config_integrations.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
     - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
@@ -10223,6 +10284,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10270,6 +10333,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
     - tests/unit/engine/scanner/test_cycle81_trade_amount_filter_fallback_removal.py
@@ -10704,6 +10768,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10750,6 +10816,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -11393,6 +11461,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -11604,6 +11674,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
@@ -12544,6 +12616,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -12591,6 +12665,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -13237,6 +13313,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -13284,6 +13362,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -14788,6 +14868,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -14835,6 +14917,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -15456,6 +15540,8 @@ backend:
     - tests/unit/ast/test_cycle101_ast_flush_required.py
     - tests/unit/ast/test_cycle101_fluctuation_purged.py
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -15473,6 +15559,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -16378,6 +16466,7 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/test_cycle162_call_auction_stale_skip.py
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
+    - tests/unit/engine/test_cycle182_call_auction_time_gate.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
@@ -21536,6 +21625,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -21588,6 +21679,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -22033,6 +22126,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -22087,6 +22182,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -22827,6 +22924,7 @@ backend:
     - tests/integration/test_next_day_clear_stock_master.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle81_price_filter_key_fix.py
     - tests/unit/engine/scanner/test_cycle81_real_data_regression.py
     - tests/unit/engine/scanner/test_cycle94_emit_visibility.py
@@ -22941,6 +23039,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -22986,6 +23086,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -23911,6 +24012,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -23958,6 +24061,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -24422,6 +24527,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -24469,6 +24576,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -24912,6 +25021,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -24959,6 +25070,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -26960,6 +27073,8 @@ backend:
     - tests/unit/ast/test_cycle155_ast_merge_keys.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -27007,6 +27122,8 @@ backend:
     - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
     - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
     - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -27942,10 +28059,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-06-28T11:12:21.474795+09:00'
+generated_at: '2026-06-28T22:51:11.291395+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 644
+  backend_tests: 650
   frontend_modules: 77
   frontend_tests: 46
   unmapped_modules:

@@ -113,6 +113,21 @@ def _make_pf(min_price=0, max_price=0):
 
 
 # ---------------------------------------------------------------------------
+# 사이클 183 — 캐시 격리 (stale-4 전환 후 모듈 캐시 오염 차단, 의미 전환 0)
+# ---------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _isolate_price_filter_cache_g1():
+    """_apply_price_filter 캐시 격리 — 테스트 간 TTL 캐시 오염 차단."""
+    from src.engine import scanner
+    if hasattr(scanner, "invalidate_price_filter_cache_scanner"):
+        scanner.invalidate_price_filter_cache_scanner()
+    yield
+    if hasattr(scanner, "invalidate_price_filter_cache_scanner"):
+        scanner.invalidate_price_filter_cache_scanner()
+
+
+
+# ---------------------------------------------------------------------------
 # G-1: 005930 운영 실데이터 → bfdy_clpr 추출 + above_max 차단
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio

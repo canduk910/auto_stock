@@ -147,9 +147,11 @@ async def _apply_price_filter(
     Q2: prdy_clpr 미확보 시 graceful 통과 (KIS pre-fetch 비채택).
     Q7-1: invalidate 시 unsubscribe 0건 — 5분 자연 delta 위임.
     """
-    # 직접 조회 — tests 에서 `patch("src.engine.scanner.get_price_filter", ...)` 로 교체 가능
-    # (TTL 캐시 bypass: subscribe_filtered_stocks 는 _get_price_filter_for_scanner 로 별도 최적화)
-    pf = await get_price_filter()
+    # 사이클 183 — 60s TTL 캐시 경유(_get_price_filter_for_scanner). PUT 즉시 반영은
+    # invalidate_price_filter_cache_scanner() 가 담당 (사이클 64/148 PUT hook 영속).
+    # tests 에서 `patch("src.engine.scanner.get_price_filter", ...)` 는 캐시 내부가
+    # 여전히 get_price_filter 를 호출하므로 유효 (캐시 miss 시 실제 DB read 경유).
+    pf = await _get_price_filter_for_scanner()
     if not pf.is_active:
         return candidates  # 비활성 → 전체 통과
 
@@ -678,7 +680,7 @@ async def scan_stocks() -> list[str]:
 
     global _last_scan_result, _last_scan_time
     _last_scan_result = filtered
-    _last_scan_time = datetime.now().strftime("%H:%M:%S")
+    _last_scan_time = datetime.now(KST_TZ).strftime("%H:%M:%S")  # 사이클 183 — KST 강제 (stale-3)
 
     # 사이클 21 — 최종 카운트 + last_run_at
     scan_filter_stats["final_prepared"] = len(filtered)
@@ -1086,6 +1088,12 @@ async def subscribe_filtered_stocks(
         # 2-pass 로 잔여 슬롯에 overflow 를 흡수해 슬롯 낭비 + 부당 drop 동시 차단.
         drop_counts: dict[str, int] = {"breakout": 0, "momentum": 0, "swing": 0}
 
+        # 사이클 184 (stale-2) — 풀 총용량 기준 잔여 슬롯 (메인 단독 카운트 → 풀 union)
+        # 세션 수는 2-pass 루프 중 불변이라 HIGH 처리 후 LOW 루프 진입 전 1회만 계산.
+        # 보조 0개(n=1) 시 _pool_total_slots=41 + kis_ws_pool._subscriptions==메인 → 현 동작 동일(회귀 0).
+        _pool_session_count = len(kis_ws_pool.get_session_status())   # main + 보조 N = 1+N
+        _pool_total_slots = MAX_SUBSCRIPTIONS * _pool_session_count
+
         # 작업 2 (2026-05-13): breakout cap 25 — momentum 슬롯 보호.
         # 1차에서는 cap 만 add, overflow 는 2차에서 잔여 슬롯에 흡수.
         breakout_primary: list[str]
@@ -1113,7 +1121,7 @@ async def subscribe_filtered_stocks(
                     # 사이클 15-A: 이미 풀에 LOW 로 구독 중 — KIS SEND skip
                     already.add(t)
                     continue
-                remaining = MAX_SUBSCRIPTIONS - len(kis_ws._subscriptions)
+                remaining = _pool_total_slots - len(kis_ws_pool._subscriptions)
                 if remaining <= 0:
                     drop_counts[label] += 1
                     continue
@@ -1141,7 +1149,7 @@ async def subscribe_filtered_stocks(
                 already.add(t)
                 skipped_already += 1
                 continue
-            remaining = MAX_SUBSCRIPTIONS - len(kis_ws._subscriptions)
+            remaining = _pool_total_slots - len(kis_ws_pool._subscriptions)
             if remaining <= 0:
                 # 잔여 0 — 더 이상 흡수 불가
                 break

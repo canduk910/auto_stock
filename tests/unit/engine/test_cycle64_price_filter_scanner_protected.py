@@ -29,6 +29,20 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+# ---------------------------------------------------------------------------
+# 사이클 183 — 캐시 격리 (stale-4 전환 후 모듈 캐시 오염 차단, 의미 전환 0)
+# ---------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _isolate_price_filter_cache_c():
+    """_apply_price_filter 캐시 격리 — 테스트 간 TTL 캐시 오염 차단."""
+    from src.engine import scanner
+    if hasattr(scanner, "invalidate_price_filter_cache_scanner"):
+        scanner.invalidate_price_filter_cache_scanner()
+    yield
+    if hasattr(scanner, "invalidate_price_filter_cache_scanner"):
+        scanner.invalidate_price_filter_cache_scanner()
+
+
 def _make_pf(min_price=10_000, max_price=100_000):
     """activate 활성 PriceFilter."""
     from src.db.system_config import PriceFilter

@@ -62,10 +62,15 @@ def _make_basics_bfdy(ticker: str, bfdy_clpr: int, *, also_prdy: int | None = No
 # ---------------------------------------------------------------------------
 @pytest.fixture(autouse=True)
 def _reset_cycle81_scanner_state():
-    """사이클 81 scanner 모듈 전역 reset — DailyEmitCap + 카운터 격리."""
+    """사이클 81 scanner 모듈 전역 reset — DailyEmitCap + 카운터 격리.
+
+    사이클 183 — `invalidate_price_filter_cache_scanner()` 추가 (stale-4 캐시 격리).
+    """
     from src.engine import scanner
 
     # 사전 reset
+    if hasattr(scanner, "invalidate_price_filter_cache_scanner"):
+        scanner.invalidate_price_filter_cache_scanner()  # 사이클 183 — TTL 캐시 격리
     if hasattr(scanner, "_price_filter_scanner_skip_logged_today"):
         scanner._price_filter_scanner_skip_logged_today.clear()
     if hasattr(scanner, "_price_filter_scanner_skip_count_today"):
@@ -73,6 +78,8 @@ def _reset_cycle81_scanner_state():
             scanner._price_filter_scanner_skip_count_today[k] = 0
     yield
     # 사후 reset
+    if hasattr(scanner, "invalidate_price_filter_cache_scanner"):
+        scanner.invalidate_price_filter_cache_scanner()  # 사이클 183 — TTL 캐시 격리
     if hasattr(scanner, "_price_filter_scanner_skip_logged_today"):
         scanner._price_filter_scanner_skip_logged_today.clear()
     if hasattr(scanner, "_price_filter_scanner_skip_count_today"):
