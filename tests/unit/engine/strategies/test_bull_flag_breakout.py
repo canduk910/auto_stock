@@ -24,6 +24,7 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+from unittest.mock import AsyncMock
 
 import pytest
 from freezegun import freeze_time
@@ -373,6 +374,17 @@ async def test_prepare_populates_candidates_on_valid_setup(strat, monkeypatch):
 
     monkeypatch.setattr("src.api.condition.fetch_daily_candles", fake_fetch)
     monkeypatch.setattr(BullFlagBreakoutStrategy, "_scan_universe", fake_universe)
+    # 사이클 187 회귀 흡수 — prepare() 의 DB일봉 어댑터(stock_master_daily.
+    # get_recent_daily_normalized → get_recent_daily)가 실연결을 시도하면
+    # httpx.ConnectError → 사이클 187 retry 래퍼가 `await asyncio.sleep(0.2)` 진입 →
+    # freeze_time 으로 동결된 monotonic 때문에 이벤트 루프가 영원히 깨어나지 못해 60s hang.
+    # DB read 를 빈 결과로 결정화하면 어댑터는 lock/신선도 게이트(`if db_rows:`)를 건너뛰고
+    # 기존 KIS 폴백(위 fetch_daily_candles mock) 경로로 그대로 진행 → pre-187 동작 보존 +
+    # retry 경로 미진입(실연결·sleep 차단). candidate 생성 검증 의도는 불변.
+    monkeypatch.setattr(
+        "src.db.stock_master_daily.get_recent_daily",
+        AsyncMock(return_value=[]),
+    )
 
     with freeze_time("2026-05-08 07:50:00"):
         await strat.prepare()

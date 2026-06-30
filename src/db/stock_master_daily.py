@@ -27,7 +27,7 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 from src.db._kst import KST, now_kst_iso
-from src.db.supabase import supabase
+from src.db.supabase import supabase, execute_with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -229,13 +229,14 @@ async def get_recent_daily(ticker: str, days: int = 20) -> list[dict]:
     clamped = max(1, min(days, 100))
 
     try:
-        result = await asyncio.to_thread(
+        result = await execute_with_retry(
             lambda: supabase.table(TABLE_NAME)
             .select("*")
             .eq("ticker", ticker)
             .order("bas_dd", desc=True)
             .limit(clamped)
-            .execute()
+            .execute(),
+            op="get_recent_daily",
         )
         return result.data or []
     except Exception:
@@ -322,11 +323,12 @@ async def get_atr(ticker: str, days: int = 14) -> Optional[float]:
 async def count_all() -> int:
     """전체 행 카운트 (UI 진단 + 운영 모니터링)."""
     try:
-        result = await asyncio.to_thread(
+        result = await execute_with_retry(
             lambda: supabase.table(TABLE_NAME)
             .select("ticker", count="exact")
             .limit(1)
-            .execute()
+            .execute(),
+            op="count_all",
         )
         if hasattr(result, "count") and result.count is not None:
             return int(result.count)
@@ -339,12 +341,13 @@ async def count_all() -> int:
 async def count_by_ticker(ticker: str) -> int:
     """단일 ticker 행 카운트 (점진 적재 진단)."""
     try:
-        result = await asyncio.to_thread(
+        result = await execute_with_retry(
             lambda: supabase.table(TABLE_NAME)
             .select("bas_dd", count="exact")
             .eq("ticker", ticker)
             .limit(1)
-            .execute()
+            .execute(),
+            op="count_by_ticker",
         )
         if hasattr(result, "count") and result.count is not None:
             return int(result.count)
@@ -370,22 +373,10 @@ async def max_bas_dd(ticker: str | None = None) -> Optional[date]:
     """
     try:
         if ticker is None:
-            result = await asyncio.to_thread(
-                lambda: supabase.table(TABLE_NAME)
-                .select("bas_dd")
-                .order("bas_dd", desc=True)
-                .limit(1)
-                .execute()
-            )
+            build = lambda: supabase.table(TABLE_NAME).select("bas_dd").order("bas_dd", desc=True).limit(1).execute()
         else:
-            result = await asyncio.to_thread(
-                lambda: supabase.table(TABLE_NAME)
-                .select("bas_dd")
-                .eq("ticker", ticker)
-                .order("bas_dd", desc=True)
-                .limit(1)
-                .execute()
-            )
+            build = lambda: supabase.table(TABLE_NAME).select("bas_dd").eq("ticker", ticker).order("bas_dd", desc=True).limit(1).execute()
+        result = await execute_with_retry(build, op="max_bas_dd")
         rows = result.data or []
         if not rows:
             return None
