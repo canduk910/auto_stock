@@ -127,6 +127,31 @@ export const handlers = [
     return HttpResponse.json(wrap({ logs: [], total: 0, has_more: false }))
   }),
 
+  // 사이클 186 — 장운영상태 (VI/거래정지/종목상태 + 서킷브레이커 휴리스틱).
+  // 기본은 0건 정상. 각 테스트에서 server.use 로 오버라이드.
+  http.get(`${base}/realtime/market-operation`, () =>
+    HttpResponse.json(
+      wrap({
+        vi_active_count: 0,
+        halt_active_count: 0,
+        last_event_count: 0,
+        iscd_stat_active_count: 0,
+        vi_active_sample: [],
+        halt_active_sample: [],
+        circuit_breaker: {
+          suspected: false,
+          reasons: [],
+          halt_ratio: 0,
+          halted: 0,
+          observed: 0,
+          representative_mkop_cls_code: '',
+          halt_reasons_sample: [],
+        },
+        details: [],
+      })
+    )
+  ),
+
   // 사이클 64 — 가격 필터. 기본은 비활성, 각 테스트에서 server.use 로 오버라이드.
   http.get(`${base}/system/price-filter`, () =>
     HttpResponse.json(wrap({ min_price: 0, max_price: 0 }))

@@ -169,7 +169,7 @@ cd frontend && npm install && npm run dev
 | 전략수정 AI자문 | 20:00 OpenAI 자동 생성 자문 — 신규 자문 탭(승인/거절) + 이력 탭(상태/전략 필터). 자산 배정/로직 자문/비중 변경 사유(`weight_reasoning`) 별도 카드 + 백테스트 비교 카드(`BacktestComparisonCard`) |
 | 일일 로그 분석 | 20:10 정산 직후 OpenAI가 system_logs+trade_history 분석한 운영 개선 리포트 (영업일 리스트 + findings + 메트릭) |
 | **종목마스터 (`/stock-master`)** | **사이클 84+** — KIS 마스터 (시총/거래대금/NXT가능/거래정지/관리종목/KOSPI200·KOSDAQ150 플래그) + 일봉/시총 분포 카드 + 시장/시총/거래대금/종목명 필터 + 4 작업 수동 trigger 버튼 (유니버스/기본정보/일봉/공식 마스터). 상단 `RefreshProgressBanner` 5초 폴링 진행률 (사이클 127) |
-| **실시간 건강도 (`/realtime-health`)** | **사이클 103+** — WebSocket 구독 슬롯 (total/acked/fresh_60s/stale_60s/limit) + 세션별 종목 expand + KIS `inquire_ccnl` 캐시 (last_cntg_hour/today_volume, TTL 5분) + 수동 재구독 버튼 |
+| **실시간 건강도 (`/realtime-health`)** | **사이클 103+** — WebSocket 구독 슬롯 (total/acked/fresh_60s/stale_60s/limit) + 세션별 종목 expand + KIS `inquire_ccnl` 캐시 (last_cntg_hour/today_volume, TTL 5분) + 수동 재구독 버튼. **사이클 186** — 5번째 카드 "장운영상태" (VI 활성/거래정지/종목상태 이상 + 서킷브레이커 휴리스틱 배지 + 종목별 상세, 관찰성 전용·표시만) |
 | 설정 | 전략 파라미터 조정, 자금 비중, 자동 시작 토글, 가격/거래대금 필터, 매수 가드 4모드, 외부 통합 토글 |
 
 ### 실전 전환
@@ -346,6 +346,7 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | POST | `/api/log-reports/run` | 수동 트리거 — 즉시 분석 실행 (영업일당 1건 UNIQUE) |
 | GET | `/api/realtime/subscriptions` | WebSocket 구독 슬롯 진단 (total/acked/fresh_60s/stale_60s/limit/tickers/reconnect_count/ws_connected) + **사이클 35/37**: `sessions[*].tickers_detail` (ticker/ticker_name/stale/last_tick/retries/last_resub/`last_cntg_hour`/`today_volume`). KIS `inquire_ccnl` 캐시(TTL 5분 + cap 20)로 KIS 실제 체결시각 동봉 — WS 구독 의심 진단용 |
 | POST | `/api/realtime/resubscribe` | stale(60s 미수신) TICK 구독 종목 즉시 일괄 재구독 (J2). 응답 `{resubscribed, tickers}`. F1 자동 재구독과 별개의 운영자 수동 트리거 (ScanMonitor 인라인 버튼). WebSocket 끊김 시 400 |
+| GET | `/api/realtime/market-operation` | **사이클 186** 장운영상태 (VI/거래정지/종목상태/서킷브레이커) 현황 (관찰성 전용). summary(`vi_active_count`/`halt_active_count`/`iscd_stat_active_count` + `circuit_breaker` 휴리스틱) + `details`(종목별 vi_code/halt_yn/halt_reason/mkop_cls_code, cap 200). cycle 149 H0UNMKO0 모니터 소스. RealtimeHealth 5번째 카드 노출. 매수 가드 미연계 |
 | GET | `/api/strategy-funnel?strategy_id=&target_date=` | **사이클 34**: 전략별 조건검색 단계별 후보/탈락 종목 (`survived_tickers` cap 200 / `excluded_sample` cap 20) |
 | GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | 최근 N영업일 추이 |
 | POST | `/api/strategy-funnel/snapshot` | 수동 trigger — 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 로 최종 단계 (`step_no=99`) 즉시 snapshot 생성 |

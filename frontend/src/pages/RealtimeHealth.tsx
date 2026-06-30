@@ -16,7 +16,9 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchRealtimeHealth } from '../api/realtime-health'
+import { fetchMarketOperationStatus } from '../api/market-operation'
 import type { TimeWindow, RealtimeHealthCard } from '../types/realtime-health'
+import type { MarketOperationStatus } from '../types/market-operation'
 
 // KST 시각 표시 헬퍼 — getHours() 사용 금지 (사이클 68 G-AST 영속)
 function formatKst(isoStr: string): string {
@@ -74,6 +76,101 @@ const CARD_CONFIGS: Record<string, CardConfig> = {
 }
 
 type CardKey = 'dispatch_drop' | 'callback_exception' | 'stale_force_retry' | 'ws_auto_restart'
+
+// ── 5번째 카드: 장운영상태 ────────────────────────────────────────────────────
+
+function countBadgeColor(count: number, warnLevel: 'amber' | 'red' = 'red'): string {
+  if (count === 0) return 'bg-gray-100 text-gray-600'
+  if (warnLevel === 'amber') return 'bg-amber-100 text-amber-800'
+  return 'bg-red-100 text-red-700'
+}
+
+function MarketOperationCard({ status }: { status: MarketOperationStatus | undefined }) {
+  if (!status) return null
+
+  const cb = status.circuit_breaker
+  const cbSuspected = cb?.suspected ?? false
+
+  const cbBadgeClass = cbSuspected
+    ? 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700'
+    : 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600'
+
+  return (
+    <div
+      data-testid="realtime-health-card-market-operation"
+      className="bg-white rounded-lg shadow p-4 col-span-1 md:col-span-2"
+    >
+      {/* 카드 헤더 */}
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-semibold text-gray-900">장운영상태</h3>
+        {/* 서킷브레이커 배지 — testid: realtime-health-cb-badge */}
+        <span
+          data-testid="realtime-health-cb-badge"
+          className={cbBadgeClass}
+        >
+          서킷브레이커: {cbSuspected ? '추정' : '정상'}
+        </span>
+      </div>
+
+      {/* VI / 거래정지 / 종목상태 배지 행 */}
+      <div className="flex items-center gap-3 mb-3">
+        <span
+          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${countBadgeColor(status.vi_active_count, 'amber')}`}
+        >
+          VI {status.vi_active_count}건
+        </span>
+        <span
+          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${countBadgeColor(status.halt_active_count)}`}
+        >
+          거래정지 {status.halt_active_count}건
+        </span>
+        <span
+          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${countBadgeColor(status.iscd_stat_active_count, 'amber')}`}
+        >
+          종목상태 이상 {status.iscd_stat_active_count}건
+        </span>
+      </div>
+
+      {/* 서킷브레이커 추정 상세 */}
+      {cbSuspected && cb.reasons.length > 0 && (
+        <div className="mb-2 text-xs text-orange-700 bg-orange-50 rounded p-2">
+          {cb.reasons.map((r, i) => (
+            <div key={i}>{r}</div>
+          ))}
+        </div>
+      )}
+
+      {/* 종목별 detail 목록 */}
+      {status.details.length === 0 ? (
+        <p className="text-xs text-gray-400 italic">0건 — 정상</p>
+      ) : (
+        <div className="space-y-1 max-h-48 overflow-y-auto mt-1">
+          {status.details.slice(0, 200).map((detail) => (
+            <div
+              key={detail.ticker}
+              className="text-xs border-l-2 border-gray-200 pl-2 py-0.5 flex flex-wrap gap-x-2"
+            >
+              <span className="font-medium text-gray-900">{detail.ticker}</span>
+              {detail.halt_yn === 'Y' && (
+                <span className="text-red-600 font-medium">거래정지</span>
+              )}
+              {detail.halt_reason && (
+                <span className="text-gray-700">{detail.halt_reason}</span>
+              )}
+              <span className="text-gray-500">MKOP:{detail.mkop_cls_code}</span>
+              {detail.vi_code && detail.vi_code !== '0' && (
+                <span className="text-amber-600">VI:{detail.vi_code}</span>
+              )}
+              {detail.received_at && (
+                <span className="text-gray-400">{formatKst(detail.received_at)}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function RealtimeHealthCardView({
   cardKey,
@@ -146,6 +243,15 @@ export default function RealtimeHealth() {
     queryFn: () => fetchRealtimeHealth(timeWindow),
     retry: 1, // 사이클 65 H3 영속
     refetchInterval: 60_000, // 60s polling
+    staleTime: 30_000,
+  })
+
+  // 사이클 186 — 5번째 카드: 장운영상태 (독립 쿼리)
+  const { data: marketOpData } = useQuery({
+    queryKey: ['market-operation'],
+    queryFn: fetchMarketOperationStatus,
+    retry: 1, // 사이클 65 H3 영속
+    refetchInterval: 60_000,
     staleTime: 30_000,
   })
 
@@ -231,6 +337,9 @@ export default function RealtimeHealth() {
           ))}
         </div>
       )}
+
+      {/* 사이클 186 — 5번째 카드: 장운영상태 */}
+      <MarketOperationCard status={marketOpData} />
 
       {/* 안내 영역 */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">

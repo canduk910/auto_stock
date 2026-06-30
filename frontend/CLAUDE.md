@@ -518,6 +518,7 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
   - `useQuery({retry: 1, refetchInterval: 60_000})` 사이클 65 H3 영속 (AST G-AST-RT 영구 가드)
   - 한글 라벨 사이클 89 영속 (영문 prefix 인접 한글 친숙 용어 영속)
   - MSW + Playwright LIFO 정합 사이클 75 G-AST5 + 80 hotfix #3/#4 영속
+- **사이클 186 (2026-06-29) — 5번째 카드 "장운영상태" 추가 (관찰성 전용)**: 신규 `frontend/src/types/market-operation.ts`(`MarketOperationStatus`/`MarketOpDetail`/`CircuitBreakerState`) + `frontend/src/api/market-operation.ts`(`fetchMarketOperationStatus()` → `GET /api/realtime/market-operation`, `data.data ?? fallback`) + `RealtimeHealth.tsx` `MarketOperationCard`(testid `realtime-health-card-market-operation`). 표시 = VI 활성 N / 거래정지 N / 종목상태 이상 N 배지(count 0=gray, >0=amber/red) + **서킷브레이커 배지**(`realtime-health-cb-badge`, `circuit_breaker.suspected` true→orange "추정"/false→gray "정상") + 종목별 detail + raw `MKOP_CLS_CODE`/거래정지 사유 계측. 데이터 = cycle 149 H0UNMKO0 백엔드 모니터(`market_operation_monitor`). CB = 휴리스틱(키워드 OR 전 시장 halt 비율) — KIS H0UNMKO0 에 CB 전용 필드 부재. **표시만(매수 가드 X)**. `useQuery({retry:1})` 사이클 65 H3 + KST `Asia/Seoul` 사이클 68 + 한글 라벨 사이클 89 영속. MSW(`handlers.ts`) + e2e(`api-mocks.ts`) `/realtime/market-operation` mock. 회귀 가드 `RealtimeHealth.cycle186.test.tsx`(5) + 기존 4카드 회귀 0.
 
 ### `Strategies` (`/strategies`, 사이클 103 신규, 2026-06-11)
 

@@ -312,6 +312,31 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope({ sessions: [], total_count: 0 }) }),
   );
 
+  // 사이클 186 (2026-06-29) — 장운영상태 (VI/거래정지/종목상태 + 서킷브레이커 휴리스틱).
+  // `**/api/realtime/**` 와일드카드 부재 → 단일 구체 path (LIFO 영향 없음). 0건 정상 기본.
+  await page.route("**/api/realtime/market-operation", (route) =>
+    route.fulfill({
+      json: envelope({
+        vi_active_count: 0,
+        halt_active_count: 0,
+        last_event_count: 0,
+        iscd_stat_active_count: 0,
+        vi_active_sample: [],
+        halt_active_sample: [],
+        circuit_breaker: {
+          suspected: false,
+          reasons: [],
+          halt_ratio: 0,
+          halted: 0,
+          observed: 0,
+          representative_mkop_cls_code: "",
+          halt_reasons_sample: [],
+        },
+        details: [],
+      }),
+    }),
+  );
+
   // 사이클 80 hotfix #3 — 함수 끝 wildcard `**/api/system/**` 제거 (LIFO 라 가장 우선 매칭되어
   // L196 price-filter / L201 trade-amount-filter 구체 라우트 무효화 → PriceFilterCard 가 envelope({}) 응답
   // 받아 min_price undefined → React controlled input throw → Error Boundary 없음 → 전체 페이지 unmount).

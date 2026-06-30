@@ -231,3 +231,55 @@ async def resubscribe_stale() -> ApiResponse:
         data={"resubscribed": len(stale), "tickers": stale},
         message="",
     )
+
+
+@router.get("/market-operation", response_model=ApiResponse)
+async def get_market_operation() -> ApiResponse:
+    """장운영 상태 + 서킷브레이커 휴리스틱 조회 (사이클 186).
+
+    응답 data 스키마:
+        vi_active_count         — VI 활성 종목 수
+        halt_active_count       — 거래정지 활성 종목 수
+        last_event_count        — 마지막 이벤트 보유 종목 수
+        vi_active_sample        — VI 활성 sample (최대 10)
+        halt_active_sample      — 거래정지 활성 sample (최대 10)
+        iscd_stat_active_count  — 종목상태 이상 종목 수
+        circuit_breaker         — 서킷브레이커 휴리스틱 dict
+            suspected / reasons / halt_ratio / halted / observed
+            representative_mkop_cls_code / halt_reasons_sample
+        details                 — VI ∪ 거래정지 종목 상세 (최대 200)
+            ticker / vi_code / ovtm_vi_code / halt_yn / halt_reason
+            iscd_stat / mkop_cls_code / exch_code / received_at
+    """
+    # 지연 import — 순환 의존 회피
+    from src.engine.market_operation_monitor import (
+        get_circuit_breaker_state,
+        get_halt_active_tickers,
+        get_last_event,
+        get_market_op_state_summary,
+        get_vi_active_tickers,
+    )
+
+    summary = get_market_op_state_summary()
+
+    # details: VI ∪ halt 종목 sorted, cap 200
+    active_tickers = sorted(get_vi_active_tickers() | get_halt_active_tickers())[:200]
+    details = []
+    for ticker in active_tickers:
+        event = get_last_event(ticker)
+        if event is None:
+            continue
+        details.append({
+            "ticker": ticker,
+            "vi_code": event.vi_cls_code,
+            "ovtm_vi_code": event.ovtm_vi_cls_code,
+            "halt_yn": event.trht_yn,
+            "halt_reason": event.tr_susp_reas_cntt,
+            "iscd_stat": event.iscd_stat_cls_code,
+            "mkop_cls_code": event.mkop_cls_code,
+            "exch_code": event.exch_cls_code,
+            "received_at": event.received_at.isoformat() if event.received_at else None,
+        })
+
+    data = {**summary, "details": details}
+    return ApiResponse(success=True, data=data, message="")
