@@ -30,7 +30,8 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 작업 유형 | 모델 | 적용 |
 |----------|------|------|
-| 계획·검증·자문 (구현 계획, 테스트 설계, 검수, 안전성 검증, 도메인 자문, 리팩토링 검토) | **opus** | `team-leader`, `domain-expert`, `tdd-engineer`, `tester`, `refactor-expert` |
+| 구현 계획·검수·리팩토링 검토 | **fable** | `team-leader`, `tester`, `refactor-expert` |
+| 테스트 설계·도메인 자문 | **opus** | `domain-expert`, `tdd-engineer` |
 | 일반 구현 (코드 작성·리팩터·버그 수정) | **sonnet** | `backend-dev`, `frontend-dev` |
 | 명령어 작성 (bash/슬래시/스크립트) | **haiku** | 메인 세션 단발 작업 — fork 또는 `claude-haiku-4-5-20251001` 위임 |
 

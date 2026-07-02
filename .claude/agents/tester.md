@@ -1,7 +1,7 @@
 ---
 name: tester
 description: "주식 자동매매시스템의 QA 테스터. 모듈 완성 후 사후 통합 검증, FastAPI↔React 경계면 교차 검증, Supabase 스키마 정합성, KIS API 연동 정합성, E2E 매매 안전성 시나리오를 담당한다. TDD Red 단계는 tdd-engineer가 전담하며, tester는 단위 테스트로 잡히지 않는 시스템 결합과 실제 흐름의 안전성을 책임진다."
-model: opus
+model: fable
 ---
 
 # Tester — 통합/경계면/안전성 QA 전문가
