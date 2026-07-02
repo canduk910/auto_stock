@@ -7,7 +7,7 @@ Supabase (PostgreSQL) CRUD 모듈.
 ## supabase.py — 클라이언트 초기화
 
 - `settings.supabase_url` + `settings.supabase_key` 로 클라이언트 생성
-- **`execute_with_retry(build, *, retries=1, op="")`** (사이클 187, 2026-06-30): 동기 Supabase 쿼리(`build()` = `.execute()` 포함 무인자 callable)를 `asyncio.to_thread` 위임 + **connection 계열 예외 `retries`회 재시도**. `_RETRY_EXCEPTIONS = (httpx.RemoteProtocolError, ConnectError, ConnectTimeout, ReadError)` 만 캐치(각 시도 사이 `asyncio.sleep(_RETRY_BACKOFF_SECS=0.2)`), 소진 시 마지막 예외 raise(호출자 graceful except 보존), 비-retry 예외(`postgrest.APIError`/`ValueError`)는 즉시 전파. `logger.warning("[supabase_retry] op=... attempt=...")` 단독 — `write_log` 미호출(사이클 72 이중 INSERT 차단, `src.db.supabase` logger → `_DbLogHandler` 단일 INSERT). **멱등 SELECT 전용** — 쓰기(INSERT/UPDATE)는 RemoteProtocolError 가 '요청 도달 후 응답만 유실' 시 중복 위험이라 미적용. 배경 = EC2 운영 traceback 확정 `httpx.RemoteProtocolError: Server disconnected` 90건/24h(16:00 일봉 task 가 수백 종목 순회 → httpx pool stale keep-alive HTTP/2 연결 재사용, 전부 read 경로·매매 hot path 0). 현재 호출자 = `stock_master_daily` read 4함수만(사이클 187). AST 영구 가드 `tests/unit/ast/test_cycle187_ast_read_retry.py`(헬퍼 `write_log` Call 0건 영구). **인계**: 전 db read 공통 retry 전환(`kis_quote_accounts list` 등 잔여)
+- **`execute_with_retry(build, *, retries=1, op="")`** (사이클 187, 2026-06-30): 동기 Supabase 쿼리(`build()` = `.execute()` 포함 무인자 callable)를 `asyncio.to_thread` 위임 + **connection 계열 예외 `retries`회 재시도**. `_RETRY_EXCEPTIONS = (httpx.RemoteProtocolError, ConnectError, ConnectTimeout, ReadError)` 만 캐치(각 시도 사이 `asyncio.sleep(_RETRY_BACKOFF_SECS=0.2)`), 소진 시 마지막 예외 raise(호출자 graceful except 보존), 비-retry 예외(`postgrest.APIError`/`ValueError`)는 즉시 전파. `logger.warning("[supabase_retry] op=... attempt=...")` 단독 — `write_log` 미호출(사이클 72 이중 INSERT 차단, `src.db.supabase` logger → `_DbLogHandler` 단일 INSERT). **멱등 SELECT 전용** — 쓰기(INSERT/UPDATE)는 RemoteProtocolError 가 '요청 도달 후 응답만 유실' 시 중복 위험이라 미적용. 배경 = EC2 운영 traceback 확정 `httpx.RemoteProtocolError: Server disconnected` 90건/24h(16:00 일봉 task 가 수백 종목 순회 → httpx pool stale keep-alive HTTP/2 연결 재사용, 전부 read 경로·매매 hot path 0). 현재 호출자 = `stock_master_daily` read 4함수(사이클 187) + **사이클 189 (2026-07-02) 확장** = `kis_quote_accounts` read 4함수(`list_accounts`/`get_account`/`get_account_by_label`/`get_credentials_for_token_manager`) + `system_config` read 9함수(`get_cash_usage_ratio`/`get_auto_regime_adjust`/`_get_bool_or_none`/`get_buy_block_mode`/`_get_float_or_default`/`_get_bool_or_default`/`_get_int_or_default`/`_get_str_or_default_UNUSED`/`_get_string_or_none`) — 7/1 로그분석 F4(kis_quote_accounts list 실패 11건/일 + price_filter/system_config get 실패) 흡수, 양 모듈 쓰기(`_upsert`/`_set_*`/insert 계열)는 미경유 영속. AST 영구 가드 `tests/unit/ast/test_cycle187_ast_read_retry.py` + `test_cycle189_ast_read_retry.py`(read 경유 + 쓰기 미경유 + 헬퍼 `write_log` Call 0건). **인계**: 잔여 db read 모듈(positions/trade_history 등 저노이즈 경로) 점진 전환
 
 ## _kst.py — KST 공용 헬퍼 (사이클 68, 2026-06-07)
 
@@ -59,6 +59,7 @@ Supabase (PostgreSQL) CRUD 모듈.
 
 ## system_config.py — 시스템 설정 키-값 헬퍼
 
+- **read 9함수 `execute_with_retry` 경유 (사이클 189)**: `get_cash_usage_ratio`/`get_auto_regime_adjust`/`_get_bool_or_none`/`get_buy_block_mode`/`_get_float_or_default`/`_get_bool_or_default`/`_get_int_or_default`/`_get_str_or_default_UNUSED`/`_get_string_or_none` — connection 계열 예외 1회 재시도, 기존 폴백 기본값 불변. 쓰기(`_upsert`/`_set_*`)는 직접 to_thread 유지 (AST `test_cycle189_ast_read_retry.py`)
 - `get_cash_usage_ratio() -> float` / `set_cash_usage_ratio(ratio)`: 키 `cash_usage_ratio`, JSONB `{"value": float}`. 범위 `[0.0, 1.0]`, 5% 단위 자동 보정, 기본 1.0
 - `get_auto_regime_adjust() -> bool` / `set_auto_regime_adjust(value)`: 키 `auto_regime_adjust`, 기본 True
 - **외부 통합 토글** (DB 우선, .env fallback):
@@ -95,6 +96,7 @@ Supabase (PostgreSQL) CRUD 모듈.
 ## kis_quote_accounts.py — 보조 KIS 시세 수신 계좌 풀
 
 - `list_accounts(active_only=False)` / `get_account(id)` / `get_account_by_label(label)` — 응답은 `KisQuoteAccount` (`app_secret_masked` 만, 평문 절대 노출 안 함)
+- **read 4함수 `execute_with_retry` 경유 (사이클 189)**: `list_accounts`/`get_account`/`get_account_by_label`/`get_credentials_for_token_manager` — connection 계열 예외 1회 재시도(7/1 실측 `[kis_quote_accounts] list 실패` 11건/일 흡수), 기존 graceful·캐시 로직 불변. 쓰기(insert/update/delete)는 직접 to_thread 유지
 - **`list_accounts` 60s TTL 메모리 캐시**: 모듈 전역 `_list_cache` / `_list_cache_expires_at` + `invalidate_list_cache()` + `_LIST_CACHE_TTL=60.0`. `time.monotonic()` 비교 → TTL 내 캐시 hit (DB 호출 0). `active_only=True/False` 키 분리. DB 예외 + 캐시 있음 → stale 반환 (graceful), 캐시 없음 → 빈 리스트 (회귀 보존). INSERT/UPDATE/DELETE 직후 `invalidate_list_cache()` — 운영 토글 즉시 반영. Settings/Dashboard 30s 폴링 + 컨테이너 재시작 race + supabase HTTP/2 stale connection 결함 대응
 - `insert_account(label, app_key, app_secret, kis_env)` — label UNIQUE 충돌 시 `LabelConflictError`, 빈 값/kis_env 부적합 시 `ValueError`
 - `update_account(id, active=None, label=None)` — 부분 갱신. app_key/app_secret 수정 미지원 (보안 감사 추적성 — 삭제 후 재등록 패턴)

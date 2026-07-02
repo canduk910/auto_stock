@@ -36,7 +36,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from src.db._kst import now_kst_iso
-from src.db.supabase import supabase
+from src.db.supabase import execute_with_retry, supabase
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ async def get_cash_usage_ratio() -> float:
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="get_cash_usage_ratio")
         rows = result.data or []
         if not rows:
             return _CASH_USAGE_RATIO_DEFAULT
@@ -134,7 +134,7 @@ async def get_auto_regime_adjust() -> bool:
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="get_auto_regime_adjust")
         rows = result.data or []
         if not rows:
             return _AUTO_REGIME_ADJUST_DEFAULT
@@ -195,7 +195,7 @@ async def _get_bool_or_none(key: str) -> bool | None:
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="_get_bool_or_none")
         rows = result.data or []
         if not rows:
             return None
@@ -308,7 +308,7 @@ async def get_buy_block_mode() -> str:
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="get_buy_block_mode")
         rows = result.data or []
         if not rows:
             return _BUY_BLOCK_MODE_DEFAULT
@@ -367,7 +367,7 @@ async def _get_float_or_default(key: str, default: float) -> float:
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="_get_float_or_default")
         rows = result.data or []
         if not rows:
             return default
@@ -396,7 +396,7 @@ async def _get_bool_or_default(key: str, default: bool) -> bool:
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="_get_bool_or_default")
         rows = result.data or []
         if not rows:
             return default
@@ -613,7 +613,7 @@ async def _get_int_or_default(key: str, default: int) -> int:
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="_get_int_or_default")
         rows = result.data or []
         if not rows:
             return default
@@ -645,7 +645,7 @@ async def _get_str_or_default_UNUSED(key: str, default: str, valid: tuple) -> st
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="_get_str_or_default_UNUSED")
         rows = result.data or []
         if not rows:
             return default
@@ -778,7 +778,7 @@ async def _get_string_or_none(key: str) -> Optional[str]:
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="_get_string_or_none")
         rows = result.data or []
         if not rows:
             return None

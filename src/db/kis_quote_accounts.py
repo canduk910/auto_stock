@@ -19,7 +19,7 @@ from typing import Any, Optional
 from uuid import UUID
 
 from src.db._kst import now_kst_iso
-from src.db.supabase import supabase
+from src.db.supabase import execute_with_retry, supabase
 from src.models.kis_quote_account import KisQuoteAccount, mask_secret
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ async def list_accounts(active_only: bool = False) -> list[KisQuoteAccount]:
         return q.order("created_at").execute()
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="list_accounts")
         rows = result.data or []
         accounts = [KisQuoteAccount.from_row(r) for r in rows]
         _list_cache[active_only] = accounts
@@ -83,7 +83,7 @@ async def get_account(account_id: UUID | str) -> Optional[KisQuoteAccount]:
         return supabase.table(TABLE_NAME).select("*").eq("id", aid).execute()
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="get_account")
         rows = result.data or []
         if not rows:
             return None
@@ -100,7 +100,7 @@ async def get_account_by_label(label: str) -> Optional[KisQuoteAccount]:
         return supabase.table(TABLE_NAME).select("*").eq("label", label).execute()
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="get_account_by_label")
         rows = result.data or []
         if not rows:
             return None
@@ -130,7 +130,7 @@ async def get_credentials_for_token_manager(label: str) -> Optional[dict[str, st
         )
 
     try:
-        result = await asyncio.to_thread(_query)
+        result = await execute_with_retry(_query, op="get_credentials_for_token_manager")
         rows = result.data or []
         if not rows:
             return None

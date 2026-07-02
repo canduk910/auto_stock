@@ -28,6 +28,7 @@ from src.engine.order_engine import OrderEngine
 from src.engine.risk import RiskManager
 from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscribe_all
 from src.engine.session import MarketBoard, session_tracker
+from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.strategy_base import Signal, StrategyConfig
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
@@ -357,6 +358,9 @@ class TradingScheduler:
         # `_scan_loop` 첫 진입 시 활성 전략의 `_funnel_steps` 를 DB strategy_funnel_snapshots 에
         # 단계별 row 로 INSERT. `_reset_daily_state` 동행 reset (매일 1회).
         self._auto_funnel_snapshot_done_today: bool = False
+        # 사이클 189 (2026-07-02) — reprepare WARNING 로그 DailyEmitCap (1회/전략/일)
+        # 사이클 31 R6 / 158 momentum 패턴 답습. 행위(prepare 재시도)는 cap 밖.
+        self._reprepare_empty_logged_today: DailyEmitCap[str] = DailyEmitCap()
         # 사이클 18 (2026-05-19, A-1) — 5xx WARNING dedupe summary 60s 주기 task
         self._5xx_dedupe_summary_task: asyncio.Task | None = None
         # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
@@ -2501,11 +2505,16 @@ class TradingScheduler:
             if scanned:
                 continue
 
-            logger.warning("스캔 후보 비어있음 — 재 prepare 시도: %s", sid)
-            try:
-                await write_log("WARNING", f"{sid} 후보 비어있음 — 재 prepare 시도")
-            except Exception:
-                logger.debug("write_log WARNING 실패: %s", sid)
+            # getattr 폴백 = __init__ 우회 스텁 인스턴스 호환 (사이클 56-D AttributeError 가드 답습)
+            _reprepare_cap = getattr(self, "_reprepare_empty_logged_today", None)
+            if _reprepare_cap is None or _reprepare_cap.should_emit(sid):
+                logger.warning("스캔 후보 비어있음 — 재 prepare 시도: %s", sid)
+                try:
+                    await write_log("WARNING", f"{sid} 후보 비어있음 — 재 prepare 시도")
+                except Exception:
+                    logger.debug("write_log WARNING 실패: %s", sid)
+                if _reprepare_cap is not None:
+                    _reprepare_cap.mark_emitted(sid)
 
             try:
                 await strategy.prepare()
@@ -3882,6 +3891,8 @@ class TradingScheduler:
             reset_next_day_clear_logged_today()
         except Exception:
             logger.exception("momentum reset_next_day_clear_logged_today 실패")
+        # 사이클 189 (2026-07-02) — reprepare WARNING DailyEmitCap 일일 초기화 (1회/전략/일 cap).
+        self._reprepare_empty_logged_today.reset_daily()
         # 사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot 일일 1회 가드 reset
         self._auto_funnel_snapshot_done_today = False
 
