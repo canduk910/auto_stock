@@ -3945,8 +3945,8 @@ class TradingScheduler:
         (15:20 강제청산 / 15:30 마감 / 19:50 매수중단 / 20:00 자문 / 20:10 정산) 영구
         누락. 6/17 운영 사례 = 알테오젠 (VB) + 알지노믹스 (LTV) 15:20 매도 누락.
 
-        본질 복원:
-        - 기본 (advance_if_passed=False) = target 도달 즉시 break. `run_daily()` 영역
+        본질 복원 (사이클 160):
+        - 기본 (advance_if_passed=False) = target 도달 즉시 return. `run_daily()` 영역
           phase 시각 도달 시 즉시 다음 phase 진입 의무 영속.
         - advance_if_passed=True = target 이 *이미 지났으면* 내일 동일 시각 대기.
           task_loop_helper 영역 폭주 차단 (사이클 152 hotfix 의도 영속).
@@ -3955,27 +3955,36 @@ class TradingScheduler:
         - task_loop_helper 가 `advance_if_passed=True` 로 호출하면 18:00 시점 _wait_until(16:30)
           → target_dt = 내일 16:30 → 86,400s 대기 → 폭주 차단 정상.
         - run_daily 영역은 advance_if_passed=False (default) 로 호출 → target 도달 시 즉시
-          break → phase 전환 정상.
+          return → phase 전환 정상.
+
+        사이클 188 회귀 시정 (2026-07-02) — advance 모드 never-return 결함 차단:
+        사이클 160 구현이 while 루프 내부에서 매 iteration 마다 target_dt 를 오늘 기준으로
+        재계산(now_dt.replace(...))하여, advance 모드에서 +1일 후에도 다음 루프에서 다시
+        오늘 target 으로 초기화 → now >= target 조건 재성립 → 또 +1일 → 영원히 return
+        불가. 결과 = task_loop_helper 정기 발화 0회 (16:00 일봉 / 16:10 basics 등 미발화).
+        시정 원칙:
+        - target_dt 를 *호출 시점 1회 확정* (while 루프 진입 전). 루프 내 재계산 금지.
+        - while 루프는 `now >= 확정 target_dt` 도달 시 즉시 return (사이클 188 신규 경로).
+        - advance 모드(target 이미 지남) = +1일 확정 후 루프 진입 → 익일 도달 시 return.
+        - `_running=False` → 발화 없이 return (CancelledError 는 헬퍼가 처리).
         """
+        now_dt = datetime.now()
+        target_dt = now_dt.replace(
+            hour=target.hour, minute=target.minute,
+            second=target.second or 0, microsecond=0,
+        )
+        if now_dt >= target_dt:
+            if not advance_if_passed:
+                # 본질 = target 도달 즉시 return (run_daily phase 전환 영속)
+                return
+            # task_loop_helper 영역 = 내일 동일 시각으로 1회 확정 (폭주 차단 영속)
+            target_dt += timedelta(days=1)
         while self._running:
             now_dt = datetime.now()
-            target_dt = now_dt.replace(
-                hour=target.hour, minute=target.minute,
-                second=target.second or 0, microsecond=0,
-            )
             if now_dt >= target_dt:
-                if not advance_if_passed:
-                    # 본질 = target 도달 즉시 break (run_daily phase 전환 영속)
-                    return
-                # task_loop_helper 영역 = 내일 동일 시각 대기 (폭주 차단 영속)
-                target_dt += timedelta(days=1)
-            wait_secs = (target_dt - now_dt).total_seconds()
-            if wait_secs <= 0:
-                # 안전망 (race 보호)
-                await asyncio.sleep(1)
-                continue
-            await asyncio.sleep(min(wait_secs, 60))
-            # 다음 iteration 에서 target_dt 재계산 + 조건 재평가
+                # 확정 target 도달 → return (사이클 188 신규 경로, 재-advance 차단)
+                return
+            await asyncio.sleep(min((target_dt - now_dt).total_seconds(), 60))
 
 
 trading_scheduler = TradingScheduler()

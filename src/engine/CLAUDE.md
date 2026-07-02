@@ -28,6 +28,26 @@ market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
+## 사이클 188 (2026-07-02) — `_wait_until(advance_if_passed=True)` never-return 회귀 시정
+
+사이클 187 실측 검증 중 발견한 사이클 160 회귀(6/17~7/2, 2주). `scheduler.py::_wait_until` 의 advance 모드에 return 경로가 없어 — while 루프가 매 iteration "오늘 target" 재계산 → 도달 순간 `+1일`로 밀며 무한 sleep — production 유일 호출처 `task_loop_helper.py:114`(`run_periodic_task_loop`)가 영원히 대기 → **모든 정기 task(16:00 일봉/16:10 basics/16:15 purge/16:20 저녁 funnel/16:30 master/20:00:05 universe) 정기 시각 발화 0회**. 매일 아침 run_daily 재시작의 `immediate_first_run` 이 D-1 데이터를 채워 silent (부작용 = 무거운 full load 가 프리마켓 07:45~08:13 에 집중).
+
+### `_wait_until` 계약 (사이클 188 이후 정본)
+
+- `target_dt` 는 **호출 시점 1회 확정** (while 루프 진입 전). 루프 내 재계산 금지 — 재-advance 구조적 차단.
+- default (`advance_if_passed=False`): target 이미 지남 → 즉시 return (사이클 160 본질, run_daily phase 전환 9곳). 미도달 → 대기 후 도달 시 return.
+- advance (`=True`, task_loop_helper 전용): target 이미 지남 → `+= timedelta(days=1)` 1회 확정 (사이클 152 폭주 차단) → **확정 target 도달 시 return (발화)** — 사이클 188 신설 경로.
+- `asyncio.sleep(min(잔여초, 60))` + `while self._running` 체크 영속 (stop 시 신속 탈출, 헬퍼의 `if not scheduler._running: break` 가 흡수).
+- `break` 사용 금지 (cycle152 AST 가드) / naive `datetime.now()` (컨테이너 TZ=Asia/Seoul) / 시그니처 불변.
+
+### 회귀 가드
+
+`tests/unit/engine/test_cycle188_wait_until_advance_return.py` 7케이스 — 가상 시계 단조 전진 mock(fake sleep 이 가상 시각 전진, freezegun 금지 = 사이클 187 동결 monotonic hang 교훈). G-188-1/2/3(advance 당일·익일 발화 + 재-advance 금지, HIGH) + G-188-4/5(default 보존) + G-188-6(_running=False 계약) + G-188-7(HIGH 통합 — `run_periodic_task_loop` + 실제 `_wait_until` 본체로 정기 발화 end-to-end, cycle134 스위트 미검증 갭 봉합). 기존 cycle160/152/134/158 테스트 수정 0 (전부 PASS 유지 — 고정 clock 방식이라 return 여부 미단언이었음). 매매 안전성 8영역 diff 0.
+
+### 인계
+
+(a) 아침 immediate_first_run 프리마켓 부하 완화 (D+1 실측 후 사용자 결정) (b) `_wait_until`/run_daily naive now → KST 명시 (LOW) (c) D+1 운영 실측 = 16:00 정기 발화 + 16:20 funnel 저녁 `is_provisional` 생성 확인.
+
 ## 사이클 172 (2026-06-22) — stock_master_daily 220일 확보 (LOW~MEDIUM, 데이터 plumbing, 사이클 173 선행)
 
 승인 설계 `/Users/koscom/.claude/plans/funnel-vast-wolf.md` 사이클 172 절. 전략별 최대 일봉 lookback = VCP 220일 (나머지 5전략 ≤65일, 현 retention 충분). 현재 backfill T-100 / retention T-150 → VCP universe (KOSPI200∪KOSDAQ150, 348종목) 220일 부족. **prepare/매수 target 미변경** (데이터 적재/조회만, 173에서 prepare 전환).
