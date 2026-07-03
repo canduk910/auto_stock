@@ -47,15 +47,24 @@ async def write_log(log_level: str, message: str) -> None:
 
     supabase-py는 동기 client이므로 asyncio.to_thread()로 thread pool에 위임 →
     이벤트 루프 블로킹 차단 (on_tick 같은 핫패스에서 호출되어도 다른 await 처리 지연 없음).
+
+    관찰성 함수 — 어떤 예외도 호출자에 전파하지 않는다 (사이클 190, 2026-07-03).
+    INSERT 실패 시 logger.debug 단독 발화 (WARNING 이상 금지 — _DbLogHandler 재귀 위험).
+    배경: 2026-07-03 07:59 scheduler.py L677 bare await write_log 가 Supabase HTTP/2
+    RemoteProtocolError 로 raise → 매매 프로세스 크래시. src/ 전체 72개 직접 호출 사이트
+    무변경으로 단일 지점에서 영구 차단.
     """
     data = {
         "log_level": log_level,
         "message": message,
         "timestamp": datetime.now(KST).isoformat(),  # 사이클 65 hotfix H2 — KST 강제 (사이클 53 패턴 답습)
     }
-    await asyncio.to_thread(
-        lambda: supabase.table("system_logs").insert(data).execute()
-    )
+    try:
+        await asyncio.to_thread(
+            lambda: supabase.table("system_logs").insert(data).execute()
+        )
+    except Exception:
+        logger.debug("[write_log_failed] level=%s msg=%.80s", log_level, message)
 
 
 async def safe_write_log(

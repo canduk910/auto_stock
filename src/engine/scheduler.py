@@ -917,7 +917,7 @@ class TradingScheduler:
                 # 사이클 13-E-2 task lifecycle 영역 영구 영속 보존 영구 영속 (좀비 task 0).
                 return
             logger.exception("매매 프로세스 오류")
-            await write_log("ERROR", "매매 프로세스 비정상 종료")
+            await write_log("ERROR", f"매매 프로세스 비정상 종료: {type(exc).__name__}: {str(exc)[:150]}")
         finally:
             # 사이클 13-E-2 — ws_task / scan_task 도 self.* 속성화 후 동일 cancel 루프 포함.
             # 정리 순서: 백그라운드 task 7종 cancel → 메인 ws disconnect → pool stop.
