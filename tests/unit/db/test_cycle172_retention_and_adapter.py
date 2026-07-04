@@ -61,27 +61,39 @@ def test_ret2_purge_logic_unchanged():
 
 @pytest.mark.asyncio
 async def test_ret2_purge_cutoff_protected():
-    """purge_old_rows — protected_tickers DELETE 제외 (사이클 32 R4 영속)."""
+    """purge_old_rows — protected_tickers DELETE 제외 (사이클 32 R4 영속).
+
+    사이클 192 의미 전환 (사이클 66 K-2) — 날짜 슬라이스 루프 배치 전환에 맞게
+    mock 형식 갱신 (bulk `delete().lt()` → SELECT oldest + DELETE eq 루프).
+    검증 의도 보존: protected_tickers 가 DELETE 에서 제외 + protected_count 반환.
+    """
     from src.db import stock_master_daily as _smd
 
-    mock_table = MagicMock()
-    mock_chain = MagicMock()
-    mock_table.return_value.delete.return_value.lt.return_value = mock_chain
-    mock_chain.not_.in_ = MagicMock(return_value=mock_chain)
+    # SELECT: 1회차 row 반환 → 2회차 empty (drained)
+    sel_result_1 = MagicMock()
+    sel_result_1.data = [{"bas_dd": "2024-12-01"}]
+    sel_result_2 = MagicMock()
+    sel_result_2.data = []
 
-    mock_result = MagicMock()
-    mock_result.data = []
-    mock_result.count = 0
-    mock_chain.execute = MagicMock(return_value=mock_result)
+    del_result = MagicMock()
+    del_result.count = 0
+
+    table_mock = MagicMock()
+    table_mock.select.return_value.lt.return_value.not_.in_.return_value \
+        .order.return_value.limit.return_value.execute.side_effect = [
+            sel_result_1, sel_result_2,
+        ]
+    table_mock.delete.return_value.eq.return_value.not_.in_.return_value \
+        .execute.return_value = del_result
 
     with patch.object(_smd, "supabase") as mock_supa:
-        mock_supa.table = mock_table
+        mock_supa.table.return_value = table_mock
         result = await _smd.purge_old_rows(
             date(2025, 1, 1), protected_tickers={"005930", "000660"}
         )
 
     assert result["protected_count"] == 2
-    mock_chain.not_.in_.assert_called_once()
+    table_mock.delete.return_value.eq.return_value.not_.in_.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

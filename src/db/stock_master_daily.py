@@ -586,20 +586,33 @@ import time as _time  # 사이클 150 — elapsed_ms 측정
 # 사이클 150 영역 (사이클 48 VCP EMA effective_long T-120일 + 30일 마진) → 사이클 172 확장.
 DAILY_RETENTION_DAYS = 230
 
+# 사이클 192 (2026-07-04) — 날짜 슬라이스 루프 런어웨이 가드.
+# 잔여 backlog 는 다음 실행이 드레인 (일 1회 16:15 KST task).
+PURGE_MAX_DATE_ITERATIONS = 500
+
 
 async def purge_old_rows(
     cutoff_date: date,
     *,
     protected_tickers: set[str] | None = None,
 ) -> dict[str, int]:
-    """T-150일 retention. cutoff_date 이전 row DELETE.
+    """T-230일 retention. cutoff_date 이전 row DELETE.
 
     사용자 결정 Q3=C — VCP T-120일 + 30일 안전 마진 영구 영속.
+
+    사이클 192 (2026-07-04) — PostgREST returning=representation 응답 비대로
+    매 실행 실패 (6/16 도입 이래 515건 누적, 47,924행 × raw JSONB 응답 시도).
+    사이클 175 루프 배치 패턴 답습 + 복합 PK (ticker, bas_dd) 적응:
+    날짜 슬라이스 루프로 재구성:
+      (1) SELECT oldest bas_dd (lt cutoff, protected 제외) → 없으면 drained break
+      (2) 그 날짜 전체 DELETE (returning="minimal" + count="exact", protected 제외)
+      (3) deleted 누적 → PURGE_MAX_DATE_ITERATIONS cap (런어웨이 가드)
+    핵심: SELECT/DELETE 양쪽 protected 제외 필수 (SELECT 누락 = never-drain 회귀).
 
     Args:
         cutoff_date: ``bas_dd < cutoff_date`` 인 row DELETE.
         protected_tickers: 보유/익일청산 ticker (사이클 32 R4 답습) — 절대 보호.
-            None 이면 미적용 (전체 영역 영역 cutoff).
+            None 이면 미적용 (전체 영역 cutoff).
 
     Returns:
         ``{"deleted": int, "protected_count": int, "elapsed_ms": int}``
@@ -611,33 +624,59 @@ async def purge_old_rows(
     - 사이클 32 R4 universe guard 보유/익일청산 절대 보호
     - 사이클 38 명문화 (scanner 매수 진입 전 영역 한정)
     - 사이클 81 G-AST1 raw 영역 보호 (raw 폐기 미진행)
-    - 사이클 88 graceful (예외 시 0 반환)
+    - 사이클 88 graceful (예외 시 부분 누적 deleted 반환)
+    - G-187-A2 execute_with_retry 미경유 (쓰기 함수)
     """
     started = _time.perf_counter()
-
     cutoff_iso = cutoff_date.isoformat()
     protected_count = len(protected_tickers) if protected_tickers else 0
-
-    def _delete():
-        chain = supabase.table(TABLE_NAME).delete().lt("bas_dd", cutoff_iso)
-        if protected_tickers:
-            # 사이클 32 R4 영속 — 보유/익일청산 절대 보호
-            chain = chain.not_.in_("ticker", list(protected_tickers))
-        return chain.execute()
+    deleted = 0
 
     try:
-        result = await asyncio.to_thread(_delete)
-        rows = getattr(result, "data", None) or []
-        count = getattr(result, "count", None)
-        if count is None:
-            count = len(rows)
-        deleted = int(count)
-    except Exception:
+        for _ in range(PURGE_MAX_DATE_ITERATIONS):
+            # (1) 가장 오래된 삭제 대상 날짜 1건 조회 — SELECT 쪽 protected 제외 필수.
+            #     누락 시: protected 만 남은 날짜를 SELECT 가 계속 반환 → never-drain 회귀.
+            def _select(cutoff=cutoff_iso, pt=protected_tickers):
+                q = (
+                    supabase.table(TABLE_NAME)
+                    .select("bas_dd")
+                    .lt("bas_dd", cutoff)
+                )
+                if pt:
+                    q = q.not_.in_("ticker", list(pt))
+                return q.order("bas_dd").limit(1).execute()
+
+            sel_result = await asyncio.to_thread(_select)
+            rows = (sel_result.data or []) if sel_result else []
+            if not rows:
+                break  # drained
+
+            oldest = rows[0]["bas_dd"]
+
+            # (2) 그 날짜 전체 DELETE — returning="minimal" (응답 비대 근본 차단).
+            #     사이클 32 R4 영속 — 보유/익일청산 절대 보호 (DELETE 쪽도 동일 적용).
+            def _delete(oldest_dd=oldest, pt=protected_tickers):
+                chain = (
+                    supabase.table(TABLE_NAME)
+                    .delete(count="exact", returning="minimal")
+                    .eq("bas_dd", oldest_dd)
+                )
+                if pt:
+                    chain = chain.not_.in_("ticker", list(pt))
+                return chain.execute()
+
+            del_result = await asyncio.to_thread(_delete)
+            deleted += int(getattr(del_result, "count", None) or 0)
+
+    except Exception as exc:
+        # 사이클 190 예외 타입 계측 + 부분 누적 deleted 반환 (graceful)
         logger.exception(
-            "[stock_master_daily_purge] 실패 graceful cutoff=%s protected=%d",
-            cutoff_iso, protected_count,
+            "[stock_master_daily_purge] 루프 실패 graceful cutoff=%s protected=%d "
+            "%s: %s",
+            cutoff_iso, protected_count, type(exc).__name__, str(exc)[:150],
         )
-        return {"deleted": 0, "protected_count": protected_count, "elapsed_ms": 0}
+        elapsed_ms = int((_time.perf_counter() - started) * 1000)
+        return {"deleted": deleted, "protected_count": protected_count, "elapsed_ms": elapsed_ms}
 
     elapsed_ms = int((_time.perf_counter() - started) * 1000)
 

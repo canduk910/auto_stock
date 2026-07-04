@@ -167,33 +167,55 @@ class TestG150DailyProtectedTickers:
 
     @pytest.mark.asyncio
     async def test_g150_daily_3_protected_tickers_excluded(self) -> None:
-        """protected_tickers 영역 영구 영속 = DELETE 영역 제외."""
+        """protected_tickers 영역 영구 영속 = SELECT/DELETE 양쪽 제외.
+
+        사이클 192 의미 전환 (사이클 66 K-2) — 날짜 슬라이스 루프 패턴에 맞게
+        mock 형식 전환. 검증 의도 보존: DELETE 쪽 not_.in_ 호출 확인.
+        신규 추가: SELECT 쪽 not_.in_ 도 확인 (never-drain 가드 영속).
+        """
         from src.db import stock_master_daily as _smd
 
-        # mock supabase chain
-        mock_table = MagicMock()
-        mock_chain = MagicMock()
-        mock_table.return_value.delete.return_value.lt.return_value = mock_chain
-        mock_chain.not_.in_ = MagicMock(return_value=mock_chain)
+        # SELECT: 1회차 row 반환 → 2회차 empty (drained)
+        sel_result_1 = MagicMock()
+        sel_result_1.data = [{"bas_dd": "2025-01-01"}]
+        sel_result_2 = MagicMock()
+        sel_result_2.data = []
 
-        mock_result = MagicMock()
-        mock_result.data = []
-        mock_result.count = 0
-        mock_chain.execute = MagicMock(return_value=mock_result)
+        # DELETE: count=1 반환
+        del_result = MagicMock()
+        del_result.count = 1
+
+        table_mock = MagicMock()
+
+        # SELECT chain: .select().lt().not_.in_().order().limit().execute()
+        table_mock.select.return_value.lt.return_value.not_.in_.return_value \
+            .order.return_value.limit.return_value.execute.side_effect = [
+                sel_result_1, sel_result_2,
+            ]
+
+        # DELETE chain: .delete().eq().not_.in_().execute()
+        table_mock.delete.return_value.eq.return_value.not_.in_.return_value \
+            .execute.return_value = del_result
 
         with patch.object(_smd, "supabase") as mock_supa:
-            mock_supa.table = mock_table
+            mock_supa.table.return_value = table_mock
             result = await _smd.purge_old_rows(
                 date(2026, 1, 1),
                 protected_tickers={"005930", "000660"},
             )
 
-        # protected_tickers 영역 영속 시 not_.in_ 호출 검증
-        mock_chain.not_.in_.assert_called_once()
-        call_args = mock_chain.not_.in_.call_args
+        # DELETE 쪽 not_.in_ 호출 검증 (보호 의도 보존)
+        delete_not_in = table_mock.delete.return_value.eq.return_value.not_.in_
+        delete_not_in.assert_called_once()
+        call_args = delete_not_in.call_args
         assert call_args[0][0] == "ticker", "ticker 컬럼 영구 영속"
         assert set(call_args[0][1]) == {"005930", "000660"}, \
-            "protected_tickers 영역 영구 영속"
+            "protected_tickers DELETE 제외 영구 영속"
+
+        # SELECT 쪽 not_.in_ 도 호출 검증 (never-drain 가드)
+        select_not_in = table_mock.select.return_value.lt.return_value.not_.in_
+        select_not_in.assert_called()
+
         assert result["protected_count"] == 2
 
 
