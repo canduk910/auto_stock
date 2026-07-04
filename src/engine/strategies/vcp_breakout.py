@@ -28,9 +28,11 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import date, datetime, time, timedelta, timezone
 
+from src.api.condition import add_business_days
 from src.engine.strategy_base import FunnelStage, Position, Signal, StrategyBase, StrategyConfig
 
 # vcp_breakout 도 멀티데이 — Position 의 _MULTIDAY_STRATEGIES 에 등록
@@ -1068,6 +1070,35 @@ class VcpBreakoutStrategy(StrategyBase):
         return self._fallback_one_share(current_price)
 
     def register_cooldown_after_exit(self, ticker: str) -> None:
+        """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 191 영업일 2단계).
+
+        1단계: 즉시 달력일 근사(days + 2)로 세팅 → 재매수 공백 0 보장.
+        2단계: _refine_cooldown_business_days 가 async KIS 호출로 정확한 N영업일로 정정.
+        OrderEngine.on_position_closed 훅에서 호출 (사이클 185 배선 영속).
+        """
         days = self.config.params["reentry_cooldown_days"]
         today = datetime.now(KST).date()
-        self._cooldown_until[ticker] = today + timedelta(days=days)
+        self._cooldown_until[ticker] = today + timedelta(days=days + 2)
+
+    async def _refine_cooldown_business_days(self, ticker: str) -> None:
+        """쿨다운을 정확한 N영업일로 정정 (사이클 191 2단계).
+
+        KIS chk-holiday CTCA0903R 1회 호출 → opnd_yn=="Y" n번째 날로 교체.
+        실패 시 1단계 근사값 유지 (graceful).
+        """
+        days = self.config.params["reentry_cooldown_days"]
+        today = datetime.now(KST).date()
+        try:
+            accurate = await add_business_days(today, days)
+            self._cooldown_until[ticker] = accurate
+        except Exception:
+            logger.warning("[vcp] 영업일 정정 실패 (ticker=%s) — 근사값 유지", ticker)
+
+    def on_position_closed(self, ticker: str) -> None:
+        """사이클 191 — 포지션 청산 시 재진입 쿨다운 등록 (VCP override, BFB 패턴 답습)."""
+        self.register_cooldown_after_exit(ticker)
+        coro = self._refine_cooldown_business_days(ticker)
+        try:
+            asyncio.create_task(coro)
+        except RuntimeError:
+            coro.close()  # 이벤트 루프 없는 환경 — coroutine 명시적 닫기, 근사값 유지

@@ -254,6 +254,34 @@ async def next_trading_day(after_date) -> "date":
         logger.exception("다음 영업일 조회 실패")
     return after_date + timedelta(days=1)
 
+
+async def add_business_days(base_date, n: int):
+    """base_date 로부터 n 영업일 후 날짜를 반환한다 (사이클 191 — 영업일 2단계 등록).
+
+    KIS chk-holiday 응답 ~30일치에서 opnd_yn=="Y" row를 순서대로 세어 n번째 날 반환.
+    실패/행 부족 시 fallback = base_date + timedelta(days=n + 2).
+    """
+    from datetime import timedelta, date as _date
+    yyyymmdd = (base_date + timedelta(days=1)).strftime("%Y%m%d")
+    try:
+        data = await kis_get_quote(
+            HOLIDAY_URL,
+            "CTCA0903R",
+            {"BASS_DT": yyyymmdd, "CTX_AREA_NK": "", "CTX_AREA_FK": ""},
+        )
+        count = 0
+        for row in data.get("output", []):
+            if row.get("opnd_yn") == "Y":
+                count += 1
+                if count == n:
+                    d = row.get("bass_dt", "")
+                    if len(d) == 8:
+                        return _date(int(d[:4]), int(d[4:6]), int(d[6:8]))
+    except Exception:
+        logger.exception("영업일 %d일 전진 조회 실패 (base=%s)", n, base_date)
+    return base_date + timedelta(days=n + 2)
+
+
 # 스캔 최소 등락률 — 29% 매수 조건의 후보군
 MIN_CHANGE_RATE = 15.0
 

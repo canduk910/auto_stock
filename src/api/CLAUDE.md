@@ -227,6 +227,7 @@ KRX 키 관리 인프라 + Supabase 저장 + 마스킹. 본 사이클 = 인프�
 - 거래량순위 API (FHPST01700000) 로 종목 필터링. 시총/거래대금 필터
 - `is_market_open(date)`: KIS chk-holiday API (CTCA0903R) 로 개장일 여부 (`opnd_yn == "Y"`)
 - `next_trading_day(after_date)`: 다음 개장일 (휴일 다음날 자동)
+- `add_business_days(base_date, n)` (사이클 191): base_date 이후 n번째 개장일 date. CTCA0903R 1회 호출(~30일치)에서 `opnd_yn=="Y"` n번째 row. 실패/개장일 부족 시 `base + timedelta(n+2)` 달력일 폴백 graceful. BFB/VCP 재진입 쿨다운 영업일 정정용 (`_refine_cooldown_business_days` 소비)
 - `fetch_daily_candles(ticker, days)`: 일봉 N영업일치. `FHKST03010100` (`/quotations/inquire-daily-itemchartprice`, 모의/실전 동일) — **단일 호출 최대 100일**. 응답 `output2` (최신순), `stck_bsop_date` 빈 placeholder 제거. 윈도우 = `days + days//2 + 10` (영업일/달력일 5/7 + 마진)
 - **사이클 172 (2026-06-22) — 분할 fetch (날짜 윈도우 100건 경계) + 220일 backfill (VCP 220일 확보, 사이클 173 prepare DB일봉 전환 선행)**:
   - `fetch_daily_candles_ranged(ticker, start_yyyymmdd, end_yyyymmdd) -> list[dict]`: KIS `FHKST03010100` 단일 윈도우 조회 (`FID_INPUT_DATE_1`=시작 / `FID_INPUT_DATE_2`=종료 / `FID_PERIOD_DIV_CODE="D"` / `FID_ORG_ADJ_PRC="0"` / `FID_COND_MRKT_DIV_CODE="J"`, KIS MCP 정본 재확인 완료). `kis_get_quote` 경유 (시세성 풀 + Rate Limit + 메트릭). output2 (최신순) + `stck_bsop_date` 빈 placeholder 제거. **memcache/single-flight 미사용** (backfill 전용, 16:00 daily task 만 호출). 6자리 ticker 가드 (`ValueError`). **`FID_ORG_ADJ_PRC="0"` (수정주가) = 기존 `_fetch_daily_candles_and_cache` 정합** — 사이클 173 DB-source vs KIS-source 동등성 게이트 보장 (정본 샘플 "1" 예시이나 본 코드베이스는 사이클 14부터 "0" 사용).
