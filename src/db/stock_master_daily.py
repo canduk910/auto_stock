@@ -609,6 +609,14 @@ async def purge_old_rows(
       (3) deleted 누적 → PURGE_MAX_DATE_ITERATIONS cap (런어웨이 가드)
     핵심: SELECT/DELETE 양쪽 protected 제외 필수 (SELECT 누락 = never-drain 회귀).
 
+    Note (사이클 193 리뷰): 루프 내 SELECT(oldest bas_dd)는 멱등 read 지만
+    `execute_with_retry` 를 **의도적으로 미경유** — G-187-A2 AST 가드가
+    `purge_old_rows` 함수 전체의 execute_with_retry Call==0 을 불변식으로 강제
+    (쓰기 함수 멱등 보수 분류). SELECT 가 connection 계열 예외를 맞으면 그날 purge 는
+    부분 누적 후 graceful 종료 → 다음날 16:15 task 가 잔여 드레인 (일 1회 멱등,
+    적체 위험 무 = 데이터/안전성 영향 0). retry 회복력이 필요해지면 가드를
+    call-level 로 세분화(SELECT 허용 / DELETE 금지)하는 별도 사이클로 처리.
+
     Args:
         cutoff_date: ``bas_dd < cutoff_date`` 인 row DELETE.
         protected_tickers: 보유/익일청산 ticker (사이클 32 R4 답습) — 절대 보호.

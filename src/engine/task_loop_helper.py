@@ -20,10 +20,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import time
+from datetime import datetime, time
 from typing import Awaitable, Callable, Protocol
 
 logger = logging.getLogger("src.engine.scheduler")
+
+# 사이클 193 — 재시작 immediate run 신선도 게이트 기본 시간 임계 (h).
+# 16:10 저녁 basics 성공 → 익일 07:50 boot = ~15.7h < 20h → immediate skip.
+IMMEDIATE_FRESH_SKIP_HOURS = 20.0
 
 
 class _SchedulerLike(Protocol):
@@ -50,6 +54,7 @@ async def run_periodic_task_loop(
     immediate_first_run: bool = True,
     retry_delay_secs: int = 60,
     initial_delay_secs: int = 0,
+    immediate_skip_if_fresh_hours: float | None = None,
 ) -> None:
     """4 task loop 공통 lifecycle 헬퍼 (사이클 134 카드 #21 영속).
 
@@ -77,6 +82,12 @@ async def run_periodic_task_loop(
         initial_delay_secs: 사이클 158 Q3 stagger 인자 (default 0 = 회귀 보존).
             > 0 시 immediate_first_run 진입 *전* asyncio.sleep(N) 발화 — 4 task 동시 발화
             race 차단 (Supabase HTTP/2 풀 ConnectionTerminated 폭주 영역 차단).
+        immediate_skip_if_fresh_hours: 사이클 193 신선도 게이트 (default None = 기존 행위 완전 동일).
+            지정 시 immediate 블록에서 `system_config.get_task_last_success(task_label)`
+            마커가 N시간 이내면 immediate once() skip (정기 while 루프 발화는 무관 영속).
+            once() 성공 직후 (immediate + while 양쪽) `set_task_last_success(task_label, KST iso)`
+            기록 (try/except graceful). None = 마커 조회/기록 0건 (신규 DB 접근 0).
+            음수 경과(미래 마커/시계 이상) 방어: `0 <= elapsed < hours * 3600` 조건.
 
     영속 의무 매트릭스:
     - 사이클 88 G-REJECT graceful 영속 (CancelledError + Exception 분리).
@@ -96,15 +107,46 @@ async def run_periodic_task_loop(
                 await asyncio.sleep(initial_delay_secs)
             except asyncio.CancelledError:
                 return
-        try:
-            summary = await once_callable()
-            record_fn(summary)
-            flush_fn()
-            logger.info(summary_log_format, *_build_log_args(summary))
-        except asyncio.CancelledError:
-            return
-        except Exception:
-            logger.exception("[%s] 초기 실행 예외 graceful", task_label)
+
+        # 사이클 193 신선도 게이트 — N시간 이내 성공 마커 있으면 immediate skip
+        _run_immediate = True
+        if immediate_skip_if_fresh_hours is not None:
+            try:
+                from src.db.system_config import get_task_last_success as _get_marker  # noqa: PLC0415
+                from src.db._kst import KST as _KST  # noqa: PLC0415
+                _last_iso = await _get_marker(task_label)
+                if _last_iso is not None:
+                    _last_dt = datetime.fromisoformat(_last_iso)
+                    _now_kst = datetime.now(_KST)
+                    _elapsed_secs = (_now_kst - _last_dt).total_seconds()
+                    if 0 <= _elapsed_secs < immediate_skip_if_fresh_hours * 3600:
+                        logger.info(
+                            "[%s] immediate run skip — fresh last_success=%s",
+                            task_label,
+                            _last_iso,
+                        )
+                        _run_immediate = False
+            except Exception:
+                pass  # graceful — 조회/파싱 예외 시 즉시 실행 (안전 방향)
+
+        if _run_immediate:
+            try:
+                summary = await once_callable()
+                record_fn(summary)
+                flush_fn()
+                logger.info(summary_log_format, *_build_log_args(summary))
+                # 사이클 193 — immediate 성공 마커 기록 (graceful)
+                if immediate_skip_if_fresh_hours is not None:
+                    try:
+                        from src.db.system_config import set_task_last_success as _set_marker  # noqa: PLC0415
+                        from src.db._kst import now_kst_iso as _now_kst_iso  # noqa: PLC0415
+                        await _set_marker(task_label, _now_kst_iso())
+                    except Exception:
+                        logger.debug("[%s] 신선도 마커 기록 실패 graceful", task_label)
+            except asyncio.CancelledError:
+                return
+            except Exception:
+                logger.exception("[%s] 초기 실행 예외 graceful", task_label)
 
     # while 루프 — _wait_until → once → record + flush + logger
     # 사이클 160 hotfix — `advance_if_passed=True` 명시 (task_loop_helper 폭주 차단 의무).
@@ -118,6 +160,14 @@ async def run_periodic_task_loop(
             record_fn(summary)
             flush_fn()
             logger.info(summary_log_format, *_build_log_args(summary))
+            # 사이클 193 — while 루프 성공 마커 기록 (graceful)
+            if immediate_skip_if_fresh_hours is not None:
+                try:
+                    from src.db.system_config import set_task_last_success as _set_marker  # noqa: PLC0415
+                    from src.db._kst import now_kst_iso as _now_kst_iso  # noqa: PLC0415
+                    await _set_marker(task_label, _now_kst_iso())
+                except Exception:
+                    logger.debug("[%s] 신선도 마커 기록 실패 graceful", task_label)
         except asyncio.CancelledError:
             break
         except Exception:

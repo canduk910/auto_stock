@@ -60,6 +60,7 @@ Supabase (PostgreSQL) CRUD 모듈.
 ## system_config.py — 시스템 설정 키-값 헬퍼
 
 - **read 9함수 `execute_with_retry` 경유 (사이클 189)**: `get_cash_usage_ratio`/`get_auto_regime_adjust`/`_get_bool_or_none`/`get_buy_block_mode`/`_get_float_or_default`/`_get_bool_or_default`/`_get_int_or_default`/`_get_str_or_default_UNUSED`/`_get_string_or_none` — connection 계열 예외 1회 재시도, 기존 폴백 기본값 불변. 쓰기(`_upsert`/`_set_*`)는 직접 to_thread 유지 (AST `test_cycle189_ast_read_retry.py`)
+- **task 신선도 마커 (사이클 193, 2026-07-04)**: `get_task_last_success(task_label) -> str | None` (키 `task_last_success_<label>`, `_get_string_or_none` 경유 = 189 retry 자동 수혜) / `set_task_last_success(task_label, iso_ts)` (upsert 패턴, 쓰기 = retry 미경유 영속). `task_loop_helper.run_periodic_task_loop` 의 `immediate_skip_if_fresh_hours` 게이트 전용 — 재시작 immediate run 이 N시간 이내 성공 마커 존재 시 skip (아침 프리마켓 burst 완화). 값은 KST ISO (`now_kst_iso()`)
 - `get_cash_usage_ratio() -> float` / `set_cash_usage_ratio(ratio)`: 키 `cash_usage_ratio`, JSONB `{"value": float}`. 범위 `[0.0, 1.0]`, 5% 단위 자동 보정, 기본 1.0
 - `get_auto_regime_adjust() -> bool` / `set_auto_regime_adjust(value)`: 키 `auto_regime_adjust`, 기본 True
 - **외부 통합 토글** (DB 우선, .env fallback):

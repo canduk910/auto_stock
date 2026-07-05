@@ -858,3 +858,25 @@ async def set_krx_open_api_config(
         await _set_string(_KRX_OPEN_API_BASE_URL_KEY, base_url)
     if enabled is not None:
         await _set_bool(_KRX_OPEN_API_ENABLED_KEY, enabled)
+
+
+# ---------------------------------------------------------------------------
+# 사이클 193 — 재시작 immediate run 신선도 게이트 task 마커 헬퍼
+# ---------------------------------------------------------------------------
+
+
+async def get_task_last_success(task_label: str) -> Optional[str]:
+    """task_last_success_<label> 키 ISO 문자열 조회. 키 부재 / 실패 시 None graceful.
+
+    사이클 189 execute_with_retry 수혜 (_get_string_or_none 경유 = retry 자동 상속).
+    """
+    return await _get_string_or_none(f"task_last_success_{task_label}")
+
+
+async def set_task_last_success(task_label: str, iso_ts: str) -> None:
+    """마지막 성공 시각 upsert. 실패 시 예외 전파 없이 graceful.
+
+    쓰기 = execute_with_retry 미경유 (_set_string 패턴 직답습, 사이클 187/189 정책 영속).
+    JSONB 표준 {"value": iso} 형태.
+    """
+    await _set_string(f"task_last_success_{task_label}", iso_ts)

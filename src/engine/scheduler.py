@@ -2971,7 +2971,7 @@ class TradingScheduler:
             record_full_universe_load_summary,
             flush_full_universe_load_collector,
         )
-        from src.engine.task_loop_helper import run_periodic_task_loop
+        from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
 
         await run_periodic_task_loop(
             scheduler=self,
@@ -2990,6 +2990,9 @@ class TradingScheduler:
             ),
             # 사이클 158 Q3 stagger — 가장 무거운 task = 즉시 발화 (0초)
             initial_delay_secs=0,
+            # 사이클 193 신선도 게이트 미적용 — full_universe 는 TTL 멱등
+            # (skipped_ttl 로 immediate 이미 저렴) + 유니버스 populator 라
+            # 게이트 시 self-heal 상실 위험 → 게이트 대상 = basics/master 만.
         )
 
     async def _stock_master_daily_load_task_loop(self) -> None:
@@ -3010,7 +3013,7 @@ class TradingScheduler:
             record_stock_master_daily_load,
             flush_stock_master_daily_load_collector,
         )
-        from src.engine.task_loop_helper import run_periodic_task_loop
+        from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
 
         await run_periodic_task_loop(
             scheduler=self,
@@ -3030,6 +3033,9 @@ class TradingScheduler:
             # 사이클 159 stagger 임계 상향 (refactor-expert 자문 옵션 C)
             # = full_universe 처리 (~280s) 완료 *직후* 진입 = 0 overlap
             initial_delay_secs=240,
+            # 사이클 193 신선도 게이트 미적용 — daily_load 는 max_bas_dd 멱등
+            # (skipped_fresh 로 immediate 이미 저렴) + 게이트 시 특정 이중 재시작에
+            # 당일 후장 최종봉 미적재 off-by-one 위험 → 게이트 대상 = basics/master 만.
         )
 
     async def _stock_master_basics_refresh_task_loop(self) -> None:
@@ -3059,7 +3065,7 @@ class TradingScheduler:
             record_stock_master_basics_refresh,
             flush_stock_master_basics_refresh_collector,
         )
-        from src.engine.task_loop_helper import run_periodic_task_loop
+        from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
 
         await run_periodic_task_loop(
             scheduler=self,
@@ -3079,6 +3085,10 @@ class TradingScheduler:
             # = full_universe 280s 처리 시간 정합 + 30s overlap 허용
             # 운영 실측 06-17 = master_skip 992 / basics_skip 1958 / 24h 폭주 영역 시정
             initial_delay_secs=480,
+            # 사이클 193 신선도 게이트 — basics 는 멱등 없이 매 run updated=3575
+            # (17분 실제 burst) → 아침 boot 재시작 시 fresh 마커면 immediate skip.
+            # 게이트 적용 2 task 중 하나 (basics/master), 정기 while 발화는 무관.
+            immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS,
         )
 
     async def _stock_master_master_load_task_loop(self) -> None:
@@ -3115,7 +3125,7 @@ class TradingScheduler:
             record_stock_master_master_load,
             flush_stock_master_master_load_collector,
         )
-        from src.engine.task_loop_helper import run_periodic_task_loop
+        from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
 
         await run_periodic_task_loop(
             scheduler=self,
@@ -3135,6 +3145,9 @@ class TradingScheduler:
             # 사이클 159 stagger 임계 상향 (refactor-expert 자문 옵션 C)
             # = basics 완료 30초 후 진입 = HTTP/2 race 차단 마진 확보
             initial_delay_secs=720,
+            # 사이클 193 신선도 게이트 — master 는 멱등 없이 매 run updated=3565
+            # (4분 실제 burst) → 게이트 적용 2 task 중 하나 (basics/master).
+            immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS,
         )
 
     async def _evening_funnel_capture_once(self) -> dict:
@@ -3308,6 +3321,8 @@ class TradingScheduler:
         def _noop_flush() -> None:
             return None
 
+        from src.engine.task_loop_helper import IMMEDIATE_FRESH_SKIP_HOURS
+
         await run_periodic_task_loop(
             scheduler=self,
             task_label="stock_master_daily_purge",
@@ -3320,6 +3335,8 @@ class TradingScheduler:
                 "elapsed_ms=%d cutoff=%s"
             ),
             summary_keys=("deleted", "protected_count", "elapsed_ms", "cutoff"),
+            # 사이클 193 신선도 게이트 미적용 — purge 는 사이클 192 후 저렴(일 1날짜)
+            # + burst 아님 → 게이트 대상 = basics/master 만.
         )
 
     def _detect_silent_inactive_sessions(self) -> list[str]:
