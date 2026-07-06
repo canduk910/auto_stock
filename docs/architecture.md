@@ -431,12 +431,12 @@ on_tick(ticker, current_price)
 ```
 prepare() 단계:
 │
-├─ _scan_universe(): 거래량순위 API(FHPST01710000) 응답 1건으로
-│    후보 + 시총·전일 거래대금 산출
-│    ├─ 시총   = stck_prpr × lstn_stcn
-│    ├─ 거래대금 = prdy_vol × (stck_prpr - prdy_vrss)   ← 영업일 기준, 시간 비의존
+├─ _scan_universe(): stock_master.list_by_filter (DB 단일 조회, 사이클 108 —
+│    거래량순위 API 폐기, KIS 호출 0건)
+│    ├─ 시총    = raw.hts_avls (억원) JSONB 필터 ≥ min_market_cap
+│    ├─ 거래대금 = raw.acml_tr_pbmn JSONB 필터 ≥ min_trade_amount
 │    └─ 0종목 확정 시 ERROR 로그 + system_logs 기록
-├─ fetch_daily_candles(): 21일 일봉
+├─ get_recent_daily_normalized(): DB 우선 일봉 (사이클 173, 락/신선도/부족 시 KIS 폴백)
 ├─ K값 = avg(노이즈 비율) = avg(1 - |종가-시가| / (고가-저가))
 ├─ target_offset_base = 전일 Range × K                  ← 보드별 K 곱 전 기본값
 ├─ ticker_prev_close[ticker] = candles[0].stck_clpr     (전일 종가 사전 등록)
@@ -724,7 +724,7 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 
 ### 13.1 다중 전략 확장 (6 전략)
 
-- 신규: `bull_flag_breakout` (눌림목 돌파, KRX 등락률 순위 → 폴 자동 검출 + 플래그 검출 → 09:05~13:00 돌파 + 거래량 ≥ 평균×2. 5영업일 시간 청산, 3영업일 쿨다운)
+- 신규: `bull_flag_breakout` (눌림목 돌파, `stock_master.list_by_filter` 시총·거래대금 컷 → 폴 자동 검출 + 플래그 검출 → 09:05~13:00 돌파 + 거래량 ≥ 평균×2. 5영업일 시간 청산, 3영업일 쿨다운)
 - 신규: `vcp_breakout` (미네르비니식 VCP. 220일 일봉 → 추세 필터 + 베이스 검출 + pullback 점진 수축 + 거래량 수축 → 09:05~14:30 돌파. **멀티데이 보유** — `Position._MULTIDAY_STRATEGIES` 멤버. 7영업일 쿨다운)
 - `_MULTIDAY_STRATEGIES = frozenset({donchian_swing, vcp_breakout})` — `is_next_day` 항상 False
 - 상세: `src/engine/strategies/CLAUDE.md`

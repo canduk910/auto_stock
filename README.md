@@ -258,7 +258,7 @@ KIS_APP_SECRET=실전용_시크릿
 ### 전략 E: 눌림목 돌파 (`bull_flag_breakout`, 2026-05-15 추가)
 | 구분 | 규칙 |
 |------|------|
-| 종목군 | KRX 등락률 순위 → 시총 ≥ 500억 + 거래대금 ≥ 20억 |
+| 종목군 | `stock_master.list_by_filter` (시총 ≥ 500억 + 거래대금 ≥ 20억, ETF/ETN 제외) — 사이클 108 KIS 순위 API 폐기 |
 | 매매 가능 보드 | MAIN(09:05~13:00) |
 | 진입 조건 | **폴 자동 검출**(직전 3~10영업일 누적 +20%↑, 음봉 비율 ≤ 30%) + **플래그 자동 검출**(3~10영업일 횡보, 조정 폭 ≤ 폴 폭의 38.2%, 거래량 < 폴 평균의 60%) → 플래그 상단(`flag_high`) 돌파 + 당일 거래량 ≥ `flag_avg_volume × 2` |
 | 매수 | 종목당 1회 + 3영업일 쿨다운. 부분봉 가드(`candles[0]==오늘`이면 [1]부터) |
@@ -287,7 +287,7 @@ KIS_APP_SECRET=실전용_시크릿
 | 잔고부족 매수 락 | 900초 — `is_insufficient_cash` 응답 또는 `max_buy_quantity≤0` 시 다음 잔고 sync까지 매수 차단 |
 | 매도 잔고부족 즉시 break | `is_insufficient_quantity` 응답 시 3회 재시도 생략 + 메모리·DB positions 정리 |
 | 체결통보 race 가드 | 시장가 즉시체결 시 체결통보가 REST 응답보다 먼저 와도 `_completed_orders` set + 보정 INSERT로 PENDING 잔존 차단 |
-| 진입 차단 | VB/LTV `_scan_universe`의 거래량순위 후보 + `scanner.scan_stocks` 모두 `ticker.isdigit()` 검증 |
+| 진입 차단 | VB/LTV `_scan_universe`의 `list_by_filter` 후보 + `scanner.scan_stocks` 모두 `ticker.isdigit()` 검증 |
 | 보드 가드 | `RiskManager.on_tick`에서 매수 신호 평가 전 `session_tracker.is_tradable(strategy_id, params)`로 현재 활성 보드가 전략 `tradable_boards`에 포함됐는지 확인 — 비활성 보드에서는 신호 평가 자체 skip |
 | 매수 수량 1주 fallback (전략 잔여 자금 기준) | `position_ratio × total_investment // current_price = 0`이어도 **전략 잔여 자금**(= `total_investment` − 해당 전략 보유 `buy_price×qty` 합 − 해당 전략 `pending_buy_amounts` 합)이 1주 살 수 있으면 1주 매수. 4개 전략 모두 `StrategyBase._fallback_one_share()` 공통 헬퍼 호출. 기존 고정 `total_investment` 직접 비교 → 자금 90% 점유 후 추가 1주 매수로 **전략 한도 초과**하던 결함 차단(2026-05-11 P1) |
 | NXT 거래가능 사전 판별 (Phase G) | KIS `CTPF1002R` 응답 `cptt_trad_tr_psbl_yn=="Y" AND nxt_tr_stop_yn=="N"`로 `nxt_tradable` 파생. `stock_master` 테이블(24h TTL)에 캐시. `OrderEngine._strategy_exchange_async`가 `nxt_tradable=False`면 NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` 로그. `scheduler._execute_next_day_clear`는 1순위 판별로 사용 → 시가 폴링/안정화 거치지 않고 즉시 보류(NXT 주문 시도 0). `execute_sell`이 NXT 시간대 매도 거부 받으면 `stock_master.upsert_one(nxt_tradable=False)` 사후 보강 |

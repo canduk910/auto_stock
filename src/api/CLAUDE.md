@@ -224,7 +224,7 @@ KRX 키 관리 인프라 + Supabase 저장 + 마스킹. 본 사이클 = 인프�
 ## condition.py — 조건검색 + 영업일 + 종목 기본정보 + TTL 캐시
 
 - **시세성 호출 풀 라우팅**: 본 모듈 6 함수 모두 `kis_get_quote` 사용 — 보조 라운드로빈 + 메인 fallback. 시그니처 변경 0 (외부 영향 없음). `from src.api.base import kis_get_quote` (메인 `kis_get` import 제거)
-- 거래량순위 API (FHPST01700000) 로 종목 필터링. 시총/거래대금 필터
+- 등락률순위 API (FHPST01700000, `/ranking/fluctuation`) 로 종목 필터링 (momentum 전용 — `거래량순위`(FHPST01710000)와 다른 TR). 시총/거래대금 필터
 - `is_market_open(date)`: KIS chk-holiday API (CTCA0903R) 로 개장일 여부 (`opnd_yn == "Y"`)
 - `next_trading_day(after_date)`: 다음 개장일 (휴일 다음날 자동)
 - `add_business_days(base_date, n)` (사이클 191): base_date 이후 n번째 개장일 date. CTCA0903R 1회 호출(~30일치)에서 `opnd_yn=="Y"` n번째 row. 실패/개장일 부족 시 `base + timedelta(n+2)` 달력일 폴백 graceful. BFB/VCP 재진입 쿨다운 영업일 정정용 (`_refine_cooldown_business_days` 소비)
