@@ -126,7 +126,8 @@ async def force_reconnect_session(scheduler: Any, label: str) -> bool:
     1. 시간당 cap 검사: 60분 이전 시각 제거 후 남은 카운트 >= cap 면 SKIP + WARNING.
     2. label 분기:
        - "main" → kis_ws._ws.close() (모듈 레벨 심볼 직접 참조)
-       - "quote-N" → kis_ws_pool._quotes[N-1]._ws.close()
+       - DB 라벨(gold/sub 등) → _quotes 리스트에서 _label 매칭 세션 close
+         (사이클 194 — 사이클 43 라벨 통일 완결, disable_quote_session 패턴 정합)
     3. 영구 로그: INFO + system_logs write_log (fire-and-forget)
     4. _silent_inactive_first_seen.pop(label) — 다음 5분 카운트 리셋
     5. _silent_inactive_recovery_count[label].append(time.monotonic())
@@ -167,15 +168,14 @@ async def force_reconnect_session(scheduler: Any, label: str) -> bool:
     if label == "main":
         ws_obj = getattr(kis_ws, "_ws", None)
     else:
-        # "quote-N" → idx = N-1 (모듈 레벨 kis_ws_pool 직접 참조 — 테스트 패치 대응)
-        try:
-            idx = int(label.replace("quote-", "")) - 1
-            quotes = getattr(kis_ws_pool, "_quotes", [])
-            if 0 <= idx < len(quotes):
-                ws_obj = getattr(quotes[idx], "_ws", None)
-        except (ValueError, AttributeError):
+        # 사이클 194 — DB 라벨 매칭 (gold/sub 등). 사이클 43 라벨 통일 완결
+        # (disable_quote_session websocket_pool.py:455 정합). quote-N 인덱스 파싱 폐기.
+        quotes = getattr(kis_ws_pool, "_quotes", [])
+        matched = next((q for q in quotes if getattr(q, "_label", None) == label), None)
+        if matched is None:
             logger.warning("[silent_inactive_force_reconnect] 알 수 없는 label=%s", label)
             return False
+        ws_obj = getattr(matched, "_ws", None)
 
     if ws_obj is None:
         logger.warning("[silent_inactive_force_reconnect] label=%s _ws is None — skip", label)

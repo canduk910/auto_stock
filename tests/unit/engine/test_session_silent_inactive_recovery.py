@@ -190,13 +190,23 @@ async def test_force_reconnect_main_session(scheduler_inst):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_force_reconnect_quote_session(scheduler_inst):
-    """보조 세션 quote-1 → pool._quotes[0]._ws.close() 호출."""
+    """보조 세션 DB 라벨(gold) → pool._quotes[매칭]._ws.close() 호출.
+
+    사이클 194 의미 전환 (사이클 66 K-2):
+    - 기존엔 구식 "quote-1" 1-based 인덱스 라벨 + `_label` 미주입 = force_reconnect_session
+      의 `int("quote-1".replace("quote-", "")) - 1` 파싱을 박제 = **버그 자체를 인코딩**
+      (사이클 43 라벨 통일 후 실제 DB 라벨은 gold/sub/ISA — quote-N 은 production 부재).
+    - Green 은 disable_quote_session(websocket_pool.py:455) 패턴 미러링
+      (`getattr(q, "_label", None) == label`). label="gold" + `_label="gold"` 주입.
+    - 단언 의도(pool._quotes[매칭]._ws.close() 호출 + first_seen pop) 보존.
+    """
     mock_ws = AsyncMock()
     mock_ws.close = AsyncMock()
     mock_quote_session = MagicMock()
     mock_quote_session._ws = mock_ws
+    mock_quote_session._label = "gold"  # 사이클 194 — DB 라벨 주입
 
-    scheduler_inst._silent_inactive_first_seen["quote-1"] = NOW
+    scheduler_inst._silent_inactive_first_seen["gold"] = NOW
 
     async def _noop_write_log(*a, **kw):
         return None
@@ -204,11 +214,11 @@ async def test_force_reconnect_quote_session(scheduler_inst):
     with patch("src.engine.scheduler.kis_ws_pool") as mock_pool, \
          patch("src.engine.scheduler.write_log", _noop_write_log):
         mock_pool._quotes = [mock_quote_session]
-        result = await scheduler_inst._force_reconnect_session("quote-1")
+        result = await scheduler_inst._force_reconnect_session("gold")
 
-    assert result is True, "보조 세션 reconnect 성공"
+    assert result is True, "보조 세션(gold) reconnect 성공"
     mock_ws.close.assert_awaited_once()
-    assert "quote-1" not in scheduler_inst._silent_inactive_first_seen, "first_seen pop 확인"
+    assert "gold" not in scheduler_inst._silent_inactive_first_seen, "first_seen pop 확인"
 
 
 # ---------------------------------------------------------------------------

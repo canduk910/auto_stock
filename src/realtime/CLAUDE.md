@@ -52,7 +52,7 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 
 - `total/acked` = 합집합 카운트, 세션별 분해는 `sessions[*]`
 - `limit = MAX_SUBSCRIPTIONS × len(sessions)` (메인 + 보조 합산 용량)
-- **사이클 43 (2026-05-22) — 세션 라벨 통일**: 보조 세션 라벨 `quote-1/quote-2/quote-3` 1-based index → DB `kis_quote_accounts.label` (ISA/sub/gold 등 사용자 등록 라벨) 직접 사용. `_session_label(ws)` / `get_session_status()` / `disable_quote_session(label)` / `[tick_coverage_session]` / `[stale_watcher_detail]` / `[priority_drop_pool]` / `[silent_inactive_force_reconnect]` / 사이클 42 `[ws_heartbeat]` / UI `KisAccountPoolCard` 모두 동일 라벨. 메인 라벨 `"main"` 절대 보존. `_quotes[idx]` 인덱스 자체는 변경 0
+- **사이클 43 (2026-05-22) — 세션 라벨 통일**: 보조 세션 라벨 `quote-1/quote-2/quote-3` 1-based index → DB `kis_quote_accounts.label` (ISA/sub/gold 등 사용자 등록 라벨) 직접 사용. `_session_label(ws)` / `get_session_status()` / `disable_quote_session(label)` / `[tick_coverage_session]` / `[stale_watcher_detail]` / `[priority_drop_pool]` / `[silent_inactive_force_reconnect]` / 사이클 42 `[ws_heartbeat]` / UI `KisAccountPoolCard` 모두 동일 라벨. 메인 라벨 `"main"` 절대 보존. `_quotes[idx]` 인덱스 자체는 변경 0. **사이클 194 (2026-07-06)**: `force_reconnect_session`(stale_session_recovery.py) 의 라벨→세션 *해석* 로직이 사이클 43에서 미이주되어 구식 `int(label.replace("quote-",""))` 파싱 잔존 → DB 라벨(gold/sub) 시 ValueError → `알 수 없는 label` → 보조 세션 강제 재연결 미발화 회귀였음. 사이클 194가 `disable_quote_session` 의 `getattr(q, "_label", None) == label` 매칭으로 교체 = 사이클 43 라벨 통일이 이 함수까지 완결 (로그 prefix 는 DB 라벨이었으나 내부 해석만 quote-N 잔존이던 문서-코드 불일치 해소)
 - 보조 0개 → `sessions` 길이 1 (main only, 기존 호환)
 
 ## websocket.py — KisWebSocket 연결 관리
