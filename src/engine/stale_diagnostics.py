@@ -84,9 +84,7 @@ def build_session_subscription_view(scheduler: Any) -> list[dict]:
 
     # 세션별 capacity (시세 채널만 카운트, 체결통보/MKOP 제외). 보조 세션은 인덱스 → 객체 매핑.
     sessions_view: list[dict] = []
-    label_order = ["main"] + [
-        f"quote-{i}" for i in range(1, len(kis_ws_pool._quotes) + 1)
-    ]
+    label_order = ["main"]
     # unknown 라벨 (race 대응) 도 포함
     if "unknown" in groups and "unknown" not in label_order:
         label_order.append("unknown")
@@ -105,13 +103,11 @@ def build_session_subscription_view(scheduler: Any) -> list[dict]:
         ws_obj = None
         if label == "main":
             ws_obj = kis_ws_pool._main
-        elif label.startswith("quote-"):
-            try:
-                idx = int(label.split("-", 1)[1]) - 1
-                if 0 <= idx < len(kis_ws_pool._quotes):
-                    ws_obj = kis_ws_pool._quotes[idx]
-            except (ValueError, IndexError):
-                ws_obj = None
+        else:
+            ws_obj = next(
+                (q for q in kis_ws_pool._quotes if getattr(q, "_label", None) == label),
+                None,
+            )
 
         if ws_obj is not None:
             cap_used = sum(
