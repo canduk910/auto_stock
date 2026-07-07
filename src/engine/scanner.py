@@ -2097,9 +2097,9 @@ def _emit_stock_master_age_warning(ticker: str, age_days: int) -> None:
 _DAILY_LOAD_FETCH_DAYS = 100   # KIS 1회 호출 한도 (Q2=C, 사이클 33 KIS_DAILY_CANDLES_MAX)
 _DAILY_LOAD_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 83/91/97/107 답습)
 _DAILY_LOAD_INCREMENTAL_THRESHOLD = 50  # 50일 이상 적재된 ticker 는 증분 적재 (Q3=B)
-# 사이클 172 — VCP universe (KOSPI200 ∪ KOSDAQ150) 220일 backfill 임계.
-# VCP 전략 최대 lookback 220일 (EMA + base + pullback). DB 깊이 < 220 이면 분할 backfill.
-_DAILY_LOAD_VCP_BACKFILL_DAYS = 220
+# 사이클 196 — retention 230cal=154영업일 실측 → 120 안전 수렴(34일 마진) + VCP prepare 100일 위 20일 버퍼.
+# VCP 전략 실제 사용 100일 (vcp_breakout.py:162-164). DB 깊이 < 120 이면 분할 backfill.
+_DAILY_LOAD_VCP_BACKFILL_DAYS = 120
 
 
 async def _stock_master_daily_load_once(force: bool = False) -> dict:

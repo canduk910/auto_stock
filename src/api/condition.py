@@ -653,16 +653,16 @@ async def fetch_daily_candles_ranged(
 
 
 async def fetch_daily_candles_backfill(
-    ticker: str, total_days: int = 220, *, window: int = 100
+    ticker: str, total_days: int = 120, *, window: int = 100
 ) -> list[dict]:
     """N일 backfill — 날짜 윈도우 ×ceil(N/window) 순차 호출 + 병합 dedupe.
 
-    220일 = 100일 윈도우 ×3 (예: T-230~T-130 / T-130~T-30 / T-30~T) 순차 호출 +
-    중복 bas_dd dedupe (윈도우 경계 겹침 제거) + bas_dd DESC 병합 정렬.
+    사이클 196 — 마지막 윈도우 start_offset = min((i+1)*window, total_days) 클램프 적용.
+    total_days=120 시 윈도우 2개 (100/20), 마지막 start_offset=120 → 178cal (290 아님).
 
     Args:
         ticker: KRX 6자리 단축코드.
-        total_days: 총 backfill 일수 (VCP 기본 220).
+        total_days: 총 backfill 일수 (VCP 기본 120, 사이클 196 수렴).
         window: 윈도우당 일수 (KIS 한도 100).
 
     Returns:
@@ -687,7 +687,8 @@ async def fetch_daily_candles_backfill(
         # 윈도우 i: [T - (i+1)*window*달력여유, T - i*window*달력여유]
         # 달력일 ≈ 영업일 × 7/5 + 마진 (휴일/공휴일 보정)
         end_offset = i * window
-        start_offset = (i + 1) * window
+        # 사이클 196 — 마지막 윈도우 목표 초과 fetch 차단 (retention 밖 churn 원천 봉쇄)
+        start_offset = min((i + 1) * window, total_days)
         # 달력일 환산 (영업일/달력일 5/7 + 마진)
         end_cal = int(end_offset * 7 / 5)
         start_cal = int(start_offset * 7 / 5) + 10

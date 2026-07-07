@@ -1,13 +1,14 @@
 """사이클 172 (2026-06-22) — _stock_master_daily_load_once VCP universe 220일 backfill 분기.
+사이클 196 (2026-07-07) — 임계 220 → 120 수렴 (retention 154영업일 실측 기반).
 
-VCP universe (KOSPI200 ∪ KOSDAQ150) 종목 중 DB 깊이 < 220 → 220일 backfill (분할 fetch).
+VCP universe (KOSPI200 ∪ KOSDAQ150) 종목 중 DB 깊이 < 120 → 120일 backfill (분할 fetch).
 나머지 종목 = 현행 T-100 유지 (회귀 0).
 
 회귀 가드 매트릭스:
-- SCAN-1 (HIGH): VCP universe (is_kospi200) DB < 220 → fetch_daily_candles_backfill 분기
+- SCAN-1 (HIGH): VCP universe (is_kospi200) DB < 120 → fetch_daily_candles_backfill 분기
 - SCAN-2 (HIGH): VCP universe (is_kosdaq150) 동일 분기
 - SCAN-3 (HIGH): 비 VCP universe → 현행 100일 fetch_daily_candles 유지 (회귀)
-- SCAN-4: VCP universe DB >= 220 → 증분 유지 (재 backfill 금지)
+- SCAN-4: VCP universe DB >= 120 → 증분 유지 (재 backfill 금지)
 - SCAN-5: graceful (backfill 실패 → 다음 ticker 진행)
 - SAFETY-1 (HIGH): 매매 무관 — risk/order_engine/realtime/auth import 0
 
