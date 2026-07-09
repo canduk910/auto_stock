@@ -725,7 +725,7 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 ### 13.1 다중 전략 확장 (6 전략)
 
 - 신규: `bull_flag_breakout` (눌림목 돌파, `stock_master.list_by_filter` 시총·거래대금 컷 → 폴 자동 검출 + 플래그 검출 → 09:05~13:00 돌파 + 거래량 ≥ 평균×2. 5영업일 시간 청산, 3영업일 쿨다운)
-- 신규: `vcp_breakout` (미네르비니식 VCP. 220일 일봉 → 추세 필터 + 베이스 검출 + pullback 점진 수축 + 거래량 수축 → 09:05~14:30 돌파. **멀티데이 보유** — `Position._MULTIDAY_STRATEGIES` 멤버. 7영업일 쿨다운)
+- 신규: `vcp_breakout` (미네르비니식 VCP. 일봉 100일(prepare cap) → 추세 필터 + 베이스 검출 + pullback 점진 수축 + 거래량 수축 → 09:05~14:30 돌파. **멀티데이 보유** — `Position._MULTIDAY_STRATEGIES` 멤버. 7영업일 쿨다운)
 - `_MULTIDAY_STRATEGIES = frozenset({donchian_swing, vcp_breakout})` — `is_next_day` 항상 False
 - 상세: `src/engine/strategies/CLAUDE.md`
 

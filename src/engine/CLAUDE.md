@@ -50,7 +50,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 
 ## 사이클 172 (2026-06-22) — stock_master_daily 220일 확보 (LOW~MEDIUM, 데이터 plumbing, 사이클 173 선행)
 
-승인 설계 `/Users/koscom/.claude/plans/funnel-vast-wolf.md` 사이클 172 절. 전략별 최대 일봉 lookback = VCP 220일 (나머지 5전략 ≤65일, 현 retention 충분). 현재 backfill T-100 / retention T-150 → VCP universe (KOSPI200∪KOSDAQ150, 348종목) 220일 부족. **prepare/매수 target 미변경** (데이터 적재/조회만, 173에서 prepare 전환).
+승인 설계 `/Users/koscom/.claude/plans/funnel-vast-wolf.md` 사이클 172 절 (도입 시점 동기부여 서술 — 아래 사이클 196 정정 참조). 사이클 172 는 VCP universe (KOSPI200∪KOSDAQ150, 348종목) 220일 backfill 을 도입했으나, **⚠️ 사이클 196 정정**: retention 230cal = 154영업일 실측 < 220 → `existing_count` 220 미도달 → 무한 재backfill(churn). VCP prepare 는 실사용 100일뿐(`vcp_breakout.py:162-164`, "220 미사용") → **backfill target 220→120 하향 수렴** (아래 분기 절). **prepare/매수 target 불변** (데이터 적재/조회만).
 
 ### `scanner.py::_stock_master_daily_load_once` VCP universe backfill 분기 (사이클 172 도입 220일 → 사이클 196 120일 수렴)
 
