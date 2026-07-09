@@ -22,6 +22,7 @@ from websockets.asyncio.client import ClientConnection
 from src.auth.token import token_manager
 from src.config import settings
 from src.db.system_logs import write_log
+from src.engine.daily_emit_cap import DailyEmitCap  # 사이클 197 — 41-cap WARNING 1회/키/일 (의존성 0, 순환 없음)
 from src.realtime.handler import set_aes_keys
 
 logger = logging.getLogger(__name__)
@@ -128,6 +129,10 @@ class KisWebSocket:
         # 사이클 17 보강 (2026-05-19) — 60s → 300s. `_scan_loop` 5분 주기 ≥ backoff 만료
         # 보장하여 같은 사이클 내 재시도 차단. KIS 답변 인용: "기등록한 사항을 재등록하지 않도록".
         self._opsp_backoff_until: dict[tuple[str, str], float] = {}
+        # 사이클 197 — 41-cap 도달 WARNING DailyEmitCap (1회/(tr_id,tr_key)/일, KST 자기리셋).
+        # 5분 scan 재시도가 동일 LOW 키를 반복 emit 하던 스팸 억제 (드롭 행위 불변).
+        self._max_sub_warn_cap: DailyEmitCap[tuple[str, str]] = DailyEmitCap()
+        self._max_sub_warn_date: str = ""
         self._running = False
         self._reconnect_count = 0
         self._on_message: Callable[[str, str, str, bool], Awaitable[None]] | None = None
@@ -461,7 +466,15 @@ class KisWebSocket:
                 )
                 return
         if not bypass_limit and len(self._subscriptions) >= MAX_SUBSCRIPTIONS:
-            logger.warning("최대 구독 수(%d) 도달, %s/%s 구독 건너뜀", MAX_SUBSCRIPTIONS, tr_id, tr_key)
+            # 사이클 197 — WARNING DailyEmitCap (1회/키/일, KST 자기리셋). 드롭 return 불변.
+            _today = datetime.now(_KST_TZ).date().isoformat()
+            if _today != self._max_sub_warn_date:
+                self._max_sub_warn_date = _today
+                self._max_sub_warn_cap.reset_daily()
+            _warn_key = (tr_id, tr_key)
+            if self._max_sub_warn_cap.should_emit(_warn_key):
+                logger.warning("최대 구독 수(%d) 도달, %s/%s 구독 건너뜀", MAX_SUBSCRIPTIONS, tr_id, tr_key)
+                self._max_sub_warn_cap.mark_emitted(_warn_key)
             return
         self._subscriptions.add((tr_id, tr_key))
         # G1: 명시적 (재)구독 호출 시 기존 ACK 무효화 — 새 응답 대기
