@@ -332,3 +332,36 @@ def fast_sleep(monkeypatch: pytest.MonkeyPatch):
 
     monkeypatch.setattr(asyncio, "sleep", _no_sleep)
     return _no_sleep
+
+
+# ---------------------------------------------------------------------------
+# 사이클 202 — 동시호가 게이트 시간 flakiness 차단 (CI 결정론화)
+#
+# stale_watcher 테스트(~20 파일)가 `SessionTracker.is_call_auction_now()` 를
+# mock/freeze 하지 않아, CI 가 동시호가 시간창(08:30~09:00 / 15:20~15:30 KST)에
+# 실행되면 `stale_watcher_core._call_auction_skip` 이 `[stale_skip_call_auction]`
+# 을 발화하며 stale 감지를 전량 skip → `_stale_last_resubscribe_at` 미갱신 등으로
+# 시간대별 flaky 실패(사이클 173/176 인계, 사이클 201 push 가 15:2x 창에 걸려 실발현).
+#
+# 근본 시정 = `is_call_auction_now` 를 전역 False 로 중립화(시계 독립화). 단, 이
+# 게이트 동작을 *직접 검증*하는 call-auction 테스트(cycle162/182)는 제외하여 실제
+# 로직 보존. stale_watcher_core 는 `from src.engine.session import session_tracker`
+# 모듈 싱글톤을 호출하므로 싱글톤 메서드 패치로 전 경로 커버.
+# ---------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _neutralize_call_auction_gate(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    if "call_auction" in request.node.nodeid:
+        return  # cycle162/182 = 게이트 동작 자체를 검증 → 실제 로직 보존
+    try:
+        from src.engine.session import session_tracker
+
+        monkeypatch.setattr(
+            session_tracker,
+            "is_call_auction_now",
+            lambda now=None: False,
+            raising=False,
+        )
+    except Exception:
+        pass
