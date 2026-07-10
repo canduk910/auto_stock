@@ -90,7 +90,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         "pole_min_return": 15.0,    # 사이클 48 — 20.0→15.0. 한국 ±30% 환경 + 음봉 45% 와 교집합 0 차단
         "pole_max_red_ratio": 0.45,  # 사이클 48 — 0.30→0.45. 강한 폴도 1~2일 음봉 정상
         # 플래그
-        "flag_lookback_min": 3,
+        "flag_lookback_min": 2,  # 사이클 198 — 3→2. 한국 급등주 얕은 2일 눌림 포착 (flag_volume_ratio 안전장치 보전)
         "flag_lookback_max": 10,
         "flag_retracement_max": 0.382,
         "flag_volume_ratio": 0.60,
