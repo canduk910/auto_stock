@@ -25,6 +25,7 @@ from typing import Any
 from src.api.base import get_request_metrics, reset_request_metrics
 from src.config import settings
 from src.db.log_reports import insert_log_report
+from src.db.strategy_funnel import list_snapshots
 from src.db.supabase import supabase
 from src.db.trade_history import get_today_buy_trades_for_funnel, get_trades_in_range
 
@@ -414,6 +415,7 @@ async def generate_daily_log_report(
     trade_metrics = _aggregate_trades(trades)
     api_metrics = get_request_metrics()
     strategy_funnel = await _collect_strategy_funnel()
+    strategy_funnel_stages = await _collect_strategy_funnel_stages(target_date)
     next_day_clear_metrics = _aggregate_next_day_clear(logs)
 
     metrics = {
@@ -421,7 +423,8 @@ async def generate_daily_log_report(
         "logs": log_metrics,
         "trades": trade_metrics,
         "api_metrics": api_metrics,
-        "strategy_funnel": strategy_funnel,
+        "strategy_funnel": strategy_funnel,           # 병존 (coarse, 불변)
+        "strategy_funnel_stages": strategy_funnel_stages,  # 신규 (E-1, 사이클 199)
         "next_day_clear": next_day_clear_metrics,
     }
 
@@ -475,6 +478,87 @@ async def generate_daily_log_report(
     # 리포트 INSERT 후 api 메트릭 리셋 — 다음 영업일 누적 시작
     reset_request_metrics()
     return row
+
+
+# 패턴 단계 키워드 (verdict 판정용). drop_step.step_name 이 이 중 하나를 포함하면
+# "패턴희소", 아니면 (유니버스/필터/차단 등 이른 단계) "후보부족".
+_PATTERN_STEP_KEYWORDS = (
+    "신고가", "돌파", "폴", "플래그", "베이스", "Pullback", "수축", "검출", "EMA", "정렬",
+)
+
+
+async def _collect_strategy_funnel_stages(target_date: date) -> dict[str, dict]:
+    """전략별 per-step funnel + 0신호 자동 판정 (E-1, 사이클 199).
+
+    strategy_funnel_snapshots (DB) 를 읽어 전략별 단계별 생존 수 + verdict 산출.
+    순수 관찰성 — 매매 무관. 실패/빈 → {} graceful (리포트 무중단, 사이클 88 패턴).
+    """
+    try:
+        rows = await list_snapshots(target_date=target_date)
+    except Exception:
+        logger.exception("[funnel_stages] list_snapshots 실패 — graceful {}")
+        return {}
+    if not rows:
+        return {}
+
+    # strategy_id 별 그룹핑 (step_no != 99 만 파이프라인)
+    by_sid: dict[str, list[dict]] = {}
+    for row in rows:
+        sid = row.get("strategy_id") or "unknown"
+        by_sid.setdefault(sid, []).append(row)
+
+    result: dict[str, dict] = {}
+    for sid, sid_rows in by_sid.items():
+        pipeline = sorted(
+            (r for r in sid_rows if int(r.get("step_no", 0)) != 99),
+            key=lambda r: int(r.get("step_no", 0)),
+        )
+        steps = [
+            {
+                "step_no": int(r.get("step_no", 0)),
+                "step_name": r.get("step_name") or "",
+                "survived_count": int(r.get("survived_count", 0)),
+                "excluded_count": int(r.get("excluded_count", 0)),
+            }
+            for r in pipeline
+        ]
+
+        if not steps:
+            result[sid] = {
+                "steps": [], "peak_survived": 0, "final_prepared": 0,
+                "drop_step": None, "verdict": "기록없음",
+            }
+            continue
+
+        peak_survived = max(s["survived_count"] for s in steps)
+        final_prepared = steps[-1]["survived_count"]  # 최대 step_no(≠99) survived
+
+        # drop_step = 직전 step>0 → 현재 step==0 으로 처음 떨어지는 step
+        drop_step = None
+        for i in range(1, len(steps)):
+            if steps[i - 1]["survived_count"] > 0 and steps[i]["survived_count"] == 0:
+                drop_step = {"step_no": steps[i]["step_no"], "step_name": steps[i]["step_name"]}
+                break
+
+        # verdict
+        if final_prepared > 0:
+            verdict = "후보준비완료"
+        elif drop_step is not None:
+            if any(kw in drop_step["step_name"] for kw in _PATTERN_STEP_KEYWORDS):
+                verdict = "패턴희소"
+            else:
+                verdict = "후보부족"
+        else:
+            verdict = "미상"
+
+        result[sid] = {
+            "steps": steps,
+            "peak_survived": peak_survived,
+            "final_prepared": final_prepared,
+            "drop_step": drop_step,
+            "verdict": verdict,
+        }
+    return result
 
 
 async def _collect_strategy_funnel() -> dict[str, dict[str, int]]:
