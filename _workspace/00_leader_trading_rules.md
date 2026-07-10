@@ -382,6 +382,12 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 - 종목당 최대 투자: 할당 자금의 10%
 - 일일 최대 손실 한도: 할당 자금의 5%
 
+### 재진입 쿨다운 (사이클 201)
+- **쿨다운**: 청산 후 **2영업일** (`reentry_cooldown_days=2`, BFB 3영업일 / VCP 7영업일과 구분 — VB 당일청산 특성상 짧게 설정).
+- **배선**: `OrderEngine.on_position_closed(ticker)` 훅에서 `register_cooldown_after_exit(ticker)` 즉시 호출(달력일 근사 = today + days + 2) → `_refine_cooldown_business_days(ticker)` 비동기 정정(CTCA0903R `add_business_days`로 정확한 N영업일 교체, 실패 시 근사값 유지 graceful).
+- **매수 게이트**: `check_buy_signal`의 `is_sold_today` 가드 직후 `_cooldown_until[ticker] >= today` 면 즉시 NONE (돌파 조건 완비 여부 무관).
+- **영속 금지**: `_cooldown_until`는 크로스데이 상태 — `_reset_daily_state`/`prepare()` 리셋 대상에서 절대 제외 (일일 초기화 시 매일 소멸하면 재진입 방어가 무력화됨).
+
 ---
 
 ## 5. 전략 C: 롱테일 변동성 돌파 상세

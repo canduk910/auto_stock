@@ -14,6 +14,7 @@ import asyncio
 import logging
 from datetime import date, datetime, timedelta, timezone
 
+from src.api.condition import add_business_days
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
@@ -82,6 +83,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
         "min_market_cap": 100_000_000_000,   # 시총 1,000억 이상
         "min_trade_amount": 20_000_000_000,  # 거래대금 200억 이상
         "max_scan_stocks": 100,              # 최대 스캔 종목 수
+        # 재진입 쿨다운 (사이클 201, BFB 3 / VCP 7 과 구분 — VB 당일청산 특성상 2영업일)
+        "reentry_cooldown_days": 2,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -106,6 +109,9 @@ class VolatilityBreakoutStrategy(StrategyBase):
         self._universe_candidate_tickers: list[str] = []
         # 사이클 21 — 단계별 카운트 (ScanMonitor 깔때기)
         self._scan_stats: dict = _empty_scan_stats()
+        # 사이클 201 — ticker -> 쿨다운 만료일(이날 이전엔 재진입 금지). multi-day 상태 —
+        # _reset_daily_state/prepare 리셋 절대 금지 (G-VB-NO-DAILY-RESET, BFB 사이클 191 답습).
+        self._cooldown_until: dict[str, date] = {}
 
     async def prepare(self) -> None:
         """장 시작 전: 시총/거래대금 조건 종목 스캔 → 21일 일봉으로 K값/Target 계산.
@@ -652,6 +658,13 @@ class VolatilityBreakoutStrategy(StrategyBase):
             return Signal.NONE
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker) or self.state.is_sold_today(ticker):
             return Signal.NONE
+
+        # 사이클 201 — 재진입 쿨다운 (청산 후 2영업일, BFB 사이클 191 패턴 답습)
+        today = datetime.now(KST).date()
+        cd_until = self._cooldown_until.get(ticker)
+        if cd_until and cd_until >= today:
+            return Signal.NONE
+
         if self.is_max_positions():
             return Signal.NONE
         if self.is_daily_loss_exceeded():
@@ -822,3 +835,37 @@ class VolatilityBreakoutStrategy(StrategyBase):
         if qty > 0:
             return qty
         return self._fallback_one_share(current_price)
+
+    def register_cooldown_after_exit(self, ticker: str) -> None:
+        """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 201, BFB 191 패턴 답습).
+
+        1단계: 즉시 달력일 근사(days + 2)로 세팅 → 재매수 공백 0 보장.
+        2단계: _refine_cooldown_business_days 가 async KIS 호출로 정확한 N영업일로 정정.
+        OrderEngine.on_position_closed 훅에서 호출 (사이클 185 배선 영속).
+        """
+        days = self.config.params["reentry_cooldown_days"]
+        today = datetime.now(KST).date()
+        self._cooldown_until[ticker] = today + timedelta(days=days + 2)
+
+    async def _refine_cooldown_business_days(self, ticker: str) -> None:
+        """쿨다운을 정확한 N영업일로 정정 (사이클 201, BFB 191 2단계 패턴 답습).
+
+        KIS chk-holiday CTCA0903R 1회 호출 → opnd_yn=="Y" n번째 날로 교체.
+        실패 시 1단계 근사값 유지 (graceful).
+        """
+        days = self.config.params["reentry_cooldown_days"]
+        today = datetime.now(KST).date()
+        try:
+            accurate = await add_business_days(today, days)
+            self._cooldown_until[ticker] = accurate
+        except Exception:
+            logger.warning("[vb] 영업일 정정 실패 (ticker=%s) — 근사값 유지", ticker)
+
+    def on_position_closed(self, ticker: str) -> None:
+        """사이클 201 — 포지션 청산 시 재진입 쿨다운 등록 (BFB 사이클 191 패턴 답습)."""
+        self.register_cooldown_after_exit(ticker)
+        coro = self._refine_cooldown_business_days(ticker)
+        try:
+            asyncio.create_task(coro)
+        except RuntimeError:
+            coro.close()  # 이벤트 루프 없는 환경 — coroutine 명시적 닫기, 근사값 유지

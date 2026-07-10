@@ -129,6 +129,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -266,6 +267,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -876,6 +878,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1014,6 +1017,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -1388,6 +1392,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1525,6 +1530,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -1895,6 +1901,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2036,6 +2043,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2411,6 +2419,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2551,6 +2560,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2927,6 +2937,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -3068,6 +3079,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4152,6 +4164,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4293,6 +4306,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4669,6 +4683,7 @@ backend:
     - tests/unit/ast/test_cycle189_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4842,6 +4857,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -5303,6 +5319,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5413,6 +5430,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -5782,6 +5800,7 @@ backend:
     - tests/unit/ast/test_cycle189_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5943,6 +5962,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -6764,6 +6784,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -6907,6 +6928,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8436,6 +8458,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -8553,6 +8576,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8927,6 +8951,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9059,6 +9084,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9653,6 +9679,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9794,6 +9821,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -10167,6 +10195,7 @@ backend:
     - tests/unit/ast/test_cycle189_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10339,6 +10368,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10763,6 +10793,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10894,6 +10925,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11273,6 +11305,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -11413,6 +11446,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -12026,6 +12060,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle158_momentum_next_day_clear_cap.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -12219,6 +12254,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
@@ -13202,6 +13238,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -13342,6 +13379,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -13932,6 +13970,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -14073,6 +14112,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -15553,6 +15593,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -15694,6 +15735,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -16332,6 +16374,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle103_momentum_log_threshold.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -16465,6 +16508,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
     - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle108_list_by_filter.py
@@ -17206,6 +17250,7 @@ backend:
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/engine/session/test_board_schedule_cycle26.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
     - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
@@ -17231,6 +17276,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -19626,6 +19672,7 @@ backend:
   src/engine/strategies/bull_flag_breakout.py:
     direct_tests:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
@@ -20543,6 +20590,7 @@ backend:
   src/engine/strategies/vcp_breakout.py:
     direct_tests:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/engine/strategies/test_cycle125_vcp_atr_db_hit.py
     - tests/unit/engine/strategies/test_cycle151_4_strategies_price_filter.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
@@ -20810,6 +20858,7 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/strategies/test_cycle108_vb_scan_universe.py
     - tests/unit/engine/strategies/test_cycle143_vb_ltv_funnel_hook.py
@@ -20819,6 +20868,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
     - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
@@ -21077,6 +21127,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21164,6 +21215,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -22606,6 +22658,7 @@ backend:
     - tests/unit/ast/test_cycle189_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -22753,6 +22806,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23131,6 +23185,7 @@ backend:
     - tests/unit/ast/test_cycle189_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -23281,6 +23336,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24082,6 +24138,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -24206,6 +24263,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -25096,6 +25154,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -25237,6 +25296,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -25634,6 +25694,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -25775,6 +25836,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26150,6 +26212,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -26290,6 +26353,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -28251,6 +28315,7 @@ backend:
     - tests/unit/ast/test_cycle187_ast_read_retry.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -28392,6 +28457,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -29278,10 +29344,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-10T09:38:56.230389+09:00'
+generated_at: '2026-07-10T15:13:49.046139+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 682
+  backend_tests: 684
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:
