@@ -339,6 +339,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -637,6 +638,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1084,6 +1086,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1595,6 +1598,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -2108,6 +2112,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2623,6 +2628,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -3137,6 +3143,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -3438,6 +3445,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3671,6 +3679,7 @@ backend:
     - tests/unit/engine/test_cycle195_stale_diag_db_label.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -3912,6 +3921,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4359,6 +4369,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -4911,6 +4922,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5180,6 +5192,7 @@ backend:
     - tests/unit/engine/test_cycle101_kst_persistence.py
     - tests/unit/engine/test_cycle129_master_load_once.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle83_r6_frequency_regression.py
     - tests/unit/engine/test_cycle83_sk_square_fixture.py
@@ -6010,6 +6023,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6312,6 +6326,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -6525,6 +6540,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -6967,6 +6983,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7259,6 +7276,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7474,6 +7492,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7698,6 +7717,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7912,6 +7932,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8154,6 +8175,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8605,6 +8627,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9113,6 +9136,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9404,6 +9428,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -9521,6 +9546,7 @@ backend:
     - tests/unit/db/test_strategy_funnel_crud.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -10393,6 +10419,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10945,6 +10972,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -11462,6 +11490,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -11769,6 +11798,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12045,6 +12075,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12515,6 +12546,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -12733,6 +12765,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12946,6 +12979,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13384,6 +13418,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -13678,6 +13713,7 @@ backend:
     - tests/unit/engine/test_cycle185_cluster1_reset.py
     - tests/unit/engine/test_cycle188_wait_until_advance_return.py
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14112,6 +14148,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14409,6 +14446,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14628,6 +14666,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14857,6 +14896,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15083,6 +15123,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -15290,6 +15331,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15729,6 +15771,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16026,6 +16069,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -16525,6 +16569,7 @@ backend:
     - tests/unit/engine/test_cycle194_force_reconnect_db_label.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -16743,6 +16788,7 @@ backend:
     - tests/unit/engine/test_cycle185_cluster1_reset.py
     - tests/unit/engine/test_cycle188_wait_until_advance_return.py
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -16974,6 +17020,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17244,6 +17291,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17476,6 +17524,7 @@ backend:
     - tests/unit/engine/test_cycle194_force_reconnect_db_label.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17716,6 +17765,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17916,6 +17966,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18151,6 +18202,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18351,6 +18403,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18574,6 +18627,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18791,6 +18845,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19005,6 +19060,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19219,6 +19275,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19441,6 +19498,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19684,6 +19742,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19919,6 +19978,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20144,6 +20204,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20370,6 +20431,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20595,6 +20657,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20832,6 +20895,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21136,6 +21200,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21364,6 +21429,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21575,6 +21641,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21804,6 +21871,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22083,6 +22151,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22309,6 +22378,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22759,6 +22829,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23290,6 +23361,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23653,6 +23725,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -24208,6 +24281,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24558,6 +24632,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -24802,6 +24877,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -25238,6 +25314,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -25775,6 +25852,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -26287,6 +26365,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -27488,6 +27567,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -27720,6 +27800,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -27951,6 +28032,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -28387,6 +28469,7 @@ backend:
     - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
+    - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -29195,10 +29278,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-10T09:18:47.531137+09:00'
+generated_at: '2026-07-10T09:38:56.230389+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 681
+  backend_tests: 682
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

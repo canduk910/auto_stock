@@ -213,7 +213,12 @@ async def capture_funnel_snapshots(registry, *, is_provisional: bool = False) ->
         if not sid:
             continue
         try:
-            funnel_steps = getattr(strategy, "_funnel_steps", []) or []
+            # 사이클 200 (D-1) — 원자적 shallow copy. capture 는 step 마다 await(yield)
+            # 로 iterate 하므로, concurrent prepare() 의 `_record_funnel_step` in-place
+            # 요소 replace(`_funnel_steps[idx]=entry`)와 인터리빙되면 논리 불가 단조성
+            # (step3 survived > step1/2)이 DB 에 기록된다(7/9 VCP 실측 step1/2=0/step3=67).
+            # `list(...)` 로 capture 시작 시점 요소 참조 고정 → concurrent 변형에 불변.
+            funnel_steps = list(getattr(strategy, "_funnel_steps", []) or [])
         except Exception:
             logger.exception("[funnel_snapshot] %s _funnel_steps 접근 실패", sid)
             continue
