@@ -83,10 +83,12 @@ class TestCycle203IscdNoOverblock:
         assert "관리종목" in r
 
     def test_g_203_5_market_warn_covers_52_53(self):
-        """G-203-5 (SAFETY 유지·52/53 커버): 시장경고 (raw.mrkt_warn_cls_code>="01") → 차단.
+        """G-203-5 (SAFETY 유지·52/53 커버): 시장경고 (raw.mrkt_warn_cls_code>="02") → 차단.
 
         투자위험(52)/투자경고(53)는 실측 mrkt_warn_cls_code 로 100% 커버.
-        iscd 제거해도 시장경고 계열 보호 유지 (불변).
+        iscd 제거해도 시장경고 계열 보호 유지 (불변). 사이클 204 — 임계
+        ">=01"(투자주의 포함) → ">=02"(투자경고/위험만) 완화, 본 케이스는
+        "02" 로 이미 단언되어 무변경 PASS.
         """
         b, r = scanner._is_master_blocked_for_entry(None, {"mrkt_warn_cls_code": "02"})
         assert b is True, "G-203-5 — 시장경고(52/53 커버) 차단 불변 (mrkt_warn_cls_code)"
@@ -102,10 +104,14 @@ class TestCycle203IscdNoOverblock:
         assert "단기과열" in r
 
     def test_g_203_7_invt_caful_sltr_temp_stop_still_blocked(self):
-        """G-203-7 (SAFETY 유지): 투자유의/정리매매/임시정지 raw 플래그 각 차단 (불변)."""
+        """G-203-7 (SAFETY 유지 → 사이클 204 의미 전환): 정리매매/임시정지 raw 플래그 차단 (불변).
+
+        투자유의(invt_caful_yn) 는 사이클 204 에서 차단 해제 (un-block).
+        KIS 삼각검증 결과 차단 대상 index 9종목 전부 우량 대형주 실증.
+        """
         b, r = scanner._is_master_blocked_for_entry(None, {"invt_caful_yn": "Y"})
-        assert b is True, "G-203-7 — 투자유의 차단 불변 (invt_caful_yn)"
-        assert "투자유의" in r
+        assert b is False, "G-203-7 — 사이클 204 투자유의 un-block (invt_caful_yn)"
+        assert r == ""
 
         b, r = scanner._is_master_blocked_for_entry(None, {"sltr_yn": "Y"})
         assert b is True, "G-203-7 — 정리매매 차단 불변 (sltr_yn, FHKST)"

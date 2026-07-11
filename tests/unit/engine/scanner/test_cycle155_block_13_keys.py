@@ -5,6 +5,13 @@
 **사이클 203 의미 전환**: FHKST raw 6건 중 iscd_stat_cls_code 차단은 완전 제거
 (운영 DB 실측 = "55만 정상" 가정이 틀림, 57=정상 91%). 5건으로 축소.
 
+**사이클 204 의미 전환**: FHKST raw 5건 중 투자주의(mrkt_warn_cls_code "01")
++ 투자유의(invt_caful_yn) 차단 해제. KIS 삼각검증 결과 차단 대상 index
+9종목 전부 우량 대형주 실증 (급등 → 투자주의 지정 → 돌파전략 후보에서
+제거되는 역설). 투자경고(02)/투자위험(03) 는 계속 차단. 최종 4건
+(master_raw 7 + raw 4 = 11건). `tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py`
+참조.
+
 영속 의무:
 - 사이클 32 R4 보유/익일청산 절대 보호 (호출 사이트 영역 영구 영속 의무 — 본 함수는 진입 차단만 판정)
 - 사이클 38 명문화 (scanner 매수 진입 전 한정)
@@ -22,23 +29,30 @@ pytestmark = pytest.mark.unit
 
 
 class TestCycle155Block13Keys:
-    """G-155-BLOCK-1~3: master_raw 7건 + FHKST raw 6건 = 13건 차단."""
+    """G-155-BLOCK-1~3: master_raw 7건 + FHKST raw 4건 = 11건 차단 (사이클 204 투자주의 해제)."""
 
-    def test_g_155_block_1_fhkst_raw_5_keys(self):
-        """G-155-BLOCK-1 (HIGH): FHKST raw 영역 5 키 차단 영역 영구 영속.
+    def test_g_155_block_1_fhkst_raw_4_keys(self):
+        """G-155-BLOCK-1 (HIGH): FHKST raw 영역 4 키 차단 영역 영구 영속.
 
         사이클 203 의미 전환 — iscd_stat_cls_code 차단은 완전 제거 (운영 DB
         실측 결과 "55만 정상" 가정이 틀림, 57=정상 91%). 6키→5키.
+        사이클 204 의미 전환 — 투자주의(mrkt_warn "01") + 투자유의
+        (invt_caful_yn) 차단 해제. 5키→4키.
         """
-        # mrkt_warn_cls_code = 시장경고 영역
+        # mrkt_warn_cls_code "01"(투자주의) = 사이클 204 un-block
         b, r = scanner._is_master_blocked_for_entry({}, {"mrkt_warn_cls_code": "01"})
+        assert b is False
+        assert r == ""
+
+        # mrkt_warn_cls_code "02"(투자경고) = 차단 유지
+        b, r = scanner._is_master_blocked_for_entry({}, {"mrkt_warn_cls_code": "02"})
         assert b is True
         assert "FHKST" in r
 
-        # invt_caful_yn = 투자유의
+        # invt_caful_yn = 투자유의 (사이클 204 un-block)
         b, r = scanner._is_master_blocked_for_entry({}, {"invt_caful_yn": "Y"})
-        assert b is True
-        assert "투자유의" in r
+        assert b is False
+        assert r == ""
 
         # short_over_yn = 단기과열
         b, r = scanner._is_master_blocked_for_entry({}, {"short_over_yn": "Y"})

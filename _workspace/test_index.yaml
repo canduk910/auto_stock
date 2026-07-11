@@ -182,6 +182,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -932,6 +933,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -1446,6 +1448,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -1957,6 +1960,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -2475,6 +2479,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -2995,6 +3000,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -4223,6 +4229,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -4775,6 +4782,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -5354,6 +5362,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -5884,6 +5893,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -6849,6 +6859,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -8499,6 +8510,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -9009,6 +9021,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -9745,6 +9758,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -10293,6 +10307,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -10860,6 +10875,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle155_safety.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
     - tests/unit/engine/scanner/test_cycle81_trade_amount_filter_fallback_removal.py
@@ -11373,6 +11389,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -12044,6 +12061,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -13309,6 +13327,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -14042,6 +14061,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -15666,6 +15686,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -16333,6 +16354,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -17350,6 +17372,7 @@ backend:
     - tests/unit/ast/test_cycle198_ast_default_params_scope.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle203_ast_no_iscd_block.py
+    - tests/unit/ast/test_cycle204_ast_no_caution_block.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17477,6 +17500,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -23154,6 +23178,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -23685,6 +23710,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -24627,6 +24653,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle155_safety.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -25647,6 +25674,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -26188,6 +26216,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -26707,6 +26736,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -28811,6 +28841,7 @@ backend:
     - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
     - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
     - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
     - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
     - tests/unit/engine/scanner/test_cycle65_daily_summary.py
     - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
@@ -29788,10 +29819,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-11T11:21:31.919029+09:00'
+generated_at: '2026-07-11T13:33:53.359836+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 687
+  backend_tests: 689
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:
