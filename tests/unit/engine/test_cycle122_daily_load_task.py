@@ -38,9 +38,9 @@ pytestmark = pytest.mark.unit
 async def test_g_scan1_load_once_iterates_stock_master():
     """stock_master 전체 ticker → 각 ticker 별 fetch_daily_candles + upsert_batch."""
     stock_master_rows = [
-        {"ticker": "005930"},
-        {"ticker": "000660"},
-        {"ticker": "035420"},
+        {"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},
+        {"ticker": "000660", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},
+        {"ticker": "035420", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},
     ]
     mock_candles = [
         {"stck_bsop_date": "20260612", "stck_clpr": "71000",
@@ -85,7 +85,7 @@ async def test_g_scan2_skip_when_already_loaded_today():
     from src.db._kst import today_kst
 
     today = today_kst()
-    stock_master_rows = [{"ticker": "005930"}]
+    stock_master_rows = [{"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}]
 
     with patch(
         "src.db.stock_master.list_all",
@@ -112,7 +112,7 @@ async def test_g_scan2_skip_when_already_loaded_today():
 @pytest.mark.asyncio
 async def test_g_scan3_backfill_when_count_below_threshold():
     """count < 50 → 백필 모드 (T-100일 호출)."""
-    stock_master_rows = [{"ticker": "005930"}]
+    stock_master_rows = [{"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}]
 
     captured_days: list[int] = []
 
@@ -146,7 +146,7 @@ async def test_g_scan3_backfill_when_count_below_threshold():
 @pytest.mark.asyncio
 async def test_g_scan3_incremental_when_count_above_threshold():
     """count >= 50 → 증분 모드 (T-7일 호출)."""
-    stock_master_rows = [{"ticker": "005930"}]
+    stock_master_rows = [{"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}]
 
     captured_days: list[int] = []
 
@@ -183,7 +183,7 @@ async def test_g_scan3_incremental_when_count_above_threshold():
 @pytest.mark.asyncio
 async def test_g_scan4_rate_limit_50ms_per_ticker():
     """ticker 간 50ms sleep — KIS LMS chain 안전 마진."""
-    stock_master_rows = [{"ticker": "005930"}, {"ticker": "000660"}]
+    stock_master_rows = [{"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}, {"ticker": "000660", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}]
     sleep_durations: list[float] = []
 
     async def capture_sleep(duration):
@@ -220,7 +220,7 @@ async def test_g_scan4_rate_limit_50ms_per_ticker():
 @pytest.mark.asyncio
 async def test_g_scan5_graceful_on_kis_failure():
     """KIS fetch_daily_candles 실패 시 다음 ticker 진행 — 사이클 88 G-REJECT."""
-    stock_master_rows = [{"ticker": "005930"}, {"ticker": "000660"}]
+    stock_master_rows = [{"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}, {"ticker": "000660", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}]
 
     async def kis_side_effect(ticker, days):
         if ticker == "005930":

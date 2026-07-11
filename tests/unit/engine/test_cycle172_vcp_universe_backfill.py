@@ -132,7 +132,8 @@ async def test_scan2_kosdaq150_under_220_triggers_backfill():
 async def test_scan3_non_vcp_keeps_100day():
     """비 VCP universe (is_kospi200=False, is_kosdaq150=False) → 현행 100일 유지."""
     stock_master_rows = [
-        {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False},
+        {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False,
+         "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},  # 사이클 206 자격
     ]
 
     backfill_mock = AsyncMock(return_value=[_vcp_candle()])
@@ -174,7 +175,10 @@ async def test_scan3_non_vcp_keeps_100day():
 @pytest.mark.asyncio
 async def test_scan3b_missing_flag_keys_treated_non_vcp():
     """is_kospi200/is_kosdaq150 키 부재 row → 비 VCP 취급 (기존 테스트 회귀 0)."""
-    stock_master_rows = [{"ticker": "005930"}]  # 사이클 122 mock 형식 (플래그 키 없음)
+    stock_master_rows = [
+        {"ticker": "005930",
+         "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},  # 사이클 206 자격
+    ]  # 사이클 122 mock 형식 (플래그 키 없음)
 
     backfill_mock = AsyncMock(return_value=[_vcp_candle()])
 
@@ -254,7 +258,8 @@ async def test_scan5_backfill_failure_graceful():
     """VCP backfill 실패 → 사이클 88 G-REJECT graceful (다음 ticker 진행)."""
     stock_master_rows = [
         {"ticker": "005930", "is_kospi200": True, "is_kosdaq150": False},
-        {"ticker": "000660", "is_kospi200": False, "is_kosdaq150": False},
+        {"ticker": "000660", "is_kospi200": False, "is_kosdaq150": False,
+         "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},  # 사이클 206 자격
     ]
 
     async def backfill_fail(ticker, **kwargs):

@@ -215,7 +215,8 @@ async def test_b5a_non_vcp_154_incremental_unchanged():
     VCP 분기 미진입 → threshold 무관 불변식 (Red/Green 모두 PASS).
     """
     stock_master_rows = [
-        {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False},
+        {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False,
+         "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},  # 사이클 206 자격
     ]
     backfill_mock = AsyncMock(return_value=[_vcp_candle()])
     captured_days: list[int] = []
@@ -260,7 +261,8 @@ async def test_b5b_non_vcp_30_hundred_day_unchanged():
     사이클 122 현행 유지 불변식 (Red/Green 모두 PASS).
     """
     stock_master_rows = [
-        {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False},
+        {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False,
+         "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},  # 사이클 206 자격
     ]
     backfill_mock = AsyncMock(return_value=[_vcp_candle()])
     captured_days: list[int] = []

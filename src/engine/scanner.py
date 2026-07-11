@@ -2101,6 +2101,27 @@ _DAILY_LOAD_INCREMENTAL_THRESHOLD = 50  # 50일 이상 적재된 ticker 는 증�
 # VCP 전략 실제 사용 100일 (vcp_breakout.py:162-164). DB 깊이 < 120 이면 분할 backfill.
 _DAILY_LOAD_VCP_BACKFILL_DAYS = 120
 
+# 사이클 206 — Supabase 용량 시정: 일봉 적재를 유니버스(index ∪ 시총/거래대금 자격) 로 한정.
+# 자격 임계는 BFB(bull_flag_breakout) 최저 필터 정합 — 5전략 中 non-index 최저치.
+_DAILY_LOAD_MIN_MCAP_EOK = 500  # 억원 (raw.hts_avls 는 억원 단위, 사이클 166/108)
+_DAILY_LOAD_MIN_TRADE_WON = 2_000_000_000  # 20억원 (raw.acml_tr_pbmn 는 원 단위)
+
+
+def _is_daily_load_universe(row: dict) -> bool:
+    """일봉 적재 유니버스 자격 판정 — mcap>=500억(억원) & trade>=20억(원).
+
+    index(is_kospi200/is_kosdaq150) 는 호출부에서 별도 OR 처리 — 여기선
+    시총/거래대금 자격만 판정. raw 부재/비숫자 → graceful False
+    (list_by_filter 패턴 답습, 사이클 108).
+    """
+    raw = row.get("raw") or {}
+    try:
+        mcap_ok = int(raw.get("hts_avls") or 0) >= _DAILY_LOAD_MIN_MCAP_EOK
+        trade_ok = int(raw.get("acml_tr_pbmn") or 0) >= _DAILY_LOAD_MIN_TRADE_WON
+    except (ValueError, TypeError):
+        return False
+    return mcap_ok and trade_ok
+
 
 async def _stock_master_daily_load_once(force: bool = False) -> dict:
     """사이클 122 — stock_master 전체 ticker 의 일봉을 stock_master_daily 에 적재.
@@ -2155,11 +2176,19 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             break
         for row in rows:
             ticker = row.get("ticker", "")
-            if ticker and len(ticker) == 6 and ticker.isdigit():
+            if not (ticker and len(ticker) == 6 and ticker.isdigit()):
+                continue
+            # 사이클 172 — VCP universe = is_kospi200 OR is_kosdaq150
+            # (플래그 키 부재 mock/legacy row 는 falsy → 비 VCP 취급, 회귀 0)
+            is_index = bool(row.get("is_kospi200") or row.get("is_kosdaq150"))
+            # 사이클 206 — 유니버스 한정 적재: index(donchian/VCP) ∪
+            # mcap500억&trade20억(VB/LTV/BFB 자격, BFB 최저 정합). 비유니버스는
+            # 전략 스캔 대상이 아니므로 일봉 캐시 불요 (Supabase 용량 낭비 차단).
+            # 재진입(유니버스 편입) 시 다음 load 가 backfill 로 자동 채움.
+            is_qualifier = _is_daily_load_universe(row)
+            if is_index or is_qualifier:
                 all_tickers.append(ticker)
-                # 사이클 172 — VCP universe = is_kospi200 OR is_kosdaq150
-                # (플래그 키 부재 mock/legacy row 는 falsy → 비 VCP 취급, 회귀 0)
-                if row.get("is_kospi200") or row.get("is_kosdaq150"):
+                if is_index:
                     vcp_universe_tickers.add(ticker)
         if len(rows) < PAGE_SIZE:
             break
