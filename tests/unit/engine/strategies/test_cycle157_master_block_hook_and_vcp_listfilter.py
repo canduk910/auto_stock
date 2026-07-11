@@ -231,6 +231,9 @@ class TestG157HookMomentumScanStocks:
 
         momentum hook 영역 = scan_stocks() 내부 mcap+trade_amount 통과 *후*, filtered.append 직전.
         사이클 132 영속 — momentum funnel 미적재.
+
+        사이클 203 의미 전환 — iscd_stat_cls_code 는 더 이상 차단 플래그가 아님
+        (실측 57=정상 91%). 차단 mock 을 실제 차단 플래그(trht_yn=Y 거래정지)로 교체.
         """
         from src.engine import scanner
 
@@ -255,11 +258,11 @@ class TestG157HookMomentumScanStocks:
                 },
             ]
 
-        # 111111 거래정지, 222222 정상
+        # 111111 임시정지, 222222 정상 (raw=FHKST 이므로 raw 전용 플래그 temp_stop_yn 사용)
         async def fake_get(ticker: str):
             if ticker == "111111":
-                return _make_basics(ticker, raw={"iscd_stat_cls_code": "57"})  # 거래정지
-            return _make_basics(ticker, raw={"iscd_stat_cls_code": "55"})  # 정상
+                return _make_basics(ticker, raw={"temp_stop_yn": "Y"})  # 임시 정지
+            return _make_basics(ticker, raw={"temp_stop_yn": "N"})  # 정상
 
         async def fake_get_master_raw(ticker: str):
             return {}
@@ -271,10 +274,10 @@ class TestG157HookMomentumScanStocks:
 
         # 차단 종목은 filtered 에서 제외, 정상 종목만 통과
         assert "111111" not in result, (
-            "G-157-HOOK-MOMENTUM — 거래정지 종목 차단 의무 (iscd_stat_cls_code=57)"
+            "G-157-HOOK-MOMENTUM — 임시정지 종목 차단 의무 (temp_stop_yn=Y)"
         )
         assert "222222" in result, (
-            "G-157-HOOK-MOMENTUM — 정상 종목 통과 의무 (iscd_stat_cls_code=55)"
+            "G-157-HOOK-MOMENTUM — 정상 종목 통과 의무 (temp_stop_yn=N)"
         )
 
 
@@ -283,7 +286,10 @@ class TestG157HookProtected:
     async def test_g157_hook_protected_tickers_pass_through(self):
         """G-157-HOOK-PROTECTED HIGH — 보유 종목 절대 보호 (사이클 32 R4 영속).
 
-        master block 13건 차단 hook 영역에서도 protected_tickers 는 무조건 통과.
+        master block 12건 차단 hook 영역에서도 protected_tickers 는 무조건 통과.
+
+        사이클 203 의미 전환 — iscd_stat_cls_code 는 더 이상 차단 플래그가 아님.
+        차단 mock 을 실제 차단 플래그(temp_stop_yn=Y 임시정지)로 교체.
         """
         from src.engine.strategies import volatility_breakout
         from src.engine import scanner as _scanner_mod
@@ -296,10 +302,10 @@ class TestG157HookProtected:
         )
         strat = volatility_breakout.VolatilityBreakoutStrategy(cfg)
 
-        # 005935 = 차단 사유 있는 종목 (거래정지)
+        # 005935 = 차단 사유 있는 종목 (임시정지)
         # 하지만 보유 종목 set 에 등록 → 통과 영역 영구 영속
         async def fake_get(ticker: str):
-            return _make_basics(ticker, raw={"iscd_stat_cls_code": "57"})
+            return _make_basics(ticker, raw={"temp_stop_yn": "Y"})
 
         async def fake_get_master_raw(ticker: str):
             return {}
@@ -354,7 +360,11 @@ class TestG157HookGraceful:
 class TestG157HookExcludedFormat:
     @pytest.mark.asyncio
     async def test_g157_hook_excluded_format_dict_ticker_name_reason(self):
-        """G-157-HOOK-EXCLUDED-FORMAT — excluded = [{ticker, name, reason}] 영역 영속 (사이클 41 답습)."""
+        """G-157-HOOK-EXCLUDED-FORMAT — excluded = [{ticker, name, reason}] 영역 영속 (사이클 41 답습).
+
+        사이클 203 의미 전환 — iscd_stat_cls_code 는 더 이상 차단 플래그가 아님.
+        차단 mock 을 실제 차단 플래그(temp_stop_yn=Y 임시정지)로 교체.
+        """
         from src.engine.strategies import volatility_breakout
         from src.engine import scanner as _scanner_mod
 
@@ -367,8 +377,8 @@ class TestG157HookExcludedFormat:
         strat = volatility_breakout.VolatilityBreakoutStrategy(cfg)
 
         async def fake_get(ticker: str):
-            # 거래정지 종목 (iscd_stat_cls_code=57)
-            return _make_basics(ticker, raw={"iscd_stat_cls_code": "57"})
+            # 임시정지 종목 (temp_stop_yn=Y)
+            return _make_basics(ticker, raw={"temp_stop_yn": "Y"})
 
         async def fake_get_master(ticker: str):
             return {}

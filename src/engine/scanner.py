@@ -646,7 +646,7 @@ async def scan_stocks() -> list[str]:
             continue
 
         # 사이클 157 Q2 — 1단계 진입 차단 hook (momentum 영역, 사이클 132 funnel 미적재 영속).
-        # _is_master_blocked_for_entry 13건 (master_raw 7 + raw 6) — 거래정지/관리종목/단기과열 등.
+        # _is_master_blocked_for_entry 12건 (master_raw 7 + raw 5) — 거래정지/관리종목/단기과열 등.
         # graceful: stock_master.get / get_master_raw 예외 시 통과 (사이클 88 G-REJECT 답습).
         try:
             from src.db import stock_master as _sm_mod
@@ -2516,7 +2516,7 @@ async def _stock_master_basics_refresh_once(force: bool = False) -> dict:
 def _is_master_blocked_for_entry(
     master_raw: dict, raw: dict | None = None
 ) -> tuple[bool, str]:
-    """1단계 차단 — 13건 매수 진입 차단 (사이클 129 7 + 사이클 155 6 확장).
+    """1단계 차단 — 12건 매수 진입 차단 (사이클 129 7 + 사이클 155 5 확장).
 
     master_raw + raw OR — 어느 한쪽이라도 매칭되면 차단. 부재 측은 평가 생략.
 
@@ -2524,9 +2524,16 @@ def _is_master_blocked_for_entry(
     - trht_yn / sltr_yn / mang_issu_yn / ssts_hot_yn / stange_runup_yn
     - mrkt_alrm_cls_code >= "02" / invt_alrm_yn (KOSDAQ)
 
-    사이클 155 (raw=FHKST01010100, 6건):
+    사이클 155 (raw=FHKST01010100, 5건):
     - mrkt_warn_cls_code >= "01" / invt_caful_yn / short_over_yn
-    - sltr_yn (FHKST) / iscd_stat_cls_code != "55" / temp_stop_yn
+    - sltr_yn (FHKST) / temp_stop_yn
+
+    사이클 203 — 종목상태 코드 기반 차단 완전 제거. 운영 DB 실측 결과
+    "55만 정상" 가정이 틀림 (57=정상/그외 91%, 58=신선도 잔재, 51=정상
+    ETF/스팩/우선주). KIS 가 코드값 의미를 공식 배포하지 않아 하드코딩
+    블록리스트는 회귀 위험. 위험 종목은 전용 플래그(시장경고/단기과열/
+    투자유의/정리매매/임시정지)가 실측 100% 커버. merge/적재는 불변
+    (raw 에 해당 코드값은 계속 저장, 차단 기준으로만 미사용).
     """
     if master_raw and isinstance(master_raw, dict):
         if master_raw.get("trht_yn") == "Y":
@@ -2562,10 +2569,6 @@ def _is_master_blocked_for_entry(
             return True, "정리매매 (sltr_yn=Y, FHKST)"
         if (raw.get("temp_stop_yn") or "").strip().upper() == "Y":
             return True, "임시 정지 (temp_stop_yn=Y, FHKST)"
-        # iscd_stat_cls_code: KIS 정본 = "55" 정상 거래중. 빈 문자열은 graceful 통과.
-        iscd_stat = (raw.get("iscd_stat_cls_code") or "").strip()
-        if iscd_stat and iscd_stat != "55":
-            return True, f"종목상태 비정상 (iscd_stat_cls_code={iscd_stat}, FHKST)"
 
     return False, ""
 
@@ -2575,10 +2578,10 @@ async def apply_master_block_filter(
     *,
     protected_tickers: set[str] | None = None,
 ) -> tuple[list[str], list[dict]]:
-    """1단계 진입 차단 13건 hook 공통 헬퍼 (사이클 157).
+    """1단계 진입 차단 12건 hook 공통 헬퍼 (사이클 157, 사이클 203 iscd 제거).
 
     5 전략 (VB/LTV/donchian/BFB/VCP) 의 `_apply_master_block_filter_in_prepare`
-    위임 대상. `_is_master_blocked_for_entry` 13건 (master_raw 7 + raw 6) 차단.
+    위임 대상. `_is_master_blocked_for_entry` 12건 (master_raw 7 + raw 5) 차단.
 
     영속 의무 매트릭스:
     - 사이클 32 R4 — 보유/익일청산 절대 보호 (protected_tickers 무조건 통과)
@@ -2586,7 +2589,7 @@ async def apply_master_block_filter(
     - 사이클 41 — excluded = [{ticker, name, reason}] 한글 사유 영속
     - 사이클 81 G-AST1 — raw 영역 read-only 영속
     - 사이클 88 G-REJECT — stock_master.get 예외 graceful 통과
-    - 사이클 129 master_raw 7건 + 사이클 155 raw 6건 = 13건 차단
+    - 사이클 129 master_raw 7건 + 사이클 155 raw 5건 = 12건 차단 (사이클 203 iscd 제거)
 
     Args:
         tickers: 평가 대상 ticker 리스트.

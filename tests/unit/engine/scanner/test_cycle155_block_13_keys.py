@@ -2,6 +2,9 @@
 
 사이클 129 master_raw 영역 영구 영속 7건 + 사이클 155 FHKST raw 영역 영구 영속 6건 = 13건.
 
+**사이클 203 의미 전환**: FHKST raw 6건 중 iscd_stat_cls_code 차단은 완전 제거
+(운영 DB 실측 = "55만 정상" 가정이 틀림, 57=정상 91%). 5건으로 축소.
+
 영속 의무:
 - 사이클 32 R4 보유/익일청산 절대 보호 (호출 사이트 영역 영구 영속 의무 — 본 함수는 진입 차단만 판정)
 - 사이클 38 명문화 (scanner 매수 진입 전 한정)
@@ -21,8 +24,12 @@ pytestmark = pytest.mark.unit
 class TestCycle155Block13Keys:
     """G-155-BLOCK-1~3: master_raw 7건 + FHKST raw 6건 = 13건 차단."""
 
-    def test_g_155_block_1_fhkst_raw_6_keys(self):
-        """G-155-BLOCK-1 (HIGH): FHKST raw 영역 6 키 차단 영역 영구 영속."""
+    def test_g_155_block_1_fhkst_raw_5_keys(self):
+        """G-155-BLOCK-1 (HIGH): FHKST raw 영역 5 키 차단 영역 영구 영속.
+
+        사이클 203 의미 전환 — iscd_stat_cls_code 차단은 완전 제거 (운영 DB
+        실측 결과 "55만 정상" 가정이 틀림, 57=정상 91%). 6키→5키.
+        """
         # mrkt_warn_cls_code = 시장경고 영역
         b, r = scanner._is_master_blocked_for_entry({}, {"mrkt_warn_cls_code": "01"})
         assert b is True
@@ -42,11 +49,6 @@ class TestCycle155Block13Keys:
         b, r = scanner._is_master_blocked_for_entry({}, {"sltr_yn": "Y"})
         assert b is True
         assert "정리매매" in r
-
-        # iscd_stat_cls_code = 비정상 (정상 "55" 외)
-        b, r = scanner._is_master_blocked_for_entry({}, {"iscd_stat_cls_code": "51"})
-        assert b is True
-        assert "종목상태" in r
 
         # temp_stop_yn = 임시 정지
         b, r = scanner._is_master_blocked_for_entry({}, {"temp_stop_yn": "Y"})
