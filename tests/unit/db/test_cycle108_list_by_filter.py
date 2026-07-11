@@ -3,6 +3,12 @@
 HIGH-1: 4 필터 (min_market_cap, min_trade_amount, nxt_tradable, exclude_tickers) 정합성
 HIGH-5: hts_avls 백만원 → 원 단위 변환 (×1_000_000)
 MEDIUM-3: stock_master 전체 활용 (~2,800종목, 사이클 106 영속)
+
+사이클 205 (2026-07-09, phase 1) 의미 전환: 시총/거래대금 컷이 Python-side raw JSONB
+파싱 → DB-side 생성 컬럼(hts_avls_eok/acml_tr_pbmn_won) gte 로 전환 (mock 은 DB 필터를
+실행하지 않으므로 rows 를 gte 시뮬레이션 형태로 사전 분할 주입). fetch_limit 도
+max(limit*2,1000) → .limit(limit) 직접으로 폐지 (m3 케이스 갱신). 상세 근거는
+`_workspace/red/cycle205_list_by_filter_db_side.md` 참조.
 """
 
 from __future__ import annotations
@@ -21,13 +27,31 @@ pytestmark = pytest.mark.unit
 
 def _make_row(
     ticker: str,
-    hts_avls: str = "10000",   # 1조 (억원 단위 — 사이클 166 정정)
-    acml_tr_pbmn: str = "50000000000",  # 500억 (원 단위)
+    hts_avls: str = "10000",   # 1조 (억원 단위 — 사이클 166 정정, raw 는 참조용 잔존)
+    acml_tr_pbmn: str = "50000000000",  # 500억 (원 단위, raw 는 참조용 잔존)
     excg_dvsn_cd: str = "02",
     nxt_tradable: bool = True,
     name: str = "테스트종목",
+    hts_avls_eok: int | None = None,
+    acml_tr_pbmn_won: int | None = None,
 ) -> dict:
-    return {
+    """사이클 205 — 생성 컬럼 hts_avls_eok/acml_tr_pbmn_won 동행 (DB-side gte 시뮬레이션용).
+
+    미지정 시 raw 문자열로부터 자동 파생 (억원/원 단위 그대로, 사이클 166 정합).
+    비숫자 raw 는 생성 컬럼 None (NULL 시뮬레이션).
+    """
+    if hts_avls_eok is None:
+        try:
+            hts_avls_eok = int(hts_avls)
+        except (ValueError, TypeError):
+            hts_avls_eok = None
+    if acml_tr_pbmn_won is None:
+        try:
+            acml_tr_pbmn_won = int(acml_tr_pbmn)
+        except (ValueError, TypeError):
+            acml_tr_pbmn_won = None
+
+    row: dict = {
         "ticker": ticker,
         "name": name,
         "excg_dvsn_cd": excg_dvsn_cd,
@@ -37,6 +61,35 @@ def _make_row(
             "acml_tr_pbmn": acml_tr_pbmn,
         },
     }
+    if hts_avls_eok is not None:
+        row["hts_avls_eok"] = hts_avls_eok
+    if acml_tr_pbmn_won is not None:
+        row["acml_tr_pbmn_won"] = acml_tr_pbmn_won
+    return row
+
+
+def _apply_db_side_filter(rows: list[dict], *, min_market_cap: int = 0, min_trade_amount: int = 0) -> list[dict]:
+    """사이클 205 — DB-side gte 필터를 mock 레벨에서 시뮬레이션.
+
+    production 이 DB-side 생성 컬럼 gte 로 전환됐으므로, mock (rows 그대로 반환)에는
+    실제 필터가 걸리지 않는다. 이 헬퍼로 fixture 자체를 gte 통과 rows 만 남기고
+    Supabase 에 주입 (= "DB 가 이미 필터링해서 반환한 상태"를 흉내).
+    """
+    hts_avls_threshold = 0
+    if min_market_cap > 0:
+        hts_avls_threshold = (min_market_cap + 99_999_999) // 100_000_000
+    acml_tr_pbmn_threshold = min_trade_amount if min_trade_amount > 0 else 0
+
+    out = []
+    for row in rows:
+        eok = row.get("hts_avls_eok")
+        won = row.get("acml_tr_pbmn_won")
+        if hts_avls_threshold > 0 and (eok is None or eok < hts_avls_threshold):
+            continue
+        if acml_tr_pbmn_threshold > 0 and (won is None or won < acml_tr_pbmn_threshold):
+            continue
+        out.append(row)
+    return out
 
 
 def _mock_supabase_result(rows: list[dict]):
@@ -47,13 +100,20 @@ def _mock_supabase_result(rows: list[dict]):
 
 
 def _setup_chain(mock_sb, result_mock):
-    """Supabase 체이닝 메서드 mock 설정."""
+    """Supabase 체이닝 메서드 mock 설정.
+
+    사이클 205 — `.gte()`/`.or_()` 도 체인 반환 의무 (DB-side 생성 컬럼 필터 전환으로
+    `list_by_filter` 가 이 메서드들을 호출 — 누락 시 체인이 MagicMock 자식으로 끊겨
+    `.limit()`/`.execute()` 가 다른 mock 인스턴스에 걸림).
+    """
     chain = MagicMock()
     mock_sb.table.return_value = chain
     chain.select.return_value = chain
     chain.order.return_value = chain
     chain.limit.return_value = chain
     chain.eq.return_value = chain
+    chain.gte.return_value = chain
+    chain.or_.return_value = chain
     chain.execute.return_value = result_mock
     return chain
 
@@ -71,11 +131,18 @@ class TestListByFilterHigh1:
     """HIGH-1: 4 필터 (시총/거래대금/nxt_tradable/exclude_tickers) 정확성."""
 
     def test_h1_min_market_cap_filters_correctly(self):
-        """시총 1,000억 미만 종목이 제외된다 (hts_avls 억원 단위 — 사이클 166 정정)."""
-        rows = [
-            _make_row("000001", hts_avls="2000"),   # 2,000억 — 통과 (억원 단위)
-            _make_row("000002", hts_avls="500"),    # 500억 — 제외 (1,000억 미만)
-        ]
+        """시총 1,000억 미만 종목이 제외된다 (hts_avls 억원 단위 — 사이클 166 정정).
+
+        사이클 205 — DB-side gte 전환. mock 은 실제 필터를 수행하지 않으므로
+        fixture 자체를 gte 시뮬레이션(`_apply_db_side_filter`)으로 사전 분할해 주입한다.
+        """
+        rows = _apply_db_side_filter(
+            [
+                _make_row("000001", hts_avls="2000"),   # 2,000억 — 통과 (억원 단위)
+                _make_row("000002", hts_avls="500"),    # 500억 — 제외 (1,000억 미만)
+            ],
+            min_market_cap=100_000_000_000,
+        )
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \
@@ -89,11 +156,17 @@ class TestListByFilterHigh1:
         assert "000002" not in tickers
 
     def test_h1_min_trade_amount_filters_correctly(self):
-        """거래대금 200억 미만 종목이 제외된다."""
-        rows = [
-            _make_row("000010", acml_tr_pbmn="50000000000"),   # 500억 — 통과
-            _make_row("000011", acml_tr_pbmn="5000000000"),    # 50억 — 제외
-        ]
+        """거래대금 200억 미만 종목이 제외된다.
+
+        사이클 205 — DB-side gte 전환 (`_apply_db_side_filter` 사전 분할 주입).
+        """
+        rows = _apply_db_side_filter(
+            [
+                _make_row("000010", acml_tr_pbmn="50000000000"),   # 500억 — 통과
+                _make_row("000011", acml_tr_pbmn="5000000000"),    # 50억 — 제외
+            ],
+            min_trade_amount=20_000_000_000,
+        )
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \
@@ -176,8 +249,14 @@ class TestListByFilterHigh5:
         assert any(r["ticker"] == "000001" for r in result)
 
     def test_h5_hts_avls_just_below_threshold_excluded(self):
-        """hts_avls=999 (999억 억원) → 1,000억 임계 미달 제외 (사이클 166)."""
-        rows = [_make_row("000002", hts_avls="999")]  # 999억 (억원 단위)
+        """hts_avls=999 (999억 억원) → 1,000억 임계 미달 제외 (사이클 166).
+
+        사이클 205 — DB-side gte 전환 (`_apply_db_side_filter` 사전 분할 주입).
+        """
+        rows = _apply_db_side_filter(
+            [_make_row("000002", hts_avls="999")],  # 999억 (억원 단위)
+            min_market_cap=100_000_000_000,
+        )
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \
@@ -189,11 +268,18 @@ class TestListByFilterHigh5:
         assert not any(r["ticker"] == "000002" for r in result)
 
     def test_h5_hts_avls_missing_graceful(self):
-        """hts_avls 키 미존재(None/없음) 시 0 으로 처리 — 시총 필터 제외."""
-        rows = [
-            {"ticker": "000003", "name": "테스트", "excg_dvsn_cd": "02",
-             "nxt_tradable": True, "raw": {}},  # hts_avls 없음
-        ]
+        """hts_avls 키 미존재(None/없음) 시 생성 컬럼 NULL — DB gte 에서 자동 제외.
+
+        사이클 205 — DB-side 생성 컬럼(hts_avls_eok) NULL 은 `.gte()` 에서 Supabase 가
+        자동 제외(정규식 가드, migration 039). `_apply_db_side_filter` 로 동일 시뮬레이션.
+        """
+        rows = _apply_db_side_filter(
+            [
+                {"ticker": "000003", "name": "테스트", "excg_dvsn_cd": "02",
+                 "nxt_tradable": True, "raw": {}},  # hts_avls 없음 → hts_avls_eok 없음(None)
+            ],
+            min_market_cap=1_000_000,  # 1억
+        )
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \
@@ -202,7 +288,7 @@ class TestListByFilterHigh5:
             import src.db.stock_master as sm
             result = asyncio.run(sm.list_by_filter(min_market_cap=1_000_000))  # 1억
 
-        # hts_avls=0 이면 1억 임계도 통과 불가
+        # hts_avls_eok=None → gte 제외 (fixture 단계에서 이미 걸러짐)
         assert not any(r["ticker"] == "000003" for r in result)
 
 
@@ -211,10 +297,14 @@ class TestListByFilterHigh5:
 # ---------------------------------------------------------------------------
 
 class TestListByFilterMedium3:
-    """MEDIUM-3: 2× 버퍼 쿼리로 limit 충족 보장."""
+    """MEDIUM-3: DB fetch limit == 요청 limit (사이클 205 — 오버페치 폐지)."""
 
     def test_m3_fetch_limit_is_double(self):
-        """DB 조회 limit 은 min(limit*2, 1000) 이상이어야 한다."""
+        """사이클 205 의미 전환: DB 조회 limit == 요청 limit (오버페치 max(limit*2,1000) 폐지).
+
+        DB-side gte 필터 전환으로 자격 종목만 반환되므로 (예: 821<1000) 버퍼 오버페치가
+        불필요해졌다. `.limit(limit)` 직접 사용 (G-205-2 정합).
+        """
         rows = []
         result_mock = _mock_supabase_result(rows)
 
@@ -224,12 +314,11 @@ class TestListByFilterMedium3:
             import src.db.stock_master as sm
             asyncio.run(sm.list_by_filter(limit=100))
 
-        # .limit(N) 호출 시 N >= 200 (100*2)
         limit_calls = chain.limit.call_args_list
         assert limit_calls, "Supabase .limit() 가 호출되지 않음"
         actual_limit = limit_calls[0][0][0]
-        assert actual_limit >= 200, (
-            f"DB fetch limit {actual_limit} 이 요청 limit 100 의 2배(200) 미만"
+        assert actual_limit == 100, (
+            f"DB fetch limit {actual_limit} 이 요청 limit 100 과 불일치 (오버페치 폐지 위반)"
         )
 
     def test_m3_no_kis_api_import_in_list_by_filter(self):

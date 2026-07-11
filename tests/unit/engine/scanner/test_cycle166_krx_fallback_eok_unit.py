@@ -5,6 +5,13 @@ KIS 경로 hts_avls 가 억원 단위로 확정됨 (사이클 166) → 같은 ht
 단위 혼재 발생. KRX 폴백도 `// 100_000_000` (원→억원) 으로 통일.
 
 domain-expert 자문: 단위 혼재는 사일런트 결함 온상 → 발화 빈도와 무관하게 통일.
+
+사이클 205 (2026-07-09, phase 1) 의미 전환: `list_by_filter` 의 시총 컷이 Python-side
+`hts_avls * 100_000_000 < min_market_cap` 비교 → DB-side 생성 컬럼(hts_avls_eok) gte
+전환으로 폐지 (`_workspace/red/cycle205_list_by_filter_db_side.md`). 억원 단위 정합 자체는
+`hts_avls_threshold = (min_market_cap + 99_999_999) // 100_000_000` (ceil 나눗셈, 동치
+공식) 로 이관 — `test_ast_1_list_by_filter_python_path_eok` 를 이 패턴 검증으로 갱신.
+`list_paged_by_filter` 경로(G-166-AST-1 두번째 케이스)는 무변경.
 """
 
 from __future__ import annotations
@@ -61,19 +68,24 @@ class TestStockMasterUnitAst:
     """stock_master.py 시총 비교 영역 억원 단위 정적 검증."""
 
     def test_ast_1_list_by_filter_python_path_eok(self):
-        """list_by_filter python-side hts_avls 비교가 × 100_000_000 (억원→원)."""
+        """list_by_filter DB-side hts_avls_eok 임계 환산이 // 100_000_000 (억원, ceil).
+
+        사이클 205 — Python-side `hts_avls * N < min_market_cap` 비교 폐지.
+        DB-side 생성 컬럼 gte 임계 환산 (`(min_market_cap + 99_999_999) // 100_000_000`)
+        으로 이관 — 억원 단위 정합(divisor=100_000_000) 은 동일하게 검증.
+        """
         src = _STOCK_MASTER_PATH.read_text(encoding="utf-8")
-        # hts_avls * N < min_market_cap 패턴
+        # hts_avls_threshold = (min_market_cap + N) // D 패턴 (ceil 나눗셈)
         m = re.search(
-            r'hts_avls\s*\*\s*([\d_]+)\s*<\s*min_market_cap', src
+            r'hts_avls_threshold\s*=\s*\(min_market_cap\s*\+\s*[\d_]+\)\s*//\s*([\d_]+)', src
         )
         assert m is not None, (
-            "list_by_filter python-side hts_avls * N < min_market_cap 패턴 미발견"
+            "list_by_filter DB-side hts_avls_threshold ceil 나눗셈 패턴 미발견"
         )
-        multiplier = m.group(1).replace("_", "")
-        assert multiplier == "100000000", (
-            f"list_by_filter hts_avls 곱셈 단위가 {multiplier} — "
-            f"억원→원 환산(100_000_000)이어야 함 (사이클 166)"
+        divisor = m.group(1).replace("_", "")
+        assert divisor == "100000000", (
+            f"list_by_filter hts_avls_threshold 나눗셈 단위가 {divisor} — "
+            f"억원 단위 환산(100_000_000)이어야 함 (사이클 166 정합 + 사이클 205 DB-side 이관)"
         )
 
     def test_ast_1_list_paged_jsonb_threshold_eok(self):

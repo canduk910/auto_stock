@@ -15,6 +15,12 @@ domain-expert 자문 채택: 억원 기준 통일 / DB 재적재 불필요 / KRX
 - list_paged_by_filter (jsonb): `(min_market_cap + 999_999) // 1_000_000` → `// 100_000_000`
 
 KIS 정본 (사이클 98 G-DOC1): FHKST01010100 inquire_price 응답 `hts_avls` = "HTS 시가총액" (억원 단위).
+
+사이클 205 (2026-07-09, phase 1) 의미 전환: `list_by_filter` 의 시총 컷이 Python-side raw
+파싱 → DB-side 생성 컬럼(hts_avls_eok) gte 로 전환. mock 은 실제 DB 필터를 수행하지 않으므로
+`TestListByFilterEokUnit` 의 경계값 테스트 3건은 fixture 자체를 gte 통과 rows 만 남기고
+주입(`_apply_eok_gte_filter`)하도록 갱신. `TestListPagedByFilterEokUnit`/`TestPathConsistency`
+는 `list_paged_by_filter`(별개 함수, 무변경) 또는 pass-through 케이스라 무변경.
 """
 
 from __future__ import annotations
@@ -80,6 +86,28 @@ async def _fake_to_thread(fn, *args, **kwargs):
     return fn(*args, **kwargs)
 
 
+def _apply_eok_gte_filter(rows: list[dict], *, min_market_cap: int) -> list[dict]:
+    """사이클 205 — DB-side hts_avls_eok gte 필터를 mock 레벨에서 시뮬레이션.
+
+    fixture 의 raw.hts_avls(억원 문자열)로부터 hts_avls_eok 를 파생해 임계 비교 후,
+    통과하는 rows 만 남긴다 (= "DB 가 이미 필터링해서 반환한 상태"를 흉내).
+    """
+    if min_market_cap <= 0:
+        return rows
+    threshold = (min_market_cap + 99_999_999) // 100_000_000
+    out = []
+    for row in rows:
+        raw = row.get("raw") or {}
+        try:
+            eok = int(raw.get("hts_avls") or 0)
+        except (ValueError, TypeError):
+            eok = None
+        if eok is None or eok < threshold:
+            continue
+        out.append(row)
+    return out
+
+
 # ===========================================================================
 # G-166-EOK-1 (HIGH) — list_by_filter python-side 경로 억원 단위 정합
 # ===========================================================================
@@ -104,8 +132,15 @@ class TestListByFilterEokUnit:
         )
 
     def test_eok_1_boundary_999_eok_excluded(self):
-        """hts_avls=999 (999억) → 1,000억 임계 미달 제외."""
-        rows = [_make_row("000002", hts_avls="999")]  # 999억
+        """hts_avls=999 (999억) → 1,000억 임계 미달 제외.
+
+        사이클 205 — DB-side gte 전환. mock 이 실제 필터를 수행하지 않으므로
+        fixture 자체를 `_apply_eok_gte_filter` 로 사전 분할해 주입한다.
+        """
+        rows = _apply_eok_gte_filter(
+            [_make_row("000002", hts_avls="999")],  # 999억
+            min_market_cap=100_000_000_000,
+        )
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \
@@ -173,11 +208,17 @@ class TestListByFilterEokUnit:
         )
 
     def test_eok_1_donchian_500eok_threshold(self):
-        """donchian 500억 임계: hts_avls=500(500억) 통과 / 499(499억) 탈락."""
-        rows = [
-            _make_row("200001", hts_avls="500"),  # 500억 — 통과
-            _make_row("200002", hts_avls="499"),  # 499억 — 탈락
-        ]
+        """donchian 500억 임계: hts_avls=500(500억) 통과 / 499(499억) 탈락.
+
+        사이클 205 — DB-side gte 전환 (`_apply_eok_gte_filter` 사전 분할 주입).
+        """
+        rows = _apply_eok_gte_filter(
+            [
+                _make_row("200001", hts_avls="500"),  # 500억 — 통과
+                _make_row("200002", hts_avls="499"),  # 499억 — 탈락
+            ],
+            min_market_cap=50_000_000_000,  # 500억
+        )
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \
@@ -191,12 +232,19 @@ class TestListByFilterEokUnit:
         assert "200002" not in tickers
 
     def test_eok_1_hts_avls_missing_graceful(self):
-        """hts_avls 키 미존재 → graceful (0 처리, 시총 필터 적용 시 제외)."""
-        rows = [
-            {"ticker": "000009", "name": "테스트", "excg_dvsn_cd": "02",
-             "nxt_tradable": True, "is_kospi200": False, "is_kosdaq150": False,
-             "raw": {}},
-        ]
+        """hts_avls 키 미존재 → graceful (0 처리, 시총 필터 적용 시 제외).
+
+        사이클 205 — DB-side gte 전환. 생성 컬럼 NULL(비숫자/미존재 raw)은 Supabase 가
+        `.gte()` 에서 자동 제외 — `_apply_eok_gte_filter` 로 동일 시뮬레이션.
+        """
+        rows = _apply_eok_gte_filter(
+            [
+                {"ticker": "000009", "name": "테스트", "excg_dvsn_cd": "02",
+                 "nxt_tradable": True, "is_kospi200": False, "is_kosdaq150": False,
+                 "raw": {}},
+            ],
+            min_market_cap=100_000_000,  # 1억
+        )
         result_mock = _mock_supabase_result(rows)
 
         with patch("src.db.stock_master.supabase") as mock_sb, \

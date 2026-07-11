@@ -570,13 +570,20 @@ async def list_by_filter(
     is_kosdaq150: bool | None = None,
     limit: int = 500,
     return_stage_counts: bool = False,
+    sort_by: str | None = None,
 ) -> list[dict] | tuple[list[dict], dict[str, list[str]]]:
-    """시총·거래대금·시장·NXT/KOSPI200/KOSDAQ150 필터로 stock_master 를 조회 (사이클 108 + 153).
+    """시총·거래대금·시장·NXT/KOSPI200/KOSDAQ150 필터로 stock_master 를 조회 (사이클 108 + 153 + 205).
 
     KIS volume-rank API 없이 DB 기반으로 유니버스를 구성한다 (KIS API 호출 0건).
 
-    NOTE: Supabase PostgREST 는 JSONB 숫자 값 직접 비교를 지원하지 않는다.
-    따라서 DB 에서 limit*2 버퍼 조회 후 Python-side 에서 JSONB raw 키 필터링을 수행한다.
+    사이클 205 (2026-07-09, phase 1) — DB-side 필터 전환 (selection bias 시정):
+    시총/거래대금 컷을 Python-side raw JSONB 파싱 대신 생성 컬럼(migration 039,
+    `hts_avls_eok`/`acml_tr_pbmn_won`) 의 `.gte()` DB-side 필터로 수행한다 (list_paged_by_filter
+    사이클 168 패턴 답습). 종전 `.order("refreshed_at", desc=True).limit(max(limit*2, 1000))`
+    오버페치 + Python-side 컷은 PostgREST 1000행 cap 에 걸려 refreshed_at 최신 버퍼에 든
+    일부만 필터 통과 — refreshed_at 은 종목 품질과 무관한 축이라 자의적 부분집합만 스캔되는
+    selection bias 였다. DB-side 필터는 자격 종목만 반환(예: 821<1000)하므로 cap 과 편향을
+    동시에 해소한다. `.limit(limit)` 직접 사용 (오버페치 폐지).
 
     사이클 153 (2026-06-16) — KOSPI200 / KOSDAQ150 영역 인자 추가 영구 영속 (사이클 108 nxt_tradable 답습):
     - is_kospi200=True 단독: KOSPI200 종목만
@@ -586,15 +593,19 @@ async def list_by_filter(
 
     Args:
         market: "kospi" (excg_dvsn_cd=02) / "kosdaq" (excg_dvsn_cd=03) / None (전체)
-        min_market_cap: 시가총액 최소값 (원 단위). hts_avls(억원) × 100_000_000 비교 (사이클 166).
-        min_trade_amount: 거래대금 최소값 (원 단위). acml_tr_pbmn 직접 비교.
+        min_market_cap: 시가총액 최소값 (원 단위). 생성 컬럼 hts_avls_eok(억원) gte
+            ceil(min_market_cap/1e8) 임계로 DB-side 비교 (사이클 166 억원 정합 + 사이클 205).
+        min_trade_amount: 거래대금 최소값 (원 단위). 생성 컬럼 acml_tr_pbmn_won(원) gte 직접 비교.
         exclude_tickers: 제외 종목 리스트.
         nxt_tradable: None=전체 / True=NXT 거래가능만 / False=NXT 불가만.
         is_kospi200: None=전체 / True=KOSPI200만 (is_kosdaq150 와 OR 합집합).
         is_kosdaq150: None=전체 / True=KOSDAQ150만 (is_kospi200 와 OR 합집합).
-        limit: 결과 최대 건수 (default 500).
+        limit: 결과 최대 건수 (default 500). DB fetch limit == 요청 limit (오버페치 폐지, 사이클 205).
         return_stage_counts: 사이클 170 카드 A — True 시 단계별 생존 ticker 누적
             (관찰성 전용, 필터 로직/임계 불변 = 매수 풀 불변). False (기본) = 현행 list.
+            사이클 205 — DB-side 전환으로 3쿼리(union/mcap/trade) 구조 (phase 1).
+        sort_by: 사이클 205 phase 2 훅. None (기본) = 현행 `refreshed_at DESC` 정렬 유지
+            (phase 1 은 정렬 무변경). phase 2 실사용은 별도 사이클 인계.
 
     Returns:
         return_stage_counts=False (기본): 기존 호출자 회귀 보존.
@@ -602,137 +613,128 @@ async def list_by_filter(
               "is_kospi200": bool, "is_kosdaq150": bool, "raw": dict}, ...]
         return_stage_counts=True: (filtered, stage) 튜플 (사이클 170 카드 A).
             stage = {"union_tickers": [...], "mcap_tickers": [...], "trade_tickers": [...]}
-            - union: index/형식/exclude 통과, 시총·거래대금 컷 *전*
-            - mcap: 시총컷 통과 후
-            - trade: 거래대금컷 통과 후 (= 최종 filtered ticker 순서 정합)
+            - union: index/형식/exclude 통과, 시총·거래대금 gte *전* 쿼리
+            - mcap: union + 시총 gte 쿼리
+            - trade: mcap + 거래대금 gte 쿼리 (= 최종 filtered ticker 순서 정합)
             attrition (예: union 348 → mcap 348 → trade 321) funnel 관찰성 노출용.
+            사이클 205 — 각 단계가 별도 DB 쿼리 (3쿼리, DB-side 필터 전환에 따른 구조 변경).
     """
     exclude_set: set[str] = set(exclude_tickers or [])
-    # 2× 버퍼 조회 — JSONB Python-side 필터 후 limit 를 충족하도록 여유분 확보
-    fetch_limit = max(limit * 2, 1000)
 
-    query = (
-        supabase.table(TABLE_NAME)
-        .select("ticker, name, excg_dvsn_cd, nxt_tradable, is_kospi200, is_kosdaq150, raw")
-        .order("refreshed_at", desc=True)
-        .limit(fetch_limit)
-    )
-    if market == "kospi":
-        query = query.eq("excg_dvsn_cd", "02")
-    elif market == "kosdaq":
-        query = query.eq("excg_dvsn_cd", "03")
-    if nxt_tradable is not None:
-        query = query.eq("nxt_tradable", nxt_tradable)
+    # 사이클 205 — 임계 환산 (list_paged_by_filter 사이클 168 패턴 답습).
+    # hts_avls_eok(억원) gte 임계: min_market_cap(원) / 1e8 의 ceil.
+    # 동치 근거: Python-side `hts_avls*1e8 >= min_market_cap` ⟺ `hts_avls >= ceil(min_market_cap/1e8)`.
+    hts_avls_threshold = 0
+    if min_market_cap and min_market_cap > 0:
+        hts_avls_threshold = (min_market_cap + 99_999_999) // 100_000_000
 
-    # 사이클 153 — KOSPI200/KOSDAQ150 영역 필터 (Q1=A 영구 영속 + Q2=A OR 합집합 의무).
-    # 단독 인자 = DB-side .eq() 필터 영역 (PostgREST 인덱스 활용 효과). 양쪽 동시 True =
-    # PostgREST .or_() 합집합 (Python-side filter 폴백 회피, 인덱스 idx_stock_master_is_kospi200
-    # + idx_stock_master_is_kosdaq150 영역 활용 영구 영속). False 인자 = .eq(False) 단독 필터.
-    if is_kospi200 is True and is_kosdaq150 is True:
-        query = query.or_("is_kospi200.eq.true,is_kosdaq150.eq.true")
-    elif is_kospi200 is not None and is_kosdaq150 is None:
-        query = query.eq("is_kospi200", is_kospi200)
-    elif is_kosdaq150 is not None and is_kospi200 is None:
-        query = query.eq("is_kosdaq150", is_kosdaq150)
-    elif is_kospi200 is not None and is_kosdaq150 is not None:
-        # 양쪽 모두 명시 (False 영역 포함) = AND 영역 영구 영속
-        query = query.eq("is_kospi200", is_kospi200).eq("is_kosdaq150", is_kosdaq150)
+    acml_tr_pbmn_threshold = 0
+    if min_trade_amount and min_trade_amount > 0:
+        acml_tr_pbmn_threshold = int(min_trade_amount)
 
-    result = await asyncio.to_thread(lambda: query.execute())
-    rows = result.data or []
+    def _build_query(*, with_mcap: bool, with_trade: bool):
+        """공통 쿼리 빌더 — index/market/nxt 필터 공통 + 시총/거래대금 gte 단계별 결합.
 
-    # 사이클 170 카드 A — 단계별 생존 ticker 누적 (관찰성 전용).
-    # cap 미적용 — 정확한 count 보존 (소비처 _record_funnel_step 가 survived_count 정확
-    # 기록 + survived 리스트만 _FUNNEL_SURVIVED_CAP 200 자름). rows 는 fetch buffer cap.
-    # 필터 로직/임계/순서/limit break 불변 → filtered 원소·순서 행위 보존 (G-A-1 HIGH).
-    union_tickers: list[str] = []
-    mcap_tickers: list[str] = []
-    trade_tickers: list[str] = []
+        사이클 205 — DB-side 생성 컬럼(hts_avls_eok/acml_tr_pbmn_won) numeric gte 비교
+        (list_paged_by_filter 사이클 168 패턴 답습). raw JSONB Python-side 파싱 폐지.
+        """
+        q = (
+            supabase.table(TABLE_NAME)
+            .select("ticker, name, excg_dvsn_cd, nxt_tradable, is_kospi200, is_kosdaq150, raw")
+            .order("refreshed_at", desc=True)
+        )
+        if market == "kospi":
+            q = q.eq("excg_dvsn_cd", "02")
+        elif market == "kosdaq":
+            q = q.eq("excg_dvsn_cd", "03")
+        if nxt_tradable is not None:
+            q = q.eq("nxt_tradable", nxt_tradable)
 
-    filtered: list[dict] = []
-    for row in rows:
-        if len(filtered) >= limit:
-            break
-        ticker = row.get("ticker", "")
-        if not ticker:
-            continue
-        if ticker in exclude_set:
-            continue
-
-        # 사이클 153 — Python-side OR/AND 필터 영역 (mock 환경 + DB-side .or_() 폴백 영역).
-        # is_kospi200=True 단독: row.is_kospi200=True 만 통과
-        # is_kosdaq150=True 단독: row.is_kosdaq150=True 만 통과
-        # 양쪽 True: row.is_kospi200=True OR row.is_kosdaq150=True 통과 (donchian 의무)
+        # 사이클 153 — KOSPI200/KOSDAQ150 영역 필터 (Q1=A 영구 영속 + Q2=A OR 합집합 의무).
         if is_kospi200 is True and is_kosdaq150 is True:
-            if not (row.get("is_kospi200") or row.get("is_kosdaq150")):
-                continue
-        elif is_kospi200 is True and is_kosdaq150 is None:
-            if not row.get("is_kospi200"):
-                continue
-        elif is_kosdaq150 is True and is_kospi200 is None:
-            if not row.get("is_kosdaq150"):
-                continue
-        elif is_kospi200 is False and is_kosdaq150 is None:
-            if row.get("is_kospi200"):
-                continue
-        elif is_kosdaq150 is False and is_kospi200 is None:
-            if row.get("is_kosdaq150"):
-                continue
+            q = q.or_("is_kospi200.eq.true,is_kosdaq150.eq.true")
+        elif is_kospi200 is not None and is_kosdaq150 is None:
+            q = q.eq("is_kospi200", is_kospi200)
+        elif is_kosdaq150 is not None and is_kospi200 is None:
+            q = q.eq("is_kosdaq150", is_kosdaq150)
         elif is_kospi200 is not None and is_kosdaq150 is not None:
-            # AND 영역 (양쪽 명시) — row 영역 정확 일치 의무
-            if row.get("is_kospi200") != is_kospi200:
+            q = q.eq("is_kospi200", is_kospi200).eq("is_kosdaq150", is_kosdaq150)
+
+        if with_mcap and hts_avls_threshold > 0:
+            q = q.gte("hts_avls_eok", hts_avls_threshold)
+        if with_trade and acml_tr_pbmn_threshold > 0:
+            q = q.gte("acml_tr_pbmn_won", acml_tr_pbmn_threshold)
+
+        return q.limit(limit)
+
+    def _filter_rows(rows: list[dict]) -> list[dict]:
+        """index OR/AND(Python-side 폴백) + exclude + limit break — DB 미이관 로직만."""
+        out: list[dict] = []
+        for row in rows:
+            if len(out) >= limit:
+                break
+            ticker = row.get("ticker", "")
+            if not ticker:
                 continue
-            if row.get("is_kosdaq150") != is_kosdaq150:
-                continue
-
-        raw: dict = row.get("raw") or {}
-
-        # 사이클 170 카드 A — union 단계 (index/형식/exclude 통과, 시총·거래대금 컷 *전*)
-        # cap 미적용 — 정확한 count 보존 (소비처 _record_funnel_step 가 survived_count=
-        # len(survived) 로 정확 기록 + survived 리스트만 _FUNNEL_SURVIVED_CAP 200 자름).
-        # rows 는 list_by_filter fetch_limit (= max(limit*2, 1000)) buffer 로 이미 cap.
-        if return_stage_counts:
-            union_tickers.append(ticker)
-
-        # 시가총액 필터 — hts_avls 단위: 억원 → 원 변환 후 비교 (사이클 166 정정)
-        # KIS FHKST01010100 inquire_price 응답 hts_avls = "HTS 시가총액" (억원 단위).
-        # 운영 DB 실측 (2026-06-19): 실제시총(원) / hts_avls ≈ 10^8 → 1단위 = 1억원 확정.
-        # 사이클 108 도입 시점 "백만원" 가정 (× 1_000_000) 은 silent 결함 — 100배 어긋남
-        # → 후보 풀 95% 축소 (min_market_cap=1,000억 시 1,734 → 80). 억원 단위로 통일.
-        if min_market_cap > 0:
-            try:
-                hts_avls = int(raw.get("hts_avls") or 0)
-            except (ValueError, TypeError):
-                hts_avls = 0
-            if hts_avls * 100_000_000 < min_market_cap:
+            if ticker in exclude_set:
                 continue
 
-        # 사이클 170 카드 A — mcap 단계 (시총컷 통과 후, 거래대금 컷 *전*)
-        if return_stage_counts:
-            mcap_tickers.append(ticker)
+            # 사이클 153 — Python-side OR/AND 필터 (mock 환경 + DB-side .or_() 폴백 영역).
+            if is_kospi200 is True and is_kosdaq150 is True:
+                if not (row.get("is_kospi200") or row.get("is_kosdaq150")):
+                    continue
+            elif is_kospi200 is True and is_kosdaq150 is None:
+                if not row.get("is_kospi200"):
+                    continue
+            elif is_kosdaq150 is True and is_kospi200 is None:
+                if not row.get("is_kosdaq150"):
+                    continue
+            elif is_kospi200 is False and is_kosdaq150 is None:
+                if row.get("is_kospi200"):
+                    continue
+            elif is_kosdaq150 is False and is_kospi200 is None:
+                if row.get("is_kosdaq150"):
+                    continue
+            elif is_kospi200 is not None and is_kosdaq150 is not None:
+                if row.get("is_kospi200") != is_kospi200:
+                    continue
+                if row.get("is_kosdaq150") != is_kosdaq150:
+                    continue
 
-        # 거래대금 필터 — acml_tr_pbmn 단위: 원
-        if min_trade_amount > 0:
-            try:
-                acml_tr = int(raw.get("acml_tr_pbmn") or 0)
-            except (ValueError, TypeError):
-                acml_tr = 0
-            if acml_tr < min_trade_amount:
-                continue
-
-        # 사이클 170 카드 A — trade 단계 (거래대금컷 통과 후 = 최종 filtered, 순서 정합)
-        if return_stage_counts:
-            trade_tickers.append(ticker)
-
-        filtered.append(row)
+            out.append(row)
+        return out
 
     if return_stage_counts:
-        return filtered, {
+        # 사이클 205 — 3쿼리 (union/mcap/trade). 각 쿼리 동일 정렬+limit, gte 단계별 추가.
+        union_result = await asyncio.to_thread(
+            lambda: _build_query(with_mcap=False, with_trade=False).execute()
+        )
+        union_filtered = _filter_rows(union_result.data or [])
+        union_tickers = [r["ticker"] for r in union_filtered]
+
+        mcap_result = await asyncio.to_thread(
+            lambda: _build_query(with_mcap=True, with_trade=False).execute()
+        )
+        mcap_filtered = _filter_rows(mcap_result.data or [])
+        mcap_tickers = [r["ticker"] for r in mcap_filtered]
+
+        trade_result = await asyncio.to_thread(
+            lambda: _build_query(with_mcap=True, with_trade=True).execute()
+        )
+        trade_filtered = _filter_rows(trade_result.data or [])
+        trade_tickers = [r["ticker"] for r in trade_filtered]
+
+        return trade_filtered, {
             "union_tickers": union_tickers,
             "mcap_tickers": mcap_tickers,
             "trade_tickers": trade_tickers,
         }
-    return filtered
+
+    result = await asyncio.to_thread(
+        lambda: _build_query(with_mcap=True, with_trade=True).execute()
+    )
+    rows = result.data or []
+    return _filter_rows(rows)
 
 
 async def is_stale(ticker: str, max_age_hours: int = 24) -> bool:

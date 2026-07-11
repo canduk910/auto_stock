@@ -17,6 +17,13 @@ union+시총+거래대금 한 번에 수행하고 최종 list 만 반환.
 - G-A-4: 미지정 호출자 → list (tuple 아님).
 - G-A-5: donchian prepare step1=348/step2=321 collapse 차단.
 - G-A-6 (AST): 시그너처 keyword + donchian _scan_universe 전달.
+
+사이클 205 (2026-07-09, phase 1) 의미 전환: `list_by_filter` 가 DB-side 생성 컬럼 gte
+전환으로 return_stage_counts=True 시 3쿼리(union/mcap/trade) 구조로 바뀜 — 단일 mock rows
+로는 3단계(union⊇mcap⊇trade) 를 재현 못하므로 `_run_filter`/`g_a_1`/`g_a_2`/`g_a_3` 가
+per-execute rows 시퀀스(다중 `.execute()` 지원)를 주입하도록 갱신. `g_a_4`/`g_a_5`/`g_a_6`
+은 단일 쿼리(return_stage_counts 미지정) 또는 직접 monkeypatch/시그너처 검사라 무변경.
+상세 근거는 `_workspace/red/cycle205_list_by_filter_db_side.md` 참조.
 """
 from __future__ import annotations
 
@@ -59,9 +66,10 @@ def _mock_result(rows):
 
 
 def _setup_chain(mock_sb, result_mock):
+    """단일 rows 고정 응답 (return_stage_counts=False, 단일 쿼리 케이스 전용)."""
     chain = MagicMock()
     mock_sb.table.return_value = chain
-    for meth in ("select", "order", "limit", "eq", "or_"):
+    for meth in ("select", "order", "limit", "eq", "or_", "gte"):
         getattr(chain, meth).return_value = chain
     chain.execute.return_value = result_mock
     return chain
@@ -72,6 +80,8 @@ async def _fake_to_thread(fn, *args, **kwargs):
 
 
 def _run_filter(rows, **kwargs):
+    """단일 rows (모든 .execute() 동일 응답) — return_stage_counts=False 또는
+    3쿼리 모두 같은 rows 를 받아도 되는(union==mcap==trade) 단순 케이스용."""
     result_mock = _mock_result(rows)
     with patch("src.db.stock_master.supabase") as mock_sb, \
          patch("asyncio.to_thread", side_effect=_fake_to_thread):
@@ -80,21 +90,72 @@ def _run_filter(rows, **kwargs):
         return asyncio.run(sm.list_by_filter(**kwargs))
 
 
+def _run_filter_staged(rows_per_execute: list[list[dict]], **kwargs):
+    """사이클 205 — per-execute rows 시퀀스 주입 (3쿼리: union/mcap/trade 각자 다른 rows).
+
+    cycle205 FakeQuery 패턴 답습 — 매 `.execute()` 호출마다 순서대로 다음 rows 를 반환.
+    """
+    state = {"idx": 0}
+
+    class FakeQuery:
+        def select(self, *a, **k):
+            return self
+
+        def order(self, *a, **k):
+            return self
+
+        def limit(self, *a, **k):
+            return self
+
+        def eq(self, *a, **k):
+            return self
+
+        def or_(self, *a, **k):
+            return self
+
+        def gte(self, *a, **k):
+            return self
+
+        def execute(self):
+            i = min(state["idx"], len(rows_per_execute) - 1)
+            data = rows_per_execute[i]
+            state["idx"] += 1
+            resp = MagicMock()
+            resp.data = data
+            return resp
+
+    with patch("src.db.stock_master.supabase") as mock_sb, \
+         patch("asyncio.to_thread", side_effect=_fake_to_thread):
+        mock_sb.table.side_effect = lambda _n: FakeQuery()
+        import src.db.stock_master as sm
+        return asyncio.run(sm.list_by_filter(**kwargs))
+
+
 # ------------------------------------------------------------------
 # G-A-1 (HIGH) — 행위 보존: True 의 filtered == False 의 결과
 # ------------------------------------------------------------------
 def test_g_a_1_filtered_identical_with_and_without_stage_counts():
-    """return_stage_counts=True 의 filtered 가 False 의 결과와 원소·순서 동일."""
-    rows = [
+    """return_stage_counts=True 의 filtered 가 False 의 결과와 원소·순서 동일.
+
+    사이클 205 — DB-side 3쿼리 구조. base(단일 쿼리, `_run_filter`)는 전량(4건)을 받아
+    Python 미필터(=DB 가 이미 필터링했다고 가정)로 그대로 반환하고, paired(3쿼리)는
+    trade 쿼리(마지막)가 base 와 동일 rows 를 받도록 주입 — trade 쿼리 = 최종 filtered.
+    """
+    all_rows = [
         _make_row("000001", hts_avls="2000", acml_tr_pbmn="50000000000"),
-        _make_row("000002", hts_avls="500", acml_tr_pbmn="50000000000"),   # 시총 탈락
-        _make_row("000003", hts_avls="2000", acml_tr_pbmn="1000000000"),   # 거래대금 탈락
+        _make_row("000002", hts_avls="500", acml_tr_pbmn="50000000000"),   # 시총 탈락 (union 만)
+        _make_row("000003", hts_avls="2000", acml_tr_pbmn="1000000000"),   # 거래대금 탈락 (union/mcap)
         _make_row("000004", hts_avls="3000", acml_tr_pbmn="80000000000"),
     ]
+    # DB-side gte 가 이미 필터링했다고 가정한 trade(=최종) 결과 — 000002/000003 탈락.
+    trade_only_rows = [all_rows[0], all_rows[3]]
     kw = dict(min_market_cap=100_000_000_000, min_trade_amount=10_000_000_000)
 
-    base = _run_filter(rows, **kw)
-    paired = _run_filter(rows, return_stage_counts=True, **kw)
+    base = _run_filter(trade_only_rows, **kw)
+    paired = _run_filter_staged(
+        [all_rows, [all_rows[0], all_rows[3]], trade_only_rows],
+        return_stage_counts=True, **kw,
+    )
 
     assert isinstance(paired, tuple), "return_stage_counts=True → tuple 반환 의무"
     filtered_paired, stage = paired
@@ -109,14 +170,18 @@ def test_g_a_1_filtered_identical_with_and_without_stage_counts():
 # G-A-2 — 단조 감소: union ⊇ mcap ⊇ trade, len(trade)==len(filtered)
 # ------------------------------------------------------------------
 def test_g_a_2_stage_monotonic():
-    """union ⊇ mcap ⊇ trade, len(trade_tickers)==len(filtered) 단조."""
-    rows = [
-        _make_row("000001", hts_avls="2000", acml_tr_pbmn="50000000000"),
-        _make_row("000002", hts_avls="500", acml_tr_pbmn="50000000000"),
-        _make_row("000003", hts_avls="2000", acml_tr_pbmn="1000000000"),
-    ]
-    filtered, stage = _run_filter(
-        rows, min_market_cap=100_000_000_000, min_trade_amount=10_000_000_000,
+    """union ⊇ mcap ⊇ trade, len(trade_tickers)==len(filtered) 단조.
+
+    사이클 205 — 3쿼리 per-execute rows 주입 (union 3건 → mcap 2건(000002 시총탈락)
+    → trade 1건(000003 거래대금탈락)).
+    """
+    r1 = _make_row("000001", hts_avls="2000", acml_tr_pbmn="50000000000")
+    r2 = _make_row("000002", hts_avls="500", acml_tr_pbmn="50000000000")
+    r3 = _make_row("000003", hts_avls="2000", acml_tr_pbmn="1000000000")
+
+    filtered, stage = _run_filter_staged(
+        [[r1, r2, r3], [r1, r3], [r1]],
+        min_market_cap=100_000_000_000, min_trade_amount=10_000_000_000,
         return_stage_counts=True,
     )
     union = stage["union_tickers"]
@@ -134,16 +199,20 @@ def test_g_a_2_stage_monotonic():
 # G-A-3 — 실측 348/348/321 패턴 재현 (시총컷 통과율 100%, 거래대금컷 일부 탈락)
 # ------------------------------------------------------------------
 def test_g_a_3_realistic_attrition_348_348_321():
-    """union=N → mcap=N (시총 전부 통과) → trade<N (거래대금 일부 탈락) 패턴."""
-    # 348 union 중 시총 전부 통과(348), 거래대금 27 탈락 → 321
-    rows = []
-    for i in range(348):
-        # 마지막 27 종목만 거래대금 미달
-        trade_amt = "1000000000" if i >= 321 else "50000000000"
-        rows.append(_make_row(f"{i:06d}", hts_avls="2000", acml_tr_pbmn=trade_amt))
+    """union=N → mcap=N (시총 전부 통과) → trade<N (거래대금 일부 탈락) 패턴.
 
-    filtered, stage = _run_filter(
-        rows, min_market_cap=50_000_000_000, min_trade_amount=10_000_000_000,
+    사이클 205 — 3쿼리 per-execute rows 주입: union=mcap=348(시총 전부 통과) 이므로
+    두 쿼리는 동일 348 rows, trade 쿼리는 321 rows(거래대금 27건 탈락 반영 완료)만 반환.
+    """
+    all_348 = [
+        _make_row(f"{i:06d}", hts_avls="2000", acml_tr_pbmn="50000000000")
+        for i in range(348)
+    ]
+    trade_321 = all_348[:321]  # 마지막 27종목 거래대금 미달 → DB gte 가 이미 제외
+
+    filtered, stage = _run_filter_staged(
+        [all_348, all_348, trade_321],
+        min_market_cap=50_000_000_000, min_trade_amount=10_000_000_000,
         limit=500, return_stage_counts=True,
     )
     assert len(stage["union_tickers"]) == 348

@@ -159,6 +159,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -910,6 +911,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -1425,6 +1427,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -1937,6 +1940,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -2457,6 +2461,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -2977,6 +2982,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -4206,6 +4212,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -4740,6 +4747,7 @@ backend:
     - tests/unit/db/test_cycle190_write_log_never_raise.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
     - tests/unit/db/test_cycle193_task_marker_helpers.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -5185,6 +5193,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle175_log_retention_loop.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -5856,6 +5865,7 @@ backend:
     - tests/unit/db/test_cycle189_read_retry_expand.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
     - tests/unit/db/test_cycle193_task_marker_helpers.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -6836,6 +6846,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -8360,6 +8371,7 @@ backend:
     - tests/unit/db/test_cycle166_hts_avls_unit_correction.py
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -8998,6 +9010,7 @@ backend:
     - tests/unit/db/test_cycle166_hts_avls_unit_correction.py
     - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -9735,6 +9748,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -10265,6 +10279,7 @@ backend:
     - tests/unit/db/test_cycle190_write_log_never_raise.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
     - tests/unit/db/test_cycle193_task_marker_helpers.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -10853,6 +10868,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -11366,6 +11382,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -12319,6 +12336,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -13304,6 +13322,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -14038,6 +14057,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -15663,6 +15683,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -16574,6 +16595,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -17433,6 +17455,7 @@ backend:
     - tests/unit/db/test_cycle190_write_log_never_raise.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
     - tests/unit/db/test_cycle193_task_marker_helpers.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -23153,6 +23176,7 @@ backend:
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle189_read_retry_expand.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -23680,6 +23704,7 @@ backend:
     - tests/unit/db/test_cycle189_read_retry_expand.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
     - tests/unit/db/test_cycle193_task_marker_helpers.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -24633,6 +24658,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -25651,6 +25677,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -26193,6 +26220,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -26713,6 +26741,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -28818,6 +28847,7 @@ backend:
     - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
     - tests/unit/db/test_cycle187_daily_read_retry.py
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
     - tests/unit/db/test_cycle84_get_stats_aggregation.py
     - tests/unit/db/test_cycle84_list_all_pagination.py
@@ -29819,10 +29849,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-11T13:33:53.359836+09:00'
+generated_at: '2026-07-11T14:11:44.003562+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 689
+  backend_tests: 690
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:
