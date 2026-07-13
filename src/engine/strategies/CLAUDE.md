@@ -80,14 +80,14 @@
 - `daily_high = max(stck_hgpr, high_price, current_price, open_price)`. 초과 시 NONE.
 - 기존 `gap_skip_threshold` 와 별개 (시가 갭 vs 당일 고가 추격).
 
-### donchian `box_contraction_period` + `max_box_volatility_pct` (P2-4)
-- 기본 10일, 5.0%. `prepare()` ATR 통과 후 박스 수축 필터.
-- 직전 N일 (high.max - low.min) / close.mean × 100 > max_box_volatility_pct → skip.
-- `_scan_stats["box_contraction_pass"]` 키 추가.
+### donchian `box_contraction_period` + `max_box_volatility_pct` (P2-4) — **사이클 208 (2026-07-13) 완전 제거**
+- ~~기본 10일, 5.0%. `prepare()` ATR 통과 후 박스 수축 필터.~~ **제거됨.**
+- **제거 사유 (domain-expert 자문 `_workspace/domain_consult/cycle_donchian_box_contraction.md`)**: "20일 신고가 돌파"(추세 상승 → 최근 박스 넓음)와 "12일 박스 ≤임계 초압축 횡보 요구"는 앞단·뒷단이 반대 종목을 선호 → 교집합 거의 공집합 = donchian 최종 후보 상시 0 (2026-07-13 KB금융/금호타이어 step8=2→step9=0). VCP/BFB 와 역할 중복. 페이크 돌파 방어는 청산 규칙(ATR×2 트레일링/-7% 하드/`breakout_fail_n_days`/`max_breakout_extension_pct`)이 담당 → 제거 리스크 무손상.
+- 삭제: 필터 블록(prepare) + DEFAULT_PARAMS 2키 + `_scan_stats["box_contraction_pass"]` + PARAM_RANGES/INT_PARAMS 2키(자동튜닝 제외 = 박스 폭은 손익 튜닝값 아닌 전략 정체성 상수, AI 5.0→3.2 과적합 조임 차단, 사이클 198 flag_lookback_min 선례). 매매 안전성 8영역 diff 0 (prepare 매수 진입 전, 사이클 38). check_exit_signal/ATR/신고가/EMA/거래대금 필터 불변.
 
 ### VCP PARAM_RANGES 화이트리스트 (P1-1)
 - `base_depth_pct(0.10,0.50)` / `volume_contraction_ratio(0.30,1.00)` / `breakout_volume_mult(1.0,5.0)` / `last_pullback_max(0.03,0.15)` 추가.
-- P2 신규 5 키도 PARAM_RANGES/INT_PARAMS 동시 등록.
+- P2 신규 5 키 중 3키(`breakout_retention_minutes`/`breakout_fail_n_days`/`max_breakout_extension_pct`) PARAM_RANGES/INT_PARAMS 등록. box 2키는 사이클 208 제외.
 
 ## 새 전략 추가
 1. 본 디렉토리에 `StrategyBase` 서브클래스 (`prepare/check_buy_signal/check_exit_signal/calc_buy_quantity`)

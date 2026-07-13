@@ -103,8 +103,6 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "breakout_retention_minutes": (1, 30),
     "breakout_fail_n_days": (2, 20),
     "max_breakout_extension_pct": (0.5, 10.0),
-    "box_contraction_period": (5, 30),
-    "max_box_volatility_pct": (1.0, 15.0),
 }
 
 # 정수형 파라미터 — 캐스트 대상
@@ -119,7 +117,6 @@ INT_PARAMS = {
     # ↓ 사이클 23 — 정수 캐스트 대상
     "breakout_retention_minutes",
     "breakout_fail_n_days",
-    "box_contraction_period",
 }
 
 

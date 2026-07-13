@@ -271,6 +271,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -614,6 +615,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -1025,6 +1027,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -1542,6 +1545,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -2059,6 +2063,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2580,6 +2585,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -3103,6 +3109,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -3449,6 +3456,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -3686,6 +3694,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -3925,6 +3934,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4334,6 +4344,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4889,6 +4900,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -5466,6 +5478,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -6002,6 +6015,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -6363,6 +6377,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -6577,6 +6592,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -6972,6 +6988,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -7319,6 +7336,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -7534,6 +7552,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -7760,6 +7779,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -7975,6 +7995,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -8203,6 +8224,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8624,6 +8646,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9136,6 +9159,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9483,6 +9507,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -9877,6 +9902,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -10428,6 +10454,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10989,6 +11016,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11514,6 +11542,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11869,6 +11898,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -12424,6 +12454,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -12631,6 +12662,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -12846,6 +12878,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -13066,6 +13099,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -13455,6 +13489,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -13807,6 +13842,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -14192,6 +14228,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -14543,6 +14580,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -14762,6 +14800,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -14993,6 +15032,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -15134,6 +15174,7 @@ backend:
     - tests/integration/test_backtest_disabled_and_graceful.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_with_market_regime.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
@@ -15428,6 +15469,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -15819,6 +15861,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -16172,6 +16215,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -16461,6 +16505,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -16996,6 +17041,7 @@ backend:
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     transitive_tests:
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_cycle163_boot_prepare_guard.py
@@ -17120,6 +17166,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -17417,6 +17464,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle203_ast_no_iscd_block.py
     - tests/unit/ast/test_cycle204_ast_no_caution_block.py
+    - tests/unit/ast/test_cycle208_ast_no_box_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17645,6 +17693,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -18050,6 +18099,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -18295,6 +18345,7 @@ backend:
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -18495,6 +18546,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -18732,6 +18784,7 @@ backend:
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -18932,6 +18985,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -19156,6 +19210,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -19375,6 +19430,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -19590,6 +19646,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -19805,6 +19862,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -20028,6 +20086,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -20276,6 +20335,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -20457,6 +20517,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -20736,6 +20797,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -20957,6 +21019,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -21191,6 +21254,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -21423,6 +21487,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -21635,6 +21700,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21962,6 +22028,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -22179,6 +22246,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -22398,6 +22466,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -22684,6 +22753,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -22905,6 +22975,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23317,6 +23388,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23851,6 +23923,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24265,6 +24338,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24782,6 +24856,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -25179,6 +25254,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -25432,6 +25508,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -25819,6 +25896,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26363,6 +26441,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26884,6 +26963,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -28138,6 +28218,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -28369,6 +28450,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -28602,6 +28684,7 @@ backend:
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -28992,6 +29075,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
+    - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -29879,10 +29963,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-11T19:12:12.922013+09:00'
+generated_at: '2026-07-13T12:37:06.375273+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 691
+  backend_tests: 693
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

@@ -1,9 +1,11 @@
-"""사이클 23 P2-4 Red — donchian 박스 수축 보조 필터.
+"""사이클 23 P2-4 → 사이클 208 의미 전환 — donchian 박스 수축 보조 필터 *제거*.
 
-요구 행위:
-1. 박스 변동성 3% (≤5%) → box_contraction_pass 증가 (통과)
-2. 박스 변동성 7% (>5%) → skip (통과 안 함)
-3. box_contraction_pass 카운터 정확히 증가
+사이클 208 (2026-07-13, 사이클 66 K-2 패턴): 박스 수축 필터가 추세 상승 종목
+(신고가 = 박스 넓음)을 상시 탈락시켜 최종 후보 상시 0 → domain 자문 채택하여
+필터 완전 제거 (`_workspace/domain_consult/cycle_donchian_box_contraction.md`).
+
+기존 "박스 변동성 3% 통과 / 7% skip / box_contraction_pass 증가" 계약을
+"필터 제거됨 (넓은 박스도 통과 / box_contraction_pass 키 부재)" 로 갱신.
 """
 from __future__ import annotations
 
@@ -64,12 +66,14 @@ def _make_candles(n=70, base_price=10_000, vol_pct=0.03, high_breakout=True):
     return candles
 
 
-def test_empty_scan_stats_has_box_contraction_pass():
-    """_empty_scan_stats() 에 box_contraction_pass 키가 기본 0이어야 한다."""
+def test_empty_scan_stats_no_box_contraction_pass():
+    """사이클 208 의미 전환 — _empty_scan_stats() 에 box_contraction_pass 키 부재.
+
+    (기존: 키 기본 0 존재 단언 → 제거 후 부재 단언)
+    """
     from src.engine.strategies.donchian_swing import _empty_scan_stats
     stats = _empty_scan_stats()
-    assert "box_contraction_pass" in stats
-    assert stats["box_contraction_pass"] == 0
+    assert "box_contraction_pass" not in stats
 
 
 def _make_donchian_passing_candles(n=70, base_price=10_000, vol_pct=0.03):
@@ -113,70 +117,66 @@ def _make_donchian_passing_candles(n=70, base_price=10_000, vol_pct=0.03):
     return candles
 
 
-@pytest.mark.asyncio
-async def test_box_contraction_pass_increments_when_low_volatility(monkeypatch):
-    """박스 변동성 3% (< 5%) → box_contraction_pass 증가."""
-    strat = _make_strat(box_period=10, max_box_vol=5.0)
+async def _run_prepare(strat, candles, tickers):
+    """사이클 173 이후 일봉 source = get_recent_daily_normalized (DB 우선 어댑터).
 
-    tickers = ["005930"]
+    _scan_universe / master_block / 어댑터 를 mock 하고 prepare 실행.
+    """
+    async def fake_scan_universe():
+        strat._scan_stats["universe_candidates"] = len(tickers)
+        strat._scan_stats["universe_filtered"] = len(tickers)
+        strat._scan_stage_counts = {
+            "union_tickers": list(tickers),
+            "mcap_tickers": list(tickers),
+            "trade_tickers": list(tickers),
+        }
+        return list(tickers)
+
+    import src.engine.scanner as scanner_mod
+    with patch.object(strat, "_scan_universe", new=fake_scan_universe), \
+            patch.object(
+                strat, "_apply_master_block_filter_in_prepare",
+                new=AsyncMock(return_value=(list(tickers), [])),
+            ), \
+            patch(
+                "src.db.stock_master_daily.get_recent_daily_normalized",
+                new=AsyncMock(return_value=candles),
+            ), \
+            patch("src.db.system_logs.write_log", new=AsyncMock()), \
+            patch.object(scanner_mod, "ticker_prev_close", {}):
+        await strat.prepare()
+
+
+@pytest.mark.asyncio
+async def test_low_volatility_box_still_prepared():
+    """사이클 208 의미 전환 — 박스 변동성 3% 종목은 여전히 최종 후보에 포함.
+
+    (기존: box_contraction_pass 증가 단언 → 필터 제거로 그 카운터 자체 부재.
+    저변동성 종목도 정상 확정됨을 재확인.)
+    """
+    strat = _make_strat(box_period=10, max_box_vol=5.0)
     candles_low_vol = _make_donchian_passing_candles(n=70, base_price=10_000, vol_pct=0.03)
 
-    # _scan_universe mock
-    async def fake_scan_universe():
-        strat._scan_stats["universe_candidates"] = 1
-        strat._scan_stats["universe_filtered"] = 1
-        return tickers
+    await _run_prepare(strat, candles_low_vol, ["005930"])
 
-    monkeypatch.setattr(strat, "_scan_universe", fake_scan_universe)
-
-    # fetch_daily_candles mock
-    async def fake_fetch(ticker, days):
-        return candles_low_vol
-
-    monkeypatch.setattr(
-        "src.api.condition.fetch_daily_candles", fake_fetch
-    )
-
-    # ticker_prev_close mock
-    import src.engine.scanner as scanner_mod
-    monkeypatch.setattr(scanner_mod, "ticker_prev_close", {})
-
-    # write_log mock
-    monkeypatch.setattr(
-        "src.db.system_logs.write_log", AsyncMock()
-    )
-
-    await strat.prepare()
-    assert strat._scan_stats["box_contraction_pass"] >= 1
+    assert "005930" in strat._candidates
+    assert "box_contraction_pass" not in strat._scan_stats
 
 
 @pytest.mark.asyncio
-async def test_box_contraction_skip_when_high_volatility(monkeypatch):
-    """박스 변동성 7% (> 5%) → skip, box_contraction_pass 증가 안 함."""
-    strat = _make_strat(box_period=10, max_box_vol=5.0)
+async def test_high_volatility_wide_box_now_prepared():
+    """사이클 208 의미 전환 — 박스 변동성 7%(넓은 박스) 종목도 이제 최종 후보에 포함.
 
-    tickers = ["005930"]
-    # 높은 변동성이지만 donchian/EMA/거래량/ATR 필터는 통과하도록 구성
+    (기존: box_contraction_pass=0 + final_prepared=0 skip 단언 →
+    필터 제거로 넓은 박스 추세 상승 종목도 확정 = 추세추종 정합.)
+    """
+    strat = _make_strat(box_period=10, max_box_vol=5.0)
     candles_high_vol = _make_donchian_passing_candles(n=70, base_price=10_000, vol_pct=0.07)
 
-    async def fake_scan_universe():
-        strat._scan_stats["universe_candidates"] = 1
-        strat._scan_stats["universe_filtered"] = 1
-        return tickers
+    await _run_prepare(strat, candles_high_vol, ["005930"])
 
-    monkeypatch.setattr(strat, "_scan_universe", fake_scan_universe)
-
-    async def fake_fetch(ticker, days):
-        return candles_high_vol
-
-    monkeypatch.setattr("src.api.condition.fetch_daily_candles", fake_fetch)
-
-    import src.engine.scanner as scanner_mod
-    monkeypatch.setattr(scanner_mod, "ticker_prev_close", {})
-
-    monkeypatch.setattr("src.db.system_logs.write_log", AsyncMock())
-
-    await strat.prepare()
-    # 고변동성이라 box_contraction_pass = 0, final_prepared = 0
-    assert strat._scan_stats["box_contraction_pass"] == 0
-    assert strat._scan_stats["final_prepared"] == 0
+    assert "005930" in strat._candidates, (
+        "넓은 박스 종목도 최종 후보 포함 (박스 수축 필터 제거 후)"
+    )
+    assert strat._scan_stats["final_prepared"] >= 1
+    assert "box_contraction_pass" not in strat._scan_stats

@@ -54,7 +54,6 @@ def _empty_scan_stats() -> dict:
         "ema_uptrend_pass": 0,
         "volume_pass": 0,
         "atr_pass": 0,
-        "box_contraction_pass": 0,  # 사이클 23 P2-4 — 박스 수축 통과 카운터
         "final_prepared": 0,
         "last_run_at": None,
     }
@@ -100,9 +99,6 @@ class DonchianSwingStrategy(StrategyBase):
         "breakout_fail_n_days": 5,
         # 사이클 23 P2-3 — 돌파폭 과열 상한 (추격 금지)
         "max_breakout_extension_pct": 3.0,
-        # 사이클 23 P2-4 — 박스 수축 보조 필터
-        "box_contraction_period": 10,
-        "max_box_volatility_pct": 5.0,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -364,24 +360,6 @@ class DonchianSwingStrategy(StrategyBase):
                     continue
                 stats["atr_pass"] += 1
                 atr_pass_tickers.append(ticker)  # 사이클 39
-
-                # 사이클 23 P2-4 — 박스 수축 보조 필터 (변동성 축소 후 돌파 패턴 강화)
-                box_period = int(self.config.params.get("box_contraction_period", 10))
-                max_box_vol = float(self.config.params.get("max_box_volatility_pct", 5.0))
-                if len(candles) > box_period:
-                    box_highs = highs[1: box_period + 1]
-                    box_lows = lows[1: box_period + 1]
-                    box_closes = closes[1: box_period + 1]
-                    if box_highs and box_lows and box_closes:
-                        box_range = max(box_highs) - min(box_lows)
-                        box_mean = sum(box_closes) / len(box_closes)
-                        if box_mean > 0:
-                            vol_pct = box_range / box_mean * 100
-                            if vol_pct > max_box_vol:
-                                continue  # 박스 수축 실패 (변동성 너무 큼)
-                            stats["box_contraction_pass"] += 1
-                        else:
-                            continue
 
                 # scanner.ticker_prev_close 사전 등록 (등락률 필터 등)
                 from src.engine.scanner import ticker_prev_close
