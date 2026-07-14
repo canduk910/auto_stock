@@ -75,10 +75,11 @@
 - `_breakout_high`: 매수 신호 발사 시 donchian_high 등록. graceful skip (0이면 분기 진입 안 함).
 - 기존 ATR 트레일링/하드 손절 보존, 추가 분기만.
 
-### donchian `max_breakout_extension_pct` (P2-3)
-- 기본 3.0%. `check_buy_signal` 갭 스킵 *후*, BUY 확정 *전* 삽입.
-- `daily_high = max(stck_hgpr, high_price, current_price, open_price)`. 초과 시 NONE.
-- 기존 `gap_skip_threshold` 와 별개 (시가 갭 vs 당일 고가 추격).
+### donchian `max_breakout_extension_pct` (P2-3) — **사이클 209 (2026-07-14): 기본 3.0→4.0, PARAM_RANGES 제외**
+- 기본 **4.0%** (사이클 209 — 0.5%(AI 과튜닝, DB) 상시 스킵 병목 해소). `check_buy_signal` 갭 스킵 *후*, BUY 확정 *전* 삽입.
+- `daily_high = max(stck_hgpr, high_price, current_price, open_price)`. `ext_pct = (daily_high - donchian_high)/donchian_high*100 > max_ext` 이면 NONE (추격 금지).
+- **구조적 주의**: donchian 후보 = "전일 종가 > donchian_high(어제 제외 20일 신고가)" = 등록 순간 이미 돌파 → 오늘 기준가 위 시작 → extension 하한이 이미 양수. 따라서 `max_breakout_extension_pct ≥ gap_skip_threshold`(4.0≥3.0) 불변식 필수 (0.5%는 갭 통과 종목도 상시 차단 = 모순). AI 자동튜닝 제외(진입 임계=전략 정체성 상수, 사이클 198/208 선례). DB 값 우선 → 변경 시 strategy_config.params 동반 UPDATE 필수.
+- 기존 `gap_skip_threshold`(3.0, 시가 갭) 와 별개 (당일 고가 추격 상한).
 
 ### donchian `box_contraction_period` + `max_box_volatility_pct` (P2-4) — **사이클 208 (2026-07-13) 완전 제거**
 - ~~기본 10일, 5.0%. `prepare()` ATR 통과 후 박스 수축 필터.~~ **제거됨.**

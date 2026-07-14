@@ -40,11 +40,12 @@ def test_vcp_key_in_param_ranges(key):
 # P1-1: P2 신규 키 존재 + 범위 확인
 # 사이클 208 의미 전환 — box_contraction_period / max_box_volatility_pct 제거
 # (donchian 박스 수축 필터 폐기 = 전략 정체성 상수 → AI 자동튜닝 화이트리스트 제외).
+# 사이클 209 의미 전환 — max_breakout_extension_pct 제거 (extension 가드 = 진입 정체성
+# 상수 → AI 자동튜닝이 0.5 로 과튜닝해 donchian 매수 상시 차단, 사이클 208/198 선례 계승).
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("key,lo,hi", [
     ("breakout_retention_minutes", 1, 30),
     ("breakout_fail_n_days", 2, 20),
-    ("max_breakout_extension_pct", 0.5, 10.0),
 ])
 def test_p2_key_ranges(key, lo, hi):
     """P2 신규 키가 PARAM_RANGES 에 올바른 범위로 등록되어 있어야 한다."""
@@ -57,14 +58,16 @@ def test_p2_key_ranges(key, lo, hi):
 
 # ---------------------------------------------------------------------------
 # 사이클 208 — box 2 키 PARAM_RANGES / INT_PARAMS 부재 (제거 확정)
+# 사이클 209 — max_breakout_extension_pct PARAM_RANGES 부재 (제거 확정)
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("key", [
     "box_contraction_period",
     "max_box_volatility_pct",
+    "max_breakout_extension_pct",
 ])
 def test_box_keys_removed_from_param_ranges(key):
-    """사이클 208 — 박스 수축 2 키가 PARAM_RANGES 에서 제거되어야 한다."""
-    assert key not in _get_param_ranges(), f"PARAM_RANGES 에 '{key}' 잔존 금지 (사이클 208 제거)"
+    """사이클 208/209 — 제거된 키가 PARAM_RANGES 에서 부재해야 한다."""
+    assert key not in _get_param_ranges(), f"PARAM_RANGES 에 '{key}' 잔존 금지 (사이클 208/209 제거)"
 
 
 # ---------------------------------------------------------------------------

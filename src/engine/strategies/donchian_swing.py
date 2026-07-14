@@ -98,7 +98,9 @@ class DonchianSwingStrategy(StrategyBase):
         # 사이클 23 P2-2 — 시간 기반 청산 (멀티데이 약한 이탈 빠른 정리)
         "breakout_fail_n_days": 5,
         # 사이클 23 P2-3 — 돌파폭 과열 상한 (추격 금지)
-        "max_breakout_extension_pct": 3.0,
+        # 사이클 209 (2026-07-14) — 0.5(AI 과튜닝)→4.0 복원. 후보=전일 이미 신고가
+        # 돌파라 오늘 기준가 위 시작 → 0.5%는 상시 스킵. 4.0≥gap_skip(3.0) 불변식.
+        "max_breakout_extension_pct": 4.0,
     }
 
     def __init__(self, config: StrategyConfig):

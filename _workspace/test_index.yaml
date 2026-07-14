@@ -130,6 +130,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -272,6 +273,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -608,6 +610,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -885,6 +888,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1028,6 +1032,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -1404,6 +1409,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1546,6 +1552,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -1918,6 +1925,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2064,6 +2072,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2441,6 +2450,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2586,6 +2596,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2964,6 +2975,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -3110,6 +3122,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -3449,6 +3462,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -3686,6 +3700,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -3927,6 +3942,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -4199,6 +4215,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4345,6 +4362,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -4723,6 +4741,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4901,6 +4920,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -5365,6 +5385,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5479,6 +5500,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -5850,6 +5872,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -6016,6 +6039,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -6370,6 +6394,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -6585,6 +6610,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -6841,6 +6867,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -6989,6 +7016,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -7329,6 +7357,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -7545,6 +7574,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -7772,6 +7802,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -7988,6 +8019,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -8209,6 +8241,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
@@ -8225,6 +8258,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8526,6 +8560,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -8647,6 +8682,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9023,6 +9059,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9160,6 +9197,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9500,6 +9538,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -9757,6 +9796,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9903,6 +9943,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -10278,6 +10319,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10455,6 +10497,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10881,6 +10924,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -11017,6 +11061,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11398,6 +11443,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -11543,6 +11589,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11891,6 +11938,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -12356,6 +12404,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
@@ -12455,6 +12504,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -12655,6 +12705,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -12871,6 +12922,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -13092,6 +13144,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -13345,6 +13398,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -13490,6 +13544,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -13835,6 +13890,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -14083,6 +14139,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -14229,6 +14286,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -14573,6 +14631,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -14790,6 +14849,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scanner/test_cycle101_emit_visibility.py
     - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
@@ -15025,6 +15085,7 @@ backend:
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -15174,6 +15235,7 @@ backend:
     - tests/integration/test_backtest_disabled_and_graceful.py
     - tests/integration/test_recommendation_backtest_flow.py
     - tests/integration/test_recommendation_with_market_regime.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -15462,6 +15524,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -15716,6 +15779,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -15862,6 +15926,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -16208,6 +16273,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -16641,6 +16707,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
     - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle108_list_by_filter.py
@@ -16701,6 +16768,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -17041,6 +17109,7 @@ backend:
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     transitive_tests:
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -17159,6 +17228,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -17465,6 +17535,7 @@ backend:
     - tests/unit/ast/test_cycle203_ast_no_iscd_block.py
     - tests/unit/ast/test_cycle204_ast_no_caution_block.py
     - tests/unit/ast/test_cycle208_ast_no_box_filter.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17694,6 +17765,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -18091,6 +18163,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -18340,6 +18413,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -18538,6 +18612,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -18779,6 +18854,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -18977,6 +19053,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -19202,6 +19279,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -19423,6 +19501,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -19639,6 +19718,7 @@ backend:
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -19855,6 +19935,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -20079,6 +20160,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -20328,6 +20410,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -20518,6 +20601,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -20558,6 +20642,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -20791,6 +20876,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -21012,6 +21098,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -21247,6 +21334,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -21481,6 +21569,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -21701,6 +21790,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21789,6 +21879,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -22023,6 +22114,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
@@ -22239,6 +22331,7 @@ backend:
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -22459,6 +22552,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -22746,6 +22840,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -22968,6 +23063,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -23237,6 +23333,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -23389,6 +23486,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23769,6 +23867,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -23924,6 +24023,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24331,6 +24431,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -24728,6 +24829,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -24857,6 +24959,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -25245,6 +25348,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
@@ -25502,6 +25606,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -25751,6 +25856,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -25897,6 +26003,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26296,6 +26403,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -26442,6 +26550,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26819,6 +26928,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -26964,6 +27074,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -28211,6 +28322,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -28443,6 +28555,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -28677,6 +28790,7 @@ backend:
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -28930,6 +29044,7 @@ backend:
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -29076,6 +29191,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
     - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -29963,10 +30079,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-13T12:37:06.375273+09:00'
+generated_at: '2026-07-14T10:04:18.263346+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 693
+  backend_tests: 695
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

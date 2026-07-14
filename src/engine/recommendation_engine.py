@@ -102,7 +102,6 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     # ↓ 사이클 23 — P2 신규 가드/필터 5 키
     "breakout_retention_minutes": (1, 30),
     "breakout_fail_n_days": (2, 20),
-    "max_breakout_extension_pct": (0.5, 10.0),
 }
 
 # 정수형 파라미터 — 캐스트 대상
