@@ -202,20 +202,25 @@ async def test_auto_apply_50_percent_cap_applies(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# 케이스 5: 보수적 파라미터 자동 적용 + 비보수적 키 skip
+# 케이스 5 (사이클 210 의미 전환): param 자동적용 0 — weight 전용
 # ---------------------------------------------------------------------------
+# 사이클 210 P0-B: _CONSERVATIVE_KEYS 게이트가 손절/한도/비중을 "조이는 방향만"
+# 자동 적용 = 단조 ratchet → 전략 교살 (donchian daily_loss_limit -6→-0.8 방치).
+# 시정 = _CONSERVATIVE_KEYS 빈 frozenset → param 자동적용 0, weight 감액만 잔존.
+# 이전 단언("stop_loss_rate 보수적 변경 자동 적용")을 "자동 적용 안 됨"으로 갱신.
+# (weight 자동적용 케이스 1~4 는 보존)
 @pytest.mark.asyncio
 async def test_auto_apply_conservative_params_only(monkeypatch):
-    """stop_loss_rate 보수적 변경(더 음수에서 덜 음수) 자동 적용, k_value_krx_main skip."""
+    """사이클 210 — stop_loss_rate 등 param 은 자동 적용되지 않음 (weight 전용)."""
     from src.engine import recommendation_engine as re_mod
 
     rec = _make_rec(
         "donchian_swing",
-        recommended_weight=0.15,  # 감액 → 적용됨
+        recommended_weight=0.15,  # 감액 → weight 만 적용됨
         current_weight=0.2,
         recommended_params={
-            "stop_loss_rate": -5.0,      # -7% → -5% (보수적: 절대값 감소)
-            "k_value_krx_main": 1.5,     # 비보수적 키 — skip
+            "stop_loss_rate": -5.0,      # -7% → -5% (조임) — 사이클 210: 미적용
+            "k_value_krx_main": 1.5,     # 비보수적 키 — 미적용
         },
     )
 
@@ -240,7 +245,8 @@ async def test_auto_apply_conservative_params_only(monkeypatch):
     mock_scheduler.registry = mock_registry
     monkeypatch.setattr(sched_mod, "trading_scheduler", mock_scheduler)
 
-    monkeypatch.setattr(re_mod, "save_weights", AsyncMock())
+    save_weights_mock = AsyncMock()
+    monkeypatch.setattr(re_mod, "save_weights", save_weights_mock)
     save_params_mock = AsyncMock()
     monkeypatch.setattr(re_mod, "save_params", save_params_mock)
     monkeypatch.setattr(
@@ -249,12 +255,17 @@ async def test_auto_apply_conservative_params_only(monkeypatch):
     write_log_mock = AsyncMock()
     monkeypatch.setattr("src.db.system_logs.write_log", write_log_mock)
 
-    await re_mod.auto_apply_recommendations(TARGET_DATE)
+    result = await re_mod.auto_apply_recommendations(TARGET_DATE)
 
-    # stop_loss_rate 적용됨
-    assert mock_strategy.config.params.get("stop_loss_rate") == -5.0
-    # k_value_krx_main 변경 안 됨
+    # 사이클 210: stop_loss_rate 자동 적용 안 됨 (기존 -7.0 보존)
+    assert mock_strategy.config.params.get("stop_loss_rate") == -7.0
+    # k_value_krx_main 도 변경 안 됨
     assert mock_strategy.config.params.get("k_value_krx_main") == 1.0
-    # [auto_params_apply] 로그 발행
+    # param 미적용 → save_params 호출 0
+    save_params_mock.assert_not_called()
+    # [auto_params_apply] 로그 미발행 (param 자동적용 0)
     log_calls = [str(c) for c in write_log_mock.call_args_list]
-    assert any("auto_params_apply" in c for c in log_calls)
+    assert not any("auto_params_apply" in c for c in log_calls)
+    # weight 감액은 여전히 적용 (순기능 보존)
+    assert result["applied"] >= 1
+    save_weights_mock.assert_called_once()

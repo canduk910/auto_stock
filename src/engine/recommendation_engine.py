@@ -948,16 +948,10 @@ async def _emit_pending_summaries(
 # ---------------------------------------------------------------------------
 # 사이클 23 P3-1+2 — AI 자문 자동 적용 (감액만 + 50% cap + 보수적 파라미터)
 # ---------------------------------------------------------------------------
-# 보수적 파라미터 키 (자동 적용 허용 목록) — 손절/포지션 비율 계열만
-_CONSERVATIVE_KEYS: frozenset[str] = frozenset({
-    "stop_loss_rate",
-    "position_ratio",
-    "daily_loss_limit",
-    "intraday_stop_loss",
-    "overnight_stop_loss",
-    "stop_loss_main",
-    "stop_loss_pre_nxt",
-})
+# 사이클 210 (2026-07-14) — auto_apply ratchet 차단: 손절/일일한도/비중 키를 자동적용 대상에서
+# 전량 제외 → auto_apply 는 weight 감액만 잔존(param 단조 조임 방지, donchian 교살 재발 차단).
+# 진입/청산 임계는 전략 정체성 상수 = 사람이 판단(208/209 선례). param 튜닝은 수동 apply 로만.
+_CONSERVATIVE_KEYS: frozenset[str] = frozenset()
 
 # 음수 손절 키 — 절대값이 작을수록 보수적 (예: -7 → -5)
 _STOP_LOSS_KEYS: frozenset[str] = frozenset({

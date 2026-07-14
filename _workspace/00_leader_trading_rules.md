@@ -438,7 +438,8 @@ VB와 동일.
   - `[swing_poll] candidates=N filtered=M bought=K elapsed=T.Ts` INFO 로그 1행 / 사이클
 
 ### 청산
-- **하드 손절**: 매수가 대비 -7%
+- **하드 손절**: 매수가 대비 **-6%** (운영 DB, 사이클 210 복원). 코드 DEFAULT -7. **⚠️ 사이클 210 (2026-07-14)**: AI 자문 수동 apply 누적으로 `stop_loss_rate -3.2` / `daily_loss_limit -0.8`(배정자금 -0.8% 손실=당일 매수 중단)까지 과조임 방치돼 208/209로 신호가 나와도 진입 직후 죽던 상태 → **stop -6.0 / daily_loss -6.0 복원**. 재조임 방지 = auto_apply `_CONSERVATIVE_KEYS` 제거(engine/CLAUDE.md 참조).
+- **일일 손실 한도** (`daily_loss_limit`): 배정자금 대비 **-6%** (사이클 210 복원, 코드 DEFAULT -8). 초과 시 당일 매수 중단.
 - **ATR×2 Chandelier 트레일링**: `high_since_buy − ATR(14) × 2` 이하로 떨어지면 매도
 - **시간 청산 없음**: 15:20 강제 청산 제외 (`check_force_clear()` 빈 리스트)
 - 평균 5~15 영업일 보유 → DB `positions` 영속화로 일자 넘어 유지
