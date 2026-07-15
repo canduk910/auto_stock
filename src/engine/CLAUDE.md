@@ -25,8 +25,30 @@ stock_master_metrics.py / stock_master_basics_metrics.py / stock_master_daily_me
 refresh_progress.py (사이클 127 — 3 작업 universe/basics/daily 진행 state 통합 메모리 dict + threading.Lock + 헬퍼 `start_progress` / `update_progress` / `finish_progress` / `get_progress` / `get_all_progress` / `is_running` / `reset_progress` / `reset_all_progress`. uvicorn 단일 워커 의무 + KST timestamp 영속. **사이클 129 TaskKey 4 확장** `Literal["universe", "basics", "daily", "master"]` + `TASK_KEYS` tuple 2 위치 동행 — AST 영구 가드)
 util/tick_size.py(KRX 7구간 호가단위 헬퍼 — `get_tick_size` / `round_to_tick` / `step_down` / `step_up`)
 market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
+**quant_score.py** (사이클 C2 — 퀀트 재무필터 순수 함수. `compute_f_score_7(curr, prev) -> int|None`(Piotroski 9지표 中 **7지표** = 현금흐름표 TR 부재로 CFO 2지표 제외, 개별 결측 미가점 / 2기 부족 fail-open None) + `compute_magic_formula(series_by_ticker, mktcap_by_ticker) -> dict`(Greenblatt EY=1/ev_ebitda 폴백 bsop_prti/EV, ROC=bsop_prti/((cras-flow_lblt)+fxas), mf_rank=ey_rank+roc_rank). DB/HTTP/시계 미접촉 순수 함수, 8영역 미접촉)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
+
+## 사이클 C1~C3 (2026-07-15) — 퀀트 재무필터 Phase 1 (관찰 전용, 마법공식 + F-Score-7)
+
+관찰 전용 Phase 1 = 재무 데이터 적재 + 스코어 계산 인프라 + VB funnel 노출까지만. 실배제 게이트는 Phase 2(C4) 조건부. 매매 hot path 무관.
+
+### 16:40 재무 적재 task (`TIME_STOCK_MASTER_FINANCIAL_LOAD = time(16, 40)`)
+
+- `scanner._stock_master_financial_load_once(force=False)` — 주1회 재무 5 TR (`src/api/finance.py`) 적재. 유니버스 = `_is_daily_load_universe` 자격 856종목 (index ∪ 시총 500억 & 거래 20억, 사이클 206 답습). ticker 별 `stock_master_financial.max_stac_yymm` 신선도 skip (당분기 이미 적재 시) → 미신선 시 `fetch_all_financials` → `upsert_financial_batch`. `[stock_master_financial_load_summary] total=.. updated=.. skipped=.. failed=..` emit. graceful (사이클 88).
+- `scheduler._stock_master_financial_load_task_loop()` — `run_periodic_task_loop` 답습. `initial_delay_secs=900` (master 16:30 후 stagger) + `immediate_skip_if_fresh_hours=168` (주1회 신선도 게이트, 사이클 193 답습). `task_label="stock_master_financial_load"`. `task_attrs` 4 위치 (start + connect finally + run_daily finally + stop, 사이클 79 G-AST2). `refresh_progress` TaskKey `"financial"` (5키).
+- **scan_stocks/매수 경로 diff 0** — 16:40 적재 = 매수 진입 전 데이터 계층 (사이클 38).
+
+### VB 관찰 훅 `_apply_quant_filter_in_prepare` (사이클 C3)
+
+- `volatility_breakout.py` — `_apply_price_filter_in_prepare`(사이클 148) 미러. DEFAULT_PARAMS `quant_filter_enabled=False` / `quant_min_f_score=0` / `quant_max_mf_rank=0` (**PARAM_RANGES 미편입**). `VB_FUNNEL_STAGES` 6→7단계 ("퀀트 재무 게이트(관찰) — F-Score/마법공식 스코어 기록, 배제 0").
+- **기본 OFF = 관찰 전용, 배제 0** — 스코어 계산 (`quant_score`) + funnel step 7 기록만. `quant_filter_enabled=True` 여도 아직 실배제 로직 미구현 (Phase 2 C4 인계). 결측·보유 fail-open (사이클 32 R4). momentum 라이브 경로 무변경 (관찰은 오프라인).
+
+### 매매 안전성 무영향
+
+- `git diff -- src/engine/risk.py src/engine/order_engine.py src/realtime/ src/auth/ src/api/order.py src/engine/session.py src/engine/scanner.py(매수경로) src/engine/strategy_registry.py` = **0** (재무 task = 16:40 매수 진입 전 + quant_score 8영역 미접촉 + VB 관찰 훅 배제 0).
+- 백엔드 3,434 PASS/0 fail. 회귀 가드 `tests/unit/api/test_cycleC1_finance_allowlist.py` 외.
+- 인계: Phase 1 관찰 데이터 유의성 검정 후 Phase 2(C4) = quant_filter_enabled=True + 실배제 조건부 게이트.
 
 ## 사이클 188 (2026-07-02) — `_wait_until(advance_if_passed=True)` never-return 회귀 시정
 

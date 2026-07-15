@@ -198,8 +198,11 @@ def test_G_159_SAFETY_2_stagger_only_in_scanner_lifecycle() -> None:
     # 사이클 171 (2026-06-22) 의미 전환 — 16:20 저녁 잠정 funnel 캡처 task 도
     # 매수 진입 전 영역(관찰성 전용, scanner/risk/order 무관)이라 stagger 허용.
     # basics(16:10) 완료 후 진입 = HTTP/2 race 차단 마진 (사이클 159 답습).
+    # 사이클 C3 (2026-07-15) 의미 전환 — 16:40 퀀트 재무 적재 task 도 동일 근거
+    # (관찰 전용, scanner 매수 진입 전, master 720초 stagger 후 900초 진입).
     allowed_methods = set(_CYCLE_159_STAGGER.keys()) | {
         "_evening_funnel_capture_task_loop",
+        "_stock_master_financial_load_task_loop",
     }
     forbidden_methods = stagger_call_methods - allowed_methods
 

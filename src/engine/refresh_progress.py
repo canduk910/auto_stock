@@ -31,11 +31,11 @@ from typing import Literal
 from src.db._kst import now_kst_iso
 
 ProgressStatus = Literal["idle", "running", "completed", "failed"]
-TaskKey = Literal["universe", "basics", "daily", "master"]
+TaskKey = Literal["universe", "basics", "daily", "master", "financial"]
 
-# 작업 키 영속 (사이클 90 universe + 사이클 126 basics/daily + 사이클 129 master 통일).
-# L34 Literal + L37 tuple 2 위치 동행 영속 의무 (AST 영구 가드).
-TASK_KEYS: tuple[TaskKey, ...] = ("universe", "basics", "daily", "master")
+# 작업 키 영속 (사이클 90 universe + 사이클 126 basics/daily + 사이클 129 master +
+# 사이클 C3 financial 통일). L34 Literal + L37 tuple 2 위치 동행 영속 의무 (AST 영구 가드).
+TASK_KEYS: tuple[TaskKey, ...] = ("universe", "basics", "daily", "master", "financial")
 
 # 진행 state schema 영속 (10 키, deep copy 보호).
 _INITIAL_STATE: dict = {

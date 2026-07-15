@@ -32,7 +32,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - `reset_quote_request_metrics() -> None` — 메인 reset 과 분리
 
 **Path 가드** (`QuotePoolPathError` raise — `ValueError` 서브클래스):
-- 화이트리스트 **7 path** 만 허용 (사이클 32 추가 → 사이클 89 `/quotations/volume-rank` 추가 → 사이클 109 `/ranking/market-cap` 추가 → **사이클 179 `/quotations/volume-rank` 폐기**): `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl` / `/ranking/market-cap`. 사이클 109 시정 = 사이클 101 도입 시점 silent 결함 (`_MARKET_CAP_URL` 화이트리스트 부재 → `_fetch_market_cap_page` → `QuotePoolPathError` raise → `_full_universe_load_once` total=0). **사이클 179 (2026-06-26) — `/quotations/volume-rank` (거래량순위 FHPST01710000) 폐기**: 사이클 108 에서 VB/LTV/BFB `_scan_universe` 가 `stock_master.list_by_filter`(DB) 로 전환되며 거래량순위 호출 0건 dead → 화이트리스트 잔존 path 제거. 재도입 영구 차단 = `tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py` (frozenset 엔트리 검사, 사이클 167 dead code 폐기 패턴). 신규 path 추가 시 AST 정적 가드 의무 (`tests/unit/api/test_cycle109_market_cap_allowlist.py` 답습)
+- 화이트리스트 **12 path** 만 허용 (사이클 32 추가 → 사이클 89 `/quotations/volume-rank` 추가 → 사이클 109 `/ranking/market-cap` 추가 → **사이클 179 `/quotations/volume-rank` 폐기** → **사이클 C1 finance 5 path 추가**): `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl` / `/ranking/market-cap` / `/finance/income-statement` / `/finance/balance-sheet` / `/finance/profit-ratio` / `/finance/stability-ratio` / `/finance/other-major-ratios`. 사이클 109 시정 = 사이클 101 도입 시점 silent 결함 (`_MARKET_CAP_URL` 화이트리스트 부재 → `_fetch_market_cap_page` → `QuotePoolPathError` raise → `_full_universe_load_once` total=0). **사이클 179 (2026-06-26) — `/quotations/volume-rank` (거래량순위 FHPST01710000) 폐기**: 사이클 108 에서 VB/LTV/BFB `_scan_universe` 가 `stock_master.list_by_filter`(DB) 로 전환되며 거래량순위 호출 0건 dead → 화이트리스트 잔존 path 제거. 재도입 영구 차단 = `tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py` (frozenset 엔트리 검사, 사이클 167 dead code 폐기 패턴). **사이클 C1 (2026-07-15) — 퀀트 재무필터 5 TR path 추가**: `src/api/finance.py::fetch_financial_tr` (5 TR — income/balance/profit/stability/other) 가 `kis_get_quote` 경유 → 화이트리스트 필수. 회귀 가드 `tests/unit/api/test_cycleC1_finance_allowlist.py` (frozenset 엔트리 + AST + 매매/잔고/체결 path 오염 미발생 검증). 신규 path 추가 시 AST 정적 가드 의무 (`tests/unit/api/test_cycle109_market_cap_allowlist.py` 답습)
 - 매매/잔고/체결조회 path (`/trading/order-cash` / `/trading/order-rvsecncl` / `/trading/inquire-balance` / `/trading/inquire-psbl-order` / `/trading/inquire-daily-ccld`) 진입 시 즉시 raise — 자금 안전 정책 위반 사전 차단
 
 **라운드로빈**:
@@ -136,6 +136,27 @@ KIS 공식 다운로드 (`https://new.real.download.dws.co.kr/common/master/`) �
 - `src/engine/scanner.py::_stock_master_master_load_once()` — 다운로드 + 파싱 + `stock_master.upsert_master_raw()` 배치 + emit
 - `src/engine/scheduler.py::_stock_master_master_load_task_loop()` — 16:30 KST 자동 task lifecycle
 - `src/routes/stock_master.py::refresh_master_now()` — POST `/api/stock-master/master/refresh` 수동 trigger (BackgroundTasks fire-and-forget)
+
+## finance.py — KIS 재무 5 TR fetch (사이클 C1, 2026-07-15)
+
+퀀트 재무필터 (마법공식 EV/EBITDA·ROC + F-Score-7) 원천 데이터. KIS 재무 5 TR 을 `kis_get_quote` 시세성 풀 경유로 호출 → `stock_master_financial` 정규화. `fetch_daily_candles_ranged` 답습 (6자리 ticker 가드).
+
+### 5 TR 정본 (path, TR_ID)
+
+| kind | path | TR_ID | 산출 컬럼 |
+|------|------|-------|----------|
+| income | `/finance/income-statement` | FHKST66430200 | sale_account / sale_totl_prfi / bsop_prti / thtr_ntin / depr_cost |
+| balance | `/finance/balance-sheet` | FHKST66430100 | cras / fxas / total_aset / flow_lblt / total_lblt / total_cptl / cpfn |
+| profit | `/finance/profit-ratio` | FHKST66430400 | cptl_ntin_rate / sale_totl_rate |
+| stability | `/finance/stability-ratio` | FHKST66430600 | lblt_rate / crnt_rate |
+| other | `/finance/other-major-ratios` | FHKST66430500 | ebitda / ev_ebitda |
+
+- **TR_ID 컨벤션 = FH 접두사 직접 하드코딩** (`settings.get_tr_id()` 미사용) — 5 TR 모두 FH 접두사 = 실전/모의 동일이나, 헬퍼의 V+base[1:] 변환이 `FH...` → `VH...` 로 깨짐 → 직접 하드코딩. 응답 output = 다기간 list
+- `fetch_financial_tr(ticker, tr_key, div_cls="0") -> list[dict]` — 단일 TR fetch (`div_cls` 0=년/1=분기)
+- `fetch_all_financials(ticker, div_cls="0") -> list[dict]` — 5 TR 호출 후 `stac_yymm` join 병합
+- **시세성 풀 화이트리스트 12 path 필수** (base.py `_QUOTE_ALLOWED_PATHS` — finance 5 path, 위 base.py 절 참조)
+- 호출자: `src/engine/scanner.py::_stock_master_financial_load_once()` (주1회 16:40) + 관찰 훅 `volatility_breakout._apply_quant_filter_in_prepare` (오프라인)
+- 매매 hot path 무관 (재무 데이터 적재 = 매수 진입 전, 사이클 38)
 
 ## krx.py — KRX 정식 OPEN API 클라이언트 (사이클 112 + 사이클 115)
 

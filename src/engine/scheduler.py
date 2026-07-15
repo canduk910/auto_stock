@@ -65,6 +65,7 @@ TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 (종가 흡수 �
 TIME_STOCK_MASTER_DAILY_LOAD = time(16, 0) # 사이클 122 — KIS 일봉 일괄 적재 (KRX 메인 종료 30분 후 안전 마진)
 TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF1002R 매스 보강 (일봉 task 직후 10분 마진)
 TIME_STOCK_MASTER_MASTER_LOAD = time(16, 30)  # 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 일괄 적재 (basics task 직후 20분 마진, domain-consult 의제 5 옵션 A)
+TIME_STOCK_MASTER_FINANCIAL_LOAD = time(16, 40)  # 사이클 C3 — 퀀트 재무 (마법공식/F-Score-7) 주1회 적재 (master 16:30 후 stagger)
 TIME_STOCK_MASTER_DAILY_PURGE = time(16, 15)  # 사이클 150 — stock_master_daily T-150일 retention cron (일봉 task 16:00 적재 직후 15분 마진)
 TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)  # 사이클 171 — 저녁 잠정 funnel 캡처 (16:00 일봉 → 16:10 basics 직후, 16:30 마스터 직전. 운영자 밤 후보 확인. domain-consult 의제 4 우선순위 2)
 TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
@@ -643,6 +644,12 @@ class TradingScheduler:
                 self._stock_master_master_load_task_loop()
             )
 
+            # 사이클 C3 (2026-07-15) — 매일 16:40 KST 퀀트 재무 (마법공식/F-Score-7) 주1회 적재 task.
+            # 관찰 전용 배포 (Phase 1) — 매매 로직 diff 0. master(16:30) 직후 stagger.
+            self._stock_master_financial_load_task = asyncio.create_task(
+                self._stock_master_financial_load_task_loop()
+            )
+
             # 사이클 150 (2026-06-16) — 매일 16:15 KST stock_master_daily T-150일 retention cron task.
             # 사용자 결정 Q3=C T-150일 (VCP T-120일 + 30일 안전 마진) + Q5=B 즉시 DROP.
             # 사이클 122 일봉 task (16:00) 적재 직후 15분 마진 + 보유/익일청산 ticker 절대 보호 (사이클 32 R4 답습).
@@ -939,6 +946,7 @@ class TradingScheduler:
                 "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
                 "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
                 "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
+                "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
                 "_ws_task", "_scan_task",
@@ -1064,6 +1072,7 @@ class TradingScheduler:
                     "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
                 "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
                 "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
+                "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
                     "_ws_task", "_scan_task",
@@ -1098,6 +1107,7 @@ class TradingScheduler:
             "_stock_master_daily_load_task",  # 사이클 122 추가 — KIS 일봉 적재 task
             "_stock_master_basics_refresh_task",  # 사이클 126 추가 — KIS CTPF1002R 매스 보강 task
             "_stock_master_master_load_task",  # 사이클 129 추가 — KIS 종목 마스터 파일 적재 task
+            "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
             "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
             "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
             "_ws_task", "_scan_task",
@@ -3153,6 +3163,60 @@ class TradingScheduler:
             # 사이클 193 신선도 게이트 — master 는 멱등 없이 매 run updated=3565
             # (4분 실제 burst) → 게이트 적용 2 task 중 하나 (basics/master).
             immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS,
+        )
+
+    async def _stock_master_financial_load_task_loop(self) -> None:
+        """사이클 C3 — 매일 16:40 KST 퀀트 재무 (마법공식/F-Score-7) 주1회 적재 task.
+
+        관찰 전용 배포 (Phase 1) — 매매 로직 diff 0. `_stock_master_financial_load_once`
+        가 유니버스(index ∪ 시총500억&거래대금20억)의 재무 데이터를 stock_master_financial
+        에 적재만 한다 (VB 관찰 훅이 이를 소비, 배제는 Phase 2(C4) 이후).
+
+        lifecycle (사이클 122/126/129 task 100% 답습):
+        - start() 직후 즉시 1회 실행(단, 주1회 신선도 게이트로 대개 skip) →
+          lifecycle race 영구 차단
+        - while 루프 _wait_until(16:40:00) 무한 루프 + asyncio.sleep(60) 안전 마진
+        - stop() task_attrs 튜플에 _stock_master_financial_load_task 포함
+          (사이클 79 G-AST2 영속)
+
+        주1회 신선도 게이트: `immediate_skip_if_fresh_hours=168` (7일, 사이클 193
+        패턴 답습) — 재무제표는 분기/연 단위 갱신이라 매일 재실행이 불필요.
+        `initial_delay_secs=900` — master(720초 지연 진입) 완료 후 stagger
+        마진 확보 (사이클 159 HTTP/2 race 차단 패턴).
+
+        영속 의무:
+        - 사이클 17 KIS LMS chain 안전 (50ms sleep 영역, finance.py 영역)
+        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
+        - 사이클 88 G-REJECT graceful (개별 ticker 실패 → 다음 ticker 진행)
+        - 사이클 106 lifecycle race 차단
+        - 사이클 127 fire-and-forget + refresh_progress 영속
+        - 사이클 193 신선도 게이트 패턴 답습
+        """
+        from src.engine.scanner import _stock_master_financial_load_once
+        from src.engine.task_loop_helper import run_periodic_task_loop
+
+        def _noop_record(_summary: dict) -> None:
+            return None
+
+        def _noop_flush() -> None:
+            return None
+
+        await run_periodic_task_loop(
+            scheduler=self,
+            task_label="stock_master_financial_load",
+            wait_time=TIME_STOCK_MASTER_FINANCIAL_LOAD,  # 16:40 KST
+            once_callable=_stock_master_financial_load_once,
+            record_fn=_noop_record,
+            flush_fn=_noop_flush,
+            summary_log_format=(
+                "[stock_master_financial_load_task_summary] total=%d updated=%d "
+                "skipped=%d failed=%d"
+            ),
+            summary_keys=("total", "updated", "skipped", "failed"),
+            # master(720초 지연) 완료 후 stagger 마진 확보 (사이클 159 패턴)
+            initial_delay_secs=900,
+            # 주1회 신선도 게이트 (7일 = 168시간, 사이클 193 패턴 답습)
+            immediate_skip_if_fresh_hours=168,
         )
 
     async def _evening_funnel_capture_once(self) -> dict:

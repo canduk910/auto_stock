@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 # 사이클 143 (2026-06-15) — VB 5단계 funnel hook (사이클 140 자문 영속)
 # 사이클 157 (2026-06-17) — 1단계 진입 차단 13건 step 추가 영구 영속 → 6단계.
-# 사이클 39+41 BFB/VCP/donchian 8단계 답습 = VB 단순 영역 = 6단계 적정 영역 영구 영속.
+# 사이클 C3 (2026-07-15) — 퀀트 재무 게이트(관찰) step 추가 → 7단계 (관찰 전용, 배제 0).
+# 사이클 39+41 BFB/VCP/donchian 8단계 답습 = VB 단순 영역 = 7단계 적정 영역 영구 영속.
 # 사이클 47 FUNNEL_STAGES 위임 패턴 답습 (`_record_funnel_pipeline_step(VB_FUNNEL_STAGES[i-1], ...)`).
 VB_FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "거래량순위 + stock_master 기반 후보"),
@@ -33,6 +34,7 @@ VB_FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(4, "일봉 fetch 통과"),
     FunnelStage(5, "전일 Range > 0 + noise 계산 통과"),
     FunnelStage(6, "K값 계산 + target_offset > 0"),
+    FunnelStage(7, "퀀트 재무 게이트(관찰) — F-Score/마법공식 스코어 기록, 배제 0"),
 )
 
 
@@ -85,6 +87,11 @@ class VolatilityBreakoutStrategy(StrategyBase):
         "max_scan_stocks": 100,              # 최대 스캔 종목 수
         # 재진입 쿨다운 (사이클 201, BFB 3 / VCP 7 과 구분 — VB 당일청산 특성상 2영업일)
         "reentry_cooldown_days": 2,
+        # 사이클 C3 — 퀀트 재무필터 관찰 훅 (Phase 1, 기본 OFF = 배제 0, 스코어 계산/funnel 노출만).
+        # PARAM_RANGES 미편입 (AI 자동튜닝 금지, 진입 정체성 상수 — 사이클 198/208/212 선례).
+        "quant_filter_enabled": False,
+        "quant_min_f_score": 0,
+        "quant_max_mf_rank": 0,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -326,6 +333,10 @@ class VolatilityBreakoutStrategy(StrategyBase):
             excluded=target_excluded,
         )
 
+        # 사이클 C3 — step 7: 퀀트 재무 게이트 (관찰 전용, quant_filter_enabled=False 기본 → 배제 0).
+        # master_block(step3) 다음 단계 삽입 원칙에 맞춰 prepare 파이프라인 최종 단계로 호출.
+        await self._apply_quant_filter_in_prepare(final_prepared_tickers)
+
         logger.info("변동성돌파 전략 준비 완료: %d/%d종목 (K값 계산)", prepared, len(tickers))
 
     async def _scan_universe(self) -> list[str]:
@@ -487,6 +498,110 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 survivors.append(ticker)
 
         return survivors
+
+    async def _apply_quant_filter_in_prepare(self, tickers: list[str]) -> list[str]:
+        """VB prepare 영역 퀀트 재무 게이트 (사이클 C3, 관찰 전용 Phase 1).
+
+        `_apply_price_filter_in_prepare`(사이클 148) 미러. `quant_filter_enabled`
+        (기본 False)일 때는 스코어 계산 + funnel step(step_no=7) 기록만 수행하고
+        **어떤 종목도 배제하지 않는다** (관찰 모드, 입력==출력).
+
+        보유 종목 절대 보호 (사이클 32 R4 답습) — 활성 모드에서도 무조건 통과.
+        결측(재무 시계열 2기 부족/조회 예외) → fail-open 통과 (사이클 88 G-REJECT 답습).
+
+        Phase 2(C4, 배제 활성)는 유의성 검정 통과 시에만 발주 — 본 메서드는
+        `quant_filter_enabled=True` 여도 아직 배제 로직을 구현하지 않는다
+        (관찰 스코어 기록만, Red 메모 명시).
+        """
+        from src.db import stock_master as _sm_mod
+        from src.db import stock_master_financial as _smf_mod
+        from src.engine import quant_score as _qs_mod
+
+        # 보유 종목 절대 보호 (사이클 32 R4 답습)
+        protected: set[str] = set()
+        try:
+            from src.engine import scanner as _scanner_mod
+            protected = _scanner_mod._collect_protected_tickers_for_scanner()
+        except Exception:
+            logger.debug(
+                "[vb_quant_filter_prepare] protected_tickers 조회 실패 graceful",
+                exc_info=True,
+            )
+
+        f_scores: dict[str, int | None] = {}
+        series_by_ticker: dict[str, dict] = {}
+        mktcap_by_ticker: dict[str, float] = {}
+
+        for ticker in tickers:
+            if ticker in protected:
+                continue
+            try:
+                series = await _smf_mod.get_financial_series(ticker, div_cls="0", limit=2)
+            except Exception:
+                logger.debug(
+                    "[vb_quant_filter_prepare] get_financial_series 실패 graceful: %s",
+                    ticker, exc_info=True,
+                )
+                series = []
+
+            if len(series) < 2:
+                f_scores[ticker] = None
+                continue
+
+            curr, prev = series[0], series[1]
+            try:
+                f_scores[ticker] = _qs_mod.compute_f_score_7(curr, prev)
+            except Exception:
+                logger.debug(
+                    "[vb_quant_filter_prepare] compute_f_score_7 실패 graceful: %s",
+                    ticker, exc_info=True,
+                )
+                f_scores[ticker] = None
+            series_by_ticker[ticker] = curr
+
+            try:
+                basics = await _sm_mod.get(ticker)
+                if basics and getattr(basics, "raw", None):
+                    raw_val = basics.raw.get("hts_avls_eok") or basics.raw.get("hts_avls")
+                    if raw_val:
+                        mktcap_by_ticker[ticker] = float(raw_val)
+            except Exception:
+                logger.debug(
+                    "[vb_quant_filter_prepare] stock_master.get 실패 graceful: %s",
+                    ticker, exc_info=True,
+                )
+
+        mf_by_ticker: dict[str, dict] = {}
+        if series_by_ticker:
+            try:
+                mf_by_ticker = _qs_mod.compute_magic_formula(series_by_ticker, mktcap_by_ticker)
+            except Exception:
+                logger.debug(
+                    "[vb_quant_filter_prepare] compute_magic_formula 실패 graceful",
+                    exc_info=True,
+                )
+                mf_by_ticker = {}
+
+        # funnel step 7 기록 (관찰 — 스코어만 기록, 배제 0)
+        survived_detail = [
+            {
+                "ticker": ticker,
+                "f_score": f_scores.get(ticker),
+                "mf_rank": (mf_by_ticker.get(ticker) or {}).get("mf_rank"),
+            }
+            for ticker in tickers
+        ]
+        self._record_funnel_pipeline_step(
+            VB_FUNNEL_STAGES[6],
+            survived=survived_detail,
+            step_conditions=(
+                f"관찰 전용(quant_filter_enabled={self.config.params.get('quant_filter_enabled', False)}) "
+                "— F-Score/마법공식 스코어 기록, 배제 0"
+            ),
+        )
+
+        # 관찰 모드(및 Phase 1 전체) — 배제 0, 입력 그대로 반환
+        return list(tickers)
 
     def get_scanned_tickers(self) -> list[str]:
         """스캔된 종목 리스트를 반환한다 (WebSocket 구독용)."""

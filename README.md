@@ -120,6 +120,7 @@ Supabase SQL Editor에서 `supabase/migrations/` 하위 마이그레이션 파�
 036_stock_master_history_seq.sql      # stock_master_history seq 컬럼 (사이클 150)
 037_stock_master_kospi200_kosdaq150.sql   # is_kospi200/is_kosdaq150 BOOLEAN + 부분 인덱스 (사이클 153)
 038_pending_next_day_clear.sql        # 익일청산큐 DB 영속화 PK(target_date, ticker, strategy_id) (사이클 162, 재기동 보호)
+041_stock_master_financial.sql        # KIS 재무 5 TR 정규화 PK(ticker, stac_yymm, div_cls) + 18 NUMERIC + raw JSONB (사이클 C1, 마법공식·F-Score-7 원천)
 ```
 
 ### 3. Docker Compose로 실행 (권장)
@@ -489,6 +490,7 @@ docker compose -f docker-compose.prod.yml up --build -d
 | 15:30 | KRX 메인 마감 (15:30~15:39:59 종가 흡수 마진 — MAIN 보드 유지). 사이클 26: `_confirm_breakout_open_prices(board="post_nxt")` 호출 제거 (VB/LTV `tradable_boards` 에 post_nxt 없음 → 시가 확정 대상 없음) |
 | **15:39:10** | **사이클 26 신규 — NXT 채널 사전 구독 마진 (50초)**: `_board_transition_loop("H0STCNT0", "H0NXCNT0", 보유+익일청산)` 종목별 원자 전환 + 매수 후보 KRX unsubscribe |
 | **15:40** | **사이클 26 — POST_NXT 진입** (기존 15:30 → 15:40 변경). 매도만 (VB/LTV `tradable_boards=("main",)`) |
+| 16:40 | (장 마감 후 데이터 계층) 퀀트 재무 5 TR 주1회 적재 — `_stock_master_financial_load_task_loop` (마스터 16:30 후 stagger, 주1회 신선도 게이트). 매매 무관 (사이클 C1~C3, 마법공식·F-Score-7 원천) |
 | 19:50 | NXT 애프터 신규 매수 중단 + 전략수정 AI 자문 생성 (OpenAI → `parameter_recommendations`) + 직후 `auto_apply_recommendations()` (사이클 23, 감액만 + 50% cap, `auto_apply_enabled=true` 시) |
 | 20:00 | NXT 애프터 종료, WebSocket 구독 해제 |
 | 20:10 | 전략별 + 합산 일일 정산, DB 실적 기록. 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`). 직후 `purge_old_logs()` (INFO 2일 / WARNING+ 30일 retention 자동 정리, 사이클 6) |

@@ -70,7 +70,9 @@ class TestHelperExportPersistence:
         """G-22-A-2 — `_TASK_REGISTRY` (또는 동등) dispatch 영속.
 
         4 task_key 모두 등록 의무 (universe / basics / daily / master).
-        refresh_progress.TASK_KEYS 와 정합 의무.
+        registry 키는 refresh_progress.TASK_KEYS 의 subset 의무 (사이클 C3 의미
+        전환 — financial 은 POST 라우트 없는 scheduler 전용 task 이므로 TASK_KEYS
+        에는 있으나 registry 에는 없음, 역방향 subset 이 아닌 방향으로 정정).
         """
         registry_attr = None
         for candidate in ("_TASK_REGISTRY", "_REFRESH_TASKS", "_TASK_DISPATCH"):
@@ -93,11 +95,18 @@ class TestHelperExportPersistence:
             keys = set(registry.keys())
         else:
             keys = set(registry)
-        expected = set(_rp.TASK_KEYS)
-        assert expected.issubset(keys), (
-            f"{registry_attr} 가 4 task_key 영속 부재 — "
-            f"expected={expected}, got={keys}. "
-            "사이클 129 TaskKey 4 영속 의무 + refresh_progress.TASK_KEYS 정합."
+        # 사이클 129 4종 (universe/basics/daily/master) 은 반드시 등록 의무.
+        required_routed = {"universe", "basics", "daily", "master"}
+        assert required_routed.issubset(keys), (
+            f"{registry_attr} 가 라우트 보유 4 task_key 영속 부재 — "
+            f"expected={required_routed}, got={keys}. "
+            "사이클 129 TaskKey 4 영속 의무."
+        )
+        # registry 키는 TASK_KEYS 의 subset 의무 (사이클 C3 — financial 은
+        # POST 라우트 없는 scheduler 전용 task 라 registry 미등록 정당).
+        assert keys.issubset(set(_rp.TASK_KEYS)), (
+            f"{registry_attr} 에 refresh_progress.TASK_KEYS 밖 미지 키 존재 — "
+            f"got={keys}, TASK_KEYS={set(_rp.TASK_KEYS)}."
         )
 
 

@@ -406,11 +406,15 @@ class TestG157HookExcludedFormat:
 
 class TestG157FunnelVB:
     def test_g157_funnel_vb_has_6_stages(self):
-        """G-157-FUNNEL-VB — VB_FUNNEL_STAGES len == 6 (5 + 1단계 진입 차단 step)."""
+        """G-157-FUNNEL-VB — VB_FUNNEL_STAGES len >= 6 (5 + 1단계 진입 차단 step).
+
+        사이클 C3 (2026-07-15) 의미 전환 — 퀀트 재무 게이트(관찰) step 추가로
+        6 → 7단계 확장 (사이클 157 시점 5→6 계약은 하한으로 보존, 상한 고정 해제).
+        """
         from src.engine.strategies.volatility_breakout import VB_FUNNEL_STAGES
 
-        assert len(VB_FUNNEL_STAGES) == 6, (
-            f"G-157-FUNNEL-VB — 5 → 6단계 영구 영속, 실제={len(VB_FUNNEL_STAGES)}"
+        assert len(VB_FUNNEL_STAGES) == 7, (
+            f"G-157-FUNNEL-VB — 6 → 7단계 영구 영속(사이클 C3), 실제={len(VB_FUNNEL_STAGES)}"
         )
 
 

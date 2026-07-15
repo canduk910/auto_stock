@@ -2341,6 +2341,162 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     return summary
 
 
+# ---------------------------------------------------------------------------
+# 사이클 C3 (2026-07-15) — 퀀트 재무필터 관찰 전용 배포 (Phase 1)
+# 산출물 (a): 주1회 재무 적재 (`_stock_master_financial_load_once`)
+# _stock_master_daily_load_once 답습 — 순수 추가 함수, scan_stocks/subscribe
+# _filtered_stocks 본체 diff 0 (momentum 발사 경로 byte-identical, G-3 SAFETY).
+# ---------------------------------------------------------------------------
+_FINANCIAL_LOAD_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 17 KIS LMS chain 답습)
+
+
+async def _stock_master_financial_load_once(force: bool = False) -> dict:
+    """사이클 C3 — 재무 데이터 (마법공식/F-Score-7) 주1회 적재.
+
+    유니버스 = `stock_master.list_by_filter` (index ∪ 시총500억&거래대금20억,
+    사이클 206 `_is_daily_load_universe` 자격과 동일 856종목 규모) — daily load
+    와 동일 유니버스 재사용.
+
+    ticker 별 `max_stac_yymm` 신선도 skip (당분기 이미 적재 시) → 미신선 시
+    `fetch_all_financials` → `upsert_financial_batch`. graceful (사이클 88
+    G-REJECT — 개별 ticker 실패 시 failed++ 후 다음 ticker 진행).
+
+    Returns:
+        summary dict: {total, updated, skipped, failed, elapsed_ms}
+    """
+    import time
+
+    from src.api import finance as _finance
+    from src.db import stock_master as _sm_mod
+    from src.db import stock_master_financial as _smf_mod
+    from src.engine import refresh_progress as _rp
+
+    start = time.monotonic()
+    summary: dict = {
+        "total": 0,
+        "updated": 0,
+        "skipped": 0,
+        "failed": 0,
+        "elapsed_ms": 0,
+    }
+
+    _rp.start_progress("financial", total=0)
+
+    # 유니버스 = index ∪ 시총500억&거래대금20억 자격 (사이클 206 daily load 자격 답습)
+    try:
+        rows = await _sm_mod.list_by_filter(
+            min_market_cap=_DAILY_LOAD_MIN_MCAP_EOK * 100_000_000,
+            min_trade_amount=_DAILY_LOAD_MIN_TRADE_WON,
+            is_kospi200=True,
+            is_kosdaq150=True,
+            limit=1000,
+        )
+    except Exception:
+        logger.exception(
+            "[stock_master_financial_load] list_by_filter 실패 graceful"
+        )
+        rows = []
+
+    tickers: list[str] = []
+    for row in rows:
+        ticker = row.get("ticker", "")
+        if ticker and len(ticker) == 6 and ticker.isdigit():
+            tickers.append(ticker)
+
+    summary["total"] = len(tickers)
+    _rp.update_progress("financial", total=len(tickers))
+
+    logger.info(
+        "[stock_master_financial_load_begin] candidates=%d force=%s",
+        len(tickers), force,
+    )
+
+    if not tickers:
+        summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+        logger.warning("[stock_master_financial_load] 유니버스 빈 영역 — 적재 skip")
+        _rp.finish_progress(
+            "financial", "completed",
+            total=0, processed=0, updated=0, skipped=0, failed=0,
+        )
+        return summary
+
+    for idx, ticker in enumerate(tickers):
+        if not force:
+            # 신선도 게이트 — max_stac_yymm 존재(=이미 적재된 재무 데이터 有) 시
+            # 당분기 이미 적재된 것으로 간주해 skip. 재무제표는 분기/연 단위로만
+            # 갱신되므로(주1회 task) 존재 여부 게이트가 주1회 정합에 충분하다.
+            try:
+                latest = await _smf_mod.max_stac_yymm(ticker)
+            except Exception:
+                latest = None
+            if latest is not None:
+                summary["skipped"] += 1
+                continue
+
+        try:
+            fin_rows = await _finance.fetch_all_financials(ticker)
+        except Exception:
+            logger.warning(
+                "[stock_master_financial_load_skip] ticker=%s reason=fetch_failed",
+                ticker,
+            )
+            summary["failed"] += 1
+            await asyncio.sleep(_FINANCIAL_LOAD_RATE_LIMIT_SLEEP_SECS)
+            continue
+
+        if not fin_rows:
+            summary["failed"] += 1
+            await asyncio.sleep(_FINANCIAL_LOAD_RATE_LIMIT_SLEEP_SECS)
+            continue
+
+        try:
+            upserted = await _smf_mod.upsert_financial_batch(ticker, fin_rows)
+            summary["updated"] += upserted
+        except Exception:
+            logger.warning(
+                "[stock_master_financial_load_skip] ticker=%s reason=upsert_failed",
+                ticker,
+            )
+            summary["failed"] += 1
+
+        await asyncio.sleep(_FINANCIAL_LOAD_RATE_LIMIT_SLEEP_SECS)
+
+        _rp.update_progress(
+            "financial",
+            processed=idx + 1,
+            updated=summary["updated"],
+            skipped=summary["skipped"],
+            failed=summary["failed"],
+        )
+
+        if (idx + 1) % 500 == 0:
+            elapsed = int((time.monotonic() - start) * 1000)
+            logger.info(
+                "[stock_master_financial_load] 진행 %d/%d updated=%d "
+                "skipped=%d failed=%d elapsed_ms=%d",
+                idx + 1, len(tickers),
+                summary["updated"], summary["skipped"], summary["failed"], elapsed,
+            )
+
+    summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
+
+    logger.info(
+        "[stock_master_financial_load_summary] total=%d updated=%d skipped=%d failed=%d",
+        summary["total"], summary["updated"], summary["skipped"], summary["failed"],
+    )
+
+    _rp.finish_progress(
+        "financial", "completed",
+        total=summary["total"],
+        processed=len(tickers),
+        updated=summary["updated"],
+        skipped=summary["skipped"],
+        failed=summary["failed"],
+    )
+
+    return summary
+
+
 # 사이클 126 영역 3 — basics refresh 상수 (사이클 122 일봉 task 답습)
 _BASICS_REFRESH_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 17 KIS LMS chain 답습)
 

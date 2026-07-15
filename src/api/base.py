@@ -92,6 +92,14 @@ _QUOTE_ALLOWED_PATHS: frozenset[str] = frozenset({
     # 사이클 101 도입 시점 silent 결함 시정 — 화이트리스트 영구 영속이 누락 영구 확정
     # 시세성 호출 + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합
     "/uapi/domestic-stock/v1/ranking/market-cap",
+    # 사이클 C1 (2026-07-15) — 퀀트 재무필터 5 TR (FHKST66430100/200/400/500/600).
+    # 시세성 호출(재무제표 조회) + 민감 식별자 없음 → 보조 풀 라우팅 자금 안전 정책 부합.
+    # 누락 시 finance.py fetch_financial_tr → QuotePoolPathError (사이클 109 선례).
+    "/uapi/domestic-stock/v1/finance/income-statement",
+    "/uapi/domestic-stock/v1/finance/balance-sheet",
+    "/uapi/domestic-stock/v1/finance/profit-ratio",
+    "/uapi/domestic-stock/v1/finance/stability-ratio",
+    "/uapi/domestic-stock/v1/finance/other-major-ratios",
 })
 
 # 보조 매니저별 격리된 Rate Limit 세마포어 (메인 20, 보조 18 보수적)

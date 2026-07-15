@@ -98,8 +98,9 @@ def test_g_rt4_refresh_progress_taskkey_extended():
         f"G-RT4: TASK_KEYS tuple 'master' 영역 부재 "
         f"(실제 {_rp.TASK_KEYS!r})"
     )
-    assert len(_rp.TASK_KEYS) == 4, (
-        f"G-RT4: TASK_KEYS 4 확장 위반 (실제 길이 {len(_rp.TASK_KEYS)})"
+    # 사이클 C3 (2026-07-15) 의미 전환 — financial 추가로 4 → 5 확장.
+    assert len(_rp.TASK_KEYS) == 5, (
+        f"G-RT4: TASK_KEYS 5 확장 위반 (사이클 C3 financial 영속, 실제 길이 {len(_rp.TASK_KEYS)})"
     )
 
     # master state 초기화 영역 영속

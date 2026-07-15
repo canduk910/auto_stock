@@ -153,6 +153,19 @@ Supabase (PostgreSQL) CRUD 모듈.
 - 영속 의무: KST timestamp `_kst.now_kst_iso()` 사용 (사이클 68 G-10b AST) + raw JSONB 덮어쓰기 금지 (사이클 81 G-AST1 답습)
 - **UI 활용 영역 (사이클 124, 2026-06-12)**: `stock_master_daily` 컬럼 추가 시 UI 동기화 의무 영속 — `GET /api/stock-master/{ticker}/daily?days=N` 라우트 (`src/routes/stock_master.py`) + `frontend/src/pages/StockMaster.tsx::DailyTab` 30 row 테이블. `get_stats()` 응답에 `total_daily_rows` + `last_daily_load_at` 노출. 절차 상세는 `frontend/CLAUDE.md` 사이클 124 본문 참조
 
+## stock_master_financial.py — KIS 재무 5 TR 정규화 (사이클 C1, 2026-07-15)
+
+- 테이블: `stock_master_financial` (migration 041). PK 복합 `(ticker, stac_yymm, div_cls)` — `div_cls` 0=년/1=분기 + 인덱스 `ix_smf_ticker_div (ticker, div_cls, stac_yymm DESC)`
+- 컬럼 18종 정규화 NUMERIC: 손익 5 (`sale_account`/`sale_totl_prfi`/`bsop_prti`/`thtr_ntin`/`depr_cost`) + 대차 7 (`cras`/`fxas`/`total_aset`/`flow_lblt`/`total_lblt`/`total_cptl`/`cpfn`) + 수익성 2 (`cptl_ntin_rate`/`sale_totl_rate`) + 안정성 2 (`lblt_rate`/`crnt_rate`) + 기타 2 (`ebitda`/`ev_ebitda`) + `raw JSONB` + `refreshed_at TIMESTAMPTZ`. 마법공식(EV/EBITDA·ROC) + F-Score-7 (`src/engine/quant_score.py`) 원천 데이터
+- CRUD 함수 (`stock_master_daily.py` 미러):
+  - `upsert_financial_batch(ticker, rows)` — 100건 배치 chunk + `on_conflict="ticker,stac_yymm,div_cls"` + graceful + KST (`now_kst_iso`, 사이클 68 영속)
+  - `get_financial_series(ticker, div_cls="0", limit=3)` — `execute_with_retry` 경유 (사이클 187 read retry). 최근 N기 (`stac_yymm` DESC). div_cls "0"=년/"1"=분기
+  - `max_stac_yymm(ticker, div_cls="0")` — 신선도/백필 게이트 키 (스캐너 사용)
+  - `count_all()` — 적재 진단
+- Supabase 동기 호출 `asyncio.to_thread()` 위임 + raw JSONB 덮어쓰기 금지 (사이클 81 G-AST1 답습)
+- 호출자: `src/engine/scanner.py::_stock_master_financial_load_once()` (주1회 16:40 적재) + `src/engine/strategies/volatility_breakout.py::_apply_quant_filter_in_prepare()` (관찰 훅, 사이클 C3)
+- 매매 hot path 무관 (재무 적재 = 매수 진입 전 데이터 계층, 사이클 38)
+
 ## stock_master.py — 사이클 129 master_raw 별도 컬럼 (2026-06-14)
 
 KIS 공식 일일 마스터 파일 (`kospi_code.mst` / `kosdaq_code.mst`) 영역 = `master_raw JSONB` 별도 컬럼 영구 영속 (사이클 81 G-AST1 영속 절대 보호 = raw 영역 변경 0). migration 034 `IF NOT EXISTS` idempotent 영속.
