@@ -239,8 +239,8 @@ def test_d_adjacent_safety_params_unchanged():
     assert dp["pole_min_return"] == 15.0, (
         f"pole_min_return 불변 (사이클 48 완화 유지). 실제={dp['pole_min_return']}"
     )
-    assert dp["flag_retracement_max"] == 0.382, (
-        f"flag_retracement_max 불변 (2순위, 사이클 198 범위 외). 실제={dp['flag_retracement_max']}"
+    assert dp["flag_retracement_max"] == 0.5, (
+        f"flag_retracement_max 사이클 211 완화(0.382→0.5). 실제={dp['flag_retracement_max']}"
     )
     assert dp["pole_max_red_ratio"] == 0.45, (
         f"pole_max_red_ratio 불변 (사이클 48). 실제={dp['pole_max_red_ratio']}"

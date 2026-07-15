@@ -92,7 +92,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # 플래그
         "flag_lookback_min": 2,  # 사이클 198 — 3→2. 한국 급등주 얕은 2일 눌림 포착 (flag_volume_ratio 안전장치 보전)
         "flag_lookback_max": 10,
-        "flag_retracement_max": 0.382,
+        "flag_retracement_max": 0.5,  # 사이클 211 — 0.382→0.5. 폴+플래그 통과 3.3배 (funnel 병목 완화, flag_volume_ratio 안전장치 절대 불변)
         "flag_volume_ratio": 0.60,
         # 매수
         "breakout_volume_mult": 2.0,

@@ -525,7 +525,7 @@ VB와 동일.
 
 **플래그(Flag) 조건 — `flag_lookback_days=2~10`** (폴 종료 직후 N영업일. **사이클 198 (2026-07-09) — 3→2 완화**: domain-expert 자문 + 298종목×4일 DB 실측(`_workspace/domain_consult/cycle198_pattern_strictness_korea.md`) — 한국 급등주는 눌림(플래그)이 얕고 빠르다(상한가 익일 눌림 → 3일차 재돌파 리듬), `flag_lookback_min=3`이면 2일 눌림을 플래그로 검출 못해 후보 소실. `flag_volume_ratio`(거래량 수축 60%) 안전장치가 저품질(급락 되돌림) 후보를 여전히 전량 흡수 실증 — 완화해도 오탐 0):
 1. 플래그 구간 최고가 = `flag_high`, 최저가 = `flag_low`
-2. **조정 폭 ≤ 폴 폭의 38.2%** (`flag_retracement_max=0.382`, 피보 retracement) — `(pole_high - flag_low) <= (pole_high - pole_start) × 0.382`
+2. **조정 폭 ≤ 폴 폭의 50%** (`flag_retracement_max=0.5`, 사이클 211 — 0.382→0.5 완화, funnel 폴/플래그 병목 실측 3.3배) — `(pole_high - flag_low) <= (pole_high - pole_start) × 0.5`. 거래량 수축(`flag_volume_ratio 0.6`)이 급락 되돌림 오판 봉쇄(안전장치 불변)
 3. **플래그 평균 거래량 < 폴 평균 거래량 × 60%** (`flag_volume_ratio=0.60`) — 거래량 수축 확인
 4. 플래그 종가 추세는 강한 우하향이 아니어야 함 (마지막 종가가 flag_low 보다 0.5×ATR 이상 멀지 않을 것 — 일종의 sanity check, 정밀한 회귀선 검사는 1차에서 생략)
 
@@ -590,7 +590,7 @@ DEFAULT_PARAMS = {
     # 플래그
     "flag_lookback_min": 2,   # 사이클 198 — 3 → 2 완화 (얕은 2일 눌림 포착, flag_volume_ratio 안전장치 보전)
     "flag_lookback_max": 10,
-    "flag_retracement_max": 0.382,
+    "flag_retracement_max": 0.5,   # 사이클 211 (0.382→0.5)
     "flag_volume_ratio": 0.60,
     # 매수
     "breakout_volume_mult": 2.0,

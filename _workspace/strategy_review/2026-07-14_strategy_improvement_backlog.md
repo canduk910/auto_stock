@@ -55,5 +55,25 @@ position_ratio 도 함께 제외 권고(자동 축소=과소진입). → auto_ap
 3. funnel 실측 부재 → 완화 후보값(pole 20→15 등)은 **스윕 시작점**, 확정값 아님.
 4. BFB pole_min_return code=15 vs **DB=20**(실효) → 논의는 DB 기준.
 
-## 다음 단계
-Phase A 백로그 = **위 A~K**. 사용자 검토 후: (1) P0(A/B) 즉시 사이클화 착수 여부 (2) Phase B(funnel 스윕) 진행 여부 결정.
+---
+
+## Phase B 결과 (2026-07-14, funnel 실측 + BFB 오프라인 스윕)
+
+**funnel 병목 단계 (신규 프로젝트 7/14):**
+- **BFB**: 유니버스 293 → step5 폴 검출 **80**(-72%) → step6 플래그 **12**(-85%) → step7 거래량 1 → 최종 1. 병목 = 폴/플래그 패턴 단계.
+- **VCP**: 331 → step5 EMA정렬 **14**(-96%, 추세필터=정당) → step6 베이스 6 → step7 Pullback **0**(전멸). 병목 = EMA(추세, 시장종속) + Pullback(정의적 패턴).
+
+**BFB 완화 스윕 (95종목 subset):** A(pole20/retr0.382)=2 / B(pole15/retr0.382)=3 / **C(pole15/retr0.5)=10 (3.3배)**. → `flag_retracement_max` 0.382→0.5 가 최대 레버, pole 20→15는 DB/코드 정합(소폭). flag_volume_ratio 0.6 안전장치 유지.
+
+**Phase B 판정:**
+| 전략 | 판정 | 조치 |
+|---|---|---|
+| **BFB** | **진입 과엄 (완화 여지 실측)** | **G-B1 (P1)**: `flag_retracement_max` 0.382→**0.5**(3.3배 레버) + `pole_min_return` DB 20→**15**(코드 정합) + flag_volume_ratio 0.6 유지. 사이클화 후보(198 답습, domain-consult+TDD) |
+| **VCP** | **순수 희소 (시장 종속)** | **G-V1 (P2/관찰)**: EMA 추세필터 96% drop(정당) + Pullback 횡보장 전멸 = 상승장 전환 시 자연 발화. param 완화 ceiling 낮음(upstream EMA/base 6종목 제한). **상승장 대기, 완화 보류**. (last_pullback_max 0.1→0.15는 소폭, 우선순위 낮음) |
+| **momentum** | **라이브 관찰 필요** | **G-M1 (P1)**: 6/17 중단은 구 프로젝트 데이터. 신규 프로젝트 관찰 시작. buy_threshold 29=진입 정체성(불변, PARAM_RANGES 제외=P1-D). 6/17 중단이 유니버스/차단(204 반영)인지 희소인지 신규 로그로 재판정 |
+| **VB** | trade-level 재진단 | -40K 손실이 재진입 whipsaw vs 신규 손절 구성 → trade_history 상세(P1 후속) |
+
+## 다음 단계 (Phase B 후)
+- **즉시 사이클화 후보**: **G-B1 (BFB flag_retracement 0.382→0.5 + pole 20→15)** = 실측 근거 확실, 198 답습. + Phase A P1 = **C(VB pos_ratio 0.35)·D(진입임계 PARAM_RANGES 제외)·E(LTV 재진입 쿨다운)**.
+- **관찰/보류**: VCP(상승장 대기)·momentum(라이브)·VB trade-level.
+- **Phase C**(자문 품질)는 별도.
