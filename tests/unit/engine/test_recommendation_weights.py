@@ -131,12 +131,15 @@ def test_validate_both_none_returns_normally():
     """둘 다 null/누락이어도 기존 흐름 정상 처리 (params 검증만)."""
     from src.engine.recommendation_engine import _validate_recommendations
 
-    raw = {"recommended_params": {"buy_threshold": 25.0}, "reasoning": "test"}
+    # 사이클 212 — buy_threshold 는 PARAM_RANGES 제외(진입 임계 화이트리스트 폐기) →
+    # 표본 키를 잔존 키(stop_loss_rate)로 교체. 테스트 의도(params 검증 통과 시
+    # reasoning/weight/notes/weight_reasoning 필드 계약)는 불변.
+    raw = {"recommended_params": {"stop_loss_rate": -5.0}, "reasoning": "test"}
     validated, reasoning, weight, notes, weight_reasoning = _validate_recommendations(
-        raw, {"buy_threshold": 29.0},
+        raw, {"stop_loss_rate": -3.0},
     )
 
-    assert validated == {"buy_threshold": 25.0}
+    assert validated == {"stop_loss_rate": -5.0}
     assert reasoning == "test"
     assert weight is None
     assert notes is None

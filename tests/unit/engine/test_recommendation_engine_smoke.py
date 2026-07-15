@@ -34,8 +34,10 @@ def test_param_ranges_present_and_bounded():
     from src.engine.recommendation_engine import PARAM_RANGES, INT_PARAMS
 
     # 핵심 키 존재 + (min<max) 검증
+    # 사이클 212 의미 전환: buy_threshold 는 진입 임계라 PARAM_RANGES 에서 제거됨
+    # (AI 자동튜닝 제외) → expected_keys 에서 삭제.
     expected_keys = {
-        "buy_threshold", "stop_loss_rate", "position_ratio",
+        "stop_loss_rate", "position_ratio",
         "max_positions", "k_period",
     }
     assert expected_keys.issubset(PARAM_RANGES.keys())
@@ -47,33 +49,40 @@ def test_param_ranges_present_and_bounded():
 
 
 def test_validate_recommendations_filters_unknown_key():
-    """현재 params 에 없는 키는 제외되어야 한다."""
+    """비화이트리스트 키는 제외 + 화이트리스트 키는 통과.
+
+    사이클 212 의미 전환: buy_threshold 가 PARAM_RANGES 에서 제거됨 → ghost_param
+    과 동일하게 드롭. 화이트리스트 잔존 키(position_ratio)로 통과 계약 검증.
+    """
     from src.engine.recommendation_engine import _validate_recommendations
 
     raw = {
-        "recommended_params": {"buy_threshold": 25.0, "ghost_param": 99},
+        "recommended_params": {"position_ratio": 0.3, "ghost_param": 99},
         "reasoning": "test",
     }
-    current = {"buy_threshold": 29.0}
+    current = {"position_ratio": 0.2}
     validated, reasoning, _weight, _notes, _wr = _validate_recommendations(raw, current)
 
     assert "ghost_param" not in validated
-    assert validated["buy_threshold"] == 25.0
+    assert validated["position_ratio"] == 0.3
     assert reasoning == "test"
 
 
 def test_validate_recommendations_clamps_out_of_range():
-    """허용 범위 벗어난 값은 제외되어야 한다."""
+    """허용 범위 벗어난 값은 제외되어야 한다.
+
+    사이클 212 의미 전환: buy_threshold 제거 → 화이트리스트 잔존 float 키
+    k_value_krx_main 허용 (0.5, 2.0) 로 범위 밖(2.5) 제외 검증.
+    """
     from src.engine.recommendation_engine import _validate_recommendations
 
-    # buy_threshold 허용 (0, 30) — 31 은 범위 밖
     raw = {
-        "recommended_params": {"buy_threshold": 31.0},
+        "recommended_params": {"k_value_krx_main": 2.5},
         "reasoning": "",
     }
-    current = {"buy_threshold": 29.0}
+    current = {"k_value_krx_main": 1.0}
     validated, _, _w, _n, _wr = _validate_recommendations(raw, current)
-    assert "buy_threshold" not in validated
+    assert "k_value_krx_main" not in validated
 
 
 def test_validate_recommendations_casts_int_params():

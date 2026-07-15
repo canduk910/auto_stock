@@ -65,7 +65,6 @@ _backtest_poll_loop_running: set[date] = set()
 # donchian_swing 의 기간/거래량/ATR 트레일 등 8 키 화이트리스트 확장
 # (min_prdy_rate 는 사이클 이전부터 등록되어 있어 중복 추가하지 않음).
 PARAM_RANGES: dict[str, tuple[float, float]] = {
-    "buy_threshold": (0.0, 30.0),
     "stop_loss_rate": (-15.0, 0.0),
     "gap_up_threshold": (0.0, 30.0),
     "trailing_stop_rate": (-10.0, 0.0),
@@ -90,7 +89,6 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "k_value_krx_main": (0.5, 2.0),
     "k_value_nxt_pre": (0.5, 2.0),
     "k_value_nxt_post": (0.5, 2.0),
-    "donchian_period": (10, 60),
     "long_ma_period": (20, 120),
     "volume_multiplier": (1.0, 5.0),
     "atr_trail_mult": (1.0, 5.0),
@@ -111,7 +109,6 @@ INT_PARAMS = {
     "k_period",
     "max_scan_stocks",
     "exclude_consecutive_limit",
-    "donchian_period",
     "long_ma_period",
     # ↓ 사이클 23 — 정수 캐스트 대상
     "breakout_retention_minutes",
