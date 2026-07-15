@@ -3396,27 +3396,22 @@ class TradingScheduler:
         await stale_manager.evaluate_universe_guard(self, candidate_tickers)
 
     async def _subscribe_market_operation_tickers(
-        self, candidate_tickers: set[str], *, cap: int = 20,
+        self, candidate_tickers: set[str], *, cap: int = 60,
     ) -> int:
-        """사이클 149 (2026-06-16) — 종목별 H0UNMKO0 구독 확장.
+        """사이클 149/214 — 종목별 H0UNMKO0 구독 확장 (HIGH 메인 직접 + LOW 풀 분산).
 
-        보유/익일청산 (HIGH) + 전략 후보 (LOW cap=20) 합집합 종목별 구독.
-        메인 세션 단일 + bypass_limit=True (자문 의제 2/3 자문 채택).
+        보유/익일청산(HIGH)=`kis_ws.subscribe(bypass_limit=True)` 메인 직접
+        절대 보장. 전략 후보(LOW cap)=`kis_ws_pool.subscribe(priority="LOW")`
+        풀 분산 (사이클 214 — H0UNMKO0=실시간시세라 안전, 체결통보 2종만 메인 강제).
 
-        domain-expert 자문 산출물:
-            `_workspace/domain_consult/cycle149_h0unmko0_per_ticker_subscription.md`
+        자문: `_workspace/domain_consult/cycle149_*.md` + `cycle214_h0unmko0_cap.md`
 
-        영속 의무:
-        - 의제 2: H0UNMKO0 LMS 한도 41 영역 = bypass_limit=True 가드 의존 (사이클 17 영속)
-        - 의제 3: HIGH 절대 보장 + LOW cap=20 (사이클 66 K-10 패턴 답습)
-        - 사이클 26 005930 대표 구독 영역 보존 (시장 단위 신호 영속)
-
-        매매 안전성 무영향 (사이클 38 명문화 영속):
-        - WebSocket 시세 TICK 영역 변경 0
-        - `risk.on_tick` / `order_engine` / `auth` 변경 0
+        영속: 의제2 LMS 41한도(bypass_limit=True 의존, 사이클17) / 의제3 HIGH
+        절대보장+LOW cap(사이클66 K-10) / 005930 대표구독(사이클26) / cap 20→60(214).
+        매매 안전성 무영향(사이클38) — WS TICK/risk/order_engine/auth 변경 0.
         """
         from src.api.market_operation import MARKET_OP_TR_ID
-        from src.realtime.websocket import kis_ws
+        from src.realtime.websocket import kis_ws, kis_ws_pool
 
         if kis_ws is None or not getattr(kis_ws, "_ws", None):
             return 0
@@ -3454,7 +3449,7 @@ class TradingScheduler:
 
         for ticker in low_tickers:
             try:
-                await kis_ws.subscribe(MARKET_OP_TR_ID, ticker, bypass_limit=False)
+                await kis_ws_pool.subscribe(MARKET_OP_TR_ID, ticker, priority="LOW")
                 subscribed += 1
                 await asyncio.sleep(0.05)
             except Exception:

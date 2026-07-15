@@ -132,6 +132,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -354,6 +355,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -657,6 +659,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -897,6 +900,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1119,6 +1123,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1423,6 +1428,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -1645,6 +1651,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -1944,6 +1951,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2173,6 +2181,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2474,6 +2483,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -2703,6 +2713,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2892,8 +2903,10 @@ backend:
   src/api/market_operation.py:
     direct_tests:
     - tests/unit/api/test_cycle149_market_operation.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/engine/test_cycle149_market_operation_monitor.py
     - tests/unit/engine/test_cycle186_market_op_cb_heuristic.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/routes/test_cycle186_market_op_route.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -3538,6 +3551,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3776,6 +3790,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -4022,6 +4037,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4255,6 +4271,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -4484,6 +4501,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -4786,6 +4804,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5051,6 +5070,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5435,6 +5455,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -5626,6 +5647,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5927,6 +5949,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -6180,6 +6203,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6487,6 +6511,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -6705,6 +6730,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -6931,6 +6957,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -7162,6 +7189,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7459,6 +7487,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7679,6 +7708,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7908,6 +7938,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8127,6 +8158,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8375,6 +8407,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8639,6 +8672,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -8841,6 +8875,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9143,6 +9178,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -9364,6 +9400,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9660,6 +9697,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -9887,6 +9925,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10114,6 +10153,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10415,6 +10455,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -10679,6 +10720,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -11025,6 +11067,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -11246,6 +11289,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -11549,6 +11593,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -11778,6 +11823,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12090,6 +12136,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12519,6 +12566,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
     - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
@@ -12653,6 +12701,7 @@ backend:
     - tests/unit/engine/test_cycle194_force_reconnect_db_label.py
     - tests/unit/engine/test_cycle195_stale_diag_db_label.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -12856,6 +12905,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -13079,6 +13129,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13297,6 +13348,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13522,6 +13574,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -13750,6 +13803,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14049,6 +14103,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14270,6 +14325,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -14498,6 +14554,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14800,6 +14857,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15024,6 +15082,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15258,6 +15317,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15489,6 +15549,7 @@ backend:
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -15701,6 +15762,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15925,6 +15987,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -16155,6 +16218,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16457,6 +16521,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -16861,6 +16926,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
     - tests/unit/db/test_cycle101_84_history_trigger.py
     - tests/unit/db/test_cycle108_list_by_filter.py
@@ -16971,6 +17037,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17191,6 +17258,7 @@ backend:
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17430,6 +17498,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17700,6 +17769,7 @@ backend:
     - tests/unit/ast/test_cycle211_ast_default_params_scope.py
     - tests/unit/ast/test_cycle212_ast_entry_threshold.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -18024,6 +18094,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -18371,6 +18442,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18616,6 +18688,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18821,6 +18894,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19061,6 +19135,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19266,6 +19341,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19494,6 +19570,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19716,6 +19793,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19935,6 +20013,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20154,6 +20233,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20381,6 +20461,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20632,6 +20713,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20873,6 +20955,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21105,6 +21188,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21336,6 +21420,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21568,6 +21653,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21813,6 +21899,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22128,6 +22215,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22361,6 +22449,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22577,6 +22666,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22811,6 +22901,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -23095,6 +23186,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -23326,6 +23418,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -23556,6 +23649,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -23791,6 +23885,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24095,6 +24190,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -24337,6 +24433,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24705,6 +24802,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -25064,6 +25162,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -25275,6 +25374,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -25630,6 +25730,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -25754,6 +25855,7 @@ backend:
     - tests/contract/test_routes_subscriptions_pool.py
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_stale_watcher_pool.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -25879,6 +25981,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -26100,6 +26203,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -26330,6 +26434,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -26652,6 +26757,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -26882,6 +26988,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -27047,6 +27154,7 @@ backend:
     - tests/integration/test_pool_distribution.py
     - tests/integration/test_scheduler_boot_quote_sessions.py
     - tests/integration/test_stale_watcher_pool.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_cycle195_stale_diag_db_label.py
@@ -27409,6 +27517,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -28615,6 +28724,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -28852,6 +28962,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29088,6 +29199,7 @@ backend:
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29309,6 +29421,7 @@ backend:
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
     - tests/unit/ast/test_cycle94_ast_no_industry_code.py
     - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
@@ -29539,6 +29652,7 @@ backend:
     - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
+    - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -30347,10 +30461,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-15T10:39:52.846161+09:00'
+generated_at: '2026-07-15T13:58:37.298425+09:00'
 stats:
   backend_modules: 112
-  backend_tests: 703
+  backend_tests: 705
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:
