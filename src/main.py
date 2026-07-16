@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import logging.handlers
 import os
+import queue
 import time
 import tracemalloc
 from collections import defaultdict, deque
-from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
+
+import src.db.pg as pg
 
 from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -113,9 +116,10 @@ error_handler.suffix = "%Y-%m-%d"
 root_logger.addHandler(error_handler)
 
 # DB 로그 핸들러 — src.* 모듈의 INFO 이상 로그를 system_logs 테이블에 기록
-# logger.info() 호출이 동기 supabase INSERT를 직접 트리거하면 호출자가 블로킹된다.
-# 단일 워커 ThreadPoolExecutor에 fire-and-forget으로 위임 → logger 호출은 즉시 반환.
-_LOG_DB_EXECUTOR = ThreadPoolExecutor(max_workers=2, thread_name_prefix="db-log")
+# 사이클 M3b — asyncpg 전환. 동기 logging.Handler.emit 은 async pg.execute 를 직접
+# await 할 수 없으므로 큐 producer(non-blocking put_nowait) + lifespan 기동 async
+# consumer task(큐 drain → pg.execute INSERT) 구조로 전환. ThreadPoolExecutor 폐기.
+_LOG_QUEUE: "queue.Queue[tuple[str, str]]" = queue.Queue(maxsize=10_000)
 
 # 사이클 72 hotfix — 500ms TTL dedupe 캐시 (옵션 D).
 # 동일 메시지가 logger.* 경로로 500ms 내 중복 emit 되면 두 번째 INSERT skip.
@@ -123,23 +127,44 @@ _LOG_DB_EXECUTOR = ThreadPoolExecutor(max_workers=2, thread_name_prefix="db-log"
 _DEDUPE_TTL_SECS = 0.5  # 500ms 동일 메시지 dedupe
 
 
-def _insert_log_to_db(level: str, message: str) -> None:
+async def _insert_log_to_db(level: str, message: str) -> None:
+    """system_logs INSERT (pg.execute, KST datetime). never-raise — 무한 재귀 방지."""
     try:
-        from src.db.supabase import supabase
-        supabase.table("system_logs").insert({
-            "log_level": level,
-            "message": message,
-            "timestamp": datetime.now(KST).isoformat(),  # 사이클 65 hotfix H2-bis — KST 강제 (사이클 53 패턴)
-        }).execute()
+        await pg.execute(
+            "INSERT INTO system_logs (log_level, message, timestamp) VALUES ($1, $2, $3)",
+            level,
+            message,
+            datetime.now(KST),  # 사이클 65 hotfix H2-bis — KST 강제 (사이클 53 패턴)
+        )
     except Exception:
         pass  # DB 기록 실패는 무시 (무한 재귀 방지)
 
 
+async def _log_queue_consumer() -> None:
+    """큐 drain → `_insert_log_to_db` INSERT (lifespan 기동 백그라운드 task).
+
+    큐가 비면 짧게 대기 후 재확인 — 폴링형 drain(단순성 우선, 로그 지연 허용).
+    """
+    while True:
+        try:
+            level, message = _LOG_QUEUE.get_nowait()
+        except queue.Empty:
+            await asyncio.sleep(0.1)
+            continue
+        try:
+            await _insert_log_to_db(level, message)
+        except Exception:
+            pass  # never-raise — consumer 루프 보존 (사이클190)
+
+
 class _DbLogHandler(logging.Handler):
-    """로그를 Supabase system_logs 테이블에 비동기로 기록한다(executor 위임).
+    """로그를 system_logs 테이블에 큐 경유로 비동기 기록한다 (사이클 M3b — asyncpg 큐 전환).
+
+    emit() 은 동기 non-blocking 큐 producer(`_LOG_QUEUE.put_nowait`) 역할만 수행하고,
+    실제 INSERT 는 lifespan 이 기동하는 `_log_queue_consumer` async task 가 처리한다.
 
     사이클 72 hotfix — 500ms TTL dedupe 캐시 (옵션 D):
-    동일 메시지가 500ms 내 중복 emit 되면 두 번째는 INSERT skip.
+    동일 메시지가 500ms 내 중복 emit 되면 두 번째는 큐 적재 skip.
     옵션 A' (write_log 직접 호출 제거) 의 안전망으로 추가.
     """
 
@@ -152,11 +177,11 @@ class _DbLogHandler(logging.Handler):
             return
         try:
             message = f"[{record.name}] {record.getMessage()}"[:500]
-            # 500ms TTL dedupe — 동일 메시지 중복 INSERT 차단
+            # 500ms TTL dedupe — 동일 메시지 중복 큐 적재 차단
             last = self._dedupe_cache.get(message)
             now = time.monotonic()
             if last is not None and (now - last) < _DEDUPE_TTL_SECS:
-                return  # 중복 INSERT 차단
+                return  # 중복 적재 차단
             # 캐시 저장 — 현재 시각 재측정 (dedupe 비교 후 시점 기록)
             self._dedupe_cache[message] = time.monotonic()
             # lazy evict — TTL 경과 항목 정리 (~100 항목 cap, 메모리 폭주 차단)
@@ -166,9 +191,10 @@ class _DbLogHandler(logging.Handler):
                     k: v for k, v in self._dedupe_cache.items()
                     if (evict_now - v) < _DEDUPE_TTL_SECS
                 }
-            _LOG_DB_EXECUTOR.submit(_insert_log_to_db, record.levelname, message)
-        except RuntimeError:
-            pass  # 인터프리터 셧다운 중 등 executor 사용 불가 시 무시
+            _LOG_QUEUE.put_nowait((record.levelname, message))
+        except Exception:
+            pass  # never-raise (사이클190) — 큐 full/기타 예외 삼킴, WARNING 이상 미발화
+
 
 _db_handler = _DbLogHandler()
 _db_handler.setLevel(logging.INFO)
@@ -192,8 +218,8 @@ async def lifespan(app: FastAPI):
 
     logger.info("=== 서버 시작 (env=%s, port=%s) ===", settings.kis_env, settings.port)
 
-    # RDS(PostgreSQL) 연결 풀 — 사이클 M0. database_url 미설정 시 graceful skip
-    # (supabase.py 가 여전히 정본 — 어느 db 모듈도 아직 pg.py 미사용).
+    # RDS(PostgreSQL) 연결 풀 — 사이클 M0. database_url 미설정 시 graceful skip.
+    _log_consumer_task: "asyncio.Task | None" = None
     if settings.database_url:
         try:
             from src.db.pg import init_pool
@@ -201,6 +227,12 @@ async def lifespan(app: FastAPI):
             logger.info("RDS 연결 풀 초기화 완료")
         except Exception:
             logger.exception("RDS 연결 풀 초기화 실패")
+
+        # 사이클 M3b — DB 로그 큐 consumer 기동 (pool 초기화 이후, pg.execute 가능 시점).
+        try:
+            _log_consumer_task = asyncio.create_task(_log_queue_consumer())
+        except Exception:
+            logger.exception("DB 로그 큐 consumer 기동 실패")
 
     try:
         await token_manager.get_token()
@@ -215,17 +247,14 @@ async def lifespan(app: FastAPI):
     except Exception:
         logger.warning("전략 설정 초기 로드 실패")
 
-    # 자동 매매 시작 (DB 설정 기준)
+    # 자동 매매 시작 (DB 설정 기준) — 사이클 M3b seam ② system_config.get_auto_start() 경유.
     try:
-        from src.db.supabase import supabase as _sb
-        _auto = _sb.table("system_config").select("value").eq("key", "auto_start").execute()
-        raw = _auto.data[0]["value"] if _auto.data else False
-        auto_start = raw is True or raw == "true"
+        from src.db import system_config as _sc
+        auto_start = await _sc.get_auto_start()
     except Exception:
         auto_start = settings.auto_start  # DB 조회 실패 시 .env 폴백
 
     if auto_start:
-        import asyncio
         from src.engine.scheduler import trading_scheduler
         logger.info("AUTO_START 활성화 — 매일 자동 매매 스케줄링")
         asyncio.create_task(trading_scheduler.run_daily())
@@ -243,6 +272,14 @@ async def lifespan(app: FastAPI):
             await _mc._client_instance.close()
     except Exception:
         logger.exception("MCP 클라이언트 정리 실패")
+
+    # 사이클 M3b — DB 로그 큐 consumer 정리.
+    if _log_consumer_task is not None:
+        _log_consumer_task.cancel()
+        try:
+            await _log_consumer_task
+        except (asyncio.CancelledError, Exception):
+            pass
 
     # RDS(PostgreSQL) 연결 풀 종료 — 사이클 M0.
     try:

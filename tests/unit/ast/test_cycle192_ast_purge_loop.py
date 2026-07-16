@@ -55,12 +55,31 @@ class TestP2NoBulkDeleteLt:
         assert ".delete().lt(" not in normalized, \
             "bulk `delete().lt(` 패턴 영구 폐기 의무 (응답 비대 근본 원인)"
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — `returning='minimal'` 은 supabase-py "
+            "DELETE 응답 비대 회피 키워드다. asyncpg 는 `pg.execute(\"DELETE ...\")` 가 "
+            "기본적으로 데이터를 반환하지 않고 상태 문자열('DELETE N')만 돌려주므로 이 키워드 "
+            "자체가 불필요/부재. 응답 비대 방지 본질은 asyncpg 실행 모델로 계승."
+        ),
+    )
     def test_p2b_returning_minimal_present(self) -> None:
         """DELETE 가 returning='minimal' 로 생성 (응답 비대 차단)."""
         unparsed = _purge_source()
         assert re.search(r"returning\s*=\s*['\"]minimal['\"]", unparsed) is not None, \
             "returning='minimal' 키워드 영구 영속 의무"
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — 날짜 슬라이스 DELETE 필터가 supabase "
+            "`.eq('bas_dd', oldest)` 에서 SQL `DELETE ... WHERE bas_dd = $1` + 위치 인자로 "
+            "전환됐다. 날짜별 DELETE 슬라이스 루프 본질은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py::test_purge_date_slice_loop_deletes_and_drains "
+            "(del_sql 에 'bas_dd' + 날짜별 DELETE)가 커버."
+        ),
+    )
     def test_p2c_eq_bas_dd_present(self) -> None:
         """날짜 슬라이스 DELETE = `.eq('bas_dd', ...)` 필터 존재."""
         unparsed = _purge_source()
@@ -97,6 +116,17 @@ class TestP7NoRetryWrapper:
         assert calls == 0, \
             "purge_old_rows execute_with_retry 미경유 영속 의무 (G-187-A2 쓰기 불변식)"
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — `asyncio.to_thread` 위임은 동기 "
+            "supabase SDK 를 thread pool 로 넘기기 위한 정책이었다. asyncpg 는 네이티브 "
+            "async 이므로 `pg.execute`/`pg.fetchrow` 를 직접 await 하고 `asyncio.to_thread` 를 "
+            "쓰지 않는다(전제 위반). purge 가 재시도 미경유(쓰기 함수) 라는 본질 불변식은 "
+            "동일 클래스의 test_p7_purge_not_via_execute_with_retry(PASS) + M2b 신규 가드 "
+            "test_purge_not_via_with_retry(pg._with_retry 미경유)가 계승."
+        ),
+    )
     def test_p7b_uses_to_thread(self) -> None:
         """purge_old_rows 는 asyncio.to_thread 위임 유지 (동기 SDK 정책)."""
         source = read_module_source(_DAILY_PY)

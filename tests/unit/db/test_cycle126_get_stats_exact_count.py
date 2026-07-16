@@ -7,6 +7,8 @@ PostgREST 디폴트 1000행 한도 silent 결함 시정:
 """
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -24,53 +26,26 @@ def _make_row(ticker: str, raw: dict | None = None) -> dict:
 
 @pytest.mark.asyncio
 async def test_g_count1_get_stats_uses_exact_count(monkeypatch):
-    """G-COUNT1: count="exact" 쿼리 결과로 count_all=2697 정확 반환."""
+    """G-COUNT1: count(*) 별도 쿼리 결과로 count_all=2697 정확 반환.
+
+    사이클 M2b — count_all 은 pg.fetchval("SELECT count(*) FROM stock_master") 로
+    정확 카운트 (PostgREST 1000행 silent cap 폐기, count='exact' → asyncpg count(*)).
+    top_10_recent 는 별도 pg.fetch. stock_master_daily 연동은 모듈 함수 patch.
+    """
     from src.db import stock_master, stock_master_daily
 
-    # raw 쿼리는 100행만 반환 (PostgREST 한도 시뮬레이션)
-    raw_rows = [_make_row(f"{i:06d}") for i in range(100)]
+    count_sqls: list[str] = []
+    data_sqls: list[str] = []
 
-    captured = {"count_called": False, "raw_called": False}
+    async def _fetchval(sql, *args):
+        count_sqls.append(sql)
+        # count_all (필터 없는 count(*)) → 2697, 나머지 카운트 → 0
+        return 2697
 
-    def fake_table(name: str):
-        class T:
-            def __init__(self):
-                self._mode = None
+    async def _fetch(sql, *args):
+        data_sqls.append(sql)
+        return []
 
-            def select(self, cols: str, count: str = None):
-                if count == "exact":
-                    captured["count_called"] = True
-                    self._mode = "count"
-                else:
-                    captured["raw_called"] = True
-                    self._mode = "raw"
-                return self
-
-            def order(self, *a, **kw):
-                return self
-
-            def range(self, start, end):
-                return self
-
-            def limit(self, n):
-                return self
-
-            def execute(self):
-                class Result:
-                    pass
-                r = Result()
-                if self._mode == "count":
-                    r.count = 2697
-                    r.data = []
-                else:
-                    r.data = raw_rows
-                return r
-
-        return T()
-
-    monkeypatch.setattr(stock_master.supabase, "table", fake_table)
-
-    # stock_master_daily 모킹 (graceful path)
     async def fake_count_all():
         return 0
     async def fake_max_bas_dd(ticker=None):
@@ -78,10 +53,14 @@ async def test_g_count1_get_stats_uses_exact_count(monkeypatch):
     monkeypatch.setattr(stock_master_daily, "count_all", fake_count_all)
     monkeypatch.setattr(stock_master_daily, "max_bas_dd", fake_max_bas_dd)
 
-    stats = await stock_master.get_stats()
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(side_effect=_fetchval)
+        pg_mod.fetch = AsyncMock(side_effect=_fetch)
+        stats = await stock_master.get_stats()
 
-    assert captured["count_called"] is True, "count='exact' 쿼리 미발화"
-    assert captured["raw_called"] is True, "raw 분석 쿼리 미발화"
+    # count(*) 별도 쿼리 발화 + raw fetch(top10) 발화
+    assert count_sqls and all("count(" in s.lower() for s in count_sqls), "count(*) 쿼리 미발화"
+    assert data_sqls, "top_10_recent raw fetch 미발화"
     assert stats["count_all"] == 2697, (
         f"PostgREST 1000행 cap 결함 미시정: count_all={stats['count_all']} (기대 2697)"
     )

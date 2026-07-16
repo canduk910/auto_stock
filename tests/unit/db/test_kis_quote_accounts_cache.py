@@ -29,7 +29,26 @@ from unittest.mock import MagicMock
 
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 M3a (Supabase→RDS asyncpg 전환) — 이 파일 전체 xfail.
+# supabase 체인 mock(`.table().select().execute()`) 기반 검증인데 kis_quote_accounts
+# 가 pg(asyncpg) 단독 전환되어 supabase 심볼이 사라짐 → 체인 mock 라우팅 불가.
+# 60s TTL 캐시(hit/만료/invalidate/DB예외 stale 반환/active_only 키 분리) 계약은
+# pg 레벨에서 test_cycleM3a_kis_quote_accounts_pg.py + 실 PG
+# test_cycleM3a_three_modules_roundtrip.py::test_cache_stale_returned_on_db_error 가
+# 절대 보존 검증으로 계승.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason=(
+            "사이클 M3a (2026-07-16) 의미 전환 — kis_quote_accounts 가 supabase-py "
+            "에서 src.db.pg(asyncpg) 로 전환되어 supabase 체인 mock 라우팅 불가. "
+            "60s TTL 캐시 계약(hit/만료/invalidate/stale 반환)은 "
+            "test_cycleM3a_kis_quote_accounts_pg.py + "
+            "test_cycleM3a_three_modules_roundtrip.py 가 계승."
+        ),
+        strict=False,
+    ),
+]
 
 
 @pytest.fixture

@@ -31,7 +31,20 @@ import httpcore
 import httpx
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 M3b (2026-07-16) — Supabase→RDS 이전, system_logs.py 가 supabase-py 체인을
+# 폐기하고 `src.db.pg`(asyncpg) 로 전환됨에 따라 `patch.object(_mod, "supabase", ...)`
+# 가 AttributeError. never-raise(사이클190) 실질 계약은
+# `tests/unit/db/test_cycleM3b_system_logs_pg.py::test_write_log_never_raises_on_pg_exception`
+# / `test_write_log_never_raises_various_exceptions` / `test_write_log_failure_logs_debug_only_no_warning`
+# / `test_safe_write_log_graceful_on_pg_exception` 로 이관되어 회귀 가드 유지.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason="사이클M3b — system_logs.py supabase→pg 전환. never-raise 계약은 "
+        "test_cycleM3b_system_logs_pg.py 로 이관",
+        strict=False,
+    ),
+]
 
 
 def _mock_supabase_raising(exc: Exception) -> MagicMock:

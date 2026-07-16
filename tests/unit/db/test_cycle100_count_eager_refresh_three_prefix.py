@@ -23,19 +23,11 @@
 """
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 pytestmark = pytest.mark.unit
-
-
-def _make_fake_count_result(count_value: int) -> MagicMock:
-    """supabase-py count="exact" 응답 mock."""
-    result = MagicMock()
-    result.count = count_value
-    result.data = [{"id": i} for i in range(count_value)]
-    return result
 
 
 @pytest.mark.asyncio
@@ -67,42 +59,18 @@ async def test_g_ui1_count_eager_refresh_today_sums_three_prefix():
     }
     EXPECTED_SUM = sum(PREFIX_COUNTS.values())  # 61 (사용자 결정 Q65=C-1 합산)
 
-    # 호출 인자 추적 — ilike() 호출시 prefix 패턴 영역 캡처
+    # 사이클 M2b — pg.fetchval 경유. count_eager_refresh_today 는 3 prefix 각각
+    #   pg.fetchval("SELECT count(*) FROM system_logs WHERE message ILIKE $1 ...", pattern, ...)
+    # 를 발화 → args[1] 이 prefix 패턴. side_effect 로 패턴 캡처 + per-pattern count 반환.
     captured_patterns: list[str] = []
 
-    def _make_chain_for_pattern(pattern: str) -> MagicMock:
-        """단일 prefix 호출 chain mock — pattern별 다른 count 반환."""
-        chain = MagicMock()
-        count_result = _make_fake_count_result(PREFIX_COUNTS.get(pattern, 0))
-        # supabase chain: table → select → ilike → gte → lte → execute
-        chain.select.return_value.ilike.return_value.gte.return_value.lte.return_value.execute.return_value = count_result
-        return chain
+    async def _fetchval(sql, *args):
+        pattern = args[0]  # $1 = ILIKE pattern
+        captured_patterns.append(pattern)
+        return PREFIX_COUNTS.get(pattern, 0)
 
-    def _table_mock(table_name: str):
-        # 매 호출마다 호출된 ilike 패턴 추적
-        chain = MagicMock()
-
-        def _select(_cols, **_kwargs):
-            select_chain = MagicMock()
-
-            def _ilike(_col, pattern):
-                captured_patterns.append(pattern)
-                ilike_chain = MagicMock()
-                count_result = _make_fake_count_result(PREFIX_COUNTS.get(pattern, 0))
-                ilike_chain.gte.return_value.lte.return_value.execute.return_value = count_result
-                # 호출 순서 호환 (gte → lte → execute / 또는 execute 직접)
-                ilike_chain.execute.return_value = count_result
-                return ilike_chain
-
-            select_chain.ilike = _ilike
-            return select_chain
-
-        chain.select = _select
-        return chain
-
-    with patch("src.db.stock_master.supabase") as mock_supabase:
-        mock_supabase.table.side_effect = _table_mock
-
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(side_effect=_fetchval)
         result = await stock_master.count_eager_refresh_today()
 
     # 가드 1: 호출 횟수 = 3 (3 prefix 각각 분리 쿼리, 사용자 결정 Q65=C-1)
@@ -148,31 +116,12 @@ async def test_g_ui1_count_eager_refresh_today_zero_when_all_empty():
 
     captured_patterns: list[str] = []
 
-    def _table_mock(_table_name: str):
-        chain = MagicMock()
+    async def _fetchval(sql, *args):
+        captured_patterns.append(args[0])
+        return 0
 
-        def _select(_cols, **_kwargs):
-            select_chain = MagicMock()
-
-            def _ilike(_col, pattern):
-                captured_patterns.append(pattern)
-                ilike_chain = MagicMock()
-                empty_result = MagicMock()
-                empty_result.count = 0
-                empty_result.data = []
-                ilike_chain.gte.return_value.lte.return_value.execute.return_value = empty_result
-                ilike_chain.execute.return_value = empty_result
-                return ilike_chain
-
-            select_chain.ilike = _ilike
-            return select_chain
-
-        chain.select = _select
-        return chain
-
-    with patch("src.db.stock_master.supabase") as mock_supabase:
-        mock_supabase.table.side_effect = _table_mock
-
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(side_effect=_fetchval)
         result = await stock_master.count_eager_refresh_today()
 
     assert len(captured_patterns) == 3, (

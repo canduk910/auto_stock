@@ -24,12 +24,12 @@ pytestmark = pytest.mark.unit
 @pytest.mark.asyncio
 async def test_get_dkstock_regime_enabled_missing_returns_none(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """키 부재 시 None 반환 — 호출자가 .env fallback."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     value = await system_config.get_dkstock_regime_enabled()
     assert value is None
 
@@ -37,11 +37,11 @@ async def test_get_dkstock_regime_enabled_missing_returns_none(
 @pytest.mark.asyncio
 async def test_set_dkstock_regime_enabled_true_then_get_true(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_dkstock_regime_enabled(True)
     assert await system_config.get_dkstock_regime_enabled() is True
 
@@ -49,11 +49,11 @@ async def test_set_dkstock_regime_enabled_true_then_get_true(
 @pytest.mark.asyncio
 async def test_set_dkstock_regime_enabled_false_then_get_false(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_dkstock_regime_enabled(False)
     assert await system_config.get_dkstock_regime_enabled() is False
 
@@ -61,11 +61,11 @@ async def test_set_dkstock_regime_enabled_false_then_get_false(
 @pytest.mark.asyncio
 async def test_dkstock_regime_enabled_round_trip(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_dkstock_regime_enabled(True)
     assert await system_config.get_dkstock_regime_enabled() is True
     await system_config.set_dkstock_regime_enabled(False)
@@ -80,11 +80,11 @@ async def test_dkstock_regime_enabled_round_trip(
 @pytest.mark.asyncio
 async def test_get_kis_mcp_enabled_missing_returns_none(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     value = await system_config.get_kis_mcp_enabled()
     assert value is None
 
@@ -92,11 +92,11 @@ async def test_get_kis_mcp_enabled_missing_returns_none(
 @pytest.mark.asyncio
 async def test_set_kis_mcp_enabled_true_then_get_true(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_kis_mcp_enabled(True)
     assert await system_config.get_kis_mcp_enabled() is True
 
@@ -104,11 +104,11 @@ async def test_set_kis_mcp_enabled_true_then_get_true(
 @pytest.mark.asyncio
 async def test_set_kis_mcp_enabled_false_then_get_false(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_kis_mcp_enabled(False)
     assert await system_config.get_kis_mcp_enabled() is False
 
@@ -116,11 +116,11 @@ async def test_set_kis_mcp_enabled_false_then_get_false(
 @pytest.mark.asyncio
 async def test_kis_mcp_enabled_round_trip(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_kis_mcp_enabled(True)
     assert await system_config.get_kis_mcp_enabled() is True
     await system_config.set_kis_mcp_enabled(False)

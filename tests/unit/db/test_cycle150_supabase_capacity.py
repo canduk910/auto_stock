@@ -165,6 +165,18 @@ class TestG150DailyRetentionDays:
 class TestG150DailyProtectedTickers:
     """G-150-DAILY-3: protected_tickers 영역 절대 보호 (사이클 32 R4 답습)."""
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 "
+            "`.select().lt().not_.in_().order().limit()` / `.delete().eq().not_.in_()` 의 "
+            "call_args 를 직접 단언한다. asyncpg 전환으로 `.not_.in_()` 체인이 "
+            "`ticker <> ALL($::text[])` SQL 절 + 위치 인자로 대체되어 이 체인 패턴이 "
+            "존재하지 않는다. SELECT/DELETE 양쪽 protected 제외 (never-drain P-3) 불변식은 "
+            "M2b 신규 가드 test_cycleM2b_stock_master_daily_pg.py::"
+            "test_purge_select_and_delete_both_exclude_protected 가 pg 레벨에서 동등 커버."
+        ),
+    )
     @pytest.mark.asyncio
     async def test_g150_daily_3_protected_tickers_excluded(self) -> None:
         """protected_tickers 영역 영구 영속 = SELECT/DELETE 양쪽 제외.
@@ -249,11 +261,12 @@ class TestG150DailyGraceful:
 
     @pytest.mark.asyncio
     async def test_g150_daily_5_graceful_exception(self) -> None:
-        """예외 발생 시 graceful 영역 영구 영속 = 0 반환."""
+        """예외 발생 시 graceful 영역 영구 영속 = 0 반환 (사이클 M2b — pg.fetchrow 예외)."""
         from src.db import stock_master_daily as _smd
 
-        with patch.object(_smd, "supabase") as mock_supa:
-            mock_supa.table.side_effect = RuntimeError("DB connection error")
+        with patch.object(_smd, "pg", create=True) as pg_mod:
+            pg_mod.fetchrow = AsyncMock(side_effect=RuntimeError("pg connection error"))
+            pg_mod.execute = AsyncMock()
             result = await _smd.purge_old_rows(date(2026, 1, 1))
 
         assert result["deleted"] == 0, "graceful 영역 영구 영속 = 0 반환"
@@ -289,6 +302,12 @@ class TestG150PurgeNoLimit:
 class TestG150PurgeSubqueryPattern:
     """G-150-PURGE-2 (HIGH): subquery select + DELETE in_ id 영역 영구 영속."""
 
+    @pytest.mark.xfail(
+        reason="사이클M3b — _purge_by_cutoff supabase→pg 전환. SELECT id 는 이제 "
+        "pg.fetch SQL 문자열('SELECT id FROM system_logs ...'). 루프배치 계약은 "
+        "test_cycleM3b_system_logs_pg.py::test_purge_* 로 이관",
+        strict=False,
+    )
     def test_g150_purge_2_select_subquery_present(self) -> None:
         """SELECT id 영역 영구 영속 (subquery 영역)."""
         content = _SYSLOG_PY.read_text(encoding="utf-8")
@@ -296,6 +315,12 @@ class TestG150PurgeSubqueryPattern:
         assert '.select("id")' in content, \
             "SELECT('id') 영역 영구 영속 의무 (subquery 영역)"
 
+    @pytest.mark.xfail(
+        reason="사이클M3b — _purge_by_cutoff supabase→pg 전환. DELETE 는 이제 "
+        "pg.execute('DELETE FROM system_logs WHERE id = ANY($1::bigint[])'). "
+        "루프배치 계약은 test_cycleM3b_system_logs_pg.py::test_purge_* 로 이관",
+        strict=False,
+    )
     def test_g150_purge_2b_delete_in_id_present(self) -> None:
         """`DELETE WHERE id IN (...)` 영역 영구 영속.
 
@@ -312,6 +337,12 @@ class TestG150PurgeFunctional:
     """G-150-PURGE-3: INFO/HIGH 양쪽 cutoff 정확 (mock)."""
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        reason="사이클M3b — _purge_by_cutoff supabase→pg 전환. mock supabase table "
+        "chain 이 더 이상 가로채지 못함. 2-step 계약은 "
+        "test_cycleM3b_system_logs_pg.py::test_purge_* 로 이관",
+        strict=False,
+    )
     async def test_g150_purge_3_select_delete_2_step(self) -> None:
         """2-step 영역 영구 영속 = SELECT + DELETE."""
         from src.db import system_logs as _sl
@@ -357,6 +388,12 @@ class TestG150PurgeEmptyResult:
     """G-150-PURGE-4: 빈 결과 short-circuit graceful."""
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        reason="사이클M3b — _purge_by_cutoff supabase→pg 전환. mock supabase table "
+        "chain 이 더 이상 가로채지 못함. 빈 결과 계약은 "
+        "test_cycleM3b_system_logs_pg.py::test_purge_empty_returns_zero_no_delete 로 이관",
+        strict=False,
+    )
     async def test_g150_purge_4_empty_select_returns_0(self) -> None:
         """SELECT 결과 0건 시 DELETE 미호출 + 0 반환."""
         from src.db import system_logs as _sl

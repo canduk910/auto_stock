@@ -87,44 +87,41 @@ def _db_row(
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_g_db1_upsert_daily_single_row_on_conflict():
-    """단건 upsert 시 ON CONFLICT (ticker, bas_dd) 사용 + raw JSONB 보존."""
-    mock_table = MagicMock()
-    mock_upsert = MagicMock()
-    mock_table.upsert.return_value = mock_upsert
-    mock_upsert.execute.return_value = MagicMock(data=[])
+    """단건 upsert 시 ON CONFLICT (ticker, bas_dd) 사용 + raw JSONB 보존.
 
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        mock_supabase.table.return_value = mock_table
+    사이클 M2b — pg.execute("INSERT ... ON CONFLICT (ticker, bas_dd) ...", *args).
+    raw dict 직접 바인딩 (codec 전담), bas_dd 는 date 바인딩.
+    """
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.execute = AsyncMock(return_value="INSERT 0 1")
         candle = _kis_candle()
         await stock_master_daily.upsert_daily("005930", date(2026, 6, 12), candle)
 
-    assert mock_supabase.table.call_args.args[0] == "stock_master_daily"
-    # ON CONFLICT keys = (ticker, bas_dd) 복합
-    upsert_call = mock_table.upsert.call_args
-    assert upsert_call.kwargs.get("on_conflict") == "ticker,bas_dd"
-    # 사이클 81 G-AST1 — raw JSONB 보존 (전체 candle 원본)
-    row = upsert_call.args[0]
-    assert row["ticker"] == "005930"
-    assert row["bas_dd"] == "2026-06-12"
-    assert row["close_price"] == 71000
-    assert row["high_price"] == 71500
-    assert "stck_bsop_date" in row["raw"]  # KIS 원본 키 영속
+    sql = pg_mod.execute.await_args.args[0]
+    assert "INSERT INTO stock_master_daily" in sql, "INSERT INTO stock_master_daily 누락"
+    assert "ON CONFLICT (ticker, bas_dd)" in sql.replace('"', ""), "복합키 ON CONFLICT 누락"
+    args = pg_mod.execute.await_args.args[1:]
+    assert "005930" in args, "ticker 바인딩 누락"
+    assert date(2026, 6, 12) in args, "bas_dd date 바인딩 누락"
+    assert 71000 in args and 71500 in args, "close/high price 바인딩 누락"
+    # 사이클 81 G-AST1 — raw JSONB dict 직접 바인딩 (KIS 원본 키 영속)
+    raw_arg = next((a for a in args if isinstance(a, dict) and "stck_bsop_date" in a), None)
+    assert raw_arg is not None, "raw JSONB dict (KIS 원본 키) 바인딩 누락"
 
 
 @pytest.mark.asyncio
 async def test_g_db1_upsert_daily_bas_dd_parse_failure_graceful():
     """bas_dd 파싱 실패 시 graceful skip + WARNING 1행 — 사이클 88 G-REJECT.
 
-    `setdefault` 는 키 존재 시 보강 X → 잘못된 bas_dd 그대로 _candle_to_row 진입.
-    _candle_to_row 가 None 반환 → upsert_daily 가 WARNING + return (호출자 보호).
+    _candle_to_row 가 None 반환 → upsert_daily 가 WARNING + return (pg.execute 미발화).
     """
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        # 잘못된 bas_dd 형식 (KIS 미정상 응답)
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.execute = AsyncMock()
         bad_candle = {"stck_bsop_date": "INVALID", "stck_clpr": "71000"}
         await stock_master_daily.upsert_daily("005930", date(2026, 6, 12), bad_candle)
 
-    # graceful skip — supabase 호출 0건 (잘못된 데이터 영구 차단)
-    assert not mock_supabase.table.called
+    # graceful skip — pg.execute 호출 0건 (잘못된 데이터 영구 차단)
+    assert pg_mod.execute.await_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -132,34 +129,34 @@ async def test_g_db1_upsert_daily_bas_dd_parse_failure_graceful():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_g_db2_upsert_batch_100_per_chunk():
-    """100건 단위 batch — Supabase HTTP/2 stale connection 회피 (사이클 26 답습)."""
+    """100건 단위 batch — Supabase HTTP/2 stale connection 회피 (사이클 26 답습).
+
+    사이클 M2b — pg.executemany(SQL, arglist) 로 100건 chunk. 250건 → 3 chunk.
+    """
     # 250건 → 100 + 100 + 50 = 3 batch
     candles = [_kis_candle(bas_dd=f"2026{(m % 12) + 1:02d}{(d % 28) + 1:02d}")
                for m in range(25) for d in range(10)]
 
-    mock_table = MagicMock()
-    mock_upsert = MagicMock()
-    mock_table.upsert.return_value = mock_upsert
-    mock_upsert.execute.return_value = MagicMock(data=[])
-
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        mock_supabase.table.return_value = mock_table
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.executemany = AsyncMock()
         upserted = await stock_master_daily.upsert_batch("005930", candles)
 
-    # 3 batch 호출됨
-    assert mock_table.upsert.call_count == 3
+    # 3 chunk 호출됨 (executemany)
+    assert pg_mod.executemany.await_count == 3
     assert upserted == 250
+    # 복합키 ON CONFLICT
+    sql = pg_mod.executemany.await_args_list[0].args[0]
+    assert "ON CONFLICT (ticker, bas_dd)" in sql.replace('"', ""), "복합키 ON CONFLICT 누락"
 
 
 @pytest.mark.asyncio
 async def test_g_db2_upsert_batch_graceful_single_batch_failure():
     """batch 1건 실패 시 다음 batch 진행 — 사이클 88 G-REJECT.
 
-    150건 candles (월/일 변화) → _candle_to_row 통과 후 batch 100 + 50 = 2 batch.
-    첫 batch raise → except 흡수 → 두 번째 batch 진행 → 50건 성공.
+    사이클 M2b — pg.executemany 첫 chunk raise → except 흡수 → 다음 chunk 진행.
     """
     # YYYYMMDD 형식 — 5개월 × 30일 = 150건 (단, 2/30 + 4/30 등 부정 일자 2건 skip)
-    # 실제 _candle_to_row 파싱 통과 = 148건 → batch 100 + 48 = 2 batch
+    # 실제 _candle_to_row 파싱 통과 = 148건 → chunk 100 + 48 = 2 chunk
     candles = []
     for m in range(1, 6):  # 1~5월
         for d in range(1, 31):  # 1~30일
@@ -168,32 +165,30 @@ async def test_g_db2_upsert_batch_graceful_single_batch_failure():
 
     call_count = [0]
 
-    def upsert_side_effect(rows, on_conflict):
+    async def _executemany(sql, arglist):
         call_count[0] += 1
         if call_count[0] == 1:
-            raise RuntimeError("Supabase 일시 실패")
-        return MagicMock(execute=lambda: MagicMock(data=[]))
+            raise RuntimeError("pg 일시 실패")
+        return None
 
-    mock_table = MagicMock()
-    mock_table.upsert.side_effect = upsert_side_effect
-
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        mock_supabase.table.return_value = mock_table
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.executemany = AsyncMock(side_effect=_executemany)
         upserted = await stock_master_daily.upsert_batch("005930", candles)
 
-    # 2 batch 시도 (1 실패 + 1 성공)
+    # 2 chunk 시도 (1 실패 + 1 성공)
     assert call_count[0] == 2
-    # 첫 batch 100 실패 + 두 번째 batch 48 성공 (150 - 2 skip = 148)
+    # 첫 chunk 100 실패 + 두 번째 chunk 48 성공 (150 - 2 skip = 148)
     assert upserted == 48
 
 
 @pytest.mark.asyncio
 async def test_g_db2_upsert_batch_empty_returns_zero():
-    """빈 candles → 즉시 0 반환 (호출 0)."""
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
+    """빈 candles → 즉시 0 반환 (pg.executemany 호출 0)."""
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.executemany = AsyncMock()
         result = await stock_master_daily.upsert_batch("005930", [])
     assert result == 0
-    assert not mock_supabase.table.called
+    assert pg_mod.executemany.await_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -201,39 +196,32 @@ async def test_g_db2_upsert_batch_empty_returns_zero():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_g_db3_get_recent_daily_desc_with_clamp():
-    """bas_dd DESC + days clamp (1~100) + KIS 호출 한도 정합."""
+    """bas_dd DESC + days clamp (1~100) + KIS 호출 한도 정합.
+
+    사이클 M2b — pg.fetch("... ORDER BY bas_dd DESC LIMIT $2", ticker, clamped).
+    days=200 → clamp 100 이 바인딩.
+    """
     mock_rows = [_db_row(bas_dd=f"2026-06-{i:02d}") for i in range(12, 7, -1)]
 
-    mock_table = MagicMock()
-    mock_select = MagicMock()
-    mock_eq = MagicMock()
-    mock_order = MagicMock()
-    mock_limit = MagicMock()
-    mock_table.select.return_value = mock_select
-    mock_select.eq.return_value = mock_eq
-    mock_eq.order.return_value = mock_order
-    mock_order.limit.return_value = mock_limit
-    mock_limit.execute.return_value = MagicMock(data=mock_rows)
-
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        mock_supabase.table.return_value = mock_table
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=mock_rows)
         # days=200 → 100 으로 clamp (KIS 호출 한도)
         result = await stock_master_daily.get_recent_daily("005930", days=200)
 
-    assert mock_eq.order.call_args.args[0] == "bas_dd"
-    assert mock_eq.order.call_args.kwargs.get("desc") is True
-    assert mock_order.limit.call_args.args[0] == 100  # clamp 영속
+    sql = pg_mod.fetch.await_args.args[0].upper()
+    assert "ORDER BY BAS_DD DESC" in sql, "bas_dd DESC 정렬 누락"
+    assert "LIMIT" in sql, "limit 절 누락"
+    args = pg_mod.fetch.await_args.args[1:]
+    assert "005930" in args, "ticker 바인딩 누락"
+    assert 100 in args, "days=200 → clamp 100 바인딩 누락"
     assert len(result) == 5  # mock 응답 길이
 
 
 @pytest.mark.asyncio
 async def test_g_db3_get_recent_daily_graceful_on_db_failure():
     """DB 실패 시 빈 list 반환 — 호출자 KIS fallback 영역."""
-    mock_table = MagicMock()
-    mock_table.select.side_effect = RuntimeError("Supabase down")
-
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        mock_supabase.table.return_value = mock_table
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(side_effect=RuntimeError("pg down"))
         result = await stock_master_daily.get_recent_daily("005930", days=20)
 
     assert result == []
@@ -359,60 +347,34 @@ async def test_g_db6_fallback_to_kis_when_db_insufficient():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_g_db7_count_all_uses_supabase_count_exact():
-    """count_all — Supabase count='exact' 메커니즘 사용."""
-    mock_table = MagicMock()
-    mock_select = MagicMock()
-    mock_limit = MagicMock()
-    mock_table.select.return_value = mock_select
-    mock_select.limit.return_value = mock_limit
-    mock_limit.execute.return_value = MagicMock(count=270000, data=[])
-
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        mock_supabase.table.return_value = mock_table
+    """count_all — count(*) 정확 카운트 (사이클 M2b — pg.fetchval)."""
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(return_value=270000)
         result = await stock_master_daily.count_all()
 
     assert result == 270000
-    # count="exact" keyword 영속
-    assert mock_table.select.call_args.kwargs.get("count") == "exact"
+    sql = pg_mod.fetchval.await_args.args[0].lower()
+    assert "count(" in sql and "stock_master_daily" in sql, "count(*) SELECT 누락"
 
 
 @pytest.mark.asyncio
 async def test_g_db7_max_bas_dd_returns_date_or_none():
-    """max_bas_dd — 점진 적재 시 신규 행 영역 결정."""
-    mock_table = MagicMock()
-    mock_select = MagicMock()
-    mock_eq = MagicMock()
-    mock_order = MagicMock()
-    mock_limit = MagicMock()
-    mock_table.select.return_value = mock_select
-    mock_select.eq.return_value = mock_eq
-    mock_eq.order.return_value = mock_order
-    mock_order.limit.return_value = mock_limit
-    mock_limit.execute.return_value = MagicMock(data=[{"bas_dd": "2026-06-12"}])
-
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        mock_supabase.table.return_value = mock_table
+    """max_bas_dd — 점진 적재 시 신규 행 영역 결정 (사이클 M2b — pg.fetchval MAX)."""
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(return_value="2026-06-12")
         result = await stock_master_daily.max_bas_dd("005930")
 
     assert result == date(2026, 6, 12)
+    sql = pg_mod.fetchval.await_args.args[0].lower()
+    assert "max(bas_dd)" in sql, "MAX(bas_dd) SELECT 누락"
+    assert "005930" in pg_mod.fetchval.await_args.args[1:], "ticker 지정 분기 바인딩 누락"
 
 
 @pytest.mark.asyncio
 async def test_g_db7_max_bas_dd_returns_none_when_missing():
     """ticker 부재 시 None 반환 (백필 의무 신호)."""
-    mock_table = MagicMock()
-    mock_select = MagicMock()
-    mock_eq = MagicMock()
-    mock_order = MagicMock()
-    mock_limit = MagicMock()
-    mock_table.select.return_value = mock_select
-    mock_select.eq.return_value = mock_eq
-    mock_eq.order.return_value = mock_order
-    mock_order.limit.return_value = mock_limit
-    mock_limit.execute.return_value = MagicMock(data=[])
-
-    with patch("src.db.stock_master_daily.supabase") as mock_supabase:
-        mock_supabase.table.return_value = mock_table
+    with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(return_value=None)
         result = await stock_master_daily.max_bas_dd("005930")
 
     assert result is None

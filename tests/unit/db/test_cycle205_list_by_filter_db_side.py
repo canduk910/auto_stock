@@ -162,6 +162,19 @@ def _run(rows_per_execute, seen: dict, **kwargs):
 
 
 class TestG205DbSideFilterEquivalence:
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_1a_market_cap_gte_hts_avls_eok_column(self):
         """min_market_cap>0 → DB 쿼리에 .gte("hts_avls_eok", ceil(min_market_cap/1e8)) 걸림.
 
@@ -183,6 +196,19 @@ class TestG205DbSideFilterEquivalence:
             f"hts_avls_eok 임계 = 1000 (억원) 의무 (사이클 108 Python-side 동치). 실제: {threshold}"
         )
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_1b_trade_amount_gte_acml_tr_pbmn_won_column(self):
         """min_trade_amount>0 → .gte("acml_tr_pbmn_won", min_trade_amount) (원 직접)."""
         seen: dict = {}
@@ -198,6 +224,19 @@ class TestG205DbSideFilterEquivalence:
             f"acml_tr_pbmn_won 임계 = 원 직접 (환산 없음). 실제: {threshold}"
         )
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_1c_no_gte_when_thresholds_zero(self):
         """min_market_cap=0, min_trade_amount=0 → 시총/거래대금 gte 미발생 (무필터 보존)."""
         seen: dict = {}
@@ -208,6 +247,19 @@ class TestG205DbSideFilterEquivalence:
         assert "hts_avls_eok" not in gte_cols, "min_market_cap=0 시 hts_avls_eok gte 금지"
         assert "acml_tr_pbmn_won" not in gte_cols, "min_trade_amount=0 시 acml_tr_pbmn_won gte 금지"
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_1d_python_side_result_unchanged_valid_rows(self):
         """숫자 생성 컬럼 정상 rows: gte 통과 종목 반환 (원소 동치).
 
@@ -229,6 +281,19 @@ class TestG205DbSideFilterEquivalence:
             f"임계 이상 전량 반환 의무 (DB-side 필터 = Python 재컷 없음). 실제: {tickers}"
         )
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_1e_nonnumeric_and_null_generated_col_excluded(self):
         """비숫자/null 생성 컬럼 (migration 039 정규식 가드 NULL): DB gte 에서 자동 제외.
 
@@ -266,6 +331,19 @@ class TestG205DbSideFilterEquivalence:
 
 
 class TestG205FetchLimitAbolished:
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_2a_limit_is_exact_not_doubled(self):
         """DB fetch limit == 요청 limit (오버페치 미발생).
 
@@ -293,6 +371,19 @@ class TestG205FetchLimitAbolished:
 
 
 class TestG205StageCounts3Queries:
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_3a_three_executes_and_monotonic(self):
         """return_stage_counts=True → 3쿼리(union/mcap/trade) + union⊇mcap⊇trade + trade==filtered.
 
@@ -328,6 +419,19 @@ class TestG205StageCounts3Queries:
         # trade == filtered (원소·순서 정합, G-A-1 답습)
         assert [r["ticker"] for r in filtered] == trade, "trade_tickers != filtered (순서·원소)"
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_3b_default_returns_list_not_tuple(self):
         """return_stage_counts 미지정 → list (tuple 아님). 3쿼리 아닌 1쿼리 (회귀 0)."""
         seen: dict = {}
@@ -346,6 +450,19 @@ class TestG205StageCounts3Queries:
 
 
 class TestG205SortByHook:
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_4a_sort_by_none_keeps_refreshed_at_desc(self):
         """sort_by=None (기본) → .order("refreshed_at", desc=True) 유지 (phase 1 무변경)."""
         seen: dict = {}
@@ -372,6 +489,19 @@ class TestG205SortByHook:
 
 
 class TestG205IndexAndMcapCombine:
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_5a_kospi200_kosdaq150_or_with_mcap_gte(self):
         """is_kospi200=True + is_kosdaq150=True (OR 합집합) + min_market_cap → or_ AND gte 양립."""
         seen: dict = {}
@@ -391,6 +521,19 @@ class TestG205IndexAndMcapCombine:
             f"OR + 시총 gte 양립 의무. 실제 gte: {seen.get('gte')}"
         )
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_5b_kospi200_single_eq_with_mcap_gte(self):
         """is_kospi200=True 단독 + min_market_cap → .eq("is_kospi200", True) AND gte 양립."""
         seen: dict = {}
@@ -411,6 +554,19 @@ class TestG205IndexAndMcapCombine:
 
 
 class TestG205SafetyContract:
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 이 테스트는 supabase 체인 특유 API "
+        "(FakeQuery `.gte()/.eq()/.or_()/.order()/.execute()` 호출 캡처 = seen[gte]/executes)를 "
+        "단언한다. asyncpg 전환으로 이 체인이 pg.fetch(SQL, *args) 단일 호출 + 생성컬럼 gte "
+        "WHERE 절 SQL 로 대체되어 체인 패턴이 부재(supabase 심볼 없음 → AttributeError). "
+        "DB-side gte 임계/3쿼리(union/mcap/trade)/OR 합집합/오버페치 폐지 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_pg.py(list_by_filter_generated_column_gte_thresholds / "
+        "return_stage_counts_three_queries / stage_counts_matches_plain_filtered / "
+        "kospi200_kosdaq150_union_or / read_uses_fetch)가 pg 레벨에서 동등 커버."
+        ),
+    )
     def test_g205_6a_return_row_fields_unchanged(self):
         """반환 row 형식 불변: ticker/name/excg_dvsn_cd/nxt_tradable/is_kospi200/is_kosdaq150/raw."""
         seen: dict = {}

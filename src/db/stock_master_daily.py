@@ -16,18 +16,29 @@ donchian (20일 신고가) / VCP (베이스 + Pullback) / VB (ATR) 전략 활용
 - 사이클 88 G-REJECT graceful 단위 의무
 - 매매 안전성 무영향 — scanner 단계 매수 진입 전 영역만
 
-supabase 동기 SDK 호출은 모두 `asyncio.to_thread()` 위임.
+사이클 M2b (Supabase→RDS 이전, 매매 hot path): supabase-py → `src.db.pg`(asyncpg) 전환.
+함수 시그니처·반환형·graceful 100% 보존 — 호출부(scanner/strategies) diff 0.
+
+⚠️ `get_recent_daily_normalized` = prepare 일봉 소스 (락/신선도/부족 폴백, 사이클 172/173).
+어댑터는 `get_recent_daily`/`max_bas_dd`/`fetch_daily_candles`(KIS, 미변경) 조합이라
+pg 전환과 무관하게 계약 보존.
+
+⚠️ `purge_old_rows` = 날짜 슬라이스 루프(사이클 192). SELECT/DELETE 양쪽 protected 제외
+절대 보존(SELECT 누락 = never-drain 회귀, P-3 HIGH). `_with_retry` 미경유(G-187-A2).
+
+read 헬퍼(`get_recent_daily`/`count_all`/`count_by_ticker`/`max_bas_dd`)는 `pg.fetch`/
+`pg.fetchval`(내부 `_with_retry` 경유, 사이클 187 정책 계승), 쓰기(`upsert_daily`/
+`upsert_batch`/`purge_old_rows`)는 `pg.execute`/`pg.executemany`(retry 미경유) 유지.
 """
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import date, datetime, timedelta
 from typing import Optional
 
+import src.db.pg as pg
 from src.db._kst import KST, now_kst_iso
-from src.db.supabase import supabase, execute_with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +85,7 @@ def _parse_bas_dd(value: str | date) -> Optional[date]:
 
     영역:
     - KIS FHKST03010100 응답 = YYYYMMDD (사이클 14)
-    - Supabase 응답 = YYYY-MM-DD ISO (사이클 122 max_bas_dd)
+    - DB 응답 = YYYY-MM-DD ISO (사이클 122 max_bas_dd)
     - Python date → 그대로 반환
     """
     if isinstance(value, date):
@@ -86,7 +97,7 @@ def _parse_bas_dd(value: str | date) -> Optional[date]:
         # KIS stck_bsop_date 형식 = YYYYMMDD
         if len(s) == 8 and s.isdigit():
             return date(int(s[:4]), int(s[4:6]), int(s[6:8]))
-        # Supabase ISO 형식 = YYYY-MM-DD (10자리)
+        # ISO 형식 = YYYY-MM-DD (10자리)
         if len(s) == 10 and s[4] == "-" and s[7] == "-":
             return date(int(s[:4]), int(s[5:7]), int(s[8:10]))
         # ISO timestamp = YYYY-MM-DDT... (앞 10자리만)
@@ -109,7 +120,7 @@ def _candle_to_row(ticker: str, candle: dict) -> Optional[dict]:
 
     return {
         "ticker": ticker,
-        "bas_dd": bas_dd.isoformat(),
+        "bas_dd": bas_dd,
         "open_price": _safe_int(candle.get(_KIS_KEY_OPEN)),
         "high_price": _safe_int(candle.get(_KIS_KEY_HIGH)),
         "low_price": _safe_int(candle.get(_KIS_KEY_LOW)),
@@ -120,8 +131,46 @@ def _candle_to_row(ticker: str, candle: dict) -> Optional[dict]:
         "flng_cls_code": str(candle.get(_KIS_KEY_FLNG_CLS) or ""),
         "prtt_rate": _safe_float(candle.get(_KIS_KEY_PRTT_RATE)),
         "raw": dict(candle),
-        "updated_at": now_kst_iso(),
+        "updated_at": datetime.fromisoformat(now_kst_iso()),
     }
+
+
+_UPSERT_DAILY_SQL = """
+    INSERT INTO stock_master_daily (
+        ticker, bas_dd, open_price, high_price, low_price, close_price,
+        volume, trade_value, change_rate, flng_cls_code, prtt_rate, raw, updated_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb, $13)
+    ON CONFLICT (ticker, bas_dd) DO UPDATE SET
+        open_price = EXCLUDED.open_price,
+        high_price = EXCLUDED.high_price,
+        low_price = EXCLUDED.low_price,
+        close_price = EXCLUDED.close_price,
+        volume = EXCLUDED.volume,
+        trade_value = EXCLUDED.trade_value,
+        change_rate = EXCLUDED.change_rate,
+        flng_cls_code = EXCLUDED.flng_cls_code,
+        prtt_rate = EXCLUDED.prtt_rate,
+        raw = EXCLUDED.raw,
+        updated_at = EXCLUDED.updated_at
+"""
+
+
+def _row_to_args(row: dict) -> tuple:
+    return (
+        row["ticker"],
+        row["bas_dd"],
+        row["open_price"],
+        row["high_price"],
+        row["low_price"],
+        row["close_price"],
+        row["volume"],
+        row["trade_value"],
+        row["change_rate"],
+        row["flng_cls_code"],
+        row["prtt_rate"],
+        row["raw"],
+        row["updated_at"],
+    )
 
 
 async def upsert_daily(ticker: str, bas_dd: date, ohlcv: dict) -> None:
@@ -145,11 +194,7 @@ async def upsert_daily(ticker: str, bas_dd: date, ohlcv: dict) -> None:
         )
         return
 
-    await asyncio.to_thread(
-        lambda: supabase.table(TABLE_NAME)
-        .upsert(row, on_conflict="ticker,bas_dd")
-        .execute()
-    )
+    await pg.execute(_UPSERT_DAILY_SQL, *_row_to_args(row))
     logger.debug(
         "[stock_master_daily] upsert ticker=%s bas_dd=%s close=%d",
         ticker, bas_dd, row["close_price"],
@@ -169,6 +214,7 @@ async def upsert_batch(ticker: str, candles: list[dict]) -> int:
     영속 의무:
     - 사이클 26 Supabase HTTP/2 stale connection 회피 (batch 100건)
     - 사이클 88 G-REJECT graceful (개별 batch 실패 시 다음 batch 진행)
+    - G-187-A2 — 쓰기 함수는 `_with_retry` 미경유 (멱등 보수 정책).
     """
     if not candles:
         return 0
@@ -197,11 +243,7 @@ async def upsert_batch(ticker: str, candles: list[dict]) -> int:
     for i in range(0, len(rows), _BATCH_SIZE):
         chunk = rows[i:i + _BATCH_SIZE]
         try:
-            await asyncio.to_thread(
-                lambda c=chunk: supabase.table(TABLE_NAME)
-                .upsert(c, on_conflict="ticker,bas_dd")
-                .execute()
-            )
+            await pg.executemany(_UPSERT_DAILY_SQL, [_row_to_args(r) for r in chunk])
             total_upserted += len(chunk)
         except Exception:
             # 사이클 88 G-REJECT graceful — 개별 batch 실패 시 다음 batch 진행
@@ -229,16 +271,12 @@ async def get_recent_daily(ticker: str, days: int = 20) -> list[dict]:
     clamped = max(1, min(days, 100))
 
     try:
-        result = await execute_with_retry(
-            lambda: supabase.table(TABLE_NAME)
-            .select("*")
-            .eq("ticker", ticker)
-            .order("bas_dd", desc=True)
-            .limit(clamped)
-            .execute(),
-            op="get_recent_daily",
+        rows = await pg.fetch(
+            "SELECT * FROM stock_master_daily WHERE ticker = $1 "
+            "ORDER BY bas_dd DESC LIMIT $2",
+            ticker, clamped,
         )
-        return result.data or []
+        return rows or []
     except Exception:
         # 사이클 88 G-REJECT graceful — DB 실패 시 빈 list 반환 (호출자 KIS fallback)
         logger.exception(
@@ -323,16 +361,8 @@ async def get_atr(ticker: str, days: int = 14) -> Optional[float]:
 async def count_all() -> int:
     """전체 행 카운트 (UI 진단 + 운영 모니터링)."""
     try:
-        result = await execute_with_retry(
-            lambda: supabase.table(TABLE_NAME)
-            .select("ticker", count="exact")
-            .limit(1)
-            .execute(),
-            op="count_all",
-        )
-        if hasattr(result, "count") and result.count is not None:
-            return int(result.count)
-        return len(result.data or [])
+        count = await pg.fetchval("SELECT count(*) FROM stock_master_daily")
+        return int(count or 0)
     except Exception:
         logger.exception("[stock_master_daily] count_all 실패 graceful")
         return 0
@@ -341,17 +371,10 @@ async def count_all() -> int:
 async def count_by_ticker(ticker: str) -> int:
     """단일 ticker 행 카운트 (점진 적재 진단)."""
     try:
-        result = await execute_with_retry(
-            lambda: supabase.table(TABLE_NAME)
-            .select("bas_dd", count="exact")
-            .eq("ticker", ticker)
-            .limit(1)
-            .execute(),
-            op="count_by_ticker",
+        count = await pg.fetchval(
+            "SELECT count(*) FROM stock_master_daily WHERE ticker = $1", ticker,
         )
-        if hasattr(result, "count") and result.count is not None:
-            return int(result.count)
-        return len(result.data or [])
+        return int(count or 0)
     except Exception:
         logger.exception(
             "[stock_master_daily] count_by_ticker 실패 graceful ticker=%s",
@@ -373,14 +396,14 @@ async def max_bas_dd(ticker: str | None = None) -> Optional[date]:
     """
     try:
         if ticker is None:
-            build = lambda: supabase.table(TABLE_NAME).select("bas_dd").order("bas_dd", desc=True).limit(1).execute()
+            result = await pg.fetchval("SELECT max(bas_dd) FROM stock_master_daily")
         else:
-            build = lambda: supabase.table(TABLE_NAME).select("bas_dd").eq("ticker", ticker).order("bas_dd", desc=True).limit(1).execute()
-        result = await execute_with_retry(build, op="max_bas_dd")
-        rows = result.data or []
-        if not rows:
+            result = await pg.fetchval(
+                "SELECT max(bas_dd) FROM stock_master_daily WHERE ticker = $1", ticker,
+            )
+        if result is None:
             return None
-        return _parse_bas_dd(rows[0].get("bas_dd"))
+        return _parse_bas_dd(result)
     except Exception:
         logger.exception(
             "[stock_master_daily] max_bas_dd 실패 graceful ticker=%s",
@@ -605,13 +628,16 @@ async def purge_old_rows(
     사이클 175 루프 배치 패턴 답습 + 복합 PK (ticker, bas_dd) 적응:
     날짜 슬라이스 루프로 재구성:
       (1) SELECT oldest bas_dd (lt cutoff, protected 제외) → 없으면 drained break
-      (2) 그 날짜 전체 DELETE (returning="minimal" + count="exact", protected 제외)
+      (2) 그 날짜 전체 DELETE (protected 제외)
       (3) deleted 누적 → PURGE_MAX_DATE_ITERATIONS cap (런어웨이 가드)
     핵심: SELECT/DELETE 양쪽 protected 제외 필수 (SELECT 누락 = never-drain 회귀).
 
+    사이클 M2b — asyncpg 전환. protected_tickers 는 `ticker <> ALL($::text[])` SQL 절
+    양쪽(SELECT/DELETE)에 필수 동행 (P-3 HIGH 가드 계승).
+
     Note (사이클 193 리뷰): 루프 내 SELECT(oldest bas_dd)는 멱등 read 지만
-    `execute_with_retry` 를 **의도적으로 미경유** — G-187-A2 AST 가드가
-    `purge_old_rows` 함수 전체의 execute_with_retry Call==0 을 불변식으로 강제
+    `_with_retry` 를 **의도적으로 미경유** — G-187-A2 AST 가드가
+    `purge_old_rows` 함수 전체의 `_with_retry` Call==0 을 불변식으로 강제
     (쓰기 함수 멱등 보수 분류). SELECT 가 connection 계열 예외를 맞으면 그날 purge 는
     부분 누적 후 graceful 종료 → 다음날 16:15 task 가 잔여 드레인 (일 1회 멱등,
     적체 위험 무 = 데이터/안전성 영향 0). retry 회복력이 필요해지면 가드를
@@ -633,55 +659,57 @@ async def purge_old_rows(
     - 사이클 38 명문화 (scanner 매수 진입 전 영역 한정)
     - 사이클 81 G-AST1 raw 영역 보호 (raw 폐기 미진행)
     - 사이클 88 graceful (예외 시 부분 누적 deleted 반환)
-    - G-187-A2 execute_with_retry 미경유 (쓰기 함수)
+    - G-187-A2 `_with_retry` 미경유 (쓰기 함수)
     """
     started = _time.perf_counter()
-    cutoff_iso = cutoff_date.isoformat()
     protected_count = len(protected_tickers) if protected_tickers else 0
+    protected_list = list(protected_tickers) if protected_tickers else None
     deleted = 0
 
     try:
         for _ in range(PURGE_MAX_DATE_ITERATIONS):
             # (1) 가장 오래된 삭제 대상 날짜 1건 조회 — SELECT 쪽 protected 제외 필수.
             #     누락 시: protected 만 남은 날짜를 SELECT 가 계속 반환 → never-drain 회귀.
-            def _select(cutoff=cutoff_iso, pt=protected_tickers):
-                q = (
-                    supabase.table(TABLE_NAME)
-                    .select("bas_dd")
-                    .lt("bas_dd", cutoff)
+            if protected_list:
+                sel_row = await pg.fetchrow(
+                    "SELECT bas_dd FROM stock_master_daily "
+                    "WHERE bas_dd < $1 AND ticker <> ALL($2::text[]) "
+                    "ORDER BY bas_dd LIMIT 1",
+                    cutoff_date, protected_list,
                 )
-                if pt:
-                    q = q.not_.in_("ticker", list(pt))
-                return q.order("bas_dd").limit(1).execute()
-
-            sel_result = await asyncio.to_thread(_select)
-            rows = (sel_result.data or []) if sel_result else []
-            if not rows:
+            else:
+                sel_row = await pg.fetchrow(
+                    "SELECT bas_dd FROM stock_master_daily "
+                    "WHERE bas_dd < $1 "
+                    "ORDER BY bas_dd LIMIT 1",
+                    cutoff_date,
+                )
+            if sel_row is None:
                 break  # drained
 
-            oldest = rows[0]["bas_dd"]
+            oldest = _parse_bas_dd(sel_row["bas_dd"]) or sel_row["bas_dd"]
 
-            # (2) 그 날짜 전체 DELETE — returning="minimal" (응답 비대 근본 차단).
-            #     사이클 32 R4 영속 — 보유/익일청산 절대 보호 (DELETE 쪽도 동일 적용).
-            def _delete(oldest_dd=oldest, pt=protected_tickers):
-                chain = (
-                    supabase.table(TABLE_NAME)
-                    .delete(count="exact", returning="minimal")
-                    .eq("bas_dd", oldest_dd)
+            # (2) 그 날짜 전체 DELETE — 사이클 32 R4 영속(보유/익일청산 절대 보호,
+            #     DELETE 쪽도 동일 적용).
+            if protected_list:
+                del_result = await pg.execute(
+                    "DELETE FROM stock_master_daily "
+                    "WHERE bas_dd = $1 AND ticker <> ALL($2::text[])",
+                    oldest, protected_list,
                 )
-                if pt:
-                    chain = chain.not_.in_("ticker", list(pt))
-                return chain.execute()
-
-            del_result = await asyncio.to_thread(_delete)
-            deleted += int(getattr(del_result, "count", None) or 0)
+            else:
+                del_result = await pg.execute(
+                    "DELETE FROM stock_master_daily WHERE bas_dd = $1",
+                    oldest,
+                )
+            deleted += _parse_delete_count(del_result)
 
     except Exception as exc:
         # 사이클 190 예외 타입 계측 + 부분 누적 deleted 반환 (graceful)
         logger.exception(
             "[stock_master_daily_purge] 루프 실패 graceful cutoff=%s protected=%d "
             "%s: %s",
-            cutoff_iso, protected_count, type(exc).__name__, str(exc)[:150],
+            cutoff_date.isoformat(), protected_count, type(exc).__name__, str(exc)[:150],
         )
         elapsed_ms = int((_time.perf_counter() - started) * 1000)
         return {"deleted": deleted, "protected_count": protected_count, "elapsed_ms": elapsed_ms}
@@ -690,7 +718,7 @@ async def purge_old_rows(
 
     logger.info(
         "[stock_master_daily_purge] deleted=%d protected=%d elapsed_ms=%d cutoff=%s",
-        deleted, protected_count, elapsed_ms, cutoff_iso,
+        deleted, protected_count, elapsed_ms, cutoff_date.isoformat(),
     )
 
     return {
@@ -698,3 +726,11 @@ async def purge_old_rows(
         "protected_count": protected_count,
         "elapsed_ms": elapsed_ms,
     }
+
+
+def _parse_delete_count(status_str) -> int:
+    """asyncpg execute() 상태 문자열("DELETE N") → affected int."""
+    try:
+        return int(str(status_str).strip().split()[-1])
+    except (ValueError, IndexError, AttributeError):
+        return 0

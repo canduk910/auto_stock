@@ -30,7 +30,7 @@ pytestmark = pytest.mark.unit
 @pytest.mark.asyncio
 async def test_A1_get_price_filter_default_no_mode_field(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """A-1: 키 부재 시 PriceFilter(min=0, max=0) — mode 필드 자체가 없어야 함.
 
@@ -40,7 +40,7 @@ async def test_A1_get_price_filter_default_no_mode_field(
     from src.db import system_config
     from src.db.system_config import PriceFilter, get_price_filter
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     pf = await get_price_filter()
     assert isinstance(pf, PriceFilter)
     assert pf.min_price == 0
@@ -59,7 +59,7 @@ async def test_A1_get_price_filter_default_no_mode_field(
 @pytest.mark.asyncio
 async def test_A2_set_price_filter_partial_update_no_mode(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """A-2: `set_price_filter(min_price=)` / `set_price_filter(max_price=)` 부분 갱신.
 
@@ -68,7 +68,7 @@ async def test_A2_set_price_filter_partial_update_no_mode(
     from src.db import system_config
     from src.db.system_config import get_price_filter, set_price_filter
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     # 1단계: min/max 둘 다 세팅 (mode 인자 없음)
     await set_price_filter(min_price=5000, max_price=1_000_000)
@@ -95,7 +95,7 @@ async def test_A2_set_price_filter_partial_update_no_mode(
 @pytest.mark.asyncio
 async def test_A3_set_price_filter_invalid_raises(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """A-3: 음수 / max<min → ValueError.
 
@@ -104,7 +104,7 @@ async def test_A3_set_price_filter_invalid_raises(
     from src.db import system_config
     from src.db.system_config import set_price_filter
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     # 음수 min
     with pytest.raises(ValueError):
@@ -125,7 +125,7 @@ async def test_A3_set_price_filter_invalid_raises(
 @pytest.mark.asyncio
 async def test_A4_set_price_filter_mode_argument_rejected(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """A-4: `set_price_filter(mode=...)` 호출 시 TypeError.
 
@@ -137,7 +137,7 @@ async def test_A4_set_price_filter_mode_argument_rejected(
     from src.db import system_config
     from src.db.system_config import set_price_filter
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     # 1) 시그니처 정적 검증 — `mode` 매개변수 부재
     sig = inspect.signature(set_price_filter)

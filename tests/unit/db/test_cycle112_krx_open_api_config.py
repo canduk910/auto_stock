@@ -14,28 +14,23 @@ G-DB-1~6 — `get_krx_open_api_config()` + `set_krx_open_api_config()` 영역.
 """
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
 
 pytestmark = pytest.mark.unit
 
 
+# 사이클 M2a (2026-07-16) — system_config 가 supabase-py → src.db.pg(asyncpg) 전환.
+# 기존 `.table().select().eq().execute()` 체인 mock → `fake_pg_kv`(conftest, key-value
+# 인메모리 pg fake) 로 대체. round-trip 계약(get/set)은 동일 — mock 형상만 전환.
+
+
 @pytest.fixture
-def supabase_mock(monkeypatch):
-    """src.db.system_config 의 supabase 객체 mock."""
+def supabase_mock(monkeypatch, fake_pg_kv):
+    """src.db.system_config 의 pg 객체를 fake_pg_kv 로 교체 (fixture 명칭은 하위 호환 보존)."""
     from src.db import system_config as sc
 
-    mock_supabase = MagicMock()
-    monkeypatch.setattr(sc, "supabase", mock_supabase)
-    return mock_supabase
-
-
-def _build_query_result(rows: list[dict]) -> MagicMock:
-    """Supabase 응답 형식 mock."""
-    result = MagicMock()
-    result.data = rows
-    return result
+    monkeypatch.setattr(sc, "pg", fake_pg_kv)
+    return fake_pg_kv
 
 
 @pytest.mark.asyncio
@@ -44,11 +39,7 @@ async def test_g_db_1_get_default_when_all_keys_absent(supabase_mock):
     from src.db.system_config import get_krx_open_api_config
     from src.models.krx_open_api import DEFAULT_BASE_URL
 
-    # 3 키 모두 빈 응답
-    supabase_mock.table.return_value.select.return_value.eq.return_value.execute.return_value = (
-        _build_query_result([])
-    )
-
+    # fake_pg_kv 초기 상태 = 빈 store (3 키 모두 부재)
     config = await get_krx_open_api_config()
 
     assert config.enabled is False
@@ -61,22 +52,9 @@ async def test_g_db_2_get_returns_all_three_keys(supabase_mock):
     """G-DB-2: 3 키 모두 DB 존재 시 정확 반환."""
     from src.db.system_config import get_krx_open_api_config
 
-    # asyncio.to_thread 가 동기 함수를 실행하므로 각 호출별 다른 응답 반환을 위한 처리
-    call_count = {"n": 0}
-    responses = [
-        _build_query_result([{"value": {"value": True}}]),  # enabled
-        _build_query_result([{"value": {"value": "https://custom.krx.example/svc"}}]),  # base_url
-        _build_query_result([{"value": {"value": "secret_key_abc1234"}}]),  # key
-    ]
-
-    def _exec_side_effect(*args, **kwargs):
-        i = call_count["n"]
-        call_count["n"] += 1
-        return responses[i]
-
-    supabase_mock.table.return_value.select.return_value.eq.return_value.execute.side_effect = (
-        _exec_side_effect
-    )
+    supabase_mock.store["krx_open_api_enabled"] = {"value": True}
+    supabase_mock.store["krx_open_api_base_url"] = {"value": "https://custom.krx.example/svc"}
+    supabase_mock.store["krx_open_api_key"] = {"value": "secret_key_abc1234"}
 
     config = await get_krx_open_api_config()
 
@@ -86,21 +64,19 @@ async def test_g_db_2_get_returns_all_three_keys(supabase_mock):
 
 
 @pytest.mark.asyncio
-async def test_g_db_3_set_with_kst_timestamp(supabase_mock):
+async def test_g_db_3_set_with_kst_timestamp(supabase_mock, monkeypatch):
     """G-DB-3: set_krx_open_api_config 가 KST timestamp 사용 (사이클 68 영속)."""
     from src.db.system_config import set_krx_open_api_config
 
-    upsert_calls = []
-    supabase_mock.table.return_value.upsert.side_effect = lambda payload, on_conflict: MagicMock(
-        execute=MagicMock(return_value=_build_query_result([])),
-        _payload=payload,  # 캡처용
-    )
+    upsert_calls: list[dict] = []
+    orig_execute = supabase_mock.execute
 
-    def _capture_upsert(payload, on_conflict):
-        upsert_calls.append(payload)
-        return MagicMock(execute=MagicMock(return_value=_build_query_result([])))
+    async def _capture_execute(sql, *args):
+        # system_config._upsert_value 바인딩 = (key, value_dict, updated_at_datetime)
+        upsert_calls.append({"key": args[0], "value": args[1], "updated_at": args[2]})
+        return await orig_execute(sql, *args)
 
-    supabase_mock.table.return_value.upsert.side_effect = _capture_upsert
+    monkeypatch.setattr(supabase_mock, "execute", _capture_execute)
 
     await set_krx_open_api_config(key="abc1234")
 
@@ -110,24 +86,24 @@ async def test_g_db_3_set_with_kst_timestamp(supabase_mock):
     assert payload["key"] == "krx_open_api_key"
     assert payload["value"] == {"value": "abc1234"}
 
-    # updated_at 영역 KST 영속 (사이클 68 `now_kst_iso()` 명시)
-    assert "updated_at" in payload
-    # KST `+09:00` 영속 (사이클 68 `_kst.py::now_kst_iso()` 형식)
-    assert "+09:00" in payload["updated_at"] or "T" in payload["updated_at"]
+    # updated_at 영역 KST 영속 (사이클 68 `now_kst_iso()` 명시) — datetime 바인딩(M1 패턴 2)
+    assert payload["updated_at"] is not None
+    assert payload["updated_at"].tzinfo is not None, "updated_at tz-aware datetime 계약."
 
 
 @pytest.mark.asyncio
-async def test_g_db_4_partial_update_enabled_only_preserves_key(supabase_mock):
+async def test_g_db_4_partial_update_enabled_only_preserves_key(supabase_mock, monkeypatch):
     """G-DB-4: enabled 단독 갱신 시 key 미저장 (기존 보존)."""
     from src.db.system_config import set_krx_open_api_config
 
-    upsert_calls = []
+    upsert_calls: list[dict] = []
+    orig_execute = supabase_mock.execute
 
-    def _capture_upsert(payload, on_conflict):
-        upsert_calls.append(payload)
-        return MagicMock(execute=MagicMock(return_value=_build_query_result([])))
+    async def _capture_execute(sql, *args):
+        upsert_calls.append({"key": args[0], "value": args[1]})
+        return await orig_execute(sql, *args)
 
-    supabase_mock.table.return_value.upsert.side_effect = _capture_upsert
+    monkeypatch.setattr(supabase_mock, "execute", _capture_execute)
 
     await set_krx_open_api_config(enabled=True)
 
@@ -138,17 +114,18 @@ async def test_g_db_4_partial_update_enabled_only_preserves_key(supabase_mock):
 
 
 @pytest.mark.asyncio
-async def test_g_db_5_partial_update_base_url_only(supabase_mock):
+async def test_g_db_5_partial_update_base_url_only(supabase_mock, monkeypatch):
     """G-DB-5: base_url 단독 갱신."""
     from src.db.system_config import set_krx_open_api_config
 
-    upsert_calls = []
+    upsert_calls: list[dict] = []
+    orig_execute = supabase_mock.execute
 
-    def _capture_upsert(payload, on_conflict):
-        upsert_calls.append(payload)
-        return MagicMock(execute=MagicMock(return_value=_build_query_result([])))
+    async def _capture_execute(sql, *args):
+        upsert_calls.append({"key": args[0], "value": args[1]})
+        return await orig_execute(sql, *args)
 
-    supabase_mock.table.return_value.upsert.side_effect = _capture_upsert
+    monkeypatch.setattr(supabase_mock, "execute", _capture_execute)
 
     await set_krx_open_api_config(base_url="https://custom.krx.co.kr/svc")
 

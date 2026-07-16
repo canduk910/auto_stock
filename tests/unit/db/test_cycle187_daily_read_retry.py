@@ -32,7 +32,28 @@ import pytest
 
 import src.db.stock_master_daily as smd
 
-pytestmark = pytest.mark.unit
+# 사이클 M2b (Supabase→RDS asyncpg 전환) — 이 파일 전체 xfail.
+# 본 가드는 supabase `execute_with_retry` 경유(체인 mock `.execute()` side_effect +
+# chain.execute.call_count==2 로 재시도 검증)를 단언한다. asyncpg 전환으로 재시도는
+# `src.db.pg._with_retry` 내부로 이동했고 재시도 대상 예외군도 httpx →
+# asyncpg(PostgresConnectionError/InterfaceError 등)로 바뀌었다. supabase 심볼 부재로
+# `patch.object(smd, "supabase")` 가 AttributeError → 라우팅 불가.
+# read 4함수(get_recent_daily/count_all/max_bas_dd)의 fetch/fetchval 경유 + graceful
+# 폴백 계약은 M2b 신규 가드 test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 커버
+# (test_get_recent_daily_desc_limit_via_fetch / _exception_graceful_empty /
+#  test_count_all_via_fetchval / test_max_bas_dd_ticker_none_and_specified), _with_retry
+# 재시도 로직 자체는 pg 인프라 테스트가 담당.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b — supabase execute_with_retry 경유 계약이 pg._with_retry 로 대체됨 "
+            "(supabase 심볼 부재, 재시도 예외군 httpx→asyncpg). read 함수 fetch/graceful 계약은 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 커버."
+        ),
+    ),
+]
 
 
 @pytest.fixture(autouse=True)

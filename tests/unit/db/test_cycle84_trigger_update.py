@@ -6,7 +6,7 @@ stock_master UPSERT 시 OLD.raw != NEW.raw → trigger `change_type='UPDATE'` + 
 """
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -34,14 +34,8 @@ async def test_M3_trigger_update_records_before_and_after():
         "after_raw": {"prdt_name": "삼성전자", "bfdy_clpr": "71000"},
         "changed_at": "2026-06-09T09:01:00+09:00",
     }]
-    fake_result = MagicMock()
-    fake_result.data = fake_rows
-
-    with patch("src.db.stock_master.supabase") as mock_supabase:
-        chain = mock_supabase.table.return_value
-        chain.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value = fake_result
-        chain.select.return_value.eq.return_value.order.return_value.execute.return_value = fake_result
-
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=fake_rows)
         rows = await list_history("005930", limit=100)
 
     assert rows, "UPDATE history row 0건"

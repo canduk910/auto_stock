@@ -10,8 +10,9 @@ G-153-FILTER 5 케이스 (HIGH 3) + G-153-SAFETY (사이클 38 명문화 보존)
 
 from __future__ import annotations
 
+import asyncio
 import inspect
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -49,26 +50,42 @@ def _make_row(
     }
 
 
-def _mock_supabase_result(rows: list[dict]):
-    mock_result = MagicMock()
-    mock_result.data = rows
-    return mock_result
+def _index_filter(rows, *, is_kospi200=None, is_kosdaq150=None):
+    """DB-side WHERE (is_kospi200/is_kosdaq150) 를 mock 레벨에서 시뮬레이션.
+
+    - 둘 다 True → OR 합집합 (is_kospi200 OR is_kosdaq150)
+    - 한쪽만 True → 해당 컬럼 True 종목만
+    - 둘 다 None → 무필터
+    """
+    if is_kospi200 is True and is_kosdaq150 is True:
+        return [r for r in rows if r.get("is_kospi200") or r.get("is_kosdaq150")]
+    if is_kospi200 is not None and is_kosdaq150 is None:
+        return [r for r in rows if r.get("is_kospi200") == is_kospi200]
+    if is_kosdaq150 is not None and is_kospi200 is None:
+        return [r for r in rows if r.get("is_kosdaq150") == is_kosdaq150]
+    return list(rows)
 
 
-def _setup_chain(mock_sb, result_mock):
-    chain = MagicMock()
-    mock_sb.table.return_value = chain
-    chain.select.return_value = chain
-    chain.order.return_value = chain
-    chain.limit.return_value = chain
-    chain.eq.return_value = chain
-    chain.or_.return_value = chain
-    chain.execute.return_value = result_mock
-    return chain
+async def _run_filter(all_rows, **kwargs):
+    """사이클 M2b — pg.fetch 경유. mock 은 DB-side 인덱스 필터링된 rows 를 반환
+    (production 은 WHERE 절만 발화 → 결과 pass-through). (result, where_sql) 반환.
 
+    where_sql = SQL 의 WHERE 절 이하만 (SELECT 컬럼 프로젝션에 is_kospi200/is_kosdaq150
+    가 등장하므로 WHERE 절로 한정해야 필터 predicate 를 정확히 검증).
+    """
+    from src.db import stock_master
 
-async def _fake_to_thread(fn, *args, **kwargs):
-    return fn(*args, **kwargs)
+    filtered = _index_filter(
+        all_rows,
+        is_kospi200=kwargs.get("is_kospi200"),
+        is_kosdaq150=kwargs.get("is_kosdaq150"),
+    )
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=filtered)
+        result = await stock_master.list_by_filter(**kwargs)
+        full_sql = pg_mod.fetch.await_args.args[0].lower()
+    where_sql = full_sql.split("where", 1)[1] if "where" in full_sql else ""
+    return result, where_sql
 
 
 # ---------------------------------------------------------------------------
@@ -89,21 +106,17 @@ class TestG153Filter1:
             _make_row("000004", is_kospi200=False, is_kosdaq150=True),
         ]
 
-        with patch.object(stock_master, "supabase") as mock_sb, \
-             patch("asyncio.to_thread", _fake_to_thread):
-            _setup_chain(mock_sb, _mock_supabase_result(rows))
-            result = await stock_master.list_by_filter(
-                is_kospi200=True,
-                min_market_cap=0,
-                min_trade_amount=0,
-                limit=10,
-            )
+        result, sql = await _run_filter(
+            rows, is_kospi200=True, min_market_cap=0, min_trade_amount=0, limit=10,
+        )
 
         tickers = [r["ticker"] for r in result]
         assert "000001" in tickers
         assert "000002" in tickers
         assert "000003" not in tickers, "KOSPI200/KOSDAQ150 모두 False → 제외 의무"
         assert "000004" not in tickers, "KOSPI200 단독 필터 영역 = KOSDAQ150 단독 종목 제외"
+        assert "is_kospi200" in sql.lower(), "SQL WHERE 에 is_kospi200 필터 누락"
+        assert " or " not in sql.lower(), "단독 지정은 OR 합집합 아님 (AND 단일 필터)"
 
 
 # ---------------------------------------------------------------------------
@@ -124,21 +137,16 @@ class TestG153Filter2:
             _make_row("000004", is_kospi200=False, is_kosdaq150=False),
         ]
 
-        with patch.object(stock_master, "supabase") as mock_sb, \
-             patch("asyncio.to_thread", _fake_to_thread):
-            _setup_chain(mock_sb, _mock_supabase_result(rows))
-            result = await stock_master.list_by_filter(
-                is_kosdaq150=True,
-                min_market_cap=0,
-                min_trade_amount=0,
-                limit=10,
-            )
+        result, sql = await _run_filter(
+            rows, is_kosdaq150=True, min_market_cap=0, min_trade_amount=0, limit=10,
+        )
 
         tickers = [r["ticker"] for r in result]
         assert "000001" not in tickers, "KOSPI200 단독 종목 제외 의무 (KOSDAQ150 단독 필터)"
         assert "000002" in tickers
         assert "000003" in tickers
         assert "000004" not in tickers
+        assert "is_kosdaq150" in sql.lower(), "SQL WHERE 에 is_kosdaq150 필터 누락"
 
 
 # ---------------------------------------------------------------------------
@@ -159,22 +167,20 @@ class TestG153Filter3:
             _make_row("000004", is_kospi200=False, is_kosdaq150=False),
         ]
 
-        with patch.object(stock_master, "supabase") as mock_sb, \
-             patch("asyncio.to_thread", _fake_to_thread):
-            _setup_chain(mock_sb, _mock_supabase_result(rows))
-            result = await stock_master.list_by_filter(
-                is_kospi200=True,
-                is_kosdaq150=True,
-                min_market_cap=0,
-                min_trade_amount=0,
-                limit=10,
-            )
+        result, sql = await _run_filter(
+            rows, is_kospi200=True, is_kosdaq150=True,
+            min_market_cap=0, min_trade_amount=0, limit=10,
+        )
 
         tickers = [r["ticker"] for r in result]
         assert "000001" in tickers, "KOSPI200 단독 = OR 통과"
         assert "000002" in tickers, "KOSDAQ150 단독 = OR 통과"
         assert "000003" in tickers, "양쪽 모두 True = OR 통과"
         assert "000004" not in tickers, "양쪽 모두 False = OR 제외"
+        s = sql.lower()
+        assert "is_kospi200" in s and "is_kosdaq150" in s and " or " in s, (
+            "둘 다 True → OR 합집합 SQL 누락 (donchian 의무)"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -194,17 +200,13 @@ class TestG153Filter4:
             _make_row("000003", is_kospi200=False, is_kosdaq150=True),
         ]
 
-        with patch.object(stock_master, "supabase") as mock_sb, \
-             patch("asyncio.to_thread", _fake_to_thread):
-            _setup_chain(mock_sb, _mock_supabase_result(rows))
-            result = await stock_master.list_by_filter(
-                min_market_cap=0,
-                min_trade_amount=0,
-                limit=10,
-            )
+        result, sql = await _run_filter(rows, min_market_cap=0, min_trade_amount=0, limit=10)
 
         tickers = [r["ticker"] for r in result]
         assert len(tickers) == 3, "None 시 무필터 영구 영속 (회귀 보존 영구 영속)"
+        assert "is_kospi200" not in sql.lower() and "is_kosdaq150" not in sql.lower(), (
+            "None 시 인덱스 필터 WHERE 미발생 (무필터 보존)"
+        )
 
 
 # ---------------------------------------------------------------------------

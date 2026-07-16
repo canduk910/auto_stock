@@ -18,11 +18,11 @@ pytestmark = pytest.mark.unit
 @pytest.mark.asyncio
 async def test_get_default_true_when_missing(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     enabled = await system_config.get_auto_regime_adjust()
     assert enabled is True
@@ -31,11 +31,11 @@ async def test_get_default_true_when_missing(
 @pytest.mark.asyncio
 async def test_set_false_then_get_false(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     await system_config.set_auto_regime_adjust(False)
     enabled = await system_config.get_auto_regime_adjust()
@@ -45,11 +45,11 @@ async def test_set_false_then_get_false(
 @pytest.mark.asyncio
 async def test_round_trip(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     await system_config.set_auto_regime_adjust(False)
     assert await system_config.get_auto_regime_adjust() is False

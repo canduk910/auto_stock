@@ -96,11 +96,22 @@ def _assert_read_funcs_routed(src: str, funcs: tuple[str, ...], label: str) -> N
 # ---------------------------------------------------------------------------
 # A-1 — kis_quote_accounts read 4함수 = execute_with_retry 경유 + to_thread 0
 # ---------------------------------------------------------------------------
+@pytest.mark.xfail(
+    reason=(
+        "사이클 M3a (2026-07-16) 의미 전환 — kis_quote_accounts 가 supabase-py에서 "
+        "src.db.pg(asyncpg) 로 전환. 사이클 189 정책(read retry)은 pg.fetch/"
+        "pg.fetchrow 자체가 내부적으로 pg._with_retry 를 경유하는 형태로 계승되어 "
+        "supabase execute_with_retry AST 패턴이 소멸(대체 = "
+        "tests/unit/db/test_cycleM3a_kis_quote_accounts_pg.py). "
+        "M1/M2a 선례(사이클 189→xfail 은퇴 패턴) 답습."
+    ),
+    strict=False,
+)
 def test_A1_kqa_read_funcs_use_execute_with_retry():
     """kis_quote_accounts read 4함수 본체 execute_with_retry ≥ 1 + 직접 to_thread 0.
 
-    현재 (retry 미존재) = read 함수가 `asyncio.to_thread(_query)` 직접 →
-    execute_with_retry 0건 → FAIL (Red). Green 전환 후 PASS.
+    사이클 M3a 전환 후 — pg.fetch/pg.fetchrow 직접 호출(내부 _with_retry 자동
+    경유)로 바뀌어 supabase execute_with_retry Call 이 0건 → xfail (의미 전환).
     """
     # 탐지기 self-test (false-negative 차단, 사이클 167/184/187 교훈)
     sample = ast.parse(
@@ -125,10 +136,23 @@ def test_A1_kqa_read_funcs_use_execute_with_retry():
 # ---------------------------------------------------------------------------
 # A-2 — system_config read 9함수 = execute_with_retry 경유 + to_thread 0
 # ---------------------------------------------------------------------------
+@pytest.mark.xfail(
+    reason=(
+        "사이클 M2a (2026-07-16) 의미 전환 — system_config 가 supabase-py에서 "
+        "src.db.pg(asyncpg) 로 전환. 사이클 189 정책(read retry)은 pg.fetch 자체가 "
+        "내부적으로 pg._with_retry 를 경유하는 형태로 계승되어 supabase "
+        "execute_with_retry AST 패턴이 소멸(대체 = "
+        "tests/unit/db/test_cycleM2a_system_config_pg.py "
+        "test_get_cash_usage_ratio_uses_with_retry 등). M1 선례(사이클 189→M1 "
+        "xfail 은퇴 패턴) 답습."
+    ),
+    strict=False,
+)
 def test_A2_sc_read_funcs_use_execute_with_retry():
     """system_config read 9함수 (UNUSED 포함) 본체 execute_with_retry ≥ 1 + to_thread 0.
 
-    현재 (retry 미존재) = read 함수 `asyncio.to_thread(_query)` 직접 → FAIL (Red).
+    사이클 M2a 전환 후 — pg.fetch 직접 호출(내부 _with_retry 자동 경유)로
+    바뀌어 supabase execute_with_retry Call 이 0건 → xfail (의미 전환).
     """
     _assert_read_funcs_routed(_sc_source(), _SC_READ_FUNCS, "G-189-A2")
 
@@ -137,17 +161,22 @@ def test_A2_sc_read_funcs_use_execute_with_retry():
 # A-3 — 양 모듈 쓰기 계열 = to_thread 직접 유지 + execute_with_retry 0건 (불변식)
 # ---------------------------------------------------------------------------
 def test_A3_write_funcs_not_routed_through_retry():
-    """쓰기 함수 = `execute_with_retry` 미경유 + `asyncio.to_thread` 직접 유지.
+    """쓰기 함수 = `execute_with_retry` 미경유 (불변식, kis_quote_accounts 한정).
 
     187 A2 패턴 = 멱등 SELECT 전용 제외 영구 보장 (쓰기 retry 금지, 중복 위험).
-    현재도 PASS (불변식) — Green 후에도 쓰기 경로 불변 유지 영구 가드.
+    사이클 M2a (2026-07-16) 의미 전환 — system_config 는 supabase-py → src.db.pg
+    전환으로 쓰기가 `asyncio.to_thread` 대신 `pg.execute` 직접 호출로 바뀌어
+    "직접 to_thread 유지" 불변식이 무의미해짐(대체 계약 =
+    test_cycleM2a_system_config_pg.py::test_set_does_not_use_with_retry).
+    사이클 M3a (2026-07-16) — kis_quote_accounts 도 동일 전환(대체 계약 =
+    test_cycleM3a_kis_quote_accounts_pg.py::test_insert_does_not_use_with_retry).
+    "직접 to_thread 유지" 불변식은 두 모듈 모두 무의미 — 본 테스트는 은퇴 대상.
+    execute_with_retry 미경유(routed 검사)는 test_A3b 계열이 계승.
     """
     routed: list[str] = []
-    missing_to_thread: list[str] = []
 
     for src, funcs, label in (
         (_kqa_source(), _KQA_WRITE_FUNCS, "kis_quote_accounts"),
-        (_sc_source(), _SC_WRITE_FUNCS, "system_config"),
     ):
         for name in funcs:
             node = find_function_def(src, name)
@@ -155,14 +184,54 @@ def test_A3_write_funcs_not_routed_through_retry():
 
             if count_function_calls_in_node(node, "execute_with_retry") != 0:
                 routed.append(f"{label}.{name}")
-            if count_function_calls_in_node(node, "to_thread") < 1:
-                missing_to_thread.append(f"{label}.{name}")
 
     assert not routed, (
         "G-189-A3 — 쓰기 함수가 `execute_with_retry` 경유 (멱등 우려, 쓰기 retry 금지):\n  "
         + ", ".join(routed)
     )
-    assert not missing_to_thread, (
-        "G-189-A3 — 쓰기 함수가 직접 `asyncio.to_thread` 미사용 (직접 위임 유지 의무):\n  "
-        + ", ".join(missing_to_thread)
+
+
+def test_A3c_kqa_write_funcs_use_pg_execute_not_retry():
+    """kis_quote_accounts 쓰기 함수 (M3a 전환 후) — pg 직접 호출 + execute_with_retry 미경유.
+
+    사이클 189 정책(쓰기 retry 금지)의 M3a 계승판. supabase to_thread 대신
+    pg.execute/pg.fetchrow 직접 호출로 동일 정책(멱등 우려로 재시도 없음) 유지.
+    """
+    routed: list[str] = []
+
+    for name in _KQA_WRITE_FUNCS:
+        node = find_function_def(_kqa_source(), name)
+        assert node is not None, f"A3c — 쓰기 함수 `kis_quote_accounts.{name}` 미발견."
+
+        if count_function_calls_in_node(node, "execute_with_retry") != 0:
+            routed.append(name)
+
+    assert not routed, (
+        "G-189-A3c — kis_quote_accounts 쓰기 함수가 execute_with_retry 경유 (정책 위반):\n  "
+        + ", ".join(routed)
+    )
+
+
+def test_A3b_sc_write_funcs_use_pg_execute_not_retry():
+    """system_config 쓰기 함수 (M2a 전환 후) — pg.execute 직접 + execute_with_retry 미경유.
+
+    사이클 189 정책(쓰기 retry 금지)의 M2a 계승판. supabase to_thread 대신
+    pg.execute 직접 호출로 동일 정책(멱등 우려로 재시도 없음) 유지.
+    """
+    routed: list[str] = []
+    missing_pg_execute: list[str] = []
+
+    for name in _SC_WRITE_FUNCS:
+        node = find_function_def(_sc_source(), name)
+        assert node is not None, f"A3b — 쓰기 함수 `system_config.{name}` 미발견."
+
+        if count_function_calls_in_node(node, "execute_with_retry") != 0:
+            routed.append(name)
+        # 직접 또는 _upsert_value 경유 pg.execute 호출(간접 위임도 정책 계승 인정)
+        # → 단순화: 본 함수가 execute_with_retry 를 쓰지 않는 것만 확인(양성 검증은
+        # test_cycleM2a_system_config_pg.py::test_set_does_not_use_with_retry 담당).
+
+    assert not routed, (
+        "G-189-A3b — system_config 쓰기 함수가 execute_with_retry 경유 (정책 위반):\n  "
+        + ", ".join(routed)
     )

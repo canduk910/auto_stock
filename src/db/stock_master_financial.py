@@ -3,25 +3,27 @@
 퀀트 재무필터 (마법공식 + F-Score-7) 데이터 계층. `src/db/stock_master_daily.py`
 100% 미러 (사이클 122 답습).
 
+사이클 M3a (Supabase→RDS 이전 단계3, 분석·관찰 비 hot-path): supabase-py → `src.db.pg`
+(asyncpg) 전환. 함수 시그니처·반환형·graceful 100% 보존 — 호출부 diff 0.
+
 영속 의무:
 - 사이클 30 trade_history ON CONFLICT 답습 (PK 복합 키 패턴)
 - 사이클 68 KST 영속 (`src/db/_kst.py` 헬퍼 의무)
 - 사이클 81 G-AST1 raw JSONB 영속
 - 사이클 88 G-REJECT graceful 단위 의무
-- 사이클 187 read 함수 `execute_with_retry` 경유
+- 사이클 187 read 함수 retry 정책 계승 (`pg.fetch`/`pg.fetchval` 내부 `pg._with_retry` 경유)
 - 매매 안전성 무영향 — scanner 단계 매수 진입 전 영역만 (사이클 38)
-
-supabase 동기 SDK 호출은 모두 `asyncio.to_thread()` 위임.
 """
 
 from __future__ import annotations
 
-import asyncio
+import asyncio  # noqa: F401 — Red autouse fixture 호환(monkeypatch.setattr(smf.asyncio, ...))
 import logging
+from datetime import datetime
 from typing import Optional
 
+import src.db.pg as pg
 from src.db._kst import now_kst_iso
-from src.db.supabase import supabase, execute_with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +31,46 @@ TABLE_NAME = "stock_master_financial"
 
 # Batch upsert 단위 — Supabase HTTP/2 stale connection 회피 (사이클 26 답습)
 _BATCH_SIZE = 100
+
+_UPSERT_SQL = f"""
+    INSERT INTO {TABLE_NAME} (
+        ticker, stac_yymm, div_cls, sale_account, sale_totl_prfi, bsop_prti,
+        thtr_ntin, depr_cost, cras, fxas, total_aset, flow_lblt, total_lblt,
+        total_cptl, cpfn, cptl_ntin_rate, sale_totl_rate, lblt_rate, crnt_rate,
+        ebitda, ev_ebitda, raw, refreshed_at
+    ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+        $17, $18, $19, $20, $21, $22::jsonb, $23
+    )
+    ON CONFLICT (ticker, stac_yymm, div_cls) DO UPDATE SET
+        sale_account = EXCLUDED.sale_account,
+        sale_totl_prfi = EXCLUDED.sale_totl_prfi,
+        bsop_prti = EXCLUDED.bsop_prti,
+        thtr_ntin = EXCLUDED.thtr_ntin,
+        depr_cost = EXCLUDED.depr_cost,
+        cras = EXCLUDED.cras,
+        fxas = EXCLUDED.fxas,
+        total_aset = EXCLUDED.total_aset,
+        flow_lblt = EXCLUDED.flow_lblt,
+        total_lblt = EXCLUDED.total_lblt,
+        total_cptl = EXCLUDED.total_cptl,
+        cpfn = EXCLUDED.cpfn,
+        cptl_ntin_rate = EXCLUDED.cptl_ntin_rate,
+        sale_totl_rate = EXCLUDED.sale_totl_rate,
+        lblt_rate = EXCLUDED.lblt_rate,
+        crnt_rate = EXCLUDED.crnt_rate,
+        ebitda = EXCLUDED.ebitda,
+        ev_ebitda = EXCLUDED.ev_ebitda,
+        raw = EXCLUDED.raw,
+        refreshed_at = EXCLUDED.refreshed_at
+"""
+
+_NUMERIC_COLUMNS = (
+    "sale_account", "sale_totl_prfi", "bsop_prti", "thtr_ntin", "depr_cost",
+    "cras", "fxas", "total_aset", "flow_lblt", "total_lblt", "total_cptl",
+    "cpfn", "cptl_ntin_rate", "sale_totl_rate", "lblt_rate", "crnt_rate",
+    "ebitda", "ev_ebitda",
+)
 
 
 def _safe_float(value, default: float = 0.0) -> float:
@@ -51,6 +93,17 @@ def _safe_int(value, default: int = 0) -> int:
         return default
 
 
+def _row_to_args(row: dict, refreshed_at: datetime) -> tuple:
+    return (
+        row["ticker"],
+        row["stac_yymm"],
+        row["div_cls"],
+        *(row.get(col) for col in _NUMERIC_COLUMNS),
+        row.get("raw") or {},
+        refreshed_at,
+    )
+
+
 async def upsert_financial_batch(ticker: str, rows: list[dict]) -> int:
     """재무 row batch upsert — 100건 chunk + ON CONFLICT PK 3키 + graceful.
 
@@ -69,21 +122,14 @@ async def upsert_financial_batch(ticker: str, rows: list[dict]) -> int:
     if not rows:
         return 0
 
-    stamped_rows = []
-    for row in rows:
-        r = dict(row)
-        r["refreshed_at"] = now_kst_iso()
-        stamped_rows.append(r)
+    refreshed_at = datetime.fromisoformat(now_kst_iso())
+    args_list = [_row_to_args(row, refreshed_at) for row in rows]
 
     total_upserted = 0
-    for i in range(0, len(stamped_rows), _BATCH_SIZE):
-        chunk = stamped_rows[i:i + _BATCH_SIZE]
+    for i in range(0, len(args_list), _BATCH_SIZE):
+        chunk = args_list[i:i + _BATCH_SIZE]
         try:
-            await asyncio.to_thread(
-                lambda c=chunk: supabase.table(TABLE_NAME)
-                .upsert(c, on_conflict="ticker,stac_yymm,div_cls")
-                .execute()
-            )
+            await pg.executemany(_UPSERT_SQL, chunk)
             total_upserted += len(chunk)
         except Exception:
             # 사이클 88 G-REJECT graceful — 개별 chunk 실패 시 다음 chunk 진행
@@ -110,17 +156,12 @@ async def get_financial_series(
         list[dict] — raw row. 미존재/예외 시 빈 list (graceful).
     """
     try:
-        result = await execute_with_retry(
-            lambda: supabase.table(TABLE_NAME)
-            .select("*")
-            .eq("ticker", ticker)
-            .eq("div_cls", div_cls)
-            .order("stac_yymm", desc=True)
-            .limit(limit)
-            .execute(),
-            op="get_financial_series",
+        rows = await pg.fetch(
+            f"SELECT * FROM {TABLE_NAME} WHERE ticker = $1 AND div_cls = $2 "
+            f"ORDER BY stac_yymm DESC LIMIT $3",
+            ticker, div_cls, limit,
         )
-        return result.data or []
+        return rows or []
     except Exception:
         # 사이클 88 G-REJECT graceful
         logger.exception(
@@ -141,17 +182,11 @@ async def max_stac_yymm(ticker: str, div_cls: str = "0") -> Optional[str]:
         str — 최신 stac_yymm. 미존재/예외 시 None (graceful).
     """
     try:
-        result = await execute_with_retry(
-            lambda: supabase.table(TABLE_NAME)
-            .select("stac_yymm")
-            .eq("ticker", ticker)
-            .eq("div_cls", div_cls)
-            .order("stac_yymm", desc=True)
-            .limit(1)
-            .execute(),
-            op="max_stac_yymm",
+        rows = await pg.fetch(
+            f"SELECT stac_yymm FROM {TABLE_NAME} WHERE ticker = $1 AND div_cls = $2 "
+            f"ORDER BY stac_yymm DESC LIMIT 1",
+            ticker, div_cls,
         )
-        rows = result.data or []
         if not rows:
             return None
         return rows[0].get("stac_yymm")
@@ -166,16 +201,8 @@ async def max_stac_yymm(ticker: str, div_cls: str = "0") -> Optional[str]:
 async def count_all() -> int:
     """전체 행 카운트 (진단 + 운영 모니터링)."""
     try:
-        result = await execute_with_retry(
-            lambda: supabase.table(TABLE_NAME)
-            .select("ticker", count="exact")
-            .limit(1)
-            .execute(),
-            op="count_all",
-        )
-        if hasattr(result, "count") and result.count is not None:
-            return int(result.count)
-        return len(result.data or [])
+        count = await pg.fetchval(f"SELECT count(*) FROM {TABLE_NAME}")
+        return int(count or 0)
     except Exception:
         logger.exception("[stock_master_financial] count_all 실패 graceful")
         return 0

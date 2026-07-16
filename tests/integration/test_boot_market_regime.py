@@ -93,28 +93,24 @@ def boot_env_regime(scheduler_env, monkeypatch: pytest.MonkeyPatch):
 
     monkeypatch.setattr(sched, "_eager_refresh_stock_master_for_held_positions", fake_eager_refresh)
 
-    class _Q:
-        def select(self, *_): return self
-        def eq(self, *_): return self
-        def gte(self, *_): return self
-        def order(self, *_, **__): return self
-        def limit(self, *_): return self
-        def update(self, *_): return self
-        def execute(self):
-            return SimpleNamespace(data=[])
+    # 사이클 M2a (2026-07-16) — trade_history 가 supabase-py → src.db.pg(asyncpg) 전환.
+    # 기존 supabase.table() mock 을 pg.fetch/fetchrow/fetchval/execute no-op 으로 대체.
+    async def fake_pg_fetch(*_a, **_kw):
+        return []
 
-    class _Tbl:
-        def __init__(self, *_): pass
-        def select(self, *_): return _Q()
-        def eq(self, *_): return _Q()
-        def update(self, *_): return _Q()
-        def insert(self, *_): return _Q()
-        def upsert(self, *_, **__): return _Q()
+    async def fake_pg_fetchrow(*_a, **_kw):
+        return None
 
-    monkeypatch.setattr(
-        "src.db.trade_history.supabase",
-        SimpleNamespace(table=lambda _name: _Tbl()),
-    )
+    async def fake_pg_fetchval(*_a, **_kw):
+        return 0
+
+    async def fake_pg_execute(*_a, **_kw):
+        return "UPDATE 0"
+
+    monkeypatch.setattr("src.db.trade_history.pg.fetch", fake_pg_fetch)
+    monkeypatch.setattr("src.db.trade_history.pg.fetchrow", fake_pg_fetchrow)
+    monkeypatch.setattr("src.db.trade_history.pg.fetchval", fake_pg_fetchval)
+    monkeypatch.setattr("src.db.trade_history.pg.execute", fake_pg_execute)
     # market_regime_snapshots INSERT 도 graceful no-op
     snapshot_calls: list[dict] = []
 

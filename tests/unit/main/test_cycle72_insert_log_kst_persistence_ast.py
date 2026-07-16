@@ -18,16 +18,24 @@ import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
 
 _MAIN_PATH = Path(__file__).resolve().parents[3] / "src" / "main.py"
 
 
+@pytest.mark.xfail(
+    reason="사이클M3b — _insert_log_to_db 가 async def 로 전환(pg.execute await 의무) + "
+    "isoformat() str 대신 datetime.now(KST) 객체 바인딩(asyncpg TIMESTAMPTZ 계약). "
+    "동일 KST/타임스탬프 계약은 test_cycleM3b_main_seam_pg.py::"
+    "test_insert_log_helper_uses_pg_execute_kst 가 이관 단언.",
+    strict=False,
+)
 def test_g_8_insert_log_to_db_uses_kst_isoformat() -> None:
     """G-8: `_insert_log_to_db` 가 `datetime.now(KST).isoformat()` 패턴 사용 영속."""
     source = _MAIN_PATH.read_text(encoding="utf-8")
     tree = ast.parse(source)
 
-    # `_insert_log_to_db` 함수 찾기
+    # `_insert_log_to_db` 함수 찾기 (동기 FunctionDef — M3b 이후 AsyncFunctionDef 로 전환)
     func_def = None
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == "_insert_log_to_db":

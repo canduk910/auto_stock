@@ -14,12 +14,12 @@ pytestmark = pytest.mark.unit
 @pytest.mark.asyncio
 async def test_auto_apply_enabled_default_false(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """DB 미설정 시 기본값 False."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     value = await system_config.get_auto_apply_enabled()
     assert value is False
 
@@ -27,12 +27,12 @@ async def test_auto_apply_enabled_default_false(
 @pytest.mark.asyncio
 async def test_auto_apply_enabled_round_trip(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """set True → get True round-trip."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_auto_apply_enabled(True)
     assert await system_config.get_auto_apply_enabled() is True
     await system_config.set_auto_apply_enabled(False)

@@ -22,11 +22,11 @@ pytestmark = pytest.mark.unit
 @pytest.mark.asyncio
 async def test_get_cash_usage_ratio_when_missing_then_default_1(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     ratio = await system_config.get_cash_usage_ratio()
     assert ratio == 1.0
@@ -35,11 +35,11 @@ async def test_get_cash_usage_ratio_when_missing_then_default_1(
 @pytest.mark.asyncio
 async def test_set_then_get_round_trip(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     await system_config.set_cash_usage_ratio(0.80)
     assert await system_config.get_cash_usage_ratio() == pytest.approx(0.80)
@@ -51,7 +51,7 @@ async def test_set_then_get_round_trip(
 @pytest.mark.asyncio
 async def test_set_below_zero_raises_value_error(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """사이클 2 (2026-05-17): 범위 [0.0, 1.0] 확장 — 0.0 미만만 거부.
 
@@ -60,7 +60,7 @@ async def test_set_below_zero_raises_value_error(
     """
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     with pytest.raises(ValueError):
         await system_config.set_cash_usage_ratio(-0.1)
@@ -69,11 +69,11 @@ async def test_set_below_zero_raises_value_error(
 @pytest.mark.asyncio
 async def test_set_above_1_raises_value_error(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     with pytest.raises(ValueError):
         await system_config.set_cash_usage_ratio(1.01)
@@ -82,12 +82,12 @@ async def test_set_above_1_raises_value_error(
 @pytest.mark.asyncio
 async def test_cycle2_low_values_accepted(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """사이클 2 (2026-05-17): 0.0 / 0.25 / 0.5 모두 정상 통과 (defensive 레짐 수용)."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     await system_config.set_cash_usage_ratio(0.0)
     assert await system_config.get_cash_usage_ratio() == pytest.approx(0.0)
@@ -102,7 +102,7 @@ async def test_cycle2_low_values_accepted(
 @pytest.mark.asyncio
 async def test_set_rounds_to_5_percent_steps(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """5% 단위 자동 보정 (운영자 실수 방지).
 
@@ -113,7 +113,7 @@ async def test_set_rounds_to_5_percent_steps(
     """
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     await system_config.set_cash_usage_ratio(0.83)
     assert await system_config.get_cash_usage_ratio() == pytest.approx(0.85)
@@ -131,12 +131,12 @@ async def test_set_rounds_to_5_percent_steps(
 @pytest.mark.asyncio
 async def test_set_boundary_values_accepted(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """경계값 0.5 / 1.0 정상 통과."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     await system_config.set_cash_usage_ratio(0.5)
     assert await system_config.get_cash_usage_ratio() == pytest.approx(0.5)

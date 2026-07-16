@@ -21,12 +21,12 @@ pytestmark = pytest.mark.unit
 @pytest.mark.asyncio
 async def test_get_buy_block_mode_missing_returns_hard(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """키 부재 시 기본 'HARD' 반환 — 현재 동작 회귀 보존."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     value = await system_config.get_buy_block_mode()
     assert value == "HARD"
 
@@ -35,13 +35,13 @@ async def test_get_buy_block_mode_missing_returns_hard(
 @pytest.mark.parametrize("mode", ["OFF", "WARN", "SOFT", "HARD"])
 async def test_set_buy_block_mode_valid_round_trip(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
     mode: str,
 ):
     """4 모드 정상 저장 + 재조회 일치."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_buy_block_mode(mode)
     assert await system_config.get_buy_block_mode() == mode
 
@@ -50,13 +50,13 @@ async def test_set_buy_block_mode_valid_round_trip(
 @pytest.mark.parametrize("bad", ["INVALID", "off", "soft", "", "hard ", "STRICT", None, 0])
 async def test_set_buy_block_mode_invalid_raises(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
     bad,
 ):
     """4 모드 외 값은 ValueError."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     with pytest.raises(ValueError):
         await system_config.set_buy_block_mode(bad)  # type: ignore[arg-type]
 
@@ -67,12 +67,12 @@ async def test_set_buy_block_mode_invalid_raises(
 @pytest.mark.asyncio
 async def test_get_buy_block_thresholds_missing_returns_defaults(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """4 키 부재 시 기본값 — vix=25.0, fg_high=85.0, fg_low=15.0, defensive_enabled=True."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     t = await system_config.get_buy_block_thresholds()
     assert t.vix_threshold == 25.0
     assert t.fg_high_threshold == 85.0
@@ -83,12 +83,12 @@ async def test_get_buy_block_thresholds_missing_returns_defaults(
 @pytest.mark.asyncio
 async def test_set_buy_block_thresholds_partial_update(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """부분 갱신 가능 — vix 만 변경하면 나머지는 기본값 유지."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_buy_block_thresholds(vix_threshold=30.0)
     t = await system_config.get_buy_block_thresholds()
     assert t.vix_threshold == 30.0
@@ -100,12 +100,12 @@ async def test_set_buy_block_thresholds_partial_update(
 @pytest.mark.asyncio
 async def test_set_buy_block_thresholds_full_update_and_persist(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """4 키 모두 갱신 후 재조회 일치."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_buy_block_thresholds(
         vix_threshold=20.0,
         fg_high_threshold=90.0,
@@ -122,12 +122,12 @@ async def test_set_buy_block_thresholds_full_update_and_persist(
 @pytest.mark.asyncio
 async def test_set_buy_block_thresholds_defensive_only_toggle(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """defensive_enabled 단독 토글 — 5/17 사용자 케이스(regime 가드만 끄기)."""
     from src.db import system_config
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_buy_block_thresholds(defensive_enabled=False)
     t = await system_config.get_buy_block_thresholds()
     assert t.defensive_enabled is False

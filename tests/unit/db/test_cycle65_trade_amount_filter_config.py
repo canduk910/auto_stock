@@ -26,7 +26,7 @@ pytestmark = pytest.mark.unit
 @pytest.mark.asyncio
 async def test_A1_get_trade_amount_filter_default(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """A-1: 미설정 시 TradeAmountFilter(min_amount=0) + is_active=False 반환.
 
@@ -36,7 +36,7 @@ async def test_A1_get_trade_amount_filter_default(
     from src.db import system_config
     from src.db.system_config import TradeAmountFilter, get_trade_amount_filter
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     taf = await get_trade_amount_filter()
 
     assert isinstance(taf, TradeAmountFilter)
@@ -52,7 +52,7 @@ async def test_A1_get_trade_amount_filter_default(
 @pytest.mark.asyncio
 async def test_A2_set_then_get_trade_amount_filter(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """A-2: `set_trade_amount_filter(min_amount=100_000_000)` 갱신 + 재조회 일치 + is_active=True.
 
@@ -64,7 +64,7 @@ async def test_A2_set_then_get_trade_amount_filter(
         set_trade_amount_filter,
     )
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     await set_trade_amount_filter(min_amount=100_000_000)
     taf = await get_trade_amount_filter()
@@ -85,7 +85,7 @@ async def test_A2_set_then_get_trade_amount_filter(
 @pytest.mark.asyncio
 async def test_A3_set_trade_amount_filter_negative_raises(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_kv,
 ):
     """A-3: `set_trade_amount_filter(min_amount=-1)` → ValueError.
 
@@ -94,7 +94,7 @@ async def test_A3_set_trade_amount_filter_negative_raises(
     from src.db import system_config
     from src.db.system_config import set_trade_amount_filter
 
-    monkeypatch.setattr(system_config, "supabase", fake_supabase)
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
 
     with pytest.raises(ValueError):
         await set_trade_amount_filter(min_amount=-1)

@@ -1,18 +1,27 @@
 """system_logs CRUD.
 
 사이클 6 통합 (2026-05-20) — 검색(`search_logs`) + retention 자동 정리(`purge_old_logs`) 추가.
+
+사이클 M3b (Supabase→RDS 이전, 마지막 db 모듈): supabase-py 체인(+asyncio.to_thread) →
+`src.db.pg`(asyncpg) 전환. 관찰성 척추 + 매매 프로세스 안전망 — 3대 불변식 절대 보존:
+1. **never-raise** (사이클190): write_log INSERT 실패 시 어떤 예외도 호출자에 전파하지 않는다.
+2. **KST timestamp** (사이클65 H2): INSERT payload timestamp = KST(+09:00) datetime 바인딩.
+3. **purge 루프 배치** (사이클175): SELECT id LIMIT 1000 → DELETE id=ANY() drained 까지 루프.
+
+함수 시그니처·반환형·graceful 폴백 100% 보존 — 호출부(72곳) diff 0.
 """
 
 from __future__ import annotations
 
-import asyncio
+import asyncio  # noqa: F401 — 하위 호환 (일부 테스트 fixture 가 _mod.asyncio 참조, 실사용 0)
 import logging
 import math
 import time
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
-from src.db.supabase import supabase
+import src.db.pg as pg
+from src.db._kst import now_kst_iso
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +37,8 @@ HIGH_LEVELS: tuple[str, ...] = ("WARNING", "ERROR", "CRITICAL")
 MAX_PURGE_BATCH = 100_000
 
 # 사이클 175 (2026-06-24) — PostgREST row-cap silent 결함 항구 시정 (루프 배치)
-# per-iteration SELECT 배치 크기. Supabase PostgREST `db-max-rows=1000` 기본 cap 이
-# SELECT 를 1000행으로 silent 절단하므로, limit(100_000) 을 요청해도 effective 는 1000.
-# → 정직하게 1000 을 요청하고 drained 까지 루프 (사이클 150 2-step 구조 유지, no-migration).
+# per-iteration SELECT 배치 크기. asyncpg 전환 후에는 PostgREST cap 자체는 없으나,
+# 동일한 배치+루프 구조를 보존 (단일 대량 DELETE 로 인한 락 경합/트랜잭션 비대 회피).
 PURGE_SELECT_BATCH = 1000
 
 # 루프 런어웨이 차단 (안전 max iterations). 2000 × 1000 = 2M 행 = 충분히 큼.
@@ -41,27 +49,31 @@ PURGE_MAX_ITERATIONS = 2000
 SEARCH_DEFAULT_LIMIT = 200
 SEARCH_MAX_LIMIT = 1000
 
+# 사이클 M3b — timestamp 를 KST(+09:00) str 로 명시 캐스트 (trade_history.py::_TS_SELECT
+# 패턴 답습). asyncpg pool 재사용 시 session timezone 이 서버 기본값(UTC)으로 리셋될 수
+# 있어(M0 _init_conn docstring 경고), SELECT 단계에서 명시 변환해 KST 계약을 절연 보장.
+_TS_SELECT = "to_char(timestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS.US+09:00') AS timestamp"
+_LOG_COLUMNS = f"id, log_level, message, {_TS_SELECT}"
+
 
 async def write_log(log_level: str, message: str) -> None:
     """시스템 로그를 기록한다.
-
-    supabase-py는 동기 client이므로 asyncio.to_thread()로 thread pool에 위임 →
-    이벤트 루프 블로킹 차단 (on_tick 같은 핫패스에서 호출되어도 다른 await 처리 지연 없음).
 
     관찰성 함수 — 어떤 예외도 호출자에 전파하지 않는다 (사이클 190, 2026-07-03).
     INSERT 실패 시 logger.debug 단독 발화 (WARNING 이상 금지 — _DbLogHandler 재귀 위험).
     배경: 2026-07-03 07:59 scheduler.py L677 bare await write_log 가 Supabase HTTP/2
     RemoteProtocolError 로 raise → 매매 프로세스 크래시. src/ 전체 72개 직접 호출 사이트
     무변경으로 단일 지점에서 영구 차단.
+
+    사이클 M3b — asyncpg 전환. timestamp 는 KST datetime 바인딩 (str 금지, TIMESTAMPTZ 계약).
     """
-    data = {
-        "log_level": log_level,
-        "message": message,
-        "timestamp": datetime.now(KST).isoformat(),  # 사이클 65 hotfix H2 — KST 강제 (사이클 53 패턴 답습)
-    }
+    ts = datetime.fromisoformat(now_kst_iso())  # 사이클 65 hotfix H2 — KST 강제
     try:
-        await asyncio.to_thread(
-            lambda: supabase.table("system_logs").insert(data).execute()
+        await pg.execute(
+            "INSERT INTO system_logs (log_level, message, timestamp) VALUES ($1, $2, $3)",
+            log_level,
+            message,
+            ts,
         )
     except Exception:
         logger.debug("[write_log_failed] level=%s msg=%.80s", log_level, message)
@@ -76,7 +88,7 @@ async def safe_write_log(
     """write_log 의 graceful skip 변형 — 실패 시 logger.debug 만 발화.
 
     사이클 56-E (2026-06-04): order_engine.py 동형 try/except 패턴 통합.
-    write_log 실패 (Supabase 일시 장애, 네트워크 에러 등) 가 매매 흐름을 막지
+    write_log 실패 (DB 일시 장애, 네트워크 에러 등) 가 매매 흐름을 막지
     않도록 graceful skip. logger.debug 는 stdout 에 흔적 보존.
 
     Args:
@@ -111,6 +123,7 @@ async def get_logs(
     """시스템 로그를 조회한다.
 
     사이클 6 (2026-05-17) — 페이징 + KST 기간 필터.
+    사이클 M3b — asyncpg 전환 (SELECT + count 는 pg.fetch + pg.fetchval 분리).
 
     Args:
         limit: 하위 호환용. ``size`` 가 None 이면 size 로 흡수된다.
@@ -125,7 +138,7 @@ async def get_logs(
 
     Note:
         - KST 컨벤션: 모든 비교 timestamp 는 ``+09:00`` suffix 명시.
-        - supabase-py 의 ``count="exact"`` 옵션으로 ``total`` 을 함께 반환받는다.
+        - `total` 은 별도 `SELECT count(*)` (동일 필터) 로 조회.
         - ``total_pages = math.ceil(total / effective_size)``; total=0 면 0.
     """
     effective_size = size if size is not None else limit
@@ -135,24 +148,38 @@ async def get_logs(
         page = 1
     offset = (page - 1) * effective_size
 
-    def _query():
-        q = (
-            supabase.table("system_logs")
-            .select("*", count="exact")
-            .order("timestamp", desc=True)
-        )
-        if log_level:
-            q = q.eq("log_level", log_level)
-        if from_date is not None:
-            q = q.gte("timestamp", f"{from_date.isoformat()}T00:00:00+09:00")
-        if to_date is not None:
-            q = q.lte("timestamp", f"{to_date.isoformat()}T23:59:59.999999+09:00")
-        q = q.range(offset, offset + effective_size - 1)
-        return q.execute()
+    conditions: list[str] = []
+    args: list[Any] = []
 
-    result = await asyncio.to_thread(_query)
-    items = list(getattr(result, "data", None) or [])
-    total = getattr(result, "count", None)
+    def _add(cond_tpl: str, value: Any) -> None:
+        args.append(value)
+        conditions.append(cond_tpl.format(n=len(args)))
+
+    if log_level:
+        _add("log_level = ${n}", log_level)
+    if from_date is not None:
+        # asyncpg 는 TIMESTAMPTZ 파라미터에 str 을 바인딩하면 프리페어 단계에서
+        # DataError(암묵 변환 미지원). `::text::timestamptz` 2단 캐스트로 서버가
+        # str → timestamptz 파싱을 전담하게 하여 str 바인딩 계약(단위테스트 isoformat
+        # 부분일치)과 실 PG 왕복(TIMESTAMPTZ 비교) 을 동시 만족.
+        _add("timestamp >= ${n}::text::timestamptz", f"{from_date.isoformat()}T00:00:00+09:00")
+    if to_date is not None:
+        _add("timestamp <= ${n}::text::timestamptz", f"{to_date.isoformat()}T23:59:59.999999+09:00")
+
+    where_sql = f" WHERE {' AND '.join(conditions)}" if conditions else ""
+
+    select_args = list(args)
+    select_sql = (
+        f"SELECT {_LOG_COLUMNS} FROM system_logs"
+        + where_sql
+        + f" ORDER BY timestamp DESC LIMIT ${len(select_args) + 1} OFFSET ${len(select_args) + 2}"
+    )
+    select_args.extend([effective_size, offset])
+
+    count_sql = "SELECT count(*) FROM system_logs" + where_sql
+
+    items = await pg.fetch(select_sql, *select_args)
+    total = await pg.fetchval(count_sql, *args)
     if total is None:
         total = len(items)
     total_pages = math.ceil(total / effective_size) if total else 0
@@ -189,7 +216,7 @@ async def search_logs(
 
     Note:
         - 대소문자 무시 substring 매칭 (`%q%`)
-        - supabase-py `ilike(col, pattern)` 사용 — 사용자 입력 그대로 패턴 임베드
+        - asyncpg `ILIKE $n` 사용 — 사용자 입력은 패턴 문자열로 바인딩 (SQL 인젝션 안전)
         - 라우트 측 `min_length=1` 가드와 이중 안전망
         - `has_more = total > len(logs)` — 추가 결과 존재 시 운영자에게 키워드 좁히기 안내
     """
@@ -203,25 +230,34 @@ async def search_logs(
 
     pattern = f"%{q}%"
 
-    def _query():
-        chain = (
-            supabase.table("system_logs")
-            .select("*", count="exact")
-            .order("timestamp", desc=True)
-            .ilike("message", pattern)
-        )
-        if level and level != "ALL":
-            chain = chain.eq("log_level", level)
-        if start is not None:
-            chain = chain.gte("timestamp", start)
-        if end is not None:
-            chain = chain.lte("timestamp", end)
-        chain = chain.limit(limit)
-        return chain.execute()
+    conditions: list[str] = ["message ILIKE $1"]
+    args: list[Any] = [pattern]
 
-    result = await asyncio.to_thread(_query)
-    items = list(getattr(result, "data", None) or [])
-    total = getattr(result, "count", None)
+    if level and level != "ALL":
+        args.append(level)
+        conditions.append(f"log_level = ${len(args)}")
+    if start is not None:
+        args.append(start)
+        # asyncpg TIMESTAMPTZ str 바인딩 DataError 회피 — `::text::timestamptz` 2단 캐스트.
+        conditions.append(f"timestamp >= ${len(args)}::text::timestamptz")
+    if end is not None:
+        args.append(end)
+        conditions.append(f"timestamp <= ${len(args)}::text::timestamptz")
+
+    where_sql = f" WHERE {' AND '.join(conditions)}"
+
+    select_args = list(args)
+    select_sql = (
+        f"SELECT {_LOG_COLUMNS} FROM system_logs"
+        + where_sql
+        + f" ORDER BY timestamp DESC LIMIT ${len(select_args) + 1}"
+    )
+    select_args.append(limit)
+
+    count_sql = "SELECT count(*) FROM system_logs" + where_sql
+
+    items = await pg.fetch(select_sql, *select_args)
+    total = await pg.fetchval(count_sql, *args)
     if total is None:
         total = len(items)
     has_more = total > len(items)
@@ -254,51 +290,42 @@ async def _purge_by_cutoff(
     if cutoff_iso is None:
         raise RuntimeError("cutoff must not be None (WHERE 누락 차단)")
 
-    # 사이클 150 영역 영속 — 사이클 6 도입 (2026-05-20) 24일 silent 결함 시정.
-    # 결함: supabase-py SyncFilterRequestBuilder 영역에서 DELETE chain `.limit()` 미지원
-    #       → AttributeError 'SyncFilterRequestBuilder' object has no attribute 'limit'
-    #       → 매일 graceful skip (`[log_retention_skip]` 24일 연속)
-    # 시정: subquery select(id) LIMIT + DELETE WHERE id IN (배치) 2-step
-    #       → supabase-py SELECT chain `.limit()` 영속 + DELETE in_ id 영역 영속
+    # 사이클 150 → 사이클 175 → 사이클 M3b 영속 — 루프 배치 구조 보존.
+    # asyncpg 전환 후 PostgREST 1000행 cap 자체는 사라졌으나, 단일 대량 DELETE 로
+    # 인한 트랜잭션 비대/락 경합을 회피하기 위해 동일한 SELECT id LIMIT 1000 +
+    # DELETE id = ANY() 를 drained 까지 루프하는 구조를 그대로 유지한다.
     #
-    # 사이클 175 (2026-06-24) — PostgREST row-cap silent 결함 항구 시정 (루프 배치).
-    # 결함: 사이클 150 의 단발 SELECT(id).limit(MAX_PURGE_BATCH=100_000) 이 Supabase
-    #       PostgREST `db-max-rows=1000` 기본 cap 에 silent 절단 → 1회 호출당 최대 1000행만 삭제.
-    #       purge_old_logs() 하루 1회 호출 + INFO 30K+/일 생성 → 640K+ 적체 → 242MB 비대.
-    #       운영 증거: [log_retention] info_deleted=1000 high_deleted=1000 매일 정확히 1000.
-    # 시정: SELECT(id, limit=PURGE_SELECT_BATCH=1000) + DELETE in_(ids) 를 drained 까지 루프.
-    #       PURGE_MAX_ITERATIONS 런어웨이 차단 + MAX_PURGE_BATCH 누적 상한 cap.
-    #       migration/RPC/PostgREST 설정 변경 0 (2-step 구조 + supabase-py API 유지).
+    # ⚠️ asyncpg 는 TIMESTAMPTZ 바인딩에 str → datetime 암묵 변환을 지원하지 않는다
+    # (M0 _init_conn docstring "최대 위험" 과 동형 계약). cutoff_iso 는 ISO 8601 str
+    # 계약(테스트/purge_old_logs 호출자) 이므로 여기서 datetime 으로 변환해 바인딩한다.
+    cutoff_dt = datetime.fromisoformat(cutoff_iso)
 
-    def _select_ids_batch():
-        chain = supabase.table("system_logs").select("id")
-        if isinstance(level_filter, str):
-            chain = chain.eq("log_level", level_filter)
-        else:
-            chain = chain.in_("log_level", list(level_filter))
-        chain = chain.lt("timestamp", cutoff_iso).limit(PURGE_SELECT_BATCH)
-        return chain.execute()
+    level_is_list = not isinstance(level_filter, str)
+    level_cond = "log_level = ANY($2::text[])" if level_is_list else "log_level = $2"
+    level_arg = list(level_filter) if level_is_list else level_filter
+
+    select_sql = (
+        f"SELECT id FROM system_logs WHERE {level_cond} AND timestamp < $1 "
+        f"LIMIT {PURGE_SELECT_BATCH}"
+    )
+    delete_sql = "DELETE FROM system_logs WHERE id = ANY($1::bigint[])"
 
     total_deleted = 0
     for _ in range(PURGE_MAX_ITERATIONS):
-        select_result = await asyncio.to_thread(_select_ids_batch)
-        select_rows = getattr(select_result, "data", None) or []
+        select_rows = await pg.fetch(select_sql, cutoff_dt, level_arg)
         ids = [row["id"] for row in select_rows if "id" in row]
 
         if not ids:
             break  # drained — 더 이상 cutoff 통과 행 없음
 
-        def _delete(_ids=ids):
-            return supabase.table("system_logs").delete().in_("id", _ids).execute()
-
-        result = await asyncio.to_thread(_delete)
-        rows = getattr(result, "data", None) or []
-        count = getattr(result, "count", None)
-        if count is None:
-            count = len(rows)
-        # supabase-py DELETE 응답 = 실제 영향 row 수 보장 영속 불일치 가능
-        # → ids 길이 영역 영속 (실제 cutoff 통과 행 수, 명시적 보호 영역)
-        deleted = len(ids) if count <= 0 else int(count)
+        result = await pg.execute(delete_sql, ids)
+        # asyncpg execute() 는 "DELETE N" 형식 상태 문자열 반환.
+        count = None
+        if isinstance(result, str) and result.upper().startswith("DELETE"):
+            parts = result.split()
+            if len(parts) >= 2 and parts[1].isdigit():
+                count = int(parts[1])
+        deleted = len(ids) if count is None or count <= 0 else count
         total_deleted += deleted
 
         if total_deleted >= MAX_PURGE_BATCH:

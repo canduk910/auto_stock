@@ -91,6 +91,17 @@ def _make_purge_mock(select_data_seq: list, delete_count_seq: list):
 
 class TestP1LoopIteration:
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p1_three_dates_loop_and_sum(self) -> None:
         """3날짜 backlog → SELECT 4회(3 데이터 + 1 빈) / DELETE 3회 / deleted=175."""
         from src.db import stock_master_daily as _smd
@@ -120,6 +131,17 @@ class TestP1LoopIteration:
             "반환 계약 {deleted, protected_count, elapsed_ms} 보존 의무"
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p1_delete_uses_eq_bas_dd(self) -> None:
         """DELETE 가 SELECT 로 얻은 oldest bas_dd 로 .eq 필터 (bulk .lt 폐기)."""
         from src.db import stock_master_daily as _smd
@@ -147,6 +169,17 @@ class TestP1LoopIteration:
 
 class TestP2ReturningMinimal:
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p2_delete_returning_minimal(self) -> None:
         """DELETE 체인이 returning='minimal' (+count='exact') 로 생성 — 응답 비대 차단."""
         from src.db import stock_master_daily as _smd
@@ -176,6 +209,17 @@ class TestP2ReturningMinimal:
 
 class TestP3ProtectedBothSides:
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p3_protected_applied_on_select_and_delete(self) -> None:
         """protected_tickers 지정 시 SELECT 와 DELETE 양쪽 not_.in_ 적용.
 
@@ -213,6 +257,17 @@ class TestP3ProtectedBothSides:
         assert result["protected_count"] == 2, "protected_count 정합"
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p3_no_protected_skips_not_in(self) -> None:
         """protected 미지정 시 not_.in_ 미적용 (회귀 보존)."""
         from src.db import stock_master_daily as _smd
@@ -247,6 +302,17 @@ class TestP4MaxIterations:
         assert isinstance(const, int) and const > 0, "PURGE_MAX_DATE_ITERATIONS 양수 int 의무"
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p4b_loop_capped_and_returns(self, monkeypatch) -> None:
         """초과 backlog(never-drain 데이터) → cap 만큼 삭제 후 정상 반환 (무한 루프 아님)."""
         import src.db.stock_master_daily as _smd
@@ -291,6 +357,17 @@ class TestP4MaxIterations:
 
 class TestP5GracefulPartial:
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p5_partial_accumulation_on_mid_exception(self) -> None:
         """2번째 DELETE 예외 → 1번째 삭제분 부분 누적 반환 + 예외 타입 로그."""
         from src.db import stock_master_daily as _smd
@@ -316,6 +393,17 @@ class TestP5GracefulPartial:
             "예외 타입(RuntimeError) 문자열 계측 의무 (사이클 190 패턴)"
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p5_first_iteration_exception_returns_zero(self) -> None:
         """첫 DELETE 예외 → deleted=0 자연 보존 (기존 '0 반환' 계약)."""
         from src.db import stock_master_daily as _smd
@@ -341,6 +429,17 @@ class TestP5GracefulPartial:
 
 class TestP6EmptyTable:
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        strict=False,
+        reason=(
+            "사이클 M2b (Supabase→RDS asyncpg 전환) — supabase 체인 특유 API "
+            "(.not_.in_() / .delete(count=, returning=\"minimal\") / .lt / .eq call_args) 를 "
+            "단언한다. asyncpg 전환으로 SELECT/DELETE 가 pg.fetchrow/pg.execute 단일 호출 + "
+            "ticker <> ALL($::text[]) SQL 절로 대체되어 이 체인 패턴이 부재. 날짜 슬라이스 루프 "
+            "+ deleted 누적 + never-drain(P-3) + graceful 부분누적 + cap 불변식은 M2b 신규 가드 "
+            "test_cycleM2b_stock_master_daily_pg.py 가 pg 레벨에서 동등 커버."
+        ),
+    )
     async def test_p6_no_target_rows(self) -> None:
         """삭제 대상 0 → SELECT 1회(즉시 drained) / DELETE 0회 / deleted=0."""
         from src.db import stock_master_daily as _smd

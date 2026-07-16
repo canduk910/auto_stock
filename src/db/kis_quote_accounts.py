@@ -7,19 +7,25 @@
 - 응답에 `app_secret` 평문 노출 금지 — 호출자는 KisQuoteAccount.from_row() 마스킹 변환 사용.
 - 단, 토큰 매니저(`src/auth/token.py`)는 평문 app_secret 이 필요 — 별도 함수 `get_credentials_for_token_manager` 노출.
 
-supabase 동기 SDK 호출은 모두 `asyncio.to_thread()` 위임 — 이벤트 루프 블로킹 차단.
+사이클 M3a (Supabase→RDS 이전 단계3, 분석·관찰 비 hot-path): supabase-py → `src.db.pg`
+(asyncpg) 전환. 함수 시그니처·반환형·graceful·캐시 100% 보존 — 호출부 diff 0.
+
+- read 4함수(list_accounts/get_account/get_account_by_label/get_credentials_for_token_manager)
+  = `pg._with_retry` 경유(사이클 189 정책 = read 만 retry).
+- 쓰기(insert/update/delete) = `pg.execute`/`pg.fetchrow` 직접(retry 미경유, 멱등 우려).
+- `list_accounts` 60s TTL 메모리 캐시 로직 절대 보존(hit/만료/DB예외 stale 반환/invalidate).
 """
 from __future__ import annotations
 
-import asyncio
+import asyncio  # noqa: F401 — Red autouse fixture 호환(monkeypatch.setattr(kqa.asyncio, ...))
 import logging
 import time
 from datetime import datetime, timezone
 from typing import Any, Optional
 from uuid import UUID
 
+import src.db.pg as pg
 from src.db._kst import now_kst_iso
-from src.db.supabase import execute_with_retry, supabase
 from src.models.kis_quote_account import KisQuoteAccount, mask_secret
 
 logger = logging.getLogger(__name__)
@@ -48,21 +54,25 @@ async def list_accounts(active_only: bool = False) -> list[KisQuoteAccount]:
     """전체 또는 활성 계좌 목록 조회 (created_at ASC). 60s TTL 캐시.
 
     active_only=True 면 active=true 만 반환.
+
+    read 는 `pg.fetch` 경유 — `pg.fetch` 자체가 내부에서 `pg._with_retry` 를
+    태우므로(사이클 189 read retry 정책 계승) 본 함수가 별도로 `_with_retry` 를
+    다시 호출하지 않는다(이중 retry 방지).
     """
     now = time.monotonic()
     expires_at = _list_cache_expires_at.get(active_only)
     if expires_at is not None and now < expires_at:
         return _list_cache[active_only]
 
-    def _query():
-        q = supabase.table(TABLE_NAME).select("*")
-        if active_only:
-            q = q.eq("active", True)
-        return q.order("created_at").execute()
-
     try:
-        result = await execute_with_retry(_query, op="list_accounts")
-        rows = result.data or []
+        if active_only:
+            rows = await pg.fetch(
+                f"SELECT * FROM {TABLE_NAME} WHERE active = $1 ORDER BY created_at",
+                True,
+            )
+        else:
+            rows = await pg.fetch(f"SELECT * FROM {TABLE_NAME} ORDER BY created_at")
+        rows = rows or []
         accounts = [KisQuoteAccount.from_row(r) for r in rows]
         _list_cache[active_only] = accounts
         _list_cache_expires_at[active_only] = now + _LIST_CACHE_TTL
@@ -79,15 +89,11 @@ async def get_account(account_id: UUID | str) -> Optional[KisQuoteAccount]:
     """ID 로 단건 조회. 미존재 → None."""
     aid = str(account_id)
 
-    def _query():
-        return supabase.table(TABLE_NAME).select("*").eq("id", aid).execute()
-
     try:
-        result = await execute_with_retry(_query, op="get_account")
-        rows = result.data or []
-        if not rows:
+        row = await pg.fetchrow(f"SELECT * FROM {TABLE_NAME} WHERE id = $1", aid)
+        if row is None:
             return None
-        return KisQuoteAccount.from_row(rows[0])
+        return KisQuoteAccount.from_row(row)
     except Exception:
         logger.exception("[kis_quote_accounts] get(%s) 실패", aid)
         return None
@@ -96,15 +102,11 @@ async def get_account(account_id: UUID | str) -> Optional[KisQuoteAccount]:
 async def get_account_by_label(label: str) -> Optional[KisQuoteAccount]:
     """label 로 단건 조회. 미존재 → None."""
 
-    def _query():
-        return supabase.table(TABLE_NAME).select("*").eq("label", label).execute()
-
     try:
-        result = await execute_with_retry(_query, op="get_account_by_label")
-        rows = result.data or []
-        if not rows:
+        row = await pg.fetchrow(f"SELECT * FROM {TABLE_NAME} WHERE label = $1", label)
+        if row is None:
             return None
-        return KisQuoteAccount.from_row(rows[0])
+        return KisQuoteAccount.from_row(row)
     except Exception:
         logger.exception("[kis_quote_accounts] get_by_label(%s) 실패", label)
         return None
@@ -120,18 +122,12 @@ async def get_credentials_for_token_manager(label: str) -> Optional[dict[str, st
     추적성 확보를 위해 별도 함수로 분리.
     """
 
-    def _query():
-        return (
-            supabase.table(TABLE_NAME)
-            .select("*")
-            .eq("label", label)
-            .eq("active", True)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="get_credentials_for_token_manager")
-        rows = result.data or []
+        rows = await pg.fetch(
+            f"SELECT * FROM {TABLE_NAME} WHERE label = $1 AND active = $2",
+            label, True,
+        )
+        rows = rows or []
         if not rows:
             return None
         row = rows[0]
@@ -176,40 +172,30 @@ async def insert_account(
     if existing is not None:
         raise LabelConflictError(f"이미 등록된 label: {label}")
 
-    payload = {
-        "label": label,
-        "app_key": app_key,
-        "app_secret": app_secret,
-        "kis_env": kis_env,
-        "active": True,
-        # 운영 DB 는 DEFAULT NOW() 로 자동 채워지지만 응답 직후 RETURNING 일관성
-        # + 인메모리 fake 호환을 위해 명시 세팅.
-        # 사이클 68 G-7 — KST timestamp 명시 (UTC 폐기)
-        "created_at": now_kst_iso(),
-        "updated_at": now_kst_iso(),
-    }
-
-    def _insert():
-        return supabase.table(TABLE_NAME).insert(payload).execute()
+    now_dt = datetime.fromisoformat(now_kst_iso())
 
     try:
-        result = await asyncio.to_thread(_insert)
+        await pg.execute(
+            f"""
+            INSERT INTO {TABLE_NAME} (
+                label, app_key, app_secret, kis_env, active, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+            """,
+            label, app_key, app_secret, kis_env, True, now_dt, now_dt,
+        )
     except Exception as e:
-        # Supabase race 충돌(UNIQUE) 메시지 검출
+        # Postgres race 충돌(UNIQUE) 메시지 검출
         msg = str(e)
         if "duplicate" in msg.lower() or "unique" in msg.lower():
             raise LabelConflictError(f"이미 등록된 label: {label}") from e
         raise
 
-    rows = result.data or []
     invalidate_list_cache()  # 사이클 14-D: 다음 list_accounts 즉시 fresh
-    if not rows:
-        # supabase-py INSERT 가 빈 응답을 주는 경우 fallback 재조회
-        fetched = await get_account_by_label(label)
-        if fetched is None:
-            raise RuntimeError("INSERT 후 row 조회 실패")
-        return fetched
-    return KisQuoteAccount.from_row(rows[0])
+    # INSERT 는 RETURNING 없이 실행 → 재조회로 최신 row 획득 (fallback 겸용)
+    fetched = await get_account_by_label(label)
+    if fetched is None:
+        raise RuntimeError("INSERT 후 row 조회 실패")
+    return fetched
 
 
 async def update_account(
@@ -229,9 +215,13 @@ async def update_account(
     if current is None:
         return None
 
-    patch: dict[str, Any] = {"updated_at": now_kst_iso()}
+    set_clauses = ["updated_at = $2"]
+    args: list = [aid, datetime.fromisoformat(now_kst_iso())]
+    idx = 3
     if active is not None:
-        patch["active"] = bool(active)
+        set_clauses.append(f"active = ${idx}")
+        args.append(bool(active))
+        idx += 1
     if label is not None:
         new_label = label.strip()
         if not new_label:
@@ -241,16 +231,17 @@ async def update_account(
             conflict = await get_account_by_label(new_label)
             if conflict is not None and str(conflict.id) != aid:
                 raise LabelConflictError(f"이미 등록된 label: {new_label}")
-            patch["label"] = new_label
+            set_clauses.append(f"label = ${idx}")
+            args.append(new_label)
+            idx += 1
 
-    if len(patch) == 1:  # updated_at 만 있는 경우 (변경 없음)
+    if len(set_clauses) == 1:  # updated_at 만 있는 경우 (변경 없음)
         return current
 
-    def _update():
-        return supabase.table(TABLE_NAME).update(patch).eq("id", aid).execute()
+    sql = f"UPDATE {TABLE_NAME} SET {', '.join(set_clauses)} WHERE id = $1"
 
     try:
-        await asyncio.to_thread(_update)
+        await pg.execute(sql, *args)
     except Exception as e:
         msg = str(e)
         if "duplicate" in msg.lower() or "unique" in msg.lower():
@@ -270,11 +261,8 @@ async def delete_account(account_id: UUID | str) -> bool:
     if current is None:
         return False
 
-    def _delete():
-        return supabase.table(TABLE_NAME).delete().eq("id", aid).execute()
-
     try:
-        await asyncio.to_thread(_delete)
+        await pg.execute(f"DELETE FROM {TABLE_NAME} WHERE id = $1", aid)
         invalidate_list_cache()  # 사이클 14-D: 다음 list_accounts 즉시 fresh
         return True
     except Exception:

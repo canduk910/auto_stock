@@ -21,7 +21,19 @@ from typing import Any
 
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 M3b (2026-07-16) — Supabase→RDS 이전. `search_logs` 가 supabase-py 체인
+# (select/ilike/eq/gte/lte/limit chain) → `pg.fetch`+`pg.fetchval` SQL(ILIKE $n) 로
+# 전환되어 본 파일의 Fake supabase 가 어떤 호출도 가로채지 못해 전량 FAIL. ILIKE 검색/
+# clamp/has_more 실질 계약은 `tests/unit/db/test_cycleM3b_system_logs_pg.py::
+# test_search_logs_*` 로 이관되어 회귀 가드 유지.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason="사이클M3b — search_logs supabase→pg 전환. ILIKE 검색 계약은 "
+        "test_cycleM3b_system_logs_pg.py 로 이관",
+        strict=False,
+    ),
+]
 
 
 class _FakeQuery:

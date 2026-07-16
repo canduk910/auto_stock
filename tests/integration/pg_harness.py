@@ -249,3 +249,104 @@ async def clean_strategy_funnel(pg_pool):
     await pg_pool.execute("DELETE FROM strategy_funnel_snapshots")
     yield pg_pool
     await pg_pool.execute("DELETE FROM strategy_funnel_snapshots")
+
+
+# ---------------------------------------------------------------------------
+# M2a 증분 — 매매 hot path 2모듈 (system_config / trade_history) 격리 fixture.
+# ---------------------------------------------------------------------------
+@pytest.fixture
+async def clean_system_config(pg_pool):
+    """system_config 테이블 비운 상태로 시작 (테스트 격리).
+
+    ⚠️ migration seed 로 기본 키(cash_usage_ratio 등)가 있을 수 있어 DELETE 선행.
+    복원 안 함 — 각 테스트가 필요한 키를 명시 set 한다.
+    """
+    await pg_pool.execute("DELETE FROM system_config")
+    yield pg_pool
+    await pg_pool.execute("DELETE FROM system_config")
+
+
+@pytest.fixture
+async def clean_trade_history(pg_pool):
+    """trade_history 테이블 비운 상태로 시작 (테스트 격리)."""
+    await pg_pool.execute("DELETE FROM trade_history")
+    yield pg_pool
+    await pg_pool.execute("DELETE FROM trade_history")
+
+
+# ---------------------------------------------------------------------------
+# M2b 증분 — 매수 유니버스 + 일봉 2모듈 (stock_master / stock_master_daily) 격리 fixture.
+#
+# ⚠️ stock_master 는 raw JSONB 문자열로부터 파생되는 생성 컬럼(hts_avls_eok /
+# acml_tr_pbmn_won, migration 039)이 존재한다. INSERT 시 그 컬럼을 직접 넣으면
+# GENERATED ALWAYS 위반 → raw 만 넣고 DB 가 계산하게 둔다(통합 실증의 핵심).
+# ---------------------------------------------------------------------------
+@pytest.fixture
+async def clean_stock_master(pg_pool):
+    """stock_master 테이블 비운 상태로 시작 (테스트 격리)."""
+    await pg_pool.execute("DELETE FROM stock_master")
+    yield pg_pool
+    await pg_pool.execute("DELETE FROM stock_master")
+
+
+@pytest.fixture
+async def clean_stock_master_daily(pg_pool):
+    """stock_master_daily 테이블 비운 상태로 시작 (테스트 격리)."""
+    await pg_pool.execute("DELETE FROM stock_master_daily")
+    yield pg_pool
+    await pg_pool.execute("DELETE FROM stock_master_daily")
+
+
+# ---------------------------------------------------------------------------
+# M3a 증분 — 분석·관찰 3모듈 (parameter_recommendations / kis_quote_accounts /
+# stock_master_financial) 격리 fixture. 비 hot-path (매매 안전성 8영역 밖).
+#
+# ⚠️ stock_master_financial 은 18 NUMERIC 컬럼 → asyncpg 가 Decimal 로 반환한다
+# (계획 3대 미묘 계약 ③). raw JSONB 왕복(codec) + PK 3키 upsert 실증의 핵심.
+# ---------------------------------------------------------------------------
+@pytest.fixture
+async def clean_parameter_recommendations(pg_pool):
+    """parameter_recommendations 테이블 비운 상태로 시작 (테스트 격리)."""
+    await pg_pool.execute("DELETE FROM parameter_recommendations")
+    yield pg_pool
+    await pg_pool.execute("DELETE FROM parameter_recommendations")
+
+
+@pytest.fixture
+async def clean_kis_quote_accounts(pg_pool):
+    """kis_quote_accounts 테이블 비운 상태로 시작 (테스트 격리).
+
+    ⚠️ list_accounts 60s TTL 메모리 캐시(`_list_cache`)가 테스트 간 오염을 유발할 수
+    있어 setup/teardown 양쪽에서 invalidate 한다 (캐시 stale 반환 계약 자체 검증은
+    별개 — 여기선 테이블 격리 목적).
+    """
+    from src.db import kis_quote_accounts as kqa
+
+    await pg_pool.execute("DELETE FROM kis_quote_accounts")
+    kqa.invalidate_list_cache()
+    yield pg_pool
+    await pg_pool.execute("DELETE FROM kis_quote_accounts")
+    kqa.invalidate_list_cache()
+
+
+@pytest.fixture
+async def clean_stock_master_financial(pg_pool):
+    """stock_master_financial 테이블 비운 상태로 시작 (테스트 격리)."""
+    await pg_pool.execute("DELETE FROM stock_master_financial")
+    yield pg_pool
+    await pg_pool.execute("DELETE FROM stock_master_financial")
+
+
+# ---------------------------------------------------------------------------
+# M3b 증분 — 관찰성 척추 system_logs 격리 fixture (마지막 db 모듈 + main seam).
+#
+# ⚠️ system_logs 는 매매 프로세스 안전망(never-raise) + 관찰성 척추. 통합 실증의 핵심 =
+# write_log KST timestamp 왕복(to_char +09:00) + purge 루프 배치 drained(1000+ 행) +
+# get_logs count/페이징 정합.
+# ---------------------------------------------------------------------------
+@pytest.fixture
+async def clean_system_logs(pg_pool):
+    """system_logs 테이블 비운 상태로 시작 (테스트 격리)."""
+    await pg_pool.execute("DELETE FROM system_logs")
+    yield pg_pool
+    await pg_pool.execute("DELETE FROM system_logs")

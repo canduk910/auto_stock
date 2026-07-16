@@ -10,11 +10,14 @@
 영역 2: `_update_trade_status_by_order_no(order_no, trade_type, status, price=None, profit_loss=None) -> int`
 - strategy 필터 영역 폐기 영구 영속 (order_no 단일 키)
 - 보정 INSERT UniqueViolation 영역 영속 → 강제 UPDATE
+
+사이클 M2a (2026-07-16) 의미 전환 — trade_history 가 supabase-py → src.db.pg(asyncpg)
+전환. 기존 `.table().select()...` 체인 mock → `pg.fetch`/`pg.execute` mock 으로 대체.
 """
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -33,10 +36,11 @@ pytestmark = pytest.mark.unit
 @pytest.mark.asyncio
 async def test_G147_LOOKUP_1_pending_row_returns_strategy() -> None:
     """trade_history PENDING row 1건 → strategy 영역 영구 영속 반환."""
-    with patch("src.db.trade_history.supabase") as mock_sb:
-        mock_result = MagicMock()
-        mock_result.data = [{"strategy": "long_tail_volatility"}]
-        mock_sb.table.return_value.select.return_value.eq.return_value.eq.return_value.eq.return_value.in_.return_value.limit.return_value.execute.return_value = mock_result
+    with patch("src.db.trade_history.pg", create=True) as pg_mock:
+        async def _fetch(sql, *args):
+            return [{"strategy": "long_tail_volatility"}]
+
+        pg_mock.fetch = _fetch
 
         result = await _lookup_strategy_from_trade_history(
             "005940", "0000004700", TradeType.SELL
@@ -50,12 +54,13 @@ async def test_G147_LOOKUP_1_pending_row_returns_strategy() -> None:
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_G147_LOOKUP_2_miss_or_exception_returns_none() -> None:
-    """0건 → None. supabase 예외 → None graceful (호출자 보호 영역)."""
+    """0건 → None. pg 예외 → None graceful (호출자 보호 영역)."""
     # 0건 영역 영구 영속
-    with patch("src.db.trade_history.supabase") as mock_sb:
-        mock_result = MagicMock()
-        mock_result.data = []
-        mock_sb.table.return_value.select.return_value.eq.return_value.eq.return_value.eq.return_value.in_.return_value.limit.return_value.execute.return_value = mock_result
+    with patch("src.db.trade_history.pg", create=True) as pg_mock:
+        async def _fetch_empty(sql, *args):
+            return []
+
+        pg_mock.fetch = _fetch_empty
 
         result = await _lookup_strategy_from_trade_history(
             "999999", "UNKNOWN", TradeType.SELL
@@ -63,8 +68,11 @@ async def test_G147_LOOKUP_2_miss_or_exception_returns_none() -> None:
         assert result is None
 
     # 예외 영역 영구 영속
-    with patch("src.db.trade_history.supabase") as mock_sb:
-        mock_sb.table.side_effect = Exception("Supabase connection error")
+    with patch("src.db.trade_history.pg", create=True) as pg_mock:
+        async def _fetch_raises(sql, *args):
+            raise Exception("DB connection error")
+
+        pg_mock.fetch = _fetch_raises
 
         result = await _lookup_strategy_from_trade_history(
             "005940", "0000004700", TradeType.SELL
@@ -78,14 +86,14 @@ async def test_G147_LOOKUP_2_miss_or_exception_returns_none() -> None:
 @pytest.mark.asyncio
 async def test_G147_UPDATE_BY_ORDER_1_strategy_agnostic_update() -> None:
     """`_update_trade_status_by_order_no` 영역 영구 영속 = order_no 단일 키 + strategy 필터 영역 폐기 영구 영속."""
-    with patch("src.db.trade_history.supabase") as mock_sb:
-        mock_result = MagicMock()
-        mock_result.data = [{"id": "uuid-001", "status": "COMPLETED"}]
-        # 체이닝 영역 영구 영속 = update().eq().eq().eq().execute()
-        chain = mock_sb.table.return_value.update.return_value
-        chain.eq.return_value.eq.return_value.eq.return_value.execute.return_value = (
-            mock_result
-        )
+    with patch("src.db.trade_history.pg", create=True) as pg_mock:
+        execute_calls: list[tuple] = []
+
+        async def _execute(sql, *args):
+            execute_calls.append((sql, args))
+            return "UPDATE 1"
+
+        pg_mock.execute = _execute
 
         affected = await _update_trade_status_by_order_no(
             "0000004700",
@@ -96,8 +104,10 @@ async def test_G147_UPDATE_BY_ORDER_1_strategy_agnostic_update() -> None:
         )
 
         assert affected == 1
-        # G-UPDATE-BY-ORDER-1-A: update_data 영역 영구 영속 영역 status + price + profit_loss
-        update_call = mock_sb.table.return_value.update.call_args[0][0]
-        assert update_call["status"] == "COMPLETED"
-        assert update_call["price"] == 33250.0
-        assert update_call["profit_loss"] == 0.0
+        # G-UPDATE-BY-ORDER-1-A: UPDATE 바인딩 영역 영구 영속 = status + price + profit_loss
+        assert len(execute_calls) == 1
+        sql, args = execute_calls[0]
+        assert "UPDATE trade_history" in sql
+        assert "COMPLETED" in args
+        assert 33250.0 in args
+        assert 0.0 in args

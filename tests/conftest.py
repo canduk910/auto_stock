@@ -298,6 +298,53 @@ def fake_supabase() -> FakeSupabase:
 
 
 # ---------------------------------------------------------------------------
+# 사이클 M2a (2026-07-16) — system_config pg.* 인메모리 fake (key-value 테이블)
+#
+# system_config.py 가 supabase-py → src.db.pg(asyncpg) 로 전환되며 기존
+# `fake_supabase`(테이블 체인 흉내) 로는 라우팅이 불가(모듈이 supabase 를 더 이상
+# import 하지 않음). 동일 round-trip 계약(get/set)을 pg.fetch/execute 인터페이스로
+# 흉내내는 최소 fake — SQL 텍스트 파싱이 아니라 system_config.py 가 실제로 발화하는
+# 고정 패턴(`SELECT value FROM system_config WHERE key = $1` /
+# `INSERT INTO system_config (key, value, updated_at) VALUES ... ON CONFLICT (key)
+# DO UPDATE ...`)에 맞춘 key-value dict 구현.
+# ---------------------------------------------------------------------------
+class FakePgKV:
+    """system_config 전용 인메모리 pg.* fake (key → value JSONB dict)."""
+
+    def __init__(self) -> None:
+        self.store: dict[str, Any] = {}
+
+    async def fetch(self, sql: str, *args: Any) -> list[dict[str, Any]]:
+        # system_config._select_value: "SELECT value FROM system_config WHERE key = $1"
+        key = args[0]
+        if key not in self.store:
+            return []
+        return [{"value": self.store[key]}]
+
+    async def fetchrow(self, sql: str, *args: Any) -> dict[str, Any] | None:
+        rows = await self.fetch(sql, *args)
+        return rows[0] if rows else None
+
+    async def fetchval(self, sql: str, *args: Any) -> Any:
+        rows = await self.fetch(sql, *args)
+        return rows[0]["value"] if rows else None
+
+    async def execute(self, sql: str, *args: Any) -> str:
+        # system_config._upsert_value: INSERT (key, value, updated_at) ... $1,$2,$3
+        key, value = args[0], args[1]
+        self.store[key] = value
+        return "INSERT 0 1"
+
+    async def _with_retry(self, coro_factory, *, op: str = ""):
+        return await coro_factory()
+
+
+@pytest.fixture
+def fake_pg_kv() -> FakePgKV:
+    return FakePgKV()
+
+
+# ---------------------------------------------------------------------------
 # 시계 freeze
 # ---------------------------------------------------------------------------
 @pytest.fixture

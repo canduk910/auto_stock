@@ -23,6 +23,19 @@ from unittest.mock import patch
 
 import pytest
 
+# 사이클 M3b (2026-07-16) — Supabase→RDS 이전, main.py seam ① 큐 전환으로 은퇴.
+# `_LOG_DB_EXECUTOR`(ThreadPoolExecutor) 는 큐 producer(`_LOG_QUEUE`) + async consumer
+# 로 대체되어 폐기됐다. dedupe(500ms TTL) 실질 계약은
+# `tests/unit/main/test_cycleM3b_main_seam_pg.py::test_emit_dedupe_500ms_within_window` /
+# `test_emit_dedupe_after_ttl_enqueues_twice` / `test_emit_different_messages_both_enqueue`
+# 로 이관되어 회귀 가드 유지. `_DEDUPE_TTL_SECS=0.5` 상수 보존은
+# `test_emit_dedupe_ttl_constant_preserved` 가 계승.
+pytestmark = pytest.mark.xfail(
+    reason="사이클M3b — _LOG_DB_EXECUTOR 폐기(큐 전환). dedupe 계약은 "
+    "test_cycleM3b_main_seam_pg.py 로 이관",
+    strict=False,
+)
+
 
 @pytest.fixture
 def db_log_handler():

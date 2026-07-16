@@ -47,19 +47,19 @@ def _basics(
 @pytest.mark.asyncio
 async def test_upsert_one_normalizes_12char_ticker(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_stock_master,
     caplog: pytest.LogCaptureFixture,
 ):
     """12자리 KIS pdno → 6자리 정규화 후 upsert (이중 안전망)."""
     from src.db import stock_master
 
-    monkeypatch.setattr(stock_master, "supabase", fake_supabase)
+    monkeypatch.setattr(stock_master, "pg", fake_pg_stock_master)
 
     with caplog.at_level(logging.WARNING, logger="src.db.stock_master"):
         await stock_master.upsert_one(_basics("00000A000100", nxt_tradable=True))
 
     # 저장된 row 의 ticker 가 6자리로 정규화됐는지 검증
-    rows = fake_supabase.store.get("stock_master", [])
+    rows = list(fake_pg_stock_master.store.values())
     assert len(rows) == 1
     assert rows[0]["ticker"] == "000100"
     # get() 도 6자리 키로 hit
@@ -77,18 +77,18 @@ async def test_upsert_one_normalizes_12char_ticker(
 @pytest.mark.asyncio
 async def test_upsert_one_preserves_6digit_ticker(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_stock_master,
     caplog: pytest.LogCaptureFixture,
 ):
     """정상 6자리 입력은 정규화 가드 발화 안 함 (변환 0회)."""
     from src.db import stock_master
 
-    monkeypatch.setattr(stock_master, "supabase", fake_supabase)
+    monkeypatch.setattr(stock_master, "pg", fake_pg_stock_master)
 
     with caplog.at_level(logging.WARNING, logger="src.db.stock_master"):
         await stock_master.upsert_one(_basics("000100"))
 
-    rows = fake_supabase.store.get("stock_master", [])
+    rows = list(fake_pg_stock_master.store.values())
     assert len(rows) == 1
     assert rows[0]["ticker"] == "000100"
     # WARNING 로그 없음 — 정상 경로는 silent

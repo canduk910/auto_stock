@@ -34,7 +34,22 @@ from typing import Any
 
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 M3b (2026-07-16) — Supabase→RDS 이전, `_purge_by_cutoff` 가 supabase-py 체인
+# (select/eq/in_/lt/limit chain fake) → `pg.fetch`/`pg.execute` SQL 로 전환됨에 따라
+# 본 파일의 Fake supabase 구조(_LoopSelectQuery 등)가 어떤 호출도 가로채지 못해 전량
+# FAIL. 루프 배치(SELECT LIMIT 1000 → DELETE id=ANY drained) 실질 계약은
+# `tests/unit/db/test_cycleM3b_system_logs_pg.py::test_purge_loop_drains_all_above_batch`
+# / `test_purge_delete_uses_id_any_not_limit` / `test_purge_cap_max_iterations_graceful`
+# / `test_purge_accum_cap_max_purge_batch` / `test_purge_cutoff_none_raises_runtime_error`
+# / `test_purge_old_logs_schema_and_emit` 로 이관되어 회귀 가드 유지.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason="사이클M3b — _purge_by_cutoff supabase→pg 전환. 루프 배치 계약은 "
+        "test_cycleM3b_system_logs_pg.py 로 이관",
+        strict=False,
+    ),
+]
 
 KST = timezone(timedelta(hours=9))
 

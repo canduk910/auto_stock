@@ -98,8 +98,25 @@ async def test_init_conn_codec_schema_pg_catalog():
 
 
 @pytest.mark.asyncio
+@pytest.mark.xfail(
+    reason=(
+        "사이클 M2a (2026-07-16) 발견 — asyncpg pool 은 커넥션 release/재획득 시 "
+        "세션 레벨 SET(SET TIME ZONE)을 서버 기본값으로 리셋한다(`init=` 훅은 신규 "
+        "*물리* 연결 최초 1회만 실행되고 이후 재사용 시 재실행되지 않음). 통합 검증 "
+        "(trade_history KST +09:00 왕복)에서 min_size=2 이상 풀의 재사용 커넥션이 "
+        "Etc/UTC 로 되돌아가는 실사고로 확인 — `_init_conn` 의 `SET TIME ZONE` 을 "
+        "`init_pool()` 의 `server_settings={'timezone': 'Asia/Seoul'}` (연결 핸드셰이크"
+        "파라미터, pool 재사용과 무관하게 매 물리 연결에 영속)로 이전. 대체 계약 = "
+        "test_init_pool_uses_asia_seoul_server_settings."
+    ),
+    strict=False,
+)
 async def test_init_conn_sets_kst_timezone():
-    """_init_conn 이 SET TIME ZONE 'Asia/Seoul' 실행 (KST 정합, 사이클69 TIMESTAMPTZ)."""
+    """_init_conn 이 SET TIME ZONE 'Asia/Seoul' 실행 (KST 정합, 사이클69 TIMESTAMPTZ).
+
+    사이클 M2a 전환 후 — KST 타임존은 `init_pool()` 의 `server_settings` 로 이전
+    (pool 재사용 시 세션 리셋 결함 회피). `_init_conn` 은 codec 등록만 담당.
+    """
     import src.db.pg as pg
 
     conn = AsyncMock()
@@ -113,6 +130,24 @@ async def test_init_conn_sets_kst_timezone():
         "_init_conn 이 conn.execute(\"SET TIME ZONE 'Asia/Seoul'\") 호출해야 함 "
         "(now() DEFAULT·표시 KST 정합)."
     )
+
+
+def test_init_pool_uses_asia_seoul_server_settings():
+    """init_pool() 이 create_pool 호출 시 server_settings={'timezone': 'Asia/Seoul'} 전달.
+
+    사이클 M2a — pool 재사용 커넥션의 timezone 리셋 결함(위 xfail 참조)을
+    `init=` 세션 SET 대신 연결 핸드셰이크 파라미터로 우회하는 정본 계약.
+    """
+    import inspect
+
+    import src.db.pg as pg
+
+    src = inspect.getsource(pg.init_pool)
+    assert "server_settings" in src, (
+        "init_pool() 이 asyncpg.create_pool(server_settings=...) 을 전달해야 함 "
+        "(pool 재사용 시 세션 TIME ZONE 리셋 결함 회피)."
+    )
+    assert "Asia/Seoul" in src, "server_settings 값에 'Asia/Seoul' 명시 누락."
 
 
 @pytest.mark.asyncio

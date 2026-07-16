@@ -45,8 +45,16 @@ _RETRY_BACKOFF_SECS = 0.2
 async def _init_conn(conn: asyncpg.Connection) -> None:
     """신규 연결마다 실행되는 초기화 훅 (asyncpg.create_pool(init=...)).
 
-    1. JSONB/JSON codec 등록 — asyncpg 기본 str 반환을 dict 로 강제 변환(왕복 무손실).
-    2. KST 타임존 — `now()` DEFAULT · 표시 정합 (사이클69 TIMESTAMPTZ 명문화).
+    JSONB/JSON codec 등록 — asyncpg 기본 str 반환을 dict 로 강제 변환(왕복 무손실).
+
+    ⚠️ M2a 통합 검증 발견 (2026-07-16): KST 타임존은 여기서 세션 `SET TIME ZONE`으로
+    설정하지 않는다 — asyncpg pool 은 커넥션을 release 할 때 세션 상태(SET 으로 바뀐
+    파라미터)를 서버 기본값으로 리셋한다(`init=` 훅은 신규 *물리* 연결 최초 1회만
+    실행되고, 이후 pool 재사용 시에는 재실행되지 않음). 그 결과 `min_size=2` 이상으로
+    확보된 연결이 재사용될 때마다 timezone 이 `Etc/UTC` 로 되돌아가는 silent 결함을
+    유발한다(trade_history 읽기 `to_char(...,'+09:00')` 가 UTC 기준으로 렌더링되어
+    KST 날짜가 하루 밀리는 사고로 실증). `init_pool()` 의 `server_settings`(연결
+    핸드셰이크 파라미터, pool 재사용과 무관하게 매 물리 연결에 영속) 로 이전.
     """
     await conn.set_type_codec(
         "jsonb",
@@ -60,11 +68,15 @@ async def _init_conn(conn: asyncpg.Connection) -> None:
         decoder=json.loads,
         schema="pg_catalog",
     )
-    await conn.execute("SET TIME ZONE 'Asia/Seoul'")
 
 
 async def init_pool() -> None:
-    """전역 연결 풀 생성. main.py lifespan 시작 시 1회 호출."""
+    """전역 연결 풀 생성. main.py lifespan 시작 시 1회 호출.
+
+    KST 타임존은 `server_settings`(연결 핸드셰이크 파라미터)로 지정한다 — `init=`
+    훅 내 `SET TIME ZONE`(세션 레벨)과 달리 pool 이 커넥션을 release/재획득해도
+    유지된다(사이클 M2a 통합 검증 발견, `_init_conn` docstring 참조).
+    """
     global _pool
     _pool = await asyncpg.create_pool(
         dsn=settings.database_url,
@@ -73,6 +85,7 @@ async def init_pool() -> None:
         max_inactive_connection_lifetime=300.0,
         command_timeout=30.0,
         init=_init_conn,
+        server_settings={"timezone": "Asia/Seoul"},
     )
 
 

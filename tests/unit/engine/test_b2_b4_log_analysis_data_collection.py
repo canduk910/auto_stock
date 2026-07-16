@@ -231,6 +231,34 @@ class _FakeTradesSupabase:
         return _FakeTradesTable(self._rows, self.captured)
 
 
+class _FakeTradesPg:
+    """사이클 M2a — `_FakeTradesSupabase` 를 `pg.fetch(sql, *args)` 인터페이스로 감싼 어댑터.
+
+    trade_history.get_trades_in_range 가 이제 `datetime.fromisoformat(start_iso)` /
+    `datetime.fromisoformat(end_iso)` 를 위치 인자로 바인딩(asyncpg TIMESTAMPTZ str 금지,
+    M1 패턴 2) — SQL 텍스트에서 `strategy` 필터 유무만 보고, args 의 첫 tz-aware
+    datetime 2개를 gte/lte 로 간주해 기존 `_FakeTradesSupabase` (문자열 기반 시간
+    윈도우 필터링 로직)에 위임한다. `captured["gte_calls"]`/`["lte_calls"]` 는
+    isoformat() 문자열로 재구성해 기존 단언(`+09:00` suffix) 호환을 보존.
+    """
+
+    def __init__(self, rows: list[dict]) -> None:
+        self._inner = _FakeTradesSupabase(rows)
+        self.captured = self._inner.captured
+
+    async def fetch(self, sql: str, *args):
+        from datetime import datetime as _dt
+
+        datetime_args = [a for a in args if isinstance(a, _dt)]
+        select = self._inner.table("trade_history").select("*")
+        if len(datetime_args) >= 1:
+            select = select.gte("timestamp", datetime_args[0].isoformat())
+        if len(datetime_args) >= 2:
+            select = select.lte("timestamp", datetime_args[1].isoformat())
+        result = select.execute()
+        return result.data
+
+
 # ---------------------------------------------------------------------------
 # 데이터 생성 헬퍼 — system_logs 1500건 (1001~1500 위치에 drained 1건 삽입)
 # ---------------------------------------------------------------------------
@@ -380,8 +408,8 @@ async def test_s3_when_utc_2320_trade_then_kst_today_includes_it(
             "timestamp": "2026-05-31T23:20:00+00:00",  # UTC = KST 2026-06-01 08:20
         },
     ]
-    fake_supabase = _FakeTradesSupabase(rows)
-    monkeypatch.setattr(trade_history, "supabase", fake_supabase)
+    fake_supabase = _FakeTradesPg(rows)
+    monkeypatch.setattr(trade_history, "pg", fake_supabase)
 
     target = date(2026, 6, 1)
     result = await trade_history.get_trades_in_range(target, target)
@@ -462,8 +490,8 @@ async def test_s4_when_utc_midnight_boundary_then_only_kst_target_date_returned(
             "timestamp": "2026-06-01T15:00:00+00:00",  # KST 6/2 00:00:00 (제외)
         },
     ]
-    fake_supabase = _FakeTradesSupabase(rows)
-    monkeypatch.setattr(trade_history, "supabase", fake_supabase)
+    fake_supabase = _FakeTradesPg(rows)
+    monkeypatch.setattr(trade_history, "pg", fake_supabase)
 
     target = date(2026, 6, 1)
     result = await trade_history.get_trades_in_range(target, target)
@@ -559,8 +587,8 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
             "timestamp": "2026-06-01T06:20:00+00:00",  # KST 15:20
         },
     ]
-    fake_trades_supabase = _FakeTradesSupabase(trades_rows)
-    monkeypatch.setattr(trade_history, "supabase", fake_trades_supabase)
+    fake_trades_supabase = _FakeTradesPg(trades_rows)
+    monkeypatch.setattr(trade_history, "pg", fake_trades_supabase)
 
     # --- OpenAI / insert mock ---
     captured_metrics: dict = {}
@@ -725,8 +753,8 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
             "timestamp": "2026-06-01T06:20:00+00:00",
         },
     ]
-    fake_trades_supabase = _FakeTradesSupabase(trades_rows)
-    monkeypatch.setattr(trade_history, "supabase", fake_trades_supabase)
+    fake_trades_supabase = _FakeTradesPg(trades_rows)
+    monkeypatch.setattr(trade_history, "pg", fake_trades_supabase)
 
     # --- OpenAI / insert / strategy_funnel / api_metrics mock ---
     captured_metrics: dict = {}

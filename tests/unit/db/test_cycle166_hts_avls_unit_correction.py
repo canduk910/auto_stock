@@ -26,7 +26,7 @@ KIS 정본 (사이클 98 G-DOC1): FHKST01010100 inquire_price 응답 `hts_avls` 
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -59,31 +59,50 @@ def _make_row(
     }
 
 
-def _mock_supabase_result(rows: list[dict], count: int | None = None):
-    mock_result = MagicMock()
-    mock_result.data = rows
-    if count is not None:
-        mock_result.count = count
-    return mock_result
+def _run_list_by_filter(rows: list[dict], **kwargs):
+    """사이클 M2b — list_by_filter 를 pg.fetch 경유 실행 (rows pass-through)."""
+    import src.db.stock_master as sm
+
+    with patch.object(sm, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=rows)
+        return asyncio.run(sm.list_by_filter(**kwargs))
 
 
-def _setup_chain(mock_sb, result_mock):
-    chain = MagicMock()
-    mock_sb.table.return_value = chain
-    chain.select.return_value = chain
-    chain.order.return_value = chain
-    chain.limit.return_value = chain
-    chain.range.return_value = chain
-    chain.eq.return_value = chain
-    chain.gte.return_value = chain
-    chain.ilike.return_value = chain
-    chain.or_.return_value = chain
-    chain.execute.return_value = result_mock
-    return chain
+def _run_list_paged_capture(min_market_cap: int) -> dict:
+    """사이클 M2b — list_paged_by_filter 의 hts_avls_eok gte 임계를 캡처.
 
+    production 은 pg.fetchval(count_sql, *count_args) + pg.fetch(data_sql, *data_args)
+    를 발화하며, WHERE 에 `hts_avls_eok >= $N` 을 넣고 임계를 args 에 바인딩한다.
+    임계는 SQL 텍스트("hts_avls_eok")와 args 를 대조해 추출.
+    """
+    import src.db.stock_master as sm
 
-async def _fake_to_thread(fn, *args, **kwargs):
-    return fn(*args, **kwargs)
+    captured: dict = {}
+
+    def _record(sql: str, args: tuple):
+        s = sql.lower()
+        if "hts_avls_eok" in s:
+            # WHERE 절 args 에서 hts_avls_eok 임계 추출 — 유일 int gte 대상.
+            for a in args:
+                if isinstance(a, int) and a not in (0,):
+                    # count/data 쿼리 공통 = 첫 int 가 임계 (limit/offset 은 data 쿼리 끝)
+                    captured["hts_avls_threshold"] = a
+                    break
+
+    async def _fetchval(sql, *args):
+        _record(sql, args)
+        return 1
+
+    async def _fetch(sql, *args):
+        _record(sql, args)
+        return [_make_row("000001", hts_avls="1000")]
+
+    with patch.object(sm, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(side_effect=_fetchval)
+        pg_mod.fetch = AsyncMock(side_effect=_fetch)
+        asyncio.run(sm.list_paged_by_filter(min_market_cap=min_market_cap))
+
+    return captured
 
 
 def _apply_eok_gte_filter(rows: list[dict], *, min_market_cap: int) -> list[dict]:
@@ -118,36 +137,19 @@ class TestListByFilterEokUnit:
     def test_eok_1_one_thousand_eok_passes(self):
         """hts_avls=1000 (1,000억) → min_market_cap=1,000억(=100_000_000_000원) 통과."""
         rows = [_make_row("000001", hts_avls="1000")]  # 1,000억
-        result_mock = _mock_supabase_result(rows)
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            _setup_chain(mock_sb, result_mock)
-            import src.db.stock_master as sm
-            result = asyncio.run(sm.list_by_filter(min_market_cap=100_000_000_000))
+        result = _run_list_by_filter(rows, min_market_cap=100_000_000_000)
 
         assert any(r["ticker"] == "000001" for r in result), (
-            "hts_avls=1000(억원=1,000억)이 1,000억 임계를 통과해야 함 "
-            "(억원 단위 정합 — 사이클 166)"
+            "hts_avls=1000(억원=1,000억)이 1,000억 임계를 통과해야 함 (억원 단위 정합 — 사이클 166)"
         )
 
     def test_eok_1_boundary_999_eok_excluded(self):
-        """hts_avls=999 (999억) → 1,000억 임계 미달 제외.
-
-        사이클 205 — DB-side gte 전환. mock 이 실제 필터를 수행하지 않으므로
-        fixture 자체를 `_apply_eok_gte_filter` 로 사전 분할해 주입한다.
-        """
+        """hts_avls=999 (999억) → 1,000억 임계 미달 제외 (DB-side gte 시뮬레이션)."""
         rows = _apply_eok_gte_filter(
             [_make_row("000002", hts_avls="999")],  # 999억
             min_market_cap=100_000_000_000,
         )
-        result_mock = _mock_supabase_result(rows)
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            _setup_chain(mock_sb, result_mock)
-            import src.db.stock_master as sm
-            result = asyncio.run(sm.list_by_filter(min_market_cap=100_000_000_000))
+        result = _run_list_by_filter(rows, min_market_cap=100_000_000_000)
 
         assert not any(r["ticker"] == "000002" for r in result), (
             "hts_avls=999(999억)는 1,000억 임계 미달로 제외돼야 함"
@@ -156,13 +158,7 @@ class TestListByFilterEokUnit:
     def test_eok_1_boundary_1000_eok_included(self):
         """hts_avls=1000 (정확히 1,000억) → 1,000억 임계 통과 (경계 포함)."""
         rows = [_make_row("000003", hts_avls="1000")]
-        result_mock = _mock_supabase_result(rows)
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            _setup_chain(mock_sb, result_mock)
-            import src.db.stock_master as sm
-            result = asyncio.run(sm.list_by_filter(min_market_cap=100_000_000_000))
+        result = _run_list_by_filter(rows, min_market_cap=100_000_000_000)
 
         assert any(r["ticker"] == "000003" for r in result), (
             "hts_avls=1000(정확히 1,000억)은 경계 포함으로 통과해야 함"
@@ -171,22 +167,12 @@ class TestListByFilterEokUnit:
     def test_eok_1_ten_trillion_passes(self):
         """hts_avls=100000 (10조) → 1,000억 임계 통과 (결함상태 80종목 영역도 통과 유지)."""
         rows = [_make_row("000004", hts_avls="100000")]  # 10조
-        result_mock = _mock_supabase_result(rows)
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            _setup_chain(mock_sb, result_mock)
-            import src.db.stock_master as sm
-            result = asyncio.run(sm.list_by_filter(min_market_cap=100_000_000_000))
+        result = _run_list_by_filter(rows, min_market_cap=100_000_000_000)
 
         assert any(r["ticker"] == "000004" for r in result)
 
     def test_eok_1_operational_pool_recovery(self):
-        """운영 실측 재현: 1,000억~10조 구간 종목이 1,000억 임계에서 통과한다.
-
-        결함상태에서는 hts_avls>=100,000(10조)만 통과 = 1,654종목 누락.
-        정정 후 hts_avls>=1,000(1,000억)부터 통과 = 후보 풀 복원.
-        """
+        """운영 실측 재현: 1,000억~10조 구간 종목이 1,000억 임계에서 통과한다."""
         # 1,000억(=1000) / 3,000억(=3000) / 1조(=10000) — 결함상태 전부 탈락하던 구간
         rows = [
             _make_row("100001", hts_avls="1000"),   # 1,000억
@@ -194,13 +180,7 @@ class TestListByFilterEokUnit:
             _make_row("100003", hts_avls="10000"),  # 1조
             _make_row("100004", hts_avls="50000"),  # 5조
         ]
-        result_mock = _mock_supabase_result(rows)
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            _setup_chain(mock_sb, result_mock)
-            import src.db.stock_master as sm
-            result = asyncio.run(sm.list_by_filter(min_market_cap=100_000_000_000))
+        result = _run_list_by_filter(rows, min_market_cap=100_000_000_000)
 
         tickers = {r["ticker"] for r in result}
         assert {"100001", "100002", "100003", "100004"} <= tickers, (
@@ -208,10 +188,7 @@ class TestListByFilterEokUnit:
         )
 
     def test_eok_1_donchian_500eok_threshold(self):
-        """donchian 500억 임계: hts_avls=500(500억) 통과 / 499(499억) 탈락.
-
-        사이클 205 — DB-side gte 전환 (`_apply_eok_gte_filter` 사전 분할 주입).
-        """
+        """donchian 500억 임계: hts_avls=500(500억) 통과 / 499(499억) 탈락 (DB-side gte 시뮬레이션)."""
         rows = _apply_eok_gte_filter(
             [
                 _make_row("200001", hts_avls="500"),  # 500억 — 통과
@@ -219,24 +196,14 @@ class TestListByFilterEokUnit:
             ],
             min_market_cap=50_000_000_000,  # 500억
         )
-        result_mock = _mock_supabase_result(rows)
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            _setup_chain(mock_sb, result_mock)
-            import src.db.stock_master as sm
-            result = asyncio.run(sm.list_by_filter(min_market_cap=50_000_000_000))  # 500억
+        result = _run_list_by_filter(rows, min_market_cap=50_000_000_000)  # 500억
 
         tickers = {r["ticker"] for r in result}
         assert "200001" in tickers
         assert "200002" not in tickers
 
     def test_eok_1_hts_avls_missing_graceful(self):
-        """hts_avls 키 미존재 → graceful (0 처리, 시총 필터 적용 시 제외).
-
-        사이클 205 — DB-side gte 전환. 생성 컬럼 NULL(비숫자/미존재 raw)은 Supabase 가
-        `.gte()` 에서 자동 제외 — `_apply_eok_gte_filter` 로 동일 시뮬레이션.
-        """
+        """hts_avls 키 미존재 → 생성 컬럼 NULL → DB gte 자동 제외 (시뮬레이션)."""
         rows = _apply_eok_gte_filter(
             [
                 {"ticker": "000009", "name": "테스트", "excg_dvsn_cd": "02",
@@ -245,13 +212,7 @@ class TestListByFilterEokUnit:
             ],
             min_market_cap=100_000_000,  # 1억
         )
-        result_mock = _mock_supabase_result(rows)
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            _setup_chain(mock_sb, result_mock)
-            import src.db.stock_master as sm
-            result = asyncio.run(sm.list_by_filter(min_market_cap=100_000_000))  # 1억
+        result = _run_list_by_filter(rows, min_market_cap=100_000_000)  # 1억
 
         assert not any(r["ticker"] == "000009" for r in result)
 
@@ -264,25 +225,8 @@ class TestListPagedByFilterEokUnit:
     """list_paged_by_filter (UI 페이징): jsonb hts_avls 억원 임계."""
 
     def _run_paged(self, min_market_cap: int):
-        """jsonb gte 임계값을 캡처하기 위한 헬퍼."""
-        captured = {}
-
-        rows = [_make_row("000001", hts_avls="1000")]
-        result_mock = _mock_supabase_result(rows, count=1)
-
-        def _gte(col, val):
-            if "hts_avls" in str(col):
-                captured["hts_avls_threshold"] = val
-            return chain
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            chain = _setup_chain(mock_sb, result_mock)
-            chain.gte.side_effect = _gte
-            import src.db.stock_master as sm
-            asyncio.run(sm.list_paged_by_filter(min_market_cap=min_market_cap))
-
-        return captured
+        """생성 컬럼 hts_avls_eok gte 임계값을 캡처하기 위한 헬퍼 (사이클 M2b — pg 경유)."""
+        return _run_list_paged_capture(min_market_cap)
 
     def test_eok_2_jsonb_threshold_is_eok(self):
         """min_market_cap=1,000억(원) → jsonb hts_avls 임계 = 1,000 (억원, ÷100_000_000)."""
@@ -317,34 +261,15 @@ class TestPathConsistency:
     """list_by_filter(python) ↔ list_paged_by_filter(jsonb) 단위 일관성."""
 
     def test_consistency_same_eok_boundary(self):
-        """동일 hts_avls=1000(1,000억) + min_market_cap=1,000억 → 양쪽 경로 모두 통과."""
-        # python 경로 (list_by_filter)
+        """동일 hts_avls=1000(1,000억) + min_market_cap=1,000억 → 양쪽 경로 단위 정합."""
+        # list_by_filter 경로 (생성 컬럼 gte, DB-side)
         rows_py = [_make_row("000001", hts_avls="1000")]
-        result_py = _mock_supabase_result(rows_py)
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            _setup_chain(mock_sb, result_py)
-            import src.db.stock_master as sm
-            py_result = asyncio.run(sm.list_by_filter(min_market_cap=100_000_000_000))
+        py_result = _run_list_by_filter(rows_py, min_market_cap=100_000_000_000)
         py_pass = any(r["ticker"] == "000001" for r in py_result)
 
-        # jsonb 경로 (list_paged_by_filter) — 임계값 확인
-        captured = {}
-        rows_js = [_make_row("000001", hts_avls="1000")]
-        result_js = _mock_supabase_result(rows_js, count=1)
+        # list_paged_by_filter 경로 — hts_avls_eok gte 임계값 확인
+        captured = _run_list_paged_capture(100_000_000_000)
 
-        def _gte(col, val):
-            if "hts_avls" in str(col):
-                captured["t"] = val
-            return chain
-
-        with patch("src.db.stock_master.supabase") as mock_sb, \
-             patch("asyncio.to_thread", side_effect=_fake_to_thread):
-            chain = _setup_chain(mock_sb, result_js)
-            chain.gte.side_effect = _gte
-            import src.db.stock_master as sm
-            asyncio.run(sm.list_paged_by_filter(min_market_cap=100_000_000_000))
-
-        # python 경로 통과 + jsonb 임계 1000(억원) = 동일 단위 체계
-        assert py_pass, "python 경로 1,000억 통과 실패"
-        assert captured.get("t") == 1000, "jsonb 경로 임계 단위 불일치 (사일런트 분기)"
+        # 양쪽 경로 동일 억원 단위 체계 (사이클 166)
+        assert py_pass, "list_by_filter 경로 1,000억 통과 실패"
+        assert captured.get("hts_avls_threshold") == 1000, "list_paged 경로 임계 단위 불일치 (silent 분기)"

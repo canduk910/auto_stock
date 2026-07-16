@@ -10,7 +10,7 @@ mocked supabase로 검증한다 (실 DB 호출은 통합 테스트 영역).
 """
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -40,15 +40,8 @@ async def test_M2_trigger_insert_creates_history_row():
         "after_raw": {"prdt_name": "삼성전자", "bfdy_clpr": "70000"},
         "changed_at": "2026-06-09T09:00:00+09:00",
     }]
-    fake_result = MagicMock()
-    fake_result.data = fake_rows
-
-    with patch("src.db.stock_master.supabase") as mock_supabase:
-        chain = mock_supabase.table.return_value
-        chain.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value = fake_result
-        # 헬퍼 구현에 따라 chain 호출 순서가 달라질 수 있어 fallback 도 등록
-        chain.select.return_value.eq.return_value.order.return_value.execute.return_value = fake_result
-
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=fake_rows)
         rows = await list_history("005930", limit=100)
 
     assert len(rows) >= 1, "INSERT 직후 history row 0건 — trigger 미발화 가정 결함"

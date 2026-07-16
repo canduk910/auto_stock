@@ -1,20 +1,33 @@
-"""trade_history CRUD."""
+"""trade_history CRUD.
+
+사이클 M2a (Supabase→RDS 이전, 매매 hot path): supabase-py → `src.db.pg`(asyncpg) 전환.
+함수 시그니처·반환형·graceful 100% 보존 — 호출부(order_engine/scheduler) diff 0.
+
+⚠️ 3대 미묘 계약 (hot path 절대 보존):
+1. TIMESTAMPTZ `+09:00` str 계약 (사이클 53 B-4):
+   - 쓰기: timestamp 는 datetime 바인딩 (asyncpg TIMESTAMPTZ str 금지).
+   - 읽기: SELECT 가 timestamp 를 `to_char(timestamp,'YYYY-MM-DD"T"HH24:MI:SS+09:00')` 로
+     str `+09:00` 캐스트 반환 → `_to_kst`/`get_trade_pairs` 소비처 무변경 보장.
+   - 범위: `get_trades_in_range` 가 `"{d}T00:00:00+09:00"` / `"{d}T23:59:59.999999+09:00"` 바인딩.
+2. `get_trade_pairs` Decimal 페어링 — 가중평균 buy/sell + profit_loss Decimal 보존.
+3. count + range 페이징 — `get_trades` 는 별도 count(*) SELECT + LIMIT/OFFSET.
+   `.in_(status)` → `status = ANY($1::text[])`. sync 함수는 dedupe 없음 + CANCELLED 제외(사이클 30/73).
+"""
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
 
-from src.db.supabase import supabase
+import src.db.pg as pg
 from src.models.trade import TradeRecord, TradeStatus, TradeType
 
 logger = logging.getLogger(__name__)
 
 KST = timezone(timedelta(hours=9))
 
-# supabase-py는 동기 client. 모든 .execute() 호출을 asyncio.to_thread()로 위임해
-# 이벤트 루프 블로킹 차단(on_tick / 체결통보 핸들러가 매 호출 ms 단위로 밀리던 결함).
+# timestamp 를 항상 +09:00 str 로 반환하는 SELECT 표현식 (읽기 str 계약, 사이클 53 B-4).
+_TS_SELECT = "to_char(t.timestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS.US+09:00') AS timestamp"
 
 
 def _to_kst(ts: str | None) -> tuple[str | None, str | None]:
@@ -51,20 +64,23 @@ def _today_kst_iso() -> str:
 
 async def insert_trade(record: TradeRecord) -> None:
     """거래 기록을 삽입한다."""
-    data = {
-        "ticker": record.ticker,
-        "ticker_name": record.ticker_name,
-        "trade_type": record.trade_type.value,
-        "price": float(record.price),
-        "quantity": record.quantity,
-        "profit_loss": float(record.profit_loss),
-        "status": record.status.value,
-        "strategy": record.strategy,
-        "order_no": record.order_no,
-        "timestamp": datetime.now(KST).isoformat(),
-    }
-    await asyncio.to_thread(
-        lambda: supabase.table("trade_history").insert(data).execute()
+    await pg.execute(
+        """
+        INSERT INTO trade_history (
+            ticker, ticker_name, trade_type, price, quantity,
+            profit_loss, status, strategy, order_no, timestamp
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        """,
+        record.ticker,
+        record.ticker_name,
+        record.trade_type.value,
+        float(record.price),
+        record.quantity,
+        float(record.profit_loss),
+        record.status.value,
+        record.strategy,
+        record.order_no,
+        datetime.now(KST),
     )
     logger.debug("거래 기록 삽입: %s %s (전략: %s)", record.trade_type.value, record.ticker, record.strategy)
 
@@ -78,28 +94,41 @@ async def update_trade_status(
     profit_loss: float | None = None,
 ) -> int:
     """최신 PENDING 거래 기록의 상태를 업데이트하고 영향받은 행 수를 반환한다."""
-    update_data: dict = {"status": status.value}
+    set_clauses = ["status = $1"]
+    args: list = [status.value]
+
     if price is not None:
-        update_data["price"] = float(price)
+        args.append(float(price))
+        set_clauses.append(f"price = ${len(args)}")
     if profit_loss is not None:
-        update_data["profit_loss"] = float(profit_loss)
+        args.append(float(profit_loss))
+        set_clauses.append(f"profit_loss = ${len(args)}")
 
-    def _update():
-        return (
-            supabase.table("trade_history")
-            .update(update_data)
-            .eq("ticker", ticker)
-            .eq("trade_type", trade_type.value)
-            .eq("status", TradeStatus.PENDING.value)
-            .eq("strategy", strategy)
-            .execute()
-        )
+    args.extend([ticker, trade_type.value, TradeStatus.PENDING.value, strategy])
+    ticker_idx = len(args) - 3
+    type_idx = len(args) - 2
+    pending_idx = len(args) - 1
+    strategy_idx = len(args)
 
-    result = await asyncio.to_thread(_update)
-    affected = len(result.data or [])
+    sql = (
+        f"UPDATE trade_history SET {', '.join(set_clauses)} "
+        f"WHERE ticker = ${ticker_idx} AND trade_type = ${type_idx} "
+        f"AND status = ${pending_idx} AND strategy = ${strategy_idx}"
+    )
+
+    result = await pg.execute(sql, *args)
+    affected = _parse_affected(result)
     logger.debug("거래 상태 변경: %s %s -> %s (전략: %s, %d건)",
                  ticker, trade_type.value, status.value, strategy, affected)
     return affected
+
+
+def _parse_affected(status_str: str) -> int:
+    """asyncpg execute() 상태 문자열("UPDATE 1" / "DELETE 0" 등) → affected int."""
+    try:
+        return int(status_str.strip().split()[-1])
+    except (ValueError, IndexError, AttributeError):
+        return 0
 
 
 async def _lookup_strategy_from_trade_history(
@@ -116,7 +145,7 @@ async def _lookup_strategy_from_trade_history(
     재발 영구 차단.
 
     Args:
-        ticker: 6자리 종목코드 (PostgREST eq filter)
+        ticker: 6자리 종목코드
         order_no: KIS 주문번호 (사이클 30 UNIQUE 인덱스 정합)
         trade_type: TradeType.BUY / TradeType.SELL
 
@@ -124,20 +153,18 @@ async def _lookup_strategy_from_trade_history(
         strategy str (PENDING/PARTIAL row 1건 매칭) / None (0건 또는 예외 graceful)
     """
     try:
-        def _query():
-            return (
-                supabase.table("trade_history")
-                .select("strategy")
-                .eq("ticker", ticker)
-                .eq("order_no", order_no)
-                .eq("trade_type", trade_type.value)
-                .in_("status", [TradeStatus.PENDING.value, TradeStatus.PARTIAL.value])
-                .limit(1)
-                .execute()
-            )
-
-        result = await asyncio.to_thread(_query)
-        rows = result.data or []
+        rows = await pg.fetch(
+            """
+            SELECT strategy FROM trade_history
+            WHERE ticker = $1 AND order_no = $2 AND trade_type = $3
+            AND status = ANY($4::text[])
+            LIMIT 1
+            """,
+            ticker,
+            order_no,
+            trade_type.value,
+            [TradeStatus.PENDING.value, TradeStatus.PARTIAL.value],
+        )
         if not rows:
             return None
         return rows[0].get("strategy")
@@ -172,25 +199,30 @@ async def _update_trade_status_by_order_no(
     Returns:
         affected row 수
     """
-    update_data: dict = {"status": status.value}
-    if price is not None:
-        update_data["price"] = float(price)
-    if profit_loss is not None:
-        update_data["profit_loss"] = float(profit_loss)
+    set_clauses = ["status = $1"]
+    args: list = [status.value]
 
-    def _update():
-        return (
-            supabase.table("trade_history")
-            .update(update_data)
-            .eq("order_no", order_no)
-            .eq("trade_type", trade_type.value)
-            .eq("status", TradeStatus.PENDING.value)
-            .execute()
-        )
+    if price is not None:
+        args.append(float(price))
+        set_clauses.append(f"price = ${len(args)}")
+    if profit_loss is not None:
+        args.append(float(profit_loss))
+        set_clauses.append(f"profit_loss = ${len(args)}")
+
+    args.extend([order_no, trade_type.value, TradeStatus.PENDING.value])
+    order_no_idx = len(args) - 2
+    type_idx = len(args) - 1
+    pending_idx = len(args)
+
+    sql = (
+        f"UPDATE trade_history SET {', '.join(set_clauses)} "
+        f"WHERE order_no = ${order_no_idx} AND trade_type = ${type_idx} "
+        f"AND status = ${pending_idx}"
+    )
 
     try:
-        result = await asyncio.to_thread(_update)
-        affected = len(result.data or [])
+        result = await pg.execute(sql, *args)
+        affected = _parse_affected(result)
         logger.info(
             "[trade_status_update_by_order_no] order_no=%s trade_type=%s status=%s affected=%d",
             order_no, trade_type.value, status.value, affected,
@@ -212,20 +244,17 @@ async def get_today_trades_for_settlement(strategy: str | None = None) -> list[d
     """
     today_iso = _today_kst_iso()
 
-    def _query():
-        q = (
-            supabase.table("trade_history")
-            .select("*")
-            .gte("timestamp", today_iso)
-            .in_("status", ["COMPLETED", "PARTIAL"])
-            .order("timestamp", desc=False)
-        )
-        if strategy:
-            q = q.eq("strategy", strategy)
-        return q.execute()
+    sql = f"""
+        SELECT t.*, {_TS_SELECT} FROM trade_history t
+        WHERE timestamp >= $1 AND status = ANY($2::text[])
+    """
+    args: list = [datetime.fromisoformat(today_iso), ["COMPLETED", "PARTIAL"]]
+    if strategy:
+        sql += f" AND strategy = ${len(args) + 1}"
+        args.append(strategy)
+    sql += " ORDER BY t.timestamp ASC"
 
-    result = await asyncio.to_thread(_query)
-    return result.data or []
+    return await pg.fetch(sql, *args) or []
 
 
 async def get_today_buy_trades(strategy: str | None = None) -> list[dict]:
@@ -241,23 +270,20 @@ async def get_today_buy_trades(strategy: str | None = None) -> list[dict]:
     """
     today_iso = _today_kst_iso()
 
-    def _query():
-        q = (
-            supabase.table("trade_history")
-            .select("*")
-            .eq("trade_type", "BUY")
-            .gte("timestamp", today_iso)
-            .in_("status", ["PENDING", "COMPLETED", "PARTIAL"])
-            .order("timestamp", desc=True)
-        )
-        if strategy:
-            q = q.eq("strategy", strategy)
-        return q.execute()
+    sql = f"""
+        SELECT t.*, {_TS_SELECT} FROM trade_history t
+        WHERE trade_type = 'BUY' AND timestamp >= $1 AND status = ANY($2::text[])
+    """
+    args: list = [datetime.fromisoformat(today_iso), ["PENDING", "COMPLETED", "PARTIAL"]]
+    if strategy:
+        sql += f" AND strategy = ${len(args) + 1}"
+        args.append(strategy)
+    sql += " ORDER BY t.timestamp DESC"
 
-    result = await asyncio.to_thread(_query)
+    rows = await pg.fetch(sql, *args) or []
     # 같은 종목이 여러 번 매수된 경우 최신 기록만 사용
     seen: dict[str, dict] = {}
-    for row in result.data:
+    for row in rows:
         ticker = row["ticker"]
         if ticker not in seen:
             seen[ticker] = row
@@ -279,19 +305,15 @@ async def get_today_buy_trades_for_funnel() -> list[dict]:
     """
     today_iso = _today_kst_iso()
 
-    def _query():
-        return (
-            supabase.table("trade_history")
-            .select("*")
-            .eq("trade_type", "BUY")
-            .gte("timestamp", today_iso)
-            .in_("status", ["PENDING", "COMPLETED", "PARTIAL", "CANCELLED"])
-            .order("timestamp", desc=True)
-            .execute()
-        )
-
-    result = await asyncio.to_thread(_query)
-    return result.data or []
+    sql = f"""
+        SELECT t.*, {_TS_SELECT} FROM trade_history t
+        WHERE trade_type = 'BUY' AND timestamp >= $1 AND status = ANY($2::text[])
+        ORDER BY t.timestamp DESC
+    """
+    rows = await pg.fetch(
+        sql, datetime.fromisoformat(today_iso), ["PENDING", "COMPLETED", "PARTIAL", "CANCELLED"]
+    )
+    return rows or []
 
 
 async def get_today_sell_trades(strategy: str | None = None) -> list[dict]:
@@ -304,22 +326,19 @@ async def get_today_sell_trades(strategy: str | None = None) -> list[dict]:
     """
     today_iso = _today_kst_iso()
 
-    def _query():
-        q = (
-            supabase.table("trade_history")
-            .select("*")
-            .eq("trade_type", "SELL")
-            .gte("timestamp", today_iso)
-            .in_("status", ["COMPLETED", "PARTIAL"])
-            .order("timestamp", desc=True)
-        )
-        if strategy:
-            q = q.eq("strategy", strategy)
-        return q.execute()
+    sql = f"""
+        SELECT t.*, {_TS_SELECT} FROM trade_history t
+        WHERE trade_type = 'SELL' AND timestamp >= $1 AND status = ANY($2::text[])
+    """
+    args: list = [datetime.fromisoformat(today_iso), ["COMPLETED", "PARTIAL"]]
+    if strategy:
+        sql += f" AND strategy = ${len(args) + 1}"
+        args.append(strategy)
+    sql += " ORDER BY t.timestamp DESC"
 
-    result = await asyncio.to_thread(_query)
+    rows = await pg.fetch(sql, *args) or []
     seen: dict[str, dict] = {}
-    for row in result.data:
+    for row in rows:
         ticker = row["ticker"]
         if ticker not in seen:
             seen[ticker] = row
@@ -358,21 +377,17 @@ async def get_today_buy_trades_for_sync(ticker: str | None = None) -> list[dict]
     """
     today_iso = _today_kst_iso()
 
-    def _query():
-        q = (
-            supabase.table("trade_history")
-            .select("*")
-            .eq("trade_type", "BUY")
-            .gte("timestamp", today_iso)
-            .in_("status", ["PENDING", "COMPLETED", "PARTIAL"])
-            .order("timestamp", desc=True)
-        )
-        if ticker:
-            q = q.eq("ticker", ticker)
-        return q.execute()
+    sql = f"""
+        SELECT t.*, {_TS_SELECT} FROM trade_history t
+        WHERE trade_type = 'BUY' AND timestamp >= $1 AND status = ANY($2::text[])
+    """
+    args: list = [datetime.fromisoformat(today_iso), ["PENDING", "COMPLETED", "PARTIAL"]]
+    if ticker:
+        sql += f" AND ticker = ${len(args) + 1}"
+        args.append(ticker)
+    sql += " ORDER BY t.timestamp DESC"
 
-    result = await asyncio.to_thread(_query)
-    return result.data or []
+    return await pg.fetch(sql, *args) or []
 
 
 async def get_today_sell_trades_for_sync(ticker: str | None = None) -> list[dict]:
@@ -382,21 +397,17 @@ async def get_today_sell_trades_for_sync(ticker: str | None = None) -> list[dict
     """
     today_iso = _today_kst_iso()
 
-    def _query():
-        q = (
-            supabase.table("trade_history")
-            .select("*")
-            .eq("trade_type", "SELL")
-            .gte("timestamp", today_iso)
-            .in_("status", ["PENDING", "COMPLETED", "PARTIAL"])
-            .order("timestamp", desc=True)
-        )
-        if ticker:
-            q = q.eq("ticker", ticker)
-        return q.execute()
+    sql = f"""
+        SELECT t.*, {_TS_SELECT} FROM trade_history t
+        WHERE trade_type = 'SELL' AND timestamp >= $1 AND status = ANY($2::text[])
+    """
+    args: list = [datetime.fromisoformat(today_iso), ["PENDING", "COMPLETED", "PARTIAL"]]
+    if ticker:
+        sql += f" AND ticker = ${len(args) + 1}"
+        args.append(ticker)
+    sql += " ORDER BY t.timestamp DESC"
 
-    result = await asyncio.to_thread(_query)
-    return result.data or []
+    return await pg.fetch(sql, *args) or []
 
 
 async def get_trades(
@@ -406,33 +417,30 @@ async def get_trades(
     strategy: str | None = None,
 ) -> tuple[list[dict], int]:
     """거래 내역을 조회한다. (데이터, 전체 건수) 반환."""
-    def _count():
-        q = supabase.table("trade_history").select("*", count="exact")
-        if ticker:
-            q = q.eq("ticker", ticker)
-        if strategy:
-            q = q.eq("strategy", strategy)
-        return q.execute()
+    count_sql = "SELECT count(*) FROM trade_history t WHERE 1=1"
+    data_sql = f"SELECT t.*, {_TS_SELECT} FROM trade_history t WHERE 1=1"
+    count_args: list = []
+    data_args: list = []
 
-    def _data():
-        q = (
-            supabase.table("trade_history")
-            .select("*")
-            .order("timestamp", desc=True)
-            .range(offset, offset + limit - 1)
-        )
-        if ticker:
-            q = q.eq("ticker", ticker)
-        if strategy:
-            q = q.eq("strategy", strategy)
-        return q.execute()
+    if ticker:
+        count_args.append(ticker)
+        count_sql += f" AND ticker = ${len(count_args)}"
+        data_args.append(ticker)
+        data_sql += f" AND ticker = ${len(data_args)}"
+    if strategy:
+        count_args.append(strategy)
+        count_sql += f" AND strategy = ${len(count_args)}"
+        data_args.append(strategy)
+        data_sql += f" AND strategy = ${len(data_args)}"
 
-    count_result, result = await asyncio.gather(
-        asyncio.to_thread(_count),
-        asyncio.to_thread(_data),
+    data_args.extend([limit, offset])
+    data_sql += (
+        f" ORDER BY t.timestamp DESC LIMIT ${len(data_args) - 1} OFFSET ${len(data_args)}"
     )
-    total = count_result.count or 0
-    return result.data, total
+
+    total = await pg.fetchval(count_sql, *count_args)
+    rows = await pg.fetch(data_sql, *data_args)
+    return rows or [], total or 0
 
 
 async def get_trades_in_range(
@@ -447,20 +455,17 @@ async def get_trades_in_range(
     start_iso = f"{start_date.isoformat()}T00:00:00+09:00"
     end_iso = f"{end_date.isoformat()}T23:59:59.999999+09:00"
 
-    def _query():
-        q = (
-            supabase.table("trade_history")
-            .select("*")
-            .gte("timestamp", start_iso)
-            .lte("timestamp", end_iso)
-            .order("timestamp", desc=False)
-        )
-        if strategy:
-            q = q.eq("strategy", strategy)
-        return q.execute()
+    sql = f"""
+        SELECT t.*, {_TS_SELECT} FROM trade_history t
+        WHERE timestamp >= $1 AND timestamp <= $2
+    """
+    args: list = [datetime.fromisoformat(start_iso), datetime.fromisoformat(end_iso)]
+    if strategy:
+        sql += f" AND strategy = ${len(args) + 1}"
+        args.append(strategy)
+    sql += " ORDER BY t.timestamp ASC"
 
-    result = await asyncio.to_thread(_query)
-    return result.data or []
+    return await pg.fetch(sql, *args) or []
 
 
 async def get_trade_pairs(
@@ -484,21 +489,20 @@ async def get_trade_pairs(
     from decimal import Decimal
 
     # 1) trade_history 전체 조회 (체결 또는 부분체결만 페어링 대상)
-    def _query():
-        q = (
-            supabase.table("trade_history")
-            .select("*")
-            .in_("status", ["COMPLETED", "PARTIAL"])
-            .order("timestamp", desc=False)
-        )
-        if strategy:
-            q = q.eq("strategy", strategy)
-        if ticker:
-            q = q.eq("ticker", ticker)
-        return q.execute()
+    sql = f"""
+        SELECT t.*, {_TS_SELECT} FROM trade_history t
+        WHERE status = ANY($1::text[])
+    """
+    args: list = [["COMPLETED", "PARTIAL"]]
+    if strategy:
+        sql += f" AND strategy = ${len(args) + 1}"
+        args.append(strategy)
+    if ticker:
+        sql += f" AND ticker = ${len(args) + 1}"
+        args.append(ticker)
+    sql += " ORDER BY t.timestamp ASC"
 
-    result = await asyncio.to_thread(_query)
-    rows = result.data or []
+    rows = await pg.fetch(sql, *args) or []
 
     # 2) (ticker, strategy)별 그룹화
     grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)

@@ -22,7 +22,19 @@ from typing import Any
 
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 M3b (2026-07-16) — Supabase→RDS 이전. `purge_old_logs`/`_purge_by_cutoff` 가
+# supabase-py 체인(select/eq/in_/lt/limit/delete chain) → `pg.fetch`+`pg.execute` SQL
+# 로 전환되어 본 파일의 Fake supabase 가 어떤 호출도 가로채지 못해 전량 FAIL. retention
+# 경계/cap/RuntimeError/emit 실질 계약은 `tests/unit/db/test_cycleM3b_system_logs_pg.py::
+# test_purge_*` 로 이관되어 회귀 가드 유지 (또한 사이클175 파일이 루프배치 상세를 이관).
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason="사이클M3b — purge_old_logs supabase→pg 전환. retention 계약은 "
+        "test_cycleM3b_system_logs_pg.py 로 이관",
+        strict=False,
+    ),
+]
 
 KST = timezone(timedelta(hours=9))
 

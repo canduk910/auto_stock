@@ -15,6 +15,23 @@ from types import SimpleNamespace
 
 import pytest
 
+# 사이클 M3a (Supabase→RDS asyncpg 전환) — 이 파일 전체 xfail.
+# supabase 체인 mock 기반 검증인데 parameter_recommendations 가 pg(asyncpg) 단독
+# 전환되어 supabase 심볼이 사라짐 → 체인 mock 라우팅 불가. 신규 3컬럼
+# (recommended_weight/code_review_notes/applied_weight) round-trip 계약은 pg 레벨
+# test_cycleM3a_parameter_recommendations_pg.py + 실 PG
+# test_cycleM3a_three_modules_roundtrip.py 가 계승.
+pytestmark = pytest.mark.xfail(
+    reason=(
+        "사이클 M3a (2026-07-16) 의미 전환 — parameter_recommendations 가 "
+        "supabase-py 에서 src.db.pg(asyncpg) 로 전환되어 supabase 체인 mock 라우팅 "
+        "불가. 신규 3컬럼 round-trip 계약은 "
+        "test_cycleM3a_parameter_recommendations_pg.py + "
+        "test_cycleM3a_three_modules_roundtrip.py 가 계승."
+    ),
+    strict=False,
+)
+
 
 @pytest.fixture
 def fake_supabase(monkeypatch):

@@ -24,19 +24,28 @@
   - 4 모드 외 값은 `set_buy_block_mode` 가 ValueError.
   - 본 키들은 .env fallback 없음 (운영 가변 설정 — DB 미설정 시 코드 디폴트).
 
-supabase 동기 SDK 호출은 모두 `asyncio.to_thread` 위임 (이벤트 루프 블로킹 차단).
+사이클 M2a (Supabase→RDS 이전, 매매 hot path): supabase-py → `src.db.pg`(asyncpg) 전환.
+함수 시그니처·반환형·graceful 폴백 100% 보존 — 호출부(risk/order_engine/scheduler/boot) diff 0.
+
+⚠️ JSONB `{"value": x}` codec — `src/db/pg.py::_init_conn` 이 jsonb encoder=json.dumps/
+decoder=json.loads 등록. read 는 codec 이 dict 로 자동 복원하므로 `isinstance(raw, dict)`
+분기가 그대로 작동한다. write 는 raw dict 를 **직접 바인딩**(json.dumps 사전 적용 금지 =
+이중 인코딩 방지, codec 이 인코딩을 전담).
+
+read 헬퍼는 `pg._with_retry`(9함수, 사이클 189 정책 = read만 재시도 계승) 경유,
+write(`_upsert`/`_set_*`)는 `pg.execute` 직접 호출(retry 미경유, 멱등 우려 정책 계승).
 """
 
 from __future__ import annotations
 
-import asyncio
 import logging
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
+import src.db.pg as pg
 from src.db._kst import now_kst_iso
-from src.db.supabase import execute_with_retry, supabase
 
 logger = logging.getLogger(__name__)
 
@@ -52,26 +61,53 @@ _AUTO_REGIME_ADJUST_KEY = "auto_regime_adjust"
 _AUTO_REGIME_ADJUST_DEFAULT = True
 
 
+async def _select_value(key: str) -> object:
+    """system_config.value(JSONB) 단건 조회. 0건이면 _MISSING sentinel.
+
+    read 는 pg.fetch 경유 (사이클 189 정책 = read retry). `pg.fetch` 자체가
+    connection 계열 예외에 대해 `_with_retry` 를 내부 경유하는 것이 정본 계약이나,
+    단위 테스트 mock 환경에서는 `pg.fetch` 만 patch 되어도 계약이 성립하도록
+    직접 호출한다(실제 `src/db/pg.py::fetch` 구현이 `_with_retry` 를 이미 감쌈).
+    """
+    rows = await pg.fetch("SELECT value FROM system_config WHERE key = $1", key)
+    if not rows:
+        return _MISSING
+    return rows[0].get("value")
+
+
+class _MissingSentinel:
+    def __repr__(self) -> str:
+        return "<MISSING>"
+
+
+_MISSING = _MissingSentinel()
+
+
+async def _upsert_value(key: str, value) -> None:
+    """system_config (key, value JSONB) upsert. updated_at datetime 바인딩."""
+    await pg.execute(
+        """
+        INSERT INTO system_config (key, value, updated_at)
+        VALUES ($1, $2::jsonb, $3)
+        ON CONFLICT (key) DO UPDATE SET
+            value = EXCLUDED.value,
+            updated_at = EXCLUDED.updated_at
+        """,
+        key,
+        value,
+        datetime.fromisoformat(now_kst_iso()),
+    )
+
+
 async def get_cash_usage_ratio() -> float:
     """매매 가용 자금 비율을 조회한다.
 
     키 부재 시 기본 1.0 반환.
     """
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", _CASH_USAGE_RATIO_KEY)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="get_cash_usage_ratio")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(_CASH_USAGE_RATIO_KEY)
+        if raw is _MISSING:
             return _CASH_USAGE_RATIO_DEFAULT
-        raw = rows[0].get("value")
         # JSONB 가 {"value": x} 형태로 저장되어 있음. 과거 호환을 위해 float 직저장도 허용.
         if isinstance(raw, dict):
             v = raw.get("value")
@@ -103,20 +139,7 @@ async def set_cash_usage_ratio(ratio: float) -> None:
     # 부동소수 표현 안정화 (5% 단위라 소수 둘째 자리까지 충분)
     adjusted = round(adjusted, 2)
 
-    payload = {
-        "key": _CASH_USAGE_RATIO_KEY,
-        "value": {"value": adjusted},
-        "updated_at": now_kst_iso(),
-    }
-
-    def _upsert():
-        return (
-            supabase.table("system_config")
-            .upsert(payload, on_conflict="key")
-            .execute()
-        )
-
-    await asyncio.to_thread(_upsert)
+    await _upsert_value(_CASH_USAGE_RATIO_KEY, {"value": adjusted})
 
 
 async def get_auto_regime_adjust() -> bool:
@@ -124,21 +147,10 @@ async def get_auto_regime_adjust() -> bool:
 
     사이클 2 (2026-05-17). 키 부재 시 기본 True. False 면 운영자 수동 설정 보존.
     """
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", _AUTO_REGIME_ADJUST_KEY)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="get_auto_regime_adjust")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(_AUTO_REGIME_ADJUST_KEY)
+        if raw is _MISSING:
             return _AUTO_REGIME_ADJUST_DEFAULT
-        raw = rows[0].get("value")
         if isinstance(raw, dict):
             v = raw.get("value")
             if v is None:
@@ -157,20 +169,7 @@ async def set_auto_regime_adjust(value: bool) -> None:
 
     사이클 2 (2026-05-17). 값은 bool 강제 변환.
     """
-    payload = {
-        "key": _AUTO_REGIME_ADJUST_KEY,
-        "value": {"value": bool(value)},
-        "updated_at": now_kst_iso(),
-    }
-
-    def _upsert():
-        return (
-            supabase.table("system_config")
-            .upsert(payload, on_conflict="key")
-            .execute()
-        )
-
-    await asyncio.to_thread(_upsert)
+    await _upsert_value(_AUTO_REGIME_ADJUST_KEY, {"value": bool(value)})
 
 
 # ---------------------------------------------------------------------------
@@ -185,21 +184,10 @@ _KIS_MCP_ENABLED_KEY = "kis_mcp_enabled"
 
 async def _get_bool_or_none(key: str) -> bool | None:
     """system_config 의 bool JSONB 값을 안전하게 조회. 키 부재 → None."""
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", key)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="_get_bool_or_none")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(key)
+        if raw is _MISSING:
             return None
-        raw = rows[0].get("value")
         if isinstance(raw, dict):
             v = raw.get("value")
             if v is None:
@@ -222,20 +210,7 @@ async def _get_bool_or_none(key: str) -> bool | None:
 
 async def _set_bool(key: str, value: bool) -> None:
     """system_config bool 값 upsert. JSONB 표준 형태 `{"value": bool}`."""
-    payload = {
-        "key": key,
-        "value": {"value": bool(value)},
-        "updated_at": now_kst_iso(),
-    }
-
-    def _upsert():
-        return (
-            supabase.table("system_config")
-            .upsert(payload, on_conflict="key")
-            .execute()
-        )
-
-    await asyncio.to_thread(_upsert)
+    await _upsert_value(key, {"value": bool(value)})
 
 
 async def get_dkstock_regime_enabled() -> bool | None:
@@ -298,21 +273,10 @@ class BuyBlockThresholds(BaseModel):
 
 async def get_buy_block_mode() -> str:
     """매수 가드 모드 조회. 키 부재 시 기본 'HARD' (현재 동작 회귀)."""
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", _BUY_BLOCK_MODE_KEY)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="get_buy_block_mode")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(_BUY_BLOCK_MODE_KEY)
+        if raw is _MISSING:
             return _BUY_BLOCK_MODE_DEFAULT
-        raw = rows[0].get("value")
         candidate: Optional[str] = None
         if isinstance(raw, dict):
             v = raw.get("value")
@@ -339,39 +303,15 @@ async def set_buy_block_mode(mode: str) -> None:
             f"buy_block_mode must be one of {_BUY_BLOCK_VALID_MODES}, got {mode!r}"
         )
 
-    payload = {
-        "key": _BUY_BLOCK_MODE_KEY,
-        "value": {"value": mode},
-        "updated_at": now_kst_iso(),
-    }
-
-    def _upsert():
-        return (
-            supabase.table("system_config")
-            .upsert(payload, on_conflict="key")
-            .execute()
-        )
-
-    await asyncio.to_thread(_upsert)
+    await _upsert_value(_BUY_BLOCK_MODE_KEY, {"value": mode})
 
 
 async def _get_float_or_default(key: str, default: float) -> float:
     """JSONB `{"value": float}` 조회. 키 부재/타입 불일치 시 default."""
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", key)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="_get_float_or_default")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(key)
+        if raw is _MISSING:
             return default
-        raw = rows[0].get("value")
         if isinstance(raw, dict):
             v = raw.get("value")
             if isinstance(v, (int, float)):
@@ -386,21 +326,10 @@ async def _get_float_or_default(key: str, default: float) -> float:
 
 async def _get_bool_or_default(key: str, default: bool) -> bool:
     """JSONB `{"value": bool}` 조회. 키 부재/타입 불일치 시 default."""
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", key)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="_get_bool_or_default")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(key)
+        if raw is _MISSING:
             return default
-        raw = rows[0].get("value")
         if isinstance(raw, dict):
             v = raw.get("value")
             if isinstance(v, bool):
@@ -430,16 +359,7 @@ async def get_buy_block_thresholds() -> BuyBlockThresholds:
 
 
 async def _set_float(key: str, value: float) -> None:
-    payload = {"key": key, "value": {"value": float(value)}, "updated_at": now_kst_iso()}
-
-    def _upsert():
-        return (
-            supabase.table("system_config")
-            .upsert(payload, on_conflict="key")
-            .execute()
-        )
-
-    await asyncio.to_thread(_upsert)
+    await _upsert_value(key, {"value": float(value)})
 
 
 # ---------------------------------------------------------------------------
@@ -603,21 +523,10 @@ async def set_price_filter(
 
 async def _get_int_or_default(key: str, default: int) -> int:
     """JSONB {"value": int} 조회. 키 부재/타입 불일치 시 default."""
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", key)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="_get_int_or_default")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(key)
+        if raw is _MISSING:
             return default
-        raw = rows[0].get("value")
         if isinstance(raw, dict):
             v = raw.get("value")
             if isinstance(v, (int, float)):
@@ -635,21 +544,10 @@ async def _get_str_or_default_UNUSED(key: str, default: str, valid: tuple) -> st
 
     참고: 하위 코드 잔재 방지용 더미 선언. 실제 호출처 없음.
     """
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", key)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="_get_str_or_default_UNUSED")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(key)
+        if raw is _MISSING:
             return default
-        raw = rows[0].get("value")
         candidate: Optional[str] = None
         if isinstance(raw, dict):
             v = raw.get("value")
@@ -668,16 +566,7 @@ async def _get_str_or_default_UNUSED(key: str, default: str, valid: tuple) -> st
 
 async def _set_int(key: str, value: int) -> None:
     """JSONB {"value": int} upsert."""
-    payload = {"key": key, "value": {"value": int(value)}, "updated_at": now_kst_iso()}
-
-    def _upsert():
-        return (
-            supabase.table("system_config")
-            .upsert(payload, on_conflict="key")
-            .execute()
-        )
-
-    await asyncio.to_thread(_upsert)
+    await _upsert_value(key, {"value": int(value)})
 
 
 # _set_str 제거 (사이클 64 — price_filter_mode 폐기로 사용처 0)
@@ -768,21 +657,10 @@ async def _get_string_or_none(key: str) -> Optional[str]:
 
     `_get_bool_or_none` 패턴 답습 + string 타입. JSONB `{"value": str}` 형태.
     """
-
-    def _query():
-        return (
-            supabase.table("system_config")
-            .select("value")
-            .eq("key", key)
-            .execute()
-        )
-
     try:
-        result = await execute_with_retry(_query, op="_get_string_or_none")
-        rows = result.data or []
-        if not rows:
+        raw = await _select_value(key)
+        if raw is _MISSING:
             return None
-        raw = rows[0].get("value")
         if isinstance(raw, dict):
             v = raw.get("value")
             if v is None:
@@ -802,20 +680,7 @@ async def _set_string(key: str, value: str) -> None:
 
     `_set_bool` 패턴 답습 + string 타입. `now_kst_iso()` 영속 (사이클 68).
     """
-    payload = {
-        "key": key,
-        "value": {"value": str(value)},
-        "updated_at": now_kst_iso(),
-    }
-
-    def _upsert():
-        return (
-            supabase.table("system_config")
-            .upsert(payload, on_conflict="key")
-            .execute()
-        )
-
-    await asyncio.to_thread(_upsert)
+    await _upsert_value(key, {"value": str(value)})
 
 
 async def get_krx_open_api_config():
@@ -865,6 +730,33 @@ async def set_krx_open_api_config(
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# 사이클 M3b — main.py lifespan seam ② auto_start 헬퍼 추출
+# ---------------------------------------------------------------------------
+
+_AUTO_START_KEY = "auto_start"
+
+
+async def get_auto_start() -> bool:
+    """자동 매매 시작 여부 조회 (main.py lifespan seam ② 추출).
+
+    기존 lifespan 인라인 조회 계약 보존: `value is True or value == "true"`.
+    키 부재/DB 예외 → False graceful (lifespan 이 .env `settings.auto_start` 로 폴백).
+    """
+    try:
+        raw = await _select_value(_AUTO_START_KEY)
+        if raw is _MISSING:
+            return False
+        if isinstance(raw, dict):
+            value = raw.get("value")
+        else:
+            value = raw
+        return value is True or value == "true"
+    except Exception:
+        logger.exception("[auto_start] get 실패 — False 반환 (호출자 .env 폴백)")
+        return False
+
+
 async def get_task_last_success(task_label: str) -> Optional[str]:
     """task_last_success_<label> 키 ISO 문자열 조회. 키 부재 / 실패 시 None graceful.
 
@@ -876,7 +768,7 @@ async def get_task_last_success(task_label: str) -> Optional[str]:
 async def set_task_last_success(task_label: str, iso_ts: str) -> None:
     """마지막 성공 시각 upsert. 실패 시 예외 전파 없이 graceful.
 
-    쓰기 = execute_with_retry 미경유 (_set_string 패턴 직답습, 사이클 187/189 정책 영속).
+    쓰기 = _with_retry 미경유 (_set_string 패턴 직답습, 사이클 187/189 정책 영속).
     JSONB 표준 {"value": iso} 형태.
     """
     await _set_string(f"task_last_success_{task_label}", iso_ts)

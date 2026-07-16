@@ -38,11 +38,13 @@ DB 안전망 부재: `(ticker, order_no, trade_type)` UNIQUE 없음 (pk = id UUI
 - S-4: `get_today_sell_trades_for_sync()` 동일 동작
 - S-5: 기존 `get_today_buy_trades()` 의 ticker dedupe 동작 보존 (포지션 복구용)
 - S-6: 기존 `get_today_sell_trades()` 의 ticker dedupe 동작 보존
+
+사이클 M2a (2026-07-16) 의미 전환 — trade_history 가 supabase-py → src.db.pg(asyncpg)
+전환. 기존 `.table().select().eq().in_()...` 체인 mock → `pg.fetch` mock (SQL 텍스트 +
+바인딩 인자 검증)으로 대체. 관찰 대상 계약(dedupe 유무/CANCELLED 제외/ticker filter)은
+동일 — mock 형상만 전환.
 """
 from __future__ import annotations
-
-from types import SimpleNamespace
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -50,31 +52,27 @@ pytestmark = pytest.mark.unit
 
 
 # ---------------------------------------------------------------------------
-# Supabase mock helper — _query() 가 호출되면 인메모리 rows 반환
+# pg mock helper — pg.fetch(sql, *args) 호출을 기록하고 rows 반환
 # ---------------------------------------------------------------------------
-def _patch_supabase_with_rows(monkeypatch, rows: list[dict]):
-    """`src.db.trade_history.supabase.table(...).select(...).execute()` 가 rows 반환하도록 mock.
+def _patch_pg_with_rows(monkeypatch, rows: list[dict]):
+    """`src.db.trade_history.pg.fetch` 가 rows 반환하도록 mock.
 
-    체인 메서드 호출 (eq/gte/in_/order/execute) 후 마지막 execute 가 .data 노출.
+    Returns:
+        calls: list[(sql, args)] — 매 fetch 호출의 SQL 텍스트 + 바인딩 인자.
     """
     from src.db import trade_history as th
 
-    # 체인의 마지막 execute() 응답
-    response = SimpleNamespace(data=rows)
+    calls: list[tuple[str, tuple]] = []
 
-    # 모든 체인 메서드가 self 반환하는 fluent mock
-    fluent = MagicMock()
-    fluent.select.return_value = fluent
-    fluent.eq.return_value = fluent
-    fluent.gte.return_value = fluent
-    fluent.in_.return_value = fluent
-    fluent.order.return_value = fluent
-    fluent.execute.return_value = response
+    async def _fetch(sql, *args):
+        calls.append((sql, args))
+        return rows
 
-    supabase_mock = MagicMock()
-    supabase_mock.table.return_value = fluent
-    monkeypatch.setattr(th, "supabase", supabase_mock)
-    return fluent, supabase_mock
+    class _PgMock:
+        fetch = staticmethod(_fetch)
+
+    monkeypatch.setattr(th, "pg", _PgMock())
+    return calls
 
 
 # ===========================================================================
@@ -93,7 +91,7 @@ async def test_for_sync_buys_preserves_distinct_order_no_for_same_ticker(monkeyp
         {"ticker": "042700", "order_no": "0000795634", "trade_type": "BUY",
          "status": "PARTIAL", "timestamp": "2026-05-20T14:05:00+09:00"},
     ]
-    _patch_supabase_with_rows(monkeypatch, rows)
+    _patch_pg_with_rows(monkeypatch, rows)
 
     from src.db.trade_history import get_today_buy_trades_for_sync
     result = await get_today_buy_trades_for_sync()
@@ -111,32 +109,25 @@ async def test_for_sync_buys_preserves_distinct_order_no_for_same_ticker(monkeyp
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_for_sync_buys_excludes_cancelled(monkeypatch):
-    """`status` filter 가 ['PENDING', 'COMPLETED', 'PARTIAL'] — CANCELLED 제외.
-
-    Note: 실제 status 필터링은 supabase `.in_()` 가 처리 — 본 테스트는 호출 인자 검증.
-    """
-    rows: list[dict] = []
-    fluent, _ = _patch_supabase_with_rows(monkeypatch, rows)
+    """status 배열 바인딩(`ANY($N::text[])`) 이 ['PENDING', 'COMPLETED', 'PARTIAL'] — CANCELLED 제외."""
+    calls = _patch_pg_with_rows(monkeypatch, [])
 
     from src.db.trade_history import get_today_buy_trades_for_sync
     await get_today_buy_trades_for_sync()
 
-    # .in_("status", [...]) 호출 인자 검증
-    in_calls = fluent.in_.call_args_list
-    assert len(in_calls) >= 1, "status filter (in_) 호출 누락"
-    found_status_filter = False
-    for call in in_calls:
-        args, _kw = call
-        if args[0] == "status":
-            statuses = set(args[1])
-            assert "CANCELLED" not in statuses, (
-                f"CANCELLED 가 status filter 에 포함됨 (제외되어야 함). 실제={statuses}"
-            )
-            assert statuses == {"PENDING", "COMPLETED", "PARTIAL"}, (
-                f"CANCELLED 제외 + PENDING/COMPLETED/PARTIAL 포함 필요. 실제={statuses}"
-            )
-            found_status_filter = True
-    assert found_status_filter, "status filter 누락"
+    assert len(calls) == 1, "fetch 1회 호출 의무"
+    sql, args = calls[0]
+    assert "ANY(" in sql.upper(), "status filter (ANY 배열) 호출 누락"
+
+    status_arrays = [a for a in args if isinstance(a, (list, tuple))]
+    assert status_arrays, "status 배열 바인딩 누락"
+    statuses = set(status_arrays[0])
+    assert "CANCELLED" not in statuses, (
+        f"CANCELLED 가 status filter 에 포함됨 (제외되어야 함). 실제={statuses}"
+    )
+    assert statuses == {"PENDING", "COMPLETED", "PARTIAL"}, (
+        f"CANCELLED 제외 + PENDING/COMPLETED/PARTIAL 포함 필요. 실제={statuses}"
+    )
 
 
 # ===========================================================================
@@ -144,39 +135,31 @@ async def test_for_sync_buys_excludes_cancelled(monkeypatch):
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_for_sync_buys_applies_ticker_filter_when_provided(monkeypatch):
-    """`ticker` 인자 명시 시 `.eq("ticker", ticker)` 추가."""
-    rows: list[dict] = []
-    fluent, _ = _patch_supabase_with_rows(monkeypatch, rows)
+    """`ticker` 인자 명시 시 바인딩 인자에 ticker 값 추가 + SQL 에 `ticker =` 조건 포함."""
+    calls = _patch_pg_with_rows(monkeypatch, [])
 
     from src.db.trade_history import get_today_buy_trades_for_sync
     await get_today_buy_trades_for_sync(ticker="042700")
 
-    # .eq("ticker", "042700") 호출 검증
-    eq_calls = fluent.eq.call_args_list
-    found_ticker_filter = any(
-        call.args == ("ticker", "042700") for call in eq_calls
-    )
-    assert found_ticker_filter, (
-        f"ticker filter (.eq(ticker, 042700)) 누락. 호출={eq_calls}"
-    )
+    assert len(calls) == 1
+    sql, args = calls[0]
+    assert "ticker" in sql.lower(), "ticker filter SQL 조건 누락"
+    assert "042700" in args, f"ticker filter 바인딩 누락. 인자={args}"
 
 
 @pytest.mark.asyncio
 async def test_for_sync_buys_no_ticker_filter_when_none(monkeypatch):
     """`ticker=None` (기본) 시 ticker filter 없음."""
-    rows: list[dict] = []
-    fluent, _ = _patch_supabase_with_rows(monkeypatch, rows)
+    calls = _patch_pg_with_rows(monkeypatch, [])
 
     from src.db.trade_history import get_today_buy_trades_for_sync
     await get_today_buy_trades_for_sync()  # 기본 None
 
-    eq_calls = fluent.eq.call_args_list
-    ticker_filter_present = any(
-        call.args[0] == "ticker" for call in eq_calls
-    )
-    assert not ticker_filter_present, (
-        f"ticker=None 인데 ticker filter 적용됨. 호출={eq_calls}"
-    )
+    assert len(calls) == 1
+    sql, args = calls[0]
+    assert "042700" not in args, f"ticker=None 인데 ticker filter 적용됨. 인자={args}"
+    # WHERE 절에 ticker = $N 조건 자체가 없어야 함 (trade_type='BUY' 는 리터럴이라 무관)
+    assert "AND ticker = " not in sql, "ticker filter SQL 조건이 부가됨 (None 인데)"
 
 
 # ===========================================================================
@@ -193,7 +176,7 @@ async def test_for_sync_sells_preserves_distinct_order_no_for_same_ticker(monkey
         {"ticker": "042700", "order_no": "9999990003", "trade_type": "SELL",
          "status": "PARTIAL", "timestamp": "2026-05-20T14:00:00+09:00"},
     ]
-    _patch_supabase_with_rows(monkeypatch, rows)
+    _patch_pg_with_rows(monkeypatch, rows)
 
     from src.db.trade_history import get_today_sell_trades_for_sync
     result = await get_today_sell_trades_for_sync()
@@ -205,23 +188,20 @@ async def test_for_sync_sells_preserves_distinct_order_no_for_same_ticker(monkey
 @pytest.mark.asyncio
 async def test_for_sync_sells_excludes_cancelled(monkeypatch):
     """매도도 CANCELLED 제외."""
-    rows: list[dict] = []
-    fluent, _ = _patch_supabase_with_rows(monkeypatch, rows)
+    calls = _patch_pg_with_rows(monkeypatch, [])
 
     from src.db.trade_history import get_today_sell_trades_for_sync
     await get_today_sell_trades_for_sync()
 
-    in_calls = fluent.in_.call_args_list
-    found = False
-    for call in in_calls:
-        if call.args[0] == "status":
-            statuses = set(call.args[1])
-            assert "CANCELLED" not in statuses
-            assert statuses == {"PENDING", "COMPLETED", "PARTIAL"}, (
-                f"매도 sync 도 PENDING/COMPLETED/PARTIAL. 실제={statuses}"
-            )
-            found = True
-    assert found
+    assert len(calls) == 1
+    sql, args = calls[0]
+    status_arrays = [a for a in args if isinstance(a, (list, tuple))]
+    assert status_arrays, "status 배열 바인딩 누락"
+    statuses = set(status_arrays[0])
+    assert "CANCELLED" not in statuses
+    assert statuses == {"PENDING", "COMPLETED", "PARTIAL"}, (
+        f"매도 sync 도 PENDING/COMPLETED/PARTIAL. 실제={statuses}"
+    )
 
 
 # ===========================================================================
@@ -240,7 +220,7 @@ async def test_existing_get_today_buy_trades_keeps_ticker_dedupe(monkeypatch):
         {"ticker": "042700", "order_no": "0000462500", "trade_type": "BUY",
          "status": "COMPLETED", "timestamp": "2026-05-20T02:14:16+09:00"},
     ]
-    _patch_supabase_with_rows(monkeypatch, rows)
+    _patch_pg_with_rows(monkeypatch, rows)
 
     from src.db.trade_history import get_today_buy_trades
     result = await get_today_buy_trades()
@@ -263,7 +243,7 @@ async def test_existing_get_today_sell_trades_keeps_ticker_dedupe(monkeypatch):
         {"ticker": "042700", "order_no": "9999990001", "trade_type": "SELL",
          "status": "COMPLETED", "timestamp": "2026-05-20T11:00:00+09:00"},
     ]
-    _patch_supabase_with_rows(monkeypatch, rows)
+    _patch_pg_with_rows(monkeypatch, rows)
 
     from src.db.trade_history import get_today_sell_trades
     result = await get_today_sell_trades()

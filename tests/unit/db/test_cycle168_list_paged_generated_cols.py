@@ -21,8 +21,9 @@
 from __future__ import annotations
 
 import ast
+import re
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -30,59 +31,51 @@ pytestmark = pytest.mark.unit
 
 
 # ---------------------------------------------------------------------------
-# Fake Supabase 쿼리 체인 — .gte 호출 (col, val) 전수 캡처
+# 사이클 M2b — pg.fetchval/fetch 경유. gte (col, val) 를 SQL 텍스트 + args 대조로 캡처.
+#
+# production list_paged_by_filter 는 WHERE 절에 `<col> >= $N` / `<col> ILIKE $N` 을
+# 넣고 args 를 append 순서대로 바인딩한다. placeholder($N) ↔ arg 매핑으로 (col, val)
+# 을 복원하여 seen["gte"] / seen["ilike"] / seen["range"] 에 기록한다.
 # ---------------------------------------------------------------------------
-def _make_chain(rows: list[dict], total_count: int, seen: dict):
-    class FakeQuery:
-        def __init__(self):
-            self.is_count = False
-
-        def select(self, cols, count=None):
-            if count == "exact":
-                self.is_count = True
-            return self
-
-        def eq(self, col, val):
-            seen.setdefault("eq", []).append((col, val))
-            return self
-
-        def ilike(self, col, pat):
-            seen.setdefault("ilike", []).append((col, pat))
-            return self
-
-        def gte(self, col, val):
-            seen.setdefault("gte", []).append((col, val))
-            return self
-
-        def order(self, *a, **k):
-            return self
-
-        def range(self, a, b):
-            seen["range"] = (a, b)
-            return self
-
-        def limit(self, n):
-            return self
-
-        def execute(self):
-            resp = MagicMock()
-            if self.is_count:
-                resp.count = total_count
-                resp.data = []
-            else:
-                resp.data = rows
-                resp.count = None
-            return resp
-
-    return FakeQuery
+def _record_clauses(sql: str, args: tuple, seen: dict) -> None:
+    s = sql
+    # `<col> >= $N` 패턴 → gte (col, args[N-1])
+    for m in re.finditer(r"(\w+)\s*>=\s*\$(\d+)", s):
+        col, idx = m.group(1), int(m.group(2))
+        if 1 <= idx <= len(args):
+            seen.setdefault("gte", []).append((col, args[idx - 1]))
+    # `<col> ILIKE $N`
+    for m in re.finditer(r"(\w+)\s+ILIKE\s+\$(\d+)", s, re.IGNORECASE):
+        col, idx = m.group(1), int(m.group(2))
+        if 1 <= idx <= len(args):
+            seen.setdefault("ilike", []).append((col, args[idx - 1]))
+    # `<col> = $N` (eq)
+    for m in re.finditer(r"(\w+)\s*=\s*\$(\d+)", s):
+        col, idx = m.group(1), int(m.group(2))
+        if 1 <= idx <= len(args):
+            seen.setdefault("eq", []).append((col, args[idx - 1]))
+    # LIMIT $N OFFSET $M → range (offset, offset+limit)
+    lm = re.search(r"LIMIT\s+\$(\d+)\s+OFFSET\s+\$(\d+)", s, re.IGNORECASE)
+    if lm:
+        li, oi = int(lm.group(1)), int(lm.group(2))
+        if 1 <= li <= len(args) and 1 <= oi <= len(args):
+            seen["range"] = (args[oi - 1], args[oi - 1] + args[li - 1])
 
 
 async def _run(seen: dict, **kwargs):
     from src.db import stock_master
 
-    factory = _make_chain(rows=[{"ticker": "005930"}], total_count=42, seen=seen)
-    with patch.object(stock_master, "supabase") as mock_sb:
-        mock_sb.table.side_effect = lambda _n: factory()
+    async def _fetchval(sql, *args):
+        _record_clauses(sql, args, seen)
+        return 42  # total count
+
+    async def _fetch(sql, *args):
+        _record_clauses(sql, args, seen)
+        return [{"ticker": "005930"}]
+
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(side_effect=_fetchval)
+        pg_mod.fetch = AsyncMock(side_effect=_fetch)
         return await stock_master.list_paged_by_filter(**kwargs)
 
 

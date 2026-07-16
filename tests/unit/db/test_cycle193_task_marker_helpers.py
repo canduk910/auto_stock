@@ -87,25 +87,30 @@ async def test_F11b_get_returns_none_when_absent():
 @pytest.mark.asyncio
 async def test_F11c_set_upserts_without_retry():
     """set_task_last_success(label, iso) → upsert(key=task_last_success_<label>,
-    value={"value": iso}) + execute_with_retry 미경유 (쓰기 = 멱등 우려, 187/189 영속).
+    value={"value": iso}) + retry 미경유 (쓰기 = 멱등 우려, 187/189 영속).
+
+    사이클 M2a (2026-07-16) 의미 전환 — system_config 가 supabase-py → src.db.pg
+    전환. upsert 는 `pg.execute` 직접 호출(INSERT ... ON CONFLICT (key) DO UPDATE)로
+    바뀌어 supabase 체인(`chain.upsert`) mock 이 무효 → `pg.execute` 인자 캡처로 대체.
     """
     iso = "2026-07-04T16:10:00+09:00"
-    mock_sb, chain = _make_supabase([_result([])])
 
-    retry_mock = AsyncMock()
-    with patch.object(sc, "supabase", mock_sb), patch.object(
-        sc, "execute_with_retry", new=retry_mock
-    ):
+    execute_calls: list[tuple] = []
+
+    async def _fake_execute(sql, *args):
+        execute_calls.append((sql, args))
+        return "INSERT 0 1"
+
+    with patch.object(sc, "pg", create=True) as pg_mock:
+        pg_mock.execute = _fake_execute
         await sc.set_task_last_success("stock_master_daily_load", iso)
 
-    # upsert payload 검증
-    assert chain.upsert.call_count == 1, "upsert 1회 호출 의무"
-    payload = chain.upsert.call_args.args[0]
-    assert payload["key"] == "task_last_success_stock_master_daily_load", (
-        "파생 키 upsert 의무"
-    )
-    assert payload["value"] == {"value": iso}, "JSONB {'value': iso} 형태 저장 의무"
+    # upsert payload 검증 — pg.execute(sql, key, value_dict, updated_at_datetime)
+    assert len(execute_calls) == 1, "execute(upsert) 1회 호출 의무"
+    sql, args = execute_calls[0]
+    assert "ON CONFLICT (key)" in sql, "key PK upsert SQL 의무"
+    assert args[0] == "task_last_success_stock_master_daily_load", "파생 키 upsert 의무"
+    assert args[1] == {"value": iso}, "JSONB {'value': iso} 형태 저장 의무"
 
-    # 쓰기 retry 미경유 (직접 to_thread)
-    retry_mock.assert_not_awaited(), "쓰기 = execute_with_retry 미경유 (멱등 우려, 187/189 영속)"
-    assert chain.execute.call_count == 1, "쓰기 = 재시도 0 (execute 1회)"
+    # 쓰기 retry 미경유 (execute 1회, 재시도 없음)
+    assert len(execute_calls) == 1, "쓰기 = 재시도 0 (execute 1회)"

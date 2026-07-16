@@ -32,7 +32,21 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 M3b (2026-07-16) — Supabase→RDS 이전. `write_log`/`_insert_log_to_db` 가
+# `supabase.table("system_logs").insert(...)` 체인을 폐기하고 `pg.execute("INSERT INTO
+# system_logs ...", ..., ts)` SQL 문자열 + positional 바인딩으로 전환되어 본 파일의
+# AST 패턴(`.table(...).insert(...)` Call 구조 + dict literal "timestamp" 키)이 매칭
+# 0건. KST(+09:00) 계약은 `test_cycleM3b_system_logs_pg.py::
+# test_write_log_timestamp_is_kst_datetime` + `test_cycleM3b_main_seam_pg.py::
+# test_insert_log_helper_uses_pg_execute_kst` 로 이관되어 회귀 가드 유지.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason="사이클M3b — supabase.table().insert() AST 패턴 폐기(pg.execute SQL 전환). "
+        "KST 계약은 test_cycleM3b_system_logs_pg.py / test_cycleM3b_main_seam_pg.py 로 이관",
+        strict=False,
+    ),
+]
 
 
 # KST 표현 정규식 — 두 가지 표기 모두 허용

@@ -43,7 +43,12 @@ def test_ret1_retention_days_230():
 # RET-2 — purge_old_rows 로직 불변 (상수만 변경)
 # ---------------------------------------------------------------------------
 def test_ret2_purge_logic_unchanged():
-    """purge_old_rows 시그너처/로직 불변 — 상수만 변경."""
+    """purge_old_rows 시그너처/로직 불변 — 상수만 변경.
+
+    사이클 M2b — asyncpg 전환. cutoff 이전 DELETE + protected 제외 로직은 supabase 체인
+    (`.lt("bas_dd")`/`.not_.in_`) 대신 SQL 절(`bas_dd < $1` / `ticker <> ALL($::text[])`)
+    로 표현. 시그너처는 불변.
+    """
     from src.db.stock_master_daily import purge_old_rows
 
     sig = inspect.signature(purge_old_rows)
@@ -53,47 +58,36 @@ def test_ret2_purge_logic_unchanged():
     assert params["protected_tickers"].kind == inspect.Parameter.KEYWORD_ONLY, \
         "protected_tickers keyword-only 영속 (사이클 32 R4)"
 
-    # purge 본체에 .lt("bas_dd", ...) + not_.in_ 영속 (로직 불변)
+    # purge 본체에 cutoff DELETE (bas_dd < $) + protected 제외 (ticker <> ALL($::text[])) 영속.
     src = inspect.getsource(purge_old_rows)
-    assert '.lt("bas_dd"' in src, "cutoff 이전 DELETE 로직 영속"
-    assert "not_.in_" in src, "protected_tickers DELETE 제외 영속"
+    assert "bas_dd <" in src, "cutoff 이전 DELETE 로직(bas_dd < cutoff) 영속"
+    assert "ticker <> all" in src.lower(), "protected_tickers 제외(ticker <> ALL(...)) 영속"
 
 
 @pytest.mark.asyncio
 async def test_ret2_purge_cutoff_protected():
     """purge_old_rows — protected_tickers DELETE 제외 (사이클 32 R4 영속).
 
-    사이클 192 의미 전환 (사이클 66 K-2) — 날짜 슬라이스 루프 배치 전환에 맞게
-    mock 형식 갱신 (bulk `delete().lt()` → SELECT oldest + DELETE eq 루프).
-    검증 의도 보존: protected_tickers 가 DELETE 에서 제외 + protected_count 반환.
+    사이클 M2b — asyncpg 전환. SELECT oldest + 날짜별 DELETE 루프 (pg.fetchrow/pg.execute).
+    protected 는 `ticker <> ALL($::text[])` SQL 절 + 위치 인자로 SELECT/DELETE 양쪽 동행.
     """
     from src.db import stock_master_daily as _smd
 
-    # SELECT: 1회차 row 반환 → 2회차 empty (drained)
-    sel_result_1 = MagicMock()
-    sel_result_1.data = [{"bas_dd": "2024-12-01"}]
-    sel_result_2 = MagicMock()
-    sel_result_2.data = []
-
-    del_result = MagicMock()
-    del_result.count = 0
-
-    table_mock = MagicMock()
-    table_mock.select.return_value.lt.return_value.not_.in_.return_value \
-        .order.return_value.limit.return_value.execute.side_effect = [
-            sel_result_1, sel_result_2,
-        ]
-    table_mock.delete.return_value.eq.return_value.not_.in_.return_value \
-        .execute.return_value = del_result
-
-    with patch.object(_smd, "supabase") as mock_supa:
-        mock_supa.table.return_value = table_mock
+    with patch.object(_smd, "pg", create=True) as pg_mod:
+        # SELECT oldest: 1회차 row 반환 → 2회차 drained
+        pg_mod.fetchrow = AsyncMock(side_effect=[{"bas_dd": "2024-12-01"}, None])
+        pg_mod.execute = AsyncMock(return_value="DELETE 0")
         result = await _smd.purge_old_rows(
             date(2025, 1, 1), protected_tickers={"005930", "000660"}
         )
 
     assert result["protected_count"] == 2
-    table_mock.delete.return_value.eq.return_value.not_.in_.assert_called_once()
+    # DELETE 쪽 protected 제외 배열 바인딩
+    del_args = pg_mod.execute.await_args.args[1:]
+    assert any(
+        isinstance(a, (list, tuple)) and {"005930", "000660"}.issubset(set(a))
+        for a in del_args
+    ), "DELETE 쪽 protected 제외 배열 바인딩 누락 (사이클 32 R4)"
 
 
 # ---------------------------------------------------------------------------

@@ -59,76 +59,36 @@ def _make_row(
     }
 
 
-def _mock_result(rows):
-    m = MagicMock()
-    m.data = rows
-    return m
-
-
-def _setup_chain(mock_sb, result_mock):
-    """단일 rows 고정 응답 (return_stage_counts=False, 단일 쿼리 케이스 전용)."""
-    chain = MagicMock()
-    mock_sb.table.return_value = chain
-    for meth in ("select", "order", "limit", "eq", "or_", "gte"):
-        getattr(chain, meth).return_value = chain
-    chain.execute.return_value = result_mock
-    return chain
-
-
-async def _fake_to_thread(fn, *args, **kwargs):
-    return fn(*args, **kwargs)
-
-
 def _run_filter(rows, **kwargs):
-    """단일 rows (모든 .execute() 동일 응답) — return_stage_counts=False 또는
-    3쿼리 모두 같은 rows 를 받아도 되는(union==mcap==trade) 단순 케이스용."""
-    result_mock = _mock_result(rows)
-    with patch("src.db.stock_master.supabase") as mock_sb, \
-         patch("asyncio.to_thread", side_effect=_fake_to_thread):
-        _setup_chain(mock_sb, result_mock)
-        import src.db.stock_master as sm
-        return asyncio.run(sm.list_by_filter(**kwargs))
+    """단일 rows (모든 pg.fetch 동일 응답) — return_stage_counts=False 또는
+    3쿼리 모두 같은 rows 를 받아도 되는(union==mcap==trade) 단순 케이스용.
+
+    사이클 M2b — pg.fetch 경유. mock 은 이미 DB-side 필터링된 rows 를 반환 →
+    production 이 _post_filter (exclude/limit) 만 적용.
+    """
+    from unittest.mock import AsyncMock
+
+    with patch.object(_sm(), "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=rows)
+        return asyncio.run(_sm().list_by_filter(**kwargs))
 
 
 def _run_filter_staged(rows_per_execute: list[list[dict]], **kwargs):
-    """사이클 205 — per-execute rows 시퀀스 주입 (3쿼리: union/mcap/trade 각자 다른 rows).
+    """사이클 M2b — per-fetch rows 시퀀스 주입 (3쿼리: union/mcap/trade 각자 다른 rows).
 
-    cycle205 FakeQuery 패턴 답습 — 매 `.execute()` 호출마다 순서대로 다음 rows 를 반환.
+    return_stage_counts=True 시 production 이 pg.fetch 를 3회(union→mcap→trade) 발화 →
+    side_effect 로 순서대로 다음 rows 반환.
     """
-    state = {"idx": 0}
+    from unittest.mock import AsyncMock
 
-    class FakeQuery:
-        def select(self, *a, **k):
-            return self
+    with patch.object(_sm(), "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(side_effect=list(rows_per_execute))
+        return asyncio.run(_sm().list_by_filter(**kwargs))
 
-        def order(self, *a, **k):
-            return self
 
-        def limit(self, *a, **k):
-            return self
-
-        def eq(self, *a, **k):
-            return self
-
-        def or_(self, *a, **k):
-            return self
-
-        def gte(self, *a, **k):
-            return self
-
-        def execute(self):
-            i = min(state["idx"], len(rows_per_execute) - 1)
-            data = rows_per_execute[i]
-            state["idx"] += 1
-            resp = MagicMock()
-            resp.data = data
-            return resp
-
-    with patch("src.db.stock_master.supabase") as mock_sb, \
-         patch("asyncio.to_thread", side_effect=_fake_to_thread):
-        mock_sb.table.side_effect = lambda _n: FakeQuery()
-        import src.db.stock_master as sm
-        return asyncio.run(sm.list_by_filter(**kwargs))
+def _sm():
+    import src.db.stock_master as sm
+    return sm
 
 
 # ------------------------------------------------------------------

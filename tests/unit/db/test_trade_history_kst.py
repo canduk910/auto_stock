@@ -77,6 +77,19 @@ def test_to_kst_handles_invalid_input(bad):
 # ---------------------------------------------------------------------------
 
 
+def _patch_pg_fetch(monkeypatch, rows: list[dict]):
+    """`src.db.trade_history.pg.fetch` 가 rows 반환하도록 mock (사이클 M2a 전환)."""
+    from src.db import trade_history
+
+    async def _fetch(sql, *args):
+        return list(rows)
+
+    class _PgMock:
+        fetch = staticmethod(_fetch)
+
+    monkeypatch.setattr(trade_history, "pg", _PgMock())
+
+
 @pytest.mark.asyncio
 async def test_get_trade_pairs_converts_utc_timestamps_to_kst(
     monkeypatch: pytest.MonkeyPatch,
@@ -108,37 +121,7 @@ async def test_get_trade_pairs_converts_utc_timestamps_to_kst(
         },
     ]
 
-    class _FakeSelect:
-        def __init__(self, rows):
-            self._rows = rows
-
-        def in_(self, *_a, **_k):
-            return self
-
-        def order(self, *_a, **_k):
-            return self
-
-        def eq(self, *_a, **_k):
-            return self
-
-        def execute(self):
-            return type("R", (), {"data": list(self._rows)})()
-
-    class _FakeTable:
-        def __init__(self, rows):
-            self._rows = rows
-
-        def select(self, *_a, **_k):
-            return _FakeSelect(self._rows)
-
-    class _FakeSupabase:
-        def __init__(self, rows):
-            self._rows = rows
-
-        def table(self, _name):
-            return _FakeTable(self._rows)
-
-    monkeypatch.setattr(trade_history, "supabase", _FakeSupabase(fake_rows))
+    _patch_pg_fetch(monkeypatch, fake_rows)
 
     pairs = await trade_history.get_trade_pairs()
     assert len(pairs) == 1
@@ -171,37 +154,7 @@ async def test_get_trade_pairs_open_position_kst(
         }
     ]
 
-    class _FakeQ:
-        def __init__(self, rows):
-            self._rows = rows
-
-        def in_(self, *_a, **_k):
-            return self
-
-        def order(self, *_a, **_k):
-            return self
-
-        def eq(self, *_a, **_k):
-            return self
-
-        def execute(self):
-            return type("R", (), {"data": list(self._rows)})()
-
-    class _FakeT:
-        def __init__(self, rows):
-            self._rows = rows
-
-        def select(self, *_a, **_k):
-            return _FakeQ(self._rows)
-
-    class _FakeS:
-        def __init__(self, rows):
-            self._rows = rows
-
-        def table(self, _name):
-            return _FakeT(self._rows)
-
-    monkeypatch.setattr(trade_history, "supabase", _FakeS(fake_rows))
+    _patch_pg_fetch(monkeypatch, fake_rows)
 
     pairs = await trade_history.get_trade_pairs()
     assert len(pairs) == 1
@@ -228,46 +181,54 @@ def test_today_kst_iso_returns_kst_timezone_string():
     assert iso.startswith("2026-05-12T00:00:00")
 
 
-@pytest.mark.asyncio
-async def test_get_today_buy_trades_uses_kst_timezone(
-    monkeypatch: pytest.MonkeyPatch,
-):
-    """`get_today_buy_trades` 가 KST timezone 명시한 ISO 로 `.gte` 를 호출한다."""
+def _patch_pg_capture_args(monkeypatch):
+    """`pg.fetch` 호출 시 SQL + 바인딩 인자를 캡처 (빈 rows 반환).
+
+    사이클 M2a — today_iso(`+09:00` str) 는 `datetime.fromisoformat()` 로 변환되어
+    바인딩된다(asyncpg TIMESTAMPTZ 컬럼은 str 거부, M1 패턴 2). tz-aware datetime
+    검증으로 KST(`+09:00`) 명시 계약을 확인한다.
+    """
     from src.db import trade_history
 
     captured: dict[str, Any] = {}
 
-    class _FakeSelect:
-        def eq(self, *_a, **_k):
-            return self
+    async def _fetch(sql, *args):
+        captured["sql"] = sql
+        captured["args"] = args
+        return []
 
-        def gte(self, col, val):
-            captured["gte"] = (col, val)
-            return self
+    class _PgMock:
+        fetch = staticmethod(_fetch)
 
-        def in_(self, *_a, **_k):
-            return self
+    monkeypatch.setattr(trade_history, "pg", _PgMock())
+    return captured
 
-        def order(self, *_a, **_k):
-            return self
 
-        def execute(self):
-            return type("R", (), {"data": []})()
+def _assert_kst_datetime_bound(captured: dict[str, Any]) -> None:
+    from datetime import datetime, timezone, timedelta
 
-    class _FakeTable:
-        def select(self, *_a, **_k):
-            return _FakeSelect()
+    kst = timezone(timedelta(hours=9))
+    datetime_args = [a for a in captured["args"] if isinstance(a, datetime)]
+    assert datetime_args, f"timestamp 바인딩(datetime) 누락. 인자={captured['args']}"
+    bound = datetime_args[0]
+    assert bound.tzinfo is not None, "timestamp 바인딩이 tz-aware 여야 함 (+09:00 명시)."
+    assert bound.utcoffset() == timedelta(hours=9), (
+        f"KST(+09:00) 명시 누락. utcoffset={bound.utcoffset()}"
+    )
 
-    class _FakeSupabase:
-        def table(self, _name):
-            return _FakeTable()
 
-    monkeypatch.setattr(trade_history, "supabase", _FakeSupabase())
+@pytest.mark.asyncio
+async def test_get_today_buy_trades_uses_kst_timezone(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """`get_today_buy_trades` 가 KST timezone 명시한 datetime 을 바인딩한다."""
+    from src.db import trade_history
+
+    captured = _patch_pg_capture_args(monkeypatch)
 
     await trade_history.get_today_buy_trades()
-    assert captured["gte"][0] == "timestamp"
-    # KST timezone 명시
-    assert captured["gte"][1].endswith("+09:00"), f"got: {captured['gte'][1]}"
+    assert "timestamp" in captured["sql"].lower()
+    _assert_kst_datetime_bound(captured)
 
 
 @pytest.mark.asyncio
@@ -277,37 +238,10 @@ async def test_get_today_sell_trades_uses_kst_timezone(
     """`get_today_sell_trades` 동일."""
     from src.db import trade_history
 
-    captured: dict[str, Any] = {}
-
-    class _FakeSelect:
-        def eq(self, *_a, **_k):
-            return self
-
-        def gte(self, col, val):
-            captured["gte"] = (col, val)
-            return self
-
-        def in_(self, *_a, **_k):
-            return self
-
-        def order(self, *_a, **_k):
-            return self
-
-        def execute(self):
-            return type("R", (), {"data": []})()
-
-    class _FakeTable:
-        def select(self, *_a, **_k):
-            return _FakeSelect()
-
-    class _FakeSupabase:
-        def table(self, _name):
-            return _FakeTable()
-
-    monkeypatch.setattr(trade_history, "supabase", _FakeSupabase())
+    captured = _patch_pg_capture_args(monkeypatch)
 
     await trade_history.get_today_sell_trades()
-    assert captured["gte"][1].endswith("+09:00")
+    _assert_kst_datetime_bound(captured)
 
 
 @pytest.mark.asyncio
@@ -317,34 +251,7 @@ async def test_get_today_trades_for_settlement_uses_kst_timezone(
     """`get_today_trades_for_settlement` 동일."""
     from src.db import trade_history
 
-    captured: dict[str, Any] = {}
-
-    class _FakeSelect:
-        def gte(self, col, val):
-            captured["gte"] = (col, val)
-            return self
-
-        def in_(self, *_a, **_k):
-            return self
-
-        def order(self, *_a, **_k):
-            return self
-
-        def eq(self, *_a, **_k):
-            return self
-
-        def execute(self):
-            return type("R", (), {"data": []})()
-
-    class _FakeTable:
-        def select(self, *_a, **_k):
-            return _FakeSelect()
-
-    class _FakeSupabase:
-        def table(self, _name):
-            return _FakeTable()
-
-    monkeypatch.setattr(trade_history, "supabase", _FakeSupabase())
+    captured = _patch_pg_capture_args(monkeypatch)
 
     await trade_history.get_today_trades_for_settlement()
-    assert captured["gte"][1].endswith("+09:00")
+    _assert_kst_datetime_bound(captured)

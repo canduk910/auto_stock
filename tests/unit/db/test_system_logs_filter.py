@@ -23,7 +23,19 @@ from typing import Any
 
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 M3b (2026-07-16) — Supabase→RDS 이전. `get_logs` 가 supabase-py 체인(select/eq/
+# gte/lte/order/range chain) → `pg.fetch`+`pg.fetchval` SQL 로 전환되어 본 파일의 Fake
+# supabase 가 어떤 호출도 가로채지 못해 전량 FAIL. 페이징/KST 기간필터/dict 응답 실질
+# 계약은 `tests/unit/db/test_cycleM3b_system_logs_pg.py::test_get_logs_*` 로 이관되어
+# 회귀 가드 유지.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason="사이클M3b — get_logs supabase→pg 전환. 페이징/KST 필터 계약은 "
+        "test_cycleM3b_system_logs_pg.py 로 이관",
+        strict=False,
+    ),
+]
 
 
 # ---------------------------------------------------------------------------

@@ -47,6 +47,18 @@ def _supabase_source() -> str:
 # ---------------------------------------------------------------------------
 # G-187-A1 — read 4함수 = execute_with_retry 경유 + 직접 to_thread 잔존 0
 # ---------------------------------------------------------------------------
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — read 4함수가 supabase "
+        "`execute_with_retry(lambda: ...execute())` 경유에서 `pg.fetch`/`pg.fetchval` "
+        "경유로 전환됐다. 재시도는 이제 `pg.fetch`/`pg.fetchval` 내부의 `pg._with_retry` "
+        "가 담당하므로 stock_master_daily 모듈 본체에는 `execute_with_retry`/`asyncio.to_thread` "
+        "호출이 부재(AST 전제 위반). read 경유 계약은 M2b 신규 가드 "
+        "test_cycleM2b_stock_master_daily_pg.py::test_get_recent_daily_desc_limit_via_fetch "
+        "등이 pg.fetch 발화로 커버, _with_retry 재시도 로직은 pg 인프라 테스트가 담당."
+    ),
+)
 def test_G187_A1_read_funcs_use_execute_with_retry():
     """read 4함수 본체에 `execute_with_retry` Call ≥ 1 + 직접 `asyncio.to_thread` Call 0.
 
@@ -97,6 +109,18 @@ def test_G187_A1_read_funcs_use_execute_with_retry():
 # ---------------------------------------------------------------------------
 # G-187-A2 — 쓰기 3함수 = execute_with_retry 미경유 + to_thread 직접 유지 (불변식)
 # ---------------------------------------------------------------------------
+@pytest.mark.xfail(
+    strict=False,
+    reason=(
+        "사이클 M2b (Supabase→RDS asyncpg 전환) — 쓰기 3함수가 supabase "
+        "`asyncio.to_thread(lambda: ...execute())` 에서 `pg.execute`/`pg.executemany` 로 "
+        "전환됐다. 이 함수들은 `execute_with_retry` 도 `asyncio.to_thread` 도 호출하지 않으므로 "
+        "AST 전제(`to_thread` Call ≥ 1) 위반. **쓰기 함수가 재시도 미경유** 라는 본질 불변식(G-187-A2)은 "
+        "M2b 신규 가드가 pg._with_retry 레벨에서 계승 — "
+        "test_cycleM2b_stock_master_daily_pg.py::test_purge_not_via_with_retry / "
+        "test_upsert_batch_writes_not_via_with_retry (pg._with_retry.await_count == 0)."
+    ),
+)
 def test_G187_A2_write_funcs_not_routed_through_retry():
     """쓰기 3함수 (upsert_daily/upsert_batch/purge_old_rows) 는 `execute_with_retry`
     미경유 + `asyncio.to_thread` 직접 유지 = Q2 멱등 SELECT 전용 제외 영구 보장.

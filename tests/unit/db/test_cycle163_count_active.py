@@ -5,50 +5,39 @@
 """
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 
 @pytest.mark.asyncio
 async def test_G163_COUNT_1_count_active_returns_int():
-    """G-163-COUNT-1: count_active() 정상 응답 = result.count 반환.
+    """G-163-COUNT-1: count_active() 정상 응답 = count(*) 반환.
 
-    Supabase mock = count=2768 → 함수 반환 2768.
+    사이클 M2b — pg.fetchval("SELECT count(*) FROM stock_master") 경유.
     """
     from src.db import stock_master
 
-    mock_result = MagicMock()
-    mock_result.count = 2768
-
-    with patch.object(stock_master, "supabase") as mock_sb:
-        chain = (
-            mock_sb.table.return_value
-            .select.return_value
-            .limit.return_value
-        )
-        chain.execute.return_value = mock_result
-
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(return_value=2768)
         cnt = await stock_master.count_active()
 
     assert cnt == 2768
-    # count="exact" 의무 검증
-    select_call = mock_sb.table.return_value.select.call_args
-    assert select_call.kwargs.get("count") == "exact"
+    # count(*) SELECT 사용 검증
+    sql = pg_mod.fetchval.await_args.args[0].lower()
+    assert "count(" in sql and "stock_master" in sql, "count(*) SELECT 누락"
 
 
 @pytest.mark.asyncio
 async def test_G163_COUNT_2_count_active_exception_returns_zero():
-    """G-163-COUNT-2: count_active() Supabase 예외 → 0 폴백 graceful.
+    """G-163-COUNT-2: count_active() 예외 → 0 폴백 graceful.
 
     사이클 88 G-REJECT graceful 영속 답습.
     """
     from src.db import stock_master
 
-    with patch.object(stock_master, "supabase") as mock_sb:
-        mock_sb.table.side_effect = RuntimeError("supabase HTTP/2 ConnectionTerminated")
-
+    with patch.object(stock_master, "pg", create=True) as pg_mod:
+        pg_mod.fetchval = AsyncMock(side_effect=RuntimeError("pg ConnectionTerminated"))
         cnt = await stock_master.count_active()
 
     assert cnt == 0

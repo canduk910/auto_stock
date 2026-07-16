@@ -1,17 +1,31 @@
-"""parameter_recommendations CRUD — OpenAI 기반 파라미터 추천 영속화."""
+"""parameter_recommendations CRUD — OpenAI 기반 파라미터 추천 영속화.
+
+사이클 M3a (Supabase→RDS 이전 단계3, 분석·관찰 비 hot-path): supabase-py → `src.db.pg`
+(asyncpg) 전환. 함수 시그니처·반환형·graceful 100% 보존 — 호출부(recommendation_engine 등)
+diff 0.
+
+영속 의무:
+- (target_date, strategy_id) UNIQUE(부분 인덱스 pending) 충돌 → None (duplicate/unique/23505 분기).
+- JSONB(current_params/recommended_params/metrics/backtest_summary) dict 직접 바인딩(codec).
+- TIMESTAMPTZ(created_at/applied_at/rejected_at) = datetime 바인딩(M1 패턴 2, str 금지).
+- NUMERIC nullable(recommended_weight/applied_weight) — None 바인딩 허용.
+- status ENUM 보존 (pending/applied/partial/rejected/expired/applied_auto).
+"""
 
 from __future__ import annotations
 
-import asyncio
+import asyncio  # noqa: F401 — Red autouse fixture 호환(monkeypatch.setattr(pr.asyncio, ...))
 import logging
 from datetime import date, datetime, timezone, timedelta
 
+import src.db.pg as pg
 from src.db._kst import KST, now_kst_iso, today_kst
-from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
 
 KST = timezone(timedelta(hours=9))
+
+_TABLE = "parameter_recommendations"
 
 
 async def insert_recommendation(
@@ -40,30 +54,36 @@ async def insert_recommendation(
 
     동일 (target_date, strategy_id) 조합이 unique index에 의해 거부되면 None 반환.
     """
-    data = {
-        "target_date": target_date.isoformat(),
-        "strategy_id": strategy_id,
-        "current_params": current_params,
-        "recommended_params": recommended_params,
-        "reasoning": reasoning,
-        "metrics": metrics,
-        "status": "pending",
-        "recommended_weight": recommended_weight,
-        "code_review_notes": code_review_notes,
-        "weight_reasoning": weight_reasoning,
-        "applied_weight": None,
-        "created_at": now_kst_iso(),
-    }
+    sql = f"""
+        INSERT INTO {_TABLE} (
+            target_date, strategy_id, current_params, recommended_params,
+            reasoning, metrics, status, recommended_weight, code_review_notes,
+            weight_reasoning, applied_weight, created_at
+        ) VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6::jsonb, $7, $8, $9, $10, $11, $12)
+        RETURNING *
+    """
+    args = (
+        target_date,
+        strategy_id,
+        current_params,
+        recommended_params,
+        reasoning,
+        metrics,
+        "pending",
+        recommended_weight,
+        code_review_notes,
+        weight_reasoning,
+        None,
+        datetime.fromisoformat(now_kst_iso()),
+    )
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table("parameter_recommendations").insert(data).execute()
-        )
-        if result.data:
+        row = await pg.fetchrow(sql, *args)
+        if row:
             logger.info(
                 "파라미터 추천 INSERT: %s (%s, 추천 %d개)",
                 strategy_id, target_date, len(recommended_params),
             )
-            return result.data[0]
+            return row
         return None
     except Exception as e:
         msg = str(e).lower()
@@ -78,29 +98,18 @@ async def insert_recommendation(
 
 async def list_recommendations(days: int = 30) -> list[dict]:
     """최근 N일의 추천 목록을 created_at 내림차순으로 반환."""
-    cutoff = (today_kst() - timedelta(days=days)).isoformat()
-    result = await asyncio.to_thread(
-        lambda: supabase.table("parameter_recommendations")
-        .select("*")
-        .gte("target_date", cutoff)
-        .order("created_at", desc=True)
-        .execute()
+    cutoff = today_kst() - timedelta(days=days)
+    rows = await pg.fetch(
+        f"SELECT * FROM {_TABLE} WHERE target_date >= $1 ORDER BY created_at DESC",
+        cutoff,
     )
-    return result.data or []
+    return rows or []
 
 
 async def get_recommendation(rec_id: str) -> dict | None:
     """단일 추천 레코드를 조회한다."""
-    result = await asyncio.to_thread(
-        lambda: supabase.table("parameter_recommendations")
-        .select("*")
-        .eq("id", rec_id)
-        .limit(1)
-        .execute()
-    )
-    if result.data:
-        return result.data[0]
-    return None
+    row = await pg.fetchrow(f"SELECT * FROM {_TABLE} WHERE id = $1", rec_id)
+    return row
 
 
 async def update_recommendation_status(
@@ -115,26 +124,33 @@ async def update_recommendation_status(
 
     applied/partial 셋 시 applied_at, rejected 셋 시 rejected_at 자동 기록.
     """
-    update_data: dict = {"status": status}
-    now_iso = datetime.now(KST).isoformat()
+    now_dt = datetime.now(KST)
+    set_clauses = ["status = $2"]
+    args: list = [rec_id, status]
+    idx = 3
+
     if status in ("applied", "partial", "applied_auto"):
         # 사이클 23: applied_auto 는 자동 적용 전용 (운영자 수동 'applied' 와 분리)
-        update_data["applied_at"] = now_iso
+        set_clauses.append(f"applied_at = ${idx}")
+        args.append(now_dt)
+        idx += 1
         if applied_params is not None:
-            update_data["applied_params"] = applied_params
+            set_clauses.append(f"applied_params = ${idx}::jsonb")
+            args.append(applied_params)
+            idx += 1
         if applied_weight is not None:
-            update_data["applied_weight"] = applied_weight
+            set_clauses.append(f"applied_weight = ${idx}")
+            args.append(applied_weight)
+            idx += 1
     elif status == "rejected":
-        update_data["rejected_at"] = now_iso
+        set_clauses.append(f"rejected_at = ${idx}")
+        args.append(now_dt)
+        idx += 1
 
-    result = await asyncio.to_thread(
-        lambda: supabase.table("parameter_recommendations")
-        .update(update_data)
-        .eq("id", rec_id)
-        .execute()
-    )
+    sql = f"UPDATE {_TABLE} SET {', '.join(set_clauses)} WHERE id = $1 RETURNING *"
+    row = await pg.fetchrow(sql, *args)
     logger.info("파라미터 추천 상태 갱신: %s -> %s", rec_id, status)
-    return result.data[0] if result.data else {}
+    return row or {}
 
 
 async def update_backtest_summary(
@@ -152,22 +168,19 @@ async def update_backtest_summary(
 
     적용 row 0건 (미존재 ID) 이면 빈 dict 반환 — 예외 전파 안 함.
     """
-    update_data = {"backtest_summary": dict(summary or {})}
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table("parameter_recommendations")
-            .update(update_data)
-            .eq("id", rec_id)
-            .execute()
+        row = await pg.fetchrow(
+            f"UPDATE {_TABLE} SET backtest_summary = $2::jsonb WHERE id = $1 RETURNING *",
+            rec_id, dict(summary or {}),
         )
     except Exception:
         logger.exception("backtest_summary 갱신 실패: %s", rec_id)
         return {}
-    if not result.data:
+    if not row:
         logger.warning("backtest_summary 갱신 대상 미존재: rec_id=%s", rec_id)
         return {}
     logger.info("backtest_summary 갱신: rec_id=%s", rec_id)
-    return result.data[0]
+    return row
 
 
 async def list_recommendations_pending_backtest(target_date: date) -> list[dict]:
@@ -176,14 +189,11 @@ async def list_recommendations_pending_backtest(target_date: date) -> list[dict]
     `idx_param_recommendations_backtest_pending` 부분 인덱스(마이그 020) 가
     매칭되어 EXPLAIN 상 인덱스 스캔이 일어난다.
     """
-    result = await asyncio.to_thread(
-        lambda: supabase.table("parameter_recommendations")
-        .select("*")
-        .eq("target_date", target_date.isoformat())
-        .is_("backtest_summary", "null")
-        .execute()
+    rows = await pg.fetch(
+        f"SELECT * FROM {_TABLE} WHERE target_date = $1 AND backtest_summary IS NULL",
+        target_date,
     )
-    return result.data or []
+    return rows or []
 
 
 async def list_pending_by_date(target_date: date) -> list[dict]:
@@ -191,14 +201,11 @@ async def list_pending_by_date(target_date: date) -> list[dict]:
 
     auto_apply_recommendations() 에서 자동 적용 대상 조회에 사용.
     """
-    result = await asyncio.to_thread(
-        lambda: supabase.table("parameter_recommendations")
-        .select("*")
-        .eq("target_date", target_date.isoformat())
-        .eq("status", "pending")
-        .execute()
+    rows = await pg.fetch(
+        f"SELECT * FROM {_TABLE} WHERE target_date = $1 AND status = $2",
+        target_date, "pending",
     )
-    return result.data or []
+    return rows or []
 
 
 async def expire_pending_before(target_date: date) -> int:
@@ -207,14 +214,19 @@ async def expire_pending_before(target_date: date) -> int:
     Returns:
         만료 처리된 레코드 수.
     """
-    result = await asyncio.to_thread(
-        lambda: supabase.table("parameter_recommendations")
-        .update({"status": "expired"})
-        .eq("status", "pending")
-        .lt("target_date", target_date.isoformat())
-        .execute()
+    result = await pg.execute(
+        f"UPDATE {_TABLE} SET status = 'expired' WHERE status = 'pending' AND target_date < $1",
+        target_date,
     )
-    expired_count = len(result.data or [])
+    expired_count = _parse_affected(result)
     if expired_count > 0:
         logger.info("이전 pending 추천 %d건 expired로 마킹", expired_count)
     return expired_count
+
+
+def _parse_affected(status: str) -> int:
+    """asyncpg 상태 문자열('UPDATE N' / 'INSERT 0 N' / 'DELETE N') → 영향 행수 int."""
+    try:
+        return int(status.strip().split()[-1])
+    except (ValueError, IndexError, AttributeError):
+        return 0

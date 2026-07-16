@@ -7,10 +7,11 @@
 1. `upsert_one(StockBasics)` — ticker PK upsert. refreshed_at 은 now() 로 자동 세팅.
 2. `get(ticker)` — 미존재 시 `None`, 존재 시 `StockBasics` 반환.
 3. `is_stale(ticker, max_age_hours=24)` — 미존재/24h 초과면 True.
-4. supabase 동기 SDK 호출은 모두 `asyncio.to_thread` 위임.
+4. read/write 는 `src.db.pg` (asyncpg) 헬퍼 경유.
 
-테스트 더블:
-- `src.db.stock_master.supabase` 를 `FakeSupabase` 로 monkeypatch.
+테스트 더블 (사이클 M2b — Supabase→RDS asyncpg 전환):
+- `src.db.stock_master.pg` 를 stateful `fake_pg_stock_master` 로 monkeypatch
+  (upsert_one → get → is_stale round-trip 계약을 pg.execute/fetchrow/fetch 로 흉내).
 - `freezegun` 으로 refreshed_at 시각을 통제해 stale 판정 검증.
 """
 
@@ -50,12 +51,12 @@ def _basics(
 @pytest.mark.asyncio
 async def test_upsert_one_and_get_round_trip(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_stock_master,
 ):
     """upsert 후 get 라운드트립."""
     from src.db import stock_master
 
-    monkeypatch.setattr(stock_master, "supabase", fake_supabase)
+    monkeypatch.setattr(stock_master, "pg", fake_pg_stock_master)
 
     await stock_master.upsert_one(_basics("012200", name="계양전기", nxt_tradable=True))
 
@@ -68,11 +69,11 @@ async def test_upsert_one_and_get_round_trip(
 @pytest.mark.asyncio
 async def test_get_returns_none_when_missing(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_stock_master,
 ):
     from src.db import stock_master
 
-    monkeypatch.setattr(stock_master, "supabase", fake_supabase)
+    monkeypatch.setattr(stock_master, "pg", fake_pg_stock_master)
 
     loaded = await stock_master.get("999999")
     assert loaded is None
@@ -81,11 +82,11 @@ async def test_get_returns_none_when_missing(
 @pytest.mark.asyncio
 async def test_is_stale_when_missing_then_true(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_stock_master,
 ):
     from src.db import stock_master
 
-    monkeypatch.setattr(stock_master, "supabase", fake_supabase)
+    monkeypatch.setattr(stock_master, "pg", fake_pg_stock_master)
 
     assert await stock_master.is_stale("999999") is True
 
@@ -93,11 +94,11 @@ async def test_is_stale_when_missing_then_true(
 @pytest.mark.asyncio
 async def test_is_stale_when_recent_then_false(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_stock_master,
 ):
     from src.db import stock_master
 
-    monkeypatch.setattr(stock_master, "supabase", fake_supabase)
+    monkeypatch.setattr(stock_master, "pg", fake_pg_stock_master)
 
     with freeze_time("2026-05-11 09:00:00", tz_offset=9):
         await stock_master.upsert_one(_basics("012200"))
@@ -110,11 +111,11 @@ async def test_is_stale_when_recent_then_false(
 @pytest.mark.asyncio
 async def test_is_stale_when_older_than_24h_then_true(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_stock_master,
 ):
     from src.db import stock_master
 
-    monkeypatch.setattr(stock_master, "supabase", fake_supabase)
+    monkeypatch.setattr(stock_master, "pg", fake_pg_stock_master)
 
     with freeze_time("2026-05-10 09:00:00", tz_offset=9):
         await stock_master.upsert_one(_basics("012200"))
@@ -127,12 +128,12 @@ async def test_is_stale_when_older_than_24h_then_true(
 @pytest.mark.asyncio
 async def test_upsert_updates_existing_row(
     monkeypatch: pytest.MonkeyPatch,
-    fake_supabase,
+    fake_pg_stock_master,
 ):
     """동일 ticker 재 upsert 시 갱신 (행 중복 없음)."""
     from src.db import stock_master
 
-    monkeypatch.setattr(stock_master, "supabase", fake_supabase)
+    monkeypatch.setattr(stock_master, "pg", fake_pg_stock_master)
 
     await stock_master.upsert_one(_basics("012200", nxt_tradable=True))
     await stock_master.upsert_one(_basics("012200", nxt_tradable=False))
@@ -140,5 +141,5 @@ async def test_upsert_updates_existing_row(
     loaded = await stock_master.get("012200")
     assert loaded is not None
     assert loaded.nxt_tradable is False
-    # store 직접 어설션 — 동일 ticker 행은 1개
-    assert sum(1 for r in fake_supabase.store["stock_master"] if r["ticker"] == "012200") == 1
+    # store 직접 어설션 — 동일 ticker 행은 1개 (ticker PK upsert)
+    assert sum(1 for t in fake_pg_stock_master.store if t == "012200") == 1

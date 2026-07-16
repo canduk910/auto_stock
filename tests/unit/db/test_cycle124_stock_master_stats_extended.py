@@ -121,40 +121,33 @@ async def test_g_stats2_with_acml_tr_pbmn_count():
 # ─── G-STATS3: total_daily_rows ───────────────────────────────────────────────
 
 async def test_g_stats3_total_daily_rows_from_smd():
-    """total_daily_rows = stock_master_daily.count_all() 값 반영."""
-    rows = [_make_row("000020", raw={})]
+    """total_daily_rows = stock_master_daily.count_all() 값 반영.
 
-    mock_execute = MagicMock()
-    mock_execute.data = rows
+    사이클 M2b — stock_master 4카운트/top10 은 pg.fetchval/fetch, stock_master_daily
+    연동(count_all/max_bas_dd)은 여전히 모듈 함수 patch.
+    """
+    from src.db import stock_master
 
     with (
-        patch("src.db.stock_master.supabase") as mock_sb,
+        patch.object(stock_master, "pg", create=True) as pg_mod,
         patch("src.db.stock_master_daily.count_all", new_callable=AsyncMock, return_value=75000) as mock_count,
         patch("src.db.stock_master_daily.max_bas_dd", new_callable=AsyncMock, return_value=date(2026, 6, 11)),
     ):
-        # 사이클 126 영역 1 — count chain (select(count="exact").limit(0).execute()) + raw chain (select.order.range.execute()) 양쪽 호환
-        mock_execute.count = len(rows)
-        mock_sb.table.return_value.select.return_value.order.return_value.range.return_value.execute.return_value = mock_execute
-        # count="exact" chain
-        mock_sb.table.return_value.select.return_value.limit.return_value.execute.return_value = mock_execute
-
-        from src.db import stock_master
+        pg_mod.fetchval = AsyncMock(return_value=1)
+        pg_mod.fetch = AsyncMock(return_value=[])
         result = await stock_master.get_stats()
 
     assert result["total_daily_rows"] == 75000
     mock_count.assert_awaited_once()  # count_all() 실제 호출 검증
 
     # graceful fallback 검증: count_all 예외 시 0 반환
-    mock_execute2 = MagicMock()
-    mock_execute2.data = rows
-
     with (
-        patch("src.db.stock_master.supabase") as mock_sb2,
+        patch.object(stock_master, "pg", create=True) as pg_mod2,
         patch("src.db.stock_master_daily.count_all", new_callable=AsyncMock, side_effect=RuntimeError("DB 오류")),
         patch("src.db.stock_master_daily.max_bas_dd", new_callable=AsyncMock, return_value=None),
     ):
-        mock_sb2.table.return_value.select.return_value.order.return_value.execute.return_value = mock_execute2
-
+        pg_mod2.fetchval = AsyncMock(return_value=1)
+        pg_mod2.fetch = AsyncMock(return_value=[])
         result2 = await stock_master.get_stats()
 
     assert result2["total_daily_rows"] == 0, "예외 시 graceful fallback 0 의무"
@@ -163,26 +156,21 @@ async def test_g_stats3_total_daily_rows_from_smd():
 # ─── G-STATS4: last_daily_load_at ─────────────────────────────────────────────
 
 async def test_g_stats4_last_daily_load_at_from_smd():
-    """last_daily_load_at = stock_master_daily.max_bas_dd(ticker=None) 를 str 변환."""
-    rows = [_make_row("000030", raw={})]
+    """last_daily_load_at = stock_master_daily.max_bas_dd(ticker=None) 를 str 변환.
 
-    mock_execute = MagicMock()
-    mock_execute.data = rows
+    사이클 M2b — stock_master 카운트/top10 은 pg, max_bas_dd 는 모듈 함수 patch.
+    """
+    from src.db import stock_master
 
     target_date = date(2026, 6, 12)
 
     with (
-        patch("src.db.stock_master.supabase") as mock_sb,
+        patch.object(stock_master, "pg", create=True) as pg_mod,
         patch("src.db.stock_master_daily.count_all", new_callable=AsyncMock, return_value=1000),
         patch("src.db.stock_master_daily.max_bas_dd", new_callable=AsyncMock, return_value=target_date) as mock_max,
     ):
-        # 사이클 126 영역 1 — count chain (select(count="exact").limit(0).execute()) + raw chain (select.order.range.execute()) 양쪽 호환
-        mock_execute.count = len(rows)
-        mock_sb.table.return_value.select.return_value.order.return_value.range.return_value.execute.return_value = mock_execute
-        # count="exact" chain
-        mock_sb.table.return_value.select.return_value.limit.return_value.execute.return_value = mock_execute
-
-        from src.db import stock_master
+        pg_mod.fetchval = AsyncMock(return_value=1)
+        pg_mod.fetch = AsyncMock(return_value=[])
         result = await stock_master.get_stats()
 
     assert result["last_daily_load_at"] == "2026-06-12"
@@ -190,16 +178,13 @@ async def test_g_stats4_last_daily_load_at_from_smd():
     mock_max.assert_awaited_once_with()  # 인자 없이 호출 (default ticker=None)
 
     # max_bas_dd 반환 None 시 last_daily_load_at=None
-    mock_execute3 = MagicMock()
-    mock_execute3.data = rows
-
     with (
-        patch("src.db.stock_master.supabase") as mock_sb3,
+        patch.object(stock_master, "pg", create=True) as pg_mod3,
         patch("src.db.stock_master_daily.count_all", new_callable=AsyncMock, return_value=0),
         patch("src.db.stock_master_daily.max_bas_dd", new_callable=AsyncMock, return_value=None),
     ):
-        mock_sb3.table.return_value.select.return_value.order.return_value.execute.return_value = mock_execute3
-
+        pg_mod3.fetchval = AsyncMock(return_value=1)
+        pg_mod3.fetch = AsyncMock(return_value=[])
         result3 = await stock_master.get_stats()
 
     assert result3["last_daily_load_at"] is None, "max_bas_dd=None 시 None 반환 의무"

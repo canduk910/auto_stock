@@ -23,7 +23,25 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-pytestmark = pytest.mark.unit
+# 사이클 M3a (Supabase→RDS asyncpg 전환) — 이 파일 전체 xfail.
+# supabase 체인 mock(`.table().upsert()/.select().execute()`) 기반 검증인데
+# stock_master_financial 이 pg(asyncpg) 단독 전환되어 supabase 심볼이 사라짐 →
+# 체인 mock 라우팅 불가. 100건 chunk/ON CONFLICT 복합PK/graceful/NUMERIC→Decimal
+# 계약은 pg 레벨에서 test_cycleM3a_stock_master_financial_pg.py + 실 PG
+# test_cycleM3a_three_modules_roundtrip.py 가 계승.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason=(
+            "사이클 M3a (2026-07-16) 의미 전환 — stock_master_financial 이 "
+            "supabase-py 에서 src.db.pg(asyncpg) 로 전환되어 supabase 체인 mock "
+            "라우팅 불가. batch/PK/graceful 계약은 "
+            "test_cycleM3a_stock_master_financial_pg.py + "
+            "test_cycleM3a_three_modules_roundtrip.py 가 계승."
+        ),
+        strict=False,
+    ),
+]
 
 
 def _fin_row(stac_yymm: str, div_cls: str = "0", **overrides) -> dict:
