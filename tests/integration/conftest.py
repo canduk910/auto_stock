@@ -26,6 +26,23 @@ from src.engine.strategy_registry import StrategyRegistry
 from src.models.balance import BuyableInfo
 from src.models.order import OrderResult, OrderSide
 
+# 실 Postgres 통합 하네스 fixture (pg_dsn/pg_migrated/pg_pool/clean_positions/
+# clean_strategy_config) re-export — Supabase→RDS 이전 단계 M1. docker/DB 없으면
+# 각 fixture 가 pytest.skip.
+from tests.integration.pg_harness import (  # noqa: E402,F401
+    clean_backtest_runs,
+    clean_daily_performance,
+    clean_log_reports,
+    clean_market_regime,
+    clean_pending_ndc,
+    clean_positions,
+    clean_strategy_config,
+    clean_strategy_funnel,
+    pg_dsn,
+    pg_migrated,
+    pg_pool,
+)
+
 
 # ---------------------------------------------------------------------------
 # 호출 추적기

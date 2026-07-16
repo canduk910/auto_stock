@@ -13,6 +13,10 @@ domain-expert 자문 산출물:
 3. `load_pending_ndc(target_date) -> set[tuple[ticker, strategy_id]]` — `boot()` 영역 복구
 4. `purge_pending_ndc_before(target_date)` — 일일 정리 (오래된 영역 영구 폐기)
 
+사이클 M1-2 (Supabase→RDS 이전 단계1 증분2): supabase-py → `src.db.pg`(asyncpg) 전환.
+함수 시그니처·반환형 100% 보존. ⚠️ 익일청산큐 = 매매 안전성 — `load_pending_ndc`
+DB 예외 시 빈 set 계약 절대 보존 (사이클 162).
+
 영속 의무 매트릭스:
 - 사이클 32 R4 보유/익일청산 절대 보호 영속
 - 사이클 38 명문화 (매도/익일청산 hot path 무관 = DB 저장 영역만)
@@ -23,12 +27,11 @@ domain-expert 자문 산출물:
 
 from __future__ import annotations
 
-import asyncio
 import logging
-from datetime import date
+from datetime import date, datetime
 
+import src.db.pg as pg
 from src.db._kst import now_kst_iso
-from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
 
@@ -52,17 +55,19 @@ async def save_pending_ndc(
 
     graceful (사이클 88 G-REJECT 답습) — 호출자가 try/except 흡수 + WARNING.
     """
-    data = {
-        "target_date": target_date.isoformat(),
-        "ticker": ticker,
-        "strategy_id": strategy_id,
-        "reason": reason,
-        "created_at": now_kst_iso(),
-    }
-    await asyncio.to_thread(
-        lambda: supabase.table(_TABLE).upsert(
-            data, on_conflict="target_date,ticker,strategy_id"
-        ).execute()
+    sql = """
+        INSERT INTO pending_next_day_clear (target_date, ticker, strategy_id, reason, created_at)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (target_date, ticker, strategy_id) DO UPDATE SET
+            reason = EXCLUDED.reason
+    """
+    await pg.execute(
+        sql,
+        target_date,
+        ticker,
+        strategy_id,
+        reason,
+        datetime.fromisoformat(now_kst_iso()),
     )
     logger.debug(
         "[pending_ndc_save] target_date=%s ticker=%s strategy=%s reason=%s",
@@ -78,10 +83,14 @@ async def delete_pending_ndc(
     drain finally 영역 호출 = `_drain_pending_next_day_clear` finally 블록.
     idempotent (미존재 행 DELETE = no-op).
     """
-    await asyncio.to_thread(
-        lambda: supabase.table(_TABLE).delete().eq(
-            "target_date", target_date.isoformat()
-        ).eq("ticker", ticker).eq("strategy_id", strategy_id).execute()
+    await pg.execute(
+        """
+        DELETE FROM pending_next_day_clear
+        WHERE target_date = $1 AND ticker = $2 AND strategy_id = $3
+        """,
+        target_date,
+        ticker,
+        strategy_id,
     )
     logger.debug(
         "[pending_ndc_delete] target_date=%s ticker=%s strategy=%s",
@@ -98,17 +107,19 @@ async def load_pending_ndc(target_date: date) -> set[tuple[str, str]]:
     실패 시 빈 set 반환 (graceful, 호출자 메모리 set 보존).
     """
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table(_TABLE).select(
-                "ticker, strategy_id"
-            ).eq("target_date", target_date.isoformat()).execute()
+        rows = await pg.fetch(
+            "SELECT ticker, strategy_id FROM pending_next_day_clear WHERE target_date = $1",
+            target_date,
         )
     except Exception:
         logger.exception("[pending_ndc_load] 실패 graceful — 메모리 set 보존")
         return set()
 
-    rows = getattr(result, "data", None) or []
-    return {(row["ticker"], row["strategy_id"]) for row in rows if row.get("ticker") and row.get("strategy_id")}
+    return {
+        (row["ticker"], row["strategy_id"])
+        for row in (rows or [])
+        if row.get("ticker") and row.get("strategy_id")
+    }
 
 
 async def purge_pending_ndc_before(target_date: date) -> int:
@@ -118,17 +129,23 @@ async def purge_pending_ndc_before(target_date: date) -> int:
     반환값 = 삭제된 행 수 (진단용, 실패 시 -1).
     """
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table(_TABLE).delete().lt(
-                "target_date", target_date.isoformat()
-            ).execute()
+        status = await pg.execute(
+            "DELETE FROM pending_next_day_clear WHERE target_date < $1",
+            target_date,
         )
     except Exception:
         logger.exception("[pending_ndc_purge] 실패 graceful")
         return -1
 
-    rows = getattr(result, "data", None) or []
-    count = len(rows)
+    count = _parse_delete_count(status)
     if count:
         logger.info("[pending_ndc_purge] deleted=%d cutoff=%s", count, target_date)
     return count
+
+
+def _parse_delete_count(status: str) -> int:
+    """asyncpg 'DELETE N' 상태 문자열에서 삭제 행 수를 파싱한다."""
+    try:
+        return int(status.split()[-1])
+    except (AttributeError, ValueError, IndexError):
+        return 0

@@ -34,6 +34,23 @@ jobs:
     # 사이클 59 hotfix: GitHub Actions 기본 6시간 cancel 대신 15분 강제 종료.
     # pytest-timeout 60s 가드 와 이중 안전망.
     timeout-minutes: 15
+    # 사이클 M1 (Supabase→RDS 이전): 실 Postgres 통합 테스트용 service 컨테이너.
+    # DATABASE_URL_TEST 있으면 pg_harness 가 이 컨테이너를 사용(docker 기동 skip),
+    # 없으면 통합 테스트 자체 skip. 기존 단위/mock 테스트는 이 컨테이너와 무관.
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: testpg
+          POSTGRES_DB: auto_stock_test
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -46,6 +63,8 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Run pytest with coverage gate
+        env:
+          DATABASE_URL_TEST: postgresql://postgres:testpg@127.0.0.1:5432/auto_stock_test
         run: python -m pytest --cov=src --cov-report=term:skip-covered -q
 
   frontend-build:

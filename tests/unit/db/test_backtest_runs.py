@@ -23,7 +23,20 @@ from datetime import date
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason=(
+            "사이클 M1-2 의미 전환 — backtest_runs.py 가 supabase-py 체인에서 "
+            "src.db.pg(asyncpg) 로 전환되어 `fake_supabase`/`supabase.table(...)` "
+            "monkeypatch 전제가 더 이상 성립하지 않는다(AttributeError). 동등 계약은 "
+            "`tests/unit/db/test_cycleM1_2_backtest_runs_pg.py` 가 pg mock 기반으로 "
+            "전량 대체(insert/dup/race/get/list/update_status 전이). 회귀 아님 "
+            "(사이클 M1-1 선례 답습)."
+        ),
+        strict=False,
+    ),
+]
 
 
 @pytest.mark.asyncio

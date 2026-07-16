@@ -66,6 +66,16 @@ class TestUpsertTransition:
         )
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        reason=(
+            "사이클 M1-3 의미 전환 — strategy_funnel.py 가 src.db.pg(asyncpg) 로 전환되어 "
+            "`patch('src.db.strategy_funnel.supabase')` 전제가 성립하지 않는다(모듈에 "
+            "supabase 심볼 부재 → AttributeError). 동등 계약(UNIQUE 재저장 시 1행 유지)은 "
+            "`tests/integration/test_cycleM1_3_daily_perf_funnel_roundtrip.py::"
+            "test_strategy_funnel_unique_upsert_one_row` 가 실 PG 왕복으로 대체. 회귀 아님."
+        ),
+        strict=False,
+    )
     async def test_g_145_funnel_3_duplicate_insert_single_row(self):
         """G-145-FUNNEL-3: 동일 (target_date, strategy_id, step_no) 2회 insert → mock 영역에서 단일 upsert 호출."""
         from src.db import strategy_funnel

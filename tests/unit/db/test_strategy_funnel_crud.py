@@ -26,7 +26,20 @@ from unittest.mock import MagicMock
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.xfail(
+        reason=(
+            "사이클 M1-3 의미 전환 — strategy_funnel.py 가 supabase-py 체인에서 "
+            "src.db.pg(asyncpg) 로 전환되어 `monkeypatch.setattr(sf_mod, 'supabase', ...)` "
+            "전제가 더 이상 성립하지 않는다(모듈에 supabase 심볼 부재, raising=False 라 "
+            "patch 자체는 통과하나 production 이 pg 를 참조해 mock 미발화). 동등 계약은 "
+            "`tests/unit/db/test_cycleM1_3_strategy_funnel_pg.py` 가 pg mock 기반으로 "
+            "전량 대체(insert/cap/list/recent 전이). 회귀 아님 (사이클 M1-1/M1-2 선례 답습)."
+        ),
+        strict=False,
+    ),
+]
 
 
 def _patch_supabase(monkeypatch, rows_to_return: list[dict] | None = None,

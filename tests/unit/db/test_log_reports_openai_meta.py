@@ -12,6 +12,18 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.xfail(
+    reason=(
+        "사이클 M1-2 의미 전환 — log_reports.py 가 supabase-py 체인에서 "
+        "src.db.pg(asyncpg) 로 전환되어 `patch('src.db.log_reports.supabase')` "
+        "전제가 더 이상 성립하지 않는다(AttributeError). OpenAI 메타 5키(payload 포함/"
+        "None 기본값) 계약은 `tests/unit/db/test_cycleM1_2_log_reports_pg.py` 의 "
+        "cost_estimate_usd Decimal→float 캐스트 + insert 바인딩 검증으로 대체. "
+        "회귀 아님 (사이클 M1-1 선례 답습)."
+    ),
+    strict=False,
+)
+
 
 def _import_log_reports():
     import importlib

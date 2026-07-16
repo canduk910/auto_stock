@@ -14,6 +14,18 @@ import pytest
 
 from src.db import pending_next_day_clear as ndc
 
+pytestmark = pytest.mark.xfail(
+    reason=(
+        "사이클 M1-2 의미 전환 — pending_next_day_clear.py 가 supabase-py 체인에서 "
+        "src.db.pg(asyncpg) 로 전환되어 `patch('src.db.pending_next_day_clear.supabase')` "
+        "전제가 더 이상 성립하지 않는다(AttributeError). ⚠️ 익일청산큐 매매 안전성 계약"
+        "(복합 PK upsert / load graceful 빈 set / purge graceful -1 / reason 기본값)은 "
+        "`tests/unit/db/test_cycleM1_2_pending_ndc_pg.py` 가 pg mock 기반으로 전량 "
+        "동등 대체(G-162 전체 케이스 커버). 회귀 아님 (사이클 M1-1 선례 답습)."
+    ),
+    strict=False,
+)
+
 
 def _make_supabase_chain(data=None):
     """Supabase chain mock — execute() 호출 시 data 반환."""

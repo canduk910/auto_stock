@@ -63,6 +63,17 @@ class TestInsertSnapshotProvisional:
         )
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        reason=(
+            "사이클 M1-3 의미 전환 — strategy_funnel.py 가 src.db.pg(asyncpg) 로 전환되어 "
+            "`patch('src.db.strategy_funnel.supabase')` 전제가 성립하지 않는다(모듈에 "
+            "supabase 심볼 부재 → AttributeError). 동등 계약(is_provisional=True 바인딩)은 "
+            "`tests/unit/db/test_cycleM1_3_strategy_funnel_pg.py::"
+            "test_insert_snapshot_uses_pg_upsert_triple_conflict` 가 pg mock 기반으로 대체. "
+            "회귀 아님."
+        ),
+        strict=False,
+    )
     async def test_g_171_db_2_provisional_true_in_payload(self):
         """G-171-DB-2: is_provisional=True → upsert payload 동행."""
         from src.db import strategy_funnel
@@ -83,6 +94,16 @@ class TestInsertSnapshotProvisional:
             )
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(
+        reason=(
+            "사이클 M1-3 의미 전환 — strategy_funnel.py 가 src.db.pg(asyncpg) 로 전환되어 "
+            "`patch('src.db.strategy_funnel.supabase')` 전제가 성립하지 않는다(모듈에 "
+            "supabase 심볼 부재 → AttributeError). 동등 계약(기본값 is_provisional=False)은 "
+            "`tests/unit/db/test_cycleM1_3_strategy_funnel_pg.py` (G-171-DB-1 signature 검사는 "
+            "본 파일 test_g_171_db_1 로 계속 유효) 가 대체. 회귀 아님."
+        ),
+        strict=False,
+    )
     async def test_g_171_db_3_default_false_in_payload(self):
         """G-171-DB-3: 미지정 시 payload is_provisional=False (기존 호출자 회귀 0)."""
         from src.db import strategy_funnel

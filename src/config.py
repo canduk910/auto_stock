@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_key: str
 
+    # RDS(PostgreSQL) — Supabase→RDS 이전 단계 0 (asyncpg 인프라, 사이클 M0)
+    # supabase_url/supabase_key 와 병존(삭제 금지) — pg.py 는 아직 어느 db 모듈도 미사용
+    database_url: str = ""
+
     # 서버
     host: str = "0.0.0.0"
     port: int = 8000

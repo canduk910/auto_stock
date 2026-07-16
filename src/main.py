@@ -191,6 +191,17 @@ async def lifespan(app: FastAPI):
         logger.info("tracemalloc 활성화 (depth=25)")
 
     logger.info("=== 서버 시작 (env=%s, port=%s) ===", settings.kis_env, settings.port)
+
+    # RDS(PostgreSQL) 연결 풀 — 사이클 M0. database_url 미설정 시 graceful skip
+    # (supabase.py 가 여전히 정본 — 어느 db 모듈도 아직 pg.py 미사용).
+    if settings.database_url:
+        try:
+            from src.db.pg import init_pool
+            await init_pool()
+            logger.info("RDS 연결 풀 초기화 완료")
+        except Exception:
+            logger.exception("RDS 연결 풀 초기화 실패")
+
     try:
         await token_manager.get_token()
         logger.info("KIS 토큰 발급 완료")
@@ -232,6 +243,13 @@ async def lifespan(app: FastAPI):
             await _mc._client_instance.close()
     except Exception:
         logger.exception("MCP 클라이언트 정리 실패")
+
+    # RDS(PostgreSQL) 연결 풀 종료 — 사이클 M0.
+    try:
+        from src.db.pg import close_pool
+        await close_pool()
+    except Exception:
+        logger.exception("RDS 연결 풀 종료 실패")
 
 
 app = FastAPI(

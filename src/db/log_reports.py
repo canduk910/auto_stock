@@ -1,14 +1,17 @@
-"""daily_log_reports CRUD."""
+"""daily_log_reports CRUD.
+
+사이클 M1-2 (Supabase→RDS 이전 단계1 증분2): supabase-py → `src.db.pg`(asyncpg) 전환.
+함수 시그니처·반환형 100% 보존 — 호출부(log_analysis_engine 등) diff 0.
+"""
 
 from __future__ import annotations
 
-import asyncio
 import logging
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
+import src.db.pg as pg
 from src.db._kst import now_kst_iso
-from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
 
@@ -34,28 +37,30 @@ async def insert_log_report(
     사이클 58 V-2: OpenAI 호출 메타(tokens/latency/cost)를 함께 기록한다.
     모두 NULL 허용 — 기존 row 자연 보존.
     """
-    payload = {
-        "target_date": target_date.isoformat(),
-        "summary": summary,
-        "findings": findings,
-        "metrics": metrics,
-        "model": model,
-        # 사이클 58 V-2 — 메타 필드 (None → NULL INSERT)
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
-        "total_tokens": total_tokens,
-        "latency_ms": latency_ms,
-        "cost_estimate_usd": (
-            float(cost_estimate_usd) if cost_estimate_usd is not None else None
-        ),
-        # 사이클 68 G-4 — KST timestamp 명시 (DB DEFAULT UTC 폐기)
-        "created_at": now_kst_iso(),
-    }
+    sql = """
+        INSERT INTO daily_log_reports (
+            target_date, summary, findings, metrics, model,
+            input_tokens, output_tokens, total_tokens, latency_ms,
+            cost_estimate_usd, created_at
+        ) VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING *
+    """
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table("daily_log_reports").insert(payload).execute()
+        row = await pg.fetchrow(
+            sql,
+            target_date,
+            summary,
+            findings,
+            metrics,
+            model,
+            input_tokens,
+            output_tokens,
+            total_tokens,
+            latency_ms,
+            float(cost_estimate_usd) if cost_estimate_usd is not None else None,
+            datetime.fromisoformat(now_kst_iso()),
         )
-        return result.data[0] if result.data else None
+        return row
     except Exception as e:
         msg = str(e)
         if "duplicate key" in msg or "23505" in msg:
@@ -67,23 +72,16 @@ async def insert_log_report(
 
 async def list_log_reports(days: int = 30) -> list[dict]:
     """최근 N일치 리포트를 신규순으로 조회한다."""
-    result = await asyncio.to_thread(
-        lambda: supabase.table("daily_log_reports")
-        .select("*")
-        .order("target_date", desc=True)
-        .limit(days)
-        .execute()
+    rows = await pg.fetch(
+        "SELECT * FROM daily_log_reports ORDER BY target_date DESC LIMIT $1",
+        days,
     )
-    return result.data or []
+    return rows or []
 
 
 async def get_log_report(target_date: date) -> dict | None:
     """단일 영업일 리포트를 조회한다."""
-    result = await asyncio.to_thread(
-        lambda: supabase.table("daily_log_reports")
-        .select("*")
-        .eq("target_date", target_date.isoformat())
-        .limit(1)
-        .execute()
+    return await pg.fetchrow(
+        "SELECT * FROM daily_log_reports WHERE target_date = $1 LIMIT 1",
+        target_date,
     )
-    return result.data[0] if result.data else None

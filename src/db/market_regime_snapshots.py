@@ -6,21 +6,22 @@ PK: ``id`` (uuid 자동). UNIQUE: ``snapshot_date``.
 용도: _boot (07:50) 시점 dkstock.cloud 매크로 응답 1행 영구 저장.
 운영자가 사후 회고/디버깅/Grafana 분석에 사용.
 
+사이클 M1-2 (Supabase→RDS 이전 단계1 증분2): supabase-py → `src.db.pg`(asyncpg) 전환.
+함수 시그니처·반환형 100% 보존.
+
 핵심 안전 원칙:
-- supabase 동기 SDK 호출은 모두 ``asyncio.to_thread`` 위임 (src/db/CLAUDE.md 규약)
 - 중복 INSERT (UNIQUE 충돌) 는 None 반환 (graceful — _boot 중복 호출 안전)
 - 외부 매크로 fetch 실패 시 호출자(MarketRegime.refresh)가 흡수 → 본 모듈 호출 안 함
 """
 from __future__ import annotations
 
-import asyncio
 import logging
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from typing import Any, Optional
 
+import src.db.pg as pg
 from src.db._kst import now_kst_iso
-from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
 
@@ -49,35 +50,40 @@ async def insert_snapshot(
 
     동일 ``snapshot_date`` 가 이미 있으면 UNIQUE 충돌 → None (graceful).
     """
-    # 사전 중복 확인 (FakeSupabase + 운영 supabase 양쪽 호환)
-    existing = await asyncio.to_thread(
-        lambda: supabase.table(TABLE_NAME)
-        .select("id")
-        .eq("snapshot_date", snapshot_date.isoformat())
-        .execute()
+    # 사전 중복 확인
+    existing = await pg.fetch(
+        "SELECT id FROM market_regime_snapshots WHERE snapshot_date = $1",
+        snapshot_date,
     )
-    if existing.data:
+    if existing:
         logger.info("market_regime_snapshots 중복 skip: %s", snapshot_date)
         return None
 
-    row = {
-        "id": str(uuid.uuid4()),
-        "snapshot_date": snapshot_date.isoformat(),
-        "regime": regime,
-        "regime_desc": regime_desc,
-        "cycle_phase": cycle_phase,
-        "vix": vix,
-        "fear_greed_score": fear_greed_score,
-        "buffett_ratio": buffett_ratio,
-        "raw_response": dict(raw_response or {}),
-        "computed_cash_usage_ratio": computed_cash_usage_ratio,
-        "buy_blocked": bool(buy_blocked),
-        "block_reason": block_reason,
-        "created_at": now_kst_iso(),
-    }
+    row_id = str(uuid.uuid4())
+    sql = """
+        INSERT INTO market_regime_snapshots (
+            id, snapshot_date, regime, regime_desc, cycle_phase,
+            vix, fear_greed_score, buffett_ratio, raw_response,
+            computed_cash_usage_ratio, buy_blocked, block_reason, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13)
+        RETURNING *
+    """
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table(TABLE_NAME).insert(row).execute()
+        row = await pg.fetchrow(
+            sql,
+            row_id,
+            snapshot_date,
+            regime,
+            regime_desc,
+            cycle_phase,
+            vix,
+            fear_greed_score,
+            buffett_ratio,
+            dict(raw_response or {}),
+            computed_cash_usage_ratio,
+            bool(buy_blocked),
+            block_reason,
+            datetime.fromisoformat(now_kst_iso()),
         )
     except Exception as e:
         msg = str(e).lower()
@@ -87,60 +93,46 @@ async def insert_snapshot(
         logger.exception("market_regime_snapshots INSERT 실패: %s", snapshot_date)
         return None
 
-    if result.data:
+    if row:
         logger.info(
             "[market_regime_snapshot] insert: %s regime=%s buy_blocked=%s",
             snapshot_date, regime, buy_blocked,
         )
-        return result.data[0]
-    return row
+        return row
+    return None
 
 
 async def get_by_date(snapshot_date: date) -> Optional[dict]:
     """단일 영업일 조회."""
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table(TABLE_NAME)
-            .select("*")
-            .eq("snapshot_date", snapshot_date.isoformat())
-            .limit(1)
-            .execute()
+        return await pg.fetchrow(
+            "SELECT * FROM market_regime_snapshots WHERE snapshot_date = $1 LIMIT 1",
+            snapshot_date,
         )
     except Exception:
         logger.exception("market_regime_snapshots get_by_date 실패: %s", snapshot_date)
         return None
-    rows = result.data or []
-    return rows[0] if rows else None
 
 
 async def get_latest() -> Optional[dict]:
     """가장 최근 snapshot_date 1행."""
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table(TABLE_NAME)
-            .select("*")
-            .order("snapshot_date", desc=True)
-            .limit(1)
-            .execute()
+        return await pg.fetchrow(
+            "SELECT * FROM market_regime_snapshots ORDER BY snapshot_date DESC LIMIT 1",
         )
     except Exception:
         logger.exception("market_regime_snapshots get_latest 실패")
         return None
-    rows = result.data or []
-    return rows[0] if rows else None
 
 
 async def list_recent(days: int = 30) -> list[dict]:
-    """최근 N 영업일 신규순 조회 (Dashboard 사parkline 용)."""
+    """최근 N 영업일 신규순 조회 (Dashboard sparkline 용)."""
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table(TABLE_NAME)
-            .select("*")
-            .order("snapshot_date", desc=True)
-            .limit(days)
-            .execute()
+        rows = await pg.fetch(
+            "SELECT * FROM market_regime_snapshots ORDER BY snapshot_date DESC LIMIT $1",
+            days,
         )
     except Exception:
         logger.exception("market_regime_snapshots list_recent 실패")
         return []
-    return result.data or []
+    return rows or []

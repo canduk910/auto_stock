@@ -9,22 +9,23 @@ PK: ``id`` (uuid 자동 생성). UNIQUE: (target_date, strategy_id, params_kind)
 3. ``update_status(run_id, "completed", metrics=...)`` — 폴 완료 시.
 4. ``update_status(run_id, "failed", error_message=...)`` — 예외/타임아웃.
 
+사이클 M1-2 (Supabase→RDS 이전 단계1 증분2): supabase-py → `src.db.pg`(asyncpg) 전환.
+함수 시그니처·반환형 100% 보존.
+
 핵심 안전 원칙:
-- supabase 동기 SDK 호출은 모두 ``asyncio.to_thread`` 위임 (src/db/CLAUDE.md 규약).
 - 중복 INSERT 는 UNIQUE 충돌 → None 반환 (자문 사이클 재진입 안전).
 - 운영 매매 흐름 영역 미침범. backtest 전용 모듈.
 """
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from typing import Any, Optional
 
+import src.db.pg as pg
 from src.db._kst import now_kst_iso
-from src.db.supabase import supabase
 
 logger = logging.getLogger(__name__)
 
@@ -52,42 +53,49 @@ async def insert_run(
             f"params_kind 는 'current' 또는 'recommended' — 입력: {params_kind!r}"
         )
 
-    # 중복 키 사전 차단 (FakeSupabase 호환 — supabase-py 도 동일 UNIQUE 에러 반환)
-    existing = await asyncio.to_thread(
-        lambda: supabase.table(TABLE_NAME)
-        .select("id")
-        .eq("target_date", target_date.isoformat())
-        .eq("strategy_id", strategy_id)
-        .eq("params_kind", params_kind)
-        .execute()
+    # 중복 키 사전 차단
+    existing = await pg.fetch(
+        """
+        SELECT id FROM backtest_runs
+        WHERE target_date = $1 AND strategy_id = $2 AND params_kind = $3
+        """,
+        target_date,
+        strategy_id,
+        params_kind,
     )
-    if existing.data:
+    if existing:
         logger.info(
             "backtest_runs 중복 — skip: target_date=%s strategy=%s kind=%s",
             target_date, strategy_id, params_kind,
         )
         return None
 
-    row = {
-        "id": str(uuid.uuid4()),
-        "target_date": target_date.isoformat(),
-        "strategy_id": strategy_id,
-        "params_kind": params_kind,
-        "params_snapshot": dict(params_snapshot or {}),
-        "metrics": None,
-        "status": "queued",
-        "mcp_job_id": None,
-        "error_message": None,
-        "created_at": now_kst_iso(),
-        "completed_at": None,
-    }
+    run_id = str(uuid.uuid4())
+    sql = """
+        INSERT INTO backtest_runs (
+            id, target_date, strategy_id, params_kind, params_snapshot,
+            metrics, status, mcp_job_id, error_message, created_at, completed_at
+        ) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8, $9, $10, $11)
+        RETURNING *
+    """
     try:
-        result = await asyncio.to_thread(
-            lambda: supabase.table(TABLE_NAME).insert(row).execute()
+        row = await pg.fetchrow(
+            sql,
+            run_id,
+            target_date,
+            strategy_id,
+            params_kind,
+            dict(params_snapshot or {}),
+            None,
+            "queued",
+            None,
+            None,
+            datetime.fromisoformat(now_kst_iso()),
+            None,
         )
     except Exception as e:
         msg = str(e).lower()
-        # PostgreSQL 23505 = unique_violation (운영 supabase 응답)
+        # PostgreSQL 23505 = unique_violation (운영 응답)
         if "duplicate" in msg or "unique" in msg or "23505" in msg:
             logger.warning(
                 "backtest_runs UNIQUE 충돌 (race): %s/%s/%s",
@@ -96,37 +104,30 @@ async def insert_run(
             return None
         logger.exception("backtest_runs INSERT 실패: %s/%s", strategy_id, target_date)
         return None
-    if result.data:
+    if row:
         logger.info(
             "[backtest_runs] insert: %s/%s/%s id=%s",
-            target_date, strategy_id, params_kind, row["id"][:8],
+            target_date, strategy_id, params_kind, run_id[:8],
         )
-        return result.data[0]
+        return row
     return None
 
 
 async def get_by_id(run_id: str) -> Optional[dict]:
     """단일 run 조회."""
-    result = await asyncio.to_thread(
-        lambda: supabase.table(TABLE_NAME)
-        .select("*")
-        .eq("id", run_id)
-        .limit(1)
-        .execute()
+    return await pg.fetchrow(
+        "SELECT * FROM backtest_runs WHERE id = $1 LIMIT 1",
+        run_id,
     )
-    rows = result.data or []
-    return rows[0] if rows else None
 
 
 async def list_by_date(target_date: date) -> list[dict]:
     """특정 영업일의 모든 run 반환 (전략 × kind = 최대 12 row)."""
-    result = await asyncio.to_thread(
-        lambda: supabase.table(TABLE_NAME)
-        .select("*")
-        .eq("target_date", target_date.isoformat())
-        .execute()
+    rows = await pg.fetch(
+        "SELECT * FROM backtest_runs WHERE target_date = $1",
+        target_date,
     )
-    return list(result.data or [])
+    return list(rows or [])
 
 
 async def update_status(
@@ -147,21 +148,32 @@ async def update_status(
     if status not in ("queued", "running", "completed", "failed", "skipped"):
         raise ValueError(f"unknown status: {status!r}")
 
-    patch: dict[str, Any] = {"status": status}
-    if mcp_job_id is not None:
-        patch["mcp_job_id"] = mcp_job_id
-    if error_message is not None:
-        patch["error_message"] = error_message
-    if metrics is not None:
-        patch["metrics"] = dict(metrics)
-    if status in ("completed", "failed", "skipped"):
-        patch["completed_at"] = now_kst_iso()
+    set_clauses: list[str] = ["status = $1"]
+    args: list[Any] = [status]
 
-    result = await asyncio.to_thread(
-        lambda: supabase.table(TABLE_NAME).update(patch).eq("id", run_id).execute()
-    )
-    if not result.data:
-        logger.warning("backtest_runs update_status 적용 row 0건: id=%s", run_id[:8])
+    if mcp_job_id is not None:
+        args.append(mcp_job_id)
+        set_clauses.append(f"mcp_job_id = ${len(args)}")
+    if error_message is not None:
+        args.append(error_message)
+        set_clauses.append(f"error_message = ${len(args)}")
+    if metrics is not None:
+        args.append(dict(metrics))
+        set_clauses.append(f"metrics = ${len(args)}::jsonb")
+    if status in ("completed", "failed", "skipped"):
+        args.append(datetime.fromisoformat(now_kst_iso()))
+        set_clauses.append(f"completed_at = ${len(args)}")
+
+    args.append(run_id)
+    sql = f"""
+        UPDATE backtest_runs SET {", ".join(set_clauses)}
+        WHERE id = ${len(args)}
+        RETURNING *
+    """
+    row = await pg.fetchrow(sql, *args)
+    run_id_short = str(run_id)[:8]
+    if not row:
+        logger.warning("backtest_runs update_status 적용 row 0건: id=%s", run_id_short)
         return {}
-    logger.info("[backtest_runs] update: id=%s status=%s", run_id[:8], status)
-    return result.data[0]
+    logger.info("[backtest_runs] update: id=%s status=%s", run_id_short, status)
+    return row

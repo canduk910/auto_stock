@@ -1,12 +1,20 @@
-"""daily_performance CRUD."""
+"""daily_performance CRUD.
+
+사이클 M1-3 (Supabase→RDS 이전 단계1 증분3, M1 마무리): supabase-py → `src.db.pg`
+(asyncpg) 전환. 함수 시그니처·반환형·graceful 100% 보존 → 호출부(scheduler `_settle`
+등) diff 0.
+
+⚠️ RPC 전환: `.rpc("recompute_daily_performance", {})` → `pg.execute("SELECT
+recompute_daily_performance()")`. plpgsql 함수는 migration 010/012 정의 — 기존
+daily_performance 행을 UPDATE 만 한다(INSERT 안 함).
+"""
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import date
 
-from src.db.supabase import supabase
+import src.db.pg as pg
 
 logger = logging.getLogger(__name__)
 
@@ -32,18 +40,29 @@ async def upsert_daily_performance(
         때문 (2026-05-15 정책 결정 — 컬럼 의미 명시화).
     cumulative_return_rate: TWR 복리 누적 수익률 (실현손익 기반, daily_profit_rate 사용).
     """
-    data = {
-        "date": target_date.isoformat(),
-        "total_asset": total_asset,
-        "daily_profit_rate": daily_profit_rate,
-        "strategy": strategy,
-        "net_external_cashflow": net_external_cashflow,
-        "daily_realized_pnl": daily_realized_pnl,
-        "deposit": deposit,
-        "cumulative_return_rate": cumulative_return_rate,
-    }
-    await asyncio.to_thread(
-        lambda: supabase.table("daily_performance").upsert(data).execute()
+    await pg.execute(
+        """
+        INSERT INTO daily_performance (
+            date, strategy, total_asset, daily_profit_rate,
+            net_external_cashflow, daily_realized_pnl, deposit, cumulative_return_rate
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (date, strategy) DO UPDATE SET
+            total_asset = EXCLUDED.total_asset,
+            daily_profit_rate = EXCLUDED.daily_profit_rate,
+            net_external_cashflow = EXCLUDED.net_external_cashflow,
+            daily_realized_pnl = EXCLUDED.daily_realized_pnl,
+            deposit = EXCLUDED.deposit,
+            cumulative_return_rate = EXCLUDED.cumulative_return_rate
+        """,
+        target_date,
+        strategy,
+        total_asset,
+        daily_profit_rate,
+        net_external_cashflow,
+        daily_realized_pnl,
+        deposit,
+        cumulative_return_rate,
     )
     logger.info(
         "일일 실적 저장: %s 전략=%s (실현 %.2f%%, 누적 %.2f%%, 외부입출금 %.0f)",
@@ -53,15 +72,17 @@ async def upsert_daily_performance(
 
 async def get_performance(days: int = 30, strategy: str = "total") -> list[dict]:
     """최근 N일 실적을 조회한다."""
-    result = await asyncio.to_thread(
-        lambda: supabase.table("daily_performance")
-        .select("*")
-        .eq("strategy", strategy)
-        .order("date", desc=True)
-        .limit(days)
-        .execute()
+    rows = await pg.fetch(
+        """
+        SELECT * FROM daily_performance
+        WHERE strategy = $1
+        ORDER BY date DESC
+        LIMIT $2
+        """,
+        strategy,
+        days,
     )
-    return sorted(result.data, key=lambda r: r["date"])
+    return sorted(rows, key=lambda r: r["date"])
 
 
 async def get_latest_performance(strategy: str = "total") -> dict | None:
@@ -69,22 +90,22 @@ async def get_latest_performance(strategy: str = "total") -> dict | None:
 
     TWR 누적 baseline + Δ예수금 계산용.
     """
-    result = await asyncio.to_thread(
-        lambda: supabase.table("daily_performance")
-        .select("*")
-        .eq("strategy", strategy)
-        .order("date", desc=True)
-        .limit(1)
-        .execute()
+    return await pg.fetchrow(
+        """
+        SELECT * FROM daily_performance
+        WHERE strategy = $1
+        ORDER BY date DESC
+        LIMIT 1
+        """,
+        strategy,
     )
-    return result.data[0] if result.data else None
 
 
 async def recompute_from_trades() -> bool:
     """trade_history 기반 daily_performance 일괄 재계산 (소급 정산).
 
-    Supabase에 등록된 PostgreSQL 함수 `recompute_daily_performance()`를 RPC 호출.
-    멱등이므로 매일 정산 후 호출해도 안전.
+    PostgreSQL 함수 `recompute_daily_performance()`를 SELECT 호출 (RPC 전환, 사이클
+    M1-3). 멱등이므로 매일 정산 후 호출해도 안전.
 
     수행 단계 (DB 함수 내부):
     1) SELL profit_loss 합 → daily_realized_pnl (전략별 + total)
@@ -92,9 +113,7 @@ async def recompute_from_trades() -> bool:
     3) cumulative_return_rate = TWR 복리 누적
     """
     try:
-        await asyncio.to_thread(
-            lambda: supabase.rpc("recompute_daily_performance", {}).execute()
-        )
+        await pg.execute("SELECT recompute_daily_performance()")
         logger.info("daily_performance 일괄 재계산 완료 (recompute_daily_performance)")
         return True
     except Exception:

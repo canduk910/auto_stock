@@ -5,22 +5,26 @@
   종목 + 탈락 사유를 알 수 없어 디버깅 곤란.
 
 본 모듈:
-- `insert_snapshot(target_date, strategy_id, step_no, step_name, ...)` — 단일 단계 1행 INSERT
+- `insert_snapshot(target_date, strategy_id, step_no, step_name, ...)` — 단일 단계 1행 UPSERT
   + JSONB cap 자동 적용 (survived 200 / excluded 20)
 - `list_snapshots(target_date, strategy_id=None)` — 단일 영업일 모든 단계 조회 (step_no ASC)
 - `list_recent_by_strategy(strategy_id, days=7)` — 추이 분석용 (target_date DESC)
 
 자금 안전: 본 모듈은 진단/추적 전용. 매매 동작 영향 0.
+
+사이클 M1-3 (Supabase→RDS 이전 단계1 증분3, M1 마무리): supabase-py → `src.db.pg`
+(asyncpg) 전환. 함수 시그니처·반환형·graceful 100% 보존 → 호출부(scheduler
+`capture_funnel_snapshots` / 라우트 `POST /api/strategy-funnel/snapshot`) diff 0.
+JSONB(`survived_tickers`/`excluded_sample`) 는 `$N::jsonb` + `json.dumps` 바인딩.
 """
 from __future__ import annotations
 
-import asyncio
 import logging
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
-from src.db.supabase import supabase
+import src.db.pg as pg
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +83,7 @@ async def insert_snapshot(
         - 사이클 145 시정 = `.upsert(on_conflict="target_date,strategy_id,step_no")` 전환
           + migration 035 영역 영구 영속 UNIQUE 변경 (snapshot_at 키 폐기).
         - 같은 (target_date, strategy_id, step_no) 영역 영구 영속 = 최신 값 영구 영속 1 row.
-        - snapshot_at 영역 영구 영속 = supabase DEFAULT now() (UPSERT 시 자동 갱신).
+        - snapshot_at 영역 영구 영속 = DB DEFAULT now() (UPSERT 시 자동 갱신).
         - 매매 안전성 무영향 (진단/추적 영역 한정).
     """
     if not strategy_id:
@@ -91,33 +95,38 @@ async def insert_snapshot(
     if survived_count is None:
         survived_count = len(survived)
 
-    # 사이클 145 — UPSERT 영역 영구 영속 (id 영역 영구 영속 conflict 시 EXCLUDED.id 영구 영속 유지).
-    # snapshot_at = supabase DEFAULT now() (사이클 145 — UPSERT 시 자동 갱신, 최신 시각만 영구 영속).
-    row = {
-        "id": str(uuid.uuid4()),
-        "target_date": target_date.isoformat(),
-        "strategy_id": strategy_id,
-        "step_no": int(step_no),
-        "step_name": step_name,
-        "survived_count": int(survived_count),
-        "excluded_count": int(excluded_count),
-        "survived_tickers": survived,
-        "excluded_sample": excluded,
-        # 사이클 171 — 잠정/확정 플래그 (migration 040 is_provisional BOOLEAN DEFAULT FALSE)
-        "is_provisional": bool(is_provisional),
-    }
+    row_id = str(uuid.uuid4())
 
     try:
-        # 사이클 145 — `.upsert(on_conflict="target_date,strategy_id,step_no")` 영역 영구 영속.
-        # migration 035 UNIQUE = (target_date, strategy_id, step_no) 정합 영구 영속.
-        result = await asyncio.to_thread(
-            lambda: supabase.table(TABLE_NAME).upsert(
-                row,
-                on_conflict="target_date,strategy_id,step_no",
-            ).execute()
+        result = await pg.fetchrow(
+            f"""
+            INSERT INTO {TABLE_NAME} (
+                id, target_date, strategy_id, step_no, step_name,
+                survived_count, excluded_count, survived_tickers, excluded_sample,
+                is_provisional
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10)
+            ON CONFLICT (target_date, strategy_id, step_no) DO UPDATE SET
+                step_name = EXCLUDED.step_name,
+                survived_count = EXCLUDED.survived_count,
+                excluded_count = EXCLUDED.excluded_count,
+                survived_tickers = EXCLUDED.survived_tickers,
+                excluded_sample = EXCLUDED.excluded_sample,
+                is_provisional = EXCLUDED.is_provisional
+            RETURNING *
+            """,
+            row_id,
+            target_date,
+            strategy_id,
+            int(step_no),
+            step_name,
+            int(survived_count),
+            int(excluded_count),
+            survived,
+            excluded,
+            bool(is_provisional),
         )
-        data = getattr(result, "data", None) or []
-        return data[0] if data else None
+        return result
     except Exception as exc:
         logger.warning(
             "strategy_funnel upsert 실패 — target=%s strategy=%s step=%d err=%s",
@@ -140,20 +149,27 @@ async def list_snapshots(
     Returns:
         snapshot row list. 응답 cap 없음 (전략당 단계 수 ≤ 10 가정).
     """
-    def _query():
-        q = (
-            supabase.table(TABLE_NAME)
-            .select("*")
-            .eq("target_date", target_date.isoformat())
-            .order("step_no")
-        )
-        if strategy_id:
-            q = q.eq("strategy_id", strategy_id)
-        return q.execute()
-
     try:
-        result = await asyncio.to_thread(_query)
-        return getattr(result, "data", None) or []
+        if strategy_id:
+            rows = await pg.fetch(
+                f"""
+                SELECT * FROM {TABLE_NAME}
+                WHERE target_date = $1 AND strategy_id = $2
+                ORDER BY step_no
+                """,
+                target_date,
+                strategy_id,
+            )
+        else:
+            rows = await pg.fetch(
+                f"""
+                SELECT * FROM {TABLE_NAME}
+                WHERE target_date = $1
+                ORDER BY step_no
+                """,
+                target_date,
+            )
+        return rows or []
     except Exception as exc:
         logger.warning(
             "strategy_funnel list 실패 — target=%s strategy=%s err=%s",
@@ -181,21 +197,18 @@ async def list_recent_by_strategy(
     today_kst = datetime.now(_KST_TZ).date()
     from_date = today_kst - timedelta(days=days - 1)
 
-    def _query():
-        return (
-            supabase.table(TABLE_NAME)
-            .select("*")
-            .eq("strategy_id", strategy_id)
-            .gte("target_date", from_date.isoformat())
-            .lte("target_date", today_kst.isoformat())
-            .order("target_date", desc=True)
-            .order("step_no")
-            .execute()
-        )
-
     try:
-        result = await asyncio.to_thread(_query)
-        return getattr(result, "data", None) or []
+        rows = await pg.fetch(
+            f"""
+            SELECT * FROM {TABLE_NAME}
+            WHERE strategy_id = $1 AND target_date >= $2 AND target_date <= $3
+            ORDER BY target_date DESC, step_no
+            """,
+            strategy_id,
+            from_date,
+            today_kst,
+        )
+        return rows or []
     except Exception as exc:
         logger.warning(
             "strategy_funnel recent 실패 — strategy=%s err=%s",
