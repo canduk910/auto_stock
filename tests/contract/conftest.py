@@ -59,7 +59,7 @@ def contract_env(monkeypatch):
     # 신규 추가된 전략은 마이그레이션상 enabled=false / weight=0 / 자금 0 으로 시작.
     # 컨트랙트 테스트의 4-전략 시나리오(`total_asset = 100M × 4 = 400M` 가정)를 유지하기 위해
     # 본 픽스처는 등록은 보존하되 자금 0 으로 격리한다 (운영 마이그레이션 011/018 컨벤션).
-    _INACTIVE_STRATEGY_IDS = {"bull_flag_breakout", "vcp_breakout"}
+    _INACTIVE_STRATEGY_IDS = {"bull_flag_breakout", "vcp_breakout", "kojiro"}
     for s in trading_scheduler.registry.all():
         s.state.positions.clear()
         s.state.pending_buys.clear()
