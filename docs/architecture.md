@@ -23,8 +23,8 @@ KIS OpenAPI 기반 주식 자동매매시스템 설계 문서.
                                      |                             |
                                      v                             |
                               +------+------+              실시간 시세 +
-                              |  Supabase   |              체결통보
-                              |  PostgreSQL |
+                              |  AWS RDS    |              체결통보
+                              |  PostgreSQL |  (asyncpg)
                               +-------------+
 ```
 
@@ -86,8 +86,9 @@ src/
 │   ├── scheduler.py         # TradingScheduler (KRX/NXT 통합 운영 08:00~20:00)
 │   └── scanner.py           # 종목 스캔 + 공용 시세 캐시 (사이클 26: get_active_tick_tr_ids(now_t) 시간대별 H0STCNT0/H0NXCNT0 분기, TICK_TR_ID=H0UNCNT0 하위 호환 보존)
 │
-├── db/                  # Supabase CRUD
-│   ├── supabase.py          # 클라이언트 초기화
+├── db/                  # RDS PostgreSQL CRUD (asyncpg)
+│   ├── pg.py                # asyncpg 풀 + 쿼리 헬퍼 (현재 DB 클라이언트 정본)
+│   ├── supabase.py          # (롤백용 병존, 미사용)
 │   ├── trade_history.py     # 거래 내역
 │   ├── positions.py         # 포지션 영속화
 │   ├── daily_performance.py # 일일 실적
@@ -122,7 +123,7 @@ src/
                               |
           +-------------------+-------------------+
           |                   |                   |
-     auth/token.py      api/base.py       db/supabase.py
+     auth/token.py      api/base.py       db/pg.py (asyncpg)
           ^              ^       ^              ^
           |              |       |              |
     +-----+-----+   +---+---+   |         +----+----+
@@ -469,6 +470,8 @@ on_tick(ticker, current_price)
 ---
 
 ## 9. DB 스키마
+
+> **DB 클라이언트 (Supabase→RDS 이전 M0~M6)**: 현재 정본 = AWS RDS PostgreSQL + `src/db/pg.py`(asyncpg 풀). 전 db 모듈이 `pg.fetch`/`pg.execute` 네이티브 async 경유. `src/db/supabase.py` 는 롤백용 병존(미사용). asyncpg 계약 = JSONB codec(raw dict) / TIMESTAMPTZ `to_char(+09:00)` 읽기 / DATE `_kst.to_date()` / NUMERIC→Decimal. 스키마(테이블 구조·마이그레이션)는 이전 전후 동일.
 
 ```
 ┌─────────────────────────────────────────────────────┐

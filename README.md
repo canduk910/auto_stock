@@ -1,6 +1,6 @@
 # KIS 주식 자동매매시스템
 
-한국투자증권(KIS) OpenAPI 기반 주식 자동매매시스템. FastAPI 백엔드 + React 프론트엔드 + Supabase DB 웹 서비스 아키텍처.
+한국투자증권(KIS) OpenAPI 기반 주식 자동매매시스템. FastAPI 백엔드 + React 프론트엔드 + AWS RDS PostgreSQL(asyncpg) 웹 서비스 아키텍처.
 
 ## 시스템 아키텍처
 
@@ -31,8 +31,8 @@
                                        │ async CRUD
                                        ▼
                           ┌────────────────────────┐         ┌──────────────┐
-                          │  Supabase (PostgreSQL) │  20:00  │   OpenAI     │
-                          │  trade_history         │ ◀─────→ │  GPT          │
+                          │  AWS RDS (PostgreSQL)  │  20:00  │   OpenAI     │
+                          │  asyncpg (src/db/pg.py)│ ◀─────→ │  GPT          │
                           │  positions / strategy  │  20:10  │  (자문 +     │
                           │  parameter_recommend.  │ ◀─────→ │   로그 분석) │
                           │  daily_log_reports     │         └──────────────┘
@@ -44,9 +44,9 @@
 
 | 구분 | 기술 |
 |------|------|
-| Backend | Python 3.11+, FastAPI, httpx, websockets, pydantic |
+| Backend | Python 3.11+, FastAPI, httpx, websockets, pydantic, asyncpg |
 | Frontend | React 19, TypeScript, Vite, TanStack Query/Table, Recharts, Tailwind CSS |
-| Database | Supabase (PostgreSQL) |
+| Database | AWS RDS PostgreSQL (asyncpg 직접 드라이버) |
 | 외부 API | 한국투자증권 OpenAPI (REST + WebSocket) |
 
 ## 사전 준비
@@ -54,7 +54,7 @@
 1. **Python 3.11+** 설치
 2. **Node.js 20+** 설치
 3. **한국투자증권 OpenAPI 신청** — [KIS Developers](https://apiportal.koreainvestment.com/)에서 앱키/시크릿 발급
-4. **Supabase 프로젝트 생성** — [supabase.com](https://supabase.com/)에서 프로젝트 생성 후 URL/Key 확보
+4. **PostgreSQL 준비** — AWS RDS PostgreSQL 인스턴스(또는 로컬 postgres) 확보 후 asyncpg DSN(`DATABASE_URL`) 구성
 
 ## 설치 및 실행
 
@@ -74,14 +74,17 @@ KIS_ACCOUNT_NO=계좌번호_8자리
 KIS_ACCOUNT_PRODUCT=01
 KIS_ENV=vts                    # vts(모의투자) 또는 real(실전)
 
-# Supabase
+# DB (AWS RDS PostgreSQL — asyncpg DSN, 현재 정본)
+DATABASE_URL=postgresql://user:pass@host:5432/dbname?sslmode=require
+
+# Supabase — 런타임 미사용 (src/db/supabase.py 롤백용 병존, 어느 db 모듈도 참조 안 함)
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=your-anon-key
 ```
 
 ### 2. 데이터베이스 초기화
 
-Supabase SQL Editor에서 `supabase/migrations/` 하위 마이그레이션 파일을 **번호 순으로 모두 실행**:
+`supabase/migrations/` 하위 마이그레이션 파일을 대상 PostgreSQL(RDS)에 **번호 순으로 모두 실행** (psql 등. 디렉토리명은 supabase/ 로 유지 — 스키마 SQL 정본):
 
 ```
 001_init.sql                          # 기본 테이블
@@ -370,7 +373,7 @@ auto_stock/
 │   ├── api/                 # KIS REST API 호출
 │   ├── realtime/            # KIS WebSocket 실시간
 │   ├── engine/              # 매매 엔진 (전략/주문/리스크/스케줄러)
-│   ├── db/                  # Supabase CRUD
+│   ├── db/                  # RDS PostgreSQL CRUD (asyncpg, pg.py)
 │   ├── routes/              # FastAPI 라우트
 │   └── models/              # Pydantic 데이터 모델
 ├── frontend/                # 프론트엔드 (React)

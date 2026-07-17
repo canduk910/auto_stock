@@ -5,6 +5,8 @@
 > 전략 6개 상세: **`src/engine/strategies/CLAUDE.md`**
 > 사이클별 변경 이력: `docs/HARNESS_CHANGELOG.md`
 
+> **DB 접근 (Supabase→RDS 이전 M5)**: `scheduler`(auto_start read + trade_history update + strategy select) / `boot_manager`(strategy 조회 + PENDING BUY 일괄 COMPLETED + 오늘 BUY 조회) / `log_analysis_engine`(`_fetch_logs_in_range` pg.fetch 페이징) 이 직접 supabase.table() 호출하던 것을 `src/db/pg.py`(asyncpg) 헬퍼 + `system_config`/`trade_history` 신규 헬퍼로 전환. auto_start = `system_config.get_auto_start`/`set_auto_start`. 상세 `src/db/CLAUDE.md`.
+
 ## 모듈 맵
 
 ```
