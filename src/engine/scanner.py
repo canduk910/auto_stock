@@ -219,7 +219,7 @@ async def _apply_price_filter(
     if excluded:
         try:
             from src.db.strategy_funnel import insert_snapshot
-            today_kst = datetime.now(KST_TZ).date().isoformat()
+            today_kst = datetime.now(KST_TZ).date()
             await insert_snapshot(
                 target_date=today_kst,
                 strategy_id="ALL",
@@ -408,7 +408,7 @@ async def _apply_trade_amount_filter(
     # Q7-4 funnel step_no=97 hook (graceful — 실패 시 매수 흐름 영향 0)
     try:
         from src.db.strategy_funnel import insert_snapshot
-        today_kst = datetime.now(KST_TZ).date().isoformat()
+        today_kst = datetime.now(KST_TZ).date()
         await insert_snapshot(
             target_date=today_kst,
             strategy_id="ALL",

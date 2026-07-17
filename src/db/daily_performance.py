@@ -15,6 +15,7 @@ import logging
 from datetime import date
 
 import src.db.pg as pg
+from src.db._kst import to_date
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,8 @@ async def upsert_daily_performance(
         때문 (2026-05-15 정책 결정 — 컬럼 의미 명시화).
     cumulative_return_rate: TWR 복리 누적 수익률 (실현손익 기반, daily_profit_rate 사용).
     """
+    # M6 — date DATE 컬럼 바인딩. str 입력도 date 로 강제 변환 (asyncpg 요구사항).
+    bound_target_date = to_date(target_date)
     await pg.execute(
         """
         INSERT INTO daily_performance (
@@ -55,7 +58,7 @@ async def upsert_daily_performance(
             deposit = EXCLUDED.deposit,
             cumulative_return_rate = EXCLUDED.cumulative_return_rate
         """,
-        target_date,
+        bound_target_date,
         strategy,
         total_asset,
         daily_profit_rate,

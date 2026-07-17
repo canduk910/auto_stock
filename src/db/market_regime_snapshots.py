@@ -21,7 +21,7 @@ from datetime import date, datetime
 from typing import Any, Optional
 
 import src.db.pg as pg
-from src.db._kst import now_kst_iso
+from src.db._kst import now_kst_iso, to_date
 
 logger = logging.getLogger(__name__)
 
@@ -50,10 +50,13 @@ async def insert_snapshot(
 
     동일 ``snapshot_date`` 가 이미 있으면 UNIQUE 충돌 → None (graceful).
     """
+    # M6 — snapshot_date DATE 컬럼 바인딩. str 입력도 date 로 강제 변환.
+    bound_snapshot_date = to_date(snapshot_date)
+
     # 사전 중복 확인
     existing = await pg.fetch(
         "SELECT id FROM market_regime_snapshots WHERE snapshot_date = $1",
-        snapshot_date,
+        bound_snapshot_date,
     )
     if existing:
         logger.info("market_regime_snapshots 중복 skip: %s", snapshot_date)
@@ -72,7 +75,7 @@ async def insert_snapshot(
         row = await pg.fetchrow(
             sql,
             row_id,
-            snapshot_date,
+            bound_snapshot_date,
             regime,
             regime_desc,
             cycle_phase,
@@ -107,7 +110,7 @@ async def get_by_date(snapshot_date: date) -> Optional[dict]:
     try:
         return await pg.fetchrow(
             "SELECT * FROM market_regime_snapshots WHERE snapshot_date = $1 LIMIT 1",
-            snapshot_date,
+            to_date(snapshot_date),
         )
     except Exception:
         logger.exception("market_regime_snapshots get_by_date 실패: %s", snapshot_date)

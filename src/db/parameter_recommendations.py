@@ -19,7 +19,7 @@ import logging
 from datetime import date, datetime, timezone, timedelta
 
 import src.db.pg as pg
-from src.db._kst import KST, now_kst_iso, today_kst
+from src.db._kst import KST, now_kst_iso, to_date, today_kst
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ async def insert_recommendation(
         RETURNING *
     """
     args = (
-        target_date,
+        to_date(target_date),
         strategy_id,
         current_params,
         recommended_params,
@@ -191,7 +191,7 @@ async def list_recommendations_pending_backtest(target_date: date) -> list[dict]
     """
     rows = await pg.fetch(
         f"SELECT * FROM {_TABLE} WHERE target_date = $1 AND backtest_summary IS NULL",
-        target_date,
+        to_date(target_date),
     )
     return rows or []
 
@@ -203,7 +203,7 @@ async def list_pending_by_date(target_date: date) -> list[dict]:
     """
     rows = await pg.fetch(
         f"SELECT * FROM {_TABLE} WHERE target_date = $1 AND status = $2",
-        target_date, "pending",
+        to_date(target_date), "pending",
     )
     return rows or []
 
@@ -216,7 +216,7 @@ async def expire_pending_before(target_date: date) -> int:
     """
     result = await pg.execute(
         f"UPDATE {_TABLE} SET status = 'expired' WHERE status = 'pending' AND target_date < $1",
-        target_date,
+        to_date(target_date),
     )
     expired_count = _parse_affected(result)
     if expired_count > 0:

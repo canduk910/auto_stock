@@ -25,6 +25,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import src.db.pg as pg
+from src.db._kst import to_date
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,10 @@ async def insert_snapshot(
 
     row_id = str(uuid.uuid4())
 
+    # M6 — target_date DATE 컬럼 바인딩. 호출자가 str(예: `.isoformat()` 오적용)을
+    # 넘겨도 asyncpg 가 요구하는 date 객체로 강제 변환 (str 그대로면 즉시 예외).
+    bound_target_date = to_date(target_date)
+
     try:
         result = await pg.fetchrow(
             f"""
@@ -116,7 +121,7 @@ async def insert_snapshot(
             RETURNING *
             """,
             row_id,
-            target_date,
+            bound_target_date,
             strategy_id,
             int(step_no),
             step_name,
@@ -149,6 +154,7 @@ async def list_snapshots(
     Returns:
         snapshot row list. 응답 cap 없음 (전략당 단계 수 ≤ 10 가정).
     """
+    bound_target_date = to_date(target_date)
     try:
         if strategy_id:
             rows = await pg.fetch(
@@ -157,7 +163,7 @@ async def list_snapshots(
                 WHERE target_date = $1 AND strategy_id = $2
                 ORDER BY step_no
                 """,
-                target_date,
+                bound_target_date,
                 strategy_id,
             )
         else:
@@ -167,7 +173,7 @@ async def list_snapshots(
                 WHERE target_date = $1
                 ORDER BY step_no
                 """,
-                target_date,
+                bound_target_date,
             )
         return rows or []
     except Exception as exc:

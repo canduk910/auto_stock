@@ -38,7 +38,7 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 import src.db.pg as pg
-from src.db._kst import KST, now_kst_iso
+from src.db._kst import KST, now_kst_iso, to_date
 
 logger = logging.getLogger(__name__)
 
@@ -665,6 +665,8 @@ async def purge_old_rows(
     protected_count = len(protected_tickers) if protected_tickers else 0
     protected_list = list(protected_tickers) if protected_tickers else None
     deleted = 0
+    # M6 — cutoff_date DATE 컬럼 바인딩. str 입력도 date 로 강제 변환.
+    cutoff_date = to_date(cutoff_date)
 
     try:
         for _ in range(PURGE_MAX_DATE_ITERATIONS):
@@ -705,11 +707,15 @@ async def purge_old_rows(
             deleted += _parse_delete_count(del_result)
 
     except Exception as exc:
-        # 사이클 190 예외 타입 계측 + 부분 누적 deleted 반환 (graceful)
+        # 사이클 190 예외 타입 계측 + 부분 누적 deleted 반환 (graceful).
+        # M6 — cutoff_date 가 to_date() 로 None 변환됐을 가능성(파싱 실패) 방어:
+        # .isoformat() 이 except 블록 내부에서 재차 raise 하면 graceful 계약이
+        # 깨진다(예외가 이 함수 밖으로 전파) → getattr 폴백으로 무조건 문자열화.
+        cutoff_repr = cutoff_date.isoformat() if cutoff_date is not None else "None"
         logger.exception(
             "[stock_master_daily_purge] 루프 실패 graceful cutoff=%s protected=%d "
             "%s: %s",
-            cutoff_date.isoformat(), protected_count, type(exc).__name__, str(exc)[:150],
+            cutoff_repr, protected_count, type(exc).__name__, str(exc)[:150],
         )
         elapsed_ms = int((_time.perf_counter() - started) * 1000)
         return {"deleted": deleted, "protected_count": protected_count, "elapsed_ms": elapsed_ms}

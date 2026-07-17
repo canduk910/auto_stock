@@ -13,6 +13,7 @@ import logging
 from datetime import date
 
 import src.db.pg as pg
+from src.db._kst import to_date
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,7 @@ async def save_position(
             buy_date = EXCLUDED.buy_date,
             high_since_buy = EXCLUDED.high_since_buy
     """
+    # M6 — buy_date DATE 컬럼 바인딩. str 입력도 date 로 강제 변환.
     await pg.execute(
         sql,
         ticker,
@@ -51,7 +53,7 @@ async def save_position(
         quantity,
         order_no,
         strategy_id,
-        buy_date,
+        to_date(buy_date),
         resolved_high,
     )
     logger.debug("포지션 저장: %s %d주 @ %d (전략: %s)", ticker, quantity, buy_price, strategy_id)

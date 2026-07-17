@@ -31,7 +31,7 @@ import logging
 from datetime import date, datetime
 
 import src.db.pg as pg
-from src.db._kst import now_kst_iso
+from src.db._kst import now_kst_iso, to_date
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +61,10 @@ async def save_pending_ndc(
         ON CONFLICT (target_date, ticker, strategy_id) DO UPDATE SET
             reason = EXCLUDED.reason
     """
+    # M6 — target_date DATE 컬럼 바인딩. str 입력도 date 로 강제 변환.
     await pg.execute(
         sql,
-        target_date,
+        to_date(target_date),
         ticker,
         strategy_id,
         reason,
@@ -88,7 +89,7 @@ async def delete_pending_ndc(
         DELETE FROM pending_next_day_clear
         WHERE target_date = $1 AND ticker = $2 AND strategy_id = $3
         """,
-        target_date,
+        to_date(target_date),
         ticker,
         strategy_id,
     )
@@ -109,7 +110,7 @@ async def load_pending_ndc(target_date: date) -> set[tuple[str, str]]:
     try:
         rows = await pg.fetch(
             "SELECT ticker, strategy_id FROM pending_next_day_clear WHERE target_date = $1",
-            target_date,
+            to_date(target_date),
         )
     except Exception:
         logger.exception("[pending_ndc_load] 실패 graceful — 메모리 set 보존")
@@ -131,7 +132,7 @@ async def purge_pending_ndc_before(target_date: date) -> int:
     try:
         status = await pg.execute(
             "DELETE FROM pending_next_day_clear WHERE target_date < $1",
-            target_date,
+            to_date(target_date),
         )
     except Exception:
         logger.exception("[pending_ndc_purge] 실패 graceful")

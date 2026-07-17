@@ -25,7 +25,7 @@ from datetime import date, datetime
 from typing import Any, Optional
 
 import src.db.pg as pg
-from src.db._kst import now_kst_iso
+from src.db._kst import now_kst_iso, to_date
 
 logger = logging.getLogger(__name__)
 
@@ -53,13 +53,16 @@ async def insert_run(
             f"params_kind 는 'current' 또는 'recommended' — 입력: {params_kind!r}"
         )
 
+    # M6 — target_date DATE 컬럼 바인딩. str 입력도 date 로 강제 변환.
+    bound_target_date = to_date(target_date)
+
     # 중복 키 사전 차단
     existing = await pg.fetch(
         """
         SELECT id FROM backtest_runs
         WHERE target_date = $1 AND strategy_id = $2 AND params_kind = $3
         """,
-        target_date,
+        bound_target_date,
         strategy_id,
         params_kind,
     )
@@ -82,7 +85,7 @@ async def insert_run(
         row = await pg.fetchrow(
             sql,
             run_id,
-            target_date,
+            bound_target_date,
             strategy_id,
             params_kind,
             dict(params_snapshot or {}),
@@ -125,7 +128,7 @@ async def list_by_date(target_date: date) -> list[dict]:
     """특정 영업일의 모든 run 반환 (전략 × kind = 최대 12 row)."""
     rows = await pg.fetch(
         "SELECT * FROM backtest_runs WHERE target_date = $1",
-        target_date,
+        to_date(target_date),
     )
     return list(rows or [])
 

@@ -11,7 +11,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 import src.db.pg as pg
-from src.db._kst import now_kst_iso
+from src.db._kst import now_kst_iso, to_date
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +45,12 @@ async def insert_log_report(
         ) VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6, $7, $8, $9, $10, $11)
         RETURNING *
     """
+    # M6 — target_date DATE 컬럼 바인딩. str 입력도 date 로 강제 변환.
+    bound_target_date = to_date(target_date)
     try:
         row = await pg.fetchrow(
             sql,
-            target_date,
+            bound_target_date,
             summary,
             findings,
             metrics,
@@ -83,5 +85,5 @@ async def get_log_report(target_date: date) -> dict | None:
     """단일 영업일 리포트를 조회한다."""
     return await pg.fetchrow(
         "SELECT * FROM daily_log_reports WHERE target_date = $1 LIMIT 1",
-        target_date,
+        to_date(target_date),
     )
