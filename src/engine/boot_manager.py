@@ -184,14 +184,10 @@ async def boot(scheduler: "TradingScheduler") -> None:
 
         # trade_history에서 전략 정보 조회
         try:
-            from src.db.supabase import supabase as _sb
-            th_result = _sb.table("trade_history").select("strategy").eq(
-                "ticker", h.ticker
-            ).eq("trade_type", "BUY").order(
-                "timestamp", desc=True
-            ).limit(1).execute()
-            if th_result.data:
-                strategy_id = th_result.data[0].get("strategy", "momentum")
+            from src.db.trade_history import get_recent_buy_strategy
+            fetched_strategy = await get_recent_buy_strategy(h.ticker)
+            if fetched_strategy:
+                strategy_id = fetched_strategy
         except Exception:
             pass
 
@@ -236,13 +232,9 @@ async def boot(scheduler: "TradingScheduler") -> None:
 
     # PENDING 매수 기록 일괄 COMPLETED 처리
     try:
-        from src.db.supabase import supabase
+        from src.db.trade_history import mark_pending_buys_completed
         for ticker in kis_tickers:
-            supabase.table("trade_history").update(
-                {"status": "COMPLETED"}
-            ).eq("ticker", ticker).eq(
-                "trade_type", "BUY"
-            ).eq("status", "PENDING").execute()
+            await mark_pending_buys_completed(ticker)
     except Exception:
         pass
 
@@ -265,13 +257,9 @@ async def boot(scheduler: "TradingScheduler") -> None:
         for row in db_positions if row.get("strategy_id")
     }
     try:
-        from src.db.supabase import supabase as _sb2
-        th_buys = _sb2.table("trade_history").select("ticker, strategy").eq(
-            "trade_type", "BUY"
-        ).gte(
-            "timestamp", today.isoformat()
-        ).execute()
-        for row in (th_buys.data or []):
+        from src.db.trade_history import get_today_buys_ticker_strategy
+        th_buys_rows = await get_today_buys_ticker_strategy()
+        for row in th_buys_rows:
             if row["ticker"] not in db_strategy_map:
                 db_strategy_map[row["ticker"]] = row.get("strategy", "momentum")
             # 당일 매수 종목을 해당 전략 sold_today에 시드 — 서버 재기동 race로 같은 종목이

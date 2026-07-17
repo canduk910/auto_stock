@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from src.db.supabase import supabase
+from src.db import system_config as _system_config
 from src.db.system_config import get_cash_usage_ratio, set_cash_usage_ratio
 from src.engine.scheduler import trading_scheduler
 from src.models.response import ApiResponse
@@ -111,20 +111,14 @@ class AutoStartRequest(BaseModel):
 @router.get("/system/auto-start", response_model=ApiResponse)
 async def get_auto_start():
     """자동 매매 시작 설정을 조회한다."""
-    result = supabase.table("system_config").select("value").eq("key", "auto_start").execute()
-    raw = result.data[0]["value"] if result.data else False
-    # JSONB에서 문자열 "true"/"false"로 저장될 수 있으므로 boolean 변환
-    enabled = raw is True or raw == "true"
+    enabled = await _system_config.get_auto_start()
     return ApiResponse(success=True, data={"auto_start": enabled})
 
 
 @router.put("/system/auto-start", response_model=ApiResponse)
 async def set_auto_start(req: AutoStartRequest):
     """자동 매매 시작 설정을 변경한다."""
-    supabase.table("system_config").upsert({
-        "key": "auto_start",
-        "value": req.enabled,
-    }, on_conflict="key").execute()
+    await _system_config.set_auto_start(req.enabled)
     return ApiResponse(success=True, message=f"자동 매매 시작 {'활성화' if req.enabled else '비활성화'}")
 
 

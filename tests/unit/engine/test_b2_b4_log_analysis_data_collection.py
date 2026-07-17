@@ -148,6 +148,29 @@ class _FakeRangeSupabase:
         return _FakeRangeTable(self._rows, self.select_holder, self.all_range_calls)
 
 
+class _FakeLogsPg:
+    """사이클 M5 — `_FakeRangeSupabase` 를 `pg.fetch(sql, *args)` 인터페이스로 감싼 어댑터.
+
+    `log_analysis_engine._fetch_logs_in_range` 가 이제 RDS(pg) `LIMIT $3 OFFSET $4`
+    페이지드 SELECT (사이클 M5) — SQL 위치 인자 (start, end, page_limit, offset) 를
+    `_FakeRangeSupabase.range(offset, offset+page_limit-1)` 로 변환해 기존 페이지네이션
+    시뮬레이션(`.range()` ledger 포함)에 위임한다. `all_range_calls` 는 (offset,
+    end_inclusive) 튜플 그대로 보존 — 기존 단언(`range_calls[0] == (0, 999)`) 호환.
+    """
+
+    def __init__(self, rows: list[dict]) -> None:
+        self._inner = _FakeRangeSupabase(rows)
+        self.all_range_calls = self._inner.all_range_calls
+
+    async def fetch(self, sql: str, *args):
+        page_limit = int(args[2])
+        offset = int(args[3])
+        select = self._inner.table("system_logs").select("*")
+        select = select.range(offset, offset + page_limit - 1)
+        result = select.execute()
+        return result.data
+
+
 # ---------------------------------------------------------------------------
 # 헬퍼 — trade_history 용 mock (gte/lte 인자 캡처)
 # ---------------------------------------------------------------------------
@@ -314,8 +337,8 @@ async def test_s1_when_supabase_has_1500_logs_then_fetch_returns_all_1500(
     - 빈 페이지 또는 <1000 건 페이지 도달 시 종료
     """
     rows = _build_1500_logs_with_drained_at_1200()
-    fake_supabase = _FakeRangeSupabase(rows)
-    monkeypatch.setattr(lae, "supabase", fake_supabase)
+    fake_pg = _FakeLogsPg(rows)
+    monkeypatch.setattr(lae, "pg", fake_pg)
 
     start = datetime(2026, 6, 1, 0, 0, 0, tzinfo=KST)
     end = datetime(2026, 6, 1, 23, 59, 59, tzinfo=KST)
@@ -323,13 +346,13 @@ async def test_s1_when_supabase_has_1500_logs_then_fetch_returns_all_1500(
 
     assert len(result) == 1500, (
         f"페이지네이션 결함: fetched={len(result)} 건 (기대 1500). "
-        f".range() 루프 미구현 — limit=5000 전달해도 PostgREST default 1000 cap 에 잘림. "
-        f"Green: `.range(offset, offset+999)` 루프 + limit 를 *총* 한도로 cap."
+        f"LIMIT/OFFSET 루프 미구현. "
+        f"Green: 페이지드 SELECT 루프 + limit 를 *총* 한도로 cap."
     )
 
     # range 호출 ledger 검증 — 최소 2회 (page 1: 0~999, page 2: 1000~1999)
     # 페이지마다 새 select 인스턴스를 사용하므로 all_range_calls (공유 누적) 로 검증.
-    range_calls = fake_supabase.all_range_calls
+    range_calls = fake_pg.all_range_calls
     assert len(range_calls) >= 2, (
         f".range() 호출 횟수 {len(range_calls)} (기대 ≥2). "
         f"Green: 페이지당 1000건씩 합산하는 루프 필요. 호출 ledger: {range_calls}"
@@ -354,8 +377,8 @@ async def test_s2_when_drained_log_at_position_1200_then_aggregate_counts_it(
     실측 사고 (2026-06-01 자동 리포트의 `drained_success=0`) 와 동일 시나리오.
     """
     rows = _build_1500_logs_with_drained_at_1200()
-    fake_supabase = _FakeRangeSupabase(rows)
-    monkeypatch.setattr(lae, "supabase", fake_supabase)
+    fake_pg = _FakeLogsPg(rows)
+    monkeypatch.setattr(lae, "pg", fake_pg)
 
     start = datetime(2026, 6, 1, 0, 0, 0, tzinfo=KST)
     end = datetime(2026, 6, 1, 23, 59, 59, tzinfo=KST)
@@ -529,8 +552,8 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
     """
     # --- system_logs mock ---
     logs_rows = _build_1500_logs_with_drained_at_1200()
-    fake_logs_supabase = _FakeRangeSupabase(logs_rows)
-    monkeypatch.setattr(lae, "supabase", fake_logs_supabase)
+    fake_logs_pg = _FakeLogsPg(logs_rows)
+    monkeypatch.setattr(lae, "pg", fake_logs_pg)
 
     # --- trade_history mock (5건) ---
     trades_rows = [
@@ -696,8 +719,8 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
     """
     # --- system_logs mock (18,000건, idx=7668 에 drained) ---
     logs_rows = _build_18000_logs_with_drained_at_7668()
-    fake_logs_supabase = _FakeRangeSupabase(logs_rows)
-    monkeypatch.setattr(lae, "supabase", fake_logs_supabase)
+    fake_logs_pg = _FakeLogsPg(logs_rows)
+    monkeypatch.setattr(lae, "pg", fake_logs_pg)
 
     # --- trade_history mock (S5 와 동일한 5건 재활용) ---
     trades_rows = [

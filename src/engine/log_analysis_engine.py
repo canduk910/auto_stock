@@ -22,11 +22,11 @@ from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any
 
+import src.db.pg as pg
 from src.api.base import get_request_metrics, reset_request_metrics
 from src.config import settings
 from src.db.log_reports import insert_log_report
 from src.db.strategy_funnel import list_snapshots
-from src.db.supabase import supabase
 from src.db.trade_history import get_today_buy_trades_for_funnel, get_trades_in_range
 
 logger = logging.getLogger(__name__)
@@ -106,32 +106,41 @@ def _normalize_message(msg: str) -> str:
     return msg.strip()[:200]
 
 
+_LOGS_TS_SELECT = (
+    "to_char(timestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS.US+09:00') AS timestamp"
+)
+
+
 async def _fetch_logs_in_range(start: datetime, end: datetime, limit: int = 5000) -> list[dict]:
     """기간 내 system_logs를 시간 오름차순으로 가져온다.
 
-    PostgREST default 1000 페이지 한도 회피를 위해 .range(offset, offset+999) 루프.
+    RDS(pg) 페이지드 SELECT (LIMIT/OFFSET, 사이클 M5 — PostgREST 1000행 cap 대체).
     `limit` 은 *총* 한도 (예: limit=5000 → 최대 5페이지).
-    빈 페이지 또는 <1000건 페이지 도달 시 종료.
+    빈 페이지 또는 <1000건 페이지 도달 시 종료. timestamp 는 `+09:00` KST str 캐스트
+    (사이클 53 B-4 계약 — `_aggregate_logs` 등 소비처 str 계약 보존).
     """
     PAGE_SIZE = 1000
     all_rows: list[dict] = []
     offset = 0
     while offset < limit:
-        end_inclusive = min(offset + PAGE_SIZE - 1, limit - 1)
-        result = (
-            supabase.table("system_logs")
-            .select("timestamp, log_level, message")
-            .gte("timestamp", start.isoformat())
-            .lte("timestamp", end.isoformat())
-            .order("timestamp", desc=False)
-            .range(offset, end_inclusive)
-            .execute()
+        page_limit = min(PAGE_SIZE, limit - offset)
+        rows = await pg.fetch(
+            f"""
+            SELECT {_LOGS_TS_SELECT}, log_level, message FROM system_logs
+            WHERE timestamp >= $1 AND timestamp <= $2
+            ORDER BY timestamp ASC
+            LIMIT $3 OFFSET $4
+            """,
+            start,
+            end,
+            page_limit,
+            offset,
         )
-        page = result.data or []
+        page = rows or []
         all_rows.extend(page)
-        if len(page) < PAGE_SIZE:
+        if len(page) < page_limit:
             break
-        offset += PAGE_SIZE
+        offset += page_limit
     return all_rows
 
 

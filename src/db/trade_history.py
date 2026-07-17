@@ -236,6 +236,89 @@ async def _update_trade_status_by_order_no(
         return 0
 
 
+async def mark_pending_buys_completed(ticker: str) -> None:
+    """ticker 의 PENDING BUY row 전량을 COMPLETED 로 일괄 갱신한다 (사이클 M5).
+
+    `scheduler._sync_positions_from_balance` + `boot_manager.boot()` 공통 전환 대상
+    (기존 supabase update/eq 체인 방식 — status COMPLETED / ticker / trade_type BUY /
+    status PENDING 필터). 체결통보 누락으로 상태가 갱신되지 않은 경우 잔고 sync
+    시점에 보정. graceful — 예외 미전파 (기존 `except Exception: pass` 계약 보존,
+    호출부 hot path 보호).
+    """
+    try:
+        await pg.execute(
+            """
+            UPDATE trade_history SET status = $1
+            WHERE ticker = $2 AND trade_type = $3 AND status = $4
+            """,
+            TradeStatus.COMPLETED.value,
+            ticker,
+            TradeType.BUY.value,
+            TradeStatus.PENDING.value,
+        )
+    except Exception as exc:
+        logger.debug(
+            "[mark_pending_buys_completed_failed] ticker=%s err=%r", ticker, exc,
+        )
+
+
+async def get_recent_buy_strategy(ticker: str) -> str | None:
+    """ticker 의 가장 최근 BUY row(전체 status, order_no 무관) 의 strategy 를 조회한다 (사이클 M5).
+
+    `scheduler._sync_positions_from_balance` + `boot_manager.boot()` 공통 전환 대상
+    (기존 `select(strategy).eq(ticker).eq(BUY).order(timestamp desc).limit(1)`).
+    `_lookup_strategy_from_trade_history` (사이클 147) 와 다른 점 — 그쪽은 order_no +
+    PENDING/PARTIAL 필터 한정, 이 함수는 order_no 무관 최근 BUY 아무 status.
+
+    Returns:
+        strategy str (1건 매칭) / None (0건 또는 예외 graceful — 호출자 "momentum" 폴백)
+    """
+    try:
+        rows = await pg.fetch(
+            """
+            SELECT strategy FROM trade_history
+            WHERE ticker = $1 AND trade_type = $2
+            ORDER BY timestamp DESC LIMIT 1
+            """,
+            ticker,
+            TradeType.BUY.value,
+        )
+        if not rows:
+            return None
+        return rows[0].get("strategy")
+    except Exception as exc:
+        logger.debug(
+            "[get_recent_buy_strategy_failed] ticker=%s err=%r", ticker, exc,
+        )
+        return None
+
+
+async def get_today_buys_ticker_strategy() -> list[dict]:
+    """오늘(KST) BUY row 의 (ticker, strategy) 목록을 조회한다 (사이클 M5, boot_manager 전용).
+
+    기존 `select(ticker, strategy).eq(trade_type,BUY).gte(timestamp, today.isoformat())`
+    (TZ-naive) → `_today_kst_iso()` (`+09:00` 명시) 로 시정 (사이클 53 B-4 계약 —
+    TZ-naive 는 KST 00:00~09:00 매수 기록 누락 위험).
+
+    Returns:
+        [{"ticker": str, "strategy": str}, ...] / 예외 시 빈 리스트 graceful (boot 루프 보호)
+    """
+    try:
+        today_iso = _today_kst_iso()
+        rows = await pg.fetch(
+            """
+            SELECT ticker, strategy FROM trade_history
+            WHERE trade_type = $1 AND timestamp >= $2
+            """,
+            TradeType.BUY.value,
+            datetime.fromisoformat(today_iso),
+        )
+        return rows or []
+    except Exception as exc:
+        logger.debug("[get_today_buys_ticker_strategy_failed] err=%r", exc)
+        return []
+
+
 async def get_today_trades_for_settlement(strategy: str | None = None) -> list[dict]:
     """정산용 — 당일 체결 거래 전체(중복 dedup 없음, 매수+매도 합산용).
 

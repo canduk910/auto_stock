@@ -410,10 +410,8 @@ class TradingScheduler:
     async def _is_auto_start_enabled(self) -> bool:
         """DB system_config에서 auto_start 설정을 조회한다."""
         try:
-            from src.db.supabase import supabase
-            result = supabase.table("system_config").select("value").eq("key", "auto_start").execute()
-            raw = result.data[0]["value"] if result.data else False
-            return raw is True or raw == "true"
+            from src.db import system_config
+            return await system_config.get_auto_start()
         except Exception:
             from src.config import settings
             return settings.auto_start
@@ -3721,7 +3719,11 @@ class TradingScheduler:
         """KIS 잔고를 조회하여 체결통보 누락된 포지션을 보완한다."""
         from src.engine.strategy_base import Position
         from src.engine.scanner import ticker_names
-        from src.db.trade_history import update_trade_status
+        from src.db.trade_history import (
+            update_trade_status,
+            mark_pending_buys_completed,
+            get_recent_buy_strategy,
+        )
         from src.models.trade import TradeType, TradeStatus
 
         holdings, _ = await get_balance()
@@ -3734,15 +3736,7 @@ class TradingScheduler:
 
             # DB에서 PENDING 상태인 매수 기록이 있으면 COMPLETED로 갱신
             # (체결통보 누락으로 상태가 갱신되지 않은 경우)
-            try:
-                from src.db.supabase import supabase
-                supabase.table("trade_history").update(
-                    {"status": "COMPLETED"}
-                ).eq("ticker", h.ticker).eq(
-                    "trade_type", "BUY"
-                ).eq("status", "PENDING").execute()
-            except Exception:
-                pass
+            await mark_pending_buys_completed(h.ticker)
 
             # 이미 어떤 전략에 포지션이 있으면 건너뜀
             if self.registry.is_ticker_held_by_any(h.ticker):
@@ -3750,18 +3744,7 @@ class TradingScheduler:
             # 체결통보 누락 — KIS 잔고에는 있지만 내부 포지션에 없음
             # strategy 매핑: trade_history의 직전 BUY 행에서 상속
             # (이전엔 무조건 'momentum' 하드코딩이라 BUY=VB / SELL=momentum strategy 어긋남 — 알루코 사례 재발 차단)
-            strategy_id = "momentum"
-            try:
-                from src.db.supabase import supabase as _sb
-                th = _sb.table("trade_history").select("strategy").eq(
-                    "ticker", h.ticker
-                ).eq("trade_type", "BUY").order(
-                    "timestamp", desc=True
-                ).limit(1).execute()
-                if th.data:
-                    strategy_id = th.data[0].get("strategy") or "momentum"
-            except Exception:
-                pass
+            strategy_id = await get_recent_buy_strategy(h.ticker) or "momentum"
 
             target = self.registry.get(strategy_id) or self.registry.get("momentum")
             if target:

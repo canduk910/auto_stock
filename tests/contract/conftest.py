@@ -179,29 +179,22 @@ def contract_env(monkeypatch):
         "src.routes.recommendations.save_weights", fake_save_weights, raising=False,
     )
 
-    # ---- supabase (auto-start 라우트 직접 호출) ----
-    class _FakeSupaResult:
-        def __init__(self, data): self.data = data
+    # ---- auto-start (사이클 M5 — system_config.get_auto_start/set_auto_start RDS 헬퍼) ----
+    async def fake_get_auto_start():
+        return bool(state.auto_start_value)
 
-    class _FakeSupaQuery:
-        def __init__(self, data): self._data = data
-        def select(self, *_): return self
-        def eq(self, *_): return self
-        def upsert(self, payload, on_conflict=None):
-            state.auto_start_value = payload.get("value", state.auto_start_value)
-            return self
-        def execute(self):
-            return _FakeSupaResult(
-                [{"value": state.auto_start_value}] if state.auto_start_value is not None else []
-            )
+    async def fake_set_auto_start(enabled):
+        state.auto_start_value = bool(enabled)
 
-    class _FakeSupabase:
-        def table(self, name):
-            return _FakeSupaQuery(state.auto_start_value)
-
-    import src.db.supabase as supabase_mod
-    monkeypatch.setattr(supabase_mod, "supabase", _FakeSupabase())
-    monkeypatch.setattr("src.routes.strategies.supabase", _FakeSupabase())
+    import src.db.system_config as system_config_mod
+    monkeypatch.setattr(system_config_mod, "get_auto_start", fake_get_auto_start)
+    monkeypatch.setattr(system_config_mod, "set_auto_start", fake_set_auto_start)
+    monkeypatch.setattr(
+        "src.routes.strategies._system_config.get_auto_start", fake_get_auto_start,
+    )
+    monkeypatch.setattr(
+        "src.routes.strategies._system_config.set_auto_start", fake_set_auto_start,
+    )
 
     # ---- recommendations 모킹 ----
     async def fake_list_recommendations(days=30):

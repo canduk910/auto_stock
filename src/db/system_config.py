@@ -757,6 +757,15 @@ async def get_auto_start() -> bool:
         return False
 
 
+async def set_auto_start(enabled: bool) -> None:
+    """자동 매매 시작 여부 저장 (사이클 M5 — routes/strategies.py 전환 대상).
+
+    JSONB `{"value": bool}` — `get_auto_start` 의 `raw.get("value")` 파싱 계약과
+    정합 (왕복 불변식 = split-brain 해소 핵심). `set_auto_regime_adjust` 패턴 답습.
+    """
+    await _upsert_value(_AUTO_START_KEY, {"value": bool(enabled)})
+
+
 async def get_task_last_success(task_label: str) -> Optional[str]:
     """task_last_success_<label> 키 ISO 문자열 조회. 키 부재 / 실패 시 None graceful.
 
