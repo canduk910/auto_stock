@@ -47,9 +47,9 @@ KST = timezone(timedelta(hours=9))
 _SUPPORTED_STRATEGIES: frozenset[str] = frozenset(
     {"momentum", "volatility_breakout", "donchian_swing"}
 )
-# (b) 폴백 전략 — 즉시 skipped 마킹
+# (b) 폴백 전략 — 즉시 skipped 마킹 (백테스트 DSL 미지원)
 _FALLBACK_STRATEGIES: frozenset[str] = frozenset(
-    {"long_tail_volatility", "bull_flag_breakout", "vcp_breakout"}
+    {"long_tail_volatility", "bull_flag_breakout", "vcp_breakout", "kojiro"}
 )
 
 # 폴 루프 주기 (테스트는 monkeypatch 로 0 으로 단축)

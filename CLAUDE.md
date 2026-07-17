@@ -41,6 +41,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 날짜 | 사이클 | 한 줄 요약 |
 |------|--------|-----------|
+| 2026-07-17 | kojiro Phase 1 | 고지로 대순환 스윙 전략 신규 (EMA 5/20/40 스테이지 + 2ATR/2.5ATR/스테이지3 청산, 멀티데이, position_ratio, 다크런치 enabled=False) — 매매 안전성 8영역 diff 0 |
 | 2026-07-16 | RDS 이전 M0~M6 | Supabase(PostgREST)→AWS RDS PostgreSQL+asyncpg 전면 교체 (17 db 모듈, DATE 핫픽스, 매매 안전성 diff 0) |
 | 2026-07-15 | C1~C3 | 퀀트 재무필터 Phase 1 — 마법공식+F-Score-7 인프라 (관찰 전용, 기본 OFF) |
 | 2026-07-15 | 214 | H0UNMKO0 후보 구독 풀 분산 + cap 20→60 (41-cap 드롭 시정) |
@@ -55,7 +56,6 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-07-11 | 204 | 투자주의/투자유의 차단 해제 (급등주 매수 유니버스 복원) |
 | 2026-07-11 | 203 | iscd_stat_cls_code 과차단 버그 제거 (6전략 유니버스 2.8배 확대) |
 | 2026-07-10 | 202 | 동시호가 게이트 CI 시간 flakiness 차단 (테스트 위생, 코드 변경 0) |
-| 2026-07-10 | 201 | VB 재진입 쿨다운 2영업일 신설 (whipsaw 재진입 손실 45% 직격) + weight 0.36→0.28 |
 
 > 사이클 200 이하 및 초기 하네스 구성 전체 이력(verbatim): [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)
 
@@ -98,7 +98,7 @@ cd frontend && npm install && npm run dev
 
 ## 다중 전략 (요약)
 
-6 전략: `momentum` / `volatility_breakout` / `long_tail_volatility` / `donchian_swing` / `bull_flag_breakout` / `vcp_breakout`.
+7 전략: `momentum` / `volatility_breakout` / `long_tail_volatility` / `donchian_swing` / `bull_flag_breakout` / `vcp_breakout` / `kojiro`(고지로 대순환 스윙, 2026-07 Phase 1 다크런치 `enabled=False`).
 
 상세 매수/청산/tradable_boards/exchange 는 **`src/engine/strategies/CLAUDE.md`** 참조.
 

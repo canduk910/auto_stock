@@ -338,7 +338,7 @@ async def test_swing_poll_subscribes_ticker_after_buy_signal():
     )
 
     # execute_buy 가 실제 OrderEngine 처럼 pending_buys 에 ticker 등록하도록 모킹
-    async def _mock_execute_buy(ticker, current_price, st):
+    async def _mock_execute_buy(ticker, current_price, st, *, soft_multiplier=1.0):
         st.state.pending_buys.add(ticker)
     sched.order_engine.execute_buy.side_effect = _mock_execute_buy
 
@@ -380,7 +380,7 @@ async def test_swing_poll_subscribe_failure_does_not_crash_loop():
         buy_results={"005930": Signal.BUY, "000660": Signal.BUY},
     )
 
-    async def _mock_execute_buy(ticker, current_price, st):
+    async def _mock_execute_buy(ticker, current_price, st, *, soft_multiplier=1.0):
         st.state.pending_buys.add(ticker)
     sched.order_engine.execute_buy.side_effect = _mock_execute_buy
 

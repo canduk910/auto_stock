@@ -80,7 +80,10 @@ src/
 │   │   ├── momentum.py              # 상한가 모멘텀 (KRX_OPEN+MAIN)
 │   │   ├── volatility_breakout.py   # 변동성 돌파 (보드별 K값 분리)
 │   │   ├── long_tail_volatility.py  # 롱테일 변동성 돌파 (VB+상한가 합성)
-│   │   └── donchian_swing.py        # 20일 신고가 스윙 (MAIN만, 멀티데이)
+│   │   ├── donchian_swing.py        # 20일 신고가 스윙 (MAIN만, 멀티데이)
+│   │   ├── bull_flag_breakout.py    # 눌림목 돌파 (폴+플래그 검출)
+│   │   ├── vcp_breakout.py          # 미네르비니식 VCP (멀티데이)
+│   │   └── kojiro.py                # 고지로 대순환 스윙 (EMA 5/20/40, 멀티데이, 2026-07 다크런치)
 │   ├── risk.py              # RiskManager (on_tick → 보드 가드 → 전략별 신호 순회)
 │   ├── order_engine.py      # OrderEngine (주문/체결/포지션 관리)
 │   ├── scheduler.py         # TradingScheduler (KRX/NXT 통합 운영 08:00~20:00)
@@ -725,11 +728,12 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 
 본 절은 본문(1~12 섹션) 작성 이후 도입된 인프라를 요약. 상세는 `docs/HARNESS_CHANGELOG.md` 와 각 디렉토리 CLAUDE.md.
 
-### 13.1 다중 전략 확장 (6 전략)
+### 13.1 다중 전략 확장 (7 전략)
 
 - 신규: `bull_flag_breakout` (눌림목 돌파, `stock_master.list_by_filter` 시총·거래대금 컷 → 폴 자동 검출 + 플래그 검출 → 09:05~13:00 돌파 + 거래량 ≥ 평균×2. 5영업일 시간 청산, 3영업일 쿨다운)
-- 신규: `vcp_breakout` (미네르비니식 VCP. 일봉 100일(prepare cap) → 추세 필터 + 베이스 검출 + pullback 점진 수축 + 거래량 수축 → 09:05~14:30 돌파. **멀티데이 보유** — `Position._MULTIDAY_STRATEGIES` 멤버. 7영업일 쿨다운)
-- `_MULTIDAY_STRATEGIES = frozenset({donchian_swing, vcp_breakout})` — `is_next_day` 항상 False
+- 신규: `vcp_breakout` (미네르비니식 VCP. 일봉 100일(prepare cap) → 추세 필터 + 베이스 검출 + pullback 점진 수축 + 거래량 수축 → 09:05~14:30 돌파. **멀티데이 보유**. 7영업일 쿨다운)
+- 신규: `kojiro` (고지로 대순환 스윙, 2026-07 Phase 1 다크런치 `enabled=False`. EMA 5/20/40 대순환 스테이지 + ATR/종가 밴드 1.0~4.5% → strict entry(스테이지1 + 6→1 인접 + 3선 우상향 + 종가>EMA5) → 09:05~09:30 시장가(갭업/갭다운/붕괴 스킵). 청산 = 고정%(-8%)→2ATR→스테이지3→2.5ATR 트레일. **멀티데이**. Phase1 = position_ratio, 터틀 유닛 sizing/피라미딩 = Phase 2. 지표 순수모듈 `kojiro_indicators.py`)
+- **코드 정본 `_MULTIDAY_STRATEGIES = frozenset({donchian_swing, kojiro})`** — `is_next_day` 항상 False. ⚠️ vcp_breakout 은 멀티데이인데 frozenset 부재(기존 드리프트/결함 의심, 별도 인계)
 - 상세: `src/engine/strategies/CLAUDE.md`
 
 ### 13.2 다중 KIS 계좌 + WebSocket 풀
@@ -763,7 +767,7 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 - DB `backtest_runs` 영속화 (`(target_date, strategy_id, params_kind)` UNIQUE, status: queued/running/completed/failed/skipped)
 - `parameter_recommendations.backtest_summary` JSONB 동봉 (현재 params vs 추천 params 의 8 메트릭 비교)
 - YAML DSL 지원 3종: momentum / volatility_breakout / donchian_swing
-- 폴백 3종: long_tail_volatility / bull_flag_breakout / vcp_breakout — Phase 4-bis 대기
+- 폴백 4종: long_tail_volatility / bull_flag_breakout / vcp_breakout / kojiro — 즉시 skipped 마킹 (백테스트 DSL 미지원)
 - 활성화 토글: `KIS_MCP_ENABLED` (기본 false)
 - `max_drawdown` 양수(절대값) 컨벤션 — `signInverted=true`
 - Frontend: `BacktestComparisonCard` (Recommendations)

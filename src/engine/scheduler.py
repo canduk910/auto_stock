@@ -34,6 +34,7 @@ from src.engine.strategy_registry import StrategyRegistry
 from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
 from src.engine.strategies.momentum import MomentumStrategy
 from src.engine.strategies.donchian_swing import DonchianSwingStrategy
+from src.engine.strategies.kojiro import KojiroStrategy
 from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
 from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
@@ -127,6 +128,11 @@ SWING_REST_POLL_INTERVAL_SECS = 60          # 폴링 사이클 주기
 SWING_REST_POLL_TICKER_SLEEP_SECS = 0.05    # 종목 사이 Rate Limit 보호 (KIS 20req/s 대비 안전)
 SWING_REST_POLL_WINDOW_START = time(9, 30)  # 09:30 (모멘텀 스캔 시작 시각과 동일)
 SWING_REST_POLL_WINDOW_END = time(15, 20)   # 15:20 (KRX 메인 매수 중단 시각과 동일)
+
+# 공유 순차 폴링 대상 = 일봉 멀티데이 스윙 전략 (donchian + kojiro, 2026-07).
+# 순차(sequential) 처리 = 동일 종목 double-buy race 차단 (전략 A execute_buy → pending_buys
+# 등록 후 전략 B is_ticker_blocked_for_buy 가 차단). 전용 task 신설 금지.
+_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")
 
 # Backwards-compat aliases — 기존 코드 참조 호환
 TIME_NEXT_DAY_CLEAR = TIME_PRE_NXT_OPEN
@@ -329,6 +335,16 @@ class TradingScheduler:
             weight=0.0,
         ))
         self.registry.register(vcp)
+
+        # 고지로 대순환 스윙 (2026-07) — 다크런치 (enabled=False, DB strategy_config 가 실제 값 로드).
+        # donchian 동형 멀티데이 스윙 → 공유 순차 폴루프(_SWING_POLL_STRATEGIES) 대상.
+        kojiro = KojiroStrategy(StrategyConfig(
+            strategy_id="kojiro",
+            name="고지로 대순환",
+            enabled=False,
+            weight=0.0,
+        ))
+        self.registry.register(kojiro)
 
         self.order_engine = OrderEngine(self.registry)
         # 사이클 15-A (2026-05-19) — _handle_sell_fill 의 unsubscribe hook 이
@@ -681,14 +697,15 @@ class TradingScheduler:
                                 await strategy.prepare()
                             except Exception:
                                 logger.exception("재 prepare 실패: %s", sid)
-                ds = self.registry.get("donchian_swing")
-                if ds and ds.config.enabled and not ds.get_scanned_tickers():
-                    logger.info("스윙 전략 유니버스 비어있음 → prepare 재실행")
-                    await write_log("INFO", "스윙 유니버스 비어있어 prepare 재실행")
-                    try:
-                        await ds.prepare()
-                    except Exception:
-                        logger.exception("재 prepare 실패: donchian_swing")
+                for _sid in _SWING_POLL_STRATEGIES:
+                    ds = self.registry.get(_sid)
+                    if ds and ds.config.enabled and not ds.get_scanned_tickers():
+                        logger.info("스윙 전략(%s) 유니버스 비어있음 → prepare 재실행", _sid)
+                        await write_log("INFO", f"스윙({_sid}) 유니버스 비어있어 prepare 재실행")
+                        try:
+                            await ds.prepare()
+                        except Exception:
+                            logger.exception("재 prepare 실패: %s", _sid)
 
                 presub = self._collect_presubscribe_tickers()
                 if presub:
@@ -1668,15 +1685,16 @@ class TradingScheduler:
         return tickers
 
     def _collect_swing_tickers(self) -> list[str]:
-        """스윙 전략(donchian_swing)의 스캔 종목을 반환한다.
+        """스윙 전략(donchian_swing + kojiro)의 스캔 종목을 반환한다.
 
         시세 미수신 시 check_buy_signal/check_exit_signal이 호출되지 않으므로
         사전구독·통합구독에 반드시 포함시켜야 한다.
         """
         tickers: list[str] = []
-        strategy = self.registry.get("donchian_swing")
-        if strategy and strategy.config.enabled and hasattr(strategy, "get_scanned_tickers"):
-            tickers.extend(strategy.get_scanned_tickers())
+        for _sid in _SWING_POLL_STRATEGIES:
+            strategy = self.registry.get(_sid)
+            if strategy and strategy.config.enabled and hasattr(strategy, "get_scanned_tickers"):
+                tickers.extend(strategy.get_scanned_tickers())
         return tickers
 
     def _collect_presubscribe_tickers(self) -> list[str]:
@@ -2203,13 +2221,15 @@ class TradingScheduler:
         )
         # 사이클 72 hotfix: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 
-        # 멀티데이 보유 전략(donchian_swing) 보유 종목의 ATR 재계산
-        ds = self.registry.get("donchian_swing")
-        if ds and hasattr(ds, "recompute_held_atr"):
-            try:
-                await ds.recompute_held_atr()
-            except Exception:
-                logger.exception("donchian_swing recompute_held_atr 실패")
+        # 멀티데이 보유 전략(donchian_swing + kojiro) 보유 종목의 ATR/stage 재계산.
+        # kojiro: recompute 가 _held_stage3(익일 아침 stage3 발화) + tighten-only floor 세팅.
+        for _sid in _SWING_POLL_STRATEGIES:
+            _s = self.registry.get(_sid)
+            if _s and hasattr(_s, "recompute_held_atr"):
+                try:
+                    await _s.recompute_held_atr()
+                except Exception:
+                    logger.exception("%s recompute_held_atr 실패", _sid)
 
     async def _sync_orders_to_db(self, orders: list[dict]) -> None:
         """KIS 주문체결내역을 DB trade_history에 동기화한다.
@@ -2556,6 +2576,8 @@ class TradingScheduler:
         from src.api.condition import fetch_stock_detail
         from src.engine.scanner import KST_TZ as _KST, TICK_TR_ID as _TICK_TR_ID, kis_ws as _kis_ws
         from src.engine.strategy_base import Signal as _Signal
+        # 레짐 매수가드 복제 (safety-M3) — swing poll 은 risk.on_tick 미경유 → 직접 조회.
+        from src.engine.market_regime import get_current_regime as _get_current_regime, BuyBlockState as _BuyBlockState
 
         BUY_WINDOW_START = _time(9, 5)
         BUY_WINDOW_END = _time(9, 30)
@@ -2594,100 +2616,120 @@ class TradingScheduler:
                 continue
 
             cycle_start = _time_mod.time()
-            strategy = self.registry.get("donchian_swing")
-            if strategy is None or not strategy.config.enabled:
+            # 공유 순차 폴루프 (2026-07) — 전략 A 완전 처리(execute_buy → pending_buys 등록)
+            # 후 전략 B 진행 = 동일 종목 double-buy race 구조적 차단 (entry-H).
+            any_enabled = False
+            total_candidates = 0
+            total_filtered = 0
+            total_bought = 0
+            for _sid in _SWING_POLL_STRATEGIES:
+                strategy = self.registry.get(_sid)
+                if strategy is None or not strategy.config.enabled:
+                    continue
+                any_enabled = True
+
+                try:
+                    candidates = list(strategy.get_scanned_tickers())
+                except Exception:
+                    logger.exception("[swing_poll] get_scanned_tickers 실패: %s", _sid)
+                    candidates = []
+                total_candidates += len(candidates)
+
+                filtered: list[str] = []
+                for t in candidates:
+                    # _bought_today: 같은 종목 중복 진입 차단
+                    if t in getattr(strategy, "_bought_today", set()):
+                        continue
+                    # 전략 간 통합 중복 가드: 보유 / 주문중 / 당일매도
+                    try:
+                        if self.registry.is_ticker_blocked_for_buy(t):
+                            continue
+                    except Exception:
+                        logger.debug("[swing_poll] is_ticker_blocked_for_buy 실패: %s", t, exc_info=True)
+                        continue
+                    filtered.append(t)
+                total_filtered += len(filtered)
+
+                for t in filtered:
+                    if not self._running:
+                        break
+                    try:
+                        detail = await fetch_stock_detail(t)
+                    except Exception:
+                        logger.debug("[swing_poll] fetch_stock_detail 실패: %s", t, exc_info=True)
+                        continue
+                    try:
+                        current_price = int(detail.get("stck_prpr") or 0)
+                        open_price = int(detail.get("stck_oprc") or 0)
+                    except (ValueError, TypeError):
+                        continue
+                    if current_price <= 0 or open_price <= 0:
+                        # 시가/현재가 0 — KIS 응답 미완성. skip
+                        continue
+
+                    try:
+                        signal = strategy.check_buy_signal(t, current_price, open_price)
+                    except Exception:
+                        logger.exception("[swing_poll] check_buy_signal 실패: %s", t)
+                        continue
+
+                    if signal == _Signal.BUY:
+                        # risk.on_tick 의 동일 카운터 증가 규약과 짝 (metrics.strategy_funnel signals).
+                        strategy.state.signal_count_today += 1
+                        # 레짐 매수가드 복제 (safety-M3) — swing poll 은 risk.on_tick 미경유 →
+                        # HARD 차단 skip / SOFT soft_multiplier 전달 (execute_buy 직접호출 우회 차단).
+                        soft_multiplier = 1.0
+                        regime = _get_current_regime()
+                        try:
+                            bbs = await regime.get_buy_block_state()
+                        except Exception:
+                            logger.exception("[swing_poll] buy_block_state 조회 실패 — HARD fallback (안전)")
+                            bbs = _BuyBlockState(mode="HARD", blocked=False, soft_multiplier=1.0, reasons=[])
+                        if bbs.mode == "HARD" and bbs.blocked:
+                            logger.info("[swing_poll] 레짐 HARD 매수 차단 skip: %s (%s)", t, _sid)
+                            await asyncio.sleep(0.05)
+                            continue
+                        if bbs.mode == "WARN" and bbs.reasons:
+                            logger.warning("[swing_poll] 레짐 WARN: %s reasons=%s", _sid, bbs.reasons)
+                        elif bbs.mode == "SOFT" and bbs.reasons:
+                            soft_multiplier = bbs.soft_multiplier
+                        # 매수 *성공* 시에만 WS subscribe (실패 종목 HIGH 슬롯 점유 차단).
+                        buy_succeeded = False
+                        try:
+                            await self.order_engine.execute_buy(
+                                t, current_price, strategy, soft_multiplier=soft_multiplier,
+                            )
+                            buy_succeeded = (
+                                t in strategy.state.pending_buys
+                                or t in strategy.state.positions
+                            )
+                            if buy_succeeded:
+                                total_bought += 1
+                        except Exception:
+                            logger.exception("[swing_poll] execute_buy 실패: %s", t)
+                        if buy_succeeded:
+                            # 안전 불변식: 보유 종목 손절/트레일링 평가 필수 → 매수 직후 HIGH 구독.
+                            try:
+                                await _kis_ws.subscribe(_TICK_TR_ID, t, bypass_limit=True)
+                            except Exception:
+                                logger.debug(
+                                    "[swing_poll] 매수 직후 시세 구독 실패: %s (다음 _scan_loop 5분 회복)",
+                                    t, exc_info=True,
+                                )
+
+                    # KIS Rate Limit 보호 — 종목간 50ms 간격
+                    await asyncio.sleep(0.05)
+
+            if not any_enabled:
                 # 비활성 — 1분 대기 후 시간 가드 재진입 (`_running=False` 즉시 반응)
-                logger.debug("[swing_poll] donchian_swing not enabled — sleep 60s")
+                logger.debug("[swing_poll] no swing strategy enabled — sleep 60s")
                 await _sleep_chunked(60.0)
                 continue
-
-            try:
-                candidates = list(strategy.get_scanned_tickers())
-            except Exception:
-                logger.exception("[swing_poll] get_scanned_tickers 실패")
-                candidates = []
-
-            filtered: list[str] = []
-            for t in candidates:
-                # _bought_today: 같은 종목 중복 진입 차단
-                if t in getattr(strategy, "_bought_today", set()):
-                    continue
-                # 전략 간 통합 중복 가드: 보유 / 주문중 / 당일매도
-                try:
-                    if self.registry.is_ticker_blocked_for_buy(t):
-                        continue
-                except Exception:
-                    logger.debug("[swing_poll] is_ticker_blocked_for_buy 실패: %s", t, exc_info=True)
-                    continue
-                filtered.append(t)
-
-            bought = 0
-            for t in filtered:
-                if not self._running:
-                    break
-                try:
-                    detail = await fetch_stock_detail(t)
-                except Exception:
-                    logger.debug("[swing_poll] fetch_stock_detail 실패: %s", t, exc_info=True)
-                    continue
-                try:
-                    current_price = int(detail.get("stck_prpr") or 0)
-                    open_price = int(detail.get("stck_oprc") or 0)
-                except (ValueError, TypeError):
-                    continue
-                if current_price <= 0 or open_price <= 0:
-                    # 시가/현재가 0 — KIS 응답 미완성. skip
-                    continue
-
-                try:
-                    signal = strategy.check_buy_signal(t, current_price, open_price)
-                except Exception:
-                    logger.exception("[swing_poll] check_buy_signal 실패: %s", t)
-                    continue
-
-                if signal == _Signal.BUY:
-                    # PR-A (2026-05-13): swing pull BUY 신호 시 퍼널 카운터 증가.
-                    # 결함: PR #1 swing pull 분리 후 risk.on_tick 의 donchian 매수 평가가 skip
-                    # 되어 `signal_count_today` 가 0 으로 잔존 → metrics.strategy_funnel
-                    # `signals=0 orders=1 fills=1` 비정합 (2026-05-13 운영 metrics).
-                    # `risk.py:on_tick` 의 동일 카운터 증가 규약과 짝.
-                    strategy.state.signal_count_today += 1
-                    # Codex 추가검토 1 (2026-05-12): 매수 *성공* 시에만 WS subscribe.
-                    # 결함: 기존 코드는 execute_buy raise 후에도 subscribe 호출 →
-                    # 매수 실패 종목까지 HIGH bypass 슬롯 점유 → MAX_SUBSCRIPTIONS=41 압박.
-                    # 매수 성공 판정 = raise 없이 return + ticker 가
-                    # (a) `pending_buys` 등록(place_order 응답 후 동기 등록) 또는
-                    # (b) `positions` 등록(즉시 체결로 pending_buys 비워진 race)
-                    buy_succeeded = False
-                    try:
-                        await self.order_engine.execute_buy(t, current_price, strategy)
-                        buy_succeeded = (
-                            t in strategy.state.pending_buys
-                            or t in strategy.state.positions
-                        )
-                        if buy_succeeded:
-                            bought += 1
-                    except Exception:
-                        logger.exception("[swing_poll] execute_buy 실패: %s", t)
-                    if buy_succeeded:
-                        # 안전 불변식: donchian_swing 보유 종목 ATR 트레일링/-7% 하드 손절 평가 필수.
-                        # 다음 5분 _scan_loop 통합 구독까지 시세 무수신 구간 차단.
-                        # `bypass_limit=True` — positions HIGH 절대 보장 규약과 동일.
-                        try:
-                            await _kis_ws.subscribe(_TICK_TR_ID, t, bypass_limit=True)
-                        except Exception:
-                            logger.debug(
-                                "[swing_poll] 매수 직후 시세 구독 실패: %s (다음 _scan_loop 5분 사이클에서 회복)",
-                                t, exc_info=True,
-                            )
-
-                # KIS Rate Limit 보호 — 종목간 50ms 간격
-                await asyncio.sleep(0.05)
 
             elapsed = _time_mod.time() - cycle_start
             logger.info(
                 "[swing_poll] candidates=%d filtered=%d bought=%d elapsed=%.1fs",
-                len(candidates), len(filtered), bought, elapsed,
+                total_candidates, total_filtered, total_bought, elapsed,
             )
 
             # 다음 분 정각까지 sleep — `_running=False` 즉시 반응 위해 chunked (KST 일관성)
@@ -2713,14 +2755,23 @@ class TradingScheduler:
             ticker_prices as _prices,
         )
 
-        ds = self.registry.get("donchian_swing")
-        if ds is None or not ds.config.enabled:
+        # 공유 순차 폴루프 (2026-07) — donchian ∪ kojiro 스윙 전략 합집합.
+        swing_strategies = []
+        for _sid in _SWING_POLL_STRATEGIES:
+            _s = self.registry.get(_sid)
+            if _s is not None and _s.config.enabled:
+                swing_strategies.append(_s)
+        if not swing_strategies:
             return {"candidates": 0, "held": 0, "pending": 0, "updated": 0, "failed": 0, "elapsed_ms": 0}
 
         # 대상 ticker 합집합 — 6자리 영숫자 필터 + dedupe (입력 순서 보존)
-        candidates = list(getattr(ds, "_scanned_tickers", []) or [])
-        held = list(ds.state.positions.keys())
-        pending = list(ds.state.pending_buys)
+        candidates: list[str] = []
+        held: list[str] = []
+        pending: list[str] = []
+        for _s in swing_strategies:
+            candidates += list(getattr(_s, "_scanned_tickers", []) or [])
+            held += list(_s.state.positions.keys())
+            pending += list(_s.state.pending_buys)
         held_set = set(held)
         seen: set[str] = set()
         all_tickers: list[str] = []

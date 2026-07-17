@@ -281,7 +281,18 @@ KIS_APP_SECRET=실전용_시크릿
 | 청산 | `high_since_buy − ATR×2` 트레일링 / 50일 EMA 이탈 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 보유 (`Position._MULTIDAY_STRATEGIES` 멤버) |
 | 보유 | 멀티데이 (VCP 통상 2~6주) |
 
-> 프론트엔드 Settings 페이지에서 전략별 자금 비중 조절 가능. 대시보드 "조건검색 현황 → 20일 신고가 스윙" 탭에서 8단계 깔때기 통계 + 후보 종목 진입상태(보유 중 / 진입 대기 / 갭 스킵 / 장 시작 전 / 진입 시간 종료) 시각화. 신규 2 전략(`bull_flag_breakout`/`vcp_breakout`)은 초기 `enabled=false, weight=0` 등록 — Settings 에서 수동 활성화 권장 (백테스트/모의 검증 후)
+### 전략 G: 고지로 대순환 스윙 (`kojiro`, 이동평균선 대순환, 2026-07 Phase 1 다크런치)
+| 구분 | 규칙 |
+|------|------|
+| 종목군 | 코스피200 + 코스닥150 → 시총/거래대금 컷 → 일봉 100일(`min_required=80`) → **ATR/종가 변동성 밴드 1.0~4.5%**(비협상 판별 필터) |
+| 매매 가능 보드 | MAIN(09:05~09:30) |
+| 진입 조건 | **strict entry(4조건 AND)**: ① 현재 스테이지1(EMA 단기>중기>장기) ② 최근 3영업일 내 6→1 전환 인접(신선도) ③ EMA 5/20/40 모두 우상향 ④ 전일 종가 > EMA5. 갭업 ≥5% / 갭다운 ≤-4% / 장중 붕괴(현재가<시가) 스킵 |
+| 매수 | 종목당 1회 (조기진입·터틀 유닛 sizing·피라미딩 = Phase 2 연기, Phase1 = position_ratio) |
+| 손절 | 고정 % -8%(ATR 독립 backstop) / 2ATR 하드손절(tighten-only) → STOP_LOSS |
+| 청산 | 스테이지3 진입(추세 종료, 익일 아침 발화) / `high_since_buy − 2.5×ATR` 트레일링 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 |
+| 보유 | 멀티데이 (`_MULTIDAY_STRATEGIES` 멤버). 지표 순수모듈 `kojiro_indicators.py`(Wilder ATR ewm(1/20)) |
+
+> 프론트엔드 Settings 페이지에서 전략별 자금 비중 조절 가능. 대시보드 "조건검색 현황 → 20일 신고가 스윙" 탭에서 8단계 깔때기 통계 + 후보 종목 진입상태(보유 중 / 진입 대기 / 갭 스킵 / 장 시작 전 / 진입 시간 종료) 시각화. 신규 3 전략(`bull_flag_breakout`/`vcp_breakout`/`kojiro`)은 초기 `enabled=false, weight=0` 등록 — Settings 에서 수동 활성화 권장 (백테스트/모의 검증 후)
 
 ### 매매 안전장치
 | 항목 | 동작 |
@@ -308,7 +319,7 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | 주문 라우팅 | `place_order(..., exchange=...)` body 에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS) 는 KRX 만 허용 — SOR/NXT 는 실전 한정. 사이클 26 신규 매수는 전략 `tradable_boards=("main",)` 로 KRX 만 유효 |
 | 조회 거래소 옵션 | `get_balance(afhr_flpr=...)` — `N`(정규장)/`Y`(시간외)/`X`(NXT 정규장). `get_daily_orders(exchange="ALL")` — KRX+NXT+SOR 합산 |
 | 보드 추상화 (사이클 26, 3 보드) | `src/engine/session.py::MarketBoard` enum 활성 3 보드: `pre_nxt` (08:00~09:00) / `main` (09:00~15:40) / `post_nxt` (15:40~20:00). `_BOARD_SCHEDULE` 도 3 구간. `krx_open`/`krx_after` enum 값은 *호환성 보존* (실제 스케줄 미사용). `SessionTracker` 30s 주기 tick + `register_board_handler` 콜백 |
-| 전략별 매매 가능 보드 | `DEFAULT_TRADABLE_BOARDS` — `momentum`: KRX_OPEN+MAIN (코드 enum 유지, 활성 보드는 MAIN) / **`volatility_breakout`·`long_tail_volatility`: MAIN only (사이클 26 KRX ONLY)** / `donchian_swing`·`bull_flag_breakout`·`vcp_breakout`: MAIN only |
+| 전략별 매매 가능 보드 | `DEFAULT_TRADABLE_BOARDS` — `momentum`: KRX_OPEN+MAIN (코드 enum 유지, 활성 보드는 MAIN) / **`volatility_breakout`·`long_tail_volatility`: MAIN only (사이클 26 KRX ONLY)** / `donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`: MAIN only |
 | VB/LTV K값 | `k_value_krx_main` (기본 1.0) — KRX 09:00 시가 기준 단독 사용. `k_value_nxt_pre`/`k_value_nxt_post` 키는 DB/AI 자문 응답 호환 보존만 (사이클 26 PRE_NXT 매수 제거) |
 | 종목 단위 원자 전환 (사이클 26) | `TradingScheduler._atomic_board_transition(ticker, stale_tr_id, new_tr_id, ack_timeout_secs=2.0)` — (1) unsubscribe (2) `_subscriptions_acked` 에서 (stale_tr_id, ticker) 제거 polling (timeout 2s) (3) new_tr_id 가 None 아니면 subscribe (4) 50ms sleep. `_board_transition_loop(stale, new, tickers, priority_groups)` — HIGH (positions / next_day_clear) 우선, 전체 순회, `[board_transition_complete]` INFO |
 | 사전 구독 마진 (사이클 26) | `TIME_KRX_MAIN_OPEN_PRESUBSCRIBE=08:59:10` (KRX 채널 50초 사전 마진) / `TIME_POST_NXT_OPEN_PRESUBSCRIBE=15:39:10` (NXT 채널 50초 사전 마진). 보유 + 익일청산 + 매수 후보 합집합 사전 구독 → 09:00 KRX 첫 체결 tick 즉시 수신 보장 |

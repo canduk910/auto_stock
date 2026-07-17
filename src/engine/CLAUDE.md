@@ -11,7 +11,7 @@
 
 ```
 strategy_base / strategy_registry → 추상 + 등록/비중/중복 가드
-strategies/{momentum, volatility_breakout, long_tail_volatility, donchian_swing, bull_flag_breakout, vcp_breakout}
+strategies/{momentum, volatility_breakout, long_tail_volatility, donchian_swing, bull_flag_breakout, vcp_breakout, kojiro}
 session.py(MarketBoard, SessionTracker)
 risk.py(on_tick) → order_engine.py(체결통보·DB persistence) → scheduler.py(시간 가드·run/settle) ← boot_manager.py(_boot 본체, 사이클 51) / stale_tracker.py(StaleTrackerState, 사이클 48) / **stale_manager.py facade 96L** (re-export only, `__all__` 21 — 사이클 67 분해) ⇄ **4 sub-module (사이클 67 카드 #14 분해)**: stale_diagnostics.py 357L (5 함수 + 4 상수 — 진단·CCNL 캐시·force_retry history prune) / stale_session_recovery.py 274L (3 함수 + 5 상수 — silent inactive 감지·세션 강제 reconnect·delta unsubscribe) / stale_universe_guard.py 157L (1 함수 + 1 상수 — 보유/익일청산 절대 보호 universe guard) / stale_watcher_core.py 399L (2 함수 — **K stale watcher 본체 HIGH hot path** `check_and_resubscribe_stale` + `resubscribe_stale_priority` 사이클 66 priority 분리 *후* cap 영속). 사이클 60 Phase 2-A1 + 사이클 61 Phase 2-A2 + **사이클 63 Phase 2-A3 (refactor #2 완료)** + **사이클 67 sub-module 분해 (카드 #14 종결)** / sell_rejection.py(SellRejectionTracker, 사이클 55 R-1 + 사이클 57 V-1 알람)
 scanner.py(종목 스캔/구독/STATIC_TICKER_NAMES + 사이클 122 `_stock_master_daily_load_once` + 사이클 126 `_stock_master_basics_refresh_once` + 사이클 129 `_stock_master_master_load_once`)
@@ -28,6 +28,7 @@ refresh_progress.py (사이클 127 — 3 작업 universe/basics/daily 진행 sta
 util/tick_size.py(KRX 7구간 호가단위 헬퍼 — `get_tick_size` / `round_to_tick` / `step_down` / `step_up`)
 market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 **quant_score.py** (사이클 C2 — 퀀트 재무필터 순수 함수. `compute_f_score_7(curr, prev) -> int|None`(Piotroski 9지표 中 **7지표** = 현금흐름표 TR 부재로 CFO 2지표 제외, 개별 결측 미가점 / 2기 부족 fail-open None) + `compute_magic_formula(series_by_ticker, mktcap_by_ticker) -> dict`(Greenblatt EY=1/ev_ebitda 폴백 bsop_prti/EV, ROC=bsop_prti/((cras-flow_lblt)+fxas), mf_rank=ey_rank+roc_rank). DB/HTTP/시계 미접촉 순수 함수, 8영역 미접촉)
+**kojiro_indicators.py** (2026-07 — 고지로 대순환 순수 지표. `ema`/`atr`(Wilder ewm(1/period))/`stage_of`(6배열+동가 유지)/`enrich`(EMA 5/20/40 + 스테이지 + 대순환 MACD1/2/3 + 밴드폭 + ATR). pandas 사용, `KojiroIndicatorConfig` 주입. quant_score 선례 = DB/HTTP/시계 미접촉 순수 함수, 8영역 미접촉. **ATR = Wilder ewm(1/20)** ≠ donchian `_atr`/`get_atr`(단순평균) — 손절선 정의 단일 진실원, 재사용 금지)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
 ```
 
@@ -528,7 +529,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 - 공통 헬퍼: `_calc_used_funds()` / `_fallback_one_share(current_price)` — 6개 전략의 1주 폴백 통합. 잔여 자금 = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`. 전략 한도 초과 결함 차단
 - `Signal`: NONE / BUY / STOP_LOSS / NEXT_DAY_CLEAR / TRAILING_STOP / FORCE_CLEAR
 - `Position`: ticker, buy_price, quantity, order_no, strategy_id, buy_date, is_next_day(프로퍼티)
-- `Position.is_next_day`: `buy_date < today AND strategy_id not in _MULTIDAY_STRATEGIES`(=`{donchian_swing, vcp_breakout}`). 멀티데이 전략은 항상 False — 확장 시 frozenset 멤버만 추가, `Position` 시그니처 변경 금지
+- `Position.is_next_day`: `buy_date < today AND strategy_id not in _MULTIDAY_STRATEGIES`(**코드 정본 = `{donchian_swing, kojiro}`**). 멀티데이 전략은 항상 False — 확장 시 frozenset 멤버만 추가, `Position` 시그니처 변경 금지. ⚠️ **vcp_breakout 은 멀티데이인데 frozenset 부재**(kojiro 배선 시 발견 — 문서가 오랜 기간 `{donchian_swing, vcp_breakout}` 이라 오기, 실제 코드엔 vcp 없음 = 기존 결함 의심: vcp 포지션 `is_next_day` 오작동 가능. 별도 시정 인계)
 - `StrategyState`: positions, pending_buys, **pending_buy_amounts**(ticker→가격×수량, 1주 폴백 잔여 자금 계산), total_investment, daily_realized_pnl, cached_buyable_qty/at, buy_blocked_until, low_funds_tickers, **signal_count_today / order_attempt_today / fill_count_today** + 헬퍼 (`is_buy_blocked / block_buy / unblock_buy / is_buyable_cache_fresh / is_low_funds_blocked / block_low_funds / clear_low_funds`)
 - 일일 퍼널 카운터는 `_reset_daily_state()` 0 초기화 → `metrics.strategy_funnel` 노출
 - `pending_buy_amounts` 는 OrderEngine `execute_buy` 시장가/지정가 폴백에서 `pending_buys.add(ticker)` 옆 동기 등록. `pending_buys.discard` 옆에서 동시 정리
@@ -741,4 +742,4 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 - TR_ID 는 `settings.get_tr_id()` 사용
 - `_confirm_breakout_open_prices` 보드 경계 정각 호출은 `board=...` 명시 의무 — 08:00 `pre_nxt` / 09:00:05 `main` / 15:30 `post_nxt`. SessionTracker race 차단
 - VB `DEFAULT_TRADABLE_BOARDS` 에 POST_NXT 추가 금지 — 당일 15:20 일괄매도 정책 위반 + OVERNIGHT 자연 보유 결함
-- donchian_swing `_swing_rest_poll_loop` 제거 금지 — 09:30~15:20 60s REST 폴링으로 멀티데이 보유 손절 평가 보강
+- `_swing_rest_poll_loop` / `_swing_buy_poll_loop` 제거 금지 — 09:30~15:20 60s REST 폴링으로 멀티데이 보유 손절 평가 보강 + 09:05~09:30 매수 평가. **공유 순차 대상 `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")`** (2026-07 — 순차 처리로 동일 종목 double-buy race 차단, 전용 task 신설 금지). buy poll 은 `execute_buy` 직전 레짐 매수가드(HARD skip / SOFT soft_multiplier) 복제

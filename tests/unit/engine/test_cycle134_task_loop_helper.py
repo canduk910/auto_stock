@@ -367,12 +367,15 @@ class TestLineReductionEffect:
         # → 193 +10 (신선도 게이트 basics/master 배선 + 미대상 3 task 제외 사유 주석) → ≤ 4,025L
         # → C3 +60 (퀀트 재무 16:40 KST 주1회 적재 task lifecycle — 상수 1 + task loop 메서드 +
         #   task_attrs 4위치) → ≤ 4,090L.
+        # → kojiro +30 (고지로 배선: import + register 블록 + _SWING_POLL_STRATEGIES 상수 +
+        #   폴루프 공유순차 일반화(buy/rest poll + boot recompute + reprepare + collect) +
+        #   레짐 매수가드 복제) → ≤ 4,120L.
         # 사이클 171 = MEDIUM 운영자 가치 (16:20 저녁 funnel — 전날 밤 후보 확인, domain-consult 의제 4).
-        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149~C3 추가는 신규 기능/시정 한정.
-        assert line_count <= 4090, (
+        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149~kojiro 추가는 신규 기능/시정 한정.
+        assert line_count <= 4120, (
             f"scheduler.py 라인 감소 영속 위반 — got {line_count}L, "
-            f"target ≤ 4,090L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L + 188 +11L + 189 +14L + 193 +10L + C3 +60L). "
-            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164/171/188/189/193/C3 추가 영속."
+            f"target ≤ 4,120L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L + 188 +11L + 189 +14L + 193 +10L + C3 +60L + kojiro +30L). "
+            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164/171/188/189/193/C3/kojiro 추가 영속."
         )
 
     def test_g_134_f2_helper_module_compact(self):
