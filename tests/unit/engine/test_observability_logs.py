@@ -130,7 +130,7 @@ async def test_tradable_skip_does_not_emit_on_first_tick_within_60s(caplog):
             return Signal.NONE
         def check_exit_signal(self, ticker, current_price, open_price):
             return Signal.NONE
-        def calc_buy_quantity(self, current_price):
+        def calc_buy_quantity(self, current_price, ticker=None):
             return 0
 
     registry = StrategyRegistry()
@@ -180,7 +180,7 @@ async def test_tradable_skip_emit_per_minute(caplog):
         def check_exit_signal(self, ticker, current_price, open_price):
             return Signal.NONE
 
-        def calc_buy_quantity(self, current_price):
+        def calc_buy_quantity(self, current_price, ticker=None):
             return 0
 
     registry = StrategyRegistry()

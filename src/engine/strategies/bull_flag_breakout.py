@@ -953,7 +953,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         """15:20 강제 청산 없음 — max_hold_days 시간 청산은 check_exit_signal 에서 처리."""
         return []
 
-    def calc_buy_quantity(self, current_price: int) -> int:
+    def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         if current_price <= 0:
             return 0
         ratio = self.config.params["position_ratio"]

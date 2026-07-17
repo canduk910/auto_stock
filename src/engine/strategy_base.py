@@ -362,7 +362,7 @@ class StrategyBase(ABC):
         """청산 신호 판단 (손절/익절/강제청산)."""
 
     @abstractmethod
-    def calc_buy_quantity(self, current_price: int) -> int:
+    def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         """매수 수량 계산."""
 
     # ------------------------------------------------------------------

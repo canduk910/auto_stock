@@ -945,7 +945,7 @@ class DonchianSwingStrategy(StrategyBase):
         """15:20 강제 청산 대상 — 스윙 전략은 강제 청산 없음."""
         return []
 
-    def calc_buy_quantity(self, current_price: int) -> int:
+    def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         """할당 자금의 position_ratio 비중. 비중 기준 0주여도 잔여 자금이 1주 살 수 있으면 1주."""
         if current_price <= 0:
             return 0

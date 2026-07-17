@@ -112,7 +112,7 @@ class _FakeDonchianSwing(StrategyBase):
     def check_exit_signal(self, ticker, current_price, open_price):
         return Signal.NONE
 
-    def calc_buy_quantity(self, current_price: int) -> int:
+    def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         return 1
 
 

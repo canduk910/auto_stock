@@ -935,7 +935,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         """15:20 강제 청산 대상 종목 리스트를 반환한다."""
         return list(self.state.positions.keys())
 
-    def calc_buy_quantity(self, current_price: int) -> int:
+    def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         """할당 자금의 position_ratio 비중으로 매수 수량 계산.
 
         비중 기준 0주이지만 신호가 이미 발생한 상태에서 잔여 자금이 1주는 살 수 있으면

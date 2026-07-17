@@ -44,7 +44,7 @@ class _SpyStrategy(StrategyBase):
         self.exit_calls.append((ticker, current_price, open_price))
         return Signal.NONE
 
-    def calc_buy_quantity(self, current_price):
+    def calc_buy_quantity(self, current_price, ticker=None):
         return 0
 
 

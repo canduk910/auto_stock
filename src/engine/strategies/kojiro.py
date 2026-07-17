@@ -115,6 +115,13 @@ class KojiroStrategy(StrategyBase):
         "position_ratio": 0.20,
         "max_positions": 5,
         "daily_loss_limit": -8.0,
+        # ── 터틀 유닛 sizing (Phase 2A-1, PARAM_RANGES 제외 = AI 자동튜닝 금지) ──
+        # sizing_mode='turtle' opt-in 시 unit=floor(전략예산×risk_pct/ATR). 기본 position_ratio.
+        # risk_pct 0.5% = 도메인 권장(KR 갭리스크). max_units 2/10 은 2B/2C 선등록(2A-1 미사용).
+        "sizing_mode": "position_ratio",
+        "risk_pct": 0.005,
+        "max_units_per_stock": 2,
+        "max_units_total": 10,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -688,11 +695,31 @@ class KojiroStrategy(StrategyBase):
         self._held_stage3.pop(ticker, None)
         self._stop_floor.pop(ticker, None)
 
-    def calc_buy_quantity(self, current_price: int) -> int:
-        """Phase 1: 할당 자금 × position_ratio (터틀 유닛 sizing 금지, Phase 2)."""
+    def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
+        """터틀 유닛(sizing_mode='turtle') 또는 position_ratio(기본). 어떤 실패든 fail-open."""
         if current_price <= 0:
             return 0
-        ratio = self.config.params["position_ratio"]
+        params = self.config.params
+        # ── 터틀 유닛 sizing (opt-in) — 실패 시 아래 position_ratio 로 fail-open ──
+        if params.get("sizing_mode") == "turtle" and ticker is not None:
+            try:
+                from src.engine.turtle_sizing import compute_unit_qty
+                atr = float(getattr(self, "_candidates", {}).get(ticker, {}).get("atr") or 0)
+                unit_qty = compute_unit_qty(
+                    int(self.state.total_investment), atr, float(params.get("risk_pct") or 0),
+                )
+                if unit_qty > 0:
+                    # 전략예산 잔여 클램프 (사이클 8 soft_multiplier 이후 max_buy_qty 이중 안전망)
+                    remaining = max(0, self.state.total_investment - self._calc_used_funds())
+                    budget_qty = remaining // current_price
+                    qty = min(unit_qty, budget_qty) if budget_qty > 0 else unit_qty
+                    if qty > 0:
+                        return qty
+            except Exception:
+                logger.debug("[kojiro_turtle_sizing_fallback] %s — position_ratio 낙하", ticker, exc_info=True)
+            # atr/budget 0 또는 예외 → position_ratio 낙하 (fail-open)
+        # ── position_ratio (기본, 바이트 동일 회귀 경로) ──
+        ratio = params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
         qty = amount // current_price
         if qty > 0:

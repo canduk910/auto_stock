@@ -63,7 +63,7 @@ class _DummyStrategy(StrategyBase):
     def check_exit_signal(self, ticker, current_price, open_price):
         return Signal.NONE
 
-    def calc_buy_quantity(self, current_price):
+    def calc_buy_quantity(self, current_price, ticker=None):
         return 0
 
     def get_scanned_tickers(self) -> list[str]:

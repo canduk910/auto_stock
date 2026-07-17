@@ -262,7 +262,9 @@ class OrderEngine:
             max_buy_qty = buyable.max_buy_quantity
             cache_hit = False
 
-        quantity = strategy.calc_buy_quantity(current_price)
+        # ticker 전달 (Phase 2A-1 터틀 유닛 sizing 이 _candidates[ticker]['atr'] 참조).
+        # position_ratio 전략은 ticker 무시 → 행위 불변.
+        quantity = strategy.calc_buy_quantity(current_price, ticker)
 
         # 사이클 8 (2026-05-18) — SOFT 모드 수량 축소.
         # multiplier=1.0 이면 no-op (회귀 보존). 1.0 미만이면 max(1, ...) 로 최소 1주 보장.

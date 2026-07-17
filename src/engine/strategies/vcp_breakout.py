@@ -1056,7 +1056,7 @@ class VcpBreakoutStrategy(StrategyBase):
         """멀티데이 — 15:20 강제 청산 없음."""
         return []
 
-    def calc_buy_quantity(self, current_price: int) -> int:
+    def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         if current_price <= 0:
             return 0
         ratio = self.config.params["position_ratio"]

@@ -45,7 +45,7 @@ class _DummyStrategy(StrategyBase):
         from src.engine.strategy_base import Signal
         return Signal.NONE
 
-    def calc_buy_quantity(self, current_price):  # pragma: no cover
+    def calc_buy_quantity(self, current_price, ticker=None):  # pragma: no cover
         return 0
 
 
