@@ -36,10 +36,12 @@ class Position:
 
     # 멀티데이 보유 전략 — 시간 청산 개념 없음 (ATR 트레일링/하드 손절만).
     # is_next_day 프로퍼티에서 항상 False 반환 → OrderMonitor "청산" 배지 노출 차단.
-    # 확장 시 frozenset 멤버만 추가 (Position 시그니처 변경 금지).
-    # kojiro (2026-07, 고지로 대순환 스윙) — donchian 동형 멀티데이. 편입 + check_force_clear()==[] 결합.
-    # ⚠️ 인계: vcp_breakout 은 멀티데이인데 여기 부재 (CLAUDE.md 2곳은 멤버라 주장 = 문서-코드 스테일/기존 결함).
-    _MULTIDAY_STRATEGIES: ClassVar[frozenset[str]] = frozenset({"donchian_swing", "kojiro"})
+    # 확장 시 frozenset 멤버만 추가 (Position 시그니처 변경 금지). 3 전략 모두 이 리터럴에 명시
+    # (import-order 독립 단일 진실원). vcp_breakout 은 과거 import 시점 동적 side-effect 로
+    # 자기를 추가하던 취약 패턴(리뷰어 오판 유발)을 2026-07 에 리터럴로 통합.
+    _MULTIDAY_STRATEGIES: ClassVar[frozenset[str]] = frozenset(
+        {"donchian_swing", "vcp_breakout", "kojiro"}
+    )
 
     @property
     def is_next_day(self) -> bool:

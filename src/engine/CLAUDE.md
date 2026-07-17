@@ -529,7 +529,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 - 공통 헬퍼: `_calc_used_funds()` / `_fallback_one_share(current_price)` — 6개 전략의 1주 폴백 통합. 잔여 자금 = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`. 전략 한도 초과 결함 차단
 - `Signal`: NONE / BUY / STOP_LOSS / NEXT_DAY_CLEAR / TRAILING_STOP / FORCE_CLEAR
 - `Position`: ticker, buy_price, quantity, order_no, strategy_id, buy_date, is_next_day(프로퍼티)
-- `Position.is_next_day`: `buy_date < today AND strategy_id not in _MULTIDAY_STRATEGIES`(**코드 정본 = `{donchian_swing, kojiro}`**). 멀티데이 전략은 항상 False — 확장 시 frozenset 멤버만 추가, `Position` 시그니처 변경 금지. ⚠️ **vcp_breakout 은 멀티데이인데 frozenset 부재**(kojiro 배선 시 발견 — 문서가 오랜 기간 `{donchian_swing, vcp_breakout}` 이라 오기, 실제 코드엔 vcp 없음 = 기존 결함 의심: vcp 포지션 `is_next_day` 오작동 가능. 별도 시정 인계)
+- `Position.is_next_day`: `buy_date < today AND strategy_id not in _MULTIDAY_STRATEGIES`(**리터럴 정본 = `{donchian_swing, vcp_breakout, kojiro}`**). 멀티데이 전략은 항상 False — 확장 시 frozenset 리터럴 멤버만 추가, `Position` 시그니처 변경 금지. 3 전략 모두 `strategy_base.py` 리터럴에 정적 선언(2026-07 — vcp 가 과거 import 시점 동적 side-effect 로 자기를 추가하던 취약 패턴을 리터럴로 통합, import-order 독립 단일 진실원)
 - `StrategyState`: positions, pending_buys, **pending_buy_amounts**(ticker→가격×수량, 1주 폴백 잔여 자금 계산), total_investment, daily_realized_pnl, cached_buyable_qty/at, buy_blocked_until, low_funds_tickers, **signal_count_today / order_attempt_today / fill_count_today** + 헬퍼 (`is_buy_blocked / block_buy / unblock_buy / is_buyable_cache_fresh / is_low_funds_blocked / block_low_funds / clear_low_funds`)
 - 일일 퍼널 카운터는 `_reset_daily_state()` 0 초기화 → `metrics.strategy_funnel` 노출
 - `pending_buy_amounts` 는 OrderEngine `execute_buy` 시장가/지정가 폴백에서 `pending_buys.add(ticker)` 옆 동기 등록. `pending_buys.discard` 옆에서 동시 정리

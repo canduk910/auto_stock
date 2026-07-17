@@ -33,13 +33,10 @@ import logging
 from datetime import date, datetime, time, timedelta, timezone
 
 from src.api.condition import add_business_days
-from src.engine.strategy_base import FunnelStage, Position, Signal, StrategyBase, StrategyConfig
+from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
-# vcp_breakout 도 멀티데이 — Position 의 _MULTIDAY_STRATEGIES 에 등록
-# (frozenset 은 immutable 이므로 새 frozenset 으로 교체)
-Position._MULTIDAY_STRATEGIES = frozenset(
-    Position._MULTIDAY_STRATEGIES | {"vcp_breakout"}
-)
+# vcp_breakout 은 멀티데이 — `Position._MULTIDAY_STRATEGIES` 리터럴에 정적 선언됨
+# (2026-07: 과거 import 시점 동적 변형 side-effect 제거, strategy_base 단일 진실원).
 
 KST = timezone(timedelta(hours=9))
 logger = logging.getLogger(__name__)

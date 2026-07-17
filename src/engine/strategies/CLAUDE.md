@@ -47,7 +47,7 @@
 
 ## 멀티데이 보유 전략
 
-`Position._MULTIDAY_STRATEGIES` — `is_next_day` 항상 False, OrderMonitor "청산" 배지 미표시. 추가 시 frozenset 멤버만, `Position` 시그니처 변경 금지. **코드 정본(2026-07) = `frozenset({"donchian_swing", "kojiro"})`.** ⚠️ **vcp_breakout 은 멀티데이인데 frozenset 부재** (본 문서 스테일/기존 결함 — kojiro 배선 시 발견, 별도 인계). 추가 시 `check_force_clear()==[]` 결합 필수 (편입만 하고 force_clear 미구현 → 15:20 강제청산으로 멀티데이 소멸).
+`Position._MULTIDAY_STRATEGIES` — `is_next_day` 항상 False, OrderMonitor "청산" 배지 미표시. 추가 시 frozenset 리터럴 멤버만, `Position` 시그니처 변경 금지. **코드 정본(2026-07) = `frozenset({"donchian_swing", "vcp_breakout", "kojiro"})`** (3 전략 모두 `strategy_base.py` 리터럴에 정적 선언 — vcp 가 과거 import 시점 동적 side-effect 로 추가하던 취약 패턴을 리터럴로 통합, import-order 독립). 추가 시 `check_force_clear()==[]` 결합 필수 (편입만 하고 force_clear 미구현 → 15:20 강제청산으로 멀티데이 소멸).
 
 ## 안전 규칙
 

@@ -57,7 +57,7 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 
 ## OrderMonitor
 
-- `pos.is_next_day=true` 일 때만 "청산" 배지 노출. 백엔드 `Position.is_next_day` 가 `_MULTIDAY_STRATEGIES`(**코드 정본 = `{donchian_swing, kojiro}`**) 분기로 멀티데이 전략은 항상 False. 다른 전략(momentum/VB/LTV/bull_flag) 기존 동작 유지. ⚠️ vcp_breakout 은 멀티데이인데 frozenset 부재(기존 드리프트/결함 의심)
+- `pos.is_next_day=true` 일 때만 "청산" 배지 노출. 백엔드 `Position.is_next_day` 가 `_MULTIDAY_STRATEGIES`(**코드 정본 = `{donchian_swing, vcp_breakout, kojiro}`**) 분기로 멀티데이 전략은 항상 False. 다른 전략(momentum/VB/LTV/bull_flag) 기존 동작 유지
 
 ## ScanMonitor
 
