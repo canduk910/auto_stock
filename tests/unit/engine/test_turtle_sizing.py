@@ -60,3 +60,29 @@ def test_invariant_qty_times_atr_approx_risk_budget():
     risk_budget = budget * rp
     assert abs(qty * atr - risk_budget) < atr
     assert qty == math.floor(risk_budget / atr)
+
+
+def test_risk_normalization_property_vs_position_ratio():
+    """핵심 검증: ATR 밴드 유니버스에서 터틀 유닛당 리스크 CV << position_ratio CV.
+
+    유닛당 리스크 = 수량 × 2ATR(손절폭). 터틀은 변동성 무관 상수(예산×2×risk_pct),
+    position_ratio 는 변동성(ATR/종가)에 비례해 흩어진다. (tools/validate_turtle_sizing 실증 고정)
+    """
+    import statistics
+    budget, risk_pct, stop_atr, pos_ratio = 100_000_000, 0.005, 2.0, 0.20
+    pr_amount = int(budget * pos_ratio)
+    t_risks, p_risks = [], []
+    for price in (10_000, 30_000, 50_000, 100_000, 300_000):
+        for atr_ratio in (0.01, 0.02, 0.03, 0.045):  # kojiro 밴드
+            atr = price * atr_ratio
+            t_qty = compute_unit_qty(budget, atr, risk_pct)
+            p_qty = pr_amount // price
+            if t_qty > 0 and p_qty > 0:
+                t_risks.append(t_qty * stop_atr * atr)
+                p_risks.append(p_qty * stop_atr * atr)
+
+    t_cv = statistics.pstdev(t_risks) / statistics.fmean(t_risks)
+    p_cv = statistics.pstdev(p_risks) / statistics.fmean(p_risks)
+    assert t_cv < 0.05, f"터틀 유닛당 리스크 정규화 실패 CV={t_cv}"   # 상수 (floor 오차만)
+    assert p_cv > 0.20, f"position_ratio 는 변동성 비례 흩어져야 CV={p_cv}"
+    assert t_cv < p_cv  # 터틀이 더 균등
