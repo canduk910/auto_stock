@@ -101,6 +101,15 @@ class DonchianSwingStrategy(StrategyBase):
         # 사이클 209 (2026-07-14) — 0.5(AI 과튜닝)→4.0 복원. 후보=전일 이미 신고가
         # 돌파라 오늘 기준가 위 시작 → 0.5%는 상시 스킵. 4.0≥gap_skip(3.0) 불변식.
         "max_breakout_extension_pct": 4.0,
+        # Phase 2A-2 (게이트 1) — 터틀 유닛 sizing opt-in. sizing_mode="turtle" 시
+        # sizing(compute_unit_qty)+하드손절(2ATR)이 entry_atr 존재로 원자 결합.
+        # 기본 "position_ratio" = 미전환(하드손절 -7%, byte 동일). 정체성 상수 =
+        # PARAM_RANGES 미편입 (AI 자동튜닝 제외, 사이클 208/209/212 선례).
+        "sizing_mode": "position_ratio",
+        "risk_pct": 0.005,        # 유닛당 리스크 = 예산 0.5% (stop_atr 2.0 → 실효 1.0%)
+        "stop_atr": 2.0,          # 하드손절 = buy - stop_atr×entry_atr (=atr_trail_mult, dead code 방지)
+        "turtle_backstop_pct": -9.0,   # ATR독립 최후 방어 (info=None/재시작/ATR=0, 2ATR보다 넓게)
+        "min_vol_floor_pct": 1.0,      # 터틀 sizing 변동성 floor (atr/price<1% → position_ratio fallback)
     }
 
     def __init__(self, config: StrategyConfig):
@@ -110,6 +119,11 @@ class DonchianSwingStrategy(StrategyBase):
         self._candidates: dict[str, dict] = {}  # ticker -> {prev_close, atr, ...}
         self._scanned_tickers: list[str] = []
         self._bought_today: set[str] = set()  # 당일 진입 시도 종목 (중복 방지)
+        # Phase 2A-2 (게이트 1) — 터틀 진입 시점 ATR 스냅샷 (하드손절 = buy - stop_atr×entry_atr).
+        # calc_buy_quantity 터틀 분기에서 sizing 과 동일 값으로 스탬프(원자 결합) +
+        # recompute_held_atr 가 재시작 시 buy_date 기준으로 재도출(loosen 차단, 영속 대체).
+        # 존재 여부가 ATR손절 게이트 = position_ratio 매수는 미스탬프 → % 손절 byte 동일.
+        self._entry_atr: dict[str, float] = {}
         # 사이클 23 P2-2 — ticker -> 진입 시 돌파선 (20일 신고가)
         self._breakout_high: dict[str, int] = {}
         # 단계별 탈락 통계 — prepare() 실행 시마다 갱신, 프론트 깔때기 시각화용
@@ -696,6 +710,39 @@ class DonchianSwingStrategy(StrategyBase):
             if pos_needs_high_recover and candles:
                 await self._apply_high_since_buy_from_candles(pos, candles, today)
 
+            # Phase 2A-2 (게이트 1) — 터틀 entry_atr 재도출 (재시작 복구).
+            # 진입 시점(buy_date 이전) ATR 재현 → 현재 팽창 ATR 로 손절선 loosen 차단.
+            # in-memory _entry_atr 존재(당일 매수 미재시작) 시 미접촉 = 정확 스탬프 보존.
+            if (
+                params.get("sizing_mode") == "turtle" and pos and pos.buy_date
+                and ticker not in self._entry_atr and candles
+            ):
+                self._rederive_entry_atr(ticker, pos, candles, atr_period)
+
+    def _rederive_entry_atr(self, ticker: str, pos, candles: list, atr_period: int) -> None:
+        """재시작 복구 — buy_date 이전 일봉으로 진입 ATR 재현 (loosen 차단, Phase 2A-2 게이트 1).
+
+        진입 시 `_candidates` ATR 은 prepare 가 매수일 전일(D-1)까지 봉으로 산출했다.
+        재시작 후 현재 ATR(팽창 가능)이 아닌 그 값을 재현하려면 buy_date *이전* 봉만
+        (`stck_bsop_date < buy_date`) 남겨 `_atr`(DESC, 최근 period) 로 계산한다.
+        봉 부족/실패 시 미복구 → % backstop 이 방어(무손절 없음).
+        """
+        try:
+            buy_dd = pos.buy_date.strftime("%Y%m%d")
+            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
+            if len(prior) < atr_period + 2:
+                return
+            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior]
+            lows = [int(c.get("stck_lwpr", "0") or 0) for c in prior]
+            closes = [int(c.get("stck_clpr", "0") or 0) for c in prior]
+            e_atr = self._atr(highs, lows, closes, atr_period)
+            if e_atr > 0:
+                self._entry_atr[ticker] = float(int(e_atr))
+                logger.info("[donchian_entry_atr_rederive] %s buy_date=%s entry_atr=%d",
+                            ticker, pos.buy_date, int(e_atr))
+        except Exception:
+            logger.exception("도치안 터틀 entry_atr 재도출 실패: %s", ticker)
+
     async def recompute_high_since_buy(self) -> None:
         """보유 종목의 `high_since_buy` 를 매수일~전영업일 KIS 일봉 high max 로 보정.
 
@@ -906,11 +953,28 @@ class DonchianSwingStrategy(StrategyBase):
 
         # 1) 하드 손절
         loss_rate = (current_price - pos.buy_price) / pos.buy_price * 100 if pos.buy_price > 0 else 0
-        stop_loss = self.config.params["stop_loss_rate"]
-        if loss_rate <= stop_loss:
-            logger.info("도치안 스윙 손절: %s 매수가(%d) 대비 %.1f%%",
-                        ticker, pos.buy_price, loss_rate)
-            return Signal.STOP_LOSS
+        # Phase 2A-2 (게이트 1) — entry_atr 존재 = 터틀 매수 → 2ATR 하드손절(지배) + % backstop
+        # (info=None/재시작/ATR=0 최후 방어). 미존재(position_ratio 매수/미스탬프) = 기존 % 손절
+        # (byte 동일 — sizing_mode 로 게이팅하지 않음, entry_atr 존재가 자연 게이트).
+        entry_atr = self._entry_atr.get(ticker, 0)
+        if entry_atr > 0:
+            stop_atr = float(self.config.params.get("stop_atr", 2.0))
+            base_stop = pos.buy_price - stop_atr * entry_atr
+            if base_stop > 0 and current_price <= base_stop:
+                logger.info("[donchian_turtle_stop] %s 매수가(%d) - %.1f×ATR(%d) = %d / 현재가 %d",
+                            ticker, pos.buy_price, stop_atr, int(entry_atr), int(base_stop), current_price)
+                return Signal.STOP_LOSS
+            backstop = float(self.config.params.get("turtle_backstop_pct", -9.0))
+            if loss_rate <= backstop:
+                logger.info("[donchian_turtle_backstop] %s 매수가(%d) 대비 %.1f%% ≤ %.1f%%",
+                            ticker, pos.buy_price, loss_rate, backstop)
+                return Signal.STOP_LOSS
+        else:
+            stop_loss = self.config.params["stop_loss_rate"]
+            if loss_rate <= stop_loss:
+                logger.info("도치안 스윙 손절: %s 매수가(%d) 대비 %.1f%%",
+                            ticker, pos.buy_price, loss_rate)
+                return Signal.STOP_LOSS
 
         # 2.5) 사이클 23 P2-2 — 시간 기반 청산 (멀티데이 약한 이탈 빠른 정리)
         # 기존 ATR 트레일링/하드 손절 보존, 추가 분기만 삽입
@@ -946,12 +1010,55 @@ class DonchianSwingStrategy(StrategyBase):
         return []
 
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
-        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 잔여 자금이 1주 살 수 있으면 1주."""
+        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 잔여 자금이 1주 살 수 있으면 1주.
+
+        Phase 2A-2 (게이트 1): sizing_mode="turtle" + ticker 지정 시 터틀 유닛 sizing
+        (변동성 정규화) 우선. 터틀이 0(변동성 floor/잔여부족) 반환 시 position_ratio 낙하.
+        """
         if current_price <= 0:
             return 0
-        ratio = self.config.params["position_ratio"]
+        params = self.config.params
+        if params.get("sizing_mode") == "turtle" and ticker is not None:
+            turtle_qty = self._turtle_buy_quantity(current_price, ticker)
+            if turtle_qty > 0:
+                return turtle_qty
+        ratio = params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
         qty = amount // current_price
         if qty > 0:
             return qty
         return self._fallback_one_share(current_price)
+
+    def _turtle_buy_quantity(self, current_price: int, ticker: str) -> int:
+        """터틀 유닛 수량 + entry_atr 원자 스탬프 (Phase 2A-2 게이트 1).
+
+        `_candidates[ticker]["atr"]`(prepare D-1 ATR)를 sizing 과 하드손절 entry_atr
+        양쪽에 동일 사용(불변식 성립 열쇠). 갭/변동성 가드는 `compute_unit_qty_guarded`.
+        0 반환(저변동/잔여부족/예외) 시 호출자가 position_ratio 로 낙하 = entry_atr 미스탬프.
+        """
+        try:
+            from src.engine.turtle_sizing import compute_unit_qty_guarded
+
+            info = self._candidates.get(ticker) or {}
+            atr = float(info.get("atr") or 0)
+            budget = int(self.state.total_investment)
+            remaining = max(0, budget - self._calc_used_funds())
+            qty = compute_unit_qty_guarded(
+                budget, atr, current_price,
+                float(self.config.params.get("risk_pct") or 0),
+                remaining_budget=remaining,
+                min_vol_pct=float(self.config.params.get("min_vol_floor_pct", 1.0)),
+                position_ratio=float(self.config.params.get("position_ratio") or 0),
+            )
+            if qty > 0:
+                # sizing 과 동일 ATR 값으로 하드손절 entry_atr 스탬프 (원자 결합)
+                self._entry_atr[ticker] = atr
+                return qty
+        except Exception:
+            logger.debug("[donchian_turtle_sizing_fallback] %s — position_ratio 낙하",
+                         ticker, exc_info=True)
+        return 0
+
+    def on_position_closed(self, ticker: str) -> None:
+        """전량 청산 시 터틀 entry_atr 정리 (재진입 stale 스냅샷 차단)."""
+        self._entry_atr.pop(ticker, None)

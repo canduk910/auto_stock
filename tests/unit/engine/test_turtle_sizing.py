@@ -10,7 +10,7 @@ import math
 
 import pytest
 
-from src.engine.turtle_sizing import compute_unit_qty
+from src.engine.turtle_sizing import compute_unit_qty, compute_unit_qty_guarded
 
 
 def test_basic_floor_formula():
@@ -86,3 +86,65 @@ def test_risk_normalization_property_vs_position_ratio():
     assert t_cv < 0.05, f"터틀 유닛당 리스크 정규화 실패 CV={t_cv}"   # 상수 (floor 오차만)
     assert p_cv > 0.20, f"position_ratio 는 변동성 비례 흩어져야 CV={p_cv}"
     assert t_cv < p_cv  # 터틀이 더 균등
+
+
+# ── compute_unit_qty_guarded (Phase 2A-2 게이트 0 갭/변동성 가드) ──
+
+def test_guarded_matches_unguarded_when_no_clamp():
+    # 정상 변동성 + 충분한 잔여 + notional 여유 → compute_unit_qty 와 동일
+    budget, atr, price, rp = 100_000_000, 3000.0, 60_000, 0.005
+    plain = compute_unit_qty(budget, atr, rp)  # 166
+    guarded = compute_unit_qty_guarded(
+        budget, atr, price, rp, remaining_budget=budget, min_vol_pct=1.0, position_ratio=0.20)
+    # notional 상한 = budget×0.20//price = 20,000,000//60,000 = 333 > 166 → 클램프 없음
+    assert guarded == plain == 166
+
+
+def test_guarded_vol_floor_returns_zero():
+    # atr/price = 0.5% < min_vol_pct 1% → 0 (position_ratio fallback 유도)
+    q = compute_unit_qty_guarded(
+        100_000_000, 500.0, 100_000, 0.005,
+        remaining_budget=100_000_000, min_vol_pct=1.0, position_ratio=0.20)
+    assert q == 0
+
+
+def test_guarded_vol_floor_off_when_min_vol_zero():
+    # min_vol_pct=0 → floor 미적용 (저변동도 통과)
+    q = compute_unit_qty_guarded(
+        100_000_000, 500.0, 100_000, 0.005,
+        remaining_budget=100_000_000, min_vol_pct=0.0, position_ratio=0.0)
+    assert q == compute_unit_qty(100_000_000, 500.0, 0.005)  # 1000
+
+
+def test_guarded_remaining_budget_clamp():
+    # 잔여 예산이 5주치뿐 → 5주로 클램프
+    q = compute_unit_qty_guarded(
+        100_000_000, 3000.0, 60_000, 0.005,
+        remaining_budget=300_000, min_vol_pct=1.0, position_ratio=0.0)
+    assert q == 300_000 // 60_000  # 5
+
+
+def test_guarded_notional_cap_by_position_ratio():
+    # 저ATR 대량 유닛 → notional 상한(position_ratio) 클램프로 단일종목 집중 차단
+    budget, atr, price, rp = 100_000_000, 1200.0, 10_000, 0.005
+    unit = compute_unit_qty(budget, atr, rp)  # 500000/1200=416
+    pr_qty = int(budget * 0.20) // price       # 20,000,000//10,000 = 2000
+    # 416 < 2000 이라 이 케이스는 클램프 안 됨 → 더 극단(atr 매우 작음)으로
+    atr2 = 150.0                                # atr/price=1.5%>1% 통과
+    unit2 = compute_unit_qty(budget, atr2, rp)  # 500000/150=3333
+    q = compute_unit_qty_guarded(
+        budget, atr2, price, rp, remaining_budget=budget, min_vol_pct=1.0, position_ratio=0.20)
+    assert unit2 == 3333
+    assert q == pr_qty == 2000  # notional 상한으로 클램프
+
+
+@pytest.mark.parametrize("bad", [
+    dict(atr_value=0.0), dict(atr_value=-1.0), dict(current_price=0),
+    dict(strategy_budget=0), dict(risk_pct=0.0),
+])
+def test_guarded_non_positive_inputs_return_zero(bad):
+    base = dict(strategy_budget=100_000_000, atr_value=3000.0, current_price=60_000, risk_pct=0.005)
+    base.update(bad)
+    assert compute_unit_qty_guarded(
+        base["strategy_budget"], base["atr_value"], base["current_price"], base["risk_pct"],
+        remaining_budget=100_000_000) == 0

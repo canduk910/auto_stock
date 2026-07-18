@@ -34,3 +34,45 @@ def compute_unit_qty(
     risk_budget = strategy_budget * risk_pct
     qty = math.floor(risk_budget / atr_value * fraction)
     return max(qty, 0)
+
+
+def compute_unit_qty_guarded(
+    strategy_budget: int,
+    atr_value: float,
+    current_price: int,
+    risk_pct: float,
+    *,
+    remaining_budget: int,
+    min_vol_pct: float = 1.0,
+    position_ratio: float = 0.0,
+    fraction: float = 1.0,
+) -> int:
+    """터틀 유닛 수량 + 갭/변동성 가드 (Phase 2A-2 게이트 0).
+
+    `compute_unit_qty` 는 무상한이라 저ATR 종목에서 수량이 폭증(KR ±30% 갭이 손절선을
+    한 봉에 관통 → 실현손실 ≫ 명목)한다. 본 함수는 3중 가드로 이를 차단하며,
+    `qty == 0` 이면 호출자가 position_ratio 로 fail-open 한다.
+
+    - **변동성 floor**: `atr/price < min_vol_pct%` → 0 (저변동/유동성 부족 = 터틀 부적합).
+    - **잔여 자금 클램프**: `remaining_budget // price` 상한 (전략 잔여 예산 초과 매수 차단).
+    - **notional 상한**: `position_ratio` notional (`budget × position_ratio // price`)
+      상한 — 저ATR 종목이 유닛 수량 폭증으로 단일종목에 집중되는 것을 차단
+      (`position_ratio <= 0` 이면 미적용).
+    """
+    if (
+        atr_value <= 0 or current_price <= 0
+        or strategy_budget <= 0 or risk_pct <= 0
+    ):
+        return 0
+    if min_vol_pct > 0 and atr_value / current_price < min_vol_pct / 100.0:
+        return 0  # 저변동 → position_ratio fallback
+    qty = compute_unit_qty(strategy_budget, atr_value, risk_pct, fraction=fraction)
+    if qty <= 0:
+        return 0
+    if remaining_budget > 0:
+        qty = min(qty, remaining_budget // current_price)
+    if position_ratio > 0:
+        pr_qty = int(strategy_budget * position_ratio) // current_price
+        if pr_qty > 0:
+            qty = min(qty, pr_qty)
+    return max(qty, 0)
