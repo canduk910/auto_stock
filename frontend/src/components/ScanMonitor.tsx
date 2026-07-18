@@ -3,6 +3,7 @@ import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { BuySignal, ScanStats } from '../types/trading'
 import { getKstMinutes } from '../utils/stale-context'
+import KojiroMonitor from './KojiroMonitor'
 
 interface BoardTarget {
   open_price: number
@@ -284,6 +285,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
   const isAll = selectedStrategy === 'all'
   const isBreakout = (BREAKOUT_KEYS as readonly string[]).includes(selectedStrategy)
   const isSwing = selectedStrategy === SWING_KEY
+  const isKojiro = selectedStrategy === 'kojiro'
   const swingStrat = strategies[SWING_KEY]
   const swingStats: ScanStats | null = swingStrat?.scan_stats ?? null
   const swingCount = swingStrat?.scanned_count ?? 0
@@ -362,15 +364,20 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
         }
         const selectedBreakoutCount = isBreakout ? breakoutCounts[selectedStrategy] : 0
         // swing 탭이면 최종 후보 수, 아니면 기존 분기
+        const kojiroFinal = strategies['kojiro']?.scan_stats?.final_prepared ?? 0
         const summaryCount = isSwing
           ? swingCount
-          : (showMomentumScan ? (scan?.filtered_count ?? 0) : selectedBreakoutCount)
+          : isKojiro
+            ? kojiroFinal
+            : (showMomentumScan ? (scan?.filtered_count ?? 0) : selectedBreakoutCount)
         // 사이클 145 (2026-06-16) — UI 라벨 명확화 (결함 4 시정).
         // 사용자 verbatim "단계가 늘어난 것처럼 보여" 영역 영구 영속 = 신고가 후보 카운트 영역이
         // donchian 후보 영역 영구 영속이나 운영자 오인 발생 → 라벨 영역 영구 영속 명확화.
         const summaryLabel = isSwing
           ? '신고가 후보 (donchian)'
-          : (isAll ? '모멘텀 필터' : '필터링')
+          : isKojiro
+            ? '대순환 최종 후보'
+            : (isAll ? '모멘텀 필터' : '필터링')
 
         return (
           <>
@@ -535,6 +542,9 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                 )}
               </div>
             )}
+
+            {/* 고지로 대순환 전용 탭 (다크런치) — KojiroMonitor 6 패널 */}
+            {isKojiro && <KojiroMonitor strategies={strategies} tickerPrices={scan?.ticker_prices} />}
 
             {/* 스윙 전용 탭(donchian_swing): 깔때기 통계 + 후보 종목 테이블 */}
             {isSwing && (() => {

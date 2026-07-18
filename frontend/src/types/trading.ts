@@ -24,6 +24,23 @@ export interface ScanStats {
   atr_pass?: number
   final_prepared?: number
   last_run_at?: string | null
+  // 고지로 대순환 전용 깔때기 키 (kojiro `_empty_scan_stats` 정합, 백엔드 미배포 시점 호환 옵셔널)
+  band_pass?: number
+  stage_valid_pass?: number
+  stage1_uptrend_pass?: number
+  strict_entry_pass?: number
+}
+
+// 고지로 후보 종목 상태 (get_targets_status). StrategyInfo.targets 엔트리 캐스팅용.
+export interface KojiroTarget {
+  prev_close: number
+  atr: number
+  stage: number           // 대순환 스테이지 1~6 (0 = 판별 불가)
+  ema_s: number
+  ema_m: number
+  ema_l: number
+  atr_ratio?: number       // atr/prev_close (백엔드 노출, 부재 시 프론트 계산)
+  target_price?: number
 }
 
 export interface StrategyInfo {

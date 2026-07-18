@@ -35,6 +35,12 @@ export const STRATEGY_COLORS: Record<string, { bg: string; text: string; badge: 
     badge: 'bg-cyan-100 text-cyan-700',
     hex: '#06B6D4',
   },
+  kojiro: {
+    bg: 'bg-violet-50',
+    text: 'text-violet-700',
+    badge: 'bg-violet-100 text-violet-700',
+    hex: '#7C3AED',
+  },
 }
 
 const DEFAULT_COLOR = {

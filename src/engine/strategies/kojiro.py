@@ -741,6 +741,8 @@ class KojiroStrategy(StrategyBase):
                 "stage": info.get("stage", 0),
                 "ema_s": int(info.get("ema_s", 0)), "ema_m": int(info.get("ema_m", 0)),
                 "ema_l": int(info.get("ema_l", 0)),
+                # 대시보드 ATR 변동성 밴드 게이지용 (atr/prev_close, 밴드 판별 정확값).
+                "atr_ratio": round(float(info.get("atr_ratio", 0) or 0), 4),
                 "target_price": info["prev_close"], "open_price": 0,
                 "target_offset": 0, "open_confirmed": True, "k": 0.0,
             }

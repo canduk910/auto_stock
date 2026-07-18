@@ -320,3 +320,22 @@ def test_check_buy_no_funnel_hook():
     src = inspect.getsource(KojiroStrategy.check_buy_signal)
     assert "_record_funnel_step" not in src
     assert "_record_funnel_pipeline_step" not in src
+
+
+def test_get_targets_status_exposes_atr_ratio(kojiro):
+    # 대시보드 ATR 밴드 게이지용 — atr_ratio(atr/prev_close) 노출 + 기존 키 보존
+    _seed_candidate(kojiro, "005930", prev_close=60000, atr=1800.0, stage=1)
+    targets = kojiro.get_targets_status()
+    t = targets["005930"]
+    assert t["atr_ratio"] == round(1800.0 / 60000, 4)  # 0.03 (3%)
+    # 기존 키 회귀 (stage/ema/prev_close/atr)
+    assert t["stage"] == 1 and t["prev_close"] == 60000 and t["atr"] == 1800
+    assert {"ema_s", "ema_m", "ema_l", "target_price"} <= t.keys()
+
+
+def test_get_targets_status_atr_ratio_graceful_when_missing(kojiro):
+    # atr_ratio 키 부재(레거시 _candidates) → 0.0 graceful
+    kojiro._candidates["000660"] = {"prev_close": 50000, "atr": 1000.0, "stage": 6,
+                                    "ema_s": 0, "ema_m": 0, "ema_l": 0}
+    t = kojiro.get_targets_status()["000660"]
+    assert t["atr_ratio"] == 0.0

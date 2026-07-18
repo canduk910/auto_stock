@@ -22,6 +22,7 @@ import {
 const STRATEGY_OPTIONS = [
   { id: '', label: '전체' },
   { id: 'donchian_swing', label: '도치안 스윙' },
+  { id: 'kojiro', label: '고지로 대순환' },
   { id: 'bull_flag_breakout', label: '눌림목 돌파' },
   { id: 'vcp_breakout', label: 'VCP 변동성 수축' },
   { id: 'momentum', label: '모멘텀' },
