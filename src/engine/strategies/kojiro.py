@@ -109,7 +109,9 @@ class KojiroStrategy(StrategyBase):
         # ── 유니버스/사이징 (donchian 동형 — 자동튜닝 수용) ──
         "min_market_cap": 50_000_000_000,    # 500억
         "min_trade_amount": 1_000_000_000,   # 10억
-        "max_scan_stocks": 200,
+        # 2026-07 — 200→400. index 합집합(KOSPI200∪KOSDAQ150)=348 인데 limit=200 이
+        # union 쿼리까지 잘라 117종목 누락(실측 자격 317). 400 = 348 전체 커버 + 마진.
+        "max_scan_stocks": 400,
         "exclude_tickers": [],
         "nxt_tradable": None,
         "position_ratio": 0.20,

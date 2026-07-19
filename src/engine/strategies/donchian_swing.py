@@ -84,7 +84,9 @@ class DonchianSwingStrategy(StrategyBase):
         #     stock_master ~2,800 영역에서 후보 풀 폭축 위험)
         "min_market_cap": 50_000_000_000,    # 500억 (Q2=D 임시 완화, 원본 3,000억)
         "min_trade_amount": 1_000_000_000,   # 10억 (Q2=D 임시 완화, 원본 50억)
-        "max_scan_stocks": 200,
+        # 2026-07 — 200→400. index 합집합(KOSPI200∪KOSDAQ150)=348 인데 limit=200 이
+        # union 쿼리까지 잘라 117종목 누락(실측 자격 317). 400 = 348 전체 커버 + 마진.
+        "max_scan_stocks": 400,
         # 사이클 119 (2026-06-12) — Plan Phase C UI 운영자 필터링 호환 영역
         "exclude_tickers": [],
         # 사이클 119 (2026-06-12) — Q5=A donchian MAIN 단독 (사이클 26 DEFAULT_TRADABLE_BOARDS

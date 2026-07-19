@@ -202,3 +202,19 @@ class TestG153Safety3:
         assert "KOSDAQ_150_TICKERS" in source, (
             "G-153-SAFETY-3 — vcp_breakout 영역 KOSDAQ_150_TICKERS 영구 영속 (사이클 153 변경 0)"
         )
+
+
+# ---------------------------------------------------------------------------
+# 2026-07 — max_scan_stocks 200→400 (index 합집합 348 전체 커버, limit 캡 117 누락 시정)
+# ---------------------------------------------------------------------------
+
+
+def test_donchian_max_scan_stocks_covers_index_union():
+    from src.engine.strategies.donchian_swing import DonchianSwingStrategy
+    p = DonchianSwingStrategy.DEFAULT_PARAMS
+    # index 합집합(KOSPI200∪KOSDAQ150)=348. limit=max_scan_stocks 가 union 쿼리까지
+    # 자르므로 348 이상 의무 (200 캡이 117 누락시켰음).
+    assert p["max_scan_stocks"] >= 348, "index 348 전체 커버 필요 (limit 캡 방지)"
+    import inspect
+    src = inspect.getsource(DonchianSwingStrategy._scan_universe)
+    assert "limit=max_stocks" in src, "limit=max_scan_stocks 규약"

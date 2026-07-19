@@ -137,7 +137,7 @@ class TestDonchianScanUniverseHigh2:
         assert kwargs["min_trade_amount"] == 1_000_000_000
         assert kwargs["exclude_tickers"] == []
         assert kwargs["nxt_tradable"] is None
-        assert kwargs["limit"] == 200  # max_scan_stocks 디폴트 영속
+        assert kwargs["limit"] == 400  # max_scan_stocks 디폴트 (2026-07 200→400, index 348 커버)
 
     def test_h2_returns_filtered_ticker_list(self):
         """반환값 = list[str] ticker (6자리 + ETF 제외)."""

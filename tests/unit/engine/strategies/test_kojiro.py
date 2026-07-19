@@ -94,9 +94,18 @@ def test_default_params_identity_constants():
     assert p["hard_stop_pct"] == -8.0
     assert p["atr_ratio_min"] == 0.01 and p["atr_ratio_max"] == 0.045
     assert p["gap_up_skip_pct"] == 5.0 and p["gap_down_skip_pct"] == -4.0
+    # 2026-07 — index 합집합(348) 전체 스캔용 limit (200 캡이 117 누락 → 400)
+    assert p["max_scan_stocks"] >= 348, "index 합집합 348 전체 커버 필요"
     # obs-M: atr_trail_mult(전역 PARAM_RANGES 키) 재사용 금지
     assert "atr_trail_mult" not in p
     assert len(FUNNEL_STAGES) == 9
+
+
+def test_scan_universe_passes_max_scan_stocks_as_limit():
+    # limit 이 union 쿼리까지 자르므로 max_scan_stocks 가 곧 유니버스 상한 — index 348 이상 의무
+    import inspect
+    src = inspect.getsource(KojiroStrategy._scan_universe)
+    assert "limit=max_stocks" in src, "limit=max_scan_stocks 규약 (union 캡 방지)"
 
 
 def test_stage_recently_adjacent_transition():
