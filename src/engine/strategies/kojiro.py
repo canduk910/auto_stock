@@ -55,6 +55,36 @@ FUNNEL_STAGES: tuple[FunnelStage, ...] = (
 )
 
 
+# 섹터/테마 동시보유 캡용 — KRX 산업지수 플래그(프로그램 basket = 실 상관구조).
+_KOJIRO_KRX_SECTOR_FLAGS: tuple[tuple[str, str], ...] = (
+    ("krx_smcn_yn", "반도체"), ("krx_car_yn", "자동차"), ("krx_bio_yn", "바이오"),
+    ("krx_bank_yn", "은행"), ("krx_scrt_yn", "증권"), ("krx_insu_yn", "보험"),
+    ("krx_enrg_chms_yn", "에너지화학"), ("krx_stel_yn", "철강"),
+    ("krx_medi_cmnc_yn", "미디어통신"), ("krx_cnst_yn", "건설"),
+    ("krx_ship_yn", "조선"), ("krx_trnp_yn", "운송"),
+)
+
+
+def _kojiro_sector_key(master_raw: dict | None, ticker: str) -> str:
+    """섹터/테마 캡용 섹터 키 (측정 Phase 1 로직과 동일).
+
+    KRX 산업지수 플래그(주) → 업종 대분류(bstp_larg_div_code ≠"0000") →
+    중분류(≠"0000") → `미분류-{ticker}`(독립, 클러스터 미포함 = fail-open).
+    "0000" catch-all 은 독립 취급 (거짓 클러스터 인플레 차단). bstp_smal 은 전량 "0000"이라 미사용.
+    """
+    if isinstance(master_raw, dict) and master_raw:
+        for key, name in _KOJIRO_KRX_SECTOR_FLAGS:
+            if str(master_raw.get(key, "")).strip().upper() == "Y":
+                return name
+        larg = str(master_raw.get("bstp_larg_div_code", "") or "").strip()
+        if larg and larg != "0000":
+            return f"업종-{larg}"
+        medm = str(master_raw.get("bstp_medm_div_code", "") or "").strip()
+        if medm and medm != "0000":
+            return f"중분류-{medm}"
+    return f"미분류-{ticker}"
+
+
 def _empty_scan_stats() -> dict:
     return {
         "universe_union": 0,
@@ -119,6 +149,10 @@ class KojiroStrategy(StrategyBase):
         "position_ratio": 0.20,
         "max_positions": 5,
         "daily_loss_limit": -8.0,
+        # 섹터/테마 동시보유 캡 (동일섹터 ≤ N, 매수 게이트 전용·fail-open). domain-consult:
+        # 대순환은 섹터 단위 정렬 → 5종목 한 섹터 집중 → 테마 붕괴 시 동시 청산불가(±30% 하한가 락).
+        # 0=off. PARAM_RANGES 제외(리스크 정체성 상수, AI 튜닝 금지). Phase 1 측정 = 활성일 ~17% 바인딩.
+        "max_positions_per_sector": 2,
         # ── 터틀 유닛 sizing (Phase 2A-1, PARAM_RANGES 제외 = AI 자동튜닝 금지) ──
         # sizing_mode='turtle' opt-in 시 unit=floor(전략예산×risk_pct/ATR). 기본 position_ratio.
         # risk_pct 0.5% = 도메인 권장(KR 갭리스크). max_units 2/10 은 2B/2C 선등록(2A-1 미사용).
@@ -336,6 +370,7 @@ class KojiroStrategy(StrategyBase):
                 self._candidates[ticker] = {
                     "prev_close": prev_close, "atr": atr_val, "stage": stage,
                     "ema_s": ema_s, "ema_m": ema_m, "ema_l": ema_l, "atr_ratio": atr_ratio,
+                    "sector": await self._fetch_sector(ticker),  # 섹터/테마 캡용
                 }
                 prepared += 1
                 final_t.append(ticker)
@@ -482,6 +517,16 @@ class KojiroStrategy(StrategyBase):
             logger.debug("[kojiro_master_block_prepare] protected 조회 실패 graceful", exc_info=True)
         return await _scanner_mod.apply_master_block_filter(tickers, protected_tickers=protected)
 
+    async def _fetch_sector(self, ticker: str) -> str:
+        """종목 섹터 키 산출 (master_raw). 실패 시 미분류(독립) — fail-open (섹터 캡 미차단)."""
+        try:
+            from src.db import stock_master as _sm_mod
+            mr = await _sm_mod.get_master_raw(ticker)
+            return _kojiro_sector_key(mr if isinstance(mr, dict) else None, ticker)
+        except Exception:
+            logger.debug("[kojiro_sector] get_master_raw 실패 graceful: %s", ticker, exc_info=True)
+            return f"미분류-{ticker}"
+
     async def _apply_price_filter_in_prepare(self, tickers: list[str]) -> list[str]:
         """가격 필터 후처리 (donchian 동형, PriceFilter 단일 source + 보유 절대 보호)."""
         from src.db import stock_master as _sm_mod
@@ -570,6 +615,7 @@ class KojiroStrategy(StrategyBase):
                         "ema_s": float(last["ema_s"]), "ema_m": float(last["ema_m"]),
                         "ema_l": float(last["ema_l"]),
                         "atr_ratio": atr_val / prev_close,
+                        "sector": await self._fetch_sector(ticker),  # 섹터 캡 카운트용(보유)
                     }
                     # tighten-only floor 갱신
                     base = int(pos.buy_price - self.config.params["stop_atr"] * atr_val) if pos else 0
@@ -610,6 +656,21 @@ class KojiroStrategy(StrategyBase):
         # 보유 재채움 stage 데이터(stage != 1)는 매수 후보 아님 — strict entry 통과분만 매수.
         if not info or info.get("stage") != 1:
             return Signal.NONE
+
+        # 섹터/테마 동시보유 캡 (매수 게이트 전용 — 청산/손절/트레일링/익일청산 절대 미차단).
+        # 동일섹터 보유(positions ∪ pending_buys) ≥ cap 이면 3번째+ 스킵. fail-open:
+        # sector 결측/미분류(독립 키) → 카운트 0 → 미차단. cap=0 → 비활성.
+        sector_cap = int(self.config.params.get("max_positions_per_sector", 0) or 0)
+        if sector_cap > 0:
+            cand_sector = info.get("sector")
+            if cand_sector and not str(cand_sector).startswith("미분류"):
+                held_pending = set(self.state.positions.keys()) | set(self.state.pending_buys)
+                same = sum(1 for t in held_pending
+                           if (self._candidates.get(t) or {}).get("sector") == cand_sector)
+                if same >= sector_cap:
+                    logger.info("[kojiro_sector_cap] %s 섹터=%s 동시보유 %d ≥ %d — 매수 스킵",
+                                ticker, cand_sector, same, sector_cap)
+                    return Signal.NONE
 
         # 시간 가드: 09:05 ~ 09:30 (KST-aware 명시, naive 금지)
         now_t = datetime.now(KST).time()
@@ -754,6 +815,8 @@ class KojiroStrategy(StrategyBase):
                 "ema_l": int(info.get("ema_l", 0)),
                 # 대시보드 ATR 변동성 밴드 게이지용 (atr/prev_close, 밴드 판별 정확값).
                 "atr_ratio": round(float(info.get("atr_ratio", 0) or 0), 4),
+                "sector": info.get("sector", ""),  # 섹터/테마 캡 대시보드 노출
+
                 "target_price": info["prev_close"], "open_price": 0,
                 "target_offset": 0, "open_confirmed": True, "k": 0.0,
             }
