@@ -94,18 +94,22 @@ def test_default_params_identity_constants():
     assert p["hard_stop_pct"] == -8.0
     assert p["atr_ratio_min"] == 0.01 and p["atr_ratio_max"] == 0.045
     assert p["gap_up_skip_pct"] == 5.0 and p["gap_down_skip_pct"] == -4.0
-    # 2026-07 — index 합집합(348) 전체 스캔용 limit (200 캡이 117 누락 → 400)
-    assert p["max_scan_stocks"] >= 348, "index 합집합 348 전체 커버 필요"
+    # 2026-07 — 전체 상장 전환. 유니버스 = 전체상장 ∩ 필터 ≈ 979 → limit 이 후보 상한이라 1000+ 필요
+    assert p["max_scan_stocks"] >= 1000, "전체상장 후보(≈979) 전량 커버 필요"
     # obs-M: atr_trail_mult(전역 PARAM_RANGES 키) 재사용 금지
     assert "atr_trail_mult" not in p
     assert len(FUNNEL_STAGES) == 9
 
 
-def test_scan_universe_passes_max_scan_stocks_as_limit():
-    # limit 이 union 쿼리까지 자르므로 max_scan_stocks 가 곧 유니버스 상한 — index 348 이상 의무
+def test_scan_universe_all_listed_no_index_filter():
+    # 2026-07 — 전체 상장 전환. 지수(is_kospi200/is_kosdaq150=True) 필터 제거 → None.
     import inspect
     src = inspect.getsource(KojiroStrategy._scan_universe)
-    assert "limit=max_stocks" in src, "limit=max_scan_stocks 규약 (union 캡 방지)"
+    assert "limit=max_stocks" in src, "limit=max_scan_stocks 규약 (후보 상한)"
+    assert "is_kospi200=None" in src and "is_kosdaq150=None" in src, "전체상장(지수 필터 제거)"
+    assert "is_kospi200=True" not in src, "지수 고정 제거됨"
+    # funnel step1 라벨 = 전체 상장
+    assert FUNNEL_STAGES[0].step_name.startswith("전체 상장"), "step1 = 전체 상장 유니버스"
 
 
 def test_stage_recently_adjacent_transition():

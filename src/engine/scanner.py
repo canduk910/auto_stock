@@ -2101,10 +2101,12 @@ _DAILY_LOAD_INCREMENTAL_THRESHOLD = 50  # 50일 이상 적재된 ticker 는 증�
 # VCP 전략 실제 사용 100일 (vcp_breakout.py:162-164). DB 깊이 < 120 이면 분할 backfill.
 _DAILY_LOAD_VCP_BACKFILL_DAYS = 120
 
-# 사이클 206 — Supabase 용량 시정: 일봉 적재를 유니버스(index ∪ 시총/거래대금 자격) 로 한정.
-# 자격 임계는 BFB(bull_flag_breakout) 최저 필터 정합 — 5전략 中 non-index 최저치.
+# 사이클 206 — 일봉 적재를 유니버스(index ∪ 시총/거래대금 자격) 로 한정 (당시 Supabase 용량).
+# 2026-07 — kojiro 전체 상장 전환(지수 제거, 시총500억/거래10억)에 맞춰 trade 임계 20억→10억.
+# kojiro 유니버스(전체상장 ∩ 500억/10억 ≈ 979) 전량 일봉 커버. RDS 라 용량 여유(사이클 206
+# Supabase 제약 해소). non-index 저거래 종목 ~123 추가 적재 (16:00 daily task 가 backfill).
 _DAILY_LOAD_MIN_MCAP_EOK = 500  # 억원 (raw.hts_avls 는 억원 단위, 사이클 166/108)
-_DAILY_LOAD_MIN_TRADE_WON = 2_000_000_000  # 20억원 (raw.acml_tr_pbmn 는 원 단위)
+_DAILY_LOAD_MIN_TRADE_WON = 1_000_000_000  # 10억원 (kojiro 500억/10억 정합, raw.acml_tr_pbmn 원 단위)
 
 
 def _is_daily_load_universe(row: dict) -> bool:

@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 FUNNEL_STAGES: tuple[FunnelStage, ...] = (
-    FunnelStage(1, "코스피200+코스닥150 합집합"),
+    FunnelStage(1, "전체 상장 유니버스 (시총/거래대금 컷 전)"),
     FunnelStage(2, "시총+거래대금 컷 통과"),
     FunnelStage(3, "1단계 진입 차단 통과 (거래정지/관리/단기과열/투자유의 등)"),
     FunnelStage(4, "일봉 fetch + 전일종가>0 + 워밍업봉 충족"),
@@ -109,9 +109,9 @@ class KojiroStrategy(StrategyBase):
         # ── 유니버스/사이징 (donchian 동형 — 자동튜닝 수용) ──
         "min_market_cap": 50_000_000_000,    # 500억
         "min_trade_amount": 1_000_000_000,   # 10억
-        # 2026-07 — 200→400. index 합집합(KOSPI200∪KOSDAQ150)=348 인데 limit=200 이
-        # union 쿼리까지 잘라 117종목 누락(실측 자격 317). 400 = 348 전체 커버 + 마진.
-        "max_scan_stocks": 400,
+        # 2026-07 — 전체 상장 전환. 지수(348) 제거 후 유니버스 = 전체상장 ∩ 필터 ≈ 979.
+        # limit 이 union/후보 쿼리 상한이므로 979 후보 전량 커버 위해 1500 (여유).
+        "max_scan_stocks": 1500,
         "exclude_tickers": [],
         "nxt_tradable": None,
         "position_ratio": 0.20,
@@ -184,7 +184,7 @@ class KojiroStrategy(StrategyBase):
         trade_tickers = stage_counts.get("trade_tickers", tickers)
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[0], survived=union_tickers,
-            step_conditions="코스피200 + 코스닥150 합집합 (필터 전 원천 유니버스)",
+            step_conditions="전체 상장 종목 (시총/거래대금 필터 전 원천 유니버스)",
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[1], survived=trade_tickers,
@@ -399,7 +399,14 @@ class KojiroStrategy(StrategyBase):
     # ────────────────────────── 유니버스/필터 (donchian 복사) ──────────────────────────
 
     async def _scan_universe(self) -> list[str]:
-        """KOSPI200∪KOSDAQ150 지수고정 유니버스 (donchian 동형, list_by_filter 단일 조회)."""
+        """전체 상장 유니버스 (시총/거래대금 필터만, 지수 고정 없음).
+
+        2026-07 — KOSPI200∪KOSDAQ150 지수 필터 제거 (사용자 결정). is_kospi200/
+        is_kosdaq150=None → 전체 상장 ∩ (min_market_cap/min_trade_amount). 실제 후보 =
+        전체상장 3577 ∩ 시총500억/거래10억 ≈ 979 (필터가 상한 — 지수 348 아님).
+        일봉 커버리지는 scanner._is_daily_load_universe(500억/10억)가 이 979 전량 적재.
+        지수 종속 donchian/VCP 는 무관(각자 is_kospi200/is_kosdaq150=True 유지).
+        """
         from src.db import stock_master as _sm_mod
         from src.db.system_logs import write_log
         from src.engine.scanner import ETF_KEYWORDS, ticker_names
@@ -415,7 +422,7 @@ class KojiroStrategy(StrategyBase):
             rows, stage = await _sm_mod.list_by_filter(
                 min_market_cap=min_mcap, min_trade_amount=min_trade,
                 exclude_tickers=exclude_tickers, nxt_tradable=nxt_tradable_param,
-                is_kospi200=True, is_kosdaq150=True,
+                is_kospi200=None, is_kosdaq150=None,
                 limit=max_stocks, return_stage_counts=True,
             )
             self._scan_stage_counts = stage

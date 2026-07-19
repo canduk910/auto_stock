@@ -16,7 +16,7 @@ const STAGE_META: Record<number, { arrange: string; role: string; tone: string }
 
 // 유니버스 깔때기 9단계 — kojiro `_empty_scan_stats` 키와 정합.
 const KOJIRO_STAGES: Array<{ key: string; label: string }> = [
-  { key: 'universe_union', label: '코스피200+코스닥150 합집합' },
+  { key: 'universe_union', label: '전체 상장 유니버스 (필터 전)' },
   { key: 'universe_candidates', label: '시총+거래대금 컷 통과' },
   { key: 'universe_filtered', label: '유니버스 확정 (ETF/6자리 제외)' },
   { key: 'candle_fetch_ok', label: '일봉 fetch + 전일종가>0 + 워밍업' },

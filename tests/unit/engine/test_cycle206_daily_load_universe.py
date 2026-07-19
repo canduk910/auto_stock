@@ -58,7 +58,7 @@ pytestmark = pytest.mark.unit
 
 # BFB 자격 임계 (Green 도입 예정 상수와 정합 — 여기서는 mock 값 산정용)
 _MCAP_EOK_MIN = 500  # 억원
-_TRADE_WON_MIN = 2_000_000_000  # 20억 원
+_TRADE_WON_MIN = 1_000_000_000  # 10억 원 (2026-07 — kojiro 전체상장 정합, 20억→10억)
 
 
 def _candle(bas_dd: str = "20260710") -> dict:
@@ -142,7 +142,7 @@ async def test_universe1_excludes_non_universe():
         _row("111111", hts_avls="400",  # 400억 < 500억
              acml_tr_pbmn=str(_TRADE_WON_MIN + 1_000_000_000)),
         _row("222222", hts_avls=str(_MCAP_EOK_MIN + 100),
-             acml_tr_pbmn="1000000000"),  # 10억 < 20억
+             acml_tr_pbmn="500000000"),  # 5억 < 10억 (임계 하향 후 여전히 미달)
         _row("333333", hts_avls="100", acml_tr_pbmn="500000000"),  # 둘 다 부족
     ]
 
