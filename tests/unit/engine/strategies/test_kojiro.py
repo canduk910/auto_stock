@@ -94,8 +94,9 @@ def test_default_params_identity_constants():
     assert p["hard_stop_pct"] == -8.0
     assert p["atr_ratio_min"] == 0.01 and p["atr_ratio_max"] == 0.045
     assert p["gap_up_skip_pct"] == 5.0 and p["gap_down_skip_pct"] == -4.0
-    # 2026-07 — 전체 상장 전환. 유니버스 = 전체상장 ∩ 필터 ≈ 979 → limit 이 후보 상한이라 1000+ 필요
-    assert p["max_scan_stocks"] >= 1000, "전체상장 후보(≈979) 전량 커버 필요"
+    # 2026-07 — 전체 상장 전환. limit 이 union/후보 쿼리 상한 → FUNNEL step1(전체상장 union)
+    # 실수치(≈3577) 노출 위해 전체 상장 종목수 이상 필요 (후보 979 커버는 자동 충족).
+    assert p["max_scan_stocks"] >= 3577, "전체상장 union 실수치 노출 (상장 종목수 이상)"
     # obs-M: atr_trail_mult(전역 PARAM_RANGES 키) 재사용 금지
     assert "atr_trail_mult" not in p
     assert len(FUNNEL_STAGES) == 9

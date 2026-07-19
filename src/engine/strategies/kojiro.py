@@ -110,8 +110,10 @@ class KojiroStrategy(StrategyBase):
         "min_market_cap": 50_000_000_000,    # 500억
         "min_trade_amount": 1_000_000_000,   # 10억
         # 2026-07 — 전체 상장 전환. 지수(348) 제거 후 유니버스 = 전체상장 ∩ 필터 ≈ 979.
-        # limit 이 union/후보 쿼리 상한이므로 979 후보 전량 커버 위해 1500 (여유).
-        "max_scan_stocks": 1500,
+        # limit 이 union/후보 쿼리 상한 → FUNNEL step1(전체상장 union) 실수치(≈3577) 노출
+        # 위해 전체 상장 종목수 이상(4000)으로 설정. 후보(979)·이하 단계는 무영향
+        # (mcap/trade 필터가 실제 상한). union fetch 는 prepare 시점 off-peak 1회.
+        "max_scan_stocks": 4000,
         "exclude_tickers": [],
         "nxt_tradable": None,
         "position_ratio": 0.20,
