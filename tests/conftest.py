@@ -399,7 +399,11 @@ def fast_sleep(monkeypatch: pytest.MonkeyPatch):
 def _neutralize_call_auction_gate(
     request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
 ):
-    if "call_auction" in request.node.nodeid:
+    # 제외는 *파일명* 기준 (nodeid 전체가 아니라 `::` 앞 파일 경로만). 테스트 *이름*에
+    # "call_auction" 이 들어간 경우(예: cycle202 test_fixture_neutralizes_call_auction_gate)
+    # 까지 오탐 제외해 시계 의존 flaky 를 유발하던 결함 시정. 게이트 검증 파일
+    # (cycle162/182_call_auction_*)은 파일명에 "call_auction" 포함 → 실제 로직 보존.
+    if "call_auction" in request.node.nodeid.split("::")[0]:
         return  # cycle162/182 = 게이트 동작 자체를 검증 → 실제 로직 보존
     try:
         from src.engine.session import session_tracker
