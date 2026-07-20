@@ -109,6 +109,24 @@ def _stage_recently(stages: list, from_stage: int, to_stage: int, within: int = 
     return False
 
 
+# 후보 점수 랭킹 (원설계 §9④) — MACD3 기울기·띠폭 확장률 계산 봉 수 (노이즈 억제).
+_RANK_LOOKBACK = 3
+
+
+def _stage_transition_distance(stages: list, from_stage: int, to_stage: int, within: int) -> int | None:
+    """최근 within봉 내 from→to 인접 전환의 마지막 봉 기준 거리(봉). 없으면 None.
+
+    거리 0 = 마지막 봉으로 전환(가장 신선). `_stage_recently` 의 거리 반환 버전.
+    """
+    st = [s for s in stages[-(within + 1):]]
+    last = len(st) - 1
+    best: int | None = None
+    for j in range(len(st) - 1):
+        if st[j] == from_stage and st[j + 1] == to_stage:
+            best = last - (j + 1)   # j 증가 → 더 최근 → best 덮어써 최소 거리
+    return best
+
+
 class KojiroStrategy(StrategyBase):
     """고지로 대순환 스윙 전략 (멀티데이 보유)."""
 
@@ -153,6 +171,13 @@ class KojiroStrategy(StrategyBase):
         # 대순환은 섹터 단위 정렬 → 5종목 한 섹터 집중 → 테마 붕괴 시 동시 청산불가(±30% 하한가 락).
         # 0=off. PARAM_RANGES 제외(리스크 정체성 상수, AI 튜닝 금지). Phase 1 측정 = 활성일 ~17% 바인딩.
         "max_positions_per_sector": 2,
+        # ── 후보 점수 랭킹 (원설계 §9④, PARAM_RANGES 제외 = 정체성 상수) ──
+        # 후보 > 슬롯/섹터캡 경합 시 최적 셋업 우선. 이미 계산되나 dormant 였던 enrich
+        # 지표(macd3 기울기·band_width 확장) + 6→1 신선도를 후보풀 min-max 정규화 가중합.
+        # 매수 후보 정렬만 조정 — 자격/청산 무변경. 합≠1 이면 자동 정규화.
+        "rank_w_macd3": 0.4,
+        "rank_w_band": 0.3,
+        "rank_w_fresh": 0.3,
         # ── 터틀 유닛 sizing (Phase 2A-1, PARAM_RANGES 제외 = AI 자동튜닝 금지) ──
         # sizing_mode='turtle' opt-in 시 unit=floor(전략예산×risk_pct/ATR). 기본 position_ratio.
         # risk_pct 0.5% = 도메인 권장(KR 갭리스크). max_units 2/10 은 2B/2C 선등록(2A-1 미사용).
@@ -264,6 +289,7 @@ class KojiroStrategy(StrategyBase):
         stage1_up_t: list[str] = []
         strict_t: list[str] = []
         final_t: list[str] = []
+        rank_raw: dict[str, tuple] = {}   # 후보 랭킹 raw 3성분 (2-pass: 루프 stash → 후 정규화)
         fetch_ex: list[dict] = []
         band_ex: list[dict] = []
         stage_valid_ex: list[dict] = []
@@ -372,6 +398,8 @@ class KojiroStrategy(StrategyBase):
                     "ema_s": ema_s, "ema_m": ema_m, "ema_l": ema_l, "atr_ratio": atr_ratio,
                     "sector": await self._fetch_sector(ticker),  # 섹터/테마 캡용
                 }
+                rank_raw[ticker] = self._rank_candidate_components(
+                    enriched, stages_series, int(params["stage1_freshness"]))
                 prepared += 1
                 final_t.append(ticker)
             except Exception as e:
@@ -406,7 +434,15 @@ class KojiroStrategy(StrategyBase):
             step_conditions="모든 단계 통과 — 멀티데이 대순환 매수 후보",
         )
 
-        self._scanned_tickers = list(self._candidates.keys())
+        # ① 후보 점수 랭킹 (원설계 §9④): 후보 > 슬롯/섹터캡 경합 시 최적 셋업 우선.
+        # get_scanned_tickers 순서 = 매수 폴루프 처리 순서 = 우선순위. 매수 정렬만 조정.
+        scores = self._score_candidates(rank_raw, params)
+        for _t, _sc in scores.items():
+            if _t in self._candidates:
+                self._candidates[_t]["score"] = _sc
+        ranked_final = sorted(rank_raw.keys(), key=lambda t: scores.get(t, 0.0), reverse=True)
+        held_only = [t for t in self._candidates.keys() if t not in rank_raw]  # 보유전용(청산 감시)
+        self._scanned_tickers = ranked_final + held_only
         self._bought_today.clear()
         stats["final_prepared"] = prepared
         stats["last_run_at"] = datetime.now(KST).isoformat()
@@ -799,6 +835,55 @@ class KojiroStrategy(StrategyBase):
         return self._fallback_one_share(current_price)
 
     # ────────────────────────── 대시보드/구독 ──────────────────────────
+
+    def _rank_candidate_components(self, enriched, stages_series: list, within: int) -> tuple[float, float, float]:
+        """후보 랭킹 raw 3성분 (원설계 §9④): (macd3 기울기, 띠폭 확장률, 신선도).
+
+        enrich 가 이미 계산한 macd3/band_width(dormant) 배선. 컬럼 부재(테스트 스텁) →
+        신선도만 산출 + macd3/band=0 (fail-safe, no crash).
+        """
+        dist = _stage_transition_distance(stages_series, 6, 1, within)
+        fresh = float(within - dist) if dist is not None else 0.0
+        try:
+            m3 = enriched["macd3"]
+            bw = enriched["band_width"]
+        except (KeyError, TypeError):
+            return (0.0, 0.0, fresh)
+        li = len(m3) - 1
+        pi = max(0, li - _RANK_LOOKBACK)
+        macd3_slope = float(m3.iloc[li] - m3.iloc[pi])
+        prev_bw = float(bw.iloc[pi])
+        band_expansion = (float(bw.iloc[li]) - prev_bw) / (abs(prev_bw) + 1e-9)
+        return (macd3_slope, band_expansion, fresh)
+
+    def _score_candidates(self, rank_raw: dict[str, tuple], params: dict) -> dict[str, float]:
+        """후보 풀 min-max 정규화 + 가중합 → {ticker: score∈[0,1]}.
+
+        단일후보/동일값 성분 → 0.5 중립. 가중치 합≠1 → 자동 정규화.
+        """
+        if not rank_raw:
+            return {}
+        tickers = list(rank_raw.keys())
+        cols = list(zip(*(rank_raw[t] for t in tickers)))   # 3 성분별 값 튜플
+        w = [
+            float(params.get("rank_w_macd3", 0.4) or 0.0),
+            float(params.get("rank_w_band", 0.3) or 0.0),
+            float(params.get("rank_w_fresh", 0.3) or 0.0),
+        ]
+        wsum = sum(w) or 1.0
+        w = [x / wsum for x in w]
+
+        def _mm(vals):
+            lo, hi = min(vals), max(vals)
+            if hi - lo < 1e-12:
+                return [0.5] * len(vals)   # 동일/단일 → 중립
+            return [(v - lo) / (hi - lo) for v in vals]
+
+        norm = [_mm(c) for c in cols]
+        return {
+            t: w[0] * norm[0][i] + w[1] * norm[1][i] + w[2] * norm[2][i]
+            for i, t in enumerate(tickers)
+        }
 
     def get_scanned_tickers(self) -> list[str]:
         return self._scanned_tickers
