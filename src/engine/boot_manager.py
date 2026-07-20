@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING
 
 from src.api.balance import get_balance, get_daily_orders
 from src.auth.token import token_manager
+from src.db._kst import to_date
 from src.db.system_logs import write_log
 
 if TYPE_CHECKING:
@@ -144,7 +145,9 @@ async def boot(scheduler: "TradingScheduler") -> None:
         if not target:
             continue
 
-        buy_dt = date.fromisoformat(row["buy_date"]) if row.get("buy_date") else yesterday
+        # asyncpg 는 positions.buy_date(DATE) 를 date 객체로 반환 → date.fromisoformat(date객체)
+        # 는 TypeError (2026-07-20 크래시루프 사고). to_date 로 date/str/None 안전 파싱.
+        buy_dt = to_date(row.get("buy_date")) or yesterday
         target.state.positions[ticker] = Position(
             ticker=ticker,
             buy_price=row["buy_price"],
