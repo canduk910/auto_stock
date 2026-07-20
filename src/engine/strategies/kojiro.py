@@ -4,7 +4,7 @@
 
 진입 (strict `evaluate_entry`, 조기진입 Phase1 OFF):
 - 현재 스테이지 1 (단기>중기>장기)
-- 최근 `stage1_freshness`(3)영업일 내 6→1 전환 (갓 진입한 신선한 스테이지 1)
+- 최근 `stage1_freshness`(5)영업일 내 6→1 전환 (갓 진입한 신선한 스테이지 1)
 - EMA 5/20/40 모두 우상향
 - 전일 종가 > EMA5
 - (유니버스 게이트) ATR/종가 밴드 1.0~4.5% (대순환/변동성 판별, 비협상)
@@ -125,10 +125,10 @@ class KojiroStrategy(StrategyBase):
         "macd_signal": 9,
         "atr_period": 20,
         "slope_lookback": 1,
-        "stage1_freshness": 3,       # 6→1 전환 인접 판정 봉수 (신선도)
+        "stage1_freshness": 5,       # 6→1 전환 인접 판정 봉수 (2026-07-20 백테스트: 3→5 PF 1.60→1.75)
         # ── ATR/종가 변동성 밴드 (비협상 필수, 정체성 상수) ──
         "atr_ratio_min": 0.01,       # 1.0%
-        "atr_ratio_max": 0.045,      # 4.5%
+        "atr_ratio_max": 0.06,       # 6.0% (2026-07-20 백테스트: 0.045→0.06 PF 0.86→1.60)
         # ── 손절/트레일 배수 (kojiro 고유명 — atr_trail_mult 재사용 금지, PARAM_RANGES 제외) ──
         "stop_atr": 2.0,             # 2ATR 하드손절
         "trail_atr": 2.5,            # 2.5ATR 샹들리에 트레일링

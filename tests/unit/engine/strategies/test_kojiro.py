@@ -92,7 +92,9 @@ def test_default_params_identity_constants():
     assert p["atr_period"] == 20
     assert p["stop_atr"] == 2.0 and p["trail_atr"] == 2.5
     assert p["hard_stop_pct"] == -8.0
-    assert p["atr_ratio_min"] == 0.01 and p["atr_ratio_max"] == 0.045
+    # 2026-07-20 — 밴드 상한 0.045→0.06 (백테스트: PF 0.86→1.60, 평균손익 -0.5%→+2.2%,
+    #   거래 2.2배. 4.5%가 수익성 중변동성 진입을 잘라내 손실 구간이었음. -8% backstop 정합)
+    assert p["atr_ratio_min"] == 0.01 and p["atr_ratio_max"] == 0.06
     assert p["gap_up_skip_pct"] == 5.0 and p["gap_down_skip_pct"] == -4.0
     # 2026-07 — 전체 상장 전환. limit 이 union/후보 쿼리 상한 → FUNNEL step1(전체상장 union)
     # 실수치(≈3577) 노출 위해 전체 상장 종목수 이상 필요 (후보 979 커버는 자동 충족).
@@ -133,9 +135,9 @@ async def test_prepare_registers_fresh_stage1_61_candidate(kojiro, monkeypatch):
 
 
 async def test_prepare_excludes_band_out_of_range(kojiro, monkeypatch):
-    # ATR/종가 = 600/10000 = 6% > 4.5% → 밴드 탈락
+    # ATR/종가 = 700/10000 = 7% > 6.0% → 밴드 탈락 (2026-07-20 상한 6.0%)
     await _run_prepare(kojiro, monkeypatch, "005930",
-                       _enriched([6, 1], close=10000, atr=600.0))
+                       _enriched([6, 1], close=10000, atr=700.0))
     assert "005930" not in kojiro._candidates
     assert kojiro.get_scan_stats()["band_pass"] == 0
 
