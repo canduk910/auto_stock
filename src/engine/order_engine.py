@@ -81,6 +81,7 @@ class OrderEngine:
         self._order_strategy: dict[str, str] = {}  # order_no -> strategy_id
         self._order_ticker: dict[str, str] = {}   # order_no -> ticker (체결통보 종목코드 보정용)
         self._selling: set[str] = set()  # 매도 진행 중인 종목 (중복 매도 차단)
+        self._selling_since: dict[str, datetime] = {}  # ticker -> _selling 진입 시각 (KST). stale 재대조 age gate.
         # 체결통보가 place_order 응답보다 먼저 도착해 COMPLETED row를 직접 INSERT한 order_no.
         # 뒤늦게 도착한 execute_buy/execute_sell이 PENDING row를 추가 INSERT하는 것을 막기 위함.
         self._completed_orders: set[str] = set()
@@ -504,6 +505,7 @@ class OrderEngine:
             logger.debug("매도 진행 중 — 중복 차단: %s", t(ticker))
             return
         self._selling.add(ticker)
+        self._selling_since[ticker] = datetime.now(_KST_TZ)
 
         # 사이클 55 R-1 (2026-06-03) — SellRejectionTracker 진입 게이트 위임.
         # 사이클 52 B-1 단일 TTL → 4 분류 통합 정책 객체 (2단계 TTL + 30초 TTL).

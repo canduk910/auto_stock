@@ -265,12 +265,11 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 - `ticker_prices[ticker]["open_price"] > 0` (또는 `_resolve_open_price` 폴링) → NXT 거래 가능 추정
 - 시가 미수신 → NXT 거래 불가 추정
 
-#### (a) NXT 거래 가능 (`nxt_tradable=True` + 시가 수신) — 08:00 NXT 프리 지정가 청산
+#### (a) NXT 거래 가능 (`nxt_tradable=True` + 시가 수신) — 갭상승 여부로 분기
 - 매수 체결가 대비 +10% 이상 갭상승 → 고점 -2% 트레일링 스탑 (기존 동작 유지)
-- 갭상승 미달 → **지정가 매도** (직전가 -1호가, KRX 호가단위 적용)
-  - `ORD_DVSN = "00"`(지정가), `EXCG_ID_DVSN_CD = "NXT"`
-  - 호가단위: `src/engine/util/tick_size.py::step_down(current, steps=1)` — KRX 표준 7구간 (1/5/10/50/100/500/1000원)
-  - **시장가 미사용 사유**: NXT 프리 시간대 시장가는 KIS 에서 거부될 수 있음
+- 갭상승 미달 → **08:00 NXT 프리 지정가 조기청산 폐지, (b) 와 동일하게 `_pending_next_day_clear` 보류(reason=`nxt_underthreshold`) → 09:00 KRX 시장가 단일 청산** (Tier 1, 2026-07-23, 자문 `nxt_prelimit_stale_selling_orderflow`)
+  - **폐지 사유**: 얇은 NXT 프리 유동성에서 open−1호가 지정가는 미체결 만료가 잦고(금호 실측 +3% 종이이익), 만료가 어느 `_selling` discard 경로에도 안 걸려 `_selling` 영구 잔존 → `risk.on_tick` 손절/트레일링 종일 억제(Defect 2). 08:00 지정가를 아예 내지 않으니 leak·double-sell 레이스 원천 소멸
+  - **손익비**: 갭<임계 조기탈출 이익은 대부분 얇은 호가의 미실현 종이이익이라, 검증된 09:00 KRX 시장가 단일 청산(`_drain_pending_next_day_clear`)이 손익비 우위
 
 #### (b) NXT 거래 불가 (`nxt_tradable=False` OR 시가 미수신) — 09:00 KRX 메인 시가 확정 후 시장가 청산
 - 08:00 시점에는 **청산 보류** (`_pending_next_day_clear` set 에 등록)

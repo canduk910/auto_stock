@@ -41,6 +41,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 날짜 | 사이클 | 한 줄 요약 |
 |------|--------|-----------|
+| 2026-07-23 | NXT prelimit stale selling | 익일청산 갭<임계 NXT 프리 지정가 조기청산 폐지 → `_pending_next_day_clear`(reason=nxt_underthreshold) 09:00 KRX 시장가 단일 청산(Tier 1) + stale `_selling` 재대조 훅(`_sync_positions_from_balance`, 보유∧열린주문無∧`_selling_since`≥180s → discard → on_tick 손절 재평가 재개) — Defect 2(stale `_selling` 손절 마비) 시정. 안전성 8영역 중 익일청산·`_selling` 2영역 의도 시정·6영역 diff 0 |
 | 2026-07-18 | Phase 2A-2 게이트0+1 | donchian 터틀 유닛 sizing + 하드손절 ATR화 opt-in (sizing_mode=turtle, buy−2.0×entry_atr + −9% backstop, entry_atr 인메모리+recompute buy_date 재도출, DB 플립 활성화) — 매매 안전성 8영역 diff 0 |
 | 2026-07-17 | kojiro Phase 1 | 고지로 대순환 스윙 전략 신규 (EMA 5/20/40 스테이지 + 2ATR/2.5ATR/스테이지3 청산, 멀티데이, position_ratio, 다크런치 enabled=False) — 매매 안전성 8영역 diff 0 |
 | 2026-07-16 | RDS 이전 M0~M6 | Supabase(PostgREST)→AWS RDS PostgreSQL+asyncpg 전면 교체 (17 db 모듈, DATE 핫픽스, 매매 안전성 diff 0) |
@@ -55,7 +56,6 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-07-11 | 206 | stock_master_daily 유니버스 한정 적재 (Supabase 용량 초과 시정, 261→54MB) |
 | 2026-07-11 | 205 | list_by_filter DB-side 생성컬럼 필터 전환 (refreshed_at 편향 + PostgREST 1000cap 시정) |
 | 2026-07-11 | 204 | 투자주의/투자유의 차단 해제 (급등주 매수 유니버스 복원) |
-| 2026-07-11 | 203 | iscd_stat_cls_code 과차단 버그 제거 (6전략 유니버스 2.8배 확대) |
 
 > 사이클 200 이하 및 초기 하네스 구성 전체 이력(verbatim): [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)
 
@@ -130,7 +130,7 @@ cd frontend && npm install && npm run dev
 - **체결통보 선행 race 가드** (`_completed_orders` set + UPDATE 0건 보정 INSERT) 제거 금지 — 시장가 즉시체결 + REST 응답 지연 시 trade_history 가 PENDING 영구 잔존
 - **`_reset_daily_state()` 제거 금지** — 정산 후 미초기화 시 pending_buys/positions/sold_today 가 다음 날까지 잔류
 - **익일 청산** 은 scheduler 에서 시가 수신 후 30s 안정화 처리 — `_pending_next_day_clear` 보류 후 09:00 KRX 시장가. `high_since_buy` 폴백 금지. on_tick 즉시 청산 금지
-- **NXT 매도 거부 좀비 차단** — `is_market_closed_rejection` (APBK0918 + 장운영시간 외) 이면 `execute_sell` 이 positions(메모리/DB) 보존 + 재시도 중단. `is_insufficient_quantity` / `is_insufficient_cash` 와 분리. `SellRejectionTracker.is_blocked()` 진입 게이트는 **2단계 TTL** — KRX 메인(09:00~15:30) 거부 = 5분 TTL (일시 장애 가정), NXT 시간대(08:00~09:00 / 15:30~20:00) 거부 = 다음 KST 09:00 TTL. `market_order_disallowed` 거부 = 30초 TTL (동일 tick 폭주 차단). NXT 폴백 실패 시 `_pending_next_day_clear` 익일 청산 자동 전환. `_reset_daily_state` 동행 clear (`_sell_rejection.reset_daily()` 4 필드 일괄 위임, `OrderEngine.reset_daily_state()` 캡슐화 보존). 호환 layer property `_market_closed_blocked` / `_market_closed_blocked_logged_today` 는 tracker 내부 dict/set 직접 노출 (is 동일성 보장)
+- **NXT 매도 거부 좀비 차단** — `is_market_closed_rejection` (APBK0918 + 장운영시간 외) 이면 `execute_sell` 이 positions(메모리/DB) 보존 + `_selling` **discard** (진입 게이트 `SellRejectionTracker.is_blocked()` 가 이후 차단 담당 — `_selling` 을 보존하면 그게 곧 stale `_selling` 좀비=손절 마비이므로 반드시 해제) + 재시도 중단. `is_insufficient_quantity` / `is_insufficient_cash` 와 분리. `SellRejectionTracker.is_blocked()` 진입 게이트는 **2단계 TTL** — KRX 메인(09:00~15:30) 거부 = 5분 TTL (일시 장애 가정), NXT 시간대(08:00~09:00 / 15:30~20:00) 거부 = 다음 KST 09:00 TTL. `market_order_disallowed` 거부 = 30초 TTL (동일 tick 폭주 차단). NXT 폴백 실패 시 `_pending_next_day_clear` 익일 청산 자동 전환. `_reset_daily_state` 동행 clear (`_sell_rejection.reset_daily()` 4 필드 일괄 위임, `OrderEngine.reset_daily_state()` 캡슐화 보존). 호환 layer property `_market_closed_blocked` / `_market_closed_blocked_logged_today` 는 tracker 내부 dict/set 직접 노출 (is 동일성 보장)
 - **매수/매도 시장가 거부 → 지정가 5호가 폴백 1회** — `is_market_order_disallowed` (msg1 키워드 `시장가매매불가` / `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리` — APBK1943/APBK3013) 매칭 시 `step_up(buy)/step_down(sell)` 으로 `LIMIT` 재시도. 매핑 동기 + race 가드 동일 규약
 - **KIS 거부 응답 영구 저장** — `_request` 가 `rt_cd != "0"` 시 `system_logs` prefix `[kis_rejection]` + path/tr_id/msg_cd/msg1 + body 주요 키 (민감 키 마스킹) fire-and-forget
 - **WebSocket 시세 보유·익일청산 우선 보장** — `MAX_SUBSCRIPTIONS=41` KIS 공식 한도. HIGH (보유/익일청산) `bypass_limit=True` 절대 보장. 후순위 drop 시 `[priority_drop]` INFO + WARNING `system_logs`. HIGH 단독 41 초과 ERROR

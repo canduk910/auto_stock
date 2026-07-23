@@ -77,6 +77,7 @@ TIME_SETTLEMENT = time(20, 10)             # 정산 + 일일 로그 분석
 SCAN_INTERVAL = 300                         # 5분마다 스캔
 SESSION_TICK_INTERVAL = 30                  # 보드 전환 감시 주기 (초)
 NEXT_DAY_STABILIZE_SECS = 30                # 익일 청산 시가 안정화 (Q2=B 단축)
+SELLING_RECONCILE_MIN_AGE_S = 180           # stale _selling 재대조 최소 경과(초). 갓 접수된 매도의 KIS 전파지연 레이스 방지.
 
 # K (2026-05-12) — WebSocket 시세 silent inactive 자동 복구 stale_watcher
 # F1(재연결 1회) + `_scan_loop`(5분) 으로 못 잡는 silent inactive 즉시 회복.
@@ -1317,7 +1318,6 @@ class TradingScheduler:
                 strategy._next_day_clear_pending = False
 
         from src.engine.scanner import t, ticker_prices
-        from src.engine.util.tick_size import step_down
 
         # Phase G (2026-05-11) — stock_master 사전 판별로 NXT 거래 불가 종목은 즉시 보류.
         # 시가 폴링/안정화 대기를 거치지 않고 09:00 KRX 시장가 청산 경로로 직행.
@@ -1436,19 +1436,36 @@ class TradingScheduler:
                     f"({strategy_id}, 기준가: {today_open})",
                 )
             else:
-                # NXT 프리에서는 지정가 매도 (직전가 -1호가, KRX 호가단위 적용)
-                limit_price = step_down(int(today_open), steps=1)
+                # Tier 1 (자문 nxt_prelimit_stale_selling_orderflow, 2026-07-21) —
+                # NXT 프리 지정가 조기청산 제거. 얇은 NXT 프리 유동성에서 open-1tick 지정가는
+                # 미체결 만료가 잦고(금호 실측), 만료는 어느 _selling discard 경로에도 안 걸려
+                # _selling 영구 잔존 → risk.on_tick 손절/트레일링 종일 억제(Defect 2).
+                # 08:00 지정가를 아예 내지 않고 09:00 KRX 시장가 단일 청산(_drain)으로 보류 →
+                # leak·double-sell 레이스 원천 소멸. 인접 두 분기와 동일 패턴.
+                self._pending_next_day_clear.add((ticker, strategy_id))
+                try:
+                    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+                    from src.db.pending_next_day_clear import save_pending_ndc
+                    _kst = _tz(_td(hours=9))
+                    _today = _dt.now(_kst).date()
+                    await save_pending_ndc(_today, ticker, strategy_id, reason="nxt_underthreshold")
+                except Exception:
+                    logger.exception(
+                        "[pending_ndc_save_skip] ticker=%s strategy=%s — 메모리 set 보존 graceful",
+                        ticker, strategy_id,
+                    )
                 logger.info(
-                    "익일 NXT 지정가 청산: %s 갭률 %.1f%% (전략: %s, 지정가: %d)",
-                    t(ticker), gap_rate, strategy_id, limit_price,
-                )
-                await self.order_engine.execute_sell(
-                    ticker, Signal.NEXT_DAY_CLEAR, strategy_id, limit_price=limit_price,
+                    "익일 청산 보류 (갭 %.1f%% < 임계 %.1f%%, 09:00 KRX 시장가 청산 예약): "
+                    "%s (전략: %s)", gap_rate, gap_up_threshold, t(ticker), strategy_id,
                 )
                 await write_log(
                     "INFO",
-                    f"익일 NXT 지정가 청산 실행: {t(ticker)} 갭률 {gap_rate:.1f}% "
-                    f"({strategy_id}, 지정가: {limit_price})",
+                    f"익일 청산 보류 (갭 {gap_rate:.1f}% < 임계): {t(ticker)} ({strategy_id})",
+                )
+                await write_log(
+                    "INFO",
+                    f"[next_day_clear_deferred] ticker={ticker} strategy={strategy_id} "
+                    f"reason=nxt_underthreshold",
                 )
 
         logger.info("익일 청산 실행 완료")
@@ -3822,6 +3839,41 @@ class TradingScheduler:
             if s.state.low_funds_tickers:
                 s.state.clear_low_funds()
 
+        # stale _selling 재대조 (자문 nxt_prelimit_stale_selling_orderflow 공통 방어선) — hot path 밖.
+        # NXT 지정가 미체결 만료·체결통보 WebSocket 유실 등으로 _selling 이 영구 잔존하면
+        # risk.on_tick 이 check_exit_signal(손절/트레일링)을 종일 억제한다(Defect 2).
+        # (보유 잔존 AND 열린 매도주문 없음 AND aged) 이면 stale → discard → on_tick 손절 재평가 재개.
+        if self.order_engine._selling:
+            try:
+                from src.api.balance import get_daily_orders
+                from src.engine.scanner import KST_TZ as _KST
+                held_qty = {h.ticker: h.quantity for h in holdings if h.quantity > 0}
+                daily_orders = await get_daily_orders()
+                # KIS sll_buy_dvsn_cd: 01=매도, 02=매수. rmn_qty>0 = 미체결(열린) 주문.
+                open_sell_tickers = {
+                    o.get("pdno", "")
+                    for o in daily_orders
+                    if o.get("sll_buy_dvsn_cd") == "01" and int(o.get("rmn_qty", "0") or 0) > 0
+                }
+                now_kst = datetime.now(_KST)
+                for tk in list(self.order_engine._selling):
+                    if held_qty.get(tk, 0) <= 0:
+                        continue  # 보유 없음 — 정상 매도 진행/체결 가능성, 건드리지 않음
+                    if tk in open_sell_tickers:
+                        continue  # 열린 매도주문 존재 — double-sell 방지, 유지
+                    since = self.order_engine._selling_since.get(tk)
+                    if since is not None and (now_kst - since).total_seconds() < SELLING_RECONCILE_MIN_AGE_S:
+                        continue  # 갓 접수된 매도 — KIS 전파 지연 레이스 방지
+                    self.order_engine._selling.discard(tk)
+                    self.order_engine._selling_since.pop(tk, None)
+                    logger.warning(
+                        "stale 매도중 상태 해제 (보유 잔존·열린 매도주문 없음) "
+                        "→ on_tick 손절 재평가 재개: %s", tk,
+                    )
+                    await write_log("WARNING", f"[selling_reconcile] stale _selling 해제: {tk}")
+            except Exception:
+                logger.exception("stale _selling 재대조 실패 — graceful (다음 주기 재시도)")
+
     async def _settle(self) -> None:
         """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.
 
@@ -3950,6 +4002,7 @@ class TradingScheduler:
 
         # OrderEngine 추적 상태 초기화
         self.order_engine._selling.clear()
+        self.order_engine._selling_since.clear()
         self.order_engine._filled_qty.clear()
         self.order_engine._order_qty.clear()
         self.order_engine._order_strategy.clear()

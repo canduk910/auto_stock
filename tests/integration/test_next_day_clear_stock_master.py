@@ -116,7 +116,11 @@ async def test_next_day_clear_uses_existing_path_when_stock_master_says_tradable
     scheduler_env,
     stub_stock_master_get,
 ):
-    """nxt_tradable=True + NXT 시가 수신 + 갭률 < threshold → NXT 지정가 매도 (기존 동작)."""
+    """nxt_tradable=True + NXT 시가 수신 + 갭률 < threshold → 09:00 KRX 드레인 보류.
+
+    의미 전환 (2026-07-21 nxt_prelimit_fix_spec Tier 1): NXT 프리 지정가 조기청산 제거로
+    "기존 동작"(즉시 지정가 매도)이 폐지되고 `_pending_next_day_clear` 보류로 대체됐다.
+    """
     sched = scheduler_env.scheduler
     momentum = sched.registry.get("momentum")
     momentum.config.enabled = True
@@ -129,11 +133,9 @@ async def test_next_day_clear_uses_existing_path_when_stock_master_says_tradable
 
     await sched._execute_next_day_clear()
 
-    sells = scheduler_env.calls.execute_sell
-    assert len(sells) == 1
-    assert sells[0]["ticker"] == "012200"
-    # 갭률 미만 → 지정가 매도
-    assert sells[0].get("limit_price", 0) > 0
+    # 갭률 미만 → Tier 1: execute_sell 즉시 호출 0건 + 09:00 KRX 드레인 보류 등록
+    assert scheduler_env.calls.execute_sell == []
+    assert ("012200", "momentum") in sched._pending_next_day_clear
 
 
 # ---------------------------------------------------------------------------
@@ -144,7 +146,12 @@ async def test_next_day_clear_falls_back_when_stock_master_miss(
     scheduler_env,
     stub_stock_master_get,
 ):
-    """캐시 miss + 시가 수신 → 기존 분기 동작."""
+    """캐시 miss + 시가 수신 → 기존 분기 동작 (갭률 판정까지는 fallback, 이후는 Tier 1 보류).
+
+    의미 전환 (2026-07-21 nxt_prelimit_fix_spec Tier 1): 갭률 < threshold 분기가 즉시
+    지정가 매도에서 09:00 KRX 드레인 보류로 대체됨에 따라 "기존 분기 동작"의 종착점도
+    execute_sell 즉시 호출에서 `_pending_next_day_clear` 등록으로 갱신.
+    """
     sched = scheduler_env.scheduler
     momentum = sched.registry.get("momentum")
     momentum.config.enabled = True
@@ -157,6 +164,5 @@ async def test_next_day_clear_falls_back_when_stock_master_miss(
 
     await sched._execute_next_day_clear()
 
-    sells = scheduler_env.calls.execute_sell
-    assert len(sells) == 1
-    assert sells[0]["ticker"] == "012200"
+    assert scheduler_env.calls.execute_sell == []
+    assert ("012200", "momentum") in sched._pending_next_day_clear

@@ -370,12 +370,17 @@ class TestLineReductionEffect:
         # → kojiro +30 (고지로 배선: import + register 블록 + _SWING_POLL_STRATEGIES 상수 +
         #   폴루프 공유순차 일반화(buy/rest poll + boot recompute + reprepare + collect) +
         #   레짐 매수가드 복제) → ≤ 4,120L.
+        # → nxt_prelimit_fix +53 (2026-07-23, Tier 1 — `_execute_next_day_clear` 갭<임계
+        #   NXT 지정가 조기청산 제거 → `_pending_next_day_clear`/`save_pending_ndc` 보류 위임 +
+        #   `step_down` 로컬 import 제거 + `_sync_positions_from_balance` stale `_selling`
+        #   공통 재대조 훅(`SELLING_RECONCILE_MIN_AGE_S` 상수) + `_reset_daily_state`
+        #   `_selling_since` 동행 clear) → ≤ 4,170L.
         # 사이클 171 = MEDIUM 운영자 가치 (16:20 저녁 funnel — 전날 밤 후보 확인, domain-consult 의제 4).
-        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149~kojiro 추가는 신규 기능/시정 한정.
-        assert line_count <= 4120, (
+        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149~nxt_prelimit_fix 추가는 신규 기능/시정 한정.
+        assert line_count <= 4170, (
             f"scheduler.py 라인 감소 영속 위반 — got {line_count}L, "
-            f"target ≤ 4,120L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L + 188 +11L + 189 +14L + 193 +10L + C3 +60L + kojiro +30L). "
-            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164/171/188/189/193/C3/kojiro 추가 영속."
+            f"target ≤ 4,170L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L + 188 +11L + 189 +14L + 193 +10L + C3 +60L + kojiro +30L + nxt_prelimit_fix +53L). "
+            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164/171/188/189/193/C3/kojiro/nxt_prelimit_fix 추가 영속."
         )
 
     def test_g_134_f2_helper_module_compact(self):

@@ -7,7 +7,9 @@
 - 30초 안정화 대기 (NEXT_DAY_STABILIZE_SECS, asyncio.sleep — fixture 가 무력화)
 - 시가 미수신 시 `_resolve_open_price` 폴백
 - gap_rate >= gap_up_threshold(10%) → 트레일링 모드 (직접 청산 X)
-- gap_rate < threshold → execute_sell(NEXT_DAY_CLEAR) 즉시
+- gap_rate < threshold → Tier 1 (자문 nxt_prelimit_stale_selling_orderflow, 2026-07-21):
+  NXT 프리 지정가 조기청산 제거 — `_pending_next_day_clear` 보류 후 09:00 KRX 시장가 단일
+  청산(`_drain_pending_next_day_clear`)으로 위임. execute_sell 즉시 호출 0건.
 """
 
 from __future__ import annotations
@@ -46,7 +48,14 @@ async def test_next_day_clear_when_no_overnight_positions_then_returns_early(sch
 
 @pytest.mark.asyncio
 async def test_next_day_clear_when_gap_below_threshold_then_immediate_clear(scheduler_env):
-    """갭률 5% < 10% → 즉시 청산."""
+    """갭률 5% < 10% → Tier 1: NXT 지정가 조기청산 제거, 09:00 KRX 드레인 보류 등록.
+
+    의미 전환 (2026-07-21 nxt_prelimit_fix_spec Tier 1): 이전엔 08:00 NXT 지정가로 즉시
+    청산했으나, 미체결 만료가 `_selling` 을 영구 잔존시켜 손절/트레일링을 억제하는 결함
+    (Defect 2) 이 있어 지정가 조기청산 자체를 제거했다. 이제 execute_sell 호출 0건 +
+    `_pending_next_day_clear` 등록만 확인 (실제 시장가 청산은 `_drain_pending_next_day_clear`
+    가 담당 — `tests/integration/test_nxt_prelimit_stale_selling_orderflow.py::test_T2a`).
+    """
     sched = scheduler_env.scheduler
     momentum = sched.registry.get("momentum")
     momentum.config.enabled = True
@@ -58,11 +67,8 @@ async def test_next_day_clear_when_gap_below_threshold_then_immediate_clear(sche
 
     await sched._execute_next_day_clear()
 
-    sells = scheduler_env.calls.execute_sell
-    assert len(sells) == 1
-    assert sells[0]["ticker"] == "005930"
-    assert sells[0]["signal"] == Signal.NEXT_DAY_CLEAR
-    assert sells[0]["strategy_id"] == "momentum"
+    assert scheduler_env.calls.execute_sell == []
+    assert ("005930", "momentum") in sched._pending_next_day_clear
 
 
 @pytest.mark.asyncio
@@ -82,6 +88,9 @@ async def test_next_day_clear_when_gap_above_threshold_then_trailing_mode_no_sel
     assert scheduler_env.calls.execute_sell == []
     # 포지션 유지
     assert "005930" in momentum.state.positions
+    # Tier 1 이후 execute_sell==[] 은 defer 분기에서도 참이므로, 트레일링 분기가
+    # defer(_pending_next_day_clear 등록) 로 오분류되지 않았음을 음성 단언으로 확정.
+    assert ("005930", "momentum") not in sched._pending_next_day_clear
 
 
 @pytest.mark.asyncio
@@ -120,6 +129,7 @@ async def test_next_day_clear_subscribes_websocket_for_overnight_tickers(schedul
 
 @pytest.mark.asyncio
 async def test_next_day_clear_handles_both_momentum_and_ltv(scheduler_env):
+    """의미 전환 (Tier 1): 갭<임계 두 종목 모두 즉시 execute_sell 대신 09:00 KRX 드레인 보류."""
     sched = scheduler_env.scheduler
     momentum = sched.registry.get("momentum")
     momentum.config.enabled = True
@@ -134,5 +144,6 @@ async def test_next_day_clear_handles_both_momentum_and_ltv(scheduler_env):
 
     await sched._execute_next_day_clear()
 
-    by_strat = {c["strategy_id"]: c["ticker"] for c in scheduler_env.calls.execute_sell}
-    assert by_strat == {"momentum": "005930", "long_tail_volatility": "000660"}
+    assert scheduler_env.calls.execute_sell == []
+    assert ("005930", "momentum") in sched._pending_next_day_clear
+    assert ("000660", "long_tail_volatility") in sched._pending_next_day_clear

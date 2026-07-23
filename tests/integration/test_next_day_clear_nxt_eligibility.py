@@ -56,7 +56,13 @@ def _seed_next_day_pos(strategy, ticker, buy_price=15000, qty=6, high=None):
 async def test_next_day_clear_when_nxt_open_received_and_gap_below_then_limit_order(
     scheduler_env,
 ):
-    """NXT 시가 수신 + 갭률 < threshold → 직전가 -1호가 지정가 매도."""
+    """NXT 시가 수신 + 갭률 < threshold → Tier 1: 지정가 조기청산 제거, 09:00 KRX 드레인 보류.
+
+    의미 전환 (2026-07-21 nxt_prelimit_fix_spec Tier 1): 얇은 NXT 프리 유동성에서
+    open-1tick 지정가는 미체결 만료가 잦고, 만료가 `_selling` discard 경로에 걸리지
+    않아 영구 잔존 → risk.on_tick 손절/트레일링 종일 억제(Defect 2). 08:00 지정가를
+    아예 내지 않고 09:00 KRX 시장가 단일 청산(`_drain_pending_next_day_clear`)으로 대체.
+    """
     sched = scheduler_env.scheduler
     momentum = sched.registry.get("momentum")
     momentum.config.enabled = True
@@ -70,13 +76,9 @@ async def test_next_day_clear_when_nxt_open_received_and_gap_below_then_limit_or
 
     await sched._execute_next_day_clear()
 
-    sells = scheduler_env.calls.execute_sell
-    assert len(sells) == 1, "갭률 미만 시 즉시 청산"
-    assert sells[0]["ticker"] == "012200"
-    assert sells[0]["signal"] == Signal.NEXT_DAY_CLEAR
-    # 지정가 정보가 전달되었는지 — fake_execute_sell 시그니처 확장 필요
-    assert sells[0].get("limit_price", 0) == 15040, (
-        "직전가 15050(10원 단위) -1호가 = 15040 이 지정가로 전달되어야 함"
+    assert scheduler_env.calls.execute_sell == [], "갭률 미만 시 지정가 조기청산 제거 (Tier 1)"
+    assert ("012200", "momentum") in sched._pending_next_day_clear, (
+        "09:00 KRX 시장가 드레인 대상으로 보류 등록되어야 함"
     )
 
 
