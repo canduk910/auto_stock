@@ -97,6 +97,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -188,6 +189,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -628,6 +630,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -858,6 +861,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -1008,6 +1012,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -1467,6 +1472,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -1567,6 +1573,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -2007,6 +2014,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -2120,6 +2128,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -2571,6 +2580,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -2685,6 +2695,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -3135,6 +3146,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -3249,6 +3261,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -3702,6 +3715,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -3814,6 +3828,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -4259,6 +4274,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -4521,6 +4537,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -4784,6 +4801,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -5053,6 +5071,7 @@ backend:
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -5161,6 +5180,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -5611,6 +5631,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -5765,6 +5786,7 @@ backend:
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_log_reports_openai_meta.py
     - tests/unit/db/test_market_regime_snapshots.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_parameter_recommendations_v2.py
     - tests/unit/db/test_parameter_recommendations_weight_reasoning.py
@@ -6202,6 +6224,7 @@ backend:
     - tests/integration/test_cycleM3a_three_modules_roundtrip.py
     - tests/integration/test_cycleM3b_system_logs_roundtrip.py
     - tests/integration/test_cycleM6_date_column_str_binding_roundtrip.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
     - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -6264,6 +6287,7 @@ backend:
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_market_regime_snapshots.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
@@ -6857,6 +6881,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -7007,6 +7032,7 @@ backend:
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_log_reports_openai_meta.py
     - tests/unit/db/test_market_regime_snapshots.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_parameter_recommendations_v2.py
     - tests/unit/db/test_parameter_recommendations_weight_reasoning.py
@@ -7484,6 +7510,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -7725,6 +7752,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -7972,6 +8000,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -8088,6 +8117,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -8538,6 +8568,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -8780,6 +8811,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -9034,6 +9066,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -9276,6 +9309,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -9519,6 +9553,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -9669,6 +9704,7 @@ backend:
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_log_reports_openai_meta.py
     - tests/unit/db/test_market_regime_snapshots.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_parameter_recommendations_v2.py
     - tests/unit/db/test_parameter_recommendations_weight_reasoning.py
@@ -10120,6 +10156,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -10377,6 +10414,7 @@ backend:
     direct_tests:
     - tests/integration/test_boot_eager_refresh.py
     - tests/integration/test_cycleM2b_universe_daily_roundtrip.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear_observability.py
     - tests/integration/test_next_day_clear_stock_master.py
     - tests/integration/test_nxt_prelimit_stale_selling_orderflow.py
@@ -10406,6 +10444,7 @@ backend:
     - tests/unit/db/test_cycle84_trigger_update.py
     - tests/unit/db/test_cycleM2b_safety_diff0.py
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/engine/strategies/test_cycle143_vb_ltv_funnel_hook.py
@@ -11005,6 +11044,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -11106,6 +11146,7 @@ backend:
     - tests/unit/db/test_cycleM2a_trade_history_pg.py
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -11554,6 +11595,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -11668,6 +11710,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -12117,6 +12160,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -12365,6 +12409,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -12478,6 +12523,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_daily_pg.py
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -12967,6 +13013,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -13081,6 +13128,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_daily_pg.py
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -13529,6 +13577,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -13638,6 +13687,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -14096,6 +14146,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -14350,6 +14401,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -14670,6 +14722,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -14927,6 +14980,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -15167,6 +15221,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -15413,6 +15468,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -15654,6 +15710,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -15768,6 +15825,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -16215,6 +16273,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -16463,6 +16522,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -16699,6 +16759,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -16813,6 +16874,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -17266,6 +17328,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -17506,6 +17569,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -17726,6 +17790,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -18009,6 +18074,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -18296,6 +18362,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -18517,6 +18584,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -18761,6 +18829,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -18875,6 +18944,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -19295,6 +19365,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -19563,6 +19634,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -19858,6 +19930,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -20125,6 +20198,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -20367,6 +20441,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -20624,6 +20699,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -20849,6 +20925,7 @@ backend:
     - tests/unit/db/test_kis_quote_accounts_cache.py
     - tests/unit/db/test_log_reports_openai_meta.py
     - tests/unit/db/test_market_regime_snapshots.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_parameter_recommendations_backtest.py
     - tests/unit/db/test_parameter_recommendations_v2.py
     - tests/unit/db/test_parameter_recommendations_weight_reasoning.py
@@ -21395,6 +21472,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -21668,6 +21746,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -21890,6 +21969,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -22155,6 +22235,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -22377,6 +22458,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -22626,6 +22708,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -22871,6 +22954,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -23112,6 +23196,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -23351,6 +23436,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -23600,6 +23686,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -23875,6 +23962,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -24087,6 +24175,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -24378,6 +24467,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -24590,6 +24680,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -24845,6 +24936,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -25140,6 +25232,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -25352,6 +25445,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -25622,6 +25716,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -25949,6 +26044,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -26238,6 +26334,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -26475,6 +26572,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -26744,6 +26842,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -27058,6 +27157,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -27298,6 +27398,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -27560,6 +27661,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -27683,6 +27785,7 @@ backend:
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
     - tests/unit/db/test_kis_quote_accounts.py
     - tests/unit/db/test_kis_quote_accounts_cache.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -28135,6 +28238,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -28255,6 +28359,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_system_config_auto_apply.py
@@ -28747,6 +28852,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -29169,6 +29275,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_pool_distribution.py
@@ -29279,6 +29386,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_daily_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
@@ -29761,6 +29869,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -30046,6 +30155,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -30282,6 +30392,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -30396,6 +30507,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -30869,6 +30981,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -30982,6 +31095,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -31436,6 +31550,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -31546,6 +31661,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -32920,6 +33036,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -33177,6 +33294,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -33434,6 +33552,7 @@ backend:
     - tests/integration/test_dockerfile_token_cache_perms.py
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -33677,6 +33796,7 @@ backend:
     - tests/integration/test_force_clear_1520.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/integration/test_multi_strategy_block.py
+    - tests/integration/test_name_coalesce_list_by_filter.py
     - tests/integration/test_next_day_clear.py
     - tests/integration/test_next_day_clear_nxt_eligibility.py
     - tests/integration/test_next_day_clear_observability.py
@@ -33790,6 +33910,7 @@ backend:
     - tests/unit/db/test_cycleM2b_stock_master_pg.py
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
     - tests/unit/db/test_stock_master.py
     - tests/unit/db/test_stock_master_upsert.py
     - tests/unit/db/test_trade_history_for_sync.py
@@ -34806,10 +34927,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-23T16:50:10.266682+09:00'
+generated_at: '2026-07-24T09:49:48.310732+09:00'
 stats:
   backend_modules: 119
-  backend_tests: 764
+  backend_tests: 766
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

@@ -629,7 +629,9 @@ async def list_by_filter(
         where_sql = f" WHERE {' AND '.join(clauses)}" if clauses else ""
         args.append(limit)
         sql = (
-            "SELECT ticker, name, excg_dvsn_cd, nxt_tradable, is_kospi200, is_kosdaq150, raw "
+            "SELECT ticker, "
+            "COALESCE(NULLIF(name, ''), NULLIF(TRIM(master_raw->>'hts_kor_isnm'), ''), '') AS name, "
+            "excg_dvsn_cd, nxt_tradable, is_kospi200, is_kosdaq150, raw "
             f"FROM stock_master{where_sql} "
             f"ORDER BY refreshed_at DESC LIMIT ${len(args)}"
         )
