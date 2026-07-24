@@ -332,6 +332,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -679,6 +680,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -1155,6 +1157,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -1717,6 +1720,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -2278,6 +2282,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -2845,6 +2850,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -3410,6 +3416,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -3978,6 +3985,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -4325,6 +4333,7 @@ backend:
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -4585,6 +4594,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -4853,6 +4863,7 @@ backend:
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -5330,6 +5341,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -5949,6 +5961,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -6312,6 +6325,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_cycle101_kst_persistence.py
     - tests/unit/engine/test_cycle129_master_load_once.py
@@ -7193,6 +7207,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -7557,6 +7572,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -7799,6 +7815,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -8267,6 +8284,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -8615,6 +8633,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -8859,6 +8878,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -9113,6 +9133,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -9356,6 +9377,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -9867,6 +9889,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -10255,6 +10278,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -10735,6 +10759,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -11293,6 +11318,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -11860,6 +11886,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -12207,6 +12234,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -12672,6 +12700,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -12976,6 +13005,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_cache.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_daily_summary.py
@@ -13837,6 +13867,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -14196,6 +14227,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -14491,6 +14523,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -14927,6 +14960,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -15272,6 +15306,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -15515,6 +15550,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
@@ -15973,6 +16009,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -16322,6 +16359,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -16568,6 +16606,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -17024,6 +17063,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -17374,6 +17414,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -17619,6 +17660,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -17877,6 +17919,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -18145,6 +18188,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -18298,6 +18342,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
@@ -18631,6 +18676,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -19094,6 +19140,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -19445,6 +19492,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -19985,6 +20033,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -20342,6 +20391,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_cycle163_boot_prepare_guard.py
@@ -20492,6 +20542,7 @@ backend:
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -21112,6 +21163,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -21520,6 +21572,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -21791,6 +21844,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -22017,6 +22071,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -22280,6 +22335,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -22506,6 +22562,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -22756,6 +22813,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -23001,6 +23059,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -23242,6 +23301,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -23483,6 +23543,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -23732,6 +23793,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -24007,6 +24069,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -24268,6 +24331,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -24512,6 +24576,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -24768,6 +24833,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -25020,6 +25086,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -25277,6 +25344,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -25543,6 +25611,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -25883,6 +25952,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -26139,6 +26209,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -26380,6 +26451,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -26638,6 +26710,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -26893,6 +26966,7 @@ backend:
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -27207,6 +27281,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -27453,6 +27528,7 @@ backend:
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -27935,6 +28011,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -28514,6 +28591,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -28930,6 +29008,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -29519,6 +29598,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -29922,6 +30002,7 @@ backend:
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -30199,6 +30280,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -30657,6 +30739,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -31245,6 +31328,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -31810,6 +31894,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -33084,6 +33169,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -33342,6 +33428,7 @@ backend:
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
@@ -33601,6 +33688,7 @@ backend:
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_boot_manager_buy_date_date_object.py
     - tests/unit/engine/test_boot_manager_extraction.py
@@ -34060,6 +34148,7 @@ backend:
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
     - tests/unit/engine/test_backtest_engine_unwrap.py
+    - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
     - tests/unit/engine/test_backtest_yaml.py
     - tests/unit/engine/test_backtest_yaml_donchian_compat.py
@@ -34927,10 +35016,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-24T09:49:48.310732+09:00'
+generated_at: '2026-07-24T13:36:14.938966+09:00'
 stats:
   backend_modules: 119
-  backend_tests: 766
+  backend_tests: 767
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

@@ -545,7 +545,9 @@ async def _enqueue_backtest_jobs(
     자문 INSERT 와 race 무관 — 본 함수는 enqueue 만 책임.
     """
     engine = _get_backtest_engine()
-    enabled = bool(getattr(engine, "enabled", False))
+    # 결함(d) 시정 (2026-07-24): 정적 engine.enabled(.env, 프로세스 시작 시 고정) 대신
+    # is_enabled_async()(DB 우선 → .env fallback)로 Settings UI 토글을 재시작 없이 즉시 반영.
+    enabled = await engine.is_enabled_async()
 
     pending_run_jobs: list[tuple[dict, str]] = []  # (run_row, kind) for (a) submit
 

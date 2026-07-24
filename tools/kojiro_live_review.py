@@ -18,9 +18,11 @@ import asyncio
 import os
 import ssl as ssl_mod
 import sys
+from datetime import date
 from urllib.parse import urlsplit, urlunsplit, parse_qs
 
 SINCE = os.environ.get("KOJIRO_REVIEW_SINCE", "2026-07-20")  # 진입조건 변경 배포일
+SINCE_D = date.fromisoformat(SINCE)  # DATE 컬럼 파라미터용 (asyncpg 는 date 객체 요구)
 STRATEGY = "kojiro"
 
 
@@ -169,22 +171,11 @@ async def main() -> None:
             conn, "daily_perf",
             """
             SELECT * FROM daily_performance
-            WHERE strategy = $1 AND date >= $2::date
+            WHERE strategy = $1 AND date >= $2
             ORDER BY date
             """,
-            STRATEGY, SINCE,
+            STRATEGY, SINCE_D,
         )
-        if not perf:
-            # date 컬럼명이 target_date 일 수 있어 재시도
-            perf = await _safe(
-                conn, "daily_perf_alt",
-                """
-                SELECT * FROM daily_performance
-                WHERE strategy = $1 AND target_date >= $2::date
-                ORDER BY target_date
-                """,
-                STRATEGY, SINCE,
-            )
         if not perf:
             _p("  (kojiro 일자별 실적 행 없음)")
         for r in perf:
@@ -202,10 +193,10 @@ async def main() -> None:
             """
             SELECT target_date, step_no, step_name, survived_count
             FROM strategy_funnel_snapshots
-            WHERE strategy_id = $1 AND target_date >= $2::date
+            WHERE strategy_id = $1 AND target_date >= $2
             ORDER BY target_date, step_no
             """,
-            STRATEGY, SINCE,
+            STRATEGY, SINCE_D,
         )
         if not funnel:
             _p("  (kojiro funnel 스냅샷 없음)")

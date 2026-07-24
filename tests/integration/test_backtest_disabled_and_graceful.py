@@ -169,6 +169,9 @@ async def test_kis_mcp_disabled_marks_all_runs_skipped(
     class DisabledEngine:
         enabled = False
 
+        async def is_enabled_async(self):
+            return self.enabled
+
         async def run_for_strategy(self, *a, **kw):
             raise AssertionError("disabled engine 은 호출되면 안 됨")
 
@@ -241,6 +244,9 @@ async def test_external_server_down_marks_runs_failed_recommendation_preserved(
     class DownEngine:
         """enabled=True 지만 모든 호출에 ExternalAPIError raise — 서버 다운."""
         enabled = True
+
+        async def is_enabled_async(self):
+            return self.enabled
 
         async def run_for_strategy(self, strategy_id, params, days=90, kind="current", **kw):
             if strategy_id in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout"):
@@ -333,6 +339,9 @@ async def test_backtest_poll_timeout_marks_running_rows_failed(
 
     class HangingEngine:
         enabled = True
+
+        async def is_enabled_async(self):
+            return self.enabled
 
         async def run_for_strategy(self, strategy_id, params, days=90, kind="current", **kw):
             if strategy_id in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout"):

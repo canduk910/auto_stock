@@ -165,6 +165,9 @@ async def test_full_flow_20_00_recommendation_backtest(
     class FakeEngine:
         enabled = True
 
+        async def is_enabled_async(self):
+            return self.enabled
+
         async def run_for_strategy(self, strategy_id, params, days=90, kind="current", **kw):
             if strategy_id in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout"):
                 raise BacktestNotSupportedError(f"{strategy_id} unsupported")
@@ -306,6 +309,9 @@ async def test_settlement_race_preserves_recommendation_insert(
 
     class FakeEngine:
         enabled = True
+
+        async def is_enabled_async(self):
+            return self.enabled
 
         async def run_for_strategy(self, strategy_id, params, days=90, kind="current", **kw):
             if strategy_id in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout"):

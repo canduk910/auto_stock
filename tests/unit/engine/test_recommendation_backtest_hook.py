@@ -189,6 +189,9 @@ async def test_enqueue_inserts_twelve_rows(
     class FakeEngine:
         enabled = True
 
+        async def is_enabled_async(self):
+            return self.enabled
+
         async def run_for_strategy(self, strategy_id, params, days=90, kind="current", **kw):
             submit_calls.append({"strategy_id": strategy_id, "kind": kind, "params": dict(params)})
             if strategy_id in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout"):
@@ -248,6 +251,9 @@ async def test_enqueue_skips_fallback_strategies(
 
     class FakeEngine:
         enabled = True
+
+        async def is_enabled_async(self):
+            return self.enabled
 
         async def run_for_strategy(self, strategy_id, params, days=90, kind="current", **kw):
             submit_calls.append(strategy_id)
@@ -310,6 +316,9 @@ async def test_enqueue_submits_supported_strategies(
     class FakeEngine:
         enabled = True
 
+        async def is_enabled_async(self):
+            return self.enabled
+
         async def run_for_strategy(self, strategy_id, params, days=90, kind="current", **kw):
             if strategy_id in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout"):
                 raise BacktestNotSupportedError(f"{strategy_id} unsupported")
@@ -369,6 +378,9 @@ async def test_enqueue_skips_when_mcp_disabled(
 
     class FakeEngine:
         enabled = False
+
+        async def is_enabled_async(self):
+            return self.enabled
 
         async def run_for_strategy(self, *args, **kwargs):
             submit_count["n"] += 1
@@ -450,6 +462,9 @@ async def test_enqueue_handles_external_api_error(
 
     class FakeEngine:
         enabled = True
+
+        async def is_enabled_async(self):
+            return self.enabled
 
         async def run_for_strategy(self, strategy_id, params, days=90, kind="current", **kw):
             if strategy_id == "momentum":
