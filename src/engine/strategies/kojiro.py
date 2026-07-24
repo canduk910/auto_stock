@@ -737,8 +737,9 @@ class KojiroStrategy(StrategyBase):
             "고지로 매수 신호: %s 현재가(%d) — 스테이지1(6→1) + EMA정배열 + ATR(%.1f)",
             ticker, current_price, info["atr"],
         )
+        from src.engine.scanner import resolve_ticker_name
         self.state.buy_signals.append({
-            "ticker": ticker, "name": "", "price": current_price,
+            "ticker": ticker, "name": resolve_ticker_name(ticker), "price": current_price,
             "stage": info["stage"], "atr": int(info["atr"]), "change_rate": 0,
             "time": datetime.now(KST).strftime("%H:%M:%S"),
         })
@@ -892,8 +893,10 @@ class KojiroStrategy(StrategyBase):
         return dict(self._scan_stats)
 
     def get_targets_status(self) -> dict[str, dict]:
+        from src.engine.scanner import resolve_ticker_name
         return {
             ticker: {
+                "name": resolve_ticker_name(ticker),  # 종목명 (ticker_names 해소, miss 시 "")
                 "prev_close": info["prev_close"], "atr": int(info["atr"]),
                 "stage": info.get("stage", 0),
                 "ema_s": int(info.get("ema_s", 0)), "ema_m": int(info.get("ema_m", 0)),

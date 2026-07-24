@@ -232,7 +232,7 @@ export default function KojiroMonitor({
                     : 0
                   const nearEdge = ratio >= bandMax * 0.9 || ratio <= bandMin * 1.1
                   const aligned = num(t.ema_s, 0) > num(t.ema_m, 0) && num(t.ema_m, 0) > num(t.ema_l, 0)
-                  const name = prices[ticker] ? ticker : ticker
+                  const name = t.name || ticker
                   return (
                     <tr key={ticker} data-testid={`kojiro-candidate-${ticker}`} className="border-b border-gray-100">
                       <td className="py-1 pr-2 font-medium text-gray-800">{name}</td>

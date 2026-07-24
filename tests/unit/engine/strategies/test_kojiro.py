@@ -355,3 +355,56 @@ def test_get_targets_status_atr_ratio_graceful_when_missing(kojiro):
                                     "ema_s": 0, "ema_m": 0, "ema_l": 0}
     t = kojiro.get_targets_status()["000660"]
     assert t["atr_ratio"] == 0.0
+
+
+# ── 후보 그리드 종목명 노출 (get_targets_status + buy_signal) ──
+# 근본 원인: KojiroMonitor 후보 그리드가 종목번호만 표시. get_targets_status(kojiro.py:894)
+#   target dict 에 name 키 부재 + buy_signal(kojiro.py:741) name="" 하드코딩.
+# 시정: 두 경로 모두 scanner.resolve_ticker_name(ticker) 로 종목명 해소.
+# 900001/111111 = STATIC_TICKER_NAMES 미포함(비시드 시 "" 보장) → 시드 경로 검증에 사용.
+
+def test_get_targets_status_includes_resolved_name(kojiro, monkeypatch):
+    # B1: ticker_names 시드 → get_targets_status()[t]["name"] == 해소된 종목명.
+    #     현행(키 부재)에선 KeyError → Red.
+    from src.engine import scanner
+    monkeypatch.setitem(scanner.ticker_names, "900001", "삼성전자")
+    _seed_candidate(kojiro, "900001", prev_close=60000, atr=1800.0, stage=1)
+    t = kojiro.get_targets_status()["900001"]
+    assert t["name"] == "삼성전자"
+
+
+def test_get_targets_status_name_graceful_when_unresolved(kojiro):
+    # B2: ticker_names/STATIC 미해소(miss) → name == "" (graceful, KeyError/None 금지).
+    _seed_candidate(kojiro, "111111", prev_close=50000, atr=1000.0, stage=6)
+    t = kojiro.get_targets_status()["111111"]
+    assert t["name"] == ""
+
+
+def test_get_targets_status_name_preserves_existing_keys(kojiro, monkeypatch):
+    # B3 회귀: name 추가가 기존 target 키(prev_close/atr/stage/ema_*/atr_ratio/sector/
+    #   target_price/open_price/target_offset/open_confirmed/k) 전부 보존.
+    from src.engine import scanner
+    monkeypatch.setitem(scanner.ticker_names, "900001", "삼성전자")
+    _seed_candidate(kojiro, "900001", prev_close=60000, atr=1800.0, stage=1,
+                    ema_s=61000.0, ema_m=60000.0, ema_l=59000.0)
+    t = kojiro.get_targets_status()["900001"]
+    expected = {"name", "prev_close", "atr", "stage", "ema_s", "ema_m", "ema_l",
+                "atr_ratio", "sector", "target_price", "open_price",
+                "target_offset", "open_confirmed", "k"}
+    assert expected <= t.keys()
+    # 기존 값 회귀 (name 추가가 다른 키 값 변형 없음)
+    assert t["prev_close"] == 60000 and t["atr"] == 1800 and t["stage"] == 1
+    assert t["atr_ratio"] == round(1800.0 / 60000, 4)
+
+
+def test_buy_signal_appends_resolved_name(kojiro, monkeypatch):
+    # B4: check_buy_signal 발화 경로 → state.buy_signals[-1]["name"] == 해소된 종목명.
+    #     현행(name="" 하드코딩)에선 "" → Red.
+    from src.engine import scanner
+    monkeypatch.setitem(scanner.ticker_names, "900001", "삼성전자")
+    _seed_candidate(kojiro, "900001", prev_close=10000)
+    with freeze_time(datetime(2026, 5, 8, 9, 10, tzinfo=KST)):
+        assert kojiro.check_buy_signal("900001", 10100, 10050) == Signal.BUY
+    sig = kojiro.state.buy_signals[-1]
+    assert sig["ticker"] == "900001"
+    assert sig["name"] == "삼성전자"

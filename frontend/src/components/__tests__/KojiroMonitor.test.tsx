@@ -158,4 +158,41 @@ describe('KojiroMonitor — 6 패널', () => {
     render(<KojiroMonitor strategies={makeKojiro({ positions_detail, targets })} />)
     expect(screen.getByTestId('kojiro-defense-035420').textContent).toContain('청산')
   })
+
+  // ── 후보 그리드 종목명 (targets.name) ──
+  // 현행 KojiroMonitor.tsx:235 = `const name = prices[ticker] ? ticker : ticker` (스텁, 항상 종목번호).
+  // 시정 = `const name = t.name || ticker` (매수신호 289 sig.name||sig.ticker / 보유 341 pos.name||ticker 정합).
+
+  it('F1) 후보 그리드: targets.name 있으면 종목명 렌더 (종목번호 아님)', () => {
+    const targets = {
+      '005930': { name: '삼성전자', prev_close: 60000, atr: 1800, stage: 1, ema_s: 61000, ema_m: 60000, ema_l: 59000, atr_ratio: 0.03 },
+    }
+    render(<KojiroMonitor strategies={makeKojiro({ targets })} />)
+    const row = screen.getByTestId('kojiro-candidate-005930')
+    // 첫 <td> = 종목명 셀 (KojiroMonitor.tsx:238). 현행 스텁은 종목번호 렌더 → Red.
+    const nameCell = row.querySelector('td')
+    expect(nameCell?.textContent).toBe('삼성전자')
+  })
+
+  it('F2) 후보 그리드: targets.name 없음/빈문자 → 종목번호 폴백', () => {
+    const targets = {
+      '000660': { prev_close: 50000, atr: 1500, stage: 2, ema_s: 0, ema_m: 0, ema_l: 0, atr_ratio: 0.03 },
+      '035420': { name: '', prev_close: 40000, atr: 1200, stage: 3, ema_s: 0, ema_m: 0, ema_l: 0, atr_ratio: 0.03 },
+    }
+    render(<KojiroMonitor strategies={makeKojiro({ targets })} />)
+    // name 미제공/빈문자 → ticker 폴백 (t.name || ticker).
+    expect(screen.getByTestId('kojiro-candidate-000660').querySelector('td')?.textContent).toBe('000660')
+    expect(screen.getByTestId('kojiro-candidate-035420').querySelector('td')?.textContent).toBe('035420')
+  })
+
+  it('F3) 회귀: name 노출 후에도 EMA 정배열/ATR 밴드 렌더 무회귀', () => {
+    const targets = {
+      '005930': { name: '삼성전자', prev_close: 60000, atr: 1800, stage: 1, ema_s: 61000, ema_m: 60000, ema_l: 59000, atr_ratio: 0.03 },
+    }
+    render(<KojiroMonitor strategies={makeKojiro({ targets })} />)
+    const row = screen.getByTestId('kojiro-candidate-005930')
+    expect(row.textContent).toContain('정배열')  // ema_s>ema_m>ema_l
+    expect(row.textContent).toContain('3.0%')     // atr_ratio 3%
+    expect(within(row).getByTestId('kojiro-band-marker-005930')).toBeTruthy()
+  })
 })

@@ -33,6 +33,7 @@ export interface ScanStats {
 
 // 고지로 후보 종목 상태 (get_targets_status). StrategyInfo.targets 엔트리 캐스팅용.
 export interface KojiroTarget {
+  name?: string            // 종목명 (백엔드 resolve_ticker_name, miss 시 "" 또는 부재 — ticker 폴백)
   prev_close: number
   atr: number
   stage: number           // 대순환 스테이지 1~6 (0 = 판별 불가)
