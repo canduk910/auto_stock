@@ -38,6 +38,15 @@ TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트
 
 Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFunnel** 는 `React.lazy()` + Suspense skeleton (초기 번들 819→656kB). `/log-reports` 라우트는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환 보존.
 
+## AppShell 레이아웃 — 화면 폭 슬라이더 (2026-07-24)
+
+`App.tsx::AppShell` 이 콘텐츠 폭을 사용자 조정 가능하게 노출 (넓은 화면에서 `max-w-7xl` 1280px 캡으로 양옆 여백이 생기던 민원 해소).
+
+- **상태**: `useContentWidth()` 훅 — `autostock.contentWidth` localStorage 키(정수 level 0~100, **기본 100=전체폭**). lazy `useState` 초기화가 mount 시 localStorage 복원(vite CSR, SSR 없음). `setLevel` 이 state+localStorage 동기, try/catch graceful(프라이빗 모드).
+- **슬라이더**: 나브 PC 행(`hidden sm:flex`) 우측 `ml-auto` 에 `<input type="range" min=0 max=100 step=5>` (`data-testid="content-width-slider"`, `aria-label="화면 폭 조정"`, 네이티브 range = 키보드 Arrow/Home/End 조작). **모바일 미노출**(소화면 조정 불요).
+- **적용**: `<main>` 과 나브 내부 컨테이너 둘 다 `max-w-7xl` 제거 + `style={{ maxWidth: contentMaxWidth(level) }}`. `contentMaxWidth(level) = max(1024px, {60 + level*0.4}%)` (level 100→전체폭 / level 0→`max(1024px, 60%)`). `max()` 는 **상한**이라 소화면 오버플로 없음(뷰포트 폭으로 자연 축소). 나브도 동일 폭 → 전체폭 시 메뉴/슬라이더가 콘텐츠 좌우 끝에 정렬.
+- 회귀 가드 `src/__tests__/ContentWidthSlider.test.tsx` 5 케이스 (슬라이더 aria-label/role, 기본 전체폭 100%, 조정+localStorage 저장 '0', 복원 40→76%, AppShell 구조 회귀). **프론트 전용, 백엔드/매매 무관**.
+
 ## StrategyFunnel (`/strategy-funnel`, 사이클 34, 2026-05-21)
 
 전략별 조건검색 단계별 후보/탈락 종목 추적 페이지. 전략 dropdown + 날짜 picker + 단계별 expand 가능한 테이블 + 수동 trigger 버튼 (`POST /api/strategy-funnel/snapshot`). 단계 클릭 시 `survived_tickers` 리스트 + `excluded_sample` 탈락 사유 표시. API: `getFunnel / getRecentFunnel / triggerFunnelSnapshot` (`frontend/src/api/strategy-funnel.ts`). queryKey `['strategy-funnel', strategy_id, target_date]`. **사이클 171 (2026-06-22)** — `FunnelSnapshot.is_provisional?: boolean` 타입 + 단계명 옆 amber "잠정" 배지 (`funnel-provisional-badge-{sid}-{step_no}`, title="16:20 저녁 잠정 캡처 — 익일 아침 마스터 델타 반영 전"). is_provisional=true 인 16:20 저녁 캡처 row 만 노출 — 운영자가 "밤에 본 후보 ≠ 아침 확정 후보" 가능성 인지 (자문 의제 9 반례 3). 회귀 가드 `StrategyFunnel.cycle171.test.tsx` 3 케이스 (정적 source 검증, 사이클 132 패턴 답습). **사이클 39 (2026-05-22)**: BFB/VCP/donchian `prepare()` 8단계 자동 hook + 09:30 일일 1회 자동 snapshot (사용자 수동 trigger 도 보존). **사이클 41 (2026-05-22)**: 단계명 옆 `조건` 툴팁 (`data-testid="funnel-step-conditions-..."` + `title`) + 통과/탈락 종목 ticker 옆 종목명 별도 표시 (`SurvivedItem` 타입 + dict/string 분기) + 탈락 사유 수치 포함 (예: `"음봉 비율 35% > 30%"` / `"마지막 폭 12% > 8%"`).

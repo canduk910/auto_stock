@@ -41,6 +41,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 날짜 | 사이클 | 한 줄 요약 |
 |------|--------|-----------|
+| 2026-07-24 | 화면폭 슬라이더 | 대시보드 나브바에 콘텐츠 폭 슬라이더 신규 — `App.tsx <main>`·나브 컨테이너 `max-w-7xl`(1280px 캡) → 동적 `max(1024px, {60+level*0.4}%)`, **기본 전체폭**(넓은 화면 여백 민원 해소). localStorage(`autostock.contentWidth`) 저장·전 페이지 적용·모바일 미노출. 프론트 전용, 백엔드 diff 0 |
 | 2026-07-24 | backtest DB토글 | `_enqueue_backtest_jobs`(recommendation_engine.py) 가 정적 `.env`(engine.enabled) 대신 `await engine.is_enabled_async()`(DB 우선) 사용 — Settings UI `kis_mcp_enabled` 토글이 재시작 없이 즉시 반영(그전엔 DB=true 여도 backtest 전량 skip=AI자문 부분실명). kojiro 실측 조사서 발견. auto_apply 무접촉, hot path diff 0 |
 | 2026-07-24 | 종목명 폴백 | `list_by_filter` SELECT `name` → `COALESCE(NULLIF(name,''), NULLIF(TRIM(master_raw->>'hts_kor_isnm'),''), '')` — 전체상장 스캔(kojiro 등) funnel 후보가 종목번호만 표시되던 버그 시정(마스터파일 한글명 읽기 폴백, G-AST1 준수·쓰기 무변경, 6전략+funnel 일괄). 매매 hot path diff 0 |
 | 2026-07-23 | NXT prelimit stale selling | 익일청산 갭<임계 NXT 프리 지정가 조기청산 폐지 → `_pending_next_day_clear`(reason=nxt_underthreshold) 09:00 KRX 시장가 단일 청산(Tier 1) + stale `_selling` 재대조 훅(`_sync_positions_from_balance`, 보유∧열린주문無∧`_selling_since`≥180s → discard → on_tick 손절 재평가 재개) — Defect 2(stale `_selling` 손절 마비) 시정. 안전성 8영역 중 익일청산·`_selling` 2영역 의도 시정·6영역 diff 0 |
@@ -55,7 +56,6 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-07-14 | 210 | donchian 손절/한도 -6.0 복원(DB) + auto_apply ratchet 차단(_CONSERVATIVE_KEYS 제거) |
 | 2026-07-14 | 209 | donchian max_breakout_extension_pct 0.5→4.0 복원 + PARAM_RANGES 제외 (매수 2차 병목 해소) |
 | 2026-07-13 | 208 | donchian_swing 박스 수축 보조 필터 완전 제거 (최종 후보 상시 0 시정) |
-| 2026-07-11 | 206 | stock_master_daily 유니버스 한정 적재 (Supabase 용량 초과 시정, 261→54MB) |
 
 > 사이클 200 이하 및 초기 하네스 구성 전체 이력(verbatim): [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)
 

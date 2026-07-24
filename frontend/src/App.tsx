@@ -30,6 +30,47 @@ const navItems = [
   { to: '/strategies', label: '전략 현황' },
 ]
 
+// 나브바 화면 폭 슬라이더 — 콘텐츠 max-width 사용자 조정 (localStorage 영속)
+const CONTENT_WIDTH_STORAGE_KEY = 'autostock.contentWidth'
+const CONTENT_WIDTH_DEFAULT_LEVEL = 100
+
+function clampContentWidthLevel(value: number): number {
+  return Math.min(100, Math.max(0, value))
+}
+
+function readStoredContentWidthLevel(): number {
+  try {
+    const raw = window.localStorage.getItem(CONTENT_WIDTH_STORAGE_KEY)
+    if (raw === null) return CONTENT_WIDTH_DEFAULT_LEVEL
+    const parsed = parseInt(raw, 10)
+    if (Number.isNaN(parsed)) return CONTENT_WIDTH_DEFAULT_LEVEL
+    return clampContentWidthLevel(parsed)
+  } catch {
+    return CONTENT_WIDTH_DEFAULT_LEVEL
+  }
+}
+
+function contentMaxWidth(level: number): string {
+  return `max(1024px, ${60 + level * 0.4}%)`
+}
+
+function useContentWidth() {
+  // SSR 없음(vite CSR) — lazy 초기화 함수가 최초 렌더 시 localStorage 를 직접 읽어 복원한다.
+  const [level, setLevelState] = useState<number>(() => readStoredContentWidthLevel())
+
+  const setLevel = (next: number) => {
+    const clamped = clampContentWidthLevel(next)
+    setLevelState(clamped)
+    try {
+      window.localStorage.setItem(CONTENT_WIDTH_STORAGE_KEY, String(clamped))
+    } catch {
+      // localStorage 접근 불가 환경(예: 프라이빗 모드) — graceful, state 는 이미 갱신됨
+    }
+  }
+
+  return { level, setLevel }
+}
+
 function PageFallback() {
   return (
     <div className="bg-white rounded-lg shadow p-8 animate-pulse">
@@ -70,6 +111,7 @@ function MobileMenuLabel() {
 
 function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { level: contentWidthLevel, setLevel: setContentWidthLevel } = useContentWidth()
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -78,7 +120,8 @@ function AppShell() {
         <EnvBanner />
 
         <nav className="bg-white shadow-sm" aria-label="기본 네비게이션">
-          <div className="max-w-7xl mx-auto px-4">
+          {/* 나브 내부 폭도 콘텐츠(main)와 동일하게 — 전체폭 시 메뉴/슬라이더가 콘텐츠 좌우 끝에 정렬 */}
+          <div className="mx-auto px-4" style={{ maxWidth: contentMaxWidth(contentWidthLevel) }}>
             {/* PC (sm 이상): 한 줄 가로 메뉴 */}
             <div className="hidden sm:flex items-center h-14 gap-8">
               <span className="font-bold text-gray-900 shrink-0">AutoStock</span>
@@ -99,6 +142,25 @@ function AppShell() {
                     {item.label}
                   </NavLink>
                 ))}
+              </div>
+
+              {/* 화면 폭 조정 슬라이더 — 콘텐츠 max-width 사용자 조정, PC 전용(모바일은 소화면이라 조정 불요) */}
+              <div className="ml-auto flex items-center gap-2 shrink-0">
+                <span className="text-xs text-gray-400 select-none" aria-hidden="true">
+                  폭
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={contentWidthLevel}
+                  onChange={(e) => setContentWidthLevel(Number(e.target.value))}
+                  data-testid="content-width-slider"
+                  aria-label="화면 폭 조정"
+                  className="w-24 h-2 rounded-lg appearance-none cursor-pointer"
+                  style={{ accentColor: '#2563eb' }}
+                />
               </div>
             </div>
 
@@ -157,7 +219,10 @@ function AppShell() {
         </nav>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main
+        className="mx-auto px-4 py-6"
+        style={{ maxWidth: contentMaxWidth(contentWidthLevel) }}
+      >
         <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
