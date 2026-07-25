@@ -41,8 +41,10 @@ def _make_scheduler(*, positions: set[str], pending: set[str]):
 def _patch_ws(monkeypatch, *, main_ws_present: bool = True):
     """`kis_ws` (메인 직접) + `kis_ws_pool` (풀 분산) 을 mock 으로 격리.
 
-    함수 본체가 `from src.realtime.websocket import kis_ws (, kis_ws_pool)` 로
-    지연 import 하므로 소스 모듈 네임스페이스를 패치한다.
+    함수 본체가 `kis_ws` 는 `src.realtime.websocket` 에서, `kis_ws_pool` 은
+    `src.realtime.websocket_pool` 에서 지연 import 하므로 각 소스 모듈 네임스페이스를
+    패치한다. (kis_ws_pool 을 websocket 네임스페이스에 패치하면 실제 import 경로와
+    어긋나 mock 이 미적용 — 결함 1(ImportError) 시정 후 patch 경로 적응.)
     """
     fake_ws = MagicMock()
     fake_ws._ws = object() if main_ws_present else None
@@ -53,7 +55,7 @@ def _patch_ws(monkeypatch, *, main_ws_present: bool = True):
 
     monkeypatch.setattr("src.realtime.websocket.kis_ws", fake_ws, raising=False)
     monkeypatch.setattr(
-        "src.realtime.websocket.kis_ws_pool", fake_pool, raising=False
+        "src.realtime.websocket_pool.kis_ws_pool", fake_pool, raising=False
     )
     return fake_ws, fake_pool
 

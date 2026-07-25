@@ -3541,7 +3541,8 @@ class TradingScheduler:
         매매 안전성 무영향(사이클38) — WS TICK/risk/order_engine/auth 변경 0.
         """
         from src.api.market_operation import MARKET_OP_TR_ID
-        from src.realtime.websocket import kis_ws, kis_ws_pool
+        from src.realtime.websocket import kis_ws
+        from src.realtime.websocket_pool import kis_ws_pool
 
         if kis_ws is None or not getattr(kis_ws, "_ws", None):
             return 0
