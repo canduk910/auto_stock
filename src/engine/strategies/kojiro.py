@@ -362,6 +362,7 @@ class KojiroStrategy(StrategyBase):
                     self._candidates[ticker] = {
                         "prev_close": prev_close, "atr": atr_val, "stage": stage,
                         "ema_s": ema_s, "ema_m": ema_m, "ema_l": ema_l, "atr_ratio": atr_ratio,
+                        "name": name,
                     }
                     self._held_stage3[ticker] = (stage == 3)
                     held_marked += 1
@@ -397,6 +398,7 @@ class KojiroStrategy(StrategyBase):
                     "prev_close": prev_close, "atr": atr_val, "stage": stage,
                     "ema_s": ema_s, "ema_m": ema_m, "ema_l": ema_l, "atr_ratio": atr_ratio,
                     "sector": await self._fetch_sector(ticker),  # 섹터/테마 캡용
+                    "name": name,
                 }
                 rank_raw[ticker] = self._rank_candidate_components(
                     enriched, stages_series, int(params["stage1_freshness"]))
@@ -645,6 +647,7 @@ class KojiroStrategy(StrategyBase):
                 stage_int = None if (stage is None or (isinstance(stage, float) and pd.isna(stage))) else int(stage)
                 prev_close = int(last["close"])
                 if atr_val > 0 and prev_close > 0:
+                    from src.engine.scanner import resolve_ticker_name
                     self._candidates[ticker] = {
                         "prev_close": prev_close, "atr": atr_val,
                         "stage": stage_int if stage_int is not None else 0,
@@ -652,6 +655,7 @@ class KojiroStrategy(StrategyBase):
                         "ema_l": float(last["ema_l"]),
                         "atr_ratio": atr_val / prev_close,
                         "sector": await self._fetch_sector(ticker),  # 섹터 캡 카운트용(보유)
+                        "name": resolve_ticker_name(ticker),
                     }
                     # tighten-only floor 갱신
                     base = int(pos.buy_price - self.config.params["stop_atr"] * atr_val) if pos else 0
@@ -739,7 +743,9 @@ class KojiroStrategy(StrategyBase):
         )
         from src.engine.scanner import resolve_ticker_name
         self.state.buy_signals.append({
-            "ticker": ticker, "name": resolve_ticker_name(ticker), "price": current_price,
+            "ticker": ticker,
+            "name": self._candidates.get(ticker, {}).get("name") or resolve_ticker_name(ticker),
+            "price": current_price,
             "stage": info["stage"], "atr": int(info["atr"]), "change_rate": 0,
             "time": datetime.now(KST).strftime("%H:%M:%S"),
         })
@@ -896,7 +902,7 @@ class KojiroStrategy(StrategyBase):
         from src.engine.scanner import resolve_ticker_name
         return {
             ticker: {
-                "name": resolve_ticker_name(ticker),  # 종목명 (ticker_names 해소, miss 시 "")
+                "name": info.get("name") or resolve_ticker_name(ticker),  # 저장값 우선, 미저장 시 실시간 폴백
                 "prev_close": info["prev_close"], "atr": int(info["atr"]),
                 "stage": info.get("stage", 0),
                 "ema_s": int(info.get("ema_s", 0)), "ema_m": int(info.get("ema_m", 0)),

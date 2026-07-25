@@ -41,6 +41,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 날짜 | 사이클 | 한 줄 요약 |
 |------|--------|-----------|
+| 2026-07-25 | kojiro 종목명 견고성 | KojiroMonitor 후보 종목명이 정산(20:10 `_reset_daily_state` 의 `ticker_names.clear`)·저녁·주말엔 사라지던 견고성 갭 시정 — 이름을 volatile `ticker_names` 대신 `_candidates[ticker]` 에 prepare/recompute 시점 저장(자기기술적) + `get_targets_status`/buy_signal 저장값 우선·실시간 폴백. 일일 reset 견딤(f6cc0cd 후속). 백엔드 kojiro.py 전용, 관찰성 UI, hot path diff 0 |
 | 2026-07-24 | kojiro 후보 종목명 | KojiroMonitor "후보 종목" 그리드가 종목번호만 표시하던 버그 시정 — 백엔드 `get_targets_status`/buy_signal 에 `resolve_ticker_name(ticker)` 추가 + 프론트 `KojiroMonitor.tsx` `t.name\|\|ticker`(스텁 `prices[ticker]?ticker:ticker` 제거) + `KojiroTarget.name?`. 앞선 funnel COALESCE fix 와 별개인 `targets` 경로 결손. 관찰성 UI, 매매 hot path diff 0 |
 | 2026-07-24 | 화면폭 슬라이더 | 대시보드 나브바에 콘텐츠 폭 슬라이더 신규 — `App.tsx <main>`·나브 컨테이너 `max-w-7xl`(1280px 캡) → 동적 `max(1024px, {60+level*0.4}%)`, **기본 전체폭**(넓은 화면 여백 민원 해소). localStorage(`autostock.contentWidth`) 저장·전 페이지 적용·모바일 미노출. 프론트 전용, 백엔드 diff 0 |
 | 2026-07-24 | backtest DB토글 | `_enqueue_backtest_jobs`(recommendation_engine.py) 가 정적 `.env`(engine.enabled) 대신 `await engine.is_enabled_async()`(DB 우선) 사용 — Settings UI `kis_mcp_enabled` 토글이 재시작 없이 즉시 반영(그전엔 DB=true 여도 backtest 전량 skip=AI자문 부분실명). kojiro 실측 조사서 발견. auto_apply 무접촉, hot path diff 0 |
@@ -55,7 +56,6 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-07-15 | 212 | VB position_ratio 0.5→0.35 + 진입임계 buy_threshold·donchian_period PARAM_RANGES 제외 |
 | 2026-07-15 | 211 | BFB flag_retracement_max 0.382→0.5 + pole_min_return 20→15 (플래그 검출 완화) |
 | 2026-07-14 | 210 | donchian 손절/한도 -6.0 복원(DB) + auto_apply ratchet 차단(_CONSERVATIVE_KEYS 제거) |
-| 2026-07-14 | 209 | donchian max_breakout_extension_pct 0.5→4.0 복원 + PARAM_RANGES 제외 (매수 2차 병목 해소) |
 
 > 사이클 200 이하 및 초기 하네스 구성 전체 이력(verbatim): [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)
 

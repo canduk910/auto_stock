@@ -408,3 +408,79 @@ def test_buy_signal_appends_resolved_name(kojiro, monkeypatch):
     sig = kojiro.state.buy_signals[-1]
     assert sig["ticker"] == "900001"
     assert sig["name"] == "삼성전자"
+
+
+# ── 후보 종목명 견고성 (_candidates 에 name 자기기술 저장) ──
+# 근본 원인 (spec kojiro_name_durable): f6cc0cd 는 get_targets_status/buy_signal 이
+#   API 호출 *시점*에 volatile scanner.ticker_names 로 이름 해소. 그러나 20:10 정산
+#   _reset_daily_state(scheduler.py:4083) 가 ticker_names.clear()+update(STATIC) →
+#   정산 후·저녁·주말엔 STATIC 미시드 후보 이름이 소실 (후보 그리드 종목번호 표시).
+# 시정: 이름을 prepare/recompute 시점에 _candidates[ticker]["name"] 로 저장(자기기술
+#   후보) → 일일 reset 견딤. get_targets_status/buy_signal 은 저장값 우선 + 실시간 폴백.
+# 900001/111111 = STATIC_TICKER_NAMES 미포함 → ticker_names 비면 "" 보장 (Red 검증).
+
+
+async def test_prepare_stores_resolved_name_in_candidates(kojiro, monkeypatch):
+    # R1 (저장): strict entry 등록 시 _candidates[ticker] 에 해소된 종목명 저장.
+    #   현행 f6cc0cd 는 prepare 빌드 dict(kojiro.py:396)에 "name" 키 부재 → None → Red.
+    from src.engine import scanner
+    monkeypatch.setitem(scanner.ticker_names, "900001", "영원무역")
+    await _run_prepare(kojiro, monkeypatch, "900001",
+                       _enriched([2, 3, 6, 1], close=10000, atr=200.0))
+    assert "900001" in kojiro._candidates
+    assert kojiro._candidates["900001"].get("name") == "영원무역"
+
+
+def test_get_targets_status_prefers_stored_name_after_daily_reset(kojiro, monkeypatch):
+    # R2 (핵심 견고성): _candidates[ticker]={.., "name": "영원무역"} + ticker_names 비어도
+    #   (정산 후 volatile 캐시 소실 재현) get_targets_status()[ticker]["name"] == "영원무역".
+    #   현행 f6cc0cd 는 resolve_ticker_name 만 → ticker_names 비어 "" → Red.
+    from src.engine import scanner
+    monkeypatch.setattr(scanner, "ticker_names", {})  # 20:10 정산 clear() 후 상태 재현
+    _seed_candidate(kojiro, "900001", prev_close=60000, atr=1800.0, stage=1)
+    kojiro._candidates["900001"]["name"] = "영원무역"  # prepare 시점 저장된 이름
+    t = kojiro.get_targets_status()["900001"]
+    assert t["name"] == "영원무역"
+
+
+def test_get_targets_status_falls_back_to_live_name_when_unstored(kojiro, monkeypatch):
+    # R3 (폴백): 저장 name 부재/"" + ticker_names[ticker] 시드 → 실시간 해소 폴백.
+    #   f6cc0cd B1 계승 (레거시/미prepare _candidates 호환). Green 이후에도 폴백 보존 가드.
+    from src.engine import scanner
+    monkeypatch.setitem(scanner.ticker_names, "900001", "한샘")
+    _seed_candidate(kojiro, "900001", prev_close=50000, atr=1000.0, stage=1)
+    # _candidates 에 name 미저장 (레거시 후보) → resolve_ticker_name 실시간 폴백
+    t = kojiro.get_targets_status()["900001"]
+    assert t["name"] == "한샘"
+
+
+async def test_recompute_held_atr_stores_resolved_name(kojiro, monkeypatch):
+    # R4 (recompute): recompute_held_atr 재채움 경로도 _candidates 에 name 저장.
+    #   현행 f6cc0cd 는 recompute 빌드 dict(kojiro.py:648)에 "name" 키 부재 → None → Red.
+    from unittest.mock import AsyncMock
+    import src.engine.strategies.kojiro as kmod
+    from src.engine import scanner
+    monkeypatch.setitem(scanner.ticker_names, "900001", "한샘")
+    _pos(kojiro, "900001", buy_price=10000)
+    monkeypatch.setattr("src.db.stock_master_daily.get_recent_daily_normalized",
+                        AsyncMock(return_value=_dummy_candles()))
+    monkeypatch.setattr(kmod, "enrich",
+                        lambda df, cfg: _enriched([1, 2], close=10000, atr=200.0))
+    monkeypatch.setattr(kojiro, "_fetch_sector", AsyncMock(return_value=""))
+    await kojiro.recompute_held_atr()
+    assert "900001" in kojiro._candidates
+    assert kojiro._candidates["900001"].get("name") == "한샘"
+
+
+def test_buy_signal_prefers_stored_name_when_ticker_names_empty(kojiro, monkeypatch):
+    # R5 (buy_signal): _candidates[ticker]["name"] 저장값 우선 (ticker_names 비어도).
+    #   현행 f6cc0cd 는 resolve_ticker_name 만 → ticker_names 비어 "" → Red.
+    from src.engine import scanner
+    monkeypatch.setattr(scanner, "ticker_names", {})  # volatile 캐시 소실 재현
+    _seed_candidate(kojiro, "900001", prev_close=10000)
+    kojiro._candidates["900001"]["name"] = "롯데렌탈"  # prepare 시점 저장된 이름
+    with freeze_time(datetime(2026, 5, 8, 9, 10, tzinfo=KST)):
+        assert kojiro.check_buy_signal("900001", 10100, 10050) == Signal.BUY
+    sig = kojiro.state.buy_signals[-1]
+    assert sig["ticker"] == "900001"
+    assert sig["name"] == "롯데렌탈"
