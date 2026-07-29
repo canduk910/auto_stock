@@ -37,6 +37,7 @@ KST = timezone(timedelta(hours=9))
 # (input_per_1k, output_per_1k)
 # 미등록 모델 → cost_estimate_usd=None + WARNING [openai_pricing_miss]
 _OPENAI_PRICING: dict[str, tuple[float, float]] = {
+    "gpt-5.6-luna": (0.0010, 0.0060),
     "gpt-5.4": (0.0050, 0.0150),
     "gpt-4o": (0.0025, 0.0100),
     "gpt-4o-mini": (0.00015, 0.00060),

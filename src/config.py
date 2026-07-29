@@ -47,7 +47,7 @@ class Settings(BaseSettings):
 
     # OpenAI 파라미터 추천
     openai_api_key: str = ""
-    openai_recommend_model: str = "gpt-5.4-mini-2026-03-17"
+    openai_recommend_model: str = "gpt-5.6-luna"
 
     # 외부 백테스트 서버 (MCP) — Phase 1
     # 운영 EC2 → AWS EC2 backtest 서버. KIS_MCP_ENABLED=true 일 때만 호출.

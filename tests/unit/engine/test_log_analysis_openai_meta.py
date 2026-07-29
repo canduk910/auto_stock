@@ -40,6 +40,17 @@ def test_compute_cost_usd_gpt54_accuracy():
 
 
 # ============================================================
+# 케이스 1-bis: _compute_cost_usd — gpt-5.6-luna 정확도 (2026-07-29 자문 모델 전환)
+# input 1000 / output 500 → (1000/1000 * 0.001) + (500/1000 * 0.006)
+#                          = 0.001 + 0.003 = 0.004
+# ============================================================
+def test_compute_cost_usd_gpt56_luna_accuracy():
+    mod = _import_engine()
+    result = mod._compute_cost_usd("gpt-5.6-luna", input_tokens=1000, output_tokens=500)
+    assert result == Decimal("0.004000"), f"기대 0.004000, 실제 {result}"
+
+
+# ============================================================
 # 케이스 2: _compute_cost_usd — 미등록 모델 → None
 # ============================================================
 def test_compute_cost_usd_unknown_model_returns_none():
@@ -175,11 +186,12 @@ def test_compute_cost_usd_zero_tokens():
 
 
 # ============================================================
-# 케이스 8: _OPENAI_PRICING dict 6 모델 존재 확인 (회귀 가드)
+# 케이스 8: _OPENAI_PRICING dict 7 모델 존재 확인 (회귀 가드)
 # ============================================================
 def test_openai_pricing_dict_has_all_required_models():
     mod = _import_engine()
     required = {
+        "gpt-5.6-luna",
         "gpt-5.4",
         "gpt-4o",
         "gpt-4o-mini",
