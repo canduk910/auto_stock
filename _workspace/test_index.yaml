@@ -316,6 +316,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
@@ -448,14 +449,17 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -677,6 +681,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
@@ -760,10 +765,12 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -1143,6 +1150,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
@@ -1276,12 +1284,15 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -1703,6 +1714,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -1838,15 +1850,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -2265,6 +2280,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -2403,15 +2419,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -2833,6 +2852,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -2970,15 +2990,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -3399,6 +3422,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -3537,15 +3561,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -3669,6 +3696,7 @@ backend:
     - tests/unit/engine/test_cycle149_market_operation_monitor.py
     - tests/unit/engine/test_cycle186_market_op_cb_heuristic.py
     - tests/unit/engine/test_cycle214_h0unmko0_pool.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/routes/test_cycle186_market_op_route.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -3968,6 +3996,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -4103,6 +4132,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -4112,6 +4142,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -4329,6 +4360,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
@@ -4414,11 +4446,13 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -4592,6 +4626,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -4677,6 +4712,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -4859,6 +4895,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
@@ -4944,11 +4981,13 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -5324,6 +5363,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -5461,15 +5501,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -5944,6 +5987,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -6085,10 +6129,12 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -6097,6 +6143,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
@@ -6585,6 +6632,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -6713,10 +6761,12 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -6725,6 +6775,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -7190,6 +7241,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -7332,10 +7384,12 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -7344,6 +7398,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -7570,6 +7625,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -7646,6 +7702,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -7813,6 +7870,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -7889,6 +7947,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -8267,6 +8326,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -8404,15 +8464,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -8631,6 +8694,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -8707,6 +8771,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -8876,6 +8941,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -8953,6 +9019,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -9131,6 +9198,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -9207,6 +9275,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -9375,6 +9444,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -9451,6 +9521,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -9872,6 +9943,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -10013,10 +10085,12 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -10025,6 +10099,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -10210,6 +10285,7 @@ backend:
     - tests/unit/engine/test_cycle161_buy_fill_price_consistency.py
     - tests/unit/engine/test_cycle185_cluster1_reset.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -10271,6 +10347,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
@@ -10360,6 +10437,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -10744,6 +10822,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -10879,15 +10958,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -11301,6 +11383,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -11439,15 +11522,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -11869,6 +11955,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -12007,15 +12094,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -12232,6 +12322,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -12308,6 +12399,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -12683,6 +12775,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -12818,15 +12911,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -13281,6 +13377,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -13412,16 +13509,19 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -13850,6 +13950,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -13988,15 +14089,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -14224,6 +14328,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
@@ -14308,11 +14413,13 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -14834,6 +14941,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
@@ -14887,10 +14995,13 @@ backend:
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
@@ -15059,6 +15170,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -15133,6 +15245,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -15300,6 +15413,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine.py
@@ -15380,6 +15494,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -15548,6 +15663,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -15621,6 +15737,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -15993,6 +16110,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -16130,15 +16248,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -16357,6 +16478,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -16429,10 +16551,12 @@ backend:
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -16605,6 +16729,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -16674,6 +16799,7 @@ backend:
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_kojiro_wiring.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -17046,6 +17172,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -17182,15 +17309,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -17412,6 +17542,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -17489,6 +17620,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -17658,6 +17790,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -17736,6 +17869,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -17871,6 +18005,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -17917,6 +18052,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -17993,6 +18129,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -18176,6 +18313,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_volatility_breakout.py
     - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
@@ -18264,6 +18402,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -18341,6 +18480,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -18514,6 +18654,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
@@ -18674,6 +18815,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -18750,6 +18892,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -19123,6 +19266,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -19260,15 +19404,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -19490,6 +19637,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -19566,6 +19714,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -20024,6 +20173,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -20112,12 +20262,15 @@ backend:
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_order_engine_buy.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -20352,6 +20505,7 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -20390,6 +20544,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
     - tests/unit/engine/test_backtest_poll_loop.py
@@ -20538,6 +20693,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
@@ -20623,11 +20779,13 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -20891,6 +21049,7 @@ backend:
     - tests/unit/ast/test_cycleM0_ast_pg_retry.py
     - tests/unit/ast/test_cycleM5_no_supabase_outside_db.py
     - tests/unit/ast/test_external_llm_reject_patterns.py
+    - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/auth/test_token.py
     - tests/unit/auth/test_token_global_serialization.py
     - tests/unit/auth/test_token_manager_multi.py
@@ -21146,6 +21305,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -21313,11 +21473,13 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_indicators.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -21326,6 +21488,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -21570,6 +21733,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -21655,6 +21819,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -21842,6 +22007,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -21902,6 +22068,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -22069,6 +22236,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -22150,6 +22318,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -22333,6 +22502,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -22393,6 +22563,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -22560,6 +22731,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -22640,6 +22812,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -22811,6 +22984,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -22891,6 +23065,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -23057,6 +23232,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -23133,6 +23309,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -23299,6 +23476,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -23375,6 +23553,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -23541,6 +23720,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -23617,6 +23797,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -23791,6 +23972,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -23864,6 +24046,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -24067,6 +24250,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -24142,6 +24326,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -24279,6 +24464,7 @@ backend:
     - tests/unit/engine/strategies/test_donchian_swing_extension_cap.py
     - tests/unit/engine/strategies/test_donchian_swing_fail_n_days.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -24407,6 +24593,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -24478,6 +24665,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -24574,6 +24762,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -24649,6 +24838,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -24831,6 +25021,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -24906,6 +25097,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -25080,6 +25272,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine.py
@@ -25161,6 +25354,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -25342,6 +25536,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -25418,6 +25613,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -25605,6 +25801,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine.py
@@ -25687,6 +25884,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -25861,6 +26059,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -25890,6 +26089,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_on_tick_selling_skip.py
@@ -26024,9 +26224,11 @@ backend:
     - tests/unit/engine/test_cycleC3_financial_load_task.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -26152,6 +26354,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_on_tick_selling_skip.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -26207,6 +26410,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -26284,6 +26488,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
@@ -26449,6 +26654,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -26523,6 +26729,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -26704,6 +26911,7 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine.py
@@ -26784,10 +26992,12 @@ backend:
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -26962,6 +27172,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
@@ -27047,9 +27258,11 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -27275,6 +27488,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine.py
@@ -27354,6 +27568,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -27524,6 +27739,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
@@ -27609,10 +27825,12 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -27994,6 +28212,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -28131,15 +28350,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -28574,6 +28796,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -28715,10 +28938,12 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -28727,6 +28952,7 @@ backend:
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -29005,6 +29231,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
@@ -29089,9 +29316,11 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -29581,6 +29810,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -29714,15 +29944,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -29900,6 +30133,7 @@ backend:
     - tests/unit/db/test_cycleM5_new_helpers.py
     - tests/unit/engine/test_cycle147_sell_fill_strategy_fallback.py
     - tests/unit/engine/test_cycle161_buy_fill_price_consistency.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -29998,6 +30232,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
@@ -30081,6 +30316,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -30278,6 +30514,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -30352,6 +30589,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -30722,6 +30960,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -30860,15 +31099,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -31311,6 +31553,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -31447,15 +31690,18 @@ backend:
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -31877,6 +32123,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -32012,13 +32259,16 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -33167,6 +33417,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_enqueue_db_toggle.py
@@ -33244,6 +33495,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -33425,6 +33677,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -33504,6 +33757,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -33684,6 +33938,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_backtest_engine.py
@@ -33762,6 +34017,7 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -34131,6 +34387,7 @@ backend:
     - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
+    - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -34269,15 +34526,18 @@ backend:
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
+    - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
@@ -35016,10 +35276,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-24T18:34:05.908918+09:00'
+generated_at: '2026-07-29T19:57:43.792513+09:00'
 stats:
   backend_modules: 119
-  backend_tests: 767
+  backend_tests: 772
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

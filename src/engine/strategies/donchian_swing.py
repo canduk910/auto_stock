@@ -112,6 +112,10 @@ class DonchianSwingStrategy(StrategyBase):
         "stop_atr": 2.0,          # 하드손절 = buy - stop_atr×entry_atr (=atr_trail_mult, dead code 방지)
         "turtle_backstop_pct": -9.0,   # ATR독립 최후 방어 (info=None/재시작/ATR=0, 2ATR보다 넓게)
         "min_vol_floor_pct": 1.0,      # 터틀 sizing 변동성 floor (atr/price<1% → position_ratio fallback)
+        # P1-A (2026-07-29, 사이클 A) — 레이어드 청산 신규 2키. 전략 정체성 상수 —
+        # PARAM_RANGES/INT_PARAMS 미편입 (AI 자동튜닝 제외, 사이클 208/209/212 선례).
+        "breakeven_promote_atr": 1.5,   # 고점이 buy+1.5×entry_atr 도달 시 손절선 buy_price 로 승격
+        "channel_exit_period": 10,      # 10일 저가 채널 이탈 청산 (0=비활성)
     }
 
     def __init__(self, config: StrategyConfig):
@@ -128,6 +132,10 @@ class DonchianSwingStrategy(StrategyBase):
         self._entry_atr: dict[str, float] = {}
         # 사이클 23 P2-2 — ticker -> 진입 시 돌파선 (20일 신고가)
         self._breakout_high: dict[str, int] = {}
+        # P1-A (2026-07-29, 사이클 A-4) — ticker -> 최근 channel_exit_period 영업일 최저가
+        # (당일 제외). recompute_held_atr 가 재도출(재시작/후보이탈 견고성). _entry_atr/
+        # _breakout_high 선례 답습 — _candidates 와 독립, on_tick KIS 신규 호출 금지.
+        self._channel_low: dict[str, int] = {}
         # 단계별 탈락 통계 — prepare() 실행 시마다 갱신, 프론트 깔때기 시각화용
         self._scan_stats: dict = _empty_scan_stats()
         # 사이클 170 카드 A — list_by_filter 단계별 생존 ticker (관찰성 전용).
@@ -712,6 +720,20 @@ class DonchianSwingStrategy(StrategyBase):
             if pos_needs_high_recover and candles:
                 await self._apply_high_since_buy_from_candles(pos, candles, today)
 
+            # P1-A (2026-07-29, A-2) — _breakout_high 재도출 (재시작 후 보유 종목 소실 복구).
+            # 시간 기반 청산(check_exit_signal 2.5) 의 breakout_high 기준선이 재시작으로
+            # 소실되면 분기가 영구 침묵 — buy_date 이전 20일 신고가로 재현. 이미 fetch한
+            # candles 재사용 (KIS 신규 호출 0). in-memory 존재(당일 매수 미재시작) 시 미접촉.
+            if pos and pos.buy_date and candles and ticker not in self._breakout_high:
+                self._rederive_breakout_high(ticker, pos, candles, params["donchian_period"])
+
+            # P1-A (2026-07-29, A-4) — _channel_low 산출 (10일 채널 청산 데이터 소스).
+            # _candidates 와 독립 dict — 후보 이탈/재시작 후에도 견고. on_tick KIS 호출
+            # 금지 — 여기서 이미 fetch 한 candles 재사용.
+            channel_period = int(params.get("channel_exit_period", 0) or 0)
+            if pos and candles and channel_period > 0:
+                self._recompute_channel_low(ticker, candles, channel_period)
+
             # Phase 2A-2 (게이트 1) — 터틀 entry_atr 재도출 (재시작 복구).
             # 진입 시점(buy_date 이전) ATR 재현 → 현재 팽창 ATR 로 손절선 loosen 차단.
             # in-memory _entry_atr 존재(당일 매수 미재시작) 시 미접촉 = 정확 스탬프 보존.
@@ -720,6 +742,47 @@ class DonchianSwingStrategy(StrategyBase):
                 and ticker not in self._entry_atr and candles
             ):
                 self._rederive_entry_atr(ticker, pos, candles, atr_period)
+
+    def _rederive_breakout_high(self, ticker: str, pos, candles: list, donchian_period: int) -> None:
+        """재시작 복구 — buy_date 이전 일봉으로 진입 시점 20일 신고가(`_breakout_high`) 재현.
+
+        P1-A (2026-07-29, A-2). 시간 기반 청산(check_exit_signal 2.5) 의 breakout_high
+        기준선이 재시작 후 소실되는 결함 차단. `_rederive_entry_atr` 선례 답습 — buy_date
+        *이전* 봉만 남겨 donchian_period 개의 최고가를 취한다. 봉 부족 시 미복구.
+        """
+        try:
+            buy_dd = pos.buy_date.strftime("%Y%m%d")
+            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
+            if len(prior) < donchian_period:
+                return
+            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior[:donchian_period]]
+            breakout_high = max(highs) if highs else 0
+            if breakout_high > 0:
+                self._breakout_high[ticker] = breakout_high
+                logger.info(
+                    "[donchian_breakout_high_rederive] %s buy_date=%s breakout_high=%d",
+                    ticker, pos.buy_date, breakout_high,
+                )
+        except Exception:
+            logger.exception("도치안 breakout_high 재도출 실패: %s", ticker)
+
+    def _recompute_channel_low(self, ticker: str, candles: list, channel_period: int) -> None:
+        """최근 channel_period 영업일 저가(당일 제외) 산출 — 10일 채널 청산 데이터 소스.
+
+        P1-A (2026-07-29, A-4). `candles[0]` 이 오늘 부분봉일 수 있어 당일을 제외한
+        최근 channel_period 개 봉의 최저 저가를 취한다. 봉 부족 시 미갱신(기존 값 보존).
+        """
+        try:
+            today_str = datetime.now(KST).strftime("%Y%m%d")
+            relevant = [c for c in candles if str(c.get("stck_bsop_date", "")) != today_str]
+            if len(relevant) < channel_period:
+                return
+            lows = [int(c.get("stck_lwpr", "0") or 0) for c in relevant[:channel_period]]
+            channel_low = min(lows) if lows else 0
+            if channel_low > 0:
+                self._channel_low[ticker] = channel_low
+        except Exception:
+            logger.exception("도치안 channel_low 산출 실패: %s", ticker)
 
     def _rederive_entry_atr(self, ticker: str, pos, candles: list, atr_period: int) -> None:
         """재시작 복구 — buy_date 이전 일봉으로 진입 ATR 재현 (loosen 차단, Phase 2A-2 게이트 1).
@@ -962,6 +1025,19 @@ class DonchianSwingStrategy(StrategyBase):
         if entry_atr > 0:
             stop_atr = float(self.config.params.get("stop_atr", 2.0))
             base_stop = pos.buy_price - stop_atr * entry_atr
+            # P1-A (2026-07-29, A-3) — 브레이크이븐 승격: 고점이 매수가 + 1.5×entry_atr
+            # 이상 도달한 이력이 있으면 하드손절선을 매수가로 승격 (tighten-only, entry_atr
+            # 존재 시에만). 손절선을 넓히는 방향은 절대 없음(max 연산).
+            breakeven_mult = float(self.config.params.get("breakeven_promote_atr", 0) or 0)
+            if breakeven_mult > 0 and pos.high_since_buy >= pos.buy_price + breakeven_mult * entry_atr:
+                promoted_stop = max(base_stop, pos.buy_price)
+                if promoted_stop != base_stop:
+                    logger.info(
+                        "[donchian_breakeven_promote] %s 고점(%d) ≥ 매수가(%d)+%.1f×ATR(%d) → 손절선 %d→%d",
+                        ticker, pos.high_since_buy, pos.buy_price, breakeven_mult,
+                        int(entry_atr), int(base_stop), int(promoted_stop),
+                    )
+                base_stop = promoted_stop
             if base_stop > 0 and current_price <= base_stop:
                 logger.info("[donchian_turtle_stop] %s 매수가(%d) - %.1f×ATR(%d) = %d / 현재가 %d",
                             ticker, pos.buy_price, stop_atr, int(entry_atr), int(base_stop), current_price)
@@ -992,9 +1068,24 @@ class DonchianSwingStrategy(StrategyBase):
                 )
                 return Signal.STOP_LOSS
 
+        # 2.6) P1-A (2026-07-29, A-4) — 10일 저가 채널 이탈 청산 (시간청산 뒤, ATR 트레일링 앞).
+        # 데이터 소스는 recompute_held_atr 가 prepare/recompute 시점 일봉으로 산출 —
+        # on_tick KIS 신규 호출 없음. channel_exit_period=0 이면 비활성(opt-out).
+        channel_period = int(self.config.params.get("channel_exit_period", 0) or 0)
+        channel_low = self._channel_low.get(ticker, 0)
+        if channel_period > 0 and channel_low > 0 and current_price < channel_low:
+            logger.info(
+                "[donchian_channel_exit] %s 현재가(%d) < 최근 %d일 채널 저가(%d)",
+                ticker, current_price, channel_period, channel_low,
+            )
+            return Signal.TRAILING_STOP
+
         # 2) ATR 트레일링 — high_since_buy 기준 (RiskManager가 매 tick 갱신)
+        # P1-A (2026-07-29, A-1) — _candidates miss(후보 이탈) 시 _entry_atr 폴백.
+        # _candidates 는 매일 prepare 가 재구성 → 보유 종목이 20일 신고가 후보에서
+        # 이탈하면 info=None → atr=0 → 트레일링 영구 침묵하던 결함 시정.
         info = self._candidates.get(ticker)
-        atr = info["atr"] if info else 0
+        atr = info["atr"] if info else self._entry_atr.get(ticker, 0)
         if atr > 0 and pos.high_since_buy > 0:
             mult = self.config.params["atr_trail_mult"]
             chandelier = pos.high_since_buy - atr * mult
@@ -1062,5 +1153,8 @@ class DonchianSwingStrategy(StrategyBase):
         return 0
 
     def on_position_closed(self, ticker: str) -> None:
-        """전량 청산 시 터틀 entry_atr 정리 (재진입 stale 스냅샷 차단)."""
+        """전량 청산 시 터틀 entry_atr + 채널 저가 정리 (재진입 stale 스냅샷 차단)."""
         self._entry_atr.pop(ticker, None)
+        # P1-A (2026-07-29, A-4) — _channel_low 는 보유 중에만 유효한 멀티데이 상태.
+        # 전량 청산 시 정리 (일일 리셋 아님 — 재진입 시 recompute_held_atr 재산출).
+        self._channel_low.pop(ticker, None)

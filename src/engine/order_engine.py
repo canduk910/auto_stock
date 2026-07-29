@@ -85,6 +85,10 @@ class OrderEngine:
         # 체결통보가 place_order 응답보다 먼저 도착해 COMPLETED row를 직접 INSERT한 order_no.
         # 뒤늦게 도착한 execute_buy/execute_sell이 PENDING row를 추가 INSERT하는 것을 막기 위함.
         self._completed_orders: set[str] = set()
+        # P1-B (2026-07-29) — 전량 체결 완료된 order_no 멱등 가드. 사이클 30 `_completed_orders`
+        # (선행 race 보정 INSERT 용도) 와 분리 — 후속 중복 체결통보를 즉시 무시해
+        # momentum 하드코딩 폴백으로 타 전략 포지션이 실명되는 결함(377450 실사고) 차단.
+        self._completed_buy_orders: set[str] = set()
         # 사이클 15-A (2026-05-19) — 매도 체결 후 WS unsubscribe hook 의 pending_next_day_clear 조회 provider.
         # scheduler 가 setattr 로 주입. 기본은 빈 set 반환 (테스트/단독 사용 안전).
         self._pending_next_day_clear_provider = lambda: set()
@@ -946,8 +950,16 @@ class OrderEngine:
         가드 매트릭스:
           - race: 체결통보가 REST 응답보다 먼저 도착 → `_completed_orders` set 등록 후
             `update_trade_status` UPDATE 영향 0건 시 보정 INSERT (사이클 30 영속).
+          - **멱등 (P1-B, 2026-07-29, B-1)**: 전량 체결 완료된 order_no 의 후속 중복 체결통보는
+            `_completed_buy_orders` (사이클 30 `_completed_orders` 와 별도 목적 — race 보정용이
+            아닌 순수 멱등 가드) 로 즉시 무시. 377450 실사고 — 동일 order_no 2차 통보가
+            매핑 pop 이후 도착 시 momentum 하드코딩 폴백으로 kojiro 포지션이 실명되던 결함 차단.
           - strategy 복구 (사이클 147): `_order_strategy` 매핑 dict miss 시
             trade_history PENDING row 영역 lookup 폴백 → momentum 하드코딩 최후 폴백.
+          - **폴백 안전 (P1-B, B-2)**: momentum 하드코딩 폴백 직전, ticker 가 이미 어느
+            전략이든 보유 중이면 덮어쓰기 대신 skip (기존 포지션 보존).
+          - **폴백 가시화 (P1-B, B-3)**: B-1/B-2 미해당인데도 momentum 폴백으로 신규
+            포지션이 등록되면 `system_logs` CRITICAL 1행 (fire-and-forget, hot path 블로킹 0).
           - 체결가 정합 (사이클 161): `update_trade_status(..., price=price)` 인자 명시 의무.
             CNTG_UNPR (handler.py fields[10]) = trade_history.price 영구 정합
             (005940 6/16 BUY 50원 차이 시정 영속).
@@ -960,6 +972,17 @@ class OrderEngine:
           사이클 102 G-REJECT-1 callback exception raise / 사이클 147 strategy fallback /
           사이클 161 price 정합 / 사이클 163 DB 격리 chain.
         """
+        if order_no in self._completed_buy_orders:
+            # P1-B (B-1) — 전량 체결 완료된 order_no 의 후속 통보. positions/trade_history/
+            # pending 매핑 무변경 (이미 정리 완료) + 즉시 return.
+            logger.info(
+                "[buy_fill_duplicate_ignored] order_no=%s ticker=%s price=%d qty=%d "
+                "— 전량 체결 완료 후 중복 체결통보 무시",
+                order_no, ticker, price, quantity,
+            )
+            return
+
+        orphan_momentum_fallback = False
         strategy_id = self._order_strategy.get(order_no)
         if strategy_id is None:
             # 매핑 dict miss — boot/reboot race. trade_history PENDING row 영역 strategy 복구.
@@ -967,11 +990,21 @@ class OrderEngine:
                 ticker, order_no, TradeType.BUY,
             )
             if strategy_id is None:
+                # P1-B (B-2) — momentum 하드코딩 폴백 직전, ticker 가 이미 어느 전략이든
+                # 보유 중이면 덮어쓰기 대신 skip (기존 포지션 보존, 377450 실사고 재현 차단).
+                if self.registry.is_ticker_held_by_any(ticker):
+                    logger.error(
+                        "[buy_fill_fallback_held_conflict] order_no=%s ticker=%s — 매핑 dict/"
+                        "trade_history 모두 miss + 이미 타 전략 보유 중 → momentum 폴백 skip",
+                        order_no, ticker,
+                    )
+                    return
                 logger.warning(
                     "[buy_fill_strategy_lookup_fallback] order_no=%s ticker=%s — 매핑 dict miss + trade_history miss → momentum 폴백",
                     order_no, ticker,
                 )
                 strategy_id = "momentum"
+                orphan_momentum_fallback = True
             else:
                 logger.info(
                     "[buy_fill_strategy_lookup_recovered] order_no=%s ticker=%s strategy=%s — 매핑 dict miss + trade_history 복구",
@@ -996,6 +1029,15 @@ class OrderEngine:
             )
             state.fill_count_today += 1
             logger.info("매수 체결 → 포지션 등록: %s %d주 @ %d (전략: %s)", t(ticker), total_filled, price, strategy_id)
+            if orphan_momentum_fallback:
+                # P1-B (B-3) — B-1/B-2 미해당인데도 momentum 폴백으로 신규 포지션 등록됨
+                # (진짜 고아 체결). 운영자 즉시 인지용 CRITICAL — fire-and-forget, hot path 블로킹 0.
+                asyncio.create_task(write_log(
+                    "CRITICAL",
+                    f"[buy_fill_fallback_orphan] order_no={order_no} ticker={ticker} "
+                    f"strategy=momentum(폴백) — 매핑/trade_history 모두 miss + 미보유 → "
+                    f"신규 포지션 등록됨. 진짜 고아 체결 여부 즉시 확인 필요",
+                ))
         else:
             # 추가 체결 (부분 체결 이후) → 수량/가격 갱신
             pos.quantity = total_filled
@@ -1100,6 +1142,9 @@ class OrderEngine:
             self._order_qty.pop(order_no, None)
             self._order_strategy.pop(order_no, None)
             self._order_ticker.pop(order_no, None)
+            # P1-B (B-1) — 전량 체결 처리 완료 시점 동기 등록. 매핑 pop 이후 도착하는
+            # 동일 order_no 후속 체결통보를 함수 진입부에서 즉시 무시하기 위한 멱등 마커.
+            self._completed_buy_orders.add(order_no)
             # 매수 체결 → 가용액이 변동했으므로 캐시 무효화
             state.cached_buyable_at = 0.0
             logger.info("매수 전량 체결: %s %d주 @ %d (전략: %s)", t(ticker), total_filled, price, strategy_id)
@@ -1314,9 +1359,12 @@ class OrderEngine:
         사이클 54 (2026-06-03): NXT 다운그레이드 로그 cap set 동행 clear.
         사이클 55 R-1 (2026-06-03): _market_closed_blocked* 2 필드 직접 clear →
             self._sell_rejection.reset_daily() 4 필드 일괄 위임 (사이클 48 stale_tracker 패턴).
+        P1-B (2026-07-29): `_completed_buy_orders` 동행 clear (무한 성장 금지, 매핑 dict 4종과
+            동일 일일 정리 주기 — order_no 는 하루 단위로만 유일성 보장).
         """
         self._sell_rejection.reset_daily()  # 4 필드 (_blocked_until / _blocked_reason / _logged_today / _history) 일괄 clear
         self._nxt_downgrade_logged_today.clear()  # 사이클 54 유지 (사이클 56-C 통합 완료)
+        self._completed_buy_orders.clear()  # P1-B (B-1) 멱등 마커 일일 정리
 
     async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
         """미체결 잔량을 취소한다."""
