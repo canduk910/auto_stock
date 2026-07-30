@@ -302,6 +302,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -678,6 +680,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -1136,6 +1140,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -1700,6 +1706,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -2266,6 +2274,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -2838,6 +2848,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -3408,6 +3420,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -3982,6 +3996,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -4357,6 +4373,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -4623,6 +4641,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -4892,6 +4912,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -5349,6 +5371,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -5973,6 +5997,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -6619,6 +6645,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -7227,6 +7255,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -7622,6 +7652,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -7867,6 +7899,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -8312,6 +8346,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -8691,6 +8727,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -8938,6 +8976,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -9195,6 +9235,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -9441,6 +9483,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -9929,6 +9973,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -10318,7 +10364,9 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
     - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
+    - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
@@ -10329,16 +10377,21 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/strategies/test_cycle119_donchian_scan_universe.py
     - tests/unit/engine/strategies/test_cycle123_donchian_db_high.py
+    - tests/unit/engine/strategies/test_cycle125_vcp_atr_db_hit.py
     - tests/unit/engine/strategies/test_cycle151_4_strategies_price_filter.py
     - tests/unit/engine/strategies/test_cycle153_donchian_index_filter.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -10348,6 +10401,9 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
     - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
+    - tests/unit/engine/strategies/test_pr15_review_fixes.py
+    - tests/unit/engine/strategies/test_vcp_breakout.py
+    - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
@@ -10385,6 +10441,7 @@ backend:
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
     - tests/unit/engine/test_cycle214_h0unmko0_pool.py
+    - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10808,6 +10865,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -11370,6 +11429,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -11941,6 +12002,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -12319,6 +12382,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -12761,6 +12826,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -13363,6 +13430,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -13936,6 +14005,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -14325,6 +14396,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -14933,6 +15006,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -15167,6 +15242,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -15410,6 +15487,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -15660,6 +15739,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -16096,6 +16177,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -16473,6 +16556,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
@@ -16726,6 +16811,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -17158,6 +17245,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -17539,6 +17628,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -17787,6 +17878,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -18049,6 +18142,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -18309,6 +18404,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -18477,6 +18574,8 @@ backend:
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -18812,6 +18911,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -19252,6 +19353,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -19634,6 +19737,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -20166,6 +20271,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_extension_cap.py
@@ -20440,6 +20547,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/test_auto_apply_recommendations.py
     - tests/unit/engine/test_boot_manager_extraction.py
     - tests/unit/engine/test_boot_preissue_tokens.py
@@ -20541,6 +20649,7 @@ backend:
     transitive_tests:
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -20690,6 +20799,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -21291,6 +21402,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -21730,6 +21843,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -22004,6 +22119,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -22233,6 +22350,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -22499,6 +22618,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -22728,6 +22849,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -22981,6 +23104,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -23229,6 +23354,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -23473,6 +23600,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -23717,6 +23846,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -23969,6 +24100,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -24150,6 +24283,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/test_cycle185_cluster1_reset.py
@@ -24247,6 +24381,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -24509,6 +24644,8 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -24761,6 +24898,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/test_auto_apply_recommendations.py
@@ -25018,6 +25157,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -25269,6 +25410,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -25434,6 +25577,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
@@ -25533,6 +25677,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -25798,6 +25943,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -26045,6 +26192,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -26407,6 +26556,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -26651,6 +26802,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -26902,6 +27055,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -27169,6 +27324,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -27485,6 +27642,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -27736,6 +27895,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -28198,6 +28359,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -28782,6 +28945,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -29228,6 +29393,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -29796,6 +29963,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -30229,6 +30398,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -30511,6 +30682,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -30946,6 +31119,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -31539,6 +31714,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -32109,6 +32286,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -33414,6 +33593,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -33674,6 +33855,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -33935,6 +34118,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
     - tests/unit/engine/strategies/test_kojiro_sector_cap.py
@@ -34373,6 +34558,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
+    - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
+    - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -35276,10 +35463,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-29T19:57:43.792513+09:00'
+generated_at: '2026-07-30T07:30:13.674494+09:00'
 stats:
   backend_modules: 119
-  backend_tests: 772
+  backend_tests: 774
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

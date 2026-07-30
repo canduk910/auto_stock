@@ -2248,6 +2248,16 @@ class TradingScheduler:
                 except Exception:
                     logger.exception("%s recompute_held_atr 실패", _sid)
 
+        # 사이클 C (2026-07-30) — VCP 보유 종목 high_since_buy 재시작 복구.
+        # 브레이크이븐 승격 래치(C-V1)의 데이터 소스 — 미배선 시 recompute 가 dead code 로
+        # 남아 재시작 후 고점 동결 → 래치 미형성. donchian 은 recompute_held_atr 내장이라 별도.
+        _vcp = self.registry.get("vcp_breakout")
+        if _vcp and hasattr(_vcp, "recompute_high_since_buy"):
+            try:
+                await _vcp.recompute_high_since_buy()
+            except Exception:
+                logger.exception("vcp_breakout recompute_high_since_buy 실패")
+
     async def _sync_orders_to_db(self, orders: list[dict]) -> None:
         """KIS 주문체결내역을 DB trade_history에 동기화한다.
 

@@ -129,6 +129,10 @@ class VcpBreakoutStrategy(StrategyBase):
         "stop_loss_rate": -7.0,
         "atr_period": 14,
         "atr_trail_mult": 2.0,
+        # 사이클 C (2026-07-30) — 브레이크이븐 승격 (default-off 배포, live ATR 래치 필수).
+        # 0.0 = 비활성 기본. 활성값 1.5 는 donchian D+1 실측 게이트 통과 후 DB 주입.
+        # PARAM_RANGES/INT_PARAMS 미편입 (청산 정체성 상수).
+        "breakeven_promote_atr": 0.0,
         "reentry_cooldown_days": 7,
         # 유니버스
         "min_market_cap": 100_000_000_000,
@@ -148,6 +152,8 @@ class VcpBreakoutStrategy(StrategyBase):
         self._prev_price: dict[str, int] = {}
         self._cooldown_until: dict[str, date] = {}
         self._scan_stats: dict = _empty_scan_stats()
+        # 사이클 C — 브레이크이븐 승격 boolean 래치 (live ATR 팽창 un-latch 병리 방지)
+        self._breakeven_latched: set[str] = set()
 
     # ------------------------------------------------------------------
     # prepare — 일봉 220일 → 추세/베이스/pullback/거래량 수축 자동 검출
@@ -1019,6 +1025,30 @@ class VcpBreakoutStrategy(StrategyBase):
 
         info = self._candidates.get(ticker)
 
+        # 1.5) 브레이크이븐 승격 (사이클 C, default-off — live ATR 래치, tighten-only)
+        # VCP 는 `_candidates[ticker]["atr14"]` live ATR 을 쓰므로 승격 후 ATR 이 팽창하면
+        # `buy+mult×atr` 조건이 다시 거짓이 되는 un-latch 병리가 생긴다 (donchian 의
+        # entry_atr 스냅샷과 다름) — boolean 래치로 최초 관측 후 ATR 무관 유지.
+        breakeven_mult = float(self.config.params.get("breakeven_promote_atr", 0) or 0)
+        if breakeven_mult > 0:
+            atr_live = info.get("atr14", 0) if info else 0
+            if (
+                ticker not in self._breakeven_latched
+                and atr_live > 0
+                and pos.high_since_buy >= pos.buy_price + breakeven_mult * atr_live
+            ):
+                self._breakeven_latched.add(ticker)
+                logger.info(
+                    "[vcp_breakeven_promote] %s 고점(%d) ≥ 매수가(%d)+%.1f×ATR(%d) → 래치",
+                    ticker, pos.high_since_buy, pos.buy_price, breakeven_mult, int(atr_live),
+                )
+            if ticker in self._breakeven_latched and current_price <= pos.buy_price:
+                logger.info(
+                    "[vcp_breakeven_promote] %s 래치 승격 발화 — 현재가(%d) ≤ 매수가(%d)",
+                    ticker, current_price, pos.buy_price,
+                )
+                return Signal.STOP_LOSS
+
         # 2) 베이스 하단 이탈
         if info and info.get("base_low") and current_price < info["base_low"]:
             logger.info(
@@ -1091,8 +1121,108 @@ class VcpBreakoutStrategy(StrategyBase):
         except Exception:
             logger.warning("[vcp] 영업일 정정 실패 (ticker=%s) — 근사값 유지", ticker)
 
+    async def recompute_high_since_buy(self) -> None:
+        """보유 종목의 `high_since_buy` 를 매수일~전영업일 일봉 high max 로 보정.
+
+        사이클 C (C-V4) — donchian_swing `recompute_high_since_buy` 패턴 이식. 재시작 시
+        시세 미수신이 누적되어 `high_since_buy` 가 매수가 부근에 동결되면 브레이크이븐
+        래치(C-V1)가 형성되지 않는 결함을 예방한다.
+
+        sequential await — KIS Rate Limit 안전(`asyncio.gather` 등 병렬 금지). 일봉
+        fetch 예외/빈 응답은 해당 종목만 skip, 다른 포지션은 계속.
+        """
+        from src.api.condition import fetch_daily_candles
+
+        params = self.config.params
+        ema_long = params["ema_long"]
+        base_max = params["base_max_days"]
+        today = datetime.now(KST).date()
+
+        for ticker in list(self.state.positions.keys()):
+            pos = self.state.positions.get(ticker)
+            if not pos:
+                continue
+            if pos.buy_date >= today:
+                if pos.buy_date > today:
+                    logger.warning(
+                        "VCP high_since_buy 보정 skip — buy_date 비정상(미래): "
+                        "%s buy_date=%s today=%s",
+                        ticker, pos.buy_date, today,
+                    )
+                continue
+
+            days_held = (today - pos.buy_date).days
+            fetch_days = max(days_held + 5, ema_long + 5, base_max + 5, 10)
+            try:
+                candles = await fetch_daily_candles(ticker, days=fetch_days)
+            except Exception:
+                logger.exception("VCP high_since_buy 보정 일봉 fetch 실패: %s", ticker)
+                continue
+            if not candles:
+                continue
+            await self._apply_high_since_buy_from_candles(pos, candles, today)
+
+    async def _apply_high_since_buy_from_candles(self, pos, candles: list[dict], today) -> None:
+        """일봉 응답에서 매수일 < bsop_date < today 범위 high max 를 추출해 보정.
+
+        보정값이 기존 high_since_buy 초과일 때만 갱신 + DB UPDATE + system_logs 1행.
+        donchian_swing `_apply_high_since_buy_from_candles` 동형 (C-V4).
+        """
+        from datetime import date as _date
+        eligible_highs: list[int] = []
+        for c in candles:
+            bsop = c.get("stck_bsop_date") or ""
+            if len(bsop) != 8 or not bsop.isdigit():
+                continue
+            try:
+                bd = _date(int(bsop[:4]), int(bsop[4:6]), int(bsop[6:8]))
+            except (ValueError, KeyError):
+                continue
+            # 경계 엄격: 매수일 당일/오늘 모두 제외
+            if not (pos.buy_date < bd < today):
+                continue
+            try:
+                hi = int(c.get("stck_hgpr", "0"))
+            except (TypeError, ValueError):
+                continue
+            if hi > 0:
+                eligible_highs.append(hi)
+
+        if not eligible_highs:
+            return
+        candidate = max(eligible_highs)
+        if candidate <= pos.high_since_buy:
+            return
+
+        prev = pos.high_since_buy
+        pos.high_since_buy = candidate
+        logger.info(
+            "VCP high_since_buy 보정: %s %d → %d "
+            "(매수일 %s 이후 %d영업일 일별 high max)",
+            pos.ticker, prev, candidate, pos.buy_date, len(eligible_highs),
+        )
+        # DB 영속화 + system_logs (fire-and-forget — 실패해도 메모리 보정은 유지)
+        try:
+            from src.db.positions import update_high
+            await update_high(pos.ticker, candidate)
+        except Exception:
+            logger.exception("VCP high_since_buy DB UPDATE 실패: %s", pos.ticker)
+        try:
+            from src.db.system_logs import write_log
+            await write_log(
+                "INFO",
+                f"[high_since_buy_recover] ticker={pos.ticker} prev={prev} "
+                f"new={candidate} days={len(eligible_highs)} buy_date={pos.buy_date}",
+            )
+        except Exception:
+            pass
+
     def on_position_closed(self, ticker: str) -> None:
-        """사이클 191 — 포지션 청산 시 재진입 쿨다운 등록 (VCP override, BFB 패턴 답습)."""
+        """사이클 191 — 포지션 청산 시 재진입 쿨다운 등록 (VCP override, BFB 패턴 답습).
+
+        사이클 C (C-V5) — 브레이크이븐 래치 정리 동행 (재진입 stale 차단).
+        """
+        self._breakeven_latched.discard(ticker)
         self.register_cooldown_after_exit(ticker)
         coro = self._refine_cooldown_business_days(ticker)
         try:

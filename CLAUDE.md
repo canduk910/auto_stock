@@ -41,6 +41,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 날짜 | 사이클 | 한 줄 요약 |
 |------|--------|-----------|
+| 2026-07-30 | 사이클 C 브레이크이븐 확산 | domain-consult 채택 — VCP/BFB 에 브레이크이븐 승격(1.5N, live-ATR un-latch 병리 방지 boolean 래치 + tighten-only) **default-off(`breakeven_promote_atr=0.0`) 배포** + VCP `recompute_high_since_buy` 이식·부팅 훅 배선(C-V6 dead code 가드). kojiro 는 FREEZE 표본 오염 판정으로 8월 하순 보류, 2단계 ratchet 기각. 활성화 게이트 = donchian 실측(승격 발화+whipsaw 부재) 후 DB 토글. 안전성 5영역 diff 0, 백엔드 4,019 PASS |
 | 2026-07-29 | P1 복기 결함 2건 | 주간 복기(실현 -24,800원 중 79%가 donchian 트레일링 미발화) → A: donchian 레이어드 청산(`_entry_atr` 트레일 폴백 + `_breakout_high` 재도출 + 브레이크이븐 승격 1.5N + 10일 채널 청산, 신규 2키 PARAM_RANGES 미편입) + B: 체결통보 중복 수신 멱등 가드(`_completed_buy_orders`) + momentum 폴백 held-conflict skip + 고아 CRITICAL(377450 실사고 재발 차단). 매매 안전성 4영역 diff 0, 백엔드 3,996 PASS. 자문 모델 gpt-5.6-luna 전환 동반 |
 | 2026-07-25 | market_op import 시정 | `_subscribe_market_operation_tickers` 함수-로컬 import 가 `from src.realtime.websocket import kis_ws, kis_ws_pool` 로 매 호출 ImportError(kis_ws_pool 은 websocket_pool 정의) → cycle214 이래 H0UNMKO0 후보/보유 종목별 구독 100% 사망(07-24 로그분석 발견 117건=일일 ERROR 94%, 만성). import 2줄 분리 시정 + kojiro 퍼널 step5 라벨 4.5→6.0% 정합. 매매 hot path diff 0(손절=시세틱/체결통보 무관), cycle214 patch 경로 적응 3건, 회귀 가드 5(런타임 ImportError·AST import 경로·kojiro 라벨) |
 | 2026-07-25 | kojiro 종목명 견고성 | KojiroMonitor 후보 종목명이 정산(20:10 `_reset_daily_state` 의 `ticker_names.clear`)·저녁·주말엔 사라지던 견고성 갭 시정 — 이름을 volatile `ticker_names` 대신 `_candidates[ticker]` 에 prepare/recompute 시점 저장(자기기술적) + `get_targets_status`/buy_signal 저장값 우선·실시간 폴백. 일일 reset 견딤(f6cc0cd 후속). 백엔드 kojiro.py 전용, 관찰성 UI, hot path diff 0 |
@@ -55,7 +56,6 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-07-15 | C1~C3 | 퀀트 재무필터 Phase 1 — 마법공식+F-Score-7 인프라 (관찰 전용, 기본 OFF) |
 | 2026-07-15 | 214 | H0UNMKO0 후보 구독 풀 분산 + cap 20→60 (41-cap 드롭 시정) |
 | 2026-07-15 | 213 | LTV 재진입 쿨다운 2영업일 신설 (상한가 면제 근사, whipsaw 차단) |
-| 2026-07-15 | 212 | VB position_ratio 0.5→0.35 + 진입임계 buy_threshold·donchian_period PARAM_RANGES 제외 |
 
 > 사이클 200 이하 및 초기 하네스 구성 전체 이력(verbatim): [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)
 

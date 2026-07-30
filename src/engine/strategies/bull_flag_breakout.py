@@ -104,6 +104,9 @@ class BullFlagBreakoutStrategy(StrategyBase):
         "stop_loss_rate": -5.0,
         "atr_period": 14,
         "atr_trail_mult": 2.0,
+        # 사이클 C (2026-07-30) — 브레이크이븐 승격 (default-off 배포, VCP 동형 live ATR 래치).
+        # 0.0 = 비활성 기본. PARAM_RANGES/INT_PARAMS 미편입 (청산 정체성 상수).
+        "breakeven_promote_atr": 0.0,
         "max_hold_days": 5,
         "reentry_cooldown_days": 3,
         # 유니버스
@@ -132,6 +135,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # 사이클 23 P2-1 — ticker -> 첫 돌파 감지 시각 (retention 대기용)
         self._breakout_first_seen: dict[str, datetime] = {}
         self._scan_stats: dict = _empty_scan_stats()
+        # 사이클 C — 브레이크이븐 승격 boolean 래치 (live ATR 팽창 un-latch 병리 방지)
+        self._breakeven_latched: set[str] = set()
 
     # ------------------------------------------------------------------
     # prepare — 일봉 fetch → 폴/플래그 자동 검출
@@ -900,6 +905,29 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         info = self._candidates.get(ticker)
 
+        # 1.5) 브레이크이븐 승격 (사이클 C, default-off — live ATR 래치, tighten-only)
+        # VCP C-V1 동형 — `_candidates[ticker]["atr14"]` live ATR 사용, 승격 후 ATR 팽창
+        # 시 조건이 다시 거짓이 되는 un-latch 병리 방지를 위한 boolean 래치.
+        breakeven_mult = float(self.config.params.get("breakeven_promote_atr", 0) or 0)
+        if breakeven_mult > 0:
+            atr_live = info.get("atr14", 0) if info else 0
+            if (
+                ticker not in self._breakeven_latched
+                and atr_live > 0
+                and pos.high_since_buy >= pos.buy_price + breakeven_mult * atr_live
+            ):
+                self._breakeven_latched.add(ticker)
+                logger.info(
+                    "[bfb_breakeven_promote] %s 고점(%d) ≥ 매수가(%d)+%.1f×ATR(%d) → 래치",
+                    ticker, pos.high_since_buy, pos.buy_price, breakeven_mult, int(atr_live),
+                )
+            if ticker in self._breakeven_latched and current_price <= pos.buy_price:
+                logger.info(
+                    "[bfb_breakeven_promote] %s 래치 승격 발화 — 현재가(%d) ≤ 매수가(%d)",
+                    ticker, current_price, pos.buy_price,
+                )
+                return Signal.STOP_LOSS
+
         # 2) 플래그 하단 이탈
         if info and info.get("flag_low") and current_price < info["flag_low"]:
             logger.info(
@@ -996,8 +1024,12 @@ class BullFlagBreakoutStrategy(StrategyBase):
         self._breakout_first_seen.clear()
 
     def on_position_closed(self, ticker: str) -> None:
-        """사이클 185 — 포지션 청산 시 partial_exit 보유결합 상태 정리 + 재진입 쿨다운 등록 (사이클 191)."""
+        """사이클 185 — 포지션 청산 시 partial_exit 보유결합 상태 정리 + 재진입 쿨다운 등록 (사이클 191).
+
+        사이클 C (C-B4) — 브레이크이븐 래치 정리 동행 (재진입 stale 차단).
+        """
         self._partial_exit.pop(ticker, None)
+        self._breakeven_latched.discard(ticker)
         self.register_cooldown_after_exit(ticker)
         coro = self._refine_cooldown_business_days(ticker)
         try:
