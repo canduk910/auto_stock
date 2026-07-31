@@ -254,6 +254,11 @@ async def _build_buy_block_status() -> BuyBlockStatusResponse:
 
     `get_current_regime().get_buy_block_state()` 가 진실의 원천 — DB 조회 1회 + 메모리 regime
     평가 1회로 구성. empty regime / fetch 실패 graceful.
+
+    사이클 D (2026-07-31) — `data_available`/`guard_inert` 관찰성 필드 추가.
+    `data_available = regime.has_regime_data`, `guard_inert = mode != "OFF" and
+    not data_available` (가드 설정됐으나 매크로 데이터 미유입으로 무력). 기존
+    mode/blocked/reasons/soft_multiplier 로직은 완전 무변경.
     """
     from src.engine import market_regime as mr_mod
 
@@ -266,7 +271,11 @@ async def _build_buy_block_status() -> BuyBlockStatusResponse:
         logger.exception("[buy_block] state 조회 실패 — HARD/기본 fallback")
         state = mr_mod.BuyBlockState(
             mode=mode, blocked=False, soft_multiplier=1.0, reasons=[],
+            data_available=regime.has_regime_data,
         )
+
+    data_available = regime.has_regime_data
+    guard_inert = state.mode != "OFF" and not data_available
 
     return BuyBlockStatusResponse(
         mode=state.mode,  # type: ignore[arg-type]
@@ -279,6 +288,8 @@ async def _build_buy_block_status() -> BuyBlockStatusResponse:
         blocked=state.blocked,
         reasons=list(state.reasons),
         soft_multiplier=state.soft_multiplier,
+        data_available=data_available,
+        guard_inert=guard_inert,
     )
 
 

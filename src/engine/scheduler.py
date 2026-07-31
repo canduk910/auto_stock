@@ -2130,6 +2130,22 @@ class TradingScheduler:
             regime = MarketRegime.empty()
         set_current_regime(regime)
 
+        # 사이클 D (2026-07-31) — 레짐 가드 silent inert 가시화 (관찰성 전용).
+        # 매크로 데이터 미유입인데 가드 모드가 OFF 가 아니면(설정은 됐으나 무력)
+        # 운영자 경보. blocked/soft_multiplier 평가 로직에는 영향 없음(fail-open 보존).
+        try:
+            from src.db.system_config import get_buy_block_mode
+
+            mode = await get_buy_block_mode()
+            if not regime.has_regime_data and mode != "OFF":
+                logger.warning(
+                    "[regime_guard_inert] mode=%s 설정됐으나 매크로 데이터 미유입 "
+                    "→ 가드 무력, 데이터 복구 전까지 매수 무제한 통과",
+                    mode,
+                )
+        except Exception:
+            logger.exception("[regime_guard_inert] mode 조회 실패 — 경보 skip")
+
         # DB snapshot INSERT — empty regime 은 persist_snapshot 내부에서 skip
         try:
             from src.engine.scanner import KST_TZ as _KST_TZ_REGIME

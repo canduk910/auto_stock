@@ -41,6 +41,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 날짜 | 사이클 | 한 줄 요약 |
 |------|--------|-----------|
+| 2026-07-31 | 사이클 D 레짐 가드 무력 가시화 | dkstock.cloud 인증서 07-27 만료(`certificate has expired`) → 레짐 매수 가드가 4일간 silent 무력화됐으나 경보 0(대시보드 "정상+평온" 오인). 근본 결함 = `get_buy_block_state()` 가 "데이터 있고 평온"과 "데이터 없음(empty)"을 동일 `blocked=False,reasons=[]` 반환. 시정(관찰성 전용, 매매 행위 byte 동일): `MarketRegime.has_regime_data` + `BuyBlockState.data_available` + boot `[regime_guard_inert]` 경보(empty∧mode≠OFF) + API `guard_inert` + 프론트 red 무력 배너(`buy-block-guard-inert`). fail-open 보존(fail-safe 전환·수동 오버라이드·인증서 갱신은 별도 인계). 매매 안전성 8영역 diff 0, 백엔드 4,036 PASS + 프론트 vitest 362 PASS |
 | 2026-07-30 | 사이클 C 브레이크이븐 확산 | domain-consult 채택 — VCP/BFB 에 브레이크이븐 승격(1.5N, live-ATR un-latch 병리 방지 boolean 래치 + tighten-only) **default-off(`breakeven_promote_atr=0.0`) 배포** + VCP `recompute_high_since_buy` 이식·부팅 훅 배선(C-V6 dead code 가드). kojiro 는 FREEZE 표본 오염 판정으로 8월 하순 보류, 2단계 ratchet 기각. 활성화 게이트 = donchian 실측(승격 발화+whipsaw 부재) 후 DB 토글. 안전성 5영역 diff 0, 백엔드 4,019 PASS |
 | 2026-07-29 | P1 복기 결함 2건 | 주간 복기(실현 -24,800원 중 79%가 donchian 트레일링 미발화) → A: donchian 레이어드 청산(`_entry_atr` 트레일 폴백 + `_breakout_high` 재도출 + 브레이크이븐 승격 1.5N + 10일 채널 청산, 신규 2키 PARAM_RANGES 미편입) + B: 체결통보 중복 수신 멱등 가드(`_completed_buy_orders`) + momentum 폴백 held-conflict skip + 고아 CRITICAL(377450 실사고 재발 차단). 매매 안전성 4영역 diff 0, 백엔드 3,996 PASS. 자문 모델 gpt-5.6-luna 전환 동반 |
 | 2026-07-25 | market_op import 시정 | `_subscribe_market_operation_tickers` 함수-로컬 import 가 `from src.realtime.websocket import kis_ws, kis_ws_pool` 로 매 호출 ImportError(kis_ws_pool 은 websocket_pool 정의) → cycle214 이래 H0UNMKO0 후보/보유 종목별 구독 100% 사망(07-24 로그분석 발견 117건=일일 ERROR 94%, 만성). import 2줄 분리 시정 + kojiro 퍼널 step5 라벨 4.5→6.0% 정합. 매매 hot path diff 0(손절=시세틱/체결통보 무관), cycle214 patch 경로 적응 3건, 회귀 가드 5(런타임 ImportError·AST import 경로·kojiro 라벨) |
@@ -55,7 +56,6 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-07-16 | RDS 이전 M0~M6 | Supabase(PostgREST)→AWS RDS PostgreSQL+asyncpg 전면 교체 (17 db 모듈, DATE 핫픽스, 매매 안전성 diff 0) |
 | 2026-07-15 | C1~C3 | 퀀트 재무필터 Phase 1 — 마법공식+F-Score-7 인프라 (관찰 전용, 기본 OFF) |
 | 2026-07-15 | 214 | H0UNMKO0 후보 구독 풀 분산 + cap 20→60 (41-cap 드롭 시정) |
-| 2026-07-15 | 213 | LTV 재진입 쿨다운 2영업일 신설 (상한가 면제 근사, whipsaw 차단) |
 
 > 사이클 200 이하 및 초기 하네스 구성 전체 이력(verbatim): [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)
 

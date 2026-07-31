@@ -358,7 +358,7 @@ class TestLineReductionEffect:
         scheduler_path = Path("src/engine/scheduler.py")
         line_count = len(scheduler_path.read_text(encoding="utf-8").splitlines())
 
-        # 사이클 142+146+149+150+158+160+162+164+171+188+189+193+C3 의미 전환 (사이클 66 K-2 패턴 답습):
+        # 사이클 142+146+149+150+158+160+162+164+171+188+189+193+C3+D 의미 전환 (사이클 66 K-2 패턴 답습):
         # 사이클 134 기준 ≤ 3,400L → 142 +21 → 146 +25 → 149 +90 → 150 +85 → 158 +15
         # → 160 +25 → 162 +26 → 164 +85 → 171 +145 (저녁 잠정 funnel 캡처: capture 헬퍼 +
         #   _evening_funnel_capture_once + _evening_funnel_capture_task_loop) → ≤ 3,990L
@@ -378,11 +378,14 @@ class TestLineReductionEffect:
         # 사이클 171 = MEDIUM 운영자 가치 (16:20 저녁 funnel — 전날 밤 후보 확인, domain-consult 의제 4).
         # → 사이클 C +10 (2026-07-30, VCP recompute_high_since_buy 부팅 훅 배선 — 브레이크이븐
         #   래치 재시작 복구 데이터 소스, C-V6 dead code 방지) → ≤ 4,180L.
-        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149~C 추가는 신규 기능/시정 한정.
-        assert line_count <= 4180, (
+        # → 사이클 D +16 (2026-07-31, 레짐 가드 silent inert 가시화 — `_refresh_market_regime_and_persist`
+        #   에 empty regime + mode!=OFF 시 `[regime_guard_inert]` WARNING 경보, DB 조회
+        #   try/except graceful) → ≤ 4,196L.
+        # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149~D 추가는 신규 기능/시정 한정.
+        assert line_count <= 4196, (
             f"scheduler.py 라인 감소 영속 위반 — got {line_count}L, "
-            f"target ≤ 4,180L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L + 188 +11L + 189 +14L + 193 +10L + C3 +60L + kojiro +30L + nxt_prelimit_fix +53L + 사이클C +10L). "
-            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164/171/188/189/193/C3/kojiro/nxt_prelimit_fix/사이클C 추가 영속."
+            f"target ≤ 4,196L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L + 188 +11L + 189 +14L + 193 +10L + C3 +60L + kojiro +30L + nxt_prelimit_fix +53L + 사이클C +10L + 사이클D +16L). "
+            "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164/171/188/189/193/C3/kojiro/nxt_prelimit_fix/사이클C/사이클D 추가 영속."
         )
 
     def test_g_134_f2_helper_module_compact(self):

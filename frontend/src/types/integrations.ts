@@ -41,12 +41,19 @@ export interface BuyBlockThresholds {
   defensive_enabled: boolean
 }
 
+/**
+ * 사이클 D (2026-07-31): `data_available` — 실제 매크로 데이터 보유 여부.
+ * `guard_inert` — mode!=='OFF' && !data_available (가드 설정됐으나 데이터 미유입으로 무력).
+ * 백엔드 `BuyBlockStatusResponse` 와 1:1.
+ */
 export interface BuyBlockState {
   mode: BuyBlockMode
   thresholds: BuyBlockThresholds
   blocked: boolean
   reasons: string[]
   soft_multiplier: number
+  data_available: boolean
+  guard_inert: boolean
 }
 
 export interface BuyBlockUpdateRequest {

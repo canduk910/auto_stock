@@ -243,6 +243,9 @@ describe('IntegrationToggleCard', () => {
     blocked: false,
     reasons: [] as string[],
     soft_multiplier: 1.0,
+    // 사이클 D-FE — 타입 정합 보강(값 무변경 의도, data_available=true 정상 데이터 유입 가정)
+    data_available: true,
+    guard_inert: false,
   }
 
   const buyBlockHardBlocked = {
@@ -488,5 +491,51 @@ describe('IntegrationToggleCard', () => {
     await waitFor(() => {
       expect(screen.getByTestId('buy-block-error')).toBeTruthy()
     }, { timeout: 3000 })
+  })
+
+  // -------------------------------------------------------------------------
+  // 사이클 D-FE (2026-07-31) — 레짐 가드 silent inert 가시화 (백엔드 사이클 D
+  // guard_inert 필드 프론트 표시, tester DEF-1 봉합)
+  // -------------------------------------------------------------------------
+  it('D-FE-1: guard_inert=true → 매수 가드 무력 배너 렌더', async () => {
+    setupToggleStubs()
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        HttpResponse.json(
+          wrap({
+            ...buyBlockHardDefault,
+            data_available: false,
+            guard_inert: true,
+          }),
+        ),
+      ),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    const banner = await screen.findByTestId('buy-block-guard-inert')
+    expect(banner.textContent).toMatch(/매수 가드 무력/)
+  })
+
+  it('D-FE-2: guard_inert=false → 매수 가드 무력 배너 미렌더', async () => {
+    setupToggleStubs()
+    server.use(
+      http.get('/api/integrations/buy-block', () =>
+        HttpResponse.json(wrap(buyBlockHardDefault)),
+      ),
+    )
+
+    render(
+      <TestProviders>
+        <IntegrationToggleCard />
+      </TestProviders>,
+    )
+
+    await screen.findByTestId('buy-block-mode-select')
+    expect(screen.queryByTestId('buy-block-guard-inert')).toBeNull()
   })
 })

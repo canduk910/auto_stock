@@ -143,6 +143,7 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 - `buy-block-defensive-toggle` 체크박스 (regime=defensive 차단, 기본 ON)
 - `buy-block-thresholds-save` 저장 — 4 슬라이더+체크박스 한 번에 PUT (ConfirmModal 없이 즉시 — 모드 변경보다 덜 위험)
 - `buy-block-reasons` 사유 리스트 (4건까지 list-disc + amber). HARD + blocked=true 시 "매수 차단 중" 강조
+- **사이클 D (2026-07-31) 무력 배너 `buy-block-guard-inert`**: `data.guard_inert === true` 시 mode 행 직후·reasons 위에 red 배너(`bg-red-100 text-red-800 border-red-300`, amber 사유보다 강조) "⚠️ 매수 가드 무력 — 레짐 매크로 데이터 미유입. mode={mode} 설정됐으나 실제 방어 미작동". `BuyBlockState` 타입에 `data_available`/`guard_inert` 추가. dkstock 인증서 만료 등으로 매크로 데이터 미유입 시 가드가 설정만 되고 무력화된 상태(false sense of protection)를 운영자에게 가시화 (백엔드 사이클 D `get_buy_block_state`/`_build_buy_block_status` 산출)
 - SOFT 모드: `buy-block-soft-multiplier` 안내 ("현재 multiplier: 0.50")
 - GET 500: `buy-block-error` graceful
 - API: `getBuyBlock / setBuyBlock`. 백엔드 `/api/integrations/buy-block` GET/PUT. queryKey `['integration', 'buy-block']`, staleTime 30s

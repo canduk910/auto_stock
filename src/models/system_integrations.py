@@ -47,13 +47,20 @@ class BuyBlockThresholdsModel(BaseModel):
 
 
 class BuyBlockStatusResponse(BaseModel):
-    """`GET /api/integrations/buy-block` 응답."""
+    """`GET /api/integrations/buy-block` 응답.
+
+    사이클 D (2026-07-31) — `data_available`/`guard_inert` 관찰성 필드 추가
+    (레짐 가드 silent inert 가시화). `blocked`/`soft_multiplier`/`reasons` 는
+    무변경 — 신규 2 필드는 표시용(프론트 degraded 배너 근거).
+    """
 
     mode: BuyBlockMode
     thresholds: BuyBlockThresholdsModel
     blocked: bool
     reasons: List[str] = Field(default_factory=list)
     soft_multiplier: float = 1.0
+    data_available: bool = True
+    guard_inert: bool = False
 
 
 class BuyBlockUpdateRequest(BaseModel):

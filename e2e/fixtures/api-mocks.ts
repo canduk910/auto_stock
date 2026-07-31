@@ -254,6 +254,10 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
           fg_low_threshold: 15,
           defensive_enabled: true,
         },
+        // 사이클 D-FE (2026-07-31) — 레짐 가드 무력 배너 타입 정합.
+        // 기존 e2e 시나리오는 guard_inert 배너를 검증하지 않으므로 false 고정(미렌더).
+        data_available: false,
+        guard_inert: false,
       }),
     }),
   );

@@ -315,6 +315,19 @@ function BuyBlockSection() {
         )}
       </div>
 
+      {/* 사이클 D-FE (2026-07-31) — 레짐 가드 silent inert 배너.
+          data_available=false + mode!=='OFF' 이면 가드가 설정만 되고 실제로는
+          무력(데이터 미유입으로 blocked/soft_multiplier 평가 자체가 무의미) —
+          amber 발동 사유보다 강한 red 강조로 false sense of protection 차단. */}
+      {data.guard_inert === true && (
+        <div
+          data-testid="buy-block-guard-inert"
+          className="bg-red-100 text-red-800 border border-red-300 rounded p-2 mb-4"
+        >
+          {`⚠️ 매수 가드 무력 — 레짐 매크로 데이터 미유입. mode=${data.mode} 설정됐으나 실제 방어 미작동 (데이터 복구 전까지 매수 무제한 통과)`}
+        </div>
+      )}
+
       {/* 발동 사유 */}
       {data.reasons.length > 0 && (
         <div

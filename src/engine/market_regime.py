@@ -69,6 +69,10 @@ class BuyBlockState:
     blocked: bool
     soft_multiplier: float
     reasons: List[str] = field(default_factory=list)
+    # 사이클 D (2026-07-31) — 레짐 가드 silent inert 가시화 (관찰성 전용).
+    # 매크로 데이터 실제 유입 여부. False 여도 blocked/soft_multiplier 는 fail-open
+    # 보존(변경 없음) — 데이터 없을 때 매수 차단 전환(fail-safe)은 범위 외 인계.
+    data_available: bool = True
 
 
 # 복합 임계 (사용자 확정 옵션 1b)
@@ -252,6 +256,24 @@ class MarketRegime:
                 )
         return reasons
 
+    @property
+    def has_regime_data(self) -> bool:
+        """사이클 D (2026-07-31) — 실제 매크로 데이터 보유 여부.
+
+        `regime`/`vix`/`fear_greed_score` 중 1개라도 not None 이거나 `raw` 가
+        비어있지 않으면 True. `empty()` 폴백(외부 fetch 실패/비활성)은 전부 None +
+        raw={} 라서 False — `persist_snapshot` 의 `regime is None` empty 판정과 정합.
+
+        `get_buy_block_state()` 가 `BuyBlockState.data_available` 세팅에 사용
+        (관찰성 전용 — blocked/soft_multiplier 평가 로직과 무관).
+        """
+        return (
+            self.regime is not None
+            or self.vix is not None
+            or self.fear_greed_score is not None
+            or bool(self.raw)
+        )
+
     def invalidate_buy_block_cache(self) -> None:
         """캐시 즉시 무효화 — 운영 UI Settings PUT 시 호출.
 
@@ -302,6 +324,7 @@ class MarketRegime:
                 blocked=False,
                 soft_multiplier=1.0,
                 reasons=[],
+                data_available=self.has_regime_data,
             )
             # OFF 는 DB ok 만 캐시 (모드 fetch 실패 폴백 시 다음 호출에서 재시도)
             if db_ok:
@@ -333,6 +356,7 @@ class MarketRegime:
                 blocked=triggered,
                 soft_multiplier=1.0,
                 reasons=reasons,
+                data_available=self.has_regime_data,
             )
         elif mode == "WARN":
             # 매수 허용 + WARNING 로그 (risk.on_tick 책임)
@@ -341,6 +365,7 @@ class MarketRegime:
                 blocked=False,
                 soft_multiplier=1.0,
                 reasons=reasons,
+                data_available=self.has_regime_data,
             )
         elif mode == "SOFT":
             state = BuyBlockState(
@@ -348,6 +373,7 @@ class MarketRegime:
                 blocked=False,
                 soft_multiplier=0.5 if triggered else 1.0,
                 reasons=reasons,
+                data_available=self.has_regime_data,
             )
         else:
             # 알 수 없는 mode — 안전 fallback HARD
@@ -359,6 +385,7 @@ class MarketRegime:
                 blocked=triggered,
                 soft_multiplier=1.0,
                 reasons=reasons,
+                data_available=self.has_regime_data,
             )
 
         # 사이클 11 — DB ok 만 캐시 (폴백 분기 결과는 영구 캐시 오염 차단)
