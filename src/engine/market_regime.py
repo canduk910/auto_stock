@@ -20,7 +20,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime
 from typing import Any, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -581,3 +581,163 @@ async def persist_snapshot(regime: MarketRegime, target_date: date) -> None:
         )
     except Exception:
         logger.exception("[market_regime] snapshot INSERT 실패 — 메모리 레짐은 유효")
+
+
+# ---------------------------------------------------------------------------
+# 사이클 E-1 (2026-07-31) — 지수ETF 고지로 스테이지 레짐 신호 (관찰 전용 다크런치)
+# ---------------------------------------------------------------------------
+# 자문: `_workspace/domain_consult/cycle_etf_kojiro_regime_20260731.md` (GO).
+# dkstock 매크로와 별개로 지수ETF(KODEX200/코스닥150)의 고지로 대순환 스테이지를
+# 관찰 — E-1 범위는 계산 + 로그 + API 노출까지. block_reason 통합/SOFT 상한/reasons
+# 태깅은 E-2(2주 관찰 후) 인계 — 매수 가드 행위(blocked/soft_multiplier/reasons)는
+# 본 절과 무관하게 완전 보존.
+
+# 방어집합 = 하락 사분면 전체 (자문 §Q2 정본). kojiro_indicators._STAGE_MAP 참조:
+# 1 안정상승 / 2 상승후조정 / 3 하락전환 / 4 안정하락 / 5 하락후반등 / 6 상승전환.
+DEFENSIVE_STAGES = frozenset({3, 4, 5})
+
+ETF_KOSPI_TICKER = "069500"    # KODEX 200
+ETF_KOSDAQ_TICKER = "229200"   # KODEX 코스닥150
+
+# stock_master_daily 조회 lookback — EMA40 안정화에 충분한 여유 (kojiro 5/20/40 답습)
+_ETF_STAGE_LOOKBACK_DAYS = 90
+# 최신 bas_dd 가 이보다 오래되면(달력일) stale — 주말+공휴일 안전 마진
+ETF_STALE_MAX_CALENDAR_DAYS = 10
+
+
+def is_two_day_defensive(stages: "List[Optional[int]]") -> bool:
+    """최근 2 스테이지(``stages[-2:]``) 가 모두 ``DEFENSIVE_STAGES`` 에 속하면 True.
+
+    히스테리시스 확인 — 단일일 방어 진입은 미확정. ``len(stages) < 2`` 또는
+    최근 2개 중 ``None`` 포함 시 False.
+    """
+    if len(stages) < 2:
+        return False
+    last_two = stages[-2:]
+    if any(s is None for s in last_two):
+        return False
+    return all(s in DEFENSIVE_STAGES for s in last_two)
+
+
+@dataclass(frozen=True)
+class EtfStageSignal:
+    """지수ETF 고지로 스테이지 관찰 신호 (사이클 E-1).
+
+    ``etf_defensive`` 는 신선(non-stale) 지수들의 ``*_defensive_2d`` OR 결합.
+    양쪽 모두 stale 이면 신호 없음(``None``).
+    """
+
+    kospi_stage: Optional[int]
+    kosdaq_stage: Optional[int]
+    kospi_defensive_2d: bool
+    kosdaq_defensive_2d: bool
+    etf_defensive: Optional[bool]
+    stale_kospi: bool
+    stale_kosdaq: bool
+
+
+def _is_daily_row_stale(latest_bas_dd: Any, now: datetime) -> bool:
+    """최신 ``bas_dd`` 가 ``ETF_STALE_MAX_CALENDAR_DAYS`` 초과 오래되면 stale.
+
+    ``date``/``datetime``/ISO 문자열 모두 수용 (never-raise, 파싱 실패 → stale).
+    """
+    if latest_bas_dd is None:
+        return True
+    bas_dd = latest_bas_dd
+    if isinstance(bas_dd, datetime):
+        bas_dd = bas_dd.date()
+    if not isinstance(bas_dd, date):
+        try:
+            bas_dd = date.fromisoformat(str(bas_dd)[:10])
+        except (TypeError, ValueError):
+            return True
+    return (now.date() - bas_dd).days > ETF_STALE_MAX_CALENDAR_DAYS
+
+
+async def _compute_single_etf_stage(
+    ticker: str, now: datetime,
+) -> "tuple[Optional[int], bool, bool]":
+    """단일 ETF 티커 → (최종 스테이지, 2일 방어 판정, stale 여부).
+
+    일봉 소스 seam = ``stock_master_daily.get_recent_daily`` (테스트 monkeypatch
+    진입점). 5/20/40 = kojiro 정체성 상수 — ETF 전용 파라미터화 금지.
+    """
+    from src.db import stock_master_daily as smd
+
+    rows = await smd.get_recent_daily(ticker, _ETF_STAGE_LOOKBACK_DAYS)
+    if not rows:
+        return None, False, True
+
+    if _is_daily_row_stale(rows[0].get("bas_dd"), now):
+        return None, False, True
+
+    import pandas as pd
+
+    from src.engine import kojiro_indicators as ki
+
+    rows_asc = sorted(rows, key=lambda r: r.get("bas_dd"))
+    closes = pd.Series([float(r.get("close_price")) for r in rows_asc])
+
+    cfg = ki.KojiroIndicatorConfig()
+    ema_s = ki.ema(closes, cfg.ema_short)
+    ema_m = ki.ema(closes, cfg.ema_mid)
+    ema_l = ki.ema(closes, cfg.ema_long)
+
+    stages: List[Optional[int]] = []
+    prev: Optional[int] = None
+    for s, m, l in zip(ema_s, ema_m, ema_l):
+        prev = ki.stage_of(s, m, l, prev)
+        stages.append(prev)
+
+    final_stage = stages[-1] if stages else None
+    defensive_2d = is_two_day_defensive(stages)
+    return final_stage, defensive_2d, False
+
+
+async def compute_etf_stage_signal(*, now: Optional[datetime] = None) -> EtfStageSignal:
+    """KODEX200(069500) + KODEX코스닥150(229200) 일봉 → 고지로 스테이지 신호.
+
+    사이클 E-1 (2026-07-31) — 관찰 전용. dkstock 성패와 무관하게 독립 계산
+    (호출자 = ``scheduler._refresh_market_regime_and_persist``).
+    """
+    if now is None:
+        from src.db._kst import KST
+        now = datetime.now(KST)
+
+    kospi_stage, kospi_def, stale_kospi = await _compute_single_etf_stage(
+        ETF_KOSPI_TICKER, now,
+    )
+    kosdaq_stage, kosdaq_def, stale_kosdaq = await _compute_single_etf_stage(
+        ETF_KOSDAQ_TICKER, now,
+    )
+
+    if stale_kospi and stale_kosdaq:
+        etf_defensive: Optional[bool] = None
+    else:
+        etf_defensive = (
+            (not stale_kospi and kospi_def) or (not stale_kosdaq and kosdaq_def)
+        )
+
+    return EtfStageSignal(
+        kospi_stage=kospi_stage,
+        kosdaq_stage=kosdaq_stage,
+        kospi_defensive_2d=kospi_def,
+        kosdaq_defensive_2d=kosdaq_def,
+        etf_defensive=etf_defensive,
+        stale_kospi=stale_kospi,
+        stale_kosdaq=stale_kosdaq,
+    )
+
+
+_current_etf_signal: Optional[EtfStageSignal] = None
+
+
+def get_current_etf_signal() -> Optional[EtfStageSignal]:
+    """현재 메모리 ETF 스테이지 신호. boot 이전엔 None (관찰 전용 다크런치)."""
+    return _current_etf_signal
+
+
+def set_current_etf_signal(sig: Optional[EtfStageSignal]) -> None:
+    """boot(``_refresh_market_regime_and_persist``) / 테스트 / API 가 호출."""
+    global _current_etf_signal
+    _current_etf_signal = sig

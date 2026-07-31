@@ -386,6 +386,31 @@ async def set_auto_apply_enabled(value: bool) -> None:
     await _set_bool(_AUTO_APPLY_ENABLED_KEY, value)
 
 
+# ---------------------------------------------------------------------------
+# 사이클 E-1 (2026-07-31) — 지수ETF 고지로 스테이지 레짐 신호 토글 (관찰 전용 다크런치)
+# ---------------------------------------------------------------------------
+# 기본 False — 다크런치. E-1 은 저장/조회만(계산+로그+API 노출까지), block 경로
+# 미소비는 E-2 인계. `get_auto_apply_enabled` 패턴 답습(.env fallback 없음).
+_ETF_REGIME_ENABLED_KEY = "etf_regime_enabled"
+
+
+async def get_etf_regime_enabled() -> bool:
+    """지수ETF 고지로 스테이지 레짐 신호 활성 여부. 키 부재 시 기본 False.
+
+    사이클 E-1. .env fallback 없음 — 운영 가변 (DB 미설정 → 다크런치 False).
+    """
+    v = await _get_bool_or_none(_ETF_REGIME_ENABLED_KEY)
+    return bool(v) if v is not None else False
+
+
+async def set_etf_regime_enabled(value: bool) -> None:
+    """지수ETF 고지로 스테이지 레짐 신호 활성 여부 저장. bool 강제 변환.
+
+    사이클 E-1.
+    """
+    await _set_bool(_ETF_REGIME_ENABLED_KEY, value)
+
+
 async def set_buy_block_thresholds(
     vix_threshold: Optional[float] = None,
     fg_high_threshold: Optional[float] = None,

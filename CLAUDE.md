@@ -41,6 +41,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 날짜 | 사이클 | 한 줄 요약 |
 |------|--------|-----------|
+| 2026-07-31 | 사이클 E-1 지수ETF 레짐 신호 (관찰) | 사용자 지시 "최종 레짐판정에 dkstock뿐 아니라 지수ETF 고지로 스테이지도 고려" — domain-consult GO(다크런치 우선). KODEX200(069500)+코스닥150(229200) 일봉→`kojiro_indicators.ema/stage_of` 스테이지 계산(방어집합 {3,4,5}, 2일 연속 확인, OR 결합, 신선도 게이트). **dkstock 독립 신호**(다운 시 fallback = 프래질리티 완화). **E-1 = 관찰 전용 다크런치**(`etf_regime_enabled=False`, 계산+boot 로그+API 4필드 노출만, **매수 가드 행위 byte 동일·배제 0**). block 통합·SOFT 상한·reasons 태깅은 2주 관찰 후 E-2 인계. FREEZE 무관(stage_of 순수함수 재사용, 5/20/40 정체성 상수). 실측 검증 = 양지수 현재 stage4·whipsaw 60일 2~3회·dkstock=defensive 부합. 매매 안전성 8영역 diff 0, 백엔드 4,072 PASS |
 | 2026-07-31 | 사이클 D 레짐 가드 무력 가시화 | dkstock.cloud 인증서 07-27 만료(`certificate has expired`) → 레짐 매수 가드가 4일간 silent 무력화됐으나 경보 0(대시보드 "정상+평온" 오인). 근본 결함 = `get_buy_block_state()` 가 "데이터 있고 평온"과 "데이터 없음(empty)"을 동일 `blocked=False,reasons=[]` 반환. 시정(관찰성 전용, 매매 행위 byte 동일): `MarketRegime.has_regime_data` + `BuyBlockState.data_available` + boot `[regime_guard_inert]` 경보(empty∧mode≠OFF) + API `guard_inert` + 프론트 red 무력 배너(`buy-block-guard-inert`). fail-open 보존(fail-safe 전환·수동 오버라이드·인증서 갱신은 별도 인계). 매매 안전성 8영역 diff 0, 백엔드 4,036 PASS + 프론트 vitest 362 PASS |
 | 2026-07-30 | 사이클 C 브레이크이븐 확산 | domain-consult 채택 — VCP/BFB 에 브레이크이븐 승격(1.5N, live-ATR un-latch 병리 방지 boolean 래치 + tighten-only) **default-off(`breakeven_promote_atr=0.0`) 배포** + VCP `recompute_high_since_buy` 이식·부팅 훅 배선(C-V6 dead code 가드). kojiro 는 FREEZE 표본 오염 판정으로 8월 하순 보류, 2단계 ratchet 기각. 활성화 게이트 = donchian 실측(승격 발화+whipsaw 부재) 후 DB 토글. 안전성 5영역 diff 0, 백엔드 4,019 PASS |
 | 2026-07-29 | P1 복기 결함 2건 | 주간 복기(실현 -24,800원 중 79%가 donchian 트레일링 미발화) → A: donchian 레이어드 청산(`_entry_atr` 트레일 폴백 + `_breakout_high` 재도출 + 브레이크이븐 승격 1.5N + 10일 채널 청산, 신규 2키 PARAM_RANGES 미편입) + B: 체결통보 중복 수신 멱등 가드(`_completed_buy_orders`) + momentum 폴백 held-conflict skip + 고아 CRITICAL(377450 실사고 재발 차단). 매매 안전성 4영역 diff 0, 백엔드 3,996 PASS. 자문 모델 gpt-5.6-luna 전환 동반 |
@@ -54,7 +55,6 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-07-18 | Phase 2A-2 게이트0+1 | donchian 터틀 유닛 sizing + 하드손절 ATR화 opt-in (sizing_mode=turtle, buy−2.0×entry_atr + −9% backstop, entry_atr 인메모리+recompute buy_date 재도출, DB 플립 활성화) — 매매 안전성 8영역 diff 0 |
 | 2026-07-17 | kojiro Phase 1 | 고지로 대순환 스윙 전략 신규 (EMA 5/20/40 스테이지 + 2ATR/2.5ATR/스테이지3 청산, 멀티데이, position_ratio, 다크런치 enabled=False) — 매매 안전성 8영역 diff 0 |
 | 2026-07-16 | RDS 이전 M0~M6 | Supabase(PostgREST)→AWS RDS PostgreSQL+asyncpg 전면 교체 (17 db 모듈, DATE 핫픽스, 매매 안전성 diff 0) |
-| 2026-07-15 | C1~C3 | 퀀트 재무필터 Phase 1 — 마법공식+F-Score-7 인프라 (관찰 전용, 기본 OFF) |
 | 2026-07-15 | 214 | H0UNMKO0 후보 구독 풀 분산 + cap 20→60 (41-cap 드롭 시정) |
 
 > 사이클 200 이하 및 초기 하네스 구성 전체 이력(verbatim): [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)

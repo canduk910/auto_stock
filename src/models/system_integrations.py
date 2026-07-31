@@ -52,6 +52,10 @@ class BuyBlockStatusResponse(BaseModel):
     사이클 D (2026-07-31) — `data_available`/`guard_inert` 관찰성 필드 추가
     (레짐 가드 silent inert 가시화). `blocked`/`soft_multiplier`/`reasons` 는
     무변경 — 신규 2 필드는 표시용(프론트 degraded 배너 근거).
+
+    사이클 E-1 (2026-07-31) — `etf_kospi_stage`/`etf_kosdaq_stage`/`etf_defensive`/
+    `etf_enabled` 지수ETF 고지로 스테이지 관찰 필드 4종 추가 (관찰 전용 다크런치).
+    기존 필드 무변경 — 신규 필드는 운영자 curl 관찰용, 매수 가드 미연계(E-1 배제 0).
     """
 
     mode: BuyBlockMode
@@ -61,6 +65,10 @@ class BuyBlockStatusResponse(BaseModel):
     soft_multiplier: float = 1.0
     data_available: bool = True
     guard_inert: bool = False
+    etf_kospi_stage: Optional[int] = None
+    etf_kosdaq_stage: Optional[int] = None
+    etf_defensive: Optional[bool] = None
+    etf_enabled: bool = False
 
 
 class BuyBlockUpdateRequest(BaseModel):

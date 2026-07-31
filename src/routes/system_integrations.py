@@ -259,6 +259,12 @@ async def _build_buy_block_status() -> BuyBlockStatusResponse:
     `data_available = regime.has_regime_data`, `guard_inert = mode != "OFF" and
     not data_available` (가드 설정됐으나 매크로 데이터 미유입으로 무력). 기존
     mode/blocked/reasons/soft_multiplier 로직은 완전 무변경.
+
+    사이클 E-1 (2026-07-31) — `etf_kospi_stage`/`etf_kosdaq_stage`/`etf_defensive`/
+    `etf_enabled` 관찰 필드 4종 추가. 소스 = boot 부착 싱글톤
+    `market_regime.get_current_etf_signal()` (요청마다 재계산 X) +
+    `system_config.get_etf_regime_enabled()`. 신호 부재(None) 시 스테이지/방어도
+    None — 배제 0(매수 가드 미연계).
     """
     from src.engine import market_regime as mr_mod
 
@@ -277,6 +283,9 @@ async def _build_buy_block_status() -> BuyBlockStatusResponse:
     data_available = regime.has_regime_data
     guard_inert = state.mode != "OFF" and not data_available
 
+    etf_sig = mr_mod.get_current_etf_signal()
+    etf_enabled = await sc.get_etf_regime_enabled()
+
     return BuyBlockStatusResponse(
         mode=state.mode,  # type: ignore[arg-type]
         thresholds=BuyBlockThresholdsModel(
@@ -290,6 +299,10 @@ async def _build_buy_block_status() -> BuyBlockStatusResponse:
         soft_multiplier=state.soft_multiplier,
         data_available=data_available,
         guard_inert=guard_inert,
+        etf_kospi_stage=etf_sig.kospi_stage if etf_sig is not None else None,
+        etf_kosdaq_stage=etf_sig.kosdaq_stage if etf_sig is not None else None,
+        etf_defensive=etf_sig.etf_defensive if etf_sig is not None else None,
+        etf_enabled=etf_enabled,
     )
 
 

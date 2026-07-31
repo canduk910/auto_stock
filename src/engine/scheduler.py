@@ -2130,6 +2130,28 @@ class TradingScheduler:
             regime = MarketRegime.empty()
         set_current_regime(regime)
 
+        # 사이클 E-1 (2026-07-31) — 지수ETF 고지로 스테이지 레짐 신호 (관찰 전용
+        # 다크런치). dkstock 성패와 무관하게 독립 계산(dkstock 죽어도 계산) —
+        # 계산 실패해도 graceful(regime 은 이미 유효 보존, boot 진행).
+        # get_buy_block_state()/blocked/reasons/soft_multiplier 완전 무변경(E-1 배제 0).
+        try:
+            from src.db.system_config import get_etf_regime_enabled
+            from src.engine.market_regime import (
+                compute_etf_stage_signal, set_current_etf_signal,
+            )
+
+            etf_sig = await compute_etf_stage_signal()
+            set_current_etf_signal(etf_sig)
+            etf_enabled = await get_etf_regime_enabled()
+            logger.info(
+                "[etf_regime] kospi=stage%s kosdaq=stage%s etf_defensive=%s "
+                "enabled=%s (관찰)",
+                etf_sig.kospi_stage, etf_sig.kosdaq_stage, etf_sig.etf_defensive,
+                etf_enabled,
+            )
+        except Exception:
+            logger.exception("[etf_regime] 계산 실패 graceful")
+
         # 사이클 D (2026-07-31) — 레짐 가드 silent inert 가시화 (관찰성 전용).
         # 매크로 데이터 미유입인데 가드 모드가 OFF 가 아니면(설정은 됐으나 무력)
         # 운영자 경보. blocked/soft_multiplier 평가 로직에는 영향 없음(fail-open 보존).
