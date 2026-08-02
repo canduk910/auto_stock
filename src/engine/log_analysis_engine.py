@@ -387,6 +387,69 @@ async def _call_openai(
         return None, meta
 
 
+async def _build_portfolio_risk_snapshot(_now_kst: datetime | None = None) -> dict | None:
+    """포트폴리오 리스크 관찰 스냅샷 빌드 (사이클 H) — 20:10 리포트 metrics seam.
+
+    registry 전 전략 + KIS 순자산 + 보유 ticker 섹터 분류를 pull 하여
+    `compute_portfolio_risk_snapshot` 호출. 관찰 전용(매수 차단 0). lazy import 로
+    순환 방지(scheduler ↔ log_analysis_engine). 호출부가 try/except 로 흡수하므로
+    치명 실패는 상위에서 None 처리.
+    """
+    from src.api.balance import get_balance
+    from src.db import stock_master
+    from src.engine.portfolio_risk import (
+        compute_portfolio_risk_snapshot,
+        extract_hard_stop_pct,
+    )
+    from src.engine.scheduler import trading_scheduler
+    from src.engine.strategies.kojiro import _kojiro_sector_key
+
+    strategies = list(trading_scheduler.registry.all())
+
+    try:
+        _holdings, summary = await get_balance()
+        net_asset = int(getattr(summary, "net_asset", 0) or 0)
+    except Exception:
+        logger.debug("[portfolio_risk] get_balance 실패 graceful", exc_info=True)
+        net_asset = 0
+
+    hard_stop_pcts: dict[str, float] = {}
+    held_tickers: set[str] = set()
+    for strat in strategies:
+        sid = getattr(strat, "strategy_id", None) or "unknown"
+        config = getattr(strat, "config", None)
+        params = (
+            getattr(config, "params", None)
+            if config is not None
+            else getattr(strat, "params", None)
+        )
+        hard_stop_pcts[sid] = extract_hard_stop_pct(
+            params if isinstance(params, dict) else None
+        )
+        state = getattr(strat, "state", None)
+        positions = getattr(state, "positions", None) if state is not None else None
+        if isinstance(positions, dict):
+            held_tickers.update(positions.keys())
+
+    sector_of: dict[str, str] = {}
+    for ticker in held_tickers:
+        try:
+            basics = await stock_master.get(ticker)
+            master_raw = getattr(basics, "raw", None) if basics is not None else None
+            sector_of[ticker] = _kojiro_sector_key(
+                master_raw if isinstance(master_raw, dict) else None, ticker
+            )
+        except Exception:
+            sector_of[ticker] = f"미분류-{ticker}"
+
+    return compute_portfolio_risk_snapshot(
+        strategies,
+        net_asset=net_asset,
+        hard_stop_pcts=hard_stop_pcts,
+        sector_of=sector_of,
+    )
+
+
 async def generate_daily_log_report(
     _now_kst: datetime | None = None,
 ) -> dict | None:
@@ -428,6 +491,14 @@ async def generate_daily_log_report(
     strategy_funnel_stages = await _collect_strategy_funnel_stages(target_date)
     next_day_clear_metrics = _aggregate_next_day_clear(logs)
 
+    # 사이클 H — 포트폴리오 리스크 관찰 스냅샷 (전 전략 합산 오픈 리스크 + 섹터/전략별 노출).
+    # 빌드 실패(잔고/registry 일시 장애)는 graceful → None (리포트 INSERT 는 보존, 사이클 88).
+    try:
+        portfolio_risk_snapshot = await _build_portfolio_risk_snapshot(now_kst)
+    except Exception:
+        logger.debug("[portfolio_risk] 스냅샷 빌드 실패 graceful", exc_info=True)
+        portfolio_risk_snapshot = None
+
     metrics = {
         "target_date": target_date.isoformat(),
         "logs": log_metrics,
@@ -436,6 +507,7 @@ async def generate_daily_log_report(
         "strategy_funnel": strategy_funnel,           # 병존 (coarse, 불변)
         "strategy_funnel_stages": strategy_funnel_stages,  # 신규 (E-1, 사이클 199)
         "next_day_clear": next_day_clear_metrics,
+        "portfolio_risk_snapshot": portfolio_risk_snapshot,  # 신규 (사이클 H, 관찰 전용)
     }
 
     logger.info(

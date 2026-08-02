@@ -157,7 +157,7 @@ AWS RDS PostgreSQL CRUD 모듈. 현재 DB 클라이언트 정본 = **`pg.py` (as
   - `upsert_batch(ticker, rows)` — 100건 배치 chunk (Supabase HTTP/2 stale 회피, 사이클 26 답습)
   - `get_recent_daily(ticker, n)` — 최근 N일 (DESC) — donchian/VCP 입력
   - `get_donchian_high(ticker, lookback=20)` — 직전 N일 최고가 (당일 제외)
-  - `get_atr(ticker, period=14)` — Wilder smoothing 14일 ATR
+  - `get_atr(ticker, days=14)` — 14일 ATR (True Range 는 웰스 와일더 3-way max(고−저, |고−전종|, |저−전종|), 평활은 **단순평균(SMA) baseline** — Wilder 지수평활은 호출자 책임. 실제 Wilder ATR 은 `kojiro_indicators.atr`(ewm α=1/N) 만)
   - `count_all()` / `count_by_ticker(ticker)` — 적재 진단
   - `max_bas_dd(ticker)` — 백필 vs 증분 자동 분기 키 (스캐너 사용)
   - `get_recent_daily_with_fallback(ticker, n)` — DB miss 시 `fetch_daily_candles` 폴백 (사이클 14 호환)

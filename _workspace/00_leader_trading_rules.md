@@ -2494,3 +2494,22 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 - BFB/VCP 가 "신호 평가 단계까지 도달 가능"함을 입증하는 fixture 테스트 추가 (실제 후보 산출 케이스).
 - 기존 backend 1671 / frontend 160 PASS 회귀 금지. 핵심 안전 규칙(체결통보 구독·단일워커·주문매핑·익일청산) 절대 불변 — 매수 진입 임계만 완화, 매도/손절/청산 로직 무수정.
 
+## 사이클 H — 포트폴리오 전체 리스크·섹터 노출 관찰 규칙 (2026-08-02, Phase 1 관찰 전용)
+
+「터틀 자금관리」 서적 대조 감사 갭 2건(포트폴리오 총리스크 상한 부재 + 전략 간 섹터 집중 무통제) 대응 1단계. 상세 명세: `_workspace/cycleH_portfolio_risk_phase1_spec.md`.
+
+### 관찰 지표 정의 (매매 행위 무영향 — 배제 0·차단 0)
+- **포지션 계획 손실(오픈 리스크) 프록시** = `buy_price × quantity × |하드손절%| / 100`
+- **전략별 하드손절%** = 손절 후보 7키(`stop_loss_rate`/`intraday_stop_loss`/`overnight_stop_loss`/`stop_loss_main`/`stop_loss_pre_nxt`/`turtle_backstop_pct`/`hard_stop_pct`) 중 음수만 → `min` (최대 계획 손실, `_normalize_stop_loss_rate` 선례 확장). 결측 시 **−7.0 fail-open** (0.0 금지)
+- **섹터 분류 정본** = `kojiro._kojiro_sector_key(master_raw, ticker)` 단일 진실원 (호출자 재사용, 이식 금지). 미분류 ticker 는 `미분류-{ticker}` 독립 취급
+- **집계** = 총 명목/총 오픈리스크/순자산 대비%/동시보유 수/전략별·섹터별 분해/top 섹터
+- 노출 경로 = `GET /api/portfolio/risk` (pull) + 20:10 일일 리포트 metrics `portfolio_risk_snapshot` + `[portfolio_risk]` 구조화 로그 1행 (정산 경로 한정)
+
+### 금기 (Phase 1)
+- 이 지표로 매수 차단/수량 축소/포지션 배제 금지 — Phase 2 (2주 관찰 게이트) 별도 사이클
+- `strategy_registry.py` 포함 매매 안전성 8영역 diff 0 의무
+- 신규 임계 PARAM_RANGES 편입 금지 (정체성 상수)
+
+### Phase 2 인계
+SOFT 상한(총 오픈리스크% / 섹터 동시보유 캡) 매수 가드 통합 · entry_atr 정밀화 · 프론트 리스크 카드.
+

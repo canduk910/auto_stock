@@ -375,7 +375,8 @@ class VcpBreakoutStrategy(StrategyBase):
                 volume_contraction_pass_tickers.append(ticker)  # 사이클 39
 
                 # 사이클 125 — DB ATR 우선 + ±10% 일치 검증 + KIS 캔들 fallback
-                # (사이클 123 donchian/VB 답습. _atr()는 SMA 기반, get_atr()는 Wilder smoothing)
+                # (사이클 123 donchian/VB 답습. _atr()·get_atr() 모두 SMA(단순평균) 평활 —
+                #  SMA vs SMA 동종비교라 ±10% 검증 무해. 진짜 Wilder 평활은 kojiro_indicators.atr 만)
                 from src.db.stock_master_daily import get_atr as _get_db_atr
                 kis_atr = self._atr(
                     [int(c.get("stck_hgpr", "0")) for c in candles],

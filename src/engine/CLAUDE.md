@@ -30,6 +30,8 @@ market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 **quant_score.py** (사이클 C2 — 퀀트 재무필터 순수 함수. `compute_f_score_7(curr, prev) -> int|None`(Piotroski 9지표 中 **7지표** = 현금흐름표 TR 부재로 CFO 2지표 제외, 개별 결측 미가점 / 2기 부족 fail-open None) + `compute_magic_formula(series_by_ticker, mktcap_by_ticker) -> dict`(Greenblatt EY=1/ev_ebitda 폴백 bsop_prti/EV, ROC=bsop_prti/((cras-flow_lblt)+fxas), mf_rank=ey_rank+roc_rank). DB/HTTP/시계 미접촉 순수 함수, 8영역 미접촉)
 **kojiro_indicators.py** (2026-07 — 고지로 대순환 순수 지표. `ema`/`atr`(Wilder ewm(1/period))/`stage_of`(6배열+동가 유지)/`enrich`(EMA 5/20/40 + 스테이지 + 대순환 MACD1/2/3 + 밴드폭 + ATR). pandas 사용, `KojiroIndicatorConfig` 주입. quant_score 선례 = DB/HTTP/시계 미접촉 순수 함수, 8영역 미접촉. **ATR = Wilder ewm(1/20)** ≠ donchian `_atr`/`get_atr`(단순평균) — 손절선 정의 단일 진실원, 재사용 금지)
 recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 로그 분석)
+**portfolio_risk.py** (사이클 H, 2026-08-02 — 포트폴리오 리스크 관찰 순수함수. `extract_hard_stop_pct(params, *, default=-7.0)`(후보 7키 stop_loss_rate/intraday/overnight/main/pre_nxt/turtle_backstop_pct/hard_stop_pct 中 음수만 min, 결측→-7.0 fail-open, 0.0 금지) + `compute_portfolio_risk_snapshot(strategies, *, net_asset, hard_stop_pcts, sector_of) -> dict`(전 전략 합산 오픈 리스크. 포지션 리스크 프록시=buy_price×qty×|hard_stop%|/100, by_strategy(0포지션 포함)/by_sector(포지션有)/top_sector/open_risk_pct_of_net). **배제 0 — 입력 무변경**. DB/HTTP/시계/registry/kojiro 미접촉(quant_score 선례). 소비=`GET /api/portfolio/risk`(routes/portfolio.py, get_balance+registry+섹터 pull) + 20:10 일일리포트 metrics(`portfolio_risk_snapshot` 키). 터틀 서적 대조 감사 갭 2건(포트폴리오 총리스크 상한·전략간 섹터 집중) Phase 1 가시화. **Phase 1 관찰 전용** — 매수 차단·SOFT 상한·entry_atr 정밀화는 2주 관찰 후 Phase 2. 신규 리스크 임계 PARAM_RANGES 미편입)
+**ta_indicators.py** (사이클 G, 2026-08-02 — RSI/상대강도 순수함수. `rsi(closes, period=14) -> float|None`(Wilder 평균, all-gains→100/all-losses→0/flat→50, len<period+1→None) + `relative_strength(stock_closes, index_closes, period=20) -> float|None`(종목 N일 수익률 − 지수 N일 수익률 %p, 양수=지수 초과 강세). **시리즈 ASC(과거→최신) 기대** — `get_recent_daily` DESC 는 호출자가 역순 변환. quant_score 선례 = DB/HTTP/시계 미접촉 순수함수, 8영역 미접촉. **⚠️ kojiro_indicators ema/atr 재사용 금지**(ATR 이원화). 소비=VB `_apply_rs_rsi_observe_in_prepare` 진입 품질 관찰(Part B, 배제 0))
 **te_metrics.py** (사이클 F, 2026-08-02 — TE/RR 전략 지표 순수함수. `compute_te_rr(pairs, *, now, window_days=90, strategy_id="") -> TeRrMetrics`(19필드). 입력=`get_trade_pairs` 출력(진입가 기준 profit_rate·왕복·미실현분리). 모집단=status=='closed'∧sell_date≥now−window_days(청산일 윈도우, open 제외). **te_pct=profit_rate 단순평균**(compute_metrics 매도가 기준 재사용 금지) / win_rate=W/N(보합 포함 분모) / rr=avg_win/|avg_loss|(전승 or min(W,L)<5 → None) / **required_rr=L/W**(서적 (1−승률)/승률 은 보합=0 특수해) / 동치 TE>0⟺RR>필요RR / 표본 게이트 sample_tier(N<20/20-49/50+) + rr_available(min(W,L)≥5) + verdict(undecided/superior/inferior/flat) + structure_tag(N≥20∧rr_available: 저승률·고RR robust/고승률·저RR fragile/balanced) + single_trade_dominant. quant_score 선례 = DB/HTTP/시계 미접촉 순수함수, 8영역 미접촉. 소비=`GET /api/strategies/te`(routes/strategies.py, 5분 캐시). 관찰 전용)
 ```
 
@@ -53,6 +55,42 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 - `git diff -- src/engine/risk.py src/engine/order_engine.py src/realtime/ src/auth/ src/api/order.py src/engine/session.py src/engine/scanner.py(매수경로) src/engine/strategy_registry.py` = **0** (재무 task = 16:40 매수 진입 전 + quant_score 8영역 미접촉 + VB 관찰 훅 배제 0).
 - 백엔드 3,434 PASS/0 fail. 회귀 가드 `tests/unit/api/test_cycleC1_finance_allowlist.py` 외.
 - 인계: Phase 1 관찰 데이터 유의성 검정 후 Phase 2(C4) = quant_filter_enabled=True + 실배제 조건부 게이트.
+
+## 사이클 G (2026-08-02) — VB RR(손익비) 개선 Phase 1 (Part A C2 조기청산 default-off + Part B RS/RSI 관찰)
+
+사이클 F 실측 = VB 유일 열위(N=65, 승률 35%, RR 1.35 < 필요RR 1.83, TE −0.63%). 구조적 원인 = check_exit_signal 에 익절·트레일링 부재(승자 15:20 캡) + −3% 하드손절 고정 + 진입 품질 필터 전무. Part A(avg_loss↓) + Part B(승률↑ 증거 축적)로 대응. 승인 계획 `~/.claude/plans/luminous-drifting-widget.md`.
+
+### Part A — 실패 돌파 조기청산 (C2, `check_exit_signal`, default-off → 백테스트 게이트)
+
+- `volatility_breakout.py` DEFAULT_PARAMS 3키 (`failed_breakout_exit_enabled=False` / `failed_breakout_buffer_pct=-0.5` / `failed_breakout_confirm_ticks=2`, **PARAM_RANGES 미편입** = 청산 정체성 상수). `check_exit_signal` 손절 분기 *뒤*·익일 안전망 *앞* 신규 분기: 돌파선(`_targets[ticker].boards[board].target_price` 우선, top-level 폴백) 대비 `current_price < target × (1 + buffer/100)` 가 `confirm_ticks` 연속 → `Signal.STOP_LOSS`. 회복(돌파선 위) 시 카운터 리셋. `_failed_breakout_count: dict[str,int]` transient(prepare clear + on_position_closed pop). **`enabled=False`(기본) → 분기 미진입 = byte-identical**(BFB 사이클 C `breakeven_promote_atr=0` 선례).
+- 롤아웃 게이트 = default-off 라이브 배포 → 외부 MCP 백테스트 buffer/confirm 스윕 통과 시 운영자 DB `strategy_config.volatility_breakout.params.failed_breakout_exit_enabled=true` 활성 → te_metrics 로 RR/avg_loss 재측정.
+
+### Part B — RS/RSI 진입 품질 관찰 훅 `_apply_rs_rsi_observe_in_prepare` (관찰 전용, 배제 0)
+
+- `_apply_quant_filter_in_prepare`(C3) 미러. DEFAULT_PARAMS 3키 (`rs_filter_enabled=False` / `rsi_filter_enabled=False` / `rsi_extreme_max=85`, **PARAM_RANGES 미편입**). `VB_FUNNEL_STAGES` 7→**9단계** (step 8 RS 관찰 / step 9 RSI 관찰). prepare 말미(quant 훅 뒤) 호출. `ta_indicators.rsi`/`relative_strength` + `stock_master_daily.get_recent_daily`(DESC→ASC 역순) + 지수 KODEX200(069500) 벤치마크. **입력==출력 배제 0** — enabled=True 여도 Phase 1 실배제 미구현. 보유 protected 스킵(사이클 32 R4) + 결측/예외/지수 미수신 fail-open(사이클 88 G-REJECT). RSI 관찰 = 극단(>85)만(단순 >70 과매수 컷 금지 — 강세 돌파는 정상적으로 RSI 高).
+- 관찰 게이트 = 2주 후 고RS/저RSI극단 vs 저RS/고RSI 진입의 승률·RR 유의성 검정 → 유의 시 별도 사이클 실배제 활성.
+
+### 매매 안전성 무영향
+
+- `git diff -- src/engine/risk.py src/engine/order_engine.py src/realtime/ src/auth/ src/api/order.py src/engine/scheduler.py src/engine/session.py src/engine/strategy_registry.py` = **0** (Part A default-off byte-identical + Part B 관찰 prepare 매수 진입 전, 사이클 38). check_buy/exit 본체 rs/rsi 토큰 인젝션 0(AST 가드).
+- 회귀 가드 43 케이스: `test_cycleG_ta_indicators.py`(14, rsi/rs 순수함수 결정적) + `test_cycleG_vb_failed_breakout_exit.py`(13, C2 임계·카운터·byte-identical·승자 미간섭) + `test_cycleG_vb_rs_rsi_observe.py`(16, 배제 0·protected·fail-open·지수 069500·funnel 8/9·SAFETY). 의미 전환 3(cycle157 6→9 + cycleC3 7→9 + cycle148 xfail 영속). 8영역 diff 0.
+- 인계: Part B 관찰 유의 시 RS(B2) 실배제 활성 → C1/C3 손절 정교화 → ETF 레짐 E-2 → 최후 A1 느슨한 트레일링(avg_win, fat-tail 절단 위험으로 마지막).
+
+## 사이클 H (2026-08-02) — 포트폴리오 리스크 관찰 훅 Phase 1 (터틀 서적 대조 감사 갭 2건, 관찰 전용)
+
+「터틀 자금관리」 서적 14p 발췌를 3중 대조(개념·정밀수치·포트폴리오)한 감사에서 도출한 최대 구조적 갭 2건(둘 다 High) 대응: (1) **포트폴리오 단위 총리스크 상한 부재** — `is_daily_loss_exceeded`가 전략별 격리라 7전략×최대5=최대 35 동시보유를 묶는 계좌 통합 정지 게이트 없음. (2) **전략 간 섹터/상관 집중 무통제** — `is_ticker_blocked_for_buy`는 동일 종목코드만 차단, donchian 반도체A+VCP B+kojiro C 동시보유 무차단. **이번 사이클 = Phase 1 관찰 전용**(매수 차단·SOFT 상한은 2주 관찰 후 Phase 2).
+
+### 8영역 회피 설계 (strategy_registry.py 가 8영역이라 registry 미접촉)
+
+- **신규 순수함수 `portfolio_risk.py`**(위 모듈 맵) — registry/kojiro/db/http 미접촉, 호출자 주입(pull). AST 가드 = 8영역 파일에 `portfolio_risk` 참조 0건 + portfolio_risk.py 에 `_kojiro_sector_key`/`trading_scheduler`/registry/db import 0건.
+- **`GET /api/portfolio/risk`**(routes/portfolio.py, 8영역 아님) — `trading_scheduler.registry.all()` + `get_balance()` net_asset + 보유 ticker 섹터(`_kojiro_sector_key` 재사용) pull → snapshot. get_balance/stock_master 실패 graceful 200(500 금지).
+- **20:10 일일리포트 계량화**(log_analysis_engine.py, hot path 아님) — `_build_portfolio_risk_snapshot(now_kst)` async 헬퍼 + metrics `portfolio_risk_snapshot` 키(빌드 실패→None graceful, 리포트 INSERT 보존).
+
+### 매매 안전성 무영향
+
+- `git diff -- src/engine/risk.py src/engine/order_engine.py src/realtime/ src/auth/ src/api/order.py src/engine/session.py src/engine/scanner.py src/engine/strategy_registry.py` = **0** (신규 순수함수 + 라우트 + 20:10 리포트 = 매매 hot path 미접촉, 배제 0).
+- 회귀 가드 43(순수함수 25 + 라우트 4 + log_analysis 2 + AST 격리 12) 전량 GREEN. 백엔드 4,033 PASS.
+- 인계 Phase 2: (a) SOFT 상한(registry 매수 게이트, HARD 승격 금지) 2주 관찰 유의 후 (b) 섹터 소스 master_raw(KRX 플래그 정본) 승격 (c) turtle entry_atr 정밀 리스크(손절% 프록시 대체) (d) 프론트 카드.
 
 ## 사이클 188 (2026-07-02) — `_wait_until(advance_if_passed=True)` never-return 회귀 시정
 
