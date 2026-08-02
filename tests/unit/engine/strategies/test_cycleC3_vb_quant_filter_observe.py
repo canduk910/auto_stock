@@ -261,10 +261,12 @@ class TestDefaultParamsQuantKeys:
 # ---------------------------------------------------------------------------
 class TestFunnelStagesExtended:
     def test_funnel_stages_has_7_steps(self):
+        # 사이클 G (2026-08-02) 의미 전환 — VB_FUNNEL_STAGES 7→9 확장 (step 8 RS / step 9 RSI
+        # 관찰 추가). C3 의 원 의도(step 7 퀀트 재무 게이트 존재)는 보존, 총 단계 수만 9 로 갱신.
         from src.engine.strategies.volatility_breakout import VB_FUNNEL_STAGES
 
-        assert len(VB_FUNNEL_STAGES) == 7, (
-            f"VB_FUNNEL_STAGES 단계 수 {len(VB_FUNNEL_STAGES)} != 7 (관찰 게이트 +1단계)."
+        assert len(VB_FUNNEL_STAGES) == 9, (
+            f"VB_FUNNEL_STAGES 단계 수 {len(VB_FUNNEL_STAGES)} != 9 (사이클 G RS/RSI 관찰 +2단계)."
         )
         step_nos = [s.step_no for s in VB_FUNNEL_STAGES]
         assert 7 in step_nos, f"step_no=7 (퀀트 재무 게이트) 누락: {step_nos}"

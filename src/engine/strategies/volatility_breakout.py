@@ -35,6 +35,9 @@ VB_FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(5, "전일 Range > 0 + noise 계산 통과"),
     FunnelStage(6, "K값 계산 + target_offset > 0"),
     FunnelStage(7, "퀀트 재무 게이트(관찰) — F-Score/마법공식 스코어 기록, 배제 0"),
+    # 사이클 G Part B — RS/RSI 진입 품질 관찰 (배제 0, 실배제는 유의성 게이트 후 별도 사이클)
+    FunnelStage(8, "상대강도 RS 관찰 — 지수(KODEX200) 대비 강세 스코어 기록, 배제 0"),
+    FunnelStage(9, "RSI 관찰 — 과매수 극단(>rsi_extreme_max) 스코어 기록, 배제 0"),
 )
 
 
@@ -92,6 +95,18 @@ class VolatilityBreakoutStrategy(StrategyBase):
         "quant_filter_enabled": False,
         "quant_min_f_score": 0,
         "quant_max_mf_rank": 0,
+        # 사이클 G Part A — 실패 돌파 조기청산 (C2, avg_loss↓). default-off = byte-identical.
+        # 돌파선(target_price) 아래 buffer% 로 confirm_ticks 연속 재이탈 시 −3% 손절 대기 없이
+        # 조기 청산. PARAM_RANGES 미편입 (청산 정체성 상수 — 사이클 198/208/212 선례).
+        "failed_breakout_exit_enabled": False,
+        "failed_breakout_buffer_pct": -0.5,
+        "failed_breakout_confirm_ticks": 2,
+        # 사이클 G Part B — RS/RSI 진입 품질 관찰 훅 (기본 OFF = 배제 0, 스코어 계산/funnel 노출만).
+        # PARAM_RANGES 미편입 (AI 자동튜닝 금지, 진입 정체성 상수). RSI 는 극단(>85) 관찰만
+        # (단순 >70 과매수 컷 금지 — 강세 돌파는 정상적으로 RSI 高, 오닐 반증).
+        "rs_filter_enabled": False,
+        "rsi_filter_enabled": False,
+        "rsi_extreme_max": 85,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -119,6 +134,9 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 사이클 201 — ticker -> 쿨다운 만료일(이날 이전엔 재진입 금지). multi-day 상태 —
         # _reset_daily_state/prepare 리셋 절대 금지 (G-VB-NO-DAILY-RESET, BFB 사이클 191 답습).
         self._cooldown_until: dict[str, date] = {}
+        # 사이클 G Part A — ticker -> 돌파선 재이탈 연속 카운트 (조기청산 confirm_ticks 용).
+        # transient 상태 — prepare 에서 clear + on_position_closed 에서 pop.
+        self._failed_breakout_count: dict[str, int] = {}
 
     async def prepare(self) -> None:
         """장 시작 전: 시총/거래대금 조건 종목 스캔 → 21일 일봉으로 K값/Target 계산.
@@ -144,6 +162,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         self._targets.clear()
         self._open_confirmed.clear()
         self._prev_price.clear()
+        self._failed_breakout_count.clear()  # 사이클 G Part A — 전일 stale 재이탈 카운터 차단
 
         # 사이클 158 Q2 — stock_master 0건 race 자동 재시도 hook (cap 3회 + sleep 30s).
         # 초기 1회 + 재시도 cap 3회 = 최대 4회 호출 영역.
@@ -336,6 +355,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 사이클 C3 — step 7: 퀀트 재무 게이트 (관찰 전용, quant_filter_enabled=False 기본 → 배제 0).
         # master_block(step3) 다음 단계 삽입 원칙에 맞춰 prepare 파이프라인 최종 단계로 호출.
         await self._apply_quant_filter_in_prepare(final_prepared_tickers)
+        # 사이클 G Part B — step 8/9: RS/RSI 진입 품질 관찰 (배제 0, 스코어/funnel 기록만).
+        await self._apply_rs_rsi_observe_in_prepare(final_prepared_tickers)
 
         logger.info("변동성돌파 전략 준비 완료: %d/%d종목 (K값 계산)", prepared, len(tickers))
 
@@ -597,6 +618,107 @@ class VolatilityBreakoutStrategy(StrategyBase):
             step_conditions=(
                 f"관찰 전용(quant_filter_enabled={self.config.params.get('quant_filter_enabled', False)}) "
                 "— F-Score/마법공식 스코어 기록, 배제 0"
+            ),
+        )
+
+        # 관찰 모드(및 Phase 1 전체) — 배제 0, 입력 그대로 반환
+        return list(tickers)
+
+    async def _apply_rs_rsi_observe_in_prepare(self, tickers: list[str]) -> list[str]:
+        """VB prepare 영역 RS/RSI 진입 품질 관찰 훅 (사이클 G Part B, 관찰 전용).
+
+        `_apply_quant_filter_in_prepare`(사이클 C3) 미러. `rs_filter_enabled`/
+        `rsi_filter_enabled`(기본 False)일 때는 상대강도(RS)·RSI 스코어를 계산 +
+        funnel step(step_no=8/9) 기록만 수행하고 **어떤 종목도 배제하지 않는다**
+        (관찰 모드, 입력==출력). Phase 1 은 enabled=True 여도 실배제 미구현 —
+        2주 관찰로 증거 축적 후 유의성 게이트 → 별도 사이클에서 실배제.
+
+        - RS 벤치마크 = KODEX200(069500) 일봉 (지수 대비 초과수익률 %p).
+        - RSI = 종목 일봉 Wilder RSI. 관찰 대상 = 극단(>rsi_extreme_max=85).
+        - 일봉 = `stock_master_daily.get_recent_daily`(DESC → ASC 역순 변환).
+        - 보유 종목 절대 보호 (사이클 32 R4) + 결측/예외 fail-open (사이클 88 G-REJECT).
+        """
+        from src.db import stock_master_daily as _smd_mod
+        from src.engine.ta_indicators import relative_strength, rsi as _rsi
+
+        _INDEX_TICKER = "069500"  # KODEX200 (RS 벤치마크)
+
+        # 보유 종목 절대 보호 (사이클 32 R4 답습)
+        protected: set[str] = set()
+        try:
+            from src.engine import scanner as _scanner_mod
+            protected = _scanner_mod._collect_protected_tickers_for_scanner()
+        except Exception:
+            logger.debug(
+                "[vb_rs_rsi_observe] protected_tickers 조회 실패 graceful",
+                exc_info=True,
+            )
+
+        def _closes_asc(rows) -> list[float]:
+            """get_recent_daily(DESC) → ASC 종가 시리즈. 결측/비정상 → []."""
+            if not rows:
+                return []
+            out: list[float] = []
+            for row in reversed(rows):  # DESC(최신 먼저) → ASC(과거 먼저)
+                try:
+                    out.append(float(row.get("close_price")))
+                except (TypeError, ValueError, AttributeError):
+                    return []
+            return out
+
+        # 지수(KODEX200) 일봉 1회 조회 — 미수신 시 RS None (배제 0)
+        index_closes: list[float] = []
+        try:
+            index_rows = await _smd_mod.get_recent_daily(_INDEX_TICKER, days=30)
+            index_closes = _closes_asc(index_rows)
+        except Exception:
+            logger.debug(
+                "[vb_rs_rsi_observe] 지수(%s) 일봉 조회 실패 graceful",
+                _INDEX_TICKER, exc_info=True,
+            )
+
+        rs_scores: dict[str, float | None] = {}
+        rsi_scores: dict[str, float | None] = {}
+
+        for ticker in tickers:
+            if ticker in protected:
+                continue
+            try:
+                rows = await _smd_mod.get_recent_daily(ticker, days=30)
+            except Exception:
+                logger.debug(
+                    "[vb_rs_rsi_observe] get_recent_daily 실패 graceful: %s",
+                    ticker, exc_info=True,
+                )
+                rows = []
+
+            stock_closes = _closes_asc(rows)
+            rsi_scores[ticker] = _rsi(stock_closes) if stock_closes else None
+            rs_scores[ticker] = (
+                relative_strength(stock_closes, index_closes)
+                if (stock_closes and index_closes) else None
+            )
+
+        # funnel step 8 (RS 관찰) + step 9 (RSI 관찰) — 스코어만 기록, 배제 0
+        rs_extreme_max = self.config.params.get("rsi_extreme_max", 85)
+        self._record_funnel_pipeline_step(
+            VB_FUNNEL_STAGES[7],
+            survived=[
+                {"ticker": t, "rs": rs_scores.get(t)} for t in tickers
+            ],
+            step_conditions=(
+                f"관찰 전용(rs_filter_enabled={self.config.params.get('rs_filter_enabled', False)}) "
+                f"— 지수(KODEX200 {_INDEX_TICKER}) 대비 상대강도 스코어 기록, 배제 0"
+            ),
+        )
+        self._record_funnel_pipeline_step(
+            VB_FUNNEL_STAGES[8],
+            survived=[
+                {"ticker": t, "rsi": rsi_scores.get(t)} for t in tickers
+            ],
+            step_conditions=(
+                f"관찰 전용(rsi_filter_enabled={self.config.params.get('rsi_filter_enabled', False)}) "
+                f"— RSI 과매수 극단(>{rs_extreme_max}) 스코어 기록, 배제 0"
             ),
         )
 
@@ -910,6 +1032,39 @@ class VolatilityBreakoutStrategy(StrategyBase):
             )
             return Signal.STOP_LOSS
 
+        # 1.5 사이클 G Part A — 실패 돌파 조기청산 (C2, avg_loss↓). default-off = byte-identical.
+        # 돌파선(target_price) 아래 buffer% 로 confirm_ticks 연속 재이탈 시 −3% 손절 대기 없이
+        # 조기 청산 → |avg_loss| 직접 축소. 승자(target 위 유지)는 카운터 리셋으로 미간섭.
+        # enabled=False(기본) 면 분기 미진입 = byte-identical.
+        if self.config.params.get("failed_breakout_exit_enabled", False):
+            info = self._targets.get(ticker)
+            target_price = 0
+            if info:
+                boards = info.get("boards") or {}
+                board_info = boards.get(active_board) if active_board else None
+                if board_info and board_info.get("target_price"):
+                    target_price = int(board_info["target_price"])
+                elif info.get("target_price"):
+                    target_price = int(info["target_price"])
+            if target_price > 0:
+                buffer_pct = float(self.config.params.get("failed_breakout_buffer_pct", -0.5))
+                threshold = target_price * (1 + buffer_pct / 100)
+                if current_price < threshold:
+                    cnt = self._failed_breakout_count.get(ticker, 0) + 1
+                    self._failed_breakout_count[ticker] = cnt
+                    confirm = int(self.config.params.get("failed_breakout_confirm_ticks", 2))
+                    if cnt >= confirm:
+                        from src.engine.scanner import t
+                        logger.info(
+                            "[vb_failed_breakout_exit] %s 돌파선 재이탈 %d회 연속 "
+                            "(현재가 %d < 돌파선 %d × %.2f%% = %.1f) — 조기청산",
+                            t(ticker), cnt, current_price, target_price, buffer_pct, threshold,
+                        )
+                        return Signal.STOP_LOSS
+                else:
+                    # 회복(돌파선 위) → 카운터 리셋 (연속 확인 요구 보존)
+                    self._failed_breakout_count[ticker] = 0
+
         # 2. 익일 청산 안전망 (2026-05-15, 결함 D 잔여) — 전일 매수 종목이 남아 있으면
         # 즉시 청산 신호. 단 scheduler 가 시가 안정화 중(_next_day_clear_pending=True)
         # 이면 보류 — scheduler 가 직접 처리 중이라 race 차단.
@@ -978,6 +1133,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
     def on_position_closed(self, ticker: str) -> None:
         """사이클 201 — 포지션 청산 시 재진입 쿨다운 등록 (BFB 사이클 191 패턴 답습)."""
+        self._failed_breakout_count.pop(ticker, None)  # 사이클 G Part A — 재진입 stale 카운터 차단
         self.register_cooldown_after_exit(ticker)
         coro = self._refine_cooldown_business_days(ticker)
         try:
