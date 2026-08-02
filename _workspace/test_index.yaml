@@ -446,6 +446,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -456,6 +458,9 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -575,6 +580,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/api/balance.py:
@@ -762,6 +770,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -843,6 +853,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/api/base.py:
     direct_tests:
@@ -1285,6 +1296,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1295,6 +1308,9 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
@@ -1413,6 +1429,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/api/condition.py:
@@ -1853,6 +1872,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -1864,6 +1885,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -1984,6 +2008,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/api/finance.py:
@@ -2424,6 +2451,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -2435,6 +2464,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -2555,6 +2587,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/api/kis_master.py:
@@ -2997,6 +3032,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -3008,6 +3045,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -3128,6 +3168,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/api/krx.py:
@@ -3570,6 +3613,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -3581,6 +3626,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -3701,6 +3749,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/api/market_operation.py:
@@ -4143,6 +4194,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -4153,6 +4206,9 @@ backend:
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -4272,6 +4328,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/api/order.py:
@@ -4457,6 +4516,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -4539,6 +4600,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/api/quotation.py:
     direct_tests:
@@ -4725,6 +4787,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -4798,6 +4862,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/auth/__init__.py:
     direct_tests:
@@ -4996,6 +5061,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -5078,6 +5145,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/auth/token.py:
     direct_tests:
@@ -5520,6 +5588,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -5531,6 +5601,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -5651,6 +5724,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/config.py:
@@ -6150,6 +6226,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -6285,6 +6363,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_dkstock_client.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
@@ -6407,6 +6488,8 @@ backend:
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle83_r6_frequency_regression.py
     - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -6415,6 +6498,8 @@ backend:
     - tests/unit/routes/test_cycle84_route_404.py
     - tests/unit/routes/test_cycle84_route_invalid_limit.py
     - tests/unit/routes/test_cycle84_route_invalid_offset.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client_db_toggle.py
@@ -6910,6 +6995,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/services/test_quote_session_health.py
   src/db/_kst.py:
     direct_tests:
@@ -6923,6 +7009,8 @@ backend:
     - tests/unit/engine/test_cycle101_kst_persistence.py
     - tests/unit/engine/test_cycle122_daily_load_task.py
     - tests/unit/engine/test_cycle193_immediate_fresh_gate.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
+    - tests/unit/engine/test_cycleF_te_rr_metrics.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -7409,6 +7497,7 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -7545,6 +7634,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_dkstock_client.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
@@ -7727,6 +7819,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -7800,6 +7894,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/db/daily_performance.py:
     direct_tests:
@@ -7974,6 +8069,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -8047,6 +8144,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/db/kis_quote_accounts.py:
     direct_tests:
@@ -8495,6 +8593,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -8506,6 +8606,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -8626,6 +8729,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/db/log_reports.py:
@@ -8802,6 +8908,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -8875,6 +8983,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/db/market_regime_snapshots.py:
     direct_tests:
@@ -9052,6 +9161,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -9132,6 +9243,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/db/parameter_recommendations.py:
     direct_tests:
@@ -9310,6 +9424,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -9383,6 +9499,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/db/pending_next_day_clear.py:
     direct_tests:
@@ -9558,6 +9675,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -9631,6 +9750,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/db/pg.py:
     direct_tests:
@@ -10126,6 +10246,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -10262,6 +10384,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_dkstock_client.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
@@ -10486,6 +10611,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -10568,6 +10695,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/db/stock_master.py:
     direct_tests:
@@ -11012,6 +11140,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -11023,6 +11153,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -11138,6 +11271,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/db/stock_master_daily.py:
@@ -11160,6 +11296,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle123_donchian_db_high.py
     - tests/unit/engine/strategies/test_cycle125_vcp_atr_db_hit.py
     - tests/unit/engine/strategies/test_kojiro_candidate_rank.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -11578,6 +11715,7 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -11589,6 +11727,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -11709,6 +11850,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/db/stock_master_financial.py:
@@ -12152,6 +12296,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -12163,6 +12309,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -12283,6 +12432,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/db/strategy_config.py:
@@ -12457,6 +12609,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -12530,6 +12684,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/db/strategy_funnel.py:
     direct_tests:
@@ -12973,6 +13128,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -12984,6 +13141,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -13104,6 +13264,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/db/supabase.py:
@@ -13176,10 +13339,14 @@ backend:
     - tests/unit/engine/test_cycle64_price_filter_scanner_protected.py
     - tests/unit/engine/test_cycle83_r6_frequency_regression.py
     - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client_db_toggle.py
@@ -13703,6 +13870,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/services/test_dkstock_client.py
     - tests/unit/services/test_mcp_client.py
     - tests/unit/services/test_mcp_client_session_log.py
@@ -14155,6 +14323,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -14166,6 +14336,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -14287,6 +14460,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/db/trade_history.py:
@@ -14479,6 +14655,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -14559,6 +14737,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/__init__.py:
     direct_tests:
@@ -14782,6 +14961,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_kojiro_indicators.py
@@ -14846,6 +15027,8 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
     transitive_tests:
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
@@ -15074,6 +15257,7 @@ backend:
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
     - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
@@ -15138,6 +15322,7 @@ backend:
     - tests/unit/routes/test_cycle84_route_404.py
     - tests/unit/routes/test_cycle84_route_invalid_limit.py
     - tests/unit/routes/test_cycle84_route_invalid_offset.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/engine/backtest_engine.py:
@@ -15315,6 +15500,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -15388,6 +15575,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/backtest_yaml.py:
     direct_tests:
@@ -15566,6 +15754,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -15639,6 +15829,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/boot_manager.py:
     direct_tests:
@@ -15811,6 +16002,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -15884,6 +16077,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/daily_emit_cap.py:
     direct_tests:
@@ -16326,6 +16520,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -16337,6 +16533,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -16457,6 +16656,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/engine/kojiro_indicators.py:
@@ -16554,6 +16756,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
+    - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
@@ -16621,6 +16824,7 @@ backend:
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
     - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
     - tests/unit/engine/test_cycle83_task_lifecycle.py
     - tests/unit/engine/test_cycle89_lifecycle.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
@@ -16633,6 +16837,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -16642,6 +16848,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_param_ranges_vcp.py
@@ -16653,6 +16862,10 @@ backend:
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_risk_buy_block_modes.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_risk_on_tick_selling_skip.py
+    - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
     - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -16707,6 +16920,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/log_analysis_engine.py:
     direct_tests:
@@ -16883,6 +17099,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_kojiro_wiring.py
@@ -16952,6 +17170,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/market_operation_monitor.py:
     direct_tests:
@@ -17393,6 +17612,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -17404,6 +17625,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -17522,6 +17746,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/engine/market_regime.py:
@@ -17531,6 +17758,8 @@ backend:
     - tests/integration/test_boot_market_regime.py
     - tests/integration/test_recommendation_with_market_regime.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_market_regime.py
     - tests/unit/engine/test_market_regime_buy_block_cache.py
     - tests/unit/engine/test_market_regime_buy_block_state.py
@@ -17538,6 +17767,8 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -17777,6 +18008,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/metrics_collector.py:
     direct_tests:
@@ -17955,6 +18187,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -18028,6 +18262,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/order_engine.py:
     direct_tests:
@@ -18217,6 +18452,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -18293,6 +18530,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/quant_score.py:
     direct_tests:
@@ -18492,6 +18730,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -18566,6 +18806,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/recommendation_engine.py:
     direct_tests:
@@ -18747,6 +18988,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -18811,6 +19054,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/recommendation_metrics.py:
     direct_tests:
@@ -18986,6 +19230,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -19059,6 +19305,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/refresh_progress.py:
     direct_tests:
@@ -19502,6 +19749,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_5min_upsert_chain.py
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -19513,6 +19762,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -19630,6 +19882,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/engine/risk.py:
@@ -19812,6 +20067,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -19882,6 +20139,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/scanner.py:
     direct_tests:
@@ -20365,6 +20623,8 @@ backend:
     - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
     - tests/unit/engine/test_cycle92_time_boot_moved.py
     - tests/unit/engine/test_cycle92_token_cache_persistence.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -20375,6 +20635,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
@@ -20452,6 +20715,9 @@ backend:
     - tests/unit/routes/test_cycle84_route_404.py
     - tests/unit/routes/test_cycle84_route_invalid_limit.py
     - tests/unit/routes/test_cycle84_route_invalid_offset.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/engine/scheduler.py:
@@ -20609,6 +20875,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
     - tests/unit/engine/test_kojiro_wiring.py
@@ -20698,6 +20966,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/sell_rejection.py:
     direct_tests:
@@ -20883,6 +21152,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -20965,6 +21236,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/session.py:
     direct_tests:
@@ -21579,6 +21851,9 @@ backend:
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC2_quant_score.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
+    - tests/unit/engine/test_cycleF_te_rr_metrics.py
     - tests/unit/engine/test_cycleM5_boot_manager_pg_sites.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
@@ -21732,6 +22007,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_dkstock_client.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
@@ -21927,6 +22205,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -22000,6 +22280,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stale_manager.py:
     direct_tests:
@@ -22178,6 +22459,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -22251,6 +22534,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stale_session_recovery.py:
     direct_tests:
@@ -22430,6 +22714,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -22503,6 +22789,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stale_tracker.py:
     direct_tests:
@@ -22677,6 +22964,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -22750,6 +23039,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stale_universe_guard.py:
     direct_tests:
@@ -22928,6 +23218,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -23001,6 +23293,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stale_watcher_core.py:
     direct_tests:
@@ -23183,6 +23476,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -23256,6 +23551,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stock_master_basics_metrics.py:
     direct_tests:
@@ -23429,6 +23725,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -23502,6 +23800,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stock_master_daily_metrics.py:
     direct_tests:
@@ -23675,6 +23974,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -23748,6 +24049,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stock_master_master_metrics.py:
     direct_tests:
@@ -23921,6 +24223,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -23994,6 +24298,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stock_master_metrics.py:
     direct_tests:
@@ -24172,6 +24477,8 @@ backend:
     - tests/unit/engine/test_cycle92_time_boot_moved.py
     - tests/unit/engine/test_cycle92_token_cache_persistence.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -24245,6 +24552,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategies/__init__.py:
     direct_tests:
@@ -24454,6 +24762,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -24527,6 +24837,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategies/donchian_swing.py:
     direct_tests:
@@ -24723,6 +25034,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -24795,6 +25108,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategies/kojiro.py:
     direct_tests:
@@ -24971,6 +25285,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -25043,6 +25359,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategies/long_tail_volatility.py:
     direct_tests:
@@ -25231,6 +25548,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -25304,6 +25623,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategies/momentum.py:
     direct_tests:
@@ -25490,6 +25810,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -25563,6 +25885,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategies/vcp_breakout.py:
     direct_tests:
@@ -25751,6 +26074,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -25823,6 +26148,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategies/volatility_breakout.py:
     direct_tests:
@@ -26024,6 +26350,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -26095,6 +26423,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategy.py:
     direct_tests: []
@@ -26371,6 +26700,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
@@ -26434,6 +26765,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/strategy_registry.py:
     direct_tests:
@@ -26633,6 +26965,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -26700,6 +27034,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/task_loop_helper.py:
     direct_tests:
@@ -26875,6 +27210,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -26935,6 +27272,62 @@ backend:
     - tests/unit/routes/test_cycle128_list_query_params.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
+    - tests/unit/routes/test_cycle84_api_response_envelope.py
+    - tests/unit/routes/test_cycle84_route_404.py
+    - tests/unit/routes/test_cycle84_route_invalid_limit.py
+    - tests/unit/routes/test_cycle84_route_invalid_offset.py
+    - tests/unit/routes/test_cycle90_concurrent_lock.py
+    - tests/unit/routes/test_cycle90_fetch_top_500_call.py
+    - tests/unit/routes/test_cycle90_kst_persistence.py
+    - tests/unit/routes/test_cycle90_lock_release.py
+    - tests/unit/routes/test_cycle90_post_route_envelope.py
+    - tests/unit/routes/test_cycle90_response_timing.py
+    - tests/unit/routes/test_cycle90_route_405_other.py
+    - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
+    - tests/unit/routes/test_cycleM5_strategies_auto_start.py
+  src/engine/te_metrics.py:
+    direct_tests:
+    - tests/unit/engine/test_cycleF_te_rr_metrics.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
+    transitive_tests:
+    - tests/contract/test_backtest_mcp_health.py
+    - tests/contract/test_cycle171_snapshot_route_steps.py
+    - tests/contract/test_cycle64_routes_price_filter.py
+    - tests/contract/test_quote_session_auto_disable.py
+    - tests/contract/test_routes_backtest.py
+    - tests/contract/test_routes_balance_perf.py
+    - tests/contract/test_routes_buy_block.py
+    - tests/contract/test_routes_history.py
+    - tests/contract/test_routes_kis_quote_accounts.py
+    - tests/contract/test_routes_log_reports.py
+    - tests/contract/test_routes_logs.py
+    - tests/contract/test_routes_logs_search.py
+    - tests/contract/test_routes_market_regime.py
+    - tests/contract/test_routes_realtime.py
+    - tests/contract/test_routes_realtime_ccnl_fields.py
+    - tests/contract/test_routes_realtime_session_details.py
+    - tests/contract/test_routes_recommendations.py
+    - tests/contract/test_routes_strategies.py
+    - tests/contract/test_routes_strategies_cash_ratio.py
+    - tests/contract/test_routes_strategy_funnel.py
+    - tests/contract/test_routes_subscriptions_pool.py
+    - tests/contract/test_routes_system_integrations.py
+    - tests/contract/test_routes_trading.py
+    - tests/integration/test_cycle100_count_eager_refresh_integration.py
+    - tests/integration/test_mcp_client_lifecycle.py
+    - tests/unit/main/test_cycle72_db_log_dedupe.py
+    - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
+    - tests/unit/main/test_cycleM3b_main_seam_pg.py
+    - tests/unit/routes/test_cycle110_emit_persistence.py
+    - tests/unit/routes/test_cycle110_exception_graceful.py
+    - tests/unit/routes/test_cycle110_import_fix.py
+    - tests/unit/routes/test_cycle110_lock_persistence.py
+    - tests/unit/routes/test_cycle110_response_format.py
+    - tests/unit/routes/test_cycle112_krx_open_api_routes.py
+    - tests/unit/routes/test_cycle126_basics_daily_routes.py
+    - tests/unit/routes/test_cycle128_list_query_params.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -27143,6 +27536,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -27219,6 +27614,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/util/__init__.py:
     direct_tests: []
@@ -27408,6 +27804,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -27488,6 +27886,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/main.py:
     direct_tests:
@@ -27720,6 +28119,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -27793,6 +28194,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/models/balance.py:
     direct_tests:
@@ -27979,6 +28381,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -28060,6 +28464,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/models/kis_quote_account.py:
     direct_tests:
@@ -28508,6 +28913,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -28519,6 +28926,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -28639,6 +29049,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/models/krx_open_api.py:
@@ -29098,6 +29511,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -29231,6 +29646,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_dkstock_client.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
@@ -29476,6 +29894,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -29556,6 +29976,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/models/recommendation.py:
     direct_tests: []
@@ -29667,6 +30088,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/models/stock.py:
     direct_tests:
@@ -30108,6 +30532,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -30119,6 +30545,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -30237,6 +30666,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/models/system_integrations.py:
@@ -30291,6 +30723,8 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
   src/models/trade.py:
     direct_tests:
     - tests/integration/test_buy_flow.py
@@ -30480,6 +30914,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -30561,6 +30997,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/realtime/__init__.py:
     direct_tests:
@@ -30755,6 +31192,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -30825,6 +31264,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/realtime/handler.py:
     direct_tests:
@@ -31269,6 +31709,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -31280,6 +31722,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -31395,6 +31840,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/realtime/websocket.py:
@@ -31863,6 +32311,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -31873,6 +32323,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -31966,6 +32419,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/realtime/websocket_pool.py:
@@ -32433,6 +32889,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -32444,6 +32902,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -32537,6 +32998,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_quote_session_health.py
   src/routes/__init__.py:
@@ -32549,6 +33013,7 @@ backend:
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle90_concurrent_lock.py
     - tests/unit/routes/test_cycle90_lock_release.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -33173,6 +33638,7 @@ backend:
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
   src/routes/strategies.py:
     direct_tests:
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -33333,6 +33799,8 @@ backend:
     direct_tests:
     - tests/contract/test_routes_system_integrations.py
     - tests/unit/routes/test_cycle112_krx_open_api_routes.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -33669,6 +34137,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -33749,6 +34219,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/services/exceptions.py:
     direct_tests:
@@ -33933,6 +34406,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -34012,6 +34487,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
     - tests/unit/services/test_dkstock_client_db_toggle.py
     - tests/unit/services/test_mcp_client_db_toggle.py
@@ -34195,6 +34673,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -34268,6 +34748,7 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/services/quote_session_health.py:
     direct_tests:
@@ -34708,6 +35189,8 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
+    - tests/unit/engine/test_cycleD_regime_inert.py
+    - tests/unit/engine/test_cycleE_etf_regime.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
     - tests/unit/engine/test_force_clear_time_guard.py
@@ -34719,6 +35202,9 @@ backend:
     - tests/unit/engine/test_log_analysis_metrics.py
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_buy.py
@@ -34839,6 +35325,9 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
+    - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
 frontend:
   frontend/src/App.tsx:
@@ -35463,10 +35952,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-07-30T07:30:13.674494+09:00'
+generated_at: '2026-08-02T14:36:50.416359+09:00'
 stats:
-  backend_modules: 119
-  backend_tests: 774
+  backend_modules: 120
+  backend_tests: 780
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

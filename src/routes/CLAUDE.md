@@ -22,6 +22,7 @@
 | POST | `/api/performance/recompute` | performance.py | trade_history 기반 daily_performance 전체 소급 재계산 (멱등) |
 | GET | `/api/strategies` | strategies.py | 전략 목록 + 비중 + 상태 + 타겟가 |
 | PUT | `/api/strategies/weights` | strategies.py | 전략별 비중 수정 (매수금액 하한선 검증) |
+| GET | `/api/strategies/te?months=3` | strategies.py | **사이클 F (2026-08-02)** — 전략별 TE(트레이딩 예지치)/RR비율 최근 N개월(months×30일) 지표 (관찰 전용). 응답 `data: TeRrMetrics[]`(7전략) 19필드: strategy_id/n/win/loss/even/win_rate/avg_win_pct/avg_loss_pct/te_pct/te_krw_avg/realized_sum_krw/rr/required_rr/rr_margin/rr_available/sample_tier/verdict/structure_tag/single_trade_dominant. 소스=`get_trade_pairs`(진입가 기준·청산왕복). **전용 엔드포인트 + 5분 monotonic 캐시**(months 키, `invalidate_te_cache()`) — 기존 `/api/strategies`(빈번 폴링) 무변경. 전략별 예외 격리. 매매 8영역 diff 0 (read-only) |
 | PUT | `/api/strategies/{id}/params` | strategies.py | 전략 파라미터 수정 (DB 영속화) |
 | GET | `/api/strategies/system/auto-start` | strategies.py | 자동 매매 설정 조회 |
 | PUT | `/api/strategies/system/auto-start` | strategies.py | 자동 매매 설정 변경 |

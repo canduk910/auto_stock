@@ -53,3 +53,32 @@ const DEFAULT_COLOR = {
 export function getStrategyColor(key: string) {
   return STRATEGY_COLORS[key] ?? DEFAULT_COLOR
 }
+
+/**
+ * 사이클 F — TE(트레이딩 예지치)/RR(손익비) 전략별 최근 N개월 성과 지표.
+ * 백엔드 `src/engine/te_metrics.py::TeRrMetrics` (dataclass) 1:1 매핑.
+ * GET /api/strategies/te?months=3 → ApiResponse<TeRrMetrics[]>
+ *
+ * 관찰 전용 — 매매 hot path 무접촉. get_trade_pairs(진입가 기준·왕복) 소스.
+ */
+export interface TeRrMetrics {
+  strategy_id: string
+  n: number
+  win: number
+  loss: number
+  even: number
+  win_rate: number
+  avg_win_pct: number | null
+  avg_loss_pct: number | null
+  te_pct: number
+  te_krw_avg: number
+  realized_sum_krw: number
+  rr: number | null
+  required_rr: number | null
+  rr_margin: number | null
+  rr_available: boolean
+  sample_tier: 'insufficient' | 'low' | 'normal'
+  verdict: 'undecided' | 'superior' | 'inferior' | 'flat'
+  structure_tag: 'robust' | 'fragile' | 'balanced' | null
+  single_trade_dominant: boolean
+}

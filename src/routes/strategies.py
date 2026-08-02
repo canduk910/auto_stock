@@ -2,12 +2,19 @@
 
 from __future__ import annotations
 
+import time
+from dataclasses import asdict
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from src.db import system_config as _system_config
+from src.db._kst import KST
 from src.db.system_config import get_cash_usage_ratio, set_cash_usage_ratio
+from src.db.trade_history import get_trade_pairs
 from src.engine.scheduler import trading_scheduler
+from src.engine.te_metrics import compute_te_rr
 from src.models.response import ApiResponse
 
 router = APIRouter(prefix="/api/strategies", tags=["strategies"])
@@ -29,6 +36,43 @@ async def get_strategies():
         success=True,
         data=trading_scheduler.registry.get_strategies_status(),
     )
+
+
+_TE_CACHE_TTL = 300.0
+_te_cache: dict[int, tuple[float, list[dict]]] = {}
+
+
+def invalidate_te_cache() -> None:
+    """TE/RR 캐시 무효화 (테스트/토글용, convention: invalidate_*)."""
+    _te_cache.clear()
+
+
+@router.get("/te", response_model=ApiResponse)
+async def get_strategies_te(months: int = 3):
+    """전략별 TE(예지치)/RR(손익비) 최근 N개월 지표를 반환한다 (관찰 전용, 사이클 F).
+
+    5분 TTL 프로세스 캐시(장중 DB 부하 완화, months 키). 전략별 계산 실패는
+    해당 전략만 빈 디폴트로 격리 — 나머지 전략은 정상 진행(F-B8).
+    """
+    cached = _te_cache.get(months)
+    if cached is not None and time.monotonic() < cached[0]:
+        return ApiResponse(success=True, data=cached[1])
+
+    window_days = months * 30
+    now = datetime.now(KST)
+
+    data: list[dict] = []
+    for strategy in trading_scheduler.registry.all():
+        sid = strategy.strategy_id
+        try:
+            pairs = await get_trade_pairs(strategy=sid)
+            metrics = compute_te_rr(pairs, now=now, window_days=window_days, strategy_id=sid)
+        except Exception:
+            metrics = compute_te_rr([], now=now, window_days=window_days, strategy_id=sid)
+        data.append(asdict(metrics))
+
+    _te_cache[months] = (time.monotonic() + _TE_CACHE_TTL, data)
+    return ApiResponse(success=True, data=data)
 
 
 @router.put("/weights", response_model=ApiResponse)

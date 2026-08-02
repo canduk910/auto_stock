@@ -544,6 +544,16 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
 - 사용자 오인 영역 영구 차단 (코미코 사례 단일 근본 원인 영역 시각화 — DB 운영 영역 `-2.4%` 영구 영속 가시화)
 - 한글 라벨 영속 (사이클 89 답습) + graceful (`params={}` 시 "—")
 
+### `Strategies` TE/RR 성과 섹션 (사이클 F, 2026-08-02)
+
+`Strategies.tsx` 전략 카드 기존 4임계 그리드 *아래* "성과 (최근 3개월)" 섹션(`te-section-{key}`) 5행 — 서적 TE(예지치)/RR비율. 데이터 = `GET /api/strategies/te?months=3` (`getStrategyTeRr`, `frontend/src/api/strategies.ts` 신규, `useQuery(['strategy-te',3], retry:1, staleTime:5분)` 사이클 65 H3, 기존 `/api/strategies` 폴링과 독립). 타입 `TeRrMetrics`(strategy.ts, 백엔드 1:1 19필드).
+- A: 배지(`te-verdict-{key}` 우위/열위/판정유보) + TE% 헤드라인(`te-value-{key}`) + 3개월 실현 ₩(`te-realized-{key}`)
+- B: RR 컴팩트 게이지(`rr-gauge-{key}`/`rr-gauge-fill-{key}`/`rr-gauge-marker-{key}`) — 실제RR 채움 + 필요RR 세로 마커. 채움≥마커=우위(이익색 `#FF3333`)/미만=열위(손실색 `#3366FF`)
+- C: 분해(`te-decomposition-{key}` 승률 W/L·평균수익·평균손실·N) / D: 구조태그(`te-structure-{key}`) / E: 표본캡션(`te-sample-caption-{key}`)
+- **표본 게이트 3분기**: `sample_tier='insufficient'`(N<20) → TE·배지 회색 뮤트+"판정 유보"+게이지·구조 숨김 / `'low'`(20-49)+rr_available → amber "표본 적음" / `'low'`+!rr_available → 게이지 "RR 참고 불가" / `'normal'`(50+) → 정상(single_trade_dominant 시 "RR 과대 가능")
+- **오독 방지(tester 발견)**: VB=열위+견고형 동시 표출(명세 정합 — verdict=TE부호·structure_tag=사분면 독립). **verdict 배지가 지배 색**(열위=손실색), **structure_tag 는 중립 회색**(`text-gray-600`) + 형태 병기 "견고형 (저승률·고RR)" — "견고형=우량" 오독 차단.
+- 페이지 하단 1회: 표 1-2 참조표(`te-reference-table` 승률10~90%→필요RR9.00~0.11) + 교육 캡션(`te-education-caption`). TE 실패해도 4임계 카드 정상 렌더(격리). **관찰 전용, 백엔드 매매 무관**. 회귀 가드 `StrategiesTeRr.test.tsx`(10) + MSW/e2e `/api/strategies/te` mock.
+
 ### `App.tsx::navItems` 7→9 갱신 (사이클 81 햄버거 + 사이클 85 M-9 영속)
 
 - 추가 메뉴 2:

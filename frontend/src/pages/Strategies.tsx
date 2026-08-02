@@ -20,6 +20,8 @@ import { useQuery } from '@tanstack/react-query'
 import apiClient from '../api/client'
 import type { ApiResponse } from '../types/common'
 import { getStrategyColor } from '../types/strategy'
+import type { TeRrMetrics } from '../types/strategy'
+import { getStrategyTeRr } from '../api/strategies'
 
 // 전략 응답 타입 — GET /api/strategies 영역 정합
 interface StrategyStatus {
@@ -73,12 +75,287 @@ const THRESHOLD_KEYS = [
 
 export type ThresholdKey = typeof THRESHOLD_KEYS[number]
 
+// ── 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 섹션 ──────────────────
+// 명세: _workspace/red/_behaviors_cycleF_te_rr_20260802.md §F-FE1~F-FE6
+// 자문: _workspace/domain_consult/cycle_te_expectancy_dashboard_20260802.md §209-234
+// 관찰 전용 — 매매 hot path 무접촉.
+
+// 이익/손실/보합 색상 (frontend/CLAUDE.md 컨벤션, PerformanceCard.tsx 패턴 답습)
+function profitColorClass(value: number): string {
+  if (value > 0) return 'text-[#FF3333]'
+  if (value < 0) return 'text-[#3366FF]'
+  return 'text-[#333333]'
+}
+
+function formatSignedPercent(val: number | null | undefined, digits = 1): string {
+  if (val === null || val === undefined || isNaN(val)) return '—'
+  return `${val > 0 ? '+' : ''}${val.toFixed(digits)}%`
+}
+
+function formatKrwSigned(val: number): string {
+  const sign = val > 0 ? '+' : ''
+  return `${sign}${Math.round(val).toLocaleString('ko-KR')}원`
+}
+
+const VERDICT_LABELS: Record<TeRrMetrics['verdict'], string> = {
+  superior: '우위',
+  inferior: '열위',
+  undecided: '판정 유보',
+  flat: '보합',
+}
+
+function verdictBadgeClass(verdict: TeRrMetrics['verdict']): string {
+  switch (verdict) {
+    case 'superior':
+      return 'bg-red-50 text-[#FF3333]'
+    case 'inferior':
+      return 'bg-blue-50 text-[#3366FF]'
+    default:
+      return 'bg-gray-100 text-gray-500'
+  }
+}
+
+// 구조 태그 — 사분면 *형태 설명* 을 앞세우고 라벨은 괄호로 보조 표기.
+// "견고형" 단독 표기는 긍정 어감이라 verdict=열위(inferior) 인데 structure_tag=robust 인
+// 실측 케이스(VB)에서 "우량 전략"으로 오독될 위험 — team-lead 지적 반영.
+// 색상은 항상 중립 회색(TeRrBody D행) — verdict 색을 따라가지 않는다.
+const STRUCTURE_LABELS: Record<NonNullable<TeRrMetrics['structure_tag']>, string> = {
+  robust: '저승률·고손익비형(견고형)',
+  fragile: '고승률·저손익비형(취약형)',
+  balanced: '균형형',
+}
+
+// 표본 캡션 (자문 §226 표 4행 규칙)
+function sampleCaption(m: TeRrMetrics): { text: string; className: string } | null {
+  if (m.sample_tier === 'insufficient') {
+    return { text: `표본 부족 (${m.n}건) — 참고 불가`, className: 'text-gray-500' }
+  }
+  if (m.sample_tier === 'low') {
+    if (m.rr_available) {
+      return { text: '표본 적음 — 추세 참고용', className: 'text-amber-700' }
+    }
+    return { text: '손실 표본 부족', className: 'text-gray-500' }
+  }
+  // normal
+  if (m.single_trade_dominant) {
+    return { text: 'RR 과대 가능 (단일 대박 의존)', className: 'text-amber-700' }
+  }
+  return null
+}
+
+// RR 게이지 — 실제RR 채움 + 필요RR 마커(세로선). 채움≥마커=우위(이익색)/미만=열위(손실색)
+function RrGauge({
+  strategyKey,
+  rr,
+  requiredRr,
+}: {
+  strategyKey: string
+  rr: number
+  requiredRr: number
+}) {
+  const scaleMax = Math.max(rr, requiredRr, 1) * 1.15
+  const fillPct = Math.min(100, Math.max(0, (rr / scaleMax) * 100))
+  const markerPct = Math.min(100, Math.max(0, (requiredRr / scaleMax) * 100))
+  const superior = rr >= requiredRr
+  const fillColorClass = superior ? 'bg-[#FF3333]' : 'bg-[#3366FF]'
+
+  return (
+    <div data-testid={`rr-gauge-${strategyKey}`}>
+      <div className="relative h-2 bg-gray-100 rounded overflow-hidden">
+        <div
+          data-testid={`rr-gauge-fill-${strategyKey}`}
+          className={`h-full ${fillColorClass}`}
+          style={{ width: `${fillPct}%` }}
+        />
+        <div
+          data-testid={`rr-gauge-marker-${strategyKey}`}
+          className="absolute top-0 h-full w-0.5 bg-gray-700"
+          style={{ left: `${markerPct}%` }}
+        />
+      </div>
+      <p className="text-[11px] text-gray-500 mt-0.5">
+        RR {rr.toFixed(2)} ⏐필요 {requiredRr.toFixed(2)} 여유{' '}
+        <span className={profitColorClass(rr - requiredRr)}>
+          {rr - requiredRr > 0 ? '+' : ''}
+          {(rr - requiredRr).toFixed(2)}
+        </span>
+      </p>
+    </div>
+  )
+}
+
+function TeRrSection({
+  strategyKey,
+  metrics,
+  isLoading,
+  isError,
+}: {
+  strategyKey: string
+  metrics: TeRrMetrics | undefined
+  isLoading: boolean
+  isError: boolean
+}) {
+  return (
+    <div
+      data-testid={`te-section-${strategyKey}`}
+      className="mt-3 pt-3 border-t border-gray-100"
+    >
+      <p className="text-xs font-semibold text-gray-700 mb-2">성과 (최근 3개월)</p>
+
+      {isLoading && <p className="text-xs text-gray-400">성과 데이터 로딩 중...</p>}
+
+      {!isLoading && isError && (
+        <p className="text-xs text-red-500">서버 연결 끊김 — 성과 데이터 조회 실패</p>
+      )}
+
+      {!isLoading && !isError && !metrics && (
+        <p className="text-xs text-gray-400">성과 데이터 없음</p>
+      )}
+
+      {!isLoading && !isError && metrics && (
+        <TeRrBody strategyKey={strategyKey} metrics={metrics} />
+      )}
+    </div>
+  )
+}
+
+function TeRrBody({ strategyKey, metrics: m }: { strategyKey: string; metrics: TeRrMetrics }) {
+  const isInsufficient = m.sample_tier === 'insufficient'
+  const showGauge = !isInsufficient && m.rr_available && m.rr !== null && m.required_rr !== null
+  const showStructure = !isInsufficient && m.structure_tag !== null
+  const caption = sampleCaption(m)
+
+  return (
+    <div className="space-y-1.5">
+      {/* A: 배지 + TE 헤드라인 + 3개월 실현 ₩ */}
+      <div className="flex items-center justify-between flex-wrap gap-1">
+        <div className="flex items-center gap-2">
+          {/* verdict 배지 = 카드에서 가장 지배적인 신호 (team-lead 지적 — structure_tag 는 보조) */}
+          <span
+            data-testid={`te-verdict-${strategyKey}`}
+            className={`inline-flex items-center px-2.5 py-1 rounded-md text-sm font-bold ${verdictBadgeClass(m.verdict)}`}
+          >
+            {VERDICT_LABELS[m.verdict]}
+          </span>
+          <span
+            data-testid={`te-value-${strategyKey}`}
+            className={`text-sm font-semibold ${isInsufficient ? 'text-gray-400' : profitColorClass(m.te_pct)}`}
+          >
+            TE {formatSignedPercent(m.te_pct)}
+          </span>
+        </div>
+        <span data-testid={`te-realized-${strategyKey}`} className="text-xs text-gray-500">
+          3개월 실현 {formatKrwSigned(m.realized_sum_krw)}
+        </span>
+      </div>
+
+      {/* B: RR 게이지 (표본 게이트) */}
+      {!isInsufficient &&
+        (showGauge ? (
+          <RrGauge strategyKey={strategyKey} rr={m.rr as number} requiredRr={m.required_rr as number} />
+        ) : (
+          <p data-testid={`rr-gauge-${strategyKey}`} className="text-xs text-gray-400">
+            RR 참고 불가 — 손실/이익 표본 부족
+          </p>
+        ))}
+
+      {/* C: 분해 (승/패/N + 평균수익/평균손실) */}
+      {isInsufficient ? (
+        <p data-testid={`te-decomposition-${strategyKey}`} className="text-xs text-gray-500">
+          승 {m.win} · 패 {m.loss} · 거래 {m.n}건
+        </p>
+      ) : (
+        <p data-testid={`te-decomposition-${strategyKey}`} className="text-xs text-gray-600">
+          승률 {(m.win_rate * 100).toFixed(0)}% (승{m.win}/패{m.loss}) · 평균수익{' '}
+          <span className={profitColorClass(m.avg_win_pct ?? 0)}>
+            {formatSignedPercent(m.avg_win_pct)}
+          </span>{' '}
+          · 평균손실{' '}
+          <span className={profitColorClass(m.avg_loss_pct ?? 0)}>
+            {formatSignedPercent(m.avg_loss_pct)}
+          </span>{' '}
+          · 거래 {m.n}건
+        </p>
+      )}
+
+      {/* D: 구조 태그 */}
+      {showStructure && (
+        <p data-testid={`te-structure-${strategyKey}`} className="text-xs text-gray-600">
+          구조: {STRUCTURE_LABELS[m.structure_tag as NonNullable<TeRrMetrics['structure_tag']>]}
+        </p>
+      )}
+
+      {/* E: 표본 캡션 (조건부) */}
+      {caption && (
+        <p data-testid={`te-sample-caption-${strategyKey}`} className={`text-xs ${caption.className}`}>
+          {caption.text}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// 표 1-2 참조표 — 승률 10~90% → 필요RR = (100-승률)/승률
+const TE_REFERENCE_ROWS = [10, 20, 30, 40, 50, 60, 70, 80, 90].map((winRatePct) => ({
+  winRatePct,
+  requiredRr: (100 - winRatePct) / winRatePct,
+}))
+
+const TE_EDUCATION_CAPTION =
+  'TE는 거래당 기대손익(크기), RR비율은 손익비(구조)입니다. RR > 필요RR 이면 우위(TE 양수와 동일 판정). ' +
+  '승률이 낮아도 RR이 크면 우위일 수 있습니다(터틀 전략). 최근 3개월 실현 청산 기준이며 미실현은 제외, ' +
+  '표본·기간이 짧아 시장 국면에 좌우되는 모니터링 지표입니다.'
+
+function TeRrReferenceFooter() {
+  return (
+    <div className="bg-white rounded-lg shadow p-4 space-y-3">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2">승률 → 필요RR 참조표</h3>
+        <div className="overflow-x-auto">
+          <table data-testid="te-reference-table" className="text-xs w-full text-left">
+            <thead>
+              <tr className="text-gray-500">
+                <th className="pr-4 py-1">승률</th>
+                {TE_REFERENCE_ROWS.map((row) => (
+                  <th key={row.winRatePct} className="px-2 py-1 text-center">
+                    {row.winRatePct}%
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="text-gray-700 font-medium">
+                <td className="pr-4 py-1">필요RR</td>
+                {TE_REFERENCE_ROWS.map((row) => (
+                  <td key={row.winRatePct} className="px-2 py-1 text-center">
+                    {row.requiredRr.toFixed(2)}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p data-testid="te-education-caption" className="text-xs text-gray-500 leading-relaxed">
+        {TE_EDUCATION_CAPTION}
+      </p>
+    </div>
+  )
+}
+// ── 사이클 F 끝 ──────────────────────────────────────────────────────────
+
 function StrategyCard({
   strategyKey,
   strategy,
+  teMetrics,
+  teLoading,
+  teError,
 }: {
   strategyKey: string
   strategy: StrategyStatus
+  teMetrics: TeRrMetrics | undefined
+  teLoading: boolean
+  teError: boolean
 }) {
   const color = getStrategyColor(strategyKey)
 
@@ -134,6 +411,14 @@ function StrategyCard({
           )
         })}
       </div>
+
+      {/* 사이클 F — TE/RR 성과 섹션 (관찰 전용) */}
+      <TeRrSection
+        strategyKey={strategyKey}
+        metrics={teMetrics}
+        isLoading={teLoading}
+        isError={teError}
+      />
     </div>
   )
 }
@@ -149,6 +434,23 @@ export default function Strategies() {
     refetchInterval: 60_000,
     staleTime: 15_000,
   })
+
+  // 사이클 F — TE/RR 성과 (최근 3개월, 관찰 전용). 5분 TTL 백엔드 캐시 정합.
+  const {
+    data: teData,
+    isLoading: teIsLoading,
+    isError: teIsError,
+  } = useQuery({
+    queryKey: ['strategy-te', 3],
+    queryFn: () => getStrategyTeRr(3),
+    retry: 1, // 사이클 65 H3 영속
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const teMetricsMap: Record<string, TeRrMetrics> = (() => {
+    if (!teData) return {}
+    return Object.fromEntries(teData.map((m) => [m.strategy_id, m]))
+  })()
 
   // strategies는 dict 또는 배열 양쪽 처리.
   // 백엔드 GET /api/strategies 가 플랫 형식 { momentum: {...}, ... } 반환 시
@@ -218,10 +520,16 @@ export default function Strategies() {
               key={key}
               strategyKey={key}
               strategy={strategiesMap[key]}
+              teMetrics={teMetricsMap[key]}
+              teLoading={teIsLoading}
+              teError={teIsError}
             />
           ))}
         </div>
       )}
+
+      {/* 사이클 F — TE/RR 참조표 + 교육 캡션 (페이지 하단 1회) */}
+      {!isLoading && !isError && strategyKeys.length > 0 && <TeRrReferenceFooter />}
 
       {/* 안내 */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">

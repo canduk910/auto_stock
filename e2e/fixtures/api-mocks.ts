@@ -119,6 +119,11 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   await page.route("**/api/strategies/system/auto-start", (route) =>
     route.fulfill({ json: envelope({ auto_start: false }) }),
   );
+  // 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 (관찰 전용, F-FE6). 구체 라우트 —
+  // 광범위 wildcard 부재 영역이라 LIFO 영향 없음(사이클 80 hotfix #3 패턴 참고).
+  await page.route("**/api/strategies/te*", (route) =>
+    route.fulfill({ json: envelope([]) }),
+  );
 
   await page.route("**/api/balance", (route) =>
     route.fulfill({

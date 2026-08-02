@@ -39,6 +39,8 @@ export const handlers = [
   ),
   http.put(`${base}/strategies/:id/params`, () => HttpResponse.json(wrap({ updated: true }))),
   http.put(`${base}/strategies/weights`, () => HttpResponse.json(wrap({ updated: true }))),
+  // 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 (관찰 전용, F-FE6)
+  http.get(`${base}/strategies/te`, () => HttpResponse.json(wrap([]))),
 
   // balance
   http.get(`${base}/balance`, () =>
