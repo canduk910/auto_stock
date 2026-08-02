@@ -185,3 +185,131 @@ test.describe("L-ST8 (LOW) — Lazy 로딩 + Suspense fallback 정상 전환", (
     await expect(page.getByText("전략 현황").first()).toBeVisible({ timeout: 20000 });
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────
+// 사이클 F 추가 — TE(트레이딩 예지치)/RR(손익비) 성과 섹션 표본 게이트 3분기 E2E
+// (tester-cycleF 인계: vitest 10케이스가 렌더 로직을 커버하나 실브라우저 E2E 미검증 갭)
+// ────────────────────────────────────────────────────────────────────────
+
+test.describe("F-ST1 — N<20 표본 부족 뮤트 (판정 유보, 게이지/구조 숨김)", () => {
+  test("insufficient tier → 판정 유보 배지 + RR 게이지/구조 태그 부재 + raw 승패N 캡션", async ({ page }) => {
+    await installApiMocks(page, {
+      teMetrics: [
+        {
+          strategy_id: "momentum",
+          n: 9,
+          win: 2,
+          loss: 5,
+          even: 2,
+          win_rate: 2 / 9,
+          avg_win_pct: 8.1,
+          avg_loss_pct: -5.4,
+          te_pct: -4.42,
+          te_krw_avg: -19800,
+          realized_sum_krw: -178200,
+          rr: null,
+          required_rr: null,
+          rr_margin: null,
+          rr_available: false,
+          sample_tier: "insufficient",
+          verdict: "undecided",
+          structure_tag: null,
+          single_trade_dominant: false,
+        },
+      ],
+    });
+    await page.goto("/strategies");
+
+    await expect(
+      page.getByTestId("te-section-momentum")
+    ).toBeVisible({ timeout: 20000 });
+
+    await expect(page.getByTestId("te-verdict-momentum")).toContainText("판정 유보");
+    await expect(page.getByTestId("rr-gauge-fill-momentum")).toHaveCount(0);
+    await expect(page.getByTestId("te-structure-momentum")).toHaveCount(0);
+    await expect(page.getByTestId("te-sample-caption-momentum")).toContainText("표본 부족");
+    await expect(page.getByTestId("te-sample-caption-momentum")).toContainText("9건");
+  });
+});
+
+test.describe("F-ST2 — 20<=N<50 정상 표본 (RR 게이지 표시 + amber 추세 참고 캡션)", () => {
+  test("low tier + rr_available → 우위 배지 + RR 게이지 채움/마커 + 구조 태그 + amber 캡션", async ({ page }) => {
+    await installApiMocks(page, {
+      teMetrics: [
+        {
+          strategy_id: "momentum",
+          n: 21,
+          win: 8,
+          loss: 13,
+          even: 0,
+          win_rate: 8 / 21,
+          avg_win_pct: 6.2,
+          avg_loss_pct: -2.1,
+          te_pct: 1.5,
+          te_krw_avg: 15238,
+          realized_sum_krw: 320000,
+          rr: 3.0,
+          required_rr: 1.86,
+          rr_margin: 1.14,
+          rr_available: true,
+          sample_tier: "low",
+          verdict: "superior",
+          structure_tag: "robust",
+          single_trade_dominant: false,
+        },
+      ],
+    });
+    await page.goto("/strategies");
+
+    await expect(
+      page.getByTestId("te-section-momentum")
+    ).toBeVisible({ timeout: 20000 });
+
+    await expect(page.getByTestId("te-verdict-momentum")).toContainText("우위");
+    await expect(page.getByTestId("rr-gauge-fill-momentum")).toBeVisible({ timeout: 20000 });
+    await expect(page.getByTestId("rr-gauge-marker-momentum")).toBeVisible({ timeout: 20000 });
+    await expect(page.getByTestId("te-structure-momentum")).toContainText("견고형");
+    await expect(page.getByTestId("te-sample-caption-momentum")).toContainText("표본 적음");
+  });
+});
+
+test.describe("F-ST3 — N>=50 정상 표본 + 단일거래 의존 플래그", () => {
+  test("normal tier + single_trade_dominant → 'RR 과대 가능' 캡션 visible", async ({ page }) => {
+    await installApiMocks(page, {
+      teMetrics: [
+        {
+          strategy_id: "momentum",
+          n: 55,
+          win: 20,
+          loss: 15,
+          even: 0,
+          win_rate: 20 / 55,
+          avg_win_pct: 5.0,
+          avg_loss_pct: -3.0,
+          te_pct: 0.6,
+          te_krw_avg: 9000,
+          realized_sum_krw: 495000,
+          rr: 1.67,
+          required_rr: 0.75,
+          rr_margin: 0.92,
+          rr_available: true,
+          sample_tier: "normal",
+          verdict: "superior",
+          structure_tag: "robust",
+          single_trade_dominant: true,
+        },
+      ],
+    });
+    await page.goto("/strategies");
+
+    await expect(
+      page.getByTestId("te-section-momentum")
+    ).toBeVisible({ timeout: 20000 });
+
+    await expect(page.getByTestId("te-sample-caption-momentum")).toContainText("RR 과대 가능");
+
+    // 페이지 하단 참조표 + 교육 캡션 (1회) 도 실브라우저에서 확인
+    await expect(page.getByTestId("te-reference-table")).toBeVisible({ timeout: 20000 });
+    await expect(page.getByTestId("te-education-caption")).toContainText("TE는 거래당 기대손익");
+  });
+});

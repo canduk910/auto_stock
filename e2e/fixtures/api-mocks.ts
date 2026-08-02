@@ -75,6 +75,8 @@ export interface MockOptions {
   trades?: AnyJson[];
   recommendations?: AnyJson[];
   logReports?: AnyJson[];
+  // 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 mock override (tester-cycleF 인계: e2e 표본 게이트 3분기 커버리지 갭)
+  teMetrics?: AnyJson[];
 }
 
 export async function installApiMocks(page: Page, opts: MockOptions = {}) {
@@ -121,8 +123,9 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   );
   // 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 (관찰 전용, F-FE6). 구체 라우트 —
   // 광범위 wildcard 부재 영역이라 LIFO 영향 없음(사이클 80 hotfix #3 패턴 참고).
+  // opts.teMetrics 로 시나리오별(표본 게이트 3분기) override 가능.
   await page.route("**/api/strategies/te*", (route) =>
-    route.fulfill({ json: envelope([]) }),
+    route.fulfill({ json: envelope(opts.teMetrics ?? []) }),
   );
 
   await page.route("**/api/balance", (route) =>
