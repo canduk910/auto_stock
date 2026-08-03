@@ -350,6 +350,35 @@ export const handlers = [
     )
   ),
 
+  // 사이클 I (2026-08-03) — 포트폴리오 리스크 관찰 (Phase 1, 매수 배제 없음).
+  // 기본은 빈 스냅샷. 각 테스트에서 server.use 로 오버라이드.
+  http.get(`${base}/portfolio/risk`, () =>
+    HttpResponse.json(
+      wrap({
+        total_notional_won: 0,
+        total_open_risk_won: 0,
+        open_risk_pct_of_net: 0,
+        concurrent_positions: 0,
+        by_strategy: {},
+        by_sector: {},
+        top_sector: null,
+      }),
+    ),
+  ),
+
+  // 사이클 I (2026-08-03) — 지수ETF 레짐(관찰) 계산 토글. 5번째 IntegrationToggleCard
+  // 토글 — 개별 테스트가 server.use 로 오버라이드하지 않는 한 이 기본값(비활성)으로 렌더되어
+  // 기존 IntegrationToggleCard 테스트(4 토글 수동 stub)가 영향받지 않음.
+  http.get(`${base}/integrations/etf-regime`, () =>
+    HttpResponse.json(wrap({ enabled: false, source: 'db', env_value: false, db_value: false })),
+  ),
+  http.put(`${base}/integrations/etf-regime`, async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>
+    return HttpResponse.json(
+      wrap({ enabled: !!body.enabled, source: 'db', env_value: false, db_value: !!body.enabled }),
+    )
+  }),
+
   // 사이클 112 (2026-06-12) — KRX 정식 OPEN API 키 관리 (인프라 사전 구성)
   http.get(`${base}/integrations/krx-open-api`, () =>
     HttpResponse.json(

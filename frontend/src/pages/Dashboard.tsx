@@ -4,6 +4,7 @@ import { getStrategyColor } from '../types/strategy'
 import { STRATEGY_INFO, ALL_STRATEGIES_INFO } from '../utils/strategyInfo'
 import ControlPanel from '../components/ControlPanel'
 import MarketRegimeCard from '../components/MarketRegimeCard'
+import PortfolioRiskCard from '../components/PortfolioRiskCard'
 import KisAccountPoolCard from '../components/KisAccountPoolCard'
 import ScanMonitor from '../components/ScanMonitor'
 import OrderMonitor from '../components/OrderMonitor'
@@ -54,6 +55,9 @@ export default function Dashboard() {
 
       {/* 사이클 2 (2026-05-17): 시장 레짐 카드 — 환경 배너 직하, 전략 탭 위 */}
       <MarketRegimeCard />
+
+      {/* 사이클 I (2026-08-03): 포트폴리오 리스크 관찰 카드 — 시장 레짐 직하 (관찰 전용, Phase 1) */}
+      <PortfolioRiskCard />
 
       {/* 사이클 7-D (2026-05-18): KIS 시세 풀 — 시장 상태 → 인프라 상태 위계 */}
       <KisAccountPoolCard />

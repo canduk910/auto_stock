@@ -35,6 +35,9 @@ const TARGET_FILES = [
   // 사이클 127 (2026-06-13) — RefreshProgressBanner.tsx 추가.
   // fetchRefreshProgress useQuery retry:1 명시 의무 (5초/60초 동적 폴링 + ECONNREFUSED 영구 차단).
   'RefreshProgressBanner.tsx',
+  // 사이클 I (2026-08-03) — PortfolioRiskCard.tsx 추가 (포트폴리오 리스크 관찰 카드,
+  // Dashboard 마운트 시 발화, e2e ECONNREFUSED 영구 차단 의무).
+  'PortfolioRiskCard.tsx',
 ]
 
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e

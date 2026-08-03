@@ -19,10 +19,16 @@ export interface IntegrationToggleRequest {
 }
 
 /**
- * IntegrationToggleCard 가 노출하는 4 토글 키.
+ * IntegrationToggleCard 가 노출하는 토글 키.
  * 사이클 23 (2026-05-20): 'auto-apply' 추가 — AI 자문 자동 적용 토글.
+ * 사이클 I (2026-08-03): 'etf-regime' 추가 — 지수ETF 레짐(관찰) 계산 토글.
  */
-export type IntegrationKey = 'dkstock-regime' | 'kis-mcp' | 'auto-regime-adjust' | 'auto-apply'
+export type IntegrationKey =
+  | 'dkstock-regime'
+  | 'kis-mcp'
+  | 'auto-regime-adjust'
+  | 'auto-apply'
+  | 'etf-regime'
 
 /** 사이클 23 — AI 자문 자동 적용 토글 상태 */
 export interface AutoApplyStatus {

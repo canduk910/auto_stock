@@ -2,12 +2,14 @@
  * 사이클 5 (2026-05-17): 외부 통합 토글 카드.
  * 사이클 8 (2026-05-18) 확장: 매수 가드 4 모드 + 4 임계값 조정.
  * 사이클 23 (2026-05-20) 확장: AI 자문 자동 적용 토글 (4번째 토글).
+ * 사이클 I (2026-08-03) 확장: 지수ETF 레짐(관찰) 계산 토글 (5번째 토글).
  *
- * 4 토글 통합 (운영자 시야 집중을 위해 단일 카드 + 분리 행):
+ * 5 토글 통합 (운영자 시야 집중을 위해 단일 카드 + 분리 행):
  * - dkstock-regime: 매크로 레짐 fetch (활성화 시 백그라운드 fetch trigger)
  * - kis-mcp: 외부 백테스트 서버 (자문 시점에만 사용)
  * - auto-regime-adjust: 매크로 레짐 → cash_usage_ratio 자동 갱신
  * - auto-apply: AI 자문 자동 적용 (감액만 + 50% cap, 기본 OFF)
+ * - etf-regime: 지수ETF 레짐(관찰) 계산 — 코스피200/코스닥150 스테이지, 매수 가드 미개입
  *
  * 사이클 8 — 매수 가드 영역:
  * - 모드 select (OFF/WARN/SOFT/HARD) + ConfirmModal 이중 확인
@@ -29,11 +31,13 @@ import {
   getAutoRegimeAdjust,
   getBuyBlock,
   getDkstockRegime,
+  getEtfRegime,
   getKisMcp,
   setAutoApply,
   setAutoRegimeAdjustToggle,
   setBuyBlock,
   setDkstockRegime,
+  setEtfRegime,
   setKisMcp,
 } from '../api/integrations'
 import type {
@@ -90,6 +94,17 @@ const TOGGLES: ToggleMeta[] = [
       '자동 조정을 비활성화합니다. cash_usage_ratio 는 운영자 수동 설정값 그대로 유지됩니다. 진행하시겠습니까?',
     envVarName: '— (DB 키 only, 사이클 2 컨벤션)',
   },
+  {
+    key: 'etf-regime',
+    label: '지수ETF 레짐 (관찰, 코스피200/코스닥150)',
+    description:
+      '코스피200/코스닥150 ETF 일봉으로 스테이지를 계산해 시장 레짐 카드에 관찰용으로 노출합니다 (매수 가드 미개입, Phase 1 다크런치).',
+    confirmOnMessage:
+      '지수ETF 레짐 관찰 계산을 활성화합니다. 코스피200/코스닥150 스테이지가 시장 레짐 카드에 표시됩니다 (매수 가드에는 영향 없음, 관찰 전용). 진행하시겠습니까?',
+    confirmOffMessage:
+      '지수ETF 레짐 관찰 계산을 비활성화합니다. 시장 레짐 카드의 지수ETF 스테이지가 "관찰 비활성" 으로 표시됩니다. 진행하시겠습니까?',
+    envVarName: '— (DB 키 only, 사이클 I, .env fallback 없음)',
+  },
 ]
 
 // 사이클 23 P3-3 — auto-apply 별도 섹션 (DB-only, .env fallback 없음)
@@ -113,6 +128,8 @@ function getterFor(key: IntegrationKey) {
       return getKisMcp
     case 'auto-regime-adjust':
       return getAutoRegimeAdjust
+    case 'etf-regime':
+      return getEtfRegime
     case 'auto-apply':
       return () => getAutoApply().then((s: AutoApplyStatus) => ({
         enabled: s.enabled,
@@ -131,6 +148,8 @@ function setterFor(key: IntegrationKey) {
       return setKisMcp
     case 'auto-regime-adjust':
       return setAutoRegimeAdjustToggle
+    case 'etf-regime':
+      return setEtfRegime
     case 'auto-apply':
       return setAutoApply
   }

@@ -63,6 +63,8 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
       '/api/integrations/auto-regime-adjust',
       '/api/integrations/auto-apply',
       '/api/integrations/buy-block',
+      // 사이클 I (2026-08-03) — 지수ETF 레짐(관찰) 계산 토글 (5번째 토글)
+      '/api/integrations/etf-regime',
     ]
 
     it.each(REQUIRED_INTEGRATION_ENDPOINTS)(
@@ -263,6 +265,30 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
           `방어 가드: stock-master.ts 에 ${fn} export 누락 — 사이클 127 fire-and-forget 위반.`,
         ).toBe(true)
       })
+    })
+  })
+
+  // 사이클 I (2026-08-03) — 포트폴리오 리스크 관찰 카드 (PortfolioRiskCard, Phase 1).
+  // Dashboard 마운트 시 GET /api/portfolio/risk 발화 — 사이클 77 G-AST5 (Dashboard 영역
+  // 확장) 패턴 답습.
+  describe('G-AST9 (사이클 I): 포트폴리오 리스크 관찰 endpoint 등록', () => {
+    it('api-mocks.ts 에 /api/portfolio/risk 라우트 등록 의무 (PortfolioRiskCard Dashboard 마운트 차단 방지)', () => {
+      const portfolioApiSource = readFileSync(
+        path.join(FRONTEND_API_DIR, 'portfolio.ts'),
+        'utf-8',
+      )
+      expect(
+        portfolioApiSource.includes('/portfolio/risk'),
+        '방어 가드: portfolio.ts 가 /portfolio/risk endpoint 를 더 이상 호출하지 않음',
+      ).toBe(true)
+
+      const source = loadApiMocksSource()
+      expect(
+        isRouteRegistered(source, '/api/portfolio/risk'),
+        'e2e api-mocks.ts 에 /api/portfolio/risk 라우트 누락 — ' +
+          '사이클 I PortfolioRiskCard Dashboard 마운트 시 ECONNREFUSED 위험. ' +
+          '사이클 77 G-AST5 (Dashboard 영역 확장) 패턴 답습 의무.',
+      ).toBe(true)
     })
   })
 

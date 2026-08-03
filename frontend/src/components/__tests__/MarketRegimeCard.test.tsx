@@ -1,13 +1,16 @@
 /**
  * 사이클 2 (2026-05-17): MarketRegimeCard 테스트.
+ * 사이클 I (2026-08-03): 표시 정직화(buy_blocked 항상 false → 배너는 block_reason 기반
+ * 관찰 라벨) + 지수ETF 레짐(관찰) 소섹션 추가.
  *
  * 요구 행위:
- * - B7-A: regime=defensive → red 배지 + 매수 가드 amber 배너
- * - B7-B: regime=aggressive → blue 배지 + 가드 비활성
+ * - B7-A: regime=defensive → red 배지 + 레짐 경보(관찰) amber 배너
+ * - B7-B: regime=aggressive → blue 배지 + 배너 없음
  * - B7-C: auto_regime_adjust 토글 클릭 → ConfirmModal → 확인 시 API 호출
  * - B7-D: VIX/Fear&Greed/Buffett/cycle 메트릭 grid 표시
  * - B7-E: API 에러 시 graceful fallback 메시지
  * - B7-F: enabled=false 시 비활성 배지
+ * - B7-G: 지수ETF 레짐(관찰) 소섹션 — stage/방어 여부 표시 + 비활성 라벨
  */
 
 import { describe, expect, it } from 'vitest'
@@ -27,11 +30,17 @@ const defensivePayload = {
   fear_greed_score: 86.0,
   buffett_ratio: 260.1,
   cash_min: 75,
-  buy_blocked: true,
+  // 사이클 I — buy_blocked 는 이제 항상 false (레짐 매수 게이트 제거). block_reason 만
+  // 관찰용 "레짐 경보 사유" 로 유지.
+  buy_blocked: false,
   block_reason: 'regime=defensive (방어 (공포 현금))',
   auto_regime_adjust: true,
   cash_usage_ratio: 0.25,
   enabled: true,
+  etf_kospi_stage: 4,
+  etf_kosdaq_stage: 3,
+  etf_defensive: true,
+  etf_enabled: true,
 }
 
 const aggressivePayload = {
@@ -47,10 +56,14 @@ const aggressivePayload = {
   auto_regime_adjust: true,
   cash_usage_ratio: 0.8,
   enabled: true,
+  etf_kospi_stage: 1,
+  etf_kosdaq_stage: 2,
+  etf_defensive: false,
+  etf_enabled: true,
 }
 
 describe('MarketRegimeCard', () => {
-  it('B7-A: regime=defensive 시 red 배지 + 매수 가드 amber 배너', async () => {
+  it('B7-A: regime=defensive 시 red 배지 + 레짐 경보(관찰) amber 배너', async () => {
     server.use(
       http.get('/api/market-regime/current', () => HttpResponse.json(wrap(defensivePayload))),
     )
@@ -62,9 +75,11 @@ describe('MarketRegimeCard', () => {
 
     const badge = await screen.findByTestId('market-regime-badge')
     expect(badge.textContent).toContain('방어')
-    // 매수 가드 amber 배너
+    // 레짐 경보(관찰) amber 배너 — 매수 미개입 관찰 라벨 (사이클 I 표시 정직화)
     const banner = screen.getByTestId('market-regime-block-banner')
-    expect(banner.textContent).toContain('매수 차단')
+    expect(banner.textContent).toContain('레짐 경보')
+    expect(banner.textContent).toContain('매수 미개입')
+    expect(banner.textContent).not.toContain('매수 차단')
     expect(banner.textContent).toContain('defensive')
   })
 
@@ -175,6 +190,10 @@ describe('MarketRegimeCard', () => {
       buffett_ratio: null,
       cash_min: null,
       cycle_phase: null,
+      etf_kospi_stage: null,
+      etf_kosdaq_stage: null,
+      etf_defensive: null,
+      etf_enabled: false,
     }
     server.use(
       http.get('/api/market-regime/current', () => HttpResponse.json(wrap(disabledPayload))),
@@ -187,5 +206,30 @@ describe('MarketRegimeCard', () => {
 
     const badge = await screen.findByTestId('market-regime-badge')
     expect(badge.textContent).toContain('비활성')
+    // 지수ETF 레짐 관찰 비활성 라벨 + null stage "-" 표시
+    const etfDisabledLabel = await screen.findByTestId('etf-regime-disabled-label')
+    expect(etfDisabledLabel.textContent).toContain('관찰 비활성')
+    expect(screen.getByTestId('metric-etf-kospi-stage').textContent).toContain('-')
+    expect(screen.getByTestId('metric-etf-kosdaq-stage').textContent).toContain('-')
+    expect(screen.getByTestId('metric-etf-defensive').textContent).toContain('-')
+  })
+
+  it('B7-G: 지수ETF 레짐(관찰) 소섹션 — 코스피200/코스닥150 stage + 방어 여부 표시', async () => {
+    server.use(
+      http.get('/api/market-regime/current', () => HttpResponse.json(wrap(defensivePayload))),
+    )
+    render(
+      <TestProviders>
+        <MarketRegimeCard />
+      </TestProviders>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('metric-etf-kospi-stage').textContent).toContain('4')
+      expect(screen.getByTestId('metric-etf-kosdaq-stage').textContent).toContain('3')
+      expect(screen.getByTestId('metric-etf-defensive').textContent).toContain('방어')
+    })
+    // etf_enabled=true 이므로 "관찰 비활성" 라벨 미노출
+    expect(screen.queryByTestId('etf-regime-disabled-label')).toBeNull()
   })
 })

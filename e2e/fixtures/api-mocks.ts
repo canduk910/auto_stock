@@ -242,6 +242,12 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   await page.route("**/api/integrations/auto-apply", (route) =>
     route.fulfill({ json: envelope({ enabled: false, source: "db" }) }),
   );
+  // 사이클 I (2026-08-03) — 지수ETF 레짐(관찰) 계산 토글 (5번째 토글)
+  await page.route("**/api/integrations/etf-regime", (route) =>
+    route.fulfill({
+      json: envelope({ enabled: false, source: "db", env_value: false, db_value: false }),
+    }),
+  );
 
   // BuyBlockSection — /api/integrations/buy-block (GET) + /api/integrations/buy-block/thresholds
   await page.route("**/api/integrations/buy-block/thresholds", (route) =>
@@ -296,6 +302,8 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   // 가드 영역 (Settings 한정) 한계 노출 → 사이클 77 = Dashboard 영역 매핑 확장)
   // 사이클 77 hotfix #2 — MarketRegimeCurrent interface 정확 매칭 (frontend/src/types/market_regime.ts)
   // 5 필수 필드 (buy_blocked / block_reason / auto_regime_adjust / cash_usage_ratio / enabled) 추가
+  // 사이클 I (2026-08-03) — 지수ETF 레짐 4 필드 추가 (etf_kospi_stage/etf_kosdaq_stage/
+  // etf_defensive/etf_enabled). buy_blocked 는 항상 false (레짐 매수 게이트 제거).
   await page.route("**/api/market-regime/current", (route) =>
     route.fulfill({
       json: envelope({
@@ -311,6 +319,10 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
         auto_regime_adjust: true,
         cash_usage_ratio: 1.0,
         enabled: false,
+        etf_kospi_stage: null,
+        etf_kosdaq_stage: null,
+        etf_defensive: null,
+        etf_enabled: false,
       }),
     }),
   );
@@ -322,6 +334,22 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   );
   await page.route("**/api/realtime/subscriptions", (route) =>
     route.fulfill({ json: envelope({ sessions: [], total_count: 0 }) }),
+  );
+
+  // 사이클 I (2026-08-03) — 포트폴리오 리스크 관찰 카드 (PortfolioRiskCard, Phase 1,
+  // 매수 배제 없음). Dashboard 마운트 시 발화 — 빈 스냅샷 기본.
+  await page.route("**/api/portfolio/risk", (route) =>
+    route.fulfill({
+      json: envelope({
+        total_notional_won: 0,
+        total_open_risk_won: 0,
+        open_risk_pct_of_net: 0,
+        concurrent_positions: 0,
+        by_strategy: {},
+        by_sector: {},
+        top_sector: null,
+      }),
+    }),
   );
 
   // 사이클 186 (2026-06-29) — 장운영상태 (VI/거래정지/종목상태 + 서킷브레이커 휴리스틱).

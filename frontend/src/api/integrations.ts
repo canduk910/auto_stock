@@ -43,6 +43,12 @@ export const setAutoRegimeAdjustToggle = (enabled: boolean) =>
   setToggle('auto-regime-adjust', enabled)
 
 // ---------------------------------------------------------------------------
+// 사이클 I (2026-08-03) — 지수ETF 레짐(관찰) 계산 토글
+// ---------------------------------------------------------------------------
+export const getEtfRegime = () => getToggle('etf-regime')
+export const setEtfRegime = (enabled: boolean) => setToggle('etf-regime', enabled)
+
+// ---------------------------------------------------------------------------
 // 사이클 8 (2026-05-18) — 매수 가드 4 모드 + 4 임계값
 // ---------------------------------------------------------------------------
 export async function getBuyBlock(): Promise<BuyBlockState> {

@@ -8,7 +8,9 @@
  * - Buffett Ratio
  * - cycle.phase (확장기/수축기)
  * - 자동 cash_usage_ratio + auto_regime_adjust 토글 (ConfirmModal 이중 확인)
- * - 매수 가드 활성 시 amber/red 배너 + block_reason
+ * - block_reason 이 있으면 "레짐 경보(참고 — 매수 미개입)" 관찰 배너 (사이클 I 표시 정직화 —
+ *   `buy_blocked` 는 이제 항상 false 이므로 더 이상 매수 차단 의미로 사용하지 않음)
+ * - 지수ETF 레짐(관찰) 소섹션 — 코스피200/코스닥150 stage + 방어 여부 (사이클 I)
  * - DKSTOCK_REGIME_ENABLED=false / empty regime 시 graceful "비활성" 표시
  */
 import { useState } from 'react'
@@ -101,15 +103,12 @@ export default function MarketRegimeCard() {
         )}
       </div>
 
-      {data.buy_blocked && data.block_reason && (
+      {data.block_reason && (
         <div
           data-testid="market-regime-block-banner"
           className="mb-3 px-3 py-2 bg-amber-50 border border-amber-300 rounded text-sm text-amber-900"
         >
-          <strong>매수 차단 활성</strong> — {data.block_reason}
-          <div className="text-xs text-amber-700 mt-1">
-            보유 종목 청산은 정상 작동합니다. 매수만 차단됩니다.
-          </div>
+          <strong>레짐 경보 (참고 — 매수 미개입)</strong> — {data.block_reason}
         </div>
       )}
 
@@ -130,6 +129,38 @@ export default function MarketRegimeCard() {
           value={data.cycle_phase ? CYCLE_LABEL[data.cycle_phase] ?? data.cycle_phase : '—'}
           testId="metric-cycle"
         />
+      </div>
+
+      {/* 사이클 E-1 → 사이클 I (2026-08-03): 지수ETF 레짐(관찰) 소섹션 */}
+      <div className="border-t pt-3 mt-3" data-testid="etf-regime-section">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-700">지수ETF 레짐 (관찰)</h3>
+          {!data.etf_enabled && (
+            <span
+              data-testid="etf-regime-disabled-label"
+              className="text-xs text-gray-400"
+            >
+              관찰 비활성
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <Metric
+            label="코스피200 stage"
+            value={data.etf_kospi_stage != null ? String(data.etf_kospi_stage) : '-'}
+            testId="metric-etf-kospi-stage"
+          />
+          <Metric
+            label="코스닥150 stage"
+            value={data.etf_kosdaq_stage != null ? String(data.etf_kosdaq_stage) : '-'}
+            testId="metric-etf-kosdaq-stage"
+          />
+          <Metric
+            label="방어 여부"
+            value={data.etf_defensive == null ? '-' : data.etf_defensive ? '방어' : '비방어'}
+            testId="metric-etf-defensive"
+          />
+        </div>
       </div>
 
       <div className="border-t pt-3 mt-3">
