@@ -134,6 +134,21 @@ class VcpBreakoutStrategy(StrategyBase):
         # PARAM_RANGES/INT_PARAMS 미편입 (청산 정체성 상수).
         "breakeven_promote_atr": 0.0,
         "reentry_cooldown_days": 7,
+        # ── 터틀 유닛 sizing + 하드손절 ATR화 (B-2 게이트 2, 2026-08-03) ──
+        # **다크런치**: 기본 position_ratio → 배포 시 행위 byte 동일. DB 토글로만 활성.
+        # 사이징만 ATR 로 바꾸면 리스크 정규화가 오히려 깨지므로(고정% 손절 + 비율 사이징은
+        # 이미 종목 무관 상수 리스크) 하드손절 ATR화와 **한 커밋에** 묶는다.
+        # 게이트는 `sizing_mode` 가 아니라 `_entry_atr` 스탬프 존재 —
+        # position_ratio 매수는 미스탬프라 기존 −7% 경로를 그대로 탄다.
+        # ⚠️ VCP 는 수축 셋업이라 진입 ATR 이 국소 최소 → 2ATR 이 −3% 로 과도하게
+        #    조여질 수 있다. `turtle_min_stop_pct` 밴드가 유일한 방어선이며 실제 활성화는
+        #    외부 MCP 백테스트 스윕 통과 후. 전 키 PARAM_RANGES/INT_PARAMS 미편입.
+        "sizing_mode": "position_ratio",
+        "risk_pct": 0.005,
+        "stop_atr": 2.0,
+        "turtle_backstop_pct": -9.0,
+        "min_vol_floor_pct": 1.0,
+        "turtle_min_stop_pct": -5.0,
         # 유니버스
         "min_market_cap": 100_000_000_000,
         "min_trade_amount": 3_000_000_000,
@@ -154,6 +169,8 @@ class VcpBreakoutStrategy(StrategyBase):
         self._scan_stats: dict = _empty_scan_stats()
         # 사이클 C — 브레이크이븐 승격 boolean 래치 (live ATR 팽창 un-latch 병리 방지)
         self._breakeven_latched: set[str] = set()
+        # B-2 게이트 2 — 터틀 진입 ATR 스냅샷. 존재 = ATR 하드손절 활성 (자연 게이트).
+        self._entry_atr: dict[str, float] = {}
 
     # ------------------------------------------------------------------
     # prepare — 일봉 220일 → 추세/베이스/pullback/거래량 수축 자동 검출
@@ -1011,44 +1028,82 @@ class VcpBreakoutStrategy(StrategyBase):
         if not pos:
             return Signal.NONE
 
-        # 1) 하드 손절 -7%
+        params = self.config.params
         loss_rate = (
             (current_price - pos.buy_price) / pos.buy_price * 100
             if pos.buy_price > 0 else 0
         )
-        stop_loss = self.config.params["stop_loss_rate"]
-        if loss_rate <= stop_loss:
-            logger.info(
-                "VCP 손절: %s 매수가(%d) 대비 %.1f%%",
-                ticker, pos.buy_price, loss_rate,
-            )
-            return Signal.STOP_LOSS
-
         info = self._candidates.get(ticker)
 
+        # 1) 하드 손절 — `_entry_atr` 스탬프 존재가 ATR 손절의 자연 게이트.
+        #    `sizing_mode` 로 게이팅하면 DB 토글 하나로 **기보유 포지션의 손절 규약**이
+        #    바뀌므로 금지 (donchian 2A-2 원칙). 미스탬프 = position_ratio 매수 →
+        #    기존 -7% 경로 byte 동일.
+        entry_atr = self._entry_atr.get(ticker, 0.0)
+        if entry_atr > 0 and pos.buy_price > 0:
+            stop_atr = float(params.get("stop_atr", 2.0))
+            base_stop = pos.buy_price - stop_atr * entry_atr
+            # 최소 폭 밴드 — VCP 는 수축 셋업이라 진입 ATR 이 국소 최소다. 2ATR 이 -3%
+            # 수준으로 조여지면 정상 흔들림에도 털린다. 더 낮은(=느슨한) 쪽을 채택.
+            min_stop_pct = float(params.get("turtle_min_stop_pct", 0.0) or 0.0)
+            if min_stop_pct < 0:
+                base_stop = min(base_stop, pos.buy_price * (1 + min_stop_pct / 100.0))
+            # 브레이크이븐 승격 — entry_atr 스냅샷 기준. tighten-only (max 로만 이동).
+            breakeven_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+            if (
+                breakeven_mult > 0
+                and pos.high_since_buy >= pos.buy_price + breakeven_mult * entry_atr
+            ):
+                base_stop = max(base_stop, float(pos.buy_price))
+            if base_stop > 0 and current_price <= base_stop:
+                logger.info(
+                    "[vcp_turtle_stop] %s 손절선(%d) = 매수가(%d) − %.1f×entry_atr(%.1f)",
+                    ticker, int(base_stop), pos.buy_price, stop_atr, entry_atr,
+                )
+                return Signal.STOP_LOSS
+            # % backstop — 고ATR 종목의 손절 폭 최대 캡 (ATR 손절 미발화 구간 방어).
+            backstop = float(params.get("turtle_backstop_pct", 0.0) or 0.0)
+            if backstop < 0 and loss_rate <= backstop:
+                logger.info(
+                    "[vcp_turtle_backstop] %s 매수가(%d) 대비 %.1f%% ≤ %.1f%%",
+                    ticker, pos.buy_price, loss_rate, backstop,
+                )
+                return Signal.STOP_LOSS
+        else:
+            stop_loss = params["stop_loss_rate"]
+            if loss_rate <= stop_loss:
+                logger.info(
+                    "VCP 손절: %s 매수가(%d) 대비 %.1f%%",
+                    ticker, pos.buy_price, loss_rate,
+                )
+                return Signal.STOP_LOSS
+
         # 1.5) 브레이크이븐 승격 (사이클 C, default-off — live ATR 래치, tighten-only)
+        # 터틀 스탬프 포지션은 위 §1 의 스냅샷 승격이 담당 → `entry_atr <= 0` 로 게이팅해
+        # 두 tighten 메커니즘 공존을 차단한다. position_ratio 경로는 행위 변화 0.
         # VCP 는 `_candidates[ticker]["atr14"]` live ATR 을 쓰므로 승격 후 ATR 이 팽창하면
         # `buy+mult×atr` 조건이 다시 거짓이 되는 un-latch 병리가 생긴다 (donchian 의
         # entry_atr 스냅샷과 다름) — boolean 래치로 최초 관측 후 ATR 무관 유지.
-        breakeven_mult = float(self.config.params.get("breakeven_promote_atr", 0) or 0)
-        if breakeven_mult > 0:
-            atr_live = info.get("atr14", 0) if info else 0
-            if (
-                ticker not in self._breakeven_latched
-                and atr_live > 0
-                and pos.high_since_buy >= pos.buy_price + breakeven_mult * atr_live
-            ):
-                self._breakeven_latched.add(ticker)
-                logger.info(
-                    "[vcp_breakeven_promote] %s 고점(%d) ≥ 매수가(%d)+%.1f×ATR(%d) → 래치",
-                    ticker, pos.high_since_buy, pos.buy_price, breakeven_mult, int(atr_live),
-                )
-            if ticker in self._breakeven_latched and current_price <= pos.buy_price:
-                logger.info(
-                    "[vcp_breakeven_promote] %s 래치 승격 발화 — 현재가(%d) ≤ 매수가(%d)",
-                    ticker, current_price, pos.buy_price,
-                )
-                return Signal.STOP_LOSS
+        if entry_atr <= 0:
+            breakeven_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+            if breakeven_mult > 0:
+                atr_live = info.get("atr14", 0) if info else 0
+                if (
+                    ticker not in self._breakeven_latched
+                    and atr_live > 0
+                    and pos.high_since_buy >= pos.buy_price + breakeven_mult * atr_live
+                ):
+                    self._breakeven_latched.add(ticker)
+                    logger.info(
+                        "[vcp_breakeven_promote] %s 고점(%d) ≥ 매수가(%d)+%.1f×ATR(%d) → 래치",
+                        ticker, pos.high_since_buy, pos.buy_price, breakeven_mult, int(atr_live),
+                    )
+                if ticker in self._breakeven_latched and current_price <= pos.buy_price:
+                    logger.info(
+                        "[vcp_breakeven_promote] %s 래치 승격 발화 — 현재가(%d) ≤ 매수가(%d)",
+                        ticker, current_price, pos.buy_price,
+                    )
+                    return Signal.STOP_LOSS
 
         # 2) 베이스 하단 이탈
         if info and info.get("base_low") and current_price < info["base_low"]:
@@ -1088,12 +1143,76 @@ class VcpBreakoutStrategy(StrategyBase):
         return []
 
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
-        """할당 자금의 position_ratio 비중. 예산 잔여로 클램프(`_apply_budget_limit`)."""
+        """할당 자금의 position_ratio 비중. 예산 잔여로 클램프(`_apply_budget_limit`).
+
+        B-2 게이트 2: `sizing_mode="turtle"` + ticker 지정 시 터틀 유닛 sizing 우선.
+        터틀이 0(변동성 floor / 잔여 부족 / 예외) 반환 시 position_ratio 낙하 =
+        `_entry_atr` 미스탬프 = 기존 % 손절 경로 유지.
+        """
         if current_price <= 0:
             return 0
-        ratio = self.config.params["position_ratio"]
+        params = self.config.params
+        if params.get("sizing_mode") == "turtle" and ticker is not None:
+            turtle_qty = self._turtle_buy_quantity(current_price, ticker)
+            if turtle_qty > 0:
+                return self._apply_budget_limit(turtle_qty, current_price, ticker)
+        ratio = params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
         return self._apply_budget_limit(amount // current_price, current_price, ticker)
+
+    def _turtle_buy_quantity(self, current_price: int, ticker: str) -> int:
+        """터틀 유닛 수량 + `_entry_atr` 원자 스탬프 (donchian `_turtle_buy_quantity` 답습).
+
+        `_candidates[ticker]["atr14"]`(prepare D-1 ATR)를 sizing 과 하드손절 entry_atr
+        양쪽에 **동일 사용** — 이 구조적 동일성이 리스크 커플링 불변식의 열쇠다.
+        `compute_unit_qty_guarded` 의 notional 상한(`position_ratio × 예산`) 덕분에
+        터틀 수량 ≤ 비중 수량이 항상 성립 = 전환은 순수 축소 방향.
+        0 반환 시 호출자가 position_ratio 로 낙하 = 미스탬프.
+        """
+        try:
+            from src.engine.turtle_sizing import compute_unit_qty_guarded
+
+            info = self._candidates.get(ticker) or {}
+            atr = float(info.get("atr14") or 0)
+            budget = int(self.state.total_investment)
+            qty = compute_unit_qty_guarded(
+                budget, atr, current_price,
+                float(self.config.params.get("risk_pct") or 0),
+                remaining_budget=max(0, budget - self._calc_used_funds()),
+                min_vol_pct=float(self.config.params.get("min_vol_floor_pct", 1.0)),
+                position_ratio=float(self.config.params.get("position_ratio") or 0),
+            )
+            if qty > 0:
+                self._entry_atr[ticker] = atr
+                return qty
+        except Exception:
+            logger.debug("[vcp_turtle_sizing_fallback] %s — position_ratio 낙하",
+                         ticker, exc_info=True)
+        return 0
+
+    def _rederive_entry_atr(self, ticker: str, pos, candles: list, atr_period: int) -> None:
+        """재시작 복구 — buy_date 이전 일봉으로 진입 ATR 재현 (loosen 차단).
+
+        donchian `_rederive_entry_atr` 동형. 진입 시 `_candidates` ATR 은 prepare 가
+        매수일 전일(D-1)까지 봉으로 산출했다. 재시작 후 현재 ATR(팽창 가능)이 아닌 그
+        값을 재현하려면 buy_date *이전* 봉만 남겨 `_atr`(DESC, 최근 period)로 계산한다.
+        봉 부족/실패 시 미복구 → `turtle_backstop_pct` 가 방어(무손절 없음).
+        """
+        try:
+            buy_dd = pos.buy_date.strftime("%Y%m%d")
+            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
+            if len(prior) < atr_period + 2:
+                return
+            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior]
+            lows = [int(c.get("stck_lwpr", "0") or 0) for c in prior]
+            closes = [int(c.get("stck_clpr", "0") or 0) for c in prior]
+            e_atr = self._atr(highs, lows, closes, atr_period)
+            if e_atr > 0:
+                self._entry_atr[ticker] = float(int(e_atr))
+                logger.info("[vcp_entry_atr_rederive] %s buy_date=%s entry_atr=%d",
+                            ticker, pos.buy_date, int(e_atr))
+        except Exception:
+            logger.exception("VCP 터틀 entry_atr 재도출 실패: %s", ticker)
 
     def register_cooldown_after_exit(self, ticker: str) -> None:
         """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 191 영업일 2단계).
@@ -1159,6 +1278,11 @@ class VcpBreakoutStrategy(StrategyBase):
                 continue
             if not candles:
                 continue
+            # B-2 게이트 2 — 터틀 entry_atr 재시작 재도출. **같은 fetch 응답 재사용**이라
+            # 추가 KIS 호출 0 + scheduler 배선 변경 0. in-memory 스탬프가 남아 있으면
+            # (당일 매수 · 미재시작) 정확한 진입 ATR 이므로 미접촉.
+            if ticker not in self._entry_atr:
+                self._rederive_entry_atr(ticker, pos, candles, params["atr_period"])
             await self._apply_high_since_buy_from_candles(pos, candles, today)
 
     async def _apply_high_since_buy_from_candles(self, pos, candles: list[dict], today) -> None:
@@ -1220,8 +1344,10 @@ class VcpBreakoutStrategy(StrategyBase):
         """사이클 191 — 포지션 청산 시 재진입 쿨다운 등록 (VCP override, BFB 패턴 답습).
 
         사이클 C (C-V5) — 브레이크이븐 래치 정리 동행 (재진입 stale 차단).
+        B-2 게이트 2 — 터틀 entry_atr 정리 동행 (재진입 stale 스냅샷 차단).
         """
         self._breakeven_latched.discard(ticker)
+        self._entry_atr.pop(ticker, None)
         self.register_cooldown_after_exit(ticker)
         coro = self._refine_cooldown_business_days(ticker)
         try:
