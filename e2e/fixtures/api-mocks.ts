@@ -179,6 +179,15 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
         size: 50,
         total: 0,
         total_pages: 0,
+        summary: {
+          realized_total_krw: 0,
+          realized_rate_pct: 0,
+          win_count: 0,
+          loss_count: 0,
+          even_count: 0,
+          win_rate_pct: 0,
+          closed_count: 0,
+        },
       }),
     }),
   );

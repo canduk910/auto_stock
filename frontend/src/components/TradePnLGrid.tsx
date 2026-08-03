@@ -17,6 +17,7 @@ const STRATEGY_NAMES: Record<string, string> = {
   donchian_swing: '20일 신고가 스윙',
   bull_flag_breakout: '눌림목 돌파',
   vcp_breakout: '변동성 수축 돌파',
+  kojiro: '고지로 대순환',
 }
 
 const columnHelper = createColumnHelper<TradePair>()
@@ -127,6 +128,16 @@ export default function TradePnLGrid() {
   })
 
   const pairs = data?.pairs ?? []
+  const summary = data?.summary ?? {
+    realized_total_krw: 0,
+    realized_rate_pct: 0,
+    win_count: 0,
+    loss_count: 0,
+    even_count: 0,
+    win_rate_pct: 0,
+    closed_count: 0,
+  }
+  const strategyLabel = strategyFilter ? (STRATEGY_NAMES[strategyFilter] ?? strategyFilter) : '전체'
 
   const table = useReactTable({
     data: pairs,
@@ -157,11 +168,30 @@ export default function TradePnLGrid() {
             <option value="donchian_swing">20일 신고가 스윙</option>
             <option value="bull_flag_breakout">눌림목 돌파</option>
             <option value="vcp_breakout">변동성 수축 돌파</option>
+            <option value="kojiro">고지로 대순환</option>
           </select>
         </div>
         <span className="text-xs text-gray-400">
           매수→매도 페어 {data?.total ?? 0}건 (보유 중: open 행)
         </span>
+      </div>
+
+      <div
+        data-testid="pnl-summary"
+        className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 border-b bg-gray-50/60 text-sm text-gray-600"
+      >
+        <span>
+          실현 합계{' '}
+          <span data-testid="pnl-summary-realized" className={pnlClass(summary.realized_total_krw)}>
+            {summary.realized_total_krw.toLocaleString()}원
+          </span>
+        </span>
+        <span>손익율 {summary.realized_rate_pct.toFixed(1)}%</span>
+        <span>
+          승 {summary.win_count}/패 {summary.loss_count}/보합 {summary.even_count}
+        </span>
+        <span>승률 {summary.win_rate_pct.toFixed(1)}%</span>
+        <span className="text-gray-400">전략: {strategyLabel}</span>
       </div>
 
       <div className="overflow-x-auto">

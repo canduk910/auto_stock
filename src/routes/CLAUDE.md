@@ -16,7 +16,7 @@
 | GET | `/api/balance` | balance.py | 잔고 (예수금 + 보유종목, 0수량 제외). J1(2026-05-11): 각 holding 에 `stock_master.get(ticker)` join → `nxt_tradable / krx_halted / excg_dvsn_cd` 3필드 노출(Optional, 캐시 miss/예외 시 None) |
 | GET | `/api/balance/buyable` | balance.py | 매수 가능 금액 |
 | GET | `/api/history?page=&size=` | history.py | 거래 내역 (페이징, 종목명/주문번호 포함) |
-| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | history.py | 매매손익 — 매수/매도 페어 1행 (가중평균). 보유 중은 open 페어 (미실현 손익은 ticker_prices 현재가 사용) |
+| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | history.py | 매매손익 — 매수/매도 페어 1행 (가중평균). 보유 중은 open 페어 (미실현 손익은 ticker_prices 현재가 사용). 응답 `data.summary` — 슬라이스 전 전체 pairs 중 closed 만 집계: `realized_total_krw`(float)/`realized_rate_pct`(가중, round2, 분모0→0.0)/`win_count`·`loss_count`·`even_count`(int)/`win_rate_pct`(round1, 분모0→0.0)/`closed_count`(int). open 페어 제외, Decimal 안전 |
 | GET | `/api/performance/summary` | performance.py | 실적 요약 |
 | GET | `/api/performance/daily` | performance.py | 일별 실적 (실현손익 기반 일별 수익률 + TWR 누적 + 외부 입출금) |
 | POST | `/api/performance/recompute` | performance.py | trade_history 기반 daily_performance 전체 소급 재계산 (멱등) |

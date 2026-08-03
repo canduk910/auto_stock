@@ -217,12 +217,23 @@ export interface TradePair {
   strategy: string
 }
 
+export interface TradePnLSummary {
+  realized_total_krw: number
+  realized_rate_pct: number
+  win_count: number
+  loss_count: number
+  even_count: number
+  win_rate_pct: number
+  closed_count: number
+}
+
 export interface TradePnLData {
   pairs: TradePair[]
   page: number
   size: number
   total: number
   total_pages: number
+  summary?: TradePnLSummary
 }
 
 export interface ActionResult {

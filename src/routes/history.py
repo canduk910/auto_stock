@@ -60,6 +60,7 @@ async def trade_pnl(
             p["ticker_name"] = ticker_names.get(p.get("ticker", ""), "")
 
     total = len(pairs)
+    summary = _build_pnl_summary(pairs)
     offset = (page - 1) * size
     sliced = pairs[offset:offset + size]
 
@@ -71,5 +72,46 @@ async def trade_pnl(
             "size": size,
             "total": total,
             "total_pages": (total + size - 1) // size if size > 0 else 0,
+            "summary": summary,
         },
     )
+
+
+def _build_pnl_summary(pairs: list[dict]) -> dict:
+    """전체 pairs(슬라이스 전) 중 closed 만 집계한 실현손익 요약.
+
+    open 페어는 미실현(profit_loss None 가능) 이므로 제외한다.
+    Decimal/float 혼용 대비 최종 값은 float 로 정규화한다.
+    """
+    closed = [p for p in pairs if p.get("status") == "closed"]
+
+    realized_total = 0.0
+    buy_amount_total = 0.0
+    win_count = 0
+    loss_count = 0
+    even_count = 0
+
+    for p in closed:
+        profit_loss = float(p.get("profit_loss") or 0)
+        realized_total += profit_loss
+        buy_amount_total += float(p.get("buy_price") or 0) * float(p.get("buy_qty") or 0)
+        if profit_loss > 0:
+            win_count += 1
+        elif profit_loss < 0:
+            loss_count += 1
+        else:
+            even_count += 1
+
+    realized_rate_pct = round(realized_total / buy_amount_total * 100, 2) if buy_amount_total else 0.0
+    win_loss_total = win_count + loss_count
+    win_rate_pct = round(win_count / win_loss_total * 100, 1) if win_loss_total else 0.0
+
+    return {
+        "realized_total_krw": realized_total,
+        "realized_rate_pct": realized_rate_pct,
+        "win_count": win_count,
+        "loss_count": loss_count,
+        "even_count": even_count,
+        "win_rate_pct": win_rate_pct,
+        "closed_count": len(closed),
+    }

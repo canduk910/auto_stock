@@ -401,7 +401,7 @@ stock_master 컬럼 / raw JSONB 키 / stock_master_daily 컬럼 추가 시 **반
 
 두 탭:
 - 주문체결내역: `TradeHistoryGrid` (raw 행)
-- 매매손익: `TradePnLGrid` (`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)" 라벨, emerald-50 배경. 시세 미수신 "(미실현 시세 대기)"
+- 매매손익: `TradePnLGrid` (`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)" 라벨, emerald-50 배경. 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). 그리드 상단 실현손익 요약 바(`pnl-summary`) — `data.summary`(슬라이스 전 전체 closed 페어 집계) 기반 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·현재 전략 필터 라벨. summary 부재 시 0 graceful
 
 ## Logs (`/logs`) — 통합 메뉴
 

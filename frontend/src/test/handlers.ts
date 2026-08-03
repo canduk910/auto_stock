@@ -73,7 +73,26 @@ export const handlers = [
   http.get(`${base}/history`, () =>
     HttpResponse.json(wrap({ items: [makeTrade()], total: 1, page: 1, size: 50 }))
   ),
-  http.get(`${base}/history/pnl`, () => HttpResponse.json(wrap({ items: [], total: 0 }))),
+  http.get(`${base}/history/pnl`, () =>
+    HttpResponse.json(
+      wrap({
+        pairs: [],
+        page: 1,
+        size: 30,
+        total: 0,
+        total_pages: 0,
+        summary: {
+          realized_total_krw: 0,
+          realized_rate_pct: 0,
+          win_count: 0,
+          loss_count: 0,
+          even_count: 0,
+          win_rate_pct: 0,
+          closed_count: 0,
+        },
+      })
+    )
+  ),
 
   // recommendations
   http.get(`${base}/recommendations`, () =>
