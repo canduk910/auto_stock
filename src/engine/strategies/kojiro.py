@@ -181,8 +181,12 @@ class KojiroStrategy(StrategyBase):
         # ── 터틀 유닛 sizing (Phase 2A-1, PARAM_RANGES 제외 = AI 자동튜닝 금지) ──
         # sizing_mode='turtle' opt-in 시 unit=floor(전략예산×risk_pct/ATR). 기본 position_ratio.
         # risk_pct 0.5% = 도메인 권장(KR 갭리스크). max_units 2/10 은 2B/2C 선등록(2A-1 미사용).
+        # min_vol_floor_pct — `compute_unit_qty_guarded` 변동성 floor (donchian 동일 규약).
+        # 유닛 명목 비중 = risk_pct ÷ (ATR/price) 라 저변동 종목일수록 폭증한다
+        # (atr_ratio 1% → 예산의 50% 단일종목 집중). floor + notional 상한이 이를 차단.
         "sizing_mode": "position_ratio",
         "risk_pct": 0.005,
+        "min_vol_floor_pct": 1.0,
         "max_units_per_stock": 2,
         "max_units_total": 10,
     }
@@ -830,20 +834,23 @@ class KojiroStrategy(StrategyBase):
         # ── 터틀 유닛 sizing (opt-in) — 실패 시 아래 position_ratio 로 fail-open ──
         if params.get("sizing_mode") == "turtle" and ticker is not None:
             try:
-                from src.engine.turtle_sizing import compute_unit_qty
+                from src.engine.turtle_sizing import compute_unit_qty_guarded
+                # donchian `_turtle_buy_quantity` 와 동일한 3중 가드(변동성 floor /
+                # 잔여 예산 / notional 상한). unguarded `compute_unit_qty` 를 쓰면
+                # 저변동 종목에서 단일종목 명목이 예산의 50%까지 치솟는다.
+                # notional 상한이 `position_ratio × 예산` 이라 **터틀 수량 ≤ 비중 수량**
+                # 이 항상 성립 = 전환은 순수 축소 방향(함정 #1 구조적 차단).
                 atr = float(getattr(self, "_candidates", {}).get(ticker, {}).get("atr") or 0)
-                unit_qty = compute_unit_qty(
-                    int(self.state.total_investment), atr, float(params.get("risk_pct") or 0),
+                budget = int(self.state.total_investment)
+                qty = compute_unit_qty_guarded(
+                    budget, atr, current_price,
+                    float(params.get("risk_pct") or 0),
+                    remaining_budget=max(0, budget - self._calc_used_funds()),
+                    min_vol_pct=float(params.get("min_vol_floor_pct", 1.0)),
+                    position_ratio=float(params.get("position_ratio") or 0),
                 )
-                if unit_qty > 0:
-                    # 전략예산 잔여 클램프 — 무조건 적용.
-                    # (구 결함: `min(unit, budget_qty) if budget_qty > 0 else unit_qty` 라
-                    #  잔여 0 = 예산 완전 소진일 때 클램프가 해제되고 풀 유닛이 통과했다.
-                    #  필요할 때 풀리는 fail-open 반전. 관문 `_apply_budget_limit` 와 이중 방어.)
-                    remaining = max(0, self.state.total_investment - self._calc_used_funds())
-                    qty = min(unit_qty, remaining // current_price)
-                    if qty > 0:
-                        return self._apply_budget_limit(qty, current_price, ticker)
+                if qty > 0:
+                    return self._apply_budget_limit(qty, current_price, ticker)
             except Exception:
                 logger.debug("[kojiro_turtle_sizing_fallback] %s — position_ratio 낙하", ticker, exc_info=True)
             # atr/budget 0 또는 예외 → position_ratio 낙하 (fail-open)

@@ -21,7 +21,7 @@ from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
 from src.engine.strategies.momentum import MomentumStrategy
-from src.engine.strategy_base import StrategyConfig
+from src.engine.strategy_base import Position, StrategyConfig
 
 pytestmark = pytest.mark.unit
 
@@ -65,11 +65,23 @@ def test_turtle_sizing_atr_inverse():
 
 
 def test_turtle_budget_clamp_binding():
-    # 예산 작아 budget_qty < unit_qty → 클램프 발동
+    """잔여 예산 클램프 바인딩.
+
+    의미 전환 (2026-08-03 B-1 guarded 전환): 기존 입력 `atr=100 / price=50,000` 은
+    `atr/price = 0.2%` 라 `compute_unit_qty_guarded` 의 변동성 floor(1%)에 걸려
+    터틀이 0 을 반환하고 position_ratio 로 낙하한다 — 예산 클램프를 관측할 수 없다.
+    입력을 floor 통과값으로 조정해 **본래 의도(잔여 예산 클램프 바인딩)를 보존**한다.
+    저변동 낙하 자체는 `test_kojiro_turtle_guarded.py` 가 별도로 고정한다.
+    """
     s = _kojiro(turtle=True, budget=1_000_000)  # 예산 100만
-    s._candidates["005930"] = {"atr": 100.0}  # unit=floor(1M*0.005/100)=50
-    # price 50000 → budget_qty = 1M//50000 = 20 < 50 → 클램프 20
-    assert s.calc_buy_quantity(50000, "005930") == 20
+    s._candidates["005930"] = {"atr": 200.0}    # atr/price = 2% ≥ floor. unit = 5000/200 = 25
+    # notional 상한 = int(1M×0.20)//10,000 = 20 / 잔여 상한 = 1M//10,000 = 100 → unit 25 중
+    # notional 20 이 먼저 바인딩하지 않도록 잔여를 더 좁혀 예산 클램프를 관측한다.
+    s.state.positions["000001"] = Position(
+        ticker="000001", buy_price=900_000, quantity=1, order_no="O", strategy_id="kojiro",
+    )
+    # 잔여 100,000 → 100,000//10,000 = 10주 (unit 25 / notional 20 보다 좁음)
+    assert s.calc_buy_quantity(10_000, "005930") == 10
 
 
 # ── FALLBACK: 모든 실패 경로 → position_ratio ──
