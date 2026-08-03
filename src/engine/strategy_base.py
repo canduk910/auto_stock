@@ -4,11 +4,16 @@
 새 전략 추가 시 StrategyBase를 상속하고 추상 메서드를 구현하면 된다.
 """
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from enum import Enum
 from typing import ClassVar
+
+from src.engine.daily_emit_cap import DailyEmitCap
+
+logger = logging.getLogger(__name__)
 
 _KST = timezone(timedelta(hours=9))
 
@@ -218,6 +223,11 @@ class StrategyBase(ABC):
         # 사이클 39 (2026-05-22) — funnel 단계별 ticker 캡처. prepare() 마다 reset.
         # 09:30 자동 snapshot 이 본 리스트를 DB `strategy_funnel_snapshots` 단계별 row 로 변환.
         self._funnel_steps: list[dict] = []
+        # 예산 이중제한 관측 — `[budget_clamp]` 1회/(ticker,전략)/일 cap.
+        # 날짜 키 자기 리셋(`_budget_clamp_day`) — `_reset_daily_state` 훅에 의존하지 않는다
+        # (서브클래스 override 가 super() 를 호출하지 않아 리셋이 누락될 수 있음).
+        self._budget_clamp_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._budget_clamp_day: str = ""
 
     @property
     def strategy_id(self) -> str:
@@ -427,3 +437,62 @@ class StrategyBase(ABC):
             return 0
         remaining = self.state.total_investment - self._calc_used_funds()
         return 1 if remaining >= current_price else 0
+
+    def _apply_budget_limit(
+        self, qty: int, current_price: int, ticker: str | None = None,
+    ) -> int:
+        """전략 예산 이중제한 ② 명목 축 — 7 전략 `calc_buy_quantity` 공통 return 관문.
+
+        이중제한 = ① 개수 `max_positions`(`is_max_positions`, check_buy_signal 담당)
+                 + ② 명목 `Σ매수금액 ≤ total_investment`(본 관문).
+
+        잔여 = ``total_investment − _calc_used_funds()`` (보유 원금 + pending 예정액)
+          - ``qty <= 0`` → `_fallback_one_share` 위임 (기존 계약 보존 — **분기 순서가 계약**)
+          - ``qty  > 0`` → ``min(qty, 잔여 // price)``. 잔여 < price 면 0.
+
+        부분 매수를 허용한다(유닛 미만 스킵 아님) — 부분 유닛의 리스크는 1유닛 *미만*
+        (under-risk)이라 안전 방향이고, 소액 계좌에서 스킵은 사실상 무매매를 만든다.
+
+        결함 배경: 주 분기가 ``int(예산×ratio)//price`` 를 잔여 검증 없이 반환해
+        ``position_ratio × max_positions > 1.0`` 인 전략이 예산을 초과 매수할 수 있었다.
+        잔여 클램프는 `_fallback_one_share` 와 turtle opt-in 분기에만 있었다.
+
+        **원자성 조건**: `order_engine.execute_buy` 는 `calc_buy_quantity` 호출부터
+        `pending_buys.add` 까지 `await` 0건이라 본 관문의 read 가 pending 등록까지
+        원자적이다. 따라서 이 메서드 안에서 ``await``/DB/HTTP 는 **절대 금지**
+        (AST 가드 A-PURE / A-ATOMIC 가 양쪽을 영구 고정).
+        """
+        if current_price <= 0:
+            return 0
+        if qty <= 0:
+            return self._fallback_one_share(current_price)
+        remaining = max(0, self.state.total_investment - self._calc_used_funds())
+        clamped = min(qty, remaining // current_price)
+        if clamped < qty:
+            self._emit_budget_clamp(ticker, qty, clamped, remaining)
+        return clamped
+
+    def _emit_budget_clamp(
+        self, ticker: str | None, requested: int, clamped: int, remaining: int,
+    ) -> None:
+        """`[budget_clamp]` 관측 로그 — 1회/(ticker,전략)/일 cap.
+
+        클램프 바인딩 빈도 실측용(부분 매수 정책 재평가 근거). 어떤 실패도 흡수 —
+        매수 수량 산출 흐름에 영향 0.
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._budget_clamp_day != today:
+                self._budget_clamp_day = today
+                self._budget_clamp_logged.reset_daily()
+            key = ticker or "-"
+            if self._budget_clamp_logged.should_emit(key):
+                self._budget_clamp_logged.mark_emitted(key)
+                logger.info(
+                    "[budget_clamp] ticker=%s strategy=%s requested=%d clamped=%d "
+                    "remaining=%d budget=%d",
+                    key, self.strategy_id, requested, clamped,
+                    remaining, self.state.total_investment,
+                )
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass

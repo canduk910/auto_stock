@@ -1114,13 +1114,10 @@ class DonchianSwingStrategy(StrategyBase):
         if params.get("sizing_mode") == "turtle" and ticker is not None:
             turtle_qty = self._turtle_buy_quantity(current_price, ticker)
             if turtle_qty > 0:
-                return turtle_qty
+                return self._apply_budget_limit(turtle_qty, current_price, ticker)
         ratio = params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        qty = amount // current_price
-        if qty > 0:
-            return qty
-        return self._fallback_one_share(current_price)
+        return self._apply_budget_limit(amount // current_price, current_price, ticker)
 
     def _turtle_buy_quantity(self, current_price: int, ticker: str) -> int:
         """터틀 유닛 수량 + entry_atr 원자 스탬프 (Phase 2A-2 게이트 1).

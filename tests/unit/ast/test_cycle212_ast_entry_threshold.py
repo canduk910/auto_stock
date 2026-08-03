@@ -76,9 +76,16 @@ def test_g212_4_int_params_literal_absent_donchian_period():
 
 
 def test_g212_4_detector_self_test():
-    """탐지기 self-test — 존재하는 키(stop_loss_rate/max_positions)는 정상 검출."""
+    """탐지기 self-test — 존재하는 키는 정상 검출.
+
+    의미 전환 (2026-08-03 예산 이중제한): INT_PARAMS 의 self-test 앵커가
+    `max_positions` 였으나 해당 키가 PARAM_RANGES/INT_PARAMS 에서 제거됐다
+    (동시보유 슬롯 수 = 리스크 정체성 상수, position_ratio 와의 곱 교차검증 부재로
+    예산 200% 조합 사고 발생). 앵커를 잔존 키 `k_period` 로 교체 — 탐지기 검증
+    의도는 동일하게 보존된다.
+    """
     src = _RECO.read_text(encoding="utf-8")
     pr = _collect_named_literal_str_keys(src, "PARAM_RANGES")
     ip = _collect_named_literal_str_keys(src, "INT_PARAMS")
     assert "stop_loss_rate" in pr, "탐지기 결함 — 존재 키 미검출 (PARAM_RANGES)"
-    assert "max_positions" in ip, "탐지기 결함 — 존재 키 미검출 (INT_PARAMS)"
+    assert "k_period" in ip, "탐지기 결함 — 존재 키 미검출 (INT_PARAMS)"

@@ -982,14 +982,12 @@ class BullFlagBreakoutStrategy(StrategyBase):
         return []
 
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
+        """할당 자금의 position_ratio 비중. 예산 잔여로 클램프(`_apply_budget_limit`)."""
         if current_price <= 0:
             return 0
         ratio = self.config.params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        qty = amount // current_price
-        if qty > 0:
-            return qty
-        return self._fallback_one_share(current_price)
+        return self._apply_budget_limit(amount // current_price, current_price, ticker)
 
     def register_cooldown_after_exit(self, ticker: str) -> None:
         """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 191 영업일 2단계).

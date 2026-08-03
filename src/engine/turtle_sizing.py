@@ -58,6 +58,11 @@ def compute_unit_qty_guarded(
     - **notional 상한**: `position_ratio` notional (`budget × position_ratio // price`)
       상한 — 저ATR 종목이 유닛 수량 폭증으로 단일종목에 집중되는 것을 차단
       (`position_ratio <= 0` 이면 미적용).
+
+    두 클램프는 **무조건 적용**한다. 구 구현은 `remaining_budget > 0` / `pr_qty > 0`
+    조건부라, 정작 상한이 필요한 경계(예산 완전 소진 / 고가주라 notional 상한이
+    1주에도 못 미침)에서 클램프가 해제되는 fail-open 반전이었다. 상한이 0 이면
+    0 을 반환하고, 호출자가 position_ratio → 1주 폴백으로 낙하한다.
     """
     if (
         atr_value <= 0 or current_price <= 0
@@ -69,10 +74,7 @@ def compute_unit_qty_guarded(
     qty = compute_unit_qty(strategy_budget, atr_value, risk_pct, fraction=fraction)
     if qty <= 0:
         return 0
-    if remaining_budget > 0:
-        qty = min(qty, remaining_budget // current_price)
+    qty = min(qty, max(0, remaining_budget) // current_price)
     if position_ratio > 0:
-        pr_qty = int(strategy_budget * position_ratio) // current_price
-        if pr_qty > 0:
-            qty = min(qty, pr_qty)
+        qty = min(qty, int(strategy_budget * position_ratio) // current_price)
     return max(qty, 0)

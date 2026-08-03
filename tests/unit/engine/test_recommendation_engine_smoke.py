@@ -36,9 +36,10 @@ def test_param_ranges_present_and_bounded():
     # 핵심 키 존재 + (min<max) 검증
     # 사이클 212 의미 전환: buy_threshold 는 진입 임계라 PARAM_RANGES 에서 제거됨
     # (AI 자동튜닝 제외) → expected_keys 에서 삭제.
+    # 2026-08-03 예산 이중제한 의미 전환: max_positions 도 제거 (리스크 정체성 상수 —
+    # position_ratio 와의 곱 교차검증 부재로 예산 200% 조합 사고).
     expected_keys = {
-        "stop_loss_rate", "position_ratio",
-        "max_positions", "k_period",
+        "stop_loss_rate", "position_ratio", "k_period",
     }
     assert expected_keys.issubset(PARAM_RANGES.keys())
     for key, (lo, hi) in PARAM_RANGES.items():
@@ -86,14 +87,18 @@ def test_validate_recommendations_clamps_out_of_range():
 
 
 def test_validate_recommendations_casts_int_params():
-    """INT_PARAMS 키는 정수로 캐스트되어야 한다."""
+    """INT_PARAMS 키는 정수로 캐스트되어야 한다.
+
+    의미 전환 (2026-08-03 예산 이중제한): 캐스트 앵커가 `max_positions` 였으나
+    해당 키가 PARAM_RANGES/INT_PARAMS 에서 제거됐다 → 잔존 정수 키 `k_period` 로 교체.
+    """
     from src.engine.recommendation_engine import _validate_recommendations
 
     raw = {
-        "recommended_params": {"max_positions": 5.4},
+        "recommended_params": {"k_period": 20.4},
         "reasoning": "",
     }
-    current = {"max_positions": 3}
+    current = {"k_period": 14}
     validated, _, _w, _n, _wr = _validate_recommendations(raw, current)
-    assert validated["max_positions"] == 5
-    assert isinstance(validated["max_positions"], int)
+    assert validated["k_period"] == 20
+    assert isinstance(validated["k_period"], int)

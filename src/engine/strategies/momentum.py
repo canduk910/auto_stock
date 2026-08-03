@@ -203,12 +203,12 @@ class MomentumStrategy(StrategyBase):
         return Signal.NONE
 
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
-        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 잔여 자금이 1주 살 수 있으면 1주."""
+        """할당 자금의 position_ratio 비중. 예산 잔여로 클램프(`_apply_budget_limit`).
+
+        비중 기준 0주면 관문이 `_fallback_one_share` 로 위임 — 잔여가 1주를 감당하면 1주.
+        """
         if current_price <= 0:
             return 0
         ratio = self.config.params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        qty = amount // current_price
-        if qty > 0:
-            return qty
-        return self._fallback_one_share(current_price)
+        return self._apply_budget_limit(amount // current_price, current_price, ticker)

@@ -195,16 +195,23 @@ def test_validate_recommendations_casts_long_ma_period_to_int():
 # E. 기존 키 회귀 보존
 # ---------------------------------------------------------------------------
 def test_existing_keys_preserved():
-    """기존 키(position_ratio, max_positions, stop_loss_rate, min_prdy_rate) 보존."""
+    """기존 키(position_ratio, stop_loss_rate, min_prdy_rate, k_period) 보존.
+
+    의미 전환 (2026-08-03 예산 이중제한): `max_positions` 는 리스크 정체성 상수로
+    PARAM_RANGES/INT_PARAMS 에서 영구 제외됐다 (position_ratio 와의 곱 교차검증 부재로
+    라이브에서 예산 200% 조합 사고 — kojiro 10×0.20 / LTV 4×0.50). 부재는
+    `tests/unit/ast/test_budget_limit_ast.py::test_max_positions_excluded_from_param_ranges`
+    가 영구 가드한다.
+    """
     from src.engine.recommendation_engine import PARAM_RANGES, INT_PARAMS
 
     for key in (
-        "position_ratio", "max_positions", "stop_loss_rate",
+        "position_ratio", "stop_loss_rate",
         "min_prdy_rate", "k_period",
     ):
         assert key in PARAM_RANGES, f"기존 키 누락: {key}"
-    # max_positions / k_period 는 정수
-    assert "max_positions" in INT_PARAMS
+    assert "max_positions" not in PARAM_RANGES
+    assert "max_positions" not in INT_PARAMS
     assert "k_period" in INT_PARAMS
 
 

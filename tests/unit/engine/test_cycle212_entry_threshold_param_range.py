@@ -73,7 +73,9 @@ def test_invariant_other_param_ranges_keys_remain():
         "volume_multiplier",
         "atr_trail_mult",
         "position_ratio",
-        "max_positions",
+        # `max_positions` 제거 (2026-08-03 예산 이중제한) — 동시보유 슬롯 수는
+        # 리스크 정체성 상수. position_ratio 와의 곱 교차검증 부재로 예산 200%
+        # 조합 사고 발생 → PARAM_RANGES/INT_PARAMS 양쪽에서 제외.
         "k_period",
         "max_scan_stocks",
         "min_prdy_rate",
@@ -87,7 +89,7 @@ def test_invariant_other_int_params_keys_remain():
     """나머지 INT_PARAMS 키가 잔존 (donchian_period 만 제거)."""
     from src.engine.recommendation_engine import INT_PARAMS
     for key in (
-        "max_positions",
+        # `max_positions` 제거 (2026-08-03 예산 이중제한) — 위 주석 참조
         "k_period",
         "max_scan_stocks",
         "long_ma_period",

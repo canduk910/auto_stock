@@ -69,7 +69,11 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "gap_up_threshold": (0.0, 30.0),
     "trailing_stop_rate": (-10.0, 0.0),
     "position_ratio": (0.01, 1.0),
-    "max_positions": (1, 20),
+    # `max_positions` 제외 (2026-08-03) — 동시보유 슬롯 수는 **리스크 정체성 상수**.
+    # 키별 독립 범위만 검증하고 `position_ratio` 와의 곱을 교차검증하지 않아
+    # 라이브에서 kojiro 10×0.20 / LTV 4×0.50 = 예산 200% 조합 사고가 났다
+    # (계좌 전체 122.5% 초과 청약). 진입 임계를 AI 튜닝에서 뺀 선례와 동일 논리
+    # (사이클 208 box 2키 / 209 max_breakout_extension_pct / 212 buy_threshold·donchian_period).
     "daily_loss_limit": (-20.0, 0.0),
     "k_period": (5, 60),
     "min_market_cap": (10_000_000_000, 10_000_000_000_000),
@@ -105,7 +109,6 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
 # 정수형 파라미터 — 캐스트 대상
 # 2026-05-17 Phase B: donchian_period / long_ma_period 추가 (정수 일봉 개수)
 INT_PARAMS = {
-    "max_positions",
     "k_period",
     "max_scan_stocks",
     "exclude_consecutive_limit",
@@ -205,6 +208,26 @@ def _validate_recommendations(
         # 변경 없는 값(현재값과 동일)은 의미 없음 — 단, 그대로 두면 프론트에서
         # 차이 표시 시 "변경 없음" 처리. 일단 포함시킨 뒤 클라이언트가 거른다.
         validated[key] = num
+
+    # ---- 교차 제약: position_ratio × max_positions ≤ 1.0 (전략 예산 불변식) ----
+    # 키별 독립 범위 검증만으로는 조합 사고를 막지 못한다 (라이브 kojiro 0.20×10 /
+    # LTV 0.50×4 = 예산 200%). `max_positions` 는 PARAM_RANGES 에서 제외됐으므로
+    # 여기서 튜닝 가능한 축은 position_ratio 뿐 — 현재 슬롯 수 기준으로 거부한다.
+    # 런타임 `_apply_budget_limit` 관문이 금전 피해는 이미 봉하지만, 초과 조합은
+    # 마지막 슬롯이 상시 부분 매수로 잘리는 상태라 설정으로도 허용하지 않는다.
+    if "position_ratio" in validated:
+        try:
+            max_pos = float(current_params.get("max_positions") or 0)
+        except (TypeError, ValueError):
+            max_pos = 0.0
+        product = validated["position_ratio"] * max_pos
+        if max_pos > 0 and product > 1.0 + 1e-9:
+            logger.warning(
+                "추천 거부 (전략 예산 초과 조합): position_ratio=%s × max_positions=%s "
+                "= %.2f > 1.0",
+                validated["position_ratio"], int(max_pos), product,
+            )
+            validated.pop("position_ratio")
 
     # ---- recommended_weight 검증 ----
     raw_weight = raw.get("recommended_weight")

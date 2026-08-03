@@ -1095,16 +1095,13 @@ class VolatilityBreakoutStrategy(StrategyBase):
 
         비중 기준 0주이지만 신호가 이미 발생한 상태에서 잔여 자금이 1주는 살 수 있으면
         1주 매수 — 매수 기회 누락 방지(고가 종목이라 비중 가드에 막혀도 신호 우선).
-        StrategyBase._fallback_one_share 공통 헬퍼 — 4개 전략 동일.
+        StrategyBase._apply_budget_limit 공통 관문 — 7 전략 동일 (0주 시 1주 폴백 위임).
         """
         if current_price <= 0:
             return 0
         ratio = self.config.params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        qty = amount // current_price
-        if qty > 0:
-            return qty
-        return self._fallback_one_share(current_price)
+        return self._apply_budget_limit(amount // current_price, current_price, ticker)
 
     def register_cooldown_after_exit(self, ticker: str) -> None:
         """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 201, BFB 191 패턴 답습).

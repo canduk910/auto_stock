@@ -836,22 +836,21 @@ class KojiroStrategy(StrategyBase):
                     int(self.state.total_investment), atr, float(params.get("risk_pct") or 0),
                 )
                 if unit_qty > 0:
-                    # 전략예산 잔여 클램프 (사이클 8 soft_multiplier 이후 max_buy_qty 이중 안전망)
+                    # 전략예산 잔여 클램프 — 무조건 적용.
+                    # (구 결함: `min(unit, budget_qty) if budget_qty > 0 else unit_qty` 라
+                    #  잔여 0 = 예산 완전 소진일 때 클램프가 해제되고 풀 유닛이 통과했다.
+                    #  필요할 때 풀리는 fail-open 반전. 관문 `_apply_budget_limit` 와 이중 방어.)
                     remaining = max(0, self.state.total_investment - self._calc_used_funds())
-                    budget_qty = remaining // current_price
-                    qty = min(unit_qty, budget_qty) if budget_qty > 0 else unit_qty
+                    qty = min(unit_qty, remaining // current_price)
                     if qty > 0:
-                        return qty
+                        return self._apply_budget_limit(qty, current_price, ticker)
             except Exception:
                 logger.debug("[kojiro_turtle_sizing_fallback] %s — position_ratio 낙하", ticker, exc_info=True)
             # atr/budget 0 또는 예외 → position_ratio 낙하 (fail-open)
         # ── position_ratio (기본, 바이트 동일 회귀 경로) ──
         ratio = params["position_ratio"]
         amount = int(self.state.total_investment * ratio)
-        qty = amount // current_price
-        if qty > 0:
-            return qty
-        return self._fallback_one_share(current_price)
+        return self._apply_budget_limit(amount // current_price, current_price, ticker)
 
     # ────────────────────────── 대시보드/구독 ──────────────────────────
 
