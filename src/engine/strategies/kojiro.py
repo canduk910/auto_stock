@@ -198,6 +198,8 @@ class KojiroStrategy(StrategyBase):
         self._held_stage3: dict[str, bool] = {}
         # 2ATR 하드손절 tighten-only floor (변동성 팽창 loosen 차단, restart-H3).
         self._stop_floor: dict[str, int] = {}
+        # 섹터 캡 held 집계 영속 맵(_candidates 와이프 독립, 포지션 수명 동안 생존) — 안 A.
+        self._position_sectors: dict[str, str] = {}
         self._scanned_tickers: list[str] = []
         self._bought_today: set[str] = set()
         self._scan_stats: dict = _empty_scan_stats()
@@ -648,15 +650,18 @@ class KojiroStrategy(StrategyBase):
                 prev_close = int(last["close"])
                 if atr_val > 0 and prev_close > 0:
                     from src.engine.scanner import resolve_ticker_name
+                    sector = await self._fetch_sector(ticker)  # 섹터 캡 카운트용(보유)
                     self._candidates[ticker] = {
                         "prev_close": prev_close, "atr": atr_val,
                         "stage": stage_int if stage_int is not None else 0,
                         "ema_s": float(last["ema_s"]), "ema_m": float(last["ema_m"]),
                         "ema_l": float(last["ema_l"]),
                         "atr_ratio": atr_val / prev_close,
-                        "sector": await self._fetch_sector(ticker),  # 섹터 캡 카운트용(보유)
+                        "sector": sector,
                         "name": resolve_ticker_name(ticker),
                     }
+                    # held 정본 소스 — _candidates 와이프(ATR 밴드/유니버스 이탈)와 독립 영속.
+                    self._position_sectors[ticker] = sector
                     # tighten-only floor 갱신
                     base = int(pos.buy_price - self.config.params["stop_atr"] * atr_val) if pos else 0
                     if base > 0:
@@ -705,8 +710,11 @@ class KojiroStrategy(StrategyBase):
             cand_sector = info.get("sector")
             if cand_sector and not str(cand_sector).startswith("미분류"):
                 held_pending = set(self.state.positions.keys()) | set(self.state.pending_buys)
-                same = sum(1 for t in held_pending
-                           if (self._candidates.get(t) or {}).get("sector") == cand_sector)
+                same = sum(
+                    1 for t in held_pending
+                    if ((self._candidates.get(t) or {}).get("sector")
+                        or self._position_sectors.get(t)) == cand_sector
+                )
                 if same >= sector_cap:
                     logger.info("[kojiro_sector_cap] %s 섹터=%s 동시보유 %d ≥ %d — 매수 스킵",
                                 ticker, cand_sector, same, sector_cap)
@@ -737,6 +745,9 @@ class KojiroStrategy(StrategyBase):
             return Signal.NONE
 
         self._bought_today.add(ticker)
+        if cand_sector := info.get("sector"):
+            # 당일 매수분 영속화 — 재-prepare _candidates 와이프에도 다음 후보 카운트 반영.
+            self._position_sectors[ticker] = cand_sector
         logger.info(
             "고지로 매수 신호: %s 현재가(%d) — 스테이지1(6→1) + EMA정배열 + ATR(%.1f)",
             ticker, current_price, info["atr"],
@@ -809,6 +820,7 @@ class KojiroStrategy(StrategyBase):
         """전량 청산 시 per-ticker 보유결합 상태 정리 (재진입 stale 차단)."""
         self._held_stage3.pop(ticker, None)
         self._stop_floor.pop(ticker, None)
+        self._position_sectors.pop(ticker, None)
 
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         """터틀 유닛(sizing_mode='turtle') 또는 position_ratio(기본). 어떤 실패든 fail-open."""
