@@ -5,7 +5,9 @@
 (500 금지 — 관찰성 실패가 운영 화면을 죽이면 안 됨, 사이클 88 G-REJECT).
 
 섹터 분류는 kojiro `_kojiro_sector_key`(KRX 산업지수 플래그) 재사용 = 이식 금지.
-Phase 2 인계 = master_raw(KRX 플래그 정본) 소스 승격 + SOFT 상한.
+섹터 소스 = `stock_master.get_master_raw`(master_raw JSONB = KRX 플래그 정본,
+kojiro `_fetch_sector` 와 동일 소스, 사이클 H Phase 2a 승격). 배치 미적재 종목은
+None → `미분류-{ticker}` fail-open. Phase 2b 인계 = SOFT 상한 + entry_atr 정밀 프록시.
 """
 
 from __future__ import annotations
@@ -44,8 +46,7 @@ async def _sector_of_graceful(tickers) -> dict:
     sector_of: dict[str, str] = {}
     for ticker in tickers:
         try:
-            basics = await stock_master.get(ticker)
-            master_raw = getattr(basics, "raw", None) if basics is not None else None
+            master_raw = await stock_master.get_master_raw(ticker)
             sector_of[ticker] = _kojiro_sector_key(
                 master_raw if isinstance(master_raw, dict) else None, ticker
             )

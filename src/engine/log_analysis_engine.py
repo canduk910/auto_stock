@@ -434,8 +434,9 @@ async def _build_portfolio_risk_snapshot(_now_kst: datetime | None = None) -> di
     sector_of: dict[str, str] = {}
     for ticker in held_tickers:
         try:
-            basics = await stock_master.get(ticker)
-            master_raw = getattr(basics, "raw", None) if basics is not None else None
+            # 사이클 H Phase 2a: 섹터 소스 = get_master_raw (KRX 플래그 정본,
+            # kojiro _fetch_sector 와 동일 소스). basics get().raw 는 KRX 플래그 전무.
+            master_raw = await stock_master.get_master_raw(ticker)
             sector_of[ticker] = _kojiro_sector_key(
                 master_raw if isinstance(master_raw, dict) else None, ticker
             )

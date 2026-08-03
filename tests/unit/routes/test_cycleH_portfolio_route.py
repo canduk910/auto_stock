@@ -82,13 +82,15 @@ def _install_fakes(monkeypatch, *, balance_raises=False, net_asset=1_000_000,
 
     monkeypatch.setattr(pf, "get_balance", _fake_get_balance, raising=False)
 
-    async def _fake_master_get(ticker: str):
+    async def _fake_master_raw(ticker: str):
         if stock_master_raises:
             raise RuntimeError("stock_master 조회 실패")
         return None  # master_raw 미확보 → _kojiro_sector_key 가 미분류-{ticker}
 
+    # 사이클 H Phase 2a: 섹터 소스 = get_master_raw (basics get().raw 아님)
     monkeypatch.setattr(
-        pf, "stock_master", SimpleNamespace(get=_fake_master_get), raising=False
+        pf, "stock_master", SimpleNamespace(get_master_raw=_fake_master_raw),
+        raising=False,
     )
     return pf
 
@@ -162,6 +164,65 @@ async def test_route_graceful_when_stock_master_fails(monkeypatch):
 
 
 # ===========================================================================
+# 사이클 H Phase 2a — 섹터 소스 승격 회귀 (master_raw KRX 플래그 → 실제 섹터)
+# ===========================================================================
+@pytest.mark.asyncio
+async def test_route_classifies_real_sector_from_master_raw(monkeypatch):
+    """`get_master_raw` 가 KRX 산업지수 플래그를 반환하면 by_sector 가 실제 섹터명.
+
+    사이클 H Phase 2a: 섹터 소스를 basics raw(get().raw — KRX 플래그 전무) →
+    master_raw(get_master_raw — KRX 플래그 정본) 로 승격. 승격 *전*(get().raw)에는
+    라우트가 get_master_raw 를 호출하지 않아 전부 미분류 → 이 테스트 RED.
+    기존 테스트들은 mock 이 None/raise 만 반환해 "미분류 확인"에 그쳐 분류가
+    실제로 작동하는지 검증하지 못하던 공백을 이 테스트가 메운다.
+    """
+    from src.routes import portfolio as pf
+
+    strategies = [
+        _strategy(
+            "kojiro",
+            {"hard_stop_pct": -8.0},
+            [_pos("068270", 30_000, 3, "kojiro")],  # 셀트리온 → 바이오
+        ),
+    ]
+    monkeypatch.setattr(
+        pf, "trading_scheduler",
+        SimpleNamespace(registry=SimpleNamespace(all=lambda: strategies)),
+        raising=False,
+    )
+
+    async def _fake_get_balance(afhr_flpr: str = "N"):
+        return ([], SimpleNamespace(net_asset=1_000_000))
+
+    monkeypatch.setattr(pf, "get_balance", _fake_get_balance, raising=False)
+
+    async def _fake_master_raw(ticker: str):
+        # KRX 바이오 산업지수 편입 플래그 (master_raw 컬럼 정본, get().raw 엔 없음)
+        if ticker == "068270":
+            return {"krx_bio_yn": "Y"}
+        return None
+
+    monkeypatch.setattr(
+        pf, "stock_master", SimpleNamespace(get_master_raw=_fake_master_raw),
+        raising=False,
+    )
+
+    resp = await pf.get_portfolio_risk()
+
+    assert resp.success is True
+    data = resp.data
+    assert data["concurrent_positions"] == 1
+    # 승격 후: 실제 섹터명 "바이오" 로 분류 (미분류-068270 아님)
+    assert "바이오" in data["by_sector"], (
+        f"master_raw KRX 플래그 → 실제 섹터 분류 실패: {list(data['by_sector'].keys())}"
+    )
+    assert not any(k.startswith("미분류-") for k in data["by_sector"].keys()), (
+        "KRX 플래그 보유 종목이 미분류로 폴백되면 안 됨"
+    )
+    assert data["top_sector"]["sector"] == "바이오"
+
+
+# ===========================================================================
 # (c) 빈 registry / 보유 0 → 0 스냅샷 200
 # ===========================================================================
 @pytest.mark.asyncio
@@ -179,11 +240,12 @@ async def test_route_empty_registry_zero_snapshot(monkeypatch):
 
     monkeypatch.setattr(pf, "get_balance", _fake_get_balance, raising=False)
 
-    async def _fake_master_get(ticker: str):
+    async def _fake_master_raw(ticker: str):
         return None
 
     monkeypatch.setattr(
-        pf, "stock_master", SimpleNamespace(get=_fake_master_get), raising=False
+        pf, "stock_master", SimpleNamespace(get_master_raw=_fake_master_raw),
+        raising=False,
     )
 
     resp = await pf.get_portfolio_risk()
