@@ -4,10 +4,10 @@
 관찰 전용(매수 차단 0). 외부(잔고/종목마스터) 실패 시 graceful **200 + 스냅샷**
 (500 금지 — 관찰성 실패가 운영 화면을 죽이면 안 됨, 사이클 88 G-REJECT).
 
-섹터 분류는 kojiro `_kojiro_sector_key`(KRX 산업지수 플래그) 재사용 = 이식 금지.
-섹터 소스 = `stock_master.get_master_raw`(master_raw JSONB = KRX 플래그 정본,
-kojiro `_fetch_sector` 와 동일 소스, 사이클 H Phase 2a 승격). 배치 미적재 종목은
-None → `미분류-{ticker}` fail-open. Phase 2b 인계 = SOFT 상한 + entry_atr 정밀 프록시.
+섹터명 소스(사이클 I 후속) = basics raw `bstp_kor_isnm`(KIS 업종 한글명 "유통"/"금융"
+등, 사람이 읽는 명칭) 우선 → 부재 시 kojiro `_kojiro_sector_key`(master_raw KRX
+산업지수 플래그 → 업종코드 → 미분류) 폴백. `_kojiro_sector_key` 무변경(kojiro 섹터
+캡 그룹핑 보존, display 전용 변환). Phase 2b 인계 = SOFT 상한 + entry_atr 정밀 프록시.
 """
 
 from __future__ import annotations
@@ -42,10 +42,26 @@ async def _net_asset_graceful() -> int:
 
 
 async def _sector_of_graceful(tickers) -> dict:
-    """보유 ticker → 섹터 사전. 개별 조회 실패는 `미분류-{ticker}` 독립 폴백."""
+    """보유 ticker → 사람이 읽는 섹터명 사전. 개별 조회 실패는 `미분류-{ticker}` 독립 폴백.
+
+    섹터명 소스 우선순위:
+      1. `bstp_kor_isnm` (basics raw = CTPF1002R, KIS 업종 한글명 "유통"/"금융"/"전기·전자")
+         — 전 종목 채워지는 사람이 읽는 명칭.
+      2. 부재 시 `_kojiro_sector_key(master_raw)` — KRX 산업지수 플래그(반도체/바이오 등)
+         → 업종 대분류코드 → 미분류. (kojiro 섹터 캡 로직과 동일 소스, 함수 무변경)
+    """
     sector_of: dict[str, str] = {}
     for ticker in tickers:
         try:
+            basics = await stock_master.get(ticker)
+            raw = getattr(basics, "raw", None) if basics is not None else None
+            name = ""
+            if isinstance(raw, dict):
+                name = str(raw.get("bstp_kor_isnm", "") or "").strip()
+            if name:
+                sector_of[ticker] = name
+                continue
+            # 폴백: master_raw KRX 산업지수 플래그 → 업종코드 → 미분류
             master_raw = await stock_master.get_master_raw(ticker)
             sector_of[ticker] = _kojiro_sector_key(
                 master_raw if isinstance(master_raw, dict) else None, ticker

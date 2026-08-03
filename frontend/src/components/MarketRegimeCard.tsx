@@ -8,7 +8,7 @@
  * - Buffett Ratio
  * - cycle.phase (확장기/수축기)
  * - 자동 cash_usage_ratio + auto_regime_adjust 토글 (ConfirmModal 이중 확인)
- * - block_reason 이 있으면 "레짐 경보(참고 — 매수 미개입)" 관찰 배너 (사이클 I 표시 정직화 —
+ * - block_reason 이 있으면 "레짐 경보" 관찰 배너 (사이클 I 표시 정직화 —
  *   `buy_blocked` 는 이제 항상 false 이므로 더 이상 매수 차단 의미로 사용하지 않음)
  * - 지수ETF 레짐(관찰) 소섹션 — 코스피200/코스닥150 stage + 방어 여부 (사이클 I)
  * - DKSTOCK_REGIME_ENABLED=false / empty regime 시 graceful "비활성" 표시
@@ -108,7 +108,7 @@ export default function MarketRegimeCard() {
           data-testid="market-regime-block-banner"
           className="mb-3 px-3 py-2 bg-amber-50 border border-amber-300 rounded text-sm text-amber-900"
         >
-          <strong>레짐 경보 (참고 — 매수 미개입)</strong> — {data.block_reason}
+          <strong>레짐 경보</strong> — {data.block_reason}
         </div>
       )}
 

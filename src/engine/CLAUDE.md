@@ -83,7 +83,7 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 ### 8영역 회피 설계 (strategy_registry.py 가 8영역이라 registry 미접촉)
 
 - **신규 순수함수 `portfolio_risk.py`**(위 모듈 맵) — registry/kojiro/db/http 미접촉, 호출자 주입(pull). AST 가드 = 8영역 파일에 `portfolio_risk` 참조 0건 + portfolio_risk.py 에 `_kojiro_sector_key`/`trading_scheduler`/registry/db import 0건.
-- **`GET /api/portfolio/risk`**(routes/portfolio.py, 8영역 아님) — `trading_scheduler.registry.all()` + `get_balance()` net_asset + 보유 ticker 섹터(`_kojiro_sector_key` 재사용, 소스=`stock_master.get_master_raw` = KRX 플래그 정본, Phase 2a) pull → snapshot. get_balance/stock_master 실패 graceful 200(500 금지).
+- **`GET /api/portfolio/risk`**(routes/portfolio.py, 8영역 아님) — `trading_scheduler.registry.all()` + `get_balance()` net_asset + 보유 ticker 섹터명 pull → snapshot. **섹터명 소스(사이클 I 후속)** = basics raw `bstp_kor_isnm`(KIS 업종 한글명 "유통"/"금융") 우선 → 부재 시 `_kojiro_sector_key(get_master_raw)`(KRX 플래그→업종코드→미분류) 폴백. `_kojiro_sector_key` 무변경(kojiro 섹터 캡 보존, display 전용). get_balance/stock_master 실패 graceful 200(500 금지).
 - **20:10 일일리포트 계량화**(log_analysis_engine.py, hot path 아님) — `_build_portfolio_risk_snapshot(now_kst)` async 헬퍼 + metrics `portfolio_risk_snapshot` 키(빌드 실패→None graceful, 리포트 INSERT 보존).
 
 ### 매매 안전성 무영향
@@ -95,6 +95,8 @@ recommendation_engine.py(20:00 AI자문) / log_analysis_engine.py(20:10 일일 �
 ### 사이클 H Phase 2a (2026-08-03) — 섹터 소스 승격 (관찰 전용, 8영역 diff 0)
 
 EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 나온 결함 시정. **근본 원인**: 두 소비 seam(`routes/portfolio.py::_sector_of_graceful` + `log_analysis_engine.py::_build_portfolio_risk_snapshot`)이 섹터 소스로 `stock_master.get(ticker).raw`(basics raw = CTPF1002R merge)를 넘겼으나, `_kojiro_sector_key`가 읽는 KRX 산업지수 플래그 12개(`krx_smcn_yn`·`krx_bio_yn` 등)+업종코드 2개(`bstp_larg/medm_div_code`)는 `stock_master.master_raw` 컬럼(migration 034, `kis_master.py` 파서 적재)에만 존재 → basics raw엔 전무(grep 0) → 항상 미분류 폴백. **시정**: 두 seam 모두 `get(ticker).raw` → `stock_master.get_master_raw(ticker)`(kojiro `_fetch_sector`와 동일 소스). `_kojiro_sector_key` 호출부 byte-identical(`get_master_raw`가 이미 `Optional[dict]` → 기존 `isinstance` 가드 그대로). **fail-open 보존**: `get_master_raw`는 lazy fallback 없음(16:30 배치만) → 미적재 종목 None → `미분류-{ticker}`(kojiro 동일). 매매 안전성 8영역+`portfolio_risk.py` diff 0(관찰 전용, 매수 차단 0). 신규 회귀 1(route `test_route_classifies_real_sector_from_master_raw` = KRX 플래그 dict→"바이오" 분류, 승격 전 RED) + 기존 route 테스트 monkeypatch seam 2줄 조정. 백엔드 4,358 PASS.
+
+**사이클 I 후속 (2026-08-03) — 섹터명 사람이 읽는 명칭 전환**: Phase 2a 배포 후 `by_sector`가 `업종-0016`처럼 업종 대분류 코드로 표기(KRX 12플래그 미해당 종목이 `bstp_larg_div_code` 폴백)돼 판독 불가. 조사 결과 `master_raw`엔 업종 한글명 없으나 **basics raw(`get().raw`)의 `bstp_kor_isnm`("유통"/"금융"/"전기·전자")이 전 종목 채워짐**(CTPF1002R, 신규 호출 0). 두 seam(route+log_analysis)을 **`bstp_kor_isnm` 우선 → 부재 시 `_kojiro_sector_key(get_master_raw)` 폴백**으로 변경. `_kojiro_sector_key` 무변경(kojiro 섹터 캡 그룹핑 보존, display 전용). ⚠️ `idx_bztp_lcls_cd_name`="시가총액규모중"은 섹터 아님(사용 금지). 신규 회귀 2(bstp_kor_isnm 명칭 + 폴백). 8영역 diff 0.
 
 ## 사이클 188 (2026-07-02) — `_wait_until(advance_if_passed=True)` never-return 회귀 시정
 

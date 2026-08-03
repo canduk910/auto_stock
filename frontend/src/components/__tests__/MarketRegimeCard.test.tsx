@@ -75,10 +75,9 @@ describe('MarketRegimeCard', () => {
 
     const badge = await screen.findByTestId('market-regime-badge')
     expect(badge.textContent).toContain('방어')
-    // 레짐 경보(관찰) amber 배너 — 매수 미개입 관찰 라벨 (사이클 I 표시 정직화)
+    // 레짐 경보(관찰) amber 배너 — "매수 차단" 문구 없이 관찰 사유만 (사이클 I 표시 정직화)
     const banner = screen.getByTestId('market-regime-block-banner')
     expect(banner.textContent).toContain('레짐 경보')
-    expect(banner.textContent).toContain('매수 미개입')
     expect(banner.textContent).not.toContain('매수 차단')
     expect(banner.textContent).toContain('defensive')
   })

@@ -453,10 +453,10 @@ Dashboard `MarketRegimeCard` 직하 신설 (시장 → 인프라 위계). Websoc
 Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
 
 - regime 배지 (defensive=red / neutral=gray / aggressive=blue / 비활성=gray-500) + VIX / Fear & Greed / Buffett / cycle 메트릭 grid + cash_usage_ratio + auto_regime_adjust 토글
-- `buy_blocked=true` 시 `data-testid="market-regime-block-banner"` amber 배너 + block_reason + "보유 종목 청산은 정상 작동. 매수만 차단"
+- **사이클 I (2026-08-03) — 레짐 매수 게이트 제거 반영**: `buy_blocked` 는 백엔드에서 항상 false(레짐 매수 미개입). `block_reason` 존재 시 `data-testid="market-regime-block-banner"` amber **"레짐 경보"** 관찰 배너(관찰 사유만, "매수 차단" 문구 없음). ETF 스테이지 소섹션(`etf_kospi_stage`/`etf_kosdaq_stage`/`etf_defensive`, etf_enabled=false 시 "관찰 비활성") 추가
 - `auto-regime-toggle` ON/OFF — `ConfirmModal` 이중 확인 (ON: "다음 영업일부터 cash_min 기반 자동 갱신" / OFF: "운영자 수동값 보존")
 - API: `getMarketRegimeCurrent()` (queryKey `['marketRegime']`, staleTime 60s) + `setAutoRegimeAdjust(boolean)` + `getMarketRegimeHistory(days)`
-- `enabled=false` (DKSTOCK_REGIME_ENABLED=false) → "비활성" gray 배지 + 메트릭 "—". 매수 가드 비활성
+- `enabled=false` (DKSTOCK_REGIME_ENABLED=false) → "비활성" gray 배지 + 메트릭 "—". 레짐 관찰 비활성 (매수 가드는 사이클 I 제거)
 
 ## 주문 안전성
 
