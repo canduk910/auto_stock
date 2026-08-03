@@ -2641,8 +2641,6 @@ class TradingScheduler:
         from src.api.condition import fetch_stock_detail
         from src.engine.scanner import KST_TZ as _KST, TICK_TR_ID as _TICK_TR_ID, kis_ws as _kis_ws
         from src.engine.strategy_base import Signal as _Signal
-        # 레짐 매수가드 복제 (safety-M3) — swing poll 은 risk.on_tick 미경유 → 직접 조회.
-        from src.engine.market_regime import get_current_regime as _get_current_regime, BuyBlockState as _BuyBlockState
 
         BUY_WINDOW_START = _time(9, 5)
         BUY_WINDOW_END = _time(9, 30)
@@ -2741,28 +2739,13 @@ class TradingScheduler:
                     if signal == _Signal.BUY:
                         # risk.on_tick 의 동일 카운터 증가 규약과 짝 (metrics.strategy_funnel signals).
                         strategy.state.signal_count_today += 1
-                        # 레짐 매수가드 복제 (safety-M3) — swing poll 은 risk.on_tick 미경유 →
-                        # HARD 차단 skip / SOFT soft_multiplier 전달 (execute_buy 직접호출 우회 차단).
-                        soft_multiplier = 1.0
-                        regime = _get_current_regime()
-                        try:
-                            bbs = await regime.get_buy_block_state()
-                        except Exception:
-                            logger.exception("[swing_poll] buy_block_state 조회 실패 — HARD fallback (안전)")
-                            bbs = _BuyBlockState(mode="HARD", blocked=False, soft_multiplier=1.0, reasons=[])
-                        if bbs.mode == "HARD" and bbs.blocked:
-                            logger.info("[swing_poll] 레짐 HARD 매수 차단 skip: %s (%s)", t, _sid)
-                            await asyncio.sleep(0.05)
-                            continue
-                        if bbs.mode == "WARN" and bbs.reasons:
-                            logger.warning("[swing_poll] 레짐 WARN: %s reasons=%s", _sid, bbs.reasons)
-                        elif bbs.mode == "SOFT" and bbs.reasons:
-                            soft_multiplier = bbs.soft_multiplier
+                        # 사이클 I (2026-08-03) — 레짐 매수 게이트 제거 (관찰 전용 전환).
+                        # swing poll 도 레짐으로 매수를 차단/축소하지 않는다 (risk.on_tick 정합).
                         # 매수 *성공* 시에만 WS subscribe (실패 종목 HIGH 슬롯 점유 차단).
                         buy_succeeded = False
                         try:
                             await self.order_engine.execute_buy(
-                                t, current_price, strategy, soft_multiplier=soft_multiplier,
+                                t, current_price, strategy,
                             )
                             buy_succeeded = (
                                 t in strategy.state.pending_buys

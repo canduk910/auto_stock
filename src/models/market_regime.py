@@ -21,6 +21,11 @@ class MarketRegimeCurrent(BaseModel):
     auto_regime_adjust: bool = True
     cash_usage_ratio: float = 1.0
     enabled: bool = False  # DKSTOCK_REGIME_ENABLED 값
+    # 사이클 I (2026-08-03) — 지수ETF 고지로 스테이지 레짐 관찰 (E-1). 매수 미개입.
+    etf_kospi_stage: Optional[int] = None
+    etf_kosdaq_stage: Optional[int] = None
+    etf_defensive: Optional[bool] = None
+    etf_enabled: bool = False  # etf_regime_enabled 토글
 
 
 class MarketRegimeSnapshotItem(BaseModel):

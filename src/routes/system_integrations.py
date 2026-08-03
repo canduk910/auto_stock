@@ -247,6 +247,49 @@ async def set_auto_regime_adjust(req: IntegrationToggleRequest):
 
 
 # ---------------------------------------------------------------------------
+# 사이클 E-1 / I — ETF 레짐 관찰 토글 (etf_regime_enabled, 관찰 전용)
+# ---------------------------------------------------------------------------
+@router.get("/etf-regime", response_model=ApiResponse)
+async def get_etf_regime():
+    """지수ETF 고지로 스테이지 레짐 관찰 활성 여부 조회 (관찰 전용).
+
+    `etf_regime_enabled` DB 토글 (.env fallback 없음). ETF 신호는 boot 에서 항상
+    계산·노출되며 본 토글은 관찰 opt-in 플래그. **매수 가드 미연계** (사이클 I 게이트 제거).
+    """
+    try:
+        enabled = await sc.get_etf_regime_enabled()
+    except Exception:
+        logger.exception("[integrations] etf_regime get 실패 — False fallback")
+        enabled = False
+    status = IntegrationToggleStatus(
+        enabled=bool(enabled), source="db", env_value=False, db_value=bool(enabled),
+    )
+    return ApiResponse(success=True, data=status.model_dump())
+
+
+@router.put("/etf-regime", response_model=ApiResponse)
+async def set_etf_regime(req: IntegrationToggleRequest):
+    """ETF 레짐 관찰 토글 (관찰 전용 — 매수 미개입)."""
+    try:
+        await sc.set_etf_regime_enabled(req.enabled)
+    except Exception as e:
+        logger.exception("[integrations] etf_regime DB 갱신 실패: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
+    status = IntegrationToggleStatus(
+        enabled=bool(req.enabled), source="db", env_value=False, db_value=bool(req.enabled),
+    )
+    return ApiResponse(
+        success=True,
+        data=status.model_dump(),
+        message=(
+            "지수ETF 레짐 관찰을 활성화했습니다. 대시보드에서 코스피200/코스닥150 스테이지를 확인하세요."
+            if req.enabled
+            else "지수ETF 레짐 관찰을 비활성화했습니다."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
 # 사이클 8 (2026-05-18) — 매수 가드 4 모드 + 4 임계값
 # ---------------------------------------------------------------------------
 async def _build_buy_block_status() -> BuyBlockStatusResponse:

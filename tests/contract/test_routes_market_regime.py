@@ -56,6 +56,11 @@ def test_get_current_returns_200_empty_regime(client, monkeypatch):
     assert data["block_reason"] is None
     assert data["auto_regime_adjust"] is True
     assert data["cash_usage_ratio"] == pytest.approx(0.85)
+    # 사이클 I — ETF 레짐 관찰 필드 스키마 (신호 부재 시 None / 토글 기본 False)
+    assert "etf_kospi_stage" in data
+    assert "etf_kosdaq_stage" in data
+    assert "etf_defensive" in data
+    assert data["etf_enabled"] is False
 
 
 def test_get_current_with_defensive_regime(client, monkeypatch):
@@ -75,7 +80,9 @@ def test_get_current_with_defensive_regime(client, monkeypatch):
     assert resp.status_code == 200
     data = resp.json()["data"]
     assert data["regime"] == "defensive"
-    assert data["buy_blocked"] is True
+    # 사이클 I — 레짐 매수 게이트 제거: defensive 여도 buy_blocked 는 항상 False (정직 표시).
+    # block_reason 은 관찰용 "레짐 경보 사유"로 유지 (매수 미개입).
+    assert data["buy_blocked"] is False
     assert "defensive" in data["block_reason"].lower()
 
 

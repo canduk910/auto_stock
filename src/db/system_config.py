@@ -243,6 +243,9 @@ async def set_kis_mcp_enabled(value: bool) -> None:
 # 운영자가 명시적으로 IntegrationToggleCard 에서 완화 선택 시에만 변경된다.
 
 _BUY_BLOCK_MODE_KEY = "buy_block_mode"
+# 사이클 I (2026-08-03) — 레짐 매수 게이트가 risk.py/scheduler 에서 제거됨.
+# buy_block_mode 는 이제 매매에 영향을 주지 않는 **표시/관찰 전용** 값 (게이트 decommission).
+# 기본값은 HARD 유지(회귀 최소화) — 운영 DB 는 OFF 로 설정해 대시보드 정직 표시.
 _BUY_BLOCK_MODE_DEFAULT = "HARD"
 _BUY_BLOCK_VALID_MODES = ("OFF", "WARN", "SOFT", "HARD")
 
@@ -272,7 +275,7 @@ class BuyBlockThresholds(BaseModel):
 
 
 async def get_buy_block_mode() -> str:
-    """매수 가드 모드 조회. 키 부재 시 기본 'HARD' (현재 동작 회귀)."""
+    """매수 가드 모드 조회. 키 부재 시 기본 'HARD' (표시 전용 — 사이클 I 게이트 제거)."""
     try:
         raw = await _select_value(_BUY_BLOCK_MODE_KEY)
         if raw is _MISSING:
@@ -292,7 +295,7 @@ async def get_buy_block_mode() -> str:
         )
         return _BUY_BLOCK_MODE_DEFAULT
     except Exception:
-        logger.exception("[buy_block_mode] get 실패 — 기본 HARD 사용")
+        logger.exception("[buy_block_mode] get 실패 — 기본 %s 사용", _BUY_BLOCK_MODE_DEFAULT)
         return _BUY_BLOCK_MODE_DEFAULT
 
 

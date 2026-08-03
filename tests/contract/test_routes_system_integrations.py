@@ -34,6 +34,7 @@ def client(monkeypatch):
         "dkstock_db": None,
         "mcp_db": None,
         "auto_regime_db": None,
+        "etf_db": False,
     }
     trigger_calls = []
 
@@ -55,12 +56,20 @@ def client(monkeypatch):
     async def fake_set_auto_regime(v):
         state["auto_regime_db"] = bool(v)
 
+    async def fake_get_etf():
+        return state["etf_db"]
+
+    async def fake_set_etf(v):
+        state["etf_db"] = bool(v)
+
     monkeypatch.setattr(sc, "get_dkstock_regime_enabled", fake_get_dkstock, raising=False)
     monkeypatch.setattr(sc, "set_dkstock_regime_enabled", fake_set_dkstock, raising=False)
     monkeypatch.setattr(sc, "get_kis_mcp_enabled", fake_get_mcp, raising=False)
     monkeypatch.setattr(sc, "set_kis_mcp_enabled", fake_set_mcp, raising=False)
     monkeypatch.setattr(sc, "get_auto_regime_adjust", fake_get_auto_regime, raising=False)
     monkeypatch.setattr(sc, "set_auto_regime_adjust", fake_set_auto_regime, raising=False)
+    monkeypatch.setattr(sc, "get_etf_regime_enabled", fake_get_etf, raising=False)
+    monkeypatch.setattr(sc, "set_etf_regime_enabled", fake_set_etf, raising=False)
 
     # settings 환경변수 (env_value 노출 기본값 False)
     from src.config import settings
@@ -201,4 +210,41 @@ def test_put_dkstock_regime_db_failure_returns_500(client, monkeypatch):
     resp = client.client.put(
         "/api/integrations/dkstock-regime", json={"enabled": True}
     )
+    assert resp.status_code == 500
+
+
+# ---------------------------------------------------------------------------
+# 사이클 E-1 / I — ETF 레짐 관찰 토글 (관찰 전용, 매수 미개입)
+# ---------------------------------------------------------------------------
+def test_get_etf_regime_default_false(client):
+    """etf_regime_enabled 기본 False → enabled=False, source=db (.env fallback 없음)."""
+    resp = client.client.get("/api/integrations/etf-regime")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["success"] is True
+    data = body["data"]
+    assert data["enabled"] is False
+    assert data["source"] == "db"
+    assert data["db_value"] is False
+
+
+def test_put_etf_regime_enabled_true(client):
+    """PUT enabled=True → DB 갱신 + 응답 반영 (관찰 활성화)."""
+    resp = client.client.put("/api/integrations/etf-regime", json={"enabled": True})
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["enabled"] is True
+    assert data["db_value"] is True
+    assert client.state["etf_db"] is True
+
+
+def test_put_etf_regime_db_failure_returns_500(client, monkeypatch):
+    from src.db import system_config as sc
+
+    async def fail_set(v):
+        raise RuntimeError("DB down")
+
+    monkeypatch.setattr(sc, "set_etf_regime_enabled", fail_set, raising=False)
+
+    resp = client.client.put("/api/integrations/etf-regime", json={"enabled": True})
     assert resp.status_code == 500

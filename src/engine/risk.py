@@ -18,7 +18,6 @@ import time
 from typing import Optional
 
 from src.engine.daily_emit_cap import DailyEmitCap
-from src.engine.market_regime import get_current_regime
 from src.engine.order_engine import OrderEngine
 from src.engine.session import session_tracker
 from src.engine.strategy_base import Signal
@@ -35,9 +34,6 @@ class RiskManager:
         # 가설 D (2026-05-12): tradable=False skip 카운터. 1분 1회 INFO 로그 + reset.
         self._tradable_skip_count: dict[str, int] = {}
         self._last_tradable_emit_ts: float = 0.0
-        # 사이클 2 (2026-05-17): 시장 레짐 매수 가드 skip 카운터. 1분 1회 INFO emit.
-        self._regime_block_count: dict[str, int] = {}
-        self._last_regime_block_emit_ts: float = 0.0
         # 사이클 31 (R6, 2026-05-21): `risk.py:152` 사전 가드 침묵 가시화.
         # `current_price > state.total_investment` skip 분기에서 1회/(ticker, strategy)/일
         # INFO emit cap. 매 틱 폭주 차단 + scheduler `_reset_daily_state` 동행 clear.
@@ -71,14 +67,14 @@ class RiskManager:
               는 매수 진입 전용.
           L1. 보드 가드 (사이클 38): `session_tracker.is_tradable(strategy_id, params)`.
               매수 신호 평가 진입 전 차단.
-          L2. 시장 레짐 매수 가드 4 모드 (사이클 2/B-1): `get_buy_block_state()`.
-              HARD → skip, WARN → 허용 + 로그, SOFT → 수량 ×0.5, OFF → 비활성.
+          L2. (사이클 I 제거) 시장 레짐 매수 가드 폐지 — 레짐은 매수를 차단/축소하지
+              않는다 (관찰 전용 전환). 레짐 대응은 cash_usage_ratio 로만.
           L3. 중복 가드: `registry.is_ticker_blocked_for_buy()`.
               보유 OR 주문중 OR 당일매도 통합 차단.
           L4. 자금 사전 가드: `state.is_low_funds_blocked(ticker)` 또는
               `current_price > state.total_investment` skip (사이클 31 R6 가시화).
 
-        매도/손절/Trailing/익일청산은 L1~L4 *전* 평가 → tradable_boards 무관 항상 작동.
+        매도/손절/Trailing/익일청산은 L1·L3·L4 *전* 평가 → tradable_boards 무관 항상 작동.
         """
         from datetime import datetime as _dt
         from src.engine.scanner import KST_TZ, ticker_last_tick, ticker_prev_close, ticker_prices
@@ -143,43 +139,10 @@ class RiskManager:
                 self._maybe_emit_tradable_skip()
                 continue
 
-            # 사이클 2 (2026-05-17) + **사이클 8 (2026-05-18)** — 매수 가드 4 모드 분기.
-            # `get_buy_block_state()` 가 DB 모드+임계 조회 후 BuyBlockState 반환:
-            # - HARD blocked → 매수 skip (사이클 2 회귀)
-            # - WARN blocked → 매수 허용 + WARNING 로그
-            # - SOFT blocked → 매수 허용 + soft_multiplier=0.5 (OrderEngine 에서 수량 축소)
-            # - OFF → 가드 자체 비활성
-            # 매도/손절은 check_exit_signal 분기에서 무관 → 보유 종목 청산 정상.
-            # 외부 fetch 실패 / DKSTOCK_REGIME_ENABLED=false 면 empty regime → reasons=[] (graceful).
-            regime = get_current_regime()
-            try:
-                buy_block_state = await regime.get_buy_block_state()
-            except Exception:
-                logger.exception(
-                    "[buy_block_state] 조회 실패 — HARD fallback (안전)"
-                )
-                from src.engine.market_regime import BuyBlockState
-                buy_block_state = BuyBlockState(
-                    mode="HARD", blocked=False, soft_multiplier=1.0, reasons=[],
-                )
-
-            soft_multiplier = 1.0
-            if buy_block_state.mode == "HARD" and buy_block_state.blocked:
-                # 사이클 2 회귀 — 매수 차단
-                self._regime_block_count[strategy.strategy_id] = (
-                    self._regime_block_count.get(strategy.strategy_id, 0) + 1
-                )
-                self._maybe_emit_regime_block(regime)
-                continue
-            if buy_block_state.mode == "WARN" and buy_block_state.reasons:
-                # WARN 모드 — 매수 허용 + WARNING 로그 (감사용)
-                logger.warning(
-                    "[buy_block_warn] strategy=%s reasons=%s",
-                    strategy.strategy_id, buy_block_state.reasons,
-                )
-            elif buy_block_state.mode == "SOFT" and buy_block_state.reasons:
-                # SOFT 모드 — 매수 허용 + 수량 ×0.5 (OrderEngine 에 kwarg 전달)
-                soft_multiplier = buy_block_state.soft_multiplier
+            # 사이클 I (2026-08-03) — 레짐 매수 게이트 제거 (관찰 전용 전환).
+            # 마켓레짐은 더 이상 매수를 차단/축소하지 않는다. 레짐 대응은
+            # cash_usage_ratio(운영자 수동 / auto_regime_adjust)로만 수행.
+            # 손절/매도/익일청산은 위 check_exit_signal 분기(레짐 게이트보다 앞)에서 정상.
 
             # 전략 간 중복 매수 방지: 보유/주문 중/당일 매도 모두 가로질러 차단
             if self.registry.is_ticker_blocked_for_buy(ticker):
@@ -216,10 +179,8 @@ class RiskManager:
             signal = strategy.check_buy_signal(ticker, current_price, open_price)
             if signal == Signal.BUY:
                 state.signal_count_today += 1
-                # 사이클 8 (2026-05-18) — SOFT 모드 시 OrderEngine 이 수량 ×0.5
                 await self.order_engine.execute_buy(
                     ticker, current_price, strategy,
-                    soft_multiplier=soft_multiplier,
                 )
 
     # ---------------------------------------------------------------------------
@@ -263,28 +224,3 @@ class RiskManager:
         self._tradable_skip_count.clear()
         self._last_tradable_emit_ts = now_ts
 
-    def _maybe_emit_regime_block(self, regime) -> None:  # type: ignore[no-untyped-def]
-        """사이클 2 (2026-05-17) — 분당 1회 [regime_block] INFO 로그.
-
-        시장 레짐 매수 차단 카운트를 1분 주기로 노출. 첫 호출 시 기준점만 등록하고
-        emit 보류 (tradable_skip 패턴과 동일).
-        """
-        now_ts = time.time()
-        if self._last_regime_block_emit_ts == 0.0:
-            self._last_regime_block_emit_ts = now_ts
-            return
-        if now_ts - self._last_regime_block_emit_ts < 60.0:
-            return
-        if not self._regime_block_count:
-            self._last_regime_block_emit_ts = now_ts
-            return
-        parts = " ".join(
-            f"{sid}={cnt}" for sid, cnt in sorted(self._regime_block_count.items())
-        )
-        try:
-            reason = regime.block_reason or "unknown"
-        except Exception:
-            reason = "unknown"
-        logger.info("[regime_block] %s reason=%s", parts, reason)
-        self._regime_block_count.clear()
-        self._last_regime_block_emit_ts = now_ts

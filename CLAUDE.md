@@ -41,6 +41,8 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 | 날짜 | 사이클 | 한 줄 요약 |
 |------|--------|-----------|
+| 2026-08-03 | 사이클 I 레짐 매수 게이트 무력화 + 관찰 활성화 | 점검=실매수 게이트(`get_buy_block_state` 모드 반영)는 현재 WARN·비차단인데 대시보드 `/api/market-regime/current` 가 레거시 `regime.buy_blocked` 프로퍼티(모드 무시·하드코딩 임계 VIX25/FG85·15/defensive)를 노출해 방어국면=모드 무관 항상 "매수 차단" 표시=오인(실제 매매 미개입, 표시/자문 payload/스냅샷 전용). 사용자 결정=레짐 매수 게이트 **전면 제거**(관찰 전용 전환)+레짐 대응은 cash_usage_ratio 만(`auto_regime_adjust` OFF 유지=수동)+ETF·포트폴리오 관찰 활성화. **Part1** risk.py on_tick 게이트(HARD skip/WARN 로그/SOFT soft_multiplier)+scheduler swing 복제 게이트+`_maybe_emit_regime_block`/`_regime_block_count` dead 제거, execute_buy soft_multiplier 미전달(**order_engine 무변경**=vestigial param). **Part2** buy_block_mode 표시 전용화(기본 HARD 유지=회귀 최소화·운영 DB OFF 설정)+`/current` `buy_blocked=False` 정직화(block_reason 은 관찰 사유 유지)+ETF 4필드 추가. **Part3** `GET/PUT /api/integrations/etf-regime` 토글 신규(관찰 opt-in, 매수 미개입). **Part4** 프론트 포트폴리오 리스크 카드 신설+MarketRegimeCard ETF 스테이지 표시. **트레이드오프**=극단 레짐 자동 매수정지 상실→수동 cash 관리 의존(손절/매도는 게이트보다 앞=무영향). 안전 8영역 중 risk.py·scheduler 의도적 수정·6영역 diff 0, 백엔드 4,352 PASS |
+| 2026-08-03 | 사이클 H Phase 2a 섹터 소스 승격 | EC2 실측 `/api/portfolio/risk` `by_sector` 가 보유 7종목 전부 `미분류-{ticker}` 로 나온 결함 시정. 근본 원인=두 소비 seam(routes/portfolio.py `_sector_of_graceful` + log_analysis_engine.py `_build_portfolio_risk_snapshot`)이 섹터 소스로 `stock_master.get().raw`(basics=CTPF1002R merge)를 넘겼으나 `_kojiro_sector_key` 가 읽는 KRX 산업지수 플래그 12+업종코드 2 는 `master_raw` 컬럼(migration 034, kis_master.py 적재)에만 존재→basics raw 전무(grep 0)→항상 미분류. 시정=두 seam `get(ticker).raw`→`stock_master.get_master_raw(ticker)`(kojiro `_fetch_sector` 동일 소스), `_kojiro_sector_key` 호출부 byte-identical(`Optional[dict]` isinstance 가드 그대로). fail-open 보존(get_master_raw lazy fallback 無=16:30 배치만→미적재 None→미분류, kojiro 동일). **관찰 전용·매수 차단 0·8영역+portfolio_risk.py diff 0.** 신규 회귀 1(route KRX플래그→"바이오" 분류, 승격 전 RED)+route 테스트 monkeypatch seam 2줄 조정. 백엔드 4,358 PASS |
 | 2026-08-02 | 사이클 H 포트폴리오 리스크 관찰 | 「터틀 자금관리」 서적 14p 발췌를 3중 워크플로 대조(개념·정밀수치·포트폴리오)한 감사 → 최대 구조적 갭 2건(둘 다 High: 포트폴리오 총리스크 상한 부재=`is_daily_loss_exceeded` 전략 격리라 최대 35 동시보유 통합 게이트 無 / 전략간 섹터 집중 무통제=동일 종목코드만 차단) 대응 Phase 1. **8영역 회피**(strategy_registry.py 가 8영역) — 신규 순수함수 `portfolio_risk.py`(registry/kojiro/db 미접촉, 호출자 pull) + `GET /api/portfolio/risk`(registry+잔고+섹터 `_kojiro_sector_key` 재사용, graceful 200) + 20:10 일일리포트 `portfolio_risk_snapshot` metrics. 리스크 프록시=매수금액×|하드손절%|(7키 min, 결측 −7% fail-open), 섹터/전략별 집계+top_sector. **관찰 전용·배제 0**(매수 차단 0, SOFT 상한·entry_atr 정밀화 2주 후 Phase 2). 매매 안전성 8영역 diff 0, 회귀 43(순수함수 25+라우트 4+log 2+AST 12), 백엔드 4,033 PASS. 동반: 터틀 대조에서 발견한 ATR 문서 오기 2건(get_atr 'Wilder'→SMA) 정정 |
 | 2026-08-02 | 사이클 G VB RR 개선 Phase 1 | 사이클 F 실측 VB 유일 열위(승률 35%·RR 1.35<필요RR 1.83·TE −0.63%) → 구조 원인(익절·트레일링 부재+−3% 하드손절+진입 필터 전무) 대응. **Part A** 실패 돌파 조기청산(C2, `check_exit_signal` 신규 분기 — 돌파선 아래 buffer% 로 confirm_ticks 연속 재이탈 시 STOP_LOSS, avg_loss↓) DEFAULT_PARAMS 3키 default-off(`failed_breakout_exit_enabled=False`) = byte-identical, 외부 MCP 백테스트 게이트. **Part B** RS/RSI 진입 품질 관찰 훅(`_apply_rs_rsi_observe_in_prepare`, C3 미러) — 신규 `ta_indicators.py`(rsi Wilder/relative_strength 순수함수)+지수 KODEX200(069500) 벤치마크, `VB_FUNNEL_STAGES` 7→9(RS/RSI step), **배제 0**(enabled 무관 관찰만)+보유 protected+fail-open. 둘 다 PARAM_RANGES 미편입(진입/청산 정체성 상수). 매매 안전성 8영역 diff 0, 회귀 43(ta 14+C2 13+관찰 16)+의미 전환 3(cycle157/C3 단계수·cycle148 xfail). 인계=Part B 2주 관찰 유의 시 RS 실배제 |
 | 2026-08-02 | 사이클 F TE/RR 전략 지표 | 서적 개념 TE(트레이딩 예지치=거래당 기대손익)+RR비율(손익비) 을 각 전략 최근 3개월 관찰 지표로 표시. domain-consult 통합 설계 — 소스=`get_trade_pairs`(진입가 기준·왕복·미실현분리, compute_metrics 매도가 기준 금지), TE%=청산왕복 수익률 평균, RR=평균수익/|평균손실|, 필요RR=L/W(보합 대응), 동치 TE>0⟺RR>필요RR, 표본 2중 게이트(TE N<20 뮤트·RR min(W,L)≥5), 구조태그(견고/취약/균형). 신규 `te_metrics.py`(순수함수)+`GET /api/strategies/te`(5분 캐시)+`/strategies` 카드 5행(배지·RR게이지·분해·구조·표본캡션)+하단 표1-2 참조. **관찰 전용, 매매 8영역 diff 0.** EC2 실측=VB N65 열위(RR1.35<필요1.83)·momentum 터틀형 우위·스윙계 판정유보. 백엔드 4,095 PASS + 프론트 372 PASS |
@@ -54,8 +56,6 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 2026-07-24 | 화면폭 슬라이더 | 대시보드 나브바에 콘텐츠 폭 슬라이더 신규 — `App.tsx <main>`·나브 컨테이너 `max-w-7xl`(1280px 캡) → 동적 `max(1024px, {60+level*0.4}%)`, **기본 전체폭**(넓은 화면 여백 민원 해소). localStorage(`autostock.contentWidth`) 저장·전 페이지 적용·모바일 미노출. 프론트 전용, 백엔드 diff 0 |
 | 2026-07-24 | backtest DB토글 | `_enqueue_backtest_jobs`(recommendation_engine.py) 가 정적 `.env`(engine.enabled) 대신 `await engine.is_enabled_async()`(DB 우선) 사용 — Settings UI `kis_mcp_enabled` 토글이 재시작 없이 즉시 반영(그전엔 DB=true 여도 backtest 전량 skip=AI자문 부분실명). kojiro 실측 조사서 발견. auto_apply 무접촉, hot path diff 0 |
 | 2026-07-24 | 종목명 폴백 | `list_by_filter` SELECT `name` → `COALESCE(NULLIF(name,''), NULLIF(TRIM(master_raw->>'hts_kor_isnm'),''), '')` — 전체상장 스캔(kojiro 등) funnel 후보가 종목번호만 표시되던 버그 시정(마스터파일 한글명 읽기 폴백, G-AST1 준수·쓰기 무변경, 6전략+funnel 일괄). 매매 hot path diff 0 |
-| 2026-07-23 | NXT prelimit stale selling | 익일청산 갭<임계 NXT 프리 지정가 조기청산 폐지 → `_pending_next_day_clear`(reason=nxt_underthreshold) 09:00 KRX 시장가 단일 청산(Tier 1) + stale `_selling` 재대조 훅(`_sync_positions_from_balance`, 보유∧열린주문無∧`_selling_since`≥180s → discard → on_tick 손절 재평가 재개) — Defect 2(stale `_selling` 손절 마비) 시정. 안전성 8영역 중 익일청산·`_selling` 2영역 의도 시정·6영역 diff 0 |
-| 2026-07-18 | Phase 2A-2 게이트0+1 | donchian 터틀 유닛 sizing + 하드손절 ATR화 opt-in (sizing_mode=turtle, buy−2.0×entry_atr + −9% backstop, entry_atr 인메모리+recompute buy_date 재도출, DB 플립 활성화) — 매매 안전성 8영역 diff 0 |
 
 > 사이클 200 이하 및 초기 하네스 구성 전체 이력(verbatim): [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md)
 
@@ -93,7 +93,7 @@ cd frontend && npm install && npm run dev
 - `DATABASE_URL`: AWS RDS PostgreSQL asyncpg DSN (`?sslmode=require`). **현재 DB 정본** — 전 db 모듈이 `src/db/pg.py` 풀로 사용
 - `SUPABASE_URL`, `SUPABASE_KEY`: **런타임 미사용** (settings/.env 에 잔존하나 어느 db 모듈도 참조 안 함, `src/db/supabase.py` 롤백용 병존)
 - `AUTO_START`: 서버 기동 시 자동 매매 시작 (DB `system_config.auto_start` 우선, 매일 시작 전 재확인)
-- `DKSTOCK_REGIME_ENABLED` (기본 false): dkstock.cloud 매크로 + 매수 가드 + cash_usage_ratio 자동 조정 활성화
+- `DKSTOCK_REGIME_ENABLED` (기본 false): dkstock.cloud 매크로 레짐 수신 + cash_usage_ratio 자동 조정 활성화 (매수 가드는 사이클 I 제거 — 레짐은 관찰 전용)
 - `KIS_MCP_ENABLED` (기본 false): 외부 백테스트 MCP 서버 활성화. 자문 직후 6 전략 × 2 kind = 12 job fire-and-forget
 
 ## 다중 전략 (요약)
@@ -116,8 +116,8 @@ cd frontend && npm install && npm run dev
 
 ### 외부 통합 (백테스트 + 매크로 레짐)
 - 20:00 AI 자문 INSERT 직후 외부 MCP 백테스트 (`http://43.202.187.5:3846/mcp`) — 6 전략 × 2 kind = 12 job fire-and-forget → `parameter_recommendations.backtest_summary` JSONB
-- 매크로 레짐 (`dkstock.cloud`) — `regime/vix/fear_greed` 4 임계 OR 매수 가드 (4 모드: HARD/WARN/SOFT/OFF) + `cash_usage_ratio` 자동 조정
-- 활성화 토글: `KIS_MCP_ENABLED` / `DKSTOCK_REGIME_ENABLED` (Settings UI 즉시 토글 가능). 외부 다운 시 graceful — 자문 INSERT 보존, summary=null, 매수 가드 비활성
+- 매크로 레짐 (`dkstock.cloud`) — `regime/vix/fear_greed` 관찰 + `cash_usage_ratio` 자동 조정 (`auto_regime_adjust`, `clamp((100-cash_min)/100)`). **매수 가드는 사이클 I(2026-08-03) 제거** — 레짐은 매수를 차단/축소하지 않는 관찰 지표(`buy_block_mode` 는 표시 전용 잔존, `get_buy_block_state` 는 대시보드/자문 payload 만 소비). ETF 레짐(E-1)·포트폴리오 리스크(사이클 H) 관찰 활성
+- 활성화 토글: `KIS_MCP_ENABLED` / `DKSTOCK_REGIME_ENABLED` / `etf_regime_enabled` (Settings UI 즉시 토글). 외부 다운 시 graceful — 자문 INSERT 보존, summary=null, 레짐 관찰 비활성
 - 운영 가이드: [`docs/backtest-monitoring.md`](docs/backtest-monitoring.md)
 
 ## 핵심 안전 규칙 (절대 깨지 말 것)

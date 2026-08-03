@@ -37,6 +37,17 @@ async def get_current():
     except Exception:
         ratio = 1.0
 
+    # 사이클 I — 지수ETF 레짐 관찰 (E-1). boot 부착 싱글톤 (재계산 X) + 토글.
+    etf_sig = mr_mod.get_current_etf_signal()
+    try:
+        etf_enabled = await sc.get_etf_regime_enabled()
+    except Exception:
+        etf_enabled = False
+
+    # 사이클 I (2026-08-03) — 레짐 매수 게이트 제거 반영.
+    # 레짐은 더 이상 매수를 차단하지 않으므로 buy_blocked 는 항상 False (정직 표시).
+    # block_reason 은 관찰용 "레짐 경보 사유"로 유지 (regime.block_reason, 매수 미개입).
+    # 레거시 `regime.buy_blocked` 프로퍼티(모드 무시)를 그대로 노출하던 표시 결함 시정.
     body = MarketRegimeCurrent(
         regime=regime.regime,
         regime_desc=regime.regime_desc,
@@ -45,11 +56,15 @@ async def get_current():
         fear_greed_score=regime.fear_greed_score,
         buffett_ratio=regime.buffett_ratio,
         cash_min=regime.cash_min,
-        buy_blocked=regime.buy_blocked,
+        buy_blocked=False,
         block_reason=regime.block_reason,
         auto_regime_adjust=auto,
         cash_usage_ratio=ratio,
         enabled=settings.dkstock_regime_enabled,
+        etf_kospi_stage=etf_sig.kospi_stage if etf_sig is not None else None,
+        etf_kosdaq_stage=etf_sig.kosdaq_stage if etf_sig is not None else None,
+        etf_defensive=etf_sig.etf_defensive if etf_sig is not None else None,
+        etf_enabled=bool(etf_enabled),
     )
     return ApiResponse(success=True, data=body.model_dump())
 

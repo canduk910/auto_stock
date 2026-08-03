@@ -1070,14 +1070,11 @@ BLNG 다중 호출로 VB/LTV 각 30종목 → dedup 후 28 breakout 슬롯 점�
 
 **옵션 1b + 2b + 3a + 4a 확정.** 운영 graceful 우선 — `DKSTOCK_REGIME_ENABLED=false` 기본 비활성.
 
+> **⚠️ 사이클 I (2026-08-03) — 레짐 매수 가드 전면 제거.** 아래 규칙 1(매수 가드)은 폐지됐다. 마켓레짐은 더 이상 매수를 차단/축소하지 않으며(관찰 전용 전환), 레짐 대응은 규칙 2(cash_usage_ratio)로만 수행한다. `risk.on_tick`/`_swing_buy_poll_loop` 의 게이트·`_maybe_emit_regime_block`·soft_multiplier 전달이 제거됐다. 점검 배경 = 실매매는 WARN·비차단이었으나 대시보드 `/current` 가 레거시 `regime.buy_blocked`(모드 무시) 노출로 오인 → `buy_blocked=False` 정직화. `buy_block_mode`/`get_buy_block_state` 는 대시보드·자문 표시 전용으로 잔존(매매 미소비, 운영 DB=OFF 권장). ETF 레짐(E-1)·포트폴리오 리스크(사이클 H) 관찰 활성화.
+
 ### 핵심 규칙
 
-1. **매수 가드 (1b — 복합 임계 OR)** — `risk.on_tick()` 매수 신호 평가 *직전*. 다음 중 1개 이상 발동 시 모든 전략 매수 차단:
-   - `regime == "defensive"`
-   - `vix > 25`
-   - `fear_greed_score > 85` (극도 탐욕)
-   - `fear_greed_score < 15` (극도 공포)
-   - **매도/손절 무관** — 보유 종목 청산은 정상 작동 (`check_exit_signal` 분기는 가드 진입 전)
+1. **~~매수 가드 (1b — 복합 임계 OR)~~ — 사이클 I 폐지** — 레짐은 매수를 차단하지 않는다. (구 규칙: defensive/vix>25/fg>85/fg<15 발동 시 매수 차단 → 제거.) **매도/손절은 원래도 무관** — 보유 종목 청산 정상 작동(`check_exit_signal` 분기는 가드보다 앞).
 
 2. **cash_usage_ratio 자동 조정 (2b)** — `_boot()` 가 매크로 fetch 후 결정:
    - `cash_usage_ratio = clamp((100 - regime.params.cash_min) / 100, 0.0, 1.0)`
@@ -1118,8 +1115,8 @@ BLNG 다중 호출로 VB/LTV 각 30종목 → dedup 후 28 breakout 슬롯 점�
 
 ### 안전 불변식
 
-- 매수 가드는 `risk.on_tick` 매수 분기 *전*, 보드 가드 *후* 위치 — 보드 가드 통과 → 매수 가드 → 중복 매수 차단 → calc_buy_quantity 순서
-- `get_current_regime()` 모듈 함수는 `_boot()` 1회 호출 가정 — 동시성 lock 없음 (운영 단일 워커)
+- **~~매수 가드는 risk.on_tick 매수 분기 前~~ — 사이클 I 제거**: 레짐 게이트 폐지. 매수 순서 = 보드 가드 → 중복 매수 차단 → 자금 사전 가드 → calc_buy_quantity (레짐 단계 없음).
+- `get_current_regime()` 모듈 함수는 `_boot()` 1회 호출 가정 — 동시성 lock 없음 (운영 단일 워커). 대시보드 `/current` + AI자문 payload 표시 전용 소비.
 - empty regime (외부 fetch 실패) 는 `regime=None` 이라 `to_dict()` 와 DB `persist_snapshot` 모두 None 키 처리 — UI/DB 안전
 - `auto_regime_adjust=true` 시에도 empty regime 이면 `computed_cash_usage_ratio()=None` → 수동값 폴백 (graceful 분기 보존)
 
@@ -2501,7 +2498,7 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 ### 관찰 지표 정의 (매매 행위 무영향 — 배제 0·차단 0)
 - **포지션 계획 손실(오픈 리스크) 프록시** = `buy_price × quantity × |하드손절%| / 100`
 - **전략별 하드손절%** = 손절 후보 7키(`stop_loss_rate`/`intraday_stop_loss`/`overnight_stop_loss`/`stop_loss_main`/`stop_loss_pre_nxt`/`turtle_backstop_pct`/`hard_stop_pct`) 중 음수만 → `min` (최대 계획 손실, `_normalize_stop_loss_rate` 선례 확장). 결측 시 **−7.0 fail-open** (0.0 금지)
-- **섹터 분류 정본** = `kojiro._kojiro_sector_key(master_raw, ticker)` 단일 진실원 (호출자 재사용, 이식 금지). 미분류 ticker 는 `미분류-{ticker}` 독립 취급
+- **섹터 분류 정본** = `kojiro._kojiro_sector_key(master_raw, ticker)` 단일 진실원 (호출자 재사용, 이식 금지). **섹터 소스 = `stock_master.get_master_raw(ticker)`** (master_raw JSONB = KRX 산업지수 플래그 정본, kojiro `_fetch_sector` 동일 소스, **Phase 2a 승격** — Phase 1 은 `get().raw`=basics raw 로 KRX 플래그 전무→전량 미분류 결함이었음). 미적재/미분류 ticker 는 `미분류-{ticker}` 독립 취급 (fail-open, kojiro 동일)
 - **집계** = 총 명목/총 오픈리스크/순자산 대비%/동시보유 수/전략별·섹터별 분해/top 섹터
 - 노출 경로 = `GET /api/portfolio/risk` (pull) + 20:10 일일 리포트 metrics `portfolio_risk_snapshot` + `[portfolio_risk]` 구조화 로그 1행 (정산 경로 한정)
 
@@ -2510,6 +2507,9 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 - `strategy_registry.py` 포함 매매 안전성 8영역 diff 0 의무
 - 신규 임계 PARAM_RANGES 편입 금지 (정체성 상수)
 
-### Phase 2 인계
+### Phase 2a (2026-08-03) — 섹터 소스 승격 완료 (관찰 전용, 8영역 diff 0)
+EC2 실측 by_sector 전량 미분류 결함(두 seam 이 basics `get().raw` 사용, KRX 플래그 전무) → `stock_master.get_master_raw` 로 교체(kojiro `_fetch_sector` 동일 소스). `_kojiro_sector_key` 호출부 byte-identical. 매수 차단 0 유지.
+
+### Phase 2b 인계
 SOFT 상한(총 오픈리스크% / 섹터 동시보유 캡) 매수 가드 통합 · entry_atr 정밀화 · 프론트 리스크 카드.
 
