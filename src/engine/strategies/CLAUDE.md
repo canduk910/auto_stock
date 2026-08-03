@@ -14,6 +14,31 @@
 | `vcp_breakout` | **미네르비니식 VCP**. 코스피200+코스닥150 → 시총 ≥ 1,000억 → 일봉 100일(prepare cap, `vcp_breakout.py:162` — 원설계 220 미실현 사이클 173, backfill 도 120 사이클 196) → **추세 필터**(50/60/120 EMA 정렬 + 장기 EMA 1개월 우상향, 사이클 48 — KIS 100일 한도 내 effective ema_long ≈75) → **베이스 자동 검출**(25~75영업일, 깊이 ≤ 30%) → **pullback 점진 수축** (사이클 49 ATR threshold ZigZag, `min_swing_atr_mult=0.5` 노이즈 필터 + 마지막 swing 미완성 포함, 2~4회, 직전 대비 폭 감소, 마지막 ≤ 12%) → **거래량 수축**(마지막 5일 평균 < 베이스 직전 20일 평균 × 70%). 09:05~14:30 **`base_high` 돌파 순간** + 당일 거래량 ≥ 20일 평균 × 1.5. `_bought_today` + `_cooldown_until` 7영업일 (**사이클 191 배선** — `on_position_closed` 신설, BFB 동일 2단계 영업일 산정). **`Position._MULTIDAY_STRATEGIES` 멤버** → `is_next_day` 항상 False | -7% 손절 / **`base_low` 이탈 → STOP_LOSS** / `high_since_buy - ATR×2` 트레일링 / **50일 EMA 이탈 → TRAILING_STOP**. **시간·15:20 청산 없음** — donchian 컨벤션, 멀티데이 보유 | MAIN / KRX |
 | `kojiro` | **고지로 대순환 스윙 (2026-07 라이브, `enabled=True`·비중 19%)**. EMA 5/20/40 대순환. 전체 상장(`is_kospi200/is_kosdaq150=None`, `max_scan_stocks≥3577`) → 시총/거래대금 컷 → 일봉 100일(`min_required=80`, EMA40 seed <2%) → **ATR/종가 변동성 밴드 1.0~6.0%(비협상 판별 필터, 2026-07-20 상한 4.5→6.0 백테스트 PF 0.86→1.60)** → 스테이지 판별(EMA 동가 None 제외) → **strict entry: 스테이지1 + 최근 5영업일 6→1 전환 인접(`stage1_freshness=5`, 2026-07-20 백테스트 3→5 PF 1.60→1.75) + EMA 3선 우상향 + 전일종가>EMA5**. **후보 점수 랭킹(2026-07-20, 원설계 §9④)** = `0.4×MACD3기울기 + 0.3×띠폭확장 + 0.3×6→1신선도`(후보풀 min-max 정규화, dormant 였던 enrich macd3/band_width 배선) → `get_scanned_tickers()` score DESC 정렬 → 매수 폴루프가 최적 셋업 먼저 처리(후보>슬롯/섹터캡 경합 시). **매수 후보 정렬만 — 자격/청산 무변경**(rank_w_* PARAM_RANGES 제외, fail-safe). 지표 = 순수모듈 `kojiro_indicators.py`(pandas Wilder ATR ewm(1/20), quant_score 선례). 09:05~09:30 매수(**갭업 ≥5% / 갭다운 ≤-4% / 장중 붕괴(현재가<시가) 스킵**), 1회만. **섹터/테마 동시보유 캡**(`max_positions_per_sector=2`, 매수 게이트 전용·fail-open·청산 미차단) — 동일섹터(`_kojiro_sector_key` KRX basket) 카운트에 **전일 보유 포함**(2026-08-03 사이클 J — `_position_sectors` 영속 맵이 `_candidates` 와이프·ATR 밴드/유니버스 이탈과 무관하게 held 집계, stamp=recompute/BUY 반환 직전/on_position_closed pop). ⚠️ `_reset_daily_state` override 금지(밤샘 보존). **조기진입(스테이지6)·터틀 유닛 sizing·피라미딩 = Phase 2 연기, position_ratio 사용**. `_candidates` = ATR/stage 단일 진실원(당일매수 손절 커버) | **고정% backstop(-8%, ATR독립) → 2ATR 하드손절(tighten-only floor) → 스테이지3 진입 TRAILING_STOP(익일 아침 발화, precompute `_held_stage3`) → 2.5ATR 샹들리에 트레일링**. `recompute_held_atr`(boot/저녁 훅, enrich Wilder ATR, fail-open). **시간·15:20 청산 없음** — donchian 컨벤션, 멀티데이. `_MULTIDAY_STRATEGIES` 멤버 + `check_force_clear()==[]`. 공유 순차 폴루프 `_SWING_POLL_STRATEGIES=("donchian_swing","kojiro")`(double-buy 차단) | MAIN / KRX |
 
+## 자금관리 — 사이징 방식 × 손절 기준 매트릭스 (2026-08-03)
+
+**핵심 명제**: `수량 = 예산 × risk_pct ÷ (진입가 − 손절가)`. 손절이 **고정 %** 면 명목 = `예산 × risk_pct/s` = 종목 무관 상수 = `position_ratio` 와 수학적으로 동일 → **고정% 손절 + 비율 사이징은 이미 리스크 균등**. ATR 유닛 사이징이 리스크를 균등화하는 것은 **손절도 ATR 기반일 때뿐**이고, 사이징만 전환하면 정규화가 오히려 깨진다(**함정 #1**). ⇒ **터틀 전환은 하드손절 ATR화와 반드시 한 커밋에 묶는다.**
+
+| 전략 | sizing_mode 기본 | 하드손절 | 터틀 상태 |
+|---|---|---|---|
+| `momentum` | (키 없음) | 고정 % | **영구 제외** — `prepare` 빈 stub·일봉 0건 → ATR 산출 구조적 불가 |
+| `volatility_breakout` | (키 없음) | 보드별 고정 % | **영구 제외** — 15:20 전량 강제청산, 보유기간 ≤1일이라 유닛 정규화 실익 낮음 |
+| `long_tail_volatility` | (키 없음) | 일중 −3% / 오버나잇 −5% | **조건부 보류** — 상한가 2모드 손절 ATR화 재설계 선행 필요 |
+| `donchian_swing` | `position_ratio` | entry_atr 스탬프 시 `buy − 2.0×entry_atr` + `−9%` backstop / 미스탬프 −7% | **라이브**(운영 DB `turtle`) |
+| `kojiro` | `position_ratio` | `−8%` backstop → `2×ATR` tighten-only floor(`_stop_floor`) | **guarded 전환 완료** — `_entry_atr` 미도입(live ATR + `_stop_floor` 단일 메커니즘 유지) |
+| `vcp_breakout` | `position_ratio` | entry_atr 스탬프 시 3단 밴드 / 미스탬프 −7% | **다크런치** — 활성화는 백테스트 게이트 |
+| `bull_flag_breakout` | `position_ratio` | entry_atr 스탬프 시 3단 밴드 / 미스탬프 −5% | **다크런치** — 활성화는 백테스트 게이트 |
+
+**규약 (신규 전략 추가 시에도 적용)**
+
+- **매수 수량은 `StrategyBase._apply_budget_limit()` 관문을 반드시 경유**한다 (AST 가드 A-GATE 가 7전략 모든 `return` 을 검사). 이중제한 = ① 개수 `max_positions` + ② 명목 `Σ매수금액 ≤ total_investment`. 잔여 부족 시 **부분 매수**(잔여 < 1주 → 0). 비중 기준 0주면 관문이 `_fallback_one_share` 로 위임 — **분기 순서가 계약**.
+- **불변식 `position_ratio × max_positions ≤ 1.0`** — DEFAULT_PARAMS 는 AST 가드(C-DEFAULT), AI 추천은 `_validate_recommendations` 교차검증이 강제. `max_positions` 는 `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(리스크 정체성 상수).
+- **ATR 손절 게이트는 `_entry_atr` 스탬프 존재** — `sizing_mode` 게이팅 **금지**. DB 토글 하나로 기보유 포지션의 손절 규약이 바뀌면 안 된다. 스탬프 값은 sizing 에 쓴 ATR 과 **반드시 동일**(커플링 불변식). 터틀이 0 을 반환하는 모든 경로(변동성 floor / 잔여 부족 / `ticker=None` / 예외)는 **미스탬프** → 기존 % 손절 byte 동일.
+- **터틀 수량 ≤ 비중 수량**이 항상 성립 — `compute_unit_qty_guarded` 의 notional 상한이 `position_ratio × 예산` 이기 때문. 즉 전환은 **순수 축소 방향**이고 저ATR 수량 폭증은 구조적으로 불가능. 임계 = `atr_ratio = risk_pct ÷ position_ratio`(기본 2.5%).
+- **3단 밴드 손절**(VCP/BFB) — `base_stop = min(buy − stop_atr×entry_atr, buy×(1+turtle_min_stop_pct/100))` 로 **과도한 타이트화 차단**, 상단은 `turtle_backstop_pct` 캡. ⚠️ VCP 는 정의상 변동성 수축 시점 진입이라 진입 ATR 이 국소 최소 → `atr_ratio 1.5%` 면 `2ATR = −3%` 로 현행 −7% 대비 절반 이하가 된다. `turtle_min_stop_pct`(VCP −5.0 / BFB −4.0)가 유일한 방어선이며 **실제 활성화 전 백테스트 스윕 필수**.
+- 기존 live-ATR breakeven 래치(사이클 C)는 `entry_atr <= 0` 로 게이팅 — 두 tighten 메커니즘 공존 차단. 승격은 `max()` 로만 이동(tighten-only).
+- 터틀 키 6종(`sizing_mode`/`risk_pct`/`stop_atr`/`turtle_backstop_pct`/`min_vol_floor_pct`/`turtle_min_stop_pct`)은 전부 `PARAM_RANGES`/`INT_PARAMS` 미편입.
+- BFB 는 `_MULTIDAY_STRATEGIES` 미포함(익일 청산)이라 재시작 `_entry_atr` 재도출 불필요 — 소실 시 `turtle_backstop_pct` 가 방어. VCP 는 `recompute_high_since_buy` 의 **기존 일봉 fetch 응답을 재사용**해 `_rederive_entry_atr` 호출(추가 KIS 호출 0 + scheduler diff 0).
+
 ## 공통 패턴
 
 - `prepare()` 단계별 통과 카운트는 `_scan_stats` 누적 → `get_scan_stats()` → `strategies.<id>.scan_stats` 로 프론트 ScanMonitor 깔때기

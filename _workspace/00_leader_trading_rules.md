@@ -44,6 +44,15 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - 보유/주문중은 `strategy_id`로 격리 — 다른 전략 포지션은 자기 전략 사용액에 포함하지 않음
   - 결함 차단: 기존 로직은 `state.total_investment >= current_price`(고정 총액)와 비교 → 동일 전략이 이미 다른 종목에 자금 90% 점유해도 1주 추가 매수 → **전략 한도 초과**. 2026-05-11 운영 사고로 노출
   - 구현: `StrategyBase._fallback_one_share(current_price)` 공통 헬퍼로 통합 — 6개 전략(`momentum`/`volatility_breakout`/`long_tail_volatility`/`donchian_swing`/`bull_flag_breakout`/`vcp_breakout`) 모두 동일 메서드 호출
+- **전략별 투자한도 이중제한 (2026-08-03 격상)**: 위 잔여 자금 규약이 **1주 폴백에만** 걸려 있어 주 경로(`int(예산×ratio)//price`)는 잔여를 보지 않았다. 라이브에서 `position_ratio × max_positions` 가 kojiro 0.20×10 / LTV 0.50×4 = 각 **2.00** → 계좌 전체 **122.5% 초과 청약**(실제 배분은 계좌 현금 클램프 선착순 = 한 전략이 타 전략 예산 잠식)으로 노출.
+  - **이중제한 = ① 개수 `max_positions` + ② 명목 `Σ매수금액 ≤ total_investment`.** ②는 신규 `StrategyBase._apply_budget_limit(qty, price, ticker)` 공통 관문이 **7 전략 `calc_buy_quantity` 의 모든 return** 을 통과시켜 강제 (AST 가드 A-GATE).
+  - `qty <= 0` → `_fallback_one_share` 위임 (**분기 순서가 계약**) / `qty > 0` → `min(qty, 잔여//price)`. **부분 매수 허용** — 부분 유닛의 리스크는 1유닛 *미만*(under-risk)이라 안전 방향이고, 소액 계좌에서 "유닛 미만 스킵"은 사실상 무매매를 만든다.
+  - **불변식 `position_ratio × max_positions ≤ 1.0`** — 코드 기본값은 AST 가드(C-DEFAULT), AI 추천은 `_validate_recommendations` 교차검증. `max_positions` 는 리스크 정체성 상수라 `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(사이클 208/209/212 선례).
+  - **원자성**: `order_engine.execute_buy` 의 `calc_buy_quantity` ~ `pending_buys.add` 사이 `await` **0건**이라 관문 read 가 pending 등록까지 원자적 → order_engine 미접촉으로 완결. 관문 안에서 `await`/DB/HTTP **절대 금지** (AST 가드 A-ATOMIC/A-PURE).
+  - 관측: `[budget_clamp] ticker=… strategy=… requested=… clamped=… remaining=…` DailyEmitCap 1회/(ticker,전략)/일 — 부분 매수 정책 재평가 근거.
+- **1회 투자금액 ATR 유닛화 (`sizing_mode="turtle"`)**: `unit = floor(전략예산 × risk_pct ÷ ATR)`. **손절이 ATR 기반인 전략에만 적용**한다 — `수량 = 예산 × risk_pct ÷ (진입가 − 손절가)` 에서 손절이 고정%면 명목이 종목 무관 상수라 `position_ratio` 가 이미 리스크 균등이고, 사이징만 바꾸면 정규화가 깨진다(함정 #1). 상세 매트릭스는 `src/engine/strategies/CLAUDE.md` 「자금관리 — 사이징 방식 × 손절 기준」 절.
+  - **ATR 손절 게이트는 `_entry_atr` 스탬프 존재** — `sizing_mode` 게이팅 금지 (DB 토글이 기보유 포지션의 손절 규약을 바꾸면 안 됨). 스탬프 값 = sizing 에 쓴 ATR 과 동일(커플링 불변식).
+  - `compute_unit_qty_guarded` 의 notional 상한이 `position_ratio × 예산` 이라 **터틀 수량 ≤ 비중 수량** 항상 성립 = 전환은 **순수 축소 방향**.
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
 
 ### WebSocket 구독 가시성 (2026-05-12 G, 운영자 슬롯 추적)
