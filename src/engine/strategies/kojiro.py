@@ -27,6 +27,7 @@ from datetime import datetime, time, timezone, timedelta
 
 import pandas as pd
 
+from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.kojiro_indicators import KojiroIndicatorConfig, enrich
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
@@ -171,6 +172,17 @@ class KojiroStrategy(StrategyBase):
         # 대순환은 섹터 단위 정렬 → 5종목 한 섹터 집중 → 테마 붕괴 시 동시 청산불가(±30% 하한가 락).
         # 0=off. PARAM_RANGES 제외(리스크 정체성 상수, AI 튜닝 금지). Phase 1 측정 = 활성일 ~17% 바인딩.
         "max_positions_per_sector": 2,
+        # Σ 오픈리스크 캡 (매수 게이트 전용, 예산 대비 %). 0 = 비활성.
+        # 개수 캡(max_positions)은 **유지하고 추가**한다 — 터틀의 유닛 캡이 통제하려던
+        # 대상은 Σ 리스크이고 유닛 개수는 프록시일 뿐이다. 프록시는 "1유닛 = 상수
+        # 리스크" 일 때만 정확한데, (1)소액 계좌 수량 절삭 (2)atr_ratio>4% 에서
+        # hard_stop_pct −8% 가 2ATR 을 자름 (3)flip 이전 position_ratio 포지션 혼재
+        # 때문에 헐거워진다. 08-04 실측 = "6포지션(=6유닛)" 이 실제로는 3.2유닛
+        # (총리스크 22,390원 = 예산 3.2%), 포지션별 편차 8.3배.
+        # 4.5% = 4.5유닛 상당. max_positions 6 × 유닛 1.0% = 6.0% 보다 낮게 잡아,
+        # 리스크가 작은 포지션은 6개까지 허용하되 full-size 유닛은 4~5개에서 멈춘다
+        # (터틀 유닛 캡의 본래 의미). PARAM_RANGES 제외 = 리스크 정체성 상수.
+        "max_open_risk_pct": 4.5,
         # ── 후보 점수 랭킹 (원설계 §9④, PARAM_RANGES 제외 = 정체성 상수) ──
         # 후보 > 슬롯/섹터캡 경합 시 최적 셋업 우선. 이미 계산되나 dormant 였던 enrich
         # 지표(macd3 기울기·band_width 확장) + 6→1 신선도를 후보풀 min-max 정규화 가중합.
@@ -180,7 +192,13 @@ class KojiroStrategy(StrategyBase):
         "rank_w_fresh": 0.3,
         # ── 터틀 유닛 sizing (Phase 2A-1, PARAM_RANGES 제외 = AI 자동튜닝 금지) ──
         # sizing_mode='turtle' opt-in 시 unit=floor(전략예산×risk_pct/ATR). 기본 position_ratio.
-        # risk_pct 0.5% = 도메인 권장(KR 갭리스크). max_units 2/10 은 2B/2C 선등록(2A-1 미사용).
+        # risk_pct 0.5% = 도메인 권장(KR 갭리스크).
+        # ⚠️ max_units_per_stock / max_units_total 은 **소비처 0건 = 미사용 상태**이며
+        #    현재 어떤 것도 강제하지 않는다(안전장치 아님). 피라미딩(2C) 도입 전까지는
+        #    1포지션 = 1유닛이 항등이라 max_units_total 은 max_positions 와 동치이고,
+        #    max_units_per_stock=2 는 도달 자체가 불가능한 상한이다. 피라미딩 검토 시
+        #    배선할 예정 — 그 전까지 이 키를 리스크 한도로 오인하지 말 것
+        #    (실효 한도는 max_positions + max_open_risk_pct + 예산 클램프 삼중).
         # min_vol_floor_pct — `compute_unit_qty_guarded` 변동성 floor (donchian 동일 규약).
         # 유닛 명목 비중 = risk_pct ÷ (ATR/price) 라 저변동 종목일수록 폭증한다
         # (atr_ratio 1% → 예산의 50% 단일종목 집중). floor + notional 상한이 이를 차단.
@@ -204,6 +222,9 @@ class KojiroStrategy(StrategyBase):
         self._stop_floor: dict[str, int] = {}
         # 섹터 캡 held 집계 영속 맵(_candidates 와이프 독립, 포지션 수명 동안 생존) — 안 A.
         self._position_sectors: dict[str, str] = {}
+        # Σ 오픈리스크 캡 로그 폭주 차단 — 보유 종목수 단위 1회 (매 틱 emit 방지).
+        # 포지션이 늘거나 줄면 다시 1회 emit 되어 상태 변화는 추적된다.
+        self._open_risk_cap_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._scanned_tickers: list[str] = []
         self._bought_today: set[str] = set()
         self._scan_stats: dict = _empty_scan_stats()
@@ -700,6 +721,10 @@ class KojiroStrategy(StrategyBase):
             return Signal.NONE
         if self.is_daily_loss_exceeded():
             return Signal.NONE
+        # Σ 오픈리스크 캡 — 개수 캡과 **병존**(대체 아님). 매수 게이트 전용이며
+        # 청산/손절/트레일링은 절대 차단하지 않는다. 계산 실패는 fail-open.
+        if self._is_open_risk_capped():
+            return Signal.NONE
 
         info = self._candidates.get(ticker)
         # 보유 재채움 stage 데이터(stage != 1)는 매수 후보 아님 — strict entry 통과분만 매수.
@@ -815,6 +840,69 @@ class KojiroStrategy(StrategyBase):
                 return Signal.TRAILING_STOP
 
         return Signal.NONE
+
+    def _is_open_risk_capped(self) -> bool:
+        """Σ 오픈리스크가 `max_open_risk_pct × 예산` 이상이면 True (매수 차단).
+
+        `0` 또는 예산 미배분(0) 이면 비활성. 어떤 예외도 흡수해 **통과**시킨다 —
+        리스크 계산 실패로 전략이 통째로 마비되는 것이 더 나쁘다(사이클 88 G-REJECT).
+        """
+        try:
+            cap_pct = float(self.config.params.get("max_open_risk_pct", 0) or 0)
+            budget = int(self.state.total_investment)
+            if cap_pct <= 0 or budget <= 0:
+                return False
+            limit = budget * cap_pct / 100.0
+            risk = self._open_risk_won()
+            if risk < limit:
+                return False
+            if self._open_risk_cap_logged.should_emit(str(len(self.state.positions))):
+                self._open_risk_cap_logged.mark_emitted(str(len(self.state.positions)))
+                logger.info(
+                    "[kojiro_open_risk_cap] Σ오픈리스크 %d원 ≥ 상한 %d원 "
+                    "(예산 %d × %.1f%%) — 보유 %d종목, 매수 스킵",
+                    risk, int(limit), budget, cap_pct, len(self.state.positions),
+                )
+            return True
+        except Exception:
+            logger.debug("[kojiro_open_risk_cap] 계산 실패 — fail-open", exc_info=True)
+            return False
+
+    def _position_stop_price(self, ticker: str, pos) -> int:
+        """포지션의 **현재 실효 손절선** (청산 우선순위와 동일 산식).
+
+        `check_exit_signal` 은 고정%(`hard_stop_pct`) → 2ATR(tighten-only `_stop_floor`)
+        순으로 검사하므로, 실제로 먼저 발화하는 선 = 둘 중 **더 높은** 가격이다.
+        `_stop_floor` 가 트레일링으로 상향돼 있으면 그 값을 쓴다(실제 노출 반영).
+        ATR 결측(재시작 직후 등) 이면 고정% 선만으로 추정 — fail-open.
+        """
+        params = self.config.params
+        pct_line = int(pos.buy_price * (1 + float(params["hard_stop_pct"]) / 100.0))
+        info = self._candidates.get(ticker)
+        atr = float(info["atr"]) if info and info.get("atr") else 0.0
+        atr_line = 0
+        if atr > 0:
+            atr_line = int(pos.buy_price - float(params["stop_atr"]) * atr)
+            floor = self._stop_floor.get(ticker)
+            if floor is not None:
+                atr_line = max(atr_line, floor)
+        return max(pct_line, atr_line)
+
+    def _open_risk_won(self) -> int:
+        """보유 포지션의 Σ 오픈리스크(원) = Σ qty × (매수가 − 실효 손절선).
+
+        터틀의 유닛 캡이 실제로 통제하려던 값. 개수(`max_positions`)는 "1유닛 =
+        상수 리스크" 가 성립할 때만 이것의 프록시인데, 수량 절삭·`hard_stop_pct` 캡·
+        사이징 혼재 때문에 우리 구현에선 프록시가 헐거워 직접 잰다.
+        """
+        total = 0
+        for ticker, pos in self.state.positions.items():
+            if pos.buy_price <= 0 or pos.quantity <= 0:
+                continue
+            stop = self._position_stop_price(ticker, pos)
+            if stop > 0 and stop < pos.buy_price:
+                total += pos.quantity * (pos.buy_price - stop)
+        return total
 
     def check_force_clear(self) -> list[str]:
         """15:20 강제 청산 대상 — 멀티데이 스윙은 강제 청산 없음."""
