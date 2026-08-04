@@ -92,6 +92,12 @@ SYSTEM_PROMPT = (
     "- 같은 패턴 반복은 묶어 한 finding으로 작성. 핵심 3~7개로 압축.\n"
     "- WARNING/ERROR가 없으면 findings는 빈 배열, summary는 '특이사항 없음' 류로.\n"
     "- 숫자/시각/종목코드 등 사실은 입력 데이터를 인용하고 추측 금지.\n"
+    "- **표본 절단 주의**: `logs.truncated` 가 true 면 원문 로그는 "
+    "`logs.covered_from`~`logs.covered_to` 구간만 수집된 것이다(상한 초과). "
+    "이때 `logs.level_counts` 는 표본 건수일 뿐이므로 **총계는 반드시 "
+    "`logs.level_counts_actual`(DB 전수 집계)을 인용**하고, 하루 전체를 본 것처럼 "
+    "서술하지 말고 summary 에 분석 구간을 명시하라. "
+    "ERROR/CRITICAL 은 절단과 무관하게 전량 포함돼 있다.\n"
     "- 한국어로 출력."
 )
 
@@ -110,6 +116,12 @@ def _normalize_message(msg: str) -> str:
 _LOGS_TS_SELECT = (
     "to_char(timestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS.US+09:00') AS timestamp"
 )
+
+# 원문 로그 fetch 총 상한 (사이클 53.1 = 30,000). 08-03 실측 97,353건이 이를 3.2배
+# 초과해 리포트가 07:45~09:47 두 시간만 보고 하루를 판정했다 → 절단 감지 의무.
+DAILY_LOG_FETCH_LIMIT = 30_000
+# ERROR/CRITICAL 전량 확보 상한 (평시 수십 건 — 사실상 무제한 역할).
+HIGH_SEVERITY_FETCH_CAP = 5_000
 
 
 async def _fetch_logs_in_range(start: datetime, end: datetime, limit: int = 5000) -> list[dict]:
@@ -145,8 +157,89 @@ async def _fetch_logs_in_range(start: datetime, end: datetime, limit: int = 5000
     return all_rows
 
 
-def _aggregate_logs(logs: list[dict]) -> dict[str, Any]:
-    """로그를 레벨별/패턴별로 집계한다."""
+async def _count_logs_by_level(start: datetime, end: datetime) -> dict[str, int]:
+    """기간 내 **진짜** 레벨별 총계 (원문 fetch 절단과 무관).
+
+    `_fetch_logs_in_range` 는 상한이 걸리면 조용히 끊기므로, 건수만큼은 DB 집계로
+    따로 구한다. 실패는 graceful — 총계 없이도 리포트는 나가야 한다 (사이클 88).
+    """
+    try:
+        rows = await pg.fetch(
+            """
+            SELECT log_level, count(*) AS cnt FROM system_logs
+            WHERE timestamp >= $1 AND timestamp <= $2
+            GROUP BY log_level
+            """,
+            start,
+            end,
+        )
+    except Exception:
+        logger.debug("[log_report] 레벨별 총계 집계 실패 graceful", exc_info=True)
+        return {}
+    return {
+        str(r["log_level"]).upper(): int(r["cnt"])
+        for r in (rows or [])
+        if r.get("log_level")
+    }
+
+
+async def _fetch_high_severity_logs(
+    start: datetime, end: datetime, limit: int = HIGH_SEVERITY_FETCH_CAP,
+) -> list[dict]:
+    """ERROR/CRITICAL 만 별도 전량 확보 (원문 cap 과 무관).
+
+    일반 fetch 가 ASC 로 잘리면 오후 ERROR 가 통째로 사라진다. 가장 중요한 신호는
+    절대 잘리지 않도록 레벨 필터를 건 별도 쿼리로 가져온다. ERROR/CRITICAL 은
+    평시 수십 건 수준이라 상한(기본 5,000)에 닿지 않는다. 실패는 graceful.
+    """
+    try:
+        rows = await pg.fetch(
+            f"""
+            SELECT {_LOGS_TS_SELECT}, log_level, message FROM system_logs
+            WHERE timestamp >= $1 AND timestamp <= $2
+              AND log_level IN ('ERROR', 'CRITICAL')
+            ORDER BY timestamp ASC
+            LIMIT $3
+            """,
+            start,
+            end,
+            limit,
+        )
+    except Exception:
+        logger.debug("[log_report] ERROR/CRITICAL 전량 fetch 실패 graceful", exc_info=True)
+        return []
+    return list(rows or [])
+
+
+def _merge_high_severity(logs: list[dict], high: list[dict]) -> list[dict]:
+    """절단된 원문에 cap 밖 ERROR/CRITICAL 을 합친다 (중복 제거 + 시간 오름차순).
+
+    동일 `(timestamp, log_level, message)` 는 1건으로 — 두 쿼리의 겹치는 구간이
+    이중 집계되면 패턴 카운트가 부풀려진다.
+    """
+    if not high:
+        return logs
+    seen = {
+        (r.get("timestamp"), r.get("log_level"), r.get("message"))
+        for r in logs
+    }
+    merged = list(logs)
+    for r in high:
+        key = (r.get("timestamp"), r.get("log_level"), r.get("message"))
+        if key not in seen:
+            seen.add(key)
+            merged.append(r)
+    merged.sort(key=lambda r: str(r.get("timestamp") or ""))
+    return merged
+
+
+def _aggregate_logs(logs: list[dict], fetch_limit: int | None = None) -> dict[str, Any]:
+    """로그를 레벨별/패턴별로 집계한다.
+
+    `fetch_limit` 전달 시 표본 절단 여부(`truncated`)와 실제로 본 시간 구간
+    (`covered_from`/`covered_to`)을 함께 싣는다. 리포트가 하루 전체를 본 것처럼
+    보이지 않게 하기 위한 것 — 미전달 시 기존 계약 그대로(`truncated=False`).
+    """
     by_level: Counter[str] = Counter()
     pattern_by_level: dict[str, Counter[str]] = {
         "WARNING": Counter(), "ERROR": Counter(), "CRITICAL": Counter(),
@@ -177,11 +270,33 @@ def _aggregate_logs(logs: list[dict]) -> dict[str, Any]:
             for pat, cnt in counter.most_common(10)
         ]
 
+    # 커버 구간은 **상한이 걸리는 레벨**(ERROR/CRITICAL 제외) 기준으로 잡는다.
+    # ERROR/CRITICAL 은 별도 쿼리로 전량 병합되므로, 그 시각까지 포함하면 다른
+    # 레벨도 거기까지 수집된 것처럼 보이는 역-오인이 생긴다.
+    capped = [
+        str(r.get("timestamp")) for r in logs
+        if r.get("timestamp") and (r.get("log_level") or "").upper() not in ("ERROR", "CRITICAL")
+    ]
+    if not capped:  # 전량이 ERROR/CRITICAL 인 희소한 날 — 전체 기준으로 폴백
+        capped = [str(r.get("timestamp")) for r in logs if r.get("timestamp")]
+    # 절단 판정도 capped 레벨 건수 기준 (병합분이 상한을 넘겨 오판정하지 않게).
+    capped_count = sum(
+        1 for r in logs if (r.get("log_level") or "").upper() not in ("ERROR", "CRITICAL")
+    )
     return {
         "level_counts": dict(by_level),
         "top_patterns": top_patterns,
         "samples": samples_by_level,
         "total_logs": len(logs),
+        # 표본 절단 관측 — 리포트가 하루 전체를 본 것처럼 오인되지 않게 한다.
+        "fetched_logs": len(logs),
+        "truncated": bool(fetch_limit) and capped_count >= int(fetch_limit),
+        "covered_from": min(capped) if capped else None,
+        "covered_to": max(capped) if capped else None,
+        "coverage_note": (
+            "covered_from~covered_to 는 ERROR/CRITICAL 을 제외한 레벨의 수집 구간이다. "
+            "ERROR/CRITICAL 은 상한과 무관하게 전량 포함."
+        ),
     }
 
 
@@ -490,10 +605,24 @@ async def generate_daily_log_report(
     # 1. 데이터 수집
     # 사이클 53.1 — 운영 부피 18,000건/일 대비 30,000 (1.6배 마진).
     # 디폴트 5000 은 부족하여 drained(ASC 7,000+번) 누락 결함.
-    logs = await _fetch_logs_in_range(start_kst, now_kst, limit=30000)
+    logs = await _fetch_logs_in_range(start_kst, now_kst, limit=DAILY_LOG_FETCH_LIMIT)
+    # ERROR/CRITICAL 은 상한과 무관하게 전량 — 원문이 ASC 로 잘리면 오후 ERROR 가
+    # 통째로 사라진다(08-03 실측: cap 경계 09:47, 이후 ERROR 5건 전부 시야 밖).
+    high_severity = await _fetch_high_severity_logs(start_kst, now_kst)
+    logs = _merge_high_severity(logs, high_severity)
     trades = await get_trades_in_range(target_date, target_date)
 
-    log_metrics = _aggregate_logs(logs)
+    log_metrics = _aggregate_logs(logs, fetch_limit=DAILY_LOG_FETCH_LIMIT)
+    # 진짜 총계는 원문 절단과 무관하게 DB 집계로 (표본 건수와 구분해 병기).
+    log_metrics["level_counts_actual"] = await _count_logs_by_level(start_kst, now_kst)
+    if log_metrics["truncated"]:
+        logger.warning(
+            "[log_report_truncated] 표본이 상한(%d)에 걸려 %s~%s 구간만 분석됨 "
+            "— 실제 총계 %s. 리포트의 시간 범위 해석에 주의",
+            DAILY_LOG_FETCH_LIMIT,
+            log_metrics.get("covered_from"), log_metrics.get("covered_to"),
+            log_metrics.get("level_counts_actual"),
+        )
     trade_metrics = _aggregate_trades(trades)
     api_metrics = get_request_metrics()
     strategy_funnel = await _collect_strategy_funnel()

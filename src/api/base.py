@@ -100,6 +100,13 @@ _QUOTE_ALLOWED_PATHS: frozenset[str] = frozenset({
     "/uapi/domestic-stock/v1/finance/profit-ratio",
     "/uapi/domestic-stock/v1/finance/stability-ratio",
     "/uapi/domestic-stock/v1/finance/other-major-ratios",
+    # 2026-08-04 — VI(변동성완화장치) 현황 (FHPST01390000). 사이클 149 도입 시점부터
+    # 누락돼 있어 `inquire_vi_status_today` 가 매 부팅/재시작마다 QuotePoolPathError →
+    # ERROR + traceback + VI 시드 100% 실패(08-03 ERROR 15건 중 8건). 사이클 109
+    # market-cap / C1 finance 와 동일 클래스의 세 번째 누락.
+    # KIS 정본 = "변동성완화장치(VI) 현황" subcategory 업종/기타 = 시세성 조회,
+    # 요청 파라미터 `FID_*` 전용(계좌·주문 식별자 없음) → 자금 안전 정책 부합.
+    "/uapi/domestic-stock/v1/quotations/inquire-vi-status",
 })
 
 # 보조 매니저별 격리된 Rate Limit 세마포어 (메인 20, 보조 18 보수적)

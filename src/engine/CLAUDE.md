@@ -740,6 +740,11 @@ EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 �
 - **`_fetch_logs_in_range(start, end, limit=5000)`**: Supabase PostgREST default 1000 페이지 한도 회피를 위해 `.range(offset, offset+999)` 루프. `limit` 은 *총* 한도 (limit=5000 → 최대 5페이지). 빈 페이지 또는 <1000건 페이지 도달 시 종료. `.limit(N)` 단독은 서버가 1000으로 강제 cap 함 — 반드시 `.range()` 루프 사용.
 - **사이클 53.1 — 호출 측 limit=30000 명시**: `generate_daily_log_report` 의 `_fetch_logs_in_range` 호출에 `limit=30000` 명시. 운영 부피 18,000건/일 대비 1.6배 마진 확보. 디폴트 5000 으로는 drained(ASC 7,000+번) 누락 결함 차단.
 - **`get_trades_in_range`**: start/end ISO 에 `+09:00` KST timezone 명시 (`src/db/trade_history.py`). TZ 없는 문자열은 PostgREST 가 UTC 해석 → KST 00:00~09:00 거래 누락 결함.
+- **표본 절단 감지 (2026-08-04)** — `_fetch_logs_in_range` 는 `ORDER BY timestamp ASC` 라 상한 초과 시 **이른 시각부터 채우고 조용히 끊는다**. 08-03 실측 총 97,353건(상한 30,000 의 3.2배) → 리포트가 **07:45~09:47 두 시간**만 보고 "일일 분석"을 산출했고, 그 뒤(11:20 사이클 I 배포 / 20:10 정산 / 21:03 까지)는 전부 시야 밖이었다. **조용함 + 이른 시각 편향** 두 결함이 겹친 것이며, 평시(~18,000건)엔 안 걸리고 **폭주한 날 = 리포트가 가장 필요한 날**에만 발동한다. 시정 3종:
+  - **`_count_logs_by_level(start, end)`** — `GROUP BY log_level` 로 **진짜 총계**를 원문 fetch 와 무관하게 산출 → `logs.level_counts_actual`. 실패 graceful(`{}`).
+  - **`_fetch_high_severity_logs(start, end, limit=HIGH_SEVERITY_FETCH_CAP)`** — ERROR/CRITICAL 만 별도 쿼리로 **전량 확보**(상한 무관). `_merge_high_severity(logs, high)` 가 `(timestamp, log_level, message)` 중복 제거 + 시간 오름차순 유지로 병합 — 가장 중요한 신호는 절대 잘리지 않는다.
+  - **`_aggregate_logs(logs, fetch_limit=...)`** — `truncated` / `covered_from` / `covered_to` / `fetched_logs` / `coverage_note` 추가. ⚠️ 커버 구간과 절단 판정은 **ERROR/CRITICAL 을 제외한 레벨 기준**으로 계산한다 — 전량 병합된 ERROR 시각이 섞이면 "오후까지 다 봤다"는 **역-오인**이 생긴다. 전량이 ERROR 인 날은 전체 기준 폴백. `fetch_limit` 미전달 시 기존 계약 보존(`truncated=False`).
+  - 절단 시 `[log_report_truncated]` WARNING 1행 + `SYSTEM_PROMPT` 가 AI 에게 "총계는 `level_counts_actual` 인용, 분석 구간을 summary 에 명시" 를 지시. 상수 `DAILY_LOG_FETCH_LIMIT=30_000` / `HIGH_SEVERITY_FETCH_CAP=5_000`. 회귀 가드 `tests/unit/engine/test_log_report_truncation.py`(13).
 
 확장 메트릭:
 - `api_metrics`: `api/base.py::get_request_metrics()` (5xx/4xx/network/retries + path별 5xx top 5). INSERT 후 `reset_request_metrics()`

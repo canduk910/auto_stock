@@ -149,9 +149,11 @@ async def inquire_vi_status_today() -> set[str]:
         "FID_TRGT_EXLS_CLS_CODE": "",
     }
     try:
-        # 사이클 109 영역 영속 = `inquire-vi-status` 는 시세성 풀 라우팅 허용 path 아님
-        # → 사이클 109+ 화이트리스트 추가 의무 (현재는 graceful 단순 폴백).
-        # 임시: kis_get_quote 가 path 가드 raise 시 except → 빈 set graceful.
+        # 2026-08-04 — `_QUOTE_ALLOWED_PATHS` 등재 완료 (사이클 109 market-cap /
+        # C1 finance 선례). 등재 전에는 매 호출 QuotePoolPathError 로 시드가 100%
+        # 실패하면서 부팅마다 ERROR + traceback 만 남겼다. 화이트리스트에서 이 path 를
+        # 빼면 그 silent 결함이 즉시 재발한다 (회귀 가드:
+        # tests/unit/api/test_vi_status_quote_allowlist.py).
         response = await kis_get_quote(VI_STATUS_URL, VI_STATUS_TR_ID, params)
         if not response or response.get("rt_cd") != "0":
             return set()
