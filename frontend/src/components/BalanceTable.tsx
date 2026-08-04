@@ -183,6 +183,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="px-4 py-3 text-left font-medium text-gray-600">종목명</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600">섹터</th>
               <th className="px-4 py-3 text-left font-medium text-gray-600">거래시장</th>
               {isAll && (
                 <th className="px-4 py-3 text-left font-medium text-gray-600">전략</th>
@@ -199,7 +200,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
           <tbody>
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={isAll ? 10 : 9} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={isAll ? 11 : 10} className="px-4 py-8 text-center text-gray-400">
                   보유 종목이 없습니다.
                 </td>
               </tr>
@@ -211,6 +212,12 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                 return (
                   <tr key={h.ticker} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-700">{h.name}</td>
+                    <td
+                      data-testid={`sector-${h.ticker}`}
+                      className="px-4 py-3 text-gray-500"
+                    >
+                      {h.sector?.trim() || '-'}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         data-testid={`market-badge-${h.ticker}`}

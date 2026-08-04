@@ -14,6 +14,9 @@ export interface Holding {
   nxt_tradable?: boolean | null
   krx_halted?: boolean | null
   excg_dvsn_cd?: string | null
+  // 2026-08-04 — 업종 한글명(bstp_kor_isnm) 우선 → KRX 산업지수 플래그/업종코드
+  // 폴백 → `미분류-{ticker}`. 백엔드 `sector_naming` 단일 진실원.
+  sector?: string | null
 }
 
 export interface BalanceSummary {

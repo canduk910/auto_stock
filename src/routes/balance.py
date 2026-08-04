@@ -8,6 +8,7 @@ from fastapi import APIRouter
 
 from src.api.balance import get_balance, get_buyable
 from src.db.stock_master import get as stock_master_get
+from src.engine.sector_naming import resolve_sector_name
 from src.models.response import ApiResponse
 
 logger = logging.getLogger(__name__)
@@ -41,6 +42,12 @@ async def balance():
             payload["krx_halted"] = bool(basics.krx_halted)
             payload["excg_dvsn_cd"] = basics.excg_dvsn_cd or None
         # basics is None: payload 의 nxt_tradable/krx_halted/excg_dvsn_cd 기본 None 유지
+        # 섹터명 — 위에서 이미 조회한 basics.raw 를 주입해 재조회를 막는다
+        # (`sector_naming` 단일 진실원: bstp_kor_isnm → master_raw → 미분류).
+        payload["sector"] = await resolve_sector_name(
+            h.ticker,
+            basics_raw=(getattr(basics, "raw", None) if basics is not None else None),
+        )
         enriched_holdings.append(payload)
 
     return ApiResponse(

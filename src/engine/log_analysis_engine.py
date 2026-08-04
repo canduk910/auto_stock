@@ -517,7 +517,7 @@ async def _build_portfolio_risk_snapshot(_now_kst: datetime | None = None) -> di
         extract_hard_stop_pct,
     )
     from src.engine.scheduler import trading_scheduler
-    from src.engine.strategies.kojiro import _kojiro_sector_key
+    from src.engine.sector_naming import resolve_sector_names
 
     strategies = list(trading_scheduler.registry.all())
 
@@ -546,25 +546,8 @@ async def _build_portfolio_risk_snapshot(_now_kst: datetime | None = None) -> di
         if isinstance(positions, dict):
             held_tickers.update(positions.keys())
 
-    sector_of: dict[str, str] = {}
-    for ticker in held_tickers:
-        try:
-            # 사이클 I 후속 — 섹터명 = basics raw bstp_kor_isnm(KIS 업종 한글명) 우선 →
-            # 부재 시 _kojiro_sector_key(master_raw KRX 플래그 → 업종코드 → 미분류) 폴백.
-            basics = await stock_master.get(ticker)
-            raw = getattr(basics, "raw", None) if basics is not None else None
-            name = ""
-            if isinstance(raw, dict):
-                name = str(raw.get("bstp_kor_isnm", "") or "").strip()
-            if name:
-                sector_of[ticker] = name
-                continue
-            master_raw = await stock_master.get_master_raw(ticker)
-            sector_of[ticker] = _kojiro_sector_key(
-                master_raw if isinstance(master_raw, dict) else None, ticker
-            )
-        except Exception:
-            sector_of[ticker] = f"미분류-{ticker}"
+    # 섹터명 해석은 `sector_naming` 단일 진실원에 위임 (portfolio 라우트와 동일 계약).
+    sector_of = await resolve_sector_names(held_tickers)
 
     return compute_portfolio_risk_snapshot(
         strategies,

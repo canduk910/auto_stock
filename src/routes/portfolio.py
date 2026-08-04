@@ -23,7 +23,7 @@ from src.engine.portfolio_risk import (
     extract_hard_stop_pct,
 )
 from src.engine.scheduler import trading_scheduler
-from src.engine.strategies.kojiro import _kojiro_sector_key
+from src.engine.sector_naming import resolve_sector_names
 from src.models.response import ApiResponse
 
 logger = logging.getLogger(__name__)
@@ -50,28 +50,7 @@ async def _sector_of_graceful(tickers) -> dict:
       2. 부재 시 `_kojiro_sector_key(master_raw)` — KRX 산업지수 플래그(반도체/바이오 등)
          → 업종 대분류코드 → 미분류. (kojiro 섹터 캡 로직과 동일 소스, 함수 무변경)
     """
-    sector_of: dict[str, str] = {}
-    for ticker in tickers:
-        try:
-            basics = await stock_master.get(ticker)
-            raw = getattr(basics, "raw", None) if basics is not None else None
-            name = ""
-            if isinstance(raw, dict):
-                name = str(raw.get("bstp_kor_isnm", "") or "").strip()
-            if name:
-                sector_of[ticker] = name
-                continue
-            # 폴백: master_raw KRX 산업지수 플래그 → 업종코드 → 미분류
-            master_raw = await stock_master.get_master_raw(ticker)
-            sector_of[ticker] = _kojiro_sector_key(
-                master_raw if isinstance(master_raw, dict) else None, ticker
-            )
-        except Exception:
-            logger.debug(
-                "[portfolio_risk] 섹터 조회 실패 graceful: %s", ticker, exc_info=True
-            )
-            sector_of[ticker] = f"미분류-{ticker}"
-    return sector_of
+    return await resolve_sector_names(tickers)
 
 
 @router.get("/risk")

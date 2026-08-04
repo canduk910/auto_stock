@@ -94,8 +94,11 @@ def _install_fakes(monkeypatch, *, balance_raises=False, net_asset=1_000_000,
         return None  # master_raw 미확보 → _kojiro_sector_key 가 미분류-{ticker}
 
     # 사이클 I 후속: 섹터명 = bstp_kor_isnm(basics get().raw) 우선 → get_master_raw 폴백
+    # 섹터 해석 seam 이동 (2026-08-04) — 로직이 `sector_naming` 단일 진실원으로
+    # 위임되면서 patch 대상도 그쪽으로 옮긴다. 행위 계약은 불변.
+    from src.engine import sector_naming as _sn
     monkeypatch.setattr(
-        pf, "stock_master",
+        _sn, "stock_master",
         SimpleNamespace(get=_fake_get, get_master_raw=_fake_master_raw),
         raising=False,
     )
@@ -205,8 +208,11 @@ async def test_route_uses_readable_sector_name_from_bstp_kor_isnm(monkeypatch):
     async def _fake_master_raw(ticker: str):
         return None
 
+    # 섹터 해석 seam 이동 (2026-08-04) — 로직이 `sector_naming` 단일 진실원으로
+    # 위임되면서 patch 대상도 그쪽으로 옮긴다. 행위 계약은 불변.
+    from src.engine import sector_naming as _sn
     monkeypatch.setattr(
-        pf, "stock_master",
+        _sn, "stock_master",
         SimpleNamespace(get=_fake_get, get_master_raw=_fake_master_raw),
         raising=False,
     )
@@ -259,8 +265,11 @@ async def test_route_falls_back_to_master_raw_krx_flag(monkeypatch):
             return {"krx_bio_yn": "Y"}
         return None
 
+    # 섹터 해석 seam 이동 (2026-08-04) — 로직이 `sector_naming` 단일 진실원으로
+    # 위임되면서 patch 대상도 그쪽으로 옮긴다. 행위 계약은 불변.
+    from src.engine import sector_naming as _sn
     monkeypatch.setattr(
-        pf, "stock_master",
+        _sn, "stock_master",
         SimpleNamespace(get=_fake_get, get_master_raw=_fake_master_raw),
         raising=False,
     )
@@ -300,8 +309,11 @@ async def test_route_empty_registry_zero_snapshot(monkeypatch):
     async def _fake_master_raw(ticker: str):
         return None
 
+    # 섹터 해석 seam 이동 (2026-08-04) — 로직이 `sector_naming` 단일 진실원으로
+    # 위임되면서 patch 대상도 그쪽으로 옮긴다. 행위 계약은 불변.
+    from src.engine import sector_naming as _sn
     monkeypatch.setattr(
-        pf, "stock_master",
+        _sn, "stock_master",
         SimpleNamespace(get=_fake_get, get_master_raw=_fake_master_raw),
         raising=False,
     )

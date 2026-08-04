@@ -13,7 +13,7 @@
 | GET | `/api/trading/status` | trading.py | 현재 상태. `?include=system,holdings,orders,scan,strategies` csv로 sub-section만 슬림 응답 (미지정/`all`은 전체). **사이클 18 (2026-05-19) — `strategies[*].tradable_boards: list[str]`** 추가 (DEFAULT_TRADABLE_BOARDS 또는 params.tradable_boards). ScanMonitor "돌파 (대기)" 라벨 분기 근거 |
 | GET | `/api/trading/positions` | trading.py | 보유 포지션 상세만(BalanceTable 전용 분리) |
 | GET | `/api/trading/orders` | trading.py | 주문 추적(pending_buys/fills/pending_cancels)만 분리 |
-| GET | `/api/balance` | balance.py | 잔고 (예수금 + 보유종목, 0수량 제외). J1(2026-05-11): 각 holding 에 `stock_master.get(ticker)` join → `nxt_tradable / krx_halted / excg_dvsn_cd` 3필드 노출(Optional, 캐시 miss/예외 시 None) |
+| GET | `/api/balance` | balance.py | 잔고 (예수금 + 보유종목, 0수량 제외). J1(2026-05-11): 각 holding 에 `stock_master.get(ticker)` join → `nxt_tradable / krx_halted / excg_dvsn_cd` 3필드 노출(Optional, 캐시 miss/예외 시 None) **2026-08-04 — `sector` 필드 추가**: 위 loop 가 이미 조회한 `basics.raw` 를 `sector_naming.resolve_sector_name(ticker, basics_raw=...)` 에 주입해 **추가 DB 호출 0** 으로 섹터명 산출 (`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`). 대시보드 포지션 표 섹터 컬럼 소비. |
 | GET | `/api/balance/buyable` | balance.py | 매수 가능 금액 |
 | GET | `/api/history?page=&size=` | history.py | 거래 내역 (페이징, 종목명/주문번호 포함) |
 | GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | history.py | 매매손익 — 매수/매도 페어 1행 (가중평균). 보유 중은 open 페어 (미실현 손익은 ticker_prices 현재가 사용). 응답 `data.summary` — 슬라이스 전 전체 pairs 중 closed 만 집계: `realized_total_krw`(float)/`realized_rate_pct`(가중, round2, 분모0→0.0)/`win_count`·`loss_count`·`even_count`(int)/`win_rate_pct`(round1, 분모0→0.0)/`closed_count`(int). open 페어 제외, Decimal 안전 |
