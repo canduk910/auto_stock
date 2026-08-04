@@ -195,9 +195,38 @@ def test_check_exit_signal_does_not_reference_sizing_mode():
     )
 
 
-def test_exit_signal_uses_candidates_atr_same_source_as_sizing():
-    """sizing 과 손절이 같은 `_candidates[t]['atr']` 를 읽는다 (커플링 보증)."""
+def test_exit_signal_resolves_atr_through_shared_resolver():
+    """손절이 `_effective_atr` 리졸버를 경유한다 (커플링 보증).
+
+    **의미 전환 (2026-08-04)**: 원래 이 테스트는 "sizing 과 손절이 같은
+    `_candidates[t]['atr']` 를 읽는다" 를 커플링 보증으로 고정했다. 그 전제가
+    틀렸다 — 같은 dict 를 읽는다는 건 **그 dict 가 사라지면 둘 다 죽는다**는
+    뜻이기도 했다. 실제로 `_candidates` 는 `prepare()` 마다 와이프되고, 08-04
+    삼영무역(002810)이 손절선을 관통했는데도 2ATR 분기가 skip 되는 사고가 났다.
+
+    시정 후 불변식은 "같은 **리졸버**를 경유한다" 이다 — `_effective_atr` 가
+    `_candidates` live → `_position_atr` 정본 순으로 폴백하므로 와이프를 견딘다.
+    """
     exit_src = inspect.getsource(KojiroStrategy.check_exit_signal)
-    calc_src = inspect.getsource(KojiroStrategy.calc_buy_quantity)
-    assert '_candidates' in exit_src and '"atr"' in exit_src
-    assert '_candidates' in calc_src and '"atr"' in calc_src
+    risk_src = inspect.getsource(KojiroStrategy._position_stop_price)
+    assert "_effective_atr" in exit_src, "손절이 ATR 리졸버를 경유해야 한다"
+    assert "_effective_atr" in risk_src, "리스크 계산도 동일 리졸버 — 손절선 불일치 차단"
+    resolver = inspect.getsource(KojiroStrategy._effective_atr)
+    assert "_candidates" in resolver and "_position_atr" in resolver, (
+        "리졸버는 live 우선 + 영속 폴백 2단이어야 한다"
+    )
+
+
+def test_sizing_and_stop_share_the_same_atr_value():
+    """행위 검증 — 같은 ATR 로 사이징하고 같은 ATR 로 손절선을 긋는다."""
+    s = _kojiro()
+    price, atr = 20_000, 800.0
+    s._candidates["005930"] = {"atr": atr, "stage": 1, "prev_close": price}
+    qty = s.calc_buy_quantity(price, "005930")
+    assert qty > 0
+    from src.engine.strategy_base import Position
+    s.state.positions["005930"] = Position(
+        ticker="005930", buy_price=price, quantity=qty, order_no="O", strategy_id="kojiro",
+    )
+    # 손절선 = 매수가 − 2×ATR (−8% backstop 20,000×0.92=18,400 보다 높으므로 이쪽이 실효)
+    assert s._position_stop_price("005930", s.state.positions["005930"]) == int(price - 2.0 * atr)

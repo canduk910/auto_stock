@@ -222,6 +222,11 @@ class KojiroStrategy(StrategyBase):
         self._stop_floor: dict[str, int] = {}
         # 섹터 캡 held 집계 영속 맵(_candidates 와이프 독립, 포지션 수명 동안 생존) — 안 A.
         self._position_sectors: dict[str, str] = {}
+        # 보유 종목 ATR 정본 — `_candidates` 와이프(prepare)·ATR 밴드/유니버스 이탈과
+        # 독립. 이게 없으면 2ATR 하드손절이 조용히 사라진다(2026-08-04 삼영무역 실증).
+        # 사이클 J `_position_sectors` 와 동일 패턴 — 포지션 수명 동안 생존.
+        # ⚠️ `_reset_daily_state` override 로 clear 금지 (멀티데이 held 밤샘 소멸).
+        self._position_atr: dict[str, float] = {}
         # Σ 오픈리스크 캡 로그 폭주 차단 — 보유 종목수 단위 1회 (매 틱 emit 방지).
         # 포지션이 늘거나 줄면 다시 1회 emit 되어 상태 변화는 추적된다.
         self._open_risk_cap_logged: DailyEmitCap[str] = DailyEmitCap[str]()
@@ -687,6 +692,7 @@ class KojiroStrategy(StrategyBase):
                     }
                     # held 정본 소스 — _candidates 와이프(ATR 밴드/유니버스 이탈)와 독립 영속.
                     self._position_sectors[ticker] = sector
+                    self._position_atr[ticker] = atr_val
                     # tighten-only floor 갱신
                     base = int(pos.buy_price - self.config.params["stop_atr"] * atr_val) if pos else 0
                     if base > 0:
@@ -774,6 +780,12 @@ class KojiroStrategy(StrategyBase):
             return Signal.NONE
 
         self._bought_today.add(ticker)
+        # 당일 매수분 ATR 영속화 — 재-prepare 와이프 후에도 2ATR 손절이 살아 있어야 한다.
+        try:
+            if (_entry_atr := float(info.get("atr") or 0)) > 0:
+                self._position_atr[ticker] = _entry_atr
+        except (TypeError, ValueError):
+            pass
         if cand_sector := info.get("sector"):
             # 당일 매수분 영속화 — 재-prepare _candidates 와이프에도 다음 후보 카운트 반영.
             self._position_sectors[ticker] = cand_sector
@@ -812,18 +824,24 @@ class KojiroStrategy(StrategyBase):
                 return Signal.STOP_LOSS
 
         info = self._candidates.get(ticker)
-        atr = float(info["atr"]) if info else 0.0
+        atr = self._effective_atr(ticker)
 
         # 2) 2ATR 하드손절 (tighten-only floor — 변동성 팽창 loosen 차단)
+        #    ATR 이 전무해도 `_stop_floor`(과거 확정 손절선)만으로 판정한다 —
+        #    구 구현은 `atr > 0` 블록 안에서만 floor 를 읽어, `_candidates` 가
+        #    사라지면 저장된 손절선까지 함께 무시됐다.
+        floor = self._stop_floor.get(ticker)
+        eff = 0
         if atr > 0 and pos.buy_price > 0:
             base = int(pos.buy_price - params["stop_atr"] * atr)
-            floor = self._stop_floor.get(ticker)
             eff = base if floor is None else max(base, floor)
             self._stop_floor[ticker] = eff
-            if eff > 0 and current_price <= eff:
-                logger.info("[kojiro_atr_stop] %s 손절선(%d) = 매수가(%d) - %.1f×ATR(%.1f)",
-                            ticker, eff, pos.buy_price, params["stop_atr"], atr)
-                return Signal.STOP_LOSS
+        elif floor is not None:
+            eff = floor
+        if eff > 0 and current_price <= eff:
+            logger.info("[kojiro_atr_stop] %s 손절선(%d) = 매수가(%d) - %.1f×ATR(%.1f)",
+                        ticker, eff, pos.buy_price, params["stop_atr"], atr)
+            return Signal.STOP_LOSS
 
         # 3) 스테이지3 진입 (추세 종료, 익일 아침 발화 — precompute 플래그)
         if self._held_stage3.get(ticker):
@@ -868,6 +886,30 @@ class KojiroStrategy(StrategyBase):
             logger.debug("[kojiro_open_risk_cap] 계산 실패 — fail-open", exc_info=True)
             return False
 
+    def _effective_atr(self, ticker: str) -> float:
+        """손절 판정용 ATR — `_candidates` live 우선, 부재 시 `_position_atr` 정본.
+
+        `_candidates` 는 `prepare()` 마다 `{}` 로 와이프되고 held 재채움은 ATR 밴드·
+        유니버스 컷에 걸리면 보장되지 않는다. 이에 의존하면 **보유 종목의 2ATR 손절이
+        조용히 사라진다** — 2026-08-04 실측(삼영무역 002810: `_candidates` 부재로
+        손절선 21,674 를 관통한 21,550 에서 미발화, −8% backstop 만 잔존).
+
+        live 우선은 설계 의도(변동성 변화 반영 + tighten-only floor) 보존이고,
+        폴백은 사이클 J `_position_sectors` 와 동일한 포지션 수명 영속 맵이다.
+        """
+        info = self._candidates.get(ticker)
+        if info:
+            try:
+                live = float(info.get("atr") or 0)
+                if live > 0:
+                    return live
+            except (TypeError, ValueError):
+                pass
+        try:
+            return float(self._position_atr.get(ticker) or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
     def _position_stop_price(self, ticker: str, pos) -> int:
         """포지션의 **현재 실효 손절선** (청산 우선순위와 동일 산식).
 
@@ -878,14 +920,15 @@ class KojiroStrategy(StrategyBase):
         """
         params = self.config.params
         pct_line = int(pos.buy_price * (1 + float(params["hard_stop_pct"]) / 100.0))
-        info = self._candidates.get(ticker)
-        atr = float(info["atr"]) if info and info.get("atr") else 0.0
+        atr = self._effective_atr(ticker)          # check_exit_signal 과 동일 소스
+        floor = self._stop_floor.get(ticker)
         atr_line = 0
         if atr > 0:
             atr_line = int(pos.buy_price - float(params["stop_atr"]) * atr)
-            floor = self._stop_floor.get(ticker)
             if floor is not None:
                 atr_line = max(atr_line, floor)
+        elif floor is not None:
+            atr_line = floor
         return max(pct_line, atr_line)
 
     def _open_risk_won(self) -> int:
@@ -913,6 +956,7 @@ class KojiroStrategy(StrategyBase):
         self._held_stage3.pop(ticker, None)
         self._stop_floor.pop(ticker, None)
         self._position_sectors.pop(ticker, None)
+        self._position_atr.pop(ticker, None)
 
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         """터틀 유닛(sizing_mode='turtle') 또는 position_ratio(기본). 어떤 실패든 fail-open."""
