@@ -85,7 +85,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - `is_market_closed_rejection(KisApiError) -> bool`: 장운영시간 외 / 매매 불가 시간 / 거래시간 외. `msg_cd=APBK0918` 공용이라 msg1 키워드(`_MARKET_CLOSED_KEYWORDS`) 로 분리. True 면 `is_insufficient_*` False — positions 보존 결정
 - `is_insufficient_cash(KisApiError) -> bool`: 예수금 부족 매수 실패. msg_cd 화이트리스트 (APBK0919/EGW00120) + msg1 키워드 ("부족" + "주문가능금액/예수금/현금") 동시 검사. `APBK0918` 은 현금 키워드 동반 시만 True. OrderEngine 매수 락 결정용
 - `is_insufficient_quantity(KisApiError) -> bool`: 보유 부족 매도 실패. msg1 키워드 ("부족" + "매도가능/보유수량/잔고") + `APBK0918` 은 보유 키워드 동반 시만 True. 매도 즉시 break 결정용
-- `is_market_order_disallowed(KisApiError) -> bool`: 시장가 거부. msg1 키워드 `_MARKET_ORDER_DISALLOWED_KEYWORDS`: `시장가매매불가` / `시장가 매매 불가` / `시장가 주문 불가` / `시장가 호가 불가` / `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리`. 기존 3종과 **상호 배타** — True 면 다른 3종 False. msg_cd 누적: APBK1943 (계양전기 매도) + APBK3013 (NXT 애프터 매도). `docs/kis/error-codes.md` 4-2절 / 5-4절
+- `is_market_order_disallowed(KisApiError) -> bool`: 시장가 거부. msg1 키워드 `_MARKET_ORDER_DISALLOWED_KEYWORDS`: `시장가매매불가` / `시장가 매매 불가` / `시장가 주문 불가` / `시장가 호가 불가` / `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리`. ⚠️ **`is_market_closed_rejection` 과 이중 매칭 실재** (2026-08-06 정정 — 종전 "상호 배타" 서술은 프리마켓 msg1 에서 거짓): APBK0918 "장운영시간이 아닙니다.([프리마켓] 시장가 매매 불가 시간)" 은 양쪽 키워드에 동시 매칭. `execute_sell` 은 closed 를 **먼저** 검사하므로 이중 매칭 = 보류(포지션 보존 + 다음 09:00 TTL) — 프리장 왜곡 시세라 지정가 폴백 즉시 매도보다 보류가 안전하다는 **의도된 계약**(순서 반전 금지 가드 `test_rejection_classifier_pre_market_priority.py`). `is_insufficient_*` 2종과는 상호 배타 유지. msg_cd 누적: APBK1943 (계양전기 매도) + APBK3013 (NXT 애프터 매도 — closed 미매칭이라 지정가 폴백 정상 경로). `docs/kis/error-codes.md` 4-2절 / 5-4절
 
 ## kis_master.py — KIS 공식 일일 마스터 파일 (사이클 129, 2026-06-14)
 
