@@ -464,7 +464,8 @@ VB와 동일.
 
 #### high_since_buy 일봉 폴백 (E3, 2026-05-12)
 - **`recompute_held_atr()` 직후 또는 함께 `high_since_buy` 일봉 보정** — 매수일 다음 영업일~전영업일까지의 KIS 일봉 high max로 복구. 시세 미수신 누적으로 chandelier 트레일링 손절선이 매수가 부근에 동결되는 결함 차단 (2026-05-12 이마트 사례)
-- 대상: **donchian_swing 보유 포지션만** (chandelier 트레일링 사용 전략). 헬퍼는 일반화하되 호출은 donchian만 — 다른 전략 확장은 별도 단계
+- 대상: ~~donchian_swing 보유 포지션만~~ → **donchian_swing · vcp_breakout · kojiro** (H-1, 2026-08-06 확장). 헬퍼 `_apply_high_since_buy_from_candles` 는 `StrategyBase` **단일 진실원**(전략별 복사본 금지 — AST 재발 가드). kojiro 는 `recompute_held_atr` 이 **이미 fetch 한 일봉 응답을 재사용**해 호출하므로 KIS 추가 호출 0 + scheduler(8영역) diff 0
+- ⚠️ **영속이 없으면 트레일링은 매일 아침 죽는다** (H-1 실증) — `risk.on_tick` 은 메모리만 올리고 `_boot()`(매 영업일 07:55)은 DB row 로 Position 을 재생성한다. 2026-08-06 실측 = 보유 7종목 **전부** DB `high_since_buy == buy_price` → 2.5ATR 샹들리에가 `buy − 2.5×ATR` 로 주저앉아 하드손절과 구분 불가. **신규 보유형 전략은 이 복구를 반드시 배선할 것** (미배선 전략: `bull_flag_breakout` — 5영업일 실질 보유인데 복구 0, 활성화 전 필수)
 - 보정 조건: `pos.buy_date < today_kst` 인 보유 포지션만. 매수일 당일/미래일은 skip (당일은 `buy_price`가 진실, 미래일은 비정상 → WARNING)
 - 보정값: `max(pos.high_since_buy, max(eligible_daily_highs))` — 일봉 응답 후 매수일 < bsop_date < today 범위 필터 → 일별 `stck_hgpr` max
 - DB 영속화: 보정값이 기존 high_since_buy 초과 시 `update_high(ticker, new_high)` (또는 `save_position`)로 UPDATE + `system_logs` `[high_since_buy_recover]` prefix 1행
@@ -585,6 +586,10 @@ VB와 동일.
 4. **잔여 ATR×2 트레일링**: `_partial_exit[ticker]==True` 분기에서 `current_price <= high_since_buy - ATR×2` → Signal.TRAILING_STOP (donchian 컨벤션 재사용)
 5. **시간 청산**: 진입 후 **5영업일 경과** 시 잔량 시장가 (`max_hold_days=5`) — `pos.buy_date + 5영업일 ≤ today` 판정 (KIS chk-holiday 활용 또는 단순 캘린더일 ±2 보정. 1차 구현은 단순 캘린더일 + 7 보정 가능, backend-dev 판단)
 
+> ⚠️ **BFB 는 익일 청산 전략이 아니다** (2026-08-06 정정). `_execute_next_day_clear`·`_force_clear_main_only` 어느 목록에도 없고 `check_force_clear()==[]` → 위 5번까지 **실질 멀티데이 보유**다. `_MULTIDAY_STRATEGIES` 비멤버는 `is_next_day` 배지 표시에만 영향한다. 종전 문서·테스트의 "익일 청산이라 재시작 복구 불필요"는 거짓이었고, 그 전제 위에서 복구 배선이 통째로 빠져 있었다 → **P1.5 에서 `_rederive_entry_atr` + `recompute_high_since_buy` 도입**(배선은 `boot_manager` — `scheduler.py` 8영역 diff 0, `_SWING_POLL_STRATEGIES` 편입은 매수 폴루프·구독까지 바꾸므로 금지).
+>
+> ⚠️ **청산 2~4번은 `_candidates` 단독 의존 금지** (P1, 2026-08-06 · VCP 와 동일 규약). 특히 3번 measured-move 는 BFB 의 **유일한 익절 경로**인데 `info["pole_high"]` 직접 인덱싱이라 부분 재채움 시 `KeyError` 로 `check_exit_signal` 전체가 죽었다 → `.get()` 방어 + **키 결손 시 미발화**(임의 기본값으로 익절을 쏘면 과잉 청산)가 계약.
+
 ### 매수 회전
 - 종목당 진입 1회 (`_bought_today` set)
 - 청산 후 **3영업일 쿨다운**
@@ -704,8 +709,10 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 1. **하드 손절**: 매수가 -7% (`stop_loss_rate=-7.0`) → Signal.STOP_LOSS
 2. **베이스 하단 이탈**: `current_price < base_low` → Signal.STOP_LOSS
 3. **ATR×2 트레일링 (Chandelier)**: `current_price <= high_since_buy - ATR×2` → Signal.TRAILING_STOP (donchian 컨벤션 재사용 — `_atr()` 헬퍼)
-4. **50일 EMA 이탈**: `current_price < ema50` (일봉 기준으로 매일 재계산되지만 1차 구현은 prepare 시점 `ema50` 그대로 사용 + 향후 매일 갱신 검토. backend-dev 판단) → Signal.TRAILING_STOP
+4. **50일 EMA 이탈**: `current_price < ema50` → Signal.TRAILING_STOP. ~~1차 구현은 prepare 시점 `ema50` 그대로 사용 + 향후 매일 갱신 검토~~ → **P1(2026-08-06) 에서 매일 갱신 도입** (boot 훅이 이미 fetch 하는 일봉으로 재계산). 진입 시점 스냅샷을 박제하면 상승 추세에서 `ema50` 이 뒤처져 이탈 청산이 늦어진다.
 5. **시간 청산 없음 + 15:20 강제 청산 없음** — `check_force_clear() = []` (donchian 컨벤션, 멀티데이 보유)
+
+> ⚠️ **청산 2~4번은 `_candidates` 단독 의존 금지** (P1, 2026-08-06). `prepare()` 는 매 실행마다 `_candidates` 를 와이프하고 **보유 종목은 돌파 후 셋업이 무너져 후보 자격을 잃는 게 정상**이라, 거기 단독 의존하면 **T+1 아침부터 매일** 2~4번이 통째로 침묵하고 1번 하드손절만 남는다(재시작 사고가 아니다 — 2026-08-04 kojiro 삼영무역과 동일 클래스). 전부 `_effective_setup(ticker)` 리졸버 경유(`_candidates` live → `_position_setup` 영속 폴백). **구조 레벨**(`base_low`)은 BUY 직전 stamp 후 불변이고 재시작 소실 시 매수일 *이전* 봉으로 재검출(실패 시 미복구 = fail-safe), **지표**(`atr14`/`ema50`)는 boot 훅이 매일 갱신. `_reset_daily_state` 에서 clear 금지(AST 봉인).
 
 ### 멀티데이 보유 영속화
 - `Position._MULTIDAY_STRATEGIES` frozenset 에 `vcp_breakout` 추가 — `is_next_day` 항상 False 반환 (OrderMonitor "청산" 배지 미표시, donchian I2 컨벤션)

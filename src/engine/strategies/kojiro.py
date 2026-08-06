@@ -665,6 +665,35 @@ class KojiroStrategy(StrategyBase):
                 logger.warning("[kojiro_recompute] 일봉 응답 없음 fail-open: %s", ticker)
                 self._held_stage3[ticker] = False
                 continue
+
+            # H-1 (2026-08-06) — 트레일링 기준점 재시작 복구.
+            # `risk.on_tick` 은 `high_since_buy` 를 메모리에서만 올리고 kojiro 는 DB 에
+            # 되쓰는 경로가 없었다. `_boot()` 이 매 영업일 07:55 DB row 로 Position 을
+            # 재생성하므로 2.5ATR 샹들리에 기준점이 **매일 아침 매수가로 리셋**됐다
+            # (08-06 실측: 보유 7종목 전부 DB high == buy_price).
+            #
+            # 위치가 계약이다 — 아래 ATR/stage 블록보다 **앞**. 워밍업 봉 부족
+            # (`len(usable) < KOJIRO_MIN_REQUIRED`)으로 그 블록이 `continue` 해도 고점
+            # 복구는 수행돼야 한다(donchian E3 가 `pos_needs_high_recover` 를 ATR 필요
+            # 여부와 독립 계산하는 이유와 동일).
+            #
+            # 이미 fetch 한 `candles` 재사용 = KIS 추가 호출 0 + **scheduler(8영역)
+            # diff 0** — `recompute_held_atr` 는 `_SWING_POLL_STRATEGIES` 루프가 이미
+            # 호출한다. VCP 전용 훅은 하드코딩 `_vcp` 라 거기 끼우면 8영역을 건드린다.
+            if pos is not None and pos.buy_date < today:
+                try:
+                    await self._apply_high_since_buy_from_candles(pos, candles, today)
+                except Exception:
+                    logger.warning(
+                        "[kojiro_recompute] high_since_buy 보정 실패 fail-open: %s",
+                        ticker, exc_info=True,
+                    )
+            elif pos is not None and pos.buy_date > today:
+                logger.warning(
+                    "[kojiro_recompute] high_since_buy 보정 skip — buy_date 비정상(미래): "
+                    "%s buy_date=%s today=%s", ticker, pos.buy_date, today,
+                )
+
             try:
                 prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
                 usable = candles[prev_idx:]
@@ -911,11 +940,28 @@ class KojiroStrategy(StrategyBase):
             return 0.0
 
     def _position_stop_price(self, ticker: str, pos) -> int:
-        """포지션의 **현재 실효 손절선** (청산 우선순위와 동일 산식).
+        """포지션의 **현재 실효 손절선** = `max(고정% backstop, 2ATR floor, 2.5ATR 샹들리에)`.
 
-        `check_exit_signal` 은 고정%(`hard_stop_pct`) → 2ATR(tighten-only `_stop_floor`)
-        순으로 검사하므로, 실제로 먼저 발화하는 선 = 둘 중 **더 높은** 가격이다.
-        `_stop_floor` 가 트레일링으로 상향돼 있으면 그 값을 쓴다(실제 노출 반영).
+        `check_exit_signal` 의 세 가격선과 동일 산식·동일 ATR 소스(`_effective_atr`)다.
+        셋은 우선순위대로 검사되지만 전부 같은 tick 의 가격 임계라, 실제로 먼저 발화하는
+        선 = 셋 중 **가장 높은** 가격이다. (스테이지3 청산은 가격 조건이 아니라 모델링
+        대상이 아니며, 그 방향은 조기 청산 = 리스크 과대계상 쪽이라 안전하다.)
+
+        **샹들리에 포함은 H-1(2026-08-06) 이후의 필수 조건이다.** 그 전에는 `_boot()` 이
+        매일 아침 `high_since_buy` 를 매수가로 리셋해 매수창(09:05~09:30) 시점의 샹들리에가
+        항상 두 선보다 낮았고, 그래서 `max(pct, atr)` 만으로도 정확했다. H-1 이 고점을
+        복구하면서 샹들리에가 `buy_price` 를 **넘어설 수 있게** 됐다(실측 슈프리마
+        51,203 > 매수가 48,200). 제외하면 **이미 이익이 확정된 포지션을 만액 리스크로
+        계상**해 Σ오픈리스크 캡이 근거 없이 신규 매수를 잠근다.
+
+        ⚠️ 샹들리에는 앞 두 선과 달리 **tighten-only 가 아니다** — 고점은 고정이지만 ATR 이
+        팽창하면 선이 내려간다. 따라서 이 값은 "재기 어려운 최악"이 아니라 **평가 시점의
+        실제 손절선**이고, `_is_open_risk_capped` 가 매수 시도마다 재평가하므로 그게 맞다.
+
+        `_stop_floor` 를 **쓰기만 하고 갱신하지 않는다** — 이 메서드는 매수 게이트에서
+        호출되는 읽기 전용 추정기이고, 여기서 floor 를 올리면 청산 규약이 매수 경로의
+        부작용으로 바뀐다.
+
         ATR 결측(재시작 직후 등) 이면 고정% 선만으로 추정 — fail-open.
         """
         params = self.config.params
@@ -929,7 +975,13 @@ class KojiroStrategy(StrategyBase):
                 atr_line = max(atr_line, floor)
         elif floor is not None:
             atr_line = floor
-        return max(pct_line, atr_line)
+        # 2.5ATR 샹들리에 — check_exit_signal §4 와 동일 조건/동일 산식.
+        # int() 절삭은 정수 가격에서 부동소수 비교와 동치이고, 어긋나도 낮은 쪽
+        # (= 리스크 과대계상 = 보수적)으로만 어긋난다.
+        trail_line = 0
+        if atr > 0 and pos.high_since_buy > 0:
+            trail_line = int(pos.high_since_buy - float(params["trail_atr"]) * atr)
+        return max(pct_line, atr_line, trail_line)
 
     def _open_risk_won(self) -> int:
         """보유 포지션의 Σ 오픈리스크(원) = Σ qty × (매수가 − 실효 손절선).
@@ -937,6 +989,10 @@ class KojiroStrategy(StrategyBase):
         터틀의 유닛 캡이 실제로 통제하려던 값. 개수(`max_positions`)는 "1유닛 =
         상수 리스크" 가 성립할 때만 이것의 프록시인데, 수량 절삭·`hard_stop_pct` 캡·
         사이징 혼재 때문에 우리 구현에선 프록시가 헐거워 직접 잰다.
+
+        `stop >= buy_price` 인 포지션(트레일링이 매수가 위로 올라간 이익 확정분)은
+        **0 으로 계상**한다 — 음수를 더하면 한 종목의 확정 이익이 다른 종목의 실제
+        손실 노출을 상쇄해 캡이 조용히 무력화된다.
         """
         total = 0
         for ticker, pos in self.state.positions.items():

@@ -22,12 +22,21 @@ BFB 기존 하드손절은 −5%(VCP −7%보다 이미 타이트) — 그래서
 `sizing_mode` 가 아니라 **`_entry_atr` 스탬프 존재**가 ATR 손절의 자연 게이트다.
 position_ratio 매수(미스탬프)는 기존 −5% 경로를 byte 동일하게 탄다.
 
-## BFB 는 익일 청산 전략 — 재시작 복구 인프라 불필요
+## ~~BFB 는 익일 청산 전략 — 재시작 복구 인프라 불필요~~ → **거짓 (2026-08-06 정정)**
 
-VCP/donchian 은 `Position._MULTIDAY_STRATEGIES` 멤버(멀티데이 보유)라 재시작 시
-`_entry_atr` 소실을 막기 위해 `_rederive_entry_atr` + `recompute_high_since_buy`
-scheduler 배선이 필요했다. BFB 는 비멤버(매일 청산)라 이 인프라 자체가 불필요 —
-장중 재시작으로 `_entry_atr` 가 소실돼도 `turtle_backstop_pct` 가 방어한다.
+종전 서술: *"BFB 는 `_MULTIDAY_STRATEGIES` 비멤버(매일 청산)라 인프라가 불필요하고
+`turtle_backstop_pct` 가 방어한다."* — 코드 실측으로 **반증**됐다:
+
+    _execute_next_day_clear 대상 = ("momentum","long_tail_volatility","volatility_breakout")
+    _force_clear_main_only 대상  = ("volatility_breakout","long_tail_volatility")
+    BullFlagBreakoutStrategy.check_force_clear() == []
+
+세 목록 어디에도 BFB 가 없다 → `max_hold_days`(5)+2 달력일까지 **실질 멀티데이
+보유**. `_MULTIDAY_STRATEGIES` 비멤버는 `is_next_day` **배지 표시에만** 영향하며
+청산 규약과 무관하다. 이 거짓 전제 위에서 복구 배선이 통째로 생략돼 있었고,
+P1.5(2026-08-06)에서 `_rederive_entry_atr` + `recompute_high_since_buy` 를 도입했다.
+배선은 `scheduler.py`(8영역)가 아니라 `boot_manager` 경유 — 상세는
+`test_bfb_restart_recovery.py`.
 """
 
 from __future__ import annotations
@@ -259,13 +268,18 @@ def test_on_position_closed_pops_entry_atr():
 # ---------------------------------------------------------------------------
 # B2-NOMULTIDAY — BFB 는 익일 청산 전략 → 재시작 복구 인프라 불필요 (팀장 지시 명문화)
 # ---------------------------------------------------------------------------
-def test_bfb_not_multiday_and_no_rederive_infra():
-    """BFB 는 `Position._MULTIDAY_STRATEGIES` 비멤버(매일 청산) — VCP/donchian 과 달리
-    `_rederive_entry_atr`/`recompute_high_since_buy` 재시작 복구 배선이 불필요하다.
+def test_bfb_is_de_facto_multiday_and_has_rederive_infra():
+    """[의미 전환 2026-08-06] 종전 명제("익일 청산이라 복구 불필요")가 **거짓**이었다.
+
+    BFB 는 익일청산·15:20 강제청산 어느 목록에도 없고 `check_force_clear()==[]`
+    이라 `max_hold_days` 까지 실질 멀티데이 보유다 ⇒ 재시작 복구 인프라가 **필수**.
+
+    `_MULTIDAY_STRATEGIES` 비멤버 assert 는 **유지**한다 — 그건 `is_next_day` 배지
+    표시 계약이지 청산 규약이 아니다(편입하면 OrderMonitor 표시가 바뀐다).
     """
     assert "bull_flag_breakout" not in Position._MULTIDAY_STRATEGIES
-    assert not hasattr(BullFlagBreakoutStrategy, "_rederive_entry_atr")
-    assert not hasattr(BullFlagBreakoutStrategy, "recompute_high_since_buy")
+    assert hasattr(BullFlagBreakoutStrategy, "_rederive_entry_atr")
+    assert hasattr(BullFlagBreakoutStrategy, "recompute_high_since_buy")
 
 
 def test_scheduler_has_no_bfb_entry_atr_wiring():

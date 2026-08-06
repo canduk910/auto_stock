@@ -152,6 +152,15 @@ class BullFlagBreakoutStrategy(StrategyBase):
         self._breakeven_latched: set[str] = set()
         # B-2 게이트 2 미러 — 터틀 진입 ATR 스냅샷. 존재 = ATR 하드손절 활성 (자연 게이트).
         self._entry_atr: dict[str, float] = {}
+        # P1 (2026-08-06) — 청산 파라미터 영속 맵 (VCP 동형). `_candidates` 는
+        # `prepare()` 마다 와이프되고 **보유 종목은 셋업이 무너져 후보 자격을 잃는 게
+        # 정상**이라, 청산이 거기 단독 의존하면 T+1 아침부터 §2 flag_low·
+        # §3 measured-move 익절·§4 트레일링이 통째로 침묵하고 고정 손절만 남는다.
+        #   - `flag_low`/`pole_start`/`pole_high`/`flag_high` = 구조 레벨 → BUY 직전
+        #     stamp 후 **불변**
+        #   - `atr14` = 지표 → boot 훅이 **이미 fetch 하는 일봉으로 매일 갱신**
+        # ⚠️ `_reset_daily_state` 에서 clear 금지 — 멀티데이 보유가 밤새 소멸한다.
+        self._position_setup: dict[str, dict] = {}
 
     # ------------------------------------------------------------------
     # prepare — 일봉 fetch → 폴/플래그 자동 검출
@@ -783,22 +792,51 @@ class BullFlagBreakoutStrategy(StrategyBase):
         return dict(self._scan_stats)
 
     def get_targets_status(self) -> dict[str, dict]:
-        """대시보드 노출용."""
-        return {
-            ticker: {
-                "pole_start": info["pole_start"],
-                "pole_high": info["pole_high"],
-                "flag_high": info["flag_high"],
-                "flag_low": info["flag_low"],
-                "atr14": info["atr14"],
+        """대시보드 후보 그리드용 — "왜 안 사는가" 진단 필드 포함 (P3a, 2026-08-06).
+
+        BFB 특유의 `breakout_seen_at`(retention 대기)이 핵심이다 — 첫 돌파 감지 후
+        `breakout_retention_minutes` 동안 `Signal.NONE` 을 돌려주며 대기하는데,
+        지금은 로그에만 남아 "돌파했는데 왜 안 샀나"에 화면으로 답할 수 없었다.
+
+        ⚠️ VB 호환 5키는 `scheduler._confirm_breakout_open_prices`(8영역) 소비
+        계약 — **제거 금지, 추가만**.
+        """
+        from src.engine.scanner import resolve_ticker_name
+
+        today = datetime.now(KST).date()
+        mult = self.config.params["breakout_volume_mult"]
+        retention = self.config.params["breakout_retention_minutes"]
+        out: dict[str, dict] = {}
+        for ticker, info in self._candidates.items():
+            flag_high = info.get("flag_high", 0)
+            pole_width = info.get("pole_high", 0) - info.get("pole_start", 0)
+            seen = self._breakout_first_seen.get(ticker)
+            cd = self._cooldown_until.get(ticker)
+            out[ticker] = {
+                "pole_start": info.get("pole_start", 0),
+                "pole_high": info.get("pole_high", 0),
+                "flag_high": flag_high,
+                "flag_low": info.get("flag_low", 0),
+                "atr14": info.get("atr14", 0),
+                # 진단 필드
+                "name": resolve_ticker_name(ticker),
+                "prev_close": info.get("prev_close", 0),
+                "stop_line": info.get("flag_low", 0),          # 이탈 시 STOP_LOSS
+                "measured_target": (flag_high + pole_width) if (pole_width > 0 and flag_high > 0) else 0,
+                "volume_threshold": int(info.get("flag_avg_volume", 0) * mult),
+                "bought_today": ticker in self._bought_today,
+                "in_cooldown": bool(cd and cd > today),
+                "cooldown_until": cd.isoformat() if cd else None,
+                "breakout_seen_at": seen.isoformat() if seen else None,
+                "retention_minutes": retention,
+                # VB 호환 (제거 금지)
                 "k": 0.0,
-                "target_price": info["flag_high"],
+                "target_price": flag_high,
                 "open_price": 0,
                 "target_offset": 0,
                 "open_confirmed": True,
             }
-            for ticker, info in self._candidates.items()
-        }
+        return out
 
     # ------------------------------------------------------------------
     # 신호 평가
@@ -882,6 +920,15 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         # 진입 확정
         self._bought_today.add(ticker)
+        # P1 — 청산 파라미터 영속화(당일 매수분). 내일 아침 prepare 가 `_candidates`
+        # 를 와이프해도 §2 flag_low / §3 measured-move / §4 트레일링이 살아남는다.
+        self._position_setup[ticker] = {
+            "flag_low": info.get("flag_low", 0),
+            "flag_high": info.get("flag_high", 0),
+            "pole_high": info.get("pole_high", 0),
+            "pole_start": info.get("pole_start", 0),
+            "atr14": info.get("atr14", 0),
+        }
         logger.info(
             "눌림목 돌파 매수 신호: %s 현재가(%d) — flag_high(%d) 돌파 + 거래량(%d≥%d)",
             ticker, current_price, flag_high, acml_vol, vol_threshold,
@@ -900,6 +947,17 @@ class BullFlagBreakoutStrategy(StrategyBase):
             self.state.buy_signals.pop(0)
         return Signal.BUY
 
+    def _effective_setup(self, ticker: str) -> dict:
+        """청산 파라미터 리졸버 — `_candidates` live 우선 → `_position_setup` 폴백.
+
+        VCP `_effective_setup` 동형. 미지 종목은 **빈 dict** — 호출부가 `.get()`
+        만으로 안전하도록 None 을 돌려주지 않는다.
+        """
+        live = self._candidates.get(ticker)
+        if live:
+            return live
+        return self._position_setup.get(ticker) or {}
+
     def check_exit_signal(self, ticker, current_price, open_price) -> Signal:
         pos = self.state.positions.get(ticker)
         if not pos:
@@ -910,7 +968,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
             (current_price - pos.buy_price) / pos.buy_price * 100
             if pos.buy_price > 0 else 0
         )
-        info = self._candidates.get(ticker)
+        # P1 — `_candidates` 단독 의존 폐기. 와이프돼도 영속 셋업으로 청산이 산다.
+        info = self._effective_setup(ticker)
 
         # 1) 하드 손절 — `_entry_atr` 스탬프 존재가 ATR 손절의 자연 게이트 (VCP 답습).
         #    `sizing_mode` 로 게이팅하면 DB 토글 하나로 **기보유 포지션의 손절 규약**이
@@ -991,8 +1050,14 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # 3) 측정된 이동 (measured move) 도달 — 절반 익절 (1차 구현은 마킹만, 전량 청산은 호출자 책임)
         # 마킹 후 잔여는 ATR 트레일링으로 처리
         if info:
-            pole_width = info["pole_high"] - info["pole_start"]
-            measured_target = info["flag_high"] + pole_width if pole_width > 0 else 0
+            # `.get()` 방어 — 영속 셋업이 부분 재채움된 경우 직접 인덱싱은 KeyError 로
+            # `check_exit_signal` 전체를 죽인다. 키 결손 시엔 **미발화**가 계약이다
+            # (임의 기본값으로 익절을 쏘면 과잉 청산).
+            pole_high = info.get("pole_high", 0) or 0
+            pole_start = info.get("pole_start", 0) or 0
+            flag_high = info.get("flag_high", 0) or 0
+            pole_width = pole_high - pole_start
+            measured_target = flag_high + pole_width if (pole_width > 0 and flag_high > 0) else 0
             already_partial = self._partial_exit.get(ticker, False)
             if measured_target > 0 and current_price >= measured_target and not already_partial:
                 self._partial_exit[ticker] = True
@@ -1110,8 +1175,162 @@ class BullFlagBreakoutStrategy(StrategyBase):
             logger.warning("[bfb] 영업일 정정 실패 (ticker=%s) — 근사값 유지", ticker)
 
     def _reset_daily_state(self) -> None:
-        """사이클 23 P2-1 — 일일 초기화 시 _breakout_first_seen 정리."""
+        """사이클 23 P2-1 — 일일 초기화 시 _breakout_first_seen 정리.
+
+        ⚠️ `_position_setup` / `_entry_atr` 는 **절대 clear 하지 마라** — BFB 는
+        `max_hold_days` 까지 실질 멀티데이 보유라 청산 규약이 밤새 소멸한다.
+        """
         self._breakout_first_seen.clear()
+
+    # ── P1.5 (2026-08-06) — 재시작 복구 ──────────────────────────────────────
+    #
+    # BFB 는 `_execute_next_day_clear` 대상도 `_force_clear_main_only` 대상도 아니고
+    # `check_force_clear()==[]` 라 **최대 `max_hold_days`+2 달력일 실질 멀티데이
+    # 보유**다. 종전 문서의 "BFB 는 익일 청산이라 재시작 복구 불필요"는 거짓이었고,
+    # 그 전제 위에서 복구 배선이 통째로 생략돼 있었다.
+    #
+    # 재시작 시 `_entry_atr` 소실 → ATR 하드손절이 고정 −5% 로 무단 강등되고,
+    # `high_since_buy` 는 `_boot()` 이 DB row 로 Position 을 재생성하며 매수가로
+    # 리셋된다(H-1 과 동일 병리).
+    #
+    # 배선은 `boot_manager` 가 담당한다 — `_SWING_POLL_STRATEGIES` 에 BFB 를 넣으면
+    # 그 상수가 매수 폴루프·구독에도 쓰여 **매수 행위가 바뀐다**(절대 금지).
+
+    _HIGH_RECOVER_LABEL = "눌림목"
+
+    def _rederive_entry_atr(self, ticker: str, pos, candles: list[dict], atr_period: int) -> None:
+        """재시작으로 소실된 `_entry_atr` 을 **매수일 이전 봉만으로** 재도출한다.
+
+        매수일 당일/이후 봉을 섞으면 돌파 당일의 큰 변동이 ATR 을 부풀려 손절선이
+        **넓어진다**(loosen). 진입 시점 ATR 을 재현하는 것이 목적이므로 엄격히
+        `bsop_date < buy_date` 만 쓴다. 봉이 모자라면 **미스탬프** — 고정 %
+        손절 경로로 남는 편이 잘못된 ATR 로 손절선을 긋는 것보다 낫다.
+        """
+        try:
+            buy_dd = pos.buy_date.strftime("%Y%m%d")
+            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
+            if len(prior) < atr_period + 2:
+                return
+            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior]
+            lows = [int(c.get("stck_lwpr", "0") or 0) for c in prior]
+            closes = [int(c.get("stck_clpr", "0") or 0) for c in prior]
+            e_atr = self._atr(highs, lows, closes, atr_period)
+            if e_atr > 0:
+                self._entry_atr[ticker] = float(int(e_atr))
+                logger.info("[bfb_entry_atr_rederive] %s buy_date=%s entry_atr=%d",
+                            ticker, pos.buy_date, int(e_atr))
+        except Exception:
+            logger.exception("눌림목 터틀 entry_atr 재도출 실패: %s", ticker)
+
+    _SETUP_LEVEL_KEYS = ("flag_low", "flag_high", "pole_high", "pole_start")
+
+    def _refresh_position_setup_from_candles(self, ticker: str, pos, candles: list[dict]) -> None:
+        """보유 종목의 청산 파라미터를 최신 일봉으로 정비한다 (VCP 동형).
+
+        - **지표** (`atr14`) → 매번 재계산.
+        - **구조 레벨** (`flag_low`/`flag_high`/`pole_high`/`pole_start`) → 진입 시점
+          셋업에서 확정된 값이라 **이미 있으면 건드리지 않는다**. 없을 때만
+          (=프로세스 재시작으로 소실) `_candidates` 보강 → 그것도 없으면 **매수일
+          *이전* 봉으로 폴/플래그 재검출**을 시도한다. 실패 시 미복구로 남긴다 —
+          잘못된 레벨로 손절·익절선을 긋느니 §1 하드손절/§5 시간청산에 맡긴다
+          (fail-safe, 절대 현행보다 나빠지지 않는다).
+
+        어떤 실패도 흡수 — 갱신 실패 시 기존 값이 남아 청산은 계속 산다.
+        """
+        if not candles:
+            return
+        try:
+            highs = [int(c.get("stck_hgpr", "0") or 0) for c in candles]
+            lows = [int(c.get("stck_lwpr", "0") or 0) for c in candles]
+            closes = [int(c.get("stck_clpr", "0") or 0) for c in candles]
+            atr = self._atr(highs, lows, closes, self.config.params["atr_period"])
+
+            cur = dict(self._position_setup.get(ticker) or {})
+            live = self._candidates.get(ticker) or {}
+            for k in self._SETUP_LEVEL_KEYS:
+                if not cur.get(k) and live.get(k):
+                    cur[k] = live[k]
+            if any(not cur.get(k) for k in self._SETUP_LEVEL_KEYS):
+                for k, v in self._rederive_setup_levels(ticker, pos, candles).items():
+                    if not cur.get(k) and v:
+                        cur[k] = v
+            if atr > 0:
+                cur["atr14"] = int(atr)
+            if cur:
+                self._position_setup[ticker] = cur
+        except Exception:
+            logger.exception("[bfb_setup_refresh] 청산 셋업 갱신 실패 fail-open: %s", ticker)
+
+    def _rederive_setup_levels(self, ticker: str, pos, candles: list[dict]) -> dict:
+        """매수일 **이전** 봉만으로 폴/플래그를 재검출한다 (실패 시 빈 dict).
+
+        매수일 당일/이후 봉을 섞으면 돌파 이후 구간이 플래그에 포함돼 레벨이
+        왜곡된다. 검출은 진입 시점 조건(`pole_min_return` 등)에 민감해 재현되지
+        않을 수 있고, 그 경우 **빈 dict** 를 돌려 호출자가 미복구로 남긴다.
+        """
+        try:
+            if pos is None or not getattr(pos, "buy_date", None):
+                return {}
+            buy_dd = pos.buy_date.strftime("%Y%m%d")
+            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
+            p = self.config.params
+            if len(prior) < p["pole_lookback_min"] + p["flag_lookback_min"]:
+                return {}
+            det = self._detect_pole_and_flag(prior)
+            if not det:
+                return {}
+            out = {k: det.get(k, 0) for k in self._SETUP_LEVEL_KEYS}
+            logger.info("[bfb_setup_rederive] %s flag_low=%s flag_high=%s (매수일 이전 봉 재검출)",
+                        ticker, out.get("flag_low"), out.get("flag_high"))
+            return out
+        except Exception:
+            logger.exception("[bfb_setup_rederive] 구조 레벨 재검출 실패: %s", ticker)
+            return {}
+
+    async def recompute_high_since_buy(self) -> None:
+        """보유 종목의 재시작 복구 — `_entry_atr` 재도출 + 청산 지표 갱신 + 고점 복구.
+
+        VCP `recompute_high_since_buy` 이식. 종목별 sequential await (KIS Rate Limit
+        안전 — `asyncio.gather` 금지). 일봉 fetch 예외/빈 응답은 해당 종목만 skip.
+
+        고점 복구는 `StrategyBase._apply_high_since_buy_from_candles` **단일 진실원**
+        에 위임한다 (전략별 복사본 금지).
+        """
+        from src.api.condition import fetch_daily_candles
+
+        params = self.config.params
+        atr_period = params["atr_period"]
+        pole_max = params["pole_lookback_max"]
+        flag_max = params["flag_lookback_max"]
+        today = datetime.now(KST).date()
+
+        for ticker in list(self.state.positions.keys()):
+            pos = self.state.positions.get(ticker)
+            if not pos:
+                continue
+            if pos.buy_date >= today:
+                if pos.buy_date > today:
+                    logger.warning(
+                        "눌림목 high_since_buy 보정 skip — buy_date 비정상(미래): "
+                        "%s buy_date=%s today=%s",
+                        ticker, pos.buy_date, today,
+                    )
+                continue
+
+            days_held = (today - pos.buy_date).days
+            fetch_days = max(days_held + 5, pole_max + flag_max + atr_period + 10, 10)
+            try:
+                candles = await fetch_daily_candles(ticker, days=fetch_days)
+            except Exception:
+                logger.exception("눌림목 재시작 복구 일봉 fetch 실패: %s", ticker)
+                continue
+            if not candles:
+                continue
+            # in-memory 스탬프가 살아 있으면(당일 매수·미재시작) 그게 정확한 진입 ATR.
+            if ticker not in self._entry_atr:
+                self._rederive_entry_atr(ticker, pos, candles, atr_period)
+            self._refresh_position_setup_from_candles(ticker, pos, candles)
+            await self._apply_high_since_buy_from_candles(pos, candles, today)
 
     def on_position_closed(self, ticker: str) -> None:
         """사이클 185 — 포지션 청산 시 partial_exit 보유결합 상태 정리 + 재진입 쿨다운 등록 (사이클 191).
@@ -1122,6 +1341,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
         self._partial_exit.pop(ticker, None)
         self._breakeven_latched.discard(ticker)
         self._entry_atr.pop(ticker, None)
+        # P1 — 영속 청산 셋업 정리 (재진입 시 stale 구조 레벨로 손절하는 것 차단).
+        self._position_setup.pop(ticker, None)
         self.register_cooldown_after_exit(ticker)
         coro = self._refine_cooldown_business_days(ticker)
         try:

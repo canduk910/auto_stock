@@ -171,6 +171,15 @@ class VcpBreakoutStrategy(StrategyBase):
         self._breakeven_latched: set[str] = set()
         # B-2 게이트 2 — 터틀 진입 ATR 스냅샷. 존재 = ATR 하드손절 활성 (자연 게이트).
         self._entry_atr: dict[str, float] = {}
+        # P1 (2026-08-06) — 청산 파라미터 영속 맵. `_candidates` 는 `prepare()` 마다
+        # 와이프되고 **보유 종목은 셋업이 무너져 후보 자격을 잃는 게 정상**이라,
+        # 청산이 거기 단독 의존하면 T+1 아침부터 §2 base_low·§3 트레일링·§4 ema50 이
+        # 통째로 침묵한다(2026-08-04 kojiro 삼영무역과 동일 클래스).
+        #   - `base_low` = 진입 시점 구조 레벨 → BUY 직전 stamp 후 **불변**
+        #   - `atr14`/`ema50` = 지표 → boot 훅이 **이미 fetch 하는 일봉으로 매일 갱신**
+        #     (스냅샷 박제 시 상승 추세에서 ema50 이 뒤처져 이탈 청산이 늦어진다)
+        # ⚠️ `_reset_daily_state` 에서 clear 금지 — 멀티데이 보유가 밤새 소멸한다.
+        self._position_setup: dict[str, dict] = {}
 
     # ------------------------------------------------------------------
     # prepare — 일봉 220일 → 추세/베이스/pullback/거래량 수축 자동 검출
@@ -940,20 +949,42 @@ class VcpBreakoutStrategy(StrategyBase):
         return dict(self._scan_stats)
 
     def get_targets_status(self) -> dict[str, dict]:
-        return {
-            ticker: {
-                "base_high": info["base_high"],
-                "base_low": info["base_low"],
-                "atr14": info["atr14"],
-                "ema50": info["ema50"],
+        """대시보드 후보 그리드용 — "왜 안 사는가" 진단 필드 포함 (P3a, 2026-08-06).
+
+        ⚠️ VB 호환 5키(`k`/`target_price`/`open_price`/`target_offset`/
+        `open_confirmed`)는 `scheduler._confirm_breakout_open_prices`(8영역)가
+        소비한다 — **제거 금지, 추가만**. `strategy_registry` 는 덕타이핑 제네릭이라
+        키를 얹으면 registry·route 수정 0 으로 프론트까지 전달된다(kojiro 선례).
+        """
+        from src.engine.scanner import resolve_ticker_name
+
+        today = datetime.now(KST).date()
+        mult = self.config.params["breakout_volume_mult"]
+        out: dict[str, dict] = {}
+        for ticker, info in self._candidates.items():
+            base_high = info.get("base_high", 0)
+            cd = self._cooldown_until.get(ticker)
+            out[ticker] = {
+                "base_high": base_high,
+                "base_low": info.get("base_low", 0),
+                "atr14": info.get("atr14", 0),
+                "ema50": info.get("ema50", 0),
+                # 진단 필드
+                "name": resolve_ticker_name(ticker),
+                "prev_close": info.get("prev_close", 0),
+                "stop_line": info.get("base_low", 0),          # 이탈 시 STOP_LOSS
+                "volume_threshold": int(info.get("avg_volume_20", 0) * mult),
+                "bought_today": ticker in self._bought_today,
+                "in_cooldown": bool(cd and cd > today),
+                "cooldown_until": cd.isoformat() if cd else None,
+                # VB 호환 (제거 금지)
                 "k": 0.0,
-                "target_price": info["base_high"],
+                "target_price": base_high,
                 "open_price": 0,
                 "target_offset": 0,
                 "open_confirmed": True,
             }
-            for ticker, info in self._candidates.items()
-        }
+        return out
 
     # ------------------------------------------------------------------
     # 신호 평가
@@ -1006,6 +1037,13 @@ class VcpBreakoutStrategy(StrategyBase):
             return Signal.NONE
 
         self._bought_today.add(ticker)
+        # P1 — 청산 파라미터 영속화(당일 매수분). 내일 아침 prepare 가 `_candidates`
+        # 를 와이프해도 §2 base_low / §3 트레일링 / §4 ema50 이 살아남는다.
+        self._position_setup[ticker] = {
+            "base_low": info.get("base_low", 0),
+            "atr14": info.get("atr14", 0),
+            "ema50": info.get("ema50", 0),
+        }
         logger.info(
             "VCP 매수 신호: %s 현재가(%d) — base_high(%d) 돌파 + 거래량(%d≥%d)",
             ticker, current_price, base_high, acml_vol, vol_threshold,
@@ -1023,6 +1061,18 @@ class VcpBreakoutStrategy(StrategyBase):
             self.state.buy_signals.pop(0)
         return Signal.BUY
 
+    def _effective_setup(self, ticker: str) -> dict:
+        """청산 파라미터 리졸버 — `_candidates` live 우선 → `_position_setup` 폴백.
+
+        live 를 우선하는 것은 설계 의도다(지표 변화 반영). 폴백이 있어야
+        `prepare()` 와이프 후에도 §2/§3/§4 가 살아남는다. 미지 종목은 **빈 dict** —
+        호출부가 `.get()` 만으로 안전하도록 None 을 돌려주지 않는다.
+        """
+        live = self._candidates.get(ticker)
+        if live:
+            return live
+        return self._position_setup.get(ticker) or {}
+
     def check_exit_signal(self, ticker, current_price, open_price) -> Signal:
         pos = self.state.positions.get(ticker)
         if not pos:
@@ -1033,7 +1083,8 @@ class VcpBreakoutStrategy(StrategyBase):
             (current_price - pos.buy_price) / pos.buy_price * 100
             if pos.buy_price > 0 else 0
         )
-        info = self._candidates.get(ticker)
+        # P1 — `_candidates` 단독 의존 폐기. 와이프돼도 영속 셋업으로 청산이 산다.
+        info = self._effective_setup(ticker)
 
         # 1) 하드 손절 — `_entry_atr` 스탬프 존재가 ATR 손절의 자연 게이트.
         #    `sizing_mode` 로 게이팅하면 DB 토글 하나로 **기보유 포지션의 손절 규약**이
@@ -1283,62 +1334,83 @@ class VcpBreakoutStrategy(StrategyBase):
             # (당일 매수 · 미재시작) 정확한 진입 ATR 이므로 미접촉.
             if ticker not in self._entry_atr:
                 self._rederive_entry_atr(ticker, pos, candles, params["atr_period"])
+            # P1 — 청산 지표(atr14/ema50) 일일 갱신. **같은 candles 재사용**이라
+            # KIS 추가 호출 0 + scheduler 배선 변경 0.
+            self._refresh_position_setup_from_candles(ticker, pos, candles)
             await self._apply_high_since_buy_from_candles(pos, candles, today)
 
-    async def _apply_high_since_buy_from_candles(self, pos, candles: list[dict], today) -> None:
-        """일봉 응답에서 매수일 < bsop_date < today 범위 high max 를 추출해 보정.
+    def _refresh_position_setup_from_candles(self, ticker: str, pos, candles: list[dict]) -> None:
+        """보유 종목의 청산 파라미터를 최신 일봉으로 정비한다.
 
-        보정값이 기존 high_since_buy 초과일 때만 갱신 + DB UPDATE + system_logs 1행.
-        donchian_swing `_apply_high_since_buy_from_candles` 동형 (C-V4).
+        필드 성격에 따라 규약이 다르다:
+
+        - **지표** (`atr14` / `ema50`) → 매번 재계산. 매일 변하는 값이라 진입 시점
+          스냅샷을 박제하면 상승 추세에서 `ema50` 이 뒤처져 §4 이탈 청산이 늦어진다.
+        - **구조 레벨** (`base_low`) → 진입 시점 베이스에서 확정된 값이라 **이미 있으면
+          건드리지 않는다**. 없을 때만(=프로세스 재시작으로 소실) `_candidates` 보강 →
+          그것도 없으면 **매수일 *이전* 봉으로 베이스 재검출**을 시도한다. 재검출
+          실패 시엔 미복구로 남긴다 — 잘못된 레벨로 손절선을 긋느니 §1 하드손절에
+          맡기는 편이 낫다(fail-safe, 절대 현행보다 나빠지지 않는다).
+
+        어떤 실패도 흡수한다 — 갱신 실패 시 기존 값이 남아 청산은 계속 산다.
         """
-        from datetime import date as _date
-        eligible_highs: list[int] = []
-        for c in candles:
-            bsop = c.get("stck_bsop_date") or ""
-            if len(bsop) != 8 or not bsop.isdigit():
-                continue
-            try:
-                bd = _date(int(bsop[:4]), int(bsop[4:6]), int(bsop[6:8]))
-            except (ValueError, KeyError):
-                continue
-            # 경계 엄격: 매수일 당일/오늘 모두 제외
-            if not (pos.buy_date < bd < today):
-                continue
-            try:
-                hi = int(c.get("stck_hgpr", "0"))
-            except (TypeError, ValueError):
-                continue
-            if hi > 0:
-                eligible_highs.append(hi)
-
-        if not eligible_highs:
+        if not candles:
             return
-        candidate = max(eligible_highs)
-        if candidate <= pos.high_since_buy:
-            return
+        try:
+            params = self.config.params
+            highs = [int(c.get("stck_hgpr", "0") or 0) for c in candles]
+            lows = [int(c.get("stck_lwpr", "0") or 0) for c in candles]
+            closes = [int(c.get("stck_clpr", "0") or 0) for c in candles]
+            atr = self._atr(highs, lows, closes, params["atr_period"])
+            period = int(params["ema_short"])
+            # `_atr` 는 KIS 최신순, `_ema` 는 시간순을 기대한다 (prepare 와 동일 규약).
+            chrono = list(reversed(closes))
+            ema50 = self._ema(chrono[-period:], period) if len(chrono) >= period else 0.0
 
-        prev = pos.high_since_buy
-        pos.high_since_buy = candidate
-        logger.info(
-            "VCP high_since_buy 보정: %s %d → %d "
-            "(매수일 %s 이후 %d영업일 일별 high max)",
-            pos.ticker, prev, candidate, pos.buy_date, len(eligible_highs),
-        )
-        # DB 영속화 + system_logs (fire-and-forget — 실패해도 메모리 보정은 유지)
-        try:
-            from src.db.positions import update_high
-            await update_high(pos.ticker, candidate)
+            cur = dict(self._position_setup.get(ticker) or {})
+            live = self._candidates.get(ticker) or {}
+            if not cur.get("base_low"):
+                if live.get("base_low"):
+                    cur["base_low"] = live["base_low"]
+                else:
+                    rederived = self._rederive_base_low(ticker, pos, candles)
+                    if rederived:
+                        cur["base_low"] = rederived
+            if atr > 0:
+                cur["atr14"] = int(atr)
+            if ema50 > 0:
+                cur["ema50"] = int(ema50)
+            if cur:
+                self._position_setup[ticker] = cur
         except Exception:
-            logger.exception("VCP high_since_buy DB UPDATE 실패: %s", pos.ticker)
+            logger.exception("[vcp_setup_refresh] 청산 셋업 갱신 실패 fail-open: %s", ticker)
+
+    def _rederive_base_low(self, ticker: str, pos, candles: list[dict]) -> int:
+        """매수일 **이전** 봉만으로 베이스를 재검출해 `base_low` 를 복원한다.
+
+        매수일 당일/이후 봉을 섞으면 돌파 이후 구간이 박스에 포함돼 베이스가
+        왜곡된다. 재검출이 실패하면 **0** — 호출자가 미복구로 남긴다.
+        """
         try:
-            from src.db.system_logs import write_log
-            await write_log(
-                "INFO",
-                f"[high_since_buy_recover] ticker={pos.ticker} prev={prev} "
-                f"new={candidate} days={len(eligible_highs)} buy_date={pos.buy_date}",
-            )
+            if pos is None or not getattr(pos, "buy_date", None):
+                return 0
+            buy_dd = pos.buy_date.strftime("%Y%m%d")
+            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
+            if len(prior) < self.config.params["base_min_days"]:
+                return 0
+            base = self._detect_base(prior)
+            low = int((base or {}).get("low", 0) or 0)
+            if low > 0:
+                logger.info("[vcp_setup_rederive] %s base_low=%d (매수일 이전 봉 재검출)",
+                            ticker, low)
+            return low
         except Exception:
-            pass
+            logger.exception("[vcp_setup_rederive] base_low 재검출 실패: %s", ticker)
+            return 0
+
+    # `_apply_high_since_buy_from_candles` 는 `StrategyBase` 로 승격(H-1, 2026-08-06).
+    # 아래 라벨이 추출 전 로그 리터럴("VCP high_since_buy 보정")을 byte 단위로 보존한다.
+    _HIGH_RECOVER_LABEL = "VCP"
 
     def on_position_closed(self, ticker: str) -> None:
         """사이클 191 — 포지션 청산 시 재진입 쿨다운 등록 (VCP override, BFB 패턴 답습).
@@ -1348,6 +1420,8 @@ class VcpBreakoutStrategy(StrategyBase):
         """
         self._breakeven_latched.discard(ticker)
         self._entry_atr.pop(ticker, None)
+        # P1 — 영속 청산 셋업 정리 (재진입 시 stale 구조 레벨로 손절하는 것 차단).
+        self._position_setup.pop(ticker, None)
         self.register_cooldown_after_exit(ticker)
         coro = self._refine_cooldown_business_days(ticker)
         try:

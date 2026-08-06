@@ -850,59 +850,12 @@ class DonchianSwingStrategy(StrategyBase):
                 continue
             await self._apply_high_since_buy_from_candles(pos, candles, today)
 
-    async def _apply_high_since_buy_from_candles(self, pos, candles: list[dict], today) -> None:
-        """일봉 응답에서 매수일 < bsop_date < today 범위 high max 를 추출해 보정.
-
-        보정값이 기존 high_since_buy 초과일 때만 갱신 + DB UPDATE + system_logs 1행.
-        """
-        from datetime import date as _date
-        eligible_highs: list[int] = []
-        for c in candles:
-            bsop = c.get("stck_bsop_date") or ""
-            if len(bsop) != 8 or not bsop.isdigit():
-                continue
-            try:
-                bd = _date(int(bsop[:4]), int(bsop[4:6]), int(bsop[6:8]))
-            except (ValueError, KeyError):
-                continue
-            # 경계 엄격: 매수일 당일/오늘 모두 제외
-            if not (pos.buy_date < bd < today):
-                continue
-            try:
-                hi = int(c.get("stck_hgpr", "0"))
-            except (TypeError, ValueError):
-                continue
-            if hi > 0:
-                eligible_highs.append(hi)
-
-        if not eligible_highs:
-            return
-        candidate = max(eligible_highs)
-        if candidate <= pos.high_since_buy:
-            return
-
-        prev = pos.high_since_buy
-        pos.high_since_buy = candidate
-        logger.info(
-            "도치안 스윙 high_since_buy 보정: %s %d → %d "
-            "(매수일 %s 이후 %d영업일 일별 high max)",
-            pos.ticker, prev, candidate, pos.buy_date, len(eligible_highs),
-        )
-        # DB 영속화 + system_logs (fire-and-forget — 실패해도 메모리 보정은 유지)
-        try:
-            from src.db.positions import update_high
-            await update_high(pos.ticker, candidate)
-        except Exception:
-            logger.exception("도치안 스윙 high_since_buy DB UPDATE 실패: %s", pos.ticker)
-        try:
-            from src.db.system_logs import write_log
-            await write_log(
-                "INFO",
-                f"[high_since_buy_recover] ticker={pos.ticker} prev={prev} "
-                f"new={candidate} days={len(eligible_highs)} buy_date={pos.buy_date}",
-            )
-        except Exception:
-            pass
+    # `_apply_high_since_buy_from_candles` 는 `StrategyBase` 로 승격(H-1, 2026-08-06) —
+    # VCP 에 로그 접두사만 다른 byte-identical 복사본이 있었고 kojiro 가 3번째가 될
+    # 참이라 단일 진실원으로 추출했다. 호출 계약(pos, candles, today)은 그대로다.
+    # 아래 라벨이 추출 전 로그 리터럴("도치안 스윙 high_since_buy 보정")을 보존한다 —
+    # 운영자가 과거 인시던트를 한글 표기로 grep 하는 경로가 끊기지 않게.
+    _HIGH_RECOVER_LABEL = "도치안 스윙"
 
     def get_scanned_tickers(self) -> list[str]:
         """WebSocket 사전 구독용."""

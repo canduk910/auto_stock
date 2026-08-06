@@ -330,6 +330,25 @@ async def boot(scheduler: "TradingScheduler") -> None:
     except Exception:
         logger.exception("[stock_master_eager] _boot 후 eager 갱신 실패 — lazy 경로로 자연 보강")
 
+    # P1.5 (2026-08-06) — bull_flag_breakout 재시작 복구.
+    #
+    # BFB 는 익일청산 대상도 15:20 강제청산 대상도 아니고 `check_force_clear()==[]`
+    # 이라 `max_hold_days` 까지 **실질 멀티데이 보유**다(종전 문서의 "BFB 는 익일
+    # 청산"은 거짓). 그런데 `_entry_atr`·`high_since_buy` 복구가 둘 다 없어서,
+    # 재시작하면 ATR 하드손절이 고정 % 로 무단 강등되고 트레일링 기준점이 매수가로
+    # 리셋된다.
+    #
+    # **여기(boot_manager)에 배선하는 이유**: (1) DB positions 복구가 **끝난 뒤**라
+    # 보유 종목이 확정돼 있고 (2) `scheduler.py` 는 매매 안전성 8영역이라 diff 0 을
+    # 지켜야 한다. `_SWING_POLL_STRATEGIES` 에 BFB 를 넣는 방법은 그 상수가 매수
+    # 폴루프·구독 대상에도 쓰여 **매수 행위가 바뀌므로 금지**.
+    _bfb = scheduler.registry.get("bull_flag_breakout")
+    if _bfb is not None and hasattr(_bfb, "recompute_high_since_buy"):
+        try:
+            await _bfb.recompute_high_since_buy()
+        except Exception:
+            logger.exception("bull_flag_breakout recompute_high_since_buy 실패")
+
     # 사이클 149 (2026-06-16) — 부팅 시점 VI 활성 종목 REST 보조 폴백 seed.
     # 자문 의제 4 (자문 채택) = inquire_vi_status REST 1회 호출 + graceful.
     # 부팅 시점 = 07:50 KST = 장 시작 *전* = VI 활성 거의 없음. 결함 시 영향 0.

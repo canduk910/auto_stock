@@ -496,3 +496,111 @@ class StrategyBase(ABC):
                 )
         except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
             pass
+
+    # ──────────── 트레일링 기준점 복구 (H-1, 2026-08-06 · 단일 진실원) ────────────
+
+    # 복구 성공 로그의 전략 표기. `None` 이면 `strategy_id` 를 쓴다.
+    # donchian/VCP 는 단일 진실원 추출 *이전*의 한글 표기를 그대로 보존한다 —
+    # 운영자가 과거 인시던트를 `grep "도치안 스윙 high_since_buy 보정"` 으로 찾는데
+    # 접두사가 바뀌면 추출 시점 이후 복구 이력이 0건으로 보인다.
+    _HIGH_RECOVER_LABEL: ClassVar[str | None] = None
+
+    @staticmethod
+    def _candle_trade_date(candle: dict) -> date | None:
+        """일봉 1행에서 영업일을 뽑는다 — KIS 원본 키 / 정규화 컬럼 양쪽 수용.
+
+        `stck_bsop_date` = KIS 원본(`"20260722"` 문자열) · `bas_dd` = DB 정규화
+        컬럼(asyncpg 가 `date` 객체로 반환). 어댑터 `get_recent_daily_normalized`
+        는 raw JSONB 가 없는 row 를 **row 자체로** 돌려주므로, 한 형태만 읽으면
+        그 종목의 봉이 조용히 전부 skip 된다.
+        """
+        raw = candle.get("stck_bsop_date") or candle.get("bas_dd")
+        if isinstance(raw, datetime):
+            return raw.date()
+        if isinstance(raw, date):
+            return raw
+        text = str(raw or "").replace("-", "")[:8]
+        if len(text) != 8 or not text.isdigit():
+            return None
+        try:
+            return date(int(text[:4]), int(text[4:6]), int(text[6:8]))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _candle_high(candle: dict) -> int:
+        """일봉 1행의 고가 — KIS `stck_hgpr` / 정규화 `high_price`. 실패 시 0.
+
+        ⚠️ `except Exception` 이 계약이다. `int(float("inf"))` 은
+        `(TypeError, ValueError)` 가 아니라 **OverflowError** 를 던지는데, 이게
+        새어 나가면 봉 하나가 `_apply_high_since_buy_from_candles` 를 통째로
+        중단시켜 **같은 루프의 남은 보유 종목까지** 그날 복구를 잃는다
+        (donchian 은 뒤따르는 `_breakout_high`/`_channel_low` 재도출도 함께 유실).
+        추출 실패는 "그 봉만 버린다"여야 한다.
+        """
+        raw = candle.get("stck_hgpr")
+        if raw is None or raw == "":
+            raw = candle.get("high_price")
+        try:
+            return int(float(raw))
+        except Exception:
+            return 0
+
+    async def _apply_high_since_buy_from_candles(
+        self, pos, candles: list[dict], today,
+    ) -> None:
+        """일봉 응답의 `buy_date < 영업일 < today` 범위 high max 로 고점을 보정한다.
+
+        보정값이 기존 `high_since_buy` 를 **초과할 때만** 갱신 + DB UPDATE +
+        `system_logs` 1행. 시세 미수신 누적 또는 재시작(`_boot` 이 DB row 로
+        Position 을 재생성)으로 트레일링 기준점이 매수가 부근에 동결되는 결함을
+        회복한다.
+
+        경계가 엄격한 이유 — **과대복구 구조적 차단**:
+          - 매수일 당일 제외: 그 날 고가는 매수 *전* 구간을 포함할 수 있어
+            실제로 보유하지 않은 고점을 잡는다(샹들리에 과대 → 조기 청산).
+          - 오늘 제외: 장중 미확정 봉.
+        따라서 남는 오차는 과소복구 한 방향뿐이고 그 방향은 청산을 늦춘다.
+
+        단일 진실원 — donchian_swing / vcp_breakout / kojiro 공유. 로그 접두사만
+        다른 복사본이 전략 파일마다 생기면 세 곳이 드리프트한다(회귀 가드
+        `test_kojiro_high_since_buy_recovery.py::test_no_duplicate_helper_definition_in_strategy_files`).
+        """
+        eligible_highs: list[int] = []
+        for c in candles:
+            bd = self._candle_trade_date(c)
+            if bd is None or not (pos.buy_date < bd < today):
+                continue
+            hi = self._candle_high(c)
+            if hi > 0:
+                eligible_highs.append(hi)
+
+        if not eligible_highs:
+            return
+        candidate = max(eligible_highs)
+        if candidate <= pos.high_since_buy:
+            return
+
+        prev = pos.high_since_buy
+        pos.high_since_buy = candidate
+        label = self._HIGH_RECOVER_LABEL or self.strategy_id
+        logger.info(
+            "%s high_since_buy 보정: %s %d → %d (매수일 %s 이후 %d영업일 일별 high max)",
+            label, pos.ticker, prev, candidate,
+            pos.buy_date, len(eligible_highs),
+        )
+        # DB 영속화 + system_logs (fire-and-forget — 실패해도 메모리 보정은 유지)
+        try:
+            from src.db.positions import update_high
+            await update_high(pos.ticker, candidate)
+        except Exception:
+            logger.exception("%s high_since_buy DB UPDATE 실패: %s", label, pos.ticker)
+        try:
+            from src.db.system_logs import write_log
+            await write_log(
+                "INFO",
+                f"[high_since_buy_recover] ticker={pos.ticker} prev={prev} "
+                f"new={candidate} days={len(eligible_highs)} buy_date={pos.buy_date}",
+            )
+        except Exception:
+            pass
