@@ -556,6 +556,39 @@ class OrderEngine:
             target_exchange = await self._strategy_exchange_async(
                 strategy_id, ticker=ticker
             )
+
+        # NXT 프리 시장가 매도 사전 지정가 변환 (2026-08-06 — 매수 PR-F :323 대칭).
+        # NXT 프리(08:00~09:00)는 KIS 정책상 지정가만 허용 — 시장가는 APBK0918 로
+        # 100% 거부된다(30일 8건 실측, 매수는 PR-F 가 이미 차단하는데 매도엔 대칭
+        # 코드가 없었다). risk 게이트가 LTV 외 전략의 프리장 청산 평가를 보류하므로
+        # 이 변환의 실효 대상은 LTV(프리장 매매가 설계 의도)다. 매도는 호가 깊이로
+        # **내려**(step_down) 체결률을 확보한다. 현재가 미수신이면 변환하지 않는다 —
+        # 임의 가격 지정가가 더 위험하고, 시장가 거부 → market_closed 보류가 안전망.
+        if order_division == OrderDivision.MARKET:
+            try:
+                from src.engine.scanner import ticker_prices as _tp
+                from src.engine.session import MarketBoard, session_tracker
+                _active = session_tracker.active
+                _is_pre_nxt_only = (
+                    MarketBoard.PRE_NXT in _active
+                    and MarketBoard.MAIN not in _active
+                )
+                if _is_pre_nxt_only and target_exchange in ("NXT", "SOR"):
+                    _cur = int(_tp.get(ticker, {}).get("current_price", 0) or 0)
+                    if _cur > 0:
+                        order_unpr = step_down(_cur, steps=5)
+                        order_division = OrderDivision.LIMIT
+                        logger.info(
+                            "[sell_market_preconvert_pre_nxt] ticker=%s exchange=%s "
+                            "current_price=%d converted_to_limit_price=%d",
+                            ticker, target_exchange, _cur, order_unpr,
+                        )
+            except Exception:
+                logger.debug(
+                    "[sell_market_preconvert_pre_nxt] 판정 실패 — 시장가 유지: %s",
+                    ticker, exc_info=True,
+                )
+
         for attempt in range(1, SELL_MAX_RETRIES + 1):
             try:
                 result = await place_order(

@@ -25,6 +25,25 @@ from src.engine.strategy_registry import StrategyRegistry
 
 logger = logging.getLogger(__name__)
 
+# NXT 프리장(08:00~09:00) 청산 **평가** 화이트리스트 (2026-08-06 사용자 결정).
+#
+# 여기 없는 전략은 프리장 단독 구간 동안 청산 평가(고점 갱신 포함) 자체를 보류한다.
+# 근거 = 프리장의 얇은 호가는 전일 상한가 종목의 시초가가 하한가 부근에 형성되는 등
+# 왜곡이 잦아(사용자 실측), 왜곡 틱으로 허깨비 손절이 발화하거나 트레일링 고점이
+# 오염된다. 30일 APBK0918 매도 거부 전수(momentum 익일매도 2 + donchian 손절 3 +
+# LTV 1)에서 KIS 거부가 **우연히** 이 보류를 수행해 전부 09:00 KRX 체결로 밀렸는데,
+# 이 게이트가 그 우연을 정식 경로로 만든다.
+#
+# **평가 보류이지 주문 보류가 아니다** — 주문만 보류하면 프리장 허깨비 틱이 발화시킨
+# 신호가 09:00 실제 매도로 전환된다(KRX 시가가 정상이어도 팔림). 평가를 보류하면
+# 09:00 부터 정상 시세로 재평가되어 진짜 이탈만 매도된다.
+#
+# LTV 는 프리장 매매가 설계 의도(상한가 익일 청산 + 프리장 매수, 사이클 38)라 예외.
+# ⚠️ `tradable_boards` 로 게이팅 금지 — 그 설정은 매수 전용(사이클 38 명문화)이고,
+#    매수 목적의 보드 변경이 청산 규약까지 조용히 바꾸는 커플링을 차단한다(AST 가드).
+_PRE_MARKET_EXIT_EVAL_STRATEGIES = frozenset({"long_tail_volatility"})
+
+
 class RiskManager:
     """실시간 시세를 감시하며 전략별 매매 신호에 따라 주문을 실행한다."""
 
@@ -42,6 +61,38 @@ class RiskManager:
         # scheduler 외부 직접 clear → reset_daily_state() 캡슐화 위임 (사이클 52 OrderEngine 패턴 답습).
         self._risk_silent_skip_logged_today: DailyEmitCap[tuple[str, str]] = DailyEmitCap[tuple[str, str]]()
         # 사이클 62 → 사이클 64 (2026-06-06): 가격 필터 필드 전면 제거 (scanner 이전)
+        # 프리장 청산 보류 관찰 로그 1회/전략/일 cap (2026-08-06)
+        self._pre_market_defer_logged: set[str] = set()
+
+    def _defers_pre_market_exit(self, strategy_id: str) -> bool:
+        """NXT 프리장 단독 구간이면 청산 평가를 보류할지 판정.
+
+        판정 소스는 `session_tracker.active`(스케줄러 이벤트 구동) — wall-clock 이
+        아니므로 단위 테스트 기본 상태(빈 frozenset)에서 결정적으로 꺼진다.
+        조건은 매수측 PR-F 와 동일한 membership(`PRE_NXT ∈ active AND MAIN ∉ active`).
+        판정 불가 시 **fail-open**(평가 유지) — 손절 정지가 더 위험하다.
+        """
+        if strategy_id in _PRE_MARKET_EXIT_EVAL_STRATEGIES:
+            return False
+        try:
+            from src.engine.session import MarketBoard
+            active = session_tracker.active
+            return (
+                MarketBoard.PRE_NXT in active
+                and MarketBoard.MAIN not in active
+            )
+        except Exception:
+            return False
+
+    def _maybe_emit_pre_market_defer(self, strategy_id: str) -> None:
+        """보류 발생 1회/전략/일 관찰 로그 — 매 틱 폭주 금지."""
+        if strategy_id in self._pre_market_defer_logged:
+            return
+        self._pre_market_defer_logged.add(strategy_id)
+        logger.info(
+            "[pre_market_exit_deferred] strategy=%s — NXT 프리장 청산 평가 보류, "
+            "09:00 KRX 시세로 재개", strategy_id,
+        )
 
     def reset_daily_state(self) -> None:
         """사이클 56-D — 일일 RiskManager 상태 초기화 (scheduler 위임).
@@ -51,6 +102,7 @@ class RiskManager:
         사이클 64 — 가격 필터 필드 scanner 이전으로 본 영역에서 제거.
         """
         self._risk_silent_skip_logged_today.clear()
+        self._pre_market_defer_logged.clear()
 
     async def on_tick(
         self,
@@ -108,16 +160,26 @@ class RiskManager:
                 state.buy_disabled = True
                 logger.warning("일일 최대 손실 한도 도달: %s, 신규 매수 중단", strategy.strategy_id)
 
-            # 보유 중이면 고가 갱신
+            # NXT 프리장 청산 평가 보류 게이트 (2026-08-06 사용자 결정) —
+            # 프리장 왜곡 틱의 허깨비 손절·트레일링 고점 오염 차단. LTV 만 예외
+            # (`_PRE_MARKET_EXIT_EVAL_STRATEGIES`). 09:00 MAIN 진입 시 자동 재개.
             pos = state.positions.get(ticker)
-            if pos:
+            defer_exit = pos is not None and self._defers_pre_market_exit(
+                strategy.strategy_id
+            )
+            if defer_exit:
+                self._maybe_emit_pre_market_defer(strategy.strategy_id)
+
+            # 보유 중이면 고가 갱신 (프리장 보류 중엔 왜곡 고가 앵커 오염 금지)
+            if pos and not defer_exit:
                 pos.high_since_buy = max(pos.high_since_buy, current_price)
 
             # 3. 청산 신호 확인 (보유 중인 경우)
             # 사이클 38 (2026-05-22) — `tradable_boards` 는 **매수 진입 전용** 정책 명문화.
             # 매도/손절/Trailing/익일청산/15:20 강제청산은 PRE/MAIN/POST 무관 항상 평가 —
             # 본 분기는 보드 가드 *없이* 진입 (line 102 `is_tradable` 검사 *전*).
-            if state.has_position(ticker):
+            # 유일한 예외 = 위 프리장 평가 보류 게이트(명시 화이트리스트, 보드 설정 무관).
+            if state.has_position(ticker) and not defer_exit:
                 # 사이클 19 (2026-05-20) — 매도 발사 후 체결통보 도착 전까지 check_exit_signal 호출 skip.
                 # `_selling` 은 execute_sell 진입 직후 add, 체결통보 _handle_sell_fill 시 discard.
                 # 매도 1회 보존 + 손절 로그 폭주 차단 (운영 결함: 042700 7초 18+ 행). 6 전략 공통.

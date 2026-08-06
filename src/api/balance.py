@@ -57,8 +57,15 @@ def is_market_order_disallowed(err: KisApiError) -> bool:
     계양전기(012200) "시장가매매불가" 거부 대응 (2026-05-11).
     msg_cd 누적: APBK1943 (계양전기 매도) + APBK3013 (NXT 애프터 매도).
     현재는 msg1 키워드 (`_MARKET_ORDER_DISALLOWED_KEYWORDS`) 기반 — 운영 로그 누적 후 화이트리스트화 예정.
-    기존 3종 분류(is_market_closed_rejection / is_insufficient_cash / is_insufficient_quantity)와
-    **상호 배타** — 이 함수가 True 이면 다른 3종은 모두 False 를 반환한다.
+
+    ⚠️ **`is_market_closed_rejection` 과 이중 매칭이 실재한다** (2026-08-06 정정 —
+    종전 "상호 배타" 서술은 프리마켓 msg1 에서 거짓): APBK0918
+    "장운영시간이 아닙니다.([프리마켓] 시장가 매매 불가 시간)" 은 양쪽 키워드에
+    동시 매칭된다. `execute_sell` 은 market_closed 를 **먼저** 검사하므로 이중
+    매칭은 "보류(포지션 보존 + 다음 09:00 TTL)" 로 떨어진다 — **이 우선순위가
+    의도된 계약**이다: 프리장은 왜곡 시세라 지정가 폴백으로 즉시 파는 것보다
+    09:00 KRX 보류가 안전하다(2026-08-06 사용자 결정). 순서를 뒤집지 마라.
+    `is_insufficient_*` 2종과는 상호 배타 유지.
     호출자: OrderEngine 의 시장가 거부 → 지정가 5호가 폴백 1회 분기.
     """
     msg1 = err.msg1 or ""
