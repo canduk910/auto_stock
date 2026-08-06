@@ -44,6 +44,40 @@ export interface KojiroTarget {
   target_price?: number
 }
 
+// VCP(vcp_breakout)/BFB(bull_flag_breakout) 후보 진단 그리드 전용 (get_targets_status).
+// StrategyInfo.targets 엔트리 캐스팅용 — "왜 안 사는가" 원인 규명 필드 (2026-08-06).
+// VCP: base_high/base_low/ema50 전용. BFB: pole_*/flag_*/measured_target/breakout_seen_at/
+// retention_minutes 전용. target_price(돌파선)/stop_line(손절선)은 양쪽 공통(백엔드가
+// VCP=base_high→target_price, BFB=flag_high→target_price 로 이미 별칭 처리해 보냄).
+export interface BreakoutDiagTarget {
+  name?: string             // 종목명 (resolve_ticker_name, miss 시 "" — ticker 폴백)
+  prev_close: number
+  atr14: number
+  stop_line: number         // 이탈 시 STOP_LOSS 가 나는 선 (VCP=base_low / BFB=flag_low)
+  volume_threshold: number
+  bought_today: boolean
+  in_cooldown: boolean
+  cooldown_until?: string | null   // ISO date(YYYY-MM-DD) 또는 null
+  target_price: number      // 돌파선 (VCP=base_high / BFB=flag_high)
+  // VCP 전용
+  base_high?: number
+  base_low?: number
+  ema50?: number
+  // BFB 전용
+  pole_start?: number
+  pole_high?: number
+  flag_high?: number
+  flag_low?: number
+  measured_target?: number
+  breakout_seen_at?: string | null  // BFB 첫 돌파 감지 KST ISO — retention_minutes 대기 기준
+  retention_minutes?: number
+  // VB 호환 키 (scheduler._confirm_breakout_open_prices 8영역 소비 계약 — 무시해도 됨)
+  k?: number
+  open_price?: number
+  target_offset?: number
+  open_confirmed?: boolean | Record<string, boolean>
+}
+
 export interface StrategyInfo {
   name: string
   enabled: boolean

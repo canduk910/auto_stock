@@ -4,6 +4,7 @@ import { getStrategyColor } from '../types/strategy'
 import type { BuySignal, ScanStats } from '../types/trading'
 import { getKstMinutes } from '../utils/stale-context'
 import KojiroMonitor from './KojiroMonitor'
+import BreakoutCandidateMonitor from './BreakoutCandidateMonitor'
 
 interface BoardTarget {
   open_price: number
@@ -284,6 +285,11 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
   const strategies = status?.strategies ?? {}
   const isAll = selectedStrategy === 'all'
   const isBreakout = (BREAKOUT_KEYS as readonly string[]).includes(selectedStrategy)
+  // VCP/BFB 전용 후보 진단 그리드 (2026-08-06) — VB/LTV 는 기존 "타겟 가격" 테이블 보존
+  // (보드별 K값·시가가 실제로 의미 있음). isBreakout 자체는 다른 곳(요약 카드/운영시간
+  // 안내/깔때기)에서 4종 공통으로 계속 쓰인다 — 아래 두 상수는 타겟 테이블 분기 전용.
+  const isVbLtv = selectedStrategy === 'volatility_breakout' || selectedStrategy === 'long_tail_volatility'
+  const isVcpOrBfb = selectedStrategy === 'vcp_breakout' || selectedStrategy === 'bull_flag_breakout'
   const isSwing = selectedStrategy === SWING_KEY
   const isKojiro = selectedStrategy === 'kojiro'
   const swingStrat = strategies[SWING_KEY]
@@ -891,8 +897,11 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               )
             })()}
 
-            {/* 돌파 전용 탭(VB/LTV): 종목 스캔 + 타겟 가격 테이블 */}
-            {isBreakout && (() => {
+            {/* 돌파 전용 탭(VB/LTV): 종목 스캔 + 타겟 가격 테이블.
+                VCP/BFB 는 전용 후보 진단 그리드로 대체 (2026-08-06, 아래 블록) —
+                보드별 K값·시가가 무의미한 두 전략에서 "K값 0.000 · 시가 -" 만 보여주던
+                결함 해소. VB/LTV 경로는 byte 동일 보존. */}
+            {isVbLtv && (() => {
               const strat = strategies[selectedStrategy]
               const targets = (strat?.targets ?? {}) as Record<string, BreakoutTarget>
               const targetEntries = Object.entries(targets)
@@ -1131,6 +1140,17 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                 </div>
               )
             })()}
+
+            {/* VCP/BFB 전용 탭: 후보 진단 그리드 (구독 커버리지 + 돌파선 거리 + 상태 배지).
+                장 외 시간에도 렌더 — 보드/시가 의존 없음 (KojiroMonitor 배선 패턴 답습). */}
+            {isVcpOrBfb && (
+              <BreakoutCandidateMonitor
+                strategyId={selectedStrategy as 'vcp_breakout' | 'bull_flag_breakout'}
+                strategies={strategies}
+                tickerPrices={scan?.ticker_prices}
+                subscribedTickers={scan?.subscribed_tickers}
+              />
+            )}
           </>
         )
       })()}

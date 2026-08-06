@@ -8,10 +8,16 @@
  * - 전체 탭에서 BFB/VCP 카운트 카드 노출
  * - 전략 탭 진입 시 BFB/VCP 도 운영시간 안내 + 타겟 가격 테이블 렌더 (VB/LTV 분기 재사용)
  *
+ * 의미 전환 (2026-08-06) — C13-B/C13-C: BFB/VCP 전략 탭의 "타겟 가격" 테이블(VB/LTV 재사용)이
+ * K값/보드별 시가가 무의미한 두 전략에 "K값 0.000 · 시가 -" 만 보여줘 "왜 안 사는가"에
+ * 답하지 못했다 (VCP 후보 0 / BFB 후보 33% WebSocket 미구독 은폐). `BreakoutCandidateMonitor`
+ * 전용 컴포넌트(구독 커버리지 + 돌파선 거리 + 상태 배지)로 대체 — VB/LTV 경로는 byte 동일
+ * 보존. 아래 두 케이스는 "타겟 가격" 헤더 대신 신규 컴포넌트 렌더를 검증하도록 갱신.
+ *
  * 회귀 가드 (3 케이스):
  * - C13-A: 전체 탭에서 BFB/VCP 카운트 카드 노출
- * - C13-B: BFB 전략 탭 진입 시 운영시간 안내 + 타겟 가격 헤더 렌더
- * - C13-C: VCP 전략 탭 진입 시 운영시간 안내 + 타겟 가격 헤더 렌더
+ * - C13-B: BFB 전략 탭 진입 시 BreakoutCandidateMonitor 렌더 (타겟 가격 테이블 대체)
+ * - C13-C: VCP 전략 탭 진입 시 BreakoutCandidateMonitor 렌더 (타겟 가격 테이블 대체)
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -167,27 +173,24 @@ describe("ScanMonitor — BFB/VCP 가시화 (사이클 13)", () => {
     expect(screen.getByText(/VCP 변동성 수축 스캔: 3종목/)).toBeInTheDocument();
   });
 
-  // C13-B: BFB 전략 탭 → 운영시간 안내 + 타겟 가격 헤더
-  it("C13-B: BFB 전략 탭 진입 시 운영시간 안내 + 타겟 가격 테이블 렌더", async () => {
+  // C13-B: BFB 전략 탭 → BreakoutCandidateMonitor 렌더 (타겟 가격 테이블 대체, 2026-08-06)
+  it("C13-B: BFB 전략 탭 진입 시 BreakoutCandidateMonitor 렌더 + 후보 종목 노출", async () => {
     await renderScanMonitor("bull_flag_breakout");
 
-    // 타겟 가격 헤더 (BFB 도 isBreakout 분기로 동일 테이블)
-    await screen.findByText(/타겟 가격 \(1종목\)/);
-    // 종목 셀 — "삼성전자(005930)"
-    await screen.findByText(/삼성전자\(005930\)/);
-    // 타겟가 셀 81,000 / 시가 79,000 (현재가 80,000 과 구분)
+    expect(await screen.findByTestId("breakout-candidate-monitor")).toBeTruthy();
+    expect(screen.getByTestId("breakout-candidate-row-005930")).toBeTruthy();
+    // 종목명(scan.ticker_names 아닌 targets.name 부재 → ticker 폴백)
+    expect(screen.getByTestId("breakout-candidate-row-005930").textContent).toContain("005930");
+    // 돌파선 81,000 렌더
     expect(screen.getByText("81,000")).toBeInTheDocument();
-    expect(screen.getByText("79,000")).toBeInTheDocument();
   });
 
-  // C13-C: VCP 전략 탭 → 운영시간 안내 + 타겟 가격 헤더
-  it("C13-C: VCP 전략 탭 진입 시 운영시간 안내 + 타겟 가격 테이블 렌더", async () => {
+  // C13-C: VCP 전략 탭 → BreakoutCandidateMonitor 렌더 (타겟 가격 테이블 대체, 2026-08-06)
+  it("C13-C: VCP 전략 탭 진입 시 BreakoutCandidateMonitor 렌더 + 후보 종목 노출", async () => {
     await renderScanMonitor("vcp_breakout");
 
-    await screen.findByText(/타겟 가격 \(1종목\)/);
-    await screen.findByText(/SK하이닉스\(000660\)/);
-    // 타겟가 152,000 / 시가 148,000 (현재가 150,000 과 구분)
+    expect(await screen.findByTestId("breakout-candidate-monitor")).toBeTruthy();
+    expect(screen.getByTestId("breakout-candidate-row-000660")).toBeTruthy();
     expect(screen.getByText("152,000")).toBeInTheDocument();
-    expect(screen.getByText("148,000")).toBeInTheDocument();
   });
 });

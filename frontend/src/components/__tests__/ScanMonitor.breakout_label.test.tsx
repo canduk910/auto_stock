@@ -18,6 +18,12 @@
  * - C18-B3: LTV + KRX 메인 시간 → 빨강 "돌파" (LTV tradable=[pre_nxt, main])
  * - C18-B4: BFB + POST_NXT 시간 → 회색 "돌파 (대기 — 메인)" (BFB tradable=[main])
  * - C18-B5: tradable_boards 미존재 (백엔드 미반영) → 기존 빨강 "돌파" fallback (안전 회귀)
+ *
+ * 의미 전환 (2026-08-06) — C18-B4: BFB 탭이 VB/LTV 재사용 "타겟 가격" 테이블(이 보드-매매
+ * 시간대 매칭 "돌파 (대기 — 보드)" 라벨의 출처)에서 전용 `BreakoutCandidateMonitor` 로
+ * 대체됐다 (ScanMonitor.bfb_vcp.test.tsx 동일 사유). 이 라벨 로직 자체는 VB/LTV 경로에 byte
+ * 동일 보존되므로 C18-B1/B2/B3/B5(VB/LTV) 는 무변경. C18-B4 는 BFB 탭이 신규 컴포넌트를
+ * 렌더함을 검증하도록 갱신 — 보드-매매시간 불일치 배지는 새 컴포넌트 범위 밖(후속 인계).
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -212,8 +218,8 @@ describe("ScanMonitor — 돌파 라벨 매매 가능 컨텍스트 (사이클 18
     expect(dolpa.className).toMatch(/red/);
   });
 
-  // C18-B4: BFB + POST_NXT → 회색 "돌파 (대기 — 메인)"
-  it("C18-B4: BFB POST_NXT 시간 → 회색 '돌파 (대기 — 메인)' 라벨", async () => {
+  // C18-B4: BFB → 타겟 가격 테이블 대신 BreakoutCandidateMonitor 렌더 (2026-08-06 의미 전환)
+  it("C18-B4: BFB 탭은 BreakoutCandidateMonitor 를 렌더 (구 '돌파 (대기 — 보드)' 라벨 없음)", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date("2026-05-19T07:43:00Z")); // KST 16:43 POST_NXT
 
@@ -232,9 +238,10 @@ describe("ScanMonitor — 돌파 라벨 매매 가능 컨텍스트 (사이클 18
 
     await renderScanMonitor("bull_flag_breakout");
 
-    const dolpaWait = await screen.findByText(/돌파 \(대기/);
-    expect(dolpaWait.className).toMatch(/gray/);
-    expect(dolpaWait.textContent).toMatch(/메인/);
+    expect(await screen.findByTestId("breakout-candidate-monitor")).toBeTruthy();
+    expect(screen.getByTestId("breakout-candidate-row-005930")).toBeTruthy();
+    // 구 로직(타겟 가격 테이블의 보드-매매시간 불일치 배지)은 더 이상 렌더되지 않음
+    expect(screen.queryByText(/돌파 \(대기/)).toBeNull();
   });
 
   // C18-B5: tradable_boards 미존재 → 기존 빨강 "돌파" fallback (안전 회귀)
