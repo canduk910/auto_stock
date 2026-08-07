@@ -3571,11 +3571,22 @@ class TradingScheduler:
         절대보장+LOW cap(사이클66 K-10) / 005930 대표구독(사이클26) / cap 20→60(214).
         매매 안전성 무영향(사이클38) — WS TICK/risk/order_engine/auth 변경 0.
         """
+        from websockets.exceptions import ConnectionClosedError
+        from websockets.protocol import State
+
         from src.api.market_operation import MARKET_OP_TR_ID
         from src.realtime.websocket import kis_ws
         from src.realtime.websocket_pool import kis_ws_pool
 
-        if kis_ws is None or not getattr(kis_ws, "_ws", None):
+        # 소켓 상태 가드 (2026-08-07) — 기존 가드는 `_ws` None 여부만 봐서, 재연결
+        # 레이스로 "존재하지만 닫힌"(state != OPEN) 소켓이 통과 → send() 에서
+        # ConnectionClosedError 폭주(08-07 11:24:57 HIGH 7종목 버스트). open 아니면
+        # 사이클 skip — H0UNMKO0 는 다음 5분 사이클에 자동 복구되는 VI 채널.
+        _ws_obj = getattr(kis_ws, "_ws", None) if kis_ws is not None else None
+        if _ws_obj is None:
+            return 0
+        if getattr(_ws_obj, "state", None) is not State.OPEN:
+            logger.info("[market_op_subscribe_skip] 소켓 미개방 — 사이클 skip, 다음 재개")
             return 0
 
         # HIGH = 보유 + 익일청산 (절대 보장)
@@ -3597,6 +3608,8 @@ class TradingScheduler:
         low_tickers = sorted(set(candidate_tickers) - high_tickers)[:cap]
 
         # 메인 세션 단일 구독 (보조 세션 절대 금지, 자문 의제 2)
+        # 루프 중 소켓이 닫히면(ConnectionClosedError) 남은 종목도 전부 실패하므로
+        # 즉시 break + WARNING 1행 — 재연결 중 예상 상태라 종목별 ERROR 폭주 금지.
         subscribed = 0
         for ticker in sorted(high_tickers):
             try:
@@ -3604,6 +3617,12 @@ class TradingScheduler:
                 await kis_ws.subscribe(MARKET_OP_TR_ID, ticker, bypass_limit=True)
                 subscribed += 1
                 await asyncio.sleep(0.05)  # Rate Limit 보호 (사이클 17 LMS chain)
+            except ConnectionClosedError:
+                logger.warning(
+                    "[market_op_subscribe] 소켓 재연결 중 — HIGH 남은 %d종목 skip",
+                    len(high_tickers) - subscribed,
+                )
+                break
             except Exception:
                 logger.exception(
                     "[market_op_subscribe] HIGH 구독 실패 ticker=%s graceful", ticker,
@@ -3614,6 +3633,11 @@ class TradingScheduler:
                 await kis_ws_pool.subscribe(MARKET_OP_TR_ID, ticker, priority="LOW")
                 subscribed += 1
                 await asyncio.sleep(0.05)
+            except ConnectionClosedError:
+                logger.warning(
+                    "[market_op_subscribe] 소켓 재연결 중 — LOW 잔여 skip",
+                )
+                break
             except Exception:
                 logger.exception(
                     "[market_op_subscribe] LOW 구독 실패 ticker=%s graceful", ticker,

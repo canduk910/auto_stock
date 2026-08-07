@@ -55,9 +55,11 @@ async def test_subscribe_market_op_does_not_raise_importerror(
     프로덕션 조건 재현: `src.realtime.websocket` 에는 `kis_ws_pool` 이 없다.
     (기존 cycle214 테스트가 주입하던 attr 을 명시적으로 제거해 결함 마스킹을 차단.)
     """
-    # 메인 세션 kis_ws = truthy `_ws` + AsyncMock subscribe (조기 return 회피).
+    # 메인 세션 kis_ws = open `_ws` + AsyncMock subscribe (조기 return 회피).
+    # 2026-08-07 — 소켓 상태 가드 도입으로 `_ws.state == State.OPEN` 필요.
+    from websockets.protocol import State as _State
     fake_ws = MagicMock()
-    fake_ws._ws = object()
+    fake_ws._ws = SimpleNamespace(state=_State.OPEN)
     fake_ws.subscribe = AsyncMock(return_value=None)
 
     # 풀 kis_ws_pool = 올바른 소스 모듈(websocket_pool)에 격리.

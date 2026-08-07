@@ -46,8 +46,11 @@ def _patch_ws(monkeypatch, *, main_ws_present: bool = True):
     패치한다. (kis_ws_pool 을 websocket 네임스페이스에 패치하면 실제 import 경로와
     어긋나 mock 이 미적용 — 결함 1(ImportError) 시정 후 patch 경로 적응.)
     """
+    # 2026-08-07 — 소켓 상태 가드 도입으로 mock `_ws` 가 open 상태(`state`)를
+    # 표현해야 한다 (프로덕션 행위 불변, mock 계약 적응).
+    from websockets.protocol import State as _State
     fake_ws = MagicMock()
-    fake_ws._ws = object() if main_ws_present else None
+    fake_ws._ws = SimpleNamespace(state=_State.OPEN) if main_ws_present else None
     fake_ws.subscribe = AsyncMock(return_value=None)
 
     fake_pool = MagicMock()
