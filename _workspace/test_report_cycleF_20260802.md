@@ -127,6 +127,13 @@ insufficient 표본(donchian/kojiro)은 TE 부호 무관 verdict=undecided 로 �
 - 프론트 TE/RR 카드 vitest `StrategiesTeRr.test.tsx`: **10 passed** (독립 재실행)
 - E2E `e2e/strategies.spec.ts`: **9 passed** (TE 섹션 추가로 인한 strategies 페이지 회귀 없음)
 
-### 발견 — E2E 커버리지 갭 (MEDIUM, 결함 아님)
+### E2E 커버리지 갭 → 해소 완료 (2026-08-02 후속)
 
-`e2e/strategies.spec.ts` 는 신규 TE/RR testid(`te-section`/`te-verdict`/`rr-gauge`/`te-structure` 등)를 **전혀 검증하지 않음**. 프론트 dev 가 api-mock 은 등록했으나 E2E 단언 케이스는 미추가(본인도 "직접 실행 안 함" 명시). vitest(10케이스)가 렌더 로직은 커버하므로 실동작 위험은 낮으나, 표본 게이트 3분기(N<20 뮤트 / 20≤N<50 게이지 / N≥50 정상)의 실브라우저 렌더 E2E 는 미존재. **인계: strategies.spec.ts 에 te-section 3분기 렌더 E2E 추가** (frontend-dev 또는 tdd-engineer).
+**최초 발견(MEDIUM)**: `e2e/strategies.spec.ts` 가 신규 TE/RR testid 를 전혀 단언하지 않음(vitest 10케이스만 렌더 커버, 실브라우저 표본 게이트 3분기 미검증).
+
+**해소(frontend-dev fdev-cycleF 직접 조치)**: `e2e/fixtures/api-mocks.ts` `MockOptions.teMetrics?: AnyJson[]` 추가(시나리오별 override) + `strategies.spec.ts` 신규 3케이스:
+- **F-ST1** (N<20 insufficient): `te-verdict` "판정 유보" + `rr-gauge-fill`/`te-structure` `toHaveCount(0)`(DOM 부재) + `te-sample-caption` "표본 부족(9건)"
+- **F-ST2** (20≤N<50 + rr_available): `te-verdict` "우위" + `rr-gauge-fill`/`rr-gauge-marker` visible + `te-structure` "견고형" + amber "표본 적음"
+- **F-ST3** (N≥50 + single_trade_dominant): `te-sample-caption` "RR 과대 가능" + `te-reference-table` + `te-education-caption` "TE는 거래당 기대손익"
+
+**tester 독립 검증**: 신규 3케이스가 명세 F-FE3 표본 게이트 3분기(자문 §226 표)에 정확 매핑 확인 + `strategies.spec.ts` **12/12 PASS**(기존 9 + 신규 3) 독립 재실행 확인. **E2E 표본 게이트 3분기 실브라우저 커버리지 확보 — 갭 종결.**
