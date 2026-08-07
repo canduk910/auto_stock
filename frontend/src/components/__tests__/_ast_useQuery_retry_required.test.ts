@@ -38,6 +38,9 @@ const TARGET_FILES = [
   // 사이클 I (2026-08-03) — PortfolioRiskCard.tsx 추가 (포트폴리오 리스크 관찰 카드,
   // Dashboard 마운트 시 발화, e2e ECONNREFUSED 영구 차단 의무).
   'PortfolioRiskCard.tsx',
+  // 전략 성과 표시 정직화 — PerformanceCard.tsx 에 strategy-te useQuery 신규 추가
+  // (Dashboard 마운트 시 발화, e2e ECONNREFUSED 영구 차단 의무).
+  'PerformanceCard.tsx',
 ]
 
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e
