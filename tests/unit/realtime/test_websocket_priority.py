@@ -311,16 +311,20 @@ async def test_priority_groups_no_drop_no_drop_log(_ws_subscribe_spy, caplog):
 #   최종 drop = max(0, len(breakout_overflow) - actually_added_in_2nd_pass)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_breakout_overflow_absorbs_unused_slots(_ws_subscribe_spy, caplog):
-    """잔여 슬롯 1개 시나리오: HIGH 5 + breakout 28 + swing 10 → breakout cap 25 + overflow 1 흡수 + 2 drop.
+async def test_breakout_takes_all_low_slots_swing_dropped(_ws_subscribe_spy, caplog):
+    """[의미 전환 2026-08-08] cap 25 제거 — breakout 전체 pass-1 최우선.
 
-    실제 산수: HIGH 5 + cap 25 + swing 10 = 40 → 잔여 1 → overflow 3 중 1 흡수 → 총 41, drop=2.
-    (PR #8 Copilot 리뷰: 이 docstring 의 'drop=0' 주장이 assertion(`drop=2`) 과 불일치하던 결함 정정)
+    HIGH 5 + breakout 28 + swing 10, 잔여 36:
+      - breakout 28 → 28 add (잔여 8, drop 0)
+      - swing 10 → 8 add (drop 2)
+      - 총 5+28+8 = 41
+    종전엔 breakout cap 25 + overflow 2-pass 흡수였으나 cap 제거로 breakout 이
+    잔여를 먼저 다 먹고 swing 이 밀린다.
     """
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
 
     positions = [f"P{i:03d}" for i in range(5)]    # HIGH 5
-    breakout = [f"B{i:03d}" for i in range(28)]    # cap 25 → overflow 3
+    breakout = [f"B{i:03d}" for i in range(28)]    # cap 없음 → 전체 pass-1
     momentum: list[str] = []
     swing = [f"S{i:03d}" for i in range(10)]       # 10
 
@@ -337,17 +341,17 @@ async def test_breakout_overflow_absorbs_unused_slots(_ws_subscribe_spy, caplog)
     )
 
     subs = _ws_subscribe_spy["subs"]
-    # HIGH 5 + cap 25 + swing 10 = 40 → 잔여 1 → overflow 1 흡수 + 2 drop → 총 41
-    assert len(subs) == 41, f"잔여 슬롯이 overflow 1 흡수로 41 가득 (실제 {len(subs)})"
+    assert len(subs) == 41, f"HIGH 5 + breakout 28 + swing 8 = 41 (실제 {len(subs)})"
 
-    # breakout overflow 3 중 1 add — drop=2
+    # breakout 28 전체 add (cap 없음)
     breakout_in = sum(1 for t in breakout if ("H0UNCNT0", t) in subs)
-    assert breakout_in == 26, f"breakout cap 25 + overflow 1 흡수 = 26 (실제 {breakout_in})"
+    assert breakout_in == 28, f"breakout 전체 pass-1 우선 (실제 {breakout_in})"
 
-    # [priority_drop] 로그에 breakout=2 (overflow 3 중 1 흡수 후 잔여 2 drop)
+    # swing 은 잔여 8 만 → 2 drop
     msg = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" in msg
-    assert "breakout=2" in msg, f"2-pass 흡수 후 drop=2 노출 (msg={msg!r})"
+    assert "breakout=0" in msg, f"breakout 전체 add (msg={msg!r})"
+    assert "swing=2" in msg, f"swing 2 drop (msg={msg!r})"
 
 
 @pytest.mark.asyncio
@@ -392,13 +396,18 @@ async def test_breakout_overflow_fully_absorbed_when_unused_slots_sufficient(_ws
 
 
 @pytest.mark.asyncio
-async def test_2pass_does_not_break_existing_cap_invariant(_ws_subscribe_spy, caplog):
-    """잔여 슬롯이 0 이면 overflow 흡수 0 — 한도 41 절대 초과 안 함."""
+async def test_breakout_priority_keeps_41_limit_invariant(_ws_subscribe_spy, caplog):
+    """[의미 전환 2026-08-08] cap 제거 후에도 한도 41 절대 초과 안 함.
+
+    HIGH 0 + breakout 30 + momentum 20 + swing 20:
+      - breakout 30 → 30 add (잔여 11, drop 0)
+      - momentum 20 → 11 add (drop 9)
+      - swing 20 → 0 add (drop 20)
+      - 총 41
+    cap 제거로 breakout 이 우선이나, 41 초과 금지 불변식은 그대로.
+    """
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
 
-    # HIGH 0 + breakout 30 (cap 25 → overflow 5) + momentum 20 + swing 20
-    # 1차: cap 25 + momentum 16 (잔여 0 도달) + swing 0 = 41
-    # 잔여 0 → overflow 0 흡수 → drop: breakout 5 + momentum 4 + swing 20
     breakout = [f"B{i:03d}" for i in range(30)]
     momentum = [f"M{i:03d}" for i in range(20)]
     swing = [f"S{i:03d}" for i in range(20)]
@@ -418,14 +427,15 @@ async def test_2pass_does_not_break_existing_cap_invariant(_ws_subscribe_spy, ca
     subs = _ws_subscribe_spy["subs"]
     assert len(subs) == MAX_SUBSCRIPTIONS, f"한도 41 절대 초과 안 됨 (실제 {len(subs)})"
 
-    # breakout 25 (cap), overflow 5 모두 drop
+    # breakout 30 전체 add (cap 없음, 잔여 41 내)
     breakout_in = sum(1 for t in breakout if ("H0UNCNT0", t) in subs)
-    assert breakout_in == 25, f"breakout cap 25 (잔여 0 → overflow 0 흡수) (실제 {breakout_in})"
+    assert breakout_in == 30, f"breakout 전체 add (실제 {breakout_in})"
 
-    # [priority_drop] 로그
+    # [priority_drop] 로그 — momentum 9 + swing 20 drop, breakout 0
     msg = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" in msg
-    assert "breakout=5" in msg, f"breakout overflow 5 drop (msg={msg!r})"
+    assert "breakout=0" in msg, f"breakout 전체 add (msg={msg!r})"
+    assert "momentum=9" in msg, f"momentum 9 drop (msg={msg!r})"
 
 
 @pytest.mark.asyncio

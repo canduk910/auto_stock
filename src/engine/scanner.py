@@ -483,12 +483,11 @@ MIN_MARKET_CAP = 100_000_000_000      # 시총 1000억 이상
 MIN_TRADE_AMOUNT = 20_000_000_000     # 거래대금 200억 이상
 MAX_STOCKS = 40                        # 최대 구독 종목 수
 
-# Breakout(VB/LTV) 후순위 슬롯 cap (2026-05-13 작업 2 — momentum 보호).
-# 2026-05-13 08:57:39 운영 로그에서 vb=30+ltv=30 → dedup 28 breakout 점유 후
-# 09:30 momentum 발화 시 41 한도 초과 → momentum drop 위험 노출. breakout 을
-# 25개로 cap 해 잔여 슬롯을 momentum 에 보장한다.
-# 명세: `_workspace/00_leader_trading_rules.md` (2026-05-13) 작업 2.
-BREAKOUT_LOW_CAP = 25
+# ~~BREAKOUT_LOW_CAP = 25~~ 제거 (2026-08-08). cap 의 명분(09:30 momentum 발화
+# 슬롯 보장)은 momentum 비활성으로 소멸했고, momentum 급등 스캔이 enabled 무관
+# 리스트를 채워 cap 이 breakout(BFB/VCP) 슬롯을 죽은 momentum 으로 전용시키는
+# 능동적 손해였다. subscribe pass-1 이 breakout 전체를 최우선 처리, 순서는
+# `_collect_breakout_tickers`(BFB→VCP→VB→LTV, 2026-08-08 tail 편중 해소).
 
 # ETF/ETN 제외 키워드
 ETF_KEYWORDS = ("KODEX", "TIGER", "KBSTAR", "KOSEF", "ARIRANG", "SOL", "ACE",
@@ -1094,16 +1093,17 @@ async def subscribe_filtered_stocks(
         _pool_session_count = len(kis_ws_pool.get_session_status())   # main + 보조 N = 1+N
         _pool_total_slots = MAX_SUBSCRIPTIONS * _pool_session_count
 
-        # 작업 2 (2026-05-13): breakout cap 25 — momentum 슬롯 보호.
-        # 1차에서는 cap 만 add, overflow 는 2차에서 잔여 슬롯에 흡수.
-        breakout_primary: list[str]
-        breakout_overflow: list[str]
-        if len(breakout) > BREAKOUT_LOW_CAP:
-            breakout_primary = breakout[:BREAKOUT_LOW_CAP]
-            breakout_overflow = breakout[BREAKOUT_LOW_CAP:]
-        else:
-            breakout_primary = breakout
-            breakout_overflow = []
+        # ~~작업 2 (2026-05-13): breakout cap 25~~ → **제거 (2026-08-08)**.
+        # cap 25 의 명분은 "09:30 momentum 발화 슬롯 보장" 이었으나 momentum 은
+        # 현재 비활성(enabled=False, weight 0)이라 지킬 대상이 사라졌다. 그런데
+        # momentum 급등 스캔(`scan_stocks`)은 registry.enabled 를 참조하지 않아
+        # 비활성이어도 리스트가 채워지므로, cap 은 살아있는 breakout(특히 BFB/VCP)
+        # 슬롯을 매수신호 0 인 죽은 momentum 스캔으로 전용시키는 **능동적 손해**였다.
+        # breakout 전체를 pass-1 최우선으로 둔다 — pool 압박 시엔
+        # `_collect_breakout_tickers` 순서(BFB→VCP→VB→LTV)의 tail(VB/LTV)부터 잘려
+        # BFB/VCP 가 우선 구독된다(사용자 결정 2026-08-08).
+        breakout_primary = breakout
+        breakout_overflow: list[str] = []
 
         # 1-pass: cap 적용된 breakout + momentum + swing 순서로 add
         # 사이클 7-C — 풀로 위임. priority='LOW' (보조 세션 라운드로빈 우선, 메인 fallback).
@@ -1172,11 +1172,15 @@ async def subscribe_filtered_stocks(
             total_subscribed = len(kis_ws._subscriptions)
             high_count = len(set(positions) | set(next_day_clear))
             low_remaining = max(0, MAX_SUBSCRIPTIONS - total_subscribed)
+            # 미구독 진단 계측 (2026-08-08) — pool 세션수·총슬롯 병기. max=41 은 메인
+            # 단독 한도라 pool 총량(41×세션수)이 안 보였다. drop 이 세션 부족 때문인지
+            # 후보 과다 때문인지 이 필드로 판별한다(BFB/VCP 미구독 근본 진단).
             drop_log = (
                 f"[priority_drop] breakout={drop_counts['breakout']} "
                 f"momentum={drop_counts['momentum']} swing={drop_counts['swing']} "
                 f"total_subscribed={total_subscribed} max={MAX_SUBSCRIPTIONS} "
-                f"high_count={high_count} low_remaining={low_remaining}"
+                f"high_count={high_count} low_remaining={low_remaining} "
+                f"pool_sessions={_pool_session_count} pool_slots={_pool_total_slots}"
             )
             logger.warning(drop_log)
             # 사이클 72 hotfix A11: write_log 제거 — logger.warning → _DbLogHandler 위임 단일 INSERT

@@ -386,9 +386,9 @@ class TestLineReductionEffect:
         #   호출 + `[etf_regime]` 관찰 로그 + `set_current_etf_signal` 부착, try/except
         #   graceful) → ≤ 4,218L.
         # 카드 #21 효과 (-103L scheduler 분해) 보존 — 사이클 149~E-1 추가는 신규 기능/시정 한정.
-        assert line_count <= 4225, (
+        assert line_count <= 4230, (
             f"scheduler.py 라인 감소 영속 위반 — got {line_count}L, "
-            f"target ≤ 4,225L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L + 188 +11L + 189 +14L + 193 +10L + C3 +60L + kojiro +30L + nxt_prelimit_fix +53L + 사이클C +10L + 사이클D +16L + 사이클E-1 +22L + market_op_socket_guard +7L). "
+            f"target ≤ 4,230L (사이클 134 ≤ 3,400L + 142 +21L + 146 +25L + 149 +90L + 150 +85L + 158 +15L + 160 +25L + 162 +26L + 164 +85L + 171 +145L + 188 +11L + 189 +14L + 193 +10L + C3 +60L + kojiro +30L + nxt_prelimit_fix +53L + 사이클C +10L + 사이클D +16L + 사이클E-1 +22L + market_op_socket_guard +7L + breakout_priority_order +5L). "
             "사이클 130 카드 #21 영속 + 사이클 142/146/149/150/158/160/162/164/171/188/189/193/C3/kojiro/nxt_prelimit_fix/사이클C/사이클D/사이클E-1 추가 영속."
         )
 

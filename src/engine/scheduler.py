@@ -1685,12 +1685,17 @@ class TradingScheduler:
         breakout 그룹의 유일한 소스)에 포함되어야 구독 → tick 수신 → 매수 평가가 성립한다.
         미포함 시 유니버스/임계 완화를 해도 BFB/VCP 0건 지속.
         """
+        # 병합 순서 = 구독 우선순위 (dedup 순서 보존 → pool 압박 시 tail 부터 잘림).
+        # BFB/VCP 를 head 로 (2026-08-08, 사용자 결정) — 종전 VB→LTV→BFB→VCP 는
+        # BFB/VCP 를 tail 로 밀어 pool 압박 시 먼저 잘렸다(BFB 60% 미구독 실측).
+        # BFB/VCP 는 폴링 루프 없이 risk.on_tick(tick)으로만 매수 평가하므로 구독
+        # 우선순위가 곧 매수 기회다. VB/LTV 는 15:20 당일청산·후순위 감내 가능.
         tickers: list[str] = []
         for sid in (
-            "volatility_breakout",
-            "long_tail_volatility",
             "bull_flag_breakout",
             "vcp_breakout",
+            "volatility_breakout",
+            "long_tail_volatility",
         ):
             strategy = self.registry.get(sid)
             if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):

@@ -61,15 +61,16 @@ def _fresh_ws_subscriptions():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_low_priority_drop_order_breakout_kept_swing_dropped(_fresh_ws_subscriptions, caplog):
-    """LOW 슬롯 부족 시 breakout 우선, swing 가장 먼저 drop.
+    """LOW 슬롯 부족 시 breakout 우선, swing·momentum 이 drop.
 
-    작업 2 (2026-05-13) cap 25 도입 후 시나리오 조정 — 같은 의도(breakout 우선,
-    swing drop) 유지하되 cap 영향 반영:
+    [의미 전환 2026-08-08] cap 25 제거 → breakout 전체 pass-1 최우선.
+    momentum 명분(발화 슬롯 보장)이 비활성으로 소멸했으므로 breakout 이
+    잔여 슬롯을 다 먹고 momentum·swing 이 밀린다(사용자 결정):
     - HIGH 11(bypass) → 잔여 30
-    - breakout 38 → cap 25 (cap drop 13) → 25 add → 잔여 5
-    - momentum 5 → 5 add (drop 0) → 잔여 0
-    - swing 10 → 0 add → swing drop 10
-    - low_remaining=0, breakout=13, momentum=0, swing=10
+    - breakout 38 → 30 add (한도 소진) → 8 drop → 잔여 0
+    - momentum 5 → 0 add (drop 5)
+    - swing 10 → 0 add (drop 10)
+    - low_remaining=0, breakout=8, momentum=5, swing=10
     """
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
     mock_subscribe, _ = _fresh_ws_subscriptions
@@ -97,15 +98,15 @@ async def test_low_priority_drop_order_breakout_kept_swing_dropped(_fresh_ws_sub
     for h in positions:
         assert h in called_tickers, f"HIGH {h} bypass 보장"
 
-    # breakout 은 cap 25 만 add (38 - 13 = 25)
+    # breakout 은 잔여 30 을 다 먹는다 (cap 없음, 38 중 30 add / 8 drop)
     breakout_subscribed = [t for t in called_tickers if t.startswith("B")]
-    assert len(breakout_subscribed) == 25, (
-        f"breakout cap 25 적용, 실제={len(breakout_subscribed)}"
+    assert len(breakout_subscribed) == 30, (
+        f"breakout 전체 pass-1 우선, 잔여 30 소진, 실제={len(breakout_subscribed)}"
     )
 
-    # momentum 5개 모두 add (LOW 잔여 5)
+    # momentum 0개 add (breakout 이 한도 소진 — 명분 소멸)
     momentum_subscribed = [t for t in called_tickers if t.startswith("M")]
-    assert len(momentum_subscribed) == 5, f"momentum 5개 모두 add, 실제={len(momentum_subscribed)}"
+    assert len(momentum_subscribed) == 0, f"momentum 도 밀린다, 실제={len(momentum_subscribed)}"
 
     # swing 0개 add (한도 소진)
     swing_subscribed = [t for t in called_tickers if t.startswith("S")]
@@ -114,8 +115,8 @@ async def test_low_priority_drop_order_breakout_kept_swing_dropped(_fresh_ws_sub
     # 로그 검증
     log_text = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" in log_text
-    assert "breakout=13" in log_text, f"breakout cap drop 13건, log={log_text}"
-    assert "momentum=0" in log_text
+    assert "breakout=8" in log_text, f"breakout 한도 drop 8건, log={log_text}"
+    assert "momentum=5" in log_text, "momentum 5개 drop"
     assert "swing=10" in log_text, "swing 10개 drop"
     assert "total_subscribed=" in log_text
     assert "max=41" in log_text
@@ -168,8 +169,8 @@ async def test_priority_drop_writes_warning_to_system_logs(
 ):
     """drop>0 시 logger.warning("[priority_drop] ...") 호출 + caplog 검증.
 
-    작업 2 (2026-05-13) cap 25 도입 후 시나리오 — HIGH 11 + breakout 38 + momentum 5
-    + swing 10 → breakout cap drop 13 + swing 한도 drop 10.
+    [의미 전환 2026-08-08] cap 25 제거 — HIGH 11 + breakout 38 + momentum 5 +
+    swing 10 → breakout 30 add(한도 소진) → breakout 8 + momentum 5 + swing 10 drop.
 
     사이클 72 hotfix: write_log → logger.warning 변경 → caplog 검증으로 전환.
     """
@@ -196,8 +197,8 @@ async def test_priority_drop_writes_warning_to_system_logs(
     ]
     assert len(drop_records) >= 1, "drop>0 시 [priority_drop] WARNING 로그 없음"
     drop_msg = drop_records[0].message
-    assert "breakout=13" in drop_msg, f"breakout cap drop 13건, msg={drop_msg}"
-    assert "momentum=0" in drop_msg
+    assert "breakout=8" in drop_msg, f"breakout 한도 drop 8건, msg={drop_msg}"
+    assert "momentum=5" in drop_msg
     assert "swing=10" in drop_msg
     assert "total_subscribed=" in drop_msg
     assert "max=41" in drop_msg
@@ -304,13 +305,14 @@ async def test_high_group_bypass_limit_preserved(_fresh_ws_subscriptions):
 # 모멘텀 매수 기회 통째로 상실 차단 위해 breakout 후순위 cap 25.
 # ---------------------------------------------------------------------------
 
-def test_breakout_cap_constant_value_is_25():
-    """`scanner.BREAKOUT_LOW_CAP` 상수가 25 로 정의되어 있어야 한다."""
-    assert hasattr(scanner_module, "BREAKOUT_LOW_CAP"), (
-        "scanner 에 BREAKOUT_LOW_CAP 상수가 정의되어야 함"
-    )
-    assert scanner_module.BREAKOUT_LOW_CAP == 25, (
-        f"BREAKOUT_LOW_CAP=25 가 명세값, 실제={scanner_module.BREAKOUT_LOW_CAP}"
+def test_breakout_cap_constant_removed():
+    """[의미 전환 2026-08-08] BREAKOUT_LOW_CAP 제거 — momentum 명분 소멸.
+
+    cap 은 살아있는 breakout(BFB/VCP) 슬롯을 죽은 momentum 급등 스캔으로
+    전용시키는 능동적 손해였다. breakout 전체가 pass-1 최우선.
+    """
+    assert not hasattr(scanner_module, "BREAKOUT_LOW_CAP"), (
+        "BREAKOUT_LOW_CAP 은 제거됐다 — breakout 전체 pass-1 우선"
     )
 
 
@@ -350,14 +352,15 @@ async def test_breakout_cap_25_applied_when_breakout_exceeds(_fresh_ws_subscript
 
 
 @pytest.mark.asyncio
-async def test_breakout_cap_preserves_momentum_slot(_fresh_ws_subscriptions, caplog):
-    """momentum 슬롯 보호 정책 — 1차 cap 25 가 momentum 보다 먼저 처리되어 momentum 슬롯 점유 안 함.
+async def test_breakout_takes_priority_over_momentum(_fresh_ws_subscriptions, caplog):
+    """[의미 전환 2026-08-08] momentum 슬롯 보호 폐기 — breakout 최우선.
 
-    PR-E (2026-05-15): cap 정책의 핵심 의도(momentum 보호)는 1-pass 단계에서 보존.
+    cap 25 의 핵심 의도였던 "momentum 슬롯 보호"는 momentum 비활성으로 명분이
+    소멸했다. 이제 breakout 이 잔여 슬롯을 먼저 먹고 momentum 이 밀린다(사용자 결정).
     HIGH 4 + breakout 30 + momentum 10:
-      - 1차: HIGH 4 + cap 25 + momentum 10 + swing 0 = 39 → 잔여 2
-      - 2차: overflow 5 중 2 흡수 → 41 사용, 흡수 못 한 3 만 drop
-    momentum 은 cap 정책으로 1차에서 100% 보호 (이게 핵심) — overflow 가 momentum 슬롯 침범 안 함.
+      - 잔여 = 41 - 4 = 37
+      - breakout 30 → 30 add (잔여 7, drop 0)
+      - momentum 10 → 7 add (drop 3)
     """
     caplog.set_level(logging.INFO, logger="src.engine.scanner")
     mock_subscribe, _ = _fresh_ws_subscriptions
@@ -384,20 +387,19 @@ async def test_breakout_cap_preserves_momentum_slot(_fresh_ws_subscriptions, cap
     momentum_subscribed = [t for t in called if t.startswith("M")]
 
     assert len(high_subscribed) == 4, f"HIGH 4개 모두 add, 실제={len(high_subscribed)}"
-    # 핵심 — momentum 슬롯 100% 보호 (cap 의 본래 의도)
-    assert len(momentum_subscribed) == 10, (
-        f"momentum 10개 모두 add 보호 (cap 의 본래 의도), 실제={len(momentum_subscribed)}"
+    # breakout 최우선 — 전체 30 add (cap 없음)
+    assert len(breakout_subscribed) == 30, (
+        f"breakout 전체 pass-1 우선, 실제={len(breakout_subscribed)}"
     )
-    # PR-E 2-pass: cap 25 + 잔여 2 슬롯에 overflow 2 흡수 = 27
-    assert len(breakout_subscribed) == 27, (
-        f"PR-E 2-pass: cap 25 + overflow 2 흡수 = 27 (잔여 슬롯 활용), 실제={len(breakout_subscribed)}"
+    # momentum 은 잔여 7 만 (명분 소멸, breakout 이 먼저 먹음)
+    assert len(momentum_subscribed) == 7, (
+        f"momentum 은 잔여 7 슬롯만, 실제={len(momentum_subscribed)}"
     )
 
     log_text = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" in log_text
-    # overflow 5 - 흡수 2 = 3 drop
-    assert "breakout=3" in log_text, f"overflow 5 - 흡수 2 = drop 3, log={log_text}"
-    assert "momentum=0" in log_text
+    assert "breakout=0" in log_text, f"breakout 전체 add, drop 0, log={log_text}"
+    assert "momentum=3" in log_text, "momentum 3 drop (10 - 잔여 7)"
     assert "swing=0" in log_text
 
 
@@ -426,3 +428,25 @@ async def test_breakout_cap_no_effect_when_under_cap(_fresh_ws_subscriptions, ca
     # cap 미적용 + slot 여유 → drop 0 → priority_drop 로그 없음
     log_text = "\n".join(r.message for r in caplog.records)
     assert "[priority_drop]" not in log_text, "drop 0 시 priority_drop 로그 없어야 함"
+
+
+# ---------------------------------------------------------------------------
+# 2026-08-08 — breakout 병합 순서 BFB→VCP→VB→LTV (tail 편중 해소)
+# ---------------------------------------------------------------------------
+def test_collect_breakout_order_bfb_vcp_first():
+    """`_collect_breakout_tickers` 가 BFB→VCP→VB→LTV 순으로 병합한다.
+
+    dedup 순서 보존 → pool 압박 시 tail(VB/LTV)부터 잘려 BFB/VCP 우선 구독.
+    종전 VB→LTV→BFB→VCP 는 BFB/VCP 를 tail 로 밀었다(60% 미구독 실측).
+    """
+    import inspect
+    from src.engine.scheduler import TradingScheduler
+
+    src = inspect.getsource(TradingScheduler._collect_breakout_tickers)
+    i_bfb = src.find('"bull_flag_breakout"')
+    i_vcp = src.find('"vcp_breakout"')
+    i_vb = src.find('"volatility_breakout"')
+    i_ltv = src.find('"long_tail_volatility"')
+    assert 0 < i_bfb < i_vcp < i_vb < i_ltv, (
+        f"BFB→VCP→VB→LTV 순이어야 함 (bfb={i_bfb} vcp={i_vcp} vb={i_vb} ltv={i_ltv})"
+    )
