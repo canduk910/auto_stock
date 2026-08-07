@@ -57,6 +57,20 @@ async def boot(scheduler: "TradingScheduler") -> None:
     # DB에서 전략 설정(비중/파라미터) 로드
     await scheduler._load_strategy_config()
 
+    # 불변식 런타임 가드 (2026-08-08) — 실행 params 로 position_ratio × max_positions
+    # ≤ 1.0 검증. 운영자 수동 DB apply 가 불변식을 우회하는 사각 차단(kojiro 1.2
+    # 위반이 그 경로). 관찰 WARNING 만 — 매수/청산 미개입, fail-open.
+    try:
+        from src.engine.portfolio_risk import check_budget_invariant
+        for v in check_budget_invariant(scheduler.registry.all()):
+            logger.warning(
+                "[budget_invariant_violation] strategy=%s ratio=%.4f max_positions=%d "
+                "product=%.4f > 1.0 — 운영자 DB 값 재확인 필요(부분매수로 흡수되나 정직도 위반)",
+                v["strategy_id"], v["ratio"], v["max_positions"], v["product"],
+            )
+    except Exception:
+        logger.exception("[budget_invariant_guard] 검증 실패 graceful — 부팅 계속")
+
     holdings, summary = await get_balance()
 
     # 사이클 2 (2026-05-17): 시장 레짐 fetch + snapshot INSERT + cash_usage_ratio 자동 조정.

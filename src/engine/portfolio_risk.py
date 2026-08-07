@@ -162,3 +162,48 @@ def compute_portfolio_risk_snapshot(
         "by_sector": by_sector,
         "top_sector": top_sector,
     }
+
+
+def check_budget_invariant(strategies: Iterable[Any]) -> list[dict]:
+    """실행 params 로 불변식 ``position_ratio × max_positions ≤ 1.0`` 을 검증한다.
+
+    부트 config-load 후 호출되는 런타임 가드 (관찰 전용, 배제 0). 기존 가드는
+    소스 DEFAULT_PARAMS(C-DEFAULT AST)와 AI 추천(C-CROSS)만 봐서, 운영자 수동
+    ``PUT /api/strategies/{id}/params`` 또는 DB 직접 수정이 불변식을 우회하는
+    사각이 있었다(2026-08-08 kojiro 1.2 위반이 그 경로). 금전 초과매수는
+    ``_apply_budget_limit`` 이 부분매수로 흡수하지만 정직도가 무너진다.
+
+    fail-open — position_ratio / max_positions 결측·비정상은 위반 아님으로 skip
+    (가드가 부팅을 막지 않는다). registry 미참조(호출자 주입, 8영역 무관).
+
+    Args:
+        strategies: registry.all() 로 얻은 전략 리스트.
+
+    Returns:
+        위반 목록 ``[{strategy_id, ratio, max_positions, product}]`` (곱 > 1.0 만).
+    """
+    violations: list[dict] = []
+    for s in strategies:
+        try:
+            params = s.config.params
+            ratio = params.get("position_ratio")
+            maxp = params.get("max_positions")
+            if ratio is None or maxp is None:
+                continue
+            ratio = float(ratio)
+            maxp = int(maxp)
+            if ratio <= 0 or maxp <= 0:
+                continue
+            product = ratio * maxp
+            # 1e-9 여유 — 0.166×6=0.996 통과, 0.1667×6=1.0002 위반 (부동소수 경계)
+            if product > 1.0 + 1e-9:
+                violations.append({
+                    "strategy_id": s.strategy_id,
+                    "ratio": ratio,
+                    "max_positions": maxp,
+                    "product": product,
+                })
+        except Exception:
+            # fail-open — 어떤 전략의 파싱 실패도 부팅을 막지 않는다
+            continue
+    return violations
