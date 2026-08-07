@@ -140,7 +140,9 @@ async def test_b_active_defensive_market_regime_payload(monkeypatch):
     assert mr["regime"] == "defensive"
     assert mr["vix_level"] == "elevated"
     assert mr["fear_greed_label"] == "공포"
-    assert mr["buy_blocked"] is True
+    # [의미 전환 2026-08-07] 관찰 전용 — 레짐은 매수를 차단하지 않는다(사이클 I).
+    # 자문 payload buy_blocked 는 defensive 여도 False (block_reason 은 관찰용 유지).
+    assert mr["buy_blocked"] is False
     # 사이클 1 의 8 필드도 함께 보존
     for key in (
         "strategy_name",

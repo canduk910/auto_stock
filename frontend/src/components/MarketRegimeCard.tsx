@@ -103,12 +103,26 @@ export default function MarketRegimeCard() {
         )}
       </div>
 
+      {/* 관찰 전용 안내 (2026-08-07) — 자동 조정 OFF 이면 레짐은 실제 매매에
+          반영되지 않는다. red 방어 배지 + amber 경보 + cash 100% 병치가 "시스템이
+          방어 중"으로 오인되던 것을 화해시키는 문구. */}
+      {data.enabled && !data.auto_regime_adjust && (
+        <div
+          data-testid="market-regime-observation-note"
+          className="mb-3 px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600"
+        >
+          레짐은 <strong>관찰 전용</strong>입니다 — 실제 매매에 반영되지 않습니다
+          (현재 cash_usage_ratio {(data.cash_usage_ratio * 100).toFixed(0)}% 수동).
+          아래 배지·경보는 dkstock 의 <strong>권고</strong>이며, 자동 조정은 OFF 입니다.
+        </div>
+      )}
+
       {data.block_reason && (
         <div
           data-testid="market-regime-block-banner"
           className="mb-3 px-3 py-2 bg-amber-50 border border-amber-300 rounded text-sm text-amber-900"
         >
-          <strong>레짐 경보</strong> — {data.block_reason}
+          <strong>레짐 경보{!data.auto_regime_adjust ? ' (권고·관찰)' : ''}</strong> — {data.block_reason}
         </div>
       )}
 

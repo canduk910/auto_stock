@@ -178,7 +178,9 @@ class MarketRegime:
             cycle_phase=cycle_obj.get("phase"),
             vix=_f(regime_obj.get("vix")),
             fear_greed_score=_f(regime_obj.get("fear_greed_score")),
-            buffett_ratio=_f(params_obj.get("pbr_max")) if params_obj.get("pbr_max") not in (None, 0) else None,
+            # F1 (2026-08-07) — buffett_ratio 는 regime.buffett_ratio 에 있다.
+            # 종전엔 params.pbr_max(PBR 상한, 라이브 0=비활성)를 읽어 전 계층 null 이었다.
+            buffett_ratio=_f(regime_obj.get("buffett_ratio")),
             cash_min=_i(params_obj.get("cash_min")),
             raw=dict(macro or {}),
         )
@@ -494,7 +496,12 @@ class MarketRegime:
             "fear_greed_score": self.fear_greed_score,
             "fear_greed_label": self._classify_fear_greed(),
             "buffett_ratio": self.buffett_ratio,
-            "buy_blocked": self.buy_blocked,
+            # 사이클 I(2026-08-03) — 레짐은 매수를 차단하지 않는다(관찰 전용). 자문
+            # payload 도 /current 와 정합해 항상 False. 종전 레거시 `self.buy_blocked`
+            # (defensive → True)를 방출하면 SYSTEM_PROMPT 거짓 등가와 결합해 AI 가
+            # 매수 파라미터 튜닝을 통째로 스킵했다. block_reason 은 관찰용으로 유지 —
+            # AI 가 방어 레짐이면 보수적 파라미터를 권고하는 참고 신호로만 쓴다.
+            "buy_blocked": False,
             "block_reason": self.block_reason,
             "cash_min_recommended": self.cash_min,
             "stock_max_recommended": stock_max,

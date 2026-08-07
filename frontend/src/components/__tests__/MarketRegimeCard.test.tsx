@@ -82,6 +82,39 @@ describe('MarketRegimeCard', () => {
     expect(banner.textContent).toContain('defensive')
   })
 
+  it('B7-A2: 자동 조정 OFF(라이브 상태) → 관찰 전용 배너 + 경보에 (권고·관찰) 표기', async () => {
+    // 2026-08-07 라이브 = auto_regime_adjust=false, defensive 권고, cash 100% 수동.
+    // 대시보드가 "방어/경보/현금75% 권고"와 "실제 cash 100%"를 화해시켜야 한다.
+    server.use(
+      http.get('/api/market-regime/current', () =>
+        HttpResponse.json(wrap({ ...defensivePayload, auto_regime_adjust: false, cash_usage_ratio: 1.0 }))),
+    )
+    render(
+      <TestProviders>
+        <MarketRegimeCard />
+      </TestProviders>,
+    )
+
+    const note = await screen.findByTestId('market-regime-observation-note')
+    expect(note.textContent).toContain('관찰 전용')
+    expect(note.textContent).toContain('100%')   // 실제 cash 수동
+    const banner = screen.getByTestId('market-regime-block-banner')
+    expect(banner.textContent).toContain('권고·관찰')
+  })
+
+  it('B7-A3: 자동 조정 ON 이면 관찰 전용 배너 미표시', async () => {
+    server.use(
+      http.get('/api/market-regime/current', () => HttpResponse.json(wrap(defensivePayload))),
+    )
+    render(
+      <TestProviders>
+        <MarketRegimeCard />
+      </TestProviders>,
+    )
+    await screen.findByTestId('market-regime-badge')
+    expect(screen.queryByTestId('market-regime-observation-note')).toBeNull()
+  })
+
   it('B7-B: regime=aggressive 시 blue 배지 + 가드 비활성', async () => {
     server.use(
       http.get('/api/market-regime/current', () => HttpResponse.json(wrap(aggressivePayload))),

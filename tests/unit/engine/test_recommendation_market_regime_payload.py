@@ -208,7 +208,11 @@ async def test_c_active_defensive_regime_included(monkeypatch):
     mr = payload["market_regime"]
     assert mr["regime"] == "defensive"
     assert mr["vix"] == 28.0
-    assert mr["buy_blocked"] is True
+    # [의미 전환 2026-08-07] 사이클 I 이후 레짐은 매수를 차단하지 않는다(관찰 전용).
+    # 자문 payload 도 /current 와 정합해 defensive 여도 buy_blocked=False —
+    # AI 가 거짓 "전면 차단" 전제로 매수 튜닝을 스킵하던 것을 막는다.
+    assert mr["buy_blocked"] is False
+    assert mr["block_reason"] is not None   # 방어 '권고' 사유는 관찰용으로 유지
 
 
 # ---------------------------------------------------------------------------
@@ -250,7 +254,8 @@ def test_d_to_advisor_dict_keys():
     assert d["buffett_ratio"] == 220.0
     assert d["cash_min_recommended"] == 75
     assert d["stock_max_recommended"] == 25
-    assert d["buy_blocked"] is True
+    # [의미 전환 2026-08-07] 관찰 전용 — 자문 buy_blocked 항상 False (block_reason 유지)
+    assert d["buy_blocked"] is False
     assert d["block_reason"] is not None
 
 
