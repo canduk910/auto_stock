@@ -44,8 +44,8 @@ logger = logging.getLogger(__name__)
 
 # 사이클 47 (2026-05-22, refactor-review 카드 #3) — Funnel 단계 정의 모듈 상수.
 FUNNEL_STAGES: tuple[FunnelStage, ...] = (
-    FunnelStage(1, "코스피200+코스닥150 합집합"),
-    FunnelStage(2, "시총 ≥ 1,000억"),
+    FunnelStage(1, "전체 상장 유니버스 (시총/거래대금 컷 전)"),
+    FunnelStage(2, "시총·거래대금 컷 통과"),
     # 사이클 157 (2026-06-17) — 1단계 진입 차단 13건 step 신규 영구 영속 → 9단계.
     FunnelStage(3, "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)"),
     FunnelStage(4, "일봉 fetch + 추세필터"),
@@ -150,9 +150,14 @@ class VcpBreakoutStrategy(StrategyBase):
         "min_vol_floor_pct": 1.0,
         "turtle_min_stop_pct": -5.0,
         # 유니버스
-        "min_market_cap": 100_000_000_000,
-        "min_trade_amount": 3_000_000_000,
-        "max_scan_stocks": 200,
+        # 2026-08-08 확대 유니버스 — 지수(KOSPI200∪KOSDAQ150) 제약 제거(전체 상장) + 거래대금
+        # 10억 필터 신설(현재 min_trade_amount=0 하드코딩이라 미사용이던 것을 실사용) + max_scan
+        # 200→4000. 시총 하한 = 100억(사용자 결정 — kojiro 500억보다 낮게 유지해 미네르비니
+        # 중소형 성장주 서식지를 더 넓게 포착. 라이브 DB 값 100억 정합). 거래량 ×1.5 돌파 +
+        # 거래량 수축이 소형주 작전 신호를 이중 방어.
+        "min_market_cap": 10_000_000_000,
+        "min_trade_amount": 1_000_000_000,
+        "max_scan_stocks": 4000,
         # 일반
         "daily_loss_limit": -8.0,
     }
@@ -230,15 +235,24 @@ class VcpBreakoutStrategy(StrategyBase):
         # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
         # 사이클 170 카드 C — step_conditions "고정 유니버스" → 실제 소스 정합.
         # 사이클 157 부터 stock_master.list_by_filter(is_kospi200, is_kosdaq150) 기반.
+        # 2026-08-08 확대 — step0=union(컷 전 전체상장)/step1=trade(시총·거래대금 컷 통과)
+        # 배선 (kojiro 패턴). 이전엔 둘 다 survived=tickers(컷 후)라 step0/step1 카운트
+        # collapse → "컷 전" 라벨이 실카운트와 모순. stage_counts 로 실제 union/trade 노출.
+        stage_counts = getattr(self, "_scan_stage_counts", None) or {}
+        union_tickers = stage_counts.get("union_tickers", tickers)
+        trade_tickers = stage_counts.get("trade_tickers", tickers)
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[0],
-            survived=tickers,
-            step_conditions="코스피200 + 코스닥150 합집합 원천 유니버스 후보 (필터 전)",
+            survived=union_tickers,
+            step_conditions="전체 상장 (지수 무제약) 원천 유니버스 후보 (시총/거래대금 컷 전)",
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[1],
-            survived=tickers,
-            step_conditions=f"시총 ≥ {p['min_market_cap']/100_000_000:.0f}억",
+            survived=trade_tickers,
+            step_conditions=(
+                f"시총 ≥ {p['min_market_cap']/100_000_000:.0f}억 "
+                f"+ 거래대금 ≥ {p['min_trade_amount']/100_000_000:.0f}억"
+            ),
         )
 
         # 사이클 157 — step 3: 1단계 진입 차단 13건 (master_raw 7 + raw 6)
@@ -793,30 +807,33 @@ class VcpBreakoutStrategy(StrategyBase):
         return sum(trs) / period
 
     async def _scan_universe(self) -> list[str]:
-        """stock_master DB 기반 KOSPI200 + KOSDAQ150 유니버스 (사이클 157 hardcoded 영역 폐기).
+        """stock_master DB 기반 확대 유니버스 (2026-08-08 — kojiro 동일 필터).
 
-        사이클 157 Q1 (2026-06-17) — KOSPI_200_TICKERS/KOSDAQ_150_TICKERS hardcoded list
-        + fetch_stock_detail (124 KIS 호출/일) 폐기. 사이클 153 donchian 패턴 답습.
-        KIS API 호출 0건 (사이클 17 KIS LMS chain 안전 마진 강화).
+        2026-08-08 확대 — 지수(KOSPI200∪KOSDAQ150) 제약 제거 → 전체 상장 ∩ 시총≥500억
+        ∩ 거래대금≥10억 (kojiro `_scan_universe` 정합). 미네르비니 VCP 셋업은 대형 지수주가
+        아니라 중소형 성장주에서 나오므로 지수 제약이 서식지를 배제해 왔다. 신설 거래대금
+        필터가 저유동성 소형주 슬리피지를 방어. 일봉 데이터는 이미 존재(daily-load 유니버스
+        = 지수∪500억/10억 = 확대 상위집합, 실측 비지수 자격 641종목 중 95.8%가 ≥100일 적재).
 
-        사이클 153 영속 — `list_by_filter(is_kospi200=True, is_kosdaq150=True)`
-        OR 합집합 영역 영구 영속 (FUNNEL_STAGES[0] "코스피200+코스닥150 합집합" 정합).
+        사이클 157 (2026-06-17) — KOSPI_200_TICKERS/KOSDAQ_150_TICKERS hardcoded list
+        + fetch_stock_detail (124 KIS 호출/일) 폐기. KIS API 호출 0건 (사이클 17 LMS chain).
         """
         from src.db import stock_master as _sm_mod
         from src.engine.scanner import ETF_KEYWORDS, ticker_names
 
         p = self.config.params
         min_mcap = p["min_market_cap"]
+        min_trade = p["min_trade_amount"]
         max_stocks = p["max_scan_stocks"]
 
         try:
-            # 사이클 157 — 사이클 153 패턴 답습 (KOSPI200 + KOSDAQ150 OR 합집합)
+            # 2026-08-08 확대 — kojiro 동일 (전체 상장 ∩ 시총 ∩ 거래대금)
             # 사이클 175 — return_stage_counts 로 합집합(union) 노출 (ScanMonitor "합집합" 정합)
             rows, stage = await _sm_mod.list_by_filter(
                 min_market_cap=min_mcap,
-                min_trade_amount=0,  # VCP 는 거래대금 필터 미사용 (시총 단독)
-                is_kospi200=True,
-                is_kosdaq150=True,
+                min_trade_amount=min_trade,  # 2026-08-08 확대 — 거래대금 필터 신설 (kojiro 동일)
+                is_kospi200=None,
+                is_kosdaq150=None,
                 limit=max_stocks,
                 return_stage_counts=True,
             )
@@ -824,12 +841,15 @@ class VcpBreakoutStrategy(StrategyBase):
             logger.exception(
                 "VCP stock_master.list_by_filter 호출 실패 graceful — 빈 list 반환"
             )
+            self._scan_stage_counts = {}
             self._scan_stats["universe_union"] = 0
             self._scan_stats["universe_candidates"] = 0
             self._scan_stats["universe_filtered"] = 0
             return []
 
         # 사이클 175 — 합집합(union) 노출 (시총 컷 전 원천)
+        # 2026-08-08 확대 — funnel step0(union)/step1(trade) 배선용 stage 보관 (kojiro 패턴)
+        self._scan_stage_counts = stage
         self._scan_stats["universe_union"] = len(stage.get("union_tickers", rows))
         self._scan_stats["universe_candidates"] = len(rows)
         self._scan_stats["mcap_pass"] = len(rows)  # 사이클 23 P1-3 (list_by_filter 가 이미 mcap 컷)
@@ -849,8 +869,8 @@ class VcpBreakoutStrategy(StrategyBase):
 
         self._scan_stats["universe_filtered"] = len(filtered)
         logger.info(
-            "VCP 유니버스 확정: %d/%d종목 (stock_master DB, 시총 %d억+)",
-            len(filtered), len(rows), min_mcap // 100_000_000,
+            "VCP 유니버스 확정: %d/%d종목 (stock_master DB 확대, 전체상장 ∩ 시총 %d억+ ∩ 거래대금 %d억+)",
+            len(filtered), len(rows), min_mcap // 100_000_000, min_trade // 100_000_000,
         )
 
         # 사이클 151 — PriceFilter 후처리 (사이클 148 VB 영역 답습, Q2=C 단일 source 영속)

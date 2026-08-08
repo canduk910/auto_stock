@@ -203,6 +203,7 @@ async def test_vcp_prepare_handles_kis_100_day_limit(monkeypatch):
         "volume_contraction_ratio": 0.70,
         "breakout_volume_mult": 1.5,
         "min_market_cap": 100_000_000_000,
+        "min_trade_amount": 1_000_000_000,  # 2026-08-08 확대 — step1 라벨 f-string 참조 (__new__ 우회라 DEFAULT 병합 없음)
         "atr_period": 14,
         "tradable_boards": ["main"],
         "exchange": "KRX",

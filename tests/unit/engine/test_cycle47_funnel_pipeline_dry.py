@@ -195,11 +195,11 @@ def test_funnel_stages_step_names_consistent():
     """3 전략 step_no=1 단계 step_name 이 사용자 명세와 일치."""
     from src.engine.strategies import bull_flag_breakout, vcp_breakout, donchian_swing
 
-    # BFB step_no=1 — 유니버스 후보
+    # BFB step_no=1 — 유니버스 후보 (이미 지수 무제약, 확대 후에도 유지)
     assert bull_flag_breakout.FUNNEL_STAGES[0].step_name == "유니버스 후보"
-    # VCP step_no=1 — 코스피200+코스닥150 합집합
-    assert vcp_breakout.FUNNEL_STAGES[0].step_name == "코스피200+코스닥150 합집합"
-    # donchian step_no=1 — 코스피200+코스닥150 합집합
+    # VCP step_no=1 — [의미 전환 2026-08-08 확대] 지수 합집합 → 전체 상장 유니버스
+    assert vcp_breakout.FUNNEL_STAGES[0].step_name == "전체 상장 유니버스 (시총/거래대금 컷 전)"
+    # donchian step_no=1 — 코스피200+코스닥150 합집합 (donchian 은 확대 대상 아님, 유지)
     assert donchian_swing.FUNNEL_STAGES[0].step_name == "코스피200+코스닥150 합집합"
 
 

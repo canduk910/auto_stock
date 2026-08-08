@@ -39,14 +39,19 @@ async def _inert_price_filter():
 class TestG157Vcp1:
     @pytest.mark.asyncio
     async def test_g157_vcp_1_scan_universe_uses_list_by_filter(self):
-        """G-157-VCP-1 HIGH — vcp_breakout._scan_universe → list_by_filter(is_kospi200=True, is_kosdaq150=True) 호출 의무 (사이클 153 donchian 패턴 답습)."""
+        """G-157-VCP-1 HIGH — vcp_breakout._scan_universe → list_by_filter 호출 의무.
+
+        [의미 전환 2026-08-08 확대 유니버스] 사이클 157 시점엔 is_kospi200=True/is_kosdaq150=True
+        (지수 합집합) 였으나, 확대 유니버스 적용으로 지수 제약 제거 → is_kospi200=None/
+        is_kosdaq150=None (전체 상장) + 거래대금 필터 신설(min_trade_amount>0). kojiro 정합.
+        """
         from src.engine.strategies import vcp_breakout
 
         cfg = vcp_breakout.StrategyConfig(
             strategy_id="vcp_breakout",
             name="VCP",
             weight=1.0,
-            params={"min_market_cap": 100_000_000_000, "max_scan_stocks": 100},
+            params={"min_market_cap": 50_000_000_000, "max_scan_stocks": 100},
         )
         strat = vcp_breakout.VcpBreakoutStrategy(cfg)
 
@@ -54,17 +59,22 @@ class TestG157Vcp1:
 
         async def fake_list_by_filter(**kwargs):
             captured_kwargs.update(kwargs)
+            if kwargs.get("return_stage_counts"):
+                return [], {"union_tickers": [], "mcap_tickers": [], "trade_tickers": []}
             return []
 
         with patch("src.db.stock_master.list_by_filter", side_effect=fake_list_by_filter):
             with patch("src.db.system_config.get_price_filter", new=_inert_price_filter):
                 await strat._scan_universe()
 
-        assert captured_kwargs.get("is_kospi200") is True, (
-            "G-157-VCP-1 HIGH — is_kospi200=True 인자 의무 (사이클 153 donchian 패턴)"
+        assert captured_kwargs.get("is_kospi200") is None, (
+            "G-157-VCP-1 HIGH [확대] — is_kospi200=None 의무 (지수 제약 제거, kojiro 정합)"
         )
-        assert captured_kwargs.get("is_kosdaq150") is True, (
-            "G-157-VCP-1 HIGH — is_kosdaq150=True 인자 의무 (사이클 153 donchian 패턴)"
+        assert captured_kwargs.get("is_kosdaq150") is None, (
+            "G-157-VCP-1 HIGH [확대] — is_kosdaq150=None 의무 (지수 제약 제거, kojiro 정합)"
+        )
+        assert captured_kwargs.get("min_trade_amount", 0) > 0, (
+            "G-157-VCP-1 HIGH [확대] — 거래대금 필터 신설 의무 (미네르비니 소형주 유동성 방어)"
         )
 
 

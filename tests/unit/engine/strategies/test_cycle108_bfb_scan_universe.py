@@ -37,6 +37,18 @@ def _make_sm_row(ticker: str, name: str = "테스트종목") -> dict:
     }
 
 
+def _lbf_mock(rows):
+    """list_by_filter mock — [2026-08-08 확대] return_stage_counts=True 튜플 반환.
+
+    BFB _scan_universe 가 확대 유니버스 전환으로 `rows, stage = await list_by_filter(
+    return_stage_counts=True)` 로 언팩(VCP/kojiro 정합, 합집합 노출)하므로 mock 도
+    (rows, stage) 튜플을 반환해야 한다. 이전엔 plain list 반환이었음(의미 전환).
+    """
+    tickers = [r["ticker"] for r in rows]
+    stage = {"union_tickers": tickers, "mcap_tickers": tickers, "trade_tickers": tickers}
+    return AsyncMock(return_value=(rows, stage))
+
+
 # ---------------------------------------------------------------------------
 # HIGH-4: KIS volume-rank API 호출 0건
 # ---------------------------------------------------------------------------
@@ -49,7 +61,7 @@ class TestBfbScanUniverseHigh4:
         strategy = _make_strategy()
         rows = [_make_sm_row("005930")]
 
-        with patch("src.db.stock_master.list_by_filter", new=AsyncMock(return_value=rows)), \
+        with patch("src.db.stock_master.list_by_filter", new=_lbf_mock(rows)), \
              patch("src.api.base.kis_get") as mock_kis_get:
             asyncio.run(strategy._scan_universe())
             mock_kis_get.assert_not_called()
@@ -59,7 +71,7 @@ class TestBfbScanUniverseHigh4:
         strategy = _make_strategy()
         rows = [_make_sm_row("035720")]
 
-        with patch("src.db.stock_master.list_by_filter", new=AsyncMock(return_value=rows)) as mock_lbf:
+        with patch("src.db.stock_master.list_by_filter", new=_lbf_mock(rows)) as mock_lbf:
             result = asyncio.run(strategy._scan_universe())
             mock_lbf.assert_called_once()
 
@@ -112,7 +124,7 @@ class TestBfbScanUniverseMedium1:
             _make_sm_row("005930", name="삼성전자"),
         ]
 
-        with patch("src.db.stock_master.list_by_filter", new=AsyncMock(return_value=rows)):
+        with patch("src.db.stock_master.list_by_filter", new=_lbf_mock(rows)):
             result = asyncio.run(strategy._scan_universe())
 
         assert "069500" not in result
@@ -126,7 +138,7 @@ class TestBfbScanUniverseMedium1:
             _make_sm_row("005930", name="삼성전자"),
         ]
 
-        with patch("src.db.stock_master.list_by_filter", new=AsyncMock(return_value=rows)):
+        with patch("src.db.stock_master.list_by_filter", new=_lbf_mock(rows)):
             result = asyncio.run(strategy._scan_universe())
 
         assert "Q52010" not in result
@@ -145,7 +157,7 @@ class TestBfbScanUniverseMedium2:
         strategy = _make_strategy()
         rows = [_make_sm_row(f"{i:06d}") for i in range(1, 8)]
 
-        with patch("src.db.stock_master.list_by_filter", new=AsyncMock(return_value=rows)):
+        with patch("src.db.stock_master.list_by_filter", new=_lbf_mock(rows)):
             asyncio.run(strategy._scan_universe())
 
         assert strategy._scan_stats["universe_candidates"] == 7
@@ -159,7 +171,7 @@ class TestBfbScanUniverseMedium2:
             _make_sm_row("000660", name="SK하이닉스"),
         ]
 
-        with patch("src.db.stock_master.list_by_filter", new=AsyncMock(return_value=rows)):
+        with patch("src.db.stock_master.list_by_filter", new=_lbf_mock(rows)):
             asyncio.run(strategy._scan_universe())
 
         assert strategy._scan_stats["universe_candidates"] == 3
@@ -170,7 +182,7 @@ class TestBfbScanUniverseMedium2:
         strategy = _make_strategy()
         rows = [_make_sm_row("005930")]
 
-        with patch("src.db.stock_master.list_by_filter", new=AsyncMock(return_value=rows)):
+        with patch("src.db.stock_master.list_by_filter", new=_lbf_mock(rows)):
             asyncio.run(strategy._scan_universe())
 
         assert strategy._scan_stats["last_run_at"] is not None

@@ -55,6 +55,8 @@ FUNNEL_STAGES: tuple[FunnelStage, ...] = (
 
 def _empty_scan_stats() -> dict:
     return {
+        # 2026-08-08 확대 — 전체 상장 합집합 (시총·거래대금 컷 *전* 원천, VCP/kojiro 정합)
+        "universe_union": 0,
         "universe_candidates": 0,
         "universe_filtered": 0,
         "candle_fetch_ok": 0,
@@ -122,10 +124,13 @@ class BullFlagBreakoutStrategy(StrategyBase):
         "turtle_backstop_pct": -7.0,
         "min_vol_floor_pct": 1.0,
         "turtle_min_stop_pct": -4.0,
-        # 유니버스
-        "min_market_cap": 50_000_000_000,
-        "min_trade_amount": 2_000_000_000,
-        "max_scan_stocks": 100,
+        # 유니버스 (2026-08-08 확대 — BFB 는 이미 지수 무제약. 거래대금 20억→15억(도메인 권고 —
+        # 장중 돌파 추격이라 kojiro 10억까지는 슬리피지 위험, 완만한 15억 하향으로 유동성 바닥
+        # 보존) + max_scan 100→4000(전체 filtered 커버, refreshed_at DESC 임의 절단 소멸).
+        # 시총 하한 = 100억(사용자 결정 — 라이브 DB 값 유지, 소형주 포함. 거래대금 15억이 방어).
+        "min_market_cap": 10_000_000_000,
+        "min_trade_amount": 1_500_000_000,
+        "max_scan_stocks": 4000,
         # 일반
         "daily_loss_limit": -6.0,
         # 사이클 23 P2-1 — 돌파 유지시간 조건 (가짜 돌파 차단)
@@ -206,14 +211,19 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # 사이클 47 (2026-05-22, refactor-review 카드 #3) — FUNNEL_STAGES 위임
         # 사이클 170 카드 C — step_conditions 구버전 등락률 순위 문구 → 실제 소스 정합.
         # 사이클 108 부터 stock_master.list_by_filter 기반 (KIS 거래량순위 API 폐기).
+        # 2026-08-08 확대 — step0=union(컷 전 전체상장)/step1=trade(시총·거래대금 컷 통과)
+        # 배선 (kojiro/VCP 패턴). 이전엔 둘 다 survived=tickers 라 step0/step1 collapse.
+        stage_counts = getattr(self, "_scan_stage_counts", None) or {}
+        union_tickers = stage_counts.get("union_tickers", tickers)
+        trade_tickers = stage_counts.get("trade_tickers", tickers)
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[0],
-            survived=tickers,
-            step_conditions="stock_master.list_by_filter 원천 유니버스 후보 + ETF/ETN 키워드 제외",
+            survived=union_tickers,
+            step_conditions="전체 상장 (지수 무제약) 원천 유니버스 후보 (시총·거래대금 컷 전)",
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[1],
-            survived=tickers,
+            survived=trade_tickers,
             step_conditions=(
                 f"시총 ≥ {params['min_market_cap']/100_000_000:.0f}억 "
                 f"+ 거래대금 ≥ {params['min_trade_amount']/100_000_000:.0f}억"
@@ -650,17 +660,35 @@ class BullFlagBreakoutStrategy(StrategyBase):
         from src.engine.scanner import ETF_KEYWORDS, ticker_names
 
         p = self.config.params
-        min_mcap = p.get("min_market_cap", 100_000_000_000)
-        min_trade = p.get("min_trade_amount", 20_000_000_000)
-        max_stocks = p.get("max_scan_stocks", 100)
+        min_mcap = p.get("min_market_cap", 50_000_000_000)
+        min_trade = p.get("min_trade_amount", 1_500_000_000)
+        max_stocks = p.get("max_scan_stocks", 4000)
 
         # 사이클 156 Q0 — nxt_tradable 강제 필터 제거 (주문 시점 분기용으로만 활용).
-        rows = await _sm_mod.list_by_filter(
-            min_market_cap=min_mcap,
-            min_trade_amount=min_trade,
-            limit=max_stocks,
-        )
+        # 2026-08-08 확대 — return_stage_counts 로 합집합(union) 노출 (VCP/kojiro 정합).
+        # BFB 는 이미 지수 무제약(is_kospi200/is_kosdaq150 미전달 = None)이라 소스는 전체 상장.
+        try:
+            rows, stage = await _sm_mod.list_by_filter(
+                min_market_cap=min_mcap,
+                min_trade_amount=min_trade,
+                limit=max_stocks,
+                return_stage_counts=True,
+            )
+        except Exception:
+            # 2026-08-08 — VCP 와 graceful 대칭 (이전 BFB 는 미포장 → prepare 로 전파)
+            logger.exception(
+                "BFB stock_master.list_by_filter 호출 실패 graceful — 빈 list 반환"
+            )
+            self._scan_stage_counts = {}
+            self._scan_stats["universe_union"] = 0
+            self._scan_stats["universe_candidates"] = 0
+            self._scan_stats["universe_filtered"] = 0
+            self._scan_stats["last_run_at"] = datetime.now(KST).isoformat()
+            return []
 
+        # 2026-08-08 확대 — 합집합(union) 노출 (시총·거래대금 컷 *전* 원천)
+        self._scan_stage_counts = stage
+        self._scan_stats["universe_union"] = len(stage.get("union_tickers", rows))
         self._scan_stats["universe_candidates"] = len(rows)
 
         filtered: list[str] = []
