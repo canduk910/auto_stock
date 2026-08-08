@@ -512,7 +512,8 @@ class KojiroStrategy(StrategyBase):
         is_kosdaq150=None → 전체 상장 ∩ (min_market_cap/min_trade_amount). 실제 후보 =
         전체상장 3577 ∩ 시총500억/거래10억 ≈ 979 (필터가 상한 — 지수 348 아님).
         일봉 커버리지는 scanner._is_daily_load_universe(500억/10억)가 이 979 전량 적재.
-        지수 종속 donchian/VCP 는 무관(각자 is_kospi200/is_kosdaq150=True 유지).
+        지수 종속 donchian 은 무관(is_kospi200/is_kosdaq150=True 유지).
+        VCP 는 2026-08-08 전체 상장 전환(is_kospi200/is_kosdaq150=None) — kojiro 만 시총 500억.
         """
         from src.db import stock_master as _sm_mod
         from src.db.system_logs import write_log

@@ -660,7 +660,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         from src.engine.scanner import ETF_KEYWORDS, ticker_names
 
         p = self.config.params
-        min_mcap = p.get("min_market_cap", 50_000_000_000)
+        min_mcap = p.get("min_market_cap", 10_000_000_000)  # DEFAULT_PARAMS 정합 (2026-08-08 확대, 이전 500억 스테일)
         min_trade = p.get("min_trade_amount", 1_500_000_000)
         max_stocks = p.get("max_scan_stocks", 4000)
 
