@@ -527,10 +527,10 @@ VB와 동일.
 ### 종목군
 - KOSPI + KOSDAQ 전체에서 사후 필터.
 - **사이클 48 (2026-05-27) 유니버스 소스 교체 — 시간무관화 (운영 결함 시정)**: 기존 `_fetch_fluctuation_rank()` + 종목별 `fetch_stock_detail()`(FHKST01010100) 방식은 응답에 `prdy_vol`(전일거래량) 필드가 없어 `acml_vol`(당일 누적거래량)으로 거래대금을 계산 → BFB `prepare()` 가 07:50 장 전 boot 에서만 호출되므로 `acml_vol=0` → **매일 "유니버스 0종목"** 결함. VB/LTV 와 동일하게 **거래량순위 API(`volume-rank` / FHPST01710000, blng 0/1/3 합집합)** 로 교체 — 응답 1건에 `prdy_vol`/`stck_prpr`/`prdy_vrss`/`lstn_stcn` 포함 → 개별 호출 없이 시총·전일거래대금 산출 + 시간 의존 제거. `trade_amt = prdy_vol × prdy_close` (prdy_close = stck_prpr - prdy_vrss).
-- **시가총액 ≥ 500억** (`min_market_cap`, 기본 50_000_000_000)
-- **전일 거래대금 ≥ 20억** (`min_trade_amount`, 기본 2_000_000_000) — 전일 확정치(prdy) 기준. 당일 누적(acml) 금지 (시간 편향 → 오후 편중 후보 왜곡)
+- **시가총액 ≥ 100억** (`min_market_cap`, 기본 10_000_000_000 — 사용자 결정: kojiro 500억보다 낮게 유지해 소형주 포함, 라이브 DB 값 정합)
+- **거래대금 ≥ 15억** (`min_trade_amount`, 기본 1_500_000_000 — 2026-08-08 확대 20억→15억. 도메인 B2: BFB 는 장중 돌파 추격이라 전 전략 중 슬리피지 최대 노출 → kojiro 10억까지 내리지 않고 완만한 15억으로 유동성 바닥 보존. 추격도 BFB>VCP>kojiro 에 비례한 차등)
 - ETF/ETN 제외 (기존 키워드 컨벤션 재사용 — KODEX/TIGER/RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS/인버스/레버리지)
-- 최대 100종목 (`max_scan_stocks`)
+- 최대 4000종목 (`max_scan_stocks`, 100→확대 — 전체 filtered 커버, `refreshed_at DESC` 임의 절단 소멸. BFB 는 이미 지수 무제약이라 실질 확대의 핵심 레버)
 
 ### 데이터 준비 (07:50 prepare)
 - 종목별 일봉 30일치(폴 10일 + 플래그 10일 + 여유 10일) — `fetch_daily_candles(ticker, days=30)`
@@ -627,10 +627,11 @@ DEFAULT_PARAMS = {
     "atr_trail_mult": 2.0,
     "max_hold_days": 5,
     "reentry_cooldown_days": 3,
-    # 유니버스
-    "min_market_cap": 50_000_000_000,
-    "min_trade_amount": 2_000_000_000,
-    "max_scan_stocks": 100,
+    # 유니버스 (2026-08-08 확대 — 이미 지수 무제약. 거래대금 20억→15억(도메인 B2 — 장중 돌파
+    # 추격이라 kojiro 10억은 슬리피지 위험) + max_scan 100→4000. 시총 100억(사용자 결정, 소형주 포함))
+    "min_market_cap": 10_000_000_000,
+    "min_trade_amount": 1_500_000_000,
+    "max_scan_stocks": 4000,
     # 일반
     "daily_loss_limit": -6.0,
 }
@@ -650,11 +651,11 @@ DEFAULT_PARAMS = {
 donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추종 보조 전략. VCP 는 베이스 + 변동성 수축 확인으로 후핵폐기를 줄인다.
 
 ### 종목군
-- **코스피200 + 코스닥150 고정 유니버스 권장** (donchian 컨벤션 재사용 — `scanner.KOSPI_200_TICKERS + KOSDAQ_150_TICKERS`)
-- **시가총액 ≥ 1,000억** (`min_market_cap`, 기본 100_000_000_000)
-- **60일 평균 거래대금 ≥ 30억** (`min_trade_amount`, 기본 3_000_000_000)
+- **전체 상장 확대 유니버스** (2026-08-08 — kojiro 동일 필터. 지수 KOSPI200∪KOSDAQ150 제약 제거 → `list_by_filter(is_kospi200=None, is_kosdaq150=None)`. 미네르비니 VCP 셋업은 대형 지수주가 아니라 중소형 성장주에서 나오므로 지수 제약이 서식지를 배제해 왔음. 일봉 데이터는 이미 존재 — daily-load 유니버스 = 지수∪500억/10억 = 확대 상위집합, 비지수 자격 641종목 중 95.8%가 ≥100일 적재 실측)
+- **시가총액 ≥ 100억** (`min_market_cap`, 기본 10_000_000_000 — 사용자 결정: kojiro 500억보다 낮게 유지해 미네르비니 중소형 성장주 더 넓게 포착, 라이브 DB 값 정합)
+- **거래대금 ≥ 10억** (`min_trade_amount`, 기본 1_000_000_000 — 이전 `_scan_universe` 하드코딩 0(미사용)을 실사용으로 전환, 소형주 유동성 바닥 방어)
 - ETF/ETN 제외
-- 최대 200종목 (`max_scan_stocks`)
+- 최대 4000종목 (`max_scan_stocks`, 200→확대 — 전체 filtered 커버, `refreshed_at DESC` 임의 절단 소멸)
 
 ### 데이터 준비 (07:50 prepare)
 - 종목별 일봉 **220일** 가져오기 (200일 EMA + 여유 20일) — `fetch_daily_candles(ticker, days=220)`
@@ -761,10 +762,10 @@ DEFAULT_PARAMS = {
     "atr_period": 14,
     "atr_trail_mult": 2.0,
     "reentry_cooldown_days": 7,
-    # 유니버스
-    "min_market_cap": 100_000_000_000,
-    "min_trade_amount": 3_000_000_000,
-    "max_scan_stocks": 200,
+    # 유니버스 (2026-08-08 확대 — 전체 상장 ∩ 시총≥100억(사용자 결정) ∩ 거래대금≥10억, 지수 제거)
+    "min_market_cap": 10_000_000_000,
+    "min_trade_amount": 1_000_000_000,
+    "max_scan_stocks": 4000,
     # 일반
     "daily_loss_limit": -8.0,
 }
