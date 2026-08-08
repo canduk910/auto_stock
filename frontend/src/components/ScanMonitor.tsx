@@ -89,8 +89,10 @@ const MOMENTUM_STAGES: Array<{ key: string; label: string }> = [
 ]
 
 const BFB_STAGES: Array<{ key: string; label: string }> = [
+  // 2026-08-08 확대 — universe_union(전체 상장 컷 전) 노출 추가 (VCP/kojiro 정합).
+  { key: 'universe_union', label: '전체 상장 유니버스 (필터 전)' },
   // 사이클 178 — universe_candidates = 시총+거래대금 컷 후 (사이클 175 '원천' 오라벨 시정)
-  { key: 'universe_candidates', label: '시총+거래대금 컷 통과' },
+  { key: 'universe_candidates', label: '시총·거래대금 컷 통과' },
   { key: 'universe_filtered', label: '유니버스 확정 (ETF/가격 제외)' },
   { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
   { key: 'pole_pass', label: '폴(Pole) 자동 검출' },
@@ -105,9 +107,12 @@ const VCP_STAGES: Array<{ key: string; label: string }> = [
   // 기존 `trend_pass`/`contraction_pass` 는 백엔드 키와 불일치 → 항상 0 표시 결함.
   // 백엔드 vcp_breakout.py `_empty_scan_stats` 정합: trend_filter_pass / base_pass / pullback_pass.
   // 5/22 사용자 보고 "EMA 0 인데 base 9" 가 단계 순서 결함이 아닌 프론트 키 매핑 결함이었음.
-  // 사이클 175 — '합집합' = universe_union (시총 컷 전 원천, DB funnel step1 정합)
-  { key: 'universe_union', label: '코스피200+코스닥150 합집합' },
-  { key: 'universe_filtered', label: '시총 ≥ 1,000억' },
+  // 2026-08-08 확대 — 지수 제약 제거(전체 상장) + 시총 500억·거래대금 10억. 라벨을
+  // 백엔드 FUNNEL_STAGES + kojiro/StrategyFunnel 정합으로 시정 (구 '코스피200+코스닥150
+  // 합집합'/'시총 ≥ 1,000억' 은 확대 후 값(전체상장·500억)과 모순).
+  { key: 'universe_union', label: '전체 상장 유니버스 (필터 전)' },
+  { key: 'universe_candidates', label: '시총·거래대금 컷 통과' },
+  { key: 'universe_filtered', label: '유니버스 확정 (ETF/가격 제외)' },
   { key: 'candle_fetch_ok', label: '일봉 fetch + 추세필터' },
   { key: 'trend_filter_pass', label: '50/150/200 EMA 정렬' },
   { key: 'base_pass', label: '베이스 자동 검출' },

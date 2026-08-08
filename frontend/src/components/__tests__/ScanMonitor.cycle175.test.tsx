@@ -15,10 +15,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const src = readFileSync(resolve(__dirname, '../ScanMonitor.tsx'), 'utf-8')
 
 describe('사이클 175 — ScanMonitor scan_stats funnel DB funnel 정합', () => {
-  it('donchian/VCP 합집합 단계가 universe_union 키 사용 (필터 후 universe_candidates 아님)', () => {
-    // "코스피200+코스닥150 합집합" 라벨이 universe_union 에 매핑 (2곳: SWING + VCP)
+  it('donchian 합집합 단계가 universe_union 키 사용 (필터 후 universe_candidates 아님)', () => {
+    // [의미 전환 2026-08-08 확대] "코스피200+코스닥150 합집합" 라벨은 이제 SWING(donchian)
+    // 만 사용 (donchian 은 지수 전용 유지). VCP 는 확대로 '전체 상장 유니버스 (필터 전)' 전환.
     const matches = src.match(/key:\s*'universe_union',\s*label:\s*'코스피200\+코스닥150 합집합'/g) || []
-    expect(matches.length).toBe(2)
+    expect(matches.length).toBe(1)
   })
 
   it('폐기된 blng 0/1/3 라벨 0건 (사이클 108 거래량순위 API 폐기)', () => {
