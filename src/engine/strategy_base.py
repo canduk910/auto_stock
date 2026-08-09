@@ -504,6 +504,8 @@ class StrategyBase(ABC):
     # 운영자가 과거 인시던트를 `grep "도치안 스윙 high_since_buy 보정"` 으로 찾는데
     # 접두사가 바뀌면 추출 시점 이후 복구 이력이 0건으로 보인다.
     _HIGH_RECOVER_LABEL: ClassVar[str | None] = None
+    # 진입 ATR 재도출(재시작 복구) 로그 접두사 — vcp/bfb/donchian 전략별 (refactor-review A5).
+    _ENTRY_ATR_REDERIVE_LABEL: ClassVar[str | None] = None
 
     @staticmethod
     def _candle_trade_date(candle: dict) -> date | None:
@@ -604,3 +606,51 @@ class StrategyBase(ABC):
             )
         except Exception:
             pass
+
+    @staticmethod
+    def _atr(highs, lows, closes, period: int) -> float:
+        """ATR(period) — 최근 period일 True Range **단순평균(SMA)**.
+
+        highs/lows/closes 최신순(idx=0 이 어제), closes[i+1]=직전일 종가.
+        ⚠️ SMA baseline — kojiro Wilder ATR(kojiro_indicators.atr, ewm α=1/N)과 정의가
+        다르다. kojiro 는 self._atr 을 쓰지 않는다(ATR 이원화 봉인, 회귀 가드
+        test_refactor_a5a6_atr_base.py). donchian/VCP/BFB 공유 (refactor-review A6).
+        """
+        if len(highs) <= period or len(lows) <= period or len(closes) <= period + 1:
+            return 0.0
+        trs = []
+        for i in range(period):
+            tr = max(
+                highs[i] - lows[i],
+                abs(highs[i] - closes[i + 1]),
+                abs(lows[i] - closes[i + 1]),
+            )
+            trs.append(tr)
+        return sum(trs) / period
+
+    def _rederive_entry_atr(self, ticker: str, pos, candles: list, atr_period: int) -> None:
+        """재시작으로 소실된 `_entry_atr` 을 **매수일 이전 봉만으로** 재도출 (loosen 차단).
+
+        매수일 당일/이후 봉을 섞으면 돌파 당일 변동이 ATR 을 부풀려 손절선이 넓어진다.
+        진입 시점 ATR 재현이 목적이라 `bsop_date < buy_date` 만 사용. 봉 부족/실패 시
+        미스탬프 — 고정% 손절 경로로 남는 편이 잘못된 ATR 손절선보다 낫다.
+
+        단일 진실원 — donchian/VCP/BFB 공유 (refactor-review A5). 로그 접두사는
+        `_ENTRY_ATR_REDERIVE_LABEL` 로 전략별 보존(운영자 grep 이력, _HIGH_RECOVER_LABEL 선례).
+        """
+        label = self._ENTRY_ATR_REDERIVE_LABEL or self.strategy_id
+        try:
+            buy_dd = pos.buy_date.strftime("%Y%m%d")
+            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
+            if len(prior) < atr_period + 2:
+                return
+            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior]
+            lows = [int(c.get("stck_lwpr", "0") or 0) for c in prior]
+            closes = [int(c.get("stck_clpr", "0") or 0) for c in prior]
+            e_atr = self._atr(highs, lows, closes, atr_period)
+            if e_atr > 0:
+                self._entry_atr[ticker] = float(int(e_atr))
+                logger.info("[%s_entry_atr_rederive] %s buy_date=%s entry_atr=%d",
+                            label, ticker, pos.buy_date, int(e_atr))
+        except Exception:
+            logger.exception("[%s_entry_atr_rederive] 재도출 실패: %s", label, ticker)

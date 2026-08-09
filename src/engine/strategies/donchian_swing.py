@@ -460,24 +460,6 @@ class DonchianSwingStrategy(StrategyBase):
             ema = v * k + ema * (1 - k)
         return ema
 
-    @staticmethod
-    def _atr(highs: list[int], lows: list[int], closes: list[int], period: int) -> float:
-        """ATR(period) — 최근 period일의 True Range 평균.
-
-        highs/lows/closes 모두 최신순(idx=0이 어제). closes[i+1]이 직전일 종가.
-        """
-        if len(highs) <= period or len(lows) <= period or len(closes) <= period + 1:
-            return 0.0
-        trs = []
-        for i in range(period):
-            tr = max(
-                highs[i] - lows[i],
-                abs(highs[i] - closes[i + 1]),
-                abs(lows[i] - closes[i + 1]),
-            )
-            trs.append(tr)
-        return sum(trs) / period
-
     async def _scan_universe(self) -> list[str]:
         """stock_master DB 기반으로 시총·거래대금 조건 종목을 스캔한다 (사이클 119).
 
@@ -784,30 +766,6 @@ class DonchianSwingStrategy(StrategyBase):
         except Exception:
             logger.exception("도치안 channel_low 산출 실패: %s", ticker)
 
-    def _rederive_entry_atr(self, ticker: str, pos, candles: list, atr_period: int) -> None:
-        """재시작 복구 — buy_date 이전 일봉으로 진입 ATR 재현 (loosen 차단, Phase 2A-2 게이트 1).
-
-        진입 시 `_candidates` ATR 은 prepare 가 매수일 전일(D-1)까지 봉으로 산출했다.
-        재시작 후 현재 ATR(팽창 가능)이 아닌 그 값을 재현하려면 buy_date *이전* 봉만
-        (`stck_bsop_date < buy_date`) 남겨 `_atr`(DESC, 최근 period) 로 계산한다.
-        봉 부족/실패 시 미복구 → % backstop 이 방어(무손절 없음).
-        """
-        try:
-            buy_dd = pos.buy_date.strftime("%Y%m%d")
-            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
-            if len(prior) < atr_period + 2:
-                return
-            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior]
-            lows = [int(c.get("stck_lwpr", "0") or 0) for c in prior]
-            closes = [int(c.get("stck_clpr", "0") or 0) for c in prior]
-            e_atr = self._atr(highs, lows, closes, atr_period)
-            if e_atr > 0:
-                self._entry_atr[ticker] = float(int(e_atr))
-                logger.info("[donchian_entry_atr_rederive] %s buy_date=%s entry_atr=%d",
-                            ticker, pos.buy_date, int(e_atr))
-        except Exception:
-            logger.exception("도치안 터틀 entry_atr 재도출 실패: %s", ticker)
-
     async def recompute_high_since_buy(self) -> None:
         """보유 종목의 `high_since_buy` 를 매수일~전영업일 KIS 일봉 high max 로 보정.
 
@@ -856,6 +814,7 @@ class DonchianSwingStrategy(StrategyBase):
     # 아래 라벨이 추출 전 로그 리터럴("도치안 스윙 high_since_buy 보정")을 보존한다 —
     # 운영자가 과거 인시던트를 한글 표기로 grep 하는 경로가 끊기지 않게.
     _HIGH_RECOVER_LABEL = "도치안 스윙"
+    _ENTRY_ATR_REDERIVE_LABEL = "donchian"
 
     def get_scanned_tickers(self) -> list[str]:
         """WebSocket 사전 구독용."""

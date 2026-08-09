@@ -630,21 +630,6 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         return None, best_fail_stage, best_fail_detail
 
-    @staticmethod
-    def _atr(highs, lows, closes, period: int) -> float:
-        """ATR(period). highs/lows/closes 최신순(idx=0 이 어제)."""
-        if len(highs) <= period or len(lows) <= period or len(closes) <= period + 1:
-            return 0.0
-        trs = []
-        for i in range(period):
-            tr = max(
-                highs[i] - lows[i],
-                abs(highs[i] - closes[i + 1]),
-                abs(lows[i] - closes[i + 1]),
-            )
-            trs.append(tr)
-        return sum(trs) / period
-
     async def _scan_universe(self) -> list[str]:
         """stock_master DB 기반으로 시총·거래대금 조건 종목을 스캔한다 (사이클 108).
 
@@ -1225,30 +1210,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
     # 그 상수가 매수 폴루프·구독에도 쓰여 **매수 행위가 바뀐다**(절대 금지).
 
     _HIGH_RECOVER_LABEL = "눌림목"
-
-    def _rederive_entry_atr(self, ticker: str, pos, candles: list[dict], atr_period: int) -> None:
-        """재시작으로 소실된 `_entry_atr` 을 **매수일 이전 봉만으로** 재도출한다.
-
-        매수일 당일/이후 봉을 섞으면 돌파 당일의 큰 변동이 ATR 을 부풀려 손절선이
-        **넓어진다**(loosen). 진입 시점 ATR 을 재현하는 것이 목적이므로 엄격히
-        `bsop_date < buy_date` 만 쓴다. 봉이 모자라면 **미스탬프** — 고정 %
-        손절 경로로 남는 편이 잘못된 ATR 로 손절선을 긋는 것보다 낫다.
-        """
-        try:
-            buy_dd = pos.buy_date.strftime("%Y%m%d")
-            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
-            if len(prior) < atr_period + 2:
-                return
-            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior]
-            lows = [int(c.get("stck_lwpr", "0") or 0) for c in prior]
-            closes = [int(c.get("stck_clpr", "0") or 0) for c in prior]
-            e_atr = self._atr(highs, lows, closes, atr_period)
-            if e_atr > 0:
-                self._entry_atr[ticker] = float(int(e_atr))
-                logger.info("[bfb_entry_atr_rederive] %s buy_date=%s entry_atr=%d",
-                            ticker, pos.buy_date, int(e_atr))
-        except Exception:
-            logger.exception("눌림목 터틀 entry_atr 재도출 실패: %s", ticker)
+    _ENTRY_ATR_REDERIVE_LABEL = "bfb"
 
     _SETUP_LEVEL_KEYS = ("flag_low", "flag_high", "pole_high", "pole_start")
 

@@ -792,20 +792,6 @@ class VcpBreakoutStrategy(StrategyBase):
             ema = v * k + ema * (1 - k)
         return ema
 
-    @staticmethod
-    def _atr(highs, lows, closes, period: int) -> float:
-        if len(highs) <= period or len(lows) <= period or len(closes) <= period + 1:
-            return 0.0
-        trs = []
-        for i in range(period):
-            tr = max(
-                highs[i] - lows[i],
-                abs(highs[i] - closes[i + 1]),
-                abs(lows[i] - closes[i + 1]),
-            )
-            trs.append(tr)
-        return sum(trs) / period
-
     async def _scan_universe(self) -> list[str]:
         """stock_master DB 기반 확대 유니버스 (2026-08-08 — kojiro 동일 필터).
 
@@ -1261,30 +1247,6 @@ class VcpBreakoutStrategy(StrategyBase):
                          ticker, exc_info=True)
         return 0
 
-    def _rederive_entry_atr(self, ticker: str, pos, candles: list, atr_period: int) -> None:
-        """재시작 복구 — buy_date 이전 일봉으로 진입 ATR 재현 (loosen 차단).
-
-        donchian `_rederive_entry_atr` 동형. 진입 시 `_candidates` ATR 은 prepare 가
-        매수일 전일(D-1)까지 봉으로 산출했다. 재시작 후 현재 ATR(팽창 가능)이 아닌 그
-        값을 재현하려면 buy_date *이전* 봉만 남겨 `_atr`(DESC, 최근 period)로 계산한다.
-        봉 부족/실패 시 미복구 → `turtle_backstop_pct` 가 방어(무손절 없음).
-        """
-        try:
-            buy_dd = pos.buy_date.strftime("%Y%m%d")
-            prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
-            if len(prior) < atr_period + 2:
-                return
-            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior]
-            lows = [int(c.get("stck_lwpr", "0") or 0) for c in prior]
-            closes = [int(c.get("stck_clpr", "0") or 0) for c in prior]
-            e_atr = self._atr(highs, lows, closes, atr_period)
-            if e_atr > 0:
-                self._entry_atr[ticker] = float(int(e_atr))
-                logger.info("[vcp_entry_atr_rederive] %s buy_date=%s entry_atr=%d",
-                            ticker, pos.buy_date, int(e_atr))
-        except Exception:
-            logger.exception("VCP 터틀 entry_atr 재도출 실패: %s", ticker)
-
     def register_cooldown_after_exit(self, ticker: str) -> None:
         """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 191 영업일 2단계).
 
@@ -1431,6 +1393,7 @@ class VcpBreakoutStrategy(StrategyBase):
     # `_apply_high_since_buy_from_candles` 는 `StrategyBase` 로 승격(H-1, 2026-08-06).
     # 아래 라벨이 추출 전 로그 리터럴("VCP high_since_buy 보정")을 byte 단위로 보존한다.
     _HIGH_RECOVER_LABEL = "VCP"
+    _ENTRY_ATR_REDERIVE_LABEL = "vcp"
 
     def on_position_closed(self, ticker: str) -> None:
         """사이클 191 — 포지션 청산 시 재진입 쿨다운 등록 (VCP override, BFB 패턴 답습).
