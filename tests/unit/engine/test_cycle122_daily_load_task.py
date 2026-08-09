@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.engine import scanner, scheduler
+from src.engine import scanner, scheduler, data_load_tasks
 
 pytestmark = pytest.mark.unit
 
@@ -288,7 +288,9 @@ def test_g_sched3_task_loop_method_exists():
     assert hasattr(sched, "_stock_master_daily_load_task_loop")
     assert callable(sched._stock_master_daily_load_task_loop)
 
-    src = inspect.getsource(sched._stock_master_daily_load_task_loop)
+    # refactor-review B1 (2026-08-09) — 본체 data_load_tasks 위임 이관. wrapper(TIME_) + 본체(helper) 결합.
+    src = inspect.getsource(sched._stock_master_daily_load_task_loop) + \
+        inspect.getsource(data_load_tasks.stock_master_daily_load_task_loop)
     # _wait_until 인자 정합 영속 (facade 또는 헬퍼 인자 영역 영구 영속)
     assert "TIME_STOCK_MASTER_DAILY_LOAD" in src, (
         "TIME_STOCK_MASTER_DAILY_LOAD 인자 영속 부재 — facade 영속 의무 위반"

@@ -180,11 +180,16 @@ class TestEveningTask:
         source = read_module_source(_SCHEDULER_PY)
         node = find_function_def(source, "_evening_funnel_capture_task_loop")
         assert node is not None
-        body = ast.unparse(node)
-        assert "run_periodic_task_loop" in body, (
-            "_evening_funnel_capture_task_loop run_periodic_task_loop 답습 의무"
+        wrapper_body = ast.unparse(node)
+        assert "TIME_EVENING_FUNNEL_CAPTURE" in wrapper_body
+        # [의미 전환 refactor-review B1] 본체는 data_load_tasks 로 위임 이관 —
+        # wrapper 는 wait_time=TIME_ 전달, run_periodic_task_loop 위임은 본체에서 확인.
+        dlt_src = read_module_source(_SCHEDULER_PY.parent / "data_load_tasks.py")
+        dlt_node = find_function_def(dlt_src, "evening_funnel_capture_task_loop")
+        assert dlt_node is not None, "data_load_tasks.evening_funnel_capture_task_loop 부재 (B1)"
+        assert "run_periodic_task_loop" in ast.unparse(dlt_node), (
+            "evening_funnel_capture_task_loop run_periodic_task_loop 답습 의무"
         )
-        assert "TIME_EVENING_FUNNEL_CAPTURE" in body
 
     @pytest.mark.asyncio
     async def test_g_171_eve_2b_once_prepares_and_captures_provisional(self):

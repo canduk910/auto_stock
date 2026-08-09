@@ -23,7 +23,7 @@ import pytest
 from tests.unit.ast._ast_helpers import read_module_source as _read
 
 from src.db import stock_master_daily
-from src.engine import scheduler, stock_master_daily_metrics
+from src.engine import scheduler, stock_master_daily_metrics, data_load_tasks
 
 pytestmark = pytest.mark.unit
 
@@ -80,7 +80,9 @@ def test_g_ast3_lifecycle_race_pattern_persistence():
     - Green 시점 (사이클 134) = `run_periodic_task_loop` 헬퍼 위임 + lifecycle 영역 헬퍼 내부 흡수
     - 핵심 의도 보존: lifecycle race 차단 + while 루프 + graceful + _wait_until 영속 (헬퍼 영역 흡수).
     """
-    src = inspect.getsource(scheduler.TradingScheduler._stock_master_daily_load_task_loop)
+    # refactor-review B1 (2026-08-09) — 본체 data_load_tasks 위임 이관. wrapper(TIME_) + 본체(helper) 결합.
+    src = inspect.getsource(scheduler.TradingScheduler._stock_master_daily_load_task_loop) + \
+        inspect.getsource(data_load_tasks.stock_master_daily_load_task_loop)
     # _wait_until 정합 (TIME_STOCK_MASTER_DAILY_LOAD 영속) - facade 또는 헬퍼 인자 영역
     assert "TIME_STOCK_MASTER_DAILY_LOAD" in src, (
         "TIME_STOCK_MASTER_DAILY_LOAD 영역 영속 부재 — facade 영역 영속 의무 위반"
@@ -127,7 +129,8 @@ def test_g_ast4_record_flush_pairing_persistence():
     assert hasattr(stock_master_daily_metrics, "flush_stock_master_daily_load_collector")
 
     # scheduler.py 가 flush 호출 의무 (사이클 78 G-AST1 답습)
-    scheduler_src = inspect.getsource(scheduler)
+    # refactor-review B1 — task loop 본체(flush 호출)는 data_load_tasks 위임 이관.
+    scheduler_src = inspect.getsource(scheduler) + inspect.getsource(data_load_tasks)
     assert "flush_stock_master_daily_load_collector" in scheduler_src, (
         "사이클 78 G-AST1 영속: record_* 정의 모듈 = 대응 flush_* 호출 사이트 ≥1 의무"
     )

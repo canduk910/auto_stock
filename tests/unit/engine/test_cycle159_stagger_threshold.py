@@ -35,6 +35,9 @@ from src.engine.task_loop_helper import run_periodic_task_loop
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 _SCHEDULER_PATH = _REPO_ROOT / "src" / "engine" / "scheduler.py"
+# refactor-review B1 (2026-08-09) — task loop 본체는 data_load_tasks.py 로 위임 이관.
+# stagger/initial_delay_secs 검사는 이제 이 모듈을 본다 (wrapper 는 scheduler 잔류).
+_DATA_LOAD_TASKS_PATH = _REPO_ROOT / "src" / "engine" / "data_load_tasks.py"
 
 
 # 사이클 159 신규 stagger 임계 (옵션 C)
@@ -47,15 +50,19 @@ _CYCLE_159_STAGGER = {
 
 
 def _extract_stagger_per_wrapper() -> dict[str, int]:
-    """scheduler.py 4 task wrapper 영역에서 initial_delay_secs 값 추출."""
-    tree = ast.parse(_SCHEDULER_PATH.read_text())
-    target_methods = set(_CYCLE_159_STAGGER.keys())
+    """data_load_tasks.py 4 task 함수에서 initial_delay_secs 값 추출 (refactor-review B1).
+
+    본체 이관 후 함수명은 언더스코어 없음(full_universe_load_task_loop 등) → scheduler
+    wrapper 명(_full_universe_load_task_loop)으로 역매핑해 기존 키 계약 보존."""
+    tree = ast.parse(_DATA_LOAD_TASKS_PATH.read_text())
+    # data_load_tasks 함수명(언더스코어 없음) → scheduler wrapper 키(언더스코어) 매핑
+    name_map = {k.lstrip("_"): k for k in _CYCLE_159_STAGGER}
     delay_values: dict[str, int] = {}
 
     for node in ast.walk(tree):
         if not isinstance(node, ast.AsyncFunctionDef):
             continue
-        if node.name not in target_methods:
+        if node.name not in name_map:
             continue
         for sub in ast.walk(node):
             if isinstance(sub, ast.Call):
@@ -69,7 +76,7 @@ def _extract_stagger_per_wrapper() -> dict[str, int]:
                 for kw in sub.keywords:
                     if kw.arg == "initial_delay_secs":
                         if isinstance(kw.value, ast.Constant):
-                            delay_values[node.name] = kw.value.value
+                            delay_values[name_map[node.name]] = kw.value.value
     return delay_values
 
 
@@ -218,8 +225,8 @@ def test_G_159_SAFETY_2_stagger_only_in_scanner_lifecycle() -> None:
 
 
 def test_G_159_AST_1_scheduler_initial_delay_keyword_count() -> None:
-    """scheduler.py 영역 initial_delay_secs= 키워드 인자 호출 ≥ 4건 (4 task)."""
-    tree = ast.parse(_SCHEDULER_PATH.read_text())
+    """data_load_tasks.py 영역 initial_delay_secs= 키워드 인자 호출 ≥ 4건 (4 task, B1 이관)."""
+    tree = ast.parse(_DATA_LOAD_TASKS_PATH.read_text())
     keyword_count = 0
     for node in ast.walk(tree):
         if isinstance(node, ast.keyword) and node.arg == "initial_delay_secs":

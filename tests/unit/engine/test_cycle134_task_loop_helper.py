@@ -308,7 +308,10 @@ class TestHelperBehaviorPreservation:
                 helper_src = p.read_text(encoding="utf-8")
                 break
 
-        combined = scheduler_src + "\n" + helper_src
+        # refactor-review B1 (2026-08-09) — task loop 본체(flush 호출)는 data_load_tasks.py 위임 이관.
+        _dlt_path = Path("src/engine/data_load_tasks.py")
+        _dlt_src = _dlt_path.read_text(encoding="utf-8") if _dlt_path.exists() else ""
+        combined = scheduler_src + "\n" + helper_src + "\n" + _dlt_src
 
         # 4 task 영역 영구 영속 flush 영역 영구 영속 호출 사이트 영속 의무 (사이클 78 G-AST1)
         flush_patterns = [

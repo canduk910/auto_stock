@@ -36,6 +36,8 @@ pytestmark = pytest.mark.unit
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SCANNER_SRC = _REPO_ROOT / "src" / "engine" / "scanner.py"
 _SCHED_SRC = _REPO_ROOT / "src" / "engine" / "scheduler.py"
+# refactor-review B1 (2026-08-09) — task loop 본체 data_load_tasks.py 위임 이관.
+_DATA_LOAD_SRC = _REPO_ROOT / "src" / "engine" / "data_load_tasks.py"
 
 
 def _sm_row(ticker: str, *, is_index: bool = False, mcap_eok: int = 1000,
@@ -323,12 +325,15 @@ class TestSchedulerFinancialConstant:
 # ---------------------------------------------------------------------------
 class TestSchedulerFinancialTaskLoop:
     def _method_source(self, name: str) -> str:
-        src = _SCHED_SRC.read_text(encoding="utf-8")
-        tree = ast.parse(src)
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
-                return ast.get_source_segment(src, node) or ""
-        return ""
+        # refactor-review B1 — scheduler wrapper(name) + data_load_tasks 본체(name.lstrip("_")) 결합.
+        combined = ""
+        for path, lookup in ((_SCHED_SRC, name), (_DATA_LOAD_SRC, name.lstrip("_"))):
+            src = path.read_text(encoding="utf-8")
+            tree = ast.parse(src)
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == lookup:
+                    combined += (ast.get_source_segment(src, node) or "") + "\n"
+        return combined
 
     def test_task_loop_delegates_and_gates(self):
         body = self._method_source("_stock_master_financial_load_task_loop")
@@ -358,12 +363,15 @@ class TestSchedulerFinancialTaskAttrs4Sites:
     """사이클 79 G-AST2 — instance create + connect finally + run_daily finally + stop tuple."""
 
     def _method_source(self, name: str) -> str:
-        src = _SCHED_SRC.read_text(encoding="utf-8")
-        tree = ast.parse(src)
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
-                return ast.get_source_segment(src, node) or ""
-        return ""
+        # refactor-review B1 — scheduler wrapper(name) + data_load_tasks 본체(name.lstrip("_")) 결합.
+        combined = ""
+        for path, lookup in ((_SCHED_SRC, name), (_DATA_LOAD_SRC, name.lstrip("_"))):
+            src = path.read_text(encoding="utf-8")
+            tree = ast.parse(src)
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == lookup:
+                    combined += (ast.get_source_segment(src, node) or "") + "\n"
+        return combined
 
     def test_instance_create_in_start(self):
         start_src = self._method_source("start")

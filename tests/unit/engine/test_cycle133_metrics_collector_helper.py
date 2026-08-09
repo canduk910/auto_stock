@@ -284,7 +284,10 @@ class TestAstStaticGuards:
         4 collector 모두 lifecycle hook 또는 task loop 영역에서 flush 호출 영속 의무.
         scheduler.py 영역에서 검증.
         """
-        scheduler_src = Path("src/engine/scheduler.py").read_text(encoding="utf-8")
+        # refactor-review B1 (2026-08-09) — task loop 본체(flush 호출)는 data_load_tasks.py 위임 이관.
+        scheduler_src = Path("src/engine/scheduler.py").read_text(encoding="utf-8") + (
+            Path("src/engine/data_load_tasks.py").read_text(encoding="utf-8")
+        )
 
         # 4 flush 호출 사이트 ≥ 1 영속 의무 (사이클 78 G-AST1 영속)
         flush_call_patterns = [

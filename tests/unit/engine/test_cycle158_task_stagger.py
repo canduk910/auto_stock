@@ -123,14 +123,16 @@ def test_G_158_Q3_2_scheduler_4_tasks_stagger_keywords() -> None:
 
     4 task 영역 각 stagger 값 = 합집합 ≥ 3종 (0/60/120/180 등 분리 발화).
     """
-    src = Path(__file__).parent.parent.parent.parent / "src" / "engine" / "scheduler.py"
+    # refactor-review B1 (2026-08-09) — task loop 본체 data_load_tasks.py 위임 이관.
+    # stagger 검사는 이 모듈을 본다 (함수명 언더스코어 없음).
+    src = Path(__file__).parent.parent.parent.parent / "src" / "engine" / "data_load_tasks.py"
     tree = ast.parse(src.read_text())
 
     target_methods = {
-        "_full_universe_load_task_loop",
-        "_stock_master_daily_load_task_loop",
-        "_stock_master_basics_refresh_task_loop",
-        "_stock_master_master_load_task_loop",
+        "full_universe_load_task_loop",
+        "stock_master_daily_load_task_loop",
+        "stock_master_basics_refresh_task_loop",
+        "stock_master_master_load_task_loop",
     }
 
     delay_values: dict[str, int] = {}

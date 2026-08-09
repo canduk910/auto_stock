@@ -459,7 +459,10 @@ class TestG150Safety:
 
         scheduler task_loop 영역에서 보유/익일청산 영역 절대 보호 (사이클 32 R4 답습).
         """
-        content = _SCHEDULER_PY.read_text(encoding="utf-8")
+        # refactor-review B1 (2026-08-09) — purge task 본체는 data_load_tasks.py 로 위임 이관.
+        content = _SCHEDULER_PY.read_text(encoding="utf-8") + (
+            _SCHEDULER_PY.parent / "data_load_tasks.py"
+        ).read_text(encoding="utf-8")
         # purge_old_rows 호출 영역에서 protected_tickers= keyword 의무 영구 영속
         assert "protected_tickers=" in content, \
             "purge_old_rows 호출 시 protected_tickers= keyword 의무 영구 영속"

@@ -38,6 +38,7 @@ from src.engine.strategies.kojiro import KojiroStrategy
 from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
 from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
+from src.engine import data_load_tasks  # refactor-review B1 위임 모듈
 from src.realtime.handler import (
     dispatch_message,
     flush_silent_drop_count,
@@ -3043,283 +3044,28 @@ class TradingScheduler:
                 break
 
     async def _scan_pool_eager_refresh_loop(self) -> None:
-        """사이클 83 (2026-06-09) — _scan_loop 후보 풀 ticker stock_master 5분 eager refresh task.
-
-        `subscribe_filtered_stocks` 진입점 hook (Q1=B) 이 5분 윈도우 누적한
-        후보 ticker 를 순차적으로 stock_master upsert.
-        - 24h TTL fresh skip (Q3=B) → KIS 호출 최소화
-        - ticker 간 50ms sleep (Q3=B) → Rate Limit 20/s 보호
-        - 사이클 42 `_heartbeat_metrics_loop` 5분 주기 패턴 답습
-        - 사이클 78 flush 전 `_running` 재검사 패턴 답습 (마지막 1회 flush 보장)
-        """
-        from src.engine.scanner import (
-            _scan_pool_eager_refresh_loop as _scanner_eager_refresh,
-            flush_scan_pool_eager_refresh_collector,
-            _SCAN_POOL_EAGER_REFRESH_WINDOW_SECS,
-        )
-
-        while self._running:
-            await asyncio.sleep(_SCAN_POOL_EAGER_REFRESH_WINDOW_SECS)
-            try:
-                await _scanner_eager_refresh()
-            except Exception:
-                logger.exception("[scan_pool_eager_refresh] refresh 실패")
-            try:
-                flush_scan_pool_eager_refresh_collector()
-            except Exception:
-                logger.exception("[scan_pool_eager_refresh_collector] flush 실패")
-            if not self._running:
-                break
+        """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
+        await data_load_tasks.scan_pool_eager_refresh_loop(self)
 
     async def _full_universe_load_task_loop(self) -> None:
-        """사이클 101 + 사이클 106 + 사이클 134 (2026-06-15) — 매일 20:00:05 전체 유니버스 일괄 적재 task facade.
-
-        사이클 134 카드 #21 영속: `run_periodic_task_loop` 헬퍼 위임 (사이클 67 facade 답습).
-        lifecycle 영역 영구 영속 = 헬퍼 영역 영구 영속에서 흡수 (사이클 106 race 차단 + 사이클 88 graceful).
-
-        영속 의무 매트릭스:
-        - 사이클 79 G-AST2 영속 (task_attrs 4 위치 영속)
-        - 사이클 78 G-AST1 영속 (record + flush 호출 사이트 영속 = 헬퍼 영역 영구 영속 내부)
-        - 사이클 101 idempotency (24h TTL fresh skip)
-        - 사이클 106 lifecycle race 차단 패턴 영속
-        """
-        from src.engine.scanner import _full_universe_load_once as _load_once
-        from src.engine.stock_master_metrics import (
-            record_full_universe_load_summary,
-            flush_full_universe_load_collector,
-        )
-        from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
-
-        await run_periodic_task_loop(
-            scheduler=self,
-            task_label="full_universe_load",
-            wait_time=TIME_FULL_UNIVERSE_LOAD,  # 20:00:05
-            once_callable=_load_once,
-            record_fn=record_full_universe_load_summary,
-            flush_fn=flush_full_universe_load_collector,
-            summary_log_format=(
-                "[full_universe_load_summary] total=%d kospi=%d kosdaq=%d "
-                "fetched=%d skipped_ttl=%d failed=%d elapsed_ms=%d"
-            ),
-            summary_keys=(
-                "total", "kospi", "kosdaq",
-                "fetched", "skipped_ttl", "failed", "elapsed_ms",
-            ),
-            # 사이클 158 Q3 stagger — 가장 무거운 task = 즉시 발화 (0초)
-            initial_delay_secs=0,
-            # 사이클 193 신선도 게이트 미적용 — full_universe 는 TTL 멱등
-            # (skipped_ttl 로 immediate 이미 저렴) + 유니버스 populator 라
-            # 게이트 시 self-heal 상실 위험 → 게이트 대상 = basics/master 만.
-        )
+        """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
+        await data_load_tasks.full_universe_load_task_loop(self, wait_time=TIME_FULL_UNIVERSE_LOAD)
 
     async def _stock_master_daily_load_task_loop(self) -> None:
-        """사이클 122 + 사이클 134 (2026-06-15) — 매일 16:00 KST KIS 일봉 적재 task facade.
-
-        사이클 134 카드 #21 영속: `run_periodic_task_loop` 헬퍼 위임 (사이클 67 facade 답습).
-
-        영속 의무 매트릭스:
-        - 사이클 14 fetch_daily_candles 재사용 (신규 KIS API 도입 0건)
-        - 사이클 17 OPSP0002 backoff 안전 마진
-        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
-        - 사이클 79 G-AST2 영속 (task_attrs 4 위치 영속)
-        - 사이클 88 G-REJECT graceful 단위 = 헬퍼 영역 영구 영속 내부
-        - 사이클 106 lifecycle race 차단 = 헬퍼 영역 영구 영속 내부
-        """
-        from src.engine.scanner import _stock_master_daily_load_once
-        from src.engine.stock_master_daily_metrics import (
-            record_stock_master_daily_load,
-            flush_stock_master_daily_load_collector,
-        )
-        from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
-
-        await run_periodic_task_loop(
-            scheduler=self,
-            task_label="stock_master_daily_load",
-            wait_time=TIME_STOCK_MASTER_DAILY_LOAD,  # 16:00 KST
-            once_callable=_stock_master_daily_load_once,
-            record_fn=record_stock_master_daily_load,
-            flush_fn=flush_stock_master_daily_load_collector,
-            summary_log_format=(
-                "[stock_master_daily_load_summary] total=%d fetched=%d upserted_rows=%d "
-                "skipped_fresh=%d failed=%d elapsed_ms=%d mode=%s"
-            ),
-            summary_keys=(
-                "total", "fetched", "upserted_rows",
-                "skipped_fresh", "failed", "elapsed_ms", "mode",
-            ),
-            # 사이클 159 stagger 임계 상향 (refactor-expert 자문 옵션 C)
-            # = full_universe 처리 (~280s) 완료 *직후* 진입 = 0 overlap
-            initial_delay_secs=240,
-            # 사이클 193 신선도 게이트 미적용 — daily_load 는 max_bas_dd 멱등
-            # (skipped_fresh 로 immediate 이미 저렴) + 게이트 시 특정 이중 재시작에
-            # 당일 후장 최종봉 미적재 off-by-one 위험 → 게이트 대상 = basics/master 만.
-        )
+        """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
+        await data_load_tasks.stock_master_daily_load_task_loop(self, wait_time=TIME_STOCK_MASTER_DAILY_LOAD)
 
     async def _stock_master_basics_refresh_task_loop(self) -> None:
-        """사이클 126 (2026-06-13) — 매일 16:10 KST KIS CTPF1002R 매스 보강 task.
-
-        KRX 1차 폴백 영역의 NXT/정지/관리종목 하드코딩 False 결함 시정:
-        - KIS CTPF1002R 호출 (사이클 107 raw 보강 영속)
-        - stock_master.upsert_one (사이클 84 history trigger 영속)
-
-        lifecycle (사이클 122 일봉 task 100% 답습):
-        - start() 직후 즉시 1회 실행 → 빠른 운영 가시화 + lifecycle race 영구 차단
-        - while 루프 _wait_until(16:10:00) 무한 루프 + asyncio.sleep(60) 안전 마진
-        - stop() task_attrs 튜플에 _stock_master_basics_refresh_task 포함 (사이클 79 답습)
-
-        emit (사이클 74/101/122 collector 패턴 답습):
-        - [stock_master_basics_refresh_summary] — 적재 완료 후 1행 INFO
-
-        영속 의무:
-        - 사이클 17 KIS LMS chain 안전 마진 (50ms sleep)
-        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
-        - 사이클 88 G-REJECT graceful 단위
-        - 사이클 106 lifecycle race 차단
-        - 사이클 107 CTPF1002R + FHKST01010100 merge 영속
-        """
-        from src.engine.scanner import _stock_master_basics_refresh_once
-        from src.engine.stock_master_basics_metrics import (
-            record_stock_master_basics_refresh,
-            flush_stock_master_basics_refresh_collector,
-        )
-        from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
-
-        await run_periodic_task_loop(
-            scheduler=self,
-            task_label="stock_master_basics_refresh",
-            wait_time=TIME_STOCK_MASTER_BASICS_REFRESH,  # 16:10 KST
-            once_callable=_stock_master_basics_refresh_once,
-            record_fn=record_stock_master_basics_refresh,
-            flush_fn=flush_stock_master_basics_refresh_collector,
-            summary_log_format=(
-                "[stock_master_basics_refresh_summary] total=%d updated=%d "
-                "skipped=%d failed=%d elapsed_ms=%d"
-            ),
-            summary_keys=(
-                "total", "updated", "skipped", "failed", "elapsed_ms",
-            ),
-            # 사이클 159 stagger 임계 상향 (refactor-expert 자문 옵션 C)
-            # = full_universe 280s 처리 시간 정합 + 30s overlap 허용
-            # 운영 실측 06-17 = master_skip 992 / basics_skip 1958 / 24h 폭주 영역 시정
-            initial_delay_secs=480,
-            # 사이클 193 신선도 게이트 — basics 는 멱등 없이 매 run updated=3575
-            # (17분 실제 burst) → 아침 boot 재시작 시 fresh 마커면 immediate skip.
-            # 게이트 적용 2 task 중 하나 (basics/master), 정기 while 발화는 무관.
-            immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS,
-        )
+        """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
+        await data_load_tasks.stock_master_basics_refresh_task_loop(self, wait_time=TIME_STOCK_MASTER_BASICS_REFRESH)
 
     async def _stock_master_master_load_task_loop(self) -> None:
-        """사이클 129 (2026-06-13) — 매일 16:30 KST KIS 종목 마스터 파일 적재 task.
-
-        KIS 정본 (kis-mcp-query 검증 영구 영속):
-        - KOSPI master = kospi_code.mst.zip (cp949, 후미 228 byte, part2 70 컬럼)
-        - KOSDAQ master = kosdaq_code.mst.zip (cp949, 후미 222 byte, part2 64 컬럼)
-
-        사용자 결정 영구 영속:
-        - Q4=A 마스터 우선 + Q5=C 전수 보존 + Q6=C master_raw 별도 컬럼
-        - Q12 시정: 시총 환산 × 100 (사용자 verbatim 정합)
-
-        lifecycle (사이클 122/126 task 100% 답습):
-        - start() 직후 즉시 1회 실행 → 빠른 운영 가시화 + lifecycle race 영구 차단
-        - while 루프 _wait_until(16:30:00) 무한 루프 + asyncio.sleep(60) 안전 마진
-        - stop() task_attrs 튜플에 _stock_master_master_load_task 포함 (사이클 79 G-AST2 영속)
-
-        emit (사이클 122 collector 패턴 답습):
-        - [stock_master_master_load_summary] — 적재 완료 후 1행 INFO
-
-        영속 의무:
-        - 사이클 17 KIS LMS chain 안전 (50ms sleep 영역 영속, kis_master.py 영역)
-        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
-        - 사이클 81 G-AST1 영속 (master_raw 별도 컬럼 = raw 변경 0)
-        - 사이클 88 G-REJECT graceful (KOSPI 또는 KOSDAQ 단독 실패 → 다른 쪽 계속)
-        - 사이클 106 lifecycle race 차단
-        - 사이클 127 fire-and-forget + refresh_progress 영속
-        - domain-consult 의제 5 옵션 A 채택 (16:30 KST 단일 task + 17시간 lag 명시 수용)
-        """
-        from src.engine.scanner import _stock_master_master_load_once
-        # 사이클 133 — master metrics collector 통합 영속 (카드 #24 일관성 결함 해소)
-        from src.engine.stock_master_master_metrics import (
-            record_stock_master_master_load,
-            flush_stock_master_master_load_collector,
-        )
-        from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
-
-        await run_periodic_task_loop(
-            scheduler=self,
-            task_label="stock_master_master_load",
-            wait_time=TIME_STOCK_MASTER_MASTER_LOAD,  # 16:30 KST
-            once_callable=_stock_master_master_load_once,
-            record_fn=record_stock_master_master_load,
-            flush_fn=flush_stock_master_master_load_collector,
-            summary_log_format=(
-                "[stock_master_master_load_summary] kospi=%d kosdaq=%d "
-                "total=%d updated=%d failed=%d elapsed_ms=%d"
-            ),
-            summary_keys=(
-                "kospi_count", "kosdaq_count", "total",
-                "updated", "failed", "elapsed_ms",
-            ),
-            # 사이클 159 stagger 임계 상향 (refactor-expert 자문 옵션 C)
-            # = basics 완료 30초 후 진입 = HTTP/2 race 차단 마진 확보
-            initial_delay_secs=720,
-            # 사이클 193 신선도 게이트 — master 는 멱등 없이 매 run updated=3565
-            # (4분 실제 burst) → 게이트 적용 2 task 중 하나 (basics/master).
-            immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS,
-        )
+        """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
+        await data_load_tasks.stock_master_master_load_task_loop(self, wait_time=TIME_STOCK_MASTER_MASTER_LOAD)
 
     async def _stock_master_financial_load_task_loop(self) -> None:
-        """사이클 C3 — 매일 16:40 KST 퀀트 재무 (마법공식/F-Score-7) 주1회 적재 task.
-
-        관찰 전용 배포 (Phase 1) — 매매 로직 diff 0. `_stock_master_financial_load_once`
-        가 유니버스(index ∪ 시총500억&거래대금20억)의 재무 데이터를 stock_master_financial
-        에 적재만 한다 (VB 관찰 훅이 이를 소비, 배제는 Phase 2(C4) 이후).
-
-        lifecycle (사이클 122/126/129 task 100% 답습):
-        - start() 직후 즉시 1회 실행(단, 주1회 신선도 게이트로 대개 skip) →
-          lifecycle race 영구 차단
-        - while 루프 _wait_until(16:40:00) 무한 루프 + asyncio.sleep(60) 안전 마진
-        - stop() task_attrs 튜플에 _stock_master_financial_load_task 포함
-          (사이클 79 G-AST2 영속)
-
-        주1회 신선도 게이트: `immediate_skip_if_fresh_hours=168` (7일, 사이클 193
-        패턴 답습) — 재무제표는 분기/연 단위 갱신이라 매일 재실행이 불필요.
-        `initial_delay_secs=900` — master(720초 지연 진입) 완료 후 stagger
-        마진 확보 (사이클 159 HTTP/2 race 차단 패턴).
-
-        영속 의무:
-        - 사이클 17 KIS LMS chain 안전 (50ms sleep 영역, finance.py 영역)
-        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
-        - 사이클 88 G-REJECT graceful (개별 ticker 실패 → 다음 ticker 진행)
-        - 사이클 106 lifecycle race 차단
-        - 사이클 127 fire-and-forget + refresh_progress 영속
-        - 사이클 193 신선도 게이트 패턴 답습
-        """
-        from src.engine.scanner import _stock_master_financial_load_once
-        from src.engine.task_loop_helper import run_periodic_task_loop
-
-        def _noop_record(_summary: dict) -> None:
-            return None
-
-        def _noop_flush() -> None:
-            return None
-
-        await run_periodic_task_loop(
-            scheduler=self,
-            task_label="stock_master_financial_load",
-            wait_time=TIME_STOCK_MASTER_FINANCIAL_LOAD,  # 16:40 KST
-            once_callable=_stock_master_financial_load_once,
-            record_fn=_noop_record,
-            flush_fn=_noop_flush,
-            summary_log_format=(
-                "[stock_master_financial_load_task_summary] total=%d updated=%d "
-                "skipped=%d failed=%d"
-            ),
-            summary_keys=("total", "updated", "skipped", "failed"),
-            # master(720초 지연) 완료 후 stagger 마진 확보 (사이클 159 패턴)
-            initial_delay_secs=900,
-            # 주1회 신선도 게이트 (7일 = 168시간, 사이클 193 패턴 답습)
-            immediate_skip_if_fresh_hours=168,
-        )
+        """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
+        await data_load_tasks.stock_master_financial_load_task_loop(self, wait_time=TIME_STOCK_MASTER_FINANCIAL_LOAD)
 
     async def _evening_funnel_capture_once(self) -> dict:
         """사이클 171 — 16:20 저녁 잠정 funnel 캡처 본체 (한 번 실행).
@@ -3386,129 +3132,12 @@ class TradingScheduler:
         return {"prepared": prepared, "saved": saved}
 
     async def _evening_funnel_capture_task_loop(self) -> None:
-        """사이클 171 — 매일 16:20 KST 저녁 잠정 funnel 캡처 task.
-
-        domain-consult 의제 4 우선순위 2 — 운영자가 전날 밤 다음 영업일 후보 확인.
-        funnel 은 D-1 일봉 기반이라 장중 불변 → 한가한 저녁에 미리 생성.
-
-        lifecycle (사이클 129/134 task 100% 답습):
-        - start() 직후 즉시 1회 실행 + 매일 16:20 KST 정기 (lifecycle race 차단)
-        - run_periodic_task_loop 헬퍼 위임 (사이클 134 카드 #21 영속)
-        - stagger initial_delay_secs — basics(16:10) 완료 후 진입 (HTTP/2 race 마진)
-
-        영속 의무:
-        - 사이클 32 R4 보유/익일청산 절대 보호 (prepare 영역, 영향 0)
-        - 사이클 38 명문화 (scanner/prepare 영역 = 매수 진입 전, 매도 hot path 무관)
-        - 사이클 79 G-AST2 task_attrs 4 위치 (_evening_funnel_capture_task)
-        - 사이클 88 G-REJECT graceful (전략별 prepare 실패 격리)
-        - 사이클 132 momentum funnel 영구 제외 영속
-        - 사이클 163 일봉 적재 완료 count polling 가드
-        - 사이클 170 in-place upsert 영속 (같은 step_no 교체)
-        """
-        from src.engine.task_loop_helper import run_periodic_task_loop
-
-        # metrics collector 미사용 (funnel = DB 직접 영속) → no-op record/flush
-        # (사이클 134 헬퍼는 record_fn/flush_fn 무조건 호출 → None 불가, no-op 위임)
-        def _noop_record(_summary: dict) -> None:
-            return None
-
-        def _noop_flush() -> None:
-            return None
-
-        await run_periodic_task_loop(
-            scheduler=self,
-            task_label="evening_funnel_capture",
-            wait_time=TIME_EVENING_FUNNEL_CAPTURE,  # 16:20 KST
-            once_callable=self._evening_funnel_capture_once,
-            record_fn=_noop_record,
-            flush_fn=_noop_flush,
-            summary_log_format=(
-                "[evening_funnel_capture_summary] prepared=%d saved=%d"
-            ),
-            summary_keys=("prepared", "saved"),
-            # basics(16:10) 완료 후 진입 = HTTP/2 race 차단 마진 (사이클 159 답습)
-            initial_delay_secs=600,
-        )
+        """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
+        await data_load_tasks.evening_funnel_capture_task_loop(self, wait_time=TIME_EVENING_FUNNEL_CAPTURE)
 
     async def _stock_master_daily_purge_task_loop(self) -> None:
-        """사이클 150 (2026-06-16) — 매일 16:15 KST stock_master_daily T-150일 retention cron task.
-
-        SUPABASE 용량초과 시정 영구 영속 — 사용자 결정 Q3=C (VCP T-120일 + 30일 안전 마진).
-
-        영속 의무 매트릭스:
-        - 사이클 6 retention 패턴 답습 (purge_old_logs 영역 정합)
-        - 사이클 32 R4 universe guard 보유/익일청산 절대 보호 (protected_tickers 영역 영속)
-        - 사이클 38 명문화 (scanner 영역 = 매수 진입 전, 매도 hot path 무관)
-        - 사이클 48 VCP EMA effective_long T-120일 영역 영속 (T-150일 안전 마진 영구 영속)
-        - 사이클 79 G-AST2 영속 (task_attrs 4 위치 영속)
-        - 사이클 88 G-REJECT graceful 단위 = 헬퍼 영역 영구 영속 내부
-        - 사이클 106 lifecycle race 차단 = 헬퍼 영역 영구 영속 내부
-        - 사이클 122 stock_master_daily T-100일 백필 영역 영속 (T-150일 retention 정합)
-        - 사이클 134 task_loop_helper 영속 (run_periodic_task_loop 패턴 답습)
-        """
-        from datetime import timedelta as _timedelta
-        from src.db._kst import today_kst
-        from src.db.stock_master_daily import (
-            DAILY_RETENTION_DAYS,
-            purge_old_rows,
-        )
-        from src.engine.task_loop_helper import run_periodic_task_loop
-
-        async def _purge_once() -> dict:
-            """T-150일 cutoff + 보유/익일청산 protected_tickers 합집합 영역."""
-            # 사이클 32 R4 답습 — 보유 ∪ 익일청산 합집합 영구 영속 보호
-            protected: set[str] = set()
-            try:
-                for strategy in self.registry.all():
-                    state = strategy.state
-                    for ticker in (state.positions or {}).keys():
-                        if ticker:
-                            protected.add(ticker)
-            except Exception:
-                logger.exception("[stock_master_daily_purge] protected tickers 영역 수집 실패 graceful")
-
-            try:
-                for entry in (self._pending_next_day_clear or set()):
-                    # entry 는 (ticker, strategy_id) 튜플 영속
-                    if isinstance(entry, tuple) and entry:
-                        ticker = entry[0]
-                    else:
-                        ticker = entry
-                    if ticker:
-                        protected.add(str(ticker))
-            except Exception:
-                logger.exception("[stock_master_daily_purge] pending_next_day_clear 영역 수집 실패 graceful")
-
-            cutoff = today_kst() - _timedelta(days=DAILY_RETENTION_DAYS)
-            summary = await purge_old_rows(cutoff, protected_tickers=protected or None)
-            # task_loop_helper summary 영역 정합 — cutoff 키 추가
-            summary["cutoff"] = cutoff.isoformat()
-            return summary
-
-        # 사이클 150 영역 = collector 단순화 — record/flush 영역 미사용 (운영 effect = retention 단일)
-        def _noop_record(summary: dict) -> None:  # noqa: ARG001
-            return None
-
-        def _noop_flush() -> None:
-            return None
-
-        from src.engine.task_loop_helper import IMMEDIATE_FRESH_SKIP_HOURS
-
-        await run_periodic_task_loop(
-            scheduler=self,
-            task_label="stock_master_daily_purge",
-            wait_time=TIME_STOCK_MASTER_DAILY_PURGE,  # 16:15 KST
-            once_callable=_purge_once,
-            record_fn=_noop_record,
-            flush_fn=_noop_flush,
-            summary_log_format=(
-                "[stock_master_daily_purge_summary] deleted=%d protected=%d "
-                "elapsed_ms=%d cutoff=%s"
-            ),
-            summary_keys=("deleted", "protected_count", "elapsed_ms", "cutoff"),
-            # 사이클 193 신선도 게이트 미적용 — purge 는 사이클 192 후 저렴(일 1날짜)
-            # + burst 아님 → 게이트 대상 = basics/master 만.
-        )
+        """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
+        await data_load_tasks.stock_master_daily_purge_task_loop(self, wait_time=TIME_STOCK_MASTER_DAILY_PURGE)
 
     def _detect_silent_inactive_sessions(self) -> list[str]:
         """세션 단위 silent inactive 감지 — 사이클 61 Phase 2-A2 stale_manager 위임."""

@@ -45,9 +45,11 @@ _UNGATED_WRAPPERS = (
 
 
 def _scheduler_source() -> str:
-    import src.engine.scheduler as _sched
+    # refactor-review B1 (2026-08-09) — task loop 본체(게이트 키워드 포함)는
+    # data_load_tasks.py 로 위임 이관. 게이트 검사는 이 모듈을 본다.
+    import src.engine.data_load_tasks as _dlt
 
-    return read_module_source(_sched.__file__)
+    return read_module_source(_dlt.__file__)
 
 
 def _helper_source() -> str:
@@ -58,8 +60,11 @@ def _helper_source() -> str:
 
 def _wrapper_has_gate_kw(scheduler_src: str, wrapper_name: str) -> bool:
     """wrapper 함수 내 run_periodic_task_loop 호출에 게이트 키워드 명시 여부 (AST)."""
-    node = find_function_def(scheduler_src, wrapper_name)
-    assert node is not None, f"wrapper `{wrapper_name}` 미발견 (구조 변경 재점검)."
+    # B1 위임 이관 — data_load_tasks 함수명은 언더스코어 없음. exact(self-test 합성명) →
+    # strip(실 wrapper→본체) 순으로 조회.
+    node = find_function_def(scheduler_src, wrapper_name) or \
+        find_function_def(scheduler_src, wrapper_name.lstrip("_"))
+    assert node is not None, f"함수 `{wrapper_name}` 미발견 (구조 변경 재점검)."
 
     for sub in ast.walk(node):
         if not isinstance(sub, ast.Call):
