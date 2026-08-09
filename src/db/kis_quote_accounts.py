@@ -20,13 +20,13 @@ from __future__ import annotations
 import asyncio  # noqa: F401 — Red autouse fixture 호환(monkeypatch.setattr(kqa.asyncio, ...))
 import logging
 import time
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 import src.db.pg as pg
 from src.db._kst import now_kst_iso
-from src.models.kis_quote_account import KisQuoteAccount, mask_secret
+from src.models.kis_quote_account import KisQuoteAccount
 
 logger = logging.getLogger(__name__)
 

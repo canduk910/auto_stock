@@ -853,7 +853,6 @@ class KojiroStrategy(StrategyBase):
                             ticker, pos.buy_price, loss_rate, params["hard_stop_pct"])
                 return Signal.STOP_LOSS
 
-        info = self._candidates.get(ticker)
         atr = self._effective_atr(ticker)
 
         # 2) 2ATR 하드손절 (tighten-only floor — 변동성 팽창 loosen 차단)

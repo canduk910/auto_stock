@@ -511,7 +511,6 @@ async def _build_portfolio_risk_snapshot(_now_kst: datetime | None = None) -> di
     치명 실패는 상위에서 None 처리.
     """
     from src.api.balance import get_balance
-    from src.db import stock_master
     from src.engine.portfolio_risk import (
         compute_portfolio_risk_snapshot,
         extract_hard_stop_pct,

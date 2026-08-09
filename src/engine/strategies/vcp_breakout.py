@@ -187,14 +187,14 @@ class VcpBreakoutStrategy(StrategyBase):
         self._position_setup: dict[str, dict] = {}
 
     # ------------------------------------------------------------------
-    # prepare — 일봉 220일 → 추세/베이스/pullback/거래량 수축 자동 검출
+    # prepare — 일봉 100일(prepare cap) → 추세/베이스/pullback/거래량 수축 자동 검출
     # ------------------------------------------------------------------
     async def prepare(self) -> None:
         import asyncio
 
         # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
-        # ★ VCP days=100 cap 절대 유지 (220 미사용) — effective_ema_long ≈75 불변.
-        #   DB 220일 적재돼 있어도 어댑터 get_recent_daily(days=100) 가 최신 100 DESC 만 반환.
+        # ★ VCP days=100 cap 절대 유지 (원설계 220 미실현, 사이클 196) — effective_ema_long ≈75 불변.
+        #   DB 100+ 적재(backfill 120·retention ~154영업일)라도 어댑터 get_recent_daily(days=100) 가 최신 100 DESC 만 반환.
         #   220 혜택 (EMA 원설계 복원) 은 별도 backtest 사이클 인계.
         from src.db.stock_master_daily import get_recent_daily_normalized
 
@@ -275,7 +275,7 @@ class VcpBreakoutStrategy(StrategyBase):
         today_str = datetime.now(KST).strftime("%Y%m%d")
 
         # 사이클 173 — DB 우선 어댑터. days=fetch_days(=100 cap) + min_required=100.
-        # 어댑터 get_recent_daily 가 min(100,100)=100 만 반환 → DB 220 있어도 100 만 사용
+        # 어댑터 get_recent_daily 가 min(100,100)=100 만 반환 → DB 100+ 있어도 100 만 사용
         # → effective_ema_long ≈75 불변 (행위 보존, G-VCP-1).
         async def _fetch_one(ticker: str):
             try:

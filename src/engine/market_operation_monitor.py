@@ -27,7 +27,7 @@ from __future__ import annotations
 import logging
 from typing import Iterable, Optional
 
-from src.api.market_operation import MarketOpEvent, is_event_blocking
+from src.api.market_operation import MarketOpEvent
 from src.engine.daily_emit_cap import DailyEmitCap
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def record_market_op_event(event: MarketOpEvent) -> None:
     의제 1 (자문 채택) — truthy 매핑:
     - VI/거래정지/종목상태 활성 → 해당 set add
     - 비활성 ("0"/""/None) → 해당 set discard
-    의제 5 (자문 채택) — `is_event_blocking()` 으로 3 영역 통합 판정.
+    VI/거래정지/종목상태 판정은 _is_code_active 인라인으로 처리 (is_event_blocking 미사용).
     """
     ticker = event.ticker
     if not ticker:

@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 from src.api.balance import get_balance, get_daily_orders
@@ -97,7 +97,6 @@ async def boot(scheduler: "TradingScheduler") -> None:
     from src.db.stock_master import count_active as _count_active
 
     waited = 0
-    initial_count = 0
     while waited < BOOT_PREPARE_STOCK_MASTER_WAIT_SECS:
         try:
             cnt = await _count_active()
@@ -110,7 +109,6 @@ async def boot(scheduler: "TradingScheduler") -> None:
                     "[boot_prepare_wait] stock_master count=%d (waited=%ds)",
                     cnt, waited,
                 )
-            initial_count = cnt
             break
         await asyncio.sleep(BOOT_PREPARE_STOCK_MASTER_POLL_SECS)
         waited += BOOT_PREPARE_STOCK_MASTER_POLL_SECS

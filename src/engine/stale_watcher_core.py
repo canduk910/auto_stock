@@ -120,7 +120,6 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         from src.realtime.websocket_pool import kis_ws_pool  # type: ignore[assignment]
 
     from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
-    from src.db.system_logs import write_log
 
     # 사이클 13-E (2026-05-18): 메인 단독 → 풀 전체로 확장
     subscribed = kis_ws_pool.get_subscribed_tickers()

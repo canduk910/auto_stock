@@ -164,8 +164,6 @@ def emit_stale_session_detail(
 
     L2909 본체를 그대로 이주. self.* → scheduler.* 치환만.
     """
-    from src.db.system_logs import write_log as _write_log
-
     try:
         view = build_session_subscription_view(scheduler)
     except Exception:

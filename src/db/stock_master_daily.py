@@ -34,7 +34,7 @@ read 헬퍼(`get_recent_daily`/`count_all`/`count_by_ticker`/`max_bas_dd`)는 `p
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import Optional
 
 import src.db.pg as pg
@@ -597,14 +597,14 @@ async def get_recent_daily_normalized(
 
 # ---------------------------------------------------------------------------
 # 사이클 150 — T-150일 retention (SUPABASE 용량초과 시정)
-# 사이클 172 — 150 → 230 (VCP 220일 + 10일 마진, 상수만 변경)
+# 사이클 172/196 — 150 → 230 (retention 230달력일 ≈ 154영업일, 상수만 변경)
 # ---------------------------------------------------------------------------
 
 import time as _time  # 사이클 150 — elapsed_ms 측정
 
 
-# 사이클 172 (2026-06-22) — 150 → 230 (VCP 220일 + 10일 안전 마진).
-# 사이클 173 prepare DB일봉 전환 시 VCP 220일 lookback DB 충족 보장.
+# 사이클 172/196 — 150 → 230 (retention 230달력일 ≈ 154영업일 보유).
+# VCP backfill target 120 (사이클 196) · prepare cap 100 — 220 미사용(EMA 원설계 미실현).
 # purge_old_rows 로직 불변 (상수만, "230일 지난 것만 삭제").
 # 사이클 150 영역 (사이클 48 VCP EMA effective_long T-120일 + 30일 마진) → 사이클 172 확장.
 DAILY_RETENTION_DAYS = 230

@@ -29,7 +29,7 @@ from src.db.backtest_runs import (
 from src.db.trade_history import get_trades_in_range
 from src.engine.market_regime import get_current_regime
 from src.engine.recommendation_metrics import compute_metrics
-from src.models.backtest import COMPARE_METRIC_KEYS, compute_metric_diff
+from src.models.backtest import compute_metric_diff
 from src.services.exceptions import (
     BacktestNotSupportedError,
     ConfigError,

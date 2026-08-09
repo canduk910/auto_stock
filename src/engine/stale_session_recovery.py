@@ -137,7 +137,6 @@ async def force_reconnect_session(scheduler: Any, label: str) -> bool:
     """
     import sys
     import time as _t
-    from src.db.system_logs import write_log as _write_log
 
     # kis_ws / kis_ws_pool 은 scheduler 모듈 네임스페이스를 우선 참조 (테스트 patch 호환).
     # sys.modules 경유는 AST 정적 import 가 아니므로 D-1 가드 통과.
@@ -227,7 +226,6 @@ async def delta_unsubscribe_dropped(scheduler: Any, new_set: set[str]) -> list[s
     - `_subscriptions` set 직접 수정 금지 — `kis_ws_pool.unsubscribe` 만 사용
     - 본체 예외는 호출자(`_scan_loop`)가 try/except 로 흡수
     """
-    from src.db.system_logs import write_log as _write_log
     from src.engine.scanner import TICK_TR_ID
     from src.realtime.websocket_pool import kis_ws_pool
 

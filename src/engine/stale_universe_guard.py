@@ -61,7 +61,6 @@ async def evaluate_universe_guard(
         제외된 종목은 다음 영업일 자동 재진입 가능.
     """
     from src.api.quotation import inquire_ccnl
-    from src.db.system_logs import write_log as _write_log
     from src.engine.scanner import TICK_TR_ID
     from src.realtime.websocket_pool import kis_ws_pool
 
