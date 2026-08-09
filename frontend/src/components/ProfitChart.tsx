@@ -12,13 +12,11 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { getDailyPerformance } from '../api/performance'
+import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR } from '../utils/pnlColor'
 
 interface Props {
   selectedStrategy: string
 }
-
-const PROFIT_COLOR = '#FF3333' // 양 (이익)
-const LOSS_COLOR = '#3366FF'   // 음 (손실)
 
 const DAILY_DAYS = 40
 const CUMULATIVE_DAYS = 180  // 약 6개월 (영업일+달력 혼합 여유, 백엔드는 N일치 raw 반환)

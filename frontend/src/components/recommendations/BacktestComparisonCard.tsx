@@ -20,9 +20,8 @@ import { useMemo } from 'react'
 import type { BacktestMetrics, BacktestSummary } from '../../types/backtest'
 import { BACKTEST_METRIC_KEYS } from '../../types/backtest'
 import { getStrategyColor } from '../../types/strategy'
+import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR } from '../../utils/pnlColor'
 
-const PROFIT_COLOR = '#FF3333' // 이익(개선)
-const LOSS_COLOR = '#3366FF' // 손실(악화)
 const NEUTRAL_COLOR = '#333333'
 
 interface MetricFormatSpec {

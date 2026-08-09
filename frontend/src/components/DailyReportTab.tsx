@@ -7,6 +7,7 @@ import type {
   LogReportItem,
   Severity,
 } from '../types/log_reports'
+import { pnlColorHex as pnlColor } from '../utils/pnlColor'
 
 /**
  * DailyReportTab — 사이클 6 (2026-05-17).
@@ -63,13 +64,6 @@ function formatPnL(n: number | undefined | null): string {
   if (n === undefined || n === null || !Number.isFinite(n)) return '-'
   const sign = n > 0 ? '+' : ''
   return `${sign}${n.toLocaleString()}원`
-}
-
-function pnlColor(n: number | undefined | null): string {
-  if (!n || !Number.isFinite(n)) return '#333333'
-  if (n > 0) return '#FF3333'
-  if (n < 0) return '#3366FF'
-  return '#333333'
 }
 
 function FindingCard({ finding }: { finding: Finding }) {

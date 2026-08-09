@@ -3,6 +3,7 @@ import { getPerformanceSummary } from '../api/performance'
 import { getStrategyTeRr } from '../api/strategies'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import type { TeRrMetrics } from '../types/strategy'
+import { pnlColorClass as profitColor } from '../utils/pnlColor'
 
 function formatKRW(value: number): string {
   return value.toLocaleString('ko-KR') + '원'
@@ -11,12 +12,6 @@ function formatKRW(value: number): string {
 function formatKRWSigned(value: number): string {
   const sign = value > 0 ? '+' : ''
   return sign + Math.round(value).toLocaleString('ko-KR') + '원'
-}
-
-function profitColor(value: number): string {
-  if (value > 0) return 'text-[#FF3333]'
-  if (value < 0) return 'text-[#3366FF]'
-  return 'text-[#333333]'
 }
 
 interface Props {

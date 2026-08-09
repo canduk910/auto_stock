@@ -129,6 +129,19 @@ const FUNNEL_THEME = {
 
 type FunnelTheme = keyof typeof FUNNEL_THEME
 
+// refactor-review C5 (2026-08-09) — 5 전략 funnel 렌더 설정 맵 (5 블록 near-identical → 단일 분기).
+// STAGES 상수는 동일 파일 유지 (cycle175/178 정적 source scan 경로 보존). testId/title/theme 문자열 불변.
+const FUNNEL_CONF: Record<
+  string,
+  { stages: ReadonlyArray<{ key: string; label: string }>; testId: string; title: string; theme: FunnelTheme }
+> = {
+  volatility_breakout: { stages: VB_STAGES, testId: 'vb-scan-funnel', title: '변동성 돌파 — 조건 통과 단계별 후보 수', theme: 'teal' },
+  long_tail_volatility: { stages: LTV_STAGES, testId: 'ltv-scan-funnel', title: '롱테일 변동성 — 조건 통과 단계별 후보 수', theme: 'teal' },
+  bull_flag_breakout: { stages: BFB_STAGES, testId: 'bfb-scan-funnel', title: '눌림목 돌파 — 조건 통과 단계별 후보 수', theme: 'indigo' },
+  vcp_breakout: { stages: VCP_STAGES, testId: 'vcp-scan-funnel', title: 'VCP 변동성 수축 — 조건 통과 단계별 후보 수', theme: 'indigo' },
+  momentum: { stages: MOMENTUM_STAGES, testId: 'momentum-scan-funnel', title: '상한가 모멘텀 — 조건 통과 단계별 후보 수', theme: 'emerald' },
+}
+
 interface ScanFunnelBarsProps {
   testId: string
   title: string
@@ -446,51 +459,19 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
 
             {/* 사이클 21 — 5 전략 깔때기 시각화 (donchian SWING_STAGES 패턴 동일 적용).
                 백엔드 _scan_stats 기반. 미반영 시점 fallback "아직 스캔 전" 표시. */}
-            {selectedStrategy === 'volatility_breakout' && (
-              <ScanFunnelBars
-                testId="vb-scan-funnel"
-                title="변동성 돌파 — 조건 통과 단계별 후보 수"
-                stages={VB_STAGES}
-                stats={strategies['volatility_breakout']?.scan_stats as Record<string, unknown> | null}
-                theme="teal"
-              />
-            )}
-            {selectedStrategy === 'long_tail_volatility' && (
-              <ScanFunnelBars
-                testId="ltv-scan-funnel"
-                title="롱테일 변동성 — 조건 통과 단계별 후보 수"
-                stages={LTV_STAGES}
-                stats={strategies['long_tail_volatility']?.scan_stats as Record<string, unknown> | null}
-                theme="teal"
-              />
-            )}
-            {selectedStrategy === 'bull_flag_breakout' && (
-              <ScanFunnelBars
-                testId="bfb-scan-funnel"
-                title="눌림목 돌파 — 조건 통과 단계별 후보 수"
-                stages={BFB_STAGES}
-                stats={strategies['bull_flag_breakout']?.scan_stats as Record<string, unknown> | null}
-                theme="indigo"
-              />
-            )}
-            {selectedStrategy === 'vcp_breakout' && (
-              <ScanFunnelBars
-                testId="vcp-scan-funnel"
-                title="VCP 변동성 수축 — 조건 통과 단계별 후보 수"
-                stages={VCP_STAGES}
-                stats={strategies['vcp_breakout']?.scan_stats as Record<string, unknown> | null}
-                theme="indigo"
-              />
-            )}
-            {selectedStrategy === 'momentum' && (
-              <ScanFunnelBars
-                testId="momentum-scan-funnel"
-                title="상한가 모멘텀 — 조건 통과 단계별 후보 수"
-                stages={MOMENTUM_STAGES}
-                stats={strategies['momentum']?.scan_stats as Record<string, unknown> | null}
-                theme="emerald"
-              />
-            )}
+            {(() => {
+              const conf = FUNNEL_CONF[selectedStrategy]
+              if (!conf) return null
+              return (
+                <ScanFunnelBars
+                  testId={conf.testId}
+                  title={conf.title}
+                  stages={conf.stages}
+                  stats={strategies[selectedStrategy]?.scan_stats as Record<string, unknown> | null}
+                  theme={conf.theme}
+                />
+              )
+            })()}
 
             {/* 모멘텀 종목 리스트 */}
             {showMomentumScan && scan && scan.filtered_count > 0 && (

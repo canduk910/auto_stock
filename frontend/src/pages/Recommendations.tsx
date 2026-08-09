@@ -8,6 +8,7 @@ import InfoTooltip from '../components/InfoTooltip'
 import ConfirmModal from '../components/ConfirmModal'
 import BacktestComparisonCard from '../components/recommendations/BacktestComparisonCard'
 import type { RecommendationItem, RecommendationStatus, RecommendationMetrics } from '../types/recommendations'
+import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR } from '../utils/pnlColor'
 
 const STATUS_LABEL: Record<RecommendationStatus, string> = {
   pending: '대기',
@@ -24,10 +25,6 @@ const STATUS_BADGE_CLASS: Record<RecommendationStatus, string> = {
   rejected: 'bg-gray-100 text-gray-600',
   expired: 'bg-gray-100 text-gray-500',
 }
-
-// 색상 컨벤션: 이익=빨강, 손실=파랑
-const PROFIT_COLOR = '#FF3333'
-const LOSS_COLOR = '#3366FF'
 
 function formatPct(value: number | undefined, fractionDigits = 2): string {
   if (value === undefined || value === null || !Number.isFinite(value)) return '-'

@@ -22,6 +22,7 @@ import type { ApiResponse } from '../types/common'
 import { getStrategyColor } from '../types/strategy'
 import type { TeRrMetrics } from '../types/strategy'
 import { getStrategyTeRr } from '../api/strategies'
+import { pnlColorClass as profitColorClass } from '../utils/pnlColor'
 
 // 전략 응답 타입 — GET /api/strategies 영역 정합
 interface StrategyStatus {
@@ -79,13 +80,6 @@ export type ThresholdKey = typeof THRESHOLD_KEYS[number]
 // 명세: _workspace/red/_behaviors_cycleF_te_rr_20260802.md §F-FE1~F-FE6
 // 자문: _workspace/domain_consult/cycle_te_expectancy_dashboard_20260802.md §209-234
 // 관찰 전용 — 매매 hot path 무접촉.
-
-// 이익/손실/보합 색상 (frontend/CLAUDE.md 컨벤션, PerformanceCard.tsx 패턴 답습)
-function profitColorClass(value: number): string {
-  if (value > 0) return 'text-[#FF3333]'
-  if (value < 0) return 'text-[#3366FF]'
-  return 'text-[#333333]'
-}
 
 function formatSignedPercent(val: number | null | undefined, digits = 1): string {
   if (val === null || val === undefined || isNaN(val)) return '—'

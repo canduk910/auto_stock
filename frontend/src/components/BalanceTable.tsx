@@ -6,6 +6,7 @@ import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { Holding } from '../types/balance'
 import ConfirmModal from './ConfirmModal'
+import { pnlColorClass as profitColor } from '../utils/pnlColor'
 
 const STRATEGY_NAMES: Record<string, string> = {
   momentum: '모멘텀',
@@ -45,11 +46,6 @@ function marketBadgeProps(h: Holding): { label: string; cls: string } {
   return { label: 'KRX', cls: `${MARKET_BADGE_BASE} bg-gray-100 text-gray-700` }
 }
 
-function profitColor(value: number): string {
-  if (value > 0) return 'text-[#FF3333]'
-  if (value < 0) return 'text-[#3366FF]'
-  return 'text-[#333333]'
-}
 
 function formatKRW(value: number): string {
   return value.toLocaleString('ko-KR')
