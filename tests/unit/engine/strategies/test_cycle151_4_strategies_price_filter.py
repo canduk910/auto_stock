@@ -580,30 +580,32 @@ class TestCommonAstGuards:
     """G-151-COMMON: 4 전략 공통 AST + INT 가드."""
 
     def test_all_strategies_have_apply_price_filter_in_prepare_method(self):
-        """G-151-COMMON-AST-2: 4 전략 _apply_price_filter_in_prepare 메서드 정의 의무."""
-        missing = []
+        """G-151-COMMON-AST-2 [의미 전환 refactor-review A1]: _apply_price_filter_in_prepare 는
+        StrategyBase 단일 정의 — 4 전략 자체 정의 금지(상속, 드리프트 차단)."""
+        base_tree = ast.parse((_REPO_ROOT / "src" / "engine" / "strategy_base.py").read_text())
+        base_defs = [
+            n.name for n in ast.walk(base_tree)
+            if isinstance(n, ast.AsyncFunctionDef) and n.name == "_apply_price_filter_in_prepare"
+        ]
+        assert base_defs, "StrategyBase _apply_price_filter_in_prepare 정의 의무 (A1 승격)"
+        offenders = []
         for label, path in _STRATEGY_PATHS.items():
             tree = ast.parse(path.read_text())
-            method_names = [
-                n.name for n in ast.walk(tree)
-                if isinstance(n, ast.AsyncFunctionDef)
-                and n.name == "_apply_price_filter_in_prepare"
-            ]
-            if not method_names:
-                missing.append(label)
-        assert not missing, (
-            f"4 전략 _apply_price_filter_in_prepare 메서드 정의 의무 — missing={missing}"
+            if any(
+                isinstance(n, ast.AsyncFunctionDef) and n.name == "_apply_price_filter_in_prepare"
+                for n in ast.walk(tree)
+            ):
+                offenders.append(label)
+        assert not offenders, (
+            f"4 전략 자체 정의 금지 — base 상속만 (A1 승격, 드리프트 차단): {offenders}"
         )
 
     def test_all_strategies_import_get_price_filter(self):
-        """G-151-COMMON-AST-1: 4 전략 get_price_filter 호출/import 영속."""
-        missing = []
-        for label, path in _STRATEGY_PATHS.items():
-            source = path.read_text()
-            if "get_price_filter" not in source:
-                missing.append(label)
-        assert not missing, (
-            f"4 전략 get_price_filter 단일 source 영속 의무 — missing={missing}"
+        """G-151-COMMON-AST-1 [의미 전환 refactor-review A1]: get_price_filter 는 base 승격 —
+        StrategyBase 소스가 단일 source 로 import (4 전략 소스에서 이동)."""
+        base_source = (_REPO_ROOT / "src" / "engine" / "strategy_base.py").read_text()
+        assert "get_price_filter" in base_source, (
+            "StrategyBase._apply_price_filter_in_prepare 가 get_price_filter 단일 source 의무 (A1 승격)"
         )
 
     def test_all_strategies_no_separate_price_keys_in_default_params(self):
@@ -668,29 +670,29 @@ class TestSafetyAstGuards:
                 )
 
     def test_apply_price_filter_in_prepare_no_check_exit_signal(self):
-        """G-151-COMMON-SAFETY-1 (HIGH): _apply_price_filter_in_prepare 본체 check_exit_signal 호출 0건."""
-        for label, path in _STRATEGY_PATHS.items():
-            tree = ast.parse(path.read_text())
-            target = None
-            for node in ast.walk(tree):
-                if isinstance(node, ast.AsyncFunctionDef) and node.name == "_apply_price_filter_in_prepare":
-                    target = node
-                    break
-            assert target is not None, f"{label} _apply_price_filter_in_prepare 메서드 부재"
-            forbidden_calls = []
-            for sub in ast.walk(target):
-                if isinstance(sub, ast.Call):
-                    func = sub.func
-                    name = None
-                    if isinstance(func, ast.Attribute):
-                        name = func.attr
-                    elif isinstance(func, ast.Name):
-                        name = func.id
-                    if name == "check_exit_signal":
-                        forbidden_calls.append(name)
-            assert not forbidden_calls, (
-                f"{label} _apply_price_filter_in_prepare 본체 check_exit_signal 호출 금지 (매매 안전성)"
-            )
+        """G-151-COMMON-SAFETY-1 (HIGH) [의미 전환 refactor-review A1]: base 승격된
+        _apply_price_filter_in_prepare 본체 check_exit_signal 호출 0건 (매매 안전성)."""
+        base_tree = ast.parse((_REPO_ROOT / "src" / "engine" / "strategy_base.py").read_text())
+        target = None
+        for node in ast.walk(base_tree):
+            if isinstance(node, ast.AsyncFunctionDef) and node.name == "_apply_price_filter_in_prepare":
+                target = node
+                break
+        assert target is not None, "StrategyBase _apply_price_filter_in_prepare 메서드 부재 (A1 승격)"
+        forbidden_calls = []
+        for sub in ast.walk(target):
+            if isinstance(sub, ast.Call):
+                func = sub.func
+                name = None
+                if isinstance(func, ast.Attribute):
+                    name = func.attr
+                elif isinstance(func, ast.Name):
+                    name = func.id
+                if name == "check_exit_signal":
+                    forbidden_calls.append(name)
+        assert not forbidden_calls, (
+            "_apply_price_filter_in_prepare 본체 check_exit_signal 호출 금지 (매매 안전성)"
+        )
 
     def test_all_strategies_apply_price_filter_called_in_scan_universe(self):
         """G-151-COMMON-AST-4: 4 전략 _scan_universe 본체에서 _apply_price_filter_in_prepare 호출 영속."""

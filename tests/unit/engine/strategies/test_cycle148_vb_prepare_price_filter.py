@@ -270,11 +270,14 @@ class TestVbPriceFilterSingleSource:
     """G-AST-148: VB prepare 영역에서 system_config.get_price_filter 호출."""
 
     def test_vb_imports_get_price_filter(self):
-        """VB 소스에 get_price_filter import 또는 사용 영속."""
-        source = _VB_SOURCE_PATH.read_text()
-        assert "get_price_filter" in source, (
-            "VB prepare 영역 PriceFilter 단일 source 영속 의무 "
-            "(system_config.get_price_filter 호출)"
+        """[의미 전환 refactor-review A1]: get_price_filter 는 StrategyBase 승격 —
+        `_apply_price_filter_in_prepare` 가 base 단독 정의라 단일 source 도 base 소스."""
+        base_source = (
+            _REPO_ROOT / "src" / "engine" / "strategy_base.py"
+        ).read_text()
+        assert "get_price_filter" in base_source, (
+            "StrategyBase._apply_price_filter_in_prepare 가 PriceFilter 단일 source 의무 "
+            "(system_config.get_price_filter 호출, A1 승격)"
         )
 
     def test_vb_no_separate_price_keys_in_default_params(self):
