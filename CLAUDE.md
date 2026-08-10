@@ -126,6 +126,7 @@ cd frontend && npm install && npm run dev
 
 상세 메커니즘은 `src/engine/CLAUDE.md` · `src/realtime/CLAUDE.md` 참조. 여기서는 **금기**만:
 
+- **기능·설정 비활성화(disable / toggle off / dead 판정) 시 심층 검증 의무** — 무언가를 "미사용/dead/낭비"라고 단정하기 **전에 소비처(consumers)를 전수 확인**하고, 비활성화 **후에는 그 소비처가 여전히 정상 동작하는지 라이브 실측**으로 검증한다. **비활성화는 "제거"가 아니라 "경로 변경"일 수 있다** — 주 경로를 끄면 폴백 경로가 조용히 degrade될 수 있으므로, 배포 후 반드시 실측 점검한다(설정 토글은 CI/Deploy 를 안 타므로 자동 검증도 없다). 실측 없는 비활성화 금지. ⚠️ **재발 방지 사례 (2026-08-08 KRX OpenAPI)**: `krx_open_api_enabled` 를 "무효 키·낭비"로 오판해 비활성화 → 소비처 `scanner._full_universe_load_krx_primary`(20:00/07:48 전체 유니버스 적재 주 소스)가 KIS market-cap 폴백으로 밀려 **full_universe_load 가 3,577→60종목으로 degrade**(D+1 실측 발견). 원인 = (a) 소비처 미확인(주 소스인데 "미사용" 오판) + (b) 비활성화 후 점검 절차 부재. 키는 실제 유효(40자)했고 재활성화로 복원. **끄기 전에 `grep` 으로 소비처를 찾고, 끈 뒤엔 그 소비처의 산출물(예: 적재 종목수)을 라이브로 확인하라.**
 - **체결통보 구독 (H0STCNI0/H0STCNI9) 제거 금지** — 미구독 시 포지션 등록·손절 불가
 - **uvicorn 단일 워커 필수** — `--workers` 금지 (스케줄/포지션/WebSocket 중복)
 - **주문번호 매핑** (`_order_qty/_order_strategy/_order_ticker/_pending_buy_orders`) 등록은 `place_order` 응답 직후 동기 영역, `await insert_trade` 진입 전 — 시장가 즉시체결 race 시 매핑 누락하면 기본값 "momentum" 으로 잘못 INSERT됨
