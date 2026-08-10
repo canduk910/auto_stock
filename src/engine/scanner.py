@@ -1172,15 +1172,21 @@ async def subscribe_filtered_stocks(
             total_subscribed = len(kis_ws._subscriptions)
             high_count = len(set(positions) | set(next_day_clear))
             low_remaining = max(0, MAX_SUBSCRIPTIONS - total_subscribed)
-            # 미구독 진단 계측 (2026-08-08) — pool 세션수·총슬롯 병기. max=41 은 메인
-            # 단독 한도라 pool 총량(41×세션수)이 안 보였다. drop 이 세션 부족 때문인지
-            # 후보 과다 때문인지 이 필드로 판별한다(BFB/VCP 미구독 근본 진단).
+            # 미구독 진단 계측 (2026-08-08 pool_sessions/pool_slots + 2026-08-10 pool_subscribed).
+            # ⚠️ total_subscribed·max·low_remaining 은 **메인 세션 단독** 뷰다. 실제 drop 은
+            # `_pool_total_slots - len(kis_ws_pool._subscriptions)` 로 판정하므로, 풀 전체
+            # 실제 구독량(pool_subscribed)·잔여(pool_remaining)를 병기해야 drop 이
+            # **세션 미활용(pool_remaining>0인데 drop = 구독 상태 드리프트/보조세션 불안정)**
+            # 인지 **실제 풀 만석(pool_remaining≈0)** 인지 판별된다. (BFB/VCP 확대 미구독 근본 진단)
+            pool_subscribed = len(kis_ws_pool._subscriptions)
+            pool_remaining = max(0, _pool_total_slots - pool_subscribed)
             drop_log = (
                 f"[priority_drop] breakout={drop_counts['breakout']} "
                 f"momentum={drop_counts['momentum']} swing={drop_counts['swing']} "
                 f"total_subscribed={total_subscribed} max={MAX_SUBSCRIPTIONS} "
                 f"high_count={high_count} low_remaining={low_remaining} "
-                f"pool_sessions={_pool_session_count} pool_slots={_pool_total_slots}"
+                f"pool_sessions={_pool_session_count} pool_slots={_pool_total_slots} "
+                f"pool_subscribed={pool_subscribed} pool_remaining={pool_remaining}"
             )
             logger.warning(drop_log)
             # 사이클 72 hotfix A11: write_log 제거 — logger.warning → _DbLogHandler 위임 단일 INSERT

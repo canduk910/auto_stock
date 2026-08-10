@@ -123,6 +123,9 @@ async def test_low_priority_drop_order_breakout_kept_swing_dropped(_fresh_ws_sub
     assert "high_count=11" in log_text
     assert "low_remaining=0" in log_text
     assert "low_remaining=-" not in log_text
+    # 2026-08-10 — pool 실제 구독량/잔여 병기 (drop 이 세션 미활용인지 실제 만석인지 판별)
+    assert "pool_subscribed=" in log_text, "pool 실제 구독량 계측 병기 의무"
+    assert "pool_remaining=" in log_text, "pool 잔여(실제 drop 판정 기준) 계측 병기 의무"
 
 
 # ---------------------------------------------------------------------------
