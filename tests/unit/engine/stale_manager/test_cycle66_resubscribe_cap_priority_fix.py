@@ -64,9 +64,14 @@ def _make_scheduler_with_high_tickers(positions: list[str] = None, ndc: set = No
 
 
 def _make_mock_pool() -> MagicMock:
-    """KIS WebSocket 풀 mock — subscribe AsyncMock."""
+    """KIS WebSocket 풀 mock — subscribe/unsubscribe_in_pool AsyncMock.
+
+    사이클 215 — resubscribe_stale_priority 가 K watcher 패턴 (unsubscribe_in_pool
+    선행)을 채택하며 unsubscribe_in_pool 도 AsyncMock 필요 (mock 적응).
+    """
     mock_pool = MagicMock()
     mock_pool.subscribe = AsyncMock(return_value=None)
+    mock_pool.unsubscribe_in_pool = AsyncMock(return_value=None)
     return mock_pool
 
 

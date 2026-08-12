@@ -38,6 +38,10 @@ from src.engine.stale_diagnostics import (
 
 logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (caplog 호환)
 
+# 사이클 216 — LOW-only 재구독 throttle (동일 종목 중복 재발사 차단).
+# 반드시 < 300s(`resubscribe_stale_priority` 5분 주기 자체) — 자기막힘/cycle215 원복 방지.
+RESUBSCRIBE_THROTTLE_SECS = 3 * STALE_FRESHNESS_SECS  # = 180
+
 
 # ── 사이클 74 옵션 C 조건부 — [stale_watcher] 5분 aggregation collector ─────────────
 
@@ -466,6 +470,31 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
     high_targets = [t for t in stale_tickers if t in high_tickers]
     low_targets = [t for t in stale_tickers if t not in high_tickers]
 
+    # 사이클 216 보강 A — 동시호가 LOW-scoped skip (HIGH 는 면제, cycle162 전체
+    # early-return 과 달리 LOW 후보만 비운다. 09:00 갭개장 손절 대비 HIGH 유지).
+    try:
+        from src.engine.session import session_tracker as _session_tracker
+        _is_call_auction = _session_tracker.is_call_auction_now(now)
+    except Exception:
+        _is_call_auction = False
+    if _is_call_auction and low_targets:
+        logger.warning(
+            "[stale_skip_call_auction_priority] low=%d skip — 동시호가 LOW 재구독 회피 (HIGH 유지)",
+            len(low_targets),
+        )
+        low_targets = []
+
+    # 사이클 216 보강 B — LOW-only per-ticker throttle (HIGH 는 완전 면제,
+    # 300s 케이던스 자체가 LMS-safe + 손절 직결). throttle → cap 순서 (계약).
+    _last_resub = getattr(scheduler, "_stale_last_resubscribe_at", {}) or {}
+    low_targets = [
+        t for t in low_targets
+        if not (
+            isinstance(_last_resub.get(t), datetime)
+            and (now - _last_resub[t]).total_seconds() < RESUBSCRIBE_THROTTLE_SECS
+        )
+    ]
+
     # Q3 시정: HIGH > cap 시 cap 위반 허용 + WARNING 로그 (운영 가시화)
     if len(high_targets) > cap:
         logger.warning(
@@ -487,6 +516,8 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
             sub_priority = "LOW"
             sub_bypass = False
         try:
+            await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+            await asyncio.sleep(0.05)
             await kis_ws_pool.subscribe(
                 TICK_TR_ID, ticker,
                 priority=sub_priority, bypass_limit=sub_bypass,

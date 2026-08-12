@@ -59,6 +59,7 @@ async def test_K1_cap_10_limits_resubscribe_targets_with_sorted_determinism():
 
     mock_pool = MagicMock()
     mock_pool.subscribe = AsyncMock(return_value=None)
+    mock_pool.unsubscribe_in_pool = AsyncMock(return_value=None)
 
     with freeze_time(base), \
          patch("asyncio.sleep", new=AsyncMock(return_value=None)), \
@@ -118,6 +119,7 @@ async def test_K2_cap_10_defect_high_ticker_excluded_by_sorted_order_currently_b
 
     mock_pool = MagicMock()
     mock_pool.subscribe = AsyncMock(return_value=None)
+    mock_pool.unsubscribe_in_pool = AsyncMock(return_value=None)
 
     with freeze_time(base), \
          patch("asyncio.sleep", new=AsyncMock(return_value=None)), \

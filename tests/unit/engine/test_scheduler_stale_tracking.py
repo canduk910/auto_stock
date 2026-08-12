@@ -176,6 +176,7 @@ async def test_resubscribe_stale_priority_updates_last_at(monkeypatch):
 
     pool_mock = MagicMock()
     pool_mock.subscribe = AsyncMock(return_value="quote-1")
+    pool_mock.unsubscribe_in_pool = AsyncMock(return_value=None)
     import src.realtime.websocket_pool as wp_mod
     monkeypatch.setattr(wp_mod, "kis_ws_pool", pool_mock)
 
