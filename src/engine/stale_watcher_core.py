@@ -506,6 +506,14 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
     targets = high_targets + low_targets[: max(0, cap - len(high_targets))]
     resubscribed: list[str] = []
 
+    # 사이클 217 — 구독 상태 스냅샷 1회 (unsubscribe SEND 가드 소스).
+    # 미구독(split-brain/stale 후보) 종목에 unsubscribe SEND 를 보내면 KIS 가
+    # OPSP0003(UNSUBSCRIBE ERROR not found!) 을 반환 (ERROR 스팸 회피).
+    try:
+        subscribed_snapshot = kis_ws_pool.get_subscribed_tickers()
+    except Exception:
+        subscribed_snapshot = set()
+
     for ticker in targets:
         # positions/next_day_clear → HIGH (메인 절대 보장, bypass 한도 무시)
         # 그 외 후보 → LOW (보조 세션 분산 우선, 사이클 25-B)
@@ -516,8 +524,14 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
             sub_priority = "LOW"
             sub_bypass = False
         try:
-            await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
-            await asyncio.sleep(0.05)
+            if ticker in subscribed_snapshot:
+                await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+                await asyncio.sleep(0.05)
+            else:
+                try:
+                    kis_ws_pool._ticker_to_session.pop(ticker, None)
+                except Exception:
+                    pass
             await kis_ws_pool.subscribe(
                 TICK_TR_ID, ticker,
                 priority=sub_priority, bypass_limit=sub_bypass,
