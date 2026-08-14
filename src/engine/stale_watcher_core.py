@@ -280,7 +280,14 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
             if last_at is not None:
                 age_secs = (_dt_mod.now(_KST_TZ) - last_at).total_seconds()
                 if age_secs < STALE_FORCE_RETRY_AFTER_SECS:
-                    # cooldown 미경과 — 기존 skip 동작 보존 (LMS 위험 차단, 카운터는 누적)
+                    # cooldown 미경과 — 기존 skip 동작 보존 (LMS 위험 차단, 무SEND).
+                    # 관찰성(cycle218): priority_resubscribe(5분)가 `_stale_last_resubscribe_at`
+                    # 를 갱신해 force_retry 600s 게이트가 지속 미충족되면 r 이 무한 climb(실측
+                    # 131)하며 실제 부하와 무관한 오해 숫자를 남긴다. r>5 는 전부 동일 경로
+                    # (force_retry `>MAX` / universe_guard `<=MAX` / diagnostics `<2` 임계)라
+                    # MAX_STALE_RETRIES+1 홀드 = 행위 불변 + 로그 정직. force_retry FIRE 경로
+                    # (age>=600 / last_at 부재)는 이 분기 밖이라 기존 r=0 리셋 보존.
+                    scheduler._stale_retry_count[ticker] = MAX_STALE_RETRIES + 1
                     skipped_giveup += 1
                     continue
             else:

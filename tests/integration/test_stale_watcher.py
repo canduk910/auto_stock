@@ -228,6 +228,8 @@ async def test_skip_after_6_giveup(scheduler_env):
     사이클 17 보강: retry>5 모두 skip — 10→11 도 skip
     사이클 29 (2026-05-21): r>5 분기는 시간 기반. 본 케이스는 cooldown 미경과로 skip 보존.
     (last_resub_age=100s < STALE_FORCE_RETRY_AFTER_SECS=300s)
+    cycle218 (2026-08-14): skip 시 카운터가 MAX_STALE_RETRIES+1(=6)로 홀드 —
+    무한 climb(131) 오해 숫자 제거. skip(SEND 0) 자체는 불변.
     """
     sched = scheduler_env.scheduler
     subscribed = {"A00001"}
@@ -243,7 +245,11 @@ async def test_skip_after_6_giveup(scheduler_env):
     assert calls.send_subscribe == []
     assert calls.unsubscribe == []
     assert calls.subscribe == []
-    assert sched._stale_retry_count == {"A00001": 11}
+    # cycle218 의미 전환: cooldown-skip 분기가 r 을 MAX_STALE_RETRIES+1(=6)로 홀드.
+    # 구 계약("skip 시 카운터 누적" → r=11)은 priority_resubscribe 실효화(cycle215) 후
+    # timestamp 지속 갱신으로 r 이 무한 climb(131)하던 오해 숫자였다. 위 SEND 0(3단언)
+    # = 와이어 행위 불변, 카운터 표기만 캡. r>5 전부 동일 경로라 소비자 행위 불변.
+    assert sched._stale_retry_count == {"A00001": 6}
 
 
 # ---------------------------------------------------------------------------
