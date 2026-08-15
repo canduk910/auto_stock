@@ -1176,20 +1176,6 @@ class VcpBreakoutStrategy(StrategyBase):
         today = datetime.now(KST).date()
         self._cooldown_until[ticker] = today + timedelta(days=days + 2)
 
-    async def _refine_cooldown_business_days(self, ticker: str) -> None:
-        """쿨다운을 정확한 N영업일로 정정 (사이클 191 2단계).
-
-        KIS chk-holiday CTCA0903R 1회 호출 → opnd_yn=="Y" n번째 날로 교체.
-        실패 시 1단계 근사값 유지 (graceful).
-        """
-        days = self.config.params["reentry_cooldown_days"]
-        today = datetime.now(KST).date()
-        try:
-            accurate = await add_business_days(today, days)
-            self._cooldown_until[ticker] = accurate
-        except Exception:
-            logger.warning("[vcp] 영업일 정정 실패 (ticker=%s) — 근사값 유지", ticker)
-
     async def recompute_high_since_buy(self) -> None:
         """보유 종목의 `high_since_buy` 를 매수일~전영업일 일봉 high max 로 보정.
 
@@ -1312,6 +1298,7 @@ class VcpBreakoutStrategy(StrategyBase):
     # 아래 라벨이 추출 전 로그 리터럴("VCP high_since_buy 보정")을 byte 단위로 보존한다.
     _HIGH_RECOVER_LABEL = "VCP"
     _ENTRY_ATR_REDERIVE_LABEL = "vcp"
+    _COOLDOWN_LOG_LABEL = "[vcp]"  # refactor-review A3 — base 위임 로그 접두사
 
     def on_position_closed(self, ticker: str) -> None:
         """사이클 191 — 포지션 청산 시 재진입 쿨다운 등록 (VCP override, BFB 패턴 답습).

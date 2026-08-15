@@ -1091,20 +1091,6 @@ class BullFlagBreakoutStrategy(StrategyBase):
         self._breakout_first_seen.pop(ticker, None)
         # 매수 1회 가드도 함께 해제 (당일 매도 set 이 차단하므로 영향 없음)
 
-    async def _refine_cooldown_business_days(self, ticker: str) -> None:
-        """쿨다운을 정확한 N영업일로 정정 (사이클 191 2단계).
-
-        KIS chk-holiday CTCA0903R 1회 호출 → opnd_yn=="Y" n번째 날로 교체.
-        실패 시 1단계 근사값 유지 (graceful).
-        """
-        days = self.config.params["reentry_cooldown_days"]
-        today = datetime.now(KST).date()
-        try:
-            accurate = await add_business_days(today, days)
-            self._cooldown_until[ticker] = accurate
-        except Exception:
-            logger.warning("[bfb] 영업일 정정 실패 (ticker=%s) — 근사값 유지", ticker)
-
     def _reset_daily_state(self) -> None:
         """사이클 23 P2-1 — 일일 초기화 시 _breakout_first_seen 정리.
 
@@ -1129,6 +1115,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
     _HIGH_RECOVER_LABEL = "눌림목"
     _ENTRY_ATR_REDERIVE_LABEL = "bfb"
+    _COOLDOWN_LOG_LABEL = "[bfb]"  # refactor-review A3 — base 위임 로그 접두사
 
     _SETUP_LEVEL_KEYS = ("flag_low", "flag_high", "pole_high", "pole_start")
 

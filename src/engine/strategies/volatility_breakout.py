@@ -437,6 +437,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         return filtered
 
     _PREPARE_LOG_LABEL = "vb"  # refactor-review A1·A2 — base 위임 로그 접두사
+    _COOLDOWN_LOG_LABEL = "[vb]"  # refactor-review A3 — base 위임 로그 접두사
 
     async def _apply_quant_filter_in_prepare(self, tickers: list[str]) -> list[str]:
         """VB prepare 영역 퀀트 재무 게이트 (사이클 C3, 관찰 전용 Phase 1).
@@ -1031,20 +1032,6 @@ class VolatilityBreakoutStrategy(StrategyBase):
         days = self.config.params["reentry_cooldown_days"]
         today = datetime.now(KST).date()
         self._cooldown_until[ticker] = today + timedelta(days=days + 2)
-
-    async def _refine_cooldown_business_days(self, ticker: str) -> None:
-        """쿨다운을 정확한 N영업일로 정정 (사이클 201, BFB 191 2단계 패턴 답습).
-
-        KIS chk-holiday CTCA0903R 1회 호출 → opnd_yn=="Y" n번째 날로 교체.
-        실패 시 1단계 근사값 유지 (graceful).
-        """
-        days = self.config.params["reentry_cooldown_days"]
-        today = datetime.now(KST).date()
-        try:
-            accurate = await add_business_days(today, days)
-            self._cooldown_until[ticker] = accurate
-        except Exception:
-            logger.warning("[vb] 영업일 정정 실패 (ticker=%s) — 근사값 유지", ticker)
 
     def on_position_closed(self, ticker: str) -> None:
         """사이클 201 — 포지션 청산 시 재진입 쿨다운 등록 (BFB 사이클 191 패턴 답습)."""

@@ -131,20 +131,6 @@ class LongTailVolatilityStrategy(StrategyBase):
         today = datetime.now(KST).date()
         self._cooldown_until[ticker] = today + timedelta(days=days + 2)
 
-    async def _refine_cooldown_business_days(self, ticker: str) -> None:
-        """쿨다운을 정확한 N영업일로 정정 (사이클 213, VB 201 2단계 패턴 답습).
-
-        KIS chk-holiday CTCA0903R 1회 호출 → opnd_yn=="Y" n번째 날로 교체.
-        실패 시 1단계 근사값 유지 (graceful).
-        """
-        days = self.config.params["reentry_cooldown_days"]
-        today = datetime.now(KST).date()
-        try:
-            accurate = await add_business_days(today, days)
-            self._cooldown_until[ticker] = accurate
-        except Exception:
-            logger.warning("[ltv] 영업일 정정 실패 (ticker=%s) — 근사값 유지", ticker)
-
     def on_position_closed(self, ticker: str) -> None:
         """사이클 185 — 포지션 청산 시 상한가 모드 보유결합 상태 정리.
 
@@ -489,6 +475,7 @@ class LongTailVolatilityStrategy(StrategyBase):
         return filtered
 
     _PREPARE_LOG_LABEL = "ltv"  # refactor-review A1·A2 — base 위임 로그 접두사
+    _COOLDOWN_LOG_LABEL = "[ltv]"  # refactor-review A3 — base 위임 로그 접두사
 
     def get_scanned_tickers(self) -> list[str]:
         """스캔된 종목 리스트를 반환한다 (WebSocket 구독용)."""

@@ -508,6 +508,8 @@ class StrategyBase(ABC):
     _ENTRY_ATR_REDERIVE_LABEL: ClassVar[str | None] = None
     # prepare 가격/마스터차단 필터 로그 접두사 — vb/ltv/dc/bfb/vcp (refactor-review A1·A2).
     _PREPARE_LOG_LABEL: ClassVar[str | None] = None
+    # 재진입 쿨다운 영업일 정정 실패 로그 접두사 — bfb/vcp/ltv/vb (refactor-review A3).
+    _COOLDOWN_LOG_LABEL: ClassVar[str | None] = None
 
     @staticmethod
     def _candle_trade_date(candle: dict) -> date | None:
@@ -656,6 +658,41 @@ class StrategyBase(ABC):
                             label, ticker, pos.buy_date, int(e_atr))
         except Exception:
             logger.exception("[%s_entry_atr_rederive] 재도출 실패: %s", label, ticker)
+
+    async def _refine_cooldown_business_days(self, ticker: str) -> None:
+        """재진입 쿨다운을 정확한 N영업일로 정정 (refactor-review A3, 단일 진실원).
+
+        1단계(`register_cooldown_after_exit`)가 즉시 달력일 근사(days+2)로 세팅한
+        `_cooldown_until[ticker]` 를, KIS `chk-holiday`(CTCA0903R) 1회 호출로 정확한
+        N영업일로 교체한다. 실패 시 1단계 근사값을 그대로 유지(graceful).
+
+        bfb/vcp/ltv/vb 4 전략에 로그 접두사만 다른 byte-identical 4벌로 존재하던 것을
+        base 로 승격(H-1 `_apply_high_since_buy_from_candles` 선례 동형). 로그 접두사는
+        `_COOLDOWN_LOG_LABEL` ClassVar 로 전략별 보존.
+
+        ⚠️ `add_business_days` 는 `src.api.condition` 을 base 에서 직접 참조하지 않고
+        **concrete 전략 모듈 네임스페이스**(`sys.modules[type(self).__module__]`)에서
+        resolve 한다 — cycle191/201/213 테스트 + 본 메서드 행위 테스트가 전략 모듈
+        바인딩(`monkeypatch.setattr(<strategy_mod>, "add_business_days", ...)`)을
+        패치하기 때문(stale_manager `sys.modules.get` 패턴 답습).
+        """
+        days = self.config.params["reentry_cooldown_days"]
+        today = datetime.now(_KST).date()
+        try:
+            import sys as _sys
+
+            _mod = _sys.modules.get(type(self).__module__)
+            _add_business_days = getattr(_mod, "add_business_days", None)
+            if _add_business_days is None:
+                from src.api.condition import add_business_days as _add_business_days  # 폴백
+
+            accurate = await _add_business_days(today, days)
+            self._cooldown_until[ticker] = accurate
+        except Exception:
+            logger.warning(
+                "%s 영업일 정정 실패 (ticker=%s) — 근사값 유지",
+                self._COOLDOWN_LOG_LABEL, ticker,
+            )
 
     async def _apply_master_block_filter_in_prepare(
         self, tickers: list[str]
