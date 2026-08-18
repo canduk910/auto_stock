@@ -788,7 +788,7 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 ### 13.6 운영 안정성 (사이클 9 / 11 / 13 / 14)
 
 - WebSocket stale watcher 임계 보수화 → 회복 강화:
-  - `STALE_WATCHER_INTERVAL_SECS=120` / `STALE_FRESHNESS_SECS=60` / `STALE_FORCE_REREGISTER_AFTER=5` (10분 stale 후 강제 재등록)
+  - `STALE_WATCHER_INTERVAL_SECS=120` / `STALE_FRESHNESS_SECS=60` / `MAX_STALE_RETRIES=5` (6회 이상 stale → 시간 기반 force_retry 경로 위임. 구 `STALE_FORCE_REREGISTER_AFTER` 는 2026-08-19 dead 상수로 제거)
   - 다중 안전망: F1 (재연결 1회) + `_scan_loop` (5분) + K watcher (120s) + `_resubscribe_stale_priority` (5분 우선) = 4중
 - `_subscriptions` 정합성 가드 (in-flight ACK race 차단)
 - `_report_tick_coverage()` 풀 통합 — 사이클 11 짝궁 누락 fix

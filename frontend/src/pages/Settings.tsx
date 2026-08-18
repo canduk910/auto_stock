@@ -212,7 +212,7 @@ export default function Settings() {
           ))}
         </div>
         <p className="text-xs text-gray-400 mt-3">
-          자동 시작 07:45 / 부트 07:50 / NXT 프리 08:00 / KRX 메인 09:00 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 20:10
+          자동 시작 07:45 / 부트 07:55 / NXT 프리 08:00 / KRX 메인 09:00 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 20:10
           · <strong>VTS(모의)는 KRX만 지원</strong> — NXT/SOR는 실전 한정
         </p>
       </div>

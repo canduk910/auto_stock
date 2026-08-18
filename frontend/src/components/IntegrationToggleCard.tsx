@@ -8,7 +8,7 @@
  * - dkstock-regime: 매크로 레짐 fetch (활성화 시 백그라운드 fetch trigger)
  * - kis-mcp: 외부 백테스트 서버 (자문 시점에만 사용)
  * - auto-regime-adjust: 매크로 레짐 → cash_usage_ratio 자동 갱신
- * - auto-apply: AI 자문 자동 적용 (감액만 + 50% cap, 기본 OFF)
+ * - auto-apply: AI 자문 자동 적용 (전략 비중 감액만 + 50% cap, 기본 OFF — 매매 파라미터는 자동 적용 안 함)
  * - etf-regime: 지수ETF 레짐(관찰) 계산 — 코스피200/코스닥150 스테이지, 매수 가드 미개입
  *
  * 사이클 8 — 매수 가드 영역:
@@ -110,11 +110,11 @@ const TOGGLES: ToggleMeta[] = [
 // 사이클 23 P3-3 — auto-apply 별도 섹션 (DB-only, .env fallback 없음)
 const AUTO_APPLY_META: ToggleMeta = {
   key: 'auto-apply',
-  label: 'AI 자문 자동 적용 (감액만 + 50% cap)',
+  label: 'AI 자문 자동 적용 (전략 비중 감액만 + 50% cap)',
   description:
-    '20:00 AI 자문 직후 weight 감액 권고 + 보수적 파라미터 (stop_loss/position_ratio/daily_loss_limit) 를 자동 적용합니다. 증액 권고는 운영자 명시 적용만 가능합니다.',
+    '20:00 AI 자문 직후 전략 비중(weight) 감액 권고만 자동 반영합니다 (감액폭 50% cap, 증액 권고는 자동 반영 대상이 아닙니다). 손절폭·종목당 비중·일일 손실한도 같은 매매 파라미터는 자동 적용되지 않으며, 필요하면 운영자가 자문 화면에서 직접 적용해야 합니다. 파라미터 자동 반영은 조이는 방향의 권고만 통과시키는 구조여서 조임이 매일 누적돼 전략이 사실상 매매를 못 하게 되는 문제가 확인되어 중단했습니다 (사이클 210).',
   confirmOnMessage:
-    'AI 자문 자동 적용을 활성화합니다. 매일 20:00 자문 직후 weight 감액 (50% cap) + 보수적 파라미터 가 자동 적용됩니다. 증액은 운영자 명시 적용만 가능합니다. 진행하시겠습니까?',
+    'AI 자문 자동 적용을 활성화합니다. 매일 20:00 자문 직후 전략 비중 감액 권고만 자동 반영됩니다 (감액폭 50% cap). 증액 권고와 매매 파라미터 권고는 자동 반영되지 않고, 운영자 명시 적용에서만 반영됩니다. 진행하시겠습니까?',
   confirmOffMessage:
     'AI 자문 자동 적용을 비활성화합니다. 모든 자문은 운영자 수동 적용에서만 반영됩니다. 진행하시겠습니까?',
   envVarName: '— (DB 키 only, 사이클 23)',

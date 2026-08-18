@@ -9,7 +9,7 @@
  * 안전 원칙:
  * - app_secret 평문 응답 노출 0 (백엔드 마스킹 + UI 는 마스킹만 표시)
  * - 폼 제출 직후 secret state 초기화 — 평문 잔존 시간 최소화
- * - 등록 시 ConfirmModal — "다음 _boot(07:50) 부터 시세 풀에 분배" 안내
+ * - 등록 시 ConfirmModal — "다음 _boot(07:55) 부터 시세 풀에 분배" 안내
  *
  * 백엔드: `/api/integrations/quote-accounts` (사이클 7-A)
  * 시세 활용: 사이클 7-B (WebsocketPool) + 7-C (REST 풀)
@@ -196,7 +196,7 @@ export default function KisQuoteAccountsCard() {
   const confirmMessage = (() => {
     if (!pendingAction) return ''
     if (pendingAction.kind === 'create') {
-      return `보조 계좌 "${form.label}" (${form.kis_env}) 를 등록합니다. 다음 _boot(07:50) 부터 시세 풀에 분배됩니다 — 41 × (1 + N) 슬롯 확장. 진행하시겠습니까?`
+      return `보조 계좌 "${form.label}" (${form.kis_env}) 를 등록합니다. 다음 _boot(07:55) 부터 시세 풀에 분배됩니다 — 41 × (1 + N) 슬롯 확장. 진행하시겠습니까?`
     }
     if (pendingAction.kind === 'toggle') {
       return pendingAction.nextActive
@@ -220,7 +220,7 @@ export default function KisQuoteAccountsCard() {
       <p className="text-xs text-gray-500 mb-4">
         시세 수신 전용 보조 계좌를 등록합니다. 매매·잔고·체결통보는 메인 계좌 단일 유지.
         등록 시 시세 풀 슬롯이 <strong>41 × (1 + N)</strong> 으로 확장됩니다 (KIS 공식 한도 — 메인 41 + 보조 N×41).
-        다음 부트(07:50) 부터 활성화됩니다.
+        다음 부트(07:55) 부터 활성화됩니다.
       </p>
 
       {/* 목록 */}

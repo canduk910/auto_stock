@@ -96,7 +96,10 @@ STALE_WATCHER_INTERVAL_SECS = 120           # task 발화 주기 (사이클 9: 3
 # 1~5회 재SEND (`pool.resend_subscribe_for_ticker`) 분기 폐기 → 첫 stale 즉시 unsubscribe + subscribe(HIGH,
 # bypass_limit=True) 강제 재등록. KIS 정상 "신규 등록" 패턴 (재SEND 0건). 5/12 silent inactive 사고
 # 안전망 보존. retry > MAX 면 skip — 다음 _scan_loop 위임 (영구 stale 의심 종목 보호).
-STALE_FORCE_REREGISTER_AFTER = 5            # (deprecated, 호환 보존) — 분기 임계가 아닌 회귀 가드 의미만 유지. 실제 동작은 MAX_STALE_RETRIES.
+# (2026-08-19 정리) 상수 `STALE_FORCE_REREGISTER_AFTER` 제거 — production 소비처 0건 dead 상수.
+#   실제 임계는 `MAX_STALE_RETRIES` (stale_watcher_core.py `if retry > MAX_STALE_RETRIES`).
+#   위 사이클 17 독트린(재SEND 금지)은 `tests/unit/engine/test_stale_force_reregister_constant_removed.py`
+#   G-DEAD-2 소스 가드(src/engine + src/realtime 호출부 0건)가 지킨다.
 
 # 사이클 60 Phase 2-A1 (2026-06-04) — 5 상수를 stale_manager.py 로 이전 후 re-export.
 # 사이클 61 Phase 2-A2 (2026-06-05) — 추가 5 상수 (SILENT_INACTIVE_* + STALE_FRESHNESS_SECS) re-export 추가.

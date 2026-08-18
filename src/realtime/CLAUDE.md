@@ -28,7 +28,7 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 - `unsubscribe(tr_id, tr_key)` — 분배 추적된 세션에서 해제. 추적 없으면 noop. 체결통보 메인 강제
 - `unsubscribe_all()` — 분배 추적 dict 순회 + 모든 세션 매칭 해제
 - `unsubscribe_in_pool(tr_id, tr_key)` — K stale watcher 헬퍼. 추적 dict 제거 + 세션 unsubscribe. 강제 재등록 시 라운드로빈 재선택 의도
-- `resend_subscribe_for_ticker(tr_id, tr_key)` — K stale watcher 헬퍼. 추적 없으면 메인 fallback
+- `resend_subscribe_for_ticker(tr_id, tr_key)` — `_ticker_to_session` 추적으로 정확한 세션에 재SEND(추적 없으면 메인 fallback). ⚠️ **production 호출자 0건** — 사이클 17(2026-05-19)이 KIS 공식 답변("기등록한 사항을 재등록하지 않도록")을 반영해 K stale watcher 의 1~5회 재SEND 분기를 폐기했다. 함수 자체는 향후 운영 도구 후보로 보존하되 **재도입 금지** — AST 가드 `tests/unit/engine/test_stale_force_reregister_constant_removed.py`(G-DEAD-2)가 `src/engine/`·`src/realtime/` 전역에서 호출부 0건을 강제한다
 - `get_subscribed_tickers() -> set[str]` — 메인 + 보조 TICK 합집합
 - `get_acked_tickers() -> set[str]` — 합집합 ACK
 - `get_subscriptions_by_session() -> dict[str, set[str]]` — **사이클 28 (2026-05-21)**: 세션 label → ticker set (역인덱싱, 영속 dict 미추가). scheduler 의 `[stale_watcher_detail]` / `[tick_coverage_session]` prefix + `/api/realtime/subscriptions` 의 `tickers_detail` 응답에 활용
@@ -205,7 +205,7 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 - **E1 (보유·익일청산 우선)** — `subscribe(priority="HIGH")` 메인 `bypass_limit=True` 절대 보장
 - **E2 (거절 응답 감지)** — 각 세션 `_handle_raw()` 독립 작동
 - **F1 (재연결 후 자동 검증)** — 각 세션 `_verify_subscriptions_after_reconnect()` 독립 발화
-- **K (stale watcher)** — `pool.resend_subscribe_for_ticker` 가 `_ticker_to_session` 활용해 정확한 세션 재전송
+- **K (stale watcher)** — 첫 stale 즉시 `pool.unsubscribe_in_pool` + `pool.subscribe(priority='HIGH', bypass_limit=True)` **강제 재등록**(KIS 정상 "신규 등록" 패턴). 재SEND(`resend_subscribe_for_ticker`) 분기는 사이클 17 에서 폐기됐다 — `retry > MAX_STALE_RETRIES(=5)` 면 시간 기반 force_retry 로 넘어간다(`stale_watcher_core.py`)
 - **세션 단위 silent inactive 자동 회복 (사이클 24, 2026-05-20)**: 메인/보조 세션의 fresh=0 + subscribed>=5 + 5분 지속 시 K stale watcher 가 `_ws.close()` 강제 발화 → connect() 의 ConnectionClosed catch → 재연결 자동 발화. 시간당 2회 cap.
 
 ## 주의사항

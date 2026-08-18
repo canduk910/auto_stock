@@ -12,13 +12,13 @@
 
 본 사이클(17 보강) 변경:
 - ``STALE_WATCHER_INTERVAL_SECS`` 120 보존 (사이클 9)
-- ``STALE_FORCE_REREGISTER_AFTER`` 5 보존 (회귀 가드 의미만, 분기 임계 아님)
+- ``STALE_FORCE_REREGISTER_AFTER`` 제거 (2026-08-19 정리 — dead 상수, 소비처 0건)
 - 신: ``MAX_STALE_RETRIES`` = 5 (6회 이상 skip)
 - ``STALE_FRESHNESS_SECS`` 60 보존
 
 회귀 가드 (의미 갱신 — 1~5회 즉시 강제 재등록):
 - A: ``STALE_WATCHER_INTERVAL_SECS == 120`` 상수
-- B: ``STALE_FORCE_REREGISTER_AFTER == 5`` 상수 (회귀 가드)
+- B: (제거) ``STALE_FORCE_REREGISTER_AFTER`` 순환 가드 — 2026-08-19 정리에서 삭제
 - B2: ``MAX_STALE_RETRIES == 5`` 신규 상수
 - 신: ``STALE_FRESHNESS_SECS == 60``
 - C: 첫 stale (retry=1) 즉시 ``unsubscribe_in_pool`` + ``subscribe(HIGH, bypass)`` 강제 재등록
@@ -52,18 +52,12 @@ def test_stale_watcher_interval_secs_is_120():
     )
 
 
-def test_stale_force_reregister_after_is_5():
-    """``STALE_FORCE_REREGISTER_AFTER`` 가 5 회 보존 (사이클 17 보강 회귀 가드).
-
-    사이클 9: 3 → 10 (KIS 차단 회피)
-    사이클 13: 10 → 5 (단발 silent inactive 회복 강화)
-    사이클 17 보강: 분기 임계가 아닌 회귀 가드 의미만 보존 (실제 동작은 MAX_STALE_RETRIES).
-    """
-    from src.engine import scheduler
-
-    assert scheduler.STALE_FORCE_REREGISTER_AFTER == 5, (
-        "사이클 13: 10 → 5; 사이클 17 보강: 호환 보존 (회귀 가드 의미)"
-    )
+# 2026-08-19 정리 ④ — ``test_stale_force_reregister_after_is_5`` 제거.
+#   제거 사유: ``STALE_FORCE_REREGISTER_AFTER`` 는 production 소비처 0건(분기는
+#   ``MAX_STALE_RETRIES`` 담당)이라 이 단언은 상수 자신만 지키는 순환 가드였다.
+#   상수가 대리하던 사이클 17 독트린(재SEND 금지)은 아래 C/D/E 케이스의
+#   ``resend_subscribe_for_ticker.assert_not_called()`` + 신설 소스 가드
+#   ``tests/unit/engine/test_stale_force_reregister_constant_removed.py`` 가 지킨다.
 
 
 def test_max_stale_retries_is_5():

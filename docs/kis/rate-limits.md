@@ -193,7 +193,7 @@ LIMIT 50;
 1. `system_logs` 에서 `[quote_session_disabled]` 사유 확인
 2. 외부 원인 (KIS 측 장애, 토큰 만료, 계정 issue) 진단
 3. Settings UI 에서 해당 보조 계좌 `active=true` 토글
-4. **다음 영업일** `_boot()` (07:50) 부터 풀 재참여 (당일 즉시 재참여 미지원)
+4. **다음 영업일** `_boot()` (07:55) 부터 풀 재참여 (당일 즉시 재참여 미지원)
 
 ### 회귀 가드 (24 신규)
 - `tests/unit/engine/test_stale_watcher_thresholds.py` 7 케이스

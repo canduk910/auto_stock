@@ -469,7 +469,7 @@ export default function KisAccountPoolCard() {
               className="mt-3 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded p-2"
               data-testid="pool-no-secondary-note"
             >
-              보조 세션 없음 (메인 only). Settings &gt; 보조 KIS 시세 계좌에서 등록하면 다음 _boot(07:50) 부터 슬롯이 41 × (1 + N) 으로 확장됩니다.
+              보조 세션 없음 (메인 only). Settings &gt; 보조 KIS 시세 계좌에서 등록하면 다음 _boot(07:55) 부터 슬롯이 41 × (1 + N) 으로 확장됩니다.
             </div>
           )}
         </>
