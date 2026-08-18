@@ -54,6 +54,7 @@ def _fake_strategy(strategy_id: str):
 def _common_recommendation_mocks(monkeypatch: pytest.MonkeyPatch):
     """recommendation_engine 공통 모킹 — DB / OpenAI / registry."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.engine.scheduler import trading_scheduler
     from src.config import settings
 
@@ -106,6 +107,7 @@ def _common_recommendation_mocks(monkeypatch: pytest.MonkeyPatch):
 def _bind_backtest_runs_store(monkeypatch: pytest.MonkeyPatch):
     """backtest_runs CRUD 모킹 — in-memory store 반환."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     runs_store: dict[str, dict] = {}
 
@@ -138,9 +140,9 @@ def _bind_backtest_runs_store(monkeypatch: pytest.MonkeyPatch):
     async def fake_db_list_by_date(td):
         return [r for r in runs_store.values() if r["target_date"] == td.isoformat()]
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_db_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_db_update_status, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_list_by_date", fake_db_list_by_date, raising=False)
+    monkeypatch.setattr(_bt, "_db_insert_run", fake_db_insert_run, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_db_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_list_by_date", fake_db_list_by_date, raising=False)
     return runs_store
 
 
@@ -161,6 +163,7 @@ async def test_kis_mcp_disabled_marks_all_runs_skipped(
     Phase 5b 후 사용자가 .env 토글 → 다음 영업일부터 자연 활성화.
     """
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     pr_store = _common_recommendation_mocks(monkeypatch)
     runs_store = _bind_backtest_runs_store(monkeypatch)
@@ -178,11 +181,11 @@ async def test_kis_mcp_disabled_marks_all_runs_skipped(
         async def poll(self, *a, **kw):
             raise AssertionError("disabled engine poll 호출 금지")
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: DisabledEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: DisabledEngine(), raising=False)
 
     spawn_called = {"n": 0}
     monkeypatch.setattr(
-        rec_mod, "_spawn_backtest_poll_task",
+        _bt, "_spawn_backtest_poll_task",
         lambda td: spawn_called.__setitem__("n", spawn_called["n"] + 1),
         raising=False,
     )
@@ -236,6 +239,7 @@ async def test_external_server_down_marks_runs_failed_recommendation_preserved(
     운영자가 ``backtest_runs.status=failed`` 행을 SQL 로 확인해 외부 서버 문제 진단.
     """
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.services.exceptions import ExternalAPIError, BacktestNotSupportedError
 
     pr_store = _common_recommendation_mocks(monkeypatch)
@@ -258,11 +262,11 @@ async def test_external_server_down_marks_runs_failed_recommendation_preserved(
         async def poll(self, *a, **kw):
             raise ExternalAPIError("MCP 서버 다운")
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: DownEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: DownEngine(), raising=False)
 
     spawn_called = {"n": 0}
     monkeypatch.setattr(
-        rec_mod, "_spawn_backtest_poll_task",
+        _bt, "_spawn_backtest_poll_task",
         lambda td: spawn_called.__setitem__("n", spawn_called["n"] + 1),
         raising=False,
     )
@@ -313,6 +317,7 @@ async def test_backtest_poll_timeout_marks_running_rows_failed(
     - 자문 INSERT 6 row 는 영속 보존
     """
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.services.exceptions import BacktestNotSupportedError
     from src.models.backtest import BacktestMetrics
 
@@ -331,10 +336,10 @@ async def test_backtest_poll_timeout_marks_running_rows_failed(
         return pr_store.get(rec_id, {})
 
     monkeypatch.setattr(
-        rec_mod, "_db_list_pending_backtest", fake_list_pending_backtest, raising=False
+        _bt, "_db_list_pending_backtest", fake_list_pending_backtest, raising=False
     )
     monkeypatch.setattr(
-        rec_mod, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
+        _bt, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
     )
 
     class HangingEngine:
@@ -352,11 +357,11 @@ async def test_backtest_poll_timeout_marks_running_rows_failed(
             # 영원히 running 반환 — timeout 분기 진입까지 강제
             return None
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: HangingEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: HangingEngine(), raising=False)
     # 폴 sleep 0초 — 빠른 iteration
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
     # timeout 도 0시간 → 첫 iteration 직후 timeout 분기 진입
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_TIMEOUT_HOURS", 0, raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_TIMEOUT_HOURS", 0, raising=False)
 
     poll_tasks: list[asyncio.Task] = []
 
@@ -366,7 +371,7 @@ async def test_backtest_poll_timeout_marks_running_rows_failed(
         poll_tasks.append(t)
         return t
 
-    monkeypatch.setattr(rec_mod, "_spawn_backtest_poll_task", spawn_poll, raising=False)
+    monkeypatch.setattr(_bt, "_spawn_backtest_poll_task", spawn_poll, raising=False)
 
     with freeze_time("2026-05-18 11:00:00"):
         inserted = await rec_mod.generate_recommendations()

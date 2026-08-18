@@ -62,8 +62,12 @@ def _make_inserted_rows(target_date: date) -> list[dict]:
     return rows
 
 
-def _install_db_doubles(monkeypatch, rec_mod):
-    """_db_insert_run / _db_update_status 더블 설치 → (inserted, updates) 반환."""
+def _install_db_doubles(monkeypatch, target_mod):
+    """_db_insert_run / _db_update_status 더블 설치 → (inserted, updates) 반환.
+
+    target_mod = src.engine.backtest_orchestration (본체가 lookup 하는 실제 네임스페이스 —
+    사이클 refactor B3 이관 후 recommendation_engine 재export patch 는 본체에 무영향).
+    """
     inserted_rows: list[dict] = []
     update_records: list[dict] = []
 
@@ -82,8 +86,8 @@ def _install_db_doubles(monkeypatch, rec_mod):
         update_records.append({"run_id": run_id, "status": status, **kwargs})
         return {"id": run_id, "status": status}
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(target_mod, "_db_insert_run", fake_insert_run, raising=False)
+    monkeypatch.setattr(target_mod, "_db_update_status", fake_update_status, raising=False)
     return inserted_rows, update_records
 
 
@@ -108,10 +112,11 @@ async def test_enqueue_uses_db_toggle_true_over_static_env_false(
     현행 게이트(라인 548, 정적 engine.enabled 읽음)는 False 를 읽어 전량 skip → Red.
     """
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     target = date(2026, 7, 24)
     recs = _make_inserted_rows(target)
-    _inserted, update_records = _install_db_doubles(monkeypatch, rec_mod)
+    _inserted, update_records = _install_db_doubles(monkeypatch, _bt)
 
     submit_calls: list[tuple[str, str]] = []
 
@@ -127,11 +132,11 @@ async def test_enqueue_uses_db_toggle_true_over_static_env_false(
             submit_calls.append((strategy_id, kind))
             return f"job-{strategy_id}-{kind}"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
 
     spawn_calls: list = []
     monkeypatch.setattr(
-        rec_mod, "_spawn_backtest_poll_task", lambda td: spawn_calls.append(td), raising=False
+        _bt, "_spawn_backtest_poll_task", lambda td: spawn_calls.append(td), raising=False
     )
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
@@ -168,10 +173,11 @@ async def test_enqueue_skips_supported_when_db_toggle_false(
 ):
     """T2: is_enabled_async()=False 면 지원 3종은 'MCP 비활성' skipped, run_for_strategy 미호출."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     target = date(2026, 7, 24)
     recs = _make_inserted_rows(target)
-    _inserted, update_records = _install_db_doubles(monkeypatch, rec_mod)
+    _inserted, update_records = _install_db_doubles(monkeypatch, _bt)
 
     submit_calls: list[str] = []
 
@@ -185,11 +191,11 @@ async def test_enqueue_skips_supported_when_db_toggle_false(
             submit_calls.append(strategy_id)
             return "job-should-not-be-called"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
 
     spawn_calls: list = []
     monkeypatch.setattr(
-        rec_mod, "_spawn_backtest_poll_task", lambda td: spawn_calls.append(td), raising=False
+        _bt, "_spawn_backtest_poll_task", lambda td: spawn_calls.append(td), raising=False
     )
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
@@ -221,10 +227,11 @@ async def test_enqueue_fallback_always_skipped_regardless_of_toggle(
     (게이트 *전* 분기이므로 enabled 무관 — kojiro 포함 4종 검증.)
     """
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     target = date(2026, 7, 24)
     recs = _make_inserted_rows(target)
-    _inserted, update_records = _install_db_doubles(monkeypatch, rec_mod)
+    _inserted, update_records = _install_db_doubles(monkeypatch, _bt)
 
     submit_calls: list[str] = []
 
@@ -238,8 +245,8 @@ async def test_enqueue_fallback_always_skipped_regardless_of_toggle(
             submit_calls.append(strategy_id)
             return f"job-{strategy_id}-{kind}"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
-    monkeypatch.setattr(rec_mod, "_spawn_backtest_poll_task", lambda td: None, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_spawn_backtest_poll_task", lambda td: None, raising=False)
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
 
@@ -273,6 +280,7 @@ async def test_enqueue_graceful_when_db_toggle_raises(
     게이트에서 예외가 전파되지 않아야 하며, .env=True fallback 으로 지원 3종 submit.
     """
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.db import system_config
 
     async def raising_get_db():
@@ -296,12 +304,12 @@ async def test_enqueue_graceful_when_db_toggle_raises(
         return f"job-{strategy_id}-{kind}"
 
     monkeypatch.setattr(engine, "run_for_strategy", fake_run_for_strategy, raising=False)
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: engine, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: engine, raising=False)
 
     target = date(2026, 7, 24)
     recs = _make_inserted_rows(target)
-    _inserted, _updates = _install_db_doubles(monkeypatch, rec_mod)
-    monkeypatch.setattr(rec_mod, "_spawn_backtest_poll_task", lambda td: None, raising=False)
+    _inserted, _updates = _install_db_doubles(monkeypatch, _bt)
+    monkeypatch.setattr(_bt, "_spawn_backtest_poll_task", lambda td: None, raising=False)
 
     # 예외 전파 없이 완료되어야 한다 (게이트 graceful)
     await rec_mod._enqueue_backtest_jobs(target, recs)

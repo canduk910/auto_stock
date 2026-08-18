@@ -52,6 +52,7 @@ async def test_full_flow_20_00_recommendation_backtest(
 ):
     """20:00 정각 자문 + 백테스트 enqueue + 폴 → backtest_summary 동봉 전 흐름."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.models.backtest import BacktestMetrics
 
     target = date(2026, 5, 16)
@@ -149,14 +150,14 @@ async def test_full_flow_20_00_recommendation_backtest(
             pr_store[rec_id]["backtest_summary"] = summary
         return pr_store.get(rec_id, {})
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_db_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_db_update_status, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_list_by_date", fake_db_list_by_date, raising=False)
+    monkeypatch.setattr(_bt, "_db_insert_run", fake_db_insert_run, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_db_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_list_by_date", fake_db_list_by_date, raising=False)
     monkeypatch.setattr(
-        rec_mod, "_db_list_pending_backtest", fake_db_list_pending_backtest, raising=False
+        _bt, "_db_list_pending_backtest", fake_db_list_pending_backtest, raising=False
     )
     monkeypatch.setattr(
-        rec_mod, "_db_update_backtest_summary", fake_db_update_backtest_summary, raising=False
+        _bt, "_db_update_backtest_summary", fake_db_update_backtest_summary, raising=False
     )
 
     # ---- BacktestEngine: 즉시 submit, poll 1회만에 완료 ----
@@ -181,8 +182,8 @@ async def test_full_flow_20_00_recommendation_backtest(
                 "total_trades": 18,
             })
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
 
     # ---- 폴 루프 task 를 await 가능하게 캡처 ----
     poll_tasks: list[asyncio.Task] = []
@@ -193,7 +194,7 @@ async def test_full_flow_20_00_recommendation_backtest(
         poll_tasks.append(t)
         return t
 
-    monkeypatch.setattr(rec_mod, "_spawn_backtest_poll_task", spawn_poll, raising=False)
+    monkeypatch.setattr(_bt, "_spawn_backtest_poll_task", spawn_poll, raising=False)
 
     # ---- 20:00 정각에 generate_recommendations 호출 ----
     with freeze_time("2026-05-16 11:00:00"):  # KST 20:00
@@ -234,6 +235,7 @@ async def test_settlement_race_preserves_recommendation_insert(
     poll 루프가 영원히 안 끝나도 pr_store 에 6 row 가 영속화되어야 한다.
     """
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.services.exceptions import BacktestNotSupportedError
 
     target = date(2026, 5, 16)
@@ -304,8 +306,8 @@ async def test_settlement_race_preserves_recommendation_insert(
         row["status"] = status
         return row
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_db_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_db_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_insert_run", fake_db_insert_run, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_db_update_status, raising=False)
 
     class FakeEngine:
         enabled = True
@@ -318,12 +320,12 @@ async def test_settlement_race_preserves_recommendation_insert(
                 raise BacktestNotSupportedError(f"{strategy_id} unsupported")
             return f"job-{strategy_id}-{kind}"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
 
     # 폴 루프 task 는 발화하지만 영원히 대기 (settlement race 시뮬레이션)
     spawn_called = {"n": 0}
     monkeypatch.setattr(
-        rec_mod, "_spawn_backtest_poll_task",
+        _bt, "_spawn_backtest_poll_task",
         lambda td: spawn_called.__setitem__("n", spawn_called["n"] + 1),
         raising=False,
     )

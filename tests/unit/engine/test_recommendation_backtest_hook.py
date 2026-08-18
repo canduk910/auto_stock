@@ -157,6 +157,7 @@ async def test_enqueue_inserts_twelve_rows(
 ):
     """B: 6 전략 × {current, recommended} = 12 row 가 backtest_runs 에 INSERT."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     target = date(2026, 5, 16)
     recs = _make_inserted_rows(target)
@@ -178,8 +179,8 @@ async def test_enqueue_inserts_twelve_rows(
     async def fake_update_status(run_id, status, **kwargs):
         return {"id": run_id, "status": status, **kwargs}
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_insert_run", fake_insert_run, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
 
     # ---- BacktestEngine: (a) 3 전략은 정상 submit, (b) 3 전략은 BacktestNotSupportedError ----
     from src.services.exceptions import BacktestNotSupportedError
@@ -198,10 +199,10 @@ async def test_enqueue_inserts_twelve_rows(
                 raise BacktestNotSupportedError(f"{strategy_id} unsupported")
             return f"job-{strategy_id}-{kind}"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
 
     # ---- poll loop 발화 차단(테스트는 enqueue 만 검증) ----
-    monkeypatch.setattr(rec_mod, "_spawn_backtest_poll_task", lambda td: None, raising=False)
+    monkeypatch.setattr(_bt, "_spawn_backtest_poll_task", lambda td: None, raising=False)
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
 
@@ -222,6 +223,7 @@ async def test_enqueue_skips_fallback_strategies(
 ):
     """C: (b) 폴백 전략은 BacktestEngine 호출 없이 status='skipped' + 사유 영속화."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.services.exceptions import BacktestNotSupportedError
 
     target = date(2026, 5, 16)
@@ -244,8 +246,8 @@ async def test_enqueue_skips_fallback_strategies(
         update_records.append({"run_id": run_id, "status": status, **kwargs})
         return {"id": run_id, "status": status}
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_insert_run", fake_insert_run, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
 
     submit_calls: list[str] = []
 
@@ -261,8 +263,8 @@ async def test_enqueue_skips_fallback_strategies(
                 raise BacktestNotSupportedError(f"{strategy_id} unsupported")
             return f"job-{strategy_id}-{kind}"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
-    monkeypatch.setattr(rec_mod, "_spawn_backtest_poll_task", lambda td: None, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_spawn_backtest_poll_task", lambda td: None, raising=False)
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
 
@@ -291,6 +293,7 @@ async def test_enqueue_submits_supported_strategies(
 ):
     """D: (a) 전략은 BacktestEngine submit → mcp_job_id 매핑 → status='running'."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.services.exceptions import BacktestNotSupportedError
 
     target = date(2026, 5, 16)
@@ -310,8 +313,8 @@ async def test_enqueue_submits_supported_strategies(
         update_records.append({"run_id": run_id, "status": status, **kwargs})
         return {"id": run_id, "status": status}
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_insert_run", fake_insert_run, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
 
     class FakeEngine:
         enabled = True
@@ -324,8 +327,8 @@ async def test_enqueue_submits_supported_strategies(
                 raise BacktestNotSupportedError(f"{strategy_id} unsupported")
             return f"job-{strategy_id}-{kind}"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
-    monkeypatch.setattr(rec_mod, "_spawn_backtest_poll_task", lambda td: None, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_spawn_backtest_poll_task", lambda td: None, raising=False)
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
 
@@ -351,6 +354,7 @@ async def test_enqueue_skips_when_mcp_disabled(
 ):
     """E: enabled=False 면 (a) 전략도 모두 skipped — 외부 호출 0."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     target = date(2026, 5, 16)
     recs = _make_inserted_rows(target)
@@ -371,8 +375,8 @@ async def test_enqueue_skips_when_mcp_disabled(
         update_records.append({"run_id": run_id, "status": status, **kwargs})
         return {"id": run_id, "status": status}
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_insert_run", fake_insert_run, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
 
     submit_count = {"n": 0}
 
@@ -386,11 +390,11 @@ async def test_enqueue_skips_when_mcp_disabled(
             submit_count["n"] += 1
             return "job-should-not-be-called"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
 
     poll_calls: list = []
     monkeypatch.setattr(
-        rec_mod, "_spawn_backtest_poll_task", lambda td: poll_calls.append(td), raising=False
+        _bt, "_spawn_backtest_poll_task", lambda td: poll_calls.append(td), raising=False
     )
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
@@ -438,6 +442,7 @@ async def test_enqueue_handles_external_api_error(
 ):
     """F: BacktestEngine.run_for_strategy 가 ExternalAPIError 던지면 해당 row 만 failed."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.services.exceptions import BacktestNotSupportedError, ExternalAPIError
 
     target = date(2026, 5, 16)
@@ -457,8 +462,8 @@ async def test_enqueue_handles_external_api_error(
         update_records.append({"run_id": run_id, "status": status, **kwargs})
         return {"id": run_id, "status": status}
 
-    monkeypatch.setattr(rec_mod, "_db_insert_run", fake_insert_run, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_insert_run", fake_insert_run, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
 
     class FakeEngine:
         enabled = True
@@ -473,8 +478,8 @@ async def test_enqueue_handles_external_api_error(
                 raise BacktestNotSupportedError(f"{strategy_id} unsupported")
             return f"job-{strategy_id}-{kind}"
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
-    monkeypatch.setattr(rec_mod, "_spawn_backtest_poll_task", lambda td: None, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_spawn_backtest_poll_task", lambda td: None, raising=False)
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
 

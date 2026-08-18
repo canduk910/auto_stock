@@ -72,6 +72,7 @@ def _make_rows_store(target_date: date) -> dict[str, dict]:
 async def test_poll_loop_polls_running_rows(monkeypatch: pytest.MonkeyPatch):
     """A: poll 호출 후 completed 전이 → metrics 첨부."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.models.backtest import BacktestMetrics
 
     target = date(2026, 5, 16)
@@ -105,13 +106,13 @@ async def test_poll_loop_polls_running_rows(monkeypatch: pytest.MonkeyPatch):
         pr_updates.append({"rec_id": rec_id, "summary": summary})
         return {"id": rec_id, "backtest_summary": summary}
 
-    monkeypatch.setattr(rec_mod, "_db_list_by_date", fake_list_by_date, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_list_by_date", fake_list_by_date, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
     monkeypatch.setattr(
-        rec_mod, "_db_list_pending_backtest", fake_list_pending, raising=False
+        _bt, "_db_list_pending_backtest", fake_list_pending, raising=False
     )
     monkeypatch.setattr(
-        rec_mod, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
+        _bt, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
     )
 
     # ---- BacktestEngine.poll 모킹: 1차 호출에 모든 (a) job 완료 반환 ----
@@ -136,11 +137,11 @@ async def test_poll_loop_polls_running_rows(monkeypatch: pytest.MonkeyPatch):
             # 모두 즉시 완료
             return BacktestMetrics.model_validate(completed_metrics)
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
     # poll 주기 0초로 단축
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
     # 24h timeout 그대로
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_TIMEOUT_HOURS", 24, raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_TIMEOUT_HOURS", 24, raising=False)
 
     await rec_mod._backtest_poll_loop(target)
 
@@ -169,6 +170,7 @@ async def test_poll_loop_polls_running_rows(monkeypatch: pytest.MonkeyPatch):
 async def test_poll_loop_computes_diff_in_summary(monkeypatch: pytest.MonkeyPatch):
     """B: backtest_summary.diff[strategy_id] 는 recommended - current 산술 차."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.models.backtest import BacktestMetrics
 
     target = date(2026, 5, 16)
@@ -215,13 +217,13 @@ async def test_poll_loop_computes_diff_in_summary(monkeypatch: pytest.MonkeyPatc
         pr_updates[rec_id] = summary
         return {"id": rec_id, "backtest_summary": summary}
 
-    monkeypatch.setattr(rec_mod, "_db_list_by_date", fake_list_by_date, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_list_by_date", fake_list_by_date, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
     monkeypatch.setattr(
-        rec_mod, "_db_list_pending_backtest", fake_list_pending, raising=False
+        _bt, "_db_list_pending_backtest", fake_list_pending, raising=False
     )
     monkeypatch.setattr(
-        rec_mod, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
+        _bt, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
     )
 
     class FakeEngine:
@@ -235,8 +237,8 @@ async def test_poll_loop_computes_diff_in_summary(monkeypatch: pytest.MonkeyPatc
                 rec_metrics if kind == "recommended" else cur_metrics
             )
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
 
     await rec_mod._backtest_poll_loop(target)
 
@@ -269,6 +271,7 @@ async def test_poll_loop_defers_summary_until_both_ready(
 ):
     """C: current 만 완료된 시점엔 summary 동봉 안 됨 (recommended 대기)."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
     from src.models.backtest import BacktestMetrics
 
     target = date(2026, 5, 16)
@@ -297,13 +300,13 @@ async def test_poll_loop_defers_summary_until_both_ready(
         pr_updates[rec_id] = summary
         return {"id": rec_id}
 
-    monkeypatch.setattr(rec_mod, "_db_list_by_date", fake_list_by_date, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_list_by_date", fake_list_by_date, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
     monkeypatch.setattr(
-        rec_mod, "_db_list_pending_backtest", fake_list_pending, raising=False
+        _bt, "_db_list_pending_backtest", fake_list_pending, raising=False
     )
     monkeypatch.setattr(
-        rec_mod, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
+        _bt, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
     )
 
     poll_counts = {"calls": 0}
@@ -324,8 +327,8 @@ async def test_poll_loop_defers_summary_until_both_ready(
                 return BacktestMetrics.model_validate({"total_return_pct": 15.0})
             return BacktestMetrics.model_validate({"total_return_pct": 10.0})
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
 
     await rec_mod._backtest_poll_loop(target)
 
@@ -343,6 +346,7 @@ async def test_poll_loop_defers_summary_until_both_ready(
 async def test_poll_loop_times_out_after_24h(monkeypatch: pytest.MonkeyPatch):
     """D: 24h 경과 시 미완료 row 'failed' + 'Timeout' 에러메시지 + task 종료."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     target = date(2026, 5, 16)
     # 모든 row 가 running 인 상태 — poll 이 영원히 None 반환
@@ -371,13 +375,13 @@ async def test_poll_loop_times_out_after_24h(monkeypatch: pytest.MonkeyPatch):
     async def fake_update_backtest_summary(rec_id, summary):
         return {}
 
-    monkeypatch.setattr(rec_mod, "_db_list_by_date", fake_list_by_date, raising=False)
-    monkeypatch.setattr(rec_mod, "_db_update_status", fake_update_status, raising=False)
+    monkeypatch.setattr(_bt, "_db_list_by_date", fake_list_by_date, raising=False)
+    monkeypatch.setattr(_bt, "_db_update_status", fake_update_status, raising=False)
     monkeypatch.setattr(
-        rec_mod, "_db_list_pending_backtest", fake_list_pending, raising=False
+        _bt, "_db_list_pending_backtest", fake_list_pending, raising=False
     )
     monkeypatch.setattr(
-        rec_mod, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
+        _bt, "_db_update_backtest_summary", fake_update_backtest_summary, raising=False
     )
 
     class FakeEngine:
@@ -386,10 +390,10 @@ async def test_poll_loop_times_out_after_24h(monkeypatch: pytest.MonkeyPatch):
         async def poll(self, job_id):
             return None  # 영원히 running
 
-    monkeypatch.setattr(rec_mod, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
+    monkeypatch.setattr(_bt, "_get_backtest_engine", lambda: FakeEngine(), raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_INTERVAL_SECS", 0, raising=False)
     # 0시간 timeout 으로 즉시 종료 트리거
-    monkeypatch.setattr(rec_mod, "_BACKTEST_POLL_TIMEOUT_HOURS", 0, raising=False)
+    monkeypatch.setattr(_bt, "_BACKTEST_POLL_TIMEOUT_HOURS", 0, raising=False)
 
     await rec_mod._backtest_poll_loop(target)
 
@@ -412,12 +416,13 @@ async def test_poll_loop_times_out_after_24h(monkeypatch: pytest.MonkeyPatch):
 async def test_poll_loop_guards_against_duplicate(monkeypatch: pytest.MonkeyPatch):
     """E: 같은 target_date 에 대해 두 번 동시 진입 시 두 번째는 즉시 종료."""
     from src.engine import recommendation_engine as rec_mod
+    from src.engine import backtest_orchestration as _bt
 
     target = date(2026, 5, 16)
 
     # 이미 실행 중이라고 시그널
     monkeypatch.setattr(
-        rec_mod, "_backtest_poll_loop_running",
+        _bt, "_backtest_poll_loop_running",
         {target},
         raising=False,
     )
@@ -428,7 +433,7 @@ async def test_poll_loop_guards_against_duplicate(monkeypatch: pytest.MonkeyPatc
         list_calls["n"] += 1
         return []
 
-    monkeypatch.setattr(rec_mod, "_db_list_by_date", fake_list_by_date, raising=False)
+    monkeypatch.setattr(_bt, "_db_list_by_date", fake_list_by_date, raising=False)
 
     await rec_mod._backtest_poll_loop(target)
 
