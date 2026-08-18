@@ -152,6 +152,7 @@ class KojiroStrategy(StrategyBase):
         "stop_atr": 2.0,             # 2ATR 하드손절
         "trail_atr": 2.5,            # 2.5ATR 샹들리에 트레일링
         "hard_stop_pct": -8.0,       # 고정 % 하드손절 (ATR 독립 backstop)
+        "breakeven_promote_atr": 0.0,   # 브레이크이븐 승격 임계 (0=비활성 다크런치, 활성 시 1.5 권장 — donchian P1 선례)
         # ── 진입 게이트 (정체성 상수, PARAM_RANGES 제외) ──
         "gap_up_skip_pct": 5.0,      # 갭업 ≥5% 스킵
         "gap_down_skip_pct": -4.0,   # 갭다운 ≤-4% 스킵
@@ -727,6 +728,12 @@ class KojiroStrategy(StrategyBase):
                     base = int(pos.buy_price - self.config.params["stop_atr"] * atr_val) if pos else 0
                     if base > 0:
                         self._stop_floor[ticker] = max(self._stop_floor.get(ticker, base), base)
+                    # 브레이크이븐 플로어 재도출 (다크런치, breakeven_promote_atr=0 → 미진입)
+                    be_mult = float(self.config.params.get("breakeven_promote_atr", 0) or 0)
+                    if (be_mult > 0 and atr_val > 0 and pos and pos.buy_price > 0
+                            and pos.high_since_buy >= pos.buy_price + be_mult * atr_val):
+                        prev_floor = self._stop_floor.get(ticker, 0)
+                        self._stop_floor[ticker] = max(prev_floor, int(pos.buy_price))
                 # stage3 플래그 (None → fail-open False)
                 self._held_stage3[ticker] = (stage_int == 3)
                 logger.info(
@@ -867,6 +874,20 @@ class KojiroStrategy(StrategyBase):
             self._stop_floor[ticker] = eff
         elif floor is not None:
             eff = floor
+
+        # 2.5) 브레이크이븐 플로어 승격 (다크런치, breakeven_promote_atr=0 → 미진입)
+        be_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+        if (be_mult > 0 and atr > 0 and pos.buy_price > 0
+                and pos.high_since_buy >= pos.buy_price + be_mult * atr):
+            promoted = max(eff, int(pos.buy_price))
+            if promoted != eff:
+                logger.info(
+                    "[kojiro_breakeven_promote] %s 고점(%d) ≥ 매수가(%d)+%.1f×ATR(%.1f) → 손절선 %d→%d",
+                    ticker, pos.high_since_buy, pos.buy_price, be_mult, atr, eff, promoted,
+                )
+            eff = promoted
+            self._stop_floor[ticker] = eff
+
         if eff > 0 and current_price <= eff:
             logger.info("[kojiro_atr_stop] %s 손절선(%d) = 매수가(%d) - %.1f×ATR(%.1f)",
                         ticker, eff, pos.buy_price, params["stop_atr"], atr)
@@ -940,12 +961,13 @@ class KojiroStrategy(StrategyBase):
             return 0.0
 
     def _position_stop_price(self, ticker: str, pos) -> int:
-        """포지션의 **현재 실효 손절선** = `max(고정% backstop, 2ATR floor, 2.5ATR 샹들리에)`.
+        """포지션의 **현재 실효 손절선** = `max(고정% backstop, 2ATR floor, 2.5ATR 샹들리에, 브레이크이븐)`.
 
-        `check_exit_signal` 의 세 가격선과 동일 산식·동일 ATR 소스(`_effective_atr`)다.
-        셋은 우선순위대로 검사되지만 전부 같은 tick 의 가격 임계라, 실제로 먼저 발화하는
-        선 = 셋 중 **가장 높은** 가격이다. (스테이지3 청산은 가격 조건이 아니라 모델링
-        대상이 아니며, 그 방향은 조기 청산 = 리스크 과대계상 쪽이라 안전하다.)
+        `check_exit_signal` 의 네 가격선(브레이크이븐 포함)과 동일 산식·동일 ATR 소스
+        (`_effective_atr`)다. 넷은 우선순위대로 검사되지만 전부 같은 tick 의 가격 임계라,
+        실제로 먼저 발화하는 선 = 그중 **가장 높은** 가격이다. (스테이지3 청산은 가격
+        조건이 아니라 모델링 대상이 아니며, 그 방향은 조기 청산 = 리스크 과대계상 쪽이라
+        안전하다.)
 
         **샹들리에 포함은 H-1(2026-08-06) 이후의 필수 조건이다.** 그 전에는 `_boot()` 이
         매일 아침 `high_since_buy` 를 매수가로 리셋해 매수창(09:05~09:30) 시점의 샹들리에가
@@ -981,7 +1003,13 @@ class KojiroStrategy(StrategyBase):
         trail_line = 0
         if atr > 0 and pos.high_since_buy > 0:
             trail_line = int(pos.high_since_buy - float(params["trail_atr"]) * atr)
-        return max(pct_line, atr_line, trail_line)
+        # 브레이크이븐 라인 — check_exit_signal §2.5 와 동일 조건/산식 (read-only 미러).
+        be_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+        be_line = 0
+        if (be_mult > 0 and atr > 0 and pos.buy_price > 0
+                and pos.high_since_buy >= pos.buy_price + be_mult * atr):
+            be_line = int(pos.buy_price)
+        return max(pct_line, atr_line, trail_line, be_line)
 
     def _open_risk_won(self) -> int:
         """보유 포지션의 Σ 오픈리스크(원) = Σ qty × (매수가 − 실효 손절선).
