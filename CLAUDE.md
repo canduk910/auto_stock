@@ -200,7 +200,7 @@ cd frontend && npm install && npm run dev
 - CI (`.github/workflows/ci.yml`): `postgres:15` service 컨테이너 + `DATABASE_URL_TEST` 로 통합 테스트 실행 (`tests/integration/pg_harness.py` 가 migration 001~041 적용)
 - GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_URL` (값=RDS DSN)
 - **로컬과 EC2 동시 실행 금지** — KIS 동일 계정 동시 접속 충돌
-- 운영 가이드: KRX 메인 시간 (09:00~15:30) 중 빈번한 push 자제 — `_scan_loop` 5분 race 가능. NXT 애프터 (15:30~) 또는 익일 07:50 _boot 전 push 권장
+- 운영 가이드: KRX 메인 시간 (09:00~15:30) 중 빈번한 push 자제 — `_scan_loop` 5분 race 가능. NXT 애프터 (15:30~) 또는 익일 07:55 _boot 전 push 권장
 
 ## 디렉토리 역할
 - `src/auth/` — KIS OAuth 인증/토큰 (메인 + 보조 multi)

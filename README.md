@@ -474,7 +474,7 @@ docker compose -f docker-compose.prod.yml up --build -d
 ```
  부팅            NXT 프리      KRX 메인           KRX 마감 → NXT 애프터              정산
 ─────────────┬────────┬─────────────────────┬──────────────────────┬────────────
- 07:45 07:50 07:55│08:00       09:00:05  09:30   15:20  15:30          19:50  20:00 20:10
+ 07:45 07:55 07:59│08:00       09:00:05  09:30   15:20  15:30          19:50  20:00 20:10
   │    │    │    │    │           │       │      │     │              │      │     │
   ▼    ▼    ▼    ▼    ▼           ▼       ▼      ▼     ▼              ▼      ▼     ▼
  자동 prepare WS 사전 익일청산   KRX 시가  모멘텀  KRX  KRX 마감       NXT 애프터  정산
@@ -493,8 +493,8 @@ docker compose -f docker-compose.prod.yml up --build -d
 | 시각 | 동작 |
 |------|------|
 | 07:45 | 자동 매매 시작 (AUTO_START 활성 시, 주말+공휴일 자동 건너뜀 — KIS chk-holiday API) |
-| 07:50 | `_boot()` — 토큰 사전 순차 발급 (사이클 20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전략 prepare |
-| 07:55 | 사전 구독 — 돌파(VB/LTV) + 스윙(donchian) 스캔 종목 + 보유 포지션. WebSocket 연결 + 체결통보 + (실전) `H0UNMKO0` 구독. 유니버스 비어있으면 prepare 재실행 |
+| 07:55 | `_boot()` — 토큰 사전 순차 발급 (사이클 20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전략 prepare |
+| 07:59 | 사전 구독 — 돌파(VB/LTV) + 스윙(donchian) 스캔 종목 + 보유 포지션. WebSocket 연결 + 체결통보 + (실전) `H0UNMKO0` 구독. 유니버스 비어있으면 prepare 재실행 |
 | 08:00 | NXT 프리 진입 — 익일 청산 백그라운드 (`NEXT_DAY_STABILIZE_SECS=30s` 안정화 후 NXT 시가 청산). 사이클 26: VB/LTV PRE_NXT 매수 제거됨 (`tradable_boards=("main",)`) — `_confirm_breakout_open_prices(board="pre_nxt")` 호출 안 함 |
 | **08:59:10** | **사이클 26 신규 — KRX 채널 사전 구독 마진 (50초)**: `_board_transition_loop("H0NXCNT0", "H0STCNT0", 보유+익일청산)` 종목별 원자 전환 + 매수 후보 신규 KRX subscribe. 09:00 KRX 첫 체결 tick 즉시 수신 보장 |
 | 09:00:05 | KRX 메인 시가 확정 — `_confirm_breakout_open_prices(board="main")` VB/LTV target_price 계산 (KRX 09:00 시가 + 전일Range × `k_value_krx_main`). 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목 KRX 시장가 일괄 청산 |

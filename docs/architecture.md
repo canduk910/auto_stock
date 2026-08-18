@@ -218,7 +218,7 @@ TradingScheduler (scheduler.py)
 ─────────────────────────────────────────────────────────────────────────
 07:45  run_daily() 기상       (TIME_AUTO_START)
        │
-07:50  _boot()                 (TIME_BOOT)
+07:55  _boot()                 (TIME_BOOT)
        ├─ get_token() ──────────────────────────────────────→ POST /oauth2/tokenP
        ├─ _load_strategy_config() ←── DB strategy_config
        │   (tradable_boards / k_value_* / exchange 포함)
@@ -229,7 +229,7 @@ TradingScheduler (scheduler.py)
        ├─ DB positions 복구 ←── DB positions
        └─ KIS 잔고 교차검증
        │
-07:55  connect() ──────────→ WebSocket 연결        (TIME_PRESUBSCRIBE)
+07:59  connect() ──────────→ WebSocket 연결        (TIME_PRESUBSCRIBE)
        │  ├─ subscribe(H0STCNI0/9, 체결통보)
        │  └─ subscribe(H0NXMKO0, "")  (실전 한정 — NXT 장운영정보)
        │  + register_board_handler(SessionTracker.on_h0nxmko0)
