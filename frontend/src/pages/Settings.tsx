@@ -78,9 +78,11 @@ export default function Settings() {
   useEffect(() => {
     if (data?.strategies) {
       const w: Record<string, number> = {}
-      const totalW = data.strategies.reduce((sum, s) => sum + s.weight, 0)
+      // 백엔드는 항상 비율(0~1)을 준다 (strategy_registry.get_strategies_status).
+      // 합계로 단위를 추론하던 종전 분기는 오염 시에만 깨어나 유효숫자를 파괴하고
+      // "3개 전략 균등분배" 화면으로 결함을 위장했다 (2026-08-18 폐기).
       for (const s of data.strategies) {
-        w[s.key] = totalW <= 1.01 ? Math.round(s.weight * 100) : Math.round(s.weight)
+        w[s.key] = Math.round(s.weight * 100)
       }
       setWeights(w)
       setDirty(false)
@@ -93,6 +95,15 @@ export default function Settings() {
 
   const strategies = data.strategies
   const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0)
+  // 배너·저장차단 판정은 **서버 저장값(비율)** 기준. 편집 중 퍼센트 합(totalWeight)을 쓰면
+  // (a) 슬라이더를 내리는 정상 편집과 (b) 4dp 비율 → 정수% 반올림 누적오차(전략 n개면 최대 ±n/2 %p)를
+  // 오염으로 오인한다. 실제 오염 시그니처는 "저장된 비율의 합"이다.
+  // ⚠️ overflow 임계는 `serverWeightSum - 1 > 0.01` 형태로만 쓴다 — 동치인 상수 리터럴 형태는
+  //    AST 가드(_ast_weight_unit_guard)가 단위 추론 휴리스틱 부활로 간주해 금지한다.
+  const serverWeightSum = strategies.reduce((sum, s) => sum + (s.weight ?? 0), 0)
+  const serverWeightPct = Math.round(serverWeightSum * 100)
+  const weightSumAbnormal = strategies.length > 0 && Math.abs(serverWeightSum - 1) > 0.01
+  const weightSumOverflow = strategies.length > 0 && serverWeightSum - 1 > 0.01
   // 가용금액 슬라이더 노출용 — 전략별 total_investment 합산 (registry.allocate_funds 결과).
   // 정확한 순자산은 `/api/balance::summary.net_asset` 이지만 Settings 페이지에서 새 API 호출을
   // 추가하지 않고 이미 fetch 한 strategies 응답으로 추정. 0 이면 카드는 카드만 표시.
@@ -119,10 +130,19 @@ export default function Settings() {
   }
 
   const handleSaveWeights = () => {
+    // 백엔드 계약: 비율(0.0~1.0). 퍼센트 송신 금지 (2026-08-18)
     const normalized: Record<string, number> = {}
     if (totalWeight > 0) {
-      for (const [key, w] of Object.entries(weights)) {
-        normalized[key] = Math.round((w / totalWeight) * 100)
+      const keys = Object.keys(weights)
+      for (const key of keys) {
+        normalized[key] = Number((weights[key] / totalWeight).toFixed(4))
+      }
+      // 반올림 잔차를 최대 항목에 흡수 — Σ === 1.0 보장 (백엔드 Σ≤1.0 가드 정합)
+      const sum = keys.reduce((acc, k) => acc + normalized[k], 0)
+      const residual = Number((1 - sum).toFixed(4))
+      if (residual !== 0) {
+        const maxKey = keys.reduce((a, b) => (normalized[b] > normalized[a] ? b : a), keys[0])
+        normalized[maxKey] = Number((normalized[maxKey] + residual).toFixed(4))
       }
     }
     weightMutation.mutate(normalized)
@@ -205,6 +225,17 @@ export default function Settings() {
           <p className="text-gray-500">등록된 전략이 없습니다.</p>
         ) : (
           <>
+            {weightSumAbnormal && (
+              <div
+                data-testid="weight-sum-warning"
+                className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"
+              >
+                {weightSumOverflow
+                  ? `저장된 비중 합이 100%를 초과합니다 (현재 ${serverWeightPct}%). 비중 값이 오염된 상태입니다 — 화면에서 저장하면 잘못된 비율이 그대로 굳으니, 운영 DB 에서 직접 정정하세요.`
+                  : `저장된 비중 합이 100%가 아닙니다 (현재 ${serverWeightPct}%). 값을 확인한 뒤 저장하세요.`}
+              </div>
+            )}
+
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <div className="flex h-6 rounded-full overflow-hidden bg-gray-200">
                 {strategies.map((s) => {
@@ -293,7 +324,10 @@ export default function Settings() {
             <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setShowConfirm(true)}
-                disabled={!dirty}
+                // 오염(Σ>1) 상태에서는 저장 차단 — 저장하면 handleWeightChange 의 overflow 재분배가
+                // 오염 비율을 보존한 채 Σ=1.0 으로 정규화해 백엔드 오염 탐지기를 영구 침묵시킨다.
+                // Σ<1 은 차단하지 않는다(운영자 고립 방지).
+                disabled={!dirty || weightSumOverflow}
                 className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 비중 저장

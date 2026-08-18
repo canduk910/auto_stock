@@ -345,7 +345,7 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | GET | `/api/performance/daily` | 일별 실적 (실현손익 기반 + TWR 누적 + 외부 입출금) |
 | POST | `/api/performance/recompute` | trade_history 기반 daily_performance 전체 소급 재계산 (멱등) |
 | GET | `/api/strategies` | 전략 목록 + 비중 + 상태 + 타겟가 + 스윙 `scan_stats` 깔때기 |
-| PUT | `/api/strategies/weights` | 전략별 비중 수정 (매수금액 하한선 검증) |
+| PUT | `/api/strategies/weights` | 전략별 비중 수정 (매수금액 하한선 검증). body `{weights: {strategy_id: ratio}}` — **단위는 비율 `0.0~1.0`, 퍼센트(0~100) 금지**(2026-08-18 확정). 범위 위반 422, Σ>1.0 은 `success=false`(저장 미수행), 부분 payload(Σ<1) 허용. `GET /api/strategies` 의 `weight` 와 단위가 같아 왕복 항등 |
 | PUT | `/api/strategies/{id}/params` | 전략 파라미터 수정 |
 | GET | `/api/strategies/system/auto-start` | 자동 매매 설정 조회 |
 | PUT | `/api/strategies/system/auto-start` | 자동 매매 설정 변경 |

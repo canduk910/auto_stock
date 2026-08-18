@@ -15,6 +15,7 @@ from src.db.strategy_config import save_params, save_weights
 from src.engine.scheduler import trading_scheduler
 from src.models.recommendation import ApplyRequest
 from src.models.response import ApiResponse
+from src.routes.strategies import _WEIGHT_SUM_TOLERANCE
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,52 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
             success=False,
             message=f"전략 '{strategy_id}'을 찾을 수 없습니다",
         )
+
+    # N1 (2026-08-18) — 자문 **증액** Σ 사전 검증.
+    #
+    # 배경: `PUT /api/strategies/weights` 가 Σ>1.0 payload 를 거부하고 프론트 Settings 는
+    #   서버 저장값 Σ 가 1.01 을 넘으면 저장 버튼을 잠근다(오염 세탁 차단). 그래서 이 경로가
+    #   상한 없이 증액하면 Σ 가 1 을 넘어 **Settings 가 영구 잠기고 복구 수단이 DB 직접 UPDATE
+    #   뿐**이 된다. 자동 경로(`recommendation_engine.auto_apply_recommendations`)에는 감액 cap
+    #   이 있으나 이 수동 apply 경로에는 가드가 없었다.
+    #
+    # 규약:
+    #   - **감액(new <= current)은 Σ 상태와 무관하게 항상 통과**. 이미 Σ>1 로 오염된 상태에서
+    #     자문 감액이 유일한 복구 수단이므로, 무조건 Σ 검사를 걸면 복구 경로가 봉쇄된다.
+    #   - **증액만** 나머지 전략 현재 비중 합 + new 를 검사한다.
+    #   - 위치 = params/weight/DB 어떤 변경도 일어나기 **전** early return (계약).
+    #   - float 변환 실패 시 검사를 건너뛰고 기존 관용 경로(아래 `except (TypeError, ValueError)`
+    #     = weight 만 skip, params 는 적용)에 그대로 맡긴다.
+    if req.apply_weight and recommended_weight is not None:
+        try:
+            _new_weight = float(recommended_weight)
+        except (TypeError, ValueError):
+            _new_weight = None
+        if _new_weight is not None:
+            _cur_weight = float(getattr(strategy.config, "weight", 0.0) or 0.0)
+            if _new_weight > _cur_weight:
+                _others_sum = sum(
+                    float(getattr(s.config, "weight", 0.0) or 0.0)
+                    for s in registry.all()
+                    if s.strategy_id != strategy_id
+                )
+                _total = _others_sum + _new_weight
+                if _total > 1.0 + _WEIGHT_SUM_TOLERANCE:
+                    _label = getattr(strategy.config, "name", None) or strategy_id
+                    logger.warning(
+                        "[weight_sum_violation] rec_id=%s strategy=%s cur=%.4f new=%.4f "
+                        "others=%.4f total=%.4f — 증액 거부",
+                        rec_id, strategy_id, _cur_weight, _new_weight,
+                        _others_sum, _total,
+                    )
+                    return ApiResponse(
+                        success=False,
+                        message=(
+                            f"{_label} 비중을 {_new_weight:.0%} 로 올리면 전체 합이 "
+                            f"{_total:.0%} 가 되어 100%를 넘습니다. "
+                            "설정 화면에서 다른 전략 비중을 먼저 낮춘 뒤 적용하세요."
+                        ),
+                    )
 
     # 전략 파라미터에 적용
     applied_count = 0

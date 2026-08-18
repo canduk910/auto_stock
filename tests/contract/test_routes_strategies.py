@@ -22,16 +22,21 @@ def test_get_strategies_returns_dict_with_strategy_keys(contract_env):
     assert "donchian_swing" in data
 
 
-def test_update_weights_when_percentages_then_normalized_and_saved(contract_env):
-    """프론트가 0~100 % 단위로 보내면 0~1 비율로 정규화되어 저장."""
+def test_update_weights_when_ratios_then_saved_verbatim(contract_env):
+    """**2026-08-18 계약 변경 — 요청 바디 단위 = 비율(0.0~1.0)**.
+
+    종전에는 프론트가 0~100 퍼센트로 보내고 라우트가 `v / 100 if v > 1` 로 단위를
+    추론했다. 그 추론이 1%(=정수 1)를 100%로 저장하는 결함이라 폐기했다.
+    이제 바디는 비율이고 저장값은 **무변환**이다(GET↔PUT 왕복 항등).
+    """
     r = contract_env.client.put(
         "/api/strategies/weights",
-        json={"weights": {"momentum": 40, "volatility_breakout": 30, "long_tail_volatility": 20, "donchian_swing": 10}},
+        json={"weights": {"momentum": 0.4, "volatility_breakout": 0.3, "long_tail_volatility": 0.2, "donchian_swing": 0.1}},
     )
     assert r.status_code == 200
     body = r.json()
     assert body["success"] is True
-    # save_weights 호출 — 정규화된 값
+    # save_weights 호출 — 입력 비율 그대로
     saved = contract_env.calls.save_weights[-1]["weights"]
     assert saved["momentum"] == 0.4
     assert saved["donchian_swing"] == 0.1

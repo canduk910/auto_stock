@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import asdict
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from src.db import system_config as _system_config
 from src.db._kst import KST
@@ -17,11 +18,35 @@ from src.engine.scheduler import trading_scheduler
 from src.engine.te_metrics import compute_te_rr
 from src.models.response import ApiResponse
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/strategies", tags=["strategies"])
+
+# 비중 합(Σ) 불변식 허용오차 — 프론트 반올림 잔차 흡수용
+_WEIGHT_SUM_TOLERANCE = 1e-3
 
 
 class WeightsRequest(BaseModel):
+    """전략별 비중. **단위 = 비율(0.0~1.0)**.
+
+    ⚠️ 퍼센트(0~100) 금지. 값 크기로 단위를 추론하던 종전 규약(`v / 100 if v > 1`)은
+    1%(=정수 1)를 100%로 저장하는 결함이라 2026-08-18 폐기했다.
+    `GET /api/strategies` 의 weight 도 비율이므로 GET↔PUT 왕복이 항등이다.
+    """
+
     weights: dict[str, float]
+
+    @field_validator("weights")
+    @classmethod
+    def _validate_ratio_range(cls, v: dict[str, float]) -> dict[str, float]:
+        for sid, w in v.items():
+            fw = float(w)
+            if not (0.0 <= fw <= 1.0):
+                raise ValueError(
+                    f"비중은 비율(0.0~1.0)이어야 합니다: {sid}={w}"
+                    " — 퍼센트(0~100) 형식은 지원하지 않습니다"
+                )
+        return v
 
 
 class ParamsRequest(BaseModel):
@@ -82,8 +107,23 @@ async def update_weights(req: WeightsRequest):
     이미 매수된 금액이 있는 전략은 해당 금액 비율 이하로 비중을 낮출 수 없다.
     """
     registry = trading_scheduler.registry
-    # 프론트에서 퍼센트(0~100)로 보내면 비율(0~1)로 변환
-    weights = {k: v / 100 if v > 1 else v for k, v in req.weights.items()}
+    # 단위 = 비율(0~1). 값 크기 기반 추론 변환 금지 (2026-08-18 결함 — 1%가 100%로 저장됨)
+    weights = {k: float(v) for k, v in req.weights.items()}
+
+    # Σ 불변식 — 오염 payload 는 저장(메모리/DB) *전에* 거부한다.
+    # 부분 payload(Σ<1)는 통과시키는 비대칭 가드(복구 저장 보존).
+    total_weight_req = sum(weights.values())
+    if total_weight_req > 1.0 + _WEIGHT_SUM_TOLERANCE:
+        logger.warning(
+            "[weight_unit_violation] sum=%.4f payload=%s", total_weight_req, weights,
+        )
+        return ApiResponse(
+            success=False,
+            message=(
+                f"비중 합이 100%를 초과합니다 (현재 {total_weight_req * 100:.1f}%). "
+                "비중은 비율(0.0~1.0)로 전송해야 하며 합이 1.0 을 넘을 수 없습니다."
+            ),
+        )
 
     # 매수금액 하한선 검증
     total_asset = sum(s.state.total_investment for s in registry.all())

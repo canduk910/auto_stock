@@ -108,9 +108,13 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 
 ### Settings — 비중 슬라이더
 
-- 하한선 = 보유 포지션 매수금액 비율 (`min_weight`, `invested_amount`)
+- 하한선 = 보유 포지션 매수금액 비율. ⚠️ `min_weight` 는 **퍼센트 정수(0~100)** 다(`invested / total_asset × 100` 반올림) — 같은 응답의 `weight`(비율 0~1)와 **단위가 다르다**. 슬라이더 마커가 `left: {minW}%` 로 그대로 쓴다. 백엔드 라우트의 하한 검증은 별도로 비율끼리 비교한다
 - 파라미터 편집은 PARAM_LABELS 정의된 number 키만
 - `position_ratio` 는 "전략 내 종목당 비중" — 전략 할당 자금 기준 (순자산 전체 아님), 예상 매수 금액 헬퍼 표시
+- **비중 단위 = 비율 `0.0~1.0` (2026-08-18)**: 로드는 `Math.round(s.weight * 100)` **단일 경로**. 합계로 단위를 추론하던 `totalW <= 1.01 ? … : Math.round(s.weight)` 분기는 폐기했다 — 오염 시에만 깨어나 유효숫자를 파괴하고 "3전략 33.3% 균등분배" 화면으로 결함을 위장했다. 저장은 퍼센트가 아니라 **비율 송신** (`weights[key] / totalWeight` 4dp + 잔차 `1 − Σ` 를 최대 항목에 흡수해 Σ=1.0 보장 → 백엔드 Σ≤1.0 가드 정합)
+- **합계 경고 배너** `data-testid="weight-sum-warning"` — 판정 소스는 편집 중 퍼센트 합이 아니라 **서버 저장값 비율 합**(`strategies.reduce(s.weight)`). 편집 중 값을 쓰면 (a) 슬라이더를 내리는 정상 조작과 (b) 4dp→정수% 반올림 누적오차(전략 n개면 최대 ±n/2 %p, 6전략 균등이면 UI 합 102)를 오염으로 오인한다. `|Σ−1| > 0.01` 이면 배너, **초과**면 비중 저장 버튼 `disabled` — 오염 상태에서 저장하면 overflow 재분배가 잘못된 비율을 보존한 채 Σ=1.0 으로 재정규화해 백엔드 `[weight_config_anomaly]` 탐지기를 **영구 침묵**시킨다. Σ<1 은 차단하지 않는다(운영자 고립 방지)
+- **422 한글 노출** (`api/trading.ts::updateStrategyWeights`): 범위 위반은 axios 가 throw 하므로 2xx 본문 해석 경로가 못 잡는다 → `axios.isAxiosError && status===422` 분기가 `detail`(문자열 또는 배열 `[0].msg`)에서 메시지를 뽑고 pydantic 접두사(`Value error, ` / `Assertion failed, `)**만** 제거한다(`^[A-Za-z ]+, ` 같은 일반 패턴 금지 — 한글 본문이 잘린다). 미처리 시 "Request failed with status code 422" opaque. `!data.success` 가 던진 일반 Error 는 재포장 금지
+- ⚠️ overflow 임계는 `serverWeightSum - 1 > 0.01` 형태로만 쓴다 — 동치인 `1.01` 리터럴은 AST 가드가 단위 추론 휴리스틱 부활로 간주해 금지한다. 가드 `_ast_weight_unit_guard.test.ts`(2: `1.01` 리터럴 0건 + `Math.round(s.weight)` 0건) / 회귀 `Settings.weightUnits.test.tsx`(12) · `api/__tests__/trading.test.ts`(+5)
 
 ### `CashUsageRatioCard`
 

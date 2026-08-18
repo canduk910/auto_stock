@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 import apiClient from './client'
 import type { TradingStatusData, ActionResult, StrategiesResponse } from '../types/trading'
 import type { ApiResponse } from '../types/common'
@@ -47,14 +49,50 @@ export const updateStrategyParams = async (
   return { success: data.success, message: data.message }
 }
 
+/**
+ * pydantic v2 가 검증 예외 앞에 붙이는 영문 접두사 — validator 본문(한글)만 남긴다.
+ * ⚠️ `^[A-Za-z ]+, ` 같은 일반 패턴 금지 — 한글 메시지에 영문 구절이 섞이면 본문을
+ * 잘라먹는다. 알려진 접두사만 명시적으로 열거한다 (ValueError / AssertionError).
+ */
+const PYDANTIC_MSG_PREFIX_RE = /^(?:Value error|Assertion failed), /
+
+const stripPydanticPrefix = (msg: string): string => {
+  const stripped = msg.replace(PYDANTIC_MSG_PREFIX_RE, '').trim()
+  return stripped || msg
+}
+
+/** 422(pydantic validator) 본문에서 사람이 읽을 메시지를 추출. 실패 시 null. */
+const extractValidationMessage = (detail: unknown): string | null => {
+  if (typeof detail === 'string' && detail.trim()) return stripPydanticPrefix(detail)
+  if (Array.isArray(detail) && detail.length > 0) {
+    const msg = (detail[0] as { msg?: unknown })?.msg
+    if (typeof msg === 'string' && msg.trim()) return stripPydanticPrefix(msg)
+  }
+  return null
+}
+
 export const updateStrategyWeights = async (
   weights: Record<string, number>,
 ): Promise<ActionResult> => {
-  const { data } = await apiClient.put<ApiResponse<null>>('/strategies/weights', { weights })
-  if (!data.success) {
-    throw new Error(data.message || '비중 변경 실패')
+  try {
+    const { data } = await apiClient.put<ApiResponse<null>>('/strategies/weights', { weights })
+    if (!data.success) {
+      throw new Error(data.message || '비중 변경 실패')
+    }
+    return { success: data.success, message: data.message }
+  } catch (err) {
+    // 422 는 axios 가 던지므로 2xx 본문 해석 경로가 못 잡는다 — validator 의 한글 안내를
+    // 운영자에게 그대로 노출한다 (미처리 시 "Request failed with status code 422" opaque).
+    // ⚠️ `!data.success` 가 던진 일반 Error 는 재포장 금지 — 그대로 전파.
+    if (axios.isAxiosError(err) && err.response?.status === 422) {
+      const detail = (err.response.data as { detail?: unknown } | undefined)?.detail
+      throw new Error(
+        extractValidationMessage(detail) ??
+          '비중 형식이 올바르지 않습니다 — 페이지를 새로고침한 뒤 다시 시도하세요',
+      )
+    }
+    throw err
   }
-  return { success: data.success, message: data.message }
 }
 
 export const manualSell = async (

@@ -417,6 +417,35 @@ class TradingScheduler:
                             strategy.config.params[key] = val
                 logger.info("DB 전략 설정 로드: %s (enabled=%s, weight=%.0f%%)",
                             sid, cfg["enabled"], cfg["weight"] * 100)
+
+            # 비중 단위 오염 감지 (2026-08-18) — 자동 클램프 금지, 관찰 WARNING + fail-open
+            #
+            # 집계 범위 = **레지스트리 등록 전략 행만** (R-LOW-1 시정).
+            #   - 바로 위 적용 루프가 `if not strategy: continue` 로 미등록 행을 건너뛰고,
+            #     `strategy_registry.allocate_funds` 도 등록 전략만 합산한다. 전량 합산하면
+            #     DB 에 은퇴 전략 stale row 가 남는 순간 실제 배분 Σ 와 무관하게 영구 오탐.
+            #   - `enabled=False` 행은 **계속 포함**한다. weight>0 인데 enabled=False 인 조합도
+            #     단위 오염 신호이고, `enabled` 자체가 weight 에서 파생(update_weights: weight>0
+            #     → enabled)되므로 배제하면 오염된 행이 통째로 탐지 구멍으로 빠진다.
+            try:
+                _live = {
+                    sid: c for sid, c in configs.items()
+                    if self.registry.get(sid) is not None
+                }
+                _weight_sum = sum(float(c.get("weight") or 0.0) for c in _live.values())
+                _over_one = [
+                    sid for sid, c in _live.items() if float(c.get("weight") or 0.0) > 1.0
+                ]
+                if _over_one or _weight_sum > 1.001:
+                    logger.warning(
+                        "[weight_config_anomaly] sum=%.4f over_one=%s — "
+                        "전략 비중 단위 오염 의심 (비율 0~1 규약 위반). "
+                        "strategy_config 실측 후 수동 정정 필요",
+                        _weight_sum, _over_one,
+                    )
+            except Exception:
+                pass
+
             self._config_loaded = True
         except Exception:
             logger.warning("전략 설정 DB 로드 실패, 기본값 사용")
