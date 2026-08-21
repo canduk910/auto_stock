@@ -155,6 +155,12 @@ class DonchianSwingStrategy(StrategyBase):
         # `_reset_daily_state` 훅에 의존하지 않는다(선례 `StrategyBase._emit_budget_clamp`).
         self._days_held_fallback_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._days_held_fallback_day: str = ""
+        # 사이클 224 (2026-08-22) — 시간청산 보유일 **상시 관측** cap.
+        # 폴백 cap 과 **별개 필드**여야 한다: 같은 필드를 쓰면 폴백이 선 날 관측이
+        # 침묵하고(그 반대도) 서로 다른 두 사실이 한 슬롯을 다툰다(OB-11).
+        # 날짜 키 자기리셋 — `_reset_daily_state` 훅 비의존(`_days_held_fallback_day` 선례).
+        self._days_held_observe_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._days_held_observe_day: str = ""
 
     async def prepare(self) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
@@ -856,6 +862,89 @@ class DonchianSwingStrategy(StrategyBase):
         except Exception:  # pragma: no cover — 관측 실패가 청산을 막지 않는다
             pass
 
+    def _emit_days_held_observation(self, ticker: str, pos, current_price: int) -> None:
+        """`[days_held_observe]` 상시 관측 로그 — 1회/ticker/일 cap (사이클 224).
+
+        ## 왜 (사각)
+
+        사이클 223 S3 가 시간청산 보유일을 달력일 → **영업일**로 바꿨는데, 그 변경이
+        라이브에서 무엇을 하는지 볼 수단이 없었다. `days_held` 가 로그에 남는 경로는
+        둘뿐이었다 — (a) `used_fallback=True` 인 폴백 로그, (b) 시간청산이 **실제로
+        발화**했을 때. 즉 **시간 기반 청산인데 발화할 때만 보유일이 보인다** =
+        "얼마나 근접했나"를 영영 못 본다.
+
+        실측 시나리오가 그 사각을 그대로 드러낸다. 금 매수 · `n_days=2` · 캐시 최신일이
+        매수일과 같은 월요일은 `days_held=1`(달력 3) 이라 게이트 미충족이고,
+        `cache_max == _prev_weekday(today)` 라 폴백 플래그도 서지 않는다 ⇒ **완전 무음**.
+        그 무음은 "S3 가 잘 돌았다"와 "가격 조건 미충족"과 "다른 분기 선발화"를 구분하지
+        못한다. 임시방편이 아니라 상시 관측성 결함이다.
+
+        ## 계약
+
+        - 호출 위치 = `check_exit_signal` **최상단**(포지션 확인 직후) ⇒ §1 하드손절을
+          포함해 **어떤 청산 분기보다 앞**이다.
+          ⚠️ F1 (적대적 검증 발견) — 처음엔 §2.5 시간청산 블록 안에 뒀는데, 그러면
+          §1 하드손절이 그날 첫 평가에서 발화할 때 이 줄에 **도달조차 못 한다**.
+          donchian 보유가 한 종목뿐인 날이면 그날 관측 목적이 통째로 소멸하고,
+          더 나쁜 변형으로 하드손절 후 매도가 거부돼(APBK0918) 포지션이 살아남으면
+          매 틱 §1 에서 return 하므로 관측이 **영구 억제**된다.
+          그래서 인자를 `(ticker, pos, current_price)` 로만 받고 나머지(오늘·보유일·
+          임계·돌파선)는 **내부에서** 구한다 — 호출부가 어떤 사전 계산도 요구하지
+          않아야 최상단으로 올릴 수 있다.
+        - `days_held`(영업일) 와 `calendar_days`(달력일) 를 **같은 한 줄**에 나란히
+          싣는 것이 이 로그의 존재 이유다. `days_held=1 calendar_days=3` 한 줄이
+          곧 S3 의 직접 확인이다.
+        - `days_ok` / `price_ok` 를 **각각** 싣는다. AND 결과 하나만으론 어느 조건이
+          막고 있는지 못 가린다.
+        - `breakout_high=0` = 재도출 실패 = 시간청산 **무장 해제** 상태 (사이클 223 G4
+          가 폴백 로그에 세운 "가장 필요한 때 침묵 금지" 원칙을 그대로 승계).
+        - cap 은 폴백 cap 과 **별개 필드**(`_days_held_observe_logged`).
+        - ⚠️ F2 — cap 키는 ticker 단독이 아니라 **`ticker|armed` / `ticker|disarmed`** 다.
+          ticker 단독이면 그날 **첫 평가 스냅샷이 박제**된다: 장중 재시작 시 포지션
+          복구가 `recompute_held_atr`(→`_rederive_breakout_high`)보다 앞서므로 첫
+          호출이 `breakout_high=0` 으로 잡히고, 수 초 뒤 재도출이 성공해 시간청산이
+          정상 무장돼도 그날 두 번째 행이 없어 운영자는 **종일 무장 해제**로 오독한다.
+          키를 무장 여부로 나누면 최대 2행/종목/일이고 **무장 행은 반드시 한 번 나온다**.
+        - 어떤 실패도 흡수 — 관측이 청산 판정을 막지 않는다. 단 ⚠️ F3 — **무흔적
+          흡수는 금지**다. 조용히 삼키면 이 기능이 영구 침묵해도 사이클 224 이전의
+          무음과 구별되지 않는다(`_turtle_buy_quantity` 의 debug 흔적 선례를 따른다).
+
+        hot path 라 cap 조회(set)를 **먼저** 하고, 보유일 계산은 그 뒤에만 한다.
+        `await`/DB/HTTP 는 없다.
+        """
+        try:
+            buy_date = getattr(pos, "buy_date", None)
+            if not buy_date:
+                return
+            today = datetime.now(KST).date()
+            today_key = today.isoformat()
+            if self._days_held_observe_day != today_key:
+                self._days_held_observe_day = today_key
+                self._days_held_observe_logged.reset_daily()
+            bh = int(self._breakout_high.get(ticker, 0) or 0)
+            cap_key = f"{ticker}|{'armed' if bh > 0 else 'disarmed'}"
+            if not self._days_held_observe_logged.should_emit(cap_key):
+                return
+            self._days_held_observe_logged.mark_emitted(cap_key)
+            n_days = int(self.config.params.get("breakout_fail_n_days", 5))
+            days_held, _ = self._business_days_held(buy_date, today)
+            logger.info(
+                "[days_held_observe] ticker=%s strategy=%s buy_date=%s"
+                " days_held=%d calendar_days=%d n_days=%d"
+                " breakout_high=%d current_price=%d days_ok=%s price_ok=%s",
+                ticker, self.strategy_id, buy_date,
+                days_held, (today - buy_date).days, n_days,
+                bh, int(current_price),
+                days_held >= n_days,
+                bh > 0 and current_price < bh,
+            )
+        except Exception:
+            # F3 — 흡수하되 흔적은 남긴다. 조용히 삼키면 이 관측이 영구 침묵해도
+            # 사이클 224 이전의 무음과 구별되지 않는다.
+            logger.debug(
+                "[days_held_observe_failed] ticker=%s", ticker, exc_info=True,
+            )
+
     def _rederive_breakout_high(self, ticker: str, pos, candles: list, donchian_period: int) -> None:
         """재시작 복구 — buy_date 이전 일봉으로 진입 시점 20일 신고가(`_breakout_high`) 재현.
 
@@ -1072,6 +1161,13 @@ class DonchianSwingStrategy(StrategyBase):
         pos = self.state.positions.get(ticker)
         if not pos:
             return Signal.NONE
+
+        # 사이클 224 (F1) — 보유일 관측은 **어떤 청산 분기보다 앞**이다.
+        # 아래 §1 하드손절이 그날 첫 평가에서 발화하면 시간청산 블록에 도달조차
+        # 못 해 그 종목의 그날 보유일이 영영 기록되지 않는다. 순수 관찰이라
+        # 반환 시그널에 어떤 영향도 주지 않고, hot path 비용은 emitter 안의
+        # cap 조회가 그날 1~2회로 한정한다.
+        self._emit_days_held_observation(ticker, pos, current_price)
 
         # 1) 하드 손절
         loss_rate = (current_price - pos.buy_price) / pos.buy_price * 100 if pos.buy_price > 0 else 0

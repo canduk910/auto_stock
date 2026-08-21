@@ -123,6 +123,18 @@
 - `_breakout_high`: 매수 신호 발사 시 donchian_high 등록. graceful skip (0이면 분기 진입 안 함). 재시작 복구는 `_rederive_breakout_high` 담당 — **`prior[1:period+1]`** 로 `prepare()` 의 `prior_high = max(highs[1:period+1])` 과 **같은 창**을 본다(사이클 223 off-by-one 시정. 이전 `prior[:period]` 는 한 칸 어긋난 돌파선을 복구해 재시작 전후로 청산 임계가 달라졌다).
 - **`PARAM_RANGES`/`INT_PARAMS` 제외** (사이클 223) — 청산 정체성 상수. 자동 자문뿐 아니라 **수동 적용 라우트**(`routes/recommendations.py`)도 같은 정본을 참조해 차단한다(한쪽만 막으면 제외가 아니다).
 - 기존 ATR 트레일링/하드 손절 보존, 추가 분기만.
+- **`[days_held_observe]` 상시 관측** (사이클 224) — 보유일을 **발화 여부와 무관하게** 하루 1회 남긴다.
+  이전엔 `days_held` 가 (a) 폴백 플래그가 섰거나 (b) 시간청산이 **실제 발화**했을 때만 로그돼,
+  *시간 기반 청산인데 발화할 때만 보유일이 보이는* 상태였다 — "얼마나 근접했나"를 영영 못 본다.
+  실측 사각: 금 매수·`n_days=2`·캐시 최신일=매수일인 월요일은 `days_held=1`(달력 3)로 게이트 미충족이고
+  `cache_max == _prev_weekday(today)` 라 폴백도 안 서서 **완전 무음**이었다.
+  한 줄에 **영업일과 달력일을 나란히** 싣는 것이 목적 — `days_held=1 calendar_days=3` 이 곧
+  사이클 223 S3(달력일→영업일)의 직접 확인이다. `days_ok`/`price_ok` 를 각각 실어 어느 조건이
+  막는지 가린다. 호출은 `check_exit_signal` **최상단**(§1 하드손절보다 앞) — §2.5 안에 두면
+  하드손절이 그날 첫 평가에 발화할 때 도달조차 못 하고, 매도 거부로 포지션이 생존하면 **영구 억제**된다.
+  cap 키는 `ticker|armed`/`ticker|disarmed` (최대 2행/종목/일) — ticker 단독이면 장중 재시작 시
+  재도출 전 `breakout_high=0` 스냅샷이 박제돼 종일 무장 해제로 오독된다. 실패는 흡수하되
+  `[days_held_observe_failed]` debug 흔적을 남긴다(무흔적 흡수는 사이클 224 이전 무음과 구별 불가).
 
 ### donchian `max_breakout_extension_pct` (P2-3) — **사이클 209 (2026-07-14): 기본 3.0→4.0, PARAM_RANGES 제외**
 - 기본 **4.0%** (사이클 209 — 0.5%(AI 과튜닝, DB) 상시 스킵 병목 해소). `check_buy_signal` 갭 스킵 *후*, BUY 확정 *전* 삽입.
