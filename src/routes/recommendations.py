@@ -12,6 +12,10 @@ from src.db.parameter_recommendations import (
     update_recommendation_status,
 )
 from src.db.strategy_config import save_params, save_weights
+# 사이클 223 F2 (2026-08-21) — 수동 apply 화이트리스트 재검증 소스.
+# 자동 경로(`recommendation_engine.auto_apply_recommendations`)가 쓰는 것과 **동일한**
+# 정본을 참조해야 두 경로가 갈라지지 않는다 (사본 금지).
+from src.engine.recommendation_engine import PARAM_RANGES
 from src.engine.scheduler import trading_scheduler
 from src.models.recommendation import ApplyRequest
 from src.models.response import ApiResponse
@@ -43,7 +47,8 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
     """선택한 키 + (옵션) weight 를 전략에 적용한다.
 
     - status가 pending|partial이 아니면 거부.
-    - body.keys ∩ recommended_params.keys 만 추려 적용.
+    - body.keys ∩ recommended_params.keys ∩ **PARAM_RANGES** 만 추려 적용
+      (사이클 223 F2 — 화이트리스트 미등재 키는 `[manual_apply_safeguard_skip]` 후 제외).
     - body.apply_weight=true 면 strategy_config.weight 도 recommended_weight 로 갱신.
       recommended_weight 가 null 이면 거부 (적용할 weight 없음).
     - 잔여 키 있으면 status='partial', 모두 적용되면 'applied'.
@@ -62,7 +67,32 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
         )
 
     recommended_params = rec.get("recommended_params") or {}
-    valid_keys = set(req.keys) & set(recommended_params.keys())
+    requested_keys = set(req.keys) & set(recommended_params.keys())
+
+    # 사이클 223 F2 (2026-08-21) — **PARAM_RANGES 화이트리스트 재검증**.
+    #
+    # 결함: 자동 경로(`auto_apply_recommendations`)에는
+    #   `if k not in PARAM_RANGES: [auto_apply_safeguard_skip]` 가드가 있는데 이 수동
+    #   경로에만 없었다. 그래서 사이클 208/209/212/223 이 "전략 정체성 상수" 라며
+    #   PARAM_RANGES 에서 뺀 키들(`buy_threshold`·`donchian_period`·`max_positions`·
+    #   `atr_trail_mult`·`breakout_fail_n_days` …)이 **UI 적용 버튼 하나로** 그대로
+    #   들어왔다. 라이브 이탈값(donchian `breakout_fail_n_days=2`·`atr_trail_mult=1.8`)의
+    #   유입 경로가 여기로 추정된다. 2026-08-08 kojiro `ratio×maxp=1.2`(운영자 수동
+    #   DB apply 사각)와 같은 클래스 — **제외 결정이 한쪽 경로에만 걸리면 제외가 아니다**.
+    #
+    # 규약:
+    #   - 걸러도 **나머지 키는 정상 적용**한다 (과제거 금지 — 부분 적용은 기존 계약).
+    #   - 걸러진 키는 `applied_params` 에 넣지 않는다 ⇒ `remaining` 에 남아 status='partial'.
+    #     운영자가 "적용됐다"고 오인하지 않게 응답 메시지에도 차단 사실을 병기한다.
+    #   - `apply_weight` 경로는 이 가드의 대상이 아니다 (params 화이트리스트와 무관).
+    valid_keys = {k for k in requested_keys if k in PARAM_RANGES}
+    blocked_keys = sorted(requested_keys - valid_keys)
+    for _bk in blocked_keys:
+        logger.warning(
+            "[manual_apply_safeguard_skip] rec_id=%s strategy=%s key=%s"
+            " reason='out_of_param_ranges'",
+            rec_id, rec.get("strategy_id"), _bk,
+        )
 
     # Phase J4 — weight 적용 사전 검증
     recommended_weight = rec.get("recommended_weight")
@@ -74,6 +104,16 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
             )
         # weight 가 있는 경우, 키 없이도 적용 가능 — valid_keys 빈집합 통과
     elif not valid_keys:
+        if blocked_keys:
+            # 조용한 성공 금지 — 무엇이 왜 막혔는지 운영자에게 그대로 돌려준다.
+            return ApiResponse(
+                success=False,
+                message=(
+                    "안전 가드에 막혀 적용된 키가 없습니다: "
+                    f"{', '.join(blocked_keys)} — 전략 정체성 상수(진입/청산 임계·슬롯 수)는 "
+                    "AI 자문으로 적용할 수 없습니다."
+                ),
+            )
         return ApiResponse(
             success=False,
             message="적용 가능한 키가 없습니다",
@@ -182,8 +222,9 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
         updated.setdefault("applied_weight", applied_weight)
 
     logger.info(
-        "추천 적용: %s (%s) keys=%s, status=%s, apply_weight=%s",
-        rec_id, strategy_id, list(valid_keys), new_status, req.apply_weight,
+        "추천 적용: %s (%s) keys=%s, blocked=%s, status=%s, apply_weight=%s",
+        rec_id, strategy_id, sorted(valid_keys), blocked_keys,
+        new_status, req.apply_weight,
     )
 
     msg_parts = []
@@ -191,6 +232,9 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
         msg_parts.append(f"{applied_count}개 파라미터 적용")
     if applied_weight is not None:
         msg_parts.append(f"weight={applied_weight:.2f} 적용")
+    if blocked_keys:
+        # 사이클 223 F2 — 부분 성공이어도 차단 사실을 숨기지 않는다.
+        msg_parts.append(f"{len(blocked_keys)}개 키 안전 가드 차단({', '.join(blocked_keys)})")
     message = " · ".join(msg_parts) if msg_parts else "변경사항 없음"
 
     return ApiResponse(

@@ -17,8 +17,9 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, time, timezone, timedelta
+from datetime import date, datetime, time, timezone, timedelta
 
+from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
@@ -141,6 +142,19 @@ class DonchianSwingStrategy(StrategyBase):
         # 사이클 170 카드 A — list_by_filter 단계별 생존 ticker (관찰성 전용).
         # {"union_tickers", "mcap_tickers", "trade_tickers"} — prepare step1/step2 노출.
         self._scan_stage_counts: dict[str, list[str]] = {}
+        # 사이클 223 (S3, 2026-08-21) — KRX 거래일 캐시. 시간청산 `days_held` 를
+        # 달력일이 아니라 **영업일**로 세기 위한 유일한 데이터 소스.
+        # prepare/recompute_held_atr 가 **이미 fetch 한** 일봉의 거래일로 union 갱신한다
+        # (KIS 신규 호출 0 · 종목마다 fetch 창이 달라 와이프 금지).
+        # check_exit_signal 은 hot path 라 KIS `add_business_days`(async) 를 쓸 수 없다.
+        self._trading_days: set[date] = set()
+        # 사이클 223 F4 (2026-08-21) — 거래일 캐시 열화(weekday 폴백) 가시성 cap.
+        # 폴백 사실이 **시간청산 발화 시에만** 로그에 남으면, 폴백 상태로 미발화가
+        # 계속되는 동안 열화가 영원히 안 보인다(리뷰 F4). 발화 여부와 무관하게
+        # 1회/ticker/일 emit 한다. 날짜 키 자기리셋(`_days_held_fallback_day`) —
+        # `_reset_daily_state` 훅에 의존하지 않는다(선례 `StrategyBase._emit_budget_clamp`).
+        self._days_held_fallback_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._days_held_fallback_day: str = ""
 
     async def prepare(self) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
@@ -270,6 +284,9 @@ class DonchianSwingStrategy(StrategyBase):
                     "reason": "KIS 일봉 응답 None",
                 })
                 continue
+            # 사이클 223 (S3) — 거래일 캐시 union. 시간청산 영업일 계산 소스이며
+            # 이미 fetch 한 일봉을 재사용하므로 KIS 신규 호출 0.
+            self._update_trading_days(candles)
             try:
                 # candles 변수는 fetch 결과를 그대로 사용 (await 제거)
                 pass
@@ -598,6 +615,10 @@ class DonchianSwingStrategy(StrategyBase):
                 logger.exception("도치안 스윙 보유종목 일봉 fetch 실패: %s", ticker)
                 continue
 
+            # 사이클 223 (S3) — 거래일 캐시 union (`_trading_days`). prepare 가 후보
+            # 종목만 훑는 데 반해 여기는 보유 종목이라, 둘을 합쳐야 매수일까지 닿는다.
+            self._update_trading_days(candles)
+
             # ATR 재계산
             if need_atr and len(candles) >= atr_period + 2:
                 try:
@@ -643,19 +664,225 @@ class DonchianSwingStrategy(StrategyBase):
             ):
                 self._rederive_entry_atr(ticker, pos, candles, atr_period)
 
+    def _update_trading_days(self, candles: list) -> None:
+        """이미 fetch 한 일봉의 거래일을 `_trading_days` 캐시에 **union** 한다.
+
+        사이클 223 (S3). KIS 신규 호출 0 — `_breakout_high`/`_channel_low` 재도출과
+        같은 candles 를 재사용한다. 날짜 추출은 `StrategyBase._candle_trade_date` 위임
+        (KIS 원본 `stck_bsop_date` / 정규화 컬럼 `bas_dd` 양쪽 수용 — 어댑터가 raw JSONB
+        없는 row 를 row 자체로 돌려주는 경로 대응. 3번째 파서 복사본 금지).
+
+        종목마다 fetch 창이 다르므로 **와이프 금지** — 합집합이어야 휴장일 판별이 는다.
+        """
+        if not candles:
+            return
+        for c in candles:
+            try:
+                bd = self._candle_trade_date(c)
+            except Exception:
+                continue
+            if bd is not None:
+                self._trading_days.add(bd)
+
+    @staticmethod
+    def _prev_weekday(d: date) -> date:
+        """`d` **직전**의 weekday(월~금). 최대 3회 순회 — hot path 안전.
+
+        사이클 223 F1/G/G2. 쓰임은 **`used_fallback` 판정 하나뿐**이다 — 계상에는
+        관여하지 않는다(G 에서 갭 메움을 걷어냈다). 공휴일 달력이 없으므로 weekday
+        근사이고, 그래서 **양방향으로 틀린다**. 사이클 223 G2 이전 이 docstring 은
+        오탐 한쪽만 인정하고 "한 방향" 이라고 적었는데, 그 주장은 **거짓**이었다.
+
+        **오탐(false positive) — 값은 맞고 로그만 한 줄 더**
+          직전 weekday 가 공휴일이면 캐시에 없는 게 정상인데도 플래그가 선다. 값은
+          그 경우에도 정확하다(갭 = 오늘 하루 → 휴장일 미계상). **연 12~15회 캘린더
+          이벤트**(설·추석·개천절·한글날·성탄절 직후 첫 거래일)에서 예정된 것이고,
+          운영자는 로그의 `cached_days`/`cache_max` 로 진짜 열화와 구분한다.
+          = 정당한 신호.
+
+        **거짓 음성(false negative) — 값이 틀린데 플래그가 안 선다** (실재 2경로)
+          1. `today` 자신이 **평일 공휴일**일 때: `cache_max == _prev_weekday(today)`
+             라 플래그 False 인데, 갭 보정 `+1` 이 그 휴장일을 세어 **과다** 계상된다.
+             (주말 `today` 는 사이클 223 G1 이 `today.weekday() < 5` 가드로 막았고,
+             평일 공휴일은 달력 없이 코드로 가를 수 없다.)
+          2. 저녁 구간(15:40~20:00): 16:20 funnel prepare 가 **오늘 봉**을 캐시에
+             넣으므로 `cache_max == today` 가 되어, 캐시 **중간 결손**이 있어도
+             플래그가 서지 않는다. 값은 과소(= 청산 지연 = 보유 연장, 안전 방향).
+
+        즉 이 플래그는 "캐시가 직전 weekday 까지 닿았다"는 **필요조건 관찰**일 뿐
+        정확성 보증이 아니다. 플래그 False 를 "값이 맞다"로 읽지 말 것.
+        """
+        cur = d - timedelta(days=1)
+        while cur.weekday() >= 5:
+            cur -= timedelta(days=1)
+        return cur
+
+    def _business_days_held(self, buy_date: date, today: date) -> tuple[int, bool]:
+        """매수일 이후 경과 **영업일** 수. 반환 `(일수, 폴백_사용_여부)`.
+
+        사이클 223 (S3). ⚠️ **동기 순수함수 · I/O 0** — `check_exit_signal` 은
+        `risk.on_tick` 이 초당 수십~수백 회 호출하는 hot path 라 신규 `await`/DB/HTTP 가
+        금지된다. `StrategyBase._refine_cooldown_business_days` 가 쓰는 KIS 영업일
+        조회 TR(CTCA0903R) 래퍼는 async 라 여기서 호출할 수 없다 — 그래서 캐시를 쓴다.
+        (그 헬퍼 이름을 여기 적지 않는 것도 계약이다: AST 가드 G-223-6 이
+        `check_exit_signal`/`_business_days_held` 본문의 I/O 심볼 유입을 문자열로 검사한다.)
+
+        ## 산식 (사이클 223 G — F1 일반화 철회 + 가시성 유지)
+
+            cache_max = max(cache)
+            held = |{d ∈ cache : buy_date < d ≤ today}|              # 캐시가 정본
+                 + (1 if today > buy_date and today ∉ cache          # 갭 기여는
+                        and today.weekday() < 5 else 0)              #  **오늘 하루**
+            used_fallback = cache_max < _prev_weekday(today)         # 가시성 전용
+
+        **왜 갭을 오늘 하루로 한정하는가.** 이 함수가 평가되는 시점은 통상 활성
+        세션이다(`on_tick` = 시세 수신 중, `_swing_rest_poll_loop` = 09:30~15:20 창)
+        — 즉 **오늘이 영업일이라고 가정**한다. ⚠️ 사이클 223 G2 — 이것은 **보장이
+        아니라 가정**이다. 깨지는 실제 경로가 둘 있다:
+
+          1. `routes/trading.py` 의 `POST /api/trading/start` · `/restart` 에 휴장·주말
+             가드가 없다(`run_daily` 의 skip 은 자동 경로 전용). 수동 시작하면 폴 루프가
+             `datetime.now().time()` 만 보고 날짜는 안 봐서 주말·휴장에도 돈다.
+          2. `scheduler.py` 의 `except Exception: "휴장일 체크 실패 — 영업일로 가정하고
+             진행"` fail-open.
+
+        전제가 깨질 때 오차의 방향은 **과다 계상 = 조기 청산**(이 사이클이 가장 비싸다고
+        규정한 방향)이라, 코드로 가를 수 있는 절반은 막았다 — 주말은 `today.weekday() < 5`
+        가드로 배제한다(사이클 223 G1: 없으면 전면 폴백 분기와 **같은 함수 안에서 달력이
+        갈린다**). 평일 공휴일은 달력 없이 불가하므로 잔여 오차로 남으며, 그 크기는
+        **하루(+1)** 이고 `used_fallback` 플래그는 이 경우 서지 않는다(`_prev_weekday`
+        docstring 의 거짓 음성 #1).
+
+        한편 `cache_max` 와 `today` **사이의 나머지 날들**은 휴장인지 스테일인지
+        구분할 수 없어 애초에 세지 않는다. 그리고 라이브 세션 중
+        `cache_max` 는 구조적으로 직전 거래일이다: `_update_trading_days` 호출부가
+        `prepare`(부팅·개장 전) 와 `recompute_held_atr`(부팅/저녁) 뿐이라 장중엔
+        오늘 봉이 캐시에 없다. 따라서 갭이 벌어졌다면 **원인은 대개 휴장**이다.
+
+        F1 은 그 갭을 weekday 로 메웠고, 그것은 "갭의 원인은 항상 스테일"이라는
+        가정이었다. 공휴일 다음 첫 거래일마다 휴장일을 영업일로 세어 **과다 계상**한다:
+
+            금 08-14 공휴일 → 월 08-17      : 메움 5   진실 4   (+1)
+            월 08-17 공휴일 → 화 08-18      : 메움 5   진실 4   (+1)
+            연휴 3일(08-12~14) → 월 08-17   : 메움 5   진실 2   (+3)
+
+        드문 열화가 아니라 **연 12~15회 되풀이되는 캘린더 이벤트**이고, 방향이 S2/S3
+        가 잡으려던 과대발화와 같아 시정 효과를 부분 상쇄한다. 그래서 G 에서 계상은
+        되돌리고 **가시성(`used_fallback` 플래그 + `[days_held_fallback]` 로그)만**
+        남긴다 — 원래 F1 지적의 본질은 "무음"이었지 "값"이 아니었다.
+
+        ## 오차의 방향
+
+        - **정상일** (`cache_max` = 직전 거래일): 갭 = 오늘 하나 → **정확**, 플래그 False
+        - **공휴일 직후** (`cache_max` = 휴장 전 거래일): 갭 = 오늘 하나 → **정확**
+          (휴장일 미계상). 플래그만 True = 예정된 오탐(`_prev_weekday` docstring)
+        - **주말 `today`** (수동 시작·fail-open): 갭 미계상 → **정확**, 전면 폴백 분기와
+          동일 값(사이클 223 G1)
+        - **평일 공휴일 `today`** (수동 시작·fail-open): 갭 +1 → **과다 하루**. 코드로
+          가를 수 없는 잔여이고 플래그도 안 선다 — 알려진 한계로 남긴다
+        - **스테일 캐시**: 과소 계상. 청산을 **늦춘다 = 보유 연장**이고, 이는 H-1
+          사이클의 *"남는 오차는 과소 한 방향뿐이고 그 방향은 청산을 늦춘다"* 원칙과
+          일치한다. 과다 계상(조기 청산)은 승자를 자르는 방향이라 훨씬 비싸다.
+          그리고 무음이 아니다 — `used_fallback=True` 로 드러난다(F1 의 본래 지적).
+        - **전면 폴백** (캐시 부재 = 재시작 직후 prepare 전 / `min(cache) > buy_date`):
+          `(buy_date, today]` 의 weekday 수. 공휴일을 영업일로 세므로 약간 과다 계상
+          이지만, 주말까지 세던 기존 달력일보다는 엄격히 낫다. 캐시가 매수일에 못
+          닿을 때 캐시 경로를 쓰면 **조용한 과소 계상**이 되므로 폴백이 의무다.
+
+        `used_fallback=True` 는 값의 정확성 주장이 아니라 **캐시가 직전 영업일까지
+        못 닿았다**는 사실을 로그로 흘리기 위한 관찰 신호다.
+        """
+        cache = self._trading_days
+        if cache and min(cache) <= buy_date:
+            cache_max = max(cache)
+            held = sum(1 for d in cache if buy_date < d <= today)
+            # 갭(`cache_max` < d ≤ `today`) 기여는 **오늘 하루뿐** — 나머지 날은
+            # 휴장/스테일 구분 불가라 세지 않는다. weekday 로 메우면 공휴일 다음
+            # 첫 거래일마다 과다 계상 = 조기 청산(사이클 223 G).
+            #
+            # 사이클 223 G1 — `today.weekday() < 5` 가드. 이게 없으면 아래 전면 폴백
+            # 분기(`cursor.weekday() < 5`)와 **한 함수 안에서 달력이 갈린다**:
+            # buy=금 08-14 · today=토 08-15 → 캐시 1 / 폴백 0 (진실 0). 주말 today 는
+            # `/api/trading/start` 수동 시작(휴장 가드 없음)과 휴장체크 fail-open 으로
+            # 실재하고, 방향이 과다 계상 = 조기 청산이라 가장 비싸다.
+            if today > buy_date and today not in cache and today.weekday() < 5:
+                held += 1
+            return held, cache_max < self._prev_weekday(today)
+
+        held = 0
+        cursor = buy_date + timedelta(days=1)
+        while cursor <= today:
+            if cursor.weekday() < 5:
+                held += 1
+            cursor += timedelta(days=1)
+        return held, True
+
+    def _emit_days_held_fallback(self, ticker: str, days_held: int, n_days: int,
+                                 breakout_high: int = 0) -> None:
+        """`[days_held_fallback]` 관측 로그 — 1회/ticker/일 cap (사이클 223 F4).
+
+        발화 여부와 **무관하게** 방출한다. 폴백은 "거래일 캐시가 직전 영업일까지 못
+        닿았다" = prepare/recompute 열화 신호이고, 그 상태에서 미발화가 이어지면
+        기존(발화 시에만 로그) 방식으로는 영원히 안 보인다.
+
+        사이클 223 G4 — 호출부 게이트가 `breakout_high > 0` 안에 있던 탓에 **시간청산
+        기준선 자체가 미복구인 최악 상태**에서 정확히 침묵했다. 호출부를 `pos.buy_date`
+        레벨로 올렸고, 그 상태를 구분할 수 있게 `breakout_high` 를 함께 싣는다
+        (`breakout_high=0` = 재도출 실패로 시간청산 **무장 해제** 상태).
+
+        사이클 223 G — 사유 문구는 **경로를 과잉 주장하지 않는다**. 플래그가 서는
+        경우는 셋이고 계상 방식이 서로 다르다: 전면 폴백(캐시 부재/매수일 미도달)만
+        weekday 환산이고, 캐시 경로는 갭을 오늘 하루로 한정하며, 공휴일 직후는
+        플래그만 서고 값은 정확하다. 셋을 구분하는 단서는 `cached_days`/`cache_max`
+        이므로 그 둘을 함께 싣는다 (`cached_days=0` = 전면 폴백).
+        어떤 실패도 흡수 — 관측이 청산 판정을 막지 않는다.
+        """
+        try:
+            today_key = datetime.now(KST).date().isoformat()
+            if self._days_held_fallback_day != today_key:
+                self._days_held_fallback_day = today_key
+                self._days_held_fallback_logged.reset_daily()
+            if self._days_held_fallback_logged.should_emit(ticker):
+                self._days_held_fallback_logged.mark_emitted(ticker)
+                cache_max = max(self._trading_days) if self._trading_days else None
+                logger.info(
+                    "[days_held_fallback] ticker=%s strategy=%s days_held=%d n_days=%d"
+                    " cached_days=%d cache_max=%s breakout_high=%d"
+                    " reason='거래일 캐시가 직전 영업일 미도달(스테일 또는 공휴일 직후)"
+                    " → 근사 계상'",
+                    ticker, self.strategy_id, days_held, n_days,
+                    len(self._trading_days), cache_max, int(breakout_high or 0),
+                )
+        except Exception:  # pragma: no cover — 관측 실패가 청산을 막지 않는다
+            pass
+
     def _rederive_breakout_high(self, ticker: str, pos, candles: list, donchian_period: int) -> None:
         """재시작 복구 — buy_date 이전 일봉으로 진입 시점 20일 신고가(`_breakout_high`) 재현.
 
         P1-A (2026-07-29, A-2). 시간 기반 청산(check_exit_signal 2.5) 의 breakout_high
         기준선이 재시작 후 소실되는 결함 차단. `_rederive_entry_atr` 선례 답습 — buy_date
         *이전* 봉만 남겨 donchian_period 개의 최고가를 취한다. 봉 부족 시 미복구.
+
+        사이클 223 (S2, 2026-08-21) — off-by-one 시정. candles 는 DESC 이므로
+        `prior[0]` 은 매수일 직전 봉 = **신호일(돌파일) 봉**이다. 신호일은 정의상 20일
+        신고가를 돌파한 날이라 이 봉을 포함하면 재도출선이 라이브 매수 경로
+        (`prepare`: `max(highs[1: donchian_period + 1])`) 보다 **항상 높거나 같다**
+        (실측 19/19, 중앙값 +5.3%). 그 결과 시간청산이 "돌파 실패"가 아니라 "돌파일
+        장중 고가 미탈환"을 판정해 과대발화했다 (판정 반전 8/19, 승자 5건 전부 포함).
+        창을 `prior[1: donchian_period + 1]` 로 옮기고 길이 가드도 `donchian_period + 1`
+        로 동반 조정한다 — 안 하면 IndexError 가 아니라 19봉으로 20일 신고가를 만드는
+        **조용한 과소 표본**이 된다.
+        근거: `_workspace/domain_consult/donchian_exit_retune.md` §2-6 / C0.
         """
         try:
             buy_dd = pos.buy_date.strftime("%Y%m%d")
             prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
-            if len(prior) < donchian_period:
+            if len(prior) < donchian_period + 1:
                 return
-            highs = [int(c.get("stck_hgpr", "0") or 0) for c in prior[:donchian_period]]
+            highs = [
+                int(c.get("stck_hgpr", "0") or 0)
+                for c in prior[1: donchian_period + 1]
+            ]
             breakout_high = max(highs) if highs else 0
             if breakout_high > 0:
                 self._breakout_high[ticker] = breakout_high
@@ -886,15 +1113,33 @@ class DonchianSwingStrategy(StrategyBase):
 
         # 2.5) 사이클 23 P2-2 — 시간 기반 청산 (멀티데이 약한 이탈 빠른 정리)
         # 기존 ATR 트레일링/하드 손절 보존, 추가 분기만 삽입
+        # 사이클 223 (S3, 2026-08-21) — 달력일 → **영업일**. `(today - buy_date).days` 는
+        # 주말·휴장을 보유일로 세어, n_days=2 라이브 값과 결합하면 금요일 매수가 월요일에
+        # `3 >= 2` 로 **실거래 1일** 만에 청산 자격을 얻었다(실측 13건 중 7건이 금요일 매수,
+        # 6건이 이 경로 = 상시 경로). 매매 규칙 정본도 "보유 N**영업일**"이라 계약 불일치였다
+        # (`_workspace/refactor/2026-06-27_full_review.md` strat-6 CONFIRMED 미시정).
+        # n_days 값(2)은 불변 — 이번 사이클은 **세는 방법만** 고친다.
         n_days = int(self.config.params.get("breakout_fail_n_days", 5))
         breakout_high = self._breakout_high.get(ticker, 0)
-        if breakout_high > 0 and pos.buy_date:
+        # 사이클 223 G4 — 관측 게이트를 `pos.buy_date` 레벨로 올린다. 종전엔
+        # `breakout_high > 0` 안에 있어서 **재시작 + `_breakout_high` 미복구 + 빈 캐시**
+        # = 관측이 가장 필요한 최악 상태에서 로그가 정확히 0건이었다(S2 의 길이 가드
+        # 강화 `period` → `period+1` 이 미복구 확률을 올렸다). 청산 조건은 그대로 —
+        # 발화는 여전히 `breakout_high > 0` 을 요구한다(아래 if).
+        if pos.buy_date:
             today = datetime.now(KST).date()
-            days_held = (today - pos.buy_date).days
-            if days_held >= n_days and current_price < breakout_high:
+            days_held, used_fallback = self._business_days_held(pos.buy_date, today)
+            if used_fallback:
+                # 사이클 223 F4 — 폴백 사용 자체를 발화 여부와 무관하게 드러낸다.
+                # hot path 폭주는 DailyEmitCap(1회/ticker/일)이 막는다.
+                self._emit_days_held_fallback(ticker, days_held, n_days, breakout_high)
+            if breakout_high > 0 and days_held >= n_days and current_price < breakout_high:
+                # 사이클 223 G — 캐시 경로/전면 폴백을 한 문구로 덮되 과잉 주장 금지
+                # (전면 폴백만 weekday 환산, 캐시 경로는 갭을 오늘 하루로 한정).
+                suffix = " [폴백: 거래일 캐시 직전 영업일 미도달 → 근사 계상]" if used_fallback else ""
                 logger.info(
-                    "도치안 시간 기반 청산: %s 보유 %d일 ≥ %d, 현재가(%d) < 돌파선(%d)",
-                    ticker, days_held, n_days, current_price, breakout_high,
+                    "도치안 시간 기반 청산: %s 보유 %d영업일 ≥ %d, 현재가(%d) < 돌파선(%d)%s",
+                    ticker, days_held, n_days, current_price, breakout_high, suffix,
                 )
                 return Signal.STOP_LOSS
 

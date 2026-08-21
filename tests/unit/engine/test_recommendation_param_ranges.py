@@ -23,13 +23,17 @@ import logging
 # 신규 키 명세 (단, min_prdy_rate 는 이미 PARAM_RANGES 에 존재 → 회귀 보존만 검증)
 # 사이클 212 의미 전환: donchian_period 는 PARAM_RANGES/INT_PARAMS 에서 제거됨
 # (진입 임계 = 전략 정체성 상수, AI 자동튜닝 제외) → 본 목록에서 삭제.
+# 사이클 223 의미 전환: `atr_trail_mult` 도 제거 — **청산 임계 = 보유기간 정체성 상수**.
+# 208/209/212 와 동일 논리이며, 라이브가 코드 기본 2.0 → 1.8 로 "더 타이트" 이탈한 것이
+# 사이클 209(하한 고착) 과 동형 서명이라 확인됐다. 샹들리에는 청산 19건 중 0회 발화 —
+# 실행된 적 없는 파라미터를 관측치로 맞추는 것은 튜닝이 아니다.
+# 근거: `_workspace/domain_consult/donchian_exit_retune.md` C9 / §5 S1.
 _NEW_RANGE_KEYS = {
     "k_value_krx_main": (0.5, 2.0),
     "k_value_nxt_pre": (0.5, 2.0),
     "k_value_nxt_post": (0.5, 2.0),
     "long_ma_period": (20, 120),
     "volume_multiplier": (1.0, 5.0),
-    "atr_trail_mult": (1.0, 5.0),
 }
 
 # 사이클 212 의미 전환: donchian_period 제거 → long_ma_period 단독 INT 캐스트 잔존.
@@ -40,10 +44,12 @@ _NEW_INT_KEYS = {"long_ma_period"}
 # A. 신규 키 등록 + 범위 정합성
 # ---------------------------------------------------------------------------
 def test_param_ranges_includes_new_eight_keys():
-    """신규 8 키(k_value_* 3 + donchian_period + long_ma_period + volume_multiplier
-    + atr_trail_mult + min_prdy_rate) 가 모두 PARAM_RANGES 에 등록되어야 한다.
+    """신규 키(k_value_* 3 + long_ma_period + volume_multiplier + min_prdy_rate) 가
+    모두 PARAM_RANGES 에 등록되어야 한다.
 
     `min_prdy_rate` 는 사이클 진입 시점에 이미 등록되어 있어 별도 변경 없음.
+    원 8키 중 `donchian_period`(사이클 212, 진입 임계) 와 `atr_trail_mult`(사이클 223,
+    청산 임계) 는 정체성 상수로 제외됐다 — `_NEW_RANGE_KEYS` 주석 참조.
     """
     from src.engine.recommendation_engine import PARAM_RANGES
 
@@ -54,7 +60,7 @@ def test_param_ranges_includes_new_eight_keys():
 
 
 def test_param_ranges_new_keys_bounds_match_spec():
-    """신규 7 키 범위가 leader 명세와 정확히 일치해야 한다."""
+    """잔존 신규 키 범위가 leader 명세와 정확히 일치해야 한다 (제외분은 목록에서 삭제)."""
     from src.engine.recommendation_engine import PARAM_RANGES
 
     for key, (lo, hi) in _NEW_RANGE_KEYS.items():
@@ -86,7 +92,12 @@ def test_int_params_includes_donchian_and_long_ma_period():
 # B. 정상 추천값 통과
 # ---------------------------------------------------------------------------
 def test_validate_recommendations_accepts_new_float_keys():
-    """k_value_krx_main / volume_multiplier / atr_trail_mult 정상 범위 통과."""
+    """k_value_* / volume_multiplier 정상 범위 통과.
+
+    사이클 223 의미 전환: `atr_trail_mult` 는 PARAM_RANGES 에서 제거돼 이제
+    비화이트리스트(=ghost_param 동일 취급)다. 통과 단언 대신 **드롭 단언**으로 전환하고,
+    나머지 화이트리스트 float 키의 통과 계약은 그대로 보존한다.
+    """
     from src.engine.recommendation_engine import _validate_recommendations
 
     raw = {
@@ -95,7 +106,7 @@ def test_validate_recommendations_accepts_new_float_keys():
             "k_value_nxt_pre": 0.8,
             "k_value_nxt_post": 1.5,
             "volume_multiplier": 2.0,
-            "atr_trail_mult": 2.5,
+            "atr_trail_mult": 2.5,   # 사이클 223 — 비화이트리스트, 드롭 대상
         },
         "reasoning": "5/15 자문 권고 반영",
     }
@@ -112,7 +123,9 @@ def test_validate_recommendations_accepts_new_float_keys():
     assert validated["k_value_nxt_pre"] == 0.8
     assert validated["k_value_nxt_post"] == 1.5
     assert validated["volume_multiplier"] == 2.0
-    assert validated["atr_trail_mult"] == 2.5
+    assert "atr_trail_mult" not in validated, (
+        "사이클 223 — atr_trail_mult 는 PARAM_RANGES 제거로 드롭 (청산 임계 자동튜닝 제외)"
+    )
     assert reasoning == "5/15 자문 권고 반영"
 
 
@@ -125,29 +138,28 @@ def test_validate_recommendations_rejects_out_of_range_new_keys(caplog):
 
     caplog.set_level(logging.WARNING, logger="src.engine.recommendation_engine")
     # 사이클 212 의미 전환: donchian_period 제거 (진입 임계) → 범위 밖 케이스에서
-    # 화이트리스트 float 2 키만 WARNING 발화 (donchian_period 는 비화이트리스트 =
-    # WARNING 없이 debug 드롭).
+    # 화이트리스트 float 키만 WARNING 발화 (비화이트리스트는 WARNING 없이 debug 드롭).
+    # 사이클 223 의미 전환: `atr_trail_mult` 도 PARAM_RANGES 에서 빠져 같은 debug 경로로
+    # 이동 — 범위 검증에 도달하지 못하므로 WARNING 이 2건 → **1건**이 된다.
+    # (드롭 자체는 위 accepts 테스트가 단언한다.)
     raw = {
         "recommended_params": {
             "k_value_krx_main": 2.5,  # 상한 초과
-            "atr_trail_mult": 0.5,    # 하한 미달
         },
         "reasoning": "",
     }
     current = {
         "k_value_krx_main": 1.0,
-        "atr_trail_mult": 2.0,
     }
     validated, _, _w, _n, _wr = _validate_recommendations(raw, current)
 
     assert "k_value_krx_main" not in validated
-    assert "atr_trail_mult" not in validated
-    # WARNING 2건 (각 키 1건씩) — 메시지 prefix "추천 값 범위 초과"
+    # WARNING 1건 — 메시지 prefix "추천 값 범위 초과"
     warning_msgs = [
         r.message for r in caplog.records
         if r.levelno == logging.WARNING and "범위 초과" in r.message
     ]
-    assert len(warning_msgs) == 2, (
+    assert len(warning_msgs) == 1, (
         f"WARNING 누락 — 실제 메시지: {warning_msgs}"
     )
 

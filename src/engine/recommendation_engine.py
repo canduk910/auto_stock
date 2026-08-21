@@ -81,7 +81,25 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "k_value_nxt_post": (0.5, 2.0),
     "long_ma_period": (20, 120),
     "volume_multiplier": (1.0, 5.0),
-    "atr_trail_mult": (1.0, 5.0),
+    # `atr_trail_mult` 제외 (사이클 223, 2026-08-21) — 청산 임계는 전략의
+    # **보유기간 정체성 상수**. 같은 청산축의 `breakeven_promote_atr`·`channel_exit_period`
+    # 는 이미 미편입인데 이 키만 남아 코드 기본값 2.0 → 라이브 1.8 로 "더 타이트" 이탈했다.
+    # 단기 손실을 목적함수로 삼는 튜너는 구조적으로 청산을 조여 추세추종을 데이트레이딩으로
+    # 변태시킨다 (사이클 208 box 2키 / 209 max_breakout_extension_pct / 212 buy_threshold·
+    # donchian_period 선례). 샹들리에는 19건 중 0회 발화 — 실행된 적 없는 파라미터를
+    # 관측치로 맞추는 것은 튜닝이 아니다. 근거: `_workspace/domain_consult/donchian_exit_retune.md` C9.
+    #
+    # ⚠️ **적용 범위 = 3전략 공유 키** (사이클 223 F3, 리뷰 지적). `atr_trail_mult` 은
+    # donchian 전용이 아니라 `donchian_swing` · `vcp_breakout` · `bull_flag_breakout`
+    # 세 전략의 DEFAULT_PARAMS(전부 2.0)와 샹들리에 청산 분기가 **공유**한다. 따라서 이
+    # 제거는 VCP·BFB 의 트레일링 배수까지 AI 튜닝에서 함께 뺀다 — 자문 이력에 두 전략의
+    # `atr_trail_mult` 권고가 다수 존재한다. 오늘은 무해하다(VCP/BFB 체결 0건 = 튜닝할
+    # 표본 자체가 없다). 다만 위 근거는 **donchian 실측(19왕복)만** 이므로, VCP/BFB 는
+    # "자기 근거로 제외된" 것이 아니라 "표본이 없어 donchian 근거에 함께 묶인" 상태다.
+    # **재검토 조건**: VCP 또는 BFB 의 청산 표본이 쌓이면(첫 체결 후 왕복 ≥20) 그 전략에
+    # 한해 재편입 여부를 독립 판정한다 — donchian 표본만으로 두 전략의 청산 규약을
+    # 영구 고정하지 않는다. 키 분리(전략 고유명)가 필요하면 `kojiro.py:151`
+    # "atr_trail_mult 재사용 금지" 선례(`stop_atr`/`trail_atr` 고유명)를 따른다.
     # ↓ 사이클 23 — VCP 핵심 진입 품질 4 키
     "base_depth_pct": (0.10, 0.50),
     "volume_contraction_ratio": (0.30, 1.00),
@@ -89,7 +107,12 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "last_pullback_max": (0.03, 0.15),
     # ↓ 사이클 23 — P2 신규 가드/필터 5 키
     "breakout_retention_minutes": (1, 30),
-    "breakout_fail_n_days": (2, 20),
+    # `breakout_fail_n_days` 제외 (사이클 223, 2026-08-21) — 위 `atr_trail_mult` 와 동일
+    # 논리. 라이브 값 2 는 구 범위 (2, 20) 의 **하한에 정확히** 붙어 있어 사이클 209
+    # (`max_breakout_extension_pct` 3.0→하한 0.5 과튜닝) 와 동형 서명이다. 보유일수 임계를
+    # 하한으로 밀면 20일 신고가 추세추종이 1~2일 데이트레이딩이 된다.
+    # 적용 범위: `breakout_fail_n_days` 는 `donchian_swing` **단독** 키다
+    # (위 `atr_trail_mult` 과 달리 공유 없음 — 제거가 다른 전략에 걸리지 않는다).
 }
 
 # 정수형 파라미터 — 캐스트 대상
@@ -101,7 +124,8 @@ INT_PARAMS = {
     "long_ma_period",
     # ↓ 사이클 23 — 정수 캐스트 대상
     "breakout_retention_minutes",
-    "breakout_fail_n_days",
+    # `breakout_fail_n_days` 는 사이클 223 에서 PARAM_RANGES 와 함께 제거 —
+    # INT_PARAMS ⊆ PARAM_RANGES 규약 유지 (정체성 상수는 AI 튜닝 대상 아님).
 }
 
 

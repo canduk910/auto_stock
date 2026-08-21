@@ -51,6 +51,21 @@ def client(monkeypatch):
 
     monkeypatch.setattr(sc, "get_price_filter", fake_get, raising=False)
     monkeypatch.setattr(sc, "set_price_filter", fake_set, raising=False)
+    # 사이클 223-F (2026-08-21) — **소비처 바인딩까지** 패치.
+    #
+    # `src/routes/system.py` 는 `from src.db.system_config import set_price_filter` 로
+    # 모듈 로드 시점에 이름을 **바인딩**한다. 따라서 위의 `sc.<name>` 패치는
+    # `src.routes.system` 이 아직 import 되지 않은 경우에만 효과가 있다 —
+    # 앞선 contract 테스트가 이미 `src.main` 을 import 했다면 라우트는 **실제** 함수를
+    # 호출하고, DB 미가동이라 `set_price_filter` 가 모듈 전역
+    # `_price_filter_memory_override` 에 값을 남긴다. 그 잔재가 뒤따르는
+    # `tests/unit/db/test_cycle64_price_filter_scanner_system_config.py::test_A1`
+    # (기본값 0 기대)을 **수집 순서에 따라** 깨뜨린다(잠복 누수).
+    # import 순서와 무관하게 성립하도록 소비처 모듈도 함께 패치한다.
+    from src.routes import system as routes_system
+
+    monkeypatch.setattr(routes_system, "get_price_filter", fake_get, raising=False)
+    monkeypatch.setattr(routes_system, "set_price_filter", fake_set, raising=False)
 
     from src.main import app
     return SimpleNamespace(client=TestClient(app), state=state)

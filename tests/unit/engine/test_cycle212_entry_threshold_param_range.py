@@ -71,7 +71,10 @@ def test_invariant_other_param_ranges_keys_remain():
         "k_value_nxt_post",
         "long_ma_period",
         "volume_multiplier",
-        "atr_trail_mult",
+        # `atr_trail_mult` / `breakout_fail_n_days` 제거 (사이클 223) — donchian 청산
+        # 임계는 **보유기간 정체성 상수**. 같은 청산축의 breakeven_promote_atr/
+        # channel_exit_period 는 이미 미편입인데 이 둘만 남아 AI 튜닝으로 "더 빨리·
+        # 더 타이트" 방향 이탈했다 (5→2 = 범위 하한 고착 / 2.0→1.8).
         "position_ratio",
         # `max_positions` 제거 (2026-08-03 예산 이중제한) — 동시보유 슬롯 수는
         # 리스크 정체성 상수. position_ratio 와의 곱 교차검증 부재로 예산 200%
@@ -80,7 +83,6 @@ def test_invariant_other_param_ranges_keys_remain():
         "max_scan_stocks",
         "min_prdy_rate",
         "breakout_retention_minutes",
-        "breakout_fail_n_days",
     ):
         assert key in PARAM_RANGES, f"잔존 의무 PARAM_RANGES 키 누락: {key}"
 
@@ -93,8 +95,9 @@ def test_invariant_other_int_params_keys_remain():
         "k_period",
         "max_scan_stocks",
         "long_ma_period",
+        # `breakout_fail_n_days` 제거 (사이클 223) — 위 주석 참조.
+        # INT_PARAMS ⊆ PARAM_RANGES 규약 유지를 위해 두 dict 에서 동시 제거.
         "breakout_retention_minutes",
-        "breakout_fail_n_days",
     ):
         assert key in INT_PARAMS, f"잔존 의무 INT_PARAMS 키 누락: {key}"
 

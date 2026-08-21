@@ -113,8 +113,12 @@ async def test_A2_breakout_high_rederived_on_recompute():
     # 재시작 재현 — _breakout_high 비어있음
     assert "096770" not in s._breakout_high
     # buy_date 이전(<0727) 봉: 20일 최고가 = 130000, 매수 후 봉은 재도출에서 제외되어야 함
+    # 사이클 223 의미 전환 — 재도출이 **신호일 봉(prior[0])을 제외**하도록 시정되면서
+    # prior 최소 길이가 period → period+1 이 됐다(19봉으로 20일 신고가를 만드는 조용한
+    # 과소 표본 차단). 픽스처를 20봉 → 21봉으로 늘린다. 창(`prior[1:21]`) 안에 있는
+    # 0720 = 130,000 이 여전히 최고가라 **기대값은 불변**이다.
     pre = [(f"202607{d:02d}", 130_000 if d == 20 else 120_000, 115_000, 118_000)
-           for d in range(26, 6, -1)]  # 20봉 DESC, 0726..0707
+           for d in range(26, 5, -1)]  # 21봉 DESC, 0726..0706
     post = [(f"202607{d:02d}", 140_000, 130_000, 135_000) for d in (28, 27)]  # 매수 당일/이후
     candles = _candles_desc(post + pre)
     with patch("src.api.condition.fetch_daily_candles", new=AsyncMock(return_value=candles)), \

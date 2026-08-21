@@ -301,6 +301,10 @@ async def test_donchian_prepare_records_funnel_steps(monkeypatch):
     strat._scan_stats = ds_mod._empty_scan_stats()
     strat._bought_today = set()
     strat._breakout_high = {}
+    # 사이클 223 — 이 테스트는 `__new__` 로 __init__ 을 우회하는 수제 부분 생성자라
+    # 신규 인스턴스 필드를 여기에도 등록해야 한다(`_breakout_high` 선례).
+    # `_trading_days` = 시간청산 영업일 계산용 거래일 캐시 (prepare 가 union 갱신).
+    strat._trading_days = set()
 
     await strat.prepare()
 

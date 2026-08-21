@@ -964,11 +964,13 @@ DEFAULT_PARAMS = {
 | `k_value_nxt_post` | (0.5, 2.0) | VB(호환), LTV | float |
 | `long_ma_period` | (20, 120) | donchian_swing | **INT** (정수 일봉 개수) |
 | `volume_multiplier` | (1.0, 5.0) | donchian_swing | float |
-| `atr_trail_mult` | (1.0, 5.0) | donchian_swing, bull_flag, vcp | float |
 
 `min_prdy_rate` 는 사이클 진입 시점에 이미 등록(`(0.0, 30.0)`)되어 있어 중복 추가하지 않음(요구 명세 8 키 → 실 추가 7 키). Phase B 확장분 중 `INT_PARAMS` 등록분은 `long_ma_period` 뿐이며, LLM 출력이 25.7 → 26 으로 자동 캐스트된다.
 
 ⚠️ **`donchian_period` 는 이후 제외됨 (사이클 212)** — 진입 임계 = **리스크 정체성 상수** 로 판정돼 `PARAM_RANGES`/`INT_PARAMS` 양쪽에서 빠졌다(`max_positions`·`buy_threshold`·`max_breakout_extension_pct` 와 동일 논리). 위 표의 해당 행은 삭제했다.
+
+⚠️ **`atr_trail_mult` 도 이후 제외됨 (사이클 223, 2026-08-21)** — 진입이 아니라 **청산 정체성 상수**. donchian 19 왕복 실측에서 MFE 대비 실현이 −12%(고점을 보고도 반납), RR 0.47 vs 손익분기 필요 2.25 로 나와 트레일링 배수는 *결함이 아니라 재튜닝 대상* 임이 확인됐다 — 그 재튜닝은 근거를 갖춘 사람의 결정이어야지 매일 밤 AI 가 흔들 값이 아니다. 같은 논리로 `breakout_fail_n_days` 도 함께 제외(`INT_PARAMS` 포함). 위 표의 `atr_trail_mult` 행은 삭제했다. 근거 = `_workspace/domain_consult/donchian_exit_retune.md`.
+⚠️ 이 키는 **donchian_swing · bull_flag_breakout · vcp_breakout 3 전략 공유**(전부 DEFAULT 2.0)인데 근거 표본은 donchian 뿐이다 — VCP/BFB 청산 왕복이 ≥20 쌓이면 재검토한다.
 
 **Phase A 별건 — LTV `stop_loss_hits=0` metrics 결함**: 5/15 자문 metrics 분석에서 `stop_loss_hits=0` 과 `max_loss_pct=-7.554%` 모순 발견. root cause 는 `recommendation_metrics.compute_metrics()` 가 `current_params.get("stop_loss_rate")` 단일 키만 참조하는데 LTV 만 `intraday_stop_loss`/`overnight_stop_loss` 분리 키 사용 → `None` 폴백 → 분기 영영 skip. 본 사이클에서는 진단만, fix 는 별도 사이클로 분리(`_workspace/red/phase-a-ltv-stop-loss-hits.md`).
 
@@ -2320,8 +2322,8 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 
 **P1-1. VCP PARAM_RANGES 4 키 + P2 신규 5 키 추가** — `src/engine/recommendation_engine.py`:
 - VCP 4 키: `base_depth_pct (0.10, 0.50)` / `volume_contraction_ratio (0.30, 1.00)` / `breakout_volume_mult (1.0, 5.0)` / `last_pullback_max (0.03, 0.15)`
-- P2 신규 5 키 → **현행 잔존 2 키**: `breakout_retention_minutes (1, 30)` / `breakout_fail_n_days (2, 20)`. **제거됨** — `box_contraction_period` · `max_box_volatility_pct`(사이클 208), `max_breakout_extension_pct`(사이클 209, 전략 정체성 상수)
-- `INT_PARAMS` 정수 캐스트 대상 확장 → **현행 잔존 2 키**: `breakout_retention_minutes` / `breakout_fail_n_days` (`box_contraction_period` 는 사이클 208 제거, `tests/unit/engine/test_param_ranges_vcp.py` 가 잔존 금지)
+- P2 신규 5 키 → **현행 잔존 1 키**: `breakout_retention_minutes (1, 30)`. **제거됨** — `box_contraction_period` · `max_box_volatility_pct`(사이클 208), `max_breakout_extension_pct`(사이클 209, 진입 정체성 상수), `breakout_fail_n_days`(사이클 223, 청산 정체성 상수)
+- `INT_PARAMS` 정수 캐스트 대상 확장 → **현행 잔존 1 키**: `breakout_retention_minutes` (`box_contraction_period` 는 사이클 208, `breakout_fail_n_days` 는 사이클 223 제거. `tests/unit/engine/test_param_ranges_vcp.py` + `test_cycle223_donchian_exit_param_ranges.py` 가 잔존 금지)
 - **목적**: AI 자문이 VCP 진입 품질 + BFB/donchian 신규 가드 9 키를 자동 권고 가능
 
 **P1-2. BFB `min_trade_amount_failed` 카운터** — `src/engine/strategies/bull_flag_breakout.py`:
@@ -2357,7 +2359,7 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 - 매수 신호 발사 시 (`check_buy_signal` BUY 분기) `_breakout_high[ticker] = info["donchian_high"]` 등록. **체결통보 도착 전이라도 매수 신호 발사 시점에 등록** (메모리 한정, DB 영속화 X)
 - `check_exit_signal` 신규 분기 (3 번째, ATR 트레일링 *직전*):
   - `pos.buy_date` 가 None 또는 미래 → skip
-  - `days_held = (today - pos.buy_date).days`
+  - `days_held = _business_days_held(pos.buy_date, today)` — **영업일** 기준 (사이클 223 시정). 이전 `(today - pos.buy_date).days` 는 달력일이라 주말·연휴가 보유일에 산입돼 청산이 최대 2~3일 앞당겨졌다. 거래일 소스 = `_trading_days` 캐시(`prepare`/`recompute_held_atr` 가 이미 fetch 한 일봉으로 union 갱신 — **KIS 추가 호출 0**). 캐시가 오늘을 아직 못 담은 구간은 오늘 하루만 가산(주말 제외)
   - `days_held >= breakout_fail_n_days` AND `current_price < _breakout_high.get(ticker, 0)` → STOP_LOSS
   - `_breakout_high[ticker] == 0` (등록 누락) → skip (영향 0)
 - `_reset_daily_state()` 보존 — `_breakout_high` 는 *멀티데이 보유* 정보이므로 일일 초기화 금지 (포지션 종료 시 `pop`)
