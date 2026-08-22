@@ -131,7 +131,11 @@ from src.engine.stale_manager import (  # noqa: E402
 # 09:30~15:20 KRX 메인 시간대 60s 주기 REST 폴링. WS 정상이면 멱등 갱신, stale 이면 메꿈.
 SWING_REST_POLL_INTERVAL_SECS = 60          # 폴링 사이클 주기
 SWING_REST_POLL_TICKER_SLEEP_SECS = 0.05    # 종목 사이 Rate Limit 보호 (KIS 20req/s 대비 안전)
-SWING_REST_POLL_WINDOW_START = time(9, 30)  # 09:30 (모멘텀 스캔 시작 시각과 동일)
+# cycle222-a — 확장 구간(매수창 25분 청산 폴 보강 0 시정). **보유 전용 + stale 중립**으로만
+# 돈다 — REST 가 `ticker_last_tick` 을 갱신하면 개장 러시 blind 종목이 "신선" 으로 보여
+# 강제 재구독이 안 걸린다(F3).
+SWING_REST_POLL_EARLY_START = time(9, 5)
+SWING_REST_POLL_WINDOW_START = time(9, 30)  # 09:30 (전체 폴 — 후보 포함 + last_tick 갱신)
 SWING_REST_POLL_WINDOW_END = time(15, 20)   # 15:20 (KRX 메인 매수 중단 시각과 동일)
 
 # 공유 순차 폴링 대상 = 일봉 멀티데이 스윙 전략 (donchian + kojiro, 2026-07).
@@ -2823,7 +2827,7 @@ class TradingScheduler:
             sleep_secs = 60 - (now_dt.second + now_dt.microsecond / 1_000_000)
             await _sleep_chunked(max(sleep_secs, 1.0))
 
-    async def _run_swing_rest_poll_once(self) -> dict:
+    async def _run_swing_rest_poll_once(self, *, held_only: bool = False, preserve_last_tick: bool = False) -> dict:
         """donchian_swing 일중 시세 REST 폴링 1사이클 (B, 2026-05-15, 결함 B).
 
         대상: `_scanned_tickers` ∪ `state.positions` ∪ `state.pending_buys`
@@ -2831,6 +2835,10 @@ class TradingScheduler:
               갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목 한정
               `RiskManager.on_tick` 호출 → 기존 트레일링/하드 손절 평가 경로 재사용.
         예외: 종목별 try/except 로 격리 (다음 종목 진행). 본체 raise 없음.
+
+        cycle222-a — 확장 구간(09:05~09:30) 전용 키워드. **기본값 = 기존 동작 byte 동일**.
+        `held_only`=보유만 폴 / `preserve_last_tick`=`ticker_last_tick` 중립(`on_tick` 이
+        내부에서 찍는 것까지 원복 — 없으면 확장이 stale 감지를 은폐한다, F3).
         Returns:
             stats dict — `candidates/held/pending/updated/failed/elapsed_ms`
         """
@@ -2861,7 +2869,7 @@ class TradingScheduler:
         held_set = set(held)
         seen: set[str] = set()
         all_tickers: list[str] = []
-        for t in candidates + held + pending:
+        for t in (held if held_only else candidates + held + pending):  # cycle222-a 확장=보유만
             if t in seen:
                 continue
             if not (len(t) == 6 and t.isalnum()):
@@ -2888,6 +2896,7 @@ class TradingScheduler:
                 current = int(detail.get("stck_prpr", "0") or 0)
                 open_p = int(detail.get("stck_oprc", "0") or 0)
                 prdy_ctrt = float(detail.get("prdy_ctrt", "0") or 0)
+                day_high = int(_h) if (_h := str(detail.get("stck_hgpr", "") or "").strip()).isdigit() else 0  # cycle222-a 당일 고가 (비숫자는 0 폴백 — failed 처리 시 손절 평가가 사라진다)
             except (ValueError, TypeError):
                 failed += 1
                 await asyncio.sleep(SWING_REST_POLL_TICKER_SLEEP_SECS)
@@ -2906,7 +2915,9 @@ class TradingScheduler:
                 "change_rate": change_rate,
                 "prdy_ctrt": prdy_ctrt,
             }
-            _last_tick[ticker] = datetime.now(_KST)
+            _prev_lt = _last_tick.get(ticker) if preserve_last_tick else None  # cycle222-a F3
+            if not preserve_last_tick:
+                _last_tick[ticker] = datetime.now(_KST)
 
             # 종목명 보강 — UI "최종 후보" 빈칸 표시 복구
             name = (detail.get("hts_kor_isnm") or "").strip()
@@ -2919,17 +2930,21 @@ class TradingScheduler:
             # candidates/pending 은 매수 평가 대상 아님 (매수는 `_swing_buy_poll_loop` 09:05~09:30 전용).
             if ticker in held_set:
                 try:
-                    await self.risk_manager.on_tick(ticker, current, open_p, change_rate)
+                    await self.risk_manager.on_tick(ticker, current, open_p, change_rate, day_high=day_high)
                 except Exception:
                     logger.exception("[swing_rest_poll] on_tick 실패: %s", ticker)
+            if preserve_last_tick:  # cycle222-a F3 — on_tick 이 찍은 것까지 원복
+                _last_tick.pop(ticker, None)
+                if _prev_lt is not None:
+                    _last_tick[ticker] = _prev_lt
 
             await asyncio.sleep(SWING_REST_POLL_TICKER_SLEEP_SECS)
 
         elapsed_ms = int((_time_mod.monotonic() - cycle_start) * 1000)
         stats = {
-            "candidates": len(candidates),
+            "candidates": 0 if held_only else len(candidates),
             "held": len(held),
-            "pending": len(pending),
+            "pending": 0 if held_only else len(pending),
             "updated": updated,
             "failed": failed,
             "elapsed_ms": elapsed_ms,
@@ -2941,16 +2956,19 @@ class TradingScheduler:
         return stats
 
     async def _swing_rest_poll_loop(self) -> None:
-        """donchian_swing 일중 시세 REST 폴링 loop — 09:30~15:20 KRX 메인, 60s 주기.
+        """donchian_swing 일중 시세 REST 폴링 loop — 09:05~15:20 KRX 메인, 60s 주기.
 
         WebSocket stale 시에도 보유 종목의 ATR×2 트레일링/하드 -7% 손절 평가가
         끊기지 않도록 보강. WS 정상이면 멱등 갱신, stale 이면 메꿈.
 
-        - 09:30 이전 / 15:20 이후: chunked sleep 으로 시간 가드 대기
+        2단 윈도우 (cycle222-a): 09:05~09:30 = 보유 전용 + stale 중립 확장(F3) /
+        09:30~15:20 = 기존 전체 폴(인자 없이 호출 = byte 보존).
+
+        - 09:05 이전 / 15:20 이후: chunked sleep 으로 시간 가드 대기
         - 매 사이클: `_run_swing_rest_poll_once()` 호출 + 60s sleep (chunked, `_running=False` 반응)
         - 본체 예외는 ERROR 로그로 흡수, 다음 사이클 자연 재시도
-        - `_swing_buy_poll_loop` 와 동시 운영 — 매수(09:05~09:30) 와 시세 보강(09:30~15:20)
-          시간 윈도우가 분리되어 충돌 없음
+        - `_swing_buy_poll_loop` 와 동시 운영 — 09:05~09:30 이 겹치나 본 폴은
+          보유 청산 평가 + 시세 갱신 전용이라 매수 평가 0 (매수 행위 diff 0)
         """
         async def _sleep_chunked(total_secs: float, *, chunk_secs: float = 2.0) -> None:
             remaining = total_secs
@@ -2961,13 +2979,14 @@ class TradingScheduler:
 
         while self._running:
             now_t = datetime.now().time()
-            if now_t < SWING_REST_POLL_WINDOW_START or now_t > SWING_REST_POLL_WINDOW_END:
+            if now_t < SWING_REST_POLL_EARLY_START or now_t > SWING_REST_POLL_WINDOW_END:
                 # 윈도우 외 — 60s 단위로 시간 가드 재진입 (_running=False 즉시 반응)
                 await _sleep_chunked(min(60.0, float(SWING_REST_POLL_INTERVAL_SECS)))
                 continue
 
+            _early = now_t < SWING_REST_POLL_WINDOW_START  # cycle222-a 확장 구간
             try:
-                await self._run_swing_rest_poll_once()
+                await self._run_swing_rest_poll_once(held_only=_early, preserve_last_tick=_early)
             except asyncio.CancelledError:
                 raise
             except Exception:

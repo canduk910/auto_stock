@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 import time
+from datetime import date as _date, datetime as _datetime
 from typing import Optional
 
 from src.engine.daily_emit_cap import DailyEmitCap
@@ -43,6 +44,83 @@ logger = logging.getLogger(__name__)
 #    매수 목적의 보드 변경이 청산 규약까지 조용히 바꾸는 커플링을 차단한다(AST 가드).
 _PRE_MARKET_EXIT_EVAL_STRATEGIES = frozenset({"long_tail_volatility"})
 
+# cycle222-a3 (2026-08-21, F-B / G-4 로 근거 정정) — 당일고가 앵커 채택 **제외** 전략.
+#
+# 여기 있는 전략은 `day_high` 를 앵커(`high_since_buy`)에 절대 채택하지 않는다.
+# 멤버십 기준은 "앵커에 **외부 소유자가 있고 그 소유자가 절대 대입을 한다**" 이다
+# — `max()` 갱신이 아니라 값을 **덮어쓰는** 코드가 있는 전략(= 두 번째 writer 를
+# 넣으면 누가 이길지가 호출 순서에 좌우된다). AST 가드
+# `tests/unit/ast/test_cycle222a3_ast_anchor_owner_coupling.py` 가 그 커플링을
+# 강제한다 — 새 절대 대입이 생기면 이 집합과 함께 재검토하라고 FAIL 한다.
+#
+# ## 사실관계 — 유일한 외부 소유자는 사이클 142 의 LTV 익일청산 경로
+#
+# `scheduler._execute_next_day_clear` 는 갭업 LTV 종목에 대해
+#     pos.high_since_buy = today_open        # ← max() 가 아니라 절대 대입
+# 을 한다. 목적은 **개장 즉시 매도 방지**다 — 전일 상한가의 stale 고점을 그대로
+# 두면 D+1 시가에 `drop_rate` 가 이미 트레일링 임계를 넘어 개장하자마자 매도가
+# 난다(2026-06-15 후성 093370: 6/12 매수 17,150 → 6/15 고점 23,700 → 마감 22,300,
+# −5.91%). 그래서 기준점을 **오늘 시가로 내리는 것이 의도**다.
+#
+# 이 대입이 실행되는 시각은 **08:00:30 근방**이다 — `_next_day_task` 가
+# `TIME_PRE_NXT_OPEN`(08:00) 직후 생성되고, `_execute_next_day_clear` 가
+# `NEXT_DAY_STABILIZE_SECS`(30초) 를 자고 나서 대입한다. 09:00:30 이 아니다.
+#
+# ## ⚠️ 정정 (G-4) — 앞선 서술 두 개가 코드·타임라인 사실과 어긋났다
+#
+# (1) "LTV 앵커는 러닝 max 가 아니라 익일 시가 기준점이라 blind 복구가 의미 없다"
+#     → **거짓**. `strategies/long_tail_volatility.py` 의 익일 트레일링 분기는 매 틱
+#       `pos.high_since_buy = max(pos.high_since_buy, current_price)` 로 **러닝 max**
+#       를 돌린다. 08:00:30 대입은 그 러닝 max 의 **시작점을 리셋**할 뿐이다.
+# (2) 절대 대입 시각이 09:00:30 이라는 서술 → **거짓**(위 08:00:30).
+#
+# ## 그래서 제외의 진짜 근거는 무엇인가 — **귀인(attribution)**
+#
+# LTV 를 제외하는 이유는 사이클 142 가 깨져서가 아니다. `day_high` 는 **오늘
+# 스코프** 라 사이클 142 가 버리려던 stale **멀티데이** 고점을 되살리지 않는다.
+# 실제로 일어나는 일은 **LTV 가 blind 내성을 얻어 놓치던 (오늘의) 고점을 보게 되고
+# −2% 트레일링이 더 일찍 발화**하는 것이다 — 규칙대로면 오히려 정확하다.
+#
+# 그럼에도 제외하는 이유는 **귀인**이다. 이번 사이클의 동기는 kojiro/donchian 의
+# ATR 트레일링이고 LTV 는 아니다. 근거 없이 두 전략의 청산 타이밍을 동시에 바꾸면
+# D+1 관측에서 무엇이 무엇을 바꿨는지 가릴 수 없다(cycle223 이 S2·S3 만 고치고
+# 파라미터 **값**은 건드리지 않은 것과 같은 논리).
+#
+# **재검토 조건 = kojiro/donchian 의 `[day_high_adopted]` 실측이 쌓인 뒤.**
+#
+# ⚠️ `tradable_boards` 로 게이팅 **금지** — 그 설정은 매수 진입 전용이고(사이클 38
+#    명문화), 매수 목적의 보드 변경이 청산 규약을 조용히 바꾸는 커플링을 차단한다.
+#    판정은 이 **명시 상수**로만 한다(AST 가드).
+#
+# 전수 조사(2026-08-21, `high_since_buy` 대입 AST 전수) 결과 메모리 앵커에
+# **절대 대입**을 하는 외부 소유자는 `scheduler` 의 LTV 익일청산 경로 하나뿐이다:
+#   - `strategies/long_tail_volatility.py` / `strategies/momentum.py` → `max(...)` (올리기 전용)
+#   - `strategy_base._apply_high_since_buy_from_candles` → `candidate <= high` 면 return
+#     (실질 올리기 전용)
+#   - `strategy.py` / `strategy_base.py` 의 `= buy_price` → 생성 시 초기화(외부 소유자 아님)
+#   - `db/positions.py` → DB 컬럼 write (메모리 앵커 아님)
+_DAY_HIGH_ANCHOR_EXCLUDED_STRATEGIES = frozenset({"long_tail_volatility"})
+
+# cycle222-a (2026-08-21) — 트레일링 앵커 blind 내성 롤백 스위치.
+#
+# True 면 `on_tick` 이 관측된 당일 고가(WS payload `[8]` 필드 / REST 단건시세의
+# 동일 필드)를 앵커(`high_since_buy`)에 반영한다. 기존 동작은 "수신된 틱들의
+# 러닝 max" 라서 tick 미수신(blind, 08-19 실측 최장 58분) 구간의 고점이 **존재
+# 자체로 기록되지 않았다** — 매수 당일 봉은 `_apply_high_since_buy_from_candles`
+# 의 `buy_date < 영업일 < today` 양쪽 strict 경계가 의도적으로 배제하므로
+# 매수일 blind 고점은 영원히 복구되지 않았다.
+#
+# 채택 대상은 **매수 이후 고가뿐**이다 — `_day_high_since_entry` 의 진입 시점
+# baseline 초과분만 통과한다(F1). 이 경계가 없으면 매수 전 스파이크가 앵커에
+# 박혀 진입 순간 브레이크이븐 승격/샹들리에가 오발화한다.
+#
+# ⚠️ 롤백 계약 (F6) — False 로 바꾸면 **앵커 갱신 규칙**만 구 동작으로 돌아간다.
+#    이미 오염된 앵커로 승격된 kojiro `_stop_floor` 는 **tighten-only 래칫**이라
+#    같은 프로세스 안에서는 되돌아가지 않는다. 즉 이 스위치는 "구 동작 완전
+#    복원" 이 아니다 — **플래그 변경 + 컨테이너 재시작이 함께 필요**하다
+#    (재시작해야 `recompute_held_atr` 가 일봉으로 손절선을 재도출한다).
+TICK_DAY_HIGH_ANCHOR = True
+
 
 class RiskManager:
     """실시간 시세를 감시하며 전략별 매매 신호에 따라 주문을 실행한다."""
@@ -63,6 +141,17 @@ class RiskManager:
         # 사이클 62 → 사이클 64 (2026-06-06): 가격 필터 필드 전면 제거 (scanner 이전)
         # 프리장 청산 보류 관찰 로그 1회/전략/일 cap (2026-08-06)
         self._pre_market_defer_logged: set[str] = set()
+        # cycle222-a — 포지션 진입 시점 당일고가 baseline (**매수 당일 한정**).
+        # {(strategy_id, ticker): (관측일자, 진입서명, baseline)}
+        # cycle222-a2: `buy_date < today` 인 멀티데이 보유는 이 맵을 쓰지 않는다
+        # (하루 전체가 진입 이후 구간이라 가릴 것이 없다).
+        # 순수 메모리(DB write 0). 상세 계약은 `_day_high_since_entry` docstring.
+        self._day_high_baseline: dict[tuple[str, str], tuple] = {}
+        # cycle222-a3 (F-C) — `[day_high_adopted]` 1회/(strategy_id, ticker)/일 emit cap.
+        # 채택이 **실제로 앵커를 올렸을 때만** 발화한다. 이 신호가 없으면 D+1 에
+        # 조기 청산이 나도 원인이 day_high 채택인지 정상 트레일링인지 구분 불가라
+        # 롤백 스위치(`TICK_DAY_HIGH_ANCHOR`)를 켤지 끌지 판단할 근거가 없다.
+        self._day_high_adopted_logged: DailyEmitCap[tuple[str, str]] = DailyEmitCap[tuple[str, str]]()
 
     def _defers_pre_market_exit(self, strategy_id: str) -> bool:
         """NXT 프리장 단독 구간이면 청산 평가를 보류할지 판정.
@@ -84,6 +173,138 @@ class RiskManager:
         except Exception:
             return False
 
+    def _adopts_day_high(self) -> bool:
+        """관측된 당일 고가를 앵커에 채택할 수 있는 구간인지 판정 (cycle222-a).
+
+        MAIN 보드가 활성일 때만 True. 판정 소스는 프리장 청산 평가 보류 게이트와
+        **동일한** `session_tracker.active`(이벤트 구동, wall-clock 아님).
+
+        프리장(PRE_NXT 단독) 고가는 얇은 호가의 왜곡이 잦아 앵커에 박히면
+        **과대복구 → 허깨비 샹들리에 청산**으로 뒤집힌다. 그래서 프리장 청산 평가
+        화이트리스트(LTV)조차 `day_high` 는 쓰지 않는다.
+
+        ⚠️ 이 게이트는 **수신 시각**만 본다 — 통합 채널(`H0UNCNT0`)의 일-스코프
+           고가는 09:00 에 리셋되지 않아 MAIN 구간 틱에도 프리장 누적치가 실려
+           온다(000250 실측). 그 축의 방어는 `realtime/handler.py` 의
+           `[27] HGPR_HOUR` MAIN 창 필터가 **소스에서** 담당한다(cycle222-a2).
+
+        판정 불가 시 **fail-closed(미채택)** — 보류 게이트의 fail-open 과 방향이
+        반대인 이유는, 여기서 실패하면 최악이 "구 동작(러닝 max) 유지"인 반면
+        잘못 채택하면 앵커가 과대복구돼 조기 청산이 나기 때문이다.
+        """
+        try:
+            from src.engine.session import MarketBoard
+            return MarketBoard.MAIN in session_tracker.active
+        except Exception:
+            return False
+
+    def _day_high_since_entry(
+        self, strategy_id: str, ticker: str, pos, day_high: int, today,
+    ) -> int:
+        """**매수 이후** 고가만 돌려준다 (cycle222-a F1 / cycle222-a2). 미채택이면 0.
+
+        판정 축은 **매수일 대비 오늘**이다:
+
+        - `buy_date < today` (멀티데이 보유) → **하루 전체가 이미 진입 이후**다.
+          가릴 '매수 전 구간' 이 존재하지 않으므로 `day_high` 를 **그대로** 돌려준다
+          (첫 관측부터 즉시 채택).
+        - `buy_date == today` (매수 당일) → **진입 시점 baseline 게이트** 유지.
+        - `buy_date > today` / `buy_date` 가 `date` 가 아님 / `today` 가 None
+          → **미채택(fail-closed)**.
+
+        ## 매수 당일에 baseline 이 필요한 이유 (F1)
+
+        관측된 당일 고가에는 **매수 전 구간**이 섞여 있다. 09:00 갭상승 스파이크
+        → 눌림 → 09:12 눌림 매수 라면, 매수 직후 첫 관측의 고가는 전부 매수 전
+        값이다. 그걸 그대로 앵커에 넣으면
+          - donchian: `high >= buy + 1.5×entry_atr`(라이브) 즉시 성립 → 손절선이
+            진입 순간 매수가로 승격 → 한 틱만 내려가면 STOP_LOSS
+          - kojiro: 앵커를 부풀린 **그 틱에서** 2.5ATR 샹들리에 발화 → 즉시 전량 청산
+        이 오염은 `_apply_high_since_buy_from_candles` 의 `buy_date < 영업일 <
+        today` 양쪽 strict 경계가 정확히 막으려고 존재하는 것과 같은 종류다.
+
+        해법 = **진입 시점 baseline**. 그 포지션 진입 후 첫 관측을 baseline 으로
+        기록만 하고 채택하지 않는다. 이후 baseline 을 **초과한** 값만 채택하므로
+        초과분은 정의상 매수 이후 고가다 → 과대복구가 구조적으로 불가능하다.
+
+        ## 왜 D+1 이후에는 baseline 을 걷어내는가 (cycle222-a2, 사용자 재설계 지시)
+
+        1차 구현은 baseline 을 **매일** 다시 잡았다. 그러면 그날 첫 관측이 통째로
+        버려지는데, 그게 버리는 것은 정확히 **오늘의 blind 고점**이다 — 전일까지의
+        고점은 매일 아침 `_apply_high_since_buy_from_candles` 가 일봉으로 복구하지만
+        **오늘 봉은 미확정이라 그 경로가 구조적으로 배제**하고, on_tick 이 올린 값은
+        DB 에 쓰이지 않는다. 즉 오늘의 blind 고점은 아무도 복구하지 않는다.
+        사용자 지적 그대로 "기간중 최고점에서 야금야금 하락했을 때 익절을 못한다".
+
+        D+1 이후에는 가릴 매수 전 구간이 애초에 없으므로 baseline 은 순손실이다.
+
+        ## 프리장 오염(F2) 방어는 어디로 갔나
+
+        통합 채널(`H0UNCNT0`)의 일-스코프 필드는 09:00 에 리셋되지 않아 프리장
+        체결이 누적된다(000250 실측). 그 방어는 **소스로 이관**됐다 —
+        `realtime/handler.py` 가 `[27] HGPR_HOUR` 로 KRX MAIN 창 밖 고가를
+        0(미관측)으로 강등한다. 매수 당일에는 baseline 이 한 겹 더 흡수한다.
+
+        불변식:
+        - **per-position-entry**: 진입 서명(매수일/매수가/주문번호)이 바뀌면
+          재스냅샷. 포지션 소멸 시 호출부가 baseline 을 pop 한다(두 겹 방어) —
+          청산 후 재진입에 구 baseline 이 살아남으면 안 된다. 멀티데이 보유 →
+          청산 → 당일 재매수 시 `buy_date == today` 가 되어 baseline 모드로 복귀한다.
+        - **날짜 키**: baseline 레코드는 관측일자를 함께 들고 있어 날짜가 바뀌면
+          무효화된다. `reset_daily_state()` 도 동행 clear.
+        - **판정 불가는 미채택**: 최악이 "구 동작(러닝 max) 유지" 인 방향으로만
+          실패한다. 잘못 채택하면 앵커 과대복구 → 허깨비 조기 청산이다.
+        - hot path — `await`/DB write **금지**. 예외는 전부 흡수해 0(미채택).
+
+        ## 앵커 소유자 제외 (cycle222-a3 F-B, G-4 로 근거 정정)
+
+        `_DAY_HIGH_ANCHOR_EXCLUDED_STRATEGIES` 멤버는 **다른 어떤 판정보다 먼저**
+        0 이다. 멤버십 기준은 "앵커에 외부 소유자의 **절대 대입**이 있다" 이고,
+        현재 유일한 그런 소유자는 `scheduler._execute_next_day_clear` 의
+        `pos.high_since_buy = today_open`(LTV 한정, 08:00:30 근방)이다.
+
+        ⚠️ LTV 제외의 결정적 근거는 "사이클 142 가 깨진다" 가 **아니다** —
+           `day_high` 는 오늘 스코프라 사이클 142 가 버리려던 stale 멀티데이 고점을
+           되살리지 않는다. 실제로 바뀌는 것은 **LTV 가 놓치던 오늘 고점을 보게 되어
+           −2% 트레일링이 더 일찍 발화**하는 것뿐이고, 규칙대로면 오히려 정확하다.
+           제외하는 이유는 **귀인**이다: 이번 사이클의 동기는 kojiro/donchian 이라
+           LTV 청산 타이밍까지 같이 움직이면 D+1 관측을 가를 수 없다.
+           재검토 조건 = kojiro/donchian 의 `[day_high_adopted]` 실측 축적 후.
+           상세는 상수 주석 참조.
+        """
+        try:
+            if strategy_id in _DAY_HIGH_ANCHOR_EXCLUDED_STRATEGIES:
+                return 0
+            if today is None:
+                return 0
+            buy_date = getattr(pos, "buy_date", None)
+            # `datetime` 은 `date` 의 서브클래스라 isinstance 만으로는 통과한다.
+            # Position.buy_date 계약은 순수 `date` 이고(`is_next_day` 도 동일 전제),
+            # datetime 을 today(date) 와 비교하면 TypeError 다 → 명시 배제해 둔다.
+            if not isinstance(buy_date, _date) or isinstance(buy_date, _datetime):
+                return 0
+            if buy_date > today:
+                # 미래 매수일 = 시계/DB 오염 → 근거 없는 앵커 상승 금지
+                return 0
+            if buy_date < today:
+                # 멀티데이 보유 — 하루 전체가 진입 이후 구간이므로 즉시 채택
+                return day_high
+
+            key = (strategy_id, ticker)
+            entry = (
+                str(buy_date),
+                int(getattr(pos, "buy_price", 0) or 0),
+                str(getattr(pos, "order_no", "") or ""),
+            )
+            rec = self._day_high_baseline.get(key)
+            if rec is None or rec[0] != today or rec[1] != entry:
+                # 진입 후 첫 관측(또는 재진입) = baseline 설정만, 채택 없음
+                self._day_high_baseline[key] = (today, entry, day_high)
+                return 0
+            return day_high if day_high > rec[2] else 0
+        except Exception:
+            return 0
+
     def _maybe_emit_pre_market_defer(self, strategy_id: str) -> None:
         """보류 발생 1회/전략/일 관찰 로그 — 매 틱 폭주 금지."""
         if strategy_id in self._pre_market_defer_logged:
@@ -92,6 +313,26 @@ class RiskManager:
         logger.info(
             "[pre_market_exit_deferred] strategy=%s — NXT 프리장 청산 평가 보류, "
             "09:00 KRX 시세로 재개", strategy_id,
+        )
+
+    def _maybe_emit_day_high_adopted(
+        self, strategy_id: str, ticker: str, prev_anchor: int, new_anchor: int,
+        observed: int,
+    ) -> None:
+        """당일고가 채택이 앵커를 올린 사실을 1회/(전략, 종목)/일 관찰 로그로 남긴다.
+
+        hot path — `logger` 만 쓴다(`write_log`/DB/`await` 금지, AST A-1/A-1b).
+        선례 = `_maybe_emit_pre_market_defer`(logger.info) + `_risk_silent_skip_logged_today`
+        (DailyEmitCap). `reset_daily_state()` 가 동행 clear 한다.
+        """
+        key = (strategy_id, ticker)
+        if not self._day_high_adopted_logged.should_emit(key):
+            return
+        self._day_high_adopted_logged.mark_emitted(key)
+        logger.info(
+            "[day_high_adopted] strategy=%s ticker=%s prev_anchor=%d "
+            "new_anchor=%d observed=%d — blind 구간 고점 복구로 트레일링 기준점 상승",
+            strategy_id, ticker, prev_anchor, new_anchor, observed,
         )
 
     def reset_daily_state(self) -> None:
@@ -103,6 +344,10 @@ class RiskManager:
         """
         self._risk_silent_skip_logged_today.clear()
         self._pre_market_defer_logged.clear()
+        # cycle222-a — 진입 시점 당일고가 baseline 동행 clear (정산 후 잔류 금지).
+        self._day_high_baseline.clear()
+        # cycle222-a3 (F-C) — `[day_high_adopted]` emit cap 동행 clear.
+        self._day_high_adopted_logged.clear()
 
     async def on_tick(
         self,
@@ -110,8 +355,23 @@ class RiskManager:
         current_price: int,
         open_price: int,
         change_rate: float,
+        *,
+        day_high: int = 0,
     ) -> None:
         """실시간 체결가 수신 시 호출된다.
+
+        cycle222-a (2026-08-21) — `day_high`(관측된 당일 고가, 키워드 전용·기본 0).
+        앵커는 "수신된 틱들의 러닝 max" 가 아니라 **"관측된 매수 이후 고가의 max"**
+        다. blind 구간 고점이 도착한 **단 하나의 관측**으로 복구된다. 갱신은
+        **올리기 전용**이며 `day_high >= current_price` 정합 가드 + MAIN 활성 +
+        **매수 이후 판정**(`_day_high_since_entry`) 을 모두 통과해야 채택한다.
+        기본값 0 = 미관측 → 구 동작 그대로.
+
+        cycle222-a2 (2026-08-21) — 매수 이후 판정을 **매수일 대비 오늘**로 한다.
+        `buy_date < today`(멀티데이 보유)면 첫 관측부터 즉시 채택하고,
+        `buy_date == today` 일 때만 진입 시점 baseline 게이트를 건다(F1).
+        프리장 오염(F2) 방어는 `realtime/handler.py` 의 `[27] HGPR_HOUR`
+        MAIN 창 필터로 **소스에 이관**됐다.
 
         가드 평가 순서 (사이클 165 명문화 — 변경 0):
           L0. 매도/손절/Trailing/익일청산: 보드 가드 *전* 평가 (사이클 38 명문화 영속).
@@ -142,7 +402,23 @@ class RiskManager:
         }
         # Phase D: 마지막 tick 수신 시각 추적 (5분 주기 _report_tick_coverage 가 사용)
         # dict assign 1회 비용 — on_tick은 초당 수십~수백 호출 가능하므로 추가 연산 금지
-        ticker_last_tick[ticker] = _dt.now(KST_TZ)
+        now_kst = _dt.now(KST_TZ)
+        ticker_last_tick[ticker] = now_kst
+
+        # cycle222-a — 앵커 blind 내성. 관측된 당일 고가의 **구간 자격**만 1회 판정한다.
+        # ⚠️ `ticker_prices` 에 절대 주입하지 않는다 — donchian 이 그 dict 의 고가 키를
+        #    읽어 `ext_pct` 를 계산하므로 값이 채워지면 **매수 행위가 바뀐다**.
+        #    `day_high` 는 함수 인자로만 흐른다.
+        # ⚠️ 여기 통과 = 채택 확정이 아니다. 포지션별 **매수 이후 baseline** 비교가
+        #    전략 루프 안에서 한 번 더 걸린다(`_day_high_since_entry`, F1/F2).
+        #    `day_high > 0` 은 미관측(0) 이 baseline 으로 굳는 것을 막는다.
+        adopt_day_high = bool(
+            TICK_DAY_HIGH_ANCHOR
+            and day_high > 0
+            and day_high >= current_price
+            and self._adopts_day_high()
+        )
+        day_high_date = now_kst.date() if adopt_day_high else None
 
         # PR7(동일가 연속 틱 신호 평가 skip) 롤백 — 회귀 발견:
         # VB/LTV 시가 확정 직후 첫 on_tick에서 _prev_price=0 → check_buy_signal first-tick skip.
@@ -171,8 +447,34 @@ class RiskManager:
                 self._maybe_emit_pre_market_defer(strategy.strategy_id)
 
             # 보유 중이면 고가 갱신 (프리장 보류 중엔 왜곡 고가 앵커 오염 금지)
+            # cycle222-a/a2 — 관측 고가는 **매수 이후 구간분만** 병합해 blind
+            # 구간 고점을 복구한다(멀티데이=즉시 / 매수당일=baseline 초과분, F1).
+            # 갱신은 올리기 전용.
             if pos and not defer_exit:
-                pos.high_since_buy = max(pos.high_since_buy, current_price)
+                eff_day_high = (
+                    self._day_high_since_entry(
+                        strategy.strategy_id, ticker, pos, day_high, day_high_date,
+                    )
+                    if adopt_day_high
+                    else 0
+                )
+                prev_anchor = pos.high_since_buy
+                pos.high_since_buy = max(
+                    prev_anchor, current_price, eff_day_high,
+                )
+                # cycle222-a3 (F-C) — 채택이 **실제로 앵커를 올렸을 때만** 관찰 로그.
+                # `eff_day_high` 는 `day_high >= current_price` 게이트를 통과한 값이라
+                # 여기서 크면 새 앵커가 곧 그 값이다(= 상승분이 채택 기여).
+                if eff_day_high > prev_anchor:
+                    self._maybe_emit_day_high_adopted(
+                        strategy.strategy_id, ticker, prev_anchor,
+                        pos.high_since_buy, eff_day_high,
+                    )
+            elif pos is None and self._day_high_baseline:
+                # 청산으로 포지션이 사라지면 baseline 폐기 — 당일 재진입 시 반드시
+                # 재스냅샷된다(진입 서명 비교와 함께 두 겹 방어). 맵이 비어 있으면
+                # 아무 것도 하지 않는다(hot path 비용 0).
+                self._day_high_baseline.pop((strategy.strategy_id, ticker), None)
 
             # 3. 청산 신호 확인 (보유 중인 경우)
             # 사이클 38 (2026-05-22) — `tradable_boards` 는 **매수 진입 전용** 정책 명문화.

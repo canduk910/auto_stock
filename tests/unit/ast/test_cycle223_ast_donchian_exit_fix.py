@@ -18,7 +18,7 @@
 - G-223-9 (HIGH): donchian DEFAULT_PARAMS 청산 7키 **값 불변**
 - G-223-10 (HIGH): 8영역 diff 0 — **staged + unstaged + untracked** 전부 (사이클 223 G3.
   `git diff` 단독은 unstaged 만 봐서 `git add` 순간 눈을 감았다). cycle222-a pre-existing
-  2파일은 **파일명이 아니라 diff sha 로** 면제 (`_PREEXISTING_DIFF_SHA`)
+  2파일은 **파일명이 아니라 diff sha 로** 면제 (`_PREEXISTING_CONTENT_SHA`)
 - G-223-11: 8영역에 donchian 청산 심볼 유입 0건
 - G-223-12: 다른 전략 파일(kojiro/VCP/BFB) diff 0
 - G-223-13: `_apply_high_since_buy_from_candles` 경계 불변 (H-1 계약)
@@ -294,9 +294,23 @@ _EIGHT_AREAS = [
 # **`git diff HEAD`** (staged + unstaged) 로 비교하고, `git diff` 가 보지 못하는
 # **신규(untracked)** 파일은 `git ls-files --others` 로 별도 확인한다.
 def _git(*args: str) -> str:
-    return subprocess.run(
+    """git 호출 — **fail-closed** (cycle222-a3 F-G).
+
+    구현은 `.stdout` 만 읽고 `returncode` 를 검사하지 않았다. git 이 실패하면
+    stdout=`""` → `changed == []` → **조용히 통과**한다. 가드가 가장 필요한
+    상황(레포 손상·경로 오타·git 미설치·detached 상태)에서 정확히 초록이 되는
+    구조라, 통과가 아니라 **사각**이다.
+    """
+    res = subprocess.run(
         ["git", *args], cwd=_REPO_ROOT, capture_output=True, text=True,
-    ).stdout
+    )
+    if getattr(res, "returncode", 0) != 0:
+        raise AssertionError(
+            f"git {' '.join(args)} 실패 (rc={res.returncode}) — 8영역 가드는 "
+            "fail-closed 다. stdout 이 비면 '변경 없음' 으로 조용히 통과하므로 "
+            f"여기서 멈춘다. stderr: {(res.stderr or '').strip()}"
+        )
+    return res.stdout
 
 
 def _changed_paths(paths: list[str]) -> list[str]:
@@ -306,9 +320,46 @@ def _changed_paths(paths: list[str]) -> list[str]:
     return sorted(set(tracked) | set(untracked))
 
 
-def _diff_sha(path: str) -> str:
-    """`path` 의 HEAD 대비 diff 내용 해시 — 면제를 **그 diff 한 벌**에 못박는다."""
-    return hashlib.sha256(_git("diff", "HEAD", "--", path).encode("utf-8")).hexdigest()
+def _read_bytes(path: str) -> bytes:
+    """면제 대상 파일의 **현재 내용 바이트**.
+
+    `_content_sha` 에서 분리한 이유 = 테스트가 이 지점만 갈아끼워 "면제 파일의
+    내용이 달라지면 FAIL 하는가" 를 워킹트리 오염 없이 검증할 수 있게 하려는 것.
+    """
+    return (_REPO_ROOT / path).read_bytes()
+
+
+def _content_sha(path: str) -> str:
+    """`path` **파일 내용**의 sha256 — 면제를 "지금 이 내용" 한 벌에 못박는다.
+
+    ## 왜 diff 텍스트 해시를 버렸나 (cycle222-a3 G-2)
+
+    1차 시정(F-D)은 `git diff` 출력에서 `index <abbrev>..<abbrev>` 줄만 걷어냈다.
+    그건 **abbrev 축만** 막은 것이고, 같은 실패 클래스(코드 변경 0인데 FAIL →
+    "핀 재산출" 유도 → 실제 8영역 변경까지 함께 봉인)가 그대로 남아 있었다.
+
+    실측 — 같은 트리·같은 내용인데 diff 텍스트가 갈리는 축:
+
+        core.abbrev=12            → 동일 (F-D 가 흡수)
+        diff.algorithm=histogram  → 동일
+        diff.noprefix=true        → **불일치**
+        diff.mnemonicPrefix=true  → **불일치**
+        diff.srcPrefix / dstPrefix→ **불일치**
+        diff.context=5            → **불일치**
+
+    `diff.noprefix=true` 는 흔한 개인 설정이다. git config 축을 하나씩 정규화하는
+    싸움은 끝이 없으므로 **입력 자체를 바꾼다** — 파일 바이트를 직접 해시하면
+    git 의 출력 포맷 설정 **전 축에 면역**이고, 예외의 의미
+    ("이 파일이 지금 이 내용일 때만 면제") 도 더 정확히 표현된다.
+
+    ## 자기소멸 성질은 그대로다
+
+    면제가 조회되는 조건은 여전히 `_changed_paths`(= `git diff HEAD --name-only`
+    + `ls-files --others`) 에 그 경로가 잡히는가이다. 면제 대상 작업이 커밋되면
+    경로가 거기 나타나지 않아 핀은 조회조차 되지 않고, 그 뒤 누가 같은 파일을
+    새로 건드리면 다시 잡혀서 sha 불일치로 FAIL 한다.
+    """
+    return hashlib.sha256(_read_bytes(path)).hexdigest()
 
 
 # 사이클 222-a(앵커 blind 내성) 작업이 워킹트리에 pre-existing 으로 존재한다. 이번
@@ -323,20 +374,50 @@ def _diff_sha(path: str) -> str:
 #
 # TODO(cycle222-a 커밋 후): 아래 dict 항목을 **삭제**한다. 커밋 시점부터 항목은
 # 무효(조회 불가)이므로 삭제는 청소이지 행위 변경이 아니다.
-_PREEXISTING_DIFF_SHA = {
-    "src/engine/risk.py": "8a1193a9858bef73bff367ac0b3081e11895b2d5081bc1a464932d9fab0220b5",
-    "src/realtime/handler.py": "9d51cfcf9ea32d6d18608968ebfc4659c863515f1be02c0b0d1b0e3c08b452b0",
-}
+#
+# 2026-08-21 재산출 (cycle222-a3) — 같은 미커밋 작업에 적대적 검증 후속 시정이 얹혔다
+# (F-A 창 상한 15:40→15:30 포함 / F-B 앵커 소유자 제외 / F-C 채택·강등 관측 로그 /
+# F-E 잔여 사각 문서화). 8영역 변경 **대상**은 여전히 그 두 파일뿐이고, cycle223
+# 작업이 8영역에 얹히지 않았다는 계약도 그대로다. 값만 새 스냅샷이다.
+#
+# 2026-08-21 재산출 2 (cycle222-a "H-3") — `handler.py` 만 갱신. 변경 내용은
+# `[day_high_scope_skip]` 로그 본문의 단정("이 행의 존재 자체가 F-E 코호트")을
+# **후보 신호**로 정직화한 것과, 잔여 노이즈 구간("09:00 직후 몇 초" → MAIN 고가가
+# 프리장 고가를 넘을 때까지, 갭다운이면 종일)·교차 판별자 보유 한정·정밀 측정 유보를
+# docstring 에 명시한 것뿐이다. **발화 조건·강등·채택 행위 diff 0** — 문구와 주석만
+# 움직였다(회귀 `tests/unit/realtime/test_cycle222a3g_handler_scope_gate.py`
+# `test_h3_emission_condition_and_downgrade_are_unchanged`). `risk.py` 핀은 무변경.
+#
+# ⚠️ cycle222-a3 G-2 — 핀 입력이 **diff 텍스트 → 파일 내용 바이트** 로 바뀌었다.
+#    1차 시정(F-D)이 막은 것은 `index <abbrev>` 축뿐이었고, `diff.noprefix` /
+#    `diff.mnemonicPrefix` / `diff.srcPrefix` / `diff.context` 는 여전히 코드 변경
+#    0인데 핀을 깨뜨렸다(실측). 파일 바이트 해시는 git config 전 축에 면역이다.
+#    ⇒ 아래 값은 `shasum -a 256 <파일>` 과 동일하다. 상세는 `_content_sha` docstring.
+# ✅ 2026-08-22 — cycle222-a 가 커밋(`d2def04`)되면서 위 면제는 **자기소멸**했다.
+#    두 파일은 더 이상 `git diff HEAD` 에 나타나지 않아 조회조차 되지 않는다.
+#    스냅샷 값을 남겨두면 "이 8영역 변경은 승인됐다" 는 죽은 기록이 되므로 비운다.
+#    기전(내용 해시 면제)은 그대로 둔다 — 다음 사이클이 같은 상황을 만나면 여기에
+#    다시 핀을 걸면 되고, **빈 dict 는 곧 8영역 변경이 하나도 면제되지 않는다**는 뜻이다.
+_PREEXISTING_CONTENT_SHA: dict[str, str] = {}
 
 
 def test_g223_10_eight_areas_diff_zero():
     changed = _changed_paths(_EIGHT_AREAS)
-    unexpected = sorted(set(changed) - set(_PREEXISTING_DIFF_SHA))
+    unexpected = sorted(set(changed) - set(_PREEXISTING_CONTENT_SHA))
     assert unexpected == [], f"8영역 신규 변경 감지 — 범위 밖: {unexpected}"
-    for path in sorted(set(changed) & set(_PREEXISTING_DIFF_SHA)):
-        assert _diff_sha(path) == _PREEXISTING_DIFF_SHA[path], (
-            f"{path} 의 diff 가 cycle222-a 스냅샷과 다르다 — 이번 사이클 변경이 얹혔거나 "
-            "cycle222-a 가 갱신됐다. 면제는 파일명이 아니라 **이 diff 한 벌**에만 걸린다."
+    for path in sorted(set(changed) & set(_PREEXISTING_CONTENT_SHA)):
+        assert _content_sha(path) == _PREEXISTING_CONTENT_SHA[path], (
+            f"{path} 의 내용이 면제 스냅샷과 다르다.\n"
+            "⚠️ **핀을 먼저 재산출하지 마라** — 그 순간 8영역 실제 변경이 그대로 "
+            "새 스냅샷으로 봉인된다.\n"
+            f"  1) `git diff HEAD -- {path}` 를 눈으로 읽고 이번 사이클이 얹은 변경이 "
+            "있는지 확인하라.\n"
+            "  2) 얹혀 있으면 그 변경을 되돌려라(8영역 diff 0 이 계약이다).\n"
+            "  3) 면제 대상 작업(cycle222-a) 자체가 갱신된 것이 확실할 때만 핀을 "
+            "재산출한다.\n"
+            "면제는 파일명이 아니라 **이 파일 내용 한 벌**에만 걸린다. "
+            "핀은 파일 바이트 해시라 git config(diff.noprefix / context / abbrev …) "
+            "에 면역이므로 '코드 무변경인데 깨짐' 은 원인이 될 수 없다(G-2)."
         )
 
 
