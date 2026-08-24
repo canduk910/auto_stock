@@ -184,6 +184,11 @@ class DonchianSwingStrategy(StrategyBase):
         # 서로 다른 사실이라 한 슬롯을 다투면 안 된다.
         self._breakout_high_rederive_skip_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._breakout_high_rederive_skip_day: str = ""
+        # 사이클 226 D-1 (2026-08-25) — `prepare()` 돌파선 0 (데이터 품질 사고) cap.
+        # 위 네 cap 과 **별개 필드** — 같은 슬롯을 공유하면 한 사실이 다른 사실을
+        # 침묵시킨다(OB-11). 날짜 키 자기리셋(`_reset_daily_state` 훅 비의존).
+        self._zero_breakout_line_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._zero_breakout_line_day: str = ""
 
     async def prepare(self) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
@@ -364,6 +369,31 @@ class DonchianSwingStrategy(StrategyBase):
                 #   신고가가 곧 일관된 source. 락 종목은 신고가/EMA 둘 다 KIS (폴백 candles)
                 #   → 혼재 영구 차단. 정상 종목은 candles=DB → 사이클 123 신고가 동일 (행위 보존).
                 prior_high = max(highs[1: donchian_period + 1])
+                # 사이클 226 D-1 (2026-08-25) — 돌파선 0 후보 **거부**.
+                # `prior_high == 0` 은 "20일 신고가를 계산하지 못했다" 는 뜻이지
+                # "돌파했다" 가 아니다. 그런데 아래 `prev_close <= prior_high` 는
+                # 0 을 **아무 양수 종가나 통과**시켜, 돌파를 검증하지 않은 후보를
+                # 만든다. 이어서 `check_buy_signal` 이 `info["donchian_high"]` 를
+                # 무조건 대입하므로 `_breakout_high[t] = 0` 이 박히고 시간청산이
+                # 영구 미발화한다(사이클 225 K-1 이 가리킨 상태의 상류 원인).
+                # 도달 경로 = 일봉 고가 결손 row(`_extract_raw` 의 raw 부재 폴백 등).
+                # 방향은 **매수를 줄이는 쪽**이다 — 거짓 신호 차단이지 확대가 아니다.
+                # ⚠️ 순서 계약 = 기존 `prev_close <= 0` 가드보다 **뒤**. 종가 결손은
+                #    지금도 `candle_fetch_ok` 미계상으로 빠지고, 그 사실을 새 마커로
+                #    덮으면 "고가 결손" 과 "종가 결손" 이 한 신호로 뭉개진다.
+                if prior_high <= 0:
+                    # 캡처가 emit **보다 먼저** — 관측기가 터져도 탈락은 남는다.
+                    donchian_excluded.append({
+                        "ticker": ticker, "name": ticker_name,
+                        "reason": (
+                            f"직전 {donchian_period}일 신고가 산출 실패 "
+                            f"(돌파선 0 — 일봉 고가 결손 의심, 돌파 미검증)"
+                        ),
+                    })
+                    self._emit_zero_breakout_line(
+                        ticker, prior_high, prev_close, donchian_period,
+                    )
+                    continue
                 if prev_close <= prior_high:
                     # 사이클 41 — 신고가 미달 사유 (수치 포함, H-4 진단)
                     donchian_excluded.append({
@@ -641,7 +671,7 @@ class DonchianSwingStrategy(StrategyBase):
                 # 아무 흔적 없이 종일 지속된다(실측 192820). 관측 전용 —
                 # 호출을 fetch 뒤로 옮기면 매수 당일 종목마다 KIS 일봉 호출이 새로
                 # 생긴다(게이트가 fetch 앞에 있는 이유가 그것이다).
-                # 발화 조건(`ticker not in self._breakout_high`) 판정은 **emitter 내부**
+                # 발화 조건(무장 여부 = `_breakout_high` **값 > 0**) 판정은 **emitter 내부**
                 # try 안에서 한다 — 여기서 읽으면 그 읽기가 try 밖이라 관측이
                 # recompute 루프를 죽일 수 있다.
                 self._emit_held_recompute_skip(
@@ -684,8 +714,31 @@ class DonchianSwingStrategy(StrategyBase):
             # P1-A (2026-07-29, A-2) — _breakout_high 재도출 (재시작 후 보유 종목 소실 복구).
             # 시간 기반 청산(check_exit_signal 2.5) 의 breakout_high 기준선이 재시작으로
             # 소실되면 분기가 영구 침묵 — buy_date 이전 20일 신고가로 재현. 이미 fetch한
-            # candles 재사용 (KIS 신규 호출 0). in-memory 존재(당일 매수 미재시작) 시 미접촉.
-            if pos and pos.buy_date and candles and ticker not in self._breakout_high:
+            # candles 재사용 (KIS 신규 호출 0). in-memory 무장(당일 매수 미재시작) 시 미접촉.
+            #
+            # 사이클 226 D-2 (2026-08-25) — 진입 게이트를 **멤버십 → 값 기준**으로.
+            # `ticker not in self._breakout_high` 는 `_breakout_high[t] == 0` 을
+            # "무장됨" 으로 판정해 복구를 **시도조차 하지 않았다**. 그런데 시간청산
+            # 게이트(`check_exit_signal` §2.5 의 `breakout_high > 0`)와 사이클 224/225
+            # 관측기는 전부 **값**으로 본다 — 이 게이트만 멤버십이라 값 0 포지션이
+            # 영구 미복구로 남았다(= 시간청산 영구 미발화). 값 0 의 도달 경로는
+            # 고가 결손 일봉으로 만들어진 후보이며, 상류는 사이클 226 D-1 이 막았다.
+            # ⚠️ 이건 **복구 전용** 변경이다 — 매수를 만들지 않고 0(무효)을 실제 값으로
+            #    되돌릴 뿐이며, fetch 는 게이트 **앞**에서 이미 일어나므로 호출 횟수도
+            #    불변이다. 무장값(>0)은 여전히 미접촉(loosen 금지).
+            # ⚠️ L-2 — `int(...)` 를 여기서 부르면 **try 밖 예외 지점**이 새로 생긴다.
+            #    이 루프에서 try 로 감싼 것은 fetch 하나뿐이라, 여기서 던지면
+            #    뒤 보유 종목의 `_channel_low`·`_entry_atr`·고점 보정이 통째로
+            #    유실돼 **청산 분기가 조용히 약해진다**. `isinstance` 는 던지지 않는다.
+            #    (현행 writer 2곳이 모두 int 를 넣어 도달 불가하나, 같은 파일이
+            #     "관측·판정이 루프를 죽여 뒤 종목 복구를 유실시키는 것" 을 1급
+            #     위험으로 반복해 다뤄왔으므로 같은 기준을 여기에도 적용한다.)
+            _bh_raw = self._breakout_high.get(ticker, 0)
+            _armed = _bh_raw if isinstance(_bh_raw, int) else 0
+            if (
+                pos and pos.buy_date and candles
+                and not _armed
+            ):
                 self._rederive_breakout_high(ticker, pos, candles, params["donchian_period"])
             else:
                 # 사이클 225 J-1 (2026-08-24) — **침묵 4층**. 이 게이트가 falsy 면
@@ -1051,6 +1104,57 @@ class DonchianSwingStrategy(StrategyBase):
         except Exception:
             pass
 
+    def _emit_zero_breakout_line(self, ticker: str, prior_high: int,
+                                 prev_close: int, period: int) -> None:
+        """`[donchian_zero_breakout_line]` — 돌파선 0 거부 관측 (사이클 226 D-1).
+
+        ## 왜 WARNING 인가
+
+        `prior_high == 0` 은 시장 사실이 아니라 **데이터 품질 사고**다 — 일봉 고가가
+        전 구간 결손이라는 뜻이고, 그 상태로 `prepare` 가 돌면 20일 신고가 돌파를
+        검증하지 않은 후보가 만들어진다. `src/main.py` 의 `_DbLogHandler` 는 **INFO
+        이상만** `system_logs` 로 적재하므로 debug 는 20:10 일일 로그 리포트와
+        대시보드에 도달하지 못한다. 사고를 조용히 거르면 시정 자체가 무의미해지므로
+        WARNING 으로 올린다.
+
+        ## 무엇을 싣나
+
+        `prior_high`(=0) 단독으로는 "고가만 결손" 과 "봉 전체가 비었다" 를 못 가른다.
+        `prev_close` 를 함께 실으면 **종가는 살아 있다** 는 사실이 한 줄에 남아
+        부분 결손 row(= `_extract_raw` 의 raw 부재 폴백)로 좁혀진다. `period` 는
+        창 길이가 파라미터로 바뀔 수 있어 사후 재현에 필요하다.
+
+        ## cap
+
+        사이클 223/224/225 의 네 cap 과 **별개 인스턴스 필드** — 같은 슬롯을 다투면
+        한 사실이 다른 사실을 침묵시킨다(OB-11). 날짜 키 자기리셋.
+
+        어떤 실패도 흡수하되 **흔적을 남긴다**(`[donchian_zero_breakout_line_failed]`).
+        ⚠️ 기존 `except Exception: logger.warning("도치안 스윙 prepare 실패 …")` 로
+        새면 관측기 결함이 일봉 파싱 결함으로 오독되므로, 여기서 전부 가둔다.
+        """
+        try:
+            today_key = datetime.now(KST).date().isoformat()
+            if self._zero_breakout_line_day != today_key:
+                self._zero_breakout_line_day = today_key
+                self._zero_breakout_line_logged.reset_daily()
+            if not self._zero_breakout_line_logged.should_emit(ticker):
+                return
+            self._zero_breakout_line_logged.mark_emitted(ticker)
+            logger.warning(
+                "[donchian_zero_breakout_line] ticker=%s strategy=%s period=%d"
+                " prior_high=%d prev_close=%d"
+                " note='직전 %d일 신고가 산출 실패(돌파선 0) — 일봉 고가 결손 의심."
+                " 돌파 미검증 후보로 새지 않도록 제외했다(데이터 품질 사고).'",
+                ticker, self.strategy_id, int(period),
+                int(prior_high or 0), int(prev_close or 0), int(period),
+            )
+        except Exception:
+            self._trace_observer_failure(
+                "[donchian_zero_breakout_line_failed]", ticker,
+                self._zero_breakout_line_logged, "_zero_breakout_line_day",
+            )
+
     def _emit_held_recompute_skip(self, ticker: str, pos, need_atr: bool,
                                   needs_high_recover: bool) -> None:
         """`[held_recompute_skip]` 관측 로그 — 1회/ticker/일 cap (사이클 225 A).
@@ -1089,8 +1193,10 @@ class DonchianSwingStrategy(StrategyBase):
 
         ## 계약
 
-        - **발화 조건 = `ticker not in self._breakout_high`** 일 때만. 이미 무장돼
-          있으면 그 skip 은 무해하고, 정상 경로를 매일 찍으면 진짜 신호가 희석된다.
+        - **발화 조건 = 무장 미복구**(`_breakout_high` 값이 0 이거나 키 부재)일 때만.
+          이미 무장돼 있으면 그 skip 은 무해하고, 정상 경로를 매일 찍으면 진짜 신호가
+          희석된다. ⚠️ 판정 축은 **멤버십이 아니라 값**이다(사이클 225 K-1) —
+          시간청산 게이트가 `breakout_high > 0` 으로 보기 때문이다.
         - 그 조건 판정은 **이 메서드 안**(try 내부)에서 한다. 호출부에서
           `_breakout_high` 를 읽으면 그 읽기가 try 밖이라 관측이 `recompute_held_atr`
           루프를 죽여 **뒤 종목의 복구까지 유실**시킬 수 있다.
@@ -1115,9 +1221,11 @@ class DonchianSwingStrategy(StrategyBase):
             # `_breakout_high[t] == 0`(고가 결손 일봉으로 매수 시 도달 가능 —
             # `check_buy_signal` 이 `info["donchian_high"]` 를 무조건 대입한다)인
             # 포지션이 "무장됨"으로 오판돼 **흔적 없이** 침묵한다.
-            # ⚠️ 재도출 진입 게이트(`ticker not in self._breakout_high`)는 **무변경** —
-            #    그건 행위이고 이번 사이클은 관측 전용이다. 값이 0 이면 재도출은 여전히
-            #    막히지만, 최소한 그 사실이 이 로그로 보인다.
+            # ⚠️ 사이클 226 D-2 정정 — 사이클 225 는 여기에 "재도출 진입 게이트는
+            #    무변경이라 값 0 이면 재도출이 여전히 막힌다" 고 적어뒀다. 그 서술은
+            #    이제 **거짓**이다: D-2 가 그 게이트도 값 기준으로 바꿔 값 0 포지션은
+            #    재도출을 **시도**한다(자가 치유). 이 로그는 그 시도조차 도달하지 못하는
+            #    상위 게이트 skip(1층)만 남는다.
             armed = int(self._breakout_high.get(ticker, 0) or 0) > 0
             if armed:
                 return
@@ -1149,7 +1257,7 @@ class DonchianSwingStrategy(StrategyBase):
 
         `recompute_held_atr` 의
 
-            if pos and pos.buy_date and candles and ticker not in self._breakout_high:
+            if pos and pos.buy_date and candles and not <무장값>:
                 self._rederive_breakout_high(...)
 
         가 거짓일 때의 `else` 에서 호출된다. 이 경로는 `_rederive_breakout_high` 에
@@ -1195,6 +1303,12 @@ class DonchianSwingStrategy(StrategyBase):
                 reason = "no_candles"
             else:
                 # 게이트 4축이 모두 참인데 여기 왔다 = 호출부 구조가 바뀐 것. 방어 기록.
+                # ⚠️ 사이클 226 D-2 — 이 사유는 한때 **실제로 도달했다**. 게이트
+                #    마지막 축이 멤버십(`ticker not in self._breakout_high`)이던 시절,
+                #    `_breakout_high[t] == 0` 인 포지션은 나머지 3축이 전부 참인데도
+                #    게이트가 거짓이라 여기로 떨어졌다(= "이론상 도달 불가" 라던 주석
+                #    자체가 멤버십 게이트의 부작용을 증언하고 있었다). D-2 가 그 축을
+                #    값 기준으로 바꾼 뒤로 다시 도달 불가 = 순수 방어 기록이다.
                 reason = "not_called"
             self._emit_breakout_high_rederive_skip(ticker, pos, reason)
         except Exception:
@@ -1218,7 +1332,8 @@ class DonchianSwingStrategy(StrategyBase):
             reason=no_candles          — `candles` falsy (KIS 빈 output2 → `[]` 5분 캐시)
             reason=no_buy_date         — `pos.buy_date` falsy
             reason=no_position         — `pos` 자체가 없음
-            reason=not_called          — 그 외 (이론상 도달 불가, 방어)
+            reason=not_called          — 그 외 (사이클 226 D-2 이후 도달 불가, 방어.
+                                          D-2 이전엔 값 0 포지션이 여기로 떨어졌다)
 
         ## cap 키 = `ticker|reason` (사이클 225 J-2)
 

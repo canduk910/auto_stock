@@ -120,7 +120,26 @@
 ### donchian `breakout_fail_n_days` (P2-2) — **사이클 223 (2026-08-21): 영업일 기준 + 재도출 off-by-one 시정 + PARAM_RANGES 제외**
 - 기본 5일. `check_exit_signal` 에서 보유 N**영업일** + 현재가 < `_breakout_high[ticker]` → STOP_LOSS.
 - **보유일 = 영업일** (사이클 223). 이전 `(today - buy_date).days` 달력일은 주말·연휴를 보유일로 세어 청산을 최대 2~3일 앞당겼다. `_business_days_held()` 가 `_trading_days` 캐시(일봉 union, **KIS 추가 호출 0**)로 계산하고, 캐시가 아직 오늘을 못 담은 구간만 하루 가산(주말 제외).
-- `_breakout_high`: 매수 신호 발사 시 donchian_high 등록. graceful skip (0이면 분기 진입 안 함). 재시작 복구는 `_rederive_breakout_high` 담당 — **`prior[1:period+1]`** 로 `prepare()` 의 `prior_high = max(highs[1:period+1])` 과 **같은 창**을 본다(사이클 223 off-by-one 시정. 이전 `prior[:period]` 는 한 칸 어긋난 돌파선을 복구해 재시작 전후로 청산 임계가 달라졌다).
+- `_breakout_high`: 매수 신호 발사 시 donchian_high 등록. graceful skip (0이면 분기 진입 안 함). 재시작 복구는 `_rederive_breakout_high` 담당
+- **돌파선 0 방어 3중 (사이클 226)** — 상류에서 하류까지 같은 사고의 세 지점을 막는다.
+  **(D-1)** `prepare()` 가 `prior_high <= 0` 이면 후보를 **거부**한다 + `[donchian_zero_breakout_line]` **WARNING**.
+  이전엔 `prev_close <= prior_high` 만 봐서 `prior_high == 0` 이 **아무 양수 종가나 통과**했다 =
+  20일 신고가 돌파를 **검증하지 않고** 후보가 만들어졌다. 돌파선 0 은 "돌파했다" 가 아니라 "계산하지 못했다" 다.
+  탈락 사유는 정상 미달과 **문자열이 달라야** 한다(funnel step5 에서 구분).
+  **(D-2)** 재도출 진입 게이트를 **값 기준**으로 — `_breakout_high[t] == 0` 이 멤버십 판정에서 "무장됨" 으로
+  오판돼 **영구 미복구**였다. 시간청산 게이트(`breakout_high > 0`)·사이클 224/225 관측기와 **같은 축**이다.
+  ⚠️ 이 변경으로 사이클 225 의 "행위 변경 0 — 재도출을 억지로 호출하지 않는다" 는 **값 0 경로에 한해 갱신**됐다:
+  값 0 이면 이제 재도출을 **시도**한다(복구 전용 — 매수를 만들지 않는다). `reason=not_called` 는 다시 도달 불가.
+  ⚠️ 게이트의 값 읽기는 `isinstance` 정규화다 — `int()` 를 조건식에서 부르면 **try 밖 예외 지점**이 생겨
+  뒤 보유 종목의 `_channel_low`·`_entry_atr`·고점 보정이 통째로 유실된다(청산 약화 방향).
+  **(D-3)** `src/db/stock_master_daily.py::_extract_raw` 가 `raw` 부재로 row 자체를 반환할 때
+  `[daily_raw_missing]` 흔적. 그런 row 는 KIS 원본 키가 없어 `prepare` 의 `int(c.get("stck_hgpr","0"))` 가
+  0 을 내고 그게 곧 D-1 사고의 **상류**다. ⚠️ 이 함수는 donchian 전용이 아니다(kojiro·VCP·BFB 공유) —
+  호출당 1행 + 1회/ticker/일 cap. 반환값 불변(`is` 동일성 고정).
+  **판독법**: 두 마커 동시 = 같은 사건(고가 결손 → 돌파선 0). D-3 단독 = 다른 전략 쪽 일봉 열화.
+  ⚠️ **현재 잠복**이다 — 일봉 writer 가 `raw` 를 항상 저장하고 라이브 샘플도 전부 보유였다.
+  D-1 의 실제 표면은 "종가는 살고 **고가만** 결손" 인 부분 결손 row 뿐이다(완전 정규화 row 는
+  `stck_clpr` 부재로 기존 `prev_close <= 0` 가드가 먼저 잡는다). — **`prior[1:period+1]`** 로 `prepare()` 의 `prior_high = max(highs[1:period+1])` 과 **같은 창**을 본다(사이클 223 off-by-one 시정. 이전 `prior[:period]` 는 한 칸 어긋난 돌파선을 복구해 재시작 전후로 청산 임계가 달라졌다).
 - **`PARAM_RANGES`/`INT_PARAMS` 제외** (사이클 223) — 청산 정체성 상수. 자동 자문뿐 아니라 **수동 적용 라우트**(`routes/recommendations.py`)도 같은 정본을 참조해 차단한다(한쪽만 막으면 제외가 아니다).
 - 기존 ATR 트레일링/하드 손절 보존, 추가 분기만.
 - **복구 경로 침묵 4층 관측화 (사이클 225)** — `_breakout_high` 가 재시작 후 무장되지 않는

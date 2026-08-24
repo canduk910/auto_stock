@@ -497,12 +497,112 @@ def _row_has_lock(row: dict) -> bool:
     return False
 
 
-def _extract_raw(db_rows: list[dict]) -> list[dict]:
-    """DB row 들에서 raw JSONB (KIS 원본 키) 추출 — 부재 시 row 자체 graceful."""
+# ---------------------------------------------------------------------------
+# 사이클 226 D-3 (2026-08-25) — `_extract_raw` 폴백 **가시화** cap (관측 전용).
+#
+# 이 함수는 donchian 전용이 아니다 — kojiro·VCP·BFB·VB/LTV 의 prepare 가 전부
+# `get_recent_daily_normalized` 를 거쳐 여기로 온다. row 당 1행이면 100일 창 ×
+# 전 전략 × 전 종목으로 로그가 폭주하므로 **호출당 1행 + 같은 날 같은 ticker 1회**
+# 로 두 겹 cap 을 건다. 모듈 전역인 이유 = 이 함수가 인스턴스 없는 순수 헬퍼이고,
+# 소비 전략이 여럿이라 전략별 cap 이면 같은 종목이 전략 수만큼 찍힌다.
+# 날짜 키 자기리셋 — 어떤 일일 정산 훅에도 의존하지 않는다.
+# ---------------------------------------------------------------------------
+# ⚠️ `DailyEmitCap`(src/engine/) 을 쓰지 않는다 — `src/db/` 가 `src/engine/` 을
+# 모듈 레벨로 import 하면 문서화된 의존 방향(`db/ ← engine/`)이 뒤집힌다.
+# 필요한 기능은 "날짜 키 + 본 집합" 두 줄이라 여기서 직접 든다.
+_RAW_MISSING_LOGGED: set[str] = set()
+_RAW_MISSING_DAY: str = ""
+
+
+def _trace_daily_raw_missing(ticker: Optional[str], missing: int, total: int) -> None:
+    """`[daily_raw_missing]` — raw JSONB 부재 폴백의 **흔적** (사이클 226 D-3).
+
+    ## 왜
+
+    `_extract_raw` 의 폴백은 지금 **완전 무음**이다. 그래서 이 경로가 살아나도
+    (마이그레이션 033 이전 잔존 row, 다른 경로로 들어온 row 등) 아무도 모른다.
+    그런 row 는 KIS 원본 키가 아니라 DB 정규화 컬럼(`high_price`/`bas_dd`/…)을
+    들고 있어 donchian `prepare` 의 `int(c.get("stck_hgpr", "0"))` 가 0 을 내고,
+    그 0 이 곧 돌파선 0(사이클 226 D-1 이 막은 사고)의 상류다.
+
+    ## 무엇을 싣나
+
+    부재 row 수와 전체 row 수를 함께 싣는다 — 비율이 곧 열화 정도이고, "1/100"
+    (마이그레이션 경계의 꼬리)과 "100/100"(적재 경로 자체 파손)은 대응이 다르다.
+    ticker 는 인자로 받되 없으면 row 에서 best-effort 로 건진다 — 종목을 모르면
+    "부재 4/22" 만 남아 어느 종목의 일봉이 썩었는지 알 수 없어 대응이 안 된다.
+
+    ## 행위 변경 0
+
+    폴백 자체는 그대로다(graceful 이 옳다). 흔적만 남긴다. 관측 실패는 흡수하되
+    무흔적 흡수는 금지 — `[daily_raw_missing_failed]` 로 남긴다(도입 이전 무음과
+    구별되어야 한다).
+    """
+    global _RAW_MISSING_DAY
+    key = str(ticker or "__unknown__")
+    try:
+        today_key = datetime.now(KST).date().isoformat()
+        if _RAW_MISSING_DAY != today_key:
+            _RAW_MISSING_DAY = today_key
+            _RAW_MISSING_LOGGED.clear()
+        if key in _RAW_MISSING_LOGGED:
+            return
+        # ⚠️ L-3 — cap 등록은 로그 **뒤**다. 앞에 두면 `logger.info` 가 던졌을 때
+        #    그 종목이 그날 내내 봉인돼 정상 관측까지 사라진다(관측기 자기실패가
+        #    관측 대상을 지우는 것 = 이 사이클이 없애려던 무음의 재생산).
+        logger.info(
+            "[daily_raw_missing] ticker=%s missing_rows=%d total_rows=%d"
+            " note='raw JSONB 부재 row 를 DB 정규화 컬럼 그대로 graceful 반환했다"
+            " — 소비 전략 prepare 가 KIS 원본 키를 못 읽어 고가/종가 0 이 될 수 있다.'",
+            key, int(missing), int(total),
+        )
+        _RAW_MISSING_LOGGED.add(key)
+    except Exception:
+        # 흡수하되 흔적은 남긴다. debug 단독은 `_DbLogHandler`(INFO 이상만 적재)를
+        # 통과하지 못해 `system_logs` 에 도달하지 않으므로 WARNING 1행을 병행한다.
+        try:
+            logger.debug("[daily_raw_missing_failed] ticker=%s", key, exc_info=True)
+        except Exception:
+            pass
+        try:
+            fail_key = key + "|__observer_failed__"
+            if fail_key not in _RAW_MISSING_LOGGED:
+                _RAW_MISSING_LOGGED.add(fail_key)
+                logger.warning(
+                    "[daily_raw_missing_failed] ticker=%s"
+                    " note='관측기 내부 예외로 이 관측이 침묵한다 — 반환값·행위와 무관,"
+                    " 스택트레이스는 동일 마커 debug 로그 참조'",
+                    key,
+                )
+        except Exception:
+            pass
+
+
+def _extract_raw(db_rows: list[dict], *, ticker: Optional[str] = None) -> list[dict]:
+    """DB row 들에서 raw JSONB (KIS 원본 키) 추출 — 부재 시 row 자체 graceful.
+
+    사이클 226 D-3 — 폴백이 실제로 탄 경우 `[daily_raw_missing]` 흔적 1행
+    (호출당 1행 + 1회/ticker/일). **반환값과 행위는 불변**이다.
+    `ticker` 는 키워드 전용 + 기본값 — 기존 위치인자 1개 호출부 호환을 깨지 않는다.
+    """
     normalized: list[dict] = []
+    missing = 0
     for r in db_rows:
         raw = r.get("raw")
-        normalized.append(raw if isinstance(raw, dict) and raw else r)
+        if isinstance(raw, dict) and raw:
+            normalized.append(raw)
+        else:
+            normalized.append(r)
+            missing += 1
+    if missing:
+        known = ticker
+        if not known:
+            for r in db_rows:
+                cand = r.get("ticker")
+                if cand:
+                    known = str(cand)
+                    break
+        _trace_daily_raw_missing(known, missing, len(db_rows))
     return normalized
 
 
@@ -522,7 +622,7 @@ async def _kis_fallback(ticker: str, days: int, db_rows: list[dict], *, reason: 
             "ticker=%s reason=%s",
             ticker, reason,
         )
-        return _extract_raw(db_rows)
+        return _extract_raw(db_rows, ticker=ticker)
 
 
 # ---------------------------------------------------------------------------
@@ -589,7 +689,7 @@ async def get_recent_daily_normalized(
 
     # 3. min_required 게이트 — DB 부족 시 KIS 폴백.
     if len(db_rows) >= min_required:
-        return _extract_raw(db_rows)
+        return _extract_raw(db_rows, ticker=ticker)
 
     reason = "miss" if not db_rows else "insufficient"
     return await _kis_fallback(ticker, days, db_rows, reason=reason)
