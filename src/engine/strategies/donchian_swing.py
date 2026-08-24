@@ -24,6 +24,18 @@ from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, Strategy
 
 KST = timezone(timedelta(hours=9))
 
+# 사이클 225 J-3 (2026-08-24) — 관측기 **자기 실패** 흔적의 cap 키 접미사.
+# 정상 관측 키(`ticker` / `ticker|reason`)와 절대 충돌하지 않아야 한다 — 충돌하면
+# 실패 1건이 그 날의 정상 관측을 통째로 침묵시킨다(J-2 와 같은 클래스의 결함).
+_OBSERVER_FAILED_KEY = "__observer_failed__"
+
+# 사이클 225 J-1 — `_rederive_breakout_high` 가 **호출조차 되지 않은** 사유들.
+# 2·3층(`insufficient_prior` / `zero_high`)은 재도출이 돌았으나 미복구인 반면,
+# 아래 사유들은 게이트가 falsy 라 함수 진입 자체가 없었다 = 4층. note 문구가 갈린다.
+_REDERIVE_NOT_CALLED_REASONS = frozenset(
+    {"no_candles", "no_buy_date", "no_position", "not_called"}
+)
+
 
 # 사이클 47 (2026-05-22, refactor-review 카드 #3) — Funnel 단계 정의 모듈 상수.
 # step_name 은 정적 — 동적 값 (donchian_period, long_ma_period 등) 은 step_conditions 통해 노출.
@@ -161,6 +173,17 @@ class DonchianSwingStrategy(StrategyBase):
         # 날짜 키 자기리셋 — `_reset_daily_state` 훅 비의존(`_days_held_fallback_day` 선례).
         self._days_held_observe_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._days_held_observe_day: str = ""
+        # 사이클 225 A (2026-08-24) — `recompute_held_atr` 게이트 skip 관측 cap.
+        # 사이클 223/224 의 두 cap 과 **별개 필드**여야 한다: 같은 필드를 공유하면
+        # 한 사실이 다른 사실을 침묵시킨다(OB-11). 날짜 키 자기리셋 —
+        # `_reset_daily_state` 훅 비의존(`_days_held_fallback_day` 선례).
+        self._held_recompute_skip_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._held_recompute_skip_day: str = ""
+        # 사이클 225 B (2026-08-24) — `_rederive_breakout_high` 조용한 실패 사유 cap.
+        # 위 A cap 과도 별개 — A(재도출 미호출)와 B(재도출 호출됐으나 미복구)는
+        # 서로 다른 사실이라 한 슬롯을 다투면 안 된다.
+        self._breakout_high_rederive_skip_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._breakout_high_rederive_skip_day: str = ""
 
     async def prepare(self) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
@@ -613,6 +636,17 @@ class DonchianSwingStrategy(StrategyBase):
             # ATR 재계산은 _candidates 미존재 시에만, high_since_buy 보정은 buy_date<today일 때
             need_atr = ticker not in self._candidates
             if not need_atr and not pos_needs_high_recover:
+                # 사이클 225 A (2026-08-24) — 침묵 1층. 이 `continue` 는 fetch **앞**이라
+                # 아래 `_rederive_breakout_high` 까지 도달하지 못한다 = 무장 미복구가
+                # 아무 흔적 없이 종일 지속된다(실측 192820). 관측 전용 —
+                # 호출을 fetch 뒤로 옮기면 매수 당일 종목마다 KIS 일봉 호출이 새로
+                # 생긴다(게이트가 fetch 앞에 있는 이유가 그것이다).
+                # 발화 조건(`ticker not in self._breakout_high`) 판정은 **emitter 내부**
+                # try 안에서 한다 — 여기서 읽으면 그 읽기가 try 밖이라 관측이
+                # recompute 루프를 죽일 수 있다.
+                self._emit_held_recompute_skip(
+                    ticker, pos, need_atr, pos_needs_high_recover,
+                )
                 continue
 
             try:
@@ -653,6 +687,21 @@ class DonchianSwingStrategy(StrategyBase):
             # candles 재사용 (KIS 신규 호출 0). in-memory 존재(당일 매수 미재시작) 시 미접촉.
             if pos and pos.buy_date and candles and ticker not in self._breakout_high:
                 self._rederive_breakout_high(ticker, pos, candles, params["donchian_period"])
+            else:
+                # 사이클 225 J-1 (2026-08-24) — **침묵 4층**. 이 게이트가 falsy 면
+                # `_rederive_breakout_high` 가 **호출조차 되지 않아** 2·3층 로그(B)가
+                # 안 찍히고, 이 지점은 이미 상위 게이트(`need_atr`/`needs_high_recover`)
+                # 를 통과한 뒤라 1층 로그(A)도 없다 ⇒ **완전 무음**.
+                # ⚠️ 여기엔 A 의 '자가 치유' 논증이 성립하지 않는다 — 상위 게이트를
+                # 통과했다는 건 `buy_date < today`(또는 후보 이탈)라는 뜻이라 `days_held`
+                # 가 계속 자라 `breakout_fail_n_days` 를 넘기는데, 시간청산은
+                # `breakout_high > 0` 에 막혀 **영구 미발화**한다.
+                # 실측 경로: `fetch_daily_candles` 는 KIS `rt_cd=0` + 빈 `output2` 시
+                # 예외 없이 `[]` 를 돌려주고 그 `[]` 를 5분 TTL 캐시에 저장한다
+                # (`src/api/condition.py`) ⇒ `candles` falsy 가 조용히 반복된다.
+                # 관측 전용 — 재도출을 억지로 호출하지 않는다(행위 변경 0). 사유 판정과
+                # 무장 여부 확인은 **emitter 내부 try** 에서 한다(A 의 C-12a 계약 동형).
+                self._emit_breakout_high_rederive_not_called(ticker, pos, candles)
 
             # P1-A (2026-07-29, A-4) — _channel_low 산출 (10일 채널 청산 데이터 소스).
             # _candidates 와 독립 dict — 후보 이탈/재시작 후에도 견고. on_tick KIS 호출
@@ -945,6 +994,295 @@ class DonchianSwingStrategy(StrategyBase):
                 "[days_held_observe_failed] ticker=%s", ticker, exc_info=True,
             )
 
+    def _trace_observer_failure(self, marker: str, ticker: str,
+                                cap: DailyEmitCap[str], day_attr: str) -> None:
+        """관측기 **자기 실패**의 흔적 — debug 스택 + WARNING 1행/ticker/일 (사이클 225 J-3).
+
+        ## 왜 debug 단독이면 안 되나
+
+        `logger.debug(..., exc_info=True)` 단독이면 `src/main.py` 의 `_DbLogHandler` 가
+        **INFO 이상만** 큐에 적재하므로 `system_logs` 에 도달하지 않는다. 20:10 일일 로그
+        리포트와 대시보드는 그 테이블을 읽으므로, emitter 가 항구적으로 깨져도 DB 기반
+        도구에서는 **도입 이전 무음과 구별되지 않는다** = 계약 §8 이 명시적으로 금지한
+        상태다. ⇒ 도달용 요약 1행을 WARNING 으로 올리고 스택트레이스는 debug 에 남긴다.
+
+        ## 폭주 차단
+
+        ⚠️ K-2 정정 — 한때 "스윙 폴(60s 주기)에서도 돈다" 고 적었으나 **거짓**이다.
+        `recompute_held_atr` 의 프로덕션 호출부는 `scheduler.py:2329` 하나뿐이고 그
+        함수(`_eager_refresh_stock_master_for_held_positions`)의 유일한 호출자는
+        `boot_manager.py:341` = **부팅 경로 전용**이다(60s 폴 본체
+        `_run_swing_rest_poll_once` 는 시세만 폴한다 — `_SWING_POLL_STRATEGIES`
+        상수를 공유할 뿐이다). 즉 실제 빈도는 부팅당 1회다.
+        그래도 cap 은 유지한다 — 장중 재배포로 하루 여러 번 부팅할 수 있고(2026-08-24
+        실측 2회), 관측기 자기실패가 종목 수만큼 반복되면 WARNING 이 곱해진다. 정상 관측과 **같은 cap 인스턴스**를 쓰되 키를
+        `ticker|__observer_failed__` 로 분리해 정상 키(`ticker` / `ticker|reason`)와
+        충돌시키지 않는다. 날짜 키 리셋도 여기서 한 번 더 시도한다 — 호출부가 정상
+        경로의 날짜 리셋 **전에** 터졌을 수 있고(예: 사유 판정 단계에서 폭발), 그러면
+        전날의 실패 키가 오늘의 WARNING 을 삼킨다.
+
+        ## ⚠️ 가장 안쪽은 어떤 경우에도 조용히 통과한다
+
+        이 메서드는 **이미 `except` 블록 안**에서 호출된다. 여기서 다시 던지면 2차 예외가
+        호출부의 except 를 뚫고 나가 관측이 매매 경로(`recompute_held_atr` 루프)를 죽인다.
+        날짜 리셋 · debug · WARNING 을 **각각** 자체 try 로 감싸고 실패는 전부 흡수한다.
+        """
+        try:
+            logger.debug("%s ticker=%s", marker, ticker, exc_info=True)
+        except Exception:
+            pass
+        try:
+            today_key = datetime.now(KST).date().isoformat()
+            if getattr(self, day_attr, "") != today_key:
+                setattr(self, day_attr, today_key)
+                cap.reset_daily()
+        except Exception:
+            pass
+        try:
+            key = f"{ticker}|{_OBSERVER_FAILED_KEY}"
+            if cap.should_emit(key):
+                cap.mark_emitted(key)
+                logger.warning(
+                    "%s ticker=%s strategy=%s"
+                    " note='관측기 내부 예외로 이 관측이 침묵한다 — 매매 행위와 무관,"
+                    " 스택트레이스는 동일 마커 debug 로그 참조'",
+                    marker, ticker, self.strategy_id,
+                )
+        except Exception:
+            pass
+
+    def _emit_held_recompute_skip(self, ticker: str, pos, need_atr: bool,
+                                  needs_high_recover: bool) -> None:
+        """`[held_recompute_skip]` 관측 로그 — 1회/ticker/일 cap (사이클 225 A).
+
+        ## 왜 (침묵 1층)
+
+        `recompute_held_atr` 루프의 게이트
+
+            need_atr = ticker not in self._candidates
+            if not need_atr and not pos_needs_high_recover: continue
+
+        는 fetch **앞**에 있고 무로그다. 두 축이 모두 False 인 종목은 그 아래
+        `_rederive_breakout_high` 에 **도달조차 못 한다** — 즉 재도출이 실패한 게
+        아니라 호출되지 않는다. 2026-08-24 15:58 장중 재배포 직후 192820 이 정확히
+        그 상태였고(`buy_date == today` + `_candidates` 잔류), `_breakout_high` 가
+        종일 0 인 채였는데 그 사실을 가리키는 로그가 시스템 어디에도 없었다.
+
+        ## ⚠️ 이 로그는 "위험" 을 주장하지 않는다
+
+        이 구멍의 발생 조건이 `buy_date == today` 라서 `_business_days_held` 는
+        **항상 0** 이고, `breakout_fail_n_days` 는 라이브 2 · 기본 5 다(사이클 223 S1
+        이 `PARAM_RANGES` 에서 제외해 AI 가 못 낮춘다). 시간청산 게이트는
+        `breakout_high > 0 and days_held >= n_days and 현재가 < breakout_high` 이므로
+        `days_held(0) >= n_days(>=2)` 가 어차피 거짓 = **게이트가 닫혀 있다**.
+        게다가 대개 **자가 치유**된다 — (a) 다음 영업일 부팅이면 `buy_date < today` 로
+        `needs_high_recover=True`, (b) 후보 이탈이면 `need_atr=True` 로 게이트를
+        통과한다. `days_held` 가 임계에 닿기 전에 재시도가 걸린다.
+        ⚠️ K-4 — 다만 **재시도이지 재무장 보장이 아니다**. 게이트를 통과해도 그 뒤
+        `candles` 가 비면(`fetch_daily_candles` 는 빈 `output2` 에 예외 없이 `[]` 를
+        돌려주고 5분 캐시에 박는다) `_rederive_breakout_high` 진입 자체가 막힌다 —
+        그 경로는 `_emit_breakout_high_rederive_not_called(reason=no_candles)` 가
+        따로 잡는다. 한때 여기 "반드시 재무장된다" 고 적혀 있었으나 그 단정은
+        같은 사이클의 J-1 이 스스로 반증했다.
+        그래서 이 사이클은 **행위를 바꾸지 않는다** — 게이트 앞에서 재도출을 억지로
+        부르면 매수 당일 종목마다 KIS 일봉 fetch 가 새로 생기는데 이득이 0이다.
+
+        ## 계약
+
+        - **발화 조건 = `ticker not in self._breakout_high`** 일 때만. 이미 무장돼
+          있으면 그 skip 은 무해하고, 정상 경로를 매일 찍으면 진짜 신호가 희석된다.
+        - 그 조건 판정은 **이 메서드 안**(try 내부)에서 한다. 호출부에서
+          `_breakout_high` 를 읽으면 그 읽기가 try 밖이라 관측이 `recompute_held_atr`
+          루프를 죽여 **뒤 종목의 복구까지 유실**시킬 수 있다.
+        - cap 은 사이클 223 `_days_held_fallback_logged` / 224
+          `_days_held_observe_logged` 와 **별개 필드**. 날짜 키 자기리셋.
+        - 어떤 실패도 흡수하되 **흔적을 남긴다**(`[held_recompute_skip_failed]` debug).
+          무흔적 흡수는 금지 — 조용히 삼키면 이 관측이 영구 침묵해도 도입 이전 무음과
+          구별되지 않는다(사이클 224 F3 계약).
+
+        hot path 는 아니지만(부팅 · 스윙 폴 주기) 무장 여부 · cap 조회를 **먼저** 하고
+        문자열 구성은 그 뒤에만 한다. `await`/DB/HTTP 는 없다.
+        """
+        try:
+            today = datetime.now(KST).date()
+            today_key = today.isoformat()
+            if self._held_recompute_skip_day != today_key:
+                self._held_recompute_skip_day = today_key
+                self._held_recompute_skip_logged.reset_daily()
+            # K-1 (적대적 검증) — 무장 판정은 **멤버십이 아니라 값**이다.
+            # 시간청산 게이트(`check_exit_signal`)가 `breakout_high > 0` 로 보고,
+            # 같은 파일 `_emit_days_held_observation` 도 값으로 본다. 여기만 멤버십이면
+            # `_breakout_high[t] == 0`(고가 결손 일봉으로 매수 시 도달 가능 —
+            # `check_buy_signal` 이 `info["donchian_high"]` 를 무조건 대입한다)인
+            # 포지션이 "무장됨"으로 오판돼 **흔적 없이** 침묵한다.
+            # ⚠️ 재도출 진입 게이트(`ticker not in self._breakout_high`)는 **무변경** —
+            #    그건 행위이고 이번 사이클은 관측 전용이다. 값이 0 이면 재도출은 여전히
+            #    막히지만, 최소한 그 사실이 이 로그로 보인다.
+            armed = int(self._breakout_high.get(ticker, 0) or 0) > 0
+            if armed:
+                return
+            if not self._held_recompute_skip_logged.should_emit(ticker):
+                return
+            self._held_recompute_skip_logged.mark_emitted(ticker)
+            logger.info(
+                "[held_recompute_skip] ticker=%s strategy=%s buy_date=%s today=%s"
+                " need_atr=%s in_candidates=%s needs_high_recover=%s"
+                " breakout_high_armed=%s"
+                " note='재도출 미호출 — 무장 미복구. 다음 영업일 부팅 또는 후보"
+                " 이탈 시 재시도되나 재무장은 보장이 아니다(일봉 fetch 성공 의존).'",
+                ticker, self.strategy_id, getattr(pos, "buy_date", None), today,
+                bool(need_atr), ticker in self._candidates,
+                bool(needs_high_recover), armed,
+            )
+        except Exception:
+            # 흡수하되 흔적은 남긴다 (사이클 224 F3 + 사이클 225 J-3).
+            # debug 단독은 `_DbLogHandler`(INFO 이상만 적재)를 통과하지 못해
+            # `system_logs` 에 도달하지 않는다 ⇒ WARNING 1행/ticker/일 병행.
+            self._trace_observer_failure(
+                "[held_recompute_skip_failed]", ticker,
+                self._held_recompute_skip_logged, "_held_recompute_skip_day",
+            )
+
+    def _emit_breakout_high_rederive_not_called(self, ticker: str, pos,
+                                                candles) -> None:
+        """침묵 **4층** 관측 — 재도출 게이트가 falsy 라 호출 자체가 없었던 경우 (사이클 225 J-1).
+
+        `recompute_held_atr` 의
+
+            if pos and pos.buy_date and candles and ticker not in self._breakout_high:
+                self._rederive_breakout_high(...)
+
+        가 거짓일 때의 `else` 에서 호출된다. 이 경로는 `_rederive_breakout_high` 에
+        **진입조차 하지 않으므로** 2·3층 로그(B)가 없고, 상위 게이트를 이미 통과했으므로
+        1층 로그(A)도 없다 = 완전 무음이었다.
+
+        ## A(1층)와 달리 '자가 치유' 가 성립하지 않는다
+
+        상위 게이트를 통과했다는 것은 `buy_date < today` 또는 후보 이탈이라는 뜻이다.
+        그러면 `days_held` 가 계속 자라 `breakout_fail_n_days` 를 넘기는데, 시간청산은
+        `breakout_high > 0` 조건에 막혀 **영구 미발화**한다. A 로그가 "다음 영업일 부팅에
+        재무장된다" 고 약속한 바로 그 경로가 여기다 — 그 약속이 깨지는 지점.
+
+        ## 발화 금지 = 이미 무장된 경우
+
+        게이트가 거짓인 **정상** 사유가 `ticker in self._breakout_high`(당일 매수 후
+        미재시작 등)다. 그 경로를 매일 찍으면 진짜 신호가 희석된다 ⇒ 무장돼 있으면
+        아무것도 하지 않는다. 남는 것은 "게이트 거짓 **이면서** 여전히 미복구" 뿐이다.
+
+        ## 판정을 이 안(try 내부)에서 하는 이유
+
+        호출부에서 사유를 계산하면 그 계산(`pos.buy_date` 접근 등)이 try 밖이라 관측이
+        `recompute_held_atr` 루프를 죽여 **뒤 종목의 복구까지 유실**시킬 수 있다
+        (A emitter 의 C-12a 계약 동형). 무장 확인 · 사유 판정 전부 try 안이다.
+
+        행위 변경 0 — 재도출을 억지로 호출하지 않는다. 순수 관찰.
+        """
+        try:
+            # K-1 — 값 기준 무장 판정(A emitter 동형). 상세는 그쪽 주석.
+            if int(self._breakout_high.get(ticker, 0) or 0) > 0:
+                return
+            if not pos:
+                # ⚠️ K-3 — 이 사유는 "직접 호출 전용 방어" 가 **아니다**. 루프에서
+                #    실제로 도달한다: `state.positions` 가 `keys()` 에는 있고
+                #    `get()` 은 None 인 레이스(청산 직후)면 상위 게이트를
+                #    `need_atr=True` 로 통과해 여기까지 온다. 정상 범주의 관측이다.
+                #    (반면 `no_buy_date` 는 상위 `pos.buy_date < today` 가 먼저
+                #     TypeError 를 내므로 루프 도달 불가 = 직접 호출 방어용.)
+                reason = "no_position"
+            elif not getattr(pos, "buy_date", None):
+                reason = "no_buy_date"
+            elif not candles:
+                reason = "no_candles"
+            else:
+                # 게이트 4축이 모두 참인데 여기 왔다 = 호출부 구조가 바뀐 것. 방어 기록.
+                reason = "not_called"
+            self._emit_breakout_high_rederive_skip(ticker, pos, reason)
+        except Exception:
+            self._trace_observer_failure(
+                "[donchian_breakout_high_rederive_skip_failed]", ticker,
+                self._breakout_high_rederive_skip_logged,
+                "_breakout_high_rederive_skip_day",
+            )
+
+    def _emit_breakout_high_rederive_skip(self, ticker: str, pos, reason: str,
+                                          prior_len: int | None = None,
+                                          need: int | None = None) -> None:
+        """`[donchian_breakout_high_rederive_skip]` — 1회/**(ticker, 사유)**/일 cap.
+
+        `_breakout_high` 가 **무장되지 않은 채 남는** 모든 조용한 경로에 사유를 남긴다.
+
+            # 재도출이 돌았으나 미복구 (사이클 225 B)
+            reason=insufficient_prior  — `len(prior) < donchian_period + 1` (침묵 2층)
+            reason=zero_high           — 계산 결과 `breakout_high <= 0`     (침묵 3층)
+            # 재도출이 **호출조차 안 됨** (사이클 225 J-1, 침묵 4층)
+            reason=no_candles          — `candles` falsy (KIS 빈 output2 → `[]` 5분 캐시)
+            reason=no_buy_date         — `pos.buy_date` falsy
+            reason=no_position         — `pos` 자체가 없음
+            reason=not_called          — 그 외 (이론상 도달 불가, 방어)
+
+        ## cap 키 = `ticker|reason` (사이클 225 J-2)
+
+        키가 ticker 단독이면 같은 날 같은 종목의 `insufficient_prior` 가 뒤따르는
+        `zero_high` 를 **침묵시킨다**(실증). 사유를 나눈 이유가 "대응이 갈리기
+        때문"(봉 부족 = 일봉 백필 / 값 0 = KIS 데이터 품질 / 게이트 falsy = 캐시된 빈
+        응답)인데 cap 이 그 구분을 지우면 분리 자체가 무의미해진다. A cap
+        (`_held_recompute_skip_logged`)은 사유가 하나뿐이라 ticker 단독 유지.
+
+        ## 필드는 **사유에 의미 있는 것만** 싣는다 (사이클 225 J-4)
+
+        단일 포맷으로 전 사유에 `need=` 를 실으면 `reason=zero_high prior=25 need=21`
+        같은 줄이 나온다. 운영자는 "25 ≥ 21 인데 왜 실패?" 로 읽고 길이 가드 회귀
+        (사이클 223 S2)를 의심해 엉뚱한 곳을 판다 — 실제 원인은 KIS 고가 필드 결손이다.
+        ⇒ `need=` 는 `insufficient_prior` 전용, `prior=` 는 재도출이 실제로 돈 2·3층
+        전용(4층엔 `prior` 개념 자체가 없다), 4층 `no_candles` 는 `candles=0` 만 적는다.
+
+        기존 성공 로그 `[donchian_breakout_high_rederive]` 와 기존
+        `except Exception: logger.exception("도치안 breakout_high 재도출 실패")` 는
+        **무변경**이다.
+
+        ⚠️ 실패는 **이 메서드의 자기 try** 안에서 흡수한다. 호출부(`_rederive_breakout_high`)
+        의 except 로 새면 운영자가 "재도출 실패" = 데이터 문제로 읽는데 실제로는
+        관측기 결함이다(원인 오독). 흔적 마커
+        `[donchian_breakout_high_rederive_skip_failed]` — debug 스택 + WARNING 1행
+        (사이클 225 J-3, `system_logs` 도달용).
+        """
+        try:
+            today_key = datetime.now(KST).date().isoformat()
+            if self._breakout_high_rederive_skip_day != today_key:
+                self._breakout_high_rederive_skip_day = today_key
+                self._breakout_high_rederive_skip_logged.reset_daily()
+            cap_key = f"{ticker}|{reason}"
+            if not self._breakout_high_rederive_skip_logged.should_emit(cap_key):
+                return
+            self._breakout_high_rederive_skip_logged.mark_emitted(cap_key)
+            # 사유별 유효 필드만. 숫자는 여기서 치환 완료 — 포맷 문자열에 `%` 미유입.
+            if reason == "insufficient_prior":
+                extra = " prior=%d need=%d" % (int(prior_len or 0), int(need or 0))
+            elif reason == "zero_high":
+                extra = " prior=%d" % int(prior_len or 0)
+            elif reason == "no_candles":
+                extra = " candles=0"
+            else:
+                extra = ""
+            if reason in _REDERIVE_NOT_CALLED_REASONS:
+                note = ("재도출 미호출(게이트 falsy) — 무장 미복구가 지속되면 "
+                        "시간청산이 breakout_high>0 에 막혀 영구 미발화한다")
+            else:
+                note = "재도출 미복구 — 시간청산 기준선이 무장되지 않은 상태"
+            logger.info(
+                "[donchian_breakout_high_rederive_skip] ticker=%s strategy=%s"
+                " buy_date=%s reason=%s" + extra + " note='%s'",
+                ticker, self.strategy_id, getattr(pos, "buy_date", None),
+                reason, note,
+            )
+        except Exception:
+            # 흡수하되 흔적은 남긴다 — 기존 '재도출 실패' 로그로 새면 원인이 오독된다.
+            self._trace_observer_failure(
+                "[donchian_breakout_high_rederive_skip_failed]", ticker,
+                self._breakout_high_rederive_skip_logged,
+                "_breakout_high_rederive_skip_day",
+            )
+
     def _rederive_breakout_high(self, ticker: str, pos, candles: list, donchian_period: int) -> None:
         """재시작 복구 — buy_date 이전 일봉으로 진입 시점 20일 신고가(`_breakout_high`) 재현.
 
@@ -966,7 +1304,16 @@ class DonchianSwingStrategy(StrategyBase):
         try:
             buy_dd = pos.buy_date.strftime("%Y%m%d")
             prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
+            # ⚠️ 길이 가드는 **리터럴 `len(prior) < donchian_period + 1`** 로 둔다 —
+            # 사이클 223 AST 가드(test_cycle223_ast_donchian_exit_fix::
+            # test_g223_3_rederive_window_excludes_signal_day)가 이 표현식을 소스에서
+            # 직접 찾는다. 지역 변수로 뽑으면 S2 off-by-one 회귀 가드가 무력화된다.
             if len(prior) < donchian_period + 1:
+                # 사이클 225 B — 침묵 2층. 사이클 223 S2 가 길이 가드를 period → period+1
+                # 로 올려 **미복구 확률이 올라간** 경로다. 사유·필요 봉 수를 남긴다.
+                self._emit_breakout_high_rederive_skip(
+                    ticker, pos, "insufficient_prior", len(prior), donchian_period + 1,
+                )
                 return
             highs = [
                 int(c.get("stck_hgpr", "0") or 0)
@@ -978,6 +1325,13 @@ class DonchianSwingStrategy(StrategyBase):
                 logger.info(
                     "[donchian_breakout_high_rederive] %s buy_date=%s breakout_high=%d",
                     ticker, pos.buy_date, breakout_high,
+                )
+            else:
+                # 사이클 225 B — 침묵 3층. 봉은 충분한데 계산 결과가 0 (KIS 고가 필드
+                # 결손 등). 2층과 **사유가 달라야** 대응이 갈린다 (봉 부족 = 백필 /
+                # 값 0 = 데이터 품질).
+                self._emit_breakout_high_rederive_skip(
+                    ticker, pos, "zero_high", len(prior), donchian_period + 1,
                 )
         except Exception:
             logger.exception("도치안 breakout_high 재도출 실패: %s", ticker)

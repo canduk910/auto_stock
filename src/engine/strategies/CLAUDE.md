@@ -123,6 +123,23 @@
 - `_breakout_high`: 매수 신호 발사 시 donchian_high 등록. graceful skip (0이면 분기 진입 안 함). 재시작 복구는 `_rederive_breakout_high` 담당 — **`prior[1:period+1]`** 로 `prepare()` 의 `prior_high = max(highs[1:period+1])` 과 **같은 창**을 본다(사이클 223 off-by-one 시정. 이전 `prior[:period]` 는 한 칸 어긋난 돌파선을 복구해 재시작 전후로 청산 임계가 달라졌다).
 - **`PARAM_RANGES`/`INT_PARAMS` 제외** (사이클 223) — 청산 정체성 상수. 자동 자문뿐 아니라 **수동 적용 라우트**(`routes/recommendations.py`)도 같은 정본을 참조해 차단한다(한쪽만 막으면 제외가 아니다).
 - 기존 ATR 트레일링/하드 손절 보존, 추가 분기만.
+- **복구 경로 침묵 4층 관측화 (사이클 225)** — `_breakout_high` 가 재시작 후 무장되지 않는
+  경로가 전부 무로그였다. 2026-08-24 장중 재배포 때 `192820` 이 `breakout_high=0` 으로
+  남았는데(cycle224 `[days_held_observe]` 의 그 필드가 **유일한 흔적**이었다) 원인 규명에
+  코드를 손으로 따라가야 했다. 신설 로그 = `[held_recompute_skip]`(1층: `recompute_held_atr`
+  게이트 `continue`, fetch **앞**) · `[donchian_breakout_high_rederive_skip]`(2·3층:
+  `insufficient_prior` / `zero_high`) · 4층 `reason=no_candles|no_buy_date|no_position`
+  (게이트 `pos and buy_date and candles and ...` 가 falsy 라 재도출에 **진입조차** 못 한 경우).
+  ⚠️ 4층이 특히 중요하다 — 그 경로는 상위 게이트를 통과한 뒤라 `buy_date < today` 이고,
+  `days_held` 가 계속 자라는데 시간청산은 `breakout_high > 0` 에 막혀 **영구 미발화**한다
+  (`fetch_daily_candles` 는 빈 `output2` 에 예외 없이 `[]` 를 돌려주고 5분 캐시에 박는다).
+  발화 조건은 **미복구일 때만** — 무장된 정상 skip 을 매일 찍으면 신호가 희석된다.
+  무장 판정은 **값(`> 0`)** 이다(멤버십 아님) — 시간청산 게이트·`[days_held_observe]` 와 같은 축.
+  cap = A 는 `ticker`, B/4층은 `ticker|reason`(사유별 대응이 갈리므로 한 사유가 다른 사유를
+  삼키면 안 된다), 실패 흔적은 `ticker|__observer_failed__`. 실패는 흡수하되
+  `logger.debug(exc_info)` + **WARNING 1행**(debug 단독은 `_DbLogHandler` INFO 컷에 막혀
+  `system_logs` 에 도달하지 않아 도입 이전 무음과 구별되지 않는다). 행위 변경 0 — 재도출을
+  억지로 호출하지 않는다(게이트가 fetch 앞에 있는 이유가 KIS 호출 절약이다).
 - **`[days_held_observe]` 상시 관측** (사이클 224) — 보유일을 **발화 여부와 무관하게** 하루 1회 남긴다.
   이전엔 `days_held` 가 (a) 폴백 플래그가 섰거나 (b) 시간청산이 **실제 발화**했을 때만 로그돼,
   *시간 기반 청산인데 발화할 때만 보유일이 보이는* 상태였다 — "얼마나 근접했나"를 영영 못 본다.
