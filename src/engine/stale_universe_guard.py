@@ -60,7 +60,8 @@ async def evaluate_universe_guard(
         매일 `_reset_daily_state` 가 `_universe_excluded_today.clear()` — 영구 블랙리스트 금지.
         제외된 종목은 다음 영업일 자동 재진입 가능.
     """
-    from src.api.quotation import inquire_ccnl
+    from src.api.quotation import inquire_acml_vol, inquire_ccnl
+    from src.engine import tick_volume
     from src.engine.scanner import TICK_TR_ID
     from src.realtime.websocket_pool import kis_ws_pool
 
@@ -108,8 +109,38 @@ async def evaluate_universe_guard(
             await asyncio.sleep(0.05)
             continue
 
+        # cycle227 (P0-2) — `today_volume`(FHKST01010300 최근 ~30체결 `cntg_vol`
+        # 합)은 "체결 1건의 거래량" 합일 뿐 진짜 당일 누적이 아니라 임계
+        # (10,000)를 사실상 항상 미달했다 — 안전조건이 "스테일 6회=무조건 축출"
+        # 로 퇴화한 원인(P0-2 실측: BFB 후보 20/48 이 이 경로로 축출). 로그
+        # 필드로만 남기고(운영 grep 연속성), 판정 소스는 실측 누적으로 바꾼다.
         today_volume = ccnl.get("today_volume", 0)
-        if today_volume >= UNIVERSE_LOW_VOLUME_THRESHOLD:
+
+        # 1순위 — tick 실측 관측 (KIS 호출 0). 2순위 — REST 폴백(FHKST01010100).
+        # 둘 다 부재면 축출을 보류한다: 잘못된 축출(=매수 평가 완전 상실)이
+        # 잘못된 보류(=슬롯 낭비)보다 훨씬 비싸다(라이브 슬롯 사용률 34% 실측).
+        observed = tick_volume.get_observed_acml_vol(ticker)
+        if observed is not None:
+            acml_vol_value: int | None = observed
+            vol_source = "tick"
+        else:
+            try:
+                acml_vol_value = await inquire_acml_vol(ticker)
+            except Exception:
+                logger.exception(
+                    "[universe_guard] inquire_acml_vol 예외 ticker=%s — 제외 보류",
+                    ticker,
+                )
+                acml_vol_value = None
+            vol_source = "rest"
+
+        if acml_vol_value is None:
+            # 두 소스 모두 부재 → 판정 근거 없음, 제외 보류 (기존 ccnl is None
+            # 패턴과 같은 방향).
+            await asyncio.sleep(0.05)
+            continue
+
+        if acml_vol_value >= UNIVERSE_LOW_VOLUME_THRESHOLD:
             # 거래량 충분 → 제외 안 함 (가드 미발화)
             await asyncio.sleep(0.05)
             continue
@@ -133,13 +164,15 @@ async def evaluate_universe_guard(
                 "[universe_excluded] unsubscribe 실패 ticker=%s", ticker
             )
 
-        # INFO 로그 + system_logs 영구 보존
+        # INFO 로그 + system_logs 영구 보존. `acml_vol`/`vol_source` 가 실제 판정
+        # 소스(cycle227), `today_volume` 은 운영 grep 연속성을 위한 레거시 필드.
         logger.info(
             "[universe_excluded] ticker=%s reason=stale_6plus_low_volume "
-            "retries=%d last_resub_age=%s last_cntg_hour=%s today_volume=%d",
+            "retries=%d last_resub_age=%s last_cntg_hour=%s acml_vol=%d "
+            "vol_source=%s today_volume=%d",
             ticker, retries, age_disp,
             ccnl.get("last_cntg_hour", ""),
-            today_volume,
+            acml_vol_value, vol_source, today_volume,
         )
         # 사이클 72 hotfix A10: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 

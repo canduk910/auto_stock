@@ -357,8 +357,16 @@ class RiskManager:
         change_rate: float,
         *,
         day_high: int = 0,
+        acml_vol: int = -1,
     ) -> None:
         """실시간 체결가 수신 시 호출된다.
+
+        cycle227 (2026-08-25) — `acml_vol`(관측된 누적거래량, 키워드 전용·기본 -1
+        = 미수신). `acml_vol >= 0` 일 때만 `tick_volume.record_acml_vol` 에 기록한다.
+        **`ticker_prices` 에는 절대 주입하지 않는다** — donchian 이 그 dict 의 고가
+        키로 `ext_pct` 과열 가드를 계산하므로 키가 늘면 매수 행위가 바뀐다(AST-1).
+        그 외 on_tick 행위 변경 0 — 이번 사이클은 배관 + 관측(Stage 0)뿐이고
+        BFB/VCP 거래량 게이트는 여전히 유령 키를 읽는다(전환은 별도 사이클).
 
         cycle222-a (2026-08-21) — `day_high`(관측된 당일 고가, 키워드 전용·기본 0).
         앵커는 "수신된 틱들의 러닝 max" 가 아니라 **"관측된 매수 이후 고가의 max"**
@@ -404,6 +412,13 @@ class RiskManager:
         # dict assign 1회 비용 — on_tick은 초당 수십~수백 호출 가능하므로 추가 연산 금지
         now_kst = _dt.now(KST_TZ)
         ticker_last_tick[ticker] = now_kst
+
+        # cycle227 — 실측 누적거래량 관측 배관(P0-1 시정 Stage 0). `acml_vol >= 0`
+        # (관측 있음)일 때만 기록 — 기본값 -1(미수신)은 무시한다(dict assign 1회,
+        # ticker_last_tick 선례 비용). **`ticker_prices` 는 절대 건드리지 않는다.**
+        if acml_vol >= 0:
+            from src.engine import tick_volume
+            tick_volume.record_acml_vol(ticker, acml_vol)
 
         # cycle222-a — 앵커 blind 내성. 관측된 당일 고가의 **구간 자격**만 1회 판정한다.
         # ⚠️ `ticker_prices` 에 절대 주입하지 않는다 — donchian 이 그 dict 의 고가 키를

@@ -141,6 +141,7 @@ def test_buy_when_after_1430_then_none(strat):
 # ---------------------------------------------------------------------------
 def test_buy_when_breakout_with_volume_then_buy(strat):
     _seed_candidate(strat, "005930", base_high=12_000, avg_volume_20=300_000)
+    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
     from src.engine import scanner as _scanner
     _scanner.ticker_prices["005930"] = {
         "current_price": 12_100,
@@ -163,6 +164,7 @@ def test_buy_when_no_breakout_then_none(strat):
 
 def test_buy_when_breakout_but_low_volume_then_none(strat):
     _seed_candidate(strat, "005930", base_high=12_000, avg_volume_20=300_000)
+    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
     from src.engine import scanner as _scanner
     _scanner.ticker_prices["005930"] = {
         "current_price": 12_100,
@@ -211,6 +213,7 @@ def test_buy_when_in_cooldown_then_none(strat):
     with freeze_time("2026-05-08 10:00:00"):
         today = date(2026, 5, 8)
         strat._cooldown_until["005930"] = today + timedelta(days=3)  # 3일 후까지 쿨다운
+        # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
         from src.engine import scanner as _scanner
         _scanner.ticker_prices["005930"] = {
             "current_price": 12_100, "open_price": 11_900, "acml_vol": 500_000,
@@ -224,6 +227,7 @@ def test_buy_when_cooldown_expired_then_buy(strat):
     with freeze_time("2026-05-08 10:00:00"):
         today = date(2026, 5, 8)
         strat._cooldown_until["005930"] = today - timedelta(days=1)
+        # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
         from src.engine import scanner as _scanner
         _scanner.ticker_prices["005930"] = {
             "current_price": 12_100, "open_price": 11_900, "acml_vol": 500_000,

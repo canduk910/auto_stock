@@ -22,9 +22,10 @@ logger = logging.getLogger(__name__)
 
 # 콜백 타입
 # cycle222-a (2026-08-21) — `day_high`(당일 고가, STCK_HGPR) 키워드 인자 추가.
+# cycle227 (2026-08-25) — `acml_vol`(누적거래량, ACML_VOL) 키워드 인자 추가.
 # 키워드 + 기본값이라 기존 4-positional 호출자는 무해하다.
 TickHandler = Callable[..., Awaitable[None]]
-# ticker, current_price, open_price, change_rate, *, day_high
+# ticker, current_price, open_price, change_rate, *, day_high, acml_vol
 
 ExecutionHandler = Callable[[str, str, str, int, int], Awaitable[None]]
 # ticker, order_no, side, price, quantity
@@ -395,20 +396,48 @@ def _parse_day_high(fields: list[str]) -> int:
         return 0
 
 
+def _parse_acml_vol(fields: list[str]) -> int:
+    """payload `[13] 누적거래량(ACML_VOL)` 을 파싱한다.
+
+    cycle227 (2026-08-25) — P0-1 시정 Stage 0. `bull_flag_breakout`/`vcp_breakout`
+    의 매수 최종 관문이 `scanner.ticker_prices[t]["acml_vol"]` 를 읽는데 그 키를
+    쓰는 코드가 전체 소스에 없어 두 전략이 구조적으로 매수 불가였다. 누적거래량은
+    이 payload 에 이미 실려 있었다 — `_parse_day_high`(cycle222-a) 가 정확히 같은
+    결함("문서화만 해두고 버림")을 시정한 바로 그 자리다.
+
+    계약:
+      1. `len(fields) < 14` / 파싱 실패 → **`-1`**(sentinel). **`0` 금지** —
+         `0` 이 바로 P0 결함의 그 값이고 "미수신"과 "진짜 거래량 0"을 구별
+         불가능하게 만든다.
+      2. 음수 응답도 `-1` 로 통일 (미수신과 동일 취급 — 소비처가 `>= 0` 한 번으로 판정).
+
+    ⚠️ 호출자는 반드시 `len(fields) < 10` 가드 **이후**에서만 호출한다
+       (`_parse_day_high` 와 동일 계약). `[13]` 부재는 IndexError → `-1`.
+    """
+    try:
+        value = int(fields[13])
+    except Exception:
+        return -1
+    if value < 0:
+        return -1
+    return value
+
+
 async def _handle_tick(payload: str) -> None:
     """실시간 체결가 메시지를 파싱한다.
 
     TR_ID: H0STCNT0 (KRX 단독) / H0NXCNT0 (NXT 단독) / H0UNCNT0 (KRX+NXT 통합) — 동일 포맷.
-    KIS MCP 정본 (`ccnl_total`/`H0UNCNT0` 46 컬럼) — 본 함수는 fields[0]~[9] 와
-    스코프 판별자 [27] 만 사용.
+    KIS MCP 정본 (`ccnl_total`/`H0UNCNT0` 46 컬럼) — 본 함수는 fields[0]~[9],
+    스코프 판별자 [27], 누적거래량 [13] 을 사용.
 
-    payload 형식 (^ 구분, fields[0]~[9] + [27]):
+    payload 형식 (^ 구분, fields[0]~[9] + [13] + [27]):
       [0] 종목코드(MKSC_SHRN_ISCD) / [1] 체결시간(STCK_CNTG_HOUR, HHMMSS)
       [2] 현재가(STCK_PRPR) / [3] 전일대비구분 / [4] 전일대비
       [5] 등락률(PRDY_CTRT) / [6] 가중평균(WGHN_AVRG_STCK_PRC) / [7] 시가(STCK_OPRC)
-      [8] 고가(STCK_HGPR) / [9] 저가(STCK_LWPR) / [27] 최고가시간(HGPR_HOUR)
+      [8] 고가(STCK_HGPR) / [9] 저가(STCK_LWPR) / [13] 누적거래량(ACML_VOL)
+      [27] 최고가시간(HGPR_HOUR)
     호출자 (`RiskManager.on_tick`): current_price + open_price + change_rate +
-    day_high(cycle222-a, 키워드) 전달.
+    day_high(cycle222-a, 키워드) + acml_vol(cycle227, 키워드) 전달.
 
     cycle222-a (2026-08-21) — `[8] 고가` 를 문서화만 해 두고 버리던 결함 시정.
     당일 고가를 넘기지 않으면 트레일링 앵커가 "수신된 틱들의 러닝 max" 로 퇴화해
@@ -418,6 +447,12 @@ async def _handle_tick(payload: str) -> None:
     스코프 필터**한다(`_parse_day_high`). 통합 채널의 일-스코프 필드는 09:00 에
     리셋되지 않아 NXT 프리장 체결이 누적된 채 MAIN 구간 틱에 계속 실려 오기
     때문이다(000250 실측). 창 밖 고가는 0(미관측)으로 강등하되 **틱은 살린다**.
+
+    cycle227 (2026-08-25) — `[13] 누적거래량` 도 같은 부류의 결함이었다: BFB/VCP
+    매수 게이트가 읽는 `ticker_prices["acml_vol"]` 에 대입하는 코드가 전체 소스에
+    없어(P0-1) 두 전략이 구조적으로 매수 불가였다. `_parse_acml_vol` 로 파싱해
+    `RiskManager.on_tick` → `tick_volume` 관측 모듈까지만 흘린다(`ticker_prices`
+    주입은 donchian `ext_pct` 커플링 때문에 금지 — AST-1 가드).
     """
     fields = payload.split("^")
     if len(fields) < 10:
@@ -436,6 +471,9 @@ async def _handle_tick(payload: str) -> None:
     current_price, open_price = parsed
     # cycle222-a/a2 — 부가 관측. 파싱/스코프 판별 실패해도 틱은 버리지 않는다(0 폴백).
     day_high = _parse_day_high(fields)
+    # cycle227 — 부가 관측(P0-1 시정 Stage 0). 파싱 실패해도 틱은 버리지 않는다
+    # (-1 sentinel, fail-open — day_high 와 동일 원칙).
+    acml_vol = _parse_acml_vol(fields)
 
     if open_price > 0:
         change_rate = (current_price - open_price) / open_price * 100
@@ -445,7 +483,8 @@ async def _handle_tick(payload: str) -> None:
     if _on_tick:
         try:
             await _on_tick(
-                ticker, current_price, open_price, change_rate, day_high=day_high,
+                ticker, current_price, open_price, change_rate,
+                day_high=day_high, acml_vol=acml_vol,
             )
         except Exception:
             logger.exception(

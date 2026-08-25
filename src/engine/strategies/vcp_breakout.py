@@ -72,6 +72,11 @@ def _empty_scan_stats() -> dict:
         "pullback_pass": 0,
         "volume_contraction_pass": 0,
         "final_prepared": 0,
+        # cycle227 (P0-1 Stage 0) — 거래량 게이트 "고쳤다면 통과했을까" 관측 카운터.
+        # 총량은 API 로 관측(로그는 cap 이 걸리지만 이 카운터는 cap 과 무관하게 누적).
+        "vol_gate_observe_pass": 0,
+        "vol_gate_observe_fail": 0,
+        "vol_gate_observe_no_obs": 0,
         "last_run_at": None,
     }
 
@@ -185,6 +190,11 @@ class VcpBreakoutStrategy(StrategyBase):
         #     (스냅샷 박제 시 상승 추세에서 ema50 이 뒤처져 이탈 청산이 늦어진다)
         # ⚠️ `_reset_daily_state` 에서 clear 금지 — 멀티데이 보유가 밤새 소멸한다.
         self._position_setup: dict[str, dict] = {}
+        # cycle227 (P0-1 Stage 0) — `[vcp_vol_gate_observe]` cap: (ticker, outcome)
+        # 1회/일. 날짜 키 자기 리셋(`_reset_daily_state` 훅 미의존 — scheduler.py
+        # diff 0 이 이번 사이클 설계 목표).
+        self._vol_gate_observe_logged: set[tuple[str, str]] = set()
+        self._vol_gate_observe_day: date | None = None
 
     # ------------------------------------------------------------------
     # prepare — 일봉 100일(prepare cap) → 추세/베이스/pullback/거래량 수축 자동 검출
@@ -910,6 +920,69 @@ class VcpBreakoutStrategy(StrategyBase):
             }
         return out
 
+    def _vol_gate_observe_should_emit(self, ticker: str, outcome: str) -> bool:
+        """cycle227 — `[vcp_vol_gate_observe]` cap: (ticker, outcome) 1회/일.
+
+        VCP 는 edge-crossing 재트리거로 관측 이벤트가 다발 가능해 cap 이 필수다.
+        `_scan_stats` 카운터는 이 cap 과 무관하게 매 호출 누적된다. 날짜 키 자기
+        리셋 — `_reset_daily_state` 훅 미의존.
+        """
+        today = datetime.now(KST).date()
+        if self._vol_gate_observe_day != today:
+            self._vol_gate_observe_day = today
+            self._vol_gate_observe_logged.clear()
+        key = (ticker, outcome)
+        if key in self._vol_gate_observe_logged:
+            return False
+        self._vol_gate_observe_logged.add(key)
+        return True
+
+    def _observe_vol_gate(self, ticker: str, vol_threshold: int) -> None:
+        """cycle227 (P0-1 Stage 0) — "고쳤다면 통과했을까" 관측. **행위 변경 0.**
+
+        BFB `_observe_vol_gate` 와 의미론 동일 + VCP 고유 거울 정합 1건:
+        게이트는 `if vol_threshold > 0 and acml_vol < vol_threshold: NONE` 이라
+        `vol_threshold <= 0` 이면 관측과 무관하게 항상 통과시킨다 — 관측기도
+        그 분기를 거울로 반영해 `outcome="pass"` 로 집계한다.
+
+        `tick_volume.get_observed_acml_vol` 은 **호출 시점** 모듈 참조로 불러야
+        관측기 자기실패 경로를 테스트로 재현할 수 있다(모듈 상단 from-import 금지).
+        실패는 전부 흡수하고 `[vcp_vol_gate_observe_failed]` WARNING 1행만 남긴다.
+        """
+        try:
+            from src.engine import tick_volume
+
+            observed = tick_volume.get_observed_acml_vol(ticker)
+            if vol_threshold <= 0:
+                outcome = "pass"
+            elif observed is None:
+                outcome = "no_obs"
+            elif observed >= vol_threshold:
+                outcome = "pass"
+            else:
+                outcome = "fail"
+            self._scan_stats[f"vol_gate_observe_{outcome}"] += 1
+
+            if self._vol_gate_observe_should_emit(ticker, outcome):
+                if observed is None:
+                    logger.info(
+                        "[vcp_vol_gate_observe] ticker=%s reason=no_observation "
+                        "threshold=%d",
+                        ticker, vol_threshold,
+                    )
+                else:
+                    logger.info(
+                        "[vcp_vol_gate_observe] ticker=%s observed=%d threshold=%d "
+                        "would_pass=%s",
+                        ticker, observed, vol_threshold, outcome == "pass",
+                    )
+        except Exception:
+            logger.warning(
+                "[vcp_vol_gate_observe_failed] ticker=%s 관측 실패 — 매수 평가는 "
+                "계속된다",
+                ticker, exc_info=True,
+            )
+
     # ------------------------------------------------------------------
     # 신호 평가
     # ------------------------------------------------------------------
@@ -950,6 +1023,14 @@ class VcpBreakoutStrategy(StrategyBase):
         self._prev_price[ticker] = current_price
         if not (prev < base_high <= current_price):
             return Signal.NONE
+
+        # cycle227 (P0-1 Stage 0) — 관측 훅. 기존 거래량 컷 블록 **직전**. 게이트
+        # 자체는 아래에서 여전히 유령 키를 읽는다(행위 변경 0, AST-2 가 아래
+        # 블록을 byte pin — 게이트 전환은 실측 후 별도 사이클).
+        self._observe_vol_gate(
+            ticker,
+            int(info.get("avg_volume_20", 0) * self.config.params["breakout_volume_mult"]),
+        )
 
         # 거래량 컷
         from src.engine.scanner import ticker_prices

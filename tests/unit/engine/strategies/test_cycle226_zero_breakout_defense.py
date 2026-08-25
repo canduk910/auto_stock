@@ -107,6 +107,7 @@ from __future__ import annotations
 
 import ast
 import datetime as _dt
+import hashlib
 import inspect
 import logging
 import subprocess
@@ -1101,7 +1102,29 @@ _EIGHT_AREAS = [
     "src/realtime",
     "src/auth",
 ]
-_ALLOWED: set[str] = set()          # ⚠️ 사이클 226 예외 핀 = 빈 집합
+# 🔁 2026-08-25 (cycle227) — 면제 기전을 **파일명 집합 → 내용 sha 핀**으로 교체.
+#
+#    사이클 226 은 `_ALLOWED: set[str] = set()` 로 두었다. 빈 집합인 동안은 문제가
+#    없지만, 거기에 파일명을 넣는 순간 면제가 **영구**가 된다 — cycle222-a3 이
+#    "제외 결정이 한쪽 경로에만 걸리면 제외가 아니다" 를 근거로 파일명 면제를 버리고
+#    자기소멸형 내용 핀으로 옮겨간 바로 그 이유다. cycle227 이 처음으로 이 가드에
+#    면제를 요구하게 되었으므로, 이름을 등록하는 대신 **자매 가드
+#    (`tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py`)의 기전을 그대로 이식**한다.
+#    ⇒ 검사 강도는 낮아지지 않는다: 핀에 없는 8영역 파일은 여전히 즉시 FAIL 이고,
+#      핀에 있는 파일도 내용이 한 바이트라도 달라지면 FAIL 한다. 커밋되면 그 경로가
+#      `git diff HEAD` 에 안 나타나 면제가 조회조차 되지 않는다(자기소멸).
+#
+#    cycle227 승인 근거 = P0-1(BFB·VCP 가 유령 키 `ticker_prices["acml_vol"]` 을
+#    읽어 전 기간 매수 0건) 시정 Stage 0 의 **사용자 명시 8영역 승인**
+#    (`handler.py` + `risk.py` 두 파일 한정). 둘 다 순수 추가이며
+#    `ticker_prices` 4키는 불변이다.
+# TODO(cycle227 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
+_ALLOWED_CONTENT_SHA: dict[str, str] = {
+    "src/engine/risk.py":
+        "58d7ceea73b24b292ebaeb95e570e9dbe5015349c7eeacc92725b049f4e16463",
+    "src/realtime/handler.py":
+        "d43b6ad4dbd5ec580832ee08ac6213ff5d1858e3a93503992bde25424d965362",
+}
 
 
 def _git(*args: str) -> str:
@@ -1115,6 +1138,17 @@ def _git(*args: str) -> str:
     return res.stdout
 
 
+def _content_sha(path: str) -> str:
+    """면제 대상 파일 **내용**의 sha256 (`shasum -a 256 <파일>` 과 동일).
+
+    diff 텍스트가 아니라 파일 바이트를 해시한다 — diff 텍스트는 git config
+    (`diff.noprefix` / `diff.mnemonicPrefix` / `diff.context` / `core.abbrev` …)
+    에 따라 **코드 변경 0인데도** 달라져서, 그때마다 "핀 재산출" 을 유도하고
+    그 과정에서 진짜 8영역 변경까지 함께 봉인된다(cycle222-a3 G-2 실측).
+    """
+    return hashlib.sha256((_REPO_ROOT / path).read_bytes()).hexdigest()
+
+
 def test_common_1_eight_areas_untouched():
     """8영역 diff **0** — staged/unstaged/untracked 전부.
 
@@ -1126,8 +1160,19 @@ def test_common_1_eight_areas_untouched():
     tracked = _git("diff", "HEAD", "--name-only", "--", *_EIGHT_AREAS).split()
     untracked = _git("ls-files", "--others", "--exclude-standard",
                      "--", *_EIGHT_AREAS).split()
-    unexpected = sorted((set(tracked) | set(untracked)) - _ALLOWED)
+    changed = set(tracked) | set(untracked)
+    unexpected = sorted(changed - set(_ALLOWED_CONTENT_SHA))
     assert unexpected == [], (
         f"8영역 변경 감지: {unexpected} — 사이클 226 허용치는 **0**이다. "
         "핀을 늘리기 전에 실제 변경을 되돌려라."
     )
+    for path in sorted(changed & set(_ALLOWED_CONTENT_SHA)):
+        assert _content_sha(path) == _ALLOWED_CONTENT_SHA[path], (
+            f"{path} 의 내용이 면제 스냅샷과 다르다.\n"
+            "⚠️ **핀을 먼저 재산출하지 마라** — 그 순간 8영역 실제 변경이 그대로 "
+            "새 스냅샷으로 봉인된다.\n"
+            f"  1) `git diff HEAD -- {path}` 를 눈으로 읽어라.\n"
+            "  2) 승인 범위 밖 변경이면 되돌려라 (8영역 diff 0 이 기본 계약이다).\n"
+            "  3) 승인된 작업(cycle227 Stage 0) 자체가 갱신된 것이 확실할 때만 "
+            f"재산출한다 (`shasum -a 256 {path}`)."
+        )

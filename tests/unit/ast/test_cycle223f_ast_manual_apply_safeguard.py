@@ -316,7 +316,21 @@ def _content_sha(path: str) -> str:
 #    스냅샷 값을 남겨두면 "이 8영역 변경은 승인됐다" 는 죽은 기록이 되므로 비운다.
 #    기전(내용 해시 면제)은 그대로 둔다 — 다음 사이클이 같은 상황을 만나면 여기에
 #    다시 핀을 걸면 되고, **빈 dict 는 곧 8영역 변경이 하나도 면제되지 않는다**는 뜻이다.
-_PREEXISTING_CONTENT_SHA: dict[str, str] = {}
+#
+# 🔁 2026-08-25 (cycle227) — P0-1 Stage 0 이 **사용자 명시 승인**으로 8영역 2파일을
+#    건드린다(`handler.py` = `_parse_acml_vol` + `acml_vol=` 키워드 전달 /
+#    `risk.py` = `on_tick(*, acml_vol=-1)` 수용 + `tick_volume` 기록). 둘 다 순수
+#    추가이고 `ticker_prices` 4키는 불변이다(donchian `ext_pct` 커플링 — 신규
+#    AST-1 가드가 전 소스에서 `acml_vol` 대입 0건을 영구 강제).
+#    자매 가드 `test_cycle223_ast_donchian_exit_fix.py` 와 **같은 값**으로 핀한다 —
+#    두 가드가 같은 워킹트리를 보므로 값이 갈리면 그 자체가 결함 신호다.
+# TODO(cycle227 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
+_PREEXISTING_CONTENT_SHA: dict[str, str] = {
+    "src/engine/risk.py":
+        "58d7ceea73b24b292ebaeb95e570e9dbe5015349c7eeacc92725b049f4e16463",
+    "src/realtime/handler.py":
+        "d43b6ad4dbd5ec580832ee08ac6213ff5d1858e3a93503992bde25424d965362",
+}
 
 
 def test_g223f_9_eight_areas_diff_zero():

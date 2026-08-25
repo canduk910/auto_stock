@@ -325,7 +325,7 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | 사전 구독 마진 (사이클 26) | `TIME_KRX_MAIN_OPEN_PRESUBSCRIBE=08:59:10` (KRX 채널 50초 사전 마진) / `TIME_POST_NXT_OPEN_PRESUBSCRIBE=15:39:10` (NXT 채널 50초 사전 마진). 보유 + 익일청산 + 매수 후보 합집합 사전 구독 → 09:00 KRX 첫 체결 tick 즉시 수신 보장 |
 | 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 청산 (`NEXT_DAY_STABILIZE_SECS=30`). 대상: `momentum`, `long_tail_volatility` 상한가 모드, `volatility_breakout` 안전망 |
 | 15:20 강제 청산 | `_force_clear_main_only` — `tradable_boards` 에 POST_NXT 가 있는 전략은 보유 유지 (현재 해당 없음). **시간 가드 (2026-05-15 hotfix)**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 |
-| donchian 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — 09:30~15:20 KRX 메인 시간대 60s 주기로 `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
+| 스윙 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — **2단 창**(사이클 222-a): **09:05~09:30 = 보유 종목 전용 + stale 중립**(REST 가 `ticker_last_tick` 을 갱신하면 개장 러시 blind 종목이 '신선'으로 보여 강제 재구독이 안 걸린다) / **09:30~15:20 = 전체 폴**(후보 포함 + `last_tick` 갱신). 대상 전략 = `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")` — **BFB·VCP 는 비멤버라 REST 보강이 없고 틱으로만 매수 평가한다**(미구독 = 매수 기회 완전 상실). 60s 주기로 `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
 
 ## API 엔드포인트
 

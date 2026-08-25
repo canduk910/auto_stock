@@ -55,6 +55,7 @@ def test_first_breakout_detected_returns_none(monkeypatch):
     _seed_candidate(strat, ticker, flag_high=12_000)
 
     # 거래량 mock
+    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
     monkeypatch.setattr(
         "src.engine.scanner.ticker_prices",
         {ticker: {"acml_vol": "5000000"}},
@@ -78,6 +79,7 @@ def test_buy_signal_after_retention_period(monkeypatch):
     _seed_candidate(strat, ticker, flag_high=12_000)
 
     # 거래량 mock (vol_threshold 계산: flag_avg_volume=500_000 × breakout_volume_mult=2 = 1_000_000)
+    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
     monkeypatch.setattr(
         "src.engine.scanner.ticker_prices",
         {ticker: {"acml_vol": "5000000"}},
@@ -105,6 +107,7 @@ def test_retreat_during_retention_pops_dict(monkeypatch):
     ticker = "005930"
     _seed_candidate(strat, ticker, flag_high=12_000)
 
+    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
     monkeypatch.setattr(
         "src.engine.scanner.ticker_prices",
         {ticker: {"acml_vol": "5000000"}},

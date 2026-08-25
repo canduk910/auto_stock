@@ -79,21 +79,32 @@ def _make_sched(
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_stale_with_low_volume_excludes_from_universe(monkeypatch):
-    """주성엔지니어링 시나리오 — stale 9회 + today_volume 8500 (< 10000) → 제외."""
+    """주성엔지니어링 시나리오 — stale 9회 + 진짜 당일 누적 8500 (< 10000) → 제외.
+
+    cycle227 (P0-2) — 판정 소스가 `today_volume`(최근 ~30체결 합)에서 실측 누적
+    (tick 관측 우선 → REST 폴백)으로 바뀌었다. 이 테스트는 tick 관측이 없는
+    경우이므로 REST 폴백(`inquire_acml_vol`)이 판정을 낸다.
+    """
+    from src.engine import tick_volume
+    tick_volume.reset_for_test()
     sched = _make_sched(stale_counts={"036930": 9})
 
-    # KIS inquire_ccnl mock — 빈약 거래량 응답
+    # KIS inquire_ccnl mock — 빈약 거래량 응답 (레거시 로그 필드로만 소비됨)
     async def _fake_ccnl(ticker, market="J"):
         return {
             "last_cntg_hour": "091342",
             "last_price": 1500,
             "last_volume": 120,
             "last_relative_strength": 82.5,
-            "today_volume": 8500,  # < 10000 임계
+            "today_volume": 8500,  # < 10000 임계 (로그 필드 — 판정 소스 아님)
             "raw_count": 5,
         }
     from src.api import quotation as quot_mod
     monkeypatch.setattr(quot_mod, "inquire_ccnl", _fake_ccnl, raising=False)
+    # cycle227 — REST 폴백(tick 미관측 시). 진짜 당일 누적도 빈약.
+    monkeypatch.setattr(
+        quot_mod, "inquire_acml_vol", AsyncMock(return_value=8500), raising=False,
+    )
 
     # WebSocket pool unsubscribe spy
     from src.realtime import websocket_pool as wp_mod
@@ -107,6 +118,7 @@ async def test_stale_with_low_volume_excludes_from_universe(monkeypatch):
     monkeypatch.setattr(sch_mod, "write_log", _wl)
 
     await sched._evaluate_universe_guard(["036930"])
+    tick_volume.reset_for_test()
 
     assert "036930" in sched._universe_excluded_today, (
         f"stale 9회 + today_volume 8500 → 제외 누락. "
@@ -151,7 +163,13 @@ async def test_stale_with_none_ccnl_response_defers_exclusion(monkeypatch):
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_kis_exception_does_not_break_evaluation(monkeypatch):
-    """`inquire_ccnl` 호출 예외 → 다른 ticker 평가 계속 (격리)."""
+    """`inquire_ccnl` 호출 예외 → 다른 ticker 평가 계속 (격리).
+
+    cycle227 (P0-2) — 035420 은 tick 미관측이라 REST 폴백(`inquire_acml_vol`)이
+    판정을 낸다.
+    """
+    from src.engine import tick_volume
+    tick_volume.reset_for_test()
     sched = _make_sched(stale_counts={"036930": 9, "035420": 8})
 
     async def _fake_ccnl(ticker, market="J"):
@@ -163,11 +181,15 @@ async def test_kis_exception_does_not_break_evaluation(monkeypatch):
             "last_price": 50000,
             "last_volume": 100,
             "last_relative_strength": 75.0,
-            "today_volume": 5000,  # < 10000
+            "today_volume": 5000,  # < 10000 (로그 필드 — 판정 소스 아님)
             "raw_count": 3,
         }
     from src.api import quotation as quot_mod
     monkeypatch.setattr(quot_mod, "inquire_ccnl", _fake_ccnl, raising=False)
+    # cycle227 — REST 폴백. 035420 의 진짜 당일 누적도 빈약.
+    monkeypatch.setattr(
+        quot_mod, "inquire_acml_vol", AsyncMock(return_value=5000), raising=False,
+    )
 
     from src.realtime import websocket_pool as wp_mod
     unsub_spy = AsyncMock()
@@ -180,6 +202,7 @@ async def test_kis_exception_does_not_break_evaluation(monkeypatch):
 
     # 예외 전파 없이 완료되어야 함
     await sched._evaluate_universe_guard(["036930", "035420"])
+    tick_volume.reset_for_test()
 
     # 036930 — KIS 예외 → 제외 보류
     assert "036930" not in sched._universe_excluded_today
@@ -299,8 +322,14 @@ def test_reset_daily_state_clears_universe_excluded():
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_universe_excluded_log_format(monkeypatch, caplog):
-    """`[universe_excluded] ticker={t} reason=... retries={n} ...` 포맷."""
+    """`[universe_excluded] ticker={t} reason=... retries={n} ...` 포맷.
+
+    cycle227 (P0-2) — tick 미관측이라 REST 폴백(`inquire_acml_vol`)이 판정을 낸다.
+    `today_volume` 은 여전히 로그 필드로 남는다(운영 grep 연속성).
+    """
     import logging
+    from src.engine import tick_volume
+    tick_volume.reset_for_test()
     sched = _make_sched(stale_counts={"036930": 9})
 
     async def _fake_ccnl(ticker, market="J"):
@@ -314,6 +343,9 @@ async def test_universe_excluded_log_format(monkeypatch, caplog):
         }
     from src.api import quotation as quot_mod
     monkeypatch.setattr(quot_mod, "inquire_ccnl", _fake_ccnl, raising=False)
+    monkeypatch.setattr(
+        quot_mod, "inquire_acml_vol", AsyncMock(return_value=8500), raising=False,
+    )
 
     from src.realtime import websocket_pool as wp_mod
     monkeypatch.setattr(wp_mod.kis_ws_pool, "unsubscribe", AsyncMock(), raising=False)
@@ -326,6 +358,7 @@ async def test_universe_excluded_log_format(monkeypatch, caplog):
     caplog.set_level(logging.INFO, logger="src.engine.scheduler")
 
     await sched._evaluate_universe_guard(["036930"])
+    tick_volume.reset_for_test()
 
     log_lines = [r.message for r in caplog.records if "[universe_excluded]" in r.message]
     assert len(log_lines) == 1, f"INFO 로그 누락. records={[r.message for r in caplog.records]}"

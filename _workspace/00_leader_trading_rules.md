@@ -567,9 +567,11 @@ VB와 동일.
 - 실측 계측 스크립트: `tools/measure_bfb_pole_flag.py` — EC2 운영 환경에서 5종목(009150/011070/242040/000660/005930) 일봉으로 4 sub-condition 조건별 바인딩 단계 집계 (KIS 실호출 필요, 클라우드 샌드박스 불가). `--db` 플래그로 운영 DB params 효과도 측정 가능.
 
 ### 매수 규칙
-- **진입 조건**: 현재가가 `flag_high`(플래그 상단) 돌파 순간 + 당일 거래량 ≥ `flag_avg_volume × 2.0` (`breakout_volume_mult=2.0`)
+- **진입 조건**: 현재가가 `flag_high`(플래그 상단) 돌파 순간 + 당일 거래량 ≥ `flag_avg_volume × breakout_volume_mult`
+  (코드 기본 `2.0` · **라이브 DB `1.0`** — 2026-08-25 실측)
   - 돌파 순간: `이전 틱 < flag_high AND 현재 틱 ≥ flag_high` (VB 컨벤션 — `_prev_price[ticker]` 추적)
-  - 거래량 컷: WebSocket tick 의 `acml_vol` 또는 분당 누적치 사용 — `scanner.ticker_prices[ticker]` 의 누적 거래량 필드 활용
+  - 거래량 컷: `bull_flag_breakout.py:846-850` 이 `scanner.ticker_prices[ticker]["acml_vol"]` 을 읽는다
+  - ⚠️ **2026-08-25 확정 — 이 거래량 컷은 구조적으로 항상 참이라 매수를 전면 차단한다.** `scanner.ticker_prices` 에 누적 거래량을 **쓰는 코드가 전체 소스에 없다**(유일한 대입부 `src/engine/risk.py:397` 은 `current_price`/`open_price`/`change_rate`/`prdy_ctrt` 4키만 기록, WS 핸들러도 체결 payload 의 누적거래량 필드를 파싱하지 않는다). 즉 위 서술의 *"`ticker_prices` 의 누적 거래량 필드"* 는 **읽는 쪽만 구현되고 쓰는 쪽이 없는 유령 키**다 ⇒ `acml_vol ≡ 0 < vol_threshold`(항상 ≥1) ⇒ `check_buy_signal` 이 `Signal.BUY` 를 반환할 수 없다. 7전략 중 이 키를 읽는 BFB·VCP 만 정확히 전 기간 체결 0건이다. 시정 지시서 = [`_workspace/00_URGENT_WORKLIST.md`](00_URGENT_WORKLIST.md). ⚠️ 회귀 테스트가 `ticker_prices` 에 `acml_vol` 을 손으로 주입해 이 결함을 은폐하고 있다.
 - **진입 시간대**: **09:05 ~ 13:00 KRX 메인** (`entry_start=09:05` / `entry_end=13:00`, 시간 가드)
   - `tradable_boards=("main",)` — KRX 메인만, NXT 비활성(눌림목 패턴이 NXT 거래대금 부족으로 신뢰성 낮음)
 - **거래소 라우팅**: 기본 `KRX` (모의 호환). 실전에서 SOR 권장은 backend-dev 판단
@@ -708,7 +710,10 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 검증 통과 시 `_candidates[ticker] = {base_high, base_low, last_pullback_pct, atr14, ema50, ema150, ema200, prev_close, avg_volume_20}` 등록 (`avg_volume_20` = 매수 거래량 컷 기준선 — 20일 평균 × `breakout_volume_mult`).
 
 ### 매수 규칙
-- **진입 조건**: 현재가가 `base_high`(베이스 상단, `pivot_high`) 돌파 순간 + 당일 거래량 ≥ 20일 평균 × 1.5 (`breakout_volume_mult=1.5`)
+- **진입 조건**: 현재가가 `base_high`(베이스 상단, `pivot_high`) 돌파 순간 + 당일 거래량 ≥ 20일 평균 × `breakout_volume_mult`
+  (코드 기본 `1.5` · **라이브 DB `1.2`** — 2026-08-25 실측)
+  - 거래량 컷: `vcp_breakout.py:955-961` 이 BFB 와 **동형**이다
+  - ⚠️ **2026-08-25 확정 — 이 거래량 컷은 구조적으로 항상 참이라 매수를 전면 차단한다.** `scanner.ticker_prices` 에 누적 거래량을 **쓰는 코드가 전체 소스에 없다**(유일한 대입부 `src/engine/risk.py:397` 은 `current_price`/`open_price`/`change_rate`/`prdy_ctrt` 4키만 기록, WS 핸들러도 체결 payload 의 누적거래량 필드를 파싱하지 않는다). 즉 위 서술의 *"`ticker_prices` 의 누적 거래량 필드"* 는 **읽는 쪽만 구현되고 쓰는 쪽이 없는 유령 키**다 ⇒ `acml_vol ≡ 0 < vol_threshold`(항상 ≥1) ⇒ `check_buy_signal` 이 `Signal.BUY` 를 반환할 수 없다. 7전략 중 이 키를 읽는 BFB·VCP 만 정확히 전 기간 체결 0건이다. 시정 지시서 = [`_workspace/00_URGENT_WORKLIST.md`](00_URGENT_WORKLIST.md). ⚠️ 회귀 테스트가 `ticker_prices` 에 `acml_vol` 을 손으로 주입해 이 결함을 은폐하고 있다.
   - 돌파 순간: `이전 틱 < base_high AND 현재 틱 ≥ base_high` (VB 컨벤션)
 - **진입 시간대**: **09:05 ~ 14:30 KRX 메인** (`entry_start=09:05` / `entry_end=14:30`)
   - `tradable_boards=("main",)`

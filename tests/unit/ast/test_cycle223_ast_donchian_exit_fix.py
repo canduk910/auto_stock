@@ -398,7 +398,29 @@ def _content_sha(path: str) -> str:
 #    스냅샷 값을 남겨두면 "이 8영역 변경은 승인됐다" 는 죽은 기록이 되므로 비운다.
 #    기전(내용 해시 면제)은 그대로 둔다 — 다음 사이클이 같은 상황을 만나면 여기에
 #    다시 핀을 걸면 되고, **빈 dict 는 곧 8영역 변경이 하나도 면제되지 않는다**는 뜻이다.
-_PREEXISTING_CONTENT_SHA: dict[str, str] = {}
+#
+# 🔁 2026-08-25 (cycle227) — 예고한 "다음 사이클" 이 왔다. P0-1(BFB·VCP 가 유령 키
+#    `ticker_prices["acml_vol"]` 을 읽어 전 기간 매수 0건) 시정 Stage 0 이
+#    **사용자 명시 승인**으로 8영역 2파일을 건드린다(`_workspace/red/
+#    cycle227_acml_vol_stage0_spec.md` 머리말: "8영역 수정 승인 = handler.py +
+#    risk.py 두 파일 한정"). 변경은 순수 추가다 —
+#      · `handler.py`  = `_parse_acml_vol`(fields[13], 실패 시 **-1** sentinel) +
+#                        `_handle_tick` 이 `acml_vol=` 키워드로 전달.
+#                        `len(fields) < 10` 가드 byte 불변(AST-3 가 별도 봉인).
+#      · `risk.py`     = `on_tick(*, acml_vol: int = -1)` 수용 + `acml_vol >= 0`
+#                        일 때만 `tick_volume.record_acml_vol` 기록.
+#                        **`ticker_prices` 4키 불변**(donchian `ext_pct` 커플링 —
+#                        AST-1 이 전 소스에서 대입 0건을 영구 강제).
+#    핀은 여전히 파일명이 아니라 **이 내용 한 벌**에 걸린다: cycle227 이 커밋되면
+#    두 경로는 `git diff HEAD` 에 나타나지 않아 조회조차 되지 않고(자기소멸),
+#    커밋 전에 누가 같은 파일을 더 건드리면 sha 불일치로 FAIL 한다.
+# TODO(cycle227 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
+_PREEXISTING_CONTENT_SHA: dict[str, str] = {
+    "src/engine/risk.py":
+        "58d7ceea73b24b292ebaeb95e570e9dbe5015349c7eeacc92725b049f4e16463",
+    "src/realtime/handler.py":
+        "d43b6ad4dbd5ec580832ee08ac6213ff5d1858e3a93503992bde25424d965362",
+}
 
 
 def test_g223_10_eight_areas_diff_zero():
@@ -438,6 +460,27 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 # ===========================================================================
 # G-223-12 — 다른 전략 파일 diff 0
 # ===========================================================================
+# 🔁 2026-08-25 (cycle227) — 이 가드는 원래 면제 기전이 **없었다**(`out == ""` 단정).
+#    cycle227 이 BFB·VCP 에 `would_pass` 관측 훅을 넣으면서(사용자 승인 범위) 처음으로
+#    면제가 필요해졌다. 파일명 집합 면제는 **영구**라 쓰지 않고, 위 8영역 가드와 **같은
+#    내용 sha 핀**(자기소멸)을 이식했다. 가드 검사 강도는 낮추지 않는다 —
+#    핀에 없는 전략 파일이 바뀌면 여전히 즉시 FAIL 이고, 핀에 있는 파일도 내용이
+#    한 바이트라도 달라지면 FAIL 한다.
+#
+#    변경 내용은 두 파일 모두 **순수 추가**(BFB +78/-0, VCP +81/-0)다 —
+#    `_scan_stats` 관측 카운터 3키 · cap 헬퍼 · `_observe_vol_gate` 훅.
+#    **기존 거래량 컷 블록은 byte 불변**이고 그 사실은 별도 가드
+#    (`test_cycle227_ast_acml_vol_guards.py::test_AST2_...`)가 소스 pin 으로 강제한다
+#    = Stage 0(행위 변경 0) 의 이중 봉인.
+# TODO(cycle227 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
+_CYCLE227_STRATEGY_CONTENT_SHA: dict[str, str] = {
+    "src/engine/strategies/bull_flag_breakout.py":
+        "a8ec2ae51330f8a2290adc0629b8c005f56f5db948fa00e5c6ab3cd8c7c87375",
+    "src/engine/strategies/vcp_breakout.py":
+        "a9338a699df5286e96209b6a47b42d930af2af390bef64512eba8c232b6ec3d9",
+}
+
+
 def test_g223_12_other_strategy_files_diff_zero():
     others = [
         "src/engine/strategies/kojiro.py",
@@ -449,8 +492,19 @@ def test_g223_12_other_strategy_files_diff_zero():
     ]
     existing = [p for p in others if (_REPO_ROOT / p).exists()]
     # staged 도 본다 (사이클 223 G3 — `git diff` 단독은 unstaged 만)
-    out = " ".join(_changed_paths(existing))
-    assert out == "", f"다른 전략 파일 변경 감지 — 범위 밖: {out}"
+    changed = _changed_paths(existing)
+    unexpected = sorted(set(changed) - set(_CYCLE227_STRATEGY_CONTENT_SHA))
+    assert unexpected == [], f"다른 전략 파일 변경 감지 — 범위 밖: {unexpected}"
+    for path in sorted(set(changed) & set(_CYCLE227_STRATEGY_CONTENT_SHA)):
+        assert _content_sha(path) == _CYCLE227_STRATEGY_CONTENT_SHA[path], (
+            f"{path} 의 내용이 면제 스냅샷과 다르다.\n"
+            "⚠️ **핀을 먼저 재산출하지 마라** — 그 순간 실제 변경이 그대로 새 "
+            "스냅샷으로 봉인된다.\n"
+            f"  1) `git diff HEAD -- {path}` 를 눈으로 읽어라.\n"
+            "  2) 이번 사이클이 얹은 범위 밖 변경이면 되돌려라.\n"
+            "  3) 면제 대상 작업(cycle227 관측 훅) 자체가 갱신된 것이 확실할 때만 "
+            f"재산출한다 (`shasum -a 256 {path}`)."
+        )
 
 
 # ===========================================================================
