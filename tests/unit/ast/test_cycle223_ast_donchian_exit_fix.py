@@ -465,12 +465,13 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    `_workspace/red/cycle228_gate_latch_spec.md`)로 같은 두 파일을 다시 승인
 #    수정하며 재핀. 파일명 집합 면제는 **영구**라 쓰지 않는다 — 핀에 없는 전략
 #    파일이 바뀌면 즉시 FAIL, 핀에 있는 파일도 1 byte 달라지면 FAIL.
-# TODO(cycle228 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
+# 🔁 2026-08-28 — cycle228-A 커밋(`4e7b302`) 후 228-B(setup 리졸버, 같은 두 파일)
+#    승인 수정으로 재핀. TODO(cycle228-B 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/bull_flag_breakout.py":
-        "369fb9cc60703afd0bfa03c67f50c8987908a2509b5dc74f7248446638999c8e",
+        "108098d38e8c83d04793daa8e1f0dff84be053f4f1e45bb8ff98c2ec2a2211da",
     "src/engine/strategies/vcp_breakout.py":
-        "24cb0ff02ad7a6f81d5c42ad12a04744db2800e7c8da9f5827e833d73f149c55",
+        "e7db28152cb8dbe505284dd6831738312b15aa3db7c26fe8608488d536abfe09",
 }
 
 

@@ -1111,16 +1111,49 @@ class BullFlagBreakoutStrategy(StrategyBase):
             self.state.buy_signals.pop(0)
         return Signal.BUY
 
-    def _effective_setup(self, ticker: str) -> dict:
-        """청산 파라미터 리졸버 — `_candidates` live 우선 → `_position_setup` 폴백.
+    # cycle228-B — 구조 레벨(진입 시점 확정 후 **불변**) 키. 지표(atr14)는 여기 없다.
+    _STRUCTURE_KEYS = ("flag_low", "flag_high", "pole_high", "pole_start")
 
-        VCP `_effective_setup` 동형. 미지 종목은 **빈 dict** — 호출부가 `.get()`
-        만으로 안전하도록 None 을 돌려주지 않는다.
+    def _effective_setup(self, ticker: str) -> dict:
+        """청산 파라미터 리졸버 — 구조 레벨 stamp 우선 + 지표 live 우선 (cycle228-B).
+
+        P1 계약("구조 레벨은 BUY 직전 stamp 후 불변, 지표만 매일 갱신")을 리졸버
+        자신의 live 통째 우선이 우회하던 결함 시정 — `prepare()` 는 보유 종목을
+        후보에서 제외하지 않으므로, 보유 중 새 폴/플래그가 재검출되면 §2 손절선이
+        새 `flag_low`(진입가보다 높을 수 있다)로 갈아타 상승 포지션을 조기
+        손절시키고 §3 측정된 이동 타겟도 진입 근거와 무관해진다.
+
+        병합 규약 = live 사본 위에 stamp 의 구조 키만 덮는다(stamp 의 `0` 결손도
+        그대로 — live 로 메우면 결함이 부분 부활한다, §2 는 결손 시 미발화가 계약).
+        stamp 부재(재시작 직후 등)는 기존 live 폴백 그대로. 미지 종목은 빈 dict.
+        구조 레벨이 실제로 어긋난 빈도는 `[setup_structure_conflict]` 로 관측한다
+        (1회/(ticker)/일 — cycle228-A 래치와 같은 날 배포라 D+1 귀인 분리 목적).
         """
-        live = self._candidates.get(ticker)
-        if live:
-            return live
-        return self._position_setup.get(ticker) or {}
+        candidate = self._candidates.get(ticker)
+        stamp = self._position_setup.get(ticker)
+        if candidate and stamp:
+            merged = dict(candidate)
+            conflict = False
+            for key in self._STRUCTURE_KEYS:
+                if key in stamp:
+                    if key in merged and merged[key] != stamp[key]:
+                        conflict = True
+                    merged[key] = stamp[key]
+            if conflict:
+                self._roll_gate_day_if_needed()
+                if self._gate_should_emit(ticker, "setup_conflict"):
+                    logger.info(
+                        "[setup_structure_conflict] ticker=%s — 보유 중 재검출된 "
+                        "live 구조 레벨이 진입 stamp 와 다르다(§2/§3 은 stamp 사용). "
+                        "stamp=%s live=%s",
+                        ticker,
+                        {k: stamp.get(k) for k in self._STRUCTURE_KEYS},
+                        {k: candidate.get(k) for k in self._STRUCTURE_KEYS},
+                    )
+            return merged
+        if candidate:
+            return candidate
+        return stamp or {}
 
     def check_exit_signal(self, ticker, current_price, open_price) -> Signal:
         pos = self.state.positions.get(ticker)

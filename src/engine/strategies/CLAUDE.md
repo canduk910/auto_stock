@@ -4,25 +4,29 @@
 
 ## 전략 카탈로그
 
-> 🔴 **BFB·VCP 는 아래 진입 조건과 무관하게 매수가 전면 차단돼 있다 (2026-08-25 확정 → 사이클 227 Stage 0 진행 중).**
-> 매수 최종 관문(`bull_flag_breakout.py` / `vcp_breakout.py` 거래량 컷)이
-> `scanner.ticker_prices[ticker]["acml_vol"]` 을 읽는데 그 키의 대입부가 전체 소스에 없다
-> (`risk.py` 는 4키만 기록) ⇒ `acml_vol ≡ 0 < vol_threshold` ⇒ `check_buy_signal` 이
-> **구조적으로 BUY 불가** ⇒ 두 전략만 전 기간 체결 0건. 진입 조건 자체는 충족되고 있다
-> (2026-08-25 BFB 후보 48건·retention 21회+ 완주·매수 0 — "조건 미통과 탓" 귀인 반증).
+> ✅ **BFB·VCP 매수 게이트 개방 (사이클 228, 2026-08-28 게이트 전환 완료 — P0-1 종결).**
+> 이력: 유령 키 `ticker_prices["acml_vol"]`(대입부 0)로 두 전략이 전 기간 체결 0건이었다
+> (2026-08-25 확정) → 사이클 227 이 배관(handler `fields[13]` → `on_tick(*, acml_vol=)` →
+> `tick_volume.py`)과 would_pass 관측을 깔았고(Stage 0), 이틀 실측 **0/5**(관측/임계
+> 8%→70% 시각순 상승)가 "돌파 순간 1회 심사 = 시계 읽기" 역선택을 확증 → 사이클 228 이
+> 게이트를 전환했다.
 >
-> **⏳ 사이클 227 Stage 0 (2026-08-25, 미커밋)** — 배관은 열렸고 게이트는 그대로다:
-> handler 가 체결 payload `fields[13]`(ACML_VOL)을 파싱해 `on_tick(*, acml_vol=)` 로 흘리고
-> `src/engine/tick_volume.py`(KST 날짜 자기 리셋, 미관측 None) 가 보관하며, 두 전략은
-> 게이트 **직전**에 `[bfb_vol_gate_observe]`/`[vcp_vol_gate_observe]` 로 `would_pass` 만
-> 관측한다(cap 1회/(ticker,outcome)/일 + `_scan_stats` `vol_gate_observe_pass/fail/no_obs`).
-> **기존 거래량 컷 블록은 byte 불변(AST-2 봉인) = 매수는 여전히 차단** — 의도된 상태다.
-> 게이트 전환은 1~2영업일 관측 후 별도 사이클: 주 3건↑ would_pass = 전환 / **0건 = P1-3
-> 충족 래치 선행 필수**(자문 — 게이트가 돌파 순간 1회만 평가라 래치 없이 켜면 통과율 0%
-> 역선택) / 일 10건↑ = 스코프 재조사. 전환 시 은폐 테스트 3파일(`ticker_prices` 손주입,
-> 주석 마커 부착됨) tick_volume 주입 의미 전환 의무.
-> 시정 지시서 = [`../../../_workspace/00_URGENT_WORKLIST.md`](../../../_workspace/00_URGENT_WORKLIST.md) ·
-> 자문 = `_workspace/domain_consult/bfb_vcp_acml_vol_gate.md`.
+> **현행 게이트 (사이클 228)**: 거래량 컷 소스 = `tick_volume` 실측 단일(미관측 None =
+> fail-closed + `[bfb|vcp_vol_gate_no_data]` WARNING, 읽기 예외도 no_data 흡수). **충족
+> 래치** — retention 완주(BFB)/edge-crossing(VCP) 후 거래량 미달·미관측 시 무장
+> `[bfb|vcp_latch_armed]`, 후퇴에도 유지, 해제선 = **전략 자신의 §2 손절선**
+> (flag_low/base_low, `reason=stop_line`) + 레벨 박제(`level_moved`), 재평가는 돌파선
+> 이상 틱에서만, 통과 시 매수 `[bfb|vcp_vol_gate_pass] ... latch_age_sec=N`. **추격 상한**
+> `max_breakout_extension_pct` = BFB **5.0** / VCP **7.5**(리터럴 — PARAM_RANGES 미편입,
+> `current_price` 단독 판정·`daily_high` 금지) + 도출 관계 부팅 관찰
+> `[extension_cap_invariant]`. 래치·cap 은 날짜 키 자기 리셋(scheduler 훅 미의존).
+> `_scan_stats` 6키 = `vol_gate_pass/reject_ext/no_data`·`latch_armed_count`·
+> `breakout_seen/retreat_count`(cap 무관 총량). ⚠️ **cycle227 관측 마커
+> `[*_vol_gate_observe]` 는 은퇴** — 같은 would_pass 의 매매 귀결이 "안 샀다→샀다" 로
+> 반전되므로 2026-08-28 이전 로그와 이후 로그를 같은 grep 으로 합산하지 마라.
+> **228-B**: `_effective_setup` 이 구조 레벨(flag_low/pole_* / base_low)은 **stamp 우선**,
+> 지표(atr14/ema50)는 live 우선으로 병합(P1 계약 복원) + `[setup_structure_conflict]` 관측.
+> 자문 = `_workspace/domain_consult/cycle228_vol_gate_latch.md` · 명세 = `_workspace/red/cycle228_gate_latch_spec.md`.
 
 | ID | 핵심 동작 | 손절·청산 | tradable_boards / exchange |
 |----|----------|----------|---------------------------|

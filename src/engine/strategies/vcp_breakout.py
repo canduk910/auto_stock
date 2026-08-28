@@ -1175,16 +1175,41 @@ class VcpBreakoutStrategy(StrategyBase):
             self.state.buy_signals.pop(0)
         return Signal.BUY
 
-    def _effective_setup(self, ticker: str) -> dict:
-        """청산 파라미터 리졸버 — `_candidates` live 우선 → `_position_setup` 폴백.
+    # cycle228-B — 구조 레벨(진입 시점 확정 후 **불변**) 키. 지표(atr14/ema50)는 여기 없다.
+    _STRUCTURE_KEYS = ("base_low",)
 
-        live 를 우선하는 것은 설계 의도다(지표 변화 반영). 폴백이 있어야
-        `prepare()` 와이프 후에도 §2/§3/§4 가 살아남는다. 미지 종목은 **빈 dict** —
-        호출부가 `.get()` 만으로 안전하도록 None 을 돌려주지 않는다.
+    def _effective_setup(self, ticker: str) -> dict:
+        """청산 파라미터 리졸버 — 구조 레벨 stamp 우선 + 지표 live 우선 (cycle228-B).
+
+        BFB `_effective_setup` 동형(상세 사유는 그쪽 docstring). VCP 구조 레벨은
+        `base_low` 하나 — 보유 중 새 베이스 재검출 시 §2 손절선이 새 `base_low`
+        (진입가보다 높을 수 있다)로 갈아타는 것을 차단한다. `atr14`/`ema50` 은
+        지표라 live 우선 유지(박제 시 상승 추세에서 §4 ema50 이탈 청산이 늦어진다).
         """
-        live = self._candidates.get(ticker)
-        if live:
-            return live
+        candidate = self._candidates.get(ticker)
+        stamp = self._position_setup.get(ticker)
+        if candidate and stamp:
+            merged = dict(candidate)
+            conflict = False
+            for key in self._STRUCTURE_KEYS:
+                if key in stamp:
+                    if key in merged and merged[key] != stamp[key]:
+                        conflict = True
+                    merged[key] = stamp[key]
+            if conflict:
+                self._roll_gate_day_if_needed()
+                if self._gate_should_emit(ticker, "setup_conflict"):
+                    logger.info(
+                        "[setup_structure_conflict] ticker=%s — 보유 중 재검출된 "
+                        "live 구조 레벨이 진입 stamp 와 다르다(§2 는 stamp 사용). "
+                        "stamp=%s live=%s",
+                        ticker,
+                        {k: stamp.get(k) for k in self._STRUCTURE_KEYS},
+                        {k: candidate.get(k) for k in self._STRUCTURE_KEYS},
+                    )
+            return merged
+        if candidate:
+            return candidate
         return self._position_setup.get(ticker) or {}
 
     def check_exit_signal(self, ticker, current_price, open_price) -> Signal:
