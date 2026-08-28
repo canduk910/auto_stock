@@ -11,6 +11,10 @@
 > 다음 액션 = **15:30 NXT 애프터 이후 푸시**(KRX 장중 자제) → D+1 관찰(첫 체결·청산 경로
 > 첫 실가동·`latch_age_sec`·`[setup_structure_conflict]`·진입 임계 재튜닝 금지 N=10).
 > ⚠️ `[*_vol_gate_observe]` 마커 은퇴 — 08-28 전후 로그 같은 grep 합산 금지.
+> tester 조건부 GO(`_workspace/test_report_cycle228.md`, 결함 6) → 228-C 로 D-1(C-6 가드
+> 공허화, 뮤테이션 실증)·D-2(죽은 필드+invariant 경고 1회/일 cap)·D-3(release cap reason 축)
+> 시정 완료. **이관 잔여**: D-4(read 예외 debug 단독 — no_data WARNING 동반이라 LOW 수용) ·
+> D-5(대시보드 래치 상태 미노출 — 후속 사이클 후보, `get_targets_status` 키 추가만으로 가능).
 
 ---
 

@@ -194,9 +194,13 @@ def test_C6_cooldown_via_hook_blocks_buy_signal() -> None:
         "pole_start": 10_000,
         "atr14": 100,
     }
-    from src.engine import scanner as _scanner
+    # cycle228 (A7, tester D-1) — 거래량은 tick_volume 실측 주입. 유령 키 주입을
+    # 남기면 게이트 no_data fail-closed 가 NONE 을 돌려 쿨다운 배선을 제거해도
+    # 통과하는 **공허 가드**가 된다(C-7 대조군과 동일 소스여야 구분력 성립).
+    from src.engine import tick_volume
 
-    _scanner.ticker_prices["005930"] = {"acml_vol": 5_000}  # 거래량 컷 통과
+    tick_volume.reset_for_test()
+    tick_volume.record_acml_vol("005930", 5_000)  # 거래량 컷 통과 (threshold 2_000)
 
     try:
         # 쿨다운 등록 (신규 배선 = register 경유). 매도 set 은 미설정 (게이트 격리).
@@ -207,7 +211,7 @@ def test_C6_cooldown_via_hook_blocks_buy_signal() -> None:
             "쿨다운 등록 종목 재돌파 → check_buy_signal NONE (게이트 최초 실효)"
         )
     finally:
-        _scanner.ticker_prices.pop("005930", None)
+        tick_volume.reset_for_test()
 
 
 # ===========================================================================

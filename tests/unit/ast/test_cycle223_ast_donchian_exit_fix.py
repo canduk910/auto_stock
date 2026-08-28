@@ -469,9 +469,9 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    승인 수정으로 재핀. TODO(cycle228-B 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/bull_flag_breakout.py":
-        "108098d38e8c83d04793daa8e1f0dff84be053f4f1e45bb8ff98c2ec2a2211da",
+        "cfa6789358497609a56defc66cea56884d33c5e238d579ffb874e4995775ac3b",
     "src/engine/strategies/vcp_breakout.py":
-        "e7db28152cb8dbe505284dd6831738312b15aa3db7c26fe8608488d536abfe09",
+        "fc664feaae2c8cda34fd8265966b5b1f59ea2ae82c101c4ae802aa686d49039c",
 }
 
 

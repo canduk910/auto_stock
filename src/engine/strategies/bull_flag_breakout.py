@@ -197,10 +197,6 @@ class BullFlagBreakoutStrategy(StrategyBase):
         # live 레벨이 이동하면 해제한다(무장 근거 소멸 — prepare 장중 재실행 대비).
         # 날짜 키 자기 리셋(어제 래치는 읽는 순간 무효).
         self._vol_latch: dict[str, dict] = {}
-        # cycle228 (A4) — 부팅 불변식 WARNING 1회만(재-prepare 스팸 방지). "첫
-        # prepare() 시 1회" 명세 — 인스턴스 수명 동안 1회로 고정.
-        self._extension_cap_invariant_checked: bool = False
-
     # ------------------------------------------------------------------
     # prepare — 일봉 fetch → 폴/플래그 자동 검출
     # ------------------------------------------------------------------
@@ -873,7 +869,10 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
     def _release_latch(self, ticker: str, reason: str) -> None:
         self._vol_latch.pop(ticker, None)
-        if self._gate_should_emit(ticker, "latch_released"):
+        # tester D-3 — cap 키에 reason 포함(cycle225 교훈: 같은 날 level_moved →
+        # 재래치 → stop_line 이중 해제 시 사유별 대응이 갈리는데 한 사유가 다른
+        # 사유를 삼키면 안 된다). 최대 2행/(ticker)/일.
+        if self._gate_should_emit(ticker, f"latch_released:{reason}"):
             logger.info("[bfb_latch_released] ticker=%s reason=%s", ticker, reason)
 
     def _check_extension_cap_invariant(self) -> None:
@@ -892,12 +891,16 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 return
             derived = (1.0 / (1.0 + stop / 100.0) - 1.0) * 100.0
             if derived < cap - 1e-9 or (derived - cap) > 1.0:
-                logger.warning(
-                    "[extension_cap_invariant] cap=%.1f stop_loss_rate=%.1f "
-                    "derived=%.2f — 리터럴 캡과 손절 도출값이 어긋났다(자동 보정 "
-                    "금지 — 사람이 판단)",
-                    cap, stop, derived,
-                )
+                # tester D-2 — 위반 상태에서 `_reprepare_breakout_if_empty`(후보 0
+                # 시 5분 주기)가 prepare 를 재호출하면 일 100행+ 스팸이 되므로
+                # 1회/일 cap(관찰 목적엔 하루 1행이면 충분, 위반은 지속 상태다).
+                if self._gate_should_emit("_invariant_", "ext_cap_warn"):
+                    logger.warning(
+                        "[extension_cap_invariant] cap=%.1f stop_loss_rate=%.1f "
+                        "derived=%.2f — 리터럴 캡과 손절 도출값이 어긋났다(자동 보정 "
+                        "금지 — 사람이 판단)",
+                        cap, stop, derived,
+                    )
         except Exception:
             return  # 관찰기 자기실패가 prepare 를 막으면 안 된다
 

@@ -993,7 +993,8 @@ class VcpBreakoutStrategy(StrategyBase):
 
     def _release_latch(self, ticker: str, reason: str) -> None:
         self._vol_latch.pop(ticker, None)
-        if self._gate_should_emit(ticker, "latch_released"):
+        # tester D-3 — cap 키에 reason 포함(cycle225 교훈, BFB 동형). 2행/(ticker)/일.
+        if self._gate_should_emit(ticker, f"latch_released:{reason}"):
             logger.info("[vcp_latch_released] ticker=%s reason=%s", ticker, reason)
 
     def _check_extension_cap_invariant(self) -> None:
@@ -1009,12 +1010,14 @@ class VcpBreakoutStrategy(StrategyBase):
                 return
             derived = (1.0 / (1.0 + stop / 100.0) - 1.0) * 100.0
             if derived < cap - 1e-9 or (derived - cap) > 1.0:
-                logger.warning(
-                    "[extension_cap_invariant] cap=%.1f stop_loss_rate=%.1f "
-                    "derived=%.2f — 리터럴 캡과 손절 도출값이 어긋났다(자동 보정 "
-                    "금지 — 사람이 판단)",
-                    cap, stop, derived,
-                )
+                # tester D-2 — 재-prepare 스팸 방지 1회/일 cap (BFB 동형).
+                if self._gate_should_emit("_invariant_", "ext_cap_warn"):
+                    logger.warning(
+                        "[extension_cap_invariant] cap=%.1f stop_loss_rate=%.1f "
+                        "derived=%.2f — 리터럴 캡과 손절 도출값이 어긋났다(자동 보정 "
+                        "금지 — 사람이 판단)",
+                        cap, stop, derived,
+                    )
         except Exception:
             return  # 관찰기 자기실패가 prepare 를 막으면 안 된다
 
