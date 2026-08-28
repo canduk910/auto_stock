@@ -119,6 +119,8 @@
 
 ## 안전 규칙
 
+- **VB·momentum 매수 컷 15:20 (`BUY_CUTOFF_KST` 모듈 상수, cycle229 2026-08-28)** — 15:20~15:30 은 KRX 장후 동시호가로 **시장가 호가가 접수**되므로(15:20 강제청산 매도가 방증) VB 매수가 체결되면 오버나잇 확정이고, 15:30 랜덤엔드 확정 종가 틱은 허위 edge-crossing(+29% = 상한가 잠금 실패 마감 표본)을 만든다. 게이트는 `check_buy_signal` **최상단·상태 무갱신·KST 명시**(naive 금지). **DB override 불가 — DEFAULT_PARAMS/PARAM_RANGES 편입 금지**(OVERNIGHT 금지는 토글로 뚫리면 안 되는 규칙). 관측 `[vb_buy_cutoff]`/`[momentum_buy_cutoff]` 1회/일. `[단일가매매]` msg1 변형은 `balance.py` 분류기가 `is_market_order_disallowed` 로 흡수(매도 step_down 폴백 경로).
+
 - **VB/LTV/BFB/VCP 후보 WebSocket 구독 우선순위** — `subscribe_filtered_stocks(priority_groups=...)` 의 `breakout` 그룹: LOW+bypass_limit=False (보조 세션 분산). **사이클 48 (2026-05-27)**: `scheduler._collect_breakout_tickers()` 가 4 돌파 전략(VB/LTV + bull_flag_breakout/vcp_breakout)을 순회 → BFB/VCP 후보도 동일 `breakout` LOW 그룹으로 편입. BFB/VCP 는 폴링 루프 없이 `risk.on_tick` 으로만 매수 평가하므로 이 구독 없이는 0건 지속(PR #15 P1). `_resubscribe_stale_priority` 의 stale 재구독도 positions/next_day_clear 소속이 아닌 후보는 LOW (사이클 25-B, 2026-05-20). 후보 HIGH 메인 집중 → 메인 과부하 → silent inactive 방지
 - **VB `DEFAULT_TRADABLE_BOARDS` = ("main",) 유지 (사이클 26)** — KRX ONLY 정책. PRE_NXT 복구 금지 (NXT 갭상승 위험 + SK하이닉스 시가 결함). POST_NXT 추가 금지 (VB OVERNIGHT 보유 결함). DB `strategy_config.params.tradable_boards` 도 함께 갱신
 - **LTV `DEFAULT_TRADABLE_BOARDS` = ("pre_nxt", "main", "post_nxt") 복원 (사이클 38, 2026-05-22)** — 사용자 운영 의도 복원. 연속 상한가 종목 익일 청산 모드 + 야간 매수. 사이클 26 KRX ONLY 정책 폐기. DB `strategy_config` 는 운영 중 보존된 3 보드 유지

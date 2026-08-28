@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.session import MarketBoard, session_tracker
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
@@ -155,6 +156,9 @@ def test_buy_first_tick_per_board_records_only(vb):
     assert vb.check_buy_signal("005930", 81000, 80000) == Signal.NONE
 
 
+# cycle229 적응 — 매수 컷(15:20 KST) 도입으로 무-freeze 실행이 벽시계 의존이 됨.
+# 장중 KST(UTC 01:00 = KST 10:00) 로 동결해 결정성 확보(행위 불변).
+@freeze_time("2026-05-08 01:00:00")
 def test_buy_when_breakout_moment_then_buy(vb):
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
     vb.config.params["k_value_krx_main"] = 1.0
@@ -178,6 +182,9 @@ def test_buy_when_above_target_but_no_breakout_moment_then_none(vb):
     assert vb.check_buy_signal("005930", 81000, 80000) == Signal.NONE
 
 
+# cycle229 적응 — 매수 컷(15:20 KST) 도입으로 무-freeze 실행이 벽시계 의존이 됨.
+# 장중 KST(UTC 01:00 = KST 10:00) 로 동결해 결정성 확보(행위 불변).
+@freeze_time("2026-05-08 01:00:00")
 def test_buy_signal_per_board_is_independent(vb):
     """main 보드에서 first tick 기록 후 두 번째 틱이 target 미달이면 NONE.
 

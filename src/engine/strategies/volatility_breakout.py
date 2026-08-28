@@ -12,12 +12,22 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 from src.api.condition import add_business_days
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
+
+# cycle229 (P1-5, 2026-08-28) — 매수 컷오프 15:20 KST. **모듈 상수 = DB override 불가**
+# (VB 는 15:20 강제청산 후 신규 매수가 곧 오버나잇이라, OVERNIGHT 금지는 토글로
+# 뚫리면 안 되는 규칙이다). 15:20~15:30 은 KRX 장후 동시호가(종가 단일가)로 시장가
+# 호가가 **접수**되므로(강제청산 시장가 매도가 작동 중인 것이 방증) 거부라는 우연한
+# 안전판이 없고, 15:30 랜덤엔드 확정 종가 1틱은 15:19 마지막 연속체결가 대비 점프해
+# 허위 edge-crossing 을 만든다(8/20~8/27 실측 9건 → APBK3013 [단일가매매] 거부 →
+# 예외 전파 → 매일 WS 재연결). 자문 = cycle229_vb_1530_single_price.md.
+# DEFAULT_PARAMS/PARAM_RANGES 편입 금지.
+BUY_CUTOFF_KST = time(15, 20)
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +144,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 사이클 201 — ticker -> 쿨다운 만료일(이날 이전엔 재진입 금지). multi-day 상태 —
         # _reset_daily_state/prepare 리셋 절대 금지 (G-VB-NO-DAILY-RESET, BFB 사이클 191 답습).
         self._cooldown_until: dict[str, date] = {}
+        # cycle229 (P1-5) — `[vb_buy_cutoff]` 1회/일 관측 cap (날짜 키 자기 리셋)
+        self._buy_cutoff_logged_day: date | None = None
         # 사이클 G Part A — ticker -> 돌파선 재이탈 연속 카운트 (조기청산 confirm_ticks 용).
         # transient 상태 — prepare 에서 clear + on_position_closed 에서 pop.
         self._failed_breakout_count: dict[str, int] = {}
@@ -810,6 +822,22 @@ class VolatilityBreakoutStrategy(StrategyBase):
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:
         """현재 활성 보드의 Target Price 돌파 시 매수."""
+        # cycle229 (P1-5) — 15:20 매수 컷. **최상단·`_prev_price` 갱신 이전**이 계약:
+        # 뒤에 두면 종가/예상체결가가 baseline 이 되어 장중 재시작 시 거짓 미돌파를
+        # 만든다(컷 틱은 어떤 상태도 갱신하지 않는다). 반드시 KST 명시(naive 금지 —
+        # 컨테이너 TZ 의존은 P2-6 등재 결함).
+        _now_kst = datetime.now(KST)
+        if _now_kst.time() >= BUY_CUTOFF_KST:
+            if self._buy_cutoff_logged_day != _now_kst.date():
+                # 1회/일 관측 — 발화 없이 조용히 막으면 "왜 안 사나"를 영영 못 본다
+                # (사이클 224 교훈). 날짜 키 자기 리셋(_reset_daily_state 훅 미의존).
+                self._buy_cutoff_logged_day = _now_kst.date()
+                logger.info(
+                    "[vb_buy_cutoff] 15:20 이후 매수 신호 차단 — ticker=%s "
+                    "(장후 동시호가·확정 종가 틱은 진입 대상이 아니다)",
+                    ticker,
+                )
+            return Signal.NONE
         if self.state.buy_disabled:
             return Signal.NONE
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker) or self.state.is_sold_today(ticker):

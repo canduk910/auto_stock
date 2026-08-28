@@ -5,6 +5,7 @@ from __future__ import annotations
 import time
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.session import MarketBoard, session_tracker
 from src.engine.strategy_base import Position
@@ -53,6 +54,9 @@ async def test_on_tick_when_low_funds_blocked_and_price_above_total_then_skip(or
     assert momentum.state.signal_count_today == 0
 
 
+# cycle229 적응 — momentum 매수 컷(15:20 KST) 도입으로 무-freeze 실행이 벽시계 의존.
+# 장중 KST 로 동결해 결정성 확보(행위 불변).
+@freeze_time("2026-05-08 01:00:00")
 @pytest.mark.asyncio
 async def test_on_tick_buy_signal_when_breakout_increments_signal_count_and_orders(order_env):
     """매수 신호 발동 → signal_count +1, execute_buy 호출 → place_order 1건."""

@@ -465,13 +465,15 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    `_workspace/red/cycle228_gate_latch_spec.md`)로 같은 두 파일을 다시 승인
 #    수정하며 재핀. 파일명 집합 면제는 **영구**라 쓰지 않는다 — 핀에 없는 전략
 #    파일이 바뀌면 즉시 FAIL, 핀에 있는 파일도 1 byte 달라지면 FAIL.
-# 🔁 2026-08-28 — cycle228-A 커밋(`4e7b302`) 후 228-B(setup 리졸버, 같은 두 파일)
-#    승인 수정으로 재핀. TODO(cycle228-B 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
+# 🔁 2026-08-28 — cycle228 커밋(4e7b302/0056db7/e139c42)으로 BFB·VCP 항목 자기소멸.
+#    cycle229(P1-5 — VB·momentum 매수 컷 15:20, 자문 cycle229_vb_1530_single_price.md,
+#    사용자 승인)가 다른 두 전략 파일을 수정하며 재핀.
+# TODO(cycle229 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
-    "src/engine/strategies/bull_flag_breakout.py":
-        "cfa6789358497609a56defc66cea56884d33c5e238d579ffb874e4995775ac3b",
-    "src/engine/strategies/vcp_breakout.py":
-        "fc664feaae2c8cda34fd8265966b5b1f59ea2ae82c101c4ae802aa686d49039c",
+    "src/engine/strategies/volatility_breakout.py":
+        "7f7a9114362f5c6efa3b7c2130e679d5275a0802ebe10ff00331ed8141771757",
+    "src/engine/strategies/momentum.py":
+        "4ee8c6ed8e8fb651aa1f0044fe48128f9514faae9bc1e74a945b04042d1ba33f",
 }
 
 

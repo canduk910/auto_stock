@@ -254,6 +254,9 @@ class TestMechanism1ResetDailyState:
             _scanner.ticker_prev_close.pop("005930", None)
         assert sig == Signal.NONE, "리셋 후 첫 틱은 기록만 (거짓 돌파 차단)"
 
+    # cycle229 적응 — 클래스 freeze "08:00"(UTC)=KST 17:00 이 매수 컷(15:20)에 걸림.
+    # BUY 기대 케이스만 장중 KST(UTC 01:00 = KST 10:00) 로 재동결(행위 불변).
+    @freeze_time("2024-06-27 01:00:00")
     def test_G1_MOM_LEAK_CONTROL_seed_without_reset_immediate_buy(self) -> None:
         """G1-MOM-LEAK-CONTROL (특성, 양쪽 PASS): 리셋 미발생 시 seed 잔존 → 첫 틱 즉시 BUY.
 

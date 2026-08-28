@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+from freezegun import freeze_time
+
 _KST = timezone(timedelta(hours=9))
 
 
@@ -95,6 +97,9 @@ def test_buy_first_tick_records_only_then_no_signal(momentum):
     assert momentum.check_buy_signal("005930", 85000, 80000) == Signal.NONE
 
 
+# cycle229 적응 — 매수 컷(15:20 KST) 도입으로 무-freeze 실행이 벽시계 의존이 됨.
+# 장중 KST(UTC 01:00 = KST 10:00) 로 동결해 결정성 확보(행위 불변).
+@freeze_time("2026-05-08 01:00:00")
 def test_buy_when_prev_below_threshold_and_current_above_then_buy(momentum):
     # 첫 틱: +27.14% 기록만 (임계 29% 미만, 부동소수 마진 충분)
     assert momentum.check_buy_signal("005930", 89000, 80000) == Signal.NONE
@@ -110,6 +115,9 @@ def test_buy_when_already_above_threshold_in_first_tick_then_no_signal(momentum)
     assert momentum.check_buy_signal("005930", 90400, 80000) == Signal.NONE
 
 
+# cycle229 적응 — 매수 컷(15:20 KST) 도입으로 무-freeze 실행이 벽시계 의존이 됨.
+# 장중 KST(UTC 01:00 = KST 10:00) 로 동결해 결정성 확보(행위 불변).
+@freeze_time("2026-05-08 01:00:00")
 def test_buy_signals_capped_at_20_entries(momentum):
     """buy_signals 리스트는 최신 20개만 유지."""
     # 첫 틱 기록 (임계 미달)

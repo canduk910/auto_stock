@@ -9,12 +9,22 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import date, datetime, time, timedelta, timezone
 
 from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
 
 logger = logging.getLogger(__name__)
+
+KST = timezone(timedelta(hours=9))
+
+# cycle229 (P1-5, 2026-08-28) — 매수 컷오프 15:20 KST. **모듈 상수 = DB override 불가.**
+# 15:20~15:30 장후 동시호가의 확정 종가 틱이 만드는 +29% 는 "돌파 순간"이 아니라
+# **상한가 잠금 실패 마감** 표본이다(momentum 이 +30% 상한가를 제외하므로 이 틱이
+# 잡는 것은 하루 종일 두드렸으나 못 잠근 종목 = 원 가설의 정확한 반대). VB 와 값
+# 동일하나 상수는 전략별 소유(파일 간 결합 회피). PARAM_RANGES/DEFAULT_PARAMS 미편입.
+# 자문 = cycle229_vb_1530_single_price.md Q2.
+BUY_CUTOFF_KST = time(15, 20)
 
 
 # 사이클 158 Q1 (2026-06-17) — momentum 익일 청산 logger 폭주 차단.
@@ -60,6 +70,8 @@ class MomentumStrategy(StrategyBase):
         super().__init__(config)
         self._prev_prdy_rate: dict[str, float] = {}
         self._next_day_clear_pending = False  # 익일 청산 대기 중 플래그 (시가 안정화 대기)
+        # cycle229 (P1-5) — `[momentum_buy_cutoff]` 1회/일 관측 cap (날짜 키 자기 리셋)
+        self._buy_cutoff_logged_day: date | None = None
 
     def _reset_daily_state(self) -> None:
         """사이클 185 — cross-day 전일등락율 캐시 초기화. 익일 첫 tick 거짓돌파 차단."""
@@ -96,6 +108,18 @@ class MomentumStrategy(StrategyBase):
     ) -> Signal:
         """전일종가 대비 29% 돌파 순간 매수."""
         from src.engine.scanner import t, ticker_names, ticker_prev_close
+
+        # cycle229 (P1-5) — 15:20 매수 컷 (VB 동형, 최상단·상태 갱신 이전·KST 명시).
+        _now_kst = datetime.now(KST)
+        if _now_kst.time() >= BUY_CUTOFF_KST:
+            if self._buy_cutoff_logged_day != _now_kst.date():
+                self._buy_cutoff_logged_day = _now_kst.date()
+                logger.info(
+                    "[momentum_buy_cutoff] 15:20 이후 매수 신호 차단 — ticker=%s "
+                    "(확정 종가 틱의 +29%%는 상한가 잠금 실패 마감 표본)",
+                    ticker,
+                )
+            return Signal.NONE
 
         if self.state.buy_disabled:
             return Signal.NONE
