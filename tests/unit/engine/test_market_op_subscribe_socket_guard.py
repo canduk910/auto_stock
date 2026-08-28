@@ -27,6 +27,15 @@ H0UNMKO0(장운영정보)는 VI·거래정지 이벤트 채널 — 시세(TICK)�
   전부 실패한다. 즉시 break + **WARNING 1행**(종목별 ERROR 폭주 대신, 재연결
   중 예상 상태이므로 ERROR 아님).
 - realtime 미접촉 — scheduler 이 duck-typing 으로 `_ws.state` 만 읽는다.
+
+## cycle221 (2026-08-20) 픽스처 적응 — 계약은 그대로
+
+VI(H0UNMKO0) 라우팅이 "메인 직접(bypass) + 풀 LOW" 2루프 → **보조 세션 직접 배치 1루프**
+로 바뀌었다(08-19 OPSP0008 시세 7건 = 보유 종목 tick blind 시정). 정정(F2)으로 대상은
+**보유 + 익일청산(HIGH) 뿐** — 후보 VI 는 `_ticker_to_session` 단일키 중복 분기 때문에
+실질 noop 이었으므로 되살리지 않는다. 이 파일이 지키는
+**소켓 OPEN 진입 가드 / ConnectionClosedError break+WARNING 1행 / ERROR 0 / 기타 예외
+종목별 graceful** 계약은 **동일**하고, 단언 대상만 메인 세션 → 보조 세션으로 이동한다.
 """
 
 from __future__ import annotations
@@ -53,6 +62,8 @@ def _make_scheduler(*, positions: set[str], pending: set[str] = frozenset()):
     registry.all.return_value = [strat]
     sched.registry = registry
     sched._pending_next_day_clear = {(t, "s") for t in pending}
+    # cycle221 — `__init__` 이 선언하는 VI 구독 추적 맵 (델타 해제 + 중복 SEND 억제)
+    sched._market_op_subs = {}
     return sched
 
 
@@ -63,14 +74,37 @@ class _FakeSocket:
         self.state = state
 
 
-def _patch_ws(monkeypatch, *, main_socket, pool_ok: bool = True):
-    """kis_ws._ws 를 임의 소켓 상태로, subscribe 를 mock 으로."""
+def _make_quote_session(label: str):
+    """cycle221 — VI 가 실제로 붙는 보조 세션 mock."""
+    ws = MagicMock()
+    ws._label = label
+    ws._subscriptions = set()
+
+    async def _sub(tr_id, tr_key, *, bypass_limit=False):
+        ws._subscriptions.add((tr_id, tr_key))
+
+    async def _unsub(tr_id, tr_key):
+        ws._subscriptions.discard((tr_id, tr_key))
+
+    ws.subscribe = AsyncMock(side_effect=_sub)
+    ws.unsubscribe = AsyncMock(side_effect=_unsub)
+    return ws
+
+
+def _patch_ws(monkeypatch, *, main_socket, pool_ok: bool = True, quotes=None):
+    """kis_ws._ws 를 임의 소켓 상태로, 보조 세션(_quotes) 을 배치 대상으로."""
     fake_ws = MagicMock()
     fake_ws._ws = main_socket
     fake_ws.subscribe = AsyncMock(return_value=None)
+    fake_ws._subscriptions = set()
+    fake_ws.get_subscribed_tickers = MagicMock(return_value=set())
 
     fake_pool = MagicMock()
     fake_pool.subscribe = AsyncMock(return_value="quote-1" if pool_ok else None)
+    fake_pool.unsubscribe = AsyncMock(return_value=None)
+    fake_pool._quotes = (
+        list(quotes) if quotes is not None else [_make_quote_session("quote-1")]
+    )
 
     monkeypatch.setattr("src.realtime.websocket.kis_ws", fake_ws, raising=False)
     monkeypatch.setattr(
@@ -100,6 +134,8 @@ async def test_non_open_socket_skips_without_sending(state, monkeypatch, caplog)
     assert n == 0, "닫힌/전이 소켓에서는 구독 시도 자체를 하지 않는다"
     fake_ws.subscribe.assert_not_awaited()
     fake_pool.subscribe.assert_not_awaited()
+    for q in fake_pool._quotes:
+        q.subscribe.assert_not_awaited()
     # ERROR/traceback 폭주가 아니라 관측 로그 (skip 사유)
     assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
@@ -127,16 +163,32 @@ async def test_none_socket_still_skips():
 
 @pytest.mark.asyncio
 async def test_open_socket_subscribes_normally(monkeypatch):
+    """[cycle221 의미 전환] 열린 소켓 정상 경로 — 배치처가 메인 → 보조 세션.
+
+    원래: `fake_ws.subscribe.await_count == 2` + `bypass_limit is True` (HIGH 메인 직접).
+    전환: 메인 SEND **0건**, `bypass_limit=True` **부재**, 전량 보조 세션 직접 배치.
+    (08-19 OPSP0008 — VI 가 메인 41 슬롯을 tick 과 경쟁해 보유 종목 시세가 밀렸다.)
+
+    cycle221 정정 — 후보 VI 는 실질 noop 이었으므로 배치하지 않는다(F2).
+    따라서 정상 경로 SEND 는 HIGH 2건(보유+익일청산)뿐이고 후보 111111 은 0건이다.
+    """
     fake_ws, fake_pool = _patch_ws(monkeypatch, main_socket=_FakeSocket(State.OPEN))
     sched = _make_scheduler(positions={"005930"}, pending={"000660"})
 
     n = await sched._subscribe_market_operation_tickers({"111111"})
 
-    assert fake_ws.subscribe.await_count == 2   # HIGH 2 (보유+익일청산)
-    assert fake_pool.subscribe.await_count == 1  # LOW 1
-    assert n == 3
-    for call in fake_ws.subscribe.await_args_list:
-        assert call.kwargs.get("bypass_limit") is True   # cycle 32 R4 불변
+    assert fake_ws.subscribe.await_count == 0, "VI 메인 직접 구독 금지"
+    assert fake_pool.subscribe.await_count == 0, "풀 API 경유 금지 (라우팅 맵 오염)"
+
+    calls = [c for q in fake_pool._quotes for c in q.subscribe.await_args_list]
+    assert sorted(c.args[1] for c in calls) == ["000660", "005930"], (
+        "HIGH 2(보유+익일청산)만 배치 — 후보는 SEND 0건"
+    )
+    assert n == 2
+    for call in calls:
+        assert call.kwargs.get("bypass_limit", False) is False, (
+            "bypass_limit=True 는 로컬 가드만 우회 — 서버 한도 41 초과 시 OPSP0008"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -145,10 +197,10 @@ async def test_open_socket_subscribes_normally(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_mid_loop_connection_closed_breaks_with_warning(monkeypatch, caplog):
+    """[cycle221 픽스처 적응] 루프 구조 2루프 → 1루프. **계약(1행 WARNING·ERROR 0) 동일.**"""
     import logging
 
-    fake_ws, fake_pool = _patch_ws(monkeypatch, main_socket=_FakeSocket(State.OPEN))
-    # 두 번째 HIGH 구독부터 소켓이 닫혀 ConnectionClosedError (재연결 레이스 재현)
+    q1 = _make_quote_session("quote-1")
     calls = {"n": 0}
 
     async def _sub(tr_id, ticker, *, bypass_limit=False):
@@ -156,13 +208,16 @@ async def test_mid_loop_connection_closed_breaks_with_warning(monkeypatch, caplo
         if calls["n"] >= 2:
             raise ConnectionClosedError(None, None)
 
-    fake_ws.subscribe = AsyncMock(side_effect=_sub)
+    q1.subscribe = AsyncMock(side_effect=_sub)
+    fake_ws, fake_pool = _patch_ws(
+        monkeypatch, main_socket=_FakeSocket(State.OPEN), quotes=[q1]
+    )
     sched = _make_scheduler(positions={"051905", "073240", "079160", "103140"})
 
     with caplog.at_level(logging.INFO):
         await sched._subscribe_market_operation_tickers(set())
 
-    # 닫힘 감지 후 남은 종목은 시도하지 않는다 (7종목 ERROR 폭주 → break)
+    # 닫힘 감지 후 남은 종목은 시도하지 않는다 (4종목 ERROR 폭주 → break)
     assert calls["n"] == 2, "ConnectionClosedError 후 즉시 break"
     errors = [r for r in caplog.records if r.levelno >= logging.ERROR]
     warns = [r for r in caplog.records
@@ -173,16 +228,19 @@ async def test_mid_loop_connection_closed_breaks_with_warning(monkeypatch, caplo
 
 @pytest.mark.asyncio
 async def test_other_exception_still_graceful_per_ticker(monkeypatch, caplog):
-    """ConnectionClosedError 외 예외는 기존대로 종목별 격리 + 계속 진행."""
+    """[cycle221 픽스처 적응] ConnectionClosedError 외 예외는 종목별 격리 + 계속 진행."""
     import logging
 
-    fake_ws, fake_pool = _patch_ws(monkeypatch, main_socket=_FakeSocket(State.OPEN))
+    q1 = _make_quote_session("quote-1")
 
     async def _sub(tr_id, ticker, *, bypass_limit=False):
         if ticker == "073240":
             raise RuntimeError("일시 오류")
 
-    fake_ws.subscribe = AsyncMock(side_effect=_sub)
+    q1.subscribe = AsyncMock(side_effect=_sub)
+    fake_ws, fake_pool = _patch_ws(
+        monkeypatch, main_socket=_FakeSocket(State.OPEN), quotes=[q1]
+    )
     sched = _make_scheduler(positions={"051905", "073240", "079160"})
 
     with caplog.at_level(logging.INFO):

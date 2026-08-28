@@ -1,15 +1,24 @@
-"""사이클 214 (2026-07-15) — AST/SAFETY 영구 가드.
+"""사이클 214 (2026-07-15) → **cycle221 (2026-08-20) 의미 전환** AST 가드.
 
-H0UNMKO0 후보 구독 풀 분산 (LOW `kis_ws_pool` + HIGH `kis_ws` 메인 직접).
+## 원래 계약
 
-- G-214-3 (SAFETY): `_EXECUTION_NOTICE_TR_IDS == {"H0STCNI0","H0STCNI9"}` 불변
-  (H0UNMKO0 미포함 = 보조 분산 허용 + 체결통보 메인 단일 강제 영속).
-- G-214-5 (AST/SAFETY): `_subscribe_market_operation_tickers` LOW 루프는
-  `kis_ws_pool` 사용 + HIGH 루프는 `kis_ws`(메인 직접) 유지.
-- 매매 안전성 8영역 diff 0 (scheduler.py = 8영역 밖, realtime/ 미변경).
+- G-214-3 (SAFETY): `_EXECUTION_NOTICE_TR_IDS == {"H0STCNI0","H0STCNI9"}` 불변. **유지**.
+- G-214-5 (AST): LOW 는 `kis_ws_pool` 경유 + HIGH 는 `kis_ws` 메인 직접 + bypass_limit=True.
 
-domain 자문: `_workspace/domain_consult/cycle214_h0unmko0_cap.md` (판정 (b))
-Red memo: `_workspace/red/cycle214_h0unmko0_pool.md`
+## 전환 (cycle221)
+
+08-19 OPSP0008 117건(시세 7건 = 매수 직후 보유 4종목 tick blind)의 근본은 VI 관찰 채널이
+메인 41 슬롯을 tick 과 경쟁한 것이다. `bypass_limit=True` 는 **로컬 가드만** 우회하고 KIS
+서버 한도는 못 넘는다 → 초과분이 OPSP0008.
+
+- G-214-5b **정확히 반전**: 함수 본체 `bypass_limit=True` 리터럴 **0건** 의무.
+- G-214-5c **폐기**: `priority="LOW"` 키워드 소멸. `_ticker_to_session` 이 `tr_key` 단일
+  키라 VI 가 풀 API 를 경유하면 TICK drop 종목이 quote-N 으로 고착 → TICK 영구 미구독(F-P).
+  대체 가드 = `test_cycle221_ast_market_op_no_main.py::test_no_pool_subscribe_unsubscribe_calls`.
+- G-214-5 **재정의**: `kis_ws_pool` 참조는 `_quotes` **읽기** 목적으로만 잔존하고,
+  `kis_ws` 참조는 구독이 아니라 **점유 계측**(`get_subscribed_tickers`/`_subscriptions`) 목적.
+
+봉인 정본은 `tests/unit/ast/test_cycle221_ast_market_op_no_main.py`.
 """
 
 from __future__ import annotations
@@ -52,68 +61,61 @@ def _collect_names(node: ast.AST) -> set[str]:
     return {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
 
 
-def test_G_214_5_low_uses_pool_high_uses_main() -> None:
-    """G-214-5 (AST/SAFETY) — LOW 풀 분산 + HIGH 메인 직접.
+def test_G_214_5_pool_referenced_for_quote_sessions_only() -> None:
+    """[의미 전환 G-214-5] 참조는 남되 **의미가 다르다**.
 
-    `_subscribe_market_operation_tickers` 함수 본체에서:
-    - `kis_ws_pool` 참조 존재 (LOW 후보 풀 분산 경유)
-    - `kis_ws` 참조 존재 (HIGH 보유/익일청산 메인 직접 유지)
-
-    현재 production 은 LOW 도 `kis_ws` 직접 → `kis_ws_pool` 참조 0건 → FAIL (Red).
+    - `kis_ws_pool` = 보조 세션 리스트(`_quotes`) **읽기** 소스 (subscribe 경유 아님).
+    - `kis_ws` = 메인 **점유 계측**(`get_subscribed_tickers`/`_subscriptions`) 소스 +
+      소켓 OPEN 가드. 구독 SEND 는 0건(cycle221 AST 가드가 별도 봉인).
     """
     tree = ast.parse(_SCHEDULER_PATH.read_text(encoding="utf-8"))
     fn = _get_function_node(tree, "_subscribe_market_operation_tickers")
     names = _collect_names(fn)
 
     assert "kis_ws_pool" in names, (
-        "LOW 후보 H0UNMKO0 는 kis_ws_pool.subscribe(priority='LOW') 풀 분산 경유 의무"
+        "보조 세션(_quotes) 을 읽으려면 kis_ws_pool 참조가 필요하다"
     )
     assert "kis_ws" in names, (
-        "HIGH 보유/익일청산 H0UNMKO0 는 kis_ws.subscribe(bypass_limit=True) 메인 직접 유지 의무"
+        "메인 점유 계측(main_tick/main_total/main_over) + 소켓 OPEN 가드용 참조 의무"
     )
 
+    quotes_read = any(
+        isinstance(n, ast.Attribute) and n.attr == "_quotes"
+        for n in ast.walk(fn)
+    ) or any(
+        isinstance(n, ast.Constant) and n.value == "_quotes" for n in ast.walk(fn)
+    )
+    assert quotes_read, "VI 는 보조 세션 리스트(_quotes) 를 직접 읽어 라운드로빈 배치한다"
 
-def test_G_214_5b_high_bypass_true_persists() -> None:
-    """G-214-5 보강 — HIGH 루프의 bypass_limit=True 키워드 인자 영속.
 
-    cycle 32 R4 보유/익일청산 절대 보호 = HIGH 구독은 bypass_limit=True 명시.
+def test_G_214_5b_bypass_true_is_now_forbidden() -> None:
+    """[의미 전환 G-214-5b, 정확히 반전] `bypass_limit=True` 리터럴 **0건**.
+
+    원래는 "cycle 32 R4 절대보호 = HIGH 는 bypass_limit=True 명시 의무" 였다.
+    그러나 R4 의 보호 대상은 **시세(tick)** 이고, VI 관찰 채널이 그 계약을 빌려 쓰면
+    메인이 서버 한도 41 을 넘겨 OPSP0008 로 **tick 이 밀린다**(08-19 실증).
     """
     tree = ast.parse(_SCHEDULER_PATH.read_text(encoding="utf-8"))
     fn = _get_function_node(tree, "_subscribe_market_operation_tickers")
 
-    has_bypass_true = False
+    offenders = []
     for node in ast.walk(fn):
         if isinstance(node, ast.Call):
             for kw in node.keywords:
-                if kw.arg == "bypass_limit" and isinstance(kw.value, ast.Constant):
-                    if kw.value.value is True:
-                        has_bypass_true = True
-    assert has_bypass_true, "HIGH H0UNMKO0 구독은 bypass_limit=True 명시 의무 (cycle 32 R4)"
-
-
-def test_G_214_5c_pool_priority_low_keyword() -> None:
-    """G-214-5 보강 — LOW 후보 풀 subscribe 는 priority='LOW' 키워드 명시.
-
-    현재 production 은 pool.subscribe 호출 자체가 없음 → FAIL (Red).
-    """
-    tree = ast.parse(_SCHEDULER_PATH.read_text(encoding="utf-8"))
-    fn = _get_function_node(tree, "_subscribe_market_operation_tickers")
-
-    has_pool_low = False
-    for node in ast.walk(fn):
-        if isinstance(node, ast.Call):
-            # kis_ws_pool.subscribe(...) 형태
-            func = node.func
-            if isinstance(func, ast.Attribute) and func.attr == "subscribe":
-                val = func.value
-                if isinstance(val, ast.Name) and val.id == "kis_ws_pool":
-                    for kw in node.keywords:
-                        if (
-                            kw.arg == "priority"
-                            and isinstance(kw.value, ast.Constant)
-                            and kw.value.value == "LOW"
-                        ):
-                            has_pool_low = True
-    assert has_pool_low, (
-        "LOW 후보는 kis_ws_pool.subscribe(priority='LOW') 풀 분산 경유 의무"
+                if (
+                    kw.arg == "bypass_limit"
+                    and isinstance(kw.value, ast.Constant)
+                    and kw.value.value is True
+                ):
+                    offenders.append(node.lineno)
+    assert offenders == [], (
+        "VI(H0UNMKO0) 구독은 bypass_limit=True 금지 — 서버 한도 41 우회 불가. "
+        f"위반 라인: {offenders}"
     )
+
+
+# [폐기] test_G_214_5c_pool_priority_low_keyword
+# `kis_ws_pool.subscribe(priority="LOW")` 경로 자체가 소멸했다 — `_ticker_to_session` 이
+# `tr_key` 단일 키라 VI 가 경유하면 TICK drop 종목이 quote-N 으로 기록돼 TICK 이 영구히
+# 안 붙는다(F-P). 대체 가드:
+#   tests/unit/ast/test_cycle221_ast_market_op_no_main.py::test_no_pool_subscribe_unsubscribe_calls
