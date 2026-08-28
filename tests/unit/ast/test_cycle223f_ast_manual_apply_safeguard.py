@@ -325,12 +325,9 @@ def _content_sha(path: str) -> str:
 #    자매 가드 `test_cycle223_ast_donchian_exit_fix.py` 와 **같은 값**으로 핀한다 —
 #    두 가드가 같은 워킹트리를 보므로 값이 갈리면 그 자체가 결함 신호다.
 # TODO(cycle227 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
-_PREEXISTING_CONTENT_SHA: dict[str, str] = {
-    "src/engine/risk.py":
-        "58d7ceea73b24b292ebaeb95e570e9dbe5015349c7eeacc92725b049f4e16463",
-    "src/realtime/handler.py":
-        "d43b6ad4dbd5ec580832ee08ac6213ff5d1858e3a93503992bde25424d965362",
-}
+# ✅ 2026-08-27 — cycle227 항목은 커밋 `a7245af` 로 **자기소멸**(죽은 값 삭제).
+#    cycle228 은 8영역 무접촉이라 신규 핀이 없다.
+_PREEXISTING_CONTENT_SHA: dict[str, str] = {}
 
 
 def test_g223f_9_eight_areas_diff_zero():

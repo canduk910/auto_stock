@@ -233,14 +233,16 @@ def test_C7_expired_cooldown_allows_buy() -> None:
     today = datetime.now(KST).date()
     bfb._cooldown_until["005930"] = today - timedelta(days=1)  # 어제 만료
 
-    from src.engine import scanner as _scanner
+    # cycle228 (A7) — 거래량은 tick_volume 실측 주입 (구 ticker_prices 손주입 폐기).
+    from src.engine import tick_volume
 
-    _scanner.ticker_prices["005930"] = {"acml_vol": 5_000}
+    tick_volume.reset_for_test()
+    tick_volume.record_acml_vol("005930", 5_000)  # threshold 1_000 × 2.0 = 2_000 초과
     try:
         sig = bfb.check_buy_signal("005930", 12_500, 12_500)
         assert sig == Signal.BUY, "쿨다운 만료 → 정상 매수 재개 (게이트 불변)"
     finally:
-        _scanner.ticker_prices.pop("005930", None)
+        tick_volume.reset_for_test()
 
 
 # ===========================================================================

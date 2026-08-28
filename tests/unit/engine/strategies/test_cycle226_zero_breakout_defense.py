@@ -1119,12 +1119,9 @@ _EIGHT_AREAS = [
 #    (`handler.py` + `risk.py` 두 파일 한정). 둘 다 순수 추가이며
 #    `ticker_prices` 4키는 불변이다.
 # TODO(cycle227 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
-_ALLOWED_CONTENT_SHA: dict[str, str] = {
-    "src/engine/risk.py":
-        "58d7ceea73b24b292ebaeb95e570e9dbe5015349c7eeacc92725b049f4e16463",
-    "src/realtime/handler.py":
-        "d43b6ad4dbd5ec580832ee08ac6213ff5d1858e3a93503992bde25424d965362",
-}
+# ✅ 2026-08-27 — cycle227 항목은 커밋 `a7245af` 로 **자기소멸**(죽은 값 삭제).
+#    cycle228 의 BFB·VCP 변경은 이 가드의 8영역 목록 밖이라 신규 핀이 불요하다.
+_ALLOWED_CONTENT_SHA: dict[str, str] = {}
 
 
 def _git(*args: str) -> str:

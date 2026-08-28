@@ -115,20 +115,19 @@ def test_buy_when_after_1300_then_none(strat):
 # ---------------------------------------------------------------------------
 def test_buy_when_breakout_with_volume_then_buy(strat):
     _seed_candidate(strat, "005930", flag_high=12_300, flag_avg_volume=200_000)
-    # 거래량 컷 통과를 위해 scanner.ticker_prices 에 누적 거래량 mock 시도
-    # — 구현체가 어떤 키를 사용하든 (acml_vol 또는 분당 누적), 충분히 큰 값 주입
-    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
-    from src.engine import scanner as _scanner
-    _scanner.ticker_prices["005930"] = {
-        "current_price": 12_350,
-        "open_price": 12_100,
-        "acml_vol": 500_000,  # flag_avg_volume × 2.0 = 400_000 초과
-    }
+    # cycle228 (A7) — 거래량은 `tick_volume` 실측 관측으로 주입한다. 구
+    # `ticker_prices["acml_vol"]` 손주입은 P0-1 을 전 기간 은폐한 장치라 영구 폐기.
+    # record 는 freeze **안** — 관측 모듈이 KST 날짜 키 자기 리셋이라 밖에서 넣으면
+    # 게이트가 읽는 시점(동결 날짜)과 어긋나 미관측이 된다.
+    from src.engine import tick_volume
     # 직전 틱 < 12_300, 현재 틱 ≥ 12_300 (돌파 순간)
     strat._prev_price["005930"] = 12_290
 
     with freeze_time("2026-05-08 09:30:00"):
+        tick_volume.reset_for_test()
+        tick_volume.record_acml_vol("005930", 500_000)  # flag_avg_volume × 2.0 = 400_000 초과
         result = strat.check_buy_signal("005930", 12_350, 12_100)
+    tick_volume.reset_for_test()
 
     assert result == Signal.BUY
     assert "005930" in strat._bought_today
@@ -144,16 +143,14 @@ def test_buy_when_no_breakout_then_none(strat):
 
 def test_buy_when_breakout_but_low_volume_then_none(strat):
     _seed_candidate(strat, "005930", flag_high=12_300, flag_avg_volume=200_000)
-    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
-    from src.engine import scanner as _scanner
-    _scanner.ticker_prices["005930"] = {
-        "current_price": 12_350,
-        "open_price": 12_100,
-        "acml_vol": 300_000,  # < 200_000 × 2.0 = 400_000
-    }
+    # cycle228 (A7) — tick_volume 실측 주입 전환.
+    from src.engine import tick_volume
     strat._prev_price["005930"] = 12_290
     with freeze_time("2026-05-08 09:30:00"):
+        tick_volume.reset_for_test()
+        tick_volume.record_acml_vol("005930", 300_000)  # < 200_000 × 2.0 = 400_000
         assert strat.check_buy_signal("005930", 12_350, 12_100) == Signal.NONE
+    tick_volume.reset_for_test()
 
 
 def test_buy_when_already_in_bought_today_then_none(strat):
@@ -194,13 +191,13 @@ def test_buy_when_in_cooldown_then_none(strat):
     with freeze_time("2026-05-08 09:30:00"):
         today = date(2026, 5, 8)
         strat._cooldown_until["005930"] = today + timedelta(days=1)  # 내일까지 쿨다운
-        # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
-        from src.engine import scanner as _scanner
-        _scanner.ticker_prices["005930"] = {
-            "current_price": 12_350, "open_price": 12_100, "acml_vol": 500_000,
-        }
+        # cycle228 (A7) — tick_volume 실측 주입 전환 (거래량 충분해도 쿨다운이 막는다).
+        from src.engine import tick_volume
+        tick_volume.reset_for_test()
+        tick_volume.record_acml_vol("005930", 500_000)
         strat._prev_price["005930"] = 12_290
         assert strat.check_buy_signal("005930", 12_350, 12_100) == Signal.NONE
+        tick_volume.reset_for_test()
 
 
 def test_buy_when_cooldown_expired_then_buy(strat):
@@ -208,13 +205,13 @@ def test_buy_when_cooldown_expired_then_buy(strat):
     with freeze_time("2026-05-08 09:30:00"):
         today = date(2026, 5, 8)
         strat._cooldown_until["005930"] = today - timedelta(days=1)  # 어제 만료
-        # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
-        from src.engine import scanner as _scanner
-        _scanner.ticker_prices["005930"] = {
-            "current_price": 12_350, "open_price": 12_100, "acml_vol": 500_000,
-        }
+        # cycle228 (A7) — tick_volume 실측 주입 전환.
+        from src.engine import tick_volume
+        tick_volume.reset_for_test()
+        tick_volume.record_acml_vol("005930", 500_000)
         strat._prev_price["005930"] = 12_290
         assert strat.check_buy_signal("005930", 12_350, 12_100) == Signal.BUY
+        tick_volume.reset_for_test()
 
 
 # ---------------------------------------------------------------------------

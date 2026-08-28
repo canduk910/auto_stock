@@ -72,11 +72,18 @@ def _empty_scan_stats() -> dict:
         "pullback_pass": 0,
         "volume_contraction_pass": 0,
         "final_prepared": 0,
-        # cycle227 (P0-1 Stage 0) — 거래량 게이트 "고쳤다면 통과했을까" 관측 카운터.
-        # 총량은 API 로 관측(로그는 cap 이 걸리지만 이 카운터는 cap 과 무관하게 누적).
-        "vol_gate_observe_pass": 0,
-        "vol_gate_observe_fail": 0,
-        "vol_gate_observe_no_obs": 0,
+        # cycle228 (A6) — 실게이트 카운터. cycle227 의 `vol_gate_observe_*` 는
+        # **은퇴**했다(같은 would_pass 의 매매 귀결이 "안 샀다"→"샀다" 로 반전되므로
+        # 키를 유지하면 과거 집계와 뒤섞인다). 로그는 cap 이 걸리지만 이 카운터는
+        # cap 과 무관하게 매 사건 누적된다(총량은 API 로 관측).
+        "vol_gate_pass": 0,
+        "vol_gate_reject_ext": 0,
+        "vol_gate_no_data": 0,
+        "latch_armed_count": 0,
+        # cycle228 (A5) — BFB 와 키 집합 통일(카운터 소비처 단일 스키마). VCP 는
+        # retention 이 없어 항상 0 이지만 키 부재는 소비처 분기를 낳는다.
+        "breakout_seen_count": 0,
+        "breakout_retreat_count": 0,
         "last_run_at": None,
     }
 
@@ -128,6 +135,14 @@ class VcpBreakoutStrategy(StrategyBase):
         "breakout_volume_mult": 1.5,
         "entry_start": "09:05",
         "entry_end": "14:30",
+        # cycle228 (A4) — 추격 상한. 래치는 돌파 시점이 아니라 **거래량 충족 시점**에
+        # 사므로, 그사이 급등한 종목을 추격하지 않도록 current_price 기준 상한을 건다.
+        # 트레이더 규칙 한 줄 = "손절선이 돌파선 위로 올라가는 가격에서는 사지 않는다"
+        # (stop −7% → entry ≤ base_high/0.93 = +7.53% → 보수적 내림 7.5).
+        # ⚠️ **리터럴 고정** — stop_loss_rate 는 PARAM_RANGES 멤버라 런타임 도출이면
+        # AI 야간 튜닝에 캡이 함께 끌려간다. 도출 관계는 `_check_extension_cap_invariant`
+        # 가 부팅 시 관찰만 한다. PARAM_RANGES/INT_PARAMS 편입 금지(진입 정체성 상수).
+        "max_breakout_extension_pct": 7.5,
         "position_ratio": 0.20,
         "max_positions": 5,
         # 청산
@@ -190,11 +205,15 @@ class VcpBreakoutStrategy(StrategyBase):
         #     (스냅샷 박제 시 상승 추세에서 ema50 이 뒤처져 이탈 청산이 늦어진다)
         # ⚠️ `_reset_daily_state` 에서 clear 금지 — 멀티데이 보유가 밤새 소멸한다.
         self._position_setup: dict[str, dict] = {}
-        # cycle227 (P0-1 Stage 0) — `[vcp_vol_gate_observe]` cap: (ticker, outcome)
-        # 1회/일. 날짜 키 자기 리셋(`_reset_daily_state` 훅 미의존 — scheduler.py
-        # diff 0 이 이번 사이클 설계 목표).
-        self._vol_gate_observe_logged: set[tuple[str, str]] = set()
-        self._vol_gate_observe_day: date | None = None
+        # cycle228 (A5/A6) — 게이트·래치 로그 emit cap: (ticker, 종류) 1회/일.
+        # 날짜 키 자기 리셋(`_reset_daily_state` 훅 미의존 — scheduler.py diff 0
+        # 이 설계 목표). cap 키에 종류를 넣는 이유 = cycle225 교훈.
+        self._gate_emit_capped: set[tuple[str, str]] = set()
+        self._gate_emit_day: date | None = None
+        # cycle228 (A3) — 충족 래치. VCP 는 retention 이 없으므로 **edge-crossing
+        # 순간**이 무장 트리거다(retention 신설 금지 — 진입 임계 신설은 표본 보호와
+        # 충돌, 자문 Q4). 엔트리 = {armed_at, armed_date, base_high, base_low}.
+        self._vol_latch: dict[str, dict] = {}
 
     # ------------------------------------------------------------------
     # prepare — 일봉 100일(prepare cap) → 추세/베이스/pullback/거래량 수축 자동 검출
@@ -209,6 +228,8 @@ class VcpBreakoutStrategy(StrategyBase):
         from src.db.stock_master_daily import get_recent_daily_normalized
 
         p = self.config.params
+        # cycle228 (A4) — 추격 상한 리터럴 ↔ 손절 도출 관계 부팅 관찰 (fail-open).
+        self._check_extension_cap_invariant()
         ema_long = p["ema_long"]
         base_max = p["base_max_days"]
         # 사이클 33 (2026-05-21) — KIS `fetch_daily_candles` 단일 호출 최대 100일 한도
@@ -920,68 +941,82 @@ class VcpBreakoutStrategy(StrategyBase):
             }
         return out
 
-    def _vol_gate_observe_should_emit(self, ticker: str, outcome: str) -> bool:
-        """cycle227 — `[vcp_vol_gate_observe]` cap: (ticker, outcome) 1회/일.
-
-        VCP 는 edge-crossing 재트리거로 관측 이벤트가 다발 가능해 cap 이 필수다.
-        `_scan_stats` 카운터는 이 cap 과 무관하게 매 호출 누적된다. 날짜 키 자기
-        리셋 — `_reset_daily_state` 훅 미의존.
-        """
+    def _roll_gate_day_if_needed(self) -> None:
+        """cycle228 — 날짜 전환 시 emit cap 자기 리셋 (BFB 동형, VCP 는
+        `_breakout_first_seen` 이 없어 cap 만 정리한다). `_vol_latch` 는 entry 별
+        `armed_date` 로 이미 자기 무효화된다(`_latch_entry`)."""
         today = datetime.now(KST).date()
-        if self._vol_gate_observe_day != today:
-            self._vol_gate_observe_day = today
-            self._vol_gate_observe_logged.clear()
-        key = (ticker, outcome)
-        if key in self._vol_gate_observe_logged:
+        if self._gate_emit_day != today:
+            self._gate_emit_day = today
+            self._gate_emit_capped.clear()
+
+    def _gate_should_emit(self, ticker: str, kind: str) -> bool:
+        """cycle228 — 게이트·래치 로그 cap: (ticker, kind) 1회/일.
+
+        VCP 는 edge-crossing 재트리거로 게이트 이벤트가 다발 가능해 cap 이 필수다.
+        `_scan_stats` 카운터는 이 cap 과 무관하게 매 사건 누적된다. 날짜 롤오버는
+        `_roll_gate_day_if_needed`(check_buy_signal 최상단)가 담당한다.
+        """
+        key = (ticker, kind)
+        if key in self._gate_emit_capped:
             return False
-        self._vol_gate_observe_logged.add(key)
+        self._gate_emit_capped.add(key)
         return True
 
-    def _observe_vol_gate(self, ticker: str, vol_threshold: int) -> None:
-        """cycle227 (P0-1 Stage 0) — "고쳤다면 통과했을까" 관측. **행위 변경 0.**
+    def _latch_entry(self, ticker: str) -> dict | None:
+        """cycle228 (A3) — 오늘자 래치 엔트리. 날짜가 지났으면 읽는 순간 무효."""
+        ent = self._vol_latch.get(ticker)
+        if ent is None:
+            return None
+        if ent.get("armed_date") != datetime.now(KST).date():
+            self._vol_latch.pop(ticker, None)
+            return None
+        return ent
 
-        BFB `_observe_vol_gate` 와 의미론 동일 + VCP 고유 거울 정합 1건:
-        게이트는 `if vol_threshold > 0 and acml_vol < vol_threshold: NONE` 이라
-        `vol_threshold <= 0` 이면 관측과 무관하게 항상 통과시킨다 — 관측기도
-        그 분기를 거울로 반영해 `outcome="pass"` 로 집계한다.
+    def _arm_latch(self, ticker: str, base_high: int, base_low: int) -> None:
+        """cycle228 (A3) — 충족 래치 무장. **이미 무장돼 있으면 호출하지 마라**
+        (armed_at 이 리셋되면 `latch_age_sec` 측정이 무너진다 — 호출부 계약)."""
+        now_kst = datetime.now(KST)
+        self._scan_stats["latch_armed_count"] += 1
+        self._vol_latch[ticker] = {
+            "armed_at": now_kst,
+            "armed_date": now_kst.date(),
+            "base_high": base_high,
+            "base_low": base_low,
+        }
+        if self._gate_should_emit(ticker, "latch_armed"):
+            logger.info(
+                "[vcp_latch_armed] ticker=%s base_high=%d base_low=%d — 돌파 감지·"
+                "거래량 대기(재평가는 base_high 이상 틱에서만)",
+                ticker, base_high, base_low,
+            )
 
-        `tick_volume.get_observed_acml_vol` 은 **호출 시점** 모듈 참조로 불러야
-        관측기 자기실패 경로를 테스트로 재현할 수 있다(모듈 상단 from-import 금지).
-        실패는 전부 흡수하고 `[vcp_vol_gate_observe_failed]` WARNING 1행만 남긴다.
+    def _release_latch(self, ticker: str, reason: str) -> None:
+        self._vol_latch.pop(ticker, None)
+        if self._gate_should_emit(ticker, "latch_released"):
+            logger.info("[vcp_latch_released] ticker=%s reason=%s", ticker, reason)
+
+    def _check_extension_cap_invariant(self) -> None:
+        """cycle228 (A4) — 추격 상한 리터럴 ↔ 손절 도출 관계 관찰 (fail-open).
+
+        BFB 동형. 캡 도출식 = `(1/(1+stop/100) − 1)×100` — VCP 는 stop −7% →
+        +7.53% → 보수적 내림 7.5. 값 자동 보정 금지(운영자 실측 근거 보존).
         """
         try:
-            from src.engine import tick_volume
-
-            observed = tick_volume.get_observed_acml_vol(ticker)
-            if vol_threshold <= 0:
-                outcome = "pass"
-            elif observed is None:
-                outcome = "no_obs"
-            elif observed >= vol_threshold:
-                outcome = "pass"
-            else:
-                outcome = "fail"
-            self._scan_stats[f"vol_gate_observe_{outcome}"] += 1
-
-            if self._vol_gate_observe_should_emit(ticker, outcome):
-                if observed is None:
-                    logger.info(
-                        "[vcp_vol_gate_observe] ticker=%s reason=no_observation "
-                        "threshold=%d",
-                        ticker, vol_threshold,
-                    )
-                else:
-                    logger.info(
-                        "[vcp_vol_gate_observe] ticker=%s observed=%d threshold=%d "
-                        "would_pass=%s",
-                        ticker, observed, vol_threshold, outcome == "pass",
-                    )
+            cap = float(self.config.params.get("max_breakout_extension_pct", 0.0))
+            stop = float(self.config.params.get("stop_loss_rate", 0.0))
+            if cap <= 0 or stop >= 0:
+                return
+            derived = (1.0 / (1.0 + stop / 100.0) - 1.0) * 100.0
+            if derived < cap - 1e-9 or (derived - cap) > 1.0:
+                logger.warning(
+                    "[extension_cap_invariant] cap=%.1f stop_loss_rate=%.1f "
+                    "derived=%.2f — 리터럴 캡과 손절 도출값이 어긋났다(자동 보정 "
+                    "금지 — 사람이 판단)",
+                    cap, stop, derived,
+                )
         except Exception:
-            logger.warning(
-                "[vcp_vol_gate_observe_failed] ticker=%s 관측 실패 — 매수 평가는 "
-                "계속된다",
-                ticker, exc_info=True,
-            )
+            return  # 관찰기 자기실패가 prepare 를 막으면 안 된다
 
     # ------------------------------------------------------------------
     # 신호 평가
@@ -1016,30 +1051,103 @@ class VcpBreakoutStrategy(StrategyBase):
             return Signal.NONE
 
         base_high = info["base_high"]
+        base_low = info.get("base_low", 0)
         if base_high <= 0 or current_price <= 0:
             return Signal.NONE
+
+        # cycle228 — 날짜 전환 시 emit cap 자기 리셋 (scheduler.py diff 0 설계).
+        self._roll_gate_day_if_needed()
+
+        # cycle228 (A3) — 충족 래치 재평가. edge-crossing 상태 기계보다 **앞선다**.
+        # ⚠️ 이 경로는 `_prev_price` 를 갱신하지 않는다(BFB 동형) — 해제 후 재무장은
+        #    **진짜 edge-crossing**(base_high 아래로 내려갔다 재접근)이 있어야 한다.
+        latch = self._latch_entry(ticker) if ticker in self._vol_latch else None
+        if latch is not None:
+            if latch["base_high"] != base_high or latch["base_low"] != base_low:
+                # 무장 당시 레벨이 라이브에서 이동 — 무장 근거 소멸(자문 Q1).
+                self._release_latch(ticker, "level_moved")
+                return Signal.NONE
+            if base_low > 0 and current_price < base_low:
+                # 베이스 소멸 — `base_low` 이탈은 §2 손절선과 동일 정의다.
+                self._release_latch(ticker, "stop_line")
+                return Signal.NONE
+            if current_price < base_high:
+                # 베이스 안 — 래치는 유지하되 아무것도 안 한다(가격 조건 우회 금지).
+                return Signal.NONE
+            return self._evaluate_vol_gate(ticker, info, current_price, base_high, latch)
 
         prev = self._prev_price.get(ticker, 0)
         self._prev_price[ticker] = current_price
         if not (prev < base_high <= current_price):
             return Signal.NONE
 
-        # cycle227 (P0-1 Stage 0) — 관측 훅. 기존 거래량 컷 블록 **직전**. 게이트
-        # 자체는 아래에서 여전히 유령 키를 읽는다(행위 변경 0, AST-2 가 아래
-        # 블록을 byte pin — 게이트 전환은 실측 후 별도 사이클).
-        self._observe_vol_gate(
-            ticker,
-            int(info.get("avg_volume_20", 0) * self.config.params["breakout_volume_mult"]),
-        )
+        # edge-crossing = VCP 의 게이트 최초 평가 지점 (retention 없음 — 자문 Q4,
+        # retention 신설은 진입 임계 신설이라 표본 보호와 충돌).
+        return self._evaluate_vol_gate(ticker, info, current_price, base_high, None)
 
-        # 거래량 컷
-        from src.engine.scanner import ticker_prices
-        info_price = ticker_prices.get(ticker, {})
-        acml_vol = int(info_price.get("acml_vol", 0) or 0)
+    def _evaluate_vol_gate(
+        self, ticker: str, info: dict, current_price: int, base_high: int, latch: dict | None,
+    ) -> Signal:
+        """cycle228 (A1/A4) — 실측 거래량 게이트 + 추격 상한. **소스 = `tick_volume` 뿐.**
+
+        BFB `_evaluate_vol_gate` 동형 + VCP 고유 거울 정합 1건: 구 게이트가
+        `if vol_threshold > 0 and acml_vol < vol_threshold` 라 **임계 0 이면 관측과
+        무관하게 통과**시켰다 — 그 의미론을 보존한다(임계 0 = 관측 자체가 무의미
+        하므로 no_data fail-closed 보다 앞선다).
+        """
         avg20 = info.get("avg_volume_20", 0)
         vol_threshold = int(avg20 * self.config.params["breakout_volume_mult"])
-        if vol_threshold > 0 and acml_vol < vol_threshold:
+
+        observed: int | None = None
+        if vol_threshold > 0:
+            try:
+                from src.engine import tick_volume
+
+                observed = tick_volume.get_observed_acml_vol(ticker)
+            except Exception:
+                # team-leader 판정(미결 2) — 읽기 실패 = 미관측(no_data) 취급.
+                # fail-closed 유지 + 예외가 on_tick 밖으로 새는 것 차단(P1-5 류).
+                logger.debug(
+                    "[vcp_vol_gate_read_failed] ticker=%s 관측 읽기 실패 — no_data 처리",
+                    ticker, exc_info=True,
+                )
+                observed = None
+
+            if observed is None:
+                self._scan_stats["vol_gate_no_data"] += 1
+                if self._gate_should_emit(ticker, "no_data"):
+                    logger.warning(
+                        "[vcp_vol_gate_no_data] ticker=%s threshold=%d — 미관측 fail-closed",
+                        ticker, vol_threshold,
+                    )
+                if latch is None:
+                    self._arm_latch(ticker, base_high, info.get("base_low", 0))
+                return Signal.NONE
+
+            if observed < vol_threshold:
+                if latch is None:
+                    self._arm_latch(ticker, base_high, info.get("base_low", 0))
+                return Signal.NONE
+
+        # 거래량 충족(또는 임계 0) — 추격 상한 검사(A4). 판정은 `current_price` 단독.
+        cap = float(self.config.params.get("max_breakout_extension_pct", 0) or 0)
+        ext_pct = (current_price - base_high) / base_high * 100 if base_high > 0 else 0.0
+        if cap > 0 and ext_pct > cap:
+            self._scan_stats["vol_gate_reject_ext"] += 1
+            if self._gate_should_emit(ticker, "reject_ext"):
+                logger.info(
+                    "[vcp_vol_gate_reject] ticker=%s reason=extension current_price=%d "
+                    "base_high=%d ext_pct=%.2f cap=%.1f",
+                    ticker, current_price, base_high, ext_pct, cap,
+                )
+            if latch is None:
+                self._arm_latch(ticker, base_high, info.get("base_low", 0))
             return Signal.NONE
+
+        latch_age_sec = 0
+        if latch is not None:
+            latch_age_sec = int((datetime.now(KST) - latch["armed_at"]).total_seconds())
+        self._vol_latch.pop(ticker, None)
 
         self._bought_today.add(ticker)
         # P1 — 청산 파라미터 영속화(당일 매수분). 내일 아침 prepare 가 `_candidates`
@@ -1049,9 +1157,10 @@ class VcpBreakoutStrategy(StrategyBase):
             "atr14": info.get("atr14", 0),
             "ema50": info.get("ema50", 0),
         }
+        self._scan_stats["vol_gate_pass"] += 1
         logger.info(
-            "VCP 매수 신호: %s 현재가(%d) — base_high(%d) 돌파 + 거래량(%d≥%d)",
-            ticker, current_price, base_high, acml_vol, vol_threshold,
+            "[vcp_vol_gate_pass] ticker=%s observed=%d threshold=%d latch_age_sec=%d",
+            ticker, -1 if observed is None else observed, vol_threshold, latch_age_sec,
         )
         self.state.buy_signals.append({
             "ticker": ticker,

@@ -122,49 +122,14 @@ def test_AST1_no_acml_vol_assignment_into_ticker_prices():
 
 
 # ===========================================================================
-# AST-2 — BFB·VCP 거래량 컷 블록 소스 pin (Stage 0 봉인)
+# (은퇴) AST-2 — Stage 0 게이트 블록 byte pin
 # ===========================================================================
-
-_BFB_GATE_BLOCK = """        # 거래량 컷
-        from src.engine.scanner import ticker_prices
-        info_price = ticker_prices.get(ticker, {})
-        acml_vol = int(info_price.get("acml_vol", 0) or 0)
-        vol_threshold = int(info["flag_avg_volume"] * self.config.params["breakout_volume_mult"])
-        if acml_vol < vol_threshold:
-            return Signal.NONE
-"""
-
-_VCP_GATE_BLOCK = """        # 거래량 컷
-        from src.engine.scanner import ticker_prices
-        info_price = ticker_prices.get(ticker, {})
-        acml_vol = int(info_price.get("acml_vol", 0) or 0)
-        avg20 = info.get("avg_volume_20", 0)
-        vol_threshold = int(avg20 * self.config.params["breakout_volume_mult"])
-        if vol_threshold > 0 and acml_vol < vol_threshold:
-            return Signal.NONE
-"""
-
-
-@pytest.mark.parametrize(
-    "path,block",
-    [
-        ("src/engine/strategies/bull_flag_breakout.py", _BFB_GATE_BLOCK),
-        ("src/engine/strategies/vcp_breakout.py", _VCP_GATE_BLOCK),
-    ],
-    ids=["bfb", "vcp"],
-)
-def test_AST2_existing_volume_gate_block_is_byte_identical(path, block):
-    """AST-2 — Stage 0 은 게이트를 **한 글자도** 바꾸지 않는다.
-
-    관측 훅은 이 블록 **직전**에 삽입된다. 이 pin 이 깨지면 관측 사이클이
-    행위 변경 사이클로 미끄러진 것이다 — 게이트 전환은 실측 1~2 영업일 후 별도 사이클.
-    """
-    src = _read(Path(path))
-    assert src.count(block) == 1, (
-        f"{path} 의 거래량 컷 블록이 pin 과 다르다 (일치 {src.count(block)}건). "
-        "Stage 0 = 행위 변경 0. 게이트를 바꿨다면 이 가드를 **의미 전환**하는 별도 "
-        "사이클이어야 한다."
-    )
+# cycle228 (2026-08-27) 이 게이트를 tick_volume 실측으로 **전환**하며 이 pin 을
+# 의미 전환했다 — pin 이 예고했던 바로 그 "별도 사이클" 이다. 대체 가드 =
+# `tests/unit/ast/test_cycle228_ast_gate_guards.py` 의
+# `test_g1_no_ticker_prices_reference`(파일 전체 0건) + `test_g9_legacy_gate_
+# expression_removed`(구 판정식 소멸). AST-1(유령 키 대입 금지)/AST-3/AST-4 는
+# cycle228 이후에도 무변경 영속이다.
 
 
 # ===========================================================================

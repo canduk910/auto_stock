@@ -54,12 +54,9 @@ def test_first_breakout_detected_returns_none(monkeypatch):
     ticker = "005930"
     _seed_candidate(strat, ticker, flag_high=12_000)
 
-    # 거래량 mock
-    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
-    monkeypatch.setattr(
-        "src.engine.scanner.ticker_prices",
-        {ticker: {"acml_vol": "5000000"}},
-    )
+    # cycle228 (A7) — 첫 감지는 게이트 **전** 단계라 거래량이 무관하다. 구
+    # `ticker_prices["acml_vol"]` 손주입(P0-1 은폐 장치)은 영구 폐기, 격리 patch 만.
+    monkeypatch.setattr("src.engine.scanner.ticker_prices", {})
 
     # prev_price < flag_high (첫 돌파 조건)
     strat._prev_price[ticker] = 11_900
@@ -78,12 +75,12 @@ def test_buy_signal_after_retention_period(monkeypatch):
     ticker = "005930"
     _seed_candidate(strat, ticker, flag_high=12_000)
 
-    # 거래량 mock (vol_threshold 계산: flag_avg_volume=500_000 × breakout_volume_mult=2 = 1_000_000)
-    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
-    monkeypatch.setattr(
-        "src.engine.scanner.ticker_prices",
-        {ticker: {"acml_vol": "5000000"}},
-    )
+    # cycle228 (A7) — 거래량은 tick_volume 실측 주입 (vol_threshold:
+    # flag_avg_volume=500_000 × breakout_volume_mult=2 = 1_000_000). record 는
+    # freeze **안** — 관측 모듈이 KST 날짜 키 자기 리셋이라 밖에서 넣으면 어긋난다.
+    from src.engine import tick_volume
+
+    monkeypatch.setattr("src.engine.scanner.ticker_prices", {})
 
     # 첫 돌파 3분 전 기록 (UTC 기준)
     first_seen = datetime(2026, 5, 20, 9, 30, 0, tzinfo=KST)
@@ -92,7 +89,10 @@ def test_buy_signal_after_retention_period(monkeypatch):
 
     # 3분 후 시점으로 freeze (UTC 09:33 → 시간 가드 통과)
     with freeze_time("2026-05-20 09:33:01"):
+        tick_volume.reset_for_test()
+        tick_volume.record_acml_vol(ticker, 5_000_000)
         sig = strat.check_buy_signal(ticker, 12_100, 11_500)
+    tick_volume.reset_for_test()
 
     assert sig == Signal.BUY
 
@@ -107,11 +107,8 @@ def test_retreat_during_retention_pops_dict(monkeypatch):
     ticker = "005930"
     _seed_candidate(strat, ticker, flag_high=12_000)
 
-    # ⚠️ cycle227 Stage 0 유지 — 게이트 전환 사이클에서 tick_volume 주입으로 의미 전환 의무
-    monkeypatch.setattr(
-        "src.engine.scanner.ticker_prices",
-        {ticker: {"acml_vol": "5000000"}},
-    )
+    # cycle228 (A7) — 후퇴는 게이트 **전** 단계라 거래량이 무관하다. 손주입 폐기.
+    monkeypatch.setattr("src.engine.scanner.ticker_prices", {})
 
     first_seen = datetime(2026, 5, 20, 9, 30, 0, tzinfo=KST)
     strat._breakout_first_seen[ticker] = first_seen

@@ -223,9 +223,18 @@ def test_bfb_measured_move_silent_on_missing_keys():
 
 @pytest.mark.parametrize("factory", [_vcp, _bfb], ids=["vcp", "bfb"])
 def test_buy_signal_stamps_setup(factory):
-    """BUY 반환 직전 stamp — 당일 매수분이 다음날 prepare 와이프를 견딘다."""
+    """BUY 반환 직전 stamp — 당일 매수분이 다음날 prepare 와이프를 견딘다.
+
+    cycle228 적응(불변식 동일·검사 표면만 이동) — 게이트 전환이 BUY 확정 블록을
+    `_evaluate_vol_gate` 로 추출해 stamp 도 함께 이동했다. BUY 경로 =
+    `check_buy_signal` → `_evaluate_vol_gate` 두 함수의 합집합 소스로 검사한다
+    (호출 배선은 cycle228 AST G-3 이 별도 강제).
+    """
     s = factory()
     src = inspect.getsource(type(s).check_buy_signal)
+    gate = getattr(type(s), "_evaluate_vol_gate", None)
+    if gate is not None:
+        src += inspect.getsource(gate)
     assert "_position_setup" in src, "BUY 경로에서 청산 파라미터를 영속화해야 한다"
 
 
