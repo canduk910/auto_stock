@@ -368,7 +368,8 @@ def test_stage3_exit_unchanged():
     """§3 스테이지3 청산 무변경 (high=buy → 승격 미발화, stage3 정상 발화)."""
     s = _kojiro(breakeven_promote_atr=1.5)
     _hold(s, high=BUY)  # high < 임계 → 승격 없음
-    s._held_stage3["111770"] = True
+    # cycle231 — 날짜 키 계약: 오늘 판정이어야 §3 발화 (stale True 는 억제)
+    s._held_stage3["111770"] = (_today(), True)
     assert s.check_exit_signal("111770", BUY, BUY) == Signal.TRAILING_STOP
 
 

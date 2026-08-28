@@ -164,7 +164,8 @@ async def test_prepare_marks_held_stage3_even_if_not_buy_candidate(kojiro, monke
     await _run_prepare(kojiro, monkeypatch, "005930",
                        _enriched([2, 3], close=10000, atr=200.0))
     assert "005930" in kojiro._candidates        # exit ATR/stage 소스
-    assert kojiro._held_stage3["005930"] is True
+    # cycle231 — 날짜 키 계약: 값은 `(판정 수행일, stage==3)` 튜플
+    assert kojiro._held_stage3["005930"] == (datetime.now(KST).date(), True)
     assert kojiro.get_scan_stats()["strict_entry_pass"] == 0  # 매수후보 아님
 
 
@@ -274,7 +275,8 @@ def test_exit_atr_stop_tighten_only_floor(kojiro):
 def test_exit_stage3_trailing_stop(kojiro):
     _pos(kojiro, "005930", buy_price=10000, high_since_buy=10000)
     _seed_candidate(kojiro, "005930", atr=200.0)
-    kojiro._held_stage3["005930"] = True
+    # cycle231 — 날짜 키 계약: 오늘 판정이어야 §3 발화
+    kojiro._held_stage3["005930"] = (datetime.now(KST).date(), True)
     # -8%/2ATR/트레일 미도달이어도 stage3 → 청산
     assert kojiro.check_exit_signal("005930", 9800, 0) == Signal.TRAILING_STOP
 
@@ -300,7 +302,8 @@ def test_check_force_clear_empty(kojiro):
 
 def test_on_position_closed_pops_state(kojiro):
     _seed_candidate(kojiro, "005930")
-    kojiro._held_stage3["005930"] = True
+    # cycle231 — 날짜 키 계약: pop 은 값 형태와 무관하게 동작해야 한다
+    kojiro._held_stage3["005930"] = (datetime.now(KST).date(), True)
     kojiro._stop_floor["005930"] = 9600
     kojiro.on_position_closed("005930")
     assert "005930" not in kojiro._held_stage3

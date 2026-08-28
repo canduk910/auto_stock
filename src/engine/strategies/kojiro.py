@@ -23,7 +23,7 @@ Phase 1: 자금관리 = position_ratio (터틀 유닛 sizing/피라미딩/조기
 from __future__ import annotations
 
 import logging
-from datetime import datetime, time, timezone, timedelta
+from datetime import date, datetime, time, timezone, timedelta
 
 import pandas as pd
 
@@ -218,7 +218,15 @@ class KojiroStrategy(StrategyBase):
         #   {prev_close, atr(float, ewm20), stage, ema_s, ema_m, ema_l, atr_ratio}
         self._candidates: dict[str, dict] = {}
         # 보유종목 스테이지3 precompute 플래그 (prepare/recompute 에서만 세팅) — 익일 아침 발화.
-        self._held_stage3: dict[str, bool] = {}
+        # cycle231 (P2-5) — 값 = `(판정 수행일 KST, stage==3)`. §3 는 유일하게 가격을
+        # 안 보는 청산이라 **오늘 판정만** 소비한다(프로세스가 며칠 상주해 인메모리
+        # bool 이 일 경계를 넘던 stale True 청산 차단 — `:649` fail-open 계약을
+        # prepare 경로까지 통일). 판정 수행일이다(봉 날짜 아님 — 연휴 무효화 정합).
+        self._held_stage3: dict[str, tuple[date, bool]] = {}
+        # cycle231 — `[kojiro_stage3_stale_skip]` cap 1회/ticker/일 (날짜 키 자기
+        # 리셋 — `_reset_daily_state` override 신설 금지 봉인).
+        self._stage3_stale_logged: set[str] = set()
+        self._stage3_stale_log_day: date | None = None
         # 2ATR 하드손절 tighten-only floor (변동성 팽창 loosen 차단, restart-H3).
         self._stop_floor: dict[str, int] = {}
         # 섹터 캡 held 집계 영속 맵(_candidates 와이프 독립, 포지션 수명 동안 생존) — 안 A.
@@ -397,7 +405,8 @@ class KojiroStrategy(StrategyBase):
                         "ema_s": ema_s, "ema_m": ema_m, "ema_l": ema_l, "atr_ratio": atr_ratio,
                         "name": name,
                     }
-                    self._held_stage3[ticker] = (stage == 3)
+                    # cycle231 — (판정 수행일, 플래그) 튜플 (오늘 판정만 §3 소비)
+                    self._held_stage3[ticker] = (datetime.now(KST).date(), stage == 3)
                     held_marked += 1
 
                 # step7: 스테이지1 + 3선 우상향
@@ -639,6 +648,28 @@ class KojiroStrategy(StrategyBase):
                 survivors.append(ticker)
         return survivors
 
+    def _emit_stage3_stale_skip(self, ticker: str, judged_on: date, today_kst: date) -> None:
+        """cycle231 — stale 스테이지3 True 억제 관측. cap 1회/ticker/일.
+
+        age 1일 = INFO(정상적 하루 지연 후보) / 2일 이상 = WARNING(재판정이 이틀째
+        안 돌고 있다 = 배관 열화 신호. debug 단독은 `_DbLogHandler` INFO 컷에 막혀
+        `system_logs` 미도달 — cycle225 교훈). 날짜 키 자기 리셋(`_reset_daily_state`
+        override 신설 금지 봉인).
+        """
+        if self._stage3_stale_log_day != today_kst:
+            self._stage3_stale_log_day = today_kst
+            self._stage3_stale_logged.clear()
+        if ticker in self._stage3_stale_logged:
+            return
+        self._stage3_stale_logged.add(ticker)
+        age_days = (today_kst - judged_on).days
+        emit = logger.info if age_days <= 1 else logger.warning
+        emit(
+            "[kojiro_stage3_stale_skip] ticker=%s judged_on=%s age_days=%d — 오늘 "
+            "재판정 없는 스테이지3 판정은 소비하지 않는다(§1·§2·§4 청산은 유지)",
+            ticker, judged_on, age_days,
+        )
+
     # ────────────────────────── 재계산 (보유종목, boot/저녁 훅) ──────────────────────────
 
     async def recompute_held_atr(self) -> None:
@@ -661,11 +692,11 @@ class KojiroStrategy(StrategyBase):
                 )
             except Exception:
                 logger.warning("[kojiro_recompute] 일봉 fetch 실패 fail-open: %s", ticker, exc_info=True)
-                self._held_stage3[ticker] = False
+                self._held_stage3[ticker] = (today, False)  # cycle231 — 오늘 판정 fail-open
                 continue
             if not candles:
                 logger.warning("[kojiro_recompute] 일봉 응답 없음 fail-open: %s", ticker)
-                self._held_stage3[ticker] = False
+                self._held_stage3[ticker] = (today, False)  # cycle231 — 오늘 판정 fail-open
                 continue
 
             # H-1 (2026-08-06) — 트레일링 기준점 재시작 복구.
@@ -682,7 +713,16 @@ class KojiroStrategy(StrategyBase):
             # 이미 fetch 한 `candles` 재사용 = KIS 추가 호출 0 + **scheduler(8영역)
             # diff 0** — `recompute_held_atr` 는 `_SWING_POLL_STRATEGIES` 루프가 이미
             # 호출한다. VCP 전용 훅은 하드코딩 `_vcp` 라 거기 끼우면 8영역을 건드린다.
-            if pos is not None and pos.buy_date < today:
+            if pos is not None and not isinstance(pos.buy_date, date):
+                # cycle231 (W3, cycle226 L-2 동형 방어) — 비교가 try 밖이라 비정상
+                # buy_date 1건의 예외가 **뒤 보유 종목의 ATR/stage3/floor 재계산까지
+                # 통째로 유실**시키던 잠복 경로. 해당 종목 보정만 skip 하고 계속 간다.
+                logger.warning(
+                    "[kojiro_recompute] buy_date 비정상(type=%s) — high_since_buy "
+                    "보정 skip, ATR/stage 재계산은 계속: %s",
+                    type(pos.buy_date).__name__, ticker,
+                )
+            elif pos is not None and pos.buy_date < today:
                 try:
                     await self._apply_high_since_buy_from_candles(pos, candles, today)
                 except Exception:
@@ -700,7 +740,7 @@ class KojiroStrategy(StrategyBase):
                 prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
                 usable = candles[prev_idx:]
                 if len(usable) < KOJIRO_MIN_REQUIRED:
-                    self._held_stage3[ticker] = False
+                    self._held_stage3[ticker] = (today, False)  # cycle231 — 오늘 판정 fail-open
                     continue
                 asc = list(reversed(usable))
                 enriched = enrich(self._build_ohlc_df(asc), self._ind_cfg)
@@ -735,14 +775,14 @@ class KojiroStrategy(StrategyBase):
                         prev_floor = self._stop_floor.get(ticker, 0)
                         self._stop_floor[ticker] = max(prev_floor, int(pos.buy_price))
                 # stage3 플래그 (None → fail-open False)
-                self._held_stage3[ticker] = (stage_int == 3)
+                self._held_stage3[ticker] = (today, stage_int == 3)  # cycle231
                 logger.info(
                     "[kojiro_recompute] %s ATR=%.1f stage=%s stage3=%s",
                     ticker, atr_val, stage_int, self._held_stage3[ticker],
                 )
             except Exception:
                 logger.warning("[kojiro_recompute] 계산 실패 fail-open: %s", ticker, exc_info=True)
-                self._held_stage3[ticker] = False
+                self._held_stage3[ticker] = (today, False)  # cycle231 — 오늘 판정 fail-open
 
     # ────────────────────────── 진입 ──────────────────────────
 
@@ -894,9 +934,23 @@ class KojiroStrategy(StrategyBase):
             return Signal.STOP_LOSS
 
         # 3) 스테이지3 진입 (추세 종료, 익일 아침 발화 — precompute 플래그)
-        if self._held_stage3.get(ticker):
-            logger.info("[kojiro_stage3_exit] %s 스테이지3 진입 (추세 종료)", ticker)
-            return Signal.TRAILING_STOP
+        # cycle231 (P2-5) — **오늘 판정만** 소비한다. §3 는 유일하게 가격을 안 보는
+        # 청산이라 "오늘 데이터임"이 보장될 때만 정당하다(`recompute` 의 fail-open
+        # 계약을 소비 축까지 통일). stale True 는 억제 + 관측만 — §1/§2/§4 가 방어하고
+        # §3 는 원래 익일 아침 발화라 하루 지연이 설계에 내장돼 있다. 억제 시 값은
+        # **보존**한다(덮어쓰면 재판정 성공 여부와 억제 이력이 구분 불가).
+        _s3 = self._held_stage3.get(ticker)
+        if isinstance(_s3, tuple) and len(_s3) == 2:
+            _judged_on, _flagged = _s3
+            _today_kst = datetime.now(KST).date()
+            if _flagged and _judged_on == _today_kst:
+                logger.info(
+                    "[kojiro_stage3_exit] %s 스테이지3 진입 (추세 종료) judged_on=%s",
+                    ticker, _judged_on,
+                )
+                return Signal.TRAILING_STOP
+            if _flagged and isinstance(_judged_on, date) and _judged_on < _today_kst:
+                self._emit_stage3_stale_skip(ticker, _judged_on, _today_kst)
 
         # 4) 2.5ATR 샹들리에 트레일링
         if atr > 0 and pos.high_since_buy > 0:

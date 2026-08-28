@@ -231,7 +231,18 @@ if acml_vol < vol_threshold:
 
 ## P2 · 정확성 · 잠재 위험
 
-### P2-5 · kojiro `_held_stage3` stale True — 방향이 반대인 실패
+### P2-5 · kojiro `_held_stage3` stale True — ✅ cycle231 종결 (2026-08-29)
+
+> 시정 = 플래그를 `(판정 수행일, bool)` 로 전환, 소비처는 **오늘 판정만** 인정(stale True
+> 억제 + `[kojiro_stage3_stale_skip]` age 1=INFO/≥2=WARNING, cap 1회/ticker/일).
+> `:649` fail-open 계약을 prepare·소비 축까지 통일한 것 — §1·§2·§4 가 방어. 자문 정정 2 =
+> cycle225 게이트는 donchian 것(kojiro recompute 는 전수 순회, 실스테일 경로 = 07:59/16:20
+> 재-prepare) + ATR 밴드 **상한** 이탈(급등 종목)이 마킹을 못 받는 경로. 부수 방어 =
+> `:685` buy_date 비교 try 밖(cycle226 L-2 동형, 잠복) isinstance 가드. Red 가 추가 실증한
+> 현행 결함 = 소비처가 비어 있지 않은 튜플을 전부 참으로 읽음(`(오늘, False)` 도 발화).
+> 자문 한계 명시 = 다수 케이스에서 하루 늦은 청산 실비용(kojiro 저승률·고RR 라 유리한
+> 교환 — **고승률·저RR 전략에 복사 금지**) + `[kojiro_stage3_exit]` 표본 ~20건 시 §3
+> 존재 가치 재검정. 자문 = `cycle231_kojiro_stage3_stale.md`.
 
 `prepare()` 경로는 실패 시 `False` 를 **쓰지 않는다**. ATR 밴드 이탈·스테이지 판별 불가로
 중간에 걸리면 **직전 값이 그대로 남는다**(`kojiro.py:393-401` vs `:664-668`, `:701-703`, `:742`).

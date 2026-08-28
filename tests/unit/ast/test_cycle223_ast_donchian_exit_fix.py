@@ -465,15 +465,13 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    `_workspace/red/cycle228_gate_latch_spec.md`)로 같은 두 파일을 다시 승인
 #    수정하며 재핀. 파일명 집합 면제는 **영구**라 쓰지 않는다 — 핀에 없는 전략
 #    파일이 바뀌면 즉시 FAIL, 핀에 있는 파일도 1 byte 달라지면 FAIL.
-# 🔁 2026-08-28 — cycle228 커밋(4e7b302/0056db7/e139c42)으로 BFB·VCP 항목 자기소멸.
-#    cycle229(P1-5 — VB·momentum 매수 컷 15:20, 자문 cycle229_vb_1530_single_price.md,
-#    사용자 승인)가 다른 두 전략 파일을 수정하며 재핀.
-# TODO(cycle229 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
+# 🔁 2026-08-29 — cycle229 커밋(6d4bc22)으로 VB·momentum 항목 자기소멸.
+#    cycle231(P2-5 — kojiro `_held_stage3` 날짜 키 무효화, 자문
+#    cycle231_kojiro_stage3_stale.md, 사용자 승인)이 kojiro 를 수정하며 재핀.
+# TODO(cycle231 커밋 후): 아래 항목을 **삭제**하고 dict 를 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
-    "src/engine/strategies/volatility_breakout.py":
-        "7f7a9114362f5c6efa3b7c2130e679d5275a0802ebe10ff00331ed8141771757",
-    "src/engine/strategies/momentum.py":
-        "4ee8c6ed8e8fb651aa1f0044fe48128f9514faae9bc1e74a945b04042d1ba33f",
+    "src/engine/strategies/kojiro.py":
+        "8093ab7e9e79a5f6f16e55b02a454dabbe7ceba4c692517d9943fd2aa530f0d1",
 }
 
 
