@@ -25,11 +25,28 @@ VB 는 15:20 전량청산 전략이라 **오버나잇 손절 규약이 설계에
 1차 판단 = cycle229 가 시정한 `[단일가매매]` 미분류 매도 거부(3회 재시도 후 **무기록** 포기)의
 시정 **전** 마지막 희생자 — 08-28 15:20 청산 시도가 cycle229 배포(15:40+) 직전이었다.
 
-**사용자 결정(08-29): 월요일 09:00 즉시 청산.** 절차 =
-1. 09:00 전 `system_logs` 08-28 15:2x 대 `257720` `[kis_rejection]`/`execute_sell` 흔적 조회 — **흔적 없음 = 무기록 포기 가설 확정**(그 자체가 발견).
-2. 09:00 개장 직후 시장가 청산(15:20 `_force_clear_main_only` 대기 금지 — 갭은 이미 실현된 뒤).
-3. `[selling_reconcile]` + cycle229 신규 마커(`market_order_disallowed` 분류) 동작 확인.
-4. 이 사건을 cycle232 의제 1 실증 사례로 등재 — `portfolio_risk` 에 `intraday_strategy_overnight_positions` 카운트 추가 후보.
+**사용자 결정(08-29): 월요일 09:00 즉시 청산 — 절차 정본 = `_workspace/monday_0831_guide.md`.**
+
+**⚠️ 08-29(토) 로그 실측으로 자문 §5 가설 반증** — 15:20 강제청산은 정상 발화했고("대상:
+['035420','257720']"), 실패 원인은 `[단일가매매]` 가 아니라 **APBK0400 "주문 가능한 수량
+초과" ×3 → CRITICAL**. 근본 = BUY `0000411400` 이 **PARTIAL 2주** 체결인데
+`positions.quantity=3`(주문수량) 잔존 → 3주 매도 시도 → 실보유 2주라 거부.
+**월요일 15:20 자동 재청산도 같은 이유로 재실패 확정** → `manual-sell {"ticker":"257720",
+"quantity":2}` (실보유 수량!) 이 유일 확실. 사후 = positions 잔량 1 유령 정리 확인.
+
+**신규 결함 2건**:
+- **N1 — ✅ cycle235 시정 완료(08-29, 커밋 대기)**. 근본 = handler 가 체결수량을
+  `fields[16]`(ODER_QTY 주문수량)으로 오독(주석이 KIS 정본과 반대) — 단일 전량 체결에선
+  잠복, 부분/분할에서 positions 과대. 시정 = ①`fields[9]`(CNTG_QTY) 정본 전환 ②엔진
+  overrun 클램프(`[fill_qty_overrun]`, 증분 동반 캡 = 손익 정합) + `quantity<=0` drop
+  (`[fill_qty_zero]`) ③강제 UPDATE WHERE PENDING+PARTIAL 포괄(N1-b). 적대 검증 확증 4
+  전부 시정. 8영역 승인 = handler·order_engine 한정(sha 핀 4가드, 커밋 시 자기소멸).
+  **후속 후보(행위 결정 사안)** = 전량 체결 분기의 잔여취소 타이머 해제 + 1차
+  update_trade_status 의 PARTIAL 포괄(C235-V2) · `_completed_orders` 일일 리셋 확인(C235-R3).
+- **N2 (잔여)** APBK0400 이 `is_insufficient_quantity`(APBK1234+"부족" 키워드) 미매칭 →
+  3회 재시도 낭비 + positions 정리·reconciliation 미발동(`balance.py` 분류기 = 비8영역.
+  KIS 정본으로 APBK0400 의미 범위(매수 문맥 겸용 여부) 확인 선행). N1 시정으로 유령 수량
+  발생원 자체는 닫혔으나 분류기는 독립 결함 — cycle236 후보.
 
 ---
 

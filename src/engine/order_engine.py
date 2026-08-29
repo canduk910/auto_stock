@@ -912,12 +912,46 @@ class OrderEngine:
                 return
             logger.warning("체결통보: 주문번호 %s에 대한 종목 매핑 없음, payload ticker 사용: %s", order_no, ticker)
 
+        # cycle235 (적대 검증 C235-F1) — 체결통보의 CNTG_QTY 는 정본상 항상 양수다.
+        # 0/음수(빈 필드 파싱 포함)는 이상 신호 → drop (fail-closed). 특히 매핑 부재
+        # 폴백(ordered=quantity=0)과 결합하면 `0 >= 0` 전량 판정으로 BUY 0주 포지션
+        # 봉인·SELL 포지션 무단 삭제가 가능하던 잔존 리스크의 조기 차단.
+        if quantity <= 0:
+            logger.warning(
+                "[fill_qty_zero] order_no=%s ticker=%s side=%s quantity=%d — "
+                "체결수량 비양수 통보 drop (정본상 CNTG_QTY 는 항상 양수)",
+                order_no, ticker, side, quantity,
+            )
+            return
+
         # 원래 주문 수량 조회
+        known_ordered = order_no in self._order_qty
         ordered_qty = self._order_qty.get(order_no, quantity)
 
         # 누적 체결 수량 추적
-        self._filled_qty[order_no] = self._filled_qty.get(order_no, 0) + quantity
+        prev_total = self._filled_qty.get(order_no, 0)
+        self._filled_qty[order_no] = prev_total + quantity
         total_filled = self._filled_qty[order_no]
+
+        # cycle235 — overrun 클램프 (BUY·SELL 공통 최후 방어망). 주문수량 초과 체결은
+        # 물리적으로 불가하므로 누적 > 주문수량 = 파싱 오독/중복 통보 이상 신호다
+        # (257720 실사고: fields[16] ODER_QTY 오독 유입 (1,2) → 합 3 → positions 3주
+        # → 익일 3주 매도 전량 APBK0400). 클램프는 `_order_qty` **매핑이 있을 때만** —
+        # 매핑 부재(수동/외부 주문)의 ordered=quantity 폴백은 신뢰 불가 값이라
+        # 다중 통보를 오캡하면 안 된다 (P1-B 멱등 가드가 기존 계약대로 담당).
+        # ⚠️ 증분 `quantity` 도 동반 캡 (적대 검증 C235-R1) — `_handle_sell_fill` 이
+        # `(price − buy) × quantity` 로 실현손익을 누적하므로, 누적만 캡하고 증분을
+        # 원시값으로 흘리면 daily_realized_pnl(일일손실 게이트 소비)이 초과분만큼
+        # 왜곡된다. 유효 증분 = ordered − 클램프 전 누적.
+        if known_ordered and ordered_qty > 0 and total_filled > ordered_qty:
+            logger.warning(
+                "[fill_qty_overrun] order_no=%s ticker=%s side=%s total_filled=%d > "
+                "ordered=%d — 주문수량으로 클램프 (파싱/중복 이상 신호, 관측 요망)",
+                order_no, ticker, side, total_filled, ordered_qty,
+            )
+            self._filled_qty[order_no] = ordered_qty
+            total_filled = ordered_qty
+            quantity = max(0, ordered_qty - prev_total)
 
         if side == "BUY":
             await self._handle_buy_fill(ticker, order_no, price, quantity, total_filled, ordered_qty)

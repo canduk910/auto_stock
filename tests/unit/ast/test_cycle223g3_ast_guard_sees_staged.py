@@ -173,10 +173,19 @@ def _fake_git(monkeypatch, mod, *, name_only_out: str,
 
 @pytest.mark.parametrize("modname", _GUARDS)
 def test_g3_4_staged_eight_area_change_fails_the_guard(monkeypatch, modname):
-    """stage 된 8영역 파일이 가드를 통과하면 안 된다 (실증된 사각)."""
+    """stage 된 8영역 파일이 가드를 통과하면 안 된다 (실증된 사각).
+
+    cycle235 견고화 — 내용도 페이크로 갈아끼운다. 승인 사이클 중에는 이 경로가
+    `_PREEXISTING_CONTENT_SHA` 에 핀될 수 있고, 그때 "핀과 **동일한** 내용" 은
+    승인된 in-flight 상태라 통과가 옳다. 셀프테스트의 의도는 "핀에 없는/핀과
+    **다른** staged 변경은 반드시 FAIL" 이므로 내용 상이를 명시적으로 시뮬레이트
+    (g3_5 와 같은 `_read_bytes` seam).
+    """
     mod = importlib.import_module(modname)
     guard = next(getattr(mod, n) for n in dir(mod) if n.endswith("eight_areas_diff_zero"))
-    _fake_git(monkeypatch, mod, name_only_out="src/engine/order_engine.py\n")
+    _fake_git(monkeypatch, mod,
+              name_only_out="src/engine/order_engine.py\n",
+              content_by_path={"src/engine/order_engine.py": b"# staged change"})
     with pytest.raises(AssertionError):
         guard()
 

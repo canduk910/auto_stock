@@ -209,15 +209,23 @@ async def _update_trade_status_by_order_no(
         args.append(float(profit_loss))
         set_clauses.append(f"profit_loss = ${len(args)}")
 
-    args.extend([order_no, trade_type.value, TradeStatus.PENDING.value])
+    # cycle235 (N1-b) — 진행 중 상태 2종(PENDING·PARTIAL)을 포괄한다. 종전
+    # PENDING 단독은 부분 체결로 이미 PARTIAL 이 된 row 를 전량 체결 보정이
+    # COMPLETED 로 올리지 못해 affected=0 → PARTIAL 영구 잔존(257720 실측
+    # `[buy_fill_correction_forced_update_zero]`). COMPLETED/CANCELLED 는
+    # 종전대로 갱신 대상이 아니다(종결 상태 불변).
+    args.extend([
+        order_no, trade_type.value,
+        [TradeStatus.PENDING.value, TradeStatus.PARTIAL.value],
+    ])
     order_no_idx = len(args) - 2
     type_idx = len(args) - 1
-    pending_idx = len(args)
+    status_idx = len(args)
 
     sql = (
         f"UPDATE trade_history SET {', '.join(set_clauses)} "
         f"WHERE order_no = ${order_no_idx} AND trade_type = ${type_idx} "
-        f"AND status = ${pending_idx}"
+        f"AND status = ANY(${status_idx}::text[])"
     )
 
     try:

@@ -510,12 +510,19 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
     if len(fields) < 15:
         return
 
-    # 필드 매핑 (KIS 체결통보 H0STCNI0/H0STCNI9 output, KIS MCP 정본 검증 26 컬럼)
-    # [0] HTS ID, [1] 계좌번호(8자리)+상품코드(2자리), [2] 주문번호(ODNO), [3] 원주문번호
-    # [4] 매도매수구분(SLL_BUY_DVSN_CD: 02:매수, 01:매도), [5] 정정구분, [6] 주문종류
-    # [7] 주문조건, [8] 종목코드(STCK_SHRN_ISCD), [9] 주문수량, [10] 체결단가(CNTG_UNPR — 사이클 161 정합)
-    # [11] 체결시간(STCK_CNTG_HOUR), [12] 거부여부, [13] 체결구분(CNTG_YN: 1:접수, 2:체결)
-    # [14] 예약 (KIS 명세), [15] 예약, [16] 체결수량(CNTG_QTY), [17] 고객명, [18] 종목명
+    # 필드 매핑 (KIS 체결통보 H0STCNI0/H0STCNI9 — KIS MCP 정본 `ccnl_notice` 26 컬럼,
+    # cycle235 재검증으로 [9]/[16] 정정)
+    # [0] CUST_ID(HTS ID), [1] ACNT_NO 계좌번호(8)+상품코드(2), [2] ODER_NO 주문번호,
+    # [3] OODER_NO 원주문번호, [4] SELN_BYOV_CLS(02:매수, 01:매도), [5] RCTF_CLS 정정구분,
+    # [6] ODER_KIND, [7] ODER_COND, [8] STCK_SHRN_ISCD 종목코드,
+    # [9] **CNTG_QTY 체결수량(통보 건별 증분)**, [10] CNTG_UNPR 체결단가(사이클 161 정합),
+    # [11] STCK_CNTG_HOUR, [12] RFUS_YN, [13] CNTG_YN(1:접수, 2:체결), [14] ACPT_YN,
+    # [15] BRNC_NO, [16] **ODER_QTY 주문수량**, [17] ACNT_NAME, [18] ORD_COND_PRC ...
+    # ⚠️ cycle235 (2026-08-29): 종전 주석이 [9]/[16] 를 정본과 반대로 적었고 코드가
+    # 주석을 따라 fields[16](주문수량)을 체결수량으로 오독 — 단일 전량 체결에선
+    # CNTG_QTY == ODER_QTY 라 잠복, 부분/분할 체결에서 positions 과대(257720 실사고:
+    # 2주 주문·실체결 2주가 3주로 등록 → 익일 매도 전량 APBK0400). AST 가드가
+    # fields[9] 소스를 봉인한다 (`test_cycle235_ast_execution_qty.py`).
     # 호출자 (`OrderEngine._handle_buy_fill`/`_handle_sell_fill`) 가 trade_history.price = CNTG_UNPR
     # 영구 정합 (사이클 161 영속 — 005940 6/16 BUY 50원 차이 시정).
 
@@ -531,7 +538,7 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
     exec_type = fields[13]  # 1:접수, 2:체결
     ticker = fields[8]
     price = int(fields[10]) if fields[10] else 0       # 체결단가
-    quantity = int(fields[16]) if len(fields) > 16 and fields[16] else 0  # 체결수량
+    quantity = int(fields[9]) if fields[9] else 0      # CNTG_QTY 체결수량 (정본, cycle235)
 
     # 접수 통보(1)는 무시, 체결 통보(2)만 처리
     if exec_type != "2":

@@ -432,6 +432,27 @@ _EIGHT_AREAS = [
 ]
 _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 
+# 🔁 2026-08-29 (cycle235) — 파일명 영구 허용(_ALLOWED)과 별개로, **승인 사이클의
+#    in-flight 변경**은 내용 sha 로 한시 면제한다(cycle223 계열 자기소멸 기전 이식 —
+#    커밋되면 diff 에서 사라져 죽은 값이 되고, 내용이 1 byte 라도 더 바뀌면 FAIL).
+#    cycle235 승인 = "N1부터 작업 시작"(handler·order_engine + realtime/CLAUDE.md 문서):
+#    체결수량 fields[16]→fields[9] 정본 전환 + overrun 클램프. 명세
+#    `_workspace/red/cycle235_fill_qty_spec.md`.
+# TODO(cycle235 커밋 후): 아래 dict 를 비운다.
+_APPROVED_CONTENT_SHA: dict[str, str] = {
+    "src/engine/order_engine.py":
+        "79de42306792b73d3741f0da0600cd91faf1cf75a7455d17780bcc2140eef3ae",
+    "src/realtime/CLAUDE.md":
+        "fa4a7b5b565ec1880ee13efad7b005589291c5563dada4dc22ed2f44ae00621f",
+}
+
+
+def _approved_and_intact(path: str) -> bool:
+    pin = _APPROVED_CONTENT_SHA.get(path)
+    if pin is None:
+        return False
+    return hashlib.sha256((_REPO_ROOT / path).read_bytes()).hexdigest() == pin
+
 
 def _git(*args: str) -> str:
     res = subprocess.run(
@@ -451,7 +472,10 @@ def test_ga3_6_eight_areas_touched_are_only_handler_and_risk():
         "ls-files", "--others", "--exclude-standard", "--", *_EIGHT_AREAS,
     ).split()
     changed = sorted(set(tracked) | set(untracked))
-    unexpected = sorted(set(changed) - _ALLOWED)
+    unexpected = sorted(
+        p for p in set(changed) - _ALLOWED if not _approved_and_intact(p)
+    )
     assert unexpected == [], (
-        f"8영역 범위 밖 변경 감지: {unexpected} — 이번 사이클 허용 = handler.py·risk.py 둘뿐"
+        f"8영역 범위 밖 변경 감지: {unexpected} — 파일명 영구 허용(handler.py·risk.py) "
+        "또는 승인 사이클 sha 핀(_APPROVED_CONTENT_SHA, 내용 일치 시 한정)만 통과한다"
     )

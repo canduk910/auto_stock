@@ -1121,7 +1121,20 @@ _EIGHT_AREAS = [
 # TODO(cycle227 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 비운다.
 # ✅ 2026-08-27 — cycle227 항목은 커밋 `a7245af` 로 **자기소멸**(죽은 값 삭제).
 #    cycle228 의 BFB·VCP 변경은 이 가드의 8영역 목록 밖이라 신규 핀이 불요하다.
-_ALLOWED_CONTENT_SHA: dict[str, str] = {}
+# 🔁 2026-08-29 (cycle235) — 257720 실사고(부분 체결 positions 수량 오염) 시정의
+#    **사용자 명시 8영역 승인**("N1부터 작업 시작", 범위 = handler·order_engine 한정):
+#    handler 는 체결수량 소스 fields[16](ODER_QTY 오독)→fields[9](CNTG_QTY 정본) 1줄
+#    + 주석 정정, order_engine 은 overrun 클램프(누적>주문수량 시 캡 + WARNING) 순수
+#    추가. 명세 `_workspace/red/cycle235_fill_qty_spec.md`.
+# TODO(cycle235 커밋 후): 아래 세 항목을 **삭제**하고 dict 를 비운다.
+_ALLOWED_CONTENT_SHA: dict[str, str] = {
+    "src/realtime/handler.py":
+        "9fa28d74ac267f2b30993535a0febee8ea5a1b408f38f6ca85a22c9a640e4799",
+    "src/engine/order_engine.py":
+        "79de42306792b73d3741f0da0600cd91faf1cf75a7455d17780bcc2140eef3ae",
+    "src/realtime/CLAUDE.md":
+        "fa4a7b5b565ec1880ee13efad7b005589291c5563dada4dc22ed2f44ae00621f",
+}
 
 
 def _git(*args: str) -> str:
