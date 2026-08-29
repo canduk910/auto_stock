@@ -121,6 +121,25 @@ def is_insufficient_cash(err: KisApiError) -> bool:
     return False
 
 
+def is_sell_qty_exceeded(err: KisApiError) -> bool:
+    """KIS 매도 거부가 '주문 가능한 수량 초과'(APBK0400) 인지 판단 (cycle236, N2).
+
+    의미 = "요청 수량 > 매도 가능 수량" — **부분 보유가 내재된 코드**라
+    `is_insufficient_quantity`(positions 통째 삭제 경로)에 흡수하면 안 된다:
+    257720 실사고(08-28)처럼 실보유 2주가 남은 상태에서 삭제하면 잔여 수량이
+    손절 감시 밖으로 떨어진다. 호출자(`execute_sell`)는 이 분류에서 잔고를
+    재대조해 수량을 보정 후 재시도한다.
+
+    보수 매칭 = msg_cd **APBK0400** ∧ msg1 에 "수량"·"초과" 동시(정본 오류코드
+    사전이 MCP/로컬 문서에 없어 실측 3건(TTTC0011U 매도, 08-28 15:20)이 근거 —
+    APBK0400 이 다른 문맥에 재사용돼도 문구 불일치로 오분류 차단). 소비처는
+    매도 경로 한정.
+    """
+    msg_cd = (err.msg_cd or "").upper()
+    msg1 = err.msg1 or ""
+    return msg_cd == "APBK0400" and ("수량" in msg1 and "초과" in msg1)
+
+
 def is_insufficient_quantity(err: KisApiError) -> bool:
     """KIS 매도 실패 응답이 '매도가능수량 부족'(보유 부족) 사유인지 판단.
 

@@ -144,6 +144,7 @@
 | **APBK0918** | 장시간외 / 보유부족 / 자금부족 **공용** | `is_market_closed_rejection` 또는 `is_insufficient_cash` 또는 `is_insufficient_quantity` (msg1 키워드로 분기) | 시간외: `positions` 보존 + 재시도 중단 / 자금부족: `block_buy(900s)` / 보유부족: 매도 즉시 break |
 | **APBK0919** | 예수금 부족(명시) | `is_insufficient_cash` | `block_buy(900s)` — 다음 잔고 sync에서 해제 |
 | **APBK1234** | 보유수량 부족(명시) | `is_insufficient_quantity` | 매도 break + DB positions 정리 |
+| **APBK0400** | "주문 가능한 수량을 초과했습니다" — 요청 수량 > 매도 가능 수량 (**부분 보유 내재** — cycle236, 실측 2026-08-28 257720 TTTC0011U ×3) | `is_sell_qty_exceeded` (msg_cd ∧ "수량"·"초과" 동시) — `is_insufficient_quantity` **흡수 금지** | `execute_sell` #1.5 잔고 재대조: 오염(held<positions)=held 로 보정+재시도 / 잠김(sellable<held)=보존+중단(`_selling` 유지) / 실보유 0=insufficient 경로 |
 | **EGW00120** | 예수금 부족 변형(게이트웨이 영역) | `is_insufficient_cash` | `block_buy(900s)` |
 | **(msg_cd 미확정)** | 시장가매매불가 (msg1 키워드 기반) | `is_market_order_disallowed` | **지정가 5호가 위 폴백 1회 시도**, 폴백 실패 시 `block_low_funds(ticker, 900s)` |
 

@@ -427,7 +427,7 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     "src/realtime/handler.py":
         "9fa28d74ac267f2b30993535a0febee8ea5a1b408f38f6ca85a22c9a640e4799",
     "src/engine/order_engine.py":
-        "79de42306792b73d3741f0da0600cd91faf1cf75a7455d17780bcc2140eef3ae",
+        "36a0af370a966d0c979679d1128bb49c6de7d33ba8d3d403d7953bf43e034377",
     "src/realtime/CLAUDE.md":
         "fa4a7b5b565ec1880ee13efad7b005589291c5563dada4dc22ed2f44ae00621f",
 }

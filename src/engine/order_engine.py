@@ -20,6 +20,7 @@ from src.api.balance import (
     is_insufficient_quantity,
     is_market_closed_rejection,
     is_market_order_disallowed,
+    is_sell_qty_exceeded,
 )
 from src.engine.util.tick_size import step_down, step_up
 from src.api.base import KisApiError
@@ -692,6 +693,107 @@ class OrderEngine:
                     except Exception:
                         logger.exception("stock_master 사후 보강 실패: %s", ticker)
                     return  # positions / DB 보존, 다음 trigger 대기
+                # 1.5) 수량 초과(APBK0400, cycle236 N2) — 잔고 재대조 → 수량 보정 재시도.
+                #    "요청 > 가능" 은 부분 보유가 내재된 코드다(257720 실사고: 실보유 2주
+                #    인데 positions 3주로 3회 재시도 전량 낭비 + 오버나잇). insufficient
+                #    경로(통째 삭제)에 태우면 잔여 수량이 손절 감시 밖으로 떨어지므로,
+                #    `sellable_quantity`(ord_psbl_qty — 기주문 잔량 차감 반영) 기준으로:
+                #    부분 보유 = 보정+재시도(자기 치유) / 전량 잠김 = 보존+중단 /
+                #    실보유 0 = 기존 insufficient 경로 / 조회 실패 = 현행 재시도(graceful).
+                if is_sell_qty_exceeded(e):
+                    sellable = None
+                    try:
+                        from src.api.balance import get_balance
+                        holdings, _summary = await get_balance()
+                        h = next((x for x in holdings if x.ticker == ticker), None)
+                        held_qty = int(getattr(h, "quantity", 0) or 0) if h else 0
+                        sellable = int(getattr(h, "sellable_quantity", 0) or 0) if h else 0
+                    except Exception:
+                        logger.warning(
+                            "[sell_qty_exceeded] %s 잔고 재대조 실패 — 현행 재시도 유지 "
+                            "(graceful)", ticker, exc_info=True,
+                        )
+                    if sellable is None:
+                        pass  # 재대조 불가 — 아래 일반 재시도 흐름
+                    elif 0 < sellable < pos.quantity and held_qty >= pos.quantity:
+                        # 적대 검증 C236-F1 — positions 는 **정확**(held == positions)한데
+                        # sellable 만 작다 = 외부(수동) 부분 매도주문 잠김. 오염이 아니므로
+                        # 하향 보정 금지(잠긴 주식이 손절 감시 밖으로 떨어진다) — 보존+중단.
+                        # `_selling` 유지 규약은 (b) 전량 잠김과 동일(열린 기주문 실재).
+                        logger.warning(
+                            "[sell_qty_partial_locked] ticker=%s strategy=%s held=%d "
+                            "sellable=%d positions=%d — 외부 부분 매도주문 잠김, 보정 "
+                            "없이 보존 + 중단 (기주문 체결통보/selling_reconcile 대기)",
+                            ticker, strategy_id, held_qty, sellable, pos.quantity,
+                        )
+                        return
+                    elif 0 < sellable < pos.quantity:
+                        # 진짜 오염(held < positions) — 보정 목표는 sellable 이 아니라
+                        # **held(보유 실체)** 다(C236-F1): 잠긴 주식도 보유는 보유라
+                        # 손절 감시 수량은 held 가 정합. 재발사가 sellable 부족으로 다시
+                        # 거부되면 그땐 held == positions 라 위 부분 잠김 분기가 흡수한다.
+                        target_qty = held_qty if 0 < held_qty < pos.quantity else sellable
+                        logger.warning(
+                            "[sell_qty_reconciled] ticker=%s strategy=%s positions=%d → "
+                            "%d 로 수량 보정 후 재시도 (%d/%d) — APBK0400 오염 자기 치유 "
+                            "(held=%d sellable=%d)",
+                            ticker, strategy_id, pos.quantity, target_qty,
+                            attempt, SELL_MAX_RETRIES, held_qty, sellable,
+                        )
+                        pos.quantity = target_qty
+                        try:
+                            from src.db.positions import save_position
+                            await save_position(
+                                ticker=ticker,
+                                ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
+                                buy_price=pos.buy_price,
+                                quantity=target_qty,
+                                order_no=pos.order_no,
+                                strategy_id=strategy_id,
+                                buy_date=pos.buy_date,
+                                high_since_buy=pos.high_since_buy,
+                            )
+                        except Exception:
+                            logger.exception(
+                                "[sell_qty_reconciled] DB positions 수량 보정 실패: %s "
+                                "(메모리는 보정 완료 — 단 sync 는 기보유 종목 수량을 "
+                                "갱신하지 않으므로 DB 는 다음 보정/청산까지 구값 잔존)",
+                                ticker,
+                            )
+                        continue
+                    elif sellable == 0 and held_qty > 0:
+                        # 전량이 기주문에 잠김 — 보정해도 거부 반복. 보존 + 중단.
+                        # ⚠️ `_selling` 은 **의도적으로 유지**한다(discard 금지) —
+                        # sellable=0·보유>0 = 열린 매도 기주문이 실재 = "매도 진행 중"
+                        # 표식이 참이고, 유지가 on_tick 매 틱 재진입(APBK0400+
+                        # get_balance 폭주)을 차단한다. 기주문 체결 시 통보가,
+                        # 미체결 만료 시 `[selling_reconcile]`(180s age gate,
+                        # 열린주문 존재 검사 포함)가 정확히 수습한다 — market_closed
+                        # 분기의 discard 와 다른 이유는 그쪽엔 열린 주문이 없어서다.
+                        logger.warning(
+                            "[sell_qty_locked] ticker=%s strategy=%s held=%d sellable=0 "
+                            "— 전량 기주문 잠김, positions 보존 + 재시도 중단 (기주문 "
+                            "체결통보 또는 selling_reconcile 대기)", ticker, strategy_id,
+                            held_qty,
+                        )
+                        return
+                    elif sellable == 0 and held_qty == 0:
+                        # 실보유 0 — 기존 insufficient 경로 재사용 (삭제 + reconciliation)
+                        insufficient_qty = True
+                        logger.warning(
+                            "매도 매도가능수량 부족(APBK0400·실보유 0) — 재시도 중단: %s "
+                            "(전략: %s)", t(ticker), strategy_id,
+                        )
+                        self._sell_rejection.register_insufficient_quantity(
+                            ticker, now_kst)
+                        break
+                    else:
+                        # sellable >= pos.quantity — 수량은 충분한데 초과 거부(이상).
+                        logger.warning(
+                            "[sell_qty_exceeded] ticker=%s sellable=%d >= positions=%d "
+                            "인데 APBK0400 — 이상 상태, 일반 재시도 지속",
+                            ticker, sellable, pos.quantity,
+                        )
                 # 2) 진짜 보유 부족(APBK1234 등) — 기존 동작 유지 + Q3 history 적재
                 if is_insufficient_quantity(e):
                     insufficient_qty = True

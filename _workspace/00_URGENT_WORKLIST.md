@@ -43,10 +43,13 @@ VB 는 15:20 전량청산 전략이라 **오버나잇 손절 규약이 설계에
   전부 시정. 8영역 승인 = handler·order_engine 한정(sha 핀 4가드, 커밋 시 자기소멸).
   **후속 후보(행위 결정 사안)** = 전량 체결 분기의 잔여취소 타이머 해제 + 1차
   update_trade_status 의 PARTIAL 포괄(C235-V2) · `_completed_orders` 일일 리셋 확인(C235-R3).
-- **N2 (잔여)** APBK0400 이 `is_insufficient_quantity`(APBK1234+"부족" 키워드) 미매칭 →
-  3회 재시도 낭비 + positions 정리·reconciliation 미발동(`balance.py` 분류기 = 비8영역.
-  KIS 정본으로 APBK0400 의미 범위(매수 문맥 겸용 여부) 확인 선행). N1 시정으로 유령 수량
-  발생원 자체는 닫혔으나 분류기는 독립 결함 — cycle236 후보.
+- **N2 — ✅ cycle236 시정 완료(08-29, 커밋 대기)**. `is_sell_qty_exceeded`(APBK0400 ∧
+  "수량"·"초과") + `execute_sell` #1.5 잔고 재대조 4분기(오염=held 보정 자기 치유 /
+  잠김=보존+`_selling` 유지 / 실보유0=insufficient / 실패=graceful). insufficient 흡수
+  금지가 계약(부분 보유 감시 이탈 차단). 적대 검증 확증 4 전부 시정(C236-F1 held 대조).
+  스펙 `_workspace/red/cycle236_sell_qty_exceeded_spec.md`. **잔여 LOW 후속 후보** =
+  대출일별 다중 row 잔고 집계(C236-F4) · manual-sell 라우트 분류 미적용(N2-R5, 수동
+  매도는 실보유 지정이라 실위험 낮음).
 
 ---
 

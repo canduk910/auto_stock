@@ -1126,12 +1126,15 @@ _EIGHT_AREAS = [
 #    handler 는 체결수량 소스 fields[16](ODER_QTY 오독)→fields[9](CNTG_QTY 정본) 1줄
 #    + 주석 정정, order_engine 은 overrun 클램프(누적>주문수량 시 캡 + WARNING) 순수
 #    추가. 명세 `_workspace/red/cycle235_fill_qty_spec.md`.
+#    + cycle236(N2, "n2 시작" 승인): APBK0400 분류(is_sell_qty_exceeded, balance.py
+#    비8영역) 소비 분기 — 잔고 재대조 수량 보정/잠김 보존/실보유0 기존 경로
+#    (`_workspace/red/cycle236_sell_qty_exceeded_spec.md`).
 # TODO(cycle235 커밋 후): 아래 세 항목을 **삭제**하고 dict 를 비운다.
 _ALLOWED_CONTENT_SHA: dict[str, str] = {
     "src/realtime/handler.py":
         "9fa28d74ac267f2b30993535a0febee8ea5a1b408f38f6ca85a22c9a640e4799",
     "src/engine/order_engine.py":
-        "79de42306792b73d3741f0da0600cd91faf1cf75a7455d17780bcc2140eef3ae",
+        "36a0af370a966d0c979679d1128bb49c6de7d33ba8d3d403d7953bf43e034377",
     "src/realtime/CLAUDE.md":
         "fa4a7b5b565ec1880ee13efad7b005589291c5563dada4dc22ed2f44ae00621f",
 }
