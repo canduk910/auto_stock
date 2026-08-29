@@ -300,6 +300,36 @@ def _aggregate_logs(logs: list[dict], fetch_limit: int | None = None) -> dict[st
     }
 
 
+# cycle234 — tick blind 계측 집계 (uptime_monitor 부팅 갭 로그, G2 대체 조치 ①)
+_TICK_BLIND_RE = re.compile(
+    r"\[tick_blind_boot\](?:\s+downtime_secs=(\d+)\s+market_blind_secs=(\d+))?"
+)
+
+
+def _aggregate_tick_blind(logs: list[dict]) -> dict[str, int]:
+    """`[tick_blind_boot]` 집계 — 일 단위 프로세스 부재 blind 총량.
+
+    `market_blind_secs_total` 이 자문 cycle232 §3.5 가 요구한 "그 숫자"다 —
+    서버 스탑(역지정가) 편익의 정량 분자. first_boot 행은 boot_count 만 올린다.
+    """
+    boot_count = 0
+    downtime_total = 0
+    market_total = 0
+    for row in logs:
+        msg = row.get("message") or ""
+        m = _TICK_BLIND_RE.search(msg)
+        if m:
+            boot_count += 1
+            if m.group(1):
+                downtime_total += int(m.group(1))
+                market_total += int(m.group(2))
+    return {
+        "boot_count": boot_count,
+        "downtime_secs_total": downtime_total,
+        "market_blind_secs_total": market_total,
+    }
+
+
 # PR-B (2026-05-14): 구조화 prefix 카운팅
 _NDC_DEFERRED_RE = re.compile(r"\[next_day_clear_deferred\]")
 _NDC_DRAINED_SUCCESS_RE = re.compile(r"\[next_day_clear_drained\][^\n]*result=success")
@@ -633,6 +663,7 @@ async def generate_daily_log_report(
     strategy_funnel = await _collect_strategy_funnel()
     strategy_funnel_stages = await _collect_strategy_funnel_stages(target_date)
     next_day_clear_metrics = _aggregate_next_day_clear(logs)
+    tick_blind_metrics = _aggregate_tick_blind(logs)  # cycle234 — G2 정량 근거
 
     # 사이클 H — 포트폴리오 리스크 관찰 스냅샷 (전 전략 합산 오픈 리스크 + 섹터/전략별 노출).
     # 빌드 실패(잔고/registry 일시 장애)는 graceful → None (리포트 INSERT 는 보존, 사이클 88).
@@ -651,6 +682,7 @@ async def generate_daily_log_report(
         "strategy_funnel_stages": strategy_funnel_stages,  # 신규 (E-1, 사이클 199)
         "next_day_clear": next_day_clear_metrics,
         "portfolio_risk_snapshot": portfolio_risk_snapshot,  # 신규 (사이클 H, 관찰 전용)
+        "tick_blind": tick_blind_metrics,  # 신규 (cycle234 — 프로세스 부재 blind)
     }
 
     logger.info(

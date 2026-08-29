@@ -400,3 +400,13 @@ async def boot(scheduler: "TradingScheduler") -> None:
         account_risk_watcher.ensure_watch_loop(scheduler)
     except Exception:
         logger.exception("[account_risk_watch] 부팅 동기 평가 실패 graceful — 부팅 계속")
+
+    # cycle234 — tick blind 계측 (G2 대체 조치 ①): 직전 하트비트와의 갭 보고 +
+    # 60s 하트비트 루프 스폰. 관측 전용 — market_blind_secs 주간 분포가 서버 스탑
+    # 재검토(cycle232 G2 게이트)의 정량 근거다. never-raise + 이중 graceful.
+    try:
+        from src.engine import uptime_monitor
+        await uptime_monitor.report_boot_blind_gap()
+        uptime_monitor.ensure_heartbeat_loop(scheduler)
+    except Exception:
+        logger.exception("[tick_blind_boot] 계측 배선 실패 graceful — 부팅 계속")
