@@ -883,6 +883,14 @@ class VolatilityBreakoutStrategy(StrategyBase):
             return Signal.NONE
 
         if prev < target and current_price >= target:
+            # cycle233 — 계좌 SOFT Σ상한 게이트는 **발사 직전**이다 (다크런치·fail-open).
+            # 최상단에 두면 block 구간 동안 `_prev_price` baseline 갱신이 동결돼,
+            # 순간 게이트(양방향)가 장중 해제된 뒤 첫 틱이 stale baseline 대비
+            # **거짓 돌파**로 읽힌다(적대 검증 C233-F1 — VB 는 추격 상한이 없어
+            # 진입가 상한 없는 추격 매수가 된다). baseline 은 위에서 이미 갱신됐고
+            # 여기서는 신호만 막는다 = "신규 매수 신호만 차단" 계약의 정확한 구현.
+            if self._account_soft_gate_blocked(ticker):
+                return Signal.NONE
             from src.engine.scanner import t, ticker_names
             board_open = board_info.get("open_price", 0)
             change_rate = round((current_price - board_open) / board_open * 100, 1) if board_open > 0 else 0

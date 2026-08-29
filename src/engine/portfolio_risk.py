@@ -64,6 +64,7 @@ def compute_portfolio_risk_snapshot(
     net_asset: int,
     hard_stop_pcts: dict[str, float],
     sector_of: dict[str, str],
+    stop_price_of: Optional[Any] = None,
 ) -> dict:
     """전 전략 합산 오픈 리스크 + 섹터/전략별 노출 스냅샷 (관찰 전용, 배제 0).
 
@@ -76,11 +77,22 @@ def compute_portfolio_risk_snapshot(
         net_asset: 순자산 (open_risk_pct_of_net 계산용).
         hard_stop_pcts: ``{strategy_id: 하드손절%}``. 결측 전략은 -7.0 fail-open.
         sector_of: ``{ticker: 섹터명}``. 결측 ticker 는 ``미분류-{ticker}`` 독립 취급.
+        stop_price_of: (cycle233 척도 병기) ``(strategy_id, ticker) -> int | None``
+            콜러블 — 전략이 노출하는 **실효 손절선**(원). **미전달(None) 시 반환은
+            기존과 byte 동일** (사이클 H 계약 보존). 전달 시 per-position 실효
+            리스크 ``qty × max(0, buy − stop)`` 를 병기한다 — ``stop ≥ buy`` 는
+            **0**(확정 이익이 타 종목 실노출을 상쇄하면 캡이 무력화 — kojiro
+            `_open_risk_won` 음수 금지 규약), 콜러블 예외/None/≤0 은 **프록시
+            폴백**(관측이 죽으면 안 된다, coverage 미계상). ⚠️ 실효 척도도
+            참값이 아니다(갭 관통 손실 미포착) — 프록시 **대체 금지**, 병기가
+            계약이다 (자문 cycle232 §2.4-β 반례 2).
 
     Returns:
         스냅샷 dict — total_notional_won / total_open_risk_won / open_risk_pct_of_net /
         concurrent_positions / by_strategy(0 포지션 전략 포함) / by_sector(포지션有만) /
-        top_sector(risk_won 최대, 포지션 0 → None).
+        top_sector(risk_won 최대, 포지션 0 → None). stop_price_of 전달 시
+        ``effective`` 키(total_open_risk_effective_won / open_risk_effective_pct_of_net /
+        effective_ratio / coverage) + ``by_strategy[sid]["risk_effective_won"]`` 추가.
 
     입력(strategies / positions / sector_of / hard_stop_pcts) 은 무변경 (관찰 전용 계약).
     """
@@ -89,11 +101,15 @@ def compute_portfolio_risk_snapshot(
     concurrent = 0
     by_strategy: dict[str, dict] = {}
     by_sector: dict[str, dict] = {}
+    measure_effective = stop_price_of is not None
+    total_risk_effective = 0
+    effective_covered = 0
 
     for strat in strategies:
         sid = getattr(strat, "strategy_id", None) or "unknown"
         s_notional = 0
         s_risk = 0
+        s_risk_effective = 0
         s_positions = 0
 
         pct = hard_stop_pcts.get(sid, _DEFAULT_HARD_STOP_PCT)
@@ -119,6 +135,28 @@ def compute_portfolio_risk_snapshot(
                 s_risk += risk
                 s_positions += 1
 
+                if measure_effective:
+                    # 실효 손절선 — 콜러블 실패/None/≤0 은 프록시 폴백 (fail-open)
+                    stop = None
+                    try:
+                        stop = stop_price_of(sid, ticker)
+                    except Exception:
+                        stop = None
+                    if stop is not None:
+                        try:
+                            stop_int = int(stop)
+                        except (TypeError, ValueError):
+                            stop_int = 0
+                        if stop_int > 0:
+                            s_risk_effective += int(quantity) * max(
+                                0, int(buy_price) - stop_int
+                            )
+                            effective_covered += 1
+                        else:
+                            s_risk_effective += risk
+                    else:
+                        s_risk_effective += risk
+
                 sector = sector_of.get(ticker) or f"미분류-{ticker}"
                 bucket = by_sector.setdefault(
                     sector, {"positions": 0, "notional_won": 0, "risk_won": 0}
@@ -132,6 +170,9 @@ def compute_portfolio_risk_snapshot(
             "notional_won": s_notional,
             "risk_won": s_risk,
         }
+        if measure_effective:
+            by_strategy[sid]["risk_effective_won"] = s_risk_effective
+            total_risk_effective += s_risk_effective
         total_notional += s_notional
         total_risk += s_risk
         concurrent += s_positions
@@ -153,7 +194,7 @@ def compute_portfolio_risk_snapshot(
             "risk_share_pct": share,
         }
 
-    return {
+    snapshot = {
         "total_notional_won": total_notional,
         "total_open_risk_won": total_risk,
         "open_risk_pct_of_net": open_risk_pct,
@@ -162,6 +203,71 @@ def compute_portfolio_risk_snapshot(
         "by_sector": by_sector,
         "top_sector": top_sector,
     }
+    if measure_effective:
+        eff_pct = (
+            round(total_risk_effective / net_asset * 100, 2)
+            if net_asset and net_asset > 0
+            else 0.0
+        )
+        snapshot["effective"] = {
+            "total_open_risk_effective_won": total_risk_effective,
+            "open_risk_effective_pct_of_net": eff_pct,
+            "effective_ratio": (
+                round(total_risk_effective / total_risk, 4) if total_risk > 0 else None
+            ),
+            "coverage": {
+                "effective_positions": effective_covered,
+                "total_positions": concurrent,
+            },
+        }
+    return snapshot
+
+
+def compute_over_cap_positions(strategies: Iterable[Any]) -> list[dict]:
+    """1주 폴백 notional 상한 초과 관측 (cycle233 — 자문 cycle232 §정정 1·부속안 ③).
+
+    `_fallback_one_share` 는 잔여 예산만 보고 notional 상한(`position_ratio × 예산`)을
+    보지 않아, 고가주 1주가 설계 유닛의 3배+ 명목이 될 수 있다(실측 000815 3.10배 =
+    4.11유닛 → 원전 R15 "동일 종목 4유닛" 상한 위반). 시정(차단)은 매수를 좁히는
+    변경이라 사용자 결정 = **관측만** — 본 함수는 초과 목록만 반환한다(입력 무변경).
+
+    Returns:
+        ``[{strategy_id, ticker, notional_won, cap_won, over_ratio}]`` — 초과분만.
+        position_ratio 결측/0·예산 0·예외 는 전략 단위 skip (fail-open).
+    """
+    out: list[dict] = []
+    for strat in strategies:
+        try:
+            sid = getattr(strat, "strategy_id", None) or "unknown"
+            params = getattr(getattr(strat, "config", None), "params", None)
+            if not isinstance(params, dict):
+                continue
+            ratio = float(params.get("position_ratio") or 0)
+            budget = int(getattr(getattr(strat, "state", None), "total_investment", 0) or 0)
+            if ratio <= 0 or budget <= 0:
+                continue
+            cap = int(budget * ratio)
+            if cap <= 0:
+                continue
+            positions = getattr(strat.state, "positions", None)
+            if not isinstance(positions, dict):
+                continue
+            for ticker, pos in positions.items():
+                try:
+                    notional = int(pos.buy_price) * int(pos.quantity)
+                except (TypeError, ValueError, AttributeError):
+                    continue
+                if notional > cap:
+                    out.append({
+                        "strategy_id": sid,
+                        "ticker": ticker,
+                        "notional_won": notional,
+                        "cap_won": cap,
+                        "over_ratio": round(notional / cap, 2),
+                    })
+        except Exception:
+            continue  # fail-open — 한 전략의 파싱 실패가 관측을 죽이지 않는다
+    return out
 
 
 def check_budget_invariant(strategies: Iterable[Any]) -> list[dict]:

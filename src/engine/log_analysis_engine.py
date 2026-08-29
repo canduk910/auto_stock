@@ -548,12 +548,35 @@ async def _build_portfolio_risk_snapshot(_now_kst: datetime | None = None) -> di
     # 섹터명 해석은 `sector_naming` 단일 진실원에 위임 (portfolio 라우트와 동일 계약).
     sector_of = await resolve_sector_names(held_tickers)
 
-    return compute_portfolio_risk_snapshot(
+    # cycle233 — 척도 병기: 전략이 노출하는 실효 손절선 주입 (fail-open — 미구현/예외
+    # 전략은 프록시 폴백). 관찰 전용 — 매매 상태 무변경.
+    strat_by_id = {
+        (getattr(s, "strategy_id", None) or "unknown"): s for s in strategies
+    }
+
+    def _stop_of(sid: str, ticker: str):
+        fn = getattr(strat_by_id.get(sid), "get_effective_stop_price", None)
+        if not callable(fn):
+            return None
+        try:
+            return fn(ticker)
+        except Exception:
+            return None
+
+    snapshot = compute_portfolio_risk_snapshot(
         strategies,
         net_asset=net_asset,
         hard_stop_pcts=hard_stop_pcts,
         sector_of=sector_of,
+        stop_price_of=_stop_of,
     )
+    # cycle233 — 1주 폴백 notional 초과 관측 (자문 cycle232 §정정 1, 관측 전용)
+    try:
+        from src.engine.portfolio_risk import compute_over_cap_positions
+        snapshot["over_cap_positions"] = compute_over_cap_positions(strategies)
+    except Exception:
+        logger.debug("[portfolio_risk] over_cap 계산 실패 graceful", exc_info=True)
+    return snapshot
 
 
 async def generate_daily_log_report(

@@ -468,10 +468,25 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 # 🔁 2026-08-29 — cycle229 커밋(6d4bc22)으로 VB·momentum 항목 자기소멸.
 #    cycle231(P2-5 — kojiro `_held_stage3` 날짜 키 무효화, 자문
 #    cycle231_kojiro_stage3_stale.md, 사용자 승인)이 kojiro 를 수정하며 재핀.
-# TODO(cycle231 커밋 후): 아래 항목을 **삭제**하고 dict 를 비운다.
+# 🔁 2026-08-29 (2차) — cycle231 커밋(84f5867)으로 kojiro 구항목 자기소멸 확인 후 삭제.
+#    cycle233(G3′ 계좌 리스크 패키지 — 자문 cycle232_risk_control_review.md,
+#    사용자 결정 "A시작")이 6전략 전부를 승인 수정하며 재핀:
+#    check_buy_signal 최상단 계좌 SOFT 게이트 1줄(전 전략) + 실효 손절선 read-only
+#    미러 get_effective_stop_price(kojiro/VCP/BFB — donchian 은 별도 가드 소관).
+# TODO(cycle233 커밋 후): 아래 항목을 **전부 삭제**하고 dict 를 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/kojiro.py":
-        "8093ab7e9e79a5f6f16e55b02a454dabbe7ceba4c692517d9943fd2aa530f0d1",
+        "0fae57e5cc9c68c7c7a5e46cacb3f65d68fd19cb490f316101aea80ed40ab3f1",
+    "src/engine/strategies/vcp_breakout.py":
+        "769595c084b9cc4daf6570ac18f570edb93fbf654cb12f362e0c5994f2f02f9f",
+    "src/engine/strategies/bull_flag_breakout.py":
+        "48d8f62d210836bd21525e2c7c8e4b58e0f4c0f93b1d58fd283e0d3a1d2dbd6d",
+    "src/engine/strategies/momentum.py":
+        "5499bb08ae7ecf670289e9b00f5f15de4c86bc773effdbe932da12cfa7822b7e",
+    "src/engine/strategies/volatility_breakout.py":
+        "a59ca1a5c3e72aee962f9628ce78f92959b1976a8f9610bbd3f43c414b57b4d6",
+    "src/engine/strategies/long_tail_volatility.py":
+        "a986b5c317c53674c755cb59d35b118de7c77aeff73e7c9247d366335796d30b",
 }
 
 

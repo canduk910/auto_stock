@@ -908,6 +908,9 @@ class BullFlagBreakoutStrategy(StrategyBase):
     # 신호 평가
     # ------------------------------------------------------------------
     def check_buy_signal(self, ticker, current_price, open_price) -> Signal:
+        # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
+        if self._account_soft_gate_blocked(ticker):
+            return Signal.NONE
         if self.state.buy_disabled:
             return Signal.NONE
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker):
@@ -1117,8 +1120,12 @@ class BullFlagBreakoutStrategy(StrategyBase):
     # cycle228-B — 구조 레벨(진입 시점 확정 후 **불변**) 키. 지표(atr14)는 여기 없다.
     _STRUCTURE_KEYS = ("flag_low", "flag_high", "pole_high", "pole_start")
 
-    def _effective_setup(self, ticker: str) -> dict:
+    def _effective_setup(self, ticker: str, *, observe: bool = True) -> dict:
         """청산 파라미터 리졸버 — 구조 레벨 stamp 우선 + 지표 live 우선 (cycle228-B).
+
+        `observe=False` (cycle233 F1) — read-only 소비처(실효 손절선 미러) 전용:
+        `[setup_structure_conflict]` 발화·cap 소비를 건너뛴다(마커의 "청산 평가
+        문맥" D+1 귀인 보존). 병합 결과는 observe 무관 동일.
 
         P1 계약("구조 레벨은 BUY 직전 stamp 후 불변, 지표만 매일 갱신")을 리졸버
         자신의 live 통째 우선이 우회하던 결함 시정 — `prepare()` 는 보유 종목을
@@ -1142,7 +1149,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
                     if key in merged and merged[key] != stamp[key]:
                         conflict = True
                     merged[key] = stamp[key]
-            if conflict:
+            if conflict and observe:
                 self._roll_gate_day_if_needed()
                 if self._gate_should_emit(ticker, "setup_conflict"):
                     logger.info(
@@ -1293,6 +1300,57 @@ class BullFlagBreakoutStrategy(StrategyBase):
             return Signal.TRAILING_STOP
 
         return Signal.NONE
+
+    def get_effective_stop_price(self, ticker: str) -> int | None:
+        """실효 손절선 read-only 미러 (cycle233 척도 병기).
+
+        `check_exit_signal` 가격선들의 max — §1 터틀 3단 밴드(또는 미스탬프 −5%),
+        §1.5 래치 승격선(래치 읽기만), §2 flag_low, §4 샹들리에. **measured-move
+        (§3)는 상방 익절 타겟이라 손절선 모델 제외** — 포함하면 상한이 오염된다.
+        §5 시간 청산은 가격 무관이라 제외. 로그 무발화·상태 무변조.
+        """
+        pos = self.state.positions.get(ticker)
+        if not pos or pos.buy_price <= 0:
+            return None
+        try:
+            params = self.config.params
+            info = self._effective_setup(ticker, observe=False)
+            lines: list[float] = []
+            entry_atr = self._entry_atr.get(ticker, 0.0)
+            if entry_atr > 0:
+                stop_atr = float(params.get("stop_atr", 2.0))
+                base_stop = pos.buy_price - stop_atr * entry_atr
+                min_stop_pct = float(params.get("turtle_min_stop_pct", 0.0) or 0.0)
+                if min_stop_pct < 0:
+                    base_stop = min(base_stop, pos.buy_price * (1 + min_stop_pct / 100.0))
+                be_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+                if (be_mult > 0
+                        and pos.high_since_buy >= pos.buy_price + be_mult * entry_atr):
+                    base_stop = max(base_stop, float(pos.buy_price))
+                if base_stop > 0:
+                    lines.append(base_stop)
+                backstop = float(params.get("turtle_backstop_pct", 0.0) or 0.0)
+                if backstop < 0:
+                    lines.append(pos.buy_price * (1 + backstop / 100.0))
+            else:
+                stop_loss = float(params["stop_loss_rate"])
+                lines.append(pos.buy_price * (1 + stop_loss / 100.0))
+                # §1.5 live ATR 래치 — 이미 래치된 종목만 승격선(read-only)
+                be_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+                if be_mult > 0 and ticker in self._breakeven_latched:
+                    lines.append(float(pos.buy_price))
+            flag_low = (info.get("flag_low") or 0) if info else 0
+            if flag_low:
+                lines.append(float(flag_low))
+            if info and pos.high_since_buy > 0:
+                atr = info.get("atr14", 0)
+                if atr > 0:
+                    mult = float(params["atr_trail_mult"])
+                    lines.append(pos.high_since_buy - atr * mult)
+            positives = [line for line in lines if line > 0]
+            return int(max(positives)) if positives else None
+        except Exception:
+            return None  # fail-open — 프록시 폴백
 
     def check_force_clear(self) -> list[str]:
         """15:20 강제 청산 없음 — max_hold_days 시간 청산은 check_exit_signal 에서 처리."""

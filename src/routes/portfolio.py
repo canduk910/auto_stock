@@ -84,12 +84,35 @@ async def get_portfolio_risk() -> ApiResponse:
 
     sector_of = await _sector_of_graceful(held_tickers)
 
+    # cycle233 — 척도 병기: 전략 노출 실효 손절선 주입 (fail-open, 프록시 폴백)
+    strat_by_id = {
+        (getattr(s, "strategy_id", None) or "unknown"): s for s in strategies
+    }
+
+    def _stop_of(sid: str, ticker: str):
+        fn = getattr(strat_by_id.get(sid), "get_effective_stop_price", None)
+        if not callable(fn):
+            return None
+        try:
+            return fn(ticker)
+        except Exception:
+            return None
+
     snapshot = compute_portfolio_risk_snapshot(
         strategies,
         net_asset=net_asset,
         hard_stop_pcts=hard_stop_pcts,
         sector_of=sector_of,
+        stop_price_of=_stop_of,
     )
+    # cycle233 — 1주 폴백 notional 초과 + 계좌 게이트 상태 관측 노출
+    try:
+        from src.engine.account_risk_watcher import get_gate_state
+        from src.engine.portfolio_risk import compute_over_cap_positions
+        snapshot["over_cap_positions"] = compute_over_cap_positions(strategies)
+        snapshot["account_gate"] = get_gate_state()
+    except Exception:
+        logger.debug("[portfolio_risk] over_cap/gate 관측 실패 graceful", exc_info=True)
     return ApiResponse(
         success=True, data=snapshot, message="포트폴리오 리스크 관찰 스냅샷"
     )

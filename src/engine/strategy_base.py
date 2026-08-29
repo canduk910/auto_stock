@@ -228,6 +228,12 @@ class StrategyBase(ABC):
         # (서브클래스 override 가 super() 를 호출하지 않아 리셋이 누락될 수 있음).
         self._budget_clamp_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._budget_clamp_day: str = ""
+        # cycle233 — 계좌 SOFT 게이트 스킵 관측(1회/전략/일) + 1주 폴백 notional
+        # 초과 관측(1회/ticker/일). 날짜 키 자기 리셋 — `_reset_daily_state` 훅 미의존.
+        self._account_gate_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._account_gate_day: str = ""
+        self._oversized_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._oversized_day: str = ""
 
     @property
     def strategy_id(self) -> str:
@@ -465,12 +471,105 @@ class StrategyBase(ABC):
         if current_price <= 0:
             return 0
         if qty <= 0:
-            return self._fallback_one_share(current_price)
-        remaining = max(0, self.state.total_investment - self._calc_used_funds())
-        clamped = min(qty, remaining // current_price)
-        if clamped < qty:
-            self._emit_budget_clamp(ticker, qty, clamped, remaining)
-        return clamped
+            final = self._fallback_one_share(current_price)
+        else:
+            remaining = max(0, self.state.total_investment - self._calc_used_funds())
+            final = min(qty, remaining // current_price)
+            if final < qty:
+                self._emit_budget_clamp(ticker, qty, final, remaining)
+        # cycle233 — 1주 폴백 notional 초과 **관측만** (자문 cycle232 §정정 1·부속안 ③).
+        # 수량은 절대 바꾸지 않는다 — 차단(부속안 ②)은 매수를 좁히는 변경이라
+        # 사용자 결정으로 기각(표본 보호 국면). 관측 실패도 수량 산출을 못 깨뜨린다.
+        try:
+            self._emit_oversized_fallback(ticker, final, current_price)
+        except Exception:  # pragma: no cover — 관측 자기실패 흡수
+            pass
+        return final
+
+    def _emit_oversized_fallback(
+        self, ticker: str | None, final_qty: int, current_price: int,
+    ) -> None:
+        """`[oversized_fallback]` — 최종 수량 명목이 notional 상한을 넘은 관측.
+
+        cycle233 (자문 cycle232 §정정 1) — `_fallback_one_share` 가 notional 상한
+        (`position_ratio × 예산`)을 보지 않아 고가주 1주가 설계 유닛의 3배+ 명목이
+        된다(실측 000815 3.10배 = R15 동일 종목 4유닛 위반). **관측 전용** — 수량
+        무변경, 1회/(ticker)/일 cap, 어떤 실패도 흡수. position_ratio 결측/0 은
+        상한 정의 불가라 무발화 (fail-open).
+        """
+        try:
+            if final_qty < 1 or current_price <= 0:
+                return
+            ratio = float(self.config.params.get("position_ratio") or 0)
+            budget = int(self.state.total_investment or 0)
+            if ratio <= 0 or budget <= 0:
+                return
+            cap = int(budget * ratio)
+            notional = final_qty * current_price
+            if cap <= 0 or notional <= cap:
+                return
+            today = datetime.now(_KST).date().isoformat()
+            if self._oversized_day != today:
+                self._oversized_day = today
+                self._oversized_logged.reset_daily()
+            key = ticker or "-"
+            if self._oversized_logged.should_emit(key):
+                # peek → 로그 → mark (cycle226 D-3 — 로그 자기실패가 그날 관측을 지우지 않게)
+                logger.info(
+                    "[oversized_fallback] ticker=%s strategy=%s qty=%d notional=%d "
+                    "cap=%d ratio=%.2f — 1주 폴백이 notional 상한 초과 (관측 전용)",
+                    key, self.strategy_id, final_qty, notional, cap, notional / cap,
+                )
+                self._oversized_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
+
+    def get_effective_stop_price(self, ticker: str) -> int | None:
+        """포지션의 **현재 실효 손절선**(원) — 척도 병기용 read-only 추정기 (cycle233).
+
+        기본 구현 = None (프록시 폴백 신호 — `portfolio_risk` 가 하드손절% 프록시로
+        폴백). 보유형 전략(kojiro/donchian/VCP/BFB)은 자신의 `check_exit_signal`
+        가격선들과 **동일 산식·동일 상태 소스**의 max 를 반환하도록 override 한다.
+        계약: **read-only** — 래치·`_stop_floor`·로그 어느 것도 변경/발화 금지
+        (kojiro `_position_stop_price` 독트린). 가격 무관 청산(시간·stage3·
+        measured-move)은 모델 제외.
+        """
+        return None
+
+    def _account_soft_gate_blocked(self, ticker: str | None = None) -> bool:
+        """계좌 SOFT Σ상한 순간 게이트 소비처 (cycle233 M6 — check_buy_signal 최상단).
+
+        `account_risk_watcher.is_soft_gated()` True 면 신규 매수 신호만 차단.
+        **fail-open** — import/판정 실패 시 False (매수 경로가 죽지 않는다).
+        lazy import — strategy_base 최상위 import 금지 (AST G-5, 순환 차단).
+        관측 = `[account_gate_skip]` 1회/전략/일 (날짜 키 자기 리셋).
+        """
+        try:
+            from src.engine import account_risk_watcher
+            if not account_risk_watcher.is_soft_gated():
+                return False
+            try:
+                today = datetime.now(_KST).date().isoformat()
+                if self._account_gate_day != today:
+                    self._account_gate_day = today
+                    self._account_gate_logged.reset_daily()
+                if self._account_gate_logged.should_emit(self.strategy_id):
+                    # peek → 로그 → mark (cycle226 D-3 규약)
+                    logger.info(
+                        "[account_gate_skip] strategy=%s ticker=%s — 계좌 Σ오픈리스크 "
+                        "SOFT 상한으로 신규 매수 신호 보류 (청산·손절 무관)",
+                        self.strategy_id, ticker or "-",
+                    )
+                    self._account_gate_logged.mark_emitted(self.strategy_id)
+            except Exception:
+                pass
+            return True
+        except Exception:
+            # fail-open — 단 완전 무음은 금지(F8): debug 흔적만 남긴다
+            # (INFO 이상이면 hot path 폭주 — cap 상태 자체가 위 try 안이라 못 쓴다)
+            logger.debug("[account_gate_skip_failed] 게이트 판정 실패 fail-open",
+                         exc_info=True)
+            return False
 
     def _emit_budget_clamp(
         self, ticker: str | None, requested: int, clamped: int, remaining: int,

@@ -150,6 +150,11 @@ class MomentumStrategy(StrategyBase):
 
         threshold = self.config.params["buy_threshold"]
         if prev_rate < threshold and change_rate >= threshold:
+            # cycle233 — 계좌 SOFT Σ상한 게이트는 **발사 직전** (VB 동형, C233-F1).
+            # 최상단 게이트는 block 구간 동안 `_prev_prdy_rate` baseline 을 동결시켜
+            # 해제 후 첫 틱을 거짓 돌파로 만든다 — baseline 갱신(위) 뒤 신호만 차단.
+            if self._account_soft_gate_blocked(ticker):
+                return Signal.NONE
             logger.info(
                 "매수 신호: %s 전일종가(%d) 대비 %.1f%% (현재가: %d, 직전: %.1f%%)",
                 t(ticker), prev_close, change_rate, current_price, prev_rate,

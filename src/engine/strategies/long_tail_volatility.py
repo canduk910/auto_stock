@@ -630,6 +630,9 @@ class LongTailVolatilityStrategy(StrategyBase):
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:
         """현재 활성 보드의 Target Price 돌파 시 매수."""
+        # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
+        if self._account_soft_gate_blocked(ticker):
+            return Signal.NONE
         from src.engine.scanner import t, ticker_names, ticker_prev_close
 
         if self.state.buy_disabled:

@@ -142,6 +142,44 @@ async def set_cash_usage_ratio(ratio: float) -> None:
     await _upsert_value(_CASH_USAGE_RATIO_KEY, {"value": adjusted})
 
 
+# ── 계좌 통합 리스크 SOFT 게이트 임계 (cycle233, G3′ 패키지) ────────────────
+# warn = 관측 경보(기본 4.0% — 설계 천장 스윙 3.55% 밖 사건 관측, 행위 없음).
+# block = SOFT 신규 매수 차단(기본 None = **다크런치** — DB 한 줄로 활성, 권고 6.0).
+# 임계를 발화시키려고 낮추는 것 금지 (자문 cycle232 §2.6 — 통제가 아니라 무작위
+# 매수 억제). .env fallback 없음 — 운영 가변 (buy_block_thresholds 선례).
+_ACCOUNT_RISK_WARN_PCT_KEY = "account_risk_warn_pct"
+_ACCOUNT_RISK_WARN_PCT_DEFAULT = 4.0
+_ACCOUNT_RISK_BLOCK_PCT_KEY = "account_risk_block_pct"
+
+
+async def _get_float_or_none(key: str) -> float | None:
+    """JSONB `{"value": x}` 또는 직저장 숫자 → float. 부재/파싱 불가/예외 → None."""
+    try:
+        raw = await _select_value(key)
+        if raw is _MISSING:
+            return None
+        if isinstance(raw, dict):
+            v = raw.get("value")
+            return float(v) if v is not None else None
+        if isinstance(raw, (int, float)):
+            return float(raw)
+        return None
+    except Exception:
+        logger.exception("[account_risk] %s get 실패 — None(기본) 사용", key)
+        return None
+
+
+async def get_account_risk_warn_pct() -> float:
+    """계좌 Σ오픈리스크 관측 경보선 % — 키 부재/실패 시 기본 4.0 (상시 관측)."""
+    v = await _get_float_or_none(_ACCOUNT_RISK_WARN_PCT_KEY)
+    return v if v is not None else _ACCOUNT_RISK_WARN_PCT_DEFAULT
+
+
+async def get_account_risk_block_pct() -> float | None:
+    """계좌 Σ오픈리스크 SOFT 차단선 % — 키 부재 시 **None = 다크런치**(차단 비활성)."""
+    return await _get_float_or_none(_ACCOUNT_RISK_BLOCK_PCT_KEY)
+
+
 async def get_auto_regime_adjust() -> bool:
     """매크로 레짐 기반 cash_usage_ratio 자동 조정 활성 여부.
 

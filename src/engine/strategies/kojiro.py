@@ -792,6 +792,9 @@ class KojiroStrategy(StrategyBase):
         _candidates 멤버십 = prepare 에서 strict entry 4조건(스테이지1+6→1인접+3선우상향+종가>EMA5)
         + ATR밴드 확정. 여기선 시간창 + 갭 게이트만.
         """
+        # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
+        if self._account_soft_gate_blocked(ticker):
+            return Signal.NONE
         if self.state.buy_disabled:
             return Signal.NONE
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker):
@@ -1084,6 +1087,20 @@ class KojiroStrategy(StrategyBase):
             if stop > 0 and stop < pos.buy_price:
                 total += pos.quantity * (pos.buy_price - stop)
         return total
+
+    def get_effective_stop_price(self, ticker: str) -> int | None:
+        """실효 손절선 read-only 미러 (cycle233 척도 병기) — `_position_stop_price` 위임.
+
+        Σ오픈리스크 캡·척도 병기 양쪽이 **동일 산식**(4선 max)을 보게 하는 단일 진실원.
+        """
+        pos = self.state.positions.get(ticker)
+        if not pos or pos.buy_price <= 0:
+            return None
+        try:
+            stop = self._position_stop_price(ticker, pos)
+            return int(stop) if stop > 0 else None
+        except Exception:
+            return None  # fail-open — 프록시 폴백
 
     def check_force_clear(self) -> list[str]:
         """15:20 강제 청산 대상 — 멀티데이 스윙은 강제 청산 없음."""

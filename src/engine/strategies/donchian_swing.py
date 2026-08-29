@@ -1549,6 +1549,9 @@ class DonchianSwingStrategy(StrategyBase):
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:
         """09:05 ~ 09:30 사이에 _candidates 종목 진입 (갭 +3%↑ 스킵, 1회만)."""
+        # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
+        if self._account_soft_gate_blocked(ticker):
+            return Signal.NONE
         if self.state.buy_disabled:
             return Signal.NONE
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker):
@@ -1737,6 +1740,50 @@ class DonchianSwingStrategy(StrategyBase):
                 return Signal.TRAILING_STOP
 
         return Signal.NONE
+
+    def get_effective_stop_price(self, ticker: str) -> int | None:
+        """실효 손절선 read-only 미러 (cycle233 척도 병기).
+
+        `check_exit_signal` 의 **가격선**들과 동일 산식·동일 상태 소스의 max —
+        §1 터틀(2ATR base + 브레이크이븐 승격 + backstop 선) 또는 미스탬프 고정%,
+        §2.6 채널 저가, §2 샹들리에. 시간청산(§2.5)은 가격 무관이라 모델 제외
+        (kojiro `_position_stop_price` stage3 제외 선례 — 조기 청산 방향 = 보수).
+        read-only — 로그 무발화·상태 무변조 (승격 로그는 check_exit 전용).
+        """
+        pos = self.state.positions.get(ticker)
+        if not pos or pos.buy_price <= 0:
+            return None
+        try:
+            params = self.config.params
+            lines: list[float] = []
+            entry_atr = self._entry_atr.get(ticker, 0)
+            if entry_atr > 0:
+                stop_atr = float(params.get("stop_atr", 2.0))
+                base_stop = pos.buy_price - stop_atr * entry_atr
+                be_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+                if (be_mult > 0
+                        and pos.high_since_buy >= pos.buy_price + be_mult * entry_atr):
+                    base_stop = max(base_stop, float(pos.buy_price))
+                if base_stop > 0:
+                    lines.append(base_stop)
+                backstop = float(params.get("turtle_backstop_pct", -9.0))
+                lines.append(pos.buy_price * (1 + backstop / 100.0))
+            else:
+                stop_loss = float(params["stop_loss_rate"])
+                lines.append(pos.buy_price * (1 + stop_loss / 100.0))
+            channel_period = int(params.get("channel_exit_period", 0) or 0)
+            channel_low = self._channel_low.get(ticker, 0)
+            if channel_period > 0 and channel_low > 0:
+                lines.append(float(channel_low))
+            info = self._candidates.get(ticker)
+            atr = info["atr"] if info else self._entry_atr.get(ticker, 0)
+            if atr > 0 and pos.high_since_buy > 0:
+                mult = float(params["atr_trail_mult"])
+                lines.append(pos.high_since_buy - atr * mult)
+            positives = [line for line in lines if line > 0]
+            return int(max(positives)) if positives else None
+        except Exception:
+            return None  # fail-open — 프록시 폴백
 
     def check_force_clear(self) -> list[str]:
         """15:20 강제 청산 대상 — 스윙 전략은 강제 청산 없음."""

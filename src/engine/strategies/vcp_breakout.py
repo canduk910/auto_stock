@@ -1025,6 +1025,9 @@ class VcpBreakoutStrategy(StrategyBase):
     # 신호 평가
     # ------------------------------------------------------------------
     def check_buy_signal(self, ticker, current_price, open_price) -> Signal:
+        # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
+        if self._account_soft_gate_blocked(ticker):
+            return Signal.NONE
         if self.state.buy_disabled:
             return Signal.NONE
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker):
@@ -1181,13 +1184,19 @@ class VcpBreakoutStrategy(StrategyBase):
     # cycle228-B — 구조 레벨(진입 시점 확정 후 **불변**) 키. 지표(atr14/ema50)는 여기 없다.
     _STRUCTURE_KEYS = ("base_low",)
 
-    def _effective_setup(self, ticker: str) -> dict:
+    def _effective_setup(self, ticker: str, *, observe: bool = True) -> dict:
         """청산 파라미터 리졸버 — 구조 레벨 stamp 우선 + 지표 live 우선 (cycle228-B).
 
         BFB `_effective_setup` 동형(상세 사유는 그쪽 docstring). VCP 구조 레벨은
         `base_low` 하나 — 보유 중 새 베이스 재검출 시 §2 손절선이 새 `base_low`
         (진입가보다 높을 수 있다)로 갈아타는 것을 차단한다. `atr14`/`ema50` 은
         지표라 live 우선 유지(박제 시 상승 추세에서 §4 ema50 이탈 청산이 늦어진다).
+
+        `observe=False` (cycle233 적대 검증 F1) — read-only 소비처(실효 손절선
+        미러 → watcher/라우트/20:10 리포트) 전용. `[setup_structure_conflict]`
+        발화·cap 소비를 건너뛰어 cycle228-B 마커의 "청산 평가 문맥" D+1 귀인을
+        보존한다(watcher 가 cap 을 선소비하면 당일 청산 경로 발화가 억제된다).
+        병합 결과는 observe 무관 동일 — 관측 부작용만 분기.
         """
         candidate = self._candidates.get(ticker)
         stamp = self._position_setup.get(ticker)
@@ -1199,7 +1208,7 @@ class VcpBreakoutStrategy(StrategyBase):
                     if key in merged and merged[key] != stamp[key]:
                         conflict = True
                     merged[key] = stamp[key]
-            if conflict:
+            if conflict and observe:
                 self._roll_gate_day_if_needed()
                 if self._gate_should_emit(ticker, "setup_conflict"):
                     logger.info(
@@ -1330,6 +1339,59 @@ class VcpBreakoutStrategy(StrategyBase):
                 return Signal.TRAILING_STOP
 
         return Signal.NONE
+
+    def get_effective_stop_price(self, ticker: str) -> int | None:
+        """실효 손절선 read-only 미러 (cycle233 척도 병기).
+
+        `check_exit_signal` 가격선들의 max — §1 터틀 3단 밴드(또는 미스탬프 −7%),
+        §1.5 래치 승격선(래치 **읽기만** — 신규 래치 금지), §2 base_low, §3 샹들리에,
+        §4 ema50. 로그 무발화·상태 무변조.
+        """
+        pos = self.state.positions.get(ticker)
+        if not pos or pos.buy_price <= 0:
+            return None
+        try:
+            params = self.config.params
+            info = self._effective_setup(ticker, observe=False)
+            lines: list[float] = []
+            entry_atr = self._entry_atr.get(ticker, 0.0)
+            if entry_atr > 0:
+                stop_atr = float(params.get("stop_atr", 2.0))
+                base_stop = pos.buy_price - stop_atr * entry_atr
+                min_stop_pct = float(params.get("turtle_min_stop_pct", 0.0) or 0.0)
+                if min_stop_pct < 0:
+                    base_stop = min(base_stop, pos.buy_price * (1 + min_stop_pct / 100.0))
+                be_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+                if (be_mult > 0
+                        and pos.high_since_buy >= pos.buy_price + be_mult * entry_atr):
+                    base_stop = max(base_stop, float(pos.buy_price))
+                if base_stop > 0:
+                    lines.append(base_stop)
+                backstop = float(params.get("turtle_backstop_pct", 0.0) or 0.0)
+                if backstop < 0:
+                    lines.append(pos.buy_price * (1 + backstop / 100.0))
+            else:
+                stop_loss = float(params["stop_loss_rate"])
+                lines.append(pos.buy_price * (1 + stop_loss / 100.0))
+                # §1.5 live ATR 래치 — 이미 래치된 종목만 승격선(read-only)
+                be_mult = float(params.get("breakeven_promote_atr", 0) or 0)
+                if be_mult > 0 and ticker in self._breakeven_latched:
+                    lines.append(float(pos.buy_price))
+            base_low = (info.get("base_low") or 0) if info else 0
+            if base_low:
+                lines.append(float(base_low))
+            if info and pos.high_since_buy > 0:
+                atr = info.get("atr14", 0)
+                if atr > 0:
+                    mult = float(params["atr_trail_mult"])
+                    lines.append(pos.high_since_buy - atr * mult)
+            ema50 = (info.get("ema50", 0) or 0) if info else 0
+            if ema50 > 0:
+                lines.append(float(ema50))
+            positives = [line for line in lines if line > 0]
+            return int(max(positives)) if positives else None
+        except Exception:
+            return None  # fail-open — 프록시 폴백
 
     def check_force_clear(self) -> list[str]:
         """멀티데이 — 15:20 강제 청산 없음."""

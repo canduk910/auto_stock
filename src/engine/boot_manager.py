@@ -389,3 +389,14 @@ async def boot(scheduler: "TradingScheduler") -> None:
         )
     except Exception:
         logger.exception("[pending_ndc_boot_restore] DB 복구 실패 graceful — 메모리 set 보존")
+
+    # cycle233 — 계좌 리스크 감시 부팅 동기 1회 (자문 cycle232 §2.5-γ 반례 2 요구사항:
+    # 이게 없으면 07:55 부팅 ~ 첫 주기 평가 사이 09:05 매수창이 무평가로 열린다)
+    # + 5분 자기 종료 감시 루프 스폰(idempotent — scheduler 라인 상한 가드 존중,
+    # cancel 불요 = `_running` False 시 ≤60s 자연 종료). watcher 내부 fail-open.
+    try:
+        from src.engine import account_risk_watcher
+        await account_risk_watcher.run_account_risk_watch_once(scheduler)
+        account_risk_watcher.ensure_watch_loop(scheduler)
+    except Exception:
+        logger.exception("[account_risk_watch] 부팅 동기 평가 실패 graceful — 부팅 계속")
