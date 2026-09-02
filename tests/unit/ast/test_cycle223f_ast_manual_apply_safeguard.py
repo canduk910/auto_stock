@@ -327,18 +327,17 @@ def _content_sha(path: str) -> str:
 # TODO(cycle227 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
 # ✅ 2026-08-27 — cycle227 항목은 커밋 `a7245af` 로 **자기소멸**(죽은 값 삭제).
 #    cycle228 은 8영역 무접촉이라 신규 핀이 없다.
+# ✅ 2026-09-02 — cycle235 항목(handler.py·order_engine.py·realtime/CLAUDE.md)은
+#    커밋 f2b831f 로 자기소멸, 삭제 (더 이상 `git diff HEAD` 에 나타나지 않는다).
+#
+# 🔁 2026-09-02 (cycle238) — 프리장 청산 보류 게이트 08:00 정각 ~30초 구멍 시정의
+#    사용자 명시 8영역 승인("P1-6 은 A 로 진행", 범위 = `risk.py` 단독).
+#    자매 가드 `test_cycle223_ast_donchian_exit_fix.py` 와 **같은 값**으로 핀한다.
+#    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
+# TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
-    # 🔁 2026-08-29 (cycle235) — 257720 실사고 시정의 사용자 명시 8영역 승인
-    #    ("N1부터 작업 시작", 범위 = handler·order_engine + realtime/CLAUDE.md 문서 동기화):
-    #    체결수량 소스 fields[16](ODER_QTY 오독)→fields[9](CNTG_QTY 정본) + overrun 클램프.
-    #    명세 = _workspace/red/cycle235_fill_qty_spec.md.
-    # TODO(cycle235 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
-    "src/realtime/handler.py":
-        "9fa28d74ac267f2b30993535a0febee8ea5a1b408f38f6ca85a22c9a640e4799",
-    "src/engine/order_engine.py":
-        "36a0af370a966d0c979679d1128bb49c6de7d33ba8d3d403d7953bf43e034377",
-    "src/realtime/CLAUDE.md":
-        "fa4a7b5b565ec1880ee13efad7b005589291c5563dada4dc22ed2f44ae00621f",
+    "src/engine/risk.py":
+        "b0e1a4778ace65af0a68b7c528cc7e135ec7726de025e224a2d3d153e5a4dde5",
 }
 
 

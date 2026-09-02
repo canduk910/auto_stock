@@ -1129,14 +1129,17 @@ _EIGHT_AREAS = [
 #    + cycle236(N2, "n2 시작" 승인): APBK0400 분류(is_sell_qty_exceeded, balance.py
 #    비8영역) 소비 분기 — 잔고 재대조 수량 보정/잠김 보존/실보유0 기존 경로
 #    (`_workspace/red/cycle236_sell_qty_exceeded_spec.md`).
-# TODO(cycle235 커밋 후): 아래 세 항목을 **삭제**하고 dict 를 비운다.
+# ✅ 2026-09-02 — cycle235 항목(handler.py·order_engine.py·realtime/CLAUDE.md)은
+#    커밋 f2b831f 로 자기소멸, 삭제 (더 이상 `git diff HEAD` 에 나타나지 않는다).
+#
+# 🔁 2026-09-02 (cycle238) — 프리장 청산 보류 게이트 08:00 정각 ~30초 구멍 시정의
+#    사용자 명시 8영역 승인("P1-6 은 A 로 진행", 범위 = `risk.py` 단독). 자매 가드
+#    (`test_cycle223_ast_donchian_exit_fix.py`)와 **같은 값**으로 핀한다.
+#    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
+# TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 비운다.
 _ALLOWED_CONTENT_SHA: dict[str, str] = {
-    "src/realtime/handler.py":
-        "9fa28d74ac267f2b30993535a0febee8ea5a1b408f38f6ca85a22c9a640e4799",
-    "src/engine/order_engine.py":
-        "36a0af370a966d0c979679d1128bb49c6de7d33ba8d3d403d7953bf43e034377",
-    "src/realtime/CLAUDE.md":
-        "fa4a7b5b565ec1880ee13efad7b005589291c5563dada4dc22ed2f44ae00621f",
+    "src/engine/risk.py":
+        "b0e1a4778ace65af0a68b7c528cc7e135ec7726de025e224a2d3d153e5a4dde5",
 }
 
 

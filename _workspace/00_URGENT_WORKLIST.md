@@ -23,7 +23,15 @@
 > 원본은 2026-08-10 대상 가이드라 날짜는 지났으나 **게이트 조건 자체는 날짜 무관**이라
 > 삭제 전 여기로 옮긴다. §6(포트폴리오 SOFT 상한)은 cycle233 으로 **완료**되어 제외.
 
-### ▶ G-8. VCP/BFB 브레이크이븐 승격 — ✅ **게이트 충족(2026-09-01 실측)** · 활성화는 사용자 결정
+### ▶ G-8. VCP/BFB 브레이크이븐 승격 — ✅ **VCP 는 이미 활성 (2026-09-02 운영 DB 실측)** · BFB 대기
+
+> **09-02 정정** — 사용자 결정 "G-8 진행" 후 운영 DB 를 읽어 보니 `vcp_breakout.params` 에
+> **`breakeven_promote_atr: 1.5` 가 이미 들어 있다**(`strategy_config.updated_at` 2026-08-18
+> 08:10 UTC 이후 변경 없음 — 사이클 C(07-30) default-off 배포 후 어느 시점에 DB 로 켜진 값).
+> BFB 는 `0.0`(비활성, 코드 기본값). 따라서 아래 UPDATE 는 **실행 불필요·실행 금지**(중복
+> 적용은 무해하나 "이날 활성화했다"는 오귀인을 만든다). `[vcp_breakeven_promote]` 로그는
+> **0건** — 활성 상태지만 VCP 체결이 전 기간 0건이라 발화할 포지션이 없었을 뿐이다.
+> **남은 액션** = VCP 첫 체결 후 래치/승격 발화 관찰 → BFB 활성 여부 재평가(NO-GO 시 2.0N).
 
 - **게이트 정의**(원본): donchian `[donchian_breakeven_promote]` **발화** + 이후 whipsaw
   (승격 직후 손절) **부재**. 원본 작성 시점(08-08)엔 "21일간 0발화·SELL 0건"이라 미충족이었다.
@@ -36,14 +44,17 @@
   (b) **whipsaw 성격**: 고점 306,500 대비 **−10.1% 반납** 후 승격선 부근에서 청산 =
       cycle220 자문이 지적한 "MFE 대비 반납" 패턴의 재현.
   표본이 **N=1** 이라 어느 쪽도 통계적 근거는 아니다.
-- **활성화 시(장 마감 후 DB)**:
+- ~~**활성화 시(장 마감 후 DB)**~~ — **VCP 는 이미 적용됨(09-02 실측), 실행하지 않는다.**
+  BFB 활성화 시에만 아래를 `strategy_id='bull_flag_breakout'` 로 바꿔 사용:
   ```sql
+  -- BFB 전용 (VCP 관찰 후 GO 판정 시). VCP 는 이미 1.5 — 재실행 금지
   UPDATE strategy_config SET params = params || '{"breakeven_promote_atr": 1.5}'::jsonb
-   WHERE strategy_id='vcp_breakout';
-  -- BFB 는 VCP 관찰 후 재평가(NO-GO 시 2.0N 상향) — 즉시 동시 활성화 금지
+   WHERE strategy_id='bull_flag_breakout';
   ```
-- ⚠️ 선결 = VCP/BFB 는 **체결 0건**이라 활성화해도 당장 검증할 포지션이 없다.
+- ⚠️ VCP/BFB 는 **체결 0건**이라 활성 상태여도 당장 검증할 포지션이 없다.
   BFB 는 09-01 래치 첫 무장(`001450`)까지 갔으므로 첫 체결 후 재검토가 순서다.
+- 확인 명령(읽기 전용): `SELECT strategy_id, params->>'breakeven_promote_atr' FROM strategy_config
+  WHERE strategy_id IN ('vcp_breakout','bull_flag_breakout');` → 기대 `1.5` / `null|0`.
 
 ### ▶ G-9B4. VB 실패돌파 조기청산 — 백테스트 스윕 대기
 
@@ -66,7 +77,7 @@ RS(B2) 실배제 우선 활성. ⚠️ 별도 실측(`project_vb_observation_hoo
 ---
 
 
-## 🔴 P1-6 · donchian 프리장 청산 보류 게이트에 **매일 ~30초 구멍** (2026-09-02 실측, cycle237 부속 발견)
+## ✅ P1-6 · donchian 프리장 청산 보류 게이트에 **매일 ~30초 구멍** — **cycle238 종결 (2026-09-02, 시정안 A, 커밋 대기)**
 
 **발단** — cycle237(청산 로그 cap) 적대 검증이 "08:00~09:00 68건은 프리장 게이트와 모순"이라
 지적 → EC2 실측으로 판별한 결과 **게이트는 작동하지만 08:00 정각에 늦게 걸린다**.
@@ -90,7 +101,40 @@ task 가 도는 시각이라 tick 이 몰린다.
 `nxt_tradable=False` 라 APBK0918 로 막혔지만, **NXT 거래가능 종목이었으면 체결**됐을 수 있다.
 대상은 donchian·kojiro·VCP·BFB·momentum·VB(= LTV 제외 전 전략)의 **멀티데이 보유 포지션**.
 
-**시정 후보 (미착수 — 사용자 결정 대기)**
+**✅ cycle238 시정 (2026-09-02, 사용자 결정 "P1-6 은 A 로 진행", 8영역 승인 `risk.py` 단독)**
+- **원인 확증** = 가설 그대로. `active` 의 유일 기록자는 `SessionTracker.tick()` 이고 `_session_loop`
+  가 30초 주기로만 호출(`SESSION_TICK_INTERVAL=30`), H0UNMKO0 는 `_last_nxt_mkop_code` 에만 기록
+  (`active` 미관여). 07:55 사전구독 첫 틱이 08:00:00 에 오면 `boards_at(07:59)`=∅ 스냅샷이 살아
+  있어 게이트 fail-open. 매수측은 2026-05-15 "결함 A" 가 같은 race 를 `board=` 명시로 우회했지만
+  청산측 게이트는 그 우회를 받지 못했다.
+- **시정** = `_defers_pre_market_exit` 를 `by_active`(기존) **OR** `by_clock`(`session.boards_at(
+  _now_kst().time())` fresh — 08:00/09:00 리터럴 신설 금지, 스케줄 표 단일 소스, `_KST` 명시)로
+  전환. 화이트리스트 LTV 최상단·평가 보류(주문 보류 아님)·`tradable_boards` 미독 불변. fail-open
+  은 **두 소스 모두** 예외일 때만. `by_active` 가 False 인 **모든** 경우(∅뿐 아니라 MAIN/POST
+  stale 포함)에 시각이 PRE 면 보류 — tracker 가 1시간 이상 죽어야 도달하는 안전 방향.
+- **09:00 정각 판단(team-leader)** = stale `active`={PRE} 잔존 ≤30초는 OR 라 보류 유지 = 현행 라이브
+  동일. 안전 방향 + 한 사이클 한 엣지(D+1 귀인) + 개장 30초 스프레드. `reason=active_stale_hold`
+  로 계량하고 clock-primary(09:00:00 정확 해제)는 후속 후보.
+- **관측** = `[pre_market_exit_gate_divergence] strategy= reason=clock_fallback|active_stale_hold
+  active= clock_kst=` 1회/(전략,사유)/일(날짜 키 `_now_kst` 자기 리셋 + `reset_daily_state` 동행
+  + peek→로그→mark). 기존 `[pre_market_exit_deferred]` 서식·cap 무변경.
+- **결정성** = 루트 `tests/conftest.py` autouse `_pin_pre_market_clock`(`risk._now_kst` 를 MAIN
+  10:30 으로 핀, 옵트아웃 마커 `real_pre_market_clock`). 2026-08-06 의 "wall-clock 아님" 계약은
+  폐기(08:00 라이브와 테스트 기본이 둘 다 `active`=∅ 라 벽시계 의존이 불가피).
+- **검증** = Red 12 FAIL → Green → 적대 검증 뮤테이션 18종 중 escape 4 → 전부 테스트 보강(F1 active
+  사망+clock PRE → True · F2 `boards_at` **호출** AST · F3 일치 시 divergence 0 · F4 화이트리스트
+  단락) + T-8 가드 과잉(`.time()` 추출까지 금지해 `timetz().replace` 우회 유발) 정밀화. 차분
+  3,000×7 `active` 정상 갱신 시 판정 차이 0. hot path +0.3µs/틱. 8영역 sha 핀 3가드 재핀(cycle235
+  죽은 핀 삭제).
+- **D+1 판독 채널** = `[pre_market_exit_deferred]` 첫 타임스탬프가 08:00:0x 로 당겨지고 같은 시각
+  `reason=clock_fallback` 이 동반되면 구멍이 닫힌 것. `도치안 시간 기반 청산` 첫 발화가 09:00 이전
+  이면 여전히 결함. ⚠️ divergence 는 **보유 종목 틱이 있을 때만** 계량 — 부재 ≠ 구멍 없음.
+- **남긴 후속** = ① clock-primary 09:00 정확 해제(계량 후 판단) ② `_adopts_day_high` 도 `active`
+  단독(stale 30초, fail-closed 라 무해 — docstring 만 정정) ③ 형제 관측기 `_maybe_emit_pre_market_
+  defer` 의 mark-before-log(관측 전용, 8영역 재승인 필요) ④ T-8 리터럴 가드는 별칭(`time as _t`)
+  미검출(기지 한계).
+
+**시정 후보 (기록 — A 채택 / B·C 기각)**
 - (A) `_defers_pre_market_exit` 를 **시각 기반 폴백**과 결합 — `active` 가 비어 있고 현재 KST 가
   08:00~09:00 이면 보류로 판정(fail-**closed** 방향). 게이트 목적이 "왜곡 틱 회피"라 보류가
   안전 방향이다. ⚠️ 8영역(`risk.py`) 이라 승인 필요.

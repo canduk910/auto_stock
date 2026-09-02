@@ -15,16 +15,50 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import date as _date, datetime as _datetime
+from datetime import date as _date, datetime as _datetime, timedelta, timezone
 from typing import Optional
 
 from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.order_engine import OrderEngine
-from src.engine.session import session_tracker
+from src.engine.session import MarketBoard, boards_at, session_tracker
 from src.engine.strategy_base import Signal
 from src.engine.strategy_registry import StrategyRegistry
 
 logger = logging.getLogger(__name__)
+
+# cycle238 (2026-09-02) — 프리장 청산 보류 게이트 시각 폴백 seam.
+#
+# `_KST`/`_now_kst()` = `session.py:25` 관례 답습(naive `datetime.now()` 금지,
+# P2-6 부류). `_now_kst` 는 **모듈 함수**로 두어 테스트 주입 seam 으로 쓴다 —
+# `tests/conftest.py` 의 autouse `_pin_pre_market_clock` 이 이 심볼을 MAIN
+# 구간으로 핀하고, 게이트를 직접 검증하는 테스트는 뒤에 도는 monkeypatch 로
+# 시각을 명시한다(픽스처보다 뒤에 적용되므로 이긴다).
+_KST = timezone(timedelta(hours=9))
+
+
+def _now_kst() -> _datetime:
+    """KST(+09:00) 현재 시각. naive `datetime.now()` 금지(P2-6 부류)."""
+    return _datetime.now(_KST)
+
+
+def _pre_market_only_by_clock() -> bool | None:
+    """`session.boards_at`(fresh)로 PRE_NXT 단독 구간인지 판정 (cycle238).
+
+    `session_tracker.active` 는 `SessionTracker.tick()`(30초 주기)가 기록하는
+    **stale 캐시** — 08:00:00~08:00:29 는 07:59 스냅샷(∅)이 그대로 살아남아
+    프리장 청산 보류 게이트를 fail-open 으로 연다(실측: 08:00:00 청산 발화 →
+    08:00:29 deferred). 이 함수는 tracker 가 쓰는 **바로 그** `_BOARD_SCHEDULE`
+    표(`session.boards_at`)를 매 호출 fresh 로 읽어 그 구멍을 닫는다 — 시각
+    리터럴을 새로 두지 않는다(스케줄 표 단일 소스).
+
+    판정 불가(예외) 시 None — `_defers_pre_market_exit` fail-open 계약의
+    한 축이다(두 소스 모두 None 일 때만 평가 유지 쪽으로 fail).
+    """
+    try:
+        boards = boards_at(_now_kst().time())
+        return MarketBoard.PRE_NXT in boards and MarketBoard.MAIN not in boards
+    except Exception:
+        return None
 
 # NXT 프리장(08:00~09:00) 청산 **평가** 화이트리스트 (2026-08-06 사용자 결정).
 #
@@ -152,32 +186,86 @@ class RiskManager:
         # 조기 청산이 나도 원인이 day_high 채택인지 정상 트레일링인지 구분 불가라
         # 롤백 스위치(`TICK_DAY_HIGH_ANCHOR`)를 켤지 끌지 판단할 근거가 없다.
         self._day_high_adopted_logged: DailyEmitCap[tuple[str, str]] = DailyEmitCap[tuple[str, str]]()
+        # cycle238 (2026-09-02) — 08:00 정각 ~30초 구멍 시정. `by_active`(30초
+        # stale) 와 `by_clock`(fresh 시각 폴백)이 갈릴 때만 1회/(전략,사유)/일.
+        self._pre_market_divergence_logged: DailyEmitCap[tuple[str, str]] = DailyEmitCap[tuple[str, str]]()
+        self._pre_market_divergence_day: str = ""
 
     def _defers_pre_market_exit(self, strategy_id: str) -> bool:
-        """NXT 프리장 단독 구간이면 청산 평가를 보류할지 판정.
+        """NXT 프리장 단독 구간이면 청산 평가를 보류할지 판정 (cycle238 갱신).
 
-        판정 소스는 `session_tracker.active`(스케줄러 이벤트 구동) — wall-clock 이
-        아니므로 단위 테스트 기본 상태(빈 frozenset)에서 결정적으로 꺼진다.
+        판정 소스는 **두 축의 OR** 이다:
+
+        - `by_active` = `session_tracker.active`(스케줄러 이벤트 구동) membership.
+          `SessionTracker.tick()` 이 30초 주기로만 갱신하는 **stale 캐시**라
+          08:00:00~08:00:29 는 07:59 스냅샷(∅)이 그대로 살아 있다.
+        - `by_clock` = `_pre_market_only_by_clock()` — tracker 가 쓰는 바로 그
+          `session.boards_at` 표를 **fresh 로** 읽는다. 08:00 정각 구멍을 시각이
+          닫는다(cycle238, 실측: 08:00:00 청산 발화 → 08:00:29 deferred → 매도
+          거부 APBK0918).
+
         조건은 매수측 PR-F 와 동일한 membership(`PRE_NXT ∈ active AND MAIN ∉ active`).
-        판정 불가 시 **fail-open**(평가 유지) — 손절 정지가 더 위험하다.
+        두 소스가 **갈릴 때만** `[pre_market_exit_gate_divergence]` 로 계량한다
+        (`reason=clock_fallback` = 시각이 구멍을 닫음 / `reason=active_stale_hold`
+        = 09:00 정각 stale 보류 유지, team-leader 결정 — 이 방향은 바꾸지 않는다).
+        두 소스 모두 판정 불가(예외)일 때만 **fail-open**(평가 유지) — 손절 정지가
+        더 위험하다. 화이트리스트 검사가 항상 최상단(LTV 는 두 소스 무관 False).
         """
         if strategy_id in _PRE_MARKET_EXIT_EVAL_STRATEGIES:
             return False
         try:
-            from src.engine.session import MarketBoard
             active = session_tracker.active
-            return (
-                MarketBoard.PRE_NXT in active
-                and MarketBoard.MAIN not in active
+            by_active: bool | None = (
+                MarketBoard.PRE_NXT in active and MarketBoard.MAIN not in active
             )
         except Exception:
-            return False
+            active = None
+            by_active = None
+        by_clock = _pre_market_only_by_clock()
+        if by_active is not None and by_clock is not None and by_active != by_clock:
+            self._maybe_emit_pre_market_gate_divergence(
+                strategy_id, by_clock=by_clock, active=active,
+            )
+        return bool(by_active) or bool(by_clock)
+
+    def _maybe_emit_pre_market_gate_divergence(
+        self, strategy_id: str, *, by_clock: bool, active,
+    ) -> None:
+        """`[pre_market_exit_gate_divergence]` 두 소스가 갈릴 때만 1회/(전략,사유)/일.
+
+        cap 키 = `(strategy_id, reason)`. 날짜 키는 `_now_kst().date()` 에서
+        나온다(cycle237 `_emit_breakeven_promote` 패턴 — seam 정합).
+        peek → 로그 → mark(mark-before-log 금지) + 전체 예외 흡수(관측 실패가
+        판정을 바꾸지 않는다). hot path — `logger` 만(`write_log`/DB/`await` 금지).
+        """
+        try:
+            reason = "clock_fallback" if by_clock else "active_stale_hold"
+            today_key = _now_kst().date().isoformat()
+            if self._pre_market_divergence_day != today_key:
+                self._pre_market_divergence_day = today_key
+                self._pre_market_divergence_logged.reset_daily()
+            key = (strategy_id, reason)
+            if not self._pre_market_divergence_logged.should_emit(key):
+                return
+            active_boards = sorted(b.value for b in active) if active else []
+            logger.info(
+                "[pre_market_exit_gate_divergence] strategy=%s reason=%s "
+                "active=%s clock_kst=%s",
+                strategy_id, reason, active_boards,
+                _now_kst().isoformat(timespec="seconds"),
+            )
+            self._pre_market_divergence_logged.mark_emitted(key)
+        except Exception:
+            pass
 
     def _adopts_day_high(self) -> bool:
         """관측된 당일 고가를 앵커에 채택할 수 있는 구간인지 판정 (cycle222-a).
 
-        MAIN 보드가 활성일 때만 True. 판정 소스는 프리장 청산 평가 보류 게이트와
-        **동일한** `session_tracker.active`(이벤트 구동, wall-clock 아님).
+        MAIN 보드가 활성일 때만 True. 판정 소스는 `session_tracker.active` **단독**
+        (이벤트 구동). cycle238 이 프리장 청산 보류 게이트에는 시각 폴백을 OR 로
+        얹었지만 이 판정에는 얹지 않았다 — `active` 의 30초 stale 이 여기서는
+        fail-closed 방향(09:00:00~29 채택 지연 ≤30초, 08:00 창은 어차피 미채택)이라
+        행위 결함이 아니다(cycle238 적대 검증 F6).
 
         프리장(PRE_NXT 단독) 고가는 얇은 호가의 왜곡이 잦아 앵커에 박히면
         **과대복구 → 허깨비 샹들리에 청산**으로 뒤집힌다. 그래서 프리장 청산 평가
@@ -348,6 +436,8 @@ class RiskManager:
         self._day_high_baseline.clear()
         # cycle222-a3 (F-C) — `[day_high_adopted]` emit cap 동행 clear.
         self._day_high_adopted_logged.clear()
+        # cycle238 — `[pre_market_exit_gate_divergence]` emit cap 동행 clear.
+        self._pre_market_divergence_logged.clear()
 
     async def on_tick(
         self,

@@ -416,3 +416,45 @@ def _neutralize_call_auction_gate(
         )
     except Exception:
         pass
+
+
+# ---------------------------------------------------------------------------
+# cycle238 — 프리장 청산 보류 게이트 **시각 폴백** 결정론화
+#
+# `_defers_pre_market_exit` 가 `session_tracker.active`(30초 stale 캐시) 외에
+# `risk._now_kst()` 기반 시각 폴백을 OR 로 더한다(08:00 정각 ~30초 구멍 시정).
+# 그 결과 게이트가 **불가피하게 벽시계에 의존**하게 되어, 08:00~09:00 KST 에
+# 실행되는 CI/로컬에서 기존 on_tick 테스트 11+ 파일이 청산 평가를 통째로 보류
+# 당해 흔들린다(사이클 202 `_neutralize_call_auction_gate` 와 동형 문제).
+#
+# 시정 = `risk._now_kst` 를 프리장 **밖**(MAIN 구간)으로 전역 핀.
+# - 핀 값 `2026-01-05 10:30:00+09:00` → `session.boards_at(10:30) == {MAIN}`.
+# - 게이트를 **직접 검증**하는 테스트는 `@pytest.mark.real_pre_market_clock` 으로
+#   옵트아웃하거나, 이 픽스처보다 뒤에 도는 `monkeypatch.setattr(risk, "_now_kst", ...)`
+#   로 시각을 명시한다(후자가 이긴다).
+# - `raising=False` — Red 단계(`_now_kst` 미존재)에서 전체 스위트가 픽스처 때문에
+#   죽지 않는다. Green 이후엔 실제 심볼을 덮어쓴다.
+# ---------------------------------------------------------------------------
+_PINNED_PRE_MARKET_CLOCK_KST = __import__("datetime").datetime(
+    2026, 1, 5, 10, 30, 0,
+    tzinfo=__import__("datetime").timezone(__import__("datetime").timedelta(hours=9)),
+)
+
+
+@pytest.fixture(autouse=True)
+def _pin_pre_market_clock(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    if request.node.get_closest_marker("real_pre_market_clock"):
+        return  # 실 seam(벽시계/freezegun) 자체를 검증하는 테스트 — 핀 금지
+    try:
+        from src.engine import risk as _risk_mod
+
+        monkeypatch.setattr(
+            _risk_mod,
+            "_now_kst",
+            lambda: _PINNED_PRE_MARKET_CLOCK_KST,
+            raising=False,
+        )
+    except Exception:
+        pass

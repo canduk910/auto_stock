@@ -20,9 +20,17 @@ donchian 멀티데이 손절 3 + LTV 당일 손절 1. 사용자 판정:
 
 ## 설계 계약
 
-- 판정 소스 = `session_tracker.active` (스케줄러 이벤트 구동). **wall-clock 아님**
-  — 단위 테스트 기본 상태(빈 frozenset)에서 게이트가 결정적으로 꺼져, 기존
-  on_tick 테스트 11개 파일이 시간대에 따라 흔들리지 않는다.
+- 판정 소스 = `session_tracker.active` (스케줄러 이벤트 구동) **OR** 시각 폴백
+  `boards_at(risk._now_kst().time())` (cycle238, 2026-09-02).
+  ⚠️ **"wall-clock 아님" 계약은 cycle238 에서 폐기됐다** — `active` 의 유일한
+  기록자 `SessionTracker.tick()` 이 30초 주기라 `boards_at(07:59:xx)`=∅ 스냅샷이
+  08:00:00~08:00:29 동안 살아남아 게이트가 fail-open 으로 열렸다(실측: 08:00:00
+  청산 발화 → 08:00:29 deferred, 매도 주문이 나가 APBK0918 거부). 시각 폴백은
+  같은 `_BOARD_SCHEDULE` 표를 fresh 로 읽어 그 창을 닫는다.
+  결정성은 이제 루트 `tests/conftest.py` 의 autouse `_pin_pre_market_clock`
+  (`risk._now_kst` 를 MAIN 구간으로 핀)이 담보한다 — 아래 빈 frozenset 케이스가
+  시간대와 무관하게 '평가 유지'인 근거도 그 픽스처다. 게이트 자체의 회귀 가드는
+  `test_cycle238_pre_market_clock_gate.py`.
 - 조건 = `PRE_NXT ∈ active AND MAIN ∉ active` (매수측 PR-F 와 동일 membership).
 - 화이트리스트 = `_PRE_MARKET_EXIT_EVAL_STRATEGIES = {"long_tail_volatility"}`
   — LTV 는 프리장 매매가 설계 의도(상한가 익일 청산 + 프리장 매수).

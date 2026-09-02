@@ -276,7 +276,7 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 - 시가 미수신 → NXT 거래 불가 추정
 
 #### (a) NXT 거래 가능 (`nxt_tradable=True` + 시가 수신) — 갭상승 여부로 분기
-- 매수 체결가 대비 +10% 이상 갭상승 → 고점 -2% 트레일링 스탑 모드로 전이. **단 트레일링 판정은 09:00 부터** — `risk._defers_pre_market_exit`(2026-08-06)가 PRE_NXT 단독 구간에서 `_PRE_MARKET_EXIT_EVAL_STRATEGIES`(=LTV) 외 전략의 청산 평가를 보류하므로, momentum 은 08:00~09:00 동안 트레일링·손절이 평가되지 않고 09:00 KRX 시세로 재개된다
+- 매수 체결가 대비 +10% 이상 갭상승 → 고점 -2% 트레일링 스탑 모드로 전이. **단 트레일링 판정은 09:00 부터** — `risk._defers_pre_market_exit`(2026-08-06)가 PRE_NXT 단독 구간에서 `_PRE_MARKET_EXIT_EVAL_STRATEGIES`(=LTV) 외 전략의 청산 평가를 보류하므로, momentum 은 08:00~09:00 동안 트레일링·손절이 평가되지 않고 09:00 KRX 시세로 재개된다. **cycle238 (2026-09-02)** — 게이트가 `session_tracker.active`(30초 stale) 단독이라 08:00:00~29 에 매일 열리던 구멍을 `boards_at(_now_kst())` 시각 폴백 OR 로 닫았다(08:00 정각부터 보류). 09:00 정각은 stale `active` 잔존 ≤30초 보류 유지(현행 동일)
 - 갭상승 미달 → **08:00 NXT 프리 지정가 조기청산 폐지, (b) 와 동일하게 `_pending_next_day_clear` 보류(reason=`nxt_underthreshold`) → 09:00 KRX 시장가 단일 청산** (Tier 1, 2026-07-23, 자문 `nxt_prelimit_stale_selling_orderflow`)
   - **폐지 사유**: 얇은 NXT 프리 유동성에서 open−1호가 지정가는 미체결 만료가 잦고(금호 실측 +3% 종이이익), 만료가 어느 `_selling` discard 경로에도 안 걸려 `_selling` 영구 잔존 → `risk.on_tick` 손절/트레일링 종일 억제(Defect 2). 08:00 지정가를 아예 내지 않으니 leak·double-sell 레이스 원천 소멸
   - **손익비**: 갭<임계 조기탈출 이익은 대부분 얇은 호가의 미실현 종이이익이라, 검증된 09:00 KRX 시장가 단일 청산(`_drain_pending_next_day_clear`)이 손익비 우위

@@ -225,7 +225,7 @@
   `[pre_market_exit_deferred]` 첫 발화 **08:00:29** ⇒ `_session_loop` 30초 주기 탓에 08:00 정각엔
   `active` 에 PRE_NXT 가 없어 게이트가 **fail-open** 하는 **~30초 구멍**이 매일 존재한다.
   그 창에서 실제 매도 주문이 나갔고 APBK0918 로 거부됐다(NXT 거래가능 종목이면 체결됐을 수 있다).
-  **별도 결함 — 후속 사이클 대상**이며, cap 은 그날 **첫** 발화를 남기므로 이 신호를 지우지 않는다.
+  **별도 결함 — ✅ cycle238 (2026-09-02) 로 시정** (`risk._defers_pre_market_exit` 에 `boards_at(_now_kst())` 시각 폴백 OR 결합 — 상세 `src/engine/CLAUDE.md` 프리장 게이트 절). cap 은 그날 **첫** 발화를 남기므로 이 신호(09:00 이전 첫 발화 = 게이트 이상)는 cycle238 이후에도 D+1 판독 채널로 유효하다.
   잔여 후속 = 같은 구조지만 실측 0건인 `도치안 스윙 손절`·`[donchian_turtle_stop]`·
   `[donchian_turtle_backstop]`·`[donchian_channel_exit]`·`도치안 스윙 트레일링`
   (매도 거부가 길어지면 동일 폭주 — TE-4 픽스처 작업 중 손절 로그 5회 반복이 실증됐다).

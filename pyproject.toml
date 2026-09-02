@@ -13,6 +13,10 @@ markers = [
     "contract: FastAPI 엔드포인트/외부 API 계약 테스트",
     "slow: 1초 이상 걸리는 테스트 (CI 분리 가능)",
     "safety: 매매 안전성 시나리오 (15:20 강제청산, 체결통보 race 등)",
+    # cycle238 — autouse `_pin_pre_market_clock` 옵트아웃. 프리장 청산 보류
+    # 게이트의 실 시각 seam(`risk._now_kst`)을 벽시계/freezegun 으로 검증하는
+    # 테스트만 붙인다. `filterwarnings = error` 라 미등록 마커는 즉시 실패.
+    "real_pre_market_clock: 시각 핀 픽스처 옵트아웃 (실 벽시계 seam 검증)",
 ]
 filterwarnings = [
     "error",

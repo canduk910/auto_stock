@@ -274,8 +274,10 @@ class DonchianSwingStrategy(StrategyBase):
         `[pre_market_exit_deferred] donchian_swing` 첫 발화 **08:00:29** = **~29초 구멍**
         (`_session_loop` 30초 주기라 08:00 정각엔 `active` 에 PRE_NXT 가 아직 없다 →
         게이트가 fail-open). 그 창에서 실제 매도 주문이 나갔고 APBK0918 로 거부됐다.
-        **이건 사이클 237 범위 밖의 독립 결함**이며 후속 사이클 대상이다. cap 이 이
-        신호를 지우지 않는다는 것이 여기 적힌 이유다(버스트 크기는 잃지만 **시각은 남는다**).
+        **이건 사이클 237 범위 밖의 독립 결함**이었고 **사이클 238 (2026-09-02) 이
+        시정**했다(`risk._defers_pre_market_exit` 에 `boards_at` 시각 폴백 OR 결합).
+        cap 이 이 신호를 지우지 않는다는 것이 여기 적힌 이유다(버스트 크기는 잃지만
+        **시각은 남는다**) — 시정 후에도 09:00 이전 첫 발화는 게이트 회귀의 증거다.
 
         ## 계약
 
