@@ -1,6 +1,7 @@
 # 월요일(2026-08-31) 실행 가이드 — 257720 청산 + D+1 관찰
 
 > 작성 2026-08-29(토). 조회는 read-only(`ssh → docker exec` 패턴). DB/설정 변경·커밋은 사용자 승인 후.
+> ⚠️ 2026-09-02 정정: EC2 백엔드 포트는 **8000**(docker `0.0.0.0:8000->8000`), Nginx 80 경유도 가능. 종전 `8002` 는 개발 compose 포트라 EC2 에선 닫혀 있다(09-02 실측 `http=000`).
 > ⚠️ 구파일 `monday_activation_guide.md` 는 08-10 대상 구버전 — 이 파일이 8/31 정본.
 
 ---
@@ -29,11 +30,11 @@
 
 1. **08:50 사전 확인** — 실보유 수량(2주 예상):
 ```
-ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74 'curl -s localhost:8002/api/balance' | python3 -c "import sys,json; d=json.load(sys.stdin); [print(h['ticker'],h.get('quantity'),h.get('sellable_quantity','')) for h in d['data']['holdings'] if h['ticker']=='257720']"
+ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74 'curl -s localhost:8000/api/balance' | python3 -c "import sys,json; d=json.load(sys.stdin); [print(h['ticker'],h.get('quantity'),h.get('sellable_quantity','')) for h in d['data']['holdings'] if h['ticker']=='257720']"
 ```
 2. **09:00 직후 수동 매도 (실보유 수량으로!)** — KRX 시장가:
 ```
-ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74 'curl -s -X POST localhost:8002/api/trading/manual-sell -H "Content-Type: application/json" -d "{\"ticker\":\"257720\",\"quantity\":2}"'
+ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74 'curl -s -X POST localhost:8000/api/trading/manual-sell -H "Content-Type: application/json" -d "{\"ticker\":\"257720\",\"quantity\":2}"'
 ```
    (1의 실보유가 2가 아니면 그 값으로. 갭은 이미 실현된 뒤라 15:20 대기 무의미 — cycle232 D7 결정.)
 3. **사후 확인**:

@@ -43,6 +43,7 @@ backend:
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle233_watcher_gate.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -207,6 +208,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -861,6 +863,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -901,6 +904,7 @@ backend:
     - tests/unit/engine/test_cycle185_cluster1_reset.py
     - tests/unit/engine/test_cycle233_watcher_gate.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -1082,6 +1086,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -1748,6 +1753,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -1978,6 +1984,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -2399,6 +2406,7 @@ backend:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -2635,6 +2643,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -2861,6 +2870,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3284,6 +3294,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3522,6 +3533,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -3738,6 +3750,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -4169,6 +4182,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -4409,6 +4423,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -4626,6 +4641,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5056,6 +5072,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5296,6 +5313,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -5513,6 +5531,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5943,6 +5962,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6183,6 +6203,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -6405,6 +6426,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -6832,6 +6854,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7070,6 +7093,7 @@ backend:
     - tests/unit/routes/test_cycle129_master_route.py
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -7286,6 +7310,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -7717,6 +7742,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7957,6 +7983,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -8482,6 +8509,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -8913,6 +8941,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9153,6 +9182,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -9373,6 +9403,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -9800,6 +9831,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10040,6 +10072,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -10259,6 +10292,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -10689,6 +10723,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10927,6 +10962,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -11256,6 +11292,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -11592,6 +11629,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -11824,6 +11862,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle90_concurrent_lock.py
     - tests/unit/routes/test_cycle90_emit_persistence.py
     - tests/unit/routes/test_cycle90_fetch_top_500_call.py
@@ -12041,6 +12080,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -12463,6 +12503,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12701,6 +12742,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -13491,6 +13533,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -13915,6 +13958,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14155,6 +14199,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -15522,6 +15567,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -15949,6 +15995,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16189,6 +16236,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -16416,6 +16464,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -16838,6 +16887,7 @@ backend:
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -17076,6 +17126,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -17328,6 +17379,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17728,6 +17780,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -17967,6 +18020,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle90_concurrent_lock.py
     - tests/unit/routes/test_cycle90_emit_persistence.py
@@ -18194,6 +18248,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -18611,6 +18666,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -18850,6 +18906,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -19069,6 +19126,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -19497,6 +19555,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -19737,6 +19796,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -20244,6 +20304,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -20667,6 +20728,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -20906,6 +20968,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -21175,6 +21238,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -21576,6 +21640,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -21804,6 +21869,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
     - tests/unit/routes/test_cycle84_route_invalid_limit.py
@@ -22024,6 +22090,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -22446,6 +22513,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -22685,6 +22753,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -22911,6 +22980,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -23334,6 +23404,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23572,6 +23643,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -23787,6 +23859,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24218,6 +24291,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24458,6 +24532,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -24676,6 +24751,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -25106,6 +25182,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -25346,6 +25423,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -25377,7 +25455,10 @@ backend:
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/account_risk_watcher.py:
     direct_tests:
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/engine/test_cycle233_watcher_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -27589,6 +27670,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -28017,6 +28099,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -28254,6 +28337,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -29342,6 +29426,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -29771,6 +29856,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -30009,6 +30095,7 @@ backend:
     - tests/unit/routes/test_cycle129_master_route.py
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -30821,6 +30908,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -31240,6 +31328,7 @@ backend:
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -31473,6 +31562,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -31692,6 +31782,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -32121,6 +32212,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -32360,6 +32452,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -33460,6 +33553,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -33890,6 +33984,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -34126,6 +34221,7 @@ backend:
     - tests/unit/routes/test_cycle128_list_query_params.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -34341,6 +34437,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34772,6 +34869,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -35012,6 +35110,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -35430,6 +35529,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -35730,6 +35830,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35908,6 +36009,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -36680,6 +36782,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37111,6 +37214,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -37349,6 +37453,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -37564,6 +37669,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37995,6 +38101,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -38235,6 +38342,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -41552,6 +41660,7 @@ backend:
     - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle222a_tick_day_high_anchor.py
     - tests/unit/engine/test_cycle233_watcher_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -43475,6 +43584,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -43638,6 +43748,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -44159,6 +44270,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -44410,6 +44522,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -44824,6 +44937,7 @@ backend:
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -45045,6 +45159,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -45929,6 +46044,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -46349,6 +46465,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -46588,6 +46705,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -46838,6 +46956,7 @@ backend:
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle233_watcher_gate.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -47448,6 +47567,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -47878,6 +47998,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -48114,6 +48235,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -48674,6 +48796,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49105,6 +49228,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -49344,6 +49468,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -49561,6 +49686,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49991,6 +50117,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -50231,6 +50358,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -50449,6 +50577,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -50879,6 +51008,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -51118,6 +51248,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -51393,6 +51524,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -51821,6 +51953,7 @@ backend:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -52059,6 +52192,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -52421,6 +52555,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -52832,6 +52967,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -53068,6 +53204,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_route_404.py
     - tests/unit/routes/test_cycle84_route_invalid_limit.py
@@ -53346,6 +53483,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -53771,6 +53909,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -54010,6 +54149,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -54548,6 +54688,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -54977,6 +55118,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -55206,6 +55348,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -55453,6 +55596,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -55883,6 +56027,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -56093,6 +56238,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -56344,6 +56490,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -56768,6 +56915,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -56980,6 +57128,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -59133,6 +59282,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -59564,6 +59714,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -59804,6 +59955,7 @@ backend:
     - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -60455,10 +60607,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-09-02T15:22:44.598645+09:00'
+generated_at: '2026-09-02T20:52:53.434995+09:00'
 stats:
   backend_modules: 130
-  backend_tests: 884
+  backend_tests: 887
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:
