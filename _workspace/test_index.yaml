@@ -210,6 +210,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -631,6 +632,7 @@ backend:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1090,6 +1092,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -1518,6 +1521,7 @@ backend:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -1990,6 +1994,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -2413,6 +2418,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -2878,6 +2884,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3303,6 +3310,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3760,6 +3768,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -4193,6 +4202,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -4653,6 +4663,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5085,6 +5096,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5545,6 +5557,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5977,6 +5990,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6442,6 +6456,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -6871,6 +6886,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7328,6 +7344,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -7761,6 +7778,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -8196,6 +8214,7 @@ backend:
     - tests/unit/engine/test_cycle222a_swing_rest_poll_day_high.py
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -8530,6 +8549,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -8963,6 +8983,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9426,6 +9447,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -9855,6 +9877,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10317,6 +10340,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -10749,6 +10773,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -11319,6 +11344,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -11657,6 +11683,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12109,6 +12136,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -12533,6 +12561,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12957,6 +12986,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13240,6 +13270,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13564,6 +13595,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -13990,6 +14022,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14416,6 +14449,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14701,6 +14735,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14995,6 +15030,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15279,6 +15315,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15600,6 +15637,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -16029,6 +16067,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16499,6 +16538,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -16923,6 +16963,7 @@ backend:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -17416,6 +17457,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17818,6 +17860,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -18287,6 +18330,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -18706,6 +18750,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -19167,6 +19212,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -19597,6 +19643,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -20021,6 +20068,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20347,6 +20395,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -20772,6 +20821,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -21283,6 +21333,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -21686,6 +21737,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -22137,6 +22189,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -22561,6 +22614,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23029,6 +23083,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -23454,6 +23509,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23910,6 +23966,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24343,6 +24400,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24804,6 +24862,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -25236,6 +25295,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -25698,6 +25758,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -26129,6 +26190,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -26556,6 +26618,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26837,6 +26900,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -27123,6 +27187,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -27404,6 +27469,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -27727,6 +27793,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -28157,6 +28224,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -28578,6 +28646,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -28875,6 +28944,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29171,6 +29241,7 @@ backend:
     - tests/unit/engine/test_cycle222a_swing_rest_poll_day_high.py
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29485,6 +29556,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -29916,6 +29988,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -30350,6 +30423,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -30632,6 +30706,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -30969,6 +31044,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -31390,6 +31466,7 @@ backend:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -31845,6 +31922,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -32276,6 +32354,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -32730,6 +32809,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -33023,6 +33103,7 @@ backend:
     - tests/unit/engine/test_cycle222a_swing_rest_poll_day_high.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -33296,6 +33377,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -33618,6 +33700,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34050,6 +34133,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -34504,6 +34588,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34937,6 +35022,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -35598,6 +35684,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -35900,6 +35987,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -36227,6 +36315,7 @@ backend:
     - tests/unit/engine/test_cycle221_market_op_off_main.py
     - tests/unit/engine/test_cycle222a_swing_rest_poll_day_high.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -36536,6 +36625,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -36853,6 +36943,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37286,6 +37377,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -37742,6 +37834,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -38175,6 +38268,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -38608,6 +38702,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -38752,6 +38847,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
     - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
     - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
     - tests/unit/engine/test_cycle61_phase2A2_constants.py
@@ -39033,6 +39129,7 @@ backend:
     direct_tests:
     - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/test_cycle194_force_reconnect_db_label.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -39326,6 +39423,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
     - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
@@ -39758,6 +39856,7 @@ backend:
     - tests/unit/engine/test_cycle222a_swing_rest_poll_day_high.py
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -40050,6 +40149,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -40336,6 +40436,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -40619,6 +40720,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -40902,6 +41004,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -41193,6 +41296,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -41521,6 +41625,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -41843,6 +41948,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -42139,6 +42245,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -42439,6 +42546,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -42737,6 +42845,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -43044,6 +43153,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -43358,6 +43468,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -43828,6 +43939,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -44142,6 +44254,7 @@ backend:
     - tests/unit/engine/test_cycle233_portfolio_risk_effective.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
     - tests/unit/engine/test_cycle234_uptime_monitor.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -44604,6 +44717,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -45020,6 +45134,7 @@ backend:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -45456,6 +45571,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -45742,6 +45858,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -46128,6 +46245,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -46550,6 +46668,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -47041,6 +47160,7 @@ backend:
     - tests/unit/engine/test_cycle233_watcher_gate.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -47328,6 +47448,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -47653,6 +47774,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -48085,6 +48207,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -48566,6 +48689,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -48884,6 +49008,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49317,6 +49442,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -49776,6 +49902,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -50208,6 +50335,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -50669,6 +50797,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -51101,6 +51230,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -51618,6 +51748,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -52048,6 +52179,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -52651,6 +52783,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -53064,6 +53197,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -53581,6 +53715,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -54008,6 +54143,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -54463,6 +54599,7 @@ backend:
     - tests/unit/engine/test_cycle222a_swing_rest_poll_day_high.py
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -54788,6 +54925,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -55219,6 +55357,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -55698,6 +55837,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -56130,6 +56270,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -56594,6 +56735,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -57020,6 +57162,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -58473,6 +58616,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -58772,6 +58916,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -59070,6 +59215,7 @@ backend:
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -59388,6 +59534,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -59821,6 +59968,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -60713,10 +60861,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-09-02T22:52:47.516750+09:00'
+generated_at: '2026-09-03T06:08:59.753423+09:00'
 stats:
   backend_modules: 130
-  backend_tests: 889
+  backend_tests: 891
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

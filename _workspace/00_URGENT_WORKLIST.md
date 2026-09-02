@@ -359,22 +359,82 @@ if acml_vol < vol_threshold:
 - 시정: 완주 후 거래량 탈락 시 `first_seen` 을 pop 하지 말고 **충족 래치**로 유지 +
   `_prev_price` 일일 청소 + 히스테리시스 밴드 검토.
 
-### P1-4 · `silent_inactive` 오판 — 하루 16~24 접속키 낭비
+### P1-4 · `silent_inactive` 오판 — 하루 16~24 접속키 낭비 (08-31 포렌식 확정 결함 ⓐ, MEDIUM) — ✅ cycle241 종결 (2026-09-02, 커밋 대기)
 
-- **매일 08:57 · 15:27 에 8개 세션 동시 강제 재연결.**
-  `[silent_inactive_force_reconnect]` — 08-24 3회, 08-21 9회(애프터 포함).
-- 가드 조건 = `fresh_ratio < 0.2` + `subscribed >= 5` + **5분 지속**
-  (`src/engine/stale_session_recovery.py:24-31`).
-  그 두 시각은 **하루 중 거래가 가장 없는 순간**이라, 가드가
-  "거래가 없어 조용한 것"과 "세션이 죽어 조용한 것"을 구분하지 못한다.
-- 접속키에 **캐시가 없다** — `src/auth/token.py:183` 이 호출마다 `POST /oauth2/Approval`,
-  그 호출이 **재연결 루프 안**(`src/realtime/websocket.py:213`)이라 재연결 = 접속키 1개 무조건.
-- 시정: 장 상태를 판정에 반영(프리장 단독·마감 직후 제외 또는 임계 완화).
-- **2026-08-27 실측 갱신 — 지속·확대 중**: 8/26·8/27 각각 **24건/일**
-  (08:58 ×8세션 + 15:27~28 ×8 + **15:39 ×8** — 종전 서술의 2슬롯이 아니라 **3슬롯**).
-- ℹ️ **2026-08-25 KIS 메일 폭주의 원인은 이것이 아니다** —
-  같은 KIS 계정에 묶인 **다른 계좌 앱키의 외부 배치**였음이 사용자 확인으로 판명.
-  이 시스템의 12시간 인증 호출은 토큰 7 + 접속키 17 = **24건**뿐(DB·컨테이너 로그 일치).
+> 시정 = `detect_silent_inactive_sessions` **세션 상대 판정**(L1) — 판정 가능 세션(`subscribed >= 5`)이
+> **2개 이상이고 그 전부**가 `fresh_ratio < 0.2` 이면 '세션 N개 동시 고장'이 아니라 **시장 침묵**으로 보고
+> 그 사이클을 기각 + 판정 가능 전 라벨 `first_seen` pop(누적 후 필터 금지 — 시장 재개 순간 지각 세션이
+> 즉발한다). 다른 세션이 하나라도 fresh 면 현행대로 발화(진짜 단독 결함 보존), 판정 가능 세션 < 2 면
+> 현행 byte 동일(fail-open) = **결과 집합 ⊆ 현행**. 시간창 리터럴·`session` import·`tradable_boards`
+> 미사용(AST G-241-5). `src/engine/stale_session_recovery.py` 단독(+196/-9, 251→438L), 8영역·
+> scheduler.py(3,999L)·facade·diagnostics·watcher_core diff 0. 스펙 = `_workspace/red/cycle241_silent_inactive_relative_spec.md`.
+
+- **실측(EC2 read-only, 30일)**: `[silent_inactive_force_reconnect]` **522건 중 491건(94.1%)이 그 시점 세션 풀
+  전원 동시 발화**(버스트 크기가 풀 증설 5→7→8 과 일치, 09-01/09-02 는 8행 **동일 timestamp** = 단일 K 이터레이션).
+  슬롯 = 장전 동시호가 27.2% / 장후 동시호가 27.2% / 15:30~16:00 22.4% / 16:00~18:00 10.9% / 18:00~ 12.3% —
+  **09:00~15:20 정규장 0건**. 일별 = 08-31 **88건**(장애일, cap-skip 632) · 09-01 **24건** · 09-02 8건+.
+  재연결의 회복 가치 **0** — 09-01 15:36:35 재연결 → 15:38:46 8세션 여전히 fresh=0 → **15:40:51 8세션 동시 회복**
+  = `_BOARD_SCHEDULE` POST_NXT 진입(시장 재개가 원인); 08-31 은 16:02 WS 닫힘 뒤 20:08 까지 재등록 실패 지속,
+  익일 07:5x 부팅으로만 회복. 09-02 접속키 발급 53건 중 **27건(50.9%)** 이 silent_inactive 발.
+- **원인**: 세션마다 **독립** 판정(`fresh_ratio < 0.2 ∧ subscribed ≥ 5 ∧ 5분`), 세션 간 비교·시장 상태 참조 0 —
+  "8세션이 같은 초에 전부 침묵"을 "8개 동시 고장"과 구분할 방법이 코드에 없었다. 재연결마다 접속키 발급 1
+  (`token.py:183` 무캐시, `websocket.py:213` 재연결 루프 첫 줄) + 세션 전 구독 재SEND + 60초 F1 재검증, 발화
+  시각이 08:57(개장 3분 전)·15:39(NXT 애프터 1분 전)라 보유 종목 시세 공백 동반. 형제 `check_and_resubscribe_stale`
+  은 같은 K 루프에서 `is_call_auction_now` 를 보는데 이 함수만 안 봤다 — 그러나 시각 게이트는 **이식하지 않는다**(아래 ⑤).
+- **착수 전제 정정 3(3렌즈 실측, 결론 불변)**: ① "동시호가 게이트 이식만으론 4% 해결" → 실측 **54.4%**(284/522).
+  그래도 L1 이 필요한 이유 = 잔여 중 15:30~16:00 D 슬롯(117건 22.4%)은 `boards_at` MAIN 갭 마진·`is_call_auction_now`
+  창 상한 15:35 어느 쪽도 못 닫고 15:40:33 정각 8세션 동시 회복이 구조적 무틱임을 증명 — **세션 비교만이 닫는다**
+  ("400/416 장 마감 후"는 `[silent_inactive_recovery_cap]` 406·632건이 섞인 표본) ② D+1 기대 "24 → 0~수건" →
+  **0~3건/일** — main 단독 침묵(sub=8 분해능 × 야간 무거래 우선주)은 타 7세션이 fresh 라 상대 판정을 **통과해 계속
+  발화**한다(설계상 옳음, 후속 A) ③ skip 마커는 발화 시각이 아니라 **에피소드 진입 시각** — `entered` ≈08:51~53 ·
+  ≈15:21~23(전원 침묵 성립 + `STALE_FRESHNESS_SECS=60`), `exited` ≈09:00~02 · ≈15:40~42. 종전 15:27/15:39 두 발화는
+  `force_reconnect_session` 의 pop 이 5분 카운트를 다시 돌린 **인공 분할**이라 L1 아래선 한 에피소드로 병합.
+- **설계 결정 8(사용자 위임 — team-leader 권장안, 스펙 §0)**: ① 게이트 위치 = first_seen 누적 **앞**(2-pass, pass 2 는
+  사이클 24/29-R2 식 byte 동일; 반환 직전 필터는 재개 순간 즉발) ② 기각 = 판정 가능 전 라벨 pop + `[]`(hold 금지 — F-7 봉인)
+  ③ `eligible < 2` 현행 byte 동일(단일 세션 픽스처 15 케이스 무수정 통과) ④ 08-31 형 전 세션 실두절 에스케이프 해치
+  **불채택**(회복 가치 0·표본 0, 가시성은 `[tick_coverage] ratio=0.0%` + `persisting` WARNING — 후속 E 트리거만)
+  ⑤ 시장 상태 신호(`is_call_auction_now`·`boards_at`·`last_nxt_mkop_code`) 게이트 미사용(운영 8세션에서 L1 단독이 3슬롯
+  전부 덮어 시각 게이트는 무효 코드 + Q1 import 표면 불증가) ⑥ 관측 상태 = `_MW_EPISODE` 모듈 전역 날짜 키 자기 리셋
+  (StaleTrackerState 7필드 정확 일치 가드 2벌·scheduler 3,999L 이라 유일 위치) ⑦ '본체 동일' **기계 가드 없음** 실측 —
+  산문 4곳 + `src/engine/CLAUDE.md` 재스코프 ⑧ 정본 문서 문안. domain-consult 불요(WebSocket 배관, 진입·청산 0).
+- **관측**: `[silent_inactive_market_wide_skip] transition=entered|persisting|exited` — entered(INFO 에피소드 1회,
+  `sessions= eligible= silent=n/n connected= reset= reconnects=`) · persisting(WARNING ≥1800s 지속 후 1800s 마다,
+  정상 최장 15:20→15:40 1,200s × 1.5) · exited(INFO `elapsed_secs= cycles=`). peek→로그→mark, 실패 흔적
+  `[silent_inactive_market_wide_skip_failed]` 1회/일, `write_log` 0. 08-31 형 4시간 두절 = entered 1 + persisting ≤8 + exited 1.
+  ⚠️ `connected=` 는 "`_ws` 객체 보유"(재연결 대기 stale 포함)이고 `reconnects=` 는 "핸드셰이크 재시도 인덱스 합"
+  (`force_reconnect_session` 강제 close 는 `MIN_STABLE_SECONDS=5` 리셋으로 **미반영**) — 둘 다 소켓 생존 확증이 아니다.
+  소켓 생존은 `[ws_heartbeat]`(세션별 PINGPONG) + `transition=persisting` 지속 시간으로 읽는다(라운드 2 정정).
+- **적대 검증**: 라운드 1 확증 8 → 시정 5(AST 헬퍼 `_resolve` 의 `assign_map.get(name, ())` tuple 기본값 `TypeError`
+  = **Red 가드 자기 결함**, 중복 리포트 4건 · `connected=` 오독 위험 · escape M06a/M06b 예외 전파 계약 봉인
+  (`test_f241_18*`) · escape M19 기각 pop 범위 봉인(`test_f241_19`)) + 처분 3(§10.2 — "main 구조적 침묵 + 7보조 실제
+  동시 결함" 교차 변형은 ④/후속 A 의 승인된 결정이라 코드 변경 0). **라운드 2** = 라운드 1 이 도입한 `reconnects=` 의
+  "재연결 폭풍 검출" 주장이 `websocket.py` 실제 카운팅과 **반대**임을 확증(`_receive_loop` 가 `ConnectionClosed` 를
+  삼켜 정상 반환, `+= 1` 은 핸드셰이크 except 분기뿐) → docstring 3곳 반전 + F-13b 목적 재정의(코드 행위 0).
+  뮤테이션 **26종 중 23 KILLED**, escape 3 은 전부 커버리지 공백(현행 구현 정확) → 회귀 5 로 봉인. 차분 실증
+  **2,500 조합** — '전원 침묵(eligible≥2 ∧ silent==eligible)' 1,000 조합에서만 설계대로 차이(`[]` + 현재 세션 라벨 pop),
+  나머지 1,500(진부분집합 1,000 + eligible<2 500)은 result·first_seen 상태·`ticker_last_tick.get` 호출 수까지 HEAD 동일,
+  결과 집합 ⊆ 현행 위반 0. 표적 218 PASS + 2 xfail(신규 39 = 행위 25 + AST 14).
+- **D+1 판독 채널**(⚠️ **의미 반전** — `force_reconnect` **감소가 정상**, skip 마커는 신규, 배포 전후 같은 grep 합산 금지):
+  | 채널 | 정상 서명 | 이상 서명 |
+  |---|---|---|
+  | `[silent_inactive_force_reconnect]` | **0~3건/일**, 전부 16:00 이후 `label=main`(단독 침묵) | 같은 초 8행 버스트 = 시정 미작동 / 09:00~15:20 발화 = 신규(종전 0) → 즉시 조사 |
+  | `[silent_inactive_market_wide_skip] transition=entered` | **2~3행/일** ≈08:51~53 · ≈15:21~23 · 간헐 ≈07:59, `sessions=8 eligible=8 silent=8/8` | 정규장에 찍힘 = 전 세션 침묵 사고 → `[tick_coverage]`·`[ws_heartbeat]` 교차 |
+  | `… transition=exited` | entered 와 1:1, `elapsed_secs` ≈180~600(아침) · ≈1,000~1,300(15:2x→15:40) · ≤120(07:59) | ≫1,300 = 시장 재개 후에도 침묵 = 두절 |
+  | `… transition=persisting`(WARNING) | **0행**(수능일 등 개장 지연일 1~2행 예외) | ≥1 = 30분 이상 전 세션 침묵(08-31 형) → `[tick_coverage] ratio=0.0%`·`[ws_heartbeat]` 교차, 필요 시 `POST /api/trading/restart` |
+  | `[silent_inactive_market_wide_skip_failed]` | 0 | ≥1 = 관측기 자기 실패(행위는 수행됨) — 로거/서식 조사 |
+  | 접속키 발급(EC2 `접속키 발급 완료`) | 일 53 → **≈26~29**(부팅 8 + 보드 전환 8 + 정기 16:02 8 + 개별 1~5) | 감소 없음 = 발화 잔존 |
+  | `[stale_watcher_detail]` 15:40:3x | 8세션 동시 fresh 회복 서명 **불변**(15:36 재연결이 사라져도 회복 시각 동일 = ④ 근거 재확인) | 회복 지연 = 재연결이 기여했었다는 반증 → ④ 재검토 |
+  | 보유 종목 시세 | 08:57·15:39 재연결 직후 HIGH `stale` 스파이크 소멸 | 보유 종목 stale 증가 = HIGH 경로 훼손 → **즉시 롤백** |
+- **후속(이번 사이클 밖)**: A main 단독 잔여 위양성(sub=8 분해능 × 야간 무거래 우선주 000815·003490·285130 — 후보
+  `SILENT_INACTIVE_MIN_SUBSCRIBED` 상향 또는 절대 fresh 하한, **domain-consult 대상**; §10.2 #5 교차 변형도 이 축)
+  · B 단일 세션 풀(VTS/개발) 2차 게이트 `is_call_auction_now`(54.4%, 운영 무효) · C `unknown` 라벨 충돌
+  (`websocket_pool.py:538-540` realtime 8영역, 운영 8라벨 전부 DB 라벨이라 미발현) · D 접속키 캐시(`token.py:183`
+  auth 8영역 — 수요 절반 감소로 우선순위 하락) · E 장중 전 세션 침묵 에스케이프 해치(재검토 트리거 = `entered` 09:00~15:20
+  + `exited elapsed ≥ 600` 실측, 현재 표본 0) · F `_MARKET_WIDE_PERSIST_WARN_SECS` 수능일·조기 마감일 실측 후 재조정
+  · G 형제 `[stale_skip_call_auction]` 유지(관측 축 상이) · H `reconnects=` 필드 존폐 — team-leader 결정 **유지**
+  (값은 "connect-phase backoff 인덱스 합" 보조 진단, 폐기는 다음 이 파일 접촉 사이클에 F-13b 회귀 동반).
+- ℹ️ **2026-08-25 KIS 메일 폭주의 원인은 이것이 아니다** — 같은 KIS 계정에 묶인 **다른 계좌 앱키의 외부 배치**였음이
+  사용자 확인으로 판명. 이 시스템의 12시간 인증 호출은 토큰 7 + 접속키 17 = **24건**뿐(DB·컨테이너 로그 일치).
 
 ### P1-5 · VB 15:30 종가 매수 발사 + APBK3013 [단일가매매] 미분류 — ✅ cycle229 종결 (2026-08-28)
 
