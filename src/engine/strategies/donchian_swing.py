@@ -189,6 +189,119 @@ class DonchianSwingStrategy(StrategyBase):
         # 침묵시킨다(OB-11). 날짜 키 자기리셋(`_reset_daily_state` 훅 비의존).
         self._zero_breakout_line_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._zero_breakout_line_day: str = ""
+        # 사이클 237 (2026-09-02) — 청산 계열 **로그 폭주** cap 2종.
+        # 실측: `[donchian_breakeven_promote]` 가 08-31 11,453건 / 09-01 9,027건
+        # (각각 그날 `system_logs` 의 36.9% / 51.0%, 전부 **단일 종목 192820**).
+        # 근본은 래칫 부재다 — kojiro 는 승격 결과를 `_stop_floor` 에 영속해 다음 틱
+        # `promoted == eff` 로 자연 1회지만, donchian 은 `base_stop` 을 매 틱
+        # `buy - stop_atr×entry_atr` 로 재계산하므로 `promoted != base` 가 **영원히 참**이다.
+        # 승격 자체는 매 틱 올바르게 일어난다(결과 동일) — 잘못된 건 로그뿐이다.
+        # 시간청산은 신호를 반환하므로 정상 흐름에선 1회지만, 매도가 거부되면
+        # (034020 = 프리마켓 APBK0918) 포지션이 살아남아 매 틱 재발화한다.
+        # ⚠️ 두 cap 모두 **로그에만** 건다 — 승격 계산과 `return Signal.STOP_LOSS` 는
+        # cap 밖이다(cap 이 청산 재시도를 끊으면 관측 시정이 아니라 결함 주입).
+        # 위 다섯 cap 과 **별개 필드**(OB-11 — 한 사실이 다른 사실을 침묵시키지 않는다).
+        self._breakeven_promote_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._breakeven_promote_day: str = ""
+        self._time_exit_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._time_exit_day: str = ""
+
+    def _emit_breakeven_promote(self, ticker: str, high: int, buy_price: int,
+                                mult: float, atr: float, before: int, after: int) -> None:
+        """`[donchian_breakeven_promote]` 1회/ticker/일 cap (사이클 237).
+
+        ## 왜
+
+        승격 조건(`high_since_buy ≥ buy + mult×ATR`)은 한 번 참이 되면 그 포지션이
+        살아 있는 동안 계속 참이고, donchian 은 승격 결과를 영속하지 않으므로
+        `promoted_stop != base_stop` 도 계속 참이다 ⇒ **틱마다 같은 문장**.
+        실측 최대 11,453건/일(단일 종목). 승격은 상태 **전이**라 하루 1행이면 족하다.
+
+        ## 계약
+
+        - 호출자는 이 메서드의 성패와 무관하게 `base_stop = promoted_stop` 을 수행한다.
+          여기서 무엇이 터져도 손절선 승격은 일어난다.
+        - peek → 로그 → mark (cycle226 D-3) — 로그가 던지면 cap 이 소비되지 않아
+          그 종목이 종일 봉인되지 않는다.
+        - 메시지 서식은 사이클 220 원본과 **byte 동일**(운영 grep 연속성).
+        """
+        try:
+            today_key = datetime.now(KST).date().isoformat()
+            if self._breakeven_promote_day != today_key:
+                self._breakeven_promote_day = today_key
+                self._breakeven_promote_logged.reset_daily()
+            if not self._breakeven_promote_logged.should_emit(ticker):
+                return
+            logger.info(
+                "[donchian_breakeven_promote] %s 고점(%d) ≥ 매수가(%d)+%.1f×ATR(%d) → 손절선 %d→%d",
+                ticker, int(high), int(buy_price), mult,
+                int(atr), int(before), int(after),
+            )
+            self._breakeven_promote_logged.mark_emitted(ticker)
+        except Exception:
+            # 관측 실패가 승격·손절을 막지 않는다. 흔적은 사이클 225 J-3 헬퍼로 —
+            # `logger.debug` 단독은 `_DbLogHandler`(INFO 컷)를 못 넘어 `system_logs` 에
+            # 도달하지 않아 **도입 이전 무음과 구별되지 않는다**(적대 검증 C237-L2-1).
+            self._trace_observer_failure(
+                "[donchian_breakeven_promote_failed]", ticker,
+                self._breakeven_promote_logged, "_breakeven_promote_day",
+            )
+
+    def _emit_time_exit(self, ticker: str, days_held: int, n_days: int,
+                        current_price: int, breakout_high: int, suffix: str) -> None:
+        """`도치안 시간 기반 청산` 1회/ticker/일 cap (사이클 237).
+
+        ## 왜
+
+        이 로그는 `Signal.STOP_LOSS` 와 짝이라 정상 흐름에선 1회다. 그런데 매도가
+        거부되면(프리마켓 시장가 불가 APBK0918 등) 포지션이 그대로 남아 다음 틱에
+        같은 분기가 다시 발화한다 — 034020 이 09-02 **08:00:00~08:00:29 사이 67건**을
+        찍었다(DB 세션 TZ=Asia/Seoul 실측 확인 — 표기 시각이 곧 KST 다).
+
+        **매도 실패 사실은 클래스별 거부 로그가 기록한다** — 장운영시간 외 WARNING
+        (`order_engine` 이 매 거부마다) / 시장가+지정가 폴백 모두 거부 WARNING / 최종 실패
+        CRITICAL. **이들에는 cap 이 없다.** `[market_closed_blocked]` 는 그중 *진입 게이트에
+        걸린 분*만 찍는 1회/ticker/일 **보조** 신호다(적대 검증 C237-L2-4 — 종전 서술은
+        결론은 옳았으나 이유가 부정확했다). 그래서 여기에 cap 을 걸어도 "청산하려 했는데
+        못 했다"는 관측은 여러 경로로 그대로 남는다.
+
+        ## ⚠️ 판독법 — 첫 발화 시각이 09:00 이전이면 프리장 게이트 이상 신호
+
+        cap 은 그날 **첫** 발화를 남긴다. donchian 은 `risk._PRE_MARKET_EXIT_EVAL_STRATEGIES`
+        화이트리스트 **밖**이라 PRE_NXT 단독 구간에는 청산 평가가 보류돼야 하므로,
+        이 로그의 타임스탬프가 09:00 이전이면 그 자체가 게이트 미적용의 증거다.
+        실제로 09-02 실측이 그랬다 — 시간청산 첫 발화 **08:00:00** vs
+        `[pre_market_exit_deferred] donchian_swing` 첫 발화 **08:00:29** = **~29초 구멍**
+        (`_session_loop` 30초 주기라 08:00 정각엔 `active` 에 PRE_NXT 가 아직 없다 →
+        게이트가 fail-open). 그 창에서 실제 매도 주문이 나갔고 APBK0918 로 거부됐다.
+        **이건 사이클 237 범위 밖의 독립 결함**이며 후속 사이클 대상이다. cap 이 이
+        신호를 지우지 않는다는 것이 여기 적힌 이유다(버스트 크기는 잃지만 **시각은 남는다**).
+
+        ## 계약
+
+        - ⚠️ 호출자는 이 메서드 **뒤에서 무조건** `return Signal.STOP_LOSS` 한다.
+          cap 이 신호까지 삼키면 매도 거부 후 재시도가 끊겨 포지션이 청산되지 못한
+          채 잔존한다 = 매매 결함 주입. cap 은 **로그 전용**이다.
+        - peek → 로그 → mark, 예외 흡수 + debug 흔적 (위 헬퍼와 동형).
+        - 메시지 서식은 사이클 223 원본과 **byte 동일**.
+        """
+        try:
+            today_key = datetime.now(KST).date().isoformat()
+            if self._time_exit_day != today_key:
+                self._time_exit_day = today_key
+                self._time_exit_logged.reset_daily()
+            if not self._time_exit_logged.should_emit(ticker):
+                return
+            logger.info(
+                "도치안 시간 기반 청산: %s 보유 %d영업일 ≥ %d, 현재가(%d) < 돌파선(%d)%s",
+                ticker, days_held, n_days, current_price, breakout_high, suffix,
+            )
+            self._time_exit_logged.mark_emitted(ticker)
+        except Exception:
+            self._trace_observer_failure(
+                "[donchian_time_exit_log_failed]", ticker,
+                self._time_exit_logged, "_time_exit_day",
+            )
 
     async def prepare(self) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
@@ -1657,10 +1770,10 @@ class DonchianSwingStrategy(StrategyBase):
             if breakeven_mult > 0 and pos.high_since_buy >= pos.buy_price + breakeven_mult * entry_atr:
                 promoted_stop = max(base_stop, pos.buy_price)
                 if promoted_stop != base_stop:
-                    logger.info(
-                        "[donchian_breakeven_promote] %s 고점(%d) ≥ 매수가(%d)+%.1f×ATR(%d) → 손절선 %d→%d",
+                    # 사이클 237 — 로그만 1회/ticker/일 cap. 승격 대입은 cap 밖(아래 줄).
+                    self._emit_breakeven_promote(
                         ticker, pos.high_since_buy, pos.buy_price, breakeven_mult,
-                        int(entry_atr), int(base_stop), int(promoted_stop),
+                        entry_atr, base_stop, promoted_stop,
                     )
                 base_stop = promoted_stop
             if base_stop > 0 and current_price <= base_stop:
@@ -1705,8 +1818,9 @@ class DonchianSwingStrategy(StrategyBase):
                 # 사이클 223 G — 캐시 경로/전면 폴백을 한 문구로 덮되 과잉 주장 금지
                 # (전면 폴백만 weekday 환산, 캐시 경로는 갭을 오늘 하루로 한정).
                 suffix = " [폴백: 거래일 캐시 직전 영업일 미도달 → 근사 계상]" if used_fallback else ""
-                logger.info(
-                    "도치안 시간 기반 청산: %s 보유 %d영업일 ≥ %d, 현재가(%d) < 돌파선(%d)%s",
+                # 사이클 237 — 로그만 1회/ticker/일 cap. 신호 반환은 cap 밖(아래 줄) —
+                # 매도 거부 시 재시도가 끊기면 포지션이 청산되지 못한 채 잔존한다.
+                self._emit_time_exit(
                     ticker, days_held, n_days, current_price, breakout_high, suffix,
                 )
                 return Signal.STOP_LOSS

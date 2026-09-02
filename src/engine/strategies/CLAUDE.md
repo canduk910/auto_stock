@@ -199,6 +199,36 @@
   cap 키는 `ticker|armed`/`ticker|disarmed` (최대 2행/종목/일) — ticker 단독이면 장중 재시작 시
   재도출 전 `breakout_high=0` 스냅샷이 박제돼 종일 무장 해제로 오독된다. 실패는 흡수하되
   `[days_held_observe_failed]` debug 흔적을 남긴다(무흔적 흡수는 사이클 224 이전 무음과 구별 불가).
+- **청산 계열 로그 폭주 cap** (사이클 237, 2026-09-02) — `[donchian_breakeven_promote]` 와
+  `도치안 시간 기반 청산` 을 각각 **1회/ticker/일**(`_emit_breakeven_promote` / `_emit_time_exit`).
+  실측 = 승격 로그가 08-31 **11,453건** · 09-01 **9,027건**(각각 그날 `system_logs` 의 36.9% / 51.0%,
+  전부 **단일 종목 192820**). 근본은 **래칫 부재**다 — kojiro 는 승격 결과를 `_stop_floor` 에
+  영속해 다음 틱 `promoted == eff` 로 자연 1회지만, donchian 은 `base_stop` 을 매 틱
+  `buy − stop_atr×entry_atr` 로 재계산하므로 `promoted_stop != base_stop` 이 **영원히 참**이다.
+  승격 자체는 매 틱 올바르게 일어난다(결과 동일) — 잘못된 건 로그뿐이다.
+  시간청산은 신호와 짝이라 정상 흐름 1회지만, **매도가 거부되면**(034020 = 프리마켓 APBK0918)
+  포지션이 잔존해 매 틱 재발화한다(09-02 68건). 매도 실패 사실은 `[market_closed_blocked]` 가
+  따로 1회/일 기록하므로 관측 손실이 없다.
+  ⚠️ **cap 은 로그에만 건다 — 행위는 cap 밖이 계약**: 승격 대입 `base_stop = promoted_stop` 과
+  `return Signal.STOP_LOSS` 는 cap 성패와 무관하게 매 틱 수행된다. cap 이 신호까지 삼키면
+  매도 거부 후 재시도가 끊겨 포지션이 청산되지 못한 채 잔존한다 = 관측 시정이 아니라 **결함 주입**
+  (뮤테이션으로 실증 — 신호를 cap 에 종속시키면 TE-2 가 FAIL).
+  두 cap 은 기존 5개와 **별개 인스턴스**(OB-11), 날짜 키 자기 리셋, peek→로그→mark(cycle226 D-3),
+  예외 전량 흡수 + debug 흔적, 메시지 서식 **byte 동일**(운영 grep 연속성).
+  **kojiro 무접촉** — 위 래칫으로 구조적으로 폭주하지 않는다(다크런치라 0건인 것과 별개 이유).
+  관측기 자기 실패는 `logger.debug` 단독이 아니라 **`_trace_observer_failure`**(cycle225 J-3)로
+  보낸다 — debug 단독은 `_DbLogHandler`(INFO 컷)를 못 넘어 `system_logs` 에 도달하지 않고,
+  그러면 도입 이전 무음과 구별되지 않는다(적대 검증 C237-L2-1).
+  ⚠️ **판독법 — 시간청산 로그의 첫 타임스탬프가 09:00 이전이면 프리장 게이트 이상 신호**다.
+  donchian 은 `risk._PRE_MARKET_EXIT_EVAL_STRATEGIES`(LTV 단독) **밖**이라 PRE_NXT 단독 구간엔
+  청산 평가가 보류돼야 한다. 09-02 실측 = 시간청산 첫 발화 **08:00:00** vs
+  `[pre_market_exit_deferred]` 첫 발화 **08:00:29** ⇒ `_session_loop` 30초 주기 탓에 08:00 정각엔
+  `active` 에 PRE_NXT 가 없어 게이트가 **fail-open** 하는 **~30초 구멍**이 매일 존재한다.
+  그 창에서 실제 매도 주문이 나갔고 APBK0918 로 거부됐다(NXT 거래가능 종목이면 체결됐을 수 있다).
+  **별도 결함 — 후속 사이클 대상**이며, cap 은 그날 **첫** 발화를 남기므로 이 신호를 지우지 않는다.
+  잔여 후속 = 같은 구조지만 실측 0건인 `도치안 스윙 손절`·`[donchian_turtle_stop]`·
+  `[donchian_turtle_backstop]`·`[donchian_channel_exit]`·`도치안 스윙 트레일링`
+  (매도 거부가 길어지면 동일 폭주 — TE-4 픽스처 작업 중 손절 로그 5회 반복이 실증됐다).
 
 ### donchian `max_breakout_extension_pct` (P2-3) — **사이클 209 (2026-07-14): 기본 3.0→4.0, PARAM_RANGES 제외**
 - 기본 **4.0%** (사이클 209 — 0.5%(AI 과튜닝, DB) 상시 스킵 병목 해소). `check_buy_signal` 갭 스킵 *후*, BUY 확정 *전* 삽입.

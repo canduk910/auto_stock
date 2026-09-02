@@ -219,12 +219,19 @@ def test_g223_7b_trading_days_uses_shared_date_parser():
 # G-223-8 (HIGH) — 청산 분기 순서 불변
 # ===========================================================================
 def test_g223_8_exit_branch_order_unchanged():
-    """①하드손절/BE → ②시간청산 → ③채널이탈 → ④샹들리에. 이번엔 계산만 고친다."""
+    """①하드손절/BE → ②시간청산 → ③채널이탈 → ④샹들리에. 이번엔 계산만 고친다.
+
+    ⚠️ 사이클 237 의미 전환 — ② 의 마커가 로그 문장 `"도치안 시간 기반 청산"` 에서
+    헬퍼 호출 `_emit_time_exit` 로 바뀌었다. 그 문장이 1회/ticker/일 cap 헬퍼로
+    이동했기 때문이며(실측 폭주 68건/일), **분기는 같은 자리에 그대로 있다** —
+    이 가드가 지키는 것은 로그 문자열의 위치가 아니라 **청산 분기의 순서**이므로
+    마커만 갱신하면 강도가 보존된다(로그 서식 자체는 헬퍼 안에서 byte 동일).
+    """
     fn = _func(ast.parse(_read(_DONCHIAN)), "check_exit_signal")
     body = ast.unparse(fn)
     markers = [
         "donchian_turtle_stop",       # ① 하드손절(2ATR, BE 승격 내포)
-        "도치안 시간 기반 청산",        # ② 시간청산
+        "_emit_time_exit",            # ② 시간청산 (사이클 237 — cap 헬퍼 위임)
         "donchian_channel_exit",      # ③ 채널 이탈
         "도치안 스윙 트레일링",         # ④ 샹들리에
     ]
