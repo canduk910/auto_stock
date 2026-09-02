@@ -1,0 +1,129 @@
+asof=2026-09-02 roundtrips=38 open=8 weights={'donchian_swing': 0.15, 'kojiro': 0.3} pos_ratio={'donchian_swing': 0.2, 'kojiro': 0.166}
+
+## donchian_swing / all_time: N=24 1주랏=20 보유영업일 avg=2.2 max=7 N%가격 avg=5.88%
+  MFE_N avg=1.13 med=0.89 max=3.33 | MAE_N avg=1.20 (2N 관통 4) | MFE20_N avg=2.94 (≥1.5N 14, ≥3N 6)
+  도달: 0.5N 20/24 (83%, d={'0': 18, '1': 2}) | 1N 10 (42%, d={'0': 4, '1': 3, '2': 2, '3': 1}) | 1.5N 6 (25%, d={'0': 2, '1': 2, '3': 1, '4': 1}) | 2N 4
+  1유닛 명목이 position_ratio 상한 초과: 16/24 (avg 2.26×) | 터틀 이론 유닛수량 ≥1주: 5/24 | 실제 랏=터틀유닛 avg 4.94 med 4.45 max 15.61 (>1유닛 20, >2유닛 17)
+  [pess] base: win 29% Σ-28,390 avg -1,183 min -10,500 max 12,500 (Σ자본% -2.47)
+         pyr : win 8% Σ-256,348 avg -10,681 min -42,336 max 4,207 (Σ자본% -18.77, 최악 1건 -3.27%) Δ=-227,958 변화 20 (개선 1/악화 19) 유닛분포 {'1': 4, '2': 10, '3': 4, '4': 6} 피라미드손절청산 5 명목max 95.1%자산 예산초과 12 최종손절리스크 avg 1.54% max 5.82%
+  [opt] base: win 29% Σ-28,390 avg -1,183 min -10,500 max 12,500 (Σ자본% -2.47)
+         pyr : win 8% Σ-249,198 avg -10,383 min -42,336 max 4,207 (Σ자본% -18.11, 최악 1건 -3.27%) Δ=-220,808 변화 20 (개선 1/악화 19) 유닛분포 {'1': 4, '2': 10, '3': 4, '4': 6} 피라미드손절청산 4 명목max 95.1%자산 예산초과 12 최종손절리스크 avg 1.54% max 5.82%
+  [pess_1N] base: win 29% Σ-28,390 avg -1,183 min -10,500 max 12,500 (Σ자본% -2.47)
+         pyr : win 12% Σ-164,479 avg -6,853 min -36,250 max 3,900 (Σ자본% -13.61, 최악 1건 -3.33%) Δ=-136,089 변화 10 (개선 0/악화 10) 유닛분포 {'1': 14, '2': 6, '3': 3, '4': 1} 피라미드손절청산 4 명목max 98.3%자산 예산초과 9 최종손절리스크 avg 0.97% max 3.24%
+  [pess_budget] base: win 29% Σ-28,390 avg -1,183 min -10,500 max 12,500 (Σ자본% -2.47)
+         pyr : win 25% Σ-52,916 avg -2,205 min -11,579 max 12,500 (Σ자본% -3.90, 최악 1건 -0.87%) Δ=-24,526 변화 10 (개선 2/악화 8) 유닛분포 {'1': 14, '2': 9, '3': 1} 피라미드손절청산 1 명목max 22.6%자산 예산초과 2 최종손절리스크 avg 0.88% max 2.34%
+
+## donchian_swing / last_60d: N=18 1주랏=14 보유영업일 avg=2.2 max=7 N%가격 avg=6.36%
+  MFE_N avg=0.92 med=0.70 max=2.34 | MAE_N avg=1.06 (2N 관통 2) | MFE20_N avg=1.73 (≥1.5N 10, ≥3N 2)
+  도달: 0.5N 14/18 (78%, d={'0': 13, '1': 1}) | 1N 6 (33%, d={'0': 2, '1': 1, '2': 2, '3': 1}) | 1.5N 3 (17%, d={'0': 1, '3': 1, '4': 1}) | 2N 1
+  1유닛 명목이 position_ratio 상한 초과: 10/18 (avg 1.74×) | 터틀 이론 유닛수량 ≥1주: 5/18 | 실제 랏=터틀유닛 avg 4.30 med 3.68 max 9.94 (>1유닛 14, >2유닛 11)
+  [pess] base: win 33% Σ-19,890 avg -1,105 min -10,500 max 7,100 (Σ자본% -1.68)
+         pyr : win 11% Σ-162,039 avg -9,002 min -42,336 max 4,207 (Σ자본% -10.10, 최악 1건 -3.27%) Δ=-142,149 변화 14 (개선 1/악화 13) 유닛분포 {'1': 4, '2': 8, '3': 3, '4': 3} 피라미드손절청산 3 명목max 44.5%자산 예산초과 6 최종손절리스크 avg 1.26% max 3.35%
+  [opt] base: win 33% Σ-19,890 avg -1,105 min -10,500 max 7,100 (Σ자본% -1.68)
+         pyr : win 11% Σ-162,039 avg -9,002 min -42,336 max 4,207 (Σ자본% -10.10, 최악 1건 -3.27%) Δ=-142,149 변화 14 (개선 1/악화 13) 유닛분포 {'1': 4, '2': 8, '3': 3, '4': 3} 피라미드손절청산 3 명목max 44.5%자산 예산초과 6 최종손절리스크 avg 1.26% max 3.35%
+  [pess_1N] base: win 33% Σ-19,890 avg -1,105 min -10,500 max 7,100 (Σ자본% -1.68)
+         pyr : win 17% Σ-71,244 avg -3,958 min -23,732 max 3,900 (Σ자본% -5.05, 최악 1건 -1.96%) Δ=-51,354 변화 6 (개선 0/악화 6) 유닛분포 {'1': 12, '2': 5, '3': 1} 피라미드손절청산 2 명목max 31.1%자산 예산초과 5 최종손절리스크 avg 0.82% max 2.24%
+  [pess_budget] base: win 33% Σ-19,890 avg -1,105 min -10,500 max 7,100 (Σ자본% -1.68)
+         pyr : win 28% Σ-44,416 avg -2,468 min -11,579 max 7,568 (Σ자본% -3.12, 최악 1건 -0.87%) Δ=-24,526 변화 10 (개선 2/악화 8) 유닛분포 {'1': 8, '2': 9, '3': 1} 피라미드손절청산 1 명목max 16.1%자산 예산초과 1 최종손절리스크 avg 0.83% max 1.77%
+
+## kojiro / all_time: N=14 1주랏=8 보유영업일 avg=7.9 max=19 N%가격 avg=4.87%
+  MFE_N avg=1.76 med=1.41 max=6.98 | MAE_N avg=1.57 (2N 관통 4) | MFE20_N avg=2.49 (≥1.5N 6, ≥3N 4)
+  도달: 0.5N 9/14 (64%, d={'0': 3, '1': 1, '2': 1, '3': 1, '4': 2, '7': 1}) | 1N 8 (57%, d={'0': 2, '1': 2, '5': 1, '7': 1, '8': 1, '12': 1}) | 1.5N 5 (36%, d={'1': 1, '3': 1, '6': 1, '7': 1, '8': 1}) | 2N 5
+  1유닛 명목이 position_ratio 상한 초과: 5/14 (avg 0.92×) | 터틀 이론 유닛수량 ≥1주: 9/14 | 실제 랏=터틀유닛 avg 1.52 med 1.35 max 3.37 (>1유닛 10, >2유닛 3)
+  [pess] base: win 21% Σ-32,190 avg -2,299 min -20,000 max 9,600 (Σ자본% -2.08)
+         pyr : win 14% Σ-68,789 avg -4,913 min -20,111 max 31,179 (Σ자본% -5.63, 최악 1건 -1.68%) Δ=-36,599 변화 12 (개선 3/악화 9) 유닛분포 {'1': 5, '2': 1, '3': 4, '4': 4} 피라미드손절청산 5 명목max 29.0%자산 예산초과 0 최종손절리스크 avg 0.81% max 2.18%
+  [opt] base: win 21% Σ-32,190 avg -2,299 min -20,000 max 9,600 (Σ자본% -2.08)
+         pyr : win 14% Σ-68,789 avg -4,913 min -20,111 max 31,179 (Σ자본% -5.63, 최악 1건 -1.68%) Δ=-36,599 변화 12 (개선 3/악화 9) 유닛분포 {'1': 5, '2': 1, '3': 4, '4': 4} 피라미드손절청산 5 명목max 29.0%자산 예산초과 0 최종손절리스크 avg 0.81% max 2.18%
+  [pess_1N] base: win 21% Σ-32,190 avg -2,299 min -20,000 max 9,600 (Σ자본% -2.08)
+         pyr : win 14% Σ-59,629 avg -4,259 min -20,000 max 23,957 (Σ자본% -4.48, 최악 1건 -1.12%) Δ=-27,439 변화 11 (개선 3/악화 8) 유닛분포 {'1': 6, '2': 4, '3': 2, '4': 2} 피라미드손절청산 5 명목max 19.3%자산 예산초과 0 최종손절리스크 avg 0.56% max 1.46%
+  [pess_budget] base: win 21% Σ-32,190 avg -2,299 min -20,000 max 9,600 (Σ자본% -2.08)
+         pyr : win 14% Σ-68,789 avg -4,913 min -20,111 max 31,179 (Σ자본% -5.63, 최악 1건 -1.68%) Δ=-36,599 변화 12 (개선 3/악화 9) 유닛분포 {'1': 5, '2': 1, '3': 4, '4': 4} 피라미드손절청산 5 명목max 29.0%자산 예산초과 0 최종손절리스크 avg 0.81% max 2.18%
+
+## kojiro / last_60d: N=14 1주랏=8 보유영업일 avg=7.9 max=19 N%가격 avg=4.87%
+  MFE_N avg=1.76 med=1.41 max=6.98 | MAE_N avg=1.57 (2N 관통 4) | MFE20_N avg=2.49 (≥1.5N 6, ≥3N 4)
+  도달: 0.5N 9/14 (64%, d={'0': 3, '1': 1, '2': 1, '3': 1, '4': 2, '7': 1}) | 1N 8 (57%, d={'0': 2, '1': 2, '5': 1, '7': 1, '8': 1, '12': 1}) | 1.5N 5 (36%, d={'1': 1, '3': 1, '6': 1, '7': 1, '8': 1}) | 2N 5
+  1유닛 명목이 position_ratio 상한 초과: 5/14 (avg 0.92×) | 터틀 이론 유닛수량 ≥1주: 9/14 | 실제 랏=터틀유닛 avg 1.52 med 1.35 max 3.37 (>1유닛 10, >2유닛 3)
+  [pess] base: win 21% Σ-32,190 avg -2,299 min -20,000 max 9,600 (Σ자본% -2.08)
+         pyr : win 14% Σ-68,789 avg -4,913 min -20,111 max 31,179 (Σ자본% -5.63, 최악 1건 -1.68%) Δ=-36,599 변화 12 (개선 3/악화 9) 유닛분포 {'1': 5, '2': 1, '3': 4, '4': 4} 피라미드손절청산 5 명목max 29.0%자산 예산초과 0 최종손절리스크 avg 0.81% max 2.18%
+  [opt] base: win 21% Σ-32,190 avg -2,299 min -20,000 max 9,600 (Σ자본% -2.08)
+         pyr : win 14% Σ-68,789 avg -4,913 min -20,111 max 31,179 (Σ자본% -5.63, 최악 1건 -1.68%) Δ=-36,599 변화 12 (개선 3/악화 9) 유닛분포 {'1': 5, '2': 1, '3': 4, '4': 4} 피라미드손절청산 5 명목max 29.0%자산 예산초과 0 최종손절리스크 avg 0.81% max 2.18%
+  [pess_1N] base: win 21% Σ-32,190 avg -2,299 min -20,000 max 9,600 (Σ자본% -2.08)
+         pyr : win 14% Σ-59,629 avg -4,259 min -20,000 max 23,957 (Σ자본% -4.48, 최악 1건 -1.12%) Δ=-27,439 변화 11 (개선 3/악화 8) 유닛분포 {'1': 6, '2': 4, '3': 2, '4': 2} 피라미드손절청산 5 명목max 19.3%자산 예산초과 0 최종손절리스크 avg 0.56% max 1.46%
+  [pess_budget] base: win 21% Σ-32,190 avg -2,299 min -20,000 max 9,600 (Σ자본% -2.08)
+         pyr : win 14% Σ-68,789 avg -4,913 min -20,111 max 31,179 (Σ자본% -5.63, 최악 1건 -1.68%) Δ=-36,599 변화 12 (개선 3/악화 9) 유닛분포 {'1': 5, '2': 1, '3': 4, '4': 4} 피라미드손절청산 5 명목max 29.0%자산 예산초과 0 최종손절리스크 avg 0.81% max 2.18%
+
+## ALL / all_time: N=38 1주랏=28 보유영업일 avg=4.3 max=19 N%가격 avg=5.51%
+  MFE_N avg=1.36 med=0.98 max=6.98 | MAE_N avg=1.33 (2N 관통 8) | MFE20_N avg=2.77 (≥1.5N 20, ≥3N 10)
+  도달: 0.5N 29/38 (76%, d={'0': 21, '1': 3, '2': 1, '3': 1, '4': 2, '7': 1}) | 1N 18 (47%, d={'0': 6, '1': 5, '2': 2, '3': 1, '5': 1, '7': 1, '8': 1, '12': 1}) | 1.5N 11 (29%, d={'0': 2, '1': 3, '3': 2, '4': 1, '6': 1, '7': 1, '8': 1}) | 2N 9
+  1유닛 명목이 position_ratio 상한 초과: 21/38 (avg 1.77×) | 터틀 이론 유닛수량 ≥1주: 14/38 | 실제 랏=터틀유닛 avg 3.68 med 2.85 max 15.61 (>1유닛 30, >2유닛 20)
+  [pess] base: win 26% Σ-60,580 avg -1,594 min -20,000 max 12,500 (Σ자본% -4.55)
+         pyr : win 11% Σ-325,136 avg -8,556 min -42,336 max 31,179 (Σ자본% -24.39, 최악 1건 -3.27%) Δ=-264,556 변화 32 (개선 4/악화 28) 유닛분포 {'1': 9, '2': 11, '3': 8, '4': 10} 피라미드손절청산 10 명목max 95.1%자산 예산초과 12 최종손절리스크 avg 1.27% max 5.82%
+  [opt] base: win 26% Σ-60,580 avg -1,594 min -20,000 max 12,500 (Σ자본% -4.55)
+         pyr : win 11% Σ-317,986 avg -8,368 min -42,336 max 31,179 (Σ자본% -23.74, 최악 1건 -3.27%) Δ=-257,406 변화 32 (개선 4/악화 28) 유닛분포 {'1': 9, '2': 11, '3': 8, '4': 10} 피라미드손절청산 9 명목max 95.1%자산 예산초과 12 최종손절리스크 avg 1.27% max 5.82%
+  [pess_1N] base: win 26% Σ-60,580 avg -1,594 min -20,000 max 12,500 (Σ자본% -4.55)
+         pyr : win 13% Σ-224,108 avg -5,898 min -36,250 max 23,957 (Σ자본% -18.09, 최악 1건 -3.33%) Δ=-163,528 변화 21 (개선 3/악화 18) 유닛분포 {'1': 20, '2': 10, '3': 5, '4': 3} 피라미드손절청산 9 명목max 98.3%자산 예산초과 9 최종손절리스크 avg 0.82% max 3.24%
+  [pess_budget] base: win 26% Σ-60,580 avg -1,594 min -20,000 max 12,500 (Σ자본% -4.55)
+         pyr : win 21% Σ-121,704 avg -3,203 min -20,111 max 31,179 (Σ자본% -9.52, 최악 1건 -1.68%) Δ=-61,124 변화 22 (개선 5/악화 17) 유닛분포 {'1': 19, '2': 10, '3': 5, '4': 4} 피라미드손절청산 6 명목max 29.0%자산 예산초과 2 최종손절리스크 avg 0.85% max 2.34%
+
+## ALL / last_60d: N=32 1주랏=22 보유영업일 avg=4.7 max=19 N%가격 avg=5.71%
+  MFE_N avg=1.29 med=0.71 max=6.98 | MAE_N avg=1.28 (2N 관통 6) | MFE20_N avg=2.07 (≥1.5N 16, ≥3N 6)
+  도달: 0.5N 23/32 (72%, d={'0': 16, '1': 2, '2': 1, '3': 1, '4': 2, '7': 1}) | 1N 14 (44%, d={'0': 4, '1': 3, '2': 2, '3': 1, '5': 1, '7': 1, '8': 1, '12': 1}) | 1.5N 8 (25%, d={'0': 1, '1': 1, '3': 2, '4': 1, '6': 1, '7': 1, '8': 1}) | 2N 6
+  1유닛 명목이 position_ratio 상한 초과: 15/32 (avg 1.38×) | 터틀 이론 유닛수량 ≥1주: 14/32 | 실제 랏=터틀유닛 avg 3.08 med 1.80 max 9.94 (>1유닛 24, >2유닛 14)
+  [pess] base: win 28% Σ-52,080 avg -1,628 min -20,000 max 9,600 (Σ자본% -3.76)
+         pyr : win 12% Σ-230,827 avg -7,213 min -42,336 max 31,179 (Σ자본% -15.73, 최악 1건 -3.27%) Δ=-178,747 변화 26 (개선 4/악화 22) 유닛분포 {'1': 9, '2': 9, '3': 7, '4': 7} 피라미드손절청산 8 명목max 44.5%자산 예산초과 6 최종손절리스크 avg 1.06% max 3.35%
+  [opt] base: win 28% Σ-52,080 avg -1,628 min -20,000 max 9,600 (Σ자본% -3.76)
+         pyr : win 12% Σ-230,827 avg -7,213 min -42,336 max 31,179 (Σ자본% -15.73, 최악 1건 -3.27%) Δ=-178,747 변화 26 (개선 4/악화 22) 유닛분포 {'1': 9, '2': 9, '3': 7, '4': 7} 피라미드손절청산 8 명목max 44.5%자산 예산초과 6 최종손절리스크 avg 1.06% max 3.35%
+  [pess_1N] base: win 28% Σ-52,080 avg -1,628 min -20,000 max 9,600 (Σ자본% -3.76)
+         pyr : win 16% Σ-130,872 avg -4,090 min -23,732 max 23,957 (Σ자본% -9.53, 최악 1건 -1.96%) Δ=-78,792 변화 17 (개선 3/악화 14) 유닛분포 {'1': 18, '2': 9, '3': 3, '4': 2} 피라미드손절청산 7 명목max 31.1%자산 예산초과 5 최종손절리스크 avg 0.71% max 2.24%
+  [pess_budget] base: win 28% Σ-52,080 avg -1,628 min -20,000 max 9,600 (Σ자본% -3.76)
+         pyr : win 22% Σ-113,204 avg -3,538 min -20,111 max 31,179 (Σ자본% -8.74, 최악 1건 -1.68%) Δ=-61,124 변화 22 (개선 5/악화 17) 유닛분포 {'1': 13, '2': 10, '3': 5, '4': 4} 피라미드손절청산 6 명목max 29.0%자산 예산초과 1 최종손절리스크 avg 0.82% max 2.18%
+
+## 왕복 상세 (pess)
+  donchian 139480 이마트     2026-05-11→2026-05-12 hold=1 q=1 px=115500→108300 N=3636(3.1%) MFE=0.58N MAE=3.44N MFE20=0.88N 0.5N@0 1N@None 1.5N@None | base -7,200 → pyr -16,218 units=2 exit=actual_exit(stop_touched_same_day) stop=110046 notional=21.4%자산 risk=1.17% cap×=3.53
+  donchian 336260 두산테스나   2026-05-11→2026-05-12 hold=1 q=1 px=89600→88300 N=6175(6.9%) MFE=2.30N MAE=0.74N MFE20=3.13N 0.5N@0 1N@0 1.5N@0 | base -1,300 → pyr -30,875 units=4 exit=pyr_stop_same_day_after_add stop=86512 notional=34.6%자산 risk=2.83% cap×=2.74
+  donchian 003550 LG      2026-05-11→2026-05-12 hold=1 q=1 px=110100→109200 N=3561(3.2%) MFE=2.33N MAE=1.54N MFE20=21.29N 0.5N@1 1N@1 1.5N@1 | base -900 → pyr -14,282 units=4 exit=actual_exit stop=108320 notional=41.4%자산 risk=1.63% cap×=3.37
+  donchian 086280 현대글로비스  2026-05-11→2026-05-12 hold=1 q=1 px=246000→258500 N=12750(5.2%) MFE=3.33N MAE=0.20N MFE20=3.33N 0.5N@0 1N@1 1.5N@1 | base 12,500 → pyr -1,375 units=4 exit=actual_exit stop=243000 notional=95.1%자산 risk=5.82% cap×=7.53
+  donchian 383220 F&F     2026-05-11→2026-05-19 hold=6 q=1 px=84700→78800 N=3582(4.2%) MFE=0.98N MAE=2.29N MFE20=1.20N 0.5N@0 1N@None 1.5N@None | base -5,900 → pyr -13,591 units=2 exit=actual_exit(stop_touched_same_day) stop=79327 notional=15.7%자산 risk=1.15% cap×=2.59
+  donchian 017670 SK텔레콤   2026-05-13→2026-05-19 hold=4 q=1 px=101700→96000 N=3993(3.9%) MFE=1.10N MAE=1.45N MFE20=9.47N 0.5N@0 1N@0 1.5N@None | base -5,700 → pyr -17,968 units=3 exit=pyr_stop stop=97707 notional=28.6%자산 risk=1.65% cap×=3.12
+  kojiro 068790 DMS     2026-07-22→2026-07-24 hold=2 q=5 px=8610→7900 N=574(6.7%) MFE=0.30N MAE=1.65N MFE20=0.30N 0.5N@None 1N@None 1.5N@None | base -3,550 → pyr -3,550 units=1 exit=actual_exit stop=7461 notional=3.6%자산 risk=0.48% cap×=0.73
+  donchian 017670 SK텔레콤   2026-07-24→2026-07-28 hold=2 q=1 px=98200→89200 N=5379(5.5%) MFE=1.38N MAE=3.27N MFE20=1.54N 0.5N@0 1N@0 1.5N@None | base -9,000 → pyr -26,368 units=3 exit=pyr_stop_gap stop=92821 notional=25.3%자산 risk=2.02% cap×=2.74
+  kojiro 139130 iM금융지주  2026-07-22→2026-07-28 hold=4 q=2 px=18330→16890 N=901(4.9%) MFE=0.54N MAE=2.20N MFE20=0.54N 0.5N@3 1N@None 1.5N@None | base -2,880 → pyr -6,661 units=2 exit=actual_exit(stop_touched_same_day) stop=16978 notional=6.3%자산 risk=0.53% cap×=0.62
+  donchian 011200 HMM     2026-07-27→2026-07-29 hold=2 q=1 px=21200→20000 N=829(3.9%) MFE=0.66N MAE=1.73N MFE20=2.66N 0.5N@0 1N@None 1.5N@None | base -1,200 → pyr -2,900 units=2 exit=pyr_stop stop=19957 notional=3.6%자산 risk=0.25% cap×=0.60
+  kojiro 089860 롯데렌탈    2026-07-21→2026-07-29 hold=6 q=1 px=37200→35300 N=1707(4.6%) MFE=2.46N MAE=1.52N MFE20=5.68N 0.5N@1 1N@1 1.5N@1 | base -1,900 → pyr -12,721 units=4 exit=actual_exit(stop_touched_same_day) stop=36346 notional=12.9%자산 risk=0.71% cap×=0.62
+  donchian 096770 SK이노베이션 2026-07-20→2026-07-29 hold=7 q=1 px=117300→106800 N=7911(6.7%) MFE=2.34N MAE=1.40N MFE20=2.34N 0.5N@0 1N@3 1.5N@3 | base -10,500 → pyr -39,554 units=4 exit=pyr_stop stop=113345 notional=40.8%자산 risk=3.27% cap×=3.24
+  kojiro 377450 리파인     2026-07-27→2026-07-30 hold=3 q=3 px=11850→11870 N=715(6.0%) MFE=0.41N MAE=2.14N MFE20=7.20N 0.5N@None 1N@None 1.5N@None | base 60 → pyr -4,290 units=1 exit=pyr_stop stop=10420 notional=3.0%자산 risk=0.36% cap×=0.61
+  donchian 068270 셀트리온    2026-07-31→2026-08-03 hold=1 q=1 px=186200→184600 N=7550(4.1%) MFE=0.41N MAE=0.78N MFE20=3.42N 0.5N@None 1N@None 1.5N@None | base -1,600 → pyr -1,600 units=1 exit=actual_exit stop=171100 notional=16.1%자산 risk=1.31% cap×=5.37
+  donchian 032640 LG유플러스  2026-07-31→2026-08-03 hold=1 q=2 px=15090→14680 N=504(3.3%) MFE=0.65N MAE=0.87N MFE20=1.27N 0.5N@0 1N@None 1.5N@None | base -820 → pyr -2,144 units=2 exit=actual_exit stop=14334 notional=5.3%자산 risk=0.31% cap×=0.87
+  kojiro 002810 삼영무역    2026-07-29→2026-08-05 hold=5 q=2 px=23400→21550 N=908(3.9%) MFE=0.44N MAE=2.20N MFE20=0.44N 0.5N@None 1N@None 1.5N@None | base -3,700 → pyr -3,630 units=1 exit=pyr_stop stop=21585 notional=4.1%자산 risk=0.32% cap×=0.82
+  donchian 073240 금호타이어   2026-08-07→2026-08-10 hold=1 q=1 px=8090→7690 N=690(8.5%) MFE=0.61N MAE=1.30N MFE20=1.10N 0.5N@0 1N@None 1.5N@None | base -400 → pyr -1,145 units=2 exit=actual_exit stop=7055 notional=1.4%자산 risk=0.21% cap×=0.23
+  donchian 103140 풍산      2026-08-07→2026-08-10 hold=1 q=1 px=84600→84500 N=5486(6.5%) MFE=0.53N MAE=0.44N MFE20=1.17N 0.5N@1 1N@None 1.5N@None | base -100 → pyr -2,943 units=2 exit=actual_exit stop=76371 notional=14.6%자산 risk=1.63% cap×=2.40
+  kojiro 236200 슈프리마    2026-07-22→2026-08-12 hold=15 q=1 px=48200→57800 N=2407(5.0%) MFE=6.98N MAE=1.58N MFE20=6.98N 0.5N@7 1N@7 1.5N@8 | base 9,600 → pyr 31,179 units=4 exit=actual_exit stop=46996 notional=16.9%자산 risk=1.02% cap×=0.82
+  donchian 028670 팬오션     2026-08-10→2026-08-12 hold=2 q=2 px=5970→5910 N=357(6.0%) MFE=0.17N MAE=0.81N MFE20=1.57N 0.5N@None 1N@None 1.5N@None | base -120 → pyr -120 units=1 exit=actual_exit stop=5256 notional=1.0%자산 risk=0.12% cap×=0.34
+  donchian 001450 현대해상    2026-08-12→2026-08-14 hold=2 q=1 px=42650→42750 N=2596(6.1%) MFE=1.21N MAE=0.44N MFE20=4.26N 0.5N@0 1N@2 1.5N@None | base 100 → pyr -3,595 units=3 exit=actual_exit stop=40054 notional=11.5%자산 risk=1.02% cap×=1.24
+  kojiro 053800 안랩      2026-08-12→2026-08-14 hold=2 q=1 px=64100→59800 N=2329(3.6%) MFE=0.17N MAE=2.32N MFE20=0.17N 0.5N@None 1N@None 1.5N@None | base -4,300 → pyr -4,657 units=1 exit=pyr_stop stop=59443 notional=5.6%자산 risk=0.40% cap×=1.12
+  donchian 009420 한올바이오파마 2026-08-14→2026-08-18 hold=1 q=1 px=60900→61500 N=4464(7.3%) MFE=0.47N MAE=0.68N MFE20=1.12N 0.5N@None 1N@None 1.5N@None | base 600 → pyr 600 units=1 exit=actual_exit stop=51971 notional=5.3%자산 risk=0.77% cap×=1.76
+  kojiro 111770 영원무역    2026-07-21→2026-08-18 hold=19 q=1 px=86800→83000 N=5807(6.7%) MFE=1.41N MAE=1.29N MFE20=1.41N 0.5N@4 1N@12 1.5N@None | base -3,800 → pyr -20,111 units=3 exit=actual_exit(stop_touched_same_day) stop=80993 notional=22.5%자산 risk=2.18% cap×=1.46
+  kojiro 051905 LG생활건강우 2026-08-06→2026-08-18 hold=7 q=1 px=110900→107100 N=5021(4.5%) MFE=1.49N MAE=1.04N MFE20=1.49N 0.5N@0 1N@0 1.5N@None | base -3,800 → pyr -18,932 units=3 exit=actual_exit(stop_touched_same_day) stop=105879 notional=29.0%자산 risk=1.93% cap×=1.90
+  kojiro 079160 CJ CGV  2026-07-30→2026-08-18 hold=12 q=2 px=5230→5170 N=221(4.2%) MFE=2.53N MAE=1.49N MFE20=2.53N 0.5N@0 1N@0 1.5N@6 | base -120 → pyr -1,993 units=3 exit=pyr_stop_same_day_after_add stop=5009 notional=2.8%자산 risk=0.17% cap×=0.18
+  kojiro 002790 아모레퍼시픽홀 2026-08-04→2026-08-18 hold=9 q=1 px=25150→25050 N=1171(4.7%) MFE=2.18N MAE=0.26N MFE20=2.48N 0.5N@0 1N@1 1.5N@3 | base -100 → pyr -3,914 units=4 exit=actual_exit stop=24564 notional=9.0%자산 risk=0.51% cap×=0.44
+  donchian 204320 HL만도    2026-08-18→2026-08-20 hold=2 q=1 px=55900→53700 N=3557(6.4%) MFE=0.48N MAE=1.52N MFE20=0.48N 0.5N@None 1N@None 1.5N@None | base -2,200 → pyr -2,200 units=1 exit=actual_exit stop=48786 notional=2.1%자산 risk=0.27% cap×=0.71
+  donchian 078930 GS      2026-08-14→2026-08-20 hold=3 q=1 px=110300→112800 N=8604(7.8%) MFE=1.27N MAE=0.40N MFE20=2.66N 0.5N@0 1N@1 1.5N@None | base 2,500 → pyr -5,405 units=3 exit=actual_exit stop=101696 notional=29.8%자산 risk=3.35% cap×=3.18
+  kojiro 316140 우리금융지주  2026-07-28→2026-08-21 hold=17 q=2 px=33050→31350 N=1507(4.6%) MFE=1.19N MAE=1.43N MFE20=1.19N 0.5N@2 1N@8 1.5N@None | base -3,400 → pyr -14,421 units=3 exit=pyr_stop_gap stop=31543 notional=17.5%자산 risk=1.17% cap×=1.15
+  donchian 095340 ISC     2026-08-19→2026-08-21 hold=2 q=1 px=162500→169600 N=13264(8.2%) MFE=1.50N MAE=0.92N MFE20=1.50N 0.5N@0 1N@0 1.5N@0 | base 7,100 → pyr -11,393 units=4 exit=actual_exit(stop_touched_same_day) stop=155868 notional=26.4%자산 risk=2.53% cap×=2.07
+  kojiro 018670 SK가스    2026-08-18→2026-08-21 hold=3 q=1 px=245500→225500 N=13300(5.4%) MFE=0.08N MAE=1.62N MFE20=0.08N 0.5N@None 1N@None 1.5N@None | base -20,000 → pyr -20,000 units=1 exit=actual_exit stop=218900 notional=9.3%자산 risk=1.01% cap×=1.87
+  donchian 403870 HPSP    2026-08-21→2026-08-25 hold=2 q=1 px=46250→43700 N=3571(7.7%) MFE=0.70N MAE=0.91N MFE20=1.89N 0.5N@0 1N@None 1.5N@None | base -2,550 → pyr -6,886 units=2 exit=actual_exit stop=40893 notional=3.6%자산 risk=0.48% cap×=0.60
+  donchian 028670 팬오션     2026-08-25→2026-08-26 hold=1 q=5 px=6280→5700 N=352(5.6%) MFE=0.71N MAE=2.19N MFE20=0.71N 0.5N@0 1N@None 1.5N@None | base -2,900 → pyr -6,679 units=2 exit=actual_exit(stop_touched_same_day) stop=5752 notional=2.5%자산 risk=0.24% cap×=0.41
+  kojiro 012750 에스원     2026-08-18→2026-08-27 hold=7 q=1 px=77400→83100 N=2629(3.4%) MFE=4.41N MAE=1.26N MFE20=4.41N 0.5N@4 1N@5 1.5N@7 | base 5,700 → pyr 14,914 units=4 exit=actual_exit stop=76086 notional=12.1%자산 risk=0.50% cap×=0.59
+  donchian 124500 아이티센글로벌 2026-08-26→2026-08-28 hold=2 q=2 px=37300→39250 N=3593(9.6%) MFE=0.89N MAE=0.08N MFE20=0.89N 0.5N@0 1N@None 1.5N@None | base 3,900 → pyr 4,207 units=2 exit=actual_exit stop=31911 notional=5.9%자산 risk=0.97% cap×=0.96
+  donchian 192820 코스맥스    2026-08-24→2026-09-01 hold=6 q=1 px=273500→275500 N=16779(6.1%) MFE=1.97N MAE=0.48N MFE20=1.97N 0.5N@0 1N@2 1.5N@4 | base 2,000 → pyr -42,336 units=4 exit=actual_exit stop=265111 notional=44.5%자산 risk=3.26% cap×=3.54
+  donchian 034020 두산에너빌리티 2026-08-31→2026-09-02 hold=2 q=1 px=83600→78900 N=4357(5.2%) MFE=0.64N MAE=0.80N MFE20=0.64N 0.5N@0 1N@None 1.5N@None | base -4,700 → pyr -11,579 units=2 exit=actual_exit stop=77064 notional=6.5%자산 risk=0.58% cap×=1.07
+
+## 오픈 포지션 (pess, 09-02 종가 평가)
+  kojiro 285130 SK케미칼   2026-08-19 hold=10 q=1 px=47350 last=54100 N=2536(5.4%) MFE=3.61N 0.5N=True 1N=True 1.5N=True units=4 adds@1|1|5 stop=46082 exit=open_mark markpnl=19,393 notional=7.5%자산 risk=0.48% cap=130,296 unit1=47,350
+  kojiro 005180 빙그레     2026-08-19 hold=10 q=1 px=75800 last=91500 N=3521(4.6%) MFE=5.74N 0.5N=True 1N=True 1.5N=True units=4 adds@0|0|1 stop=74039 exit=open_mark markpnl=52,236 notional=12.0%자산 risk=0.67% cap=130,296 unit1=75,800
+  kojiro 004690 삼천리     2026-08-20 hold=1 q=1 px=130000 last=130400 N=4179(3.2%) MFE=0.34N 0.5N=False 1N=False 1.5N=False units=1 adds@ stop=121643 exit=open_mark markpnl=400 notional=5.0%자산 risk=0.32% cap=128,853 unit1=130,000
+  kojiro 000815 삼성화재우   2026-08-21 hold=8 q=1 px=405500 last=437000 N=11286(2.8%) MFE=3.06N 0.5N=True 1N=True 1.5N=True units=4 adds@0|0|3 stop=399857 exit=open_mark markpnl=92,143 notional=64.1%자산 risk=2.18% cap=128,693 unit1=405,500
+  kojiro 225570 넥슨게임즈   2026-08-27 hold=4 q=4 px=11040 last=11500 N=479(4.3%) MFE=1.06N 0.5N=True 1N=True 1.5N=False units=3 adds@0|3 stop=10561 exit=open_mark markpnl=2,644 notional=5.2%자산 risk=0.33% cap=129,036 unit1=44,160
+  kojiro 003490 대한항공    2026-08-28 hold=3 q=2 px=28050 last=28750 N=896(3.2%) MFE=1.00N 0.5N=True 1N=True 1.5N=False units=3 adds@0|2 stop=27154 exit=open_mark markpnl=1,511 notional=6.5%자산 risk=0.31% cap=130,996 unit1=56,100
+  donchian 088350 한화생명    2026-08-31 hold=2 q=5 px=5790 last=5920 N=355(6.1%) MFE=0.73N 0.5N=True 1N=False 1.5N=False units=2 adds@0 stop=5258 exit=open_mark markpnl=413 notional=2.2%자산 risk=0.24% cap=78,421 unit1=28,950
+  donchian 293490 카카오게임즈  2026-09-02 hold=0 q=2 px=9600 last=9880 N=649(6.8%) MFE=0.43N 0.5N=False 1N=False 1.5N=False units=1 adds@ stop=8303 exit=open_mark markpnl=560 notional=0.7%자산 risk=0.10% cap=77,464 unit1=19,200
