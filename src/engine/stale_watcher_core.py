@@ -384,6 +384,35 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     emit_stale_session_detail(scheduler, stale_tickers, now)
 
 
+def _collect_low_desired(scheduler: Any) -> tuple[set[str], set[str]]:
+    """cycle240 — LOW desired 소스 2종 (breakout, momentum). 각각 실패 시 빈 set.
+
+    08-31 포렌식 결함 ⓑ(5분 우선 재구독 핑퐁) 시정 — `resubscribe_stale_priority` 의
+    LOW 후보를 이 함수가 반환하는 desired 집합과 교집합한다(호출부 §2.2 참조).
+
+    - breakout = `scheduler._collect_breakout_tickers()` — VB/LTV/BFB/VCP scanned
+      ∖ `_universe_excluded_today` (scheduler **소유** 소스 = 활성 게이트의 유일 근거.
+      인스턴스 메서드 호출뿐 — scheduler 정적 import 0, D-1 동형).
+    - momentum = `scanner._last_scan_result` — 같은 `_scan_loop` 이터레이션의
+      `scan_stocks()` 결과. **가산 전용**(활성 판정 불참 — 모듈 전역 잔여값이 행위를
+      뒤집지 못하게).
+
+    await 0 · DB 접근 0 · 예외 전파 0 (호출부/헬퍼 내부 모두 try 로 흡수).
+    """
+    breakout: set[str] = set()
+    momentum: set[str] = set()
+    try:
+        breakout = set(scheduler._collect_breakout_tickers() or [])
+    except Exception:
+        breakout = set()
+    try:
+        from src.engine import scanner as _scanner_mod  # lazy — patch("src.engine.scanner._last_scan_result") 호환
+        momentum = set(getattr(_scanner_mod, "_last_scan_result", None) or [])
+    except Exception:
+        momentum = set()
+    return breakout, momentum
+
+
 async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]:
     """`_scan_loop` 5분 stale 우선순위 재구독 (사이클 25-B 우선순위 분리 영속).
 
@@ -403,6 +432,18 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
       → 2026-05-20 14:58 메인 sub=11 fresh=0 stale=11 silent inactive 사고
     - 변경: positions/next_day_clear = HIGH (보유·익일청산 보장 절대 유지)
             그 외 후보 = LOW (보조 분산, 사이클 24 자동 회복과 시너지)
+
+    사이클 240 (2026-09-02) — 08-31 포렌식 결함 ⓑ(5분 우선 재구독 핑퐁) 시정:
+    - 원인: LOW 후보 소스가 `ticker_last_tick` **전수**라 매도·후보이탈 종목도 20:10
+      정산까지 stale 자격 유지 → `_scan_loop` 같은 이터레이션 안에서
+      `delta_unsubscribe_dropped`(빼기) ↔ 여기(되살리기) 가 무한 핑퐁.
+    - 시정: priority 분리(HIGH/LOW) **직후**, cycle216 A(동시호가)/B(throttle)/cap
+      **앞**에 `low_targets` 만 `_collect_low_desired()` 의 desired 집합(breakout ∪
+      momentum)과 교집합한다. HIGH 는 `low_targets` 에 애초에 들어가지 않으므로
+      필터 경로를 지나지 않는다(구조적 면제). 활성 게이트 = breakout 비어있지 않음
+      ∧ HIGH 수집 무예외(momentum 은 게이트 불참) — 게이트 off 시 현행 byte 동일
+      (fail-open). 관측 = `[stale_priority_resubscribe]` 기존 INFO 1행에
+      `desired_low=` / `filtered_not_desired=` / `filtered_sample=` 3필드 확장.
 
     Returns:
         재구독한 ticker 리스트 (호출 카운트 + 회귀 검증용)
@@ -459,23 +500,36 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
     # Q6-4 의미 전환: 사이클 63 K-2 결함 confirm → 사이클 66 K-2 시정 confirm.
     # 사이클 29 005935 사고 패턴 (HIGH 종목 cap 밖 잘림 8분 영구 잔류 + LMS chain) 영구 차단.
     high_tickers: set[str] = set()
+    _high_collect_ok = True                          # cycle240 — HIGH 수집 실패 시 필터 fail-open
     try:
         for s in scheduler.registry.all():
             try:
                 high_tickers.update(s.state.positions.keys())
             except Exception:
-                pass
+                _high_collect_ok = False
     except Exception:
         # registry 미주입 인스턴스(테스트 __new__) 보호 — 모두 LOW 로 처리
-        pass
+        _high_collect_ok = False
     try:
         high_tickers.update(t for (t, _sid) in scheduler._pending_next_day_clear)
     except Exception:
-        pass
+        _high_collect_ok = False
 
     # Q1 시정: priority 분리 *먼저*, cap 적용 *나중* (HIGH 절대 우선)
     high_targets = [t for t in stale_tickers if t in high_tickers]
     low_targets = [t for t in stale_tickers if t not in high_tickers]
+
+    # cycle240 — LOW desired 교집합 (재구독 핑퐁 차단). HIGH 는 이 블록을 지나지 않는다.
+    try:
+        _breakout_desired, _momentum_desired = _collect_low_desired(scheduler)
+    except Exception:
+        _breakout_desired, _momentum_desired = set(), set()
+    _filter_active = bool(_breakout_desired) and _high_collect_ok   # momentum 은 게이트 불참(AST G-240-5)
+    _desired_low = _breakout_desired | _momentum_desired
+    filtered_not_desired: list[str] = []
+    if _filter_active and low_targets:
+        filtered_not_desired = [t for t in low_targets if t not in _desired_low]
+        low_targets = [t for t in low_targets if t in _desired_low]
 
     # 사이클 216 보강 A — 동시호가 LOW-scoped skip (HIGH 는 면제, cycle162 전체
     # early-return 과 달리 LOW 후보만 비운다. 09:00 갭개장 손절 대비 HIGH 유지).
@@ -554,8 +608,11 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
         await asyncio.sleep(0.05)  # Rate Limit 보호
 
     logger.info(
-        "[stale_priority_resubscribe] count=%d tickers=%s",
+        "[stale_priority_resubscribe] count=%d tickers=%s desired_low=%d "
+        "filtered_not_desired=%d filtered_sample=%s",
         len(resubscribed), resubscribed,
+        len(_desired_low) if _filter_active else 0,
+        len(filtered_not_desired), filtered_not_desired[:10],
     )
     # 사이클 72 hotfix A5: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
 

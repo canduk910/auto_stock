@@ -411,6 +411,68 @@ if acml_vol < vol_threshold:
 - 부수 미규명 1건: 8/24 09:46:49 `[callback_exception] ticker=377300` — 15:30 패턴과 다른
   시각. 별도 규명 필요(단발).
 
+### P1-7 · 5분 우선 재구독 핑퐁 (08-31 포렌식 확정 결함 ⓑ, MEDIUM) — ✅ cycle240 종결 (2026-09-02, 커밋 대기)
+
+> 시정 = `resubscribe_stale_priority`(`_scan_loop` 5분, cap=10)의 **LOW 후보만** desired 집합
+> (breakout `_collect_breakout_tickers()` ∪ momentum `scanner._last_scan_result`)과 교집합.
+> HIGH(보유 ∪ 익일청산)는 `low_targets` 에 애초에 없어 필터 경로를 지나지 않는다(구조적 면제)
+> + HIGH 수집 예외 시 게이트 off(이중). 활성 게이트 = breakout 비어있지 않음 ∧ HIGH 수집 무예외
+> — off 면 **현행 byte 동일(fail-open)**. `src/engine/stale_watcher_core.py` 단독(+61/-4),
+> 8영역·scheduler.py(3,999L)·facade diff 0. 스펙 = `_workspace/red/cycle240_resubscribe_desired_filter_spec.md`.
+
+- **실측(EC2 read-only, UTC 저장 +9h)**: 09-02 09:40 `[stale_priority_resubscribe]` 9종목 →
+  09:45 `[scan_loop_delta] unsubscribed=` **동일 9** → 10:00 RESUB → 10:05 DELTA … 1:1 무한 페어링.
+  `034020` 은 09:00:29 매도 후 **19:59 까지 35회** 재구독. 종목언급/행수 = 09-01 **993/115**,
+  09-02 **843/108**. `[scan_loop_delta]` 09-02 **222행**. `cap_exceeded` 0건(HIGH 가 cap 을 넘은 적 없음).
+- **원인**: stale 후보 소스가 `scanner.ticker_last_tick.items()` **전수**(`stale_watcher_core.py:449`)
+  — 그 dict 는 per-ticker pop/del 이 src 전체 0건, 유일 정리 = 20:10 정산 `_reset_daily_state` 의
+  `clear()`. 09:00 에 한 번 tick 받은 종목은 매도·후보 이탈 후에도 20:10 까지 stale 자격 유지.
+  형제 `check_and_resubscribe_stale`(120s)은 소스가 `get_subscribed_tickers()`(구독 집합 한정)라
+  같은 결함 없음 = **비대칭이 뿌리**. cycle216 LOW throttle 180s < 300s 주기라 구조적으로 못 막고,
+  universe 가드 평가 대상이 `new_set` 한정이라 되살아난 종목엔 자동 수렴 경로 0.
+  LOW 라 메인 41 하드리밋은 안 깨지지만 구독 슬롯·KIS SEND 낭비 + 로그 오염 +
+  `_stale_last_resubscribe_at`(throttle/force_retry 타임스탬프) 오염.
+- **설계 결정(사용자 위임 — team-leader 권장안)**: ① desired = `new_set ∪ NDC` 동치 정의(같은
+  try 블록·같은 이터레이션 — 필터가 `_scan_loop` 자신이 구독하려는 종목을 자를 수 없다) ②
+  `kis_ws_pool.get_subscribed_tickers()` 는 desired **부적격**(cycle215/217 "미구독 split-brain
+  종목 재구독" 계약 무력화 — F-12 실증) ③ 스윙 후보 **제외**(넣는 순간 대표 피해자 매도 완료
+  donchian/kojiro 가 desired 로 부활) ④ momentum 은 **가산 전용·게이트 불참**(모듈 전역 잔여값이
+  기존 LOW 회귀 23파일을 순서 의존으로 깨는 방향 = 덜 허용적, 활성 판정은 scheduler 소유 소스에만)
+  ⑤ `ticker_last_tick` 잔존은 이번 무접촉(소비처 8곳, pop 자연 위치 = `order_engine` 8영역 → 후속 A)
+  ⑥ 순서 = 분리 → **필터** → cycle216 A(동시호가) → B(throttle) → cap(유령이 cap 10 을 소비 못 함).
+- **관측**: `[stale_priority_resubscribe] count=%d tickers=%s desired_low=%d filtered_not_desired=%d
+  filtered_sample=%s`(기존 INFO 1행 확장, `count=` 첫 필드 byte 보존, sample ≤10, 신규 마커 0·cap 0
+  — 행 빈도 5분 1행 불변). `filtered_not_desired` 는 하루 누적 유령 수(30~80 이 **정상**).
+- **부수 시정**: cycle222a `test_a11b_stale_watcher_core_untouched`(bare `git diff HEAD` **영구 동결**
+  — 사이클 한정 스코프 가드가 수명을 넘겨 stale watcher 의 모든 후속 시정을 무조건 RED)를 내용 검사
+  `test_a11b_stale_watcher_core_no_anchor_coupling`(앵커 토큰 `day_high`/`stck_hgpr`/`high_price` 0)로
+  재스코프 + cycle222a3 `_GIT_HELPER_FILES` 목록 동기(`_git` 헬퍼 삭제 반영).
+- **적대 검증**: 3렌즈 발견 5 → 실질 1 = F-8 **테스트 픽스처 결함**(`_capture_scheduler_warnings()`
+  가 `src.engine.scheduler` 로거 레벨을 WARNING 으로 올려 caplog INFO 를 삼킴 → `IndexError`;
+  **구현은 무결함** — 캡처된 `low=1` 이 이미 필터 통과분으로 정확) → caplog 단일 캡처로 교체(src 변경 0).
+  뮤테이션 **21종 중 20 KILLED / 1 ESCAPED**(m5a — `resubscribed.append`/`_stale_last_resubscribe_at`
+  가 `subscribe` 성공 **전** 스탬프: cycle240 diff **밖** 사이클 28/216 기존 루프 = 기존 커버리지 공백,
+  후속 H). 차분 실증 **2,300 조합 0 불일치**(A 게이트 off·desired ⊇ LOW 1,000 조합 HEAD byte 동일 /
+  B 무작위 1,000 조합 차이는 desired 밖 종목뿐·HIGH 탈락 0 / C 게이트 off 300 조합 HEAD 동일).
+- **D+1 판독 채널**(⚠️ **의미 반전** — `count` **감소가 정상**, 배포 전후 같은 grep 합산 금지):
+  | 채널 | 정상 서명 | 이상 서명 |
+  |---|---|---|
+  | `[stale_priority_resubscribe]` | 장중 `desired_low>0` · `filtered_not_desired≥1` 대부분 사이클 · 종목언급 09-01 993 → **<50/일**, 대부분 `count=0` | 장중 `desired_low=0` 지속 = 게이트 off(4 돌파 전략 후보 0 또는 registry 이상) / `count` 종전 수준 = 필터 미작동 |
+  | `[scan_loop_delta] unsubscribed=` | 매도·후보 이탈 시점에만(09-02 222행 → 수십 행), 직전 RESUB 와 1:1 페어링 **0** | 페어링 재출현 = desired 소스 누락(어떤 전략 후보가 desired 밖) |
+  | 페어링 SQL | RESUB tickers ∩ 5분 뒤 DELTA tickers = ∅ | ≠ ∅ → 해당 종목 소속(전략·상태) 추적 |
+  | `[stale_watcher_detail]` | `stale=`/`r=` 감소(유령의 5분 점유 소멸) | 불변 = 120s 형제 경로 독립 결함(후속 F) |
+  | `[stale_priority_resubscribe_cap_exceeded]` | 0 유지 | ≥1 = HIGH>10(필터 무관, 보유 급증) |
+  | HIGH 회귀 | `/api/realtime/subscriptions` 보유 종목 fresh 비율 불변 · 매도 후 `[unsubscribe]` 정상 | 보유 종목 stale 증가 = HIGH 경로 훼손 → **즉시 롤백** |
+- **후속(이번 사이클 밖)**: A `ticker_last_tick` 매도 시 pop(`order_engine._unsubscribe_if_no_other_strategy`
+  8영역 승인 + 소비처 8곳 영향 평가, 이번 시정으로 무해화 = P3) · B `_scan_loop` `new_set` 에 NDC 부재
+  (`scheduler.py:2457`, 부팅 복구 창 delta 해제 잠재 — 순증 0 편집 필요) · C 사이클 한정 bare `git diff`
+  영구 동결 가드 수명 감사(`test_cycle223f:236`·`test_cycle223:325` 잔존 → sha 핀 자기소멸 또는 내용 검사)
+  · D `[scan_loop_delta]` `reason` 축 · E universe 가드 평가 대상 `new_set` 한정(관측) · F K watcher(120s)
+  subscribed∖desired 재등록(≤5분 창, `[stale_watcher_detail]` 불변 시 카드) · G `scanner._last_scan_result`
+  공개 접근자(8영역) · **H** m5a 순서 보정(`resubscribed.append`/타임스탬프를 `subscribe` 성공 이후로 —
+  다음 `stale_watcher_core` 접촉 사이클, tester 사본 테스트 `test_cycle240_tester_m5a_stamp_after_success.py`
+  실트리 미추가).
+
 ---
 
 ## P2 · 정확성 · 잠재 위험

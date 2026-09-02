@@ -16,14 +16,15 @@
 - A-9 (HIGH, F7): `register_tick_handler` 등록 경로 봉인 — `day_high=` 키워드를
   못 받는 핸들러가 붙으면 TypeError → handler 재-raise → WS 재연결 오발화
 - A-10 (HIGH, F1): `risk` 에 **매수 이후 baseline** 경계 실재 + hot path 계약
-- A-11 (HIGH, F3): 09:05 확장이 stale 중립 모드로만 돌고 stale watcher 는 무변경
+- A-11 (HIGH, F3): 09:05 확장이 stale 중립 모드로만 돌고 stale watcher 본체에
+  앵커 토큰(`day_high`/`stck_hgpr`/`high_price`) 0건 (cycle240 재스코프 — 종전
+  `git diff` 영구 동결은 후속 사이클을 무조건 차단해 내용 검사로 전환)
 """
 
 from __future__ import annotations
 
 import ast
 import inspect
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -52,25 +53,6 @@ _PRICE_KEYS = {"current_price", "open_price", "change_rate", "prdy_ctrt"}
 
 def _read(p: Path) -> str:
     return p.read_text(encoding="utf-8")
-
-
-def _git(*args: str) -> str:
-    """git 호출 — **fail-closed** (cycle222-a3 F-G).
-
-    구현은 `.stdout` 만 읽고 `returncode` 를 검사하지 않았다. git 이 실패하면
-    stdout=`""` → `changed == []` → **조용히 통과**한다. 즉 가드가 가장 필요한
-    상황에서 정확히 초록이 된다.
-    """
-    res = subprocess.run(
-        ["git", *args], cwd=_REPO_ROOT, capture_output=True, text=True,
-    )
-    if getattr(res, "returncode", 0) != 0:
-        raise AssertionError(
-            f"git {' '.join(args)} 실패 (rc={res.returncode}) — 범위 가드는 "
-            "fail-closed 다. stdout 이 비면 '변경 없음' 으로 조용히 통과하므로 "
-            f"여기서 멈춘다. stderr: {(res.stderr or '').strip()}"
-        )
-    return res.stdout
 
 
 def _func(tree: ast.Module, name: str):
@@ -389,23 +371,24 @@ def test_a11_early_window_is_stale_neutral():
     )
 
 
-def test_a11b_stale_watcher_core_untouched():
-    """이번 범위에서 stale watcher 자체는 건드리지 않는다.
+def test_a11b_stale_watcher_core_no_anchor_coupling():
+    """이번(cycle222-a) 범위에서 stale watcher 는 **앵커 로직과 얽히지 않는다**.
 
-    ⚠️ `git diff` 단독은 **unstaged 만** 본다 — `git add` 하는 순간 이 안전망이 눈을
-    감는다. 커밋 직전이야말로 가드가 가장 필요한 시점이라, 이건 통과가 아니라 **사각**
-    이다(사이클 223 G3 가 8영역 가드에서 실증·시정한 것과 동일 클래스).
+    ⚠️ **재스코프 (cycle240)** — 종전 구현은 `git diff HEAD -- stale_watcher_core.py`
+    공집합을 요구하는 **영구 동결**이었다. cycle222-a 라는 한 사이클의 범위 선언이
+    수명을 넘겨, 그 파일에 대한 **모든 후속 시정**(예: cycle240 재구독 desired 교집합)을
+    무조건 RED 로 만든다. 사이클 한정 스코프 가드가 영구 가드로 굳는 이 패턴은
+    cycle223 G3 가 8영역에서 sha 핀 자기소멸로 이미 해결한 클래스다.
 
-    시정 2종:
-      1. `git diff HEAD` — staged + unstaged 를 **모두** 본다.
-      2. `git ls-files --others --exclude-standard` — diff 가 보지 못하는
-         **신규(untracked)** 파일도 잡는다. 지금은 `stale_watcher_core.py` 가 추적
-         파일이라 무의미해 보이지만, 이 가드가 경로 목록으로 확장될 때 같은 사각이
-         재발하지 않도록 헬퍼 형태를 처음부터 맞춰 둔다.
+    cycle222-a 의 **실제 의도**는 "앵커(day_high) blind 시정이 stale watcher 와 얽히지
+    않는다" 였다. 그 의도를 **내용 기준**(A-5 와 같은 토큰 집합)으로 보존한다 — 파일이
+    다른 이유로 바뀌는 것은 허용하되, 앵커 토큰이 스며드는 것은 계속 막는다.
     """
-    paths = ["src/engine/stale_watcher_core.py"]
-
-    tracked = _git("diff", "HEAD", "--name-only", "--", *paths).split()
-    untracked = _git("ls-files", "--others", "--exclude-standard", "--", *paths).split()
-    changed = sorted(set(tracked) | set(untracked))
-    assert changed == [], f"stale_watcher_core.py 변경 감지 — 범위 밖: {changed}"
+    core = _SRC / "engine" / "stale_watcher_core.py"
+    assert core.exists(), f"{core} 미존재"
+    src = _read(core)
+    hits = [tok for tok in ("day_high", "stck_hgpr", "high_price") if tok in src]
+    assert hits == [], (
+        "stale watcher 본체에 앵커 토큰이 스몄다 — 재구독 판정은 `ticker_last_tick` "
+        f"하나만 본다(A-11 의도). 발견: {hits}"
+    )

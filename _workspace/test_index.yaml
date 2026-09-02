@@ -209,6 +209,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -439,6 +440,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -1087,6 +1089,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -1317,6 +1320,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -1985,6 +1989,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -2214,6 +2219,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -2871,6 +2877,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3100,6 +3107,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -3751,6 +3759,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3981,6 +3990,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -4642,6 +4652,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -4872,6 +4883,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -5532,6 +5544,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5761,6 +5774,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -6427,6 +6441,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -6657,6 +6672,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -7311,6 +7327,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -7541,6 +7558,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -8118,6 +8136,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
@@ -8510,6 +8529,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -8740,6 +8760,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -9404,6 +9425,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -9631,6 +9653,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -10293,6 +10316,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -10522,6 +10546,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -11293,6 +11318,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -11444,6 +11470,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -12081,6 +12108,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -12305,6 +12333,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -13534,6 +13563,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -13758,6 +13788,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -15568,6 +15599,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -15794,6 +15826,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -16465,6 +16498,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -16693,6 +16727,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -17380,6 +17415,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17583,6 +17619,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -18249,6 +18286,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -18469,6 +18507,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -19127,6 +19166,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -19354,6 +19394,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -20305,6 +20346,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -20530,6 +20572,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -21239,6 +21282,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -21450,6 +21494,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -22091,6 +22136,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -22312,6 +22358,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -22981,6 +23028,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -23204,6 +23252,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -23860,6 +23909,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24090,6 +24140,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -24752,6 +24803,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24982,6 +25034,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -25644,6 +25697,7 @@ backend:
     - tests/unit/ast/test_cycle233_ast_account_risk.py
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -25874,6 +25928,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -27671,6 +27726,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -27901,6 +27957,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -29427,6 +29484,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -29657,6 +29715,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -30909,6 +30968,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -31139,6 +31199,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -31783,6 +31844,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -32013,6 +32075,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -33554,6 +33617,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -33784,6 +33848,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -34438,6 +34503,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34668,6 +34734,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -35530,6 +35597,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -35681,6 +35749,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -36783,6 +36852,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37013,6 +37083,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -37670,6 +37741,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37900,6 +37972,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -38476,6 +38549,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle215_resubscribe_split_brain.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
@@ -38673,6 +38747,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
@@ -38956,6 +39031,7 @@ backend:
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
   src/engine/stale_session_recovery.py:
     direct_tests:
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/test_cycle194_force_reconnect_db_label.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -39627,6 +39703,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
     - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
@@ -39815,6 +39892,7 @@ backend:
   src/engine/stale_watcher_core.py:
     direct_tests:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/test_cycle102_stale_summary_emit.py
     - tests/unit/engine/test_cycle162_call_auction_stale_skip.py
     - tests/unit/engine/test_cycle74_stale_watcher_aggregation.py
@@ -43749,6 +43827,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -43976,6 +44055,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -44523,6 +44603,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -44751,6 +44832,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -46045,6 +46127,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -46275,6 +46358,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -47568,6 +47652,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -47798,6 +47883,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -48797,6 +48883,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49027,6 +49114,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -49687,6 +49775,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49917,6 +50006,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -50578,6 +50668,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -50807,6 +50898,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -51525,6 +51617,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -51755,6 +51848,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -52556,6 +52650,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -52769,6 +52864,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -53484,6 +53580,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -53710,6 +53807,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -54689,6 +54787,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -54919,6 +55018,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -55597,6 +55697,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -55827,6 +55928,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -56491,6 +56593,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -56717,6 +56820,7 @@ backend:
     - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
     - tests/unit/engine/session/test_board_schedule_cycle26.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -59283,6 +59387,7 @@ backend:
     - tests/unit/ast/test_cycle234_ast_uptime.py
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -59513,6 +59618,7 @@ backend:
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
@@ -60607,10 +60713,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-09-02T20:52:53.434995+09:00'
+generated_at: '2026-09-02T22:52:47.516750+09:00'
 stats:
   backend_modules: 130
-  backend_tests: 887
+  backend_tests: 889
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

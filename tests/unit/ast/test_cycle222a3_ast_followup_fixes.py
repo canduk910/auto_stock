@@ -26,8 +26,15 @@ _SRC = _REPO_ROOT / "src"
 _AST_DIR = _REPO_ROOT / "tests" / "unit" / "ast"
 
 # `_git` / `_diff_sha` 를 정의한 가드 파일 전수
+#
+# 🔁 2026-09-02 (cycle240) — `test_cycle222a_ast_day_high_scope.py` **제외**.
+#    그 파일의 유일한 `_git` 사용처였던 `test_a11b_stale_watcher_core_untouched`
+#    (bare `git diff HEAD -- stale_watcher_core.py` **영구 동결**)를 내용 검사
+#    (`test_a11b_stale_watcher_core_no_anchor_coupling`)로 재스코프하면서 `_git`
+#    헬퍼 자체가 사라졌다. 사이클 한정 스코프 선언이 수명을 넘겨 그 파일의 모든
+#    후속 시정을 무조건 RED 로 만들던 것을 끊은 것이라, 여기 목록에 남겨 두면
+#    "탐지기 스테일" 로 잘못 경보한다. 남은 2파일은 여전히 sha 핀 기전을 쓴다.
 _GIT_HELPER_FILES = [
-    _AST_DIR / "test_cycle222a_ast_day_high_scope.py",
     _AST_DIR / "test_cycle223_ast_donchian_exit_fix.py",
     _AST_DIR / "test_cycle223f_ast_manual_apply_safeguard.py",
 ]
