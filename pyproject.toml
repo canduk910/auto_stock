@@ -17,6 +17,12 @@ markers = [
     # 게이트의 실 시각 seam(`risk._now_kst`)을 벽시계/freezegun 으로 검증하는
     # 테스트만 붙인다. `filterwarnings = error` 라 미등록 마커는 즉시 실패.
     "real_pre_market_clock: 시각 핀 픽스처 옵트아웃 (실 벽시계 seam 검증)",
+    # cycle243 — autouse `_neutralize_api_auth` 옵트아웃. X-API-Key 인증을 *직접*
+    # 검증하는 테스트(미들웨어 단위 A · 앱 배선 B · 픽스처 옵트아웃 실증 C-2)만
+    # 붙인다. 미부착 테스트는 판정 함수가 중립화되어 종전처럼 200 을 본다.
+    # `filterwarnings = error` 라 미등록 마커는 즉시 스위트 실패 — Red 와 같은
+    # 커밋에 등재하는 것이 계약(명세 §9.1).
+    "real_api_auth: API 인증 중립화 픽스처 옵트아웃 (실제 인증 판정 검증)",
 ]
 filterwarnings = [
     "error",

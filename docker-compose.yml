@@ -31,5 +31,11 @@ services:
       - ./frontend/tsconfig.node.json:/app/tsconfig.node.json
     environment:
       - VITE_API_URL=http://backend:8000
+      # cycle243 Phase 2 — dev 대시보드 생존 경로. 백엔드가 fail-closed 라 키가 없으면
+      # 로컬에서도 전 경로 401 이다. **개발 예외·개발용 기본키를 두지 않는다**(커밋되는
+      # 기본키는 공격자가 프로덕션에 가장 먼저 시도할 값이고, 모드 분기 예외는 운영이
+      # vts 로 도는 날 인증을 조용히 없앤다). 대신 vite proxy 가 서버 측에서 헤더를 넣는다
+      # (`frontend/vite.config.ts`). 값은 각자 `.env` 에 둔다(gitignore).
+      - API_AUTH_KEY=${API_AUTH_KEY}
     depends_on:
       - backend

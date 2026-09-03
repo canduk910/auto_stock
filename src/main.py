@@ -23,6 +23,11 @@ KST = timezone(timedelta(hours=9))
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config import settings
+from src.middleware.api_auth import (
+    ApiAuthMiddleware,
+    log_startup_state as _log_api_auth_startup_state,
+    parse_allowed_origins,
+)
 from src.routes import (
     trading,
     balance,
@@ -219,6 +224,13 @@ async def lifespan(app: FastAPI):
 
     logger.info("=== 서버 시작 (env=%s, port=%s) ===", settings.kis_env, settings.port)
 
+    # cycle243 — API 인증 상태 1회 보고. 키 부재면 CRITICAL(fail-closed 진단 채널).
+    # 관측 실패가 기동을 막지 않도록 흡수한다.
+    try:
+        _log_api_auth_startup_state()
+    except Exception:
+        logger.exception("API 인증 상태 로그 실패")
+
     # RDS(PostgreSQL) 연결 풀 — 사이클 M0. database_url 미설정 시 graceful skip.
     _log_consumer_task: "asyncio.Task | None" = None
     if settings.database_url:
@@ -299,13 +311,22 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    # cycle243 — `["*"]` + `allow_credentials=True` 조합 제거. starlette 는
+    # `not allow_all_origins or allow_credentials` 로 preflight 를 **모든 오리진에
+    # 허가**하는데, nginx Basic Auth 도입 후에는 브라우저가 캐시한 자격 + nginx 의
+    # 무차별 X-API-Key 주입 때문에 그게 그대로 credentialed 요청이 된다.
+    # prod·dev 모두 same-origin(`client.ts` 의 `baseURL:'/api'` 상대경로)이라 비용 0.
+    allow_origins=parse_allowed_origins(settings.api_allowed_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 # 응답시간 측정 미들웨어 — /api/system/metrics에서 p50/p95/p99 노출
 app.add_middleware(MetricsMiddleware)
+# cycle243 — API 인증. **반드시 마지막 add** = 최외곽이다(starlette 는 `insert(0)` 후
+# `reversed()` 로 감싸므로 소스 순서의 역이 실행 순서다). 익명 401 이 MetricsMiddleware
+# 안쪽으로 들어가면 raw path 키가 무한 증식해 인증 계층이 DoS 증폭기가 된다.
+app.add_middleware(ApiAuthMiddleware)
 
 
 app.include_router(trading.router)

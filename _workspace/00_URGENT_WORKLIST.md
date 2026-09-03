@@ -18,6 +18,59 @@
 
 ---
 
+## 🔐 cycle243 · API 인증 (2026-09-03 구현 완료 · 배포 대기) + 후속 F1~F9
+
+> **배포 전 현재 상태 = 인터넷의 누구나 이 계좌의 매매를 조작할 수 있다.**
+> 메인 세션 실측: `curl http://3.38.228.74/api/trading/status` → **200(무인증)**.
+> 같은 :80 표면에 `POST /api/trading/manual-sell`(임의 종목·수량 시장가 매도) ·
+> `POST /api/trading/stop`(보유 전 종목 손절 정지) · `PUT /api/strategies/{id}/params`
+> (손절%·`max_positions` 화이트리스트 없이 덮어쓰기) 가 함께 열려 있다.
+> 리포 private 전환은 **소스 노출만** 닫았고 런타임 표면은 그대로였다.
+> 명세(Red·상세 근거) = `_workspace/red/cycle243_api_auth_spec.md`.
+
+### 배포 (2단계 — 창이 다르다)
+
+| Phase | 내용 | 창 | 선행 조건 |
+|---|---|---|---|
+| **Phase 1** | nginx Basic Auth(사이트 전체 = SPA + `/api`) + `proxy_set_header X-API-Key` 주입. **프론트 자산만** 건드려 백엔드 이미지·config 해시가 불변 ⇒ backend 무재시작 | **장중 가능**(cycle232 D6 미적용 — 근거는 "재시작 tick blind" 인데 재시작이 없다). ⚠️ 커밋에 `src/**`·`requirements.txt`·backend 블록·`.env` 가 **한 줄이라도** 섞이면 전제 붕괴 | EC2 `secrets/.htpasswd` 선생성(755/644 — uid 101 vs 1000, 700/600 이면 자격 요청 전부 500) |
+| **Phase 2** | 백엔드 `X-API-Key` 미들웨어(**fail-closed** · `/health` 만 예외) + CORS `*` 폐지 + 상태변경 Origin 검사 + backend ports `127.0.0.1:8000:8000` | **15:30 이후**(보유 있으면 필수 — 백엔드 재시작 1~5분 tick blind) | `.env` 에 `API_AUTH_KEY` 32자↑ 1줄 존재 증명(`grep -c '^API_AUTH_KEY=.\{32,\}$' .env` → 1). **이 게이트를 건너뛰면 대시보드가 전면 401** |
+
+- **포트마다 필요한 인증이 다르다** — :80(nginx 경유) = `-u <USER>:<PASS>` / EC2 내부
+  :8000 직결 = `-H "X-API-Key: …"`(nginx 미경유라 basic auth 무의미). 비상 매도 경로가
+  :8000 직결이라 이걸 틀리면 **사고 당일 401 로 손이 묶인다** → `monday_0831_guide.md` 참조.
+- **두 Phase 사이가 위험 창(L3)** — Phase 1 만으로는 backend :8000 이 AWS 보안그룹에만
+  의존한다. Phase 1 당일 장 종료 직후 Phase 2 배포가 기본, 지연되면 SG 8000 인바운드
+  부재를 콘솔에서 재확인한다.
+- 401 fail-closed 복구는 `git revert` 왕복이 아니라 **`.env` 키 주입 + `docker compose
+  -f docker-compose.prod.yml up -d`**(수십 초, 컨테이너 재생성 동반).
+
+### 남는 위험 (배포해도 사라지지 않는다)
+
+- **L1 · TLS 부재 (최대 잔여 위험)** — Basic Auth 자격과 X-API-Key 가 **평문 HTTP** 로
+  오간다. 경로상 관찰자는 자격을 그대로 획득한다. 이번 사이클은 "익명 인터넷 전체 →
+  자격 보유자 + 경로 관찰자" 로 줄일 뿐 **없애지 않는다**. → 후속 **F1(HTTPS)**.
+- L2 단일 공유 키·단일 계정(주체 식별·감사 추적 없음) / L7 rate limit 없음(무차별 대입
+  방어 없음) / L8 인증은 실수 방어가 아니다(`PUT /api/strategies/{id}/params` 는 인증
+  후에도 화이트리스트 없음) / L10 대시보드에 401 공통 처리 없음(폴링만 조용히 실패).
+- L4 nginx 실기동 자동 가드 부재 — vitest(jsdom)·Playwright(vite dev) 둘 다 nginx 미경유.
+  리포에 남는 것은 텍스트·AST 가드뿐이고 실검증은 배포 후 수동 curl.
+
+### 후속 (우선순위 순)
+
+| # | 항목 | 우선도 |
+|---|---|---|
+| **F1** | **HTTPS 도입**(Caddy 자동 인증서 또는 ALB+ACM) — L1 해소. 도메인 필요 여부 사용자 결정 | **최우선** |
+| **F2** | **AWS 보안그룹 80 인바운드를 운영자 IP 로 제한** — 사용자 콘솔 작업(코드 범위 밖), 즉시 가능한 최대 효과 | **즉시 권고** |
+| **F3** | `PUT /api/strategies/{id}/params` 파라미터 화이트리스트(cycle223 F2 비대칭 해소, L8) | 높음 |
+| **F4** | axios 401 인터셉터 — 재인증 안내/리로드(L10) | 중 |
+| **F5** | 키 회전 절차 문서화·스크립트화(회전은 frontend·backend **동시 재시작** 필요 = 장중 불가, L6) | 중 |
+| **F6** | `_endpoint_metrics` raw path 키 상한 또는 라우트 템플릿 정규화(L9) | 중 |
+| **F7** | 감사 로그 — 상태변경 엔드포인트 호출자·시각·페이로드 요약(L2) | 중 |
+| **F8** | nginx `limit_req` — 폴링 18곳(최단 3초) 실측 기반 임계 산정 후 도입(L7) | 낮음 |
+| **F9** | `/docs`·`/redoc` 운영 완전 비활성(`docs_url=None`) 여부 결정 — 현재는 인증으로 보호만 | 낮음 |
+
+---
+
 ## 📋 활성화 게이트 4건 (구 `monday_activation_guide.md` 에서 이전, 2026-09-02)
 
 > 원본은 2026-08-10 대상 가이드라 날짜는 지났으나 **게이트 조건 자체는 날짜 무관**이라
@@ -768,11 +821,14 @@ note 본문이 교차 판별자로 `[day_high_adopted]` 를 언급해, 단순 su
 # 유령 키 확인 (대입부는 risk.py:397 하나뿐, acml_vol 없음)
 grep -rn "ticker_prices\[" src/ | grep -v CLAUDE.md
 
+# ⚠️ cycle243 이후 :80 은 nginx Basic Auth 뒤에 있다 — `-u <USER>:<PASS>` 없으면 401.
+#    (EC2 내부 :8000 직결은 대신 `-H "X-API-Key: …"` — 포트마다 방식이 다르다)
+
 # 라이브 키 출현 대조
-curl -s "http://3.38.228.74/api/trading/status" | grep -o '"acml_vol"' | wc -l   # → 0
+curl -s -u "<USER>:<PASS>" "http://3.38.228.74/api/trading/status" | grep -o '"acml_vol"' | wc -l   # → 0
 
 # BFB 상태
-curl -s "http://3.38.228.74/api/strategies" | python3 -c \
+curl -s -u "<USER>:<PASS>" "http://3.38.228.74/api/strategies" | python3 -c \
   "import sys,json;r=json.load(sys.stdin)['data']['bull_flag_breakout'];print(r['scan_stats'],r['positions'],r['buy_signals'])"
 
 # 전체 회귀

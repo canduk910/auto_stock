@@ -153,6 +153,19 @@ cd frontend && npm install && npm run dev
 - 백엔드: `http://localhost:8000`, API 문서: `http://localhost:8000/docs`
 - 프론트엔드: `http://localhost:3000`
 
+> **API 인증 (cycle243) — `.env` 에 `API_AUTH_KEY` 가 없으면 아무것도 안 열린다.**
+> 백엔드는 **fail-closed** 라 키 미설정 시 `/health` 를 뺀 **전 경로**(`/docs`·
+> `/openapi.json` 포함)가 401 이고, 기동 로그에 `[api_auth_key_missing]` CRITICAL 이
+> 찍힌다. 개발용 기본키·모드 분기 예외는 두지 않는다.
+> ```bash
+> python3 -c "import secrets;print(secrets.token_urlsafe(32))"   # → .env 의 API_AUTH_KEY=
+> curl -H "X-API-Key: $API_AUTH_KEY" http://localhost:8000/api/trading/status
+> ```
+> `npm run dev` 대시보드는 vite proxy 가 서버 측에서 헤더를 넣으므로 브라우저 설정이
+> 필요 없다(`API_AUTH_KEY=… npm run dev` 로 프로세스 환경에만 넣으면 된다).
+> **프로덕션(:80)** 은 nginx Basic Auth 가 앞단에 있어 `-u <USER>:<PASS>` 를 쓰고,
+> X-API-Key 는 nginx 가 주입한다 — 포트마다 필요한 인증이 다르다.
+
 ## 사용 방법
 
 ### 모의투자 테스트

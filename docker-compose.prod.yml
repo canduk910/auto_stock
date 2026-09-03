@@ -4,7 +4,12 @@ services:
       context: .
       target: prod
     ports:
-      - "8000:8000"
+      # cycle243 Phase 2 — 루프백 바인딩. 종전 `"8000:8000"` 은 0.0.0.0 게시라 AWS 보안그룹이
+      # **유일한 방어막**이었다. nginx(frontend 컨테이너)는 compose 네트워크로 붙으므로
+      # 호스트 포트 공개가 필요 없다.
+      # ⚠️ 이 한 줄이 backend 서비스 config 해시를 바꿔 **컨테이너를 재생성**한다 —
+      # 그래서 Phase 1(무재시작) 커밋에 섞으면 안 되고, 배포는 15:30 이후다(cycle232 D6).
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./logs:/app/logs
       - ./.token_cache:/app/.token_cache  # 사이클 20 — 토큰 캐시 영속화 (분당 1개 한도 대응)
@@ -20,6 +25,30 @@ services:
       target: prod
     ports:
       - "80:80"
+    volumes:
+      # cycle243 Phase 1 — nginx Basic Auth 자격 파일. **git 에 커밋 금지**(.gitignore: secrets/).
+      # 파일이 아니라 **디렉터리**를 마운트한다 — bind mount 소스가 없으면 Docker 가 호스트에
+      # 빈 디렉터리를 만들어 마운트하는데, 파일로 걸면 "파일이 디렉터리가 되는" 상태가 된다.
+      # 자격 파일 결손은 기동 실패가 아니다(요청 시점에 연다). 증상 3갈래(실측):
+      #   무자격 → 401(정상과 동일) / 자격+파일부재 → 403 / 자격+권한거부 → 500.
+      # ⚠️ 권한: nginx worker 는 **uid 101(nginx)**, 호스트 파일은 `ubuntu`(uid 1000) 소유다.
+      # `chmod 600`/디렉터리 `chmod 700` 이면 자격 요청이 전부 500 이 된다
+      # (`.token_cache` root 소유 사고와 동일 계열) → `chmod 755 secrets` + `644 .htpasswd`.
+      # 배포 전 호스트에서 `secrets/.htpasswd` 생성이 하드 게이트다.
+      - ./secrets:/etc/nginx/secrets:ro
+    environment:
+      # `env_file: .env` 금지 — KIS·OPENAI 등 33개 비밀을 nginx 컨테이너 환경에 밀어 넣는다.
+      # compose 는 프로젝트 디렉터리 `.env` 를 `${VAR}` 보간용으로 자동 로드하므로 이걸로 충분하다.
+      # ⚠️ 이 줄을 지우면 컨테이너 환경에 변수가 **아예 없어** envsubst 가 치환을 건너뛰고
+      # nginx 가 `[emerg] unknown "api_auth_key" variable` 로 기동 실패한다(실측). 반대로
+      # `.env` 에 키가 없으면 빈 문자열로 정의돼 `X-API-Key ""` 로 렌더된다(헤더 미전달).
+      # ⚠️ **`.env` 를 편집하면 `env_file: .env` 인 backend 가 재생성된다**(실측) — Phase 1
+      # 무재시작 전제가 무너지므로 키 추가는 Phase 2 창(15:30 이후)에서만 한다.
+      - API_AUTH_KEY=${API_AUTH_KEY}
+      # 치환 대상을 이 변수 **하나**로 제한한다(앵커 필수 — 엔트리포인트가 부분 일치로 평가해
+      # 앵커가 없으면 `API_AUTH_KEY_OLD` 류까지 걸린다).
+      - NGINX_ENVSUBST_FILTER=^API_AUTH_KEY$
+      - TZ=Asia/Seoul
     depends_on:
       - backend
     restart: unless-stopped

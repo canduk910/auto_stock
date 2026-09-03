@@ -45,6 +45,16 @@ class Settings(BaseSettings):
     port: int = 8000
     auto_start: bool = False  # True: 서버 기동 시 자동 매매 시작
 
+    # cycle243 — API 인증(X-API-Key). 미설정이면 **fail-closed**(/health 를 뺀 전 경로 401)
+    # + 기동 시 `[api_auth_key_missing]` CRITICAL. fail-open 은 "키가 없으면 인증이 조용히
+    # 사라진다" = 이 사이클이 고치려는 결함의 재현이라 채택하지 않는다.
+    # 생성: python3 -c "import secrets;print(secrets.token_urlsafe(32))"
+    api_auth_key: str = ""
+    # 교차 출처 허용 목록(CSV). 기본 빈 문자열 = same-origin 전용.
+    # CORS `allow_origins` 와 상태변경 Origin 검사가 이 값 하나를 공유한다. dev 예:
+    # http://localhost:3000
+    api_allowed_origins: str = ""
+
     # OpenAI 파라미터 추천
     openai_api_key: str = ""
     openai_recommend_model: str = "gpt-5.6-luna"

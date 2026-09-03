@@ -17,7 +17,7 @@ npm run lint
 
 ```
 src/
-├── api/       # axios 호출 (client.ts: baseURL, 인터셉터)
+├── api/       # axios 호출 (client.ts: baseURL 만 — **인터셉터 없음**, cycle243 확인)
 ├── components/
 ├── contexts/  # TradingStatusContext 등
 ├── pages/
@@ -469,6 +469,24 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
 ## 주문 안전성
 
 - 시작/정지/매도 등 주문 관련 버튼은 ConfirmModal 이중 확인 필수
+
+## 인증 (cycle243, 2026-09-03)
+
+- **프로덕션은 nginx Basic Auth 뒤에 있다.** `frontend/nginx.conf.template`(구
+  `nginx.conf` 는 삭제 — 되살리면 인증 없는 구버전이 조용히 서빙되는 fail-open)이
+  server 레벨 `auth_basic` 으로 SPA·`/api/` 를 모두 덮고, `/api/` 프록시에
+  `proxy_set_header X-API-Key "${API_AUTH_KEY}";` 로 백엔드 키를 **서버 측에서** 주입한다
+  — 키는 번들·브라우저 어디에도 실리지 않는다. `auth_basic off;` 는 이 파일에 절대
+  쓰지 않는다(한 줄로 Basic Auth 와 백엔드 인증이 동시에 열린다 — AST 가드가 금지).
+- **프론트 코드 변경은 0이다.** `client.ts` 가 `baseURL:'/api'` 상대경로 단일
+  클라이언트라 문서 출처 == XHR 출처 → 브라우저가 Basic 자격을 자동 동봉하고,
+  `withCredentials` 도 필요 없다.
+- **dev 는 nginx 를 거치지 않는다.** `vite.config.ts` proxy 가 `X-API-Key`(=
+  `process.env.API_AUTH_KEY`)와 `Origin: apiTarget` 을 함께 넣는다. Origin 정규화가
+  빠지면 `changeOrigin: true` 가 Host 만 바꾸는 탓에 백엔드 CSRF 검사가 **상태변경만**
+  401 로 막아 "화면은 멀쩡한데 버튼만 죽는" 형태가 된다.
+- **알려진 한계 (후속 F4)** — `client.ts` 에 **401 인터셉터가 없다**. 자격 만료·키 교체
+  시 폴링(18곳, 최단 3초)이 재인증 유도 없이 조용히 실패한다.
 
 ## 백엔드 연동
 

@@ -45,6 +45,11 @@ os.environ.setdefault(
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 )
 os.environ.setdefault("AUTO_START", "false")
+# cycle243 — API 인증 키 테스트 기본값(비밀 아님). 개발자 `.env` 유무와 무관하게
+# `settings.api_auth_key` 를 결정론적으로 만든다. 인증을 *직접* 검증하는 테스트는
+# 값을 monkeypatch 로 명시하므로 이 값에 의존하지 않는다.
+os.environ.setdefault("API_AUTH_KEY", "test-api-auth-key-not-a-secret-cycle243")
+os.environ.setdefault("API_ALLOWED_ORIGINS", "")
 
 import pytest
 import respx
@@ -456,5 +461,37 @@ def _pin_pre_market_clock(
             lambda: _PINNED_PRE_MARKET_CLOCK_KST,
             raising=False,
         )
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
+# cycle243 — API 인증(X-API-Key) 중립화
+#
+# 인증을 켜면 `src.main.app` 을 TestClient 로 두드리는 기존 40파일·수집 201케이스가
+# 401 로 전멸하고 coverage gate(`fail_under=60`)까지 동반 실패한다(진입 경로 =
+# `tests/contract/conftest.py` 의 `contract_env` 13파일 + 직접 `from src.main import
+# app` 27파일). TestClient 가 27곳에서 각자 생성되므로 "기본 헤더 주입" 은 27곳 수정이
+# 필요해 부적합하고, seam 은 한 곳이어야 한다.
+#
+# ⚠️ **프로덕션 코드에 `_TEST_BYPASS` 류 플래그를 두지 않는다.** 판정 함수 자체를
+# 테스트가 갈아끼우는 형태여야 런타임에 우회 경로가 *존재하지 않는다*. 그래서
+# `src/middleware/api_auth.py` 는 `authorize` 를 모듈 전역 이름으로 호출하고
+# (AST 가드 D-12), 이 픽스처는 그 이름 하나만 바꾼다.
+#
+# 인증 판정 자체를 검증하는 테스트는 `@pytest.mark.real_api_auth` 로 옵트아웃한다
+# (미들웨어 단위 A · 앱 배선 B · 픽스처 옵트아웃 실증 C-2).
+# `raising=False` — 미구현 단계에서 전체 스위트가 픽스처 때문에 죽지 않는다.
+# ---------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _neutralize_api_auth(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    if request.node.get_closest_marker("real_api_auth"):
+        return  # 인증 자체를 검증하는 테스트 — 중립화 금지
+    try:
+        from src.middleware import api_auth as _api_auth_mod
+
+        monkeypatch.setattr(_api_auth_mod, "authorize", lambda scope: "", raising=False)
     except Exception:
         pass

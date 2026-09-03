@@ -28,15 +28,51 @@
 
 ### 절차
 
+> ⚠️ **cycle243 이후 인증 필수 — 포트마다 방식이 다르다.**
+> * EC2 내부 `localhost:8000` **직결**(아래 명령들) = `-H "X-API-Key: …"`. nginx 를 거치지
+>   않으므로 Basic Auth 는 무의미하고, 헤더가 없으면 **401** 이라 비상 매도가 막힌다.
+> * 외부 `http://3.38.228.74/…`(:80, nginx 경유) = `-u <USER>:<PASS>`. X-API-Key 는 nginx 가
+>   주입한다.
+>
+> 키를 argv·셸 히스토리에 남기지 않으려면 EC2 에서 이렇게 읽는다(값 출력 없음):
+> ```
+> KEY=$(grep '^API_AUTH_KEY=' ~/auto_stock/.env | cut -d= -f2-)
+> CFG=$(mktemp); printf 'header = "X-API-Key: %s"\n' "$KEY" > "$CFG"
+> # …사용 후: rm -f "$CFG"
+> ```
+
 1. **08:50 사전 확인** — 실보유 수량(2주 예상):
 ```
-ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74 'curl -s localhost:8000/api/balance' | python3 -c "import sys,json; d=json.load(sys.stdin); [print(h['ticker'],h.get('quantity'),h.get('sellable_quantity','')) for h in d['data']['holdings'] if h['ticker']=='257720']"
+ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74 'KEY=$(grep "^API_AUTH_KEY=" ~/auto_stock/.env | cut -d= -f2-); CFG=$(mktemp); printf "header = \"X-API-Key: %s\"\n" "$KEY" > "$CFG"; curl -s --config "$CFG" localhost:8000/api/balance; rm -f "$CFG"' | python3 -c "import sys,json; d=json.load(sys.stdin); [print(h['ticker'],h.get('quantity'),h.get('sellable_quantity','')) for h in d['data']['holdings'] if h['ticker']=='257720']"
 ```
 2. **09:00 직후 수동 매도 (실보유 수량으로!)** — KRX 시장가:
 ```
-ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74 'curl -s -X POST localhost:8000/api/trading/manual-sell -H "Content-Type: application/json" -d "{\"ticker\":\"257720\",\"quantity\":2}"'
+ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74 'KEY=$(grep "^API_AUTH_KEY=" ~/auto_stock/.env | cut -d= -f2-); CFG=$(mktemp); printf "header = \"X-API-Key: %s\"\n" "$KEY" > "$CFG"; curl -s --config "$CFG" -X POST localhost:8000/api/trading/manual-sell -H "Content-Type: application/json" -d "{\"ticker\":\"257720\",\"quantity\":2}"; rm -f "$CFG"'
 ```
    (1의 실보유가 2가 아니면 그 값으로. 갭은 이미 실현된 뒤라 15:20 대기 무의미 — cycle232 D7 결정.)
+
+   ⚠️ **401 이 오면 그것이 곧 비상 경로 차단이다 — 진단에서 멈추지 말고 복구까지 간다.**
+   이 문서는 자동 청산이 실패했을 때 손으로 파는 절차이므로 "엔진은 살아 있으니 자동
+   경로를 기다린다" 는 답이 될 수 없다(잠긴 것은 대시보드·API 이고 엔진은 계속 돌지만,
+   **그 엔진의 자동 청산이 실패해서** 이 문서를 펴든 상황이다).
+
+   1) **진단** — `grep -c '^API_AUTH_KEY=.\{32,\}$' ~/auto_stock/.env`
+      - **1** → 키는 정상. 원인은 호출 쪽이다: :8000 직결에 `-u` 를 썼거나(무의미),
+        :80 에 `-H "X-API-Key: …"` 만 썼거나(nginx Basic Auth 통과 실패), 헤더 오타.
+      - **0** → 백엔드가 fail-closed 라 `/health` 를 뺀 **전 경로 401**. 아래 2)로.
+   2) **복구** — 수십 초. `git revert` 후 재배포 왕복(CI+Deploy 5~10분)이 아니다:
+```
+ssh -i ~/.ssh/auto-stock-key.pem ubuntu@3.38.228.74        # 접속 후 아래 4줄
+cd ~/auto_stock
+grep -q '^API_AUTH_KEY=' .env || python3 -c "import secrets;print('API_AUTH_KEY='+secrets.token_urlsafe(32))" >> .env
+docker compose -f docker-compose.prod.yml up -d
+grep -c '^API_AUTH_KEY=.\{32,\}$' .env                     # → 1 (값은 출력하지 않는다)
+```
+   ⚠️ 이 복구는 `.env` 변경이라 compose 가 **backend·frontend 컨테이너를 재생성**한다
+   = 장중이면 **1~5분 tick blind**(cycle232 D6 가 평소 장중 배포를 금지하는 바로 그 비용).
+   비상 매도가 막힌 상황에서만 감수하는 교환이다. 재생성 후 `[boot]` 재개·포지션 복구를
+   확인한 뒤 위 2번 manual-sell 을 다시 쏘고, 그동안 15:20 자동 청산은 **폴백으로만**
+   취급한다(cycle236 자기 치유가 붙었어도 이 종목은 실패 전력이 있다).
 3. **사후 확인**:
    - 체결: `trade_history` SELL COMPLETED + 체결통보 로그.
    - **positions 잔량**: 2주 매도 체결 시 `_handle_sell_fill` 이 3−2=1 잔량으로 남길 수 있다 → 15분 `_sync_positions_from_balance` / `[positions_reconciliation]` 이 정리하는지 확인. **미정리 시 DB 정정은 사용자 승인 후**(유령 1주가 다음 15:20 강제청산에서 또 APBK0400 을 만든다).

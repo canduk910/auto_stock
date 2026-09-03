@@ -2,6 +2,28 @@
 
 프론트엔드에 데이터를 제공하는 REST API 엔드포인트.
 
+## 인증 — deny-by-default (cycle243, 2026-09-03)
+
+**이 표의 모든 라우트는 인증 대상이다.** `src/middleware/api_auth.py::ApiAuthMiddleware`
+가 **최외곽**에서 `X-API-Key` 를 요구하며, 보호 범위는 `/api` 접두사가 아니라
+**`/health` 를 제외한 전 경로**다(`/docs`·`/redoc`·`/openapi.json` 포함 — `/api` 스코프로
+잡으면 78개 엔드포인트 스키마가 그대로 열린다). 새 라우트는 접두사와 무관하게 **자동으로
+보호된다** — 예외를 늘리려면 `EXEMPT_PATHS` 를 고쳐야 하고, 그건 계약 변경이다.
+
+* **fail-closed** — `API_AUTH_KEY` 미설정·빈 문자열이면 전부 401 이다(조용히 열지 않는다).
+  매매 엔진은 in-process 라 API 가 잠겨도 매매 영향은 0이고, 대시보드만 멈춘다.
+* **상태변경(POST/PUT/PATCH/DELETE)** 은 키에 더해 **Origin 검사**를 통과해야 한다
+  (`Origin` 부재 → 허용 = curl·ssh 비상 경로 보존 / Host 일치 → 허용 / `API_ALLOWED_ORIGINS`
+  등재 → 허용 / 그 외 → 401 `reason=cross_origin`). CORS 는 simple request 의 **실행**을
+  막지 못하므로 CSRF 방어는 이쪽이다.
+* **응답은 401 단일** + `{"success": false, "data": null, "message": "unauthorized"}`.
+  사유는 로그에만 남는다(`[api_auth_reject] reason=…`, 사유당 ≤5행/일).
+* **포트별 인증이 다르다** — `:80`(nginx 경유) = Basic Auth `-u <USER>:<PASS>`(X-API-Key 는
+  nginx 가 주입) / EC2 내부 `:8000` 직결 = `-H "X-API-Key: …"`. 비상 매도 절차서
+  (`_workspace/monday_0831_guide.md`)가 후자다.
+* **인증은 실수 방어가 아니다** — `PUT /api/strategies/{id}/params` 는 인증 후에도
+  화이트리스트 없이 손절 파라미터를 받는다(후속 F3).
+
 ## 엔드포인트 목록
 
 | Method | URL | 파일 | 설명 |

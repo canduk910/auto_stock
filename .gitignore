@@ -39,6 +39,19 @@ playwright/.cache/
 # 스크린샷
 *.png
 
+# cycle243 — nginx Basic Auth 자격(.htpasswd). 절대 commit 금지.
+#   생성(EC2). 비밀을 **argv 에 싣지 않는다** — argv 는 같은 호스트의 다른 사용자에게
+#   `ps aux` 로 보이고 셸 히스토리에도 남는다. `read -s` + `-stdin` 으로 넘긴다:
+#     read -r -p 'basic auth user: ' AUTH_USER
+#     read -r -s -p 'basic auth password: ' AUTH_PASS; echo
+#     mkdir -p secrets && chmod 755 secrets
+#     printf '%s:%s\n' "$AUTH_USER" "$(printf '%s' "$AUTH_PASS" | openssl passwd -apr1 -stdin)" \
+#       > secrets/.htpasswd
+#     chmod 644 secrets/.htpasswd; unset AUTH_PASS
+#   권한 755/644 는 필수 — nginx worker 는 컨테이너 안 uid 101, 호스트 파일은 uid 1000
+#   소유라 700/600 이면 자격 요청이 전부 500 이 된다(§10.1 F2 실측).
+secrets/
+
 # SSH 키 (절대 commit 금지)
 *.pem
 *.key

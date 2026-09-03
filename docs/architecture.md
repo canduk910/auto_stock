@@ -10,7 +10,8 @@ KIS OpenAPI 기반 주식 자동매매시스템 설계 문서.
 +------------------+        +-------------------+        +-------------------+
 |   React Frontend |  REST  |  FastAPI Backend   | KIS API|  한국투자증권      |
 |   (Vite + Nginx) | <----> |  (Uvicorn)         | <----> |  OpenAPI Server   |
-|   Port 80        |  /api  |  Port 8000         |        |                   |
+|   Port 80        |  /api  |  127.0.0.1:8000    |        |                   |
+|   Basic Auth     |        |  ApiAuthMiddleware |        |                   |
 +------------------+        +--------+----------+        +--------+----------+
                                      |                             |
                                      |                    +--------+----------+
@@ -27,6 +28,38 @@ KIS OpenAPI 기반 주식 자동매매시스템 설계 문서.
                               |  PostgreSQL |  (asyncpg)
                               +-------------+
 ```
+
+### 요청 인증 흐름 (cycle243, 2026-09-03)
+
+```
+브라우저 / curl
+   |
+   | (1) http://<EC2>:80/…            ← 평문 HTTP (TLS 없음 = 알려진 한계 L1, 후속 F1)
+   v
+[nginx : frontend 컨테이너]
+   |  auth_basic  "auto_stock"        ← server 레벨. SPA·/api/ 전부 덮는다.
+   |  auth_basic_user_file /etc/nginx/secrets/.htpasswd   (호스트 bind mount, git 미커밋)
+   |     · 무자격            → 401
+   |     · 자격 + 파일 부재  → 403   (ENOENT)
+   |     · 자격 + 권한 거부  → 500   (EACCES — worker uid 101 이 못 여는 경우)
+   |
+   | (2) location /api/ 에서 헤더 주입 (클라이언트가 보낸 동명 헤더는 **치환**된다)
+   |        proxy_set_header X-API-Key "${API_AUTH_KEY}"   ← 브라우저에 노출 안 됨
+   |        proxy_set_header Host      $http_host          ← 원 포트 보존(포트 탈락 시 CSRF 오탐)
+   v
+[FastAPI : backend 컨테이너 — 127.0.0.1:8000 (SG 오설정 2차 방어)]
+   |
+   |  ApiAuthMiddleware  ← **최외곽**(MetricsMiddleware 보다 바깥)
+   |     · /health 만 예외, 그 외 전 경로 보호(/docs·/openapi.json 포함)
+   |     · 키 미설정/불일치 → 401  (fail-closed)
+   |     · 상태변경(POST/PUT/PATCH/DELETE)은 Origin 검사 추가 → cross_origin 401
+   |     · 익명 401 은 하위 앱에 도달하지 않는다 = raw path 메트릭 오염 차단
+   v
+CORSMiddleware → 라우터
+```
+
+dev 는 nginx 를 거치지 않는다 — vite proxy 가 서버 측에서 `X-API-Key` 와 `Origin` 을
+넣어 같은 관문을 통과시킨다(`frontend/vite.config.ts`).
 
 ### 컨테이너 구성 (Docker Compose)
 
