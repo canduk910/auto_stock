@@ -57,13 +57,29 @@ def _section(text: str, heading_pattern: str) -> str | None:
 # D-15 (F11 잔여) — 비밀이 argv 에 실리는 레시피 0건
 # ---------------------------------------------------------------------------
 def test_secret_recipes_when_tracked_then_never_pass_password_via_argv():
-    """D-15 — 추적 파일의 모든 `openssl passwd` 호출이 `-stdin` 이고 인용 리터럴 인자가 없다.
+    """D-15 — **운영자용** 추적 파일의 `openssl passwd` 가 전부 `-stdin` 이고 인용 리터럴이 없다.
 
     argv 는 같은 호스트의 다른 사용자에게 `ps aux` 로 보이고 셸 히스토리에도 남는다.
-    `tests/` 는 가드 자신이 문자열을 포함하므로 제외한다.
+
+    제외 2종 — 둘 다 "가드가 **자기 자신의 서술**을 위반으로 세는" 경우다:
+      - `tests/` : 가드 자신이 탐지 문자열을 포함한다.
+      - `_workspace/red/` : 설계 명세는 적대 검증 표(§10.1 F11 · §10.2 · §11 뮤테이션
+        목록)에서 **금지형을 인용해야만** 왜 금지인지 적을 수 있다. 인용을 위반으로
+        세면 결함을 문서화할수록 가드가 붉어진다.
+
+    ⚠️ 이 제외는 cycle244 에서 **실패를 보고 추가**한 것이다. 종전 구현은
+    `git grep`(= 추적 파일만 검색) 으로 전 트리를 훑었는데, 명세가 아직 untracked
+    이던 Docs 단계에서는 초록이었다가 **커밋되는 순간 붉어졌다**(실측: 스위트
+    6,240 PASS → 커밋 후 1 failed). "커밋 전까지만 초록인 가드" 는 cycle222-a 의
+    `git diff` 영구 동결(cycle240 이 재스코프)과 같은 부류다.
+
+    운영자가 실제로 복사할 경로(`.gitignore` · `CLAUDE.md` · `README.md` ·
+    `_workspace/monday_0831_guide.md` · `frontend/CLAUDE.md`)는 그대로 검사 범위에
+    남으므로 가드의 목적은 보존된다 — 아래 D-15b 가 그 범위의 비공허성을 못박는다.
     """
     proc = subprocess.run(
-        ["git", "grep", "-nI", "openssl passwd", "--", ".", ":(exclude)tests/"],
+        ["git", "grep", "-nI", "openssl passwd", "--", ".",
+         ":(exclude)tests/", ":(exclude)_workspace/red/"],
         cwd=_ROOT,
         capture_output=True,
         text=True,
@@ -82,6 +98,30 @@ def test_secret_recipes_when_tracked_then_never_pass_password_via_argv():
         "비밀이 argv 로 넘어가는 htpasswd 레시피가 추적 파일에 남아 있다 "
         f"(`-stdin` + `read -s` 형태여야 한다, §10.2 F11): {offenders}"
     )
+
+
+def test_secret_recipe_guard_when_scoped_then_not_vacuous():
+    """D-15b (cycle244) — D-15 의 제외가 가드를 공허하게 만들지 않았음을 못박는다.
+
+    D-15 는 "위반이 없다" 를 단언하므로, 검사 범위에 `openssl passwd` 가 **한 줄도
+    없어도** 초록이다. `_workspace/red/` 를 제외한 뒤 그 상태가 되면 가드는 살아
+    있는 척하는 죽은 코드가 된다. 그래서 운영자 경로에 레시피가 **실재**하고
+    그것이 `-stdin` 형태임을 여기서 직접 확인한다.
+    """
+    proc = subprocess.run(
+        ["git", "grep", "-nI", "openssl passwd", "--", ".",
+         ":(exclude)tests/", ":(exclude)_workspace/red/"],
+        cwd=_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode in (0, 1), proc.stderr
+    hits = [line for line in proc.stdout.splitlines() if line.strip()]
+    assert hits, (
+        "운영자 경로에 htpasswd 생성 레시피가 하나도 없다 — D-15 가 공허해졌다. "
+        "`.gitignore` 주석의 생성 절차가 삭제됐는지 확인하라."
+    )
+    assert all("-stdin" in h for h in hits), hits
 
 
 # ---------------------------------------------------------------------------
