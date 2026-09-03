@@ -30,6 +30,19 @@ filterwarnings = [
     # 로 변환되어 filterwarnings="error" 에 걸린다. Linux CI 에서는 재현 불가 (macOS 한정).
     # 진짜 ResourceWarning (파일·DB 연결 미닫힘) 은 이 패턴과 다르므로 영향 없음.
     "ignore::ResourceWarning",
+    # 사이클 244 (2026-09-03) — 의존성 드리프트 hotfix. anyio 4.15.0 이 `anyio.abc`
+    # 를 lazy import 로 바꾸면서 `anyio.abc.BlockingPortal` 접근 시 DeprecationWarning
+    # 을 낸다. starlette 0.46.2 의 `testclient.py:37` 이 타입 별칭 정의에 그 경로를
+    # 쓰므로, `fastapi.testclient.TestClient` 를 import 하는 **모든** 테스트가
+    # `error` 승격에 걸려 **수집 단계에서** 죽는다(CI 실측: 24 errors during
+    # collection, run 33753758784). 우리 코드가 아니라 서드파티 내부 호출이라
+    # 손댈 수 없다 — starlette 가 `anyio.from_thread.BlockingPortal` 로 옮기면
+    # 이 줄을 삭제한다.
+    # ⚠️ 로컬(anyio 4.7.0)에서는 경고 자체가 없어 이 필터가 inert 다. 검증은 격리
+    # venv(anyio 4.15.0)에서 ignore 없음 → 수집 에러 재현 / ignore 추가 → 통과로
+    # 수행했다. 버전 핀 대신 필터를 택한 이유 = anyio 를 구버전에 묶으면 무관한
+    # 보안·버그 수정까지 함께 막힌다.
+    "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning",
 ]
 
 [tool.coverage.run]
