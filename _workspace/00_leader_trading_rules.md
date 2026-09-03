@@ -53,6 +53,7 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - 관측: `[budget_clamp] ticker=… strategy=… requested=… clamped=… remaining=…` DailyEmitCap 1회/(ticker,전략)/일 — 부분 매수 정책 재평가 근거.
 - **1회 투자금액 ATR 유닛화 (`sizing_mode="turtle"`)**: `unit = floor(전략예산 × risk_pct ÷ ATR)`. **손절이 ATR 기반인 전략에만 적용**한다 — `수량 = 예산 × risk_pct ÷ (진입가 − 손절가)` 에서 손절이 고정%면 명목이 종목 무관 상수라 `position_ratio` 가 이미 리스크 균등이고, 사이징만 바꾸면 정규화가 깨진다(함정 #1). 상세 매트릭스는 `src/engine/strategies/CLAUDE.md` 「자금관리 — 사이징 방식 × 손절 기준」 절.
   - **ATR 손절 게이트는 `_entry_atr` 스탬프 존재** — `sizing_mode` 게이팅 금지 (DB 토글이 기보유 포지션의 손절 규약을 바꾸면 안 됨). 스탬프 값 = sizing 에 쓴 ATR 과 동일(커플링 불변식).
+  - **랏당 최대 유닛 상한 `max_lot_units` (K = 2.0, cycle242 · 2026-09-03)** — `sizing_mode="turtle"` 전략의 **모든 매수 랏**(터틀 유닛 · `position_ratio` 낙하 · 1주 폴백)에 `min(수량, floor(K × 예산 × risk_pct ÷ ATR))` 을 적용하고, 그 상한이 0 이면 **매수하지 않는다**. 발단 = 터틀 유닛이 1주에 못 미치면 관문이 1주를 사는데 고가 종목에선 그 1주가 설계 유닛의 **평균 4.94배·최대 15.61배**(donchian 실측)라 `risk_pct` 통제가 진입 시점에 이미 무력했다. **매수를 줄이는 방향뿐**이고 정상 터틀 랏(≤1유닛)은 K≥1 이라 한 건도 안 건드린다. K 는 리스크 정체성 상수 — `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(AI 자문·자동 적용 대상 아님), 읽는 쪽 `[1.0, 20.0]` 클램프. ATR 결측·모호·`risk_pct ≤ 0`·예외는 **fail-open**(현행 수량 유지 + `[fallback_cap_skipped]` WARNING). 고정%손절 5전략은 범위 밖. 피라미딩 착수 시 **K → 1.0**. 롤백은 DB `strategy_config.params.max_lot_units = 20.0`(코드 재배포 불필요, 단 당일 `_bought_today` 소진 종목은 다음 세션부터).
   - `compute_unit_qty_guarded` 의 notional 상한이 `position_ratio × 예산` 이라 **터틀 수량 ≤ 비중 수량** 항상 성립 = 전환은 **순수 축소 방향**.
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
 
@@ -641,6 +642,7 @@ DEFAULT_PARAMS = {
     "stop_atr": 2.0,
     "turtle_backstop_pct": -7.0,
     "min_vol_floor_pct": 1.0,
+    "max_lot_units": 2.0,      # cycle242 — 랏당 최대 유닛(K). PARAM_RANGES/INT_PARAMS 미편입
     "turtle_min_stop_pct": -4.0,
     # 유니버스 (2026-08-08 확대 — 이미 지수 무제약. 거래대금 20억→15억(도메인 B2 — 장중 돌파
     # 추격이라 kojiro 10억은 슬리피지 위험) + max_scan 100→4000. 시총 100억(사용자 결정, 소형주 포함))
@@ -788,6 +790,7 @@ DEFAULT_PARAMS = {
     "stop_atr": 2.0,
     "turtle_backstop_pct": -9.0,
     "min_vol_floor_pct": 1.0,
+    "max_lot_units": 2.0,      # cycle242 — 랏당 최대 유닛(K). PARAM_RANGES/INT_PARAMS 미편입
     "turtle_min_stop_pct": -5.0,
     # 유니버스 (2026-08-08 확대 — 전체 상장 ∩ 시총≥100억(사용자 결정) ∩ 거래대금≥10억, 지수 제거)
     "min_market_cap": 10_000_000_000,

@@ -169,6 +169,7 @@ class VcpBreakoutStrategy(StrategyBase):
         "turtle_backstop_pct": -9.0,
         "min_vol_floor_pct": 1.0,
         "turtle_min_stop_pct": -5.0,
+        "max_lot_units": 2.0,   # cycle242 — 랏당 최대 유닛(K). 터틀 모드 모든 랏 ≤ K유닛, floor(K×u*)==0 이면 미매수. PARAM_RANGES 미편입. 롤백 = DB 20.0
         # 유니버스
         # 2026-08-08 확대 유니버스 — 지수(KOSPI200∪KOSDAQ150) 제약 제거(전체 상장) + 거래대금
         # 10억 필터 신설(현재 min_trade_amount=0 하드코딩이라 미사용이던 것을 실사용) + max_scan

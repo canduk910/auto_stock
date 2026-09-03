@@ -208,6 +208,7 @@ class KojiroStrategy(StrategyBase):
         "min_vol_floor_pct": 1.0,
         "max_units_per_stock": 2,
         "max_units_total": 10,
+        "max_lot_units": 2.0,   # cycle242 — 랏당 최대 유닛(K). 터틀 모드 모든 랏 ≤ K유닛, floor(K×u*)==0 이면 미매수. PARAM_RANGES 미편입. 롤백 = DB 20.0
     }
 
     def __init__(self, config: StrategyConfig):

@@ -56,6 +56,18 @@
 - 확인 명령(읽기 전용): `SELECT strategy_id, params->>'breakeven_promote_atr' FROM strategy_config
   WHERE strategy_id IN ('vcp_breakout','bull_flag_breakout');` → 기대 `1.5` / `null|0`.
 
+### ▶ G-8′. BFB·VCP 진입 완화 1차 (2026-09-03 07:40 적용, 사용자 결정 "기준을 조금 완화해 매수가 진행되게")
+
+- **근거** = `_workspace/domain_consult/bfb_vcp_entry_relax_20260903.md`(6렌즈 실측 + 적대 비판 18건 반영). 08-31 개방 후 3영업일 체결 0. 병목 실측: **BFB 는 임계가 아니라 시계** — 게이트가 'flag 일평균 × 1.0' 을 요구하는데 관측 창 09:05~13:00 이 하루 누적의 65~70% 라 실효 요구치가 EOD 1.43~1.54배, 그 앞단 retention 1분이 래치 무장까지 차단(감지 4건 중 3건이 1~23초 후퇴 사망). **VCP 는 prepare() 가 후보를 못 만듦** — pullback 상한이 아니라 자(ruler) `min_swing_atr_mult=0.5` 가 미세 진동을 조정으로 세어 회수를 5~6 으로 부풀림. 공통: 후보 20~32% 장중 틱 무수신(파라미터로 못 고침).
+- **적용(PUT /api/strategies/{id}/params — `_config_loaded` 가 프로세스당 1회라 SQL 만으론 당일 미실효)**: BFB `entry_end` 13:00→**14:30** + `breakout_retention_minutes` 1→**0** / VCP `min_swing_atr_mult` 0.5→**1.0**. 거래량 배수(1.0/1.2)·추격 상한(5.0/7.5)·손절 **무변경**(품질 임계 불변). 메모리·DB 모두 반영 확인.
+- **✅ D+0 결과 (09-03 11:33) — BFB 첫 체결**: `001450` 1주 @ 53,900. 09:26:26 `[bfb_latch_armed]`(retention 0 효과) → 11:33:43 `[bfb_vol_gate_pass] observed=501912 threshold=485973 latch_age_sec=7637`(래치 2시간 7분 유지 = "시계" 가설 확증, 관측/임계 1.033). **`entry_end` 14:30 은 미실효(11:33 < 13:00) — 공로는 retention 0 단독.** ⚠️ **프로토콜 발동 = N=10 왕복까지 BFB 진입 파라미터 전면 동결.** VCP 는 `pullback=1` 여전(`min_swing_atr_mult` 1.0 무효) — 2차 노브 조건(고유 후보 ≥3 × 3일 누적 0건) 미달.
+- **기대** = 합계 0.2~0.5건/일(BFB 0.15~0.35 + VCP 0.05~0.15), 3영업일 0.6~1.5건. 개방 규모 만기 645,533원 = NAV 25%, 9포지션 동시 손절 최악 NAV 1.45%.
+- **프로토콜** = 최소 5영업일 또는 체결 3건 중 먼저 동결. 체결 1건이라도 나면 N=10 왕복까지 진입 파라미터 전면 동결(cycle228 계약). 2차 노브는 달력이 아니라 **기전 증거**로: 래치 ticker 의 EOD 실봉 acml_vol ÷ flag_avg_volume = R 을 매일 역산 → (래치 ≥5 ∧ R 중앙값 ≥1.2 ∧ pass 0) 이면 시계 가설 확증 → `entry_end` 15:00 / (R 중앙값 <1.0) 이면 진짜 거래량 부족 = 아무 노브도 안 연다. VCP 2차 = 고유 후보 ≥3 종목 3일 누적 0건일 때만 `base_max_days` 45.
+- **영구 기각** = `breakout_volume_mult` 0.7(거래량 없이 뚫는 건 안 뚫린 것 — 09-01 실패 돌파 60% 가 그 대역) · `pullback_count_max` 확대(측정 반증: 추가 통과 0/18) · `entry_end` 15:20(종가 단일가 오버나잇 경로).
+- **일일 5지표** = `[bfb_latch_armed]`(09:05:0x 첫 틱 아티팩트 분리) · `[*_vol_gate_pass]` 발생 시각 · `reason=extension` · `[stale_watcher_detail]` · `[*_vol_gate_no_data]`. **첫 실패 모드 예상** = 09:05 첫 틱 갭업 체결(retention 0) — 방어는 추격 상한 5.0%·손절 −5%.
+- **롤백**(PUT 로 원복: BFB entry_end 13:00·retention 1 / VCP swing 0.5) = 하루 BFB 3건↑ / 누적 5건 승률 ≤1/5 또는 실현손실 NAV 1%↑ / gate_pass 직후 −5% 손절 3연속 / 14:00 이후 체결 편중 전손.
+- ⚠️ **운영 주의** = ① retention 0 은 PARAM_RANGES (1,30) 밖이라 20:00 자문이 매일 '교정' 을 제안 — **BFB/VCP pending 자문 수동 apply 금지**, 09-02 pending 2건(비중 감액 + `max_scan_stocks` 500 = 유니버스 87% 축소)은 UI 에서 거절 권고 ② PUT 은 params dict 전체를 DB 에 핀 — 이후 코드 DEFAULT_PARAMS 변경이 두 전략엔 전파되지 않음(기존 breakout_volume_mult 함정과 동형) ③ 매일 07:56~58 `stock_master_daily` placeholder(volume 0) ~970행이 flag_avg_volume 을 희석 — 체결 시 flag 구간 0봉 여부 확인.
+
 ### ▶ G-9B4. VB 실패돌파 조기청산 — 백테스트 스윕 대기
 
 `failed_breakout_buffer_pct` / `failed_breakout_confirm_ticks` 외부 MCP 스윕(VB 는 YAML DSL 지원)
@@ -72,10 +84,118 @@ RS(B2) 실배제 우선 활성. ⚠️ 별도 실측(`project_vb_observation_hoo
 
 외부 백테스트 스윕이 게이트인데 **VCP/BFB ∈ `_FALLBACK_STRATEGIES`**(recommendation_engine.py)
 라 MCP YAML DSL 미지원 ⇒ 스윕 자체가 불가. 대안 = (a) 로컬 백테스트 어댑터 구현 또는
-(b) 확대 유니버스로 라이브 체결 축적 후 실측.
+(b) 확대 유니버스로 라이브 체결 축적 후 실측. ⚠️ **터틀 전환 시 `max_lot_units`(K=2.0) 캡이 자동 편입**된다(cycle242 — 캡 게이트가 `sizing_mode == "turtle"` 이라 DB 키를 켜는 순간 두 전략의 모든 랏이 K 유닛 이하로 잘린다). 게이트 통과 판정 시 이 축소 효과를 백테스트 전제에 반영할 것.
 
 ---
 
+
+## ✅ G0 · 1주 폴백 = 진입 시점 과잉 피라미딩 — **cycle242 ⓑ 종결 (2026-09-03, `max_lot_units` K=2.0, 커밋 대기)**
+
+**발단** — 피라미딩 심층 검토(`_workspace/domain_consult/pyramiding_deep_review_20260903.md` §0.0·§1.2·§4.3)가
+**사다리를 얹기 전부터 첫 랏이 이미 과대**임을 실측했다. 09-03 아침 리포트 §7 #1 에 대한 사용자 결정 =
+**ⓑ 폴백 notional 상한 먼저**(ⓐ "<1주면 스킵"은 donchian 거래 ~79% 감소라 표본 확보 후 재검토).
+
+**실측 (120일 BUY 226건, `_workspace/pyramiding_review_20260903/`)**
+
+| 지표 | 값 |
+|---|---|
+| 1주 매수 비율 | **170/226 = 75.2%** |
+| donchian 실제 1랏의 터틀 유닛 배수 | 평균 **4.94** · 중앙 4.42 · **최대 15.61**(086280 현대글로비스 1주) |
+| kojiro 동 배수 | 평균 1.52 |
+| 1주 폴백 스택 −30% 시 계좌 손실 | **8.83%** |
+| 관측 증거 | cycle233 `[oversized_fallback]` 이 R15 위반을 이미 실측(000815 3.10배·4.11유닛) |
+
+**확증 원인** — 터틀 사이징(`compute_unit_qty_guarded`)이 이론 유닛 <1주를 내면 관문
+`StrategyBase._apply_budget_limit` 이 `_fallback_one_share` 로 **1주를 산다**. 그 폴백의 유일한 상한은
+"잔여 ≥ 현재가"뿐 — 가격·ATR·유닛 대비 상한이 **전무**했다. 터틀 경로에는 변동성 floor·잔여·notional
+3중 상한이 무조건 걸리는데, **그 상한을 통과 못 한 종목이 오히려 무상한 1주로 사는 역전**이다.
+구조 항등식: 폴백 ⇔ `P > ρB` ⇒ 유닛 배수 `M1 > (ρ/r)·ATR%` = donchian **40×ATR%**(중앙 6.10% → >2.44).
+⚠️ **같은 항등식이 PR 낙하 랏**(터틀 0 → `floor(ρB/P)`주, donchian 최대 3.71유닛)**에도 성립** —
+"폴백만" 막는 스코프로는 G0 가 종결되지 않는다(그래서 적용 범위를 터틀 전략의 **모든 랏**으로 잡았다).
+
+**시정 (`src/engine/strategy_base.py` 단독 + 터틀 4전략 `DEFAULT_PARAMS` 각 1줄)** — 관문 안, 폴백/잔여
+클램프 **뒤** · `[oversized_fallback]` 관측 **앞**에서 `sizing_mode == "turtle"` 전략의 랏에
+`min(final, compute_unit_qty(budget, atr, risk_pct, fraction=K))` 적용, 0 이면 매수하지 않는다.
+
+**결정 12(domain-consult `cycle242_fallback_notional_cap.md` 채택)** — ①`max_lot_units` **2.0** 전 전략 공통
+(K 는 `예산×risk_pct` 로 이미 정규화된 무차원 수) ②척도 = **ATR 축**, `compute_unit_qty(fraction=K)` **재사용**
+(새 수식 0; ρ 축은 관측으로 **병존**) ③범위 = **터틀 전략의 모든 랏**(고정%손절 5전략은 `position_ratio` 가
+이미 리스크 균등이라 범위 밖) ④관문 안·관측 앞 ⑤**시그니처 무변경** — `_resolve_sizing_atr` 이 터틀 분기와
+같은 `_candidates[ticker]` 를 read-only 로 읽고 `("atr","atr14")` 두 키 상이 시 불채택 ⑥**fail-open + LOUD**
+⑦마커 5종 ⑧`PARAM_RANGES`/`INT_PARAMS` 편입 금지 + 읽는 쪽 `[1.0, 20.0]` 클램프 ⑨래치 신설 금지
+⑩기대 효과(아래) ⑪**G0 종료 기준 재정의**(아래) ⑫정본 문서 6종.
+
+**전제 정정 5(코드 재실측, 결론 불변)** — ①진단이 예고한 "기존 테스트 6+ 파손·cycle233 계약 폐기"는
+결정 ③ 게이트 아래서 **파손 0**(cycle233 6케이스·A-FALLBACK·Case A/D/E·전략 폴백 3건 전부 게이트 off 경로)
+→ 계약은 폐기가 아니라 **docstring 재스코프** ②ATR 축을 택해도 시그니처 불변 ③`[fallback_cap_config]` 는
+부팅이 아니라 **첫 관문 평가 시** 1회/전략/일(`boot_manager` 무접촉) ④마커는 `reason=` 6종으로 일반화
+⑤"as-was K∈[1.0,2.0] 결과 동일"은 08-18 입금 이전 표본의 성질 — 현행 예산 재정규화에선 K=1 → 7/26,
+K=2 → 14/26 으로 **2배 갈린다**.
+
+**기대 효과(현행 예산 재정규화, net 2,582,132)**
+
+| 전략 | BUY 생존 | 최대 랏 | 단일 랏 −30% 꼬리(계좌) |
+|---|---|---|---|
+| donchian | 14/26 (**−46%**) | 8.66 → **≤2.0유닛** | 3.18% → ≤1.45% |
+| kojiro | 18/20 (−10%) | 3.44 → **≤2.0유닛** | 4.71% → ≤2.73% |
+
+**T 경로(정상 터틀 랏 — donchian 7·kojiro 13건 전부 ≤1.68유닛)는 한 건도 안 건드린다.** 보유 8종목 무영향(진입 사이징만).
+
+**관측 마커 5종** — `[fallback_notional_capped]`(INFO, 캡 발동) · `[fallback_cap_skipped]`(WARNING, fail-open
++ `atr=`/`units=` 진단 병기) · `[fallback_cap_config]`(INFO 카나리아 `cap=on|off`·`k`·`atr_max`) ·
+`[fallback_cap_clamped]`(WARNING, **키 명시 존재 시에만**) · `[oversized_fallback]`(ρ 축, 꼬리 ` units=` 확장).
+
+**D+1 판독 (배포 = 15:30 이후 또는 익일 07:55 `_boot` 전)**
+
+| 채널 | 정상 서명 | 이상 → 조치 |
+|---|---|---|
+| `[fallback_cap_config]` | donchian·kojiro 각 1행/일 `sizing_mode=turtle cap=on k=2.00`, `atr_max` ≈ 3,873 / 7,746 | `cap=off` = DB `sizing_mode` 리셋(조용한 꺼짐) → 즉시 DB 확인. `k≠2.00` = PUT 변경 |
+| `[fallback_notional_capped]` | donchian ≈0.15건/영업일·kojiro ≈0.03 → **대부분의 날 0행**. 첫 실발화 = G0 ① 실증 | 하루 5건↑ × 5영업일 = R2. `units_after > 2.00` = R3 핫픽스 |
+| `[fallback_cap_skipped]` | **0행** | `no_atr`/`ambiguous_atr` ≥1 = 후보 dict ATR 배관 결함(매수는 fail-open 으로 현행대로 나감) · `exception` ≥1 = 코드 결함 |
+| `[oversized_fallback] units=` | **비제로가 정상**(⚠️ 의미 반전). `units ≤ 2.00` 전수 = G0 ② | `units > 2.00` 1건 = R3. turtle 전략에서 `units=-` = ATR 결손 |
+| order_engine "매수 수량 0 → 900s cooldown" | 캡 마커와 **같은 시각·같은 ticker** 짝 = 오귀인 정상 서명(`_bought_today` 로 종목당 1회/일이라 1:1 성립) | 캡 마커 없이 단독 = 진짜 잔여 부족 |
+| donchian 실체결 BUY | 주 ~1건(0.175/일) — R1 카운트 시작 | 15영업일 연속 0 = R1 |
+
+⚠️ **의미 반전 2** — `[oversized_fallback]` 은 "0 이 목표"에서 **"≤K 유닛이면 정상"**(비제로가 정상)으로,
+order_engine 수량-0 WARNING 은 "잔고 부족"에서 "캡 스킵 포함"으로. **배포 전후 같은 grep 합산 금지.**
+
+**재검토 트리거 (롤백 = 대상 전략 `strategy_config.params.max_lot_units = 20.0` DB UPDATE 또는
+`PUT /api/strategies/{id}/params` — 코드 재배포 불필요. ⚠️ 당일 캡→0 으로 `_bought_today` 가 소진된 종목은
+**다음 세션부터만** 되살아난다: `cap_qty` 는 D-1 ATR 기반 일중 상수이고 `recompute_held_atr` 유일 호출자는 부팅 전용)**
+
+| # | 트리거 | 임계 | 조치 |
+|---|---|---|---|
+| R1 | donchian 매수 정지 | 15영업일 연속 BUY 0(기대 2.6건, P(0)≈7%) | K=2.5 완화 검토(사용자 결정) |
+| R2 | 캡이 유니버스 대부분을 자름 | `[fallback_notional_capped]` 5건/일 × 5영업일 | K 완화가 아니라 **유니버스 가격 상한** 또는 weight 재검토 |
+| R3 | 캡 불성립 | `units_after > K` 또는 `[oversized_fallback] units > K` **1건** | 즉시 핫픽스 |
+| R4 | 파라미터 커플링 | weight / `position_ratio` / `risk_pct` 변경 | K 실효 강도가 예산에 선형 비례 → **K 재검토 의무** |
+| R5 | 자연 은퇴 | 6개월 무발화 + `P_max` 중앙값 > 유니버스 90퍼센타일 | 게이트 **유지**(자본이 줄면 다시 필요), 삭제 금지 |
+| R6 | 피라미딩 착수(T1) | 피라미딩 다크런치와 동시 | **K → 1.0**(K=2 랏 + 4유닛 사다리 = 8유닛 = R15 재위반) |
+
+**⑪ G0 종료 기준 재정의** — 검토 보고서 §4.3 의 "`[oversized_fallback]` 발화 0"은 K>1 과 **논리적 양립 불가**
+(캡을 통과한 랏도 ρ 상한을 계속 넘을 수 있다). 실제 종료 = ①`[fallback_notional_capped]` 실발화 1건 이상 ∧
+②배포 후 신규 랏 전수 `units ≤ K`(`[oversized_fallback] units=` **와** PR 경로 fail-open 랏의
+`[fallback_cap_skipped] atr=`/`units=` 양쪽으로 검증) ∧ ③회귀 가드 존재.
+
+**⚠️ 문서 정정 2(적대 검증 확증, 코드 무변경)** — ①**"K유닛 = 예산 2.0% 노출"은 `_entry_atr` 스탬프 랏 한정**
+이다. 폴백·PR 낙하 랏은 미스탬프라 고정% 손절(-7%)을 타므로 실효 상한은 `cap_qty × price × |stop_loss_rate|`
+— donchian 실측 최대 **2.09%**·이론 6.99%(kojiro 는 `_position_atr` 을 항상 스탬프하므로 원 서술 성립.
+**두 전략을 한 문장으로 묶은 것 자체가 오류**였다). ②롤백 다이얼의 당일 무효(위 괄호).
+
+**ⓐ("<1주면 스킵") 재검토 조건** — 캡 배포 후 donchian·kojiro 각 **N≥20 왕복** 축적 ∧ 캡 통과 랏의 실현 엣지가
+캡 이전 표본 대비 열위가 아님 ∧ R1 미발화. 그 전엔 표본이 −79% 로 잘려 어떤 검정도 불가능하다.
+
+**후속 A~G** — A. 6개월 재검정(K 가 자른 고가·저ATR 종목군의 사후 성과 = 선택 편향 정산) · B. 명시 ATR
+kwarg 전달(`sizing_atr=`)로 `_resolve_sizing_atr` 덕타이핑 은퇴 · C. 폴백/PR 랏 `_entry_atr` 미스탬프 ↔
+재시작 소급 스탬프 불일치(위 문서 정정 ①이 근거) · D. 고정%손절 5전략의 폴백 명목(ρ) 상한 — **LTV 부터**
+(오버나잇 갭 실노출) · E. `[fallback_cap_config]` 부팅 시점 이관 · F. `risk.py:628` 사전 스킵 비대칭 +
+order_engine 900s 오귀인 문구(8영역, 별도 승인) · G. `portfolio_risk.compute_over_cap_positions` 에 `units` 병기.
+
+**산출물** — 스펙 `_workspace/red/cycle242_fallback_notional_cap_spec.md` · 자문
+`_workspace/domain_consult/cycle242_fallback_notional_cap.md` · 신규 회귀 2파일 **161 PASS** ·
+백엔드 전체 **6,163 PASS** · 8영역 + `scheduler.py`/`boot_manager.py`/`turtle_sizing.py`/`portfolio_risk.py` **diff 0**.
+
+---
 
 ## ✅ P1-6 · donchian 프리장 청산 보류 게이트에 **매일 ~30초 구멍** — **cycle238 종결 (2026-09-02, 시정안 A, 커밋 대기)**
 
@@ -190,7 +310,7 @@ VB 는 15:20 전량청산 전략이라 **오버나잇 손절 규약이 설계에
 
 | 의제 | 결정 | 구현 |
 |---|---|---|
-| **G3′ 계좌 통합 통제** | **자문 권고 패키지 착수** — ⓪척도 병기(프록시+실효, 관찰 전용) ①SOFT Σ상한 다크런치(관측 4%/차단 6%, 임계 비활성→2주 후 DB 활성, HARD 금지). Σ상한=순간 게이트/드로다운=일 래칫 **이원 설계**(D1). fail-open+LOUD(D2). 1주 폴백 notional 초과는 **관측만** `[oversized_fallback]`(D3). 드로다운 3층은 **다음 사이클**(입출금 보정 선행) | **✅ cycle233 구현 완료 (2026-08-29) — 커밋 80f164c·배포 완료(08-29, EC2 반영).** 스펙 `_workspace/red/cycle233_account_risk_spec.md` · 적대 검증 21→확증 6 전부 시정(HIGH 2 = 자기 가드 공허, 뮤테이션 실증) · 백엔드 **5,818 PASS** · 8영역+scheduler diff 0(라인 상한 가드로 감시자를 자기 종료 루프로 설계). 활성화 = 2주 관측 후 DB `account_risk_block_pct=6.0` 한 줄. **✅ cycle239 선결(신선도) 시정 (2026-09-02) — 활성화 게이트 충족**: `is_soft_gated()` 가 `_gate_active` 만 돌려줘 감시 루프(5분) 사멸·hang 시 마지막 판정이 **동결**(block 로 얼면 7전략 신규 매수 영구 차단)되던 결함을 **900s(=3×주기) 초과 stale → fail-open(False) + `[account_risk_gate] released reason=stale` WARNING 1회/일**(cap `gate_stale`, peek→로그→mark) 로 닫았다 — 스펙 `_workspace/red/cycle239_gate_freshness_spec.md`. `get_gate_state` 4키(`stale/age_secs/stale_max_secs/effective_gated`, `level` 은 마지막 평가값 보존 = 동결 서명 `level=block ∧ stale ∧ !effective_gated`) + `ensure_watch_loop` done_callback LOUD(`[account_risk_watch_loop_died]` WARNING / `_loop_exit] reason=running_false` INFO 매일 1건). 적대 검증 확증 10(실질 4) 전부 시정(R1 = 기록자 `was_active` 원시값 환원(매 아침 부팅 거짓 stale WARNING + cap 선소비 차단) · `gate_stale` cap 키 독립 F-8c · G-239-7 전 트리 diff 가드 삭제 · 판정 예외 fail-closed 변조 검출 F-5b) · 뮤테이션 23종 21 검출 + escape 2 → 신규 회귀로 봉인 · 3,000틱 fresh 차분 0 · 신규 회귀 36 · 8영역+scheduler diff 0 · `account_risk_watcher.py` 단독. **활성화 잔여 조건(AND)** = 배포 후 2영업일 `reason=stale` 0 ∧ `loop_exit reason=running_false` 매일 1 ∧ 장중 `GET /api/portfolio/risk` `account_gate.age_secs ≤ 600` ∧ cycle233 2주 관측 창(~09-12) 만료 → 사용자 결정으로 DB 한 줄. 활성화 D+1 첫 확인 = `transition=entered` 시 대시보드 `effective_gated=true`(행위-관측 정합) |
+| **G3′ 계좌 통합 통제** | **자문 권고 패키지 착수** — ⓪척도 병기(프록시+실효, 관찰 전용) ①SOFT Σ상한 다크런치(관측 4%/차단 6%, 임계 비활성→2주 후 DB 활성, HARD 금지). Σ상한=순간 게이트/드로다운=일 래칫 **이원 설계**(D1). fail-open+LOUD(D2). 1주 폴백 notional 초과는 **관측만** `[oversized_fallback]`(D3). → **cycle242 가 K 축 행위(`max_lot_units`)로 전환, ρ 축 `[oversized_fallback]` 은 관측 병존** — 두 척도는 대체재가 아니다(ρ = 갭·거래정지 명목 / K = 정상 시장 손절 리스크). 드로다운 3층은 **다음 사이클**(입출금 보정 선행) | **✅ cycle233 구현 완료 (2026-08-29) — 커밋 80f164c·배포 완료(08-29, EC2 반영).** 스펙 `_workspace/red/cycle233_account_risk_spec.md` · 적대 검증 21→확증 6 전부 시정(HIGH 2 = 자기 가드 공허, 뮤테이션 실증) · 백엔드 **5,818 PASS** · 8영역+scheduler diff 0(라인 상한 가드로 감시자를 자기 종료 루프로 설계). 활성화 = 2주 관측 후 DB `account_risk_block_pct=6.0` 한 줄. **✅ cycle239 선결(신선도) 시정 (2026-09-02) — 활성화 게이트 충족**: `is_soft_gated()` 가 `_gate_active` 만 돌려줘 감시 루프(5분) 사멸·hang 시 마지막 판정이 **동결**(block 로 얼면 7전략 신규 매수 영구 차단)되던 결함을 **900s(=3×주기) 초과 stale → fail-open(False) + `[account_risk_gate] released reason=stale` WARNING 1회/일**(cap `gate_stale`, peek→로그→mark) 로 닫았다 — 스펙 `_workspace/red/cycle239_gate_freshness_spec.md`. `get_gate_state` 4키(`stale/age_secs/stale_max_secs/effective_gated`, `level` 은 마지막 평가값 보존 = 동결 서명 `level=block ∧ stale ∧ !effective_gated`) + `ensure_watch_loop` done_callback LOUD(`[account_risk_watch_loop_died]` WARNING / `_loop_exit] reason=running_false` INFO 매일 1건). 적대 검증 확증 10(실질 4) 전부 시정(R1 = 기록자 `was_active` 원시값 환원(매 아침 부팅 거짓 stale WARNING + cap 선소비 차단) · `gate_stale` cap 키 독립 F-8c · G-239-7 전 트리 diff 가드 삭제 · 판정 예외 fail-closed 변조 검출 F-5b) · 뮤테이션 23종 21 검출 + escape 2 → 신규 회귀로 봉인 · 3,000틱 fresh 차분 0 · 신규 회귀 36 · 8영역+scheduler diff 0 · `account_risk_watcher.py` 단독. **활성화 잔여 조건(AND)** = 배포 후 2영업일 `reason=stale` 0 ∧ `loop_exit reason=running_false` 매일 1 ∧ 장중 `GET /api/portfolio/risk` `account_gate.age_secs ≤ 600` ∧ cycle233 2주 관측 창(~09-12) 만료 → 사용자 결정으로 DB 한 줄. 활성화 D+1 첫 확인 = `transition=entered` 시 대시보드 `effective_gated=true`(행위-관측 정합) |
 | **G2 역지정가** | **보류 + 대체 조치** — 착수 게이트 3(스탑지정가 `ORD_DVSN` 스펙 확정 · 모의/소액 실주문 검증 · T1 자본) AND 충족 전 도입 금지. 근거 = KIS 는 스탑**지정가**만(`CNDT_PRIC` 정본) — 갭 관통 미체결 = Defect 2 재현 + 다일 잔존 주문의 체결통보 오귀속("momentum" INSERT 경로). 지금 할 것 = tick blind 총시간/일 계측 + 부팅 직후 청산 평가 우선순위 확인 + **D6 운영 규약 승격**(보유 포지션 有 시 09:00~15:30 push 금지) | 대체 조치 진행(08-29): **D6 승격 완료**(CLAUDE.md 운영 가이드) · **청산 우선순위 확인 완료** — 청산 평가는 tick 기반(`risk.on_tick` 첫 tick 즉시)이라 매수 스캔(09:30) 비의존 + 보유는 07:59 HIGH 사전구독 = 현행 충족, 실사각은 재구독 지연의 tick blind 자체 → **✅ ① tick blind 계측 완료(cycle234, 08-29)** — `uptime_monitor.py`(60s 하트비트 + `[tick_blind_boot]` + 20:10 `tick_blind` metrics). **G2 대체 조치 3건 전부 종결.** G2 재검토 = `market_blind_secs_total` 주간 분포 실측 후. 재검토 트리거 = `_pending_next_day_clear` 미집행 실측 1회 |
 | **G1 risk_pct 0.5→1.0%** | **보류 — T2 재분류.** 해제 게이트(AND) = net≥500만 ∧ kojiro·donchian 각 N≥20 TE>0 ∧ 상관군 캡 활성(`max_open_risk_pct` 4.5→9 동반 — 로드맵 규칙 4). 근거 = 체결 ~70% 1주 폴백 무관 + 효과 비단조(저가주 편향) + kojiro 동시 유닛 4.5→2.25 반토막 | 코드 변경 0 — 문서 등재만 |
 

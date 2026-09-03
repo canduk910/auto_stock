@@ -143,6 +143,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         "stop_atr": 2.0,
         "turtle_backstop_pct": -7.0,
         "min_vol_floor_pct": 1.0,
+        "max_lot_units": 2.0,   # cycle242 — 랏당 최대 유닛(K). 터틀 모드 모든 랏 ≤ K유닛, floor(K×u*)==0 이면 미매수. PARAM_RANGES 미편입. 롤백 = DB 20.0
         "turtle_min_stop_pct": -4.0,
         # 유니버스 (2026-08-08 확대 — BFB 는 이미 지수 무제약. 거래대금 20억→15억(도메인 권고 —
         # 장중 돌파 추격이라 kojiro 10억까지는 슬리피지 위험, 완만한 15억 하향으로 유동성 바닥

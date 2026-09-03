@@ -5,6 +5,7 @@
 """
 
 import logging
+import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
@@ -12,10 +13,19 @@ from enum import Enum
 from typing import ClassVar
 
 from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.turtle_sizing import compute_unit_qty
 
 logger = logging.getLogger(__name__)
 
 _KST = timezone(timedelta(hours=9))
+
+# ── cycle242 랏당 최대 유닛 상한 (터틀 전략 한정) — 리스크 정체성 상수,
+# PARAM_RANGES/INT_PARAMS 편입 금지(AST G-242-1). 4 터틀 전략 DEFAULT_PARAMS
+# ["max_lot_units"] 는 _MAX_LOT_UNITS_DEFAULT 와 동치여야 한다(AST G-242-6).
+_MAX_LOT_UNITS_DEFAULT = 2.0   # K — 1주 폴백/PR 낙하 랏도 이 유닛 수를 넘지 못한다
+_MAX_LOT_UNITS_MIN = 1.0       # K<1 은 "터틀 유닛보다 작게" = 정의상 무의미.
+                                # 하한 1.0 = T 경로(정상 터틀 랏 ≤ u*) 무접촉의 수학적 전제
+_MAX_LOT_UNITS_MAX = 20.0      # 관측 최대 M1 15.61 < 20 → 사실상 현행 복귀(롤백 다이얼)
 
 
 class Signal(str, Enum):
@@ -217,6 +227,11 @@ class StrategyBase(ABC):
     _FUNNEL_SURVIVED_CAP = 200
     _FUNNEL_EXCLUDED_CAP = 20
 
+    # cycle242 — 캡 ATR 소스 키. 터틀 사이징이 읽는 `_candidates[ticker]` 의 키와
+    # 동일 집합이어야 한다(donchian·kojiro = "atr" / VCP·BFB = "atr14", 실측
+    # 상호 배타). 두 키가 서로 다른 값을 동시에 가지면 채택하지 않는다(ambiguous).
+    _SIZING_ATR_KEYS: ClassVar[tuple[str, ...]] = ("atr", "atr14")
+
     def __init__(self, config: StrategyConfig):
         self.config = config
         self.state = StrategyState(strategy_id=config.strategy_id)
@@ -234,6 +249,10 @@ class StrategyBase(ABC):
         self._account_gate_day: str = ""
         self._oversized_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._oversized_day: str = ""
+        # cycle242 — 랏 유닛 상한 관측 cap (복합 키: "cap|{ticker}" / "skip|{ticker}|{reason}"
+        # / "cfg"). 날짜 키 자기 리셋 — `_reset_daily_state` 훅에 의존하지 않는다.
+        self._lot_cap_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._lot_cap_day: str = ""
 
     @property
     def strategy_id(self) -> str:
@@ -458,6 +477,10 @@ class StrategyBase(ABC):
 
         부분 매수를 허용한다(유닛 미만 스킵 아님) — 부분 유닛의 리스크는 1유닛 *미만*
         (under-risk)이라 안전 방향이고, 소액 계좌에서 스킵은 사실상 무매매를 만든다.
+        **단, `sizing_mode="turtle"` 전략에서는 최종 랏이 `max_lot_units`(K) 유닛을
+        초과하면 초과분을 자르고, K 유닛이 1주에 못 미치면 매수하지 않는다**
+        (cycle242 — 1주 폴백이 설계 유닛의 수 배가 되던 §0.0 결함 시정. 고정%손절
+        전략은 position_ratio 가 이미 리스크 균등이라 범위 밖).
 
         결함 배경: 주 분기가 ``int(예산×ratio)//price`` 를 잔여 검증 없이 반환해
         ``position_ratio × max_positions > 1.0`` 인 전략이 예산을 초과 매수할 수 있었다.
@@ -472,19 +495,343 @@ class StrategyBase(ABC):
             return 0
         if qty <= 0:
             final = self._fallback_one_share(current_price)
+            _via_fallback = True
         else:
             remaining = max(0, self.state.total_investment - self._calc_used_funds())
             final = min(qty, remaining // current_price)
+            _via_fallback = False
             if final < qty:
                 self._emit_budget_clamp(ticker, qty, final, remaining)
+        # cycle242 — 랏당 최대 유닛 상한 (행위, 터틀 전략 한정). 폴백/잔여 클램프
+        # **뒤** · `[oversized_fallback]` 관측 **앞**에 배치 — 관측기가 캡 이후
+        # 최종 수량을 재도록 한다. 캡 산출 실패는 현행 수량 유지(fail-open) —
+        # 헬퍼 내부에서 흡수·LOUD.
+        final = self._apply_lot_units_cap(
+            final, current_price, ticker, via_fallback=_via_fallback,
+        )
         # cycle233 — 1주 폴백 notional 초과 **관측만** (자문 cycle232 §정정 1·부속안 ③).
         # 수량은 절대 바꾸지 않는다 — 차단(부속안 ②)은 매수를 좁히는 변경이라
         # 사용자 결정으로 기각(표본 보호 국면). 관측 실패도 수량 산출을 못 깨뜨린다.
+        # cycle242 — ρ 축(`position_ratio×예산`) 관측은 K 축(`max_lot_units`) 행위와
+        # **병존**한다. K>1 이면 캡 통과 랏도 ρ 축 상한을 넘을 수 있어 **비제로가
+        # 정상**(의미 반전 — cycle228/240/241 교훈, 배포 전후 같은 grep 합산 금지).
         try:
             self._emit_oversized_fallback(ticker, final, current_price)
         except Exception:  # pragma: no cover — 관측 자기실패 흡수
             pass
         return final
+
+    # ──────────── cycle242 — 랏당 최대 유닛 상한 (`max_lot_units`, 터틀 한정) ────────────
+
+    def _read_max_lot_units(self) -> float:
+        """`max_lot_units` 읽기 + 클램프.
+
+        비수치·None·bool·비유한·<MIN → `_MAX_LOT_UNITS_DEFAULT` / >MAX → MAX.
+        PUT 라우트/DB 병합에 화이트리스트가 없어 임의 값이 들어올 수 있으므로
+        읽는 쪽에서 항상 안전 범위로 정규화한다(쓰는 쪽 검증 아님).
+
+        cycle242 R4 — **키가 명시적으로 존재하는데** 값이 무효/범위밖이라
+        클램프가 실제 발동하면 `[fallback_cap_clamped]` WARNING 1회/전략/일로
+        흔적을 남긴다(`raw=` 원본 값 병기). **키 부재**(DB/params 에 값이 없어
+        코드 기본값을 쓰는 정상 구성)는 클램프가 아니므로 무발화 — 그렇지
+        않으면 "DB 미설정"과 "PUT 으로 무효 값을 넣었다가 걸러짐"이 로그에서
+        구별 불가해진다(루트 CLAUDE.md "비중 단위 추론 변환 금지" 독트린의
+        "위반은 조용히 흡수 말고 시끄럽게 거부" 원칙 적용).
+        """
+        has_key = "max_lot_units" in self.config.params
+        raw = self.config.params.get("max_lot_units", _MAX_LOT_UNITS_DEFAULT)
+        clamped = False
+        if isinstance(raw, bool):
+            result = _MAX_LOT_UNITS_DEFAULT
+            clamped = has_key
+        else:
+            try:
+                k = float(raw)
+            except (TypeError, ValueError):
+                result = _MAX_LOT_UNITS_DEFAULT
+                clamped = has_key
+            else:
+                if not math.isfinite(k) or k < _MAX_LOT_UNITS_MIN:
+                    result = _MAX_LOT_UNITS_DEFAULT
+                    clamped = has_key
+                elif k > _MAX_LOT_UNITS_MAX:
+                    result = _MAX_LOT_UNITS_MAX
+                    clamped = True
+                else:
+                    result = k
+        if clamped:
+            self._emit_fallback_cap_clamped(raw, result)
+        return result
+
+    def _resolve_sizing_atr(self, ticker: str | None) -> tuple[float | None, str]:
+        """터틀 사이징과 **같은 소스**(`_candidates[ticker]`)에서 ATR 을 읽는다 — read-only.
+
+        반환 (atr, reason): reason ∈ {"ok","no_ticker","no_candidates","no_atr","ambiguous_atr"}.
+        `_SIZING_ATR_KEYS` 중 양수로 파싱되는 값을 모아 **서로 다른 값이 2개 이상이면
+        채택하지 않는다**(어느 키가 사이징에 쓰였는지 관문은 모르므로 — 틀린 ATR 로
+        상한을 계산하느니 현행 유지). `_candidates` 를 변경·생성하지 않는다
+        (setdefault/pop/update 금지 — AST G-242-8).
+        """
+        if not ticker:
+            return None, "no_ticker"
+        cands = getattr(self, "_candidates", None)
+        if not isinstance(cands, dict):
+            return None, "no_candidates"
+        info = cands.get(ticker)
+        if not isinstance(info, dict):
+            return None, "no_atr"
+        values: list[float] = []
+        for key in self._SIZING_ATR_KEYS:
+            raw = info.get(key)
+            if raw is None or isinstance(raw, bool):
+                continue
+            try:
+                v = float(raw)
+            except (TypeError, ValueError):
+                continue
+            if math.isfinite(v) and v > 0 and v not in values:
+                values.append(v)
+        if not values:
+            return None, "no_atr"
+        if len(values) > 1:
+            return None, "ambiguous_atr"
+        return values[0], "ok"
+
+    def _apply_lot_units_cap(
+        self, final: int, current_price: int, ticker: str | None, *, via_fallback: bool,
+    ) -> int:
+        """랏당 최대 유닛 상한 — `sizing_mode == "turtle"` 전략의 모든 랏에
+        `min(final, floor(K × 예산 × risk_pct ÷ ATR))` 을 적용한다.
+
+        - 캡 산출은 `turtle_sizing.compute_unit_qty(budget, atr, risk_pct, fraction=K)`
+          재사용(새 수식 금지) — 정상 터틀 랏(K≥1, `_calc_used_funds` 클램프까지 거친
+          `compute_unit_qty_guarded` 결과)은 이 캡보다 항상 작거나 같다.
+        - fail-open: `sizing_mode != "turtle"` / `ticker is None` / ATR 결측·모호 /
+          `risk_pct <= 0` / 예외 → `final` 그대로. ATR·risk_pct·예외 사유는
+          `[fallback_cap_skipped]` WARNING 으로 LOUD. 모드 아님·ticker None 은 조용히
+          (터틀 분기 자체가 같은 조건에서 조용히 off 하는 것과 정합).
+        - 행위(반환값)는 관측 성패와 무관 — 세 emit 은 내부에서 예외 흡수.
+        """
+        if final < 1 or current_price <= 0:
+            return final
+        try:
+            params = self.config.params
+            mode = params.get("sizing_mode")
+            k = self._read_max_lot_units()
+            budget = int(self.state.total_investment or 0)
+            try:
+                risk_pct = float(params.get("risk_pct") or 0)
+            except (TypeError, ValueError):
+                risk_pct = 0.0
+            # 첫 관문 평가마다 캡 상태를 기록 — 캡이 조용히 꺼진 채(DB `sizing_mode`
+            # 리셋 등) 매수가 나가는 사고를 감지하기 위한 카나리아(1회/전략/일).
+            self._emit_fallback_cap_config(mode, k, budget, risk_pct)
+            if mode != "turtle" or ticker is None:
+                return final
+            if risk_pct <= 0 or budget <= 0:
+                self._emit_fallback_cap_skipped(
+                    ticker, "no_risk_pct" if risk_pct <= 0 else "no_budget",
+                    final, current_price,
+                )
+                return final
+            atr, reason = self._resolve_sizing_atr(ticker)
+            if atr is None:
+                self._emit_fallback_cap_skipped(ticker, reason, final, current_price)
+                return final
+            cap_qty = compute_unit_qty(budget, atr, risk_pct, fraction=k)
+            if final <= cap_qty:
+                return final
+            self._emit_fallback_notional_capped(
+                ticker, via_fallback=via_fallback, price=current_price, atr=atr, k=k,
+                req_qty=final, capped_qty=cap_qty, budget=budget, risk_pct=risk_pct,
+            )
+            return cap_qty
+        except Exception:
+            # 캡 산출 자체가 던지면 현행 수량 유지 (변경 이전 행위 쪽으로 fail)
+            # cycle242 R1/R2 — `logger.debug` 도 emit 과 같은 try 안(관문 밖으로
+            # 예외가 전파되지 않게, §3 불변계약 9 "행위는 cap 밖" 적용 대상은
+            # 관측 *성패* 뿐 아니라 관측 *시도* 자체도 포함한다 — 로거가 죽어도
+            # 매수 수량 산출은 살아야 한다).
+            try:
+                self._emit_fallback_cap_skipped(ticker, "exception", final, current_price)
+                logger.debug(
+                    "[fallback_cap_skipped] exception ticker=%s", ticker, exc_info=True,
+                )
+            except Exception:  # pragma: no cover
+                pass
+            return final
+
+    def _emit_fallback_notional_capped(
+        self, ticker: str | None, *, via_fallback: bool, price: int, atr: float,
+        k: float, req_qty: int, capped_qty: int, budget: int, risk_pct: float,
+    ) -> None:
+        """`[fallback_notional_capped]` — 랏이 `max_lot_units`(K) 초과해 잘렸다(행위 확정 후 기록).
+
+        cycle242 — §0.0 결함(1주 폴백/PR 낙하 랏이 설계 유닛의 수 배가 되던 것)의
+        직접 증거. INFO, 1회/(전략,ticker)/일(날짜 키 자기 리셋). 캡 자체는 이미
+        `_apply_lot_units_cap` 이 확정했으므로 여기서의 발화 성패는 매수 수량에
+        영향을 주지 않는다(peek → 로그 → mark).
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._lot_cap_day != today:
+                self._lot_cap_day = today
+                self._lot_cap_logged.reset_daily()
+            key = f"cap|{ticker or '-'}"
+            if not self._lot_cap_logged.should_emit(key):
+                return
+            unit_qty = (budget * risk_pct / atr) if atr > 0 else 0.0
+            denom = budget * risk_pct
+            units_before = (req_qty * atr / denom) if denom > 0 else 0.0
+            units_after = (capped_qty * atr / denom) if denom > 0 else 0.0
+            path = "fallback" if via_fallback else "sized"
+            logger.info(
+                "[fallback_notional_capped] ticker=%s strategy=%s path=%s price=%d "
+                "atr=%d unit_qty=%.3f k=%.2f req_qty=%d capped_qty=%d "
+                "units_before=%.2f units_after=%.2f budget=%d risk_pct=%.4f",
+                ticker or "-", self.strategy_id, path, price, int(atr), unit_qty, k,
+                req_qty, capped_qty, units_before, units_after, budget, risk_pct,
+            )
+            self._lot_cap_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
+
+    def _emit_fallback_cap_skipped(
+        self, ticker: str | None, reason: str, final: int, price: int,
+    ) -> None:
+        """`[fallback_cap_skipped]` — 캡 미적용(현행 수량 유지, fail-open) LOUD.
+
+        reason ∈ {no_candidates,no_atr,ambiguous_atr,no_risk_pct,no_budget,exception}.
+        WARNING, 1회/(전략,ticker,reason)/일. ATR 배관 결함이 조용히 지나가지 않게
+        하되, 매수 자체는 캡 이전 수량 그대로 진행된다(fail-open — cycle228 유령
+        키 P0-1 재현 방지, fail-closed 구현은 계약 위반).
+
+        cycle242 R3 — 꼬리 `atr=`/`units=` 진단 필드(캡 산출과 무관, read-only).
+        `[oversized_fallback]` 은 notional(ρ 축)이 상한을 넘을 때만 발화해서
+        PR 경로(`path=sized`)가 `no_atr`/`ambiguous_atr` 로 fail-open 스킵되면
+        K 초과 사실이 **어떤 마커에도** 안 남는 사각이 있었다 — `_candidates`
+        의 미채택 원시 ATR 후보값과 그 값 기준 유닛 배수를 그대로 노출해
+        메운다. ambiguous_atr/no_atr 는 정의상 `atr=-` (`_resolve_sizing_atr`
+        의 "채택 안 함" 계약과 정합 — 이 필드는 그 판단을 바꾸지 않는다).
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._lot_cap_day != today:
+                self._lot_cap_day = today
+                self._lot_cap_logged.reset_daily()
+            key = f"skip|{ticker or '-'}|{reason}"
+            if not self._lot_cap_logged.should_emit(key):
+                return
+            atr_desc, units_desc = self._describe_lot_cap_diagnostics(ticker, final)
+            logger.warning(
+                "[fallback_cap_skipped] ticker=%s strategy=%s reason=%s qty=%d "
+                "price=%d atr=%s units=%s — 캡 미적용(현행 수량 유지, fail-open)",
+                ticker or "-", self.strategy_id, reason, final, price,
+                atr_desc, units_desc,
+            )
+            self._lot_cap_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
+
+    def _describe_lot_cap_diagnostics(
+        self, ticker: str | None, final: int,
+    ) -> tuple[str, str]:
+        """cycle242 R3 — 진단 전용 read-only 헬퍼.
+
+        `[fallback_cap_skipped]` 가 fail-open 으로 스킵할 때 `_candidates[ticker]`
+        의 `_SIZING_ATR_KEYS` **원시값**(채택 여부와 무관 — `_resolve_sizing_atr`
+        가 no_atr/ambiguous_atr 로 불채택한 값도 그대로 노출)과, 그 값 기준
+        유닛 배수(`final*atr/(budget*risk_pct)`)를 각각 `key=value` `|` 구분
+        문자열로 반환한다. 캡 산출 로직에는 관여하지 않는다(read-only,
+        `_candidates` 변경 없음). 값이 하나도 없거나 예외 시 `("-", "-")`.
+        """
+        try:
+            cands = getattr(self, "_candidates", None)
+            if not isinstance(cands, dict) or not ticker:
+                return "-", "-"
+            info = cands.get(ticker)
+            if not isinstance(info, dict):
+                return "-", "-"
+            try:
+                budget = int(self.state.total_investment or 0)
+                risk_pct = float(self.config.params.get("risk_pct") or 0)
+            except (TypeError, ValueError):
+                budget, risk_pct = 0, 0.0
+            atr_parts: list[str] = []
+            unit_parts: list[str] = []
+            for skey in self._SIZING_ATR_KEYS:
+                raw = info.get(skey)
+                if raw is None or isinstance(raw, bool):
+                    continue
+                try:
+                    v = float(raw)
+                except (TypeError, ValueError):
+                    continue
+                if not (math.isfinite(v) and v > 0):
+                    continue
+                atr_parts.append(f"{skey}={v:.0f}")
+                if budget > 0 and risk_pct > 0:
+                    unit_parts.append(f"{final * v / (budget * risk_pct):.2f}")
+                else:
+                    unit_parts.append("-")
+            if not atr_parts:
+                return "-", "-"
+            return "|".join(atr_parts), "|".join(unit_parts)
+        except Exception:  # pragma: no cover — 진단 실패가 매수/로그를 막지 않는다
+            return "-", "-"
+
+    def _emit_fallback_cap_config(
+        self, mode: str | None, k: float, budget: int, risk_pct: float,
+    ) -> None:
+        """`[fallback_cap_config]` — 캡 활성 상태 카나리아. INFO, 1회/전략/일.
+
+        캡이 조용히 꺼진 채(DB `sizing_mode` 리셋 등) 매수가 나가는 사고를
+        `[fallback_cap_config] cap=off` 부재/존재로 감지하기 위한 상시 표식.
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._lot_cap_day != today:
+                self._lot_cap_day = today
+                self._lot_cap_logged.reset_daily()
+            key = "cfg"
+            if not self._lot_cap_logged.should_emit(key):
+                return
+            cap_state = "on" if mode == "turtle" else "off"
+            atr_max = int(k * budget * risk_pct)
+            logger.info(
+                "[fallback_cap_config] strategy=%s sizing_mode=%s cap=%s k=%.2f "
+                "budget=%d risk_pct=%.4f atr_max=%d",
+                self.strategy_id, mode, cap_state, k, budget, risk_pct, atr_max,
+            )
+            self._lot_cap_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
+
+    def _emit_fallback_cap_clamped(self, raw: object, result: float) -> None:
+        """`[fallback_cap_clamped]` — `max_lot_units` 가 실제로 클램프됐다. WARNING, 1회/전략/일.
+
+        cycle242 R4 — `_read_max_lot_units` 가 키가 **명시적으로 존재하는데**
+        무효/범위밖이라 클램프를 발동시킬 때만 호출된다(키 부재 = 정상 기본값
+        사용이라 클램프 아님 — 호출 자체가 안 일어난다). `raw=` 에 원본 값을
+        그대로 `repr` 해 "DB 미설정"과 "PUT 으로 무효 값이 들어와 걸러짐"을
+        `[fallback_cap_config] k=` 만으로는 구별 못 하던 사각을 메운다.
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._lot_cap_day != today:
+                self._lot_cap_day = today
+                self._lot_cap_logged.reset_daily()
+            key = "clamp"
+            if not self._lot_cap_logged.should_emit(key):
+                return
+            logger.warning(
+                "[fallback_cap_clamped] strategy=%s raw=%r clamped_to=%.2f "
+                "— max_lot_units 범위 밖 값이 클램프됨(DB/PUT 확인 필요)",
+                self.strategy_id, raw, result,
+            )
+            self._lot_cap_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
 
     def _emit_oversized_fallback(
         self, ticker: str | None, final_qty: int, current_price: int,
@@ -496,6 +843,13 @@ class StrategyBase(ABC):
         된다(실측 000815 3.10배 = R15 동일 종목 4유닛 위반). **관측 전용** — 수량
         무변경, 1회/(ticker)/일 cap, 어떤 실패도 흡수. position_ratio 결측/0 은
         상한 정의 불가라 무발화 (fail-open).
+
+        cycle242 — ρ 축(본 마커, `position_ratio×예산`) 관측은 K 축
+        (`max_lot_units` 캡, `_apply_lot_units_cap` 행위)과 **병존**한다. K>1 이면
+        캡을 통과한 랏도 ρ 축 상한을 넘을 수 있어 **비제로가 정상**(의미 반전 —
+        08-28 이전과 배포 전후 같은 grep 합산 금지). 꼬리 `units=` 필드는
+        `_resolve_sizing_atr`(터틀 사이징과 동일 소스) 기준 유닛 배수 — ATR/risk_pct
+        결측 시 `-`.
         """
         try:
             if final_qty < 1 or current_price <= 0:
@@ -515,10 +869,21 @@ class StrategyBase(ABC):
             key = ticker or "-"
             if self._oversized_logged.should_emit(key):
                 # peek → 로그 → mark (cycle226 D-3 — 로그 자기실패가 그날 관측을 지우지 않게)
+                atr, _reason = self._resolve_sizing_atr(ticker)
+                try:
+                    risk_pct = float(self.config.params.get("risk_pct") or 0)
+                except (TypeError, ValueError):
+                    risk_pct = 0.0
+                if atr and risk_pct > 0:
+                    units_s = f"{final_qty * atr / (budget * risk_pct):.2f}"
+                else:
+                    units_s = "-"
                 logger.info(
                     "[oversized_fallback] ticker=%s strategy=%s qty=%d notional=%d "
-                    "cap=%d ratio=%.2f — 1주 폴백이 notional 상한 초과 (관측 전용)",
+                    "cap=%d ratio=%.2f — 1주 폴백이 notional 상한 초과 (관측 전용) "
+                    "units=%s",
                     key, self.strategy_id, final_qty, notional, cap, notional / cap,
+                    units_s,
                 )
                 self._oversized_logged.mark_emitted(key)
         except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
@@ -578,6 +943,9 @@ class StrategyBase(ABC):
 
         클램프 바인딩 빈도 실측용(부분 매수 정책 재평가 근거). 어떤 실패도 흡수 —
         매수 수량 산출 흐름에 영향 0.
+
+        cycle242 §2.6 — `mark_emitted` 는 `logger.info` **뒤**(peek → 로그 → mark,
+        cycle226 D-3 / cycle233 F4 규약). 로그 자기실패가 그날 관측을 지우지 않게.
         """
         try:
             today = datetime.now(_KST).date().isoformat()
@@ -586,13 +954,13 @@ class StrategyBase(ABC):
                 self._budget_clamp_logged.reset_daily()
             key = ticker or "-"
             if self._budget_clamp_logged.should_emit(key):
-                self._budget_clamp_logged.mark_emitted(key)
                 logger.info(
                     "[budget_clamp] ticker=%s strategy=%s requested=%d clamped=%d "
                     "remaining=%d budget=%d",
                     key, self.strategy_id, requested, clamped,
                     remaining, self.state.total_investment,
                 )
+                self._budget_clamp_logged.mark_emitted(key)
         except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
             pass
 

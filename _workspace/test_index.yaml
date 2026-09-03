@@ -211,6 +211,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -633,6 +634,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1093,6 +1095,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -1522,6 +1525,7 @@ backend:
     - tests/unit/engine/test_cycle235_fill_qty_overrun.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -1995,6 +1999,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -2419,6 +2424,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -2885,6 +2891,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3311,6 +3318,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3769,6 +3777,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -4203,6 +4212,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -4664,6 +4674,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5097,6 +5108,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5558,6 +5570,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5991,6 +6004,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6457,6 +6471,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -6887,6 +6902,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7345,6 +7361,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -7779,6 +7796,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -8145,6 +8163,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -8550,6 +8569,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -8984,6 +9004,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9448,6 +9469,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -9878,6 +9900,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10341,6 +10364,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -10774,6 +10798,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -11345,6 +11370,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -11684,6 +11710,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12137,6 +12164,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -12562,6 +12590,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12924,6 +12953,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -13208,6 +13238,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -13596,6 +13627,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -14023,6 +14055,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14387,6 +14420,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -14672,6 +14706,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -14968,6 +15003,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -15253,6 +15289,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -15638,6 +15675,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -16068,6 +16106,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16539,6 +16578,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -16964,6 +17004,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -17458,6 +17499,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17861,6 +17903,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -18331,6 +18374,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -18751,6 +18795,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -19213,6 +19258,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -19644,6 +19690,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -20006,6 +20053,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -20396,6 +20444,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -20822,6 +20871,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -21334,6 +21384,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -21738,6 +21789,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -22190,6 +22242,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -22615,6 +22668,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23084,6 +23138,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -23510,6 +23565,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23967,6 +24023,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24401,6 +24458,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24863,6 +24921,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -25296,6 +25355,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -25759,6 +25819,7 @@ backend:
     - tests/unit/ast/test_cycle235_ast_execution_qty.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -26191,6 +26252,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -26557,6 +26619,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -26840,6 +26903,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -27121,6 +27185,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -27412,6 +27477,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -27794,6 +27860,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -28225,6 +28292,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -28585,6 +28653,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -28867,6 +28936,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycleH_ast_portfolio_risk_isolation.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
@@ -28945,6 +29015,7 @@ backend:
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29183,6 +29254,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -29557,6 +29629,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -29989,6 +30062,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -30361,6 +30435,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -30640,6 +30715,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scanner/test_cycle101_emit_visibility.py
     - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
@@ -31045,6 +31121,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -31467,6 +31544,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -31923,6 +32001,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -32355,6 +32434,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -32718,6 +32798,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -32947,6 +33028,7 @@ backend:
     - tests/unit/ast/test_budget_limit_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/engine/strategies/test_bfb_turtle_sizing.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle220_kojiro_breakeven_floor.py
@@ -33315,6 +33397,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -33701,6 +33784,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34134,6 +34218,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -34589,6 +34674,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -35023,6 +35109,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -35685,6 +35772,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -35988,6 +36076,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -36405,6 +36494,7 @@ backend:
     - tests/unit/ast/test_budget_limit_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle220_kojiro_breakeven_floor.py
     - tests/unit/engine/strategies/test_cycle229_momentum_buy_cutoff.py
@@ -36563,6 +36653,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -36944,6 +37035,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37378,6 +37470,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -37835,6 +37928,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -38269,6 +38363,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -38635,6 +38730,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -38957,6 +39053,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -39219,6 +39316,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -39531,6 +39629,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -39792,6 +39891,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -40086,6 +40186,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -40374,6 +40475,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -40658,6 +40760,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -40942,6 +41045,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -41234,6 +41338,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -41480,6 +41585,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_bfb_universe_expansion.py
     - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle185_cluster1_reset.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     transitive_tests:
@@ -41571,6 +41677,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -41844,6 +41951,7 @@ backend:
     - tests/unit/engine/test_cycle222a_tick_day_high_anchor.py
     - tests/unit/engine/test_cycle233_watcher_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_strategy_fallback_budget.py
@@ -41885,6 +41993,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -42098,6 +42207,7 @@ backend:
     - tests/unit/engine/test_cycle222a2_multiday_anchor.py
     - tests/unit/engine/test_cycle222a2_regression_guards.py
     - tests/unit/engine/test_cycle222a_tick_day_high_anchor.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
     - tests/unit/engine/test_kojiro_wiring.py
     transitive_tests:
@@ -42188,6 +42298,7 @@ backend:
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -42486,6 +42597,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -42779,6 +42891,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -43005,6 +43118,7 @@ backend:
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/strategies/test_vcp_turtle_sizing.py
     - tests/unit/engine/test_budget_limit_gate.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_multiday_strategies_registry.py
@@ -43097,6 +43211,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -43402,6 +43517,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -43655,6 +43771,7 @@ backend:
     - tests/integration/test_vb_board_stop_loss_fallback.py
     - tests/unit/ast/test_budget_limit_ast.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -43774,6 +43891,7 @@ backend:
     - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -44718,6 +44836,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -45135,6 +45254,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -45480,6 +45600,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -45798,6 +45919,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -46246,6 +46368,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -46669,6 +46792,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -46940,6 +47064,7 @@ backend:
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/turtle_sizing.py:
     direct_tests:
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_turtle_sizing.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -47019,53 +47144,390 @@ backend:
     - tests/integration/test_stale_watcher.py
     - tests/integration/test_stale_watcher_pool.py
     - tests/integration/test_vb_board_stop_loss_fallback.py
+    - tests/unit/api/test_base.py
+    - tests/unit/api/test_base_logging.py
+    - tests/unit/api/test_base_retry_logging.py
     - tests/unit/api/test_condition_cache.py
+    - tests/unit/api/test_condition_quote_routing.py
+    - tests/unit/api/test_condition_stock_basics.py
+    - tests/unit/api/test_cycle107_inquire_stock_basics_merge.py
+    - tests/unit/api/test_cycle108_inquire_stock_basics_hts_avls.py
+    - tests/unit/api/test_cycle109_market_cap_allowlist.py
+    - tests/unit/api/test_cycle112_krx_client.py
+    - tests/unit/api/test_cycle115_krx_endpoints.py
+    - tests/unit/api/test_cycle129_kis_master_download.py
+    - tests/unit/api/test_cycle129_parse_master_fixed_width.py
+    - tests/unit/api/test_cycle144_graceful_visibility.py
+    - tests/unit/api/test_cycle145_raw_preserve.py
+    - tests/unit/api/test_cycle149_market_operation.py
+    - tests/unit/api/test_cycle155_merge_35_keys.py
+    - tests/unit/api/test_cycle172_daily_ranged_backfill.py
+    - tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py
+    - tests/unit/api/test_cycle181_token_expiry_whitelist.py
+    - tests/unit/api/test_cycle191_add_business_days.py
+    - tests/unit/api/test_cycle196_backfill_window_clamp.py
+    - tests/unit/api/test_cycle229_single_price_classifier.py
+    - tests/unit/api/test_cycle76_error_preservation_matrix.py
+    - tests/unit/api/test_cycle76_recovered_collector.py
+    - tests/unit/api/test_cycle76_request_5xx_dedupe.py
+    - tests/unit/api/test_cycleC1_finance_allowlist.py
+    - tests/unit/api/test_cycleC1_finance_fetch.py
+    - tests/unit/api/test_inquire_ccnl.py
+    - tests/unit/api/test_insufficient_classification.py
+    - tests/unit/api/test_quote_pool.py
+    - tests/unit/api/test_quote_pool_5xx_dedupe.py
+    - tests/unit/api/test_quote_pool_label_skip.py
+    - tests/unit/api/test_rejection_classifier_pre_market_priority.py
+    - tests/unit/api/test_vi_status_quote_allowlist.py
+    - tests/unit/ast/test_ast_weight_no_magnitude_heuristic.py
     - tests/unit/ast/test_budget_limit_ast.py
+    - tests/unit/ast/test_cycle100_ast_count_eager_refresh_three_prefix.py
+    - tests/unit/ast/test_cycle100_docstring_kis_chk_citation.py
+    - tests/unit/ast/test_cycle101_ast_chk_citation.py
     - tests/unit/ast/test_cycle101_ast_flush_required.py
     - tests/unit/ast/test_cycle101_ast_task_cancel.py
+    - tests/unit/ast/test_cycle101_fluctuation_purged.py
     - tests/unit/ast/test_cycle101_universe_eager_refresh_purged.py
+    - tests/unit/ast/test_cycle102_ast_callback_exception.py
+    - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
+    - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
+    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
+    - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
+    - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
+    - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
+    - tests/unit/ast/test_cycle112_security_ast.py
+    - tests/unit/ast/test_cycle115_krx_endpoint_urls.py
+    - tests/unit/ast/test_cycle115_krx_no_plaintext_key.py
     - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
+    - tests/unit/ast/test_cycle124_ast_endpoint.py
+    - tests/unit/ast/test_cycle126_ast_basics_refresh_persistence.py
+    - tests/unit/ast/test_cycle127_ast_progress_hooks.py
+    - tests/unit/ast/test_cycle128_ast_no_range_9999_silent_cap.py
+    - tests/unit/ast/test_cycle129_ast_master_raw_separation.py
+    - tests/unit/ast/test_cycle129_ast_task_key_master_persistence.py
+    - tests/unit/ast/test_cycle136_ast_helpers.py
+    - tests/unit/ast/test_cycle137_ast_dry_continuation.py
+    - tests/unit/ast/test_cycle138_ast_dry_3rd_migration.py
+    - tests/unit/ast/test_cycle139_ast_dry_card25_termination.py
+    - tests/unit/ast/test_cycle147_ast_sell_fill_fallback.py
+    - tests/unit/ast/test_cycle149_ast_dict_separation.py
+    - tests/unit/ast/test_cycle155_ast_merge_keys.py
+    - tests/unit/ast/test_cycle163_ast_persistence.py
+    - tests/unit/ast/test_cycle167_ast_no_dead_market_cap_funcs.py
+    - tests/unit/ast/test_cycle172_safety_no_trading_diff.py
+    - tests/unit/ast/test_cycle180_prepare_reset_ast.py
+    - tests/unit/ast/test_cycle181_token_whitelist_ast.py
+    - tests/unit/ast/test_cycle182_call_auction_ast_gate.py
+    - tests/unit/ast/test_cycle183_stale3_stale4_ast.py
+    - tests/unit/ast/test_cycle184_pool_slots_ast.py
     - tests/unit/ast/test_cycle185_cluster1_ast.py
+    - tests/unit/ast/test_cycle187_ast_read_retry.py
+    - tests/unit/ast/test_cycle189_ast_read_retry.py
+    - tests/unit/ast/test_cycle190_ast_write_log_guard.py
     - tests/unit/ast/test_cycle191_cooldown_ast.py
+    - tests/unit/ast/test_cycle192_ast_purge_loop.py
+    - tests/unit/ast/test_cycle193_ast_fresh_gate.py
+    - tests/unit/ast/test_cycle198_ast_default_params_scope.py
     - tests/unit/ast/test_cycle201_vb_cooldown_ast.py
+    - tests/unit/ast/test_cycle203_ast_no_iscd_block.py
+    - tests/unit/ast/test_cycle204_ast_no_caution_block.py
+    - tests/unit/ast/test_cycle208_ast_no_box_filter.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
+    - tests/unit/ast/test_cycle210_ast_conservative_keys.py
+    - tests/unit/ast/test_cycle211_ast_default_params_scope.py
+    - tests/unit/ast/test_cycle212_ast_entry_threshold.py
     - tests/unit/ast/test_cycle213_ltv_cooldown_ast.py
+    - tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
+    - tests/unit/ast/test_cycle222a3_ast_anchor_owner_coupling.py
+    - tests/unit/ast/test_cycle222a3_ast_followup_fixes.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
+    - tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py
+    - tests/unit/ast/test_cycle223f_ast_manual_apply_safeguard.py
+    - tests/unit/ast/test_cycle223g3_ast_guard_sees_staged.py
+    - tests/unit/ast/test_cycle227_ast_acml_vol_guards.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle229_ast_cutoff_guards.py
+    - tests/unit/ast/test_cycle233_ast_account_risk.py
+    - tests/unit/ast/test_cycle234_ast_uptime.py
+    - tests/unit/ast/test_cycle235_ast_execution_qty.py
+    - tests/unit/ast/test_cycle239_ast_gate_freshness.py
+    - tests/unit/ast/test_cycle240_ast_desired_filter.py
+    - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
+    - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
+    - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
+    - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
+    - tests/unit/ast/test_cycle74_ast_aggregator_helper.py
+    - tests/unit/ast/test_cycle76_ast_api_retry_helper.py
+    - tests/unit/ast/test_cycle78_ast_flush_required.py
+    - tests/unit/ast/test_cycle79_ast_task_cancel_required.py
+    - tests/unit/ast/test_cycle81_ast_price_filter_key.py
+    - tests/unit/ast/test_cycle83_ast_task_cancel_required.py
+    - tests/unit/ast/test_cycle83_ast_tradable_boards_no_reference.py
+    - tests/unit/ast/test_cycle84_ast_no_update_route.py
+    - tests/unit/ast/test_cycle89_ast_flush_required.py
+    - tests/unit/ast/test_cycle89_ast_task_cancel_required.py
+    - tests/unit/ast/test_cycle89_g_reject_persistence.py
+    - tests/unit/ast/test_cycle90_g_reject_persistence.py
+    - tests/unit/ast/test_cycle91_ast_pagination_pattern.py
+    - tests/unit/ast/test_cycle92_g_reject_persistence.py
+    - tests/unit/ast/test_cycle93_ast_chain_required.py
+    - tests/unit/ast/test_cycle94_ast_no_industry_code.py
+    - tests/unit/ast/test_cycle96_ast_no_zero_market_code.py
+    - tests/unit/ast/test_cycle97_ast_no_volume_rank.py
+    - tests/unit/ast/test_cycle98_ast_chk_citation_required.py
+    - tests/unit/ast/test_cycle98_ast_rank_sort_cls_code.py
+    - tests/unit/ast/test_cycle99_default_arg_persistence.py
+    - tests/unit/ast/test_cycle99_kis_limit_documentation.py
     - tests/unit/ast/test_cycleH_ast_portfolio_risk_isolation.py
+    - tests/unit/ast/test_cycleM0_ast_pg_retry.py
+    - tests/unit/ast/test_cycleM5_no_supabase_outside_db.py
+    - tests/unit/ast/test_external_llm_reject_patterns.py
+    - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
+    - tests/unit/auth/test_token.py
+    - tests/unit/auth/test_token_global_serialization.py
+    - tests/unit/auth/test_token_manager_multi.py
+    - tests/unit/db/test_backtest_runs.py
+    - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
+    - tests/unit/db/test_cycle101_84_history_trigger.py
+    - tests/unit/db/test_cycle108_list_by_filter.py
+    - tests/unit/db/test_cycle112_krx_open_api_config.py
+    - tests/unit/db/test_cycle122_stock_master_daily.py
+    - tests/unit/db/test_cycle124_stock_master_stats_extended.py
+    - tests/unit/db/test_cycle126_get_stats_exact_count.py
+    - tests/unit/db/test_cycle128_get_stats_exact_count_per_key.py
+    - tests/unit/db/test_cycle128_list_paged_by_filter.py
+    - tests/unit/db/test_cycle129_master_raw_column.py
+    - tests/unit/db/test_cycle145_funnel_upsert.py
+    - tests/unit/db/test_cycle146_upsert_master_raw_nxt.py
+    - tests/unit/db/test_cycle147_trade_history_strategy_lookup.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
+    - tests/unit/db/test_cycle153_list_by_filter_index_flags.py
+    - tests/unit/db/test_cycle162_pending_next_day_clear_crud.py
+    - tests/unit/db/test_cycle163_count_active.py
+    - tests/unit/db/test_cycle166_hts_avls_unit_correction.py
+    - tests/unit/db/test_cycle168_list_paged_generated_cols.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
+    - tests/unit/db/test_cycle171_funnel_provisional.py
+    - tests/unit/db/test_cycle172_retention_and_adapter.py
+    - tests/unit/db/test_cycle173_adapter_lock_stale_gate.py
+    - tests/unit/db/test_cycle175_log_retention_loop.py
+    - tests/unit/db/test_cycle187_daily_read_retry.py
+    - tests/unit/db/test_cycle187_execute_with_retry.py
+    - tests/unit/db/test_cycle189_read_retry_expand.py
+    - tests/unit/db/test_cycle190_write_log_never_raise.py
+    - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
+    - tests/unit/db/test_cycle193_task_marker_helpers.py
+    - tests/unit/db/test_cycle205_list_by_filter_db_side.py
+    - tests/unit/db/test_cycle235_forced_update_partial.py
+    - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
+    - tests/unit/db/test_cycle65_trade_amount_filter_config.py
+    - tests/unit/db/test_cycle68_date_today_kst_g12.py
+    - tests/unit/db/test_cycle68_kst_global_ast_guard_g10.py
+    - tests/unit/db/test_cycle68_kst_helper_module_g1.py
+    - tests/unit/db/test_cycle68_kst_timestamp_per_module_g2_g9.py
+    - tests/unit/db/test_cycle68_stock_master_is_stale_kst_g11.py
+    - tests/unit/db/test_cycle84_count_eager_refresh_today.py
+    - tests/unit/db/test_cycle84_cycle72_dedupe_no_impact.py
+    - tests/unit/db/test_cycle84_get_stats_aggregation.py
+    - tests/unit/db/test_cycle84_kst_consistency.py
+    - tests/unit/db/test_cycle84_list_all_pagination.py
+    - tests/unit/db/test_cycle84_list_history_per_ticker.py
+    - tests/unit/db/test_cycle84_migration_032_applied.py
+    - tests/unit/db/test_cycle84_trigger_insert.py
+    - tests/unit/db/test_cycle84_trigger_ttl_refresh.py
+    - tests/unit/db/test_cycle84_trigger_update.py
+    - tests/unit/db/test_cycle89_history_trigger_persistence.py
+    - tests/unit/db/test_cycleC1_financial_migration.py
+    - tests/unit/db/test_cycleC1_stock_master_financial_crud.py
+    - tests/unit/db/test_cycleM0_config_and_safety.py
+    - tests/unit/db/test_cycleM0_init_conn_codec.py
+    - tests/unit/db/test_cycleM0_pg_helpers.py
+    - tests/unit/db/test_cycleM1_1_positions_pg.py
+    - tests/unit/db/test_cycleM1_1_strategy_config_pg.py
+    - tests/unit/db/test_cycleM1_2_backtest_runs_pg.py
+    - tests/unit/db/test_cycleM1_2_log_reports_pg.py
+    - tests/unit/db/test_cycleM1_2_market_regime_pg.py
+    - tests/unit/db/test_cycleM1_2_pending_ndc_pg.py
+    - tests/unit/db/test_cycleM1_3_daily_performance_pg.py
+    - tests/unit/db/test_cycleM1_3_strategy_funnel_pg.py
+    - tests/unit/db/test_cycleM2a_safety_diff0.py
+    - tests/unit/db/test_cycleM2a_system_config_pg.py
+    - tests/unit/db/test_cycleM2a_trade_history_pg.py
+    - tests/unit/db/test_cycleM2b_safety_diff0.py
+    - tests/unit/db/test_cycleM2b_stock_master_daily_pg.py
+    - tests/unit/db/test_cycleM2b_stock_master_pg.py
+    - tests/unit/db/test_cycleM3a_kis_quote_accounts_pg.py
+    - tests/unit/db/test_cycleM3a_parameter_recommendations_pg.py
+    - tests/unit/db/test_cycleM3a_safety_diff0.py
+    - tests/unit/db/test_cycleM3a_stock_master_financial_pg.py
+    - tests/unit/db/test_cycleM3b_safety_diff0.py
+    - tests/unit/db/test_cycleM3b_system_logs_pg.py
+    - tests/unit/db/test_cycleM5_new_helpers.py
+    - tests/unit/db/test_cycleM6_date_column_str_binding.py
+    - tests/unit/db/test_cycleM6_to_date_helper.py
+    - tests/unit/db/test_kis_quote_accounts.py
+    - tests/unit/db/test_kis_quote_accounts_cache.py
+    - tests/unit/db/test_log_reports_openai_meta.py
+    - tests/unit/db/test_market_regime_snapshots.py
+    - tests/unit/db/test_name_coalesce_list_by_filter.py
+    - tests/unit/db/test_parameter_recommendations_backtest.py
+    - tests/unit/db/test_parameter_recommendations_v2.py
+    - tests/unit/db/test_parameter_recommendations_weight_reasoning.py
+    - tests/unit/db/test_safe_write_log.py
+    - tests/unit/db/test_stock_master.py
+    - tests/unit/db/test_stock_master_upsert.py
+    - tests/unit/db/test_strategy_funnel_crud.py
+    - tests/unit/db/test_system_config_auto_apply.py
+    - tests/unit/db/test_system_config_auto_regime.py
+    - tests/unit/db/test_system_config_buy_block.py
+    - tests/unit/db/test_system_config_cash_ratio.py
+    - tests/unit/db/test_system_config_integrations.py
+    - tests/unit/db/test_system_logs_filter.py
+    - tests/unit/db/test_system_logs_kst_timestamp.py
+    - tests/unit/db/test_system_logs_retention.py
+    - tests/unit/db/test_system_logs_search.py
+    - tests/unit/db/test_trade_history_for_sync.py
+    - tests/unit/db/test_trade_history_kst.py
+    - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
+    - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
+    - tests/unit/e2e_mocks/test_cycle105_ast_playwright_resourcetype_guard.py
+    - tests/unit/e2e_mocks/test_cycle105_ast_strategies_response_fallback.py
+    - tests/unit/e2e_mocks/test_cycle124_api_mocks_daily_route.py
+    - tests/unit/e2e_mocks/test_cycle75_api_mocks_routes_registered.py
+    - tests/unit/e2e_mocks/test_cycle85_api_mocks_stock_master_lifo.py
+    - tests/unit/e2e_mocks/test_e2e_spec_timeout_required.py
+    - tests/unit/engine/scanner/test_cycle100_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_88_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle101_emit_visibility.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_input_iscd.py
+    - tests/unit/engine/scanner/test_cycle101_market_cap_pagination.py
+    - tests/unit/engine/scanner/test_cycle101_rate_limit_env_split.py
+    - tests/unit/engine/scanner/test_cycle101_stock_master_age_warning.py
+    - tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py
+    - tests/unit/engine/scanner/test_cycle116_krx_mktcap_unit.py
+    - tests/unit/engine/scanner/test_cycle117_krx_basdd_retry.py
+    - tests/unit/engine/scanner/test_cycle118_krx_trdval_mapping.py
+    - tests/unit/engine/scanner/test_cycle119_krx_kis_key_mapping.py
+    - tests/unit/engine/scanner/test_cycle120_ttl_bypass.py
+    - tests/unit/engine/scanner/test_cycle155_block_13_keys.py
+    - tests/unit/engine/scanner/test_cycle155_safety.py
+    - tests/unit/engine/scanner/test_cycle166_krx_fallback_eok_unit.py
+    - tests/unit/engine/scanner/test_cycle183_stale3_stale4.py
+    - tests/unit/engine/scanner/test_cycle184_pool_union_slots.py
+    - tests/unit/engine/scanner/test_cycle203_iscd_stat_no_overblock.py
+    - tests/unit/engine/scanner/test_cycle204_investment_caution_unblock.py
+    - tests/unit/engine/scanner/test_cycle65_apply_trade_amount_filter.py
+    - tests/unit/engine/scanner/test_cycle65_daily_summary.py
+    - tests/unit/engine/scanner/test_cycle65_get_acml_tr_pbmn_fallback.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_ast_guards.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_cache.py
+    - tests/unit/engine/scanner/test_cycle65_trade_amount_filter_protected.py
+    - tests/unit/engine/scanner/test_cycle81_price_filter_key_fix.py
+    - tests/unit/engine/scanner/test_cycle81_real_data_regression.py
+    - tests/unit/engine/scanner/test_cycle81_trade_amount_filter_fallback_removal.py
+    - tests/unit/engine/scanner/test_cycle89_etf_exclusion.py
+    - tests/unit/engine/scanner/test_cycle89_fetch_top_500_universe.py
+    - tests/unit/engine/scanner/test_cycle89_kospi_kosdaq_separation.py
+    - tests/unit/engine/scanner/test_cycle91_fetch_top_500_universe_full.py
+    - tests/unit/engine/scanner/test_cycle91_graceful_kis_error.py
+    - tests/unit/engine/scanner/test_cycle91_no_pagination_legacy.py
+    - tests/unit/engine/scanner/test_cycle91_rate_limit_sleep.py
+    - tests/unit/engine/scanner/test_cycle91_volume_rank_max_pages_guard.py
+    - tests/unit/engine/scanner/test_cycle91_volume_rank_pagination.py
+    - tests/unit/engine/scanner/test_cycle91_volume_rank_top_n_early_break.py
+    - tests/unit/engine/scanner/test_cycle94_emit_visibility.py
+    - tests/unit/engine/scanner/test_cycle94_etf_exclusion_500.py
+    - tests/unit/engine/scanner/test_cycle94_fid_input_iscd_fix.py
+    - tests/unit/engine/scanner/test_cycle94_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle94_graceful_market_id_missing.py
+    - tests/unit/engine/scanner/test_cycle94_kospi_kosdaq_split_500.py
+    - tests/unit/engine/scanner/test_cycle94_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle94_post_split_market_id.py
+    - tests/unit/engine/scanner/test_cycle94_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle94_volume_rank_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle95_chain_with_unknown.py
+    - tests/unit/engine/scanner/test_cycle95_classify_market_graceful.py
+    - tests/unit/engine/scanner/test_cycle95_emit_visibility_unknown.py
+    - tests/unit/engine/scanner/test_cycle95_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle95_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle95_universe_500_lock_in_break.py
+    - tests/unit/engine/scanner/test_cycle95_unknown_split.py
+    - tests/unit/engine/scanner/test_cycle96_emit_visibility_2call.py
+    - tests/unit/engine/scanner/test_cycle96_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle96_kospi_kosdaq_separation_2call.py
+    - tests/unit/engine/scanner/test_cycle96_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle96_market_input_iscd_restored.py
+    - tests/unit/engine/scanner/test_cycle96_post_split_removed.py
+    - tests/unit/engine/scanner/test_cycle96_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle96_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle96_two_call_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_emit_visibility_fluctuation.py
+    - tests/unit/engine/scanner/test_cycle97_fid_input_cnt_1_control.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_pagination_500.py
+    - tests/unit/engine/scanner/test_cycle97_fluctuation_url_tr_id.py
+    - tests/unit/engine/scanner/test_cycle97_g_reject_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_kst_persistence.py
+    - tests/unit/engine/scanner/test_cycle97_rate_limit_2call.py
+    - tests/unit/engine/scanner/test_cycle97_scanner_upsert_chain.py
+    - tests/unit/engine/scanner/test_cycle97_volume_rank_deprecated.py
+    - tests/unit/engine/scanner/test_cycle98_rank_sort_cls_code_fix.py
+    - tests/unit/engine/scanner/test_cycle99_60_ticker_persistence.py
+    - tests/unit/engine/scanner/test_cycle99_pagination_purged.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/scheduler/test_post_nxt_open_time.py
+    - tests/unit/engine/scheduler/test_tick_tr_id_by_time.py
+    - tests/unit/engine/session/test_board_schedule_cycle26.py
     - tests/unit/engine/stale_manager/test_cycle215_resubscribe_split_brain.py
     - tests/unit/engine/stale_manager/test_cycle216_priority_throttle_call_auction.py
     - tests/unit/engine/stale_manager/test_cycle217_unsubscribe_guard.py
     - tests/unit/engine/stale_manager/test_cycle218_retry_counter_cap.py
+    - tests/unit/engine/stale_manager/test_cycle240_resubscribe_desired_filter.py
     - tests/unit/engine/stale_manager/test_cycle66_resubscribe_cap_priority_fix.py
+    - tests/unit/engine/stale_manager/test_cycle67_cycle60_persistence_g14_g15.py
     - tests/unit/engine/stale_manager/test_cycle67_cycle63_cycle66_persistence_g10_g13.py
+    - tests/unit/engine/stale_manager/test_cycle67_cycle66_priority_cap_persistence_g17.py
+    - tests/unit/engine/stale_manager/test_cycle67_dependency_logger_g6_g9.py
+    - tests/unit/engine/stale_manager/test_cycle67_facade_patch_persistence_g16.py
+    - tests/unit/engine/stale_manager/test_cycle67_module_decomposition_g1_g5.py
     - tests/unit/engine/strategies/test_bfb_restart_recovery.py
     - tests/unit/engine/strategies/test_bfb_turtle_sizing.py
     - tests/unit/engine/strategies/test_bull_flag_breakout.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_min_trade_failed.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_prepare.py
     - tests/unit/engine/strategies/test_bull_flag_breakout_retention.py
+    - tests/unit/engine/strategies/test_cycle103_momentum_log_threshold.py
     - tests/unit/engine/strategies/test_cycle108_bfb_scan_universe.py
+    - tests/unit/engine/strategies/test_cycle108_ltv_scan_universe.py
+    - tests/unit/engine/strategies/test_cycle108_vb_scan_universe.py
     - tests/unit/engine/strategies/test_cycle119_donchian_scan_universe.py
     - tests/unit/engine/strategies/test_cycle123_donchian_db_high.py
     - tests/unit/engine/strategies/test_cycle125_vcp_atr_db_hit.py
+    - tests/unit/engine/strategies/test_cycle132_momentum_funnel_exclusion.py
+    - tests/unit/engine/strategies/test_cycle143_vb_ltv_funnel_hook.py
+    - tests/unit/engine/strategies/test_cycle148_vb_prepare_price_filter.py
     - tests/unit/engine/strategies/test_cycle151_4_strategies_price_filter.py
     - tests/unit/engine/strategies/test_cycle153_donchian_index_filter.py
+    - tests/unit/engine/strategies/test_cycle156_nxt_filter_removal.py
     - tests/unit/engine/strategies/test_cycle157_master_block_hook_and_vcp_listfilter.py
+    - tests/unit/engine/strategies/test_cycle158_momentum_next_day_clear_cap.py
+    - tests/unit/engine/strategies/test_cycle158_prepare_auto_retry.py
+    - tests/unit/engine/strategies/test_cycle163_prepare_retry_hook.py
     - tests/unit/engine/strategies/test_cycle170_card_b_funnel_atomic.py
+    - tests/unit/engine/strategies/test_cycle170_card_c_step1_standardize.py
+    - tests/unit/engine/strategies/test_cycle173_prepare_db_equivalence.py
     - tests/unit/engine/strategies/test_cycle175_universe_union_scan_stats.py
+    - tests/unit/engine/strategies/test_cycle180_vb_ltv_prepare_reset.py
     - tests/unit/engine/strategies/test_cycle191_cooldown_wiring.py
     - tests/unit/engine/strategies/test_cycle198_bfb_flag_lookback_min.py
+    - tests/unit/engine/strategies/test_cycle201_vb_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle209_donchian_extension_gate.py
     - tests/unit/engine/strategies/test_cycle211_bfb_flag_retracement.py
+    - tests/unit/engine/strategies/test_cycle213_ltv_reentry_cooldown.py
     - tests/unit/engine/strategies/test_cycle220_kojiro_breakeven_floor.py
     - tests/unit/engine/strategies/test_cycle223_donchian_business_days_held.py
     - tests/unit/engine/strategies/test_cycle223_donchian_rederive_offbyone.py
@@ -47084,12 +47546,16 @@ backend:
     - tests/unit/engine/strategies/test_cycle231_stage3_date_key.py
     - tests/unit/engine/strategies/test_cycle233_effective_stop_mirrors.py
     - tests/unit/engine/strategies/test_cycle237_donchian_exit_log_cap.py
+    - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
+    - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
     - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
     - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
+    - tests/unit/engine/strategies/test_cycleG_vb_failed_breakout_exit.py
+    - tests/unit/engine/strategies/test_cycleG_vb_rs_rsi_observe.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
     - tests/unit/engine/strategies/test_donchian_swing_box_contraction.py
@@ -47104,19 +47570,32 @@ backend:
     - tests/unit/engine/strategies/test_kojiro_sector_cap_held.py
     - tests/unit/engine/strategies/test_kojiro_turtle_guarded.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
+    - tests/unit/engine/strategies/test_long_tail_volatility.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_active_boards.py
+    - tests/unit/engine/strategies/test_long_tail_volatility_scan_stats.py
+    - tests/unit/engine/strategies/test_momentum.py
+    - tests/unit/engine/strategies/test_momentum_scan_stats.py
     - tests/unit/engine/strategies/test_p1a_donchian_layered_exit.py
     - tests/unit/engine/strategies/test_pr15_review_fixes.py
     - tests/unit/engine/strategies/test_refactor_a1a2_prepare_filters_base.py
     - tests/unit/engine/strategies/test_refactor_a3_cooldown_base.py
     - tests/unit/engine/strategies/test_refactor_a5a6_atr_base.py
+    - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
     - tests/unit/engine/strategies/test_vcp_bfb_exit_persistence.py
     - tests/unit/engine/strategies/test_vcp_bfb_targets_payload.py
     - tests/unit/engine/strategies/test_vcp_bfb_universe_expansion.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/strategies/test_vcp_breakout_mcap_pass.py
     - tests/unit/engine/strategies/test_vcp_turtle_sizing.py
+    - tests/unit/engine/strategies/test_volatility_breakout.py
+    - tests/unit/engine/strategies/test_volatility_breakout_active_boards.py
+    - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
+    - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
+    - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
     - tests/unit/engine/test_auto_apply_recommendations.py
+    - tests/unit/engine/test_b1_market_closed_zombie_block.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_backtest_engine.py
     - tests/unit/engine/test_backtest_engine_db_toggle.py
     - tests/unit/engine/test_backtest_engine_nested_metrics.py
@@ -47131,40 +47610,90 @@ backend:
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_budget_invariant_runtime_guard.py
     - tests/unit/engine/test_budget_limit_gate.py
+    - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
+    - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
+    - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
+    - tests/unit/engine/test_cycle101_32_r4_persistence.py
+    - tests/unit/engine/test_cycle101_38_명문화_persistence.py
+    - tests/unit/engine/test_cycle101_kst_persistence.py
     - tests/unit/engine/test_cycle101_time_full_universe_load.py
+    - tests/unit/engine/test_cycle102_force_retry_threshold.py
+    - tests/unit/engine/test_cycle102_stale_summary_emit.py
+    - tests/unit/engine/test_cycle106_full_universe_load_idempotency.py
     - tests/unit/engine/test_cycle106_full_universe_load_lifecycle.py
     - tests/unit/engine/test_cycle122_daily_load_task.py
+    - tests/unit/engine/test_cycle126_basics_refresh_once.py
+    - tests/unit/engine/test_cycle127_refresh_progress_state.py
+    - tests/unit/engine/test_cycle129_master_load_once.py
     - tests/unit/engine/test_cycle129_master_task_loop.py
+    - tests/unit/engine/test_cycle129_master_uri_priority.py
+    - tests/unit/engine/test_cycle133_metrics_collector_helper.py
     - tests/unit/engine/test_cycle134_task_loop_helper.py
+    - tests/unit/engine/test_cycle142_ltv_defect_fix.py
+    - tests/unit/engine/test_cycle146_start_graceful_recovery.py
+    - tests/unit/engine/test_cycle147_sell_fill_strategy_fallback.py
+    - tests/unit/engine/test_cycle149_market_operation_monitor.py
     - tests/unit/engine/test_cycle152_wait_until_runaway_hotfix.py
+    - tests/unit/engine/test_cycle153_master_load_kospi200_kosdaq150.py
+    - tests/unit/engine/test_cycle154_kospi200_code_value_hotfix.py
+    - tests/unit/engine/test_cycle158_task_stagger.py
+    - tests/unit/engine/test_cycle159_stagger_threshold.py
     - tests/unit/engine/test_cycle160_wait_until_break_restore.py
+    - tests/unit/engine/test_cycle161_buy_fill_price_consistency.py
+    - tests/unit/engine/test_cycle162_call_auction_stale_skip.py
     - tests/unit/engine/test_cycle163_boot_prepare_guard.py
+    - tests/unit/engine/test_cycle163_buy_fill_db_error_isolation.py
     - tests/unit/engine/test_cycle164_open_confirm_retry_chain.py
     - tests/unit/engine/test_cycle171_evening_funnel.py
+    - tests/unit/engine/test_cycle172_vcp_universe_backfill.py
+    - tests/unit/engine/test_cycle176_basics_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle176_e2e_premarket_preservation.py
+    - tests/unit/engine/test_cycle182_call_auction_time_gate.py
     - tests/unit/engine/test_cycle185_cluster1_reset.py
+    - tests/unit/engine/test_cycle186_market_op_cb_heuristic.py
     - tests/unit/engine/test_cycle188_wait_until_advance_return.py
     - tests/unit/engine/test_cycle189_reprepare_emit_cap.py
+    - tests/unit/engine/test_cycle190_crash_handler_instrument.py
+    - tests/unit/engine/test_cycle193_immediate_fresh_gate.py
+    - tests/unit/engine/test_cycle194_force_reconnect_db_label.py
+    - tests/unit/engine/test_cycle195_stale_diag_db_label.py
+    - tests/unit/engine/test_cycle196_vcp_backfill_convergence.py
     - tests/unit/engine/test_cycle199_funnel_stages_report.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
     - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
+    - tests/unit/engine/test_cycle202_stale_gate_time_independence.py
+    - tests/unit/engine/test_cycle206_daily_load_universe.py
     - tests/unit/engine/test_cycle210_auto_apply_ratchet_block.py
     - tests/unit/engine/test_cycle212_entry_threshold_param_range.py
     - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle221_market_op_off_main.py
     - tests/unit/engine/test_cycle222a2_multiday_anchor.py
     - tests/unit/engine/test_cycle222a2_regression_guards.py
+    - tests/unit/engine/test_cycle222a3_day_high_exclusion_and_log.py
     - tests/unit/engine/test_cycle222a_swing_rest_poll_day_high.py
     - tests/unit/engine/test_cycle222a_tick_day_high_anchor.py
     - tests/unit/engine/test_cycle223_donchian_exit_param_ranges.py
+    - tests/unit/engine/test_cycle227_e2e_acml_vol_pipeline.py
+    - tests/unit/engine/test_cycle227_risk_on_tick_acml.py
+    - tests/unit/engine/test_cycle227_tick_volume.py
     - tests/unit/engine/test_cycle227_universe_guard_acml.py
+    - tests/unit/engine/test_cycle229_sell_fallback_e2e.py
+    - tests/unit/engine/test_cycle233_account_risk_guard.py
+    - tests/unit/engine/test_cycle233_oversized_fallback.py
+    - tests/unit/engine/test_cycle233_portfolio_risk_effective.py
     - tests/unit/engine/test_cycle233_watcher_gate.py
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
+    - tests/unit/engine/test_cycle234_uptime_monitor.py
+    - tests/unit/engine/test_cycle235_fill_qty_overrun.py
+    - tests/unit/engine/test_cycle236_sell_qty_exceeded.py
+    - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
+    - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -47173,29 +47702,62 @@ backend:
     - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
     - tests/unit/engine/test_cycle61_phase2A2_cap_dict_identity.py
     - tests/unit/engine/test_cycle61_phase2A2_constants.py
+    - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
     - tests/unit/engine/test_cycle61_phase2A2_delegation.py
     - tests/unit/engine/test_cycle61_phase2A2_delta_unsubscribe_race.py
+    - tests/unit/engine/test_cycle61_phase2A2_dependency_direction.py
+    - tests/unit/engine/test_cycle61_phase2A2_import_sanity.py
     - tests/unit/engine/test_cycle61_phase2A2_reset_daily.py
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_5min.py
     - tests/unit/engine/test_cycle61_phase2A2_silent_inactive_cap.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_held_protection.py
     - tests/unit/engine/test_cycle61_phase2A2_universe_guard_ndc_protection.py
+    - tests/unit/engine/test_cycle63_phase2A3_dataclass_completeness.py
     - tests/unit/engine/test_cycle63_phase2A3_delegation.py
+    - tests/unit/engine/test_cycle63_phase2A3_dependency_direction.py
     - tests/unit/engine/test_cycle63_phase2A3_force_resubscribe.py
     - tests/unit/engine/test_cycle63_phase2A3_force_retry.py
     - tests/unit/engine/test_cycle63_phase2A3_history_window.py
+    - tests/unit/engine/test_cycle63_phase2A3_import_sanity.py
+    - tests/unit/engine/test_cycle63_phase2A3_logger_binding.py
     - tests/unit/engine/test_cycle63_phase2A3_priority_cap.py
     - tests/unit/engine/test_cycle63_phase2A3_priority_split.py
     - tests/unit/engine/test_cycle63_phase2A3_property_compat.py
     - tests/unit/engine/test_cycle63_phase2A3_reset_daily.py
+    - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
+    - tests/unit/engine/test_cycle64_price_filter_scanner_ast.py
+    - tests/unit/engine/test_cycle64_price_filter_scanner_cache.py
+    - tests/unit/engine/test_cycle64_price_filter_scanner_daily_summary.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_emit_cap.py
+    - tests/unit/engine/test_cycle64_price_filter_scanner_protected.py
+    - tests/unit/engine/test_cycle65_scheduler_integration.py
+    - tests/unit/engine/test_cycle72_no_duplicate_insert_per_site.py
+    - tests/unit/engine/test_cycle73_swing_rest_poll_no_write_log.py
+    - tests/unit/engine/test_cycle74_stale_watcher_aggregation.py
     - tests/unit/engine/test_cycle74_swing_rest_poll_aggregation.py
+    - tests/unit/engine/test_cycle78_flush_call_sites.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
+    - tests/unit/engine/test_cycle79_collector_task_cancel.py
     - tests/unit/engine/test_cycle79_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_emit_visibility.py
     - tests/unit/engine/test_cycle83_memory_leak.py
+    - tests/unit/engine/test_cycle83_r6_frequency_regression.py
+    - tests/unit/engine/test_cycle83_rate_limit_sleep.py
+    - tests/unit/engine/test_cycle83_sk_square_fixture.py
+    - tests/unit/engine/test_cycle83_stop_flush.py
     - tests/unit/engine/test_cycle83_task_lifecycle.py
+    - tests/unit/engine/test_cycle83_ttl_fresh_skip.py
+    - tests/unit/engine/test_cycle84_cycle32_r4_no_impact.py
+    - tests/unit/engine/test_cycle84_scan_pool_emit_persistence.py
+    - tests/unit/engine/test_cycle89_bfdy_clpr_persistence.py
+    - tests/unit/engine/test_cycle89_candidate_pool_protection.py
+    - tests/unit/engine/test_cycle89_emit_visibility.py
+    - tests/unit/engine/test_cycle89_kst_consistency.py
     - tests/unit/engine/test_cycle89_lifecycle.py
+    - tests/unit/engine/test_cycle89_protected_tickers_integration.py
+    - tests/unit/engine/test_cycle89_r4_universe_guard_persistence.py
     - tests/unit/engine/test_cycle89_rate_limit_50ms.py
+    - tests/unit/engine/test_cycle89_trade_amount_filter_persistence.py
     - tests/unit/engine/test_cycle89_ttl_24h.py
     - tests/unit/engine/test_cycle92_boot_presubscribe_race.py
     - tests/unit/engine/test_cycle92_time_auto_start_persistence.py
@@ -47204,15 +47766,23 @@ backend:
     - tests/unit/engine/test_cycle93_scheduler_5min_upsert_chain.py
     - tests/unit/engine/test_cycle93_scheduler_upsert_chain.py
     - tests/unit/engine/test_cycle93_upsert_graceful.py
+    - tests/unit/engine/test_cycleC2_quant_score.py
     - tests/unit/engine/test_cycleC3_financial_load_task.py
     - tests/unit/engine/test_cycleD_regime_inert.py
     - tests/unit/engine/test_cycleE_etf_regime.py
+    - tests/unit/engine/test_cycleF_te_rr_metrics.py
+    - tests/unit/engine/test_cycleG_ta_indicators.py
     - tests/unit/engine/test_cycleH_log_analysis_snapshot.py
+    - tests/unit/engine/test_cycleH_portfolio_risk.py
+    - tests/unit/engine/test_cycleM5_boot_manager_pg_sites.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_cycleM5_scheduler_pg_sites.py
+    - tests/unit/engine/test_daily_emit_cap.py
     - tests/unit/engine/test_force_clear_time_guard.py
+    - tests/unit/engine/test_get_scan_status_tick_coverage.py
     - tests/unit/engine/test_high_since_buy_recovery.py
     - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
+    - tests/unit/engine/test_kojiro_indicators.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -47220,23 +47790,45 @@ backend:
     - tests/unit/engine/test_log_report_truncation.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
     - tests/unit/engine/test_market_op_subscribe_socket_guard.py
+    - tests/unit/engine/test_market_regime.py
+    - tests/unit/engine/test_market_regime_buy_block_cache.py
+    - tests/unit/engine/test_market_regime_buy_block_state.py
     - tests/unit/engine/test_multiday_strategies_registry.py
     - tests/unit/engine/test_observability_logs.py
+    - tests/unit/engine/test_order_engine_buy.py
+    - tests/unit/engine/test_order_engine_sell_fallback.py
+    - tests/unit/engine/test_order_engine_sell_pre_nxt_preconvert.py
+    - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
+    - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/engine/test_param_ranges_vcp.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/engine/test_recommendation_engine_smoke.py
     - tests/unit/engine/test_recommendation_market_regime_payload.py
+    - tests/unit/engine/test_recommendation_metrics_board_stop_loss.py
+    - tests/unit/engine/test_recommendation_metrics_ltv_stop_loss.py
+    - tests/unit/engine/test_recommendation_metrics_smoke.py
     - tests/unit/engine/test_recommendation_param_ranges.py
     - tests/unit/engine/test_recommendation_param_ranges_board_stop_loss.py
     - tests/unit/engine/test_recommendation_weight_reasoning.py
     - tests/unit/engine/test_recommendation_weights.py
+    - tests/unit/engine/test_refactor_b1_data_load_tasks.py
+    - tests/unit/engine/test_refactor_b3_backtest_orchestration.py
     - tests/unit/engine/test_regime_observation_honesty.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
+    - tests/unit/engine/test_risk_buy_block_modes.py
+    - tests/unit/engine/test_risk_donchian_skip_buy.py
+    - tests/unit/engine/test_risk_on_tick_selling_skip.py
+    - tests/unit/engine/test_risk_pre_market_exit_gate.py
+    - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
     - tests/unit/engine/test_scan_loop_delta_only.py
     - tests/unit/engine/test_scan_loop_reprepare.py
     - tests/unit/engine/test_scan_loop_stale_priority.py
+    - tests/unit/engine/test_scanner_pool_count.py
+    - tests/unit/engine/test_scanner_priority_dispatch.py
     - tests/unit/engine/test_scanner_priority_order.py
+    - tests/unit/engine/test_scanner_unsubscribe_all_pool.py
+    - tests/unit/engine/test_scanner_unsubscribe_failure_log.py
     - tests/unit/engine/test_scheduler_finally_main_disconnect.py
     - tests/unit/engine/test_scheduler_pool_stop_on_shutdown.py
     - tests/unit/engine/test_scheduler_priority_groups.py
@@ -47250,40 +47842,100 @@ backend:
     - tests/unit/engine/test_scheduler_tick_coverage_session_view.py
     - tests/unit/engine/test_scheduler_zombie_task_cleanup.py
     - tests/unit/engine/test_sector_naming.py
+    - tests/unit/engine/test_sell_rejection_tracker.py
+    - tests/unit/engine/test_session.py
     - tests/unit/engine/test_session_silent_inactive_ratio.py
     - tests/unit/engine/test_session_silent_inactive_recovery.py
     - tests/unit/engine/test_stale_force_reregister_constant_removed.py
     - tests/unit/engine/test_stale_watcher_priority_split.py
     - tests/unit/engine/test_stale_watcher_thresholds.py
+    - tests/unit/engine/test_strategy_base.py
+    - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/engine/test_strategy_fallback_budget.py
+    - tests/unit/engine/test_strategy_registry.py
+    - tests/unit/engine/test_subscription_source_counts.py
     - tests/unit/engine/test_swing_poll_loop.py
     - tests/unit/engine/test_swing_rest_poll.py
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/engine/test_tick_size.py
     - tests/unit/engine/test_universe_guard.py
+    - tests/unit/engine/test_v1_rejection_alarm.py
     - tests/unit/engine/test_vb_force_clear_at_15_20.py
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     - tests/unit/engine/test_weight_config_anomaly.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
+    - tests/unit/main/test_cycle72_db_log_dedupe_structure_ast.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
+    - tests/unit/realtime/test_ack_orphan_guard.py
+    - tests/unit/realtime/test_aes_keys_main_only.py
+    - tests/unit/realtime/test_cycle102_callback_exception.py
+    - tests/unit/realtime/test_cycle102_dispatch_drop.py
+    - tests/unit/realtime/test_cycle102_last_ws_message_at.py
+    - tests/unit/realtime/test_cycle135_subscribe_grace_period.py
+    - tests/unit/realtime/test_cycle149_handler_market_op.py
+    - tests/unit/realtime/test_cycle197_max_sub_warn_cap.py
+    - tests/unit/realtime/test_cycle222a2_handler_hgpr_hour.py
+    - tests/unit/realtime/test_cycle222a3_handler_scope_observability.py
+    - tests/unit/realtime/test_cycle222a3g_handler_scope_gate.py
+    - tests/unit/realtime/test_cycle222a_handler_day_high.py
+    - tests/unit/realtime/test_cycle227_handler_acml_vol.py
+    - tests/unit/realtime/test_cycle235_execution_qty_parse.py
+    - tests/unit/realtime/test_cycle42_pingpong_metrics.py
+    - tests/unit/realtime/test_cycle43_session_label_unified.py
+    - tests/unit/realtime/test_cycle73_logger_persistence.py
+    - tests/unit/realtime/test_cycle73_ws_reverify_no_write_log.py
+    - tests/unit/realtime/test_cycle73_ws_subscribe_reject_no_write_log.py
+    - tests/unit/realtime/test_cycle74_error_preservation_matrix.py
+    - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
+    - tests/unit/realtime/test_cycle92_4_safety_nets_persistence.py
+    - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
+    - tests/unit/realtime/test_cycle92_auto_restart_failure_graceful.py
+    - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
+    - tests/unit/realtime/test_cycle92_auto_restart_idempotent.py
+    - tests/unit/realtime/test_cycle92_auto_restart_trigger.py
+    - tests/unit/realtime/test_cycle92_auto_restart_window_prune.py
+    - tests/unit/realtime/test_cycle92_logger_kst_persistence.py
+    - tests/unit/realtime/test_cycle92_max_reconnect_persistence.py
+    - tests/unit/realtime/test_handler_tick_parse_guard.py
+    - tests/unit/realtime/test_pool_safety_rules.py
+    - tests/unit/realtime/test_websocket_ack.py
+    - tests/unit/realtime/test_websocket_on_message_guard.py
+    - tests/unit/realtime/test_websocket_pool.py
+    - tests/unit/realtime/test_websocket_pool_disable.py
+    - tests/unit/realtime/test_websocket_pool_session_grouping.py
+    - tests/unit/realtime/test_websocket_pool_start_ready.py
+    - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
+    - tests/unit/realtime/test_websocket_pool_stop_reset.py
+    - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
+    - tests/unit/realtime/test_websocket_priority.py
+    - tests/unit/realtime/test_websocket_reverify.py
+    - tests/unit/realtime/test_websocket_subscribe_rejection.py
+    - tests/unit/realtime/test_ws_subscribe_backoff.py
     - tests/unit/routes/test_cycle110_emit_persistence.py
     - tests/unit/routes/test_cycle110_exception_graceful.py
     - tests/unit/routes/test_cycle110_import_fix.py
     - tests/unit/routes/test_cycle110_lock_persistence.py
     - tests/unit/routes/test_cycle110_response_format.py
     - tests/unit/routes/test_cycle112_krx_open_api_routes.py
+    - tests/unit/routes/test_cycle124_stock_master_daily_route.py
     - tests/unit/routes/test_cycle126_basics_daily_routes.py
+    - tests/unit/routes/test_cycle127_progress_routes.py
     - tests/unit/routes/test_cycle128_list_query_params.py
+    - tests/unit/routes/test_cycle129_master_route.py
+    - tests/unit/routes/test_cycle131_stock_master_refresh_helper.py
     - tests/unit/routes/test_cycle132_strategy_funnel_holiday_field.py
     - tests/unit/routes/test_cycle186_market_op_route.py
+    - tests/unit/routes/test_cycle239_portfolio_gate_state.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
     - tests/unit/routes/test_cycle84_route_invalid_limit.py
     - tests/unit/routes/test_cycle84_route_invalid_offset.py
     - tests/unit/routes/test_cycle90_concurrent_lock.py
+    - tests/unit/routes/test_cycle90_emit_persistence.py
     - tests/unit/routes/test_cycle90_fetch_top_500_call.py
     - tests/unit/routes/test_cycle90_kst_persistence.py
     - tests/unit/routes/test_cycle90_lock_release.py
@@ -47291,9 +47943,21 @@ backend:
     - tests/unit/routes/test_cycle90_response_timing.py
     - tests/unit/routes/test_cycle90_route_405_other.py
     - tests/unit/routes/test_cycle93_route_upsert_chain.py
+    - tests/unit/routes/test_cycleD_buyblock_inert_field.py
+    - tests/unit/routes/test_cycleE_etf_observe_field.py
     - tests/unit/routes/test_cycleF_te_endpoint.py
     - tests/unit/routes/test_cycleH_portfolio_route.py
     - tests/unit/routes/test_cycleM5_strategies_auto_start.py
+    - tests/unit/routes/test_pnl_summary.py
+    - tests/unit/services/test_dkstock_client.py
+    - tests/unit/services/test_dkstock_client_db_toggle.py
+    - tests/unit/services/test_mcp_client.py
+    - tests/unit/services/test_mcp_client_db_toggle.py
+    - tests/unit/services/test_mcp_client_session_log.py
+    - tests/unit/services/test_mcp_client_unwrap.py
+    - tests/unit/services/test_quote_session_health.py
+    - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/uptime_monitor.py:
     direct_tests:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
@@ -47386,6 +48050,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -47775,6 +48440,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -48208,6 +48874,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -48624,6 +49291,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -49009,6 +49677,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49443,6 +50112,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -49903,6 +50573,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -50336,6 +51007,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -50798,6 +51470,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -51231,6 +51904,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -51749,6 +52423,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -52180,6 +52855,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -52784,6 +53460,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -53198,6 +53875,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -53716,6 +54394,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -54144,6 +54823,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -54540,6 +55220,7 @@ backend:
     - tests/unit/ast/test_cycle185_cluster1_ast.py
     - tests/unit/ast/test_cycle209_ast_extension_param_range.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -54926,6 +55607,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -55358,6 +56040,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -55838,6 +56521,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -56271,6 +56955,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -56736,6 +57421,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -57163,6 +57849,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -58553,6 +59240,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -58851,6 +59539,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -59151,6 +59840,7 @@ backend:
     - tests/unit/ast/test_cycle221_ast_market_op_no_main.py
     - tests/unit/ast/test_cycle222a_ast_day_high_scope.py
     - tests/unit/ast/test_cycle228_ast_gate_guards.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/db/test_cycle150_supabase_capacity.py
     - tests/unit/engine/scheduler/test_atomic_board_transition.py
     - tests/unit/engine/scheduler/test_board_transition_presubscribe.py
@@ -59535,6 +60225,7 @@ backend:
     - tests/unit/ast/test_cycle239_ast_gate_freshness.py
     - tests/unit/ast/test_cycle240_ast_desired_filter.py
     - tests/unit/ast/test_cycle241_ast_silent_inactive_relative.py
+    - tests/unit/ast/test_cycle242_ast_fallback_notional_cap.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -59969,6 +60660,7 @@ backend:
     - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle241_silent_inactive_relative.py
+    - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -60861,10 +61553,10 @@ frontend:
     direct_tests: []
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
-generated_at: '2026-09-03T06:08:59.753423+09:00'
+generated_at: '2026-09-03T13:10:40.985907+09:00'
 stats:
   backend_modules: 130
-  backend_tests: 891
+  backend_tests: 893
   frontend_modules: 79
   frontend_tests: 54
   unmapped_modules:

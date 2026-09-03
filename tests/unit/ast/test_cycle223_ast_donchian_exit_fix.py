@@ -492,14 +492,19 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    사용자 결정 "A시작")이 6전략 전부를 승인 수정하며 재핀:
 #    check_buy_signal 최상단 계좌 SOFT 게이트 1줄(전 전략) + 실효 손절선 read-only
 #    미러 get_effective_stop_price(kojiro/VCP/BFB — donchian 은 별도 가드 소관).
-# TODO(cycle233 커밋 후): 아래 항목을 **전부 삭제**하고 dict 를 비운다.
+# 🔁 2026-09-03 (cycle242) — cycle233 항목이 아직 미커밋인 채로 G0-ⓑ(피라미딩
+#    심층 검토 §0.0, `_workspace/red/cycle242_fallback_notional_cap_spec.md`)가
+#    kojiro/vcp/bfb 3 파일에 `DEFAULT_PARAMS["max_lot_units"]=2.0` 1줄만 승인
+#    추가하며 같은 3 항목을 재핀(momentum/VB/LTV 는 cycle242 무접촉 — 범위 밖
+#    선언, 값 무변경). TODO(cycle233+242 커밋 후): 아래 항목을 **전부 삭제**하고
+#    dict 를 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/kojiro.py":
-        "0fae57e5cc9c68c7c7a5e46cacb3f65d68fd19cb490f316101aea80ed40ab3f1",
+        "a87a1e1c50757b744b3c75dd0e84a90ac064664005d91ee6ea6f3553db14d181",
     "src/engine/strategies/vcp_breakout.py":
-        "769595c084b9cc4daf6570ac18f570edb93fbf654cb12f362e0c5994f2f02f9f",
+        "58f61003c918cb7c70fb4d21f7b97b2725800f00478d948ccb07c3286a1e659c",
     "src/engine/strategies/bull_flag_breakout.py":
-        "48d8f62d210836bd21525e2c7c8e4b58e0f4c0f93b1d58fd283e0d3a1d2dbd6d",
+        "09279df6efc77bcc04e6472284d66fa4a1a184c035246fad4c68ebae7522d4ec",
     "src/engine/strategies/momentum.py":
         "5499bb08ae7ecf670289e9b00f5f15de4c86bc773effdbe932da12cfa7822b7e",
     "src/engine/strategies/volatility_breakout.py":

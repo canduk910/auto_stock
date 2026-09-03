@@ -125,6 +125,7 @@ class DonchianSwingStrategy(StrategyBase):
         "stop_atr": 2.0,          # 하드손절 = buy - stop_atr×entry_atr (=atr_trail_mult, dead code 방지)
         "turtle_backstop_pct": -9.0,   # ATR독립 최후 방어 (info=None/재시작/ATR=0, 2ATR보다 넓게)
         "min_vol_floor_pct": 1.0,      # 터틀 sizing 변동성 floor (atr/price<1% → position_ratio fallback)
+        "max_lot_units": 2.0,   # cycle242 — 랏당 최대 유닛(K). 터틀 모드 모든 랏 ≤ K유닛, floor(K×u*)==0 이면 미매수. PARAM_RANGES 미편입. 롤백 = DB 20.0
         # P1-A (2026-07-29, 사이클 A) — 레이어드 청산 신규 2키. 전략 정체성 상수 —
         # PARAM_RANGES/INT_PARAMS 미편입 (AI 자동튜닝 제외, 사이클 208/209/212 선례).
         "breakeven_promote_atr": 1.5,   # 고점이 buy+1.5×entry_atr 도달 시 손절선 buy_price 로 승격

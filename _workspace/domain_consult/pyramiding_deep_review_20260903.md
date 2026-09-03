@@ -369,6 +369,8 @@ kojiro `daily_loss_limit` = −8% = **61,971원**. 190,000원짜리 4주 스택�
 | **G6** | 장중 레벨 크로싱 **실행 경로 설계 확정** (사용자 결정 사항) | 매수 평가 창 확장 vs 신규 leaf 폴 루프 | 09:05~09:30 단일 창 | ✗ |
 | **G7** | 대상 **kojiro 한정** 확정 (donchian 제외) | 본 문서 채택 여부 | — | 사용자 결정 |
 
+> **G0 종료 기준 재정의(cycle242, 2026-09-03)** — 위 "`[oversized_fallback]` 발화 0" 문구는 `max_lot_units`(K) 채택 후 **논리적으로 양립 불가**하다(K>1 이면 캡을 통과한 랏도 ρ 축 상한을 계속 넘을 수 있어 그 마커의 **비제로가 정상**으로 의미 반전됐다). 실제 종료 기준 = ①`[fallback_notional_capped]` 실발화 1건 이상 ∧ ②배포 후 신규 랏 전수 `units ≤ K`(`[oversized_fallback] units=` 필드 **와**, PR 경로가 `ambiguous_atr`/`no_atr` 로 fail-open 스킵된 랏은 `[fallback_cap_skipped] atr=`/`units=` 필드 — 라운드 1 이 후자를 신설했다, tester 적대적 검증 확증 결함 #3: 기존 `[oversized_fallback]` 단독으로는 그 경로의 K 초과 사실이 어떤 마커에도 안 남아 종료 기준②를 검증할 수 없었다) 양쪽으로 검증 ∧ ③회귀 가드 존재. 상세 = `_workspace/red/cycle242_fallback_notional_cap_spec.md` §0⑪·§11.
+
 #### T2 게이트 — "실활성(ON)" 을 허용하는 조건 (T1 전부 + 아래)
 
 | # | 게이트 | 측정 방법 | 현재 | 판정 |
