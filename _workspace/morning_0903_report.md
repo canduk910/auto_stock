@@ -86,12 +86,67 @@
 
 게이트(요지): T1 = G0 1주 폴백 시정 · G1′ 순자산 ≥500만 5영업일 · G4 Σ상한 6.0 활성+2주 무오탐 · G6 장중 레벨 크로싱 실행 경로 확정 · G7 kojiro 한정 확정. T2 = G1″ 5,000만 또는 G2′(유닛 ≥2주일 때만 추가) · G3 kojiro 30왕복 N기대값 CI 하한>0(MDE +0.59N 주의) · G3′ 충실 사이징 시뮬 Δ>0 · G5 배관 결함 동시 시정 · G8 매수 게이트 8종 재판정 · G9 entry_atr 영속 · G10 추가 경로 1주 폴백 금지 · G11 상관군 유닛 캡 · G12 결합 백테스트(청산 규약 × 간격) — **A 를 뒤집을 수 있는 유일한 증거 경로**.
 
+## 5.0 피라미딩 설계 청사진 (적용 전제 · 5천만원 성장 경로) — ✅ 완성 (사용자 08:xx 지시)
+
+- 정본 `_workspace/domain_consult/pyramiding_design_blueprint_20260903.md`(1,548행, docs 커밋 `e73fe8b`) · 웹 https://claude.ai/code/artifact/acce6f03-ae28-42c6-9e65-b0b1874bac5d
+- 구조 = [내용정리 → 현재 로직 현황 → 변경 로직 상세안 → 충돌 45건 → 기대효과 → 롤아웃]. 3인 적대 비판 40건 반영 최종본(HIGH 정정 6: 기존 `max_units_per_stock="2"` DB 영속이라 코드 기본값 다크런치 불성립 → 신규 키 `pyramid_max_units` 필요 · 세트선이 손절 확률을 53%→75% 로 올림 · 5,000만 as-built Δ −17.2M/년(초판 2.7배 과소) 등).
+- 권고 8 = 가중평단 누적(+positions 3컬럼) · kojiro 단독 · 마지막 진입가 앵커 단조 사다리 · Stage 2 진입 시 1N · 추가 유닛 ≥2주만(1주 폴백 금지) · Σ캡 상향은 섹터 유닛 캡 뒤 별도 · `max_units`↑ 와 `position_ratio` 0.166→0.10 동반 · 다크 스위치 = DB 에 없는 신규 키.
+- 롤아웃 = Stage 0 관측 배치(20:10 would_add) + **Stage 0.5 = 1주 폴백 K=2.0 클램프(= cycle242 진행 중)** → Stage 1 배관 11건 + 다크런치(T1 net≥500만, 8~10사이클) → Stage 2a/2b/2c(2,000만→5,000만, max_units 2→3→4).
+- 정직한 한계 = 음수 기대값의 원인이 '기제' 인지 '청산 규약 상호작용' 인지 미구분 — G12 결합 백테스트가 유일 구분 도구. 열린 질문 N-1 섹터 taxonomy(29.5% 미분류 fail-open) · N-4 드로다운 정지선 · N-5 `_place_and_track` 리팩토링.
+
+## 5.1 BFB·VCP 진입 완화 1차 — ✅ 07:40 적용 (사용자 지시 "조금 완화해 매수가 진행되게")
+
+- 병목 실측(6렌즈 + 적대 비판): BFB 는 **시계**(관측 창 09:05~13:00 이 하루 누적 65~70% → 실효 요구 1.43~1.54배) + retention 1분이 래치 무장 차단 · VCP 는 `min_swing_atr_mult=0.5` 가 미세 진동을 조정으로 세어 후보를 못 만듦.
+- 적용(PUT, 메모리+DB 확인): BFB `entry_end` 14:30 + `breakout_retention_minutes` 0 / VCP `min_swing_atr_mult` 1.0. 거래량 배수·추격 상한·손절 무변경.
+- 기대 0.2~0.5건/일. 프로토콜·롤백·영구 기각 노브·운영 주의는 워크리스트 G-8′ 절. 자문 문서 `_workspace/domain_consult/bfb_vcp_entry_relax_20260903.md`.
+- ⚠️ 사용자 확인 사항: 09-02 pending 자문 2건(BFB/VCP 비중 감액 + `max_scan_stocks` 500) UI 거절 권고, retention 0 이 PARAM_RANGES 밖이라 매일 '교정' 제안이 뜸 — 수동 apply 금지.
+
 ## 6. 오늘 아침 확인 항목 (D+1 판독)
 
 - **08:00:0x** `[pre_market_exit_deferred]` 첫 발화 + 같은 시각 `[pre_market_exit_gate_divergence] reason=clock_fallback` 동반 → cycle238 구멍 닫힘. `도치안 시간 기반 청산` 첫 발화가 09:00 이전이면 회귀. (보유 종목 틱이 있어야 계량됨 — 부재 ≠ 정상)
 - **09:00:00~29** `reason=active_stale_hold` 건수 → clock-primary 후속 판단 분자.
 - cycle239: `[account_risk_watch_loop_exit] reason=running_false` 는 20:10 직후 1건이 정상, `released reason=stale` 0건, `[account_risk_watch_loop_died]` 0건, 장중 `GET /api/portfolio/risk` 의 `account_gate.age_secs ≤ 600`.
 - 07:45 부팅 `[tick_blind_boot] market_blind_secs=0` (야간 재시작 2회분 downtime 은 정상).
+
+
+### 6.1 08:07 실측 (자동 판독, EC2 system_logs KST)
+
+| 항목 | 실측 | 판정 |
+|---|---|---|
+| 07:51:54 부팅 | 순자산 2,582,132 · 보유 8종목 DB 복구 · `[account_risk_watch] level=ok eff_pct=0.51` · `[tick_blind_boot] market_blind_secs=0`(야간 downtime 42,119s 는 정상) | 정상 |
+| **cycle238 프리장 게이트** | **08:00:04** `[pre_market_exit_gate_divergence] strategy=kojiro reason=clock_fallback active=[]` + 같은 초 `[pre_market_exit_deferred] strategy=kojiro` | **구멍 닫힘 확증** — `active=[]`(30초 stale 캐시 비어 있음)인데 시각 폴백이 첫 틱에서 보류를 걸었다. 어제까지 08:00:29 였던 첫 보류가 08:00:04 로 당겨짐 |
+| 회귀 신호 | 오늘 `도치안 시간 기반 청산` 0건 · APBK0918 0건 · ERROR/CRITICAL 0건 | 회귀 없음 |
+| **cycle241 세션 상대 판정** | **07:59:58** `[silent_inactive_market_wide_skip] transition=entered sessions=8 eligible=8 silent=8/8` → 08:01:58 `exited elapsed_secs=120` | 스펙이 예측한 "간헐 07:59" 에피소드 그대로 — 8세션 강제 재연결 0건(어제 이 시각 8회) |
+| cycle239 | `[account_risk_watch] level=ok`, `loop_died` 0 | 정상(loop_exit running_false 는 20:10 이후 확인) |
+| cycle240 | `[stale_priority_resubscribe]` 필드 확장은 09:30 첫 `_scan_loop` 이후 확인 | 대기 |
+| 기타 | 07:51:12 `[market_regime] dkstock.cloud fetch 실패`(외부, 관찰 전용) | 무영향 |
+
+divergence 는 보유 종목 틱이 있어야 계량되는데 오늘은 kojiro 보유 종목 첫 틱이 08:00:04 에 들어와 정상 계량됐다. 09:00:00~29 의 `reason=active_stale_hold` 건수는 장 시작 후 별도 확인.
+
+
+### 6.2 장중 실측 11:47 — 🎉 **BFB 첫 체결** + 3사이클 전부 실효 확인
+
+**BFB 001450(현대해상) 1주 @ 53,900 — 08-31 개방 이후 첫 체결, 완화 적용 3시간 만.**
+
+| 시각 | 로그 | 의미 |
+|---|---|---|
+| 09:26:26 | `[bfb_latch_armed] ticker=001450 flag_high=54000 flag_low=48450 — retention 통과·거래량 대기` | **`breakout_retention_minutes` 0 의 직접 효과** — 어제까지 감지 4건 중 3건이 1~23초 후퇴로 사망하던 자리 |
+| 11:33:43 | `[bfb_vol_gate_pass] observed=501912 threshold=485973 latch_age_sec=7637` | **래치가 2시간 7분 유지되며 거래량 누적을 기다림** = 자문의 "병목은 임계가 아니라 임계를 재는 시계" 가설 확증(관측/임계 1.033배) |
+| 11:33:43 | 지정가 54,000 주문 → 1주 @ 53,900 전량 체결 | 포지션 등록 정상, 11:35 main 세션 승격 |
+
+⚠️ **프로토콜 발동** — 체결 1건이 났으므로 **N=10 왕복까지 BFB 진입 파라미터 전면 동결**(cycle228 계약). `entry_end` 14:30 은 아직 실효 전(11:33 < 13:00)이라 이번 체결의 공로는 retention 0 단독이다.
+
+**나머지 3사이클 실효 확인**
+
+| 사이클 | 실측 | 기준선 대비 |
+|---|---|---|
+| cycle238 | 08:00:04 `reason=clock_fallback` · 09:00:07 `reason=active_stale_hold` | 두 방향 모두 설계대로. 09:00 정각 stale 보류는 clock-primary 후속 판단 분자 1건 확보 |
+| cycle240 | `desired_low=141 filtered_not_desired=16`, `filtered_sample` 에 **034020**(어제 매도 종목) 포함, `count=0` | 핑퐁 차단 확증. 행수 25행(11:46 기준) vs 09-01 115 / 09-02 108 |
+| cycle241 | `force_reconnect` **0건**, `market_wide_skip entered` 2건 | 기준선 08-31 88 / 09-01 24 / 09-02 27 → **0**. 접속키 낭비 소멸 |
+
+**VCP 는 미해결** — `VCP 준비 완료: 0/670종목 — trend=45 base=20 pullback=1 vol_cnt=0`. `min_swing_atr_mult` 1.0 이 pullback 회수를 줄이지 못했다(여전히 1종목 생존). VCP 2차 노브(`base_max_days` 45)는 프로토콜상 "고유 후보 3개 이상이 3일 누적 0건" 조건이라 아직 미달.
+
+**오늘 다른 체결** — donchian 138040, VB 105560·086790, LTV 042660(전부 1주). 현재 13포지션. WARNING 80건은 전부 정상 범위(`tick_coverage` 52 · 동시호가 stale 회피 15 · KIS HTTP 재시도 8). ERROR 0.
 
 ## 7. 사용자 결정이 필요한 분기
 
@@ -113,4 +168,4 @@
 야간 자율 결정 목록(사후 승인용): cycle240·241 커밋·푸시(권장안 "검증 깨끗하면 푸시") · 피라미딩 시뮬 스크립트 `_workspace/` 영속화 · cycle240 에서 cycle222-a 영구 동결 AST 가드 재스코프 · cycle241 에서 사이클 61/67 "본체 변경 0" 산문 계약 재스코프 · 8/31 가이드 포트 정정.
 
 ---
-마지막 갱신: 2026-09-03 06:25 KST (08:07 D+1 자동 실측 결과가 이 아래에 추가됨)
+마지막 갱신: 2026-09-03 11:50 KST (BFB 첫 체결·장중 실측 반영)
