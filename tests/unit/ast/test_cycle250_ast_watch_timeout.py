@@ -30,7 +30,6 @@ cycle233/cycle239 의 AST 파일은 **봉인 기록으로 무접촉** — 이 �
 from __future__ import annotations
 
 import ast
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -274,28 +273,23 @@ def test_g250_4b_only_timeout_error_is_caught():
 # ===========================================================================
 # G-250-5 — 내부 평가 함수 본체 무변경 (HEAD 대비)
 # ===========================================================================
-def _head_source() -> str | None:
-    try:
-        proc = subprocess.run(
-            ["git", "show", f"HEAD:{_WATCHER_REL}"],
-            cwd=str(ROOT), capture_output=True, timeout=30,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    if proc.returncode != 0:
-        return None
-    return proc.stdout.decode("utf-8")
+
+# 리터럴 핀 (2026-09-05 리팩토링 리뷰 카드 #2) — HEAD 비교는 커밋 직후 자기 일치로 전락하고
+# 편집 순간 영구 동결이 된다(cycle252 tester F-4 교훈). 정당한 본체 변경이면 아래 한 줄을
+# `hashlib.sha256(ast.dump(fn).encode()).hexdigest()` 로 재산출해 갱신한다(핀을 먼저 재산출하지 마라).
+_RUN_ONCE_BODY_SHA256 = "1d87f590e0f406f9fac203dd6a3400a48c291fd941edc51eb266d4c8547a6a90"
 
 
-def test_g250_5_run_once_body_unchanged_vs_head():
-    head = _head_source()
-    if head is None:
-        pytest.skip("git 미가용 — HEAD 소스 비교 불가")
-    head_fn = _fn(ast.parse(head), _RAW)
+def test_g250_5_run_once_body_pinned():
+    """cycle250 계약 — `run_account_risk_watch_once` 본체 무변경(wrapper 신설 + 호출부 2곳만).
+
+    ast.dump 의 sha256 리터럴 핀. ast.dump 는 함수 docstring 도 본다 — 설명은 모듈
+    docstring 에 쓴다.
+    """
+    import hashlib as _hl
     work_fn = _fn(_tree(WATCHER), _RAW)
-    assert ast.dump(head_fn) == ast.dump(work_fn), (
-        "`run_account_risk_watch_once` 본체가 HEAD 대비 변경됐다 — 이 사이클의 "
-        "허용 변경은 wrapper 신설 + 호출부 2곳 + **모듈** docstring 뿐이다. "
-        "(ast.dump 는 함수 docstring 도 본다: 설명은 모듈 docstring 에 쓴다. "
-        "정당한 본체 변경이라면 team-leader 확인 후 이 가드를 명시적으로 갱신하라.)"
+    actual = _hl.sha256(ast.dump(work_fn).encode("utf-8")).hexdigest()
+    assert actual == _RUN_ONCE_BODY_SHA256, (
+        "`run_account_risk_watch_once` 본체가 cycle250 승인 형상과 다르다 — 정당한 변경이면 "
+        f"team-leader 확인 후 `_RUN_ONCE_BODY_SHA256` 을 {actual} 로 갱신하라: {actual}"
     )

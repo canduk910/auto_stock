@@ -36,7 +36,6 @@ from __future__ import annotations
 
 import ast
 import re
-import subprocess
 from datetime import date
 from pathlib import Path
 from types import SimpleNamespace
@@ -442,45 +441,32 @@ def test_g251_1c_gate_block_is_a_separate_try_from_over_cap():
 # ===========================================================================
 # g251_2 (AST) — account_risk_watcher.get_gate_state 무접촉 봉인 (HEAD 대비)
 # ===========================================================================
-def _head_source(rel: str) -> str | None:
-    try:
-        proc = subprocess.run(
-            ["git", "show", f"HEAD:{rel}"],
-            cwd=str(ROOT), capture_output=True, timeout=30,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    if proc.returncode != 0:
-        return None
-    return proc.stdout.decode("utf-8")
+
+_ACCOUNT_GATE_KEYS = {
+    "level", "reasons", "open_risk_pct", "evaluated_at",
+    "age_secs", "stale", "stale_max_secs", "effective_gated",
+}
 
 
-def test_g251_2_get_gate_state_unchanged_vs_head():
-    """cycle250 직후 — 이 사이클은 watcher 를 **읽기만** 한다.
+def test_g251_2_get_gate_state_key_set_matches_frontend_contract():
+    """`get_gate_state()` 8키 = 프론트 `AccountGate` 8필드 (리팩토링 리뷰 카드 #2 전환).
 
-    `get_gate_state` 의 키 집합이 바뀌면 프론트 타입(`AccountGate`)·리포트 스키마·
-    `/api/portfolio/risk` 소비자가 동시에 어긋난다. 이번 사이클의 변경 범위는
-    `log_analysis_engine.py` + 프론트 3파일뿐이다(§1).
+    종전 HEAD `ast.dump` 비교는 커밋 직후 공허해지고 편집 순간 영구 동결이 됐다.
+    진짜 계약은 키 집합 — 리포트 `account_gate` 는 여기에 `eval_timeouts_today` 1키를
+    더한 것이고(T1), 프론트 타입은 8필드 그대로다. 키가 늘면 세 곳을 함께 고친다.
     """
-    head = _head_source(WATCHER_REL)
-    if head is None:
-        pytest.skip("git 미가용 — HEAD 소스 비교 불가")
-    head_fn = _fn(ast.parse(head), "get_gate_state")
-    work_fn = _fn(_tree(WATCHER_SRC), "get_gate_state")
-    assert ast.dump(head_fn) == ast.dump(work_fn), (
-        "`account_risk_watcher.get_gate_state` 가 HEAD 대비 변경됐다 — cycle251 의 "
-        "허용 변경 파일에 `account_risk_watcher.py` 는 없다(§1 금지). 키 집합을 "
-        "바꿔야 한다면 team-leader 확인 후 이 가드를 명시적으로 갱신하라."
-    )
-
-
-def test_g251_2b_watcher_file_untouched_vs_head():
-    """파일 전체 무접촉 — `_eval_timeout_count` 등 다른 접근자도 함께 봉인."""
-    head = _head_source(WATCHER_REL)
-    if head is None:
-        pytest.skip("git 미가용 — HEAD 소스 비교 불가")
-    assert ast.dump(ast.parse(head)) == ast.dump(_tree(WATCHER_SRC)), (
-        "`src/engine/account_risk_watcher.py` 가 HEAD 대비 변경됐다 (§1 금지 — diff 0)"
+    from src.engine import account_risk_watcher as arw
+    arw.reset_state_for_test()
+    try:
+        assert set(arw.get_gate_state()) == _ACCOUNT_GATE_KEYS
+    finally:
+        arw.reset_state_for_test()
+    ts = (ROOT / "frontend" / "src" / "types" / "portfolio.ts").read_text(encoding="utf-8")
+    iface = ts[ts.index("export interface AccountGate"):]
+    iface = iface[: iface.index("}")]
+    fields = set(re.findall(r"^\s*([a-z_]+)\??:", iface, re.M))
+    assert fields == _ACCOUNT_GATE_KEYS, (
+        f"프론트 AccountGate 필드 {sorted(fields)} ≠ 백엔드 8키 {sorted(_ACCOUNT_GATE_KEYS)}"
     )
 
 
