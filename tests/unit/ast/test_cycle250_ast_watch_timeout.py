@@ -275,21 +275,28 @@ def test_g250_4b_only_timeout_error_is_caught():
 # ===========================================================================
 
 # 리터럴 핀 (2026-09-05 리팩토링 리뷰 카드 #2) — HEAD 비교는 커밋 직후 자기 일치로 전락하고
-# 편집 순간 영구 동결이 된다(cycle252 tester F-4 교훈). 정당한 본체 변경이면 아래 한 줄을
-# `hashlib.sha256(ast.dump(fn).encode()).hexdigest()` 로 재산출해 갱신한다(핀을 먼저 재산출하지 마라).
-_RUN_ONCE_BODY_SHA256 = "1d87f590e0f406f9fac203dd6a3400a48c291fd941edc51eb266d4c8547a6a90"
+# 편집 순간 영구 동결이 된다(cycle252 tester F-4 교훈). 핀 대상은 **소스 텍스트 세그먼트**
+# (`ast.get_source_segment`) 다 — `ast.dump` 는 파이썬 버전마다 출력이 달라 CI(다른 버전)에서
+# 거짓 FAIL 을 냈다(04f070d 실측: 로컬 3.13 vs CI). 정당한 본체 변경이면 아래 한 줄을
+# `hashlib.sha256(ast.get_source_segment(src, fn).encode()).hexdigest()` 로 재산출해 갱신한다
+# (핀을 먼저 재산출하지 마라 — 변경 의도를 team-leader 가 확인한 뒤).
+_RUN_ONCE_BODY_SHA256 = "80a2684ee5505d279221a631fca4a03655aa2406707c74abcc54b9f46949f7c0"
 
 
 def test_g250_5_run_once_body_pinned():
     """cycle250 계약 — `run_account_risk_watch_once` 본체 무변경(wrapper 신설 + 호출부 2곳만).
 
-    ast.dump 의 sha256 리터럴 핀. ast.dump 는 함수 docstring 도 본다 — 설명은 모듈
-    docstring 에 쓴다.
+    함수 소스 세그먼트(데코레이터 제외, def 줄부터 본체 끝까지)의 sha256 리터럴 핀 —
+    파이썬 버전 무관. 주석·공백 변경도 핀을 깨뜨린다(의도: 본체는 문자 그대로 동결).
     """
     import hashlib as _hl
-    work_fn = _fn(_tree(WATCHER), _RAW)
-    actual = _hl.sha256(ast.dump(work_fn).encode("utf-8")).hexdigest()
+    src = WATCHER.read_text(encoding="utf-8")
+    work_fn = _fn(ast.parse(src), _RAW)
+    seg = ast.get_source_segment(src, work_fn) or ""
+    actual = _hl.sha256(seg.encode("utf-8")).hexdigest()
     assert actual == _RUN_ONCE_BODY_SHA256, (
         "`run_account_risk_watch_once` 본체가 cycle250 승인 형상과 다르다 — 정당한 변경이면 "
-        f"team-leader 확인 후 `_RUN_ONCE_BODY_SHA256` 을 {actual} 로 갱신하라: {actual}"
+        f"team-leader 확인 후 `_RUN_ONCE_BODY_SHA256` 을 갱신하라: {actual}"
     )
+
+
