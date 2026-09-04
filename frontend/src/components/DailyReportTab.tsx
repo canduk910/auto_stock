@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Component, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { listLogReports, runLogReport } from '../api/log_reports'
 import type {
@@ -93,8 +93,101 @@ function FindingCard({ finding }: { finding: Finding }) {
   )
 }
 
+// cycle249 (W2) — ext_summary 또는 ext_findings(비어있지 않음) 존재 시 "Claude 분석" 블록 렌더.
+function hasExtAnalysis(report: LogReportItem): boolean {
+  return Boolean(report.ext_summary) || Boolean(report.ext_findings && report.ext_findings.length > 0)
+}
+
+// cycle249 W2 hotfix — ext_findings 는 백엔드 ExternalReportIn.findings 가 항목 내부를
+// 검증하지 않는 list[dict] 라 임의 형태가 그대로 온다(레거시 OpenAI 경로는
+// log_analysis_engine._validate_report 가 이미 정규화). 여기서 동일 규약을 프론트에서
+// 재현 — severity/category 폴백 + title/detail/suggestion 문자열 강제 + title·detail
+// 없는 항목 드롭. React 는 객체 자식을 렌더할 수 없어(정규화 부재 시 한 항목이 탭 전체를
+// 빈 화면으로 만들었다), 어떤 형태가 와도 문자열로 귀결시키는 것이 계약이다.
+const ALLOWED_SEVERITIES: readonly Severity[] = ['high', 'medium', 'low']
+const ALLOWED_CATEGORIES: readonly FindingCategory[] = [
+  'trading',
+  'order',
+  'websocket',
+  'scan',
+  'balance',
+  'settlement',
+  'data_quality',
+  'infra',
+  'etc',
+]
+
+function toDisplayString(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(value)
+  }
+}
+
+function normalizeExtFinding(raw: unknown): Finding | null {
+  if (!raw || typeof raw !== 'object') return null
+  const item = raw as Record<string, unknown>
+
+  const severityRaw = typeof item.severity === 'string' ? item.severity.toLowerCase().trim() : ''
+  const severity: Severity = (ALLOWED_SEVERITIES as readonly string[]).includes(severityRaw)
+    ? (severityRaw as Severity)
+    : 'medium'
+
+  const categoryRaw = typeof item.category === 'string' ? item.category.toLowerCase().trim() : ''
+  const category: FindingCategory = (ALLOWED_CATEGORIES as readonly string[]).includes(categoryRaw)
+    ? (categoryRaw as FindingCategory)
+    : 'etc'
+
+  const title = toDisplayString(item.title).trim()
+  const detail = toDisplayString(item.detail).trim()
+  const suggestion = toDisplayString(item.suggestion).trim()
+
+  // 레거시 _validate_report 와 동일 규약 — title/detail 없는 항목은 드롭.
+  if (!title || !detail) return null
+
+  return { category, severity, title, detail, suggestion }
+}
+
+// ReportCard 렌더 중 예외(정규화가 못 잡는 예상 밖 형태 포함) 발생 시 탭 전체가
+// 아니라 이 카드만 대체 — 한 행의 데이터 결함이 전체 화면을 지우지 않게 하는 최소
+// error boundary. React 는 함수 컴포넌트 error boundary 를 지원하지 않는다.
+class ReportCardBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: unknown) {
+    // eslint-disable-next-line no-console
+    console.error('[DailyReportTab] 리포트 카드 렌더 오류', error)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          className="bg-red-50 border border-red-200 rounded-lg p-6 text-sm text-red-700"
+          data-testid="report-card-error"
+        >
+          이 리포트를 표시하는 중 오류가 발생했습니다 — 데이터 형식을 확인하세요.
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 function ReportCard({ report }: { report: LogReportItem }) {
   const [showMetrics, setShowMetrics] = useState(false)
+  const [showExtReportMd, setShowExtReportMd] = useState(false)
 
   const sortedFindings = useMemo(() => {
     return [...(report.findings ?? [])].sort(
@@ -102,11 +195,79 @@ function ReportCard({ report }: { report: LogReportItem }) {
     )
   }, [report.findings])
 
+  const sortedExtFindings = useMemo(() => {
+    return (report.ext_findings ?? [])
+      .map(normalizeExtFinding)
+      .filter((f): f is Finding => f !== null)
+      .sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity])
+  }, [report.ext_findings])
+
   const logs = report.metrics?.logs
   const trades = report.metrics?.trades
 
   return (
     <div className="space-y-6">
+      {hasExtAnalysis(report) && (
+        <div className="bg-white rounded-lg shadow p-6" data-testid="ext-analysis-card">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-900">
+              {report.target_date} Claude 분석
+            </h2>
+            <span className="text-xs text-gray-400">
+              생성 {formatDateTime(report.ext_created_at)}
+              {report.ext_provider && ` · ${report.ext_provider}`}
+              {report.ext_model && ` · ${report.ext_model}`}
+            </span>
+          </div>
+          {report.ext_summary && (
+            <p
+              className="text-sm text-gray-700 whitespace-pre-line leading-relaxed"
+              data-testid="ext-summary"
+            >
+              {report.ext_summary}
+            </p>
+          )}
+
+          {sortedExtFindings.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-base font-semibold text-gray-800 mb-3">
+                개선 항목 ({sortedExtFindings.length}건)
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {sortedExtFindings.map((f, idx) => (
+                  <FindingCard key={`ext-${report.id}-${idx}`} finding={f} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {report.ext_report_md && (
+            <div className="mt-4 border border-gray-100 rounded-lg">
+              <button
+                onClick={() => setShowExtReportMd((v) => !v)}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+                data-testid="ext-report-md-toggle"
+              >
+                <span className="text-sm font-medium text-gray-700">상세 리포트</span>
+                <span className="text-xs text-gray-400">
+                  {showExtReportMd ? '접기' : '펼치기'}
+                </span>
+              </button>
+              {showExtReportMd && (
+                <div
+                  className="border-t border-gray-100 p-4"
+                  data-testid="ext-report-md-content"
+                >
+                  <pre className="whitespace-pre-wrap text-xs text-gray-700 font-mono">
+                    {report.ext_report_md}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-gray-900">{report.target_date} 총평</h2>
@@ -350,8 +511,16 @@ export default function DailyReportTab() {
                     }`}
                   >
                     <div>{r.target_date}</div>
-                    <div className="text-xs text-gray-400 mt-0.5">
-                      개선 {(r.findings ?? []).length}건
+                    <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                      <span>개선 {(r.findings ?? []).length}건</span>
+                      {r.ext_summary && (
+                        <span
+                          className="px-1.5 py-0.5 text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-200 rounded"
+                          data-testid={`ext-badge-${r.id}`}
+                        >
+                          Claude
+                        </span>
+                      )}
                     </div>
                   </button>
                 </li>
@@ -361,7 +530,9 @@ export default function DailyReportTab() {
 
           <div>
             {selectedReport ? (
-              <ReportCard report={selectedReport} />
+              <ReportCardBoundary key={selectedReport.id}>
+                <ReportCard report={selectedReport} />
+              </ReportCardBoundary>
             ) : (
               <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
                 좌측에서 영업일을 선택하세요.

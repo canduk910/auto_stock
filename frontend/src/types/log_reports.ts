@@ -48,4 +48,13 @@ export interface LogReportItem {
   metrics: LogReportMetrics | null
   model: string | null
   created_at: string
+  // cycle249 (W2, 2026-09-05) — 매일 20:20 KST Claude 루틴이
+  // POST /api/log-reports/{date}/external 로 채우는 외부(Claude) 분석 필드.
+  // 전부 NULL 허용 — 채워지기 전 행은 undefined/null 로 온다.
+  ext_provider?: string | null
+  ext_model?: string | null
+  ext_summary?: string | null
+  ext_findings?: Finding[] | null
+  ext_report_md?: string | null
+  ext_created_at?: string | null
 }
