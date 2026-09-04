@@ -30,7 +30,6 @@ git 무관 = shallow clone 에서도 동작). 정당한 seam 추가는 그 사�
 from __future__ import annotations
 
 import ast
-import subprocess
 from pathlib import Path
 
 import pytest
