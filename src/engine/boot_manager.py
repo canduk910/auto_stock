@@ -394,9 +394,12 @@ async def boot(scheduler: "TradingScheduler") -> None:
     # 이게 없으면 07:55 부팅 ~ 첫 주기 평가 사이 09:05 매수창이 무평가로 열린다)
     # + 5분 자기 종료 감시 루프 스폰(idempotent — scheduler 라인 상한 가드 존중,
     # cancel 불요 = `_running` False 시 ≤60s 자연 종료). watcher 내부 fail-open.
+    # cycle250 — guarded(타임아웃 300s)로 교체: 같은 hang 이 부팅 자체를 막던
+    # 것을 차단한다(타임아웃이면 wrapper 가 fail-open 후처리를 마치고 None
+    # 반환 — 아래 except 는 그 밖의 예외만 흡수).
     try:
         from src.engine import account_risk_watcher
-        await account_risk_watcher.run_account_risk_watch_once(scheduler)
+        await account_risk_watcher.run_account_risk_watch_once_guarded(scheduler)
         account_risk_watcher.ensure_watch_loop(scheduler)
     except Exception:
         logger.exception("[account_risk_watch] 부팅 동기 평가 실패 graceful — 부팅 계속")

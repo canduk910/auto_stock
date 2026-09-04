@@ -54,6 +54,31 @@ stale WARNING 이 1회/일 cap 으로 포착한다 — 탐지 채널이 기록�
 뿐 소실은 아니다. `gate_stale` cap 키는 `gate_block`/`watch_failed` 와 절대 공유
 금지(회귀 가드 x3).
 
+**cycle250 — 평가 타임아웃(hang 근본, cycle239 후속 A, 2026-09-05)**: cycle239 는
+*소비자* 쪽(`is_soft_gated()`)에 신선도 fail-open 을 넣어 "동결된 게이트가 매수를
+영구 차단"하는 피해만 막았다. 감시 루프(`watch_loop`) 자체가 `run_account_risk_watch_once`
+를 **무기한** await 하는 문제는 그대로였다 — 안의 `balance_mod.get_balance()`(KIS
+세마포어)·`system_config.get_*`(asyncpg `pool.acquire()`) 둘 다 시간 상한이 없어
+한 번 hang 하면 루프가 영원히 그 자리에 서고, hang 은 예외가 아니라서 `_watch_task`
+가 done 이 되지 않아 `[account_risk_watch_loop_died]` 조차 찍히지 않는다(죽은 게
+아니라 멈춘 것). 부팅 동기 1회(`boot_manager.py`)도 같은 hang 에 부팅이 막힌다.
+시정 = `run_account_risk_watch_once_guarded(scheduler)` — `asyncio.wait_for(
+run_account_risk_watch_once(scheduler), timeout=_EVAL_TIMEOUT_SECS)`. **타임아웃 후처리는
+wrapper 가 소유한다** — `wait_for` 의 타임아웃은 내부 코루틴을 **취소**로 끝내고,
+취소(`CancelledError`, `BaseException` 상속)는 `run_account_risk_watch_once` 의
+`except Exception`을 지나가지 않으므로 내부 함수는 자기 취소를 후처리할 수 없다.
+그래서 `asyncio.TimeoutError` 핸들러가 **기존 실패 분기와 동일한 후처리**(원시
+`was_active` → `_gate_active=False` fail-open → `_evaluated_mono` 스탬프(같은
+동기 블록, await 0 = G-239-5 동형) → `_gate_state` level=error/reasons=["timeout"]
+→ 활성이었으면 `released reason=eval_timeout` WARNING(cap 밖) →
+`[account_risk_eval_timeout]` WARNING 1회/일 cap, 일 카운터는 cap 과 무관하게
+증가)를 직접 수행한다. **다른 예외는 잡지 않는다** — `TimeoutError` 만 catch 해야
+내부 함수의 기존 실패 분기와 이중 기록이 안 되고, 내부가 못 잡은 진짜 배선 오류가
+조용히 삼켜지지 않는다. 호출부 2곳(`watch_loop`/`boot_manager`)만 guarded 로
+교체하고 `run_account_risk_watch_once` 본체는 **무변경**(AST 가드가 HEAD 대비
+ast.dump 동일을 봉인). 계약 `0 < _EVAL_TIMEOUT_SECS <= _WATCH_INTERVAL_SECS
+< _GATE_STALE_MAX_SECS` — 타임아웃 후 다음 평가가 stale 이전에 온다.
+
 로그 (cap 은 날짜 키 자기 리셋 — scheduler 훅 미의존. **전이 로그는 cap 밖**:
 희소 사건이고 flapping 자체가 관측해야 할 신호다 — 적대 검증 F5):
 - `[account_risk_gate] transition=entered` WARNING = block 진입 전이(cap 밖) /
@@ -70,6 +95,12 @@ stale WARNING 이 1회/일 cap 으로 포착한다 — 탐지 채널이 기록�
 - **cycle239** — `[account_risk_watch_loop_died]` WARNING = 루프 사멸(예외) +
   복구 안내(`/api/trading/restart`) / `[account_risk_watch_loop_exit]` INFO =
   루프 정상 종료(`reason=running_false`, 매일 1건) / 취소(`reason=cancelled`).
+- **cycle250** — `[account_risk_eval_timeout] timeout_secs=… count=…` WARNING
+  1회/일(cap 키 `eval_timeout`, `gate_stale`/`gate_block`/`watch_failed` 와
+  별개) — hang 이 타임아웃으로 끝날 때마다. 일 카운터(`_eval_timeout_count()`)는
+  cap 과 무관하게 매 타임아웃마다 증가(폭주해도 "몇 번 멈췄나"는 안 지워진다).
+  활성 게이트였으면 `[account_risk_gate] released reason=eval_timeout` WARNING
+  (cap 밖, `reason=eval_failure`/`stale` 와 동형).
 관측 순서 규약 = **peek → 로그 → mark** (cycle226 D-3 — 관측기 자기실패가
 관측 대상을 지우면 안 된다: 로그가 던져도 cap 은 미소비라 다음 평가가 재시도).
 """
@@ -103,7 +134,15 @@ _WATCH_INTERVAL_SECS = 300  # 5분 주기 (collector flush 케이던스 정합)
 # cycle239 — 신선도 임계 = 주기의 3배(연속 2회 완전 결측). 리터럴 900 금지
 # (AST G-239-1) — 주기 변경 시 조용히 어긋나는 것을 차단한다.
 _GATE_STALE_MAX_SECS = _WATCH_INTERVAL_SECS * 3  # = 900
+# cycle250 — 평가 타임아웃(초). 계약 = 0 < _EVAL_TIMEOUT_SECS <= _WATCH_INTERVAL_SECS
+# < _GATE_STALE_MAX_SECS (타임아웃 후 다음 평가가 stale 이전에 온다). 리터럴은
+# 이 한 곳(AST G-250-3b 가 모듈 내 다른 위치의 그림자 리터럴을 봉인).
+_EVAL_TIMEOUT_SECS = 300
 _watch_task = None  # asyncio.Task — 중복 스폰 방지 참조 (boot 는 매 영업일 재실행)
+
+# cycle250 — 일일 타임아웃 발생 횟수(사실). cap 과 독립 — 로그가 눌려도 셈은 유지.
+_eval_timeout_count_today: int = 0
+_eval_timeout_count_day: str = ""
 
 
 async def watch_loop(scheduler: Any) -> None:
@@ -114,7 +153,7 @@ async def watch_loop(scheduler: Any) -> None:
     스폰은 `ensure_watch_loop`(boot_manager) 단일 지점, 중복 스폰 방지 내장.
     """
     while getattr(scheduler, "_running", False):
-        await run_account_risk_watch_once(scheduler)
+        await run_account_risk_watch_once_guarded(scheduler)
         for _ in range(_WATCH_INTERVAL_SECS // 60):
             if not getattr(scheduler, "_running", False):
                 break
@@ -255,12 +294,36 @@ def get_gate_state() -> dict:
 def reset_state_for_test() -> None:
     """테스트 전용 — 모듈 상태 초기화."""
     global _gate_active, _gate_state, _emit_cap, _emit_day, _evaluated_mono
+    global _eval_timeout_count_today, _eval_timeout_count_day
     _gate_active = False
     _gate_state = {"level": "ok", "reasons": [], "open_risk_pct": None,
                    "evaluated_at": None}
     _emit_cap = DailyEmitCap[str]()
     _emit_day = ""
     _evaluated_mono = None
+    _eval_timeout_count_today = 0
+    _eval_timeout_count_day = ""
+
+
+def _bump_eval_timeout_count() -> int:
+    """cycle250 — 오늘 타임아웃 발생 횟수를 1 증가시키고 반환한다.
+
+    cap(`_peek_emit`) 과 독립 — 로그가 눌려도(1회/일) 이 셈은 매 타임아웃마다
+    증가한다("몇 번 멈췄나"가 지워지면 안 된다, 명세 5-T2).
+    """
+    global _eval_timeout_count_today, _eval_timeout_count_day
+    today = datetime.now(KST).date().isoformat()
+    if _eval_timeout_count_day != today:
+        _eval_timeout_count_day = today
+        _eval_timeout_count_today = 0
+    _eval_timeout_count_today += 1
+    return _eval_timeout_count_today
+
+
+def _eval_timeout_count() -> int:
+    """cycle250 — 오늘 타임아웃 발생 횟수 조회(명세 5-T2 접근자, `reset_state_for_test`
+    가 0 으로 되돌린다)."""
+    return _eval_timeout_count_today
 
 
 def _peek_emit(key: str) -> bool:
@@ -418,6 +481,53 @@ async def run_account_risk_watch_once(scheduler: Any) -> Optional[dict]:
                     "%s: %s", type(exc).__name__, str(exc)[:150],
                 )
                 _mark_emitted("watch_failed")
+        except Exception:
+            pass
+        return None
+
+
+async def run_account_risk_watch_once_guarded(scheduler: Any) -> Optional[dict]:
+    """cycle250 — hang 방어 wrapper. `run_account_risk_watch_once` 를
+    `_EVAL_TIMEOUT_SECS` 로 감싸 타임아웃 시 기존 실패 분기와 동일한 후처리를
+    수행한다. 상세 근거(왜 wrapper 가 후처리를 소유하는지)는 모듈 docstring
+    cycle250 절 참조 — 여기서는 재서술하지 않는다(AST G-250-5 가 `run_account_risk_watch_once`
+    본체를 HEAD 대비 봉인하므로 이 함수의 docstring 은 자유롭다).
+
+    `TimeoutError` 만 잡는다 — 다른 예외는 내부 함수의 기존 `except Exception`
+    이 이미 fail-open + 관측을 마쳤으므로 여기서 다시 잡으면 이중 기록이 된다.
+    """
+    global _gate_active, _gate_state, _evaluated_mono
+    try:
+        return await asyncio.wait_for(
+            run_account_risk_watch_once(scheduler), timeout=_EVAL_TIMEOUT_SECS,
+        )
+    except asyncio.TimeoutError:
+        was_active = _gate_active  # cycle250 — 원시값(cycle239-R1 동형 규약)
+        _gate_active = False  # fail-open — hang 이 매수를 영구 차단하면 안 된다
+        _evaluated_mono = _now_mono()  # 타임아웃도 '살아 있음'(루프 생존 중 타임아웃)
+        _gate_state = {
+            "level": "error",
+            "reasons": ["timeout"],
+            "open_risk_pct": None,
+            "evaluated_at": datetime.now(KST).isoformat(),
+        }
+        try:
+            if was_active:
+                # 무음 해제 금지(F5 동형) — cap 밖, `reason=eval_failure`/`stale` 와 동형
+                logger.warning(
+                    "[account_risk_gate] released reason=eval_timeout — "
+                    "평가 타임아웃(%ss)으로 fail-open 해제",
+                    _EVAL_TIMEOUT_SECS,
+                )
+            count = _bump_eval_timeout_count()
+            if _peek_emit("eval_timeout"):
+                logger.warning(
+                    "[account_risk_eval_timeout] timeout_secs=%s count=%d — "
+                    "계좌 리스크 평가 타임아웃(hang 의심). 게이트 fail-open 유지, "
+                    "감시 루프는 다음 주기부터 계속. 지속 시 KIS/DB 응답 지연 점검",
+                    _EVAL_TIMEOUT_SECS, count,
+                )
+                _mark_emitted("eval_timeout")
         except Exception:
             pass
         return None
