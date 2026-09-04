@@ -7,7 +7,7 @@
 
 | 항목 | 결과 |
 |---|---|
-| 배포 | **커밋 21건**(코드 사이클 8 = cycle247·248·245·249·W2·250·251·252·253 / 테스트 위생 6 / 문서 5). backend 재시작 7회 전부 장외(`market_blind_secs=0`), frontend 전용 1회(무재시작 실증), 문서 전용은 배포 자체 없음. EC2 최종 = HEAD·마커 05ebb51, 04:28 기동 |
+| 배포 | **커밋 23건**(20:25~04:30, 코드 9 · 테스트 7 · 문서 7 — 리포트 자체 커밋 2건 포함). 서버에 올린 작업 묶음 8 = cycle248·245·249·250·251·252·253 + 화면(W2) 1건. backend 재시작 7회(20:25 이후, 밤 창 23:00 이후는 6회) 전부 장외(`market_blind_secs=0`), frontend 전용 1회(무재시작 실증), 문서 전용은 배포 자체 없음. EC2 최종 = HEAD·마커 05ebb51, 04:28 기동 |
 | 루틴 | 일일 리포트(평일 20:20)·주간 자문(화 20:30) 생성, 일일 스모크 성공(Notion+DB). 첫 자동 실행 월 09-07 20:20 |
 | 핵심 발견 | **장중 stale 33% = H0UNCNT0 이 KRX 단독(nxt_false) 종목 프레임을 안 보냄**(07-24~ 만성). 보유 000815·003490 WS blind(REST 폴만). A=cycle252 배포 완료 · 프로브 도구 cycle253 배포 완료(기본 OFF) · **월 09:30 프로브 실행 승인(D8)** → 결과로 B(채널 리졸버, 8영역) 결정 |
 | 미결 결정 | D1~D11 (§4) — 특히 **D8 월 09:30 프로브 실행 승인**(코드 준비 완료), D3/D4 cycle245 잔여, D5 TLS 도메인, D11 리팩토링 카드 채택 |
@@ -26,11 +26,11 @@
 | 09-05 02:26 | f86bcc3 | cycle251 계좌 게이트 관측 노출(`log_analysis_engine.py` + 프론트 2파일) | `full`(src 변경) | 재시작(02:26 재생성, startup 정상, `/api/portfolio/risk` `account_gate` 8키 실측, 마커=f86bcc3) |
 | 09-05 03:19 | 8f57bee | cycle252 no_feed churn 중단(`no_feed_registry.py` 신규 + `stale_watcher_core.py` + `db/stock_master.py`) | **CI 실패 → Deploy skipped** | 미배포(아래 핫픽스) |
 | 09-05 03:33 | a375f51 | cycle252 CI 핫픽스 — 테스트 T2 의 caplog 필터를 WARNING 레벨로 한정(구현 무변경) → cycle252 본체가 이 배포로 반영 | `full`(8f57bee 누적) | 재시작(03:33 재생성, startup 정상, `no_feed_registry` import 실측, 마커=a375f51) |
-| 09-05 03:4x~04:0x | cefc4c8 · db48e1a · 04f070d · 4c19807 · f793817 · 07285ba | 테스트 위생 6건(리팩토링 리뷰 카드 1·2·3 — 사이클 한정 bare `git diff HEAD` 가드 폐기, HEAD 동결 가드 → 소스 세그먼트 sha 핀/키 집합 계약, 자기소멸한 승인 sha 핀 11항목 비움 + dead skip 테스트 삭제) | tests 전용 → `none`(무재시작) | 무접촉. CI: 04f070d·4c19807·f793817 은 `ast.dump` 버전 의존 핀으로 실패 → 07285ba 에서 초록 |
+| 09-05 03:51~04:00 | cefc4c8 · db48e1a · 04f070d · 4c19807 · f793817 · 07285ba | 테스트 위생 6건(리팩토링 리뷰 카드 1·2·3 — 사이클 한정 bare `git diff HEAD` 가드 폐기, HEAD 동결 가드 → 소스 세그먼트 sha 핀/키 집합 계약, 자기소멸한 승인 sha 핀 11항목 비움 + dead skip 테스트 삭제) | tests 전용 → `none`(무재시작) | 무접촉. CI: 04f070d·4c19807·f793817 은 `ast.dump` 버전 의존 핀으로 실패 → 07285ba 에서 초록 |
 | 09-05 03:5x | 558c7d4 | 리팩토링 리뷰 메모(문서) | 배포 없음 | 무접촉 |
 | 09-05 04:28 | 05ebb51 | cycle253 H0STCNT0 프로브 엔드포인트(`routes/realtime.py` 단독 +506) | `full`(src 변경) | 재시작(04:28 재생성, startup 정상, `GET channel-probe` = `count 0`, H0UNCNT0·잘못된 ticker POST 422 실측, 마커=05ebb51) |
 
-모든 백엔드 재시작은 장외(정산 20:10 이후)였고 `market_blind_secs=0`. 마지막 검증: EC2 HEAD 2f76490, 마커 2f76490, 시도 마커 없음, 외부 401·아이콘 204 유지.
+모든 백엔드 재시작은 장외(정산 20:10 이후)였고 `market_blind_secs=0`. 마지막 검증(04:28): EC2 HEAD 05ebb51, 마커 05ebb51, 시도 마커 없음, 외부 401·아이콘 204 유지, 최근 30분 ERROR 0.
 
 ## 2. 일일 로그 분석 이관 (cycle249 → 루틴)
 
@@ -68,7 +68,7 @@
 - **무엇**: `no_feed_registry`(stock_master `nxt_tradable=False` 집합, 600s TTL, fail-open) + K watcher 루프에서 **LOW no_feed 종목만** SEND·스탬프·history 생략(`continue`). **HIGH(보유) 경로 byte 동일** — 가설이 틀렸을 때 잃는 것이 손절 커버리지라 포렌식 원안(HIGH 도 제외)보다 보수적으로. 대신 `[no_feed_held] tickers=[000815, 003490]` WARNING 1회/일. `_stale_retry_count` 는 계속(r>5 홀드) → universe guard 저유동 축출 보존. `[tick_coverage] stale` 은 **불변이 정상**(은폐 금지).
 - **검증**: 뮤테이션 26/26 KILLED, 차분 1,200 + 5,000 조합 불일치 0(no_feed ∅ 이면 HEAD 완전 동일, 아니면 차이는 LOW no_feed 의 SEND뿐, SEND 27,538→21,728), 소비처 4곳(universe guard 통합 테스트 포함), 기존 K watcher 회귀 541 무수정, 신규 51. 적대 검증이 잡은 실결함 1 = 관측 헬퍼가 예외를 전파하면 HIGH 재등록 사이클이 끊기던 경로(try/except 봉인).
 - **2차 효과(수용)**: LOW no_feed 의 r=6 영구 홀드 → universe guard 평가 체류율 ≈50%→100% → 유동 nxt_false 후보 REST(`inquire_ccnl`) 5분당 ≈1→2회(+35~78/5분, KIS 20/s 대비 무시 가능). B 착지 시 소멸.
-- **D+1(09-07)**: `[stale_force_retry]` 09:05~15:20 399→≈0 · 보조 SUBSCRIBE ≈957→<150 · `ws_ack_orphan` 7,120→<500 · `no_feed_skipped>0` · `[no_feed_held]` 1행 · `[tick_coverage] stale` 35~38 불변.
+- **D+1(09-07)**: `[stale_force_retry]` 09:05~15:20 399→≈0 · 보조 SUBSCRIBE ≈957→<150 · `ws_ack_orphan` 7,120→<500 · `no_feed_skipped>0` · `[no_feed_held]` 1행 · `[tick_coverage] stale` 35~38 불변. ⚠️ SEND ≈14,600/일 감소는 **예상치**(포렌식 실측 낭비량) — 월요일 로그로 실측하며 HIGH 2종목 분은 설계상 남는다.
 
 ## 2.9 리팩토링 검토 (사이클 247~252 누적 6사이클, refactor-expert, 코드 무수정)
 
@@ -100,7 +100,7 @@
 | D5 | **TLS(F1)** — 루틴이 매일 Basic 자격을 평문 HTTP 로 보낸다. EC2 공개 DNS 는 Let's Encrypt 불가라 **도메인 확보**가 선결 | 도메인 있으면 알려 주세요 |
 | D6 | **주간 자문 정본 위치** — 프롬프트 §4/§5(봉인 키·결정 로그)를 코드 정본(`advisor_policy.py`)으로 옮길지 | 09-08 첫 산출물 본 뒤 |
 | D8 | **채널 리졸버(B) 착수 승인** — 1단계 다크런치 프로브: 보조 세션 1개에서 005935·035720 을 `H0STCNT0` 로만 구독해 프레임 수신 실측(장중 1시간) → 성공 시 `tick_tr_id_for(ticker)` 리졸버로 `TICK_TR_ID` 직접 사용처 전부 경유 + 풀 TICK 필터 `{H0UNCNT0,H0STCNT0}` + 편출/플리커 debounce. 접촉 8영역 4파일 → sha 핀 재핀·뮤테이션 실증 대상 | **프로브는 8영역 무접촉으로 가능** — `kis_ws_pool.subscribe` 가 tr_id 를 받고 handler 가 H0STCNT0 를 동일 처리하므로 라우트 전용 엔드포인트 `POST/GET/DELETE /api/realtime/channel-probe`(기본 OFF, 보유·후보·기구독 종목 409 거부, `bypass_limit` 금지)로 월 09:30 curl 실측 가능. 설계 = `_workspace/forensics/krx_channel_probe_design.md`. **야간에 cycle253 으로 구현·배포까지 시도**(승인 필요한 것은 월요일 '프로브 실행' 뿐) |
-| D11 | **리팩토링 카드 채택** — 메모 10장 중 ②③(테스트 위생, LOW)은 다음 주중 즉시, ④⑤(관측 표준화, MEDIUM)는 사이클 1개, ⑧(사이클 26 죽은 코드)은 B 승인과 동반 | ②③ 승인 없이 진행 가능(테스트만), ④⑤⑧ 은 결정 |
+| D11 | **리팩토링 카드 채택** — 메모 10장 중 ①②③(테스트 위생)은 야간에 처리 완료. 남은 7장 = ④⑤⑥⑦(관측·모듈 구조, MEDIUM, 사이클 1~2개) + ⑧(사이클 26 죽은 코드, 8영역 승인 = B 와 동반) + ⑨⑩(프론트 소소, LOW) | ④~⑦ 은 결정, ⑧ 은 D8 결과와 함께, ⑨⑩ 은 승인 없이 진행 |
 | D10 | **`pg._pool.acquire()` 타임아웃(cycle239 후속 E)** — 풀 생성은 `command_timeout=30`(문장 타임아웃)만 있고 **커넥션 획득 대기에는 타임아웃이 없다**(`src/db/pg.py:128` 등 5곳). 풀 고갈 시 모든 DB 호출이 무한 대기 = cycle250 이 300s 로 막은 hang 의 공통 뿌리. 시정안 = `acquire(timeout=30)` + `_with_retry` 의 재시도 예외에 `asyncio.TimeoutError` 편입. 단 **전 호출자(8영역 `order_engine` 의 `insert_trade` 등)의 실패 모드가 '무한 대기 → 예외' 로 바뀌므로** 호출자 계약 검토가 선행 — 야간 자율 범위 밖으로 판단해 미착수 | 주중 별도 사이클(호출자 전수 + 뮤테이션), 8영역 승인 동반 |
 | D9 | **REST 폴 조기 시작(C)** — `SWING_REST_POLL_EARLY_START` 09:05 → 09:00:30(held_only) 로 시가 직후 5분 공백 축소. scheduler.py 상수(3,999L 라인 상한) | B 착지까지 임시. 승인 시 1줄 |
 | D7 | **일일 리포트 판독 채널** — `[ratio_cap_config]` 등 INFO 마커는 20:10 리포트에 안 실림. 루틴 프롬프트가 `/api/logs/search` 로 직접 대조하도록 돼 있어 루틴 리포트가 D+1 채널 역할을 대신함 | 유지 |
