@@ -165,6 +165,22 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 
 ---
 
+## ✅ 2026-09-05 사용자 결정 세트 (아침 리포트 §4 D1~D11) — 처리 현황
+
+| 항목 | 결정 | 처리 |
+|---|---|---|
+| D8 채널 프로브 | 진행 | **EC2 cron 1회성 자동 실행** 월 09-07 09:30 — `tools/ops/channel_probe.sh`(후보 순차 POST → 5분×3 상태 → 전부 DELETE, `in_desired_now` 즉시 해제, 자기 제거). 결과 = `~/auto_stock/logs/channel_probe_20260907.log` + `[krx_channel_probe]` 시스템 로그 → 20:20 일일 루틴이 읽음. 판정 후 B(채널 리졸버) 착수 여부 결정 |
+| D3 터틀 1주 폴백 ρ 노출(F-9) | 자문 | domain-consult → `_workspace/domain_consult/cycle254_turtle_fallback_rho_exposure.md` (진행 중) |
+| D4 `_bought_today` 선기록(F-10) | 월요일 별도 작업 | 명세 초안 `_workspace/specs/cycle_next_D4_bought_today_after_fill.md` — 권고 A(주문 접수 훅), `order_engine.py` 1곳 8영역 승인 필요 |
+| D5 TLS | `auto.dkstock.cloud` | cycle255 준비(ACME location + TLS 템플릿·compose 오버레이·`tools/ops/tls_enable.sh`). **사용자 할 일 = DNS A 레코드 `auto.dkstock.cloud → 3.38.228.74` 등록** → 그 뒤 스크립트로 발급·전환 → 루틴 BASE·허용 도메인 갱신 |
+| D9 REST 폴 조기 시작 | 권고대로 적용 | `SWING_REST_POLL_EARLY_START` 09:05 → **09:00:30** (scheduler.py 상수 1줄, 3,999L 불변, 테스트 갱신). D+1 = 09:00:3x 부터 `[swing_rest_poll_summary]` held_only 폴 |
+| D10 pg acquire 타임아웃 | 주중 별도 사이클 | 명세 초안 `_workspace/specs/cycle_next_D10_pg_acquire_timeout.md` — 호출자 전수 + 8영역 승인 동반 |
+| D11 리팩토링 카드 | 진행 | ①②③ 완료(09-05 새벽). 남은 순서 = ⑨⑩(프론트) → ⑧(사이클 26 죽은 코드, scanner 8영역·scheduler — 사용자 D11 승인에 포함) → ④⑤(관측 표준화) → ⑥⑦(구조) |
+| D1 리포터 비밀번호 | 유지 | 변경 없음 |
+| D2 OpenAI 경로 | 09-19 까지 병행 후 결정 | 변경 없음 |
+| D6 주간 자문 정본 위치 | 09-08 첫 산출물 후 | 변경 없음 |
+| D7 리포트 판독 채널 | 유지 | 변경 없음 |
+
 ## 🔴 P1-7 · 통합 채널 H0UNCNT0 무송출 — KRX 단독(`nxt_tradable=False`) 종목 장중 stale 33% (포렌식 2026-09-05 확정, A=cycle252 야간 진행 · B=8영역 승인 대기)
 
 - **사실**: 09-01~09-04 구독 184~209종목이 `nxt_true ↔ H0UNCNT0 프레임>0` / `nxt_false ↔ 프레임=0` 으로 예외 0 완전 분할(064550 NXT 편출 자연 실험 포함). 유동주(005935 3,538억·035720 등) 포함 = 채널 결함(가설 ≈90%, KIS 문서·MCP 샘플에 대상 범위 무명시). 최소 07-24 부터 만성 — "09-01 이후" 는 INFO 2일 retention 착시. 정본 = `_workspace/forensics/stale_candidates_0904.md`.

@@ -134,7 +134,7 @@ SWING_REST_POLL_TICKER_SLEEP_SECS = 0.05    # 종목 사이 Rate Limit 보호 (K
 # cycle222-a — 확장 구간(매수창 25분 청산 폴 보강 0 시정). **보유 전용 + stale 중립**으로만
 # 돈다 — REST 가 `ticker_last_tick` 을 갱신하면 개장 러시 blind 종목이 "신선" 으로 보여
 # 강제 재구독이 안 걸린다(F3).
-SWING_REST_POLL_EARLY_START = time(9, 5)
+SWING_REST_POLL_EARLY_START = time(9, 0, 30)  # D9(2026-09-05): 09:05→09:00:30 — no_feed 보유 종목(WS 무송출) 시가 직후 5분 손절 사각 축소(P1-7 C)
 SWING_REST_POLL_WINDOW_START = time(9, 30)  # 09:30 (전체 폴 — 후보 포함 + last_tick 갱신)
 SWING_REST_POLL_WINDOW_END = time(15, 20)   # 15:20 (KRX 메인 매수 중단 시각과 동일)
 

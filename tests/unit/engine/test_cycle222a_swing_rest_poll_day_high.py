@@ -181,8 +181,8 @@ def test_rest_poll_window_constants():
     """
     from datetime import time as _time
 
-    assert sched_mod.SWING_REST_POLL_EARLY_START == _time(9, 5), (
-        "확장 구간 시작 상수(09:05) 부재 — 매수창 25분 청산 폴 보강이 0 이다"
+    assert sched_mod.SWING_REST_POLL_EARLY_START == _time(9, 0, 30), (
+        "확장 구간 시작 상수(09:00:30, D9 2026-09-05 — 종전 09:05) 부재 — 시가 직후 보유 종목 청산 폴 보강이 0 이다"
     )
     assert sched_mod.SWING_REST_POLL_WINDOW_START == _time(9, 30), (
         "전체 폴 시작은 09:30 유지 — 내리면 개장 러시 구간 stale 감지가 약해진다"
