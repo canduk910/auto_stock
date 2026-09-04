@@ -464,10 +464,14 @@ def test_g251_2_get_gate_state_key_set_matches_frontend_contract():
     ts = (ROOT / "frontend" / "src" / "types" / "portfolio.ts").read_text(encoding="utf-8")
     iface = ts[ts.index("export interface AccountGate"):]
     iface = iface[: iface.index("}")]
-    fields = set(re.findall(r"^\s*([a-z_]+)\??:", iface, re.M))
-    assert fields == _ACCOUNT_GATE_KEYS, (
-        f"프론트 AccountGate 필드 {sorted(fields)} ≠ 백엔드 8키 {sorted(_ACCOUNT_GATE_KEYS)}"
+    # 필수 필드만 대조 — 선택 필드(`?:`, 예: cycle256 이 선반영한 `eval_timeouts_today?`)는
+    # 리포트 스냅샷 쪽 확장이라 `get_gate_state()` 8키 계약의 대상이 아니다.
+    required = set(re.findall(r"^\s*([a-z_]+):", iface, re.M))
+    optional = set(re.findall(r"^\s*([a-z_]+)\?:", iface, re.M))
+    assert required == _ACCOUNT_GATE_KEYS, (
+        f"프론트 AccountGate 필수 필드 {sorted(required)} ≠ 백엔드 8키 {sorted(_ACCOUNT_GATE_KEYS)}"
     )
+    assert optional <= {"eval_timeouts_today"}, f"예상 밖 선택 필드: {sorted(optional)}"
 
 
 # ===========================================================================
@@ -485,7 +489,14 @@ def test_g251_3_card_uses_intl_kst_not_local_getters():
             "`Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', ... })` 를 쓴다."
         )
 
-    assert re.search(r"timeZone\s*:\s*['\"]Asia/Seoul['\"]", src), (
-        "Red — `PortfolioRiskCard.tsx` 에 `timeZone: 'Asia/Seoul'` 미사용 "
+    # cycle256 — KST 포맷터는 `utils/kst.ts` 단일 진실원으로 위임됐다. 카드는 그 유틸을 쓰고,
+    # `timeZone: 'Asia/Seoul'` 리터럴은 유틸 파일에 있어야 한다(두 파일 중 어느 쪽에도 없으면 RED).
+    kst_util = ROOT / "frontend" / "src" / "utils" / "kst.ts"
+    util_src = kst_util.read_text(encoding="utf-8") if kst_util.exists() else ""
+    assert re.search(r"timeZone\s*:\s*['\"]Asia/Seoul['\"]", src + util_src), (
+        "`PortfolioRiskCard.tsx` 도 `utils/kst.ts` 도 `timeZone: 'Asia/Seoul'` 미사용 "
         "(`evaluated_at` HH:mm 표기는 KST 명시가 계약)"
+    )
+    assert ("formatKstHHMM" in src) or re.search(r"timeZone\s*:\s*['\"]Asia/Seoul['\"]", src), (
+        "카드가 KST 유틸(`formatKstHHMM`)에 위임하지도, 직접 KST 를 명시하지도 않는다"
     )

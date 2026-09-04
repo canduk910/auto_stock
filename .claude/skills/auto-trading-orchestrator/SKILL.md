@@ -200,6 +200,9 @@ Agent(
 
 ### Phase 4: 통합 및 안전성 검증
 
+> **프론트 전용 사이클 주의 (cycle256 교훈, 2026-09-05)**: vitest·`tsc -b`·build 만으로는 부족하다. 백엔드 pytest 안에 프론트 파일을 읽는 가드가 있다(`grep -rl 'frontend/' tests/unit` — 예: cycle251 의 `AccountGate` 8키·KST 텍스트 가드). 프론트만 바꾼 사이클도 그 목록을 반드시 실행한다. 타입 관문은 `npx tsc -b`(루트 tsconfig 가 솔루션 형식이라 `--noEmit` 은 0파일 검사).
+
+
 1. tester가 모듈 완성 알림을 받으면 즉시 시작
 2. 양쪽 동시 읽기로 경계면 검증 (KIS 스펙 + **KIS MCP** ↔ 구현, FastAPI↔React, DB↔모델)
 3. 매매 안전성 시나리오 실행 (중복 매수, 부분 체결, 체결통보 race, 강제청산, Rate Limit, 보드 가드, NXT 좀비 차단)
