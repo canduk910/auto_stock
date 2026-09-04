@@ -12,9 +12,10 @@
 # 사용: EC2 ~/auto_stock 에서  bash tools/ops/channel_probe.sh run [후보,후보,...]
 #       상태만:               bash tools/ops/channel_probe.sh status
 #       전부 해제:             bash tools/ops/channel_probe.sh stop
-#       cron 등록(1회성):      bash tools/ops/channel_probe.sh install-cron "30 9 7 9 *"
+#       cron 등록(1회성):      bash tools/ops/channel_probe.sh install-cron "30 0 7 9 *"   # 호스트 UTC: 00:30 UTC = 09:30 KST
 # 키: .env 의 API_AUTH_KEY 를 읽어 루프백(127.0.0.1:8000)에만 보낸다. 키는 출력하지 않는다.
 set -u
+export TZ=Asia/Seoul   # 호스트(EC2)는 UTC — 로그 시각·파일명은 KST 로 통일 (cron 스펙은 호스트 UTC 기준이라 별도)
 
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel 2>/dev/null || echo "$HOME/auto_stock")" || exit 2
 BASE="${PROBE_BASE:-http://127.0.0.1:8000}"
@@ -88,7 +89,7 @@ run() {
 }
 
 install_cron() {
-  local spec="${1:-30 9 7 9 *}"  # 기본 = 2026-09-07 09:30 (월) 1회성 — 실행 후 자기 항목 제거
+  local spec="${1:-30 0 7 9 *}"  # 기본 = 2026-09-07 09:30 KST = 00:30 UTC (EC2 호스트 crontab 은 UTC, CRON_TZ 미지원) — 1회성, 실행 후 자기 항목 제거
   local here; here="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
   local line="$spec cd $HOME/auto_stock && bash $here run >> $HOME/auto_stock/logs/channel_probe_cron.out 2>&1; crontab -l | grep -v channel_probe.sh | crontab -  # channel_probe.sh one-shot"
   ( crontab -l 2>/dev/null | grep -v 'channel_probe.sh' ; echo "$line" ) | crontab -

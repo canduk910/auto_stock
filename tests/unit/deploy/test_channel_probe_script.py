@@ -52,4 +52,5 @@ def test_probe_contract_tokens():
 def test_cron_is_one_shot_self_removing():
     s = _src()
     assert "crontab -l | grep -v channel_probe.sh | crontab -" in s, "cron 자기 제거 부재"
-    assert 'local spec="${1:-30 9 7 9 *}"' in s, "기본 cron = 2026-09-07 09:30 1회"
+    assert 'local spec="${1:-30 0 7 9 *}"' in s, "기본 cron = 2026-09-07 00:30 UTC(=09:30 KST) 1회 — EC2 호스트 crontab 은 UTC"
+    assert "export TZ=Asia/Seoul" in s, "로그 시각은 KST 로 통일"
