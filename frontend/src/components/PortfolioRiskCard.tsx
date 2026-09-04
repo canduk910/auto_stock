@@ -10,13 +10,24 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { getPortfolioRisk } from '../api/portfolio'
-import type { PortfolioRiskBucket } from '../types/portfolio'
+import type { AccountGate, PortfolioRiskBucket } from '../types/portfolio'
 
 const SECTOR_CONCENTRATION_WARNING_PCT = 40
 
 function formatWon(value: number): string {
   return `${Math.round(value).toLocaleString('ko-KR')}원`
 }
+
+// 사이클 251 — 계좌 SOFT 게이트 평가 시각. 반드시 Intl.DateTimeFormat +
+// timeZone: 'Asia/Seoul' 로만 표기한다 (CLAUDE.md KST 규칙 — Date 인스턴스의
+// 로컬타임 getter 로 시/분을 직접 추출하는 것은 브라우저 TZ 에 따라 값이 어긋나
+// 금지된다).
+const KST_HHMM_FORMATTER = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false, // ko-KR 기본은 12시제("오후 01:05") — HH:mm 계약 + 타 컴포넌트 관례
+})
 
 export default function PortfolioRiskCard() {
   const { data, isLoading, isError } = useQuery({
@@ -94,6 +105,8 @@ export default function PortfolioRiskCard() {
           testId="portfolio-risk-concurrent-positions"
         />
       </div>
+
+      <AccountGateBlock gate={data.account_gate} />
 
       <div className="border-t pt-3 mt-3">
         <h3 className="text-sm font-medium text-gray-700 mb-2">섹터별 리스크 집중</h3>
@@ -177,6 +190,100 @@ function SectorBarRow({ sector, bucket, maxVal }: SectorBarRowProps) {
             style={{ width: `${widthPct}%` }}
           />
         </div>
+      </div>
+    </div>
+  )
+}
+
+interface AccountGateBlockProps {
+  gate: AccountGate | null | undefined
+}
+
+/**
+ * 사이클 251 — 계좌 SOFT Σ상한 게이트 관측 배지 (cycle239 후속 F).
+ *
+ * `GET /api/portfolio/risk` 의 `data.account_gate` 를 그대로 표시한다.
+ * `account_risk_watcher.get_gate_state()` 8키 — 백엔드 graceful 실패 시 키
+ * 자체가 없거나 null 일 수 있어 그 경로는 "게이트 정보 없음" 한 줄로 처리한다
+ * (기존 MSW 기본 응답이 이 경로 — 기존 카드 테스트 4건이 이 분기를 통과한다).
+ */
+function AccountGateBlock({ gate }: AccountGateBlockProps) {
+  if (!gate) {
+    return (
+      <div
+        className="border-t pt-3 mt-3 text-xs text-gray-400"
+        data-testid="portfolio-risk-gate-absent"
+      >
+        게이트 정보 없음
+      </div>
+    )
+  }
+
+  const isBlocked = gate.effective_gated
+  const isWarn = !isBlocked && gate.level === 'warn'
+  const isError = gate.level === 'error'
+  const isStale = gate.stale
+
+  let badgeText = '정상'
+  let badgeClass = 'bg-gray-100 text-gray-600'
+  if (isBlocked) {
+    badgeText = '차단 중'
+    badgeClass = 'bg-red-100 text-red-700'
+  } else if (isWarn) {
+    badgeText = '경고'
+    badgeClass = 'bg-amber-100 text-amber-700'
+  }
+
+  const openRiskDisplay =
+    gate.open_risk_pct === null || gate.open_risk_pct === undefined
+      ? '—'
+      : `${gate.open_risk_pct.toFixed(2)}%`
+
+  const evaluatedDisplay = gate.evaluated_at
+    ? KST_HHMM_FORMATTER.format(new Date(gate.evaluated_at))
+    : '—'
+
+  const ageMinutes =
+    gate.age_secs === null || gate.age_secs === undefined ? null : Math.floor(gate.age_secs / 60)
+
+  // 동결 서명 — `level=block ∧ stale ∧ !effective_gated` 이면 "판정 자체는
+  // 차단이었지만 신선도가 지나 fail-open 으로 풀렸다"는 사실을 툴팁으로 설명한다
+  // (cycle239 R1 — 이 상태에서 배지가 "차단 중"으로 보이면 실제와 반대로 읽힌다).
+  const freezeTitle =
+    isStale && gate.level === 'block' && !isBlocked
+      ? 'block 판정이 stale 로 fail-open 되었습니다 (마지막 평가가 오래되어 매수 차단이 해제된 상태)'
+      : undefined
+
+  return (
+    <div
+      className="border-t pt-3 mt-3"
+      data-testid="portfolio-risk-account-gate"
+      title={freezeTitle}
+    >
+      <div className="flex items-center gap-2 mb-1 flex-wrap">
+        <h3 className="text-sm font-medium text-gray-700">계좌 게이트</h3>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeClass}`}
+          data-testid="portfolio-risk-gate-badge"
+        >
+          {badgeText}
+        </span>
+        {isStale && (
+          <span
+            className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-200 text-gray-600"
+            data-testid="portfolio-risk-gate-stale"
+          >
+            STALE
+          </span>
+        )}
+      </div>
+      <div className="text-xs text-gray-600 flex flex-wrap gap-x-3 gap-y-0.5">
+        <span>오픈 리스크 {openRiskDisplay}</span>
+        <span>평가 시각 {evaluatedDisplay}</span>
+        {isStale && ageMinutes !== null && <span>마지막 평가 {ageMinutes}분 전</span>}
+        {isError && gate.reasons.length > 0 && (
+          <span className="text-gray-400 lowercase">{gate.reasons[0]}</span>
+        )}
       </div>
     </div>
   )

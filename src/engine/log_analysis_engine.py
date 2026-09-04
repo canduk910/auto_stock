@@ -607,6 +607,20 @@ async def _build_portfolio_risk_snapshot(_now_kst: datetime | None = None) -> di
         snapshot["over_cap_positions"] = compute_over_cap_positions(strategies)
     except Exception:
         logger.debug("[portfolio_risk] over_cap 계산 실패 graceful", exc_info=True)
+
+    # cycle251 — 계좌 SOFT Σ상한 게이트 관측 부착 (후속 G, 관측 전용). over_cap 과
+    # 독립된 별도 try — 한쪽 실패가 다른 쪽을 삼키지 않는다. `is_soft_gated()` 는
+    # stale 시 `gate_stale` cap 을 소비하는 쓰기 경로라 호출 금지(cycle233 F1 /
+    # cycle239 R1 동형) — 무발화 read 함수 `get_gate_state()`/`_eval_timeout_count()`
+    # 만 쓴다. dict() 로 복사해 watcher 내부 dict 를 스냅샷에 그대로 싣지 않는다.
+    try:
+        from src.engine import account_risk_watcher
+        gate = dict(account_risk_watcher.get_gate_state())
+        gate["eval_timeouts_today"] = account_risk_watcher._eval_timeout_count()
+        snapshot["account_gate"] = gate
+    except Exception:
+        logger.debug("[portfolio_risk] account_gate 관측 실패 graceful", exc_info=True)
+
     return snapshot
 
 
