@@ -35,6 +35,16 @@
 #                      그 외 값은 exit 2 — 오타가 실배포로 이어지면 안 된다)
 #   COMPOSE_FILE_PATH  compose 파일 (기본 docker-compose.prod.yml)
 #
+# ■ cycle255 — TLS(443) 오버레이 마커
+#   호스트 파일 `.tls_enabled`(git 밖, `tools/ops/tls_enable.sh` 가 인증서 발급 **성공 뒤**에만
+#   만든다)가 있으면 모든 compose 호출에 `-f docker-compose.tls.yml` 를 base 파일 **뒤**에
+#   덧붙인다(compose 는 뒤에 오는 파일이 이긴다 — base 위에 얹는 것이 의도다). 마커가 없으면
+#   이 파일이 리포에 있어도 명령은 cycle248 과 byte 동일하다(인증서 없이 443 을 열면 nginx 가
+#   기동 실패해 같은 컨테이너인 80 까지 죽는다). **마커는 모드 판정(full/frontend/none)에
+#   개입하지 않는다** — 개입하면 TLS 를 켠 날부터 모든 배포가 backend 재시작이 되어 cycle248
+#   이 없앤 비용이 부활한다. `docker-compose.tls.yml` 자체의 변경은 다른 compose 파일과 동일하게
+#   backend 축(full)으로 분류한다(BACKEND_RE, fail-safe).
+#
 # ■ 운영 규칙 — 마커는 "이 git SHA 가 성공 배포됐다" 만 뜻하고 실행 중 이미지와 대조하지 않는다.
 #   EC2 에서 git 을 손으로 움직였거나(reset/checkout/revert/stash) 수동 `docker compose build|up --build`
 #   를 했으면 `rm .deployed_sha` 로 다음 자동 배포를 full 로 만든다. 수동 배포는 이 스크립트로 한다.
@@ -57,8 +67,21 @@ case "$(printf '%s' "${DEPLOY_DRY_RUN:-0}" | tr '[:upper:]' '[:lower:]')" in
 esac
 
 # 정규식은 ERE. 앵커(^ … / 또는 $)가 계약이다 — `srcs/`·`frontendx/`·`requirements-dev.txt` 가 새면 안 된다.
-BACKEND_RE='^(src/|requirements\.txt$|Dockerfile$|docker-compose\.prod\.yml$|\.dockerignore$|\.github/workflows/deploy\.yml$|tools/deploy/)'
+# cycle255 — docker-compose.tls.yml 추가(다른 compose 파일과 동일하게 backend 축, fail-safe).
+BACKEND_RE='^(src/|requirements\.txt$|Dockerfile$|docker-compose\.prod\.yml$|docker-compose\.tls\.yml$|\.dockerignore$|\.github/workflows/deploy\.yml$|tools/deploy/)'
 FRONTEND_RE='^(frontend/)'
+
+# cycle255 — TLS 오버레이 마커. **모드 판정에는 관여하지 않는다** — 여기서 읽어 두는 것은
+# compose 호출에 붙일 `-f` 목록뿐이다. 마커는 존재만 본다(내용 파싱 금지 — `touch` 로 만든
+# 빈 파일도 켜짐이다).
+TLS_MARKER=".tls_enabled"
+TLS_COMPOSE="docker-compose.tls.yml"
+TLS_STATE="off"
+COMPOSE_FILE_ARGS=(-f "$COMPOSE_FILE")
+if [ -f "$TLS_MARKER" ]; then
+    TLS_STATE="on"
+    COMPOSE_FILE_ARGS+=(-f "$TLS_COMPOSE")
+fi
 
 log() { echo "[deploy] $*"; }
 
@@ -115,7 +138,7 @@ N_CHANGED=0
 if [ -n "$CHANGED" ]; then
     N_CHANGED="$(printf '%s\n' "$CHANGED" | grep -c . || true)"
 fi
-log "mode=${MODE} reason=${REASON} prev=${PREV_SHA:-none} head=${HEAD_SHA} changed=${N_CHANGED}"
+log "mode=${MODE} reason=${REASON} prev=${PREV_SHA:-none} head=${HEAD_SHA} changed=${N_CHANGED} tls=${TLS_STATE}"
 if [ -n "$CHANGED" ]; then
     # ⚠️ `head` 금지 — pipefail 아래서 head 가 40행 뒤 닫힐 때 printf 가 아직 쓰고 있으면(목록이 파이프
     # 버퍼 64KB 를 넘는 큰 diff) SIGPIPE(141) → 스크립트 통째 중단. sed 는 입력을 끝까지 읽는다(T-16).
@@ -129,15 +152,15 @@ fi
 
 case "$MODE" in
     full)
-        run docker compose -f "$COMPOSE_FILE" up --build -d --remove-orphans
+        run docker compose "${COMPOSE_FILE_ARGS[@]}" up --build -d --remove-orphans
         ;;
     frontend)
         # --no-deps 가 계약이다: 빼면 depends_on(backend) 까지 --build 대상이 돼 backend 가 재생성된다(실측).
-        run docker compose -f "$COMPOSE_FILE" up --build -d --remove-orphans --no-deps frontend
+        run docker compose "${COMPOSE_FILE_ARGS[@]}" up --build -d --remove-orphans --no-deps frontend
         ;;
     none)
         # 빌드 없는 up = 구성 일치 시 Running(재생성 0), 죽어 있던 컨테이너만 기동.
-        run docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+        run docker compose "${COMPOSE_FILE_ARGS[@]}" up -d --remove-orphans
         ;;
     *)
         log "internal error: unknown mode '$MODE'"; exit 2

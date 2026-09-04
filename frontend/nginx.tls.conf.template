@@ -1,0 +1,77 @@
+# cycle255 (2026-09-05) — TLS(443) 서버 블록 템플릿, `auto.dkstock.cloud` 전용.
+#
+# 이 파일은 **기본 빌드 이미지에 굽지 않는다** — 인증서가 없는 상태로 nginx 가 이 파일을
+# 읽으면 `ssl_certificate` 경로 부재로 기동 실패한다. `docker-compose.tls.yml` 오버레이가
+# 인증서 발급 **후**에만 이 파일을 `/etc/nginx/templates/tls.conf.template` 로 볼륨
+# 마운트해 활성화한다(`.tls_enabled` 마커 기반, `tools/deploy/compose_up_changed.sh`).
+#
+# ⚠️ 이 파일에 `map` 블록을 두지 마라. `frontend/nginx.conf.template` 의 http 컨텍스트
+# `map $remote_user $api_key_for_user { … }` 를 그대로 공유해서 쓴다 — 두 템플릿이 같은
+# `/etc/nginx/conf.d/` 아래로 렌더돼 하나의 http 컨텍스트로 합쳐지기 때문이다. 여기서
+# 같은 이름을 다시 정의해도 nginx 는 **정상 기동한다**(`nginx -t` 성공, duplicate/emerg 로그
+# 0건 — nginx:alpine 실측). 대신 뒤에 include 되는 이 파일(`tls.conf` 가 `default.conf` 뒤)의
+# map 이 조용히 이겨 **모든 사용자의 X-API-Key 가 빈 값**이 되고 http/https/reporter 전부
+# backend 401 이 된다 — 관측으로 드러나지 않는 실패라 텍스트 가드(G-255-2f)가 유일한 방어다.
+#
+# ⚠️ 이 파일도 `*.template` 로 envsubst 를 통과한다 — 치환 구문(달러+중괄호)을 어디에도
+# 쓰지 마라(cycle246 결함의 재현 경로: 렌더된 설정 주석에 키가 평문으로 박힌다). 인증서
+# 경로·Basic Auth·프록시 헤더는 HTTP 템플릿과 값을 그대로 맞춰 하드코딩한다 — 이 파일은
+# 변수를 받지 않는다.
+#
+# 1단계(이 사이클) — 443 을 80 과 **병행** 제공한다. 80 → 443 리다이렉트는 걸지 않는다
+# (안정화 뒤 2단계에서 `default.conf.template` 자체를 TLS 전제로 바꾸며 처리). HSTS 도
+# 아직 넣지 않는다 — 브라우저에 되돌릴 수 없는 상태를 심으므로, `rm .tls_enabled` 로
+# 80 단독 원복 경로가 살아 있어야 하는 지금 단계엔 적합하지 않다.
+server {
+    listen 443 ssl;
+    server_name auto.dkstock.cloud;
+
+    ssl_certificate     /etc/letsencrypt/live/auto.dkstock.cloud/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/auto.dkstock.cloud/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # 사이트 전체 Basic Auth — HTTP 템플릿과 동일 규약. `auth_basic off;` 는 여기에도
+    # 절대 쓰지 않는다(D-1-b, TLS 사본에도 그대로 적용된다 — 빠지면 443 만 무인증이 되고
+    # 80 은 정상이라 증상이 겉으로 드러나지 않는다).
+    auth_basic           "auto_stock";
+    auth_basic_user_file /etc/nginx/secrets/.htpasswd;
+
+    # 브라우저 아이콘 탐침 단락 — cycle247 과 byte 동일. `return 204;` 외 지시어 금지
+    # (proxy_pass/root/alias 가 들어오면 무자격 콘텐츠 제공이 된다). 정규식 location 은
+    # 선언 순서로 매칭되므로 이 단락은 아래 정적자산 정규식보다 먼저 있어야 한다.
+    location = /favicon.ico { return 204; }
+    location = /favicon.svg { return 204; }
+    location ~ ^/apple-touch-icon(-[0-9]+x[0-9]+)?(-precomposed)?\.png$ { return 204; }
+
+    # API 리버스 프록시 — HTTP 템플릿과 동일 헤더 4종. `$api_key_for_user` 는 위에서
+    # 설명한 대로 HTTP 템플릿의 `map` 을 그대로 공유해서 쓴다(이 파일엔 map 이 없다).
+    # ACME 챌린지 location 은 여기 없다 — HTTP-01 은 80 에서만 처리한다(갱신도 동일).
+    location /api/ {
+        auth_basic           "auto_stock";
+        auth_basic_user_file /etc/nginx/secrets/.htpasswd;
+
+        proxy_pass http://backend:8000;
+        # `$host` 는 포트를 떨어뜨린다(D-2-b) — 반드시 `$http_host`.
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # 443 에서는 이 값이 비로소 `https` 가 된다 — 리터럴로 굳히지 말 것.
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-API-Key $api_key_for_user;
+    }
+
+    # SPA fallback — index.html은 캐시 금지
+    location / {
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+    }
+
+    # 정적 파일 캐싱
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}

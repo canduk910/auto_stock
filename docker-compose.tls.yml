@@ -1,0 +1,24 @@
+# cycle255 (2026-09-05) — TLS(443) 오버레이. `frontend` 서비스만 확장한다.
+#
+# 활성화 = 호스트 파일 `.tls_enabled`(git 밖) 존재 여부. `tools/deploy/compose_up_changed.sh`
+# 가 마커를 보고 이 파일을 `-f` 로 덧붙인다 — 마커가 없으면 이 파일은 리포에 있어도 어떤
+# compose 호출에도 등장하지 않는다(현행 byte 동일).
+#
+# ⚠️ `frontend` 외 서비스를 여기 추가하지 마라 — `backend` 가 한 줄이라도 들어오면 그
+# 서비스의 config 해시가 바뀌어 backend 컨테이너가 재생성된다(cycle232 D6, 장중 tick
+# blind). `build`/`environment` 를 다시 적는 것도 금지 — merge 결과가 base 와 달라질
+# 위험이 있다. 이 파일의 frontend 키는 `ports`/`volumes` 뿐이어야 한다(가드 G-255-3).
+#
+# 세 마운트 전부 읽기전용이다 — nginx 가 인증서나 챌린지 파일을 쓸 이유가 없다.
+services:
+  frontend:
+    ports:
+      - "443:443"
+    volumes:
+      # TLS 서버 블록 템플릿 — 이미지에 굽지 않고 볼륨으로만 마운트한다(인증서가 없는
+      # 상태에서 이미지에 들어가면 nginx 가 기동 실패한다).
+      - ./frontend/nginx.tls.conf.template:/etc/nginx/templates/tls.conf.template:ro
+      # 호스트 certbot 산출물(인증서/개인키).
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      # ACME 챌린지 webroot — 기본 compose 의 HTTP 서버가 읽는 경로와 동일해야 한다.
+      - ./certbot-www:/var/www/certbot:ro

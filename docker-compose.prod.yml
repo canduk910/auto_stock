@@ -36,6 +36,12 @@ services:
       # (`.token_cache` root 소유 사고와 동일 계열) → `chmod 755 secrets` + `644 .htpasswd`.
       # 배포 전 호스트에서 `secrets/.htpasswd` 생성이 하드 게이트다.
       - ./secrets:/etc/nginx/secrets:ro
+      # cycle255 — ACME HTTP-01 챌린지 webroot. HTTP 서버 블록의 ACME location
+      # (root /var/www/certbot, `frontend/nginx.conf.template`)이 실제로 파일을 읽으려면
+      # **기본** compose 에도 같은 마운트가 있어야 한다 — TLS 오버레이(`docker-compose.tls.yml`)
+      # 는 인증서 발급 *후*에야 켜지므로, 기본 경로에 마운트가 없으면 첫 발급 자체가
+      # 불가능하다(닭·달걀). 디렉터리라 호스트에 없으면 Docker 가 빈 디렉터리를 만든다.
+      - ./certbot-www:/var/www/certbot:ro
     environment:
       # `env_file: .env` 금지 — KIS·OPENAI 등 33개 비밀을 nginx 컨테이너 환경에 밀어 넣는다.
       # compose 는 프로젝트 디렉터리 `.env` 를 `${VAR}` 보간용으로 자동 로드하므로 이걸로 충분하다.

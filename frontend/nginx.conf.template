@@ -59,6 +59,26 @@ server {
     auth_basic           "auto_stock";
     auth_basic_user_file /etc/nginx/secrets/.htpasswd;
 
+    # ACME(Let's Encrypt) HTTP-01 챌린지 전용 — cycle255 (2026-09-05, TLS 준비 1단계).
+    # `/.well-known/acme-challenge/<token>` 은 인증서 발급 중 **무자격 200** 이어야 한다.
+    # `auth_basic off;` 는 이 파일에 절대 쓰지 않으므로(D-1-b), 인증 상속을 합법적으로
+    # 끊는 유일한 수단이 `satisfy any; allow all;` 다. `^~` 접두는 필수 — 없으면 아래
+    # 정적자산 정규식 location 이 먼저 평가될 수 있어 토큰 파일명이 우연히 그 패턴에
+    # 걸리는 순간 챌린지가 401 로 떨어져 발급이 실패한다.
+    # ⚠️ 이 블록엔 `satisfy`/`allow`/`root`/`default_type` 외 아무 지시어도 두지 마라 —
+    # `proxy_pass`/`alias`/`try_files` 가 들어오는 순간 무자격 콘텐츠 제공 경로가 된다
+    # (G-247-2 와 동일 논리, 여기선 인증이 명시적으로 꺼져 있어 더 위험하다). `satisfy`
+    # 는 이 파일 전체에서 **정확히 1회**만 존재해야 한다(가드 G-255-1).
+    # webroot(`/var/www/certbot`)는 호스트 `./certbot-www` 마운트와 짝이다 — 기본
+    # compose 에도 같은 마운트가 있어야 첫 발급이 가능하다(TLS 오버레이는 발급 후에만
+    # 켜진다).
+    location ^~ /.well-known/acme-challenge/ {
+        satisfy any;
+        allow all;
+        root /var/www/certbot;
+        default_type text/plain;
+    }
+
     # 브라우저 아이콘 탐침 단락 — cycle247 (2026-09-04).
     # Safari 의 WebKit 네트워킹 프로세스는 favicon / apple-touch-icon 을 페이지 자격 **없이**
     # 따로 가져오고, 그 401 에 실린 WWW-Authenticate 가 **두 번째 로그인 다이얼로그**가 된다
