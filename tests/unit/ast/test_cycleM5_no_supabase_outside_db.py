@@ -20,7 +20,6 @@ Red 유효성: production 미변경 → 4파일 13 사이트 잔존 → 위반 �
 from __future__ import annotations
 
 import re
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -86,36 +85,5 @@ def test_supabase_self_still_present():
     assert (_SRC / "db" / "supabase.py").exists(), (
         "supabase.py 병존(롤백 경로) 유지 — M5 는 마지막 전환이나 supabase.py 삭제 금지."
     )
-
-
-# ---------------------------------------------------------------------------
-# 매매 안전성 8영역 diff 0 (M5 4파일은 8영역 밖)
-# ---------------------------------------------------------------------------
-_SAFETY_PATHS = (
-    "src/engine/risk.py",
-    "src/engine/order_engine.py",
-    "src/realtime/",
-    "src/auth/",
-    "src/api/order.py",
-    "src/engine/session.py",
-    "src/engine/scanner.py",
-    "src/engine/strategy_registry.py",
-)
-
-
-def _git_changed_files() -> list[str]:
-    out = subprocess.run(
-        ["git", "-C", str(_REPO), "status", "--porcelain"],
-        capture_output=True, text=True, check=True,
-    ).stdout
-    files: list[str] = []
-    for line in out.splitlines():
-        if not line.strip():
-            continue
-        path = line[3:].strip()
-        if " -> " in path:
-            path = path.split(" -> ", 1)[1]
-        files.append(path)
-    return files
 
 
