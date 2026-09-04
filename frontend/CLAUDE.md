@@ -478,15 +478,29 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
   `proxy_set_header X-API-Key "${API_AUTH_KEY}";` 로 백엔드 키를 **서버 측에서** 주입한다
   — 키는 번들·브라우저 어디에도 실리지 않는다. `auth_basic off;` 는 이 파일에 절대
   쓰지 않는다(한 줄로 Basic Auth 와 백엔드 인증이 동시에 열린다 — AST 가드가 금지).
-- **프론트 코드 변경은 0이다.** `client.ts` 가 `baseURL:'/api'` 상대경로 단일
-  클라이언트라 문서 출처 == XHR 출처 → 브라우저가 Basic 자격을 자동 동봉하고,
-  `withCredentials` 도 필요 없다.
+- ~~**프론트 코드 변경은 0이다.**~~ **⚠️ cycle246 이 실측으로 반증했다.** 배포 직후
+  사용자가 "로그인 계정/pw 를 두 번 입력해야 한다" 고 보고했고, nginx 접근 로그가
+  원인을 확정했다 — 문서 `/` 는 인증되는데 SPA 의 XHR 이 **자격 없이**(access log 의
+  user 필드 `-`) 나가 401 을 받고 브라우저가 두 번째 다이얼로그를 띄운다. 재입력 후
+  같은 경로가 `ubuntu` 로 찍힌다. realm 불일치가 아니다(전 location 이 동일
+  `"auto_stock"` 실측, 백엔드 401 에는 `WWW-Authenticate` 없음 실측).
+  → `client.ts` 에 **`withCredentials: true`** 를 넣는다. 동일 출처라 CORS 파급 0.
+  회귀 가드 `tests/unit/ast/test_cycle246_nginx_template_no_key_leak.py::G-246-5`
+  (주석을 걷어낸 뒤 검사 — 같은 파일 설명 주석이 이 문자열을 담고 있어 순진한 검색은
+  실제 설정을 주석 처리해도 통과한다).
 - **dev 는 nginx 를 거치지 않는다.** `vite.config.ts` proxy 가 `X-API-Key`(=
   `process.env.API_AUTH_KEY`)와 `Origin: apiTarget` 을 함께 넣는다. Origin 정규화가
   빠지면 `changeOrigin: true` 가 Host 만 바꾸는 탓에 백엔드 CSRF 검사가 **상태변경만**
   401 로 막아 "화면은 멀쩡한데 버튼만 죽는" 형태가 된다.
 - **알려진 한계 (후속 F4)** — `client.ts` 에 **401 인터셉터가 없다**. 자격 만료·키 교체
   시 폴링(18곳, 최단 3초)이 재인증 유도 없이 조용히 실패한다.
+- **🔴 cycle246 — 템플릿 주석에 치환 구문 금지**: `nginx.conf.template` 의 설명 주석이
+  치환 구문(달러+중괄호)을 문자 그대로 담고 있었고, envsubst 는 주석을 구분하지 않아
+  **렌더된 설정 주석에 API 키가 평문으로 박혔다**(실측: 렌더 결과에 키 2회 등장 —
+  `proxy_set_header` 1 + 주석 1). 운영 중 설정 덤프로 그대로 새어 나가는 경로다.
+  치환 구문은 `proxy_set_header X-API-Key` **단 한 줄**에만 쓰고, 설명에는 변수 이름만
+  백틱으로 적는다. 가드 = 같은 파일의 G-246-1~3(치환 구문 1회 · 그 1회가 헤더 줄 ·
+  중괄호 없는 형태 0건). **이 결함이 드러난 키는 폐기하고 교체한다.**
 
 ## 백엔드 연동
 

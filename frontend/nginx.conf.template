@@ -19,8 +19,14 @@
 #     apr1 **해시**뿐이고 호스트 접근은 이미 SSH 로 제한된다.
 #   * `API_AUTH_KEY` 환경변수가 **아예 없으면** envsubst 가 치환하지 않아 nginx 가
 #     `[emerg] unknown "api_auth_key" variable` 로 **기동 실패**한다(빈 값과 증상이 정반대).
-#     compose 의 `environment: - API_AUTH_KEY=${API_AUTH_KEY}` 가 항상 변수를 정의하므로
-#     그 줄을 지우지 마라 — 빈 값이면 `X-API-Key ""` 로 렌더돼 헤더가 전달되지 않는다.
+#     compose 의 frontend `environment:` 에 있는 API_AUTH_KEY 전달 줄이 항상 변수를
+#     정의하므로 그 줄을 지우지 마라 — 빈 값이면 `X-API-Key ""` 로 렌더돼 헤더가
+#     전달되지 않는다.
+#   * 🔴 **이 파일에서 치환 구문(달러+중괄호 형태)은 아래 `proxy_set_header X-API-Key`
+#     단 한 줄에만 쓴다.** envsubst 는 주석을 구분하지 않으므로 설명문에 그 구문을 적으면
+#     **렌더된 설정 주석에 키가 평문으로 박힌다**(cycle246 실측: 렌더 결과에 키 2회 등장,
+#     운영 중 설정 덤프로 유출). 설명에는 변수 이름만 백틱으로 쓴다.
+#     회귀 가드 = `tests/unit/ast/test_cycle246_nginx_template_no_key_leak.py`.
 server {
     listen 80;
     server_name _;
