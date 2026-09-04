@@ -13,7 +13,7 @@ SEND/스탬프가 되살아나거나, leaf 가 scheduler/scanner 를 끌어와 �
 | G-252-2 | `stale_watcher_core.py` 의 `sys.modules.get` 출현 수 = 기준값 7 (cycle252 직전 sha 8b146ff 실측) | cycle63 D-2 카운트 가드 훼손 |
 | G-252-3 | no_feed 분기가 `sub_priority` 대입 **뒤** · `retry > MAX` **앞** | 분기 이동 |
 | G-252-4 | 분기 본문 토큰 0: unsubscribe/subscribe/스탬프/sleep | skip 이 skip 이 아니게 되는 회귀 |
-| G-252-5 | scheduler·8영역·stale_diagnostics/universe_guard/session_recovery diff 0 | 범위 이탈 |
+| ~~G-252-5~~ | (폐기 — 사이클 한정 bare git diff 가드, 배포 후 삭제) | — |
 | G-252-6 | 시간창 리터럴 신설 0 (두 파일) | 시각 게이트 밀반입 |
 | G-252-7 | `write_log` 직접 호출 0 (두 파일) | cycle72 이중 INSERT 회귀 |
 
@@ -49,17 +49,6 @@ _FUNC = "check_and_resubscribe_stale"
 # 부분 문자열은 서술이지 게이트가 아니다(금지 대상은 "시각으로 분기하는 코드").
 _TIME_LITERALS = {"08:00", "09:00", "15:20", "15:30"}
 
-
-def _git(*args: str) -> str:
-    res = subprocess.run(
-        ["git", *args], cwd=_REPO_ROOT, capture_output=True, text=True,
-    )
-    if getattr(res, "returncode", 0) != 0:
-        raise AssertionError(
-            f"git {' '.join(args)} 실패 (rc={res.returncode}) — fail-closed. "
-            f"stderr: {(res.stderr or '').strip()}"
-        )
-    return res.stdout
 
 
 def _tree(path: Path) -> ast.Module:
@@ -347,68 +336,13 @@ def test_g252_4b_branch_holds_retry_counter():
 
 
 # ===========================================================================
-# G-252-5 — 범위 이탈 0 (⚠️ 사이클 한정 가드 — cycle252 배포 후 폐기 대상)
+# G-252-5 / G-252-5b — 폐기 (2026-09-05 03:4x, cycle252 배포 a375f51 직후)
+# 사이클 한정 bare `git diff HEAD` 가드였다. 배포 후 자기소멸했고, 5b 는 전 트리
+# 화이트리스트라 다음 사이클(cycle253 `src/routes/realtime.py`)의 워킹트리에서 즉시
+# RED 가 되는 클래스(cycle222a `test_a11b_stale_watcher_core_untouched` 선례)다.
+# 8영역·scheduler 무접촉은 커밋 8f57bee 의 diff 로 확정됐다 — 리팩토링 리뷰
+# `_workspace/refactor/2026-09-05_review.md` 카드 1.
 # ===========================================================================
-_EIGHT_AREAS = [
-    "src/engine/risk.py",
-    "src/engine/order_engine.py",
-    "src/engine/scanner.py",
-    "src/engine/session.py",
-    "src/engine/strategy_registry.py",
-    "src/api/order.py",
-    "src/realtime",
-    "src/auth",
-]
-_FROZEN_PATHS = _EIGHT_AREAS + [
-    "src/engine/scheduler.py",
-    "src/engine/stale_diagnostics.py",
-    "src/engine/stale_universe_guard.py",
-    "src/engine/stale_session_recovery.py",
-]
-
-
-def test_g252_5_out_of_scope_files_untouched():
-    """스펙 §2 금지 — 8영역 · scheduler.py · stale_* 3파일 diff 0.
-
-    ⚠️ **사이클 한정 가드다.** cycle252 가 커밋되면 diff 가 비어 자기소멸하고, 그때
-    이 테스트를 **삭제**한다. bare `git diff HEAD` 를 영구 동결한 가드가 후속 사이클을
-    무조건 RED 로 만든 선례(cycle222a `test_a11b_stale_watcher_core_untouched`,
-    cycle240 이 내용 검사로 재스코프)를 반복하지 않기 위한 명시다.
-    """
-    tracked = _git("diff", "HEAD", "--name-only", "--", *_FROZEN_PATHS).split()
-    untracked = _git(
-        "ls-files", "--others", "--exclude-standard", "--", *_FROZEN_PATHS,
-    ).split()
-    changed = sorted(set(tracked) | set(untracked))
-
-    assert changed == [], (
-        f"cycle252 범위 밖 변경 감지: {changed} — 스펙 §2 는 이 파일들의 diff 0 을 "
-        "요구한다(8영역은 사용자 승인 사안, scheduler.py 는 3,999L 라인 상한, "
-        "stale_* 3파일은 이번 사이클 무접촉)"
-    )
-
-
-def test_g252_5b_changed_files_are_within_declared_scope():
-    """변경 파일 화이트리스트 — 스펙 §2 목록 밖 소스 변경 0."""
-    allowed_prefixes = (
-        "src/engine/no_feed_registry.py",
-        "src/db/stock_master.py",
-        "src/engine/stale_watcher_core.py",
-        "tests/",
-        "_workspace/",
-        "docs/",
-        "CLAUDE.md",
-    )
-    tracked = _git("diff", "HEAD", "--name-only").split()
-    untracked = _git("ls-files", "--others", "--exclude-standard").split()
-    changed = sorted(set(tracked) | set(untracked))
-    offenders = [
-        p for p in changed
-        if not p.startswith(allowed_prefixes) and not p.endswith(".md")
-    ]
-    assert offenders == [], (
-        f"스펙 §2 범위 밖 파일 변경: {offenders}"
-    )
 
 
 # ===========================================================================
