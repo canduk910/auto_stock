@@ -318,15 +318,22 @@ def test_build_context_when_phase1_then_backend_image_inputs_unchanged():
     `requirements.txt` · `src/` 뿐.
 
     이 두 사실이 "Phase 1 파일은 어느 COPY 레이어의 입력도 아니다 → BuildKit 캐시 전부
-    히트 → 동일 이미지 ID → backend 컨테이너 미재생성" 의 전제다(①). 회귀하면 Phase 1
-    장중 배포 판단(①-b: D6 미적용) 자체가 무효가 된다.
+    히트 → 동일 이미지 ID" 의 전제다(①).
+
+    ⚠️ cycle248(2026-09-04) 정정 — 동일 이미지 ID 여도 Compose v5.1 `up --build` 는 backend
+    컨테이너를 **재생성한다**(재태그 → LastTagTime 갱신, 실측). 그래서 "→ 미재생성 → D6 미적용"
+    결론은 거짓이었고, 무재시작은 `tools/deploy/compose_up_changed.sh` 가 diff 로 backend 입력
+    무변경을 판정해 `--no-deps frontend` 로 올릴 때만 성립한다. 이 가드의 COPY 소스 집합은 이제
+    그 분류 정규식의 **정합 근거**다(`test_cycle248_deploy_pipeline.py::G-248-2` 가 교차 검사).
     """
     ignore = _read(_DOCKERIGNORE)
     assert re.search(r"^frontend/\s*$", ignore, re.M), ignore
 
     dockerfile = _read(_ROOT_DOCKERFILE)
-    sources = [
-        m.group(1)
-        for m in re.finditer(r"^COPY\s+(?:--\S+\s+)*(\S+)", dockerfile, re.M)
-    ]
+    # cycle248 — 첫 소스만 캡처하던 종전 정규식은 `COPY requirements.txt pyproject.toml ./` 같은
+    # 다중 소스·ADD 를 못 봤다(뮤테이션 escape). 모든 소스 토큰(dest 제외, 플래그 제거)을 본다.
+    sources: list[str] = []
+    for m in re.finditer(r"^\s*(COPY|ADD)\s+(.+?)\s*$", dockerfile, re.M | re.I):
+        args = [t for t in m.group(2).split() if not t.startswith("--")]
+        sources.extend(a[2:] if a.startswith("./") else a for a in args[:-1])
     assert set(sources) == {"requirements.txt", "src/"}, sources

@@ -55,3 +55,7 @@ secrets/
 # SSH 키 (절대 commit 금지)
 *.pem
 *.key
+
+# cycle248 — EC2 선택적 배포 마커(마지막 성공 배포 SHA). tools/deploy/compose_up_changed.sh 가 쓴다.
+.deployed_sha
+.deployed_sha.attempt

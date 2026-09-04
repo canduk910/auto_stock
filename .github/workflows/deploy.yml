@@ -9,6 +9,15 @@ on:
     types: [completed]
     branches: [main]
 
+# cycle248 — 배포 직렬화. 연속 push 로 Deploy 가 겹치면 두 스크립트가 같은 마커/HEAD 를 놓고
+# 경쟁한다(어느 인터리빙도 변경을 *놓치지는* 않지만 불필요한 재생성이 생긴다). 진행 중 run 은 취소하지
+# 않는다. ⚠️ GitHub 은 그룹당 **대기 1건만** 유지하고 더 오래된 대기 run 은 취소·교체한다(공식 문서) —
+# 취소된 대기 run 의 변경은 살아남은 run 의 `git pull` + 마커↔HEAD 누적 diff 가 흡수하므로 유실이 아니라
+# 지연이다.
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,6 +34,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: SUPABASE_DB_URL
           script: |
+            # cycle248 — ssh-action v1 은 set -e 를 주입하지 않는다(README: script_stop 제거, 직접 넣으라).
+            # 없으면 `git pull` 실패가 구 HEAD 로 이어져 선택 스크립트가 `already_deployed` 로 초록을 만든다(실측).
+            set -e
             cd ~/auto_stock
             git pull origin main
 
@@ -47,5 +59,10 @@ jobs:
               echo "[deploy] SUPABASE_DB_URL secret 또는 psql 부재 — migration 자동 적용 skip (graceful)"
             fi
 
-            docker compose -f docker-compose.prod.yml up --build -d --remove-orphans
-            docker image prune -f
+            # cycle248 (2026-09-04) — 선택적 배포. 종전의 무조건 `up --build` 는 Compose v5.1 에서
+            # 이미지 ID 가 같아도 build: 서비스를 전부 재생성해(재태그 → LastTagTime 갱신) 프론트·
+            # 문서만 바꾼 push 도 backend 를 ~100초 tick blind 로 몰았다(13db0d9 실측).
+            # 스크립트가 마지막 성공 배포 SHA(.deployed_sha)와 HEAD 의 diff 로 full / frontend(--no-deps)
+            # / none(빌드 없는 up) 을 고른다. 판정 불가는 전부 full(현행 동작). 상세·계약 = 스크립트 머리말
+            # + tests/unit/deploy/test_cycle248_compose_up_changed.py.
+            bash tools/deploy/compose_up_changed.sh
