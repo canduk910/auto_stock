@@ -57,12 +57,25 @@ class TestDeployMigration:
         )
 
     def test_g_145_migration_4_docker_compose_preserved(self):
-        """G-145-MIGRATION-4: docker compose 배포 영역 영구 영속 (사이클 114 영속)."""
-        source = _DEPLOY_YML.read_text(encoding="utf-8")
+        """G-145-MIGRATION-4: migration 적용 뒤 compose 배포가 보존된다.
 
-        # docker compose 영역 영구 영속 보존
-        assert "docker compose" in source
-        assert "docker-compose.prod.yml" in source
+        cycle248(2026-09-04) 재스코프 — compose 호출이 deploy.yml 에서
+        `tools/deploy/compose_up_changed.sh`(선택적 배포)로 이동했다. 계약은 "migration
+        루프 **뒤에** compose 배포가 따라온다" 이므로, deploy.yml 은 그 스크립트를 migration
+        뒤에 호출하고 스크립트가 `docker compose` + `docker-compose.prod.yml` 을 품는지 본다.
+        (스크립트 자체의 모드 계약은 tests/unit/deploy/test_cycle248_compose_up_changed.py.)
+        """
+        source = _DEPLOY_YML.read_text(encoding="utf-8")
+        script_path = _DEPLOY_YML.parents[2] / "tools" / "deploy" / "compose_up_changed.sh"
+        assert script_path.exists(), "선택적 배포 스크립트가 없다"
+        script = script_path.read_text(encoding="utf-8")
+        call = "bash tools/deploy/compose_up_changed.sh"
+        assert call in source, "deploy.yml 이 compose 배포 스크립트를 호출하지 않는다"
+        assert source.index("supabase/migrations") < source.index(call), (
+            "compose 배포가 migration 적용보다 앞이다 — 새 코드가 옛 스키마 위에서 뜬다"
+        )
+        assert "docker compose" in script
+        assert "docker-compose.prod.yml" in script
 
     def test_g_145_migration_5_workflow_run_trigger(self):
         """G-145-MIGRATION-5: 사이클 114 workflow_run trigger 영역 영구 영속."""

@@ -64,7 +64,12 @@ def _git(repo: Path, *args: str) -> str:
 
 
 def _commit(repo: Path, files: dict[str, str | None], msg: str = "c") -> str:
-    """files: path → 내용(None 이면 삭제). 커밋 SHA 반환."""
+    """files: path → 내용(None 이면 삭제). 커밋 SHA 반환.
+
+    추가/수정은 **한 번의** `git add --` 로 묶는다 — T-16(2,500 파일)이 파일마다 git 을 띄우면
+    60초에 육박해 전체 스위트의 per-test timeout 아래서 부하에 따라 붉는다(실측: 단독 35~58s).
+    """
+    to_add: list[str] = []
     for rel, content in files.items():
         p = repo / rel
         if content is None:
@@ -73,7 +78,9 @@ def _commit(repo: Path, files: dict[str, str | None], msg: str = "c") -> str:
             continue
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content, encoding="utf-8")
-        _git(repo, "add", rel)
+        to_add.append(rel)
+    if to_add:
+        _git(repo, "add", "--", *to_add)
     _git(repo, "commit", "-q", "--allow-empty", "-m", msg)
     return _git(repo, "rev-parse", "HEAD")
 
