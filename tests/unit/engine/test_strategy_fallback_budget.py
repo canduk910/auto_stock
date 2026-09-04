@@ -51,9 +51,16 @@ def _build(strategy_id: str, cls):
 def test_fallback_when_no_usage_then_returns_one(strategy_id, cls):
     """사용액 0 + 비중계산 0주 + 잔여(=total) >= 가격 → 1주 폴백."""
     s = _build(strategy_id, cls)
-    # total=1M, ratio≈0.1~0.25 → amount=100k~250k. 가격 1주에 800k → 비중 기준 0주.
     s.state.total_investment = 1_000_000
-    assert s.calc_buy_quantity(current_price=800_000) == 1
+    # cycle245 — 고정가 800k 는 ρ컷오프(2.5 × int(1M×ratio))를 momentum(625k)·
+    # VB(250k)·LTV(375k)·donchian(500k) 전부에서 넘겨 캡에 잘린다. 가격을 **전략
+    # 비중에서 도출**하면 "비중계산 0주 + 잔여 충분 → 1주 폴백" 이라는 원 의도를
+    # 오히려 더 정확히 표현한다: price = int(예산×ratio)+1 이면 비중 수량은 정확히
+    # 0 이고 ρ컷오프(=2.5배)는 항상 그 위다.
+    ratio = s.config.params["position_ratio"]
+    price = int(s.state.total_investment * ratio) + 1
+    assert int(s.state.total_investment * ratio) // price == 0
+    assert s.calc_buy_quantity(current_price=price) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -114,7 +121,12 @@ def test_fallback_uses_common_helper(strategy_id, cls):
     ) as mock_helper:
         result = s.calc_buy_quantity(current_price=100_000_000)
 
-    assert result == sentinel
+    # cycle245 — 위임은 그대로이나 반환값은 ρ캡을 통과한다. 모킹된 42주 × 1억원 =
+    # ρ상한의 천문학적 배수라 캡이 0 으로 자른다(§3-7 "모든 랏" 계약의 직접 증거).
+    # 헬퍼 반환값 유통 계약은 `test_cycle245_ratio_notional_cap.py` F-14 가 캡
+    # 비바인딩 조건에서 검증한다. 이 테스트의 계약은 **헬퍼 호출 자체**다.
+    assert sentinel == 42
+    assert result == 0
     mock_helper.assert_called_once_with(100_000_000)
 
 
@@ -139,8 +151,11 @@ def test_fallback_isolated_per_strategy_state():
     # VB 는 깨끗한 상태 — total 1M, 사용액 0. ratio=10% → amount=100k, qty=0
     vb.state.total_investment = 1_000_000
 
-    # VB 입장에서 잔여 = 1M >= 600k → 1주 폴백 가능해야 함 (momentum 사용액 영향 없음)
-    assert vb.calc_buy_quantity(current_price=600_000) == 1
+    # VB 입장에서 잔여 = 1M >= 200k → 1주 폴백 가능해야 함 (momentum 사용액 영향 없음)
+    # cycle245 — 가격 600k 는 VB ρ컷오프(2.5 × 100k = 250k)를 넘어 캡에 잘리므로
+    # 200k 로 낮춘다. 비중 수량은 여전히 0주(100,000 // 200,000 = 0)이고 격리
+    # 검증(momentum 노이즈 무영향)이라는 원 의도는 무손상이다.
+    assert vb.calc_buy_quantity(current_price=200_000) == 1
 
 
 # ---------------------------------------------------------------------------

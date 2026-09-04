@@ -117,6 +117,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         "rs_filter_enabled": False,
         "rsi_filter_enabled": False,
         "rsi_extreme_max": 85,
+        "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
     }
 
     def __init__(self, config: StrategyConfig):

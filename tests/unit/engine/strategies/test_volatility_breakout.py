@@ -248,8 +248,11 @@ def test_calc_qty_when_amount_covers_qty(vb):
 
 
 def test_calc_qty_when_ratio_zero_but_total_covers_one_share(vb):
-    vb.state.total_investment = 100_000  # 10% = 10k
-    # 가격 50_000 → ratio 기준 0주, but total 100k >= 50k → 1주
+    # cycle245 — total 100_000 이면 ρ컷오프(2.5×10,000=25,000) < 50,000 이라 폴백
+    # 1주가 캡에 잘린다. 의도("비중 기준 0주 + 잔여 충분 → 1주 폴백") 보존을 위해
+    # 예산만 상향: 250,000 → cap 25,000 · 컷오프 62,500 ≥ 50,000 (캡 비바인딩).
+    vb.state.total_investment = 250_000  # 10% = 25k
+    # 가격 50_000 → ratio 기준 0주, but total 250k >= 50k → 1주
     assert vb.calc_buy_quantity(current_price=50_000) == 1
 
 

@@ -498,19 +498,25 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    추가하며 같은 3 항목을 재핀(momentum/VB/LTV 는 cycle242 무접촉 — 범위 밖
 #    선언, 값 무변경). TODO(cycle233+242 커밋 후): 아래 항목을 **전부 삭제**하고
 #    dict 를 비운다.
+# 🔁 2026-09-04 (cycle245) — cycle233+242 항목이 아직 미커밋인 채로 ρ축 랏 명목 상한
+#    (`_workspace/red/cycle245_ratio_notional_cap_spec.md` §2.6 결정 ⑩, 사용자 결정
+#    "K=2.0 유지하고 cycle245 도 진행해줘")이 **6 파일 전부**에
+#    `DEFAULT_PARAMS["max_lot_ratio_mult"]=2.5` 1줄만 승인 추가하며 6 항목을 재핀.
+#    재핀 전 `git diff HEAD -- src/engine/strategies/` 로 7 파일 각 +1/−0 (같은 1줄)
+#    임을 눈으로 확인했다(가드 절차 1·2). donchian_swing.py 는 이 dict 소관이 아니다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/kojiro.py":
-        "a87a1e1c50757b744b3c75dd0e84a90ac064664005d91ee6ea6f3553db14d181",
+        "fb8938d89267ecf715dee0161716ae1a2023836aaee0380b0dfb42938864b771",
     "src/engine/strategies/vcp_breakout.py":
-        "58f61003c918cb7c70fb4d21f7b97b2725800f00478d948ccb07c3286a1e659c",
+        "f77ffc1896037692c47a6611a6d3b8aecf66bf17f3c6161a1cf52bc96f0ce3dd",
     "src/engine/strategies/bull_flag_breakout.py":
-        "09279df6efc77bcc04e6472284d66fa4a1a184c035246fad4c68ebae7522d4ec",
+        "0b7cfe745c6f437a7f55b7c6773e549c5c545f0c5b6c85be51623221a3b6afb0",
     "src/engine/strategies/momentum.py":
-        "5499bb08ae7ecf670289e9b00f5f15de4c86bc773effdbe932da12cfa7822b7e",
+        "5bfc25a183a13ec0e00bdce7ff0e1727d323bd62f1ba8b8937561a4eb74c0da1",
     "src/engine/strategies/volatility_breakout.py":
-        "a59ca1a5c3e72aee962f9628ce78f92959b1976a8f9610bbd3f43c414b57b4d6",
+        "51e55b5534cad0a90828e049e12b4d587c27ae8f45a0ce18327e5efa1fa5ba7e",
     "src/engine/strategies/long_tail_volatility.py":
-        "a986b5c317c53674c755cb59d35b118de7c77aeff73e7c9247d366335796d30b",
+        "415eaea75db040b4fbcf402ae4fddf28859669790dfbadcfc03f921ccec644f7",
 }
 
 

@@ -168,7 +168,13 @@ def test_fallback_helper_still_invoked_for_zero_ratio_qty(strategy_id, cls):
         StrategyBase, "_fallback_one_share", return_value=sentinel,
     ) as mock_helper:
         result = s.calc_buy_quantity(100_000_000, "005930")
-    assert result == sentinel
+    # cycle245 — 위임은 그대로이나 반환값은 ρ캡을 통과한다. 모킹된 42주 × 1억원 =
+    # ρ상한의 천문학적 배수라 캡이 0 으로 자른다(§3-7 "모든 랏" 계약의 직접 증거).
+    # 헬퍼 반환값이 그대로 유통되는 계약은 `test_cycle245_ratio_notional_cap.py`
+    # F-14 가 캡 비바인딩 조건에서 강하게 검증한다. 이 테스트의 진짜 계약은
+    # **분기 순서/위임**(아래 assert_called_once_with)이므로 그것은 무변경.
+    assert sentinel == 42
+    assert result == 0
     mock_helper.assert_called_once_with(100_000_000)
 
 

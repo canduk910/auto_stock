@@ -3,8 +3,8 @@
 `_fallback_one_share` 가 notional 상한(`position_ratio × 예산`)을 보지 않아 실측
 000815 가 설계 유닛 4.11(상한 3.10배)이 됐다. 사용자 결정 = **관측만** — 수량은
 불변(행위 변경 0), `_apply_budget_limit` 최종 수량이 상한을 넘으면 1회/(ticker)/일
-INFO. **position_ratio 모드(본 파일 픽스처)에서는** 수량이 0 이 되는 구현이
-부속안 ②(차단) 오구현으로 FAIL 이 계약이다.
+INFO. **관측기(`_emit_oversized_fallback`) 자신이** 수량을 바꾸면 부속안 ②(차단)
+오구현으로 FAIL 이 계약이다.
 
 ⚠️ **cycle242(2026-09-03, 사용자 결정 G0-ⓑ) 재스코프** — `sizing_mode="turtle"`
 전략에서는 `max_lot_units`(K=2.0) 상한이 도입돼 **같은 000815 픽스처가 0 이 정답**이다
@@ -12,6 +12,12 @@ INFO. **position_ratio 모드(본 파일 픽스처)에서는** 수량이 0 이 �
 `sizing_mode` 미지정 = 캡 게이트 off 경로라 **assertion 은 byte 무변경**으로 유효하다.
 `[oversized_fallback]` 은 이제 ρ 축(`position_ratio × 예산`) 관측으로 K 축 행위와
 **병존**하며 **비제로가 정상**이다(의미 반전 — 배포 전후 같은 grep 합산 금지).
+
+⚠️ **cycle245(2026-09-04) 재스코프** — 같은 ρ 축(`position_ratio × 예산`)에
+**별도 헬퍼**(`_apply_ratio_notional_cap`)로 차단 행위가 도입됐다. 본 파일 픽스처는
+`max_lot_ratio_mult` 키가 없어 **캡 OFF 경로**(키 부재 = OFF 가 계약)라 6 케이스
+assertion 은 다시 byte 무변경으로 유효하다. 다만 이 마커의 의미는 ρ캡 **앞**에서
+발화하게 되어 **"실제로 산 랏" → "사려 했던 랏"** 으로 전환됐다.
 
 `_apply_budget_limit` 내 await 0 (A-PURE/A-ATOMIC) 은 기존 AST 가드가 계속 강제.
 """

@@ -27,6 +27,16 @@ _MAX_LOT_UNITS_MIN = 1.0       # K<1 은 "터틀 유닛보다 작게" = 정의�
                                 # 하한 1.0 = T 경로(정상 터틀 랏 ≤ u*) 무접촉의 수학적 전제
 _MAX_LOT_UNITS_MAX = 20.0      # 관측 최대 M1 15.61 < 20 → 사실상 현행 복귀(롤백 다이얼)
 
+# ── cycle245 랏 명목 ρ축 상한 (= K축이 실제로 심사하지 못한 모든 랏) —
+# 리스크 정체성 상수, PARAM_RANGES/INT_PARAMS 편입 금지(AST G-245-1).
+# 7 전략 DEFAULT_PARAMS["max_lot_ratio_mult"] 는 _MAX_LOT_RATIO_MULT_DEFAULT 와
+# 동치여야 한다(AST G-245-6 — strategies/*.py glob 전수 = 신규 전략의 무방비 편입 차단).
+_MAX_LOT_RATIO_MULT_DEFAULT = 2.5   # K_ρ — 랏 명목 ≤ K_ρ × (position_ratio × 예산)
+_MAX_LOT_RATIO_MULT_MIN = 1.0       # K_ρ<1 은 정상 비중 랏까지 잘라 전면 무매매 = 정의상 금지.
+                                    # 하한 1.0 = 주 분기(qty>0) 무접촉의 수학적 전제
+_MAX_LOT_RATIO_MULT_MAX = 20.0      # 09-04 예산에서 K=20 컷오프가 비터틀 5전략 전부
+                                    # price_filter_max(500,000) 초과 = 사실상 현행 복귀(롤백 다이얼)
+
 
 class Signal(str, Enum):
     """매매 신호."""
@@ -253,6 +263,12 @@ class StrategyBase(ABC):
         # / "cfg"). 날짜 키 자기 리셋 — `_reset_daily_state` 훅에 의존하지 않는다.
         self._lot_cap_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._lot_cap_day: str = ""
+        # cycle245 — ρ축 랏 명목 상한 관측 cap (복합 키: "blk|{ticker}" /
+        # "skip|{ticker}|{reason}" / "cfg" / "clamp"). cycle242 `_lot_cap_logged` 와
+        # **별개 인스턴스** — 한 사이클의 키 폭주·날짜 리셋이 다른 사이클 관측을
+        # 지우지 않게 한다(cycle236 "별개 cap 가드" 선례). 날짜 키 자기 리셋.
+        self._ratio_cap_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+        self._ratio_cap_day: str = ""
 
     @property
     def strategy_id(self) -> str:
@@ -481,6 +497,12 @@ class StrategyBase(ABC):
         초과하면 초과분을 자르고, K 유닛이 1주에 못 미치면 매수하지 않는다**
         (cycle242 — 1주 폴백이 설계 유닛의 수 배가 되던 §0.0 결함 시정. 고정%손절
         전략은 position_ratio 가 이미 리스크 균등이라 범위 밖).
+        **그리고 K축이 이 랏을 실제로 심사하지 못한 랏(비터틀 전략 전부 + 터틀이지만
+        ATR 배관이 끊긴 랏)은 최종 명목이 `max_lot_ratio_mult`(K_ρ) × `position_ratio`
+        × 예산 을 넘으면 그만큼 자르고, 1주도 못 사면 매수하지 않는다**(cycle245 —
+        1주 폴백 랏 크기가 그 종목의 *주가* 로 결정되던 §5 결함 시정. 09-04 실측
+        4.23배 랏(LTV 000500)이 그날 최대 손실 −11,000원을 냈다). 두 캡은
+        **상호배타** — `min` 합성이 아니라 K축 심사 여부로 갈린다.
 
         결함 배경: 주 분기가 ``int(예산×ratio)//price`` 를 잔여 검증 없이 반환해
         ``position_ratio × max_positions > 1.0`` 인 전략이 예산을 초과 매수할 수 있었다.
@@ -519,6 +541,15 @@ class StrategyBase(ABC):
             self._emit_oversized_fallback(ticker, final, current_price)
         except Exception:  # pragma: no cover — 관측 자기실패 흡수
             pass
+        # cycle245 — ρ축 랏 명목 상한 (행위). K축(cycle242)이 이 랏을 실제로
+        # 심사하지 못한 경우에만 적용 = 두 캡은 상호배타(min 합성 없음).
+        # 관측(`[oversized_fallback]`) **뒤**에 두는 것이 계약 — 앞에 두면 차단된
+        # 랏의 ρ 관측이 `final_qty < 1` 조기탈출로 통째로 사라져 R7 자기검증
+        # 불변식이 성립하지 않는다. 캡 산출 실패는 현행 수량 유지(fail-open) —
+        # 헬퍼 내부에서 흡수·LOUD.
+        final = self._apply_ratio_notional_cap(
+            final, current_price, ticker, via_fallback=_via_fallback,
+        )
         return final
 
     # ──────────── cycle242 — 랏당 최대 유닛 상한 (`max_lot_units`, 터틀 한정) ────────────
@@ -850,6 +881,21 @@ class StrategyBase(ABC):
         08-28 이전과 배포 전후 같은 grep 합산 금지). 꼬리 `units=` 필드는
         `_resolve_sizing_atr`(터틀 사이징과 동일 소스) 기준 유닛 배수 — ATR/risk_pct
         결측 시 `-`.
+
+        cycle245 — 이 마커는 ρ캡(`_apply_ratio_notional_cap`) **앞**에서 발화하므로
+        의미가 **"실제로 산 랏" → "사려 했던 랏"** 으로 전환됐다. 차단된 랏
+        (`[ratio_notional_blocked]`)도 여기에 1행 남는다.
+
+        **자기검증 불변식(R7 — 라운드 1 재정의)**: `ratio` 가 **그날 그 전략의
+        `[ratio_cap_config] k=` 값**(리터럴 2.50 이 아니다 — 롤백으로 3.0/20.0 이
+        될 수 있고 그때 리터럴 판정은 상시 오탐이 된다)을 넘고 그 전략의 `cap=on`
+        인데 같은 (전략, ticker, 일자)에 `[ratio_notional_blocked]` **도**
+        `[ratio_cap_skipped]` **도** 없으면 캡 우회 = 결함. ⚠️ `cap=backstop`
+        (터틀) 행은 **정상**이다 — K축(`compute_unit_qty`)은 무상한 유닛 축이라
+        저ATR·고가 랏에서 ρ 상한의 3.86~5.00배가 통과하며, 그 잔여 노출은 결정 ⑦
+        (상호배타)의 알려진 귀결로 별건 후속(§8 F-9)에 등재돼 있다.
+        ⚠️ 배포(09-04) 전후 같은 grep 합산 금지. 로그 서식은 byte 불변
+        (AST G-245-10 이 포맷 문자열을 핀 — cycle233 형 `"3.10" in message` 호환).
         """
         try:
             if final_qty < 1 or current_price <= 0:
@@ -886,6 +932,308 @@ class StrategyBase(ABC):
                     units_s,
                 )
                 self._oversized_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
+
+    # ──────────── cycle245 — ρ축 랏 명목 상한 (`max_lot_ratio_mult`) ────────────
+
+    def _read_max_lot_ratio_mult(self) -> float | None:
+        """`max_lot_ratio_mult` 읽기 + 클램프. **키 부재는 `None`**(= 캡 OFF).
+
+        ⚠️ cycle242 `_read_max_lot_units` 와 **반대 관례**다. 이 캡은 *매수를 막는*
+        통제이므로 "설정이 없으면 막는다"(fail-closed)는 P0-1 유령 키 재현 경로다
+        (유령 키 → 항상 차단 → 전 기간 체결 0). 키는 7 전략 `DEFAULT_PARAMS` 에
+        전부 명시돼 라이브는 항상 ON 이고, 키가 없는 것은 `StrategyBase` 를 직접
+        상속한 테스트 더블뿐이다(AST G-245-6 이 `strategies/*.py` glob 전수로 키
+        존재를 강제하고, 조용한 꺼짐은 `[ratio_cap_config] cap=off` 가 감지).
+
+        키 존재 + 무효/범위밖 → `_MAX_LOT_RATIO_MULT_DEFAULT` 또는 MAX 로 정규화하고
+        `[ratio_cap_clamped]` WARNING 1회/전략/일(`raw=%r` 병기). `PUT /api/strategies
+        /{id}/params` 가 화이트리스트 없이 기존 키를 덮어쓰므로 읽는 쪽 클램프가
+        필수다(쓰는 쪽 검증 아님). bool 은 수치로 보지 않는다.
+        """
+        if "max_lot_ratio_mult" not in self.config.params:
+            return None
+        raw = self.config.params.get("max_lot_ratio_mult")
+        clamped = False
+        if isinstance(raw, bool):
+            result = _MAX_LOT_RATIO_MULT_DEFAULT
+            clamped = True
+        else:
+            try:
+                k = float(raw)
+            except (TypeError, ValueError):
+                result = _MAX_LOT_RATIO_MULT_DEFAULT
+                clamped = True
+            else:
+                if not math.isfinite(k) or k < _MAX_LOT_RATIO_MULT_MIN:
+                    result = _MAX_LOT_RATIO_MULT_DEFAULT
+                    clamped = True
+                elif k > _MAX_LOT_RATIO_MULT_MAX:
+                    result = _MAX_LOT_RATIO_MULT_MAX
+                    clamped = True
+                else:
+                    result = k
+        if clamped:
+            self._emit_ratio_cap_clamped(raw, result)
+        return result
+
+    def _lot_units_cap_governs(self, ticker: str | None) -> tuple[bool, str]:
+        """cycle242 K축 캡이 **이 랏을 실제로 심사하는가** — ρ축 미적용 조건 (read-only, 무음).
+
+        반환 `(governs, reason)`. `_apply_lot_units_cap` 의 fail-open 4조건과 **같은
+        소스·같은 판정**을 쓴다(`params["sizing_mode"]` / `params["risk_pct"]` /
+        `state.total_investment` / `_resolve_sizing_atr`) — 판정이 드리프트하면 두
+        캡 사이에 무방비 구간이나 이중 캡이 생긴다(AST G-245-8 이 소스 동일성을 핀).
+        로그를 내지 않는다 — 판정기가 시끄러우면 랏마다 2배로 찍힌다(관측은
+        `[ratio_cap_config]` 카나리아 담당).
+
+        reason ∈ {"k_axis", "not_turtle", "no_ticker", "no_risk_pct", "no_budget",
+                  "no_atr", "probe_error"}.
+        - `"k_axis"` → K축이 심사 = ρ축 **미적용**(조용히)
+        - `"probe_error"` → 판정 자체가 실패 = **fail-open 방향으로 미적용** + LOUD
+        - 그 외 → ρ축 **적용**(백스톱 — 터틀인데 ATR 배관이 끊긴 랏도 여기로 온다)
+        """
+        try:
+            params = self.config.params
+            if params.get("sizing_mode") != "turtle":
+                return False, "not_turtle"
+            if ticker is None:
+                return False, "no_ticker"
+            try:
+                risk_pct = float(params.get("risk_pct") or 0)
+            except (TypeError, ValueError):
+                return False, "no_risk_pct"
+            if risk_pct <= 0:
+                return False, "no_risk_pct"
+            if int(self.state.total_investment or 0) <= 0:
+                return False, "no_budget"
+            atr, _reason = self._resolve_sizing_atr(ticker)
+            if atr is None:
+                return False, "no_atr"
+            return True, "k_axis"
+        except Exception:  # pragma: no cover — 판정 실패는 fail-open 방향
+            # 판정 실패는 "현행 수량 유지" 쪽으로 fail (착수 제약: fail-open + LOUD).
+            # 호출자가 `probe_error` 를 보고 `[ratio_cap_skipped]` 로 LOUD 하게 남긴다.
+            return True, "probe_error"
+
+    def _apply_ratio_notional_cap(
+        self, final: int, current_price: int, ticker: str | None, *, via_fallback: bool,
+    ) -> int:
+        """랏 명목 ρ축 상한 — `min(final, int(K_ρ × int(예산 × position_ratio)) // 현재가)`.
+
+        - 산식의 `cap = int(예산 × position_ratio)` 는 `_emit_oversized_fallback`
+          (cycle233) · `portfolio_risk.compute_over_cap_positions` 와 **동일**하다
+          (세 번째 복제가 아니라 이미 두 곳이 재고 있는 축에 행위를 얹는 것) —
+          §7 R7 자기검증 불변식의 전제다.
+        - 차단 조건은 `final × price > cutoff` = **경계 포함 통과**(`>=` 아님).
+        - `K_ρ ≥ 1` 이므로 주 분기(`qty > 0`)는 정의상 무접촉이다 — 호출자가
+          `int(예산×ratio)//price` 로 만든 수량은 명목이 이미 `cap` 이하이고
+          `cutoff ≥ cap` 이기 때문(F-4/F-5 가 항등식으로 봉인).
+        - fail-open: 키 부재 / K축 심사 / `position_ratio` ≤ 0 / 예산 ≤ 0 / cap 0 /
+          예외 → `final` 그대로. 사유는 `[ratio_cap_skipped]` WARNING(키 부재·K축
+          심사는 조용히 — 정상 구성이고 `[ratio_cap_config]` 가 이미 기록한다).
+        - 행위(반환값)는 관측 성패와 무관 — 네 emit 은 내부에서 예외 흡수(cycle237).
+        """
+        if final < 1 or current_price <= 0:
+            return final
+        try:
+            params = self.config.params
+            k = self._read_max_lot_ratio_mult()        # None = 키 부재 = OFF
+            mode = params.get("sizing_mode")
+            try:
+                pos_ratio = float(params.get("position_ratio") or 0)
+            except (TypeError, ValueError):
+                pos_ratio = 0.0
+            budget = int(self.state.total_investment or 0)
+            cap = int(budget * pos_ratio) if (pos_ratio > 0 and budget > 0) else 0
+            cutoff = int(k * cap) if (k is not None and cap > 0) else 0
+            governs, gov_reason = self._lot_units_cap_governs(ticker)
+            # 캡 상태 카나리아 (1회/전략/일) — 조용히 꺼진 채 매수가 나가는 사고 감지
+            self._emit_ratio_cap_config(mode, k, budget, pos_ratio, cap, cutoff)
+            if k is None:
+                return final                                  # 키 부재 = OFF (조용히)
+            if governs:
+                if gov_reason == "probe_error":
+                    self._emit_ratio_cap_skipped(
+                        ticker, "k_axis_probe_error", final, current_price,
+                    )
+                return final                                  # K축이 심사 = 이중 캡 금지
+            if cap <= 0:
+                reason = ("no_ratio" if pos_ratio <= 0
+                          else "no_budget" if budget <= 0 else "no_cap")
+                self._emit_ratio_cap_skipped(ticker, reason, final, current_price)
+                return final
+            cap_qty = cutoff // current_price
+            if final <= cap_qty:
+                return final
+            self._emit_ratio_notional_blocked(
+                ticker, via_fallback=via_fallback, price=current_price, cap=cap,
+                cutoff=cutoff, k=k, req_qty=final, capped_qty=cap_qty,
+                budget=budget, pos_ratio=pos_ratio,
+            )
+            return cap_qty
+        except Exception:
+            # 캡 산출 자체가 던지면 현행 수량 유지 (변경 이전 행위 쪽으로 fail).
+            # `logger.debug` 도 emit 과 **같은 try 안** — cycle242 R1/R2 교훈
+            # (로거가 죽어도 매수 수량 산출은 살아야 한다).
+            try:
+                self._emit_ratio_cap_skipped(ticker, "exception", final, current_price)
+                logger.debug(
+                    "[ratio_cap_skipped] exception ticker=%s", ticker, exc_info=True,
+                )
+            except Exception:  # pragma: no cover
+                pass
+            return final
+
+    def _emit_ratio_notional_blocked(
+        self, ticker: str | None, *, via_fallback: bool, price: int, cap: int,
+        cutoff: int, k: float, req_qty: int, capped_qty: int, budget: int,
+        pos_ratio: float,
+    ) -> None:
+        """`[ratio_notional_blocked]` — 랏 명목이 ρ 상한을 넘어 잘렸다(행위 확정 후 기록).
+
+        cycle245 — §5 결함(1주 폴백 랏 크기가 그 종목 주가로 결정되던 것)의 직접
+        증거. INFO, 1회/(전략,ticker)/일(날짜 키 자기 리셋). 캡 자체는 이미
+        `_apply_ratio_notional_cap` 이 확정했으므로 여기서의 발화 성패는 매수 수량에
+        영향을 주지 않는다(peek → 로그 → mark, cycle226 D-3). `ratio` 는
+        `[oversized_fallback]` 의 `ratio` 와 **같은 정의**(명목 ÷ cap)라 두 마커를
+        같은 축에서 대조할 수 있다(R7 자기검증).
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._ratio_cap_day != today:
+                self._ratio_cap_day = today
+                self._ratio_cap_logged.reset_daily()
+            key = f"blk|{ticker or '-'}"
+            if not self._ratio_cap_logged.should_emit(key):
+                return
+            ratio = (req_qty * price / cap) if cap > 0 else 0.0
+            path = "fallback" if via_fallback else "sized"
+            logger.info(
+                "[ratio_notional_blocked] ticker=%s strategy=%s path=%s price=%d "
+                "cap=%d cutoff=%d k=%.2f ratio=%.2f req_qty=%d capped_qty=%d "
+                "budget=%d pos_ratio=%.4f",
+                ticker or "-", self.strategy_id, path, price, cap, cutoff, k, ratio,
+                req_qty, capped_qty, budget, pos_ratio,
+            )
+            self._ratio_cap_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
+
+    def _emit_ratio_cap_skipped(
+        self, ticker: str | None, reason: str, final: int, price: int,
+    ) -> None:
+        """`[ratio_cap_skipped]` — ρ캡 미적용(현행 수량 유지, fail-open) LOUD.
+
+        reason ∈ {no_ratio, no_budget, no_cap, k_axis_probe_error, exception}.
+        WARNING, 1회/(전략,ticker,reason)/일. 예산 배분 결함·코드 결함이 조용히
+        지나가지 않게 하되, 매수 자체는 캡 이전 수량 그대로 진행된다(fail-open —
+        P0-1 유령 키 재현 방지, fail-closed 구현은 계약 위반). **키 부재**(정상
+        OFF 구성)와 **K축 심사**(정상 터틀 랏)는 여기로 오지 않는다 —
+        `[ratio_cap_config]` 가 이미 그 상태를 1행으로 기록하기 때문이다.
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._ratio_cap_day != today:
+                self._ratio_cap_day = today
+                self._ratio_cap_logged.reset_daily()
+            key = f"skip|{ticker or '-'}|{reason}"
+            if not self._ratio_cap_logged.should_emit(key):
+                return
+            logger.warning(
+                "[ratio_cap_skipped] ticker=%s strategy=%s reason=%s qty=%d "
+                "price=%d — ρ캡 미적용(현행 수량 유지, fail-open)",
+                ticker or "-", self.strategy_id, reason, final, price,
+            )
+            self._ratio_cap_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
+
+    def _emit_ratio_cap_config(
+        self, mode: str | None, k: float | None, budget: int, pos_ratio: float,
+        cap: int, cutoff: int,
+    ) -> None:
+        """`[ratio_cap_config]` — ρ캡 활성 상태 카나리아. INFO, 1회/(전략, 값 조합)/일.
+
+        cap 키가 **값-민감**(`cap 상태 | k | cutoff`)이라 정상 운영에서는 하루 1행이지만
+        누가 `PUT /api/strategies/{id}/params` 로 `max_lot_ratio_mult` 를 바꾸거나
+        `weight` 변경이 예산을 재분배해 `cutoff_price` 가 달라지면 **그때 1행이 더**
+        찍힌다(cycle245 R1 — 공식 롤백 수단을 확인할 채널이 없던 사각).
+
+        캡이 조용히 꺼진 채(`max_lot_ratio_mult` 키 소실 등) 매수가 나가는 사고를
+        `cap=off` 존재로 감지한다. 라벨은 **`sizing_mode` 기준**이다(랏별 `governs`
+        판정이 아니라) — 이 마커는 하루 첫 랏에서 1회만 찍히므로 랏 단위 판정을
+        실으면 그날의 나머지를 대표하지 못한다.
+
+        cap = "off"      (k is None — 키 부재)
+            | "backstop" (mode == "turtle" — K축 우선, ρ는 K축이 fail-open 할 때만)
+            | "on"       (그 외 = ρ축이 주 상한)
+
+        ⚠️ `cutoff_price` 는 **필수 필드**다 — 운영자가 아침에 한 줄로 "오늘 LTV 는
+        130,100원 넘는 종목을 못 산다"를 읽어야 한다(자문 §8.1).
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._ratio_cap_day != today:
+                self._ratio_cap_day = today
+                self._ratio_cap_logged.reset_daily()
+            if k is None:
+                cap_state = "off"
+            elif mode == "turtle":
+                cap_state = "backstop"
+            else:
+                cap_state = "on"
+            k_desc = "-" if k is None else f"{k:.2f}"
+            # cycle245 R1 — cap 키는 **값-민감**이다(`cfg` 단일 키 아님). 공식 롤백
+            # 수단(`PUT /api/strategies/{id}/params` → `max_lot_ratio_mult=20.0`)은
+            # in-memory 를 즉시 덮어쓰는데, 단일 키면 그날 첫 랏이 이미 cap 을 소진해
+            # **변경 후 새 k 를 확인할 마커가 0 개**가 된다(차단이 사라지면
+            # `[ratio_notional_blocked]` 도 안 나온다). `weight` PUT 이 예산을
+            # 재분배해 `cutoff_price` 가 stale 이 되는 것도 같은 사각이다.
+            # 정상 운영에선 값이 안 바뀌므로 여전히 1행/일이고, 실제로 바뀐 날에만
+            # 1행이 추가된다 = 폭주 없이 롤백 확인이 회복된다.
+            key = f"cfg|{cap_state}|{k_desc}|{cutoff}"
+            if not self._ratio_cap_logged.should_emit(key):
+                return
+            logger.info(
+                "[ratio_cap_config] strategy=%s sizing_mode=%s cap=%s k=%s "
+                "budget=%d pos_ratio=%.4f cap_notional=%d cutoff_price=%d",
+                self.strategy_id, mode, cap_state, k_desc, budget, pos_ratio,
+                cap, cutoff,
+            )
+            self._ratio_cap_logged.mark_emitted(key)
+        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
+            pass
+
+    def _emit_ratio_cap_clamped(self, raw: object, result: float) -> None:
+        """`[ratio_cap_clamped]` — `max_lot_ratio_mult` 가 실제로 클램프됐다. WARNING, 1회/(전략, raw)/일.
+
+        `_read_max_lot_ratio_mult` 가 키가 **존재하는데** 무효/범위밖이라 클램프를
+        발동시킬 때만 호출된다(키 부재 = 캡 OFF 라 클램프가 아니고, 호출 자체가
+        일어나지 않는다). `raw=` 에 원본 값을 그대로 `repr` 해 "DB 미설정"과
+        "PUT 으로 무효 값이 들어와 걸러짐"을 `[ratio_cap_config] k=` 만으로는 구별
+        못 하던 사각을 메운다. cap 키는 `raw` 별이다 — 단일 키면 같은 날 두 번째
+        범위밖 값이 무음 클램프돼 운영자가 현재 K 를 오판한다(cycle245 R1).
+        """
+        try:
+            today = datetime.now(_KST).date().isoformat()
+            if self._ratio_cap_day != today:
+                self._ratio_cap_day = today
+                self._ratio_cap_logged.reset_daily()
+            # cycle245 R1 — `raw` 별 키. 단일 `clamp` 키면 같은 날 두 번째 범위밖
+            # 값이 **무음 클램프**된다(09:30 `0.5` → 13:00 `25.0` 이면 로그엔 raw=0.5
+            # 만 남아 운영자가 현재 K 를 2.50 으로 오판한다). 키 길이는 잘라
+            # 이상 입력이 cap 사전을 부풀리지 못하게 한다.
+            key = f"clamp|{raw!r}"[:96]
+            if not self._ratio_cap_logged.should_emit(key):
+                return
+            logger.warning(
+                "[ratio_cap_clamped] strategy=%s raw=%r clamped_to=%.2f "
+                "— max_lot_ratio_mult 범위 밖 값이 클램프됨(DB/PUT 확인 필요)",
+                self.strategy_id, raw, result,
+            )
+            self._ratio_cap_logged.mark_emitted(key)
         except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
             pass
 

@@ -204,7 +204,11 @@ def test_calc_qty_when_amount_covers_qty_then_returns_floor(momentum):
 
 
 def test_calc_qty_when_ratio_zero_but_total_covers_one_share_then_one(momentum):
-    momentum.state.total_investment = 100_000  # ratio 25% = 25k → 100k 가격 → 0주
+    # cycle245 — total 100_000 이면 ρ컷오프(2.5×25,000=62,500)가 100,000 미만이라
+    # 폴백 1주가 캡에 잘려 0 이 된다. 이 테스트의 의도("비중 기준 0주 + 잔여 충분
+    # → 1주 폴백")를 보존하려면 예산만 키우면 된다 — 200,000 → cap 50,000 ·
+    # 컷오프 125,000 ≥ 100,000 이라 캡 비바인딩.
+    momentum.state.total_investment = 200_000  # ratio 25% = 50k → 100k 가격 → 0주
     qty = momentum.calc_buy_quantity(current_price=100_000)
     # ratio 기준 0 이지만 total_investment 가 1주 가격 이상 → 1주
     assert qty == 1

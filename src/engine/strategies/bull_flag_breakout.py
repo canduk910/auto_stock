@@ -156,6 +156,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         "daily_loss_limit": -6.0,
         # 사이클 23 P2-1 — 돌파 유지시간 조건 (가짜 돌파 차단)
         "breakout_retention_minutes": 3,
+        "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
     }
 
     def __init__(self, config: StrategyConfig):
