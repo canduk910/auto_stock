@@ -488,6 +488,21 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
   회귀 가드 `tests/unit/ast/test_cycle246_nginx_template_no_key_leak.py::G-246-5`
   (주석을 걷어낸 뒤 검사 — 같은 파일 설명 주석이 이 문자열을 담고 있어 순진한 검색은
   실제 설정을 주석 처리해도 통과한다).
+- **🔴 cycle247 (2026-09-04) — 두 번째 로그인 다이얼로그의 진짜 트리거는 아이콘 탐침이었다.**
+  cycle246 배포 후 Safari 시크릿 창에서 여전히 두 번 떴다. 접근 로그: 같은 초에 문서·JS·
+  `/api/*` 는 전부 `user=ubuntu` 200(= XHR 은 자격 동봉, cycle246 은 Chrome 관측 경로만
+  닫은 것), `/favicon.ico` `/favicon.svg` `/apple-touch-icon(-precomposed).png` 넷만
+  `user=-` 401 → 12초 뒤 같은 경로가 `ubuntu` 로 재요청(= 재입력). Safari 의 WebKit
+  네트워킹 프로세스가 아이콘을 페이지 자격 없이 따로 가져오고 그 401 의
+  `WWW-Authenticate` 가 다이얼로그가 된다.
+  → 템플릿에 `location = /favicon.ico|svg { return 204; }` + apple-touch 정규식(크기 변형
+  포함) 단락. **`return` 은 rewrite 단계라 access 단계의 `auth_basic` 에 도달하지 않는다**
+  (nginx:alpine 로컬 실측: 아이콘 204, `/`·`/assets/*`·`/api/` 는 그대로 401) — 그래서
+  `auth_basic off` 없이 닫힌다(D-1-b 불변). 204 는 본문 0바이트라 무자격 노출 내용이 없고,
+  블록엔 `return 204;` 외 지시자를 두지 않는다(proxy_pass/root 가 들어오면 무자격 제공).
+  실제 아이콘은 `index.html` 이 **data URI** 로 품어 서버 요청 자체가 없다(`/favicon.svg`
+  서버 경로로 되돌리면 재발). 가드 = `tests/unit/ast/test_cycle247_icon_probe_no_second_prompt.py`
+  G-247-1~5(단락 존재 · 블록 순수성 · 정규식 선언 순서 · `auth_basic off` 0건 · data URI).
 - **dev 는 nginx 를 거치지 않는다.** `vite.config.ts` proxy 가 `X-API-Key`(=
   `process.env.API_AUTH_KEY`)와 `Origin: apiTarget` 을 함께 넣는다. Origin 정규화가
   빠지면 `changeOrigin: true` 가 Host 만 바꾸는 탓에 백엔드 CSRF 검사가 **상태변경만**

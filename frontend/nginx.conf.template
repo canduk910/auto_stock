@@ -43,6 +43,24 @@ server {
     auth_basic           "auto_stock";
     auth_basic_user_file /etc/nginx/secrets/.htpasswd;
 
+    # 브라우저 아이콘 탐침 단락 — cycle247 (2026-09-04).
+    # Safari 의 WebKit 네트워킹 프로세스는 favicon / apple-touch-icon 을 페이지 자격 **없이**
+    # 따로 가져오고, 그 401 에 실린 WWW-Authenticate 가 **두 번째 로그인 다이얼로그**가 된다
+    # (접근 로그 실측: 같은 초에 문서·JS·/api/* 전부 user=ubuntu 200, 아이콘 4경로만
+    # user=- 401 → 12초 뒤 같은 경로가 ubuntu 로 재요청 = 재입력). cycle246 의
+    # withCredentials 는 Chrome 세션에서 관측된 XHR 무자격 경로만 닫았다.
+    # `return` 은 rewrite 단계에서 요청을 끝내 access 단계의 auth_basic 에 **도달하지 않는다**
+    # (nginx:alpine 로컬 실측 — `/`·`/assets/*`·`/api/` 는 그대로 401). 그래서 `auth_basic off`
+    # 없이 204 를 준다. 204 = 본문 0바이트라 무자격에 노출되는 내용이 없고, 실제 아이콘은
+    # index.html 이 data URI 로 품어 서버 요청 자체가 없다.
+    # ⚠️ 이 블록들엔 `return 204;` 외에 아무것도 두지 마라 — proxy_pass/root/alias/try_files 가
+    # 들어오는 순간 무자격 콘텐츠 제공이 된다(`tests/unit/ast/test_cycle247_*` G-247 가드).
+    # 정규식 location 은 **선언 순서**로 매칭되므로 apple-touch 블록은 아래 정적자산 정규식보다
+    # 앞에 있어야 한다.
+    location = /favicon.ico { return 204; }
+    location = /favicon.svg { return 204; }
+    location ~ ^/apple-touch-icon(-[0-9]+x[0-9]+)?(-precomposed)?\.png$ { return 204; }
+
     # API 리버스 프록시
     location /api/ {
         # 방어 심층화 — 상속으로도 걸리지만 명시한다(location 추가 시 누락 방지).

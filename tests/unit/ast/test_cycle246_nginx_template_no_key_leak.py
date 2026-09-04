@@ -87,7 +87,13 @@ def test_client_when_basic_auth_enabled_then_xhr_sends_credentials():
 
     이게 없으면 문서는 인증되는데 SPA 의 XHR 이 무자격으로 나가 401 을 받고
     브라우저가 **두 번째 로그인 다이얼로그**를 띄운다(cycle246 발단, nginx 접근 로그
-    실측: 같은 초의 `/api/*` 다수가 user 필드 `-`).
+    실측: 같은 초의 `/api/*` 다수가 user 필드 `-` — **Chrome 세션**).
+
+    ⚠️ 이것만으로 이중 다이얼로그가 닫히지 않았다(2026-09-04 Safari 시크릿 창 재현).
+    Safari 는 XHR 이 아니라 **favicon / apple-touch-icon 탐침**을 무자격으로 보내고 그
+    401 이 두 번째 다이얼로그가 된다 — 그 축은 cycle247(`test_cycle247_*`, nginx
+    `return 204` 단락 + data URI favicon)이 닫는다. 두 가드는 서로 다른 브라우저의
+    서로 다른 트리거를 각각 봉인한다.
     """
     src = (_ROOT / "frontend" / "src" / "api" / "client.ts").read_text(encoding="utf-8")
     # ⚠️ 주석을 먼저 걷어낸다. 같은 파일의 설명 주석이 `withCredentials: true` 를
