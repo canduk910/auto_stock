@@ -1,0 +1,192 @@
+<title>{{짧은 리포트 이름}}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: #F5F6F8;
+    --card: #FFFFFF;
+    --ink: #1B1F24;
+    --muted: #5C6470;
+    --line: #E1E4E8;
+    --accent: #0F6E68;
+    --accent-soft: #E3F1F0;
+    --good: #1F7A4D;
+    --good-soft: #E6F4EC;
+    --warn: #A8650A;
+    --warn-soft: #FBF1DE;
+    --bad: #B42318;
+    --bad-soft: #FBE9E7;
+    --code-bg: #EEF0F3;
+    --display: "IBM Plex Sans KR", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0F1216; --card: #171B21; --ink: #E6E8EB; --muted: #9AA3AE; --line: #2A3038;
+      --accent: #4FB3AC; --accent-soft: #15302E; --good: #5BC28A; --good-soft: #14291D;
+      --warn: #E0A54A; --warn-soft: #302512; --bad: #F0776B; --bad-soft: #331A17; --code-bg: #20262E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0F1216; --card: #171B21; --ink: #E6E8EB; --muted: #9AA3AE; --line: #2A3038;
+    --accent: #4FB3AC; --accent-soft: #15302E; --good: #5BC28A; --good-soft: #14291D;
+    --warn: #E0A54A; --warn-soft: #302512; --bad: #F0776B; --bad-soft: #331A17; --code-bg: #20262E;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 15.5px; line-height: 1.8; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+  header.top { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+  .eyebrow { font-family: var(--display); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  h1 { font-family: var(--display); font-size: 30px; line-height: 1.25; margin: 6px 0 8px; font-weight: 700; text-wrap: balance; }
+  .lede { font-size: 17px; color: var(--muted); margin: 0; max-width: 60ch; }
+  h2 { font-family: var(--display); font-size: 21px; margin: 40px 0 12px; font-weight: 600; text-wrap: balance; }
+  h3 { font-family: var(--display); font-size: 16.5px; margin: 22px 0 8px; font-weight: 600; }
+  p { margin: 0 0 12px; max-width: 68ch; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; max-width: 70ch; }
+  li { margin-bottom: 6px; }
+  li::marker { color: var(--muted); }
+  code { font-family: var(--mono); font-size: .88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  dl.terms { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; margin: 14px 0 18px; max-width: 72ch; }
+  dl.terms dt { font-family: var(--display); font-weight: 600; margin-top: 8px; }
+  dl.terms dd { margin: 0 0 4px; color: var(--ink); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 20px 0 8px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+  .tile .num { font-family: var(--display); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .tile .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .tile.good .num { color: var(--good); } .tile.warn .num { color: var(--warn); } .tile.accent .num { color: var(--accent); }
+  .callout { background: var(--accent-soft); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 18px 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .pill { display: inline-block; font-family: var(--display); font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; vertical-align: middle; white-space: nowrap; }
+  .pill.good { background: var(--good-soft); color: var(--good); } .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.bad { background: var(--bad-soft); color: var(--bad); } .pill.info { background: var(--accent-soft); color: var(--accent); }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--card); margin: 14px 0 18px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th { text-align: left; font-family: var(--display); font-weight: 600; font-size: 12.5px; color: var(--muted); letter-spacing: .02em; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--card); white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td.t { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .decision { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+  .decision .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: var(--display); font-weight: 600; font-size: 16px; }
+  .decision .head .id { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+  .decision p { margin: 8px 0 0; }
+  .decision .ask { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+  .decision .ask strong { color: var(--accent); }
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 28px; position: relative; }
+  .check li::before { content: ""; position: absolute; left: 2px; top: 9px; width: 14px; height: 14px; border: 1.5px solid var(--muted); border-radius: 3px; }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps li { counter-increment: s; position: relative; padding-left: 40px; margin-bottom: 10px; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 3px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-family: var(--display); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 14px 0 18px; }
+  .flow .box { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; font-size: 14px; }
+  .flow .box b { display: block; font-family: var(--display); margin-bottom: 4px; }
+  .flow .box.bad { border-color: var(--bad); } .flow .box.good { border-color: var(--good); }
+  .small { font-size: 13px; color: var(--muted); }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  a { color: var(--accent); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">auto_stock · {{보고 종류: 야간 자율 작업 보고 / 사이클 N~M 마무리 보고}}</div>
+  <h1>{{언제부터 언제까지, 무엇을 했고 무엇을 결정해야 하나}}</h1>
+  <p class="lede">{{집계 창(시작~끝)과 한 줄 결론. 사고 유무를 한 문장으로.}}</p>
+</header>
+
+<section>
+  <h2>먼저, 이 리포트에 나오는 말</h2>
+  <dl class="terms">
+    <dt>커밋</dt><dd>고친 내용을 저장소에 확정해 기록하는 것.</dd>
+    <dt>배포</dt><dd>고친 프로그램을 실제 서버에 올리는 것. 서버가 다시 시작되는 배포와 그렇지 않은 배포가 있습니다.</dd>
+    <dt>{{용어 3}}</dt><dd>{{한 줄 풀이}}</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>한눈에 보기</h2>
+  <div class="tiles">
+    <div class="tile accent"><div class="num">{{N}}</div><div class="lbl">커밋 (코드 · 테스트 · 문서)</div></div>
+    <div class="tile accent"><div class="num">{{N}}</div><div class="lbl">서버에 올린 작업 묶음</div></div>
+    <div class="tile good"><div class="num">0</div><div class="lbl">장중 서버 중단 · 매매 사고 · 서버 기동 오류</div></div>
+    <div class="tile warn"><div class="num">{{N}}</div><div class="lbl">지금 답이 필요한 결정 카드 (전체 M개 항목 중)</div></div>
+  </div>
+  <div class="callout">
+    <p><strong>가장 중요한 발견.</strong> {{독자에게 뜻하는 바까지 두세 문장.}}</p>
+    <p>{{무엇을 답해 주시면 되는지 한 문장.}}</p>
+  </div>
+</section>
+
+<section>
+  <h2>1. 서버에 올린 것 (시간순)</h2>
+  <p>{{재시작이 장이 닫힌 시간이었는지, 확인 방법.}}</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>시각</th><th>무엇을</th><th>쉬운 설명</th><th>서버</th></tr></thead>
+    <tbody>
+      <tr><td class="t">{{HH:MM}}</td><td>{{사이클 N}}</td><td>{{쉬운 설명 두 문장 이내}}</td><td><span class="pill info">재시작</span></td></tr>
+      <tr><td class="t">{{HH:MM}}</td><td>{{화면 수정}}</td><td>{{…}}</td><td><span class="pill good">무재시작</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>2. 가장 중요한 발견을 쉽게 풀면</h2>
+  <div class="flow">
+    <div class="box bad"><b>증상</b>{{…}}</div>
+    <div class="box"><b>공통점</b>{{…}}</div>
+    <div class="box"><b>{{반박 근거 제목}}</b>{{…}}</div>
+    <div class="box good"><b>결론</b>{{… 확신도}}</div>
+  </div>
+  <ul>
+    <li><strong>{{이 때문에 생기던 일 1}}</strong> {{…}}</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. 결정해 주세요</h2>
+  <div class="decision">
+    <div class="head"><span class="id">{{D#}}</span> {{제목}} <span class="pill warn">급함</span></div>
+    <p>{{무엇인가, 두세 문장.}}</p>
+    <p class="ask"><strong>답해 주실 것:</strong> {{한 줄. 실행 주체 명시.}}</p>
+  </div>
+  <h3>나머지 결정 항목</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>번호</th><th>내용</th><th>제안</th></tr></thead>
+    <tbody>
+      <tr><td class="t">{{D#}}</td><td>{{…}}</td><td>{{…}}</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>4. 다음 확인 목록</h2>
+  <p>{{언제, 어디서, 누가 확인하는지. 이상 시 할 일 한 줄.}}</p>
+  <ul class="check">
+    <li>{{확인 항목 + 정상 기준}}</li>
+  </ul>
+</section>
+
+<section>
+  <h2>5. 승인하시면 제가 할 일</h2>
+  <ol class="steps">
+    <li>{{단계 (주체 명시)}}</li>
+  </ol>
+</section>
+
+<section>
+  <h2>6. 함께 만든 것들</h2>
+  <ul><li>{{…}}</li></ul>
+</section>
+
+<section>
+  <h2>7. 배운 점</h2>
+  <ul><li>{{…}}</li></ul>
+</section>
+
+<footer>
+  원문 리포트: 저장소 <code>{{_workspace/reports/YYYY-MM-DD_slug.md}}</code> · 관련 문서: {{경로}} · 서버 마지막 상태: {{…}} (내부 참조: 커밋 {{sha}})
+</footer>
+</div>

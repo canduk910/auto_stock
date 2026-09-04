@@ -48,6 +48,7 @@ TradingScheduler ← registry 기반 boot/run/settle
 | frontend-dev | frontend-dev | React.js 대시보드 | trading-dashboard | `frontend/` |
 | tester | tester | 사후 통합/경계면/안전성 검증 | trading-test, **kis-mcp-query** | 테스트 리포트 |
 | **refactor-expert** | refactor-expert | *주기적* 코드 품질 검토 — 중복/명명/모듈 비대화/아키텍처 드리프트 | **refactor-review, kis-mcp-query** | `_workspace/refactor/` |
+| **report-writer** | report-writer | 긴 작업 주기 끝의 쉬운 말 보고서(HTML 아티팩트) + 원문 md | **cycle-report** | `_workspace/reports/` |
 
 ### 호출 시점
 
@@ -55,6 +56,7 @@ TradingScheduler ← registry 기반 boot/run/settle
 - **domain-expert**: Phase 2.5 명세 분해 *직전* (선택적, 매매 의사결정 자문이 필요할 때) + 사이클 중 *행위 영향 평가* 가 필요할 때
 - **tdd-engineer / backend-dev / frontend-dev / tester**: Phase 3~4 표준 TDD 사이클
 - **refactor-expert**: Phase 4.5 — 사이클 5회 누적 또는 사용자 명시 요청 시
+- **report-writer**: Phase 5 — 사이클 3회 이상 연속 · 자율 진행 구간 종료 · 사용자 "리포트" 요청 시 (`cycle-report` 스킬)
 
 ## 워크플로우
 
@@ -241,6 +243,7 @@ Agent(
    - 테스트 통계: 단위/통합/계약/E2E 통과 수
    - 알려진 제한사항
    - 실행 방법
+5. **마무리 보고 (2026-09-05)**: 사이클 3회 이상 연속 · 자율 진행 구간 종료 · 사용자 요청이면 `cycle-report` 스킬로 `report-writer` 를 호출해 쉬운 말 아티팩트 보고서 + 원문 md + 결정 카드를 만든다. 사이클 1~2회는 위 4의 터미널 보고로 충분하다(결정 항목 3개 이상이면 보고서).
 
 ## 데이터 흐름 (TDD + 도메인 자문 + 리팩토링 통합 후)
 
@@ -281,6 +284,9 @@ Agent(
     │
     └── 채택 카드 ──→ Phase 3 사이클 (Red→Green→tester 회귀 0)
 ```
+
+[report-writer] (Phase 5)
+    └── 쉬운 말 아티팩트 + `_workspace/reports/` 원문 + 결정 카드 ──→ 사용자
 
 ## 에러 핸들링
 
