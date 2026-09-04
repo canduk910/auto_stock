@@ -447,10 +447,8 @@ _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 #    `_workspace/red/cycle235_fill_qty_spec.md`.
 # TODO(cycle235 커밋 후): 아래 dict 를 비운다.
 _APPROVED_CONTENT_SHA: dict[str, str] = {
-    "src/engine/order_engine.py":
-        "36a0af370a966d0c979679d1128bb49c6de7d33ba8d3d403d7953bf43e034377",
-    "src/realtime/CLAUDE.md":
-        "fa4a7b5b565ec1880ee13efad7b005589291c5563dada4dc22ed2f44ae00621f",
+    # 2026-09-05 비움(리팩토링 리뷰 카드 #3) — 종전 항목은 전부 커밋돼 자기소멸한 죽은 값이었다.
+    # 다음 8영역 승인 사이클이 in-flight 변경의 내용 sha 를 여기 한시 등록하고, 커밋 후 다시 비운다.
 }
 
 

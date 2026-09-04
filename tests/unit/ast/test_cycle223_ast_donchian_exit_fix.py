@@ -435,8 +435,8 @@ def _content_sha(path: str) -> str:
 #    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
 # TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
-    "src/engine/risk.py":
-        "b0e1a4778ace65af0a68b7c528cc7e135ec7726de025e224a2d3d153e5a4dde5",
+    # 2026-09-05 비움(리팩토링 리뷰 카드 #3) — 종전 항목은 전부 커밋돼 자기소멸한 죽은 값이었다.
+    # 다음 8영역 승인 사이클이 in-flight 변경의 내용 sha 를 여기 한시 등록하고, 커밋 후 다시 비운다.
 }
 
 
@@ -505,18 +505,8 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    재핀 전 `git diff HEAD -- src/engine/strategies/` 로 7 파일 각 +1/−0 (같은 1줄)
 #    임을 눈으로 확인했다(가드 절차 1·2). donchian_swing.py 는 이 dict 소관이 아니다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
-    "src/engine/strategies/kojiro.py":
-        "fb8938d89267ecf715dee0161716ae1a2023836aaee0380b0dfb42938864b771",
-    "src/engine/strategies/vcp_breakout.py":
-        "f77ffc1896037692c47a6611a6d3b8aecf66bf17f3c6161a1cf52bc96f0ce3dd",
-    "src/engine/strategies/bull_flag_breakout.py":
-        "0b7cfe745c6f437a7f55b7c6773e549c5c545f0c5b6c85be51623221a3b6afb0",
-    "src/engine/strategies/momentum.py":
-        "5bfc25a183a13ec0e00bdce7ff0e1727d323bd62f1ba8b8937561a4eb74c0da1",
-    "src/engine/strategies/volatility_breakout.py":
-        "51e55b5534cad0a90828e049e12b4d587c27ae8f45a0ce18327e5efa1fa5ba7e",
-    "src/engine/strategies/long_tail_volatility.py":
-        "415eaea75db040b4fbcf402ae4fddf28859669790dfbadcfc03f921ccec644f7",
+    # 2026-09-05 비움(리팩토링 리뷰 카드 #3) — 종전 항목은 전부 커밋돼 자기소멸한 죽은 값이었다.
+    # 다음 8영역 승인 사이클이 in-flight 변경의 내용 sha 를 여기 한시 등록하고, 커밋 후 다시 비운다.
 }
 
 

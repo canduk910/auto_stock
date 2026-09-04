@@ -119,15 +119,3 @@ def _git_changed_files() -> list[str]:
     return files
 
 
-@pytest.mark.skip(reason="RDS 이전(M0~M6) 완료 은퇴 — 워킹트리 git status 기반 8영역 가드는 마이그레이션 종료 후 dead(커밋 시 항상 통과, 로컬 미커밋 8영역 작업마다 오발화). 실 8영역 보호는 각 변경의 git diff 규율로 대체.")
-def test_safety_8_areas_unchanged():
-    """M5 전환(routes/strategies + scheduler + boot_manager + log_analysis_engine)은 8영역 밖 → git diff 0."""
-    changed = _git_changed_files()
-    violations = [
-        f for f in changed
-        if any(f == p or f.startswith(p) for p in _SAFETY_PATHS)
-    ]
-    assert not violations, (
-        "M5 는 매매 안전성 8영역 diff 0 이어야 함 (4파일 모두 8영역 밖). 변경 감지:\n  "
-        + "\n  ".join(violations)
-    )
