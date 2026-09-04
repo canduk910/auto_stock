@@ -8,7 +8,7 @@
 
 ## 2. 프로브를 8영역 무접촉으로 만들 수 있다 (cycle253 후보)
 - `kis_ws_pool.subscribe(tr_id, tr_key, ...)` 가 tr_id 를 이미 받고, `handler.dispatch_message` 가 `H0STCNT0` 를 통합 채널과 같은 `_handle_tick` 으로 처리해 `ticker_last_tick` 을 갱신한다 → 라우트에서 `H0STCNT0` 로 구독을 걸고 `ticker_last_tick` 신선도를 보면 수신 여부가 판정된다.
-- 격리: TICK 집합 함수·K stale watcher·universe guard·delta unsubscribe·F1 재검증은 전부 `tr_id == H0UNCNT0` 필터 → 프로브는 그 어디에도 안 보인다(재등록 대상 아님, 삭제 대상 아님, stale 집계 밖). 재연결 복원은 `_subscriptions` 전체라 유지되고, 20:00 `unsubscribe_all` 이 함께 지운다. 슬롯은 정직하게 41 cap 에 셈된다.
+- 격리: TICK 집합 함수·120s K stale watcher·universe guard·delta unsubscribe·F1 재검증은 `tr_id == H0UNCNT0` 필터 → 프로브는 그 경로들에 안 보인다(재등록 대상 아님, 삭제 대상 아님, stale 집계 밖). ⚠️ 예외(cycle253 적대 검증 F4) = 5분 `resubscribe_stale_priority` 는 `ticker_last_tick` 전수가 소스라 프로브 종목이 프레임을 받은 뒤 stale 이 되면 후보에 들 수 있고, cycle240 desired 필터가 꺼진 상태(breakout desired ∅ ∨ HIGH 수집 예외)면 TICK 으로 재구독돼 이중 채널이 된다 — 평일 정상 상태에선 필터가 활성이라 프로브 종목(desired 밖)은 걸러진다. 재연결 복원은 `_subscriptions` 전체라 유지되고, 20:00 `unsubscribe_all` 이 함께 지운다. 슬롯은 정직하게 41 cap 에 셈된다.
 - 위험과 가드: `_ticker_to_session` 이 tr_key 단일 키라 **이미 H0UNCNT0 로 구독된 종목·보유·익일청산·desired 후보는 프로브 금지**(라우트가 409 로 거부). 프레임이 오면 `risk.on_tick` 이 실제로 돌기 때문에 후보 종목이면 실매수 신호가 날 수 있다 — 위 배제가 그 경로를 막는다. `bypass_limit=True` 금지(HIGH 슬롯을 밀면 안 된다).
 - 엔드포인트 = `POST/GET/DELETE /api/realtime/channel-probe` (명세 `spec_cycle253_channel_probe.md`, 라우트 파일 1개 + 테스트 2개). 기본 OFF — 호출하지 않으면 아무 일도 없다.
 - 운영: 월 09:30 후보 2종목 POST → 5분 간격 GET → `received=true` 면 가설 확정, 15분간 `subscribed∧acked∧!received` 면 반증(KIS 문의).
