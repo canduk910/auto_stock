@@ -35,6 +35,10 @@ from src.engine.stale_diagnostics import (
     SUBSCRIBE_GRACE_SECS,  # 사이클 135 — 구독 ACK grace period (180s, Q3=A 영속)
     emit_stale_session_detail,
 )
+# cycle252 — 무송출(no_feed) 종목 레지스트리. 모듈-레벨 정적 import (D-1/D-2 류
+# 동적 조회 seam 이 아니다 — 그 계열 출현 수 불변, AST G-252-2).
+from src.engine import no_feed_registry
+from src.engine.daily_emit_cap import DailyEmitCap
 
 logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (caplog 호환)
 
@@ -52,7 +56,7 @@ def record_stale_watcher_check(stats: dict) -> None:
     """5분 윈도우 누적 (사이클 74 옵션 C 조건부 aggregation).
 
     stats keys: subscribed / stale / force_reregistered / skipped_giveup /
-                force_retried / cap_blocked
+                force_retried / cap_blocked / no_feed_skipped(cycle252)
     stale_count > 0 인 경우 `emit_stale_session_detail` 를 통한 individual
     `[stale_watcher_detail]` 는 별도 보존 (사이클 73 영속, 변경 0).
     """
@@ -64,6 +68,9 @@ def flush_stale_watcher_collector() -> None:
 
     scheduler disconnect / cancel 직전 마지막 flush 1회 호출 의무 (Q5 옵션 A).
     collector 비어 있으면 emit skip (no-op).
+
+    cycle252 — 기존 5필드 prefix 는 byte 보존, 끝에 ` no_feed_skipped=%d`(합계)
+    를 추가만 한다(키 부재 = 0, 구 형태 stats 와 혼재해도 KeyError 없음).
     """
     if not _stale_watcher_collector:
         return
@@ -72,11 +79,58 @@ def flush_stale_watcher_collector() -> None:
     retried = sum(s.get("force_reregistered", 0) for s in _stale_watcher_collector)
     cap_blocked = sum(s.get("cap_blocked", 0) for s in _stale_watcher_collector)
     force_retried = sum(s.get("force_retried", 0) for s in _stale_watcher_collector)
+    no_feed_skipped = sum(s.get("no_feed_skipped", 0) for s in _stale_watcher_collector)
     logger.info(
-        "[stale_watcher_summary] checks=%d stale_total=%d retried=%d cap_blocked=%d force_retried=%d",
-        checks, stale_total, retried, cap_blocked, force_retried,
+        "[stale_watcher_summary] checks=%d stale_total=%d retried=%d cap_blocked=%d force_retried=%d"
+        " no_feed_skipped=%d",
+        checks, stale_total, retried, cap_blocked, force_retried, no_feed_skipped,
     )
     _stale_watcher_collector.clear()
+
+
+# ── cycle252 — [no_feed_held] 1회/일 cap (HIGH ∩ no_feed 관측) ─────────────────
+# 날짜 키 자기 리셋(`_reset_daily_state` 훅 미의존 — 이 파일은 scheduler.py 무접촉
+# 규약이라 scheduler 의 정산 훅에 배선할 수 없다. strategy_base.py `_budget_clamp_day`
+# 등 기존 모듈 전역 self-reset 선례 답습).
+_no_feed_held_logged: DailyEmitCap[str] = DailyEmitCap[str]()
+_no_feed_held_day: str = ""
+_NO_FEED_HELD_KEY = "no_feed_held"
+
+
+def _maybe_emit_no_feed_held(tickers: set, now: datetime) -> None:
+    """HIGH(보유/익일청산) ∩ no_feed 가 비어있지 않으면 WARNING 1회/일.
+
+    peek→로그→mark(cycle226 D-3 순서 답습) — mark 를 먼저 하면 로그 자기실패가
+    그날 관측을 지운다. 판정 자체(호출부의 `high_tickers` 계산)는 cap 밖 —
+    cap 은 로그 빈도만 조절한다.
+
+    관측기 자기 예외는 **여기서 흡수**한다(tester F-1, cycle237/242 "emit 헬퍼는
+    예외 흡수 · 행위는 cap 밖" 계약). 호출부는 `if not stale_tickers: return` 과
+    stale 루프 **앞**이라, 여기서 던지면 그 사이클의 HIGH 재등록까지 통째로 빠진다
+    (`_stale_watcher_loop` 이 흡수해 프로세스는 살지만 결함 지속 시 120s 마다 반복).
+    흔적은 debug 스택만 — `logger.warning` 자체가 깨진 상황이라 WARNING 승격은 무의미.
+    """
+    global _no_feed_held_day
+    try:
+        today = now.date().isoformat()
+        if _no_feed_held_day != today:
+            _no_feed_held_day = today
+            _no_feed_held_logged.reset_daily()
+
+        if not _no_feed_held_logged.should_emit(_NO_FEED_HELD_KEY):
+            return
+        logger.warning(
+            "[no_feed_held] tickers=%s — WS 프레임 0(KRX 단독, H0UNCNT0 무송출). "
+            "손절 평가는 REST 폴(donchian/kojiro 60s 09:05~15:20)만. tick 전략 보유면 사각",
+            sorted(tickers),
+        )
+        _no_feed_held_logged.mark_emitted(_NO_FEED_HELD_KEY)
+    except Exception:
+        # 가장 안쪽은 어떤 경우에도 조용히 통과한다 (cycle237 `_trace_observer_failure`).
+        try:
+            logger.debug("[no_feed_held] emit 실패 — 관측 침묵, 행위 무관", exc_info=True)
+        except Exception:
+            pass
 
 
 # ── A3 2 함수 — K stale watcher 핵심 (사이클 63 Phase 2-A3, 2026-06-05) ────────────
@@ -129,6 +183,15 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     subscribed = kis_ws_pool.get_subscribed_tickers()
     if not subscribed:
         return
+
+    # cycle252 — no_feed 분류 신선도 보장(§2(a)). 예외는 흡수 — 관측 개선이
+    # 사이클 완주를 막으면 안 된다(4중 안전망의 한 축, W6).
+    try:
+        await no_feed_registry.ensure_fresh(subscribed)
+    except Exception:
+        logger.debug(
+            "[no_feed_registry] ensure_fresh 실패 — 이번 사이클 no_feed 판정 skip"
+        )
 
     now = _dt_mod.now(_KST_TZ)
     threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
@@ -223,25 +286,14 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
             len(_excluded_for_log), _excluded_for_log[:20],
         )
 
-    if not stale_tickers:
-        # 모두 fresh — 누적 retry 카운터 리셋 (회복 케이스)
-        scheduler._stale_retry_count.clear()
-        # 사이클 28 — _stale_last_resubscribe_at 동행 clear (G5 cleanup 동행).
-        # getattr 폴백으로 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
-        if hasattr(scheduler, "_stale_last_resubscribe_at"):
-            scheduler._stale_last_resubscribe_at.clear()
-        return
-
-    force_reregistered = 0
-    skipped_giveup = 0
-    force_retry_count = 0       # 사이클 29 — 영구 stale 시간 기반 강제 재시도 카운트
-    force_retry_cap_blocked = 0  # 사이클 29 — 시간당 cap 초과 차단 카운트
-
     # 사이클 29-R3 (2026-05-21) — 우선순위 분리 (메인 편중 73% 해소)
     # 사이클 25-B `_resubscribe_stale_priority` 와 동일 패턴:
     #   - positions / _pending_next_day_clear → HIGH+bypass_limit=True (메인 절대 보장)
     #   - 그 외 후보 → LOW+bypass_limit=False (보조 라운드로빈 분산)
     # Q2 RECOMMEND — try/except 4 중 가드 그대로 보존
+    # cycle252 — stale_tickers 가 비어도(전부 fresh) high_tickers 는 필요하다
+    # (아래 [no_feed_held] 판정이 stale 여부와 무관하게 매 사이클 계산되므로
+    # `if not stale_tickers: return` **앞**으로 끌어올렸다, §2(c)).
     high_tickers: set[str] = set()
     try:
         for s in scheduler.registry.all():
@@ -257,6 +309,28 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     except Exception:
         pass
 
+    # cycle252(c) — HIGH ∩ no_feed 관측. `is_no_feed` 호출은 동시호가 조기
+    # return **뒤**(위 262행)이므로 W9(동시호가 사이클에서 판정 0회)를 만족한다.
+    if high_tickers:
+        no_feed_high = {t for t in high_tickers if no_feed_registry.is_no_feed(t)}
+        if no_feed_high:
+            _maybe_emit_no_feed_held(no_feed_high, now)
+
+    if not stale_tickers:
+        # 모두 fresh — 누적 retry 카운터 리셋 (회복 케이스)
+        scheduler._stale_retry_count.clear()
+        # 사이클 28 — _stale_last_resubscribe_at 동행 clear (G5 cleanup 동행).
+        # getattr 폴백으로 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
+        if hasattr(scheduler, "_stale_last_resubscribe_at"):
+            scheduler._stale_last_resubscribe_at.clear()
+        return
+
+    force_reregistered = 0
+    skipped_giveup = 0
+    force_retry_count = 0       # 사이클 29 — 영구 stale 시간 기반 강제 재시도 카운트
+    force_retry_cap_blocked = 0  # 사이클 29 — 시간당 cap 초과 차단 카운트
+    no_feed_skipped = 0          # cycle252 — LOW no_feed 종목 SEND 생략 카운트
+
     for ticker in stale_tickers:
         retry = scheduler._stale_retry_count.get(ticker, 0) + 1
         scheduler._stale_retry_count[ticker] = retry
@@ -268,6 +342,24 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         else:
             sub_priority = "LOW"
             sub_bypass = False
+
+        # cycle252(b) — LOW no_feed 종목은 재등록 SEND 를 아예 내지 않는다
+        # (회복 가치 0, 포렌식 ②-5). HIGH 는 이 조건에서 구조적으로 면제된다
+        # (§1 D1). retry 카운터는 정직하게 계속 증가시키되(§1 D2) r>5 는 기존
+        # cooldown 분기(cycle218)와 같은 홀드로 정직화 — stale_universe_guard
+        # 의 `retries > MAX_STALE_RETRIES` 저유동 축출 경로를 보존한다.
+        # ⚠️ D2 의 2차 효과(tester F-3, 행위 결함 아님): 종전엔 force_retry 가
+        # 20분 주기로 r 을 0 으로 되돌려 r>5 체류율이 ≈50% 였지만, 이제 LOW
+        # no_feed 는 r=6 에 **영구 홀드** → universe guard 의 5분 평가 대상에
+        # 100% 체류 = 유동 nxt_false 후보의 `inquire_ccnl`/`inquire_acml_vol`
+        # REST 가 5분당 ≈1회 → 2회(+35~78 호출/5분 ≈0.12~0.26/s, KIS 20/s 대비
+        # 무시 가능). D+1 은 `[universe_excluded]` 건수와 두 path 의 api_metrics
+        # 로 예상 범위인지 확인한다. 근본 시정 B(H0STCNT0 리졸버) 착지 시 소멸.
+        if sub_priority == "LOW" and no_feed_registry.is_no_feed(ticker):
+            if retry > MAX_STALE_RETRIES:
+                scheduler._stale_retry_count[ticker] = MAX_STALE_RETRIES + 1
+            no_feed_skipped += 1
+            continue
 
         if retry > MAX_STALE_RETRIES:
             # 사이클 29 (2026-05-21) — 영구 stale 무한 skip 결함 대응.
@@ -374,6 +466,7 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         "skipped_giveup": skipped_giveup,
         "force_retried": force_retry_count,
         "cap_blocked": force_retry_cap_blocked,
+        "no_feed_skipped": no_feed_skipped,
     })
     # 사이클 72 hotfix A3: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
     # 사이클 74: 직접 logger.info("[stale_watcher] subscribed=...") 제거 → collector 흡수

@@ -708,3 +708,24 @@ async def is_stale(ticker: str, max_age_hours: int = 24) -> bool:
         return True
     age = datetime.now(KST) - refreshed_at
     return age > timedelta(hours=max_age_hours)
+
+
+async def get_nxt_tradable_map(tickers: list[str]) -> dict[str, bool | None]:
+    """cycle252 — `no_feed_registry.ensure_fresh` 전용 벌크 조회.
+
+    요청 ticker 전부를 키로 반환한다(DB 미존재 = `None`) — 반환에서 키가 빠지면
+    호출측 `_known` 집합이 그 ticker 를 영원히 "미지" 로 보고 TTL 이 무력화된다
+    (D2). 빈 입력은 쿼리 자체를 생략한다(D3).
+    """
+    if not tickers:
+        return {}
+    rows = await pg.fetch(
+        "SELECT ticker, nxt_tradable FROM stock_master WHERE ticker = ANY($1::text[])",
+        list(tickers),
+    )
+    result: dict[str, bool | None] = {t: None for t in tickers}
+    for row in rows:
+        ticker = row.get("ticker")
+        if ticker in result:
+            result[ticker] = row.get("nxt_tradable")
+    return result
