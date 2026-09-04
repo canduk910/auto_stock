@@ -163,7 +163,10 @@ def test_t2_no_feed_held_peek_log_mark_order(monkeypatch, caplog):
     monkeypatch.setattr(core, "logger", real_logger)
     caplog.set_level(logging.DEBUG)
     core._maybe_emit_no_feed_held({"003490"}, now)
-    assert len([r for r in caplog.records if _HELD in r.getMessage()]) == 1, "복구 후 같은 날 1회 발화"
+    # CI 는 루트 로거가 DEBUG 라 첫 시도의 실패 흔적(`[no_feed_held] emit 실패`, debug)도
+    # 캡처된다 — 관측 계약은 WARNING 행 1회이므로 레벨로 거른다(cycle252 CI 핫픽스).
+    emitted = [r for r in caplog.records if _HELD in r.getMessage() and r.levelno >= logging.WARNING]
+    assert len(emitted) == 1, f"복구 후 같은 날 WARNING 1회 발화 — actual={[r.getMessage()[:60] for r in emitted]}"
     assert core._no_feed_held_logged.should_emit(core._NO_FEED_HELD_KEY) is False, "성공 후 mark"
 
 
