@@ -19,6 +19,7 @@ import time
 from collections import Counter
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
+from datetime import time as _dtime
 from decimal import Decimal
 from typing import Any
 
@@ -609,32 +610,32 @@ async def _build_portfolio_risk_snapshot(_now_kst: datetime | None = None) -> di
     return snapshot
 
 
-async def generate_daily_log_report(
-    _now_kst: datetime | None = None,
-) -> dict | None:
-    """매일 정산(16:10) 직후 호출.
+async def collect_daily_log_metrics(
+    target_date: date, *, now_kst: datetime | None = None
+) -> dict:
+    """대상 영업일의 system_logs + trade_history 를 집계해 `metrics` dict 를 만든다.
 
-    당일 KST 00:00 ~ now 사이의 system_logs + trade_history를 집계해
-    OpenAI에 분석 요청 → daily_log_reports INSERT.
+    cycle249 — `generate_daily_log_report` 의 "1. 데이터 수집" 블록을 추출한 것이다.
+    20:20 KST 클라우드 루틴이 `GET /api/log-reports/bundle` 로 읽는 번들이 이 함수의
+    반환값과 **같은 것**이어야 병행 기간(OpenAI ↔ Claude) 비교가 성립한다.
+
+    반환 dict 의 **키 집합·순서**는 종전 `generate_daily_log_report` 의 `metrics` 와
+    정확히 같다 — 이 dict 는 그대로 (a) OpenAI 프롬프트 본문이고 (b)
+    `daily_log_reports.metrics` JSONB 다.
 
     Args:
-        _now_kst: 테스트용 현재 시각 override. None 이면 datetime.now(KST) 사용.
-
-    Returns:
-        INSERT된 row, 이미 존재하거나 OpenAI 비활성/실패 시 None.
+        target_date: 집계 대상 영업일.
+        now_kst: 수집 윈도우의 끝(KST). None 이면 `target_date` 가 오늘(KST)일 때
+            `datetime.now(KST)`(장중 수동 호출·`run_now` 경로 보존), 과거 날짜면
+            그 날 23:59:59 KST(과거 날짜에 `now()` 를 쓰면 여러 날치 로그가 한 날
+            리포트로 섞인다).
     """
-    if not settings.openai_api_key:
-        logger.warning("OPENAI_API_KEY 미설정 — 로그 분석 리포트 건너뜀")
-        return None
-
-    try:
-        from openai import AsyncOpenAI
-    except ImportError:
-        logger.error("openai 패키지가 설치되지 않았습니다")
-        return None
-
-    now_kst = _now_kst if _now_kst is not None else datetime.now(KST)
-    target_date = now_kst.date()
+    if now_kst is None:
+        today = datetime.now(KST).date()
+        if target_date == today:
+            now_kst = datetime.now(KST)
+        else:
+            now_kst = datetime.combine(target_date, _dtime(23, 59, 59), tzinfo=KST)
     start_kst = datetime.combine(target_date, datetime.min.time(), tzinfo=KST)
 
     # 1. 데이터 수집
@@ -693,6 +694,41 @@ async def generate_daily_log_report(
         log_metrics["level_counts"].get("CRITICAL", 0),
         trade_metrics["trades_total"],
     )
+
+    return metrics
+
+
+async def generate_daily_log_report(
+    _now_kst: datetime | None = None,
+) -> dict | None:
+    """매일 정산(16:10) 직후 호출.
+
+    당일 KST 00:00 ~ now 사이의 system_logs + trade_history를 집계해
+    OpenAI에 분석 요청 → daily_log_reports INSERT.
+
+    Args:
+        _now_kst: 테스트용 현재 시각 override. None 이면 datetime.now(KST) 사용.
+
+    Returns:
+        INSERT된 row, 이미 존재하거나 OpenAI 비활성/실패 시 None.
+    """
+    if not settings.openai_api_key:
+        logger.warning("OPENAI_API_KEY 미설정 — 로그 분석 리포트 건너뜀")
+        return None
+
+    try:
+        from openai import AsyncOpenAI
+    except ImportError:
+        logger.error("openai 패키지가 설치되지 않았습니다")
+        return None
+
+    now_kst = _now_kst if _now_kst is not None else datetime.now(KST)
+    target_date = now_kst.date()
+
+    # 1. 데이터 수집 — cycle249: `collect_daily_log_metrics` 로 추출(20:20 클라우드
+    # 루틴의 번들 GET 과 같은 함수를 공유한다). `now_kst` 를 그대로 넘겨 기존
+    # `_now_kst` 주입 seam(장중 수동 호출·`run_now`)을 byte 동일 보존한다.
+    metrics = await collect_daily_log_metrics(target_date, now_kst=now_kst)
 
     # 2. OpenAI 호출 (60초 타임아웃) — 사이클 58 V-2: client/model 주입 + meta 수집
     model = settings.openai_recommend_model

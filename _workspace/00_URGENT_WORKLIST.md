@@ -18,6 +18,100 @@
 
 ---
 
+## ✅ 비터틀 랏 명목 ρ축 상한 — **cycle245 종결 (2026-09-04, `max_lot_ratio_mult` K_ρ=2.5 · 커밋·배포 대기)**
+
+> cycle242 후속 D 종결. 스펙 `_workspace/red/cycle245_ratio_notional_cap_spec.md` ·
+> 자문 `_workspace/domain_consult/cycle245_ratio_notional_cap.md` · 발단 정본 `_workspace/review_0904_intraday.md` §5.
+> **8영역·`scheduler.py`·`boot_manager.py`·`turtle_sizing.py`·`portfolio_risk.py` diff 0**,
+> src 변경 = `src/engine/strategy_base.py`(+348) + 전략 7파일 `DEFAULT_PARAMS` 각 1줄.
+
+### 실측 (09-04 장중 검토 §5)
+cycle242 의 유닛 상한(K축, ATR 척도)이 `sizing_mode == "turtle"` 전략에만 걸려 **비터틀은 캡이 꺼진 채
+같은 병리가 실재**했다 — `[fallback_cap_config] strategy=long_tail_volatility sizing_mode=None cap=off
+k=2.00 budget=260203 risk_pct=0.0000 atr_max=0`(VB·BFB 동일).
+
+| 날짜 | 전략 | 종목 | notional | ρ상한 | 배수 | 결과 |
+|---|---|---|---|---|---|---|
+| **09-04** | LTV | 000500 | 220,000 | 52,041 | **4.23** | 08:12 매수 → 09:32 손절 **−11,000원**(순자산 0.42%) = 그날 최대 손실 |
+| 08-31 | LTV | 161890 | 171,700 | 52,041 | 3.30 | |
+| 08-28 | LTV | 010950 | 144,800 | 52,041 | 2.78 | |
+| 09-02 | VB | 108490 | 247,000 | 136,607 | 1.81 | |
+
+현행 레짐(08-19~09-04) 51랏 중 **22건(1.8건/영업일)** ρ초과, 총손실 −122,285원의 **31%** 가 배수 ≥2.11 인 3랏.
+⚠️ `[oversized_fallback]` 만 세면 규모를 **1/4 로 과소평가**한다.
+
+### 확증 원인
+주 분기(`int(예산×ratio)//price`)와 터틀 분기(`compute_unit_qty_guarded`)는 정의상 ρ상한 이하 ⇒
+**무상한 지점은 `_fallback_one_share` 하나뿐**이다. 그리고 1주 폴백은 예외가 아니라 **주 경로**다
+(90일 1주 비율 VB **91%** · LTV **79%** · momentum 73%, ρ초과 69랏 중 66건이 qty=1).
+
+### 시정 (결정 13 요약)
+- **척도 = ρ축**: `cutoff = int(K_ρ × int(예산 × position_ratio))` · `cap_qty = cutoff // price` · `min` 합성.
+  비터틀 3전략은 `risk_pct`·`_entry_atr`·`_candidates` 가 소스에 **0건**이라 ATR 축이 원리적으로 불가.
+- **적용 범위 = "K축이 이 랏을 실제로 심사하지 못한 모든 랏"**(백스톱). ⚠️ 자문 원안(`mode != turtle` 게이팅)은
+  시뮬레이션 실측에서 **cycle242 테스트 4건**을 깼다 — 백스톱은 그 4건을 무수정 통과시키면서 "터틀인데 ATR 배관이
+  끊긴 랏 = 양축 무방비" 사각까지 닫는다(라이브 비용 0).
+- **두 캡 상호배타 — `min` 합성 없음.** 관문 위치는 `_apply_lot_units_cap` → `[oversized_fallback]` **뒤**·return 앞.
+- **차단(0주)이 유일 선택지**(K_ρ≥1 이면 캡은 폴백 경로에서만 바인딩되고 그 수량은 항상 1). 유니버스 가격 상한안 기각.
+- **전략별 차등 없음**(진짜 차등은 이미 `weight × position_ratio` 에 있다). **키 부재 = OFF**(fail-closed 는 P0-1 재현).
+- K_ρ 는 리스크 정체성 상수 — `PARAM_RANGES`/`INT_PARAMS` 미편입 + 읽는 쪽 `[1.0, 20.0]` 클램프(하한 1.0 이 전제).
+
+### 🚨 배포 전 필수 조치 (체크리스트 — 누락 시 당일부터 완화 실험 표본이 깎인다)
+1. **BFB·VCP 만 `max_lot_ratio_mult = 20.0` DB 선반영** — 두 전략은 `check_buy_signal` 안에서 **주문 이전에**
+   `_vol_latch.pop` + `_bought_today.add` + `_position_setup[t]=…` 를 실행하므로 캡이 0 을 돌려주면 주문은 안 나가는데
+   그 종목은 그날 `Signal.NONE` 으로 **영구 차단** = 당일 표본 영구 소실. 유니버스 913종목 기준 컷오프 초과가
+   VCP **10.0%** · BFB **3.5%**(1주 폴백 경로 기준 VCP 36%)이고, 두 전략은 cycle228 이 연 N=10 표본 수집 중이다.
+   ```sql
+   UPDATE strategy_config
+      SET params = jsonb_set(params, '{max_lot_ratio_mult}', '20.0'::jsonb, true)
+    WHERE strategy_id IN ('bull_flag_breakout', 'vcp_breakout');
+   ```
+   ⚠️ **배포 전 경로는 이 SQL 하나뿐** — `PUT /api/strategies/{id}/params` 는 배포 전 무음 실패(미지 키 탈락 + `success=true`)이고
+   그 뒤 `save_params` 가 `params` 를 통째 덮어 **먼저 넣은 SQL 값까지 지운다** ⇒ SQL 선반영~배포 사이 두 전략에 **어떤 PUT 도 금지**.
+   확인 = `SELECT params->'max_lot_ratio_mult' FROM strategy_config WHERE strategy_id IN (…)`(구코드엔 마커가 없어 로그로는 확인 불가).
+2. **배포 창 = 15:30 이후**(`strategy_base.py` 변경 = 백엔드 재시작 동반, cycle232 D6). VB 는 선반영 대상 아님(컷오프 341,515 = 유니버스 2.2%, 90일 차단 0건).
+3. 배포 후 확인 = `[ratio_cap_config] … k=20.00`(BFB·VCP) / `cap=on k=2.50`(LTV·VB·momentum) / `cap=backstop`(donchian·kojiro).
+
+### D+1 판독
+| 채널 | 정상 | 이상 |
+|---|---|---|
+| `[ratio_cap_config]` | 전략마다 1행/일, `cutoff_price` = LTV·VCP 130,100 / VB 341,515 / BFB 243,940 / MOM 81,312 | 비터틀에 `cap=off` = **키가 사라짐** / donchian·kojiro 에 `cap=backstop` 부재 = 배치 오류 |
+| `[ratio_notional_blocked]` | LTV 0~1건/일(기대 0.33), **BFB·VCP 0**(선반영) | `capped_qty > 0` = 도달 불가 구간 → R7 조사 |
+| `[ratio_cap_skipped]` / `[ratio_cap_clamped]` | **0행** | `k_axis_probe_error`·`exception` ≥1 = 코드 결함, 즉시 조사 |
+| cycle242 마커 3종 | donchian·kojiro `[fallback_cap_config] cap=on k=2.00` 존속 | 사라지면 배치 오류 = 즉시 롤백 |
+
+⚠️ **의미 전환 2** — `[oversized_fallback]` = "사려 했던 랏"(0 수렴 아님) · `order_engine` 수량-0 WARNING = "ρ캡 차단 포함"
+(**1:N** — 표적 3전략엔 `_bought_today` 가 없어 하루 3~4회 재시도). **배포 전후 같은 grep 합산 금지.**
+⚠️ INFO 2마커는 20:10 리포트에 **구조적으로 안 실린다** — 판독은 `system_logs` 직접 조회가 유일 채널.
+
+### 트리거
+R1 LTV 주 3건↑ → K=3.0 / R2 BFB·VCP 1건이라도 차단 = 선반영 누락 **감지** 채널(사후로는 늦다) /
+R3 LTV 10영업일 매수 0(⚠️ edge-crossing 이라 스펙 상정보다 쉽게 걸린다) / R4 momentum 차단률 50%↑ →
+`weight` 재검토 / R5 20영업일 0 = 자연 무해화(게이트 유지) / R6 캡 마커 없는 수량-0 distinct (전략,ticker) 하루 3 초과 /
+**R7 캡 우회 = 즉시 핫픽스**(판정은 리터럴 2.50 이 아니라 그날 그 전략의 `[ratio_cap_config] k=`, `cap=backstop` 행 제외).
+R8 `weight`/`position_ratio`/`cash_usage_ratio` 변경 시 K 재검토(컷오프가 예산에 선형 비례).
+
+### 롤백
+해당 전략 `max_lot_ratio_mult = 20.0`. **PUT = 즉시 / SQL UPDATE = 다음 백엔드 재시작에서만**
+(`_config_loaded` 프로세스당 1회, 07:55 `_boot` 재호출 no-op) ⇒ cycle232 D6 와 겹쳐 **장중 실효 수단은 PUT 뿐**.
+
+### 후속
+F-1 `price_filter_max` 500,000→250,000(사용자 결정, 터틀 2전략 영향 평가 선행) · F-2 VB `position_ratio` 0.35 재검토
+(어떤 K 로도 정책선 10% 안에 못 들어온다) · F-3 `order_engine` 수량-0 사유 분기(8영역) · F-4 프리장 한정 더 낮은 K 또는
+LTV `tradable_boards` 에서 `pre_nxt` 제거(**사용자 결정**) · F-5 LTV 15:20 청산 누수(`_limit_up_reached` 무영속) ·
+F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘다 = 고가주 자체가 나쁜 매매일 가능성) · F-7 자금 규모 대비 전략 수
+(순자산 1,000만이면 자연 소멸) · **F-8 cycle242 후속 D 종결** · **F-9 터틀 1주 폴백 랏의 ρ 잔여 노출**(kojiro 3.86배·donchian 5.00배 —
+차단 요인은 cycle242 무손상이 **아니라** 이 사이클의 상호배타 결정이다, 재검토는 team-leader/사용자 몫) ·
+**F-10 BFB/VCP 표본 기록 시점**(주문 확정 전 `_bought_today.add`, 8영역 승인 필요) · **F-11 계좌 SOFT Σ상한 켜기 전 LTV 게이트 위치**
+(C233-F1 재현 잠복) · F-12 20:10 리포트 ρ캡 집계 · F-13 차단 마커의 랏 수 관측 공백(LOW, 1회/(전략,ticker)/일) · **F-14 `_quote_5xx_dedupe` 테스트 격리**(모듈 전역 dict 를 리셋하는 픽스처가 없어 앞선 부팅 통합 테스트의 실제 KIS 500 잔재가 `test_cycle76_request_5xx_dedupe::test_g_md4` 를 넘어뜨린다 — 로컬 `.token_cache` 보유 시에만 발화하고 CI 는 캐시가 없어 초록이라 잠복. cycle245 무관, Docs 단계 실측으로 신규 등재).
+
+### 검증
+뮤테이션 **53종 중 50 KILLED**(escape 3 = 봉인 3건 신설 + 등가 1) · 차분 5,000×2 조합(cap=OFF 5,000 HEAD 완전 동일 ·
+터틀 K축 심사 502 차이 0 · ρ 비초과 4,374 차이 0 · **수량 증가 0**) · 경계 전수 **12,962,313 조합** 불일치 0 ·
+신규 회귀 **161**(행위 103 + AST 58) · 백엔드 **6,587 passed / 1 failed**(Docs 단계 최종 실측 원문 `1 failed, 6587 passed, 10 skipped, 329 xfailed, 12 xpassed in 215.85s`). 유일 실패 = `test_cycle76_request_5xx_dedupe::test_g_md4` **환경 결함** — 로컬 `.token_cache` 가 있으면 부팅 통합 테스트가 실제 KIS 호출을 내 모듈 전역 `_quote_5xx_dedupe` 를 오염시킨다(클린 HEAD 사본에 같은 캐시를 복사하면 **동일 재현**, 없으면 통과. CI 는 캐시가 없어 초록. cycle245 무관, 후속 F-14). ⚠️ 이 실행에는 **동시 진행 세션(cycle249)** 산출물이 섞여 있다 — cycle245 단독 기준은 그 파일들 제외 시 **6,479 PASS**.
+
+---
+
 ## 🔐 cycle243 · API 인증 (2026-09-03 구현 완료 · 배포 대기) + 후속 F1~F9
 
 > **배포 전 현재 상태 = 인터넷의 누구나 이 계좌의 매매를 조작할 수 있다.**
@@ -68,6 +162,27 @@
 | **F7** | 감사 로그 — 상태변경 엔드포인트 호출자·시각·페이로드 요약(L2) | 중 |
 | **F8** | nginx `limit_req` — 폴링 18곳(최단 3초) 실측 기반 임계 산정 후 도입(L7) | 낮음 |
 | **F9** | `/docs`·`/redoc` 운영 완전 비활성(`docs_url=None`) 여부 결정 — 현재는 인증으로 보호만 | 낮음 |
+
+---
+
+## 🔐 cycle249 · 일일 로그 분석 이관 1단계 — 리포터 스코프 + 번들/외부 API (2026-09-04 구현 완료 · 커밋 대기)
+
+20:10 OpenAI 일일 로그 분석을 **Claude Code 클라우드 루틴**(매일 20:20 KST)으로 이관하는
+1단계. `authorize()` 에 리포터 스코프 판정(GET/HEAD 전체 + `POST /api/log-reports/{date}/external`
+단 한 경로) + nginx `map $remote_user` 사용자별 키 주입 + `GET /api/log-reports/bundle` +
+`POST /api/log-reports/{date}/external` + migration 042(`ext_*` 6컬럼). 8영역 diff 0,
+`generate_daily_log_report` 행위 byte 동일(신규 회귀 107 + 기존 47 전부 그린). 상세는
+`docs/HARNESS_CHANGELOG.md` 2026-09-04 cycle249 행.
+
+### 후속 2건 (배포 후 이 문서에서 처리)
+
+| # | 항목 | 비고 |
+|---|---|---|
+| **W1** | **20:20 KST 클라우드 루틴 생성** — 스케줄(cron) + 자동매매 프로젝트 env + 시크릿 = `reporter` Basic 사용자 비밀번호(htpasswd 신규 등록 필요, `secrets/.htpasswd` 는 git 밖) + `GET /api/log-reports/bundle` 로 당일 번들 수집 → 분석 → `POST /api/log-reports/{date}/external` 로 결과 저장 → Notion 에도 출력(사용자 요청) |
+| **W2** | **프론트 `DailyReportTab` 에 `ext_*` 표시** — 현재는 API·DB 만 있고 UI 가 `ext_provider`/`ext_summary`/`ext_findings`/`ext_report_md` 를 노출하지 않는다(`GET /api/log-reports/{date}` 는 `SELECT *` 라 이미 응답에 포함되지만 UI 미소비). 병행 1~2주 관찰 후 OpenAI 경로 off 스위치(`generate_daily_log_report` 호출부·20:10 task) 도입 여부 결정 |
+
+배포 전제(cycle243 규약 승계) = `.env` 에 `API_REPORTER_KEY` 추가는 backend 를 재생성한다
+(Phase 2 창, 15:30 이후) + `secrets/.htpasswd` 에 `reporter` 사용자 추가는 호스트 작업(git 밖).
 
 ---
 
@@ -241,7 +356,7 @@ order_engine 수량-0 WARNING 은 "잔고 부족"에서 "캡 스킵 포함"으�
 **후속 A~G** — A. 6개월 재검정(K 가 자른 고가·저ATR 종목군의 사후 성과 = 선택 편향 정산) · B. 명시 ATR
 kwarg 전달(`sizing_atr=`)로 `_resolve_sizing_atr` 덕타이핑 은퇴 · C. 폴백/PR 랏 `_entry_atr` 미스탬프 ↔
 재시작 소급 스탬프 불일치(위 문서 정정 ①이 근거) · D. 고정%손절 5전략의 폴백 명목(ρ) 상한 — **LTV 부터**
-(오버나잇 갭 실노출) · E. `[fallback_cap_config]` 부팅 시점 이관 · F. `risk.py:628` 사전 스킵 비대칭 +
+(오버나잇 갭 실노출) → **cycle245 로 종결**(2026-09-04, `max_lot_ratio_mult` K_ρ=2.5. 다만 5전략 화이트리스트가 아니라 **"K축이 심사하지 못한 모든 랏"** 백스톱으로 구현 — 아래 항목) · E. `[fallback_cap_config]` 부팅 시점 이관 · F. `risk.py:628` 사전 스킵 비대칭 +
 order_engine 900s 오귀인 문구(8영역, 별도 승인) · G. `portfolio_risk.compute_over_cap_positions` 에 `units` 병기.
 
 **산출물** — 스펙 `_workspace/red/cycle242_fallback_notional_cap_spec.md` · 자문

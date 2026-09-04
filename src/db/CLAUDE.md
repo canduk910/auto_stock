@@ -69,9 +69,10 @@ AWS RDS PostgreSQL CRUD 모듈. 현재 DB 클라이언트 정본 = **`pg.py` (as
 ## log_reports.py — 일일 로그 분석 리포트
 
 - `insert_log_report()`: 20:10 정산 직후 INSERT. `target_date` UNIQUE (충돌 시 None). **사이클 58 V-2 (2026-06-04)**: `input_tokens / output_tokens / total_tokens / latency_ms / cost_estimate_usd` 5 keyword 추가 (모두 기본 None — NULL INSERT). `cost_estimate_usd` 는 `Decimal | None` → DB 저장 시 `float` 변환.
-- `list_log_reports(days=30)`: 최근 N일 신규순
-- `get_log_report(target_date)`: 단일 영업일
-- 스키마: id(uuid) / target_date(unique) / summary(text) / findings(jsonb 배열) / metrics(jsonb) / model(varchar) / created_at / **input_tokens(int, NULL)** / **output_tokens(int, NULL)** / **total_tokens(int, NULL)** / **latency_ms(int, NULL)** / **cost_estimate_usd(decimal(10,6), NULL)** (migration 031, 사이클 58)
+- `list_log_reports(days=30)`: 최근 N일 신규순 (`SELECT *` — ext_* 6컬럼 자동 포함)
+- `get_log_report(target_date)`: 단일 영업일 (`SELECT *` — 동일)
+- **`upsert_external_report(*, target_date, provider, model, summary, findings, report_md) -> dict`** (cycle249) — 20:20 KST 클라우드 루틴 결과를 `ext_*` 6컬럼에만 저장한다. `INSERT … ON CONFLICT (target_date) DO UPDATE SET` 절이 **ext_* 6개뿐**(`ext_provider`/`ext_model`/`ext_summary`/`ext_findings`/`ext_report_md`/`ext_created_at`) — 기존 컬럼(summary/findings/metrics/model + 토큰 5)은 **절대 SET 절에 넣지 않는다**. 한 컬럼이라도 새면 20:10 OpenAI 리포트(병행 비교 기준선)가 조용히 지워진다. 행이 없는 날(20:10 실패)의 INSERT 경로는 기존 컬럼을 하드코드 SQL 리터럴(`''`/`'[]'::jsonb`/`'{}'::jsonb`/`NULL`)로 채워 호출자 데이터가 심길 여지를 원천 차단한다 — 다만 이 빈 값 채우기는 "나중에 튕기지 않게" 하는 조치가 아니다. `target_date` UNIQUE 때문에 **이 함수가 먼저 placeholder 행을 만들면 그날의 `insert_log_report`(OpenAI 경로)는 UNIQUE 충돌로 `None` 을 반환한다** — 정상 순서(20:10 OpenAI → 20:20 이 함수)에서는 발생하지 않지만, 순서를 뒤집어 수동 호출(디버깅·백필)할 때는 주의. DB 규약 준수 — JSONB raw list 바인딩 + `::jsonb` 캐스트, DATE `to_date()`, TIMESTAMPTZ `datetime.fromisoformat(now_kst_iso())`.
+- 스키마: id(uuid) / target_date(unique) / summary(text) / findings(jsonb 배열) / metrics(jsonb) / model(varchar) / created_at / **input_tokens(int, NULL)** / **output_tokens(int, NULL)** / **total_tokens(int, NULL)** / **latency_ms(int, NULL)** / **cost_estimate_usd(decimal(10,6), NULL)** (migration 031, 사이클 58) / **ext_provider(text, NULL)** / **ext_model(text, NULL)** / **ext_summary(text, NULL)** / **ext_findings(jsonb, NULL)** / **ext_report_md(text, NULL)** / **ext_created_at(timestamptz, NULL)** (migration 042, cycle249 — 20:20 클라우드 루틴 병행 컬럼, 전부 NULL 허용)
 
 ## system_config.py — 시스템 설정 키-값 헬퍼
 

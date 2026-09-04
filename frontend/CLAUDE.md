@@ -513,9 +513,35 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
   치환 구문(달러+중괄호)을 문자 그대로 담고 있었고, envsubst 는 주석을 구분하지 않아
   **렌더된 설정 주석에 API 키가 평문으로 박혔다**(실측: 렌더 결과에 키 2회 등장 —
   `proxy_set_header` 1 + 주석 1). 운영 중 설정 덤프로 그대로 새어 나가는 경로다.
-  치환 구문은 `proxy_set_header X-API-Key` **단 한 줄**에만 쓰고, 설명에는 변수 이름만
-  백틱으로 적는다. 가드 = 같은 파일의 G-246-1~3(치환 구문 1회 · 그 1회가 헤더 줄 ·
-  중괄호 없는 형태 0건). **이 결함이 드러난 키는 폐기하고 교체한다.**
+  치환 구문은 (cycle249 이후) `map` 블록의 `default`/`reporter` **두 줄에만** 쓰고,
+  설명에는 변수 이름만 백틱으로 적는다. 가드 = 같은 파일의 G-246-1/1b(운영·리포터
+  키 각 1회, 그 1회가 map 블록 안) · G-246-2(`proxy_set_header X-API-Key` 줄은
+  `$api_key_for_user` 를 쓰고 `${` 미포함) · G-246-3(중괄호 없는 형태 두 변수 모두
+  0건) · G-246-4(FILTER 값 `^API_(AUTH|REPORTER)_KEY$`). **이 결함이 드러난 키는
+  폐기하고 교체한다.**
+- **🟢 cycle249 — 리포터 스코프 사용자별 키 주입**: `nginx.conf.template` 최상단(http
+  컨텍스트, `server {` 밖·앞)의 `map $remote_user $api_key_for_user { default
+  "${API_AUTH_KEY}"; reporter "${API_REPORTER_KEY}"; }` 가 Basic 사용자별로 다른
+  백엔드 키를 고른다 — `location /api/` 는 클라이언트가 보낸 X-API-Key 를 무조건
+  치환하므로 "20:20 KST 클라우드 루틴이 스코프 키를 보낸다" 는 설계는 성립하지 않고,
+  스코프의 출발점은 **Basic 사용자**여야 한다. **사용자명 `reporter` 는 계약**이다 —
+  htpasswd 에 그 이름으로 등록해야 `map` 이 리포터 키를 매칭한다(다른 이름이면
+  `default` 로 떨어져 운영 키를 받고, 그 사용자는 조용히 리포터 스코프를 벗어난
+  전체 권한을 갖는다 — 관측으로 드러나지 않는 사고). `API_REPORTER_KEY` 미설정
+  (`.env` 에 값 없음)이면 envsubst 가 빈 문자열을 넣어 `reporter` 사용자가 빈 키를
+  받고, 백엔드가 fail-closed 로 401 한다(의도된 안전 방향). 리포터 자격은 백엔드
+  `authorize()` 가 GET/HEAD 전체 + `POST /api/log-reports/{date}/external` 단
+  한 경로로만 좁힌다(`src/routes/CLAUDE.md` 참조). **위생 주의(cycle249 적대 검증)** —
+  nginx `map` 은
+  소스 문자열(`$remote_user`)을 **대소문자 무관**으로 매칭한다. 즉 htpasswd 에
+  `Reporter`/`REPORTER` 같은 케이스 변형으로 등록된 Basic 사용자도 `map` 의
+  `reporter` 줄에 걸려 리포터 키를 받는다 — 운영자 계정에는 `reporter` 와 대소문자만
+  다른 사용자명을 **절대 만들지 않는다**(의도치 않게 스코프가 좁은 계정을 만든 줄
+  알았는데 실제로는 정상 리포터 권한이 부여된다). `API_REPORTER_KEY` 가 `.env` 에
+  비어 있으면 envsubst 가 빈 문자열을 넣고, `proxy_set_header` 는 값이 빈 문자열인
+  헤더를 **아예 보내지 않는다**(nginx 문서화된 동작) — 그래서 이 경우 백엔드가 받는
+  건 "빈 `X-API-Key`" 가 아니라 **헤더 자체의 부재**이고, `[api_auth_reject]` 사유는
+  `bad_key` 가 아니라 `missing_header` 로 찍힌다.
 
 ## 백엔드 연동
 

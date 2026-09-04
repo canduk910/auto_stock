@@ -532,12 +532,18 @@ async def test_reject_log_when_observer_raises_then_auth_path_intact(monkeypatch
     assert any("count=10" in line for line in _reject_lines(caplog)), _reject_lines(caplog)
 
 
-async def test_reject_reason_when_logged_then_within_fixed_four(monkeypatch, caplog):
-    """A-25 — 거부 사유는 4종 고정(`no_key_configured`·`missing_header`·`bad_key`·
-    `cross_origin`)이고 상황별로 **구분**된다.
+async def test_reject_reason_when_logged_then_within_fixed_five(monkeypatch, caplog):
+    """A-25 — 거부 사유는 **5종 고정**이고 상황별로 **구분**된다.
+
+    `no_key_configured` · `missing_header` · `bad_key` · `cross_origin` (cycle243 4종)
+    + `reporter_scope` (cycle249 — 리포터 키가 허용 범위 밖 요청을 보낸 경우, 유일하게
+    403 으로 응답한다).
 
     사유는 cap 키이자 운영자의 유일한 진단 채널이다(응답은 401 단일 — 미설정 상태를
     503 으로 구분하면 공격자에게 "이 박스는 키가 없다"를 알려준다, §0-④-b).
+    집합을 **닫아 두는 것**이 계약이다: 새 경로가 임의 문자열을 만들면 `_log_reject` 의
+    cap 키가 무제한으로 늘어나 인터넷 노출면에서 메모리 증식 벡터가 된다. 그래서
+    cycle249 도 사유를 하나만 추가하고 이 상한을 5로 **명시**한다.
     """
     from src.config import settings
 
@@ -562,7 +568,8 @@ async def test_reject_reason_when_logged_then_within_fixed_four(monkeypatch, cap
         "missing_header",
         "bad_key",
         "cross_origin",
-    }, f"고정 4종 밖 사유: {reasons}"
+        "reporter_scope",  # cycle249 — 리포터 스코프 밖 요청(403)
+    }, f"고정 5종 밖 사유: {reasons}"
 
 
 # ---------------------------------------------------------------------------

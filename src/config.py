@@ -55,6 +55,16 @@ class Settings(BaseSettings):
     # http://localhost:3000
     api_allowed_origins: str = ""
 
+    # cycle249 — 리포터 스코프 키. Basic Auth 사용자 `reporter` 에게만 nginx
+    # `map $remote_user` 가 이 값을 주입한다(운영 키와 다른 값). 허용 범위는
+    # GET/HEAD 전체 + `POST /api/log-reports/{date}/external` 단 한 경로뿐이다
+    # (20:20 KST 클라우드 루틴 — 로그 안 외부 문자열에 의한 prompt injection 이
+    # 매매 조작으로 승격되지 않도록 쓰기 표면을 구조적으로 좁힌다).
+    # 기본 빈 문자열 = 리포터 역할 **비활성**(어떤 요청도 리포터로 통과하지 못한다 —
+    # `authorize()` 가 빈 리포터 키를 비교 자체를 하지 않는다, compare_digest("","")
+    # True 함정 방지).
+    api_reporter_key: str = ""
+
     # OpenAI 파라미터 추천
     openai_api_key: str = ""
     openai_recommend_model: str = "gpt-5.6-luna"

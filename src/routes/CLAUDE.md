@@ -59,6 +59,8 @@
 | GET | `/api/log-reports?days=30` | log_reports.py | 일일 로그 분석 리포트 목록 (신규순) |
 | GET | `/api/log-reports/{YYYY-MM-DD}` | log_reports.py | 단일 영업일 리포트 상세 |
 | POST | `/api/log-reports/run` | log_reports.py | 수동 트리거 — 즉시 분석 실행 (당일 1건만, 중복 방지) |
+| GET | `/api/log-reports/bundle?date=YYYY-MM-DD` | log_reports.py | **cycle249** — 20:20 KST 클라우드 루틴이 읽는 분석 입력 번들. `/{target_date}` **보다 먼저 선언**(FastAPI 선언 순서 매칭 — 뒤에 두면 `bundle` 이 날짜 파라미터로 잡힌다). `date` 미지정 → 오늘(KST), 미래 날짜·형식 오류(엄격 `%Y-%m-%d`) → `success=False`. 응답 `data = {target_date, collected_at(KST ISO), metrics(=collect_daily_log_metrics 결과), process_scoped_keys:["api_metrics","strategy_funnel","portfolio_risk_snapshot"]}` — 이 3키는 프로세스 현재 스냅샷이라 과거 날짜 조회 시 그 날의 값이 아니라는 표식(`portfolio_risk_snapshot` 은 사이클 249 위생 시정으로 편입 — 현재 보유·잔고를 읽는 `compute_portfolio_risk_snapshot` 결과라 과거 조회에서도 항상 "지금"이다). **리포터 스코프 키로 GET 가능**(경로 무관 읽기 허용) |
+| POST | `/api/log-reports/{YYYY-MM-DD}/external` | log_reports.py | **cycle249** — 20:20 KST 클라우드 루틴의 분석 결과 저장. **리포터 스코프의 유일한 쓰기 경로**(`src/middleware/api_auth.py::REPORTER_WRITE_PATH_RE`). 바디 `ExternalReportIn`: `provider`(1~40자) / `model`(1~80자) / `summary`(1~4000자) / `findings`(≤50개, 기존 `_validate_report` 로 category/severity 정규화 + title/detail/suggestion 길이 상한 — OpenAI 경로와 같은 정규화기) / `report_md`(선택, ≤200,000자). 범위 위반은 422. 날짜 형식 오류 → `success=False`. `src/db/log_reports.py::upsert_external_report` 가 `ext_*` 6컬럼에만 저장(기존 summary/findings/metrics/model 무접촉 — 20:10 OpenAI 경로와 병행 비교 기준선 보존) |
 | GET | `/api/system/memory` | system.py | 프로세스 메모리(psutil RSS/VMS/threads/files) + (옵션) tracemalloc top 20 |
 | GET | `/api/system/metrics` | system.py | 엔드포인트별 응답시간 분포 p50/p95/p99 (최근 1024개 샘플) |
 | POST | `/api/system/metrics/reset` | system.py | metrics 누적 샘플 초기화 (실험 베이스라인 리셋) |

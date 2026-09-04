@@ -2,9 +2,9 @@
 # `/etc/nginx/templates/*.template` 을 `/etc/nginx/conf.d/` 로 렌더한다.
 #   * 파일명이 `default.conf.template` 이어야 스톡 `default.conf` 를 덮어쓴다.
 #     (다른 이름이면 스톡 server 블록이 80 에 공존한다 — Dockerfile 의 COPY 대상 확인)
-#   * `NGINX_ENVSUBST_FILTER=^API_AUTH_KEY$` 로 치환 대상을 **한 개**로 제한한다.
-#     제한하지 않으면 `.env` 에 같은 이름 변수가 생겼을 때 프록시 헤더가 오염되고,
-#     다른 비밀이 설정 파일로 샐 수 있다.
+#   * `NGINX_ENVSUBST_FILTER=^API_(AUTH|REPORTER)_KEY$` 로 치환 대상을 **두 개**로
+#     제한한다(cycle249 — 리포터 스코프 키 추가). 제한하지 않으면 `.env` 에 같은
+#     접두 변수가 생겼을 때 프록시 헤더가 오염되고, 다른 비밀이 설정 파일로 샐 수 있다.
 #   * `.htpasswd` 는 git 에 커밋하지 않는다. 호스트 `./secrets/` 를 읽기전용 마운트.
 #     `auth_basic_user_file` 은 파싱 시점이 아니라 **요청 시점**에 파일을 여므로 nginx 는
 #     어떤 결손 상태에서도 정상 기동한다. 증상은 **세 갈래**다(실측, nginx 1.31.5-alpine):
@@ -21,12 +21,28 @@
 #     `[emerg] unknown "api_auth_key" variable` 로 **기동 실패**한다(빈 값과 증상이 정반대).
 #     compose 의 frontend `environment:` 에 있는 API_AUTH_KEY 전달 줄이 항상 변수를
 #     정의하므로 그 줄을 지우지 마라 — 빈 값이면 `X-API-Key ""` 로 렌더돼 헤더가
-#     전달되지 않는다.
-#   * 🔴 **이 파일에서 치환 구문(달러+중괄호 형태)은 아래 `proxy_set_header X-API-Key`
-#     단 한 줄에만 쓴다.** envsubst 는 주석을 구분하지 않으므로 설명문에 그 구문을 적으면
-#     **렌더된 설정 주석에 키가 평문으로 박힌다**(cycle246 실측: 렌더 결과에 키 2회 등장,
-#     운영 중 설정 덤프로 유출). 설명에는 변수 이름만 백틱으로 쓴다.
+#     전달되지 않는다. `API_REPORTER_KEY` 도 같은 원리로 항상 정의돼 있어야 하고,
+#     미설정이면 envsubst 가 빈 문자열을 넣어 `reporter` 사용자가 빈 키를 받는다
+#     (의도 — 백엔드가 fail-closed 로 401 한다).
+#   * 🔴 **이 파일에서 치환 구문(달러+중괄호 형태)은 아래 `map` 블록의 `default`/
+#     `reporter` 두 줄에만 쓴다.** envsubst 는 주석을 구분하지 않으므로 설명문에 그
+#     구문을 적으면 **렌더된 설정 주석에 키가 평문으로 박힌다**(cycle246 실측: 렌더
+#     결과에 키 2회 등장, 운영 중 설정 덤프로 유출). 설명에는 변수 이름만 백틱으로 쓴다.
 #     회귀 가드 = `tests/unit/ast/test_cycle246_nginx_template_no_key_leak.py`.
+#
+# cycle249 — Basic 사용자별 X-API-Key 선택. `location /api/` 는 클라이언트가 보낸
+# X-API-Key 를 **치환**하므로(cycle243) "루틴이 스코프 키를 보낸다" 는 설계는 성립
+# 하지 않는다 — 스코프의 출발점은 nginx Basic 사용자다. `reporter` 사용자(계약된
+# 이름 — htpasswd 등록 시 이 이름을 쓴다)에게만 리포터 키를 주입하고, 그 외
+# (`default`)는 종전대로 운영 키를 받는다. `map` 은 **http 컨텍스트**(server 블록
+# 밖·앞)에서만 유효하다 — server 블록 안에 두면 nginx 가 기동을 거부한다.
+# ⚠️ default/reporter 를 뒤바꾸면 리포터 사용자가 운영 키를 받아 스코프가 통째로
+# 사라지는데, 모든 요청이 정상 200 이라 관측으로는 절대 드러나지 않는다.
+map $remote_user $api_key_for_user {
+    default  "${API_AUTH_KEY}";
+    reporter "${API_REPORTER_KEY}";
+}
+
 server {
     listen 80;
     server_name _;
@@ -79,7 +95,8 @@ server {
         # 백엔드 X-API-Key(Phase 2). 브라우저에는 노출되지 않는다.
         # proxy_set_header 는 클라이언트가 보낸 동명 헤더를 **치환**하므로 헤더 밀반입이
         # 불가능하다(공격자가 직접 보낸 X-API-Key 는 여기서 덮어써진다).
-        proxy_set_header X-API-Key "${API_AUTH_KEY}";
+        # cycle249 — 위 `map` 이 고른 사용자별 키(`$api_key_for_user`)를 주입한다.
+        proxy_set_header X-API-Key $api_key_for_user;
     }
 
     # SPA fallback — index.html은 캐시 금지

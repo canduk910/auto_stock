@@ -45,9 +45,13 @@ services:
       # ⚠️ **`.env` 를 편집하면 `env_file: .env` 인 backend 가 재생성된다**(실측) — Phase 1
       # 무재시작 전제가 무너지므로 키 추가는 Phase 2 창(15:30 이후)에서만 한다.
       - API_AUTH_KEY=${API_AUTH_KEY}
-      # 치환 대상을 이 변수 **하나**로 제한한다(앵커 필수 — 엔트리포인트가 부분 일치로 평가해
+      # cycle249 — 리포터 스코프 키. nginx `map $remote_user` 가 Basic 사용자 `reporter`
+      # 에게만 이 값을 주입한다(운영 키와 별개). backend 블록은 이 변수를 받지 않는다
+      # (D-5/D-16 — backend 를 건드리면 컨테이너가 재생성돼 장중 배포가 tick blind 를 만든다).
+      - API_REPORTER_KEY=${API_REPORTER_KEY}
+      # 치환 대상을 이 두 변수로 제한한다(앵커 필수 — 엔트리포인트가 부분 일치로 평가해
       # 앵커가 없으면 `API_AUTH_KEY_OLD` 류까지 걸린다).
-      - NGINX_ENVSUBST_FILTER=^API_AUTH_KEY$
+      - NGINX_ENVSUBST_FILTER=^API_(AUTH|REPORTER)_KEY$
       - TZ=Asia/Seoul
     depends_on:
       - backend

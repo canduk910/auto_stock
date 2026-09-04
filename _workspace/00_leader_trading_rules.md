@@ -53,7 +53,17 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - 관측: `[budget_clamp] ticker=… strategy=… requested=… clamped=… remaining=…` DailyEmitCap 1회/(ticker,전략)/일 — 부분 매수 정책 재평가 근거.
 - **1회 투자금액 ATR 유닛화 (`sizing_mode="turtle"`)**: `unit = floor(전략예산 × risk_pct ÷ ATR)`. **손절이 ATR 기반인 전략에만 적용**한다 — `수량 = 예산 × risk_pct ÷ (진입가 − 손절가)` 에서 손절이 고정%면 명목이 종목 무관 상수라 `position_ratio` 가 이미 리스크 균등이고, 사이징만 바꾸면 정규화가 깨진다(함정 #1). 상세 매트릭스는 `src/engine/strategies/CLAUDE.md` 「자금관리 — 사이징 방식 × 손절 기준」 절.
   - **ATR 손절 게이트는 `_entry_atr` 스탬프 존재** — `sizing_mode` 게이팅 금지 (DB 토글이 기보유 포지션의 손절 규약을 바꾸면 안 됨). 스탬프 값 = sizing 에 쓴 ATR 과 동일(커플링 불변식).
-  - **랏당 최대 유닛 상한 `max_lot_units` (K = 2.0, cycle242 · 2026-09-03)** — `sizing_mode="turtle"` 전략의 **모든 매수 랏**(터틀 유닛 · `position_ratio` 낙하 · 1주 폴백)에 `min(수량, floor(K × 예산 × risk_pct ÷ ATR))` 을 적용하고, 그 상한이 0 이면 **매수하지 않는다**. 발단 = 터틀 유닛이 1주에 못 미치면 관문이 1주를 사는데 고가 종목에선 그 1주가 설계 유닛의 **평균 4.94배·최대 15.61배**(donchian 실측)라 `risk_pct` 통제가 진입 시점에 이미 무력했다. **매수를 줄이는 방향뿐**이고 정상 터틀 랏(≤1유닛)은 K≥1 이라 한 건도 안 건드린다. K 는 리스크 정체성 상수 — `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(AI 자문·자동 적용 대상 아님), 읽는 쪽 `[1.0, 20.0]` 클램프. ATR 결측·모호·`risk_pct ≤ 0`·예외는 **fail-open**(현행 수량 유지 + `[fallback_cap_skipped]` WARNING). 고정%손절 5전략은 범위 밖. 피라미딩 착수 시 **K → 1.0**. 롤백은 DB `strategy_config.params.max_lot_units = 20.0`(코드 재배포 불필요, 단 당일 `_bought_today` 소진 종목은 다음 세션부터).
+  - **랏당 최대 유닛 상한 `max_lot_units` (K = 2.0, cycle242 · 2026-09-03)** — `sizing_mode="turtle"` 전략의 **모든 매수 랏**(터틀 유닛 · `position_ratio` 낙하 · 1주 폴백)에 `min(수량, floor(K × 예산 × risk_pct ÷ ATR))` 을 적용하고, 그 상한이 0 이면 **매수하지 않는다**. 발단 = 터틀 유닛이 1주에 못 미치면 관문이 1주를 사는데 고가 종목에선 그 1주가 설계 유닛의 **평균 4.94배·최대 15.61배**(donchian 실측)라 `risk_pct` 통제가 진입 시점에 이미 무력했다. **매수를 줄이는 방향뿐**이고 정상 터틀 랏(≤1유닛)은 K≥1 이라 한 건도 안 건드린다. K 는 리스크 정체성 상수 — `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(AI 자문·자동 적용 대상 아님), 읽는 쪽 `[1.0, 20.0]` 클램프. ATR 결측·모호·`risk_pct ≤ 0`·예외는 **fail-open**(현행 수량 유지 + `[fallback_cap_skipped]` WARNING). 고정%손절 5전략은 범위 밖. 피라미딩 착수 시 **K → 1.0**. 롤백은 해당 전략 `max_lot_units = 20.0` — **`PUT /api/strategies/{id}/params` 는 즉시, DB SQL UPDATE 는 다음 백엔드 재시작에서만** 반영되고(cycle245 라운드 2 실측), 당일 `_bought_today` 소진 종목은 어느 쪽이든 다음 세션부터다.
+- **랏 명목 ρ축 상한 `max_lot_ratio_mult` (K_ρ = 2.5, cycle245 · 2026-09-04)** — K축(`max_lot_units`, ATR 척도)이 **이 랏을 실제로 심사하지 못한 모든 랏**의 명목을 `K_ρ × position_ratio × 예산` 이하로 자르고, 1주도 못 사면 **매수하지 않는다**. 심사 판정 = `sizing_mode=="turtle"` ∧ `ticker` ∧ `risk_pct>0` ∧ 예산>0 ∧ ATR 해석 성공 — 대상은 **비터틀 5전략 전부**(momentum·VB·LTV·BFB·VCP)와 **터틀이지만 ATR 배관이 끊긴 랏**이다. **두 캡은 상호배타 — `min` 합성 없음.**
+  - **발단(09-04 실측)**: 비터틀 전략은 K축이 꺼진 채(`[fallback_cap_config] sizing_mode=None cap=off`) 같은 병리를 그대로 안고 있었다. 08:12 LTV 000500 220,000원 = 설계 랏 52,041원의 **4.23배** → 09:32 −5% 손절 **−11,000원**(순자산 0.42%) = 그날 최대 단일 손실. 현행 레짐 51랏 중 **22건(1.8건/영업일)** 이 ρ상한 초과, 총손실의 31%가 배수 ≥2.11 인 3랏에 몰렸다.
+  - **왜 ρ축인가**: LTV·VB·momentum 은 `risk_pct`·`_entry_atr`·`_candidates` 가 **소스에 0건**이라 ATR 축이 원리적으로 불가하다. `cutoff = int(K_ρ × int(예산 × position_ratio))` 는 `[oversized_fallback]`·`portfolio_risk.compute_over_cap_positions` 가 이미 재고 있는 축이라 자기검증(R7)이 성립한다.
+  - **차단(0주)이 유일 선택지** — K_ρ≥1 이면 캡은 1주 폴백 경로에서만 바인딩되고 그 수량은 항상 1이다(1주는 쪼갤 수 없다). 유니버스 가격 상한(전일종가 기준 `price_filter_max`)은 급등 추격에서 새고 momentum 은 그 경로를 아예 안 타므로 기각.
+  - **전략별 차등 없음** — 진짜 차등은 이미 `weight × position_ratio`(순자산 대비 VB 5.25% / BFB 3.75% / LTV·VCP 2.00% / MOM 1.25%)에 있다. 청산 규약(당일/오버나잇) 근거 차등은 코드 실측이 반증한다(momentum 은 `check_force_clear` 자체가 없어 구조적 오버나잇).
+  - **키 부재 = 캡 OFF** (cycle242 와 **반대 관례** — 매수를 막는 통제라 fail-closed 는 P0-1 유령 키 재현 경로). 키는 **7 전략 전부**의 `DEFAULT_PARAMS` 에 2.5 로 명시하고 AST 가 glob 전수로 강제한다. `PARAM_RANGES`/`INT_PARAMS` **편입 금지**, 읽는 쪽 `[1.0, 20.0]` 클램프(**하한 1.0 = 정상 비중 랏 무접촉의 수학적 전제**). `position_ratio` 결측·예산 0·초소액·판정 예외는 **fail-open**(현행 수량 + `[ratio_cap_skipped]` WARNING).
+  - **09-04 예산 기준 컷오프**: LTV·VCP **130,100원** / VB **341,515원** / BFB **243,940원** / momentum **81,312원** — 그 가격을 넘는 종목은 그 전략이 못 산다(예산에 선형 비례하므로 `weight`·`cash_usage_ratio`·순자산이 바뀌면 함께 움직인다).
+  - **관측 4마커** `[ratio_notional_blocked]`(INFO 행위) · `[ratio_cap_skipped]`(WARNING fail-open) · `[ratio_cap_config]`(INFO 카나리아, `cutoff_price` 필수) · `[ratio_cap_clamped]`(WARNING). ⚠️ `[oversized_fallback]` 은 이제 **"사려 했던 랏"** 이고 `order_engine` 수량-0 WARNING 은 **"ρ캡 차단 포함"** 이다(1:1 아니라 1:N) — 배포 전후 같은 grep 합산 금지.
+  - **잔여 노출(명시)** — K축이 심사한 터틀 1주 폴백 랏은 이 항등식 **밖**이다(kojiro 3.86배 · donchian 5.00배). 닫으려면 "상호배타" 결정을 먼저 재검토해야 한다(후속 F-9).
+  - **롤백** = 해당 전략 `max_lot_ratio_mult = 20.0`. **PUT 은 즉시 / SQL UPDATE 는 다음 재시작에서만** 반영되고, 보유 중 장중 재시작은 금지(cycle232 D6)이므로 **장중 실효 수단은 PUT 뿐**이다. ⚠️ 배포 **전**에는 PUT 이 무음 실패(미지 키 탈락) + `params` 통째 덮어쓰기로 SQL 값까지 지우므로 배포 전 조치는 SQL 단일 경로다.
   - `compute_unit_qty_guarded` 의 notional 상한이 `position_ratio × 예산` 이라 **터틀 수량 ≤ 비중 수량** 항상 성립 = 전환은 **순수 축소 방향**.
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
 
@@ -643,6 +653,8 @@ DEFAULT_PARAMS = {
     "turtle_backstop_pct": -7.0,
     "min_vol_floor_pct": 1.0,
     "max_lot_units": 2.0,      # cycle242 — 랏당 최대 유닛(K). PARAM_RANGES/INT_PARAMS 미편입
+    "max_lot_ratio_mult": 2.5, # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수.
+                               # 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = 20.0
     "turtle_min_stop_pct": -4.0,
     # 유니버스 (2026-08-08 확대 — 이미 지수 무제약. 거래대금 20억→15억(도메인 B2 — 장중 돌파
     # 추격이라 kojiro 10억은 슬리피지 위험) + max_scan 100→4000. 시총 100억(사용자 결정, 소형주 포함))
@@ -791,6 +803,8 @@ DEFAULT_PARAMS = {
     "turtle_backstop_pct": -9.0,
     "min_vol_floor_pct": 1.0,
     "max_lot_units": 2.0,      # cycle242 — 랏당 최대 유닛(K). PARAM_RANGES/INT_PARAMS 미편입
+    "max_lot_ratio_mult": 2.5, # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수.
+                               # 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = 20.0
     "turtle_min_stop_pct": -5.0,
     # 유니버스 (2026-08-08 확대 — 전체 상장 ∩ 시총≥100억(사용자 결정) ∩ 거래대금≥10억, 지수 제거)
     "min_market_cap": 10_000_000_000,

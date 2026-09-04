@@ -158,13 +158,18 @@ def test_template_when_proxying_then_preserves_original_host_port():
 
 
 def test_template_when_present_then_injects_api_key_header():
-    """D-2 — `proxy_set_header X-API-Key "${API_AUTH_KEY}";` 존재.
+    """D-2 — `proxy_set_header X-API-Key $api_key_for_user;` + 사용자별 `map` 존재.
 
     `proxy_set_header` 는 클라이언트가 보낸 동명 헤더를 **치환**하므로 헤더 밀반입이
     불가능하다(§2.1 주석 · 수동 검증 V7). 브라우저에는 키가 노출되지 않는다.
+
+    cycle249 재스코프 — 치환 구문이 `proxy_set_header` 줄에서 `map $remote_user
+    $api_key_for_user { ... }` 블록(Basic 사용자별 키 선택)으로 이동했다. 이 가드는
+    이제 리터럴 값이 아니라 **변수 배선**(map 존재 + 주입 줄이 그 변수를 씀)을 본다.
     """
     normalized = _norm(_strip_comments(_read(_TEMPLATE)))
-    assert 'proxy_set_header X-API-Key "${API_AUTH_KEY}";' in normalized, normalized
+    assert "map $remote_user $api_key_for_user {" in normalized, normalized
+    assert "proxy_set_header X-API-Key $api_key_for_user;" in normalized, normalized
 
 
 def test_legacy_nginx_conf_when_migrated_then_absent():
@@ -214,7 +219,9 @@ def test_compose_frontend_when_configured_then_secrets_and_filtered_envsubst():
     entries = _env_entries(service)
 
     assert "API_AUTH_KEY=${API_AUTH_KEY}" in entries, entries
-    assert "NGINX_ENVSUBST_FILTER=^API_AUTH_KEY$" in entries, entries
+    # cycle249 — 리포터 스코프 키(map $remote_user 가 소비) + FILTER 가 2변수 앵커.
+    assert "API_REPORTER_KEY=${API_REPORTER_KEY}" in entries, entries
+    assert "NGINX_ENVSUBST_FILTER=^API_(AUTH|REPORTER)_KEY$" in entries, entries
     assert "env_file" not in service, (
         "frontend 에 env_file 이 붙었다 — 33개 비밀이 nginx 컨테이너로 샌다"
     )

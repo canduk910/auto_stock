@@ -42,6 +42,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import secrets
 from datetime import datetime, timedelta, timezone
 
@@ -66,9 +67,37 @@ REASON_NO_KEY = "no_key_configured"
 REASON_MISSING_HEADER = "missing_header"
 REASON_BAD_KEY = "bad_key"
 REASON_CROSS_ORIGIN = "cross_origin"
-#: **4종 고정**. cap 키이자 운영자의 유일한 진단 채널이다(응답은 401 단일 — 미설정 상태를
-#: 503 으로 구분하면 공격자에게 "이 박스는 키가 없다"를 알려준다).
-REASONS = (REASON_NO_KEY, REASON_MISSING_HEADER, REASON_BAD_KEY, REASON_CROSS_ORIGIN)
+#: cycle249 — 리포터 키가 허용 범위(GET/HEAD + 리포트 POST 1경로) 밖으로 나간 경우.
+#: 유일하게 **403** 으로 응답한다(다른 사유는 전부 401 — "키는 맞았고 권한이 없다"는
+#: 신호를 모르는 키에까지 주면 공격자에게 유효 키 보유를 알려준다).
+REASON_REPORTER_SCOPE = "reporter_scope"
+#: **5종 고정**(cycle243 4종 + cycle249 `reporter_scope`). cap 키이자 운영자의 유일한
+#: 진단 채널이다(응답은 401/403 뿐 — 미설정 상태를 503 으로 구분하면 공격자에게
+#: "이 박스는 키가 없다"를 알려준다). 집합을 여기서 닫아 두지 않으면 인터넷 노출면에서
+#: `_log_reject` 의 cap 키가 무제한으로 늘어난다.
+REASONS = (
+    REASON_NO_KEY,
+    REASON_MISSING_HEADER,
+    REASON_BAD_KEY,
+    REASON_CROSS_ORIGIN,
+    REASON_REPORTER_SCOPE,
+)
+
+#: cycle249 — 리포터 키가 부작용 없이 통과하는 메서드(경로 무관). POST 를 넣는 순간
+#: 스코프 전체가 무력화된다.
+REPORTER_READ_METHODS = frozenset({"GET", "HEAD"})
+#: cycle249 — 리포터의 **유일한 쓰기** 경로. 앵커(`^`/`\Z`) 필수 — 빠지면 접두 삽입이나
+#: `…/external/../trading/manual-sell` 같은 접미 확장이 통과한다. **`$` 가 아니라 `\Z`**
+#: 를 쓴다 — `$` 는 "문자열 끝" 뿐 아니라 "**끝의 개행 직전**"도 허용해(re 모듈 기본
+#: 동작) `…/external\n` 처럼 인코딩된 위조 경로가 매치될 여지를 남긴다(적대 검증
+#: 위생 시정, `authorize` 도 이 정규식을 `.fullmatch()` 로 쓴다). **`\d` 가 아니라
+#: `[0-9]`** — `\d` 는 Python 기본으로 유니코드 십진 숫자(전각 숫자 U+FF10~FF19 등)
+#: 까지 매치하는데, 그런 문자는 실제 라우트 매칭에 쓰이지도 않으면서 이 판정만
+#: 통과시킬 수 있다. `|` 로 경로를 늘리는 변경은 "유일한 쓰기 경로" 라는 스코프의
+#: 근거 자체를 무너뜨리므로 금지.
+REPORTER_WRITE_PATH_RE = re.compile(
+    r"^/api/log-reports/[0-9]{4}-[0-9]{2}-[0-9]{2}/external\Z"
+)
 
 #: `secrets.token_urlsafe(32)` = 43~44자. 이보다 짧으면 기동 시 WARNING.
 MIN_KEY_LEN = 24
@@ -80,6 +109,9 @@ PATH_LOG_MAXLEN = 80
 EMIT_AT = frozenset({1, 10, 100, 1000, 10000})
 
 _UNAUTHORIZED_BODY = {"success": False, "data": None, "message": "unauthorized"}
+#: cycle249 — `reporter_scope` 사유 전용 403 바디. 401 봉투와 `message` 만 다르다
+#: (프론트 `data.data` 계약은 그대로 유지).
+_FORBIDDEN_BODY = {"success": False, "data": None, "message": "forbidden"}
 
 # 거부 카운터 — 날짜 문자열 **자기 리셋**. `DailyEmitCap` 은 스스로 롤오버하지 않고 외부
 # `reset_daily()` 호출자(스케줄러 일일 정산)에 의존하는데 미들웨어엔 그 훅이 없다.
@@ -184,19 +216,27 @@ def _origin_allowed(scope: dict) -> bool:
 
 
 def authorize(scope: dict) -> str:
-    """요청 1건의 인증 판정. `""` = 통과, 그 외 = 거부 사유(`REASONS` 4종).
+    """요청 1건의 인증 판정. `""` = 통과, 그 외 = 거부 사유(`REASONS` 5종).
 
     **모듈 레벨 함수인 것이 계약**이다(파일 docstring 4번). 메서드로 감추면 기존 스위트
-    보호 픽스처가 갈아끼울 대상이 사라지고 40파일·201케이스가 401 로 전멸한다.
+    보호 픽스처가 갈아끼울 대상이 사라지고 수백 케이스가 401 로 전멸한다.
 
-    판정 순서에 이유가 있다:
+    판정 순서에 이유가 있다(cycle249 이 리포터 분기를 **운영자 판정 뒤**에 삽입했다 —
+    두 키가 같은 값으로 설정되는 사고에서 운영자가 갑자기 403 을 받으면 안 된다):
 
     1. `/health` 예외 — 무인증 통과.
-    2. **빈 키 선분기가 헤더 비교보다 먼저**다. `compare_digest("", "")` 는 True 라,
+    2. **빈 운영 키 선분기가 헤더 비교보다 먼저**다. `compare_digest("", "")` 는 True 라,
        순서를 바꾸면 키 미설정 상태에서 빈 헤더를 보낸 쪽이 통과하는 구멍이 생긴다.
+       리포터 키만 설정된 상태에서도 이 분기가 먼저 걸려 `no_key_configured` 로
+       fail-closed 한다 — 리포터 표면이 유일한 입구가 되는 조용한 구성 사고 차단.
     3. 헤더 부재 → `missing_header`.
     4. **상수시간 비교**(`secrets.compare_digest`) — `==` 는 타이밍 사이드채널이다.
-    5. 키가 맞은 뒤에야 Origin 검사 — 사유 귀인을 섞지 않는다.
+       운영 키가 일치하면 상태변경 Origin 검사 후 통과(기존 cycle243 경로, byte 동일).
+    5. 운영 키가 불일치했을 때만 **리포터 키**를 본다. 리포터 키가 **비어 있지 않고**
+       상수시간 일치하면: GET/HEAD 는 경로 무관 통과, `POST` + 정확한 리포트 경로는
+       Origin 검사 후 통과, 그 외(다른 상태변경 메서드·다른 경로)는 `reporter_scope`
+       (유일하게 403). 빈 리포터 키는 `and` 로 비교 자체를 건너뛴다(§2번과 동형 함정).
+    6. 둘 다 불일치 → `bad_key`.
     """
     path = scope.get("path") or ""
     if path in EXEMPT_PATHS:
@@ -209,13 +249,26 @@ def authorize(scope: dict) -> str:
     provided = _header(scope, HEADER_NAME)
     if provided is None:
         return REASON_MISSING_HEADER
-    if not secrets.compare_digest(provided, key.encode("utf-8")):
-        return REASON_BAD_KEY
 
     method = str(scope.get("method") or "").upper()
-    if method in STATE_CHANGING_METHODS and not _origin_allowed(scope):
-        return REASON_CROSS_ORIGIN
-    return ""
+
+    if secrets.compare_digest(provided, key.encode("utf-8")):
+        if method in STATE_CHANGING_METHODS and not _origin_allowed(scope):
+            return REASON_CROSS_ORIGIN
+        return ""
+
+    # cycle249 — 리포터 스코프. 운영 키 불일치 뒤에만 평가한다(§4 참조).
+    reporter_key = settings.api_reporter_key  # 요청 시점 참조 (캡처 금지)
+    if reporter_key and secrets.compare_digest(provided, reporter_key.encode("utf-8")):
+        if method in REPORTER_READ_METHODS:
+            return ""
+        if method == "POST" and REPORTER_WRITE_PATH_RE.fullmatch(path):
+            if not _origin_allowed(scope):
+                return REASON_CROSS_ORIGIN
+            return ""
+        return REASON_REPORTER_SCOPE
+
+    return REASON_BAD_KEY
 
 
 # ---------------------------------------------------------------------------
@@ -283,7 +336,7 @@ def _log_reject(scope: dict, reason: str) -> None:
     한 번 로깅에 실패해도 다음 임계에서 정상 발화한다(영구 침묵 금지).
     """
     try:
-        # 사유 집합을 **구조적으로** 4종에 고정 — 미래의 어떤 경로가 새 문자열을 만들어도
+        # 사유 집합을 **구조적으로** 5종에 고정 — 미래의 어떤 경로가 새 문자열을 만들어도
         # cap 키가 무제한으로 늘지 않는다.
         bucket = reason if reason in REASONS else REASON_BAD_KEY
 
@@ -360,11 +413,46 @@ def log_startup_state() -> None:
             "와일드카드는 CORS credentialed preflight 를 전 오리진에 열고 상태변경 "
             "Origin 검사(CSRF)까지 무력화한다. 허용할 오리진을 명시 열거하라"
         )
+    reporter_key = settings.api_reporter_key or ""
+    # cycle249 위생 시정 — 운영 키(위 elif)와 대칭인 약한 키 경고. 리포터 키는 운영
+    # 키보다 노출 표면이 넓다(20:20 KST 클라우드 루틴이 매일 왕복시킨다) — 짧은 값은
+    # 그 표면에서 먼저 브루트포스 대상이 된다. 값·길이 미출력 규약은 동일.
+    if reporter_key and len(reporter_key) < MIN_KEY_LEN:
+        logger.warning(
+            "[api_auth_reporter_key_weak] key_len=%d — 32바이트 이상(token_urlsafe(32)) 권장",
+            len(reporter_key),
+        )
+    # cycle249 적대 검증(auth-bypass, MEDIUM) — `authorize` 는 운영 키를 **선행** 비교
+    # 하므로(§4) 두 키가 같은 값이면 운영자 분기가 항상 먼저 이겨 리포터 분기(§5)에
+    # 도달하지 않는다 = 리포터 스코프가 **존재하지 않고** 그 키를 쥔 쪽이 전권을 가진다.
+    # 모든 요청이 정상 200 이라 운영 관측(응답 코드·기존 `reporter_enabled=true` 한
+    # 줄)으로는 절대 드러나지 않는다 — 그래서 기동 시점에 **한 번** 시끄럽게 비교한다.
+    # 값·길이는 여전히 미출력(§2.3.6 불변) — 일치 여부(bool)만 CRITICAL 로 알린다.
+    reporter_distinct = True
+    if key and reporter_key:
+        try:
+            collides = secrets.compare_digest(key.encode("utf-8"), reporter_key.encode("utf-8"))
+        except Exception:
+            collides = False
+        if collides:
+            reporter_distinct = False
+            logger.critical(
+                "[api_auth_reporter_key_collision] API_REPORTER_KEY 가 API_AUTH_KEY 와 "
+                "동일 — 리포터 스코프가 존재하지 않는다(값 미출력). 서로 다른 키를 "
+                "설정하라(생성: python3 -c \"import secrets;print(secrets.token_urlsafe(32))\")"
+            )
     logger.info(
-        "[api_auth_config] enabled=%s key_len=%d allowed_origins=%d protected=all_except_health",
+        "[api_auth_config] enabled=%s key_len=%d allowed_origins=%d "
+        "protected=all_except_health reporter_enabled=%s reporter_distinct=%s",
         "true" if key else "false",
         len(key),
         len(_allowed_origin_set()),
+        # cycle249 — 활성 여부만 노출한다. 값·길이를 찍으면 그 자체가 유출 표면이다
+        # (cycle246: 렌더된 nginx 주석에 키가 박혀 설정 덤프로 샜다).
+        "true" if reporter_key else "false",
+        # cycle249 적대 검증 시정 — 리포터 키가 운영 키와 구별되는지(충돌 없음)를
+        # 별도 필드로 병기한다. 리포터 비활성(빈 키)이면 충돌 여지가 없어 true.
+        "true" if reporter_distinct else "false",
     )
 
 
@@ -403,5 +491,10 @@ class ApiAuthMiddleware:
         _log_reject(scope, reason)  # 실패해도 아래 거부 응답은 그대로 나간다
         # `WWW-Authenticate` 를 붙이지 않는다 — 브라우저가 백엔드 다이얼로그를 띄우면
         # nginx Basic Auth(Phase 1) 자격과 혼동된다.
-        response = JSONResponse(_UNAUTHORIZED_BODY, status_code=401)
+        # cycle249 — `reporter_scope` 만 403(키는 맞았고 권한이 없다). 나머지 4종은
+        # 종전대로 401(모르는 키에까지 403 을 주면 공격자에게 유효 키 보유를 알려준다).
+        if reason == REASON_REPORTER_SCOPE:
+            response = JSONResponse(_FORBIDDEN_BODY, status_code=403)
+        else:
+            response = JSONResponse(_UNAUTHORIZED_BODY, status_code=401)
         await response(scope, receive, send)
