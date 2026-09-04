@@ -19,6 +19,11 @@ def _src() -> str:
     return SCRIPT.read_text(encoding="utf-8")
 
 
+def _code() -> str:
+    """주석 줄(선행 공백 + #)을 뺀 코드만 — 설명문에 등장하는 채널 이름·용어는 검사 대상이 아니다."""
+    return "\n".join(l for l in _src().splitlines() if not l.lstrip().startswith("#"))
+
+
 def test_bash_syntax_ok():
     proc = subprocess.run(["bash", "-n", str(SCRIPT)], capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr
@@ -35,12 +40,13 @@ def test_loopback_default_and_key_not_printed():
 def test_probe_contract_tokens():
     s = _src()
     assert 'TR_ID="${PROBE_TR_ID:-H0STCNT0}"' in s
-    assert "H0UNCNT0" not in s.replace("# ", ""), "라이브 채널을 프로브로 쓰면 안 된다"
+    code = _code()
+    assert "H0UNCNT0" not in code, "라이브 채널을 프로브로 쓰면 안 된다"
     assert "/api/realtime/channel-probe" in s
     assert re.search(r"api DELETE \"/api/realtime/channel-probe/\$t\"", s), "해제 경로 부재"
     assert "trap 'log \"trap: 종료 전 해제\"; stop_all' EXIT" in s, "종료 시 무조건 해제(trap) 부재"
     assert "in_desired_now" in s, "후보 편입 즉시 해제 로직 부재"
-    assert "bypass_limit" not in s and "HIGH" not in s, "프로브 스크립트는 슬롯 우선순위를 건드리지 않는다"
+    assert "bypass_limit" not in code and "HIGH" not in code, "프로브 스크립트는 슬롯 우선순위를 건드리지 않는다"
 
 
 def test_cron_is_one_shot_self_removing():
