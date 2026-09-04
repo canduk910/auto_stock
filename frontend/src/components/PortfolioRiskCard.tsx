@@ -10,7 +10,8 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { getPortfolioRisk } from '../api/portfolio'
-import type { AccountGate, PortfolioRiskBucket } from '../types/portfolio'
+import type { AccountGate, GateLevel, PortfolioRiskBucket } from '../types/portfolio'
+import { formatKstHHMM } from '../utils/kst'
 
 const SECTOR_CONCENTRATION_WARNING_PCT = 40
 
@@ -18,16 +19,17 @@ function formatWon(value: number): string {
   return `${Math.round(value).toLocaleString('ko-KR')}원`
 }
 
-// 사이클 251 — 계좌 SOFT 게이트 평가 시각. 반드시 Intl.DateTimeFormat +
-// timeZone: 'Asia/Seoul' 로만 표기한다 (CLAUDE.md KST 규칙 — Date 인스턴스의
-// 로컬타임 getter 로 시/분을 직접 추출하는 것은 브라우저 TZ 에 따라 값이 어긋나
-// 금지된다).
-const KST_HHMM_FORMATTER = new Intl.DateTimeFormat('ko-KR', {
-  timeZone: 'Asia/Seoul',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false, // ko-KR 기본은 12시제("오후 01:05") — HH:mm 계약 + 타 컴포넌트 관례
-})
+/**
+ * 사이클 256 (리팩토링 카드 #10) — `AccountGate.level` 런타임 가드.
+ *
+ * 타입이 `GateLevel` 유니온이어도 API 응답은 컴파일 타임 보장 밖이다(백엔드가
+ * 미지 값을 보낼 가능성). 미지 값은 이 가드가 걸러 아래 배지 로직이 알려진 4
+ * 레벨과 정확히 같은 방식으로만 분기하게 한다 — 걸러진 값은 어떤 분기에도 걸리지
+ * 않아 기존 `else` 분기("정상" 배지)와 동일하게 처리된다.
+ */
+export function isKnownLevel(value: unknown): value is GateLevel {
+  return value === 'ok' || value === 'warn' || value === 'block' || value === 'error'
+}
 
 export default function PortfolioRiskCard() {
   const { data, isLoading, isError } = useQuery({
@@ -219,9 +221,10 @@ function AccountGateBlock({ gate }: AccountGateBlockProps) {
     )
   }
 
+  const level = isKnownLevel(gate.level) ? gate.level : undefined
   const isBlocked = gate.effective_gated
-  const isWarn = !isBlocked && gate.level === 'warn'
-  const isError = gate.level === 'error'
+  const isWarn = !isBlocked && level === 'warn'
+  const isError = level === 'error'
   const isStale = gate.stale
 
   let badgeText = '정상'
@@ -239,9 +242,7 @@ function AccountGateBlock({ gate }: AccountGateBlockProps) {
       ? '—'
       : `${gate.open_risk_pct.toFixed(2)}%`
 
-  const evaluatedDisplay = gate.evaluated_at
-    ? KST_HHMM_FORMATTER.format(new Date(gate.evaluated_at))
-    : '—'
+  const evaluatedDisplay = formatKstHHMM(gate.evaluated_at)
 
   const ageMinutes =
     gate.age_secs === null || gate.age_secs === undefined ? null : Math.floor(gate.age_secs / 60)
@@ -250,7 +251,7 @@ function AccountGateBlock({ gate }: AccountGateBlockProps) {
   // 차단이었지만 신선도가 지나 fail-open 으로 풀렸다"는 사실을 툴팁으로 설명한다
   // (cycle239 R1 — 이 상태에서 배지가 "차단 중"으로 보이면 실제와 반대로 읽힌다).
   const freezeTitle =
-    isStale && gate.level === 'block' && !isBlocked
+    isStale && level === 'block' && !isBlocked
       ? 'block 판정이 stale 로 fail-open 되었습니다 (마지막 평가가 오래되어 매수 차단이 해제된 상태)'
       : undefined
 
