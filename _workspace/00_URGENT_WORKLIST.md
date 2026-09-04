@@ -165,7 +165,7 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 
 ---
 
-## 🔐 cycle249 · 일일 로그 분석 이관 1단계 — 리포터 스코프 + 번들/외부 API (2026-09-04 구현 완료 · 커밋 대기)
+## 🔐 cycle249 · 일일 로그 분석 이관 1단계 — 리포터 스코프 + 번들/외부 API (2026-09-05 00:29 배포 완료 2f76490 · W1/W2 종결)
 
 20:10 OpenAI 일일 로그 분석을 **Claude Code 클라우드 루틴**(매일 20:20 KST)으로 이관하는
 1단계. `authorize()` 에 리포터 스코프 판정(GET/HEAD 전체 + `POST /api/log-reports/{date}/external`
@@ -174,12 +174,14 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 `generate_daily_log_report` 행위 byte 동일(신규 회귀 107 + 기존 47 전부 그린). 상세는
 `docs/HARNESS_CHANGELOG.md` 2026-09-04 cycle249 행.
 
-### 후속 2건 (배포 후 이 문서에서 처리)
+### 후속 처리 현황 (2026-09-05 야간 자율 작업)
 
 | # | 항목 | 비고 |
 |---|---|---|
-| **W1** | **20:20 KST 클라우드 루틴 생성** — 스케줄(cron) + 자동매매 프로젝트 env + 시크릿 = `reporter` Basic 사용자 비밀번호(htpasswd 신규 등록 필요, `secrets/.htpasswd` 는 git 밖) + `GET /api/log-reports/bundle` 로 당일 번들 수집 → 분석 → `POST /api/log-reports/{date}/external` 로 결과 저장 → Notion 에도 출력(사용자 요청) |
-| **W2** | **프론트 `DailyReportTab` 에 `ext_*` 표시** — 현재는 API·DB 만 있고 UI 가 `ext_provider`/`ext_summary`/`ext_findings`/`ext_report_md` 를 노출하지 않는다(`GET /api/log-reports/{date}` 는 `SELECT *` 라 이미 응답에 포함되지만 UI 미소비). 병행 1~2주 관찰 후 OpenAI 경로 off 스위치(`generate_daily_log_report` 호출부·20:10 task) 도입 여부 결정 |
+| **W1** | ✅ **완료** — 클라우드 루틴 `trig_01E6XNiNTxaLWNn7jeTXR9qZ` "auto_stock 일일 운영 리포트 (20:20 KST)"(cron `20 11 * * 1-5` UTC, env 자동매매, `claude-fable-5-1`, 커넥터 Notion 만). 자격 = 환경 변수 `REPORTER_BASIC_PASSWORD`(Basic 사용자 `reporter`, htpasswd 는 환경 변수 값 기준으로 09-05 00:41 재생성), 네트워크 = Custom 허용 도메인 `ec2-3-38-228-74.ap-northeast-2.compute.amazonaws.com`. 산출 = `POST /api/log-reports/{date}/external` + Notion 상위 페이지 https://app.notion.com/p/3d1438fa0d268118872bfe83f71fb240 . 수동 백필 = Run now 에 `date=YYYY-MM-DD`. 스모크 1차(00:31) 는 htpasswd 불일치 401 로 실패(루틴이 실패 페이지·푸시 알림 생성 = 설계대로), 2차(00:42) 진행 결과는 아침 리포트 참조 |
+| **W2** | ✅ **완료** — 25b6951(frontend 전용): `DailyReportTab` 에 "Claude 분석" 블록(ext_summary·ext_findings 정렬·ext_report_md 접이식 원문)·목록 "Claude" 배지, ext 부재 시 ReportCard DOM 파리티, ext_findings 정규화 + ReportCardBoundary. vitest 479 PASS. 병행 1~2주 관찰 후 OpenAI 경로 off 스위치 도입 여부 결정(→ W4) |
+| **W3** | ✅ **생성** — 주간 파라미터 자문 루틴 `trig_01H1TtfhP52CXKuyxwG2KnBW` "auto_stock 주간 파라미터 자문 (화 20:30 KST)"(cron `30 11 * * 2`, 첫 실행 09-08 화 20:32). 프롬프트 = `advisor_prompt_review_20260903.md` §F v2 원칙(목적함수·절대 금지 키·사람 결정·표본 N=10·전략당 최대 3키) 이식, 산출 = PR `_workspace/domain_consult/weekly_advice_YYYY-MM-DD.md`(브랜치 `claude/weekly-advice-*`, 자동 적용 없음) + Notion 상위 https://app.notion.com/p/3d1438fa0d2681ae9502c26d1a2c4ebe . 첫 산출물 검토 후 프롬프트 §4/§5(봉인 키·결정 로그)를 코드 정본(`advisor_policy.py`, 사이클 A)으로 옮길지 결정 |
+| **W4** | ⏳ OpenAI 경로 처분 — 20:00 자문(`recommendation_engine`)·20:10 분석(`generate_daily_log_report`)은 병행 비교 기간(~09-19) 동안 유지. 이후 `system_config` 토글로 off(코드 사이클 필요) |
 
 배포 전제(cycle243 규약 승계) = `.env` 에 `API_REPORTER_KEY` 추가는 backend 를 재생성한다
 (Phase 2 창, 15:30 이후) + `secrets/.htpasswd` 에 `reporter` 사용자 추가는 호스트 작업(git 밖).
