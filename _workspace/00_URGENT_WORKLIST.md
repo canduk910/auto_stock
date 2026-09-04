@@ -169,7 +169,7 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 
 | 항목 | 결정 | 처리 |
 |---|---|---|
-| D8 채널 프로브 | 진행 | **EC2 cron 1회성 자동 실행** 월 09-07 09:30 — `tools/ops/channel_probe.sh`(후보 순차 POST → 5분×3 상태 → 전부 DELETE, `in_desired_now` 즉시 해제, 자기 제거). 결과 = `~/auto_stock/logs/channel_probe_20260907.log` + `[krx_channel_probe]` 시스템 로그 → 20:20 일일 루틴이 읽음. 판정 후 B(채널 리졸버) 착수 여부 결정 |
+| D8 채널 프로브 | 진행 | ✅ **EC2 cron 등록 완료(09-05 06:57)** `30 0 7 9 *` = 월 09-07 **00:30 UTC = 09:30 KST**(호스트 crontab 은 UTC, 실측 정정) — `tools/ops/channel_probe.sh`(후보 순차 POST → 5분×3 상태 → 전부 DELETE, `in_desired_now` 즉시 해제, 자기 제거). 결과 = `~/auto_stock/logs/channel_probe_20260907.log` + `[krx_channel_probe]` 시스템 로그 → 20:20 일일 루틴이 읽음. 판정 후 B(채널 리졸버) 착수 여부 결정 |
 | D3 터틀 1주 폴백 ρ 노출(F-9) | 자문 | ✅ 자문 완료 `_workspace/domain_consult/cycle254_turtle_fallback_rho_exposure.md` — **권고 B = `min` 합성**(K_ρ 2.5 유지, `_apply_ratio_notional_cap` 의 `if governs: return` 조기탈출만 좁힘, `probe_error` fail-open 존치). 실측: 붉어지는 테스트 1건(`test_f245_7b`, 결정 ⑦ 재확인 단언), cycle242 97/0 무손상, 격자 1,728 조합 차이 122건 전부 1주 폴백 랏·전부 축소·증가 0, cycle242 실측 11랏 변경 0. **선결 = 월 09-07 `[ratio_cap_config]` donchian·kojiro 행이 `cap=on` 이면 F-9 는 이미 닫혀 변경 불필요.** 매매 행위 코드 변경이라 **사용자 결정 후 착수**(사이클 254 후보, 월요일 판독 뒤) |
 | D4 `_bought_today` 선기록(F-10) | 월요일 별도 작업 | 명세 초안 `_workspace/specs/cycle_next_D4_bought_today_after_fill.md` — 권고 A(주문 접수 훅), `order_engine.py` 1곳 8영역 승인 필요 |
 | D5 TLS | `auto.dkstock.cloud` | cycle255 준비(ACME location + TLS 템플릿·compose 오버레이·`tools/ops/tls_enable.sh`). **사용자 할 일 = DNS A 레코드 `auto.dkstock.cloud → 3.38.228.74` 등록** → 그 뒤 스크립트로 발급·전환 → 루틴 BASE·허용 도메인 갱신 |
