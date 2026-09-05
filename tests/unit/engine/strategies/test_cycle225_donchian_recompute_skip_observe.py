@@ -108,6 +108,7 @@ import pytest
 from freezegun import freeze_time
 
 import src.engine.strategies.donchian_swing as _mod
+from src.engine.observer_trace import trace_observer_failure
 from src.engine.strategies.donchian_swing import DonchianSwingStrategy
 from src.engine.strategy_base import Position, Signal, StrategyConfig
 
@@ -996,9 +997,13 @@ def test_j3_failed_cap_key_does_not_collide_with_normal_keys(caplog):
         try:
             raise RuntimeError("인위적")
         except RuntimeError:
-            s._trace_observer_failure(
+            # 사이클 258 카드 #5 — 메서드 `s._trace_observer_failure`(4인자, day_attr
+            # 포함)가 모듈 함수 `trace_observer_failure`(3인자, day 는 KstDailyEmitCap
+            # 내부로 흡수)로 승격됐다. donchian 자신의 로거를 명시해 캡슐화 스코프
+            # (`caplog.at_level(..., logger=_LOGGER)`)와의 호환을 보존한다.
+            trace_observer_failure(
                 _RSKIP_FAILED, "192820", s._breakout_high_rederive_skip_logged,
-                "_breakout_high_rederive_skip_day",
+                dest_logger=_mod.logger,
             )
         s._emit_breakout_high_rederive_skip("192820", pos, "insufficient_prior", 5, 21)
         s._emit_breakout_high_rederive_skip("192820", pos, "zero_high", 25, 21)
@@ -1007,17 +1012,46 @@ def test_j3_failed_cap_key_does_not_collide_with_normal_keys(caplog):
     assert len(_lines(caplog, _RSKIP)) == 2, "실패 흔적 키가 정상 관측 키를 삼켰다"
 
 
+class _DoubleFaultLogger:
+    """사이클 258 카드 #5 — `info`(1차 폭발) 와 `warning`(흔적의 2차 폭발) 을 각각
+    독립적으로 터뜨리는 대역.
+
+    옛 `_trace_observer_failure` 메서드의 WARNING 서식(`"...ticker=%s..."`)은
+    `"ticker="` 리터럴을 포맷 문자열 자체에 담고 있어 `_PoisonLogger` 하나로
+    1차·2차가 동시에 터졌다. 모듈 함수 `trace_observer_failure` 의 WARNING 은
+    `"%s observer_failed key=%s"` — marker/key 는 **인자**로 전달되므로
+    `_PoisonLogger._maybe_boom` 이 보는 raw 포맷 문자열에는 안 실린다(구조가
+    달라졌을 뿐, 계약은 동일 — 이 테스트는 그 계약을 검증한다). 그래서 `warning`
+    은 내용 무관 무조건 폭발시켜 "흔적 자신도 실패할 수 있다" 시나리오를 재현한다.
+    """
+
+    def __init__(self, real):
+        self._real = real
+
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
+    def info(self, msg, *a, **k):
+        if "ticker=" in str(msg):
+            raise RuntimeError("관측 로그 폭발 (인위적): ticker=")
+        return self._real.info(msg, *a, **k)
+
+    def warning(self, msg, *a, **k):
+        raise RuntimeError("관측 로그 폭발 (인위적): warning")
+
+
 async def test_j3_nested_guard_swallows_failure_of_the_trace_itself(caplog, monkeypatch):
     """**가장 안쪽은 어떤 경우에도 조용히 통과** — 흔적 로그가 또 터져도 전파 금지.
 
     흔적 로그는 이미 `except` 안이다. 여기서 2차 예외가 새면 관측이 매매 경로
     (`recompute_held_atr` 루프)를 죽여 뒤 종목의 복구까지 유실된다.
-    `"ticker="` 로 poison 하면 emitter 의 `info` 와 흔적의 `warning` 이 **둘 다** 터진다.
+    `info`(1차, `[held_recompute_skip]` 발화 시도) 와 `warning`(2차, 흔적 자신의
+    WARNING 발화 시도) 을 각각 폭발시켜 **둘 다** 조용히 흡수되는지 본다.
     """
     s = _mk()
     _hold(s, "192820", D(2026, 8, 24))                        # A 경로 → info 폭발
     _hold(s, "403870", D(2026, 8, 21), buy_price=45_000)      # 뒤 종목
-    monkeypatch.setattr(_mod, "logger", _PoisonLogger(_mod.logger, "ticker="))
+    monkeypatch.setattr(_mod, "logger", _DoubleFaultLogger(_mod.logger))
 
     with caplog.at_level(logging.DEBUG, logger=_LOGGER), \
             freeze_time("2026-08-24 16:03:52+09:00"), \

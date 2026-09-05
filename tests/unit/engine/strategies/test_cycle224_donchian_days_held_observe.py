@@ -409,7 +409,10 @@ def test_ob_11_observe_cap_independent_of_fallback_cap(caplog):
     s = _mk(n_days=2)
     _cache(s, [])                                # 전면 폴백
     _arm(s, buy_date=D(2026, 8, 21))
-    s._days_held_fallback_day = _dt.date(2026, 8, 24).isoformat()
+    # 사이클 258(C258-T8) — 옛 `s._days_held_fallback_day = <오늘>` 선세팅은 필드가
+    # `KstDailyEmitCap` 안으로 흡수돼 죽은 속성 대입(no-op)이 됐다. 선점이 첫
+    # `should_emit` 의 날짜 프라이밍에 지워지지 않는 성질은 K-13 계약
+    # (`test_cycle258_kst_emit_cap.py`)이 대신 보장한다.
     s._days_held_fallback_logged.mark_emitted("005930")   # 폴백 cap 선점
 
     s.check_exit_signal("005930", 9_800, 9_900)

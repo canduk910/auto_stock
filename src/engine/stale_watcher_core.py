@@ -38,7 +38,8 @@ from src.engine.stale_diagnostics import (
 # cycle252 — 무송출(no_feed) 종목 레지스트리. 모듈-레벨 정적 import (D-1/D-2 류
 # 동적 조회 seam 이 아니다 — 그 계열 출현 수 불변, AST G-252-2).
 from src.engine import no_feed_registry
-from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.daily_emit_cap import KstDailyEmitCap
+from src.engine.observer_trace import trace_observer_failure
 
 logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (caplog 호환)
 
@@ -89,11 +90,10 @@ def flush_stale_watcher_collector() -> None:
 
 
 # ── cycle252 — [no_feed_held] 1회/일 cap (HIGH ∩ no_feed 관측) ─────────────────
-# 날짜 키 자기 리셋(`_reset_daily_state` 훅 미의존 — 이 파일은 scheduler.py 무접촉
-# 규약이라 scheduler 의 정산 훅에 배선할 수 없다. strategy_base.py `_budget_clamp_day`
-# 등 기존 모듈 전역 self-reset 선례 답습).
-_no_feed_held_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-_no_feed_held_day: str = ""
+# 날짜 키 자기 리셋 — `KstDailyEmitCap`(사이클 258 카드 #4)이 내부에서 KST 롤오버를
+# 자체 처리한다(`_reset_daily_state` 훅 미의존 — 이 파일은 scheduler.py 무접촉
+# 규약이라 scheduler 의 정산 훅에 배선할 수 없었던 사정은 그대로다).
+_no_feed_held_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 _NO_FEED_HELD_KEY = "no_feed_held"
 
 
@@ -108,29 +108,23 @@ def _maybe_emit_no_feed_held(tickers: set, now: datetime) -> None:
     예외 흡수 · 행위는 cap 밖" 계약). 호출부는 `if not stale_tickers: return` 과
     stale 루프 **앞**이라, 여기서 던지면 그 사이클의 HIGH 재등록까지 통째로 빠진다
     (`_stale_watcher_loop` 이 흡수해 프로세스는 살지만 결함 지속 시 120s 마다 반복).
-    흔적은 debug 스택만 — `logger.warning` 자체가 깨진 상황이라 WARNING 승격은 무의미.
-    """
-    global _no_feed_held_day
-    try:
-        today = now.date().isoformat()
-        if _no_feed_held_day != today:
-            _no_feed_held_day = today
-            _no_feed_held_logged.reset_daily()
 
-        if not _no_feed_held_logged.should_emit(_NO_FEED_HELD_KEY):
+    사이클 258 — 이중 try(자기 실패 debug 흔적을 또 try 로 감싸던 것)를
+    `observer_trace.trace_observer_failure` 단일 호출로 흡수한다(cap=None —
+    이 사이트는 폭주 차단 cap 이 없던 자리이므로 WARNING 승격 없이 debug
+    스택만 남긴다, 기존 계약 그대로).
+    """
+    try:
+        if not _no_feed_held_logged.should_emit(_NO_FEED_HELD_KEY, now=now):
             return
         logger.warning(
             "[no_feed_held] tickers=%s — WS 프레임 0(KRX 단독, H0UNCNT0 무송출). "
             "손절 평가는 REST 폴(donchian/kojiro 60s 09:05~15:20)만. tick 전략 보유면 사각",
             sorted(tickers),
         )
-        _no_feed_held_logged.mark_emitted(_NO_FEED_HELD_KEY)
+        _no_feed_held_logged.mark_emitted(_NO_FEED_HELD_KEY, now=now)
     except Exception:
-        # 가장 안쪽은 어떤 경우에도 조용히 통과한다 (cycle237 `_trace_observer_failure`).
-        try:
-            logger.debug("[no_feed_held] emit 실패 — 관측 침묵, 행위 무관", exc_info=True)
-        except Exception:
-            pass
+        trace_observer_failure("[no_feed_held_emit_failed]", _NO_FEED_HELD_KEY, None)
 
 
 # ── A3 2 함수 — K stale watcher 핵심 (사이클 63 Phase 2-A3, 2026-06-05) ────────────

@@ -20,7 +20,9 @@ cycle233 SOFT Σ상한 **활성화 게이트(AND)** 의 한 축이 "장중 `age_
 - T2: `get_gate_state` 예외 → 키 **미부착** + 나머지 스냅샷 온전 + 예외 전파 0.
       (관측 부착 실패가 리포트 전체를 죽이면 안 된다 — 사이클 88 G-REJECT 동형)
 - T3: `compute_over_cap_positions` 예외와 **독립**(두 try 블록이 별개).
-- T4: **무발화** — `is_soft_gated()` 호출 0회 ∧ `_emit_cap`/`_emit_day` 불변.
+- T4: **무발화** — `is_soft_gated()` 호출 0회 ∧ `_emit_cap` 불변(사이클 258 —
+      `_emit_day` 는 `KstDailyEmitCap` 내부로 흡수돼 소멸, `_emit_cap._emitted`
+      비교로 동일한 의도를 검증한다).
       `is_soft_gated()` 는 stale 시 `gate_stale` cap 을 소비하는 **쓰기 경로**다.
       리포트 빌더가 그걸 부르면 그날 장중 진짜 hang 이 났을 때 WARNING 이
       무음이 된다(cycle233 F1 / cycle239 R1 이 이미 한 번 고친 결함의 재현).
@@ -255,14 +257,14 @@ async def test_t4b_snapshot_when_gate_stale_then_emit_cap_untouched(snapshot_dep
     """실물 접근자로 stale 상태를 만들어 cap 소비 여부를 직접 관측한다.
 
     `_gate_active=True` ∧ `_evaluated_mono=None` → `is_soft_gated()` 를 부르면
-    `_emit_stale_release` 가 `gate_stale` 키를 소비하고 `_emit_day` 를 오늘로
-    세운다. 빌더 호출 후에도 둘 다 초기값이면 그 경로를 안 밟은 것이다.
+    `_emit_stale_release` 가 `gate_stale` 키를 소비한다. 빌더 호출 후에도
+    비어 있으면 그 경로를 안 밟은 것이다(사이클 258 — 날짜 필드는
+    `KstDailyEmitCap` 내부로 흡수돼 `_emit_cap._emitted` 비교만으로 충분하다).
     """
     arw._gate_active = True
     arw._evaluated_mono = None
     before_emitted = set(arw._emit_cap._emitted)
-    before_day = arw._emit_day
-    assert before_emitted == set() and before_day == ""
+    assert before_emitted == set()
 
     snapshot = await lae._build_portfolio_risk_snapshot()
 
@@ -271,7 +273,6 @@ async def test_t4b_snapshot_when_gate_stale_then_emit_cap_untouched(snapshot_dep
         f"`_emit_cap` 이 소비됐다 ({sorted(arw._emit_cap._emitted)}) — 관측 read 경로가 "
         "쓰기 경로(`is_soft_gated`)를 탔다"
     )
-    assert arw._emit_day == before_day, "`_emit_day` 가 갱신됐다 — cap 경로 진입 흔적"
     # stale 이라도 `level` 은 마지막 평가값 보존 (동결 서명 — cycle239 계약)
     if "account_gate" in snapshot:
         assert snapshot["account_gate"]["stale"] is True

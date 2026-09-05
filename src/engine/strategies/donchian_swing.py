@@ -19,15 +19,11 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime, time, timezone, timedelta
 
-from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.daily_emit_cap import KstDailyEmitCap
+from src.engine.observer_trace import trace_observer_failure
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
-
-# 사이클 225 J-3 (2026-08-24) — 관측기 **자기 실패** 흔적의 cap 키 접미사.
-# 정상 관측 키(`ticker` / `ticker|reason`)와 절대 충돌하지 않아야 한다 — 충돌하면
-# 실패 1건이 그 날의 정상 관측을 통째로 침묵시킨다(J-2 와 같은 클래스의 결함).
-_OBSERVER_FAILED_KEY = "__observer_failed__"
 
 # 사이클 225 J-1 — `_rederive_breakout_high` 가 **호출조차 되지 않은** 사유들.
 # 2·3층(`insufficient_prior` / `zero_high`)은 재도출이 돌았으나 미복구인 반면,
@@ -165,32 +161,26 @@ class DonchianSwingStrategy(StrategyBase):
         # 사이클 223 F4 (2026-08-21) — 거래일 캐시 열화(weekday 폴백) 가시성 cap.
         # 폴백 사실이 **시간청산 발화 시에만** 로그에 남으면, 폴백 상태로 미발화가
         # 계속되는 동안 열화가 영원히 안 보인다(리뷰 F4). 발화 여부와 무관하게
-        # 1회/ticker/일 emit 한다. 날짜 키 자기리셋(`_days_held_fallback_day`) —
-        # `_reset_daily_state` 훅에 의존하지 않는다(선례 `StrategyBase._emit_budget_clamp`).
-        self._days_held_fallback_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._days_held_fallback_day: str = ""
+        # 1회/ticker/일 emit 한다. 날짜 키 자기 리셋 — `KstDailyEmitCap`(사이클 258
+        # 카드 #4)이 내부에서 KST 롤오버를 자체 처리한다(수동 `_x_day` 필드 소멸).
+        self._days_held_fallback_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
         # 사이클 224 (2026-08-22) — 시간청산 보유일 **상시 관측** cap.
         # 폴백 cap 과 **별개 필드**여야 한다: 같은 필드를 쓰면 폴백이 선 날 관측이
         # 침묵하고(그 반대도) 서로 다른 두 사실이 한 슬롯을 다툰다(OB-11).
-        # 날짜 키 자기리셋 — `_reset_daily_state` 훅 비의존(`_days_held_fallback_day` 선례).
-        self._days_held_observe_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._days_held_observe_day: str = ""
+        # 날짜 키 자기 리셋(KstDailyEmitCap 내장).
+        self._days_held_observe_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
         # 사이클 225 A (2026-08-24) — `recompute_held_atr` 게이트 skip 관측 cap.
         # 사이클 223/224 의 두 cap 과 **별개 필드**여야 한다: 같은 필드를 공유하면
-        # 한 사실이 다른 사실을 침묵시킨다(OB-11). 날짜 키 자기리셋 —
-        # `_reset_daily_state` 훅 비의존(`_days_held_fallback_day` 선례).
-        self._held_recompute_skip_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._held_recompute_skip_day: str = ""
+        # 한 사실이 다른 사실을 침묵시킨다(OB-11). 날짜 키 자기 리셋(KstDailyEmitCap 내장).
+        self._held_recompute_skip_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
         # 사이클 225 B (2026-08-24) — `_rederive_breakout_high` 조용한 실패 사유 cap.
         # 위 A cap 과도 별개 — A(재도출 미호출)와 B(재도출 호출됐으나 미복구)는
         # 서로 다른 사실이라 한 슬롯을 다투면 안 된다.
-        self._breakout_high_rederive_skip_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._breakout_high_rederive_skip_day: str = ""
+        self._breakout_high_rederive_skip_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
         # 사이클 226 D-1 (2026-08-25) — `prepare()` 돌파선 0 (데이터 품질 사고) cap.
         # 위 네 cap 과 **별개 필드** — 같은 슬롯을 공유하면 한 사실이 다른 사실을
         # 침묵시킨다(OB-11). 날짜 키 자기리셋(`_reset_daily_state` 훅 비의존).
-        self._zero_breakout_line_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._zero_breakout_line_day: str = ""
+        self._zero_breakout_line_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
         # 사이클 237 (2026-09-02) — 청산 계열 **로그 폭주** cap 2종.
         # 실측: `[donchian_breakeven_promote]` 가 08-31 11,453건 / 09-01 9,027건
         # (각각 그날 `system_logs` 의 36.9% / 51.0%, 전부 **단일 종목 192820**).
@@ -203,10 +193,8 @@ class DonchianSwingStrategy(StrategyBase):
         # ⚠️ 두 cap 모두 **로그에만** 건다 — 승격 계산과 `return Signal.STOP_LOSS` 는
         # cap 밖이다(cap 이 청산 재시도를 끊으면 관측 시정이 아니라 결함 주입).
         # 위 다섯 cap 과 **별개 필드**(OB-11 — 한 사실이 다른 사실을 침묵시키지 않는다).
-        self._breakeven_promote_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._breakeven_promote_day: str = ""
-        self._time_exit_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._time_exit_day: str = ""
+        self._breakeven_promote_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        self._time_exit_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 
     def _emit_breakeven_promote(self, ticker: str, high: int, buy_price: int,
                                 mult: float, atr: float, before: int, after: int) -> None:
@@ -228,10 +216,6 @@ class DonchianSwingStrategy(StrategyBase):
         - 메시지 서식은 사이클 220 원본과 **byte 동일**(운영 grep 연속성).
         """
         try:
-            today_key = datetime.now(KST).date().isoformat()
-            if self._breakeven_promote_day != today_key:
-                self._breakeven_promote_day = today_key
-                self._breakeven_promote_logged.reset_daily()
             if not self._breakeven_promote_logged.should_emit(ticker):
                 return
             logger.info(
@@ -241,12 +225,14 @@ class DonchianSwingStrategy(StrategyBase):
             )
             self._breakeven_promote_logged.mark_emitted(ticker)
         except Exception:
-            # 관측 실패가 승격·손절을 막지 않는다. 흔적은 사이클 225 J-3 헬퍼로 —
-            # `logger.debug` 단독은 `_DbLogHandler`(INFO 컷)를 못 넘어 `system_logs` 에
-            # 도달하지 않아 **도입 이전 무음과 구별되지 않는다**(적대 검증 C237-L2-1).
-            self._trace_observer_failure(
+            # 관측 실패가 승격·손절을 막지 않는다. 흔적은 `observer_trace`(사이클
+            # 258 카드 #5 — 옛 `_trace_observer_failure` 메서드를 승격한 모듈
+            # 함수)로 — `logger.debug` 단독은 `_DbLogHandler`(INFO 컷)를 못 넘어
+            # `system_logs` 에 도달하지 않아 **도입 이전 무음과 구별되지 않는다**
+            # (적대 검증 C237-L2-1).
+            trace_observer_failure(
                 "[donchian_breakeven_promote_failed]", ticker,
-                self._breakeven_promote_logged, "_breakeven_promote_day",
+                self._breakeven_promote_logged, dest_logger=logger,
             )
 
     def _emit_time_exit(self, ticker: str, days_held: int, n_days: int,
@@ -290,10 +276,6 @@ class DonchianSwingStrategy(StrategyBase):
         - 메시지 서식은 사이클 223 원본과 **byte 동일**.
         """
         try:
-            today_key = datetime.now(KST).date().isoformat()
-            if self._time_exit_day != today_key:
-                self._time_exit_day = today_key
-                self._time_exit_logged.reset_daily()
             if not self._time_exit_logged.should_emit(ticker):
                 return
             logger.info(
@@ -302,9 +284,9 @@ class DonchianSwingStrategy(StrategyBase):
             )
             self._time_exit_logged.mark_emitted(ticker)
         except Exception:
-            self._trace_observer_failure(
+            trace_observer_failure(
                 "[donchian_time_exit_log_failed]", ticker,
-                self._time_exit_logged, "_time_exit_day",
+                self._time_exit_logged, dest_logger=logger,
             )
 
     async def prepare(self) -> None:
@@ -1063,10 +1045,6 @@ class DonchianSwingStrategy(StrategyBase):
         어떤 실패도 흡수 — 관측이 청산 판정을 막지 않는다.
         """
         try:
-            today_key = datetime.now(KST).date().isoformat()
-            if self._days_held_fallback_day != today_key:
-                self._days_held_fallback_day = today_key
-                self._days_held_fallback_logged.reset_daily()
             if self._days_held_fallback_logged.should_emit(ticker):
                 self._days_held_fallback_logged.mark_emitted(ticker)
                 cache_max = max(self._trading_days) if self._trading_days else None
@@ -1078,8 +1056,15 @@ class DonchianSwingStrategy(StrategyBase):
                     ticker, self.strategy_id, days_held, n_days,
                     len(self._trading_days), cache_max, int(breakout_high or 0),
                 )
-        except Exception:  # pragma: no cover — 관측 실패가 청산을 막지 않는다
-            pass
+        except Exception:
+            # 관측 실패가 청산을 막지 않는다 — 단 **무흔적 흡수는 금지**(사이클 258
+            # C258-T3, 카드 #5 잔여 A 형태 시정). debug 스택 + WARNING 1회/ticker/일
+            # (`system_logs` 도달) — 조용히 삼키면 이 관측이 영구 침묵해도 사이클
+            # 223 이전의 무음과 구별되지 않는다(C237-L2-1). never-raise.
+            trace_observer_failure(
+                "[days_held_fallback_failed]", ticker,
+                self._days_held_fallback_logged, dest_logger=logger,
+            )
 
     def _emit_days_held_observation(self, ticker: str, pos, current_price: int) -> None:
         """`[days_held_observe]` 상시 관측 로그 — 1회/ticker/일 cap (사이클 224).
@@ -1127,6 +1112,9 @@ class DonchianSwingStrategy(StrategyBase):
         - 어떤 실패도 흡수 — 관측이 청산 판정을 막지 않는다. 단 ⚠️ F3 — **무흔적
           흡수는 금지**다. 조용히 삼키면 이 기능이 영구 침묵해도 사이클 224 이전의
           무음과 구별되지 않는다(`_turtle_buy_quantity` 의 debug 흔적 선례를 따른다).
+          사이클 258(C258-T3)부터 흔적은 `observer_trace.trace_observer_failure`
+          (debug 스택 + `[days_held_observe_failed] observer_failed key=` WARNING
+          1회/ticker/일) — debug 로거 자신이 죽어도 2차 예외가 새지 않는다.
 
         hot path 라 cap 조회(set)를 **먼저** 하고, 보유일 계산은 그 뒤에만 한다.
         `await`/DB/HTTP 는 없다.
@@ -1136,10 +1124,6 @@ class DonchianSwingStrategy(StrategyBase):
             if not buy_date:
                 return
             today = datetime.now(KST).date()
-            today_key = today.isoformat()
-            if self._days_held_observe_day != today_key:
-                self._days_held_observe_day = today_key
-                self._days_held_observe_logged.reset_daily()
             bh = int(self._breakout_high.get(ticker, 0) or 0)
             cap_key = f"{ticker}|{'armed' if bh > 0 else 'disarmed'}"
             if not self._days_held_observe_logged.should_emit(cap_key):
@@ -1160,66 +1144,14 @@ class DonchianSwingStrategy(StrategyBase):
         except Exception:
             # F3 — 흡수하되 흔적은 남긴다. 조용히 삼키면 이 관측이 영구 침묵해도
             # 사이클 224 이전의 무음과 구별되지 않는다.
-            logger.debug(
-                "[days_held_observe_failed] ticker=%s", ticker, exc_info=True,
+            # 사이클 258 C258-T3 — 무가드 `logger.debug`(카드 #5 B 형태)는 debug
+            # 자체가 죽으면 2차 예외가 `check_exit_signal` 밖으로 샜다(400/400
+            # RAISED 실측). `trace_observer_failure` 는 never-raise 이고 WARNING
+            # 1회/ticker/일 로 `system_logs` 에도 도달한다(C237-L2-1).
+            trace_observer_failure(
+                "[days_held_observe_failed]", ticker,
+                self._days_held_observe_logged, dest_logger=logger,
             )
-
-    def _trace_observer_failure(self, marker: str, ticker: str,
-                                cap: DailyEmitCap[str], day_attr: str) -> None:
-        """관측기 **자기 실패**의 흔적 — debug 스택 + WARNING 1행/ticker/일 (사이클 225 J-3).
-
-        ## 왜 debug 단독이면 안 되나
-
-        `logger.debug(..., exc_info=True)` 단독이면 `src/main.py` 의 `_DbLogHandler` 가
-        **INFO 이상만** 큐에 적재하므로 `system_logs` 에 도달하지 않는다. 20:10 일일 로그
-        리포트와 대시보드는 그 테이블을 읽으므로, emitter 가 항구적으로 깨져도 DB 기반
-        도구에서는 **도입 이전 무음과 구별되지 않는다** = 계약 §8 이 명시적으로 금지한
-        상태다. ⇒ 도달용 요약 1행을 WARNING 으로 올리고 스택트레이스는 debug 에 남긴다.
-
-        ## 폭주 차단
-
-        ⚠️ K-2 정정 — 한때 "스윙 폴(60s 주기)에서도 돈다" 고 적었으나 **거짓**이다.
-        `recompute_held_atr` 의 프로덕션 호출부는 `scheduler.py:2329` 하나뿐이고 그
-        함수(`_eager_refresh_stock_master_for_held_positions`)의 유일한 호출자는
-        `boot_manager.py:341` = **부팅 경로 전용**이다(60s 폴 본체
-        `_run_swing_rest_poll_once` 는 시세만 폴한다 — `_SWING_POLL_STRATEGIES`
-        상수를 공유할 뿐이다). 즉 실제 빈도는 부팅당 1회다.
-        그래도 cap 은 유지한다 — 장중 재배포로 하루 여러 번 부팅할 수 있고(2026-08-24
-        실측 2회), 관측기 자기실패가 종목 수만큼 반복되면 WARNING 이 곱해진다. 정상 관측과 **같은 cap 인스턴스**를 쓰되 키를
-        `ticker|__observer_failed__` 로 분리해 정상 키(`ticker` / `ticker|reason`)와
-        충돌시키지 않는다. 날짜 키 리셋도 여기서 한 번 더 시도한다 — 호출부가 정상
-        경로의 날짜 리셋 **전에** 터졌을 수 있고(예: 사유 판정 단계에서 폭발), 그러면
-        전날의 실패 키가 오늘의 WARNING 을 삼킨다.
-
-        ## ⚠️ 가장 안쪽은 어떤 경우에도 조용히 통과한다
-
-        이 메서드는 **이미 `except` 블록 안**에서 호출된다. 여기서 다시 던지면 2차 예외가
-        호출부의 except 를 뚫고 나가 관측이 매매 경로(`recompute_held_atr` 루프)를 죽인다.
-        날짜 리셋 · debug · WARNING 을 **각각** 자체 try 로 감싸고 실패는 전부 흡수한다.
-        """
-        try:
-            logger.debug("%s ticker=%s", marker, ticker, exc_info=True)
-        except Exception:
-            pass
-        try:
-            today_key = datetime.now(KST).date().isoformat()
-            if getattr(self, day_attr, "") != today_key:
-                setattr(self, day_attr, today_key)
-                cap.reset_daily()
-        except Exception:
-            pass
-        try:
-            key = f"{ticker}|{_OBSERVER_FAILED_KEY}"
-            if cap.should_emit(key):
-                cap.mark_emitted(key)
-                logger.warning(
-                    "%s ticker=%s strategy=%s"
-                    " note='관측기 내부 예외로 이 관측이 침묵한다 — 매매 행위와 무관,"
-                    " 스택트레이스는 동일 마커 debug 로그 참조'",
-                    marker, ticker, self.strategy_id,
-                )
-        except Exception:
-            pass
 
     def _emit_zero_breakout_line(self, ticker: str, prior_high: int,
                                  prev_close: int, period: int) -> None:
@@ -1251,10 +1183,6 @@ class DonchianSwingStrategy(StrategyBase):
         새면 관측기 결함이 일봉 파싱 결함으로 오독되므로, 여기서 전부 가둔다.
         """
         try:
-            today_key = datetime.now(KST).date().isoformat()
-            if self._zero_breakout_line_day != today_key:
-                self._zero_breakout_line_day = today_key
-                self._zero_breakout_line_logged.reset_daily()
             if not self._zero_breakout_line_logged.should_emit(ticker):
                 return
             self._zero_breakout_line_logged.mark_emitted(ticker)
@@ -1267,9 +1195,9 @@ class DonchianSwingStrategy(StrategyBase):
                 int(prior_high or 0), int(prev_close or 0), int(period),
             )
         except Exception:
-            self._trace_observer_failure(
+            trace_observer_failure(
                 "[donchian_zero_breakout_line_failed]", ticker,
-                self._zero_breakout_line_logged, "_zero_breakout_line_day",
+                self._zero_breakout_line_logged, dest_logger=logger,
             )
 
     def _emit_held_recompute_skip(self, ticker: str, pos, need_atr: bool,
@@ -1328,10 +1256,6 @@ class DonchianSwingStrategy(StrategyBase):
         """
         try:
             today = datetime.now(KST).date()
-            today_key = today.isoformat()
-            if self._held_recompute_skip_day != today_key:
-                self._held_recompute_skip_day = today_key
-                self._held_recompute_skip_logged.reset_daily()
             # K-1 (적대적 검증) — 무장 판정은 **멤버십이 아니라 값**이다.
             # 시간청산 게이트(`check_exit_signal`)가 `breakout_high > 0` 로 보고,
             # 같은 파일 `_emit_days_held_observation` 도 값으로 본다. 여기만 멤버십이면
@@ -1363,9 +1287,9 @@ class DonchianSwingStrategy(StrategyBase):
             # 흡수하되 흔적은 남긴다 (사이클 224 F3 + 사이클 225 J-3).
             # debug 단독은 `_DbLogHandler`(INFO 이상만 적재)를 통과하지 못해
             # `system_logs` 에 도달하지 않는다 ⇒ WARNING 1행/ticker/일 병행.
-            self._trace_observer_failure(
+            trace_observer_failure(
                 "[held_recompute_skip_failed]", ticker,
-                self._held_recompute_skip_logged, "_held_recompute_skip_day",
+                self._held_recompute_skip_logged, dest_logger=logger,
             )
 
     def _emit_breakout_high_rederive_not_called(self, ticker: str, pos,
@@ -1429,10 +1353,9 @@ class DonchianSwingStrategy(StrategyBase):
                 reason = "not_called"
             self._emit_breakout_high_rederive_skip(ticker, pos, reason)
         except Exception:
-            self._trace_observer_failure(
+            trace_observer_failure(
                 "[donchian_breakout_high_rederive_skip_failed]", ticker,
-                self._breakout_high_rederive_skip_logged,
-                "_breakout_high_rederive_skip_day",
+                self._breakout_high_rederive_skip_logged, dest_logger=logger,
             )
 
     def _emit_breakout_high_rederive_skip(self, ticker: str, pos, reason: str,
@@ -1479,10 +1402,6 @@ class DonchianSwingStrategy(StrategyBase):
         (사이클 225 J-3, `system_logs` 도달용).
         """
         try:
-            today_key = datetime.now(KST).date().isoformat()
-            if self._breakout_high_rederive_skip_day != today_key:
-                self._breakout_high_rederive_skip_day = today_key
-                self._breakout_high_rederive_skip_logged.reset_daily()
             cap_key = f"{ticker}|{reason}"
             if not self._breakout_high_rederive_skip_logged.should_emit(cap_key):
                 return
@@ -1509,10 +1428,9 @@ class DonchianSwingStrategy(StrategyBase):
             )
         except Exception:
             # 흡수하되 흔적은 남긴다 — 기존 '재도출 실패' 로그로 새면 원인이 오독된다.
-            self._trace_observer_failure(
+            trace_observer_failure(
                 "[donchian_breakout_high_rederive_skip_failed]", ticker,
-                self._breakout_high_rederive_skip_logged,
-                "_breakout_high_rederive_skip_day",
+                self._breakout_high_rederive_skip_logged, dest_logger=logger,
             )
 
     def _rederive_breakout_high(self, ticker: str, pos, candles: list, donchian_period: int) -> None:

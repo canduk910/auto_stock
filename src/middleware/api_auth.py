@@ -321,7 +321,7 @@ def _client_ip(scope: dict) -> tuple[str, str]:
     return "-", "none"
 
 
-def _trace_observer_failure(what: str) -> None:
+def _trace_auth_observer_failure(what: str) -> None:
     """관측기 자기 실패의 흔적. 무흔적 `pass` 는 도입 이전 무음과 구별할 수 없다."""
     try:
         logger.debug("[api_auth_observer_failed] %s", what, exc_info=True)
@@ -361,7 +361,7 @@ def _log_reject(scope: dict, reason: str) -> None:
             count,
         )
     except Exception:
-        _trace_observer_failure("reject_log")
+        _trace_auth_observer_failure("reject_log")
 
 
 def _log_internal_error(exc: BaseException | None) -> None:
@@ -384,7 +384,7 @@ def _log_internal_error(exc: BaseException | None) -> None:
             count,
         )
     except Exception:
-        _trace_observer_failure("internal_error_log")
+        _trace_auth_observer_failure("internal_error_log")
 
 
 def log_startup_state() -> None:

@@ -96,7 +96,6 @@ def _patch_registry(monkeypatch, no_feed):
 
 def _reset_held_cap(core):
     core._no_feed_held_logged.reset_daily()
-    core._no_feed_held_day = ""
 
 
 # ===========================================================================
@@ -156,7 +155,7 @@ def test_t2_no_feed_held_peek_log_mark_order(monkeypatch, caplog):
     except RuntimeError:
         pass
     assert calls["n"] == 1, "로그 시도 1회"
-    assert core._no_feed_held_logged.should_emit(core._NO_FEED_HELD_KEY) is True, (
+    assert core._no_feed_held_logged.should_emit(core._NO_FEED_HELD_KEY, now=now) is True, (
         "로그 실패 시 mark 되면 안 된다 (peek→로그→mark) — mark-before-log 회귀"
     )
 
@@ -167,7 +166,9 @@ def test_t2_no_feed_held_peek_log_mark_order(monkeypatch, caplog):
     # 캡처된다 — 관측 계약은 WARNING 행 1회이므로 레벨로 거른다(cycle252 CI 핫픽스).
     emitted = [r for r in caplog.records if _HELD in r.getMessage() and r.levelno >= logging.WARNING]
     assert len(emitted) == 1, f"복구 후 같은 날 WARNING 1회 발화 — actual={[r.getMessage()[:60] for r in emitted]}"
-    assert core._no_feed_held_logged.should_emit(core._NO_FEED_HELD_KEY) is False, "성공 후 mark"
+    assert core._no_feed_held_logged.should_emit(core._NO_FEED_HELD_KEY, now=now) is False, (
+        "성공 후 mark"
+    )
 
 
 # ===========================================================================
@@ -285,11 +286,16 @@ def test_t4_no_feed_held_helper_absorbs_its_own_exception(monkeypatch, caplog):
     core._maybe_emit_no_feed_held({"003490"}, now)  # raise 하면 즉시 FAIL
 
     assert calls["n"] == 1, "로그 시도 1회"
-    assert core._no_feed_held_logged.should_emit(core._NO_FEED_HELD_KEY) is True, (
+    assert core._no_feed_held_logged.should_emit(core._NO_FEED_HELD_KEY, now=now) is True, (
         "실패한 emit 은 mark 되지 않는다 (peek→로그→mark)"
     )
+    # 사이클 258 카드 #5 — 흡수 흔적이 `observer_trace.trace_observer_failure` 단일
+    # 정책으로 수렴하며 정확한 한글 문구가 `"%s observer_failed key=%s"` 로
+    # 표준화됐다(4갈래 정책 통일이 이 리팩토링의 목적이므로 문구 자체는 byte 불변
+    # 대상이 아니다 — `_HELD`/`실패` 문구가 아니라 표준 마커+`observer_failed`로 검사).
     trace = [r for r in caplog.records
-             if r.levelno == logging.DEBUG and _HELD in r.getMessage() and "실패" in r.getMessage()]
+             if r.levelno == logging.DEBUG and "observer_failed" in r.getMessage()
+             and core._NO_FEED_HELD_KEY in r.getMessage()]
     assert len(trace) == 1, (
         f"흡수 흔적 debug 1행 — actual={[r.getMessage() for r in caplog.records]}"
     )

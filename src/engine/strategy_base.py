@@ -12,7 +12,8 @@ from datetime import date, datetime, timedelta, timezone
 from enum import Enum
 from typing import ClassVar
 
-from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.daily_emit_cap import KstDailyEmitCap
+from src.engine.observer_trace import trace_observer_failure
 from src.engine.turtle_sizing import compute_unit_qty
 
 logger = logging.getLogger(__name__)
@@ -249,26 +250,22 @@ class StrategyBase(ABC):
         # 09:30 자동 snapshot 이 본 리스트를 DB `strategy_funnel_snapshots` 단계별 row 로 변환.
         self._funnel_steps: list[dict] = []
         # 예산 이중제한 관측 — `[budget_clamp]` 1회/(ticker,전략)/일 cap.
-        # 날짜 키 자기 리셋(`_budget_clamp_day`) — `_reset_daily_state` 훅에 의존하지 않는다
-        # (서브클래스 override 가 super() 를 호출하지 않아 리셋이 누락될 수 있음).
-        self._budget_clamp_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._budget_clamp_day: str = ""
+        # 날짜 키 자기 리셋 — `KstDailyEmitCap`(사이클 258 카드 #4)가 내부에서
+        # KST 날짜 롤오버를 자체 처리한다(`_reset_daily_state` 훅 미의존 — 서브클래스
+        # override 가 super() 를 호출하지 않아 리셋이 누락될 수 있었던 문제도 함께 소멸).
+        self._budget_clamp_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
         # cycle233 — 계좌 SOFT 게이트 스킵 관측(1회/전략/일) + 1주 폴백 notional
-        # 초과 관측(1회/ticker/일). 날짜 키 자기 리셋 — `_reset_daily_state` 훅 미의존.
-        self._account_gate_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._account_gate_day: str = ""
-        self._oversized_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._oversized_day: str = ""
+        # 초과 관측(1회/ticker/일). 날짜 키 자기 리셋(KstDailyEmitCap 내장).
+        self._account_gate_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
+        self._oversized_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
         # cycle242 — 랏 유닛 상한 관측 cap (복합 키: "cap|{ticker}" / "skip|{ticker}|{reason}"
-        # / "cfg"). 날짜 키 자기 리셋 — `_reset_daily_state` 훅에 의존하지 않는다.
-        self._lot_cap_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._lot_cap_day: str = ""
+        # / "cfg"). 날짜 키 자기 리셋(KstDailyEmitCap 내장).
+        self._lot_cap_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
         # cycle245 — ρ축 랏 명목 상한 관측 cap (복합 키: "blk|{ticker}" /
         # "skip|{ticker}|{reason}" / "cfg" / "clamp"). cycle242 `_lot_cap_logged` 와
         # **별개 인스턴스** — 한 사이클의 키 폭주·날짜 리셋이 다른 사이클 관측을
-        # 지우지 않게 한다(cycle236 "별개 cap 가드" 선례). 날짜 키 자기 리셋.
-        self._ratio_cap_logged: DailyEmitCap[str] = DailyEmitCap[str]()
-        self._ratio_cap_day: str = ""
+        # 지우지 않게 한다(cycle236 "별개 cap 가드" 선례). 날짜 키 자기 리셋(KstDailyEmitCap 내장).
+        self._ratio_cap_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
 
     @property
     def strategy_id(self) -> str:
@@ -704,10 +701,6 @@ class StrategyBase(ABC):
         영향을 주지 않는다(peek → 로그 → mark).
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._lot_cap_day != today:
-                self._lot_cap_day = today
-                self._lot_cap_logged.reset_daily()
             key = f"cap|{ticker or '-'}"
             if not self._lot_cap_logged.should_emit(key):
                 return
@@ -724,8 +717,10 @@ class StrategyBase(ABC):
                 req_qty, capped_qty, units_before, units_after, budget, risk_pct,
             )
             self._lot_cap_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[fallback_notional_capped_failed]", ticker or "-", self._lot_cap_logged,
+            )
 
     def _emit_fallback_cap_skipped(
         self, ticker: str | None, reason: str, final: int, price: int,
@@ -746,10 +741,6 @@ class StrategyBase(ABC):
         의 "채택 안 함" 계약과 정합 — 이 필드는 그 판단을 바꾸지 않는다).
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._lot_cap_day != today:
-                self._lot_cap_day = today
-                self._lot_cap_logged.reset_daily()
             key = f"skip|{ticker or '-'}|{reason}"
             if not self._lot_cap_logged.should_emit(key):
                 return
@@ -761,8 +752,10 @@ class StrategyBase(ABC):
                 atr_desc, units_desc,
             )
             self._lot_cap_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[fallback_cap_skipped_failed]", ticker or "-", self._lot_cap_logged,
+            )
 
     def _describe_lot_cap_diagnostics(
         self, ticker: str | None, final: int,
@@ -820,10 +813,6 @@ class StrategyBase(ABC):
         `[fallback_cap_config] cap=off` 부재/존재로 감지하기 위한 상시 표식.
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._lot_cap_day != today:
-                self._lot_cap_day = today
-                self._lot_cap_logged.reset_daily()
             key = "cfg"
             if not self._lot_cap_logged.should_emit(key):
                 return
@@ -835,8 +824,10 @@ class StrategyBase(ABC):
                 self.strategy_id, mode, cap_state, k, budget, risk_pct, atr_max,
             )
             self._lot_cap_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[fallback_cap_config_failed]", self.strategy_id, self._lot_cap_logged,
+            )
 
     def _emit_fallback_cap_clamped(self, raw: object, result: float) -> None:
         """`[fallback_cap_clamped]` — `max_lot_units` 가 실제로 클램프됐다. WARNING, 1회/전략/일.
@@ -848,10 +839,6 @@ class StrategyBase(ABC):
         `[fallback_cap_config] k=` 만으로는 구별 못 하던 사각을 메운다.
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._lot_cap_day != today:
-                self._lot_cap_day = today
-                self._lot_cap_logged.reset_daily()
             key = "clamp"
             if not self._lot_cap_logged.should_emit(key):
                 return
@@ -861,8 +848,10 @@ class StrategyBase(ABC):
                 self.strategy_id, raw, result,
             )
             self._lot_cap_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[fallback_cap_clamped_failed]", self.strategy_id, self._lot_cap_logged,
+            )
 
     def _emit_oversized_fallback(
         self, ticker: str | None, final_qty: int, current_price: int,
@@ -908,10 +897,6 @@ class StrategyBase(ABC):
             notional = final_qty * current_price
             if cap <= 0 or notional <= cap:
                 return
-            today = datetime.now(_KST).date().isoformat()
-            if self._oversized_day != today:
-                self._oversized_day = today
-                self._oversized_logged.reset_daily()
             key = ticker or "-"
             if self._oversized_logged.should_emit(key):
                 # peek → 로그 → mark (cycle226 D-3 — 로그 자기실패가 그날 관측을 지우지 않게)
@@ -932,8 +917,10 @@ class StrategyBase(ABC):
                     units_s,
                 )
                 self._oversized_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[oversized_fallback_failed]", ticker or "-", self._oversized_logged,
+            )
 
     # ──────────── cycle245 — ρ축 랏 명목 상한 (`max_lot_ratio_mult`) ────────────
 
@@ -1101,10 +1088,6 @@ class StrategyBase(ABC):
         같은 축에서 대조할 수 있다(R7 자기검증).
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._ratio_cap_day != today:
-                self._ratio_cap_day = today
-                self._ratio_cap_logged.reset_daily()
             key = f"blk|{ticker or '-'}"
             if not self._ratio_cap_logged.should_emit(key):
                 return
@@ -1118,8 +1101,10 @@ class StrategyBase(ABC):
                 req_qty, capped_qty, budget, pos_ratio,
             )
             self._ratio_cap_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[ratio_notional_blocked_failed]", ticker or "-", self._ratio_cap_logged,
+            )
 
     def _emit_ratio_cap_skipped(
         self, ticker: str | None, reason: str, final: int, price: int,
@@ -1134,10 +1119,6 @@ class StrategyBase(ABC):
         `[ratio_cap_config]` 가 이미 그 상태를 1행으로 기록하기 때문이다.
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._ratio_cap_day != today:
-                self._ratio_cap_day = today
-                self._ratio_cap_logged.reset_daily()
             key = f"skip|{ticker or '-'}|{reason}"
             if not self._ratio_cap_logged.should_emit(key):
                 return
@@ -1147,8 +1128,10 @@ class StrategyBase(ABC):
                 ticker or "-", self.strategy_id, reason, final, price,
             )
             self._ratio_cap_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[ratio_cap_skipped_failed]", ticker or "-", self._ratio_cap_logged,
+            )
 
     def _emit_ratio_cap_config(
         self, mode: str | None, k: float | None, budget: int, pos_ratio: float,
@@ -1174,10 +1157,6 @@ class StrategyBase(ABC):
         130,100원 넘는 종목을 못 산다"를 읽어야 한다(자문 §8.1).
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._ratio_cap_day != today:
-                self._ratio_cap_day = today
-                self._ratio_cap_logged.reset_daily()
             if k is None:
                 cap_state = "off"
             elif mode == "turtle":
@@ -1203,8 +1182,10 @@ class StrategyBase(ABC):
                 cap, cutoff,
             )
             self._ratio_cap_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[ratio_cap_config_failed]", self.strategy_id, self._ratio_cap_logged,
+            )
 
     def _emit_ratio_cap_clamped(self, raw: object, result: float) -> None:
         """`[ratio_cap_clamped]` — `max_lot_ratio_mult` 가 실제로 클램프됐다. WARNING, 1회/(전략, raw)/일.
@@ -1217,10 +1198,6 @@ class StrategyBase(ABC):
         범위밖 값이 무음 클램프돼 운영자가 현재 K 를 오판한다(cycle245 R1).
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._ratio_cap_day != today:
-                self._ratio_cap_day = today
-                self._ratio_cap_logged.reset_daily()
             # cycle245 R1 — `raw` 별 키. 단일 `clamp` 키면 같은 날 두 번째 범위밖
             # 값이 **무음 클램프**된다(09:30 `0.5` → 13:00 `25.0` 이면 로그엔 raw=0.5
             # 만 남아 운영자가 현재 K 를 2.50 으로 오판한다). 키 길이는 잘라
@@ -1234,8 +1211,10 @@ class StrategyBase(ABC):
                 self.strategy_id, raw, result,
             )
             self._ratio_cap_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[ratio_cap_clamped_failed]", self.strategy_id, self._ratio_cap_logged,
+            )
 
     def get_effective_stop_price(self, ticker: str) -> int | None:
         """포지션의 **현재 실효 손절선**(원) — 척도 병기용 read-only 추정기 (cycle233).
@@ -1262,10 +1241,6 @@ class StrategyBase(ABC):
             if not account_risk_watcher.is_soft_gated():
                 return False
             try:
-                today = datetime.now(_KST).date().isoformat()
-                if self._account_gate_day != today:
-                    self._account_gate_day = today
-                    self._account_gate_logged.reset_daily()
                 if self._account_gate_logged.should_emit(self.strategy_id):
                     # peek → 로그 → mark (cycle226 D-3 규약)
                     logger.info(
@@ -1275,7 +1250,9 @@ class StrategyBase(ABC):
                     )
                     self._account_gate_logged.mark_emitted(self.strategy_id)
             except Exception:
-                pass
+                trace_observer_failure(
+                    "[account_gate_skip_failed]", self.strategy_id, self._account_gate_logged,
+                )
             return True
         except Exception:
             # fail-open — 단 완전 무음은 금지(F8): debug 흔적만 남긴다
@@ -1296,10 +1273,6 @@ class StrategyBase(ABC):
         cycle226 D-3 / cycle233 F4 규약). 로그 자기실패가 그날 관측을 지우지 않게.
         """
         try:
-            today = datetime.now(_KST).date().isoformat()
-            if self._budget_clamp_day != today:
-                self._budget_clamp_day = today
-                self._budget_clamp_logged.reset_daily()
             key = ticker or "-"
             if self._budget_clamp_logged.should_emit(key):
                 logger.info(
@@ -1309,8 +1282,10 @@ class StrategyBase(ABC):
                     remaining, self.state.total_investment,
                 )
                 self._budget_clamp_logged.mark_emitted(key)
-        except Exception:  # pragma: no cover — 관측 실패가 매수를 막지 않는다
-            pass
+        except Exception:
+            trace_observer_failure(
+                "[budget_clamp_failed]", ticker or "-", self._budget_clamp_logged,
+            )
 
     # ──────────── 트레일링 기준점 복구 (H-1, 2026-08-06 · 단일 진실원) ────────────
 

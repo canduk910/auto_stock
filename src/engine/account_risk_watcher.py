@@ -114,7 +114,8 @@ from datetime import datetime
 from typing import Any, Optional
 
 from src.db._kst import KST
-from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.daily_emit_cap import KstDailyEmitCap
+from src.engine.observer_trace import trace_observer_failure
 
 # 운영 grep 연속성 — 감시자 로그는 scheduler 네임스페이스로 (stale_manager 선례)
 logger = logging.getLogger("src.engine.scheduler")
@@ -123,8 +124,7 @@ logger = logging.getLogger("src.engine.scheduler")
 _gate_active: bool = False
 _gate_state: dict = {"level": "ok", "reasons": [], "open_risk_pct": None,
                      "evaluated_at": None}
-_emit_cap: DailyEmitCap[str] = DailyEmitCap[str]()
-_emit_day: str = ""
+_emit_cap: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 
 # cycle239 — 마지막 평가의 monotonic 스탬프(성공·실패 공통). None = 미평가.
 _evaluated_mono: Optional[float] = None
@@ -244,7 +244,9 @@ def _emit_stale_release(age: Optional[float]) -> None:
         )
         _mark_emitted("gate_stale")
     except Exception:
-        pass
+        trace_observer_failure(
+            "[account_risk_gate_stale_failed]", "gate_stale", _emit_cap,
+        )
 
 
 def is_soft_gated() -> bool:
@@ -293,13 +295,12 @@ def get_gate_state() -> dict:
 
 def reset_state_for_test() -> None:
     """테스트 전용 — 모듈 상태 초기화."""
-    global _gate_active, _gate_state, _emit_cap, _emit_day, _evaluated_mono
+    global _gate_active, _gate_state, _emit_cap, _evaluated_mono
     global _eval_timeout_count_today, _eval_timeout_count_day
     _gate_active = False
     _gate_state = {"level": "ok", "reasons": [], "open_risk_pct": None,
                    "evaluated_at": None}
-    _emit_cap = DailyEmitCap[str]()
-    _emit_day = ""
+    _emit_cap = KstDailyEmitCap[str]()
     _evaluated_mono = None
     _eval_timeout_count_today = 0
     _eval_timeout_count_day = ""
@@ -330,18 +331,28 @@ def _peek_emit(key: str) -> bool:
     """1회/(key)/일 cap 의 **판정만** — mark 는 로그 성공 후 `_mark_emitted`.
 
     mark-before-log 는 로그 자기실패가 그날 관측을 지운다(cycle226 D-3 동형,
-    적대 검증 F4). 날짜 키 자기 리셋(`_reset_daily_state` 훅 미의존).
+    적대 검증 F4). 날짜 키 자기 리셋은 `KstDailyEmitCap`(사이클 258 카드 #4)이
+    내부에서 처리한다 — 이 함수는 더 이상 수동 `_emit_day` 비교를 하지 않는다.
+    `run_account_risk_watch_once`/`run_account_risk_watch_once_guarded` 의
+    호출부(`if _peek_emit(...): logger.warning(...); _mark_emitted(...)`)는
+    이 함수의 이름·시그니처가 그대로이므로 사이클258 무접촉이다(G-250-5 sha 핀).
+
+    이 함수 자신의 실패(예: cap 내부 예외)는 흡수하고 흔적을 남긴 뒤 False 를
+    반환한다 — "이번 관측은 건너뛴다"이지 호출부(그 함수의 넓은 except)로
+    전파해 그 사이클의 평가 전체를 실패로 만들지 않는다.
     """
-    global _emit_day
-    today = datetime.now(KST).date().isoformat()
-    if _emit_day != today:
-        _emit_day = today
-        _emit_cap.reset_daily()
-    return _emit_cap.should_emit(key)
+    try:
+        return _emit_cap.should_emit(key)
+    except Exception:
+        trace_observer_failure("[account_risk_watch_emit_failed]", key, None)
+        return False
 
 
 def _mark_emitted(key: str) -> None:
-    _emit_cap.mark_emitted(key)
+    try:
+        _emit_cap.mark_emitted(key)
+    except Exception:
+        trace_observer_failure("[account_risk_watch_emit_failed]", key, None)
 
 
 async def run_account_risk_watch_once(scheduler: Any) -> Optional[dict]:

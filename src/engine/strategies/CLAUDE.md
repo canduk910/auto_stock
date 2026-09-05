@@ -217,7 +217,7 @@
   두 cap 은 기존 5개와 **별개 인스턴스**(OB-11), 날짜 키 자기 리셋, peek→로그→mark(cycle226 D-3),
   예외 전량 흡수 + debug 흔적, 메시지 서식 **byte 동일**(운영 grep 연속성).
   **kojiro 무접촉** — 위 래칫으로 구조적으로 폭주하지 않는다(다크런치라 0건인 것과 별개 이유).
-  관측기 자기 실패는 `logger.debug` 단독이 아니라 **`_trace_observer_failure`**(cycle225 J-3)로
+  관측기 자기 실패는 `logger.debug` 단독이 아니라 **`observer_trace.trace_observer_failure(…, dest_logger=logger)`**(cycle225 J-3 의 `_trace_observer_failure` 메서드를 cycle258 이 모듈 함수로 승격)로
   보낸다 — debug 단독은 `_DbLogHandler`(INFO 컷)를 못 넘어 `system_logs` 에 도달하지 않고,
   그러면 도입 이전 무음과 구별되지 않는다(적대 검증 C237-L2-1).
   ⚠️ **판독법 — 시간청산 로그의 첫 타임스탬프가 09:00 이전이면 프리장 게이트 이상 신호**다.
@@ -251,3 +251,5 @@
 2. `scheduler.py` `__init__` 에 `registry.register()` 추가
 3. 필요 시 `scanner.py` 에 스캔 함수 추가
 4. 본 표 + `_workspace/00_leader_trading_rules.md` 에 명세 추가
+
+> **cycle258 (2026-09-05) — donchian 관측기 자기 실패 정본 경로**: `_trace_observer_failure` 메서드(cycle225 J-3)는 삭제되고 `src/engine/observer_trace.trace_observer_failure(marker, ticker, cap, dest_logger=logger)` 로 승격됐다(8/8 사이트 C 형태). cap 필드 7개는 `KstDailyEmitCap`(날짜 자기 리셋 내장)이라 `_x_day` 필드가 없다. 정상 마커 서식 byte 불변, 실패 흔적은 `observer_failed` 토큰(D+1 grep 축 신규).

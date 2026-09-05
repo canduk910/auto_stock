@@ -513,7 +513,32 @@ def test_g245_9_cap_instance_is_separate(name):
         f"{name} 이 cycle242 cap 인스턴스를 공유합니다 — 한쪽의 키 폭주·날짜 리셋이 "
         "다른 사이클 관측을 지웁니다"
     )
-    assert "_ratio_cap_day" in attrs, f"{name} 에 날짜 키 자기 리셋이 없습니다"
+    # 사이클 258 카드 #4 재조준 — `_ratio_cap_day` 수동 날짜 필드는 `KstDailyEmitCap`
+    # 이 자기 리셋을 내장하며 소멸했다(문자열 속성 검사 불가). 날짜 자기 리셋
+    # 존재는 이제 **cap 이 KstDailyEmitCap 타입인가** 런타임 확인으로 갈음한다.
+    from src.engine.daily_emit_cap import KstDailyEmitCap
+    from src.engine.strategy_base import StrategyBase
+
+    class _Probe(StrategyBase):
+        async def prepare(self):  # pragma: no cover
+            return None
+
+        def check_buy_signal(self, ticker, current_price, open_price):
+            return None
+
+        def check_exit_signal(self, ticker, current_price, open_price):
+            return None
+
+        def calc_buy_quantity(self, current_price, ticker=None):
+            return 0
+
+    from src.engine.strategy_base import StrategyConfig
+
+    probe = _Probe(StrategyConfig(strategy_id="probe", name="probe"))
+    assert isinstance(probe._ratio_cap_logged, KstDailyEmitCap), (
+        f"{name} 이 참조하는 `_ratio_cap_logged` 가 `KstDailyEmitCap` 이 아닙니다 — "
+        "날짜 자기 리셋을 잃습니다"
+    )
 
 
 # ---------------------------------------------------------------------------
