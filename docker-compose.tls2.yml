@@ -1,0 +1,24 @@
+# cycle260 (2026-09-05) — TLS 2단계(http→https 301 · HSTS) 오버레이. `frontend` 서비스만
+# 스니펫 디렉터리 하나를 얹는다.
+#
+# 활성화 = 호스트 파일 `.tls_stage2`(git 밖) 존재 **그리고** `.tls_enabled`(cycle255, 1단계)가
+# 함께 있을 때만. `tools/deploy/compose_up_changed.sh` 가 두 마커를 보고 이 파일을 1단계
+# 오버레이(`docker-compose.tls.yml`) **뒤**에 `-f` 로 덧붙인다 — 1단계 마커만 있으면 이 파일은
+# 리포에 있어도 어떤 compose 호출에도 등장하지 않는다(cycle255 명령과 byte 동일).
+#
+# ⚠️ `frontend` 외 서비스를 여기 추가하지 마라 — `backend` 가 한 줄이라도 들어오면 그
+# 서비스의 config 해시가 바뀌어 backend 컨테이너가 재생성된다(cycle232 D6, 장중 tick
+# blind). `ports`/`build`/`environment` 를 다시 적는 것도 금지 — 443 게시·인증서 마운트는
+# 1단계 오버레이(`docker-compose.tls.yml`)의 몫이고, 이 파일은 **스니펫 마운트 하나뿐**이다
+# (가드 G-260-2a/b — 원복 단순성: `rm .tls_stage2` 한 줄이 완전한 원복이려면 이 파일이
+# 커지지 않아야 한다).
+#
+# 스니펫 디렉터리는 읽기전용이다 — nginx 가 이 안의 `.conf` 파일을 쓸 이유가 없다.
+# `frontend/nginx.conf.template`(80)·`frontend/nginx.tls.conf.template`(443) 의
+# `include /etc/nginx/conf.d/stage2/*.conf;` 와일드카드가 이 마운트가 없으면 매치 0건으로
+# 조용히 넘어가고(nginx:alpine 실측), 있으면 `tools/ops/tls_stage2/` 안의 리다이렉트·HSTS
+# 스니펫을 편입한다.
+services:
+  frontend:
+    volumes:
+      - ./tools/ops/tls_stage2:/etc/nginx/conf.d/stage2:ro

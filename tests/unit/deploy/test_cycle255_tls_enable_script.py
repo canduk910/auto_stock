@@ -374,3 +374,23 @@ def test_when_email_missing_then_nothing_called(repo, fakes):
     assert proc.returncode == 1
     assert calls == [], calls
     assert "LE_EMAIL" in proc.stderr
+
+
+def test_when_stage2_marker_present_then_refuse_before_certbot(repo, fakes):
+    """E-18 (cycle260 tester F-4) — `.tls_stage2` 가 켜져 있으면 certbot/docker 호출 전에 거부한다.
+
+    이 스크립트의 사후 검증은 `http://127.0.0.1/api/health` → 401 을 기대한다. 2단계
+    (`tools/ops/tls_stage2_enable.sh`)가 켜지면 80 은 자격과 무관하게 301 을 낸다(rewrite
+    단계가 access 단계보다 앞 — cycle260 실 nginx 실측) — 재발급 목적으로 2단계 뒤에 이
+    스크립트를 다시 돌리면 발급까지 성공하고도 "80 이 401 이 아니다" 로 TLS 전체를 원복하고
+    `.tls_stage2` 만 고아로 남긴다(다음 자동 배포가 `tls2=ignored_no_tls` 로 조용히 무시 —
+    사이트가 평문 80 으로 회귀한다).
+    """
+    (repo / ".tls_stage2").write_text("", encoding="utf-8")
+    proc, calls = _run(repo, fakes)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert not any(c.startswith(("certbot ", "docker ")) for c in calls), (
+        f"2단계 마커가 있는데 발급/전환을 시도했다: {calls}"
+    )
+    assert not (repo / MARKER).exists()
+    assert ".tls_stage2" in (proc.stdout + proc.stderr), proc.stdout + proc.stderr

@@ -71,6 +71,22 @@ fi
 
 log() { echo "[tls_enable] $*"; }
 
+# 0/6 (cycle260 tester 후속) — 2단계(http→https 301) 가 이미 켜져 있으면 재실행을 거부한다.
+# 이 스크립트의 사후 검증은 `http://127.0.0.1/api/health` → **401** 을 기대한다(무자격 Basic
+# Auth 거부). 2단계가 켜지면 80 은 자격과 무관하게 **301** 을 낸다(rewrite 단계가 access
+# 단계보다 앞 — cycle260 실 nginx 실측) — 즉 재발급 목적으로 2단계 뒤에 이 스크립트를 다시
+# 돌리면 certbot 발급까지 성공하고도 "80 이 401 이 아니다" 로 `rollback_to_http_only` 가
+# **TLS 전체를 원복**하고 `.tls_stage2` 만 고아로 남는다(다음 자동 배포가 `tls2=ignored_no_tls`
+# 로 조용히 무시 — 사이트는 평문 80 으로 회귀한다). certbot/docker 호출 전에 막는다.
+STAGE2_MARKER=".tls_stage2"
+if [ -f "${STAGE2_MARKER}" ]; then
+    log "실패: ${STAGE2_MARKER}(2단계 http→https 301) 가 이미 켜져 있다 — 이 스크립트를"
+    log "  재실행하면 사후 검증(80→401 기대)이 실제로는 301 이라 발급에 성공해도 TLS 전체를"
+    log "  원복한다. 인증서 갱신만 필요하면: sudo certbot renew"
+    log "  이 스크립트를 다시 쓰려면 먼저 2단계를 꺼라: bash tools/ops/tls_stage2_enable.sh disable"
+    exit 1
+fi
+
 # 호스트 webroot — nginx `root /var/www/certbot`(컨테이너) 과 짝인 호스트 경로. certbot 은
 # 호스트에서 돌므로 **호스트 경로**를 준다. 절대경로로 고정한다 — renewal conf 에 영속되는
 # 값이라 상대경로가 남으면 timer(cwd `/`)의 갱신이 webroot 를 못 찾는다.

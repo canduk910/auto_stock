@@ -62,3 +62,6 @@ secrets/
 # cycle255 — TLS 오버레이 활성 마커·ACME 웹루트 (EC2 호스트 전용, git 밖)
 .tls_enabled
 certbot-www/
+# cycle260 — TLS 2단계(리다이렉트·HSTS) 활성 마커 (EC2 호스트 전용, git 밖). `.tls_enabled`
+# 와 함께 있을 때만 유효 — 단독이면 배포 스크립트가 무시한다.
+.tls_stage2

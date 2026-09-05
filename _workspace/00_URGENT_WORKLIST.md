@@ -182,7 +182,7 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 | D5 TLS | `auto.dkstock.cloud` | ✅ **완료 09-05 13:06** — DNS 등록(사용자) → certbot 발급(만료 2026-12-04, snap 타이머 + renewal conf `renew_hook` nginx reload) → `.tls_enabled` 마커 → frontend 만 오버레이 재기동(백엔드 무재시작). 외부 실측 https 401·TLS1.2/1.3·http 401 유지·ACME 404. 첫 실행 4/6 거짓 실패(`/etc/letsencrypt/live` root 700) → `sudo test -f` 수정 b46f1f4. 루틴 2개 BASE → https(연결 실패 시 http EC2 예비 + 마지막 메시지에 사용 주소 표기). **남은 사용자 할 일 = 클라우드 환경 '자동매매' 허용 도메인에 `auto.dkstock.cloud` 추가**(월 20:20 루틴이 '예비 주소 사용' 이라고 쓰면 아직 안 된 것). 2단계(HSTS·http→https 리다이렉트)는 루틴 예비 경로 제거 후 |
 | D9 REST 폴 조기 시작 | 권고대로 적용 | `SWING_REST_POLL_EARLY_START` 09:05 → **09:00:30** (scheduler.py 상수 1줄, 3,999L 불변, 테스트 갱신). D+1 = 09:00:3x 부터 `[swing_rest_poll_summary]` held_only 폴 |
 | D10 pg acquire 타임아웃 | 주중 별도 사이클 | 명세 초안 `_workspace/specs/cycle_next_D10_pg_acquire_timeout.md` — 호출자 전수 + 8영역 승인 동반 |
-| D11 리팩토링 카드 | 진행 | ①②③ 완료(새벽) · **⑨⑩ 완료(cycle256, 09-05 08:xx)** — ⑨ 는 PortfolioRiskCard 1사이트 + 유틸 신설로 한정(DailyReportTab 서식 전환 `2026. 9. 7. 9시 5분 0초`→`2026-09-07 09:05:00` 은 **사용자 결정 대기**), ⑩ 완료. **⑧ 완료(cycle257, 09-05 09:xx — scheduler 3,999→3,864L, 인계: `handler.py:78` 주석은 B 사이클)**. **④⑤ 완료(cycle258, 09-05 10:xx — 차분 13,000+ 조합 불일치 0, 뮤테이션 27/27)**. **⑥⑦ 완료(cycle259, 09-05 11:xx)** — **D11 10장 전부 처리**. 잔존 = 8영역 권고 4곳(`risk.py:244,419`·`scanner.py:388`·`kojiro.py:987` 관측 배관) · DailyReportTab 서식 결정 · `handler.py:78` 주석(B) |
+| D11 리팩토링 카드 | 진행 | ①②③ 완료(새벽) · **⑨⑩ 완료(cycle256, 09-05 08:xx)** — ⑨ 는 PortfolioRiskCard 1사이트 + 유틸 신설로 한정(DailyReportTab 서식 전환 `2026. 9. 7. 9시 5분 0초`→`2026-09-07 09:05:00` 은 09-05 오후 "바꾸자" 로 **cycle256-F 적용 완료**), ⑩ 완료. **⑧ 완료(cycle257, 09-05 09:xx — scheduler 3,999→3,864L, 인계: `handler.py:78` 주석은 B 사이클)**. **④⑤ 완료(cycle258, 09-05 10:xx — 차분 13,000+ 조합 불일치 0, 뮤테이션 27/27)**. **⑥⑦ 완료(cycle259, 09-05 11:xx)** — **D11 10장 전부 처리**. 잔존 = 8영역 권고 4곳(`risk.py:244,419`·`scanner.py:388`·`kojiro.py:987` 관측 배관) · `handler.py:78` 주석(B) |
 | D1 리포터 비밀번호 | 유지 | 변경 없음 |
 | D2 OpenAI 경로 | 09-19 까지 병행 후 결정 | 변경 없음 |
 | D6 주간 자문 정본 위치 | 09-08 첫 산출물 후 | 변경 없음 |
@@ -989,6 +989,6 @@ find . -name __pycache__ -prune -exec rm -rf {} + ; python -m pytest -q
 | 카드 | 사용자 답(09-05 15:0x) | 처리 |
 |---|---|---|
 | ① 허용 도메인 `auto.dkstock.cloud` 추가 | "추가완료" | 월 09-07 20:20 자동 리포트 마지막 메시지 "(e) 사용 주소 = https" 로 확인(그 전 수동 실행은 하지 않는다 — 토요일 리포트·Notion 페이지 노이즈) |
-| ② 대시보드 '일일 리포트' 탭 시각 표기 | "바꾸자" | cycle256 후속 — `DailyReportTab` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(`2026-09-07 09:05:00`), 프론트 전용 배포(frontend 모드) |
+| ② 대시보드 '일일 리포트' 탭 시각 표기 | "바꾸자" | **구현 완료(cycle256-F, vitest 537 PASS·`tsc -b` clean) — 배포 대기** — `DailyReportTab` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(`2026-09-07 09:05:00`), 배포 = frontend 모드 |
 | ③ D10 착수 요일 | "화요일" | 09-08(화) 아침 호출자 전수(영향 범위 목록) 제시 → 8영역 승인 → Red→Green → 장외 배포. 명세 `_workspace/specs/cycle_next_D10_pg_acquire_timeout.md` |
-| ④ TLS 2단계 시점 | "제안대로" | 월 09-07 20:20 자동 리포트 https 성공 확인 뒤 진행(http→https 301 + HSTS + Basic 자격 회전). 주말에 **가동 스위치가 꺼진 상태로 코드·절차만 준비**(cycle260) |
+| ④ TLS 2단계 시점 | "제안대로" | **준비 완료(cycle260, 신규 가드 168 PASS·백엔드 전체 7,005 PASS)** — 스위치는 여전히 OFF, 가동은 월 09-07 20:20 자동 리포트 https 성공 확인 뒤 `ROUTINE_HTTPS_CONFIRMED=1 bash tools/ops/tls_stage2_enable.sh`(http→https 301 + HSTS 1일 + Basic 자격 회전) |

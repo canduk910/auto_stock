@@ -59,6 +59,18 @@ server {
     auth_basic           "auto_stock";
     auth_basic_user_file /etc/nginx/secrets/.htpasswd;
 
+    # cycle260 — TLS 2단계(http→https 301) 준비 스위치. `docker-compose.tls2.yml` 오버레이가
+    # `./tools/ops/tls_stage2/` 를 이 경로로 마운트할 때만 파일이 존재한다 — 마커
+    # (`.tls_stage2`, `.tls_enabled` 와 **함께** 있을 때만 유효) 없이는 디렉터리 자체가
+    # 없어 nginx 의 와일드카드 include 가 매치 0건으로 조용히 넘어간다(로컬 nginx:alpine
+    # 실측 — 존재하지 않는 디렉터리의 glob include 는 오류가 아니다). 그래서 이 한 줄이
+    # 리포에 들어와도 마운트 전에는 1단계와 **행위 동일**이다. `conf.d` **하위**의
+    # 와일드카드([tools/ops/tls_stage2/http-redirect.conf](../tools/ops/tls_stage2/http-redirect.conf)
+    # 같은 파일들)만 열고, `server {}` **직속**(location 밖) — 301 은 rewrite 단계에서
+    # 걸려야 해당 요청의 location 선택 자체를 대체하므로 특정 location 안에 두면 그
+    # 경로만 리다이렉트되고 나머지는 평문으로 샌다.
+    include /etc/nginx/conf.d/stage2/http-*.conf;
+
     # ACME(Let's Encrypt) HTTP-01 챌린지 전용 — cycle255 (2026-09-05, TLS 준비 1단계).
     # `/.well-known/acme-challenge/<token>` 은 인증서 발급 중 **무자격 200** 이어야 한다.
     # `auth_basic off;` 는 이 파일에 절대 쓰지 않으므로(D-1-b), 인증 상속을 합법적으로

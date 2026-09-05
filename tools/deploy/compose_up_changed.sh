@@ -49,6 +49,20 @@
 #   EC2 에서 git 을 손으로 움직였거나(reset/checkout/revert/stash) 수동 `docker compose build|up --build`
 #   를 했으면 `rm .deployed_sha` 로 다음 자동 배포를 full 로 만든다. 수동 배포는 이 스크립트로 한다.
 #   `.env` 편집 후 수동 `up -d` 는 이미지가 그대로라 마커를 건드리지 않아도 된다.
+#
+# ■ cycle260 — TLS 2단계(http→https 301 · HSTS) 오버레이 마커, 1단계에 **종속**
+#   호스트 파일 `.tls_stage2`(git 밖, `tools/ops/tls_stage2_enable.sh` 가 사후 검증까지 통과한
+#   뒤에만 만든다)가 있고 **`.tls_enabled` 도 함께** 있을 때만 모든 compose 호출에
+#   `-f docker-compose.tls2.yml` 를 1단계 오버레이 **뒤**에 덧붙인다(`-f prod -f tls -f tls2` —
+#   compose 는 뒤에 오는 파일이 이긴다). `.tls_stage2` 만 있고 `.tls_enabled` 가 없으면 443 이
+#   없는 상태에서 80 을 https 로 301 하는 꼴이라 사이트가 통째로 도달 불가가 된다 — 그래서
+#   조용히 무시하고(1단계만 켠 것과 byte 동일 명령) 로그에 `tls2=ignored_no_tls` 로 사유를
+#   남긴다(마커는 git 밖이라 리포만 봐서는 그날 무엇이 켜졌는지 알 수 없다). 마커는 이번에도
+#   **모드 판정(full/frontend/none)에 개입하지 않는다** — 개입하면 2단계를 켠 날부터 모든
+#   배포가 backend 재시작이 되어 cycle248 이 없앤 비용이 부활한다. `docker-compose.tls2.yml`
+#   자체의 변경은 다른 compose 파일과 동일하게 backend 축(full)으로 분류한다(BACKEND_RE,
+#   fail-safe) — `tools/ops/tls_stage2/*.conf` 스니펫은 볼륨 마운트라 이미지 재빌드가
+#   필요 없으므로 여기 포함하지 않는다(frontend 재기동만으로 반영).
 set -euo pipefail
 # 마커·compose 경로는 저장소 루트 기준이다 — 하위 디렉터리에서 손으로 실행해도 같은 마커를 본다.
 cd "$(git rev-parse --show-toplevel)"
@@ -68,8 +82,15 @@ esac
 
 # 정규식은 ERE. 앵커(^ … / 또는 $)가 계약이다 — `srcs/`·`frontendx/`·`requirements-dev.txt` 가 새면 안 된다.
 # cycle255 — docker-compose.tls.yml 추가(다른 compose 파일과 동일하게 backend 축, fail-safe).
-BACKEND_RE='^(src/|requirements\.txt$|Dockerfile$|docker-compose\.prod\.yml$|docker-compose\.tls\.yml$|\.dockerignore$|\.github/workflows/deploy\.yml$|tools/deploy/)'
-FRONTEND_RE='^(frontend/)'
+BACKEND_RE='^(src/|requirements\.txt$|Dockerfile$|docker-compose\.prod\.yml$|docker-compose\.tls\.yml$|docker-compose\.tls2\.yml$|\.dockerignore$|\.github/workflows/deploy\.yml$|tools/deploy/)'
+# cycle260 tester 후속(F-8) — `tools/ops/tls_stage2/*.conf` 스니펫은 `docker-compose.tls2.yml`
+# 이 볼륨으로 마운트한다(이미지 재빌드 불필요, 반영에 필요한 것은 frontend **재기동**뿐).
+# 이 디렉터리를 어느 축에도 안 넣으면 `none` 모드(`up -d`, 재생성 0)가 되어 스니펫을 고쳐도
+# 실행 중인 nginx 는 옛 설정을 계속 문다(nginx 는 기동·reload 시점에만 설정을 읽는다) — 스니펫
+# 변경이 frontend 모드(`--no-deps frontend`, cycle248 실측대로 이미지 동일해도 컨테이너
+# 재생성)를 타도록 frontend 축에 추가한다. backend 이미지 입력이 아니므로 BACKEND_RE 에는
+# 넣지 않는다(넣으면 헤더 한 글자 고칠 때마다 backend 가 재시작돼 cycle232 D6 이 발동한다).
+FRONTEND_RE='^(frontend/|tools/ops/tls_stage2/)'
 
 # cycle255 — TLS 오버레이 마커. **모드 판정에는 관여하지 않는다** — 여기서 읽어 두는 것은
 # compose 호출에 붙일 `-f` 목록뿐이다. 마커는 존재만 본다(내용 파싱 금지 — `touch` 로 만든
@@ -81,6 +102,20 @@ COMPOSE_FILE_ARGS=(-f "$COMPOSE_FILE")
 if [ -f "$TLS_MARKER" ]; then
     TLS_STATE="on"
     COMPOSE_FILE_ARGS+=(-f "$TLS_COMPOSE")
+fi
+
+# cycle260 — 2단계(리다이렉트·HSTS) 스니펫 오버레이 마커. 1단계에 **종속**이다(443 없이
+# 80 을 https 로 301 하면 사이트가 도달 불가가 된다).
+TLS2_MARKER=".tls_stage2"
+TLS2_COMPOSE="docker-compose.tls2.yml"
+TLS2_STATE="off"
+if [ -f "$TLS2_MARKER" ]; then
+    if [ "$TLS_STATE" = "on" ]; then
+        TLS2_STATE="on"
+        COMPOSE_FILE_ARGS+=(-f "$TLS2_COMPOSE")
+    else
+        TLS2_STATE="ignored_no_tls"
+    fi
 fi
 
 log() { echo "[deploy] $*"; }
@@ -138,7 +173,7 @@ N_CHANGED=0
 if [ -n "$CHANGED" ]; then
     N_CHANGED="$(printf '%s\n' "$CHANGED" | grep -c . || true)"
 fi
-log "mode=${MODE} reason=${REASON} prev=${PREV_SHA:-none} head=${HEAD_SHA} changed=${N_CHANGED} tls=${TLS_STATE}"
+log "mode=${MODE} reason=${REASON} prev=${PREV_SHA:-none} head=${HEAD_SHA} changed=${N_CHANGED} tls=${TLS_STATE} tls2=${TLS2_STATE}"
 if [ -n "$CHANGED" ]; then
     # ⚠️ `head` 금지 — pipefail 아래서 head 가 40행 뒤 닫힐 때 printf 가 아직 쓰고 있으면(목록이 파이프
     # 버퍼 64KB 를 넘는 큰 diff) SIGPIPE(141) → 스크립트 통째 중단. sed 는 입력을 끝까지 읽는다(T-16).
