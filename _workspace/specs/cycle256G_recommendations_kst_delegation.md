@@ -16,3 +16,10 @@
 
 ## 문서
 - `frontend/CLAUDE.md` cycle256 불릿의 위임 목록에 `Recommendations`(cycle256-G) 추가 + "KST 강제" 예시 줄(65행)에서 이 함수가 timeZone 없이 있던 결함 시정 명기. 루트 CLAUDE.md 표는 행 추가 없이 cycle256 행 구절에 "· 256-G Recommendations(09-05 '바꿔')" 덧붙임. changelog 짧은 행 1개. 워크리스트 3부 답변 표 ③ 행 → 완료(배포 대기).
+
+## 결과 (2026-09-06, Green→검증 완료)
+- `formatDateTime` export 전환 + `utils/kst.ts::formatKstDateTime` 위임 배포(사용처 3곳 = 생성/적용 시각/거절 시각). 빈 값 `'-'`, 파싱 불가 `'—'` 계약 유지. `kst.test.ts` K4 가드를 `DELEGATING_COMPONENTS`(파일명)→`DELEGATING_FILES`(상대 경로) 로 확장해 `pages/Recommendations.tsx` 도 검사 범위에 편입(기존 두 항목 판정 로직 무변경).
+- 표적 6파일 74 tests 전부 PASS(Red 16 FAIL 전환), 프론트 전체 77 files/579 tests PASS(회귀 0), `npx tsc -b` exit 0, `npm run build` 성공(Recommendations 청크 23.73kB). 백엔드 `test_cycle251_report_account_gate.py`(frontend/ 참조 유일 파일) 12 passed 무영향.
+- 뮤테이션 13/13 KILLED(escape 0) + 적대 검토(사용처 3곳 렌더값·빈값/파싱불가/UTC↔+09:00 동치·K4 가드 확장이 기존 검사 약화 안 함·숫자 포맷 무접촉) 전부 반증 실패 = 구현 정상.
+- 문서 동기화: `frontend/CLAUDE.md`(Green, 위임 목록+KST 강제 문단) · 루트 `CLAUDE.md` 하네스 표(15행 유지, cycle256 행에 "· 256-G Recommendations(09-05 '바꿔', timeZone 없던 결함 시정)" 부기) · `docs/HARNESS_CHANGELOG.md`(cycle256-F 다음 행 삽입) · `_workspace/00_URGENT_WORKLIST.md` 3부 답변 표 ③ 행 → "구현 완료(배포 대기)" 갱신 완료.
+- 잔여 = 배포(frontend 모드, backend 무접촉·장중 가능) — 코드는 커밋 전 상태(메인 세션이 커밋 정책에 따라 처리).

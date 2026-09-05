@@ -13,10 +13,20 @@
  *
  * ## 범위 정정 2 (cycle256-F, 2026-09-05 오후) — DailyReportTab 도 위임한다
  * 아래 "범위 정정" 이 미룬 결정에 사용자가 "바꾸자" 로 답했다(09-05 보고서 2부 카드 ②).
- * 그래서 `DELEGATING_COMPONENTS` 에 `DailyReportTab.tsx` 를 넣고 K4-e 를 뒤집었다 —
+ * 그래서 위임 목록(당시 `DELEGATING_COMPONENTS`, 지금은 `DELEGATING_FILES`)에
+ * `DailyReportTab.tsx` 를 넣고 K4-e 를 뒤집었다 —
  * 이제 이 파일은 "byte 동일" 이 아니라 **위임 여부**를 잰다. 서식 계약(`yyyy-MM-dd
  * HH:mm:ss`, 빈 값 `'-'` 유지, 파싱 불가 `'—'`)은
  * `components/__tests__/DailyReportTab.format.test.tsx` 가 소유한다.
+ *
+ * ## 범위 확장 3 (cycle256-G, 2026-09-06) — `pages/Recommendations.tsx` 도 위임한다
+ * 09-05 3부 보고서 카드 ③ 의 사용자 답이 "바꿔" 였다. 이 파일의 `formatDateTime` 은
+ * `toLocaleString('ko-KR', { hour12: false })` 로 **`timeZone` 자체가 없어**(cycle256-F 가
+ * 고친 `DailyReportTab` 보다 한 단계 더 나쁘다 — 그쪽은 tz 는 있고 서식만 ICU 의존)
+ * 표시 시각이 브라우저/컨테이너 로컬타임이었다. 그래서 위임 목록을 파일명이 아니라
+ * **`src/` 기준 상대 경로**(`DELEGATING_FILES`)로 바꿔 `components/` 밖도 읽는다 —
+ * 기존 두 항목의 검사 의미(K4-a/b/c)는 무변경이다. 서식 계약은
+ * `pages/__tests__/Recommendations.format.test.tsx` 가 소유한다.
  *
  * ## 범위 정정 (Verify F1, 2026-09-05) — ⚠️ 위 "범위 정정 2" 가 이 절을 대체했다(맥락 보존)
  * 명세 §1 은 `DailyReportTab.formatDateTime` 도 위임 대상으로 적었지만, HEAD 의
@@ -30,7 +40,7 @@
  * 위임한다. 그때 주의할 점 = `formatDateTime(null)` 은 기존 회귀
  * `src/pages/__tests__/LogReports.formatDateTime.test.ts` 가 `'-'`(하이픈)을 못박고
  * 있으므로 `if (!iso) return '-'` 를 호출부에 남긴 채 유효 입력만 넘겨야 한다(유틸
- * 폴백은 `'—'` em dash). K4 가드의 `DELEGATING_COMPONENTS` 는 그때 확장한다.
+ * 폴백은 `'—'` em dash). K4 가드의 위임 목록은 그때 확장한다.
  *
  * ## 요구 행위
  * - K1 `formatKstHHMM(iso)` — KST `HH:mm` 24시제. UTC 입력도 KST 환산. 잘못된 입력 → `'—'`
@@ -84,17 +94,23 @@ afterAll(() => {
 })
 
 const UTILS_DIR = path.join(__dirname, '..')
-const COMPONENTS_DIR = path.join(__dirname, '..', '..', 'components')
+const SRC_DIR = path.join(__dirname, '..', '..')
 const KST_UTIL_PATH = path.join(UTILS_DIR, 'kst.ts')
 const THIS_TEST_PATH = path.join(__dirname, 'kst.test.ts')
 
-// 위임 사이트. cycle256 = PortfolioRiskCard(출력 byte 동일) · cycle256-F =
-// DailyReportTab(09-05 사용자 결정 "바꾸자" — 서식이 `2026-09-07 09:05:00` 으로 바뀐다,
-// 헤더 "범위 정정 2" 참조).
-const DELEGATING_COMPONENTS = ['PortfolioRiskCard.tsx', 'DailyReportTab.tsx'] as const
+// 위임 사이트 — `src/` 기준 **상대 경로**다(cycle256-G 에서 파일명 → 경로로 확장:
+// 위임 대상이 `components/` 밖(`pages/`)으로 나갔다. 헤더 "범위 확장 3" 참조).
+//   cycle256   = PortfolioRiskCard (출력 byte 동일)
+//   cycle256-F = DailyReportTab    (09-05 결정 "바꾸자" — `2026-09-07 09:05:00` 서식)
+//   cycle256-G = pages/Recommendations (09-05 결정 "바꿔" — HEAD 는 timeZone 자체가 없었다)
+const DELEGATING_FILES = [
+  'components/PortfolioRiskCard.tsx',
+  'components/DailyReportTab.tsx',
+  'pages/Recommendations.tsx',
+] as const
 
-function readComponent(filename: string): string {
-  return readFileSync(path.join(COMPONENTS_DIR, filename), 'utf-8')
+function readSourceFile(relPath: string): string {
+  return readFileSync(path.join(SRC_DIR, relPath), 'utf-8')
 }
 
 /**
@@ -240,10 +256,10 @@ describe('K3: kstTodayISO — KST 기준 YYYY-MM-DD (now 주입 seam)', () => {
 })
 
 describe('K4: 텍스트 가드 — KST 포맷 소유권이 utils/kst.ts 로 이동', () => {
-  it.each(DELEGATING_COMPONENTS)(
+  it.each(DELEGATING_FILES)(
     'K4-a: %s 코드에 `new Intl.DateTimeFormat` 0건 (포맷터 자체 생성 금지)',
-    (filename) => {
-      const code = stripComments(readComponent(filename))
+    (relPath) => {
+      const code = stripComments(readSourceFile(relPath))
       const hits = code
         .split('\n')
         .map((line, idx) => ({ line, no: idx + 1 }))
@@ -251,37 +267,62 @@ describe('K4: 텍스트 가드 — KST 포맷 소유권이 utils/kst.ts 로 이�
 
       expect(
         hits.map(({ no, line }) => `L${no}: ${line.trim()}`),
-        `${filename}: KST 포맷터 자체 생성 잔존 — utils/kst.ts 위임 위반`,
+        `${relPath}: KST 포맷터 자체 생성 잔존 — utils/kst.ts 위임 위반`,
       ).toEqual([])
     },
   )
 
-  it.each(DELEGATING_COMPONENTS)(
+  it.each(DELEGATING_FILES)(
     'K4-b: %s 코드에 날짜용 `toLocaleString(...)` 0건 (숫자 서식은 대상 아님)',
-    (filename) => {
+    (relPath) => {
       expect(
-        kstLocaleStringHits(readComponent(filename)),
-        `${filename}: timeZone/hour12 를 동반한 toLocale*String 잔존 — utils/kst.ts 위임 위반`,
+        kstLocaleStringHits(readSourceFile(relPath)),
+        `${relPath}: timeZone/hour12 를 동반한 toLocale*String 잔존 — utils/kst.ts 위임 위반`,
       ).toEqual([])
     },
   )
 
-  it.each(DELEGATING_COMPONENTS)(
+  it.each(DELEGATING_FILES)(
     "K4-c: %s 코드에 `'Asia/Seoul'` 리터럴 0건 (tz 리터럴 단일 진실원)",
-    (filename) => {
-      const code = stripComments(readComponent(filename))
-      expect(code.includes('Asia/Seoul'), `${filename}: tz 리터럴 잔존`).toBe(false)
+    (relPath) => {
+      const code = stripComments(readSourceFile(relPath))
+      expect(code.includes('Asia/Seoul'), `${relPath}: tz 리터럴 잔존`).toBe(false)
     },
   )
 
   it('K4-d: PortfolioRiskCard.tsx 가 `formatKstHHMM` 을 호출한다 (위임 확인)', () => {
-    expect(stripComments(readComponent('PortfolioRiskCard.tsx'))).toContain('formatKstHHMM')
+    expect(stripComments(readSourceFile('components/PortfolioRiskCard.tsx'))).toContain('formatKstHHMM')
   })
 
   it('K4-e: DailyReportTab.tsx 가 `formatKstDateTime` 을 호출한다 (cycle256-F 위임 확인)', () => {
     // cycle256 에서는 이 케이스가 반대 방향(미위임 보존)이었다 — 09-05 사용자 결정
     // "바꾸자" 로 뒤집었다. 서식 계약은 components/__tests__/DailyReportTab.format.test.tsx.
-    expect(stripComments(readComponent('DailyReportTab.tsx'))).toContain('formatKstDateTime')
+    expect(stripComments(readSourceFile('components/DailyReportTab.tsx'))).toContain('formatKstDateTime')
+  })
+
+  it('K4-h: pages/Recommendations.tsx 가 `formatKstDateTime` 을 호출한다 (cycle256-G 위임 확인)', () => {
+    // HEAD 는 `toLocaleString('ko-KR', { hour12: false })` — timeZone 자체가 없어 표시
+    // 시각이 브라우저/컨테이너 로컬타임이었다. 서식 계약은
+    // pages/__tests__/Recommendations.format.test.tsx 가 소유한다.
+    expect(stripComments(readSourceFile('pages/Recommendations.tsx'))).toContain('formatKstDateTime')
+  })
+
+  it('K4-i: 날짜용 hit 판정은 숫자 서식(`value.toLocaleString()`)을 잡지 않는다 (6줄 창 규칙)', () => {
+    // `Recommendations.formatNumber` 는 같은 메서드를 천단위 서식에 쓰고 이번 범위 밖이다.
+    // 합성 소스로 판정기 자체를 검증한다(실파일 행 번호에 의존하지 않는다).
+    const numericOnly = [
+      'function formatNumber(value: number): string {',
+      '  return value.toLocaleString()',
+      '}',
+    ].join('\n')
+    expect(kstLocaleStringHits(numericOnly), '숫자 서식이 날짜 hit 로 오판됨').toEqual([])
+
+    const dateLike = [
+      'function formatDateTime(iso: string): string {',
+      "  return new Date(iso).toLocaleString('ko-KR', { hour12: false })",
+      '}',
+    ].join('\n')
+    expect(kstLocaleStringHits(dateLike).length, '날짜 서식을 못 잡음').toBe(1)
   })
 
   it('K4-f: utils/kst.ts 에 `hour12: false` ≥1 (ko-KR 기본 12시제 차단)', () => {

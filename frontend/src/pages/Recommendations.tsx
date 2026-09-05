@@ -9,6 +9,7 @@ import ConfirmModal from '../components/ConfirmModal'
 import BacktestComparisonCard from '../components/recommendations/BacktestComparisonCard'
 import type { RecommendationItem, RecommendationStatus, RecommendationMetrics } from '../types/recommendations'
 import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR, NEUTRAL_HEX } from '../utils/pnlColor'
+import { formatKstDateTime } from '../utils/kst'
 
 const STATUS_LABEL: Record<RecommendationStatus, string> = {
   pending: '대기',
@@ -41,14 +42,10 @@ function formatNumber(value: number | undefined): string {
   return value.toLocaleString()
 }
 
-function formatDateTime(iso: string | null): string {
+// cycle256-G — utils/kst 위임(09-05 사용자 결정 "바꿔"). 빈 값 '-' 유지(현행), 파싱 불가 '—'.
+export function formatDateTime(iso: string | null): string {
   if (!iso) return '-'
-  try {
-    const d = new Date(iso)
-    return d.toLocaleString('ko-KR', { hour12: false })
-  } catch {
-    return iso
-  }
+  return formatKstDateTime(iso)
 }
 
 interface MetricFieldDef {

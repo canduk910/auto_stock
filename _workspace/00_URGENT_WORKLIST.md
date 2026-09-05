@@ -188,7 +188,10 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 | D6 주간 자문 정본 위치 | 09-08 첫 산출물 후 | 변경 없음 |
 | D7 리포트 판독 채널 | 유지 | 변경 없음 |
 
-## ✅ cycle261 · DK Stock 디자인시스템 v2 적용 (2026-09-05 저녁, 사용자 지시 `dk-stock-design/handoff/` 절차대로 · frontend 전용 · src·8영역 diff 0 — **배포 대기**)
+## ✅ cycle261 · DK Stock 디자인시스템 v2 적용
+
+> 기록 정정(09-06 00:1x): 폰트 TTF 3파일은 사용자가 스테이징해 둔 상태였고, 3부 보고서 커밋 `340a297`(09-05 22:0x)이 `git commit` 으로 스테이징 전체를 포함하면서 **먼저 들어갔다**(그 커밋이 CI + frontend 모드 배포 1회를 유발 — 백엔드 무접촉). cycle261 커밋 `ad2ffb4` 메시지의 "폰트 3개 커밋" 은 실제로는 `340a297` 이다. 기능 영향 없음.
+ (2026-09-05 저녁, 사용자 지시 `dk-stock-design/handoff/` 절차대로 · frontend 전용 · src·8영역 diff 0 — **배포 대기**)
 
 - 가을 팔레트(`index.css` @theme 별칭 재정의로 기존 className 무수정) + Gmarket Sans 3 weight + 손익색/전략 7색 재정의 + 브랜드명 "AutoStock"→"DK Stock". tester 적대 검토가 별칭 재정의 부작용(보드·토글·게이트·체결상태 배지 hex 충돌 4건)과 nginx `/fonts/` 캐시 결손을 찾아 시정 완료. 게이트 전부 PASS(`tsc -b` 0·`npm test` 76/557·`npm run build`·e2e 33·백엔드 frontend 가드 235). 상세 = `docs/HARNESS_CHANGELOG.md` cycle261 행, 명세 = `_workspace/specs/cycle261_dk_stock_design_v2.md`.
 
@@ -1003,4 +1006,4 @@ find . -name __pycache__ -prune -exec rm -rf {} + ; python -m pytest -q
 |---|---|---|
 | ① 월 09-07 20:25~22:00 2단계 가동 자율 구간 | "허용" | **자율 구간 성립**(커밋·푸시·장외 배포·루틴 프롬프트 수정 포함). 절차 = 런북 `_workspace/specs/tls_stage2_activation_runbook_0907.md`. 사용자 직접 행동 = ⑤ 새 비밀번호를 클라우드 환경 `REPORTER_BASIC_PASSWORD` 에 넣기 + 브라우저 재로그인 |
 | ② HSTS 기간 상향 | "1주 뒤 올려" | 가동 1주 뒤(**09-14 이후 첫 장외 시간**) `max-age=86400` → `15552000`(180일): 스니펫 2(`tls-srv-hsts.conf`·`tls-loc-hsts.conf`) + `tls_stage2_enable.sh` 검증 정규식 2줄 + G-260 가드 기대값 동시 갱신 → push(frontend 모드) → 헤더 실측. 사전 승인됨 |
-| ③ '전략수정 AI자문' 페이지 시각 표기 | "바꿔" | cycle256-G — `pages/Recommendations.tsx` `formatDateTime` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(KST 강제 + `2026-09-07 09:05:00`), 프론트 전용 배포 |
+| ③ '전략수정 AI자문' 페이지 시각 표기 | "바꿔" | **구현 완료(cycle256-G, vitest 579 PASS·`tsc -b` clean·`npm run build` 성공) — 배포 대기** — `pages/Recommendations.tsx` `formatDateTime` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(KST 강제 + `2026-09-07 09:05:00`, export 추가로 단위 테스트화), 배포 = frontend 모드 |
