@@ -42,7 +42,9 @@ HHMMSS 6자리). 0-index 검증됨:
 1차 상한은 `session._BOARD_SCHEDULE` 의 MAIN 구간(09:00~15:40, 배타)에서 왔는데
 그 **15:40 은 보드 전환 갭 마진이지 거래시간이 아니다**(session.py 주석이
 "15:30~15:40 갭 마진 포함" 이라고 자백한다). KRX 정규장은 15:30 에 끝난다 —
-`scanner._TIME_KRX_MAIN_END = 15:30` / `scheduler.TIME_KRX_MAIN_CLOSE = 15:30` /
+`scheduler.TIME_KRX_MAIN_CLOSE = 15:30`(cycle257 이전엔 `scanner._TIME_KRX_MAIN_END`
+도 같은 값을 들고 있었으나 그 상수의 유일 소비자였던 사이클 26 시간대별 채널
+전환이 108일간 미배선이라 cycle257 에서 함께 삭제됐다) /
 `sell_rejection.is_nxt_session_hours` 가 15:30~20:00 을 NXT 로 본다.
 
 즉 **15:30:00~15:39:59 에 새 당일고가가 생기려면 NXT 애프터 체결뿐**인데 구 상한은
@@ -226,17 +228,22 @@ def test_window_bounds_track_krx_regular_session():
     구 계약은 출처를 `session._BOARD_SCHEDULE` MAIN(09:00~15:40)에 걸었다. 그
     15:40 은 보드 전환 갭 마진이라 **거래시간이 아니고**, 그 결과 NXT 애프터
     체결 10분이 KRX 고가로 새어 들어왔다. 이제 출처는 정규장 종료 상수다.
+
+    출처 상수는 `scheduler.TIME_KRX_MAIN_CLOSE` — cycle257 이전엔
+    `scanner._TIME_KRX_MAIN_END` 도 같은 값(15:30)의 동형 상수였으나, 그 상수의
+    유일 소비자(사이클 26 시간대별 채널 전환)가 108일간 미배선이라 cycle257 에서
+    삭제됐다. 이 테스트가 지키는 불변식(KRX 정규장 종료 = 15:30)은 그대로다.
     """
     from datetime import time as _time
 
-    from src.engine.scanner import _TIME_KRX_MAIN_END
+    from src.engine.scheduler import TIME_KRX_MAIN_CLOSE
 
-    assert _TIME_KRX_MAIN_END == _time(15, 30), (
+    assert TIME_KRX_MAIN_CLOSE == _time(15, 30), (
         "KRX 정규장 종료 상수가 바뀌었다 — handler 의 고가시간 상한도 함께 갱신하라"
     )
     assert handler._HGPR_HOUR_MAIN_START == 90000
     assert handler._HGPR_HOUR_MAIN_END == (
-        _TIME_KRX_MAIN_END.hour * 10000 + _TIME_KRX_MAIN_END.minute * 100
+        TIME_KRX_MAIN_CLOSE.hour * 10000 + TIME_KRX_MAIN_CLOSE.minute * 100
     ), "고가시간 상한이 KRX 정규장 종료와 어긋났다"
 
 

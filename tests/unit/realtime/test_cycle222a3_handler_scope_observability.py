@@ -4,10 +4,10 @@
 
 `_HGPR_HOUR_MAIN_END = 154000`(배타)은 `session._BOARD_SCHEDULE` 의 MAIN
 구간(09:00~15:40)에서 온 값인데, **그 15:40 은 보드 전환 갭 마진이지 거래시간이
-아니다**. KRX 정규장은 15:30 에 끝난다(`scanner._TIME_KRX_MAIN_END`,
-`scheduler.TIME_KRX_MAIN_CLOSE`, `sell_rejection.is_nxt_session_hours` 가
-15:30~20:00 을 NXT 로 판정). 즉 15:30:00~15:39:59 에 **새 당일고가가 생기려면 NXT
-애프터 체결뿐**인데 구 필터는 그걸 통과시켰다.
+아니다**. KRX 정규장은 15:30 에 끝난다(`scheduler.TIME_KRX_MAIN_CLOSE`,
+`sell_rejection.is_nxt_session_hours` 가 15:30~20:00 을 NXT 로 판정). 즉
+15:30:00~15:39:59 에 **새 당일고가가 생기려면 NXT 애프터 체결뿐**인데 구 필터는
+그걸 통과시켰다.
 
 ## F-C — 강등 경로에 로그가 0건이면 배포 후 실측이 불가능하다
 

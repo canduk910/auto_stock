@@ -376,25 +376,16 @@ class TestG241_5ImportSurface:
 
 
 # ===========================================================================
-# G-241-6 — scheduler.py 무접촉 (라인 상한 가드 헤드룸 1)
+# G-241-6 — scheduler.py 무접촉 (토큰 유입 0)
+#   ⚠️ 사이클 한정 동결 `test_scheduler_line_count_unchanged`(== 3999) 는 자기소멸 조건대로
+#   cycle257(보드 전환 죽은 코드 삭제, 3,999 → <3,900L) 이 은퇴시켰다 — 라인 수 계약은
+#   `test_cycle257_ast_dead_code_removed.py::TestA4`(< 3,900) 와 기존 상한(< 4,000) 이 담당.
 # ===========================================================================
 class TestG241_6SchedulerUntouched:
     def test_no_market_wide_token_in_scheduler(self):
         text = _SCHEDULER.read_text(encoding="utf-8")
         for token in ("market_wide", "_MW_EPISODE"):
             assert token not in text, f"scheduler.py 에 `{token}` 유입 — 이번 사이클 diff 0 계약"
-
-    def test_scheduler_line_count_unchanged(self):
-        """실측 3,999L / 상한 4,000L = 헤드룸 1 — 이 사이클은 순증 0 이 아니라 **diff 0**.
-
-        ⚠️ 자기소멸 조건: scheduler.py 를 의도적으로 편집하는 후속 사이클이 이 단언을 갱신하거나
-        제거한다(cycle233 `test_scheduler_untouched` 동형, 사이클 한정 동결).
-        """
-        line_count = len(_SCHEDULER.read_text(encoding="utf-8").splitlines())
-        assert line_count == 3999, (
-            f"scheduler.py {line_count}L — cycle241 은 호출부 `:3024-3029` 와 wrapper 가 "
-            f"이미 필요한 형태라 diff 0 이 계약이다."
-        )
 
 
 # ===========================================================================

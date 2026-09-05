@@ -495,74 +495,13 @@ ETF_KEYWORDS = ("KODEX", "TIGER", "KBSTAR", "KOSEF", "ARIRANG", "SOL", "ACE",
                 "HANARO", "히어로즈", "마이티", "BNK", "MASTER", "WON",
                 "ETN", "선물", "인버스", "레버리지", "채권", "혼합")
 
-# 실시간 체결가 TR_ID — 사이클 26 (2026-05-20): 시간대별 채널 분리
-# - PRE/POST NXT 시간대: H0NXCNT0 (NXT 전용 체결가)
-# - KRX MAIN 시간대: H0STCNT0 (KRX 전용 체결가)
-# 기존 H0UNCNT0 (통합) 상수는 하위 호환용으로 보존 (scheduler._execute_next_day_clear 등 직접 참조)
-TICK_TR_ID = "H0UNCNT0"  # (deprecated: 사이클 26 이후 get_active_tick_tr_ids() 사용)
+# 실시간 체결가 TR_ID — TICK_TR_ID = 현행 유일 활성 채널(통합). 시간대별 전환(사이클 26,
+# 2026-05-20 f7f0766, 시간 경계 판정 함수 + 경계 상수 7 + 미사용 시간 alias import)은
+# 108일간 배선된 적 없어 cycle257 에서 삭제 — 속성 기반 리졸버는 P1-7 B 로 별도 착수한다.
+# TICK_TR_ID_KRX/NXT 2줄은 그 리졸버 `tick_tr_id_for(ticker)` 의 반환값 자리로 보존한다.
+TICK_TR_ID = "H0UNCNT0"
 TICK_TR_ID_KRX = "H0STCNT0"   # KRX 메인 전용 (09:00~15:39:59)
 TICK_TR_ID_NXT = "H0NXCNT0"   # NXT 프리/애프터 전용 (08:00~08:59:59, 15:40~20:00)
-
-# 시간 경계 상수 (사이클 26 — get_active_tick_tr_ids 내부 사용)
-from datetime import time as _time
-
-_TIME_PRE_NXT_START = _time(8, 0)
-_TIME_KRX_PRESUBSCRIBE = _time(8, 59, 10)   # KRX 채널 사전 구독 시작 마진
-_TIME_KRX_MAIN_START = _time(9, 0)
-_TIME_KRX_MAIN_END = _time(15, 30)
-_TIME_NXT_PRESUBSCRIBE = _time(15, 39, 10)  # NXT 채널 사전 구독 시작 마진
-_TIME_POST_NXT_START = _time(15, 40)
-_TIME_POST_NXT_END = _time(20, 0)
-
-
-def get_active_tick_tr_ids(now_t: "_time | None" = None) -> "set[str]":
-    """현재 KST 시각 기준 활성 시세 채널 TR_ID set 반환.
-
-    사이클 26 (2026-05-20) — 시세 채널 시간대별 분리:
-
-    | 구간                      | TR_ID                        | 설명           |
-    |---------------------------|------------------------------|----------------|
-    | 08:00~08:59:09            | {H0NXCNT0}                   | NXT 프리       |
-    | 08:59:10~08:59:59         | {H0NXCNT0, H0STCNT0}         | KRX 사전 마진  |
-    | 09:00:00~15:29:59         | {H0STCNT0}                   | KRX 메인       |
-    | 15:30:00~15:39:09         | {H0STCNT0}                   | 종가 흡수 마진 |
-    | 15:39:10~15:39:59         | {H0STCNT0, H0NXCNT0}         | NXT 사전 마진  |
-    | 15:40:00~19:59:59         | {H0NXCNT0}                   | NXT 애프터     |
-
-    사전 마진 50초 구간에서는 두 채널 동시 활성 — 종목별 원자 전환 진행 중
-    (_board_transition_loop) + on_tick 중복 호출 안전 (scanner.ticker_prices 마지막 값 채택).
-
-    Returns:
-        set[str]: 활성 TR_ID 집합. 장 외 시간이면 빈 집합.
-    """
-    from datetime import datetime, timezone, timedelta
-
-    if now_t is None:
-        kst = timezone(timedelta(hours=9))
-        now_t = datetime.now(kst).time()
-
-    # PRE_NXT 구간: 08:00~08:59:09
-    if _TIME_PRE_NXT_START <= now_t < _TIME_KRX_PRESUBSCRIBE:
-        return {TICK_TR_ID_NXT}
-
-    # KRX 사전 마진: 08:59:10~08:59:59
-    if _TIME_KRX_PRESUBSCRIBE <= now_t < _TIME_KRX_MAIN_START:
-        return {TICK_TR_ID_NXT, TICK_TR_ID_KRX}
-
-    # KRX 메인 + 종가 흡수 마진: 09:00~15:39:09
-    if _TIME_KRX_MAIN_START <= now_t < _TIME_NXT_PRESUBSCRIBE:
-        return {TICK_TR_ID_KRX}
-
-    # NXT 사전 마진: 15:39:10~15:39:59
-    if _TIME_NXT_PRESUBSCRIBE <= now_t < _TIME_POST_NXT_START:
-        return {TICK_TR_ID_KRX, TICK_TR_ID_NXT}
-
-    # POST_NXT: 15:40~19:59:59
-    if _TIME_POST_NXT_START <= now_t < _TIME_POST_NXT_END:
-        return {TICK_TR_ID_NXT}
-
-    # 장 외 (08:00 이전, 20:00 이후)
-    return set()
 
 
 async def scan_stocks() -> list[str]:

@@ -2,8 +2,8 @@
 
 > **선행 명세**: `_workspace/red/cycle61_phase2A2_stale_manager.md` (Q6-G1, best-effort)
 
-`_delta_unsubscribe_dropped` 이 `_scan_loop` + `_board_transition_loop` 동시 발화 시
-동일 종목 unsubscribe 충돌 — *현재 행위 기록 only*.
+`_delta_unsubscribe_dropped` 이 `_scan_loop` + 사이클 26 보드 전환 루프(cycle257 에서
+삭제 — 108일간 미배선) 동시 발화 시 동일 종목 unsubscribe 충돌 — *현재 행위 기록 only*.
 
 검증:
 1. `asyncio.gather(call_a, call_b)` 동시 호출

@@ -120,7 +120,7 @@ src/
 │   ├── risk.py              # RiskManager (on_tick → 보드 가드 → 전략별 신호 순회)
 │   ├── order_engine.py      # OrderEngine (주문/체결/포지션 관리)
 │   ├── scheduler.py         # TradingScheduler (KRX/NXT 통합 운영 08:00~20:00)
-│   └── scanner.py           # 종목 스캔 + 공용 시세 캐시 (사이클 26: get_active_tick_tr_ids(now_t) 시간대별 H0STCNT0/H0NXCNT0 분기, TICK_TR_ID=H0UNCNT0 하위 호환 보존)
+│   └── scanner.py           # 종목 스캔 + 공용 시세 캐시 (TICK_TR_ID=H0UNCNT0 현행 유일 활성 채널. 사이클 26 시간대별 분기는 미배선으로 cycle257 삭제 — 속성 기반 재분리는 P1-7 B)
 │
 ├── db/                  # RDS PostgreSQL CRUD (asyncpg)
 │   ├── pg.py                # asyncpg 풀 + 쿼리 헬퍼 (현재 DB 클라이언트 정본)
@@ -844,8 +844,7 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 
 - 매매 정책 = KRX 메인 09:00~15:20 단독. VB/LTV `tradable_boards=("main",)` (PRE_NXT/POST_NXT 매수 비활성)
 - `MarketBoard` 3 보드: `pre_nxt` (08:00~09:00) / `main` (09:00~15:40) / `post_nxt` (15:40~20:00)
-- 시세 채널 6 구간 분기: H0STCNT0 (KRX) + H0NXCNT0 (NXT) 시간대별
-- 사전 구독 마진 (50초): `TIME_KRX_MAIN_OPEN_PRESUBSCRIBE=08:59:10` / `TIME_POST_NXT_OPEN_PRESUBSCRIBE=15:39:10`. `_atomic_board_transition` 종목별 원자 전환 (ack_timeout=2s)
+- 시세 채널 시간대별 6 구간 분기 + 사전 구독 마진(50초) 종목별 원자 전환은 **108일간 미배선으로 cycle257 에서 삭제** — 실제 구독은 처음부터 `TICK_TR_ID=H0UNCNT0`(통합) 단일. 속성 기반 재분리는 P1-7 B
 - 15:20 KRX 메인 강제 청산 (`_force_clear_main_only`) 영속 — VB 전량 + LTV 상한가 미도달
 
 ### 14.2 사이클 149 — 종목별 H0UNMKO0 구독 + VI/거래정지 stale 회피

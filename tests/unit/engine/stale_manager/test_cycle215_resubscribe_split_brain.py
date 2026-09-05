@@ -55,7 +55,7 @@ from freezegun import freeze_time
 pytestmark = pytest.mark.unit
 
 KST = timezone(timedelta(hours=9))
-TICK_TR_ID = "H0UNCNT0"  # scanner.TICK_TR_ID (사이클 26 이후 get_active_tick_tr_ids 폴백 리터럴)
+TICK_TR_ID = "H0UNCNT0"  # scanner.TICK_TR_ID (현행 유일 활성 채널, cycle257 참조)
 
 
 # ===========================================================================

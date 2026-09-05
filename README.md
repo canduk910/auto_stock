@@ -327,15 +327,14 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 
 | 항목 | 사용 |
 |------|------|
-| 시세 채널 (시간대별, 사이클 26) | `H0STCNT0` (KRX 단독) + `H0NXCNT0` (NXT 단독) — `scanner.get_active_tick_tr_ids(now_t)` 가 6 구간 분기: PRE_NXT 08:00~08:59:09 {H0NXCNT0} / **KRX 사전 마진 08:59:10~08:59:59 {H0NXCNT0, H0STCNT0}** / MAIN 09:00~15:30 {H0STCNT0} / 종가 흡수 15:30~15:39:09 {H0STCNT0} / **NXT 사전 마진 15:39:10~15:39:59 {H0STCNT0, H0NXCNT0}** / POST_NXT 15:40~19:59 {H0NXCNT0}. `H0UNCNT0` (통합) TR_ID 는 하위 호환 보존만 |
+| 시세 채널 | `TICK_TR_ID=H0UNCNT0` (통합) 단일 — 사이클 26(2026-05-20)이 설계한 시간대별 6구간 분기(`H0STCNT0`/`H0NXCNT0`)는 108일간 미배선으로 cycle257(2026-09-05)에서 삭제됐다. 속성 기반 재분리는 P1-7 B |
 | 통합 장운영정보 | `H0UNMKO0` / 대표 종목 `005930` 구독 (실전 한정). `MKOP_CLS_CODE`(110/112/121/129/130~159) 시장 전체 공통이라 1종목으로 보드 전환 수신. SessionTracker 가 시각 기반 tick + H0UNMKO0 코드 동시 사용 |
 | 주문 라우팅 | `place_order(..., exchange=...)` body 에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS) 는 KRX 만 허용 — SOR/NXT 는 실전 한정. 사이클 26 신규 매수는 전략 `tradable_boards=("main",)` 로 KRX 만 유효 |
 | 조회 거래소 옵션 | `get_balance(afhr_flpr=...)` — `N`(정규장)/`Y`(시간외)/`X`(NXT 정규장). `get_daily_orders(exchange="ALL")` — KRX+NXT+SOR 합산 |
 | 보드 추상화 (사이클 26, 3 보드) | `src/engine/session.py::MarketBoard` enum 활성 3 보드: `pre_nxt` (08:00~09:00) / `main` (09:00~15:40) / `post_nxt` (15:40~20:00). `_BOARD_SCHEDULE` 도 3 구간. `krx_open`/`krx_after` enum 값은 *호환성 보존* (실제 스케줄 미사용). `SessionTracker` 30s 주기 tick + `register_board_handler` 콜백 |
 | 전략별 매매 가능 보드 | `DEFAULT_TRADABLE_BOARDS` — `momentum`: KRX_OPEN+MAIN (코드 enum 유지, 활성 보드는 MAIN) / **`volatility_breakout`·`long_tail_volatility`: MAIN only (사이클 26 KRX ONLY)** / `donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`: MAIN only |
 | VB/LTV K값 | `k_value_krx_main` (기본 1.0) — KRX 09:00 시가 기준 단독 사용. `k_value_nxt_pre`/`k_value_nxt_post` 키는 DB/AI 자문 응답 호환 보존만 (사이클 26 PRE_NXT 매수 제거) |
-| 종목 단위 원자 전환 (사이클 26) | `TradingScheduler._atomic_board_transition(ticker, stale_tr_id, new_tr_id, ack_timeout_secs=2.0)` — (1) unsubscribe (2) `_subscriptions_acked` 에서 (stale_tr_id, ticker) 제거 polling (timeout 2s) (3) new_tr_id 가 None 아니면 subscribe (4) 50ms sleep. `_board_transition_loop(stale, new, tickers, priority_groups)` — HIGH (positions / next_day_clear) 우선, 전체 순회, `[board_transition_complete]` INFO |
-| 사전 구독 마진 (사이클 26) | `TIME_KRX_MAIN_OPEN_PRESUBSCRIBE=08:59:10` (KRX 채널 50초 사전 마진) / `TIME_POST_NXT_OPEN_PRESUBSCRIBE=15:39:10` (NXT 채널 50초 사전 마진). 보유 + 익일청산 + 매수 후보 합집합 사전 구독 → 09:00 KRX 첫 체결 tick 즉시 수신 보장 |
+| 종목 단위 원자 전환 / 사전 구독 마진 | 사이클 26 이 설계했던 보드 전환 원자 처리(50초 사전 구독 마진 2 시각)는 유일 소비 경로가 미배선이라 cycle257 에서 함께 삭제 — 위 시세 채널 행 참조 |
 | 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 청산 (`NEXT_DAY_STABILIZE_SECS=30`). 대상: `momentum`, `long_tail_volatility` 상한가 모드, `volatility_breakout` 안전망 |
 | 15:20 강제 청산 | `_force_clear_main_only` — `tradable_boards` 에 POST_NXT 가 있는 전략은 보유 유지 (현재 해당 없음). **시간 가드 (2026-05-15 hotfix)**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 |
 | 스윙 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — **2단 창**(사이클 222-a): **09:05~09:30 = 보유 종목 전용 + stale 중립**(REST 가 `ticker_last_tick` 을 갱신하면 개장 러시 blind 종목이 '신선'으로 보여 강제 재구독이 안 걸린다) / **09:30~15:20 = 전체 폴**(후보 포함 + `last_tick` 갱신). 대상 전략 = `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")` — **BFB·VCP 는 비멤버라 REST 보강이 없고 틱으로만 매수 평가한다**(미구독 = 매수 기회 완전 상실). 60s 주기로 `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
@@ -509,13 +508,11 @@ docker compose -f docker-compose.prod.yml up --build -d
 | 07:55 | `_boot()` — 토큰 사전 순차 발급 (사이클 20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전략 prepare |
 | 07:59 | 사전 구독 — 돌파(VB/LTV) + 스윙(donchian) 스캔 종목 + 보유 포지션. WebSocket 연결 + 체결통보 + (실전) `H0UNMKO0` 구독. 유니버스 비어있으면 prepare 재실행 |
 | 08:00 | NXT 프리 진입 — 익일 청산 백그라운드 (`NEXT_DAY_STABILIZE_SECS=30s` 안정화 후 NXT 시가 청산). 사이클 26: VB/LTV PRE_NXT 매수 제거됨 (`tradable_boards=("main",)`) — `_confirm_breakout_open_prices(board="pre_nxt")` 호출 안 함 |
-| **08:59:10** | **사이클 26 신규 — KRX 채널 사전 구독 마진 (50초)**: `_board_transition_loop("H0NXCNT0", "H0STCNT0", 보유+익일청산)` 종목별 원자 전환 + 매수 후보 신규 KRX subscribe. 09:00 KRX 첫 체결 tick 즉시 수신 보장 |
 | 09:00:05 | KRX 메인 시가 확정 — `_confirm_breakout_open_prices(board="main")` VB/LTV target_price 계산 (KRX 09:00 시가 + 전일Range × `k_value_krx_main`). 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목 KRX 시장가 일괄 청산 |
 | 09:05~09:30 | donchian 스윙 진입창 — 시장가 1주문/종목, 갭 +3%↑ 스킵 |
 | 09:30 | 모멘텀(상한가) 종목 스캔 시작, 매수 감시. 5분 주기 `_scan_loop` 시작 — 모멘텀+돌파+스윙+보유 합집합 시세 재구독 |
 | 15:20 | KRX 메인 신규 매수 중단 + 강제 청산 (`_force_clear_main_only`) — VB 전체 + LTV 상한가 미도달 청산. 시간 가드(2026-05-15 hotfix): `>=15:30` 진입 시 skip + 익일 청산 안전망 위임 |
 | 15:30 | KRX 메인 마감 (15:30~15:39:59 종가 흡수 마진 — MAIN 보드 유지). 사이클 26: `_confirm_breakout_open_prices(board="post_nxt")` 호출 제거 (VB/LTV `tradable_boards` 에 post_nxt 없음 → 시가 확정 대상 없음) |
-| **15:39:10** | **사이클 26 신규 — NXT 채널 사전 구독 마진 (50초)**: `_board_transition_loop("H0STCNT0", "H0NXCNT0", 보유+익일청산)` 종목별 원자 전환 + 매수 후보 KRX unsubscribe |
 | **15:40** | **사이클 26 — POST_NXT 진입** (기존 15:30 → 15:40 변경). 매도만 (VB/LTV `tradable_boards=("main",)`) |
 | 16:40 | (장 마감 후 데이터 계층) 퀀트 재무 5 TR 주1회 적재 — `_stock_master_financial_load_task_loop` (마스터 16:30 후 stagger, 주1회 신선도 게이트). 매매 무관 (사이클 C1~C3, 마법공식·F-Score-7 원천) |
 | 19:50 | NXT 애프터 신규 매수 중단 + 전략수정 AI 자문 생성 (OpenAI → `parameter_recommendations`) + 직후 `auto_apply_recommendations()` (사이클 23, 감액만 + 50% cap, `auto_apply_enabled=true` 시) |
