@@ -9,7 +9,7 @@
 #   `ubuntu`(대시보드)·`reporter`(20:20 자동 리포트) 두 계정이 있고, 하나라도 하드코딩
 #   목록에서 빠지면 그 계정의 다음 로그인/자동 리포트가 조용히 401 이 된다(예: 리포터를
 #   빠뜨리면 다음 날 리포트가 통째로 사라진다). `htpasswd` 명령(apache2-utils)은 EC2 에
-#   설치돼 있지 않다 — 해시는 `openssl passwd -apr1` 로만 만든다.
+#   설치돼 있지 않다 — 해시는 `openssl passwd -apr1 -stdin` 로만 만든다(비밀은 stdin 으로, argv 금지).
 #
 # ■ 검증 대상 경로 — **`/`**(SPA 정적 파일), `/api/health` 가 아니다. `/api/health` 는
 #   백엔드에 그런 라우트가 없다(백엔드는 `/health` 만 등록하고, `ApiAuthMiddleware.EXEMPT_PATHS`
