@@ -93,3 +93,11 @@ KIS API 응답을 회귀 테스트로 합성할 때는 **KIS MCP** (`mcp__kis-co
 - **backend-dev**: Red→Green 페어링. 구현 코드와 테스트가 서로의 디자인을 다듬는다.
 - **frontend-dev**: 컴포넌트 단위 + MSW 계약 테스트 페어링.
 - **tester**: 사후 통합/E2E 결함을 회귀 테스트로 승격받아 사이클에 흡수.
+
+## 가드 설계 금기 (2026-09-05 — 같은 날 CI 만 붉어진 사례 4건에서 확정)
+- **`ast.dump(...)` 의 sha 를 리터럴로 핀하지 않는다** — 파이썬 3.12(CI)와 3.13(로컬)의 `ast.dump` 출력이 달라 로컬 초록·CI 실패가 난다(cycle256 G-250-5·cycle259 S4a 실측). 본체 무변경 핀은 `ast.get_source_segment(src, fn)` 의 sha256 으로 잰다. 같은 인터프리터 안에서 두 트리를 `ast.dump` 로 **비교**하는 것은 무해하다.
+- **소스 스캔에 `git grep`/`git ls-files` 를 쓰지 않는다** — 추적 파일만 보므로 Green 이 새로 만든 미추적 파일을 로컬에서는 못 보고 CI(커밋 후)에서만 잡는다(cycle259 S4b). `Path(...).rglob("*.py")` + AST(호출·정의만, 주석·docstring 제외)로 센다.
+- **bare `git diff HEAD` 를 영구 가드로 두지 않는다** — 커밋 직후 공허해지고 다음 편집에서 무조건 RED 가 된다(cycle240 A11b·cycle252 G-252-5b). 사이클 한정 범위 가드는 헤더에 "커밋 후 삭제" 를 명시하고, 8영역 승인은 내용 sha 핀 dict 규약을 따른다.
+- **caplog 개수 단언은 레벨·prefix 로 한정한다** — CI 루트 로거는 DEBUG 라 실패 흔적 debug 행까지 잡힌다(cycle252 T2). `r.levelno >= WARNING ∧ msg.startswith("[marker] ")`.
+- **프론트 파일을 읽는 백엔드 가드**를 만들면 그 사실을 파일 헤더에 적고, 프론트 전용 사이클의 검증 목록(`grep -rl 'frontend/' tests/unit`)에 들어가게 한다(cycle256 g251_2/3).
+- **모듈 레벨 `Intl`/시간대 의존 객체를 검사하는 vitest** 는 `beforeAll` 에서 TZ 를 고정한 뒤 **동적 import** 한다(정적 import 는 고정 이전에 생성됨 — cycle256 F2).
