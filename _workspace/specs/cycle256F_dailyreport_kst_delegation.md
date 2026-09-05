@@ -20,3 +20,10 @@
 - `frontend/CLAUDE.md` 66행 cycle256 불릿: "현재 위임 = PortfolioRiskCard … DailyReportTab 은 결정 대기" → "위임 = PortfolioRiskCard(byte 동일) + DailyReportTab(cycle256-F, 09-05 사용자 결정 '바꾸자' — 서식 `2026-09-07 09:05:00`, 빈 값 `'-'` 유지)". 
 - 루트 CLAUDE.md 하네스 표에는 **행을 추가하지 않는다**(cycle256 행의 "DailyReportTab 위임은 되돌림(사용자 결정 카드)" 문구 뒤에 "→ 09-05 오후 '바꾸자' 로 cycle256-F 적용" 한 구절만). changelog 에는 짧은 행 1개 append.
 - 워크리스트 결정 카드 ② 행 → 완료.
+
+## 결과 (2026-09-05 실측)
+- 구현 = `DailyReportTab.tsx::formatDateTime` 를 `utils/kst.ts::formatKstDateTime` 위임 2줄로 교체(빈 값 `'-'` 유지, 파싱 불가 `'—'`). `formatNumber`/`formatPnL` 무접촉.
+- 표적 3파일(`DailyReportTab.format.test.tsx` 13 + `kst.test.ts` 36 + `DailyReportTab.ext.test.tsx` 10) = **59 PASS**. 전체 `npm test` = **72 files / 537 tests PASS**. `npx tsc -b` = clean(exit 0).
+- 뮤테이션 검증 2라운드(Green 7종 + 적대 검토 8종) **전부 KILLED** — 위임 제거·`toLocaleString` 복원·빈 값/파싱불가 반환값 변경 등 모두 표적 테스트가 잡음.
+- 문서 동기화 완료: `frontend/CLAUDE.md`(cycle256 불릿 갱신), 루트 `CLAUDE.md`(cycle256 행에 "→ cycle256-F 적용" 구절 추가, 신규 행 없음), `docs/HARNESS_CHANGELOG.md`(cycle256-F 행 append), 워크리스트 카드 ② → 완료.
+- 배포 = frontend 모드(backend 무접촉, 장중 가능) — 실제 push 는 메인 세션의 커밋 정책에 따라 별도 진행(이 사이클은 커밋/push 미실행).

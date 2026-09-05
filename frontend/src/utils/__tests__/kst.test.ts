@@ -11,7 +11,14 @@
  * 12시제·로컬타임 회귀가 재발할 여지가 그대로 남는다. 이번 사이클은 **신규 사이트만**
  * `utils/kst.ts` 로 위임한다(기존 13 은 사이트별 출력 동등성 확인이 선행 — 후속).
  *
- * ## 범위 정정 (Verify F1, 2026-09-05) — DailyReportTab 위임은 이번 사이클에서 제외
+ * ## 범위 정정 2 (cycle256-F, 2026-09-05 오후) — DailyReportTab 도 위임한다
+ * 아래 "범위 정정" 이 미룬 결정에 사용자가 "바꾸자" 로 답했다(09-05 보고서 2부 카드 ②).
+ * 그래서 `DELEGATING_COMPONENTS` 에 `DailyReportTab.tsx` 를 넣고 K4-e 를 뒤집었다 —
+ * 이제 이 파일은 "byte 동일" 이 아니라 **위임 여부**를 잰다. 서식 계약(`yyyy-MM-dd
+ * HH:mm:ss`, 빈 값 `'-'` 유지, 파싱 불가 `'—'`)은
+ * `components/__tests__/DailyReportTab.format.test.tsx` 가 소유한다.
+ *
+ * ## 범위 정정 (Verify F1, 2026-09-05) — ⚠️ 위 "범위 정정 2" 가 이 절을 대체했다(맥락 보존)
  * 명세 §1 은 `DailyReportTab.formatDateTime` 도 위임 대상으로 적었지만, HEAD 의
  * `toLocaleString('ko-KR', { timeZone, hour12: false })` 출력(브라우저 `2026. 9. 7.
  * 09:05:00` · Node ICU 77 `2026. 9. 7. 9시 5분 0초`)과 유틸의 `yyyy-MM-dd HH:mm:ss`
@@ -81,8 +88,10 @@ const COMPONENTS_DIR = path.join(__dirname, '..', '..', 'components')
 const KST_UTIL_PATH = path.join(UTILS_DIR, 'kst.ts')
 const THIS_TEST_PATH = path.join(__dirname, 'kst.test.ts')
 
-// 이번 사이클 위임 사이트. DailyReportTab 은 서식 변경 승인 후 후속(헤더 "범위 정정").
-const DELEGATING_COMPONENTS = ['PortfolioRiskCard.tsx'] as const
+// 위임 사이트. cycle256 = PortfolioRiskCard(출력 byte 동일) · cycle256-F =
+// DailyReportTab(09-05 사용자 결정 "바꾸자" — 서식이 `2026-09-07 09:05:00` 으로 바뀐다,
+// 헤더 "범위 정정 2" 참조).
+const DELEGATING_COMPONENTS = ['PortfolioRiskCard.tsx', 'DailyReportTab.tsx'] as const
 
 function readComponent(filename: string): string {
   return readFileSync(path.join(COMPONENTS_DIR, filename), 'utf-8')
@@ -269,12 +278,10 @@ describe('K4: 텍스트 가드 — KST 포맷 소유권이 utils/kst.ts 로 이�
     expect(stripComments(readComponent('PortfolioRiskCard.tsx'))).toContain('formatKstHHMM')
   })
 
-  it('K4-e: DailyReportTab.tsx 는 이번 사이클 미위임 — HEAD 서식(`toLocaleString` + timeZone) 보존', () => {
-    // 후속 사이클에서 위임하면 이 케이스를 뒤집고 DELEGATING_COMPONENTS 에 추가한다.
-    // 지금 뒤집히면 byte 동일 계약(헤더 "범위 정정") 밖의 서식 변경이 섞인 것이다.
-    const code = stripComments(readComponent('DailyReportTab.tsx'))
-    expect(code).not.toContain('formatKstDateTime')
-    expect(kstLocaleStringHits(readComponent('DailyReportTab.tsx')).length).toBeGreaterThanOrEqual(1)
+  it('K4-e: DailyReportTab.tsx 가 `formatKstDateTime` 을 호출한다 (cycle256-F 위임 확인)', () => {
+    // cycle256 에서는 이 케이스가 반대 방향(미위임 보존)이었다 — 09-05 사용자 결정
+    // "바꾸자" 로 뒤집었다. 서식 계약은 components/__tests__/DailyReportTab.format.test.tsx.
+    expect(stripComments(readComponent('DailyReportTab.tsx'))).toContain('formatKstDateTime')
   })
 
   it('K4-f: utils/kst.ts 에 `hour12: false` ≥1 (ko-KR 기본 12시제 차단)', () => {

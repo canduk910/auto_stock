@@ -8,6 +8,7 @@ import type {
   Severity,
 } from '../types/log_reports'
 import { pnlColorHex as pnlColor } from '../utils/pnlColor'
+import { formatKstDateTime } from '../utils/kst'
 
 /**
  * DailyReportTab — 사이클 6 (2026-05-17).
@@ -43,16 +44,10 @@ const CATEGORY_LABEL: Record<FindingCategory, string> = {
 }
 
 // KST(Asia/Seoul) 강제 — 백엔드 `_to_kst` 와 동일 컨벤션.
+// cycle256-F: `utils/kst.ts::formatKstDateTime` 위임(빈 값 '-' 유지, 파싱 불가 '—').
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '-'
-  try {
-    return new Date(iso).toLocaleString('ko-KR', {
-      timeZone: 'Asia/Seoul',
-      hour12: false,
-    })
-  } catch {
-    return iso
-  }
+  return formatKstDateTime(iso)
 }
 
 function formatNumber(n: number | undefined | null): string {
