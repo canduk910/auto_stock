@@ -447,9 +447,8 @@ _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 #    `_workspace/red/cycle235_fill_qty_spec.md`.
 # TODO(cycle235 커밋 후): 아래 dict 를 비운다.
 _APPROVED_CONTENT_SHA: dict[str, str] = {
-    # cycle257 승인 D11 2026-09-05 — 커밋 후 비운다.
-    "src/engine/scanner.py": "31aca37ddff812d7594a3982058c35c1b5cff760ceb497dc2f2340d0a0ed00cc",
-    "src/realtime/CLAUDE.md": "8b2c5ce7fb7bbb3d1f177617dc22140a1205cc21231db6e1c0955f8ab53e5a74",
+    # 2026-09-05 비움 — cycle257(scanner.py, D11 승인) 커밋 4cf479a 후 자기소멸. 다음 8영역 승인 사이클이
+    # in-flight 변경의 내용 sha 를 여기 한시 등록하고, 커밋 후 다시 비운다.
 }
 
 
