@@ -116,7 +116,9 @@ sudo certbot certonly --webroot -w "${WEBROOT}" -d auto.dkstock.cloud --agree-to
 # 4/6 — 산출물 확인 뒤에만 마커 생성. 순서가 뒤집히면 인증서 없는 443 기동 = frontend 전면 실패.
 log "4/6 발급 산출물 확인"
 FULLCHAIN="${LE_LIVE_DIR:-/etc/letsencrypt/live/auto.dkstock.cloud}/fullchain.pem"
-if [ ! -f "${FULLCHAIN}" ]; then
+# `/etc/letsencrypt/live` 는 root 700 이라 ubuntu 의 `[ -f ]` 는 EACCES 로 거짓 "없음" 을 낸다
+# (2026-09-05 첫 실행 실측 — 인증서는 발급됐는데 4/6 에서 멈춤). 존재 확인은 sudo 로 한다.
+if ! sudo test -f "${FULLCHAIN}"; then
     log "실패: certbot 이 성공했다고 종료했지만 발급 산출물이 없다:"
     log "  ${FULLCHAIN}"
     exit 1
