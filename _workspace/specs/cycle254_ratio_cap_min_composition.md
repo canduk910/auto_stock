@@ -15,7 +15,7 @@
 
 **실측** — 09-05 DB `strategy_config` 조회 결과 donchian_swing·kojiro 둘 다 `sizing_mode=turtle`
 (`max_lot_ratio_mult` 키 부재 → DEFAULT 2.5)로 확인 = **F-9 실재**. 구현 착수.
-`system_logs` 의 `[ratio_cap_config]` 행은 09-04 00:00 이후 **0행**(09-04 야간 cycle245 배포 뒤 주말이라 매수 랏이 없었다) — 자문 §9 가 요구한 "배포 전 `cap=` 두 행" 대조군은 로그가 아니라 위 DB 값으로 대체한다. 월 09-07 첫 행은 곧바로 `cap=on` 이어야 한다.
+`system_logs`·파일 로그(`logs/auto_stock.log.2026-09-04`)·docker logs 세 채널 모두 `[ratio_cap_config]` 행은 09-04 00:00 이후 **0행**(09-04 야간 cycle245 배포 뒤 매수 랏이 없었다 — "09-05 아침 7행 판독" 메모리 기록은 근거 없음으로 정정). 마커는 세 채널에 같이 남는다(DB 핸들러 INFO+, 파일 DEBUG 일 회전 30일) — 자문 §9 가 요구한 "배포 전 `cap=` 두 행" 대조군은 로그가 아니라 위 DB 값으로 대체한다. 월 09-07 첫 행은 곧바로 `cap=on` 이어야 한다.
 
 ## 1. 무엇을 바꾸나 (행위)
 
@@ -88,8 +88,8 @@ if governs and gov_reason == "probe_error":
 ## 6. D+1 판독 (월 09-07, `system_logs` 직접 조회 — 20:10 리포트는 INFO 마커 미도달)
 | # | 서명 | 기대 |
 |---|---|---|
-| 1 | `[ratio_cap_config] strategy=donchian_swing sizing_mode=turtle cap=on k=2.50 … cutoff_price=195150` | 1행 (`backstop` 잔존 = 미반영) |
-| 2 | `[ratio_cap_config] strategy=kojiro … cap=on … cutoff_price=323952` | 1행 (387,320 이면 DB `position_ratio` 0.20 = 08-08 지혈 롤백 의심) |
+| 1 | `[ratio_cap_config] strategy=donchian_swing sizing_mode=turtle cap=on k=2.50 … cutoff_price=195150` | 1행 (`backstop` 잔존 = 미반영). 컷오프 값은 리포 예산 390,300 기준 추정 — 실 예산이 390,305 면 195,152 처럼 수 원 차이가 정상, 수백 원 이상이면 DB 예산·ρ 상이 |
+| 2 | `[ratio_cap_config] strategy=kojiro … cap=on … cutoff_price=323952` | 1행 (약 390,300 이면 DB `position_ratio` 0.20 = 08-08 지혈 롤백 의심 — 자문 §5.3 의 387,320 은 산술 오기, 780,611×0.20×2.5=390,305) |
 | 3 | `[ratio_notional_blocked] strategy=donchian_swing\|kojiro path=fallback` | 0건(나오면 F-9 첫 실측 표본 — ticker·price·ATR% 기록) |
 | 4 | `[fallback_notional_capped]` 건수 | 배포 전과 동일(변하면 K축 접촉 = 롤백) |
 | 5 | `[ratio_cap_skipped] reason=k_axis_probe_error` | 0건 |
@@ -102,4 +102,4 @@ if governs and gov_reason == "probe_error":
 
 ## 7. 롤백
 - 코드 롤백 불필요 — 해당 전략 `max_lot_ratio_mult = 20.0` (PUT 즉시 / SQL 은 다음 재시작). K_ρ 상한 20.0 이면 cutoff 가 P 를 넘어 1주 폴백도 통과.
-- 이번 변경은 **수량을 늘리지 않는다**(min). 보유 8종목 청산 규약 무접촉(`check_exit_signal` diff 0).
+- 이번 변경은 **수량을 늘리지 않는다**(min). 보유 종목(09-05 14:3x DB `positions` 실측 **9** = kojiro 6 · donchian_swing 2 · bull_flag_breakout 1)의 청산 규약 무접촉(`check_exit_signal` diff 0).
