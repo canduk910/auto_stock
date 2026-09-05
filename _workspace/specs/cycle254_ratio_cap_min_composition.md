@@ -96,6 +96,8 @@ if governs and gov_reason == "probe_error":
 | 6 | donchian·kojiro 매수 건수 | 직전 5영업일 평균 대비 감소 0 |
 | 7 | `[oversized_fallback]` 건수 | 동일(ρ캡 **앞**에서 발화) |
 
+**배포 전 기준선(`system_logs`, KST, 09-05 14:0x 조회)** — 09-03 `[oversized_fallback]` 4 · 09-04 `[fallback_cap_config]` 4 + `[oversized_fallback]` 1 · `[ratio_cap_config]`/`[ratio_notional_blocked]`/`[ratio_cap_skipped]`/`[fallback_notional_capped]` 09-01~09-05 **0행**(cycle245 는 09-04 야간 배포라 그 뒤 매수 랏 없음). 월 09-07 서명 ④·⑦의 "배포 전과 동일"은 이 표가 아니라 **직전 5영업일 평균(1~4건/일)** 과 비교한다.
+
 ⚠️ 의미 전환 2 — `cap=backstop` → `cap=on` 라벨 / R7 자기검증 반전: 터틀 행에서 `[oversized_fallback] ratio > k` 인데 같은 (전략, ticker, 일자)에 `[ratio_notional_blocked]` 도 `[ratio_cap_skipped]` 도 없으면 **캡 우회 = 결함**. 배포 전후 같은 grep 합산 금지.
 
 ## 7. 롤백
