@@ -142,4 +142,19 @@ server {
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
+
+    # 자체 호스팅 서체(cycle261 DK Stock v2, Gmarket Sans TTF) — 적대 검토 발견(cycle261
+    # 후속): 이 정규식 위 정적자산 목록에 `ttf` 가 없어 `/fonts/*.ttf` 가 위 SPA fallback
+    # location 으로 떨어져 `no-cache, no-store, must-revalidate` 를 받았다(실측: 전체
+    # 새로고침마다 Medium+Bold ≈ 4.9MB 재다운로드 + font-display:swap FOUT 반복). 파일명에
+    # 해시가 없으므로(다른 정적자산과 달리 재배포해도 파일명 불변) `immutable` 은 쓰지
+    # 않고 유한 TTL 로 캐시한다 — 서체가 바뀌어도 최대 30일 뒤 반영.
+    location ^~ /fonts/ {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+        # nginx:alpine mime.types 에 ttf 가 없어 default_type(application/octet-stream)으로
+        # 나가던 것도 동봉 시정 — 브라우저가 @font-face 에 MIME 을 강제하진 않지만(렌더
+        # 자체는 이미 정상) 올바른 타입을 실어 보내는 편이 맞다.
+        default_type font/ttf;
+    }
 }

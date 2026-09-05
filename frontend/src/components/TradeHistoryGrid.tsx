@@ -128,7 +128,9 @@ const columns = [
       const map: Record<string, { label: string; cls: string }> = {
         COMPLETED: { label: '체결', cls: 'bg-green-100 text-green-700' },
         PENDING: { label: '대기', cls: 'bg-yellow-100 text-yellow-700' },
-        PARTIAL: { label: '부분체결', cls: 'bg-orange-100 text-orange-700' },
+        // cycle261 후속(적대 검토) — yellow/orange→beige/brown 별칭 이후 종전 orange-100 이
+        // PENDING(beige-100)과 거의 같은 배경이 됐다(sRGB 거리 ≈15.9). brown-200 으로 구분 복원.
+        PARTIAL: { label: '부분체결', cls: 'bg-brown-200 text-brown-800' },
         CANCELLED: { label: '취소', cls: 'bg-gray-100 text-gray-500' },
       }
       const m = map[v] ?? { label: v, cls: 'bg-gray-100 text-gray-500' }

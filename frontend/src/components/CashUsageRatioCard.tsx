@@ -90,7 +90,7 @@ export default function CashUsageRatioCard({ netAsset }: Props) {
         onChange={onSliderChange}
         data-testid="cash-usage-ratio-slider"
         className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-        style={{ accentColor: '#2563eb' }}
+        style={{ accentColor: 'var(--color-navy-600)' }}
       />
 
       <div className="flex justify-between text-xs text-gray-400 mt-1">

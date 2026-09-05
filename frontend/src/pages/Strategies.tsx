@@ -101,9 +101,9 @@ const VERDICT_LABELS: Record<TeRrMetrics['verdict'], string> = {
 function verdictBadgeClass(verdict: TeRrMetrics['verdict']): string {
   switch (verdict) {
     case 'superior':
-      return 'bg-red-50 text-[#FF3333]'
+      return 'bg-red-50 text-pnl-profit'
     case 'inferior':
-      return 'bg-blue-50 text-[#3366FF]'
+      return 'bg-blue-50 text-pnl-loss'
     default:
       return 'bg-gray-100 text-gray-500'
   }
@@ -151,7 +151,7 @@ function RrGauge({
   const fillPct = Math.min(100, Math.max(0, (rr / scaleMax) * 100))
   const markerPct = Math.min(100, Math.max(0, (requiredRr / scaleMax) * 100))
   const superior = rr >= requiredRr
-  const fillColorClass = superior ? 'bg-[#FF3333]' : 'bg-[#3366FF]'
+  const fillColorClass = superior ? 'bg-pnl-profit' : 'bg-pnl-loss'
 
   return (
     <div data-testid={`rr-gauge-${strategyKey}`}>

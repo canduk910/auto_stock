@@ -560,8 +560,11 @@ function ToggleRow({ meta }: ToggleRowProps) {
       ? 'bg-blue-100 text-blue-800'
       : 'bg-gray-100 text-gray-600'
 
+  // cycle261 후속(적대 검토) — index.css 별칭(emerald≡blue) 때문에 종전 emerald 가
+  // 바로 위 sourceBadgeClass(db=blue) · BuyBlockSection 의 SOFT 모드 배지(blue)와 실제
+  // hex 가 동일했다. "활성" 의미를 다른 배지와 겹치지 않는 sky 계열로 분리.
   const stateBadgeClass = data.enabled
-    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+    ? 'bg-sky-100 text-sky-800 border border-sky-300'
     : 'bg-gray-100 text-gray-600 border border-gray-300'
 
   return (

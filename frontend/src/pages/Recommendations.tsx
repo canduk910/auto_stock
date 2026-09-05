@@ -8,7 +8,7 @@ import InfoTooltip from '../components/InfoTooltip'
 import ConfirmModal from '../components/ConfirmModal'
 import BacktestComparisonCard from '../components/recommendations/BacktestComparisonCard'
 import type { RecommendationItem, RecommendationStatus, RecommendationMetrics } from '../types/recommendations'
-import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR } from '../utils/pnlColor'
+import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR, NEUTRAL_HEX } from '../utils/pnlColor'
 
 const STATUS_LABEL: Record<RecommendationStatus, string> = {
   pending: '대기',
@@ -519,7 +519,7 @@ export default function Recommendations() {
                                   const diff = hasCurrent ? recommendedValue - (currentValue as number) : null
                                   const diffColor =
                                     diff === null || diff === 0
-                                      ? '#333333'
+                                      ? NEUTRAL_HEX
                                       : diff > 0
                                         ? PROFIT_COLOR
                                         : LOSS_COLOR

@@ -5,8 +5,8 @@
  * 백엔드 `parameter_recommendations.backtest_summary` JSONB 를 렌더.
  * 8개 메트릭을 좌(current) / 우(recommended) / diff 칩 형태로 표시.
  *
- * 컬러 컨벤션 (frontend/CLAUDE.md):
- * - 이익(개선) = #FF3333 빨강 / 손실(악화) = #3366FF 파랑 / 보합 = #333333
+ * 컬러 컨벤션 (frontend/CLAUDE.md, DK Stock 디자인시스템 v2 — `utils/pnlColor.ts` 위임):
+ * - 이익(개선) = PROFIT_HEX 빨강 / 손실(악화) = LOSS_HEX 파랑 / 보합 = NEUTRAL_HEX
  * - max_drawdown 은 외부 MCP 서버가 **양수 절대값**(예: 8.5, 16.1) 으로 반환 (Phase 6 실측 확정).
  *   diff = recommended - current. 양수 diff = MDD 절대값 증가 = 손실 악화 → 파랑 (signInverted: true).
  *   음수 diff = MDD 절대값 감소 = 손실 완화 → 빨강.
@@ -20,9 +20,9 @@ import { useMemo } from 'react'
 import type { BacktestMetrics, BacktestSummary } from '../../types/backtest'
 import { BACKTEST_METRIC_KEYS } from '../../types/backtest'
 import { getStrategyColor } from '../../types/strategy'
-import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR } from '../../utils/pnlColor'
+import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR, NEUTRAL_HEX } from '../../utils/pnlColor'
 
-const NEUTRAL_COLOR = '#333333'
+const NEUTRAL_COLOR = NEUTRAL_HEX
 
 interface MetricFormatSpec {
   label: string

@@ -255,7 +255,7 @@ describe('사이클 F 프론트 — TE/RR 전략 카드', () => {
     const teValue = screen.getByTestId('te-value-momentum')
     expect(teValue.textContent ?? '').toContain('1.5')
     // TE 양수 = 이익색
-    expect(teValue.className).toContain('FF3333')
+    expect(teValue.className).toContain('pnl-profit')
   })
 
   it('F-FE2/F-FE3 열위 배지 렌더 (volatility_breakout, normal tier)', async () => {
@@ -271,7 +271,7 @@ describe('사이클 F 프론트 — TE/RR 전략 카드', () => {
     const teValue = screen.getByTestId('te-value-volatility_breakout')
     expect(teValue.textContent ?? '').toContain('-0.6')
     // TE 음수 = 손실색
-    expect(teValue.className).toContain('3366FF')
+    expect(teValue.className).toContain('pnl-loss')
   })
 
   it('F-FE3 N<20 표본 부족 뮤트 — 배지 회색 + 게이지/구조 숨김 + raw 승/패/N', async () => {
@@ -335,7 +335,7 @@ describe('사이클 F 프론트 — TE/RR 전략 카드', () => {
     // momentum: rr=3.0 > required_rr=1.86 → 채움이 마커보다 우측(큰 값)
     expect(momentumFillPct).toBeGreaterThan(momentumMarkerPct)
     // 우위 = 이익색
-    expect(momentumFill.className).toContain('FF3333')
+    expect(momentumFill.className).toContain('pnl-profit')
 
     const vbFill = screen.getByTestId('rr-gauge-fill-volatility_breakout')
     const vbMarker = screen.getByTestId('rr-gauge-marker-volatility_breakout')
@@ -344,7 +344,7 @@ describe('사이클 F 프론트 — TE/RR 전략 카드', () => {
     // VB: rr=1.35 < required_rr=1.83 → 채움이 마커보다 작음
     expect(vbFillPct).toBeLessThan(vbMarkerPct)
     // 열위 = 손실색
-    expect(vbFill.className).toContain('3366FF')
+    expect(vbFill.className).toContain('pnl-loss')
   })
 
   it('F-FE2 구조 태그 렌더 — robust/balanced 한글 라벨', async () => {
@@ -368,7 +368,7 @@ describe('사이클 F 프론트 — TE/RR 전략 카드', () => {
     // verdict 배지 = 지배적 신호: 손실색 + 굵은 글씨 + structure_tag 보다 큰 글자
     const verdict = screen.getByTestId('te-verdict-volatility_breakout')
     expect(verdict.textContent ?? '').toContain('열위')
-    expect(verdict.className).toContain('3366FF')
+    expect(verdict.className).toContain('pnl-loss')
     expect(verdict.className).toContain('font-bold')
     expect(verdict.className).toContain('text-sm')
 
@@ -377,8 +377,8 @@ describe('사이클 F 프론트 — TE/RR 전략 카드', () => {
     const structure = screen.getByTestId('te-structure-volatility_breakout')
     expect(structure.textContent ?? '').toContain('견고형')
     expect(structure.textContent ?? '').toContain('저승률')
-    expect(structure.className).not.toContain('FF3333')
-    expect(structure.className).not.toContain('3366FF')
+    expect(structure.className).not.toContain('pnl-profit')
+    expect(structure.className).not.toContain('pnl-loss')
     expect(structure.className).toContain('text-gray')
     expect(structure.className).toContain('text-xs')
   })

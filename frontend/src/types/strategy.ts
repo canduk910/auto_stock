@@ -1,45 +1,46 @@
+// DK Stock 디자인시스템 v2 (가을 팔레트) — 전략 식별 7색
 export const STRATEGY_COLORS: Record<string, { bg: string; text: string; badge: string; hex: string }> = {
   momentum: {
     bg: 'bg-blue-50',
     text: 'text-blue-700',
     badge: 'bg-blue-100 text-blue-700',
-    hex: '#3B82F6',
+    hex: '#3d73b7',
   },
   volatility_breakout: {
-    bg: 'bg-purple-50',
-    text: 'text-purple-700',
-    badge: 'bg-purple-100 text-purple-700',
-    hex: '#8B5CF6',
+    bg: 'bg-navy-50',
+    text: 'text-navy-700',
+    badge: 'bg-navy-100 text-navy-700',
+    hex: '#364c6d',
   },
   long_tail_volatility: {
-    bg: 'bg-amber-50',
-    text: 'text-amber-700',
-    badge: 'bg-amber-100 text-amber-700',
-    hex: '#F59E0B',
+    bg: 'bg-beige-50',
+    text: 'text-beige-700',
+    badge: 'bg-beige-100 text-beige-700',
+    hex: '#b39364',
   },
   donchian_swing: {
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-700',
-    badge: 'bg-emerald-100 text-emerald-700',
-    hex: '#10B981',
+    bg: 'bg-sky-50',
+    text: 'text-sky-700',
+    badge: 'bg-sky-100 text-sky-700',
+    hex: '#488eb4',
   },
   bull_flag_breakout: {
-    bg: 'bg-pink-50',
-    text: 'text-pink-700',
-    badge: 'bg-pink-100 text-pink-700',
-    hex: '#EC4899',
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    badge: 'bg-red-100 text-red-700',
+    hex: '#c34a36',
   },
   vcp_breakout: {
-    bg: 'bg-cyan-50',
-    text: 'text-cyan-700',
-    badge: 'bg-cyan-100 text-cyan-700',
-    hex: '#06B6D4',
+    bg: 'bg-brown-50',
+    text: 'text-brown-700',
+    badge: 'bg-brown-100 text-brown-700',
+    hex: '#9d6644',
   },
   kojiro: {
-    bg: 'bg-violet-50',
-    text: 'text-violet-700',
-    badge: 'bg-violet-100 text-violet-700',
-    hex: '#7C3AED',
+    bg: 'bg-navy-50',
+    text: 'text-navy-900',
+    badge: 'bg-navy-200 text-navy-900',
+    hex: '#141c2b',
   },
 }
 
@@ -47,7 +48,7 @@ const DEFAULT_COLOR = {
   bg: 'bg-gray-50',
   text: 'text-gray-700',
   badge: 'bg-gray-100 text-gray-700',
-  hex: '#6B7280',
+  hex: '#74716a',
 }
 
 export function getStrategyColor(key: string) {

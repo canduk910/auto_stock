@@ -89,7 +89,7 @@ function EnvBanner() {
   if (!status) return null
   return (
     <div className={`text-center text-white text-sm font-medium py-1 ${
-      status.env === 'real' ? 'bg-red-600' : 'bg-green-600'
+      status.env === 'real' ? 'bg-red-600' : 'bg-sky-600'
     }`}>
       {status.env === 'real' ? '실전 매매 환경' : '모의투자 환경'}
     </div>
@@ -114,7 +114,7 @@ function AppShell() {
   const { level: contentWidthLevel, setLevel: setContentWidthLevel } = useContentWidth()
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-beige-100">
       {/* 상단 환경 배너 + 네비게이션 — 스크롤해도 항상 화면 최상단에 고정 */}
       <div className="sticky top-0 z-50" data-testid="nav-sticky-wrapper">
         <EnvBanner />
@@ -124,7 +124,7 @@ function AppShell() {
           <div className="mx-auto px-4" style={{ maxWidth: contentMaxWidth(contentWidthLevel) }}>
             {/* PC (sm 이상): 한 줄 가로 메뉴 */}
             <div className="hidden sm:flex items-center h-14 gap-8">
-              <span className="font-bold text-gray-900 shrink-0">AutoStock</span>
+              <span className="font-brand font-bold tracking-tight text-gray-900 shrink-0">DK Stock</span>
               <div className="flex gap-1 flex-wrap">
                 {navItems.map((item) => (
                   <NavLink
@@ -159,14 +159,14 @@ function AppShell() {
                   data-testid="content-width-slider"
                   aria-label="화면 폭 조정"
                   className="w-24 h-2 rounded-lg appearance-none cursor-pointer"
-                  style={{ accentColor: '#2563eb' }}
+                  style={{ accentColor: 'var(--color-navy-600)' }}
                 />
               </div>
             </div>
 
             {/* 모바일 (sm 미만): 로고 + 현재 메뉴명 + 햄버거 버튼 */}
             <div className="flex sm:hidden items-center justify-between h-14">
-              <span className="font-bold text-gray-900">AutoStock</span>
+              <span className="font-brand font-bold tracking-tight text-gray-900">DK Stock</span>
               <MobileMenuLabel />
               <button
                 data-testid="mobile-menu-button"

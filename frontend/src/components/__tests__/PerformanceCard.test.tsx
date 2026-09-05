@@ -171,7 +171,7 @@ describe('PerformanceCard', () => {
 
     const pnl = await screen.findByTestId('realized-pnl-kojiro')
     expect(pnl.textContent).toContain('120,000')
-    expect(pnl.className).toContain('#3366FF') // 손실 = 파랑
+    expect(pnl.className).toContain('pnl-loss') // 손실 = 파랑 (cycle261 — text-pnl-loss 시맨틱 클래스)
     expect(screen.getByTestId('realized-winrate-kojiro').textContent).toContain('33%')
     const badge = screen.getByTestId('strategy-status-badge-kojiro')
     expect(badge.textContent).toContain('활성')

@@ -5,10 +5,14 @@
  * A. backtest_summary == null → 미실행 안내 메시지 ("백테스트 미실행") + placeholder 렌더
  * B. 자기 전략 current==null AND recommended==null (b)폴백 → "로컬 어댑터 대기" 안내
  * C. 자기 전략 정상 데이터 → 8 메트릭 좌(current)/우(recommended) 비교 + diff 컬러 칩
- * D. 이익색(#FF3333)/손실색(#3366FF), max_drawdown 부호 역전
+ * D. 이익색(PROFIT_HEX)/손실색(LOSS_HEX), max_drawdown 부호 역전
  * E. peer 전략 데이터 — 5개 peer mini 비교 (자율 결정: 표시함)
  * F. 숫자 포맷 — 수익률 소수 2자리 + %, sharpe/sortino 소수 2자리, total_trades 콤마
  * G. data-testid 일관성
+ *
+ * cycle261 (2026-09-05) — DK Stock 디자인시스템 v2 전환에 맞춰 색 단언을 hex 리터럴에서
+ * `utils/pnlColor` 상수 import 로 바꿨다. 팔레트가 다시 바뀌어도 이 파일은 무수정이고,
+ * 두 정본(index.css @theme ↔ pnlColor.ts) 드리프트는 designSystem.v2 가드가 따로 잡는다.
  */
 
 import { describe, expect, it } from "vitest";
@@ -16,6 +20,22 @@ import { render, screen, within } from "@testing-library/react";
 
 import BacktestComparisonCard from "../BacktestComparisonCard";
 import type { BacktestSummary } from "../../../types/backtest";
+import { PROFIT_HEX, LOSS_HEX, NEUTRAL_HEX } from "../../../utils/pnlColor";
+
+/**
+ * inline style 의 color 단언용 패턴.
+ * jsdom 은 `style` 속성을 `color: rgb(r, g, b)` 로 직렬화하므로 hex/rgb 양쪽을 허용한다.
+ */
+function colorPattern(hex: string): RegExp {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return new RegExp(`${hex}|rgb\\(\\s*${r},\\s*${g},\\s*${b}\\s*\\)`, "i");
+}
+
+const PROFIT_STYLE = colorPattern(PROFIT_HEX);
+const LOSS_STYLE = colorPattern(LOSS_HEX);
+const NEUTRAL_STYLE = colorPattern(NEUTRAL_HEX);
 
 // Phase 6.1 (2026-05-17) — 외부 MCP 실측 검증으로 MDD 양수(절대값) 컨벤션 확정.
 // 픽스처는 양수형 MDD 를 사용한다 (예: 8.5 — 절대값). 추천 MDD 가 더 크면 손실 악화.
@@ -126,22 +146,22 @@ describe("BacktestComparisonCard — Phase 4", () => {
     }
   });
 
-  it("D: diff 양수 = 이익색(#FF3333), 음수 = 손실색(#3366FF). max_drawdown 부호 역전 (양수 컨벤션).", () => {
+  it("D: diff 양수 = 이익색(PROFIT_HEX), 음수 = 손실색(LOSS_HEX). max_drawdown 부호 역전 (양수 컨벤션).", () => {
     const summary = makeSummary();
     render(<BacktestComparisonCard strategyId="momentum" summary={summary} />);
     const card = screen.getByTestId("backtest-comparison-card-momentum");
 
     // total_return_pct diff +2.66 → 이익색 빨강
     const totalReturnDiff = within(card).getByTestId("metric-diff-total_return_pct");
-    expect(totalReturnDiff.getAttribute("style") ?? "").toMatch(/#FF3333|rgb\(255,\s*51,\s*51\)/i);
+    expect(totalReturnDiff.getAttribute("style") ?? "").toMatch(PROFIT_STYLE);
 
     // sharpe_ratio diff +0.17 → 이익색
     const sharpeDiff = within(card).getByTestId("metric-diff-sharpe_ratio");
-    expect(sharpeDiff.getAttribute("style") ?? "").toMatch(/#FF3333|rgb\(255,\s*51,\s*51\)/i);
+    expect(sharpeDiff.getAttribute("style") ?? "").toMatch(PROFIT_STYLE);
 
     // Phase 6.1 양수 컨벤션: max_drawdown diff +1.5 → 추천 MDD 더 큼 → 손실 증가 → 손실색 파랑 (signInverted)
     const mddDiff = within(card).getByTestId("metric-diff-max_drawdown");
-    expect(mddDiff.getAttribute("style") ?? "").toMatch(/#3366FF|rgb\(51,\s*102,\s*255\)/i);
+    expect(mddDiff.getAttribute("style") ?? "").toMatch(LOSS_STYLE);
   });
 
   it("D-2: 일반 메트릭 음수 diff → 손실색 파랑", () => {
@@ -155,10 +175,23 @@ describe("BacktestComparisonCard — Phase 4", () => {
     const card = screen.getByTestId("backtest-comparison-card-momentum");
 
     const winRateDiff = within(card).getByTestId("metric-diff-win_rate");
-    expect(winRateDiff.getAttribute("style") ?? "").toMatch(/#3366FF|rgb\(51,\s*102,\s*255\)/i);
+    expect(winRateDiff.getAttribute("style") ?? "").toMatch(LOSS_STYLE);
 
     const totalDiff = within(card).getByTestId("metric-diff-total_return_pct");
-    expect(totalDiff.getAttribute("style") ?? "").toMatch(/#3366FF|rgb\(51,\s*102,\s*255\)/i);
+    expect(totalDiff.getAttribute("style") ?? "").toMatch(LOSS_STYLE);
+  });
+
+  // cycle261 — 보합(diff 0)도 pnlColor 정본에 위임한다. 카드가 자기만의 중립 hex 를
+  // 들고 있으면 팔레트를 갈아끼울 때 이 한 칸만 구 팔레트로 남는다(D 케이스는 못 잡는 사각).
+  it("D-3: diff 0 → 보합색(NEUTRAL_HEX)", () => {
+    const zeroSummary = makeSummary({
+      diff: { momentum: { total_return_pct: 0 } },
+    });
+    render(<BacktestComparisonCard strategyId="momentum" summary={zeroSummary} />);
+    const card = screen.getByTestId("backtest-comparison-card-momentum");
+
+    const zeroDiff = within(card).getByTestId("metric-diff-total_return_pct");
+    expect(zeroDiff.getAttribute("style") ?? "").toMatch(NEUTRAL_STYLE);
   });
 
   it("E: peer 전략 mini 비교 표시 — 5개 peer 모두 카드 렌더", () => {
@@ -224,7 +257,7 @@ describe("BacktestComparisonCard — Phase 4", () => {
     const card = screen.getByTestId("backtest-comparison-card-momentum");
 
     const mddDiff = within(card).getByTestId("metric-diff-max_drawdown");
-    expect(mddDiff.getAttribute("style") ?? "").toMatch(/#3366FF|rgb\(51,\s*102,\s*255\)/i);
+    expect(mddDiff.getAttribute("style") ?? "").toMatch(LOSS_STYLE);
     // 표시 텍스트는 양수 그대로 (+5.00%)
     expect(mddDiff.textContent).toMatch(/\+5\.00/);
 
@@ -248,7 +281,7 @@ describe("BacktestComparisonCard — Phase 4", () => {
     const cards = screen.getAllByTestId("backtest-comparison-card-momentum");
     const lastCard = cards[cards.length - 1];
     const mddDiff2 = within(lastCard).getByTestId("metric-diff-max_drawdown");
-    expect(mddDiff2.getAttribute("style") ?? "").toMatch(/#FF3333|rgb\(255,\s*51,\s*51\)/i);
+    expect(mddDiff2.getAttribute("style") ?? "").toMatch(PROFIT_STYLE);
   });
 
   it("G: data-testid 일관성 — backtest-comparison-card-{strategy_id} 루트 + 메트릭 testid", () => {

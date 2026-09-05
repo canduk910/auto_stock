@@ -26,12 +26,15 @@ interface BreakoutTarget {
 }
 
 // 보드별 시각 메타 — chip 색상 + 한글 라벨
+// cycle261 후속(적대 검토) — index.css 별칭(green≡teal≡cyan≡sky, purple≡violet≡indigo≡navy)
+// 때문에 종전 pre_nxt(teal)≡krx_open(sky) · post_nxt(violet)≡krx_after(purple) 가 실제
+// hex 까지 동일했다. 5보드를 서로 다른 실제 색 계열(blue/sky/navy/beige/brown)로 재배정.
 const BOARD_META: Record<string, { label: string; chipCls: string }> = {
   main: { label: '메인', chipCls: 'bg-blue-100 text-blue-700' },
-  pre_nxt: { label: '프리', chipCls: 'bg-teal-100 text-teal-700' },
-  post_nxt: { label: '애프터', chipCls: 'bg-violet-100 text-violet-700' },
-  krx_open: { label: '동시호가', chipCls: 'bg-sky-100 text-sky-700' },
-  krx_after: { label: '시간외', chipCls: 'bg-purple-100 text-purple-700' },
+  pre_nxt: { label: '프리', chipCls: 'bg-sky-100 text-sky-700' },
+  post_nxt: { label: '애프터', chipCls: 'bg-navy-100 text-navy-700' },
+  krx_open: { label: '동시호가', chipCls: 'bg-beige-100 text-beige-700' },
+  krx_after: { label: '시간외', chipCls: 'bg-brown-100 text-brown-700' },
 }
 
 interface SwingTarget {
@@ -347,11 +350,14 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
     const m = Number(parts.find((p) => p.type === 'minute')?.value ?? '0')
     const t = h * 60 + m
     const result: { code: string; label: string; color: string }[] = []
-    if (t >= 8 * 60 && t < 9 * 60) result.push({ code: 'pre_nxt', label: 'NXT 프리', color: 'bg-teal-100 text-teal-700' })
-    if (t >= 8 * 60 + 30 && t < 9 * 60) result.push({ code: 'krx_open', label: 'KRX 동시호가', color: 'bg-sky-100 text-sky-700' })
-    if (t >= 9 * 60 && t < 15 * 60 + 30) result.push({ code: 'main', label: 'KRX 메인', color: 'bg-green-100 text-green-700' })
-    if (t >= 15 * 60 + 30 && t < 18 * 60) result.push({ code: 'krx_after', label: 'KRX 시간외', color: 'bg-purple-100 text-purple-700' })
-    if (t >= 15 * 60 + 30 && t < 20 * 60) result.push({ code: 'post_nxt', label: 'NXT 애프터', color: 'bg-violet-100 text-violet-700' })
+    // cycle261 후속 — BOARD_META 와 동일한 색 배정(blue/sky/navy/beige/brown 5계열
+    // 서로 다른 hex). pre_nxt(08:00~09:00)∩krx_open(08:30~09:00), post_nxt(15:30~20:00)
+    // ∩krx_after(15:30~18:00) 구간엔 실제로 두 배지가 동시에 노출된다.
+    if (t >= 8 * 60 && t < 9 * 60) result.push({ code: 'pre_nxt', label: 'NXT 프리', color: 'bg-sky-100 text-sky-700' })
+    if (t >= 8 * 60 + 30 && t < 9 * 60) result.push({ code: 'krx_open', label: 'KRX 동시호가', color: 'bg-beige-100 text-beige-700' })
+    if (t >= 9 * 60 && t < 15 * 60 + 30) result.push({ code: 'main', label: 'KRX 메인', color: 'bg-blue-100 text-blue-700' })
+    if (t >= 15 * 60 + 30 && t < 18 * 60) result.push({ code: 'krx_after', label: 'KRX 시간외', color: 'bg-brown-100 text-brown-700' })
+    if (t >= 15 * 60 + 30 && t < 20 * 60) result.push({ code: 'post_nxt', label: 'NXT 애프터', color: 'bg-navy-100 text-navy-700' })
     return result
   })()
 

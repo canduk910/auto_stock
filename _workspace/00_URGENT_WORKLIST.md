@@ -188,6 +188,10 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 | D6 주간 자문 정본 위치 | 09-08 첫 산출물 후 | 변경 없음 |
 | D7 리포트 판독 채널 | 유지 | 변경 없음 |
 
+## ✅ cycle261 · DK Stock 디자인시스템 v2 적용 (2026-09-05 저녁, 사용자 지시 `dk-stock-design/handoff/` 절차대로 · frontend 전용 · src·8영역 diff 0 — **배포 대기**)
+
+- 가을 팔레트(`index.css` @theme 별칭 재정의로 기존 className 무수정) + Gmarket Sans 3 weight + 손익색/전략 7색 재정의 + 브랜드명 "AutoStock"→"DK Stock". tester 적대 검토가 별칭 재정의 부작용(보드·토글·게이트·체결상태 배지 hex 충돌 4건)과 nginx `/fonts/` 캐시 결손을 찾아 시정 완료. 게이트 전부 PASS(`tsc -b` 0·`npm test` 76/557·`npm run build`·e2e 33·백엔드 frontend 가드 235). 상세 = `docs/HARNESS_CHANGELOG.md` cycle261 행, 명세 = `_workspace/specs/cycle261_dk_stock_design_v2.md`.
+
 ## 🔴 P1-7 · 통합 채널 H0UNCNT0 무송출 — KRX 단독(`nxt_tradable=False`) 종목 장중 stale 33% (포렌식 2026-09-05 확정, A=cycle252 야간 진행 · B=8영역 승인 대기)
 
 - **사실**: 09-01~09-04 구독 184~209종목이 `nxt_true ↔ H0UNCNT0 프레임>0` / `nxt_false ↔ 프레임=0` 으로 예외 0 완전 분할(064550 NXT 편출 자연 실험 포함). 유동주(005935 3,538억·035720 등) 포함 = 채널 결함(가설 ≈90%, KIS 문서·MCP 샘플에 대상 범위 무명시). 최소 07-24 부터 만성 — "09-01 이후" 는 INFO 2일 retention 착시. 정본 = `_workspace/forensics/stale_candidates_0904.md`.

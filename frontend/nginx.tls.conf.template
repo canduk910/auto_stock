@@ -92,4 +92,12 @@ server {
         # 겹치지 않는 파일 집합).
         include /etc/nginx/conf.d/stage2/tls-loc-*.conf;
     }
+
+    # 자체 호스팅 서체 — HTTP 템플릿과 byte 동일 규약(cycle261 후속). `ttf` 가 위 정규식에
+    # 없어 no-store SPA fallback 으로 떨어지던 결함을 여기서도 동일하게 시정한다.
+    location ^~ /fonts/ {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+        default_type font/ttf;
+    }
 }

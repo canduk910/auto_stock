@@ -234,7 +234,10 @@ function AccountGateBlock({ gate }: AccountGateBlockProps) {
     badgeClass = 'bg-red-100 text-red-700'
   } else if (isWarn) {
     badgeText = '경고'
-    badgeClass = 'bg-amber-100 text-amber-700'
+    // cycle261 후속(적대 검토) — amber→beige 별칭 이후 종전 amber-100 이 gray-100("정상")과
+    // 거의 같은 배경이 돼(sRGB 거리 ≈10.5) 구분이 글자색 채도 차이 하나에만 의존했다.
+    // beige-200 로 배경 축 구분을 복원(거리 ≈39).
+    badgeClass = 'bg-beige-200 text-beige-800'
   }
 
   const openRiskDisplay =
