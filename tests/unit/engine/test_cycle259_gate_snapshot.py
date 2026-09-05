@@ -44,7 +44,6 @@ from __future__ import annotations
 import ast
 import hashlib
 import inspect
-import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
