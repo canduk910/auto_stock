@@ -26,3 +26,29 @@
 
 ## 6. 착수 조건
 - 8영역 호출자 목록 승인 → 주중 장외 배포 → D+1 `[pg_acquire_timeout]` 0건이 정상.
+
+## 3-a. 호출자 사전 목록 (09-05 15:2x 자동 집계 — 화요일 착수 시 재실행해 갱신)
+- 총 `pg.*` 호출 **116** 건 / 함수별 {'fetch': 52, 'fetchrow': 21, 'execute': 28, 'fetchval': 13, 'executemany': 2} / 파일 18개. 8영역 파일은 굵게. 직접 `.acquire(` 호출 6건: src/db/pg.py:128; src/db/pg.py:138; src/db/pg.py:148; src/db/pg.py:156; src/db/pg.py:162; src/engine/account_risk_watcher.py:61.
+
+| 파일 | 호출 수 | 비고 |
+|---|---|---|
+| `src/db/stock_master.py` | 19 |  |
+| `src/db/trade_history.py` | 17 |  |
+| `src/db/stock_master_daily.py` | 11 |  |
+| `src/db/kis_quote_accounts.py` | 8 |  |
+| `src/db/parameter_recommendations.py` | 8 |  |
+| `src/db/system_logs.py` | 7 |  |
+| `src/db/backtest_runs.py` | 5 |  |
+| `src/db/daily_performance.py` | 5 |  |
+| `src/db/market_regime_snapshots.py` | 5 |  |
+| `src/db/positions.py` | 5 |  |
+| `src/db/log_reports.py` | 4 |  |
+| `src/db/pending_next_day_clear.py` | 4 |  |
+| `src/db/stock_master_financial.py` | 4 |  |
+| `src/db/strategy_config.py` | 4 |  |
+| `src/db/strategy_funnel.py` | 4 |  |
+| `src/engine/log_metrics_collector.py` | 3 |  |
+| `src/db/system_config.py` | 2 |  |
+| `src/main.py` | 1 |  |
+
+- 화요일 아침 절차: ① 위 표 재집계 ② 8영역 파일의 각 호출 지점을 (a)/(b)/(c) 로 분류해 표에 열 추가 ③ 사용자 승인(8영역 = 예외 타입 추가만, 코드 diff 는 `src/db/pg.py` 단독) ④ Red→Green→Verify ⑤ 장외 배포.
