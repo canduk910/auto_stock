@@ -232,8 +232,11 @@ def test_k6b_emit_once_second_call_same_day_is_capped():
     cap = _cap()
     rec = _Recorder()
     d = _dt(2026, 9, 5)
-    assert cap.emit_once("k", rec, "m") is True
-    assert cap.emit_once("k", rec, "m") is False
+    # 첫 두 호출도 `now=d` 를 명시한다 — 생략하면 실제 시계(KST 오늘)를 써서, 실제 날짜가
+    # 2026-09-06 이 되는 순간 세 번째 호출의 "날짜 변경" 이 성립하지 않아 CI 가 붉어진다
+    # (2026-09-06 04:07 KST 실측 — 날짜 의존 flake).
+    assert cap.emit_once("k", rec, "m", now=d) is True
+    assert cap.emit_once("k", rec, "m", now=d) is False
     assert len(rec.calls) == 1, "1회/(key)/일 cap 이 안 걸렸습니다"
     assert cap.emit_once("k", rec, "m", now=_dt(2026, 9, 6)) is True, (
         "날짜가 바뀌었는데 재발화하지 않습니다"
