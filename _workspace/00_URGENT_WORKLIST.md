@@ -51,7 +51,7 @@ k=2.00 budget=260203 risk_pct=0.0000 atr_max=0`(VB·BFB 동일).
 - **적용 범위 = "K축이 이 랏을 실제로 심사하지 못한 모든 랏"**(백스톱). ⚠️ 자문 원안(`mode != turtle` 게이팅)은
   시뮬레이션 실측에서 **cycle242 테스트 4건**을 깼다 — 백스톱은 그 4건을 무수정 통과시키면서 "터틀인데 ATR 배관이
   끊긴 랏 = 양축 무방비" 사각까지 닫는다(라이브 비용 0).
-- **두 캡 상호배타 — `min` 합성 없음.** 관문 위치는 `_apply_lot_units_cap` → `[oversized_fallback]` **뒤**·return 앞.
+- **두 캡 상호배타 — `min` 합성 없음**(결정 ⑦ — **cycle254(2026-09-05)에서 폐기**, D3 행 참조). 관문 위치는 `_apply_lot_units_cap` → `[oversized_fallback]` **뒤**·return 앞.
 - **차단(0주)이 유일 선택지**(K_ρ≥1 이면 캡은 폴백 경로에서만 바인딩되고 그 수량은 항상 1). 유니버스 가격 상한안 기각.
 - **전략별 차등 없음**(진짜 차등은 이미 `weight × position_ratio` 에 있다). **키 부재 = OFF**(fail-closed 는 P0-1 재현).
 - K_ρ 는 리스크 정체성 상수 — `PARAM_RANGES`/`INT_PARAMS` 미편입 + 읽는 쪽 `[1.0, 20.0]` 클램프(하한 1.0 이 전제).
@@ -70,12 +70,12 @@ k=2.00 budget=260203 risk_pct=0.0000 atr_max=0`(VB·BFB 동일).
    그 뒤 `save_params` 가 `params` 를 통째 덮어 **먼저 넣은 SQL 값까지 지운다** ⇒ SQL 선반영~배포 사이 두 전략에 **어떤 PUT 도 금지**.
    확인 = `SELECT params->'max_lot_ratio_mult' FROM strategy_config WHERE strategy_id IN (…)`(구코드엔 마커가 없어 로그로는 확인 불가).
 2. **배포 창 = 15:30 이후**(`strategy_base.py` 변경 = 백엔드 재시작 동반, cycle232 D6). VB 는 선반영 대상 아님(컷오프 341,515 = 유니버스 2.2%, 90일 차단 0건).
-3. 배포 후 확인 = `[ratio_cap_config] … k=20.00`(BFB·VCP) / `cap=on k=2.50`(LTV·VB·momentum) / `cap=backstop`(donchian·kojiro).
+3. 배포 후 확인 = `[ratio_cap_config] … k=20.00`(BFB·VCP) / `cap=on k=2.50`(LTV·VB·momentum·donchian·kojiro — **cycle254 이후 터틀도 `cap=on`**, 터틀 전용 구 라벨은 폐기).
 
 ### D+1 판독
 | 채널 | 정상 | 이상 |
 |---|---|---|
-| `[ratio_cap_config]` | 전략마다 1행/일, `cutoff_price` = LTV·VCP 130,100 / VB 341,515 / BFB 243,940 / MOM 81,312 | 비터틀에 `cap=off` = **키가 사라짐** / donchian·kojiro 에 `cap=backstop` 부재 = 배치 오류 |
+| `[ratio_cap_config]` | 전략마다 1행/일, `cutoff_price` = LTV·VCP 130,100 / VB 341,515 / BFB 243,940 / MOM 81,312 | 비터틀에 `cap=off` = **키가 사라짐** / donchian·kojiro 에 터틀 전용 구 라벨 **잔존**(`cap=on` 아님) = cycle254 미반영(롤백/재배포 확인) |
 | `[ratio_notional_blocked]` | LTV 0~1건/일(기대 0.33), **BFB·VCP 0**(선반영) | `capped_qty > 0` = 도달 불가 구간 → R7 조사 |
 | `[ratio_cap_skipped]` / `[ratio_cap_clamped]` | **0행** | `k_axis_probe_error`·`exception` ≥1 = 코드 결함, 즉시 조사 |
 | cycle242 마커 3종 | donchian·kojiro `[fallback_cap_config] cap=on k=2.00` 존속 | 사라지면 배치 오류 = 즉시 롤백 |
@@ -83,12 +83,16 @@ k=2.00 budget=260203 risk_pct=0.0000 atr_max=0`(VB·BFB 동일).
 ⚠️ **의미 전환 2** — `[oversized_fallback]` = "사려 했던 랏"(0 수렴 아님) · `order_engine` 수량-0 WARNING = "ρ캡 차단 포함"
 (**1:N** — 표적 3전략엔 `_bought_today` 가 없어 하루 3~4회 재시도). **배포 전후 같은 grep 합산 금지.**
 ⚠️ INFO 2마커는 20:10 리포트에 **구조적으로 안 실린다** — 판독은 `system_logs` 직접 조회가 유일 채널.
+⚠️ **cycle254 반전 규칙** — 위 표·R7 은 cycle245 단독 배포 시점 서술이다. cycle254(2026-09-05) 이후 라벨은
+2종(off/on)으로 통일되고(donchian·kojiro 포함 — 터틀 전용 구 라벨은 폐기), R7 자기검증에 터틀 예외가 없어진다 —
+터틀 행에서 `[oversized_fallback] ratio > k` 인데 같은 (전략,ticker,일자)에 `[ratio_notional_blocked]` 도
+`[ratio_cap_skipped]` 도 없으면 **캡 우회 = 결함**. 터틀 전용 구 라벨이 보이면 그 자체가 cycle254 미반영 신호다.
 
 ### 트리거
 R1 LTV 주 3건↑ → K=3.0 / R2 BFB·VCP 1건이라도 차단 = 선반영 누락 **감지** 채널(사후로는 늦다) /
 R3 LTV 10영업일 매수 0(⚠️ edge-crossing 이라 스펙 상정보다 쉽게 걸린다) / R4 momentum 차단률 50%↑ →
 `weight` 재검토 / R5 20영업일 0 = 자연 무해화(게이트 유지) / R6 캡 마커 없는 수량-0 distinct (전략,ticker) 하루 3 초과 /
-**R7 캡 우회 = 즉시 핫픽스**(판정은 리터럴 2.50 이 아니라 그날 그 전략의 `[ratio_cap_config] k=`, `cap=backstop` 행 제외).
+**R7 캡 우회 = 즉시 핫픽스**(판정은 리터럴 2.50 이 아니라 그날 그 전략의 `[ratio_cap_config] k=` — cycle254 이후 터틀 행도 예외 없이 대상).
 R8 `weight`/`position_ratio`/`cash_usage_ratio` 변경 시 K 재검토(컷오프가 예산에 선형 비례).
 
 ### 롤백
@@ -100,8 +104,9 @@ F-1 `price_filter_max` 500,000→250,000(사용자 결정, 터틀 2전략 영향
 (어떤 K 로도 정책선 10% 안에 못 들어온다) · F-3 `order_engine` 수량-0 사유 분기(8영역) · F-4 프리장 한정 더 낮은 K 또는
 LTV `tradable_boards` 에서 `pre_nxt` 제거(**사용자 결정**) · F-5 LTV 15:20 청산 누수(`_limit_up_reached` 무영속) ·
 F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘다 = 고가주 자체가 나쁜 매매일 가능성) · F-7 자금 규모 대비 전략 수
-(순자산 1,000만이면 자연 소멸) · **F-8 cycle242 후속 D 종결** · **F-9 터틀 1주 폴백 랏의 ρ 잔여 노출**(kojiro 3.86배·donchian 5.00배 —
-차단 요인은 cycle242 무손상이 **아니라** 이 사이클의 상호배타 결정이다, 재검토는 team-leader/사용자 몫) ·
+(순자산 1,000만이면 자연 소멸) · **F-8 cycle242 후속 D 종결** · **F-9 터틀 1주 폴백 랏의 ρ 잔여 노출 — ✅ 종결(cycle254, 2026-09-05)**
+(kojiro 3.86배·donchian 5.00배는 구 결정 ⑦ "상호배타" 폐기로 닫혔다 — 자문 `_workspace/domain_consult/cycle254_turtle_fallback_rho_exposure.md`
+권고 B 채택, 상세는 아래 09-05 결정 세트 D3 행) ·
 **F-10 BFB/VCP 표본 기록 시점**(주문 확정 전 `_bought_today.add`, 8영역 승인 필요) · **F-11 계좌 SOFT Σ상한 켜기 전 LTV 게이트 위치**
 (C233-F1 재현 잠복) · F-12 20:10 리포트 ρ캡 집계 · F-13 차단 마커의 랏 수 관측 공백(LOW, 1회/(전략,ticker)/일) · **F-14 `_quote_5xx_dedupe` 테스트 격리**(모듈 전역 dict 를 리셋하는 픽스처가 없어 앞선 부팅 통합 테스트의 실제 KIS 500 잔재가 `test_cycle76_request_5xx_dedupe::test_g_md4` 를 넘어뜨린다 — 로컬 `.token_cache` 보유 시에만 발화하고 CI 는 캐시가 없어 초록이라 잠복. cycle245 무관, Docs 단계 실측으로 신규 등재).
 
@@ -167,12 +172,12 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 
 ## ✅ 2026-09-05 사용자 결정 세트 (아침 리포트 §4 D1~D11) — 처리 현황
 
-> **주말 보고서(09-05 12:2x 게시)**: https://claude.ai/code/artifact/0c558bf8-4fa8-45d0-8aa4-98ab392ffb46 · 원문 `_workspace/reports/2026-09-05_weekend_decision_set.md`. 남은 사용자 답 = ① DNS A 레코드 등록(오늘) ② D4 월요일 착수 승인 ③ D3 권고 B 채택(월 `cap=` 판독 후, 미리 정해도 됨) ④ DailyReportTab 시각 서식 전환 여부 · 표 = D10 착수 요일 · D8 후속(채널 리졸버, 월 09:30 프로브 결과 후).
+> **주말 보고서(09-05 12:2x 게시)**: https://claude.ai/code/artifact/0c558bf8-4fa8-45d0-8aa4-98ab392ffb46 · 원문 `_workspace/reports/2026-09-05_weekend_decision_set.md`. 남은 사용자 답 = ① DNS A 레코드 등록(오늘) ② D4 월요일 착수 승인 ③ ~~D3 권고 B 채택~~ **09-05 12:5x 채택 → cycle254 구현 완료(배포 대기, D3 행 참조)** ④ DailyReportTab 시각 서식 전환 여부 · 표 = D10 착수 요일 · D8 후속(채널 리졸버, 월 09:30 프로브 결과 후).
 
 | 항목 | 결정 | 처리 |
 |---|---|---|
 | D8 채널 프로브 | 진행 | ✅ **EC2 cron 등록 완료(09-05 06:57)** `30 0 7 9 *` = 월 09-07 **00:30 UTC = 09:30 KST**(호스트 crontab 은 UTC, 실측 정정) — `tools/ops/channel_probe.sh`(후보 순차 POST → 5분×3 상태 → 전부 DELETE, `in_desired_now` 즉시 해제, 자기 제거). 결과 = `~/auto_stock/logs/channel_probe_20260907.log` + `[krx_channel_probe]` 시스템 로그 → 20:20 일일 루틴이 읽음. 판정 후 B(채널 리졸버) 착수 여부 결정 |
-| D3 터틀 1주 폴백 ρ 노출(F-9) | 자문 | ✅ 자문 완료 `_workspace/domain_consult/cycle254_turtle_fallback_rho_exposure.md` — **권고 B = `min` 합성**(K_ρ 2.5 유지, `_apply_ratio_notional_cap` 의 `if governs: return` 조기탈출만 좁힘, `probe_error` fail-open 존치). 실측: 붉어지는 테스트 1건(`test_f245_7b`, 결정 ⑦ 재확인 단언), cycle242 97/0 무손상, 격자 1,728 조합 차이 122건 전부 1주 폴백 랏·전부 축소·증가 0, cycle242 실측 11랏 변경 0. **선결 = 월 09-07 `[ratio_cap_config]` donchian·kojiro 행이 `cap=on` 이면 F-9 는 이미 닫혀 변경 불필요.** **사용자 결정 09-05 12:5x = 권고 B 채택** → cycle254 착수(min 합성, K_ρ 2.5 유지, 장외 배포) |
+| D3 터틀 1주 폴백 ρ 노출(F-9) | 권고 B 채택 → 구현 완료 | ✅ **cycle254 구현 완료(배포 대기)** — 선결 확인(09-05 DB 실측 donchian_swing·kojiro `sizing_mode=turtle` = F-9 실재) 후 자문 권고 B(`min` 합성, K_ρ 2.5 유지) 그대로 구현. `_apply_ratio_notional_cap` 조기탈출을 `governs and gov_reason=="probe_error"` 한 조건만 남기고(그 외엔 K축 심사 여부와 무관하게 ρ캡 적용), `[ratio_cap_config]` 라벨 `backstop`→`on` 통일. `strategy_base.py` **단독**, 8영역·scheduler·turtle_sizing·portfolio_risk·전략 7파일 diff 0. 검증 = 뮤테이션 3라운드(15/15·8/8·9/9) 전부 KILLED · 격자 6,458 조합(터틀 4,400 중 차이 624 전부 1주 폴백→0·증가 0) · 전체 회귀 4,722 PASS. 정본 문서 5곳(루트/leader rules/engine·strategies CLAUDE.md/본 워크리스트) 동반 개정. **F-9 종결** — 남은 것은 장외 배포(주말) + D+1(월 09-07) `system_logs` 7서명 확인뿐(상세 `docs/HARNESS_CHANGELOG.md` cycle254 행) |
 | D4 `_bought_today` 선기록(F-10) | **월요일 착수 승인(09-05 12:5x)** | 명세 `_workspace/specs/cycle_next_D4_bought_today_after_fill.md` — 권고 A(주문 접수 훅), `order_engine.py` 1곳 승인 완료 → 월 09-07 장외(15:30 이후 또는 07:55 전) 배포 |
 | D5 TLS | `auto.dkstock.cloud` | ✅ **완료 09-05 13:06** — DNS 등록(사용자) → certbot 발급(만료 2026-12-04, snap 타이머 + renewal conf `renew_hook` nginx reload) → `.tls_enabled` 마커 → frontend 만 오버레이 재기동(백엔드 무재시작). 외부 실측 https 401·TLS1.2/1.3·http 401 유지·ACME 404. 첫 실행 4/6 거짓 실패(`/etc/letsencrypt/live` root 700) → `sudo test -f` 수정 b46f1f4. 루틴 2개 BASE → https(연결 실패 시 http EC2 예비 + 마지막 메시지에 사용 주소 표기). **남은 사용자 할 일 = 클라우드 환경 '자동매매' 허용 도메인에 `auto.dkstock.cloud` 추가**(월 20:20 루틴이 '예비 주소 사용' 이라고 쓰면 아직 안 된 것). 2단계(HSTS·http→https 리다이렉트)는 루틴 예비 경로 제거 후 |
 | D9 REST 폴 조기 시작 | 권고대로 적용 | `SWING_REST_POLL_EARLY_START` 09:05 → **09:00:30** (scheduler.py 상수 1줄, 3,999L 불변, 테스트 갱신). D+1 = 09:00:3x 부터 `[swing_rest_poll_summary]` held_only 폴 |

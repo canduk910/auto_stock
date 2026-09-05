@@ -494,12 +494,14 @@ class StrategyBase(ABC):
         초과하면 초과분을 자르고, K 유닛이 1주에 못 미치면 매수하지 않는다**
         (cycle242 — 1주 폴백이 설계 유닛의 수 배가 되던 §0.0 결함 시정. 고정%손절
         전략은 position_ratio 가 이미 리스크 균등이라 범위 밖).
-        **그리고 K축이 이 랏을 실제로 심사하지 못한 랏(비터틀 전략 전부 + 터틀이지만
-        ATR 배관이 끊긴 랏)은 최종 명목이 `max_lot_ratio_mult`(K_ρ) × `position_ratio`
-        × 예산 을 넘으면 그만큼 자르고, 1주도 못 사면 매수하지 않는다**(cycle245 —
-        1주 폴백 랏 크기가 그 종목의 *주가* 로 결정되던 §5 결함 시정. 09-04 실측
-        4.23배 랏(LTV 000500)이 그날 최대 손실 −11,000원을 냈다). 두 캡은
-        **상호배타** — `min` 합성이 아니라 K축 심사 여부로 갈린다.
+        **그리고 최종 명목이 `max_lot_ratio_mult`(K_ρ) × `position_ratio` × 예산 을
+        넘으면 그만큼 자르고, 1주도 못 사면 매수하지 않는다**(cycle245 — 1주 폴백
+        랏 크기가 그 종목의 *주가* 로 결정되던 §5 결함 시정. 09-04 실측 4.23배 랏
+        (LTV 000500)이 그날 최대 손실 −11,000원을 냈다). **cycle254** — 이 ρ축은
+        K축이 심사한 랏도 `min` 으로 후심사한다(구 결정 ⑦ "상호배타" 폐기). 사이즈드
+        터틀 랏·PR 낙하 랏은 `compute_unit_qty_guarded` 의 notional 상한 때문에
+        항등식으로 무접촉(F-9b/F-9e)이고, 실효는 1주 폴백 랏뿐(F-9a/F-9g) — 판정
+        자체가 실패한 `probe_error` 만 fail-open 으로 남는다.
 
         결함 배경: 주 분기가 ``int(예산×ratio)//price`` 를 잔여 검증 없이 반환해
         ``position_ratio × max_positions > 1.0`` 인 전략이 예산을 초과 매수할 수 있었다.
@@ -538,8 +540,10 @@ class StrategyBase(ABC):
             self._emit_oversized_fallback(ticker, final, current_price)
         except Exception:  # pragma: no cover — 관측 자기실패 흡수
             pass
-        # cycle245 — ρ축 랏 명목 상한 (행위). K축(cycle242)이 이 랏을 실제로
-        # 심사하지 못한 경우에만 적용 = 두 캡은 상호배타(min 합성 없음).
+        # cycle245 — ρ축 랏 명목 상한 (행위). cycle254 부터 K축(cycle242)이 심사한
+        # 랏도 min 으로 후심사한다(구 결정 ⑦ "상호배타" 폐기) — 사이즈드 터틀·PR
+        # 낙하 랏은 compute_unit_qty_guarded 의 notional 상한 때문에 항등식으로
+        # 무접촉이고, 실효는 1주 폴백 랏뿐(판정 실패 probe_error 만 fail-open).
         # 관측(`[oversized_fallback]`) **뒤**에 두는 것이 계약 — 앞에 두면 차단된
         # 랏의 ρ 관측이 `final_qty < 1` 조기탈출로 통째로 사라져 R7 자기검증
         # 불변식이 성립하지 않는다. 캡 산출 실패는 현행 수량 유지(fail-open) —
@@ -875,15 +879,16 @@ class StrategyBase(ABC):
         의미가 **"실제로 산 랏" → "사려 했던 랏"** 으로 전환됐다. 차단된 랏
         (`[ratio_notional_blocked]`)도 여기에 1행 남는다.
 
-        **자기검증 불변식(R7 — 라운드 1 재정의)**: `ratio` 가 **그날 그 전략의
+        **자기검증 불변식(R7 — cycle254 재정의)**: `ratio` 가 **그날 그 전략의
         `[ratio_cap_config] k=` 값**(리터럴 2.50 이 아니다 — 롤백으로 3.0/20.0 이
         될 수 있고 그때 리터럴 판정은 상시 오탐이 된다)을 넘고 그 전략의 `cap=on`
         인데 같은 (전략, ticker, 일자)에 `[ratio_notional_blocked]` **도**
-        `[ratio_cap_skipped]` **도** 없으면 캡 우회 = 결함. ⚠️ `cap=backstop`
-        (터틀) 행은 **정상**이다 — K축(`compute_unit_qty`)은 무상한 유닛 축이라
-        저ATR·고가 랏에서 ρ 상한의 3.86~5.00배가 통과하며, 그 잔여 노출은 결정 ⑦
-        (상호배타)의 알려진 귀결로 별건 후속(§8 F-9)에 등재돼 있다.
-        ⚠️ 배포(09-04) 전후 같은 grep 합산 금지. 로그 서식은 byte 불변
+        `[ratio_cap_skipped]` **도** 없으면 캡 우회 = 결함. **터틀 행에도 예외가
+        없다** — cycle254 가 K축이 심사한 랏도 ρ축으로 `min` 후심사하므로, 사이즈드
+        터틀 랏은 항등식으로 애초에 `ratio ≤ k` 이고(BLOCKED/RSKIP 부재가 정상),
+        1주 폴백만 `ratio > k` 가 가능한데 그때는 반드시 BLOCKED 나 RSKIP 이
+        동반된다(구 결정 ⑦ 시절의 터틀 전용 예외 라벨은 폐기).
+        ⚠️ 배포(09-05) 전후 같은 grep 합산 금지. 로그 서식은 byte 불변
         (AST G-245-10 이 포맷 문자열을 핀 — cycle233 형 `"3.10" in message` 호환).
         """
         try:
@@ -966,20 +971,22 @@ class StrategyBase(ABC):
         return result
 
     def _lot_units_cap_governs(self, ticker: str | None) -> tuple[bool, str]:
-        """cycle242 K축 캡이 **이 랏을 실제로 심사하는가** — ρ축 미적용 조건 (read-only, 무음).
+        """cycle242 K축 캡이 **이 랏을 실제로 심사하는가** (read-only, 무음).
 
         반환 `(governs, reason)`. `_apply_lot_units_cap` 의 fail-open 4조건과 **같은
         소스·같은 판정**을 쓴다(`params["sizing_mode"]` / `params["risk_pct"]` /
-        `state.total_investment` / `_resolve_sizing_atr`) — 판정이 드리프트하면 두
-        캡 사이에 무방비 구간이나 이중 캡이 생긴다(AST G-245-8 이 소스 동일성을 핀).
+        `state.total_investment` / `_resolve_sizing_atr`) — 판정이 드리프트하면
+        판정기가 실제 fail-open 조건과 어긋나 `probe_error` 오판정이 생긴다
+        (AST G-245-8 이 소스 동일성을 핀).
         로그를 내지 않는다 — 판정기가 시끄러우면 랏마다 2배로 찍힌다(관측은
         `[ratio_cap_config]` 카나리아 담당).
 
         reason ∈ {"k_axis", "not_turtle", "no_ticker", "no_risk_pct", "no_budget",
                   "no_atr", "probe_error"}.
-        - `"k_axis"` → K축이 심사 = ρ축 **미적용**(조용히)
+        - `"k_axis"` → K축이 심사한 랏도 ρ축이 **`min` 으로 후심사**한다(cycle254) —
+          사이즈드 터틀·PR 낙하 랏은 항등식으로 무접촉, 1주 폴백만 실효
         - `"probe_error"` → 판정 자체가 실패 = **fail-open 방향으로 미적용** + LOUD
-        - 그 외 → ρ축 **적용**(백스톱 — 터틀인데 ATR 배관이 끊긴 랏도 여기로 온다)
+        - 그 외 → ρ축 **적용**(터틀인데 ATR 배관이 끊긴 랏도 여기로 온다)
         """
         try:
             params = self.config.params
@@ -1017,9 +1024,15 @@ class StrategyBase(ABC):
         - `K_ρ ≥ 1` 이므로 주 분기(`qty > 0`)는 정의상 무접촉이다 — 호출자가
           `int(예산×ratio)//price` 로 만든 수량은 명목이 이미 `cap` 이하이고
           `cutoff ≥ cap` 이기 때문(F-4/F-5 가 항등식으로 봉인).
-        - fail-open: 키 부재 / K축 심사 / `position_ratio` ≤ 0 / 예산 ≤ 0 / cap 0 /
-          예외 → `final` 그대로. 사유는 `[ratio_cap_skipped]` WARNING(키 부재·K축
-          심사는 조용히 — 정상 구성이고 `[ratio_cap_config]` 가 이미 기록한다).
+        - fail-open: 키 부재 / 판정 실패(`probe_error`) / `position_ratio` ≤ 0 /
+          예산 ≤ 0 / cap 0 / 예외 → `final` 그대로. 사유는 `[ratio_cap_skipped]`
+          WARNING(키 부재는 조용히 — 정상 구성이고 `[ratio_cap_config]` 가 이미
+          기록한다). **cycle254** — K축이 심사한 랏(`governs=True ∧ reason="k_axis"`)
+          은 더 이상 조용히 통과하지 않는다. 그 아래 `min` 산식을 그대로 밟되,
+          사이즈드 터틀 랏·PR 낙하 랏은 `compute_unit_qty_guarded` 의 notional
+          상한(`min(qty, int(B×ρ)//P)`)이 명목을 이미 `cap` 이하로 묶어 두므로
+          `cutoff ≥ cap` 인 이상 `final <= cap_qty` 로 항등적으로 통과한다(무접촉).
+          실효는 **1주 폴백 랏**(`P > B×ρ`)뿐이다.
         - 행위(반환값)는 관측 성패와 무관 — 네 emit 은 내부에서 예외 흡수(cycle237).
         """
         if final < 1 or current_price <= 0:
@@ -1040,12 +1053,11 @@ class StrategyBase(ABC):
             self._emit_ratio_cap_config(mode, k, budget, pos_ratio, cap, cutoff)
             if k is None:
                 return final                                  # 키 부재 = OFF (조용히)
-            if governs:
-                if gov_reason == "probe_error":
-                    self._emit_ratio_cap_skipped(
-                        ticker, "k_axis_probe_error", final, current_price,
-                    )
-                return final                                  # K축이 심사 = 이중 캡 금지
+            if governs and gov_reason == "probe_error":
+                self._emit_ratio_cap_skipped(
+                    ticker, "k_axis_probe_error", final, current_price,
+                )
+                return final                # 판정 실패만 fail-open (cycle254 — min 합성)
             if cap <= 0:
                 reason = ("no_ratio" if pos_ratio <= 0
                           else "no_budget" if budget <= 0 else "no_cap")
@@ -1145,24 +1157,18 @@ class StrategyBase(ABC):
         찍힌다(cycle245 R1 — 공식 롤백 수단을 확인할 채널이 없던 사각).
 
         캡이 조용히 꺼진 채(`max_lot_ratio_mult` 키 소실 등) 매수가 나가는 사고를
-        `cap=off` 존재로 감지한다. 라벨은 **`sizing_mode` 기준**이다(랏별 `governs`
-        판정이 아니라) — 이 마커는 하루 첫 랏에서 1회만 찍히므로 랏 단위 판정을
-        실으면 그날의 나머지를 대표하지 못한다.
+        `cap=off` 존재로 감지한다. **cycle254** — 라벨은 `sizing_mode` 와 무관하게
+        `k` 존재 여부만 본다(2 라벨). 이 마커는 하루 첫 랏에서 1회만 찍히므로 랏
+        단위 판정을 실으면 그날의 나머지를 대표하지 못한다.
 
-        cap = "off"      (k is None — 키 부재)
-            | "backstop" (mode == "turtle" — K축 우선, ρ는 K축이 fail-open 할 때만)
-            | "on"       (그 외 = ρ축이 주 상한)
+        cap = "off" (k is None — 키 부재)
+            | "on"  (그 외 — K축 심사 랏도 ρ축이 `min` 으로 후심사한다, cycle254)
 
         ⚠️ `cutoff_price` 는 **필수 필드**다 — 운영자가 아침에 한 줄로 "오늘 LTV 는
         130,100원 넘는 종목을 못 산다"를 읽어야 한다(자문 §8.1).
         """
         try:
-            if k is None:
-                cap_state = "off"
-            elif mode == "turtle":
-                cap_state = "backstop"
-            else:
-                cap_state = "on"
+            cap_state = "off" if k is None else "on"
             k_desc = "-" if k is None else f"{k:.2f}"
             # cycle245 R1 — cap 키는 **값-민감**이다(`cfg` 단일 키 아님). 공식 롤백
             # 수단(`PUT /api/strategies/{id}/params` → `max_lot_ratio_mult=20.0`)은

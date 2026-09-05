@@ -40,6 +40,10 @@ cycle242 의 랏 상한은 **ATR 축(K)** 이라 `sizing_mode == "turtle"` 전�
    (a) K축이 0 으로 자르는 랏 = ρ 마커 **전무** (b) K축을 통과했지만 ρ 상한을 넘는
    터틀 랏 = **수량 불변 + `cap=backstop`** 두 케이스로 갈랐다. (b) 가 "정상 터틀 랏을
    ρ 로 자르지 않는다"는 결정 ⑤·⑦의 직접 증거다.
+   ⚠️ **cycle254 로 (b) 는 개정됐다** — 결정 ⑦(상호배타)이 `min` 합성으로 바뀌어
+   `test_f245_7b`·`test_f245_16b` 의 단언이 뒤집혔다(`qty 1 → 0` · `cap=backstop → on`).
+   위 (b) 문장은 cycle245 시점의 이력이다. 개정 근거 =
+   `_workspace/specs/cycle254_ratio_cap_min_composition.md` §2.
 3. **F-10(d) 경로 정정** — `_lot_units_cap_governs` **자체**를 raise 로 monkeypatch 하면
    참조 구현에서는 바깥 try 가 잡아 `reason=exception` 이 된다(`k_axis_probe_error` 는
    판정기 **내부** 예외 전용). 그래서 (d)는 `_resolve_sizing_atr` 을 raise 시켜
@@ -444,12 +448,19 @@ def test_f245_7a_turtle_capped_by_k_axis_has_no_rho_markers(caplog):
 
 @freeze_time("2026-09-04 10:00:00+09:00")
 def test_f245_7b_turtle_over_rho_cutoff_is_not_cut(caplog):
-    """K축을 통과한 터틀 랏은 ρ 상한(195,150)을 넘어도 **자르지 않는다**.
+    """**cycle254 결정 ⑦ 개정** — K축을 통과한 터틀 랏도 ρ 상한을 넘으면 자른다.
+
+    (함수명은 이력 추적을 위해 유지한다 — 명세
+    `_workspace/specs/cycle254_ratio_cap_min_composition.md` §2 표와 자문 §3.2 가
+    "유일 실패" 로 인용하는 대조 지점이 이 이름이다. 단언은 반대로 뒤집혔다.)
 
     donchian B=390,300 · ATR 3,000 ⇒ K축 cap_qty = 1 ≥ final(1) → 통과.
-    같은 랏의 명목 300,000 은 ρ 상한의 3.84배지만 결정 ⑦(상호배타)에 따라 불변이다.
-    여기서 자르면 kojiro 000815 3.13배·donchian 3.50배 같은 **정상 터틀 랏**이
-    ρ 로 잘려 자문 §2.5 의 목적이 뒤집힌다.
+    cycle245(결정 ⑦)는 "K축이 심사했으니 ρ축 미적용" 으로 이 1주를 통과시켰고,
+    그 명목 300,000 은 ρ 상한(195,150)의 3.84배 = **전략 예산의 77%** 였다.
+    K축은 유닛 축(`floor(K×B×r÷ATR)`)이라 저ATR 종목에서 명목에 천장이 없다 —
+    그 잔여가 F-9 이고, cycle254 가 조기탈출을 `probe_error` fail-open 한 갈래로
+    좁혀 닫는다. 사이즈드 터틀 랏·PR 낙하 랏은 항등식으로 무접촉이다
+    (`compute_unit_qty_guarded` 의 notional 상한 = `min(qty, int(B×ρ)//P)`).
     """
     s = _dc()
     s._candidates = {"000815": {
@@ -458,12 +469,25 @@ def test_f245_7b_turtle_over_rho_cutoff_is_not_cut(caplog):
     with caplog.at_level(logging.INFO):
         qty = s.calc_buy_quantity(300_000, "000815")
 
-    assert qty == 1, "K축이 심사한 랏을 ρ축이 잘랐다 (이중 캡 금지 — 결정 ⑦)"
-    assert not _msgs(caplog, BLOCKED)
+    assert qty == 0, (
+        "K축이 심사한 1주 폴백 랏(명목 300,000 = ρ 상한의 3.84배)이 그대로 "
+        "통과했다 — cycle254 `min` 합성 미적용"
+    )
+    hits = _msgs(caplog, BLOCKED)
+    assert len(hits) == 1, f"{BLOCKED} 1행 기대, 실제 {len(hits)}"
+    assert hits[0] == (
+        "[ratio_notional_blocked] ticker=000815 strategy=donchian_swing "
+        "path=fallback price=300000 cap=78060 cutoff=195150 k=2.50 ratio=3.84 "
+        "req_qty=1 capped_qty=0 budget=390300 pos_ratio=0.2000"
+    )
     cfg = _msgs(caplog, RCONFIG)
     assert len(cfg) == 1
-    assert " cap=backstop " in cfg[0], f"터틀 모드 카나리아 라벨 오류: {cfg[0]}"
-    assert len(_msgs(caplog, OVERSIZED)) == 1, "ρ 초과 관측(cycle233)은 그대로 남는다"
+    assert " cap=on " in cfg[0], (
+        f"터틀 행 라벨이 `on` 으로 통일되지 않았다(cycle254): {cfg[0]}"
+    )
+    assert len(_msgs(caplog, OVERSIZED)) == 1, (
+        "ρ 초과 관측(cycle233)은 ρ캡 **앞**에서 그대로 남는다"
+    )
 
 
 # ===========================================================================
@@ -898,6 +922,13 @@ def test_f245_16a_config_marker_exact_for_non_turtle(caplog):
 
 @freeze_time("2026-09-04 10:00:00+09:00")
 def test_f245_16b_config_marker_backstop_label(caplog):
+    """**cycle254 결정 ⑦ 개정** — 터틀 행 라벨도 `cap=on`(2 라벨: off | on).
+
+    (함수명 유지 이유는 `test_f245_7b` 와 같다 — 명세 §2 표가 이 이름으로 개정을
+    지시한다.) `min` 합성 후 ρ축은 "K축이 fail-open 할 때만 받는 백스톱" 이 아니라
+    **상시 후심사**이므로 `backstop` 은 거짓 라벨이다. 나머지 필드는 byte 동일 —
+    D+1 판독 서명 1(`cutoff_price=195150`)이 정본이다.
+    """
     s = _dc(turtle=True)
     s._candidates = {"000815": {"prev_close": 300000, "atr": 3000,
                                 "ema60": 0, "donchian_high": 0}}
@@ -906,7 +937,7 @@ def test_f245_16b_config_marker_backstop_label(caplog):
     hits = _msgs(caplog, RCONFIG)
     assert len(hits) == 1
     assert hits[0] == (
-        "[ratio_cap_config] strategy=donchian_swing sizing_mode=turtle cap=backstop "
+        "[ratio_cap_config] strategy=donchian_swing sizing_mode=turtle cap=on "
         "k=2.50 budget=390300 pos_ratio=0.2000 cap_notional=78060 cutoff_price=195150"
     )
 

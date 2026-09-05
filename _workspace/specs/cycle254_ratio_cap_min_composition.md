@@ -13,6 +13,10 @@
 한 번 더 확인하고 이 문단에 실측 행을 붙인다. 두 전략 다 `cap=on` 이면 **이 사이클은 하지 않는다**
 (워크리스트 "터틀 전환 시 선결" 로 재분류).
 
+**실측** — 09-05 DB `strategy_config` 조회 결과 donchian_swing·kojiro 둘 다 `sizing_mode=turtle`
+(`max_lot_ratio_mult` 키 부재 → DEFAULT 2.5)로 확인 = **F-9 실재**. 구현 착수.
+`system_logs` 의 `[ratio_cap_config]` 행은 09-04 00:00 이후 **0행**(09-04 야간 cycle245 배포 뒤 주말이라 매수 랏이 없었다) — 자문 §9 가 요구한 "배포 전 `cap=` 두 행" 대조군은 로그가 아니라 위 DB 값으로 대체한다. 월 09-07 첫 행은 곧바로 `cap=on` 이어야 한다.
+
 ## 1. 무엇을 바꾸나 (행위)
 
 `_apply_ratio_notional_cap` 의 조기탈출 **한 조건**만 좁힌다.
