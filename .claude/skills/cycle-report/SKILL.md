@@ -46,7 +46,7 @@ report-writer 는 세션 맥락이 없다. 아래를 프롬프트에 담아 준�
 지적은 `{severity, where, problem, suggestion}` 구조로 받는다.
 
 ### 4. 반영과 게시 (report-writer)
-- `mode: publish` 로 report-writer 를 다시 호출한다(초안 경로 + 지적 전문 + 기존 URL 이 있으면 URL). 에이전트가 지적을 전부 처리(수용/불수용 사유)하고, 정본 md 쪽 오류는 md 도 고친 뒤 `artifact-design` 스킬 로드 → `Artifact` 게시(새 게시 favicon 🌙 / 재게시는 `url` 을 `read` 한 뒤 같은 `url`, `label` 판 이름, `description` 한 문장) → `SendUserFile` 로 원문 md 첨부.
+- `mode: publish` 로 report-writer 를 다시 호출한다(초안 경로 + 지적 전문 + 기존 URL 이 있으면 URL). 에이전트가 지적을 전부 처리(수용/불수용 사유)하고, 정본 md 쪽 오류는 md 도 고친 뒤 `artifact-design` 스킬 로드 → `Artifact` 게시(새 게시 favicon 🌙 / 재게시는 `url` 을 `read` 한 뒤 같은 `url`, `label` 판 이름, `description` 한 문장) → 원문 md 첨부는 **메인 세션**이 `SendUserFile`(status proactive, display attach)로 한다(2026-09-05 실측: 서브에이전트 컨텍스트에는 `SendUserFile` 이 없을 수 있다 — report-writer 가 쓸 수 있으면 직접, 없으면 마지막 메시지에 경로만).
 - **report-writer 는 커밋·push 를 하지 않는다.** 산출물 경로를 받은 메인 세션이 커밋 정책(사용자 명시 지시 또는 명시된 자율 구간)에 따라 커밋 여부를 결정한다.
 
 ### 5. 전달 (메인 세션)

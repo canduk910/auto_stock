@@ -167,6 +167,8 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 
 ## ✅ 2026-09-05 사용자 결정 세트 (아침 리포트 §4 D1~D11) — 처리 현황
 
+> **주말 보고서(09-05 12:2x 게시)**: https://claude.ai/code/artifact/0c558bf8-4fa8-45d0-8aa4-98ab392ffb46 · 원문 `_workspace/reports/2026-09-05_weekend_decision_set.md`. 남은 사용자 답 = ① DNS A 레코드 등록(오늘) ② D4 월요일 착수 승인 ③ D3 권고 B 채택(월 `cap=` 판독 후, 미리 정해도 됨) ④ DailyReportTab 시각 서식 전환 여부 · 표 = D10 착수 요일 · D8 후속(채널 리졸버, 월 09:30 프로브 결과 후).
+
 | 항목 | 결정 | 처리 |
 |---|---|---|
 | D8 채널 프로브 | 진행 | ✅ **EC2 cron 등록 완료(09-05 06:57)** `30 0 7 9 *` = 월 09-07 **00:30 UTC = 09:30 KST**(호스트 crontab 은 UTC, 실측 정정) — `tools/ops/channel_probe.sh`(후보 순차 POST → 5분×3 상태 → 전부 DELETE, `in_desired_now` 즉시 해제, 자기 제거). 결과 = `~/auto_stock/logs/channel_probe_20260907.log` + `[krx_channel_probe]` 시스템 로그 → 20:20 일일 루틴이 읽음. 판정 후 B(채널 리졸버) 착수 여부 결정 |

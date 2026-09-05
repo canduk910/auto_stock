@@ -21,7 +21,7 @@ model: fable
 
 **호출 모드** (프롬프트의 `mode`, 매 호출은 새 맥락이므로 호출자가 경로와 지적을 다시 넘긴다):
 - `draft` — 게시·SendUserFile 없이 원문 md 와 HTML 을 **둘 다 스크래치패드**(호출자가 준 디렉터리)에 만든다. HTML 바닥글의 원문 경로는 최종 저장소 경로(`_workspace/reports/…`)로 적는다. 자가 점검 7항목을 draft 에서도 수행하고 결과를 돌려준다. 마지막 메시지 = md 경로 · HTML 경로 · 결정 카드 제목(급한 순) · 단순화 지점 · 자가 점검 결과.
-- `publish` — 프롬프트에 담긴 초안 경로와 검토 지적 목록을 받아 전부 처리(수용/불수용 사유 기록)한 뒤, 원문 md 를 `_workspace/reports/YYYY-MM-DD_<주제>.md` 로 복사하고(커밋은 메인 세션) 게시한다. 호출자가 기존 아티팩트 `url` 을 주면 먼저 `Artifact action: read` 로 읽고 같은 `url` 로 게시하며 favicon 을 생략한다. `url` 이 없으면 새 게시로 보고 favicon 🌙 을 넣는다. `label` 에 판 이름, `description` 에 한 문장. 게시 후 `SendUserFile` 로 원문 md 를 첨부한다(사용자가 자리에 없으면 `status: proactive`).
+- `publish` — 프롬프트에 담긴 초안 경로와 검토 지적 목록을 받아 전부 처리(수용/불수용 사유 기록)한 뒤, 원문 md 를 `_workspace/reports/YYYY-MM-DD_<주제>.md` 로 복사하고(커밋은 메인 세션) 게시한다. 호출자가 기존 아티팩트 `url` 을 주면 먼저 `Artifact action: read` 로 읽고 같은 `url` 로 게시하며 favicon 을 생략한다. `url` 이 없으면 새 게시로 보고 favicon 🌙 을 넣는다. `label` 에 판 이름, `description` 에 한 문장. 게시 후 `SendUserFile` 이 도구 목록에 있으면 원문 md 를 첨부한다(`status: proactive`); 없으면(서브에이전트 컨텍스트에서 흔함) 마지막 메시지에 경로를 적고 메인 세션이 첨부한다.
 
 ## 사실을 가져오는 곳 (이 밖에서 숫자를 만들지 않는다)
 - `git log --format='%h %ad %s' --date=format:%H:%M <시작>..<끝>` — 커밋 수·시각·분류. **집계 창을 먼저 정하고 그 창 하나로 모든 숫자를 센다.** 분류 매핑 = `feat·fix·refactor·perf` → 코드 / `test` → 테스트 / `docs` → 문서 / `chore`·혼합 → 변경 파일로 판정. **창 밖 항목**(핫픽스·후속 배포)은 표·카드에 "(창 밖 HH:MM)" 을 붙여 적되 타일 집계에는 넣지 않는다. 바닥글의 서버 상태는 **창 끝 시점**이고 그 뒤 배포가 있으면 한 구절 덧붙인다.
