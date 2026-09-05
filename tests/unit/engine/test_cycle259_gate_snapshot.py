@@ -374,13 +374,13 @@ def test_s3b_both_consumers_call_snapshot_once_and_nothing_else():
 #: (리팩토링 리뷰 카드 #2 가 cycle250/251 에서 지적한 그 함정). 정당한 변경 시
 #: 이 한 줄을 갱신하되 **프론트 `AccountGate` 8필드 · 라우트 · 리포트 3곳 동기**를
 #: 함께 확인한다.
-_GET_GATE_STATE_AST_SHA = "923bf376c49ac762f561845b6201913d904d05520a46f1e743d6d9586339101a"
+_GET_GATE_STATE_SRC_SHA = "7d2582ee619dbf0cea74e0f30274a2b28e6306ec98136cf0e3246f3465daa23b"  # 소스 세그먼트 sha256 (ast.dump 는 파이썬 3.12/3.13 출력이 달라 CI 거짓 FAIL — cycle256/259 실측)
 
 
 def test_s4a_get_gate_state_body_is_byte_stable():
     node = _fn_node(WATCHER_SRC, "get_gate_state")
-    got = hashlib.sha256(ast.dump(node).encode("utf-8")).hexdigest()
-    assert got == _GET_GATE_STATE_AST_SHA, (
+    got = hashlib.sha256((ast.get_source_segment(WATCHER_SRC.read_text(encoding="utf-8"), node) or "").encode("utf-8")).hexdigest()
+    assert got == _GET_GATE_STATE_SRC_SHA, (
         f"`get_gate_state()` 본체가 변경됐다 (sha {got}). 카드 ⑥ 은 **추가만** 한다 — "
         "이 함수는 프론트 `AccountGate` 8필드 계약의 원천이라 byte 불변이다. "
         "의도한 변경이라면 이 리터럴을 갱신하고 프론트 타입·라우트·리포트를 함께 본다."
@@ -388,20 +388,29 @@ def test_s4a_get_gate_state_body_is_byte_stable():
 
 
 def test_s4b_private_timeout_accessor_has_no_callers_outside_watcher():
-    """`_eval_timeout_count` 는 watcher **내부용** — 모듈 밖 호출 0 (§1 ⑥)."""
-    out = subprocess.run(
-        ["git", "grep", "-n", "_eval_timeout_count", "--", "src"],
-        cwd=ROOT, capture_output=True, text=True,
-    )
-    # git grep: 0=매치 있음 · 1=매치 없음 · >1=실행 실패(무매치로 오독하면 fail-open)
-    if out.returncode > 1:  # pragma: no cover - git 부재 환경
-        pytest.skip(f"git grep 실행 실패(rc={out.returncode}) — 외부 호출 0 판정 불가")
-    hits = [
-        line for line in out.stdout.splitlines()
-        if line.strip() and not line.startswith("src/engine/account_risk_watcher.py:")
-    ]
+    """`_eval_timeout_count` 는 watcher **내부용** — 모듈 밖 **호출** 0 (§1 ⑥).
+
+    AST 로 `Call` 만 센다(주석·docstring 언급은 허용). `git grep` 은 추적 파일만 보고
+    주석까지 잡아 로컬(미추적 신규 파일)과 CI(추적) 결과가 달랐다 — cycle259 CI 실측.
+    """
+    watcher = ROOT / "src" / "engine" / "account_risk_watcher.py"
+    hits: list[str] = []
+    for py in sorted((ROOT / "src").rglob("*.py")):
+        if py.resolve() == watcher.resolve():
+            continue
+        try:
+            tree = ast.parse(py.read_text(encoding="utf-8"))
+        except SyntaxError:  # pragma: no cover
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            f = node.func
+            name = f.attr if isinstance(f, ast.Attribute) else (f.id if isinstance(f, ast.Name) else None)
+            if name == "_eval_timeout_count":
+                hits.append(f"{py.relative_to(ROOT)}:{node.lineno}")
     assert hits == [], (
-        "Red — private 접근자 `_eval_timeout_count` 를 watcher 밖에서 참조한다:\n  "
+        "Red — private 접근자 `_eval_timeout_count` 를 watcher 밖에서 호출한다:\n  "
         + "\n  ".join(hits)
         + "\n두 소비자는 공개 `get_gate_snapshot()` 만 쓴다 (카드 ⑥)."
     )
