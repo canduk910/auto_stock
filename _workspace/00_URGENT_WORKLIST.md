@@ -1007,3 +1007,10 @@ find . -name __pycache__ -prune -exec rm -rf {} + ; python -m pytest -q
 | ① 월 09-07 20:25~22:00 2단계 가동 자율 구간 | "허용" | **자율 구간 성립**(커밋·푸시·장외 배포·루틴 프롬프트 수정 포함). 절차 = 런북 `_workspace/specs/tls_stage2_activation_runbook_0907.md`. 사용자 직접 행동 = ⑤ 새 비밀번호를 클라우드 환경 `REPORTER_BASIC_PASSWORD` 에 넣기 + 브라우저 재로그인 |
 | ② HSTS 기간 상향 | "1주 뒤 올려" | 가동 1주 뒤(**09-14 이후 첫 장외 시간**) `max-age=86400` → `15552000`(180일): 스니펫 2(`tls-srv-hsts.conf`·`tls-loc-hsts.conf`) + `tls_stage2_enable.sh` 검증 정규식 2줄 + G-260 가드 기대값 동시 갱신 → push(frontend 모드) → 헤더 실측. 사전 승인됨 |
 | ③ '전략수정 AI자문' 페이지 시각 표기 | "바꿔" | **구현 완료(cycle256-G, vitest 579 PASS·`tsc -b` clean·`npm run build` 성공) — 배포 대기** — `pages/Recommendations.tsx` `formatDateTime` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(KST 강제 + `2026-09-07 09:05:00`, export 추가로 단위 테스트화), 배포 = frontend 모드 |
+
+## 2026-09-06 사용자 결정 — 수수료·세금 비용 반영 사이클
+
+- 사용자(09-06 새벽): "화요일부터 하자". 09-03 결정 항목 9(수수료·세금 관측 배선, 권고안대로)의 착수일 확정 = **화 09-08**(D10 과 같은 날 — D10 아침 승인 뒤 이어서 또는 D10 배포 뒤).
+- 1단계(관측): 매도 체결마다 수수료·거래세 **추정액**과 순손익(net)을 기록(`trade_history` 가산형 컬럼 — NULL 허용 ADD COLUMN), 일일 실적·20:10 리포트·대시보드에 gross/net 병기. 손익 계산 지점 `order_engine.py:1389`(8영역) 1곳 = 승인 필요. 비용률 = KIS 계좌 실제 수수료율 확인(잔고/체결 조회 TR 의 수수료 필드 또는 계좌 약정) → 확인 불가 시 설계서 가정(수수료 0.015%/편도, 거래세 0.15% 매도 시). 슬리피지는 비용 모델 밖(관측만).
+- 2단계(행위): `daily_loss_limit` 게이트를 net 기준으로 — 관측 며칠 뒤 별도 결정.
+- 정본 근거: `_workspace/domain_consult/pyramiding_deep_review_20260903.md` §비용(왕복 0.32~0.53% = 1N 의 5.3~11.5%), 설계 청사진 C-27(미해소), `_workspace/morning_0903_report.md` §7 #9.
