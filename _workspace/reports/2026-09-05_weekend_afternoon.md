@@ -58,7 +58,7 @@ CI = b46f1f4 12:57 push → CI 통과 13:04 → Deploy `none` 13:05 / 92e75f3 14
 
 **선결 확인(F-9 실재)** — 자문이 "F-9 는 그 전략의 라이브 `sizing_mode` 가 `turtle` 일 때만 실재"라고 못박아, 09-05 DB `strategy_config` 실측으로 donchian_swing·kojiro 둘 다 `sizing_mode=turtle`(`max_lot_ratio_mult` 키 부재 → DEFAULT 2.5)임을 확인한 뒤 착수. `system_logs` 의 `[ratio_cap_config]` 는 09-04 00:00 이후 **0행**(09-04 야간 cycle245 배포 뒤 주말이라 매수 랏 없음) — 자문 §9 의 "배포 전 `cap=` 두 행" 대조군은 로그가 아니라 DB 값으로 대체.
 
-**"아침 7행" 기록의 정정(메인 세션 실측)** — 명세 §0 첫 문단·자문 §1·메모리가 인용한 "09-05 아침 `[ratio_cap_config]` 7행(donchian·kojiro `cap=backstop`)" 은 근거가 확인되지 않는다. `system_logs`(DB 로그 핸들러가 INFO 이상을 받는다 — 09-04 `[fallback_cap_config]` 4행이 실제로 있음)·파일 로그 `logs/auto_stock.log.2026-09-04`(같은 4행 + `[oversized_fallback]` 1행)·컨테이너 표준출력 어디에도 `[ratio_cap_config]` 는 09-04 이후 0행이다. 즉 cycle245 배포(09-04 밤) 뒤 매수 랏 자체가 없어 그 마커는 한 번도 찍히지 않았다. 메모리 기록은 오기로 정정했고, F-9 실재 확인은 DB `strategy_config` 값으로 했다.
+**"아침 7행" 기록의 정정(정본 간 불일치 해소, 메인 세션 추가 실측)** — 명세 §0 첫 문단·자문 §1·메모리가 인용한 "09-05 아침 `[ratio_cap_config]` 7행(donchian·kojiro `cap=backstop`)" 은 세 채널 어디에도 없다. DB `system_logs`(INFO 이상, 형식 `[src.engine.strategy_base] [ratio_cap_config] …`) · 서버 파일 로그 `logs/auto_stock.log`(일 단위 회전, 30일 보존, 컨테이너 재생성에도 남음) · 컨테이너 표준출력(`docker logs`) 모두 09-04 이후 `[ratio_cap_config]` **0행**. 반면 09-04 `[fallback_cap_config]` 4행은 `system_logs` 와 09-04 회전 파일 양쪽에 실재하고 회전 파일에는 `[oversized_fallback]` 1행도 있다 = INFO 마커는 채널에 정상으로 남는다. 따라서 `[ratio_cap_config]` 는 cycle245 배포(09-04 밤) 뒤 **한 번도 찍힌 적이 없고**(매수 랏 자체가 없었다), "아침 7행 판독" 이라는 메모리 기록은 근거가 확인되지 않아 메인 세션이 **오기로 정정**했다. **월요일 판독 채널 = `system_logs` 직접 조회가 기본, 파일 로그 grep 이 보조.** 20:10 분석 리포트에는 안 잡힌다(WARNING↑만 집계, INFO 마커 미도달).
 
 **발단(구조적 천장, 실제 체결 아님)** — cycle245 의 구 결정 ⑦ "두 캡은 상호배타"로 K축(`max_lot_units`, ATR 유닛 캡)이 심사한 랏은 ρ축(`max_lot_ratio_mult`, 비중 명목 캡)을 건너뛰었다. 1주 폴백 랏(주가 > 예산×position_ratio)이 저ATR 고가 종목에서 K축을 통과하면 명목 상한이 없어 **donchian 390,300원**(그 전략 예산 전부, 순자산 15.0%, ρ배수 5.00) · **kojiro 500,000원**(`price_filter_max`, 순자산 19.2%, ρ배수 3.86)까지 허용된 상태였다. 자문 §2.2: `min` 합성이 행위를 바꾸는 창 = ATR% < 2.00%(donchian) / 2.41%(kojiro), 계좌 크기 무관 = "저변동 고가주" 문제. 자문 §2.4: 폴백 랏은 `_entry_atr` 미스탬프라 고정%손절(donchian 라이브 −6.0%) → 390,300원 랏의 정상 손절 손실 −23,418원(순자산 0.90%) = 설계 유닛 리스크 1,952원(0.075%)의 12배. −30% 갭이면 순자산 4.50%/5.76%.
 
@@ -98,7 +98,7 @@ CI = b46f1f4 12:57 push → CI 통과 13:04 → Deploy `none` 13:05 / 92e75f3 14
 
 1부 §5 항목은 그대로 유효하다(cycle257·258·259 첫 부팅 · D9 09:00:3x 폴 · D8 09:30 프로브 로그 · `[no_feed_held]` 등). 이번 창이 추가·갱신한 항목:
 
-- [ ] **판독 채널** = `system_logs` 직접 조회가 기본(형식 `[src.engine.strategy_base] [ratio_cap_config] …`), 파일 로그 `logs/auto_stock.log` grep 이 보조(일 단위 회전·30일 보존, 컨테이너 재생성에도 남음). 20:10 리포트는 WARNING↑만 집계해 INFO 마커 미도달.
+- [ ] **판독 채널** = `system_logs` 직접 조회가 기본, 파일 로그 `logs/auto_stock.log` grep 이 보조(§3.2). 20:10 리포트는 WARNING↑만 집계해 INFO 마커 미도달.
 - [ ] **cycle254 ①②** `[ratio_cap_config] strategy=donchian_swing sizing_mode=turtle cap=on k=2.50 … cutoff_price=약 195150` 1행 / `strategy=kojiro … cap=on … cutoff_price=약 323952` 1행(리포 예산 기준 추정 — 195,152 처럼 수 원 차이는 정상, 수백 원 이상이면 DB 예산·비중 상이). `backstop` 잔존 = 미반영. kojiro 가 **약 390,300** 이면 DB `position_ratio` 0.20 = 08-08 지혈 롤백 의심(명세 §6 — 자문 §5.3 의 387,320 은 산술 오기, 780,611×0.20×2.5=390,305)
 - [ ] **③** `[ratio_notional_blocked] strategy=donchian_swing|kojiro path=fallback` **0건** — 나오면 F-9 첫 실측 표본(ticker·price·ATR% 기록, 결함 아님)
 - [ ] **④** `[fallback_notional_capped]`(K축 = 손절 폭 기준 한도, cycle242 부터) — 최근 5영업일 0건이었으니 **0건 유지**. 생기면 K축 접촉 = 롤백
@@ -129,7 +129,7 @@ CI = b46f1f4 12:57 push → CI 통과 13:04 → Deploy `none` 13:05 / 92e75f3 14
 
 - **관리자 전용 폴더의 파일 존재 확인은 관리자 권한으로 해야 한다.** `/etc/letsencrypt/live` 는 root 700 이라 일반 사용자의 `[ -f ]` 가 "없음"을 낸다(EACCES ≠ 부재). 인증서는 발급됐는데 스크립트가 4/6 에서 멈췄다. 재실행은 certbot 이 "갱신 불필요"로 답해 발급 한도 소모 없이 통과했다 — 스크립트가 순서(산출물 확인 뒤에만 마커)를 강제한 덕에 인증서 없는 443 기동은 없었다.
 - **정본 문서는 코드보다 늦게 늙는다.** 결정 ⑦ 을 폐기한 코드가 붙기 전까지 문서 3파일이 "상호배타 · `cap=backstop` 정상" 을 서술했다. tester 의 적대 검증이 드리프트를 찾았고 가드로 봉인했다 — 단 살아 있는 문서(워크리스트)에는 가드를 두지 않는다(오탐 생성기).
-- **배포 전 대조군 행 자체가 없다.** `[ratio_cap_config]` 는 cycle245 배포(09-04 밤) 뒤 세 채널(`system_logs`·파일 로그·표준출력) 모두 0행 — 매수 랏이 없었기 때문이다. "배포 전 라벨을 읽어 F-9 실재를 확인하라"는 자문 절차는 DB `strategy_config` 값(donchian_swing·kojiro `sizing_mode=turtle`)으로 대체했다. 월요일 첫 행은 곧바로 `cap=on` 이어야 하고, `backstop` 이 보이면 cycle254 미반영이다.
+- **배포 전 대조군 행 자체가 없다.** `[ratio_cap_config]` 는 cycle245 배포(09-04 밤) 뒤 매수 랏이 없어 세 채널(`system_logs` · 파일 로그 · `docker logs`) 어디에도 한 번도 찍히지 않았다. "아침 7행을 판독했다"는 메모리 기록은 근거가 확인되지 않아 오기로 정정했다. "배포 전 라벨을 읽어 F-9 실재를 확인하라"는 자문 절차는 DB `strategy_config` 값으로 대체했다. 월요일 첫 행이 곧바로 `cap=on` 이어야 한다.
 - **정본 간 불일치 1건(재확인 대상)** — 명세 §7 = 09-05 14:3x DB `positions` 실측 **9**(kojiro 6 · donchian_swing 2 · bull_flag_breakout 1) vs 1부 보고서 §5·부록 A 의 positions **4**. 1부 값은 장중 메모리 상태였을 가능성이 있어 재확인 대상이다. 명세 §7 의 이 수정은 미커밋(이 보고서와 함께 커밋 예정). 이 보고서와 HTML 은 보유 종목 수를 판단 근거로 쓰지 않는다.
 
 ## 부록 A. 쉬운 말 리포트(HTML)에서 단순화한 곳 — 정확값 대응표
@@ -159,6 +159,6 @@ CI = b46f1f4 12:57 push → CI 통과 13:04 → Deploy `none` 13:05 / 92e75f3 14
 | 서버 마지막 상태 14:08 재시작 | 92e75f3 full, 기동 오류 0, 이미지 코드 확인, API 200, https 401(§2 표) |
 | 되돌리기 = 컷오프 배수(2.5)를 20 으로 | 해당 전략 `max_lot_ratio_mult=20.0`, PUT 즉시 / SQL 다음 재시작 |
 | 월요일 "지난 5영업일 수준(하루 1~4건)" | `[oversized_fallback]` 09-03 4 · 09-04 1 기준(1~4건/일). `[fallback_cap_config]` 09-04 4 는 설정 알림이라 따로 센다. `[fallback_notional_capped]` 는 09-01~05 0행이라 "0건 유지"가 기준 |
-| 월요일 기록을 찾는 곳 | `system_logs` 조회 기본 + 파일 로그 grep 보조(§3.2·§5). 20:10 리포트 미도달 |
+| 월요일 기록을 찾는 곳 | `system_logs` 직접 조회 기본 + 파일 로그 grep 보조(§3.2·§5). 20:10 리포트 미도달 |
 | 핵심 파일 여덟 곳 | 8영역 = `src/engine/{risk,order_engine,session,scanner,strategy_registry}.py` · `src/api/order.py` · `src/realtime/**` · `src/auth/**`(루트 `CLAUDE.md`) |
 | 파일의 원본 지문 | 8영역 승인 시 소스 세그먼트 sha 핀 절차 |
