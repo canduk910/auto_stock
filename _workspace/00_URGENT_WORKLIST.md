@@ -989,6 +989,6 @@ find . -name __pycache__ -prune -exec rm -rf {} + ; python -m pytest -q
 | 카드 | 사용자 답(09-05 15:0x) | 처리 |
 |---|---|---|
 | ① 허용 도메인 `auto.dkstock.cloud` 추가 | "추가완료" | 월 09-07 20:20 자동 리포트 마지막 메시지 "(e) 사용 주소 = https" 로 확인(그 전 수동 실행은 하지 않는다 — 토요일 리포트·Notion 페이지 노이즈) |
-| ② 대시보드 '일일 리포트' 탭 시각 표기 | "바꾸자" | **구현 완료(cycle256-F, vitest 537 PASS·`tsc -b` clean) — 배포 대기** — `DailyReportTab` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(`2026-09-07 09:05:00`), 배포 = frontend 모드 |
+| ② 대시보드 '일일 리포트' 탭 시각 표기 | "바꾸자" | **구현 완료(cycle256-F, vitest 537 PASS·`tsc -b` clean) — **배포 완료 09-05 18:32**(full, 마커 f27f55b — 8fe9565 CI 는 rotate 스크립트 주석의 `-stdin` 누락으로 D-15 가드 실패 → f27f55b 핫픽스)** — `DailyReportTab` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(`2026-09-07 09:05:00`), 배포 = frontend 모드 |
 | ③ D10 착수 요일 | "화요일" | 09-08(화) 아침 호출자 전수(영향 범위 목록) 제시 → 8영역 승인 → Red→Green → 장외 배포. 명세 `_workspace/specs/cycle_next_D10_pg_acquire_timeout.md` |
-| ④ TLS 2단계 시점 | "제안대로" | **준비 완료(cycle260, 신규 가드 168 PASS·백엔드 전체 7,005 PASS)** — 스위치는 여전히 OFF, 가동은 월 09-07 20:20 자동 리포트 https 성공 확인 뒤 `ROUTINE_HTTPS_CONFIRMED=1 bash tools/ops/tls_stage2_enable.sh`(http→https 301 + HSTS 1일 + Basic 자격 회전) |
+| ④ TLS 2단계 시점 | "제안대로" | **준비 완료(cycle260, 신규 가드 168 PASS·백엔드 전체 7,005 PASS)** — 스위치는 여전히 OFF, 가동은 월 09-07 20:20 자동 리포트 https 성공 확인 뒤 `ROUTINE_HTTPS_CONFIRMED=1 bash tools/ops/tls_stage2_enable.sh`(http→https 301 + HSTS 1일 + Basic 자격 회전) — **준비 코드 배포 완료 09-05 18:32**(tls2=off, nginx -t OK, 80/443 응답 1단계와 동일 실측) |
