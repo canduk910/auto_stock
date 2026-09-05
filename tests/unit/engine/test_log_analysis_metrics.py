@@ -9,6 +9,7 @@ from __future__ import annotations
 import pytest
 
 from src.engine import log_analysis_engine as lae
+from src.engine import log_metrics_collector as collector  # cycle259 카드 ⑦ — 이동처
 
 pytestmark = pytest.mark.unit
 
@@ -29,7 +30,7 @@ def test_aggregate_next_day_clear_counts_prefixes():
         _log("INFO", "정상 매매 로그 — 무관"),
     ]
 
-    result = lae._aggregate_next_day_clear(logs)
+    result = collector._aggregate_next_day_clear(logs)
 
     assert result == {
         "deferred": 2,
@@ -43,7 +44,7 @@ def test_aggregate_next_day_clear_empty_when_no_prefix():
         _log("INFO", "WebSocket 시세 구독 완료"),
         _log("WARNING", "포지션 불일치 감지"),
     ]
-    result = lae._aggregate_next_day_clear(logs)
+    result = collector._aggregate_next_day_clear(logs)
     assert result == {"deferred": 0, "drained_success": 0, "drained_fail": 0}
 
 
@@ -79,8 +80,8 @@ async def test_generate_daily_log_report_exposes_next_day_clear_in_metrics(monke
     async def _fake_insert(*_args, **_kwargs):
         return {"id": "row-1"}
 
-    monkeypatch.setattr(lae, "_fetch_logs_in_range", _fake_fetch)
-    monkeypatch.setattr(lae, "get_trades_in_range", _fake_get_trades)
+    monkeypatch.setattr(collector, "_fetch_logs_in_range", _fake_fetch)
+    monkeypatch.setattr(collector, "get_trades_in_range", _fake_get_trades)
     monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
@@ -89,7 +90,7 @@ async def test_generate_daily_log_report_exposes_next_day_clear_in_metrics(monke
     # PR-D (2026-05-14): async 변환 — coroutine 반환 필요
     async def _empty_funnel() -> dict:
         return {}
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", _empty_funnel)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel", _empty_funnel)
 
     await lae.generate_daily_log_report()
 

@@ -106,11 +106,13 @@ async def get_portfolio_risk() -> ApiResponse:
         stop_price_of=_stop_of,
     )
     # cycle233 — 1주 폴백 notional 초과 + 계좌 게이트 상태 관측 노출
+    # cycle259 카드 ⑥ — 조립은 watcher 단일 소유 `get_gate_snapshot()`(8키 +
+    # `eval_timeouts_today`)로 위임한다. 20:10 리포트 빌더와 같은 형상을 낸다.
     try:
-        from src.engine.account_risk_watcher import get_gate_state
+        from src.engine.account_risk_watcher import get_gate_snapshot
         from src.engine.portfolio_risk import compute_over_cap_positions
         snapshot["over_cap_positions"] = compute_over_cap_positions(strategies)
-        snapshot["account_gate"] = get_gate_state()
+        snapshot["account_gate"] = get_gate_snapshot()
     except Exception:
         logger.debug("[portfolio_risk] over_cap/gate 관측 실패 graceful", exc_info=True)
     return ApiResponse(

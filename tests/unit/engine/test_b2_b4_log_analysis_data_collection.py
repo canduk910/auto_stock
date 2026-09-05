@@ -59,6 +59,7 @@ import pytest
 
 from src.db import trade_history
 from src.engine import log_analysis_engine as lae
+from src.engine import log_metrics_collector as collector  # cycle259 카드 ⑦ — 이동처
 
 pytestmark = pytest.mark.unit
 
@@ -338,11 +339,11 @@ async def test_s1_when_supabase_has_1500_logs_then_fetch_returns_all_1500(
     """
     rows = _build_1500_logs_with_drained_at_1200()
     fake_pg = _FakeLogsPg(rows)
-    monkeypatch.setattr(lae, "pg", fake_pg)
+    monkeypatch.setattr(collector, "pg", fake_pg)
 
     start = datetime(2026, 6, 1, 0, 0, 0, tzinfo=KST)
     end = datetime(2026, 6, 1, 23, 59, 59, tzinfo=KST)
-    result = await lae._fetch_logs_in_range(start, end, limit=5000)
+    result = await collector._fetch_logs_in_range(start, end, limit=5000)
 
     assert len(result) == 1500, (
         f"페이지네이션 결함: fetched={len(result)} 건 (기대 1500). "
@@ -378,14 +379,14 @@ async def test_s2_when_drained_log_at_position_1200_then_aggregate_counts_it(
     """
     rows = _build_1500_logs_with_drained_at_1200()
     fake_pg = _FakeLogsPg(rows)
-    monkeypatch.setattr(lae, "pg", fake_pg)
+    monkeypatch.setattr(collector, "pg", fake_pg)
 
     start = datetime(2026, 6, 1, 0, 0, 0, tzinfo=KST)
     end = datetime(2026, 6, 1, 23, 59, 59, tzinfo=KST)
-    fetched = await lae._fetch_logs_in_range(start, end, limit=5000)
+    fetched = await collector._fetch_logs_in_range(start, end, limit=5000)
 
     # 페이지네이션 후 1500건이 와야 drained 가 포착됨
-    next_day_metrics = lae._aggregate_next_day_clear(fetched)
+    next_day_metrics = collector._aggregate_next_day_clear(fetched)
 
     assert next_day_metrics["drained_success"] == 1, (
         f"drained_success={next_day_metrics['drained_success']} (기대 1). "
@@ -553,7 +554,7 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
     # --- system_logs mock ---
     logs_rows = _build_1500_logs_with_drained_at_1200()
     fake_logs_pg = _FakeLogsPg(logs_rows)
-    monkeypatch.setattr(lae, "pg", fake_logs_pg)
+    monkeypatch.setattr(collector, "pg", fake_logs_pg)
 
     # --- trade_history mock (5건) ---
     trades_rows = [
@@ -630,11 +631,11 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
 
     monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", _empty_funnel)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel", _empty_funnel)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
 
     # api_metrics 도 차단 (외부 영향 없음)
-    monkeypatch.setattr(lae, "get_request_metrics", lambda: {})
+    monkeypatch.setattr(collector, "get_request_metrics", lambda: {})
     monkeypatch.setattr(lae, "reset_request_metrics", lambda: None)
 
     # 날짜 고정 — 테스트 데이터가 2026-06-01 기준이므로 _now_kst 로 override.
@@ -720,7 +721,7 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
     # --- system_logs mock (18,000건, idx=7668 에 drained) ---
     logs_rows = _build_18000_logs_with_drained_at_7668()
     fake_logs_pg = _FakeLogsPg(logs_rows)
-    monkeypatch.setattr(lae, "pg", fake_logs_pg)
+    monkeypatch.setattr(collector, "pg", fake_logs_pg)
 
     # --- trade_history mock (S5 와 동일한 5건 재활용) ---
     trades_rows = [
@@ -796,9 +797,9 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
 
     monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", _empty_funnel)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel", _empty_funnel)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
-    monkeypatch.setattr(lae, "get_request_metrics", lambda: {})
+    monkeypatch.setattr(collector, "get_request_metrics", lambda: {})
     monkeypatch.setattr(lae, "reset_request_metrics", lambda: None)
 
     # 날짜 고정 — target_date=2026-06-01

@@ -293,6 +293,22 @@ def get_gate_state() -> dict:
     return snap
 
 
+def get_gate_snapshot() -> dict:
+    """`get_gate_state()` 8키 + `eval_timeouts_today` — 두 소비자 단일 소유 스냅샷.
+
+    cycle259 리팩토링 카드 ⑥ — 20:10 리포트 빌더(`log_metrics_collector.
+    _build_portfolio_risk_snapshot`)와 `routes/portfolio.py::get_portfolio_risk`
+    가 각자 `dict(get_gate_state()) + _eval_timeout_count()` 를 조립하던 것을
+    단일 소유로 흡수한다. 무발화(read-only) — `get_gate_state()`/
+    `_eval_timeout_count()` 에 **위임**한다(로직 복제 금지: 복제하면 이 두 접근자를
+    patch 해 graceful 을 검증하는 기존 계약이 무음으로 깨진다). 반환은 항상
+    dict 의 **복사본**(watcher 내부 `_gate_state` 를 그대로 노출하지 않는다).
+    """
+    snap = dict(get_gate_state())
+    snap["eval_timeouts_today"] = _eval_timeout_count()
+    return snap
+
+
 def reset_state_for_test() -> None:
     """테스트 전용 — 모듈 상태 초기화."""
     global _gate_active, _gate_state, _emit_cap, _evaluated_mono

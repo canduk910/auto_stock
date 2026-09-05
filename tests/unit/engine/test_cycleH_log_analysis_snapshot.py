@@ -22,6 +22,7 @@ from __future__ import annotations
 import pytest
 
 from src.engine import log_analysis_engine as lae
+from src.engine import log_metrics_collector as collector  # cycle259 카드 ⑦ — 이동처
 
 pytestmark = pytest.mark.unit
 
@@ -50,13 +51,13 @@ def _stub_common(monkeypatch, captured: dict):
     async def _stages(_target_date) -> dict:
         return {}
 
-    monkeypatch.setattr(lae, "_fetch_logs_in_range", _fake_fetch_logs)
-    monkeypatch.setattr(lae, "get_trades_in_range", _fake_get_trades)
+    monkeypatch.setattr(collector, "_fetch_logs_in_range", _fake_fetch_logs)
+    monkeypatch.setattr(collector, "get_trades_in_range", _fake_get_trades)
     monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", _coarse)
-    monkeypatch.setattr(lae, "_collect_strategy_funnel_stages", _stages, raising=False)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel", _coarse)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages, raising=False)
 
 
 # ===========================================================================
@@ -80,7 +81,7 @@ async def test_metrics_includes_portfolio_risk_snapshot(monkeypatch):
     async def _fake_build(_now_kst=None):
         return fake_snapshot
 
-    monkeypatch.setattr(lae, "_build_portfolio_risk_snapshot", _fake_build, raising=False)
+    monkeypatch.setattr(collector, "_build_portfolio_risk_snapshot", _fake_build, raising=False)
 
     row = await lae.generate_daily_log_report()
     assert row == {"id": "row-H"}
@@ -109,7 +110,7 @@ async def test_snapshot_build_exception_keeps_report(monkeypatch):
     async def _raising_build(_now_kst=None):
         raise RuntimeError("get_balance / registry 일시 장애")
 
-    monkeypatch.setattr(lae, "_build_portfolio_risk_snapshot", _raising_build, raising=False)
+    monkeypatch.setattr(collector, "_build_portfolio_risk_snapshot", _raising_build, raising=False)
 
     row = await lae.generate_daily_log_report()
     # 리포트 INSERT 보존 (스냅샷 실패가 리포트 생성 막지 않음)

@@ -30,6 +30,7 @@ import pytest
 from freezegun import freeze_time
 
 import src.engine.log_analysis_engine as lae
+import src.engine.log_metrics_collector as collector  # cycle259 카드 ⑦ — 이동처
 
 pytestmark = pytest.mark.unit
 
@@ -93,14 +94,14 @@ def isolated(monkeypatch):
     async def _snapshot(now=None):
         return None
 
-    monkeypatch.setattr(lae, "_fetch_logs_in_range", _fetch)
-    monkeypatch.setattr(lae, "_fetch_high_severity_logs", _high)
-    monkeypatch.setattr(lae, "_count_logs_by_level", _count)
-    monkeypatch.setattr(lae, "get_trades_in_range", _trades)
-    monkeypatch.setattr(lae, "get_request_metrics", lambda: {"total": 0})
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", _funnel)
-    monkeypatch.setattr(lae, "_collect_strategy_funnel_stages", _stages)
-    monkeypatch.setattr(lae, "_build_portfolio_risk_snapshot", _snapshot)
+    monkeypatch.setattr(collector, "_fetch_logs_in_range", _fetch)
+    monkeypatch.setattr(collector, "_fetch_high_severity_logs", _high)
+    monkeypatch.setattr(collector, "_count_logs_by_level", _count)
+    monkeypatch.setattr(collector, "get_trades_in_range", _trades)
+    monkeypatch.setattr(collector, "get_request_metrics", lambda: {"total": 0})
+    monkeypatch.setattr(collector, "_collect_strategy_funnel", _funnel)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages)
+    monkeypatch.setattr(collector, "_build_portfolio_risk_snapshot", _snapshot)
     return seen
 
 
@@ -314,7 +315,9 @@ async def test_collect_when_run_then_logs_input_summary(isolated, caplog):
     """
     import logging
 
-    with caplog.at_level(logging.INFO, logger="src.engine.log_analysis_engine"):
+    # cycle259 카드 ⑦ — 이 INFO 는 `collect_daily_log_metrics` 본문에서 나가고, 그
+    # 함수가 `log_metrics_collector.py` 로 옮겨 로거 이름도 그 모듈 것으로 바뀐다.
+    with caplog.at_level(logging.INFO, logger="src.engine.log_metrics_collector"):
         await _collector()(date(2026, 9, 4))
 
     assert any("로그 분석 리포트 입력" in r.getMessage() for r in caplog.records), [

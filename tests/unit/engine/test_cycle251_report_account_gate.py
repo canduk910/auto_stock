@@ -37,6 +37,7 @@ RED 상태(구현 전): T1/T3/T5 는 `"account_gate"` 키 부재로 FAIL, T2/T4 
 from __future__ import annotations
 
 import ast
+import inspect
 import re
 from datetime import date
 from pathlib import Path
@@ -51,12 +52,22 @@ from src.engine import log_analysis_engine as lae
 pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
-LAE_SRC = ROOT / "src" / "engine" / "log_analysis_engine.py"
 WATCHER_SRC = ROOT / "src" / "engine" / "account_risk_watcher.py"
 WATCHER_REL = "src/engine/account_risk_watcher.py"
 CARD_TSX = ROOT / "frontend" / "src" / "components" / "PortfolioRiskCard.tsx"
 
 _BUILDER = "_build_portfolio_risk_snapshot"
+
+
+def _builder_path() -> Path:
+    """`_build_portfolio_risk_snapshot` 정의 파일 — **함수 객체에서 역추적**.
+
+    cycle259 카드 ⑦ 이 이 함수를 `log_metrics_collector.py` 로 옮긴다 — 리터럴 경로
+    상수(구 `LAE_SRC`)를 쓰면 이동마다 거짓 RED 가 된다(카드 ⑦ Red 파일이 지적한
+    `LAE_SRC` 문제와 동형). `lae.` 를 통해 역추적해도 재export 라 실제 정의 파일을
+    정확히 가리킨다.
+    """
+    return Path(inspect.getsourcefile(getattr(lae, _BUILDER)))
 
 #: `get_gate_state()` 가 돌려주는 키 집합 (cycle239 4키 + 원 4키).
 GATE_KEYS = {
@@ -284,7 +295,13 @@ async def test_t4b_snapshot_when_gate_stale_then_emit_cap_untouched(snapshot_dep
 # ===========================================================================
 @pytest.fixture
 def collect_deps(monkeypatch, snapshot_deps):
-    """`collect_daily_log_metrics` 의 로그/거래 수집만 대역 — 스냅샷 빌더는 실물."""
+    """`collect_daily_log_metrics` 의 로그/거래 수집만 대역 — 스냅샷 빌더는 실물.
+
+    cycle259 카드 ⑦ 이 `collect_daily_log_metrics` 를 `log_metrics_collector.py`
+    로 옮겨 내부 참조가 그 모듈 전역에서 해석된다 — `lae.X` patch 는 더 이상
+    먹지 않는다(collector 경로로 갱신).
+    """
+    from src.engine import log_metrics_collector as collector
 
     async def _fetch(start, end, limit=None):
         return []
@@ -304,13 +321,13 @@ def collect_deps(monkeypatch, snapshot_deps):
     async def _stages(_target_date):
         return {}
 
-    monkeypatch.setattr(lae, "_fetch_logs_in_range", _fetch)
-    monkeypatch.setattr(lae, "_fetch_high_severity_logs", _high)
-    monkeypatch.setattr(lae, "_count_logs_by_level", _count)
-    monkeypatch.setattr(lae, "get_trades_in_range", _trades)
-    monkeypatch.setattr(lae, "get_request_metrics", lambda: {"total": 0})
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", _funnel)
-    monkeypatch.setattr(lae, "_collect_strategy_funnel_stages", _stages)
+    monkeypatch.setattr(collector, "_fetch_logs_in_range", _fetch)
+    monkeypatch.setattr(collector, "_fetch_high_severity_logs", _high)
+    monkeypatch.setattr(collector, "_count_logs_by_level", _count)
+    monkeypatch.setattr(collector, "get_trades_in_range", _trades)
+    monkeypatch.setattr(collector, "get_request_metrics", lambda: {"total": 0})
+    monkeypatch.setattr(collector, "_collect_strategy_funnel", _funnel)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages)
 
 
 async def test_t5_collect_metrics_when_built_then_bundle_carries_eval_timeouts_today(
@@ -385,32 +402,46 @@ def _body_without_docstring(fn) -> list[ast.stmt]:
 
 
 def test_g251_1a_builder_never_references_is_soft_gated():
-    fn = _fn(_tree(LAE_SRC), _BUILDER)
+    fn = _fn(_tree(_builder_path()), _BUILDER)
     code = "\n".join(ast.unparse(stmt) for stmt in _body_without_docstring(fn))
     assert "is_soft_gated" not in code, (
         "`_build_portfolio_risk_snapshot` 본문에 `is_soft_gated` 식별자 — 그 함수는 "
         "stale 시 `gate_stale` cap 을 소비하는 **쓰기 경로**다. 관측은 무발화 "
-        "`get_gate_state()` 만 쓴다 (설명은 docstring 에)."
+        "`get_gate_snapshot()` 만 쓴다 (설명은 docstring 에)."
     )
 
 
-def test_g251_1b_builder_calls_read_only_accessors_exactly_once():
-    fn = _fn(_tree(LAE_SRC), _BUILDER)
-    got_state = _call_count(fn, "get_gate_state")
-    got_count = _call_count(fn, "_eval_timeout_count")
-    assert got_state == 1, f"`get_gate_state()` 호출이 정확히 1회여야 한다 (실측 {got_state})"
-    assert got_count == 1, (
-        f"`_eval_timeout_count()` 호출이 정확히 1회여야 한다 (실측 {got_count}) — "
-        "cycle250 카운터 병기가 명세 §1 G 의 값 정의다"
+def test_g251_1b_builder_calls_snapshot_accessor_exactly_once():
+    """cycle259 카드 ⑥ 재조준 — 조립은 `get_gate_snapshot()` 단일 위임이다.
+
+    종전엔 `get_gate_state()`·`_eval_timeout_count()` 를 각 1회씩 불렀지만, 카드 ⑥
+    이후로는 그 두 접근자를 **직접 부르지 않는다**(watcher 내부 위임으로 옮겨감) —
+    `get_gate_snapshot()` 호출 1 + 구 접근자 0 + `is_soft_gated` 0 이 새 계약이다.
+    """
+    fn = _fn(_tree(_builder_path()), _BUILDER)
+    code = "\n".join(ast.unparse(stmt) for stmt in _body_without_docstring(fn))
+    got_snapshot = _call_count(fn, "get_gate_snapshot")
+    assert got_snapshot == 1, (
+        f"`get_gate_snapshot()` 호출이 정확히 1회여야 한다 (실측 {got_snapshot}) — "
+        "카드 ⑥ 의 조립 단일 소유 계약"
     )
+    assert _call_count(fn, "get_gate_state") == 0, (
+        "`_build_portfolio_risk_snapshot` 이 `get_gate_state()` 를 직접 부른다 — "
+        "조립이 두 벌로 남는다(카드 ⑥ 의 표적)"
+    )
+    assert _call_count(fn, "_eval_timeout_count") == 0, (
+        "`_build_portfolio_risk_snapshot` 이 private `_eval_timeout_count()` 를 "
+        "모듈 밖에서 읽는다 — 경계 위반(카드 ⑥)"
+    )
+    assert "is_soft_gated" not in code
 
 
 def test_g251_1c_gate_block_is_a_separate_try_from_over_cap():
-    fn = _fn(_tree(LAE_SRC), _BUILDER)
+    fn = _fn(_tree(_builder_path()), _BUILDER)
     tries = [n for n in ast.walk(fn) if isinstance(n, ast.Try)]
     assert tries, "빌더에 try 블록이 없다"
 
-    gate_tries = [t for t in tries if _call_count(t, "get_gate_state") > 0]
+    gate_tries = [t for t in tries if _call_count(t, "get_gate_snapshot") > 0]
     over_tries = [t for t in tries if _assigns_subscript_key(t, "over_cap_positions")]
 
     assert len(gate_tries) == 1, (

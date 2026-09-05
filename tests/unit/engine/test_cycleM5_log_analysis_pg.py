@@ -25,6 +25,8 @@ pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parents[3]
 _LAE = _REPO / "src" / "engine" / "log_analysis_engine.py"
+# cycle259 카드 ⑦ — `_fetch_logs_in_range` 등 pg 접근 코드의 실제 소재지.
+_COLLECTOR = _REPO / "src" / "engine" / "log_metrics_collector.py"
 
 KST = timezone(timedelta(hours=9))
 
@@ -33,11 +35,12 @@ KST = timezone(timedelta(hours=9))
 # 소스 텍스트 가드 — supabase 직접 접근 제거
 # ---------------------------------------------------------------------------
 def test_log_analysis_no_supabase_reference():
-    body = _LAE.read_text(encoding="utf-8")
-    assert "from src.db.supabase import" not in body, (
-        "log_analysis_engine.py 는 supabase 직접 import 금지 (pg 경유)."
-    )
-    assert "supabase.table(" not in body, "log_analysis_engine.py 는 supabase.table() 호출 0건."
+    for path in (_LAE, _COLLECTOR):
+        body = path.read_text(encoding="utf-8")
+        assert "from src.db.supabase import" not in body, (
+            f"{path.name} 는 supabase 직접 import 금지 (pg 경유)."
+        )
+        assert "supabase.table(" not in body, f"{path.name} 는 supabase.table() 호출 0건."
 
 
 # ---------------------------------------------------------------------------
@@ -46,7 +49,7 @@ def test_log_analysis_no_supabase_reference():
 @pytest.mark.asyncio
 async def test_fetch_logs_uses_pg_fetch():
     """_fetch_logs_in_range → pg.fetch SELECT FROM system_logs (supabase 체인 폐기)."""
-    from src.engine import log_analysis_engine as lae
+    from src.engine import log_metrics_collector as lae  # cycle259 카드 ⑦ — 이동처
 
     start = datetime(2026, 7, 17, 0, 0, tzinfo=KST)
     end = datetime(2026, 7, 17, 23, 59, tzinfo=KST)
@@ -68,7 +71,7 @@ async def test_fetch_logs_uses_pg_fetch():
 @pytest.mark.asyncio
 async def test_fetch_logs_window_and_order_asc():
     """윈도우 (gte start / lte end) + ASC 정렬 + LIMIT/OFFSET 페이징 계약 보존."""
-    from src.engine import log_analysis_engine as lae
+    from src.engine import log_metrics_collector as lae  # cycle259 카드 ⑦ — 이동처
 
     start = datetime(2026, 7, 17, 0, 0, tzinfo=KST)
     end = datetime(2026, 7, 17, 23, 59, tzinfo=KST)
@@ -91,7 +94,7 @@ async def test_fetch_logs_paging_drains_until_short_page():
 
     1000/1000/300 반환 → pg.fetch 3회 (마지막 <1000 이면 종료).
     """
-    from src.engine import log_analysis_engine as lae
+    from src.engine import log_metrics_collector as lae  # cycle259 카드 ⑦ — 이동처
 
     start = datetime(2026, 7, 17, 0, 0, tzinfo=KST)
     end = datetime(2026, 7, 17, 23, 59, tzinfo=KST)
@@ -119,7 +122,7 @@ async def test_fetch_logs_paging_drains_until_short_page():
 @pytest.mark.asyncio
 async def test_fetch_logs_timestamp_kst_expr():
     """timestamp 는 +09:00 KST str 로 반환 (SELECT to_char '+09:00' 캐스트, 사이클 53 B-4)."""
-    from src.engine import log_analysis_engine as lae
+    from src.engine import log_metrics_collector as lae  # cycle259 카드 ⑦ — 이동처
 
     start = datetime(2026, 7, 17, 0, 0, tzinfo=KST)
     end = datetime(2026, 7, 17, 23, 59, tzinfo=KST)

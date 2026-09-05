@@ -26,7 +26,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from src.engine import log_analysis_engine as lae
+from src.engine import log_metrics_collector as lae  # cycle259 카드 ⑦ — 이동처
 
 pytestmark = pytest.mark.unit
 

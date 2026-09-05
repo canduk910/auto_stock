@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 import pytest
 
 from src.engine import log_analysis_engine as lae
+from src.engine import log_metrics_collector as collector  # cycle259 카드 ⑦ — 이동처
 
 pytestmark = pytest.mark.unit
 
@@ -85,7 +86,7 @@ async def test_funnel_async_callable(monkeypatch):
     """`_collect_strategy_funnel` 가 awaitable (async def) 인지 검증."""
     import inspect
 
-    assert inspect.iscoroutinefunction(lae._collect_strategy_funnel), (
+    assert inspect.iscoroutinefunction(collector._collect_strategy_funnel), (
         "PR-D: _collect_strategy_funnel 는 async def 여야 한다"
     )
 
@@ -95,8 +96,8 @@ async def test_funnel_async_callable(monkeypatch):
     async def _empty(*_a, **_kw):
         return []
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _empty, raising=False)
-    result = await lae._collect_strategy_funnel()
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _empty, raising=False)
+    result = await collector._collect_strategy_funnel()
     assert result == {}
 
 
@@ -116,9 +117,9 @@ async def test_funnel_uses_in_memory_when_higher(monkeypatch):
     async def _trades(*_a, **_kw):
         return [_trade("005930", "momentum", "COMPLETED")]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     assert funnel["momentum"] == {"signals": 5, "orders": 3, "fills": 2}
 
 
@@ -137,9 +138,9 @@ async def test_funnel_uses_db_when_in_memory_zero(monkeypatch):
     async def _trades(*_a, **_kw):
         return [_trade("066570", "long_tail_volatility", "COMPLETED")]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     # DB 보강: fills=1, orders=1, signals≥orders=1
     assert funnel["long_tail_volatility"]["fills"] == 1
     assert funnel["long_tail_volatility"]["orders"] == 1
@@ -163,9 +164,9 @@ async def test_funnel_handles_pending_in_orders_not_fills(monkeypatch):
             _trade("000004", "volatility_breakout", "PARTIAL"),
         ]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     assert funnel["volatility_breakout"]["orders"] == 4  # 모든 상태
     assert funnel["volatility_breakout"]["fills"] == 1   # COMPLETED 만
     assert funnel["volatility_breakout"]["signals"] >= 4  # signals ≥ orders
@@ -191,9 +192,9 @@ async def test_funnel_signal_monotonic_ge_orders(monkeypatch):
             _trade("000003", "momentum", "PENDING"),
         ]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     assert funnel["momentum"]["orders"] == 3
     assert funnel["momentum"]["signals"] >= 3, (
         "signals 는 orders 이상이어야 한다 (단조성)"
@@ -216,9 +217,9 @@ async def test_funnel_unknown_strategy_skipped_or_grouped(monkeypatch):
             _trade("000003", "ghost_strategy", "COMPLETED"),
         ]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     # momentum 만 등록 → momentum=1, ghost/null 은 funnel 키로 노출 안 됨
     assert funnel["momentum"]["fills"] == 1
     assert "ghost_strategy" not in funnel
@@ -240,9 +241,9 @@ async def test_funnel_db_failure_falls_back_to_in_memory(monkeypatch):
     async def _raise(*_a, **_kw):
         raise RuntimeError("supabase connection lost")
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _raise, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _raise, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     assert funnel["donchian_swing"] == {"signals": 2, "orders": 1, "fills": 1}
 
 
@@ -266,9 +267,9 @@ async def test_funnel_multiple_strategies_isolated(monkeypatch):
             _trade("005930", "momentum", "COMPLETED"),  # in-memory 가 더 큼
         ]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     # momentum: in-memory 우선
     assert funnel["momentum"]["signals"] == 10
     assert funnel["momentum"]["fills"] == 2
@@ -303,8 +304,8 @@ async def test_generate_daily_log_report_awaits_funnel(monkeypatch):
     async def _fake_insert(*_a, **_kw):
         return {"id": "row-x"}
 
-    monkeypatch.setattr(lae, "_fetch_logs_in_range", _fake_fetch_logs)
-    monkeypatch.setattr(lae, "get_trades_in_range", _fake_trades)
+    monkeypatch.setattr(collector, "_fetch_logs_in_range", _fake_fetch_logs)
+    monkeypatch.setattr(collector, "get_trades_in_range", _fake_trades)
     monkeypatch.setattr(lae, "_call_openai", _fake_call)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy")
@@ -319,7 +320,7 @@ async def test_generate_daily_log_report_awaits_funnel(monkeypatch):
     async def _today_buys(*_a, **_kw):
         return [_trade("066570", "long_tail_volatility", "COMPLETED")]
 
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _today_buys, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _today_buys, raising=False)
 
     row = await lae.generate_daily_log_report()
     assert row == {"id": "row-x"}
@@ -351,9 +352,9 @@ async def test_funnel_counts_multiple_buys_of_same_ticker(monkeypatch):
             _trade("005930", "momentum", "COMPLETED"),
             _trade("005930", "momentum", "COMPLETED"),  # 같은 ticker 두 번째
         ]
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     assert funnel["momentum"]["fills"] == 2, "multi-BUY 시 fills=2 (dedupe 없음)"
     assert funnel["momentum"]["orders"] == 2
 
@@ -375,9 +376,9 @@ async def test_funnel_counts_same_ticker_different_strategies(monkeypatch):
             _trade("005930", "momentum", "COMPLETED"),
             _trade("005930", "volatility_breakout", "COMPLETED"),  # 같은 ticker 다른 strategy
         ]
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     assert funnel["momentum"]["fills"] == 1, "momentum strategy 1건"
     assert funnel["volatility_breakout"]["fills"] == 1, "VB strategy 1건 — 다른 전략 흡수 X"
 
@@ -398,8 +399,8 @@ async def test_funnel_includes_cancelled_in_orders(monkeypatch):
             _trade("005930", "momentum", "CANCELLED"),
             _trade("000660", "momentum", "COMPLETED"),
         ]
-    monkeypatch.setattr(lae, "get_today_buy_trades_for_funnel", _trades, raising=False)
+    monkeypatch.setattr(collector, "get_today_buy_trades_for_funnel", _trades, raising=False)
 
-    funnel = await lae._collect_strategy_funnel()
+    funnel = await collector._collect_strategy_funnel()
     assert funnel["momentum"]["orders"] == 2, "CANCELLED + COMPLETED = orders 2"
     assert funnel["momentum"]["fills"] == 1, "COMPLETED 만 fills 1"

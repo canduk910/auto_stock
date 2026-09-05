@@ -18,6 +18,7 @@ from __future__ import annotations
 import pytest
 
 from src.engine import log_analysis_engine as lae
+from src.engine import log_metrics_collector as collector  # cycle259 카드 ⑦ — 이동처
 
 pytestmark = pytest.mark.unit
 
@@ -42,8 +43,8 @@ async def test_metrics_includes_funnel_stages_and_coarse_coexist(monkeypatch):
     async def _fake_insert(*_a, **_kw):
         return {"id": "row-199"}
 
-    monkeypatch.setattr(lae, "_fetch_logs_in_range", _fake_fetch_logs)
-    monkeypatch.setattr(lae, "get_trades_in_range", _fake_get_trades)
+    monkeypatch.setattr(collector, "_fetch_logs_in_range", _fake_fetch_logs)
+    monkeypatch.setattr(collector, "get_trades_in_range", _fake_get_trades)
     monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
@@ -52,7 +53,7 @@ async def test_metrics_includes_funnel_stages_and_coarse_coexist(monkeypatch):
     async def _coarse() -> dict:
         return {"volatility_breakout": {"signals": 0, "orders": 0, "fills": 0}}
 
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", _coarse)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel", _coarse)
 
     # 신규 stages stub — verdict 포함 dict 반환
     async def _stages(_target_date) -> dict:
@@ -69,7 +70,7 @@ async def test_metrics_includes_funnel_stages_and_coarse_coexist(monkeypatch):
             }
         }
 
-    monkeypatch.setattr(lae, "_collect_strategy_funnel_stages", _stages, raising=False)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages, raising=False)
 
     row = await lae.generate_daily_log_report()
     assert row == {"id": "row-199"}
@@ -116,13 +117,13 @@ async def test_metrics_funnel_stages_receives_target_date(monkeypatch):
         captured["target_date"] = target_date
         return {}
 
-    monkeypatch.setattr(lae, "_fetch_logs_in_range", _fake_fetch_logs)
-    monkeypatch.setattr(lae, "get_trades_in_range", _fake_get_trades)
+    monkeypatch.setattr(collector, "_fetch_logs_in_range", _fake_fetch_logs)
+    monkeypatch.setattr(collector, "get_trades_in_range", _fake_get_trades)
     monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
-    monkeypatch.setattr(lae, "_collect_strategy_funnel", _coarse)
-    monkeypatch.setattr(lae, "_collect_strategy_funnel_stages", _stages, raising=False)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel", _coarse)
+    monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages, raising=False)
 
     from datetime import datetime
 

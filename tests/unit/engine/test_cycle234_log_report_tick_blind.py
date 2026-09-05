@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.engine.log_analysis_engine import _aggregate_tick_blind
+from src.engine.log_metrics_collector import _aggregate_tick_blind
 
 
 def _row(msg):
@@ -34,7 +34,11 @@ class TestR4Aggregate:
         }
 
     def test_metrics_wiring_exists(self):
-        """generate_daily_log_report 의 metrics 조립에 tick_blind 키 배선."""
+        """collect_daily_log_metrics 의 metrics 조립에 tick_blind 키 배선.
+
+        cycle259 카드 ⑦ — `collect_daily_log_metrics` 가 `log_metrics_collector.py`
+        로 이동해 배선도 그 파일에 있다.
+        """
         from pathlib import Path
-        src = Path("src/engine/log_analysis_engine.py").read_text(encoding="utf-8")
+        src = Path("src/engine/log_metrics_collector.py").read_text(encoding="utf-8")
         assert '"tick_blind"' in src and "_aggregate_tick_blind(" in src

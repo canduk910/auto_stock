@@ -175,7 +175,7 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 | D5 TLS | `auto.dkstock.cloud` | ✅ cycle255 **배포 완료 08:00**(마커 06673f7, ACME 무자격 404·루트 401 실측). **사용자 할 일 = ① DNS A 레코드 `auto.dkstock.cloud → 3.38.228.74` 등록 ② EC2 `sudo snap install certbot --classic` ③ `bash tools/ops/tls_enable.sh`(사후 검증·자동 원복 내장) ④ 루틴 2개 BASE `https://auto.dkstock.cloud` + 클라우드 환경 허용 도메인 추가**. 80 은 계속 유지(1단계), 리다이렉트·HSTS 는 2단계 |
 | D9 REST 폴 조기 시작 | 권고대로 적용 | `SWING_REST_POLL_EARLY_START` 09:05 → **09:00:30** (scheduler.py 상수 1줄, 3,999L 불변, 테스트 갱신). D+1 = 09:00:3x 부터 `[swing_rest_poll_summary]` held_only 폴 |
 | D10 pg acquire 타임아웃 | 주중 별도 사이클 | 명세 초안 `_workspace/specs/cycle_next_D10_pg_acquire_timeout.md` — 호출자 전수 + 8영역 승인 동반 |
-| D11 리팩토링 카드 | 진행 | ①②③ 완료(새벽) · **⑨⑩ 완료(cycle256, 09-05 08:xx)** — ⑨ 는 PortfolioRiskCard 1사이트 + 유틸 신설로 한정(DailyReportTab 서식 전환 `2026. 9. 7. 9시 5분 0초`→`2026-09-07 09:05:00` 은 **사용자 결정 대기**), ⑩ 완료. **⑧ 완료(cycle257, 09-05 09:xx — scheduler 3,999→3,864L, 인계: `handler.py:78` 주석은 B 사이클)**. **④⑤ 완료(cycle258, 09-05 10:xx — 차분 13,000+ 조합 불일치 0, 뮤테이션 27/27)**. 남은 = ⑥⑦(cycle259) |
+| D11 리팩토링 카드 | 진행 | ①②③ 완료(새벽) · **⑨⑩ 완료(cycle256, 09-05 08:xx)** — ⑨ 는 PortfolioRiskCard 1사이트 + 유틸 신설로 한정(DailyReportTab 서식 전환 `2026. 9. 7. 9시 5분 0초`→`2026-09-07 09:05:00` 은 **사용자 결정 대기**), ⑩ 완료. **⑧ 완료(cycle257, 09-05 09:xx — scheduler 3,999→3,864L, 인계: `handler.py:78` 주석은 B 사이클)**. **④⑤ 완료(cycle258, 09-05 10:xx — 차분 13,000+ 조합 불일치 0, 뮤테이션 27/27)**. **⑥⑦ 완료(cycle259, 09-05 11:xx)** — **D11 10장 전부 처리**. 잔존 = 8영역 권고 4곳(`risk.py:244,419`·`scanner.py:388`·`kojiro.py:987` 관측 배관) · DailyReportTab 서식 결정 · `handler.py:78` 주석(B) |
 | D1 리포터 비밀번호 | 유지 | 변경 없음 |
 | D2 OpenAI 경로 | 09-19 까지 병행 후 결정 | 변경 없음 |
 | D6 주간 자문 정본 위치 | 09-08 첫 산출물 후 | 변경 없음 |
