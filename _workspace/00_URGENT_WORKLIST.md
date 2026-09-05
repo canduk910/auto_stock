@@ -996,3 +996,11 @@ find . -name __pycache__ -prune -exec rm -rf {} + ; python -m pytest -q
 | ② 대시보드 '일일 리포트' 탭 시각 표기 | "바꾸자" | **구현 완료(cycle256-F, vitest 537 PASS·`tsc -b` clean) — **배포 완료 09-05 18:32**(full, 마커 f27f55b — 8fe9565 CI 는 rotate 스크립트 주석의 `-stdin` 누락으로 D-15 가드 실패 → f27f55b 핫픽스)** — `DailyReportTab` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(`2026-09-07 09:05:00`), 배포 = frontend 모드 |
 | ③ D10 착수 요일 | "화요일" | 09-08(화) 아침 호출자 전수(영향 범위 목록) 제시 → 8영역 승인 → Red→Green → 장외 배포. 명세 `_workspace/specs/cycle_next_D10_pg_acquire_timeout.md` |
 | ④ TLS 2단계 시점 | "제안대로" | **준비 완료(cycle260, 신규 가드 168 PASS·백엔드 전체 7,005 PASS)** — 스위치는 여전히 OFF, 가동은 월 09-07 20:20 자동 리포트 https 성공 확인 뒤 `ROUTINE_HTTPS_CONFIRMED=1 bash tools/ops/tls_stage2_enable.sh`(http→https 301 + HSTS 1일 + Basic 자격 회전) — **준비 코드 배포 완료 09-05 18:32**(tls2=off, nginx -t OK, 80/443 응답 1단계와 동일 실측) |
+
+## 2026-09-05 밤 사용자 답변(보고서 3부 결정 카드)
+
+| 카드 | 사용자 답(09-05 23:xx) | 처리 |
+|---|---|---|
+| ① 월 09-07 20:25~22:00 2단계 가동 자율 구간 | "허용" | **자율 구간 성립**(커밋·푸시·장외 배포·루틴 프롬프트 수정 포함). 절차 = 런북 `_workspace/specs/tls_stage2_activation_runbook_0907.md`. 사용자 직접 행동 = ⑤ 새 비밀번호를 클라우드 환경 `REPORTER_BASIC_PASSWORD` 에 넣기 + 브라우저 재로그인 |
+| ② HSTS 기간 상향 | "1주 뒤 올려" | 가동 1주 뒤(**09-14 이후 첫 장외 시간**) `max-age=86400` → `15552000`(180일): 스니펫 2(`tls-srv-hsts.conf`·`tls-loc-hsts.conf`) + `tls_stage2_enable.sh` 검증 정규식 2줄 + G-260 가드 기대값 동시 갱신 → push(frontend 모드) → 헤더 실측. 사전 승인됨 |
+| ③ '전략수정 AI자문' 페이지 시각 표기 | "바꿔" | cycle256-G — `pages/Recommendations.tsx` `formatDateTime` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(KST 강제 + `2026-09-07 09:05:00`), 프론트 전용 배포 |
