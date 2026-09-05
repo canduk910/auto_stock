@@ -983,3 +983,12 @@ curl -s -u "<USER>:<PASS>" "http://3.38.228.74/api/strategies" | python3 -c \
 # 전체 회귀
 find . -name __pycache__ -prune -exec rm -rf {} + ; python -m pytest -q
 ```
+
+## 2026-09-05 오후 사용자 답변(보고서 2부 결정 카드)
+
+| 카드 | 사용자 답(09-05 15:0x) | 처리 |
+|---|---|---|
+| ① 허용 도메인 `auto.dkstock.cloud` 추가 | "추가완료" | 월 09-07 20:20 자동 리포트 마지막 메시지 "(e) 사용 주소 = https" 로 확인(그 전 수동 실행은 하지 않는다 — 토요일 리포트·Notion 페이지 노이즈) |
+| ② 대시보드 '일일 리포트' 탭 시각 표기 | "바꾸자" | cycle256 후속 — `DailyReportTab` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(`2026-09-07 09:05:00`), 프론트 전용 배포(frontend 모드) |
+| ③ D10 착수 요일 | "화요일" | 09-08(화) 아침 호출자 전수(영향 범위 목록) 제시 → 8영역 승인 → Red→Green → 장외 배포. 명세 `_workspace/specs/cycle_next_D10_pg_acquire_timeout.md` |
+| ④ TLS 2단계 시점 | "제안대로" | 월 09-07 20:20 자동 리포트 https 성공 확인 뒤 진행(http→https 301 + HSTS + Basic 자격 회전). 주말에 **가동 스위치가 꺼진 상태로 코드·절차만 준비**(cycle260) |
