@@ -28,11 +28,51 @@
 > 지표(atr14/ema50)는 live 우선으로 병합(P1 계약 복원) + `[setup_structure_conflict]` 관측.
 > 자문 = `_workspace/domain_consult/cycle228_vol_gate_latch.md` · 명세 = `_workspace/red/cycle228_gate_latch_spec.md`.
 
+> ⏸️ **VB·LTV 09:00 직후 진입 보류 `open_entry_hold_secs` (cycle262, 2026-09-06) — 지혈이며 근본 시정이 아니다.**
+> KRX 개장 후 기본 **90초**(창 = KST `[09:00:00, 09:01:30)`, 하한 포함·상한 배타) 동안
+> **신규 매수 신호만** 내지 않는다 — 청산·손절·트레일링·익일청산·15:20 강제청산은 무접촉.
+> 근거 = 목표가의 기준 시가가 KRX 09:00 시가가 아니라 통합 채널 `H0UNCNT0` `fields[7]`
+> (**세션 시가** — 프리장 체결이 있었으면 프리장 시가)이고, 09:00~09:01:30 코호트가
+> "체결가 ≥ KRX시가+offset" 을 **20/20 전부 위반**(이후 53/93, Fisher p=6.4e-5).
+> ⚠️ 오염된 `[7]` 은 **일-스코프 상수**라 90초 뒤에도 값이 그대로다 — **근본 시정**은
+> `[7]` 에 `[24] OPRC_HOUR` 스코프 필터(`src/realtime/**` = **8영역**, 별도 승인 + 자문).
+> **보드 무관 — 시간창 단독 판정**(`tradable_boards` 분기 금지: 09:00:00~09:00:30 은 세션
+> 트래커 30초 주기 탓에 보드가 `pre_nxt` 로 잡힐 수 있는 stale 캐시 구간이다). LTV 의
+> 08:00~09:00 진짜 프리장 매수는 **창 밖 = 무접촉**. **판정 자리 = 돌파 발사점**(계좌 SOFT
+> 게이트 뒤) — 최상단 금지(보류 중 `_prev_price` baseline 동결 → 해제 후 거짓 돌파, cycle233
+> C233-F1 + would_buy 증거 소실). **보류 중에도 baseline 갱신은 계속된다.**
+> **fail-open 이 계약** — 키 부재·`None`·`""`·파싱 실패(`inf`/`nan` 포함)는 전부 0 = OFF =
+> 현행 행위, 읽는 쪽 `[0, 600]` 클램프(읽기 `except` 는 **bare `Exception`**: `1e400` 은
+> 유효 JSON 이라 `int(inf)` → `OverflowError` 가 `check_buy_signal` 을 뚫고
+> `risk.on_tick` → `handler.py` re-raise → WS 재연결 폭주로 이어진다).
+> 관측 = `[open_entry_hold_config]`(적용값 카나리아, 1회/**(전략, 값)**/일 — 값-민감 cap 이
+> 장중 PUT 롤백 확인 채널이다. `source` 는 **출처가 아니라 값 동등성 추론**. ⚠️ 계좌 SOFT
+> 게이트 활성일에는 **LTV 카나리아가 0행** — LTV 는 `GATE_FIRST_FILES` 라 게이트 If 가
+> `check_buy_signal` 첫 문장이어야 하고(cycle233 M6, AST 봉인) 로그 emit 은 그 앞에 둘 수
+> 없다. VB 는 게이트가 발사 직전이라 무영향. 후속 F-6) +
+> `[open_entry_hold_blocked]`(**would_buy 정본**, 1회/(ticker,전략)/일). 두 emit 모두
+> peek→로그→mark(cycle226 D-3) + bare `except Exception` 흡수 — **행위는 관측 밖**.
+> `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(진입 정체성 상수, AST G-262-1).
+> 롤백 = `PUT /api/strategies/{id}/params {"open_entry_hold_secs": 0}` **즉시** /
+> `strategy_config` SQL UPDATE 는 **다음 재시작에서만**(cycle232 D6 → 장중 실효 수단은 PUT 뿐).
+> 자문 §2.6 의 **세 번째(선택) 마커 `[open_entry_hold_release]`**("막고 나서 더 좋은 값에
+> 샀나" 의 직접 측정)는 **이번 범위에서 미구현 = 후속 F-4** — 그때까지 그 판정은
+> `trade_history` 조인으로만 복원되고 "못 샀다" vs "더 좋은 값에 샀다" 가 구분되지 않는다.
+> 두 cap 은 **별개 인스턴스가 계약**(같은 슬롯을 다투면 config 1행이 그날의 blocked 표본을
+> 통째로 침묵시킨다 — cycle236 '별개 cap 가드' / donchian OB-11 선례).
+> 🕒 `[open_entry_hold_blocked]` 는 지금 **`system_logs` 에만** 남고 전략 INFO 는 실측상 최근
+> 며칠분만 잔존한다 — **재검토 창(2주)이 닫히기 전에 purge 될 수 있다**(후속 F-1 = 일일 추출 적재).
+> ⚠️ **DB 선반영 금지** — `_load_strategy_config`·`PUT /params` 둘 다 "코드에 이미 있는 키만
+> 덮는" 오버레이라 **배포 전 PUT 은 무음 실패**하고 `params` JSONB 를 통째로 덮는다(cycle245 선례).
+> 가드 = `tests/unit/engine/strategies/test_cycle262_open_entry_hold.py`(행위 104, C1~C12) ·
+> `tests/unit/ast/test_cycle262_ast_open_entry_hold.py`(AST 28, G-262-1a~9).
+> 명세 = `_workspace/00_leader_trading_rules.md` §5 · 자문 = `_workspace/consult/2026-09-06_open_entry_hold.md`.
+
 | ID | 핵심 동작 | 손절·청산 | tradable_boards / exchange |
 |----|----------|----------|---------------------------|
 | `momentum` | 전일종가 +29% 돌파 (상한가 30% 제외, 돌파 순간만) | -7.5% / 익일 청산: 갭+10%↑ → 트레일링 -2% / 그 외 즉시 매도 | KRX_OPEN+MAIN / KRX·NXT·SOR (실전 SOR 권장, 모의는 KRX 강제) |
-| `volatility_breakout` | 보드별 시가 + (전일Range × 보드별 K) 돌파. `_targets[ticker].boards[board]` 보드 분리 저장. `_open_confirmed[ticker]` / `_prev_price[ticker]` 도 `{board: ...}` dict | **보드별 손절**: `stop_loss_main` 우선 → 부재 시 `stop_loss_rate` top-level fallback. (`stop_loss_pre_nxt` 키는 DB 호환 보존, PRE_NXT 제거로 적용 안 됨). `_get_stop_loss_for_board(params, board)` 헬퍼 + `_resolve_active_board()` 활성 보드 조회. **15:20 KRX 메인 일괄 청산** (OVERNIGHT 거부) | **MAIN 단독** (사이클 26: PRE_NXT + POST_NXT 제거, KRX ONLY) / `k_value_krx_main` / `k_value_nxt_pre` (`k_value_nxt_post` 키 호환 보존만) |
-| `long_tail_volatility` | VB 방식 + 전일대비 `min_prdy_rate%`↑. `_limit_up_reached` set으로 모드 관리. **`_cooldown_until` 2영업일 재진입 쿨다운** (사이클 213 — `on_position_closed` 훅에서 `was_limit_up`(discard 전 판정) 이면 면제, **당일 모드 손절 종목만** 등록 = 상한가 익일보유 정상 재진입 보존. 테스 whipsaw 차단. `reentry_cooldown_days=2` PARAM_RANGES 미등록, 일일 리셋 금지) | 당일 모드 -3% / 상한가 모드 -5% + 익일 갭/트레일링. **15:20 상한가 미도달 일괄 청산** / 상한가 모드는 익일 NXT 프리 청산 + POST_NXT 손절 모니터링. `_next_day_clear_pending` 가드 | **PRE_NXT + MAIN + POST_NXT 3보드** (사이클 38, 2026-05-22 사용자 의도 복원 — 연속 상한가 익일 청산 + 야간 매수. 사이클 26 KRX ONLY 정책 폐기). 매수 진입 전용 — 보유 손절/Trailing/익일청산은 보드 가드 무관 항상 작동 |
+| `volatility_breakout` | 보드별 시가 + (전일Range × 보드별 K) 돌파. `_targets[ticker].boards[board]` 보드 분리 저장. `_open_confirmed[ticker]` / `_prev_price[ticker]` 도 `{board: ...}` dict | **보드별 손절**: `stop_loss_main` 우선 → 부재 시 `stop_loss_rate` top-level fallback. (`stop_loss_pre_nxt` 키는 DB 호환 보존, PRE_NXT 제거로 적용 안 됨). `_get_stop_loss_for_board(params, board)` 헬퍼 + `_resolve_active_board()` 활성 보드 조회. **15:20 KRX 메인 일괄 청산** (OVERNIGHT 거부) | **MAIN 단독** (사이클 26: PRE_NXT + POST_NXT 제거, KRX ONLY) / `k_value_krx_main` / `k_value_nxt_pre` (`k_value_nxt_post` 키 호환 보존만). **cycle262 — 09:00 직후 `open_entry_hold_secs`(기본 90초) 진입 보류**(위 배너, 보드 무관 시간창 단독) |
+| `long_tail_volatility` | VB 방식 + 전일대비 `min_prdy_rate%`↑. `_limit_up_reached` set으로 모드 관리. **`_cooldown_until` 2영업일 재진입 쿨다운** (사이클 213 — `on_position_closed` 훅에서 `was_limit_up`(discard 전 판정) 이면 면제, **당일 모드 손절 종목만** 등록 = 상한가 익일보유 정상 재진입 보존. 테스 whipsaw 차단. `reentry_cooldown_days=2` PARAM_RANGES 미등록, 일일 리셋 금지) | 당일 모드 -3% / 상한가 모드 -5% + 익일 갭/트레일링. **15:20 상한가 미도달 일괄 청산** / 상한가 모드는 익일 NXT 프리 청산 + POST_NXT 손절 모니터링. `_next_day_clear_pending` 가드 | **PRE_NXT + MAIN + POST_NXT 3보드** (사이클 38, 2026-05-22 사용자 의도 복원 — 연속 상한가 익일 청산 + 야간 매수. 사이클 26 KRX ONLY 정책 폐기). 매수 진입 전용 — 보유 손절/Trailing/익일청산은 보드 가드 무관 항상 작동. **cycle262 — 09:00 직후 `open_entry_hold_secs`(기본 90초) 진입 보류**(위 배너). 08:00~09:00 프리장 매수는 창 밖 = 무접촉 |
 | `donchian_swing` | 코스피200+코스닥150 고정 유니버스 → 시총 컷 → 60일 일봉 → 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5×. `prepare` 부분봉 가드(`candles[0]==오늘`이면 [1] 부터). 09:05~09:30 매수, 갭 +3%↑ 스킵, 1회만. **Phase 2A-2 터틀 sizing opt-in**(`sizing_mode="turtle"`, 기본 `position_ratio`=byte 동일) — `compute_unit_qty_guarded`(변동성 floor 1%+notional 클램프)로 유닛 sizing + `_entry_atr` 원자 스탬프 | ATR(14)×2 Chandelier 트레일링 + **하드손절**: 터틀(entry_atr 스탬프) → `buy − stop_atr(2.0)×entry_atr` + `-9%` backstop(ATR독립 최후 방어) / position_ratio(미스탬프) → **-7% byte 동일**. entry_atr = `recompute_held_atr` 가 재시작 시 buy_date 이전 봉으로 재도출(loosen 차단). **시간·15:20 청산 없음** — 멀티데이 보유 (DB positions 영속화) | MAIN |
 | `bull_flag_breakout` | `stock_master.list_by_filter` (**전체 상장 확대 유니버스**, 시총 ≥ 100억 + 거래대금 ≥ 15억, ETF/ETN 제외; 사이클 108 KIS 순위 API 폐기. **2026-08-08 확대** — BFB 는 이미 지수 무제약이라 실질 변경 = 거래대금 20억→15억(도메인 B2, 장중 돌파 추격 슬리피지 방어로 kojiro 10억까지 안 내림) + `max_scan_stocks` 100→4000(`refreshed_at DESC` 임의 절단 소멸) + `return_stage_counts=True` 합집합 노출 배선) → 35일 일봉(DB 우선 어댑터, 사이클 173 `min_required=35`) → **폴 자동 검출**(3~10영업일 누적 +15%↑(사이클 48), 음봉 ≤ 45%) + **플래그 자동 검출**(2~10영업일, 조정 폭 ≤ 폴 폭의 **50%**(사이클 211, 0.382→0.5), 거래량 < 폴 평균 × 60%(안전장치 불변)). 09:05~13:00 **`flag_high` 돌파 순간** + 당일 거래량 ≥ `flag_avg_volume × 2`. `_bought_today` 1회 가드 + `_cooldown_until[ticker]=date` 3영업일 쿨다운 (**사이클 191 배선** — `on_position_closed` 훅에서 즉시 달력일 근사(+5) 등록 후 CTCA0903R `add_business_days` 로 정확 3영업일 정정. 청산 유형 무구분, 일일 리셋 금지 AST 가드) | -5% 손절 / **`flag_low` 이탈 → STOP_LOSS** / **측정된 이동 도달 → TRAILING_STOP**(타겟가 `flag_high + (pole_high - pole_start)`, 1차 구현 전량 청산) / 잔여 `high_since_buy - ATR×2` 트레일링 / 5영업일 시간 청산 (캘린더일 +2 보정) | MAIN / KRX |
 | `vcp_breakout` | **미네르비니식 VCP**. **전체 상장 확대 유니버스**(2026-08-08 확대 — 지수 KOSPI200∪KOSDAQ150 제약 제거 `is_kospi200/is_kosdaq150=None`, 미네르비니 셋업은 중소형 성장주 서식지라 지수 제약이 그 종목군을 배제해 왔음) → 시총 ≥ 100억(사용자 결정 — kojiro 500억보다 낮게, 소형주 포함) + 거래대금 ≥ 10억(이전 `min_trade_amount=0` 하드코딩 미사용 → 실사용) + `max_scan_stocks` 200→4000 → 일봉 100일(prepare cap, `vcp_breakout.py:162` — 원설계 220 미실현 사이클 173, backfill 도 120 사이클 196. 확대 종목 일봉은 daily-load(지수∪500억/10억)가 이미 커버, 비지수 자격 641종목 중 95.8% ≥100일 실측 → scanner 무변경) → **추세 필터**(50/60/120 EMA 정렬 + 장기 EMA 1개월 우상향, 사이클 48 — KIS 100일 한도 내 effective ema_long ≈75) → **베이스 자동 검출**(25~75영업일, 깊이 ≤ 30%) → **pullback 점진 수축** (사이클 49 ATR threshold ZigZag, `min_swing_atr_mult=0.5` 노이즈 필터 + 마지막 swing 미완성 포함, 2~4회, 직전 대비 폭 감소, 마지막 ≤ 12%) → **거래량 수축**(마지막 5일 평균 < 베이스 직전 20일 평균 × 70%). 09:05~14:30 **`base_high` 돌파 순간** + 당일 거래량 ≥ 20일 평균 × 1.5. `_bought_today` + `_cooldown_until` 7영업일 (**사이클 191 배선** — `on_position_closed` 신설, BFB 동일 2단계 영업일 산정). **`Position._MULTIDAY_STRATEGIES` 멤버** → `is_next_day` 항상 False | -7% 손절 / **`base_low` 이탈 → STOP_LOSS** / `high_since_buy - ATR×2` 트레일링 / **50일 EMA 이탈 → TRAILING_STOP**. **시간·15:20 청산 없음** — donchian 컨벤션, 멀티데이 보유 | MAIN / KRX |

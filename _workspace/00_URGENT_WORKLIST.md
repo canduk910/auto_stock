@@ -16,6 +16,101 @@
 > 시정 완료. **이관 잔여**: D-4(read 예외 debug 단독 — no_data WARNING 동반이라 LOW 수용) ·
 > D-5(대시보드 래치 상태 미노출 — 후속 사이클 후보, `get_targets_status` 키 추가만으로 가능).
 
+
+---
+
+## ⏸️ cycle262 — VB·LTV 09:00 직후 진입 보류 `open_entry_hold_secs` (2026-09-06, **커밋·배포 대기**)
+
+> 사용자 결정(09-06) = 카드 ② "조사와 임시 매수 보류 함께" · 범위 **VB + LTV 둘 다**(자문 권고 b) ·
+> 배포 **오늘 일요일 장외**(월 09:00 개장부터 발효). 자문 정본 =
+> `_workspace/consult/2026-09-06_open_entry_hold.md` · 조사 근거 =
+> `_workspace/analysis/entry_price_0900_20260906/{code_trace.md,forensic.md}`.
+> **변경 파일 = `src/engine/strategies/{volatility_breakout,long_tail_volatility}.py` 둘뿐**
+> (8영역·`scheduler.py`·타 전략 5파일 diff 0 = C12).
+
+### 무엇을 했나
+KRX 개장 후 기본 **90초**(창 = KST `[09:00:00, 09:01:30)`) 동안 **신규 매수 신호만** 보류한다.
+청산·손절·트레일링·익일청산·15:20 강제청산은 무접촉. 보드 무관 — **시간창 단독 판정**.
+LTV 의 08:00~09:00 진짜 프리장 매수는 창 밖이라 무접촉.
+
+### ⚠️ 이건 지혈이다 (근본 시정 아님)
+목표가의 기준 시가가 KRX 09:00 시가가 아니라 통합 채널 `H0UNCNT0` `fields[7]`(= **세션 시가**,
+프리장 체결이 있었으면 프리장 시가)다. 09:00~09:01:30 코호트는 "체결가 ≥ KRX시가+offset" 을
+**20/20 전부 위반**(이후 구간 53/93 = 57%), Fisher p=6.4e-5. **오염된 `[7]` 은 일-스코프 상수라
+90초 뒤에도 값이 그대로다** — 보류는 통계적으로 최악인 구간만 피할 뿐 오염을 고치지 않는다.
+
+### 🔴 근본 시정은 **열린 채로 남는다** — 이 사이클이 그 항목을 닫지 않는다
+`[7]` 오염은 **전 시간대 공통**이다(09:01:30 이후에도 53/93 = 57.0% 위반). 보류가 회수하는 것은
+**건수의 17%(20/113)** 이고 손실의 39% 다. 근본 시정 = `[7]` 에 **`[24] OPRC_HOUR` 스코프 필터**를
+거는 것 — 형제 필드 `[8] 고가`가 cycle222-a2 에서 `[27] HGPR_HOUR` 로 받은 것과 **대칭**이고,
+`[24]` 는 지금 **전 소스 파싱 0건**이다. `src/realtime/**` = **8영역** + 진입 목표가 = **매매 행위
+변경**이라 **사용자 승인 + `domain-consult` 선행**이 필요하다 ⇒ 아래 **F-2**(미착수).
+⚠️ **고가와 달리 시가는 fail-closed(0 강등)를 쓸 수 없다** — 0 이면 VB 매수가 통째로 멈춘다.
+방향 설계(0 강등 vs REST `stck_oprc` 폴백 vs 보류)가 별도 쟁점이다.
+> 자문 §4.1 원문: **"⚠️ 이 보류가 워크리스트에서 근본 시정 항목을 닫으면 안 된다. 지혈은 지혈로만 기록한다."**
+
+### 판독 (월 09-07 09:00~09:05)
+- `[open_entry_hold_config] strategy=… hold_secs=90 until=09:01:30 source=default` — **전략당 1행**
+  (cap 은 정확히는 1회/**(전략, 값)**/일 — 장중 PUT 롤백 시에만 2행). 0행이면 보류가 안 걸렸거나
+  그날 평가 자체가 없었다는 뜻이므로 즉시 확인.
+  ⚠️ `source` 는 **출처가 아니라 값 동등성 추론**이다(`PUT` 으로 90 을 재확정해도 `default`).
+- `[open_entry_hold_blocked] ticker=… current_price=… target=… board_open=… elapsed_secs=…` —
+  **would_buy 정본**, 1회/(ticker,전략)/일. 이 사이클의 **핵심 산출물**이다.
+- 롤백(장중) = `PUT /api/strategies/{id}/params {"open_entry_hold_secs": 0}` — **즉시** 반영.
+  `strategy_config` SQL UPDATE 는 **다음 백엔드 재시작에서만**(cycle232 D6 로 보유 중 장중
+  재시작 금지 ⇒ **장중 실효 수단은 PUT 뿐**). 키가 전략별이라 VB 90 유지 + LTV 만 끄기 가능.
+- ⚠️ **배포 전 DB 선반영 금지** — `_load_strategy_config`·`PUT /params` 둘 다 "코드에 이미 있는
+  키만 덮는" 오버레이라 배포 전 PUT 은 **무음 실패**하고 `params` JSONB 를 통째로 덮는다.
+
+### 🕒 증거 만료 시한 (후속 F-1 이 닫히기 전까지 유효)
+`[open_entry_hold_blocked]` 는 지금 **`system_logs` 에만** 남는다. 자문 §4.2 실측상 전략 INFO 는
+최근 며칠분만 잔존하므로, **자문 ⑨ 의 재검토 트리거(2주 연속 관찰)가 닫히기 전에 로그가 purge 될 수
+있다.** F-1 이 배선되기 전까지는 **주 1회 이상 수동 추출**(`system_logs` grep → 별도 보관)로 버틴다.
+
+### 후속 티켓 (자문 §8 ⑩ 우선순위 — ①~④ 가 그 정본 순서)
+
+| 우선 | # | 티켓 | 범위 | 왜 |
+|---|---|---|---|---|
+| **①** | **F-7** | `stock_master_daily` **16:00 적재 복구** | **이미 승인·명세 완료 = cycle263** (`_workspace/specs/cycle263_daily_load_stub_fix.md`, 09-06 카드 ④ "승인" — `scanner.py` 8영역 접촉 포함) | 자문 §4.3 **단계 1**(매일 09:35 `[breakout_open_confirm]` 스탬프 vs `stock_master_daily` 그날 KRX 시가 대조 — 8영역 무접촉·코드 0줄)의 **선결 조건**이다. 스텁이면 대조 자체가 불가능하다. 09-06 15:16 금요일 보정으로 09-04 스텁 1,015→120 은 해소됐지만 **매일 아침 07:5x 스텁이 `max_bas_dd==오늘` idempotency 를 다시 거는 구조**는 시정 배포 전까지 그대로다 |
+| **②** | **F-2** | `[24] OPRC_HOUR` 프로브 → **근본 시정** | `src/realtime/**` = **8영역** — 사용자 승인 + `domain-consult` 선행 필수 | `[7]` 이 세션 시가라는 **오염 자체**를 고친다. `[24]` 를 한 번도 찍어 본 적이 없어(파싱 0건) "그 값이 08:00 프리장 시가다" 는 **정황 확정**에 머문다 — 임시 보류의 정당성엔 무관하지만(무엇으로 오염됐든 KRX 시가가 아니다) **시정 방향 선택에는 그 분포가 필요하다**(자문 §4.3 단계 2) |
+| **③** | **F-8** | 09:00:05 `[breakout_open_confirm]` **`confirmed=0 empty=55~65`** 원인 | 확정 경로 조사(읽기 전용 먼저). 시정은 8영역 여부 판정 후 | 시가 확정 **주 경로가 사실상 무동작**이라 목표가를 실제로 굳히는 것이 첫 MAIN 틱의 인라인 폴백이다 = **오염이 들어오는 문**. 09-03·09-04 양일 실측. 이 경로가 살아나면 F-2 의 설계 선택지가 넓어진다 |
+| **④** | **F-3** | **kojiro 갭스킵 오염** 조사 | `src/engine/strategies/kojiro.py`(읽기 전용 조사 먼저) | kojiro 는 매수 창이 09:05~09:30 이라 이번 보류 **밖**이지만, 갭업/갭다운 스킵이 **같은 오염된 `open_price`** 로 갭률을 잰다. 프리장 시가 ≈ 전일종가면 `gap_rate ≈ 0` 이 되어 **스킵해야 할 갭업 종목을 스킵하지 않는다** = 방향이 **위험 증가** 쪽. 자문 §7-9 가 "별도 티켓으로 반드시 등재" 라고 못박았다 |
+| **⏱ 시한부** | **F-1** | `[open_entry_hold_blocked]` **일일 추출 적재** (would_buy 보존) | `src/engine/log_metrics_collector.py`(20:10) 또는 `GET /api/log-reports/bundle`(20:20) — **cycle262 C12 범위 밖이라 별도 사이클** | 사용자 결정 ⑥ 은 "`system_logs` 만" 이 아니라 **일일 추출 적재**로 확정됐다. would_buy 정본이 평가 창이 닫히기 전에 사라지면 **지혈의 근거를 지혈이 스스로 지운다**. ⚠️ 우선순위 ①~④ 와 달리 **로그 retention 이 시계를 돌린다** — 배선 전까지는 주 1회 이상 수동 추출로 버틴다 |
+| 그 밖 | **F-4** | `[open_entry_hold_release]` (자문 §2.6 선택 마커, **이번 범위 미구현**) | VB·LTV | "막고 나서 더 좋은 값에 샀나" 를 로그 단독으로 판정 가능하게 한다. 없으면 자문 ⑨ 재검토 트리거는 `trade_history` 조인으로만 복원되고 **"못 샀다" vs "더 좋은 값에 샀다" 가 구분되지 않는다** |
+| 그 밖 | **F-6** | 계좌 게이트 활성일 **LTV config 카나리아 0행** | `long_tail_volatility.py` + `tests/unit/ast/test_cycle233_ast_account_risk.py`(계약 자체 변경 = 승인 사안) | 적대 검증이 "카나리아를 게이트 앞으로" 권고했으나 그 이동은 cycle233 M6(게이트 = `check_buy_signal` 첫 문장, `GATE_FIRST_FILES`)를 **RED 로 만든다**(실측 확인 = **불수용** 사유). 두 계약을 어떻게 화해시킬지는 별도 결정 — 그때까지 비대칭은 **문서화된 한계**이고 `test_c7_8` 이 그 현상을 고정한다 |
+| 그 밖 | **F-5** | `source` 필드 **진짜 출처 판정** | `scheduler._load_strategy_config` + `routes/strategies.update_params`(둘 다 C12 범위 밖) | 현재는 값 동등성 추론이라 `PUT 90` 을 `default` 로 보고한다. 출처 흔적을 남기려면 오버레이 지점이 기록해야 한다 |
+
+### ✅ 커밋 **직후** 정리 체크리스트 (누락 시 다음 사이클이 오해한다)
+1. `tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py::_CYCLE228_STRATEGY_CONTENT_SHA` 의
+   **두 항목을 삭제하고 dict 를 다시 비운다**. 커밋 후 그 sha 는 죽은 값이 되고, 남겨 두면 다음에
+   VB/LTV 를 정당하게 건드리는 사이클이 "사이클228 게이트 전환" 문구가 붙은 **오해 소지 있는**
+   실패 메시지를 받는다(2026-09-05 리팩토링 리뷰 카드 #3 이 같은 이유로 이 dict 를 비웠다 — 재발 방지).
+2. `test_cycle262_open_entry_hold.py::test_c12_1` / `test_c12_2` **삭제**. 둘 다 `git diff` 워킹트리
+   기반이라 커밋 직후 `changed == []` 로 **공허 통과**한다 — 남겨 두면 "가드가 지켜준다"고 오해하게 된다.
+   8영역의 **영구** 가드는 `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py::test_ga3_6_*` 다.
+3. sha 핀은 **커밋 직전 마지막 단계**에 `shasum -a 256` 으로 재산출한다(검토 중 파일이 여러 번
+   재기록되므로 대화 중간의 어떤 값도 쓰지 않는다).
+
+### 게이트 (2026-09-06 로컬 실측)
+- 신규 가드 **132 PASS** — 행위 `tests/unit/engine/strategies/test_cycle262_open_entry_hold.py` **104**
+  (C1 키 · C2 fail-open 격자/클램프 · C3 창 경계(09:00:00 포함 / `+hold` 배타 / naive 무차단) ·
+  C4 배치(계좌 게이트 선행 · 최상단 아님) · C5 보드 무관 + LTV 프리장 무접촉 + 09:00 이전 무마커 ·
+  C6 baseline 갱신 지속 + 해제 후 거짓 돌파 없음 + 진짜 재돌파는 매수 + 청산 무접촉 ·
+  C7 config 8 · C8 blocked 6 · C10 흡수기 4 · C11 `PARAM_RANGES` 배제 · C12 범위) +
+  AST `tests/unit/ast/test_cycle262_ast_open_entry_hold.py` **28**(G-262-1a/1b·2·3a/3b·4·5·6a/6b·7a~7e·8·9).
+- `test_cycle223_ast_donchian_exit_fix.py` **18 PASS**(sha 재핀) — 합계 **150 PASS**.
+- `tests/unit/ast` + `tests/unit/engine/strategies` = **2,252 passed** / 3 skipped / 50 xfailed / 3 xpassed.
+- 백엔드 전체 = **7,145 passed** / 11 skipped / 328 xfailed / 13 xpassed (3분 47초). 회귀 0.
+- sha 핀 대조(문서 개정 시점) — VB `0ac6a7f0…`, LTV `8eddbae2…` 로 **파일 실제 sha 와 일치** 확인.
+- ⚠️ 로컬 Python 3.13 초록은 **게이트가 아니다** — CI 는 3.12 다(`.github/workflows/ci.yml`).
+  push 후 `gh run list` 로 CI/Deploy 확인 의무(신규 AST 가드는 `ast.dump` 가 아니라 **파일 내용 sha**
+  만 쓰므로 버전 독립이지만, 게이트는 CI 초록으로 잡는다).
+- 적대 검증(tester) 전건 처리 — **HIGH 2 수용**(① `int(inf)` `OverflowError` 가 fail-open 계약을
+  뚫던 유일한 실제 행위 결함 → bare `except Exception` + `inf`/`-inf`/`nan` 격자, 뮤턴트 M06 KILLED
+  ② config 흡수기 미검정 → `test_c10_4` 신설 + AST `g262_7b` 에 bare-except 검사 추가).
+  처분 = 수용 12 · 부분 수용 1(C12 범위) · **불수용 1**(LTV 카나리아 게이트 앞 이동 = cycle233 M6
+  AST RED, 코드 사실로 반박). **ESCAPED 6건 전부 테스트로 봉인, 구현 약화 0.**
+
 ---
 
 ## ✅ 비터틀 랏 명목 ρ축 상한 — **cycle245 종결 (2026-09-04, `max_lot_ratio_mult` K_ρ=2.5 · 커밋·배포 대기)**

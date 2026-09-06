@@ -14,9 +14,18 @@ import logging
 from datetime import date, datetime, timedelta, timezone
 
 from src.api.condition import add_business_days
+from src.engine.daily_emit_cap import KstDailyEmitCap
+from src.engine.observer_trace import trace_observer_failure
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 KST = timezone(timedelta(hours=9))
+
+# cycle262 (2026-09-06) — 09:00 직후 진입 보류 창의 시작(KRX 개장)과 읽는 쪽 상한.
+# 창 폭 자체는 `open_entry_hold_secs` 파라미터다(장중에 끌 수 있어야 하는 임시
+# 조치이므로 — 자문 §2.4). VB 와 값이 같아도 상수를 공유하지 않는다(파일 간 결합
+# 금지 — 한쪽만 바꾸려는 미래의 변경이 다른 쪽을 조용히 끌고 간다, cycle229 G-4).
+OPEN_ENTRY_HOLD_START_HOUR = 9
+OPEN_ENTRY_HOLD_MAX_SECS = 600
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +107,17 @@ class LongTailVolatilityStrategy(StrategyBase):
         "max_positions": 6,
         "daily_loss_limit": -5.0,
         "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
+        # cycle262 (2026-09-06) — KRX 09:00 개장 후 이 초 동안 신규 매수 신호를
+        # 발사하지 않는다(0 = OFF = 현행 행위). LTV 는 08:00~09:00 pre_nxt 에서
+        # **그 보드의 올바른 시가**로 정상 판정하지만, 09:00 에 보드가 main 으로
+        # 넘어가면 `_open_confirmed['main']` 이 False 라 **같은 프리장 시가로 main
+        # 목표가를 다시 굳힌다** — 프리장 목표가를 KRX 목표가로 이름만 바꿔 다시
+        # 거는 셈이고, `min_prdy_rate` 필터 탓에 갭업이 클수록 통과가 쉬워진다
+        # (09:35 스탬프 실측 3/3 불일치). **지혈이지 근본 시정이 아니다** — 근본은
+        # `[7]` 에 `[24] OPRC_HOUR` 스코프 필터(`src/realtime/**` = 8영역, 별도 승인).
+        # 진입 정체성 상수 = PARAM_RANGES/INT_PARAMS 편입 금지. 장중 롤백 = PUT 0
+        # (키가 전략별이라 VB 90 을 유지한 채 LTV 만 끌 수 있다).
+        "open_entry_hold_secs": 90,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -120,6 +140,13 @@ class LongTailVolatilityStrategy(StrategyBase):
         self._next_day_clear_pending = False
         # 사이클 21 — 단계별 카운트 (ScanMonitor 깔때기)
         self._scan_stats: dict = _empty_scan_stats()
+        # cycle262 — 09:00 직후 진입 보류 관측 cap 2종. **별개 인스턴스가 계약**이다
+        # (같은 슬롯을 다투면 config 1행이 그날의 blocked 표본을 통째로 침묵시킨다 —
+        # cycle236 '별개 cap 가드' / donchian OB-11 선례). 날짜 키 자기 리셋은
+        # `KstDailyEmitCap`(cycle258) 내장 — `_reset_daily_state` 훅에 의존하면
+        # 서브클래스 override 하나로 관측이 영구 침묵한다.
+        self._open_entry_hold_config_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        self._open_entry_hold_blocked_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 
     def register_cooldown_after_exit(self, ticker: str) -> None:
         """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 213, VB 201 패턴 답습).
@@ -632,8 +659,23 @@ class LongTailVolatilityStrategy(StrategyBase):
     ) -> Signal:
         """현재 활성 보드의 Target Price 돌파 시 매수."""
         # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
+        # ⚠️ **`check_buy_signal` 의 첫 문장이 계약**이다(cycle233 M6 — LTV 는
+        # `GATE_FIRST_FILES` 멤버, AST 가드
+        # `test_cycle233_ast_account_risk.py::test_gate_first_strategies_have_gate_as_first_statement`).
+        # 부작용(로그 emit 포함)·상태 갱신은 **이 게이트 뒤**에 온다. cycle262 적대
+        # 검증이 "카나리아를 게이트 앞으로" 권고했으나 그 이동은 이 가드를 RED 로
+        # 만든다 — 게이트 활성일에 LTV config 카나리아가 0행인 것은 **알려진 한계**로
+        # 문서화했다(`_workspace/00_leader_trading_rules.md` §5 · 후속 티켓 F-6).
         if self._account_soft_gate_blocked(ticker):
             return Signal.NONE
+        # cycle262 — 09:00 직후 진입 보류. 여기서는 **읽고 관측만** 한다 (차단 판정은
+        # 아래 발사점). 카나리아를 발사점에 두면 돌파가 없는 날 한 줄도 안 남아
+        # '보류가 조용히 꺼진' 상태를 볼 수 없다(자문 §2.5 침묵 차단) — 그래서
+        # 카나리아(매 평가)와 판정(발사점)을 일부러 분리했다. 계좌 게이트가 이
+        # 전략에선 함수 최상단이라(cycle233 M6) 배치가 VB 와 다르다.
+        _now_kst = datetime.now(KST)
+        _hold_secs = self._read_open_entry_hold_secs()
+        self._emit_open_entry_hold_config(_hold_secs, _now_kst)
         from src.engine.scanner import t, ticker_names, ticker_prev_close
 
         if self.state.buy_disabled:
@@ -688,6 +730,47 @@ class LongTailVolatilityStrategy(StrategyBase):
 
         # 돌파 순간 감지
         if prev < target and current_price >= target:
+            # cycle262 — 09:00 직후 N초 진입 보류 (기준가 오염 지혈, 자문 §2.3).
+            # **이 자리가 계약이다.** 최상단으로 올리면 (a) 보류 구간 동안
+            # `_prev_price` baseline 이 동결돼 해제 후 첫 틱이 stale baseline 대비
+            # 거짓 돌파로 읽히고(cycle233 C233-F1) (b) 목표가도 baseline 도 안 잡혀
+            # **무엇을 살 뻔했는지**를 기록할 수 없다 = 결함의 증거를 스스로 지운다.
+            # baseline 은 위에서 이미 갱신됐고 여기서는 신호만 막는다.
+            # 보드로 분기하지 않는다(시간창 단독) — 09:00:00~09:00:30 은 세션 트래커
+            # 30초 주기 탓에 보드가 아직 pre_nxt 로 잡힐 수 있는데 그건 설계 의도가
+            # 아니라 stale 캐시 산물이라, 보드로 나누면 그 30초가 통째로 구멍이 된다.
+            # 08:00~09:00 진짜 프리장 매수는 창 밖이라 **무접촉**이다.
+            _hold_elapsed = self._open_entry_hold_elapsed(_now_kst, _hold_secs)
+            if _hold_elapsed is not None:
+                # 관측은 **행위 밖**이다 — emit 이 어떻게 터지든 아래 return 은 그대로
+                # 수행된다(관측 예외가 check_buy_signal 을 뚫으면 risk.on_tick 이 그
+                # 종목의 나머지 평가를 잃는다, cycle237 TE-2).
+                try:
+                    _key = ticker or "-"
+                    if self._open_entry_hold_blocked_logged.should_emit(_key, now=_now_kst):
+                        logger.info(
+                            "[open_entry_hold_blocked] ticker=%s board=%s "
+                            "current_price=%d target=%d board_open=%d prev=%d "
+                            "k=%.4f offset=%d elapsed_secs=%d prdy_close=%d "
+                            "note='09:00 직후 %d초 진입 보류 — would_buy 정본'",
+                            _key, board, current_price, target,
+                            int(board_info.get("open_price", 0) or 0), prev,
+                            float(info.get("k") or 0),
+                            int(board_info.get("target_offset", 0) or 0),
+                            _hold_elapsed,
+                            int(ticker_prev_close.get(ticker, 0) or 0),
+                            _hold_secs,
+                        )
+                        self._open_entry_hold_blocked_logged.mark_emitted(_key, now=_now_kst)
+                except Exception:
+                    try:
+                        trace_observer_failure(
+                            "[open_entry_hold_blocked]", ticker or "-",
+                            self._open_entry_hold_blocked_logged, dest_logger=logger,
+                        )
+                    except Exception:  # pragma: no cover — 2차 예외까지 흡수
+                        pass
+                return Signal.NONE
             board_open = board_info.get("open_price", 0)
             change_rate = round((current_price - board_open) / board_open * 100, 1) if board_open > 0 else 0
             logger.info(
@@ -709,6 +792,123 @@ class LongTailVolatilityStrategy(StrategyBase):
             return Signal.BUY
 
         return Signal.NONE
+
+    # ────────── cycle262 — 09:00 직후 진입 보류 (`open_entry_hold_secs`) ──────────
+    #
+    # 지혈이지 근본 시정이 아니다. 목표가의 기준가가 KRX 09:00 시가가 아니라 통합 채널
+    # H0UNCNT0 `fields[7]`(세션 시가)이고, 그 값은 **일-스코프 상수**라 90초 뒤에도
+    # 그대로다 — 근본은 `[7]` 에 `[24] OPRC_HOUR` 스코프 필터를 거는 것이고
+    # `src/realtime/**` = 8영역이라 별도 승인 + 별도 자문 사안이다.
+
+    def _read_open_entry_hold_secs(self) -> int:
+        """`open_entry_hold_secs` 읽기 + `[0, 600]` 클램프. **결측·무효 = 0 = OFF**.
+
+        키 부재·None·빈 문자열·파싱 실패는 전부 0(보류 없음 = 현행 행위)이다.
+        **fail-open 이 계약**이고 반대 방향은 금지다 — "설정이 없으면 막는다" 는
+        P0-1 유령 키(`ticker_prices["acml_vol"]` 대입부 0)가 BFB/VCP 를 전 기간
+        체결 0건으로 만든 바로 그 경로다. 코드 기본값 90 은 `DEFAULT_PARAMS` 가
+        제공하므로 런타임에 키가 없는 경우는 사실상 없고(`_load_strategy_config` ·
+        `PUT /params` 둘 다 **코드에 이미 있는 키만** 덮는 오버레이다), 폴백 0 은
+        그 전제가 깨졌을 때 매수를 조용히 막지 않겠다는 선언이다.
+
+        상한 클램프가 필요한 이유 = `PUT /api/strategies/{id}/params` 가 화이트리스트
+        없이 기존 키를 덮으므로 검증은 **읽는 쪽**에 있어야 한다. 오타 하나(`10000`)가
+        오전 전체를 무매매로 만드는 것을 막는다.
+
+        `except Exception` 이 계약이다(cycle262 적대 검증 HIGH). 좁은 튜플
+        `(TypeError, ValueError)` 는 **자기 docstring 을 어긴다** — `1e400` 은 표준
+        유효 JSON 이라 starlette/pydantic 파서가 `inf` 로 만들고 `int(inf)` 는
+        `OverflowError`(∉ 튜플)를 던진다. 그 예외는 `check_buy_signal` 최상단에서
+        전파돼 `risk.on_tick`(전략별 try 없음) → `handler.py` `[callback_exception]`
+        → **재연결 re-raise** 로 이어진다(= 틱마다 WS 재연결 = 손절 사각). 여기는
+        관측이 아니라 **행위 입력**이라 C10 의 관측 try/except 로 덮이지 않는다 —
+        읽는 쪽에서 닫는다.
+        """
+        try:
+            secs = int(self.config.params.get("open_entry_hold_secs", 0) or 0)
+        except Exception:
+            return 0
+        if secs < 0:
+            return 0
+        return min(secs, OPEN_ENTRY_HOLD_MAX_SECS)
+
+    def _open_entry_hold_elapsed(self, now: datetime, hold_secs: int) -> int | None:
+        """보류 창 안이면 09:00:00 이후 경과 초, 창 밖이면 `None`. 순수 계산.
+
+        창 = KST `[09:00:00, 09:00:00 + hold_secs)` — **하한 포함 · 상한 배타**.
+        `hold_secs <= 0` 이면 항상 `None`(= OFF = 현행 행위).
+
+        `now` 는 **tz-aware KST** 여야 한다. naive 벽시계는 컨테이너 `TZ` 가 깨지는
+        순간 창을 9시간 옮겨 *막아야 할 때 열고 열어야 할 때 막는다*(cycle229 G-1 이
+        AST 로 잡는 그 결함). 보드가 아니라 시각으로만 판정하는 이유는 호출부 주석 참조.
+        """
+        if hold_secs <= 0:
+            return None
+        start = now.replace(
+            hour=OPEN_ENTRY_HOLD_START_HOUR, minute=0, second=0, microsecond=0,
+        )
+        if not (start <= now < start + timedelta(seconds=hold_secs)):
+            return None
+        return int((now - start).total_seconds())
+
+    def _emit_open_entry_hold_config(self, hold_secs: int, now: datetime) -> None:
+        """`[open_entry_hold_config]` — 그날 실제 적용값 카나리아. INFO, 1회/(전략, 값)/일.
+
+        **fail-open 이 침묵과 짝이 되면 안 된다**(자문 §2.5). 키가 사라져 보류가 꺼진
+        날에도 `hold_secs=0` 한 줄이 남아야 운영자가 그 사실을 본다 —
+        `[ratio_cap_config]`(cycle245) 선례 그대로다.
+
+        cap 키가 **값-민감**(`cfg|<초>`)인 이유 = 장중 유일 롤백 수단인
+        `PUT /api/strategies/{id}/params` 는 in-memory `config.params` 를 즉시 덮는데,
+        단일 키면 그날 첫 틱이 이미 cap 을 소진해 **바뀐 값을 확인할 마커가 0 개**가
+        된다(cycle245 R1 이 겪은 사각). 정상 운영에선 값이 안 바뀌므로 1행/일이고,
+        실제로 바꾼 날에만 1행이 늘어 롤백 확인이 회복된다.
+
+        09:00 이전에는 발화하지 않는다 — 이 사이클은 KRX 개장 이후 창만 다루고,
+        LTV 의 08:00~09:00 프리장 매수는 **무접촉**이기 때문이다(그 구간의 `[7]` 은
+        그 보드의 올바른 기준가다 — 오염이 아니다, 자문 §2.1).
+
+        ⚠️ `source` 는 **출처가 아니라 값 동등성 추론**이다(적대 검증 LOW, 명시 한계).
+        적용값이 `DEFAULT_PARAMS[KEY]` 와 같으면 `default`, 다르면 `db` 다. 그래서
+        운영자가 `PUT {"open_entry_hold_secs": 90}` 으로 **90 을 명시 재확정한** 날에도
+        라벨은 `default` 다. 진짜 출처 판정은 이 파일에서 관측 불가하다 —
+        `_load_strategy_config`(scheduler) 도 `update_params`(routes) 도 병합된
+        `config.params[key]` 를 **제자리에서 덮어써** 출처 흔적을 남기지 않고, 그 둘은
+        cycle262 C12 의 무접촉 대상이다(후속 티켓). 그래서 "값이 바뀌었나" 의 정본은
+        `source` 가 아니라 **`hold_secs=` 자체 + 값-민감 cap 이 만드는 2행째**다.
+
+        어떤 실패도 흡수한다(관측은 행위 밖). 흔적은 `observer_trace` 규약을 따른다.
+        """
+        try:
+            start = now.replace(
+                hour=OPEN_ENTRY_HOLD_START_HOUR, minute=0, second=0, microsecond=0,
+            )
+            if now < start:
+                return
+            key = f"cfg|{hold_secs}"
+            if not self._open_entry_hold_config_logged.should_emit(key, now=now):
+                return
+            until = (start + timedelta(seconds=hold_secs)).strftime("%H:%M:%S")
+            source = (
+                "default"
+                if hold_secs == self.DEFAULT_PARAMS.get("open_entry_hold_secs")
+                else "db"
+            )
+            logger.info(
+                "[open_entry_hold_config] strategy=%s hold_secs=%d until=%s "
+                "source=%s note='09:00 직후 진입 보류 — 0 이면 OFF(현행 행위). "
+                "라벨은 코드 기본값과의 값 동등성 추론이다(출처 아님)'",
+                self.strategy_id, hold_secs, until, source,
+            )
+            self._open_entry_hold_config_logged.mark_emitted(key, now=now)
+        except Exception:
+            try:
+                trace_observer_failure(
+                    "[open_entry_hold_config]", self.strategy_id,
+                    self._open_entry_hold_config_logged, dest_logger=logger,
+                )
+            except Exception:  # pragma: no cover — 2차 예외까지 흡수
+                pass
 
     def check_exit_signal(
         self, ticker: str, current_price: int, open_price: int,

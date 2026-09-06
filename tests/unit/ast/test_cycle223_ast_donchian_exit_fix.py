@@ -504,9 +504,32 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    `DEFAULT_PARAMS["max_lot_ratio_mult"]=2.5` 1줄만 승인 추가하며 6 항목을 재핀.
 #    재핀 전 `git diff HEAD -- src/engine/strategies/` 로 7 파일 각 +1/−0 (같은 1줄)
 #    임을 눈으로 확인했다(가드 절차 1·2). donchian_swing.py 는 이 dict 소관이 아니다.
+# 🔁 2026-09-06 (cycle262) — 09:00 직후 진입 보류 `open_entry_hold_secs`
+#    (자문 정본 `_workspace/consult/2026-09-06_open_entry_hold.md`, 사용자 결정 09-06
+#    카드 ② '조사와 임시 매수 보류 함께' · 범위 = VB + LTV 둘 다)가 두 파일을 승인
+#    수정하며 재핀. 8영역·`scheduler.py`·나머지 전략 5파일은 diff 0 이다.
+#    재핀 전 `git diff HEAD -- src/engine/strategies/` 로 두 파일의 변경이 이 사이클
+#    범위(DEFAULT_PARAMS 키 1 + 모듈 상수 2 + cap 필드 2 + 카나리아/판정 2 지점 +
+#    헬퍼 3)뿐임을 눈으로 확인했다(가드 절차 1·2).
+#    ⚠️ 2026-09-06 적대 검증 반영으로 두 파일이 재기록됐고(읽기 `except` 를 bare
+#    `Exception` 으로 확대 — `1e400` 이 유효 JSON 이라 `int(inf)` → `OverflowError` 가
+#    전파되던 HIGH 시정 + `source` 라벨 의미 명시 + 두 emit 순서·흡수기 폭 봉인), 이
+#    핀은 **커밋 직전 마지막 단계**에 `shasum -a 256` 으로 재산출한 값이다.
+#    ⚠️ LTV 카나리아를 계좌 게이트 **앞**으로 옮기는 적대 검증 권고는 **불수용**했다 —
+#    LTV 는 cycle233 `GATE_FIRST_FILES` 멤버라 게이트 If 가 `check_buy_signal` 첫
+#    문장이어야 하고(`test_cycle233_ast_account_risk.py`) 로그 emit 은 부작용이라 그
+#    앞에 올 수 없다(실측 RED). 비대칭은 문서화 + `test_c7_8` 로 고정했다.
+#    TODO(cycle262 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다
+#    (남겨 두면 다음에 VB/LTV 를 정당하게 건드리는 사이클이 "사이클228 게이트 전환"
+#    면제 문구가 붙은 오해 소지 있는 실패 메시지를 받는다 — 09-05 카드 #3 재발 방지).
+#    워크리스트 "커밋 직후 정리 체크리스트" 1번 항목이 정본이다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
-    # 2026-09-05 비움(리팩토링 리뷰 카드 #3) — 종전 항목은 전부 커밋돼 자기소멸한 죽은 값이었다.
-    # 다음 8영역 승인 사이클이 in-flight 변경의 내용 sha 를 여기 한시 등록하고, 커밋 후 다시 비운다.
+    "src/engine/strategies/volatility_breakout.py": (
+        "0ac6a7f0145174f1d779fd282b09c9eabc58cd33c824714aae95c4c966ac03d4"
+    ),
+    "src/engine/strategies/long_tail_volatility.py": (
+        "8eddbae2dabf4dc74ede6db17d0b33aebbbe6c54a234ff3f787c1a3d119e3498"
+    ),
 }
 
 
