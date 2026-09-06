@@ -523,14 +523,7 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    (남겨 두면 다음에 VB/LTV 를 정당하게 건드리는 사이클이 "사이클228 게이트 전환"
 #    면제 문구가 붙은 오해 소지 있는 실패 메시지를 받는다 — 09-05 카드 #3 재발 방지).
 #    워크리스트 "커밋 직후 정리 체크리스트" 1번 항목이 정본이다.
-_CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
-    "src/engine/strategies/volatility_breakout.py": (
-        "0ac6a7f0145174f1d779fd282b09c9eabc58cd33c824714aae95c4c966ac03d4"
-    ),
-    "src/engine/strategies/long_tail_volatility.py": (
-        "8eddbae2dabf4dc74ede6db17d0b33aebbbe6c54a234ff3f787c1a3d119e3498"
-    ),
-}
+_CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {}
 
 
 def test_g223_12_other_strategy_files_diff_zero():
