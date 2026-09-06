@@ -4,11 +4,21 @@ source 텍스트 grep 금지 — AST 노드 검사 (사이클 167/179/184/187 fa
 `tests/unit/ast/_ast_helpers.py` 재사용.
 
 가드:
-- F-10-1: scheduler 게이트 대상 2 wrapper (basics/master) 의 `run_periodic_task_loop`
-  호출에 `immediate_skip_if_fresh_hours` 키워드 명시. (사이클 193 검증 워크플로우 결과 —
-  멱등 있는 daily_load/full_universe/purge 는 off-by-one/self-heal 위험 + burst 아님 →
-  게이트 대상에서 제외, basics/master 만 = 멱등 없는 실제 burst).
-- F-10-2: 게이트 미대상 4 wrapper (full_universe/daily_load/purge/evening_funnel) 부재.
+- F-10-1: scheduler 게이트 대상 3 wrapper (basics/master/**daily_load**) 의
+  `run_periodic_task_loop` 호출에 `immediate_skip_if_fresh_hours` 키워드 명시.
+- F-10-2: 게이트 미대상 3 wrapper (full_universe/purge/evening_funnel) 부재.
+
+⚠️ **사이클 263 (2026-09-06) 이 daily_load 제외 결정을 뒤집었다** (사용자 결정 09-06 카드 ④).
+사이클 193 이 daily_load 만 게이트에서 뺀 근거는 "`max_bas_dd` 멱등이 immediate 를 이미
+저렴하게 한다" 였는데, **그 멱등이 실제로는 깨져 있었다**: 아침 immediate(07:56)가 장 전
+KIS 오늘봉(껍데기 = O·H·L·C 전일종가, 거래량 0)을 먼저 써서 `max_bas_dd == today` 를
+만들고 그날 16:00 정기 실행을 전 종목 skip 시켰다(09-03 `fetched=0 skipped_fresh=982` ·
+09-04 `fetched=1 skipped_fresh=1015` 실측). 게이트 투입은 껍데기 생성 주체를 없애
+**사이클 193 의 전제를 되살리는 방향**이다. 우려했던 off-by-one 은 (a) 마커가 once() 성공
+시에만 갱신되므로 16:00 실패·다운 시 다음 아침 immediate 가 자동 부활하고 (b) 사이클 263
+오늘봉 시각 필터가 낮 재배포 구멍까지 닫아 해소된다.
+상세 = `_workspace/specs/cycle263_daily_load_stub_fix.md` ·
+`_workspace/consult/2026-09-06_daily_load_stub_bar.md` 부록 A-1.
 - F-10-3: task_loop_helper 모듈-레벨 `IMMEDIATE_FRESH_SKIP_HOURS` 상수 존재.
 - F-10-4: 게이트 경로 naive `datetime.now()` 0건 (KST 강제, CLAUDE.md).
 """
@@ -30,15 +40,17 @@ pytestmark = pytest.mark.unit
 _GATE_KW = "immediate_skip_if_fresh_hours"
 _HELPER_CALL = "run_periodic_task_loop"
 
-# 게이트 적용 2 wrapper (사이클 193 검증 후 — 멱등 없는 실제 burst 만)
+# 게이트 적용 3 wrapper (사이클 193 basics/master + 사이클 263 daily_load)
 _TARGET_WRAPPERS = (
     "_stock_master_basics_refresh_task_loop",
     "_stock_master_master_load_task_loop",
+    # 사이클 263 — `max_bas_dd` 멱등이 껍데기 봉 때문에 깨져 있었다(모듈 docstring 참조).
+    # 게이트가 아침 껍데기 생성 주체를 없애 16:00 정기 실행을 되살린다.
+    "_stock_master_daily_load_task_loop",
 )
-# 게이트 미대상 (멱등/TTL 있어 immediate 이미 저렴 + off-by-one/self-heal 위험 회피 + 범위 외)
+# 게이트 미대상 (멱등/TTL 있어 immediate 이미 저렴 + self-heal 위험 회피 + 범위 외)
 _UNGATED_WRAPPERS = (
     "_full_universe_load_task_loop",   # TTL 멱등 + 유니버스 populator self-heal
-    "_stock_master_daily_load_task_loop",  # max_bas_dd 멱등 + 후장 완결 off-by-one 회피
     "_stock_master_daily_purge_task_loop",  # 사이클 192 후 저렴 + burst 아님
     "_evening_funnel_capture_task_loop",  # 사용자 결정 범위 외
 )
@@ -123,9 +135,10 @@ def test_F10_detector_self_test():
 # F-10-1 — scheduler 게이트 대상 2 wrapper (basics/master) 게이트 키워드 명시
 # ---------------------------------------------------------------------------
 def test_F10_1_gated_wrappers_have_gate_kw():
-    """basics/master wrapper run_periodic_task_loop 호출에 게이트 키워드 명시 의무.
+    """basics/master/daily_load wrapper run_periodic_task_loop 게이트 키워드 명시 의무.
 
-    사이클 193 검증 후 게이트 대상 = 멱등 없는 실제 burst 2 task 만.
+    사이클 193 = 멱등 없는 실제 burst 2 task(basics/master).
+    사이클 263 = daily_load 추가 — 믿었던 `max_bas_dd` 멱등이 깨져 있었다(모듈 docstring).
     """
     scheduler_src = _scheduler_source()
     missing = [
@@ -137,14 +150,14 @@ def test_F10_1_gated_wrappers_have_gate_kw():
 
 
 # ---------------------------------------------------------------------------
-# F-10-2 (불변식) — 게이트 미대상 4 wrapper 게이트 부재
+# F-10-2 (불변식) — 게이트 미대상 3 wrapper 게이트 부재 (사이클 263: daily_load 제외)
 # ---------------------------------------------------------------------------
 def test_F10_2_ungated_wrappers_no_gate():
-    """full_universe/daily_load/purge/evening_funnel = 게이트 키워드 부재 의무.
+    """full_universe/purge/evening_funnel = 게이트 키워드 부재 의무.
 
-    daily_load/full_universe/purge = 멱등/TTL 이 immediate 를 이미 저렴하게 함 +
-    게이트 시 off-by-one(daily_load) / self-heal 상실(populator) 위험 → 제외.
-    evening_funnel = 사용자 결정 범위 외.
+    full_universe/purge = TTL 멱등이 immediate 를 이미 저렴하게 함 + self-heal 상실
+    (populator) 위험 → 제외. evening_funnel = 사용자 결정 범위 외.
+    ⚠️ daily_load 는 사이클 263 에서 이 목록을 떠나 게이트 대상이 됐다(모듈 docstring).
     """
     scheduler_src = _scheduler_source()
     unexpected = [

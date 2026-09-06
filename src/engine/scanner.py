@@ -14,7 +14,7 @@ import asyncio as _asyncio  # 사이클 101 — Rate Limit sleep patch 호환 (a
 import logging
 import sys as _sys
 import time as _monotonic_time
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time as _dtime, timedelta, timezone
 from typing import Any, TYPE_CHECKING
 
 from src.api.condition import MIN_CHANGE_RATE, fetch_rising_stocks
@@ -2057,6 +2057,43 @@ _DAILY_LOAD_VCP_BACKFILL_DAYS = 120
 _DAILY_LOAD_MIN_MCAP_EOK = 500  # 억원 (raw.hts_avls 는 억원 단위, 사이클 166/108)
 _DAILY_LOAD_MIN_TRADE_WON = 1_000_000_000  # 10억원 (kojiro 500억/10억 정합, raw.acml_tr_pbmn 원 단위)
 
+# 사이클 263 — 오늘봉(확정 전 잠정봉) 커트오프. KRX 마감 15:30 + 마감 동시호가 흡수 10분.
+# scanner **전용** 상수다 — 값이 같아 보여도 scheduler 의 매매/보드 시각 상수를 재사용하지
+# 않는다: 매수 보드 시각 변경이 적재 규약을 딸려 바꾸는 커플링을 끊는다(tradable_boards ↔
+# 청산 규약 커플링을 끊어 둔 기존 원칙과 같은 이유).
+_DAILY_LOAD_TODAY_BAR_CUTOFF = _dtime(15, 40)
+
+
+def _drop_today_bars(
+    candles: list[dict], *, now_kst: datetime, today: date
+) -> list[dict]:
+    """확정 전 오늘봉을 걸러낸다 (사이클 263, 순수 함수 — 입력 리스트 비파괴).
+
+    규칙 (`now_kst` 는 호출부가 **루프 밖에서 1회** 계산한다 — 15:39 에 시작해 15:42 에
+    끝나는 실행이 종목마다 다른 기준을 쓰면 안 된다):
+    - `now_kst` < 15:40 → `bas_dd >= today` 폐기 (장 전 껍데기 봉 · 장중 부분봉)
+    - `now_kst` >= 15:40 → `bas_dd > today` 만 폐기 (시계 왜곡 방어)
+    - `bas_dd` 파싱 불가/부재 → **보존** (fail-open — 판정 실패가 곧 데이터 유실이 되면 안 된다)
+
+    ⚠️ 판정 기준은 **시각 단독**이다. "거래량 0 ∧ OHLC 평탄"(데이터 기준)으로 바꾸지 말 것.
+    반증 2건 — (1) 장중 재시작이 만드는 부분봉은 거래량>0·비평탄이라 데이터 기준을 확정봉인
+    척 통과한다(껍데기보다 나쁘다: 평탄하지 않아 눈에 안 띈다) (2) 거래정지 종목의 *진짜*
+    평탄 확정봉(하루 1~8건)을 16:00 에 죽여 그 날짜 행을 영영 못 갖게 한다. 시각 기준은 둘
+    다 자동 처리하고 진짜 무거래봉을 정의상 100% 보존한다.
+    """
+    today_ymd = today.strftime("%Y%m%d")
+    drop_from_today = now_kst.time() < _DAILY_LOAD_TODAY_BAR_CUTOFF
+    kept: list[dict] = []
+    for candle in candles:
+        raw_dd = candle.get("stck_bsop_date") if isinstance(candle, dict) else None
+        bas_dd = str(raw_dd or "")
+        if len(bas_dd) == 8 and bas_dd.isdigit():
+            drop = bas_dd >= today_ymd if drop_from_today else bas_dd > today_ymd
+            if drop:
+                continue
+        kept.append(candle)
+    return kept
+
 
 def _is_daily_load_universe(row: dict) -> bool:
     """일봉 적재 유니버스 자격 판정 — mcap>=500억(억원) & trade>=20억(원).
@@ -2090,6 +2127,11 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     from src.db import stock_master, stock_master_daily
 
     start = time.monotonic()
+    # 사이클 263 — 오늘봉 필터 판정 시각은 **함수 진입 시 1회**(stock_master 페이징 *앞*).
+    # 루프 중 시계가 커트오프를 넘어도 규칙을 유지한다 — 15:39 에 진입해 15:42 에 끝나는
+    # 실행이 종목마다 다른 기준을 쓰면 안 되고, list_all 페이징 지연이 판정을 뒤집어서도
+    # 안 된다(계약 C2 "함수 진입 시각").
+    load_now_kst = datetime.now(KST_TZ)
     summary: dict = {
         "total": 0,
         "fetched": 0,
@@ -2167,9 +2209,15 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         )
         return summary
 
-    # 오늘 KST 날짜 (점진 적재 fresh skip 기준)
+    # 오늘 KST 날짜 (점진 적재 fresh skip 기준 + 사이클 263 오늘봉 필터 비교자).
+    # ⚠️ `load_now_kst` 를 **먼저** 읽는 순서가 계약이다 — 두 읽기 사이 KST 자정이 지나도
+    # 판정은 keep 쪽으로만 기운다(역순이면 drop 쪽으로 기울어 확정봉을 잃는다).
     from src.db._kst import today_kst
     today = today_kst()
+
+    filter_dropped_rows = 0
+    filter_dropped_tickers = 0
+    filter_errors = 0
 
     backfill_count = 0
     incremental_count = 0
@@ -2235,17 +2283,38 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
 
         summary["fetched"] += 1
 
-        # 4) DB batch upsert (사이클 88 G-REJECT graceful 내장)
+        # 3-b) 사이클 263 — 확정 전 오늘봉 폐기. 두 fetch 분기의 합류점이자 `fetched` 증가
+        # *뒤* · upsert *앞* 이라, `fetched`("KIS 응답을 받았다") 와 `failed`(KIS 실패 전용)
+        # 카운터 의미가 보존된다. 판정 예외는 fail-open — 원본 전량 upsert 유지
+        # (fail-closed 는 P0-1 유령 키가 두 전략을 전 기간 체결 0건으로 만든 그 방향이다).
         try:
-            upserted = await stock_master_daily.upsert_batch(ticker, candles)
-            summary["upserted_rows"] += upserted
+            kept = _drop_today_bars(candles, now_kst=load_now_kst, today=today)
+            if len(kept) != len(candles):
+                filter_dropped_rows += len(candles) - len(kept)
+                filter_dropped_tickers += 1
+            candles = kept
         except Exception:
-            # 사이클 126 영역 4 — db_write_failures 분리 카운터 (KIS fetch 실패와 구분)
-            logger.warning(
-                "[stock_master_daily_load_skip] ticker=%s reason=upsert_batch_failed",
-                ticker,
-            )
-            summary["db_write_failures"] += 1
+            if filter_errors == 0:  # WARNING 은 실행당 1행 (종목당 폭주 차단)
+                logger.warning(
+                    "[daily_load_today_filter_skipped] ticker=%s reason=filter_error",
+                    ticker, exc_info=True,
+                )
+            filter_errors += 1  # 건수는 계속 센다 — 요약 마커가 fail-open 규모를 노출
+
+        # 4) DB batch upsert (사이클 88 G-REJECT graceful 내장)
+        # 필터가 전량 제거했으면 upsert 를 부르지 않는다 (fetched 는 증가한 채로 유지 —
+        # 그 종목을 실제로 fetch 한 것은 사실이다).
+        if candles:
+            try:
+                upserted = await stock_master_daily.upsert_batch(ticker, candles)
+                summary["upserted_rows"] += upserted
+            except Exception:
+                # 사이클 126 영역 4 — db_write_failures 분리 카운터 (KIS fetch 실패와 구분)
+                logger.warning(
+                    "[stock_master_daily_load_skip] ticker=%s reason=upsert_batch_failed",
+                    ticker,
+                )
+                summary["db_write_failures"] += 1
 
         # 5) Rate Limit sleep (사이클 17/83/91/97/107 답습)
         await asyncio.sleep(_DAILY_LOAD_RATE_LIMIT_SLEEP_SECS)
@@ -2269,6 +2338,21 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
                 summary["fetched"], summary["upserted_rows"],
                 summary["skipped_fresh"], summary["failed"], elapsed,
             )
+
+    # 사이클 263 — 오늘봉 필터 관측: **실행당 1행**. 종목당 emit 은 하루 1,000행 폭주다
+    # (사이클 237 donchian 청산 로그 폭주 시정의 교훈). ⚠️ 이 시정으로 16:00 실행의
+    # `skipped_fresh` 가 ~1,000 → ~0 으로 **의미가 반전**한다 — 배포 전후 로그 합산 금지.
+    logger.info(
+        "[daily_load_today_bar_filter] mode=%s cutoff=%s now=%s today=%s "
+        "dropped_rows=%d tickers_affected=%d filter_errors=%d",
+        "drop" if load_now_kst.time() < _DAILY_LOAD_TODAY_BAR_CUTOFF else "keep",
+        _DAILY_LOAD_TODAY_BAR_CUTOFF.strftime("%H:%M"),
+        load_now_kst.strftime("%H:%M"),
+        today.isoformat(),
+        filter_dropped_rows,
+        filter_dropped_tickers,
+        filter_errors,  # >0 = fail-open 발생 (dropped_rows=0 과 "버릴 봉 없음" 을 구분)
+    )
 
     summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
     # mode 결정: 백필 우세 → "full" / 증분 우세 → "incremental" / 혼합 → "mixed"

@@ -41,6 +41,7 @@ cycle222-a 가 커밋된 뒤에도 그 두 파일은 영원히 무시된다. F2 
 from __future__ import annotations
 
 import ast
+import hashlib
 import importlib
 import re
 import subprocess
@@ -257,5 +258,112 @@ def test_g3_8_pins_match_current_tree():
             pytest.skip(f"{path} 가 이미 커밋됨 — 면제 항목 삭제 대상")
         assert mod._content_sha(path) == pinned, (
             f"{path} 핀 스테일 — cycle222-a 작업이 갱신됐다면 핀을 재산출하라 "
+            f"(`shasum -a 256 {path}`)"
+        )
+
+
+# ===========================================================================
+# G3-9 (사이클 263 추가, 영구) — sha 핀 **자매 가드 전수 정합**
+# ===========================================================================
+#
+# 같은 계약(8영역 diff 0 + 내용 sha 면제)을 각자 독립된 dict 로 들고 있는 가드가
+# **4개** 다. cycle263 이 한 곳(222a3)에만 핀을 등록한 채 전체 회귀를 돌려
+# 7 failed(223 · 223f · 226 + 이 파일의 g3_7 2건 + 고아 cycle262 2건)를 냈다.
+# "핀은 항상 N곳" 을 기계가 강제하지 않으면 이 사고는 8영역 승인 사이클마다 재현된다.
+#
+# 이 가드는 **영구** 다 — 8영역 변경이 없으면 공허하게 통과하고, 있으면 네 곳이
+# 같은 값으로 등록됐는지 + 그 값이 현 파일 내용과 일치하는지를 잰다.
+# ---------------------------------------------------------------------------
+_PIN_GUARD_FILES = (
+    "tests/unit/ast/test_cycle222a3_ast_followup_fixes.py",
+    "tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py",
+    "tests/unit/ast/test_cycle223f_ast_manual_apply_safeguard.py",
+    "tests/unit/engine/strategies/test_cycle226_zero_breakout_defense.py",
+)
+_PIN_DECL_RE = re.compile(r"^_[A-Z0-9_]+_CONTENT_SHA\s*(?::[^=]+)?=\s*\{", re.M)
+
+
+def _discover_pin_guard_files() -> list[str]:
+    """모듈 레벨 `*_CONTENT_SHA = {...}` 선언을 가진 테스트 파일 전수."""
+    res = subprocess.run(
+        ["git", "grep", "-l", "_CONTENT_SHA", "--", "tests"],
+        cwd=_REPO_ROOT, capture_output=True, text=True,
+    )
+    assert res.returncode in (0, 1), (   # 1 = 매치 없음
+        f"git grep 실패 (rc={res.returncode}) — fail-closed. stderr: {res.stderr.strip()}"
+    )
+    out = []
+    for rel in res.stdout.split():
+        src = (_REPO_ROOT / rel).read_text(encoding="utf-8")
+        if _PIN_DECL_RE.search(src):
+            out.append(rel)
+    return sorted(out)
+
+
+def _pin_dict(rel: str) -> dict[str, str]:
+    """`*_CONTENT_SHA` dict 리터럴을 AST 로 추출 (import 부작용 없이)."""
+    tree = ast.parse((_REPO_ROOT / rel).read_text(encoding="utf-8"))
+    for node in tree.body:
+        name = None
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            name = node.target.id
+        elif (isinstance(node, ast.Assign) and len(node.targets) == 1
+              and isinstance(node.targets[0], ast.Name)):
+            name = node.targets[0].id
+        if name and name.endswith("_CONTENT_SHA") and isinstance(node.value, ast.Dict):
+            return {
+                k.value: v.value
+                for k, v in zip(node.value.keys, node.value.values)
+                if isinstance(k, ast.Constant) and isinstance(v, ast.Constant)
+            }
+    raise AssertionError(f"{rel}: 모듈 레벨 `*_CONTENT_SHA` dict 선언을 찾지 못했다")
+
+
+def test_g3_9a_pin_guard_file_set_is_complete():
+    """자매 가드 목록이 실제 소스와 일치 — 새 가드가 생기면 여기 등록 의무.
+
+    목록이 낡으면 G3-9b 가 새 가드를 검사하지 않아 "핀은 항상 N곳" 이 조용히 헐거워진다.
+    """
+    found = _discover_pin_guard_files()
+    assert found == sorted(_PIN_GUARD_FILES), (
+        f"sha 핀 자매 가드 목록 불일치 — 실측 {found} / 등록 {sorted(_PIN_GUARD_FILES)}. "
+        "새 가드를 만들었으면 `_PIN_GUARD_FILES` 에 추가하라 (핀은 항상 N곳이다)"
+    )
+
+
+def test_g3_9b_eight_area_changes_are_pinned_in_every_sibling_guard():
+    """워킹트리의 8영역 변경은 **네 가드 전부**에 **같은 값**으로 핀돼야 한다.
+
+    한 곳만 등록하면 나머지 셋이 붉어지고(cycle263 실측 7 failed), 그 실패 문구는
+    "핀을 재산출하지 마라 — 실제 변경을 되돌려라" 라서 **승인된 8영역 변경을 되돌리도록
+    오도한다**. 8영역 변경이 없으면 이 가드는 공허하게 통과한다.
+    """
+    mod = importlib.import_module("tests.unit.ast.test_cycle222a3_ast_followup_fixes")
+    eight_areas = list(mod._EIGHT_AREAS)
+    tracked = subprocess.run(
+        ["git", "diff", "HEAD", "--name-only", "--", *eight_areas],
+        cwd=_REPO_ROOT, capture_output=True, text=True, check=True,
+    ).stdout.split()
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "--", *eight_areas],
+        cwd=_REPO_ROOT, capture_output=True, text=True, check=True,
+    ).stdout.split()
+    changed = sorted(set(tracked) | set(untracked))
+    if not changed:
+        return  # 8영역 무접촉 = 이 가드는 공허 (정상)
+
+    pins = {rel: _pin_dict(rel) for rel in _PIN_GUARD_FILES}
+    for path in changed:
+        actual = hashlib.sha256((_REPO_ROOT / path).read_bytes()).hexdigest()
+        missing = sorted(rel for rel, d in pins.items() if path not in d)
+        assert missing == [], (
+            f"8영역 변경 `{path}` 가 자매 가드 {missing} 에 미등록 — "
+            "승인된 8영역 변경이라면 **네 곳 전부**에 같은 값으로 한시 등록하라 "
+            "(커밋 직후 네 곳을 함께 비운다). 승인 없는 변경이라면 되돌려라"
+        )
+        wrong = sorted(rel for rel, d in pins.items() if d[path] != actual)
+        assert wrong == [], (
+            f"`{path}` 핀 값 불일치 {wrong} — 실제 sha={actual}. "
+            "네 가드는 같은 워킹트리를 보므로 값이 갈리면 그 자체가 결함 신호다 "
             f"(`shasum -a 256 {path}`)"
         )

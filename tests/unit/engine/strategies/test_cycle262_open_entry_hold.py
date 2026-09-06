@@ -30,7 +30,15 @@ VB 목표가의 기준 시가가 KRX 09:00 시가가 아니라 통합 채널 `H0
 | C9 | `KstDailyEmitCap` 재사용(신규 cap 클래스 금지), 날짜 자기 리셋 | `test_c7_5` · `test_c8_5` + AST |
 | C10 | 관측 실패는 매수 판정을 **절대** 바꾸지 않는다 | `test_c10_*` |
 | C11 | `PARAM_RANGES`/`INT_PARAMS` 미편입 | `test_c11_*` + AST |
-| C12 | 8영역·scheduler·타 전략 5파일 diff 0 | `test_c12_*` (**커밋 후 삭제**) |
+| C12 | 8영역·scheduler·타 전략 5파일 diff 0 | ~~`test_c12_*`~~ — **cycle262 커밋(92bc140) 후 삭제됨**(cycle263) |
+
+⚠️ C12 는 `git diff HEAD` 로 범위를 재는 **사이클 한정** 가드였다. cycle262 가 커밋되는
+순간 공허해졌고(diff 소멸), 그대로 두면 그 뒤 *무관한* 사이클의 diff 를 재서 무조건
+붉어진다 — 실제로 cycle263 워킹트리를 "허용 밖 src 파이썬 파일 변경" 으로 잡았다
+(cycle240 A11b · cycle252 G-252-5b 와 같은 고아 가드 사고). 2026-09-06 cycle263 이
+`test_c12_1`/`test_c12_2` + `_ALLOWED_SRC_PY`/`_FORBIDDEN_PATHS` 를 삭제했다.
+8영역의 **영구** 가드는 `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py` 가 계속
+들고 있으므로 이 삭제로 잃는 커버리지는 없다.
 
 ## freezegun 과 타임존 — 이 파일의 모든 시각 표기 규약
 
@@ -53,9 +61,7 @@ from __future__ import annotations
 
 import logging
 import re
-import subprocess
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
 import pytest
 from freezegun import freeze_time
@@ -68,7 +74,6 @@ from src.engine.strategy_base import Position, Signal, StrategyConfig
 pytestmark = pytest.mark.unit
 
 KST = timezone(timedelta(hours=9))
-_REPO_ROOT = Path(__file__).resolve().parents[4]
 
 KEY = "open_entry_hold_secs"
 _M_CONFIG = "[open_entry_hold_config]"
@@ -1175,84 +1180,3 @@ def test_c11_1_not_in_param_ranges_or_int_params() -> None:
     ]
     assert hits == [], f"보류 관련 키가 AI 튜닝 화이트리스트에 편입됨: {hits}"
 
-
-# ===========================================================================
-# C12 — 무접촉 (⚠️ 사이클 한정 가드 — **커밋 후 이 클래스를 삭제한다**)
-# ===========================================================================
-#
-# `git diff HEAD` 는 커밋 직후 공허해지고, 그 뒤의 무관한 편집을 무조건 RED 로 만든다
-# (cycle240 A11b · cycle252 G-252-5b 선례). 그래서 이 가드는 **cycle262 워킹트리 전용**
-# 이며 커밋과 함께 삭제한다. 8영역의 영구 가드는
-# `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py::test_ga3_6_*` 가 담당한다.
-#
-# TODO(cycle262 커밋 후): 아래 두 테스트를 삭제한다.
-# ---------------------------------------------------------------------------
-_ALLOWED_SRC_PY = {
-    "src/engine/strategies/volatility_breakout.py",
-    "src/engine/strategies/long_tail_volatility.py",
-}
-_FORBIDDEN_PATHS = (
-    "src/engine/risk.py",
-    "src/engine/order_engine.py",
-    "src/engine/session.py",
-    "src/engine/scanner.py",
-    "src/engine/strategy_registry.py",
-    "src/engine/scheduler.py",
-    "src/api/order.py",
-    "src/realtime",
-    "src/auth",
-    "src/engine/strategies/momentum.py",
-    "src/engine/strategies/donchian_swing.py",
-    "src/engine/strategies/bull_flag_breakout.py",
-    "src/engine/strategies/vcp_breakout.py",
-    "src/engine/strategies/kojiro.py",
-)
-
-
-def _git(*args: str) -> str:
-    res = subprocess.run(
-        ["git", *args], cwd=_REPO_ROOT, capture_output=True, text=True,
-    )
-    if res.returncode != 0:
-        raise AssertionError(
-            f"git {' '.join(args)} 실패 (rc={res.returncode}) — fail-closed. "
-            f"stderr: {(res.stderr or '').strip()}"
-        )
-    return res.stdout
-
-
-def _changed(*paths: str) -> list[str]:
-    """워킹트리까지 보는 변경 목록 — 스테이지 여부·추적 여부 무관.
-
-    `git diff HEAD` 만으로는 **새로 만든 미추적 파일**이 안 잡혀 로컬 초록 · CI 붉음이
-    난다(cycle259 S4b 교훈). `ls-files --others` 를 합집합해 그 사각을 막는다.
-    """
-    tracked = _git("diff", "HEAD", "--name-only", "--", *paths).split()
-    untracked = _git("ls-files", "--others", "--exclude-standard", "--", *paths).split()
-    return sorted(set(tracked) | set(untracked))
-
-
-def test_c12_1_eight_areas_and_other_strategies_untouched() -> None:
-    """C12 (사이클 한정): 8영역 · `scheduler.py` · 타 전략 5파일 diff 0.
-
-    이 사이클은 **매매 행위 변경**이지만 8영역 밖에서 완결된다(자문 §2.7). 배치가
-    `risk.on_tick`(후보 ②)으로 새면 7전략 공통 경로에 전략 지식이 새고 `_prev_price` 를
-    전 전략에서 얼린다.
-    """
-    changed = _changed(*_FORBIDDEN_PATHS)
-    assert changed == [], (
-        f"8영역/scheduler/타 전략 변경 감지: {changed} — cycle262 는 VB·LTV 2파일로 완결된다"
-    )
-
-
-def test_c12_2_only_two_python_files_change_under_src() -> None:
-    """C12 (사이클 한정): `src/**/*.py` 변경은 VB·LTV **둘뿐**.
-
-    `strategy_base.py` 를 포함한 어떤 공통 모듈도 건드리지 않는다 — 관문(`_apply_budget_limit`)
-    은 수량 축이고 이 사이클은 신호 축이다. `.md`(문서 동기화)는 범위 밖이라 제외한다.
-    """
-    changed = [p for p in _changed("src") if p.endswith(".py")]
-    unexpected = sorted(set(changed) - _ALLOWED_SRC_PY)
-    assert unexpected == [], (
-        f"허용 밖 src 파이썬 파일 변경: {unexpected} (허용 = {sorted(_ALLOWED_SRC_PY)})"
-    )

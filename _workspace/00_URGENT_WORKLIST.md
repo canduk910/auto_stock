@@ -19,7 +19,156 @@
 
 ---
 
-## ⏸️ cycle262 — VB·LTV 09:00 직후 진입 보류 `open_entry_hold_secs` (2026-09-06, **커밋·배포 대기**)
+## ✅ cycle263 — 일봉 적재 껍데기 봉 시정 (라) = (가) 신선도 게이트 + (다) 오늘봉 시각 필터 (2026-09-06, **커밋·배포 대기**)
+
+> 사용자 결정(09-06) = 카드 ④ "승인" — `src/engine/scanner.py` **8영역 접촉 포함**.
+> 자문 정본 = `_workspace/consult/2026-09-06_daily_load_stub_bar.md`(본문 + 부록 A) ·
+> 명세 = `_workspace/specs/cycle263_daily_load_stub_fix.md` ·
+> 선행 실행 = 09-06 15:16 금요일 일봉 보정(963종목·6,916행, 09-04 스텁 1,015→120 — 이 파일 아래
+> "2026-09-06 15:16" 절). **변경 파일 = `src/engine/data_load_tasks.py` + `src/engine/scanner.py`
+> 둘뿐**(C9 — `scheduler.py`·전략 7파일·`src/db/**`·`src/realtime/**`·`src/auth/**`·
+> `src/api/order.py`·frontend·migrations diff 0).
+
+### 결함 (실측 확증)
+
+멱등 규칙 `latest >= today` skip + 기동 직후 1회 실행(`immediate_first_run=True`,
+`initial_delay_secs=240`)이 결합해, 아침 07:56 immediate 가 장 전 KIS 로부터 **오늘 날짜 껍데기 봉**
+(O=H=L=C=전일종가·거래량 0)을 받아 먼저 쓰고 `max_bas_dd == today` 를 만든다 ⇒ **그날 16:00 정기
+실행이 전 종목 skip**.
+
+```
+09-03 07:57 fetched=982  skipped_fresh=0   |  09-03 16:00 fetched=0 skipped_fresh=982
+09-04 07:57 fetched=1015 skipped_fresh=0   |  09-04 16:04 fetched=1 skipped_fresh=1015
+```
+
+**오염 경로는 "오늘 스텁" 이 아니라 "어제 스텁" 이다** — 전략 7종은 `prev_idx` 가드로 오늘 봉을 이미
+잘라내는데, `_boot` 의 `prepare()` 가 적재보다 **4분 먼저**(07:51 vs 07:56) 돌아 그 시점 테이블
+헤드가 *어제* 날짜 껍데기이고 `bas_dd != today` 라 가드를 그냥 통과한다. 같은 아침 두 prepare 실측 =
+LTV 09-03 `10/90 → 90/90` · 09-04 `5/32 → 32/32` · donchian `1/111 → 4/111` · BFB `42/595 → 25/596` ·
+kojiro `32/662 → 14/663` — **BFB·kojiro 는 오염 쪽이 더 많다**(거짓 후보 생성 + 진짜 후보 죽임 =
+양방향). donchian 은 오염 상태에서 신고가·거래대금 게이트가 **수학적으로 통과 불가**(P0-1 계열
+구조적 차단). 이 손상을 매일 지워온 08:02 재-prepare 는 설계가 아니라 `evening_funnel_capture`
+immediate run(boot+600s)의 **우연**이고, 적재가 360초를 넘기면 그 우연이 깨진다.
+
+### 시정 — 두 축을 **함께** 넣는다
+
+- **(가) `src/engine/data_load_tasks.py`(8영역 밖)** — `stock_master_daily_load_task_loop` 의
+  `run_periodic_task_loop` 호출에 `immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS`(20.0)
+  추가 + `:110` 의 "미적용" 주석 정정. 사이클 193 이 daily_load 만 게이트를 뺀 근거가
+  "`max_bas_dd` 멱등을 믿어서" 인데 **지금 깨진 것이 정확히 그 멱등**이라, 게이트 투입은 사이클 193
+  의 전제를 되살리는 방향이다. 메커니즘은 이미 프로덕션 검증됨(basics/master/financial 3 task 마커가
+  D-1 16:2x~16:4x 로 살아 있고 익일 07:55 에 15.5h < 20h 로 실제 skip 중). 마커는 `once()` **성공
+  시에만** 갱신되므로 16:00 실패·프로세스 다운·주말·공휴일 전부 다음 아침 immediate 가 자동
+  부활한다(사이클 106 lifecycle race 안전망 보존).
+- **(다) `src/engine/scanner.py`(8영역, 승인 완료)** — `fetched += 1` **뒤** · `upsert_batch` **앞**
+  에서 `_drop_today_bars(candles, now_kst=load_now_kst, today=today)` 로 확정 전 오늘봉을 폐기한다.
+  그 자리가 유일하게 안전하다(두 fetch 분기의 **합류점** + `fetched`/`failed` 카운터 의미 보존).
+  커트오프 `_DAILY_LOAD_TODAY_BAR_CUTOFF = time(15, 40)` 는 **scanner 전용 상수**다 — 값이 같아
+  보여도 매매/보드 시각 상수를 재사용하지 않는다(매수 보드 시각 변경이 적재 규약을 딸려 바꾸는
+  커플링 차단). `load_now_kst = datetime.now(KST_TZ)` 는 **함수 진입 시 1회**(`stock_master.list_all`
+  페이징 *앞*, `today_kst()` 보다 **먼저**) 읽는다. 판정은 **시각 단독**이고, 예외는 **fail-open**
+  (전량 upsert 유지 + `[daily_load_today_filter_skipped]` WARNING 실행당 1행).
+- **왜 데이터 기준(거래량 0 ∧ OHLC 평탄)이면 안 되나** — (a) 장중 재시작이 만드는 부분봉은
+  거래량>0·비평탄이라 확정봉인 척 통과한다(껍데기보다 **나쁘다** — 평탄하지 않아 눈에 안 띈다)
+  (b) 거래정지 종목의 **진짜 평탄 확정봉**(하루 1~8건)을 16:00 에 죽여 그 날짜 행을 영영 못 갖게
+  한다. 시각 기준은 진짜 무거래봉을 **정의상 100% 보존**한다.
+- **왜 (가) 단독이면 안 되나** — 마커 D-1 16:0x + 20h = D 12:0x 만료 ⇒ 12:0x~15:30 재시작이면
+  immediate 가 다시 떠서 부분봉을 확정봉처럼 박고 그날 16:00 이 skip 된다(실측 = 최근 30일 full
+  모드 커밋 5건: 13:25·13:45·13:49·14:01·14:30 = 주 1회 이상). (다)가 그 구멍을 닫는다.
+
+### 게이트 (2026-09-06 로컬 실측)
+
+- 신규·연관 가드 **158 PASS** — `tests/unit/engine/test_cycle263_daily_load_stub_filter.py` **40**
+  (A 게이트/마커 8 · B `_drop_today_bars` 순수 10 · C 통합·시각 계약 6 · D 마커 서식 3 ·
+  E fail-open·backfill 분기 3 · I `force` 경로 4 · F 상수·naive 금지 3 · G 구멍 폐쇄·3일 수렴 2 ·
+  H 전략 `prev_idx` 가드 전제 1) + `test_cycle263_scope_guard.py` 1 +
+  `test_cycle193_ast_fresh_gate.py` 5(게이트 대상 3 task 로 갱신) +
+  `test_cycle193_immediate_fresh_gate.py` 10 + `test_cycle223g3_ast_guard_sees_staged.py` **17**
+  (`test_g3_9a/9b` 신설 포함) + `test_cycle222a3` 23 + `test_cycle223` 18 + `test_cycle223f` 9 +
+  `test_cycle226` 35.
+- sha 핀 대조 — 네 파일 전부 `fa4f7f2f49cbe8d363bee6a972e96fdfc95e787abf341ea35edfd0149b44bc11`
+  이고 `shasum -a 256 src/engine/scanner.py` 실측과 **일치** 확인.
+- **백엔드 전체 = 7,186 passed / 11 skipped / 328 xfailed / 13 xpassed (3분 47초). 회귀 0.**
+  (cycle262 커밋 시점 7,145 대비 +41 = 신규 41 − 삭제된 cycle262 `test_c12_*` 2 + 신설 `test_g3_9a/9b` 2.)
+- ⚠️ 로컬 Python 3.13 초록은 게이트가 아니다 — CI 는 3.12 다. push 후 `gh run list` 확인 의무.
+- 적대 검증 3렌즈 18건 전건 처리 = 수용 16 · 부분 수용 1 · 불수용 1. **구현을 약화시킨 곳 0.**
+  HIGH 3 = ① sha 핀 자매 4곳 중 한 곳만 등록해 전체 회귀 **7 failed**(223·223f·226 + 메타 가드
+  `test_g3_7` 2건 + 고아 cycle262 `test_c12_*` 2건) → 네 곳 동일 값 등록 + 재발 방지 `test_g3_9a/9b`
+  (**영구**) 신설 ② 커밋된 cycle262 `test_c12_1/2` + `_ALLOWED_SRC_PY`/`_FORBIDDEN_PATHS` 가 고아로
+  남아 cycle263 diff 를 재고 있었음 → 삭제 ③ `src/engine/CLAUDE.md` 의 게이트 대상 서술이 이
+  사이클이 뒤집은 정책을 반대로 기술 → 정정. **뮤테이션 ESCAPED 6건 전부 KILL**(M29 backfill 분기
+  우회 → `test_E3` / M30 `isinstance(candle, dict)` 제거 → `test_E2` 강화 / M21·M13
+  `dropped_rows`↔`tickers_affected` 상호 치환 → `test_D3` / M31 `load_now_kst` 위치 → `test_C6` /
+  M35 증분 창 7→1·2일 → `test_G2` 보정 창 단언).
+
+### 배포
+
+- 모드 **full**(`src/**` 변경 = backend 재생성). 일요일 장외는 승인된 창(주말 종일), 20:00~20:15 만
+  회피. 주말에는 스케줄러가 월 07:45 까지 대기라 매매 무영향.
+- **효과의 절반은 월 09-07 16:00 부터, 아침 prepare 정상화는 화 09-08 07:51 부터**다.
+- 롤백 = 다음 커밋으로 원복 + 재시작(코드 경로라 **즉시** 반영). 보유 중 장중(09:00~15:30)은 D6 로
+  불가 — 15:30 이후 또는 익일 07:45 전.
+
+### D+1 확인 항목 (월 09-07 · 화 09-08)
+
+| 시점 | 확인할 것 | 기대 |
+|---|---|---|
+| 월 07:56 | `[daily_load_today_bar_filter]` **1행** | 마커가 아직 **부재**(게이트가 daily_load 에 적용된 적 없어 기록이 없다)라 immediate 는 **실행된다**. `mode=drop` · `cutoff=15:40` · `dropped_rows≈1,000` · `tickers_affected≈1,000` · `filter_errors=0` |
+| 월 07:56 | 09-07 스텁이 **생기지 않는다** | `SELECT count(*) FROM stock_master_daily WHERE bas_dd='20260907' AND volume=0 AND high_price=low_price AND (updated_at AT TIME ZONE 'Asia/Seoul')::date = bas_dd` = **0** |
+| 월 16:00 | `[stock_master_daily_load_summary]` | `fetched≈total` · **`skipped_fresh≈0`** · `upserted_rows` 수천 = 16:00 이 **처음으로 일을 한다**(09-07 실봉 기록) |
+| 월 16:00 직후 | `system_config.task_last_success_stock_master_daily_load` | **최초 기록**(그전까지 부재) |
+| 화~금 07:56 | `[stock_master_daily_load] immediate run skip — fresh last_success=…` INFO 1행 | 마커 ≈15.9h < 20h ⇒ 아침 immediate **skip**. 이게 매일 보이면 껍데기 생성 주체가 사라진 것 |
+| **화 09-08 07:51 / 08:02** | **두 prepare 카운트 수렴 = 핵심 성공 서명** | 전략별 `준비 완료: N/M` 이 거의 같아야 한다. 특히 **LTV 가 07:51 에 이미 N/N**(지금은 5/32·10/90). donchian 은 07:51 의 `donchian=`·`volume=` 이 08:02 값과 일치 |
+| 월 07:51 | (참고) 이미 대체로 정상 | 09-06 15:16 보정으로 09-04 실봉이 963종목 채워져 있다 — 시정 배포 여부와 **무관**하게 성립한다. 잔여 120종목은 `stock_master` 유니버스 밖이라 보정 범위 밖 |
+| 상시 | 신규 상장·유니버스 진입 종목 backfill **≈8시간 지연** | 아침 → 같은 날 16:00 으로 이동. 그 사이 `get_recent_daily_normalized` 는 `reason="miss"` KIS 폴백(데이터는 더 정확, 장중 KIS 호출은 증가). 규모 관측(09-04 실측 16:04 `fetched=1` / 18:45 재시작 `fetched=66`) |
+| 상시 | UI "마지막 일봉 적재" | 낮 동안 **어제 날짜** = **정상**(의미상 "마지막으로 확정된 일봉"이 어제인 것이 맞다) |
+
+- ⚠️ **의미 반전** — 16:00 실행의 `skipped_fresh` 가 **~1,000 → ~0** 이 된다. **배포 전후 로그를 같은
+  grep 으로 합산하지 말 것**(사이클 228 `[*_vol_gate_observe]` `would_pass` 반전 때 세운 규약과 동형).
+  부수적으로 `upserted_rows` 총량이 하루 ~7,900 → ~15,800, KIS 일봉 호출이 ~1,015 → ~2,030 이 되는데
+  이건 결함이 아니라 16:00 이 비로소 일을 하는 것이다.
+- ⚠️ **`[daily_load_today_bar_filter]` 가 안 보이면** 코드 미배포로 단정하기 전에
+  `[stock_master_daily_load_begin] candidates=` 를 먼저 본다 — `stock_master.list_all` 이 전 페이지
+  실패하거나 빈 결과면 조기 return 이라 마커가 0행이다(그 경로엔 `stock_master 빈 영역 — 적재 skip`
+  WARNING 도 남는다).
+- ⚠️ **`[prepare_db_fallback] reason=stale` 은 체크리스트에서 뺀다** — 자문 본문 §6-5 가 성공 서명으로
+  제시했으나 그 emit 은 `logger.debug`(`src/db/stock_master_daily.py::_kis_fallback`)라 `system_logs`(INFO+)에
+  **애초에 안 들어간다**(자문 §A-4 정정 2). 굳이 보려면 EC2 컨테이너 로그(`docker logs`) 기준으로만.
+- `filter_errors > 0` 이면 fail-open 이 발생한 것이다 — `[daily_load_today_filter_skipped]` WARNING 과
+  대조한다. 이 필드가 없으면 `dropped_rows=0` 이 "버릴 오늘봉이 없었다" 와 "필터가 전량 죽어 시정 전
+  행위로 되돌아갔다" 를 구분하지 못한다.
+
+### ✅ 커밋 **직후** 정리 체크리스트
+
+1. `scanner.py` sha 핀을 **네 곳 동시에 비운다** — `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA` ·
+   `tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py::_PREEXISTING_CONTENT_SHA` ·
+   `tests/unit/ast/test_cycle223f_ast_manual_apply_safeguard.py::_PREEXISTING_CONTENT_SHA` ·
+   `tests/unit/engine/strategies/test_cycle226_zero_breakout_defense.py::_ALLOWED_CONTENT_SHA`.
+   ⚠️ **한 곳만 등록/삭제하면 나머지가 붉어지는데 그 실패 문구가 "핀을 먼저 재산출하지 마라 — 실제
+   변경을 되돌려라" 라서 승인된 8영역 변경을 되돌리도록 오도한다**(cycle263 이 실제로 그 사고를 냈다).
+   순서는 **소스 확정 → `shasum -a 256` 재산출 → 4곳 동시 갱신** 이고, `scanner.py` 를 1 byte 라도
+   더 고치면 네 핀이 전부 무효다. 재발 방지 가드 = `test_cycle223g3_ast_guard_sees_staged.py::test_g3_9a/9b`(**영구**).
+2. `tests/unit/engine/test_cycle263_scope_guard.py` **삭제**(`_skip_if_cycle_committed` 가 커밋 후
+   자기 은퇴시키므로 잊어도 다음 사이클을 막지는 않는다 — cycle253 패턴).
+3. (이 사이클에서 이미 처리) 커밋된 cycle262 의 `test_c12_1`/`test_c12_2` +
+   `_ALLOWED_SRC_PY`/`_FORBIDDEN_PATHS` 삭제 완료 — cycle240 A11b · cycle252 G-252-5b 선례.
+
+### 별건으로 남는 것 (이 사이클에서 **손대지 않았다**)
+
+| # | 항목 | 상태 |
+|---|---|---|
+| **D-4** | `DAILY_STALENESS_DAYS`(현 4) | **무변경.** 2026-02 이후 144회 거래일 전이 중 간격 ≥5 는 1회(02-19 설, 간격 6). **다음 발화 예정 = 추석(9월 하순)** — 발화하면 1,000종목 250~300초 prepare 지연이지만 폴백 데이터가 더 정확하므로 위험이 아니라 비용이다. 상향은 "D-1 미적재 감지" 목적을 무디게 하므로 별도 결정 |
+| **D-5** | VB `k_period=15` vs 하드코딩 `min_required=22` | **VB 는 DB 일봉을 한 번도 쓴 적이 없다**(17 < 22 ⇒ 매 prepare 종목당 KIS 1회 폴백). 고치면 VB 가 처음 DB 경로에 들어오므로 별도 검증 사이클 |
+| **D-6** | `stock_master_daily.get_atr()` 오늘봉 가드 부재 | VCP ATR **평균 6.3% 과소**(중앙 6.3% · 최악 29.3% · 1,805 중 272종목이 10%+). VCP 의 ±10% 교차검증 문턱 **아래**라 `[vcp_atr_mismatch]` 가 3개월간 무발화. (다) 로 증상은 사라지지만 **가드 자체는 없다** — `market_regime._compute_single_etf_stage` · VB RS/RSI 훅도 동일. ⚠️ **G-7(VCP/BFB 터틀 sizing 전환)은 이 시정 D+1 확인 뒤로**(6.3% 낮은 ATR = 전 유닛 6.7% 과대) |
+| **D-9** | `TIME_STOCK_MASTER_DAILY_LOAD` 16:00 → **18:10** | (라) 가 잃는 **유일한 것**(헤드 봉의 시간외 단일가 16:00~18:00 물량이 하루 늦게 반영)을 완전 해소한다. 16:10 basics·16:15 purge·16:20 funnel 과 무충돌, 16:20 funnel 이 읽는 헤드는 이동 전후 동일. **이 시정 D+1 확인 후 별건** |
+| **D-11** | 사용자 제안 05:00(·23:00) 기동 | **보류 — 구조적 불가.** task loop 이 `while scheduler._running` 인데 `scheduler.py:1035` 가 20:10 정산 직후 `_running=False` 를 세우고 `run_daily` 가 익일 07:45 까지 sleep 한다 ⇒ 그 시각엔 루프가 존재하지 않아 발화하지 않는다. 하려면 task 를 uvicorn lifespan 으로 빼는 재설계 선행 |
+| **D-12** | 락 게이트를 안 타는 `get_recent_daily` 직접 호출 3곳 | `get_atr`(VCP 14일) · `market_regime._compute_single_etf_stage`(90일) · VB RS/RSI 훅(30일). VCP 는 ±10% 교차검증이 방어 중(30일 2건 발화), 나머지 2곳은 관찰 전용 |
+| — | **액면분할 미조정 26,844행 / 242종목** | 60일 락 발생 271종목 중. KIS 는 소급 재조정하지만(210980 실증: `4,445 × (1−0.3196) = 3,024 ≈ 3,054`) **T-7 창이 회수하지 못한다** — 하루 두 번을 돌든 한 번을 돌든 창이 7일이라 결과가 같다. 실제 방어는 prepare 시점 **락 게이트**라 적재 빈도와 **독립**이고, 아침 실행 skip 과 무관하다. **이번 사이클 무조정** |
+| — | **prepare↔적재 순서 규약 2건** | ① 자문 안 (E) `_boot` 의 prepare 를 daily load **뒤로** 옮기는 순서 시정 — 근본 방향이나 `scheduler.py`(라인 상한) + `boot_manager.py` 를 건드리고 07:59 사전 구독까지의 14분 예산에 119초 적재를 끼워 넣게 되어 이번 범위 밖. (다) 를 넣으면 아침 prepare 가 읽는 헤드가 이미 정확해져 순서 변경이 **불필요**해진다 ② 16:00 이 실패한 다음날에는 08:02 `evening_funnel_capture` 재-prepare 가 다시 **유일한** 보정이 된다 — 우연 의존이 완전히 사라지지는 않는다. 새 전략이 `prev_idx` 오늘봉 가드를 빠뜨리면 이 전제가 깨지므로 `test_H1`(영구)이 7 전략의 가드 존재를 잠근다 |
+
+---
+
+## ✅ cycle262 — VB·LTV 09:00 직후 진입 보류 `open_entry_hold_secs` (2026-09-06, **커밋·푸시 완료 `92bc140`** — 배포는 push 자동 full, CI 확인 의무)
 
 > 사용자 결정(09-06) = 카드 ② "조사와 임시 매수 보류 함께" · 범위 **VB + LTV 둘 다**(자문 권고 b) ·
 > 배포 **오늘 일요일 장외**(월 09:00 개장부터 발효). 자문 정본 =
@@ -71,7 +220,7 @@ LTV 의 08:00~09:00 진짜 프리장 매수는 창 밖이라 무접촉.
 
 | 우선 | # | 티켓 | 범위 | 왜 |
 |---|---|---|---|---|
-| **①** | **F-7** | `stock_master_daily` **16:00 적재 복구** | **이미 승인·명세 완료 = cycle263** (`_workspace/specs/cycle263_daily_load_stub_fix.md`, 09-06 카드 ④ "승인" — `scanner.py` 8영역 접촉 포함) | 자문 §4.3 **단계 1**(매일 09:35 `[breakout_open_confirm]` 스탬프 vs `stock_master_daily` 그날 KRX 시가 대조 — 8영역 무접촉·코드 0줄)의 **선결 조건**이다. 스텁이면 대조 자체가 불가능하다. 09-06 15:16 금요일 보정으로 09-04 스텁 1,015→120 은 해소됐지만 **매일 아침 07:5x 스텁이 `max_bas_dd==오늘` idempotency 를 다시 거는 구조**는 시정 배포 전까지 그대로다 |
+| **①** | **F-7** | `stock_master_daily` **16:00 적재 복구** | **✅ cycle263 구현 완료 — 커밋·배포 대기** (이 파일 최상단 절 · 명세 `_workspace/specs/cycle263_daily_load_stub_fix.md`, 09-06 카드 ④ "승인" — `scanner.py` 8영역 접촉 포함) | 자문 §4.3 **단계 1**(매일 09:35 `[breakout_open_confirm]` 스탬프 vs `stock_master_daily` 그날 KRX 시가 대조 — 8영역 무접촉·코드 0줄)의 **선결 조건**이다. 스텁이면 대조 자체가 불가능하다. 09-06 15:16 금요일 보정으로 09-04 스텁 1,015→120 은 해소됐지만 **매일 아침 07:5x 스텁이 `max_bas_dd==오늘` idempotency 를 다시 거는 구조**는 시정 배포 전까지 그대로다 |
 | **②** | **F-2** | `[24] OPRC_HOUR` 프로브 → **근본 시정** | `src/realtime/**` = **8영역** — 사용자 승인 + `domain-consult` 선행 필수 | `[7]` 이 세션 시가라는 **오염 자체**를 고친다. `[24]` 를 한 번도 찍어 본 적이 없어(파싱 0건) "그 값이 08:00 프리장 시가다" 는 **정황 확정**에 머문다 — 임시 보류의 정당성엔 무관하지만(무엇으로 오염됐든 KRX 시가가 아니다) **시정 방향 선택에는 그 분포가 필요하다**(자문 §4.3 단계 2) |
 | **③** | **F-8** | 09:00:05 `[breakout_open_confirm]` **`confirmed=0 empty=55~65`** 원인 | 확정 경로 조사(읽기 전용 먼저). 시정은 8영역 여부 판정 후 | 시가 확정 **주 경로가 사실상 무동작**이라 목표가를 실제로 굳히는 것이 첫 MAIN 틱의 인라인 폴백이다 = **오염이 들어오는 문**. 09-03·09-04 양일 실측. 이 경로가 살아나면 F-2 의 설계 선택지가 넓어진다 |
 | **④** | **F-3** | **kojiro 갭스킵 오염** 조사 | `src/engine/strategies/kojiro.py`(읽기 전용 조사 먼저) | kojiro 는 매수 창이 09:05~09:30 이라 이번 보류 **밖**이지만, 갭업/갭다운 스킵이 **같은 오염된 `open_price`** 로 갭률을 잰다. 프리장 시가 ≈ 전일종가면 `gap_rate ≈ 0` 이 되어 **스킵해야 할 갭업 종목을 스킵하지 않는다** = 방향이 **위험 증가** 쪽. 자문 §7-9 가 "별도 티켓으로 반드시 등재" 라고 못박았다 |
@@ -80,12 +229,12 @@ LTV 의 08:00~09:00 진짜 프리장 매수는 창 밖이라 무접촉.
 | 그 밖 | **F-6** | 계좌 게이트 활성일 **LTV config 카나리아 0행** | `long_tail_volatility.py` + `tests/unit/ast/test_cycle233_ast_account_risk.py`(계약 자체 변경 = 승인 사안) | 적대 검증이 "카나리아를 게이트 앞으로" 권고했으나 그 이동은 cycle233 M6(게이트 = `check_buy_signal` 첫 문장, `GATE_FIRST_FILES`)를 **RED 로 만든다**(실측 확인 = **불수용** 사유). 두 계약을 어떻게 화해시킬지는 별도 결정 — 그때까지 비대칭은 **문서화된 한계**이고 `test_c7_8` 이 그 현상을 고정한다 |
 | 그 밖 | **F-5** | `source` 필드 **진짜 출처 판정** | `scheduler._load_strategy_config` + `routes/strategies.update_params`(둘 다 C12 범위 밖) | 현재는 값 동등성 추론이라 `PUT 90` 을 `default` 로 보고한다. 출처 흔적을 남기려면 오버레이 지점이 기록해야 한다 |
 
-### ✅ 커밋 **직후** 정리 체크리스트 (누락 시 다음 사이클이 오해한다)
-1. `tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py::_CYCLE228_STRATEGY_CONTENT_SHA` 의
+### ✅ 커밋 **직후** 정리 체크리스트 (누락 시 다음 사이클이 오해한다) — **1·2 모두 처리 완료**
+1. **[완료 `d292805`]** `tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py::_CYCLE228_STRATEGY_CONTENT_SHA` 의
    **두 항목을 삭제하고 dict 를 다시 비운다**. 커밋 후 그 sha 는 죽은 값이 되고, 남겨 두면 다음에
    VB/LTV 를 정당하게 건드리는 사이클이 "사이클228 게이트 전환" 문구가 붙은 **오해 소지 있는**
    실패 메시지를 받는다(2026-09-05 리팩토링 리뷰 카드 #3 이 같은 이유로 이 dict 를 비웠다 — 재발 방지).
-2. `test_cycle262_open_entry_hold.py::test_c12_1` / `test_c12_2` **삭제**. 둘 다 `git diff` 워킹트리
+2. **[완료 — cycle263 이 삭제]** `test_cycle262_open_entry_hold.py::test_c12_1` / `test_c12_2` **삭제**. 둘 다 `git diff` 워킹트리
    기반이라 커밋 직후 `changed == []` 로 **공허 통과**한다 — 남겨 두면 "가드가 지켜준다"고 오해하게 된다.
    8영역의 **영구** 가드는 `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py::test_ga3_6_*` 다.
 3. sha 핀은 **커밋 직전 마지막 단계**에 `shasum -a 256` 으로 재산출한다(검토 중 파일이 여러 번
@@ -1148,7 +1297,11 @@ find . -name __pycache__ -prune -exec rm -rf {} + ; python -m pytest -q
 - 매크로(dkstock) 축은 **판정 불가**(스냅샷 12행·전부 defensive·VIX 중앙 18일/최대 73일 stale).
 - 결정 항목 10건은 `regime_gap/design.md`. 권고 = **S0(야간 재구성 관측, 코드 0줄·SELECT 만) 즉시 → 20 거래일 뒤 S1(shadow 배선) 재판단**, 실배제는 09:00 기준가 조사 뒤.
 
-### ⚠️ 운영 결함 발견 — 일봉 16:00 적재가 매일 no-op (2026-09-06 실측)
+### ⚠️ 운영 결함 발견 — 일봉 16:00 적재가 매일 no-op (2026-09-06 실측) — **✅ cycle263 이 시정(커밋·배포 대기)**
+
+> 아래는 **발견 시점 기록**이다. 시정 내용·D+1 확인 항목·별건 목록은 이 파일 최상단 cycle263 절이 정본이다.
+> ⚠️ 배포 후 16:00 실행의 `skipped_fresh` 는 ~1,000 → ~0 으로 **의미가 반전**한다 — 아래 실측치와 배포 후 로그를
+> 같은 grep 으로 합산하지 말 것.
 
 - `_stock_master_daily_load_once` 의 idempotency 규칙이 **"max_bas_dd 가 오늘이면 skip"** 인데, 07:5x 아침 적재가 KIS 에서 **당일 스텁 봉**(장 전이라 o=h=l=c=전일종가·volume 0)을 받아 오늘 날짜 행을 먼저 만든다 → 16:00 적재가 전 종목을 fresh 로 보고 건너뛴다. 09-04 실측 로그: `16:04 total=1016 fetched=1 upserted_rows=1 skipped_fresh=1015`.
 - 결과: **D 의 실봉은 16:00 이 아니라 D+1 07:5x 에 들어온다.** DB 실측 — 09-04 행 1,082 중 실봉 67, 09-03 행의 `updated_at` 이 09-04. 07:55 적재와 `_boot`/`prepare()` 가 겹쳐 **경합**이 생긴다(스윙 전략이 갱신 전 스텁 봉을 읽을 수 있다).

@@ -65,6 +65,15 @@ BFB·kojiro 는 오염 쪽이 **더 많다** = 거짓 후보. donchian 은 오�
 skip(껍데기 생성 주체 소멸) → D1 16:00 은 `latest=D0 < D1` 이라 fetch 하는데 **16:00 의
 KIS 오늘봉은 껍데기가 아니라 확정 실봉**이다 → D2 아침 prepare 부터 헤드가 실봉.
 
+⚠️ **최종값 보정 담지자 교체 (적대 검증 지적, 2026-09-06)** — 자문 §3 은 "아침 재fetch 가
+사실은 최종값 보장 장치" 라고 했는데, (가) 는 그 아침 실행을 **정상일마다 skip** 시킨다.
+따라서 D 봉의 최종값을 나중에 바로잡는 것은 이제 **D+1 16:00 정기 실행의 7일 증분 창**
+(`fetch_days=7` → `ON CONFLICT DO UPDATE`)이다. D+1 아침 prepare 가 읽는 D 봉은 "다음날
+아침에 확정된 최종본" 이 아니라 **"D 16:00 스냅샷"** 이다(시정 전에는 껍데기였으므로 방향은
+여전히 개선). 그 창을 1~2일로 줄이면 D 봉이 16:00 스냅샷에 영구 고정된다 — 회귀 가드 =
+G2 수렴 시뮬의 "보정 창 존치" 단언(`fetch_days` 를 줄이면 붉어진다). D-9(16:00→18:10 이동,
+이번 범위 밖)를 판단할 때 이 사실이 전제가 된다.
+
 **메커니즘은 이미 프로덕션 검증됨** — `system_config` 실측으로 basics/master/financial
 3 task 의 `task_last_success_*` 마커가 D-1 16:2x~16:4x 로 살아 있고 익일 07:55
 (15.5h < 20h)에 실제로 skip 중이다. `task_last_success_stock_master_daily_load` 만 부재
@@ -114,6 +123,8 @@ KIS 오늘봉은 껍데기가 아니라 확정 실봉**이다 → D2 아침 prep
 | `get_recent_daily_normalized` 신선도 게이트(`DAILY_STALENESS_DAYS=4`) | **유일한 실질 위험.** 2026-02 이후 144회 거래일 전이 중 간격 ≥5 는 1회(02-19 설, 간격 6). 다음은 추석. 발화 시 1,000종목 250~300초 지연이나 폴백 데이터가 더 정확하다 ⇒ **이번 사이클 무변경**(D-4) |
 | UI `last_daily_load_at` | 낮 동안 어제 날짜로 보인다 — **수용**(의미상 정확, D-7) |
 | `market_regime` · VB RS/RSI 훅 | 증상 소멸(개선). 가드 자체는 별건(D-6) |
+| 수동 보정 `force=True` (`POST /api/stock-master/refresh-daily`) | **방해받지 않는다.** `force` 는 `latest >= today` 멱등 skip **만** 우회하고 필터는 통과한다. 실측 4시나리오 — (a) 주말 15:16 수동 보정(09-06 에 실제로 쓴 경로): `today` 가 토/일이라 KIS 가 오늘 날짜 봉을 안 준다 ⇒ **필터 무접촉** (b) 평일 17:00: 오늘 확정봉 기록(16:00 실패 후 수동 복구 정상) (c) 평일 10:00: 오늘 잠정봉 폐기·D-1 기록(설계 의도) (d) `force=False` + `latest==today`: 종전대로 skip. 회귀 가드 = `test_I1~I4` |
+| 신규 상장·유니버스 진입 종목 backfill | **≈8시간 지연** — 종전에는 07:48 `full_universe_load` immediate 가 `stock_master` 에 넣은 종목을 07:56 daily_load immediate 가 8분 뒤 backfill 했다. (가) 투입 후 그 아침 immediate 가 skip 되므로 같은 날 **16:00** 까지 미뤄진다. 그 사이 `get_recent_daily_normalized` 는 `db_rows` 0 → `reason="miss"` KIS 폴백(데이터는 오히려 더 정확, 다만 **장중 KIS 호출 증가**). 최종 커버리지 손실은 0. 규모 = 하루 수 건~수십 건 추정(09-04 실측 16:04 `fetched=1` / 18:45 재시작 `fetched=66` 누적) — D+1 관측 항목 |
 
 ---
 
@@ -122,6 +133,19 @@ KIS 오늘봉은 껍데기가 아니라 확정 실봉**이다 → D2 아침 prep
 - **의미 반전** — `skipped_fresh` 가 16:00 에서 ~1,000 → ~0 이 된다.
   **배포 전후 grep 합산 금지.**
 - 신규 마커 `[daily_load_today_bar_filter]` — **실행당 1행** INFO(종목당 로그 금지).
+  필드 = `mode` / `cutoff` / `now` / `today` / `dropped_rows`(행) / `tickers_affected`(종목) /
+  `filter_errors`. 앞의 둘은 **서로 다른 것을 센다**(한 종목이 2행을 잃을 수 있다). 
+  `filter_errors > 0` = C4 fail-open 발생 — 이 필드가 없으면 `dropped_rows=0` 이 "버릴 오늘봉이
+  없었다" 와 "필터가 전량 죽어 시정 전 행위로 되돌아갔다" 를 문자열상 구분하지 못한다.
+- ⚠️ **마커가 0행인 경로가 하나 있다** — `stock_master.list_all` 이 전 페이지 실패하거나 빈
+  결과를 주면 조기 return 이라 마커를 안 찍는다. D+1 에 마커가 안 보이면 "코드가 배포 안 됐다"
+  로 단정하기 전에 `[stock_master_daily_load_begin] candidates=` 값을 먼저 본다
+  (그 경로에는 `[stock_master_daily_load] stock_master 빈 영역 — 적재 skip` WARNING 도 남는다).
+- 인지 항목: 유니버스 조회가 전부 실패해도 `once()` 는 raise 하지 않고 빈 summary 를 **정상
+  반환**하므로 `set_task_last_success` 가 찍힌다(= "아무것도 적재 안 한 실행" 이 fresh 로 기록).
+  실피해 0 — 16:00 정기 while 루프는 게이트 밖이라 그날 적재는 그대로 수행되고, immediate 가
+  한 번 더 떠 봐야 D-1..D-7 재기록(내용 동일)뿐이다. 엄밀히 하려면 4 task 공용 헬퍼를 고쳐야
+  해서 C9 범위 밖이다.
 - **D+1 핵심 성공 서명** = 07:51 과 08:02 **두 prepare 카운트가 수렴**(특히 LTV 가
   07:51 에 이미 N/N).
 - ⚠️ 자문 본문 §6-5 의 `[prepare_db_fallback] reason=stale` 은 `logger.debug` 라
@@ -147,6 +171,39 @@ KIS 오늘봉은 껍데기가 아니라 확정 실봉**이다 → D2 아침 prep
 4. **부분봉 시나리오** — `now=13:04` immediate + KIS 가 거래량>0 비평탄 오늘봉 반환
    → DB 미기록, 같은 날 16:00 이 `latest=D-1` 을 보고 fetch (구멍 폐쇄 회귀 가드).
 5. **수렴 3일 시뮬** — D0 껍데기 → D1 전환 → D2 정상 (freezegun, 07:56/16:00 × 3일).
+
+### 6-1. sha 핀 자매 4곳 (2026-09-06 적대 검증 HIGH — 반드시 지킬 절차)
+
+8영역 diff-0 + 내용 sha 면제 계약을 **각자 독립된 dict** 로 들고 있는 가드가 4개다.
+
+| 파일 | 상수명 |
+|---|---|
+| `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py` | `_APPROVED_CONTENT_SHA` |
+| `tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py` | `_PREEXISTING_CONTENT_SHA` |
+| `tests/unit/ast/test_cycle223f_ast_manual_apply_safeguard.py` | `_PREEXISTING_CONTENT_SHA` |
+| `tests/unit/engine/strategies/test_cycle226_zero_breakout_defense.py` | `_ALLOWED_CONTENT_SHA` |
+
+`scanner.py` 를 바꾸면 **네 곳 전부**에 `"src/engine/scanner.py": "<sha256>"` 를 **같은
+값으로** 한시 등록해야 하고, 커밋 직후 네 곳을 함께 비운다. 한 곳만 등록하면 나머지 셋이
+붉어지는데 그 실패 문구가 *"핀을 먼저 재산출하지 마라 — 실제 변경을 되돌려라"* 라서
+**승인된 8영역 변경을 되돌리도록 오도한다**(cycle263 이 실제로 그 사고를 냈다: 전체 회귀
+7 failed = 223 · 223f · 226 + 그 둘을 실행하는 메타 가드 `test_g3_7` 2건 + 고아 cycle262
+`test_c12_*` 2건). 순서는 **소스 확정 → `shasum -a 256` 재산출 → 4곳 동시 갱신** 이다 —
+`scanner.py` 를 1 byte 라도 더 고치면 네 핀이 전부 무효다.
+
+재발 방지 = `tests/unit/ast/test_cycle223g3_ast_guard_sees_staged.py::test_g3_9a/9b`(**영구**).
+9a 는 `*_CONTENT_SHA` dict 를 가진 테스트 파일 집합이 등록 목록과 일치하는지(= 새 자매 가드가
+생기면 붉어진다), 9b 는 워킹트리의 8영역 변경이 네 곳 전부에 **같은 값** 으로 핀됐는지를 잰다.
+8영역 무접촉이면 공허하게 통과한다.
+
+### 6-2. 커밋과 함께 정리할 사이클 한정 가드
+
+- `tests/unit/engine/test_cycle263_scope_guard.py` — **삭제**(`_skip_if_cycle_committed` 가
+  자기 은퇴시키므로 잊어도 다음 사이클을 막지는 않는다).
+- 위 4곳의 `scanner.py` 핀 — **함께 비운다**.
+- (cycle263 에서 이미 처리) 커밋된 cycle262 의 `test_c12_1`/`test_c12_2` +
+  `_ALLOWED_SRC_PY`/`_FORBIDDEN_PATHS` **삭제** — 커밋되는 순간 공허해지고 그 뒤 무관한
+  사이클의 diff 를 재는 고아 가드였다(cycle240 A11b · cycle252 G-252-5b 선례).
 
 ---
 
