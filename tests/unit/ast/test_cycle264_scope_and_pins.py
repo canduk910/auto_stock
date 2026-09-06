@@ -3,8 +3,8 @@
 ## ⚠️ 이 파일의 절반은 **사이클 한정**이다 — 커밋 후 삭제/갱신 의무
 
 - `test_c7_working_tree_touches_only_allowed_files` (범위 가드)
-  → **cycle264 커밋 직후 삭제한다.** bare `git diff HEAD` 는 커밋 뒤 공허해지고
-    다음 편집에서 무조건 RED 가 된다(cycle240 A11b · cycle252 G-252-5b).
+  → **cycle264 커밋(38f2560) 직후 삭제 완료.** bare `git diff HEAD` 는 커밋 뒤
+    공허해지고 다음 편집에서 무조건 RED 가 된다(cycle240 A11b · cycle252 G-252-5b).
 - `test_c4_strategy_entry_methods_pinned` (전략 7파일 무접촉 sha 핀)
   → **cycle265(기준가 시정)가 VB/LTV 를 실제로 바꾼다.** 그 사이클이 이 핀을
     갱신하거나 이 테스트를 삭제한다. cycle264 안에서 sha 가 바뀌면 계약 위반이다.
@@ -72,42 +72,6 @@ def _git(*args: str) -> str:
 
 # ===========================================================================
 # C7 — 접촉 범위 (⚠️ 사이클 한정 — cycle264 커밋 직후 삭제)
-# ===========================================================================
-
-def test_c7_working_tree_touches_only_allowed_files():
-    """C7 — 워킹트리에서 바뀐 **소스** 파일은 `_ALLOWED_SRC` 3개뿐이다.
-
-    ⚠️ 사이클 한정 가드 — cycle264 커밋 직후 이 테스트를 삭제한다.
-    """
-    changed = {
-        line.strip() for line in _git("diff", "HEAD", "--name-only").splitlines()
-        if line.strip()
-    }
-    untracked = {
-        line.strip()
-        for line in _git("ls-files", "--others", "--exclude-standard").splitlines()
-        if line.strip()
-    }
-    touched_src = {p for p in (changed | untracked) if p.startswith("src/")}
-
-    assert touched_src <= _ALLOWED_SRC, (
-        "cycle264 는 handler.py · scheduler.py · open_price_observe.py(leaf) 만 "
-        f"만진다(C7). 범위 밖 변경={sorted(touched_src - _ALLOWED_SRC)}"
-    )
-
-    forbidden = {
-        p for p in touched_src
-        if p in _UNTOUCHABLE_GLOBS or any(
-            p.startswith(d) and p not in _ALLOWED_SRC for d in _UNTOUCHABLE_DIRS
-        )
-    }
-    assert not forbidden, (
-        f"8영역·전략 7파일·realtime 타 파일 무접촉 위반: {sorted(forbidden)}"
-    )
-
-
-# ===========================================================================
-# C7 — `scheduler.py` 라인 상한 (영구)
 # ===========================================================================
 
 def test_c7_scheduler_line_cap():

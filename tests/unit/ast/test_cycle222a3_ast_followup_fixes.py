@@ -437,7 +437,7 @@ _EIGHT_AREAS = [
     "src/realtime",
     "src/auth",
 ]
-_ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py", "src/realtime/CLAUDE.md"}
+_ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 
 # 🔁 2026-08-29 (cycle235) — 파일명 영구 허용(_ALLOWED)과 별개로, **승인 사이클의
 #    in-flight 변경**은 내용 sha 로 한시 면제한다(cycle223 계열 자기소멸 기전 이식 —
@@ -447,15 +447,9 @@ _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py", "src/realtime/CLAUD
 #    `_workspace/red/cycle235_fill_qty_spec.md`.
 # TODO(cycle235 커밋 후): 아래 dict 를 비운다.
 _APPROVED_CONTENT_SHA: dict[str, str] = {
-    # cycle264 (2026-09-06, 사용자 승인) — `[open_scope_observe]` shadow 관측 1건.
     #    `_parse_tick_prices` 는 byte 동일(소스 세그먼트 sha 핀)이고 `_handle_tick` 의
     #    `on_tick` 6-튜플도 골든 12케이스로 불변 실증 = **매매 행위 diff 0**.
     #    명세 = `_workspace/consult/2026-09-07_open_price_scope_filter.md` §7.1.
-    # TODO(cycle264 커밋 후): 자매 가드 4곳에서 이 항목을 함께 비운다.
-    "src/realtime/handler.py": "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
-    # cycle264 — 정본 문서 동반 개정. `src/realtime/**` 글롭이 .md 도 8영역으로 잡는다.
-    # 커밋 후 handler.py 핀과 함께 비운다.
-    "src/realtime/CLAUDE.md": "22e3e2d92096d7d58e18a048180d2ee5ef8a127f05dc4085c948e8a27109e5cc",
     #    `_stock_master_daily_load_once` 가 upsert 앞에서 **확정 전 오늘봉**(장 전 껍데기 ·
     #    장중 부분봉)을 시각 기준(15:40 KST)으로 폐기한다. 명세 =
     #    ⚠️ **자매 가드 4곳**(222a3 `_APPROVED_CONTENT_SHA` · 223 · 223f
