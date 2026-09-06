@@ -264,11 +264,17 @@ def test_stop_tuple_equals_finally_tuple_members():
         "_stock_master_financial_load_task",  # 사이클 C3 추가 (퀀트 재무 16:40 KST 주1회 적재 task)
         "_stock_master_daily_purge_task",  # 사이클 150 추가 (T-150일 retention cron 16:15 KST task)
         "_evening_funnel_capture_task",  # 사이클 171 추가 (16:20 KST 저녁 잠정 funnel 캡처 task)
+        # cycle264 추가 (2026-09-06) — 09:05:30 시가 3자 대조 shadow task.
+        # 관측 전용(행위 0)이지만 종목당 0.2초 throttle 로 최대 ~28초를 도는 루프라
+        # cancel 목록 누락 시 `stop()` 이 그 REST 버스트를 끊지 못한다. 속성명이
+        # `_*_task_handle` 이던 초안은 cycle79 가드의 수집 패턴(`endswith("_task")`)
+        # 에도 안 잡혀 세 목록 전부에서 조용히 빠져 있었다(적대 검증 MEDIUM).
+        "_open_source_compare_task",
         "_ws_task",
         "_scan_task",
     }
     assert stop_members == expected_members, (
-        f"stop() tuple 이 명세 §9 ① 의 18종과 불일치.\n"
+        f"stop() tuple 이 명세 §9 ① 의 19종과 불일치.\n"
         f"  실제 : {sorted(stop_members)}\n"
         f"  기대 : {sorted(expected_members)}\n"
         f"명세 §4 Patch A 코드 블록 참조."

@@ -75,6 +75,30 @@ def _core():
     return core
 
 
+@pytest.fixture(autouse=True)
+def _reset_no_feed_held_cap():
+    """모듈 전역 `[no_feed_held]` cap 을 테스트마다 초기화한다.
+
+    ⚠️ **선재 결함 시정 (2026-09-07 실측, cycle264 전체 회귀에서 발견).**
+    `stale_watcher_core._no_feed_held_logged` 는 모듈 전역 `KstDailyEmitCap` 인데
+    이 파일 어디에도 리셋 훅이 없었다. 앞선 테스트들은 **실제 시계**로 돌아 그날의
+    KST 날짜 키를 소비하고, `test_w7` 은 `freeze_time("2026-09-07 ...")` 로 고정하므로
+    **실제 KST 날짜가 2026-09-07 인 날에만** 두 날짜가 충돌해 cap 이 이미 소진된 채
+    "1행" 단언이 0행으로 붉어진다(2026-09-08 절반도 동형). 즉 리포가 특정 달력일에만
+    붉어지는 시한폭탄이었고, 실제로 오늘이 그날이다(cycle264 와 무관 — HEAD 에서도
+    `git stash` 후 동일하게 재현된다).
+
+    cap 을 새 인스턴스로 갈아 끼워 날짜 의존을 제거한다(소스 무변경).
+    """
+    from src.engine import stale_watcher_core as core
+    from src.engine.daily_emit_cap import KstDailyEmitCap
+
+    saved = core._no_feed_held_logged
+    core._no_feed_held_logged = KstDailyEmitCap()
+    yield
+    core._no_feed_held_logged = saved
+
+
 def _registry():
     """모듈 부재는 SKIP 이 아니라 FAIL (Red 는 붉어야 한다)."""
     try:

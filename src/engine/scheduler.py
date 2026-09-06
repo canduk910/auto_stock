@@ -39,6 +39,7 @@ from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrateg
 from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine import data_load_tasks  # refactor-review B1 위임 모듈
+from src.engine import open_price_observe  # cycle264 관측 leaf (라인 상한 보호)
 from src.realtime.handler import (
     dispatch_message,
     flush_silent_drop_count,
@@ -716,6 +717,12 @@ class TradingScheduler:
                 self._evening_funnel_capture_task_loop()
             )
 
+            # cycle264 (2026-09-06) — 09:05:30 시가 3자 대조 shadow (관측 전용, 행위 0).
+            # 메인 루프는 09:00:05 확정 직후 09:30 까지 블록되므로 백그라운드 task 여야 한다.
+            self._open_source_compare_task = asyncio.create_task(
+                open_price_observe.open_source_compare_task_loop(self)
+            )
+
             now = datetime.now().time()
 
             # 07:55 사전 구독: 돌파 종목 + 보유 포지션 → NXT 프리(08:00) 시가 즉시 수신
@@ -1001,6 +1008,7 @@ class TradingScheduler:
                 "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
+                "_open_source_compare_task",  # cycle264 추가 — 09:05:30 시가 3자 대조 shadow task
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -1127,6 +1135,7 @@ class TradingScheduler:
                 "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
+                "_open_source_compare_task",  # cycle264 추가 — 09:05:30 시가 3자 대조 shadow task
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -1162,6 +1171,7 @@ class TradingScheduler:
             "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
             "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
             "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
+            "_open_source_compare_task",  # cycle264 추가 — 09:05:30 시가 3자 대조 shadow task
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -1665,6 +1675,9 @@ class TradingScheduler:
                     open_price = int(detail.get("stck_oprc", "0"))
                     if open_price > 0:
                         strategy.on_open_price_confirmed(ticker, open_price, board=board)
+                        # cycle264 — 이 종목의 시가 출처는 WS 캐시가 아니라 REST 다.
+                        # 09:05:30 대조의 `used_src` 라벨(관측 전용, never-raise, 행위 0).
+                        open_price_observe.mark_confirmed_via_rest(sid, ticker, board)
                 except Exception:
                     logger.debug("%s 시가 조회 실패: %s", sid, ticker)
 
@@ -1681,10 +1694,22 @@ class TradingScheduler:
         - empty: open_price == 0 (시가 미확정) 후보 수
         - sample: sorted(ticker) 처음 5개의 {ticker: open_price} dict
         """
+        # cycle264 C3 — 표시 버그 시정(근거·계약 = `open_price_observe.count_board_confirmed`).
+        # 기존 필드는 의미까지 보존하고 `truth_*` 를 덧붙인다. ⚠️ status 호출 **앞**에서
+        # 센다 — 정정 계측기가 정정 대상(`get_targets_status`)의 고장에 함께 죽으면 안 된다.
+        truth_confirmed, truth_total = open_price_observe.count_board_confirmed(strategy, board)
+        sid = getattr(strategy, "strategy_id", None) or getattr(
+            getattr(strategy, "config", None), "strategy_id", "?")
         try:
             status = strategy.get_targets_status()
         except Exception:
+            # status 가 고장나도 정정 계측기는 남는다(레거시 필드는 -1 sentinel = 미측정).
             logger.debug("[breakout_open_confirm] get_targets_status 실패", exc_info=True)
+            logger.info(
+                "[breakout_open_confirm] board=%s strategy=%s confirmed=-1 empty=-1 sample={} "
+                "truth_confirmed=%d truth_total=%d",
+                board, sid, truth_confirmed, truth_total,
+            )
             return
         confirmed = 0
         empty = 0
@@ -1703,11 +1728,18 @@ class TradingScheduler:
                 empty += 1
         sample_keys = sorted(opens.keys())[:5]
         sample = {t: opens[t] for t in sample_keys}
-        sid = getattr(strategy, "strategy_id", None) or getattr(strategy.config, "strategy_id", "?")
         logger.info(
-            "[breakout_open_confirm] board=%s strategy=%s confirmed=%d empty=%d sample=%s",
-            board, sid, confirmed, empty, sample,
+            "[breakout_open_confirm] board=%s strategy=%s confirmed=%d empty=%d sample=%s "
+            "truth_confirmed=%d truth_total=%d",
+            board, sid, confirmed, empty, sample, truth_confirmed, truth_total,
         )
+
+    async def _run_open_source_compare_once(self) -> None:
+        """cycle264 — 09:05:30 시가 3자 대조 shadow 위임(행위 0, never-raise).
+
+        본체는 leaf `src/engine/open_price_observe.py` — 여기는 <3,900L 상한이다.
+        """
+        await open_price_observe.run_open_source_compare_once(self)
 
     def _collect_breakout_tickers(self) -> list[str]:
         """돌파 4 전략(VB / LTV / BFB / VCP)의 스캔 종목을 합산한다.

@@ -19,6 +19,150 @@
 
 ---
 
+## ✅ cycle264 — 시가 `[7] STCK_OPRC` 스코프 **shadow 관측** (2026-09-06~07, **커밋·배포 대기** · 행위 변경 0)
+
+> 사용자 승인(09-06) = **"전부 승인할게 진행시작하자"** — `src/realtime/**`·`scheduler.py` 접촉 포함.
+> 자문 정본 = `_workspace/consult/2026-09-07_open_price_scope_filter.md`(§1.1 전제 반전 · §7.1 마커 설계 ·
+> §8.1 배포 시점) · 조사 정본 = `_workspace/analysis/entry_price_0900_20260906/{code_trace.md,forensic.md}`.
+> **변경 파일 = `src/realtime/handler.py` + `src/engine/scheduler.py` + 신규 leaf
+> `src/engine/open_price_observe.py` 셋**(8영역 타 파일 · 전략 7파일 · `src/realtime/` 타 파일 diff 0).
+>
+> ### 🔴 이 사이클은 **관측만**이다. 시정이 아니다.
+> `_parse_tick_prices` 는 **byte 동일**(소스 세그먼트 sha 핀)이고 `[7]` 에는 **여전히 스코프 필터가
+> 없다.** 근본 시정 = **cycle265(후속 F-2), 다음 주말** — 아래 "🔴 열린 채로 남는 것" 절.
+
+### 무엇을 했나 — 마커 3 (전부 INFO, 전부 never-raise)
+
+| 마커 | 위치 | cap | 무엇을 재나 |
+|---|---|---|---|
+| `[open_scope_observe]` | `handler.py` (`_handle_tick`, `parsed` 성공 뒤) | 1회/ticker/일 | `[24] OPRC_HOUR`·`[27]`·`[34]`·`[43]` **원문** + `tick_open`(= `[7]` 파싱값) + `in_main_window` |
+| `[open_source_compare]` | leaf `open_price_observe.py` (**09:05:30** 백그라운드 task) | 1회/(전략,종목)/일 | VB·LTV `main` 확정 종목의 `used_open` ↔ KRX REST `stck_oprc` + `delta_bp`·`target_used`·`target_if_rest`·`used_src`·`reason` |
+| `[breakout_open_confirm]` | `scheduler.py` (기존 마커에 **추가**) | 기존과 동일 | `truth_confirmed`/`truth_total`(= `_open_confirmed` 직접 계수, 분모는 `_targets`) |
+
+- **게이트와 라벨은 다른 축이다** — 게이트는 `[1] STCK_CNTG_HOUR` 가 MAIN 창(090000~153000) 안일
+  때만 cap 을 태우고(프리장 틱이 cap 을 먹으면 코호트 **분모**가 죽는다), 라벨 `in_main_window` 는
+  `[24]` 의 창 안/밖을 **모두** 남긴다(분모가 있어야 오염 **비율**이 나온다 — `[day_high_scope_skip]`
+  은 skip 만 남겨 분모가 없었고 그래서 "93/287" 이 지금도 추정이다).
+- **`[24]` 는 정규화 없이 원문 그대로** 남긴다(부재 `"?"`, 빈 문자열 `""` 는 서로 다른 사실).
+- `[open_source_compare]` 가 **09:05:30** 인 이유 = KRX 시가는 프린트되면 종일 불변이라 언제 읽어도
+  같고, 09:00~09:01:30 은 cycle262 보류 창 + 매수 주문 구간이라 전역 20건/초를 매수와 다투며,
+  09:05 **정각**은 `_swing_buy_poll_loop` `BUY_WINDOW_START` 와 겹친다. throttle 5건/초.
+- `target_if_rest` 는 `rest_oprc + target_offset` **산술**이다 — `on_open_price_confirmed()` 로
+  계산하면 그 순간 보드 목표가가 REST 시가로 갈아끼워져 **행위 변경 = 제1 계약 위반**이다.
+
+### ⚠️ 자문이 조사 정본의 전제 하나를 뒤집었다 (§1.1) — 판독 전에 반드시 읽을 것
+
+`[breakout_open_confirm] confirmed=0 empty=55~65` 는 **"09:00:05 경로 무동작" 이 아니라 표시 버그**였다.
+`_emit_breakout_open_confirm`(`scheduler.py:1676`)이 `_open_confirmed` 를 직접 세지 않고
+`strategy.get_targets_status()` 를 거치는데, 그 함수가 `session_tracker.active ∩ tradable_boards` 로
+보드를 가린다(`volatility_breakout.py:708-719`). 09:00:05~09:00:2x 에는 세션 트래커가 30초 주기 stale
+캐시라 `active={PRE_NXT}` 이고 VB 는 `tradable_boards=["main"]` ⇒ **교집합 ∅** → `open_price: 0`.
+같은 함수 **바로 앞줄의 비필터 로그**는 09-03 VB **51/65**, 09-04 VB **46/55** 확정을 말한다.
+
+⇒ **REST 폴백은 고장이 아니다. 오염된 WS 캐시가 먼저 이겨 차례가 오지 않을 뿐이다.**
+cycle265 의 (B) 는 새 배관을 까는 일이 아니라 **우선순위를 뒤집는 일**이다.
+조사의 **결론(기준가가 KRX 09:00 시가가 아니다)은 그대로 유효**하고 증거가 하나 늘었다 — 09-03 LTV
+프리장 보드 시가와 메인 보드 시가가 **4/4 동일**(000720 111,600 · 000880 123,000 · 001450 52,900 ·
+003670 177,400). 단 이 표는 "09:00:19 값 = pre_nxt 보드 값" 이라는 **코드 모델 기반 해석**에 의존하므로
+하드 증거가 아니라 **강한 정황**이다. 조사 두 문서에는 **정정 주석**을 달았다(원문 보존).
+
+### 📋 D+1 판독 (월 2026-09-07 장중~장후) — 이 사이클의 유일한 산출물
+
+1. **`[open_scope_observe]` 총 행 수를 먼저 센다.** 그 수가 오염 비율의 **분모**다.
+   ⚠️ 분모로 "구독 슬롯 ~287" 을 쓰지 마라 — 그것은 **용량**이고 실사용 `[tick_coverage] subscribed=`
+   는 09-03/09-04 기준 **107~148** 이다. 반대로 `_scan_loop` 5분 delta 가 구독을 회전시켜 하루 동안
+   관측된 서로 다른 ticker 수는 슬롯 수보다 클 수도 있다. **~300행을 크게 넘으면 볼륨 재평가.**
+2. **`[24] OPRC_HOUR` 분포** — 이 프로젝트가 이 필드를 보는 **첫날**이다(그 전까지 파싱 0건 =
+   *한 번도 관측된 적이 없다*). 세 갈래로 갈라서 센다:
+   (i) `08xxxx` = 프리장 시각 = **진짜 오염** (ii) `000000`/빈 문자열 = 무체결·부재
+   (iii) 비숫자·파싱 실패. ⚠️ **`in_main_window=false` 를 그대로 오염으로 세지 마라** — 그 라벨은
+   셋을 한 값으로 합친다. 원문 `oprc_hour` 가 보존돼 있으니 반드시 갈라서 본다.
+3. **`[open_source_compare]` 3자 대조** — `used_open`(사용값) ↔ `rest_oprc`(KRX REST) ↔
+   `stock_master_daily` 그날 KRX 시가(cycle263 배포로 16:00 적재가 살아났는지도 같이 확인).
+   - ⚠️ **`delta_bp≈0` 을 그대로 "오염 없음" 으로 세지 마라.** `used_src=rest` 행은 09:00:05 폴백이
+     이미 REST 시가를 심은 종목이라 대조가 REST↔REST 이고 `delta_bp=0.0` 이 **산술적으로 보장**된다.
+     오염 판정은 **`used_src=ws` 행에서만** 성립한다.
+   - ⚠️ `reason` 이 `ok` 가 아닌 행(`rest_zero`/`rest_error`)은 대조가 성립하지 않은 행이다 —
+     "REST 가 전부 일치했다" 와 "REST 가 N 종목에서 아무것도 못 줬다" 를 **반드시 구분**해서 보고한다.
+     그 구분이 cycle265 REST 폴백 배선의 성패다(09:05 무체결 저유동 종목이야말로 오염 확률이 가장
+     높은 코호트라 **결측이 무작위가 아니다**).
+   - `[open_source_compare] skipped reason=no_confirmed_target` 이 보이면 그날 대조는 **0행**이다
+     (09:05:30 이후 재시작 등). 침묵이 아니라 이 한 줄로 드러나게 해 뒀다.
+4. **`truth_confirmed` vs 기존 `confirmed`** — 09:00:0x 행에서 두 수가 갈라지면 §1.1 의 표시 버그가
+   재현된 것이고(예상: `confirmed=0` 인데 `truth_confirmed≈46~51`), 09:35 행에서는 둘이 **같아야**
+   한다(그때는 트래커가 MAIN 이라 마스킹이 없다). 이것이 정정의 자기 검증이다.
+   `truth_total` 분모는 `_open_confirmed` 가 아니라 **`_targets`**(= 후보 전체)다.
+5. 판독 결과는 **cycle265 착수 전에** `_workspace/analysis/` 에 기록한다. 로그는
+   `system_logs` 에만 남고 전략 INFO 는 최근 며칠분만 잔존한다(cycle262 F-1 과 같은 만료 시한).
+
+### 🔴 열린 채로 남는 것 — 근본 시정은 **cycle265**(후속 F-2)
+
+`[7]` 오염은 전 시간대 공통이고(09:01:30 이후에도 53/93 = 57% 위반) **이 사이클은 아무것도 고치지
+않았다.** 시정 방향(자문 §0 권고) = **소스에서 `[7]` 을 0 으로 강등하는 fail-closed 는 금지** —
+`[7]` 은 VB 목표가 말고도 08:00 익일청산 갭 판정 · LTV 프리장 보드 목표가 · kojiro 갭스킵/시가아래
+가드 · momentum 익일청산 갭률까지 **여섯 소비처**가 공유하고, 0 이면 *가드가 조용히 꺼지고*(kojiro)
+*강제 청산으로 뒤집히고*(momentum) *프리장 매매가 통째로 죽는다*(LTV·익일청산). 권고는 **`[7]` 을
+그대로 두고 `board="main"` 목표가의 기준가만 KRX REST(`stck_oprc`, `J`)로 갈아 끼우는** 방향이다.
+
+- **선결** = 위 D+1 판독. **행위 영향** = VB 진입 추정 **−27.6%** ⇒ `src/realtime/**` 8영역 승인 +
+  `domain-consult` 선행 + 킬스위치 `open_price_scope_mode`(`off`/`enforce`, **키 부재 = off**,
+  `PARAM_RANGES`/`INT_PARAMS` 편입 금지, 배포 전 DB 선반영 금지 = 무음 실패) — 자문 §7.2/§8.2.
+- cycle265 가 심을 마커 = `[open_scope_substituted]`(무엇으로 대체했다) ·
+  `[open_scope_unresolved]`(**커버리지 손실 정본** — 0 이 아니면 "고치려다 매수를 잃고 있다") ·
+  `[open_scope_config]`(카나리아, 1회/(전략,**값**)/일).
+- ⚠️ **`scheduler.py` 여유가 3행뿐이다**(3,896L / 상한 3,900L) — **cycle265 는 leaf 위임을 전제로
+  설계한다.**
+
+### 적대 검증 15건 (HIGH 3 = 동일 사안 3렌즈 · MEDIUM 8 · LOW 4) — **전건 수용, 불수용 0**
+
+- **HIGH — `scheduler.py` 3,979L 이 cycle257 영구 가드(<3,900)를 깬다.** 리포의 실제 예산은 계약서에
+  적힌 4,000 이 아니라 **3,900** 이었고(cycle257 `test_cycle257_ast_dead_code_removed.py::
+  TestA4SchedulerLineCount::test_line_count_below_3900`), cycle264 **자체 가드가 4,000 을 재는 바람에
+  위반이 초록으로 덮이고 있었다**(실측 `1 failed / 7,276 passed`). ⇒ 관측 본체를 leaf
+  `src/engine/open_price_observe.py`(327L, 신규)로 분리(cycle233 `account_risk_watcher` ·
+  cycle259 `log_metrics_collector` 패턴 답습). **scheduler 3,864 → 3,896L**(HEAD 대비 +32).
+  자체 상한을 `< 3900` 으로 조이고 **cycle257 리터럴과 자동 대조**하는 가드를 신설해 "느슨한 자체
+  가드가 위반을 덮는" 재발을 구조로 막았다.
+  - ⚠️ **파생 결정 2**: ① C7 접촉 범위가 **2 → 3 파일**로 확대됐다(8영역·전략 7파일·realtime 타 파일은
+    여전히 diff 0, 신규 leaf 는 8영역이 아니다) ② **cycle265 는 여유 3행 위에서 설계해야 한다.**
+- **MEDIUM 주요** — ① 좀비 task: `_open_source_compare_task` 를 `stop()`·finally **세 목록 전부**에
+  등재(초안의 `_*_task_handle` 명은 cycle79 가드의 수집 패턴 `endswith("_task")` 에도 안 잡혀 조용히
+  빠져 있었다. 종목당 0.2초 throttle 로 최대 ~28초를 도는 루프라 cancel 누락 시 `stop()` 이 REST
+  버스트를 못 끊는다) + 본체가 `_running` 을 매 종목 확인해 즉시 이탈 ② 09:05:30 **이후** 재시작이면
+  `main` 보드 시가가 아직 0 이라 전 종목 skip → 그날 **0행**: 2초 간격 최대 90초 준비 폴링 + 타임아웃
+  시 `skipped reason=no_confirmed_target` 을 **침묵하지 않고** 남긴다(cycle224 교훈).
+- **선재 결함 1건 동반 시정(테스트 전용)** — `tests/unit/engine/test_cycle252_stale_watcher_no_feed.py`
+  가 모듈 전역 `stale_watcher_core._no_feed_held_logged` 리셋 훅 없이 `freeze_time("2026-09-07")` 을
+  써, **실제 KST 날짜가 2026-09-07 인 날에만** 앞선 테스트가 소비한 날짜 키와 충돌해 붉어지는
+  시한폭탄이었다(HEAD 에서 `git stash` 후 동일 재현 = cycle264 무관). autouse fixture 로 cap 을 새
+  인스턴스로 갈아 끼워 날짜 의존을 제거했다(소스 무변경).
+
+### 게이트 / 산출물
+
+- 신규 가드 **3파일 70 테스트 함수** — AST `tests/unit/ast/test_cycle264_scope_and_pins.py` **8**
+  (C7 접촉 범위 · 라인 상한 3,900 · cycle257 리터럴 대조 · `create_task`↔cancel 정합 · task 등재 ·
+  C4 전략 진입 메서드 핀 · 마커 2파일 한정 · **킬스위치 파라미터 미도입**) · leaf
+  `tests/unit/engine/test_cycle264_open_source_compare.py` **34** · handler
+  `tests/unit/realtime/test_cycle264_open_scope_observe.py` **28**.
+- 행위 불변(C4) = `_parse_tick_prices` 소스 세그먼트 sha 핀 + `_handle_tick` 의 `on_tick` 6-튜플
+  골든 12케이스 + 전략 진입 메서드 3종 반환 핀.
+- 8영역 sha 자매 가드 **4곳**(222a3 `_APPROVED_CONTENT_SHA` · 223 · 223f · 226)에
+  `src/realtime/handler.py` 승인 항목 등재.
+
+### ✅ 커밋 **직후** 정리 체크리스트
+
+1. 자매 가드 **4곳**의 `src/realtime/handler.py` 항목을 **함께 비운다**(각 파일 TODO 주석 참조).
+   커밋 후 그 sha 는 죽은 값이 되고, 남겨 두면 다음에 handler 를 정당하게 건드리는 사이클이
+   오해 소지 있는 실패 메시지를 받는다.
+2. `test_cycle264_scope_and_pins.py::test_c7_working_tree_touches_only_allowed_files` 는 `git diff`
+   워킹트리 기반이라 커밋 직후 **공허 통과**한다 — 8영역의 **영구** 가드는
+   `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py::test_ga3_6_*` 다(cycle262 선례와 동일).
+3. sha 핀은 **커밋 직전 마지막 단계**에 `shasum -a 256` 으로 재산출한다.
+4. 배포 = **full 모드**(`src/**` 변경 ⇒ backend 재생성). 장외 창 **월 07:45 이전**에 push
+   (07:55 `_boot` 전 재생성 여유 1~5분). 09:00~15:30 은 D6 로 금지.
+
+---
+
 ## ✅ cycle263 — 일봉 적재 껍데기 봉 시정 (라) = (가) 신선도 게이트 + (다) 오늘봉 시각 필터 (2026-09-06, **커밋·배포 대기**)
 
 > 사용자 결정(09-06) = 카드 ④ "승인" — `src/engine/scanner.py` **8영역 접촉 포함**.
@@ -193,7 +337,8 @@ LTV 의 08:00~09:00 진짜 프리장 매수는 창 밖이라 무접촉.
 **건수의 17%(20/113)** 이고 손실의 39% 다. 근본 시정 = `[7]` 에 **`[24] OPRC_HOUR` 스코프 필터**를
 거는 것 — 형제 필드 `[8] 고가`가 cycle222-a2 에서 `[27] HGPR_HOUR` 로 받은 것과 **대칭**이고,
 `[24]` 는 지금 **전 소스 파싱 0건**이다. `src/realtime/**` = **8영역** + 진입 목표가 = **매매 행위
-변경**이라 **사용자 승인 + `domain-consult` 선행**이 필요하다 ⇒ 아래 **F-2**(미착수).
+변경**이라 **사용자 승인 + `domain-consult` 선행**이 필요하다 ⇒ 아래 **F-2**
+(**관측 단계만 cycle264 로 착수 — 시정은 여전히 미착수, cycle265**).
 ⚠️ **고가와 달리 시가는 fail-closed(0 강등)를 쓸 수 없다** — 0 이면 VB 매수가 통째로 멈춘다.
 방향 설계(0 강등 vs REST `stck_oprc` 폴백 vs 보류)가 별도 쟁점이다.
 > 자문 §4.1 원문: **"⚠️ 이 보류가 워크리스트에서 근본 시정 항목을 닫으면 안 된다. 지혈은 지혈로만 기록한다."**
@@ -221,8 +366,8 @@ LTV 의 08:00~09:00 진짜 프리장 매수는 창 밖이라 무접촉.
 | 우선 | # | 티켓 | 범위 | 왜 |
 |---|---|---|---|---|
 | **①** | **F-7** | `stock_master_daily` **16:00 적재 복구** | **✅ cycle263 구현 완료 — 커밋·배포 대기** (이 파일 최상단 절 · 명세 `_workspace/specs/cycle263_daily_load_stub_fix.md`, 09-06 카드 ④ "승인" — `scanner.py` 8영역 접촉 포함) | 자문 §4.3 **단계 1**(매일 09:35 `[breakout_open_confirm]` 스탬프 vs `stock_master_daily` 그날 KRX 시가 대조 — 8영역 무접촉·코드 0줄)의 **선결 조건**이다. 스텁이면 대조 자체가 불가능하다. 09-06 15:16 금요일 보정으로 09-04 스텁 1,015→120 은 해소됐지만 **매일 아침 07:5x 스텁이 `max_bas_dd==오늘` idempotency 를 다시 거는 구조**는 시정 배포 전까지 그대로다 |
-| **②** | **F-2** | `[24] OPRC_HOUR` 프로브 → **근본 시정** | `src/realtime/**` = **8영역** — 사용자 승인 + `domain-consult` 선행 필수 | `[7]` 이 세션 시가라는 **오염 자체**를 고친다. `[24]` 를 한 번도 찍어 본 적이 없어(파싱 0건) "그 값이 08:00 프리장 시가다" 는 **정황 확정**에 머문다 — 임시 보류의 정당성엔 무관하지만(무엇으로 오염됐든 KRX 시가가 아니다) **시정 방향 선택에는 그 분포가 필요하다**(자문 §4.3 단계 2) |
-| **③** | **F-8** | 09:00:05 `[breakout_open_confirm]` **`confirmed=0 empty=55~65`** 원인 | 확정 경로 조사(읽기 전용 먼저). 시정은 8영역 여부 판정 후 | 시가 확정 **주 경로가 사실상 무동작**이라 목표가를 실제로 굳히는 것이 첫 MAIN 틱의 인라인 폴백이다 = **오염이 들어오는 문**. 09-03·09-04 양일 실측. 이 경로가 살아나면 F-2 의 설계 선택지가 넓어진다 |
+| **②** | **F-2** | `[24] OPRC_HOUR` 프로브 → **근본 시정** | **프로브 = ✅ cycle264 구현 완료(관측만, 커밋·배포 대기)** · **시정 = 🔴 열린 채 — cycle265, 다음 주말** (`src/realtime/**` = **8영역** — 사용자 승인 + `domain-consult` 선행 필수) | `[7]` 이 세션 시가라는 **오염 자체**를 고친다. `[24]` 는 이 리포에서 **한 번도 관측된 적이 없어**(파싱 0건) "그 값이 08:00 프리장 시가다" 는 여전히 **추론**이다 — cycle264 의 `[open_scope_observe]`·`[open_source_compare]` 가 월 09-07 하루치 분포와 3자 대조를 만든다(이 파일 최상단 절의 **D+1 판독** 5항목). 자문 §8.1 = **월요일에는 행위를 바꾸지 않는다**(시정하면 VB 진입 −27.6% 라 cycle262·263 의 첫 실전 검증과 귀인이 섞인다). 시정 방향은 자문 §0 = `[7]` **0 강등 금지**(여섯 소비처 공유), `board="main"` 기준가만 KRX REST 로 교체 + 킬스위치 `open_price_scope_mode` |
+| ~~③~~ | **F-8** | 09:00:05 `[breakout_open_confirm]` **`confirmed=0 empty=55~65`** 원인 | **✅ 원인 규명 완료 — 자문 §1.1(2026-09-06). 표시 시정은 cycle264 C3 에 동봉(커밋·배포 대기)** | **`confirmed=0` 은 표시 버그였다.** `_emit_breakout_open_confirm` 이 `_open_confirmed` 를 직접 세지 않고 `get_targets_status()` 를 거치는데 그 함수가 `session_tracker.active ∩ tradable_boards` 로 보드를 가린다 — 09:00:0x 트래커는 30초 stale 캐시라 `active={PRE_NXT}` 이고 VB 는 `["main"]` ⇒ 교집합 ∅ → 전 종목 `open_price: 0`. 같은 함수 바로 앞줄 비필터 로그는 **VB 51/65(09-03)·46/55(09-04) 확정**. ⇒ ~~"주 경로 무동작"~~ 은 **반증**됐고 **REST 폴백은 고장이 아니라 오염된 WS 캐시에 차례를 뺏긴 것**이다 = F-2 는 새 배관이 아니라 **우선순위 뒤집기**. cycle264 가 `truth_confirmed`/`truth_total` 을 **추가**(기존 필드 보존)해 재발을 막는다 |
 | **④** | **F-3** | **kojiro 갭스킵 오염** 조사 | `src/engine/strategies/kojiro.py`(읽기 전용 조사 먼저) | kojiro 는 매수 창이 09:05~09:30 이라 이번 보류 **밖**이지만, 갭업/갭다운 스킵이 **같은 오염된 `open_price`** 로 갭률을 잰다. 프리장 시가 ≈ 전일종가면 `gap_rate ≈ 0` 이 되어 **스킵해야 할 갭업 종목을 스킵하지 않는다** = 방향이 **위험 증가** 쪽. 자문 §7-9 가 "별도 티켓으로 반드시 등재" 라고 못박았다 |
 | **⏱ 시한부** | **F-1** | `[open_entry_hold_blocked]` **일일 추출 적재** (would_buy 보존) | `src/engine/log_metrics_collector.py`(20:10) 또는 `GET /api/log-reports/bundle`(20:20) — **cycle262 C12 범위 밖이라 별도 사이클** | 사용자 결정 ⑥ 은 "`system_logs` 만" 이 아니라 **일일 추출 적재**로 확정됐다. would_buy 정본이 평가 창이 닫히기 전에 사라지면 **지혈의 근거를 지혈이 스스로 지운다**. ⚠️ 우선순위 ①~④ 와 달리 **로그 retention 이 시계를 돌린다** — 배선 전까지는 주 1회 이상 수동 추출로 버틴다 |
 | 그 밖 | **F-4** | `[open_entry_hold_release]` (자문 §2.6 선택 마커, **이번 범위 미구현**) | VB·LTV | "막고 나서 더 좋은 값에 샀나" 를 로그 단독으로 판정 가능하게 한다. 없으면 자문 ⑨ 재검토 트리거는 `trade_history` 조인으로만 복원되고 **"못 샀다" vs "더 좋은 값에 샀다" 가 구분되지 않는다** |

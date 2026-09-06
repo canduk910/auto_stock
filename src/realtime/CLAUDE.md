@@ -114,6 +114,80 @@ cycle257(2026-09-05)이 이를 삭제(`scanner.py`/`scheduler.py`)했다. 채널
 - 체결통보 필드 매핑 (`^` 구분, **cycle235 정본 정정** — KIS `ccnl_notice` 26컬럼): [0]CUST_ID(HTS ID), **[1]계좌번호(8)+상품코드(2)**, [2]주문번호, [3]원주문번호, [4]매도매수구분(02:매수/01:매도), [5]정정구분, [6]주문종류, [7]주문조건, **[8]종목코드**, **[9]CNTG_QTY 체결수량(통보 건별 증분)**, [10]CNTG_UNPR 체결단가, [11]체결시간, [12]거부여부, [13]CNTG_YN 체결구분(1:접수,2:체결), [14]ACPT_YN, [15]BRNC_NO, **[16]ODER_QTY 주문수량**, [17]고객명, [18]ORD_COND_PRC. ⚠️ 종전 표기([9]주문수량/[16]체결수량)는 정본과 **반대**였고 코드가 이를 따라 fields[16] 을 수량으로 오독 — 단일 전량 체결(두 값 동일)에선 잠복, 부분/분할 체결에서 positions 과대(08-28 257720 실사고: 실체결 2주가 3주 등록 → 익일 매도 전량 APBK0400). cycle235 가 fields[9] 로 시정 + AST 봉인(`test_cycle235_ast_execution_qty.py`) + 엔진 overrun 클램프(`[fill_qty_overrun]`) 이중 방어
 - **계좌 필터**: `fields[1]` 이 `settings.kis_account_no` 로 시작하지 않으면 무시 (실전 H0STCNI0 은 동일 HTS ID 묶인 타 계좌 통보 함께 푸시)
 
+### cycle264 (2026-09-06~07) — `[open_scope_observe]` 시가 스코프 shadow 관측 (**행위 변경 0**)
+
+> 이 절은 **관측**의 계약이다. **시정이 아니다.** `_parse_tick_prices` 는 여전히 `[7] STCK_OPRC`
+> 에 스코프 필터가 **없고**, 그것을 고치는 것은 **cycle265**(후속 F-2)다 — 아래 "아직 열려 있는 것".
+
+#### 무엇을 재는가
+
+통합 채널 `H0UNCNT0` 의 **일-스코프 필드는 09:00 에 리셋되지 않는다**. cycle222-a2 가 `[8] STCK_HGPR`
+에서 실측하고 `[27] HGPR_HOUR` 로 KRX 정규장 창 필터를 붙였다(`_parse_day_high`). 같은 성질이
+`[7] STCK_OPRC` 에도 적용되면, MAIN 구간 틱이 실어 오는 "시가" 가 **08:00~09:00 NXT 프리장 기준가**
+이고 그 값이 `RiskManager.on_tick(open_price=…)` → `scanner.ticker_prices[t]["open_price"]` →
+VB/LTV 의 보드 시가 → `target = open + offset` 으로 흘러간다(포렌식
+`_workspace/analysis/entry_price_0900_20260906/`). 이 사이클은 그 가설의 **판별자를 하루치 재기만** 한다.
+
+```
+[open_scope_observe] ticker=%s oprc_hour=%s tick_open=%d cntg_hour=%s hgpr_hour=%s
+                     mkop=%s hour_cls=%s in_main_window=%s
+```
+
+- 위치 = `_handle_tick` 안, `parsed` 성공 **뒤**. INFO, **1회/ticker/일**
+  (`src/engine/daily_emit_cap.py::KstDailyEmitCap`, cycle258 표준 재사용).
+- `oprc_hour` = `[24] OPRC_HOUR`, `hgpr_hour` = `[27]`, `mkop` = `[34] NEW_MKOP_CLS_CODE`,
+  `hour_cls` = `[43] HOUR_CLS_CODE`. `[24]/[27]/[30]` 은 완전한 3-형제(시가/고가/저가가 찍힌 시각,
+  HHMMSS 6자리)라 `_parse_day_high` 의 창 판정을 그대로 쓸 수 있다.
+- `tick_open` = `_parse_tick_prices` 가 이미 만든 `[7]` 파싱값을 **그대로** 받는다.
+- 리셋 훅 = `reset_open_scope_observe()`(`reset_day_high_scope_skip` 대칭).
+
+#### 계약 (어기면 관측이 무의미해지거나 매매가 위험해진다)
+
+1. **`_parse_tick_prices` 는 byte 동일이다.** 소스 세그먼트 sha 로 핀했다. 마커는 그 함수 **밖**에 둔다.
+2. **게이트와 라벨은 다른 축이다.**
+   - *게이트* = `[1] STCK_CNTG_HOUR`(틱 자신의 체결 시각)가 MAIN 창(`090000~153000`) 안일 때만
+     cap 을 태운다(`_maybe_log_day_high_scope_skip` 과 동일 설계). **프리장 틱이 1회 cap 을 먹으면
+     그 종목이 코호트 분모에서 사라진다.** `[1]` 파싱 실패도 cap 미소모(근거 없이 태우지 않는다).
+   - *라벨* `in_main_window` = `[24]` 가 MAIN 창 안인가. **창 안/밖을 모두 남긴다** — 분모가 있어야
+     오염 **비율**이 나온다. `[day_high_scope_skip]` 은 skip 만 남겨 분모가 없었고, 그래서 지금
+     "93/287" 이 **추정**에 머문다.
+3. **원문 보존 — 정규화 금지.** `[24]`·`[27]`·`[34]`·`[43]` 은 0 치환·zero-pad·trim 없이 그대로
+   남긴다. 부재/접근 실패는 `"?"`, 빈 문자열 수신은 `""` — **둘은 서로 다른 사실**이다.
+   ⚠️ **`[24]` 는 이 마커가 배포되기 전까지 이 프로젝트에서 한 번도 관측된 적이 없다**
+   (`grep fields[24]` 전 소스 0건, KIS 로컬 캐시·MCP 정본 모두 컬럼 *이름*만 제공). "프리장 체결이
+   없던 종목에 무엇을 주는가" 는 **추론**이며, 정규화는 바로 그 미지를 지운다.
+4. **never-raise + 흡수기의 2차 예외까지 흡수.** 헬퍼 자체가 흡수하고, 호출부에서 **한 겹 더** 감싼다.
+   이 경로에서 예외가 새면 `_on_tick` 콜백과 같은 자리로 전파돼 **틱마다 WebSocket 재연결**이
+   일어난다(사이클 88 G-REJECT-1 의 `raise` 규약) = 손절 사각. 자기 실패 흔적은
+   `src/engine/observer_trace.py::trace_observer_failure`(무흔적 `pass` 금지, cycle258 카드 #5).
+5. **hot path 순수성** — `logger` 만 쓴다. `write_log`/DB/`await` 금지(AST A-1 동형).
+   순서는 **창 게이트 → cap peek(비소모) → 필드 읽기 → emit**(cap 소진 시 인자 구성이 버려질 작업이다).
+6. **볼륨 = 종목당 1행/일.** 종목당 다중 로그 금지. ⚠️ 자문의 "~290행/일" 은 구독 슬롯 **용량** 기반
+   **추정**이고 운영 실측 `[tick_coverage] subscribed=` 는 09-03/09-04 기준 **107~148** 이다. 반대로
+   `_scan_loop` 5분 delta 가 구독을 회전시키므로 하루 동안 관측된 서로 다른 ticker 수는 슬롯 수보다
+   클 수도 있다 ⇒ D+1 에 **실제 행 수를 세고**(그 수가 오염 비율의 분모다) ~300행을 크게 넘으면 재평가.
+   이 수를 다음 사이클이 "실측" 으로 인용하지 않는다.
+
+#### 🔴 아직 열려 있는 것 — `[7]` 에는 여전히 스코프 필터가 없다 (cycle265 / 후속 F-2)
+
+`_parse_tick_prices` 는 지금도 `int(fields[2]), int(fields[7])` 을 **필터 없이** 반환한다.
+`[8] 고가` 는 스코프를 재고 `[7] 시가` 는 재지 않는 **비대칭이 그대로 남아 있다.**
+
+- **시정 방향(자문 §0 권고)** = 소스에서 `[7]` 을 0 으로 강등하는 fail-closed 는 **쓰면 안 된다**.
+  `[7]` 은 VB 목표가 말고도 08:00 익일청산 갭 판정 · LTV 프리장 보드 목표가 · kojiro 갭스킵/시가아래
+  가드 · momentum 익일청산 갭률까지 **여섯 소비처**가 공유하고, 0 을 받으면 *가드가 조용히 꺼지거나*
+  (kojiro) *강제 청산으로 뒤집히거나*(momentum) *프리장 매매가 통째로 죽는다*(LTV·익일청산).
+  권고는 **`[7]` 을 그대로 두고 `board="main"` 목표가의 기준가만 KRX REST(`stck_oprc`, `J`)로
+  갈아 끼우는** 방향이다.
+- **선결 = 이 사이클의 3자 대조 판독**(`[open_scope_observe]` `[24]` 분포 + `[open_source_compare]`
+  + `stock_master_daily` KRX 시가). 시정은 VB 진입이 추정 **−27.6%** 줄어드는 **매매 행위 변경**이라
+  `src/realtime/**` = 8영역 승인 + `domain-consult` 선행이 필요하다.
+- ⚠️ 자문이 조사 정본의 전제 하나를 뒤집었다 — `[breakout_open_confirm] confirmed=0` 은 **표시
+  버그**였고(`get_targets_status()` 의 `active ∩ tradable_boards` 마스킹) 실제로는 09:00:05 REST
+  경로가 VB **51/65**(09-03)·**46/55**(09-04)를 확정하고 있었다. **REST 폴백은 고장이 아니다 —
+  오염된 WS 캐시가 먼저 이겨 차례가 오지 않을 뿐**이다. 즉 cycle265 는 새 배관을 까는 일이 아니라
+  **우선순위를 뒤집는 일**이다.
+
 ### 사이클 102 (2026-06-11) — 시세 구독 영역 전면 재검토 (3 영역 통합 가시화)
 
 사용자 신규 요구 "재구독 로직 자체가 실수가 아닌가 싶어. 시세구독 관련 부분을 전면 새로운 시각에서 재검토" + refactor-expert + domain-expert 병렬 자문 일치 결론 (사이클 88 G-REJECT 영구 영속 + 가시화 강화 + 임계 상향). 사용자 결정 Q72=F+가시화 (`last_ws_message_at` + dispatch + callback 3 영역 통합).

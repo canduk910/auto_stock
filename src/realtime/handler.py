@@ -17,6 +17,9 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding as sym_padding
 
 from src.config import settings
+# cycle264 — 관측 cap 표준(사이클 258). `daily_emit_cap` 은 stdlib 만 쓰는 leaf 라
+# 모듈 최상단 import 로도 순환이 없다(`src/realtime/websocket.py` 선례).
+from src.engine.daily_emit_cap import KstDailyEmitCap
 
 logger = logging.getLogger(__name__)
 
@@ -249,6 +252,141 @@ def _maybe_log_day_high_scope_skip(
     )
 
 
+# ---------------------------------------------------------------------------
+# cycle264 (2026-09-06) — `[7] STCK_OPRC` 스코프 shadow 관측. **행위 변경 0.**
+#
+# `[8] 고가` 에서 실측된 성질(통합 채널의 일-스코프 필드는 09:00 에 리셋되지 않는다,
+# cycle222-a2)은 `[7] 시가` 에도 그대로 적용된다. 그 시가가 VB/LTV 의 목표가 기준가가
+# 되므로, MAIN 구간 틱이 08:00~09:00 NXT 프리장 기준가를 실어 오면 목표가가 통째로
+# 어긋난다(포렌식 `_workspace/analysis/entry_price_0900_20260906/`).
+#
+# ## 왜 이번 사이클은 **관측만** 하고 고치지 않는가 (자문 §8.1)
+#
+# 1. 판별자 `[24] OPRC_HOUR` 를 **한 번도 찍어 본 적이 없다** — `grep fields[24]` 가
+#    전 소스 0건이고, KIS 로컬 캐시·MCP 정본 모두 컬럼 **이름**만 준다. "프리장 체결이
+#    없던 종목에 이 필드가 무엇을 주는가" 는 지금으로선 **추론**이다. 미검증 필드 위에
+#    기준가 시정을 세우면 시정의 성패가 그 추론에 걸린다.
+# 2. 시정의 행위 영향이 크다 — 과거 VB 매수 116건 재계산상 진입의 **27.6%** 가 사라진다.
+# 3. 오늘 이미 두 사이클(cycle262 진입 보류·cycle263 일봉)이 배포됐고 월요일 09:00 이
+#    그 둘의 첫 실전 검증이다. 여기에 기준가 시정을 얹으면 진입 감소가 (a) 90초 보류
+#    (b) 기준가 상향 (c) 그날 장세 중 무엇 때문인지 **분리 불가능**해진다.
+#
+# ⇒ 월요일에는 하루치 코호트만 재고(행위 0이라 판독을 오염시키지 않는다), 시정은
+#    다음 주말(cycle265)에 3자 대조 결과를 읽은 뒤에 한다.
+#
+# ⚠️ 볼륨 = 구독 종목당 1행/일. 이 사이클이 쓰는 "~290행/일" 은 **추정**(동시 구독 슬롯
+#    41×세션 기준)이고, 운영 `system_logs` 실측 `[tick_coverage] subscribed=` 는 09-03/09-04
+#    기준 **107~148** 이다. 반대로 `_scan_loop` 5분 delta 가 구독을 회전시키므로 하루 동안
+#    관측된 서로 다른 ticker 수는 슬롯 수보다 클 수도 있다 ⇒ D+1 판독에서 실제 행 수를
+#    반드시 세고(분모이자 볼륨 근거), ~300행을 크게 넘으면 재평가한다. 이 수를 다음
+#    사이클이 "실측" 으로 인용하지 않게 한다.
+#
+# ⚠️ `_parse_tick_prices` 는 **byte 동일**이다(소스 세그먼트 sha 핀). 마커는 그 함수
+#    밖(`_handle_tick` 의 `parsed` 성공 뒤)에 두고, 어떤 실패도 밖으로 내보내지 않는다 —
+#    이 경로에서 예외가 새면 `_on_tick` 재-raise 와 같은 자리로 전파돼 **틱마다 WS
+#    재연결**이 일어나고(사이클 88 G-REJECT-1) 그게 곧 손절 사각이다.
+_open_scope_observe_cap: KstDailyEmitCap[str] = KstDailyEmitCap()
+
+
+def reset_open_scope_observe() -> None:
+    """`[open_scope_observe]` cap 강제 초기화 (`reset_day_high_scope_skip` 대칭 훅)."""
+    global _open_scope_observe_cap
+    _open_scope_observe_cap = KstDailyEmitCap()
+
+
+def _tick_field_raw(fields: list[str], idx: int) -> str:
+    """payload 선택 필드를 **원문 그대로** 읽는다. 부재/접근 실패는 `"?"`.
+
+    정규화(0 치환·zero-pad·trim)를 하지 않는 것이 계약이다 — 지금 우리는 이 필드들이
+    무엇을 주는지 모르고, 정규화는 바로 그 미지를 지워 관측의 목적을 없앤다.
+    `"?"`(부재)와 `""`(빈 문자열 수신)는 서로 다른 사실이므로 구분해서 남긴다.
+    """
+    try:
+        return fields[idx]
+    except Exception:
+        return "?"
+
+
+def _maybe_log_open_scope_observe(fields: list[str], open_price: int) -> None:
+    """MAIN 체결 틱 1개당 시가 스코프 판별자를 1회/ticker/일 INFO 로 남긴다.
+
+    형식:
+        [open_scope_observe] ticker=%s oprc_hour=%s tick_open=%d cntg_hour=%s
+                             hgpr_hour=%s mkop=%s hour_cls=%s in_main_window=%s
+
+    - `oprc_hour` = `[24] OPRC_HOUR`(시가가 찍힌 시각). `[27] HGPR_HOUR` 와 같은
+      3-형제 서식(HHMMSS)이라 `_parse_day_high` 의 창 판정을 그대로 쓸 수 있다.
+    - `tick_open` = `_parse_tick_prices` 가 이미 만든 `[7]` 파싱값을 **그대로** 받는다.
+      여기서 `[7]` 을 다시 파싱하면 두 수가 갈라질 수 있고, 그 순간 이 관측은
+      "목표가가 실제로 쓴 값" 을 재는 것이 아니게 된다.
+    - `mkop`/`hour_cls` = `[34] NEW_MKOP_CLS_CODE` / `[43] HOUR_CLS_CODE`. **틱 자신의**
+      장운영/시간 구분이라 `[7]` 의 스코프를 말해 주지는 않지만, 판독 시
+      "프리장 틱 / 시가단일가 틱 / 장중 틱" 라벨이 붙어 코호트를 가르기 쉬워진다.
+
+    ## 게이트와 라벨은 **다른 축**이다
+
+    - **게이트** = `[1] STCK_CNTG_HOUR`(틱 자신의 체결 시각)가 MAIN 창 안일 때만
+      cap 을 태운다(`_maybe_log_day_high_scope_skip` 과 동일 설계). 프리장 틱이 1회
+      cap 을 먹으면 코호트 **분모**가 통째로 죽는다.
+    - **라벨** `in_main_window` = `[24]` 가 MAIN 창 안인가. 창 안/밖을 **모두** 남겨야
+      오염 **비율**이 나온다. `[day_high_scope_skip]` 은 skip 만 남겨 분모가 없었고
+      그래서 지금 "93/287" 이 추정에 머문다.
+
+    hot path — `logger` 만 쓴다(`write_log`/DB/`await` 금지, AST A-1 동형).
+    이 함수는 **never-raise** 다(호출자 `_handle_tick` 도 한 겹 더 감싼다).
+    """
+    ticker = "?"
+    try:
+        ticker = fields[0]
+        cntg_hour = fields[1]
+        try:
+            cntg = int(cntg_hour)
+        except Exception:
+            # 코호트 판정 불가 — 근거 없이 그 종목의 1회 cap 을 태우지 않는다.
+            return
+        if not (_HGPR_HOUR_MAIN_START <= cntg <= _HGPR_HOUR_MAIN_END):
+            # 프리장/애프터 틱 — 관측 대상이 아니다(분모 오염 차단). cap 미소모.
+            return
+        if not _open_scope_observe_cap.should_emit(ticker):
+            # cap 소진 — 아래 필드 읽기·문자열 인자 구성 전체가 버려질 작업이다.
+            # `_maybe_log_day_high_scope_skip` 과 같은 순서(창 게이트 → cap → 인자).
+            # 종목당 1행/일 계약이라 그날 첫 틱 이후의 모든 MAIN 틱이 이 자리로 온다.
+            # `should_emit` 은 비소모 peek 이고 `_sync_day`(KST 롤오버 리셋)도 그대로 탄다.
+            return
+
+        oprc_hour = _tick_field_raw(fields, 24)
+        hgpr_hour = _tick_field_raw(fields, 27)
+        mkop = _tick_field_raw(fields, 34)
+        hour_cls = _tick_field_raw(fields, 43)
+        try:
+            _oprc = int(oprc_hour)
+            in_main_window = (
+                "true" if _HGPR_HOUR_MAIN_START <= _oprc <= _HGPR_HOUR_MAIN_END else "false"
+            )
+        except Exception:
+            # 파싱 불가 = "창 안" 이라고 단정할 수 없다 → false (원문은 위에 그대로 남는다)
+            in_main_window = "false"
+
+        _open_scope_observe_cap.emit_once(
+            ticker,
+            logger.info,
+            "[open_scope_observe] ticker=%s oprc_hour=%s tick_open=%d cntg_hour=%s "
+            "hgpr_hour=%s mkop=%s hour_cls=%s in_main_window=%s",
+            ticker, oprc_hour, open_price, cntg_hour,
+            hgpr_hour, mkop, hour_cls, in_main_window,
+        )
+    except Exception:
+        # 관측기 자기 실패 흔적 — 무흔적 `pass` 금지(사이클 258 카드 #5 규약).
+        try:
+            from src.engine.observer_trace import trace_observer_failure
+            trace_observer_failure(
+                "[open_scope_observe]", ticker, _open_scope_observe_cap,
+                dest_logger=logger,
+            )
+        except Exception:  # pragma: no cover — 2차 예외도 흡수
+            pass
+
+
 def set_aes_keys(iv: str, key: str) -> None:
     """WebSocket 접속 시 수신한 AES 키를 저장한다."""
     global _aes_iv, _aes_key
@@ -474,6 +612,14 @@ async def _handle_tick(payload: str) -> None:
     # cycle227 — 부가 관측(P0-1 시정 Stage 0). 파싱 실패해도 틱은 버리지 않는다
     # (-1 sentinel, fail-open — day_high 와 동일 원칙).
     acml_vol = _parse_acml_vol(fields)
+    # cycle264 — 시가 스코프 shadow 관측. **행위 변경 0** (아래 어떤 값도 읽지 않고
+    # 바꾸지 않는다). `_parse_tick_prices` 밖(= parsed 성공 뒤)이 배치 계약이고,
+    # 헬퍼 자체가 never-raise 지만 monkeypatch·재정의 사고까지 막으려 한 겹 더 감싼다 —
+    # 여기서 예외가 새면 `_on_tick` 과 같은 자리로 전파돼 **틱마다 WS 재연결**이다.
+    try:
+        _maybe_log_open_scope_observe(fields, open_price)
+    except Exception:
+        pass
 
     if open_price > 0:
         change_rate = (current_price - open_price) / open_price * 100
