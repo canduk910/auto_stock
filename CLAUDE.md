@@ -56,7 +56,7 @@ stamp 우선 복원(첫 체결이 밟을 청산 경로의 P1 계약 위반 선�
 
 | 작업 유형 | 모델 | 적용 |
 |----------|------|------|
-| 구현 계획·검수·리팩토링 검토·마무리 보고서 | **fable** | `team-leader`, `tester`, `refactor-expert`, `report-writer` |
+| 구현 계획·검수·리팩토링 검토·마무리 보고서 | **메인 세션 상속**(모델 지정 없음) | `team-leader`, `tester`, `refactor-expert`, `report-writer` — 2026-09-06 정정: 종전 `model: fable` 고정은 메인 세션이 다른 모델로 바뀌면 그 넷만 크레딧 부족으로 전부 실패한다(09-06 실측: report-writer·2렌즈 4에이전트 × 2회 = 11회 전부 `out of usage credits`). 프런트매터에서 `model:` 을 지운다 = 메인 세션 모델을 따라간다 |
 | 테스트 설계·도메인 자문 | **opus** | `domain-expert`, `tdd-engineer` |
 | 일반 구현 (코드 작성·리팩터·버그 수정) | **sonnet** | `backend-dev`, `frontend-dev` |
 | 명령어 작성 (bash/슬래시/스크립트) | **haiku** | 메인 세션 단발 작업 — fork 또는 `claude-haiku-4-5-20251001` 위임 |
