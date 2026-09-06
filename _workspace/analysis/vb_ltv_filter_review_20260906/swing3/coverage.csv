@@ -1,0 +1,211 @@
+section,strategy,pool,metric,days,n,value,note
+funnel_steps,bull_flag_breakout,step1,유니버스 후보,40,40,1860.0,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step2,유니버스 필터 통과 (시총·거래대금),40,40,579.1,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step3,1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등),40,40,433.4,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step4,일봉 fetch 성공,40,40,430.7,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step5,폴(Pole) 자동 검출,40,40,274.9,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step6,플래그(Flag) 자동 검출,40,40,145.6,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step7,거래량 수축,40,40,35.2,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step8,ATR(14) > 0,40,40,35.2,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step9,최종 prepared,40,40,35.2,survived_count 평균/일
+funnel_steps,bull_flag_breakout,step99,최종 prepared (auto),40,40,35.2,survived_count 평균/일
+funnel_steps,donchian_swing,step1,코스피200+코스닥150 합집합,40,40,325.8,survived_count 평균/일
+funnel_steps,donchian_swing,step2,시총+거래대금 컷 통과,40,40,129.8,survived_count 평균/일
+funnel_steps,donchian_swing,step3,1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등),40,40,114.3,survived_count 평균/일
+funnel_steps,donchian_swing,step4,일봉 fetch + 전일종가>0,40,40,114.3,survived_count 평균/일
+funnel_steps,donchian_swing,step5,신고가 돌파,40,40,5.7,survived_count 평균/일
+funnel_steps,donchian_swing,step6,EMA 우상향 + 종가>EMA,40,40,3.3,survived_count 평균/일
+funnel_steps,donchian_swing,step7,거래대금 평균 대비 통과,40,40,2.1,survived_count 평균/일
+funnel_steps,donchian_swing,step8,ATR(14) > 0,40,40,2.1,survived_count 평균/일
+funnel_steps,donchian_swing,step9,최종 후보,40,40,2.1,survived_count 평균/일
+funnel_steps,donchian_swing,step99,최종 prepared (auto),40,40,2.1,survived_count 평균/일
+funnel_steps,kojiro,step1,전체 상장 유니버스 (시총/거래대금 컷 전),34,34,3579.0,survived_count 평균/일
+funnel_steps,kojiro,step1,코스피200+코스닥150 합집합,1,1,200.0,survived_count 평균/일
+funnel_steps,kojiro,step2,시총+거래대금 컷 통과,35,35,986.9,survived_count 평균/일
+funnel_steps,kojiro,step3,1단계 진입 차단 통과 (거래정지/관리/단기과열/투자유의 등),35,35,667.8,survived_count 평균/일
+funnel_steps,kojiro,step4,일봉 fetch + 전일종가>0 + 워밍업봉 충족,35,35,660.2,survived_count 평균/일
+funnel_steps,kojiro,step5,ATR/종가 변동성 밴드 통과 (1.0~4.5%),6,6,85.8,survived_count 평균/일
+funnel_steps,kojiro,step5,ATR/종가 변동성 밴드 통과 (1.0~6.0%),29,29,177.1,survived_count 평균/일
+funnel_steps,kojiro,step6,스테이지 판별 가능 (EMA 동가 제외),35,35,161.5,survived_count 평균/일
+funnel_steps,kojiro,step7,스테이지1 + 3선 우상향,35,35,39.7,survived_count 평균/일
+funnel_steps,kojiro,step8,6→1 전환 인접 + 종가>EMA5 (대순환 진입 확정),35,35,11.7,survived_count 평균/일
+funnel_steps,kojiro,step9,최종 후보,35,35,11.7,survived_count 평균/일
+funnel_steps,kojiro,step99,최종 prepared (auto),35,35,14.6,survived_count 평균/일
+funnel_steps,vcp_breakout,step1,전체 상장 유니버스 (시총/거래대금 컷 전),19,19,3580.5,survived_count 평균/일
+funnel_steps,vcp_breakout,step1,코스피200+코스닥150 합집합,21,21,331.1,survived_count 평균/일
+funnel_steps,vcp_breakout,step2,"시총 ≥ 1,000억",21,21,331.1,survived_count 평균/일
+funnel_steps,vcp_breakout,step2,시총·거래대금 컷 통과,19,19,1047.1,survived_count 평균/일
+funnel_steps,vcp_breakout,step3,1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등),40,40,482.4,survived_count 평균/일
+funnel_steps,vcp_breakout,step4,일봉 fetch + 추세필터,40,40,479.5,survived_count 평균/일
+funnel_steps,vcp_breakout,step5,단기/중기/장기 EMA 정렬,40,40,24.2,survived_count 평균/일
+funnel_steps,vcp_breakout,step6,베이스 자동 검출,40,40,13.5,survived_count 평균/일
+funnel_steps,vcp_breakout,step7,Pullback 점진 수축,40,40,0.8,survived_count 평균/일
+funnel_steps,vcp_breakout,step8,거래량 수축,40,40,0.1,survived_count 평균/일
+funnel_steps,vcp_breakout,step9,최종 prepared,40,40,0.1,survived_count 평균/일
+funnel_steps,vcp_breakout,step99,최종 prepared (auto),40,40,0.1,survived_count 평균/일
+pool_coverage,donchian_swing,final,후보 관측,32,85,2.66/일,거래일 32일
+pool_coverage,donchian_swing,final,일봉 보유(daily_ok),32,85,85/85 (100.0%),
+pool_coverage,donchian_swing,final,D 시가 진입 가능(d0),32,85,85/85 (100.0%),
+pool_coverage,donchian_swing,final,D+1 시가 진입 가능(d1),32,85,81/85 (95.3%),
+pool_coverage,donchian_swing,final,RS 보유(D-1),32,85,85/85 (100.0%),
+pool_coverage,donchian_swing,final,RSI 보유(D-1),32,85,85/85 (100.0%),
+pool_coverage,donchian_swing,final,F-Score 보유,32,85,85/85 (100.0%),
+pool_coverage,donchian_swing,final,MF(유니버스) 보유,32,85,85/85 (100.0%),
+pool_coverage,donchian_swing,final,재무 시점적격(D≥07-15),32,85,82/85 (96.5%),
+pool_coverage,donchian_swing,final,d0 ret5d 보유,32,85,78/85 (91.8%),
+pool_coverage,donchian_swing,final,d0 ret20d 보유,32,85,28/85 (32.9%),
+pool_coverage,donchian_swing,final,d1 ret5d 보유,32,85,74/85 (87.1%),
+pool_coverage,donchian_swing,final,d1 ret20d 보유,32,85,24/85 (28.2%),
+pool_coverage,donchian_swing,final,d0 규약근사 성립,32,85,85/85 (100.0%),
+pool_coverage,donchian_swing,final,실체결 조인,32,16,16,이 pool 로 점수 조인된 왕복 수
+pool_coverage,donchian_swing,wide,후보 관측,35,226,6.46/일,거래일 35일
+pool_coverage,donchian_swing,wide,일봉 보유(daily_ok),35,226,226/226 (100.0%),
+pool_coverage,donchian_swing,wide,D 시가 진입 가능(d0),35,226,226/226 (100.0%),
+pool_coverage,donchian_swing,wide,D+1 시가 진입 가능(d1),35,226,217/226 (96.0%),
+pool_coverage,donchian_swing,wide,RS 보유(D-1),35,226,226/226 (100.0%),
+pool_coverage,donchian_swing,wide,RSI 보유(D-1),35,226,226/226 (100.0%),
+pool_coverage,donchian_swing,wide,F-Score 보유,35,226,226/226 (100.0%),
+pool_coverage,donchian_swing,wide,MF(유니버스) 보유,35,226,226/226 (100.0%),
+pool_coverage,donchian_swing,wide,재무 시점적격(D≥07-15),35,226,223/226 (98.7%),
+pool_coverage,donchian_swing,wide,d0 ret5d 보유,35,226,205/226 (90.7%),
+pool_coverage,donchian_swing,wide,d0 ret20d 보유,35,226,58/226 (25.7%),
+pool_coverage,donchian_swing,wide,d1 ret5d 보유,35,226,194/226 (85.8%),
+pool_coverage,donchian_swing,wide,d1 ret20d 보유,35,226,46/226 (20.4%),
+pool_coverage,donchian_swing,wide,d0 규약근사 성립,35,226,226/226 (100.0%),
+pool_coverage,donchian_swing,wide,실체결 조인,35,0,0,이 pool 로 점수 조인된 왕복 수
+pool_coverage,kojiro,final,후보 관측,33,408,12.36/일,거래일 33일
+pool_coverage,kojiro,final,일봉 보유(daily_ok),33,408,407/408 (99.8%),
+pool_coverage,kojiro,final,D 시가 진입 가능(d0),33,408,407/408 (99.8%),
+pool_coverage,kojiro,final,D+1 시가 진입 가능(d1),33,408,388/408 (95.1%),
+pool_coverage,kojiro,final,RS 보유(D-1),33,408,407/408 (99.8%),
+pool_coverage,kojiro,final,RSI 보유(D-1),33,408,407/408 (99.8%),
+pool_coverage,kojiro,final,F-Score 보유,33,408,202/408 (49.5%),
+pool_coverage,kojiro,final,MF(유니버스) 보유,33,408,202/408 (49.5%),
+pool_coverage,kojiro,final,재무 시점적격(D≥07-15),33,408,407/408 (99.8%),
+pool_coverage,kojiro,final,d0 ret5d 보유,33,408,310/408 (76.0%),
+pool_coverage,kojiro,final,d0 ret20d 보유,33,408,81/408 (19.9%),
+pool_coverage,kojiro,final,d1 ret5d 보유,33,408,294/408 (72.1%),
+pool_coverage,kojiro,final,d1 ret20d 보유,33,408,71/408 (17.4%),
+pool_coverage,kojiro,final,d0 규약근사 성립,33,408,407/408 (99.8%),
+pool_coverage,kojiro,final,실체결 조인,33,12,12,이 pool 로 점수 조인된 왕복 수
+pool_coverage,kojiro,wide,후보 관측,35,1390,39.71/일,거래일 35일
+pool_coverage,kojiro,wide,일봉 보유(daily_ok),35,1390,1389/1390 (99.9%),
+pool_coverage,kojiro,wide,D 시가 진입 가능(d0),35,1390,1389/1390 (99.9%),
+pool_coverage,kojiro,wide,D+1 시가 진입 가능(d1),35,1390,1309/1390 (94.2%),
+pool_coverage,kojiro,wide,RS 보유(D-1),35,1390,1389/1390 (99.9%),
+pool_coverage,kojiro,wide,RSI 보유(D-1),35,1390,1389/1390 (99.9%),
+pool_coverage,kojiro,wide,F-Score 보유,35,1390,736/1390 (52.9%),
+pool_coverage,kojiro,wide,MF(유니버스) 보유,35,1390,736/1390 (52.9%),
+pool_coverage,kojiro,wide,재무 시점적격(D≥07-15),35,1390,1389/1390 (99.9%),
+pool_coverage,kojiro,wide,d0 ret5d 보유,35,1390,1039/1390 (74.7%),
+pool_coverage,kojiro,wide,d0 ret20d 보유,35,1390,277/1390 (19.9%),
+pool_coverage,kojiro,wide,d1 ret5d 보유,35,1390,951/1390 (68.4%),
+pool_coverage,kojiro,wide,d1 ret20d 보유,35,1390,232/1390 (16.7%),
+pool_coverage,kojiro,wide,d0 규약근사 성립,35,1390,1389/1390 (99.9%),
+pool_coverage,kojiro,wide,실체결 조인,35,0,0,이 pool 로 점수 조인된 왕복 수
+pool_coverage,vcp_breakout,final,후보 관측,2,2,1.00/일,거래일 2일
+pool_coverage,vcp_breakout,final,일봉 보유(daily_ok),2,2,2/2 (100.0%),
+pool_coverage,vcp_breakout,final,D 시가 진입 가능(d0),2,2,2/2 (100.0%),
+pool_coverage,vcp_breakout,final,D+1 시가 진입 가능(d1),2,2,2/2 (100.0%),
+pool_coverage,vcp_breakout,final,RS 보유(D-1),2,2,2/2 (100.0%),
+pool_coverage,vcp_breakout,final,RSI 보유(D-1),2,2,2/2 (100.0%),
+pool_coverage,vcp_breakout,final,F-Score 보유,2,2,0/2 (0.0%),
+pool_coverage,vcp_breakout,final,MF(유니버스) 보유,2,2,0/2 (0.0%),
+pool_coverage,vcp_breakout,final,재무 시점적격(D≥07-15),2,2,2/2 (100.0%),
+pool_coverage,vcp_breakout,final,d0 ret5d 보유,2,2,1/2 (50.0%),
+pool_coverage,vcp_breakout,final,d0 ret20d 보유,2,2,0/2 (0.0%),
+pool_coverage,vcp_breakout,final,d1 ret5d 보유,2,2,1/2 (50.0%),
+pool_coverage,vcp_breakout,final,d1 ret20d 보유,2,2,0/2 (0.0%),
+pool_coverage,vcp_breakout,final,d0 규약근사 성립,2,2,2/2 (100.0%),
+pool_coverage,vcp_breakout,final,실체결 조인,2,0,0,이 pool 로 점수 조인된 왕복 수
+pool_coverage,vcp_breakout,wide,후보 관측,39,539,13.82/일,거래일 39일
+pool_coverage,vcp_breakout,wide,일봉 보유(daily_ok),39,539,539/539 (100.0%),
+pool_coverage,vcp_breakout,wide,D 시가 진입 가능(d0),39,539,539/539 (100.0%),
+pool_coverage,vcp_breakout,wide,D+1 시가 진입 가능(d1),39,539,514/539 (95.4%),
+pool_coverage,vcp_breakout,wide,RS 보유(D-1),39,539,539/539 (100.0%),
+pool_coverage,vcp_breakout,wide,RSI 보유(D-1),39,539,539/539 (100.0%),
+pool_coverage,vcp_breakout,wide,F-Score 보유,39,539,359/539 (66.6%),
+pool_coverage,vcp_breakout,wide,MF(유니버스) 보유,39,539,359/539 (66.6%),
+pool_coverage,vcp_breakout,wide,재무 시점적격(D≥07-15),39,539,528/539 (98.0%),
+pool_coverage,vcp_breakout,wide,d0 ret5d 보유,39,539,449/539 (83.3%),
+pool_coverage,vcp_breakout,wide,d0 ret20d 보유,39,539,195/539 (36.2%),
+pool_coverage,vcp_breakout,wide,d1 ret5d 보유,39,539,423/539 (78.5%),
+pool_coverage,vcp_breakout,wide,d1 ret20d 보유,39,539,187/539 (34.7%),
+pool_coverage,vcp_breakout,wide,d0 규약근사 성립,39,539,539/539 (100.0%),
+pool_coverage,vcp_breakout,wide,실체결 조인,39,0,0,이 pool 로 점수 조인된 왕복 수
+pool_coverage,vcp_breakout,wide2,후보 관측,39,970,24.87/일,거래일 39일
+pool_coverage,vcp_breakout,wide2,일봉 보유(daily_ok),39,970,970/970 (100.0%),
+pool_coverage,vcp_breakout,wide2,D 시가 진입 가능(d0),39,970,970/970 (100.0%),
+pool_coverage,vcp_breakout,wide2,D+1 시가 진입 가능(d1),39,970,917/970 (94.5%),
+pool_coverage,vcp_breakout,wide2,RS 보유(D-1),39,970,970/970 (100.0%),
+pool_coverage,vcp_breakout,wide2,RSI 보유(D-1),39,970,970/970 (100.0%),
+pool_coverage,vcp_breakout,wide2,F-Score 보유,39,970,547/970 (56.4%),
+pool_coverage,vcp_breakout,wide2,MF(유니버스) 보유,39,970,547/970 (56.4%),
+pool_coverage,vcp_breakout,wide2,재무 시점적격(D≥07-15),39,970,939/970 (96.8%),
+pool_coverage,vcp_breakout,wide2,d0 ret5d 보유,39,970,781/970 (80.5%),
+pool_coverage,vcp_breakout,wide2,d0 ret20d 보유,39,970,276/970 (28.5%),
+pool_coverage,vcp_breakout,wide2,d1 ret5d 보유,39,970,731/970 (75.4%),
+pool_coverage,vcp_breakout,wide2,d1 ret20d 보유,39,970,268/970 (27.6%),
+pool_coverage,vcp_breakout,wide2,d0 규약근사 성립,39,970,970/970 (100.0%),
+pool_coverage,vcp_breakout,wide2,실체결 조인,39,0,0,이 pool 로 점수 조인된 왕복 수
+fin_coverage_monthly,donchian_swing,final,2026-07,0,22,F 22/22 (100%) · MF 22/22 (100%),
+fin_coverage_monthly,donchian_swing,final,2026-08,0,56,F 56/56 (100%) · MF 56/56 (100%),
+fin_coverage_monthly,donchian_swing,final,2026-09,0,7,F 7/7 (100%) · MF 7/7 (100%),
+fin_coverage_monthly,donchian_swing,wide,2026-07,0,34,F 34/34 (100%) · MF 34/34 (100%),
+fin_coverage_monthly,donchian_swing,wide,2026-08,0,171,F 171/171 (100%) · MF 171/171 (100%),
+fin_coverage_monthly,donchian_swing,wide,2026-09,0,21,F 21/21 (100%) · MF 21/21 (100%),
+fin_coverage_monthly,kojiro,final,2026-07,0,59,F 40/59 (68%) · MF 40/59 (68%),
+fin_coverage_monthly,kojiro,final,2026-08,0,272,F 122/272 (45%) · MF 122/272 (45%),
+fin_coverage_monthly,kojiro,final,2026-09,0,76,F 40/76 (53%) · MF 40/76 (53%),
+fin_coverage_monthly,kojiro,wide,2026-07,0,171,F 91/171 (53%) · MF 91/171 (53%),
+fin_coverage_monthly,kojiro,wide,2026-08,0,927,F 501/927 (54%) · MF 501/927 (54%),
+fin_coverage_monthly,kojiro,wide,2026-09,0,291,F 144/291 (49%) · MF 144/291 (49%),
+fin_coverage_monthly,vcp_breakout,final,2026-08,0,2,F 0/2 (0%) · MF 0/2 (0%),
+fin_coverage_monthly,vcp_breakout,wide,2026-07,0,163,F 163/163 (100%) · MF 163/163 (100%),
+fin_coverage_monthly,vcp_breakout,wide,2026-08,0,297,F 155/297 (52%) · MF 155/297 (52%),
+fin_coverage_monthly,vcp_breakout,wide,2026-09,0,79,F 41/79 (52%) · MF 41/79 (52%),
+fin_coverage_monthly,vcp_breakout,wide2,2026-07,0,242,F 242/242 (100%) · MF 242/242 (100%),
+fin_coverage_monthly,vcp_breakout,wide2,2026-08,0,555,F 227/555 (41%) · MF 227/555 (41%),
+fin_coverage_monthly,vcp_breakout,wide2,2026-09,0,173,F 78/173 (45%) · MF 78/173 (45%),
+trades,bull_flag_breakout,-,왕복(FIFO),1,1,조인 0/1,gross 손익합 -3400원
+trades,donchian_swing,-,왕복(FIFO),17,26,조인 16/26,gross 손익합 -29240원
+trades,kojiro,-,왕복(FIFO),10,14,조인 12/14,gross 손익합 -32190원
+fwd_bar_diag,donchian_swing,final,ret20d 결손 사유,0,85,달력절단 57 · 일봉적재결손 0,일봉적재결손 = 달력엔 날이 있는데 그 종목 봉이 없음
+fwd_bar_diag,donchian_swing,final,"결손 정보성(시총 중앙, 억)",0,85,보유 146096 vs 결손 41808,차이 크면 20일 표본은 대형주 편향
+fwd_bar_diag,donchian_swing,final,"결손 정보성(ret5d 중앙, bp)",0,85,보유 -38 vs 결손 -57,차이 크면 20일 표본은 성과 편향
+fwd_bar_diag,donchian_swing,final,ret10d 달력 불일치,0,61,0/61,봉 10칸 뒤 ≠ 달력 10거래일 뒤 (중간 결손일)
+fwd_bar_diag,donchian_swing,wide,ret20d 결손 사유,0,226,달력절단 168 · 일봉적재결손 0,일봉적재결손 = 달력엔 날이 있는데 그 종목 봉이 없음
+fwd_bar_diag,donchian_swing,wide,"결손 정보성(시총 중앙, 억)",0,226,보유 124196 vs 결손 49602,차이 크면 20일 표본은 대형주 편향
+fwd_bar_diag,donchian_swing,wide,"결손 정보성(ret5d 중앙, bp)",0,226,보유 -93 vs 결손 -406,차이 크면 20일 표본은 성과 편향
+fwd_bar_diag,donchian_swing,wide,ret10d 달력 불일치,0,155,0/155,봉 10칸 뒤 ≠ 달력 10거래일 뒤 (중간 결손일)
+fwd_bar_diag,kojiro,final,ret20d 결손 사유,0,407,달력절단 306 · 일봉적재결손 20,일봉적재결손 = 달력엔 날이 있는데 그 종목 봉이 없음
+fwd_bar_diag,kojiro,final,"결손 정보성(시총 중앙, 억)",0,407,보유 22138 vs 결손 8488,차이 크면 20일 표본은 대형주 편향
+fwd_bar_diag,kojiro,final,"결손 정보성(ret5d 중앙, bp)",0,407,보유 220 vs 결손 -62,차이 크면 20일 표본은 성과 편향
+fwd_bar_diag,kojiro,final,ret10d 달력 불일치,0,255,15/255,봉 10칸 뒤 ≠ 달력 10거래일 뒤 (중간 결손일)
+fwd_bar_diag,kojiro,wide,ret20d 결손 사유,0,1389,달력절단 1071 · 일봉적재결손 41,일봉적재결손 = 달력엔 날이 있는데 그 종목 봉이 없음
+fwd_bar_diag,kojiro,wide,"결손 정보성(시총 중앙, 억)",0,1389,보유 23307 vs 결손 12260,차이 크면 20일 표본은 대형주 편향
+fwd_bar_diag,kojiro,wide,"결손 정보성(ret5d 중앙, bp)",0,1389,보유 34 vs 결손 -32,차이 크면 20일 표본은 성과 편향
+fwd_bar_diag,kojiro,wide,ret10d 달력 불일치,0,707,27/707,봉 10칸 뒤 ≠ 달력 10거래일 뒤 (중간 결손일)
+fwd_bar_diag,vcp_breakout,final,ret20d 결손 사유,0,2,달력절단 2 · 일봉적재결손 0,일봉적재결손 = 달력엔 날이 있는데 그 종목 봉이 없음
+fwd_bar_diag,vcp_breakout,final,"결손 정보성(시총 중앙, 억)",0,2,보유 - vs 결손 1293,차이 크면 20일 표본은 대형주 편향
+fwd_bar_diag,vcp_breakout,final,"결손 정보성(ret5d 중앙, bp)",0,2,보유 - vs 결손 13,차이 크면 20일 표본은 성과 편향
+fwd_bar_diag,vcp_breakout,final,ret10d 달력 불일치,0,1,1/1,봉 10칸 뒤 ≠ 달력 10거래일 뒤 (중간 결손일)
+fwd_bar_diag,vcp_breakout,wide,ret20d 결손 사유,0,539,달력절단 344 · 일봉적재결손 0,일봉적재결손 = 달력엔 날이 있는데 그 종목 봉이 없음
+fwd_bar_diag,vcp_breakout,wide,"결손 정보성(시총 중앙, 억)",0,539,보유 43562 vs 결손 18481,차이 크면 20일 표본은 대형주 편향
+fwd_bar_diag,vcp_breakout,wide,"결손 정보성(ret5d 중앙, bp)",0,539,보유 -249 vs 결손 101,차이 크면 20일 표본은 성과 편향
+fwd_bar_diag,vcp_breakout,wide,ret10d 달력 불일치,0,332,2/332,봉 10칸 뒤 ≠ 달력 10거래일 뒤 (중간 결손일)
+fwd_bar_diag,vcp_breakout,wide2,ret20d 결손 사유,0,970,달력절단 692 · 일봉적재결손 2,일봉적재결손 = 달력엔 날이 있는데 그 종목 봉이 없음
+fwd_bar_diag,vcp_breakout,wide2,"결손 정보성(시총 중앙, 억)",0,970,보유 40156 vs 결손 8872,차이 크면 20일 표본은 대형주 편향
+fwd_bar_diag,vcp_breakout,wide2,"결손 정보성(ret5d 중앙, bp)",0,970,보유 -423 vs 결손 21,차이 크면 20일 표본은 성과 편향
+fwd_bar_diag,vcp_breakout,wide2,ret10d 달력 불일치,0,554,8/554,봉 10칸 뒤 ≠ 달력 10거래일 뒤 (중간 결손일)
+notes,-,-,진입 가정,0,0,d0 = 후보일 D 시가 · d1 = D+1 시가,"funnel target_date == 실매수일 실측(donchian 17/28 · kojiro 18/20 · BFB 2/2 same_day). d0 가 라이브 정합, d1 은 계획서가 지정한 보수 변형. 둘 다 산출했다."
+notes,-,-,정보집합,0,0,주 점수 = `_dm1` (D-1 종가까지),"저장된 funnel 행의 내용은 D-1 종가 정보다 — VB 훅 기록값을 end=D-1 창으로 99.6%(1441/1447) 정확 재현. 계획서가 가정한 `end=D, period=20` 은 4.3% 만 재현한다. `_d` 컬럼은 D 종가까지라 d0 진입 기준에서는 룩어헤드다(참고용)."
+notes,-,-,RS 정의,0,0,ta_indicators.relative_strength(period=20) 재현,"훅 기록값과 정확히 맞는 파라미터는 (end=D-1, period=19)였다. 코드 period 는 20 이므로 1봉 차이는 캡처 시점 DB 시리즈와 현재 시리즈의 vintage 차이로 보이며 원인을 현재 데이터로는 확정할 수 없었다. `rs20_dm1` 은 **코드 정의(period=20)** 를 D-1 창에 적용한 값이다."
+notes,-,-,F-Score,0,0,quant_score.compute_f_score_7 재현 — 정확일치 1800/1800,"결측 지표는 0점, prev 7필드 전부 결측이면 None(fail-open). 연간(div_cls='0') 2기 비교."
+notes,-,-,마법공식,0,0,"compute_magic_formula 재현 — Spearman 0.9986, |diff| 중앙 1랭크","정확일치는 39% 뿐이다(EY 분모 시총이 라이브는 그날 값, 오프라인은 현재 값 = 시점 드리프트). `mf_rank_pool` = 라이브 정의(그날 그 전략 후보 안 상대순위), `mf_rank_univ`/`mf_pct_univ` = 재무 보유 347종목 고정 모집단 순위 — 후보 2~3개짜리 날에는 pool 순위가 무의미하므로 univ 를 쓸 것."
+notes,-,-,재무 정지,0,0,stock_master_financial 마지막 갱신 2026-08-12 · 347 종목,07-15 최초 적재. D<2026-07-15 후보는 라이브에서 점수를 볼 수 없었다(`fin_asof_ok=0`). 커버리지는 전략별로 극단적으로 갈린다 — donchian 100% vs kojiro 50% vs VCP 56~67%.
+notes,-,-,20일 성과 편향,0,0,ret20d 는 달력 절단이 지배적이며 표본이 대형주·초기 구간에 쏠린다,fwd_bar_diag 섹션 참조. 20일 결과를 전 표본 결과로 읽지 말 것 — 같은 날짜 안에서만 비교하거나 3/5/10일을 주 지평으로 쓸 것.
+notes,-,-,VCP 표본,0,0,최종 단계(step9) 후보가 전 기간 2건,"step7(Pullback 수축)에서 13.5→0.8/일로 잘린다. 그래서 pool=wide(step6 베이스 검출, 13.8/일)와 wide2(step5 EMA 정렬, 24.9/일)를 함께 냈다. VCP 는 실체결도 0건이라 후보-레벨만 가능하다."
+notes,-,-,청산 근사,0,0,"일봉 기반, 실체결 왕복과 상관 0.658 · 부호일치 19/28","장중 순서를 모른다(손절은 저가 터치, 트레일은 종가 판정). ATR·채널저가는 진입일 값 고정. donchian breakout_high 는 진입 직전 20일 신고가로 근사. VCP 는 base_low 를 재현할 수 없어 그 분기가 빠졌다(계획서의 VCP `max_hold_days` 는 코드에 없다 — BFB 전용 키다)."
+notes,-,-,비용,0,0,왕복 28bp 차감 = `*_net_bp`,수수료 0.015%×2 + 거래세 0.15% + 슬리피지 10bp.
+notes,-,-,금기,0,0,이 산출물은 SELECT 만으로 만들었다,리포·DB·설정 무변경.
