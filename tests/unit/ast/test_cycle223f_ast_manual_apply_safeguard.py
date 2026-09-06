@@ -336,17 +336,11 @@ def _content_sha(path: str) -> str:
 #    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
 # TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
-    # 🔁 2026-09-06 (cycle263) — 일봉 적재 껍데기 봉 시정의 **사용자 명시 8영역 승인**
-    #    (09-06 결정 카드 ④ "승인", 범위 = `scanner.py` 단독 + 비8영역 `data_load_tasks.py`).
     #    `_stock_master_daily_load_once` 가 upsert 앞에서 **확정 전 오늘봉**(장 전 껍데기 ·
     #    장중 부분봉)을 시각 기준(15:40 KST)으로 폐기한다. 명세 =
-    #    `_workspace/specs/cycle263_daily_load_stub_fix.md`.
     #    ⚠️ **자매 가드 4곳**(222a3 `_APPROVED_CONTENT_SHA` · 223 · 223f
     #    `_PREEXISTING_CONTENT_SHA` · 226 `_ALLOWED_CONTENT_SHA`)에 **같은 값**으로 핀한다 —
     #    네 가드가 같은 워킹트리를 보므로 값이 갈리거나 한 곳만 등록되면 그 자체가 결함
-    #    신호다(cycle263 이 실제로 한 곳만 등록해 전체 회귀 7건이 붉었다).
-    # TODO(cycle263 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
-    "src/engine/scanner.py": "fa4f7f2f49cbe8d363bee6a972e96fdfc95e787abf341ea35edfd0149b44bc11",
 }
 
 
