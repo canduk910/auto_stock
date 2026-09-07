@@ -19,6 +19,37 @@
 
 ---
 
+## ✅ cycle266 — 종목마스터 "일봉 (30일)" 탭 결함 3건 시정 (2026-09-07, 매매 행위 변경 0 · 커밋 대기)
+
+> 운영 EC2·운영 DB 실측(2026-09-07) 확정 — 흰 화면(Decimal→JSON 문자열 직렬화 + `ErrorBoundary`
+> 부재) + "일봉 데이터 조회 실패" 오류 문구 오판(실제론 49.5% 미적재가 정상) + 라우트 fail-silent
+> (`except Exception: rows=[]` 가 진짜 DB 장애를 404 로 은폐) 3건 시정. 도입 = `dc66026`(사이클
+> 124, 2026-06-13) — 이 탭은 그날부터 오늘까지 한 번도 정상 동작한 적이 없었다. 상세 =
+> `docs/HARNESS_CHANGELOG.md` 2026-09-07 행, `src/routes/CLAUDE.md`/`frontend/CLAUDE.md` 갱신분.
+> 8영역·`scheduler.py`·전략 7파일·`src/db/stock_master_daily.py` diff 0. 검증 = 백엔드 7,321
+> PASS(+5)·`tsc -b` 0·vitest 599(+7)·Playwright 34×4연속·뮤테이션 13/13 KILLED.
+
+### 열린 후속 (이번 사이클 범위 밖 — 등재만)
+
+- **F-1** `src/db/stock_master_daily.py::get_recent_daily` 가 DB 예외를 **자신이** 삼켜 `[]` 를
+  반환한다(280~287행). 그래서 이번 사이클이 만든 라우트 500 경로는 오늘 **실질 도달 불가**이고,
+  진짜 DB 장애도 여전히 404("적재 대상 아님")로 도착한다. 근본 시정은 그 db 모듈인데
+  **6 전략 전부의 `prepare()`** + `get_atr`(터틀 사이징 ATR) + `get_donchian_high` +
+  `_row_has_lock`(수정주가 락 게이트) + `market_regime.compute_etf_stage_signal` 이 공유 ⇒
+  **사용자 승인 + `domain-consult` 선행** 대상.
+- **B-4** `StockMaster` 페이지 전체가 여전히 `ErrorBoundary` 무방비다(이번 사이클은 일봉 탭
+  렌더만 방어했다 — `toSafeNumber`/`formatSafeCount`/`formatSafeChangeRate`). 프로젝트 전체에서
+  `ErrorBoundary` 를 갖춘 곳은 `components/DailyReportTab.tsx` 한 곳뿐이라, 같은 계열(값 타입
+  오판 → 미검증 값에 `toFixed`/`toLocaleString` 직접 호출)의 결함이 다른 탭·다른 페이지에도
+  잠재해 있을 가능성이 있다.
+- **D-4** `src/routes/stock_master.py` 가 이번 시정으로 **338L**(상한 340L)까지 찼다 — 여유
+  2행. 다음 이 파일에 손댈 사이클은 분리·리팩터부터 검토해야 한다.
+- **D-5** 일봉 미적재 종목(운영 DB 실측 49.5%)에도 프론트가 60초 `refetchInterval` 폴링을
+  계속한다(코드 사실 — `useQuery` 옵션에 조건부 중단 없음). 폴링이 실제로 지속되는지는
+  이번 사이클에서 실측하지 않았다.
+
+---
+
 ## ✅ cycle264 — 시가 `[7] STCK_OPRC` 스코프 **shadow 관측** (2026-09-06~07, **커밋·배포 대기** · 행위 변경 0)
 
 > 사용자 승인(09-06) = **"전부 승인할게 진행시작하자"** — `src/realtime/**`·`scheduler.py` 접촉 포함.
@@ -249,7 +280,7 @@ immediate run(boot+600s)의 **우연**이고, 적재가 360초를 넘기면 그 
 
 - 모드 **full**(`src/**` 변경 = backend 재생성). 일요일 장외는 승인된 창(주말 종일), 20:00~20:15 만
   회피. 주말에는 스케줄러가 월 07:45 까지 대기라 매매 무영향.
-- **효과의 절반은 월 09-07 16:00 부터, 아침 prepare 정상화는 화 09-08 07:51 부터**다.
+- ~~**효과의 절반은 월 09-07 16:00 부터, 아침 prepare 정상화는 화 09-08 07:51 부터**다.~~ → **둘 다 월 09-07 에 확인됐다**(16:00 `skipped_fresh` 1,000→0 · 아침 prepare 붕괴 소멸). 실측 시각은 07:51 이 아니라 **07:45**.
 - 롤백 = 다음 커밋으로 원복 + 재시작(코드 경로라 **즉시** 반영). 보유 중 장중(09:00~15:30)은 D6 로
   불가 — 15:30 이후 또는 익일 07:45 전.
 
@@ -262,7 +293,7 @@ immediate run(boot+600s)의 **우연**이고, 적재가 360초를 넘기면 그 
 | 월 16:00 | `[stock_master_daily_load_summary]` | `fetched≈total` · **`skipped_fresh≈0`** · `upserted_rows` 수천 = 16:00 이 **처음으로 일을 한다**(09-07 실봉 기록) |
 | 월 16:00 직후 | `system_config.task_last_success_stock_master_daily_load` | **최초 기록**(그전까지 부재) |
 | 화~금 07:56 | `[stock_master_daily_load] immediate run skip — fresh last_success=…` INFO 1행 | 마커 ≈15.9h < 20h ⇒ 아침 immediate **skip**. 이게 매일 보이면 껍데기 생성 주체가 사라진 것 |
-| **화 09-08 07:51 / 08:02** | **두 prepare 카운트 수렴 = 핵심 성공 서명** | 전략별 `준비 완료: N/M` 이 거의 같아야 한다. 특히 **LTV 가 07:51 에 이미 N/N**(지금은 5/32·10/90). donchian 은 07:51 의 `donchian=`·`volume=` 이 08:02 값과 일치 |
+| ~~화 09-08 07:51 / 08:02~~ → **✅ 월 09-07 확인 완료** | **두 prepare 카운트 수렴 = 핵심 성공 서명** | ⚠️ **시각이 낡았다** — 실측 부팅 prepare **07:45**, 적재 **07:49~07:51**, 재-prepare **07:56**(상대 순서·4분 간격은 서술과 동일, 절대 시각만 다름). 09-07 실측 = **LTV 99/99 → 92/92**(시정 전 10/90 → 90/90 붕괴 소멸) · **BFB 27/548 → 25/596**(거짓 후보 격차 17 → 2) · VB 63/63 → 68/68 · donchian 2/102 → 1/110 · VCP 0/651 → 0/689 · kojiro 13/647 → 13/683. 잔여 소폭 차이는 껍데기 봉이 아니라 07:53 `stock_master_basics_refresh` 의 유니버스 증가로 설명된다(BFB 분모 548→596). **정본 = `_workspace/analysis/2026-09-07_open_scope_dplus1_readout.md` §5** |
 | 월 07:51 | (참고) 이미 대체로 정상 | 09-06 15:16 보정으로 09-04 실봉이 963종목 채워져 있다 — 시정 배포 여부와 **무관**하게 성립한다. 잔여 120종목은 `stock_master` 유니버스 밖이라 보정 범위 밖 |
 | 상시 | 신규 상장·유니버스 진입 종목 backfill **≈8시간 지연** | 아침 → 같은 날 16:00 으로 이동. 그 사이 `get_recent_daily_normalized` 는 `reason="miss"` KIS 폴백(데이터는 더 정확, 장중 KIS 호출은 증가). 규모 관측(09-04 실측 16:04 `fetched=1` / 18:45 재시작 `fetched=66`) |
 | 상시 | UI "마지막 일봉 적재" | 낮 동안 **어제 날짜** = **정상**(의미상 "마지막으로 확정된 일봉"이 어제인 것이 맞다) |
@@ -368,11 +399,12 @@ LTV 의 08:00~09:00 진짜 프리장 매수는 창 밖이라 무접촉.
 | **①** | **F-7** | `stock_master_daily` **16:00 적재 복구** | **✅ cycle263 구현 완료 — 커밋·배포 대기** (이 파일 최상단 절 · 명세 `_workspace/specs/cycle263_daily_load_stub_fix.md`, 09-06 카드 ④ "승인" — `scanner.py` 8영역 접촉 포함) | 자문 §4.3 **단계 1**(매일 09:35 `[breakout_open_confirm]` 스탬프 vs `stock_master_daily` 그날 KRX 시가 대조 — 8영역 무접촉·코드 0줄)의 **선결 조건**이다. 스텁이면 대조 자체가 불가능하다. 09-06 15:16 금요일 보정으로 09-04 스텁 1,015→120 은 해소됐지만 **매일 아침 07:5x 스텁이 `max_bas_dd==오늘` idempotency 를 다시 거는 구조**는 시정 배포 전까지 그대로다 |
 | **②** | **F-2** | `[24] OPRC_HOUR` 프로브 → **근본 시정** | **프로브 = ✅ cycle264 구현 완료(관측만, 커밋·배포 대기)** · **시정 = 🔴 열린 채 — cycle265, 다음 주말** (`src/realtime/**` = **8영역** — 사용자 승인 + `domain-consult` 선행 필수) | `[7]` 이 세션 시가라는 **오염 자체**를 고친다. `[24]` 는 이 리포에서 **한 번도 관측된 적이 없어**(파싱 0건) "그 값이 08:00 프리장 시가다" 는 여전히 **추론**이다 — cycle264 의 `[open_scope_observe]`·`[open_source_compare]` 가 월 09-07 하루치 분포와 3자 대조를 만든다(이 파일 최상단 절의 **D+1 판독** 5항목). 자문 §8.1 = **월요일에는 행위를 바꾸지 않는다**(시정하면 VB 진입 −27.6% 라 cycle262·263 의 첫 실전 검증과 귀인이 섞인다). 시정 방향은 자문 §0 = `[7]` **0 강등 금지**(여섯 소비처 공유), `board="main"` 기준가만 KRX REST 로 교체 + 킬스위치 `open_price_scope_mode` |
 | ~~③~~ | **F-8** | 09:00:05 `[breakout_open_confirm]` **`confirmed=0 empty=55~65`** 원인 | **✅ 원인 규명 완료 — 자문 §1.1(2026-09-06). 표시 시정은 cycle264 C3 에 동봉(커밋·배포 대기)** | **`confirmed=0` 은 표시 버그였다.** `_emit_breakout_open_confirm` 이 `_open_confirmed` 를 직접 세지 않고 `get_targets_status()` 를 거치는데 그 함수가 `session_tracker.active ∩ tradable_boards` 로 보드를 가린다 — 09:00:0x 트래커는 30초 stale 캐시라 `active={PRE_NXT}` 이고 VB 는 `["main"]` ⇒ 교집합 ∅ → 전 종목 `open_price: 0`. 같은 함수 바로 앞줄 비필터 로그는 **VB 51/65(09-03)·46/55(09-04) 확정**. ⇒ ~~"주 경로 무동작"~~ 은 **반증**됐고 **REST 폴백은 고장이 아니라 오염된 WS 캐시에 차례를 뺏긴 것**이다 = F-2 는 새 배관이 아니라 **우선순위 뒤집기**. cycle264 가 `truth_confirmed`/`truth_total` 을 **추가**(기존 필드 보존)해 재발을 막는다 |
-| **④** | **F-3** | **kojiro 갭스킵 오염** 조사 | `src/engine/strategies/kojiro.py`(읽기 전용 조사 먼저) | kojiro 는 매수 창이 09:05~09:30 이라 이번 보류 **밖**이지만, 갭업/갭다운 스킵이 **같은 오염된 `open_price`** 로 갭률을 잰다. 프리장 시가 ≈ 전일종가면 `gap_rate ≈ 0` 이 되어 **스킵해야 할 갭업 종목을 스킵하지 않는다** = 방향이 **위험 증가** 쪽. 자문 §7-9 가 "별도 티켓으로 반드시 등재" 라고 못박았다 |
+| **④** | **F-3** | **kojiro 갭스킵 오염** — 조사 ✅ 완료(2026-09-07) · **관측 = cycle266 착수** | 조사 정본 `_workspace/consult/2026-09-07_kojiro_gap_contamination.md` · 관측 명세 `_workspace/specs/cycle268_kojiro_gap_observe.md`(`src/engine/kojiro_gap_observe.py` 신규 leaf + `kojiro.py` 호출 6행, **행위 변경 0**) · **시정(조사 1안 = `risk.py:646` 에 kojiro 추가)은 8영역 승인 대기 — 열린 채** | kojiro 는 매수 창이 09:05~09:30 이라 이번 보류 **밖**이지만, 갭업/갭다운 스킵이 **같은 오염된 `open_price`** 로 갭률을 잰다. 프리장 시가 ≈ 전일종가면 `gap_rate ≈ 0` 이 되어 **스킵해야 할 갭업 종목을 스킵하지 않는다** = 방향이 **위험 증가** 쪽. 자문 §7-9 가 "별도 티켓으로 반드시 등재" 라고 못박았다. **09-07 실측으로 확정** — 오염 경로는 `risk.on_tick`(`risk.py:646` skip 목록에 `donchian_swing` 만 있고 kojiro 가 **없다**)이고, 주 경로 `_swing_buy_poll_loop` 는 KRX REST(`J`)라 깨끗하다. WS 시가 ≠ KRX 시가 **98/103(95.1%)**, 갭률 오차 최대 **6.77%p**, kojiro 임계 적용 시 전이 **`pass→skip_up` 8건 / 반대 0건 = 진짜 갭업 8건 전부 미탐**. 스킵만 `_bought_today` 당일 영구 래치라 **래치 구조가 오염을 위험 증가 쪽으로 정류**한다. 오늘 노출 = kojiro 후보 14 중 **1(004020)** — 실제 매수 2건은 둘 다 09:05 REST(깨끗) |
 | **⏱ 시한부** | **F-1** | `[open_entry_hold_blocked]` **일일 추출 적재** (would_buy 보존) | `src/engine/log_metrics_collector.py`(20:10) 또는 `GET /api/log-reports/bundle`(20:20) — **cycle262 C12 범위 밖이라 별도 사이클** | 사용자 결정 ⑥ 은 "`system_logs` 만" 이 아니라 **일일 추출 적재**로 확정됐다. would_buy 정본이 평가 창이 닫히기 전에 사라지면 **지혈의 근거를 지혈이 스스로 지운다**. ⚠️ 우선순위 ①~④ 와 달리 **로그 retention 이 시계를 돌린다** — 배선 전까지는 주 1회 이상 수동 추출로 버틴다 |
 | 그 밖 | **F-4** | `[open_entry_hold_release]` (자문 §2.6 선택 마커, **이번 범위 미구현**) | VB·LTV | "막고 나서 더 좋은 값에 샀나" 를 로그 단독으로 판정 가능하게 한다. 없으면 자문 ⑨ 재검토 트리거는 `trade_history` 조인으로만 복원되고 **"못 샀다" vs "더 좋은 값에 샀다" 가 구분되지 않는다** |
 | 그 밖 | **F-6** | 계좌 게이트 활성일 **LTV config 카나리아 0행** | `long_tail_volatility.py` + `tests/unit/ast/test_cycle233_ast_account_risk.py`(계약 자체 변경 = 승인 사안) | 적대 검증이 "카나리아를 게이트 앞으로" 권고했으나 그 이동은 cycle233 M6(게이트 = `check_buy_signal` 첫 문장, `GATE_FIRST_FILES`)를 **RED 로 만든다**(실측 확인 = **불수용** 사유). 두 계약을 어떻게 화해시킬지는 별도 결정 — 그때까지 비대칭은 **문서화된 한계**이고 `test_c7_8` 이 그 현상을 고정한다 |
 | 그 밖 | **F-5** | `source` 필드 **진짜 출처 판정** | `scheduler._load_strategy_config` + `routes/strategies.update_params`(둘 다 C12 범위 밖) | 현재는 값 동등성 추론이라 `PUT 90` 을 `default` 로 보고한다. 출처 흔적을 남기려면 오버레이 지점이 기록해야 한다 |
+| 그 밖 | **F-3b** | **momentum·LTV 익일청산 갭률의 동일 시가 오염** (등재만 — 이번 사이클에서 고치지 않는다) | `momentum.check_exit_signal:177`(갭률 `:209`) · `long_tail_volatility.check_exit_signal:913`(갭률 `:938`) — 둘 다 `risk.on_tick` 경로 | F-3 조사 §6.1 이 찾았고 **현재 어느 목록에도 없었다**. 같은 오염된 `open_price`(통합 채널 `[7]`, 일-스코프 상수)로 `gap_rate = (open_price − buy_price)/buy_price` 를 재는데, **방향이 kojiro 와 반대**다 — 프리장 시가가 KRX 시가보다 낮으면(09-07 실측 64/98) 갭률이 **과소 측정**돼 트레일링으로 갈 종목이 **즉시 청산**된다 = 손실 확대가 아니라 **기대수익 훼손**. 임계가 10.0%(momentum)로 높아 뒤집힘 빈도는 kojiro(5.0%)보다 낮을 것으로 보이나 **미측정**이다. ⚠️ **08:00 `_execute_next_day_clear` 경로는 오염이 아니다** — 그 시각의 `[7]` 은 그 시점 최신 프리장 시가이고 08:00 익일청산의 설계 의도 자체가 "NXT 프리 시가 기준 갭 판정" 이다. 문제는 **MAIN 구간 `on_tick` 이 같은 낡은 값을 계속 읽는 것**. cycle265(F-2)가 `check_*_signal` 호출 인자 byte 동일을 검증 항목으로 못박았으므로 **cycle265 로도 닫히지 않는다** |
 
 ### ✅ 커밋 **직후** 정리 체크리스트 (누락 시 다음 사이클이 오해한다) — **1·2 모두 처리 완료**
 1. **[완료 `d292805`]** `tests/unit/ast/test_cycle223_ast_donchian_exit_fix.py::_CYCLE228_STRATEGY_CONTENT_SHA` 의
