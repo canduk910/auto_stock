@@ -28,6 +28,7 @@ from datetime import date, datetime, time, timezone, timedelta
 import pandas as pd
 
 from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.kojiro_gap_observe import absorb_call_failure, observe_gap
 from src.engine.kojiro_indicators import KojiroIndicatorConfig, enrich
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
@@ -819,6 +820,14 @@ class KojiroStrategy(StrategyBase):
         if not info or info.get("stage") != 1:
             return Signal.NONE
 
+        # cycle268 — kojiro_gap_observe 지점 1: 섹터캡·시간창 판정 *전* = A/B 비율의 분모.
+        try:
+            observe_gap(ticker, "candidate", arg_open=open_price,
+                        prev_close=info.get("prev_close"), current_price=current_price,
+                        params=self.config.params)
+        except Exception:
+            absorb_call_failure(ticker)
+
         # 섹터/테마 동시보유 캡 (매수 게이트 전용 — 청산/손절/트레일링/익일청산 절대 미차단).
         # 동일섹터 보유(positions ∪ pending_buys) ≥ cap 이면 3번째+ 스킵. fail-open:
         # sector 결측/미분류(독립 키) → 카운트 0 → 미차단. cap=0 → 비활성.
@@ -843,6 +852,17 @@ class KojiroStrategy(StrategyBase):
             return Signal.NONE
 
         prev_close = info["prev_close"]
+        # cycle268 — kojiro_gap_observe 지점 2: 갭 게이트가 평가조차 안 되는 코호트.
+        # 아래 실 분기(§2.2 표 "else")와 같은 조건을 앞서 판정하는 전용 if/else —
+        # 기존 갭 게이트 if 문은 재배열하지 않고 그대로 둔다(명세 §2.2 재배열 금지).
+        if open_price > 0 and prev_close > 0:
+            pass
+        else:
+            try:
+                observe_gap(ticker, "no_data", arg_open=open_price, prev_close=prev_close,
+                            current_price=current_price, params=self.config.params)
+            except Exception:
+                absorb_call_failure(ticker)
         # 갭업/갭다운 스킵 (당일 영구 스킵)
         if open_price > 0 and prev_close > 0:
             gap_rate = (open_price - prev_close) / prev_close * 100
@@ -850,17 +870,38 @@ class KojiroStrategy(StrategyBase):
             gap_down = self.config.params["gap_down_skip_pct"]
             if gap_rate >= gap_up:
                 logger.info("고지로 갭업 스킵: %s 갭률 %.1f%% ≥ %.1f%%", ticker, gap_rate, gap_up)
+                try:
+                    observe_gap(ticker, "skip_up", arg_open=open_price, prev_close=prev_close,
+                                current_price=current_price, params=self.config.params)
+                except Exception:
+                    absorb_call_failure(ticker)
                 self._bought_today.add(ticker)
                 return Signal.NONE
             if gap_rate <= gap_down:
                 logger.info("고지로 갭다운 스킵: %s 갭률 %.1f%% ≤ %.1f%%", ticker, gap_rate, gap_down)
+                try:
+                    observe_gap(ticker, "skip_down", arg_open=open_price, prev_close=prev_close,
+                                current_price=current_price, params=self.config.params)
+                except Exception:
+                    absorb_call_failure(ticker)
                 self._bought_today.add(ticker)
                 return Signal.NONE
 
         # 장중 비붕괴 확인 (지금 무너지고 있지 않음) — transient NONE (창 내 재시도)
         if open_price > 0 and current_price < open_price:
+            try:
+                observe_gap(ticker, "collapse", arg_open=open_price, prev_close=prev_close,
+                            current_price=current_price, params=self.config.params)
+            except Exception:
+                absorb_call_failure(ticker)
             return Signal.NONE
 
+        # cycle268 — kojiro_gap_observe 지점 6: 붕괴 가드 통과 후, 매수 확정 직전.
+        try:
+            observe_gap(ticker, "pass", arg_open=open_price, prev_close=prev_close,
+                        current_price=current_price, params=self.config.params)
+        except Exception:
+            absorb_call_failure(ticker)
         self._bought_today.add(ticker)
         # 당일 매수분 ATR 영속화 — 재-prepare 와이프 후에도 2ATR 손절이 살아 있어야 한다.
         try:
