@@ -136,6 +136,13 @@ def repo(tmp_path: Path) -> Path:
 #: "HSTS 가 안 붙은 응답" 을 흉내 내는 손잡이다. `FAKE_HTTPS_CODE_AFTER` 는 **2단계 마커가
 #: 생긴 뒤**(= 전환 up 이후)에만 적용된다 — 전환 전 사전 점검은 통과시키고 전환 후에만 443 이
 #: 죽는 상황(스니펫이 443 블록을 깨뜨린 경우)을 흉내 낸다.
+#:
+#: ⚠️ cycle267 시정 — 헤더 줄 종단을 **기본 CRLF** 로 낸다. 실제 HTTP/1.1 응답 헤더는 CRLF 로
+#: 끝나는데(RFC 9112 §2.2, `listen 443 ssl;` = HTTP/2 아님) 이 하네스는 종전에 LF 만 내서,
+#: 스크립트의 `grep -qiE '…86400\r?$'` 가 **GNU grep 에서 `\r` 을 리터럴 `r` 로 해석**하는
+#: 결함(EC2 GNU grep 3.11 실측 — 실입력 CRLF 에는 절대 매치되지 않는다)을 10개 뮤테이션
+#: 케이스 전부 초록으로 덮었다. 단언이 약했던 게 아니라 **입력이 현실과 달랐다**.
+#: `FAKE_HEADER_EOL=lf` 로 LF 종단도 낼 수 있다(검사식이 양쪽에서 동작하는지 재는 손잡이).
 _FAKE_CURL = r"""#!/usr/bin/env bash
 echo "curl $*" >> "$FAKE_LOG"
 url=""; wfmt=""; dump=""; inc=0; prev=""
@@ -156,14 +163,15 @@ case "$url" in
                       if [ -f .tls_stage2 ] && [ -n "${FAKE_HTTPS_CODE_AFTER:-}" ]; then code="$FAKE_HTTPS_CODE_AFTER"; fi ;;
   http://*)           code="${FAKE_HTTP_CODE:-301}"; loc="${FAKE_HTTP_LOCATION-https://auto.dkstock.cloud/}" ;;
 esac
-head="HTTP/1.1 ${code} X
-Server: nginx"
+if [ "${FAKE_HEADER_EOL:-crlf}" = "lf" ]; then CR=""; else CR=$'\r'; fi
+head="HTTP/1.1 ${code} X${CR}
+Server: nginx${CR}"
 if [ -n "$loc" ];  then head="${head}
-Location: ${loc}"; fi
+Location: ${loc}${CR}"; fi
 if [ -n "$hsts" ]; then head="${head}
-Strict-Transport-Security: ${hsts}"; fi
+Strict-Transport-Security: ${hsts}${CR}"; fi
 head="${head}
-
+${CR}
 "
 if [ -n "$dump" ]; then
   if [ "$dump" = "-" ]; then printf '%s' "$head"; else printf '%s' "$head" > "$dump"; fi

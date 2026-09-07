@@ -25,7 +25,11 @@
 #      인증서 이름 불일치로 막히면 안 된다) · 80 ACME 경로 → 404(301 이면 90일 뒤 갱신이
 #      깨진다) · 443 `/` → 401 + HSTS(문서 응답) · 443 정적자산 → HSTS(add_header 는
 #      상속이 아니라 **대체** — location 마다 따로 붙어야 한다. 정적자산만 누락되는
-#      경우는 브라우저 개발자도구를 열지 않으면 안 보인다).
+#      경우는 브라우저 개발자도구를 열지 않으면 안 보인다). HSTS 매치는 `hsts_ok()`
+#      (cycle267) — `tr -d '\r'` 로 CR 을 먼저 제거한 뒤 정확 값 앵커 매치한다. GNU
+#      grep `-E` 는 패턴 속 `\r` 을 리터럴 `r` 로 해석해 CRLF 헤더에 영구히 매치 실패하고
+#      (2026-09-07 EC2 가동 실패 원인), macOS BSD grep 은 같은 패턴을 CR 로 해석해 개발기
+#      에서만 통과한다 — `tr` 사전 제거가 이 셸 차이를 없앤다.
 #   7) 실패(전환 up 자체의 실패 포함) → `.tls_stage2` 만 삭제 + `-f prod -f tls up -d
 #      --no-deps frontend` 로 **1단계로 원복** + 원복 뒤 80/443 재확인. `.tls_enabled` 는
 #      절대 지우지 않는다 — 지우면 443 이 함께 내려가 2단계 원복이 아니라 TLS 전체
@@ -63,6 +67,16 @@ probe80() { curl -s -o /dev/null -D - -w '%{http_code}' "$1" || true; }
 probe443() { curl -sk -o /dev/null -D - -w '%{http_code}' --resolve "${DOMAIN}:443:127.0.0.1" "$1" || true; }
 # probe 결과 문자열의 마지막 줄이 상태코드다(그 앞은 헤더 덤프).
 code_of() { printf '%s' "$1" | tail -n1; }
+
+HSTS_VALUE="max-age=86400"
+# HSTS 헤더 검사. CR 을 **먼저 제거**한 뒤 정확 값으로 앵커 매치한다.
+# GNU grep 의 -E 는 패턴 안의 `\r` 을 캐리지 리턴이 아니라 리터럴 `r` 로 해석하므로
+# (GNU grep 3.11 실측), `...86400\r?$` 는 CRLF 로 끝나는 실제 HTTP 헤더에 절대 매치되지
+# 않는다 — 2026-09-07 EC2 2단계 가동 실패의 원인이다(cycle260 이 접두 매치 뮤테이션을
+# 막으려다 심은 결함). macOS BSD grep 은 같은 패턴을 CR 로 해석해 개발기에서 은폐된다.
+# `tr -d '\r'` 는 셸·grep 의 이스케이프 해석에 전혀 의존하지 않아 CRLF·LF 양쪽에서
+# 동일하게 동작하고, 끝 `$` 앵커가 `max-age=0`·`max-age=864000`·초과 속성을 계속 막는다.
+hsts_ok() { printf '%s' "$1" | tr -d '\r' | grep -qiE "^Strict-Transport-Security: ${HSTS_VALUE}$"; }
 
 # 원복 = 마커 삭제(1단계 마커는 절대 건드리지 않는다) + **그 자리의 1단계 상태**로 frontend
 # 재기동. `enable` 경로의 실패 원복은 항상 `.tls_enabled` 가 있는 상태에서 일어난다(2 가
@@ -158,8 +172,8 @@ for _attempt in 1 2 3 4 5 6 7 8 9 10; do
        && printf '%s' "${R80}" | grep -qi "^Location: https://${DOMAIN}/" \
        && [ "$(code_of "${RACME}")" = "404" ] \
        && [ "$(code_of "${RDOC}")" = "401" ] \
-       && printf '%s' "${RDOC}" | grep -qiE '^Strict-Transport-Security: max-age=86400\r?$' \
-       && printf '%s' "${RASSET}" | grep -qiE '^Strict-Transport-Security: max-age=86400\r?$' \
+       && hsts_ok "${RDOC}" \
+       && hsts_ok "${RASSET}" \
        && [ "${STATE}" = '"State":"running"' ]; then
         OK=1
         break
