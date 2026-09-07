@@ -180,6 +180,45 @@ cycle265 의 (B) 는 새 배관을 까는 일이 아니라 **우선순위를 뒤
 - 8영역 sha 자매 가드 **4곳**(222a3 `_APPROVED_CONTENT_SHA` · 223 · 223f · 226)에
   `src/realtime/handler.py` 승인 항목 등재.
 
+### 🔴 cycle268 (`a77f9c3`) — 커밋 직후 정리 + **48시간 시한**
+
+**⏱ 시한부 — 이 마커는 스스로 영속되지 않는다.** `[kojiro_gap_observe]` 는 INFO 라
+(a) `system_logs` 도달은 하지만 (b) **20:10 리포트에는 안 들어가고**
+(`log_metrics_collector.pattern_by_level` 이 WARNING+ 만 담는다 — INFO 는 `level_counts` 숫자 하나뿐)
+(c) **이틀 뒤 삭제된다**(`system_logs.INFO_RETENTION_DAYS = 2`, 20:10 `purge_old_logs()`).
+⇒ **D+1(화 09-08) 판독을 48시간 안에 수행하거나 첫날 행을 별도 파일로 덤프한다.**
+cycle245 `[ratio_notional_blocked]` 후속 F-12 · cycle262 후속 F-1 과 **동일 계열**이다.
+⚠️ 레벨 승격(INFO→WARNING)으로 때우지 마라 — 하루 30~70행이 리포트 `top_patterns` 를 오염시킨다.
+
+**커밋 직후 정리 2건**
+
+1. **in-flight sha 핀 4곳 비우기** — 키 `"src/engine/strategies/kojiro.py"` + 그 위 cycle268 주석 블록을 함께 삭제.
+   값 = `4414ff9ef03a3cc3c395c540f28fea0ecd002e2500160b04d9078929556fdfb3`.
+   `test_cycle223_ast_donchian_exit_fix.py::_CYCLE228_STRATEGY_CONTENT_SHA`(:552) ·
+   같은 파일 `::_PREEXISTING_CONTENT_SHA`(:447) ·
+   `test_cycle223f_ast_manual_apply_safeguard.py::_PREEXISTING_CONTENT_SHA`(:348) ·
+   `test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA`(:459).
+   선례 = `0c878ec`(cycle263) · `29b67ff`(cycle264) 둘 다 별도 후속 커밋. **넷 중 하나만 빠져도 다른 가드가 붉어진다.**
+2. **사이클 한정 가드 2건 은퇴** — `test_cycle268_ast_gap_observe.py::test_g268_14*` + `CYCLE_SCOPED_DELETE_AFTER_COMMIT`.
+   `git diff HEAD` 기반이라 커밋된 지금 공허하게 통과하고, 반대로 **D4(`order_engine.py`)·cycle265(`src/realtime/**`)가
+   워킹트리를 만지면 cycle268 과 무관하게 붉어진다** = 오탐 발생기.
+
+**판독 함정 3 (tester 적대 검토 실측 — 명세 §1/§5 정본에 반영 완료)**
+
+- 🔴 **경로 B(`caller=on_tick`) 행의 `ws_*` 4필드는 동어반복이다.** `risk.on_tick` 이 `check_buy_signal` 호출
+  **전에** `ticker_prices[t]["open_price"] = open_price` 를 덮으므로(`risk.py:495`) `ws_cmp=ws_eq` 가 **산술적으로 보장**된다.
+  `ws_ne` 건수를 오염 지표로 세면 **경로 B 전체가 "일치" 로 잡혀 결론이 뒤집힌다**(cycle264 `used_src=rest` 함정과 동형).
+  경로 B 오염 판정 = `stock_master_daily` 오프라인 조인**만**.
+- **`verdict=candidate` 는 시간창 게이트 앞이라 창 밖에서도 발화한다.** 경로 A/B 비율은 로그 타임스탬프
+  `[09:05, 09:30]` 로 **먼저 거르고** 세라. 판정 5종은 창 안 전용이 맞다.
+- **grep 앵커 필수.** `verdict=` 는 `ws_verdict=` 의 접미이고 두 필드는 서식상 인접하지 않는다 —
+  앵커 없는 grep 은 실측 1행짜리를 **4행**으로 부풀리고, 한 패턴 grep 은 **0행**을 낸다.
+  정본 = `grep ' verdict=skip_up ' | grep ' ws_verdict=pass'`.
+
+**구조적 실측 (조사 §1.3 확증)** — `_build_priority_groups`(`scheduler.py:1909`)가 `"swing": []` 을 고정 반환해
+**kojiro 후보는 WS 구독 대상이 아니다**. 경로 B 노출은 `kojiro 후보 ∩ (breakout ∪ momentum)` 교집합뿐이고,
+momentum 몫은 09:30 이후 첫 틱이라 매수 창 밖이다.
+
 ### ✅ 커밋 **직후** 정리 체크리스트
 
 1. 자매 가드 **4곳**의 `src/realtime/handler.py` 항목을 **함께 비운다**(각 파일 TODO 주석 참조).

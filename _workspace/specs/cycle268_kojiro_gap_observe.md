@@ -31,10 +31,10 @@
 
 | 알아야 할 것 | 어떻게 나오는가 |
 |---|---|
-| **경로 A/B 비율** (오염 노출 종목 수) | `verdict=candidate` 행을 `caller` 로 그룹 — `caller=on_tick` = 경로 B(오염), `caller=_swing_buy_poll_loop` = 경로 A(깨끗) |
-| **오염으로 판정이 뒤집혔는가 (경로 A 행)** | 같은 행 안의 `verdict` ↔ `ws_verdict` 불일치. `grep 'verdict=skip_up ws_verdict=pass'` = "깨끗한 경로는 걸렀는데 오염 경로였으면 놓쳤을 종목" |
-| **오염으로 판정이 뒤집혔는가 (경로 B 행)** | 익일 오프라인 조인 — `arg_open`·`prev_close`·`gap_up`·`gap_down` 이 전부 행에 있으므로 `stock_master_daily` KRX 시가만 붙이면 반사실 재계산이 **완결**된다 (§5 쿼리) |
-| **09:05~09:30 구간 직접 관측** (조사 §4.2-2 공백) | 이 마커는 매수 창 안에서만 verdict 행을 낸다 — cycle264 `[open_scope_observe]` 가 09:00 에 cap 소진되던 공백을 정확히 메운다 |
+| **경로 A/B 비율** (오염 노출 종목 수) | `verdict=candidate` 행을 `caller` 로 그룹 — `caller=on_tick` = 경로 B(오염), `caller=_swing_buy_poll_loop` = 경로 A(깨끗). ⚠️ **반드시 로그 타임스탬프 `[09:05, 09:30]` 로 먼저 거른다** — `candidate` 는 시간창 게이트 *앞*에서 발화하므로(§2.2 지점 1) 창 밖 행이 섞이고, 특히 momentum 유니버스와 겹친 종목은 09:30 이후 첫 틱으로 들어와 **심사받을 기회조차 없던 종목**이 분모를 부풀린다 |
+| **오염으로 판정이 뒤집혔는가 (경로 A 행)** | 같은 행 안의 `verdict` ↔ `ws_verdict` 불일치. ⚠️ **두 필드는 서식상 인접하지 않는다**(사이에 7필드) — 한 패턴 grep 은 **0행**을 낸다. 그리고 `verdict=` 는 `ws_verdict=` 의 접미라 앵커 없는 grep 은 **건수를 부풀린다**(실측 1행짜리가 4행). 정본 = `grep ' verdict=skip_up ' \| grep ' ws_verdict=pass'` — **모든 verdict 카운트에 선행 공백 앵커 ` verdict=` 를 쓴다** |
+| **오염으로 판정이 뒤집혔는가 (경로 B 행)** | **오프라인 조인이 유일 경로다.** ⚠️ 경로 B 행의 `ws_open`·`ws_cmp`·`ws_gap`·`ws_verdict` 는 **동어반복**이다 — `risk.on_tick` 이 `check_buy_signal` 호출 **전에** `ticker_prices[ticker]["open_price"] = open_price` 를 덮으므로(`risk.py:495`) `caller=on_tick` 행은 **구조적으로 항상** `ws_cmp=ws_eq` · `ws_verdict == verdict` 다. `arg_open`·`prev_close`·`gap_up`·`gap_down` 에 `stock_master_daily` KRX 시가를 붙여야만 반사실이 성립한다 (§5 쿼리) |
+| **09:05~09:30 구간 직접 관측** (조사 §4.2-2 공백) | **판정 5종**(`no_data`/`skip_up`/`skip_down`/`collapse`/`pass`)은 시간창 게이트 뒤라 **창 안에서만** 발화한다 — cycle264 `[open_scope_observe]` 가 09:00 에 cap 소진되던 공백을 정확히 메운다. **`candidate` 만 창 무관**이다(§2.2 지점 1이 시간창 *앞*) |
 | **결측이 무작위인가** | `verdict=candidate` 행은 있는데 대응하는 판정 행(`pass`/`skip_*`/`collapse`/`no_data`)이 없는 ticker = **갭 블록에 도달하지 못한 코호트**. 그 사유는 시간창 밖 또는 섹터캡(기존 `[kojiro_sector_cap]` 로 조인)이다. **침묵으로 사라지지 않는다** |
 
 > cycle264 가 `reason=ok|rest_zero|rest_error` 로 침묵을 막은 것과 같은 원칙 —
@@ -44,7 +44,15 @@
 
 1. `[open_source_compare]`(cycle264)에 kojiro 가 **구조적으로 못 들어간다**(`_targets` 부재) → 별도 마커로 해결.
 2. 09:05~09:30 직접 관측 0건 → 이 마커가 그 창에서 발화한다.
-3. 과거 갭스킵 이력 0(INFO 2일 보존) → **오늘부터 쌓기 시작**한다. 20:10 로그 분석이 `system_logs` 로 영속한다.
+3. 과거 갭스킵 이력 0(INFO 2일 보존) → **오늘부터 쌓기 시작**한다.
+   🔴 **그러나 이 마커는 스스로 영속되지 않는다 — 판독에 48시간의 시한이 걸린다.**
+   - `system_logs` 도달은 한다(`src/main.py::_DbLogHandler` 가 INFO 컷).
+   - **20:10 리포트에는 도달하지 않는다** — `log_metrics_collector.pattern_by_level` 이 WARNING/ERROR/CRITICAL 만 담아
+     INFO 는 `level_counts` 숫자 하나로만 남고 `top_patterns`·`samples`·OpenAI 프롬프트·`daily_log_reports.metrics` 에
+     **한 글자도 들어가지 않는다**(cycle245 `[ratio_notional_blocked]` 후속 F-12 와 동일 계열).
+   - **이틀 뒤 삭제된다** — `src/db/system_logs.py::INFO_RETENTION_DAYS = 2`, 20:10 `purge_old_logs()` 가 지운다.
+   ⇒ **D+1 판독을 48시간 안에 수행**하거나 첫날 행을 별도 파일로 덤프한다.
+   ⚠️ 레벨 승격(INFO→WARNING)으로 해결하지 마라 — 하루 30~70행이 WARNING 이 되어 리포트 `top_patterns` 를 오염시킨다.
 
 ---
 
@@ -159,6 +167,10 @@ FROM t JOIN stock_master_daily d
 
 판독 시 **반드시** 지킬 것:
 
+- 🔴 **경로 B(`caller=on_tick`) 행의 `ws_*` 4필드로는 오염을 판정할 수 없다** — `risk.py:495` 가 인자와 **같은 값**을
+  캐시에 먼저 쓰므로 `ws_cmp=ws_eq` 가 **산술적으로 보장**된다(cycle264 `used_src=rest → delta_bp=0` 함정과 동형).
+  **`ws_cmp=ws_ne` 건수를 오염 지표로 세면 경로 B 전체가 분모에서 "일치" 로 잡혀 결론이 뒤집힌다.**
+  경로 B 오염 판정 = 이 절의 오프라인 조인**만**이 유일 경로다.
 - **`caller=on_tick` 행에서만** 오염 판정이 성립한다. `caller=_swing_buy_poll_loop` 행의 `arg_open` 은
   REST 값이라 KRX 확정 시가와 일치하는 것이 **정상**이며, 그 일치는 "오염 없음"의 증거가 아니라
   **경로 A 가 깨끗함의 재확인**일 뿐이다(cycle264 `used_src=rest` 함정과 동형).

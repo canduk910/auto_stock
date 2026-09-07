@@ -336,16 +336,11 @@ def _content_sha(path: str) -> str:
 #    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
 # TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
-    # 🔁 2026-09-07 (cycle268) — `[kojiro_gap_observe]` 갭 판정 shadow 관측
-    #    (명세 `_workspace/specs/cycle268_kojiro_gap_observe.md`, 팀장 승인 범위 =
-    #    `kojiro.py` 단독 + 신규 leaf `src/engine/kojiro_gap_observe.py`).
-    #    변경은 순수 추가 41행 — import 1행 교체 + `check_buy_signal` 안의 관측 호출
-    #    6지점(각각 `try/except Exception: absorb_call_failure(ticker)`) + `no_data`
-    #    그림자 `if/else`. 기존 갭 스킵 로그 2줄·`_bought_today` 래치·반환 Signal 은
-    #    byte/행위 불변(골든 매트릭스 18조합 + 폭사 내성 18조합 실증).
-    #    8영역·`scheduler.py`·나머지 전략 6파일 diff 0.
-    # TODO(cycle268 커밋 후): 아래 1항목을 **자매 4곳에서 함께 삭제**하고 dict 를 비운다.
-    "src/engine/strategies/kojiro.py": "4414ff9ef03a3cc3c395c540f28fea0ecd002e2500160b04d9078929556fdfb3",
+    # ✅ 2026-09-07 — cycle268 항목(kojiro.py)은 커밋 `a77f9c3` 으로 **자기소멸**했다
+    #    (`git diff HEAD` 에 더 이상 나타나지 않는다). 스냅샷을 남겨 두면 (a) `test_g3_8`
+    #    이 첫 커밋된 항목에서 통째로 skip 돼 나머지 핀의 스테일 탐지가 조용히 죽고
+    #    (b) 다음에 kojiro.py 를 정당하게 건드리는 사이클이 "cycle268 면제" 문구가 붙은
+    #    오해 소지 있는 실패를 받아 **핀 재산출로 유도된다**(09-05 카드 #3 재발). 그래서 비운다.
     #    `_parse_tick_prices` 는 byte 동일(소스 세그먼트 sha 핀)이고 `_handle_tick` 의
     #    `on_tick` 6-튜플도 골든 12케이스로 불변 실증 = **매매 행위 diff 0**.
     #    명세 = `_workspace/consult/2026-09-07_open_price_scope_filter.md` §7.1.

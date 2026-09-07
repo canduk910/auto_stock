@@ -21,7 +21,6 @@
 | G-266-11 | `scheduler.py` < 3,900L ∧ cycle257 상한과 정합 | 라인 여유 3행 | 영구 |
 | G-266-12 | leaf `observe_gap` 시그니처(`depth` kwonly 기본 2) + never-raise 골격 | §3.1 / §3-1 | 영구 |
 | G-266-13 | leaf 는 read-only — 변형 메서드/대입 0건, 신규 cap 클래스 0 | §3-2 / cycle258 배관 | 영구 |
-| G-266-14 | 8영역·`scheduler.py`·타 전략 6파일 워킹트리 diff 0 | 접촉 범위 | **⚠️ 사이클 한정** |
 
 ## 수명 판단 — 왜 sha 핀을 새로 만들지 않는가
 
@@ -39,23 +38,29 @@
   가드를 영구로 두지 마라" 를 못박았다.
 
 ⇒ 이 사이클의 "타 전략 무접촉" 은 **① 마커/모듈명 containment(영구) + ② 워킹트리
-diff 범위 가드(G-266-14, 사이클 한정)** 로 지킨다. G-266-14 는 **커밋 직후 삭제**한다
+diff 범위 가드(G-268-14, 사이클 한정)** 로 지켰다.
+
+✅ **2026-09-07 — G-268-14 / G-268-14b 는 커밋 `a77f9c3` 직후 삭제됐다.** 예고대로다
 (cycle264 `test_c7_working_tree_touches_only_allowed_files` 선례 — 그 파일 헤더가
-"커밋(38f2560) 직후 삭제 완료" 라고 적어 둔 바로 그 패턴).
+"커밋(38f2560) 직후 삭제 완료" 라고 적어 둔 바로 그 패턴). 커밋 뒤 그 둘은
+cycle268 에 대해서는 **영구히 공허**한 반면, 워킹트리에서 `risk.py`·`scheduler.py`·
+`order_engine.py` 를 만지는 **다른** 사이클(D4 · cycle265)에는 cycle268 과 무관하게
+붉어지는 **오탐 발생기**가 된다. 커밋 감지 skip 으로 살려두지도 않았다 — 조건부로
+잠자는 가드는 다음 사람이 그 조건을 읽어야 하는 부채다.
+남은 이 파일의 가드는 **전부 영구**이며 워킹트리·git 상태에 의존하지 않는다.
 
 ## `ast.dump` sha 를 쓰지 않는 이유
 
 파이썬 3.12(CI)/3.13(로컬) 출력이 달라 로컬 초록·CI 실패가 난다(cycle256 G-250-5 ·
 cycle259 S4a). 소스 스캔에 `git grep`/`git ls-files` 도 쓰지 않는다 — 추적 파일만 보므로
 Green 이 새로 만든 미추적 파일을 로컬에서 놓친다(cycle259 S4b). 전부 `Path.rglob` + AST 다.
-(예외 = G-266-14 의 워킹트리 diff 판정 — git 없이는 정의되지 않는 질문이다.)
+(G-268-14 삭제 이후 이 파일에는 `git` 을 부르는 곳이 **하나도 없다**.)
 """
 
 from __future__ import annotations
 
 import ast
 import re
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -705,68 +710,3 @@ def test_g268_13c_leaf_does_not_touch_strategy_internals():
         f"leaf 가 전략 내부 상태를 참조한다: {hits} — 관측이 판정의 입력이 되면 "
         "'행위 변경 0' 이 깨진다"
     )
-
-
-# ===========================================================================
-# G-266-14 — 워킹트리 접촉 범위 (⚠️ **사이클 한정 — cycle268 커밋 직후 삭제**)
-# ===========================================================================
-#
-# bare `git diff HEAD` 는 커밋 뒤 공허해지고 그다음 편집에서 무조건 RED 가 된다
-# (cycle240 A11b · cycle252 G-252-5b). 그래서 이 가드는 **영구가 아니다** —
-# cycle268 커밋 직후 이 섹션(그리고 이 상수 블록)을 삭제한다.
-# ---------------------------------------------------------------------------
-CYCLE_SCOPED_DELETE_AFTER_COMMIT = (
-    "test_g268_14_untouchable_files_have_zero_diff",
-    "test_g268_14b_engine_scope_is_two_files",
-)
-
-_UNTOUCHABLE = (
-    # 8영역 (CLAUDE.md 정본)
-    "src/engine/risk.py", "src/engine/order_engine.py", "src/engine/session.py",
-    "src/engine/scanner.py", "src/engine/strategy_registry.py", "src/api/order.py",
-    "src/auth", "src/realtime",
-    # 라인 상한 때문에 같은 승인 대상
-    "src/engine/scheduler.py",
-    # 나머지 전략 6파일
-    "src/engine/strategies/momentum.py",
-    "src/engine/strategies/volatility_breakout.py",
-    "src/engine/strategies/long_tail_volatility.py",
-    "src/engine/strategies/donchian_swing.py",
-    "src/engine/strategies/bull_flag_breakout.py",
-    "src/engine/strategies/vcp_breakout.py",
-)
-
-
-def test_g268_14_untouchable_files_have_zero_diff():
-    """8영역 · `scheduler.py` · 타 전략 6파일 워킹트리 diff **0** (명세 §0)."""
-    def _git(*args):
-        return subprocess.run(["git", *args], cwd=_ROOT, capture_output=True,
-                              text=True, check=True).stdout.split()
-
-    changed = sorted(set(_git("diff", "HEAD", "--name-only", "--", *_UNTOUCHABLE))
-                     | set(_git("ls-files", "--others", "--exclude-standard",
-                                "--", *_UNTOUCHABLE)))
-    assert changed == [], (
-        f"cycle268 이 만지면 안 되는 파일이 바뀌었다: {changed}. "
-        "접촉 허용은 `src/engine/kojiro_gap_observe.py` + "
-        "`src/engine/strategies/kojiro.py` 둘뿐이다(명세 §0)"
-    )
-
-
-def test_g268_14b_engine_scope_is_two_files():
-    """`src/engine/**` 안에서 바뀐 파일이 명세 §0 의 2개뿐이다.
-
-    ⚠️ 스코프를 `src/` 전체가 아니라 `src/engine/` 으로 좁힌 이유 — 이 워킹트리는
-    여러 에이전트가 공유한다(작성 시점 실측: 다른 작업이 `src/routes/stock_master.py`
-    를 편집 중이었고 `src/` 전체 스코프가 그것을 cycle268 위반으로 잡았다). 8영역
-    (`src/api/order.py`·`src/realtime/**`·`src/auth/**`)은 G-266-14 가 이미 파일
-    단위로 지키므로 커버리지 손실은 없고, 오탐만 사라진다.
-    """
-    def _git(*args):
-        return subprocess.run(["git", *args], cwd=_ROOT, capture_output=True,
-                              text=True, check=True).stdout.split()
-
-    changed = set(_git("diff", "HEAD", "--name-only", "--", "src/engine")) | set(
-        _git("ls-files", "--others", "--exclude-standard", "--", "src/engine"))
-    extra = sorted(changed - {LEAF_REL, KOJIRO_REL})
-    assert extra == [], f"허용 범위 밖 `src/engine` 변경: {extra}"
