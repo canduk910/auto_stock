@@ -235,6 +235,19 @@ Agent(
 
 **Phase 4.5 는 Phase 4 완료 후 또는 별도 세션으로 실행** — 운영 시간 (KRX 메인 09:00~15:30) 중 push 자제 권고 (CLAUDE.md 운영 가이드).
 
+### Phase 4.8: 문서 동기화 (`/sync-docs`) — **필수**
+
+코드가 바뀐 사이클은 커밋 **전에** `/sync-docs` 를 돈다. 워크플로 안에서 처리하더라도
+그 명령의 §2 매핑 표와 **대상 문서 정본 목록**을 근거로 삼는다(그게 누락 방지의 유일한 체크리스트다).
+
+- 최소 의무 = ① 변경된 코드 위치 → 매핑 표로 갱신 후보 문서 확정 ② **모듈 누락 자가 점검**
+  (디렉터리 정본이 그 디렉터리의 새 모듈을 담고 있는가 — 기계적 grep) ③ 루트 `CLAUDE.md`
+  하네스 표 1행 + `docs/HARNESS_CHANGELOG.md` verbatim ④ 열린 과제는 `_workspace/00_URGENT_WORKLIST.md`
+- **전용 `CLAUDE.md` 가 없는 디렉터리**(`src/services/` · `src/middleware/` · `tools/` · `e2e/`)를
+  건드렸으면 상위 문서를 본다 — 이 넷이 누락이 반복되는 지점이다.
+- ⚠️ `src/**` 는 확장자 무관 **이미지 입력**이라 `src/*/CLAUDE.md` 수정만으로도 배포가 full 이 된다.
+  보유 중 장중이면 커밋만 하고 푸시는 장 종료 후로 미룬다(cycle232 D6).
+
 ### Phase 5: 정리
 
 1. 팀원 종료 요청 (SendMessage)

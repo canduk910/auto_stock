@@ -48,6 +48,9 @@ stamp 우선 복원(첫 체결이 밟을 청산 경로의 P1 계약 위반 선�
 - 단위/회귀 테스트 → `tdd-cycle` (백엔드 pytest+respx+freezegun / 프론트엔드 vitest+RTL+MSW)
 - 영향 인덱스 → `test-impact-index`
 - 통합/경계면/E2E/안전성 → `trading-test`
+- **문서 동기화 → `/sync-docs` 명령 (Phase 4.8, 코드 변경 사이클은 커밋 전 필수)** — 코드 위치 → 갱신 후보 문서
+  매핑 표 + **대상 문서 정본 목록** + 모듈 누락 자가 점검을 담은 유일한 체크리스트다.
+  ⚠️ 전용 `CLAUDE.md` 가 없는 `src/services/` · `src/middleware/` · `tools/` · `e2e/` 가 누락 반복 지점
 - KIS API 정본 스펙 (TR_ID·응답 구조·거부 코드) → `kis-mcp-query` 스킬 (backend-dev / tdd-engineer / tester / refactor-expert 공유)
 
 **우회 허용 (메인 세션 직접 응답):** 단순 사실 질의, 단발 디버그/grep, 운영 환경 즉시 점검(EC2 SSH 등). 코드 변경 제안이 따라오면 다시 team-leader 로 인계.

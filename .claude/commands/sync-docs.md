@@ -50,12 +50,50 @@ git diff 를 보지 말고 **지정 영역의 코드를 직접 읽는다**.
 | `src/services/*` | `src/CLAUDE.md`(디렉토리 역할), `CLAUDE.md`(외부 통합) — **전용 CLAUDE.md 없음, 누락 주의** |
 | `src/models/*` | `src/models/CLAUDE.md` |
 | `src/routes/*` | `src/routes/CLAUDE.md`, `README.md`(API 엔드포인트 표) |
+| `src/middleware/*` | `src/CLAUDE.md`(의존 관계·진입점 표), `CLAUDE.md`(API 인증 규칙·환경 변수) — **전용 CLAUDE.md 없음, 누락 주의**(cycle243 API 인증이 여기 산다) |
+| `tools/deploy/*`, `.github/workflows/deploy.yml` | `CLAUDE.md`(Docker/배포 — 선택적 배포 3모드), `README.md`(배포) |
+| `tools/ops/*` | `CLAUDE.md`(운영 가이드 — TLS 단계·자격 회전 등 운영자 실행 절차) |
+| `tools/analysis/*`, `tools/test_impact/*` | `CLAUDE.md`(테스트 실행 / 관측 도구), 해당 산출물 디렉터리의 README 성격 문서 |
+| `e2e/*` | `frontend/CLAUDE.md`(E2E 규약), `README.md`(테스트 실행) |
 | `frontend/*` | `frontend/CLAUDE.md`, `README.md`(UI 화면 표), `docs/architecture.md`(10. 프론트엔드 구조) |
 | `supabase/migrations/*` | `CLAUDE.md`(DB 스키마 표), `src/db/CLAUDE.md`, `docs/architecture.md`(9. DB 스키마), `README.md`(마이그레이션 목록) |
 | `Dockerfile`, `docker-compose*.yml`, `.github/workflows/*` | `CLAUDE.md`(Docker/배포), `README.md`(빌드/실행), `docs/architecture.md`(12. 배포) |
 | `requirements.txt`, `frontend/package.json` | `README.md`(의존성 — 영향 있을 때만) |
 | 신규 전략/매매 규칙 | `CLAUDE.md`(다중 전략 섹션) + 전략 명세 + `_workspace/00_leader_trading_rules.md` 동기화 여부 안내 |
 | 사이클 단위 변경 이력 (하네스) | `docs/HARNESS_CHANGELOG.md`(verbatim 상세) + `CLAUDE.md`(하네스 변경 이력 요약 표 1줄) |
+| `.claude/agents/*`, `.claude/skills/*`, `.claude/commands/*` | `CLAUDE.md`(하네스 절 — 에이전트 목록·모델 라우팅·스킬 트리거). 하네스 구성을 바꿨으면 **루트 CLAUDE.md 가 정본**이므로 반드시 같이 본다 |
+| 운영 결함·후속 과제 발생 | `_workspace/00_URGENT_WORKLIST.md` — 루트 CLAUDE.md 가 "다른 작업 전에 먼저 읽을 것"으로 지목한 문서다. 열린 과제가 생기거나 닫히면 **여기가 정본**이다 |
+
+### 대상 문서 정본 목록 (2026-09-07 전수 집계)
+
+이 목록에 없는 `.md` 가 리포에 새로 생겼으면 **먼저 이 목록에 넣을지 판단**한다(§6 보고에 명시).
+
+| 문서 | 성격 |
+|---|---|
+| `CLAUDE.md` | 루트 정본 — 안전 규칙·전략·DB·배포·하네스 |
+| `README.md` · `frontend/README.md` | 외부 독자용 |
+| `src/CLAUDE.md` + `src/{api,auth,db,engine,engine/strategies,models,realtime,routes}/CLAUDE.md` (9) | 디렉터리 정본 |
+| `frontend/CLAUDE.md` | 프론트 정본 |
+| `docs/architecture.md` | 흐름 도식 (실제로 변했을 때만) |
+| `docs/HARNESS_CHANGELOG.md` | verbatim 누적 (행 추가만) |
+| `docs/backtest-monitoring.md` | 외부 통합(백테스트 MCP·매크로 레짐) 운영 가이드 |
+| `_workspace/00_URGENT_WORKLIST.md` | 열린 과제 정본 |
+| `_workspace/00_leader_trading_rules.md` | 매매 규칙 정본 (`DEFAULT_PARAMS` 변경 시 동기화 의무) |
+| `.claude/agents/*.md` · `.claude/skills/**/SKILL.md` · `.claude/commands/*.md` | 하네스 구성 |
+
+**전용 `CLAUDE.md` 가 없는 코드 디렉터리** (누락이 반복되는 지점): `src/services/` · `src/middleware/` ·
+`tools/` · `e2e/`. 이 넷은 상위 문서(`src/CLAUDE.md` 또는 루트 `CLAUDE.md`)가 정본이므로 **거기를 본다**.
+
+### 모듈 누락 자가 점검 (모드 B 필수)
+
+디렉터리 정본은 그 디렉터리의 모듈을 **빠짐없이** 담아야 한다. 기계적으로 확인한다:
+
+```bash
+for f in src/engine/*.py; do b=$(basename $f .py); [ "$b" = "__init__" ] && continue;
+  grep -q "$b" src/engine/CLAUDE.md || echo "누락: $b.py"; done
+```
+`src/{api,db,engine,models,realtime,routes}` 각각에 같은 검사를 돌린다.
+(2026-09-07 실측으로 engine 4건·routes 1건·middleware 1건이 이 검사로 드러났다.)
 
 **손대지 않는 영역**:
 - `docs/kis/` — KIS 공식 API 스펙. 코드 동기화 대상 아님.

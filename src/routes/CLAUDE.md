@@ -99,6 +99,14 @@
 | GET | `/api/stock-master/{ticker}/daily?days=30` | stock_master.py | **사이클 124 (2026-06-12)** — ticker 별 일봉 조회 (`stock_master_daily`, bas_dd DESC). days ∈ [1,100]. 응답 30 행 OHLCV. 미적재 ticker → 404 |
 | GET | `/api/stock-master/{ticker}` | stock_master.py | **사이클 84** — 단건 조회. 미존재 시 404. 응답 StockBasics dict |
 
+### backtest.py — `/api/backtest/*`
+
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| GET | `/api/backtest/mcp/health` | 외부 MCP 백테스트 서버(`http://43.202.187.5:3846/mcp`) 헬스체크. Phase 1 산출 — 실행/조회 엔드포인트는 미구현 |
+
+`KIS_MCP_ENABLED` 가 꺼져 있으면 외부 호출 없이 graceful. 매매 hot path 무관.
+
 ## 응답 형식
 모든 응답은 `models/response.py`의 `ApiResponse` 래퍼 사용:
 ```json
