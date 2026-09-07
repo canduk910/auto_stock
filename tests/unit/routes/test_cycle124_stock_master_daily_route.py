@@ -87,7 +87,17 @@ async def test_g_daily2_not_found_when_no_data():
 
 
 async def test_g_daily2b_graceful_on_exception():
-    """GET /{ticker}/daily — get_recent_daily 예외 시 graceful → 404 (빈 리스트 처리)."""
+    """GET /{ticker}/daily — get_recent_daily 예외 시 500 (은폐 금지).
+
+    ⚠️ 계약 반전 (cycle266, 사이클 66 K-2 관례) — 이 테스트는 원래
+    "예외 → rows=[] → 404(graceful)" 를 단언했다. 그 계약은 진짜 DB 장애를
+    "데이터 없음"으로 영구 은폐하는 결함이었다(운영 실측 3,583종목 중 1,773종목이
+    정상 미적재인 상황에서 진짜 장애까지 같은 404 로 섞여 구분 불가).
+    cycle266 A-2 가 라우트의 `except Exception: rows = []` 를 제거해
+    404("적재 대상 아님")와 500("DB 장애")를 분리했다 — 상세 =
+    `_workspace/specs/cycle266_daily_tab_fix.md` §3-A-2,
+    `tests/unit/routes/test_cycle266_daily_route_serialization.py::test_c266_a2_1_*`.
+    """
     with patch(
         "src.routes.stock_master.stock_master_daily.get_recent_daily",
         new_callable=AsyncMock,
@@ -102,8 +112,8 @@ async def test_g_daily2b_graceful_on_exception():
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.get("/api/stock-master/000001/daily")
 
-    # 예외 → rows=[] → 404 (graceful, 500 아님)
-    assert resp.status_code == 404, f"예외 graceful → 404 의무, got {resp.status_code}"
+    # 예외는 은폐하지 않고 500 으로 올린다 (404 는 "적재 대상 아님" 전용)
+    assert resp.status_code == 500, f"DB 예외 → 500 의무, got {resp.status_code}"
 
 
 # ─── G-DAILY3: 라우트 등록 순서 정적 가드 ─────────────────────────────────────

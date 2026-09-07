@@ -355,10 +355,50 @@ function formatFieldValue(key: string, value: unknown): React.ReactNode {
 }
 
 // ────────────────────────────────────────────────────────────────────────
-// 일봉 탭 컴포넌트 (사이클 124 Q1=A)
+// 일봉 탭 방어 변환 헬퍼 (cycle266 B-1)
+//
+// 계약: 백엔드 NUMERIC 컬럼(change_rate 등)이 asyncpg Decimal → pydantic v2
+// JSON 모드에서 문자열로 직렬화되는 경우가 있다(운영 실측 "0.0000"). 아래
+// 헬퍼는 문자열 숫자·number·null/undefined/NaN/비숫자 문자열을 전부 받아
+// (a) 유효하면 number, (b) 그 외에는 null 을 돌려준다 — 렌더 쪽은 null 을
+// '—'(em dash) 로만 표시하고 `toFixed`/`toLocaleString` 을 직접 호출하지
+// 않는다(호출부는 항상 이 헬퍼가 돌려준 number 에만 건다).
+// ────────────────────────────────────────────────────────────────────────
+
+/** 문자열 숫자 → number, 그 외(NaN/null/undefined/빈 문자열/비숫자 문자열) → null. */
+function toSafeNumber(value: unknown): number | null {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null
+  }
+  if (typeof value === 'string' && value.trim() !== '') {
+    const n = Number(value)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+/** OHLCV 셀 — 변환 실패는 '—'. */
+function formatSafeCount(value: unknown): string {
+  const n = toSafeNumber(value)
+  return n === null ? '—' : n.toLocaleString('ko-KR')
+}
+
+/** 등락률 셀 — 텍스트 + 색상 클래스를 함께 돌려준다(색상 분기는 변환 후 값 기준). */
+function formatSafeChangeRate(value: unknown): { text: string; className: string } {
+  const n = toSafeNumber(value)
+  if (n === null) {
+    return { text: '—', className: 'text-gray-500' }
+  }
+  const className = n > 0 ? 'text-red-600' : n < 0 ? 'text-blue-600' : 'text-gray-500'
+  const text = `${n > 0 ? '+' : ''}${n.toFixed(2)}%`
+  return { text, className }
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// 일봉 탭 컴포넌트 (사이클 124 Q1=A, 사이클 266 B-1/B-3 방어 변환 + 404 분기)
 // ────────────────────────────────────────────────────────────────────────
 function DailyTab({ ticker }: { ticker: string }) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['stock-master-daily', ticker],
     queryFn: () => fetchDaily(ticker, 30),
     retry: 1,
@@ -368,9 +408,35 @@ function DailyTab({ ticker }: { ticker: string }) {
 
   const rows: StockMasterDailyRow[] = Array.isArray(data) ? data : []
 
+  // cycle266 B-3 — 404 는 "적재 대상 아님" 안내(회색), 그 외(500·네트워크)는 오류(빨강).
+  // DetailModal 의 is404 판별(약 435행)과 동일 패턴.
+  const is404 =
+    isError && axios.isAxiosError(error) && error.response?.status === 404
+
   if (isLoading) return <p className="text-sm text-gray-400 animate-pulse py-4">로딩 중...</p>
-  if (isError) return <p className="text-sm text-red-600 py-4">일봉 데이터 조회 실패</p>
-  if (rows.length === 0) return <p className="text-sm text-gray-500 py-4">일봉 데이터가 없습니다.</p>
+
+  if (isError && !is404) {
+    return (
+      <p className="text-sm text-red-600 py-4" data-testid="stock-master-daily-error">
+        일봉 데이터 조회 실패 — 잠시 후 다시 시도해 주세요.
+      </p>
+    )
+  }
+
+  // cycle266 D-1 — 404 는 '정상 미적재' 가 압도적이지만 **유일한 원인은 아니다**:
+  // `src/db/stock_master_daily.py::get_recent_daily` 가 DB 예외를 자신이 삼키고
+  // `[]` 를 돌려주므로(그 모듈은 6 전략 prepare 공유 = 이번 사이클 무접촉) 진짜
+  // 장애도 여기로 온다. 안내가 원인을 **단정하지 않도록** 단서 한 절을 붙인다.
+  // ⚠️ 이 단서를 지우지 말 것 — 가드 = StockMaster.dailyTab.cycle266.test.tsx D-1.
+  if (is404 || rows.length === 0) {
+    return (
+      <p className="text-sm text-gray-500 py-4" data-testid="stock-master-daily-notice">
+        일봉 미적재 — 일봉은 전 종목이 아니라 전략 유니버스 대상만 적재됩니다.
+        단, 서버가 데이터를 가져오지 못한 경우에도 같은 안내가 나올 수 있으니,
+        계속 보이면 시스템 로그에서 stock_master_daily 를 확인하세요.
+      </p>
+    )
+  }
 
   return (
     <div className="overflow-x-auto" data-testid="stock-master-daily-table">
@@ -387,19 +453,22 @@ function DailyTab({ ticker }: { ticker: string }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {rows.map((row) => (
-            <tr key={row.bas_dd} className="hover:bg-gray-50">
-              <td className="py-1.5 pr-3 font-mono text-gray-700 text-xs">{row.bas_dd}</td>
-              <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{row.open_price.toLocaleString('ko-KR')}</td>
-              <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{row.high_price.toLocaleString('ko-KR')}</td>
-              <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{row.low_price.toLocaleString('ko-KR')}</td>
-              <td className="py-1.5 pr-3 font-mono text-right font-medium text-gray-900">{row.close_price.toLocaleString('ko-KR')}</td>
-              <td className="py-1.5 pr-3 font-mono text-right text-gray-600">{row.volume.toLocaleString('ko-KR')}</td>
-              <td className={`py-1.5 font-mono text-right ${row.change_rate > 0 ? 'text-red-600' : row.change_rate < 0 ? 'text-blue-600' : 'text-gray-500'}`}>
-                {row.change_rate > 0 ? '+' : ''}{row.change_rate.toFixed(2)}%
-              </td>
-            </tr>
-          ))}
+          {rows.map((row) => {
+            const changeRate = formatSafeChangeRate(row.change_rate)
+            return (
+              <tr key={row.bas_dd} className="hover:bg-gray-50">
+                <td className="py-1.5 pr-3 font-mono text-gray-700 text-xs">{row.bas_dd}</td>
+                <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{formatSafeCount(row.open_price)}</td>
+                <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{formatSafeCount(row.high_price)}</td>
+                <td className="py-1.5 pr-3 font-mono text-right text-gray-700">{formatSafeCount(row.low_price)}</td>
+                <td className="py-1.5 pr-3 font-mono text-right font-medium text-gray-900">{formatSafeCount(row.close_price)}</td>
+                <td className="py-1.5 pr-3 font-mono text-right text-gray-600">{formatSafeCount(row.volume)}</td>
+                <td className={`py-1.5 font-mono text-right ${changeRate.className}`}>
+                  {changeRate.text}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

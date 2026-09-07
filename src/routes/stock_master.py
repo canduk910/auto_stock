@@ -34,6 +34,7 @@
 
 from __future__ import annotations
 
+import decimal
 import logging
 from typing import Awaitable, Callable
 
@@ -282,15 +283,26 @@ async def get_stock_master_history(
     return ApiResponse(success=True, data=data, message="")
 
 
+def _daily_row_for_json(row: dict) -> dict:
+    """사이클 266 A-1 — Decimal→float 새 dict 사영(원본 불변, A-1-6). 필드명 열거 금지
+    (값 타입 판정, A-1-3), `raw` 재귀 변환 금지(G-AST1, A-1b), `float()` 실패는 fail-open(A-1d)."""
+    def _cast(key: str, value: object) -> object:
+        try:
+            return float(value) if key != "raw" and isinstance(value, decimal.Decimal) else value
+        except Exception:
+            return value
+    return {key: _cast(key, value) for key, value in row.items()}
+
+
 @router.get("/{ticker}/daily")
 async def get_stock_master_daily(
     ticker: str,
     days: int = Query(30, ge=1, le=100),
 ):
-    """사이클 124 — ticker 일봉 데이터 (최근 days일, stock_master_daily 조회).
-
-    라우트 등록 순서: /{ticker}/history ← /{ticker}/daily ← /{ticker} 순서 의무.
-    """
+    """사이클 124 — ticker 일봉(최근 days일). 등록 순서: history→daily→{ticker} 의무.
+    사이클 266 A-2 — DB 예외는 500(404 위장 금지). ⚠️F-1(지우지 말 것): `get_recent_daily`
+    자신이 내부에서 이미 삼켜(db 모듈=6전략 prepare+터틀 ATR 공유, 별도승인 대상) 이 500 은
+    오늘 실질 도달 불가한 계약 가드다 — db 모듈이 바뀌면 실동한다."""
     _POST_ONLY_PATHS = {"refresh-universe", "basics", "daily", "refresh-progress", "master"}
     if ticker in _POST_ONLY_PATHS:
         raise HTTPException(status_code=405, detail=f"Method Not Allowed — {ticker} 은 POST only")
@@ -298,15 +310,14 @@ async def get_stock_master_daily(
     try:
         rows = await stock_master_daily.get_recent_daily(ticker=ticker, days=days)
     except Exception:
-        rows = []
+        logger.exception("[stock_master_daily_route_error] ticker=%s days=%s", ticker, days)
+        raise HTTPException(500, detail=f"ticker={ticker} 일봉 조회 실패 (days={days})")
 
     if not rows:
-        raise HTTPException(
-            status_code=404,
-            detail=f"ticker={ticker} 일봉 데이터 없음 (days={days})",
-        )
+        raise HTTPException(404, detail=f"ticker={ticker} 일봉 미적재 — 전략 유니버스 대상만 적재됩니다 (days={days}). 단, 서버 조회 실패도 같은 404 로 보일 수 있으니(cycle266 D-1) 로그에서 stock_master_daily 를 확인하세요")
 
-    return ApiResponse(success=True, data=rows, message=f"{len(rows)}일 일봉")
+    data = [_daily_row_for_json(row) for row in rows]
+    return ApiResponse(success=True, data=data, message=f"{len(rows)}일 일봉")
 
 
 @router.get("/{ticker}")

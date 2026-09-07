@@ -828,16 +828,69 @@ const SAMPLE_STATS_124 = {
   last_daily_load_at: '2026-06-13T20:00:00+09:00',
 }
 
-const SAMPLE_DAILY_ROWS = Array.from({ length: 5 }, (_, i) => ({
-  bas_dd: `202606${(13 - i).toString().padStart(2, '0')}`,
-  open_price: 74000 + i * 100,
-  high_price: 75500 + i * 100,
-  low_price: 73500 + i * 100,
-  close_price: 75000 + i * 100,
-  volume: 1_000_000 + i * 50_000,
-  trade_value: 75_000_000_000,
-  change_rate: parseFloat((1.2 - i * 0.3).toFixed(2)),
-}))
+// cycle266 §C-3 — 종전 목은 `change_rate` 를 전부 진짜 number 로, `bas_dd` 를
+// `YYYYMMDD` 로 만들어 **의도한 계약**만 담고 **실제 응답**을 담지 않았다. 그래서
+// 일봉 탭이 프로덕션에서 3개월 넘게 흰 화면인 동안 이 파일은 계속 초록이었다.
+// 실제 응답: `change_rate`/`prtt_rate` = NUMERIC(8,4) → asyncpg Decimal →
+// pydantic v2 JSON **문자열**, `bas_dd` = DATE → `YYYY-MM-DD`.
+// ⇒ 문자열 케이스(시정 전 모양)와 숫자 케이스(A-1 시정 후 모양)를 **함께** 담는다.
+const SAMPLE_DAILY_ROWS = [
+  {
+    bas_dd: '2026-09-05',
+    open_price: 74000,
+    high_price: 75500,
+    low_price: 73500,
+    close_price: 75000,
+    volume: 1000000,
+    trade_value: 75000000000,
+    change_rate: '1.2000',
+    prtt_rate: '0.0000',
+  },
+  {
+    bas_dd: '2026-09-04',
+    open_price: 74100,
+    high_price: 75600,
+    low_price: 73600,
+    close_price: 75100,
+    volume: 1050000,
+    trade_value: 75000000000,
+    change_rate: 0.9,
+    prtt_rate: '0.0000',
+  },
+  {
+    bas_dd: '2026-09-03',
+    open_price: 74200,
+    high_price: 75700,
+    low_price: 73700,
+    close_price: 75200,
+    volume: 1100000,
+    trade_value: 75000000000,
+    change_rate: '0.6000',
+    prtt_rate: '0.0000',
+  },
+  {
+    bas_dd: '2026-09-02',
+    open_price: 74300,
+    high_price: 75800,
+    low_price: 73800,
+    close_price: 75300,
+    volume: 1150000,
+    trade_value: 75000000000,
+    change_rate: 0.3,
+    prtt_rate: '0.0000',
+  },
+  {
+    bas_dd: '2026-09-01',
+    open_price: 74400,
+    high_price: 75900,
+    low_price: 73900,
+    close_price: 75400,
+    volume: 1200000,
+    trade_value: 75000000000,
+    change_rate: '0.0000',
+    prtt_rate: '0.0000',
+  },
+]
 
 function setup124Handlers() {
   server.use(
@@ -1022,7 +1075,7 @@ describe('사이클 124 G-TAB-2 (HIGH) — 일봉 탭 전환 + OHLCV 테이블',
     }
   })
 
-  it('G-TAB-2: 일봉 테이블에 mock 데이터 행 (bas_dd "20260613") 이 표시된다', async () => {
+  it('G-TAB-2: 일봉 테이블에 mock 데이터 행 (bas_dd "2026-09-05") 이 표시된다', async () => {
     setup124Handlers()
     render(withProviders(<StockMaster />))
 
@@ -1036,8 +1089,10 @@ describe('사이클 124 G-TAB-2 (HIGH) — 일봉 탭 전환 + OHLCV 테이블',
     fireEvent.click(screen.getByTestId('stock-master-tab-daily'))
 
     await waitFor(() => {
-      // SAMPLE_DAILY_ROWS 기준일 = "20260613" (첫 번째 행, i=0 → 13-0=13)
-      expect(screen.getByText('20260613')).toBeDefined()
+      // SAMPLE_DAILY_ROWS 기준일 = "2026-09-05" (첫 번째 행, i=0 → 5-0=5).
+      // cycle266 §C-3 — `bas_dd` 는 DATE 컬럼이라 응답이 `YYYY-MM-DD` 다
+      // (종전 목의 `20260613` 은 KIS 원본 필드 모양이지 우리 응답 모양이 아니다).
+      expect(screen.getByText('2026-09-05')).toBeDefined()
     })
   })
 })

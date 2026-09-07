@@ -448,20 +448,74 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     }),
   );
   // 사이클 124 Q1=A — 일봉 라우트 (history 후 등록 = LIFO 우선, /*catch-all 보다 앞).
+  // ⚠️ LIFO 순서는 cycle266 이 건드리지 않는다 (사이클 80 hotfix #3 영속,
+  //    가드 = tests/unit/e2e_mocks/test_cycle124_api_mocks_daily_route.py).
+  // cycle266 §C-3 — 종전 목은 `change_rate` 를 전부 진짜 number 로, `bas_dd` 를
+  // `YYYYMMDD` 로 만들어 **의도한 계약**만 담고 **실제 응답**을 담지 않았다. 그래서
+  // 일봉 탭이 프로덕션에서 3개월 넘게 흰 화면인 동안 목 셋은 계속 초록이었다.
+  // 실제 응답: `change_rate`/`prtt_rate` = NUMERIC(8,4) → asyncpg Decimal →
+  // pydantic v2 JSON **문자열** / `bas_dd` = DATE 컬럼 → `YYYY-MM-DD`.
+  // ⇒ 문자열 행(시정 전 모양)과 숫자 행(A-1 시정 후 모양)을 **함께** 담는다.
+  // 가드 = tests/unit/e2e_mocks/test_cycle266_mock_string_change_rate.py
   await page.route("**/api/stock-master/*/daily*", (route) =>
     route.fulfill({
-      json: envelope(
-        Array.from({ length: 5 }, (_, i) => ({
-          bas_dd: `202606${(13 - i).toString().padStart(2, "0")}`,
-          open_price: 74000 + i * 100,
-          high_price: 75500 + i * 100,
-          low_price: 73500 + i * 100,
-          close_price: 75000 + i * 100,
-          volume: 1000000 + i * 50000,
+      json: envelope([
+        {
+          bas_dd: "2026-09-05",
+          open_price: 74000,
+          high_price: 75500,
+          low_price: 73500,
+          close_price: 75000,
+          volume: 1000000,
           trade_value: 75000000000,
-          change_rate: parseFloat((1.2 - i * 0.3).toFixed(2)),
-        })),
-      ),
+          change_rate: "1.2000",
+          prtt_rate: "0.0000",
+        },
+        {
+          bas_dd: "2026-09-04",
+          open_price: 74100,
+          high_price: 75600,
+          low_price: 73600,
+          close_price: 75100,
+          volume: 1050000,
+          trade_value: 75000000000,
+          change_rate: 0.9,
+          prtt_rate: "0.0000",
+        },
+        {
+          bas_dd: "2026-09-03",
+          open_price: 74200,
+          high_price: 75700,
+          low_price: 73700,
+          close_price: 75200,
+          volume: 1100000,
+          trade_value: 75000000000,
+          change_rate: "0.6000",
+          prtt_rate: "0.0000",
+        },
+        {
+          bas_dd: "2026-09-02",
+          open_price: 74300,
+          high_price: 75800,
+          low_price: 73800,
+          close_price: 75300,
+          volume: 1150000,
+          trade_value: 75000000000,
+          change_rate: 0.3,
+          prtt_rate: "0.0000",
+        },
+        {
+          bas_dd: "2026-09-01",
+          open_price: 74400,
+          high_price: 75900,
+          low_price: 73900,
+          close_price: 75400,
+          volume: 1200000,
+          trade_value: 75000000000,
+          change_rate: "0.0000",
+          prtt_rate: "0.0000",
+        },
+      ]),
     }),
   );
   await page.route("**/api/stock-master/*", (route) =>

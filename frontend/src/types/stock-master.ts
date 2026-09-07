@@ -29,14 +29,28 @@ export interface StockMasterStats {
  * GET /api/stock-master/{ticker}/daily?days=30 응답 배열의 개별 원소.
  */
 export interface StockMasterDailyRow {
-  bas_dd: string        // 기준일자 (YYYYMMDD)
+  bas_dd: string        // 기준일자 (DATE 컬럼 → 직렬화 YYYY-MM-DD, cycle266 B-2 사실화)
   open_price: number
   high_price: number
   low_price: number
   close_price: number
   volume: number
   trade_value: number   // 거래대금 (원)
-  change_rate: number   // 등락률 (%)
+  // 등락률 (%) — NUMERIC(8,4) → asyncpg Decimal → pydantic v2 JSON 모드에서 문자열 직렬화
+  // ("0.0000"). 백엔드가 숫자로 내보내도록 시정돼도(cycle266 A-1) 프론트는 문자열도
+  // 허용해 스스로 버틴다(cycle266 B-1/B-2, 명세 §3-B).
+  change_rate: number | string
+  // ── cycle266 D-2 — 라우트는 `SELECT *` 라 응답이 migration 033 의 **14 컬럼 전수**다.
+  // 렌더는 위 8개만 쓰지만, 타입이 나머지를 숨기면 "응답에 없는 필드" 로 오해돼
+  // 다음 사이클이 또 목을 실제와 다르게 만든다(이 사이클이 고친 그 결함의 씨앗).
+  // 선택 필드로 명시만 하고 렌더 로직은 건드리지 않는다.
+  ticker?: string
+  flng_cls_code?: string          // 락 구분 코드 (기본 '')
+  // 분할 비율 — `change_rate` 와 같은 NUMERIC(8,4) 계열이라 문자열로 올 수 있다.
+  prtt_rate?: number | string
+  raw?: Record<string, unknown>   // KIS 원본 JSONB (사이클 81 G-AST1 — 라우트가 변형하지 않는다)
+  created_at?: string             // TIMESTAMPTZ → KST +09:00 ISO
+  updated_at?: string             // TIMESTAMPTZ → KST +09:00 ISO
 }
 
 export interface StockMasterListItem {

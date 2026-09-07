@@ -378,6 +378,56 @@ CATEGORY_KEYS master 카테고리 추가. master_raw JSONB 키 → 한글 라벨
 - 마지막 30 영업일 OHLCV 테이블 = `bas_dd / open_price / high_price / low_price / close_price / volume / change_rate`
 - 빈 응답 또는 로딩 처리
 
+##### 사이클 266 (2026-09-07) — 흰 화면 결함 시정 + 목 정직화
+
+운영 EC2·운영 DB 실측(2026-09-07) 결함 3건 시정. 도입 = `dc66026`(사이클 124, 2026-06-13) —
+**이 탭은 그날부터 오늘까지 한 번도 정상 동작한 적이 없었다.**
+
+- **흰 화면 원인** — `change_rate`(`NUMERIC(8,4)`)가 asyncpg `Decimal` → pydantic v2 JSON 모드에서
+  **문자열**로 직렬화(운영 실측 `"open_price": 267000` 숫자인데 `"change_rate": "0.0000"` 문자열).
+  `row.change_rate.toFixed(2)` 가 `TypeError` → **`StockMaster` 에 `ErrorBoundary` 부재**(프로젝트
+  전체에서 `DailyReportTab.tsx` 한 곳만 보유)라 예외가 React 루트까지 올라가 트리 전체 언마운트.
+  타입 선언이 `number` 라 `tsc` 도 못 잡았다.
+- **방어 변환 3 헬퍼** (`StockMaster.tsx`) — `toSafeNumber(unknown): number | null`(숫자·숫자형
+  문자열 → 유한 number, `null`/`undefined`/빈 문자열/비숫자/`NaN`/무한대 → `null`. **빈 문자열
+  가드가 `Number("")===0` 오판을 막는다**) · `formatSafeCount`(OHLCV 셀, 실패 시 `'—'`) ·
+  `formatSafeChangeRate`(색상 분기도 변환 **후** 값 기준, 클래스 `text-red-600`/`text-blue-600`/
+  `text-gray-500` 유지). **미검증 값에 `toFixed`/`toLocaleString` 직접 호출 금지** — 렌더는 항상
+  이 세 헬퍼가 돌려준 값에만 건다.
+- **404 vs 500 렌더 분기** — `axios.isAxiosError(error) && error.response?.status === 404`
+  (`DetailModal.is404` 선례 답습). 404("적재 대상 아님" — testid `stock-master-daily-notice`,
+  회색)와 그 외(500·네트워크, testid `stock-master-daily-error`, 빨강)를 분리. 일봉은 전 종목
+  적재가 아니다(운영 DB 실측 `stock_master` 3,583 중 일봉 보유 1,810 / 없음 1,773 = 49.5%) —
+  종전 "일봉 데이터 조회 실패" 문구는 정상 미적재를 오류로 오인시켰다. `retry: 1` 은 그대로
+  (사이클 65 H3 AST 가드 영속).
+- **타입** (`types/stock-master.ts::StockMasterDailyRow`) — `change_rate: number | string`,
+  `prtt_rate?: number | string`(같은 `NUMERIC(8,4)` 계열이라 문자열로 올 수 있다), 실제 응답
+  **14 필드**(migration 033 컬럼 전수: `ticker`/`flng_cls_code`/`raw`/`created_at`/`updated_at`
+  선택 필드로 명시 — 렌더는 여전히 8개만 쓰지만 타입이 나머지를 숨기면 "응답에 없는 필드"로
+  오해돼 다음 사이클이 또 목을 실제와 다르게 만든다), `bas_dd` 주석 `YYYYMMDD` → **`DATE`
+  컬럼이라 실제 직렬화는 `YYYY-MM-DD`**(주석만 시정, 렌더 무변경).
+- **목 3곳의 구조적 결함 시정 (재발 방지의 핵심)** — `frontend/src/test/handlers.ts` ·
+  `e2e/fixtures/api-mocks.ts` · `frontend/src/pages/__tests__/StockMaster.test.tsx` 셋이 전부
+  `change_rate` 를 `Array.from` + `parseFloat` 생성기로 **진짜 숫자**만 만들어 *의도한 계약*만
+  담고 *실제 응답*을 담지 않았다 — 그래서 이 흰 화면 결함이 **3개월 넘게** 세 목 전부 초록인
+  채로 살아 있었다. 생성기를 **명시 리터럴 5행**(문자열 3 + 숫자 2, `bas_dd` 전 행 `YYYY-MM-DD`)
+  으로 바꿔 사람이 눈으로 실제 응답과 대조할 수 있게 했다. Playwright route **LIFO**(사이클 80
+  hotfix #3) 규약은 무변경.
+- **E2E `G-E2E-9`** (`e2e/stock-master.spec.ts`) 신규 — 일봉 탭을 실브라우저에서 여는 **유일한**
+  벽. 종전 8 케이스(사이클 86)는 일봉 탭을 한 번도 열지 않아 33건 통과가 이 결함에 아무 증거도
+  못 줬다. 문자열 등락률(`"1.2000"`) → `+1.20%` 렌더 + 숫자 등락률(`0.9`) → `+0.90%` 렌더를 함께
+  검증(`table` 안 `NaN`/`—` 부재 단언).
+- **⚠️ 교훈 — 사이클 124 "UI 동기화 8단계 절차"(§ 아래)가 목의 정직성까지는 강제하지 못했다.**
+  8단계는 "신규 컬럼·키를 UI가 놓치지 않는다"만 보장하고, 목이 *실제 응답 타입*(Decimal→문자열
+  직렬화 같은)을 흉내 내는지는 검사하지 않는다 — 신규 데이터 추가 시 목을 만들 때는 **응답을
+  실제로 한 번 받아서(curl/운영 로그) 그 모양 그대로 리터럴로 박을 것**, 생성기로 "그럴듯한"
+  값을 합성하지 말 것.
+- **남은 후속(이번 범위 밖)** — F-1(`get_recent_daily` 내부 예외 삼킴, `src/db/CLAUDE.md`+
+  `src/routes/CLAUDE.md` 참조, 승인 대상) · **B-4 `StockMaster` 전체가 여전히 `ErrorBoundary`
+  무방비**(이번엔 일봉 탭 렌더만 방어했다 — 같은 계열 결함이 다른 탭·다른 페이지에도 잠재)
+  · D-4(`src/routes/stock_master.py` 338L, 상한 340L, 여유 2행) · D-5(404 종목 49.5%에 60초
+  폴링이 계속됨 — 코드 사실 기반, 폴링 지속 자체는 미실측)
+
 #### 핵심 시정 (TanStack Query)
 
 - `DetailModal` `useQuery` = `initialData` → `placeholderData: initialData`. `StockMasterListItem` 을 `initialData` 로 전달 시 TanStack Query 가 fresh 처리 → `fetchDetail` 재호출 차단 → 신규 매핑 6 키 호출 누락. `placeholderData` 는 항상 stale 처리 → `fetchDetail` 정상 호출 + 신규 매핑 6 키 응답 정상
@@ -405,9 +455,25 @@ stock_master 컬럼 / raw JSONB 키 / stock_master_daily 컬럼 추가 시 **반
 - G-GUIDE 가이드라인 영역 영속
 - e2e_mocks: G-AST-MOCK 등록 영역 + G-AST-LIFO 1/2 정합 (사이클 80 hotfix #3)
 
+#### 회귀 가드 (사이클 266 신규)
+
+- `StockMaster.dailyTab.cycle266.test.tsx` — `toSafeNumber`/`formatSafeCount`/`formatSafeChangeRate`
+  단위 케이스(문자열 숫자·number·`null`/`undefined`/빈 문자열/`NaN`/무한대) + 404→`stock-master-daily-notice`
+  / 500·네트워크→`stock-master-daily-error` 렌더 분기 + D-1 단서 문구 잔존 가드(지우면 실패)
+- `test_cycle266_daily_route_serialization.py`(C-1, 백엔드) — 라우트를 실제로 태워 **직렬화된 JSON
+  본문**의 타입을 잰다(파이썬 객체 비교 아님). A-1(`Decimal`→`float`, 필드명 열거 금지) / A-1b(`raw`
+  재귀 변환 금지) / A-1c(비-`Decimal` 무접촉) / A-1d(fail-open) / A-2(예외→500) / A-3(빈 rows→404)
+- `test_cycle266_mock_string_change_rate.py`(e2e_mocks) — `handlers.ts`/`api-mocks.ts` 목 5행이
+  문자열·숫자 혼합 + `YYYY-MM-DD` `bas_dd` 인지 정적 대조(생성기 재발 차단)
+- `e2e/stock-master.spec.ts::G-E2E-9` — 실브라우저 일봉 탭 렌더 + 문자열 등락률 `+1.20%` 변환 +
+  `NaN`/`—` 부재
+- `test_cycle124_stock_master_daily_route.py::test_g_daily2b_graceful_on_exception` — **의미
+  전환**(사이클 66 K-2 관례): "DB 예외 → graceful 404" 계약을 "DB 예외 → 500" 으로 뒤집었다
+  (docstring 에 전환 사유 명기)
+
 #### 영속 의무 매트릭스
 
-사이클 65 H3 useQuery retry:1 / 68 KST 일관성 / 75 G-AST5 api-mocks / 80 hotfix #3 LIFO / 81 G-AST1 raw 영속 / 85 StockMaster.tsx 영역 / 89 한글 친숙 용어 / 90 POST 화이트리스트 / 106 모바일 햄버거 + 안내 배너 / 122 stock_master_daily.
+사이클 65 H3 useQuery retry:1 / 68 KST 일관성 / 75 G-AST5 api-mocks / 80 hotfix #3 LIFO / 81 G-AST1 raw 영속 / 85 StockMaster.tsx 영역 / 89 한글 친숙 용어 / 90 POST 화이트리스트 / 106 모바일 햄버거 + 안내 배너 / 122 stock_master_daily / **266 일봉 탭 방어 변환(`toSafeNumber` 계열)·404/500 렌더 분기·목 정직성(리터럴 5행)**.
 
 ## History (`/history`)
 

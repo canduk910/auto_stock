@@ -2,6 +2,7 @@
  * 사이클 86 (2026-06-09) — stock_master UI 통합 검증 E2E spec.
  *
  * 8 케이스 매트릭스 (HIGH 3 + MEDIUM 3 + LOW 2)
+ * cycle266 D-3 (2026-09-07): G-E2E-9 추가 → 9 케이스 (일봉 탭 실브라우저 커버리지).
  * 사이클 80 hotfix #2 답습: timeout 20s (카드 누적 + useQuery 다중 + lazy + Suspense fallback)
  * 사이클 80 hotfix #3 답습: Playwright LIFO 정합 (api-mocks 5 stock-master 라우트 영속)
  * 사이클 81 G-M5 답습: 모바일 햄버거 메뉴 7개 압축 검증
@@ -215,5 +216,86 @@ test.describe("G-E2E-8 (LOW) — 7번째 메뉴 종목마스터 클릭 → 라�
     await expect(
       page.getByTestId("stock-master-stats-card"),
     ).toBeVisible({ timeout: 20000 });
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────
+// cycle266 D-3 (tester 적대 검토) — 일봉 탭 실브라우저 커버리지
+//
+// 종전 8 케이스는 일봉 탭을 **한 번도 열지 않았다**(`grep -n "daily" e2e/*.spec.ts`
+// = 0건). 그래서 2026-06-13(사이클 124) 이후 일봉 탭이 프로덕션에서 흰 화면인
+// 3개월 내내 E2E 33 케이스가 초록이었다 — 통과한 E2E 는 이 결함에 대해 아무
+// 증거도 제공하지 않았다.
+//
+// 이 케이스가 재는 것: 문자열 등락률(`"1.2000"`, 운영 실제 응답 모양)이 실브라우저
+// 에서 `+1.20%` 로 렌더되고 트리가 살아 있는가. 종전 구현은 여기서
+// `row.change_rate.toFixed(2)` → TypeError → (ErrorBoundary 부재) 루트 언마운트로
+// 흰 화면이 됐다.
+//
+// ⚠️ Playwright route 는 **LIFO**(사이클 80 hotfix #3). 아래 목록 라우트는
+// `installApiMocks` **뒤에** 등록해 목록만 덮는다 — 일봉 목은 fixture 정본
+// (`e2e/fixtures/api-mocks.ts`, 문자열/숫자 혼합 5행)을 그대로 쓴다.
+// ────────────────────────────────────────────────────────────────────────
+
+test.describe("G-E2E-9 (cycle266 D-3) — 일봉 탭 렌더 + 문자열 등락률", () => {
+  test("종목 클릭 → 일봉 탭 → 표 가시 + 문자열 등락률이 +1.20% 로 렌더", async ({ page }) => {
+    await installApiMocks(page);
+
+    // LIFO 우선 — 목록에 클릭 가능한 종목 1건을 만든다 (fixture 기본은 빈 목록).
+    await page.route("**/api/stock-master/list*", (route) =>
+      route.fulfill({
+        json: {
+          success: true,
+          message: "",
+          data: {
+            items: [
+              {
+                ticker: "005930",
+                name: "삼성전자",
+                excg_dvsn_cd: "01",
+                nxt_tradable: true,
+                krx_halted: false,
+                admin_item: false,
+                refreshed_at: "2026-09-05T09:00:00+09:00",
+                raw: { bfdy_clpr: 75000, stck_prpr: "75000" },
+              },
+            ],
+            total: 1,
+            limit: 100,
+            offset: 0,
+          },
+        },
+      }),
+    );
+
+    await page.goto("/stock-master");
+
+    // 목록 행 클릭 → 상세 모달 (사이클 80 hotfix #2 답습 timeout 20s)
+    const row = page.getByTestId("stock-master-row-stck-prpr-005930");
+    await expect(row).toBeVisible({ timeout: 20000 });
+    await row.click();
+
+    await expect(
+      page.getByTestId("stock-master-detail-tabs"),
+    ).toBeVisible({ timeout: 20000 });
+
+    // 일봉 탭 전환
+    await page.getByTestId("stock-master-tab-daily").click();
+
+    const table = page.getByTestId("stock-master-daily-table");
+    await expect(table).toBeVisible({ timeout: 20000 });
+
+    // 문자열 등락률 행 — `change_rate: "1.2000"` (fixture 첫 행)
+    const stringRow = table.locator("tbody tr").filter({ hasText: "2026-09-05" });
+    await expect(stringRow).toHaveCount(1);
+    await expect(stringRow.locator("td").nth(6)).toHaveText("+1.20%");
+
+    // 숫자 등락률 행도 함께 통과해야 한다 — `change_rate: 0.9` (A-1 시정 후의 모양)
+    const numberRow = table.locator("tbody tr").filter({ hasText: "2026-09-04" });
+    await expect(numberRow.locator("td").nth(6)).toHaveText("+0.90%");
+
+    // 흰 화면 재발 신호 — 변환 실패('—')·NaN 이 표 안에 없어야 한다
+    await expect(table).not.toContainText("NaN");
+    await expect(table).not.toContainText("—");
   });
 });
