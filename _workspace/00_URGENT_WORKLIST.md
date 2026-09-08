@@ -23,9 +23,21 @@
 
 | 크론(UTC) | KST | 스크립트 | 하는 일 |
 |---|---|---|---|
-| `30 0 8 9 *` | 09-08 09:30 | `activate_probe.sh` | 후보 15종목 풀에서 순서대로 `POST /api/realtime/channel-probe`(H0STCNT0) 시도, 409 는 건너뛰고 3종목 성공까지 |
-| `30 1 8 9 *` | 09-08 10:30 | `deactivate_and_dump_probe.sh` | `[open_scope_observe]` 로그 덤프 → `DELETE` 로 프로브 해제(다크런치 원복) |
+| `30 0 8 9 *` | 09-08 09:30 | `activate_probe.sh` | **P-1**(무송출 후보 — 포렌식 4일 공통 9종목) · **P-2**(어제 프리장 체결 확인 105종목 후보) 를 각각 `H0STCNT0` 로 순서대로 시도, 409 는 건너뛴다 |
+| `0 1 8 9 *` | 09-08 10:00 | `switch_to_p3.sh` | P-2 종목의 `H0STCNT0` 구독을 해제하고 **같은 종목**을 `H0NXCNT0` 로 재등록 = **P-3**(스코프가 채널 속성임을 증명하는 가장 강한 증거) |
+| `30 1 8 9 *` | 09-08 10:30 | `deactivate_and_dump_probe.sh` | `[open_scope_observe]` 마커 덤프(P-1·P-2 는 여기 찍힘) + **원문 프레임 로그**(`~/auto_stock/logs/auto_stock.log`, DEBUG, **캡 없음** — P-2↔P-3 채널 비교의 유일한 근거) grep 덤프 → 전부 해제 |
 | `0 11 * * *` | **매일** 20:00 | `dump_daily_observations.sh` | `[kojiro_gap_observe]`·`[open_scope_observe]`·`[open_source_compare]`·`[breakout_open_confirm]` 4마커를 그날치 JSON 으로 저장(48시간 시한 대응) |
+
+⚠️ **1차 설계 결함을 사용자가 잡아냈다** — 처음엔 "임의 대형주 15종목을 H0STCNT0 하나로만"
+찔러보게 짰었는데, 사용자가 "NXT 채널로는 프로브 안 해?" 라고 물어서 자문 정본의 실제 실험
+설계(P-1/P-2/P-3, `_workspace/consult/2026-09-07_channel_split_by_session.md` "cycle253 프로브로
+무엇을 어떻게 재는가" 절)를 다시 확인하고 재설계했다. **결정적 함정 하나를 그 과정에서 발견**
+— `[open_scope_observe]` 캡이 **종목 단위**(`_open_scope_observe_cap.should_emit(ticker)`,
+`handler.py`)라 P-2 종목을 나중에 NXT 로 재구독해도(P-3) 마커가 **또 안 찍힌다**(그날 첫 틱에서
+이미 소모). 자문이 이걸 예견해 "측정의 이중화 — 정본은 EC2 host DEBUG 로그의 원문 프레임"
+을 지시해 뒀고(§Q3 인근), 그 로그가 실제로 `~/auto_stock/logs/auto_stock.log` 에
+`< TEXT '0|H0STCNT0|...'` 형태로 **캡 없이** 남는 것을 실측 확인했다. P-2↔P-3 비교는
+이 원문 로그로만 가능하다.
 
 - **사전 검증 완료**: GET 인증 200 · POST/DELETE/로그검색 흐름 전부 확인(WS 미연결 상태라 400 은
   예상된 것 — 09:30 은 07:45 부팅 이후라 WS 연결돼 있을 것). 세 스크립트 `bash -n` 문법 통과.
