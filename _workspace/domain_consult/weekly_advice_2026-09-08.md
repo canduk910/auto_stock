@@ -38,7 +38,7 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
 | `vcp_breakout` | **0** | insufficient | — | — | — | — | — | **1** (완화, 후보 공급) |
 | `kojiro` | 10 | sufficient | 30.0% | **3.24** | 2.33 | **+11.39%p** | −10,020 | **0** (무변경) |
 
-- 출처 = `GET /api/history/pnl` 전 페이지(297 페어, 그중 확정 289) 를 `sell_date ≥ 2026-08-09`
+- 출처 = `GET /api/history/pnl` 전 페이지의 `data.pairs`(297 페어, 그중 확정 289) 를 `sell_date ≥ 2026-08-09`
   로 거른 값. `RR = 평균이익% ÷ |평균손실%|`, `손익분기 RR = (1−승률) ÷ 승률`.
   **RR > 손익분기 RR 이면 기대값 양수**다. 30일 창에서 그 조건을 넘는 전략은 `kojiro` 하나다.
 - `원` 열은 같은 페어의 `profit_loss` 합이다. **`kojiro` 는 %로는 +11.39%p 인데 원으로는 −10,020**
@@ -58,9 +58,9 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
 | 일평균 수익률 | −0.21% | 같은 응답 `data.avg_daily_profit_rate` |
 | 전 기간 실현손익 | **−176,110 원 (−0.51%)** | `GET /api/history/pnl` → `data.summary.realized_total_krw` / `realized_rate_pct` |
 | 전 기간 확정 왕복 / 승률 | 289건 / **38.0%** | 같은 `summary.closed_count` / `win_rate_pct` |
-| 최근 30행 실현손익 합 | −115,345 원 | `GET /api/performance/daily?days=30` (2026-07-28~09-08) `daily_realized_pnl` 합 |
-| 같은 기간 외부 입출금 순합 | **+1,294,052 원** | 같은 응답 `net_external_cashflow` 합 |
-| 이번 주(09-02~09-08, 5영업일) 실현손익 | **−6,850 원** | 같은 응답 해당 5행 합 |
+| 최근 30행 실현손익 합 | −115,345 원 | `GET /api/performance/daily?days=30` (2026-07-28~09-08) `data[].daily_realized_pnl` 합 |
+| 같은 기간 외부 입출금 순합 | **+1,294,052 원** | 같은 응답 `data[].net_external_cashflow` 합 |
+| 이번 주(09-02~09-08, 5영업일) 실현손익 | **−6,850 원** | 같은 응답 `data[]` 해당 5행 합 |
 
 > ⚠️ **순자산 증가는 성과가 아니다.** 같은 30행에서 총자산은 1,157,348원(07-28)에서 2,535,556원
 > (09-08)으로 늘었지만 그 차이(+1,378,208)보다 외부 입금 순합(+1,294,052)이 크고 실현손익은
@@ -68,8 +68,8 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
 
 ### 2.2 노출·오픈리스크
 
-`GET /api/portfolio/risk` = `total_notional_won 0` / `total_open_risk_won 0` / `concurrent_positions 0`
-/ `by_sector {}`. **수집 시각(엔진 정지)의 값이므로 "노출 없음"이 아니라 "측정 불가"로 읽어야
+`GET /api/portfolio/risk` → `data.total_notional_won` 0 / `data.total_open_risk_won` 0 /
+`data.concurrent_positions` 0 / `data.by_sector` {}. **수집 시각(엔진 정지)의 값이므로 "노출 없음"이 아니라 "측정 불가"로 읽어야
 한다.** 장중 노출의 대리 지표는 일일 로그 리포트 쪽에 있다 — 09-07 리포트 `ext_findings` 의
 `계좌 게이트 open_risk_proxy_pct 3.82% — 경고선 4.0% 에 0.18%p 근접`(low) 이 이번 주 유일한
 정량 기록이고, 같은 리포트가 `삼성화재우 1주 405,500원 = 순자산 15.7%, 보험 섹터 리스크 39.5%`
@@ -102,7 +102,8 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
 ```
 
 라이브 값(순자산 2,535,556 · `cash_usage_ratio` **1.0** — `GET /api/strategies/system/cash-usage-ratio`
-→ `{"ratio":1.0}` · Σweight_enabled = 1.00 · 전 전략 K_ρ = 2.5) 대입:
+→ `data.ratio` (전문 `{"success":true,"data":{"ratio":1.0},"message":""}`) · Σweight_enabled = 1.00 ·
+전 전략 K_ρ = 2.5) 대입:
 
 | 전략 | weight | position_ratio | **매수 가능 주가 상한(원, 근사)** |
 |---|---:|---:|---:|
@@ -120,7 +121,7 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
   1. 09-07 일일 리포트 `ext_findings` — `LTV 매수 수량 0 쿨다운 16건 — 예산 대비 고가주 후보로
      1주도 매수 불가`(medium). LTV 상한 126,700원과 정확히 같은 현상이다.
   2. 09-08 `vcp_breakout` 의 **유일한** 최종 후보 095610 의 `prev_close` 는 **152,700원**
-     (`GET /api/strategies` → `vcp_breakout.targets["095610"].prev_close`)으로 VCP 상한
+     (`GET /api/strategies` → `data.vcp_breakout.targets["095610"].prev_close`)으로 VCP 상한
      126,700원을 넘는다 → 후보가 생겨도 **매수 불가**다.
 
 ---
@@ -164,7 +165,7 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
  "recommended_weight":null,"weight_reasoning":null,
  "hypotheses":[{"claim":"보유일수를 제한하는 것은 트레일이 아니라 breakout_fail_n_days=2 다","evidence":"라이브 2 는 코드 기본 5 의 40% 다. '2영업일 안에 신고가를 못 만들면 청산'은 20일 채널 돌파가 되돌림을 소화할 시간을 주지 않는다. 관측된 보유일수 중앙값 3일이 이 값과 정합한다","test":"5 로 복원 후 보유일수 분포와 최대이익 분포를 28건 기준선(중앙값 3일, 최대 +5.23%)과 비교","required_sample":20,"confidence":0.65},
   {"claim":"30일 원 기준 +2,030 은 우위의 증거가 아니라 랏 크기 잡음이다","evidence":"같은 17건의 % 합은 −22.47%p 다. 최대 손실 팬오션 5주 31,400원(−9.24%)과 최대 이익 ISC 1주 162,500원(+4.37%)의 명목이 5배 어긋난다","test":"§2.3 의 1주 폴백 비율이 내려간 뒤 원 기준과 % 기준의 부호가 일치하는지 재확인","required_sample":20,"confidence":0.85}],
- "needs_human_decision":[{"topic":"donchian 청산 2키를 코드 기본값으로 복원할 것인가","issue":"atr_trail_mult 1.8→2.0, breakout_fail_n_days 2→5. 두 키 모두 사이클 223 에서 AI 튜닝 대상에서 제외됐지만 **라이브 값은 그때 조여진 상태 그대로 남아 있고 코드 기본값으로 되돌려진 적이 없다**. 제외의 취지가 '단기 손실 목적함수의 튜너가 추세추종을 데이트레이딩으로 변태시키는 것을 막는다'였다면, 그 변태의 결과물인 현재 값을 그대로 두는 것은 취지의 절반만 집행한 상태다","evidence":"라이브 params(GET /api/strategies) atr_trail_mult=1.8 / breakout_fail_n_days=2 vs DEFAULT_PARAMS 2.0 / 5. 전 기간 28왕복 t=−2.95(7전략 중 유일한 유의 음수), 최대이익 +5.23%, 평균이익 2.51%, 보유 중앙값 3일","options":["두 키 모두 코드 기본값 복원(2.0 / 5) — 권고 방향이나 매매 행위 변경이라 승인 + domain-consult 선행 필요","breakout_fail_n_days 만 먼저 5 로 복원해 보유기간 축과 트레일 축을 분리 관측","현행 유지하고 N=50 까지 관측","전략 중단"]},
+ "needs_human_decision":[{"topic":"donchian 청산 2키를 코드 기본값으로 복원할 것인가","issue":"atr_trail_mult 1.8→2.0, breakout_fail_n_days 2→5. 두 키 모두 사이클 223 에서 AI 튜닝 대상에서 제외됐지만 **라이브 값은 그때 조여진 상태 그대로 남아 있고 코드 기본값으로 되돌려진 적이 없다**. 제외의 취지가 '단기 손실 목적함수의 튜너가 추세추종을 데이트레이딩으로 변태시키는 것을 막는다'였다면, 그 변태의 결과물인 현재 값을 그대로 두는 것은 취지의 절반만 집행한 상태다","evidence":"라이브 params(GET /api/strategies → data.donchian_swing.params) atr_trail_mult=1.8 / breakout_fail_n_days=2 vs DEFAULT_PARAMS 2.0 / 5. 전 기간 28왕복 t=−2.95(7전략 중 유일한 유의 음수), 최대이익 +5.23%, 평균이익 2.51%, 보유 중앙값 3일","options":["두 키 모두 코드 기본값 복원(2.0 / 5) — 권고 방향이나 매매 행위 변경이라 승인 + domain-consult 선행 필요","breakout_fail_n_days 만 먼저 5 로 복원해 보유기간 축과 트레일 축을 분리 관측","현행 유지하고 N=50 까지 관측","전략 중단"]},
   {"topic":"sizing_mode=turtle 이 이 전략에 맞는가","issue":"라이브는 turtle 이지만 코드 기본은 position_ratio 다. 30일 17건 중 5주·2주 랏이 섞여 있는데 손실 최대건(팬오션 5주)이 가장 큰 명목이었다","evidence":"라이브 sizing_mode='turtle', risk_pct 0.005, max_lot_units 2.0 vs DEFAULT_PARAMS sizing_mode='position_ratio'","options":["현행 유지(권고 — 손절이 ATR 기반이라 터틀이 정합한다)","코드 기본으로 되돌린다","별도 사이클에서 _entry_atr 스탬프 비율을 먼저 실측한다"]}],
  "no_change_reason":"기대값을 되돌릴 수 있는 두 키가 전부 봉인 키(atr_trail_mult·breakout_fail_n_days)라, 허용 키에서 억지로 하나를 고르면 근거 없는 변경이 된다. 무변경 + 사람 결정 상신이 정직한 산출물이다.",
  "code_review_notes":"daily_loss_limit 도 라이브 −6.0 / 기본 −8.0 으로 조여져 있다. 09-08 funnel 은 5단계(신고가 돌파) 116→9, 6단계(EMA 우상향) 9→9, 7단계(거래대금) 9→5 로 거래량 필터가 후보를 절반 가까이 줄이지만, 기대값이 음수인 상태에서 후보를 늘리면 손실만 늘어나므로 volume_multiplier 완화는 권고하지 않는다."}
@@ -193,7 +194,7 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
  "recommended_weight":null,"weight_reasoning":null,
  "hypotheses":[{"claim":"momentum 의 우위는 전적으로 오른쪽 꼬리에 있고, 라이브 trailing_stop_rate −1.3 은 그 꼬리를 자른다","evidence":"전 기간 월별 최대이익 04월 +20.85% / 05월 +41.11% / 06월 +26.53%, 평균이익 7.07~15.51%. 라이브 trailing_stop_rate −1.3 은 코드 기본 −2.0 의 65% 이고 stop_loss_rate −5.0 은 기본 −7.5 의 67% 다","test":"공급이 돌아온 뒤 −2.0 복원 전후로 avgW·최대이익 분포 비교","required_sample":10,"confidence":0.6},
   {"claim":"§2.3 의 매수 가능 주가 상한 ≈79,200원(7전략 중 최저)이 공급 고갈에 더해 후보를 추가로 자른다","evidence":"weight 0.05(최저) × position_ratio 0.25 × K_ρ 2.5 × 순자산. 단 cycle245 배포일은 2026-09-04 라 07월에 시작된 고갈 자체는 설명하지 못한다 — 현재 시점의 제약일 뿐이다","test":"[ratio_notional_blocked] 의 momentum 행 유무를 확인","required_sample":5,"confidence":0.5}],
- "needs_human_decision":[{"topic":"전 기간 유일한 양(+)의 전략이 최저 비중(0.05)을 갖는 것이 의도인가","issue":"momentum 은 원 +41,594 / % +36.09%p 로 두 기준 모두 유일한 양수인데 weight 0.05 로 7전략 중 최저다. 표본 규약상 30일 3왕복으로는 비중 권고를 낼 수 없으나, 이 배치가 관측에 기반한 결정인지 아니면 종전 일일 자문의 반복 축소 권고(09-01~09-08 사이 0.02~0.03 반복 권고)가 누적된 결과인지는 사람이 확인해야 한다","evidence":"/api/history/pnl 54 페어 mean +0.67%p, sum +36.09%p, 원 +41,594. /api/strategies weight=0.05. /api/recommendations 최근 8일 momentum recommended_weight 0.02~0.03 반복(applied 전건 None)","options":["현행 유지 — 07~09월 5왕복으로는 공급이 없어 비중이 무의미(권고: 표본이 돌아올 때까지 유지)","weight 상향 — 단 상대비율이라 다른 전략에서 가져와야 한다","공급 조건(buy_threshold 29, 봉인 키)을 별도 사이클에서 재검토"]}],
+ "needs_human_decision":[{"topic":"전 기간 유일한 양(+)의 전략이 최저 비중(0.05)을 갖는 것이 의도인가","issue":"momentum 은 원 +41,594 / % +36.09%p 로 두 기준 모두 유일한 양수인데 weight 0.05 로 7전략 중 최저다. 표본 규약상 30일 3왕복으로는 비중 권고를 낼 수 없으나, 이 배치가 관측에 기반한 결정인지 아니면 종전 일일 자문의 반복 축소 권고(09-01~09-08 사이 0.02~0.03 반복 권고)가 누적된 결과인지는 사람이 확인해야 한다","evidence":"/api/history/pnl data.summary 및 54 페어 집계 mean +0.67%p, sum +36.09%p, 원 +41,594. /api/strategies data.momentum.weight=0.05. /api/recommendations 최근 8일 momentum recommended_weight 0.02~0.03 반복(applied 전건 None)","options":["현행 유지 — 07~09월 5왕복으로는 공급이 없어 비중이 무의미(권고: 표본이 돌아올 때까지 유지)","weight 상향 — 단 상대비율이라 다른 전략에서 가져와야 한다","공급 조건(buy_threshold 29, 봉인 키)을 별도 사이클에서 재검토"]}],
  "no_change_reason":"30일 확정 왕복 3건 < 문턱 10. 표본 규약에 따라 청산·비중 축 권고를 내지 않는다.",
  "code_review_notes":"라이브 daily_loss_limit −10.0 은 코드 기본 −5.0 보다 완화돼 있어 조임 드리프트의 예외다. gap_up_threshold 는 라이브·기본 모두 10.0 으로 일치한다."}
 ```
@@ -206,7 +207,7 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
  "reasoning":"확정 왕복 2건(−1.40%, −6.31%)으로 문턱 10 미달이다. 그리고 breakout_retention_minutes=0(2026-09-03 진입 완화 실험)은 '청산 왕복 ≥10 그리고 영업일 ≥10 이 둘 다 충족될 때까지 어떤 방향으로도 권고 금지' 동결 대상이며 오늘 기준 왕복 2건·영업일 4일(09-03~09-08)로 둘 다 미충족이다. 후보 공급은 건강하다 — 최근 5영업일 final_prepared 25/22/29/27/24 로 안정적이고, 09-03 이후 매수 3건(09-03 001450, 09-04 452430, 09-07 114810·000500)이므로 체결률은 자문 실측 ≈0.5건/일과 정합한다. 즉 배관 결함이 아니라 정상적인 표본 형성 중이다.",
  "recommended_weight":null,"weight_reasoning":null,
  "hypotheses":[{"claim":"BFB 는 배관 결함 없이 표본을 쌓고 있다","evidence":"09-08 funnel: universe_union 3583 → 862 → 573 → 567 → pole_pass 243 → flag_pass 91 → volume_contraction_pass 24 → final_prepared 24. 09-03 이후 실체결 3건","test":"영업일 10일·왕복 10건 도달 시점(대략 2026-09-17 전후)에 동결 해제하고 재평가","required_sample":10,"confidence":0.8}],
- "needs_human_decision":[{"topic":"BFB·VCP 의 K_ρ=20 표본 보호 예외가 라이브에 없다","issue":"주간 자문 절차 §5 는 'BFB·VCP 는 K_ρ=20(표본 보호)'로 기재하지만 라이브 값은 두 전략 모두 max_lot_ratio_mult=2.5 다(7전략 전부 2.5). 라이브가 정본이라는 규칙에 따르면 표본 보호 예외는 현재 걸려 있지 않으며, 그 결과 §2.3 의 매수 가능 주가 상한이 두 전략에도 그대로 적용된다(BFB ≈237,700원 / VCP ≈126,700원)","evidence":"GET /api/strategies → 7전략 전부 params.max_lot_ratio_mult=2.5. 절차 문서 §5 기재와 불일치","options":["절차 문서 §5 를 라이브에 맞춰 정정(사실 정합)","DB/PUT 으로 BFB·VCP 를 20.0 으로 되돌려 표본 보호를 실제로 건다","현행 유지하되 두 전략의 표본 형성 기간을 늘려 잡는다"]}],
+ "needs_human_decision":[{"topic":"BFB·VCP 의 K_ρ=20 표본 보호 예외가 라이브에 없다","issue":"주간 자문 절차 §5 는 'BFB·VCP 는 K_ρ=20(표본 보호)'로 기재하지만 라이브 값은 두 전략 모두 max_lot_ratio_mult=2.5 다(7전략 전부 2.5). 라이브가 정본이라는 규칙에 따르면 표본 보호 예외는 현재 걸려 있지 않으며, 그 결과 §2.3 의 매수 가능 주가 상한이 두 전략에도 그대로 적용된다(BFB ≈237,700원 / VCP ≈126,700원)","evidence":"GET /api/strategies → data.<전략>.params.max_lot_ratio_mult 이 7전략 전부 2.5. 절차 문서 §5 기재와 불일치","options":["절차 문서 §5 를 라이브에 맞춰 정정(사실 정합)","DB/PUT 으로 BFB·VCP 를 20.0 으로 되돌려 표본 보호를 실제로 건다","현행 유지하되 두 전략의 표본 형성 기간을 늘려 잡는다"]}],
  "no_change_reason":"표본 문턱 미달 + breakout_retention_minutes 동결 조건 미충족. 어떤 방향의 권고도 절차 위반이다.",
  "code_review_notes":null}
 ```
@@ -223,7 +224,7 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
  "needs_human_decision":[{"topic":"VCP EMA 정렬 3키가 화이트리스트 밖에서 94% 를 죽인다","issue":"라이브 ema_short/mid/long = 50/150/200 인데 코드 기본은 50/60/120 이다. 5단계에서 668→41(93.9% 사멸)이 이 정렬 조건이며 PARAM_RANGES 에 없어 이 자문이 권고할 수 없다. 7단계만 완화해도 5단계에서 이미 41개만 남으므로 체결이 생길지 불확실하다","evidence":"09-08 funnel 5단계 668→41. 최근 5일 41/45/50/57/41. 라이브 params vs src/engine/strategies/vcp_breakout.py::DEFAULT_PARAMS","options":["코드 기본(50/60/120)으로 복원해 후보 공급을 먼저 확보","150/200 을 유지하고 7단계 완화 효과만 2주 관측(권고: 한 번에 한 축)","중간값(50/100/150)으로 한 걸음","전략 중단하고 weight 0.10 을 회수"]},
   {"topic":"volume_contraction_ratio 가 범위 상한(1.00)인데도 생존자를 죽인다","issue":"라이브 1.00 은 PARAM_RANGES 상한(0.30~1.00)이고 코드 기본 0.70 보다 이미 최대로 완화된 값인데, 최근 5일 중 4일 7단계 생존자 1건을 8단계에서 전부 탈락시켰다. 즉 화이트리스트 안에서는 더 이상 손쓸 수단이 없다. 조건이 '마지막 5일 평균 거래량 < 베이스 직전 20일 평균 × 100%' 이므로 1.00 에서 탈락한다는 것은 후보들이 베이스 후반에 이미 거래량 팽창을 시작했다는 뜻이다 — 그렇다면 이 게이트의 의도(수축 확인)와 대상(이미 돌파 중인 종목)이 어긋나 있다","evidence":"09-02~09-07 4일 연속 089860 롯데렌탈 단독 탈락. 09-08 도 1건 탈락. 일일 리포트 09-03 medium 'vcp_breakout 스캔이 거래량 수축 단계에서 전부 탈락함' / 09-07 medium 'vcp_breakout 후보 0 — 8단계 거래량 수축에서 전멸'","options":["PARAM_RANGES 상한을 1.00 초과로 넓힌다(사실상 게이트 무력화 — 신중)","조건식을 '마지막 5일 < 베이스 평균' 이 아니라 '베이스 후반 < 베이스 전반' 으로 재정의(코드 변경, 별도 사이클)","현행 유지하고 5·7단계 완화 효과를 먼저 본다(권고)"]},
   {"topic":"pullback_count_max=4 + 엄격 단조 수축의 결합","issue":"7단계 배제 사유에서 회수 5~13회가 반복 등장한다(09-02 샘플: 신한지주 10회, 메리츠금융 11회, 삼성화재우 13회). 25~75일 베이스에서 ZigZag 가 그만큼의 swing 을 뽑아내는데 허용 회수는 2~4 다. 게다가 통과하려면 그 2~4개 폭이 **등호 없이** 단조 감소해야 해서(코드 확인) 회수 4일 때 무작위 순서 통과 확률은 1/24 수준이다. pullback_count_min/max 와 min_swing_atr_mult(라이브 1.0 vs 기본 0.5) 모두 PARAM_RANGES 밖이다","evidence":"src/engine/strategies/vcp_breakout.py 의 pullback 판정부(회수 범위 → 엄격 단조 → 마지막 폭 순서). funnel 배제 샘플의 회수 분포","options":["pullback_count_max 를 4→6 으로 넓힌다(코드/화이트리스트 변경 필요)","단조 수축을 '전체 엄격'에서 '마지막 폭 < 첫 폭'으로 완화","min_swing_atr_mult 를 올려 swing 검출 자체를 줄이면 회수가 범위 안으로 들어온다 — 조임처럼 보이지만 깔때기는 넓어지는 역설","현행 유지"]},
-  {"topic":"체결 0건 전략이 weight 0.10 을 점유하는 것","issue":"vcp_breakout 은 전 기간 체결 0건인데 상대 비중 0.10 을 갖는다. weight 는 상대 비율이므로 이 10% 는 현금으로 남는 것이 아니라 **다른 전략이 쓸 수 있었던 몫**이다. 표본 규약상 이 자문은 비중을 권고하지 않는다(insufficient)","evidence":"GET /api/strategies vcp_breakout.weight=0.10, 체결 이력 0건(/api/history 609행 중 vcp_breakout 0행)","options":["후보 공급 완화 2주 관측 후 재판단(권고)","weight 를 낮춰 다른 전략으로 돌린다 — 단 weight=0.0 은 축소가 아니라 비활성화다","현행 유지"]}],
+  {"topic":"체결 0건 전략이 weight 0.10 을 점유하는 것","issue":"vcp_breakout 은 전 기간 체결 0건인데 상대 비중 0.10 을 갖는다. weight 는 상대 비율이므로 이 10% 는 현금으로 남는 것이 아니라 **다른 전략이 쓸 수 있었던 몫**이다. 표본 규약상 이 자문은 비중을 권고하지 않는다(insufficient)","evidence":"GET /api/strategies → data.vcp_breakout.weight=0.10, 체결 이력 0건(/api/history data.trades 609행 중 vcp_breakout 0행)","options":["후보 공급 완화 2주 관측 후 재판단(권고)","weight 를 낮춰 다른 전략으로 돌린다 — 단 weight=0.0 은 축소가 아니라 비활성화다","현행 유지"]}],
  "no_change_reason":null,
  "code_review_notes":"base_depth_pct 는 라이브 0.35 / 기본 0.30 으로 이미 완화돼 있고 6단계(베이스 검출)는 41→22 로 병목이 아니라 손대지 않는다. breakout_volume_mult 라이브 1.2 / 기본 1.5 도 완화 방향이다. 즉 VCP 의 조임은 EMA 3키·last_pullback_max·min_swing_atr_mult 에 집중돼 있고, 그중 화이트리스트 안에 있는 것은 last_pullback_max 하나뿐이다."}
 ```
@@ -232,7 +233,7 @@ donchian_swing 을 뺀 6개 전부 t 값이 ±1.6 안이다. 이 상태에서 �
 
 ## 4. 운영 관찰 — 최근 7일 일일 리포트에서 반복되는 항목
 
-출처 = `GET /api/log-reports?days=7` (7행: 08-31, 09-01, 09-02, 09-03, 09-04, 09-07, 09-08).
+출처 = `GET /api/log-reports?days=7` 의 `data[]` (7행: 08-31, 09-01, 09-02, 09-03, 09-04, 09-07, 09-08).
 `findings` = 20:10 자동 분석(gpt-5.6-luna), `ext_findings` = Claude 일일 분석(09-04·09-07 2행만 존재).
 
 | 반복 항목 | 빈도 | 등급 | 매매 영향 |
