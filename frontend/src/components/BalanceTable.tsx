@@ -175,6 +175,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
       )}
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
             <tr>
@@ -262,6 +263,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {sellTarget && (
