@@ -40,6 +40,7 @@ from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine import data_load_tasks  # refactor-review B1 위임 모듈
 from src.engine import open_price_observe  # cycle264 관측 leaf (라인 상한 보호)
+from src.engine import quote_token_refresh  # cycle269 토큰 갱신 leaf (라인 상한 보호)
 from src.realtime.handler import (
     dispatch_message,
     flush_silent_drop_count,
@@ -722,6 +723,7 @@ class TradingScheduler:
             self._open_source_compare_task = asyncio.create_task(
                 open_price_observe.open_source_compare_task_loop(self)
             )
+            self._quote_token_refresh_task = asyncio.create_task(quote_token_refresh.task_loop(self))  # cycle269 — 매일 15:45 KST 보조 시세 계정 접근토큰 강제 재발급(만료 앵커 고정 = 장중 재발급 드리프트 차단)
 
             now = datetime.now().time()
 
@@ -1008,7 +1010,7 @@ class TradingScheduler:
                 "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
-                "_open_source_compare_task",  # cycle264 추가 — 09:05:30 시가 3자 대조 shadow task
+                "_open_source_compare_task", "_quote_token_refresh_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -1135,7 +1137,7 @@ class TradingScheduler:
                 "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
-                "_open_source_compare_task",  # cycle264 추가 — 09:05:30 시가 3자 대조 shadow task
+                "_open_source_compare_task", "_quote_token_refresh_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -1171,7 +1173,7 @@ class TradingScheduler:
             "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
             "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
             "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
-            "_open_source_compare_task",  # cycle264 추가 — 09:05:30 시가 3자 대조 shadow task
+            "_open_source_compare_task", "_quote_token_refresh_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
