@@ -610,10 +610,10 @@ def test_p5_get_reports_freshness_and_pins_first_tick(client, env):
         assert row["last_tick_at"] == first_tick.isoformat()
         assert row["first_tick_at"] == first_tick.isoformat()
         assert row["age_secs"] == 60
-        assert row["price"] == {"price": 61000, "acml_vol": None}, (
-            "price 는 ticker_prices 의 `current_price` 를 읽어야 한다(`price` 키는 운영에 "
-            "존재하지 않아 항상 null — Verify F2) + acml_vol 은 ticker_prices 가 아니라 "
-            f"tick_volume 관측값만 — {row['price']}"
+        assert row["price"] == {"price": 61000, "acml_vol": None, "open_price": 60500}, (
+            "price 는 ticker_prices 의 `current_price`/`open_price` 를 읽어야 한다(`price` "
+            "키는 운영에 존재하지 않아 항상 null — Verify F2) + acml_vol 은 ticker_prices "
+            f"가 아니라 tick_volume 관측값만 — {row['price']}"
         )
 
         # acml_vol 의 유일 소스 = cycle227 tick_volume leaf
@@ -621,8 +621,9 @@ def test_p5_get_reports_freshness_and_pins_first_tick(client, env):
 
         tick_volume.record_acml_vol(PROBE_TICKER, 12345)
         row = _rows(client)[PROBE_TICKER]
-        assert row["price"] == {"price": 61000, "acml_vol": 12345}, (
-            f"price 는 price/acml_vol 두 키만 — 틱 dict 통째 노출 금지 — {row['price']}"
+        assert row["price"] == {"price": 61000, "acml_vol": 12345, "open_price": 60500}, (
+            "price 는 price/acml_vol/open_price 세 키만 — 틱 dict 통째 노출 금지(09-09 "
+            f"채널 시가 비교용 open_price 추가) — {row['price']}"
         )
 
         # (4) 이후 틱이 더 뒤로 가도 first_tick_at 은 불변 (폴링 기반 근사의 정본)

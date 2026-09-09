@@ -285,6 +285,13 @@ def _build_probe_row(
     `tick_volume.record_acml_vol` 로만 흐른다(P0-1 확정 사실). `price`/`acml_vol`
     키를 읽으면 운영에서 항상 `{null, null}` 이다.
 
+    **`open_price` (09-09 추가)** — 채널별 시가 비교(NXT 프리장 vs KRX 전용, cycle264/265
+    조사)에 이 값이 필요해 세 번째 키로 노출한다. 원문 WebSocket 프레임(`auto_stock.log`
+    DEBUG)은 필드가 중간에서 잘려 시가를 못 뽑는다는 게 09-09 실측으로 확인됐다(websockets
+    라이브러리가 긴 TEXT 프레임을 repr 축약해서 기록) — 이 파싱된 값이 채널 비교의 유일한
+    안전한 소스다. `ticker_prices` 는 채널 무관 단일 dict(마지막 tick 값)라 같은 종목을
+    한 채널에서 다른 채널로 전환하며 폴링하면 전환 전후 값을 그대로 비교할 수 있다.
+
     `live_tick_subscribed`(= `get_subscribed_tickers()` 포함) / `in_desired_now`
     (= breakout ∪ swing ∪ momentum 후보 포함)는 프로브 **시작 후** 같은 종목이 라이브
     유니버스에 편입됐는지를 드러낸다 — `in_desired_now ∧ ¬live_tick_subscribed` 는
@@ -338,14 +345,15 @@ def _build_probe_row(
 
     price_entry = ticker_prices.get(ticker) if hasattr(ticker_prices, "get") else None
     current_price = price_entry.get("current_price") if isinstance(price_entry, dict) else None
+    open_price = price_entry.get("open_price") if isinstance(price_entry, dict) else None
     try:
         acml_vol = get_observed_acml_vol(ticker)
     except Exception:
         acml_vol = None
-    if current_price is None and acml_vol is None:
+    if current_price is None and acml_vol is None and open_price is None:
         price: dict | None = None
     else:
-        price = {"price": current_price, "acml_vol": acml_vol}
+        price = {"price": current_price, "acml_vol": acml_vol, "open_price": open_price}
 
     live_tick_subscribed = ticker in live_tick if live_tick is not None else None
     in_desired_now = ticker in desired if desired is not None else None
