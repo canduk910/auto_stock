@@ -145,7 +145,7 @@ EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 �
 
 - `vcp_universe_tickers: set[str]` = `list_all` row 의 `is_kospi200 OR is_kosdaq150` (사이클 153 컬럼, `.select("*")` 포함 → 별도 쿼리 0건). 플래그 키 부재 mock/legacy row 는 falsy → 비 VCP 취급 (회귀 0).
 - 분기 (**사이클 196 (2026-07-07) — 220→120 수렴**): VCP universe + `existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS(=120)` → `condition.fetch_daily_candles_backfill(ticker, total_days=120)` (분할 fetch 윈도우 ×2, 마지막 클램프). 그 외 = 현행 (비 VCP `<50` 백필 100일 / `>=50` 증분 7일, 사이클 122 영속). VCP `>=120` → 증분 7일 (재 backfill 금지). **churn 근본 원인**: 사이클 172 target=220 이 retention 230cal(=154영업일 실측) 초과 → `existing_count` 220 미도달 → VCP 348종목 매 load 전량 재backfill (churn 45K행/load + 잉여 KIS 2,088호출/일). VCP prepare 는 100일만 사용 (`vcp_breakout.py:162-164`) → 220 = 순수 낭비. 시정 = target 120 (retained 154 대비 34일 마진) → 즉시 수렴 (backfill 1회 후 incremental) + 윈도우 클램프로 backfill 도달 178cal < retention → churn 0.
-- graceful (사이클 88 G-REJECT — backfill 실패 → failed++ + 다음 ticker). **장중 자동 실행 금지** — 16:00 daily task (장 마감 후) + 수동 trigger 만 (task lifecycle 변경 0, 사이클 122).
+- graceful (사이클 88 G-REJECT — backfill 실패 → failed++ + 다음 ticker). **장중 자동 실행 금지** — 18:10 daily task (장 마감 후, cycle273f 이동) + 수동 trigger 만 (task lifecycle 변경 0, 사이클 122).
 
 ### 사이클 263 (2026-09-06) — 확정 전 오늘봉 시각 필터 (8영역 승인, 09-06 카드 ④)
 
@@ -191,7 +191,7 @@ purge(`_evaluate_universe_guard` 계열)는 보유·익일청산 종목을 이�
 
 ### 매매 안전성 무영향 (데이터 plumbing 한정)
 
-- scanner `_stock_master_daily_load_once` = 16:00 daily task (매수 진입 무관, 사이클 38/122). 어댑터 `get_recent_daily_normalized` (db) = 정의만 (prepare 미연결 → 매수 target 불변, 호출처 0).
+- scanner `_stock_master_daily_load_once` = 18:10 daily task (`TIME_STOCK_MASTER_DAILY_LOAD = time(18, 10)` — cycle273f 2026-09-10 사용자 결정 D8, 종전 16:00; 시간외 단일가 물량 포함, 16:1x~16:40 작업보다 뒤라 유니버스 판정이 오늘치 raw. 매수 진입 무관, 사이클 38/122). 어댑터 `get_recent_daily_normalized` (db) = 정의만 (prepare 미연결 → 매수 target 불변, 호출처 0).
 - `git diff -- src/engine/risk.py src/engine/order_engine.py src/realtime/ src/auth/ src/api/order.py` = **0 라인** (직접 검증). 신규 함수 본체 매매 hot path 참조 0.
 - production: `src/api/condition.py` (+128L 분할 fetch — `fetch_daily_candles_ranged` + `fetch_daily_candles_backfill`, `src/api/CLAUDE.md` 참조) / `src/db/stock_master_daily.py` (+70L retention 230 + 어댑터, `src/db/CLAUDE.md` 참조) / `src/engine/scanner.py` (+37L VCP 분기). net +219L.
 - 회귀 가드 27 케이스 (RANGE 4 + BACKFILL 4 + AST 1 / RET 2 + ADAPT 4 / SCAN 5 + SCAN-3b + SAFETY 1 / SAFETY AST 5) + 의미 전환 1 (cycle150 retention 150→230). 백엔드 3,161 PASS × flakiness 0.
@@ -209,7 +209,7 @@ purge(`_evaluate_universe_guard` 계열)는 보유·익일청산 종목을 이�
 ### 16:20 저녁 task (`TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)`)
 
 - `_evening_funnel_capture_task_loop` — `run_periodic_task_loop` 답습 (`_stock_master_master_load_task_loop` 패턴 100% + no-op record/flush). `initial_delay_secs=600` (basics 16:10 완료 후 진입, HTTP/2 race 마진).
-- `_evening_funnel_capture_once` 본체: (1) 16:00 일봉 적재 완료 대기 — `stock_master_daily.count_all()` 5분 cap polling (사이클 163 boot prepare 가드 패턴, 빈 funnel 영속 방지) (2) 5 전략 `prepare()` (기존 KIS-fetch 그대로 — 16:20 한가, 속도 무관. HIGH DB일봉 전환은 사이클 173) (3) `capture_funnel_snapshots(registry, is_provisional=True)`.
+- `_evening_funnel_capture_once` 본체: (1) 일봉 테이블 비어있지 않음 확인 — `stock_master_daily.count_all() > 0` 5분 cap polling(⚠️ F-D8-a: 그날 적재 완료 대기가 아니다 — cycle273f 부터 일봉은 18:10 이라 16:20 캡처는 전일 봉 기준, 전략 절단이 날짜 비교라 결과 동일) (사이클 163 boot prepare 가드 패턴, 빈 funnel 영속 방지) (2) 5 전략 `prepare()` (기존 KIS-fetch 그대로 — 16:20 한가, 속도 무관. HIGH DB일봉 전환은 사이클 173) (3) `capture_funnel_snapshots(registry, is_provisional=True)`.
 - `task_attrs` 4 위치 영속 (사이클 79 G-AST2): `self._evening_funnel_capture_task = asyncio.create_task(...)` (start) + cancel 튜플 3 (start finally / run_daily finally / stop). `test_scheduler_stop_zombie_tasks.py::expected_members` 16 → 17종 갱신.
 
 ### 매매 안전성 무영향
@@ -469,7 +469,7 @@ purge(`_evaluate_universe_guard` 계열)는 보유·익일청산 종목을 이�
 
 ### `scanner.py::_stock_master_daily_load_once` (+168L)
 
-- 호출: `_stock_master_daily_load_task_loop` 매일 16:00 KST 1회
+- 호출: `_stock_master_daily_load_task_loop` 매일 18:10 KST(cycle273f, 종전 16:00) 1회
 - 분기 로직: `max_bas_dd(ticker)` 사용 — 부재 시 백필 (T-100일), 존재 시 증분 (1일 단위)
 - KIS `fetch_daily_candles(ticker, days=N)` 호출 → `upsert_batch(ticker, rows)` 영속화
 - graceful (사이클 88 G-REJECT 답습) — KIS 거부/타임아웃 시 ticker skip 후 다음 진행

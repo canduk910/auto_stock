@@ -255,8 +255,12 @@ async def test_g_scan5_graceful_on_kis_failure():
 # G-SCHED1 (HIGH) — TIME_STOCK_MASTER_DAILY_LOAD = 16:00 KST
 # ---------------------------------------------------------------------------
 def test_g_sched1_time_constant_is_16_00():
-    """TIME_STOCK_MASTER_DAILY_LOAD = time(16, 0) — KRX 메인 종료 30분 후 안전 마진."""
-    assert scheduler.TIME_STOCK_MASTER_DAILY_LOAD == time(16, 0)
+    """TIME_STOCK_MASTER_DAILY_LOAD = time(18, 10) — cycle273f(2026-09-10, 사용자 결정 D8)로 16:00 에서 이동.
+
+    종전 16:00(KRX 메인 종료 30분 후 안전 마진)은 시간외 단일가(~18:00) 물량을 다음날 보정에 맡겼다.
+    18:10 은 그날 봉에 그 물량이 들어오고, 19:00 토큰 재발급(문턱 18:50)·20:00 자문 앞에 끝난다.
+    """
+    assert scheduler.TIME_STOCK_MASTER_DAILY_LOAD == time(18, 10)
 
 
 # ---------------------------------------------------------------------------

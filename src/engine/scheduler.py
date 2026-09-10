@@ -63,12 +63,12 @@ TIME_POST_NXT_OPEN = time(15, 40)          # NXT 애프터 진입 (사이클 26:
 TIME_SCAN_START = time(9, 30)              # 모멘텀 스캔
 TIME_KRX_MAIN_BUY_STOP = time(15, 20)      # KRX 메인 신규 매수 중단 + 강제 청산
 TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 (종가 흡수 마진 시작, _force_clear_main_only 가드 기준)
-TIME_STOCK_MASTER_DAILY_LOAD = time(16, 0) # 사이클 122 — KIS 일봉 일괄 적재 (KRX 메인 종료 30분 후 안전 마진)
-TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF1002R 매스 보강 (일봉 task 직후 10분 마진)
+TIME_STOCK_MASTER_DAILY_LOAD = time(18, 10)  # 사이클 122 16:00 → cycle273f(2026-09-10, D8) 18:10 — 시간외 단일가(~18:00) 물량이 그날 봉에 들어온다. ⚠️ basics(16:10)·purge·funnel·마스터·재무보다 뒤 = 유니버스 판정이 오늘치 raw(양방향 회전 위상 하루 당김, D5 와 함께)
+TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF1002R 매스 보강 (cycle273f 부터 일봉(18:10)보다 먼저 돈다 — 일봉 의존 없음)
 TIME_STOCK_MASTER_MASTER_LOAD = time(16, 30)  # 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 일괄 적재 (basics task 직후 20분 마진, domain-consult 의제 5 옵션 A)
 TIME_STOCK_MASTER_FINANCIAL_LOAD = time(16, 40)  # 사이클 C3 — 퀀트 재무 (마법공식/F-Score-7) 주1회 적재 (master 16:30 후 stagger)
 TIME_STOCK_MASTER_DAILY_PURGE = time(16, 15)  # 사이클 150 — stock_master_daily T-150일 retention cron (일봉 task 16:00 적재 직후 15분 마진)
-TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)  # 사이클 171 — 저녁 잠정 funnel 캡처 (16:00 일봉 → 16:10 basics 직후, 16:30 마스터 직전. 운영자 밤 후보 확인. domain-consult 의제 4 우선순위 2)
+TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)  # 사이클 171 — 저녁 잠정 funnel 캡처 (16:10 basics 직후, 16:30 마스터 직전; 일봉은 18:10 이라 이 캡처는 전일 봉 기준 — 전략 오늘봉 절단이 날짜 비교라 결과 동일. 운영자 밤 후보 확인)
 TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
 TIME_RECOMMENDATION = time(20, 0)          # AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동 — 백테스트 검증 정합성)
 TIME_FULL_UNIVERSE_LOAD = time(20, 0, 5)   # 사이클 101 — 전체 유니버스 적재 (AI자문 직후 5초 마진)
@@ -712,7 +712,7 @@ class TradingScheduler:
             )
 
             # 사이클 171 (2026-06-22) — 매일 16:20 KST 저녁 잠정 funnel 캡처 task.
-            # 16:00 일봉 → 16:10 basics → 16:20 funnel → 16:30 마스터 순서 (운영자 밤 후보 확인).
+            # 16:10 basics → 16:20 funnel → 16:30 마스터 → 18:10 일봉(cycle273f) 순서 (운영자 밤 후보 확인).
             # domain-consult 의제 4 우선순위 2 + 사이클 134 task_loop_helper 패턴 답습.
             self._evening_funnel_capture_task = asyncio.create_task(
                 self._evening_funnel_capture_task_loop()
@@ -3023,20 +3023,20 @@ class TradingScheduler:
         """사이클 171 — 16:20 저녁 잠정 funnel 캡처 본체 (한 번 실행).
 
         흐름 (domain-consult 의제 4 우선순위 2):
-        1. 16:00 일봉 적재 완료 대기 — `stock_master_daily.count_all()` 폴링
+        1. 일봉 테이블 비어있지 않음 확인 — `count_all() > 0` 폴링(⚠️ 그날 적재 완료 대기가 아니다 — F-D8-a)
            (사이클 163 boot prepare 가드 패턴, 일봉 미적재 시 빈 funnel 영속 방지)
         2. 5 전략 `prepare()` 호출 (기존 KIS-fetch 그대로 — 16:20 한가, 속도 무관.
            HIGH DB일봉 전환은 사이클 173). graceful (사이클 88) — 전략별 실패 격리
         3. `capture_funnel_snapshots(registry, is_provisional=True)` 단계별 + step_no=99 캡처
 
         안전 가드 (관찰성 한정 — 매매 hot path diff 0):
-        - 16:00 일봉 → 16:10 basics → 16:20 prepare → 16:30 마스터 순서 의존성 보장
+        - 16:10 basics → 16:20 prepare → 16:30 마스터 → 18:10 일봉(cycle273f) 순서; 캡처는 전일 봉 기준(전략 절단이 날짜 비교라 동일)
         - 사이클 158 재시도 hook + 사이클 32 R4 보유/익일청산 보호 영속
         - 사이클 132 momentum funnel 영구 제외 (prepare 호출은 하되 _funnel_steps 미적재)
         """
         from src.db.stock_master_daily import count_all as _daily_count_all
 
-        # (1) 16:00 일봉 적재 완료 대기 (사이클 163 count polling 패턴 답습, 5분 cap)
+        # (1) 일봉 테이블 비어있지 않음 확인 — 전체 행 수 > 0 만 본다(공허 게이트, F-D8-a 정직화. 사이클 163 패턴, 5분 cap)
         _WAIT_CAP_SECS = 300
         _POLL_SECS = 10
         waited = 0
