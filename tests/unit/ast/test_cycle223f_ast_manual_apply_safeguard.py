@@ -355,6 +355,13 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    is_protected` 로 OR 강제 포함 + list_all 실패 대비 forced_extra 합집합 +
     #    실행당 1행 `[daily_load_protected_forced]` 마커.
     "src/engine/scanner.py": "f999183c7b92b29e0a9fc1222161e4c6c978a7baaef6603173ead48e65944b99",
+    # ✅ 2026-09-10 — cycle273 J2 273c (D3, `_workspace/red/cycle273c_kojiro_rank_restore_spec.md`):
+    #    `_rank_candidate_components` 성분①②(macd3 기울기%·띠폭 확장률) 원설계 복원
+    #    (`/close`·`/_RANK_LOOKBACK`·5봉평균 분모) + OQ-5 nan/inf 성분 중립화 + shadow
+    #    관측 `[kojiro_band_observe]` 배선(신규 헬퍼 `_band_observe_row`, leaf 는
+    #    `src/engine/kojiro_band_observe.py` 별도 파일). 가중치·자격 게이트·청산 무접촉
+    #    (C9 후보 집합 불변·C10 진입/수량/청산 sha 불변으로 실증). 자매 가드 4곳 동일 값.
+    "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
 }
 
 

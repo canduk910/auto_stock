@@ -73,16 +73,23 @@ def test_score_empty():
 # ── (c) 컴포넌트 추출 (enrich dormant 지표 배선) ──
 
 def test_rank_components_from_enriched():
+    """cycle273-D3 원설계 복원 갱신값 (독립 재계산 — 명세 §5.1).
+
+    li=4, pi=1 → m3s = (5-1)/3/10000 = 1.3333333333333333e-4
+    bw.iloc[-6:-1] = [10,10,12,14] → mean 11.5 → be = 15/11.5-1 = 0.30434782608695654
+    stages [4,5,6,1,1] → dist 1 → fr = 5-1 = 4.0
+    """
     s = _mk()
     # len 5, _RANK_LOOKBACK=3 → li=4, pi=1
     df = pd.DataFrame({
-        "macd3": [0.0, 1.0, 2.0, 3.0, 5.0],          # slope = 5 - 1 = 4
-        "band_width": [10.0, 10.0, 12.0, 14.0, 15.0],  # exp = (15-10)/10 = 0.5
+        "macd3": [0.0, 1.0, 2.0, 3.0, 5.0],
+        "band_width": [10.0, 10.0, 12.0, 14.0, 15.0],
+        "close": [10000.0] * 5,
     })
     stages = [4, 5, 6, 1, 1]                           # 6→1 dist 1 → fresh = 5-1 = 4
     m3s, be, fr = s._rank_candidate_components(df, stages, within=5)
-    assert m3s == pytest.approx(4.0)
-    assert be == pytest.approx(0.5, abs=0.01)
+    assert m3s == pytest.approx(1.3333333333333333e-4, abs=1e-18)
+    assert be == pytest.approx(0.30434782608695654, abs=1e-15)
     assert fr == pytest.approx(4.0)
     assert _RANK_LOOKBACK == 3
 
