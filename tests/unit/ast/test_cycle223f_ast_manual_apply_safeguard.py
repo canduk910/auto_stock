@@ -336,8 +336,6 @@ def _content_sha(path: str) -> str:
 #    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
 # TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
-    # cycle271 승인 항목 — 커밋 후 비울 것
-    "src/engine/order_engine.py": "773b4d2b783869b7ae703f17fe9e1ef8ebbff333bc21c2b19da0ff096e3ee2c3",
     # ✅ 2026-09-07 — cycle268 항목(kojiro.py)은 커밋 `a77f9c3` 으로 **자기소멸**했다
     #    (`git diff HEAD` 에 더 이상 나타나지 않는다). 스냅샷을 남겨 두면 (a) `test_g3_8`
     #    이 첫 커밋된 항목에서 통째로 skip 돼 나머지 핀의 스테일 탐지가 조용히 죽고

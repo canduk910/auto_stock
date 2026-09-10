@@ -195,7 +195,7 @@ KRX 개장가가 나온다.** 채널 리졸버 제안(P1-7 B)을 뒷받침하는
      분모 감소(107→90/65/91)는 "구독 회전"이 아니라 구독 수 ≫ MAIN 틱 낸 종목 수(cycle252 무송출 계열)
      로 보임 · 09-10 09:35 `[breakout_open_confirm]` LTV 행 부재 = **09:09 사용자 비중 변경으로 LTV
      `enabled=False`** 가 원인(메인 세션 확인).
-2. **09:05 `[swing_poll] execute_buy 실패` 오탐 시정 — ✅ 09-10 cycle271 완료(Green·tester GO, 기존 "고치자" 승인 근거; 커밋·배포는 아래 진행 기록 절)**
+2. **09:05 `[swing_poll] execute_buy 실패` 오탐 시정 — ✅ 09-10 cycle271 완료 — 커밋 `d4cbb58`(코드+문서) + 핀 비움 후속 커밋, 18:5x 푸시(full 배포)(기존 "고치자" 승인 근거; 배포 확인은 아래 진행 기록 절)**
    **후속(cycle271 tester r2 비차단 지적, 코드 무접촉 — 별도 승인 사안)**:
    - **F-271-1 (LOW→우선순위 상향)** `_completed_orders` 는 `reset_daily_state()` 가 비우지 않는다(`_completed_buy_orders` 만 clear). 신규 판별자의 유일한 근거 집합이 무한 성장 — 오삼킴 경로는 코드상 닫혀 있으나(스테일 엔트리는 헬퍼 호출 **전** 관문이 소비, 재시작 시 in-memory 라 비어 있음) 명세 F-3 을 F-1/C235-V2(PARTIAL 포괄로 `affected=0` 누수원 차단)와 묶어 판단. **이번 사이클에서 `.clear()` 추가 금지**(사이클 30 가드의 세션 경계 의미 변경 = 별도 승인·명세).
    - **F-271-2 (LOW, 기존 동작)** 폴백 INSERT 는 바깥 `except KisApiError` 본문 안이라 증거 없는 `UniqueViolationError` 가 폴백에서 나면 `except Exception:`(`pending_buys.discard`) 을 거치지 않고 호출자로 직행 → 그 ticker 가 `pending_buys`·`pending_buy_amounts` 에 잔류(재매수 차단 + 잔여 자금 과소). cycle271 이 만든 것이 아니라 시정 전과 동일. 선택지 = 폴백 쌍둥이 테스트로 현행 문서화 / 폴백 `try` 정리 핸들러 추가(8영역 별도 사이클).
