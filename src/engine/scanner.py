@@ -2063,6 +2063,9 @@ _DAILY_LOAD_MIN_TRADE_WON = 1_000_000_000  # 10억원 (kojiro 500억/10억 정�
 # 청산 규약 커플링을 끊어 둔 기존 원칙과 같은 이유).
 _DAILY_LOAD_TODAY_BAR_CUTOFF = _dtime(15, 40)
 
+# 사이클 273 D5 — 보유/익일청산 강제 포함 관측 마커 (실행당 1행, 사이클 237 교훈 — 종목당 emit 금지)
+_DAILY_LOAD_PROTECTED_FORCED_MARKER = "[daily_load_protected_forced]"
+
 
 def _drop_today_bars(
     candles: list[dict], *, now_kst: datetime, today: date
@@ -2154,6 +2157,25 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     # 사이클 172 — VCP universe (KOSPI200 ∪ KOSDAQ150) ticker set (220일 backfill 분기용).
     # list_all 의 .select("*") 가 is_kospi200/is_kosdaq150 컬럼 포함 (사이클 153) → 별도 쿼리 0건.
     vcp_universe_tickers: set[str] = set()
+
+    # 사이클 273 D5 — 보유/익일청산 종목 강제 포함 (spec §3). "지우는 쪽(16:15 purge)은
+    # 보호하는데 채우는 쪽(16:00 load)은 보호하지 않는다" 비대칭 시정 — 자격을 못 넘긴
+    # 날마다 그날 봉을 잃던 004690(삼천리) 실사례. C2 fail-open: 판정 실패는 현행
+    # (is_index or is_qualifier) 집합 그대로 진행한다. C4: 6자리 숫자 ticker 만 보호 대상
+    # (진입 게이트 비대칭 규약 — ETF/신주인수권/오염 문자열은 제외).
+    try:
+        _protected_raw = _collect_protected_tickers_for_scanner()
+    except Exception:
+        logger.debug(
+            "[daily_load_protected_forced] 보호 집합 조회 실패 graceful", exc_info=True,
+        )
+        _protected_raw = set()
+    protected_tickers: set[str] = {
+        t for t in _protected_raw
+        if isinstance(t, str) and len(t) == 6 and t.isdigit()
+    }
+    forced_in_universe_count = 0
+
     page = 0
     PAGE_SIZE = 1000
     while True:
@@ -2179,13 +2201,33 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             # 전략 스캔 대상이 아니므로 일봉 캐시 불요 (Supabase 용량 낭비 차단).
             # 재진입(유니버스 편입) 시 다음 load 가 backfill 로 자동 채움.
             is_qualifier = _is_daily_load_universe(row)
-            if is_index or is_qualifier:
+            # 사이클 273 D5 — 보호 종목은 자격과 무관하게 강제 포함(C1: vcp_universe_tickers
+            # 에는 넣지 않는다 — 120일 분할 backfill 은 index 전용, 보호 목적은 '오늘 봉').
+            is_protected = ticker in protected_tickers
+            if is_index or is_qualifier or is_protected:
                 all_tickers.append(ticker)
                 if is_index:
                     vcp_universe_tickers.add(ticker)
+                if is_protected and not (is_index or is_qualifier):
+                    forced_in_universe_count += 1
         if len(rows) < PAGE_SIZE:
             break
         page += 1
+
+    # 사이클 273 D5 — list_all 페이징이 통째로 실패(G-273D-2)하거나 보호 종목이 어느
+    # 페이지에도 실리지 않은 경우까지 대비한 합집합. C5b: 이미 유니버스 안인 보호 종목은
+    # 중복 append 되지 않는다(집합 차집합으로만 추가).
+    forced_extra_tickers = protected_tickers - set(all_tickers)
+    if forced_extra_tickers:
+        all_tickers.extend(sorted(forced_extra_tickers))
+
+    _protected_marker_tickers = ",".join(sorted(protected_tickers)[:20]) or "-"
+    logger.info(
+        "%s protected=%d forced_in_universe=%d forced_extra=%d tickers=%s",
+        _DAILY_LOAD_PROTECTED_FORCED_MARKER,
+        len(protected_tickers), forced_in_universe_count, len(forced_extra_tickers),
+        _protected_marker_tickers,
+    )
 
     summary["total"] = len(all_tickers)
     _rp.update_progress("daily", total=len(all_tickers))

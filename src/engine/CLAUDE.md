@@ -163,6 +163,30 @@ EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 �
 - **부작용** — 신규 상장·유니버스 진입 종목의 일봉 backfill 이 아침(07:56)에서 같은 날 16:00 으로 **≈8시간 미뤄진다**(그 사이 `get_recent_daily_normalized` 는 `reason="miss"` KIS 폴백 = 데이터는 더 정확하지만 장중 KIS 호출이 는다). 최종 커버리지 손실은 0. UI `last_daily_load_at` 은 낮 동안 어제 날짜로 보인다(의미상 정확).
 - 회귀 가드 = `tests/unit/engine/test_cycle263_daily_load_stub_filter.py` (40) + `tests/unit/ast/test_cycle193_ast_fresh_gate.py`(게이트 대상 3 task 로 갱신).
 
+### 사이클 273d (2026-09-10) — 보유/익일청산 종목 유니버스 필터 강제 포함 (D5, 8영역 승인)
+
+`_stock_master_daily_load_once` 의 유니버스 필터 게이트가 `if is_index or is_qualifier:` 였던 것을
+`if is_index or is_qualifier or is_protected:` 로 확장했다(순수 OR 추가, 기존 분기 제거 0). 16:15
+purge(`_evaluate_universe_guard` 계열)는 보유·익일청산 종목을 이미 절대 보호하는데, 16:00 load 는
+자격(시총·거래대금 등) 미달 종목을 그냥 건너뛰어 "지우는 쪽은 보호, 채우는 쪽은 방치"라는 비대칭이
+있었다 — 자격 미달일마다 그날 봉을 영구 결손시킨 004690(삼천리) 실사례가 발단.
+
+- `is_protected` = 기존 공통 헬퍼 `_collect_protected_tickers_for_scanner()`(사이클 64 도입, 신규
+  아님 — line 55)로 얻은 보유·익일청산 종목 중 **6자리 숫자 ticker 만**(진입 게이트 비대칭 규약과
+  동일 — ETF/신주인수권/오염 문자열은 보호 집합에서 제외).
+- 헬퍼 예외는 **fail-open** — `protected_tickers = set()` 으로 현행 집합(index/qualifier)만 진행.
+- 페이징 루프 종료 뒤 `protected_tickers - set(all_tickers)` 차집합을 `all_tickers` 에 추가
+  append 한다(중복 방지 + 페이징 부분 실패·누락 종목 대비 합집합 — 어느 페이지에도 안 실린
+  보호 종목까지 커버).
+- `vcp_universe_tickers` 에는 넣지 않는다(120일 분할 backfill 은 index 전용, 보호 목적은
+  "오늘 봉 결손 방지" 로 국한).
+- 관측 `[daily_load_protected_forced] protected=%d forced_in_universe=%d forced_extra=%d tickers=%s`
+  — **실행당 1행**(cycle237 donchian 로그 폭주 교훈 재적용, 종목당 emit 금지). 페이징 루프 밖·
+  `summary["total"]` 대입 앞에서 무조건 emit 되므로 조기 return 경로에서도 1행이 남는다.
+- scanner.py +44L, `scheduler.py` 무접촉(3,898L, <3,900 상한 유지). 회귀 가드 =
+  `tests/unit/engine/test_cycle273_daily_load_protected.py` (47) + sha 핀 4곳 갱신.
+- 명세 `_workspace/red/cycle273d_daily_load_held_inclusion_spec.md`, 사용자 결정 D3.
+
 ### 매매 안전성 무영향 (데이터 plumbing 한정)
 
 - scanner `_stock_master_daily_load_once` = 16:00 daily task (매수 진입 무관, 사이클 38/122). 어댑터 `get_recent_daily_normalized` (db) = 정의만 (prepare 미연결 → 매수 target 불변, 호출처 0).
