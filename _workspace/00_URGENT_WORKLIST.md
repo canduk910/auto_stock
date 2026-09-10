@@ -152,6 +152,7 @@ KRX 개장가가 나온다.** 채널 리졸버 제안(P1-7 B)을 뒷받침하는
    순간에 안 찍힐 수 있다).
 
 ## 🟢 09-10(목) 자율 구간 진행 기록 (16:17~21:00, 사용자 허용 = 기존 결정 범위 커밋·푸시 포함 · 종료 후 아티팩트 리포트)
+- **cycle273b-F7(그룹 1 I1) 완료·브랜치 커밋**: `_selling` 재대조 블록 → leaf `selling_reconcile.py`(scheduler 3,871L), `[selling_hold]` 3분기 가시화, 검증 2라운드 지적 전부 처리(logger 정체성 가드·rmn_qty=0·2-ticker 격리·180s 경계·graceful). AST1·AST2(order_engine) 는 I3 까지 skip — **I3 완료 시 skip 해제 의무**. 배포는 main 병합 후(가·다 묶음).
 
 > 입력 꾸러미 정본 = `scratchpad/report_bundle_0910.md`(세션 스크래치, 보고서 원문은 `_workspace/reports/2026-09-10_*.md` 로 report-writer 가 확정). 아래는 **이미 확정된 사실만** — 코드 사이클 결과는 끝나는 대로 덧붙인다.
 

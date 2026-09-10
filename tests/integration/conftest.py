@@ -246,6 +246,9 @@ def scheduler_env(monkeypatch):
     monkeypatch.setattr("src.engine.scheduler.write_log", fake_write_log)
     # 사이클 51: boot_manager 분리 — write_log 가 boot_manager 에서도 import 됨
     monkeypatch.setattr("src.engine.boot_manager.write_log", fake_write_log, raising=False)
+    # cycle273b F-7: stale _selling 재대조가 leaf selling_reconcile 로 위임됨 — write_log 도
+    # 그 모듈 이름공간에서 별도로 patch 해야 한다(위 두 줄과 동형, cycle51 선례).
+    monkeypatch.setattr("src.engine.selling_reconcile.write_log", fake_write_log, raising=False)
 
     # kis_ws.subscribe 호출 추적
     async def fake_subscribe(tr_id, tr_key):
