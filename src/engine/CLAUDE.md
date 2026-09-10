@@ -705,7 +705,7 @@ EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 �
 
 체결통보 race 가드:
 - 주문번호 매핑(`_order_qty / _order_strategy / _order_ticker / _pending_buy_orders`)은 **`place_order` 응답 직후 동기 영역**, `await insert_trade` 진입 *전*
-- `_completed_orders` set + `update_trade_status` 영향 row 0건 보정 INSERT — 체결통보가 REST 응답보다 먼저 도착해도 단일 COMPLETED row 보장
+- `_completed_orders` set + `update_trade_status` 영향 row 0건 보정 INSERT — 체결통보가 REST 응답보다 먼저 도착해도 단일 COMPLETED row 보장 · **cycle271** — PENDING INSERT 의 `await` 도중 체결통보가 먼저 완주하면 그 PENDING INSERT 가 migration 029 부분 UNIQUE 를 위반한다 → `_insert_pending_buy_or_absorb_race`(시장가·지정가 폴백 두 지점 공용) 가 `order_no in _completed_orders` 일 때만 흡수·discard + `[buy_fill_during_insert] ticker= order_no= strategy= path=market|fallback` INFO 1행, 증거 없는 위반은 전파(`test_cycle271_execute_buy_fill_during_insert.py` 16케이스)
 
 거래소 라우팅 (`exchange`):
 - 모든 `place_order` / `cancel_order` 에 `_strategy_exchange(strategy_id)` 전달

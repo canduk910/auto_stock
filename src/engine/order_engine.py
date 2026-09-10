@@ -23,6 +23,7 @@ from src.api.balance import (
     is_sell_qty_exceeded,
 )
 from src.engine.util.tick_size import step_down, step_up
+from asyncpg.exceptions import UniqueViolationError
 from src.api.base import KisApiError
 from src.api.order import cancel_order, place_order
 from src.db.system_logs import write_log, safe_write_log
@@ -206,6 +207,40 @@ class OrderEngine:
             except Exception:
                 logger.debug("[nxt_downgrade] write_log 실패", exc_info=True)
         return "KRX"
+
+    async def _insert_pending_buy_or_absorb_race(
+        self,
+        record: TradeRecord,
+        *,
+        ticker: str,
+        order_no: str,
+        strategy_id: str,
+        path: str,
+    ) -> None:
+        """PENDING INSERT — 체결통보가 그 `await` 도중 착지하는 race(cycle271) 흡수.
+
+        `await insert_trade` 는 이벤트 루프에 제어를 넘긴다. 그 사이 체결통보
+        (`_handle_buy_fill`) 가 먼저 완주하면 보정 INSERT 로 같은
+        `(ticker, order_no, trade_type)` COMPLETED 행을 먼저 넣어 두므로, 재개된
+        이 PENDING INSERT 는 migration 029 부분 UNIQUE 인덱스를 위반한다.
+
+        `_completed_orders` 에 이 `order_no` 가 있다는 것이 "체결통보가 먼저
+        INSERT 했다"는 유일한 증거다 — 그때만 성공 경로로 합류하고
+        (누수 방지를 위해 그 order_no 를 소비/discard), 증거 없는
+        UniqueViolationError(예: 같은 키의 CANCELLED 잔존 등 다른 원인)는
+        그대로 전파한다.
+        """
+        try:
+            await insert_trade(record)
+        except UniqueViolationError:
+            if order_no in self._completed_orders:
+                self._completed_orders.discard(order_no)
+                logger.info(
+                    "[buy_fill_during_insert] ticker=%s order_no=%s strategy=%s path=%s",
+                    ticker, order_no, strategy_id, path,
+                )
+            else:
+                raise
 
     async def execute_buy(
         self,
@@ -404,7 +439,10 @@ class OrderEngine:
                     strategy=strategy.strategy_id,
                     order_no=result.order_no,
                 )
-                await insert_trade(record)
+                await self._insert_pending_buy_or_absorb_race(
+                    record, ticker=ticker, order_no=result.order_no,
+                    strategy_id=strategy.strategy_id, path="market",
+                )
 
             logger.info("매수 주문 접수: %s %d주 @ %d (주문번호: %s, 전략: %s)",
                          t(ticker), quantity, record_price, result.order_no, strategy.strategy_id)
@@ -468,7 +506,10 @@ class OrderEngine:
                             strategy=strategy.strategy_id,
                             order_no=result.order_no,
                         )
-                        await insert_trade(record)
+                        await self._insert_pending_buy_or_absorb_race(
+                            record, ticker=ticker, order_no=result.order_no,
+                            strategy_id=strategy.strategy_id, path="fallback",
+                        )
 
                     logger.warning(
                         "시장가 거부 → 지정가 5호가 폴백: %s @ %d (원인 [%s] %s)",

@@ -1138,6 +1138,8 @@ _EIGHT_AREAS = [
 #    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
 # TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 비운다.
 _ALLOWED_CONTENT_SHA: dict[str, str] = {
+    # cycle271 승인 항목 — 커밋 후 비울 것
+    "src/engine/order_engine.py": "773b4d2b783869b7ae703f17fe9e1ef8ebbff333bc21c2b19da0ff096e3ee2c3",
     #    `_parse_tick_prices` 는 byte 동일(소스 세그먼트 sha 핀)이고 `_handle_tick` 의
     #    `on_tick` 6-튜플도 골든 12케이스로 불변 실증 = **매매 행위 diff 0**.
     #    명세 = `_workspace/consult/2026-09-07_open_price_scope_filter.md` §7.1.
