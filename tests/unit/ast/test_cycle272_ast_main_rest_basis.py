@@ -594,38 +594,6 @@ def test_g272_28c2_cycle264_killswitch_ban_drops_only_this_name():
     )
 
 
-def test_g272_28d_untouchable_areas_untouched():
-    """C28 — 8영역 9경로 **diff 0**.
-
-    ⚠️ **사이클 한정 — cycle272 커밋 직후 이 테스트를 삭제한다.**
-    `git diff HEAD` 는 커밋 뒤 공허해지고 다음 편집에서 무조건 RED 가 된다
-    (cycle240 A11b · cycle252 G-252-5b · cycle262 C12). 영구 가드는
-    `test_cycle222a3_ast_followup_fixes.py` 가 들고 있다.
-
-    leaf 는 `scanner.ticker_prices` 를 **읽기만** 하므로 이 사이클의 8영역 접촉은 0 이고,
-    따라서 **자매 sha 핀 4곳도 손대지 않는다**.
-    """
-    changed = _changed_paths()
-    offenders = sorted(
-        p for p in changed
-        if p in _UNTOUCHABLE_FILES or p.startswith(_UNTOUCHABLE_DIRS)
-    )
-    assert not offenders, (
-        f"8영역이 변경됐다: {offenders} — cycle272 의 계약은 접촉 0 이다. "
-        "정말 필요하면 사용자 승인 + 자매 sha 핀 4곳 등록 절차를 따른다"
-    )
-
-
-def test_g272_28e_other_strategy_files_untouched():
-    """C28 — 전략 7파일 중 VB·LTV 외 **5파일 diff 0**.
-
-    ⚠️ **사이클 한정 — cycle272 커밋 직후 삭제.**
-    """
-    changed = set(_changed_paths())
-    offenders = sorted(set(_OTHER_STRATEGY_FILES) & changed)
-    assert not offenders, f"VB·LTV 외 전략 파일이 변경됐다: {offenders}"
-
-
 def test_g272_28f_docs_declare_the_new_key():
     """C28 — 정본 문서 2곳에 새 키가 기재된다(cycle254 G-254-4 문서 가드 패턴).
 

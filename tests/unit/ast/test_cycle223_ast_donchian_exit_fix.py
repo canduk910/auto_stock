@@ -448,6 +448,19 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    ⚠️ **자매 가드 4곳**(222a3 `_APPROVED_CONTENT_SHA` · 223 · 223f
     #    `_PREEXISTING_CONTENT_SHA` · 226 `_ALLOWED_CONTENT_SHA`)에 **같은 값**으로 핀한다 —
     #    네 가드가 같은 워킹트리를 보므로 값이 갈리거나 한 곳만 등록되면 그 자체가 결함
+    # ✅ 2026-09-10 — cycle273 J1(D5, `_workspace/red/cycle273d_daily_load_held_inclusion_spec.md`):
+    #    `_stock_master_daily_load_once` 유니버스 게이트에 보호 집합(보유 ∪ 익일청산,
+    #    `_collect_protected_tickers_for_scanner` 재사용)을 `is_index or is_qualifier or
+    #    is_protected` 로 OR 강제 포함 + list_all 실패 대비 forced_extra 합집합 +
+    #    실행당 1행 `[daily_load_protected_forced]` 마커.
+    "src/engine/scanner.py": "f999183c7b92b29e0a9fc1222161e4c6c978a7baaef6603173ead48e65944b99",
+    # ✅ 2026-09-10 — cycle273 J2 273c (D3, `_workspace/red/cycle273c_kojiro_rank_restore_spec.md`):
+    #    `_rank_candidate_components` 성분①②(macd3 기울기%·띠폭 확장률) 원설계 복원
+    #    (`/close`·`/_RANK_LOOKBACK`·5봉평균 분모) + OQ-5 nan/inf 성분 중립화 + shadow
+    #    관측 `[kojiro_band_observe]` 배선(신규 헬퍼 `_band_observe_row`, leaf 는
+    #    `src/engine/kojiro_band_observe.py` 별도 파일). 가중치·자격 게이트·청산 무접촉
+    #    (C9 후보 집합 불변·C10 진입/수량/청산 sha 불변으로 실증). 자매 가드 4곳 동일 값.
+    "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
 }
 
 
@@ -549,11 +562,17 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    8영역·`scheduler.py` 는 별도 라인 상한 가드(`test_cycle272_ast_main_rest_basis.py`)로
 #    diff 0 을 기계적으로 강제한다. 명세 = `_workspace/red/cycle272_rest_open_basis_spec.md`.
 #    TODO(cycle272 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
+# ✅ 2026-09-10 — cycle273 J2 273c (D3, `_workspace/red/cycle273c_kojiro_rank_restore_spec.md`):
+#    `_rank_candidate_components` 성분①②(macd3 기울기%·띠폭 확장률) 원설계 복원 +
+#    OQ-5 nan/inf 중립화 + shadow 관측 `[kojiro_band_observe]` 배선. 가중치·자격
+#    게이트·청산 무접촉(C9 후보 집합 불변·C10 진입/수량/청산 sha 불변으로 실증).
+#    TODO(cycle273 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
         "44c610949800a16a1c58eeaba74ba9b4ce1ee10a7b324273f2eccfa486654a63",
     "src/engine/strategies/long_tail_volatility.py":
         "04913d7024e5f58ced6e9e70e6325f2f33b17678936b26a6b56acb5973d0936b",
+    "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
 }
 
 

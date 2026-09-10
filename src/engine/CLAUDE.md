@@ -30,6 +30,8 @@ util/tick_size.py(KRX 7구간 호가단위 헬퍼 — `get_tick_size` / `round_t
 market_regime.py(dkstock.cloud 매크로 → 매수 가드 + cash_usage_ratio)
 **quant_score.py** (사이클 C2 — 퀀트 재무필터 순수 함수. `compute_f_score_7(curr, prev) -> int|None`(Piotroski 9지표 中 **7지표** = 현금흐름표 TR 부재로 CFO 2지표 제외, 개별 결측 미가점 / 2기 부족 fail-open None) + `compute_magic_formula(series_by_ticker, mktcap_by_ticker) -> dict`(Greenblatt EY=1/ev_ebitda 폴백 bsop_prti/EV, ROC=bsop_prti/((cras-flow_lblt)+fxas), mf_rank=ey_rank+roc_rank). DB/HTTP/시계 미접촉 순수 함수, 8영역 미접촉)
 **kojiro_indicators.py** (2026-07 — 고지로 대순환 순수 지표. `ema`/`atr`(Wilder ewm(1/period))/`stage_of`(6배열+동가 유지)/`enrich`(EMA 5/20/40 + 스테이지 + 대순환 MACD1/2/3 + 밴드폭 + ATR). pandas 사용, `KojiroIndicatorConfig` 주입. quant_score 선례 = DB/HTTP/시계 미접촉 순수 함수, 8영역 미접촉. **ATR = Wilder ewm(1/20)** ≠ donchian `_atr`/`get_atr`(단순평균) — 손절선 정의 단일 진실원, 재사용 금지)
+
+**kojiro_band_observe.py** (cycle273c, 2026-09-10 — 고지로 후보 순위 성분①② 원설계 복원의 shadow 관측 leaf. `observe_band(band_raw, ranked_final, held_only, scores=None)` 이 `[kojiro_band_observe]` 마커로 `ranked_final + held_only` 순서 1행/(ticker,role)/일 방출 — `bar`(D-1 완성봉 날짜)·`exp1`(레거시 단일봉 분모)/`exp5`(복원 직전5봉평균 분모)·`slope_raw`/`slope_pct`·`score` 등 12원소 stash + 파생 3필드(atr_pct/bw_close_pct/bw_atr)를 한 행에 나란히 남겨 복원 전후 대조. never-raise(`_band_observe_row`·`observe_band`·`absorb_band_call_failure` 전부 단일 `try/except Exception`, 실패는 `observer_trace.trace_observer_failure` 흔적) + read-only + cap=`KstDailyEmitCap`(키=(ticker,role)) — `kojiro_gap_observe.py`(cycle268) 자매 leaf, 이름만 band 계열. 소비처 = `KojiroStrategy.prepare()` 점수 확정 직후 1블록, 실패해도 매수 후보 처리(final_prepared/`_scanned_tickers`) 무영향)
 recommendation_engine.py(20:00 AI자문) / **backtest_orchestration.py**(refactor-review B3, 2026-08-18 — 백테스트 오케스트레이션 5함수 `_get_backtest_engine`/`_spawn_backtest_poll_task`/`_enqueue_backtest_jobs`/`_backtest_poll_loop`/`_emit_pending_summaries` + `_backtest_poll_loop_running`/`_BACKTEST_POLL_*` 상수를 recommendation_engine 에서 위임 분리. leaf 모듈(core 미호출, 순환 0). recommendation_engine 이 module-level 재export = scheduler.py:3760 `_backtest_poll_loop_running` import·테스트 patch 경로 **동일 객체** 보존. logger 명시 `getLogger("src.engine.recommendation_engine")`. recommendation_engine 1126→657L) / log_analysis_engine.py(20:10 일일 로그 분석)
 **sector_naming.py** (2026-08-04 — 보유 종목 섹터명 해석 **단일 진실원**. `resolve_sector_name(ticker, *, basics_raw=_UNSET)` + `resolve_sector_names(tickers)`. 우선순위 = basics raw `bstp_kor_isnm`(사람이 읽는 업종 한글명) → `_kojiro_sector_key(master_raw)`(KRX 산업지수 플래그 → 업종코드) → `미분류-{ticker}`(독립 키 fail-open). `basics_raw` 주입 시 `stock_master.get` 재조회 생략(잔고 라우트 중복 fetch 방지). **추출 배경** = 동일 로직이 `routes/portfolio.py` 와 `log_analysis_engine.py` 에 이미 중복돼 있었고 `routes/balance.py` 섹터 컬럼으로 세 번째 복사본이 생길 상황이었다 — 3 소비처 전부 위임(회귀 가드가 중복 재발 차단). 행위는 사이클 H Phase 2a + 사이클 I 후속 계약 그대로 보존)
 **portfolio_risk.py** (사이클 H, 2026-08-02 — 포트폴리오 리스크 관찰 순수함수. `extract_hard_stop_pct(params, *, default=-7.0)`(후보 7키 stop_loss_rate/intraday/overnight/main/pre_nxt/turtle_backstop_pct/hard_stop_pct 中 음수만 min, 결측→-7.0 fail-open, 0.0 금지) + `compute_portfolio_risk_snapshot(strategies, *, net_asset, hard_stop_pcts, sector_of) -> dict`(전 전략 합산 오픈 리스크. 포지션 리스크 프록시=buy_price×qty×|hard_stop%|/100, by_strategy(0포지션 포함)/by_sector(포지션有)/top_sector/open_risk_pct_of_net). **배제 0 — 입력 무변경**. DB/HTTP/시계/registry/kojiro 미접촉(quant_score 선례). 소비=`GET /api/portfolio/risk`(routes/portfolio.py, get_balance+registry+섹터 pull) + 20:10 일일리포트 metrics(`portfolio_risk_snapshot` 키). 터틀 서적 대조 감사 갭 2건(포트폴리오 총리스크 상한·전략간 섹터 집중) Phase 1 가시화. **Phase 1 관찰 전용** — 매수 차단·SOFT 상한·entry_atr 정밀화는 2주 관찰 후 Phase 2. 신규 리스크 임계 PARAM_RANGES 미편입. **세 번째 함수 `check_budget_invariant(strategies) -> list[dict]`** — `params.position_ratio × params.max_positions > 1.0 + 1e-9` 위반 목록 반환(결측/0 이하/예외 skip = fail-open). 소비 = `boot_manager` 가 `_load_strategy_config` 직후 호출해 `[budget_invariant_violation]` WARNING. **차단 아닌 관찰** — 운영자 수동 DB apply 사각을 잡는 런타임 가드다. ⚠️ 이 가드는 `position_ratio × max_positions` 축만 본다 — **Σweight ≤ 1.0 축은 보지 않는다**(2026-08-18 비중 단위 오염을 전혀 못 잡았다). Σ 축은 라우트 Σ 가드 + `[weight_config_anomaly]` 담당)
@@ -145,7 +147,7 @@ EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 �
 
 - `vcp_universe_tickers: set[str]` = `list_all` row 의 `is_kospi200 OR is_kosdaq150` (사이클 153 컬럼, `.select("*")` 포함 → 별도 쿼리 0건). 플래그 키 부재 mock/legacy row 는 falsy → 비 VCP 취급 (회귀 0).
 - 분기 (**사이클 196 (2026-07-07) — 220→120 수렴**): VCP universe + `existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS(=120)` → `condition.fetch_daily_candles_backfill(ticker, total_days=120)` (분할 fetch 윈도우 ×2, 마지막 클램프). 그 외 = 현행 (비 VCP `<50` 백필 100일 / `>=50` 증분 7일, 사이클 122 영속). VCP `>=120` → 증분 7일 (재 backfill 금지). **churn 근본 원인**: 사이클 172 target=220 이 retention 230cal(=154영업일 실측) 초과 → `existing_count` 220 미도달 → VCP 348종목 매 load 전량 재backfill (churn 45K행/load + 잉여 KIS 2,088호출/일). VCP prepare 는 100일만 사용 (`vcp_breakout.py:162-164`) → 220 = 순수 낭비. 시정 = target 120 (retained 154 대비 34일 마진) → 즉시 수렴 (backfill 1회 후 incremental) + 윈도우 클램프로 backfill 도달 178cal < retention → churn 0.
-- graceful (사이클 88 G-REJECT — backfill 실패 → failed++ + 다음 ticker). **장중 자동 실행 금지** — 16:00 daily task (장 마감 후) + 수동 trigger 만 (task lifecycle 변경 0, 사이클 122).
+- graceful (사이클 88 G-REJECT — backfill 실패 → failed++ + 다음 ticker). **장중 자동 실행 금지** — 18:10 daily task (장 마감 후, cycle273f 이동) + 수동 trigger 만 (task lifecycle 변경 0, 사이클 122).
 
 ### 사이클 263 (2026-09-06) — 확정 전 오늘봉 시각 필터 (8영역 승인, 09-06 카드 ④)
 
@@ -165,9 +167,33 @@ EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 �
 - **부작용** — 신규 상장·유니버스 진입 종목의 일봉 backfill 이 아침(07:56)에서 같은 날 16:00 으로 **≈8시간 미뤄진다**(그 사이 `get_recent_daily_normalized` 는 `reason="miss"` KIS 폴백 = 데이터는 더 정확하지만 장중 KIS 호출이 는다). 최종 커버리지 손실은 0. UI `last_daily_load_at` 은 낮 동안 어제 날짜로 보인다(의미상 정확).
 - 회귀 가드 = `tests/unit/engine/test_cycle263_daily_load_stub_filter.py` (40) + `tests/unit/ast/test_cycle193_ast_fresh_gate.py`(게이트 대상 3 task 로 갱신).
 
+### 사이클 273d (2026-09-10) — 보유/익일청산 종목 유니버스 필터 강제 포함 (D5, 8영역 승인)
+
+`_stock_master_daily_load_once` 의 유니버스 필터 게이트가 `if is_index or is_qualifier:` 였던 것을
+`if is_index or is_qualifier or is_protected:` 로 확장했다(순수 OR 추가, 기존 분기 제거 0). 16:15
+purge(`_evaluate_universe_guard` 계열)는 보유·익일청산 종목을 이미 절대 보호하는데, 16:00 load 는
+자격(시총·거래대금 등) 미달 종목을 그냥 건너뛰어 "지우는 쪽은 보호, 채우는 쪽은 방치"라는 비대칭이
+있었다 — 자격 미달일마다 그날 봉을 영구 결손시킨 004690(삼천리) 실사례가 발단.
+
+- `is_protected` = 기존 공통 헬퍼 `_collect_protected_tickers_for_scanner()`(사이클 64 도입, 신규
+  아님 — line 55)로 얻은 보유·익일청산 종목 중 **6자리 숫자 ticker 만**(진입 게이트 비대칭 규약과
+  동일 — ETF/신주인수권/오염 문자열은 보호 집합에서 제외).
+- 헬퍼 예외는 **fail-open** — `protected_tickers = set()` 으로 현행 집합(index/qualifier)만 진행.
+- 페이징 루프 종료 뒤 `protected_tickers - set(all_tickers)` 차집합을 `all_tickers` 에 추가
+  append 한다(중복 방지 + 페이징 부분 실패·누락 종목 대비 합집합 — 어느 페이지에도 안 실린
+  보호 종목까지 커버).
+- `vcp_universe_tickers` 에는 넣지 않는다(120일 분할 backfill 은 index 전용, 보호 목적은
+  "오늘 봉 결손 방지" 로 국한).
+- 관측 `[daily_load_protected_forced] protected=%d forced_in_universe=%d forced_extra=%d tickers=%s`
+  — **실행당 1행**(cycle237 donchian 로그 폭주 교훈 재적용, 종목당 emit 금지). 페이징 루프 밖·
+  `summary["total"]` 대입 앞에서 무조건 emit 되므로 조기 return 경로에서도 1행이 남는다.
+- scanner.py +44L, `scheduler.py` 무접촉(3,898L, <3,900 상한 유지). 회귀 가드 =
+  `tests/unit/engine/test_cycle273_daily_load_protected.py` (47) + sha 핀 4곳 갱신.
+- 명세 `_workspace/red/cycle273d_daily_load_held_inclusion_spec.md`, 사용자 결정 D3.
+
 ### 매매 안전성 무영향 (데이터 plumbing 한정)
 
-- scanner `_stock_master_daily_load_once` = 16:00 daily task (매수 진입 무관, 사이클 38/122). 어댑터 `get_recent_daily_normalized` (db) = 정의만 (prepare 미연결 → 매수 target 불변, 호출처 0).
+- scanner `_stock_master_daily_load_once` = 18:10 daily task (`TIME_STOCK_MASTER_DAILY_LOAD = time(18, 10)` — cycle273f 2026-09-10 사용자 결정 D8, 종전 16:00; 시간외 단일가 물량 포함, 16:1x~16:40 작업보다 뒤라 유니버스 판정이 오늘치 raw. 매수 진입 무관, 사이클 38/122). 어댑터 `get_recent_daily_normalized` (db) = 정의만 (prepare 미연결 → 매수 target 불변, 호출처 0).
 - `git diff -- src/engine/risk.py src/engine/order_engine.py src/realtime/ src/auth/ src/api/order.py` = **0 라인** (직접 검증). 신규 함수 본체 매매 hot path 참조 0.
 - production: `src/api/condition.py` (+128L 분할 fetch — `fetch_daily_candles_ranged` + `fetch_daily_candles_backfill`, `src/api/CLAUDE.md` 참조) / `src/db/stock_master_daily.py` (+70L retention 230 + 어댑터, `src/db/CLAUDE.md` 참조) / `src/engine/scanner.py` (+37L VCP 분기). net +219L.
 - 회귀 가드 27 케이스 (RANGE 4 + BACKFILL 4 + AST 1 / RET 2 + ADAPT 4 / SCAN 5 + SCAN-3b + SAFETY 1 / SAFETY AST 5) + 의미 전환 1 (cycle150 retention 150→230). 백엔드 3,161 PASS × flakiness 0.
@@ -185,7 +211,7 @@ EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 �
 ### 16:20 저녁 task (`TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)`)
 
 - `_evening_funnel_capture_task_loop` — `run_periodic_task_loop` 답습 (`_stock_master_master_load_task_loop` 패턴 100% + no-op record/flush). `initial_delay_secs=600` (basics 16:10 완료 후 진입, HTTP/2 race 마진).
-- `_evening_funnel_capture_once` 본체: (1) 16:00 일봉 적재 완료 대기 — `stock_master_daily.count_all()` 5분 cap polling (사이클 163 boot prepare 가드 패턴, 빈 funnel 영속 방지) (2) 5 전략 `prepare()` (기존 KIS-fetch 그대로 — 16:20 한가, 속도 무관. HIGH DB일봉 전환은 사이클 173) (3) `capture_funnel_snapshots(registry, is_provisional=True)`.
+- `_evening_funnel_capture_once` 본체: (1) 일봉 테이블 비어있지 않음 확인 — `stock_master_daily.count_all() > 0` 5분 cap polling(⚠️ F-D8-a: 그날 적재 완료 대기가 아니다 — cycle273f 부터 일봉은 18:10 이라 16:20 캡처는 전일 봉 기준, 전략 절단이 날짜 비교라 결과 동일) (사이클 163 boot prepare 가드 패턴, 빈 funnel 영속 방지) (2) 5 전략 `prepare()` (기존 KIS-fetch 그대로 — 16:20 한가, 속도 무관. HIGH DB일봉 전환은 사이클 173) (3) `capture_funnel_snapshots(registry, is_provisional=True)`.
 - `task_attrs` 4 위치 영속 (사이클 79 G-AST2): `self._evening_funnel_capture_task = asyncio.create_task(...)` (start) + cancel 튜플 3 (start finally / run_daily finally / stop). `test_scheduler_stop_zombie_tasks.py::expected_members` 16 → 17종 갱신.
 
 ### 매매 안전성 무영향
@@ -445,7 +471,7 @@ EC2 실측에서 `by_sector`가 보유 7종목 전부 `미분류-{ticker}`로 �
 
 ### `scanner.py::_stock_master_daily_load_once` (+168L)
 
-- 호출: `_stock_master_daily_load_task_loop` 매일 16:00 KST 1회
+- 호출: `_stock_master_daily_load_task_loop` 매일 18:10 KST(cycle273f, 종전 16:00) 1회
 - 분기 로직: `max_bas_dd(ticker)` 사용 — 부재 시 백필 (T-100일), 존재 시 증분 (1일 단위)
 - KIS `fetch_daily_candles(ticker, days=N)` 호출 → `upsert_batch(ticker, rows)` 영속화
 - graceful (사이클 88 G-REJECT 답습) — KIS 거부/타임아웃 시 ticker skip 후 다음 진행

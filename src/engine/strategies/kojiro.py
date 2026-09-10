@@ -23,11 +23,13 @@ Phase 1: 자금관리 = position_ratio (터틀 유닛 sizing/피라미딩/조기
 from __future__ import annotations
 
 import logging
+import math
 from datetime import date, datetime, time, timezone, timedelta
 
 import pandas as pd
 
 from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.kojiro_band_observe import absorb_band_call_failure, observe_band
 from src.engine.kojiro_gap_observe import absorb_call_failure, observe_gap
 from src.engine.kojiro_indicators import KojiroIndicatorConfig, enrich
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
@@ -334,6 +336,7 @@ class KojiroStrategy(StrategyBase):
         strict_t: list[str] = []
         final_t: list[str] = []
         rank_raw: dict[str, tuple] = {}   # 후보 랭킹 raw 3성분 (2-pass: 루프 stash → 후 정규화)
+        band_raw: dict[str, tuple] = {}   # cycle273 shadow 관측 원자료 (leaf 로만 소비, 행위 무영향)
         fetch_ex: list[dict] = []
         band_ex: list[dict] = []
         stage_valid_ex: list[dict] = []
@@ -351,6 +354,7 @@ class KojiroStrategy(StrategyBase):
                 # candles DESC (idx0=최신). 오늘 부분봉이면 드롭.
                 prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
                 usable = candles[prev_idx:]
+                bar_date = usable[0].get("stck_bsop_date", "") if usable else ""  # cycle273 관측용 D-1 완성봉 날짜
                 if len(usable) < KOJIRO_MIN_REQUIRED:
                     fetch_ex.append({
                         "ticker": ticker, "name": name,
@@ -411,6 +415,11 @@ class KojiroStrategy(StrategyBase):
                     # cycle231 — (판정 수행일, 플래그) 튜플 (오늘 판정만 §3 소비)
                     self._held_stage3[ticker] = (datetime.now(KST).date(), stage == 3)
                     held_marked += 1
+                    # cycle273 shadow 관측 원자료 (role=held) — never-raise 헬퍼, 실패해도
+                    # 위 held 스탬프·이후 청산 로직에 영향 없음.
+                    band_raw[ticker] = self._band_observe_row(
+                        name, bar_date, prev_close, atr_val, enriched, stages_series,
+                        int(params["stage1_freshness"]))
 
                 # step7: 스테이지1 + 3선 우상향
                 if not (stage == 1 and all_up):
@@ -447,6 +456,11 @@ class KojiroStrategy(StrategyBase):
                 }
                 rank_raw[ticker] = self._rank_candidate_components(
                     enriched, stages_series, int(params["stage1_freshness"]))
+                # cycle273 shadow 관측 원자료 (role=candidate, held 와 동일 헬퍼) —
+                # rank_raw 확정 직후, prepare 산출(후보 집합·순서)에 영향 없음.
+                band_raw[ticker] = self._band_observe_row(
+                    name, bar_date, prev_close, atr_val, enriched, stages_series,
+                    int(params["stage1_freshness"]))
                 prepared += 1
                 final_t.append(ticker)
             except Exception as e:
@@ -489,6 +503,12 @@ class KojiroStrategy(StrategyBase):
                 self._candidates[_t]["score"] = _sc
         ranked_final = sorted(rank_raw.keys(), key=lambda t: scores.get(t, 0.0), reverse=True)
         held_only = [t for t in self._candidates.keys() if t not in rank_raw]  # 보유전용(청산 감시)
+        # cycle273 — `[kojiro_band_observe]` shadow 관측 1블록. 점수 확정 뒤,
+        # `_scanned_tickers` 대입 전. never-raise(leaf) + 호출 실패도 absorb 로 흡수.
+        try:
+            observe_band(band_raw, ranked_final, held_only, scores=scores)
+        except Exception:
+            absorb_band_call_failure("prepare")
         self._scanned_tickers = ranked_final + held_only
         self._bought_today.clear()
         stats["final_prepared"] = prepared
@@ -1192,24 +1212,85 @@ class KojiroStrategy(StrategyBase):
     # ────────────────────────── 대시보드/구독 ──────────────────────────
 
     def _rank_candidate_components(self, enriched, stages_series: list, within: int) -> tuple[float, float, float]:
-        """후보 랭킹 raw 3성분 (원설계 §9④): (macd3 기울기, 띠폭 확장률, 신선도).
+        """후보 랭킹 raw 3성분 (원설계 §9④, cycle273-D3 원설계 복원): (macd3 기울기%, 띠폭 확장률, 신선도).
 
-        enrich 가 이미 계산한 macd3/band_width(dormant) 배선. 컬럼 부재(테스트 스텁) →
-        신선도만 산출 + macd3/band=0 (fail-safe, no crash).
+        원설계 정본 = `_workspace/kojiro_ma/kojiro/screener.py:113-120`.
+        ① macd3_slope_pct = (macd3[-1]-macd3[-4]) / 3 / 종가 — **원(₩) 단위 금지.**
+           `/종가` 누락이 이 성분을 주가 순위표로 만들었다(2026-09-10 실측 ρ=+0.853).
+           `/3` 은 후보 공통 상수라 min-max 뒤 점수 불변이지만 원설계 단위를 지킨다.
+        ② band_expansion 분모 = 직전 5봉 **평균**(`bw[-6:-1]`), `>0` 아니면 `0.0`.
+           단일봉 분모 + 미소 엡실론 가산은 6→1 직후(정의상 bw≈0)에 폭발해
+           **좁은 밴드를 보상**했다(이 엡실론은 제거됐다).
+           5봉 평균 자체가 하한 기구다 — 별도 엡실론·ATR·중앙값 하한을 두지 않는다.
+        ③ 신선도는 현행 유지 — `within − dist61` 은 원설계 `−fresh_days` 의 양의 아핀
+           변환이고 min-max 는 아핀 불변이므로 정규화값이 동일하다(복원 대상 아님).
+
+        컬럼 부재(테스트 스텁) → 신선도만 산출 + macd3/band=0 (fail-safe, no crash).
+        OQ-5(승인) — `nan`/`inf` 성분은 그 성분만 `0.0` 으로 중립화한다. 원설계에
+        없는 추가 방어지만, 방치하면 `nan` 하나가 `_score_candidates` 의 min-max
+        를 오염시켜 **그날 후보 전원의 score 가 nan** 이 된다.
         """
         dist = _stage_transition_distance(stages_series, 6, 1, within)
         fresh = float(within - dist) if dist is not None else 0.0
         try:
             m3 = enriched["macd3"]
             bw = enriched["band_width"]
+            close_s = enriched["close"]
         except (KeyError, TypeError):
             return (0.0, 0.0, fresh)
         li = len(m3) - 1
         pi = max(0, li - _RANK_LOOKBACK)
-        macd3_slope = float(m3.iloc[li] - m3.iloc[pi])
-        prev_bw = float(bw.iloc[pi])
-        band_expansion = (float(bw.iloc[li]) - prev_bw) / (abs(prev_bw) + 1e-9)
+        # ② 짧은 시리즈는 pandas 가 알아서 자른다(len 1 → 빈 슬라이스 → mean()=nan,
+        #    `nan > 0` 이 False 라 0.0). ZeroDivisionError·IndexError 불가.
+        band_prev = float(bw.iloc[-6:-1].mean())
+        band_expansion = (float(bw.iloc[li]) / band_prev - 1.0) if band_prev > 0 else 0.0
+        if not math.isfinite(band_expansion):
+            band_expansion = 0.0
+        # ① 종가 정규화. close<=0/비수치는 성분①만 0.0 (밴드·신선도는 살린다).
+        try:
+            close = float(close_s.iloc[li])
+        except (TypeError, ValueError):
+            close = 0.0
+        macd3_slope = (
+            (float(m3.iloc[li] - m3.iloc[pi]) / _RANK_LOOKBACK) / close if close > 0 else 0.0
+        )
+        if not math.isfinite(macd3_slope):
+            macd3_slope = 0.0
         return (macd3_slope, band_expansion, fresh)
+
+    def _band_observe_row(
+        self, name, bar, close, atr, enriched, stages_series: list, within: int,
+    ) -> tuple:
+        """cycle273 D3 shadow 관측 원자료 stash (12원소, 순서 고정) — never-raise.
+
+        `[kojiro_band_observe]` leaf 로만 소비된다. `_rank_candidate_components` 를
+        호출하지 않고 **독립 재계산**한다 — 그쪽 실패가 관측까지 전파되거나,
+        관측 실패가 그쪽(자격/랭킹)까지 전파되는 결합을 피한다. 레거시(단일봉 분모)
+        ·복원(5봉평균 분모) 두 식을 **한 행에 나란히** 남겨 시정의 전후 대조가
+        되게 한다(exp1/exp5, slope_raw/slope_pct).
+
+        실패(컬럼 부재·비수치 등)는 0.0/None 폴백 — 절대 밖으로 던지지 않는다
+        (호출부인 `prepare` 의 후보/순위 확정 로직과 같은 try 스코프를 공유하므로,
+        여기서 던지면 그 ticker 의 매수 후보 처리 자체가 스킵된다 = 행위 변경).
+        """
+        try:
+            m3 = enriched["macd3"]
+            bw = enriched["band_width"]
+            li = len(m3) - 1
+            pi = max(0, li - _RANK_LOOKBACK)
+            bw_last = float(bw.iloc[li])
+            bw_prev1 = float(bw.iloc[pi])            # 레거시(현행) 단일봉 분모
+            bw_prev5 = float(bw.iloc[-6:-1].mean())   # 복원 직전5봉 평균 분모
+            exp1 = (bw_last - bw_prev1) / (abs(bw_prev1) + 1e-9)
+            exp5 = (bw_last / bw_prev5 - 1.0) if bw_prev5 > 0 else 0.0
+            slope_raw = float(m3.iloc[li] - m3.iloc[pi])
+            close_f = float(close) if close is not None else 0.0
+            slope_pct = (slope_raw / _RANK_LOOKBACK) / close_f if close_f > 0 else 0.0
+            dist = _stage_transition_distance(stages_series, 6, 1, within)
+            return (name, bar, close, atr, bw_last, bw_prev1, bw_prev5,
+                    exp1, exp5, slope_raw, slope_pct, dist)
+        except Exception:
+            return (name, bar, close, atr, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, None)
 
     def _score_candidates(self, rank_raw: dict[str, tuple], params: dict) -> dict[str, float]:
         """후보 풀 min-max 정규화 + 가중합 → {ticker: score∈[0,1]}.
