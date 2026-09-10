@@ -546,6 +546,19 @@ VB와 동일.
 
 ---
 
+### VB·LTV LLM 매수 평가 게이트 `llm_gate_*` (cycle274, 2026-09-11) — **shadow, 행위 변경 0**
+
+사용자 발의(09-10 21:5x) = *"매수신호가 나올 때마다 GPT-5.6-luna 에 30일 일봉 + 기술지표를 넘겨 1~100점 평가, 70점 이상만 매수"*.
+자문(`_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`)에 따라 **shadow 부터** — 점수는 기록만 하고 매수는 종전대로.
+`enforce` 는 미구현(어떤 값이든 `off` 낙하)이며, 실패 규약(fail-open/closed)·판정 기간(2주 배관 + 6주 임계)·보존·donchian 편입은 사용자 결정(Q1~Q10).
+
+- **`DEFAULT_PARAMS` 4키(VB·LTV 각각, `PARAM_RANGES`/`INT_PARAMS` 편입 금지)**: `llm_gate_mode="shadow"` · `llm_gate_min_score=70` · `llm_gate_daily_call_cap=20` · `llm_gate_timeout_secs=20`
+- **키 부재** = `mode` off · `daily_call_cap` 0(호출 안 함) · `min_score` 70 · `timeout` 20 — 돈을 쓰는 기능이라 "설정 없으면 안 한다"(cycle272 `open_price_scope_mode` 부재=enforce 와 반대).
+- **자리** = `return Signal.BUY` 직전(계좌 SOFT 게이트·cycle262 보류·신호 로그 뒤) — shadow 표본 = enforce 표본.
+- **비용·지연** = 신호 시점 트리거 월 $0.41~1.06 예상, 타임아웃 20초(같은 모델 리포 내 실측 6.1~11.3초). pre-warm(목표가 확정 시 전량 선평가)은 호출 17배·표본 불변이라 하지 않는다 — `slip_bp` 실측이 필요 여부를 답한다.
+- **롤백** = `PUT /api/strategies/{id}/params {"llm_gate_mode":"off"}` 즉시. `.env` `OPENAI_API_KEY` 제거는 재시작 후(`no_key`).
+- **D+1 서명** = `[llm_gate_config]` VB·LTV 각 1행 · `[llm_buy_score]` 4~6행(score 1~100) · `_failed` <10% · `[llm_gate_daily_cap]` 0행 · VB·LTV 매수 건수·시각·수량 패턴 불변.
+
 ## 6. 전략 D: 20일 신고가 스윙 (donchian_swing) 상세
 
 ### 개념
