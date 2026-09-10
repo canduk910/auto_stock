@@ -173,6 +173,22 @@ KRX 개장가가 나온다.** 채널 리졸버 제안(P1-7 B)을 뒷받침하는
   에 `ws_collapse=`(`blocked`/`allowed`/`-`) 꼬리 append, 기존 13필드 byte 불변. 표적 152 PASS · 448조합
   byte 동일 실증 · 뮤테이션 9종 KILLED 9/ESCAPED 0. **이어지는 I1~I4(order_engine·risk 8영역 항목,
   (다)(나) 순서)는 별도 커밋으로 진행 — 이 항목은 준비 단계일 뿐 그룹 전체 완료 아님.**
+- **cycle273-group1 I4 273e(그룹 1, D2 나) 완료·브랜치 커밋**: `risk.py` 명시 상수
+  `_TICK_BUY_EVAL_SKIP_STRATEGIES = frozenset({"donchian_swing", "kojiro"})` 신설 + `:646`
+  기존 donchian 전용 skip 을 이 상수 멤버십으로 in-place 치환 — WS 틱(`on_tick`) 경로에서
+  kojiro `check_buy_signal` 호출이 0 이 되고, 매수는 경로 A(`_swing_buy_poll_loop`, REST
+  `stck_oprc`)에서만 남는다. 근거 = 09-07 실측 N=103(WS 시가≠KRX 확정 시가 95.1%·갭업
+  탐지율 0/8·최대 오차 6.77%p, 스코프 필터 없는 통합채널 `[7] STCK_OPRC` 단일 의존).
+  자문 `_workspace/domain_consult/cycle273_kojiro_gap_gate_20260910.md` — 착수 권고(보류
+  비권고). 8영역 `risk.py` **단독**(그 외 8영역·`scheduler.py`(3,873L)·전략 7파일 diff 0),
+  판정 축은 `strategy_id` 문자열만(AST 가드), 킬스위치 없음(1행 revert). `test_cycle268_…
+  ::test_real_risk_on_tick_yields_caller_on_tick`(원 docstring "삭제하지 마라")을
+  `test_real_risk_on_tick_yields_no_kojiro_rows` 로 계약 반전(경로 B 0행 + 별도 인스턴스
+  양성 대조 짝), 자매 2건도 동반 반전. sha 핀 4곳 `risk.py` 값 `19f48b4a…` 등록. 표적 26 +
+  AST 931 + `engine`+`strategies`+`ast` 회귀 2,403 PASS + 백엔드 전체 7,646 PASS(회귀 0).
+  뮤테이션 12종 KILLED/ESCAPED 0. **I0~I4 로 그룹1(273a·273b-F7·273b I3·273-pre·273e) 전부
+  완료** — 배포는 main 병합 후. D+1(09-11 금) 판독 = `[kojiro_gap_observe] caller=on_tick`
+  0행 + `caller=_swing_buy_poll_loop` ≥6행(양성 대조 짝) + kojiro 청산 마커 불변.
 
 ## 🔵 결정 대기 — 사용자 답 필요 (재개 시 순서대로)
 

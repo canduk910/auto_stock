@@ -173,61 +173,92 @@ async def test_real_swing_poll_loop_yields_caller_swing_buy_poll_loop(caplog):
 
 
 # ===========================================================================
-# 경로 B — 실제 `RiskManager.on_tick`
+# 경로 B — 실제 `RiskManager.on_tick` (cycle273e F-3 이후 — **계약 반전**)
 # ===========================================================================
 @pytest.mark.asyncio
-async def test_real_risk_on_tick_yields_caller_on_tick(caplog):
-    """경로 B 를 **실 프로덕션 호출 스택**(`RiskManager.on_tick`)으로 봉인한다.
+async def test_real_risk_on_tick_yields_no_kojiro_rows(caplog):
+    """경로 B 는 **프로덕션에서 사라졌다** — 실제 `RiskManager.on_tick` 에서 0행.
 
-    위 경로 A 테스트와 같은 성격 — 합성 shim 이 아니라 진짜 호출 스택으로
-    `sys._getframe(2)` 전제를 잰다. 두 경로가 **같은 depth 로 서로 다른 이름**을
-    내는 것이 `caller` 필드가 A/B 판별 정본으로 성립하는 조건이고, 그 조건은
-    두 실경로를 나란히 돌려야만 검정된다(한쪽만으로는 depth 오프셋 오류가
-    '양쪽 다 틀린 이름'으로 조용히 통과한다). 삭제하지 마라.
+    ⚠️ 이 테스트는 cycle268 의 `test_real_risk_on_tick_yields_caller_on_tick` 을
+    **계약 반전**으로 교체한 것이다(cycle273e F-3, D2(나)). 원 가드는 실 호출
+    스택으로 `caller == "on_tick"` 을 봉인했으나, F-3 이후 `risk.on_tick` 은
+    kojiro `check_buy_signal` 을 호출하지 않으므로 그 행 자체가 존재하지 않는다.
+
+    **삭제하지 마라. 합성 shim 으로 되살리지도 마라** — depth=2 봉인은 위
+    `test_real_swing_poll_loop_yields_caller_swing_buy_poll_loop`(경로 A)가 계속
+    진다. 여기서 재는 것은 "경로 B 가 정말로 닫혔는가" 다
+    (명세 `_workspace/red/cycle273e_kojiro_gap_gate_spec.md` §R11).
+
+    양성 대조가 같은 테스트 안에 있다 — 마커 자체가 죽어서 0행인 것과
+    경로 B 만 닫혀서 0행인 것을 구별한다(자문 §3.5 "부재는 양성 대조와 짝으로만").
     """
     registry = StrategyRegistry()
     strategy = _kojiro()
     registry.register(strategy)
     order_engine = MagicMock()
     order_engine.execute_buy = AsyncMock()
+    order_engine.execute_sell = AsyncMock()
+    order_engine._selling = set()
     rm = RiskManager(registry, order_engine)
 
     from src.engine import scanner
     scanner.ticker_prev_close[TICKER] = 10000
 
+    from src.engine.kojiro_gap_observe import reset_kojiro_gap_observe_cap
+
     caplog.set_level(logging.INFO)
-    with _freeze_kst("2026-05-12 09:10:00"), _main_board_active():
-        await rm.on_tick(TICKER, 10100, 10050, 0.5)
+    try:
+        # ① 양성 대조 먼저 — **별도 인스턴스**로 마커 배관이 살아 있음을 확인한다.
+        #    (같은 인스턴스를 재사용하면 `_bought_today` 래치가 관측 지점 1 앞에서
+        #     잘라 0행이 되어 대조가 무효가 된다.)
+        control = _kojiro()
+        reset_kojiro_gap_observe_cap()
+        with _freeze_kst("2026-05-12 09:10:00"):
+            control.check_buy_signal(TICKER, 10100, 10050)
+        direct = _rows(caplog)
 
-    scanner.ticker_prev_close.pop(TICKER, None)
+        # ② 실제 경로 B
+        caplog.clear()
+        reset_kojiro_gap_observe_cap()
+        with _freeze_kst("2026-05-12 09:10:00"), _main_board_active():
+            await rm.on_tick(TICKER, 10100, 10050, 0.5)
+        via_on_tick = _rows(caplog)
+    finally:
+        scanner.ticker_prev_close.pop(TICKER, None)
 
-    rows = _rows(caplog)
-    assert rows, "실제 on_tick 경로에서 마커가 한 행도 나오지 않았다"
-    callers = {_fields(r)["caller"] for r in rows}
-    assert callers == {"on_tick"}, (
-        f"depth=2 전제 위반 — 실제 경로 B 의 caller={callers}"
+    assert direct, (
+        "양성 대조 실패 — `[kojiro_gap_observe]` 마커 자체가 죽었다. "
+        "그러면 아래 0행 단언은 F-3 의 증거가 아니다(자문 §3.5 #1↔#2 짝 규칙)"
     )
+    assert via_on_tick == [], (
+        f"실제 `RiskManager.on_tick` 이 여전히 kojiro 관측 행을 낸다 — "
+        f"경로 B 가 살아 있다: {via_on_tick}"
+    )
+    assert order_engine.execute_buy.await_count == 0
 
 
 # ===========================================================================
-# 경로 B 의 `ws_*` 는 **동어반복**이다 — 판독 함정 봉인
+# 경로 B 의 `ws_*` 자기참조 계약 — cycle273e F-3 이후 **재계약 반전**
+#
+# ⚠️ 아래 두 테스트는 cycle273e 명세 §8.1 표에 명시 열거되지 않았으나, F-3(kojiro
+# 를 `_TICK_BUY_EVAL_SKIP_STRATEGIES` 에 편입)의 **직접 귀결**로 HEAD 에서 회귀한다
+# — 원래는 "경로 B 가 `check_buy_signal` 을 호출해 만드는 관측 행의 `ws_*` 필드가
+# 구조적으로 항상 자기 자신과 일치한다"를 검정했는데, F-3 이후 경로 B 는 그
+# `check_buy_signal` 호출 자체를 하지 않으므로 행이 원천적으로 0개가 된다. 위
+# `test_real_risk_on_tick_yields_no_kojiro_rows`(R11)와 **동일한 설계 결정**
+# (합성 shim 으로 경로 B 를 되살리지 않고 0행을 새 계약으로 못박는다)을 그대로
+# 적용한다 — 원 시나리오(오염된 WS 캐시 사전 주입)는 문서 가치를 위해 보존한다.
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_path_b_ws_fields_are_self_referential(caplog):
-    """⚠️ 이것은 **회귀 가드가 아니라 판독 함정의 계약화**다 — 깨지면 코드가 아니라
-    **명세 §5 판독 절차부터 다시 써야 한다**(아래 마지막 문단).
+    """cycle273e 이후 — 경로 B 는 더 이상 `[kojiro_gap_observe]` 행을 내지 않는다.
 
-    `risk.on_tick` 은 `check_buy_signal` **전에** `ticker_prices[t]["open_price"]`
-    를 그 틱의 `open_price` 로 덮는다(`risk.py` 상단 "1. 공용 시세 갱신").
-
-    따라서 경로 B 행의 `ws_cmp` 는 **구조적으로 항상 `ws_eq`** 이고 `ws_gap`·
-    `ws_verdict` 는 `gap_rate`·`verdict` 의 사본이다 — 그 일치는 "WS 캐시가 인자와
-    맞았다" 는 **증거가 아니라 자기 자신과의 비교**다(cycle264 `used_src=rest` →
-    `delta_bp=0` 함정과 동형). 경로 B 의 오염 판정은 §5 오프라인 조인으로만 성립한다.
-
-    이 테스트는 그 사실을 **의도된 계약으로 못박아** 판독자가 `ws_cmp=ws_ne` 개수를
-    전체 분모로 세는 오독을 막는다. 이 단언이 깨지면(= 경로 B 에서 `ws_ne` 가 나오면)
-    `risk.on_tick` 의 갱신 순서가 바뀐 것이므로 판독 절차부터 다시 써야 한다.
+    원래 이 테스트는 `risk.on_tick` 이 `check_buy_signal` **전에**
+    `ticker_prices[t]["open_price"]` 를 그 틱의 `open_price` 로 덮어(`risk.py`
+    상단 "1. 공용 시세 갱신") `ws_cmp` 가 항상 `ws_eq` 임을 검정했다(판독 함정
+    계약화, cycle264 `used_src=rest` → `delta_bp=0` 함정과 동형). F-3 이 경로 B 의
+    `check_buy_signal` 호출 자체를 skip 하므로 그 전제(행이 존재한다)가 사라졌다
+    — 0행이 새 계약이다. 삭제·합성 shim 금지는 R11 과 동일 근거.
     """
     registry = StrategyRegistry()
     strategy = _kojiro()
@@ -238,7 +269,7 @@ async def test_path_b_ws_fields_are_self_referential(caplog):
 
     from src.engine import scanner
     scanner.ticker_prev_close[TICKER] = 10000
-    # 오염된(전혀 다른) WS 캐시를 미리 심어도 on_tick 이 먼저 덮는다.
+    # 오염된(전혀 다른) WS 캐시를 미리 심어도 — F-3 이후엔 애초에 평가되지 않는다.
     scanner.ticker_prices[TICKER] = {"current_price": 1, "open_price": 999999}
 
     caplog.set_level(logging.INFO)
@@ -248,29 +279,19 @@ async def test_path_b_ws_fields_are_self_referential(caplog):
     scanner.ticker_prev_close.pop(TICKER, None)
 
     rows = _rows(caplog)
-    assert rows
-    for r in rows:
-        f = _fields(r)
-        assert f["ws_cmp"] == "ws_eq", f"경로 B 는 동어반복이어야 한다: {r}"
-        assert f["ws_open"] == f["arg_open"]
-        assert f["ws_gap"] == f["gap_rate"]
+    assert rows == [], (
+        f"경로 B 가 여전히 kojiro 관측 행을 낸다 — F-3 이 무효화됐을 수 있다: {rows}"
+    )
 
 
 @pytest.mark.asyncio
 async def test_path_b_ws_collapse_is_self_referential(caplog):
-    """cycle273-pre — `ws_collapse` 도 경로 B 에서는 **동어반복**이다(위 테스트의 자매).
+    """cycle273e 이후 — `ws_collapse` 자기참조 시나리오도 경로 B 에서 0행이다.
 
-    ⚠️ 이것도 **회귀 가드가 아니라 판독 함정의 계약화**다. `risk.on_tick` 이
-    `ticker_prices[t]["open_price"]` 를 `check_buy_signal` **전에** 그 틱의
-    `open_price` 로 덮으므로(`risk.py` 상단 "1. 공용 시세 갱신") 경로 B 행은
-    `ws_open ≡ arg_open` 이 항상 성립하고, 그 결과 `ws_collapse` 는 **실제 붕괴
-    판정(`verdict`)과 구조적으로 항상 일치**한다 — `verdict=collapse` 면
-    `ws_collapse=blocked`, 그 외 6종(`candidate`/`no_data`/`skip_up`/`skip_down`/
-    `pass`) 이면 `ws_collapse=allowed` 이거나(붕괴 가드까지 도달한 경우) `-`
-    (WS 캐시가 이 행 자체가 심은 값이라 `ws_absent` 는 이 경로에서 발생하지 않는다).
-
-    경로 A(`_swing_buy_poll_loop`) 만이 `ws_collapse` 로 오염을 판정할 수 있는
-    유일한 경로다 — `_workspace/specs/cycle268_kojiro_gap_observe.md` §5 참조.
+    원래 이 테스트는 `verdict=collapse` 행에서 `ws_collapse=blocked` 가 구조적
+    자기참조임을 검정했다(cycle273-pre). F-3 이후 그 관문(`check_buy_signal`)
+    자체가 경로 B 에서 호출되지 않으므로 `verdict=collapse` 행이 나올 수 없다 —
+    0행이 새 계약이다(R11·위 테스트와 동일 설계).
     """
     registry = StrategyRegistry()
     strategy = _kojiro()
@@ -281,25 +302,22 @@ async def test_path_b_ws_collapse_is_self_referential(caplog):
 
     from src.engine import scanner
     scanner.ticker_prev_close[TICKER] = 10000
-    # 오염된(전혀 다른) WS 캐시를 미리 심어도 on_tick 이 먼저 덮는다.
+    # 오염된(전혀 다른) WS 캐시를 미리 심어도 — F-3 이후엔 애초에 평가되지 않는다.
     scanner.ticker_prices[TICKER] = {"current_price": 1, "open_price": 999999}
 
     caplog.set_level(logging.INFO)
     with _freeze_kst("2026-05-12 09:10:00"), _main_board_active():
-        # current(10040) < open(10050) → 실제 붕괴 가드가 걸린다(verdict=collapse).
+        # current(10040) < open(10050) — HEAD 이전이었다면 붕괴 가드가 걸렸을 값.
         await rm.on_tick(TICKER, 10040, 10050, 0.5)
 
     scanner.ticker_prev_close.pop(TICKER, None)
 
     rows = _rows(caplog)
     collapse_rows = [r for r in rows if _fields(r)["verdict"] == "collapse"]
-    assert collapse_rows, f"collapse verdict 행이 없다 — 테스트 전제가 깨졌다: {rows}"
-    for r in collapse_rows:
-        f = _fields(r)
-        assert f["ws_cmp"] == "ws_eq", f"경로 B 전제(ws_open≡arg_open) 자체가 깨졌다: {r}"
-        assert f["ws_collapse"] == "blocked", (
-            f"경로 B 는 ws_collapse 도 동어반복이어야 한다(실제 collapse ⇒ blocked): {r}"
-        )
+    assert collapse_rows == [], (
+        f"경로 B 에서 여전히 collapse verdict 행이 나온다 — F-3 이 무효화됐을 수 있다: "
+        f"{collapse_rows}"
+    )
 
 
 # ===========================================================================

@@ -468,6 +468,12 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    `_workspace/red/cycle273b_philoptics_no_behavior_3_spec.md`.
     # TODO(cycle273b 커밋 후): 아래 항목을 비운다.
     "src/engine/order_engine.py": "a7967892f7baba40dc66d634fc2ae326cd0df69773269de0dbace547edad2ad8",
+    # 🔁 2026-09-11 (cycle273e I4) — D2(나) F-3: kojiro 틱 경로(risk.on_tick) 매수
+    #    평가 skip. 명시 상수 `_TICK_BUY_EVAL_SKIP_STRATEGIES` (donchian_swing 관례
+    #    동형). 자문 완료(착수 권고) `_workspace/domain_consult/cycle273_kojiro_gap_gate_20260910.md`.
+    #    명세 `_workspace/red/cycle273e_kojiro_gap_gate_spec.md`.
+    # TODO(cycle273e 커밋 후): 아래 항목을 비운다.
+    "src/engine/risk.py": "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
 }
 
 
