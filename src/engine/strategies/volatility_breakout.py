@@ -15,6 +15,7 @@ import logging
 from datetime import date, datetime, time, timedelta, timezone
 
 from src.api.condition import add_business_days
+from src.engine import open_price_rest
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
@@ -137,6 +138,12 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 진입 정체성 상수 = PARAM_RANGES/INT_PARAMS 편입 금지(cycle223 선례 — 최근
         # 손실을 목적함수로 삼는 튜너는 n≤20 에 과적합한다). 장중 롤백 = PUT 0.
         "open_entry_hold_secs": 90,
+        # cycle272 (2026-09-10) — 사용자 결정 D1: `main` 기준가는 KRX REST
+        # `stck_oprc` 단일 출처. `"off"` 만 롤백값(대소문자·공백 무시 정확 일치),
+        # 그 외 모든 값·부재·예외는 `enforce`. 진입 정체성 상수 —
+        # PARAM_RANGES/INT_PARAMS 편입 금지(AST G-272-28a/b). 장중 롤백 =
+        # `PUT /api/strategies/{id}/params {"open_price_scope_mode":"off"}`.
+        "open_price_scope_mode": "enforce",
     }
 
     def __init__(self, config: StrategyConfig):
@@ -821,8 +828,26 @@ class VolatilityBreakoutStrategy(StrategyBase):
                 return candidate
         return None
 
-    def on_open_price_confirmed(self, ticker: str, open_price: int, board: str = "main") -> None:
-        """보드별 시가 확정 — Target Price를 보드별로 계산한다."""
+    def on_open_price_confirmed(
+        self, ticker: str, open_price: int, board: str = "main", *, source: str = "ws",
+    ) -> None:
+        """보드별 시가 확정 — Target Price를 보드별로 계산한다.
+
+        cycle272 (2026-09-10) — `board=="main"` 확정은 `source` 가 신뢰 목록
+        (`("rest",)`)에 있을 때만 통과한다(`open_price_scope_mode` 기본
+        `enforce`). `source` 기본값이 불신 `"ws"` 이므로 이 함수를 부르는 세
+        경로(스케줄러 1차 WS 폴링·전략 인라인 확정·그 밖의 미래 호출부)는
+        **한 글자도 안 바뀐다** — `check_buy_signal`/`check_exit_signal`/
+        `calc_buy_quantity` byte 동일이 그 증거다(cycle264 `_STRATEGY_PINS`
+        6개 불변). 비-`main` 보드(`pre_nxt`/`post_nxt`)는 게이트 스코프 밖이라
+        전면 무접촉(LTV 08:00 프리장 등).
+        """
+        if open_price_rest.reject_untrusted_main_basis(
+            self.config.params, board, source,
+            strategy_id=self.strategy_id, ticker=ticker,
+            tick_open=open_price, dest_logger=logger,
+        ):
+            return
         info = self._targets.get(ticker)
         if not info or open_price <= 0:
             return

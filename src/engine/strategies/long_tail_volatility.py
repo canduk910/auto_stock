@@ -14,6 +14,7 @@ import logging
 from datetime import date, datetime, timedelta, timezone
 
 from src.api.condition import add_business_days
+from src.engine import open_price_rest
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
@@ -118,6 +119,14 @@ class LongTailVolatilityStrategy(StrategyBase):
         # 진입 정체성 상수 = PARAM_RANGES/INT_PARAMS 편입 금지. 장중 롤백 = PUT 0
         # (키가 전략별이라 VB 90 을 유지한 채 LTV 만 끌 수 있다).
         "open_entry_hold_secs": 90,
+        # cycle272 (2026-09-10) — 사용자 결정 D1: `main` 기준가는 KRX REST
+        # `stck_oprc` 단일 출처. `"off"` 만 롤백값(대소문자·공백 무시 정확 일치),
+        # 그 외 모든 값·부재·예외는 `enforce`. 진입 정체성 상수 —
+        # PARAM_RANGES/INT_PARAMS 편입 금지(AST G-272-28a/b). `pre_nxt`/
+        # `post_nxt` 보드는 게이트 스코프 밖이라 08:00~09:00 프리장 매수·야간
+        # 매수는 무접촉. 장중 롤백 = `PUT /api/strategies/{id}/params
+        # {"open_price_scope_mode":"off"}`.
+        "open_price_scope_mode": "enforce",
     }
 
     def __init__(self, config: StrategyConfig):
@@ -634,8 +643,23 @@ class LongTailVolatilityStrategy(StrategyBase):
                 return candidate
         return None
 
-    def on_open_price_confirmed(self, ticker: str, open_price: int, board: str = "main") -> None:
-        """보드별 시가 확정 + Target 계산."""
+    def on_open_price_confirmed(
+        self, ticker: str, open_price: int, board: str = "main", *, source: str = "ws",
+    ) -> None:
+        """보드별 시가 확정 + Target 계산.
+
+        cycle272 (2026-09-10) — VB `on_open_price_confirmed` 와 동형(상호
+        import 금지, 각자의 `DEFAULT_PARAMS["open_price_scope_mode"]` 가
+        부분 롤백 독립성을 보장한다). `source` 기본값이 불신 `"ws"` 라
+        `check_buy_signal`/`check_exit_signal`/`calc_buy_quantity` 는 한 글자도
+        안 바뀐다(cycle264 `_STRATEGY_PINS` 6개 불변).
+        """
+        if open_price_rest.reject_untrusted_main_basis(
+            self.config.params, board, source,
+            strategy_id=self.strategy_id, ticker=ticker,
+            tick_open=open_price, dest_logger=logger,
+        ):
+            return
         info = self._targets.get(ticker)
         if not info or open_price <= 0:
             return

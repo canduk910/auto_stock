@@ -539,7 +539,22 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    이 첫 커밋된 항목에서 통째로 skip 돼 나머지 핀의 스테일 탐지가 조용히 죽고
 #    (b) 다음에 kojiro.py 를 정당하게 건드리는 사이클이 "cycle268 면제" 문구가 붙은
 #    오해 소지 있는 실패를 받아 **핀 재산출로 유도된다**(09-05 카드 #3 재발). 그래서 비운다.
-_CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {}
+#
+# 🔁 2026-09-10 (cycle272) — 사용자 결정 D1(REST 기준가) 구현이 VB·LTV
+#    `on_open_price_confirmed` 에 출처 게이트(`open_price_rest.reject_untrusted_main_basis`)
+#    1줄 + `DEFAULT_PARAMS["open_price_scope_mode"]="enforce"` 1줄만 승인 추가하며
+#    두 파일을 재핀. `check_buy_signal`/`check_exit_signal`/`calc_buy_quantity` 는
+#    `source` 기본값을 `"ws"`(불신)로 둬 **한 글자도 바뀌지 않는다**
+#    (`test_cycle264_scope_and_pins.py::_STRATEGY_PINS` 6개 sha 불변이 그 증거).
+#    8영역·`scheduler.py` 는 별도 라인 상한 가드(`test_cycle272_ast_main_rest_basis.py`)로
+#    diff 0 을 기계적으로 강제한다. 명세 = `_workspace/red/cycle272_rest_open_basis_spec.md`.
+#    TODO(cycle272 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
+_CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
+    "src/engine/strategies/volatility_breakout.py":
+        "44c610949800a16a1c58eeaba74ba9b4ce1ee10a7b324273f2eccfa486654a63",
+    "src/engine/strategies/long_tail_volatility.py":
+        "04913d7024e5f58ced6e9e70e6325f2f33b17678936b26a6b56acb5973d0936b",
+}
 
 
 def test_g223_12_other_strategy_files_diff_zero():

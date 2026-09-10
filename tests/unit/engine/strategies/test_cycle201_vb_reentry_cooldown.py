@@ -92,7 +92,7 @@ def test_1_active_cooldown_blocks_buy(monkeypatch) -> None:
     """
     vb = _make_vb(monkeypatch)
     _seed_target(vb, "005930", prev_range=1000, k=0.5)  # base 500
-    vb.on_open_price_confirmed("005930", open_price=80000, board="main")  # target 80500
+    vb.on_open_price_confirmed("005930", open_price=80000, board="main", source="rest")  # target 80500
     _activate("main")
 
     today = datetime.now(KST).date()
@@ -127,7 +127,7 @@ def test_2_normal_breakout_allows_buy(monkeypatch) -> None:
     """
     vb = _make_vb(monkeypatch)
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
-    vb.on_open_price_confirmed("005930", open_price=80000, board="main")
+    vb.on_open_price_confirmed("005930", open_price=80000, board="main", source="rest")
     _activate("main")
 
     assert vb.check_buy_signal("005930", 80200, 80000) == Signal.NONE  # 첫 틱 기록
@@ -249,7 +249,7 @@ def test_5b_ls_electric_reentry_blocked_via_hook(monkeypatch) -> None:
     """
     vb = _make_vb(monkeypatch)
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
-    vb.on_open_price_confirmed("005930", open_price=80000, board="main")  # target 80500
+    vb.on_open_price_confirmed("005930", open_price=80000, board="main", source="rest")  # target 80500
     _activate("main")
 
     # 청산 → on_position_closed 훅 (매도 set 은 미설정 = 게이트 격리, 크로스데이 시뮬)

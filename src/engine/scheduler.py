@@ -39,7 +39,7 @@ from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrateg
 from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine import data_load_tasks  # refactor-review B1 위임 모듈
-from src.engine import open_price_observe  # cycle264 관측 leaf (라인 상한 보호)
+from src.engine import open_price_observe, open_price_rest  # cycle264 관측 leaf / cycle272 기준가 leaf (라인 상한 보호)
 from src.engine import quote_token_refresh  # cycle269 토큰 갱신 leaf (라인 상한 보호)
 from src.realtime.handler import (
     dispatch_message,
@@ -720,10 +720,9 @@ class TradingScheduler:
 
             # cycle264 (2026-09-06) — 09:05:30 시가 3자 대조 shadow (관측 전용, 행위 0).
             # 메인 루프는 09:00:05 확정 직후 09:30 까지 블록되므로 백그라운드 task 여야 한다.
-            self._open_source_compare_task = asyncio.create_task(
-                open_price_observe.open_source_compare_task_loop(self)
-            )
+            self._open_source_compare_task = asyncio.create_task(open_price_observe.open_source_compare_task_loop(self))
             self._quote_token_refresh_task = asyncio.create_task(quote_token_refresh.task_loop(self))  # cycle269 — 매일 15:45 KST 보조 시세 계정 접근토큰 강제 재발급(만료 앵커 고정 = 장중 재발급 드리프트 차단)
+            self._main_rest_basis_task = asyncio.create_task(open_price_rest.main_rest_basis_task_loop(self))  # cycle272 — main 목표가 기준가를 KRX REST 로 확정(09:00:35 R1, 09:05:00 이후 스케줄러 백스톱 인계)
 
             now = datetime.now().time()
 
@@ -1010,7 +1009,7 @@ class TradingScheduler:
                 "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
-                "_open_source_compare_task", "_quote_token_refresh_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급
+                "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -1137,7 +1136,7 @@ class TradingScheduler:
                 "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
-                "_open_source_compare_task", "_quote_token_refresh_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급
+                "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -1173,7 +1172,7 @@ class TradingScheduler:
             "_stock_master_financial_load_task",  # 사이클 C3 추가 — 퀀트 재무 적재 task
             "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
             "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
-            "_open_source_compare_task", "_quote_token_refresh_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급
+            "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -1618,8 +1617,8 @@ class TradingScheduler:
             if not hasattr(strategy, '_targets') or not hasattr(strategy, 'on_open_price_confirmed'):
                 continue
             allowed = get_tradable_boards(sid, strategy.config.params)
-            if MarketBoard(board) not in allowed:
-                continue
+            if MarketBoard(board) not in allowed or open_price_rest.owns_board(strategy, board):
+                continue  # cycle272 — owns_board=True 인 09:00:35~09:05:00 창은 leaf 가 전담
             targets.append((sid, strategy, list(strategy._targets.keys())))
 
         if not targets:
@@ -1676,7 +1675,7 @@ class TradingScheduler:
                     detail = await fetch_stock_detail(ticker)
                     open_price = int(detail.get("stck_oprc", "0"))
                     if open_price > 0:
-                        strategy.on_open_price_confirmed(ticker, open_price, board=board)
+                        strategy.on_open_price_confirmed(ticker, open_price, board=board, source="rest")  # cycle272 — 09:05 이후 main 백스톱
                         # cycle264 — 이 종목의 시가 출처는 WS 캐시가 아니라 REST 다.
                         # 09:05:30 대조의 `used_src` 라벨(관측 전용, never-raise, 행위 0).
                         open_price_observe.mark_confirmed_via_rest(sid, ticker, board)

@@ -118,7 +118,7 @@ def test_g213_2_today_mode_close_registers_cooldown_blocks_rebuy(monkeypatch) ->
     """
     ltv = _make_ltv(monkeypatch)
     _seed_target(ltv, "095610", prev_range=1000, k=0.5)  # base 500
-    ltv.on_open_price_confirmed("095610", open_price=80000, board="main")  # target 80500
+    ltv.on_open_price_confirmed("095610", open_price=80000, board="main", source="rest")  # target 80500
     _activate("main")
 
     # 당일 모드 = 상한가 미도달 (_limit_up_reached 비멤버)
@@ -312,7 +312,7 @@ def test_normal_breakout_allows_buy(monkeypatch) -> None:
     """
     ltv = _make_ltv(monkeypatch)
     _seed_target(ltv, "095610", prev_range=1000, k=0.5)
-    ltv.on_open_price_confirmed("095610", open_price=80000, board="main")
+    ltv.on_open_price_confirmed("095610", open_price=80000, board="main", source="rest")
     _activate("main")
 
     assert ltv.check_buy_signal("095610", 80200, 80000) == Signal.NONE  # 첫 틱 기록

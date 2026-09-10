@@ -894,6 +894,12 @@ async def test_c2_confirm_open_prices_rest_fallback_marks_source(monkeypatch):
     """C2 — `_confirm_breakout_open_prices` 의 **2차 폴백 분기**가 라벨을 심는다.
 
     1차 WS 폴링으로 확정된 종목에는 심지 않는다(그것이 `ws`).
+
+    cycle272 — `open_price_scope_mode` 기본 `enforce` 에서는 1차 WS 폴링 자체가
+    거부돼(`source` 기본값 불신 `"ws"`) 이 시나리오("WS 로 확정된 종목")가
+    성립하지 않는다. 이 테스트는 **레거시(off) 경로 회귀 가드**로 재분류한다
+    — WS 라벨 분기 자체(cycle264 의 제1 계약)는 `mode="off"` 에서 여전히
+    살아 있어야 한다.
     """
     from src.engine import open_price_observe as obs_mod
     from src.engine import scanner
@@ -904,6 +910,7 @@ async def test_c2_confirm_open_prices_rest_fallback_marks_source(monkeypatch):
         "001450": _target(0, 700),         # REST 폴백으로 확정될 종목
     })
     vb = sched.registry.get("volatility_breakout")
+    vb.config.params["open_price_scope_mode"] = "off"  # cycle272 — 레거시 WS 경로 회귀 가드
     vb._open_confirmed = {"000720": {}, "001450": {}}
 
     monkeypatch.setattr(scanner, "ticker_prices", {

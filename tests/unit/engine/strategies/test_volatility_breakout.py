@@ -73,7 +73,9 @@ def test_default_params_includes_board_k_values():
 def test_on_open_when_main_board_then_target_uses_krx_main_k(vb):
     _seed_target(vb, "005930", prev_range=1000, k=0.5)  # base = 500
     vb.config.params["k_value_krx_main"] = 1.2
-    vb.on_open_price_confirmed("005930", open_price=80000, board="main")
+    # cycle272 — `board="main"` 확정은 `source="rest"` 없이는 게이트가 거부한다
+    # (기본 enforce). K값 산식 자체는 게이트 밖이라 REST 경로로 그대로 검증한다.
+    vb.on_open_price_confirmed("005930", open_price=80000, board="main", source="rest")
 
     board = vb._targets["005930"]["boards"]["main"]
     assert board["open_price"] == 80000
@@ -103,7 +105,8 @@ def test_on_open_when_unknown_ticker_then_no_op(vb):
 def test_on_open_records_top_level_compat_for_first_confirmed_board(vb):
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
     vb.config.params["k_value_krx_main"] = 1.0
-    vb.on_open_price_confirmed("005930", open_price=80000, board="main")
+    # cycle272 — REST 로 확정된 기준가를 심는다(`source` 기본값 "ws" 는 게이트가 거부).
+    vb.on_open_price_confirmed("005930", open_price=80000, board="main", source="rest")
 
     info = vb._targets["005930"]
     # backwards-compat: 첫 보드 확정 시 top-level 에 노출
@@ -160,8 +163,13 @@ def test_buy_first_tick_per_board_records_only(vb):
 # 장중 KST(UTC 01:00 = KST 10:00) 로 동결해 결정성 확보(행위 불변).
 @freeze_time("2026-05-08 01:00:00")
 def test_buy_when_breakout_moment_then_buy(vb):
+    """cycle272 — 레거시(off) 경로 회귀 가드. 이 테스트는 `check_buy_signal` 의
+    인라인 자동확정(첫 틱에서 `source` 미지정으로 `on_open_price_confirmed` 를
+    스스로 부르는 경로)에 의존한다 — 기본 enforce 에서는 그 경로가 거부되므로
+    `mode="off"` 로 현행 계약을 그대로 유지한다."""
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
     vb.config.params["k_value_krx_main"] = 1.0
+    vb.config.params["open_price_scope_mode"] = "off"
     _activate("main")
     # 첫 틱 80200 (target 80500 미달) — 기록
     assert vb.check_buy_signal("005930", 80200, 80000) == Signal.NONE
@@ -190,9 +198,12 @@ def test_buy_signal_per_board_is_independent(vb):
 
     사이클 26 (2026-05-20): VB KRX ONLY — PRE_NXT 보드 제거.
     보드별 _prev_price 분리는 MAIN 단일 보드에서 연속 틱으로 검증.
+
+    cycle272 — 레거시(off) 경로 회귀 가드(인라인 자동확정 의존, 주석 위 참조).
     """
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
     vb.config.params["k_value_krx_main"] = 1.0
+    vb.config.params["open_price_scope_mode"] = "off"
 
     _activate("main")
     vb.check_buy_signal("005930", 80200, 80000)  # main 첫 틱 (기록만)

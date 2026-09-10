@@ -111,7 +111,7 @@ def _armed_vb(monkeypatch) -> VolatilityBreakoutStrategy:
     """돌파 1틱이면 BUY 가 나오는 최소 rig — open 80,000 / target 80,500."""
     vb = _make_vb(monkeypatch)
     _seed_target(vb, _TICKER, prev_range=1000, k=0.5)   # base 500
-    vb.on_open_price_confirmed(_TICKER, open_price=80000, board="main")  # target 80,500
+    vb.on_open_price_confirmed(_TICKER, open_price=80000, board="main", source="rest")  # target 80,500
     _activate("main")
     return vb
 

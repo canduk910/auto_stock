@@ -86,11 +86,15 @@ def test_buy_when_prdy_rate_below_min_then_none(ltv, monkeypatch):
 
 
 def test_buy_when_breakout_and_prdy_rate_above_min_then_buy(ltv, monkeypatch):
+    """cycle272 — 레거시(off) 경로 회귀 가드. 인라인 자동확정(첫 틱에서 `source`
+    미지정으로 `on_open_price_confirmed` 를 스스로 부르는 경로)에 의존한다 —
+    기본 enforce 에서는 거부되므로 `mode="off"` 로 현행 계약을 유지한다."""
     from src.engine import scanner
 
     monkeypatch.setitem(scanner.ticker_prev_close, "005930", 70000)
     _seed_target(ltv, "005930", prev_range=2000, k=0.5)  # base 1000, target = 81000
     ltv.config.params["k_value_krx_main"] = 1.0
+    ltv.config.params["open_price_scope_mode"] = "off"
     _activate("main")
     # 첫 틱: 80000 (target 81000 미달, prdy +14% > 5%) — 기록만
     assert ltv.check_buy_signal("005930", 80000, 80000) == Signal.NONE

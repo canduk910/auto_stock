@@ -513,6 +513,37 @@ VB와 동일.
   ③ **벽시계 임계의 구멍**: 세션 트래커가 30초 지터로 늦게 뒤집히면 같은 거래가 09:01:31
   에 그대로 난다. 실측 경계 = **09:01:34 1건**(07-22 064350, 위반 −76.2bp)으로 창 밖 4초다.
 
+### `main` 기준가 출처 `open_price_scope_mode` (cycle272, 2026-09-10) — 사용자 결정 D1
+
+**VB·LTV 공통.** `board=="main"` 목표가의 기준가를 통합 채널 `H0UNCNT0` `fields[7]`
+(오염된 세션 시가)에서 **KRX REST `stck_oprc`(`J`) 단일 출처**로 교체한다. 사용자
+결정 원문 = *"체크할 필요가 없이 KRX시가를 쓰는게 원칙"*. 위 `open_entry_hold_secs`
+가 최악 구간을 피하는 **지혈**이었다면, 이건 오염된 기준가 자체를 **REST 값으로
+교체**하는 시정이다 — 둘은 독립이고 90초 보류가 0 으로 롤백돼도 이 시정은
+그대로 유효하다.
+
+- **좁은 목** = `on_open_price_confirmed(ticker, open_price, board="main", *, source="ws")`.
+  `source` 기본값이 불신 `"ws"` 라 WS 3 호출부(스케줄러 1차 폴링·전략 인라인 확정)는
+  **한 글자도 안 바뀌고** 거부된다 — `check_buy_signal`/`check_exit_signal`/
+  `calc_buy_quantity` byte 동일(cycle264 `_STRATEGY_PINS` 6개 불변).
+- **REST 확보** = 신규 leaf `src/engine/open_price_rest.py`. 09:00:35 R1 부터 30초
+  간격 9라운드(마지막 09:04:35) → 이후 5분 간격 15:20 까지. 프린트 안 된 종목은
+  그 시점 **매수 불가**(틀린 목표선으로 들어간 포지션은 손절선까지 틀리지만, 안 들어간
+  종목은 기회비용만 남는다). 09:05:00 이후는 스케줄러의 기존 2차 REST 폴백이 백스톱.
+- **킬스위치** `open_price_scope_mode` — **각 전략의** `DEFAULT_PARAMS`(상호 import
+  금지) 키. 기본 **`"enforce"`**(= REST 단일 출처). `"off"` 만 롤백값(대소문자·공백
+  무시 정확 일치) — cycle271 이전 행위(WS 캐시·인라인 확정 허용)로 되돌린다. 그 외
+  모든 값·부재·예외는 **enforce**(D1 "체크할 필요가 없이" 의 직역). `pre_nxt`/
+  `post_nxt` 보드는 게이트 스코프 밖 — LTV 08:00~09:00 프리장 매수·야간 매수는 전면 무접촉.
+- **`PARAM_RANGES`/`INT_PARAMS` 편입 금지** — 진입 정체성 상수(AST G-272-28a/b).
+- **롤백** = `PUT /api/strategies/{id}/params {"open_price_scope_mode":"off"}` —
+  **즉시** 반영(그날 이미 REST 로 확정된 목표가는 되돌아오지 않는다 — 전진 방향으로만
+  듣는다). `strategy_config` SQL UPDATE 는 **다음 재시작에서만**(cycle232 D6).
+- **8영역 접촉 0** — `risk.py`/`order_engine.py`/`session.py`/`scanner.py`/
+  `strategy_registry.py`/`src/api/order.py`/`src/realtime/**`/`src/auth/**` 전부 무접촉.
+- 상세 = `src/engine/strategies/CLAUDE.md` · 자문 =
+  `_workspace/domain_consult/cycle272_rest_open_basis_20260910.md`.
+
 ---
 
 ## 6. 전략 D: 20일 신고가 스윙 (donchian_swing) 상세

@@ -176,7 +176,9 @@ def _armed(
     for t in tickers:
         _seed_target(s, t)
         for b in (boards or (board,)):
-            s.on_open_price_confirmed(t, open_price=_OPEN, board=b)
+            # cycle272 — `board="main"` 확정은 `source="rest"` 없이는 게이트가
+            # 거부한다(기본 enforce). 이 rig 는 "REST 로 확정된 기준가"를 심는다.
+            s.on_open_price_confirmed(t, open_price=_OPEN, board=b, source="rest")
     _activate(board)
     return s
 

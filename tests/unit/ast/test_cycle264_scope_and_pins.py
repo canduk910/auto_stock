@@ -6,8 +6,10 @@
   → **cycle264 커밋(38f2560) 직후 삭제 완료.** bare `git diff HEAD` 는 커밋 뒤
     공허해지고 다음 편집에서 무조건 RED 가 된다(cycle240 A11b · cycle252 G-252-5b).
 - `test_c4_strategy_entry_methods_pinned` (전략 7파일 무접촉 sha 핀)
-  → **cycle265(기준가 시정)가 VB/LTV 를 실제로 바꾼다.** 그 사이클이 이 핀을
-    갱신하거나 이 테스트를 삭제한다. cycle264 안에서 sha 가 바뀌면 계약 위반이다.
+  → ✅ **cycle272(기준가 시정)가 VB/LTV 를 실제로 바꿨지만 이 핀은 갱신하지
+    않았다** — `source` 기본값을 `"ws"`(불신)로 둬 이 여섯 메서드는 손대지
+    않는 설계를 택했다(자문 §9 O-I, 예고 문장을 이 사실에 맞춰 정정한다).
+    cycle264 안에서 sha 가 바뀌면 계약 위반이다.
 
 나머지(`scheduler.py` 라인 상한, 8영역 무접촉)는 영구 가드다.
 
@@ -195,7 +197,7 @@ def test_c7_open_source_compare_task_registered():
 
 
 # ===========================================================================
-# C4 — 진입/청산/수량 메서드 무변경 (⚠️ cycle265 가 갱신·삭제)
+# C4 — 진입/청산/수량 메서드 무변경 (✅ cycle272 가 확인 — 핀은 불변으로 남았다)
 # ===========================================================================
 
 # `ast.get_source_segment` 의 sha256 (2026-09-06 HEAD).
@@ -237,7 +239,9 @@ def test_c4_strategy_entry_methods_pinned(key):
     """C4 — 같은 입력에 대한 진입/청산/수량 산출이 cycle264 전후 동일하다.
 
     관측만 넣는 사이클이므로 이 여섯 메서드는 **문자 그대로** 동결이다.
-    ⚠️ cycle265(기준가 시정)가 이 핀을 갱신한다 — 그 전에 바뀌면 계약 위반.
+    ✅ cycle272(기준가 시정)가 `on_open_price_confirmed` 의 `source` 기본값을
+    `"ws"`(불신)로 둬 이 여섯은 손대지 않았다 — 6/6 불변이 "무접촉 6종"의
+    기계적 증거다(자문 §9 O-I, 예고와 달리 핀은 갱신되지 않는다).
     """
     module, cls_name, method = key
     actual = hashlib.sha256(
@@ -277,14 +281,15 @@ def test_c7_markers_live_only_in_two_files():
 
 
 def test_c7_no_killswitch_param_introduced():
-    """금기 — 관측에는 킬스위치 파라미터를 만들지 않는다.
+    """금기 — 이 파일(cycle264 관측)에는 킬스위치 파라미터를 만들지 않는다.
 
-    `DEFAULT_PARAMS` 신규 키는 별도 사용자 결정 사안이고(자문 §8.2 는
-    cycle265 시정에만 `open_price_scope_mode` 를 권고했다), 관측은 끄고 켤
-    대상이 아니다.
+    `open_price_scope_mode` 는 이 금지 목록에서 **빠졌다** — cycle272(기준가
+    시정)가 그 이름으로 실제 킬스위치를 `DEFAULT_PARAMS` 에 도입했다(사용자
+    결정 D1). 관측 자체의 킬스위치(`open_scope_observe_enabled`·
+    `open_source_compare_enabled`)는 여전히 금지다 — 관측은 끄고 켤 대상이
+    아니다.
     """
-    banned = ("open_price_scope_mode", "open_scope_observe_enabled",
-              "open_source_compare_enabled")
+    banned = ("open_scope_observe_enabled", "open_source_compare_enabled")
     offenders: dict[str, list[str]] = {}
     for path in _SRC.rglob("*.py"):
         text = path.read_text(encoding="utf-8")

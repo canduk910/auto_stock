@@ -68,6 +68,29 @@
 > `tests/unit/ast/test_cycle262_ast_open_entry_hold.py`(AST 28, G-262-1a~9).
 > 명세 = `_workspace/00_leader_trading_rules.md` §5 · 자문 = `_workspace/consult/2026-09-06_open_entry_hold.md`.
 
+> ✅ **VB·LTV `main` 목표가 기준가 = KRX REST 단일 출처 (cycle272, 2026-09-10 — 사용자 결정 D1).**
+> `board=="main"` 목표가가 통합 채널 `H0UNCNT0` `fields[7]`(오염된 세션 시가)로 서던 것을
+> 멈춘다 — 기준가는 이제 **KRX REST `stck_oprc`(`J`) 단일 출처**뿐이다. `on_open_price_confirmed(
+> ticker, open_price, board="main", *, source="ws")` 가 좁은 목이고, `source` 기본값이
+> 불신 `"ws"` 라 WS 3 호출부(스케줄러 1차 폴링·전략 인라인 확정)는 **한 글자도 안 바뀌고**
+> 거부된다(`check_buy_signal`/`check_exit_signal`/`calc_buy_quantity` byte 동일 = cycle264
+> `_STRATEGY_PINS` 6개 불변). REST 확보는 신규 leaf `src/engine/open_price_rest.py` —
+> 09:00:35 R1 부터 30초 간격 9라운드(마지막 09:04:35) → 이후 5분 간격 15:20 까지. 프린트
+> 안 된 종목은 그 시점 매수 불가(유계 재시도가 회수, 못 하면 그날 안 산다). 09:05:00
+> 이후는 `owns_board()` 가 False 로 떨어져 스케줄러의 기존 2차 REST 폴백이 백스톱.
+> **킬스위치 `open_price_scope_mode`** — 각 전략의 `DEFAULT_PARAMS`(상호 import 금지) 키,
+> 기본 `"enforce"`. `"off"` 만 롤백값(대소문자·공백 무시 정확 일치), 그 외 전부 enforce.
+> `pre_nxt`/`post_nxt` 보드는 게이트 스코프 밖 — LTV 08:00~09:00 프리장·야간 매수 무접촉.
+> `PARAM_RANGES`/`INT_PARAMS` 편입 금지. 롤백 = `PUT {"open_price_scope_mode":"off"}`
+> **즉시**(그날 이미 REST 로 확정된 목표가는 안 되돌아온다 — 전진 방향으로만 듣는다).
+> 8영역 접촉 0. 관측 마커 4종(`[main_rest_basis_config/round/confirmed/unresolved]`)은
+> cycle264 마커와 별개. 가드 =
+> `tests/unit/engine/strategies/test_cycle272_main_rest_basis.py` ·
+> `tests/unit/engine/test_cycle272_open_price_rest_leaf.py` ·
+> `tests/unit/ast/test_cycle272_ast_main_rest_basis.py`.
+> 명세 = `_workspace/00_leader_trading_rules.md` §5 · 자문 =
+> `_workspace/domain_consult/cycle272_rest_open_basis_20260910.md`.
+
 | ID | 핵심 동작 | 손절·청산 | tradable_boards / exchange |
 |----|----------|----------|---------------------------|
 | `momentum` | 전일종가 +29% 돌파 (상한가 30% 제외, 돌파 순간만) | -7.5% / 익일 청산: 갭+10%↑ → 트레일링 -2% / 그 외 즉시 매도 | KRX_OPEN+MAIN / KRX·NXT·SOR (실전 SOR 권장, 모의는 KRX 강제) |

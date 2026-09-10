@@ -274,6 +274,10 @@ def test_stop_tuple_equals_finally_tuple_members():
         # 재발급 task. 7계정 × 61초 직렬화로 ~7분을 도는 루프라 cancel 누락 시
         # `stop()` 이 그 발급 cascade 를 끊지 못한다.
         "_quote_token_refresh_task",
+        # cycle272 추가 (2026-09-10) — main 목표가 기준가 KRX REST 확정 task.
+        # 09:00:35~15:20 을 도는 루프라 cancel 누락 시 `stop()` 이 그 REST 스윕을
+        # 끊지 못한다(같은 종목 이중 스윕 위험).
+        "_main_rest_basis_task",
         "_ws_task",
         "_scan_task",
     }

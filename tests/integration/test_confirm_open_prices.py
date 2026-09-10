@@ -26,10 +26,13 @@ def _seed_target(strategy, ticker, prev_range=1000, k=0.5):
 
 @pytest.mark.asyncio
 async def test_confirm_main_board_when_open_price_in_cache_then_target_set(scheduler_env):
+    """cycle272 — 레거시(off) 경로 회귀 가드. `main` 기준가 기본값은 `enforce`
+    (KRX REST 단일 출처)라 WS 캐시 확정은 `mode="off"` 명시로만 재현된다."""
     sched = scheduler_env.scheduler
     vb = sched.registry.get("volatility_breakout")
     vb.config.enabled = True
     vb.config.params["k_value_krx_main"] = 1.0
+    vb.config.params["open_price_scope_mode"] = "off"
     _seed_target(vb, "005930", prev_range=1000, k=0.5)  # base 500
 
     from src.engine import scanner
@@ -148,13 +151,17 @@ async def test_confirm_does_nothing_when_no_enabled_strategy(scheduler_env):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_confirm_is_idempotent_when_all_already_confirmed(scheduler_env, monkeypatch, caplog):
-    """모든 종목이 이미 해당 board 로 confirmed 면 1차 폴링/2차 폴백/INFO 로그 모두 skip."""
+    """모든 종목이 이미 해당 board 로 confirmed 면 1차 폴링/2차 폴백/INFO 로그 모두 skip.
+
+    cycle272 — 레거시(off) 경로 회귀 가드(WS 캐시 확정 전제, 주석 참조 위).
+    """
     import logging
     sched = scheduler_env.scheduler
     vb = sched.registry.get("volatility_breakout")
     vb.config.enabled = True
     vb.config.params["k_value_krx_main"] = 1.0
     vb.config.params["tradable_boards"] = ["main"]
+    vb.config.params["open_price_scope_mode"] = "off"
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
     _seed_target(vb, "000660", prev_range=2000, k=0.5)
 
@@ -197,12 +204,16 @@ async def test_confirm_is_idempotent_when_all_already_confirmed(scheduler_env, m
 
 @pytest.mark.asyncio
 async def test_confirm_proceeds_when_partially_confirmed(scheduler_env):
-    """일부만 confirmed 면 미확정 종목에 대해서만 진행 — INFO 로그 정상 노출."""
+    """일부만 confirmed 면 미확정 종목에 대해서만 진행 — INFO 로그 정상 노출.
+
+    cycle272 — 레거시(off) 경로 회귀 가드(WS 캐시 확정 전제, 주석 참조 위).
+    """
     sched = scheduler_env.scheduler
     vb = sched.registry.get("volatility_breakout")
     vb.config.enabled = True
     vb.config.params["k_value_krx_main"] = 1.0
     vb.config.params["tradable_boards"] = ["main"]
+    vb.config.params["open_price_scope_mode"] = "off"
     _seed_target(vb, "005930", prev_range=1000, k=0.5)
     _seed_target(vb, "000660", prev_range=2000, k=0.5)
 

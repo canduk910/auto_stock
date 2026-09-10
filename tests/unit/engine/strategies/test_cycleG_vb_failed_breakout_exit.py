@@ -94,7 +94,7 @@ def _prime(strategy, ticker, *, open_price, base_offset, buy_price, is_next_day=
     _seed_target(strategy, ticker, prev_range=base_offset, k=1.0)
     strategy.config.params["k_value_krx_main"] = 1.0
     _activate("main")
-    strategy.on_open_price_confirmed(ticker, open_price, board="main")
+    strategy.on_open_price_confirmed(ticker, open_price, board="main", source="rest")
     buy_date = _today_kst() - timedelta(days=1) if is_next_day else _today_kst()
     strategy.state.positions[ticker] = Position(
         ticker=ticker, buy_price=buy_price, quantity=1,
