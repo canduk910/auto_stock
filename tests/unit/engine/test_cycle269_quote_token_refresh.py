@@ -4,8 +4,14 @@
 
 무엇을 잠그는가:
 - C1  활성 보조 계정 전부에 `issue()` 가 (순서대로) 불린다.
-- C2  `issue()` 여야 한다 — `get_token()` 은 캐시 hit 면 재발급하지 않아 앵커를
-      옮기지 못한다(이 사이클의 목적 자체가 앵커 이동이다).
+- C2  `get_token()` 은 쓰지 않는다 — 캐시 hit 면 재발급하지 않아 앵커를 옮기지
+      못한다(이 사이클의 목적 자체가 앵커 이동이다).
+      ⚠️ **cycle270 의미 전환 (2026-09-10)**: `issue()` **단독**으로도 앵커가
+      옮겨진다는 cycle269 의 전제는 09-10 실측으로 반증됐다 — KIS `/oauth2/tokenP`
+      는 유효 토큰이 있으면 같은 토큰·같은 만료를 돌려준다. 계약은
+      `revoke()` → `issue()` 로 전환됐고(`tests/unit/engine/`
+      `test_cycle270_quote_token_revoke_then_issue.py` 가 정본), 이 파일이 잠그는
+      것은 그중 **`get_token()` 금지** 부분이다.
 - C3  주계정(`label=None`, 매매용)은 대상이 아니다.
 - C4  계정 1건 실패는 흡수되고 나머지가 계속 발급된다.
 - C5  계정 목록 조회 실패 = 그 회차 skip (예외 미전파, 전부 0 요약).
@@ -42,14 +48,24 @@ def _make_account(label: str):
 
 
 class _DummyMgr:
-    """`issue()` / `get_token()` 호출을 각각 따로 센다."""
+    """`issue()` / `get_token()` 호출을 각각 따로 센다.
+
+    cycle270 의미 전환 — `revoke()` 를 더블에 추가한다. 본체가 폐기 후 발급으로
+    바뀌어도 이 파일의 계약(대상 계정 · 예외 흡수 · 위임)은 그대로 성립해야 하며,
+    더블에 메서드가 없으면 `AttributeError` 가 계정 단위 except 에 먹혀 모든 케이스가
+    `failed` 로 뒤집힌다. 폐기 자체의 **행위 계약**은 cycle270 파일이 잠근다.
+    """
 
     def __init__(self, label, issue_calls, get_token_calls, fail: bool = False):
         self._label = label
         self._issue_calls = issue_calls
         self._get_token_calls = get_token_calls
         self._fail = fail
+        self.revoke_calls: list[str] = []
         self.token_expired = datetime(2026, 9, 9, 15, 45, 0)
+
+    async def revoke(self) -> None:
+        self.revoke_calls.append(self._label)
 
     async def issue(self) -> None:
         if self._fail:
@@ -103,7 +119,10 @@ async def test_c1_issues_all_active_quote_accounts_in_order(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_c2_uses_issue_not_get_token(monkeypatch):
-    """C2 — `get_token()` 은 캐시 hit 면 no-op 이라 앵커를 못 옮긴다. 0회여야 한다."""
+    """C2 — `get_token()` 은 캐시 hit 면 no-op 이라 앵커를 못 옮긴다. 0회여야 한다.
+
+    cycle270 이후에도 이 계약은 불변이다(발급 앞에 `revoke()` 가 붙었을 뿐).
+    """
     from src.engine import quote_token_refresh as mod
 
     issue_calls, get_token_calls, _ = _install(

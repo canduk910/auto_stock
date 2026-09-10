@@ -5,7 +5,7 @@
 | G-269-1 | `scheduler.py` < 3,900L (cycle257 영구 상한 리터럴과 **자동 대조**) | 영구 |
 | G-269-2 | `_quote_token_refresh_task` 가 생성 1 + cancel 3 = 4곳 전부에 등재 | 영구 |
 | G-269-3 | leaf 는 `scheduler` 를 import 하지 않는다 (순환 차단) | 영구 |
-| G-269-4 | leaf 는 `issue()` 를 부르고 `get_token()` 을 부르지 않는다 | 영구 |
+| G-269-4 | leaf 는 `revoke()`+`issue()` 를 부르고 `get_token()` 을 부르지 않는다 (cycle270 의미 전환) | 영구 |
 | G-269-5 | leaf 는 주계정 싱글톤(`token_manager`)을 참조하지 않는다 | 영구 |
 | G-269-6 | `TokenManager._is_valid` 소스 세그먼트 sha 핀 (token.py 무접촉 계약) | 영구 |
 | G-269-7 | cycle269 마커가 8영역·전략 7파일로 새지 않는다 | 영구 |
@@ -93,6 +93,12 @@ def test_g269_4_leaf_calls_issue_not_get_token():
 
     이 사이클의 존재 이유가 '만료 앵커를 고정 장외 시각으로 옮기는 것' 이므로
     호출을 `get_token()` 으로 바꾸는 뮤테이션은 기능 전체를 무력화한다.
+
+    ⚠️ **cycle270 의미 전환 (2026-09-10)** — `issue()` 단독이면 충분하다는 전제가
+    09-10 실측으로 반증됐다(강제 발급 7/7 성공인데 만료가 장중 자연 재발급 값과
+    동일). KIS `/oauth2/tokenP` 는 유효 토큰이 있으면 같은 토큰·같은 만료를 준다
+    ⇒ `revoke()` 가 **필수 동반**이다. 호출 순서 계약은
+    `tests/unit/ast/test_cycle270_ast_revoke_then_issue.py::G-270-1` 소관.
     """
     tree = ast.parse(_LEAF.read_text(encoding="utf-8"))
     attr_calls = {
@@ -101,6 +107,9 @@ def test_g269_4_leaf_calls_issue_not_get_token():
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
     }
     assert "issue" in attr_calls
+    assert "revoke" in attr_calls, (
+        "`issue()` 단독은 앵커를 옮기지 못한다 (cycle270) — 폐기가 선행돼야 한다"
+    )
     assert "get_token" not in attr_calls, (
         "`get_token()` 은 캐시 hit 면 no-op 이라 재발급 시각을 고정하지 못한다"
     )

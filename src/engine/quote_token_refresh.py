@@ -17,10 +17,19 @@
 
 ## 어떻게 고치는가
 
-`token.py` 는 **한 글자도 고치지 않는다**. `TokenManager.issue()` 는 이미 유효성
-검사 없이 강제 발급하는 public 메서드이므로, 매일 **고정된 장외 시각**에 활성
-보조 계정 전부를 대상으로 `issue()` 를 부르면 그 시각이 매일 새 24h 창의 앵커가
-된다. 자연 재발급(위 드리프트 경로)은 그 앵커 뒤에서 다시 앵커를 덮어쓰지 못한다.
+`token.py` 는 **한 글자도 고치지 않는다**. **cycle270 정정 (2026-09-10)**: 이
+절의 원래 서술("`issue()` 를 부르면 그 시각이 새 앵커")은 09-10 실측으로
+반증됐다 — 09-09/09-10 이틀 강제 발급 7/7 이 매번 같은 날 장중 자연 재발급과
+**완전히 동일한 만료**를 돌려받아 앵커가 한 번도 옮겨지지 않았다. KIS
+`/oauth2/tokenP` 는 유효 토큰이 살아 있으면 **같은 토큰·같은 만료**를 돌려주기
+때문이다(사용자 승인 하 09-10 17:13 fire 계정 1건 수동 실측이 유일한 반증 —
+`revoke` 0.20s → `issue` 0.23s 로 만료가 실제로 옮겨갔다). 그래서 이제
+`issue()` 앞에 `TokenManager.revoke()` 를 **계정 단위로 먼저** 호출해 앵커를
+비운 뒤 발급한다 — 매일 **고정된 장외 시각**에 활성 보조 계정 전부를 대상으로
+`revoke()`→`issue()` 페어를 순차 실행하면 그 시각이 매일 새 24h 창의 앵커가
+된다. 자연 재발급(위 드리프트 경로)은 그 앵커 뒤에서 다시 앵커를 덮어쓰지
+못한다. `revoke()` 실패는 `issue()` 시도를 막지 않는다(무토큰 방치 금지 =
+fail-open) — 다만 그 계정만 이번 회차에 앵커가 그대로 남는다.
 
 ## 왜 15:45 인가 (팀장 제안 15:35 에서 조정 — 근거 있는 변경)
 
@@ -69,8 +78,13 @@
 ## 관측 마커 (`[quote_token_refresh]`)
 
 1. `scheduled at=...` — task 기동 시 1회. "배선이 살아 있는가" 의 카나리아.
-2. `label=<label> issued expired=<만료시각>` — 계정별 성공 1행.
+2. `label=<label> issued expired=<만료시각> revoked=<True|False>` — 계정별
+   성공 1행(**cycle270** — `revoked` 필드 추가, 접두는 byte 보존).
+   `revoked=False` 면 `revoke()` 가 실패해 그 계정은 이번 회차에 앵커가
+   이동하지 않았다는 뜻이다(별도 WARNING 도 동반).
 3. `accounts=%d issued=%d failed=%d` — 회차 요약 1행(`run_periodic_task_loop`).
+   **cycle270 에서도 이 3필드는 불변** — revoke 성패는 계정별 행으로 이미
+   관측되므로 요약에 넣지 않기로 결정했다.
 
 판독법: 배포 D+1 부터 `[quote_token_refresh]` 요약이 매일 15:45 대에 1행씩
 남고, 보조 계정의 "토큰 발급 완료(label=quote-*)" 가 15:35~15:52 창 밖에서는
@@ -114,10 +128,12 @@ def _trace_failure(key: str) -> None:
         pass
 
 
-def _emit_issued(label: str, expired) -> None:
+def _emit_issued(label: str, expired, revoked: bool) -> None:
     """계정별 성공 1행. 로그 실패가 다음 계정 발급을 막으면 안 된다."""
     try:
-        logger.info("%s label=%s issued expired=%s", MARKER, label, expired)
+        logger.info(
+            "%s label=%s issued expired=%s revoked=%s", MARKER, label, expired, revoked
+        )
     except Exception:
         _trace_failure(label)
 
@@ -161,10 +177,26 @@ async def refresh_quote_tokens_once() -> dict:
             continue
         try:
             manager = await get_token_manager(label)
+
+            # KIS `/oauth2/tokenP` 는 유효 토큰이 있으면 같은 토큰·같은 만료를
+            # 돌려준다(cycle270, 09-10 실측) — issue() 단독으로는 앵커가 안
+            # 옮겨진다. revoke() 로 먼저 비운다. 실패해도 issue() 는 시도한다
+            # (무토큰 방치 금지 = fail-open 방향) — 그 계정만 앵커가 그대로 남는다.
+            revoked = True
+            try:
+                await manager.revoke()
+            except Exception:
+                revoked = False
+                logger.warning(
+                    "%s label=%s 토큰 폐기 실패 — 발급은 계속 시도, "
+                    "이번 회차 앵커는 이동하지 않음",
+                    MARKER, label,
+                )
+
             # 강제 발급. 내부 전역 lock + 61s gap 직렬화를 그대로 탄다.
             await manager.issue()
             summary["issued"] += 1
-            _emit_issued(str(label), getattr(manager, "token_expired", None))
+            _emit_issued(str(label), getattr(manager, "token_expired", None), revoked)
         except Exception:
             summary["failed"] += 1
             logger.exception(
