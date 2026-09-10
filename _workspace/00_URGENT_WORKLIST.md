@@ -154,6 +154,7 @@ KRX 개장가가 나온다.** 채널 리졸버 제안(P1-7 B)을 뒷받침하는
 ## 🟢 09-10(목) 자율 구간 진행 기록 (16:17~21:00, 사용자 허용 = 기존 결정 범위 커밋·푸시 포함 · 종료 후 아티팩트 리포트)
 - **cycle273a(그룹 1 I2, D2 가) 완료·브랜치 커밋**: 잔여취소 타이머 order_no 게이트 해제 + `match_partial` opt-in 2곳(KST 하한 datetime 바인딩). 검증 r2 가 실 PG 로 str 바인딩 DataError 를 잡아 메인 세션이 시정(실 PG 왕복·AST5 영속 가드 추가). D+1 = `[buy_fill_correction_unique_violation]` 0 · APBK0927 헛 취소 0 · `[buy_fill_db_error]` 0.
 - **cycle273b-F7(그룹 1 I1) 완료·브랜치 커밋**: `_selling` 재대조 블록 → leaf `selling_reconcile.py`(scheduler 3,871L), `[selling_hold]` 3분기 가시화, 검증 2라운드 지적 전부 처리(logger 정체성 가드·rmn_qty=0·2-ticker 격리·180s 경계·graceful). AST1·AST2(order_engine) 는 I3 까지 skip — **I3 완료 시 skip 해제 의무**. 배포는 main 병합 후(가·다 묶음).
+- **cycle273b I3(그룹 1, D2 다) 완료·브랜치 커밋**: F-1/F-2 — `update_trade_status` 6개 호출부(C1~C6) 전부에 `order_no=` 전달해 WHERE 를 그 주문 한 건으로 좁힘(미전달 시 SQL byte 동일, opt-in). F-3 — `affected>1` 시 `[trade_status_multi_update]` WARNING(`trade_history.py` 단일 소재). **I1 이 skip 해 둔 AST1·AST2 해제 완료**(직전 검증 HIGH#1 반영 — AST1 을 "키워드 이름"에서 "지역변수 바인딩"까지 강화). 필옵틱스(161580) 사건의 근본 원인(order_no 없는 WHERE 가 다른 주문 행까지 덮던 것) 시정. 소스 diff = `src/db/trade_history.py`·`order_engine.py`(호출부만) 2파일, 8영역 `order_engine.py` 단독, scheduler diff 0(3,873L), sha 핀 4곳 갱신. 표적 46 + 실PG 32 + AST 926 PASS, 뮤테이션 프로덕션 14종 KILLED/ESCAPED 0.
 
 > 입력 꾸러미 정본 = `scratchpad/report_bundle_0910.md`(세션 스크래치, 보고서 원문은 `_workspace/reports/2026-09-10_*.md` 로 report-writer 가 확정). 아래는 **이미 확정된 사실만** — 코드 사이클 결과는 끝나는 대로 덧붙인다.
 

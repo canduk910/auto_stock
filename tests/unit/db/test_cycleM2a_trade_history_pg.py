@@ -86,7 +86,8 @@ async def test_insert_trade_timestamp_is_datetime():
 
 
 # ---------------------------------------------------------------------------
-# update_trade_status — UPDATE affected 수 ("UPDATE N" 파싱) + 4-eq 필터 보존
+# update_trade_status — UPDATE affected 수 ("UPDATE N" 파싱) +
+# 4-eq + (opt-in) 당일 하한 + (opt-in) order_no 필터
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_update_trade_status_returns_affected_count():

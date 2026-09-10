@@ -238,6 +238,112 @@ async def test_update_trade_status_match_partial_roundtrip(clean_trade_history):
 
 
 @pytest.mark.asyncio
+async def test_update_trade_status_order_no_narrows_where_roundtrip(clean_trade_history):
+    """cycle273b F-1 — `order_no` WHERE 좁히기를 **실 asyncpg** 로 왕복시킨다(161580 재현).
+
+    같은 ticker·trade_type·strategy 의 PENDING 행이 둘(다른 order_no) 있을 때,
+    `order_no=` 를 넘긴 UPDATE 가 **그 주문 한 건만** COMPLETED 로 만들고 나머지는
+    PENDING 그대로여야 한다 — migration 029 부분 UNIQUE 인덱스
+    `(ticker, order_no, trade_type)` 아래에서 두 order_no 가 공존 가능함을 실물로 확인한다.
+    """
+    from src.db import trade_history
+    from src.models.trade import TradeRecord, TradeStatus, TradeType
+
+    for order_no in ("C-1", "C-2"):
+        await trade_history.insert_trade(TradeRecord(
+            ticker="161580", ticker_name="필옵틱스", trade_type=TradeType.BUY,
+            price=25000, quantity=5, profit_loss=0, status=TradeStatus.PENDING,
+            strategy="donchian_swing", order_no=order_no,
+        ))
+
+    affected = await trade_history.update_trade_status(
+        "161580", TradeType.BUY, TradeStatus.COMPLETED, strategy="donchian_swing",
+        price=25100, order_no="C-1",
+    )
+    assert affected == 1, "order_no 로 좁힌 UPDATE 는 그 주문 한 건만 잡아야 한다(실 PG 왕복)."
+
+    rows = await trade_history.get_today_buy_trades_for_sync(ticker="161580")
+    by_order = {r["order_no"]: r["status"] for r in rows}
+    assert by_order["C-1"] == TradeStatus.COMPLETED.value, "지정한 주문(C-1)만 COMPLETED."
+    assert by_order["C-2"] == TradeStatus.PENDING.value, (
+        "다른 주문(C-2)은 PENDING 그대로여야 한다 — 161580 결함(다중 행 덮어쓰기) 시정의 실물 증거."
+    )
+
+
+@pytest.mark.asyncio
+async def test_update_trade_status_match_partial_and_order_no_combo_roundtrip(clean_trade_history):
+    """직전 검증 MEDIUM#2 — `match_partial=True` **와** `order_no=` 를 **함께** 넘기는
+
+    조합을 실 asyncpg 로 왕복시킨다. `order_engine.py` C1(매수 전량체결)·C3(매도
+    전량체결) 은 모든 체결마다 이 둘을 **동시에** 넘기는데(가장 트래픽이 많은
+    경로), 그 조합이 단위·실 PG 어디에도 테스트가 없었다(grep 전수 0건) —
+    동적 절 2개(`status = ANY(...)` + `AND order_no = $n`)가 플레이스홀더 번호를
+    밀리지 않고 공존하는지가 관건이다. 같은 ticker·strategy 로 PARTIAL 행(A-1)과
+    PENDING 행(A-2)을 두고, A-1 만 지정해 COMPLETED 로 좁힌다.
+    """
+    from src.db import trade_history
+    from src.models.trade import TradeRecord, TradeStatus, TradeType
+
+    await trade_history.insert_trade(TradeRecord(
+        ticker="161580", ticker_name="필옵틱스", trade_type=TradeType.BUY,
+        price=25000, quantity=5, profit_loss=0, status=TradeStatus.PARTIAL,
+        strategy="donchian_swing", order_no="A-1",
+    ))
+    await trade_history.insert_trade(TradeRecord(
+        ticker="161580", ticker_name="필옵틱스", trade_type=TradeType.BUY,
+        price=25000, quantity=5, profit_loss=0, status=TradeStatus.PENDING,
+        strategy="donchian_swing", order_no="A-2",
+    ))
+
+    affected = await trade_history.update_trade_status(
+        "161580", TradeType.BUY, TradeStatus.COMPLETED, strategy="donchian_swing",
+        price=25100, order_no="A-1", match_partial=True,
+    )
+    assert affected == 1, "match_partial+order_no 조합 UPDATE 는 지정한 주문 한 건만 잡아야 한다."
+
+    rows = await trade_history.get_today_buy_trades_for_sync(ticker="161580")
+    by_order = {r["order_no"]: r["status"] for r in rows}
+    assert by_order["A-1"] == TradeStatus.COMPLETED.value, "PARTIAL 이던 A-1 이 COMPLETED 돼야 한다."
+    assert by_order["A-2"] == TradeStatus.PENDING.value, (
+        "다른 주문(A-2, PENDING)은 조합 UPDATE 에도 건드려지면 안 된다 — C1 실사용 조합의 실물 증거."
+    )
+
+
+@pytest.mark.asyncio
+async def test_update_trade_status_match_partial_and_order_no_combo_sell_roundtrip(clean_trade_history):
+    """직전 검증 MEDIUM#2 — 매도 축(C3, `profit_loss` 동반) 조합. 동적 절 3개
+    (`status = ANY(...)` + `AND order_no = $n` + `profit_loss` SET) 공존을 확인한다.
+    """
+    from src.db import trade_history
+    from src.models.trade import TradeRecord, TradeStatus, TradeType
+
+    await trade_history.insert_trade(TradeRecord(
+        ticker="161580", ticker_name="필옵틱스", trade_type=TradeType.SELL,
+        price=25000, quantity=5, profit_loss=0, status=TradeStatus.PARTIAL,
+        strategy="donchian_swing", order_no="S-1",
+    ))
+    await trade_history.insert_trade(TradeRecord(
+        ticker="161580", ticker_name="필옵틱스", trade_type=TradeType.SELL,
+        price=25000, quantity=5, profit_loss=0, status=TradeStatus.PENDING,
+        strategy="donchian_swing", order_no="S-2",
+    ))
+
+    affected = await trade_history.update_trade_status(
+        "161580", TradeType.SELL, TradeStatus.COMPLETED, strategy="donchian_swing",
+        price=25500, profit_loss=2500.0, order_no="S-1", match_partial=True,
+    )
+    assert affected == 1
+
+    rows = await trade_history.get_today_sell_trades_for_sync(ticker="161580")
+    by_order = {r["order_no"]: r for r in rows}
+    assert by_order["S-1"]["status"] == TradeStatus.COMPLETED.value
+    assert float(by_order["S-1"]["profit_loss"]) == 2500.0
+    assert by_order["S-2"]["status"] == TradeStatus.PENDING.value, (
+        "다른 주문(S-2, PENDING)은 조합 UPDATE 에도 건드려지면 안 된다 — C3 실사용 조합의 실물 증거."
+    )
+
+
+@pytest.mark.asyncio
 async def test_sync_no_dedupe_excludes_cancelled_roundtrip(clean_trade_history):
     """sync 함수 왕복 — 같은 ticker 다른 order_no 전부 보존 + CANCELLED 제외 (사이클 30/73)."""
     from src.db import trade_history

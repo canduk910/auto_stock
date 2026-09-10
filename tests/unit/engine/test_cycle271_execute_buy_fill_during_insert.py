@@ -99,12 +99,15 @@ class FakeTradeHistory:
                 )
         self.rows.append(row)
 
-    def update_status(self, ticker, trade_type, status, strategy, price, *, match_partial=False) -> int:
-        """`src/db/trade_history.py::update_trade_status` 의 WHERE 절 중 **status/strategy 축만** 거울 — `match_partial` 의 KST timestamp 하한은 실 SQL 레벨 테스트(`tests/unit/db/test_cycle273a_update_trade_status_match_partial.py::test_b2d`)와 실 PG 왕복(`test_cycleM2a_hotpath_roundtrip`)이 별도로 지킨다(cycle273a r2 MEDIUM).
+    def update_status(self, ticker, trade_type, status, strategy, price, *,
+                       order_no=None, match_partial=False) -> int:
+        """`src/db/trade_history.py::update_trade_status` 의 WHERE 절 중 **status/strategy/order_no 축**만 거울 — `match_partial` 의 KST timestamp 하한은 실 SQL 레벨 테스트(`tests/unit/db/test_cycle273a_update_trade_status_match_partial.py::test_b2d`)와 실 PG 왕복(`test_cycleM2a_hotpath_roundtrip`)이 별도로 지킨다(cycle273a r2 MEDIUM).
 
-        WHERE ticker AND trade_type AND status = 'PENDING' AND strategy
-        (기본 = PENDING 단독). cycle273a `match_partial=True` 는 PENDING∪PARTIAL 을
-        함께 잡는다 — 이 거울이 현행 그대로면 "초록인 채로 낡은 계약을 검증" 하게 된다.
+        WHERE ticker AND trade_type AND status = 'PENDING' AND strategy [AND order_no]
+        (기본 = PENDING 단독, order_no 미전달 시 무시). cycle273a `match_partial=True`
+        는 PENDING∪PARTIAL 을 함께 잡는다. cycle273b F-1 — `order_no` 를 전달하면
+        그 주문 한 건으로 좁힌다(이 거울이 현행 그대로면 "초록인 채로 낡은 계약을
+        검증" 하게 된다).
         """
         allowed = {TradeStatus.PENDING.value}
         if match_partial:
@@ -116,6 +119,7 @@ class FakeTradeHistory:
                 and r["trade_type"] == trade_type.value
                 and r["status"] in allowed
                 and r["strategy"] == strategy
+                and (order_no is None or r["order_no"] == order_no)
             ):
                 r["status"] = status.value
                 if price is not None:
@@ -255,12 +259,12 @@ def make_env(monkeypatch):
     async def fake_update_trade_status(ticker, trade_type, status, strategy=None,
                                        price=None, profit_loss=None,
                                        *, order_no=None, match_partial=False):
-        # cycle273a — 실 시그니처가 keyword-only match_partial 을 받으므로(order_no 는
-        # cycle273b 대비 선반영) 이 fake 도 받아야 한다 — 안 받으면 TypeError.
+        # cycle273a — 실 시그니처가 keyword-only match_partial 을 받으므로 이 fake 도
+        # 받아야 한다 — 안 받으면 TypeError. cycle273b — order_no 도 거울에 전달한다.
         if state.update_status_forced is not None:
             return state.update_status_forced
         return db.update_status(ticker, trade_type, status, strategy, price,
-                                 match_partial=match_partial)
+                                 order_no=order_no, match_partial=match_partial)
 
     async def fake_force_update(order_no, trade_type, status, price=None,
                                profit_loss=None):
@@ -658,3 +662,40 @@ async def test_b_1_when_partial_fill_during_insert_then_no_exception_and_single_
     order_no = env.injector.fired_order_no
     rows = env.db.rows_for(TICKER, order_no, TradeType.BUY)
     assert len(rows) == 1
+
+
+# ---------------------------------------------------------------------------
+# cycle273b 직전 검증 LOW#4 — FakeTradeHistory 거울이 order_no 를 실제로 반영하는지
+# ---------------------------------------------------------------------------
+def test_cycle273b_fake_mirror_order_no_narrows_update(env):
+    """`FakeTradeHistory.update_status` 의 `order_no` 거울이 살아 있는지.
+
+    뮤테이션 M8(추가된 거울 한 줄 `and (order_no is None or r["order_no"] == order_no)`
+    을 되돌림)이 이 파일의 93건 전부를 통과시켰다 — 이 fake 를 쓰는 어떤 기존
+    테스트도 order_no 로 행이 갈리는 상황을 만들지 않았기 때문이다. 같은
+    ticker·strategy 의 PENDING 2행(다른 order_no)을 직접 심고 한쪽만 지정해
+    갱신한다 — 거울이 낡으면(order_no 를 무시하면) 두 행 모두 COMPLETED 로 갱신돼
+    이 단언이 붉어진다.
+    """
+    env.db.rows.append({
+        "ticker": TICKER, "order_no": "M-1", "trade_type": TradeType.BUY.value,
+        "status": TradeStatus.PENDING.value, "price": float(PRICE),
+        "quantity": 3, "strategy": "momentum",
+    })
+    env.db.rows.append({
+        "ticker": TICKER, "order_no": "M-2", "trade_type": TradeType.BUY.value,
+        "status": TradeStatus.PENDING.value, "price": float(PRICE),
+        "quantity": 3, "strategy": "momentum",
+    })
+
+    affected = env.db.update_status(
+        TICKER, TradeType.BUY, TradeStatus.COMPLETED, "momentum", PRICE,
+        order_no="M-1",
+    )
+
+    assert affected == 1
+    assert env.db.rows_for(TICKER, "M-1", TradeType.BUY)[0]["status"] == TradeStatus.COMPLETED.value
+    assert env.db.rows_for(TICKER, "M-2", TradeType.BUY)[0]["status"] == TradeStatus.PENDING.value, (
+        "다른 주문(M-2) 이 함께 갱신됐다 — FakeTradeHistory.update_status 의 order_no "
+        "거울이 낡았다(실 WHERE 의 order_no 절과 더 이상 같은 것을 검증하지 못한다)"
+    )

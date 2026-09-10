@@ -1283,7 +1283,7 @@ class OrderEngine:
             try:
                 affected = await update_trade_status(
                     ticker, TradeType.BUY, TradeStatus.COMPLETED,
-                    strategy=strategy_id, price=price, match_partial=True,
+                    strategy=strategy_id, price=price, order_no=order_no, match_partial=True,
                 )
             except Exception as exc:
                 logger.error(
@@ -1379,7 +1379,7 @@ class OrderEngine:
             # 사이클 161 (2026-06-17): `price=price` 인자 명시 — 부분 체결 시점 체결단가 정합.
             await update_trade_status(
                 ticker, TradeType.BUY, TradeStatus.PARTIAL,
-                strategy=strategy_id, price=price,
+                strategy=strategy_id, price=price, order_no=order_no,
             )
             self._schedule_cancel(ticker, order_no, ordered_qty, strategy_id)
             logger.info("매수 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)
@@ -1466,7 +1466,8 @@ class OrderEngine:
             # 행도 이 1차 UPDATE 로 직접 잡는다(매수 축과 동일 계약, §3.2).
             affected = await update_trade_status(
                 ticker, TradeType.SELL, TradeStatus.COMPLETED,
-                strategy=strategy_id, price=price, profit_loss=profit_loss, match_partial=True,
+                strategy=strategy_id, price=price, profit_loss=profit_loss,
+                order_no=order_no, match_partial=True,
             )
             if affected == 0:
                 # 체결통보가 execute_sell의 insert_trade(PENDING)보다 먼저 도착한 race
@@ -1526,7 +1527,7 @@ class OrderEngine:
             await self._unsubscribe_if_no_other_strategy(ticker)
         else:
             # 부분 체결 → PARTIAL, 30초 후 잔여 취소 + 손절 시 재주문
-            await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss)
+            await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss, order_no=order_no)
             remaining = ordered_qty - total_filled
             self._schedule_cancel_and_reorder(ticker, order_no, remaining, is_stop_loss=True)
             logger.info("매도 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)
@@ -1540,7 +1541,7 @@ class OrderEngine:
             try:
                 await asyncio.sleep(PARTIAL_FILL_WAIT)
                 await cancel_order(order_no, 0, cancel_all=True, exchange=self._strategy_exchange(strategy_id))
-                await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id)
+                await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
                 logger.info("부분 체결 잔여 취소: %s (주문번호: %s)", t(ticker), order_no)
             except asyncio.CancelledError:
                 pass  # 새 task로 교체됨 — pop은 새 task가 관리
@@ -1568,7 +1569,7 @@ class OrderEngine:
                 strategy_id = self._order_strategy.get(order_no, "momentum")
                 ex = self._strategy_exchange(strategy_id)
                 await cancel_order(order_no, 0, cancel_all=True, exchange=ex)
-                await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id)
+                await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
                 logger.info("매도 잔여 취소: %s %d주", t(ticker), remaining)
 
                 if is_stop_loss and remaining > 0:

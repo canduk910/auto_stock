@@ -463,8 +463,11 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     # 🔁 2026-09-10 (cycle273a) — D2(가) C235-V2: 잔여취소 타이머 해제(order_no 게이트) +
     #    update_trade_status match_partial opt-in(COMPLETED 2곳). 명세
     #    `_workspace/red/cycle273a_c235v2_cancel_timer_and_partial_spec.md`.
-    # TODO(cycle273a 커밋 후): 아래 항목을 비운다.
-    "src/engine/order_engine.py": "9b85f049cba676068db6c3c208302b72867d735d8fa486720cd6445bce17076e",
+    # 🔁 2026-09-11 (cycle273b I3) — D2(다) F-1/F-2: update_trade_status 호출 6곳(C1~C6)
+    #    전부에 order_no= 추가(WHERE 좁히기만, 무행위). 명세
+    #    `_workspace/red/cycle273b_philoptics_no_behavior_3_spec.md`.
+    # TODO(cycle273b 커밋 후): 아래 항목을 비운다.
+    "src/engine/order_engine.py": "a7967892f7baba40dc66d634fc2ae326cd0df69773269de0dbace547edad2ad8",
 }
 
 

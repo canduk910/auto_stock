@@ -4,8 +4,8 @@
 
 | # | 가드 | 지키는 것 | HEAD |
 |---|---|---|---|
-| G-273b-AST1 | `order_engine.py` 의 `update_trade_status` 호출 **전부**가 `order_no=` 를 넘긴다 | F-1/F-2 스코프(6곳, C5/C6 포함) | **RED** |
-| G-273b-AST2 | `[trade_status_multi_update]` 는 `src/db/trade_history.py` **한 곳**에만 있고 `logger.warning` 으로 낸다 | 8영역 diff 축소 + 단일 진실원 | **RED** |
+| G-273b-AST1 | `order_engine.py` 의 `update_trade_status` 호출 **전부**가 `order_no=` 를 넘긴다 | F-1/F-2 스코프(6곳, C5/C6 포함) | GREEN(I3) |
+| G-273b-AST2 | `[trade_status_multi_update]` 는 `src/db/trade_history.py` **한 곳**에만 있고 `logger.warning` 으로 낸다 | 8영역 diff 축소 + 단일 진실원 | GREEN(I3) |
 | G-273b-AST3 | leaf `src/engine/selling_reconcile.py` 존재 + `[selling_hold]` 를 `logger.warning` 으로 낸다 | F-7 | **RED** |
 | G-273b-AST4 | scheduler 의 `_selling` 인라인 3분기 소멸(`open_sell_tickers` 토큰 0건) + leaf 호출 존재 | 위임 실증 | **RED** |
 | G-273b-AST5 | `scheduler.py` < 3,900L | cycle257 영구 상한 자매 | GREEN(3,898) |
@@ -87,9 +87,8 @@ def _marker_log_calls(tree: ast.AST, marker: str) -> list[tuple[str, int]]:
 # ---------------------------------------------------------------------------
 # G-273b-AST1 — order_no 는 6곳 전부
 # ---------------------------------------------------------------------------
-@pytest.mark.skip(reason="cycle273b I3(F-1/F-2 order_no · F-3 multi_update 관측) Green 에서 활성 — I1(F-7) 시점 HEAD 는 RED 예정, 워크리스트 등재")
 def test_g273b_ast1_all_update_calls_pass_order_no():
-    """RED (HEAD) — 0/6.
+    """GREEN(I3) — 6/6. I1(F-7) 시점 HEAD 는 0/6 이었다(워크리스트 등재).
 
     정본 F-2 문면은 C1·C3 두 곳이지만 코드 근거는 **6곳 전부**다. 특히 C5/C6
     (`_cancel_after_wait`·`_cancel_and_reorder` 의 CANCELLED)가 가장 위험하다 —
@@ -97,6 +96,13 @@ def test_g273b_ast1_all_update_calls_pass_order_no():
     을 CANCELLED 로 뒤집으면, B 의 체결통보는 1차 UPDATE 0 → 보정 INSERT
     UniqueViolation → 강제 UPDATE(PENDING∪PARTIAL)도 CANCELLED 를 못 집는다
     ⇒ B 행이 **영구 CANCELLED** = 정산·sync 양쪽 소실(UA §6.1).
+
+    ⚠️ 직전 검증 HIGH#1 — 종전 매처는 `k.arg == "order_no"` 로 **키워드 이름의
+    존재만** 검사하고 **바인딩된 값**은 보지 않았다. `order_no=ticker` 처럼 엉뚱한
+    변수를 넘겨도(그 자리는 항상 ticker 자신으로 WHERE 를 좁히니 실질적으로
+    "order_no 없음"과 동형인 결함) 이 가드는 그냥 통과시켰다 — 뮤테이션 M12
+    ESCAPED 로 실측 확인. 그래서 **지역 변수 `order_no` 를 그대로 넘겼는지**까지
+    고정한다.
     """
     tree = ast.parse(_ORDER_ENGINE.read_text(encoding="utf-8"))
     calls = _calls_named(tree, "update_trade_status")
@@ -104,20 +110,24 @@ def test_g273b_ast1_all_update_calls_pass_order_no():
 
     missing = [
         c.lineno for c in calls
-        if not any(k.arg == "order_no" for k in c.keywords)
+        if not any(
+            k.arg == "order_no" and isinstance(k.value, ast.Name) and k.value.id == "order_no"
+            for k in c.keywords
+        )
     ]
     assert missing == [], (
-        f"order_engine.py 의 update_trade_status 호출 중 order_no 미전달: 줄 {missing} "
-        f"(WHERE 를 좁히기만 하므로 무행위 — 빠뜨리면 그 자리만 161580 결함이 남는다)"
+        f"order_engine.py 의 update_trade_status 호출 중 order_no 를 지역 변수 order_no "
+        f"그대로 넘기지 않은 지점: 줄 {missing} — 키워드 이름만이 아니라 지역 변수 "
+        f"order_no 를 그대로 넘겨야 한다(WHERE 를 좁히기만 하므로 무행위 — 빠뜨리거나 "
+        f"엉뚱한 변수를 넘기면 그 자리만 161580 결함이 남는다)"
     )
 
 
 # ---------------------------------------------------------------------------
 # G-273b-AST2 — F-3 관측은 db 한 곳 · WARNING
 # ---------------------------------------------------------------------------
-@pytest.mark.skip(reason="cycle273b I3(F-1/F-2 order_no · F-3 multi_update 관측) Green 에서 활성 — I1(F-7) 시점 HEAD 는 RED 예정, 워크리스트 등재")
 def test_g273b_ast2_multi_update_marker_single_site_warning():
-    """RED (HEAD) — 마커 자체가 없다.
+    """GREEN(I3) — 마커가 `trade_history.update_trade_status` 한 곳에만 있다.
 
     관측을 `trade_history.update_trade_status` 안에 두면 (a) C1~C6 **여섯 곳 전부**를
     덮고 (b) `order_engine.py`(8영역) diff 가 늘지 않는다(cycle258 leaf 관례와 동형).
