@@ -241,6 +241,7 @@ purge(`_evaluate_universe_guard` 계열)는 보유·익일청산 종목을 이�
 - 전량 체결 분기: `update_trade_status(BUY, COMPLETED, strategy=strategy_id, price=price)` — `price` 인자 명시
 - 보정 INSERT UniqueViolation 영역: `try/except Exception` + `_update_trade_status_by_order_no(price=price)` 강제 UPDATE (사이클 147 `_handle_sell_fill` 패턴 답습)
 - 부분 체결 분기: `update_trade_status(BUY, PARTIAL, strategy=strategy_id, price=price)` — `price` 인자 명시
+- **cycle273a/273b(2026-09-10) 이후** 위 호출부(C1~C6 여섯 곳)는 전부 `order_no=order_no` 를 함께 넘겨 WHERE 를 그 주문 행으로 좁히고, 전량 체결 분기 2곳은 `match_partial=True` 로 PARTIAL 행까지 포괄한다(AST1/AST2 가 강제)
 
 ### 영속 의무 매트릭스
 

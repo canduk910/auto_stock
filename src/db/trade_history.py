@@ -180,7 +180,8 @@ async def update_trade_status(
                  ticker, trade_type.value, status.value, strategy, affected, match_partial)
     if affected > 1:
         # cycle273b F-3 — 한 UPDATE 가 다중 행을 덮었다(필옵틱스 161580 계열).
-        # WARNING 이상만 `system_logs` 에 도달한다(`_DbLogHandler` INFO 컷).
+        # `_DbLogHandler`(INFO 이상)가 `system_logs` 로 적재한다 — DEBUG 는 도달하지 않으므로
+        # 기존 `logger.debug` 로는 무증거였다(D-3). WARNING 은 결함 신호라 레벨을 올려 잡는다(AST2 가 강제).
         logger.warning(
             "[trade_status_multi_update] ticker=%s trade_type=%s status=%s strategy=%s "
             "order_no=%s affected=%d — 한 주문의 체결이 다중 행을 덮었다",

@@ -6,10 +6,10 @@
 |---|---|---|---|
 | G-273b-AST1 | `order_engine.py` 의 `update_trade_status` 호출 **전부**가 `order_no=` 를 넘긴다 | F-1/F-2 스코프(6곳, C5/C6 포함) | GREEN(I3) |
 | G-273b-AST2 | `[trade_status_multi_update]` 는 `src/db/trade_history.py` **한 곳**에만 있고 `logger.warning` 으로 낸다 | 8영역 diff 축소 + 단일 진실원 | GREEN(I3) |
-| G-273b-AST3 | leaf `src/engine/selling_reconcile.py` 존재 + `[selling_hold]` 를 `logger.warning` 으로 낸다 | F-7 | **RED** |
-| G-273b-AST4 | scheduler 의 `_selling` 인라인 3분기 소멸(`open_sell_tickers` 토큰 0건) + leaf 호출 존재 | 위임 실증 | **RED** |
-| G-273b-AST5 | `scheduler.py` < 3,900L | cycle257 영구 상한 자매 | GREEN(3,898) |
-| G-273b-AST6 | leaf 가 `KstDailyEmitCap` 과 `trace_observer_failure` 를 쓴다 | cycle258 관측 배관 표준 | **RED** |
+| G-273b-AST3 | leaf `src/engine/selling_reconcile.py` 존재 + `[selling_hold]` 를 `logger.warning` 으로 낸다 | F-7 | GREEN(I1 a60f43e) |
+| G-273b-AST4 | scheduler 의 `_selling` 인라인 3분기 소멸(`open_sell_tickers` 토큰 0건) + leaf 호출 존재 | 위임 실증 | GREEN(I1 a60f43e) |
+| G-273b-AST5 | `scheduler.py` < 3,900L | cycle257 영구 상한 자매 | GREEN(3,872 — 병합 133d6bc) |
+| G-273b-AST6 | leaf 가 `KstDailyEmitCap` 과 `trace_observer_failure` 를 쓴다 | cycle258 관측 배관 표준 | GREEN(I1 a60f43e) |
 
 ## 규약
 `ast.dump` sha 핀 금지(3.12 CI ↔ 3.13 로컬) · `git grep`/`git ls-files` 금지
