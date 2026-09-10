@@ -18,7 +18,7 @@
 - C6  활성 계정 0건 = 발급 0회.
 - C7  계정별 로그 emit 실패가 발급 cascade 를 끊지 않는다.
 - C8  `task_loop` 는 `run_periodic_task_loop` 에 정확한 계약으로 위임한다
-      (immediate_first_run=False · wait_time=21:30(cycle270-B, 종전 15:45) · once_callable 동일성).
+      (immediate_first_run=False · wait_time=19:00(cycle270-C; 이력 15:45→21:30 무발화→19:00) · once_callable 동일성).
 - C9  시각 불변식 — T 와 T−10분(자연 재발급 문턱)이 **모두** KRX 마감 이후,
       그리고 20:00~20:15(자문/정산 금기 창) 밖.
 """
@@ -264,7 +264,7 @@ async def test_c8_task_loop_delegates_with_expected_contract(monkeypatch):
 
     await mod.task_loop(_Sched())
 
-    assert captured["wait_time"] == mod.TIME_QUOTE_TOKEN_REFRESH == time(21, 30)
+    assert captured["wait_time"] == mod.TIME_QUOTE_TOKEN_REFRESH == time(19, 0)
     assert captured["once_callable"] is mod.refresh_quote_tokens_once
     assert captured["immediate_first_run"] is False, (
         "부팅 즉시 실행하면 부팅 시각이 새 앵커가 되어 '고정 장외 시각' 설계가 무너진다"
@@ -304,13 +304,14 @@ def test_c9_schedule_time_invariants():
     assert threshold > close_dt, (
         f"T−10분 문턱({threshold.time()})이 KRX 마감 이전이면 자연 재발급이 장중에 난다"
     )
-    # cycle270-B(2026-09-10 사용자 결정 15:45 → 21:30): 16:00 적재 앞에 끝내야 한다는
-    # 종전 제약은 소멸. 대신 T−10분 문턱 ~ T+8분(7계정 × 61초 직렬화) 창이
-    # 20:00 자문 / 20:00:05 유니버스 / 20:10 정산 창(CLAUDE.md 금기 20:00~20:15)
-    # 과 그 밖의 scheduler 예정 시각 어느 것과도 겹치지 않아야 한다.
-    assert not (TIME_RECOMMENDATION <= T <= time(TIME_SETTLEMENT.hour, 15))
-    assert threshold.time() > time(TIME_SETTLEMENT.hour, 15), (
-        "문턱이 20:00~20:15 안이면 자연 재발급이 자문·정산의 REST 와 다툰다"
+    # cycle270-C(2026-09-10): T 는 **스케줄러 루프 생존 창 안**이어야 한다 —
+    # scheduler.start() 는 TIME_SETTLEMENT(20:10) 정산 뒤 finally 에서 백그라운드
+    # task 를 전부 cancel 하므로 그 뒤 시각은 매일 0회 발화한다(cycle270-B 21:30 실패 원인).
+    # 종전 단언 `threshold > 20:15` 는 T 를 루프 사망 뒤로 밀어내도록 강제하던 결함이라 삭제.
+    assert T < TIME_SETTLEMENT, "루프 사망(20:10) 뒤 시각은 매일 0회 발화한다"
+    # T+8분(7계정 × 61초 직렬화)이 20:00 자문/유니버스/NXT 종료 REST 집중 창 앞에 끝나야 한다
+    assert (t_dt + timedelta(minutes=8)).time() < TIME_RECOMMENDATION, (
+        "직렬화 창이 20:00 REST 집중 창을 침범한다"
     )
     import src.engine.scheduler as _sched
     window_lo, window_hi = threshold.time(), (t_dt + timedelta(minutes=8)).time()
@@ -320,3 +321,27 @@ def test_c9_schedule_time_invariants():
     )
     assert collisions == [], f"강제 재발급 창 {window_lo}~{window_hi} 와 겹치는 예정 작업: {collisions}"
     assert TIME_STOCK_MASTER_DAILY_LOAD < T, "일봉 적재보다 뒤여야 16:00 적재를 침범하지 않는다"
+
+
+def test_c10_periodic_wait_times_must_be_inside_the_loop_lifetime():
+    """C10(영속 가드, cycle270-C) — 주기 루프 `wait_time` 은 전부 `TIME_SETTLEMENT` 이전.
+
+    `run_periodic_task_loop` 는 `while scheduler._running` 안에서 잠들고, `start()` 의
+    finally 가 20:10 정산 뒤 task 를 cancel 한다. 그 뒤 시각은 매일 0회 발화한다.
+    이 계열("루프 밖 시각")은 일봉 적재 23:00/05:00 안이 같은 이유로 기각됐고,
+    cycle270-B(21:30)가 두 번째 재발이었다 — 세 번째를 막는다.
+    """
+    from src.engine import scheduler as sched
+    from src.engine.quote_token_refresh import TIME_QUOTE_TOKEN_REFRESH
+
+    periodic = {
+        "TIME_STOCK_MASTER_DAILY_LOAD": sched.TIME_STOCK_MASTER_DAILY_LOAD,
+        "TIME_STOCK_MASTER_BASICS_REFRESH": sched.TIME_STOCK_MASTER_BASICS_REFRESH,
+        "TIME_STOCK_MASTER_MASTER_LOAD": sched.TIME_STOCK_MASTER_MASTER_LOAD,
+        "TIME_STOCK_MASTER_FINANCIAL_LOAD": sched.TIME_STOCK_MASTER_FINANCIAL_LOAD,
+        "TIME_STOCK_MASTER_DAILY_PURGE": sched.TIME_STOCK_MASTER_DAILY_PURGE,
+        "TIME_FULL_UNIVERSE_LOAD": sched.TIME_FULL_UNIVERSE_LOAD,
+        "TIME_QUOTE_TOKEN_REFRESH": TIME_QUOTE_TOKEN_REFRESH,
+    }
+    dead = {k: v for k, v in periodic.items() if v >= sched.TIME_SETTLEMENT}
+    assert not dead, f"루프 사망({sched.TIME_SETTLEMENT}) 뒤 시각 — 매일 0회 발화한다: {dead}"

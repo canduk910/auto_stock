@@ -54,7 +54,7 @@ MARKER = "[quote_token_refresh]"
 
 # 09-10 실측 서식 그대로 — 장중 자연 재발급이 남긴 만료(= 옮겨지지 않은 앵커).
 _NATURAL_EXPIRY = datetime(2026, 9, 11, 14, 34, 38)
-# 강제 재발급이 실행되는 시각(당시 15:45 KST — 09-10 밤 cycle270-B 로 21:30 이동, 이 픽스처는
+# 강제 재발급이 실행되는 시각(당시 15:45 KST — 09-10 밤 cycle270-B 21:30(루프 밖 무발화) → cycle270-C 19:00 이동, 이 픽스처는
 # 만료 산술만 검증하므로 값은 그대로 둔다)과 그때 KIS 가 줘야 할 새 만료.
 _REFRESH_AT = datetime(2026, 9, 10, 15, 45, 0)
 _NEW_EXPIRY = _REFRESH_AT + timedelta(hours=24)
