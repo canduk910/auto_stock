@@ -34,7 +34,10 @@
 ## 서식 (필드 **순서 고정** — 이후 사이클에서도 이름·순서를 바꾸지 않는다)
 
     [kojiro_gap_observe] ticker= verdict= caller= ws_cmp= arg_open= ws_open= prev_close=
-                         gap_rate= ws_gap= ws_verdict= cur= gap_up= gap_down=
+                         gap_rate= ws_gap= ws_verdict= cur= gap_up= gap_down= ws_collapse=
+
+cycle273-pre 가 `ws_collapse=`(붕괴 가드 반사실)를 **끝에 추가**했다 — 이 13필드의
+이름·순서는 여전히 byte 불변이고, `FIELD_ORDER` 아래에 14번째 원소로만 반영한다.
 
 ## 왜 `caller` 를 문자열로 주입하지 않는가
 
@@ -58,9 +61,10 @@ KST = timezone(timedelta(hours=9))
 MARKER = "[kojiro_gap_observe]"
 
 # 명세 §2.1 표 순서 그대로 — 이 튜플이 서식 계약의 정본이다.
+# cycle273-pre — `ws_collapse` 를 끝에 추가(기존 13개는 byte 불변).
 FIELD_ORDER = (
     "ticker", "verdict", "caller", "ws_cmp", "arg_open", "ws_open", "prev_close",
-    "gap_rate", "ws_gap", "ws_verdict", "cur", "gap_up", "gap_down",
+    "gap_rate", "ws_gap", "ws_verdict", "cur", "gap_up", "gap_down", "ws_collapse",
 )
 
 VERDICTS = ("candidate", "no_data", "skip_up", "skip_down", "collapse", "pass")
@@ -147,7 +151,7 @@ def call(observe, *, ticker=T_131290, verdict="pass", arg_open=10050,
 # 1. 서식 — 마커 · 필드 순서 · 레벨
 # ===========================================================================
 def test_marker_prefix_and_field_order_are_fixed(observe, ws_cache, caplog):
-    """§2.1 — 마커 접두 + 13개 필드가 **명세 순서 그대로** 나온다."""
+    """§2.1 — 마커 접두 + 필드가 `FIELD_ORDER` 순서 그대로 나온다(cycle273-pre 이후 14개)."""
     with caplog.at_level(logging.INFO):
         call(observe)
     got = rows(caplog)

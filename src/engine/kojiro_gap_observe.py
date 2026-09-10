@@ -18,6 +18,19 @@
 임계로 반사실 재판정(`ws_verdict`)까지 계산한다 — grep 한 번으로 "깨끗한 경로는 걸렀는데
 오염 경로였으면 놓쳤을 종목" 이 드러난다.
 
+cycle273-pre(자문 cycle273_kojiro_gap_gate_20260910.md §3.4(다)) — `ws_verdict` 는
+**갭 게이트만**(붕괴 가드 제외) 재현하므로, 판독에서 실제로 뒤집힌 유일한 관문인
+붕괴 가드(`kojiro.py:891`)는 관측 밖이었다. `ws_collapse` 가 그 직교 반사실을 같은
+행에 마저 남긴다 — "WS 값이었으면 붕괴 가드에 걸렸을지"(`blocked`/`allowed`/`-`).
+
+⚠️ **경로 B(`caller=on_tick`) 행에서는 이 필드도 동어반복이다** — `risk.on_tick`
+이 `check_buy_signal` **전에** `ticker_prices[t]["open_price"]` 를 그 틱의
+`open_price` 로 덮으므로(`risk.py:495`) 경로 B 행은 항상 `ws_open ≡ arg_open` 이고,
+`ws_collapse` 는 **실제 붕괴 판정과 구조적으로 항상 일치**한다(기존 `ws_cmp`/
+`ws_gap`/`ws_verdict` 3필드와 같은 함정, cycle264 `used_src=rest → delta_bp=0`
+동형). **오염 판정에 쓸 수 있는 것은 `caller=_swing_buy_poll_loop`(경로 A) 행뿐**
+— 경로 B 오염 판정은 명세 §5 오프라인 조인만이 유일 경로다.
+
 ## leaf 계약 (cycle264 `open_price_observe.py` 선례)
 
 - **never-raise** — 본체 전체가 `try`/`except Exception` 하나. 실패는
@@ -116,6 +129,42 @@ def _verdict_for_gap(gap: "float | None", gap_up, gap_down) -> "str | None":
     return "pass"
 
 
+def _collapse_verdict_for_ws(ws_open, current_price) -> "str | None":
+    """`ws_open` 으로 **붕괴 가드만**(갭 게이트 제외) 재현한 판정 — `_verdict_for_gap`
+    의 반대짝(직교). 실 코드(`kojiro.py:891`)와 동일한 `open_price > 0 and
+    current_price < open_price` 를 `ws_open` 에 대해 재현한다. `ws_open` 부재/해석
+    불가는 `None`(= `-`) — WS 캐시가 없는 행에서 "붕괴 아님" 을 단정하면 안 된다.
+
+    자문 cycle273_kojiro_gap_gate_20260910.md §3.4(다) 는 필드명·재현식만 확정했고
+    (문면 = "WS 값이었으면 붕괴 가드에 걸렸을지" · 재현식 `ws_open>0 and
+    current_price<ws_open`), 값 토큰은 명시하지 않았다. `pass` 를 값으로 재사용하면
+    `verdict=pass`/`ws_verdict=pass` 와 값 레벨에서 섞여 앵커 없는 grep 이 더
+    모호해진다(§2.1 판독표가 이미 `verdict=`↔`ws_verdict=` 접두 함정을 경고).
+    `clear` 도 기각됐다 — 이 리포에서 `clear` 는 "청산"(`NEXT_DAY_CLEAR`/
+    `_execute_next_day_clear`/`_force_clear_main_only` 등)의 고정 의미라, 판독자가
+    "붕괴 가드에 안 걸렸다" 가 아니라 "청산했다" 로 **반대로** 읽는다(team-leader
+    kojiro-gap-observe 판정, 2026-09-10). ⇒ `blocked`/`allowed`/`-` 로 확정.
+
+    `ws_open<=0` 은 `None`(= `-`) — `_gap_rate` 가 `open_f == 0` 을 "산출 불가" 로
+    다루는 같은 파일 선례(L97-98)를 따른다. 실 코드의 불리언은 `open_price<=0`
+    이면 기계적으로 "붕괴 아님" 이 되지만, 그 값은 애초에 재무적으로 무의미한
+    시가라 `allowed` 로 찍으면 "붕괴 가드를 안전하게 통과했을 것" 이라는 **거짓
+    확신**을 준다 — 여기선 "재현 자체가 불가능하다" 는 `-` 가 더 정직하다.
+    """
+    if ws_open is None:
+        return None
+    try:
+        ws_open_f = float(ws_open)
+        cur_f = float(current_price)
+    except (TypeError, ValueError):
+        return None
+    if ws_open_f <= 0:
+        return None
+    if cur_f < ws_open_f:
+        return "blocked"
+    return "allowed"
+
+
 def _fmt(v) -> str:
     return "-" if v is None else str(v)
 
@@ -136,10 +185,20 @@ def observe_gap(
 ) -> None:
     """`[kojiro_gap_observe]` 1행 — cap 1회/(ticker,caller,verdict)/일. **never-raise.**
 
-    서식(필드 순서 고정)::
+    서식(기존 13필드 순서 고정 — cycle268 정본, 과거 로그 대조 유지)::
 
         [kojiro_gap_observe] ticker= verdict= caller= ws_cmp= arg_open= ws_open=
                              prev_close= gap_rate= ws_gap= ws_verdict= cur= gap_up= gap_down=
+
+    cycle273-pre — 붕괴 가드 반사실 `ws_collapse=`(`blocked`/`allowed`/`-`) 를
+    **끝에 추가**(기존 13필드는 byte 불변, cycle264 `truth_confirmed`/
+    `truth_total` 추가 선례와 동형)::
+
+        ... gap_down= ws_collapse=
+
+    ⚠️ `ws_collapse` 도 경로 B(`caller=on_tick`) 행에서는 **동어반복**이다 — 모듈
+    상단 docstring 경로 B 경고 참조. 오염 판정에 쓸 수 있는 것은 경로 A
+    (`caller=_swing_buy_poll_loop`) 행뿐이다.
     """
     try:
         try:
@@ -168,14 +227,17 @@ def observe_gap(
         gap_rate = _gap_rate(arg_open, prev_close)
         ws_gap = _gap_rate(ws_open, prev_close) if ws_open is not None else None
         ws_verdict = _verdict_for_gap(ws_gap, gap_up, gap_down)
+        ws_collapse = _collapse_verdict_for_ws(ws_open, current_price)
 
         logger.info(
             "%s ticker=%s verdict=%s caller=%s ws_cmp=%s arg_open=%s ws_open=%s "
-            "prev_close=%s gap_rate=%s ws_gap=%s ws_verdict=%s cur=%s gap_up=%s gap_down=%s",
+            "prev_close=%s gap_rate=%s ws_gap=%s ws_verdict=%s cur=%s gap_up=%s gap_down=%s "
+            "ws_collapse=%s",
             MARKER, ticker, verdict, caller, ws_cmp,
             _fmt(arg_open), _fmt(ws_open), _fmt(prev_close),
             _fmt_gap(gap_rate), _fmt_gap(ws_gap), _fmt(ws_verdict),
             _fmt(current_price), _fmt(gap_up), _fmt(gap_down),
+            _fmt(ws_collapse),
         )
         _cap.mark_emitted(key)
     except Exception:

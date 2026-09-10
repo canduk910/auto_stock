@@ -92,8 +92,40 @@ async def update_trade_status(
     strategy: str = "momentum",
     price: int | None = None,
     profit_loss: float | None = None,
+    *,
+    order_no: str | None = None,
+    match_partial: bool = False,
 ) -> int:
-    """최신 PENDING 거래 기록의 상태를 업데이트하고 영향받은 행 수를 반환한다."""
+    """`ticker`+`trade_type`+`strategy` 가 일치하는 진행 중 거래 기록의 상태를 갱신한다.
+
+    기본(`match_partial=False`)은 `status = 'PENDING'` 단일 비교 — SQL 은 이전과
+    **byte 동일**하다(`_cancel_after_wait`/`_cancel_and_reorder` 의 CANCELLED 호출은
+    절대 이 인자를 넘기지 않는다 — 넘기면 부분 체결 행이 취소로 뒤집힌다, §3.3).
+
+    `match_partial=True` 는 `status = ANY(...)` 로 PENDING∪PARTIAL 을 함께 잡는다
+    (cycle273a C235-V2-b) — 부분 체결로 이미 PARTIAL 이 된 행에 전량 체결의 1차
+    UPDATE 가 와도 `affected=0` 이 되어 보정 INSERT→UniqueViolation→강제 UPDATE
+    3단 우회를 타던 것을 닫는다. `_update_trade_status_by_order_no`(cycle235 N1-b)
+    와 같은 PENDING∪PARTIAL 패턴이며, **호출부가 명시적으로 opt-in** 해야만 넓어진다
+    — 기본을 넓히면 CANCELLED 호출까지 함께 넓어져 정산·sync 양쪽에서 부분 체결
+    사실이 소실된다(전역 확대 금지, §3.3). 같은 인자는 `AND timestamp >= (KST 오늘
+    00:00)` 하한도 함께 켠다 — WHERE 에 `order_no` 가 없어 같은 (ticker, trade_type,
+    strategy) 의 **다른 order_no** 가 남긴 좌초 PARTIAL 행까지 잡힐 수 있는데(직전
+    검증 HIGH#1), 그 노출을 최소한 "오늘" 로는 좁힌다. 단, C1~C6 여섯 호출부가
+    모두 order_no 를 넘기므로 이 하한은 order_no 미전달 경로(수기 행 등)에만
+    실효가 있다 — C1~C6 는 order_no 자체가 WHERE 를 주문 한 건으로 좁혀 이
+    하한을 이중 방어로 격하시킨다.
+
+    `order_no`(cycle273b F-1/F-2, 필옵틱스 161580 사건 시정) 는 **keyword-only,
+    기본 None** — 전달하면 WHERE 에 `AND order_no = $n` 이 추가되어 같은
+    (ticker, trade_type, strategy) 의 **다른 주문 행**을 더 이상 함께 덮지 않는다.
+    미전달 시 SQL 은 이전과 **byte 동일**(좁히기만 하는 opt-in, 전역 확대 아님).
+    `affected > 1` 이면 `[trade_status_multi_update]` WARNING 1행을 낸다 — F-1 과
+    같은 커밋에서는 부분 UNIQUE 인덱스 `(ticker, order_no, trade_type)` 때문에
+    비어 있지 않은 `order_no` 에 대해 구조적으로 발화 불가능해지므로, 과거를 재는
+    측정기가 아니라 **WHERE·인덱스 후퇴를 잡는 영구 회귀 감시자**다(수기 입력
+    `order_no=""` 행에는 여전히 유효).
+    """
     set_clauses = ["status = $1"]
     args: list = [status.value]
 
@@ -104,22 +136,56 @@ async def update_trade_status(
         args.append(float(profit_loss))
         set_clauses.append(f"profit_loss = ${len(args)}")
 
-    args.extend([ticker, trade_type.value, TradeStatus.PENDING.value, strategy])
+    status_filter = (
+        [TradeStatus.PENDING.value, TradeStatus.PARTIAL.value]
+        if match_partial
+        else TradeStatus.PENDING.value
+    )
+    args.extend([ticker, trade_type.value, status_filter, strategy])
     ticker_idx = len(args) - 3
     type_idx = len(args) - 2
-    pending_idx = len(args) - 1
+    status_idx = len(args) - 1
     strategy_idx = len(args)
 
+    status_clause = (
+        f"status = ANY(${status_idx}::text[])" if match_partial else f"status = ${status_idx}"
+    )
+    # cycle273a 회귀가드(직전 검증 HIGH#1) — match_partial=True 의 WHERE 는 여전히
+    # ticker+trade_type+strategy+status 뿐이라, 같은 조합의 **다른 order_no** 가 남긴
+    # 좌초 PARTIAL 행까지 오늘 전량 체결의 COMPLETED UPDATE 가 함께 덮어쓸 수 있다.
+    # order_no 자체를 WHERE 에 넣는 것은 cycle273b F-1 범위(이번 사이클 밖) — 이
+    # 사이클은 KST 당일 하한으로 노출을 좁힌다: 어제 이전에 좌초된 행은 이 UPDATE
+    # 대상에서 제외된다(명세 Open Q O-A1, 회귀 테스트 = test_b1d/test_b2d).
+    date_clause = ""
+    if match_partial:
+        # TIMESTAMPTZ 파라미터는 datetime 객체로 바인딩(모듈 관례 :358 등 — str 이면 asyncpg
+        # DataError, cycle273a 검증 r2 HIGH#1 / 사이클 M6 DATE str 바인딩 사고와 같은 계열)
+        args.append(datetime.fromisoformat(_today_kst_iso()))
+        date_clause = f" AND timestamp >= ${len(args)}"
+    # cycle273b F-1/F-2 — order_no 가 오면 WHERE 를 그 주문 한 건으로 좁힌다.
+    # 미전달(None) 이면 이 절이 붙지 않아 SQL 이 이전과 byte 동일하다(opt-in, 전역 확대 아님).
+    order_no_clause = ""
+    if order_no is not None:
+        args.append(order_no)
+        order_no_clause = f" AND order_no = ${len(args)}"
     sql = (
         f"UPDATE trade_history SET {', '.join(set_clauses)} "
         f"WHERE ticker = ${ticker_idx} AND trade_type = ${type_idx} "
-        f"AND status = ${pending_idx} AND strategy = ${strategy_idx}"
+        f"AND {status_clause} AND strategy = ${strategy_idx}{date_clause}{order_no_clause}"
     )
 
     result = await pg.execute(sql, *args)
     affected = _parse_affected(result)
-    logger.debug("거래 상태 변경: %s %s -> %s (전략: %s, %d건)",
-                 ticker, trade_type.value, status.value, strategy, affected)
+    logger.debug("거래 상태 변경: %s %s -> %s (전략: %s, %d건, match_partial=%s)",
+                 ticker, trade_type.value, status.value, strategy, affected, match_partial)
+    if affected > 1:
+        # cycle273b F-3 — 한 UPDATE 가 다중 행을 덮었다(필옵틱스 161580 계열).
+        # WARNING 이상만 `system_logs` 에 도달한다(`_DbLogHandler` INFO 컷).
+        logger.warning(
+            "[trade_status_multi_update] ticker=%s trade_type=%s status=%s strategy=%s "
+            "order_no=%s affected=%d — 한 주문의 체결이 다중 행을 덮었다",
+            ticker, trade_type.value, status.value, strategy, order_no or "-", affected,
+        )
     return affected
 
 

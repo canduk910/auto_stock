@@ -63,10 +63,13 @@
 ```
 [kojiro_gap_observe] ticker=131290 verdict=skip_up caller=_swing_buy_poll_loop ws_cmp=ws_ne \
  arg_open=252500 ws_open=236500 prev_close=236500 gap_rate=6.77 ws_gap=0.00 ws_verdict=pass \
- cur=253000 gap_up=5.0 gap_down=-4.0
+ cur=253000 gap_up=5.0 gap_down=-4.0 ws_collapse=allowed
 ```
 
-(실제로는 한 줄. 필드 **순서 고정** — 과거 로그 대조 가능성을 위해 이후 사이클에서도 순서·이름을 바꾸지 않는다.)
+(실제로는 한 줄. 필드 **순서 고정** — 과거 로그 대조 가능성을 위해 이후 사이클에서도 순서·이름을 바꾸지 않는다.
+`ws_collapse` 는 cycle273-pre 추가분 — 앞 13필드는 byte 불변, 순수 append 만이다. 위 예시는
+`verdict=skip_up`(갭업 스킵이라 붕괴 가드까지 가지 않는 행)이지만 `observe_gap` 은 verdict 와 무관하게
+`ws_collapse` 를 항상 계산해 싣는다.)
 
 | 필드 | 값 | 비고 |
 |---|---|---|
@@ -82,6 +85,7 @@
 | `ws_verdict` | `ws_gap` 을 **같은 임계**로 판정한 결과 `skip_up`/`skip_down`/`pass`. 불가 `-` | **갭 게이트만** 재현(붕괴 가드 제외) — 명세에 명시 |
 | `cur` | `current_price` | 붕괴 가드 사후 재구성용 |
 | `gap_up` / `gap_down` | 그 순간 **실제 적용된** 파라미터 | PUT 로 장중 변경 가능하므로 값을 함께 남긴다 |
+| `ws_collapse` | `ws_open` 이었으면 붕괴 가드(`current_price < open_price`)에 걸렸을지 — `blocked`(걸림) \| `allowed`(안 걸림) \| `-`(산출 불가: `ws_open` 부재·0·음수). **갭 게이트와 직교** — `ws_verdict` 와 접어 넣지 않는다 | `clear` 는 **쓰지 않는다** — 이 리포에서 `clear` 는 "청산"이다(`NEXT_DAY_CLEAR`·`_pending_next_day_clear`·`_execute_next_day_clear`·`_force_clear_main_only` 외 2). 판정 로그가 그 낱말을 다른 뜻으로 쓰면 사람이 반대로 읽는다. cycle273-pre 추가(자문 §3.4(다)), 앞 13행은 순서 고정 그대로 — 이 행은 **꼬리 append** |
 
 ### 2.2 `verdict` 6종과 발화 위치 (kojiro.py 삽입 지점 6곳)
 
@@ -167,9 +171,11 @@ FROM t JOIN stock_master_daily d
 
 판독 시 **반드시** 지킬 것:
 
-- 🔴 **경로 B(`caller=on_tick`) 행의 `ws_*` 4필드로는 오염을 판정할 수 없다** — `risk.py:495` 가 인자와 **같은 값**을
+- 🔴 **경로 B(`caller=on_tick`) 행의 `ws_*` 5필드(`ws_cmp`/`ws_open`/`ws_gap`/`ws_verdict`/`ws_collapse`,
+  cycle273-pre 추가분 포함)로는 오염을 판정할 수 없다** — `risk.py:495` 가 인자와 **같은 값**을
   캐시에 먼저 쓰므로 `ws_cmp=ws_eq` 가 **산술적으로 보장**된다(cycle264 `used_src=rest → delta_bp=0` 함정과 동형).
   **`ws_cmp=ws_ne` 건수를 오염 지표로 세면 경로 B 전체가 분모에서 "일치" 로 잡혀 결론이 뒤집힌다.**
+  같은 이유로 `ws_collapse` 도 경로 B 에서는 **실제 붕괴 판정과 구조적으로 항상 일치**한다 —
   경로 B 오염 판정 = 이 절의 오프라인 조인**만**이 유일 경로다.
 - **`caller=on_tick` 행에서만** 오염 판정이 성립한다. `caller=_swing_buy_poll_loop` 행의 `arg_open` 은
   REST 값이라 KRX 확정 시가와 일치하는 것이 **정상**이며, 그 일치는 "오염 없음"의 증거가 아니라

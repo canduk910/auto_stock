@@ -362,6 +362,20 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    `src/engine/kojiro_band_observe.py` 별도 파일). 가중치·자격 게이트·청산 무접촉
     #    (C9 후보 집합 불변·C10 진입/수량/청산 sha 불변으로 실증). 자매 가드 4곳 동일 값.
     "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
+    # 🔁 2026-09-10 (cycle273a) — D2(가) C235-V2: 잔여취소 타이머 해제(order_no 게이트) +
+    #    update_trade_status match_partial opt-in(COMPLETED 2곳). 명세
+    #    `_workspace/red/cycle273a_c235v2_cancel_timer_and_partial_spec.md`.
+    # 🔁 2026-09-11 (cycle273b I3) — D2(다) F-1/F-2: update_trade_status 호출 6곳(C1~C6)
+    #    전부에 order_no= 추가(WHERE 좁히기만, 무행위). 명세
+    #    `_workspace/red/cycle273b_philoptics_no_behavior_3_spec.md`.
+    # TODO(cycle273b 커밋 후): 아래 항목을 비운다.
+    "src/engine/order_engine.py": "a7967892f7baba40dc66d634fc2ae326cd0df69773269de0dbace547edad2ad8",
+    # 🔁 2026-09-11 (cycle273e I4) — D2(나) F-3: kojiro 틱 경로(risk.on_tick) 매수
+    #    평가 skip. 명시 상수 `_TICK_BUY_EVAL_SKIP_STRATEGIES` (donchian_swing 관례
+    #    동형). 자문 완료(착수 권고) `_workspace/domain_consult/cycle273_kojiro_gap_gate_20260910.md`.
+    #    명세 `_workspace/red/cycle273e_kojiro_gap_gate_spec.md`.
+    # TODO(cycle273e 커밋 후): 아래 항목을 비운다.
+    "src/engine/risk.py": "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
 }
 
 

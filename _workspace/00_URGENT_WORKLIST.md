@@ -156,6 +156,9 @@ KRX 개장가가 나온다.** 채널 리졸버 제안(P1-7 B)을 뒷받침하는
 
 > **다음 큐(사용자 결정 09-10 21:5x) — VB·LTV 매수 신호 LLM 평가 게이트(가칭 cycle274)**: 매수 신호마다 OpenAI(`gpt-5.6-luna`, 기존 `AsyncOpenAI` 재사용)에 30일 일봉 + 기술지표(EMA20/50/100·RSI·MACD·ATR·스토캐스틱·HV·지지/저항, 아침 `prepare()` 에서 선계산) + 신호 시점 스냅샷(시가·현재가·목표가·갭률·시간정규화 거래량)을 보내 1~100점을 받고 **70점 이상만 매수**. 순서 = ① 현재 큐(cycle272·그룹 1·그룹 2) 종료 후 `domain-consult`(프롬프트·특징 세트·임계·타임아웃·실패 규약) ② **shadow 배선**(행위 0 — 모든 신호에 `[llm_buy_score] ticker strategy score` 기록, 종목당 1회/일 래치, 타임아웃 4~5s, temperature 0, JSON 스키마 강제, fail-open, `llm_gate_mode=off|shadow|enforce` 킬스위치 — PARAM_RANGES/INT_PARAMS 편입 금지, 8영역 무접촉: 전략 2파일 + leaf) ③ 2주 shadow 뒤 점수 구간별 실현손익 분리 확인 → enforce 결정. 설계 제약: `check_buy_signal` 은 동기·틱마다 호출 → 비동기 평가 task + 종목별 판정 캐시, 매수 시 추격 상한 재검사. EMA200 은 일봉 보존 230일이라 불가(EMA100 까지).
 - **cycle273f(그룹 2 J3, D8) 완료·브랜치 커밋**: 일봉 적재 16:00 → 18:10(리터럴 1개, 주석 정직화, 3,898L 유지), g273f_6 은 cycle270-C `test_c10` 으로 채택돼 삭제. 부수 효과(유니버스 판정 오늘치 raw) 때문에 D5 와 함께 배포. D+1 = 18:10 적재 발화 + 이동 전후 합산 금지.
+- **cycle273a(그룹 1 I2, D2 가) 완료·브랜치 커밋**: 잔여취소 타이머 order_no 게이트 해제 + `match_partial` opt-in 2곳(KST 하한 datetime 바인딩). 검증 r2 가 실 PG 로 str 바인딩 DataError 를 잡아 메인 세션이 시정(실 PG 왕복·AST5 영속 가드 추가). D+1 = `[buy_fill_correction_unique_violation]` 0 · APBK0927 헛 취소 0 · `[buy_fill_db_error]` 0.
+- **cycle273b-F7(그룹 1 I1) 완료·브랜치 커밋**: `_selling` 재대조 블록 → leaf `selling_reconcile.py`(scheduler 3,871L), `[selling_hold]` 3분기 가시화, 검증 2라운드 지적 전부 처리(logger 정체성 가드·rmn_qty=0·2-ticker 격리·180s 경계·graceful). AST1·AST2(order_engine) 는 I3 까지 skip — **I3 완료 시 skip 해제 의무**. 배포는 main 병합 후(가·다 묶음).
+- **cycle273b I3(그룹 1, D2 다) 완료·브랜치 커밋**: F-1/F-2 — `update_trade_status` 6개 호출부(C1~C6) 전부에 `order_no=` 전달해 WHERE 를 그 주문 한 건으로 좁힘(미전달 시 SQL byte 동일, opt-in). F-3 — `affected>1` 시 `[trade_status_multi_update]` WARNING(`trade_history.py` 단일 소재). **I1 이 skip 해 둔 AST1·AST2 해제 완료**(직전 검증 HIGH#1 반영 — AST1 을 "키워드 이름"에서 "지역변수 바인딩"까지 강화). 필옵틱스(161580) 사건의 근본 원인(order_no 없는 WHERE 가 다른 주문 행까지 덮던 것) 시정. 소스 diff = `src/db/trade_history.py`·`order_engine.py`(호출부만) 2파일, 8영역 `order_engine.py` 단독, scheduler diff 0(3,873L), sha 핀 4곳 갱신. 표적 46 + 실PG 32 + AST 926 PASS, 뮤테이션 프로덕션 14종 KILLED/ESCAPED 0.
 
 > 입력 꾸러미 정본 = `scratchpad/report_bundle_0910.md`(세션 스크래치, 보고서 원문은 `_workspace/reports/2026-09-10_*.md` 로 report-writer 가 확정). 아래는 **이미 확정된 사실만** — 코드 사이클 결과는 끝나는 대로 덧붙인다.
 
@@ -168,6 +171,29 @@ KRX 개장가가 나온다.** 채널 리졸버 제안(P1-7 B)을 뒷받침하는
 - **보유 종목 일봉 stale(신규)**: 004690 삼천리 헤드 **09-04**(4거래일) · 003470 유안타 09-09. 삼천리는 **적재 대상이 맞고 09-04 까지 행이 있다가 09-05 부터 끊겼다**(1단계 검증 렌즈 정정 — "적재 대상 아님" 아님). 구조 원인 = `scanner.py:2181-2185` 적재 유니버스가 `지수 ∪ (시총≥500억 ∧ 거래대금≥20억)` 을 **매 실행 시 재평가**할 뿐 **보유·익일청산 강제 포함이 없어** 자격을 잃는 순간 보유 중에도 적재가 멈춘다(`force` 도 신선도 skip 만 우회). 완화 = kojiro `recompute_held_atr` stale 시 KIS 폴백(donchian·VCP 도 같은 일봉을 읽으므로 별건). `scanner.py` 8영역 → 카드("보유·익일청산 종목 강제 포함", 사이클 32 R4 보호 원칙과 동형). ✅ **시정 완료(cycle273d, D5)** — 유니버스 필터 게이트에 `is_protected` OR 분기 추가, `_collect_protected_tickers_for_scanner()` 재사용 + 6자리 숫자 ticker 한정 + fail-open + 페이징 누락 대비 차집합 합류. 신규 47케이스 PASS · 뮤테이션 11/13 KILLED(2건 기존 가드 방어) · scanner.py +44L · scheduler.py 3,898L 무변경 · 8영역 나머지 diff 0. 상세 = `src/engine/CLAUDE.md` "사이클 273d" 절, 명세 `_workspace/red/cycle273d_daily_load_held_inclusion_spec.md`. **커밋 완료(워크트리 cycle273-group2, 미push — 메인 세션 병합 대기)**.
 - **문서 정합 커밋 `1821310`**: 낡은 "커밋·배포 대기" 라벨 17곳(git log 대조) · 주간 루틴 요일 · 257줄 배너 정정.
 - **cycle273c(고지로 후보 순위 성분①② 원설계 복원 + shadow `[kojiro_band_observe]`) Green·tester 2라운드 검증 종결** — J2, D3 사용자 결정 "복원 진행하자"(카드③ A안 "둘 다 복원" + shadow "같이"). tester 2라운드 지적 3건(HIGH `_band_observe_row` `except Exception:` 폴백 무검정 · MEDIUM `bar_date=usable[0]` 무검정 · MEDIUM `observe_band(scores=)` 배선 무검정)을 테스트 3종 추가로 종결, 뮤테이션 3종 전부 KILLED. `src/engine/strategies/kojiro.py`(sha `bfc61480…`)·신규 leaf `kojiro_band_observe.py` 는 무접촉(테스트·문서만). `tests/unit/ast`+`tests/unit/engine` 전량 PASS(별도 착수 중인 cycle273f 관련 RED 1건은 범위 밖). 정본 = `src/engine/CLAUDE.md`·`src/engine/strategies/CLAUDE.md`·`_workspace/00_leader_trading_rules.md`·`docs/HARNESS_CHANGELOG.md`·루트 `CLAUDE.md` 5곳 동기화 완료. **커밋 완료(워크트리 cycle273-group2, 미push — 메인 세션 병합 대기)**.
+- **cycle273-group1 착수 — I0 273-pre(kojiro_gap_observe `ws_collapse` 반사실 필드) ✅**: 사용자 결정
+  "D2 가, 다, 나 순서" 의 (가) 무행위 선두 항목. 자문 `_workspace/domain_consult/cycle273_kojiro_gap_gate_20260910.md`
+  §3.4(다) — 기존 `ws_verdict` 는 갭 게이트만 재현해 판독에서 실제로 뒤집힌 유일한 관문(붕괴 가드
+  `kojiro.py:891`)이 관측 밖이었다. `src/engine/kojiro_gap_observe.py` 단독(8영역·`scheduler.py` 무접촉)
+  에 `ws_collapse=`(`blocked`/`allowed`/`-`) 꼬리 append, 기존 13필드 byte 불변. 표적 152 PASS · 448조합
+  byte 동일 실증 · 뮤테이션 9종 KILLED 9/ESCAPED 0. **이어지는 I1~I4(order_engine·risk 8영역 항목,
+  (다)(나) 순서)는 별도 커밋으로 진행 — 이 항목은 준비 단계일 뿐 그룹 전체 완료 아님.**
+- **cycle273-group1 I4 273e(그룹 1, D2 나) 완료·브랜치 커밋**: `risk.py` 명시 상수
+  `_TICK_BUY_EVAL_SKIP_STRATEGIES = frozenset({"donchian_swing", "kojiro"})` 신설 + `:646`
+  기존 donchian 전용 skip 을 이 상수 멤버십으로 in-place 치환 — WS 틱(`on_tick`) 경로에서
+  kojiro `check_buy_signal` 호출이 0 이 되고, 매수는 경로 A(`_swing_buy_poll_loop`, REST
+  `stck_oprc`)에서만 남는다. 근거 = 09-07 실측 N=103(WS 시가≠KRX 확정 시가 95.1%·갭업
+  탐지율 0/8·최대 오차 6.77%p, 스코프 필터 없는 통합채널 `[7] STCK_OPRC` 단일 의존).
+  자문 `_workspace/domain_consult/cycle273_kojiro_gap_gate_20260910.md` — 착수 권고(보류
+  비권고). 8영역 `risk.py` **단독**(그 외 8영역·`scheduler.py`(3,873L)·전략 7파일 diff 0),
+  판정 축은 `strategy_id` 문자열만(AST 가드), 킬스위치 없음(1행 revert). `test_cycle268_…
+  ::test_real_risk_on_tick_yields_caller_on_tick`(원 docstring "삭제하지 마라")을
+  `test_real_risk_on_tick_yields_no_kojiro_rows` 로 계약 반전(경로 B 0행 + 별도 인스턴스
+  양성 대조 짝), 자매 2건도 동반 반전. sha 핀 4곳 `risk.py` 값 `19f48b4a…` 등록. 표적 26 +
+  AST 931 + `engine`+`strategies`+`ast` 회귀 2,403 PASS + 백엔드 전체 7,646 PASS(회귀 0).
+  뮤테이션 12종 KILLED/ESCAPED 0. **I0~I4 로 그룹1(273a·273b-F7·273b I3·273-pre·273e) 전부
+  완료** — 배포는 main 병합 후. D+1(09-11 금) 판독 = `[kojiro_gap_observe] caller=on_tick`
+  0행 + `caller=_swing_buy_poll_loop` ≥6행(양성 대조 짝) + kojiro 청산 마커 불변.
 
 ## 🔵 결정 대기 — 사용자 답 필요 (재개 시 순서대로)
 

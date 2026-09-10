@@ -3513,7 +3513,6 @@ class TradingScheduler:
         from src.engine.strategy_base import Position
         from src.engine.scanner import ticker_names
         from src.db.trade_history import (
-            update_trade_status,
             mark_pending_buys_completed,
             get_recent_buy_strategy,
         )
@@ -3565,39 +3564,13 @@ class TradingScheduler:
                 s.state.clear_low_funds()
 
         # stale _selling 재대조 (자문 nxt_prelimit_stale_selling_orderflow 공통 방어선) — hot path 밖.
-        # NXT 지정가 미체결 만료·체결통보 WebSocket 유실 등으로 _selling 이 영구 잔존하면
-        # risk.on_tick 이 check_exit_signal(손절/트레일링)을 종일 억제한다(Defect 2).
-        # (보유 잔존 AND 열린 매도주문 없음 AND aged) 이면 stale → discard → on_tick 손절 재평가 재개.
+        # cycle273b F-7 — 유지 3분기 가시화([selling_hold])는 라인 상한 때문에
+        # leaf `selling_reconcile.reconcile_stale_selling` 로 위임(판정 byte 동일 이동).
         if self.order_engine._selling:
-            try:
-                from src.api.balance import get_daily_orders
-                from src.engine.scanner import KST_TZ as _KST
-                held_qty = {h.ticker: h.quantity for h in holdings if h.quantity > 0}
-                daily_orders = await get_daily_orders()
-                # KIS sll_buy_dvsn_cd: 01=매도, 02=매수. rmn_qty>0 = 미체결(열린) 주문.
-                open_sell_tickers = {
-                    o.get("pdno", "")
-                    for o in daily_orders
-                    if o.get("sll_buy_dvsn_cd") == "01" and int(o.get("rmn_qty", "0") or 0) > 0
-                }
-                now_kst = datetime.now(_KST)
-                for tk in list(self.order_engine._selling):
-                    if held_qty.get(tk, 0) <= 0:
-                        continue  # 보유 없음 — 정상 매도 진행/체결 가능성, 건드리지 않음
-                    if tk in open_sell_tickers:
-                        continue  # 열린 매도주문 존재 — double-sell 방지, 유지
-                    since = self.order_engine._selling_since.get(tk)
-                    if since is not None and (now_kst - since).total_seconds() < SELLING_RECONCILE_MIN_AGE_S:
-                        continue  # 갓 접수된 매도 — KIS 전파 지연 레이스 방지
-                    self.order_engine._selling.discard(tk)
-                    self.order_engine._selling_since.pop(tk, None)
-                    logger.warning(
-                        "stale 매도중 상태 해제 (보유 잔존·열린 매도주문 없음) "
-                        "→ on_tick 손절 재평가 재개: %s", tk,
-                    )
-                    await write_log("WARNING", f"[selling_reconcile] stale _selling 해제: {tk}")
-            except Exception:
-                logger.exception("stale _selling 재대조 실패 — graceful (다음 주기 재시도)")
+            from src.engine.selling_reconcile import reconcile_stale_selling
+            await reconcile_stale_selling(
+                self.order_engine, holdings, min_age_s=SELLING_RECONCILE_MIN_AGE_S,
+            )
 
     async def _settle(self) -> None:
         """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.
@@ -3736,6 +3709,8 @@ class TradingScheduler:
         for task in self.order_engine._pending_cancel_tasks.values():
             task.cancel()
         self.order_engine._pending_cancel_tasks.clear()
+        # cycle273a (D2-가-a) S1 — 짝 dict 동행 clear (order_no 그림자).
+        self.order_engine._pending_cancel_order_no.clear()
         # 사이클 B-1 (2026-06-01) — 장운영시간 외 거부 TTL 게이트 일일 초기화 (캡슐화 위임)
         self.order_engine.reset_daily_state()
 

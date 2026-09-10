@@ -78,6 +78,15 @@ def _pre_market_only_by_clock() -> bool | None:
 #    매수 목적의 보드 변경이 청산 규약까지 조용히 바꾸는 커플링을 차단한다(AST 가드).
 _PRE_MARKET_EXIT_EVAL_STRATEGIES = frozenset({"long_tail_volatility"})
 
+# cycle273e (2026-09-10, D2(나)) — WS 틱(`on_tick`) 매수 평가 skip 대상.
+# donchian_swing = 일봉 전략이라 tick 평가가 구조적 낭비(2026-05-12, G안).
+# kojiro = 갭업/갭다운/붕괴 가드가 스코프 필터 없는 통합채널 `[7] STCK_OPRC`
+#   하나에 매달려 있어(09-07 실측 N=103, 갭업 탐지율 0/8) 매수 평가 자체가
+#   오염된다 — "일봉이라 낭비"가 아니라 경계 판정 × 노이즈 구간 × 손절폭
+#   대비 타이밍 비용이 근거다(kojiro 용은 검증된 적 없는 donchian 판단을
+#   복붙하지 않는다). 매수는 `_swing_buy_poll_loop`(REST `stck_oprc`)에서만.
+_TICK_BUY_EVAL_SKIP_STRATEGIES = frozenset({"donchian_swing", "kojiro"})
+
 # cycle222-a3 (2026-08-21, F-B / G-4 로 근거 정정) — 당일고가 앵커 채택 **제외** 전략.
 #
 # 여기 있는 전략은 `day_high` 를 앵커(`high_since_buy`)에 절대 채택하지 않는다.
@@ -640,10 +649,10 @@ class RiskManager:
             # 사이클 64 (2026-06-06) — 가격 필터 분기 scanner 이전 (G-1 AST 가드 영속).
             # 본 위치(on_tick)에 가격 필터 코드 없음 — scanner.subscribe_filtered_stocks 에서만 적용.
 
-            # G안 (2026-05-12): donchian_swing 매수 평가는 Pull 폴링(_swing_buy_poll_loop)에서만.
-            # WebSocket tick 흐름에서는 skip — 일봉 전략이라 실시간 tick 평가가 구조적 낭비.
-            # 청산(ATR 트레일링/하드 -7%)은 위 check_exit_signal 분기에서 정상 동작 — 영향 없음.
-            if strategy.strategy_id == "donchian_swing":
+            # cycle273e — WS 틱 매수 평가 skip. 근거는 전략마다 다르다(:79 근처
+            # `_TICK_BUY_EVAL_SKIP_STRATEGIES` 주석). 청산(check_exit_signal)은 위
+            # 분기에서 이미 평가됐다 — 이 skip 은 매수에만 영향, 무접촉.
+            if strategy.strategy_id in _TICK_BUY_EVAL_SKIP_STRATEGIES:
                 continue
             signal = strategy.check_buy_signal(ticker, current_price, open_price)
             if signal == Signal.BUY:

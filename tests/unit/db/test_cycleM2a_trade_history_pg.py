@@ -86,7 +86,8 @@ async def test_insert_trade_timestamp_is_datetime():
 
 
 # ---------------------------------------------------------------------------
-# update_trade_status — UPDATE affected 수 ("UPDATE N" 파싱) + 4-eq 필터 보존
+# update_trade_status — UPDATE affected 수 ("UPDATE N" 파싱) +
+# 4-eq + (opt-in) 당일 하한 + (opt-in) order_no 필터
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_update_trade_status_returns_affected_count():
@@ -106,9 +107,11 @@ async def test_update_trade_status_returns_affected_count():
     assert affected == 1, "'UPDATE 1' → affected=1 (execute 상태 문자열 파싱 계약)."
     sql = _first_sql_matching(pg_mod, "UPDATE")
     assert sql is not None and "trade_history" in sql
-    # 4-eq 필터 보존 (ticker/trade_type/status=PENDING/strategy)
+    # 4-eq 필터 보존 (ticker/trade_type/status=PENDING/strategy) — 기본 호출(match_partial
+    # 미전달) 한정. cycle273a 는 opt-in `match_partial=True` 시 PENDING∪PARTIAL 로
+    # 넓히는 것을 허용하지만, 그 경로는 여기 대상이 아니다(별도 테스트).
     assert "PENDING" in sql or "PENDING" in str(pg_mod.execute.await_args.args), (
-        "PENDING 필터 보존 누락 (최신 PENDING 갱신)."
+        "PENDING 필터 보존 누락 (기본 경로 갱신)."
     )
 
 

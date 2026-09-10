@@ -77,6 +77,11 @@ class OrderEngine:
     def __init__(self, registry: StrategyRegistry) -> None:
         self.registry = registry
         self._pending_cancel_tasks: dict[str, asyncio.Task] = {}  # ticker -> 취소 대기 태스크
+        # cycle273a (D2-가-a) — 위 dict 와 항상 짝으로 갱신되는 order_no 그림자.
+        # 키가 ticker 이고 매수(`_schedule_cancel`)·매도(`_schedule_cancel_and_reorder`)가
+        # 같은 dict 를 공유하므로, 전량 체결 시 "이 order_no 의 타이머일 때만" 해제하기
+        # 위한 게이트 값이다(§1.4 — pop(ticker) 단독은 남의 타이머를 실종시킨다).
+        self._pending_cancel_order_no: dict[str, str] = {}  # ticker -> 그 타이머가 지키는 order_no
         self._filled_qty: dict[str, int] = {}  # order_no -> 누적 체결 수량
         self._order_qty: dict[str, int] = {}   # order_no -> 원래 주문 수량
         self._pending_buy_orders: dict[str, dict] = {}  # order_no -> {ticker, price, quantity, strategy_id}
@@ -1273,10 +1278,12 @@ class OrderEngine:
             # `_on_tick` / `_on_board` raise 영속 의무 영역 변경 0 (다른 callback 영역 한정).
 
             # 영역 1: update_trade_status (PENDING → COMPLETED)
+            # cycle273a (D2-가-b) — match_partial=True: 부분 체결로 이미 PARTIAL 이 된
+            # 행도 이 1차 UPDATE 로 직접 잡는다(§3.2 — 004990 09-10 09:05 3단 우회 시정).
             try:
                 affected = await update_trade_status(
                     ticker, TradeType.BUY, TradeStatus.COMPLETED,
-                    strategy=strategy_id, price=price,
+                    strategy=strategy_id, price=price, order_no=order_no, match_partial=True,
                 )
             except Exception as exc:
                 logger.error(
@@ -1358,12 +1365,21 @@ class OrderEngine:
             # 매수 체결 → 가용액이 변동했으므로 캐시 무효화
             state.cached_buyable_at = 0.0
             logger.info("매수 전량 체결: %s %d주 @ %d (전략: %s)", t(ticker), total_filled, price, strategy_id)
+            # cycle273a (D2-가-a) — 자기 order_no 의 잔여취소 타이머 해제.
+            # `_pending_cancel_tasks` 키는 ticker 이고 매수·매도가 같은 dict 를 공유하므로
+            # order_no 가 일치할 때만 지운다(§1.4 — 004990 09-10 09:05 APBK0927 재현 차단).
+            if self._pending_cancel_order_no.get(ticker) == order_no:
+                _cancel_task = self._pending_cancel_tasks.pop(ticker, None)
+                self._pending_cancel_order_no.pop(ticker, None)
+                if _cancel_task is not None and not _cancel_task.done():
+                    _cancel_task.cancel()
+                logger.info("[partial_cancel_timer_cleared] ticker=%s order_no=%s", t(ticker), order_no)
         else:
             # 부분 체결 → PARTIAL 기록, 30초 후 잔여 취소
             # 사이클 161 (2026-06-17): `price=price` 인자 명시 — 부분 체결 시점 체결단가 정합.
             await update_trade_status(
                 ticker, TradeType.BUY, TradeStatus.PARTIAL,
-                strategy=strategy_id, price=price,
+                strategy=strategy_id, price=price, order_no=order_no,
             )
             self._schedule_cancel(ticker, order_no, ordered_qty, strategy_id)
             logger.info("매수 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)
@@ -1446,9 +1462,12 @@ class OrderEngine:
             from src.db.positions import delete_position
             await delete_position(ticker)
             self._selling.discard(ticker)
+            # cycle273a (D2-가-b) — match_partial=True: 부분 체결로 이미 PARTIAL 이 된
+            # 행도 이 1차 UPDATE 로 직접 잡는다(매수 축과 동일 계약, §3.2).
             affected = await update_trade_status(
                 ticker, TradeType.SELL, TradeStatus.COMPLETED,
                 strategy=strategy_id, price=price, profit_loss=profit_loss,
+                order_no=order_no, match_partial=True,
             )
             if affected == 0:
                 # 체결통보가 execute_sell의 insert_trade(PENDING)보다 먼저 도착한 race
@@ -1493,12 +1512,22 @@ class OrderEngine:
             self._order_strategy.pop(order_no, None)
             self._order_ticker.pop(order_no, None)
             logger.info("매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s)", t(ticker), total_filled, price, profit_loss, strategy_id)
+            # cycle273a (D2-가-a) — 자기 order_no 의 잔여취소/재주문 타이머 해제(매수 축과
+            # 동일 게이트, §1.4). 해제하지 않으면 `_cancel_and_reorder` 가 30초 뒤 잔량 0 인
+            # 주문을 취소하려다 APBK0927 로 거부되거나, 더 나쁘면 낡은 `remaining` 으로
+            # 중복 매도 재주문을 낸다(§1.3).
+            if self._pending_cancel_order_no.get(ticker) == order_no:
+                _cancel_task = self._pending_cancel_tasks.pop(ticker, None)
+                self._pending_cancel_order_no.pop(ticker, None)
+                if _cancel_task is not None and not _cancel_task.done():
+                    _cancel_task.cancel()
+                logger.info("[partial_cancel_timer_cleared] ticker=%s order_no=%s", t(ticker), order_no)
             # 사이클 15-A (2026-05-19) — 매도 전량 체결 후 WS 구독 정리 (KIS 정상 패턴).
             # 다른 전략이 보유하지 않고, 익일청산 대기 X, 다른 전략 스캔 후보 X 인 경우만 unsubscribe.
             await self._unsubscribe_if_no_other_strategy(ticker)
         else:
             # 부분 체결 → PARTIAL, 30초 후 잔여 취소 + 손절 시 재주문
-            await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss)
+            await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss, order_no=order_no)
             remaining = ordered_qty - total_filled
             self._schedule_cancel_and_reorder(ticker, order_no, remaining, is_stop_loss=True)
             logger.info("매도 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)
@@ -1512,7 +1541,7 @@ class OrderEngine:
             try:
                 await asyncio.sleep(PARTIAL_FILL_WAIT)
                 await cancel_order(order_no, 0, cancel_all=True, exchange=self._strategy_exchange(strategy_id))
-                await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id)
+                await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
                 logger.info("부분 체결 잔여 취소: %s (주문번호: %s)", t(ticker), order_no)
             except asyncio.CancelledError:
                 pass  # 새 task로 교체됨 — pop은 새 task가 관리
@@ -1522,8 +1551,10 @@ class OrderEngine:
                 # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
                 if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
                     self._pending_cancel_tasks.pop(ticker, None)
+                    self._pending_cancel_order_no.pop(ticker, None)
 
         self._pending_cancel_tasks[ticker] = asyncio.create_task(_cancel_after_wait())
+        self._pending_cancel_order_no[ticker] = order_no
 
     def _schedule_cancel_and_reorder(
         self, ticker: str, order_no: str, remaining: int, *, is_stop_loss: bool
@@ -1538,7 +1569,7 @@ class OrderEngine:
                 strategy_id = self._order_strategy.get(order_no, "momentum")
                 ex = self._strategy_exchange(strategy_id)
                 await cancel_order(order_no, 0, cancel_all=True, exchange=ex)
-                await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id)
+                await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
                 logger.info("매도 잔여 취소: %s %d주", t(ticker), remaining)
 
                 if is_stop_loss and remaining > 0:
@@ -1559,8 +1590,10 @@ class OrderEngine:
                 # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
                 if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
                     self._pending_cancel_tasks.pop(ticker, None)
+                    self._pending_cancel_order_no.pop(ticker, None)
 
         self._pending_cancel_tasks[ticker] = asyncio.create_task(_cancel_and_reorder())
+        self._pending_cancel_order_no[ticker] = order_no
 
     def reset_daily_state(self) -> None:
         """일일 차단 게이트 상태 초기화 (scheduler `_reset_daily_state` 가 위임 호출).
