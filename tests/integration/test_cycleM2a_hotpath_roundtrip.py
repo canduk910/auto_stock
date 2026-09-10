@@ -213,6 +213,31 @@ async def test_update_trade_status_affected_roundtrip(clean_trade_history):
 
 
 @pytest.mark.asyncio
+async def test_update_trade_status_match_partial_roundtrip(clean_trade_history):
+    """cycle273a — `match_partial=True` 를 **실 asyncpg** 로 왕복시킨다(검증 r2 HIGH#3).
+
+    PARTIAL 행 INSERT → COMPLETED UPDATE(match_partial=True) → affected=1. KST 당일 하한이
+    TIMESTAMPTZ 에 datetime 으로 바인딩돼야 한다 — str 이면 DataError(사이클 M6 계열).
+    """
+    from src.db import trade_history
+    from src.models.trade import TradeRecord, TradeStatus, TradeType
+
+    await trade_history.insert_trade(TradeRecord(
+        ticker="005930", ticker_name="삼성전자", trade_type=TradeType.BUY,
+        price=70000, quantity=10, profit_loss=0, status=TradeStatus.PARTIAL,
+        strategy="momentum", order_no="B-2",
+    ))
+    affected = await trade_history.update_trade_status(
+        "005930", TradeType.BUY, TradeStatus.COMPLETED, strategy="momentum", price=70050,
+        match_partial=True,
+    )
+    assert affected == 1, "PARTIAL 행이 match_partial=True 로 COMPLETED 돼야 한다(실 PG 왕복)."
+    rows = await trade_history.get_today_buy_trades_for_sync()
+    mine = [r for r in rows if r.get("order_no") == "B-2"]
+    assert mine and mine[0]["status"] == TradeStatus.COMPLETED.value
+
+
+@pytest.mark.asyncio
 async def test_sync_no_dedupe_excludes_cancelled_roundtrip(clean_trade_history):
     """sync 함수 왕복 — 같은 ticker 다른 order_no 전부 보존 + CANCELLED 제외 (사이클 30/73)."""
     from src.db import trade_history

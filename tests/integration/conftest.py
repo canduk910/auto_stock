@@ -156,10 +156,16 @@ def order_env(monkeypatch):
     async def fake_insert_trade(record):
         calls.insert_trade.append(record)
 
-    async def fake_update_trade_status(ticker, trade_type, status, strategy=None, price=None, profit_loss=None):
+    async def fake_update_trade_status(
+        ticker, trade_type, status, strategy=None, price=None, profit_loss=None,
+        *, order_no=None, match_partial=False,
+    ):
+        # cycle273a — 실 시그니처가 keyword-only match_partial(+ cycle273b order_no) 를
+        # 받으므로 이 fake 도 받아야 한다(안 받으면 TypeError). 값 자체는 calls 에만 기록.
         calls.update_trade_status.append({
             "ticker": ticker, "trade_type": trade_type, "status": status,
             "strategy": strategy, "price": price, "profit_loss": profit_loss,
+            "order_no": order_no, "match_partial": match_partial,
         })
         return state.update_status_affected
 

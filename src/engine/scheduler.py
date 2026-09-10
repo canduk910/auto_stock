@@ -3710,6 +3710,8 @@ class TradingScheduler:
         for task in self.order_engine._pending_cancel_tasks.values():
             task.cancel()
         self.order_engine._pending_cancel_tasks.clear()
+        # cycle273a (D2-가-a) S1 — 짝 dict 동행 clear (order_no 그림자).
+        self.order_engine._pending_cancel_order_no.clear()
         # 사이클 B-1 (2026-06-01) — 장운영시간 외 거부 TTL 게이트 일일 초기화 (캡슐화 위임)
         self.order_engine.reset_daily_state()
 

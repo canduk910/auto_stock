@@ -99,18 +99,22 @@ class FakeTradeHistory:
                 )
         self.rows.append(row)
 
-    def update_status(self, ticker, trade_type, status, strategy, price) -> int:
-        """`src/db/trade_history.py::update_trade_status` 의 WHERE 절 그대로.
+    def update_status(self, ticker, trade_type, status, strategy, price, *, match_partial=False) -> int:
+        """`src/db/trade_history.py::update_trade_status` 의 WHERE 절 중 **status/strategy 축만** 거울 — `match_partial` 의 KST timestamp 하한은 실 SQL 레벨 테스트(`tests/unit/db/test_cycle273a_update_trade_status_match_partial.py::test_b2d`)와 실 PG 왕복(`test_cycleM2a_hotpath_roundtrip`)이 별도로 지킨다(cycle273a r2 MEDIUM).
 
         WHERE ticker AND trade_type AND status = 'PENDING' AND strategy
-        (PENDING 단독 — PARTIAL 행은 매치하지 않는다).
+        (기본 = PENDING 단독). cycle273a `match_partial=True` 는 PENDING∪PARTIAL 을
+        함께 잡는다 — 이 거울이 현행 그대로면 "초록인 채로 낡은 계약을 검증" 하게 된다.
         """
+        allowed = {TradeStatus.PENDING.value}
+        if match_partial:
+            allowed.add(TradeStatus.PARTIAL.value)
         affected = 0
         for r in self.rows:
             if (
                 r["ticker"] == ticker
                 and r["trade_type"] == trade_type.value
-                and r["status"] == TradeStatus.PENDING.value
+                and r["status"] in allowed
                 and r["strategy"] == strategy
             ):
                 r["status"] = status.value
@@ -249,10 +253,14 @@ def make_env(monkeypatch):
         db.insert(record)
 
     async def fake_update_trade_status(ticker, trade_type, status, strategy=None,
-                                       price=None, profit_loss=None):
+                                       price=None, profit_loss=None,
+                                       *, order_no=None, match_partial=False):
+        # cycle273a — 실 시그니처가 keyword-only match_partial 을 받으므로(order_no 는
+        # cycle273b 대비 선반영) 이 fake 도 받아야 한다 — 안 받으면 TypeError.
         if state.update_status_forced is not None:
             return state.update_status_forced
-        return db.update_status(ticker, trade_type, status, strategy, price)
+        return db.update_status(ticker, trade_type, status, strategy, price,
+                                 match_partial=match_partial)
 
     async def fake_force_update(order_no, trade_type, status, price=None,
                                profit_loss=None):

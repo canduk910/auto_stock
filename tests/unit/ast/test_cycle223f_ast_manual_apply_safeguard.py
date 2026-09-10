@@ -349,6 +349,11 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    ⚠️ **자매 가드 4곳**(222a3 `_APPROVED_CONTENT_SHA` · 223 · 223f
     #    `_PREEXISTING_CONTENT_SHA` · 226 `_ALLOWED_CONTENT_SHA`)에 **같은 값**으로 핀한다 —
     #    네 가드가 같은 워킹트리를 보므로 값이 갈리거나 한 곳만 등록되면 그 자체가 결함
+    # 🔁 2026-09-10 (cycle273a) — D2(가) C235-V2: 잔여취소 타이머 해제(order_no 게이트) +
+    #    update_trade_status match_partial opt-in(COMPLETED 2곳). 명세
+    #    `_workspace/red/cycle273a_c235v2_cancel_timer_and_partial_spec.md`.
+    # TODO(cycle273a 커밋 후): 아래 항목을 비운다.
+    "src/engine/order_engine.py": "9b85f049cba676068db6c3c208302b72867d735d8fa486720cd6445bce17076e",
 }
 
 
