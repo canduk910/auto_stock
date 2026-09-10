@@ -256,6 +256,52 @@ async def test_path_b_ws_fields_are_self_referential(caplog):
         assert f["ws_gap"] == f["gap_rate"]
 
 
+@pytest.mark.asyncio
+async def test_path_b_ws_collapse_is_self_referential(caplog):
+    """cycle273-pre — `ws_collapse` 도 경로 B 에서는 **동어반복**이다(위 테스트의 자매).
+
+    ⚠️ 이것도 **회귀 가드가 아니라 판독 함정의 계약화**다. `risk.on_tick` 이
+    `ticker_prices[t]["open_price"]` 를 `check_buy_signal` **전에** 그 틱의
+    `open_price` 로 덮으므로(`risk.py` 상단 "1. 공용 시세 갱신") 경로 B 행은
+    `ws_open ≡ arg_open` 이 항상 성립하고, 그 결과 `ws_collapse` 는 **실제 붕괴
+    판정(`verdict`)과 구조적으로 항상 일치**한다 — `verdict=collapse` 면
+    `ws_collapse=blocked`, 그 외 6종(`candidate`/`no_data`/`skip_up`/`skip_down`/
+    `pass`) 이면 `ws_collapse=allowed` 이거나(붕괴 가드까지 도달한 경우) `-`
+    (WS 캐시가 이 행 자체가 심은 값이라 `ws_absent` 는 이 경로에서 발생하지 않는다).
+
+    경로 A(`_swing_buy_poll_loop`) 만이 `ws_collapse` 로 오염을 판정할 수 있는
+    유일한 경로다 — `_workspace/specs/cycle268_kojiro_gap_observe.md` §5 참조.
+    """
+    registry = StrategyRegistry()
+    strategy = _kojiro()
+    registry.register(strategy)
+    order_engine = MagicMock()
+    order_engine.execute_buy = AsyncMock()
+    rm = RiskManager(registry, order_engine)
+
+    from src.engine import scanner
+    scanner.ticker_prev_close[TICKER] = 10000
+    # 오염된(전혀 다른) WS 캐시를 미리 심어도 on_tick 이 먼저 덮는다.
+    scanner.ticker_prices[TICKER] = {"current_price": 1, "open_price": 999999}
+
+    caplog.set_level(logging.INFO)
+    with _freeze_kst("2026-05-12 09:10:00"), _main_board_active():
+        # current(10040) < open(10050) → 실제 붕괴 가드가 걸린다(verdict=collapse).
+        await rm.on_tick(TICKER, 10040, 10050, 0.5)
+
+    scanner.ticker_prev_close.pop(TICKER, None)
+
+    rows = _rows(caplog)
+    collapse_rows = [r for r in rows if _fields(r)["verdict"] == "collapse"]
+    assert collapse_rows, f"collapse verdict 행이 없다 — 테스트 전제가 깨졌다: {rows}"
+    for r in collapse_rows:
+        f = _fields(r)
+        assert f["ws_cmp"] == "ws_eq", f"경로 B 전제(ws_open≡arg_open) 자체가 깨졌다: {r}"
+        assert f["ws_collapse"] == "blocked", (
+            f"경로 B 는 ws_collapse 도 동어반복이어야 한다(실제 collapse ⇒ blocked): {r}"
+        )
+
+
 # ===========================================================================
 # tester 뮤테이션 ESCAPED 봉인 3건
 # ===========================================================================
