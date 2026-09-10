@@ -118,8 +118,11 @@ donchian 17% / BFB 17% / VCP 11% / kojiro 42%`, `_workspace/reports/2026-09-10_t
 | 한도 초과 포지션 | **1건** |
 | 게이트 판정 | `ok`, `reasons=[]` |
 
-**계좌 노출은 여유롭다**(실효 0.97% = 관측 임계의 1/4). 리스크 축소를 권고할 계좌 차원의
-근거는 없다. 계좌 전체 노출 레버 `cash_usage_ratio` 는 §3 에 따라 권고 대상이 아니다.
+**20:08:20 스냅샷 기준으로는 계좌 노출이 여유롭다**(실효 0.97% = 관측 임계의 1/4).
+⚠️ 그 스냅샷은 `stale=true`(조회 시각 20:32 기준 `age_secs=1457`)이고 그 사이 엔진이
+종료됐으므로 **20:32 현재 노출을 보증하지 않는다** — 다만 종료 후에는 신규 진입이 없으므로
+그 사이 노출이 늘었을 경로도 없다. 어느 쪽이든 이번 주 자문에서 리스크 축소를 권고할
+계좌 차원의 근거는 없고, 계좌 전체 노출 레버 `cash_usage_ratio` 는 §3 에 따라 권고 대상이 아니다.
 
 ### 2.3 진입 시각대별 손익 — cycle262 검증
 
@@ -176,7 +179,7 @@ donchian 17% / BFB 17% / VCP 11% / kojiro 42%`, `_workspace/reports/2026-09-10_t
 ```json
 {"strategy_id":"vcp_breakout","sample_status":"insufficient","closed_round_trips_90d":0,
  "recommended_params":{"last_pullback_max":0.12},
- "reasoning":"funnel 5일 실측에서 VCP 가 죽는 곳은 step 8(거래량 수축)이 아니라 step 7(Pullback 점진 수축)이다 — 베이스 검출 생존 24/32/22/28/38 이 step7 에서 1/1/2/1/4 로 줄어 평균 92% 가 탈락한다. step7 은 세 술어의 AND(회수 [2,4] AND 직전 대비 폭 단조 감소 AND 마지막 폭 <= last_pullback_max)인데 그중 last_pullback_max 만 PARAM_RANGES 에 있다. 탈락 종목의 실제 일봉을 GET /api/stock-master/{ticker}/daily 로 받아 _detect_base + _check_pullback_sequence 를 라이브 파라미터로 재실행한 결과(23행), 폭 단독 위반은 6행뿐이고 0.12 에서 정확히 그 6행이 통과한다(010950 S-Oil 5일 연속 + 204620 글로벌텍스프리 1일 = 2종목). 0.15 로 더 완화해도 추가 통과는 0 이다. 라이브 0.10 은 코드 DEFAULT_PARAMS 0.12(vcp_breakout.py:126)보다 조여진 값이므로 이 권고는 신규 완화가 아니라 기본값 복원이며, 기대 효과는 step7 생존 +약 1.2건/일로 작다. 2차 병목인 volume_contraction_ratio 는 라이브 1.00 = PARAM_RANGES 상한이라 더 완화할 수 없다.",
+ "reasoning":"funnel 5일 실측에서 VCP 가 죽는 곳은 step 8(거래량 수축)이 아니라 step 7(Pullback 점진 수축)이다 — 베이스 검출 생존 24/32/22/28/38 이 step7 에서 1/1/2/1/4 로 줄어 통합 93.75%(135/144, 일자별 단순평균 93.90%)가 탈락한다. step7 은 세 술어의 AND(회수 [2,4] AND 직전 대비 폭 단조 감소 AND 마지막 폭 <= last_pullback_max)인데 그중 last_pullback_max 만 PARAM_RANGES 에 있다. 탈락 종목의 실제 일봉을 GET /api/stock-master/{ticker}/daily 로 받아 _detect_base + _check_pullback_sequence 를 라이브 파라미터로 재실행한 결과(23행), 폭 단독 위반은 6행뿐이고 0.12 에서 정확히 그 6행이 통과한다(010950 S-Oil 5일 연속 + 204620 글로벌텍스프리 1일 = 2종목). 0.15 로 더 완화해도 추가 통과는 0 이다. 라이브 0.10 은 코드 DEFAULT_PARAMS 0.12(vcp_breakout.py:126)보다 조여진 값이므로 이 권고는 신규 완화가 아니라 기본값 복원이며, 기대 효과는 step7 생존 +약 1.2건/일로 작다. 2차 병목인 volume_contraction_ratio 는 라이브 1.00 = PARAM_RANGES 상한이라 더 완화할 수 없다.",
  "recommended_weight":null,
  "weight_reasoning":null,
  "hypotheses":[
@@ -185,6 +188,7 @@ donchian 17% / BFB 17% / VCP 11% / kojiro 42%`, `_workspace/reports/2026-09-10_t
    {"claim":"0.12 로 완화해도 하루 prepared 는 3건을 넘지 않아 리스크 증가가 제한적이다","evidence":"step7 이 5일에 6행(2종목)만 늘고, 그 뒤 step8 통과율이 실측 09-08 1/2·09-10 2/4 = 약 50% 다. 현재 prepared 0.6건/일 → 추정 0.8~1.5건/일","test":"적용 후 10영업일 step99 일평균과 실제 체결 수","required_sample":10,"confidence":0.7}],
  "needs_human_decision":[
    {"topic":"step7 의 진짜 병목은 단조 수축이고 그 키는 튜닝 대상이 아니다","issue":"vcp_breakout.py:786-788 은 pullback 폭이 직전보다 반드시 작아야 한다(strict, 등호 거부). 대응 파라미터가 없어 자문이 손댈 수 없는데, 회수 조건을 통과한 탈락 51행 중 45행(88%)이 여기 걸린다","evidence":"28행은 폭도 임계 이하라 남는 위반 술어가 단조뿐(코드 연역) + 23행 실제 봉 재실행에서 17행 단조 위반 확인. 재실행은 GET /api/stock-master/{ticker}/daily 100일 + 라이브 파라미터로 순수 메서드 직접 호출, funnel 이 기록한 마지막 폭과 23/23 일치","options":["현행 strict 유지","등호 허용 또는 허용 오차(curr <= prev × 1.05) 도입 — 코드 + 매매 행위 변경이라 승인 + domain-consult 선행","pullback_count_max 4→5,6 확대(역시 PARAM_RANGES 밖)"]},
+   {"topic":"D2 적용의 선결 조건 — VCP·BFB max_lot_ratio_mult 20.0 잔재","issue":"두 전략의 K_rho 는 cycle245 배포 직전 표본 보호용 임시값 20.0 이 DB 에 그대로다. D2 는 VCP 의 첫 진입을 여는 변경이므로, 복원 없이 적용하면 4개월 반 만의 첫 랏이 rho축 명목 상한이 꺼진 채로 나간다","evidence":"_workspace/00_URGENT_WORKLIST.md 결정표 항목 6 = 'max_lot_ratio_mult 20.0 -> 2.5 복원은 VCP 첫 진입 개방과 같은 사이클에서 반드시 동반' + 잔여 결함 2번 '최소한 VCP 진입 개방 전 2.5 복원'","options":["D2 와 같은 사이클에서 VCP·BFB K_rho 를 2.5 로 복원(권고)","K_rho 복원 없이는 D2 를 적용하지 않는다","D2 보류"]},
    {"topic":"volume_contraction_ratio 가 범위 상한에 붙어 있다","issue":"라이브 1.00 = PARAM_RANGES 상한(0.30~1.00)이자 코드 기본값 0.70 보다 이미 완화된 값이다. 2차 병목인데 자문이 더 완화할 수단이 없다","evidence":"09-04·09-07·09-09 는 step7 생존 1건을 step8 이 전부 탈락시켜 prepared 0 (funnel 실측). 09-09 일일 튜너는 오히려 0.8 로 조이라고 권고했다","options":["현행 1.00 유지","PARAM_RANGES 상한 재검토는 코드 변경 = 사람 결정","step7 완화 후 step8 통과율 10영업일 재측정 뒤 판단"]},
    {"topic":"체결 0건 전략이 예산 20% 를 점유한다","issue":"weight=0.20 인데 전 기간 왕복 0. allocate_funds 가 Σ 로 정규화하므로 이 20% 는 다른 전략이 못 쓰는 자금이다","evidence":"GET /api/strategies vcp_breakout.weight=0.20 · GET /api/strategies/te n=0","options":["step7 완화 후 10영업일 관찰하고 그때 재검토","즉시 축소(자문은 권고하지 않는다 — 표본 0으로 비중을 깎는 것은 §6 금지 추론)","현행 유지"]}],
  "no_change_reason":null,
@@ -196,7 +200,7 @@ donchian 17% / BFB 17% / VCP 11% / kojiro 42%`, `_workspace/reports/2026-09-10_t
 대신 funnel 을 열어 **어디서 죽는지** 봤다.
 
 베이스(base)까지는 매일 22~38종목이 살아 오는데, 그다음 "Pullback 이 점점 얕아지는가"
-관문에서 **평균 92%가 잘린다.** 그 관문은 세 조건의 AND 다 — ① 되돌림 횟수 2~4회
+관문에서 **93.75%가 잘린다**(135/144, 일자별 단순평균 93.90%). 그 관문은 세 조건의 AND 다 — ① 되돌림 횟수 2~4회
 ② 매번 직전보다 얕아질 것 ③ **마지막 되돌림 폭 10% 이하**. ①②는 범위 밖이고 ③만 조정 가능하다.
 
 **여기서 로그만으로는 답이 안 나온다.** 탈락 사유 문자열은 세 조건을 통째로 나열하고,
@@ -412,7 +416,8 @@ TE +0.27%/왕복 · RR 1.50 > 필요RR 1.32 로 **유일한 `superior`** 다.
 | # | 항목 | 요지 |
 |---|---|---|
 | **D1** | **비중 재배분 감사 공백 + VCP 20%** | 09:09 PUT 기록과 20:32 라이브가 다르고 **두 번째 변경의 기록이 없다.** 그 결과 전 기간 왕복 0인 VCP 가 11%→20% 로 올라갔다 |
-| **D2** | **`vcp_breakout.last_pullback_max` 0.10 → 0.12** | 이번 주 유일한 권고. 코드 기본값 복원 · 방향 완화. 실제 일봉 재실행 결과 23행 중 **6행**(2종목)이 이 값 하나에만 걸린다. **효과는 작다**. **0.15 는 선택지가 아니다**(추가 통과 0 으로 실측) |
+| **D2** | **`vcp_breakout.last_pullback_max` 0.10 → 0.12** | 이번 주 유일한 권고. 코드 기본값 복원 · 방향 완화. 실제 일봉 재실행 결과 23행 중 **6행**(2종목)이 이 값 하나에만 걸린다. **효과는 작다**. **0.15 는 선택지가 아니다**(추가 통과 0 으로 실측). ⚠️ **선결 조건 있음 — D2' 를 먼저 읽을 것** |
+| **D2'** | ⚠️ **D2 의 선결 조건 — VCP·BFB `max_lot_ratio_mult` 20.0 → 2.5 복원** | 두 전략의 K_ρ 는 cycle245 배포 직전 **표본 보호용 임시값 20.0** 이 DB 에 그대로 남아 있다. **D2 는 VCP 의 첫 진입을 여는 변경이므로, 복원 없이 적용하면 4개월 반 만의 첫 랏이 ρ축 명목 상한이 꺼진 채로 나간다.** 워크리스트가 이미 "VCP 첫 진입 개방과 **같은 사이클에서** 반드시 동반"으로 못박아 둔 항목이다(`_workspace/00_URGENT_WORKLIST.md` 결정표 ⑥ · 잔여 결함 2번) |
 | **D3** | **donchian 이 열위인데 고칠 키가 봉인돼 있다** | verdict `inferior` · RR 0.50 vs 필요RR 2.14. 개선 축 `atr_trail_mult`(1.8, 코드 기본 2.0)·`breakout_fail_n_days`(2, 구 범위 하한) 둘 다 봉인 키 → 주간 자문 체계 안에서는 구조적으로 방치된다 |
 | **D3'** | **VCP step7 단조 수축 조건(strict)** | 회수 조건 통과 탈락 51행의 **45행(88%)** 이 여기 걸린다. 등호도 거부하는 비교라 폭이 직전과 같기만 해도 탈락. **대응 파라미터 없음** = VCP 4개월 반 무체결의 진짜 이유 |
 | **D4** | **cycle265(`[7] STCK_OPRC` 스코프 시정) 착수 여부** | 90초 보류는 실측으로 닫혔지만 오염된 시가 값 자체는 그대로. **VB·LTV 재활성의 선결 조건** |
@@ -430,7 +435,7 @@ TE +0.27%/왕복 · RR 1.50 > 필요RR 1.32 로 **유일한 `superior`** 다.
 |---|---|---|---|
 | V1 | D2 적용 시 VCP funnel | step7 생존 1~4 → **2~5**(+약 1.2건/일), step99 0.6 → **0.8~1.5건/일**. 이보다 크게 늘면 재실행 추정이 틀린 것이므로 재조사 | 5영업일 |
 | V1b | D3' 정량화(코드 변경 없이) | 탈락 종목 pullback 폭 수열을 덤프해 직전 대비 반등 5%·10% 이내 비율 산출 → D3' 판단 근거 | 0(즉시 가능) |
-| V2 | VCP 첫 체결 | 4개월 반 만의 첫 BUY. 1건이라도 나오면 배관 정상 실증 | 1건 |
+| V2 | VCP 진입 배관 | ⚠️ **BUY 1건은 "한 경로가 끝까지 통과했다"는 증거일 뿐 배관 정상 입증이 아니다**(간헐적 누락은 그대로 숨는다). 성공 서명 = `prepared → step99 → would_buy → order` 전환을 **5영업일 연속 집계**해 단계 간 누락이 없을 것. 첫 BUY 는 그 집계의 시작점이지 종료 조건이 아니다 | 5영업일 |
 | V3 | cycle262 게이트 지속 | 09:00:00~09:01:30 매수 체결 **0건 유지**(현재 4영업일 연속 0) | 5영업일 |
 | V4 | cycle271 race 시정 | 09-04·09-09 의 중복 키 high finding **소멸** | 5영업일 |
 | V5 | donchian·kojiro 표본 증분 | `/api/strategies/te` n 이 donchian 22→**30+**, kojiro 17→**20+**(등급 문턱) | 각 5왕복 |
