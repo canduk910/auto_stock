@@ -938,6 +938,12 @@ async def test_c2_confirm_open_prices_rest_fallback_marks_source(monkeypatch):
 @pytest.mark.asyncio
 async def test_c2_source_label_never_breaks_confirm_loop(monkeypatch):
     """C2 — 출처 라벨이 터져도 시가 확정 루프는 죽지 않는다(관측 < 매매)."""
+    # cycle272 이후: 09:00:35~09:05:00 창은 leaf 가 main 기준가를 전담하고 이 백스톱 루프는
+    # VB·LTV 를 건너뛴다(open_price_rest.owns_board = now < 09:05). 이 테스트의 계약은 백스톱
+    # 경로 자체이므로 시각과 무관하게 백스톱을 강제한다 — 실제 벽시계에 두면 00:00~09:05 KST
+    # 실행(CI 00:04 실측, 2026-09-11)에서 확정 0 으로 붉어지는 시각 의존 결함이었다.
+    from src.engine import open_price_rest as _opr
+    monkeypatch.setattr(_opr, "owns_board", lambda *_a, **_k: False)
     from src.engine import open_price_observe as obs_mod
     from src.engine import scanner
     from src.api import condition as cond

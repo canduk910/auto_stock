@@ -68,6 +68,12 @@ async def test_confirm_skips_strategy_when_board_not_in_tradable(scheduler_env):
 @pytest.mark.asyncio
 async def test_confirm_falls_back_to_kis_api_when_open_price_missing(scheduler_env, monkeypatch):
     """ticker_prices 에 open_price 없으면 KIS fetch_stock_detail 폴백."""
+    # cycle272 이후: 09:00:35~09:05:00 창은 leaf 가 main 기준가를 전담하고 이 백스톱 루프는
+    # VB·LTV 를 건너뛴다(open_price_rest.owns_board = now < 09:05). 이 테스트의 계약은 백스톱
+    # 경로 자체이므로 시각과 무관하게 백스톱을 강제한다 — 실제 벽시계에 두면 00:00~09:05 KST
+    # 실행(CI 00:04 실측, 2026-09-11)에서 확정 0 으로 붉어지는 시각 의존 결함이었다.
+    from src.engine import open_price_rest as _opr
+    monkeypatch.setattr(_opr, "owns_board", lambda *_a, **_k: False)
     sched = scheduler_env.scheduler
     vb = sched.registry.get("volatility_breakout")
     vb.config.enabled = True
