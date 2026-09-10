@@ -14,7 +14,7 @@ import logging
 from datetime import date, datetime, timedelta, timezone
 
 from src.api.condition import add_business_days
-from src.engine import open_price_rest
+from src.engine import llm_buy_gate, open_price_rest
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
@@ -127,6 +127,18 @@ class LongTailVolatilityStrategy(StrategyBase):
         # 매수는 무접촉. 장중 롤백 = `PUT /api/strategies/{id}/params
         # {"open_price_scope_mode":"off"}`.
         "open_price_scope_mode": "enforce",
+        # cycle274 (2026-09-11) — VB·LTV 매수 신호 LLM 평가 게이트(shadow). 값은
+        # **기록만** 한다 — `enforce` 는 이 사이클에 미구현이라 `shadow` 외 전부
+        # `off` 로 낙하한다(leaf `llm_buy_gate._read_mode`). 돈을 쓰는 기능이라
+        # `llm_gate_mode`/`llm_gate_daily_call_cap` 키 부재는 **off/0**(cycle245
+        # `max_lot_ratio_mult` 관례와 같은 방향, cycle272 `open_price_scope_mode`
+        # 부재=enforce 와는 반대). PARAM_RANGES/INT_PARAMS 편입 금지(4키 전부,
+        # AST 런타임+소스 이중 가드). 장중 롤백 =
+        # `PUT /api/strategies/{id}/params {"llm_gate_mode":"off"}`.
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20,
     }
 
     def __init__(self, config: StrategyConfig):
@@ -813,7 +825,42 @@ class LongTailVolatilityStrategy(StrategyBase):
             })
             if len(self.state.buy_signals) > 20:
                 self.state.buy_signals.pop(0)
-            return Signal.BUY
+            # cycle274 — VB·LTV 매수 신호 LLM 평가 게이트(shadow). 값 복사만
+            # 넘긴다(전략 객체·_targets·config.params 참조 금지, 자문 §3.3/C17).
+            # 이 try/except 는 `observe_signal` 자신의 never-raise 계약과
+            # 별개다 — 호출 지점의 사고(시그니처 불일치·monkeypatch)까지
+            # 흡수해야 매매 행위가 한 글자도 바뀌지 않는다(cycle268 고지로
+            # 갭 관측 호출부의 흡수기 자리와 같은 계열).
+            try:
+                from src.engine.scanner import ticker_market_info as _llm_mkt_info
+                _llm_mkt = _llm_mkt_info.get(ticker) or {}
+                llm_buy_gate.observe_signal(
+                    strategy_id=self.strategy_id,
+                    ticker=ticker,
+                    name=ticker_names.get(ticker, ""),
+                    board=board,
+                    price_won=current_price,
+                    board_open_won=int(board_open),
+                    target_won=int(target),
+                    target_offset_won=int(board_info.get("target_offset", 0) or 0),
+                    k=float(info.get("k") or 0),
+                    prev_price_won=int(prev),
+                    prdy_close_won=int(ticker_prev_close.get(ticker, 0) or 0),
+                    market_cap_eok=_llm_mkt.get("market_cap"),
+                    trade_amount_eok=_llm_mkt.get("trade_amount"),
+                    budget_won=int(self.state.total_investment or 0),
+                    params_snapshot=dict(self.config.params),
+                    now_kst=_now_kst,
+                )
+                return Signal.BUY
+            except Exception:
+                try:
+                    trace_observer_failure(
+                        "[llm_buy_gate_call]", ticker or "-", None, dest_logger=logger,
+                    )
+                except Exception:  # pragma: no cover — 2차 예외까지 흡수
+                    pass
+                return Signal.BUY
 
         return Signal.NONE
 

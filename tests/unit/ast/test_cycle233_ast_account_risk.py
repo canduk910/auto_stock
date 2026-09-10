@@ -94,15 +94,60 @@ class TestG1SevenStrategyWiring:
             )
 
     def test_edge_crossing_strategies_gate_before_buy_return(self):
-        """momentum/VB — 게이트는 baseline 갱신 **뒤**, BUY 발사 **직전** (C233-F1)."""
+        """momentum/VB — 게이트는 baseline 갱신 **뒤**, BUY 발사 **직전** (C233-F1).
+
+        🔁 2026-09-11 (cycle274) — `buy_idx` 판정이 직접 `Return(BUY)` 뿐 아니라
+        **"모든 분기가 `Return(BUY)` 로 귀결되는 `Try` 문"** 도 인정하도록 넓어졌다.
+        VB 가 cycle274 LLM 게이트 관측 호출부의 예외를 `try/except` 로 흡수하면서
+        (`llm_buy_gate.observe_signal(...)` 이 monkeypatch 로 터져도 `Signal.BUY`
+        가 동일해야 한다는 별도 계약, C2) `return Signal.BUY` 가 이 블록의 **직접**
+        원소가 아니라 그 try/except 의 두 분기(try 본문 끝·except 핸들러 끝) 안에
+        중첩된다 — 원래의 직접-일치 검사는 이 정당한 구조 변화에도 항상 실패한다.
+        ⚠️ **넓히는 폭을 최소로 잡았다** — `ast.walk(s)` 로 하위 트리 전체를
+        재귀 탐색하면(1차 시도, 폐기) momentum.py 에서 무관한 블록의 무관한
+        중첩 반환까지 조기 매치돼 `break` 를 먼저 태워 **오탐 회귀**를 냈다
+        (그 블록엔 게이트가 없어 `ok=False`). 그래서 "Try 문 자신이 **모든**
+        분기에서 BUY 로 끝난다" 는 좁은 조건만 추가했다 — 임의의 중첩 반환이
+        아니라 정확히 이 사이클이 만든 패턴(try/except 양쪽 다 같은 반환으로
+        수렴)만 인정한다. momentum.py 처럼 직접 `Return(BUY)` 인 기존 케이스는
+        그대로 잡힌다(엄격한 상위집합).
+
+        🔁 2026-09-11 (cycle274 검증 라운드2 파인딩 #7) — `orelse`/`finalbody`
+        를 판정에 넣었다. 종전 판정은 `Try.body` 와 `handlers` 만 봐서
+        `try: ... except: return BUY else: return Signal.NONE` 같은 구조가
+        (정상 완주 시 `orelse` 만 실행되고 그 경로가 NONE 을 반환하는데도)
+        `try.body` 가 애초에 Return 으로 안 끝나 판정 자체가 False 로 빠지며
+        이 가드를 그냥 통과했다 — 게이트의 실제 불변식(BUY 발사보다 게이트가
+        먼저 평가된다)을 넓힌 판정이 놓칠 수 있는 사각이었다. `finally` 안에
+        Return 이 있으면 흐름이 거기로 흡수될 수 있어 판정 자체를 거부한다.
+        VB/LTV 의 현재 구조는 `else`/`finally` 를 쓰지 않으므로 이 강화는
+        기존 케이스에 영향이 없다(상한집합 그대로).
+        """
+        def _try_all_branches_return_buy(node: ast.stmt) -> bool:
+            if not isinstance(node, ast.Try):
+                return False
+            if any(isinstance(n, ast.Return) for s in node.finalbody for n in ast.walk(s)):
+                return False
+            branches = [node.body] + [h.body for h in node.handlers]
+            if node.orelse:
+                branches.append(node.orelse)
+            if not branches:
+                return False
+            return all(
+                b and isinstance(b[-1], ast.Return) and b[-1].value is not None
+                and "BUY" in ast.dump(b[-1].value)
+                for b in branches
+            )
+
         for fname in GATE_PRE_BUY_FILES:
             fn = _check_buy_fn(SRC / "engine" / "strategies" / fname)
             ok = False
             for block in _stmt_blocks(fn):
                 buy_idx = [
                     i for i, s in enumerate(block)
-                    if isinstance(s, ast.Return) and s.value is not None
-                    and "BUY" in ast.dump(s.value)
+                    if (isinstance(s, ast.Return) and s.value is not None
+                        and "BUY" in ast.dump(s.value))
+                    or _try_all_branches_return_buy(s)
                 ]
                 if not buy_idx:
                     continue

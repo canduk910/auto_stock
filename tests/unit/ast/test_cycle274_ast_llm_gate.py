@@ -1,0 +1,846 @@
+"""cycle274 Red — AST/구조 가드 (행위 0 의 **기계 증명**).
+
+정본 = `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`
+(§9 C1 · C5 · C10 · C15 · C16 · C17 · C18 · §10 leaf import 한정)
+
+**Red 단계 — 테스트만. `src/` 미변경.** Green = backend-dev.
+지금은 leaf 2파일이 없고 전략 파일에 호출도 없으므로 C1·C5·C10(소스)·C17·C18 이 RED 다.
+
+## 왜 `git grep`/`git ls-files` 로 소스를 스캔하지 않는가
+
+추적 파일만 보므로 Green 이 새로 만든 **미추적** 파일을 로컬에서 못 보고 CI(커밋 후)
+에서만 잡는다(cycle259 S4b). 소스 스캔은 `Path(...).rglob` + AST 로 한다.
+
+## 왜 `ast.dump` 의 sha 를 핀하지 않는가
+
+3.12(CI) / 3.13(로컬) 출력이 달라 로컬 초록·CI 실패가 난다(cycle256 G-250-5 ·
+cycle259 S4a). 본체 무변경 핀은 `ast.get_source_segment` 의 sha256 또는 파일
+내용 sha256 으로 잰다.
+
+## ⚠️ 사이클 한정 — 커밋 후 정리 의무
+
+`test_c15_*`(8영역 내용 sha 핀)는 **브랜치 base `4ca3463` 의 blob sha** 를 고정한 것이라
+cycle274 의 "8영역 무접촉" 증거로만 유효하다. 이후 8영역을 **정당하게** 바꾸는 사이클이
+오면 그 사이클이 이 dict 를 갱신하거나 이 테스트를 삭제한다(고아 가드 방지 — cycle240
+A11b · cycle252 G-252-5b). `bare git diff HEAD` 를 쓰지 않는 이유도 같다: 커밋 직후
+공허해지고 다음 편집에서 무조건 붉어진다.
+"""
+
+from __future__ import annotations
+
+import ast
+import hashlib
+import re
+from pathlib import Path
+
+import pytest
+
+pytestmark = pytest.mark.unit
+
+_ROOT = Path(__file__).resolve().parents[3]
+_SRC = _ROOT / "src"
+_STRATEGY_DIR = _SRC / "engine" / "strategies"
+
+_LEAF_GATE = _SRC / "engine" / "llm_buy_gate.py"
+_LEAF_FEATURES = _SRC / "engine" / "llm_features.py"
+_VB = _STRATEGY_DIR / "volatility_breakout.py"
+_LTV = _STRATEGY_DIR / "long_tail_volatility.py"
+_RECO = _SRC / "engine" / "recommendation_engine.py"
+_SCHEDULER = _SRC / "engine" / "scheduler.py"
+
+_VB_REL = "src/engine/strategies/volatility_breakout.py"
+_LTV_REL = "src/engine/strategies/long_tail_volatility.py"
+
+_KEYS = (
+    "llm_gate_mode",
+    "llm_gate_min_score",
+    "llm_gate_daily_call_cap",
+    "llm_gate_timeout_secs",
+)
+
+_MARKERS = (
+    "[llm_buy_score]",
+    "[llm_buy_score_failed]",
+    "[llm_gate_config]",
+    "[llm_gate_daily_cap]",
+)
+
+_REASONS = (
+    "timeout", "api_error", "parse_error", "schema_error",
+    "no_bars", "no_key", "cap_exceeded", "disabled_model",
+)
+
+
+# ---------------------------------------------------------------------------
+# 헬퍼
+# ---------------------------------------------------------------------------
+def _read(path: Path) -> str:
+    assert path.exists(), (
+        f"{path.relative_to(_ROOT)} 가 없다 — 자문 §10 파일 목록 미이행(Red)"
+    )
+    return path.read_text(encoding="utf-8")
+
+
+def _tree(path: Path) -> tuple[ast.Module, str]:
+    src = _read(path)
+    return ast.parse(src), src
+
+
+def _func(tree: ast.Module, name: str):
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name:
+            return n
+    return None
+
+
+def _method(tree: ast.Module, cls_name: str, name: str):
+    for cls in ast.walk(tree):
+        if isinstance(cls, ast.ClassDef) and cls.name == cls_name:
+            for n in cls.body:
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name:
+                    return n
+    return None
+
+
+def _parents(tree: ast.AST) -> dict[int, ast.AST]:
+    out: dict[int, ast.AST] = {}
+    for parent in ast.walk(tree):
+        for child in ast.iter_child_nodes(parent):
+            out[id(child)] = parent
+    return out
+
+
+def _observe_calls(tree: ast.AST) -> list[ast.Call]:
+    """`llm_buy_gate.observe_signal(...)` Call 노드."""
+    out = []
+    for n in ast.walk(tree):
+        if not isinstance(n, ast.Call):
+            continue
+        fn = n.func
+        if isinstance(fn, ast.Attribute) and fn.attr == "observe_signal":
+            out.append(n)
+    return out
+
+
+def _content_sha(rel: str) -> str:
+    return hashlib.sha256((_ROOT / rel).read_bytes()).hexdigest()
+
+
+def _method_segment(module_path: Path, cls_name: str, method: str) -> str:
+    src = _read(module_path)
+    tree = ast.parse(src)
+    cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == cls_name)
+    fn = next(
+        n for n in cls.body
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == method
+    )
+    return ast.get_source_segment(src, fn) or ""
+
+
+_STRATEGY_META = {
+    "vb": (_VB, "VolatilityBreakoutStrategy"),
+    "ltv": (_LTV, "LongTailVolatilityStrategy"),
+}
+_KINDS = ("vb", "ltv")
+
+
+# ===========================================================================
+# C1 — 호출은 `ast.Expr` statement, `return Signal.BUY` 직전, 파일당 1회 (HIGH)
+# ===========================================================================
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c1_1_observe_call_appears_exactly_once(kind: str) -> None:
+    """C1 (HIGH) — 전략 파일 전체에서 `observe_signal` 호출은 **정확히 1회**.
+
+    두 자리에서 부르면 래치·cap 이 흔들리고 "어느 자리가 표본인가" 가 흐려진다.
+    """
+    tree, src = _tree(_STRATEGY_META[kind][0])
+    calls = _observe_calls(tree)
+    assert len(calls) == 1, f"`observe_signal` 호출 {len(calls)}건 (기대 1)"
+    assert src.count("observe_signal") >= 1
+
+
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c1_2_observe_call_is_a_bare_expression(kind: str) -> None:
+    """C1 (HIGH) — Call 의 **직접 부모가 `ast.Expr`** 다.
+
+    반환값이 어떤 이름에도 바인딩되지 않고, 어떤 `If`/`Return`/`BoolOp`/비교의
+    피연산자도 아니다 = "반환값이 점수와 무관" 의 기계 증명. 이 한 가지가 이
+    사이클의 심장이다.
+    """
+    tree, _src = _tree(_STRATEGY_META[kind][0])
+    call = _observe_calls(tree)[0]
+    parent = _parents(tree)[id(call)]
+    assert isinstance(parent, ast.Expr), (
+        f"`observe_signal(...)` 의 부모가 {type(parent).__name__} 다 — "
+        "값이 소비되는 자리에 두면 shadow 계약이 깨진다"
+    )
+
+
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c1_3_observe_is_inside_check_buy_signal(kind: str) -> None:
+    """C1 — 호출은 `check_buy_signal` 안에 있다(다른 메서드로 새면 표본이 달라진다)."""
+    path, cls_name = _STRATEGY_META[kind]
+    tree, _src = _tree(path)
+    fn = _method(tree, cls_name, "check_buy_signal")
+    assert fn is not None
+    assert len(_observe_calls(fn)) == 1
+
+
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c1_4_observe_statement_immediately_precedes_return_buy(kind: str) -> None:
+    """C1 (HIGH) — 관측을 담은 문장과 `return Signal.BUY` 사이에 **분기가 0** 이다.
+
+    자문 §5.1 3번 근거: 반환문과 observe 사이에 어떤 조건도 없어야 "반환값이 점수와
+    무관" 을 AST 로 증명할 수 있다. 호출부 흡수기(`try/except`) 는 허용한다 —
+    C2(HIGH)가 그 흡수기를 요구하기 때문이다.
+    """
+    path, cls_name = _STRATEGY_META[kind]
+    tree, _src = _tree(path)
+    fn = _method(tree, cls_name, "check_buy_signal")
+    parents = _parents(fn)
+    call = _observe_calls(fn)[0]
+
+    # 관측 호출을 담은 "블록 내 문장" 까지 거슬러 올라가 그 형제 목록을 찾는다.
+    node: ast.AST = call
+    while id(node) in parents:
+        parent = parents[id(node)]
+        body = getattr(parent, "body", None)
+        if isinstance(body, list) and node in body:
+            idx = body.index(node)
+            assert idx + 1 < len(body), "관측 문장 뒤에 문장이 없다(return 이 어디에?)"
+            nxt = body[idx + 1]
+            assert isinstance(nxt, ast.Return), (
+                f"관측 문장 다음이 `return` 이 아니다: {type(nxt).__name__}"
+            )
+            assert isinstance(nxt.value, ast.Attribute) and nxt.value.attr == "BUY", (
+                "관측 문장 다음 반환이 `Signal.BUY` 가 아니다"
+            )
+            return
+        node = parent
+    pytest.fail("관측 호출을 담은 문장을 찾지 못했다")
+
+
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c1_5_observe_call_uses_keyword_arguments_only(kind: str) -> None:
+    """C1/§3.3 — 위치 인자 0. 16개 스칼라를 순서로 넘기면 조용한 자리 바뀜이 생긴다."""
+    tree, _src = _tree(_STRATEGY_META[kind][0])
+    call = _observe_calls(tree)[0]
+    assert call.args == [], "위치 인자 사용 — 키워드 전용이 계약이다"
+    assert call.keywords, "키워드 인자가 없다"
+
+
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c1_6_no_await_on_observe(kind: str) -> None:
+    """C1/C5 — 호출을 `await` 하지 않는다(동기 hot path 를 막으면 틱 처리가 정지한다)."""
+    tree, _src = _tree(_STRATEGY_META[kind][0])
+    call = _observe_calls(tree)[0]
+    assert not isinstance(_parents(tree)[id(call)], ast.Await)
+
+
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c1_7_module_imports_the_leaf(kind: str) -> None:
+    """C1/§5.1 diff (1) — 모듈 상단 import 1줄(`from src.engine import llm_buy_gate`)."""
+    tree, _src = _tree(_STRATEGY_META[kind][0])
+    names = set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ImportFrom) and n.module == "src.engine":
+            names |= {a.asname or a.name for a in n.names}
+    assert "llm_buy_gate" in names, "`from src.engine import llm_buy_gate` 부재"
+
+
+# ===========================================================================
+# C5 — `observe_signal` 본체: await/DB/HTTP 0, `create_task` 정확 1회 (HIGH)
+# ===========================================================================
+def _observe_fn():
+    tree, _src = _tree(_LEAF_GATE)
+    fn = _func(tree, "observe_signal")
+    assert fn is not None, "`observe_signal` 이 leaf 에 없다"
+    return fn
+
+
+def test_c5_1_observe_is_sync_def() -> None:
+    """C5 (HIGH) — `observe_signal` 은 **동기** 함수다(`async def` 금지)."""
+    tree, _src = _tree(_LEAF_GATE)
+    fn = _func(tree, "observe_signal")
+    assert isinstance(fn, ast.FunctionDef), "`async def observe_signal` 은 계약 위반"
+
+
+def test_c5_2_no_await_in_observe() -> None:
+    """C5 (HIGH) — 본체에 `Await`/`AsyncFor`/`AsyncWith` 0건.
+
+    `check_buy_signal` 은 동기이고 틱마다 돈다. 여기서 한 번 기다리면 그 틱의
+    나머지 전략 평가가 전부 밀린다.
+    """
+    bad = [
+        type(n).__name__ for n in ast.walk(_observe_fn())
+        if isinstance(n, (ast.Await, ast.AsyncFor, ast.AsyncWith))
+    ]
+    assert bad == [], f"동기 hot path 에 비동기 구문: {bad}"
+
+
+def test_c5_3_no_db_or_http_in_observe() -> None:
+    """C5 (HIGH) — DB/HTTP 호출 흔적 0건(`pg.`·`fetch`·`httpx`·`client.`)."""
+    fn = _observe_fn()
+    seg = ast.get_source_segment(_read(_LEAF_GATE), fn) or ""
+    for token in ("pg.", "httpx", "get_recent_daily", "chat.completions"):
+        assert token not in seg, f"`observe_signal` 안에 `{token}` — 동기 경로 오염"
+
+
+def test_c5_4_create_task_called_exactly_once() -> None:
+    """C5 (HIGH) — `asyncio.create_task` Call 이 정확히 1개.
+
+    2개면 같은 신호가 두 번 평가돼 비용·표본이 모두 어긋난다.
+    """
+    calls = [
+        n for n in ast.walk(_observe_fn())
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+        and n.func.attr == "create_task"
+    ]
+    assert len(calls) == 1, f"`create_task` {len(calls)}건 (기대 1)"
+
+
+def test_c5_5_latch_mark_precedes_create_task() -> None:
+    """C5 (뮤테이션 '래치 mark 를 create_task 뒤로 이동' 킬).
+
+    mark 가 `create_task` **앞**에 있어야 중복 발사가 구조적으로 막힌다. 런타임
+    테스트로는 이 순서를 구별할 수 없다(둘 사이에 양보가 없어 결과가 같다) —
+    그래서 **줄 순서** 로만 잰다.
+    """
+    fn = _observe_fn()
+    # 검증 라운드 2 HIGH — `_daily_cap_warned.mark_emitted`(cap 경고 래치)는 항상
+    # create_task 앞이라 `min(marks)` 판정이 미끼에 속았다. **래치 인스턴스
+    # `_latch` 의 mark 만** 모으고, 그 **전부**가 첫 create_task 앞이어야 한다.
+    marks = [
+        n.lineno for n in ast.walk(fn)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+        and n.func.attr == "mark_emitted"
+        and isinstance(n.func.value, ast.Name) and n.func.value.id == "_latch"
+    ]
+    tasks = [
+        n.lineno for n in ast.walk(fn)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+        and n.func.attr == "create_task"
+    ]
+    assert marks, "`_latch.mark_emitted` 호출이 없다"
+    assert tasks, "`create_task` 호출이 없다"
+    assert max(marks) < min(tasks), (
+        f"`_latch.mark_emitted`(lines {marks}) 가 create_task(line {min(tasks)}) 뒤에 있다 — 중복 발사"
+    )
+
+
+def test_c5_6_observe_body_is_wrapped_in_try_except_exception() -> None:
+    """C5/§5.2 — 본체 전체가 `try/except Exception` 하나. never-raise 의 구조적 근거.
+
+    좁은 튜플(`except (TypeError, ValueError)`)은 `int(inf)` 의 `OverflowError` 에서
+    뚫린다(cycle262 적대 검증 HIGH). 뮤테이션 `except Exception` → 좁은 튜플을 죽인다.
+    """
+    fn = _observe_fn()
+    tries = [n for n in fn.body if isinstance(n, ast.Try)]
+    assert tries, "`observe_signal` 본체에 최상위 `try` 가 없다"
+    handlers = [h for t in tries for h in t.handlers]
+    assert any(
+        isinstance(h.type, ast.Name) and h.type.id == "Exception" for h in handlers
+    ), "`except Exception` 이 없다(좁은 예외 튜플은 OverflowError 를 놓친다)"
+
+
+def test_c5_7_observe_returns_none_only() -> None:
+    """C5/§5.2 — 반환은 항상 `None`(값을 돌려주면 호출부가 언젠가 그것을 읽는다)."""
+    fn = _observe_fn()
+    bad = [
+        n.lineno for n in ast.walk(fn)
+        if isinstance(n, ast.Return) and n.value is not None
+        and not (isinstance(n.value, ast.Constant) and n.value.value is None)
+    ]
+    assert bad == [], f"값을 돌려주는 return: line {bad}"
+
+
+def test_c5_8_observe_leaves_a_trace_on_failure() -> None:
+    """C5/cycle258 카드 #5 — 흡수기가 `trace_observer_failure` 를 부른다(무흔적 pass 금지)."""
+    seg = ast.get_source_segment(_read(_LEAF_GATE), _observe_fn()) or ""
+    assert "trace_observer_failure" in seg
+
+
+def test_c5_9_evaluate_uses_wait_for_with_timeout() -> None:
+    """C5/§4.4 — `_evaluate` 가 `asyncio.wait_for(..., timeout=...)` 로 콜을 감싼다.
+
+    `AsyncOpenAI` 기본 타임아웃은 **600s** 다. 지정하지 않으면 task 가 10분 산다.
+    """
+    tree, src = _tree(_LEAF_GATE)
+    fn = _func(tree, "_evaluate")
+    assert fn is not None, "`_evaluate` 부재"
+    calls = [
+        n for n in ast.walk(fn)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+        and n.func.attr == "wait_for"
+    ]
+    assert calls, "`asyncio.wait_for` 미사용"
+    assert any(kw.arg == "timeout" for c in calls for kw in c.keywords), (
+        "`wait_for` 에 `timeout=` 키워드가 없다"
+    )
+
+
+def test_c5_10_evaluate_reraises_cancelled_error() -> None:
+    """C5/§5.3 — `asyncio.CancelledError` 는 re-raise(cycle272 `open_price_rest` 계약)."""
+    src = _read(_LEAF_GATE)
+    fn = _func(ast.parse(src), "_evaluate")
+    assert fn is not None, "`_evaluate` 부재"
+    seg = ast.get_source_segment(src, fn) or ""
+    assert "CancelledError" in seg, "`CancelledError` 분기 부재 — 취소가 본체에 갇힌다"
+    assert "raise" in seg
+
+
+def test_c5_11_semaphore_is_two() -> None:
+    """C5/§5.4 (뮤테이션 '세마포어 무제한' 킬) — 전역 `Semaphore(2)` 리터럴."""
+    src = _read(_LEAF_GATE)
+    assert re.search(r"Semaphore\(\s*2\s*\)", src), "전역 `asyncio.Semaphore(2)` 부재"
+
+
+def test_c5_12_max_retries_zero_and_no_temperature() -> None:
+    """C5/§4.4 — SDK 재시도 0(지연 3배화 방지) · `temperature` 미지정.
+
+    gpt-5 계열은 1 이외 `temperature` 를 거부할 수 있고 거부는 fail-open 으로
+    흡수되지만 그러면 게이트가 **조용히 죽는다**(§11 Q10).
+    """
+    src = _read(_LEAF_GATE)
+    assert re.search(r"max_retries\s*=\s*0", src), "`max_retries=0` 부재"
+    # 주석·docstring 은 세지 않는다 — **실제 인자**만 본다(문자열 검사는 설명문까지 잡는다).
+    tree = ast.parse(src)
+    bad = [
+        n.lineno for n in ast.walk(tree)
+        if isinstance(n, ast.Call)
+        for kw in n.keywords if kw.arg == "temperature"
+    ]
+    assert not bad, f"`temperature=` 를 인자로 넘긴다(§4.4 위반): line {bad}"
+
+
+# ===========================================================================
+# leaf import 한정 (§10) + 마커 스코프
+# ===========================================================================
+_ALLOWED_LEAF_IMPORTS = {
+    "src.engine.daily_emit_cap",
+    "src.engine.observer_trace",
+    "src.engine.llm_features",
+    "src.config",
+    "src.db.stock_master_daily",
+}
+
+
+def test_g1_1_leaf_module_level_src_imports_are_limited() -> None:
+    """§10 — leaf 의 **모듈 최상단** `src.*` import 는 허용 목록으로 한정된다.
+
+    `scanner` 는 함수 내 **지연 import** 여야 한다(순환 차단 — cycle268/272 선례).
+    이 한정이 곧 "leaf 는 8영역을 모듈 로드 시점에 끌어오지 않는다" 의 증거다.
+    """
+    tree, _src = _tree(_LEAF_GATE)
+    mods = set()
+    for n in tree.body:      # 최상단만
+        if isinstance(n, ast.ImportFrom) and (n.module or "").startswith("src"):
+            mods.add(n.module)
+        elif isinstance(n, ast.Import):
+            mods |= {a.name for a in n.names if a.name.startswith("src")}
+    extra = mods - _ALLOWED_LEAF_IMPORTS
+    assert not extra, f"leaf 모듈 최상단 import 위반: {sorted(extra)}"
+
+
+def test_g1_2_features_module_imports_no_src() -> None:
+    """§10 — `llm_features` 는 **순수 함수** 모듈이다. `src.*` import 0건."""
+    tree, _src = _tree(_LEAF_FEATURES)
+    mods = set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ImportFrom) and (n.module or "").startswith("src"):
+            mods.add(n.module)
+        elif isinstance(n, ast.Import):
+            mods |= {a.name for a in n.names if a.name.startswith("src")}
+    assert not mods, f"`llm_features` 가 `src.*` 를 import 한다: {sorted(mods)}"
+
+
+def test_g1_3_scanner_is_lazy_imported_inside_a_function() -> None:
+    """§7.2 — `scanner` 는 함수 안에서만 import 된다(모듈 최상단 금지)."""
+    tree, _src = _tree(_LEAF_GATE)
+    top = {
+        n.module for n in tree.body
+        if isinstance(n, ast.ImportFrom) and n.module
+    }
+    assert not any("scanner" in (m or "") for m in top), "scanner 모듈 최상단 import"
+    inner = [
+        n for n in ast.walk(tree)
+        if isinstance(n, ast.ImportFrom) and "scanner" in (n.module or "")
+    ]
+    assert inner, "`scanner` 지연 import 가 없다 — `slip_bp` 를 어디서 읽나"
+
+
+def test_g1_4_markers_live_only_in_the_leaf() -> None:
+    """§7.1 — 마커 4종 문자열은 leaf 한 파일에만 존재한다(전략·8영역으로 새지 않는다).
+
+    소스 스캔은 `rglob`(미추적 파일 포함) — `git grep` 은 Green 이 새로 만든 파일을
+    로컬에서 놓친다(cycle259 S4b).
+    """
+    offenders: dict[str, list[str]] = {}
+    for path in _SRC.rglob("*.py"):
+        if path == _LEAF_GATE:
+            continue
+        text = path.read_text(encoding="utf-8")
+        hits = [m for m in _MARKERS if m in text]
+        if hits:
+            offenders[path.relative_to(_ROOT).as_posix()] = hits
+    assert not offenders, f"cycle274 마커가 leaf 밖에 있다: {offenders}"
+
+
+def test_g1_5_failure_reason_vocabulary_is_complete() -> None:
+    """§7.1 ② — 실패 사유 8종이 전부 leaf 소스에 리터럴로 존재한다.
+
+    어휘가 빠지면 그 실패는 다른 사유로 뭉뚱그려져 **실패 분포가 왜곡**되고,
+    2주 뒤 "실패율 <10%" 게이트가 무엇을 잰 것인지 알 수 없게 된다.
+    """
+    src = _read(_LEAF_GATE)
+    missing = [r for r in _REASONS if f'"{r}"' not in src and f"'{r}'" not in src]
+    assert not missing, f"실패 사유 리터럴 누락: {missing}"
+
+
+def test_g1_6_no_openai_call_at_import_time() -> None:
+    """§4.4 — 모듈 최상단에서 `AsyncOpenAI()` 를 만들지 않는다(지연 import 싱글톤).
+
+    `recommendation_engine._call_openai` 는 콜마다 새로 만든다(하루 4번이면 무해).
+    hot path 는 커넥션 풀을 재사용해야 하지만, **import 시점**에 만들면 키가 없는
+    테스트/CLI 환경에서 모듈 로드 자체가 실패한다.
+    """
+    tree, _src = _tree(_LEAF_GATE)
+    top_calls = [
+        n for n in tree.body
+        if isinstance(n, (ast.Assign, ast.Expr))
+        for c in ast.walk(n)
+        if isinstance(c, ast.Call) and isinstance(c.func, ast.Name)
+        and c.func.id == "AsyncOpenAI"
+    ]
+    assert not top_calls, "모듈 최상단에서 AsyncOpenAI 를 생성한다"
+
+
+# ===========================================================================
+# C10 — `PARAM_RANGES` / `INT_PARAMS` 미편입 (런타임 + 소스 이중, G-242-1 답습)
+# ===========================================================================
+@pytest.mark.parametrize("key", _KEYS)
+def test_c10_1_runtime_dicts_exclude_key(key: str) -> None:
+    """C10 (HIGH) — 4키 전부 `PARAM_RANGES`·`INT_PARAMS` 밖.
+
+    `_validate_recommendations` 가 화이트리스트 밖 키를 버리므로 미편입이 곧 AI
+    자동 튜닝 차단이다. 임계 70 을 최근 손실로 최적화하면 n≤20 에 과적합한다
+    (cycle223 선례). `llm_gate_daily_call_cap` 은 **비용 다이얼**이기도 하다.
+    """
+    from src.engine.recommendation_engine import INT_PARAMS, PARAM_RANGES
+
+    assert key not in PARAM_RANGES
+    assert key not in INT_PARAMS
+
+
+@pytest.mark.parametrize("key", _KEYS)
+def test_c10_2_recommendation_engine_source_has_no_key_literal(key: str) -> None:
+    """C10 — 런타임 dict 만 보면 조건부 편입(`if ...: PARAM_RANGES[K] = ...`)을 놓친다."""
+    text = _read(_RECO)
+    hits = [i for i, line in enumerate(text.splitlines(), 1) if key in line]
+    assert not hits, f"`recommendation_engine.py` 에 `{key}` 리터럴(lines {hits})"
+
+
+@pytest.mark.parametrize("key", _KEYS)
+def test_c10_3_key_lives_in_exactly_vb_and_ltv_default_params(key: str) -> None:
+    """C10/§6.2 — 전략 glob 전수에서 이 키를 `DEFAULT_PARAMS` 에 가진 파일 = 정확히 {VB, LTV}.
+
+    나머지 5전략에 새면 그 전략이 조용히 LLM 비용을 쓰기 시작한다(§11 Q8 = VB·LTV 확정).
+    """
+    owners: dict[str, object] = {}
+    for path in _STRATEGY_DIR.rglob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Assign):
+                continue
+            if not any(isinstance(t, ast.Name) and t.id == "DEFAULT_PARAMS"
+                       for t in node.targets):
+                continue
+            if not isinstance(node.value, ast.Dict):
+                continue
+            for k, v in zip(node.value.keys, node.value.values):
+                if isinstance(k, ast.Constant) and k.value == key:
+                    owners[path.relative_to(_ROOT).as_posix()] = getattr(v, "value", v)
+    assert set(owners) == {_VB_REL, _LTV_REL}, (
+        f"`{key}` 소유 전략이 {{VB, LTV}} 가 아니다 — 실측 {sorted(owners)}"
+    )
+
+
+def test_c10_4_config_declares_buy_gate_model() -> None:
+    """C10 자매/§6.3 — `src/config.py` 에 `openai_buy_gate_model` 1키(기본 `gpt-5.6-luna`).
+
+    20:00 자문 모델(`openai_recommend_model`)과 **분리**한다 — 한쪽을 더 싼 모델로
+    옮기고 싶을 때 다른 쪽이 딸려가면 안 된다. `openai_api_key` 는 재사용.
+    """
+    from src.config import settings
+
+    assert getattr(settings, "openai_buy_gate_model", None) == "gpt-5.6-luna"
+    assert hasattr(settings, "openai_recommend_model")
+    assert settings.openai_recommend_model == "gpt-5.6-luna"
+
+
+def test_c10_5_no_new_killswitch_boolean_param() -> None:
+    """C10/§6.2 — 킬스위치는 `llm_gate_mode` 하나다(`*_enabled` 불리언 신설 금지).
+
+    끄는 수단이 둘이면 "무엇이 이겼는지" 를 로그로 판정할 수 없다(cycle264 계약).
+    """
+    for path in (_VB, _LTV):
+        src = _read(path)
+        assert "llm_gate_enabled" not in src
+        assert "llm_buy_gate_enabled" not in src
+
+
+# ===========================================================================
+# C17 — leaf read-only (AST): scanner/params 전역에 대입하지 않는다
+# ===========================================================================
+_READONLY_NAMES = (
+    "ticker_prices", "ticker_names", "ticker_market_info", "ticker_prev_close",
+    "_targets", "params",
+)
+
+
+def test_c17_3_leaf_never_assigns_to_readonly_state() -> None:
+    """C17 (HIGH) — leaf 는 읽기 전용 상태에 **대입하지 않는다**.
+
+    `scanner.ticker_prices[...] = ...` · `.update(...)` · `.pop(...)` 전부 금지.
+    8영역을 파일로 건드리지 않아도 그 **상태**를 바꾸면 같은 사고다(cycle242 G-242-8 동형).
+    """
+    tree, _src = _tree(_LEAF_GATE)
+    bad: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for t in targets:
+                if isinstance(t, ast.Subscript):
+                    base = t.value
+                    name = getattr(base, "attr", getattr(base, "id", ""))
+                    if name in _READONLY_NAMES:
+                        bad.append(f"line {node.lineno}: {name}[...] 대입")
+                if isinstance(t, ast.Attribute) and t.attr in _READONLY_NAMES:
+                    bad.append(f"line {node.lineno}: .{t.attr} 대입")
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            base = node.func.value
+            name = getattr(base, "attr", getattr(base, "id", ""))
+            if name in _READONLY_NAMES and node.func.attr in {
+                "update", "pop", "clear", "setdefault", "popitem", "__setitem__",
+            }:
+                bad.append(f"line {node.lineno}: {name}.{node.func.attr}()")
+    assert not bad, f"leaf 가 읽기 전용 상태를 변경한다: {bad}"
+
+
+def test_c17_4_leaf_does_not_import_eight_area_modules() -> None:
+    """C17 — leaf 가 `risk`/`order_engine`/`strategy_registry`/`session`/`realtime`/`auth`
+    를 import 하지 않는다(8영역 무접촉의 두 번째 증거)."""
+    src = _read(_LEAF_GATE)
+    banned = (
+        "src.engine.risk", "src.engine.order_engine", "src.engine.strategy_registry",
+        "src.engine.session", "src.realtime", "src.auth", "src.api.order",
+    )
+    hits = [b for b in banned if b in src]
+    assert not hits, f"leaf 가 8영역 모듈을 참조한다: {hits}"
+
+
+# ===========================================================================
+# C15 — 8영역 + scheduler + strategy_base + 나머지 전략 5파일 내용 sha 불변 (HIGH)
+#
+# ⚠️ 사이클 한정. 값은 브랜치 base `4ca3463` 의 blob sha256 (`git show 4ca3463:<path>`).
+# ===========================================================================
+_BASE_SHA = {
+    "src/engine/risk.py":
+        "b0e1a4778ace65af0a68b7c528cc7e135ec7726de025e224a2d3d153e5a4dde5",
+    "src/engine/order_engine.py":
+        "773b4d2b783869b7ae703f17fe9e1ef8ebbff333bc21c2b19da0ff096e3ee2c3",
+    "src/engine/session.py":
+        "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
+    "src/engine/scanner.py":
+        "f999183c7b92b29e0a9fc1222161e4c6c978a7baaef6603173ead48e65944b99",
+    "src/engine/strategy_registry.py":
+        "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
+    "src/api/order.py":
+        "ccd430b445358062a41b6b37f8e4d379b9a97c24090ab5133aa83ae829207115",
+    "src/engine/scheduler.py":
+        "51dbd6cdfd0db74d4e7350878e0341489366ff3afd13c4a7e64ddf3957f5a870",
+    "src/engine/strategy_base.py":
+        "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
+    "src/auth/token.py":
+        "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
+    "src/auth/hashkey.py":
+        "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
+    "src/realtime/handler.py":
+        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+    "src/realtime/websocket.py":
+        "1589cffb955e5af28ad0f145860bcc127ea8fda2b25d6817bd79c079472d5c4f",
+    "src/realtime/websocket_pool.py":
+        "bd1108dd40da4e72eab10581485b1b032e58af7c06754a9118fc7fafc20c8de7",
+    "src/engine/strategies/momentum.py":
+        "5bfc25a183a13ec0e00bdce7ff0e1727d323bd62f1ba8b8937561a4eb74c0da1",
+    "src/engine/strategies/donchian_swing.py":
+        "107246d21feeac07ed6556269897b60d61ab1b617746d3c2f6aacd3d1385dfa0",
+    "src/engine/strategies/kojiro.py":
+        "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
+    "src/engine/strategies/vcp_breakout.py":
+        "f77ffc1896037692c47a6611a6d3b8aecf66bf17f3c6161a1cf52bc96f0ce3dd",
+    "src/engine/strategies/bull_flag_breakout.py":
+        "0b7cfe745c6f437a7f55b7c6773e549c5c545f0c5b6c85be51623221a3b6afb0",
+}
+
+
+@pytest.mark.parametrize("rel", sorted(_BASE_SHA))
+def test_c15_1_untouchable_files_are_byte_identical(rel: str) -> None:
+    """C15 (HIGH) — 8영역·`scheduler.py`·`strategy_base.py`·나머지 전략 5파일 **byte 동일**.
+
+    이 사이클의 제1 계약은 "매매 행위를 한 글자도 바꾸지 않는다" 다.
+    ⚠️ **핀을 먼저 재산출하지 마라** — 그 순간 실제 변경이 새 스냅샷으로 봉인된다.
+      1) `git diff 4ca3463 -- <path>` 를 눈으로 읽어라.
+      2) cycle274 범위 밖 변경이면 되돌려라.
+      3) 이 사이클은 이 파일들을 **바꾸지 않는다** — 재산출할 일이 없다.
+    """
+    assert _content_sha(rel) == _BASE_SHA[rel], (
+        f"{rel} 이 base(4ca3463) 와 다르다 — 8영역 무접촉 위반"
+    )
+
+
+def test_c15_2_realtime_and_auth_have_no_new_python_files() -> None:
+    """C15 — `src/realtime/**`·`src/auth/**` 에 신규 `.py` 가 생기지 않았다."""
+    seen = {
+        p.relative_to(_ROOT).as_posix()
+        for d in ("realtime", "auth") for p in (_SRC / d).rglob("*.py")
+        if p.name != "__init__.py"
+    }
+    assert seen <= set(_BASE_SHA), f"8영역 디렉터리에 신규 파일: {sorted(seen - set(_BASE_SHA))}"
+
+
+# ===========================================================================
+# C16 — `scheduler.py` 라인 상한 (무접촉이므로 3,897 그대로)
+# ===========================================================================
+def test_c16_1_scheduler_line_count_unchanged() -> None:
+    """C16 — `scheduler.py` 는 이 사이클에서 **무접촉**이라 3,897L 그대로다."""
+    lines = len(_read(_SCHEDULER).splitlines())
+    assert lines == 3897, f"scheduler.py {lines}L (기대 3,897 — cycle274 는 무접촉)"
+
+
+def test_c16_2_scheduler_line_cap_is_not_looser_than_cycle257() -> None:
+    """C16 — 자체 상한이 cycle257 의 **영구** 상한(3,900)보다 느슨하지 않다.
+
+    cycle264 가 자기 상한을 4,000 으로 느슨하게 두는 바람에 cycle257 영구 가드
+    위반을 초록으로 덮을 뻔했다(적대 검증 HIGH). 두 수가 갈라지면 항상 **더 조인
+    쪽**이 정본이다.
+    """
+    mine = {int(c) for c in re.findall(
+        r"assert lines [<=]=? (\d+)", Path(__file__).read_text(encoding="utf-8"),
+    )}
+    theirs = {int(c) for c in re.findall(
+        r"assert count < (\d+)",
+        (_ROOT / "tests" / "unit" / "ast"
+         / "test_cycle257_ast_dead_code_removed.py").read_text(encoding="utf-8"),
+    )}
+    assert mine and theirs
+    assert min(mine) <= min(theirs), f"cycle274 상한({sorted(mine)}) > cycle257({sorted(theirs)})"
+
+
+# ===========================================================================
+# C18 — sha 핀 재핀: `check_buy_signal` 2핀 갱신 · 나머지 4핀 불변 (HIGH)
+# ===========================================================================
+_PINS_FILE = _ROOT / "tests" / "unit" / "ast" / "test_cycle264_scope_and_pins.py"
+
+# base(4ca3463) 시점의 `ast.get_source_segment` sha256 — cycle264 `_STRATEGY_PINS` 원문.
+_BASE_METHOD_SHA = {
+    ("vb", "check_buy_signal"):
+        "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
+    ("vb", "check_exit_signal"):
+        "86593b038e4cf8121ae47069fb368346edc50d9692b29db4cbdcc8897421b72e",
+    ("vb", "calc_buy_quantity"):
+        "6d24ef3f3afd211ae6123623075b08320cdc08c9cd48a6db965355305ad4e732",
+    ("ltv", "check_buy_signal"):
+        "fb1e7460e5d6906aacd9dd6cbc1037fb7327759c24ca4df055773ba1f22cac2a",
+    ("ltv", "check_exit_signal"):
+        "c8b0e6a8c8705d49bb6f12f82f505d426a5bdeb81413f8b2e0276eabb7dd9cad",
+    ("ltv", "calc_buy_quantity"):
+        "1149ecc8ea37fb1ba164cc1fd88e6525111d5142168ca879f1026c7890905b81",
+}
+
+_FROZEN = [k for k in _BASE_METHOD_SHA if k[1] != "check_buy_signal"]
+
+
+def _current_method_sha(kind: str, method: str) -> str:
+    path, cls_name = _STRATEGY_META[kind]
+    return hashlib.sha256(_method_segment(path, cls_name, method).encode("utf-8")).hexdigest()
+
+
+@pytest.mark.parametrize("key", sorted(_FROZEN))
+def test_c18_1_exit_and_qty_methods_are_frozen(key) -> None:
+    """C18 (HIGH) — `check_exit_signal`·`calc_buy_quantity` **4핀 불변**.
+
+    그 4핀 불변이 "청산·수량 규약 무접촉" 의 기계적 증거다. LLM 게이트는 진입
+    관측이지 청산·사이징에 손대는 사이클이 아니다.
+    """
+    kind, method = key
+    assert _current_method_sha(kind, method) == _BASE_METHOD_SHA[key], (
+        f"{kind}.{method} 이 바뀌었다 — cycle274 범위 밖(청산·수량 무접촉 위반)"
+    )
+
+
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c18_2_check_buy_signal_must_change(kind: str) -> None:
+    """C18 (HIGH) — VB·LTV `check_buy_signal` 은 **반드시 바뀐다**(관측 1줄 삽입).
+
+    Red 에서는 아직 안 바뀌었으므로 이 케이스가 RED 다 = "배선이 아직 없다" 의 신호.
+    """
+    key = (kind, "check_buy_signal")
+    assert _current_method_sha(kind, "check_buy_signal") != _BASE_METHOD_SHA[key], (
+        f"{kind}.check_buy_signal 이 base 와 같다 — 관측 배선이 아직 없다(Red)"
+    )
+
+
+@pytest.mark.parametrize("kind", _KINDS)
+def test_c18_3_cycle264_pins_are_repinned_to_current(kind: str) -> None:
+    """C18 (HIGH) — cycle264 `_STRATEGY_PINS` 의 `check_buy_signal` 2핀이 **현재값으로 갱신**.
+
+    핀을 갱신하지 않으면 cycle264 가드가 붉어지고, 갱신을 잊은 채 그 가드를
+    삭제하면 무접촉 증거가 통째로 사라진다. 갱신은 **승인 항목**이다(자문 §5.1).
+    """
+    text = _read(_PINS_FILE)
+    module = "volatility_breakout" if kind == "vb" else "long_tail_volatility"
+    m = re.search(
+        rf'\(\s*"{module}"\s*,\s*"\w+"\s*,\s*"check_buy_signal"\s*\)\s*:\s*\n?\s*"([0-9a-f]{{64}})"',
+        text,
+    )
+    assert m, f"`_STRATEGY_PINS` 에서 {module}.check_buy_signal 핀을 찾지 못했다"
+    assert m.group(1) == _current_method_sha(kind, "check_buy_signal"), (
+        f"{module}.check_buy_signal 핀이 현재 소스와 다르다 — 재핀 누락"
+    )
+
+
+@pytest.mark.parametrize("key", sorted(_FROZEN))
+def test_c18_4_cycle264_frozen_pins_are_untouched(key) -> None:
+    """C18 — cycle264 `_STRATEGY_PINS` 의 나머지 4핀 문자열이 **손대지 않았다**.
+
+    "2 갱신 · 4 불변" 을 파일 텍스트 수준에서도 못박는다(재핀 김에 6개를 다
+    재산출하는 사고 차단 — 09-05 카드 #3 계열).
+    """
+    kind, method = key
+    module = "volatility_breakout" if kind == "vb" else "long_tail_volatility"
+    text = _read(_PINS_FILE)
+    m = re.search(
+        rf'\(\s*"{module}"\s*,\s*"\w+"\s*,\s*"{method}"\s*\)\s*:\s*\n?\s*"([0-9a-f]{{64}})"',
+        text,
+    )
+    assert m, f"`_STRATEGY_PINS` 에서 {module}.{method} 핀을 찾지 못했다"
+    assert m.group(1) == _BASE_METHOD_SHA[key], f"{module}.{method} 핀이 변조됐다"
+
+
+def test_c18_5_sibling_content_pin_covers_vb_and_ltv() -> None:
+    """C18/`test_g3_9*` 4곳 규약 — 전략 파일 sha 를 고정한 **자매 핀**도 재핀 대상이다.
+
+    `test_cycle223_ast_donchian_exit_fix.py::_CYCLE228_STRATEGY_CONTENT_SHA` 가 VB·LTV
+    파일 내용 sha 를 들고 있다(cycle273 이 남긴 스냅샷). Green 이 두 파일을 바꾸면
+    그 dict 도 현재값으로 갱신되어야 한다 — 아니면 그 가드가 붉어진다.
+    """
+    text = (_ROOT / "tests" / "unit" / "ast"
+            / "test_cycle223_ast_donchian_exit_fix.py").read_text(encoding="utf-8")
+    for rel in (_VB_REL, _LTV_REL):
+        m = re.search(rf'"{re.escape(rel)}"\s*:\s*\n?\s*"([0-9a-f]{{64}})"', text)
+        if m is None:
+            continue          # dict 가 비워졌으면 재핀 의무 없음(그 편이 정상)
+        assert m.group(1) == _content_sha(rel), (
+            f"`_CYCLE228_STRATEGY_CONTENT_SHA[{rel}]` 가 현재 소스와 다르다 — 자매 핀 재핀 누락"
+        )

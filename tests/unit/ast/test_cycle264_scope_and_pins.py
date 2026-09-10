@@ -204,14 +204,18 @@ def test_c7_open_source_compare_task_registered():
 # ⚠️ `ast.dump` 를 쓰지 않는 이유 = 3.12(CI) / 3.13(로컬) 출력이 달라 CI 만 붉어진다
 #    (cycle256 G-250-5 · cycle259 S4a 실측).
 _STRATEGY_PINS = {
+    # cycle274 (2026-09-11) — VB·LTV 매수 신호 LLM 평가 게이트(shadow) 배선으로
+    # `check_buy_signal` **2핀만 갱신**(관측 1줄 삽입 — 자문 §5.1). 나머지
+    # 4핀(`check_exit_signal`/`calc_buy_quantity`)은 불변 — 그 불변이 청산·수량
+    # 규약 무접촉의 기계적 증거다. 값-출처 = `ast.get_source_segment` sha256.
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_buy_signal"):
-        "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
+        "b251e37b52984a43f6ce753d7a62c84aa30573844d86375f76a1528bdacdcefe",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_exit_signal"):
         "86593b038e4cf8121ae47069fb368346edc50d9692b29db4cbdcc8897421b72e",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "calc_buy_quantity"):
         "6d24ef3f3afd211ae6123623075b08320cdc08c9cd48a6db965355305ad4e732",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "check_buy_signal"):
-        "fb1e7460e5d6906aacd9dd6cbc1037fb7327759c24ca4df055773ba1f22cac2a",
+        "8956faa5c5b97a2ee11eb725782b7e41a339a0227c89f2c6f85413dce4ec6688",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "check_exit_signal"):
         "c8b0e6a8c8705d49bb6f12f82f505d426a5bdeb81413f8b2e0276eabb7dd9cad",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "calc_buy_quantity"):
