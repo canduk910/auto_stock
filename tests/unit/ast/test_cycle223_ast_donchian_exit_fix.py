@@ -435,46 +435,7 @@ def _content_sha(path: str) -> str:
 #    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
 # TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
-    # ✅ 2026-09-07 — cycle268 항목(kojiro.py)은 커밋 `a77f9c3` 으로 **자기소멸**했다
-    #    (`git diff HEAD` 에 더 이상 나타나지 않는다). 스냅샷을 남겨 두면 (a) `test_g3_8`
-    #    이 첫 커밋된 항목에서 통째로 skip 돼 나머지 핀의 스테일 탐지가 조용히 죽고
-    #    (b) 다음에 kojiro.py 를 정당하게 건드리는 사이클이 "cycle268 면제" 문구가 붙은
-    #    오해 소지 있는 실패를 받아 **핀 재산출로 유도된다**(09-05 카드 #3 재발). 그래서 비운다.
-    #    `_parse_tick_prices` 는 byte 동일(소스 세그먼트 sha 핀)이고 `_handle_tick` 의
-    #    `on_tick` 6-튜플도 골든 12케이스로 불변 실증 = **매매 행위 diff 0**.
-    #    명세 = `_workspace/consult/2026-09-07_open_price_scope_filter.md` §7.1.
-    #    `_stock_master_daily_load_once` 가 upsert 앞에서 **확정 전 오늘봉**(장 전 껍데기 ·
-    #    장중 부분봉)을 시각 기준(15:40 KST)으로 폐기한다. 명세 =
-    #    ⚠️ **자매 가드 4곳**(222a3 `_APPROVED_CONTENT_SHA` · 223 · 223f
-    #    `_PREEXISTING_CONTENT_SHA` · 226 `_ALLOWED_CONTENT_SHA`)에 **같은 값**으로 핀한다 —
-    #    네 가드가 같은 워킹트리를 보므로 값이 갈리거나 한 곳만 등록되면 그 자체가 결함
-    # ✅ 2026-09-10 — cycle273 J1(D5, `_workspace/red/cycle273d_daily_load_held_inclusion_spec.md`):
-    #    `_stock_master_daily_load_once` 유니버스 게이트에 보호 집합(보유 ∪ 익일청산,
-    #    `_collect_protected_tickers_for_scanner` 재사용)을 `is_index or is_qualifier or
-    #    is_protected` 로 OR 강제 포함 + list_all 실패 대비 forced_extra 합집합 +
-    #    실행당 1행 `[daily_load_protected_forced]` 마커.
-    "src/engine/scanner.py": "f999183c7b92b29e0a9fc1222161e4c6c978a7baaef6603173ead48e65944b99",
-    # ✅ 2026-09-10 — cycle273 J2 273c (D3, `_workspace/red/cycle273c_kojiro_rank_restore_spec.md`):
-    #    `_rank_candidate_components` 성분①②(macd3 기울기%·띠폭 확장률) 원설계 복원
-    #    (`/close`·`/_RANK_LOOKBACK`·5봉평균 분모) + OQ-5 nan/inf 성분 중립화 + shadow
-    #    관측 `[kojiro_band_observe]` 배선(신규 헬퍼 `_band_observe_row`, leaf 는
-    #    `src/engine/kojiro_band_observe.py` 별도 파일). 가중치·자격 게이트·청산 무접촉
-    #    (C9 후보 집합 불변·C10 진입/수량/청산 sha 불변으로 실증). 자매 가드 4곳 동일 값.
-    "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
-    # 🔁 2026-09-10 (cycle273a) — D2(가) C235-V2: 잔여취소 타이머 해제(order_no 게이트) +
-    #    update_trade_status match_partial opt-in(COMPLETED 2곳). 명세
-    #    `_workspace/red/cycle273a_c235v2_cancel_timer_and_partial_spec.md`.
-    # 🔁 2026-09-11 (cycle273b I3) — D2(다) F-1/F-2: update_trade_status 호출 6곳(C1~C6)
-    #    전부에 order_no= 추가(WHERE 좁히기만, 무행위). 명세
-    #    `_workspace/red/cycle273b_philoptics_no_behavior_3_spec.md`.
-    # TODO(cycle273b 커밋 후): 아래 항목을 비운다.
-    "src/engine/order_engine.py": "a7967892f7baba40dc66d634fc2ae326cd0df69773269de0dbace547edad2ad8",
-    # 🔁 2026-09-11 (cycle273e I4) — D2(나) F-3: kojiro 틱 경로(risk.on_tick) 매수
-    #    평가 skip. 명시 상수 `_TICK_BUY_EVAL_SKIP_STRATEGIES` (donchian_swing 관례
-    #    동형). 자문 완료(착수 권고) `_workspace/domain_consult/cycle273_kojiro_gap_gate_20260910.md`.
-    #    명세 `_workspace/red/cycle273e_kojiro_gap_gate_spec.md`.
-    # TODO(cycle273e 커밋 후): 아래 항목을 비운다.
-    "src/engine/risk.py": "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
+    # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
 }
 
 
