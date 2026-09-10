@@ -1177,16 +1177,25 @@ def test_f245_21a2_config_loaded_has_no_reset_or_extra_reload_path():
     )
 
 
-async def test_f245_21b_put_before_deploy_drops_key_and_overwrites_db(monkeypatch):
-    """배포 **전** PUT 은 무음 실패다 — 키를 버리고 `success=true` + DB 덮어쓰기.
+async def test_f245_21b_put_before_deploy_is_rejected_not_silently_dropped(monkeypatch):
+    """배포 **전** PUT 으로는 그 키를 넣을 수 없다 — 결론은 그대로, 실패 방식이 바뀌었다.
 
-    §7.1 이 배포 전 조치로 SQL 을 지시하고 PUT 을 대안으로 병기했으나, 구코드의
-    in-memory `params` 에는 `max_lot_ratio_mult` 가 없어 라우트의
-    `if key in strategy.config.params` 필터가 값을 조용히 버린다. 그 뒤
-    `save_params(…, strategy.config.params)` 가 params JSONB 를 **통째로** 덮으므로
-    (`save` 의 `params = EXCLUDED.params`) 먼저 넣어둔 SQL 값까지 사라진다.
+    **2026-09-11 계약 변경 (사이클 278).** 종전 본문(`…_drops_key_and_overwrites_db`)이
+    잰 것은 "라우트가 미지 키를 **조용히 버리고** `success=true` 를 돌려주며, 이어지는
+    `save_params(…, strategy.config.params)` 가 params JSONB 를 통째로 덮어 먼저 넣어둔
+    SQL 값까지 지운다" 였다. 그 무음 실패가 사이클 278 이 고친 결함이다.
+
+    지금은 같은 payload 가 **422 `unknown_key`** 이고 `save_params` 는 아예 호출되지
+    않는다(all-or-nothing). 그래서:
+
+    * §7.1 의 "배포 전 조치는 SQL 단일 경로" 지시는 **여전히 유효**하다 —
+      배포 전 PUT 은 그 키를 넣지 못한다.
+    * 다만 "먼저 넣어둔 SQL 값이 PUT 때문에 사라진다"는 **부수 위험은 사라졌다**
+      (저장 자체가 일어나지 않는다).
     """
     from types import SimpleNamespace
+
+    from fastapi import HTTPException
 
     from src.routes import strategies as routes_mod
 
@@ -1207,18 +1216,18 @@ async def test_f245_21b_put_before_deploy_drops_key_and_overwrites_db(monkeypatc
 
     monkeypatch.setattr("src.db.strategy_config.save_params", _fake_save)
 
-    resp = await routes_mod.update_params(
-        "long_tail_volatility",
-        routes_mod.ParamsRequest(params={"max_lot_ratio_mult": 20.0}),
-    )
+    with pytest.raises(HTTPException) as exc:
+        await routes_mod.update_params(
+            "long_tail_volatility",
+            routes_mod.ParamsRequest(params={"max_lot_ratio_mult": 20.0}),
+        )
 
-    assert resp.success is True, "라우트가 미지 키를 거부하지 않는다 (현행 계약)"
+    assert exc.value.status_code == 422, "미지 키가 다시 조용히 통과한다 (사이클 278 회귀)"
+    assert exc.value.detail[0]["code"] == "unknown_key", exc.value.detail
     assert "max_lot_ratio_mult" not in pre_deploy.config.params, (
         "미지 키가 in-memory 에 들어갔다 — 라우트 필터가 바뀌었으니 §7.1 갱신"
     )
-    assert "max_lot_ratio_mult" not in saved["params"], (
-        "배포 전 PUT 이 DB 에 키를 남긴다면 §7.1 의 'SQL 단일 경로' 지시를 완화해도 된다"
-    )
+    assert not saved, "422 인데 DB 저장이 일어났다 — all-or-nothing 위반"
 
 
 async def test_f245_21b2_put_after_deploy_applies_immediately(monkeypatch):

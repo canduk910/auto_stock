@@ -6,6 +6,8 @@
 
 import { http, HttpResponse } from "msw";
 import { wrap, makePosition, makeStrategy, makeTrade } from "./factories";
+// cycle278 — 전략 파라미터 카탈로그 스키마 골든 픽스처(param_catalog.py 에서 기계 생성).
+import { PARAM_SCHEMA_FIXTURE } from "./fixtures/paramSchema.fixture";
 
 const base = "/api";
 
@@ -37,7 +39,23 @@ export const handlers = [
       })
     )
   ),
-  http.put(`${base}/strategies/:id/params`, () => HttpResponse.json(wrap({ updated: true }))),
+  // cycle278 — 실응답과 **같은 형태**를 돌려준다: `{ applied, warnings, strategies }`.
+  // 종전 `{ updated: true }` 는 서버가 한 번도 낸 적 없는 모양이었다 — 목이 *의도한 계약*만
+  // 담고 *실제 응답*을 안 담아 3개월 넘게 초록이던 cycle266(종목마스터 일봉 탭)의 재발이다.
+  // `applied` 는 서버처럼 요청 바디를 되울린다(화면이 "무엇이 저장됐나" 를 읽는 필드).
+  // 형태 대조 가드 = `tests/unit/routes/test_cycle278_params_validation.py`
+  // ::test_msw_default_put_handler_matches_live_response_shape
+  http.put(`${base}/strategies/:id/params`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as {
+      params?: Record<string, unknown>
+    }
+    return HttpResponse.json(
+      wrap(
+        { applied: body.params ?? {}, warnings: [], strategies: {} },
+        "파라미터 업데이트 완료"
+      )
+    )
+  }),
   http.put(`${base}/strategies/weights`, () => HttpResponse.json(wrap({ updated: true }))),
   // 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 (관찰 전용, F-FE6)
   http.get(`${base}/strategies/te`, () => HttpResponse.json(wrap([]))),
@@ -468,5 +486,14 @@ export const handlers = [
         key_masked: '****1234',
       })
     )
+  ),
+
+  // cycle278 (2026-09-11) — 전략 파라미터 카탈로그 스키마.
+  // 편집기(StrategyParamsEditor)는 **이 한 응답**으로 렌더한다(키 하드코딩 0건의 전제).
+  // 미등록이면 setup.ts 의 onUnhandledRequest:"error" 로 vitest 가 즉시 붕괴한다.
+  // 목 본문은 손으로 쓴 요약이 아니라 param_catalog.py 에서 생성한 골든 픽스처다 —
+  // 목이 *의도한 계약*만 담고 *실제 응답*을 안 담아 3개월 초록이던 cycle266 재발 차단.
+  http.get(`${base}/strategies/params-schema`, () =>
+    HttpResponse.json(wrap(PARAM_SCHEMA_FIXTURE))
   ),
 ];

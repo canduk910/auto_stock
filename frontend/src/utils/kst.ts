@@ -78,3 +78,46 @@ export function kstTodayISO(now?: Date): string {
   const parts = partsToMap(DATE_PART_FORMATTER.formatToParts(base))
   return `${parts.year}-${parts.month}-${parts.day}`
 }
+
+// ── cycle278 — KST 분 단위 시각 판정 ────────────────────────────────────────
+// 시각 창 게이트를 "현재 시각" 으로만 판정하면 CI 가 특정 시간대에만 붉어진다
+// (백엔드 `owns_board(now<09:05)` 선례 — 로컬 23:5x 초록 / CI 00:04 실패).
+// 그래서 두 함수 모두 `now` 주입 seam 을 가진다.
+
+const HHMM_PART_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Asia/Seoul',
+  hour: '2-digit',
+  minute: '2-digit',
+  // `hour12: false` 는 엔진에 따라 자정을 "24" 로 준다 — h23 을 명시해 0~23 으로 고정.
+  hourCycle: 'h23',
+})
+
+/** KRX 정규장 개장 = KST 09:00 (분 단위). */
+export const KRX_MAIN_OPEN_MINUTE = 9 * 60
+/** KRX 정규장 마감 = KST 15:30 (분 단위, 이 값은 창 **밖**). */
+export const KRX_MAIN_CLOSE_MINUTE = 15 * 60 + 30
+
+/**
+ * KST 기준 자정으로부터의 분(0~1439). `now` 생략 시 현재 시각.
+ *
+ * `Date` 의 로컬타임 getter 를 쓰지 않는다 — 브라우저·컨테이너 TZ 가 무엇이든 같은 값이어야 한다.
+ */
+export function kstMinutesOfDay(now?: Date): number {
+  const base = now ?? new Date()
+  const parts = partsToMap(HHMM_PART_FORMATTER.formatToParts(base))
+  const hour = Number(parts.hour)
+  const minute = Number(parts.minute)
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return 0
+  return (hour % 24) * 60 + minute
+}
+
+/**
+ * KRX 정규장(09:00 이상 15:30 미만) 여부. `now` 생략 시 현재 시각.
+ *
+ * ⚠️ 이 창은 "즉시 반영" 경고의 범위일 뿐 매매 시간대 전체가 아니다 — NXT 프리(08:00~09:00)·
+ * 애프터(15:40~20:00) 에도 저장은 즉시 반영된다. 배너 문구가 그 사각을 함께 밝힌다.
+ */
+export function isKrxMainSession(now?: Date): boolean {
+  const minutes = kstMinutesOfDay(now)
+  return minutes >= KRX_MAIN_OPEN_MINUTE && minutes < KRX_MAIN_CLOSE_MINUTE
+}

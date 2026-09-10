@@ -6,6 +6,8 @@
  */
 
 import type { Page } from "@playwright/test";
+// cycle278 — 전략 파라미터 카탈로그 스키마 골든 픽스처(param_catalog.py 에서 기계 생성).
+import { PARAM_SCHEMA_FIXTURE } from "./param-schema.fixture";
 
 type AnyJson = Record<string, unknown>;
 
@@ -629,4 +631,44 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   // 사이클 104 — /api/strategies GET 플랫 형식은 L103 기존 핸들러(status.strategies)가 처리.
   // Strategies.tsx 는 data?.strategies ?? data fallback 으로 플랫 형식에서도 카드 렌더.
   // 사이클 103 내포 형식 핸들러 = 사이클 104 에서 삭제 (settings.spec.ts 회귀 차단).
+
+  // ── cycle278 (2026-09-11) — 전략 파라미터 카탈로그 편집 ──────────────────────
+  // 사이클 80 hotfix #3 LIFO 정합: 위쪽 `**/api/strategies/*/params`(무조건 200) 보다
+  // **후** 등록해야 422 분기가 살아난다. 미등록이면 vite proxy → ECONNREFUSED → timeout.
+  //
+  // 스키마 본문은 손으로 쓴 요약이 아니라 `param_catalog.py` 에서 생성한 골든 픽스처다
+  // (목이 *의도한 계약*만 담고 *실제 응답*을 안 담아 3개월 초록이던 cycle266 재발 차단).
+  await page.route("**/api/strategies/params-schema", (route) =>
+    route.fulfill({ json: envelope(PARAM_SCHEMA_FIXTURE) }),
+  );
+
+  // PUT 검증 시나리오 — 종목당 비중(비율 저장)이 1.0 을 넘으면 백엔드가 422 `out_of_range`.
+  // 그 외에는 200 + applied. 비-PUT 은 앞서 등록된 기존 라우트로 넘긴다(fallback).
+  await page.route("**/api/strategies/*/params", async (route) => {
+    const request = route.request();
+    if (request.method() !== "PUT") return route.fallback();
+    const body = (request.postDataJSON() ?? {}) as { params?: Record<string, unknown> };
+    const params = body.params ?? {};
+    const ratio = params["position_ratio"];
+    if (typeof ratio === "number" && ratio > 1.0) {
+      return route.fulfill({
+        status: 422,
+        json: {
+          detail: [
+            {
+              key: "position_ratio",
+              code: "out_of_range",
+              msg: `종목당 비중은 0.01 ~ 1.0 이어야 합니다 — 받은 값 ${ratio} (비율 저장, 화면 표시는 %)`,
+              strategy_id: "momentum",
+              given: ratio,
+              expected: { min: 0.01, max: 1.0, type: "percent", range_src: "param_ranges" },
+            },
+          ],
+        },
+      });
+    }
+    return route.fulfill({
+      json: envelope({ applied: params, warnings: [] }, "파라미터 저장 완료"),
+    });
+  });
 }

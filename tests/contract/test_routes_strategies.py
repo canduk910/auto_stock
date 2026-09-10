@@ -73,29 +73,100 @@ def test_update_params_when_unknown_strategy_then_failure(contract_env):
 
 
 def test_update_params_when_known_strategy_then_applied(contract_env):
+    """**2026-09-11 계약 변경 (사이클 278)** — 예산 불변식이 422 로 강제된다.
+
+    종전 본문은 momentum 에 `position_ratio=0.3` 을 보냈다. momentum 의
+    `max_positions=4` 이므로 `0.3 × 4 = 1.2 > 1.0` 이라 그 payload 는 이제 422 다
+    (한 전략이 배정 자금의 120% 를 청약하는 설정). 정상 저장 경로를 계속 재려고 값만
+    `0.2`(= 0.8) 로 낮췄다 — 두 키를 함께 보내는 경로는 아래 케이스가 잰다.
+    """
     r = contract_env.client.put(
         "/api/strategies/momentum/params",
-        json={"params": {"position_ratio": 0.3}},
+        json={"params": {"position_ratio": 0.2}},
     )
     assert r.status_code == 200
     body = r.json()
     assert body["success"] is True
+    assert body["data"]["applied"] == {"position_ratio": 0.2}
     # 메모리 + DB 양쪽 반영
     momentum = contract_env.scheduler.registry.get("momentum")
-    assert momentum.config.params["position_ratio"] == 0.3
+    assert momentum.config.params["position_ratio"] == 0.2
     assert contract_env.calls.save_params
     assert contract_env.calls.save_params[-1]["strategy_id"] == "momentum"
 
 
-def test_update_params_ignores_unknown_keys(contract_env):
-    """파라미터 dict 에 없는 키는 무시 (silently dropped)."""
+def test_update_params_when_budget_keys_sent_together_then_applied(contract_env):
+    """사이클 278 — 비중을 올리려면 동시 보유 종목수를 같은 저장에서 함께 줄인다.
+
+    ⚠️ `contract_env` 는 scheduler **싱글톤**을 쓰고 params 를 되돌리지 않는다 —
+    이 케이스가 바꾼 두 키는 끝에서 직접 복원한다(뒤 테스트 오염 차단).
+    """
+    momentum = contract_env.scheduler.registry.get("momentum")
+    before = dict(momentum.config.params)
+    try:
+        r = contract_env.client.put(
+            "/api/strategies/momentum/params",
+            json={"params": {"position_ratio": 0.3, "max_positions": 3}},
+        )
+        assert r.status_code == 200
+        assert r.json()["success"] is True
+        assert momentum.config.params["position_ratio"] == 0.3
+        assert momentum.config.params["max_positions"] == 3
+    finally:
+        momentum.config.params.clear()
+        momentum.config.params.update(before)
+
+
+def test_update_params_when_budget_invariant_violated_then_422(contract_env):
+    """사이클 278 — `position_ratio × max_positions > 1.0` 은 422 이고 아무것도 저장되지 않는다."""
+    momentum = contract_env.scheduler.registry.get("momentum")
+    before = dict(momentum.config.params)
+
+    r = contract_env.client.put(
+        "/api/strategies/momentum/params",
+        json={"params": {"position_ratio": 0.9, "stop_loss_rate": -6.0}},
+    )
+
+    assert r.status_code == 422
+    detail = r.json()["detail"]
+    assert isinstance(detail, list) and detail[0]["code"] == "budget_invariant"
+    assert momentum.config.params == before, "422 인데 통과분이 저장됐다 (all-or-nothing 위반)"
+
+
+def test_update_params_when_unknown_key_then_422(contract_env):
+    """**2026-09-11 계약 변경 (사이클 278)** — 미지 키는 조용히 버리지 않는다.
+
+    종전 이름 `test_update_params_ignores_unknown_keys` 가 잰 것은 "오타가 성공 응답을
+    받는다"였다. 오타·신규 키가 200 을 받고 무시되던 것이 이 사이클이 고친 결함이므로,
+    같은 payload 가 이제 **422 `unknown_key`** 임을 잰다.
+    """
+    momentum = contract_env.scheduler.registry.get("momentum")
+
     r = contract_env.client.put(
         "/api/strategies/momentum/params",
         json={"params": {"some_unknown_key": 999}},
     )
-    assert r.status_code == 200
-    momentum = contract_env.scheduler.registry.get("momentum")
+
+    assert r.status_code == 422
+    detail = r.json()["detail"]
+    assert isinstance(detail, list) and detail[0]["code"] == "unknown_key"
+    assert detail[0]["key"] == "some_unknown_key"
     assert "some_unknown_key" not in momentum.config.params
+
+
+def test_get_params_schema_returns_catalog_and_strategy_rows(contract_env):
+    """사이클 278 — 편집 화면이 렌더에 쓰는 유일한 응답 (앱 경로 계약)."""
+    r = contract_env.client.get("/api/strategies/params-schema")
+
+    assert r.status_code == 200
+    body = r.json()
+    assert body["success"] is True
+    data = body["data"]
+    assert len(data["params"]) == 99
+    assert {s["strategy_id"] for s in data["strategies"]} >= {"momentum", "kojiro"}
+    momentum = next(s for s in data["strategies"] if s["strategy_id"] == "momentum")
+    assert momentum["keys"] and set(momentum["params"]) == set(momentum["keys"])
+    assert set(momentum["defaults"]) == set(momentum["keys"])
 
 
 def test_get_auto_start_returns_value(contract_env):

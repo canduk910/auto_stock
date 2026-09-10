@@ -41,6 +41,11 @@ const TARGET_FILES = [
   // 전략 성과 표시 정직화 — PerformanceCard.tsx 에 strategy-te useQuery 신규 추가
   // (Dashboard 마운트 시 발화, e2e ECONNREFUSED 영구 차단 의무).
   'PerformanceCard.tsx',
+  // cycle278 (2026-09-11) — StrategyParamsEditor.tsx 추가.
+  // 전략 파라미터 카탈로그 스키마(GET /api/strategies/params-schema) useQuery 는 패널을 열 때
+  // 발화한다. retry 미명시 시 e2e/백엔드 미기동 환경에서 기본 retry(3회 backoff) 가 누적돼
+  // 패널이 뜨지 않는다 — 사이클 65 H3 패턴 답습.
+  'StrategyParamsEditor.tsx',
 ]
 
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e
@@ -54,7 +59,9 @@ const TARGET_FILES = [
 //
 // 사이클 103 영역 0 (2026-06-11) G-AST-RT — RealtimeHealth.tsx 신규 페이지 추가.
 // 1 useQuery (fetchRealtimeHealth) retry:1 명시 의무 영구 가드 (사이클 85 패턴 답습).
-const TARGET_PAGES = ['Settings.tsx', 'StockMaster.tsx', 'RealtimeHealth.tsx']
+// cycle278 (2026-09-11) — Strategies.tsx 추가. 전략 카드에서 파라미터 편집기를 여는
+// 진입점 페이지이고 자체 useQuery 2건(strategies / strategy-te)을 가진다.
+const TARGET_PAGES = ['Settings.tsx', 'StockMaster.tsx', 'RealtimeHealth.tsx', 'Strategies.tsx']
 
 describe('사이클 65 hotfix H3 + 사이클 75 Q4 확장 — useQuery retry 옵션 영구 가드', () => {
   it.each(TARGET_FILES)(
