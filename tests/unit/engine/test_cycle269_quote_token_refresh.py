@@ -18,7 +18,7 @@
 - C6  활성 계정 0건 = 발급 0회.
 - C7  계정별 로그 emit 실패가 발급 cascade 를 끊지 않는다.
 - C8  `task_loop` 는 `run_periodic_task_loop` 에 정확한 계약으로 위임한다
-      (immediate_first_run=False · wait_time=15:45 · once_callable 동일성).
+      (immediate_first_run=False · wait_time=21:30(cycle270-B, 종전 15:45) · once_callable 동일성).
 - C9  시각 불변식 — T 와 T−10분(자연 재발급 문턱)이 **모두** KRX 마감 이후,
       그리고 20:00~20:15(자문/정산 금기 창) 밖.
 """
@@ -264,7 +264,7 @@ async def test_c8_task_loop_delegates_with_expected_contract(monkeypatch):
 
     await mod.task_loop(_Sched())
 
-    assert captured["wait_time"] == mod.TIME_QUOTE_TOKEN_REFRESH == time(15, 45)
+    assert captured["wait_time"] == mod.TIME_QUOTE_TOKEN_REFRESH == time(21, 30)
     assert captured["once_callable"] is mod.refresh_quote_tokens_once
     assert captured["immediate_first_run"] is False, (
         "부팅 즉시 실행하면 부팅 시각이 새 앵커가 되어 '고정 장외 시각' 설계가 무너진다"
@@ -304,7 +304,19 @@ def test_c9_schedule_time_invariants():
     assert threshold > close_dt, (
         f"T−10분 문턱({threshold.time()})이 KRX 마감 이전이면 자연 재발급이 장중에 난다"
     )
-    # 7계정 × 61초 직렬화(≈7분)가 16:00 일봉 적재 전에 끝나야 한다
-    assert (t_dt + timedelta(minutes=8)).time() <= TIME_STOCK_MASTER_DAILY_LOAD
-    # 20:00 자문 / 20:10 정산 창 밖 (CLAUDE.md 금기)
+    # cycle270-B(2026-09-10 사용자 결정 15:45 → 21:30): 16:00 적재 앞에 끝내야 한다는
+    # 종전 제약은 소멸. 대신 T−10분 문턱 ~ T+8분(7계정 × 61초 직렬화) 창이
+    # 20:00 자문 / 20:00:05 유니버스 / 20:10 정산 창(CLAUDE.md 금기 20:00~20:15)
+    # 과 그 밖의 scheduler 예정 시각 어느 것과도 겹치지 않아야 한다.
     assert not (TIME_RECOMMENDATION <= T <= time(TIME_SETTLEMENT.hour, 15))
+    assert threshold.time() > time(TIME_SETTLEMENT.hour, 15), (
+        "문턱이 20:00~20:15 안이면 자연 재발급이 자문·정산의 REST 와 다툰다"
+    )
+    import src.engine.scheduler as _sched
+    window_lo, window_hi = threshold.time(), (t_dt + timedelta(minutes=8)).time()
+    collisions = sorted(
+        name for name, val in vars(_sched).items()
+        if name.startswith("TIME_") and isinstance(val, time) and window_lo <= val <= window_hi
+    )
+    assert collisions == [], f"강제 재발급 창 {window_lo}~{window_hi} 와 겹치는 예정 작업: {collisions}"
+    assert TIME_STOCK_MASTER_DAILY_LOAD < T, "일봉 적재보다 뒤여야 16:00 적재를 침범하지 않는다"

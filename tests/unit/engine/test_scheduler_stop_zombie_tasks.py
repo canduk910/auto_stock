@@ -270,7 +270,7 @@ def test_stop_tuple_equals_finally_tuple_members():
         # `_*_task_handle` 이던 초안은 cycle79 가드의 수집 패턴(`endswith("_task")`)
         # 에도 안 잡혀 세 목록 전부에서 조용히 빠져 있었다(적대 검증 MEDIUM).
         "_open_source_compare_task",
-        # cycle269 추가 (2026-09-08) — 매일 15:45 KST 보조 시세 계정 접근토큰 강제
+        # cycle269 추가 (2026-09-08) — 매일 21:30 KST(cycle270-B 이동, 종전 15:45) 보조 시세 계정 접근토큰 강제
         # 재발급 task. 7계정 × 61초 직렬화로 ~7분을 도는 루프라 cancel 누락 시
         # `stop()` 이 그 발급 cascade 를 끊지 못한다.
         "_quote_token_refresh_task",
