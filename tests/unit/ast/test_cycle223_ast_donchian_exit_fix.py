@@ -581,11 +581,17 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    OQ-5 nan/inf 중립화 + shadow 관측 `[kojiro_band_observe]` 배선. 가중치·자격
 #    게이트·청산 무접촉(C9 후보 집합 불변·C10 진입/수량/청산 sha 불변으로 실증).
 #    TODO(cycle273 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
+# ✅ 2026-09-11 — cycle274 (VB·LTV 매수 신호 LLM 평가 게이트 shadow 배선,
+#    `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`): import 1줄 +
+#    `DEFAULT_PARAMS` 4키 + `return Signal.BUY` 직전 관측 호출(값 복사, C1 AST
+#    가드가 반환값 무관을 기계 증명). 청산·수량 sha 는
+#    `test_cycle264_scope_and_pins.py::_STRATEGY_PINS` 의 4핀 불변으로 별도 보증.
+#    TODO(cycle274 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
-        "44c610949800a16a1c58eeaba74ba9b4ce1ee10a7b324273f2eccfa486654a63",
+        "1a0e242c2db5cdd6602f41abb3d589fec1226b39e935f8dc1429e3015fc4a009",
     "src/engine/strategies/long_tail_volatility.py":
-        "04913d7024e5f58ced6e9e70e6325f2f33b17678936b26a6b56acb5973d0936b",
+        "3294280dd98fb60a794cd96064a3e680a8b1979787329a6ef889ded1ef5c9ebd",
     "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
 }
 

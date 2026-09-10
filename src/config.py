@@ -69,6 +69,11 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_recommend_model: str = "gpt-5.6-luna"
 
+    # cycle274 — VB·LTV 매수 신호 LLM 평가 게이트(shadow) 전용 모델. 20:00 자문
+    # 모델(openai_recommend_model)과 분리 — 한쪽을 더 싼 모델로 옮기고 싶을 때
+    # 다른 쪽이 딸려가면 안 된다(자문 §6.3). `openai_api_key` 는 재사용한다.
+    openai_buy_gate_model: str = "gpt-5.6-luna"
+
     # 외부 백테스트 서버 (MCP) — Phase 1
     # 운영 EC2 → AWS EC2 backtest 서버. KIS_MCP_ENABLED=true 일 때만 호출.
     kis_mcp_url: str = "http://43.202.187.5:3846/mcp"
