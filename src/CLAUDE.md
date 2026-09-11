@@ -24,6 +24,11 @@ models/    ← 모든 모듈
 middleware/api_auth.py ← main.py (최외곽 미들웨어 — MetricsMiddleware 보다 바깥)
 ```
 
+> **예정 (cycle279 프로세스 분리 1단계, 코드 아직 없음)** — `engine/llm_buy_gate` 가
+> `db/llm_buy_evaluations` 에 요청 행을 남기면 별도 프로세스 `llm_worker` 가 그 행을 선점해 채운다.
+> 위 블록의 `←`(import 방향)가 아니라 DB 를 거치는 데이터 흐름이다. 워커는 `api/`·`auth/`·`realtime/` 을
+> import 하지 않는다. 상세 = `docs/architecture.md` 15.2
+
 ## 진입점
 
 | 영역 | 진실의 원천 |

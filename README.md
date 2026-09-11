@@ -124,6 +124,7 @@ SUPABASE_KEY=your-anon-key
 037_stock_master_kospi200_kosdaq150.sql   # is_kospi200/is_kosdaq150 BOOLEAN + 부분 인덱스 (사이클 153)
 038_pending_next_day_clear.sql        # 익일청산큐 DB 영속화 PK(target_date, ticker, strategy_id) (사이클 162, 재기동 보호)
 041_stock_master_financial.sql        # KIS 재무 5 TR 정규화 PK(ticker, stac_yymm, div_cls) + 18 NUMERIC + raw JSONB (사이클 C1, 마법공식·F-Score-7 원천)
+043_llm_buy_evaluations.sql           # AI 매수평가(LLM) 주문 시점 기록 PK(trade_date, account_no, ticker, order_no) (cycle276, 관측 전용 — 매매 hot path 무관)
 ```
 
 ### 3. Docker Compose로 실행 (권장)
@@ -453,6 +454,40 @@ auto_stock/
 - **단일 책임**: 각 에이전트는 자신의 역할 범위 안에서만 파일 수정. 경계면 변경(API 응답 스키마 등)은 backend-dev 가 정의 → frontend-dev 가 타입 동기화
 - **검수 흐름**: 매매 규칙 변경 → (선택) domain-expert 자문 → team-leader 명세 → tdd-engineer Red → backend-dev/frontend-dev Green → tester 검증 → (사이클 5회 누적) refactor-expert 검토
 - **KIS MCP 통합**: 신규 API 통합 / 응답 분기 / 회귀 시나리오 합성 / 응답 처리 통일 시 `kis-mcp-query` 스킬 — `docs/kis/` 로컬 캐시와 MCP 응답 불일치 시 *MCP 가 정본*
+
+## 프로세스 구성과 분리 로드맵
+
+현재 운영 프로세스는 컨테이너 2개다 (`docker-compose.prod.yml`).
+
+```
+            ┌────────────────────┐        ┌──────────────────────────────┐
+            │  frontend          │  /api  │  backend (uvicorn 단일 워커) │        ┌───────────────────┐
+            │  nginx + SPA       │───────▶│  시세 감시 · 전략 판정 ·     │◀──────▶│  KIS OpenAPI      │
+            │  Basic Auth        │        │  주문 · 정산 · 관측이 한 곳  │        │  REST · WebSocket │
+            └────────────────────┘        └───────────────┬──────────────┘        └───────────────────┘
+                                                          │ asyncpg
+                                                          ▼
+                                             ┌────────────────────────┐
+                                             │   AWS RDS PostgreSQL   │
+                                             └────────────────────────┘
+```
+
+매매에 필요한 모든 일이 한 프로세스 안에 있어서, 프롬프트 한 줄만 고쳐도 backend 전체를
+재시작해야 한다(재시작 1~5분 동안 시세를 못 받는다). 그래서 보유 포지션이 있는 장중에는
+배포 자체가 금지돼 있다. 그 결합을 단계적으로 푸는 계획이 아래다.
+
+| 단계 | 무엇을 떼나 | 상태 |
+|------|-------------|------|
+| 1 | **AI 매수평가** — 매수 주문 직후 LLM 이 점수를 매겨 기록만 하는 관찰 기능(실매매 미개입)을 `llm_worker` 컨테이너로 분리. 큐는 별도 메시지 브로커가 아니라 `llm_buy_evaluations` 테이블(043) | **진행 중** |
+| 2 | 20:00 AI 자문 · 20:10 로그 분석 · 외부 백테스트 | 계획 |
+| 3 | 시세 감시 ↔ 전략 판정 ↔ 주문 완전 분리 | **보류** |
+
+3단계를 보류한 이유는 REST 초당 20건 한도, 토큰 발급 분당 1건 가드, 체결통보의 메인 세션
+단일 강제, 매수 수량 계산의 원자성 — 이 네 가지가 모두 **한 프로세스 안에서만** 성립하는
+장치이기 때문이다. 가르려면 넷을 프로세스 밖으로 옮기는 별도 설계가 먼저 필요하다.
+
+단계별 도식(0~3단계)과 근거가 되는 파일·행은
+[`docs/architecture.md` 15장 — 프로세스 분리 로드맵](docs/architecture.md#15-프로세스-분리-로드맵-2026-09-11) 에 있다.
 
 ## 배포 (AWS EC2)
 

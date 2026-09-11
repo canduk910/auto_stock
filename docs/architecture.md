@@ -611,6 +611,7 @@ on_tick(ticker, current_price)
 | `stock_master_daily` | 033 | KIS FHKST03010100 일봉 정규화 — PK (ticker, bas_dd) + OHLCV + change_rate + raw JSONB. 매일 16:00 KST 적재 (T-100 백필 → D-1 증분) |
 | `stock_master.master_raw` | 034 | KIS 공식 일일 마스터 파일 raw JSONB + master_raw_updated_at + is_kospi200/is_kosdaq150 BOOLEAN (037, 사이클 153) |
 | `pending_next_day_clear` | 038 | 익일청산큐 DB 영속화 — PK (target_date, ticker, strategy_id). 재기동 시 메모리 휘발 차단 (사이클 162) |
+| `llm_buy_evaluations` | 043 | AI 매수평가(LLM) 주문 시점 기록 — PK (trade_date, account_no, ticker, order_no) + eval_kind('order'|'blocked'). 주문 1건 = 1행(성공·실패 모두), 매매 hot path 무관한 관측 계층. 열 정의 정본 = 루트 `CLAUDE.md` DB 스키마 표 (cycle276). 프로세스 분리 1단계가 이 테이블을 큐로 재사용한다 → 15.2 |
 
 ---
 
@@ -699,6 +700,8 @@ frontend/src/
 | 잔고 API 0수량 필터 | KIS가 매도 완료 종목도 반환하므로 제외 |
 | 비주식 상품 필터 | 6자리 숫자 종목코드만 허용 (CMA/펀드 제외) |
 | 로컬/EC2 동시 실행 금지 | KIS API 동일 계정 동시 접속 충돌 |
+
+> 위 제약 중 "단일 uvicorn 워커"·"체결통보 구독 필수"는 프로세스를 가르는 순간 재설계가 필요하다. 언제 어디까지 가를지는 15장(프로세스 분리 로드맵), 특히 보류 근거 네 가지를 정리한 15.4 를 본다.
 
 ---
 
@@ -896,3 +899,264 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 
 > 본 14장은 13장 이후 도입된 인프라의 요약. 14.1 (KRX ONLY 보드 전환) 영역 도식 갱신 + 14.6 (동시호가 시각 분기) 시퀀스 다이어그램은 별도 사이클로 위임.
 
+
+---
+
+## 15. 프로세스 분리 로드맵 (2026-09-11)
+
+매매 엔진은 지금 **한 프로세스**다. 시세 감시·전략 판정·주문·정산·관측이 같은 uvicorn 단일
+워커 안에 있어서, 프롬프트 한 줄을 고치려 해도 backend 전체를 재시작해야 하고(재시작 1~5분
+tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 실측한 특정 push 2건은
+약 100초였다), 보유 포지션이 있으면 장중 배포 자체가 금지돼 있다. 이 장은 그 결합을 단계적으로
+푸는 계획을 적는다.
+
+| 단계 | 범위 | 상태 |
+|------|------|------|
+| 0 | 현재 — 컨테이너 2개(backend / frontend) | 가동 중 |
+| 1 | AI 매수평가(LLM)를 `llm_worker` 로 분리 | **진행 중** (cycle279 — 워커 컨테이너 신설) |
+| 2 | 20:00 자문 · 20:10 로그 분석 · 외부 백테스트 분리 (퍼널은 가를 수 없다 → 15.3) | 계획 (착수 미정) |
+| 3 | 시세 감시 ↔ 전략 판정 ↔ 주문 완전 분리 | **보류** (착수하지 않는다) |
+
+> 1단계가 "진행 중"인 근거는 **사용자 결정(2026-09-11 — "1단계만 진행")** 이다. 사이클 번호
+> `cycle279` 는 예약해 둔 것이고 명세·코드·changelog 항목은 아직 없다(리포 안의 실재 최신
+> 사이클은 cycle278). 2·3단계는 승인된 설계가 아니라 방향 기록이다.
+
+### 15.1 0단계 — 현재 (가동 중)
+
+```
+  +------------------+          +-------------------------------------------+
+  |  frontend        |   /api   |  backend  (uvicorn 단일 워커)             |
+  |  nginx:alpine    |--------->|  scheduler / session / scanner            |
+  |  SPA + BasicAuth |          |  strategies(7) -> risk -> order_engine    |     KIS WebSocket
+  +------------------+          |  llm_buy_gate (AI 매수평가 — VB·LTV 만)   |<--> (시세 · 체결통보)
+                                |  recommendation_engine  (20:00 자문)      |
+                                |  log_analysis_engine    (20:10 분석)      |     KIS REST
+                                |  api/base.py  _semaphore = Semaphore(20)  |<--> (주문 · 잔고 · 일봉)
+                                +---------------------+---------------------+
+                                                      | asyncpg (db/pg.py)
+                                                      v
+                                          +------------------------+
+                                          |   AWS RDS PostgreSQL   |
+                                          +------------------------+
+```
+
+`docker-compose.prod.yml` 의 서비스는 `backend` · `frontend` 둘뿐이다. 위 상자 안의
+모든 이름은 같은 이벤트 루프 위에서 돈다.
+
+### 15.2 1단계 — AI 매수평가 분리 (진행 중 · cycle279 = llm_worker 컨테이너 신설)
+
+여기서 "AI 매수평가"는 cycle274 가 배선하고 cycle276 이 주문 시점으로 옮긴 **관찰 기능**이다 —
+VB·LTV 두 전략의 매수 주문 직후에 LLM 이 점수를 매겨 **기록만** 하고 매수 여부는 바꾸지 않는다
+(shadow). 켜져 있는 전략은 그 둘뿐이다(`volatility_breakout.py:155` · `long_tail_volatility.py:138`
+의 `"llm_gate_mode": "shadow"`, 나머지 5 전략은 키 부재 = off).
+
+1단계는 이 평가를 별도 컨테이너 `llm_worker` 로 뺀다. 엔진은 평가 **요청 행**만 DB 에 적고,
+워커가 그 행을 선점해 일봉 조회·지표·프롬프트·모델 호출을 하고 결과를 같은 행에 채운다.
+큐로 **재사용할 대상**은 신규 메시지 브로커가 아니라 평가 테이블
+`llm_buy_evaluations`(`supabase/migrations/043_llm_buy_evaluations.sql`)다.
+
+```
+  +------------------+          +-------------------------------------------+
+  |  frontend        |   /api   |  backend  (uvicorn 단일 워커)             |
+  |  nginx + SPA     |--------->|  scheduler / scanner / strategies         |     KIS WS / REST
+  +------------------+          |  risk / order_engine                      |<--> (워커는 쓰지 않는다)
+                                |  execute_buy: place_order 성공 직후       |
+                                |    create_task 안에서 요청 행만 남긴다    |
+                                +---------------------+---------------------+
+                                                      | asyncpg
+                                                      v
+                        +--------------------------------------------------+
+                        |  llm_buy_evaluations   (migration 043)           |
+                        |  지금은 결과 기록 테이블이다 — 큐로 쓰려면       |
+                        |  선점 열(status/claimed_at/attempts) 추가 필요   |
+                        +--------------------------------------------------+
+                             |  미처리 행 선점      ^  결과 UPDATE
+                             v                      |
+                        +--------------------------------------------------+
+                        |  llm_worker  (신규 컨테이너 — 예정)              |
+                        |   stock_master_daily 일봉 조회 (DB)              |
+                        |   -> 지표 -> 프롬프트 -> 모델 호출               |
+                        |   -> 같은 행에 점수 · 근거 · 비용 기입           |
+                        |   KIS 미호출 (api/auth/realtime import 0)        |
+                        +--------------------------------------------------+
+```
+
+- **얻는 것** — 프롬프트·지표·모델을 **장중에** 고칠 수 있다. 지금은 그 한 줄을 고치려 해도
+  backend 재생성이 필요하고(재시작 1~5분 tick blind — D6. cycle248 실측 2건은 약 100초),
+  보유 중에는 그 배포가 금지돼 있다.
+- **KIS 격리** — 워커는 KIS 를 호출하지 않는다. 현재 `src/engine/llm_buy_gate.py` 도
+  `src.api` / `src.auth` / `src.realtime` 를 한 번도 import 하지 않고(실측 0건), 일봉은
+  `src.db.stock_master_daily` 에서 읽는다(`llm_buy_gate.py:55`). `.token_cache` 도
+  마운트하지 않는다. 이 격리가 15.4 의 보류 근거 ①②③ 을 건드리지 않는 이유다.
+- **엔진 쪽 실패 흡수** — 훅은 지금도 never-raise 다(`order_engine.py:433-459` 의
+  `try/except` + `logger.debug`). 워커가 죽어도 매매 영향은 0 이고 요청 행만 쌓인다.
+
+**미확정 — cycle279 명세에서 정한다.**
+
+| 항목 | 지금 상태 | 정해야 할 것 |
+|------|-----------|--------------|
+| 선점 규약 | migration 043 에 claim/status/lease 열이 **없다**. 미처리 행을 커버하는 인덱스도 없다(4개 전부 `trade_date`/`strategy_id`/`ticker`/`order_no` 축) | 선점 열 + 미처리 행 인덱스를 더하는 **가산형 마이그레이션**. `result` 등 NOT NULL 11열에 "아직 채워지지 않은 행"을 어떻게 넣을지(센티넬 여부)도 함께 |
+| 요청 행을 적는 자리 | 동기 훅 안에서는 **불가**하다 — `observe_order` 는 sync·DB 금지(가드 C1-14 `tests/unit/ast/test_cycle276_ast_order_hook.py:580`)이고 훅~PENDING INSERT 사이 `await` 0건(C1-9 `:488`)·훅 자체 `await` 금지(C1-4 `:425`)다 | 오늘처럼 `asyncio.create_task` 안에서 적을지, 자리를 옮길지 |
+| 워커 경로 | `src/workers/` 디렉터리는 **없다** | 워커 축 경로와 `BACKEND_RE` 제외 방식 (15.6 ⚠️) |
+| 컨테이너 정의 | `docker-compose.prod.yml` 에 `llm_worker` 서비스가 **없다** | 오버레이가 아니라 **본체**에 정의 (15.6 ⚠️) |
+
+현재(0단계) 훅 자리는 이렇다 — 1단계는 이 자리를 옮기지 않고 **뒷단만** 뗀다.
+
+```
+  execute_buy  (order_engine.py:251)
+  │
+  ├─ place_order (KIS 접수)
+  ├─ 주문번호 매핑 등록                            ← 동기 영역
+  ├─ llm_buy_gate.observe_order(...)               ← order_engine.py:434
+  │   └─ 래치/캡 확인 → asyncio.create_task(...)   ← llm_buy_gate.py:759
+  │        · 0단계: 같은 프로세스에서 모델 호출
+  │        · 1단계: 이 task 가 요청 행만 남기고 워커가 집어 간다
+  └─ PENDING INSERT
+```
+
+훅은 여기 한 곳이 아니라 **두 곳**이다 — 위의 주 경로(`:434`)와 시장가 거부 뒤 지정가 폴백
+경로(`:535`). 가드 `test_c1_1_hook_appears_exactly_twice` 가 정확히 2곳임을 강제하므로 1단계도
+두 자리를 같이 옮긴다.
+
+> `llm_buy_evaluations` 의 **열 정의 정본은 루트 `CLAUDE.md` 의 DB 스키마 표**다(cycle276 —
+> "주문 시점 기록, 주문 1건 = 1행"). 1단계는 그 기록 테이블에 "아직 채워지지 않은 행 = 작업
+> 대기열" 이라는 의미를 하나 더 얹는 설계이므로, 착수하면 그 정본 행도 cycle279 에서 함께 고친다.
+
+### 15.3 2단계 — 관측·분석 분리 (계획 · 착수 미정)
+
+20:00 AI 자문, 20:10 일일 로그 분석, 외부 백테스트 연동을 워커 쪽으로 옮긴다.
+
+```
+  +---------------------------------------------+
+  |  backend  (매매 전용으로 얇아진다)          |
+  |  scheduler / scanner / strategies           |
+  |  risk / order_engine / realtime             |
+  |  ※ 퍼널 캡처는 여기 남는다 (_funnel_steps)  |
+  +---------------------------------------------+
+                        | asyncpg
+                        v
+  +---------------------------------------------+
+  |       AWS RDS PostgreSQL                    |
+  |   parameter_recommendations                 |
+  |   daily_log_reports                         |
+  |   strategy_funnel_snapshots                 |
+  |   backtest_runs                             |
+  +---------------------------------------------+
+        ^  결과 쓰기               |  읽기
+        |                          v
+  +---------------------------------------------+
+  |  llm_worker  (2단계에서 분석 작업 추가)     |
+  |   20:00 AI 자문     recommendation_engine   |
+  |   20:10 로그 분석   log_analysis_engine     |
+  |   외부 백테스트 MCP                         |
+  +---------------------------------------------+
+```
+
+- **얻는 것** — 리포트 로직을 장중에 고칠 수 있다. 20:10 정산 시각에 무거운 분석이
+  엔진 이벤트 루프를 점유하지 않는다.
+- **위험 — 균일하지 않다. 셋으로 갈린다.**
+
+| 대상 | 위험 | 이유 |
+|------|------|------|
+| 20:10 로그 분석 · 외부 백테스트 | 낮음 | live registry 를 읽지 않는다. DB 를 읽어 DB 에 쓴다 |
+| 20:00 AI 자문 | **중간 — 매매 행위가 바뀐다** | `recommendation_engine.py:404-406`·`:581-582` 가 `trading_scheduler.registry` 를 잡아 **살아 있는 전략 객체**를 읽고, auto_apply 는 `:626 strategy.config.weight = new_weight` · `:657 strategy.config.params[k] = v` 로 그 객체를 **직접 변이**한다. 이 in-memory 쓰기가 파라미터 즉시 반영의 유일한 경로다(루트 `CLAUDE.md` — `strategy_config` SQL UPDATE 는 다음 재시작에서만 반영). 워커로 옮기면 DB 쓰기만 남아 감액·보수적 파라미터가 **다음 재시작까지 실매매에 반영되지 않는다** |
+| 퍼널 스냅샷 | 가를 수 없다 | 데이터 원천이 DB 가 아니라 **엔진 프로세스의 메모리**다. `capture_funnel_snapshots(registry, …)`(`scheduler.py:186`)가 registry 를 순회해 각 전략의 `_funnel_steps` 를 읽고(`:236`, 접근 실패 로그 `:238`), 호출자는 `_scan_loop` 안의 `:2424` 다. 워커 프로세스엔 그 객체가 없다 |
+
+그래서 2단계의 실제 범위는 **적재·분석 쪽**이다. 퍼널은 **캡처는 엔진에 남기고 적재(영속)만**
+옮길 수 있고, 20:00 자문은 적용(`auto_apply`)을 엔진 측 API(`PUT /api/strategies/{id}/params`)로
+되돌리는 설계가 **선행**돼야 옮길 수 있다.
+
+### 15.4 3단계 — 시세 감시 ↔ 전략 판정 ↔ 주문 완전 분리 (보류 — 지금 하지 않는다)
+
+사용자 원안의 "시세 감시(데몬) → 전략 판정 → 주문" 완전 분리다. 아래 도식의 ①~④ 네 곳이
+현재 코드가 **프로세스 안** 자원으로 강제하고 있는 지점이며, 그것이 보류 근거다.
+
+```
+  +------------------+   ticks   +------------------+  orders  +------------------+
+  |  feed daemon     |---------->|  decision proc.  |--------->|  order proc.     |
+  |  WS 구독 · 캐시  |           |  전략 판정       |    ④     |  KIS 주문 접수   |
+  +--------+---------+           +--------+---------+          +--------+---------+
+           |                              |                             |
+           | ③ 체결통보 메인 단일         |                             | ① REST 20/s
+           | ① REST 20/s  ② 토큰 발급     |                             | ② 토큰 발급
+           |   (폴링 · 조건검색도 쓴다)   |                             |
+           +------------------------------+-----------------------------+
+                                          |
+                                          v
+                               +--------------------+
+                               |  AWS RDS Postgres  |
+                               +--------------------+
+```
+
+①②는 **양쪽 기둥에 다 걸린다** — 주문만 REST·토큰을 쓰는 게 아니라 피드·스캔 쪽도 쓴다
+(donchian `_swing_rest_poll_loop` 60초 폴링, stale universe 가드의 `inquire_ccnl`, 조건검색).
+보조 시세계정은 라벨마다 또 다른 세마포어를 쓴다(`src/api/base.py:346` `asyncio.Semaphore(18)`).
+④는 `decision` 아래가 아니라 **두 기둥의 경계**에 있다 — `order_engine.execute_buy` 안에서
+전략의 `calc_buy_quantity` 를 부르는 구간이라 전략 판정과 주문을 가로지른다.
+
+보류 근거 — 측정된 코드 사실 네 가지:
+
+| # | 제약 | 정본 위치 | 가르면 생기는 일 |
+|---|------|-----------|------------------|
+| ① | REST 초당 20건 한도가 **프로세스 안** 세마포어 | `src/api/base.py:28` — `_semaphore = asyncio.Semaphore(20)` | 두 프로세스면 계정 한도 40/s 위반. 두 프로세스 **모두** REST 를 쓴다 |
+| ② | 토큰 발급 분당 1건 가드가 **프로세스 안** Lock | `src/auth/token.py:50` — `_GLOBAL_ISSUE_LOCK: asyncio.Lock \| None = None`(lazy 생성 `:55-60`) + `:52` `_ISSUE_GAP_SECS: float = 61.0` | KIS `/oauth2/tokenP` 는 분당 1개 전역 한도라 두 프로세스가 각자 발급하면 일부 403(`token.py:10`) |
+| ③ | 체결통보(H0STCNI0/H0STCNI9) **메인 세션 단일 강제** | `src/realtime/websocket_pool.py:59` `_EXECUTION_NOTICE_TR_IDS` + `:62` `_enforce_main_only_execution_notice` (보조 세션 구독 시 `QuoteSessionExecutionNoticeError` `:52`) | 체결이 다른 프로세스에 도착해 손절 경로에 한 홉이 늘어난다 |
+| ④ | 매수 수량 계산 ~ 대기 등록 사이 `await` 0건 규약(A-ATOMIC) | `src/engine/order_engine.py:314`(`calc_buy_quantity`) ~ `:355`(`pending_buys.add`), 가드 `tests/unit/ast/test_budget_limit_ast.py:60` | 단일 이벤트 루프 전제가 깨져 예산·중복 판정이 분산 잠금 문제가 된다. 이 경로에서 메시지 한 건 중복 = 주문 한 건 중복 |
+
+**예상** — 지금 설계는 틱 경로를 동기적으로 막지는 않는다. 평가를 `asyncio.create_task` 로
+던지고 즉시 반환하기 때문이다(`src/engine/llm_buy_gate.py:759`, 동시 실행은 `:141`
+`_SEM = asyncio.Semaphore(2)` 로 2건까지). 다만 같은 이벤트 루프와 같은 asyncpg 풀은 계속
+공유하고, 3단계의 남은 동기 — 전략 판정 경로가 죽을 때 WS 피드까지 같이 죽지 않게 하는 **크래시
+격리**와 **독립 재시작** — 은 1·2단계가 덮지 않는다. 1·2단계가 확실히 해소하는 것은 **배포
+재시작으로 생기는 중단** 쪽이다.
+
+**착수 전제** — 위 네 제약을 프로세스 밖으로 옮기는 별도 설계(공유 레이트리미터 · 발급
+잠금 · 체결통보 중계 · 분산 예산 잠금) + 중복 배달·순서 보장 규약. 사용자 승인 없이
+착수하지 않는다.
+
+### 15.5 지금 어디까지 됐고 다음에 무엇을 하나
+
+**지금**: 0단계(컨테이너 2개)가 가동 중이고, 1단계는 **설계 단계에서 진행 중**이다 — 코드는
+아직 한 줄도 없다(`src/workers/` 없음 · `llm_worker` 서비스 없음 · migration 043 에 선점 열 없음).
+2·3단계는 착수 전이다.
+
+**다음**: 1단계의 다음 할 일은 cycle279 명세를 써서 15.2 의 **미확정 4항목**을 확정하는 것이다.
+얻는 것과 위험은 각 절(15.2 · 15.3 · 15.4)에 적혀 있고, 아래 표에는 **무엇이 있어야 그 단계가
+시작되는지**만 적는다.
+
+| 단계 | 착수 조건 |
+|------|-----------|
+| 1 | 착수됨 (사용자 결정 2026-09-11 "1단계만 진행"). 다음 할 일 = cycle279 명세에서 15.2 의 **미확정 4항목**(선점 규약 · 요청 행 자리 · 워커 경로 · 컨테이너 정의) 확정 |
+| 2 | 1단계 워커가 실전에서 안정적으로 돌 것 + 20:00 자문 auto_apply 를 엔진 측 API 로 되돌리는 설계(15.3) + 사용자 승인 |
+| 3 | 15.4 ①~④ 를 프로세스 밖으로 옮기는 별도 설계 + 중복 배달·순서 보장 규약 + 사용자 승인 |
+
+### 15.6 배포 모드 — 현재 3종, 1단계 이후 4종(예정)
+
+모드 판정의 정본은 `tools/deploy/compose_up_changed.sh` 다(`.deployed_sha` 마커와 HEAD 의
+누적 diff → 모드, cycle248).
+
+| 모드 | 트리거 경로 | compose 호출 | backend 영향 |
+|------|-------------|--------------|--------------|
+| `full` | `BACKEND_RE` (`tools/deploy/compose_up_changed.sh:85`) — `src/`·`requirements.txt`·`Dockerfile`·compose·`deploy.yml`·`tools/deploy/` | `up --build -d --remove-orphans` (`:190`) | 재생성 |
+| `frontend` | `FRONTEND_RE` (`:93`) — `frontend/`·`tools/ops/tls_stage2/` | `up --build -d --remove-orphans --no-deps frontend` (`:194`) | 무접촉 |
+| `none` | 그 외(tests·`tools/test_impact`·…) 또는 마커==HEAD | `up -d --remove-orphans` (`:198`) | 빌드 없음 |
+| `worker` (미구현 · 예정) | 워커 전용 경로만 | `up --build -d --remove-orphans --no-deps llm_worker` | 무접촉 **전망** |
+
+`worker` 모드는 `frontend` 모드와 같은 원리(`--no-deps` 로 그 서비스만 재생성)로 backend
+무접촉이 될 **전망**이다. 아직 코드에는 없다 — 현재 `case "$MODE"` 는 full/frontend/none
+3갈래뿐이고 그 밖은 `log "internal error: unknown mode"; exit 2` 다(`:188-203`).
+
+⚠️ **`llm_worker` 는 `docker-compose.prod.yml` 본체에 정의한다.** TLS 처럼 오버레이
+(`docker-compose.tls.yml`/`tls2.yml`)에만 두면, 그 오버레이를 붙이지 않는 `full`·`none` 배포의
+`--remove-orphans`(`:190`/`:198`)가 **돌고 있던 워커 컨테이너를 orphan 으로 삭제한다**.
+
+⚠️ **지금의 `BACKEND_RE` 는 첫 대안이 `src/` 다**(`:85`) — 워커 코드를 `src/` 아래에 그대로
+두면 워커 전용 변경도 `full` 로 분류돼 backend 가 재시작된다(D6 발동). 1단계가 노리는
+"backend 무접촉 배포" 가 경로 설계에 달려 있다는 뜻이라, 어떤 경로를 워커 축으로 뗄지(그리고
+`BACKEND_RE` 에서 어떻게 제외할지)는 cycle279 에서 정한다. 모드 판정 불가는 종전대로 전부
+`full`(fail-safe)이다.
+
+---
+
+> 본 15장은 **계획 문서**다. 1단계는 진행 중이고, 2·3단계는 착수 승인 전이다.
+> 코드가 실제로 들어오면 각 절의 "예정" 표기를 실제 파일 경로로 바꾼다.
