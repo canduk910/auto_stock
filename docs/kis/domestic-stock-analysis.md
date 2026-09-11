@@ -1,6 +1,8 @@
 # [국내주식] 시세분석 API 명세
 
-> 원본: `한국투자증권_오픈API_전체문서_20260418_030007.xlsx`
+> 원본: `한국투자증권_오픈API_전체문서_20260911_030009.xlsx`
+
+> 이 문서는 워크북에서 **전 필드 그대로** 생성됩니다. 손으로 고치지 마세요 — `사용` 표시만 보존됩니다.
 
 
 ## API 목록 (29개)
@@ -17,7 +19,6 @@
 | 118 | REST | 프로그램매매 종합현황(일별) | FHPPG04600001 | GET | `/uapi/domestic-stock/v1/quotations/comp-program-trade-daily` |  |
 | 119 | REST | 종목별 일별 대차거래추이 | HHPST074500C0 | GET | `/uapi/domestic-stock/v1/quotations/daily-loan-trans` |  |
 | 120 | REST | 종목조건검색조회 | HHKST03900400 | GET | `/uapi/domestic-stock/v1/quotations/psearch-result` |  |
-| 121 | REST | 국내주식 매물대/거래비중 | FHPST01130000 | GET | `/uapi/domestic-stock/v1/quotations/pbar-tratio` |  |
 | 122 | REST | 국내기관_외국인 매매종목가집계 | FHPTJ04400000 | GET | `/uapi/domestic-stock/v1/quotations/foreign-institution-total` |  |
 | 123 | REST | 관심종목 그룹별 종목조회 | HHKCM113004C6 | GET | `/uapi/domestic-stock/v1/quotations/intstock-stocklist-by-group` |  |
 | 124 | REST | 주식현재가 회원사 종목매매동향 | FHPST04540000 | GET | `/uapi/domestic-stock/v1/quotations/inquire-member-daily` |  |
@@ -36,29 +37,119 @@
 | 137 | REST | 국내주식 시간외예상체결등락률 | FHKST11860000 | GET | `/uapi/domestic-stock/v1/ranking/overtime-exp-trans-fluct` |  |
 | 138 | REST | 종목별 외국계 순매수추이 | FHKST644400C0 | GET | `/uapi/domestic-stock/v1/quotations/frgnmem-pchs-trend` |  |
 | 139 | REST | 관심종목(멀티종목) 시세조회 | FHKST11300006 | GET | `/uapi/domestic-stock/v1/quotations/intstock-multprice` |  |
+| 9999 | REST | 국내주식 매물대_거래비중 | FHPST01130000 | GET | `/uapi/domestic-stock/v1/quotations/pbar-tratio` |  |
 
 ---
 
 ## 상세 명세
 
+
 ### 프로그램매매 종합현황(시간)
 
-- **TR_ID**: FHPPG04600101
-- **Method**: GET
+- **API ID**: 국내주식-114
+- **실전 TR_ID**: FHPPG04600101
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/comp-program-trade-today`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+프로그램매매 종합현황(시간) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0460] 프로그램매매 종합현황 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 장시간(09:00~15:30) 동안의 최근 30분간의 데이터 확인이 가능하며, 다음조회가 불가합니다.
+※ 장시간(09:00~15:30) 이후에는 bsop_hour 에 153000 ~ 170000 까지의 시간데이터가 출력되지만 데이터는 모두 동일한 장마감 데이터인 점 유의 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | '※ 구TR은 사전고지 없이 막힐 수 있으므로 반드시 신TR로 변경이용 부탁드립니다.<br>[실전투자]<br>(구)FHPPG04600100 → (신)FHPPG04600101' |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (6)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 시장 분류 코드 | string | Y | 2 | KRX : J , NXT : NX, 통합 : UN |
+| 1 | `FID_MRKT_CLS_CODE` | 시장 구분 코드 | string | Y | 2 | K:코스피, Q:코스닥 |
+| 2 | `FID_SCTN_CLS_CODE` | 구간 구분 코드 | string | Y | 2 | 공백 입력 |
+| 3 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 공백 입력 |
+| 4 | `FID_COND_MRKT_DIV_CODE1` | 시장 분류코드1 | string | Y | 2 | 공백 입력 |
+| 5 | `FID_INPUT_HOUR_1` | 입력 시간1 | string | Y | 10 | 공백 입력 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (22)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `bsop_hour` | 영업 시간 | string | Y | 6 |  |
+| 5 | `arbt_smtn_seln_tr_pbmn` | 차익 합계 매도 거래 대금 | string | Y | 18 |  |
+| 6 | `arbt_smtm_seln_tr_pbmn_rate` | 차익 합계 매도 거래대금 비율 | string | Y | 72 |  |
+| 7 | `arbt_smtn_shnu_tr_pbmn` | 차익 합계 매수2 거래 대금 | string | Y | 18 |  |
+| 8 | `arbt_smtm_shun_tr_pbmn_rate` | 차익합계매수거래대금비율 | string | Y | 72 |  |
+| 9 | `nabt_smtn_seln_tr_pbmn` | 비차익 합계 매도 거래 대금 | string | Y | 18 |  |
+| 10 | `nabt_smtm_seln_tr_pbmn_rate` | 비차익 합계 매도 거래대금 비율 | string | Y | 72 |  |
+| 11 | `nabt_smtn_shnu_tr_pbmn` | 비차익 합계 매수2 거래 대금 | string | Y | 18 |  |
+| 12 | `nabt_smtm_shun_tr_pbmn_rate` | 비차익합계매수거래대금비율 | string | Y | 72 |  |
+| 13 | `arbt_smtn_ntby_tr_pbmn` | 차익 합계 순매수 거래 대금 | string | Y | 18 |  |
+| 14 | `arbt_smtm_ntby_tr_pbmn_rate` | 차익 합계 순매수 거래대금 비율 | string | Y | 72 |  |
+| 15 | `nabt_smtn_ntby_tr_pbmn` | 비차익 합계 순매수 거래 대금 | string | Y | 18 |  |
+| 16 | `nabt_smtm_ntby_tr_pbmn_rate` | 비차익 합계 순매수 거래대금 비 | string | Y | 72 |  |
+| 17 | `whol_smtn_ntby_tr_pbmn` | 전체 합계 순매수 거래 대금 | string | Y | 18 |  |
+| 18 | `whol_ntby_tr_pbmn_rate` | 전체 순매수 거래대금 비율 | string | Y | 72 |  |
+| 19 | `bstp_nmix_prpr` | 업종 지수 현재가 | string | Y | 112 |  |
+| 20 | `bstp_nmix_prdy_vrss` | 업종 지수 전일 대비 | string | Y | 112 |  |
+| 21 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_MRKT_CLS_CODE:Q
 FID_SCTN_CLS_CODE:1
 FID_INPUT_ISCD:
 FID_COND_MRKT_DIV_CODE1:
-FID_INPUT_HOUR_1: |  |
-| Response Example | {
+FID_INPUT_HOUR_1:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "bsop_hour": "170000",
@@ -574,27 +665,125 @@ FID_INPUT_HOUR_1: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 신용잔고 일별추이
 
-- **TR_ID**: FHPST04760000
-- **Method**: GET
+- **API ID**: 국내주식-110
+- **실전 TR_ID**: FHPST04760000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/daily-credit-balance`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 신용잔고 일별추이 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0476] 국내주식 신용잔고 일별추이 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+한 번의 호출에 최대 30건 확인 가능하며, fid_input_date_1 을 입력하여 다음 조회가 가능합니다.
+
+※ 상환수량은 "매도상환수량+현금상환수량"의 합계 수치입니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPST04760000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `fid_cond_mrkt_div_code` | 시장 분류 코드 | string | Y | 2 | 시장구분코드 (주식 J) |
+| 1 | `fid_cond_scr_div_code` | 화면 분류 코드 | string | Y | 5 | Unique key(20476) |
+| 2 | `fid_input_iscd` | 종목코드 | string | Y | 12 | 종목코드 (ex 005930) |
+| 3 | `fid_input_date_1` | 결제일자 | string | Y | 10 | 결제일자 (ex 20240313) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (30)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `deal_date` | 매매 일자 | string | Y | 8 |  |
+| 5 | `stck_prpr` | 주식 현재가 | string | Y | 10 |  |
+| 6 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 7 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 8 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 9 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 10 | `stlm_date` | 결제 일자 | string | Y | 8 |  |
+| 11 | `whol_loan_new_stcn` | 전체 융자 신규 주수 | string | Y | 18 | 단위: 주 |
+| 12 | `whol_loan_rdmp_stcn` | 전체 융자 상환 주수 | string | Y | 18 | 단위: 주 |
+| 13 | `whol_loan_rmnd_stcn` | 전체 융자 잔고 주수 | string | Y | 18 | 단위: 주 |
+| 14 | `whol_loan_new_amt` | 전체 융자 신규 금액 | string | Y | 18 | 단위: 만원 |
+| 15 | `whol_loan_rdmp_amt` | 전체 융자 상환 금액 | string | Y | 18 | 단위: 만원 |
+| 16 | `whol_loan_rmnd_amt` | 전체 융자 잔고 금액 | string | Y | 18 | 단위: 만원 |
+| 17 | `whol_loan_rmnd_rate` | 전체 융자 잔고 비율 | string | Y | 84 |  |
+| 18 | `whol_loan_gvrt` | 전체 융자 공여율 | string | Y | 82 |  |
+| 19 | `whol_stln_new_stcn` | 전체 대주 신규 주수 | string | Y | 18 | 단위: 주 |
+| 20 | `whol_stln_rdmp_stcn` | 전체 대주 상환 주수 | string | Y | 18 | 단위: 주 |
+| 21 | `whol_stln_rmnd_stcn` | 전체 대주 잔고 주수 | string | Y | 18 | 단위: 주 |
+| 22 | `whol_stln_new_amt` | 전체 대주 신규 금액 | string | Y | 18 | 단위: 만원 |
+| 23 | `whol_stln_rdmp_amt` | 전체 대주 상환 금액 | string | Y | 18 | 단위: 만원 |
+| 24 | `whol_stln_rmnd_amt` | 전체 대주 잔고 금액 | string | Y | 18 | 단위: 만원 |
+| 25 | `whol_stln_rmnd_rate` | 전체 대주 잔고 비율 | string | Y | 84 |  |
+| 26 | `whol_stln_gvrt` | 전체 대주 공여율 | string | Y | 82 |  |
+| 27 | `stck_oprc` | 주식 시가2 | string | Y | 10 |  |
+| 28 | `stck_hgpr` | 주식 최고가 | string | Y | 10 |  |
+| 29 | `stck_lwpr` | 주식 최저가 | string | Y | 10 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_cond_scr_div_code":"20476",
 "fid_input_iscd":"005930",
 "fid_input_date_1":"20240315"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "deal_date": "20240313",
@@ -1440,25 +1629,135 @@ FID_INPUT_HOUR_1: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 시장별 투자자매매동향(일별)
 
-- **TR_ID**: FHPTJ04040000
-- **Method**: GET
+- **API ID**: 국내주식-075
+- **실전 TR_ID**: FHPTJ04040000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/inquire-investor-daily-by-market`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:U
+```text
+시장별 투자자매매동향(일별) API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0404] 시장별 일별동향 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPTJ04040000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (6)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건 시장 분류 코드 | string | Y | 2 | 시장구분코드 (업종 U) |
+| 1 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 코스피, 코스닥 : 업종분류코드 (종목정보파일 - 업종코드 참조) |
+| 2 | `FID_INPUT_DATE_1` | 입력 날짜1 | string | Y | 10 | ex. 20240517 |
+| 3 | `FID_INPUT_ISCD_1` | 입력 종목코드 | string | Y | 12 | 코스피(KSP), 코스닥(KSQ) |
+| 4 | `FID_INPUT_DATE_2` | 입력 날짜2 | string | Y | 10 | 입력 날짜1과 동일날짜 입력 |
+| 5 | `FID_INPUT_ISCD_2` | 하위 분류코드 | string | Y | 10 | 코스피, 코스닥 : 업종분류코드 (종목정보파일 - 업종코드 참조) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (43)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stck_bsop_date` | 주식 영업 일자 | string | Y | 8 |  |
+| 5 | `bstp_nmix_prpr` | 업종 지수 현재가 | string | Y | 112 |  |
+| 6 | `bstp_nmix_prdy_vrss` | 업종 지수 전일 대비 | string | Y | 112 |  |
+| 7 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 8 | `bstp_nmix_prdy_ctrt` | 업종 지수 전일 대비율 | string | Y | 82 |  |
+| 9 | `bstp_nmix_oprc` | 업종 지수 시가2 | string | Y | 112 |  |
+| 10 | `bstp_nmix_hgpr` | 업종 지수 최고가 | string | Y | 112 |  |
+| 11 | `bstp_nmix_lwpr` | 업종 지수 최저가 | string | Y | 112 |  |
+| 12 | `stck_prdy_clpr` | 주식 전일 종가 | string | Y | 10 |  |
+| 13 | `frgn_ntby_qty` | 외국인 순매수 수량 | string | Y | 12 |  |
+| 14 | `frgn_reg_ntby_qty` | 외국인 등록 순매수 수량 | string | Y | 18 |  |
+| 15 | `frgn_nreg_ntby_qty` | 외국인 비등록 순매수 수량 | string | Y | 18 |  |
+| 16 | `prsn_ntby_qty` | 개인 순매수 수량 | string | Y | 12 |  |
+| 17 | `orgn_ntby_qty` | 기관계 순매수 수량 | string | Y | 18 |  |
+| 18 | `scrt_ntby_qty` | 증권 순매수 수량 | string | Y | 12 |  |
+| 19 | `ivtr_ntby_qty` | 투자신탁 순매수 수량 | string | Y | 12 |  |
+| 20 | `pe_fund_ntby_vol` | 사모 펀드 순매수 거래량 | string | Y | 18 |  |
+| 21 | `bank_ntby_qty` | 은행 순매수 수량 | string | Y | 12 |  |
+| 22 | `insu_ntby_qty` | 보험 순매수 수량 | string | Y | 12 |  |
+| 23 | `mrbn_ntby_qty` | 종금 순매수 수량 | string | Y | 12 |  |
+| 24 | `fund_ntby_qty` | 기금 순매수 수량 | string | Y | 12 |  |
+| 25 | `etc_ntby_qty` | 기타 순매수 수량 | string | Y | 12 |  |
+| 26 | `etc_orgt_ntby_vol` | 기타 단체 순매수 거래량 | string | Y | 18 |  |
+| 27 | `etc_corp_ntby_vol` | 기타 법인 순매수 거래량 | string | Y | 18 |  |
+| 28 | `frgn_ntby_tr_pbmn` | 외국인 순매수 거래 대금 | string | Y | 18 |  |
+| 29 | `frgn_reg_ntby_pbmn` | 외국인 등록 순매수 대금 | string | Y | 18 |  |
+| 30 | `frgn_nreg_ntby_pbmn` | 외국인 비등록 순매수 대금 | string | Y | 18 |  |
+| 31 | `prsn_ntby_tr_pbmn` | 개인 순매수 거래 대금 | string | Y | 18 |  |
+| 32 | `orgn_ntby_tr_pbmn` | 기관계 순매수 거래 대금 | string | Y | 18 |  |
+| 33 | `scrt_ntby_tr_pbmn` | 증권 순매수 거래 대금 | string | Y | 18 |  |
+| 34 | `ivtr_ntby_tr_pbmn` | 투자신탁 순매수 거래 대금 | string | Y | 18 |  |
+| 35 | `pe_fund_ntby_tr_pbmn` | 사모 펀드 순매수 거래 대금 | string | Y | 18 |  |
+| 36 | `bank_ntby_tr_pbmn` | 은행 순매수 거래 대금 | string | Y | 18 |  |
+| 37 | `insu_ntby_tr_pbmn` | 보험 순매수 거래 대금 | string | Y | 18 |  |
+| 38 | `mrbn_ntby_tr_pbmn` | 종금 순매수 거래 대금 | string | Y | 18 |  |
+| 39 | `fund_ntby_tr_pbmn` | 기금 순매수 거래 대금 | string | Y | 18 |  |
+| 40 | `etc_ntby_tr_pbmn` | 기타 순매수 거래 대금 | string | Y | 18 |  |
+| 41 | `etc_orgt_ntby_tr_pbmn` | 기타 단체 순매수 거래 대금 | string | Y | 18 |  |
+| 42 | `etc_corp_ntby_tr_pbmn` | 기타 법인 순매수 거래 대금 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:U
 FID_INPUT_ISCD:0001
 FID_INPUT_DATE_1:20240517
-FID_INPUT_ISCD_1:KSP |  |
-| Response Example | {
+FID_INPUT_ISCD_1:KSP
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stck_bsop_date": "20240517",
@@ -1546,41 +1845,295 @@ FID_INPUT_ISCD_1:KSP |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 공매도 일별추이
 
-- **TR_ID**: FHPST04830000
-- **Method**: GET
+- **API ID**: 국내주식-134
+- **실전 TR_ID**: FHPST04830000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/daily-short-sale`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지`
 
-#### Response
+#### Request Header (13)
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) |  |  |
-| Response Example |  |  |
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPST04830000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_INPUT_DATE_2` | 입력 날짜2 | string | Y | 10 | ~ 누적 |
+| 1 | `FID_COND_MRKT_DIV_CODE` | 조건 시장 분류 코드 | string | Y | 2 | 시장구분코드 (주식 J) |
+| 2 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 종목코드 |
+| 3 | `FID_INPUT_DATE_1` | 입력 날짜1 | string | Y | 10 | 공백시 전체 (기간 ~) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (32)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `stck_prpr` | 주식 현재가 | string | Y | 10 |  |
+| 5 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 6 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 7 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 8 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 9 | `prdy_vol` | 전일 거래량 | string | Y | 18 |  |
+| 10 | `output2` | 응답상세 | object array | Y |  | array |
+| 11 | `stck_bsop_date` | 주식 영업 일자 | string | Y | 8 |  |
+| 12 | `stck_clpr` | 주식 종가 | string | Y | 10 |  |
+| 13 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 14 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 15 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 16 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 17 | `stnd_vol_smtn` | 기준 거래량 합계 | string | Y | 18 |  |
+| 18 | `ssts_cntg_qty` | 공매도 체결 수량 | string | Y | 12 |  |
+| 19 | `ssts_vol_rlim` | 공매도 거래량 비중 | string | Y | 62 |  |
+| 20 | `acml_ssts_cntg_qty` | 누적 공매도 체결 수량 | string | Y | 13 |  |
+| 21 | `acml_ssts_cntg_qty_rlim` | 누적 공매도 체결 수량 비중 | string | Y | 72 |  |
+| 22 | `acml_tr_pbmn` | 누적 거래 대금 | string | Y | 18 |  |
+| 23 | `stnd_tr_pbmn_smtn` | 기준 거래대금 합계 | string | Y | 18 |  |
+| 24 | `ssts_tr_pbmn` | 공매도 거래 대금 | string | Y | 18 |  |
+| 25 | `ssts_tr_pbmn_rlim` | 공매도 거래대금 비중 | string | Y | 62 |  |
+| 26 | `acml_ssts_tr_pbmn` | 누적 공매도 거래 대금 | string | Y | 19 |  |
+| 27 | `acml_ssts_tr_pbmn_rlim` | 누적 공매도 거래 대금 비중 | string | Y | 72 |  |
+| 28 | `stck_oprc` | 주식 시가2 | string | Y | 10 |  |
+| 29 | `stck_hgpr` | 주식 최고가 | string | Y | 10 |  |
+| 30 | `stck_lwpr` | 주식 최저가 | string | Y | 10 |  |
+| 31 | `avrg_prc` | 평균가격 | string | Y | 11 |  |
 
 
 ### 종목별 투자자매매동향(일별)
 
-- **TR_ID**: FHPTJ04160001
-- **Method**: GET
+- **API ID**: 종목별 투자자매매동향(일별)
+- **실전 TR_ID**: FHPTJ04160001
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+국내주식 종목별 투자자매매동향(일별) API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0416] 종목별 일별동향 화면 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 단위 : 금액(백만원) 수량(주)
+
+당일 데이터는 15:40이후에 데이터가 가집계 및 산출되어 15:40부터 조회가능하며,
+데이터 산출의 경우 산출 시간대는 일정하지 않을 수 있음을 참고 부탁드립니다.
+추가로 API를 통한 00:00 ~ 15:40 이외의 시간은 당일 조회가 제한되는 점 이용에 참고 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 40 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPTJ04160001 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | 공백 : 초기 조회 <br>N : 다음 데이터 조회 (output header의 tr_cont가 M일 경우) |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 필수] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건 시장 분류 코드 | string | Y | 2 | J:KRX, NX:NXT, UN:통합 |
+| 1 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 종목번호 (6자리) |
+| 2 | `FID_INPUT_DATE_1` | 입력 날짜1 | string | Y | 10 | 입력 날짜(20250812) (해당일 조회는 장 종료 후 정상 조회 가능) |
+| 3 | `FID_ORG_ADJ_PRC` | 수정주가 원주가 가격 | string | Y | 2 | 공란 입력 |
+| 4 | `FID_ETC_CLS_CODE` | 기타 구분 코드 | string | Y | 2 | "1" 입력 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | 공백 : 초기 조회 <br>N : 다음 데이터 조회 (output header의 tr_cont가 M일 경우) |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 필수] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (113)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `stck_prpr` | 주식 현재가 | string | Y | 10 |  |
+| 5 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 6 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 7 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 8 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 9 | `prdy_vol` | 전일 거래량 | string | Y | 18 |  |
+| 10 | `rprs_mrkt_kor_name` | 대표 시장 한글 명 | string | Y | 40 |  |
+| 11 | `output2` | 응답상세 | object array | Y |  | array |
+| 12 | `stck_bsop_date` | 주식 영업 일자 | string | Y | 8 |  |
+| 13 | `stck_clpr` | 주식 종가 | string | Y | 10 |  |
+| 14 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 15 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 16 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 17 | `acml_vol` | 누적 거래량 | string | Y | 18 | 단위 : 주 |
+| 18 | `acml_tr_pbmn` | 누적 거래 대금 | string | Y | 18 | 단위 : 백만원 |
+| 19 | `stck_oprc` | 주식 시가2 | string | Y | 10 |  |
+| 20 | `stck_hgpr` | 주식 최고가 | string | Y | 10 |  |
+| 21 | `stck_lwpr` | 주식 최저가 | string | Y | 10 |  |
+| 22 | `frgn_ntby_qty` | 외국인 순매수 수량 | string | Y | 12 | 단위 : 주 |
+| 23 | `frgn_reg_ntby_qty` | 외국인 등록 순매수 수량 | string | Y | 18 |  |
+| 24 | `frgn_nreg_ntby_qty` | 외국인 비등록 순매수 수량 | string | Y | 18 |  |
+| 25 | `prsn_ntby_qty` | 개인 순매수 수량 | string | Y | 12 |  |
+| 26 | `orgn_ntby_qty` | 기관계 순매수 수량 | string | Y | 18 |  |
+| 27 | `scrt_ntby_qty` | 증권 순매수 수량 | string | Y | 12 |  |
+| 28 | `ivtr_ntby_qty` | 투자신탁 순매수 수량 | string | Y | 12 |  |
+| 29 | `pe_fund_ntby_vol` | 사모 펀드 순매수 거래량 | string | Y | 18 |  |
+| 30 | `bank_ntby_qty` | 은행 순매수 수량 | string | Y | 12 |  |
+| 31 | `insu_ntby_qty` | 보험 순매수 수량 | string | Y | 12 |  |
+| 32 | `mrbn_ntby_qty` | 종금 순매수 수량 | string | Y | 12 |  |
+| 33 | `fund_ntby_qty` | 기금 순매수 수량 | string | Y | 12 |  |
+| 34 | `etc_ntby_qty` | 기타 순매수 수량 | string | Y | 12 |  |
+| 35 | `etc_corp_ntby_vol` | 기타 법인 순매수 거래량 | string | Y | 18 |  |
+| 36 | `etc_orgt_ntby_vol` | 기타 단체 순매수 거래량 | string | Y | 18 |  |
+| 37 | `frgn_reg_ntby_pbmn` | 외국인 등록 순매수 대금 | string | Y | 18 | 단위 : 백만원 |
+| 38 | `frgn_ntby_tr_pbmn` | 외국인 순매수 거래 대금 | string | Y | 18 |  |
+| 39 | `frgn_nreg_ntby_pbmn` | 외국인 비등록 순매수 대금 | string | Y | 18 |  |
+| 40 | `prsn_ntby_tr_pbmn` | 개인 순매수 거래 대금 | string | Y | 18 |  |
+| 41 | `orgn_ntby_tr_pbmn` | 기관계 순매수 거래 대금 | string | Y | 18 |  |
+| 42 | `scrt_ntby_tr_pbmn` | 증권 순매수 거래 대금 | string | Y | 18 |  |
+| 43 | `pe_fund_ntby_tr_pbmn` | 사모 펀드 순매수 거래 대금 | string | Y | 18 |  |
+| 44 | `ivtr_ntby_tr_pbmn` | 투자신탁 순매수 거래 대금 | string | Y | 18 |  |
+| 45 | `bank_ntby_tr_pbmn` | 은행 순매수 거래 대금 | string | Y | 18 |  |
+| 46 | `insu_ntby_tr_pbmn` | 보험 순매수 거래 대금 | string | Y | 18 |  |
+| 47 | `mrbn_ntby_tr_pbmn` | 종금 순매수 거래 대금 | string | Y | 18 |  |
+| 48 | `fund_ntby_tr_pbmn` | 기금 순매수 거래 대금 | string | Y | 18 |  |
+| 49 | `etc_ntby_tr_pbmn` | 기타 순매수 거래 대금 | string | Y | 18 |  |
+| 50 | `etc_corp_ntby_tr_pbmn` | 기타 법인 순매수 거래 대금 | string | Y | 18 |  |
+| 51 | `etc_orgt_ntby_tr_pbmn` | 기타 단체 순매수 거래 대금 | string | Y | 18 |  |
+| 52 | `frgn_seln_vol` | 외국인 매도 거래량 | string | Y | 18 |  |
+| 53 | `frgn_shnu_vol` | 외국인 매수2 거래량 | string | Y | 18 |  |
+| 54 | `frgn_seln_tr_pbmn` | 외국인 매도 거래 대금 | string | Y | 18 |  |
+| 55 | `frgn_shnu_tr_pbmn` | 외국인 매수2 거래 대금 | string | Y | 18 |  |
+| 56 | `frgn_reg_askp_qty` | 외국인 등록 매도 수량 | string | Y | 18 |  |
+| 57 | `frgn_reg_bidp_qty` | 외국인 등록 매수 수량 | string | Y | 18 |  |
+| 58 | `frgn_reg_askp_pbmn` | 외국인 등록 매도 대금 | string | Y | 18 |  |
+| 59 | `frgn_reg_bidp_pbmn` | 외국인 등록 매수 대금 | string | Y | 18 |  |
+| 60 | `frgn_nreg_askp_qty` | 외국인 비등록 매도 수량 | string | Y | 18 |  |
+| 61 | `frgn_nreg_bidp_qty` | 외국인 비등록 매수 수량 | string | Y | 18 |  |
+| 62 | `frgn_nreg_askp_pbmn` | 외국인 비등록 매도 대금 | string | Y | 18 |  |
+| 63 | `frgn_nreg_bidp_pbmn` | 외국인 비등록 매수 대금 | string | Y | 18 |  |
+| 64 | `prsn_seln_vol` | 개인 매도 거래량 | string | Y | 18 |  |
+| 65 | `prsn_shnu_vol` | 개인 매수2 거래량 | string | Y | 18 |  |
+| 66 | `prsn_seln_tr_pbmn` | 개인 매도 거래 대금 | string | Y | 18 |  |
+| 67 | `prsn_shnu_tr_pbmn` | 개인 매수2 거래 대금 | string | Y | 18 |  |
+| 68 | `orgn_seln_vol` | 기관계 매도 거래량 | string | Y | 18 |  |
+| 69 | `orgn_shnu_vol` | 기관계 매수2 거래량 | string | Y | 18 |  |
+| 70 | `orgn_seln_tr_pbmn` | 기관계 매도 거래 대금 | string | Y | 18 |  |
+| 71 | `orgn_shnu_tr_pbmn` | 기관계 매수2 거래 대금 | string | Y | 18 |  |
+| 72 | `scrt_seln_vol` | 증권 매도 거래량 | string | Y | 18 |  |
+| 73 | `scrt_shnu_vol` | 증권 매수2 거래량 | string | Y | 18 |  |
+| 74 | `scrt_seln_tr_pbmn` | 증권 매도 거래 대금 | string | Y | 18 |  |
+| 75 | `scrt_shnu_tr_pbmn` | 증권 매수2 거래 대금 | string | Y | 18 |  |
+| 76 | `ivtr_seln_vol` | 투자신탁 매도 거래량 | string | Y | 18 |  |
+| 77 | `ivtr_shnu_vol` | 투자신탁 매수2 거래량 | string | Y | 18 |  |
+| 78 | `ivtr_seln_tr_pbmn` | 투자신탁 매도 거래 대금 | string | Y | 18 |  |
+| 79 | `ivtr_shnu_tr_pbmn` | 투자신탁 매수2 거래 대금 | string | Y | 18 |  |
+| 80 | `pe_fund_seln_tr_pbmn` | 사모 펀드 매도 거래 대금 | string | Y | 18 |  |
+| 81 | `pe_fund_seln_vol` | 사모 펀드 매도 거래량 | string | Y | 18 |  |
+| 82 | `pe_fund_shnu_tr_pbmn` | 사모 펀드 매수2 거래 대금 | string | Y | 18 |  |
+| 83 | `pe_fund_shnu_vol` | 사모 펀드 매수2 거래량 | string | Y | 18 |  |
+| 84 | `bank_seln_vol` | 은행 매도 거래량 | string | Y | 18 |  |
+| 85 | `bank_shnu_vol` | 은행 매수2 거래량 | string | Y | 18 |  |
+| 86 | `bank_seln_tr_pbmn` | 은행 매도 거래 대금 | string | Y | 18 |  |
+| 87 | `bank_shnu_tr_pbmn` | 은행 매수2 거래 대금 | string | Y | 18 |  |
+| 88 | `insu_seln_vol` | 보험 매도 거래량 | string | Y | 18 |  |
+| 89 | `insu_shnu_vol` | 보험 매수2 거래량 | string | Y | 18 |  |
+| 90 | `insu_seln_tr_pbmn` | 보험 매도 거래 대금 | string | Y | 18 |  |
+| 91 | `insu_shnu_tr_pbmn` | 보험 매수2 거래 대금 | string | Y | 18 |  |
+| 92 | `mrbn_seln_vol` | 종금 매도 거래량 | string | Y | 18 |  |
+| 93 | `mrbn_shnu_vol` | 종금 매수2 거래량 | string | Y | 18 |  |
+| 94 | `mrbn_seln_tr_pbmn` | 종금 매도 거래 대금 | string | Y | 18 |  |
+| 95 | `mrbn_shnu_tr_pbmn` | 종금 매수2 거래 대금 | string | Y | 18 |  |
+| 96 | `fund_seln_vol` | 기금 매도 거래량 | string | Y | 18 |  |
+| 97 | `fund_shnu_vol` | 기금 매수2 거래량 | string | Y | 18 |  |
+| 98 | `fund_seln_tr_pbmn` | 기금 매도 거래 대금 | string | Y | 18 |  |
+| 99 | `fund_shnu_tr_pbmn` | 기금 매수2 거래 대금 | string | Y | 18 |  |
+| 100 | `etc_seln_vol` | 기타 매도 거래량 | string | Y | 18 |  |
+| 101 | `etc_shnu_vol` | 기타 매수2 거래량 | string | Y | 18 |  |
+| 102 | `etc_seln_tr_pbmn` | 기타 매도 거래 대금 | string | Y | 18 |  |
+| 103 | `etc_shnu_tr_pbmn` | 기타 매수2 거래 대금 | string | Y | 18 |  |
+| 104 | `etc_orgt_seln_vol` | 기타 단체 매도 거래량 | string | Y | 18 |  |
+| 105 | `etc_orgt_shnu_vol` | 기타 단체 매수2 거래량 | string | Y | 18 |  |
+| 106 | `etc_orgt_seln_tr_pbmn` | 기타 단체 매도 거래 대금 | string | Y | 18 |  |
+| 107 | `etc_orgt_shnu_tr_pbmn` | 기타 단체 매수2 거래 대금 | string | Y | 18 |  |
+| 108 | `etc_corp_seln_vol` | 기타 법인 매도 거래량 | string | Y | 18 |  |
+| 109 | `etc_corp_shnu_vol` | 기타 법인 매수2 거래량 | string | Y | 18 |  |
+| 110 | `etc_corp_seln_tr_pbmn` | 기타 법인 매도 거래 대금 | string | Y | 18 |  |
+| 111 | `etc_corp_shnu_tr_pbmn` | 기타 법인 매수2 거래 대금 | string | Y | 18 |  |
+| 112 | `bold_yn` | BOLD 여부 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_INPUT_ISCD:005930
 FID_INPUT_DATE_1:20250811
 FID_ORG_ADJ_PRC:
-FID_ETC_CLS_CODE: |  |
-| Response Example | {
+FID_ETC_CLS_CODE:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "stck_prpr": "71100",
         "prdy_vrss": "100",
@@ -1698,24 +2251,101 @@ FID_ETC_CLS_CODE: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 종목조건검색 목록조회
 
-- **TR_ID**: HHKST03900300
-- **Method**: GET
+- **API ID**: 국내주식-038
+- **실전 TR_ID**: HHKST03900300
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/psearch-title`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+HTS(efriend Plus) [0110] 조건검색에서 등록 및 서버저장한 나의 조건 목록을 확인할 수 있는 API입니다.
+종목조건검색 목록조회 API(/uapi/domestic-stock/v1/quotations/psearch-title)의 output인 'seq'을 종목조건검색조회 API(/uapi/domestic-stock/v1/quotations/psearch-result)의 input으로 사용하시면 됩니다.
+
+※ 시스템 안정성을 위해 API로 제공되는 조건검색 결과의 경우 조건당 100건으로 제한을 둔 점 양해 부탁드립니다.
+
+※ [0110] 화면의 '대상변경' 설정사항은 HTS [0110] 사용자 조건검색 화면에만 적용됨에 유의 부탁드립니다.
+
+※ '조회가 계속 됩니다. (다음을 누르십시오.)' 오류 발생 시 해결방법
+→ HTS(efriend Plus) [0110] 조건검색 화면에서 조건을 등록하신 후, 왼쪽 하단의 "사용자조건 서버저장" 클릭하셔서 등록한 조건들을 서버로 보낸 후 다시 API 호출 시도 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKST03900300 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (1)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `user_id` | 사용자 HTS ID | string | Y | 40 |  |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (8)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output2` | 응답상세 | object array | Y |  | Array |
+| 4 | `user_id` | HTS ID | string | Y | 40 |  |
+| 5 | `seq` | 조건키값 | string | Y | 10 | 해당 값을 종목조건검색조회 API의 input으로 사용<br>(0번부터 시작) |
+| 6 | `grp_nm` | 그룹명 | string | Y | 40 | HTS(eFriend Plus) [0110] "사용자조건검색"화면을 통해<br>등록한 사용자조건 그룹 |
+| 7 | `condition_nm` | 조건명 | string | Y | 40 | 등록한 사용자 조건명 |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 	"user_id":"abcd9876"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output2": [
         {
             "user_id": "abcd9876",
@@ -1775,21 +2405,105 @@ FID_ETC_CLS_CODE: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 상하한가 포착
 
-- **TR_ID**: FHKST130000C0
-- **Method**: GET
+- **API ID**: 국내주식-190
+- **실전 TR_ID**: FHKST130000C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/capture-uplowprice`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+국내주식 상하한가 포착 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0917] 실시간 상하한가 포착 화면 의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST130000C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (10)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건시장분류코드 | string | Y | 2 | 시장구분(J) |
+| 1 | `FID_COND_SCR_DIV_CODE` | 조건화면분류코드 | string | Y | 5 | 11300(Unique key) |
+| 2 | `FID_PRC_CLS_CODE` | 상하한가 구분코드 | string | Y | 2 | 0(상한가),1(하한가) |
+| 3 | `FID_DIV_CLS_CODE` | 분류구분코드 | string | Y | 2 | '0(상하한가종목),6(8%상하한가 근접), 5(10%상하한가 근접), 1(15%상하한가 근접),2(20%상하한가 근접),<br>3(25%상하한가 근접)' |
+| 4 | `FID_INPUT_ISCD` | 입력종목코드 | string | Y | 12 | 전체(0000), 코스피(0001),코스닥(1001) |
+| 5 | `FID_TRGT_CLS_CODE` | 대상구분코드 | string | Y | 32 | 공백 입력 |
+| 6 | `FID_TRGT_EXLS_CLS_CODE` | 대상제외구분코드 | string | Y | 32 | 공백 입력 |
+| 7 | `FID_INPUT_PRICE_1` | 입력가격1 | string | Y | 12 | 공백 입력 |
+| 8 | `FID_INPUT_PRICE_2` | 입력가격2 | string | Y | 12 | 공백 입력 |
+| 9 | `FID_VOL_CNT` | 거래량수 | string | Y | 12 | 공백 입력 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (21)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `mksc_shrn_iscd` | 유가증권단축종목코드 | string | Y | 9 |  |
+| 5 | `hts_kor_isnm` | HTS한글종목명 | string | Y | 40 |  |
+| 6 | `stck_prpr` | 주식현재가 | string | Y | 10 |  |
+| 7 | `prdy_vrss_sign` | 전일대비부호 | string | Y | 1 |  |
+| 8 | `prdy_vrss` | 전일대비 | string | Y | 10 |  |
+| 9 | `prdy_ctrt` | 전일대비율 | string | Y | 82 |  |
+| 10 | `acml_vol` | 누적거래량 | string | Y | 18 |  |
+| 11 | `total_askp_rsqn` | 총매도호가잔량 | string | Y | 12 |  |
+| 12 | `total_bidp_rsqn` | 총매수호가잔량 | string | Y | 12 |  |
+| 13 | `askp_rsqn1` | 매도호가잔량1 | string | Y | 12 |  |
+| 14 | `bidp_rsqn1` | 매수호가잔량1 | string | Y | 12 |  |
+| 15 | `prdy_vol` | 전일거래량 | string | Y | 18 |  |
+| 16 | `seln_cnqn` | 매도체결량 | string | Y | 18 |  |
+| 17 | `shnu_cnqn` | 매수2체결량 | string | Y | 18 |  |
+| 18 | `stck_llam` | 주식하한가 | string | Y | 10 |  |
+| 19 | `stck_mxpr` | 주식상한가 | string | Y | 10 |  |
+| 20 | `prdy_vrss_vol_rate` | 전일대비거래량비율 | string | Y | 84 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_COND_SCR_DIV_CODE:11300
 FID_PRC_CLS_CODE:0
 FID_DIV_CLS_CODE:0
@@ -1798,8 +2512,16 @@ FID_TRGT_CLS_CODE:
 FID_TRGT_EXLS_CLS_CODE:
 FID_INPUT_PRICE_1:
 FID_INPUT_PRICE_2:
-FID_VOL_CNT: |  |
-| Response Example | {
+FID_VOL_CNT:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "mksc_shrn_iscd": "012800",
@@ -1843,25 +2565,196 @@ FID_VOL_CNT: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 프로그램매매 종합현황(일별)
 
-- **TR_ID**: FHPPG04600001
-- **Method**: GET
+- **API ID**: 국내주식-115
+- **실전 TR_ID**: FHPPG04600001
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/comp-program-trade-daily`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:UN
+```text
+프로그램매매 종합현황(일별) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0460] 프로그램매매 종합현황 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+* 8개월 이상 과거 조회는 불가하며 에러메시지가 발생합니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | '※ 구TR은 사전고지 없이 막힐 수 있으므로 반드시 신TR로 변경이용 부탁드립니다.<br>[실전투자]<br>(구)FHPPG04600000 → (신)FHPPG04600001' |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 시장 분류 코드 | string | Y | 2 | J : KRX, NX : NXT, UN : 통합 |
+| 1 | `FID_MRKT_CLS_CODE` | 시장 구분 코드 | string | Y | 2 | K:코스피, Q:코스닥 |
+| 2 | `FID_INPUT_DATE_1` | 검색시작일 | string | Y | 10 | 공백 입력, 입력 시 ~ 입력일자까지 조회됨<br>* 8개월 이상 과거 조회 불가 |
+| 3 | `FID_INPUT_DATE_2` | 검색종료일 | string | Y | 10 | 공백 입력 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (104)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stck_bsop_date` | 주식 영업 일자 | string | Y | 8 |  |
+| 5 | `nabt_entm_seln_tr_pbmn` | 비차익 위탁 매도 거래 대금 | string | Y | 18 |  |
+| 6 | `nabt_onsl_seln_vol` | 비차익 자기 매도 거래량 | string | Y | 18 |  |
+| 7 | `whol_onsl_seln_tr_pbmn` | 전체 자기 매도 거래 대금 | string | Y | 18 |  |
+| 8 | `arbt_smtn_shnu_vol` | 차익 합계 매수2 거래량 | string | Y | 18 |  |
+| 9 | `nabt_smtn_shnu_tr_pbmn` | 비차익 합계 매수2 거래 대금 | string | Y | 18 |  |
+| 10 | `arbt_entm_ntby_qty` | 차익 위탁 순매수 수량 | string | Y | 18 |  |
+| 11 | `nabt_entm_ntby_tr_pbmn` | 비차익 위탁 순매수 거래 대금 | string | Y | 18 |  |
+| 12 | `arbt_entm_seln_vol` | 차익 위탁 매도 거래량 | string | Y | 18 |  |
+| 13 | `nabt_entm_seln_vol_rate` | 비차익 위탁 매도 거래량 비율 | string | Y | 82 |  |
+| 14 | `nabt_onsl_seln_vol_rate` | 비차익 자기 매도 거래량 비율 | string | Y | 82 |  |
+| 15 | `whol_onsl_seln_tr_pbmn_rate` | 전체 자기 매도 거래 대금 비율 | string | Y | 82 |  |
+| 16 | `arbt_smtm_shun_vol_rate` | 차익 합계 매수 거래량 비율 | string | Y | 72 |  |
+| 17 | `nabt_smtm_shun_tr_pbmn_rate` | 비차익 합계 매수 거래대금 비율 | string | Y | 72 |  |
+| 18 | `arbt_entm_ntby_qty_rate` | 차익 위탁 순매수 수량 비율 | string | Y | 82 |  |
+| 19 | `nabt_entm_ntby_tr_pbmn_rate` | 비차익 위탁 순매수 거래 대금 | string | Y | 82 |  |
+| 20 | `arbt_entm_seln_vol_rate` | 차익 위탁 매도 거래량 비율 | string | Y | 82 |  |
+| 21 | `nabt_entm_seln_tr_pbmn_rate` | 비차익 위탁 매도 거래 대금 비 | string | Y | 82 |  |
+| 22 | `nabt_onsl_seln_tr_pbmn` | 비차익 자기 매도 거래 대금 | string | Y | 18 |  |
+| 23 | `whol_smtn_seln_vol` | 전체 합계 매도 거래량 | string | Y | 18 |  |
+| 24 | `arbt_smtn_shnu_tr_pbmn` | 차익 합계 매수2 거래 대금 | string | Y | 18 |  |
+| 25 | `whol_entm_shnu_vol` | 전체 위탁 매수2 거래량 | string | Y | 18 |  |
+| 26 | `arbt_entm_ntby_tr_pbmn` | 차익 위탁 순매수 거래 대금 | string | Y | 18 |  |
+| 27 | `nabt_onsl_ntby_qty` | 비차익 자기 순매수 수량 | string | Y | 18 |  |
+| 28 | `arbt_entm_seln_tr_pbmn` | 차익 위탁 매도 거래 대금 | string | Y | 18 |  |
+| 29 | `nabt_onsl_seln_tr_pbmn_rate` | 비차익 자기 매도 거래 대금 비 | string | Y | 82 |  |
+| 30 | `whol_seln_vol_rate` | 전체 매도 거래량 비율 | string | Y | 72 |  |
+| 31 | `arbt_smtm_shun_tr_pbmn_rate` | 차익 합계 매수 거래대금 비율 | string | Y | 72 |  |
+| 32 | `whol_entm_shnu_vol_rate` | 전체 위탁 매수 거래량 비율 | string | Y | 82 |  |
+| 33 | `arbt_entm_ntby_tr_pbmn_rate` | 차익 위탁 순매수 거래 대금 비 | string | Y | 82 |  |
+| 34 | `nabt_onsl_ntby_qty_rate` | 비차익 자기 순매수 수량 비율 | string | Y | 82 |  |
+| 35 | `arbt_entm_seln_tr_pbmn_rate` | 차익 위탁 매도 거래 대금 비율 | string | Y | 82 |  |
+| 36 | `nabt_smtn_seln_vol` | 비차익 합계 매도 거래량 | string | Y | 18 |  |
+| 37 | `whol_smtn_seln_tr_pbmn` | 전체 합계 매도 거래 대금 | string | Y | 18 |  |
+| 38 | `nabt_entm_shnu_vol` | 비차익 위탁 매수2 거래량 | string | Y | 18 |  |
+| 39 | `whol_entm_shnu_tr_pbmn` | 전체 위탁 매수2 거래 대금 | string | Y | 18 |  |
+| 40 | `arbt_onsl_ntby_qty` | 차익 자기 순매수 수량 | string | Y | 18 |  |
+| 41 | `nabt_onsl_ntby_tr_pbmn` | 비차익 자기 순매수 거래 대금 | string | Y | 18 |  |
+| 42 | `arbt_onsl_seln_tr_pbmn` | 차익 자기 매도 거래 대금 | string | Y | 18 |  |
+| 43 | `nabt_smtm_seln_vol_rate` | 비차익 합계 매도 거래량 비율 | string | Y | 72 |  |
+| 44 | `whol_seln_tr_pbmn_rate` | 전체 매도 거래대금 비율 | string | Y | 72 |  |
+| 45 | `nabt_entm_shnu_vol_rate` | 비차익 위탁 매수 거래량 비율 | string | Y | 82 |  |
+| 46 | `whol_entm_shnu_tr_pbmn_rate` | 전체 위탁 매수 거래 대금 비율 | string | Y | 82 |  |
+| 47 | `arbt_onsl_ntby_qty_rate` | 차익 자기 순매수 수량 비율 | string | Y | 82 |  |
+| 48 | `nabt_onsl_ntby_tr_pbmn_rate` | 비차익 자기 순매수 거래 대금 | string | Y | 82 |  |
+| 49 | `arbt_onsl_seln_tr_pbmn_rate` | 차익 자기 매도 거래 대금 비율 | string | Y | 82 |  |
+| 50 | `nabt_smtn_seln_tr_pbmn` | 비차익 합계 매도 거래 대금 | string | Y | 18 |  |
+| 51 | `arbt_entm_shnu_vol` | 차익 위탁 매수2 거래량 | string | Y | 18 |  |
+| 52 | `nabt_entm_shnu_tr_pbmn` | 비차익 위탁 매수2 거래 대금 | string | Y | 18 |  |
+| 53 | `whol_onsl_shnu_vol` | 전체 자기 매수2 거래량 | string | Y | 18 |  |
+| 54 | `arbt_onsl_ntby_tr_pbmn` | 차익 자기 순매수 거래 대금 | string | Y | 18 |  |
+| 55 | `nabt_smtn_ntby_qty` | 비차익 합계 순매수 수량 | string | Y | 18 |  |
+| 56 | `arbt_onsl_seln_vol` | 차익 자기 매도 거래량 | string | Y | 18 |  |
+| 57 | `nabt_smtm_seln_tr_pbmn_rate` | 비차익 합계 매도 거래대금 비율 | string | Y | 72 |  |
+| 58 | `arbt_entm_shnu_vol_rate` | 차익 위탁 매수 거래량 비율 | string | Y | 82 |  |
+| 59 | `nabt_entm_shnu_tr_pbmn_rate` | 비차익 위탁 매수 거래 대금 비 | string | Y | 82 |  |
+| 60 | `whol_onsl_shnu_tr_pbmn` | 전체 자기 매수2 거래 대금 | string | Y | 18 |  |
+| 61 | `arbt_onsl_ntby_tr_pbmn_rate` | 차익 자기 순매수 거래 대금 비 | string | Y | 82 |  |
+| 62 | `nabt_smtm_ntby_qty_rate` | 비차익 합계 순매수 수량 비율 | string | Y | 72 |  |
+| 63 | `arbt_onsl_seln_vol_rate` | 차익 자기 매도 거래량 비율 | string | Y | 82 |  |
+| 64 | `whol_entm_seln_vol` | 전체 위탁 매도 거래량 | string | Y | 18 |  |
+| 65 | `arbt_entm_shnu_tr_pbmn` | 차익 위탁 매수2 거래 대금 | string | Y | 18 |  |
+| 66 | `nabt_onsl_shnu_vol` | 비차익 자기 매수2 거래량 | string | Y | 18 |  |
+| 67 | `whol_onsl_shnu_tr_pbmn_rate` | 전체 자기 매수 거래 대금 비율 | string | Y | 82 |  |
+| 68 | `arbt_smtn_ntby_qty` | 차익 합계 순매수 수량 | string | Y | 18 |  |
+| 69 | `nabt_smtn_ntby_tr_pbmn` | 비차익 합계 순매수 거래 대금 | string | Y | 18 |  |
+| 70 | `arbt_smtn_seln_vol` | 차익 합계 매도 거래량 | string | Y | 18 |  |
+| 71 | `whol_entm_seln_tr_pbmn` | 전체 위탁 매도 거래 대금 | string | Y | 18 |  |
+| 72 | `arbt_entm_shnu_tr_pbmn_rate` | 차익 위탁 매수 거래 대금 비율 | string | Y | 82 |  |
+| 73 | `nabt_onsl_shnu_vol_rate` | 비차익 자기 매수 거래량 비율 | string | Y | 82 |  |
+| 74 | `whol_onsl_shnu_vol_rate` | 전체 자기 매수 거래량 비율 | string | Y | 82 |  |
+| 75 | `arbt_smtm_ntby_qty_rate` | 차익 합계 순매수 수량 비율 | string | Y | 72 |  |
+| 76 | `nabt_smtm_ntby_tr_pbmn_rate` | 비차익 합계 순매수 거래대금 비 | string | Y | 72 |  |
+| 77 | `arbt_smtm_seln_vol_rate` | 차익 합계 매도 거래량 비율 | string | Y | 72 |  |
+| 78 | `whol_entm_seln_vol_rate` | 전체 위탁 매도 거래량 비율 | string | Y | 82 |  |
+| 79 | `arbt_onsl_shnu_vol` | 차익 자기 매수2 거래량 | string | Y | 18 |  |
+| 80 | `nabt_onsl_shnu_tr_pbmn` | 비차익 자기 매수2 거래 대금 | string | Y | 18 |  |
+| 81 | `whol_smtn_shnu_vol` | 전체 합계 매수2 거래량 | string | Y | 18 |  |
+| 82 | `arbt_smtn_ntby_tr_pbmn` | 차익 합계 순매수 거래 대금 | string | Y | 18 |  |
+| 83 | `whol_entm_ntby_qty` | 전체 위탁 순매수 수량 | string | Y | 18 |  |
+| 84 | `arbt_smtn_seln_tr_pbmn` | 차익 합계 매도 거래 대금 | string | Y | 18 |  |
+| 85 | `whol_entm_seln_tr_pbmn_rate` | 전체 위탁 매도 거래 대금 비율 | string | Y | 82 |  |
+| 86 | `arbt_onsl_shnu_vol_rate` | 차익 자기 매수 거래량 비율 | string | Y | 82 |  |
+| 87 | `nabt_onsl_shnu_tr_pbmn_rate` | 비차익 자기 매수 거래 대금 비 | string | Y | 82 |  |
+| 88 | `whol_shun_vol_rate` | 전체 매수 거래량 비율 | string | Y | 72 |  |
+| 89 | `arbt_smtm_ntby_tr_pbmn_rate` | 차익 합계 순매수 거래대금 비율 | string | Y | 72 |  |
+| 90 | `whol_entm_ntby_qty_rate` | 전체 위탁 순매수 수량 비율 | string | Y | 82 |  |
+| 91 | `arbt_smtm_seln_tr_pbmn_rate` | 차익 합계 매도 거래대금 비율 | string | Y | 72 |  |
+| 92 | `whol_onsl_seln_vol` | 전체 자기 매도 거래량 | string | Y | 18 |  |
+| 93 | `arbt_onsl_shnu_tr_pbmn` | 차익 자기 매수2 거래 대금 | string | Y | 18 |  |
+| 94 | `nabt_smtn_shnu_vol` | 비차익 합계 매수2 거래량 | string | Y | 18 |  |
+| 95 | `whol_smtn_shnu_tr_pbmn` | 전체 합계 매수2 거래 대금 | string | Y | 18 |  |
+| 96 | `nabt_entm_ntby_qty` | 비차익 위탁 순매수 수량 | string | Y | 18 |  |
+| 97 | `whol_entm_ntby_tr_pbmn` | 전체 위탁 순매수 거래 대금 | string | Y | 18 |  |
+| 98 | `nabt_entm_seln_vol` | 비차익 위탁 매도 거래량 | string | Y | 18 |  |
+| 99 | `whol_onsl_seln_vol_rate` | 전체 자기 매도 거래량 비율 | string | Y | 82 |  |
+| 100 | `arbt_onsl_shnu_tr_pbmn_rate` | 차익 자기 매수 거래 대금 비율 | string | Y | 82 |  |
+| 101 | `nabt_smtm_shun_vol_rate` | 비차익 합계 매수 거래량 비율 | string | Y | 72 |  |
+| 102 | `whol_shun_tr_pbmn_rate` | 전체 매수 거래대금 비율 | string | Y | 72 |  |
+| 103 | `nabt_entm_ntby_qty_rate` | 비차익 위탁 순매수 수량 비율 | string | Y | 82 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:UN
 FID_MRKT_CLS_CODE:K
 FID_INPUT_DATE_1:
-FID_INPUT_DATE_2: |  |
-| Response Example | {
+FID_INPUT_DATE_2:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stck_bsop_date": "20240404",
@@ -2209,26 +3102,107 @@ FID_INPUT_DATE_2: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 종목별 일별 대차거래추이
 
-- **TR_ID**: HHPST074500C0
-- **Method**: GET
+- **API ID**: 국내주식-135
+- **실전 TR_ID**: HHPST074500C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/daily-loan-trans`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | mrkt_div_cls_code:1
+```text
+종목별 일별 대차거래추이 API입니다.
+한 번의 조회에 최대 100건까지 조회 가능하며, start_date, end_date 를 수정하여 다음 조회가 가능합니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHPST074500C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `MRKT_DIV_CLS_CODE` | 조회구분 | string | Y | 1 | 1(코스피), 2(코스닥), 3(종목) |
+| 1 | `MKSC_SHRN_ISCD` | 종목코드 | string | Y | 9 | 종목코드 |
+| 2 | `START_DATE` | 조회시작일시 | string | Y | 8 | 조회기간 ~ |
+| 3 | `END_DATE` | 조회종료일시 | string | Y | 8 | ~ 조회기간 |
+| 4 | `CTS` | 이전조회KEY | string | Y | 8 |  |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (15)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `bsop_date` | 일자 | string | Y | 8 |  |
+| 5 | `stck_prpr` | 주식 종가 | string | Y | 10 |  |
+| 6 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 7 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 8 | `prdy_ctrt` | 전일 대비율 | string | Y | 8 |  |
+| 9 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 10 | `new_stcn` | 당일 증가 주수 (체결) | string | Y | 16 |  |
+| 11 | `rdmp_stcn` | 당일 감소 주수 (상환) | string | Y | 16 |  |
+| 12 | `prdy_rmnd_vrss` | 대차거래 증감 | string | Y | 16 |  |
+| 13 | `rmnd_stcn` | 당일 잔고 주수 | string | Y | 16 |  |
+| 14 | `rmnd_amt` | 당일 잔고 금액 | string | Y | 20 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+mrkt_div_cls_code:1
 mksc_shrn_iscd:005930
 start_date:20240401
 end_date:20240430
-cts: |  |
-| Response Example | {
+cts:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output2": [
         {
             "bsop_date": "20240430",
@@ -2507,25 +3481,126 @@ cts: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 종목조건검색조회
 
-- **TR_ID**: HHKST03900400
-- **Method**: GET
+- **API ID**: 국내주식-039
+- **실전 TR_ID**: HHKST03900400
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/psearch-result`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+HTS(efriend Plus) [0110] 조건검색에서 등록 및 서버저장한 나의 조건 목록을 확인할 수 있는 API입니다.
+종목조건검색 목록조회 API(/uapi/domestic-stock/v1/quotations/psearch-title)의 output인 'seq'을 종목조건검색조회 API(/uapi/domestic-stock/v1/quotations/psearch-result)의 input으로 사용하시면 됩니다.
+
+※ 시스템 안정성을 위해 API로 제공되는 조건검색 결과의 경우 조건당 100건으로 제한을 둔 점 양해 부탁드립니다.
+
+※ [0110] 화면의 '대상변경' 설정사항은 HTS [0110] 사용자 조건검색 화면에만 적용됨에 유의 부탁드립니다.
+
+※ '조회가 계속 됩니다. (다음을 누르십시오.)' 오류 발생 시 해결방법
+→ HTS(efriend Plus) [0110] 조건검색 화면에서 조건을 등록하신 후, 왼쪽 하단의 "사용자조건 서버저장" 클릭하셔서 등록한 조건들을 서버로 보낸 후 다시 API 호출 시도 부탁드립니다.
+
+※ {"rt_cd":"1","msg_cd":"MCA05918","msg1":"종목코드 오류입니다."} 메시지 발생 이유
+→ 조건검색 결과 검색된 종목이 0개인 경우 위 응답값을 수신하게 됩니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKST03900400 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `user_id` | 사용자 HTS ID | string | Y | 40 |  |
+| 1 | `seq` | 사용자조건 키값 | string | Y | 10 | 종목조건검색 목록조회 API의 output인 'seq'을 이용<br>(0 부터 시작) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (28)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output2` | 응답상세 | object array | Y |  | Array |
+| 4 | `code` | 종목코드 | string | Y | 6 |  |
+| 5 | `name` | 종목명 | string | Y | 20 |  |
+| 6 | `daebi` | 전일대비부호 | string | Y | 1 | 1. 상한 2. 상승 3. 보합 4. 하한 5. 하락 |
+| 7 | `price` | 현재가 | string | Y | 16 |  |
+| 8 | `chgrate` | 등락율 | string | Y | 16 |  |
+| 9 | `acml_vol` | 거래량 | string | Y | 16 |  |
+| 10 | `trade_amt` | 거래대금 | string | Y | 16 |  |
+| 11 | `change` | 전일대비 | string | Y | 16 |  |
+| 12 | `cttr` | 체결강도 | string | Y | 16 |  |
+| 13 | `open` | 시가 | string | Y | 16 |  |
+| 14 | `high` | 고가 | string | Y | 16 |  |
+| 15 | `low` | 저가 | string | Y | 16 |  |
+| 16 | `high52` | 52주최고가 | string | Y | 16 |  |
+| 17 | `low52` | 52주최저가 | string | Y | 16 |  |
+| 18 | `expprice` | 예상체결가 | string | Y | 16 |  |
+| 19 | `expchange` | 예상대비 | string | Y | 16 |  |
+| 20 | `expchggrate` | 예상등락률 | string | Y | 16 |  |
+| 21 | `expcvol` | 예상체결수량 | string | Y | 16 |  |
+| 22 | `chgrate2` | 전일거래량대비율 | string | Y | 16 |  |
+| 23 | `expdaebi` | 예상대비부호 | string | Y | 1 |  |
+| 24 | `recprice` | 기준가 | string | Y | 16 |  |
+| 25 | `uplmtprice` | 상한가 | string | Y | 16 |  |
+| 26 | `dnlmtprice` | 하한가 | string | Y | 16 |  |
+| 27 | `stotprice` | 시가총액 | string | Y | 16 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 	"user_id":"abcd4321",
 	"seq":"0"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output2": [
         {
             "code": "000120",
@@ -3311,52 +4386,221 @@ cts: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
 
 
-### 국내주식 매물대/거래비중
-
-- **TR_ID**: FHPST01130000
-- **Method**: GET
-- **URL**: `/uapi/domestic-stock/v1/quotations/pbar-tratio`
-
-> ⚠ 원본 엑셀에 상세 명세 시트 없음
 
 ### 국내기관_외국인 매매종목가집계
 
-- **TR_ID**: FHPTJ04400000
-- **Method**: GET
+- **API ID**: 국내주식-037
+- **실전 TR_ID**: FHPTJ04400000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/foreign-institution-total`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) |  |  |
-| Response Example |  |  |
+```text
+국내기관_외국인 매매종목가집계 API입니다.
+
+HTS(efriend Plus) [0440] 외국인/기관 매매종목 가집계 화면을 API로 구현한 사항으로 화면을 함께 보시면 기능 이해가 쉽습니다.
+
+증권사 직원이 장중에 집계/입력한 자료를 단순 누계한 수치로서, 
+입력시간은 외국인 09:30, 11:20, 13:20, 14:30 / 기관종합 10:00, 11:20, 13:20, 14:30 이며, 
+입력한 시간은 ±10분정도 차이가 발생할 수 있으며, 장운영 사정에 다라 변동될 수 있습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPTJ04400000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (6)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 시장 분류 코드 | string | Y | 2 | V(Default) |
+| 1 | `FID_COND_SCR_DIV_CODE` | 조건 화면 분류 코드 | string | Y | 5 | 16449(Default) |
+| 2 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 0000:전체, 0001:코스피, 1001:코스닥<br>...<br>포탈 (FAQ : 종목정보 다운로드(국내) - 업종코드 참조) |
+| 3 | `FID_DIV_CLS_CODE` | 분류 구분 코드 | string | Y | 2 | 0: 수량정열, 1: 금액정열 |
+| 4 | `FID_RANK_SORT_CLS_CODE` | 순위 정렬 구분 코드 | string | Y | 2 | 0: 순매수상위, 1: 순매도상위 |
+| 5 | `FID_ETC_CLS_CODE` | 기타 구분  정렬 | string | Y | 2 | 0:전체 1:외국인 2:기관계 3:기타 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (30)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `Output` | 응답상세1 | object | Y |  |  |
+| 4 | `hts_kor_isnm` | HTS 한글 종목명 | string | Y | 40 |  |
+| 5 | `mksc_shrn_iscd` | 유가증권 단축 종목코드 | string | Y | 9 |  |
+| 6 | `ntby_qty` | 순매수 수량 | string | Y | 18 |  |
+| 7 | `stck_prpr` | 주식 현재가 | string | Y | 10 |  |
+| 8 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 9 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 10 | `prdy_ctrt` | 전일 대비율 | string | Y | 8 |  |
+| 11 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 12 | `frgn_ntby_qty` | 외국인 순매수 수량 | string | Y | 12 |  |
+| 13 | `orgn_ntby_qty` | 기관계 순매수 수량 | string | Y | 18 |  |
+| 14 | `ivtr_ntby_qty` | 투자신탁 순매수 수량 | string | Y | 12 |  |
+| 15 | `bank_ntby_qty` | 은행 순매수 수량 | string | Y | 12 |  |
+| 16 | `insu_ntby_qty` | 보험 순매수 수량 | string | Y | 12 |  |
+| 17 | `mrbn_ntby_qty` | 종금 순매수 수량 | string | Y | 12 |  |
+| 18 | `fund_ntby_qty` | 기금 순매수 수량 | string | Y | 12 |  |
+| 19 | `etc_orgt_ntby_vol` | 기타 단체 순매수 거래량 | string | Y | 18 |  |
+| 20 | `etc_corp_ntby_vol` | 기타 법인 순매수 거래량 | string | Y | 18 |  |
+| 21 | `frgn_ntby_tr_pbmn` | 외국인 순매수 거래 대금 | string | Y | 18 | frgn_ntby_tr_pbmn ~ etc_corp_ntby_tr_pbmn<br>(단위 : 백만원, 수량*현재가) |
+| 22 | `orgn_ntby_tr_pbmn` | 기관계 순매수 거래 대금 | string | Y | 18 |  |
+| 23 | `ivtr_ntby_tr_pbmn` | 투자신탁 순매수 거래 대금 | string | Y | 18 |  |
+| 24 | `bank_ntby_tr_pbmn` | 은행 순매수 거래 대금 | string | Y | 18 |  |
+| 25 | `insu_ntby_tr_pbmn` | 보험 순매수 거래 대금 | string | Y | 18 |  |
+| 26 | `mrbn_ntby_tr_pbmn` | 종금 순매수 거래 대금 | string | Y | 18 |  |
+| 27 | `fund_ntby_tr_pbmn` | 기금 순매수 거래 대금 | string | Y | 18 |  |
+| 28 | `etc_orgt_ntby_tr_pbmn` | 기타 단체 순매수 거래 대금 | string | Y | 18 |  |
+| 29 | `etc_corp_ntby_tr_pbmn` | 기타 법인 순매수 거래 대금 | string | Y | 18 |  |
 
 
 ### 관심종목 그룹별 종목조회
 
-- **TR_ID**: HHKCM113004C6
-- **Method**: GET
+- **API ID**: 국내주식-203
+- **실전 TR_ID**: HHKCM113004C6
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/intstock-stocklist-by-group`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | TYPE:1
+```text
+관심종목 그룹별 종목조회 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0161] 관심종목 화면 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+① 관심종목 그룹조회 → ② 관심종목 그룹별 종목조회 → ③ 관심종목(멀티종목) 시세조회 순서대로 호출하셔서 관심종목 시세 조회 가능합니다.
+
+※ 한 번의 호출에 최대 30종목의 시세 확인 가능합니다.
+
+한국투자증권 Github 에서 관심종목 복수시세조회 파이썬 샘플코드를 참고하실 수 있습니다.
+https://github.com/koreainvestment/open-trading-api/blob/main/rest/get_interest_stocks_price.py
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKCM113004C6 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (8)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `TYPE` | 관심종목구분코드 | string | Y | 1 | Unique key(1) |
+| 1 | `USER_ID` | 사용자 ID | string | Y | 16 | HTS_ID 입력 |
+| 2 | `DATA_RANK` | 데이터 순위 | string | Y | 10 | 공백 |
+| 3 | `INTER_GRP_CODE` | 관심 그룹 코드 | string | Y | 3 | 관심그룹 조회 결과의 그룹 값 입력 |
+| 4 | `INTER_GRP_NAME` | 관심 그룹 명 | string | Y | 40 | 공백 |
+| 5 | `HTS_KOR_ISNM` | HTS 한글 종목명 | string | Y | 40 | 공백 |
+| 6 | `CNTG_CLS_CODE` | 체결 구분 코드 | string | Y | 1 | 공백 |
+| 7 | `FID_ETC_CLS_CODE` | 기타 구분 코드 | string | Y | 2 | Unique key(4) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (17)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `data_rank` | 데이터 순위 | string | Y | 10 |  |
+| 5 | `inter_grp_name` | 관심 그룹 명 | string | Y | 40 |  |
+| 6 | `output2` | 응답상세 | object array | Y |  | array |
+| 7 | `fid_mrkt_cls_code` | FID 시장 구분 코드 | string | Y | 2 |  |
+| 8 | `data_rank` | 데이터 순위 | string | Y | 10 |  |
+| 9 | `exch_code` | 거래소코드 | string | Y | 4 |  |
+| 10 | `jong_code` | 종목코드 | string | Y | 16 |  |
+| 11 | `color_code` | 생상 코드 | string | Y | 8 |  |
+| 12 | `memo` | 메모 | string | Y | 128 |  |
+| 13 | `hts_kor_isnm` | HTS 한글 종목명 | string | Y | 40 |  |
+| 14 | `fxdt_ntby_qty` | 기준일 순매수 수량 | string | Y | 12 |  |
+| 15 | `cntg_unpr` | 체결단가 | string | Y | 11 |  |
+| 16 | `cntg_cls_code` | 체결 구분 코드 | string | Y | 1 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+TYPE:1
 USER_ID:{{HTS_ID}}
 DATA_RANK:
 INTER_GRP_CODE:002
 INTER_GRP_NAME:
 HTS_KOR_ISNM:
 CNTG_CLS_CODE:
-FID_ETC_CLS_CODE:4 |  |
-| Response Example | {
+FID_ETC_CLS_CODE:4
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "data_rank": "0000000002",
         "inter_grp_name": "관심종목02"
@@ -3630,27 +4874,107 @@ FID_ETC_CLS_CODE:4 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 주식현재가 회원사 종목매매동향
 
-- **TR_ID**: FHPST04540000
-- **Method**: GET
+- **API ID**: 국내주식-197
+- **실전 TR_ID**: FHPST04540000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/inquire-member-daily`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+주식현재가 회원사 종목매매동향 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0454] 증권사 종목매매동향 화면을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPST04540000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (6)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건시장분류코드 | string | Y | 2 | J: KRX, NX: NXT, UN: 통합 |
+| 1 | `FID_INPUT_ISCD` | 입력종목코드 | string | Y | 12 | 주식종목코드입력 |
+| 2 | `FID_INPUT_ISCD_2` | 회원사코드 | string | Y | 8 | 회원사코드 (kis developers 포탈 사이트 포럼-> FAQ -> 종목정보 다운로드(국내) > 회원사 참조) |
+| 3 | `FID_INPUT_DATE_1` | 입력날짜1 | string | Y | 10 | 날짜 ~ |
+| 4 | `FID_INPUT_DATE_2` | 입력날짜2 | string | Y | 10 | ~ 날짜 |
+| 5 | `FID_SCTN_CLS_CODE` | 구간구분코드 | string | Y | 2 | 공백 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stck_bsop_date` | 주식영업일자 | string | Y | 8 |  |
+| 5 | `total_seln_qty` | 총매도수량 | string | Y | 18 |  |
+| 6 | `total_shnu_qty` | 총매수2수량 | string | Y | 18 |  |
+| 7 | `ntby_qty` | 순매수수량 | string | Y | 18 |  |
+| 8 | `stck_prpr` | 주식현재가 | string | Y | 10 |  |
+| 9 | `prdy_vrss` | 전일대비 | string | Y | 10 |  |
+| 10 | `prdy_vrss_sign` | 전일대비부호 | string | Y | 1 |  |
+| 11 | `prdy_ctrt` | 전일대비율 | string | Y | 82 |  |
+| 12 | `acml_vol` | 누적거래량 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_INPUT_ISCD:136480
 FID_INPUT_ISCD_2:00003
 FID_INPUT_DATE_1:20240501
 FID_INPUT_DATE_2:20240530
-FID_SCTN_CLS_CODE: |  |
-| Response Example | {
+FID_SCTN_CLS_CODE:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stck_bsop_date": "20240530",
@@ -3865,24 +5189,107 @@ FID_SCTN_CLS_CODE: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 종목별 프로그램매매추이(일별)
 
-- **TR_ID**: FHPPG04650201
-- **Method**: GET
+- **API ID**: 국내주식-113
+- **실전 TR_ID**: FHPPG04650201
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/program-trade-by-stock-daily`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+국내주식 종목별 프로그램매매추이(일별) API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0465] 종목별 프로그램 매매추이 화면(혹은 한국투자 MTS &gt; 국내 현재가 &gt; 기타수급 &gt; 프로그램) 의 "일자별" 클릭 시 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | '※ 구TR은 사전고지 없이 막힐 수 있으므로 반드시 신TR로 변경이용 부탁드립니다.<br>[실전투자]<br>(구)FHPPG04650200 → (신)FHPPG04650201' |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건 시장 분류 코드 | string | Y | 2 | KRX : J , NXT : NX, 통합 : UN |
+| 1 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 종목코드 |
+| 2 | `FID_INPUT_DATE_1` | 입력 날짜1 | string | Y | 10 | 기준일 (ex 0020240308), 미입력시 당일부터 조회 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (19)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stck_bsop_date` | 주식 영업 일자 | string | Y | 8 |  |
+| 5 | `stck_clpr` | 주식 종가 | string | Y | 10 |  |
+| 6 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 7 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 8 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 9 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 10 | `acml_tr_pbmn` | 누적 거래 대금 | string | Y | 18 |  |
+| 11 | `whol_smtn_seln_vol` | 전체 합계 매도 거래량 | string | Y | 18 |  |
+| 12 | `whol_smtn_shnu_vol` | 전체 합계 매수2 거래량 | string | Y | 18 |  |
+| 13 | `whol_smtn_ntby_qty` | 전체 합계 순매수 수량 | string | Y | 18 |  |
+| 14 | `whol_smtn_seln_tr_pbmn` | 전체 합계 매도 거래 대금 | string | Y | 18 |  |
+| 15 | `whol_smtn_shnu_tr_pbmn` | 전체 합계 매수2 거래 대금 | string | Y | 18 |  |
+| 16 | `whol_smtn_ntby_tr_pbmn` | 전체 합계 순매수 거래 대금 | string | Y | 18 |  |
+| 17 | `whol_ntby_vol_icdc` | 전체 순매수 거래량 증감 | string | Y | 10 |  |
+| 18 | `whol_ntby_tr_pbmn_icdc2` | 전체 순매수 거래 대금 증감2 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_INPUT_ISCD:005930
-FID_INPUT_DATE_1:20240517 |  |
-| Response Example | {
+FID_INPUT_DATE_1:20240517
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stck_bsop_date": "20240517",
@@ -3956,24 +5363,105 @@ FID_INPUT_DATE_1:20240517 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 관심종목 그룹조회
 
-- **TR_ID**: HHKCM113004C7
-- **Method**: GET
+- **API ID**: 국내주식-204
+- **실전 TR_ID**: HHKCM113004C7
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/intstock-grouplist`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | TYPE:1
+```text
+관심종목 그룹조회 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0161] 관심종목 화면 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+① 관심종목 그룹조회 → ② 관심종목 그룹별 종목조회 → ③ 관심종목(멀티종목) 시세조회 순서대로 호출하셔서 관심종목 시세 조회 가능합니다.
+
+※ 한 번의 호출에 최대 30종목의 시세 확인 가능합니다.
+
+한국투자증권 Github 에서 관심종목 복수시세조회 파이썬 샘플코드를 참고하실 수 있습니다.
+https://github.com/koreainvestment/open-trading-api/blob/main/rest/get_interest_stocks_price.py
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKCM113004C7 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `TYPE` | 관심종목구분코드 | string | Y | 1 | Unique key(1) |
+| 1 | `FID_ETC_CLS_CODE` | FID 기타 구분 코드 | string | Y | 2 | Unique key(00) |
+| 2 | `USER_ID` | 사용자 ID | string | Y | 16 | HTS_ID 입력 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (10)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output2` | 응답상세 | object | Y |  |  |
+| 4 | `date` | 일자 | string | Y | 8 |  |
+| 5 | `trnm_hour` | 전송 시간 | string | Y | 6 |  |
+| 6 | `data_rank` | 데이터 순위 | string | Y | 10 |  |
+| 7 | `inter_grp_code` | 관심 그룹 코드 | string | Y | 3 |  |
+| 8 | `inter_grp_name` | 관심 그룹 명 | string | Y | 40 |  |
+| 9 | `ask_cnt` | 요청 개수 | string | Y | 4 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+TYPE:1
 FID_ETC_CLS_CODE:00
-USER_ID:{{HTS_ID}} |  |
-| Response Example | {
+USER_ID:{{HTS_ID}}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output2": [
         {
             "date": "20230517",
@@ -4003,24 +5491,98 @@ USER_ID:{{HTS_ID}} |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 종목별 외인기관 추정가집계
 
-- **TR_ID**: HHPTJ04160200
-- **Method**: GET
+- **API ID**: v1_국내주식-046
+- **실전 TR_ID**: HHPTJ04160200
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/investor-trend-estimate`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 종목별 외국인, 기관 추정가집계 API입니다.
+
+한국투자 MTS &gt; 국내 현재가 &gt; 투자자 &gt; 투자자동향 탭 &gt; 왼쪽구분을 '추정(주)'로 선택 시 확인 가능한 데이터를 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+증권사 직원이 장중에 집계/입력한 자료를 단순 누계한 수치로서,
+입력시간은 외국인 09:30, 11:20, 13:20, 14:30 / 기관종합 10:00, 11:20, 13:20, 14:30 이며, 사정에 따라 변동될 수 있습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHPTJ04160200 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (1)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `MKSC_SHRN_ISCD` | 종목코드 | string | Y | 12 | 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (8)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output2` | 응답상세 | object array | Y |  | Array |
+| 4 | `bsop_hour_gb` | 입력구분 | string | Y | 1 | 1: 09시 30분 입력<br>2: 10시 00분 입력 <br>3: 11시 20분 입력 <br>4: 13시 20분 입력 <br>5: 14시 30분 입력 |
+| 5 | `frgn_fake_ntby_qty` | 외국인수량(가집계) | string | Y | 18 |  |
+| 6 | `orgn_fake_ntby_qty` | 기관수량(가집계) | string | Y | 18 |  |
+| 7 | `sum_fake_ntby_qty` | 합산수량(가집계) | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
    "MKSC_SHRN_ISCD":"000660"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output2": [
         {
             "bsop_hour_gb": "5",
@@ -4056,28 +5618,104 @@ USER_ID:{{HTS_ID}} |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 종목별일별매수매도체결량
 
-- **TR_ID**: FHKST03010800
-- **Method**: GET
+- **API ID**: v1_국내주식-056
+- **실전 TR_ID**: FHKST03010800
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/inquire-daily-trade-volume`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+종목별일별매수매도체결량 API입니다. 실전계좌의 경우, 한 번의 호출에 최대 100건까지 확인 가능합니다.
+국내주식 종목의 일별 매수체결량, 매도체결량 데이터를 확인할 수 있습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST03010800 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | FID 조건 시장 분류 코드 | string | Y | 2 | J: KRX, NX: NXT, UN: 통합 |
+| 1 | `FID_INPUT_ISCD` | FID 입력 종목코드 | string | Y | 12 | 005930 |
+| 2 | `FID_INPUT_DATE_1` | FID 입력 날짜1 | string | Y | 10 | from |
+| 3 | `FID_INPUT_DATE_2` | FID 입력 날짜2 | string | Y | 10 | to |
+| 4 | `FID_PERIOD_DIV_CODE` | FID 기간 분류 코드 | string | Y | 32 | D |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (10)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `shnu_cnqn_smtn` | 매수 체결량 합계 | string | Y | 18 |  |
+| 5 | `seln_cnqn_smtn` | 매도 체결량 합계 | string | Y | 18 |  |
+| 6 | `output2` | 응답상세2 | object array | Y |  | array |
+| 7 | `stck_bsop_date` | 거래상태정보 | string | Y | 8 |  |
+| 8 | `total_seln_qty` | 총 매도 수량 | string | Y | 18 |  |
+| 9 | `total_shnu_qty` | 총 매수 수량 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 	"fid_cond_mrkt_div_code":"J",
 	"fid_input_iscd":"005930",
 	"fid_input_date_1":"20240101",
 	"fid_input_date_2":"20240126",
 	"fid_period_div_code":"D"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "shnu_cnqn_smtn": "4520816",
         "seln_cnqn_smtn": "5285722"
@@ -4182,24 +5820,103 @@ USER_ID:{{HTS_ID}} |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 체결금액별 매매비중
 
-- **TR_ID**: FHKST111900C0
-- **Method**: GET
+- **API ID**: 국내주식-192
+- **실전 TR_ID**: FHKST111900C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/tradprt-byamt`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+국내주식 체결금액별 매매비중 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0135] 체결금액별 매매비중 화면의 "상단 표" 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST111900C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건시장분류코드 | string | Y | 2 | J: KRX, NX: NXT, UN: 통합 |
+| 1 | `FID_COND_SCR_DIV_CODE` | 조건화면분류코드 | string | Y | 5 | Uniquekey(11119) |
+| 2 | `FID_INPUT_ISCD` | 입력종목코드 | string | Y | 12 | 종목코드(ex)(005930 (삼성전자)) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (15)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `prpr_name` | 가격명 | string | Y | 40 |  |
+| 5 | `smtn_avrg_prpr` | 합계 평균가격 | string | Y | 10 |  |
+| 6 | `acml_vol` | 합계 거래량 | string | Y | 18 |  |
+| 7 | `whol_ntby_qty_rate` | 합계 순매수비율 | string | Y | 72 |  |
+| 8 | `ntby_cntg_csnu` | 합계 순매수건수 | string | Y | 10 |  |
+| 9 | `seln_cnqn_smtn` | 매도 거래량 | string | Y | 18 |  |
+| 10 | `whol_seln_vol_rate` | 매도 거래량비율 | string | Y | 72 |  |
+| 11 | `seln_cntg_csnu` | 매도 건수 | string | Y | 10 |  |
+| 12 | `shnu_cnqn_smtn` | 매수 거래량 | string | Y | 18 |  |
+| 13 | `whol_shun_vol_rate` | 매수 거래량비율 | string | Y | 72 |  |
+| 14 | `shnu_cntg_csnu` | 매수 건수 | string | Y | 10 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_COND_SCR_DIV_CODE:11119
-FID_INPUT_ISCD:005930 |  |
-| Response Example | {
+FID_INPUT_ISCD:005930
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "prpr_name": "3백 이하",
@@ -4309,22 +6026,109 @@ FID_INPUT_ISCD:005930 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 프로그램매매 투자자매매동향(당일)
 
-- **TR_ID**: HHPPG046600C1
-- **Method**: GET
+- **API ID**: 국내주식-116
+- **실전 TR_ID**: HHPPG046600C1
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/investor-program-trade-today`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | MRKT_DIV_CLS_CODE:1 |  |
-| Response Example | {
+```text
+프로그램매매 투자자매매동향(당일) API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0466] 프로그램매매 투자자별 동향 화면 의 "당일동향" 표의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | '※ 구TR은 사전고지 없이 막힐 수 있으므로 반드시 신TR로 변경이용 부탁드립니다.<br>[실전투자]<br>(구)HHPPG046600C0 → (신)HHPPG046600C1' |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `EXCH_DIV_CLS_CODE` | 거래소 구분 코드 | string | Y | 2 | J : KRX, NX : NXT, UN : 통합 |
+| 1 | `MRKT_DIV_CLS_CODE` | 시장 구분 코드 | string | Y | 1 | 1:코스피, 4:코스닥 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (24)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `invr_cls_code` | 투자자코드 | string | Y | 4 |  |
+| 5 | `all_seln_qty` | 전체매도수량 | string | Y | 18 |  |
+| 6 | `all_seln_amt` | 전체매도대금 | string | Y | 18 |  |
+| 7 | `invr_cls_name` | 투자자 구분 명 | string | Y | 20 |  |
+| 8 | `all_shnu_qty` | 전체매수수량 | string | Y | 18 |  |
+| 9 | `all_shnu_amt` | 전체매수대금 | string | Y | 18 |  |
+| 10 | `all_ntby_amt` | 전체순매수대금 | string | Y | 12 |  |
+| 11 | `arbt_seln_qty` | 차익매도수량 | string | Y | 18 |  |
+| 12 | `all_ntby_qty` | 전체순매수수량 | string | Y | 12 |  |
+| 13 | `arbt_shnu_qty` | 차익매수수량 | string | Y | 18 |  |
+| 14 | `arbt_ntby_qty` | 차익순매수수량 | string | Y | 12 |  |
+| 15 | `arbt_seln_amt` | 차익매도대금 | string | Y | 18 |  |
+| 16 | `arbt_shnu_amt` | 차익매수대금 | string | Y | 18 |  |
+| 17 | `arbt_ntby_amt` | 차익순매수대금 | string | Y | 12 |  |
+| 18 | `nabt_seln_qty` | 비차익매도수량 | string | Y | 18 |  |
+| 19 | `nabt_shnu_qty` | 비차익매수수량 | string | Y | 18 |  |
+| 20 | `nabt_ntby_qty` | 비차익순매수수량 | string | Y | 12 |  |
+| 21 | `nabt_seln_amt` | 비차익매도대금 | string | Y | 18 |  |
+| 22 | `nabt_shnu_amt` | 비차익매수대금 | string | Y | 18 |  |
+| 23 | `nabt_ntby_amt` | 비차익순매수대금 | string | Y | 12 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+MRKT_DIV_CLS_CODE:1
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "invr_cls_code": "7100",
@@ -4572,22 +6376,108 @@ FID_INPUT_ISCD:005930 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내 증시자금 종합
 
-- **TR_ID**: FHKST649100C0
-- **Method**: GET
+- **API ID**: 국내주식-193
+- **실전 TR_ID**: FHKST649100C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/mktfunds`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_INPUT_DATE_1:20240503 |  |
-| Response Example | {
+```text
+국내 증시자금 종합 API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0470] 증시자금 종합 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다. (단위: 억원)
+
+※ 해당자료는 금융투자협회의 자료를 제공하고 있으며, 오류와 지연이 발생할 수 있습니다.
+※ 위 정보에 의한 투자판단의 최종책임은 정보이용자에게 있으며, 당사와 한국금융투자협회는 어떠한 법적인 책임도 지지 않사오니 투자에 참고로만 이용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST649100C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (1)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_INPUT_DATE_1` | 입력날짜1 | string | Y | 10 |  |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (21)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `bsop_date` | 영업일자 | string | Y | 8 |  |
+| 5 | `bstp_nmix_prpr` | 업종지수현재가 | string | Y | 112 |  |
+| 6 | `bstp_nmix_prdy_vrss` | 업종지수전일대비 | string | Y | 112 |  |
+| 7 | `prdy_vrss_sign` | 전일대비부호 | string | Y | 1 | 1. 상한 2. 상승 3. 보합 4. 하한 5. 하락 |
+| 8 | `prdy_ctrt` | 전일대비율 | string | Y | 82 |  |
+| 9 | `hts_avls` | HTS시가총액 | string | Y | 18 | 단위: 백만원 |
+| 10 | `cust_dpmn_amt` | 고객예탁금금액 | string | Y | 18 | 단위: 억원 |
+| 11 | `cust_dpmn_amt_prdy_vrss` | 고객예탁금금액전일대비 | string | Y | 18 |  |
+| 12 | `amt_tnrt` | 금액회전율 | string | Y | 84 |  |
+| 13 | `uncl_amt` | 미수금액 | string | Y | 18 | 단위: 억원 |
+| 14 | `crdt_loan_rmnd` | 신용융자잔고 | string | Y | 18 | 단위: 억원 |
+| 15 | `futs_tfam_amt` | 선물예수금금액 | string | Y | 18 | 단위: 억원 |
+| 16 | `sttp_amt` | 주식형금액 | string | Y | 18 | 단위: 억원 |
+| 17 | `mxtp_amt` | 혼합형금액 | string | Y | 18 | 단위: 억원 |
+| 18 | `bntp_amt` | 채권형금액 | string | Y | 18 | 단위: 억원 |
+| 19 | `mmf_amt` | MMF금액 | string | Y | 18 | 단위: 억원 |
+| 20 | `secu_lend_amt` | 담보대출잔고금액 | string | Y | 18 | 단위: 억원 |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_INPUT_DATE_1:20240503
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "bsop_date": "20240430",
@@ -4821,26 +6711,110 @@ FID_INPUT_ISCD:005930 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 예상체결가 추이
 
-- **TR_ID**: FHPST01810000
-- **Method**: GET
+- **API ID**: 국내주식-118
+- **실전 TR_ID**: FHPST01810000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/exp-price-trend`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 예상체결가 추이 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0184] 예상체결지수 추이 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+최대 30건 확인 가능하며, 다음 조회가 불가합니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPST01810000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `fid_mkop_cls_code` | 장운영 구분 코드 | string | Y | 12 | 0:전체, 4:체결량 0 제외 |
+| 1 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | 시장구분코드 (주식 J) |
+| 2 | `fid_input_iscd` | 입력 종목코드 | string | Y | 5 | 종목코드(ex. 005930) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (19)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `rprs_mrkt_kor_name` | 대표 시장 한글 명 | string | Y | 40 |  |
+| 5 | `antc_cnpr` | 예상 체결가 | string | Y | 10 |  |
+| 6 | `antc_cntg_vrss_sign` | 예상 체결 대비 부호 | string | Y | 1 |  |
+| 7 | `antc_cntg_vrss` | 예상 체결 대비 | string | Y | 10 |  |
+| 8 | `antc_cntg_prdy_ctrt` | 예상 체결 전일 대비율 | string | Y | 82 |  |
+| 9 | `antc_vol` | 예상 거래량 | string | Y | 18 |  |
+| 10 | `antc_tr_pbmn` | 예상 거래대금 | string | Y | 19 |  |
+| 11 | `output2` | 응답상세 | object array | Y |  | array |
+| 12 | `stck_bsop_date` | 주식 영업 일자 | string | Y | 8 |  |
+| 13 | `stck_cntg_hour` | 주식 체결 시간 | string | Y | 6 |  |
+| 14 | `stck_prpr` | 주식 현재가 | string | Y | 10 |  |
+| 15 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 16 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 17 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 18 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_input_iscd":"005930",
 "fid_mkop_cls_code":"0"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "rprs_mrkt_kor_name": "KOSPI200",
         "antc_cnpr": "72600",
@@ -5125,26 +7099,112 @@ FID_INPUT_ISCD:005930 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 회원사 실시간 매매동향(틱)
 
-- **TR_ID**: FHPST04320000
-- **Method**: GET
+- **API ID**: 국내주식-163
+- **실전 TR_ID**: FHPST04320000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: WEBSOCKET · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/frgnmem-trade-trend`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_SCR_DIV_CODE:20432
+```text
+회원사 실시간 매매동향(틱) API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0432] 회원사 실시간 매매동향 화면 의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+최근 100건까지 데이터 조회 가능합니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPST04320000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (6)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | FID 조건 시장 분류 코드 | string | Y | 2 | J 고정 입력 |
+| 1 | `FID_COND_SCR_DIV_CODE` | 화면분류코드 | string | Y | 5 | 20432(primary key) |
+| 2 | `FID_INPUT_ISCD` | 종목코드 | string | Y | 12 | ex. 005930(삼성전자) <br>※ FID_INPUT_ISCD(종목코드) 혹은 FID_MRKT_CLS_CODE(시장구분코드) 둘 중 하나만 입력 |
+| 3 | `FID_INPUT_ISCD_2` | 회원사코드 | string | Y | 10 | ex. 99999(전체)<br>※ 회원사코드 (kis developers 포탈 사이트 포럼-> FAQ -> 종목정보 다운로드(국내) 참조) |
+| 4 | `FID_MRKT_CLS_CODE` | 시장구분코드 | string | Y | 2 | A(전체),K(코스피), Q(코스닥), K2(코스피200), W(ELW)<br>※ FID_INPUT_ISCD(종목코드) 혹은 FID_MRKT_CLS_CODE(시장구분코드) 둘 중 하나만 입력 |
+| 5 | `FID_VOL_CNT` | 거래량 | string | Y | 12 | 거래량 ~ |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (17)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  | array |
+| 4 | `total_seln_qty` | 총매도수량 | string | Y | 18 |  |
+| 5 | `total_shnu_qty` | 총매수2수량 | string | Y | 18 |  |
+| 6 | `output2` | 응답상세 | object array | Y |  | array |
+| 7 | `bsop_hour` | 영업시간 | string | Y | 6 |  |
+| 8 | `mbcr_name` | 회원사명 | string | Y | 50 |  |
+| 9 | `hts_kor_isnm` | HTS한글종목명 | string | Y | 40 |  |
+| 10 | `stck_prpr` | 주식현재가 | string | Y | 10 |  |
+| 11 | `prdy_vrss` | 전일대비 | string | Y | 10 |  |
+| 12 | `prdy_vrss_sign` | 전일대비부호 | string | Y | 1 |  |
+| 13 | `cntg_vol` | 체결거래량 | string | Y | 18 |  |
+| 14 | `acml_ntby_qty` | 누적순매수수량 | string | Y | 18 |  |
+| 15 | `glob_ntby_qty` | 외국계순매수수량 | string | Y | 12 |  |
+| 16 | `frgn_ntby_qty_icdc` | 외국인순매수수량증감 | string | Y | 10 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_SCR_DIV_CODE:20432
 FID_INPUT_ISCD:005930
 FID_INPUT_ISCD2:99999
 FID_MRKT_CLS_CODE:
-FID_VOL_CNT: |  |
-| Response Example | {
+FID_VOL_CNT:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "total_seln_qty": "3403046",
@@ -5228,25 +7288,164 @@ FID_VOL_CNT: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 시장별 투자자매매동향(시세)
 
-- **TR_ID**: FHPTJ04030000
-- **Method**: GET
+- **API ID**: v1_국내주식-074
+- **실전 TR_ID**: FHPTJ04030000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/inquire-investor-time-by-market`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+시장별 투자자매매동향(시세성) API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0403] 시장별 시간동향 의 상단 표 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPTJ04030000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `fid_input_iscd` | 시장구분 | string | Y | 12 | 코스피: KSP, 코스닥:KSQ,<br>선물,콜옵션,풋옵션 : K2I, 주식선물:999,<br>ETF: ETF, ELW:ELW, ETN: ETN, <br>미니: MKI, 위클리월 : WKM, 위클리목: WKI<br>코스닥150: KQI |
+| 1 | `fid_input_iscd_2` | 업종구분 | string | Y | 8 | - fid_input_iscd: KSP(코스피) 혹은 KSQ(코스닥)인 경우<br>코스피(0001_종합, .…0027_제조업 )<br>코스닥(1001_종합, …. 1041_IT부품)<br>...<br>포탈 (FAQ : 종목정보 다운로드(국내) - 업종코드 참조)<br>- fid_input_iscd가 K2I인 경우<br>F001(선물)<br>OC01(콜옵션)<br>OP01(풋옵션)<br>- fid_input_iscd가 999인 경우<br>S001(주식선물)<br>- fid_input_iscd가 ETF인 경우<br>T000(ETF)<br>- fid_input_iscd가 ELW인 경우<br>W000(ELW)<br>- fid_input_iscd가 ETN인 경우<br>E199(ETN)<br>- fid_input_iscd가 MKI인 경우<br>F004(미니선물)<br>OC02(미니콜옵션)<br>OP02(미니풋옵션)<br>- fid_input_iscd가 WKM인 경우<br>OC05(위클리콜(월))<br>OP05(위클리풋(월))<br>- fid_input_iscd가 WKI인 경우<br>OC04(위클리콜(목))<br>OP04(위클리풋(목))   <br>- fid_input_iscd가 KQI인 경우<br>F002(코스닥150선물)<br>OC03(코스닥150콜옵션)<br>OP03(코스닥150풋옵션) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (76)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object | Y |  |  |
+| 4 | `frgn_seln_vol` | 외국인 매도 거래량 | string | Y | 18 |  |
+| 5 | `frgn_shnu_vol` | 외국인 매수2 거래량 | string | Y | 18 |  |
+| 6 | `frgn_ntby_qty` | 외국인 순매수 수량 | string | Y | 12 |  |
+| 7 | `frgn_seln_tr_pbmn` | 외국인 매도 거래 대금 | string | Y | 18 |  |
+| 8 | `frgn_shnu_tr_pbmn` | 외국인 매수2 거래 대금 | string | Y | 18 |  |
+| 9 | `frgn_ntby_tr_pbmn` | 외국인 순매수 거래 대금 | string | Y | 18 |  |
+| 10 | `prsn_seln_vol` | 개인 매도 거래량 | string | Y | 18 |  |
+| 11 | `prsn_shnu_vol` | 개인 매수2 거래량 | string | Y | 18 |  |
+| 12 | `prsn_ntby_qty` | 개인 순매수 수량 | string | Y | 12 |  |
+| 13 | `prsn_seln_tr_pbmn` | 개인 매도 거래 대금 | string | Y | 18 |  |
+| 14 | `prsn_shnu_tr_pbmn` | 개인 매수2 거래 대금 | string | Y | 18 |  |
+| 15 | `prsn_ntby_tr_pbmn` | 개인 순매수 거래 대금 | string | Y | 18 |  |
+| 16 | `orgn_seln_vol` | 기관계 매도 거래량 | string | Y | 18 |  |
+| 17 | `orgn_shnu_vol` | 기관계 매수2 거래량 | string | Y | 18 |  |
+| 18 | `orgn_ntby_qty` | 기관계 순매수 수량 | string | Y | 18 |  |
+| 19 | `orgn_seln_tr_pbmn` | 기관계 매도 거래 대금 | string | Y | 18 |  |
+| 20 | `orgn_shnu_tr_pbmn` | 기관계 매수2 거래 대금 | string | Y | 18 |  |
+| 21 | `orgn_ntby_tr_pbmn` | 기관계 순매수 거래 대금 | string | Y | 18 |  |
+| 22 | `scrt_seln_vol` | 증권 매도 거래량 | string | Y | 18 |  |
+| 23 | `scrt_shnu_vol` | 증권 매수2 거래량 | string | Y | 18 |  |
+| 24 | `scrt_ntby_qty` | 증권 순매수 수량 | string | Y | 12 |  |
+| 25 | `scrt_seln_tr_pbmn` | 증권 매도 거래 대금 | string | Y | 18 |  |
+| 26 | `scrt_shnu_tr_pbmn` | 증권 매수2 거래 대금 | string | Y | 18 |  |
+| 27 | `scrt_ntby_tr_pbmn` | 증권 순매수 거래 대금 | string | Y | 18 |  |
+| 28 | `ivtr_seln_vol` | 투자신탁 매도 거래량 | string | Y | 18 |  |
+| 29 | `ivtr_shnu_vol` | 투자신탁 매수2 거래량 | string | Y | 18 |  |
+| 30 | `ivtr_ntby_qty` | 투자신탁 순매수 수량 | string | Y | 12 |  |
+| 31 | `ivtr_seln_tr_pbmn` | 투자신탁 매도 거래 대금 | string | Y | 18 |  |
+| 32 | `ivtr_shnu_tr_pbmn` | 투자신탁 매수2 거래 대금 | string | Y | 18 |  |
+| 33 | `ivtr_ntby_tr_pbmn` | 투자신탁 순매수 거래 대금 | string | Y | 18 |  |
+| 34 | `pe_fund_seln_tr_pbmn` | 사모 펀드 매도 거래 대금 | string | Y | 18 |  |
+| 35 | `pe_fund_seln_vol` | 사모 펀드 매도 거래량 | string | Y | 18 |  |
+| 36 | `pe_fund_ntby_vol` | 사모 펀드 순매수 거래량 | string | Y | 18 |  |
+| 37 | `pe_fund_shnu_tr_pbmn` | 사모 펀드 매수2 거래 대금 | string | Y | 18 |  |
+| 38 | `pe_fund_shnu_vol` | 사모 펀드 매수2 거래량 | string | Y | 18 |  |
+| 39 | `pe_fund_ntby_tr_pbmn` | 사모 펀드 순매수 거래 대금 | string | Y | 18 |  |
+| 40 | `bank_seln_vol` | 은행 매도 거래량 | string | Y | 18 |  |
+| 41 | `bank_shnu_vol` | 은행 매수2 거래량 | string | Y | 18 |  |
+| 42 | `bank_ntby_qty` | 은행 순매수 수량 | string | Y | 12 |  |
+| 43 | `bank_seln_tr_pbmn` | 은행 매도 거래 대금 | string | Y | 18 |  |
+| 44 | `bank_shnu_tr_pbmn` | 은행 매수2 거래 대금 | string | Y | 18 |  |
+| 45 | `bank_ntby_tr_pbmn` | 은행 순매수 거래 대금 | string | Y | 18 |  |
+| 46 | `insu_seln_vol` | 보험 매도 거래량 | string | Y | 18 |  |
+| 47 | `insu_shnu_vol` | 보험 매수2 거래량 | string | Y | 18 |  |
+| 48 | `insu_ntby_qty` | 보험 순매수 수량 | string | Y | 12 |  |
+| 49 | `insu_seln_tr_pbmn` | 보험 매도 거래 대금 | string | Y | 18 |  |
+| 50 | `insu_shnu_tr_pbmn` | 보험 매수2 거래 대금 | string | Y | 18 |  |
+| 51 | `insu_ntby_tr_pbmn` | 보험 순매수 거래 대금 | string | Y | 18 |  |
+| 52 | `mrbn_seln_vol` | 종금 매도 거래량 | string | Y | 18 |  |
+| 53 | `mrbn_shnu_vol` | 종금 매수2 거래량 | string | Y | 18 |  |
+| 54 | `mrbn_ntby_qty` | 종금 순매수 수량 | string | Y | 12 |  |
+| 55 | `mrbn_seln_tr_pbmn` | 종금 매도 거래 대금 | string | Y | 18 |  |
+| 56 | `mrbn_shnu_tr_pbmn` | 종금 매수2 거래 대금 | string | Y | 18 |  |
+| 57 | `mrbn_ntby_tr_pbmn` | 종금 순매수 거래 대금 | string | Y | 18 |  |
+| 58 | `fund_seln_vol` | 기금 매도 거래량 | string | Y | 18 |  |
+| 59 | `fund_shnu_vol` | 기금 매수2 거래량 | string | Y | 18 |  |
+| 60 | `fund_ntby_qty` | 기금 순매수 수량 | string | Y | 12 |  |
+| 61 | `fund_seln_tr_pbmn` | 기금 매도 거래 대금 | string | Y | 18 |  |
+| 62 | `fund_shnu_tr_pbmn` | 기금 매수2 거래 대금 | string | Y | 18 |  |
+| 63 | `fund_ntby_tr_pbmn` | 기금 순매수 거래 대금 | string | Y | 18 |  |
+| 64 | `etc_orgt_seln_vol` | 기타 단체 매도 거래량 | string | Y | 18 |  |
+| 65 | `etc_orgt_shnu_vol` | 기타 단체 매수2 거래량 | string | Y | 18 |  |
+| 66 | `etc_orgt_ntby_vol` | 기타 단체 순매수 거래량 | string | Y | 18 |  |
+| 67 | `etc_orgt_seln_tr_pbmn` | 기타 단체 매도 거래 대금 | string | Y | 18 |  |
+| 68 | `etc_orgt_shnu_tr_pbmn` | 기타 단체 매수2 거래 대금 | string | Y | 18 |  |
+| 69 | `etc_orgt_ntby_tr_pbmn` | 기타 단체 순매수 거래 대금 | string | Y | 18 |  |
+| 70 | `etc_corp_seln_vol` | 기타 법인 매도 거래량 | string | Y | 18 |  |
+| 71 | `etc_corp_shnu_vol` | 기타 법인 매수2 거래량 | string | Y | 18 |  |
+| 72 | `etc_corp_ntby_vol` | 기타 법인 순매수 거래량 | string | Y | 18 |  |
+| 73 | `etc_corp_seln_tr_pbmn` | 기타 법인 매도 거래 대금 | string | Y | 18 |  |
+| 74 | `etc_corp_shnu_tr_pbmn` | 기타 법인 매수2 거래 대금 | string | Y | 18 |  |
+| 75 | `etc_corp_ntby_tr_pbmn` | 기타 법인 순매수 거래 대금 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "FID_INPUT_ISCD":"KSP",
 "FID_INPUT_ISCD_2":"0001"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "frgn_seln_vol": "75588",
@@ -5326,41 +7525,185 @@ FID_VOL_CNT: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 종목별 프로그램매매추이(체결)
 
-- **TR_ID**: FHPPG04650101
-- **Method**: GET
+- **API ID**: v1_국내주식-044
+- **실전 TR_ID**: FHPPG04650101
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/program-trade-by-stock`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) |  |  |
-| Response Example |  |  |
+```text
+국내주식 종목별 프로그램매매추이(체결) API입니다.
+
+한국투자 HTS(eFriend Plus) &gt; [0465] 종목별 프로그램 매매추이 화면(혹은 한국투자 MTS &gt; 국내 현재가 &gt; 기타수급 &gt; 프로그램) 의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | '※ 구TR은 사전고지 없이 막힐 수 있으므로 반드시 신TR로 변경이용 부탁드립니다.<br>[실전투자]<br>(구)FHPPG04650100 → (신)FHPPG04650101' |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건 시장 분류 코드 | string | Y | 2 | KRX : J , NXT : NX, 통합 : UN |
+| 1 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (18)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `bsop_hour` | 영업 시간 | string | Y | 6 |  |
+| 5 | `stck_prpr` | 주식 현재가 | string | Y | 10 |  |
+| 6 | `prdy_vrss` | 전일 대비 | string | Y | 10 |  |
+| 7 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 8 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 9 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 10 | `whol_smtn_seln_vol` | 전체 합계 매도 거래량 | string | Y | 18 |  |
+| 11 | `whol_smtn_shnu_vol` | 전체 합계 매수2 거래량 | string | Y | 18 |  |
+| 12 | `whol_smtn_ntby_qty` | 전체 합계 순매수 수량 | string | Y | 18 |  |
+| 13 | `whol_smtn_seln_tr_pbmn` | 전체 합계 매도 거래 대금 | string | Y | 18 |  |
+| 14 | `whol_smtn_shnu_tr_pbmn` | 전체 합계 매수2 거래 대금 | string | Y | 18 |  |
+| 15 | `whol_smtn_ntby_tr_pbmn` | 전체 합계 순매수 거래 대금 | string | Y | 18 |  |
+| 16 | `whol_ntby_vol_icdc` | 전체 순매수 거래량 증감 | string | Y | 10 |  |
+| 17 | `whol_ntby_tr_pbmn_icdc` | 전체 순매수 거래 대금 증감 | string | Y | 10 |  |
 
 
 ### 외국계 매매종목 가집계
 
-- **TR_ID**: FHKST644100C0
-- **Method**: GET
+- **API ID**: 국내주식-161
+- **실전 TR_ID**: FHKST644100C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/frgnmem-trade-estimate`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+외국계 매매종목 가집계 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0430] 외국계 매매종목 가집계 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST644100C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건시장분류코드 | string | Y | 2 | 시장구분코드 (J) |
+| 1 | `FID_COND_SCR_DIV_CODE` | 조건화면분류코드 | string | Y | 5 | Uniquekey (16441) |
+| 2 | `FID_INPUT_ISCD` | 입력종목코드 | string | Y | 12 | 0000(전체), 1001(코스피), 2001(코스닥) |
+| 3 | `FID_RANK_SORT_CLS_CODE` | 순위정렬구분코드 | string | Y | 2 | 0(금액순), 1(수량순) |
+| 4 | `FID_RANK_SORT_CLS_CODE_2` | 순위정렬구분코드2 | string | Y | 2 | 0(매수순), 1(매도순) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (14)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stck_shrn_iscd` | 주식단축종목코드 | string | Y | 9 |  |
+| 5 | `hts_kor_isnm` | HTS한글종목명 | string | Y | 40 |  |
+| 6 | `glob_ntsl_qty` | 외국계순매도수량 | string | Y | 12 |  |
+| 7 | `stck_prpr` | 주식현재가 | string | Y | 10 |  |
+| 8 | `prdy_vrss` | 전일대비 | string | Y | 10 |  |
+| 9 | `prdy_vrss_sign` | 전일대비부호 | string | Y | 1 |  |
+| 10 | `prdy_ctrt` | 전일대비율 | string | Y | 82 |  |
+| 11 | `acml_vol` | 누적거래량 | string | Y | 18 |  |
+| 12 | `glob_total_seln_qty` | 외국계총매도수량 | string | Y | 18 |  |
+| 13 | `glob_total_shnu_qty` | 외국계총매수2수량 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_COND_SCR_DIV_CODE:16441
 FID_INPUT_ISCD:0000
 FID_RANK_SORT_CLS_CODE:0
-FID_RANK_SORT_CLS_CODE_2:0 |  |
-| Response Example | {
+FID_RANK_SORT_CLS_CODE_2:0
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stck_shrn_iscd": "005930",
@@ -5642,29 +7985,115 @@ FID_RANK_SORT_CLS_CODE_2:0 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 시간외예상체결등락률
 
-- **TR_ID**: FHKST11860000
-- **Method**: GET
+- **API ID**: 국내주식-140
+- **실전 TR_ID**: FHKST11860000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ranking/overtime-exp-trans-fluct`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+국내주식 시간외예상체결등락률 API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0236] 시간외 예상체결등락률 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST11860000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (8)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건 시장 분류 코드 | string | Y | 2 | 시장구분코드 (J: 주식) |
+| 1 | `FID_COND_SCR_DIV_CODE` | 조건 화면 분류 코드 | string | Y | 5 | Unique key(11186) |
+| 2 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 0000(전체), 0001(코스피), 1001(코스닥) |
+| 3 | `FID_RANK_SORT_CLS_CODE` | 순위 정렬 구분 코드 | string | Y | 2 | 0(상승률), 1(상승폭), 2(보합), 3(하락률), 4(하락폭) |
+| 4 | `FID_DIV_CLS_CODE` | 분류 구분 코드 | string | Y | 2 | '0(전체), 1(관리종목), 2(투자주의), 3(투자경고),<br> 4(투자위험예고), 5(투자위험), 6(보통주), 7(우선주)' |
+| 5 | `FID_INPUT_PRICE_1` | 입력 가격1 | string | Y | 12 | 가격 ~ |
+| 6 | `FID_INPUT_PRICE_2` | 입력 가격2 | string | Y | 12 | 공백 |
+| 7 | `FID_INPUT_VOL_1` | 입력 거래량 | string | Y | 18 | 거래량 ~ |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (17)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object | Y |  |  |
+| 4 | `data_rank` | 데이터 순위 | string | Y | 10 |  |
+| 5 | `iscd_stat_cls_code` | 종목 상태 구분 코드 | string | Y | 3 |  |
+| 6 | `stck_shrn_iscd` | 주식 단축 종목코드 | string | Y | 9 |  |
+| 7 | `hts_kor_isnm` | HTS 한글 종목명 | string | Y | 40 |  |
+| 8 | `ovtm_untp_antc_cnpr` | 시간외 단일가 예상 체결가 | string | Y | 10 |  |
+| 9 | `ovtm_untp_antc_cntg_vrss` | 시간외 단일가 예상 체결 대비 | string | Y | 10 |  |
+| 10 | `ovtm_untp_antc_cntg_vrsssign` | 시간외 단일가 예상 체결 대비 | string | Y | 1 |  |
+| 11 | `ovtm_untp_antc_cntg_ctrt` | 시간외 단일가 예상 체결 대비율 | string | Y | 82 |  |
+| 12 | `ovtm_untp_askp_rsqn1` | 시간외 단일가 매도호가 잔량1 | string | Y | 12 |  |
+| 13 | `ovtm_untp_bidp_rsqn1` | 시간외 단일가 매수호가 잔량1 | string | Y | 12 |  |
+| 14 | `ovtm_untp_antc_cnqn` | 시간외 단일가 예상 체결량 | string | Y | 18 |  |
+| 15 | `itmt_vol` | 장중 거래량 | string | Y | 18 |  |
+| 16 | `stck_prpr` | 주식 현재가 | string | Y | 10 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_COND_SCR_DIV_CODE:11186
 FID_INPUT_ISCD:0000
 FID_RANK_SORT_CLS_CODE:0
 FID_DIV_CLS_CODE:0
 FID_INPUT_PRICE_1:
 FID_INPUT_PRICE_2:
-FID_INPUT_VOL_1: |  |
-| Response Example | {
+FID_INPUT_VOL_1:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "data_rank": "1",
@@ -6120,23 +8549,101 @@ FID_INPUT_VOL_1: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 종목별 외국계 순매수추이
 
-- **TR_ID**: FHKST644400C0
-- **Method**: GET
+- **API ID**: 국내주식-164
+- **실전 TR_ID**: FHKST644400C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/frgnmem-pchs-trend`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_INPUT_ISCD:005930
-FID_INPUT_ISCD_2:99999 |  |
-| Response Example | {
+```text
+종목별 외국계 순매수추이 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0433] 종목별 외국계 순매수추이 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST644400C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_INPUT_ISCD` | 조건시장분류코드 | string | Y | 12 | 종목코드(ex) 005930(삼성전자)) |
+| 1 | `FID_INPUT_ISCD_2` | 조건화면분류코드 | string | Y | 8 | 외국계 전체(99999) |
+| 2 | `FID_COND_MRKT_DIV_CODE` | 시장구분코드 | string | Y | 10 | J (KRX만 지원) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (14)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `bsop_hour` | 영업시간 | string | Y | 6 |  |
+| 5 | `stck_prpr` | 주식현재가 | string | Y | 10 |  |
+| 6 | `prdy_vrss` | 전일대비 | string | Y | 10 |  |
+| 7 | `prdy_vrss_sign` | 전일대비부호 | string | Y | 1 |  |
+| 8 | `prdy_ctrt` | 전일대비율 | string | Y | 82 |  |
+| 9 | `acml_vol` | 누적거래량 | string | Y | 18 |  |
+| 10 | `frgn_seln_vol` | 외국인매도거래량 | string | Y | 18 |  |
+| 11 | `frgn_shnu_vol` | 외국인매수2거래량 | string | Y | 18 |  |
+| 12 | `glob_ntby_qty` | 외국계순매수수량 | string | Y | 12 |  |
+| 13 | `frgn_ntby_qty_icdc` | 외국인순매수수량증감 | string | Y | 10 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_INPUT_ISCD:005930
+FID_INPUT_ISCD_2:99999
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "bsop_hour": "153106",
@@ -6262,27 +8769,181 @@ FID_INPUT_ISCD_2:99999 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 관심종목(멀티종목) 시세조회
 
-- **TR_ID**: FHKST11300006
-- **Method**: GET
+- **API ID**: 국내주식-205
+- **실전 TR_ID**: FHKST11300006
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/intstock-multprice`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE_1:J
+```text
+관심종목(멀티종목) 시세조회 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0161] 관심종목 화면 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST11300006 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (60)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE_1` | 조건 시장 분류 코드1 | string | Y | 2 | 그룹별종목조회 결과 fid_mrkt_cls_code(시장구분) 1 입력<br>J: KRX, NX: NXT, UN: 통합<br>ex) J |
+| 1 | `FID_INPUT_ISCD_1` | 입력 종목코드1 | string | Y | 16 | 그룹별종목조회 결과 jong_code(종목코드) 1 입력<br>ex) 005930 |
+| 2 | `FID_COND_MRKT_DIV_CODE_2` | 조건 시장 분류 코드2 | string | Y | 2 |  |
+| 3 | `FID_INPUT_ISCD_2` | 입력 종목코드2 | string | Y | 16 |  |
+| 4 | `FID_COND_MRKT_DIV_CODE_3` | 조건 시장 분류 코드3 | string | Y | 2 |  |
+| 5 | `FID_INPUT_ISCD_3` | 입력 종목코드3 | string | Y | 16 |  |
+| 6 | `FID_COND_MRKT_DIV_CODE_4` | 조건 시장 분류 코드4 | string | Y | 2 |  |
+| 7 | `FID_INPUT_ISCD_4` | 입력 종목코드4 | string | Y | 16 |  |
+| 8 | `FID_COND_MRKT_DIV_CODE_5` | 조건 시장 분류 코드5 | string | Y | 2 |  |
+| 9 | `FID_INPUT_ISCD_5` | 입력 종목코드5 | string | Y | 16 |  |
+| 10 | `FID_COND_MRKT_DIV_CODE_6` | 조건 시장 분류 코드6 | string | Y | 2 |  |
+| 11 | `FID_INPUT_ISCD_6` | 입력 종목코드6 | string | Y | 16 |  |
+| 12 | `FID_COND_MRKT_DIV_CODE_7` | 조건 시장 분류 코드7 | string | Y | 2 |  |
+| 13 | `FID_INPUT_ISCD_7` | 입력 종목코드7 | string | Y | 16 |  |
+| 14 | `FID_COND_MRKT_DIV_CODE_8` | 조건 시장 분류 코드8 | string | Y | 2 |  |
+| 15 | `FID_INPUT_ISCD_8` | 입력 종목코드8 | string | Y | 16 |  |
+| 16 | `FID_COND_MRKT_DIV_CODE_9` | 조건 시장 분류 코드9 | string | Y | 2 |  |
+| 17 | `FID_INPUT_ISCD_9` | 입력 종목코드9 | string | Y | 16 |  |
+| 18 | `FID_COND_MRKT_DIV_CODE_10` | 조건 시장 분류 코드10 | string | Y | 12 |  |
+| 19 | `FID_INPUT_ISCD_10` | 입력 종목코드10 | string | Y | 16 |  |
+| 20 | `FID_COND_MRKT_DIV_CODE_11` | 조건 시장 분류 코드11 | string | Y | 2 |  |
+| 21 | `FID_INPUT_ISCD_11` | 입력 종목코드11 | string | Y | 16 |  |
+| 22 | `FID_COND_MRKT_DIV_CODE_12` | 조건 시장 분류 코드12 | string | Y | 2 |  |
+| 23 | `FID_INPUT_ISCD_12` | 입력 종목코드12 | string | Y | 16 |  |
+| 24 | `FID_COND_MRKT_DIV_CODE_13` | 조건 시장 분류 코드13 | string | Y | 2 |  |
+| 25 | `FID_INPUT_ISCD_13` | 입력 종목코드13 | string | Y | 16 |  |
+| 26 | `FID_COND_MRKT_DIV_CODE_14` | 조건 시장 분류 코드14 | string | Y | 2 |  |
+| 27 | `FID_INPUT_ISCD_14` | 입력 종목코드14 | string | Y | 16 |  |
+| 28 | `FID_COND_MRKT_DIV_CODE_15` | 조건 시장 분류 코드15 | string | Y | 2 |  |
+| 29 | `FID_INPUT_ISCD_15` | 입력 종목코드15 | string | Y | 16 |  |
+| 30 | `FID_COND_MRKT_DIV_CODE_16` | 조건 시장 분류 코드16 | string | Y | 2 |  |
+| 31 | `FID_INPUT_ISCD_16` | 입력 종목코드16 | string | Y | 16 |  |
+| 32 | `FID_COND_MRKT_DIV_CODE_17` | 조건 시장 분류 코드17 | string | Y | 2 |  |
+| 33 | `FID_INPUT_ISCD_17` | 입력 종목코드17 | string | Y | 16 |  |
+| 34 | `FID_COND_MRKT_DIV_CODE_18` | 조건 시장 분류 코드18 | string | Y | 2 |  |
+| 35 | `FID_INPUT_ISCD_18` | 입력 종목코드18 | string | Y | 16 |  |
+| 36 | `FID_COND_MRKT_DIV_CODE_19` | 조건 시장 분류 코드19 | string | Y | 2 |  |
+| 37 | `FID_INPUT_ISCD_19` | 입력 종목코드19 | string | Y | 16 |  |
+| 38 | `FID_COND_MRKT_DIV_CODE_20` | 조건 시장 분류 코드20 | string | Y | 2 |  |
+| 39 | `FID_INPUT_ISCD_20` | 입력 종목코드20 | string | Y | 16 |  |
+| 40 | `FID_COND_MRKT_DIV_CODE_21` | 조건 시장 분류 코드21 | string | Y | 2 |  |
+| 41 | `FID_INPUT_ISCD_21` | 입력 종목코드21 | string | Y | 16 |  |
+| 42 | `FID_COND_MRKT_DIV_CODE_22` | 조건 시장 분류 코드22 | string | Y | 2 |  |
+| 43 | `FID_INPUT_ISCD_22` | 입력 종목코드22 | string | Y | 16 |  |
+| 44 | `FID_COND_MRKT_DIV_CODE_23` | 조건 시장 분류 코드23 | string | Y | 2 |  |
+| 45 | `FID_INPUT_ISCD_23` | 입력 종목코드23 | string | Y | 16 |  |
+| 46 | `FID_COND_MRKT_DIV_CODE_24` | 조건 시장 분류 코드24 | string | Y | 2 |  |
+| 47 | `FID_INPUT_ISCD_24` | 입력 종목코드24 | string | Y | 16 |  |
+| 48 | `FID_COND_MRKT_DIV_CODE_25` | 조건 시장 분류 코드25 | string | Y | 2 |  |
+| 49 | `FID_INPUT_ISCD_25` | 입력 종목코드25 | string | Y | 16 |  |
+| 50 | `FID_COND_MRKT_DIV_CODE_26` | 조건 시장 분류 코드26 | string | Y | 16 |  |
+| 51 | `FID_INPUT_ISCD_26` | 입력 종목코드26 | string | Y | 2 |  |
+| 52 | `FID_COND_MRKT_DIV_CODE_27` | 조건 시장 분류 코드27 | string | Y | 2 |  |
+| 53 | `FID_INPUT_ISCD_27` | 입력 종목코드27 | string | Y | 16 |  |
+| 54 | `FID_COND_MRKT_DIV_CODE_28` | 조건 시장 분류 코드28 | string | Y | 2 |  |
+| 55 | `FID_INPUT_ISCD_28` | 입력 종목코드28 | string | Y | 16 |  |
+| 56 | `FID_COND_MRKT_DIV_CODE_29` | 조건 시장 분류 코드29 | string | Y | 2 |  |
+| 57 | `FID_INPUT_ISCD_29` | 입력 종목코드29 | string | Y | 16 |  |
+| 58 | `FID_COND_MRKT_DIV_CODE_30` | 조건 시장 분류 코드30 | string | Y | 2 |  |
+| 59 | `FID_INPUT_ISCD_30` | 입력 종목코드30 | string | Y | 16 |  |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (33)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object | Y |  |  |
+| 4 | `kospi_kosdaq_cls_name` | 코스피 코스닥 구분 명 | string | Y | 10 |  |
+| 5 | `mrkt_trtm_cls_name` | 시장 조치 구분 명 | string | Y | 10 |  |
+| 6 | `hour_cls_code` | 시간 구분 코드 | string | Y | 1 |  |
+| 7 | `inter_shrn_iscd` | 관심 단축 종목코드 | string | Y | 16 |  |
+| 8 | `inter_kor_isnm` | 관심 한글 종목명 | string | Y | 40 |  |
+| 9 | `inter2_prpr` | 관심2 현재가 | string | Y | 11 |  |
+| 10 | `inter2_prdy_vrss` | 관심2 전일 대비 | string | Y | 11 |  |
+| 11 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 12 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 13 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 14 | `inter2_oprc` | 관심2 시가 | string | Y | 11 |  |
+| 15 | `inter2_hgpr` | 관심2 고가 | string | Y | 11 |  |
+| 16 | `inter2_lwpr` | 관심2 저가 | string | Y | 11 |  |
+| 17 | `inter2_llam` | 관심2 하한가 | string | Y | 11 |  |
+| 18 | `inter2_mxpr` | 관심2 상한가 | string | Y | 11 |  |
+| 19 | `inter2_askp` | 관심2 매도호가 | string | Y | 11 |  |
+| 20 | `inter2_bidp` | 관심2 매수호가 | string | Y | 11 |  |
+| 21 | `seln_rsqn` | 매도 잔량 | string | Y | 12 |  |
+| 22 | `shnu_rsqn` | 매수2 잔량 | string | Y | 12 |  |
+| 23 | `total_askp_rsqn` | 총 매도호가 잔량 | string | Y | 12 |  |
+| 24 | `total_bidp_rsqn` | 총 매수호가 잔량 | string | Y | 12 |  |
+| 25 | `acml_tr_pbmn` | 누적 거래 대금 | string | Y | 18 |  |
+| 26 | `inter2_prdy_clpr` | 관심2 전일 종가 | string | Y | 11 |  |
+| 27 | `oprc_vrss_hgpr_rate` | 시가 대비 최고가 비율 | string | Y | 84 |  |
+| 28 | `intr_antc_cntg_vrss` | 관심 예상 체결 대비 | string | Y | 11 |  |
+| 29 | `intr_antc_cntg_vrss_sign` | 관심 예상 체결 대비 부호 | string | Y | 1 |  |
+| 30 | `intr_antc_cntg_prdy_ctrt` | 관심 예상 체결 전일 대비율 | string | Y | 72 |  |
+| 31 | `intr_antc_vol` | 관심 예상 거래량 | string | Y | 18 |  |
+| 32 | `inter2_sdpr` | 관심2 기준가 | string | Y | 11 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE_1:J
 FID_INPUT_ISCD_1:005930
 FID_COND_MRKT_DIV_CODE_2:J
 FID_INPUT_ISCD_2:000660
 FID_COND_MRKT_DIV_CODE_3:U
-FID_INPUT_ISCD_3:0001 |  |
-| Response Example | {
+FID_INPUT_ISCD_3:0001
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "kospi_kosdaq_cls_name": "거래소",
@@ -6381,5 +9042,239 @@ FID_INPUT_ISCD_3:0001 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
+
+
+### 국내주식 매물대_거래비중
+
+- **API ID**: 국내주식-196
+- **실전 TR_ID**: FHPST01130000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
+- **URL**: `/uapi/domestic-stock/v1/quotations/pbar-tratio`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
+
+<details><summary>개요</summary>
+
+```text
+국내주식 매물대/거래비중 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0113] 당일가격대별 매물대 화면의 데이터 중 일부를 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPST01130000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건시장분류코드 | string | Y | 2 | J:KRX, NX:NXT, UN:통합 |
+| 1 | `FID_INPUT_ISCD` | 입력종목코드 | string | Y | 12 | 주식단축종목코드 |
+| 2 | `FID_COND_SCR_DIV_CODE` | 조건화면분류코드 | string | Y | 5 | Uniquekey(20113) |
+| 3 | `FID_INPUT_HOUR_1` | 입력시간1 | string | Y | 10 | 공백 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (20)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `rprs_mrkt_kor_name` | 대표시장한글명 | string | Y | 40 |  |
+| 5 | `stck_shrn_iscd` | 주식단축종목코드 | string | Y | 9 |  |
+| 6 | `hts_kor_isnm` | HTS한글종목명 | string | Y | 40 |  |
+| 7 | `stck_prpr` | 주식현재가 | string | Y | 10 |  |
+| 8 | `prdy_vrss_sign` | 전일대비부호 | string | Y | 1 |  |
+| 9 | `prdy_vrss` | 전일대비 | string | Y | 10 |  |
+| 10 | `prdy_ctrt` | 전일대비율 | string | Y | 82 |  |
+| 11 | `acml_vol` | 누적거래량 | string | Y | 18 |  |
+| 12 | `prdy_vol` | 전일거래량 | string | Y | 18 |  |
+| 13 | `wghn_avrg_stck_prc` | 가중평균주식가격 | string | Y | 192 |  |
+| 14 | `lstn_stcn` | 상장주수 | string | Y | 18 |  |
+| 15 | `output2` | 응답상세 | object array | Y |  | array |
+| 16 | `data_rank` | 데이터순위 | string | Y | 10 |  |
+| 17 | `stck_prpr` | 주식현재가 | string | Y | 10 |  |
+| 18 | `cntg_vol` | 체결거래량 | string | Y | 18 |  |
+| 19 | `acml_vol_rlim` | 누적거래량비중 | string | Y | 72 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
+FID_INPUT_ISCD:136480
+FID_COND_SCR_DIV_CODE:20113
+FID_INPUT_HOUR_1:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
+    "output1": {
+        "rprs_mrkt_kor_name": "KOSDAQ",
+        "stck_shrn_iscd": "136480",
+        "hts_kor_isnm": "하림",
+        "stck_prpr": "3240",
+        "prdy_vrss_sign": "5",
+        "prdy_vrss": "-65",
+        "prdy_ctrt": "-1.97",
+        "acml_vol": "847563",
+        "prdy_vol": "974060",
+        "wghn_avrg_stck_prc": "3256.34",
+        "lstn_stcn": "106209702"
+    },
+    "output2": [
+        {
+            "data_rank": "1",
+            "stck_prpr": "3255",
+            "cntg_vol": "124515",
+            "acml_vol_rlim": "14.69"
+        },
+        {
+            "data_rank": "2",
+            "stck_prpr": "3260",
+            "cntg_vol": "123909",
+            "acml_vol_rlim": "14.62"
+        },
+        {
+            "data_rank": "3",
+            "stck_prpr": "3250",
+            "cntg_vol": "87983",
+            "acml_vol_rlim": "10.38"
+        },
+        {
+            "data_rank": "4",
+            "stck_prpr": "3245",
+            "cntg_vol": "83496",
+            "acml_vol_rlim": "9.85"
+        },
+        {
+            "data_rank": "5",
+            "stck_prpr": "3235",
+            "cntg_vol": "72101",
+            "acml_vol_rlim": "8.51"
+        },
+        {
+            "data_rank": "6",
+            "stck_prpr": "3240",
+            "cntg_vol": "70712",
+            "acml_vol_rlim": "8.34"
+        },
+        {
+            "data_rank": "7",
+            "stck_prpr": "3265",
+            "cntg_vol": "65838",
+            "acml_vol_rlim": "7.77"
+        },
+        {
+            "data_rank": "8",
+            "stck_prpr": "3275",
+            "cntg_vol": "57283",
+            "acml_vol_rlim": "6.76"
+        },
+        {
+            "data_rank": "9",
+            "stck_prpr": "3270",
+            "cntg_vol": "56295",
+            "acml_vol_rlim": "6.64"
+        },
+        {
+            "data_rank": "10",
+            "stck_prpr": "3230",
+            "cntg_vol": "30998",
+            "acml_vol_rlim": "3.66"
+        },
+        {
+            "data_rank": "11",
+            "stck_prpr": "3290",
+            "cntg_vol": "27419",
+            "acml_vol_rlim": "3.24"
+        },
+        {
+            "data_rank": "12",
+            "stck_prpr": "3280",
+            "cntg_vol": "15080",
+            "acml_vol_rlim": "1.78"
+        },
+        {
+            "data_rank": "13",
+            "stck_prpr": "3295",
+            "cntg_vol": "13623",
+            "acml_vol_rlim": "1.61"
+        },
+        {
+            "data_rank": "14",
+            "stck_prpr": "3285",
+            "cntg_vol": "9580",
+            "acml_vol_rlim": "1.13"
+        },
+        {
+            "data_rank": "15",
+            "stck_prpr": "3310",
+            "cntg_vol": "3646",
+            "acml_vol_rlim": "0.43"
+        },
+        {
+            "data_rank": "16",
+            "stck_prpr": "3225",
+            "cntg_vol": "2199",
+            "acml_vol_rlim": "0.26"
+        },
+        {
+            "data_rank": "17",
+            "stck_prpr": "3300",
+            "cntg_vol": "1898",
+            "acml_vol_rlim": "0.22"
+        },
+        {
+            "data_rank": "18",
+            "stck_prpr": "3305",
+            "cntg_vol": "988",
+            "acml_vol_rlim": "0.12"
+        }
+    ],
+    "rt_cd": "0",
+    "msg_cd": "MCA00000",
+    "msg1": "정상처리 되었습니다."
+}
+```
+
+</details>
+
 

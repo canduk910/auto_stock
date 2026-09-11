@@ -1,128 +1,224 @@
 # OAuth인증 API 명세
 
-> 원본: `한국투자증권_오픈API_전체문서_20260418_030007.xlsx`
+> 원본: `한국투자증권_오픈API_전체문서_20260911_030009.xlsx`
+
+> 이 문서는 워크북에서 **전 필드 그대로** 생성됩니다. 손으로 고치지 마세요 — `사용` 표시만 보존됩니다.
 
 
-## API 목록 (4개)
+## API 목록 (3개)
 
 | # | 통신 | API명 | TR_ID | Method | URL | 사용 |
 |---|------|------|-------|--------|-----|:---:|
-| 1 | REST | Hashkey | - | POST | `/uapi/hashkey` |  |
-| 2 | WEBSOCKET | 실시간 (웹소켓) 접속키 발급 | - | POST | `/oauth2/Approval` |  |
-| 3 | REST | 접근토큰폐기(P) | - | POST | `/oauth2/revokeP` |  |
-| 4 | REST | 접근토큰발급(P) | - | POST | `/oauth2/tokenP` |  |
+| 1 | WEBSOCKET | 실시간 (웹소켓) 접속키 발급 | 실시간-000 | POST | `/oauth2/Approval` |  |
+| 2 | REST | 접근토큰폐기(P) | 인증-002 | POST | `/oauth2/revokeP` |  |
+| 3 | REST | 접근토큰발급(P) | 인증-001 | POST | `/oauth2/tokenP` |  |
 
 ---
 
 ## 상세 명세
 
-### Hashkey
-
-- **TR_ID**: -
-- **Method**: POST
-- **URL**: `/uapi/hashkey`
-
-#### Response
-
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
-	"ORD_PRCS_DVSN_CD": "02",
-	"CANO": "계좌번호",
-	"ACNT_PRDT_CD": "03",
-	"SLL_BUY_DVSN_CD": "02",
-	"SHTN_PDNO": "101S06",
-	"ORD_QTY": "1",
-	"UNIT_PRICE": "370",
-	"NMPR_TYPE_CD": "",
-	"KRX_NMPR_CNDT_CD": "",
-	"CTAC_TLNO": "",
-	"FUOP_ITEM_DVSN_CD": "",
-	"ORD_DVSN_CD": "02"
-} |  |
-| Response Example | {
-  "BODY": {
-    "ORD_PRCS_DVSN_CD": "02",
-    "CANO": "계좌번호",
-    "ACNT_PRDT_CD": "03",
-    "SLL_BUY_DVSN_CD": "02",
-    "SHTN_PDNO": "101S06",
-    "ORD_QTY": "1",
-    "UNIT_PRICE": "370",
-    "NMPR_TYPE_CD": "",
-    "KRX_NMPR_CNDT_CD": "",
-    "CTAC_TLNO": "",
-    "FUOP_ITEM_DVSN_CD": "",
-    "ORD_DVSN_CD": "02"
-  },
-  "HASH": "8b84068222a49302f7ef58226d90403f62e216828f8103465f900de0e7be2f0f"
-} |  |
-
 
 ### 실시간 (웹소켓) 접속키 발급
 
-- **TR_ID**: -
-- **Method**: POST
+- **API ID**: 실시간-000
+- **실전 TR_ID**: 
+- **모의 TR_ID**: 
+- **통신방식**: WEBSOCKET · **Method**: POST
 - **URL**: `/oauth2/Approval`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `https://openapivts.koreainvestment.com:29443`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+실시간 (웹소켓) 접속키 발급받으실 수 있는 API 입니다.
+웹소켓 이용 시 해당 키를 appkey와 appsecret 대신 헤더에 넣어 API를 호출합니다.
+
+접속키의 유효기간은 24시간이지만, 접속키는 세션 연결 시 초기 1회만 사용하기 때문에 접속키 인증 후에는 세션종료되지 않는 이상 접속키 신규 발급받지 않으셔도 365일 내내 웹소켓 데이터 수신하실 수 있습니다.
+```
+
+</details>
+
+
+#### Request Header (1)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | N | 20 | application/json; utf-8 |
+
+#### Request Body (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `grant_type` | 권한부여타입 | string | Y | 18 | "client_credentials" |
+| 1 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 2 | `secretkey` | 시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appsecret (절대 노출되지 않도록 주의해주세요.)<br>* 주의 : appsecret와 secretkey는 동일하오니 착오없으시기 바랍니다. (용어가 다른점 양해 부탁드립니다.) |
+
+#### Response Body (1)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `approval_key` | 웹소켓 접속키 | string | Y | 286 | 웹소켓 이용 시 발급받은 웹소켓 접속키를 appkey와 appsecret 대신 헤더에 넣어 API 호출합니다. |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 	"grant_type": "client_credentials",
 	"appkey": "PSg5dctL9dKPo727J13Ur405OSXXXXXXXXXX",
 	"secretkey": "yo2t8zS68zpdjGuWvFyM9VikjXE0i0CbgPEamnqPA00G0bIfrdfQb2RUD1xP7SqatQXr1cD1fGUNsb78MMXoq6o4lAYt9YTtHAjbMoFy+c72kbq5owQY1Pvp39/x6ejpJlXCj7gE3yVOB/h25Hvl+URmYeBTfrQeOqIAOYc/OIXXXXXXXXXX"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "approval_key": "a2585daf-8c09-4587-9fce-8ab893XXXXX"
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 접근토큰폐기(P)
 
-- **TR_ID**: -
-- **Method**: POST
+- **API ID**: 인증-002
+- **실전 TR_ID**: 
+- **모의 TR_ID**: 
+- **통신방식**: REST · **Method**: POST
 - **URL**: `/oauth2/revokeP`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `https://openapivts.koreainvestment.com:29443`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+부여받은 접큰토큰을 더 이상 활용하지 않을 때 사용합니다.
+```
+
+</details>
+
+
+#### Request Body (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `appkey` | 고객 앱Key | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 1 | `appsecret` | 고객 앱Secret | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appsecret (절대 노출되지 않도록 주의해주세요.) |
+| 2 | `token` | 접근토큰 | string | Y | 286 | OAuth 토큰이 필요한 API 경우 발급한 Access token<br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용)<br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+
+#### Response Body (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `code` | 응답코드 | string | N | 8 | HTTP 응답코드 |
+| 1 | `message` | 응답메세지 | string | N | 450 | 응답메세지 |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
   "appkey" : "PSw2UvBQCpoZFc7nZpIfIrOttmXXXXXXXXXX",
   "appsecret" : "/g84gaZp7W3DJEZhamiTH8ZdJkUJ8603rjo3HcOm5PvIc1YC3YmyJOQoW1H0kNjo4IbHwGUdi3+9oEbH4RKKl8GnEu3n/khxm0OrwHkQur+wbA74fcFXxaUnEbftu0X72Eaw9dEBMuK3rODeeOanrsJ1kZ9oKWykIG04F0nmgdXXXXXXXXXX",
   "token" : "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0b2tlbiIsImF1ZCI6IjZmNDgxMjBiLTlmMDItNGI5ZS05MGExLTRiNDk2MGM5ZWY2MyIsImlzcyI6InVub2d3IiwiZXhwIjoxNjQzMjg2MDUzLCJpYXQiOjE2NDMxOTk2NTMsImp0aSI6IlBTdzJVdkJRQ3dvWkZhOG5acElmSXJPdHRtZUtLUGZCclNKcyJ9.6Z-UvArobBfXbnpSFbFhd9WPVEM3ZQa5NEpqfmQ6rrZBISCi-P9CEamfVReIduTVYbafF02Pl6EPXXXXXXXXXX"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
   "code" : 200,
   "message" : "접근토큰 폐기에 성공하였습니다"
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 접근토큰발급(P)
 
-- **TR_ID**: -
-- **Method**: POST
+- **API ID**: 인증-001
+- **실전 TR_ID**: 
+- **모의 TR_ID**: 
+- **통신방식**: REST · **Method**: POST
 - **URL**: `/oauth2/tokenP`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `https://openapivts.koreainvestment.com:29443`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+본인 계좌에 필요한 인증 절차로, 인증을 통해 접근 토큰을 부여받아 오픈API 활용이 가능합니다.
+
+1. 접근토큰(access_token)의 유효기간은 24시간 이며(1일 1회발급 원칙) 
+   갱신발급주기는 6시간 입니다.(6시간 이내는 기존 발급키로 응답)
+
+2. 접근토큰발급(/oauth2/tokenP) 시 접근토큰값(access_token)과 함께 수신되는 
+   접근토큰 유효기간(acess_token_token_expired)을 이용해 접근토큰을 관리하실 수 있습니다.
+
+
+[참고]
+
+'23.4.28 이후 지나치게 잦은 토큰 발급 요청건을 제어 하기 위해 신규 접근토큰발급 이후 일정시간 이내에 재호출 시에는 직전 토큰값을 리턴하게 되었습니다. 일정시간 이후 접근토큰발급 API 호출 시에는 신규 토큰값을 리턴합니다. 
+접근토큰발급 API 호출 및 코드 작성하실 때 해당 사항을 참고하시길 바랍니다.
+
+※ 참고 : 포럼 &gt; 공지사항 &gt;  [수정] [중요] 접근 토큰 발급 변경 안내
+```
+
+</details>
+
+
+#### Request Body (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `grant_type` | 권한부여 Type | string | Y | 18 | client_credentials |
+| 1 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 2 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appsecret (절대 노출되지 않도록 주의해주세요.) |
+
+#### Response Body (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `access_token` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token<br>ex) "eyJ0eXUxMiJ9.eyJz…..................................."<br> - 일반개인고객/일반법인고객<br>  . Access token 유효기간 1일<br>  .. 일정시간(6시간) 이내에 재호출 시에는 직전 토큰값을 리턴<br>  . OAuth 2.0의 Client Credentials Grant 절차를 준용<br> - 제휴법인<br>  . Access token 유효기간 3개월<br>  . Refresh token 유효기간 1년<br>  . OAuth 2.0의 Authorization Code Grant 절차를 준용 |
+| 1 | `token_type` | 접근토큰유형 | string | Y | 20 | 접근토큰유형 : "Bearer"<br>※ API 호출 시, 접근토큰유형 "Bearer" 입력. ex) "Bearer eyJ...." |
+| 2 | `expires_in` | 접근토큰 유효기간 | number | Y | 10 | 유효기간(초)<br>ex) 7776000 |
+| 3 | `access_token_token_expired` | 접근토큰 유효기간(일시표시) | string | Y | 50 | 유효기간(년:월:일 시:분:초)<br>ex) "2022-08-30 08:10:10" |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
   "grant_type": "client_credentials",
   "appkey": "PSg5dctL9dKPo727J13Ur405OSXXXXXXXXXX",
   "appsecret":  "yo2t8zS68zpdjGuWvFyM9VikjXE0i0CbgPEamnqPA00G0bIfrdfQb2RUD1xP7SqatQXr1cD1fGUNsb78MMXoq6o4lAYt9YTtHAjbMoFy+c72kbq5owQY1Pvp39/x6ejpJlXCj7gE3yVOB/h25Hvl+URmYeBTfrQeOqIAOYc/OIXXXXXXXXXX"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
 	"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0b2tlbiIsImF1ZCI6ImMwNzM1NTYzLTA1MjctNDNhZS05ODRiLTJiNWI1ZWZmOWYyMyIsImlzcyI6InVub2d3IiwiZXhwIjoxNjQ5NzUxMTAwLCJpYXQiOjE2NDE5NzUxMDAsImp0aSI6IkJTZlM0QUtSSnpRVGpmdHRtdXZlenVQUTlKajc3cHZGdjBZVyJ9.Oyt_C639yUjWmRhymlszgt6jDo8fvIKkkxH1mMngunV1T15SCC4I3Xe6MXxcY23DXunzBfR1uI0KXXXXXXXXXX",
 	"access_token_token_expired":"2023-12-22 08:16:59",
 	"token_type":"Bearer",
 	"expires_in":86400
-} |  |
+}
+```
+
+</details>
+
 

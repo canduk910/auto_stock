@@ -1,6 +1,8 @@
 # [국내주식] 종목정보 API 명세
 
-> 원본: `한국투자증권_오픈API_전체문서_20260418_030007.xlsx`
+> 원본: `한국투자증권_오픈API_전체문서_20260911_030009.xlsx`
+
+> 이 문서는 워크북에서 **전 필드 그대로** 생성됩니다. 손으로 고치지 마세요 — `사용` 표시만 보존됩니다.
 
 
 ## API 목록 (26개)
@@ -30,30 +32,104 @@
 | 105 | REST | 예탁원정보(주주총회일정) | HHKDB669111C0 | GET | `/uapi/domestic-stock/v1/ksdinfo/sharehld-meet` |  |
 | 106 | REST | 국내주식 성장성비율 | FHKST66430800 | GET | `/uapi/domestic-stock/v1/finance/growth-ratio` |  |
 | 107 | REST | 국내주식 대차대조표 | FHKST66430100 | GET | `/uapi/domestic-stock/v1/finance/balance-sheet` |  |
-| 108 | REST | 예탁원정보(합병/분할일정) | HHKDB669104C0 | GET | `/uapi/domestic-stock/v1/ksdinfo/merger-split` |  |
 | 109 | REST | 국내주식 종목추정실적 | HHKST668300C0 | GET | `/uapi/domestic-stock/v1/quotations/estimate-perform` |  |
 | 110 | REST | 국내주식 기타주요비율 | FHKST66430500 | GET | `/uapi/domestic-stock/v1/finance/other-major-ratios` |  |
+| 9999 | REST | 예탁원정보(합병_분할일정) | HHKDB669104C0 | GET | `/uapi/domestic-stock/v1/ksdinfo/merger-split` |  |
 
 ---
 
 ## 상세 명세
 
+
 ### 상품기본조회
 
-- **TR_ID**: CTPF1604R
-- **Method**: GET
+- **API ID**: v1_국내주식-029
+- **실전 TR_ID**: CTPF1604R
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/search-info`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+#### Request Header (13)
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | CTPF1604R |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `PDNO` | 상품번호 | string | Y | 12 | '주식(하이닉스) :  000660 (코드 : 300)<br>선물(101S12) :  KR4101SC0009 (코드 : 301)<br>미국(AAPL) : AAPL (코드 : 512)' |
+| 1 | `PRDT_TYPE_CD` | 상품유형코드 | string | Y | 3 | '300 주식<br>301 선물옵션<br>302 채권<br>512  미국 나스닥 / 513  미국 뉴욕 / 529  미국 아멕스 <br>515  일본<br>501  홍콩 / 543  홍콩CNY / 558  홍콩USD<br>507  베트남 하노이 / 508  베트남 호치민<br>551  중국 상해A / 552  중국 심천A' |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (24)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세1 | object | Y |  |  |
+| 4 | `pdno` | 상품번호 | string | Y | 12 |  |
+| 5 | `prdt_type_cd` | 상품유형코드 | string | Y | 3 |  |
+| 6 | `prdt_name` | 상품명 | string | Y | 60 |  |
+| 7 | `prdt_name120` | 상품명120 | string | Y | 120 |  |
+| 8 | `prdt_abrv_name` | 상품약어명 | string | Y | 60 |  |
+| 9 | `prdt_eng_name` | 상품영문명 | string | Y | 60 |  |
+| 10 | `prdt_eng_name120` | 상품영문명120 | string | Y | 120 |  |
+| 11 | `prdt_eng_abrv_name` | 상품영문약어명 | string | Y | 60 |  |
+| 12 | `std_pdno` | 표준상품번호 | string | Y | 12 |  |
+| 13 | `shtn_pdno` | 단축상품번호 | string | Y | 12 |  |
+| 14 | `prdt_sale_stat_cd` | 상품판매상태코드 | string | Y | 2 |  |
+| 15 | `prdt_risk_grad_cd` | 상품위험등급코드 | string | Y | 2 |  |
+| 16 | `prdt_clsf_cd` | 상품분류코드 | string | Y | 6 |  |
+| 17 | `prdt_clsf_name` | 상품분류명 | string | Y | 60 |  |
+| 18 | `sale_strt_dt` | 판매시작일자 | string | Y | 8 |  |
+| 19 | `sale_end_dt` | 판매종료일자 | string | Y | 8 |  |
+| 20 | `wrap_asst_type_cd` | 랩어카운트자산유형코드 | string | Y | 2 |  |
+| 21 | `ivst_prdt_type_cd` | 투자상품유형코드 | string | Y | 4 |  |
+| 22 | `ivst_prdt_type_cd_name` | 투자상품유형코드명 | string | Y | 60 |  |
+| 23 | `frst_erlm_dt` | 최초등록일자 | string | Y | 8 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 	"PDNO":"AAPL",
 	"PRDT_TYPE_CD":"512"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": {
         "pdno": "AAPL",
         "prdt_type_cd": "512",
@@ -79,25 +155,104 @@
     "rt_cd": "0",
     "msg_cd": "KIOK0530",
     "msg1": "조회되었습니다                                                                  "
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 예탁원정보(상장정보일정)
 
-- **TR_ID**: HHKDB669107C0
-- **Method**: GET
+- **API ID**: 국내주식-150
+- **실전 TR_ID**: HHKDB669107C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/list-info`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(상장정보일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0666] 상장정보 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669107C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+| 1 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 2 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 3 | `CTS` | CTS | string | Y | 17 | 공백 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (12)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `list_dt` | 상장/등록일 | string | Y | 10 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `stk_kind` | 주식종류 | string | Y | 10 |  |
+| 8 | `issue_type` | 사유 | string | Y | 21 |  |
+| 9 | `issue_stk_qty` | 상장주식수 | string | Y | 12 |  |
+| 10 | `tot_issue_stk_qty` | 총발행주식수 | string | Y | 12 |  |
+| 11 | `issue_price` | 발행가 | string | Y | 9 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230301
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "list_dt": "20240326",
@@ -1076,25 +1231,109 @@ sht_cd: |  |
             "stk_kind": "보통",
             "issue_type": "국내BW행사",
             "issue_stk_qty": "     1131380",
-            "tot_issue_stk_qty" |  |
+            "tot_issue_stk_qty"
+```
+
+</details>
+
 
 
 ### 예탁원정보(공모주청약일정)
 
-- **TR_ID**: HHKDB669108C0
-- **Method**: GET
+- **API ID**: 국내주식-151
+- **실전 TR_ID**: HHKDB669108C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/pub-offer`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(공모주청약일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0667] 공모주청약 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669108C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+| 1 | `CTS` | CTS | string | Y | 17 | 공백 |
+| 2 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 3 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (17)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `fix_subscr_pri` | 공모가 | string | Y | 12 |  |
+| 8 | `face_value` | 액면가 | string | Y | 9 |  |
+| 9 | `subscr_dt` | 청약기간 | string | Y | 23 |  |
+| 10 | `pay_dt` | 납입일 | string | Y | 10 |  |
+| 11 | `refund_dt` | 환불일 | string | Y | 10 |  |
+| 12 | `list_dt` | 상장/등록일 | string | Y | 10 |  |
+| 13 | `lead_mgr` | 주간사 | string | Y | 41 |  |
+| 14 | `pub_bf_cap` | 공모전자본금 | string | Y | 12 |  |
+| 15 | `pub_af_cap` | 공모후자본금 | string | Y | 12 |  |
+| 16 | `assign_stk_qty` | 당사배정물량 | string | Y | 12 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230301
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20240325",
@@ -1974,26 +2213,104 @@ sht_cd: |  |
             "face_value": "000000500",
             "subscr_dt": "2023/10/05 ~ 2023/10/06",
             "pay_dt": "2023/10/11",
-            "refu |  |
+            "refu
+```
+
+</details>
+
 
 
 ### 국내주식 재무비율
 
-- **TR_ID**: FHKST66430300
-- **Method**: GET
+- **API ID**: v1_국내주식-080
+- **실전 TR_ID**: FHKST66430300
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/finance/financial-ratio`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 재무비율 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0635] 재무분석종합 화면의 우측의 '재무 비율' 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST66430300 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_DIV_CLS_CODE` | 분류 구분 코드 | string | Y | 2 | 0: 년, 1: 분기 |
+| 1 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | J |
+| 2 | `fid_input_iscd` | 입력 종목코드 | string | Y | 12 | 000660 : 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (14)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stac_yymm` | 결산 년월 | string | Y | 6 |  |
+| 5 | `grs` | 매출액 증가율 | string | Y | 124 |  |
+| 6 | `bsop_prfi_inrt` | 영업 이익 증가율 | string | Y | 124 | 적자지속, 흑자전환, 적자전환인 경우 0으로 표시 |
+| 7 | `ntin_inrt` | 순이익 증가율 | string | Y | 124 |  |
+| 8 | `roe_val` | ROE 값 | string | Y | 132 |  |
+| 9 | `eps` | EPS | string | Y | 112 |  |
+| 10 | `sps` | 주당매출액 | string | Y | 18 |  |
+| 11 | `bps` | BPS | string | Y | 112 |  |
+| 12 | `rsrv_rate` | 유보 비율 | string | Y | 84 |  |
+| 13 | `lblt_rate` | 부채 비율 | string | Y | 84 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_input_iscd":"005930",
 "fid_div_cls_code":"1"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stac_yymm": "202312",
@@ -2359,25 +2676,105 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 예탁원정보(자본감소일정)
 
-- **TR_ID**: HHKDB669106C0
-- **Method**: GET
+- **API ID**: 국내주식-149
+- **실전 TR_ID**: HHKDB669106C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/cap-dcrs`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(자본감소일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0665] 자본감소 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669106C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `CTS` | CTS | string | Y | 17 | 공백 |
+| 1 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 2 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 3 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `stk_kind` | 주식종류 | string | Y | 10 |  |
+| 8 | `reduce_cap_type` | 감자구분 | string | Y | 9 |  |
+| 9 | `reduce_cap_rate` | 감자배정율 | string | Y | 142 |  |
+| 10 | `comp_way` | 계산방법 | string | Y | 6 |  |
+| 11 | `td_stop_dt` | 매매거래정지기간 | string | Y | 23 |  |
+| 12 | `list_dt` | 상장/등록일 | string | Y | 10 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230301
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20240315",
@@ -3393,25 +3790,107 @@ sht_cd: |  |
         },
         {
             "record_date": "20230329",
-            "sht_cd": "101000", |  |
+            "sht_cd": "101000",
+```
+
+</details>
+
 
 
 ### 예탁원정보(무상증자일정)
 
-- **TR_ID**: HHKDB669101C0
-- **Method**: GET
+- **API ID**: 국내주식-144
+- **실전 TR_ID**: HHKDB669101C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/bonus-issue`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(무상증자일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0656] 무상증자 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669101C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `CTS` | CTS | string | Y | 17 | 공백 |
+| 1 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 2 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 3 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (15)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `fix_rate` | 확정배정율 | string | Y | 152 |  |
+| 8 | `odd_rec_price` | 단주기준가 | string | Y | 9 |  |
+| 9 | `right_dt` | 권리락일 | string | Y | 8 |  |
+| 10 | `odd_pay_dt` | 단주대금지급일 | string | Y | 23 |  |
+| 11 | `list_date` | 상장/등록일 | string | Y | 8 |  |
+| 12 | `tot_issue_stk_qty` | 발행주식 | string | Y | 12 |  |
+| 13 | `issue_stk_qty` | 발행할주식 | string | Y | 12 |  |
+| 14 | `stk_kind` | 주식종류 | string | Y | 2 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230301
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20240326",
@@ -3482,27 +3961,116 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 증권사별 투자의견
 
-- **TR_ID**: FHKST663400C0
-- **Method**: GET
+- **API ID**: 국내주식-189
+- **실전 TR_ID**: FHKST663400C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/invest-opbysec`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+국내주식 증권사별 투자의견 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0608] 증권사별 투자의견 화면 의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+한 번의 호출에 20건까지 조회가 가능하기에, 일자 파라미터(FID_INPUT_DATE_1, FID_INPUT_DATE_2)를 조절하여 다음 데이터 조회하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST663400C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (6)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건시장분류코드 | string | Y | 2 | J(시장 구분 코드) |
+| 1 | `FID_COND_SCR_DIV_CODE` | 조건화면분류코드 | string | Y | 5 | 16634(Primary key) |
+| 2 | `FID_INPUT_ISCD` | 입력종목코드 | string | Y | 12 | 회원사코드 (kis developers 포탈 사이트 포럼-> FAQ -> 종목정보 다운로드(국내) 참조) |
+| 3 | `FID_DIV_CLS_CODE` | 분류구분코드 | string | Y | 2 | 전체(0) 매수(1) 중립(2) 매도(3) |
+| 4 | `FID_INPUT_DATE_1` | 입력날짜1 | string | Y | 10 | 이후 ~ |
+| 5 | `FID_INPUT_DATE_2` | 입력날짜2 | string | Y | 10 | ~ 이전 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (20)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stck_bsop_date` | 주식영업일자 | string | Y | 8 |  |
+| 5 | `stck_shrn_iscd` | 주식단축종목코드 | string | Y | 9 |  |
+| 6 | `hts_kor_isnm` | HTS한글종목명 | string | Y | 40 |  |
+| 7 | `invt_opnn` | 투자의견 | string | Y | 40 |  |
+| 8 | `invt_opnn_cls_code` | 투자의견구분코드 | string | Y | 2 |  |
+| 9 | `rgbf_invt_opnn` | 직전투자의견 | string | Y | 40 |  |
+| 10 | `rgbf_invt_opnn_cls_code` | 직전투자의견구분코드 | string | Y | 2 |  |
+| 11 | `mbcr_name` | 회원사명 | string | Y | 50 |  |
+| 12 | `stck_prpr` | 주식현재가 | string | Y | 10 |  |
+| 13 | `prdy_vrss` | 전일대비 | string | Y | 10 |  |
+| 14 | `prdy_vrss_sign` | 전일대비부호 | string | Y | 1 |  |
+| 15 | `prdy_ctrt` | 전일대비율 | string | Y | 82 |  |
+| 16 | `hts_goal_prc` | HTS목표가격 | string | Y | 10 |  |
+| 17 | `stck_prdy_clpr` | 주식전일종가 | string | Y | 10 |  |
+| 18 | `stft_esdg` | 주식선물괴리도 | string | Y | 10 |  |
+| 19 | `dprt` | 괴리율 | string | Y | 82 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_COND_SCR_DIV_CODE:16633
 FID_INPUT_ISCD:999
 FID_DIV_CLS_CODE:0
 FID_INPUT_DATE_1:20240428
-FID_INPUT_DATE_2:20240528 |  |
-| Response Example | {
+FID_INPUT_DATE_2:20240528
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stck_bsop_date": "20240527",
@@ -3634,28 +4202,102 @@ FID_INPUT_DATE_2:20240528 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 당사 신용가능종목
 
-- **TR_ID**: FHPST04770000
-- **Method**: GET
+- **API ID**: 국내주식-111
+- **실전 TR_ID**: FHPST04770000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/credit-by-company`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 당사 신용가능종목 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0477] 당사 신용가능 종목 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+최대 100건 확인 가능하며, 다음 조회가 불가합니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHPST04770000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `fid_rank_sort_cls_code` | 순위 정렬 구분 코드 | string | Y | 2 | 0:코드순, 1:이름순 |
+| 1 | `fid_slct_yn` | 선택 여부 | string | Y | 1 | 0:신용주문가능, 1: 신용주문불가 |
+| 2 | `fid_input_iscd` | 입력 종목코드 | string | Y | 12 | 0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200, 4001: KRX100 |
+| 3 | `fid_cond_scr_div_code` | 조건 화면 분류 코드 | string | Y | 5 | Unique key(20477) |
+| 4 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | 시장구분코드 (주식 J) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (7)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stck_shrn_iscd` | 주식 단축 종목코드 | string | Y | 9 |  |
+| 5 | `hts_kor_isnm` | HTS 한글 종목명 | string | Y | 40 |  |
+| 6 | `crdt_rate` | 신용 비율 | string | Y | 84 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_cond_scr_div_code":"20477",
 "fid_input_iscd":"0000",
 "fid_slct_yn":"0",
 "fid_rank_sort_cls_code":"1"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stck_shrn_iscd": "473440",
@@ -4161,25 +4803,105 @@ FID_INPUT_DATE_2:20240528 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 예탁원정보(주식매수청구일정)
 
-- **TR_ID**: HHKDB669103C0
-- **Method**: GET
+- **API ID**: 국내주식-146
+- **실전 TR_ID**: HHKDB669103C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/purreq`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(주식매수청구일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0663] 주식매수청구 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669103C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+| 1 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 2 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 3 | `CTS` | CTS | string | Y | 17 | 공백 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `stk_kind` | 주식종류 | string | Y | 8 |  |
+| 8 | `opp_opi_rcpt_term` | 반대의사접수시한 | string | Y | 9 |  |
+| 9 | `buy_req_rcpt_term` | 매수청구접수시한 | string | Y | 12 |  |
+| 10 | `buy_req_price` | 매수청구가격 | string | Y | 62 |  |
+| 11 | `buy_amt_pay_dt` | 매수대금지급일 | string | Y | 62 |  |
+| 12 | `get_meet_dt` | 주총일 | string | Y | 10 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230301
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20240313",
@@ -5140,26 +5862,105 @@ sht_cd: |  |
         },
         {
             "record_date": "20231129",
-            " |  |
+            "
+```
+
+</details>
+
 
 
 ### 예탁원정보(액면교체일정)
 
-- **TR_ID**: HHKDB669105C0
-- **Method**: GET
+- **API ID**: 국내주식-148
+- **실전 TR_ID**: HHKDB669105C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/rev-split`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(액면교체일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0657] 액면교체 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669105C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+| 1 | `CTS` | CTS | string | Y | 17 | 공백 |
+| 2 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 3 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 4 | `MARKET_GB` | 시장구분 | string | Y | 1 | 0:전체, 1:코스피, 2:코스닥 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (11)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `inter_bf_face_amt` | 변경전액면가 | string | Y | 9 |  |
+| 8 | `inter_af_face_amt` | 변경후액면가 | string | Y | 9 |  |
+| 9 | `td_stop_dt` | 매매거래정지기간 | string | Y | 23 |  |
+| 10 | `list_dt` | 상장/등록일 | string | Y | 10 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230301
 t_dt:20240326
 sht_cd:
-market_gb:1 |  |
-| Response Example | {
+market_gb:1
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20230823",
@@ -5309,27 +6110,114 @@ market_gb:1 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 예탁원정보(배당일정)
 
-- **TR_ID**: HHKDB669102C0
-- **Method**: GET
+- **API ID**: 국내주식-145
+- **실전 TR_ID**: HHKDB669102C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/dividend`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(배당일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0658] 배당 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+'주식배당지급일'은 배당주식의 주식교부일자를 말합니다. 배당주식의 계좌입고는 배당주식 상장일인데 일반적으로 주권교부일의 익영업일입니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669102C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (6)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `CTS` | CTS | string | Y | 17 | 공백 |
+| 1 | `GB1` | 조회구분 | string | Y | 1 | 0:배당전체, 1:결산배당, 2:중간배당 |
+| 2 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 3 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 4 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+| 5 | `HIGH_GB` | 고배당여부 | string | Y | 1 | 공백 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (17)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `divi_kind` | 배당종류 | string | Y | 8 |  |
+| 8 | `face_val` | 액면가 | string | Y | 9 |  |
+| 9 | `per_sto_divi_amt` | 현금배당금 | string | Y | 12 |  |
+| 10 | `divi_rate` | 현금배당률(%) | string | Y | 62 |  |
+| 11 | `stk_divi_rate` | 주식배당률(%) | string | Y | 152 |  |
+| 12 | `divi_pay_dt` | 배당금지급일 | string | Y | 10 |  |
+| 13 | `stk_div_pay_dt` | 주식배당지급일 | string | Y | 10 |  |
+| 14 | `odd_pay_dt` | 단주대금지급일 | string | Y | 10 |  |
+| 15 | `stk_kind` | 주식종류 | string | Y | 10 |  |
+| 16 | `high_divi_gb` | 고배당종목여부 | string | Y | 1 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 gb1:0
 f_dt:20230301
 t_dt:20240326
 sht_cd:
-high_gb:0 |  |
-| Response Example | {
+high_gb:0
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20240326",
@@ -6301,26 +7189,110 @@ high_gb:0 |  |
             "divi_rate": " 12.80",
             "stk_divi_rate": "  0.00",
             "divi_pay_dt": "2024/04/09",
-            "stk_div_pay_dt": "", |  |
+            "stk_div_pay_dt": "",
+```
+
+</details>
+
 
 
 ### 국내주식 종목투자의견
 
-- **TR_ID**: FHKST663300C0
-- **Method**: GET
+- **API ID**: 국내주식-188
+- **실전 TR_ID**: FHKST663300C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/invest-opinion`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | FID_COND_MRKT_DIV_CODE:J
+```text
+국내주식 종목투자의견 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0605] 종목투자의견 화면 의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+한 번의 호출에 100건까지 조회가 가능하기에, 일자 파라미터(FID_INPUT_DATE_1, FID_INPUT_DATE_2)를 조절하여 다음 데이터 조회하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST663300C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건시장분류코드 | string | Y | 2 | J(시장 구분 코드) |
+| 1 | `FID_COND_SCR_DIV_CODE` | 조건화면분류코드 | string | Y | 5 | 16633(Primary key) |
+| 2 | `FID_INPUT_ISCD` | 입력종목코드 | string | Y | 12 | 종목코드(ex) 005930(삼성전자)) |
+| 3 | `FID_INPUT_DATE_1` | 입력날짜1 | string | Y | 10 | 이후 ~(ex) 0020231113) |
+| 4 | `FID_INPUT_DATE_2` | 입력날짜2 | string | Y | 10 | ~ 이전(ex) 0020240513) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (16)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stck_bsop_date` | 주식영업일자 | string | Y | 8 |  |
+| 5 | `invt_opnn` | 투자의견 | string | Y | 40 |  |
+| 6 | `invt_opnn_cls_code` | 투자의견구분코드 | string | Y | 2 |  |
+| 7 | `rgbf_invt_opnn` | 직전투자의견 | string | Y | 40 |  |
+| 8 | `rgbf_invt_opnn_cls_code` | 직전투자의견구분코드 | string | Y | 2 |  |
+| 9 | `mbcr_name` | 회원사명 | string | Y | 50 |  |
+| 10 | `hts_goal_prc` | HTS목표가격 | string | Y | 10 |  |
+| 11 | `stck_prdy_clpr` | 주식전일종가 | string | Y | 10 |  |
+| 12 | `stck_nday_esdg` | 주식N일괴리도 | string | Y | 10 |  |
+| 13 | `nday_dprt` | N일괴리율 | string | Y | 82 |  |
+| 14 | `stft_esdg` | 주식선물괴리도 | string | Y | 10 |  |
+| 15 | `dprt` | 괴리율 | string | Y | 82 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+FID_COND_MRKT_DIV_CODE:J
 FID_COND_SCR_DIV_CODE:16633
 FID_INPUT_ISCD:005930
 FID_INPUT_DATE_1:20240101
-FID_INPUT_DATE_2:20240528 |  |
-| Response Example | {
+FID_INPUT_DATE_2:20240528
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stck_bsop_date": "20240527",
@@ -6424,26 +7396,99 @@ FID_INPUT_DATE_2:20240528 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 안정성비율
 
-- **TR_ID**: FHKST66430600
-- **Method**: GET
+- **API ID**: v1_국내주식-083
+- **실전 TR_ID**: FHKST66430600
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/finance/stability-ratio`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 안정성비율 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0635] 재무분석종합 화면의 하단 '5. 안정성비율' 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST66430600 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `fid_input_iscd` | 입력 종목코드 | string | Y | 12 | 000660 : 종목코드 |
+| 1 | `fid_div_cls_code` | 분류 구분 코드 | string | Y | 2 | 0: 년, 1: 분기 |
+| 2 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | J |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (9)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stac_yymm` | 결산 년월 | string | Y | 6 |  |
+| 5 | `lblt_rate` | 부채 비율 | string | Y | 84 |  |
+| 6 | `bram_depn` | 차입금 의존도 | string | Y | 92 |  |
+| 7 | `crnt_rate` | 유동 비율 | string | Y | 84 |  |
+| 8 | `quck_rate` | 당좌 비율 | string | Y | 84 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_input_iscd":"005930",
 "fid_div_cls_code":"1"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stac_yymm": "202312",
@@ -6659,26 +7704,99 @@ FID_INPUT_DATE_2:20240528 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 수익성비율
 
-- **TR_ID**: FHKST66430400
-- **Method**: GET
+- **API ID**: v1_국내주식-081
+- **실전 TR_ID**: FHKST66430400
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/finance/profit-ratio`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 수익성비율 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0635] 재무분석종합 화면의 하단 '4. 수익성비율' 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST66430400 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `fid_input_iscd` | 입력 종목코드 | string | Y | 12 | 000660 : 종목코드 |
+| 1 | `FID_DIV_CLS_CODE` | 분류 구분 코드 | string | Y | 2 | 0: 년, 1: 분기 |
+| 2 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | J |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (9)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stac_yymm` | 결산 년월 | string | Y | 6 |  |
+| 5 | `cptl_ntin_rate` | 총자본 순이익율 | string | Y | 92 |  |
+| 6 | `self_cptl_ntin_inrt` | 자기자본 순이익율 | string | Y | 92 |  |
+| 7 | `sale_ntin_rate` | 매출액 순이익율 | string | Y | 92 |  |
+| 8 | `sale_totl_rate` | 매출액 총이익율 | string | Y | 92 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_input_iscd":"005930",
 "fid_div_cls_code":"1"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stac_yymm": "202312",
@@ -6894,25 +8012,105 @@ FID_INPUT_DATE_2:20240528 |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 예탁원정보(실권주일정)
 
-- **TR_ID**: HHKDB669109C0
-- **Method**: GET
+- **API ID**: 국내주식-152
+- **실전 TR_ID**: HHKDB669109C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/forfeit`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(실권주일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0668] 실권주 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669109C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+| 1 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 2 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 3 | `CTS` | CTS | string | Y | 17 | 공백 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `subscr_dt` | 청약일 | string | Y | 23 |  |
+| 8 | `subscr_price` | 공모가 | string | Y | 9 |  |
+| 9 | `subscr_stk_qty` | 공모주식수 | string | Y | 12 |  |
+| 10 | `refund_dt` | 환불일 | string | Y | 10 |  |
+| 11 | `list_dt` | 상장/등록일 | string | Y | 10 |  |
+| 12 | `lead_mgr` | 주간사 | string | Y | 25 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230301
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20240131",
@@ -6984,25 +8182,102 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 예탁원정보(의무예치일정)
 
-- **TR_ID**: HHKDB669110C0
-- **Method**: GET
+- **API ID**: 국내주식-153
+- **실전 TR_ID**: HHKDB669110C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/mand-deposit`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(의무예치일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0758] 의무예치 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669110C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 1 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+| 2 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 3 | `CTS` | CTS | string | Y | 17 | 공백 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (10)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 5 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 6 | `stk_qty` | 주식수 | string | Y | 12 |  |
+| 7 | `depo_date` | 예치일 | string | Y | 23 |  |
+| 8 | `depo_reason` | 사유 | string | Y | 10 |  |
+| 9 | `tot_issue_qty_per_rate` | 총발행주식수대비비율(%) | string | Y | 52 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230301
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "sht_cd": "27322R",
@@ -7168,26 +8443,107 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 손익계산서
 
-- **TR_ID**: FHKST66430200
-- **Method**: GET
+- **API ID**: v1_국내주식-079
+- **실전 TR_ID**: FHKST66430200
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/finance/income-statement`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: ``
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 손익계산서 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0635] 재무분석종합 화면의 하단 '2. 손익계산서' 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST66430200 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_DIV_CLS_CODE` | 분류 구분 코드 | string | Y | 2 | 0: 년, 1: 분기<br>※ 분기데이터는 연단위 누적합산 |
+| 1 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | J |
+| 2 | `fid_input_iscd` | 입력 종목코드 | string | Y | 12 | 000660 : 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (17)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stac_yymm` | 결산 년월 | string | Y | 6 |  |
+| 5 | `sale_account` | 매출액 | string | Y | 18 |  |
+| 6 | `sale_cost` | 매출 원가 | string | Y | 182 |  |
+| 7 | `sale_totl_prfi` | 매출 총 이익 | string | Y | 182 |  |
+| 8 | `depr_cost` | 감가상각비 | string | Y | 182 | 출력되지 않는 데이터(99.99 로 표시) |
+| 9 | `sell_mang` | 판매 및 관리비 | string | Y | 182 | 출력되지 않는 데이터(99.99 로 표시) |
+| 10 | `bsop_prti` | 영업 이익 | string | Y | 182 |  |
+| 11 | `bsop_non_ernn` | 영업 외 수익 | string | Y | 182 | 출력되지 않는 데이터(99.99 로 표시) |
+| 12 | `bsop_non_expn` | 영업 외 비용 | string | Y | 182 | 출력되지 않는 데이터(99.99 로 표시) |
+| 13 | `op_prfi` | 경상 이익 | string | Y | 182 |  |
+| 14 | `spec_prfi` | 특별 이익 | string | Y | 182 |  |
+| 15 | `spec_loss` | 특별 손실 | string | Y | 182 |  |
+| 16 | `thtr_ntin` | 당기순이익 | string | Y | 102 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_input_iscd":"005930",
 "fid_div_cls_code":"1"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stac_yymm": "202312",
@@ -7643,27 +8999,117 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 당사 대주가능 종목
 
-- **TR_ID**: CTSC2702R
-- **Method**: GET
+- **API ID**: 국내주식-195
+- **실전 TR_ID**: CTSC2702R
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/lendable-by-company`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | EXCG_DVSN_CD:00
+```text
+당사 대주가능 종목 API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0490] 당사 대주가능 종목 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 본 API는 다음조회가 불가합니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | CTSC2702R |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (6)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `EXCG_DVSN_CD` | 거래소구분코드 | string | Y | 2 | 00(전체), 02(거래소), 03(코스닥) |
+| 1 | `PDNO` | 상품번호 | string | Y | 12 | 공백 : 전체조회, 종목코드 입력 시 해당종목만 조회 |
+| 2 | `THCO_STLN_PSBL_YN` | 당사대주가능여부 | string | Y | 1 | Y |
+| 3 | `INQR_DVSN_1` | 조회구분1 | string | Y | 1 | 0 : 전체조회, 1: 종목코드순 정렬 |
+| 4 | `CTX_AREA_FK200` | 연속조회검색조건200 | string | Y | 200 | 미입력 (다음조회 불가) |
+| 5 | `CTX_AREA_NK100` | 연속조회키100 | string | Y | 100 | 미입력 (다음조회 불가) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (21)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `pdno` | 상품번호 | string | Y | 12 |  |
+| 5 | `prdt_name` | 상품명 | string | Y | 60 |  |
+| 6 | `papr` | 액면가 | string | Y | 19 |  |
+| 7 | `bfdy_clpr` | 전일종가 | string | Y | 19 | 전일종가 |
+| 8 | `sbst_prvs` | 대용가 | string | Y | 19 |  |
+| 9 | `tr_stop_dvsn_name` | 거래정지구분명 | string | Y | 60 |  |
+| 10 | `psbl_yn_name` | 가능여부명 | string | Y | 60 |  |
+| 11 | `lmt_qty1` | 한도수량1 | string | Y | 19 |  |
+| 12 | `use_qty1` | 사용수량1 | string | Y | 19 |  |
+| 13 | `trad_psbl_qty2` | 매매가능수량2 | string | Y | 19 | 가능수량 |
+| 14 | `rght_type_cd` | 권리유형코드 | string | Y | 2 |  |
+| 15 | `bass_dt` | 기준일자 | string | Y | 8 |  |
+| 16 | `psbl_yn` | 가능여부 | string | Y | 1 |  |
+| 17 | `output2` | 응답상세 | object | Y |  |  |
+| 18 | `tot_stup_lmt_qty` | 총설정한도수량 | string | Y | 19 |  |
+| 19 | `brch_lmt_qty` | 지점한도수량 | string | Y | 19 |  |
+| 20 | `rqst_psbl_qty` | 신청가능수량 | string | Y | 19 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+EXCG_DVSN_CD:00
 PDNO:
 THCO_STLN_PSBL_YN:Y
 INQR_DVSN_1:0
 CTX_AREA_FK200:
-CTX_AREA_NK100: |  |
-| Response Example | {
+CTX_AREA_NK100:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "ctx_area_fk200": "00!^!^Y!^0                                                                                                                                                                                              ",
     "ctx_area_nk100": "                                                                                                    ",
     "output1": [
@@ -7781,25 +9227,159 @@ CTX_AREA_NK100: |  |
     "rt_cd": "0",
     "msg_cd": "KIOK0460",
     "msg1": "조회 되었습니다. (마지막 자료)                                                  "
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 주식기본조회
 
-- **TR_ID**: CTPF1002R
-- **Method**: GET
+- **API ID**: v1_국내주식-067
+- **실전 TR_ID**: CTPF1002R
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/search-stock-info`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+주식기본조회 API입니다.
+국내주식 종목의 종목상세정보를 확인할 수 있습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | CTPF1002R |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `PRDT_TYPE_CD` | 상품유형코드 | string | Y | 3 | 300: 주식, ETF, ETN, ELW <br>301 : 선물옵션 <br>302 : 채권 <br>306 : ELS' |
+| 1 | `PDNO` | 상품번호 | string | Y | 12 | 종목번호 (6자리)<br>ETN의 경우, Q로 시작 (EX. Q500001) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (71)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세1 | object | Y |  |  |
+| 4 | `pdno` | 상품번호 | string | Y | 12 |  |
+| 5 | `prdt_type_cd` | 상품유형코드 | string | Y | 3 |  |
+| 6 | `mket_id_cd` | 시장ID코드 | string | Y | 3 | AGR.농축산물파생<br>BON.채권파생<br>CMD.일반상품시장<br>CUR.통화파생<br>ENG.에너지파생<br>EQU.주식파생<br>ETF.ETF파생<br>IRT.금리파생<br>KNX.코넥스<br>KSQ.코스닥<br>MTL.금속파생<br>SPI.주가지수파생<br>STK.유가증권 |
+| 7 | `scty_grp_id_cd` | 증권그룹ID코드 | string | Y | 2 | BC.수익증권<br>DR.주식예탁증서<br>EF.ETF<br>EN.ETN<br>EW.ELW<br>FE.해외ETF<br>FO.선물옵션<br>FS.외국주권<br>FU.선물<br>FX.플렉스 선물<br>GD.금현물<br>IC.투자계약증권<br>IF.사회간접자본투융자회사<br>KN.코넥스주권<br>MF.투자회사<br>OP.옵션<br>RT.부동산투자회사<br>SC.선박투자회사<br>SR.신주인수권증서<br>ST.주권<br>SW.신주인수권증권<br>TC.신탁수익증권 |
+| 8 | `excg_dvsn_cd` | 거래소구분코드 | string | Y | 2 | 01.한국증권<br>02.증권거래소<br>03.코스닥<br>04.K-OTC<br>05.선물거래소<br>06.CME<br>07.EUREX<br>21.금현물<br>50.미국주간<br>51.홍콩<br>52.상해B<br>53.심천<br>54.홍콩거래소<br>55.미국<br>56.일본<br>57.상해A<br>58.심천A<br>59.베트남<br>61.장전시간외시장<br>64.경쟁대량매매<br>65.경매매시장<br>81.시간외단일가시장 |
+| 9 | `setl_mmdd` | 결산월일 | string | Y | 4 |  |
+| 10 | `lstg_stqt` | 상장주수 | string | Y | 19 |  |
+| 11 | `lstg_cptl_amt` | 상장자본금액 | string | Y | 19 |  |
+| 12 | `cpta` | 자본금 | string | Y | 19 |  |
+| 13 | `papr` | 액면가 | string | Y | 19 |  |
+| 14 | `issu_pric` | 발행가격 | string | Y | 19 |  |
+| 15 | `kospi200_item_yn` | 코스피200종목여부 | string | Y | 1 |  |
+| 16 | `scts_mket_lstg_dt` | 유가증권시장상장일자 | string | Y | 8 |  |
+| 17 | `scts_mket_lstg_abol_dt` | 유가증권시장상장폐지일자 | string | Y | 8 |  |
+| 18 | `kosdaq_mket_lstg_dt` | 코스닥시장상장일자 | string | Y | 8 |  |
+| 19 | `kosdaq_mket_lstg_abol_dt` | 코스닥시장상장폐지일자 | string | Y | 8 |  |
+| 20 | `frbd_mket_lstg_dt` | 프리보드시장상장일자 | string | Y | 8 |  |
+| 21 | `frbd_mket_lstg_abol_dt` | 프리보드시장상장폐지일자 | string | Y | 8 |  |
+| 22 | `reits_kind_cd` | 리츠종류코드 | string | Y | 1 |  |
+| 23 | `etf_dvsn_cd` | ETF구분코드 | string | Y | 2 |  |
+| 24 | `oilf_fund_yn` | 유전펀드여부 | string | Y | 1 |  |
+| 25 | `idx_bztp_lcls_cd` | 지수업종대분류코드 | string | Y | 3 |  |
+| 26 | `idx_bztp_mcls_cd` | 지수업종중분류코드 | string | Y | 3 |  |
+| 27 | `idx_bztp_scls_cd` | 지수업종소분류코드 | string | Y | 3 |  |
+| 28 | `stck_kind_cd` | 주식종류코드 | string | Y | 3 | 000.해당사항없음<br>101.보통주<br>201.우선주<br>202.2우선주<br>203.3우선주<br>204.4우선주<br>205.5우선주<br>206.6우선주<br>207.7우선주<br>208.8우선주<br>209.9우선주<br>210.10우선주<br>211.11우선주<br>212.12우선주<br>213.13우선주<br>214.14우선주<br>215.15우선주<br>216.16우선주<br>217.17우선주<br>218.18우선주<br>219.19우선주<br>220.20우선주<br>301.후배주<br>401.혼합주 |
+| 29 | `mfnd_opng_dt` | 뮤추얼펀드개시일자 | string | Y | 8 |  |
+| 30 | `mfnd_end_dt` | 뮤추얼펀드종료일자 | string | Y | 8 |  |
+| 31 | `dpsi_erlm_cncl_dt` | 예탁등록취소일자 | string | Y | 8 |  |
+| 32 | `etf_cu_qty` | ETFCU수량 | string | Y | 10 |  |
+| 33 | `prdt_name` | 상품명 | string | Y | 60 |  |
+| 34 | `prdt_name120` | 상품명120 | string | Y | 120 |  |
+| 35 | `prdt_abrv_name` | 상품약어명 | string | Y | 60 |  |
+| 36 | `std_pdno` | 표준상품번호 | string | Y | 12 |  |
+| 37 | `prdt_eng_name` | 상품영문명 | string | Y | 60 |  |
+| 38 | `prdt_eng_name120` | 상품영문명120 | string | Y | 120 |  |
+| 39 | `prdt_eng_abrv_name` | 상품영문약어명 | string | Y | 60 |  |
+| 40 | `dpsi_aptm_erlm_yn` | 예탁지정등록여부 | string | Y | 1 |  |
+| 41 | `etf_txtn_type_cd` | ETF과세유형코드 | string | Y | 2 |  |
+| 42 | `etf_type_cd` | ETF유형코드 | string | Y | 2 |  |
+| 43 | `lstg_abol_dt` | 상장폐지일자 | string | Y | 8 |  |
+| 44 | `nwst_odst_dvsn_cd` | 신주구주구분코드 | string | Y | 2 |  |
+| 45 | `sbst_pric` | 대용가격 | string | Y | 19 |  |
+| 46 | `thco_sbst_pric` | 당사대용가격 | string | Y | 19 |  |
+| 47 | `thco_sbst_pric_chng_dt` | 당사대용가격변경일자 | string | Y | 8 |  |
+| 48 | `tr_stop_yn` | 거래정지여부 | string | Y | 1 |  |
+| 49 | `admn_item_yn` | 관리종목여부 | string | Y | 1 |  |
+| 50 | `thdt_clpr` | 당일종가 | string | Y | 19 |  |
+| 51 | `bfdy_clpr` | 전일종가 | string | Y | 19 |  |
+| 52 | `clpr_chng_dt` | 종가변경일자 | string | Y | 8 |  |
+| 53 | `std_idst_clsf_cd` | 표준산업분류코드 | string | Y | 6 |  |
+| 54 | `std_idst_clsf_cd_name` | 표준산업분류코드명 | string | Y | 130 | 표준산업소분류코드<br>000000	해당사항없음                                     <br>010101	작물 재배업                                      <br>010102	축산업                                           <br>010103	작물재배 및 축산 복합농업                        <br>010104	작물재배 및 축산 관련 서비스업                   <br>010105	수렵 및 관련 서비스업                            <br>010201	임업                                             <br>010301	어로 어업                                        <br>010302	양식어업 및 어업관련 서비스업                    <br>020501	석탄 광업                                        <br>020502	원유 및 천연가스 채굴업                          <br>020601	철 광업                                          <br>020602	비철금속 광업                                    <br>020701	토사석 광업                                      <br>020702	기타 비금속광물 광업                             <br>020801	광업 지원 서비스업                               <br>031001	도축, 육류 가공 및 저장 처리업                   <br>031002	수산물 가공 및 저장 처리업                       <br>031003	과실, 채소 가공 및 저장 처리업                   <br>031004	동물성 및 식물성 유지 제조업                     <br>031005	낙농제품 및 식용빙과류 제조업                    <br>031006	곡물가공품, 전분 및 전분제품 제조업              <br>031007	기타 식품 제조업                                 <br>031008	동물용 사료 및 조제식품 제조업                   <br>031101	알콜음료 제조업                                  <br>031102	비알콜음료 및 얼음 제조업                        <br>031201	담배 제조업                                      <br>031301	방적 및 가공사 제조업                            <br>031302	직물직조 및 직물제품 제조업                      <br>031303	편조원단 및 편조제품 제조업                      <br>031304	섬유제품 염색, 정리 및 마무리 가공업             <br>031309	기타 섬유제품 제조업                             <br>031401	봉제의복 제조업                                  <br>031402	모피가공 및 모피제품 제조업                      <br>031403	편조의복 제조업                                  <br>031404	의복 액세서리 제조업                             <br>031501	가죽, 가방 및 유사제품 제조업                    <br>031502	신발 및 신발부분품 제조업                        <br>031601	제재 및 목재 가공업                              <br>031602	나무제품 제조업                                  <br>031603	코르크 및 조물 제품 제조업                       <br>031701	펄프, 종이 및 판지 제조업                        <br>031702	골판지, 종이 상자 및 종이용기 제조업             <br>031709	기타 종이 및 판지 제품 제조업                    <br>031801	인쇄 및 인쇄관련 산업                            <br>031802	기록매체 복제업                                  <br>031901	코크스 및 연탄 제조업                            <br>031902	석유 정제품 제조업                               <br>032001	기초화학물질 제조업                              <br>032002	비료 및 질소화합물 제조업                        <br>032003	합성고무 및 플라스틱 물질 제조업                 <br>032004	기타 화학제품 제조업                             <br>032005	화학섬유 제조업                                  <br>032101	기초 의약물질 및 생물학적 제제 제조업            <br>032102	의약품 제조업                                    <br>032103	의료용품 및 기타 의약관련제품 제조업             <br>032201	고무제품 제조업                                  <br>032202	플라스틱제품 제조업                              <br>032301	유리 및 유리제품 제조업                          <br>032302	도자기 및 기타 요업제품 제조업                   <br>032303	시멘트, 석회, 플라스터 및 그 제품 제조업         <br>032309	기타 비금속 광물제품 제조업                      <br>032401	1차 철강 제조업                                  <br>032402	1차 비철금속 제조업                              <br>032403	금속 주조업                                      <br>032501	구조용 금속제품, 탱크 및 증기발생기 제조업       <br>032502	무기 및 총포탄 제조업                            <br>032509	기타 금속가공제품 제조업                         <br>032601	반도체 제조업                                    <br>032602	전자부품 제조업                                  <br>032603	컴퓨터 및 주변장치 제조업                        <br>032604	통신 및 방송 장비 제조업                         <br>032605	영상 및 음향기기 제조업                          <br>032606	마그네틱 및 광학 매체 제조업                     <br>032701	의료용 기기 제조업                               <br>032702	측정, 시험, 항해, 제어 및 기타 정밀기기 제조업; ?<br>032703	안경, 사진장비 및 기타 광학기기 제조업           <br>032704	시계 및 시계부품 제조업                          <br>032801	전동기, 발전기 및 전기 변환 · 공급 · 제어 장치 <br>032802	일차전지 및 축전지 제조업                        <br>032803	절연선 및 케이블 제조업                          <br>032804	전구 및 조명장치 제조업                          <br>032805	가정용 기기 제조업                               <br>032809	기타 전기장비 제조업                             <br>032901	일반 목적용 기계 제조업                          <br>032902	특수 목적용 기계 제조업                          <br>033001	자동차용 엔진 및 자동차 제조업                   <br>033002	자동차 차체 및 트레일러 제조업                   <br>033003	자동차 부품 제조업                               <br>033101	선박 및 보트 건조업                              <br>033102	철도장비 제조업                                  <br>033103	항공기,우주선 및 부품 제조업                     <br>033109	그외 기타 운송장비 제조업                        <br>033201	가구 제조업                                      <br>033301	귀금속 및 장신용품 제조업                        <br>033302	악기 제조업                                      <br>033303	운동 및 경기용구 제조업                          <br>033304	인형,장난감 및 오락용품 제조업                   <br>033309	그외 기타 제품 제조업                            <br>043501	전기업                                           <br>043502	가스 제조 및 배관공급업                          <br>043503	증기, 냉온수 및 공기조절 공급업                  <br>043601	수도사업                                         <br>053701	하수, 폐수 및 분뇨 처리업                        <br>053801	폐기물 수집운반업                                <br>053802	폐기물 처리업                                    <br>053803	금속 및 비금속 원료 재생업                       <br>053901	환경 정화 및 복원업                              <br>064101	건물 건설업                                      <br>064102	토목 건설업                                      <br>064201	기반조성 및 시설물 축조관련 전문공사업           <br>064202	건물설비 설치 공사업                             <br>064203	전기 및 통신 공사업                              <br>064204	실내건축 및 건축 마무리 공사업                   <br>064205	건설장비 운영업                                  <br>074501	자동차 판매업                                    <br>074502	자동차 부품 및 내장품 판매업                     <br>074503	모터사이클 및 부품 판매업                        <br>074601	상품 중개업                                      <br>074602	산업용 농축산물 및 산동물 도매업                 <br>074603	음·식료품 및 담배 도매업                        <br>074604	가정용품 도매업                                  <br>074605	기계장비 및 관련 물품 도매업                     <br>074606	건축자재, 철물 및 난방장치 도매업                <br>074607	기타 전문 도매업                                 <br>074608	상품 종합 도매업                                 <br>074701	종합 소매업                                      <br>074702	음·식료품 및 담배 소매업                        <br>074703	정보통신장비 소매업                              <br>074704	섬유, 의복, 신발 및 가죽제품 소매업              <br>074705	기타 가정용품 소매업                             <br>074706	문화, 오락 및 여가 용품 소매업                   <br>074707	연료 소매업                                      <br>074708	기타 상품 전문 소매업                            <br>074709	무점포 소매업                                    <br>084901	철도운송업                                       <br>084902	육상 여객 운송업                                 <br>084903	도로 화물 운송업                                 <br>084904	소화물 전문 운송업                               <br>084905	파이프라인 운송업                                <br>085001	해상 운송업                                      <br>085002	내륙 수상 및 항만내 운송업                       <br>085101	정기 항공 운송업                                 <br>085102	부정기 항공 운송업                               <br>085201	보관 및 창고업                                   <br>085209	기타 운송관련 서비스업                           <br>095501	숙박시설 운영업                                  <br>095509	기타 숙박업                                      <br>095601	음식점업                                         <br>095602	주점 및 비알콜음료점업                           <br>105801	서적, 잡지 및 기타 인쇄물 출판업                 <br>105802	소프트웨어 개발 및 공급업                        <br>105901	영화, 비디오물, 방송프로그램 제작 및 배급업      <br>105902	오디오물 출판 및 원판 녹음업                     <br>106001	라디오 방송업                                    <br>106002	텔레비전 방송업                                  <br>106101	우편업                                           <br>106102	전기통신업                                       <br>106201	컴퓨터 프로그래밍, 시스템 통합 및 관리업         <br>106301	자료처리, 호스팅, 포털 및 기타 인터넷 정보매개서?<br>106309	기타 정보 서비스업                               <br>116401	은행 및 저축기관                                 <br>116402	투자기관                                         <br>116409	기타 금융업                                      <br>116501	보험업                                           <br>116502	재 보험업                                        <br>116503	연금 및 공제업                                   <br>116601	금융지원 서비스업                                <br>116602	보험 및 연금관련 서비스업                        <br>126801	부동산 임대 및 공급업                            <br>126802	부동산 관련 서비스업                             <br>126901	운송장비 임대업                                  <br>126902	개인 및 가정용품 임대업                          <br>126903	산업용 기계 및 장비 임대업                       <br>126904	무형재산권 임대업                                <br>137001	자연과학 및 공학 연구개발업                      <br>137002	인문 및 사회과학 연구개발업                      <br>137101	법무관련 서비스업                                <br>137102	회계 및 세무관련 서비스업                        <br>137103	광고업                                           <br>137104	시장조사 및 여론조사업                           <br>137105	회사본부, 지주회사 및 경영컨설팅 서비스업        <br>137201	건축기술, 엔지니어링 및 관련기술 서비스업        <br>137209	기타 과학기술 서비스업                           <br>137301	수의업                                           <br>137302	전문디자인업                                     <br>137303	사진 촬영 및 처리업                              <br>137309	그외 기타 전문, 과학 및 기술 서비스업            <br>147401	사업시설 유지관리 서비스업                       <br>147402	건물·산업설비 청소 및 방제 서비스업             <br>147403	조경 관리 및 유지 서비스업                       <br>147501	인력공급 및 고용알선업                           <br>147502	여행사 및 기타 여행보조 서비스업                 <br>147503	경비, 경호 및 탐정업                             <br>147509	기타 사업지원 서비스업                           <br>158401	입법 및 일반 정부 행정                           <br>158402	사회 및 산업정책 행정                            <br>158403	외무 및 국방 행정                                <br>158404	사법 및 공공질서 행정                            <br>158405	사회보장 행정                                    <br>168501	초등 교육기관                                    <br>168502	중등 교육기관                                    <br>168503	고등 교육기관                                    <br>168504	특수학교, 외국인학교 및 대안학교                 <br>168505	일반 교습 학원                                   <br>168506	기타 교육기관                                    <br>168507	교육지원 서비스업                                <br>178601	병원                                             <br>178602	의원                                             <br>178603	공중 보건 의료업                                 <br>178609	기타 보건업                                      <br>178701	거주 복지시설 운영업                             <br>178702	비거주 복지시설 운영업                           <br>189001	창작 및 예술관련 서비스업                        <br>189002	도서관, 사적지 및 유사 여가관련 서비스업         <br>189101	스포츠 서비스업                                  <br>189102	유원지 및 기타 오락관련 서비스업                 <br>199401	산업 및 전문가 단체                              <br>199402	노동조합                                         <br>199409	기타 협회 및 단체                                <br>199501	기계 및 장비 수리업                              <br>199502	자동차 및 모터사이클 수리업                      <br>199503	개인 및 가정용품 수리업                          <br>199601	미용, 욕탕 및 유사 서비스업                      <br>199609	그외 기타 개인 서비스업                          <br>209701	가구내 고용활동                                  <br>209801	자가 소비를 위한 가사 생산 활동                  <br>209802	자가 소비를 위한 가사 서비스 활동                <br>219901	국제 및 외국기관 |
+| 55 | `idx_bztp_lcls_cd_name` | 지수업종대분류코드명 | string | Y | 60 | 표준산업대분류코드<br>00	해당사항없음                                                            <br>01	농업, 임업 및 어업                                                      <br>02	광업                                                                    <br>03	제조업                                                                  <br>04	전기, 가스, 증기 및 수도사업                                            <br>05	하수-폐기물 처리, 원료재생 및환경복원업                                 <br>06	건설업                                                                  <br>07	도매 및 소매업                                                          <br>08	운수업                                                                  <br>09	숙박 및 음식점업                                                        <br>10	출판, 영상, 방송통신 및 정보서비스업                                    <br>11	금융 및 보험업                                                          <br>12	부동산업 및 임대업                                                      <br>13	전문, 과학 및 기술 서비스업                                             <br>14	사업시설관리 및 사업지원서비스업                                        <br>15	공공행정, 국방 및 사회보장 행정                                         <br>16	교육 서비스업                                                           <br>17	보건업 및 사회복지 서비스업                                             <br>18	예술, 스포츠 및 여가관련 서비스업                                       <br>19	협회 및 단체, 수리 및 기타 개인 서비스업                                <br>20	가구내 고용활동 및 달리 분류되지 않은 자가소비생산활동                  <br>21	국제 및 외국기관 |
+| 56 | `idx_bztp_mcls_cd_name` | 지수업종중분류코드명 | string | Y | 60 | 표준산업중분류코드                                                   <br>0000	해당사항없음                                                            <br>0101	농업                                                                    <br>0102	임업                                                                    <br>0103	어업                                                                    <br>0205	석탄, 원유 및 천연가스 광업                                             <br>0206	금속 광업                                                               <br>0207	비금속광물 광업; 연료용 제외                                            <br>0208	광업 지원 서비스업                                                      <br>0310	식료품 제조업                                                           <br>0311	음료 제조업                                                             <br>0312	담배 제조업                                                             <br>0313	섬유제품 제조업; 의복제외                                               <br>0314	의복, 의복액세서리 및 모피제품제조업                                    <br>0315	가죽, 가방 및 신발 제조업                                               <br>0316	목재 및 나무제품 제조업;가구제외                                        <br>0317	펄프, 종이 및 종이제품 제조업                                           <br>0318	인쇄 및 기록매체 복제업                                                 <br>0319	코크스, 연탄 및 석유정제품 제조업                                       <br>0320	화학물질 및 화학제품 제조업;의약품 제외                                 <br>0321	의료용 물질 및 의약품 제조업                                            <br>0322	고무제품 및 플라스틱제품 제조업                                         <br>0323	비금속 광물제품 제조업                                                  <br>0324	1차 금속 제조업                                                         <br>0325	금속가공제품 제조업;기계 및가구 제외                                    <br>0326	전자부품, 컴퓨터, 영상, 음향 및 통신장비 제조업                         <br>0327	의료, 정밀, 광학기기 및 시계 제조업                                     <br>0328	전기장비 제조업                                                         <br>0329	기타 기계 및 장비 제조업                                                <br>0330	자동차 및 트레일러 제조업                                               <br>0331	기타 운송장비 제조업                                                    <br>0332	가구 제조업                                                             <br>0333	기타 제품 제조업                                                        <br>0435	전기, 가스, 증기 및 공기조절 공급업                                     <br>0436	수도사업                                                                <br>0537	하수, 폐수 및 분뇨 처리업                                               <br>0538	폐기물 수집운반, 처리 및 원료재생업                                     <br>0539	환경 정화 및 복원업                                                     <br>0641	종합 건설업                                                             <br>0642	전문직별 공사업                                                         <br>0745	자동차 및 부품 판매업                                                   <br>0746	도매 및 상품중개업                                                      <br>0747	소매업; 자동차 제외                                                     <br>0849	육상운송 및 파이프라인 운송업                                           <br>0850	수상 운송업                                                             <br>0851	항공 운송업                                                             <br>0852	창고 및 운송관련 서비스업                                               <br>0955	숙박업                                                                  <br>0956	음식점 및 주점업                                                        <br>1058	출판업                                                                  <br>1059	영상·오디오 기록물 제작 및 배급업                                      <br>1060	방송업                                                                  <br>1061	통신업                                                                  <br>1062	컴퓨터 프로그래밍, 시스템 통합및 관리업                                 <br>1063	정보서비스업                                                            <br>1164	금융업                                                                  <br>1165	보험 및 연금업                                                          <br>1166	금융 및 보험 관련 서비스업                                              <br>1268	부동산업                                                                <br>1269	임대업;부동산 제외                                                      <br>1370	연구개발업                                                              <br>1371	전문서비스업                                                            <br>1372	건축기술, 엔지니어링 및 기타과학기술 서비스업                           <br>1373	기타 전문, 과학 및 기술 서비스업                                        <br>1474	사업시설 관리 및 조경 서비스업                                          <br>1475	사업지원 서비스업                                                       <br>1584	공공행정, 국방 및 사회보장 행정                                         <br>1685	교육 서비스업                                                           <br>1786	보건업                                                                  <br>1787	사회복지 서비스업                                                       <br>1890	창작, 예술 및 여가관련 서비스업                                         <br>1891	스포츠 및 오락관련 서비스업                                             <br>1994	협회 및 단체                                                            <br>1995	수리업                                                                  <br>1996	기타 개인 서비스업                                                      <br>2097	가구내 고용활동                                                         <br>2098	달리 분류되지 않은 자가소비를 위한가구의 재화 및 서비스 생산활동        <br>2199	국제 및 외국기관 |
+| 57 | `idx_bztp_scls_cd_name` | 지수업종소분류코드명 | string | Y | 60 | 표준산업소분류코드 참조 |
+| 58 | `ocr_no` | OCR번호 | string | Y | 5 |  |
+| 59 | `crfd_item_yn` | 크라우드펀딩종목여부 | string | Y | 1 |  |
+| 60 | `elec_scty_yn` | 전자증권여부 | string | Y | 1 |  |
+| 61 | `issu_istt_cd` | 발행기관코드 | string | Y | 5 |  |
+| 62 | `etf_chas_erng_rt_dbnb` | ETF추적수익율배수 | string | Y | 19 |  |
+| 63 | `etf_etn_ivst_heed_item_yn` | ETFETN투자유의종목여부 | string | Y | 1 |  |
+| 64 | `stln_int_rt_dvsn_cd` | 대주이자율구분코드 | string | Y | 2 |  |
+| 65 | `frnr_psnl_lmt_rt` | 외국인개인한도비율 | string | Y | 24 |  |
+| 66 | `lstg_rqsr_issu_istt_cd` | 상장신청인발행기관코드 | string | Y | 5 |  |
+| 67 | `lstg_rqsr_item_cd` | 상장신청인종목코드 | string | Y | 12 |  |
+| 68 | `trst_istt_issu_istt_cd` | 신탁기관발행기관코드 | string | Y | 5 |  |
+| 69 | `cptt_trad_tr_psbl_yn` | NXT 거래종목여부 | string | Y | 1 | NXT 거래가능한 종목은 Y, 그 외 종목은 N |
+| 70 | `nxt_tr_stop_yn` | NXT 거래정지여부 | string | Y | 1 | NXT 거래종목 중 거래정지가 된 종목은 Y, 그 외 모든 종목은 N |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "PDNO":"000660",
 "PRDT_TYPE_CD":"300"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": {
         "pdno": "00000A000660",
         "prdt_type_cd": "300",
@@ -7862,26 +9442,111 @@ CTX_AREA_NK100: |  |
     "rt_cd": "0",
     "msg_cd": "KIOK0530",
     "msg1": "조회되었습니다                                                                  "
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 예탁원정보(유상증자일정)
 
-- **TR_ID**: HHKDB669100C0
-- **Method**: GET
+- **API ID**: 국내주식-143
+- **실전 TR_ID**: HHKDB669100C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/paidin-capin`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(유상증자일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0655] 유상증자 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669100C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `CTS` | CTS | string | Y | 17 | 공백 |
+| 1 | `GB1` | 조회구분 | string | Y | 1 | 1(청약일별), 2(기준일별) |
+| 2 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 3 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 4 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백(전체),  특정종목 조회시(종목코드) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (17)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `tot_issue_stk_qty` | 발행주식 | string | Y | 12 |  |
+| 8 | `issue_stk_qty` | 발행할주식 | string | Y | 12 |  |
+| 9 | `fix_rate` | 확정배정율 | string | Y | 152 |  |
+| 10 | `disc_rate` | 할인율 | string | Y | 52 |  |
+| 11 | `fix_price` | 발행예정가 | string | Y | 8 |  |
+| 12 | `right_dt` | 권리락일 | string | Y | 8 |  |
+| 13 | `sub_term_ft` | 청약기간 | string | Y | 8 |  |
+| 14 | `sub_term` | 청약기간 | string | Y | 23 |  |
+| 15 | `list_date` | 상장/등록일 | string | Y | 10 |  |
+| 16 | `stk_kind` | 주식종류 | string | Y | 2 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 gb1:1
 f_dt:20230301
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20240222",
@@ -7962,25 +9627,103 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 예탁원정보(주주총회일정)
 
-- **TR_ID**: HHKDB669111C0
-- **Method**: GET
+- **API ID**: 국내주식-154
+- **실전 TR_ID**: HHKDB669111C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/ksdinfo/sharehld-meet`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | cts:
+```text
+예탁원정보(주주총회일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0759] 주주총회 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669111C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `CTS` | CTS | string | Y | 17 | 공백 |
+| 1 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 2 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 3 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (11)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `isin_name` | 종목명 | string | Y | 40 |  |
+| 7 | `gen_meet_dt` | 주총일자 | string | Y | 10 |  |
+| 8 | `gen_meet_type` | 주총사유 | string | Y | 8 |  |
+| 9 | `agenda` | 주총의안 | string | Y | 71 |  |
+| 10 | `vote_tot_qty` | 의결권주식총수 | string | Y | 12 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
 f_dt:20230101
 t_dt:20240326
-sht_cd: |  |
-| Response Example | {
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "record_date": "20240322",
@@ -8166,26 +9909,99 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 성장성비율
 
-- **TR_ID**: FHKST66430800
-- **Method**: GET
+- **API ID**: v1_국내주식-085
+- **실전 TR_ID**: FHKST66430800
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/finance/growth-ratio`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 성장성비율 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0635] 재무분석종합 화면의 하단 '7.성장성비율' 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST66430800 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `fid_input_iscd` | 입력 종목코드 | string | Y | 12 | ex : 000660 |
+| 1 | `fid_div_cls_code` | 분류 구분 코드 | string | Y | 2 | 0: 년, 1: 분기 |
+| 2 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | 시장구분코드 (주식 J) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (9)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stac_yymm` | 결산 년월 | string | Y | 6 |  |
+| 5 | `grs` | 매출액 증가율 | string | Y | 124 |  |
+| 6 | `bsop_prfi_inrt` | 영업 이익 증가율 | string | Y | 124 |  |
+| 7 | `equt_inrt` | 자기자본 증가율 | string | Y | 92 |  |
+| 8 | `totl_aset_inrt` | 총자산 증가율 | string | Y | 92 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_input_iscd":"005930",
 "fid_div_cls_code":"1"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stac_yymm": "202312",
@@ -8401,26 +10217,105 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 대차대조표
 
-- **TR_ID**: FHKST66430100
-- **Method**: GET
+- **API ID**: v1_국내주식-078
+- **실전 TR_ID**: FHKST66430100
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/finance/balance-sheet`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 대차대조표 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0635] 재무분석종합 화면의 하단 '1. 대차대조표' 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST66430100 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_DIV_CLS_CODE` | 분류 구분 코드 | string | Y | 2 | 0: 년, 1: 분기 |
+| 1 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | J |
+| 2 | `fid_input_iscd` | 입력 종목코드 | string | Y | 12 | 000660 : 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (15)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stac_yymm` | 결산 년월 | string | Y | 6 |  |
+| 5 | `cras` | 유동자산 | string | Y | 112 |  |
+| 6 | `fxas` | 고정자산 | string | Y | 112 |  |
+| 7 | `total_aset` | 자산총계 | string | Y | 102 |  |
+| 8 | `flow_lblt` | 유동부채 | string | Y | 112 |  |
+| 9 | `fix_lblt` | 고정부채 | string | Y | 112 |  |
+| 10 | `total_lblt` | 부채총계 | string | Y | 102 |  |
+| 11 | `cpfn` | 자본금 | string | Y | 22 |  |
+| 12 | `cfp_surp` | 자본 잉여금 | string | Y | 182 | 출력되지 않는 데이터(99.99 로 표시) |
+| 13 | `prfi_surp` | 이익 잉여금 | string | Y | 182 | 출력되지 않는 데이터(99.99 로 표시) |
+| 14 | `total_cptl` | 자본총계 | string | Y | 102 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_input_iscd":"005930",
 "fid_div_cls_code":"1"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stac_yymm": "202312",
@@ -8816,30 +10711,113 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
 
 
-### 예탁원정보(합병/분할일정)
-
-- **TR_ID**: HHKDB669104C0
-- **Method**: GET
-- **URL**: `/uapi/domestic-stock/v1/ksdinfo/merger-split`
-
-> ⚠ 원본 엑셀에 상세 명세 시트 없음
 
 ### 국내주식 종목추정실적
 
-- **TR_ID**: HHKST668300C0
-- **Method**: GET
+- **API ID**: 국내주식-187
+- **실전 TR_ID**: HHKST668300C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/quotations/estimate-perform`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | SHT_CD:005930 |  |
-| Response Example | {
+```text
+국내주식 종목추정실적 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0613] 종목추정실적 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다. 
+ 
+※ 본 화면의 추정실적 및 투자의견은 당월 초의 애널리스트의 의견사항이므로 월중 변동 사항이 있을 수 있음을 유의하시기 바랍니다.
+※ 종목별 수익추정은 리서치본부에서 매월 발표되는 거래소, 코스닥 160여개 기업에 한정합니다. 구체적인 종목 리스트는 추정종목리스트를 참고하기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKST668300C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (1)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `SHT_CD` | 종목코드 | string | Y | 2 | ex) 265520 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (26)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `sht_cd` | ELW단축종목코드 | string | Y | 9 |  |
+| 5 | `item_kor_nm` | HTS한글종목명 | string | Y | 40 |  |
+| 6 | `name1` | ELW현재가 | string | Y | 10 |  |
+| 7 | `name2` | 전일대비 | string | Y | 10 |  |
+| 8 | `estdate` | 전일대비부호 | string | Y | 1 |  |
+| 9 | `rcmd_name` | 전일대비율 | string | Y | 82 |  |
+| 10 | `capital` | 누적거래량 | string | Y | 18 |  |
+| 11 | `forn_item_lmtrt` | 행사가 | string | Y | 112 |  |
+| 12 | `output2` | 응답상세 | object array | Y |  | '(추정손익계산서-6개 array)<br>  매출액, 매출액증감율,<br>  영업이익, 영업이익증감율,<br>  순이익, 순이익증감율,' |
+| 13 | `data1` | DATA1 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 14 | `data2` | DATA2 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 15 | `data3` | DATA3 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 16 | `data4` | DATA4 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 17 | `data5` | DATA5 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 18 | `output3` | 응답상세 | object array | Y |  | '(투자지표-8개 array)<br>  EBITDA(십억원), EPS(원), <br>  EPS 증감율(0.1%),  PER(배, 0.1%), <br>  EV/EBITDA(배, 0.1), ROE(0.1%),<br>  부채비율(0.1%), 이자보상배율(0.1%)' |
+| 19 | `data1` | DATA1 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 20 | `data2` | DATA2 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 21 | `data3` | DATA3 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 22 | `data4` | DATA4 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 23 | `data5` | DATA5 | string | Y | 15 | 결산연월(outblock4) 참조 |
+| 24 | `output4` | 응답상세 | object array | Y |  | array |
+| 25 | `dt` | 결산년월 | string | Y | 8 | DATA1 ~5 결산월 정보 |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+SHT_CD:005930
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "sht_cd": "A005930",
         "item_kor_nm": "삼성전자",
@@ -8972,26 +10950,99 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 국내주식 기타주요비율
 
-- **TR_ID**: FHKST66430500
-- **Method**: GET
+- **API ID**: v1_국내주식-082
+- **실전 TR_ID**: FHKST66430500
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/domestic-stock/v1/finance/other-major-ratios`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+국내주식 기타주요비율 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [0635] 재무분석종합 화면의 하단 '9. 기타주요비율' 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST66430500 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `fid_input_iscd` | 입력 종목코드 | string | Y | 12 | 000660 : 종목코드 |
+| 1 | `fid_div_cls_code` | 분류 구분 코드 | string | Y | 2 | 0: 년, 1: 분기 |
+| 2 | `fid_cond_mrkt_div_code` | 조건 시장 분류 코드 | string | Y | 2 | J |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (9)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object array | Y |  | array |
+| 4 | `stac_yymm` | 결산 년월 | string | Y | 6 |  |
+| 5 | `payout_rate` | 배당 성향 | string | Y | 92 | 비정상 출력되는 데이터로 무시 |
+| 6 | `eva` | EVA | string | Y | 82 |  |
+| 7 | `ebitda` | EBITDA | string | Y | 82 |  |
+| 8 | `ev_ebitda` | EV_EBITDA | string | Y | 82 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "fid_cond_mrkt_div_code":"J",
 "fid_input_iscd":"005930",
 "fid_div_cls_code":"1"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": [
         {
             "stac_yymm": "202309",
@@ -9207,5 +11258,966 @@ sht_cd: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
+
+
+### 예탁원정보(합병_분할일정)
+
+- **API ID**: 국내주식-147
+- **실전 TR_ID**: HHKDB669104C0
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
+- **URL**: `/uapi/domestic-stock/v1/ksdinfo/merger-split`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `미지원`
+
+<details><summary>개요</summary>
+
+```text
+예탁원정보(합병/분할일정) API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0664] 합병/분할 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+※ 예탁원에서 제공한 자료이므로 정보용으로만 사용하시기 바랍니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHKDB669104C0 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `CTS` | CTS | string | Y | 17 | 공백 |
+| 1 | `F_DT` | 조회일자From | string | Y | 8 | 일자 ~ |
+| 2 | `T_DT` | 조회일자To | string | Y | 8 | ~ 일자 |
+| 3 | `SHT_CD` | 종목코드 | string | Y | 9 | 공백: 전체,  특정종목 조회시 : 종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (18)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  | array |
+| 4 | `record_date` | 기준일 | string | Y | 8 |  |
+| 5 | `sht_cd` | 종목코드 | string | Y | 9 |  |
+| 6 | `opp_cust_cd` | 피합병(피분할)회사코드 | string | Y | 5 |  |
+| 7 | `opp_cust_nm` | 피합병(피분할)회사명 | string | Y | 37 |  |
+| 8 | `cust_cd` | 합병(분할)회사코드 | string | Y | 5 |  |
+| 9 | `cust_nm` | 합병(분할)회사명 | string | Y | 37 |  |
+| 10 | `merge_type` | 합병사유 | string | Y | 8 |  |
+| 11 | `merge_rate` | 비율 | string | Y | 142 |  |
+| 12 | `td_stop_dt` | 매매거래정지기간 | string | Y | 23 |  |
+| 13 | `list_dt` | 상장/등록일 | string | Y | 9 |  |
+| 14 | `odd_amt_pay_dt` | 단주대금지급일 | string | Y | 10 |  |
+| 15 | `tot_issue_stk_qty` | 발행주식 | string | Y | 12 |  |
+| 16 | `issue_stk_qty` | 발행할주식 | string | Y | 12 |  |
+| 17 | `seq` | 연번 | string | Y | 3 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+cts:
+f_dt:20230301
+t_dt:20240326
+sht_cd:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
+    "output1": [
+        {
+            "record_date": "20240311",
+            "sht_cd": "224020",
+            "opp_cust_cd": "22402",
+            "opp_cust_nm": "에스케이씨에스",
+            "cust_cd": "17735",
+            "cust_nm": "베셀",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.66",
+            "td_stop_dt": "2024/03/08 ~ 2024/03/28",
+            "list_dt": "20240329",
+            "odd_amt_pay_dt": "2024/04/05",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240305",
+            "sht_cd": "397880",
+            "opp_cust_cd": "39788",
+            "opp_cust_nm": "교보11호기업인수목적",
+            "cust_cd": "42057",
+            "cust_nm": "제이투케이바이오",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.12",
+            "td_stop_dt": "2024/03/04 ~",
+            "list_dt": "20240325",
+            "odd_amt_pay_dt": "2024/04/01",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240229",
+            "sht_cd": "210980",
+            "opp_cust_cd": "21098",
+            "opp_cust_nm": "에스케이디앤디",
+            "cust_cd": "47515",
+            "cust_nm": "에스케이이터닉스",
+            "merge_type": "회사분할",
+            "merge_rate": " 1.15",
+            "td_stop_dt": "2024/02/28 ~ 2024/03/28",
+            "list_dt": "20240329",
+            "odd_amt_pay_dt": "2024/04/05",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240229",
+            "sht_cd": "21098L",
+            "opp_cust_cd": "21098",
+            "opp_cust_nm": "에스케이디앤디",
+            "cust_cd": "21098",
+            "cust_nm": "에스케이디앤디",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.77",
+            "td_stop_dt": "2024/02/28 ~ 2024/03/28",
+            "list_dt": "20240329",
+            "odd_amt_pay_dt": "2024/04/05",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240228",
+            "sht_cd": "072700",
+            "opp_cust_cd": "07270",
+            "opp_cust_nm": "더존홀딩스",
+            "cust_cd": "01251",
+            "cust_nm": "더존비즈온",
+            "merge_type": "흡수합병",
+            "merge_rate": "834.0",
+            "td_stop_dt": "2024/02/27 ~ 2024/03/21",
+            "list_dt": "20240322",
+            "odd_amt_pay_dt": "2024/03/29",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240228",
+            "sht_cd": "452240",
+            "opp_cust_cd": "45224",
+            "opp_cust_nm": "뉴온",
+            "cust_cd": "12384",
+            "cust_nm": "뉴온",
+            "merge_type": "흡수합병",
+            "merge_rate": "24.52",
+            "td_stop_dt": "",
+            "list_dt": "20240325",
+            "odd_amt_pay_dt": "2024/04/02",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240213",
+            "sht_cd": "001880",
+            "opp_cust_cd": "00188",
+            "opp_cust_nm": "디엘건설",
+            "cust_cd": "37550",
+            "cust_nm": "디엘이앤씨",
+            "merge_type": "주식교환",
+            "merge_rate": " 0.37",
+            "td_stop_dt": "2024/02/08 ~ 2024/03/03",
+            "list_dt": "20240304",
+            "odd_amt_pay_dt": "2024/03/12",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240213",
+            "sht_cd": "00188K",
+            "opp_cust_cd": "00188",
+            "opp_cust_nm": "디엘건설",
+            "cust_cd": "00188",
+            "cust_nm": "디엘건설",
+            "merge_type": "주식교환",
+            "merge_rate": " 1.00",
+            "td_stop_dt": "2024/02/08 ~ 2024/03/03",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240213",
+            "sht_cd": "115960",
+            "opp_cust_cd": "11596",
+            "opp_cust_nm": "연우",
+            "cust_cd": "16189",
+            "cust_nm": "한국콜마",
+            "merge_type": "주식교환",
+            "merge_rate": " 0.29",
+            "td_stop_dt": "2024/02/08 ~ 2024/03/05",
+            "list_dt": "20240306",
+            "odd_amt_pay_dt": "2024/03/13",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240130",
+            "sht_cd": "183410",
+            "opp_cust_cd": "18341",
+            "opp_cust_nm": "골프존데카",
+            "cust_cd": "21500",
+            "cust_nm": "골프존",
+            "merge_type": "주식교환",
+            "merge_rate": " 0.01",
+            "td_stop_dt": "2024/01/29 ~ 2024/02/21",
+            "list_dt": "20240222",
+            "odd_amt_pay_dt": "2024/02/28",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240123",
+            "sht_cd": "372290",
+            "opp_cust_cd": "37229",
+            "opp_cust_nm": "하나머스트7호기업인수목적",
+            "cust_cd": "45243",
+            "cust_nm": "사피엔반도체",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.13",
+            "td_stop_dt": "2024/01/22 ~",
+            "list_dt": "20240219",
+            "odd_amt_pay_dt": "2024/02/23",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240122",
+            "sht_cd": "426550",
+            "opp_cust_cd": "42655",
+            "opp_cust_nm": "아이비케이에스제19호기업인수목적",
+            "cust_cd": "44367",
+            "cust_nm": "에스피소프트",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.62",
+            "td_stop_dt": "2024/01/19 ~",
+            "list_dt": "20240215",
+            "odd_amt_pay_dt": "2024/02/22",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240115",
+            "sht_cd": "068400",
+            "opp_cust_cd": "06840",
+            "opp_cust_nm": "에스케이렌터카",
+            "cust_cd": "06840",
+            "cust_nm": "에스케이렌터카",
+            "merge_type": "주식교환",
+            "merge_rate": " 1.00",
+            "td_stop_dt": "2024/01/12 ~ 2024/01/30",
+            "list_dt": "20240131",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240115",
+            "sht_cd": "427950",
+            "opp_cust_cd": "42795",
+            "opp_cust_nm": "하나금융23호기업인수목적",
+            "cust_cd": "19955",
+            "cust_nm": "레이저옵텍",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.23",
+            "td_stop_dt": "2024/01/12 ~",
+            "list_dt": "20240201",
+            "odd_amt_pay_dt": "2024/02/07",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20240108",
+            "sht_cd": "377400",
+            "opp_cust_cd": "37740",
+            "opp_cust_nm": "하이제6호기업인수목적",
+            "cust_cd": "36299",
+            "cust_nm": "드림인사이트",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.37",
+            "td_stop_dt": "2024/01/05 ~",
+            "list_dt": "20240125",
+            "odd_amt_pay_dt": "2024/02/02",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231227",
+            "sht_cd": "033290",
+            "opp_cust_cd": "03329",
+            "opp_cust_nm": "코웰패션",
+            "cust_cd": "47285",
+            "cust_nm": "폰드그룹",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.37",
+            "td_stop_dt": "2023/12/26 ~ 2024/02/01",
+            "list_dt": "20240202",
+            "odd_amt_pay_dt": "2024/02/08",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231219",
+            "sht_cd": "091990",
+            "opp_cust_cd": "09199",
+            "opp_cust_nm": "셀트리온헬스케어",
+            "cust_cd": "06827",
+            "cust_nm": "셀트리온",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.45",
+            "td_stop_dt": "2023/12/18 ~ 2024/01/11",
+            "list_dt": "20240112",
+            "odd_amt_pay_dt": "2024/02/08",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231211",
+            "sht_cd": "404950",
+            "opp_cust_cd": "40495",
+            "opp_cust_nm": "디비금융제10호기업인수목적",
+            "cust_cd": "45219",
+            "cust_nm": "한빛레이저",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.65",
+            "td_stop_dt": "2023/12/08 ~",
+            "list_dt": "20240104",
+            "odd_amt_pay_dt": "2024/01/11",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231204",
+            "sht_cd": "450410",
+            "opp_cust_cd": "45041",
+            "opp_cust_nm": "엔에이치기업인수목적28호",
+            "cust_cd": "10967",
+            "cust_nm": "씨싸이트",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.18",
+            "td_stop_dt": "2023/12/01 ~",
+            "list_dt": "20231221",
+            "odd_amt_pay_dt": "2023/12/28",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231203",
+            "sht_cd": "046140",
+            "opp_cust_cd": "04614",
+            "opp_cust_nm": "에스비에스콘텐츠허브",
+            "cust_cd": "04614",
+            "cust_nm": "에스비에스콘텐츠허브",
+            "merge_type": "주식교환",
+            "merge_rate": " 1.00",
+            "td_stop_dt": "2023/11/30 ~ 2023/12/17",
+            "list_dt": "",
+            "odd_amt_pay_dt": "2023/12/26",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231107",
+            "sht_cd": "173200",
+            "opp_cust_cd": "17320",
+            "opp_cust_nm": "아센텍",
+            "cust_cd": "47196",
+            "cust_nm": "세종에이앤에프",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.14",
+            "td_stop_dt": "",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231107",
+            "sht_cd": "367360",
+            "opp_cust_cd": "36736",
+            "opp_cust_nm": "디비금융제9호기업인수목적",
+            "cust_cd": "45216",
+            "cust_nm": "제이엔비",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.35",
+            "td_stop_dt": "2023/11/06 ~",
+            "list_dt": "20231124",
+            "odd_amt_pay_dt": "2023/12/01",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231017",
+            "sht_cd": "440200",
+            "opp_cust_cd": "44020",
+            "opp_cust_nm": "케이비제23호기업인수목적",
+            "cust_cd": "18826",
+            "cust_nm": "세니젠",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.24",
+            "td_stop_dt": "2023/10/16 ~",
+            "list_dt": "20231103",
+            "odd_amt_pay_dt": "2023/11/10",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231012",
+            "sht_cd": "085370",
+            "opp_cust_cd": "08537",
+            "opp_cust_nm": "루트로닉",
+            "cust_cd": "08537",
+            "cust_nm": "루트로닉",
+            "merge_type": "주식교환",
+            "merge_rate": " 1.00",
+            "td_stop_dt": "2023/10/11 ~",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231012",
+            "sht_cd": "08537M",
+            "opp_cust_cd": "08537",
+            "opp_cust_nm": "루트로닉",
+            "cust_cd": "08537",
+            "cust_nm": "루트로닉",
+            "merge_type": "주식교환",
+            "merge_rate": " 1.00",
+            "td_stop_dt": "2023/10/11 ~",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231011",
+            "sht_cd": "284100",
+            "opp_cust_cd": "28410",
+            "opp_cust_nm": "이안프론티어",
+            "cust_cd": "46939",
+            "cust_nm": "퍼스트온파트너스",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.11",
+            "td_stop_dt": "",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231011",
+            "sht_cd": "405350",
+            "opp_cust_cd": "40535",
+            "opp_cust_nm": "아이비케이에스제17호기업인수목적",
+            "cust_cd": "29056",
+            "cust_nm": "신시웨이",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.23",
+            "td_stop_dt": "2023/10/10 ~",
+            "list_dt": "20231103",
+            "odd_amt_pay_dt": "2023/11/08",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20231010",
+            "sht_cd": "177900",
+            "opp_cust_cd": "17790",
+            "opp_cust_nm": "쓰리에이로직스",
+            "cust_cd": "46933",
+            "cust_nm": "쓰리에이솔루션",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.20",
+            "td_stop_dt": "",
+            "list_dt": "",
+            "odd_amt_pay_dt": "2023/11/29",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230927",
+            "sht_cd": "077500",
+            "opp_cust_cd": "07750",
+            "opp_cust_nm": "유니퀘스트",
+            "cust_cd": "19265",
+            "cust_nm": "드림텍",
+            "merge_type": "분할합병",
+            "merge_rate": " 0.92",
+            "td_stop_dt": "2023/09/26 ~ 2023/10/22",
+            "list_dt": "20231023",
+            "odd_amt_pay_dt": "2023/11/01",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230919",
+            "sht_cd": "019360",
+            "opp_cust_cd": "01936",
+            "opp_cust_nm": "한국신소재",
+            "cust_cd": "01796",
+            "cust_nm": "한국카본",
+            "merge_type": "흡수합병",
+            "merge_rate": "39.74",
+            "td_stop_dt": "",
+            "list_dt": "20231020",
+            "odd_amt_pay_dt": "2023/10/27",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230904",
+            "sht_cd": "366330",
+            "opp_cust_cd": "36633",
+            "opp_cust_nm": "신한제7호기업인수목적",
+            "cust_cd": "38447",
+            "cust_nm": "코어라인소프트",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.19",
+            "td_stop_dt": "2023/09/01 ~",
+            "list_dt": "20230918",
+            "odd_amt_pay_dt": "2023/09/26",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230831",
+            "sht_cd": "011810",
+            "opp_cust_cd": "01181",
+            "opp_cust_nm": "STX",
+            "cust_cd": "46577",
+            "cust_nm": "STX 그린로지스",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.23",
+            "td_stop_dt": "2023/08/30 ~ 2023/09/14",
+            "list_dt": "20230915",
+            "odd_amt_pay_dt": "2023/10/31",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230824",
+            "sht_cd": "048120",
+            "opp_cust_cd": "04812",
+            "opp_cust_nm": "원옥",
+            "cust_cd": "16857",
+            "cust_nm": "포겟",
+            "merge_type": "흡수합병",
+            "merge_rate": "12.00",
+            "td_stop_dt": "",
+            "list_dt": "20230912",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230822",
+            "sht_cd": "400560",
+            "opp_cust_cd": "40056",
+            "opp_cust_nm": "하나금융20호기업인수목적",
+            "cust_cd": "40349",
+            "cust_nm": "농업회사법인 우듬지팜",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.74",
+            "td_stop_dt": "2023/08/21 ~",
+            "list_dt": "20230919",
+            "odd_amt_pay_dt": "2023/09/26",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230821",
+            "sht_cd": "259210",
+            "opp_cust_cd": "25921",
+            "opp_cust_nm": "글람",
+            "cust_cd": "25921",
+            "cust_nm": "글람",
+            "merge_type": "주식교환",
+            "merge_rate": " 0.00",
+            "td_stop_dt": "",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230821",
+            "sht_cd": "367480",
+            "opp_cust_cd": "36748",
+            "opp_cust_nm": "유안타제8호기업인수목적",
+            "cust_cd": "14606",
+            "cust_nm": "율촌",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.87",
+            "td_stop_dt": "2023/08/18 ~",
+            "list_dt": "20230908",
+            "odd_amt_pay_dt": "2023/09/14",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230808",
+            "sht_cd": "409570",
+            "opp_cust_cd": "40957",
+            "opp_cust_nm": "한국제10호기업인수목적",
+            "cust_cd": "35539",
+            "cust_nm": "크라우드웍스",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.09",
+            "td_stop_dt": "",
+            "list_dt": "20230831",
+            "odd_amt_pay_dt": "2023/09/07",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230807",
+            "sht_cd": "010050",
+            "opp_cust_cd": "01005",
+            "opp_cust_nm": "우리종합금융",
+            "cust_cd": "31614",
+            "cust_nm": "우리금융지주",
+            "merge_type": "주식교환",
+            "merge_rate": " 0.06",
+            "td_stop_dt": "2023/08/04 ~ 2023/08/27",
+            "list_dt": "20230828",
+            "odd_amt_pay_dt": "2023/08/31",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230807",
+            "sht_cd": "298870",
+            "opp_cust_cd": "29887",
+            "opp_cust_nm": "우리벤처파트너스",
+            "cust_cd": "31614",
+            "cust_nm": "우리금융지주",
+            "merge_type": "주식교환",
+            "merge_rate": " 0.22",
+            "td_stop_dt": "2023/08/04 ~ 2023/08/27",
+            "list_dt": "20230828",
+            "odd_amt_pay_dt": "2023/08/31",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230702",
+            "sht_cd": "390620",
+            "opp_cust_cd": "39062",
+            "opp_cust_nm": "엠리테일",
+            "cust_cd": "05788",
+            "cust_nm": "피에이치씨",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.00",
+            "td_stop_dt": "",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230630",
+            "sht_cd": "000480",
+            "opp_cust_cd": "00048",
+            "opp_cust_nm": "시알홀딩스",
+            "cust_cd": "46252",
+            "cust_nm": "조선내화",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.30",
+            "td_stop_dt": "2023/06/29 ~ 2023/07/27",
+            "list_dt": "20230728",
+            "odd_amt_pay_dt": "2023/08/04",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230630",
+            "sht_cd": "011870",
+            "opp_cust_cd": "01187",
+            "opp_cust_nm": "엘티삼보",
+            "cust_cd": "46220",
+            "cust_nm": "엘티",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.33",
+            "td_stop_dt": "2023/06/29 ~ 2023/07/30",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230626",
+            "sht_cd": "046110",
+            "opp_cust_cd": "04611",
+            "opp_cust_nm": "한일네트웍스",
+            "cust_cd": "03787",
+            "cust_nm": "유베이스",
+            "merge_type": "주식교환",
+            "merge_rate": " 0.00",
+            "td_stop_dt": "",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230531",
+            "sht_cd": "001230",
+            "opp_cust_cd": "00123",
+            "opp_cust_nm": "동국홀딩스",
+            "cust_cd": "46086",
+            "cust_nm": "동국제강",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.52",
+            "td_stop_dt": "2023/05/30 ~ 2023/06/15",
+            "list_dt": "20230616",
+            "odd_amt_pay_dt": "2023/06/23",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230501",
+            "sht_cd": "388220",
+            "opp_cust_cd": "38822",
+            "opp_cust_nm": "하나금융19호기업인수목적",
+            "cust_cd": "27183",
+            "cust_nm": "팸텍",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.41",
+            "td_stop_dt": "2023/04/27 ~",
+            "list_dt": "20230523",
+            "odd_amt_pay_dt": "2023/05/30",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230428",
+            "sht_cd": "005950",
+            "opp_cust_cd": "00595",
+            "opp_cust_nm": "이수화학",
+            "cust_cd": "45719",
+            "cust_nm": "이수스페셜티케미컬",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.20",
+            "td_stop_dt": "2023/04/27 ~ 2023/05/30",
+            "list_dt": "20230531",
+            "odd_amt_pay_dt": "2023/06/14",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230428",
+            "sht_cd": "010060",
+            "opp_cust_cd": "01006",
+            "opp_cust_nm": "OCI홀딩스",
+            "cust_cd": "45604",
+            "cust_nm": "OCI",
+            "merge_type": "회사분할",
+            "merge_rate": " 0.31",
+            "td_stop_dt": "2023/04/27 ~ 2023/05/29",
+            "list_dt": "20230530",
+            "odd_amt_pay_dt": "2023/06/05",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230411",
+            "sht_cd": "246070",
+            "opp_cust_cd": "24607",
+            "opp_cust_nm": "딤채홀딩스",
+            "cust_cd": "00288",
+            "cust_nm": "대유에이텍",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.00",
+            "td_stop_dt": "",
+            "list_dt": "",
+            "odd_amt_pay_dt": "",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230410",
+            "sht_cd": "396770",
+            "opp_cust_cd": "39677",
+            "opp_cust_nm": "엔에이치기업인수목적22호",
+            "cust_cd": "29883",
+            "cust_nm": "슈어소프트테크",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.37",
+            "td_stop_dt": "2023/04/07 ~",
+            "list_dt": "20230428",
+            "odd_amt_pay_dt": "2023/05/04",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230410",
+            "sht_cd": "421750",
+            "opp_cust_cd": "42175",
+            "opp_cust_nm": "벨로크",
+            "cust_cd": "42476",
+            "cust_nm": "벨로크",
+            "merge_type": "흡수합병",
+            "merge_rate": " 5.12",
+            "td_stop_dt": "",
+            "list_dt": "20230428",
+            "odd_amt_pay_dt": "2023/05/04",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230404",
+            "sht_cd": "008560",
+            "opp_cust_cd": "00856",
+            "opp_cust_nm": "메리츠증권",
+            "cust_cd": "13804",
+            "cust_nm": "메리츠금융지주",
+            "merge_type": "주식교환",
+            "merge_rate": " 0.16",
+            "td_stop_dt": "2023/04/03 ~ 2023/04/24",
+            "list_dt": "20230425",
+            "odd_amt_pay_dt": "2023/04/28",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230403",
+            "sht_cd": "426670",
+            "opp_cust_cd": "42667",
+            "opp_cust_nm": "대신밸런스제12호기업인수목적",
+            "cust_cd": "31816",
+            "cust_nm": "셀바이오휴먼텍",
+            "merge_type": "흡수합병",
+            "merge_rate": " 0.33",
+            "td_stop_dt": "2023/03/31 ~",
+            "list_dt": "20230420",
+            "odd_amt_pay_dt": "2023/04/26",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        },
+        {
+            "record_date": "20230317",
+            "sht_cd": "062760",
+            "opp_cust_cd": "06276",
+            "opp_cust_nm": "코스텍시스",
+            "cust_cd": "35515",
+            "cust_nm": "코스텍시스",
+            "merge_type": "흡수합병",
+            "merge_rate": " 6.42",
+            "td_stop_dt": "2023/03/16 ~ 2023/04/02",
+            "list_dt": "20230403",
+            "odd_amt_pay_dt": "2023/04/10",
+            "tot_issue_stk_qty": "           0",
+            "issue_stk_qty": "           0",
+            "seq": "00"
+        }
+    ],
+    "rt_cd": "0",
+    "msg_cd": "MCA00000",
+    "msg1": "정상처리 되었습니다."
+}
+```
+
+</details>
+
 

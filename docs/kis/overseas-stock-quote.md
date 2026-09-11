@@ -1,6 +1,8 @@
 # [해외주식] 기본시세 API 명세
 
-> 원본: `한국투자증권_오픈API_전체문서_20260418_030007.xlsx`
+> 원본: `한국투자증권_오픈API_전체문서_20260911_030009.xlsx`
+
+> 이 문서는 워크북에서 **전 필드 그대로** 생성됩니다. 손으로 고치지 마세요 — `사용` 표시만 보존됩니다.
 
 
 ## API 목록 (14개)
@@ -11,38 +13,120 @@
 | 254 | REST | 해외주식 기간별시세 | HHDFS76240000 | GET | `/uapi/overseas-price/v1/quotations/dailyprice` |  |
 | 255 | REST | 해외결제일자조회 | CTOS5011R | GET | `/uapi/overseas-stock/v1/quotations/countries-holiday` |  |
 | 256 | REST | 해외주식 현재체결가 | HHDFS00000300 | GET | `/uapi/overseas-price/v1/quotations/price` |  |
-| 257 | REST | 해외주식 복수종목 시세조회 | HHDFS76220000  | GET | `/uapi/overseas-price/v1/quotations/multprice` |  |
+| 257 | REST | 해외주식 복수종목 시세조회 | HHDFS76220000 | GET | `/uapi/overseas-price/v1/quotations/multprice` |  |
 | 258 | REST | 해외주식조건검색 | HHDFS76410000 | GET | `/uapi/overseas-price/v1/quotations/inquire-search` |  |
 | 259 | REST | 해외주식 상품기본정보 | CTPF1702R | GET | `/uapi/overseas-price/v1/quotations/search-info` |  |
 | 260 | REST | 해외지수분봉조회 | FHKST03030200 | GET | `/uapi/overseas-price/v1/quotations/inquire-time-indexchartprice` |  |
 | 261 | REST | 해외주식분봉조회 | HHDFS76950200 | GET | `/uapi/overseas-price/v1/quotations/inquire-time-itemchartprice` |  |
 | 262 | REST | 해외주식 현재가상세 | HHDFS76200200 | GET | `/uapi/overseas-price/v1/quotations/price-detail` |  |
 | 263 | REST | 해외주식 업종별코드조회 | HHDFS76370100 | GET | `/uapi/overseas-price/v1/quotations/industry-price` |  |
-| 264 | REST | 해외주식 종목/지수/환율기간별시세(일/주/월/년) | FHKST03030100 | GET | `/uapi/overseas-price/v1/quotations/inquire-daily-chartprice` |  |
 | 265 | REST | 해외주식 업종별시세 | HHDFS76370000 | GET | `/uapi/overseas-price/v1/quotations/industry-theme` |  |
 | 266 | REST | 해외주식 현재가 호가 | HHDFS76200100 | GET | `/uapi/overseas-price/v1/quotations/inquire-asking-price` |  |
+| 9999 | REST | 해외주식 종목_지수_환율기간별시세(일_주_월_년) | FHKST03030100 | GET | `/uapi/overseas-price/v1/quotations/inquire-daily-chartprice` |  |
 
 ---
 
 ## 상세 명세
 
+
 ### 해외주식 체결추이
 
-- **TR_ID**: HHDFS76200300
-- **Method**: GET
+- **API ID**: 해외주식-037
+- **실전 TR_ID**: HHDFS76200300
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/inquire-ccnl`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | AUTH:
+```text
+해외주식 체결추이 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [7625] 해외주식 체결추이 화면 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHDFS76200300 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `EXCD` | 거래소명 | string | Y | 4 | 'NYS : 뉴욕, NAS : 나스닥,  AMS : 아멕스 <br>HKS : 홍콩, SHS : 상해 , SZS : 심천<br>HSX : 호치민, HNX : 하노이<br>TSE : 도쿄 ' |
+| 1 | `AUTH` | 사용자권한정보 | string | Y | 32 | 공백 |
+| 2 | `KEYB` | NEXT KEY BUFF | string | Y | 32 | 공백 |
+| 3 | `TDAY` | 당일전일구분 | string | Y | 1 | 0:전일, 1:당일 |
+| 4 | `SYMB` | 종목코드 | string | Y | 16 | 해외종목코드 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (19)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output2` | 응답상세 | object array | Y |  | array |
+| 4 | `khms` | 한국기준시간 | string | Y | 6 |  |
+| 5 | `last` | 체결가 | string | Y | 12 |  |
+| 6 | `sign` | 기호 | string | Y | 1 |  |
+| 7 | `diff` | 대비 | string | Y | 12 |  |
+| 8 | `rate` | 등락율 | string | Y | 12 |  |
+| 9 | `evol` | 체결량 | string | Y | 10 |  |
+| 10 | `tvol` | 거래량 | string | Y | 14 |  |
+| 11 | `mtyp` | 시장구분 | string | Y | 1 | 0: 장중 1:장전 2:장후 |
+| 12 | `pbid` | 매수호가 | string | Y | 12 |  |
+| 13 | `pask` | 매도호가 | string | Y | 12 |  |
+| 14 | `vpow` | 체결강도 | string | Y | 10 |  |
+| 15 | `output1` | 응답상세 | object | Y |  |  |
+| 16 | `rsym` | 실시간조회종목코드 | string | Y | 16 |  |
+| 17 | `ZDIV` | 소수점자리수 | string | Y | 1 |  |
+| 18 | `NREC` | Record Count | string | Y | 4 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+AUTH:
 EXCD:NAS
 SYMB:AAPL
 TDAY:0
-KEYB: |  |
-| Response Example | {
+KEYB:
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": [
         {
             "khms": "085957",
@@ -87,30 +171,135 @@ KEYB: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 해외주식 기간별시세
 
-- **TR_ID**: HHDFS76240000
+- **API ID**: v1_해외주식-010
+- **실전 TR_ID**: HHDFS76240000
 - **모의 TR_ID**: HHDFS76240000
-- **Method**: GET
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/dailyprice`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `https://openapivts.koreainvestment.com:29443`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+해외주식의 기간별시세를 확인하는 API 입니다.
+실전계좌/모의계좌의 경우, 한 번의 호출에 최대 100건까지 확인 가능합니다.
+
+해외주식 시세는 무료시세(지연체결가)만이 제공되며, API로는 유료시세(실시간체결가)를 받아보실 수 없습니다.
+
+해외주식 시세는 무료시세(지연시세)만이 제공되며, API로는 유료시세(실시간시세)를 받아보실 수 없습니다.
+
+※ 지연시세 지연시간 : 미국 - 실시간무료(0분 지연, 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보)
+                                홍콩, 베트남, 중국, 일본 - 15분지연
+   미국의 경우 0분 지연 시세로 제공되나, 장중 당일 시가는 상이할 수 있으며, 익일 정정 표시됩니다.
+
+[미국주식시세 이용시 유의사항]
+■ 무료 실시간 시세(나스닥 토탈뷰)를 별도 신청없이 제공하고 있으며, 유료 시세 서비스를 신청하시더라도 OpenAPI의 경우 무료 시세로만 제공하고있습니다.
+※ 무료(매수/매도 각 10호가) : 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보
+※ 유료(매수/매도 각 1호가) : OpenAPI 서비스 미제공
+■ 무료 실시간 시세 서비스는 유료 실시간 시세 서비스 대비 평균 50% 수준에 해당하는 정보이므로 현재가/호가/순간체결량/차트 등에서 일시적·부분적 차이가 있을 수 있습니다. 
+■ 무료 실시간 시세 서비스의 시가, 저가, 고가, 종가는 타 매체의 유료 실시간 시세 서비스와 다를 수 있으며, 이로 인해 발생하는 손실에 대해서 당사가 책임지지 않습니다.
+    이용에 유의 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | N | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token<br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용)<br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용)<br>※ 토큰 지정시 토큰 타입("Bearer") 지정 필요. 즉, 발급받은 접근토큰 앞에 앞에 "Bearer" 붙여서 호출<br>EX) "Bearer eyJ..........8GA" |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appsecret (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | [실전투자/모의투자]<br>HHDFS76240000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객타입 | string | N | 1 | B : 법인<br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호<br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (7)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `AUTH` | 사용자권한정보 | string | Y | 32 | "" (Null 값 설정) |
+| 1 | `EXCD` | 거래소코드 | string | Y | 4 | HKS : 홍콩<br>NYS : 뉴욕<br>NAS : 나스닥<br>AMS : 아멕스<br>TSE : 도쿄<br>SHS : 상해<br>SZS : 심천<br>SHI : 상해지수<br>SZI : 심천지수<br>HSX : 호치민<br>HNX : 하노이 |
+| 2 | `SYMB` | 종목코드 | string | Y | 16 | 종목코드 (ex. TSLA) |
+| 3 | `GUBN` | 일/주/월구분 | string | Y | 1 | 0 : 일<br>1 : 주<br>2 : 월 |
+| 4 | `BYMD` | 조회기준일자 | string | Y | 8 | 조회기준일자(YYYYMMDD)<br>※ 공란 설정 시, 기준일 오늘 날짜로 설정 |
+| 5 | `MODP` | 수정주가반영여부 | string | Y | 1 | 0 : 미반영<br>1 : 반영 |
+| 6 | `KEYB` | NEXT KEY BUFF | string | N | 1 | 응답시 다음값이 있으면 값이 셋팅되어 있으므로 다음 조회시 응답값 그대로 셋팅 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | Y | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | Y | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (22)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 | 0 : 성공 <br>0 이외의 값 : 실패 |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 | 응답코드 |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 | 응답메세지 |
+| 3 | `output1` | 응답상세1 | object | Y |  |  |
+| 4 | `rsym` | 실시간조회종목코드 | string | Y | 16 | D+시장구분(3자리)+종목코드<br>예) DNASAAPL : D+NAS(나스닥)+AAPL(애플)<br>[시장구분]<br>NYS : 뉴욕, NAS : 나스닥, AMS : 아멕스 ,<br>TSE : 도쿄, HKS : 홍콩,<br>SHS : 상해, SZS : 심천<br>HSX : 호치민, HNX : 하노이 |
+| 5 | `zdiv` | 소수점자리수 | string | Y | 1 |  |
+| 6 | `nrec` | 전일종가 | string | Y | 12 |  |
+| 7 | `output2` | 응답상세2 | object array | Y |  |  |
+| 8 | `xymd` | 일자(YYYYMMDD) | string | Y | 8 |  |
+| 9 | `clos` | 종가 | string | Y | 12 | 해당 일자의 종가 |
+| 10 | `sign` | 대비기호 | string | Y | 1 | 1 : 상한<br>2 : 상승<br>3 : 보합<br>4 : 하한<br>5 : 하락 |
+| 11 | `diff` | 대비 | string | Y | 12 | 해당 일자의 종가와 해당 전일 종가의 차이 (해당일 종가-해당 전일 종가) |
+| 12 | `rate` | 등락율 | string | Y | 12 | 해당 전일 대비 / 해당일 종가 * 100 |
+| 13 | `open` | 시가 | string | Y | 12 | 해당일 최초 거래가격 |
+| 14 | `high` | 고가 | string | Y | 12 | 해당일 가장 높은 거래가격 |
+| 15 | `low` | 저가 | string | Y | 12 | 해당일 가장 낮은 거래가격 |
+| 16 | `tvol` | 거래량 | string | Y | 14 | 해당일 거래량 |
+| 17 | `tamt` | 거래대금 | string | Y | 14 | 해당일 거래대금 |
+| 18 | `pbid` | 매수호가 | string | Y | 12 | 마지막 체결이 발생한 시점의 매수호가<br>* 해당 일자 거래량 0인 경우 값이 수신되지 않음 |
+| 19 | `vbid` | 매수호가잔량 | string | Y | 10 | * 해당 일자 거래량 0인 경우 값이 수신되지 않음 |
+| 20 | `pask` | 매도호가 | string | Y | 12 | 마지막 체결이 발생한 시점의 매도호가<br>* 해당 일자 거래량 0인 경우 값이 수신되지 않음 |
+| 21 | `vask` | 매도호가잔량 | string | Y | 10 | * 해당 일자 거래량 0인 경우 값이 수신되지 않음 |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "AUTH": "",
 "EXCD": "NAS",
 "SYMB": "TSLA",
 "GUBN": "0",
 "BYMD": "",
 "MODP": "0"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
   "output1": {
     "rsym": "DNASTSLA",
     "zdiv": "4",
@@ -1498,26 +1687,101 @@ KEYB: |  |
       "clos": "1084.6000",
       "sign": "5",
       "diff": "10.4000",
-      "rate": "-0 |  |
+      "rate": "-0
+```
+
+</details>
+
 
 
 ### 해외결제일자조회
 
-- **TR_ID**: CTOS5011R
-- **Method**: GET
+- **API ID**: 해외주식-017
+- **실전 TR_ID**: CTOS5011R
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-stock/v1/quotations/countries-holiday`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+해외결제일자조회 API입니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | CTOS5011R |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | N | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `TRAD_DT` | 기준일자 | string | Y | 8 | 기준일자(YYYYMMDD) |
+| 1 | `CTX_AREA_NK` | 연속조회키 | string | Y | 20 | 공백으로 입력 |
+| 2 | `CTX_AREA_FK` | 연속조회검색조건 | string | Y | 20 | 공백으로 입력 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (12)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세1 | object | Y |  |  |
+| 4 | `prdt_type_cd` | 상품유형코드 | string | Y | 3 | 512  미국 나스닥 / 513  미국 뉴욕거래소 / 529  미국 아멕스 <br>515  일본<br>501  홍콩 / 543  홍콩CNY / 558  홍콩USD<br>507  베트남 하노이거래소 / 508  베트남 호치민거래소<br>551  중국 상해A / 552  중국 심천A |
+| 5 | `tr_natn_cd` | 거래국가코드 | string | Y | 3 | 840 미국 / 392 일본 / 344 홍콩<br>704 베트남 / 156 중국 |
+| 6 | `tr_natn_name` | 거래국가명 | string | Y | 60 |  |
+| 7 | `natn_eng_abrv_cd` | 국가영문약어코드 | string | Y | 2 | US 미국 / JP 일본 / HK 홍콩<br>VN 베트남 / CN 중국 |
+| 8 | `tr_mket_cd` | 거래시장코드 | string | Y | 2 |  |
+| 9 | `tr_mket_name` | 거래시장명 | string | Y | 60 |  |
+| 10 | `acpl_sttl_dt` | 현지결제일자 | string | Y | 8 | 현지결제일자(YYYYMMDD) |
+| 11 | `dmst_sttl_dt` | 국내결제일자 | string | Y | 8 | 국내결제일자(YYYYMMDD) |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
     "TRAD_DT":"20221227",
     "CTX_AREA_NK":"",
     "CTX_AREA_FK":""
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "ctx_area_fk": "20221227            ",
     "ctx_area_nk": "                    ",
     "output": [
@@ -1615,27 +1879,118 @@ KEYB: |  |
     "rt_cd": "0",
     "msg_cd": "KIOK0460",
     "msg1": "조회 되었습니다. (마지막 자료)                                                  "
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 해외주식 현재체결가
 
-- **TR_ID**: HHDFS00000300
+- **API ID**: v1_해외주식-009
+- **실전 TR_ID**: HHDFS00000300
 - **모의 TR_ID**: HHDFS00000300
-- **Method**: GET
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/price`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `https://openapivts.koreainvestment.com:29443`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+해외주식종목의 현재체결가를 확인하는 API 입니다.
+
+해외주식 시세는 무료시세(지연시세)만이 제공되며, API로는 유료시세(실시간시세)를 받아보실 수 없습니다.
+
+※ 지연시세 지연시간 : 미국 - 실시간무료(0분 지연, 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보)
+                                홍콩, 베트남, 중국, 일본 - 15분지연
+   미국의 경우 0분 지연 시세로 제공되나, 장중 당일 시가는 상이할 수 있으며, 익일 정정 표시됩니다.
+
+[미국주식시세 이용시 유의사항]
+■ 무료 실시간 시세(나스닥 토탈뷰)를 별도 신청없이 제공하고 있으며, 유료 시세 서비스를 신청하시더라도 OpenAPI의 경우 무료 시세로만 제공하고있습니다.
+※ 무료(매수/매도 각 10호가) : 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보
+※ 유료(매수/매도 각 1호가) : OpenAPI 서비스 미제공
+■ 무료 실시간 시세 서비스는 유료 실시간 시세 서비스 대비 평균 50% 수준에 해당하는 정보이므로 현재가/호가/순간체결량/차트 등에서 일시적·부분적 차이가 있을 수 있습니다. 
+■ 무료 실시간 시세 서비스의 시가, 저가, 고가, 종가는 타 매체의 유료 실시간 시세 서비스와 다를 수 있으며, 이로 인해 발생하는 손실에 대해서 당사가 책임지지 않습니다.
+    이용에 유의 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | N | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token<br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용)<br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용)<br>※ 토큰 지정시 토큰 타입("Bearer") 지정 필요. 즉, 발급받은 접근토큰 앞에 앞에 "Bearer" 붙여서 호출<br>EX) "Bearer eyJ..........8GA" |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appsecret (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | [실전투자/모의투자]<br>HHDFS00000300 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객타입 | string | N | 1 | B : 법인<br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호<br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `AUTH` | 사용자권한정보 | string | Y | 32 | "" (Null 값 설정) |
+| 1 | `EXCD` | 거래소코드 | string | Y | 4 | HKS : 홍콩<br>NYS : 뉴욕<br>NAS : 나스닥<br>AMS : 아멕스<br>TSE : 도쿄<br>SHS : 상해<br>SZS : 심천<br>SHI : 상해지수<br>SZI : 심천지수<br>HSX : 호치민<br>HNX : 하노이<br>BAY : 뉴욕(주간)<br>BAQ : 나스닥(주간)<br>BAA : 아멕스(주간) |
+| 2 | `SYMB` | 종목코드 | string | Y | 16 |  |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | Y | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | Y | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (15)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 | 0 : 성공 <br>0 이외의 값 : 실패 |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 | 응답코드 |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 | 응답메세지 |
+| 3 | `output` | 응답상세 | object | Y |  |  |
+| 4 | `rsym` | 실시간조회종목코드 | string | Y | 16 | D+시장구분(3자리)+종목코드<br>예) DNASAAPL : D+NAS(나스닥)+AAPL(애플)<br>[시장구분]<br>NYS : 뉴욕, NAS : 나스닥, AMS : 아멕스 ,<br>TSE : 도쿄, HKS : 홍콩,<br>SHS : 상해, SZS : 심천<br>HSX : 호치민, HNX : 하노이 |
+| 5 | `zdiv` | 소수점자리수 | string | Y | 1 |  |
+| 6 | `base` | 전일종가 | string | Y | 12 | 전일의 종가 |
+| 7 | `pvol` | 전일거래량 | string | Y | 14 | 전일의 거래량 |
+| 8 | `last` | 현재가 | string | Y | 12 | 당일 조회시점의 현재 가격 |
+| 9 | `sign` | 대비기호 | string | Y | 1 | 1 : 상한<br>2 : 상승<br>3 : 보합<br>4 : 하한<br>5 : 하락 |
+| 10 | `diff` | 대비 | string | Y | 12 | 전일 종가와 당일 현재가의 차이 (당일 현재가-전일 종가) |
+| 11 | `rate` | 등락율 | string | Y | 12 | 전일 대비 / 당일 현재가 * 100 |
+| 12 | `tvol` | 거래량 | string | Y | 14 | 당일 조회시점까지 전체 거래량 |
+| 13 | `tamt` | 거래대금 | string | Y | 14 | 당일 조회시점까지 전체 거래금액 |
+| 14 | `ordy` | 매수가능여부 | string | Y | 20 | 매수주문 가능 종목 여부 |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "AUTH": "",
 "EXCD": "NAS",
 "SYMB": "TSLA"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
   "output": {
     "rsym": "DNASTSLA",
     "zdiv": "4",
@@ -1652,38 +2007,281 @@ KEYB: |  |
   "rt_cd": "0",
   "msg_cd": "MCA00000",
   "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 해외주식 복수종목 시세조회
 
-- **TR_ID**: HHDFS76220000 
-- **모의 TR_ID**: 미지원 
-- **Method**: GET
+- **API ID**: 해외주식 복수종목 시세조회
+- **실전 TR_ID**: HHDFS76220000
+- **모의 TR_ID**: 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/multprice`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) |  |  |
-| Response Example |  |  |
+```text
+※ 지연시세 지연시간 : 미국 - 실시간무료(0분 지연, 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보)
+                                홍콩, 베트남, 중국, 일본 - 15분지연
+   미국의 경우 0분 지연 시세로 제공되나, 장중 당일 시가는 상이할 수 있으며, 익일 정정 표시됩니다.
+
+[미국주식시세 이용시 유의사항]
+■ 무료 실시간 시세(나스닥 토탈뷰)를 별도 신청없이 제공하고 있으며, 유료 시세 서비스를 신청하시더라도 OpenAPI의 경우 무료 시세로만 제공하고있습니다.
+※ 무료(매수/매도 각 10호가) : 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보
+※ 유료(매수/매도 각 1호가) : OpenAPI 서비스 미제공
+■ 무료 실시간 시세 서비스는 유료 실시간 시세 서비스 대비 평균 50% 수준에 해당하는 정보이므로 현재가/호가/순간체결량/차트 등에서 일시적·부분적 차이가 있을 수 있습니다. 
+■ 무료 실시간 시세 서비스의 시가, 저가, 고가, 종가는 타 매체의 유료 실시간 시세 서비스와 다를 수 있으며, 이로 인해 발생하는 손실에 대해서 당사가 책임지지 않습니다.
+    이용에 유의 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 40 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHDFS76220000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | 공백 : 초기 조회 <br>N : 다음 데이터 조회 (output header의 tr_cont가 M일 경우) |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 필수] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `AUTH` | 사용자권한정보 | string | Y | 32 | 공백 입력 필수 |
+| 1 | `NREC` | 종목요청개수 | string | Y | 4 | 최대 10 |
+| 2 | `EXCD_01 ~ 10` | 거래소코드 | string | Y | 4 | HKS : 홍콩<br>NYS : 뉴욕<br>NAS : 나스닥<br>AMS : 아멕스<br>TSE : 도쿄<br>SHS : 상해<br>SZS : 심천<br>SHI : 상해지수<br>SZI : 심천지수<br>HSX : 호치민<br>HNX : 하노이<br>BAY : 뉴욕(주간)<br>BAQ : 나스닥(주간)<br>BAA : 아멕스(주간) |
+| 3 | `SYMB_01 ~ 10` | 종목코드 | string | Y | 16 | API 문서 -> 종목정보파일 -> 마스터 파일 참조 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | 공백 : 초기 조회 <br>N : 다음 데이터 조회 (output header의 tr_cont가 M일 경우) |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 필수] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (54)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object | Y |  |  |
+| 4 | `nrec` | Output 개수 | string | Y | 4 |  |
+| 5 | `output2` | 응답상세 | object array | Y |  | Array |
+| 6 | `rsym` | 실시간조회심볼 | string | Y | 16 |  |
+| 7 | `excd` | 거래소코드 | string | Y | 4 |  |
+| 8 | `symb` | 종목코드 | string | Y | 16 |  |
+| 9 | `knam` | 종목명 | string | Y | 48 |  |
+| 10 | `exnm` | 거래소명 | string | Y | 20 |  |
+| 11 | `nnam` | 국가명 | string | Y | 20 |  |
+| 12 | `stat1` | 실 지 휴 정 재 | string | Y | 4 |  |
+| 13 | `stat2` | 실시간 지연15분 휴장 거래정지 거래재개 | string | Y | 16 |  |
+| 14 | `zdiv` | 소수점자리수 | string | Y | 1 |  |
+| 15 | `last` | Last Price | string | Y | 12 |  |
+| 16 | `sign` | 대비기호 | string | Y | 1 |  |
+| 17 | `diff` | 대비 | string | Y | 12 |  |
+| 18 | `rate` | 등락율 | string | Y | 12 |  |
+| 19 | `open` | 시가 | string | Y | 12 |  |
+| 20 | `high` | 고가 | string | Y | 12 |  |
+| 21 | `low` | 저가 | string | Y | 12 |  |
+| 22 | `pbid` | Bid Price | string | Y | 12 |  |
+| 23 | `pask` | Ask Price | string | Y | 12 |  |
+| 24 | `vbid` | 매수호가잔량 | string | Y | 10 |  |
+| 25 | `vask` | 매도호가잔량 | string | Y | 10 |  |
+| 26 | `bvol` | 매수호가총잔량 | string | Y | 10 |  |
+| 27 | `avol` | 매도호가총잔량 | string | Y | 10 |  |
+| 28 | `evol` | 체결량 | string | Y | 10 |  |
+| 29 | `tvol` | 거래량 | string | Y | 14 |  |
+| 30 | `tamt` | 거래대금 | string | Y | 14 |  |
+| 31 | `powx` | 체결강도 | string | Y | 10 |  |
+| 32 | `xhms` | 현지기준시간(HHMMSS) | string | Y | 6 |  |
+| 33 | `khms` | 한국기준시간(HHMMSS) | string | Y | 6 |  |
+| 34 | `curr` | 통화코드 | string | Y | 4 |  |
+| 35 | `base` | Base Price | string | Y | 12 |  |
+| 36 | `pvol` | Previous Volume | string | Y | 14 |  |
+| 37 | `pamt` | 전일거래대금 | string | Y | 14 |  |
+| 38 | `popen` | 전일시가 | string | Y | 12 |  |
+| 39 | `phigh` | 전일고가 | string | Y | 12 |  |
+| 40 | `plow` | 전일저가 | string | Y | 12 |  |
+| 41 | `shar` | 상장주수 | string | Y | 16 |  |
+| 42 | `mcap` | 자본금 | string | Y | 16 |  |
+| 43 | `tomv` | 시가총액 | string | Y | 16 |  |
+| 44 | `h52p` | 52주최고가 | string | Y | 12 |  |
+| 45 | `l52p` | 52주최저가 | string | Y | 12 |  |
+| 46 | `h52d` | 52주최고일자 | string | Y | 8 |  |
+| 47 | `l52d` | 52주최저일자 | string | Y | 8 |  |
+| 48 | `hanp` | High Anual Price | string | Y | 12 |  |
+| 49 | `lanp` | Low Anual Price | string | Y | 12 |  |
+| 50 | `hand` | 연중최고일자 | string | Y | 8 |  |
+| 51 | `land` | 연중최저일자 | string | Y | 8 |  |
+| 52 | `bnit` | 매매단위 | string | Y | 6 |  |
+| 53 | `t_xprc` | 원환산당일가격 | string | Y | 12 |  |
 
 
 ### 해외주식조건검색
 
-- **TR_ID**: HHDFS76410000
+- **API ID**: v1_해외주식-015
+- **실전 TR_ID**: HHDFS76410000
 - **모의 TR_ID**: HHDFS76410000
-- **Method**: GET
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/inquire-search`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `https://openapivts.koreainvestment.com:29443`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+해외주식 조건검색 API입니다.
+한국투자 HTS(eFriend Plus) &gt; [7641] 해외주식 조건검색 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+  
+현재 조건검색 결과값은 최대 100개까지 조회 가능합니다. 다음 조회(100개 이후의 값) 기능에 대해서는 개선검토 중에 있습니다.
+
+※ 지연시세 지연시간 : 미국 - 실시간무료(0분지연) / 홍콩, 베트남, 중국, 일본 - 15분지연 (중국은 실시간시세 신청 시 무료실시간시세 제공)
+   미국의 경우 0분지연시세로 제공되나, 장중 당일 시가는 상이할 수 있으며, 익일 정정 표시됩니다.
+
+※ 2024년 12월 13일(금) 오후 5시부터 HTS(efriend Plus) [7781] 시세신청(실시간) 화면에서 유료 서비스 신청 후 접근토큰 발급하면 최대 2시간 이후 실시간 유료 시세 수신 가능
+
+※ 그날 거래량이나 시세 형성이 안된 종목은 해외주식 기간별시세(HHDFS76240000)에서는 조회되지만 
+   해외주식 조건검색(HHDFS76410000)에서 조회되지 않습니다. (EX. NAS AATC)
+
+[미국주식시세 이용시 유의사항]
+■ 무료 실시간 시세 서비스가 기본 제공되며, 유료 실시간 시세 서비스는 HTS ‘[7781] 시세신청 (실시간)’과 MTS(모바일) ‘고객서비스 &gt; 거래 서비스신청 &gt; 해외주식 &gt; 해외 실시간시세 신청’ 에서 신청 가능합니다.
+※ 무료(매수/매도 각 1호가) : 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보
+※ 유료(매수/매도 각 1호가) : 미국 전체 거래소들의 통합 주문체결 및 최우선 호가
+■ 무료 실시간 시세 서비스는 유료 실시간 시세 서비스 대비 평균 50% 수준에 해당하는 정보이므로 
+현재가/호가/순간체결량/차트 등에서 일시적·부분적 차이가 있을 수 있습니다. 
+■ 무료∙유료 모두 미국에 상장된 종목(뉴욕, 나스닥, 아멕스 등)의 시세를 제공하며, 동일한 시스템을 사용하여 주문∙체결됩니다. 
+단, 무료∙유료의 기반 데이터 차이로 호가 및 체결 데이터는 차이가 발생할 수 있고, 이로 인해 발생하는 손실에 대해서 당사가 책임지지 않습니다.
+■ 무료 실시간 시세 서비스의 시가, 저가, 고가, 종가는 유료 실시간 시세 서비스와 다를 수 있으며, 
+종목별 과거 데이터(거래량, 시가, 종가, 고가, 차트 데이터 등)는 장 종료 후(오후 12시경) 유료 실시간 시세 서비스 데이터와 동일하게 업데이트됩니다.
+■ 유료 실시간 시세 서비스는 신청 시 1~12개월까지 기간 선택 후 해당 요금을 일괄 납부하며, 
+해지 시 해지한 달의 말일까지 시세 제공 후 남은 기간 해당 금액이 환급되니 유의하시기 바랍니다.
+(출처: 한국투자증권 외화증권 거래설명서 - https://www.truefriend.com/main/customer/guide/Guide.jsp?&cmd=TF04ag010002&currentPage=1&num=64)
+■ output2에 조회되는 순위(rank)는 거래량을 기준으로 내림차순 정렬 시 나오는 순위인 점 참고 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용)<br>※ 토큰 지정시 토큰 타입("Bearer") 지정 필요. 즉, 발급받은 접근토큰 앞에 앞에 "Bearer" 붙여서 호출<br>EX) "Bearer eyJ..........8GA" |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHDFS76410000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | N | 1 | B : 법인 / P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | 법인 : "001" / default   개인: "" |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (27)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `AUTH` | 사용자권한정보 | string | Y | 32 | "" (Null 값 설정) |
+| 1 | `EXCD` | 거래소코드 | string | Y | 4 | NYS : 뉴욕, NAS : 나스닥,  AMS : 아멕스 <br>HKS : 홍콩, SHS : 상해 , SZS : 심천<br>HSX : 호치민, HNX : 하노이<br>TSE : 도쿄 |
+| 2 | `CO_YN_PRICECUR` | 현재가선택조건 | string | N | 1 | 해당조건 사용시(1), 미사용시 필수항목아님 |
+| 3 | `CO_ST_PRICECUR` | 현재가시작범위가 | string | N | 12 | 단위: 각국통화(JPY, USD, HKD, CNY, VND) |
+| 4 | `CO_EN_PRICECUR` | 현재가끝범위가 | string | N | 12 | 단위: 각국통화(JPY, USD, HKD, CNY, VND) |
+| 5 | `CO_YN_RATE` | 등락율선택조건 | string | N | 1 | 해당조건 사용시(1), 미사용시 필수항목아님 |
+| 6 | `CO_ST_RATE` | 등락율시작율 | string | N | 12 | % |
+| 7 | `CO_EN_RATE` | 등락율끝율 | string | N | 12 | % |
+| 8 | `CO_YN_VALX` | 시가총액선택조건 | string | N | 1 | 해당조건 사용시(1), 미사용시 필수항목아님 |
+| 9 | `CO_ST_VALX` | 시가총액시작액 | string | N | 12 | 단위: 천 |
+| 10 | `CO_EN_VALX` | 시가총액끝액 | string | N | 12 | 단위: 천 |
+| 11 | `CO_YN_SHAR` | 발행주식수선택조건 | string | N | 1 | 해당조건 사용시(1), 미사용시 필수항목아님 |
+| 12 | `CO_ST_SHAR` | 발행주식시작수 | string | N | 12 | 단위: 천 |
+| 13 | `CO_EN_SHAR` | 발행주식끝수 | string | N | 112 | 단위: 천 |
+| 14 | `CO_YN_VOLUME` | 거래량선택조건 | string | N | 1 | 해당조건 사용시(1), 미사용시 필수항목아님 |
+| 15 | `CO_ST_VOLUME` | 거래량시작량 | string | N | 12 | 단위: 주 |
+| 16 | `CO_EN_VOLUME` | 거래량끝량 | string | N | 12 | 단위: 주 |
+| 17 | `CO_YN_AMT` | 거래대금선택조건 | string | N | 1 | 해당조건 사용시(1), 미사용시 필수항목아님 |
+| 18 | `CO_ST_AMT` | 거래대금시작금 | string | N | 12 | 단위: 천 |
+| 19 | `CO_EN_AMT` | 거래대금끝금 | string | N | 12 | 단위: 천 |
+| 20 | `CO_YN_EPS` | EPS선택조건 | string | N | 1 | 해당조건 사용시(1), 미사용시 필수항목아님 |
+| 21 | `CO_ST_EPS` | EPS시작 | string | N | 12 |  |
+| 22 | `CO_EN_EPS` | EPS끝 | string | N | 12 |  |
+| 23 | `CO_YN_PER` | PER선택조건 | string | N | 1 | 해당조건 사용시(1), 미사용시 필수항목아님 |
+| 24 | `CO_ST_PER` | PER시작 | string | N | 12 |  |
+| 25 | `CO_EN_PER` | PER끝 | string | N | 12 |  |
+| 26 | `KEYB` | NEXT KEY BUFF | string | N | 8 | "" 공백 입력 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (30)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세1 | object | Y |  |  |
+| 4 | `zdiv` | 소수점자리수 | string | Y | 1 | 소수점자리수 |
+| 5 | `stat` | 거래상태정보 | string | Y | 20 | 거래상태정보 |
+| 6 | `crec` | 현재조회종목수 | string | Y | 6 | 현재조회종목수 |
+| 7 | `trec` | 전체조회종목수 | string | Y | 6 | 전체조회종목수 |
+| 8 | `nrec` | Record Count | string | Y | 4 | Record Count |
+| 9 | `output2` | 응답상세2 | object array | Y |  | 조회결과 상세 |
+| 10 | `rsym` | 실시간조회심볼 | string | N | 32 | 실시간조회심볼<br>D+시장구분(3자리)+종목코드<br>예) DNASAAPL : D+NAS(나스닥)+AAPL(애플)<br>[시장구분]<br>NYS : 뉴욕, NAS : 나스닥, AMS : 아멕스 ,<br>TSE : 도쿄, HKS : 홍콩,<br>SHS : 상해, SZS : 심천<br>HSX : 호치민, HNX : 하노이 |
+| 11 | `excd` | 거래소코드 | string | N | 4 | 거래소코드 |
+| 12 | `name` | 종목명 | string | N | 48 | 종목명 |
+| 13 | `symb` | 종목코드 | string | N | 16 | 종목코드 |
+| 14 | `last` | 현재가 | string | N | 12 | 현재가 |
+| 15 | `shar` | 발행주식 | string | N | 14 | 발행주식수(단위: 천) |
+| 16 | `valx` | 시가총액 | string | N | 14 | 시가총액(단위: 천) |
+| 17 | `plow` | 저가 | string | N | 12 | 저가 |
+| 18 | `phigh` | 고가 | string | N | 12 | 고가 |
+| 19 | `popen` | 시가 | string | N | 12 | 시가 |
+| 20 | `tvol` | 거래량 | string | N | 14 | 거래량(단위: 주) |
+| 21 | `rate` | 등락율 | string | N | 12 | 등락율(%) |
+| 22 | `diff` | 대비 | string | N | 12 | 대비 |
+| 23 | `sign` | 기호 | string | N | 1 | 기호 |
+| 24 | `avol` | 거래대금 | string | N | 14 | 거래대금(단위: 천) |
+| 25 | `eps` | EPS | string | N | 14 | EPS |
+| 26 | `per` | PER | string | N | 14 | PER |
+| 27 | `rank` | 순위 | string | N | 6 | 순위 |
+| 28 | `ename` | 영문종목명 | string | N | 48 | 영문종목명 |
+| 29 | `e_ordyn` | 매매가능 | string | N | 2 | 가능 : O |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
     "AUTH":"",
     "EXCD":"NAS",
     "CO_YN_PRICECUR":"1",
@@ -1710,8 +2308,16 @@ KEYB: |  |
     CO_YN_PER":"",
     CO_ST_PER":"",
     CO_EN_PER":""
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "zdiv": "4",
         "stat": "무료실시간",
@@ -1768,25 +2374,161 @@ KEYB: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 해외주식 상품기본정보
 
-- **TR_ID**: CTPF1702R
-- **Method**: GET
+- **API ID**: v1_해외주식-034
+- **실전 TR_ID**: CTPF1702R
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/search-info`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+해외주식 상품기본정보 API입니다.
+시세제공기관(연합)에서 제공하는 해외주식 상품기본정보 데이터를 확인하실 수 있습니다.
+
+※ 해당자료는 시세제공기관(연합)의 자료를 제공하고 있으며, 오류와 지연이 발생할 수 있습니다.
+※ 위 정보에 의한 투자판단의 최종책임은 정보이용자에게 있으며, 당사와 시세제공기관(연합)는 어떠한 법적인 책임도 지지 않사오니 투자에 참고로만 이용하시기 바랍니다.
+
+08.05/수 부터
+국내 장시작 후 ~ 30분간 국내 장 매매 환경의 원활한 제공을 위하여 
+해외주식 상품기본정보 API의 호출 제한이 적용되오니 이용에 참고 부탁드리겠습니다.
+
+- 거래제어시간 : 08:59 ~ 09:31
+- 거래제어 시간 동안 호출 되는 오류메시지 : [EGW00317] 09:00 ~ 09:30 시간 동안에는 조회하실 수 없습니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | CTPF1702R |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `PRDT_TYPE_CD` | 상품유형코드 | string | Y | 3 | 512  미국 나스닥 / 513  미국 뉴욕 / 529  미국 아멕스 <br>515  일본<br>501  홍콩 / 543  홍콩CNY / 558  홍콩USD<br>507  베트남 하노이 / 508  베트남 호치민<br>551  중국 상해A / 552  중국 심천A |
+| 1 | `PDNO` | 상품번호 | string | Y | 12 | 예) AAPL (애플) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (63)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세1 | object | Y |  |  |
+| 4 | `std_pdno` | 표준상품번호 | string | Y | 12 |  |
+| 5 | `prdt_eng_name` | 상품영문명 | string | Y | 60 |  |
+| 6 | `natn_cd` | 국가코드 | string | Y | 3 |  |
+| 7 | `natn_name` | 국가명 | string | Y | 60 |  |
+| 8 | `tr_mket_cd` | 거래시장코드 | string | Y | 2 |  |
+| 9 | `tr_mket_name` | 거래시장명 | string | Y | 60 |  |
+| 10 | `ovrs_excg_cd` | 해외거래소코드 | string | Y | 4 |  |
+| 11 | `ovrs_excg_name` | 해외거래소명 | string | Y | 60 |  |
+| 12 | `tr_crcy_cd` | 거래통화코드 | string | Y | 3 |  |
+| 13 | `ovrs_papr` | 해외액면가 | string | Y | 195 |  |
+| 14 | `crcy_name` | 통화명 | string | Y | 60 |  |
+| 15 | `ovrs_stck_dvsn_cd` | 해외주식구분코드 | string | Y | 2 | 01.주식<br>02.WARRANT<br>03.ETF<br>04.우선주 |
+| 16 | `prdt_clsf_cd` | 상품분류코드 | string | Y | 6 |  |
+| 17 | `prdt_clsf_name` | 상품분류명 | string | Y | 60 |  |
+| 18 | `sll_unit_qty` | 매도단위수량 | string | Y | 10 |  |
+| 19 | `buy_unit_qty` | 매수단위수량 | string | Y | 10 |  |
+| 20 | `tr_unit_amt` | 거래단위금액 | string | Y | 238 |  |
+| 21 | `lstg_stck_num` | 상장주식수 | string | Y | 19 |  |
+| 22 | `lstg_dt` | 상장일자 | string | Y | 8 | 제공되지 않는 데이터 |
+| 23 | `ovrs_stck_tr_stop_dvsn_cd` | 해외주식거래정지구분코드 | string | Y | 2 | ※ 해당 값 지연 반영될 수 있는 점 유의 부탁드립니다.<br>01.정상<br>02.거래정지(ALL)<br>03.거래중단<br>04.매도정지<br>05.거래정지(위탁)<br>06.매수정지 |
+| 24 | `lstg_abol_item_yn` | 상장폐지종목여부 | string | Y | 1 |  |
+| 25 | `ovrs_stck_prdt_grp_no` | 해외주식상품그룹번호 | string | Y | 20 |  |
+| 26 | `lstg_yn` | 상장여부 | string | Y | 1 |  |
+| 27 | `tax_levy_yn` | 세금징수여부 | string | Y | 1 |  |
+| 28 | `ovrs_stck_erlm_rosn_cd` | 해외주식등록사유코드 | string | Y | 2 |  |
+| 29 | `ovrs_stck_hist_rght_dvsn_cd` | 해외주식이력권리구분코드 | string | Y | 2 |  |
+| 30 | `chng_bf_pdno` | 변경전상품번호 | string | Y | 12 |  |
+| 31 | `prdt_type_cd_2` | 상품유형코드2 | string | Y | 3 |  |
+| 32 | `ovrs_item_name` | 해외종목명 | string | Y | 60 |  |
+| 33 | `sedol_no` | SEDOL번호 | string | Y | 15 |  |
+| 34 | `blbg_tckr_text` | 블름버그티커내용 | string | Y | 100 |  |
+| 35 | `ovrs_stck_etf_risk_drtp_cd` | 해외주식ETF위험지표코드 | string | Y | 3 | 001.ETF<br>002.ETN<br>003.ETC(Exchage Traded Commodity)<br>004.Others(REIT's, Mutual Fund)<br>005.VIX Underlying ETF<br>006.VIX Underlying ETN |
+| 36 | `etp_chas_erng_rt_dbnb` | ETP추적수익율배수 | string | Y | 236 |  |
+| 37 | `istt_usge_isin_cd` | 기관용도ISIN코드 | string | Y | 12 |  |
+| 38 | `mint_svc_yn` | MINT서비스여부 | string | Y | 1 |  |
+| 39 | `mint_svc_yn_chng_dt` | MINT서비스여부변경일자 | string | Y | 8 |  |
+| 40 | `prdt_name` | 상품명 | string | Y | 60 |  |
+| 41 | `lei_cd` | LEI코드 | string | Y | 20 |  |
+| 42 | `ovrs_stck_stop_rson_cd` | 해외주식정지사유코드 | string | Y | 2 | 01.권리발생<br>02.ISIN상이<br>03.기타<br>04.급등락종목<br>05.상장폐지(예정)<br>06.종목코드,거래소변경<br>07.PTP종목 |
+| 43 | `lstg_abol_dt` | 상장폐지일자 | string | Y | 8 |  |
+| 44 | `mini_stk_tr_stat_dvsn_cd` | 미니스탁거래상태구분코드 | string | Y | 2 | 01.정상<br>02.매매 불가<br>03.매수 불가<br>04.매도 불가 |
+| 45 | `mint_frst_svc_erlm_dt` | MINT최초서비스등록일자 | string | Y | 8 |  |
+| 46 | `mint_dcpt_trad_psbl_yn` | MINT소수점매매가능여부 | string | Y | 1 |  |
+| 47 | `mint_fnum_trad_psbl_yn` | MINT정수매매가능여부 | string | Y | 1 |  |
+| 48 | `mint_cblc_cvsn_ipsb_yn` | MINT잔고전환불가여부 | string | Y | 1 |  |
+| 49 | `ptp_item_yn` | PTP종목여부 | string | Y | 1 |  |
+| 50 | `ptp_item_trfx_exmt_yn` | PTP종목양도세면제여부 | string | Y | 1 |  |
+| 51 | `ptp_item_trfx_exmt_strt_dt` | PTP종목양도세면제시작일자 | string | Y | 8 |  |
+| 52 | `ptp_item_trfx_exmt_end_dt` | PTP종목양도세면제종료일자 | string | Y | 8 |  |
+| 53 | `dtm_tr_psbl_yn` | 주간거래가능여부 | string | Y | 1 |  |
+| 54 | `sdrf_stop_ecls_yn` | 급등락정지제외여부 | string | Y | 1 |  |
+| 55 | `sdrf_stop_ecls_erlm_dt` | 급등락정지제외등록일자 | string | Y | 8 |  |
+| 56 | `memo_text1` | 메모내용1 | string | Y | 500 |  |
+| 57 | `ovrs_now_pric1` | 해외현재가격1 | string | Y | 23 | 23.5 |
+| 58 | `sgle_item_lvrg_etp_yn` | 단일종목레버리지ETP여부 | string | Y | 1 |  |
+| 59 | `last_rcvg_dtime` | 최종수신일시 | string | Y | 14 |  |
+| 60 | `etp_bast_lcls_cd` | ETP기초자산대분류코드 | string | Y | 3 |  |
+| 61 | `etp_bast_mcls_cd` | ETP기초자산중분류코드 | string | Y | 3 |  |
+| 62 | `etp_bast_scls_cd` | ETP기초자산소분류코드 | string | Y | 3 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "PDNO":"AAPL",
 "PRDT_TYPE_CD":"512"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": {
         "std_pdno": "US0378331005",
         "prdt_eng_name": "APPLE INC",
@@ -1844,27 +2586,116 @@ KEYB: |  |
     "rt_cd": "0",
     "msg_cd": "KIOK0530",
     "msg1": "조회되었습니다                                                                  "
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 해외지수분봉조회
 
-- **TR_ID**: FHKST03030200
-- **Method**: GET
+- **API ID**: v1_해외주식-031
+- **실전 TR_ID**: FHKST03030200
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/inquire-time-indexchartprice`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+해외지수분봉조회 API입니다. 
+한국투자 HTS(eFriend Plus) &gt; [0303] 해외지수 종합차트 화면의 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+실전계좌의 경우, 한 번의 호출에 최대 102건까지 확인 가능합니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | FHKST03030200 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | N | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | 조건 시장 분류 코드 | string | Y | 2 | N 해외지수<br>X 환율<br>KX 원화환율 |
+| 1 | `FID_INPUT_ISCD` | 입력 종목코드 | string | Y | 12 | 종목번호(ex. TSLA) |
+| 2 | `FID_HOUR_CLS_CODE` | 시간 구분 코드 | string | Y | 5 | 0: 정규장, 1: 시간외 |
+| 3 | `FID_PW_DATA_INCU_YN` | 과거 데이터 포함 여부 | string | Y | 2 | Y/N |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (23)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `ovrs_nmix_prdy_vrss` | 해외 지수 전일 대비 | string | Y | 114 |  |
+| 5 | `prdy_vrss_sign` | 전일 대비 부호 | string | Y | 1 |  |
+| 6 | `hts_kor_isnm` | HTS 한글 종목명 | string | Y | 40 |  |
+| 7 | `prdy_ctrt` | 전일 대비율 | string | Y | 82 |  |
+| 8 | `ovrs_nmix_prdy_clpr` | 해외 지수 전일 종가 | string | Y | 114 |  |
+| 9 | `acml_vol` | 누적 거래량 | string | Y | 18 |  |
+| 10 | `ovrs_nmix_prpr` | 해외 지수 현재가 | string | Y | 114 |  |
+| 11 | `stck_shrn_iscd` | 주식 단축 종목코드 | string | Y | 9 |  |
+| 12 | `ovrs_prod_oprc` | 해외 상품 시가2 | string | Y | 114 | 시가 |
+| 13 | `ovrs_prod_hgpr` | 해외 상품 최고가 | string | Y | 114 | 최고가 |
+| 14 | `ovrs_prod_lwpr` | 해외 상품 최저가 | string | Y | 114 | 최저가 |
+| 15 | `output2` | 응답상세2 | object array | Y |  | array |
+| 16 | `stck_bsop_date` | 주식 영업 일자 | string | Y | 8 | 영업 일자 |
+| 17 | `stck_cntg_hour` | 주식 체결 시간 | string | Y | 6 | 체결 시간 |
+| 18 | `optn_prpr` | 옵션 현재가 | string | Y | 112 | 현재가 |
+| 19 | `optn_oprc` | 옵션 시가2 | string | Y | 112 | 시가 |
+| 20 | `optn_hgpr` | 옵션 최고가 | string | Y | 112 | 최고가 |
+| 21 | `optn_lwpr` | 옵션 최저가 | string | Y | 112 | 최저가 |
+| 22 | `cntg_vol` | 체결 거래량 | string | Y | 18 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "FID_COND_MRKT_DIV_CODE":"N",
 "FID_INPUT_ISCD":"SPX",
 "FID_HOUR_CLS_CODE":"0",
 "FID_PW_DATA_INCU_YN":"Y"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "ovrs_nmix_prdy_vrss": "105.23",
         "prdy_vrss_sign": "2",
@@ -2801,21 +3632,143 @@ KEYB: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 해외주식분봉조회
 
-- **TR_ID**: HHDFS76950200
-- **Method**: GET
+- **API ID**: v1_해외주식-030
+- **실전 TR_ID**: HHDFS76950200
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/inquire-time-itemchartprice`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+해외주식분봉조회 API입니다. 실전계좌의 경우, 한 번의 호출에 최근 120건까지 확인 가능합니다.
+NEXT 및 KEYB 값을 사용하여 데이터를 계속해서 다음 조회할 수 있으며, 최대 다음조회 가능 기간은 약 1개월입니다. 
+
+※ 해외주식분봉조회 조회 방법
+params
+. 초기 조회: 
+ - PINC: "1" 입력
+ - NEXT: 처음 조회 시, "" 공백 입력
+ - KEYB: 처음 조회 시, "" 공백 입력
+. 다음 조회:
+ - PINC: "1" 입력
+ - NEXT: "1" 입력
+ - KEYB: 이전 조회 결과의 마지막 분봉 데이터를 이용하여, 1분 전 혹은 n분 전의 시간을 입력 (형식: YYYYMMDDHHMMSS, ex. 20241014140100)
+
+* 따라서 분봉데이터를 기간별로 수집하고자 하실 경우 NEXT, KEYB 값을 이용하시면서 다음조회하시면 됩니다.
+* 한국투자 Github에서 해외주식 분봉 다음조회 파이썬 샘플코드 참고하실 수 있습니다. (아래 링크 참고)
+  https://github.com/koreainvestment/open-trading-api/blob/main/rest/get_ovsstk_chart_price.py
+
+※ 해외주식 분봉은 정규장만 과거조회 가능합니다.
+미국주식 주간거래( EXCD: BAY, BAQ, BAA )의 경우 본 API로 최대 1일치 분봉만 조회가 가능합니다.
+
+※ 지연시세 지연시간 : 미국 - 실시간무료(0분지연) / 홍콩, 베트남, 중국, 일본 - 15분지연
+   미국의 경우 0분지연시세로 제공되나, 장중 당일 시가는 상이할 수 있으며, 익일 정정 표시됩니다.
+
+해외주식 시세는 무료시세(지연시세)만이 제공되며, API로는 유료시세(실시간시세)를 받아보실 수 없습니다.
+
+※ 지연시세 지연시간 : 미국 - 실시간무료(0분 지연, 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보)
+                                홍콩, 베트남, 중국, 일본 - 15분지연
+   미국의 경우 0분 지연 시세로 제공되나, 장중 당일 시가는 상이할 수 있으며, 익일 정정 표시됩니다.
+
+[미국주식시세 이용시 유의사항]
+■ 무료 실시간 시세(나스닥 토탈뷰)를 별도 신청없이 제공하고 있으며, 유료 시세 서비스를 신청하시더라도 OpenAPI의 경우 무료 시세로만 제공하고있습니다.
+※ 무료(매수/매도 각 10호가) : 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보
+※ 유료(매수/매도 각 1호가) : OpenAPI 서비스 미제공
+■ 무료 실시간 시세 서비스는 유료 실시간 시세 서비스 대비 평균 50% 수준에 해당하는 정보이므로 현재가/호가/순간체결량/차트 등에서 일시적·부분적 차이가 있을 수 있습니다. 
+■ 무료 실시간 시세 서비스의 시가, 저가, 고가, 종가는 타 매체의 유료 실시간 시세 서비스와 다를 수 있으며, 이로 인해 발생하는 손실에 대해서 당사가 책임지지 않습니다.
+    이용에 유의 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHDFS76950200 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | N | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (9)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `AUTH` | 사용자권한정보 | string | Y | 32 | "" 공백으로 입력 |
+| 1 | `EXCD` | 거래소코드 | string | Y | 4 | NYS : 뉴욕<br>NAS : 나스닥<br>AMS : 아멕스 <br>HKS : 홍콩<br>SHS : 상해 <br>SZS : 심천<br>HSX : 호치민<br>HNX : 하노이<br>TSE : 도쿄 <br>※ 주간거래는 최대 1일치 분봉만 조회 가능<br>BAY : 뉴욕(주간)<br>BAQ : 나스닥(주간)<br>BAA : 아멕스(주간) |
+| 2 | `SYMB` | 종목코드 | string | Y | 16 | 종목코드(ex. TSLA) |
+| 3 | `NMIN` | 분갭 | string | Y | 4 | 분단위(1: 1분봉, 2: 2분봉, ...) |
+| 4 | `PINC` | 전일포함여부 | string | Y | 1 | 0:당일 1:전일포함<br>※ 다음조회 시 반드시 "1"로 입력 |
+| 5 | `NEXT` | 다음여부 | string | Y | 1 | 처음조회 시, "" 공백 입력<br>다음조회 시, "1" 입력 |
+| 6 | `NREC` | 요청갯수 | string | Y | 4 | 레코드요청갯수 (최대 120) |
+| 7 | `FILL` | 미체결채움구분 | string | Y | 1 | "" 공백으로 입력 |
+| 8 | `KEYB` | NEXT KEY BUFF | string | Y | 32 | 처음 조회 시, "" 공백 입력<br>다음 조회 시, 이전 조회 결과의 마지막 분봉 데이터를 이용하여, 1분 전 혹은 n분 전의 시간을 입력 <br>(형식: YYYYMMDDHHMMSS, ex. 20241014140100) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (25)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object array | Y |  |  |
+| 4 | `rsym` | 실시간종목코드 | string | Y | 16 |  |
+| 5 | `zdiv` | 소수점자리수 | string | Y | 1 |  |
+| 6 | `stim` | 장시작현지시간 | string | Y | 6 |  |
+| 7 | `etim` | 장종료현지시간 | string | Y | 6 |  |
+| 8 | `sktm` | 장시작한국시간 | string | Y | 6 |  |
+| 9 | `ektm` | 장종료한국시간 | string | Y | 6 |  |
+| 10 | `next` | 다음가능여부 | string | Y | 1 |  |
+| 11 | `more` | 추가데이타여부 | string | Y | 1 |  |
+| 12 | `nrec` | 레코드갯수 | string | Y | 4 |  |
+| 13 | `output2` | 응답상세2 | object | Y |  | array |
+| 14 | `tymd` | 현지영업일자 | string | Y | 8 |  |
+| 15 | `xymd` | 현지기준일자 | string | Y | 8 |  |
+| 16 | `xhms` | 현지기준시간 | string | Y | 6 |  |
+| 17 | `kymd` | 한국기준일자 | string | Y | 8 |  |
+| 18 | `khms` | 한국기준시간 | string | Y | 6 |  |
+| 19 | `open` | 시가 | string | Y | 12 |  |
+| 20 | `high` | 고가 | string | Y | 12 |  |
+| 21 | `low` | 저가 | string | Y | 12 |  |
+| 22 | `last` | 종가 | string | Y | 12 |  |
+| 23 | `evol` | 체결량 | string | Y | 12 |  |
+| 24 | `eamt` | 체결대금 | string | Y | 14 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 "AUTH":"",
 "EXCD":"NAS",
 "SYMB":"TSLA",
@@ -2825,8 +3778,16 @@ KEYB: |  |
 "NREC":"120",
 "FILL":"",
 "KEYB":""
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "rsym": "DNASTSLA",
         "zdiv": "4",
@@ -3942,26 +4903,150 @@ KEYB: |  |
             "low": "193.7200",
             "last": "194.5231",
             "evol": "1176735",
-            "eamt": "228544 |  |
+            "eamt": "228544
+```
+
+</details>
+
 
 
 ### 해외주식 현재가상세
 
-- **TR_ID**: HHDFS76200200
-- **Method**: GET
+- **API ID**: v1_해외주식-029
+- **실전 TR_ID**: HHDFS76200200
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/price-detail`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | {
+```text
+해외주식 현재가상세 API입니다.
+
+해당 API를 활용하여 해외주식 종목의 매매단위(vnit), 호가단위(e_hogau), PER, PBR, EPS, BPS 등의 데이터를 확인하실 수 있습니다.
+
+해외주식 시세는 무료시세(지연시세)만이 제공되며, API로는 유료시세(실시간시세)를 받아보실 수 없습니다.
+
+※ 지연시세 지연시간 : 미국 - 실시간무료(0분 지연, 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보)
+                                홍콩, 베트남, 중국, 일본 - 15분지연
+   미국의 경우 0분 지연 시세로 제공되나, 장중 당일 시가는 상이할 수 있으며, 익일 정정 표시됩니다.
+
+[미국주식시세 이용시 유의사항]
+■ 무료 실시간 시세(나스닥 토탈뷰)를 별도 신청없이 제공하고 있으며, 유료 시세 서비스를 신청하시더라도 OpenAPI의 경우 무료 시세로만 제공하고있습니다.
+※ 무료(매수/매도 각 10호가) : 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보
+※ 유료(매수/매도 각 1호가) : OpenAPI 서비스 미제공
+■ 무료 실시간 시세 서비스는 유료 실시간 시세 서비스 대비 평균 50% 수준에 해당하는 정보이므로 현재가/호가/순간체결량/차트 등에서 일시적·부분적 차이가 있을 수 있습니다. 
+■ 무료 실시간 시세 서비스의 시가, 저가, 고가, 종가는 타 매체의 유료 실시간 시세 서비스와 다를 수 있으며, 이로 인해 발생하는 손실에 대해서 당사가 책임지지 않습니다.
+    이용에 유의 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHDFS76200200 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | N | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `AUTH` | 사용자권한정보 | string | Y | 32 |  |
+| 1 | `EXCD` | 거래소명 | string | Y | 4 | HKS : 홍콩<br>NYS : 뉴욕<br>NAS : 나스닥<br>AMS : 아멕스<br>TSE : 도쿄<br>SHS : 상해<br>SZS : 심천<br>SHI : 상해지수<br>SZI : 심천지수<br>HSX : 호치민<br>HNX : 하노이<br>BAY : 뉴욕(주간)<br>BAQ : 나스닥(주간)<br>BAA : 아멕스(주간) |
+| 2 | `SYMB` | 종목코드 | string | Y | 16 |  |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (45)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output` | 응답상세 | object | Y |  |  |
+| 4 | `rsym` | 실시간조회종목코드 | string | Y | 16 |  |
+| 5 | `pvol` | 전일거래량 | string | Y | 14 |  |
+| 6 | `open` | 시가 | string | Y | 12 |  |
+| 7 | `high` | 고가 | string | Y | 12 |  |
+| 8 | `low` | 저가 | string | Y | 12 |  |
+| 9 | `last` | 현재가 | string | Y | 12 |  |
+| 10 | `base` | 전일종가 | string | Y | 12 |  |
+| 11 | `tomv` | 시가총액 | string | Y | 16 |  |
+| 12 | `pamt` | 전일거래대금 | string | Y | 14 |  |
+| 13 | `uplp` | 상한가 | string | Y | 12 |  |
+| 14 | `dnlp` | 하한가 | string | Y | 12 |  |
+| 15 | `h52p` | 52주최고가 | string | Y | 12 |  |
+| 16 | `h52d` | 52주최고일자 | string | Y | 8 |  |
+| 17 | `l52p` | 52주최저가 | string | Y | 12 |  |
+| 18 | `l52d` | 52주최저일자 | string | Y | 8 |  |
+| 19 | `perx` | PER | string | Y | 10 |  |
+| 20 | `pbrx` | PBR | string | Y | 10 |  |
+| 21 | `epsx` | EPS | string | Y | 10 |  |
+| 22 | `bpsx` | BPS | string | Y | 10 |  |
+| 23 | `shar` | 상장주수 | string | Y | 16 |  |
+| 24 | `mcap` | 자본금 | string | Y | 16 |  |
+| 25 | `curr` | 통화 | string | Y | 4 |  |
+| 26 | `zdiv` | 소수점자리수 | string | Y | 1 |  |
+| 27 | `vnit` | 매매단위 | string | Y | 6 |  |
+| 28 | `t_xprc` | 원환산당일가격 | string | Y | 12 |  |
+| 29 | `t_xdif` | 원환산당일대비 | string | Y | 12 |  |
+| 30 | `t_xrat` | 원환산당일등락 | string | Y | 12 |  |
+| 31 | `p_xprc` | 원환산전일가격 | string | Y | 12 |  |
+| 32 | `p_xdif` | 원환산전일대비 | string | Y | 12 |  |
+| 33 | `p_xrat` | 원환산전일등락 | string | Y | 12 |  |
+| 34 | `t_rate` | 당일환율 | string | Y | 12 |  |
+| 35 | `p_rate` | 전일환율 | string | Y | 12 |  |
+| 36 | `t_xsgn` | 원환산당일기호 | string | Y | 1 | HTS 색상표시용 |
+| 37 | `p_xsng` | 원환산전일기호 | string | Y | 1 | HTS 색상표시용 |
+| 38 | `e_ordyn` | 거래가능여부 | string | Y | 20 |  |
+| 39 | `e_hogau` | 호가단위 | string | Y | 8 |  |
+| 40 | `e_icod` | 업종(섹터) | string | Y | 40 |  |
+| 41 | `e_parp` | 액면가 | string | Y | 12 |  |
+| 42 | `tvol` | 거래량 | string | Y | 14 |  |
+| 43 | `tamt` | 거래대금 | string | Y | 14 |  |
+| 44 | `etyp_nm` | ETP 분류명 | string | Y | 20 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```json
+{
 	"AUTH":"",
 	"EXCD":"NAS",
 	"SYMB":"TSLA"
-} |  |
-| Response Example | {
+}
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output": {
         "rsym": "DNASTSLA",
         "zdiv": "4",
@@ -4008,23 +5093,93 @@ KEYB: |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
 
 
 ### 해외주식 업종별코드조회
 
-- **TR_ID**: HHDFS76370100
-- **Method**: GET
+- **API ID**: 해외주식-049
+- **실전 TR_ID**: HHDFS76370100
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/industry-price`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | AUTH:
-EXCD:NAS |  |
-| Response Example | {
+```text
+해외주식 업종별코드조회 API입니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHDFS76370100 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (2)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `AUTH` | 사용자권한정보 | string | Y | 32 | 공백 |
+| 1 | `EXCD` | 거래소코드 | string | Y | 4 | 'NYS : 뉴욕, NAS : 나스닥,  AMS : 아멕스 <br>HKS : 홍콩, SHS : 상해 , SZS : 심천<br>HSX : 호치민, HNX : 하노이<br>TSE : 도쿄 ' |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (8)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `nrec` | RecordCount | string | Y | 4 |  |
+| 5 | `output2` | 응답상세 | object array | Y |  | array |
+| 6 | `icod` | 업종코드 | string | Y | 4 |  |
+| 7 | `name` | 업종명 | string | Y | 32 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+AUTH:
+EXCD:NAS
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "nrec": "42"
     },
@@ -4041,47 +5196,283 @@ EXCD:NAS |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
 
 
-### 해외주식 종목/지수/환율기간별시세(일/주/월/년)
-
-- **TR_ID**: FHKST03030100
-- **Method**: GET
-- **URL**: `/uapi/overseas-price/v1/quotations/inquire-daily-chartprice`
-
-> ⚠ 원본 엑셀에 상세 명세 시트 없음
 
 ### 해외주식 업종별시세
 
-- **TR_ID**: HHDFS76370000
-- **Method**: GET
+- **API ID**: 해외주식-048
+- **실전 TR_ID**: HHDFS76370000
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/industry-theme`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) |  |  |
-| Response Example |  |  |
+```text
+해외주식 업종별시세 API입니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHDFS76370000 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `KEYB` | NEXT KEY BUFF | string | Y | 8 | 공백 |
+| 1 | `AUTH` | 사용자권한정보 | string | Y | 32 | 공백 |
+| 2 | `EXCD` | 거래소코드 | string | Y | 4 | 'NYS : 뉴욕, NAS : 나스닥,  AMS : 아멕스 <br>HKS : 홍콩, SHS : 상해 , SZS : 심천<br>HSX : 호치민, HNX : 하노이<br>TSE : 도쿄 ' |
+| 3 | `ICOD` | 업종코드 | string | Y | 1 | 업종코드별조회(HHDFS76370100) 를 통해 확인 |
+| 4 | `VOL_RANG` | 거래량조건 | string | Y | 1 | 0(전체), 1(1백주이상), 2(1천주이상), 3(1만주이상), 4(10만주이상), 5(100만주이상), 6(1000만주이상) |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (26)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메시지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y |  |  |
+| 4 | `zdiv` | 소수점자리수 | string | Y | 1 |  |
+| 5 | `stat` | 거래상태정보 | string | Y | 20 |  |
+| 6 | `crec` | 현재조회종목수 | string | Y | 6 |  |
+| 7 | `trec` | 전체조회종목수 | string | Y | 6 |  |
+| 8 | `nrec` | RecordCount | string | Y | 4 |  |
+| 9 | `output2` | 응답상세 | object array | Y |  | array |
+| 10 | `rsym` | 실시간조회심볼 | string | Y | 16 |  |
+| 11 | `excd` | 거래소코드 | string | Y | 4 |  |
+| 12 | `symb` | 종목코드 | string | Y | 1 |  |
+| 13 | `name` | 종목명 | string | Y | 48 |  |
+| 14 | `last` | 현재가 | string | Y | 16 |  |
+| 15 | `sign` | 기호 | string | Y | 1 |  |
+| 16 | `diff` | 대비 | string | Y | 12 |  |
+| 17 | `rate` | 등락율 | string | Y | 12 |  |
+| 18 | `tvol` | 거래량 | string | Y | 14 |  |
+| 19 | `vask` | 매도잔량 | string | Y | 10 |  |
+| 20 | `pask` | 매도호가 | string | Y | 12 |  |
+| 21 | `pbid` | 매수호가 | string | Y | 12 |  |
+| 22 | `vbid` | 매수잔량 | string | Y | 10 |  |
+| 23 | `seqn` | 순위 | string | Y | 6 |  |
+| 24 | `ename` | 영문종목명 | string | Y | 48 |  |
+| 25 | `e_ordyn` | 매매가능 | string | Y | 2 |  |
 
 
 ### 해외주식 현재가 호가
 
-- **TR_ID**: HHDFS76200100
-- **Method**: GET
+- **API ID**: 해외주식-033
+- **실전 TR_ID**: HHDFS76200100
+- **모의 TR_ID**: 모의투자 미지원
+- **통신방식**: REST · **Method**: GET
 - **URL**: `/uapi/overseas-price/v1/quotations/inquire-asking-price`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `모의투자 미지원`
 
-#### Response
+<details><summary>개요</summary>
 
-| 필드 | 타입 | 설명 |
-|-----|------|------|
-| Example |  |  |
-| Request Example (Python) | AUTH:
+```text
+해외주식 현재가 호가 API입니다.
+미국 거래소는 10호가, 그 외 국가 거래소는 1호가만 제공됩니다.  
+한국투자 HTS(eFriend Plus) &gt; [7620] 해외주식 현재가 화면에서 "왼쪽 호가 창" 기능을 API로 개발한 사항으로, 해당 화면을 참고하시면 기능을 이해하기 쉽습니다.
+
+해외주식 시세는 무료시세(지연시세)만이 제공되며, API로는 유료시세(실시간시세)를 받아보실 수 없습니다.
+
+※ 지연시세 지연시간 : 미국 - 실시간무료(0분 지연, 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보)
+                                홍콩, 베트남, 중국, 일본 - 15분지연
+   미국의 경우 0분 지연 시세로 제공되나, 장중 당일 시가는 상이할 수 있으며, 익일 정정 표시됩니다.
+
+[미국주식시세 이용시 유의사항]
+■ 무료 실시간 시세(나스닥 토탈뷰)를 별도 신청없이 제공하고 있으며, 유료 시세 서비스를 신청하시더라도 OpenAPI의 경우 무료 시세로만 제공하고있습니다.
+※ 무료(매수/매도 각 10호가) : 나스닥 마켓센터에서 거래되는 호가 및 호가 잔량 정보
+※ 유료(매수/매도 각 1호가) : OpenAPI 서비스 미제공
+■ 무료 실시간 시세 서비스는 유료 실시간 시세 서비스 대비 평균 50% 수준에 해당하는 정보이므로 현재가/호가/순간체결량/차트 등에서 일시적·부분적 차이가 있을 수 있습니다. 
+■ 무료 실시간 시세 서비스의 시가, 저가, 고가, 종가는 타 매체의 유료 실시간 시세 서비스와 다를 수 있으며, 이로 인해 발생하는 손실에 대해서 당사가 책임지지 않습니다.
+    이용에 유의 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | HHDFS76200100 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | Y | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (3)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `AUTH` | 사용자권한정보 | string | Y | 32 | 공백 |
+| 1 | `EXCD` | 거래소코드 | string | Y | 4 | NYS : 뉴욕<br>NAS : 나스닥<br>AMS : 아멕스 <br>HKS : 홍콩<br>SHS : 상해 <br>SZS : 심천<br>HSX : 호치민<br>HNX : 하노이<br>TSE : 도쿄 <br>BAY : 뉴욕(주간)<br>BAQ : 나스닥(주간)<br>BAA : 아멕스(주간) |
+| 2 | `SYMB` | 종목코드 | string | Y | 16 | 종목코드 예)TSLA |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (92)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세 | object | Y | 100 |  |
+| 4 | `rsym` | 실시간조회종목코드 | string | Y | 16 |  |
+| 5 | `zdiv` | 소수점자리수 | string | Y | 1 |  |
+| 6 | `curr` | 통화 | string | Y | 4 |  |
+| 7 | `base` | 전일종가 | string | Y | 12 |  |
+| 8 | `open` | 시가 | string | Y | 12 |  |
+| 9 | `high` | 고가 | string | Y | 12 |  |
+| 10 | `low` | 저가 | string | Y | 12 |  |
+| 11 | `last` | 현재가 | string | Y | 12 |  |
+| 12 | `dymd` | 호가일자 | string | Y | 8 |  |
+| 13 | `dhms` | 호가시간 | string | Y | 6 |  |
+| 14 | `bvol` | 매수호가총잔량 | string | Y | 10 |  |
+| 15 | `avol` | 매도호가총잔량 | string | Y | 10 |  |
+| 16 | `bdvl` | 매수호가총잔량대비 | string | Y | 10 |  |
+| 17 | `advl` | 매도호가총잔량대비 | string | Y | 10 |  |
+| 18 | `code` | 종목코드 | string | Y | 16 |  |
+| 19 | `ropen` | 시가율 | string | Y | 12 |  |
+| 20 | `rhigh` | 고가율 | string | Y | 12 |  |
+| 21 | `rlow` | 저가율 | string | Y | 12 |  |
+| 22 | `rclose` | 현재가율 | string | Y | 12 |  |
+| 23 | `output2` | 응답상세 | array | Y | 100 |  |
+| 24 | `pbid1` | 매수호가가격1 | string | Y | 12 |  |
+| 25 | `pask1` | 매도호가가격1 | string | Y | 12 |  |
+| 26 | `vbid1` | 매수호가잔량1 | string | Y | 10 |  |
+| 27 | `vask1` | 매도호가잔량1 | string | Y | 10 |  |
+| 28 | `dbid1` | 매수호가대비1 | string | Y | 10 |  |
+| 29 | `dask1` | 매도호가대비1 | string | Y | 10 |  |
+| 30 | `pbid2` | 매수호가가격2 | string | Y | 12 | 미국 거래소만 수신 |
+| 31 | `pask2` | 매도호가가격2 | string | Y | 12 | 미국 거래소만 수신 |
+| 32 | `vbid2` | 매수호가잔량2 | string | Y | 10 | 미국 거래소만 수신 |
+| 33 | `vask2` | 매도호가잔량2 | string | Y | 10 | 미국 거래소만 수신 |
+| 34 | `dbid2` | 매수호가대비2 | string | Y | 10 | 미국 거래소만 수신 |
+| 35 | `dask2` | 매도호가대비2 | string | Y | 10 | 미국 거래소만 수신 |
+| 36 | `pbid3` | 매수호가가격3 | string | Y | 12 | 미국 거래소만 수신 |
+| 37 | `pask3` | 매도호가가격3 | string | Y | 12 | 미국 거래소만 수신 |
+| 38 | `vbid3` | 매수호가잔량3 | string | Y | 10 | 미국 거래소만 수신 |
+| 39 | `vask3` | 매도호가잔량3 | string | Y | 10 | 미국 거래소만 수신 |
+| 40 | `dbid3` | 매수호가대비3 | string | Y | 10 | 미국 거래소만 수신 |
+| 41 | `dask3` | 매도호가대비3 | string | Y | 10 | 미국 거래소만 수신 |
+| 42 | `pbid4` | 매수호가가격4 | string | Y | 12 | 미국 거래소만 수신 |
+| 43 | `pask4` | 매도호가가격4 | string | Y | 12 | 미국 거래소만 수신 |
+| 44 | `vbid4` | 매수호가잔량4 | string | Y | 10 | 미국 거래소만 수신 |
+| 45 | `vask4` | 매도호가잔량4 | string | Y | 10 | 미국 거래소만 수신 |
+| 46 | `dbid4` | 매수호가대비4 | string | Y | 10 | 미국 거래소만 수신 |
+| 47 | `dask4` | 매도호가대비4 | string | Y | 10 | 미국 거래소만 수신 |
+| 48 | `pbid5` | 매수호가가격5 | string | Y | 12 | 미국 거래소만 수신 |
+| 49 | `pask5` | 매도호가가격5 | string | Y | 12 | 미국 거래소만 수신 |
+| 50 | `vbid5` | 매수호가잔량5 | string | Y | 10 | 미국 거래소만 수신 |
+| 51 | `vask5` | 매도호가잔량5 | string | Y | 10 | 미국 거래소만 수신 |
+| 52 | `dbid5` | 매수호가대비5 | string | Y | 10 | 미국 거래소만 수신 |
+| 53 | `dask5` | 매도호가대비5 | string | Y | 10 | 미국 거래소만 수신 |
+| 54 | `pbid6` | 매수호가가격6 | string | Y | 12 | 미국 거래소만 수신 |
+| 55 | `pask6` | 매도호가가격6 | string | Y | 12 | 미국 거래소만 수신 |
+| 56 | `vbid6` | 매수호가잔량6 | string | Y | 10 | 미국 거래소만 수신 |
+| 57 | `vask6` | 매도호가잔량6 | string | Y | 10 | 미국 거래소만 수신 |
+| 58 | `dbid6` | 매수호가대비6 | string | Y | 10 | 미국 거래소만 수신 |
+| 59 | `dask6` | 매도호가대비6 | string | Y | 10 | 미국 거래소만 수신 |
+| 60 | `pbid7` | 매수호가가격7 | string | Y | 12 | 미국 거래소만 수신 |
+| 61 | `pask7` | 매도호가가격7 | string | Y | 12 | 미국 거래소만 수신 |
+| 62 | `vbid7` | 매수호가잔량7 | string | Y | 10 | 미국 거래소만 수신 |
+| 63 | `vask7` | 매도호가잔량7 | string | Y | 10 | 미국 거래소만 수신 |
+| 64 | `dbid7` | 매수호가대비7 | string | Y | 10 | 미국 거래소만 수신 |
+| 65 | `dask7` | 매도호가대비7 | string | Y | 10 | 미국 거래소만 수신 |
+| 66 | `pbid8` | 매수호가가격8 | string | Y | 12 | 미국 거래소만 수신 |
+| 67 | `pask8` | 매도호가가격8 | string | Y | 12 | 미국 거래소만 수신 |
+| 68 | `vbid8` | 매수호가잔량8 | string | Y | 10 | 미국 거래소만 수신 |
+| 69 | `vask8` | 매도호가잔량8 | string | Y | 10 | 미국 거래소만 수신 |
+| 70 | `dbid8` | 매수호가대비8 | string | Y | 10 | 미국 거래소만 수신 |
+| 71 | `dask8` | 매도호가대비8 | string | Y | 10 | 미국 거래소만 수신 |
+| 72 | `pbid9` | 매수호가가격9 | string | Y | 12 | 미국 거래소만 수신 |
+| 73 | `pask9` | 매도호가가격9 | string | Y | 12 | 미국 거래소만 수신 |
+| 74 | `vbid9` | 매수호가잔량9 | string | Y | 10 | 미국 거래소만 수신 |
+| 75 | `vask9` | 매도호가잔량9 | string | Y | 10 | 미국 거래소만 수신 |
+| 76 | `dbid9` | 매수호가대비9 | string | Y | 10 | 미국 거래소만 수신 |
+| 77 | `dask9` | 매도호가대비9 | string | Y | 10 | 미국 거래소만 수신 |
+| 78 | `pbid10` | 매수호가가격10 | string | Y | 12 | 미국 거래소만 수신 |
+| 79 | `pask10` | 매도호가가격10 | string | Y | 12 | 미국 거래소만 수신 |
+| 80 | `vbid10` | 매수호가잔량10 | string | Y | 10 | 미국 거래소만 수신 |
+| 81 | `vask10` | 매도호가잔량10 | string | Y | 10 | 미국 거래소만 수신 |
+| 82 | `dbid10` | 매수호가대비10 | string | Y | 10 | 미국 거래소만 수신 |
+| 83 | `dask10` | 매도호가대비10 | string | Y | 10 | 미국 거래소만 수신 |
+| 84 | `output3` | 응답상세 | object array | Y | 100 |  |
+| 85 | `vstm` | VCMStart시간 | string | Y | 6 | 데이터 없음 |
+| 86 | `vetm` | VCMEnd시간 | string | Y | 6 | 데이터 없음 |
+| 87 | `csbp` | CAS/VCM기준가 | string | Y | 12 | 데이터 없음 |
+| 88 | `cshi` | CAS/VCMHighprice | string | Y | 12 | 데이터 없음 |
+| 89 | `cslo` | CAS/VCMLowprice | string | Y | 12 | 데이터 없음 |
+| 90 | `iep` | IEP | string | Y | 12 | 데이터 없음 |
+| 91 | `iev` | IEV | string | Y | 12 | 데이터 없음 |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+AUTH:
 EXCD:NAS
-SYMB:TSLA |  |
-| Response Example | {
+SYMB:TSLA
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```json
+{
     "output1": {
         "rsym": "DNASTSLA",
         "zdiv": "4",
@@ -4177,5 +5568,156 @@ SYMB:TSLA |  |
     "rt_cd": "0",
     "msg_cd": "MCA00000",
     "msg1": "정상처리 되었습니다."
-} |  |
+}
+```
+
+</details>
+
+
+
+### 해외주식 종목_지수_환율기간별시세(일_주_월_년)
+
+- **API ID**: v1_해외주식-012
+- **실전 TR_ID**: FHKST03030100
+- **모의 TR_ID**: FHKST03030100
+- **통신방식**: REST · **Method**: GET
+- **URL**: `/uapi/overseas-price/v1/quotations/inquire-daily-chartprice`
+- **실전 Domain**: `https://openapi.koreainvestment.com:9443`
+- **모의 Domain**: `https://openapivts.koreainvestment.com:29443`
+
+<details><summary>개요</summary>
+
+```text
+해외주식 종목/지수/환율기간별시세(일/주/월/년) API입니다.
+
+해외지수 당일 시세의 경우 지연시세 or 종가시세가 제공됩니다.
+
+※ 해당 API로 미국주식 조회 시, 다우30, 나스닥100, S&P500 종목만 조회 가능합니다.
+   더 많은 미국주식 종목 시세를 이용할 시에는, 해외주식기간별시세 API 사용 부탁드립니다.
+```
+
+</details>
+
+
+#### Request Header (13)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | N | 40 | application/json; charset=utf-8 |
+| 1 | `authorization` | 접근토큰 | string | Y | 350 | OAuth 토큰이 필요한 API 경우 발급한 Access token <br>일반고객(Access token 유효기간 1일, OAuth 2.0의 Client Credentials Grant 절차를 준용) <br>법인(Access token 유효기간 3개월, Refresh token 유효기간 1년, OAuth 2.0의 Authorization Code Grant 절차를 준용) |
+| 2 | `appkey` | 앱키 | string | Y | 36 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 3 | `appsecret` | 앱시크릿키 | string | Y | 180 | 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.) |
+| 4 | `personalseckey` | 고객식별키 | string | N | 180 | [법인 필수] 제휴사 회원 관리를 위한 고객식별키 |
+| 5 | `tr_id` | 거래ID | string | Y | 13 | [실전투자/모의투자]<br>FHKST03030100 |
+| 6 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 7 | `custtype` | 고객 타입 | string | N | 1 | B : 법인 <br>P : 개인 |
+| 8 | `seq_no` | 일련번호 | string | N | 2 | [법인 필수] 001 |
+| 9 | `mac_address` | 맥주소 | string | N | 12 | 법인고객 혹은 개인고객의 Mac address 값 |
+| 10 | `phone_number` | 핸드폰번호 | string | N | 12 | [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호 <br>ex) 01011112222 (하이픈 등 구분값 제거) |
+| 11 | `ip_addr` | 접속 단말 공인 IP | string | N | 12 | [법인 필수] 사용자(회원)의 IP Address |
+| 12 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Request Query Parameter (5)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `FID_COND_MRKT_DIV_CODE` | FID 조건 시장 분류 코드 | string | Y | 2 | N: 해외지수, X 환율, I: 국채, S:금선물 |
+| 1 | `FID_INPUT_ISCD` | FID 입력 종목코드 | string | Y | 12 | 종목코드<br>※ 해외주식 마스터 코드 참조 <br>(포럼 > FAQ > 종목정보 다운로드(해외) > 해외지수)<br>※ 해당 API로 미국주식 조회 시, 다우30, 나스닥100, S&P500 종목만 조회 가능합니다. 더 많은 미국주식 종목 시세를 이용할 시에는, 해외주식기간별시세 API 사용 부탁드립니다. |
+| 2 | `FID_INPUT_DATE_1` | FID 입력 날짜1 | string | Y | 10 | 시작일자(YYYYMMDD) |
+| 3 | `FID_INPUT_DATE_2` | FID 입력 날짜2 | string | Y | 10 | 종료일자(YYYYMMDD) |
+| 4 | `FID_PERIOD_DIV_CODE` | FID 기간 분류 코드 | string | Y | 32 | D:일, W:주, M:월, Y:년 |
+
+#### Response Header (4)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `content-type` | 컨텐츠타입 | string | Y | 40 | application/json; charset=utf-8 |
+| 1 | `tr_id` | 거래ID | string | Y | 13 | 요청한 tr_id |
+| 2 | `tr_cont` | 연속 거래 여부 | string | N | 1 | tr_cont를 이용한 다음조회 불가 API |
+| 3 | `gt_uid` | Global UID | string | N | 32 | [법인 전용] 거래고유번호로 사용하므로 거래별로 UNIQUE해야 함 |
+
+#### Response Body (24)
+
+| # | Element | 한글명 | Type | Req | Len | Description |
+|--:|---------|--------|------|:---:|----:|-------------|
+| 0 | `rt_cd` | 성공 실패 여부 | string | Y | 1 |  |
+| 1 | `msg_cd` | 응답코드 | string | Y | 8 |  |
+| 2 | `msg1` | 응답메세지 | string | Y | 80 |  |
+| 3 | `output1` | 응답상세1 | object | N |  | 기본정보 |
+| 4 | `ovrs_nmix_prdy_vrss` | 전일 대비 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 5 | `prdy_vrss_sign` | 전일 대비 부호 | string | N | 1 |  |
+| 6 | `prdy_ctrt` | 전일 대비율 | string | N | 11 | 11(8.2) 정수부분 8자리, 소수부분 2자리 |
+| 7 | `ovrs_nmix_prdy_clpr` | 전일 종가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 8 | `acml_vol` | 누적 거래량 | string | N | 18 |  |
+| 9 | `hts_kor_isnm` | HTS 한글 종목명 | string | N | 40 |  |
+| 10 | `ovrs_nmix_prpr` | 현재가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 11 | `stck_shrn_iscd` | 단축 종목코드 | string | N | 9 |  |
+| 12 | `prdy_vol` | 전일 거래량 | string | N | 18 |  |
+| 13 | `ovrs_prod_oprc` | 시가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 14 | `ovrs_prod_hgpr` | 최고가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 15 | `ovrs_prod_lwpr` | 최저가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 16 | `output2` | 응답상세2 | object array | N |  | 일자별 정보 |
+| 17 | `stck_bsop_date` | 영업 일자 | string | N | 8 |  |
+| 18 | `ovrs_nmix_prpr` | 현재가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 19 | `ovrs_nmix_oprc` | 시가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 20 | `ovrs_nmix_hgpr` | 최고가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 21 | `ovrs_nmix_lwpr` | 최저가 | string | N | 16 | 16(11.4) 정수부분 11자리, 소수부분 4자리 |
+| 22 | `acml_vol` | 누적 거래량 | string | N | 18 |  |
+| 23 | `mod_yn` | 변경 여부 | string | N | 1 |  |
+
+<details><summary>Request Example (Python)</summary>
+
+```text
+"input": {
+            "fid_cond_mrkt_div_code": "N",
+            "fid_input_date_1": "20220401",
+            "fid_input_date_2": "20220613",
+            "fid_input_iscd": ".DJI",
+            "fid_period_div_code": "D"
+        }
+```
+
+</details>
+
+
+<details><summary>Response Example</summary>
+
+```text
+"output1": {
+            "acml_vol": "397268510",
+            "hts_kor_isnm": "다우존스 산업지수",
+            "ovrs_nmix_prdy_clpr": "31029.31",
+            "ovrs_nmix_prdy_vrss": "-253.88",
+            "ovrs_nmix_prpr": "30775.43",
+            "ovrs_prod_hgpr": "30979.85",
+            "ovrs_prod_lwpr": "30431.87",
+            "ovrs_prod_oprc": "30790.00",
+            "prdy_ctrt": "-0.82",
+            "prdy_vrss_sign": "5",
+            "stck_shrn_iscd": ".DJI"
+        },
+        "output2": [
+            {
+                "acml_vol": "480501460",
+                "mod_yn": "N",
+                "ovrs_nmix_hgpr": "31144.91",
+                "ovrs_nmix_lwpr": "30373.72",
+                "ovrs_nmix_oprc": "31144.91",
+                "ovrs_nmix_prpr": "30516.74",
+                "stck_bsop_date": "20220613"
+            },
+....
+            {
+                "acml_vol": "346813590",
+                "mod_yn": "N",
+                "ovrs_nmix_hgpr": "34847.91",
+                "ovrs_nmix_lwpr": "34538.25",
+                "ovrs_nmix_oprc": "34740.89",
+                "ovrs_nmix_prpr": "34818.27",
+                "stck_bsop_date": "20220401"
+            }
+```
+
+</details>
+
 

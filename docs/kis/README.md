@@ -1,15 +1,16 @@
 # KIS OpenAPI 전체 레퍼런스
 
-> 원본: `한국투자증권_오픈API_전체문서_20260418_030007.xlsx`
-> 총 API: 338개 (REST + WebSocket)
+> 원본: `한국투자증권_오픈API_전체문서_20260911_030009.xlsx`
+> 총 API: 338개 (REST 278 + WebSocket 60) · 필드 14,746개 **전수 수록**
+> 재생성 도구: 워크북 → `docs/kis/*.md` 자동 생성. 상세 명세는 손으로 고치지 않는다(목록 표의 `사용` 표시만 보존).
 
 ## 카테고리별 명세 파일
 
 | 카테고리 | API 수 | 파일 |
 |---------|:-----:|------|
-| OAuth인증 | 4 | [oauth.md](oauth.md) |
+| OAuth인증 | 3 | [oauth.md](oauth.md) |
 | [국내주식] 주문/계좌 | 23 | [domestic-stock-order.md](domestic-stock-order.md) |
-| [국내주식] 기본시세 | 21 | [domestic-stock-quote.md](domestic-stock-quote.md) |
+| [국내주식] 기본시세 | 22 | [domestic-stock-quote.md](domestic-stock-quote.md) |
 | [국내주식] ELW 시세 | 22 | [domestic-stock-elw.md](domestic-stock-elw.md) |
 | [국내주식] 업종/기타 | 14 | [domestic-stock-industry.md](domestic-stock-industry.md) |
 | [국내주식] 종목정보 | 26 | [domestic-stock-info.md](domestic-stock-info.md) |
