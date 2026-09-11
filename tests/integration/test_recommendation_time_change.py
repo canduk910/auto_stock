@@ -123,13 +123,29 @@ def test_time_nxt_post_buy_stop_remains_19_50():
 # Case C — 자문 시각이 정산 시각보다 앞이어야 함
 # ---------------------------------------------------------------------------
 def test_recommendation_strictly_before_settlement():
-    """TIME_RECOMMENDATION < TIME_SETTLEMENT 순서 보장 (20:00 < 20:10)."""
+    """TIME_RECOMMENDATION < TIME_SETTLEMENT 순서 보장 (20:00 < 21:30, cycle283)."""
     assert scheduler_mod.TIME_RECOMMENDATION < scheduler_mod.TIME_SETTLEMENT, (
         "자문 시각이 정산 시각 이후이면 metrics 수집/INSERT 가 깨질 수 있다."
     )
-    # 추가: 20:00 / 20:10 사이 10분 간격 보장 (OpenAI 호출 ~3분 수용 마진)
-    assert scheduler_mod.TIME_SETTLEMENT == dtime(20, 10), (
-        "TIME_SETTLEMENT 가 20:10 이 아니면 자문 ↔ 정산 간격 가정이 깨짐."
+    # cycle283 재기준선 — 원 단언의 *의도* 는 "자문(OpenAI ~3분)이 끝날 시간을 주고
+    # 정산이 온다" 는 **간격 하한**이었고, 20:10 하드핀은 그 시절의 유일한 값이었다.
+    # 정산이 21:30 으로 옮겨지면서(사용자 결정 D3 — 일봉 적재 20:30 뒤로 밀기 위함)
+    # 그 간격은 10분 → 90분이 됐다. 값을 뒤집는 대신 **의도를 재표현**한다:
+    #   (a) 정산은 여전히 정확한 값에 핀(우발적 드리프트 차단)
+    #   (b) 자문↔정산 간격이 OpenAI 수용 마진(10분) 이상
+    # 그리고 이제 그 사이에 **일봉 적재(20:30)** 가 끼므로 그 순서도 함께 잠근다.
+    assert scheduler_mod.TIME_SETTLEMENT == dtime(21, 30), (
+        "TIME_SETTLEMENT 가 21:30 이 아니면 자문 ↔ 적재 ↔ 정산 순서 가정이 깨짐."
+    )
+    _rec = scheduler_mod.TIME_RECOMMENDATION
+    _set = scheduler_mod.TIME_SETTLEMENT
+    gap_min = (_set.hour * 60 + _set.minute) - (_rec.hour * 60 + _rec.minute)
+    assert gap_min >= 10, (
+        f"자문↔정산 간격 {gap_min}분 — OpenAI 호출(전략당 30s × 6 ≈ 3분) 수용 마진 부족"
+    )
+    assert _rec <= scheduler_mod.TIME_STOCK_MASTER_DAILY_LOAD < _set, (
+        "일봉 적재가 자문↔정산 사이에 있어야 한다 — 정산 뒤면 매일 0회 발화하고, "
+        "자문 앞이면 애프터마켓(~20:00) 물량을 못 담는다"
     )
 
 

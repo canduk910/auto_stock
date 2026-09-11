@@ -340,7 +340,7 @@ async def purge_old_logs() -> dict[str, int]:
     """등급별 retention 정책 적용 — INFO 2일 / WARNING+ 30일.
 
     호출 시점:
-    - settlement(20:10) 흐름의 ``_log_analysis_engine`` 직후, ``_reset_daily_state()`` *직전*
+    - settlement(21:30 — cycle283 D3) 흐름의 ``_log_analysis_engine`` 직후, ``_reset_daily_state()`` *직전*
     - scheduler 가 try/except 로 graceful 처리 (실패 시 다음 사이클 재시도)
 
     Returns:

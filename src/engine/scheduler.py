@@ -8,7 +8,7 @@
 - 15:30 KRX 메인 마감 → NXT 애프터 진입
 - 19:50 NXT 애프터 신규 매수 중단 + 16:00 AI자문 → 19:50으로 이동
 - 20:00 NXT 애프터 종료, unsubscribe
-- 20:10 정산: daily_performance 기록, 일일 로그 분석
+- 20:05 metrics 1차 스냅샷 · 20:30 일봉 적재 · 21:30 정산: daily_performance, 일일 로그 분석
 """
 
 from __future__ import annotations
@@ -63,17 +63,19 @@ TIME_POST_NXT_OPEN = time(15, 40)          # NXT 애프터 진입 (사이클 26:
 TIME_SCAN_START = time(9, 30)              # 모멘텀 스캔
 TIME_KRX_MAIN_BUY_STOP = time(15, 20)      # KRX 메인 신규 매수 중단 + 강제 청산
 TIME_KRX_MAIN_CLOSE = time(15, 30)         # KRX 메인 마감 (종가 흡수 마진 시작, _force_clear_main_only 가드 기준)
-TIME_STOCK_MASTER_DAILY_LOAD = time(18, 10)  # 사이클 122 16:00 → cycle273f(2026-09-10, D8) 18:10 — 시간외 단일가(~18:00) 물량이 그날 봉에 들어온다. ⚠️ basics(16:10)·purge·funnel·마스터·재무보다 뒤 = 유니버스 판정이 오늘치 raw(양방향 회전 위상 하루 당김, D5 와 함께)
-TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF1002R 매스 보강 (cycle273f 부터 일봉(18:10)보다 먼저 돈다 — 일봉 의존 없음)
+TIME_STOCK_MASTER_DAILY_LOAD = time(20, 30)  # 사이클 122 16:00 → cycle273f → cycle283(2026-09-11, D2) 20:30 — 09-14 부터 KRX 애프터마켓(16:00~20:00 실시간 체결) 종료 후. 일봉 거래량은 애프터마켓 동안 계속 늘어난다(09-11 실측). 전량 스윕 ~121초 → 20:32 종료. ⚠️ basics(16:10)·purge·funnel·마스터·재무보다 뒤 = 유니버스 판정이 오늘치 raw(양방향 회전 위상 하루 당김, D5 와 함께)
+TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF1002R 매스 보강 (cycle273f 부터 일봉 적재보다 먼저 돈다 — 일봉 의존 없음)
 TIME_STOCK_MASTER_MASTER_LOAD = time(16, 30)  # 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 일괄 적재 (basics task 직후 20분 마진, domain-consult 의제 5 옵션 A)
 TIME_STOCK_MASTER_FINANCIAL_LOAD = time(16, 40)  # 사이클 C3 — 퀀트 재무 (마법공식/F-Score-7) 주1회 적재 (master 16:30 후 stagger)
-TIME_STOCK_MASTER_DAILY_PURGE = time(16, 15)  # 사이클 150 — stock_master_daily T-150일 retention cron (일봉 task 16:00 적재 직후 15분 마진)
-TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)  # 사이클 171 — 저녁 잠정 funnel 캡처 (16:10 basics 직후, 16:30 마스터 직전; 일봉은 18:10 이라 이 캡처는 전일 봉 기준 — 전략 오늘봉 절단이 날짜 비교라 결과 동일. 운영자 밤 후보 확인)
+TIME_STOCK_MASTER_DAILY_PURGE = time(16, 15)  # 사이클 150 — stock_master_daily T-150일 retention cron. ⚠️ 원래는 '일봉 적재 직후 15분 마진' 이었으나 적재가 cycle273f/cycle283 으로 밀려 이제 적재보다 **4시간 15분 앞**이다(그날 적재분은 다음 날 purge 대상). 전일까지의 retention 경계만 다루므로 행위 무영향
+TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)  # 사이클 171 — 저녁 잠정 funnel 캡처 (16:10 basics 직후, 16:30 마스터 직전; 일봉 적재(20:30)보다 앞이라 이 캡처는 여전히 전일 봉 기준 — 전략 오늘봉 절단이 날짜 비교라 결과 동일. 운영자 밤 후보 확인)
 TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
 TIME_RECOMMENDATION = time(20, 0)          # AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동 — 백테스트 검증 정합성)
 TIME_FULL_UNIVERSE_LOAD = time(20, 0, 5)   # 사이클 101 — 전체 유니버스 적재 (AI자문 직후 5초 마진)
 TIME_NXT_POST_CLOSE = time(20, 0)          # NXT 애프터 종료, unsubscribe (자문과 동시 발화, 백그라운드 task 분리)
-TIME_SETTLEMENT = time(20, 10)             # 정산 + 일일 로그 분석
+TIME_SETTLEMENT = time(21, 30)             # 정산 + 일일 로그 분석 (cycle283 D3: 20:10 → 21:30 — 일봉 적재 20:30 뒤). ⚠️ 주기 task 수명 상한 = run_daily finally 가 정산 뒤 전부 cancel
+TIME_SESSION_START_CUTOFF = time(20, 0)  # cycle283 D4 — `start()` 기동 거부 경계를 `TIME_SETTLEMENT` 에서 분리. 겸하면 20:00~21:30 재기동이 `_wait_until(advance_if_passed=False)` 즉시반환으로 20:00 자문·auto_apply 를 재실행한다(종전 창 10분). 값은 매매 종료와 같지만 상수는 다르다. 상세 = src/engine/CLAUDE.md
+TIME_METRICS_SNAPSHOT = time(20, 5)      # cycle283 D5 — metrics 1차 스냅샷(OpenAI 미호출). api_metrics·strategy_funnel 은 프로세스 메모리 전용이라 정산 21:30 이동으로 유실 노출이 10분→90분 = 5분으로 축소
 SCAN_INTERVAL = 300                         # 5분마다 스캔
 SESSION_TICK_INTERVAL = 30                  # 보드 전환 감시 주기 (초)
 NEXT_DAY_STABILIZE_SECS = 30                # 익일 청산 시가 안정화 (Q2=B 단축)
@@ -561,8 +563,11 @@ class TradingScheduler:
         현재 시각에 따라 적절한 단계부터 시작한다:
         - 07:50 이전: 07:50까지 대기 후 전체 스케줄 실행
         - 07:50~15:20: 즉시 부팅 + 현재 시각 이후 스케줄부터 실행
-        - 15:20~20:10: NXT 애프터 단계, 신규 매수는 보드별 정책에 따름
-        - 20:10 이후: 장 종료, 시작 불가
+        - 15:20~20:00: NXT 애프터 단계, 신규 매수는 보드별 정책에 따름
+        - 20:00 이후: 기동 거부 (`TIME_SESSION_START_CUTOFF`)
+
+        ⚠️ cycle283 D4 — 두 경계는 이제 **다른 시각**이다: 기동 거부 20:00
+        (`TIME_SESSION_START_CUTOFF`) / 정산 21:30(`TIME_SETTLEMENT`, 일봉 적재 20:30 뒤).
         """
         if self._running:
             logger.warning("이미 실행 중")
@@ -570,10 +575,21 @@ class TradingScheduler:
 
         now = datetime.now().time()
 
-        if now >= TIME_SETTLEMENT:
-            logger.warning("장 종료 후에는 시작할 수 없습니다 (현재 %s, 정산 %s)",
-                           now.strftime("%H:%M"), TIME_SETTLEMENT.strftime("%H:%M"))
-            await write_log("WARNING", "장 종료 후 시작 시도 — 거부됨")
+        # cycle283 D4 — 거부 경계는 `TIME_SESSION_START_CUTOFF` 이고 `run_daily` 의 "이미 장
+        # 종료면 내일로" 판정도 **같은 상수**를 쓴다(갈리면 60초 주기 헛 재시도 ~90회).
+        if now >= TIME_SESSION_START_CUTOFF:
+            _cut = TIME_SESSION_START_CUTOFF.strftime("%H:%M")
+            logger.warning(
+                "장 종료 후에는 시작할 수 없습니다 (현재 %s, TIME_SESSION_START_CUTOFF=%s, "
+                "정산 %s) — 이 창의 재기동이 잃는 것: 20:30 일봉 적재 · _settle(daily_performance) "
+                "· 일일 로그 분석 · 로그 retention. 복구: daily/refresh + performance/recompute",
+                now.strftime("%H:%M"), _cut, TIME_SETTLEMENT.strftime("%H:%M"),
+            )
+            await write_log(
+                "WARNING",
+                f"장 종료 후 시작 시도 — 거부됨 (TIME_SESSION_START_CUTOFF {_cut}). 그날 "
+                "20:30 일봉 적재 · _settle(daily_performance) · 일일 로그 분석 · retention 결손",
+            )
             return
 
         self._running = True
@@ -712,7 +728,7 @@ class TradingScheduler:
             )
 
             # 사이클 171 (2026-06-22) — 매일 16:20 KST 저녁 잠정 funnel 캡처 task.
-            # 16:10 basics → 16:20 funnel → 16:30 마스터 → 18:10 일봉(cycle273f) 순서 (운영자 밤 후보 확인).
+            # 16:10 basics → 16:20 funnel → 16:30 마스터 → 20:30 일봉(cycle283 D2) 순서 (운영자 밤 후보 확인).
             # domain-consult 의제 4 우선순위 2 + 사이클 134 task_loop_helper 패턴 답습.
             self._evening_funnel_capture_task = asyncio.create_task(
                 self._evening_funnel_capture_task_loop()
@@ -874,7 +890,7 @@ class TradingScheduler:
 
             # 20:00 전략수정 AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동)
             # - 백테스트 검증 정합성 사전 확보 (Phase 3 에서 외부 MCP 백테스트 enqueue)
-            # - settlement(20:10) 와 10분 간격 — OpenAI 호출(전략당 30s × 6 = 3분) 수용 마진
+            # - 20:05 metrics 1차 스냅샷과 5분 간격 — OpenAI 호출(전략당 30s × 6 = 3분) 수용 마진 (정산은 21:30)
             try:
                 from src.engine.recommendation_engine import generate_recommendations
                 await generate_recommendations()
@@ -909,7 +925,16 @@ class TradingScheduler:
                     f"AI 자문 자동 적용 실패: {type(e).__name__}: {e!s}",
                 )
 
-            # 20:10 정산
+            # 20:05 metrics 1차 스냅샷 (cycle283 D5) — OpenAI 미호출, 저장만. ⚠️ `advance_if_passed`
+            # 기본 False 라 자문이 20:05 를 넘겨도 즉시 반환(= "자문 종료 직후"); True 면 그날 건너뜀
+            await self._wait_until(TIME_METRICS_SNAPSHOT)
+            try:
+                from src.engine.daily_metrics_snapshot import run_daily_metrics_snapshot
+                await run_daily_metrics_snapshot()
+            except Exception:
+                logger.exception("[daily_metrics_snapshot] 배선 실패 graceful")
+
+            # 21:30 정산
             await self._wait_until(TIME_SETTLEMENT)
             self._phase = "settling"
             # 사이클 62 (2026-06-05) — 가격 필터 일일 집계 (_settle 직전, Q6 자문)
@@ -1077,8 +1102,8 @@ class TradingScheduler:
                             today_start.strftime("%H:%M"), wait_secs / 60)
                 await asyncio.sleep(max(wait_secs, 0))
 
-            # 이미 장 종료 시간이면 내일로
-            if now.time() >= TIME_SETTLEMENT:
+            # 이미 장 종료 시간이면 내일로 (cycle283 D4 — `start()` 기동 거부와 **같은 상수**)
+            if now.time() >= TIME_SESSION_START_CUTOFF:
                 tomorrow_start = datetime.combine(
                     now.date() + timedelta(days=1),
                     TIME_AUTO_START,
@@ -3029,7 +3054,7 @@ class TradingScheduler:
         3. `capture_funnel_snapshots(registry, is_provisional=True)` 단계별 + step_no=99 캡처
 
         안전 가드 (관찰성 한정 — 매매 hot path diff 0):
-        - 16:10 basics → 16:20 prepare → 16:30 마스터 → 18:10 일봉(cycle273f) 순서; 캡처는 전일 봉 기준(전략 절단이 날짜 비교라 동일)
+        - 16:10 basics → 16:20 prepare → 16:30 마스터 → 20:30 일봉(cycle283 D2) 순서; 캡처는 전일 봉 기준(전략 절단이 날짜 비교라 동일)
         - 사이클 158 재시도 hook + 사이클 32 R4 보유/익일청산 보호 영속
         - 사이클 132 momentum funnel 영구 제외 (prepare 호출은 하되 _funnel_steps 미적재)
         """
@@ -3824,7 +3849,7 @@ class TradingScheduler:
         사이클 160 hotfix (2026-06-17) — 사이클 152 hotfix 결정타 결함 시정:
         사이클 152 가 `_wait_until` 본질을 깨뜨려 target 도달 시에도 break 하지 않고
         다음 날로 미루는 결함을 도입. 결과 = `run_daily()` 영역 모든 phase 전환
-        (15:20 강제청산 / 15:30 마감 / 19:50 매수중단 / 20:00 자문 / 20:10 정산) 영구
+        (15:20 강제청산 / 15:30 마감 / 19:50 매수중단 / 20:00 자문 / 정산) 영구
         누락. 6/17 운영 사례 = 알테오젠 (VB) + 알지노믹스 (LTV) 15:20 매도 누락.
 
         본질 복원 (사이클 160):

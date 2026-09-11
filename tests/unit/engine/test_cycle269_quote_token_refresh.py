@@ -320,7 +320,25 @@ def test_c9_schedule_time_invariants():
         if name.startswith("TIME_") and isinstance(val, time) and window_lo <= val <= window_hi
     )
     assert collisions == [], f"강제 재발급 창 {window_lo}~{window_hi} 와 겹치는 예정 작업: {collisions}"
-    assert TIME_STOCK_MASTER_DAILY_LOAD < T, "일봉 적재보다 뒤여야 16:00 적재를 침범하지 않는다"
+    # 🔁 cycle283 재표현 — 종전 단언 `TIME_STOCK_MASTER_DAILY_LOAD < T` 삭제.
+    #   원 의도 = "강제 재발급의 직렬화 창이 일봉 적재를 침범하지 않는다".
+    #   그 의도를 **정확히** 재는 것은 바로 위 `collisions` 창 검사이고(그 검사는
+    #   `vars(_sched)` 의 `TIME_*` 전수를 훑으므로 `TIME_STOCK_MASTER_DAILY_LOAD` 도
+    #   이미 포함한다), 부등식은 그보다 넓게 잡힌 **프록시**였다 — 적재가 창 *뒤*
+    #   (20:30)로 옮겨져도 침범은 0인데 부등식만 기각한다.
+    #   ⇒ 부등식은 창 검사에 흡수하고, 침범 0 을 **양방향**으로 명시한다.
+    assert TIME_STOCK_MASTER_DAILY_LOAD not in (
+        v for n, v in vars(_sched).items()
+        if n.startswith("TIME_") and isinstance(v, time) and window_lo <= v <= window_hi
+    ), "일봉 적재가 강제 재발급 직렬화 창 안이다 — 두 KIS 집중 작업이 겹친다"
+    _load_min = (
+        TIME_STOCK_MASTER_DAILY_LOAD.hour * 60 + TIME_STOCK_MASTER_DAILY_LOAD.minute
+    )
+    _t_min = t_dt.hour * 60 + t_dt.minute
+    assert abs(_load_min - _t_min) >= 10, (
+        f"토큰 강제 재발급(T={T})과 일봉 적재({TIME_STOCK_MASTER_DAILY_LOAD})가 "
+        f"10분 이내다 — 어느 쪽이 앞이든 KIS 호출이 겹친다"
+    )
 
 
 def test_c10_periodic_wait_times_must_be_inside_the_loop_lifetime():
@@ -330,6 +348,14 @@ def test_c10_periodic_wait_times_must_be_inside_the_loop_lifetime():
     finally 가 20:10 정산 뒤 task 를 cancel 한다. 그 뒤 시각은 매일 0회 발화한다.
     이 계열("루프 밖 시각")은 일봉 적재 23:00/05:00 안이 같은 이유로 기각됐고,
     cycle270-B(21:30)가 두 번째 재발이었다 — 세 번째를 막는다.
+
+    🔁 cycle283 주의 — `TIME_SETTLEMENT` 이 20:10 → **21:30** 으로 옮겨지면서 이 상한이
+    90분 늘었다. **상한이 늘어난 것은 정산 시각 자체가 옮겨졌기 때문이지, "루프 밖
+    시각을 다시 제안해도 된다" 는 뜻이 아니다.** 이 가드가 재는 것은 절대 시각이 아니라
+    **`TIME_SETTLEMENT` 과의 상대 관계**이고, 그 관계는 불변이다 — `run_daily` 의
+    finally 가 정산 직후 모든 주기 task 를 cancel 한다는 구조가 그대로이기 때문이다.
+    (아이러니하게도 cycle270-B 가 기각당한 그 값 21:30 이 이제 정산 시각이다. 그때
+    21:30 이 죽었던 이유는 "21:30 이라서" 가 아니라 "정산 뒤라서" 였다.)
     """
     from src.engine import scheduler as sched
     from src.engine.quote_token_refresh import TIME_QUOTE_TOKEN_REFRESH

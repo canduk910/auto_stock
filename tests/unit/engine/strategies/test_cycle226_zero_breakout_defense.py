@@ -1142,7 +1142,14 @@ _EIGHT_AREAS = [
 #    관측 훅 2곳). 자매 가드 **네 곳 전부**에 같은 값으로 핀한다 — 한 곳만 등록하면
 #    나머지가 붉어지고 그 실패 문구가 "승인된 변경을 되돌려라" 로 오도한다.
 # TODO(cycle276 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
+# ✅ 2026-09-11 (cycle283) — 저녁 창 재설계. 사용자 명시 승인 범위 = `src/engine/scanner.py`
+#    **단독**(커트오프 상수 `_DAILY_LOAD_TODAY_BAR_CUTOFF` 15:40 → 20:00 + 근거 주석·
+#    docstring 정직화). 판정식 2줄은 **텍스트 동일**이고 나머지 7영역은 diff 0 이다.
+#    자매 가드 **네 곳 전부**에 같은 값으로 핀한다.
+# TODO(cycle283 커밋 후): 아래 항목을 **삭제**한다.
 _ALLOWED_CONTENT_SHA: dict[str, str] = {
+    "src/engine/scanner.py":
+        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
     "src/engine/order_engine.py":
         "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",

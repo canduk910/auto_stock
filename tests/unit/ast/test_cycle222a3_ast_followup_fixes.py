@@ -452,7 +452,14 @@ _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 #    두 매수 경로의 관측 훅 2곳(각각 `try` / 1문 / `except Exception` 흡수기)뿐이고,
 #    A-ATOMIC 구간(`calc_buy_quantity` ~ `pending_buys.add`)은 byte 동일이다.
 #    TODO(cycle276 커밋 후): 아래 dict 를 다시 **비운다**.
+# ✅ 2026-09-11 (cycle283) — 저녁 창 재설계. 사용자 명시 승인 범위 = `src/engine/scanner.py`
+#    **단독**(커트오프 상수 `_DAILY_LOAD_TODAY_BAR_CUTOFF` 15:40 → 20:00 + 근거 주석·
+#    docstring 정직화). 판정식 2줄은 **텍스트 동일**이고 나머지 7영역은 diff 0 이다.
+#    자매 가드 **네 곳 전부**에 같은 값으로 핀한다.
+# TODO(cycle283 커밋 후): 아래 항목을 **삭제**한다.
 _APPROVED_CONTENT_SHA: dict[str, str] = {
+    "src/engine/scanner.py":
+        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     "src/engine/order_engine.py":
         "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
 }

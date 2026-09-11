@@ -59,21 +59,37 @@ async def test_log_reports_jsonb_roundtrip_returns_dict_list(clean_log_reports):
 
 
 @pytest.mark.asyncio
-async def test_log_reports_unique_target_date_returns_none(clean_log_reports):
-    """동일 target_date 재INSERT → UNIQUE 충돌 → None (중복 방지)."""
+async def test_log_reports_unique_target_date_keeps_one_row(clean_log_reports):
+    """동일 target_date 재저장 → **여전히 1행** (UNIQUE 중복 방지 계약).
+
+    🔁 **cycle283 재표현** — 종전 단언은 "재INSERT → UNIQUE 충돌 → `None`" 이었다.
+    `insert_log_report` 가 `ON CONFLICT (target_date) DO UPDATE` upsert 로 바뀌면서
+    (cycle283 D6) 그 반환 계약은 **의도적으로** 폐기됐다: 정산이 21:30 이 되면서 20:20
+    클라우드 루틴이 그날 행을 먼저 만들고, 순수 INSERT 면 그날 `metrics` JSONB 가
+    통째로 유실됐다. 이 테스트가 지키던 *원 의도*는 반환값이 아니라 **"한 영업일에 행은
+    하나"** 이고, 그 불변식은 그대로다. 비파괴 모드(`on_conflict="nothing"`)만 `None` 이다.
+    """
     from src.db import log_reports
 
     first = await log_reports.insert_log_report(
         target_date=date(2026, 7, 16), summary="a", findings=[], metrics={}, model=None,
     )
     assert first is not None
-    dup = await log_reports.insert_log_report(
+    second = await log_reports.insert_log_report(
         target_date=date(2026, 7, 16), summary="b", findings=[], metrics={}, model=None,
     )
-    assert dup is None, "target_date UNIQUE 충돌 → None."
+    assert second is not None, "upsert 는 충돌해도 행을 돌려준다 (cycle283 D6)"
+    assert second["summary"] == "b", "두 번째 저장이 base 컬럼을 덮어쓰지 않았다"
+
+    skipped = await log_reports.insert_log_report(
+        target_date=date(2026, 7, 16), summary="c", findings=[], metrics={}, model=None,
+        on_conflict="nothing",
+    )
+    assert skipped is None, "`DO NOTHING` 은 RETURNING 이 비어 None"
 
     rows = await log_reports.list_log_reports()
     assert len(rows) == 1, "UNIQUE → 1행."
+    assert rows[0]["summary"] == "b", "비파괴 모드가 기존 행을 덮었다"
 
 
 @pytest.mark.asyncio

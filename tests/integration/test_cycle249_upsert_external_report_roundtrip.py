@@ -112,20 +112,24 @@ async def test_upsert_after_openai_row_then_existing_columns_untouched(clean_log
 
 
 # ---------------------------------------------------------------------------
-# B — 빈 테이블에 upsert 가 먼저 도착: placeholder 행이 이후 insert_log_report 를 선점
+# B — 빈 테이블에 upsert 가 먼저 도착: placeholder 행 위에 OpenAI 경로가 실린다
+#     🔁 cycle283 재표현 (2026-09-11)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_upsert_before_openai_row_then_insert_log_report_returns_none(
+async def test_upsert_before_openai_row_then_insert_log_report_fills_base_columns(
     clean_log_reports,
 ):
-    """B — 빈 테이블에 `upsert_external_report` 가 먼저 행을 만들면(placeholder),
-    같은 날짜의 `insert_log_report`(OpenAI 경로, 순수 INSERT)는 `target_date`
-    UNIQUE 충돌로 **None** 을 반환한다 — `src/db/log_reports.py::upsert_external_report`
-    docstring 정정(항목 3)의 주장을 mock 없이 실증한다.
+    """B — 빈 테이블에 `upsert_external_report` 가 먼저 행을 만든(placeholder) 뒤에도
+    같은 날짜의 `insert_log_report` 가 base 9컬럼을 **정상 기록**하고 `ext_*` 는 보존된다.
 
-    정상 운영 순서(20:10 → 20:20)에서는 발생하지 않는 배치이지만, 수동 호출(디버깅·
-    백필)로 순서가 뒤집히면 그날의 OpenAI 리포트가 영구히 만들어지지 않는다는 사실을
-    이 테스트가 실 DB 로 못박는다.
+    🔁 **cycle283 재표현.** 종전 단언은 "순수 INSERT 라 UNIQUE 충돌 → `None`" 이었고,
+    그것이 이 사이클이 **고친 결함**이다: 정산이 21:30 으로 밀리면서 20:20 클라우드
+    루틴(POST 실측 20:34~20:54)이 거의 항상 **먼저** 행을 만들게 됐고, 그러면 그날
+    `metrics` JSONB 가 통째로 유실됐다(호출부 `log_analysis_engine` 이 `if row:` 뿐이라
+    조용히 끝난다). 이제 `insert_log_report` 는 `ON CONFLICT (target_date) DO UPDATE`
+    이고 SET 절이 base 9컬럼뿐이라 **양방향 보존**이 성립한다.
+
+    이 테스트가 지키는 *원 의도*(= 행은 하나 · ext_* 는 이 함수 호출값 그대로)는 그대로다.
     """
     from src.db import log_reports
 
@@ -139,20 +143,18 @@ async def test_upsert_before_openai_row_then_insert_log_report_returns_none(
     )
     assert placeholder is not None
 
-    blocked = await _insert_openai_row()
-    assert blocked is None, (
-        "placeholder 행이 있는데도 insert_log_report 가 성공했다 — "
-        "target_date UNIQUE 충돌 계약이 깨졌다"
+    written = await _insert_openai_row()
+    assert written is not None, (
+        "placeholder 행이 있다고 insert_log_report 가 None 을 돌려줬다 — "
+        "그러면 그날 `metrics` JSONB 가 통째로 유실된다 (cycle283 D6 가 고친 결함)"
     )
 
     got = await log_reports.get_log_report(_D)
     assert got is not None
-    # INSERT 경로의 기존 컬럼 기본값(호출자 데이터를 심지 않는다) — cycle249 계약.
-    assert got["summary"] == "", got["summary"]
-    assert got["findings"] == [], got["findings"]
-    assert got["metrics"] == {}, got["metrics"]
-    assert got["model"] is None, got["model"]
-    # ext_* 는 placeholder 호출값 그대로.
+    # base 컬럼 = OpenAI 경로가 덮어쓴 값 (cycle283: 종전에는 빈 placeholder 값이었다)
+    assert got["summary"] != "", "base 컬럼이 placeholder 빈 값에 고착됐다"
+    assert got["model"] is not None
+    # ext_* 는 placeholder 호출값 그대로 — 두 SET 절의 교집합이 공집합이라 상호 보존.
     assert got["ext_provider"] == "claude-code"
     assert got["ext_summary"] == "OpenAI 경로보다 먼저 도착한 외부 분석"
 

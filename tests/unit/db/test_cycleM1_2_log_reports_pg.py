@@ -122,7 +122,18 @@ async def test_insert_log_report_created_at_is_datetime():
 
 @pytest.mark.asyncio
 async def test_insert_log_report_unique_conflict_returns_none():
-    """target_date UNIQUE 충돌 시 None (기존 duplicate key/23505 분기 보존)."""
+    """duplicate key/23505 예외가 올라오면 None (방어 분기 보존).
+
+    🔁 cycle283 재서술 — `insert_log_report` 가 `ON CONFLICT (target_date) DO UPDATE`
+    upsert 가 되면서 이 분기는 **정상 경로에서 도달 불가**해졌다. 이 테스트는 pg 대역에
+    duplicate 예외를 *강제 주입*하므로 여전히 통과하지만, 재는 대상이 달라졌다:
+    이제 이 분기는 **`ON CONFLICT` 타깃이 어긋났을 때만 사는 종**이다(예: 누가
+    `ON CONFLICT (id)` 로 바꾸거나 UNIQUE 제약을 다른 컬럼으로 옮기면 실 DB 가 여기로
+    떨어진다). 삭제하지 않는다 — 삭제하면 그 회귀를 아무도 못 본다.
+    ⚠️ 대신 "정상 재실행이 None 을 돌려준다" 는 **계약이 아니다**(cycle283 이후
+    정상 재실행은 갱신된 행을 돌려준다). 그 계약은
+    `tests/unit/db/test_cycle283_log_report_upsert.py` 가 정본으로 잰다.
+    """
     from src.db import log_reports
 
     with patch.object(log_reports, "pg", create=True) as pg_mod:

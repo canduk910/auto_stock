@@ -1,4 +1,4 @@
-"""cycle273 D8 — 일봉 적재 16:00 → **18:10** 이동 (Red).
+"""cycle273 D8 — 일봉 적재 16:00 → 18:10 이동 / **cycle283 재기준선: 18:10 → 20:30**.
 
 정본 = `_workspace/red/cycle273f_daily_load_1810_spec.md` ·
 조사 `_workspace/analysis/2026-09-10_cycle273_UD_load_and_ui.md` §D8.
@@ -19,7 +19,25 @@
   그날 거래대금이 9억이면 18:10 로 옮겨도 여전히 빠진다.
 - 미확인 1건: NXT 애프터(~20:00) 물량이 이 일봉에 잡히는지는 **여전히 미확인**.
 
-⚠️ `scheduler.py` 는 8영역은 아니지만 **라인 상한(<3,900L)** 때문에 같은 승인 대상이다.
+⚠️ `scheduler.py` 는 8영역은 아니지만 **라인 상한(<3,900L — cycle257 영구 상한이 정본, 4,000 은 구 상한)** 때문에 같은 승인 대상이다.
+
+────────────────────────────────────────────────────────────────────────────
+🔁 cycle283 재기준선 (2026-09-11, 사용자 결정 D2) — 적재 18:10 → **20:30**
+────────────────────────────────────────────────────────────────────────────
+위 "미확인 1건: NXT 애프터(~20:00) 물량이 이 일봉에 잡히는지" 가 09-11 에 **실측으로
+해소**됐다 — 일봉 OHLC 는 15:30 확정이지만 **거래량·거래대금은 시간외 거래 동안 계속
+증가**한다. 게다가 09-14(월)부터 KRX 애프터마켓(16:00~20:00 실시간 체결)이 신설돼
+그날 거래가 20:00 에 끝난다 ⇒ 18:10 적재는 **매일** 부분 거래량을 담는다.
+
+이 파일의 단언 중 **의도를 재표현**한 것 둘:
+- `test_g273f_2d` 의 `DAILY_LOAD < TIME_NXT_POST_BUY_STOP(19:50)` — 원 의도는
+  "장중 침범 0 · 정산 전 완료" 였고 19:50 은 그 시절의 *매매 종료 프록시*였다.
+  매매는 이제 20:00(`TIME_NXT_POST_CLOSE`)에 끝나므로 20:30 은 침범이 아니다.
+  ⇒ `TIME_NXT_POST_CLOSE <= DAILY_LOAD < TIME_SETTLEMENT` 로 재표현한다.
+- `test_g273f_3` 의 `DAILY_LOAD < TIME_QUOTE_TOKEN_REFRESH(19:00)` — 원 의도는
+  "토큰 재발급 직렬화 창과 겹치지 않는다" 이고, 그것을 **정확히** 재는 것은 바로
+  아래 줄의 창 검사(`not (18:50 <= DAILY_LOAD <= 19:08)`)다. 부등식은 그 의도보다
+  넓게 잡힌 프록시였을 뿐이라 창 검사에 **흡수**한다(삭제 사유 = 중복 프록시).
 """
 from __future__ import annotations
 
@@ -34,7 +52,7 @@ import src.engine.scheduler as sched
 
 pytestmark = pytest.mark.unit
 
-_NEW = time(18, 10)
+_NEW = time(20, 30)  # cycle283 (구 18:10 — cycle273f)
 
 
 # ===========================================================================
@@ -42,11 +60,11 @@ _NEW = time(18, 10)
 # ===========================================================================
 
 def test_g273f_1_daily_load_time_moved_to_1810():
-    """`TIME_STOCK_MASTER_DAILY_LOAD = time(18, 10)`.
+    """`TIME_STOCK_MASTER_DAILY_LOAD = time(20, 30)` (cycle283 재기준선).
 
-    RED = 현행 `time(16, 0)`. 이 단언이 초록이 되는 순간
-    `tests/unit/engine/test_cycle122_daily_load_task.py::test_sched1_*`
-    (`== time(16, 0)`)가 RED 가 된다 — **같은 커밋에서 갱신**한다(spec §6).
+    RED = 현행 `time(18, 10)`. 이 단언이 초록이 되는 순간
+    `tests/unit/engine/test_cycle122_daily_load_task.py::test_g_sched1_*`
+    도 함께 갱신돼야 한다 — **같은 커밋에서** (cycle273f 때와 같은 규약).
     """
     assert sched.TIME_STOCK_MASTER_DAILY_LOAD == _NEW, (
         f"실측 {sched.TIME_STOCK_MASTER_DAILY_LOAD}"
@@ -66,9 +84,10 @@ def test_g273f_1b_wiring_still_passes_the_constant():
               and n.name == "stock_master_daily_load_task_loop")
     body = ast.get_source_segment(dsrc, fn)
     assert "time(" not in body, "facade 에 시각 리터럴이 생겼다(정본 이원화)"
-    assert "16:00" not in body, (
-        "주석의 `16:00` 이 남아 있다 — 시각 이동 사이클은 주석도 함께 옮긴다"
-    )
+    for stale in ("16:00", "18:10"):
+        assert stale not in body, (
+            f"주석의 `{stale}` 이 남아 있다 — 시각 이동 사이클은 주석도 함께 옮긴다"
+        )
 
 
 # ===========================================================================
@@ -76,9 +95,10 @@ def test_g273f_1b_wiring_still_passes_the_constant():
 # ===========================================================================
 
 def test_g273f_2_no_scheduled_work_collides_with_the_load_window():
-    """적재 창(18:10~18:12, 실측 소요 ~2분 + 여유 10분)과 겹치는 예정 작업 0건.
+    """적재 창(20:30~20:40, 실측 전량 ~121초 + 여유)과 겹치는 예정 작업 0건.
 
-    실측 = 09-10 16:00~16:02 에 1,003종목 완료. 다음 예정 작업(19:50)까지 1시간 38분 여유.
+    실측 = 09-10 16:00~16:02 에 1,003종목 완료(전량 스윕은 ~121초). 창 `[20:30, 20:40]`
+    안에 다른 `TIME_*` 가 하나도 없어야 하고, 정산(21:30)까지 50분 여유가 남는다.
     """
     lo = _NEW
     hi = (datetime(2026, 9, 10, _NEW.hour, _NEW.minute) + timedelta(minutes=10)).time()
@@ -114,10 +134,20 @@ def test_g273f_2c_side_effect_is_explicit_universe_uses_todays_raw():
 
 
 def test_g273f_2d_still_after_market_close_and_before_settlement():
-    """장중 침범 0 · 정산 전 완료 — 시각 이동의 바깥 울타리."""
+    """장중 침범 0 · 정산 전 완료 — 시각 이동의 바깥 울타리(cycle283 재표현).
+
+    종전 단언은 `DAILY_LOAD < TIME_NXT_POST_BUY_STOP(19:50)` 이었다. 19:50 은 "NXT
+    애프터 **신규 매수** 중단" 시각이고, 그 시절엔 그게 곧 '거래가 끝나는 시각' 의
+    프록시였다. 09-14 제도 변경 이후 거래는 `TIME_NXT_POST_CLOSE(20:00)` 에 끝나므로
+    프록시를 **진짜 경계**로 바꾼다 — 20:30 은 19:50 보다 뒤지만 침범이 아니다.
+    """
     assert sched.TIME_KRX_MAIN_CLOSE < sched.TIME_STOCK_MASTER_DAILY_LOAD
-    assert sched.TIME_STOCK_MASTER_DAILY_LOAD < sched.TIME_NXT_POST_BUY_STOP
-    assert sched.TIME_STOCK_MASTER_DAILY_LOAD < sched.TIME_SETTLEMENT
+    assert sched.TIME_NXT_POST_CLOSE <= sched.TIME_STOCK_MASTER_DAILY_LOAD, (
+        "적재가 매매 종료(20:00)보다 앞이면 그날 봉을 장중에 긁는 것이다"
+    )
+    assert sched.TIME_STOCK_MASTER_DAILY_LOAD < sched.TIME_SETTLEMENT, (
+        "정산(= 루프 수명 상한) 전에 끝나지 않으면 매일 0회 발화한다"
+    )
 
 
 # ===========================================================================
@@ -125,16 +155,20 @@ def test_g273f_2d_still_after_market_close_and_before_settlement():
 # ===========================================================================
 
 def test_g273f_3_quote_token_refresh_window_still_clear():
-    """`TIME_STOCK_MASTER_DAILY_LOAD < TIME_QUOTE_TOKEN_REFRESH` 유지 + 창 겹침 0.
+    """일봉 적재가 토큰 재발급 **직렬화 창**과 겹치지 않는다 (cycle283 재표현).
+
+    종전에는 `DAILY_LOAD < TIME_QUOTE_TOKEN_REFRESH` 부등식이 함께 있었다. 그 부등식의
+    *의도*는 "직렬화 창 침범 금지" 이고, 그것을 **정확히** 재는 것은 아래 창 검사다
+    (부등식은 그보다 넓게 잡힌 프록시라 20:30 처럼 창 **뒤**인 값도 기각한다).
+    ⇒ 부등식은 창 검사에 흡수하고 삭제했다. `test_cycle269::test_c9` 의 쌍둥이
+    단언도 같은 사유로 같이 재표현한다.
 
     `test_cycle269_quote_token_refresh.py::test_c9_schedule_time_invariants` 가
-    `scheduler.TIME_*` 전수를 `[T−10분, T+8분]` 창으로 훑는다. 18:10 은 21:30 기준
-    그 창 밖이지만, **T 를 옮기는 후속 사이클은 반드시 이 창을 다시 계산해야 한다**
-    — `T ∈ [18:02, 18:20]` 은 이제 금지 구간이다.
+    `scheduler.TIME_*` 전수를 `[T−10분, T+8분]` 창으로 훑는다 — **T 를 옮기는 후속
+    사이클은 반드시 이 창을 다시 계산해야 한다.**
     """
     from src.engine.quote_token_refresh import TIME_QUOTE_TOKEN_REFRESH as T
 
-    assert sched.TIME_STOCK_MASTER_DAILY_LOAD < T
     base = datetime(2026, 9, 10)
     t_dt = base.replace(hour=T.hour, minute=T.minute)
     lo = (t_dt - timedelta(minutes=10)).time()
@@ -190,9 +224,13 @@ def test_g273f_4b_strategies_cut_today_bar_by_date_comparison():
 def test_g273f_5_engine_claude_md_states_the_new_time():
     root = Path(inspect.getfile(sched)).resolve().parent
     text = (root / "CLAUDE.md").read_text(encoding="utf-8")
-    assert "TIME_STOCK_MASTER_DAILY_LOAD = time(18, 10)" in text, (
-        "`src/engine/CLAUDE.md` 시각 표가 옛 16:00 을 말한다 — 문서가 코드보다 "
+    assert "TIME_STOCK_MASTER_DAILY_LOAD = time(20, 30)" in text, (
+        "`src/engine/CLAUDE.md` 시각 표가 옛 값(16:00/18:10)을 말한다 — 문서가 코드보다 "
         "성기면 다음 포팅이 또 어긋난다(D3 가 그 사례다)"
+    )
+    assert "time(18, 10)" not in text, (
+        "옛 18:10 서술이 남아 있다 — 같은 문서 안에 두 값이 공존하면 `:209`/`:496` 이 "
+        "서로 어긋났던 cycle273f 의 상태로 되돌아간다"
     )
 
 

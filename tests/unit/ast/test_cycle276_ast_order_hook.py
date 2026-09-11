@@ -330,19 +330,23 @@ _BASE_PLACE_KWARGS_DICT = ["exchange", "price", "quantity", "side", "ticker"]
 # ⚠️ **핀을 먼저 재산출하지 마라** — 그 순간 실제 변경이 새 스냅샷으로 봉인된다.
 #    1) `git diff 34ba9e6 -- <path>` 를 눈으로 읽어라. 2) 범위 밖이면 되돌려라.
 #    3) 이 사이클은 이 파일들을 바꾸지 않는다 — 재산출할 일이 없다.
+# 🔁 2026-09-11 (cycle283) 재핀 — 저녁 창 재설계가 `scanner.py`(8영역, 사용자 승인)와
+#    `scheduler.py`(라인 상한 승인 대상)를 바꿨다. 이 사이클의 변경이 아니라 **다른
+#    사이클의 승인된 변경**이므로 값만 현재 워킹트리로 재산출한다(cycle274→cycle276
+#    승계 때와 같은 절차). 나머지 핀은 불변이다.
 _BASE_SHA = {
     "src/engine/risk.py":
         "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "f999183c7b92b29e0a9fc1222161e4c6c978a7baaef6603173ead48e65944b99",
+        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
         "ccd430b445358062a41b6b37f8e4d379b9a97c24090ab5133aa83ae829207115",
     "src/engine/scheduler.py":
-        "e083419ca01dda278ea93b9943b1682b2ea253419dd696109003df2fdb06dff3",
+        "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     "src/auth/token.py":
@@ -718,10 +722,10 @@ def test_c5_1b_realtime_and_auth_have_no_new_python_files() -> None:
     assert seen <= set(_BASE_SHA), f"8영역 디렉터리에 신규 파일: {sorted(seen - set(_BASE_SHA))}"
 
 
-def test_c5_2_scheduler_line_count_is_3872() -> None:
-    """C13 — `scheduler.py` 는 이 사이클에서 무접촉이라 3,872L 그대로다."""
+def test_c5_2_scheduler_line_count_is_3897() -> None:
+    """C13 — `scheduler.py` 는 이 사이클에서 무접촉이라 3,897L 그대로다(cycle283 재핀)."""
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3872, f"scheduler.py {lines}L (기대 3,872 — cycle276 은 무접촉)"
+    assert lines == 3897, f"scheduler.py {lines}L (기대 3,897 — cycle276 은 무접촉; cycle283 뒤 재핀)"
 
 
 def test_c5_3_scheduler_line_cap_is_not_looser_than_cycle257() -> None:
@@ -863,21 +867,37 @@ def test_c6_4b_cycle223_sibling_content_pin_matches_current_source() -> None:
         )
 
 
+#: `_APPROVED_CONTENT_SHA`(= `test_cycle222a3_ast_followup_fixes.py`)에 등록돼도 좋은
+#: 8영역 파일 — **사용자 승인을 받은 사이클만** 여기 한 줄을 더한다.
+#:   · `order_engine.py` = cycle276(AI 매수평가 주문 발화 시점 이동)
+#:   · `scanner.py`      = cycle283(오늘봉 커트오프 15:40 → 20:00)
+_APPROVED_EIGHT_AREA_PINS = {_ORDER_ENGINE_REL, "src/engine/scanner.py"}
+
+
 def test_c6_4c_cycle222a3_approves_only_order_engine() -> None:
-    """C14 (HIGH) — 8영역 diff 가드에 `order_engine.py` **1건만** 승인 등록된다.
+    """C14 (HIGH) — 8영역 diff 가드의 승인 등록이 **명시 목록과 정확히 일치**한다.
 
     승인 sha 핀은 "이 사이클이 이 파일을 바꾼다" 는 명시 선언이자 자기소멸 기전이다
     (내용이 1 byte 라도 더 바뀌면 FAIL, 커밋되면 diff 에서 사라져 죽은 값이 된다).
-    다른 8영역 파일이 이 dict 에 들어가면 승인 범위가 조용히 넓어진다.
+    등록되지 않은 8영역 파일이 이 dict 에 들어가면 승인 범위가 조용히 넓어진다.
+
+    🔁 2026-09-11 (cycle283) 재표현 — 종전에는 `{order_engine.py}` 하나로 하드코딩돼
+    있었다. 그 서술의 *의도*는 "이 사이클이 바꾸는 파일 하나뿐" 이 아니라 **"승인 목록이
+    조용히 늘지 않는다"** 이고, 후속 사이클이 사용자 승인을 받아 다른 8영역 파일을
+    등록하는 것은 그 의도를 깨지 않는다. 그래서 기대 집합을 모듈 상수
+    `_APPROVED_EIGHT_AREA_PINS` 로 올려 **명시적으로만** 늘어나게 했다 —
+    cycle283 이 `scanner.py`(커트오프 20:00, 사용자 승인)를 추가한 것이 그 첫 사례다.
     """
     mod = _AST_DIR / "test_cycle222a3_ast_followup_fixes.py"
     text = mod.read_text(encoding="utf-8")
     m = re.search(r"_APPROVED_CONTENT_SHA: dict\[str, str\] = \{(.*?)\n\}", text, re.S)
     assert m, "`_APPROVED_CONTENT_SHA` dict 를 찾지 못했다"
     entries = dict(re.findall(r'"([^"]+)"\s*:\s*\n?\s*"([0-9a-f]{64})"', m.group(1)))
-    assert set(entries) == {_ORDER_ENGINE_REL}, (
-        f"승인 등록 {sorted(entries)} (기대 {{{_ORDER_ENGINE_REL}}} 하나뿐)"
+    assert set(entries) == _APPROVED_EIGHT_AREA_PINS, (
+        f"승인 등록 {sorted(entries)} (기대 {sorted(_APPROVED_EIGHT_AREA_PINS)}) — "
+        "새 항목은 **사용자 승인을 받은 사이클만** 추가한다"
     )
-    assert entries[_ORDER_ENGINE_REL] == _content_sha(_ORDER_ENGINE_REL), (
-        "승인 sha 핀이 현재 `order_engine.py` 내용과 다르다 — 등록 후 추가 편집"
-    )
+    for rel_path, pinned in entries.items():
+        assert pinned == _content_sha(rel_path), (
+            f"승인 sha 핀이 현재 `{rel_path}` 내용과 다르다 — 등록 후 추가 편집"
+        )

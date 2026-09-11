@@ -252,15 +252,18 @@ async def test_g_scan5_graceful_on_kis_failure():
 
 
 # ---------------------------------------------------------------------------
-# G-SCHED1 (HIGH) — TIME_STOCK_MASTER_DAILY_LOAD = 16:00 KST
+# G-SCHED1 (HIGH) — TIME_STOCK_MASTER_DAILY_LOAD = 20:30 KST (cycle283)
 # ---------------------------------------------------------------------------
-def test_g_sched1_time_constant_is_16_00():
-    """TIME_STOCK_MASTER_DAILY_LOAD = time(18, 10) — cycle273f(2026-09-10, 사용자 결정 D8)로 16:00 에서 이동.
+def test_g_sched1_time_constant_is_20_30():
+    """TIME_STOCK_MASTER_DAILY_LOAD = time(20, 30) — cycle283(2026-09-11, 사용자 결정 D2).
 
-    종전 16:00(KRX 메인 종료 30분 후 안전 마진)은 시간외 단일가(~18:00) 물량을 다음날 보정에 맡겼다.
-    18:10 은 그날 봉에 그 물량이 들어오고, 19:00 토큰 재발급(문턱 18:50)·20:00 자문 앞에 끝난다.
+    이력: 16:00(사이클 122) → 18:10(cycle273f, 시간외 단일가 ~18:00 물량) → **20:30**.
+    09-14(월)부터 KRX 애프터마켓 16:00~20:00 실시간 체결이 신설돼 그날 거래가 20:00 에
+    끝나고, 일봉 **거래량**은 그동안 계속 는다(09-11 실측: OHLC 는 15:30 확정, 거래량은
+    시간외 내내 증가 — 16:14 저장분 대비 중앙값 +0.51%·최대 +13.97%).
+    20:30 은 애프터마켓 종료 후이고, 실측 전량 스윕 121초라 정산(21:30) 앞에 끝난다.
     """
-    assert scheduler.TIME_STOCK_MASTER_DAILY_LOAD == time(18, 10)
+    assert scheduler.TIME_STOCK_MASTER_DAILY_LOAD == time(20, 30)
 
 
 # ---------------------------------------------------------------------------

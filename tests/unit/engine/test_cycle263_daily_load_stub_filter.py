@@ -13,13 +13,13 @@
 - **(가)** `data_load_tasks.stock_master_daily_load_task_loop` 의 `run_periodic_task_loop`
   호출에 `immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS`(20.0) 추가 — 8영역 밖.
 - **(다)** `scanner._stock_master_daily_load_once` 가 `fetched += 1` **뒤** ·
-  `upsert_batch` **앞**에서 **함수 진입 시각이 15:40 KST 이전이면 `bas_dd == today` 캔들을
+  `upsert_batch` **앞**에서 **함수 진입 시각이 20:00 KST(cycle283) 이전이면 `bas_dd == today` 캔들을
   폐기** — 8영역(사용자 결정 09-06 카드 ④ 승인).
 
 ────────────────────────────────────────────────────────────────────────────
 Green 이 맞춰야 하는 seam (이 파일이 정의하는 계약)
 ────────────────────────────────────────────────────────────────────────────
-1) `scanner._DAILY_LOAD_TODAY_BAR_CUTOFF: datetime.time = time(15, 40)`
+1) `scanner._DAILY_LOAD_TODAY_BAR_CUTOFF: datetime.time = time(20, 0)`  # cycle283 (구 15:40)
    — scanner.py **전용 상수**(매매 시각 상수 `TIME_POST_NXT_OPEN` 재사용 금지, C5).
 2) `scanner._drop_today_bars(candles, *, now_kst, today) -> list[dict]`
    — 순수 함수(부작용·await 0). 입력 리스트 비파괴. 판정 규칙:
@@ -30,7 +30,7 @@ Green 이 맞춰야 하는 seam (이 파일이 정의하는 계약)
    필터 호출을 `try/except` 로 감싸 예외 시 **원본 전량 upsert**(C4 fail-open) +
    `[daily_load_today_filter_skipped]` WARNING **실행당 최대 1행**.
 4) 관측 마커 `[daily_load_today_bar_filter]` — **실행당 정확히 1행** INFO
-   (`mode=drop|keep cutoff=15:40 now=HH:MM today=YYYY-MM-DD dropped_rows=N
+   (`mode=drop|keep cutoff=20:00 now=HH:MM today=YYYY-MM-DD dropped_rows=N
    tickers_affected=M`). 종목당 emit 금지(cycle237 로그 폭주 교훈).
 
 Red 유효성(현재 소스):
@@ -46,6 +46,26 @@ Red 유효성(현재 소스):
 
 ⚠️ 의미 반전(C8): 시정 후 16:00 의 `skipped_fresh` 가 ~1,000 → ~0 이 된다.
    배포 전후 로그를 같은 grep 으로 **합산 금지**.
+
+────────────────────────────────────────────────────────────────────────────
+🔁 cycle283 재기준선 (2026-09-11, 사용자 결정 D1) — 커트오프 15:40 → **20:00**
+────────────────────────────────────────────────────────────────────────────
+09-14(월)부터 KRX 애프터마켓(16:00~20:00 실시간 체결)이 신설돼 **그날 거래가 20:00 에
+끝난다**. 15:40 컷오프는 그 뒤의 모든 실행(정기·재기동 immediate·`force=True`)이
+**부분 거래량 봉**을 확정봉으로 받아들이게 한다 — 09-11(금) 사고의 직접 원인이다
+(16:14 재기동 immediate 가 1,005종목의 부분봉을 박고 18:10 정기가 908종목을
+`skipped_fresh` 로 건너뜀; 40종목 대조 중앙값 **+0.51%**, 최대 **+13.97%**).
+
+이 파일이 재기준선한 것은 **커트오프 값과 그 값을 전제한 시각들**뿐이고, 각 단언의
+*의도*(시각 단독 판정 · fail-open · 실행당 1행 관측 · 보정 창 존치)는 그대로다.
+가장 중요한 변경은 §G 시뮬의 **시장 모델**이다 — 종전 `_sim_kis_response` 는
+"15:40 이후면 KIS 가 오늘 **확정봉**을 준다" 고 모델링했는데, 그것이 바로 이 사이클이
+반증하는 명제다. 그 모델을 두면 회귀 스위트가 09-11 결함을 **구조적으로 재현할 수
+없다**. 이제 15:30~20:00 은 OHLC 동일 + **거래량 부분값**(`_sim_partial`)을 준다.
+
+⚠️ 의미 반전 ②: `[daily_load_today_bar_filter] mode=` 이 **세 번째 세대**다
+   (원본 / cycle263 / cycle283). 15:40~20:00 구간 실행의 `mode` 가 keep → **drop**
+   으로 뒤집힌다. 3세대 로그 합산 금지.
 """
 
 from __future__ import annotations
@@ -464,7 +484,7 @@ def test_B1_before_cutoff_drops_only_today_bar():
 
 
 def test_B2_after_cutoff_keeps_flat_zero_volume_today_bar():
-    """C3 반증 2 — 16:05 진입 + 거래량 0·OHLC 평탄 오늘봉 = **거래정지 종목의 진짜 확정봉**.
+    """C3 반증 2 — 20:05 진입 + 거래량 0·OHLC 평탄 오늘봉 = **거래정지 종목의 진짜 확정봉**.
 
     데이터 기준(거래량 0 ∧ 평탄)으로 구현하면 이 행을 영영 못 갖는다 → 붉어져야 한다.
     """
@@ -472,11 +492,11 @@ def test_B2_after_cutoff_keeps_flat_zero_volume_today_bar():
     candles = [flat_today, _bar(_D1, close=10000, vol=5000)]
 
     kept = scanner._drop_today_bars(
-        candles, now_kst=_kst_at(_TODAY, 16, 5), today=_TODAY
+        candles, now_kst=_kst_at(_TODAY, 20, 5), today=_TODAY
     )
 
     assert [c["stck_bsop_date"] for c in kept] == [_ymd(_TODAY), _ymd(_D1)], (
-        "15:40 이후 = 확정봉 시각 — 진짜 무거래봉(하루 1~8건) 100% 보존 의무"
+        "20:00 이후 = 확정봉 시각(cycle283) — 진짜 무거래봉(하루 1~8건) 100% 보존 의무"
     )
 
 
@@ -500,10 +520,15 @@ def test_B3_before_cutoff_drops_intraday_partial_bar():
 
 @pytest.mark.parametrize(
     "hh,mm,expect_dropped",
-    [(15, 39, True), (15, 40, False), (15, 41, False), (0, 0, True)],
+    [(19, 59, True), (20, 0, False), (20, 1, False), (0, 0, True), (15, 40, True)],
 )
-def test_B4_cutoff_boundary_is_15_40(hh, mm, expect_dropped):
-    """C2/C5 — 커트오프 경계는 15:40 KST (15:39 폐기 / 15:40 보존)."""
+def test_B4_cutoff_boundary_is_20_00(hh, mm, expect_dropped):
+    """C2/C5 — 커트오프 경계는 **20:00** KST (19:59 폐기 / 20:00 보존, cycle283).
+
+    `(15, 40, True)` 가 재기준선의 심장이다 — 구 컷오프 시각이 이제 **폐기 쪽**이라는
+    사실을 못 박는다. 이 항이 없으면 누가 값을 15:40 으로 되돌려도 나머지 세 항만으로는
+    아무것도 붉어지지 않는다.
+    """
     candles = [_bar(_TODAY, close=10100, vol=12), _bar(_D1, close=10000, vol=5000)]
 
     kept = scanner._drop_today_bars(
@@ -517,12 +542,12 @@ def test_B4_cutoff_boundary_is_15_40(hh, mm, expect_dropped):
 
 
 def test_B5_after_cutoff_still_drops_future_dated_bar():
-    """C2 — 15:40 이후에도 `bas_dd > today` 는 폐기 (시계 왜곡 방어)."""
+    """C2 — 20:00 이후에도 `bas_dd > today` 는 폐기 (시계 왜곡 방어)."""
     future = _bar(_TODAY + timedelta(days=1), close=10500, vol=100)
     candles = [future, _bar(_TODAY, close=10100, vol=9000)]
 
     kept = scanner._drop_today_bars(
-        candles, now_kst=_kst_at(_TODAY, 16, 5), today=_TODAY
+        candles, now_kst=_kst_at(_TODAY, 20, 5), today=_TODAY
     )
 
     assert [c["stck_bsop_date"] for c in kept] == [_ymd(_TODAY)], (
@@ -595,17 +620,17 @@ async def test_C2_counters_unchanged_when_all_candles_dropped():
     assert h.upsert.all_dates == [], "오늘봉 단독 응답 → 기록 0행"
 
 
-@freeze_time("2026-09-08T16:05:00+09:00")
+@freeze_time("2026-09-08T20:05:00+09:00")
 @pytest.mark.asyncio
 async def test_C3_evening_run_writes_today_real_bar():
-    """C2 — 16:05 실행은 오늘 확정봉을 그대로 기록한다 (16:00 이 비로소 일을 한다)."""
+    """C2 — 20:05 실행은 오늘 확정봉을 그대로 기록한다 (20:30 정기가 비로소 일을 한다)."""
     def _candles(_t):
         return [_bar(_TODAY, close=10250, vol=812_004), _bar(_D1, close=10000, vol=5000)]
 
     h = _LoadHarness(candles_fn=_candles, latest=_D1)
     await h.run()
 
-    assert _ymd(_TODAY) in h.upsert.all_dates, "15:40 이후 = 확정봉 기록 의무"
+    assert _ymd(_TODAY) in h.upsert.all_dates, "20:00 이후 = 확정봉 기록 의무(cycle283)"
 
 
 @freeze_time("2026-09-07T22:56:00")
@@ -735,7 +760,7 @@ async def test_D1_filter_marker_emitted_once_per_run_with_fields(caplog):
     )
     line = rows[0].getMessage()
     assert _field(line, "mode") == "drop"
-    assert _field(line, "cutoff") == "15:40"
+    assert _field(line, "cutoff") == "20:00"
     assert _field(line, "now") == "07:56"
     assert _field(line, "today") == _TODAY.isoformat()
     assert _field(line, "dropped_rows") == "50", (
@@ -747,10 +772,10 @@ async def test_D1_filter_marker_emitted_once_per_run_with_fields(caplog):
     assert _field(line, "filter_errors") == "0", "정상 경로는 판정 실패 0"
 
 
-@freeze_time("2026-09-08T16:05:00+09:00")
+@freeze_time("2026-09-08T20:30:00+09:00")
 @pytest.mark.asyncio
 async def test_D2_filter_marker_emitted_in_keep_mode_too(caplog):
-    """C7 — 16:05 실행도 1행(`mode=keep dropped_rows=0`) — 관측 연속성."""
+    """C7 — 20:30 정기 실행도 1행(`mode=keep dropped_rows=0`) — 관측 연속성."""
     def _candles(_t):
         return [_bar(_TODAY, close=10250, vol=812_004), _bar(_D1, close=10000, vol=5000)]
 
@@ -955,10 +980,14 @@ async def test_I1_weekend_manual_backfill_is_untouched_by_filter(caplog):
     assert _field(line, "dropped_rows") == "0", "주말은 오늘 날짜 봉 자체가 없다 = 폐기 0"
 
 
-@freeze_time("2026-09-08T17:00:00+09:00")
+@freeze_time("2026-09-08T20:35:00+09:00")
 @pytest.mark.asyncio
 async def test_I2_after_cutoff_manual_force_records_today_confirmed_bar():
-    """평일 17:00 `force=True`(16:00 실패 후 수동 복구) → 오늘 **확정봉** 기록."""
+    """평일 20:35 `force=True`(20:30 실패 후 수동 복구) → 오늘 **확정봉** 기록.
+
+    cycle283 재기준선 — 종전 17:00 은 이제 컷오프 **이전**이라 같은 의도를 재려면
+    시각을 20:00 뒤로 옮겨야 한다. 의도("컷오프 이후 수동 복구는 확정봉을 기록")는 불변.
+    """
     def _candles(_t):
         return [_bar(_TODAY, close=10250, vol=812_004), _bar(_D1, close=10000, vol=5000)]
 
@@ -967,7 +996,7 @@ async def test_I2_after_cutoff_manual_force_records_today_confirmed_bar():
 
     assert summary["skipped_fresh"] == 0, "force 는 latest==today 여도 fetch 한다"
     assert h.upsert.all_dates.count(_ymd(_TODAY)) == 1, (
-        f"15:40 이후 수동 복구는 오늘 확정봉을 기록해야 한다 (실측 {h.upsert.all_dates})"
+        f"20:00 이후 수동 복구는 오늘 확정봉을 기록해야 한다 (실측 {h.upsert.all_dates})"
     )
 
 
@@ -1009,12 +1038,17 @@ async def test_I4_without_force_fresh_skip_is_unchanged():
 # ══════════════════════════════════════════════════════════════════════
 # F. 상수/구조 가드 — C5/C6
 # ══════════════════════════════════════════════════════════════════════
-def test_F1_cutoff_constant_is_scanner_local_literal_15_40():
-    """C5 — `_DAILY_LOAD_TODAY_BAR_CUTOFF = time(15, 40)` 이 scanner.py 모듈 레벨 리터럴."""
+def test_F1_cutoff_constant_is_scanner_local_literal_20_00():
+    """C5 — `_DAILY_LOAD_TODAY_BAR_CUTOFF = time(20, 0)` 이 scanner.py 모듈 레벨 리터럴.
+
+    cycle283 재기준선: 값만 20:00 으로 옮긴다. **"scanner 지역 리터럴 의무" 는 유지**
+    — scheduler 의 매매/보드 시각 상수를 import 해 쓰면 매수 보드 시각 변경이 적재
+    규약을 딸려 바꾼다(C5 원칙 불변, `test_F2` 가 그 축을 따로 지킨다).
+    """
     assert hasattr(scanner, "_DAILY_LOAD_TODAY_BAR_CUTOFF"), (
         "C5 위반 — scanner 전용 커트오프 상수 부재"
     )
-    assert scanner._DAILY_LOAD_TODAY_BAR_CUTOFF == dtime(15, 40)
+    assert scanner._DAILY_LOAD_TODAY_BAR_CUTOFF == dtime(20, 0)
 
     tree = ast.parse(_SCANNER_SRC.read_text(encoding="utf-8"))
     found = []
@@ -1030,9 +1064,9 @@ def test_F1_cutoff_constant_is_scanner_local_literal_15_40():
         f"모듈 레벨 정의 1건 의무 (실측 {len(found)}건) — 함수 안 지역 상수 금지"
     )
     value = found[0].value
-    assert isinstance(value, ast.Call), "리터럴 `time(15, 40)` 호출 의무"
+    assert isinstance(value, ast.Call), "리터럴 `time(20, 0)` 호출 의무"
     args = [a.value for a in value.args if isinstance(a, ast.Constant)]
-    assert args[:2] == [15, 40], f"커트오프 15:40 리터럴 의무 (실측 {args[:2]})"
+    assert args[:2] == [20, 0], f"커트오프 20:00 리터럴 의무 (실측 {args[:2]})"
 
 
 def test_F2_scanner_does_not_reuse_trading_time_constants():
@@ -1137,19 +1171,58 @@ def _sim_close(d: date) -> int:
     return 10_000 + 100 * _SESSIONS.index(d)
 
 
+def _sim_final_vol(d: date) -> int:
+    return 100_000 + _SESSIONS.index(d)
+
+
 def _sim_real(d: date) -> dict:
-    return _bar(d, close=_sim_close(d), vol=100_000 + _SESSIONS.index(d))
+    """**최종** 봉 — 애프터마켓(~20:00)까지 담은 확정 거래량."""
+    return _bar(d, close=_sim_close(d), vol=_sim_final_vol(d))
+
+
+#: 09-11 실측 최대 오염(현대차 +13.97%)을 시장 모델에 반영한 부분 거래량 비율.
+#: 중앙값 +0.51% 가 아니라 **최대치**를 쓴다 — 시뮬이 재려는 것은 "평균적으로 얼마나
+#: 틀리나" 가 아니라 "부분값이 확정값과 **다른 값**임을 필터가 알아보나" 이고,
+#: 근소한 차이는 반올림·정수 절삭에 묻혀 단언을 공허하게 만든다.
+_SIM_PARTIAL_VOL_RATIO = 0.87
+
+
+def _sim_partial(d: date) -> dict:
+    """**부분** 봉 — OHLC 는 15:30 확정값과 동일하고 **거래량만 모자란다**(09-11 실측).
+
+    ⚠️ 이 함수가 cycle283 재기준선의 핵심이다. 종전 모델(`15:40` 이후면 곧바로
+    `_sim_real`)은 "장 마감 40분 뒤면 KIS 가 확정봉을 준다" 는 **반증된 명제**를
+    시장 대역에 박아 두고 있었다. 그 대역 위에서는 09-11 결함(부분봉을 확정봉으로
+    박음)이 **구조적으로 재현 불가능**하다 — 필터를 15:40 으로 되돌려도 시뮬은
+    초록이다. 부분값과 최종값이 **다른 값**이어야 비로소 스위트가 결함을 본다.
+    """
+    partial_vol = int(_sim_final_vol(d) * _SIM_PARTIAL_VOL_RATIO)
+    assert partial_vol != _sim_final_vol(d), "부분값이 최종값과 같으면 시뮬이 공허하다"
+    return _bar(d, close=_sim_close(d), vol=partial_vol)
 
 
 def _sim_kis_response(days: int) -> list[dict]:
-    """KIS 대역 — 장 전이면 오늘 껍데기 봉, 15:40 이후면 오늘 확정봉을 헤드로 준다."""
+    """KIS 대역 (cycle283 모델) — 하루를 **세 구간**으로 나눈다.
+
+    - 장 전(~09:00): 오늘 **껍데기** 봉 (O=H=L=C=전일종가, 거래량 0)
+    - 09:00~20:00: 오늘 **부분** 봉 — OHLC 는 15:30 이후 확정이지만 거래량은 계속 는다
+      (09-11 실측: 일봉 OHLC 6종목 전수 불변 / 거래량·거래대금은 시간외 동안 증가)
+    - 20:00~: 오늘 **최종** 봉 (애프터마켓 종료 후)
+
+    ⚠️ 20:00 확정 자체는 아직 **미실측 가설**이다(`docs/market-changes-2026-09-14.md`
+    §2 마지막 행 = "KIS 일봉이 애프터마켓 물량을 언제 반영하는가 → 문서에 근거 없음").
+    09-14 저녁 §4-1 실측(20:05/20:20/20:40/21:00 재조회)에서 어긋나면 여기 상수와
+    `scanner._DAILY_LOAD_TODAY_BAR_CUTOFF` 를 함께 뒤로 민다.
+    """
     now = datetime.now(KST)
     today = now.date()
     out: list[dict] = []
     prior = [d for d in _SESSIONS if d < today]
     if today in _SESSIONS:
-        if now.time() < dtime(15, 40):
+        if now.time() < dtime(9, 0):
             out.append(_stub_bar(today, _sim_close(prior[-1])))
+        elif now.time() < dtime(20, 0):
+            out.append(_sim_partial(today))
         else:
             out.append(_sim_real(today))
     for d in reversed(prior):
@@ -1159,10 +1232,14 @@ def _sim_kis_response(days: int) -> list[dict]:
 
 @pytest.mark.asyncio
 async def test_G1_intraday_redeploy_hole_is_closed():
-    """§A-6 (4) — 13:04 재배포 immediate 가 부분봉을 박지 않고, 같은 날 16:00 이 fetch 한다.
+    """§A-6 (4) — 13:04 재배포 immediate 가 부분봉을 박지 않고, 같은 날 **20:30** 이 fetch 한다.
 
     (가) 단독이면 마커 만료(D 12:0x)로 immediate 가 다시 떠서 **부분봉**을 확정봉처럼
-    박고 그날 16:00 이 skip 된다. 실측 12:00~15:30 full 배포 = 최근 30일 5건(주 1회 이상).
+    박고 그날 정기 적재가 skip 된다. 실측 12:00~15:30 full 배포 = 최근 30일 5건(주 1회 이상).
+
+    cycle283 재기준선 — 정기 적재 시각이 16:00 → 20:30 이고, 시장 대역이 16:05 에도
+    **부분 거래량**을 주므로 "두 번째 실행" 을 20:30 으로 옮긴다. 의도(장중 재기동이
+    구멍을 못 만든다)는 불변이며, 오히려 이제 **거래량 축까지** 검사한다.
     """
     store = _FakeDailyStore()
     store.seed("005930", [_sim_real(d) for d in _SESSIONS if d <= date(2026, 9, 7)])
@@ -1200,22 +1277,27 @@ async def test_G1_intraday_redeploy_hole_is_closed():
     )
     assert await store.max_bas_dd(ticker) == date(2026, 9, 7)
 
-    # 2) 같은 날 16:05 정기
-    with freeze_time("2026-09-08T16:05:00+09:00"):
+    # 2) 같은 날 20:30 정기 (cycle283)
+    with freeze_time("2026-09-08T20:30:00+09:00"):
         with ExitStack() as stack:
             _stack(stack)
             summary = await scanner._stock_master_daily_load_once()
 
-    assert summary["skipped_fresh"] == 0, "latest=D-1 < today → 16:00 이 fetch 해야 한다"
+    assert summary["skipped_fresh"] == 0, "latest=D-1 < today → 20:30 이 fetch 해야 한다"
     head = store.head(ticker)
     assert head is not None and head["stck_bsop_date"] == _ymd(date(2026, 9, 8))
-    assert not _is_stub(head), "16:00 기록은 확정 실봉 의무"
-    assert fetch_log == ["13:04", "16:05"], f"두 실행 모두 fetch 의무 (실측 {fetch_log})"
+    assert not _is_stub(head), "20:30 기록은 확정 실봉 의무"
+    assert int(head["acml_vol"]) == _sim_final_vol(date(2026, 9, 8)), (
+        "20:30 기록은 **최종** 거래량이어야 한다 — 부분값이 박히면 09-11 사고의 재현이다 "
+        f"(실측 {head['acml_vol']}, 최종 {_sim_final_vol(date(2026, 9, 8))}, "
+        f"부분 {int(_sim_final_vol(date(2026, 9, 8)) * _SIM_PARTIAL_VOL_RATIO)})"
+    )
+    assert fetch_log == ["13:04", "20:30"], f"두 실행 모두 fetch 의무 (실측 {fetch_log})"
 
 
 @pytest.mark.asyncio
 async def test_G2_three_day_convergence_simulation():
-    """§A-6 (5) — D0 껍데기 → D1 전환 → D2 정상 (07:56 / 16:00 × 3일).
+    """§A-6 (5) — D0 껍데기 → D1 전환 → D2 정상 (07:56 / **20:30** × 3일, cycle283).
 
     성공 서명: (i) 아침 immediate 는 **첫날만** 실행 (D1·D2 는 마커 15.9h 로 skip)
     (ii) DB 에 껍데기 행이 한 건도 남지 않는다 (iii) D1 부터 아침 prepare 가 읽는
@@ -1288,10 +1370,10 @@ async def test_G2_three_day_convergence_simulation():
             with ExitStack() as stack:
                 _stack(stack)
                 await data_load_tasks.stock_master_daily_load_task_loop(
-                    FakeScheduler(running=False), wait_time=dtime(16, 0)
+                    FakeScheduler(running=False), wait_time=dtime(20, 30)
                 )
-        # ── 16:00 정기 (while 루프 1회분 = once() + 마커 기록)
-        with freeze_time(f"{day.isoformat()}T16:00:30+09:00"):
+        # ── 20:30 정기 (while 루프 1회분 = once() + 마커 기록)
+        with freeze_time(f"{day.isoformat()}T20:30:30+09:00"):
             with ExitStack() as stack:
                 _stack(stack)
                 await scanner._stock_master_daily_load_once()
@@ -1323,16 +1405,16 @@ async def test_G2_three_day_convergence_simulation():
 
     # ── 보정 창 존치 (담지자 교체의 잠금)
     # (가) 적용 후 아침 immediate 가 정상일마다 skip 되므로, "D 봉의 최종값" 을 나중에
-    # 바로잡는 담지자는 더 이상 *다음 날 아침 재fetch* 가 아니라 **D+1 16:00 정기 실행의
+    # 바로잡는 담지자는 더 이상 *다음 날 아침 재fetch* 가 아니라 **D+1 20:30 정기 실행의
     # 7일 증분 창**(`fetch_days=7` → `ON CONFLICT DO UPDATE`)이다. 누가 그 창을 1~2일로
-    # 줄이면 D 봉이 16:00 스냅샷에 영구 고정되므로 여기서 붉어져야 한다.
+    # 줄이면 D 봉이 20:30 스냅샷에 영구 고정되므로 여기서 붉어져야 한다.
     evening_0908 = [
-        dates for ts, _t, dates in store.upsert_log if ts == "2026-09-08 16:00"
+        dates for ts, _t, dates in store.upsert_log if ts == "2026-09-08 20:30"
     ]
-    assert evening_0908, "D+1 16:00 정기 실행이 upsert 에 도달해야 한다"
-    assert _ymd(date(2026, 9, 8)) in evening_0908[0], "16:00 은 당일 확정봉을 쓴다"
+    assert evening_0908, "D+1 20:30 정기 실행이 upsert 에 도달해야 한다"
+    assert _ymd(date(2026, 9, 8)) in evening_0908[0], "20:30 은 당일 확정봉을 쓴다"
     assert _ymd(date(2026, 9, 7)) in evening_0908[0], (
-        "16:00 증분 창이 **직전 거래일 봉도 다시 쓴다** = 최종값 보정 담지자. "
+        "20:30 증분 창이 **직전 거래일 봉도 다시 쓴다** = 최종값 보정 담지자. "
         f"창을 줄이면 이 단언이 붉어진다 (실측 {evening_0908[0]})"
     )
 
