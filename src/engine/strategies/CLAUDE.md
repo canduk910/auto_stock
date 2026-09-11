@@ -75,7 +75,9 @@
 > 불신 `"ws"` 라 WS 3 호출부(스케줄러 1차 폴링·전략 인라인 확정)는 **한 글자도 안 바뀌고**
 > 거부된다(`check_buy_signal`/`check_exit_signal`/`calc_buy_quantity` byte 동일 = cycle264
 > `_STRATEGY_PINS` 6개 불변). REST 확보는 신규 leaf `src/engine/open_price_rest.py` —
-> 09:00:35 R1 부터 30초 간격 9라운드(마지막 09:04:35) → 이후 5분 간격 15:20 까지. 프린트
+> 09:00:35 R1 부터 30초 간격 **19라운드**(마지막 **09:09:35**, cycle276 후속 A-2 — 종전 9회는
+> 09:04:35 에 끝나고 첫 slow 가 09:09:35 여서 그 5분을 메우는 주체가 없었다) → 이후 5분 간격
+> 15:20 까지(첫 slow 09:14:35). 09:05:00 이관 시각은 불변이다. 프린트
 > 안 된 종목은 그 시점 매수 불가(유계 재시도가 회수, 못 하면 그날 안 산다). 09:05:00
 > 이후는 `owns_board()` 가 False 로 떨어져 스케줄러의 기존 2차 REST 폴백이 백스톱.
 > **킬스위치 `open_price_scope_mode`** — 각 전략의 `DEFAULT_PARAMS`(상호 import 금지) 키,
@@ -90,26 +92,40 @@
 > `tests/unit/ast/test_cycle272_ast_main_rest_basis.py`.
 > 명세 = `_workspace/00_leader_trading_rules.md` §5 · 자문 =
 > `_workspace/domain_consult/cycle272_rest_open_basis_20260910.md`.
-> 🧪 **VB·LTV 매수 신호 LLM 평가 게이트 — shadow (cycle274, 2026-09-11)**. `return Signal.BUY` **직전**(계좌 SOFT
-> 게이트·cycle262 보류·신호 로그 뒤)에서 leaf `src/engine/llm_buy_gate.py::observe_signal(...)` 을 호출부
-> `try/except` 흡수기로 감싸 호출한다 — 반환값은 어디에도 바인딩되지 않고(AST C1) 양 분기 모두 `Signal.BUY`
-> (C2), `execute_buy` 인자 동일(C3), 동기 hot path `await`/DB/HTTP 0 + `create_task` 1회(C5). 점수는
-> **기록만** 한다(`enforce` 미구현 — 어떤 값이든 `off` 로 낙하). `DEFAULT_PARAMS` 4키(VB·LTV 각각):
+> 🧪 **VB·LTV AI 매수평가 — 주문 접수 시점 shadow (cycle274 → cycle276, 2026-09-11)**. **전략 파일에는 훅이 없다.**
+> cycle274 가 `return Signal.BUY` 직전에 두었던 신호 시점 훅은 cycle276 에서 **전부 제거**됐다(그 함수
+> `observe_signal` 은 이름조차 소스에 없다 — 현재 계약은 `llm_buy_gate.observe_order(...)` 뿐이다)(`check_buy_signal`/`check_exit_signal`/`calc_buy_quantity` 세그먼트 sha 가 cycle272 값으로 복귀 —
+> `tests/unit/ast/test_cycle264_scope_and_pins.py::_STRATEGY_PINS` 6핀), 평가는 `order_engine.execute_buy` 가
+> **매수 주문을 실제로 발화한 직후**(두 매수 `place_order` 경로 각각의 매핑 등록 블록 끝, PENDING INSERT 앞)에서
+> `llm_buy_gate.observe_order(...)` 로 접수된다 — 신호 10건 중 절반만 주문이 되던 cycle274 의 표본 괴리를 없애고
+> 주문번호가 확정된 시점이라야 PK `(trade_date, account_no, ticker, order_no)` 가 성립하기 때문이다(사용자 지시
+> 09-11). 전략에 남는 것은 **`DEFAULT_PARAMS` 4키뿐**이며 그것이 설정 표면이자 킬스위치다(VB·LTV 각각):
 > `llm_gate_mode="shadow"` · `llm_gate_min_score=70`(`would_block` 반사실용) · `llm_gate_daily_call_cap=20` ·
-> `llm_gate_timeout_secs=20`. **키 부재 의미가 셋으로 갈린다** — `mode` 부재 = **off**, `daily_call_cap` 부재 =
-> **0**(호출 안 함), `min_score`/`timeout` 부재 = 70/20. 이유 = 돈을 쓰는 기능이라 "설정 없으면 안 한다"
-> (cycle245 `max_lot_ratio_mult` 부재=OFF 와 방향은 같되 이유가 다르고, cycle272 `open_price_scope_mode`
-> 부재=enforce 와는 **반대** — 그쪽은 오염 차단이 안전이라 fail-closed). 4키 전부 `PARAM_RANGES`/`INT_PARAMS`
-> **편입 금지**(AST C10 이중 검사). 래치 1회/(전략,종목)/일(저점수도 래치) · 세마포어 2 · 재시도 0 · 일봉 캐시
-> (ticker, KST date) 상한 400 · 당일 봉 폐기 · 출력 검증은 **클램프 금지**(범위 밖·NaN/inf·bool 은 `schema_error`).
-> 마커 = `[llm_gate_config]`(1회/(전략,값)/일, off 롤백 확인용 카나리아 — off-return **앞**) · `[llm_buy_score]`
-> (1행/(전략,종목)/일, `score`·`would_block`·`slip_bp`·`verdict_lag_ms`·`latency_ms`·`rationale` 60자 — `system_logs`
-> 는 500자 컷이라 rationale 꼬리가 잘릴 수 있고 전문은 docker 로그) · `[llm_buy_score_failed] reason=timeout|
-> api_error|parse_error|schema_error|payload_error|no_bars|no_key|disabled_model` · `[llm_gate_daily_cap]`. LTV
-> `pre_nxt` 신호 포함(`board_note` + `vol_ratio_time_norm=null`). 모델 `settings.openai_buy_gate_model`
-> (기본 `gpt-5.6-luna`, 20:00 자문 모델과 분리), 키 `openai_api_key` 재사용, temperature 미지정.
+> `llm_gate_timeout_secs=20`. 훅 자체는 전략 무관이지만 `order_engine` 이 `strategy.config.params` 를 읽어
+> 넘기므로 **4키가 없는 5전략(momentum·donchian·BFB·VCP·kojiro)은 `mode=off` 로 낙하** = `create_task` 0 · DB 0행
+> (`[llm_gate_config]` 카나리아 1행만 남는다). **키 부재 의미가 셋으로 갈린다** — `mode` 부재 = **off**,
+> `daily_call_cap` 부재 = **0**(호출 안 함), `min_score`/`timeout` 부재 = 70/20. 이유 = 돈을 쓰는 기능이라
+> "설정 없으면 안 한다"(cycle245 `max_lot_ratio_mult` 부재=OFF 와 방향은 같되 이유가 다르고, cycle272
+> `open_price_scope_mode` 부재=enforce 와는 **반대** — 그쪽은 오염 차단이 안전이라 fail-closed). 4키 전부
+> `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(AST 이중 검사). 래치는 **주문번호/일**(cycle274 의 (전략,종목)/일 아님
+> — 같은 종목을 하루 두 번 사면 두 번 평가한다) · 세마포어 2 · 재시도 0 · 일봉 캐시 `(ticker, KST date)` 상한 400 ·
+> 당일 봉 폐기 · 출력 검증은 **클램프 금지**(범위 밖·NaN/inf·bool 은 `schema_error`). 마커 5종 =
+> `[llm_gate_config]`(1회/(전략,값)/일, off 롤백 확인용 카나리아 — off-return **앞**) · `[llm_buy_score]`
+> (주문당 1행, `order_no`·`score`·`would_block`·**`post_order_drift_bp`**(cycle274 `slip_bp` 개명 + 부호 의미 반대 =
+> **합산 금지**)·`verdict_lag_ms`·`latency_ms`·`rationale` 60자 — `system_logs` 는 500자 컷이라 전문은 docker 로그) ·
+> `[llm_buy_score_failed] reason=timeout|api_error|parse_error|schema_error|payload_error|no_bars|no_key|
+> disabled_model|truncated` + `finish=`(OpenAI `finish_reason` 원문, 호출 전 실패는 `-`) — `truncated` 는
+> cycle276 후속 A-1: 추론 모델의 추론 토큰이 `max_completion_tokens`(2000)를 함께 먹어 `content=""` 로
+> 오는 경우이고, "모델이 스키마를 벗어났다"(`schema_error`)와 **다른 사실**이다 · `[llm_gate_daily_cap]`(1회/전략/일) · **`[llm_eval_persist] order_no= result=ok|error`**
+> (DB 기록 유무를 남기는 유일 채널 — `reason=empty_order_no`/`cap_exceeded` 는 평가를 시작하지 않은 주문). 평가는
+> 성공·실패 **모두** `llm_buy_evaluations` 에 1행 남는다(migration 043 · 조회 `GET /api/llm-evaluations/{order_no}`
+> · UI 거래기록 두 그리드의 "AI 자문" 버튼). LTV `pre_nxt` 주문 포함(`board_note` + `vol_ratio_time_norm=null`).
+> 모델 `settings.openai_buy_gate_model`(기본 `gpt-5.6-luna`, 20:00 자문 모델과 분리), 키 `openai_api_key` 재사용,
+> temperature 미지정. **행위 변경 0**(점수는 기록만 — `enforce` 미구현, `shadow` 외 모든 값은 `off` 낙하).
 > 킬스위치 = `PUT /api/strategies/{id}/params {"llm_gate_mode":"off"}` **즉시**(SQL 은 재시작 후). 자문 =
-> `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`(열린 질문 Q1~Q10 = enforce 설계는 사용자 결정).
+> `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`(Q1~Q10 = enforce 설계는 사용자 결정) +
+> `_workspace/domain_consult/cycle276_order_time_llm_20260911.md`, 명세 =
+> `_workspace/red/cycle276_order_time_llm_eval_spec.md`.
 
 
 | ID | 핵심 동작 | 손절·청산 | tradable_boards / exchange |

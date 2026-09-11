@@ -292,6 +292,58 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
     })
   })
 
+  // cycle276 (2026-09-11) — AI 매수평가(LLM shadow) 기록 조회 2 endpoint.
+  // 거래기록 화면(`/history`)의 두 그리드가 배치 요약을, 팝업이 단건 상세를 부른다.
+  // e2e `history.spec.ts`(G-E2E-10) 가 이 경로를 실브라우저로 밟으므로 목 누락 =
+  // vite proxy → ECONNREFUSED → React Query retry 누적 → spec timeout.
+  // ⚠️ Playwright 는 **LIFO** — 배치 fallback(`**\/api/llm-evaluations*`)을 먼저,
+  //    단건(`**\/api/llm-evaluations/*`)을 나중에 등록해야 단건이 이긴다.
+  describe('G-AST10 (cycle276): AI 매수평가 endpoint 등록', () => {
+    it('api-mocks.ts 에 /api/llm-evaluations 라우트 등록 의무', () => {
+      const apiSource = readFileSync(
+        path.join(FRONTEND_API_DIR, 'llm-evaluations.ts'),
+        'utf-8',
+      )
+      // 방어 가드 — 클라이언트가 그 리터럴을 더 이상 부르지 않으면 본 케이스는 무효다.
+      expect(
+        apiSource.includes("'/llm-evaluations'"),
+        '방어 가드: api/llm-evaluations.ts 가 배치 요약 endpoint 를 더 이상 호출하지 않음 — ' +
+          '본 가드 갱신 의무.',
+      ).toBe(true)
+      expect(
+        apiSource.includes('`/llm-evaluations/${orderNo}`'),
+        '방어 가드: api/llm-evaluations.ts 가 단건 상세 endpoint 를 더 이상 호출하지 않음 — ' +
+          '본 가드 갱신 의무.',
+      ).toBe(true)
+
+      const source = loadApiMocksSource()
+      expect(
+        isRouteRegistered(source, '/api/llm-evaluations'),
+        'e2e api-mocks.ts 에 /api/llm-evaluations 라우트 누락 — ' +
+          'cycle276 거래기록 "AI 자문" 버튼이 마운트되는 순간 ECONNREFUSED. ' +
+          '사이클 77 G-AST5 (영역 확장) 패턴 답습 의무.',
+      ).toBe(true)
+    })
+
+    it('두 그리드와 팝업이 배치/단건 클라이언트를 실제로 쓴다 (방어 가드)', () => {
+      const pairs: Array<[string, string]> = [
+        ['TradeHistoryGrid.tsx', 'getLlmEvaluationSummaries'],
+        ['TradePnLGrid.tsx', 'getLlmEvaluationSummaries'],
+        ['LlmEvaluationModal.tsx', 'getLlmEvaluation'],
+      ]
+      pairs.forEach(([filename, fn]) => {
+        const source = readFileSync(
+          path.join(FRONTEND_COMPONENTS_DIR, filename),
+          'utf-8',
+        )
+        expect(
+          source.includes(fn),
+          `방어 가드: ${filename} 가 ${fn} 를 더 이상 호출하지 않음 — cycle276 영역 변경 시 본 가드 갱신 의무.`,
+        ).toBe(true)
+      })
+    })
+  })
+
   describe('G-AST4: 3 컴포넌트 useQuery `retry:` 옵션 명시 (Q4 확장)', () => {
     const TARGET_COMPONENTS = [
       'IntegrationToggleCard.tsx',

@@ -9,7 +9,7 @@
 - `DATABASE_URL_TEST` env 있으면 그 DSN 사용 (CI 의 postgres:15 service 컨테이너).
 - 없으면 로컬 docker `postgres:15` 컨테이너를 subprocess 로 기동 (testcontainers 부재).
   랜덤 host 포트(`-p 0:5432`) → `docker port` 로 파싱 → healthcheck.
-- 확보한 DSN 으로 asyncpg 연결 → **migration 001~042 순차 적용** (각 `.sql` 파일 내용을
+- 확보한 DSN 으로 asyncpg 연결 → **migration 001~043 순차 적용** (각 `.sql` 파일 내용을
   `conn.execute`) → `src.db.pg` 전역 풀을 그 DSN 으로 연결 → yield → teardown.
 
 docker 도, `DATABASE_URL_TEST` 도 없으면 fixture 가 `pytest.skip` — 통합은 옵셔널.
@@ -111,7 +111,7 @@ async def _wait_healthy(dsn: str, *, timeout: float = 30.0) -> None:
 
 
 async def _apply_migrations(dsn: str) -> None:
-    """migration 001~042 순차 적용 (asyncpg 로 각 .sql 파일 실행)."""
+    """migration 001~043 순차 적용 (asyncpg 로 각 .sql 파일 실행)."""
     import asyncpg
 
     files = sorted(_MIGRATIONS_DIR.glob("*.sql"))
@@ -147,7 +147,7 @@ def pg_dsn() -> str:
 
 @pytest.fixture(scope="session")
 def pg_migrated(pg_dsn: str) -> str:
-    """migration 001~042 적용된 DSN. 세션 1회."""
+    """migration 001~043 적용된 DSN. 세션 1회."""
     asyncio.run(_apply_migrations(pg_dsn))
     return pg_dsn
 

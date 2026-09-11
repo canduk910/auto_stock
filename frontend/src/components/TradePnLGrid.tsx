@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   useReactTable,
@@ -7,8 +7,15 @@ import {
   createColumnHelper,
 } from '@tanstack/react-table'
 import { getTradePnL } from '../api/history'
+import {
+  findLlmSummary,
+  getLlmEvaluationSummaries,
+  llmSummaryDatesFor,
+} from '../api/llm-evaluations'
 import { getStrategyColor } from '../types/strategy'
 import type { TradePair } from '../types/trading'
+import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
+import LlmEvaluationModal from './LlmEvaluationModal'
 
 const STRATEGY_NAMES: Record<string, string> = {
   momentum: '모멘텀',
@@ -39,7 +46,20 @@ function pnlClass(v: number | null | undefined): string {
   return v > 0 ? 'text-red-600 font-medium' : 'text-blue-600 font-medium'
 }
 
-const columns = [
+/**
+ * cycle276 — 열 정의를 모듈 상수에서 **팩토리**로 바꾼다.
+ *
+ * 손익 화면은 테이블이 아니라 `get_trade_pairs` 가 매번 계산하는 뷰다(명세 §8). 그래서
+ * 행을 가리키는 키가 `pair_key`(= `전략:종목:첫 매수 order_no`)이고, 평가 조회 키는
+ * **`buy_order_nos`(복수)** 다 — 운영 DB 전 기간 614행 중 9건이 매수 주문 2건 이상을
+ * 품은 페어라 단수 필드로는 그 사이클의 평가를 다 못 가리킨다.
+ */
+function makeColumns(
+  summaries: LlmEvaluationSummaryMap,
+  summariesReady: boolean,
+  onOpen: (orderNos: string[], tradeDate: string | undefined) => void,
+) {
+  return [
   columnHelper.accessor('buy_date', {
     header: '매수일',
     cell: (info) => fmtDate(info.getValue()),
@@ -115,19 +135,129 @@ const columns = [
       return <span className={`px-1.5 py-0.5 rounded text-xs ${color.badge}`}>{name}</span>
     },
   }),
-]
+  // cycle276 — AI 매수평가 팝업 버튼(맨 끝 열).
+  // 활성 조건은 "이 페어를 만든 매수 주문 중 **하나라도** 평가 기록이 있는가" 다.
+  // 주문번호가 없는 페어(수기 매매 등, 운영 DB 실측 9행)는 가리킬 대상이 없어 비활성이고,
+  // 왜 못 누르는지를 title 로 알린다 — 침묵은 결함처럼 보인다.
+  columnHelper.display({
+    id: 'llmEval',
+    header: 'AI 자문',
+    cell: (info) => {
+      const pair = info.row.original
+      const buyOrderNos = (pair.buy_order_nos ?? [])
+        .map((no) => String(no ?? '').trim())
+        .filter((no) => no !== '')
+      // 조회 대상인지(매수 주문번호가 있는가)는 요약 응답 없이 확정된다. 대상인데 아직
+      // 답을 못 받은 구간에 "평가 기록 없음" 을 띄우면 거짓말이므로 별도 상태로 그린다.
+      if (buyOrderNos.length > 0 && !summariesReady) {
+        return (
+          <button
+            type="button"
+            data-testid={`llm-eval-btn-pair-loading-${info.row.index}`}
+            disabled
+            title="평가 기록 조회 중..."
+            className="px-2 py-1 text-xs rounded border border-gray-200 text-gray-300 cursor-progress"
+          >
+            AI 자문{buyOrderNos.length > 1 ? ` (${buyOrderNos.length})` : ''}
+          </button>
+        )
+      }
+      // ⚠️ 배치 요약은 **날짜 없이** 묻고 상세는 `pair.buy_date` 와 **함께** 묻는다.
+      // KIS 주문번호(ODNO)는 하루 단위로만 유일하므로, 같은 번호가 다른 날 재사용됐으면
+      // "버튼은 활성인데 모달은 404" 조합이 생긴다. 그래서 배치 응답 맵의 키가
+      // `날짜|주문번호` 복합 키이고, 이 셀은 페어의 **첫 매수일**로 조회한 주문만 활성
+      // 근거로 센다 — 활성 ⇔ 상세 요청이 답을 받는다. 멀티데이 피라미딩의 둘째 매수
+      // (다른 날 주문)는 이 행에서 열 수 없고 title 로 알린다.
+      const buyDate = pair.buy_date ?? undefined
+      const matchedOrderNos = buyOrderNos.filter(
+        (no) => Boolean(findLlmSummary(summaries, buyDate, no)),
+      )
+      const hasEval = matchedOrderNos.length > 0
+      const otherDateOnly =
+        !hasEval && buyOrderNos.some((no) => llmSummaryDatesFor(summaries, no).length > 0)
+      const pairKey = pair.pair_key
+      const testId = pairKey
+        ? `llm-eval-btn-pair-${pairKey}`
+        : `llm-eval-btn-pair-none-${info.row.index}`
+      const title =
+        buyOrderNos.length === 0
+          ? '매수 주문번호 없음 — 평가 기록 없음'
+          : hasEval
+            ? 'AI 매수평가 보기'
+            : otherDateOnly
+              ? '다른 날짜의 평가 기록 — 이 행에서 열 수 없음'
+              : '평가 기록 없음'
+      return (
+        <button
+          type="button"
+          data-testid={testId}
+          disabled={!hasEval}
+          title={title}
+          // 날짜(`buyDate`)를 **반드시** 함께 넘긴다 — 빼면 라우트가 "가장 최근 1건" 을
+          // 골라 같은 번호가 재사용된 **다른 거래의 평가**를 띄운다(회귀 가드 F25b).
+          onClick={() => onOpen(buyOrderNos, buyDate)}
+          className={`px-2 py-1 text-xs rounded border ${
+            hasEval
+              ? 'border-blue-300 text-blue-700 hover:bg-blue-50'
+              : 'border-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          AI 자문{buyOrderNos.length > 1 ? ` (${buyOrderNos.length})` : ''}
+        </button>
+      )
+    },
+  }),
+  ]
+}
 
 export default function TradePnLGrid() {
   const [page, setPage] = useState(1)
   const size = 30
   const [strategyFilter, setStrategyFilter] = useState<string>('')
+  const [selected, setSelected] = useState<
+    { orderNos: string[]; tradeDate?: string } | null
+  >(null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['tradePnL', page, strategyFilter],
+    retry: 1,
     queryFn: () => getTradePnL({ page, size, strategy: strategyFilter || undefined }),
   })
 
   const pairs = data?.pairs ?? []
+
+  // cycle276 — 이 페이지의 모든 `buy_order_nos` 를 flat 하게 모아 **한 요청**으로 조회한다.
+  // 페어마다 개별 조회하면 페이지당 30 요청이 나간다(명세 §10.3 · 뮤테이션 M19).
+  const buyOrderNos = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          pairs.flatMap((p) =>
+            (p.buy_order_nos ?? []).map((no) => String(no ?? '').trim()).filter((no) => no !== ''),
+          ),
+        ),
+      ),
+    [pairs],
+  )
+  const orderNosKey = buyOrderNos.join(',')
+
+  const { data: summaries, isFetched: summariesFetched } = useQuery({
+    queryKey: ['llmEvalSummaries', 'pnl', page, strategyFilter, orderNosKey],
+    retry: 1,
+    enabled: buyOrderNos.length > 0,
+    queryFn: () => getLlmEvaluationSummaries(buyOrderNos),
+  })
+
+  // 조회가 **끝났는가**(성공/실패 무관). 실패해도 손익 표를 막지 않는다.
+  const summariesReady = buyOrderNos.length === 0 || summariesFetched
+
+  const columns = useMemo(
+    () =>
+      makeColumns(summaries ?? {}, summariesReady, (orderNos, tradeDate) =>
+        setSelected({ orderNos, tradeDate }),
+      ),
+    [summaries, summariesReady],
+  )
   const summary = data?.summary ?? {
     realized_total_krw: 0,
     realized_rate_pct: 0,
@@ -259,6 +389,14 @@ export default function TradePnLGrid() {
           </button>
         </div>
       </div>
+
+      {selected && (
+        <LlmEvaluationModal
+          orderNos={selected.orderNos}
+          tradeDate={selected.tradeDate}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </div>
   )
 }

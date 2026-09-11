@@ -446,8 +446,15 @@ _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 #    체결수량 fields[16]→fields[9] 정본 전환 + overrun 클램프. 명세
 #    `_workspace/red/cycle235_fill_qty_spec.md`.
 # TODO(cycle235 커밋 후): 아래 dict 를 비운다.
+# ✅ 2026-09-11 (cycle276) — AI 매수평가 **주문 발화 시점 이동**. 사용자가
+#    `src/engine/order_engine.py` 접촉을 명시 승인했다("매수신호가 실제로 발생하고
+#    …실제로 매수주문을 발화하는 시점으로 함"). 변경은 import 1줄 + `execute_buy`
+#    두 매수 경로의 관측 훅 2곳(각각 `try` / 1문 / `except Exception` 흡수기)뿐이고,
+#    A-ATOMIC 구간(`calc_buy_quantity` ~ `pending_buys.add`)은 byte 동일이다.
+#    TODO(cycle276 커밋 후): 아래 dict 를 다시 **비운다**.
 _APPROVED_CONTENT_SHA: dict[str, str] = {
-    # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
+    "src/engine/order_engine.py":
+        "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
 }
 
 

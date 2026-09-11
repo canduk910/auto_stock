@@ -1,11 +1,24 @@
 /**
- * MSW 기본 핸들러 — 19개 엔드포인트 기본 응답.
+ * MSW 기본 핸들러 — 46개 라우트 기본 응답(2026-09-11 실측).
  *
  * 각 테스트는 `server.use(http.get('/api/...', ...))`로 시나리오별 오버라이드.
+ *
+ * ⚠️ **목은 실제 응답을 담는다** — "의도한 계약"만 담은 목은 결함을 3개월간 초록으로
+ * 덮는다(cycle266 §C-3: `change_rate` 를 목이 전부 number 로 만들어 실제 문자열
+ * 응답의 흰 화면을 아무도 못 봤다). cycle276 에서 `/api/history` 의 `items` 를
+ * 실제 응답 키인 `trades` + `total_pages` 로 정직화했다 — 그 전에는 그리드가 빈 표를
+ * 렌더해도 목 덕분에 아무 테스트도 깨지지 않았다.
  */
 
 import { http, HttpResponse } from "msw";
-import { wrap, makePosition, makeStrategy, makeTrade } from "./factories";
+import {
+  wrap,
+  makePosition,
+  makeStrategy,
+  makeTrade,
+  makeTradePair,
+  makeLlmEvaluation,
+} from "./factories";
 
 const base = "/api";
 
@@ -70,17 +83,22 @@ export const handlers = [
   ),
 
   // history
+  // ⚠️ 응답 키는 `trades` + `total_pages` 다(백엔드 `src/routes/history.py`,
+  //    프론트 타입 `TradeHistoryData`). 구 목의 `items` 는 부정직 — cycle276 시정.
   http.get(`${base}/history`, () =>
-    HttpResponse.json(wrap({ items: [makeTrade()], total: 1, page: 1, size: 50 }))
+    HttpResponse.json(
+      wrap({ trades: [makeTrade()], page: 1, size: 20, total: 1, total_pages: 1 })
+    )
   ),
   http.get(`${base}/history/pnl`, () =>
     HttpResponse.json(
       wrap({
-        pairs: [],
+        // cycle276 — 페어에 `buy_order_nos`/`sell_order_nos`/`pair_key` 가 실린다.
+        pairs: [makeTradePair()],
         page: 1,
         size: 30,
-        total: 0,
-        total_pages: 0,
+        total: 1,
+        total_pages: 1,
         summary: {
           realized_total_krw: 0,
           realized_rate_pct: 0,
@@ -93,6 +111,17 @@ export const handlers = [
       })
     )
   ),
+
+  // cycle276 — AI 매수평가(LLM) 기록.
+  // MSW 는 **first-match** 이므로 구체 경로(단건)를 먼저, 배치를 뒤에 둔다.
+  http.get(`${base}/llm-evaluations/:orderNo`, ({ params }) =>
+    HttpResponse.json(
+      wrap(makeLlmEvaluation({ order_no: String(params.orderNo) }))
+    )
+  ),
+  // 배치 요약 기본값 = **빈 맵**(기록 없음). 기록이 있는 상황은 각 테스트가 override 한다 —
+  // 기본값을 "전부 있음" 으로 두면 버튼 비활성 분기가 어느 테스트에서도 안 밟힌다.
+  http.get(`${base}/llm-evaluations`, () => HttpResponse.json(wrap({}))),
 
   // recommendations
   http.get(`${base}/recommendations`, () =>

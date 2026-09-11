@@ -527,7 +527,9 @@ VB와 동일.
   **한 글자도 안 바뀌고** 거부된다 — `check_buy_signal`/`check_exit_signal`/
   `calc_buy_quantity` byte 동일(cycle264 `_STRATEGY_PINS` 6개 불변).
 - **REST 확보** = 신규 leaf `src/engine/open_price_rest.py`. 09:00:35 R1 부터 30초
-  간격 9라운드(마지막 09:04:35) → 이후 5분 간격 15:20 까지. 프린트 안 된 종목은
+  간격 **19라운드**(마지막 09:09:35 — cycle276 후속 A-2 가 9→19 로 늘려 첫 slow(09:14:35) 전까지
+  30초 격자를 연속 커버한다; 종전에는 09:04:35~09:09:35 5분이 비었고 스케줄러 재시도는 09:30
+  `_scan_loop` 안이라 메우지 못했다) → 이후 5분 간격 15:20 까지. 프린트 안 된 종목은
   그 시점 **매수 불가**(틀린 목표선으로 들어간 포지션은 손절선까지 틀리지만, 안 들어간
   종목은 기회비용만 남는다). 09:05:00 이후는 스케줄러의 기존 2차 REST 폴백이 백스톱.
 - **킬스위치** `open_price_scope_mode` — **각 전략의** `DEFAULT_PARAMS`(상호 import
@@ -546,18 +548,28 @@ VB와 동일.
 
 ---
 
-### VB·LTV LLM 매수 평가 게이트 `llm_gate_*` (cycle274, 2026-09-11) — **shadow, 행위 변경 0**
+### VB·LTV AI 매수평가 `llm_gate_*` (cycle274 → **cycle276 주문 시점 이동**, 2026-09-11) — **shadow, 행위 변경 0**
 
 사용자 발의(09-10 21:5x) = *"매수신호가 나올 때마다 GPT-5.6-luna 에 30일 일봉 + 기술지표를 넘겨 1~100점 평가, 70점 이상만 매수"*.
 자문(`_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`)에 따라 **shadow 부터** — 점수는 기록만 하고 매수는 종전대로.
 `enforce` 는 미구현(어떤 값이든 `off` 낙하)이며, 실패 규약(fail-open/closed)·판정 기간(2주 배관 + 6주 임계)·보존·donchian 편입은 사용자 결정(Q1~Q10).
 
+**cycle276 사용자 지시(09-11 05:4x)** = *"인공지능 매수평가 시점을 각 전략에서 매수신호가 실제로 발생하고, 자금조건 등에 의해
+실제로 매수주문을 발화하는 시점으로 함. 인공지능 매수평가의 입력과 결과에 대해 로그와 DB에 기록하고(별도 테이블에
+일자-계좌-종목-주문번호 기준으로 pk구성해서 기록을 남긴 뒤 주문체결내역과 향후 연결할 수 있도록 함). UI의 거래기록(체결,
+매매손익)에서 각 행에 AI매매자문 버튼을 달고 버튼 선택 시 팝업형태로 확인가능하도록 함."*
+
 - **`DEFAULT_PARAMS` 4키(VB·LTV 각각, `PARAM_RANGES`/`INT_PARAMS` 편입 금지)**: `llm_gate_mode="shadow"` · `llm_gate_min_score=70` · `llm_gate_daily_call_cap=20` · `llm_gate_timeout_secs=20`
 - **키 부재** = `mode` off · `daily_call_cap` 0(호출 안 함) · `min_score` 70 · `timeout` 20 — 돈을 쓰는 기능이라 "설정 없으면 안 한다"(cycle272 `open_price_scope_mode` 부재=enforce 와 반대).
-- **자리** = `return Signal.BUY` 직전(계좌 SOFT 게이트·cycle262 보류·신호 로그 뒤) — shadow 표본 = enforce 표본.
-- **비용·지연** = 신호 시점 트리거 월 $0.41~1.06 예상, 타임아웃 20초(같은 모델 리포 내 실측 6.1~11.3초). pre-warm(목표가 확정 시 전량 선평가)은 호출 17배·표본 불변이라 하지 않는다 — `slip_bp` 실측이 필요 여부를 답한다.
+- **자리(cycle276)** = **전략 파일에는 훅이 없다.** `order_engine.execute_buy` 가 매수 `place_order` 에 성공한 **직후**(매핑 등록 블록 끝 · PENDING INSERT 앞) 두 경로(주 경로 · 시장가 거부 지정가 5호가 폴백) 각각에서 `llm_buy_gate.observe_order(...)`. 이유 = ① cycle274 의 신호 시점은 신호 10건 중 절반만 주문이 되어 점수가 실현손익에 붙지 않았다 ② PK 의 `order_no` 는 `place_order` 응답 뒤에야 확정된다. 매도·취소 `place_order` 는 훅 금지. 훅 자체는 전략 무관이고 평가 여부는 `strategy.config.params["llm_gate_mode"]` 가 정한다 → **4키가 없는 5전략은 `mode=off` 낙하**(평가 0·비용 0, `[llm_gate_config]` 카나리아만 1행).
+- **평가 1회/주문** — 래치 키가 `(전략, 종목)/일` → **주문번호**다(같은 종목을 하루 두 번 사면 두 번 평가, 주문이 둘이므로 PK 도 둘). 일일 cap 은 전략별 유지이고 cap 초과 주문은 `[llm_eval_persist] reason=cap_exceeded` 1행으로 남는다(DB 행 0).
+- **기록** = `llm_buy_evaluations`(migration 043, PK `(trade_date, account_no, ticker, order_no)`, 53열). **성공·실패 모두 1행** — 실패도 `reason` 과 **입력 payload** 를 담고 `score=NULL`(침묵하면 "평가 안 함" 과 "평가 실패" 가 구별되지 않는다). 계좌는 저장은 원문, **API 응답은 마스킹**(앞 4자리 + `****`).
+- **회고분석 규약** = `prompt_version`/`feature_version` 이 다른 행을 **섞어서 회귀하지 않는다** · 주문 시점 제약 3열(`budget_total_won`/`budget_remaining_after_won`/`open_positions_n`)로 차단의 반사실을 판단한다(예산·`max_positions` 가 묶여 있으면 차단은 다른 종목 매수로 **대체**된다) · `input_payload` 는 요약·절단 없이 저장해 훗날 다른 모델로 **오프라인 재채점**한다 · 조인은 `order_no`→`trade_history`(3축), `buy_order_nos`→`get_trade_pairs` 실현손익이고 **체결/부분체결/미체결/취소 4분류를 반드시 분리**한다(미체결을 손익 0 으로 섞으면 오염) · 페어 손익을 주문 단위로 배분할 때는 **매수 금액(수량×매수가) 가중**으로 나눈다.
+- **UI** = 거래기록 두 그리드(체결 = BUY 행 `order_no`, 손익 = `buy_order_nos`) 각 행에 "AI 자문" 버튼, 기록 없으면 비활성(회색)·툴팁 "평가 기록 없음". 팝업 = 점수/임계/차단여부·사유·핵심 위험·무효화 조건·지표 요약·주문 스냅샷·모델/토큰/비용/지연·원문 payload(접기).
+- **비용·지연** = 주문 시점 트리거이므로 호출 수가 신호 시점보다 **줄어든다**(신호 중 주문이 된 것만 평가). 타임아웃 20초(같은 모델 리포 내 실측 6.1~11.3초). pre-warm(목표가 확정 시 전량 선평가)은 호출 17배·표본 불변이라 하지 않는다 — `post_order_drift_bp` 실측이 필요 여부를 답한다.
 - **롤백** = `PUT /api/strategies/{id}/params {"llm_gate_mode":"off"}` 즉시. `.env` `OPENAI_API_KEY` 제거는 재시작 후(`no_key`).
-- **D+1 서명** = `[llm_gate_config]` VB·LTV 각 1행 · `[llm_buy_score]` 4~6행(score 1~100) · `_failed` <10% · `[llm_gate_daily_cap]` 0행 · VB·LTV 매수 건수·시각·수량 패턴 불변.
+- **D+1 서명** = `[llm_gate_config]` VB·LTV 각 1행(5전략은 `mode=off` 행) · `[llm_buy_score]` **매수 주문당 1행**(score 1~100, `order_no=` 포함) · `[llm_eval_persist] result=ok` 가 같은 수 · `_failed` <10% · `[llm_gate_daily_cap]` 0행 · VB·LTV 매수 건수·시각·수량 패턴 불변 · DB `llm_buy_evaluations` 행 수 = 그날 VB·LTV 매수 주문 수.
+- ⚠️ **cycle274 와 로그를 합산하지 않는다** — 판정 시점(신호→주문)이 다르고 표류 필드가 `slip_bp`→`post_order_drift_bp` 로 개명되며 **부호 의미가 반대**다(이제 + 는 주문 뒤 상승 = 이득).
 
 ## 6. 전략 D: 20일 신고가 스윙 (donchian_swing) 상세
 

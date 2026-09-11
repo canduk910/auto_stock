@@ -641,7 +641,19 @@ async def get_trade_pairs(
     Returns: 각 dict는 다음 키를 갖는다 —
         buy_date, buy_time, sell_date, sell_time, ticker, ticker_name,
         buy_price, buy_qty, sell_price, sell_qty,
-        profit_loss, profit_rate, status('closed'|'open'), strategy
+        profit_loss, profit_rate, status('closed'|'open'), strategy,
+        buy_order_nos, sell_order_nos, pair_key
+
+    cycle276 (2026-09-11) — 주문번호 3키 **추가**(사영만, 페어링 알고리즘 무변경).
+    손익 화면은 테이블이 아니라 매번 계산되는 뷰라 행을 가리키는 안정적 키가 없었다.
+    운영 DB 실측에서 **한 페어가 매수 주문 2건 이상**인 사례가 9건이라 단수 필드로는
+    담을 수 없어 `list[str]` 로 내보내고, `pair_key = f"{strategy}:{ticker}:{첫 매수
+    order_no}"` 가 그 사이클의 안정적 식별자다(첫 매수 주문번호가 사이클을 유일하게
+    식별한다). 주문번호 없는 체결(수기 매매 등 운영 DB 9행)은 **목록에서만** 빠지고
+    행 자체는 그대로 만든다 — 페어를 지우면 손익 화면에서 거래가 사라진다.
+
+    ⚠️ 버퍼 튜플 arity 는 3 을 유지한다(주문번호는 **병행 리스트**). 4-튜플로 바꾸면
+    언패킹 지점 5곳 이상을 동시에 고쳐야 하고 한 곳만 놓쳐도 매매손익 뷰가 500 이 된다.
     """
     from collections import defaultdict
     from decimal import Decimal
@@ -686,6 +698,20 @@ async def get_trade_pairs(
         position = 0
         buy_buf: list[tuple[str, Decimal, int]] = []   # (ts, price, qty)
         sell_buf: list[tuple[str, Decimal, int]] = []
+        # cycle276 — 주문번호 병행 리스트(버퍼 arity 불변). 빈 주문번호는 담지 않는다.
+        buy_ono_buf: list[str] = []
+        sell_ono_buf: list[str] = []
+
+        def _dedupe(seq: list[str]) -> list[str]:
+            """순서(시간 오름차순)를 보존한 중복 제거."""
+            seen: set[str] = set()
+            out: list[str] = []
+            for x in seq:
+                if x in seen:
+                    continue
+                seen.add(x)
+                out.append(x)
+            return out
 
         def emit_closed():
             buy_total_qty = sum(q for _, _, q in buy_buf)
@@ -702,6 +728,8 @@ async def get_trade_pairs(
             sell_ts = sell_buf[-1][0] if sell_buf else None
             buy_d, buy_t = _to_kst(buy_ts)
             sell_d, sell_t = _to_kst(sell_ts)
+            buy_onos = _dedupe(buy_ono_buf)
+            sell_onos = _dedupe(sell_ono_buf)
             pairs.append({
                 "buy_date": buy_d,
                 "buy_time": buy_t,
@@ -717,6 +745,9 @@ async def get_trade_pairs(
                 "profit_rate": float(round(rate, 4)),
                 "status": "closed",
                 "strategy": strat,
+                "buy_order_nos": buy_onos,
+                "sell_order_nos": sell_onos,
+                "pair_key": f"{strat}:{tkr}:{buy_onos[0]}" if buy_onos else None,
             })
 
         for t in trades:
@@ -729,15 +760,21 @@ async def get_trade_pairs(
             if q <= 0:
                 continue
             ts = t.get("timestamp") or ""
+            ono = str(t.get("order_no") or "").strip()
             if ttype == "BUY":
                 buy_buf.append((ts, p, q))
+                if ono:
+                    buy_ono_buf.append(ono)
                 position += q
             elif ttype == "SELL":
                 sell_buf.append((ts, p, q))
+                if ono:
+                    sell_ono_buf.append(ono)
                 position -= q
                 if position <= 0:
                     emit_closed()
                     buy_buf, sell_buf = [], []
+                    buy_ono_buf, sell_ono_buf = [], []
                     position = 0  # 음수 케이스(데이터 이상) 방어
 
         # 그룹 끝: 잔여 보유분이 있으면 open 페어
@@ -757,6 +794,7 @@ async def get_trade_pairs(
                 pl_val = None
                 rate_val = None
             buy_d, buy_t = _to_kst(buy_ts)
+            buy_onos = _dedupe(buy_ono_buf)
             pairs.append({
                 "buy_date": buy_d,
                 "buy_time": buy_t,
@@ -772,6 +810,11 @@ async def get_trade_pairs(
                 "profit_rate": rate_val,
                 "status": "open",
                 "strategy": strat,
+                "buy_order_nos": buy_onos,
+                # open 페어는 아직 매도가 없다 — `None` 이 아니라 `[]` 다
+                # (프론트가 `.some(...)` 로 읽으므로 `None` 이면 런타임에서 죽는다).
+                "sell_order_nos": [],
+                "pair_key": f"{strat}:{tkr}:{buy_onos[0]}" if buy_onos else None,
             })
 
     # 4) 신규 매수가 위로 오도록 buy_date+buy_time DESC. open이 closed보다 우선

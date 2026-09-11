@@ -34,6 +34,7 @@ from src.db.trade_history import (
     _update_trade_status_by_order_no,
 )
 from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine import llm_buy_gate
 from src.engine.sell_rejection import SellRejectionTracker, is_krx_main_hours, is_nxt_session_hours
 from src.engine.strategy_base import Position, Signal, StrategyBase
 from src.engine.strategy_registry import StrategyRegistry
@@ -424,6 +425,39 @@ class OrderEngine:
                 "strategy_id": strategy.strategy_id,
             }
 
+            # cycle276 — AI 매수평가(shadow) 주문 시점 훅. 주문은 이미 KIS 에 접수됐고
+            # 이 호출은 기록만 한다. 동기·never-raise·반환 미사용(Expr statement).
+            # 자리 = 매핑 등록 **뒤** · `already_completed` 판정과 PENDING INSERT **앞**.
+            # INSERT 뒤로 옮기면 체결통보 선행 코호트(가장 빨리 체결되는 진입)가
+            # 기록에서 통째로 빠진다(명세 C7, 09-09 034020·09-10 004990 실측).
+            try:
+                llm_buy_gate.observe_order(
+                    strategy_id=strategy.strategy_id,
+                    ticker=ticker,
+                    order_no=result.order_no,
+                    order_kst=datetime.now(_KST_TZ),
+                    order_price_won=record_price,
+                    ordered_qty=quantity,
+                    order_division=getattr(order_division, "value", order_division),
+                    order_path="market",
+                    exchange=buy_exchange,
+                    current_price_won=current_price,
+                    budget_total_won=state.total_investment,
+                    budget_remaining_after_won=(
+                        state.total_investment - strategy._calc_used_funds()
+                    ),
+                    open_positions_n=len(state.positions),
+                    params_snapshot=dict(strategy.config.params),
+                    # 꼬리를 자르지 않는다 — 전략이 `buy_signals` 를 이미 20건으로 cap 하므로
+                    # `[-3:]` 는 비용을 아끼지 못하고(dict 20개 얕은 복사), 같은 종목의 신호가
+                    # 그 3건 밖으로 밀리면 `_match_signal` 이 실패해 목표가·k·돌파 초과폭이
+                    # 통째로 `None` 이 된다 — 값 없음으로 정직하게 기록되긴 하지만 회고분석은
+                    # 그 주문을 쓸 수 없다(한 번에 여러 종목이 돌파하는 09:0x 가 그 구간이다).
+                    buy_signals_tail=list(state.buy_signals),
+                )
+            except Exception:
+                logger.debug("[llm_buy_gate_call] 주문 시점 관측 호출 실패", exc_info=True)
+
             # 체결통보가 응답보다 먼저 도착해 COMPLETED row가 이미 INSERT됐다면 PENDING INSERT 생략
             already_completed = result.order_no in self._completed_orders
             if already_completed:
@@ -491,6 +525,35 @@ class OrderEngine:
                         "quantity": quantity,
                         "strategy_id": strategy.strategy_id,
                     }
+
+                    # cycle276 — 지정가 5호가 폴백 경로의 AI 매수평가(shadow) 훅.
+                    # 주 경로와 같은 형태·같은 자리. 흡수기가 `except Exception` 인
+                    # 이유 = 이 훅은 `except KisApiError` 핸들러 **안**의 중첩 try 라
+                    # 형제 핸들러가 non-KisApiError 를 못 잡는다 — 좁히면 관측 실패
+                    # 하나가 pending 좀비(손절 마비)를 만든다(명세 C3).
+                    try:
+                        llm_buy_gate.observe_order(
+                            strategy_id=strategy.strategy_id,
+                            ticker=ticker,
+                            order_no=result.order_no,
+                            order_kst=datetime.now(_KST_TZ),
+                            order_price_won=fallback_price,
+                            ordered_qty=quantity,
+                            order_division="LIMIT",
+                            order_path="fallback",
+                            exchange=buy_exchange,
+                            current_price_won=current_price,
+                            budget_total_won=state.total_investment,
+                            budget_remaining_after_won=(
+                                state.total_investment - strategy._calc_used_funds()
+                            ),
+                            open_positions_n=len(state.positions),
+                            params_snapshot=dict(strategy.config.params),
+                            # 주 경로와 같은 이유로 꼬리를 자르지 않는다(전략이 20건 cap).
+                            buy_signals_tail=list(state.buy_signals),
+                        )
+                    except Exception:
+                        logger.debug("[llm_buy_gate_call] 폴백 주문 시점 관측 호출 실패", exc_info=True)
 
                     # 체결통보 선행 race 가드 (기존 시장가 경로 동일)
                     if result.order_no in self._completed_orders:

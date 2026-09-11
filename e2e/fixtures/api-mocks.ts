@@ -72,7 +72,15 @@ const defaultStatus = {
 
 export interface MockOptions {
   isRunning?: boolean;
+  // cycle276 — 체결 목의 각 항목은 실제 응답처럼 `order_no` 를 실어야 한다.
+  // "AI 자문" 버튼의 키가 `order_no` 라, 목이 그것을 빼면 버튼이 없는 화면을 보고도
+  // 시나리오가 초록으로 통과한다(cycle266 §C-3 계열 부정직).
   trades?: AnyJson[];
+  // cycle276 — AI 매수평가 기록. **픽스처 입력**의 키 = 주문번호(테스트 편의), 값 =
+  // `GET /api/llm-evaluations/{order_no}` 상세 응답 전문. 배치 요약 응답의 키는 실 라우트와
+  // 같은 `날짜|주문번호` 복합 키로 만들어 나간다. 배치 요약은 이 맵에서
+  // **있는 주문만** 요약으로 사영해 돌려준다(없는 주문은 키 자체가 없다 = 버튼 비활성).
+  llmEvaluations?: Record<string, AnyJson>;
   recommendations?: AnyJson[];
   logReports?: AnyJson[];
   // 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 mock override (tester-cycleF 인계: e2e 표본 게이트 3분기 커버리지 갭)
@@ -160,8 +168,17 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope([]) }),
   );
 
-  await page.route("**/api/history*", (route) =>
-    route.fulfill({
+  // ⚠️ cycle276 Green 실측 — `**/api/history*` 글롭은 vite 모듈 요청
+  //    `http://localhost:3000/src/api/history.ts` 까지 잡는다. JSON 을 돌려주면 MIME
+  //    불일치로 `History.tsx` 동적 import 가 통째로 죽어 **빈 화면**이 된다(사이클 104 가
+  //    `**/api/logs*` 에서 고친 것과 같은 계열). 거래기록 화면을 실브라우저로 밟는 spec 이
+  //    cycle276 에서 처음 생겨 이 구멍이 드러났다 — 그 전에는 아무 spec 도 /history 를
+  //    열지 않아 3개월 넘게 무증상이었다.
+  //    판정은 **경로가 진짜 `/api/` 인지**로 한다(resourceType 보다 확실하다).
+  const isRealApiCall = (url: string) => new URL(url).pathname.startsWith("/api/");
+  await page.route("**/api/history*", (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    return route.fulfill({
       json: envelope({
         trades: opts.trades ?? [],
         page: 1,
@@ -169,10 +186,11 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
         total: opts.trades?.length ?? 0,
         total_pages: 1,
       }),
-    }),
-  );
-  await page.route("**/api/history/pnl*", (route) =>
-    route.fulfill({
+    });
+  });
+  await page.route("**/api/history/pnl*", (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    return route.fulfill({
       json: envelope({
         pairs: [],
         page: 1,
@@ -189,8 +207,62 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
           closed_count: 0,
         },
       }),
-    }),
-  );
+    });
+  });
+
+  // cycle276 — AI 매수평가(LLM) 기록.
+  // Playwright 는 **LIFO** 이므로 배치(fallback)를 **먼저**, 단건(구체)을 **나중에** 등록한다.
+  // ⚠️ 사이클 104 hotfix 답습 — `**/api/llm-evaluations*` 글롭은 vite 모듈 요청
+  //    `http://localhost:3000/src/api/llm-evaluations.ts` 까지 잡아 JSON 을 돌려주면
+  //    MIME 불일치로 모듈 로드가 죽는다(실측 `resourceType()==='script'`).
+  //    경로 가드(`/api/` 로 시작하는가)를 정본으로 두고 resourceType 은 보조로 남긴다.
+  const llmEvaluations = opts.llmEvaluations ?? {};
+  const summaryKeys = [
+    "order_no",
+    "trade_date",
+    "ticker",
+    "strategy_id",
+    "result",
+    "reason",
+    "score",
+    "min_score",
+    "would_block",
+    "evaluated_at",
+  ];
+  await page.route("**/api/llm-evaluations*", (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    if (route.request().resourceType() === "script") return route.continue();
+    const url = new URL(route.request().url());
+    const orderNos = (url.searchParams.get("order_nos") ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const data: AnyJson = {};
+    for (const no of orderNos) {
+      const rec = llmEvaluations[no];
+      if (!rec) continue;                       // 기록 없음 = 키 자체가 없다
+      const summary: AnyJson = {};
+      for (const k of summaryKeys) summary[k] = rec[k];
+      // 응답 맵의 키는 **`날짜|주문번호` 복합 키**다(라우트 `summary_key()`).
+      // 주문번호 단독 키는 같은 번호의 다른 날짜 평가를 지운다 — 실 라우트와 같은 형태로
+      // 돌려주지 않으면 목이 "의도한 계약" 만 담고 실제 응답을 담지 않게 된다(cycle266).
+      data[`${rec["trade_date"] ?? ""}|${no}`] = summary;
+    }
+    return route.fulfill({ json: envelope(data) });
+  });
+  await page.route("**/api/llm-evaluations/*", (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    if (route.request().resourceType() === "script") return route.continue();
+    const orderNo = new URL(route.request().url()).pathname.split("/").pop() ?? "";
+    const rec = llmEvaluations[orderNo];
+    if (!rec) {
+      return route.fulfill({
+        status: 404,
+        json: { success: false, data: null, message: `order_no=${orderNo} 평가 기록 없음` },
+      });
+    }
+    return route.fulfill({ json: envelope(rec) });
+  });
 
   await page.route("**/api/recommendations", (route) =>
     route.fulfill({ json: envelope(opts.recommendations ?? []) }),

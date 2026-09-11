@@ -41,6 +41,14 @@ const TARGET_FILES = [
   // 전략 성과 표시 정직화 — PerformanceCard.tsx 에 strategy-te useQuery 신규 추가
   // (Dashboard 마운트 시 발화, e2e ECONNREFUSED 영구 차단 의무).
   'PerformanceCard.tsx',
+  // cycle276 (2026-09-11) — AI 매수평가 팝업. 거래기록 두 그리드가 배치 요약(`/api/llm-evaluations`)
+  // 을, 팝업이 단건 상세(`/api/llm-evaluations/{order_no}`)를 부른다. 세 파일 모두 e2e
+  // `history.spec.ts`(G-E2E-10) 진입 경로에 있어 retry 누락 시 ECONNREFUSED 누적 → timeout.
+  // ⚠️ 이 가드는 **파일 단위**라 등재와 동시에 그 파일의 *기존* useQuery 도 `retry:` 명시
+  //    의무를 진다(TradeHistoryGrid 의 tradeHistory · TradePnLGrid 의 tradePnL 조회 포함).
+  'LlmEvaluationModal.tsx',
+  'TradeHistoryGrid.tsx',
+  'TradePnLGrid.tsx',
 ]
 
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e

@@ -235,20 +235,21 @@ def test_g272_5d_gate_has_no_await_or_db_or_write_log():
 # 6/6 불변이 곧 "여섯 가지 무접촉"(비중·position_ratio·max_positions·랏 캡·
 # open_entry_hold_secs·LTV 청산 규약)의 기계적 증거다.
 #
-# 🔁 2026-09-11 (cycle274) — VB·LTV 매수 신호 LLM 평가 게이트(shadow) 배선이
-#    `check_buy_signal` 2핀을 **의도적으로 갱신**한다(관측 1줄 삽입, 자문 §5.1).
-#    `check_exit_signal`/`calc_buy_quantity` 4핀은 여전히 불변 — cycle264
-#    `_STRATEGY_PINS` 와 **같은 값**으로 자매 갱신한다(`test_g272_7b` 가 두 dict
-#    의 동일성을 강제하므로 한쪽만 고치면 그 가드가 붉어진다).
+# 🔁 2026-09-11 (cycle274 → cycle276) — cycle274 가 `check_buy_signal` 2핀을
+#    갱신했다가 cycle276 이 관측 훅을 `order_engine.execute_buy`(주문 접수 직후)로
+#    옮기면서 **cycle272 값으로 되돌렸다**. 결과적으로 이 dict 는 cycle272 원본
+#    6/6 그대로다 — 그것이 "여섯 가지 무접촉" 의 기계적 증거다. cycle264
+#    `_STRATEGY_PINS` 와 **같은 값**을 유지한다(`test_g272_7b` 가 두 dict 의
+#    동일성을 강제하므로 한쪽만 고치면 그 가드가 붉어진다).
 _FROZEN_PINS = {
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_buy_signal"):
-        "b251e37b52984a43f6ce753d7a62c84aa30573844d86375f76a1528bdacdcefe",
+        "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_exit_signal"):
         "86593b038e4cf8121ae47069fb368346edc50d9692b29db4cbdcc8897421b72e",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "calc_buy_quantity"):
         "6d24ef3f3afd211ae6123623075b08320cdc08c9cd48a6db965355305ad4e732",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "check_buy_signal"):
-        "8956faa5c5b97a2ee11eb725782b7e41a339a0227c89f2c6f85413dce4ec6688",
+        "fb1e7460e5d6906aacd9dd6cbc1037fb7327759c24ca4df055773ba1f22cac2a",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "check_exit_signal"):
         "c8b0e6a8c8705d49bb6f12f82f505d426a5bdeb81413f8b2e0276eabb7dd9cad",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "calc_buy_quantity"):

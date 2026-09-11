@@ -3,8 +3,15 @@
 정본 = `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`
 (§9 C1 · C5 · C10 · C15 · C16 · C17 · C18 · §10 leaf import 한정)
 
-**Red 단계 — 테스트만. `src/` 미변경.** Green = backend-dev.
-지금은 leaf 2파일이 없고 전략 파일에 호출도 없으므로 C1·C5·C10(소스)·C17·C18 이 RED 다.
+🔁 **2026-09-11 cycle276 승계** — 관측 훅이 전략의 `check_buy_signal` 에서
+`order_engine.execute_buy`(주문 접수 직후)로 **옮겨졌다**. 그래서
+① 전략 배선을 재던 C1 그룹은 이 파일에서 **삭제**하고(그 자리를
+`test_cycle276_ast_order_hook.py::test_c6_*` 가 "배선 0건" 으로 대신 잰다),
+② leaf 진입점 이름이 `observe_signal` → `observe_order` 로 바뀌었으며,
+③ `wait_for`/`CancelledError` 계약은 `_evaluate` → `_evaluate_core` 로 내려갔고,
+④ `order_engine.py` 는 이 사이클의 **승인된** 8영역 변경이라 `_BASE_SHA` 를 재핀했다.
+살아남은 케이스(C5 본체 계약 · §10 import 한정 · C10 4키 · C17 read-only ·
+C15/C16 무접촉)는 여전히 유효한 영구 가드다.
 
 ## 왜 `git grep`/`git ls-files` 로 소스를 스캔하지 않는가
 
@@ -58,11 +65,13 @@ _KEYS = (
     "llm_gate_timeout_secs",
 )
 
+# cycle276 — DB 기록 채널 `[llm_eval_persist]` 를 더해 **5종**이다(C26).
 _MARKERS = (
     "[llm_buy_score]",
     "[llm_buy_score_failed]",
     "[llm_gate_config]",
     "[llm_gate_daily_cap]",
+    "[llm_eval_persist]",
 )
 
 _REASONS = (
@@ -110,18 +119,6 @@ def _parents(tree: ast.AST) -> dict[int, ast.AST]:
     return out
 
 
-def _observe_calls(tree: ast.AST) -> list[ast.Call]:
-    """`llm_buy_gate.observe_signal(...)` Call 노드."""
-    out = []
-    for n in ast.walk(tree):
-        if not isinstance(n, ast.Call):
-            continue
-        fn = n.func
-        if isinstance(fn, ast.Attribute) and fn.attr == "observe_signal":
-            out.append(n)
-    return out
-
-
 def _content_sha(rel: str) -> str:
     return hashlib.sha256((_ROOT / rel).read_bytes()).hexdigest()
 
@@ -145,124 +142,23 @@ _KINDS = ("vb", "ltv")
 
 
 # ===========================================================================
-# C1 — 호출은 `ast.Expr` statement, `return Signal.BUY` 직전, 파일당 1회 (HIGH)
-# ===========================================================================
-@pytest.mark.parametrize("kind", _KINDS)
-def test_c1_1_observe_call_appears_exactly_once(kind: str) -> None:
-    """C1 (HIGH) — 전략 파일 전체에서 `observe_signal` 호출은 **정확히 1회**.
-
-    두 자리에서 부르면 래치·cap 이 흔들리고 "어느 자리가 표본인가" 가 흐려진다.
-    """
-    tree, src = _tree(_STRATEGY_META[kind][0])
-    calls = _observe_calls(tree)
-    assert len(calls) == 1, f"`observe_signal` 호출 {len(calls)}건 (기대 1)"
-    assert src.count("observe_signal") >= 1
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-def test_c1_2_observe_call_is_a_bare_expression(kind: str) -> None:
-    """C1 (HIGH) — Call 의 **직접 부모가 `ast.Expr`** 다.
-
-    반환값이 어떤 이름에도 바인딩되지 않고, 어떤 `If`/`Return`/`BoolOp`/비교의
-    피연산자도 아니다 = "반환값이 점수와 무관" 의 기계 증명. 이 한 가지가 이
-    사이클의 심장이다.
-    """
-    tree, _src = _tree(_STRATEGY_META[kind][0])
-    call = _observe_calls(tree)[0]
-    parent = _parents(tree)[id(call)]
-    assert isinstance(parent, ast.Expr), (
-        f"`observe_signal(...)` 의 부모가 {type(parent).__name__} 다 — "
-        "값이 소비되는 자리에 두면 shadow 계약이 깨진다"
-    )
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-def test_c1_3_observe_is_inside_check_buy_signal(kind: str) -> None:
-    """C1 — 호출은 `check_buy_signal` 안에 있다(다른 메서드로 새면 표본이 달라진다)."""
-    path, cls_name = _STRATEGY_META[kind]
-    tree, _src = _tree(path)
-    fn = _method(tree, cls_name, "check_buy_signal")
-    assert fn is not None
-    assert len(_observe_calls(fn)) == 1
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-def test_c1_4_observe_statement_immediately_precedes_return_buy(kind: str) -> None:
-    """C1 (HIGH) — 관측을 담은 문장과 `return Signal.BUY` 사이에 **분기가 0** 이다.
-
-    자문 §5.1 3번 근거: 반환문과 observe 사이에 어떤 조건도 없어야 "반환값이 점수와
-    무관" 을 AST 로 증명할 수 있다. 호출부 흡수기(`try/except`) 는 허용한다 —
-    C2(HIGH)가 그 흡수기를 요구하기 때문이다.
-    """
-    path, cls_name = _STRATEGY_META[kind]
-    tree, _src = _tree(path)
-    fn = _method(tree, cls_name, "check_buy_signal")
-    parents = _parents(fn)
-    call = _observe_calls(fn)[0]
-
-    # 관측 호출을 담은 "블록 내 문장" 까지 거슬러 올라가 그 형제 목록을 찾는다.
-    node: ast.AST = call
-    while id(node) in parents:
-        parent = parents[id(node)]
-        body = getattr(parent, "body", None)
-        if isinstance(body, list) and node in body:
-            idx = body.index(node)
-            assert idx + 1 < len(body), "관측 문장 뒤에 문장이 없다(return 이 어디에?)"
-            nxt = body[idx + 1]
-            assert isinstance(nxt, ast.Return), (
-                f"관측 문장 다음이 `return` 이 아니다: {type(nxt).__name__}"
-            )
-            assert isinstance(nxt.value, ast.Attribute) and nxt.value.attr == "BUY", (
-                "관측 문장 다음 반환이 `Signal.BUY` 가 아니다"
-            )
-            return
-        node = parent
-    pytest.fail("관측 호출을 담은 문장을 찾지 못했다")
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-def test_c1_5_observe_call_uses_keyword_arguments_only(kind: str) -> None:
-    """C1/§3.3 — 위치 인자 0. 16개 스칼라를 순서로 넘기면 조용한 자리 바뀜이 생긴다."""
-    tree, _src = _tree(_STRATEGY_META[kind][0])
-    call = _observe_calls(tree)[0]
-    assert call.args == [], "위치 인자 사용 — 키워드 전용이 계약이다"
-    assert call.keywords, "키워드 인자가 없다"
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-def test_c1_6_no_await_on_observe(kind: str) -> None:
-    """C1/C5 — 호출을 `await` 하지 않는다(동기 hot path 를 막으면 틱 처리가 정지한다)."""
-    tree, _src = _tree(_STRATEGY_META[kind][0])
-    call = _observe_calls(tree)[0]
-    assert not isinstance(_parents(tree)[id(call)], ast.Await)
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-def test_c1_7_module_imports_the_leaf(kind: str) -> None:
-    """C1/§5.1 diff (1) — 모듈 상단 import 1줄(`from src.engine import llm_buy_gate`)."""
-    tree, _src = _tree(_STRATEGY_META[kind][0])
-    names = set()
-    for n in ast.walk(tree):
-        if isinstance(n, ast.ImportFrom) and n.module == "src.engine":
-            names |= {a.asname or a.name for a in n.names}
-    assert "llm_buy_gate" in names, "`from src.engine import llm_buy_gate` 부재"
-
-
-# ===========================================================================
-# C5 — `observe_signal` 본체: await/DB/HTTP 0, `create_task` 정확 1회 (HIGH)
+# C5 — `observe_order` 본체: await/DB/HTTP 0, `create_task` 정확 1회 (HIGH)
+#
+# 🔁 cycle276 — 진입점 이름이 `observe_signal` → `observe_order` 다(신호 시점 →
+#    주문 접수 시점). 계약 자체는 한 글자도 완화되지 않았다.
 # ===========================================================================
 def _observe_fn():
     tree, _src = _tree(_LEAF_GATE)
-    fn = _func(tree, "observe_signal")
-    assert fn is not None, "`observe_signal` 이 leaf 에 없다"
+    fn = _func(tree, "observe_order")
+    assert fn is not None, "`observe_order` 가 leaf 에 없다"
     return fn
 
 
 def test_c5_1_observe_is_sync_def() -> None:
-    """C5 (HIGH) — `observe_signal` 은 **동기** 함수다(`async def` 금지)."""
+    """C5 (HIGH) — `observe_order` 는 **동기** 함수다(`async def` 금지)."""
     tree, _src = _tree(_LEAF_GATE)
-    fn = _func(tree, "observe_signal")
-    assert isinstance(fn, ast.FunctionDef), "`async def observe_signal` 은 계약 위반"
+    fn = _func(tree, "observe_order")
+    assert isinstance(fn, ast.FunctionDef), "`async def observe_order` 은 계약 위반"
 
 
 def test_c5_2_no_await_in_observe() -> None:
@@ -283,7 +179,7 @@ def test_c5_3_no_db_or_http_in_observe() -> None:
     fn = _observe_fn()
     seg = ast.get_source_segment(_read(_LEAF_GATE), fn) or ""
     for token in ("pg.", "httpx", "get_recent_daily", "chat.completions"):
-        assert token not in seg, f"`observe_signal` 안에 `{token}` — 동기 경로 오염"
+        assert token not in seg, f"`observe_order` 안에 `{token}` — 동기 경로 오염"
 
 
 def test_c5_4_create_task_called_exactly_once() -> None:
@@ -336,7 +232,7 @@ def test_c5_6_observe_body_is_wrapped_in_try_except_exception() -> None:
     """
     fn = _observe_fn()
     tries = [n for n in fn.body if isinstance(n, ast.Try)]
-    assert tries, "`observe_signal` 본체에 최상위 `try` 가 없다"
+    assert tries, "`observe_order` 본체에 최상위 `try` 가 없다"
     handlers = [h for t in tries for h in t.handlers]
     assert any(
         isinstance(h.type, ast.Name) and h.type.id == "Exception" for h in handlers
@@ -361,13 +257,15 @@ def test_c5_8_observe_leaves_a_trace_on_failure() -> None:
 
 
 def test_c5_9_evaluate_uses_wait_for_with_timeout() -> None:
-    """C5/§4.4 — `_evaluate` 가 `asyncio.wait_for(..., timeout=...)` 로 콜을 감싼다.
+    """C5/§4.4 — LLM 콜이 `asyncio.wait_for(..., timeout=...)` 로 감싸여 있다.
 
     `AsyncOpenAI` 기본 타임아웃은 **600s** 다. 지정하지 않으면 task 가 10분 산다.
+    🔁 cycle276 — 콜 본체가 `_evaluate` → `_evaluate_core` 로 내려갔다(`_evaluate` 는
+    outcome 을 받아 DB 에 1행 기록하는 얇은 진입점이 됐다).
     """
     tree, src = _tree(_LEAF_GATE)
-    fn = _func(tree, "_evaluate")
-    assert fn is not None, "`_evaluate` 부재"
+    fn = _func(tree, "_evaluate_core")
+    assert fn is not None, "`_evaluate_core` 부재"
     calls = [
         n for n in ast.walk(fn)
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
@@ -380,10 +278,14 @@ def test_c5_9_evaluate_uses_wait_for_with_timeout() -> None:
 
 
 def test_c5_10_evaluate_reraises_cancelled_error() -> None:
-    """C5/§5.3 — `asyncio.CancelledError` 는 re-raise(cycle272 `open_price_rest` 계약)."""
+    """C5/§5.3 — `asyncio.CancelledError` 는 re-raise(cycle272 `open_price_rest` 계약).
+
+    🔁 cycle276 — 본체가 `_evaluate_core` 로 내려갔다(진입점 `_evaluate` 도 같은 계약을
+    지키지만, 취소가 갇히면 안 되는 자리는 실제 await 가 있는 core 다).
+    """
     src = _read(_LEAF_GATE)
-    fn = _func(ast.parse(src), "_evaluate")
-    assert fn is not None, "`_evaluate` 부재"
+    fn = _func(ast.parse(src), "_evaluate_core")
+    assert fn is not None, "`_evaluate_core` 부재"
     seg = ast.get_source_segment(src, fn) or ""
     assert "CancelledError" in seg, "`CancelledError` 분기 부재 — 취소가 본체에 갇힌다"
     assert "raise" in seg
@@ -649,7 +551,9 @@ def test_c17_4_leaf_does_not_import_eight_area_modules() -> None:
 # ===========================================================================
 _BASE_SHA = {
     "src/engine/risk.py": "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
-    "src/engine/order_engine.py": "a7967892f7baba40dc66d634fc2ae326cd0df69773269de0dbace547edad2ad8",
+    # 🔁 cycle276 — 사용자 명시 승인 하에 이 사이클이 바꾸는 **유일한** 8영역 파일이다
+    # (import 1줄 + `execute_buy` 두 매수 경로의 관측 훅 2곳). A-ATOMIC 구간은 byte 동일.
+    "src/engine/order_engine.py": "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
@@ -779,16 +683,11 @@ def test_c18_1_exit_and_qty_methods_are_frozen(key) -> None:
     )
 
 
-@pytest.mark.parametrize("kind", _KINDS)
-def test_c18_2_check_buy_signal_must_change(kind: str) -> None:
-    """C18 (HIGH) — VB·LTV `check_buy_signal` 은 **반드시 바뀐다**(관측 1줄 삽입).
-
-    Red 에서는 아직 안 바뀌었으므로 이 케이스가 RED 다 = "배선이 아직 없다" 의 신호.
-    """
-    key = (kind, "check_buy_signal")
-    assert _current_method_sha(kind, "check_buy_signal") != _BASE_METHOD_SHA[key], (
-        f"{kind}.check_buy_signal 이 base 와 같다 — 관측 배선이 아직 없다(Red)"
-    )
+# 🔁 cycle276 — `test_c18_2_check_buy_signal_must_change` 는 **삭제**했다. cycle274 가
+#    "이 메서드는 반드시 바뀐다" 고 요구했지만 cycle276 이 훅을 order_engine 으로 옮기며
+#    두 메서드를 cycle272 값으로 **되돌렸다**. 그 복귀는 이제
+#    `test_cycle276_ast_order_hook.py::test_c6_1_strategy_methods_return_to_cycle272_sha`
+#    가 6/6 으로 잰다(고아 가드 방지 — cycle240 A11b · cycle252 G-252-5b).
 
 
 @pytest.mark.parametrize("kind", _KINDS)
