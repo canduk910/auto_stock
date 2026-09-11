@@ -12,17 +12,21 @@ LLM 점수는 **기록만** 한다. `check_buy_signal` 반환값·`execute_buy` 
 로 낙하한다(C9). 이 파일이 그 계약의 런타임 증거이고, AST 증거는
 `tests/unit/ast/test_cycle274_ast_llm_gate.py` 가 든다.
 
-## Green 이 지켜야 하는 호출부 계약
+## 🔁 2026-09-11 cycle276 승계 — 전략에서 배선이 **사라졌다**
 
-`return Signal.BUY` **직전**(계좌 SOFT 게이트 → cycle262 90초 보류 → 신호 로그 →
-`state.buy_signals.append` **뒤**)에서 `llm_buy_gate.observe_signal(...)` 을
-**키워드 인자만**으로 부른다. 인자는 전부 **값 복사** — 전략 객체·`_targets`·
-`config.params` 자체를 넘기지 않는다(§3.3, C17).
+관측 훅이 `check_buy_signal` 에서 `order_engine.execute_buy`(주문 접수 직후)로 옮겨졌다.
+그래서 이 파일의 "발사점 배선"(w1_4~w1_8)과 "호출부 흡수기"(c2_1~c2_4) 케이스는 **삭제**
+했다 — 그 계약은 이제 `tests/unit/engine/test_cycle276_order_time_hook.py`(런타임)와
+`tests/unit/ast/test_cycle276_ast_order_hook.py`(구조)가 든다. 고아 가드를 남기지 않는다
+(cycle240 A11b · cycle252 G-252-5b).
 
-⚠️ **C2 는 호출부에 흡수기를 요구한다.** `observe_signal` 이 스스로 never-raise 여도
-호출부의 `try/except` 는 그 바깥의 사고(import 실패·monkeypatch·시그니처 불일치)까지
-받는다 — cycle268 `kojiro_gap_observe.absorb_call_failure` 와 같은 자리다. 자문 §5.1 의
-"직전 1줄" 스케치는 그 흡수기를 세지 않은 표현이다(결과의 `spec_disagreements` 참조).
+**남긴 것**은 cycle276 이후에도 유효한 계약뿐이다:
+- `DEFAULT_PARAMS` 4키 존재·기본값·머지 생존(w1_1~w1_3) — 이 4키는 여전히 VB·LTV 의
+  설정 표면이자 킬스위치다(`order_engine` 이 `strategy.config.params` 로 읽는다).
+- `llm_gate_mode` 값이 무엇이든 매매 행위가 동일하다(c9_1·c3_1~c3_5) — 이제 전략은 그
+  키를 **읽지도 않으므로** 더 강한 형태로 참이며, 누군가 전략에 mode 분기를 되살리면
+  이 케이스들이 잡는다.
+- 전략 모듈이 leaf 를 참조하지 않는다(w0_1, 신설).
 
 ## freezegun ↔ KST
 
@@ -80,13 +84,16 @@ def _module(kind: str):
     return vb_mod if kind == "vb" else ltv_mod
 
 
-def _gate_of(kind: str):
-    """전략 모듈이 물고 있는 `llm_buy_gate` — 부재면 **실패**(Red)."""
+def _assert_no_leaf_reference(kind: str) -> None:
+    """🔁 cycle276 — 전략 모듈은 leaf 를 **모른다**(배선이 order_engine 으로 옮겨졌다).
+
+    이름이 남아 있으면 전략에 죽은 배선이 있다는 뜻이고, 그 죽은 배선은 언젠가 다시
+    호출된다.
+    """
     mod = _module(kind)
-    assert hasattr(mod, "llm_buy_gate"), (
-        f"{mod.__name__} 에 `llm_buy_gate` import 가 없다 — 자문 §5.1 diff (1) 미배선"
+    assert not hasattr(mod, "llm_buy_gate"), (
+        f"{mod.__name__} 에 `llm_buy_gate` 참조가 남아 있다 — cycle276 원상 복구 미완"
     )
-    return mod.llm_buy_gate
 
 
 def _seed_target(strategy, ticker: str) -> None:
@@ -133,24 +140,6 @@ def _breakout(s, ticker: str = _TICKER, px: int = _TARGET) -> Signal:
     return s.check_buy_signal(ticker, px, _OPEN)
 
 
-class _Spy:
-    """`observe_signal` 스파이 — 호출 kwargs 를 그대로 보관."""
-
-    def __init__(self, exc: BaseException | None = None) -> None:
-        self.calls: list[dict] = []
-        self.exc = exc
-
-    def __call__(self, **kw):
-        self.calls.append(kw)
-        if self.exc is not None:
-            raise self.exc
-        return None
-
-
-def _install(kind: str, monkeypatch, spy: _Spy) -> None:
-    monkeypatch.setattr(_gate_of(kind), "observe_signal", spy)
-
-
 # ===========================================================================
 # 신규 4키 (§6.2)
 # ===========================================================================
@@ -183,175 +172,17 @@ def test_w1_3_mode_default_is_shadow_not_enforce(kind: str) -> None:
 
 
 # ===========================================================================
-# 배선 — 발사점에서 정확히 1회 호출 (§5.1)
+# 🔁 cycle276 — 전략에는 배선이 없다
 # ===========================================================================
 @pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_1000)
-def test_w1_4_observe_called_once_on_breakout(monkeypatch, kind: str) -> None:
-    """C1 런타임 짝/§5.1 — 돌파 발사점에서 `observe_signal` 이 **정확히 1회** 불린다.
+def test_w0_1_strategy_module_does_not_reference_the_leaf(kind: str) -> None:
+    """C12 런타임 짝 — VB·LTV 모듈에 `llm_buy_gate` 이름이 없다.
 
-    이 자리(계좌 SOFT 게이트 → cycle262 보류 → 신호 로그 → `buy_signals` append 뒤,
-    `return Signal.BUY` 앞)여야 **shadow 표본 = enforce 표본**이 된다 — 다른 게이트를
-    전부 통과한 신호만 평가하므로 2주 뒤 판정이 그대로 enforce 예측이 된다.
+    cycle274 는 `check_buy_signal` 의 `return Signal.BUY` 직전에서 leaf 를 불렀다.
+    cycle276 이 그 훅을 `order_engine.execute_buy`(주문 접수 직후)로 옮겼으므로
+    전략 쪽 참조는 **전부** 사라져야 한다 — 남으면 죽은 배선이다.
     """
-    spy = _Spy()
-    _install(kind, monkeypatch, spy)
-    s = _armed(kind, monkeypatch)
-    assert _prime(s) == Signal.NONE
-    assert len(spy.calls) == 0, "baseline 틱에서 평가가 나갔다(신호가 아닌데 돈을 쓴다)"
-    assert _breakout(s) == Signal.BUY
-    assert len(spy.calls) == 1
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_1000)
-def test_w1_5_observe_not_called_without_breakout(monkeypatch, kind: str) -> None:
-    """C1 런타임 짝/§5.1 — 돌파가 아니면 호출 0건(목표가 아래 틱은 신호가 아니다)."""
-    spy = _Spy()
-    _install(kind, monkeypatch, spy)
-    s = _armed(kind, monkeypatch)
-    _prime(s)
-    assert s.check_buy_signal(_TICKER, _TARGET - 1, _OPEN) == Signal.NONE
-    assert spy.calls == []
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_090030)
-def test_w1_6_observe_not_called_while_open_entry_hold(monkeypatch, kind: str) -> None:
-    """C1 런타임 짝/§5.1 — cycle262 보류(09:00~09:01:30)로 막힌 신호는 **평가하지 않는다**.
-
-    보류된 신호는 매수가 아니므로 shadow 표본에 들어가면 안 된다(표본 오염 +
-    쓸 데 없는 비용). cycle262 게이트가 `observe_signal` **앞**이라는 순서 계약.
-    """
-    spy = _Spy()
-    _install(kind, monkeypatch, spy)
-    s = _armed(kind, monkeypatch, params={"open_entry_hold_secs": 90})
-    _prime(s)
-    assert _breakout(s) == Signal.NONE
-    assert spy.calls == []
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_1000)
-def test_w1_7_observe_receives_value_copies_only(monkeypatch, kind: str) -> None:
-    """C17/§3.3 — 넘기는 것은 **값 복사**다. 전략 객체·`_targets`·`config.params` 금지.
-
-    `create_task` 에 전략 객체를 넘기면 task 실행 시점에 `_targets` 가 이미 바뀌어
-    있을 수 있다(재-prepare). 그리고 `config.params` 를 그대로 넘기면 leaf 가
-    (실수로라도) 전략 파라미터를 오염시킬 수 있는 경로가 열린다.
-    """
-    spy = _Spy()
-    _install(kind, monkeypatch, spy)
-    s = _armed(kind, monkeypatch)
-    _prime(s)
-    _breakout(s)
-
-    kw = spy.calls[0]
-    assert kw, "키워드 인자로 호출되지 않았다(위치 인자는 순서 결함에 취약하다)"
-    for value in kw.values():
-        assert value is not s, "전략 객체 자체를 넘겼다"
-        assert value is not s._targets, "`_targets` 참조를 넘겼다"
-        assert value is not s.config.params, "`config.params` 참조를 넘겼다(오염 경로)"
-    snap = kw["params_snapshot"]
-    assert isinstance(snap, dict) and snap is not s.config.params
-    for key in _KEYS:
-        assert key in snap, f"params_snapshot 에 `{key}` 누락 — 모드 판정 불가"
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_1000)
-def test_w1_8_observe_payload_fields(monkeypatch, kind: str) -> None:
-    """C17 전제/§3.3 B군 — 신호 시점 스냅샷의 핵심 필드가 실제 값으로 넘어간다."""
-    spy = _Spy()
-    _install(kind, monkeypatch, spy)
-    s = _armed(kind, monkeypatch)
-    _prime(s)
-    _breakout(s)
-
-    kw = spy.calls[0]
-    assert kw["strategy_id"] == s.strategy_id
-    assert kw["ticker"] == _TICKER
-    assert kw["board"] == "main"
-    assert kw["price_won"] == _TARGET
-    assert kw["board_open_won"] == _OPEN
-    assert kw["target_won"] == _TARGET
-    assert kw["target_offset_won"] == _OFFSET
-    assert kw["prev_price_won"] == _PRIME_PX
-    assert kw["prdy_close_won"] == _PRDY
-    assert float(kw["k"]) == pytest.approx(_K)
-    assert kw["now_kst"].tzinfo is not None, "`now_kst` 는 tz-aware 여야 한다(KST 강제)"
-
-
-# ===========================================================================
-# C2 — 관측이 터져도 반환값 동일 (HIGH)
-# ===========================================================================
-@pytest.mark.parametrize("kind", _KINDS)
-@pytest.mark.parametrize(
-    "exc",
-    [RuntimeError("boom"), TypeError("signature"), ValueError("x"), OverflowError("inf")],
-    ids=["runtime", "type", "value", "overflow"],
-)
-@freeze_time(_KST_1000)
-def test_c2_1_observe_exception_does_not_change_signal(monkeypatch, kind: str, exc) -> None:
-    """C2 (HIGH) — `observe_signal` 이 무엇을 던져도 반환은 `Signal.BUY` 다.
-
-    관측 예외가 `check_buy_signal` 을 뚫으면 `risk.on_tick` 은 전략별 try 가 없어
-    그 종목의 나머지 평가를 통째로 잃고, `handler.py` 가 re-raise 해 **WS 재연결
-    루프**가 된다(cycle237 TE-2 · cycle262 C10 과 같은 계열).
-    """
-    _install(kind, monkeypatch, _Spy(exc=exc))
-    s = _armed(kind, monkeypatch)
-    assert _prime(s) == Signal.NONE
-    assert _breakout(s) == Signal.BUY
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_1000)
-def test_c2_2_observe_exception_preserves_buy_signals_entry(monkeypatch, kind: str) -> None:
-    """C2 — 관측이 터져도 `state.buy_signals` 항목이 정상 형태로 남는다(대시보드 무영향)."""
-    _install(kind, monkeypatch, _Spy(exc=RuntimeError("boom")))
-    s = _armed(kind, monkeypatch)
-    _prime(s)
-    _breakout(s)
-    assert len(s.state.buy_signals) == 1
-    entry = s.state.buy_signals[0]
-    assert entry["ticker"] == _TICKER
-    assert entry["price"] == _TARGET
-    assert entry["target_price"] == _TARGET
-    assert entry["board"] == "main"
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_1000)
-def test_c2_3_observe_exception_leaves_a_trace(monkeypatch, kind: str, caplog) -> None:
-    """C2/cycle258 카드 #5 — 호출부 흡수기는 **무흔적 `pass` 가 아니다**.
-
-    관측기가 죽어도 아무도 모르면 이 마커의 **결측이 '신호가 없었다' 로 오독된다**
-    (cycle268 §1 판독 표가 막으려던 바로 그것).
-    """
-    caplog.set_level(logging.DEBUG)
-    caplog.set_level(logging.DEBUG, logger=_module(kind).__name__)
-    caplog.set_level(logging.DEBUG, logger="src.engine.observer_trace")
-    _install(kind, monkeypatch, _Spy(exc=RuntimeError("boom")))
-    s = _armed(kind, monkeypatch)
-    _prime(s)
-    _breakout(s)
-    assert any("observer_failed" in r.getMessage() for r in caplog.records), (
-        "관측 호출 실패의 흔적이 남지 않았다(무흔적 pass 금지). 흔적 경로는 강제하지 "
-        "않는다 — 호출부가 `trace_observer_failure(..., dest_logger=logger)` 를 쓰든 "
-        "leaf 의 흡수기를 타든 어느 쪽이든 `observer_failed` 한 줄은 남아야 한다."
-    )
-
-
-@pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_1000)
-def test_c2_4_observe_exception_does_not_block_next_ticks(monkeypatch, kind: str) -> None:
-    """C2 — 한 번 터진 뒤에도 다음 틱 평가가 계속된다(관측 사망이 매매를 마비시키지 않는다)."""
-    _install(kind, monkeypatch, _Spy(exc=RuntimeError("boom")))
-    s = _armed(kind, monkeypatch)
-    _prime(s)
-    _breakout(s)
-    assert s.check_buy_signal(_TICKER, _TARGET + 100, _OPEN) == Signal.NONE  # 이미 돌파 후
+    _assert_no_leaf_reference(kind)
 
 
 # ===========================================================================
@@ -369,28 +200,15 @@ def test_c9_1_signal_is_identical_for_every_mode(monkeypatch, kind: str, mode) -
     `enforce` 는 이 사이클에 **구현되지 않았다.** 미구현 모드를 DB 에 넣었을 때
     반환값이 달라지면 그것이 곧 무허가 행위 변경이다.
     """
-    _install(kind, monkeypatch, _Spy())
     s = _armed(kind, monkeypatch, params={"llm_gate_mode": mode})
     assert _prime(s) == Signal.NONE
     assert _breakout(s) == Signal.BUY
 
 
-@pytest.mark.parametrize("kind", _KINDS)
-@freeze_time(_KST_1000)
-def test_c9_2_observe_is_called_even_in_off_mode(monkeypatch, kind: str) -> None:
-    """C9 — 모드 판정은 **leaf 의 책임**이다(전략은 항상 부르고 leaf 가 즉시 return).
-
-    전략 파일에 mode 분기를 두면 `check_buy_signal` 안에 새 `if` 가 생겨 C1 의
-    "반환값이 점수와 무관" 기계 증명이 흐려지고, `[llm_gate_config]` 롤백 카나리아도
-    off 에서 사라진다.
-    """
-    spy = _Spy()
-    _install(kind, monkeypatch, spy)
-    s = _armed(kind, monkeypatch, params={"llm_gate_mode": "off"})
-    _prime(s)
-    _breakout(s)
-    assert len(spy.calls) == 1
-    assert spy.calls[0]["params_snapshot"]["llm_gate_mode"] == "off"
+# 🔁 cycle276 — `test_c9_2_observe_is_called_even_in_off_mode` 는 **삭제**했다.
+#    "전략은 항상 부르고 mode 판정은 leaf 가 한다" 는 계약의 자리가 order_engine 으로
+#    옮겨졌다. 그 계약(off 에서도 `[llm_gate_config]` 카나리아 1행)은 이제
+#    `test_cycle276_order_time_hook.py::test_c19_2_mode_off_still_emits_config_canary` 가 든다.
 
 
 # ===========================================================================
@@ -423,7 +241,6 @@ async def test_c3_1_execute_buy_args_identical_off_vs_shadow(monkeypatch, kind: 
     `execute_buy(ticker, current_price, strategy)` — 종목·가격·전략 셋 다 같아야
     한다. 하나라도 다르면 shadow 가 매매를 건드린 것이다.
     """
-    _install(kind, monkeypatch, _Spy())
     seen = []
     for mode in ("off", "shadow"):
         s, oe, risk = _rig(kind, monkeypatch, mode=mode)
@@ -436,11 +253,15 @@ async def test_c3_1_execute_buy_args_identical_off_vs_shadow(monkeypatch, kind: 
 
 @pytest.mark.parametrize("kind", _KINDS)
 @freeze_time(_KST_1000)
-async def test_c3_2_execute_buy_args_identical_when_observe_explodes(monkeypatch, kind: str) -> None:
-    """C3 — 관측이 터지는 상황에서도 `execute_buy` 인자가 동일하다."""
+async def test_c3_2_execute_buy_args_identical_across_repeat_runs(monkeypatch, kind: str) -> None:
+    """C3 — 같은 입력을 두 번 태워도 `execute_buy` 인자가 동일하다(결정성 회귀).
+
+    🔁 cycle276 — 종전에는 "관측기가 터져도 동일" 을 쟀다. 관측기가 전략에서
+    사라졌으므로 그 계약은 `test_cycle276_order_time_hook.py::test_c3_2/_c3_4`
+    (훅이 던져도 `execute_buy` 결과 동일)로 옮겨졌다.
+    """
     seen = []
-    for spy in (_Spy(), _Spy(exc=RuntimeError("boom"))):
-        _install(kind, monkeypatch, spy)
+    for _ in range(2):
         s, oe, risk = _rig(kind, monkeypatch, mode="shadow")
         await _run_on_tick(risk)
         assert oe.execute_buy.await_count == 1
@@ -455,7 +276,6 @@ async def test_c3_3_signal_count_today_unchanged(monkeypatch, kind: str) -> None
     """C3 — `state.signal_count_today` 증가도 동일하다(대시보드 카운터 무영향)."""
     counts = []
     for mode in ("off", "shadow"):
-        _install(kind, monkeypatch, _Spy())
         s, _oe, risk = _rig(kind, monkeypatch, mode=mode)
         await _run_on_tick(risk)
         counts.append(s.state.signal_count_today)
@@ -472,7 +292,6 @@ async def test_c3_4_calc_buy_quantity_identical(monkeypatch, kind: str) -> None:
     """
     qtys = []
     for mode in ("off", "shadow"):
-        _install(kind, monkeypatch, _Spy())
         s = _armed(kind, monkeypatch, params={"llm_gate_mode": mode})
         qtys.append(s.calc_buy_quantity(_TARGET, ticker=_TICKER))
     assert qtys[0] == qtys[1]
@@ -483,7 +302,6 @@ async def test_c3_4_calc_buy_quantity_identical(monkeypatch, kind: str) -> None:
 async def test_c3_5_no_buy_when_no_breakout_regardless_of_gate(monkeypatch, kind: str) -> None:
     """C3 — 돌파가 없으면 어느 모드에서도 매수 0건(게이트가 매수를 **만들지** 않는다)."""
     for mode in ("off", "shadow"):
-        _install(kind, monkeypatch, _Spy())
         _s, oe, risk = _rig(kind, monkeypatch, mode=mode)
         await risk.on_tick(_TICKER, current_price=_PRIME_PX, open_price=_OPEN, change_rate=14.5)
         await risk.on_tick(_TICKER, current_price=_TARGET - 1, open_price=_OPEN, change_rate=14.9)

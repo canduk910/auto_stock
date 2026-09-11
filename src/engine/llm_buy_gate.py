@@ -1,33 +1,55 @@
-"""cycle274 — VB·LTV 매수 신호 LLM 평가 게이트(shadow) leaf. **행위 변경 0.**
+"""cycle276 — AI 매수평가(LLM shadow) **주문 시점** leaf. **매매 행위 변경 0.**
 
-정본 = `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`
-(§5.2 `observe_signal` · §5.3 `_evaluate` · §5.4 자원 상한 · §6.2 키 · §6.4 출력 검증 ·
-§7.1 마커 4종 · §7.2 `slip_bp`)
+정본 = `_workspace/red/cycle276_order_time_llm_eval_spec.md` §6 (C17~C30) ·
+cycle274 자문 `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`
+(§5.3 `_evaluate` · §5.4 자원 상한 · §6.2 키 · §6.4 출력 검증).
 
-`check_buy_signal` 의 `return Signal.BUY` 직전에서 신호 1건을 동기로 접수해
-`asyncio.create_task` 로 던지고 즉시 리턴한다. LLM 점수는 **기록만** 한다 — 이
-사이클에 `enforce` 는 구현되지 않았고, `shadow` 외 모든 값은 `off` 로 낙하한다.
+`order_engine.execute_buy` 가 `place_order` 에 성공한 **직후**(매핑 등록 뒤 · PENDING
+INSERT 앞)에서 주문 1건을 동기로 접수해 `asyncio.create_task` 로 던지고 즉시 리턴한다.
+주문은 이미 KIS 에 접수됐고 이 leaf 는 **기록만** 한다 — 주문을 막지도, 늦추지도,
+바꾸지도 않는다. `enforce` 는 이 사이클에 미구현이고 `shadow` 외 모든 값은 `off` 낙하다.
+
+## cycle274 와 무엇이 다른가 (시각 의미 이동 — **배포 전후 로그 합산 금지**)
+- 진입점이 `observe_signal`(신호 시점) → **`observe_order`(주문 접수 시점)** 으로 옮겼다.
+  cycle274 는 신호 10건 중 5건만 주문이 돼 점수 절반이 실현손익에 붙지 않았다.
+- 래치 키가 `(전략, 종목)/일` → **주문번호**다. 같은 종목을 하루 두 번 사면 두 번 평가한다.
+- 표류 필드가 **`post_order_drift_bp`** 로 개명됐다(구 이름과 부호 **의미**가 반대다 —
+  이제 + 는 주문 뒤 상승 = 이득). `signal_kst`/`signal_price` → `order_kst`/`order_price`.
+- 평가 결과를 로그뿐 아니라 **DB(`llm_buy_evaluations`)에도 1행** 남긴다(성공·실패 모두).
 
 ## leaf 계약
-- `observe_signal` — 동기·never-raise·`await`/DB/HTTP 0·반환 항상 `None`.
-- `_evaluate` — async 본체. 세마포어 2 → 일봉 캐시(60봉 fetch, 오늘봉 폐기, 30봉만
-  프롬프트에 싣는다) → LLM 호출(`asyncio.wait_for` 타임아웃) → 출력 검증(클램프 금지).
+- `observe_order` — 동기·never-raise·`await`/DB/HTTP 0·반환 항상 `None`.
+- `_evaluate` — async 진입. `_evaluate_core` 의 outcome 을 받아 **단 1곳**에서
+  `_persist_evaluation` 한다(C24).
+- `_evaluate_core` — 세마포어 2 → 일봉 캐시(60봉 fetch, 오늘봉 폐기, 30봉만 프롬프트에
+  싣는다) → LLM 호출(`asyncio.wait_for` 타임아웃) → 출력 검증(클램프 금지) → outcome.
 - `src.*` import 는 §10 허용 목록(`daily_emit_cap`·`observer_trace`·`llm_features`·
   `config`·`db.stock_master_daily`)으로 한정 — **모듈 최상단**에서만. `scanner`·
-  `tick_volume`·`log_analysis_engine` 은 전부 함수 내 **지연 import**(순환 차단 ·
-  §10 허용 목록 밖이라 최상단에 나타나면 안 된다).
-- 실패는 전부 `[llm_buy_score_failed] reason=` 9종 어휘 중 하나로 남긴다:
+  `tick_volume`·`log_analysis_engine`·`db.llm_buy_evaluations` 는 전부 함수 내
+  **지연 import**(순환 차단 · §10 허용 목록 밖이라 최상단에 나타나면 안 된다).
+- 보드는 세션 트래커가 아니라 **시계**로 푼다(`_board_by_clock`) — leaf 는 8영역 모듈을
+  참조하지 않고(C22), 트래커의 활성 보드는 30초 stale 이라 09:00:0x 에 `pre_nxt` 로
+  굳는다(cycle264 실증).
+- 실패는 전부 `[llm_buy_score_failed] reason=` 10종 어휘 중 하나로 남긴다:
   timeout / api_error / parse_error / schema_error / no_bars / no_key /
   cap_exceeded / disabled_model / payload_error(검증 라운드2 파인딩 #10 —
-  자문 §6.1/§7.1 의 8종 밖 확장, `spec_disagreements` 등재).
+  자문 §6.1/§7.1 의 8종 밖 확장, `spec_disagreements` 등재) /
+  truncated(09-11 운영 실측 — 추론 토큰이 출력 한도를 먹어 `content=""`).
+  그 행에는 `finish=`(OpenAI `finish_reason` 원문, LLM 호출 전 실패는 `-`)도 실린다.
+  `empty_order_no` 는 **평가 어휘가 아니라 persist 어휘**다(C21/C28) — persist 사유를
+  평가 실패 분포에 섞으면 20:10 리포트의 실패 분류가 오염된다. `cap_exceeded` 도
+  persist 채널에서만 발화한다(평가를 시작하지 않은 주문, 검증 라운드 3 #3).
 """
 
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import time as _wall_clock
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal as _Decimal
 
 from src.config import settings
 from src.db.stock_master_daily import get_recent_daily_normalized
@@ -55,13 +77,20 @@ MARKER_SCORE = "[llm_buy_score]"
 MARKER_FAILED = "[llm_buy_score_failed]"
 MARKER_CONFIG = "[llm_gate_config]"
 MARKER_DAILY_CAP = "[llm_gate_daily_cap]"
+# cycle276 — DB 기록의 성공/실패를 남기는 **유일한 채널**. 이 마커가 없으면
+# "평가 안 함" 과 "기록 실패" 가 구별되지 않는다(C25).
+MARKER_PERSIST = "[llm_eval_persist]"
+
+# KST — leaf 는 `scanner.KST_TZ` 를 끌어오지 않는다(순환 차단, 모듈 로컬 정의 관례).
+_KST_TZ = timezone(timedelta(hours=9))
 
 # 실패 사유 전체 어휘(자문 §7.1 ②) — `[llm_buy_score_failed] reason=` 이 쓰는
 # 8종 + 검증 라운드2 파인딩 #10 이 추가한 `payload_error`. `cap_exceeded` 는
-# **이 사이클의 실제 차단 경로가 아니다** — 일일 cap 도달은 `[llm_gate_daily_cap]`
-# WARNING 으로 별도 표시한다(§7.1 ④, C7 계약). 이 값은 향후 "호출까지는 갔는데
-# 그 뒤 다른 동시성 상한에 막힌" 사유가 생길 때를 위해 어휘를 미리 예약해 둔다 —
-# 20:10 리포트의 실패 분포 파서가 그 값을 몰라서 "미지 사유"로 뭉뚱그리지 않도록.
+# `[llm_buy_score_failed]`(평가 실패) 어휘로는 **여전히 발화하지 않는다** — 일일 cap
+# 도달은 평가를 시작하지도 않기 때문이다. 대신 검증 라운드 3 #3 이 지적한 주문 단위
+# 복원 불가를 막기 위해 `[llm_eval_persist] result=error reason=cap_exceeded` 로
+# 주문마다 1행을 남긴다(마커가 다르므로 20:10 리포트의 실패 분포는 섞이지 않는다).
+# 전략 단위 요약은 종전대로 `[llm_gate_daily_cap]` WARNING 1회/전략/일이다(§7.1 ④, C7).
 #
 # `payload_error` — **자문 §6.1/§7.1 이 정의한 8종 밖의 확장**(spec_disagreements
 # 등재). 프롬프트 조립 실패(`build_messages`, `json.dumps` 포함)를 LLM 출력
@@ -69,10 +98,16 @@ MARKER_DAILY_CAP = "[llm_gate_daily_cap]"
 # "우리 코드가 페이로드를 못 만든다"와 "모델이 이상한 걸 준다"를 20:10 리포트가
 # 구별할 수 없다(검증 파인딩 #10). `_evaluate` 는 `build_messages` 실패를
 # **이 값으로만** 분류한다 — LLM 응답 파싱/검증 실패는 여전히 `schema_error`다.
+#
+# `truncated` — **추론 모델의 출력 한도 소진**(cycle276 후속, 09-11 운영 실측). 추론
+# 토큰이 `max_completion_tokens` 를 같이 먹으므로 한도가 모자라면 `finish_reason="length"`
+# + `content=""` 가 와서 파싱이 실패한다. 그것을 `schema_error`("모델이 스키마를
+# 벗어났다")로 뭉개면 20:10 리포트가 "모델 출력이 이상하다" 와 "우리가 한도를 너무
+# 낮게 줬다" 를 구별할 수 없다 — 전자는 프롬프트 문제, 후자는 상수 한 줄 문제다.
 _FAILURE_REASONS = (
     "timeout", "api_error", "parse_error", "schema_error",
     "no_bars", "no_key", "cap_exceeded", "disabled_model",
-    "payload_error",
+    "payload_error", "truncated",
 )
 
 _DEFAULT_MODE = "shadow"
@@ -84,7 +119,22 @@ _BARS_CACHE_MAX = 400
 _BARS_FETCH_DAYS = 60
 _BARS_MIN_REQUIRED = 30
 _PROMPT_BAR_COUNT = 30
-_MAX_COMPLETION_TOKENS = 400
+# `gpt-5.6-luna` 는 **추론 모델**이라 추론 토큰이 `max_completion_tokens` 를 함께
+# 소비한다. 09-11 운영 컨테이너 실측(같은 프롬프트, 한도만 바꿔 재현) —
+#
+#   한도   finish_reason   content 길이   reasoning_tokens   결과
+#   3000   stop            218            202                score 43 정상
+#    400   stop            270            203                score 44 정상(여유 30)
+#    250   length            0            250                빈 문자열 → 실패
+#    150   length            0            150                빈 문자열 → 실패
+#
+# 400 은 실측 여유가 30 토큰뿐이라 추론이 조금만 길어지면 전건 실패한다(09-11 09:0x
+# 실전 2건이 `reason=schema_error latency_ms=10047/5514` 로 끝난 그 경로). 2000 은
+# 실측 최대 소비(≈470)의 4배 여유다.
+#
+# ⚠️ **비용은 오르지 않는다** — 과금은 실제 사용 토큰이고 이 상수는 상한일 뿐이다.
+# 한도를 올려도 모델이 더 쓰지 않는다(위 표의 3000 행이 218자·202 추론토큰).
+_MAX_COMPLETION_TOKENS = 2000
 
 # 세마포어 2 — 09:01:30 해제 순간 다수 종목이 동시 돌파할 수 있다(실측 09-08
 # 09:01:34/09:01:42 8초 간격 2건). 2면 8초 안에 4건을 소화한다(자문 §5.4).
@@ -93,9 +143,11 @@ _SEM = asyncio.Semaphore(2)
 # 진행 중 task 강참조 — asyncio 는 참조가 사라지면 GC 한다.
 _tasks: set = set()
 
-# 래치 = KstDailyEmitCap[(strategy_id, ticker)] **별도 인스턴스**(cycle236 '별개
-# cap' 계약 — emit cap 과 슬롯을 다투지 않는다).
-_latch: "KstDailyEmitCap[tuple[str, str]]" = KstDailyEmitCap()
+# 래치 = KstDailyEmitCap[order_no] **별도 인스턴스**(cycle236 '별개 cap' 계약 —
+# emit cap 과 슬롯을 다투지 않는다). cycle276 에서 키가 `(전략, 종목)/일` → **주문번호**
+# 로 바뀌었다: 같은 종목을 하루 두 번 사면 주문이 둘이므로 두 번 평가한다(09-10 000990
+# 처럼 12:06 첫 신호의 점수가 15:13 주문에 붙던 사고가 옛 키에서 나왔다).
+_latch: "KstDailyEmitCap[str]" = KstDailyEmitCap()
 
 # 일일 cap 도달 WARNING 은 1회/전략/일.
 _daily_cap_warned: "KstDailyEmitCap[str]" = KstDailyEmitCap()
@@ -333,14 +385,241 @@ def _get_client():
         return None
 
 
-def observe_signal(
+def _opt_int(value):
+    """`int` 강제 — 실패는 `None`(0 위장 금지)."""
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except Exception:
+        return None
+
+
+def _opt_float(value):
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
+def _read_scanner_snapshot(ticker):
+    """scanner 값 복사(read-only) — `(name, market_cap_eok, trade_amount_eok,
+    prdy_close_won, board_open_won)`.
+
+    `scanner` 는 §10 leaf 허용 import 목록 밖이라 **함수 내 지연 import** 다(순환 차단).
+    어떤 실패도 값으로 흡수한다 — 관측이 주문 경로를 깨면 안 된다.
+    """
+    name = ""
+    market_cap_eok = None
+    trade_amount_eok = None
+    prdy_close = 0
+    board_open = 0
+    try:
+        from src.engine.scanner import (
+            ticker_market_info,
+            ticker_names,
+            ticker_prev_close,
+            ticker_prices,
+        )
+        try:
+            name = ticker_names.get(ticker, "") or ""
+        except Exception:
+            name = ""
+        try:
+            info = ticker_market_info.get(ticker) or {}
+            market_cap_eok = info.get("market_cap")
+            trade_amount_eok = info.get("trade_amount")
+        except Exception:
+            pass
+        try:
+            prdy_close = int(ticker_prev_close.get(ticker, 0) or 0)
+        except Exception:
+            prdy_close = 0
+        try:
+            entry = ticker_prices.get(ticker)
+            if isinstance(entry, dict):
+                board_open = int(entry.get("open_price") or 0)
+        except Exception:
+            board_open = 0
+    except Exception:
+        pass
+    return name, market_cap_eok, trade_amount_eok, prdy_close, board_open
+
+
+def _board_by_clock(order_kst) -> str:
+    """주문 접수 KST 시각만으로 파생하는 보드.
+
+    세션 트래커의 활성 보드를 쓰지 않는다 — 그 값은 30초 stale 이라 09:00:0x 에
+    `pre_nxt` 로 굳고(cycle264 실증), leaf 는 8영역 모듈을 참조하지 않는다(C22).
+    경계는 `[시작, 끝)` 반열림이다. 이상 입력은 예외가 아니라 값으로 흡수한다.
+    """
+    try:
+        secs = order_kst.hour * 3600 + order_kst.minute * 60 + order_kst.second
+    except Exception:
+        return "off_hours"
+    if 8 * 3600 <= secs < 9 * 3600:
+        return "pre_nxt"
+    if 9 * 3600 <= secs < 15 * 3600 + 30 * 60:
+        return "main"
+    if 15 * 3600 + 30 * 60 <= secs < 20 * 3600:
+        return "post_nxt"
+    return "off_hours"
+
+
+def _match_signal(buy_signals_tail, ticker):
+    """`state.buy_signals` 꼬리에서 같은 종목의 **최신 1건**을 값 복사로 찾는다.
+
+    없으면 `None` — 호출부는 그때 `signal_matched=False` 로 정직하게 남긴다. 없는
+    값을 0 으로 위장하면 회고분석이 "목표가 0원 돌파" 를 실제로 세게 된다(§14-4).
+    """
+    try:
+        rows = list(buy_signals_tail or [])
+    except Exception:
+        return None
+    for row in reversed(rows):
+        try:
+            if not isinstance(row, dict):
+                continue
+            if str(row.get("ticker") or "") == str(ticker or ""):
+                return dict(row)   # 원본을 나중에 변조해도 payload 가 흔들리지 않게
+        except Exception:
+            continue
+    return None
+
+
+_JSON_SAFE_MAX_DEPTH = 6
+
+
+def _json_safe(obj, _depth: int = 0):
+    """JSON 직렬화 안전 사영 — datetime→isoformat · Decimal→float · set→list.
+
+    payload 는 `order_kst_dt`(datetime)를 담고 있다. 사영을 빼먹으면 JSONB 바인딩이
+    터지고, 그 실패가 **관측을 관측이 막는** 형태가 된다(C35). 재귀 깊이 상한 6.
+    """
+    if _depth > _JSON_SAFE_MAX_DEPTH:
+        try:
+            return str(obj)
+        except Exception:
+            return None
+    if obj is None or isinstance(obj, (bool, int, float, str)):
+        return obj
+    if isinstance(obj, dict):
+        out = {}
+        for k, v in obj.items():
+            try:
+                out[str(k)] = _json_safe(v, _depth + 1)
+            except Exception:
+                out[str(k)] = None
+        return out
+    if isinstance(obj, (list, tuple, set, frozenset)):
+        try:
+            return [_json_safe(v, _depth + 1) for v in obj]
+        except Exception:
+            return []
+    if isinstance(obj, datetime):
+        try:
+            return obj.isoformat()
+        except Exception:
+            return str(obj)
+    if isinstance(obj, _Decimal):
+        try:
+            return float(obj)
+        except Exception:
+            return str(obj)
+    try:
+        return str(obj)
+    except Exception:
+        return None
+
+
+_prompt_version_cache: "str | None" = None
+_feature_version_cache: "str | None" = None
+
+
+def _prompt_version() -> str:
+    """SYSTEM 프롬프트 + user 템플릿 + **user payload 스키마**의 sha256 앞 12자 (§7-1, C30).
+
+    프롬프트가 바뀐 뒤의 행과 그 전의 행을 **섞어서 회귀하면 안 된다**. 모듈 로드 후
+    1회 계산해 캐시하고, 계산 실패는 `""` (fail-open — 버전 문자열 하나 때문에
+    평가가 멈추면 관측이 관측을 막는 셈이다).
+
+    해시 blob 에 `_SNAPSHOT_KEYS` 를 포함하는 이유(검증 라운드 3 #4) — 모델이 실제로
+    읽는 것은 SYSTEM 문장만이 아니라 **user 메시지 payload 의 키 집합**이다. 두 문자열만
+    해싱하면 스냅샷 키만 바꾼 사이클이 *같은* `prompt_version` 으로 다른 스키마의 행을
+    만들어, §7-1 이 금지한 "프롬프트 바뀐 전후 행을 섞은 회귀" 가 조용히 가능해진다.
+    지표 키 집합은 `_feature_version` 이 따로 잰다(둘은 서로 다른 축이다).
+    """
+    global _prompt_version_cache
+    if _prompt_version_cache is not None:
+        return _prompt_version_cache
+    try:
+        from src.engine import llm_features as _lf
+        blob = (
+            str(_lf.SYSTEM_PROMPT)
+            + str(_lf._USER_PREAMBLE)
+            + "|".join(_lf._SNAPSHOT_KEYS)
+        ).encode("utf-8")
+        _prompt_version_cache = hashlib.sha256(blob).hexdigest()[:12]
+    except Exception:
+        _prompt_version_cache = ""
+    return _prompt_version_cache
+
+
+def _feature_version() -> str:
+    """`compute_technicals` 출력 **키 집합**의 sha256 앞 12자 (§7-1, C30).
+
+    지표 목록이 바뀌면 그 전후 행의 회귀를 섞으면 안 된다. 값이 아니라 키 집합을
+    잰다 — 키가 같으면 같은 특징 공간이다. 계산 실패는 `""` (fail-open).
+    """
+    global _feature_version_cache
+    if _feature_version_cache is not None:
+        return _feature_version_cache
+    try:
+        keys = sorted(compute_technicals([], current_price=0).keys())
+        _feature_version_cache = hashlib.sha256("|".join(keys).encode("utf-8")).hexdigest()[:12]
+    except Exception:
+        _feature_version_cache = ""
+    return _feature_version_cache
+
+
+def _emit_persist(order_no, result: str, reason=None) -> None:
+    """`[llm_eval_persist]` — 평가 1건이 DB 행이 됐는지를 남기는 **유일한 채널**(C25).
+
+    `result=ok` = 1행 저장 · `result=error reason=<예외명>` = 저장 실패 ·
+    `reason=empty_order_no`(C21) / `reason=cap_exceeded`(검증 라운드 3 #3) = 평가를
+    시작하지 않아 담을 outcome 이 없는 주문(둘 다 DB 행 0).
+
+    기록 전용 스위치를 따로 두지 않는 이유이기도 하다: 스위치가 늘면 "설정이 없으면
+    관측이 사라지는" P0-1 계열 경로가 하나 더 생긴다. never-raise.
+    """
+    try:
+        ono = str(order_no or "-") or "-"
+        if reason:
+            logger.info("%s order_no=%s result=%s reason=%s",
+                        MARKER_PERSIST, ono, result, reason)
+        else:
+            logger.info("%s order_no=%s result=%s", MARKER_PERSIST, ono, result)
+    except Exception:  # pragma: no cover — 관측 실패는 흡수
+        pass
+
+
+def observe_order(
     *,
-    strategy_id, ticker, name, board, price_won, board_open_won,
-    target_won, target_offset_won, k, prev_price_won, prdy_close_won,
-    market_cap_eok, trade_amount_eok, budget_won, params_snapshot, now_kst,
+    strategy_id, ticker, order_no, order_kst,
+    order_price_won, ordered_qty, order_division, order_path, exchange,
+    current_price_won,
+    budget_total_won, budget_remaining_after_won, open_positions_n,
+    params_snapshot, buy_signals_tail,
 ) -> None:
-    """동기 접수 — 비용 순서(자문 §5.2): mode → 래치 peek → cap peek → 값 복사 →
-    래치 mark + cap 증가 → `create_task` → return None. **never-raise.**
+    """주문 접수 직후 동기 접수 (§6.1). **never-raise · 반환 항상 `None`.**
+
+    비용 순서(C19) = mode 읽기 → `[llm_gate_config]` 카나리아 → `order_no` 유효성 →
+    래치 peek → 일일 cap peek → 값 복사 → 래치 mark + cap 증가 → `create_task` → None.
+
+    주문은 이미 KIS 에 접수됐다. 이 호출은 기록만 하며 주문을 막지도, 늦추지도,
+    바꾸지도 않는다 — 호출부는 반환값을 쓰지 않는 `ast.Expr` statement 다.
     """
     try:
         params = params_snapshot if isinstance(params_snapshot, dict) else {}
@@ -350,53 +629,107 @@ def observe_signal(
         timeout_s = _read_timeout(params)
         model = str(getattr(settings, "openai_buy_gate_model", "") or "")
 
-        # 카나리아는 mode==off 로 낙하하는 return **앞**이다 — 롤백이 먹었는지
-        # 확인할 유일한 채널이 여기서 사라지면 안 된다(§7.1 ③).
-        _emit_config_canary(strategy_id, mode, min_score, daily_cap, timeout_s, model, now_kst)
+        # 카나리아는 mode==off 로 낙하하는 return **앞**이다 — 롤백이 먹었는지 확인할
+        # 유일한 채널이 여기서 사라지면 안 된다(§7.1 ③). 4키가 없는 5전략에서도
+        # `mode=off` 로 1행 발화한다(로그 표면만 넓어지고 행위·비용은 0, C16).
+        _emit_config_canary(strategy_id, mode, min_score, daily_cap, timeout_s, model, order_kst)
 
         if mode != "shadow":
             return None
 
-        latch_key = (str(strategy_id), str(ticker))
-        if not _latch.should_emit(latch_key, now=now_kst):
+        ono = str(order_no or "").strip()
+        if not ono:
+            # 자문 R2 — 무음 금지. "평가 안 함" 과 "주문번호를 못 받았다" 를 구별한다.
+            _emit_persist("-", "error", "empty_order_no")
             return None
 
-        if _peek_call_count(strategy_id, now_kst) >= daily_cap:
-            if _daily_cap_warned.should_emit(str(strategy_id), now=now_kst):
+        if not _latch.should_emit(ono, now=order_kst):
+            return None
+
+        if _peek_call_count(strategy_id, order_kst) >= daily_cap:
+            # `[llm_gate_daily_cap]` 은 1회/전략/일이라 **어느 주문**이 평가를 못 받았는지
+            # 남기지 못한다 — 그러면 나중에 "cap 때문에 평가 안 함" 과 "게이트가 off 였다"
+            # 를 주문 단위로 구별할 수 없고, 평가 유무 쪽에 선택 편향이 생긴다(검증 라운드
+            # 3 #3). C21 `empty_order_no` 선례대로 persist 채널에 주문번호와 함께 1행.
+            # DB 행은 없다(평가를 시작하지 않았으므로 담을 outcome 도 없다).
+            _emit_persist(ono, "error", "cap_exceeded")
+            if _daily_cap_warned.should_emit(str(strategy_id), now=order_kst):
                 logger.warning("%s strategy=%s daily_cap=%d", MARKER_DAILY_CAP, strategy_id, daily_cap)
-                _daily_cap_warned.mark_emitted(str(strategy_id), now=now_kst)
+                _daily_cap_warned.mark_emitted(str(strategy_id), now=order_kst)
             return None
 
-        # --- 값 복사만(전략 객체·_targets·config.params 참조 금지, C17) --------
-        signal_kst = now_kst.strftime("%H:%M:%S") if hasattr(now_kst, "strftime") else ""
-        price_i = int(price_won or 0)
-        board_open_i = int(board_open_won or 0)
-        prdy_close_i = int(prdy_close_won or 0)
+        # --- 값 복사만(전략 객체·_targets·config.params 원본 참조 금지, C23) -------
+        tkr = str(ticker)
+        name, market_cap_eok, trade_amount_eok, prdy_close_i, board_open_i = (
+            _read_scanner_snapshot(tkr)
+        )
+        board = _board_by_clock(order_kst)
+        order_kst_s = order_kst.strftime("%H:%M:%S") if hasattr(order_kst, "strftime") else ""
+        order_price_i = int(order_price_won or 0)
+        qty_i = _opt_int(ordered_qty)
+
+        # `signal_time_local` — 전략이 `buy_signals` 에 넣은 시각 문자열("HH:MM:SS")
+        # **그대로**다. 6전략은 `datetime.now()`(tz 인자 없음), kojiro 만
+        # `datetime.now(KST)` 라 값은 EC2 컨테이너의 `TZ=Asia/Seoul` 전제에서만 KST 와
+        # 같다 — **KST 를 보장하지 않는다**. 그래서 이름에 `_kst` 를 쓰지 않는다.
+        # 이 사이클은 원천(전략 7파일)을 byte 동일로 동결하므로 여기서 정규화하지도
+        # 않는다(모르는 tz 를 KST 로 단정하는 것이 더 나쁜 거짓말이다).
+        sig = _match_signal(buy_signals_tail, tkr)
+        if sig is None:
+            # §14-4 — 매칭이 없으면 파생 5필드는 전부 `None` 이다(0 위장 금지).
+            signal_matched = False
+            signal_price_won = None
+            signal_time_local = None
+            strategy_board = None
+            target_won = None
+            k_val = None
+            excess_bp = None
+        else:
+            signal_matched = True
+            signal_price_won = _opt_int(sig.get("price"))
+            signal_time_local = sig.get("time")
+            strategy_board = sig.get("board")
+            target_won = _opt_int(sig.get("target_price"))
+            k_val = _opt_float(sig.get("k"))
+            excess_bp = _excess_bp(order_price_i, target_won) if target_won else None
+
         payload = {
             "strategy_id": str(strategy_id),
             "strategy": str(strategy_id),
-            "ticker": str(ticker),
+            "ticker": tkr,
             "name": name,
-            "board": str(board),
-            "signal_kst": signal_kst,
-            "mins_from_krx_open": _mins_from_open(now_kst),
-            "price_won": price_i,
+            "board": board,
+            "order_no": ono,
+            "order_kst": order_kst_s,
+            "order_kst_dt": order_kst,
+            "mins_from_krx_open": _mins_from_open(order_kst),
+            "order_price_won": order_price_i,
+            "current_price_won": _opt_int(current_price_won),
+            "ordered_qty": qty_i,
+            "order_notional_won": order_price_i * int(qty_i or 0),
+            "order_division": str(order_division or ""),
+            "order_path": str(order_path or ""),
+            "exchange": exchange,
             "board_open_won": board_open_i,
-            "target_won": int(target_won or 0),
-            "target_offset_won": int(target_offset_won or 0),
-            "k": float(k or 0),
-            "breakout_excess_bp": _excess_bp(price_won, target_won),
-            "prev_price_won": int(prev_price_won or 0),
+            "signal_matched": signal_matched,
+            "signal_price_won": signal_price_won,
+            "signal_time_local": signal_time_local,
+            "strategy_board": strategy_board,
+            "target_won": target_won,
+            "k": k_val,
+            "breakout_excess_bp": excess_bp,
             "prdy_close_won": prdy_close_i,
-            # §3.3 B군 — 검증 파인딩 #2 시정. prdy_ctrt_pct/intraday_ctrt_pct 는
-            # 이미 확보한 원시값만으로 순수 계산(llm_features.pct_change).
+            # §3.3 B군 — 이미 확보한 원시값만으로 순수 계산(llm_features.pct_change).
             # acml_vol_shares 는 tick_volume leaf 관측(없으면 None, 0 위장 금지).
-            "prdy_ctrt_pct": pct_change(price_i, prdy_close_i),
-            "intraday_ctrt_pct": pct_change(price_i, board_open_i),
-            "acml_vol_shares": _read_acml_vol_shares(ticker),
+            "prdy_ctrt_pct": pct_change(order_price_i, prdy_close_i),
+            "intraday_ctrt_pct": pct_change(order_price_i, board_open_i),
+            "acml_vol_shares": _read_acml_vol_shares(tkr),
             "market_cap_eok": market_cap_eok,
             "trade_amount_eok": trade_amount_eok,
-            "budget_won": int(budget_won or 0),
+            "budget_won": int(budget_total_won or 0),
+            "budget_total_won": _opt_int(budget_total_won),
+            "budget_remaining_after_won": _opt_int(budget_remaining_after_won),
+            "open_positions_n": _opt_int(open_positions_n),
             "position_ratio": _read_position_ratio(params),
             "stop_loss_pct": _read_stop_loss_pct(strategy_id, params),
             "exit_rule": _read_exit_rule(strategy_id, params),
@@ -405,10 +738,16 @@ def observe_signal(
             "timeout_s": timeout_s,
             "model": model,
             "mode": mode,
-            "now_kst": now_kst,
+            # 계좌는 leaf 가 `settings` 에서 읽는다 — order_engine 은 계좌를 모른다
+            # (8영역 import 표면을 넓히지 않는다, C10). `input_payload` 에는 싣지
+            # 않는다(C40) — PK 열로 충분하고, 리포터 스코프 키가 GET/HEAD 를 경로
+            # 무관 통과시키므로 응답 표면에 원문이 실릴 경로를 원천 차단한다.
+            "account_no": str(getattr(settings, "kis_account_no", "") or ""),
+            "account_product": str(getattr(settings, "kis_account_product", "") or ""),
+            "now_kst": order_kst,
         }
 
-        _latch.mark_emitted(latch_key, now=now_kst)
+        _latch.mark_emitted(ono, now=order_kst)
         _increment_call_count(strategy_id)
 
         # `create_task` 가 실패(무루프·monkeypatch 등)하면 이미 만들어진 코루틴
@@ -429,7 +768,7 @@ def observe_signal(
         return None
     except Exception:
         try:
-            trace_observer_failure("[llm_buy_gate]", str(ticker or "-"), None, now=now_kst)
+            trace_observer_failure("[llm_buy_gate]", str(ticker or "-"), None, now=order_kst)
         except Exception:  # pragma: no cover — 2차 예외도 흡수
             pass
         return None
@@ -517,6 +856,19 @@ def _parse_score_response(content):
     return score_val, obj.get("rationale"), obj.get("key_risks"), obj.get("invalidations"), None
 
 
+def _is_truncated(finish_reason) -> bool:
+    """`finish_reason == "length"`(대소문자·공백 무시) 이면 출력 한도 소진이다.
+
+    OpenAI 는 추론 토큰까지 `max_completion_tokens` 에서 차감하므로 한도가 모자라면
+    본문 없이(`content == ""`) `length` 로 끝난다. 예외·미지 값은 **False**(fail-open
+    = 종전 어휘 유지) — 판별에 실패했다고 실패 사유를 새로 만들지 않는다.
+    """
+    try:
+        return str(finish_reason or "").strip().lower() == "length"
+    except Exception:
+        return False
+
+
 def _clean_line_field(s, limit: int) -> str:
     if not isinstance(s, str):
         return ""
@@ -524,35 +876,69 @@ def _clean_line_field(s, limit: int) -> str:
     return cleaned[:limit]
 
 
-def _read_slip_bp(ticker, signal_price):
-    """§7.2 — 판정 도착 순간 `scanner.ticker_prices` 대비 신호가 이동폭(bp). read-only."""
+def _read_drift(ticker, order_price_won):
+    """§7.2(개명) — 판정 도착 순간 `scanner.ticker_prices` 대비 **주문가** 이동폭.
+
+    반환 `(drift_price, drift_bp, tick_age_s)`. read-only 지연 import.
+
+    ⚠️ 부호 **의미**가 cycle274 의 구 필드와 반대다 — 그때는 "신호 뒤 올랐다 = 나쁜
+    체결" 이었고 지금은 "주문 뒤 올랐다 = 이득" 이다. 산식은 같지만 두 이름의 값을
+    절대 합산하지 말 것(cycle228 `would_pass` · cycle263 `skipped_fresh` 계열 사고).
+
+    `tick_age_s` = 그 현재가 틱의 나이(초). 무송출 종목(nxt_tradable=false, cycle252)은
+    고정값이 실려 "표류 0" 으로 오독되므로 판독 시 stale 행을 제외하는 근거로 쓴다.
+    """
     try:
+        from src.engine.scanner import ticker_last_tick as _last_tick
         from src.engine.scanner import ticker_prices as _ticker_prices
         entry = _ticker_prices.get(ticker)
         if not isinstance(entry, dict):
-            return 0, None
+            return 0, None, None
         price = entry.get("current_price")
         if price is None:
-            return 0, None
-        verdict_price = int(price)
-        if not signal_price:
-            return verdict_price, None
-        return verdict_price, (verdict_price - signal_price) / signal_price * 10000.0
+            return 0, None, None
+        drift_price = int(price)
+
+        tick_age_s = None
+        try:
+            last = _last_tick.get(ticker)
+            if last is not None:
+                tick_age_s = round(
+                    (datetime.now(_KST_TZ) - last).total_seconds(), 2
+                )
+        except Exception:
+            tick_age_s = None
+
+        if not order_price_won:
+            return drift_price, None, tick_age_s
+        return (
+            drift_price,
+            (drift_price - order_price_won) / order_price_won * 10000.0,
+            tick_age_s,
+        )
     except Exception:
-        return 0, None
+        return 0, None, None
 
 
-def _emit_failed(payload: dict, reason: str, t_start: float) -> None:
+def _emit_failed(payload: dict, reason: str, t_start: float, *, finish=None) -> None:
+    """`finish=` 는 OpenAI `finish_reason` 원문(없으면 `-`).
+
+    `reason=truncated` 를 사후에 판독하려면 "모델이 왜 멈췄나" 가 같은 행에 있어야
+    한다 — `length` 면 한도 소진, `stop` 이면 우리 파서 쪽 문제다. LLM 호출 이전에
+    끝난 실패(`no_key`·`no_bars`·`payload_error` 등)는 아직 `finish_reason` 이
+    존재하지 않으므로 `-` 다(0/`stop` 위장 금지).
+    """
     try:
         try:
             latency_ms = int((_monotonic() - t_start) * 1000)
         except Exception:
             latency_ms = 0
         model = str(payload.get("model") or "")
+        finish_disp = "-" if finish is None or finish == "" else str(finish)
         logger.info(
-            "%s strategy=%s ticker=%s reason=%s latency_ms=%d model=%s",
+            "%s strategy=%s ticker=%s order_no=%s reason=%s finish=%s latency_ms=%d model=%s",
             MARKER_FAILED, payload.get("strategy_id"), payload.get("ticker"),
-            reason, latency_ms, model,
+            payload.get("order_no", "-"), reason, finish_disp, latency_ms, model,
         )
     except Exception:
         try:
@@ -561,62 +947,64 @@ def _emit_failed(payload: dict, reason: str, t_start: float) -> None:
             pass
 
 
-def _emit_score(payload: dict, tech: dict, score: int, rationale, tokens_in: int,
-                 tokens_out: int, t_start: float, latency_ms: int, bars_count: int) -> None:
-    """`latency_ms`(LLM 호출 구간만, 호출자가 `_monotonic()` 두 지점으로 잰다)와
-    `verdict_lag_ms`(신호 접수→판정 도착 전체, 세마포어 대기·DB fetch 포함 —
-    `t_start` 기준 여기서 다시 잰다)는 **서로 다른 값이어야 한다**(검증 파인딩
-    #4 — 종전 구현은 `t_start` 를 두 번 읽어 로그의 두 필드가 항상 동일했다)."""
+def _emit_score(payload: dict, tech: dict, outcome: dict) -> None:
+    """`[llm_buy_score]` 1행. **서식은 20:10 리포트 정규식 파서의 기준선**이다.
+
+    cycle276 변경 = `order_no=` 추가 · `signal_price=`→`order_price=` ·
+    `signal_kst=`→`order_kst=` · 표류 필드 개명(`post_order_drift_bp=`).
+    `key_risks`/`invalidations` 는 **로그에 싣지 않는다**(C29) — DB 에만 남긴다.
+
+    `latency_ms`(LLM 호출 구간만)와 `verdict_lag_ms`(접수→판정 전체, 세마포어 대기·
+    DB fetch 포함)는 **서로 다른 값이어야 한다**(검증 파인딩 #4).
+    """
     try:
+        score = int(outcome.get("score") or 0)
         min_score = payload.get("min_score", _DEFAULT_MIN_SCORE)
-        signal_price = payload.get("price_won", 0)
-        target = payload.get("target_won", 0)
+        order_price = payload.get("order_price_won", 0)
+        target = payload.get("target_won") or 0
         would_block = bool(score < min_score)
 
-        verdict_price, slip_bp = _read_slip_bp(payload.get("ticker"), signal_price)
-        try:
-            verdict_lag_ms = int((_monotonic() - t_start) * 1000)
-        except Exception:
-            verdict_lag_ms = 0
-
-        cost_usd = _cost_usd(payload.get("model", ""), tokens_in, tokens_out)
+        drift_bp = outcome.get("post_order_drift_bp")
+        drift_disp = "none" if drift_bp is None else f"{drift_bp:.1f}"
 
         tech = tech if isinstance(tech, dict) else {}
         rsi14 = tech.get("rsi14")
         pos_ch20 = tech.get("pos_in_ch20_pct")
         volr = tech.get("vol_ratio_time_norm")
-
-        slip_disp = "none" if slip_bp is None else f"{slip_bp:.1f}"
         rsi_disp = "-" if rsi14 is None else f"{rsi14:.1f}"
         pos_disp = "-" if pos_ch20 is None else f"{pos_ch20:.1f}"
         volr_disp = "-" if volr is None else f"{volr:.2f}"
-        # 검증 파인딩 #5 — rationale 은 이미 `_clean_line_field` 로 정제되는데
-        # name 만 원문 그대로 로깅됐다. 개행이 든 이름 하나가 `[llm_buy_score]`
-        # 한 행을 둘로 쪼개 위조 로그 행을 만들 수 있다(§7.3 SQL 파서가 이
-        # 마커를 정규식으로 긁는다). 같은 헬퍼로 통일한다.
+        # 검증 파인딩 #5 — name 을 원문 그대로 로깅하면 개행이 든 이름 하나가
+        # `[llm_buy_score]` 한 행을 둘로 쪼개 위조 로그 행을 만들 수 있다(§7.3 SQL
+        # 파서가 이 마커를 정규식으로 긁는다). rationale 과 같은 헬퍼로 통일한다.
         name_disp = _clean_line_field(payload.get("name", ""), 20)
 
         logger.info(
-            "%s strategy=%s ticker=%s name=%s board=%s mode=%s "
+            "%s strategy=%s ticker=%s order_no=%s name=%s board=%s mode=%s "
             "score=%d min_score=%d would_block=%s "
-            "signal_price=%d target=%d excess_bp=%.1f k=%.4f "
-            "signal_kst=%s mins_from_open=%d "
-            "verdict_price=%d slip_bp=%s verdict_lag_ms=%d "
+            "order_price=%d target=%d excess_bp=%.1f k=%.4f "
+            "order_kst=%s mins_from_open=%d "
+            "drift_price=%d post_order_drift_bp=%s verdict_lag_ms=%d "
             "latency_ms=%d model=%s tokens_in=%d tokens_out=%d cost_usd=%.6f "
             "bars=%d rsi14=%s pos_ch20=%s volr=%s "
             "rationale='%s'",
             MARKER_SCORE, payload.get("strategy_id"), payload.get("ticker"),
+            payload.get("order_no", "-"),
             name_disp, payload.get("board"), payload.get("mode"),
-            int(score), int(min_score), would_block,
-            int(signal_price), int(target), float(payload.get("breakout_excess_bp", 0.0)),
-            float(payload.get("k", 0.0)),
-            payload.get("signal_kst", ""), int(payload.get("mins_from_krx_open", 0)),
-            verdict_price, slip_disp, verdict_lag_ms,
-            int(latency_ms), payload.get("model", ""), int(tokens_in), int(tokens_out), cost_usd,
-            int(bars_count), rsi_disp, pos_disp, volr_disp,
-            # 검증 라운드 2 LOW — 실측 1행 562자 > `_DbLogHandler` 500자 컷. 구조화 필드는
-            # rationale 앞(≈454자)이라 살지만 rationale 이 잘리므로 120→60 으로 조인다.
-            _clean_line_field(rationale, 60),
+            score, int(min_score), would_block,
+            int(order_price), int(target),
+            float(payload.get("breakout_excess_bp") or 0.0),
+            float(payload.get("k") or 0.0),
+            payload.get("order_kst", ""), int(payload.get("mins_from_krx_open", 0)),
+            int(outcome.get("drift_price_won") or 0), drift_disp,
+            int(outcome.get("verdict_lag_ms") or 0),
+            int(outcome.get("latency_ms") or 0), payload.get("model", ""),
+            int(outcome.get("tokens_in") or 0), int(outcome.get("tokens_out") or 0),
+            float(outcome.get("cost_usd") if outcome.get("cost_usd") is not None else -1.0),
+            int(outcome.get("bars_count") or 0), rsi_disp, pos_disp, volr_disp,
+            # 검증 라운드 2 LOW — 실측 1행 562자 > `_DbLogHandler` 500자 컷. 구조화
+            # 필드는 rationale 앞(≈454자)이라 살지만 rationale 이 잘리므로 60 으로 조인다.
+            _clean_line_field(outcome.get("rationale"), 60),
         )
     except Exception:
         try:
@@ -625,115 +1013,315 @@ def _emit_score(payload: dict, tech: dict, score: int, rationale, tokens_in: int
             pass
 
 
-async def _evaluate(payload: dict) -> None:
-    """§5.3 — 세마포어 → 일봉 캐시 → 프롬프트 조립 → LLM 호출(타임아웃) → 검증 → 관측."""
-    ticker = payload.get("ticker")
-    now_kst = payload.get("now_kst")
-    t_start = _monotonic()
+def _verdict_lag_ms(t_start: float) -> int:
     try:
-        async with _SEM:
-            try:
-                bars = await _bars_cached(ticker, now_kst=now_kst)
-            except asyncio.CancelledError:
-                raise
-            except Exception:
-                bars = None
+        return int((_monotonic() - t_start) * 1000)
+    except Exception:
+        return 0
 
-            if not bars or len(bars) < _BARS_MIN_REQUIRED:
-                _emit_failed(payload, "no_bars", t_start)
-                return None
 
-            client = _get_client()
-            if client is None:
-                _emit_failed(payload, "no_key", t_start)
-                return None
-
-            model = str(payload.get("model") or "").strip()
-            if not model:
-                _emit_failed(payload, "disabled_model", t_start)
-                return None
-
-            try:
-                tech = compute_technicals(
-                    bars, current_price=payload.get("price_won", 0),
-                    today_open_won=payload.get("board_open_won", 0),
-                )
-            except Exception:
-                tech = {}
-
-            # §3.3 B군 — vol_ratio_vs_avg20/vol_ratio_time_norm 은 A군의
-            # `vol_avg20_shares`(일봉에서만 산출)가 나온 **뒤**라야 계산할 수
-            # 있다. `payload` 는 `observe_signal` 이 만든 이 task 전용 값 복사본
-            # 이라(전역 상태 아님) 여기서 채워 넣어도 C17 read-only 계약과
-            # 무관하다(검증 파인딩 #2).
-            try:
-                vol_avg20 = tech.get("vol_avg20_shares") if isinstance(tech, dict) else None
-                acml = payload.get("acml_vol_shares")
-                payload["vol_ratio_vs_avg20"] = safe_ratio(acml, vol_avg20)
-                payload["vol_ratio_time_norm"] = normalize_volume_ratio(
-                    acml, vol_avg20, now_kst=now_kst, board=payload.get("board"),
-                )
-            except Exception:
-                payload["vol_ratio_vs_avg20"] = None
-                payload["vol_ratio_time_norm"] = None
-
-            try:
-                messages = build_messages(payload, tech, bars[:_PROMPT_BAR_COUNT])
-            except Exception:
-                # 검증 파인딩 #1/#10 — 프롬프트 조립(json.dumps 포함) 실패는
-                # LLM 출력 검증 실패(schema_error)와 **다른 사유**로 남긴다.
-                _emit_failed(payload, "payload_error", t_start)
-                return None
-
-            timeout_s = payload.get("timeout_s", _DEFAULT_TIMEOUT)
-            # 검증 파인딩 #4 — `latency_ms`(LLM 호출만)는 세마포어 대기·DB
-            # fetch·프롬프트 조립이 끝난 **이 지점**부터 잰다. `t_start`(신호
-            # 접수 시각) 재사용 금지 — 그러면 두 필드가 항상 같은 값이 된다.
-            t_call = _monotonic()
-            try:
-                resp = await asyncio.wait_for(
-                    client.chat.completions.create(
-                        model=model,
-                        messages=messages,
-                        response_format={"type": "json_object"},
-                        max_completion_tokens=_MAX_COMPLETION_TOKENS,
-                    ),
-                    timeout=timeout_s,
-                )
-            except asyncio.CancelledError:
-                raise
-            except asyncio.TimeoutError:
-                _emit_failed(payload, "timeout", t_start)
-                return None
-            except Exception:
-                _emit_failed(payload, "api_error", t_start)
-                return None
-            latency_ms = int((_monotonic() - t_call) * 1000)
-
-            try:
-                content = resp.choices[0].message.content
-            except Exception:
-                content = None
-
-            score, rationale, _risks, _invalids, reason = _parse_score_response(content)
-            if reason is not None:
-                _emit_failed(payload, reason, t_start)
-                return None
-
-            try:
-                usage = getattr(resp, "usage", None)
-                tokens_in = int(getattr(usage, "prompt_tokens", 0) or 0) if usage is not None else 0
-                tokens_out = int(getattr(usage, "completion_tokens", 0) or 0) if usage is not None else 0
-            except Exception:
-                tokens_in, tokens_out = 0, 0
-
-            _emit_score(payload, tech, score, rationale, tokens_in, tokens_out, t_start, latency_ms, len(bars))
+def _eval_to_order_lag_ms(payload: dict, evaluated_at):
+    """`evaluated_at - order_kst`(ms). enforce(선평가)로 가면 "얼마나 묵은 점수로
+    샀는지" 를 재야 하므로 지금부터 기록한다."""
+    try:
+        ordered = payload.get("order_kst_dt")
+        if not isinstance(ordered, datetime) or not isinstance(evaluated_at, datetime):
             return None
+        return int((evaluated_at - ordered).total_seconds() * 1000)
+    except Exception:
+        return None
+
+
+def _failed_outcome(payload: dict, reason: str, t_start: float, *,
+                    tech=None, bars30=None, raw_content=None,
+                    drift=(0, None, None)) -> dict:
+    """실패 outcome — 점수는 **`None`** 이다(0 위장 금지: 분포가 0 근처로 왜곡된다)."""
+    evaluated_at = datetime.now(_KST_TZ)
+    drift_price, drift_bp, tick_age_s = drift
+    return {
+        "result": "failed",
+        "reason": reason,
+        "score": None,
+        "would_block": None,
+        "rationale": None,
+        "key_risks": None,
+        "invalidations": None,
+        "tokens_in": None,
+        "tokens_out": None,
+        "cost_usd": None,
+        "latency_ms": None,
+        "verdict_lag_ms": _verdict_lag_ms(t_start),
+        "evaluated_at": evaluated_at,
+        "eval_to_order_lag_ms": _eval_to_order_lag_ms(payload, evaluated_at),
+        "bars_count": len(bars30) if bars30 else 0,
+        "tech": tech if isinstance(tech, dict) else {},
+        "bars30": list(bars30) if bars30 else [],
+        "raw_content": raw_content,
+        "post_order_drift_bp": drift_bp,
+        "drift_price_won": drift_price,
+        "tick_age_s": tick_age_s,
+    }
+
+
+async def _evaluate(payload: dict) -> None:
+    """평가 진입점 — `_evaluate_core` 의 outcome 을 받아 **단 1곳**에서 기록한다(C24).
+
+    성공(점수 산출)이든 실패(9종 사유)든 `llm_buy_evaluations` 에 1행이 남는다.
+    침묵하면 "평가 안 함" 과 "평가 실패" 가 구별되지 않는다(브리프 §3.4).
+    """
+    t_start = _monotonic()
+    outcome = None
+    try:
+        outcome = await _evaluate_core(payload, t_start)
     except asyncio.CancelledError:
         raise
     except Exception:
         try:
-            trace_observer_failure("[llm_buy_gate_evaluate]", str(ticker or "-"), None, now=now_kst)
+            trace_observer_failure(
+                "[llm_buy_gate_evaluate]", str(payload.get("ticker") or "-"), None,
+                now=payload.get("now_kst"),
+            )
         except Exception:  # pragma: no cover — 2차 예외도 흡수
             pass
-        return None
+    if outcome is not None:
+        await _persist_evaluation(payload, outcome)
+    return None
+
+
+async def _evaluate_core(payload: dict, t_start: float):
+    """§5.3 — 세마포어 → 일봉 캐시 → 프롬프트 조립 → LLM 호출(타임아웃) → 검증 → outcome.
+
+    `asyncio.CancelledError` 만 전파한다(cycle272 `open_price_rest` 계약). 그 밖의
+    실패는 전부 outcome 으로 내려보내 **기록될 기회**를 잃지 않게 한다.
+    """
+    ticker = payload.get("ticker")
+    now_kst = payload.get("now_kst")
+    async with _SEM:
+        try:
+            bars = await _bars_cached(ticker, now_kst=now_kst)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            bars = None
+
+        if not bars or len(bars) < _BARS_MIN_REQUIRED:
+            _emit_failed(payload, "no_bars", t_start)
+            return _failed_outcome(payload, "no_bars", t_start)
+
+        client = _get_client()
+        if client is None:
+            _emit_failed(payload, "no_key", t_start)
+            return _failed_outcome(payload, "no_key", t_start)
+
+        model = str(payload.get("model") or "").strip()
+        if not model:
+            _emit_failed(payload, "disabled_model", t_start)
+            return _failed_outcome(payload, "disabled_model", t_start)
+
+        try:
+            tech = compute_technicals(
+                bars, current_price=payload.get("order_price_won", 0),
+                today_open_won=payload.get("board_open_won", 0),
+            )
+        except Exception:
+            tech = {}
+
+        # §3.3 B군 — vol_ratio_* 는 A군의 `vol_avg20_shares`(일봉에서만 산출)가 나온
+        # **뒤**라야 계산할 수 있다. `payload` 는 `observe_order` 가 만든 이 task 전용
+        # 값 복사본이라(전역 상태 아님) 여기서 채워 넣어도 read-only 계약과 무관하다.
+        try:
+            vol_avg20 = tech.get("vol_avg20_shares") if isinstance(tech, dict) else None
+            acml = payload.get("acml_vol_shares")
+            payload["vol_ratio_vs_avg20"] = safe_ratio(acml, vol_avg20)
+            payload["vol_ratio_time_norm"] = normalize_volume_ratio(
+                acml, vol_avg20, now_kst=now_kst, board=payload.get("board"),
+            )
+        except Exception:
+            payload["vol_ratio_vs_avg20"] = None
+            payload["vol_ratio_time_norm"] = None
+
+        bars30 = bars[:_PROMPT_BAR_COUNT]
+        try:
+            messages = build_messages(payload, tech, bars30)
+        except Exception:
+            # 검증 파인딩 #1/#10 — 프롬프트 조립(json.dumps 포함) 실패는 LLM 출력
+            # 검증 실패(schema_error)와 **다른 사유**로 남긴다.
+            _emit_failed(payload, "payload_error", t_start)
+            return _failed_outcome(payload, "payload_error", t_start, tech=tech, bars30=bars30)
+
+        timeout_s = payload.get("timeout_s", _DEFAULT_TIMEOUT)
+        # 검증 파인딩 #4 — `latency_ms`(LLM 호출만)는 세마포어 대기·DB fetch·프롬프트
+        # 조립이 끝난 **이 지점**부터 잰다. `t_start`(접수 시각) 재사용 금지.
+        t_call = _monotonic()
+        try:
+            resp = await asyncio.wait_for(
+                client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    response_format={"type": "json_object"},
+                    max_completion_tokens=_MAX_COMPLETION_TOKENS,
+                ),
+                timeout=timeout_s,
+            )
+        except asyncio.CancelledError:
+            raise
+        except asyncio.TimeoutError:
+            _emit_failed(payload, "timeout", t_start)
+            return _failed_outcome(payload, "timeout", t_start, tech=tech, bars30=bars30)
+        except Exception:
+            _emit_failed(payload, "api_error", t_start)
+            return _failed_outcome(payload, "api_error", t_start, tech=tech, bars30=bars30)
+        latency_ms = int((_monotonic() - t_call) * 1000)
+
+        try:
+            content = resp.choices[0].message.content
+        except Exception:
+            content = None
+        try:
+            finish_reason = resp.choices[0].finish_reason
+        except Exception:
+            finish_reason = None
+
+        score, rationale, key_risks, invalidations, reason = _parse_score_response(content)
+        if reason is not None and _is_truncated(finish_reason):
+            # 출력 한도 소진은 **파싱이 실패한 경우에만** 재분류한다. 한도에 닿았어도
+            # 완전한 JSON 이 왔다면 그 점수는 유효하므로 실패로 바꾸지 않는다.
+            reason = "truncated"
+        if reason is not None:
+            _emit_failed(payload, reason, t_start, finish=finish_reason)
+            return _failed_outcome(
+                payload, reason, t_start, tech=tech, bars30=bars30, raw_content=content,
+            )
+
+        try:
+            usage = getattr(resp, "usage", None)
+            tokens_in = int(getattr(usage, "prompt_tokens", 0) or 0) if usage is not None else 0
+            tokens_out = int(getattr(usage, "completion_tokens", 0) or 0) if usage is not None else 0
+        except Exception:
+            tokens_in, tokens_out = 0, 0
+
+        drift_price, drift_bp, tick_age_s = _read_drift(
+            ticker, payload.get("order_price_won", 0),
+        )
+        evaluated_at = datetime.now(_KST_TZ)
+        min_score = payload.get("min_score", _DEFAULT_MIN_SCORE)
+        outcome = {
+            "result": "ok",
+            "reason": None,
+            "score": int(score),
+            "would_block": bool(int(score) < int(min_score)),
+            # C29 — cycle274 는 `_risks, _invalids` 로 **버렸다**. 그 둘이 회고분석에서
+            # "무엇을 걱정했는데 실제로 무엇이 터졌나" 를 볼 유일한 텍스트다.
+            "rationale": rationale,
+            "key_risks": key_risks,
+            "invalidations": invalidations,
+            "tokens_in": tokens_in,
+            "tokens_out": tokens_out,
+            "cost_usd": _cost_usd(payload.get("model", ""), tokens_in, tokens_out),
+            "latency_ms": latency_ms,
+            "verdict_lag_ms": _verdict_lag_ms(t_start),
+            "evaluated_at": evaluated_at,
+            "eval_to_order_lag_ms": _eval_to_order_lag_ms(payload, evaluated_at),
+            "bars_count": len(bars),
+            "tech": tech,
+            "bars30": bars30,
+            "raw_content": content,
+            "post_order_drift_bp": drift_bp,
+            "drift_price_won": drift_price,
+            "tick_age_s": tick_age_s,
+        }
+        _emit_score(payload, tech, outcome)
+        return outcome
+
+
+# `input_payload` 에서 제외하는 키 — 계좌번호는 PK 열로 충분하고, 리포터 스코프 키가
+# GET/HEAD 를 경로 무관 통과시키므로 응답 표면에 원문이 실릴 경로를 원천 차단한다(C40).
+_PAYLOAD_EXCLUDED_KEYS = frozenset({"account_no", "account_product"})
+
+
+async def _persist_evaluation(payload: dict, outcome: dict) -> None:
+    """평가 1행 upsert — **never-raise**. 결과는 `[llm_eval_persist]` 1행으로 남긴다.
+
+    `src.db.llm_buy_evaluations` 는 §10 leaf 허용 import 목록 밖이라 **함수 내 지연
+    import** 다(그 목록 자체를 건드리지 않는다).
+    """
+    order_no = payload.get("order_no", "")
+    try:
+        from src.db.llm_buy_evaluations import upsert_evaluation
+
+        safe_payload = _json_safe(
+            {k: v for k, v in payload.items() if k not in _PAYLOAD_EXCLUDED_KEYS}
+        )
+        # C36 — `build_messages` 의 세 인자 그대로(요약·절단 금지). 프롬프트가 아직
+        # 조립되지 못한 실패는 확보한 만큼만 담는다. 훗날 다른 모델·다른 프롬프트로
+        # 같은 거래를 오프라인 재채점하는 유일한 다리다.
+        input_payload = {
+            "payload": safe_payload,
+            "tech": _json_safe(outcome.get("tech") or {}),
+            "bars30": _json_safe(outcome.get("bars30") or []),
+        }
+        raw_content = outcome.get("raw_content")
+        raw_response = {"content": raw_content} if raw_content is not None else None
+
+        order_kst_dt = payload.get("order_kst_dt")
+        trade_date = order_kst_dt.date() if isinstance(order_kst_dt, datetime) else None
+
+        await upsert_evaluation(
+            trade_date=trade_date,
+            account_no=payload.get("account_no", ""),
+            ticker=payload.get("ticker", ""),
+            order_no=order_no,
+            eval_kind="order",
+            account_product=payload.get("account_product") or None,
+            strategy_id=payload.get("strategy_id", ""),
+            mode=payload.get("mode", ""),
+            result=outcome.get("result", ""),
+            reason=outcome.get("reason"),
+            score=outcome.get("score"),
+            min_score=int(payload.get("min_score", _DEFAULT_MIN_SCORE)),
+            would_block=outcome.get("would_block"),
+            rationale=outcome.get("rationale"),
+            key_risks=outcome.get("key_risks"),
+            invalidations=outcome.get("invalidations"),
+            model=payload.get("model") or None,
+            tokens_in=outcome.get("tokens_in"),
+            tokens_out=outcome.get("tokens_out"),
+            cost_usd=outcome.get("cost_usd"),
+            latency_ms=outcome.get("latency_ms"),
+            verdict_lag_ms=outcome.get("verdict_lag_ms"),
+            eval_to_order_lag_ms=outcome.get("eval_to_order_lag_ms"),
+            order_kst=order_kst_dt,
+            evaluated_at=outcome.get("evaluated_at"),
+            order_price_won=int(payload.get("order_price_won") or 0),
+            ordered_qty=int(payload.get("ordered_qty") or 0),
+            order_notional_won=int(payload.get("order_notional_won") or 0),
+            order_division=payload.get("order_division", ""),
+            order_path=payload.get("order_path", ""),
+            exchange=payload.get("exchange"),
+            board=payload.get("board", ""),
+            current_price_won=payload.get("current_price_won"),
+            signal_matched=bool(payload.get("signal_matched")),
+            signal_price_won=payload.get("signal_price_won"),
+            signal_time_local=payload.get("signal_time_local"),
+            strategy_board=payload.get("strategy_board"),
+            target_won=payload.get("target_won"),
+            k=payload.get("k"),
+            breakout_excess_bp=payload.get("breakout_excess_bp"),
+            post_order_drift_bp=outcome.get("post_order_drift_bp"),
+            drift_price_won=outcome.get("drift_price_won"),
+            tick_age_s=outcome.get("tick_age_s"),
+            budget_total_won=payload.get("budget_total_won"),
+            budget_remaining_after_won=payload.get("budget_remaining_after_won"),
+            open_positions_n=payload.get("open_positions_n"),
+            prompt_version=_prompt_version(),
+            feature_version=_feature_version(),
+            bars_count=outcome.get("bars_count"),
+            input_payload=input_payload,
+            raw_response=raw_response,
+        )
+        _emit_persist(order_no, "ok")
+    except asyncio.CancelledError:
+        raise
+    except Exception as exc:
+        _emit_persist(order_no, "error", type(exc).__name__)
+    return None

@@ -249,6 +249,13 @@ export interface TradePair {
   profit_rate: number | null
   status: 'closed' | 'open'
   strategy: string
+  // cycle276 — AI 매수평가 조인 키. 손익 화면은 테이블이 아니라 `get_trade_pairs` 가
+  // 매번 계산하는 뷰라 행을 가리키는 안정적 키가 없었다(명세 §8). 한 페어가 매수 주문
+  // 2건 이상을 품은 사례가 운영 DB 전 기간 614행 중 9건이라 **단수 필드로는 부족**하다.
+  //   `pair_key` = `strategy:ticker:첫 매수 order_no` — 빈 값이면 null(버튼 비활성).
+  buy_order_nos: string[]
+  sell_order_nos: string[]
+  pair_key: string | null
 }
 
 export interface TradePnLSummary {

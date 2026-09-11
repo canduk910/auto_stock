@@ -32,10 +32,12 @@ emit)에만** 적용된다. 확보 실패(`rest_zero`/`rest_error`)는 침묵하
 ## 라운드 일정
 
 R1 = 09:00:35(09:00:30 프린트 무릎 + 5초, `_swing_rest_poll_loop` 정각 회피) →
-30초 간격 9라운드(마지막 09:04:35, `_swing_buy_poll_loop`·cycle264 대조 배치
-둘 다 회피) → 이후 5분 간격 15:20 까지(재-prepare 회수 + 킬스위치 카나리아의
-종일 채널). 09:05:00 이후는 `owns_board()` 가 False 로 떨어져 스케줄러의 기존
-1차 WS 폴링·2차 REST 폴백이 백스톱으로 부활한다.
+30초 간격 **19라운드**(마지막 09:09:35) → 이후 5분 간격 15:20 까지(첫 slow
+09:14:35 — 재-prepare 회수 + 킬스위치 카나리아의 종일 채널). 라운드 시각은
+`_swing_buy_poll_loop`(09:05 정각)·cycle264 대조 배치(09:05:30)와 30초 격자상
+겹치지 않는다. 09:05:00 이후는 `owns_board()` 가 False 로 떨어져 스케줄러의 기존
+1차 WS 폴링·2차 REST 폴백이 백스톱으로 **함께** 돈다(중복 호출은 `_is_confirmed`
+멱등으로 무해).
 
 ## 안전 계약
 
@@ -84,7 +86,23 @@ _BASIS_STRATEGIES = ("volatility_breakout", "long_tail_volatility")
 # ---------------------------------------------------------------------------
 TIME_MAIN_REST_BASIS_R1 = _dtime(9, 0, 35)
 MAIN_REST_BASIS_ROUND_INTERVAL_S = 30.0
-MAIN_REST_BASIS_FAST_ROUNDS = 9
+# fast 19회 = 09:00:35 ~ **09:09:35** 를 30초 간격으로 **연속** 커버한다(cycle276 후속).
+#
+# 종전 9회는 09:04:35 에 끝나고 첫 slow 라운드가 09:09:35 였다 — 그 5분을 메우는 주체가
+# 하나도 없었다. `owns_board` 가 09:05:00 에 스케줄러로 이관하지만 스케줄러의 재시도
+# 경로(`_confirm_breakout_open_prices_if_pending`)는 `_scan_loop` 안에 있고 그 루프는
+# **09:30**(`TIME_SCAN_START`)에 시작한다. 09-11 실측 노출은 0건(98종목 중 97이 R1
+# 09:00:35 확정, 1종목이 09:02:35, `unresolved` 0행)이었지만 구조적 구멍이라 메운다.
+#
+# 비용 — 라운드는 `_pending_main_tickers` 만 조회하므로 전 종목이 확정된 뒤의 라운드는
+# REST 콜 0 이다(09-11 라운드 6~9 실측 `calls=0 elapsed_ms=0`). 늘어난 10라운드는
+# 평상시 빈 루프 10회이고, 결손이 남은 날에만 실제 콜이 나간다.
+#
+# 09:05:00 이관(`TIME_MAIN_REST_BASIS_HANDOFF`)은 **바꾸지 않는다** — 이관은 스케줄러가
+# 다시 참여하는 시점이고 leaf 의 라운드와 별개 축이다. 09:05 이후 두 주체가 같은 종목에
+# REST 를 중복 호출할 수 있으나, 확정은 `_is_confirmed` 로 멱등이라(이미 확정된 종목은
+# pending 목록에서 빠지고, 같은 값 재확정도 목표가를 바꾸지 않는다) 무해하다.
+MAIN_REST_BASIS_FAST_ROUNDS = 19
 MAIN_REST_BASIS_SLOW_INTERVAL_S = 300.0
 TIME_MAIN_REST_BASIS_STOP = _dtime(15, 20)
 TIME_MAIN_REST_BASIS_HANDOFF = _dtime(9, 5, 0)
@@ -408,8 +426,12 @@ def _has_any_pending_targets(registry) -> bool:
 def round_schedule() -> list[tuple[int, int, str, "_dtime"]]:
     """`(round_no, total, kind, KST 시각)` 전체 일정.
 
-    fast = 09:00:35 부터 30초 간격 9회(마지막 09:04:35).
-    slow = 마지막 fast 로부터 300초 간격, 15:20 을 넘지 않는다.
+    fast = 09:00:35 부터 30초 간격 19회(마지막 **09:09:35**).
+    slow = 마지막 fast 로부터 300초 간격(첫 slow 09:14:35), 15:20 을 넘지 않는다.
+
+    ⚠️ fast 마지막 라운드가 `[main_rest_basis_unresolved]`(커버리지 손실 정본)를 쏘는
+    자리다 — 그 발화 시각이 09:04:35 → 09:09:35 로 이동했다. 배포 전후의 unresolved
+    행 수를 같은 코호트로 합산하지 말 것(cycle263 `skipped_fresh` 계열 사고).
     """
     anchor = datetime(2000, 1, 1, TIME_MAIN_REST_BASIS_R1.hour,
                        TIME_MAIN_REST_BASIS_R1.minute, TIME_MAIN_REST_BASIS_R1.second)

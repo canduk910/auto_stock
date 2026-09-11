@@ -43,11 +43,43 @@ AWS RDS PostgreSQL CRUD 모듈. 현재 DB 클라이언트 정본 = **`pg.py` (as
 - `update_trade_status() -> int`: 체결/취소 시 PENDING row 새 status 갱신 + 영향 row 수 반환. 0건이면 호출자(OrderEngine) 가 체결통보 선행 race 로 판단해 COMPLETED 보정 INSERT. **cycle273a/273b(2026-09-10)** — `match_partial=True`(opt-in) 면 PARTIAL 행도 갱신 대상이고, `order_no=`(opt-in, 호출 6곳 전부 전달) 를 넘기면 WHERE 가 그 주문 행으로 좁혀진다(빈 문자열도 필터로 취급). 둘 다 미전달 = 종전 byte 동일 + 당일 KST 하한(datetime 바인딩)
 - **`get_trades_in_range(start_date, end_date, strategy=None)`**: `[start_date, end_date]` KST 범위 inclusive 조회. `start_iso = f"{date}T00:00:00+09:00"` / `end_iso = f"{date}T23:59:59.999999+09:00"` — **`+09:00` timezone 명시 필수** (TZ 없으면 PostgREST UTC 해석 → KST 00:00~09:00 거래 누락). `recommendation_engine` + `log_analysis_engine` 공유. 사이클 53 B-4 시정.
 - `get_trades(limit, offset, ticker)`: 페이징 조회 + total count
-- `get_trade_pairs(strategy=None, ticker=None)`: 매매손익 뷰용 매수/매도 페어 리스트. 같은 (ticker, strategy) 그룹 내 timestamp ASC 순회 → 누적 보유수량 0 사이클마다 closed 페어 emit (매수가/매도가 가중평균, Decimal 보존), 잔여 보유는 open 페어 emit (미실현 손익은 `scanner.ticker_prices` fallback). 응답 키: buy_date/buy_time/sell_date/sell_time/ticker/ticker_name/buy_price/buy_qty/sell_price/sell_qty/profit_loss/profit_rate/status('closed'|'open')/strategy. `_to_kst()` 헬퍼로 ISO (UTC/KST/tz-naive 모두) → `astimezone(KST).strftime()` 명시 변환
+- `get_trade_pairs(strategy=None, ticker=None)`: 매매손익 뷰용 매수/매도 페어 리스트. 같은 (ticker, strategy) 그룹 내 timestamp ASC 순회 → 누적 보유수량 0 사이클마다 closed 페어 emit (매수가/매도가 가중평균, Decimal 보존), 잔여 보유는 open 페어 emit (미실현 손익은 `scanner.ticker_prices` fallback). 응답 키: buy_date/buy_time/sell_date/sell_time/ticker/ticker_name/buy_price/buy_qty/sell_price/sell_qty/profit_loss/profit_rate/status('closed'|'open')/strategy **+ cycle276 3키 `buy_order_nos: list[str]` / `sell_order_nos: list[str]` / `pair_key: str|None`**(= `strategy:ticker:첫 매수 order_no` — 페어는 어디에도 저장되지 않으므로 그것이 사이클을 가리키는 유일한 안정 식별자다. 운영 DB 실측에서 한 페어가 매수 주문 2건 이상인 사례가 9건이라 **단수 필드는 불가**하고, 빈 `order_no` 체결은 목록에서만 빠지고 **행 자체는 그대로** 만든다 → `pair_key=None` 이면 UI 버튼 비활성). `_to_kst()` 헬퍼로 ISO (UTC/KST/tz-naive 모두) → `astimezone(KST).strftime()` 명시 변환
 - `get_today_buy_trades / get_today_sell_trades / get_today_pending_buys`: today 기준 same-day. 쿼리 기준점 `f"{today}T00:00:00+09:00"` KST timezone 명시 (timezone-naive → PostgreSQL TIMESTAMPTZ UTC 해석 결함 차단). **ticker 별 dedupe 적용 (포지션 복구용 — 최신 1건만 반환)**
 - **`get_today_buy_trades_for_sync(ticker=None) / get_today_sell_trades_for_sync(ticker=None)`** (사이클 30, 2026-05-21): **dedupe 없음** + CANCELLED 제외 + optional ticker filter. `_sync_orders_to_db` 중복 판정 키 소스 전용. 절대 포지션 복구용 dedupe 함수를 sync 에 재사용 금지 (5/20 042700 핑퐁 INSERT 사고 — 같은 ticker 의 다른 `order_no` 가 가려져 매 재기동마다 신규 판정)
 - **DB 부분 UNIQUE 인덱스** (사이클 30, migration 029): `uq_trade_history_ticker_order_no_type ON (ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND order_no != ''`. 코드 결함 재발 시 PG 가 INSERT 거부 → 애플리케이션 로직 회귀 보호. NULL/빈 order_no (수동 매매 사전 등) 는 제외
 - **`mark_pending_buys_completed(ticker)` / `get_recent_buy_strategy(ticker) -> str|None` / `get_today_buys_ticker_strategy() -> list[dict]`** (사이클 M5): `boot_manager` 의 직접 supabase.table() 호출(PENDING BUY 일괄 COMPLETED + 최근 BUY strategy 조회 + 오늘 BUY 조회)을 헬퍼로 추출 (split-brain 시정). 오늘 조회는 `+09:00` KST 명시 (boot_manager 의 TZ-naive `today.isoformat()` 버그 동반 시정)
+
+## llm_buy_evaluations.py — AI 매수평가 기록 (cycle276, 2026-09-11)
+
+- 테이블 `llm_buy_evaluations` (migration 043, 53열). **PK `(trade_date, account_no, ticker, order_no)`** —
+  KIS ODNO 는 **하루 단위로만** 유일하므로 날짜가 PK 선두여야 하고, `trade_history` 조인도
+  `(trade_date, ticker, order_no)` **3축**이어야 안전하다. 인덱스 4 = `(trade_date)` ·
+  `(strategy_id, trade_date)` · `(ticker, trade_date)` · `(order_no)`.
+- `upsert_evaluation(**kw) -> dict|None`: **주문 1건 = 평가 1행**(성공·실패 모두). 같은 PK 재기록은 UPDATE 이고
+  `created_at` 은 보존한다. 실패 행도 `input_payload` 를 담고 `score`/`would_block` 은 **NULL**(0 위장 금지 —
+  점수 분포가 0 근처로 왜곡된다). 호출자는 leaf `engine/llm_buy_gate._persist_evaluation` 하나뿐이다.
+- `get_by_order(order_no, *, trade_date=None)`: 날짜를 주면 좁히고, 없으면 **가장 최근 1행**.
+- `list_by_order_nos([...], *, trade_date=None)`: 존재하는 **`(trade_date, order_no)` 쌍 전부**를
+  `trade_date DESC` 로 돌려준다(빈 목록은 **쿼리 없이** `[]` — 빈 배치가 전체 스캔이 되지 않게).
+  ⚠️ cycle276 후속 B-2 — 종전에는 여기서 "주문번호당 최신 1행" 으로 접었다. ODNO 가 하루 단위로만
+  유일해서 그 접기는 오래된 날짜의 평가를 응답에서 지우고, 그 날짜의 거래 행은 버튼이 비활성인데
+  상세 조회(`get_by_order(..., trade_date=…)`)로는 멀쩡히 읽혔다. 접는 일은 이 층이 하지 않고
+  호출자가 두 값으로 대조한다(라우트가 `"<trade_date>|<order_no>"` 복합 키로 응답).
+- **타입 강제는 호출자에게 맡기지 않는다**(M6·cycle273a HIGH#1 계열): DATE = `_kst.to_date()`, TIMESTAMPTZ =
+  `_to_dt()` 가 aware `datetime` 으로 강제(ISO **문자열도 변환**하고 미지 타입은 `TypeError`), JSONB 4열
+  (`key_risks`/`invalidations`/`input_payload`/`raw_response`)은 **raw dict/list** 바인딩(`json.dumps` 금지),
+  NUMERIC = `Decimal`(라우트가 `float` 로 사영 — cycle266 흰 화면). 시각 문자열 열은
+  **`signal_time_local`** 이다(cycle276 후속 B-4 개명) — 값의 원천이 6전략 `datetime.now()`(tz 인자
+  없음)·kojiro `datetime.now(KST)` 라 컨테이너 `TZ=Asia/Seoul` 전제에서만 KST 와 같고 값 자체는
+  KST 를 보장하지 않는다. 실 PG 왕복 가드 =
+  `tests/integration/test_cycle276_llm_eval_pg_roundtrip.py`(mock 은 str 바인딩을 통과시키고 실 PG 만 `DataError` 다).
+- **이 모듈은 예외를 전파한다** — 기록 실패의 침묵은 leaf 의 `[llm_eval_persist] result=error` 가 깨고, 조회 실패의
+  침묵은 라우트의 500 이 깬다. 여기서 `except Exception: return None` 을 하면 그 두 채널이 동시에 막힌다(cycle266).
+- 회고 층화 열 = `prompt_version`/`feature_version`(프롬프트·지표가 바뀐 전후 행을 **섞어서 회귀 금지**) ·
+  `budget_total_won`/`budget_remaining_after_won`/`open_positions_n`(차단의 반사실은 "손익이 사라진다" 가 아니라
+  "다른 종목 매수로 대체된다") · `raw_response`(파싱 전 원문 — 다른 파서로 재해석 가능) · `input_payload`
+  (`build_messages` 3인자 전체, 요약·절단 금지 = 오프라인 재채점의 유일한 다리). 분석 시 `trade_history.status` 로
+  **체결/부분체결/미체결/취소 4분류를 반드시 분리**한다(미체결을 손익 0 으로 섞으면 통째로 오염).
 
 ## daily_performance.py — 일일 실적
 
@@ -247,6 +279,7 @@ KIS 공식 일일 마스터 파일 (`kospi_code.mst` / `kosdaq_code.mst`) 영역
 - `trade_history.status`: PENDING → COMPLETED / PARTIAL → CANCELLED
 - `trade_history.trade_type`: BUY / SELL
 - `trade_history` 부분 UNIQUE 인덱스 `(ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND != ''` (migration 029, 사이클 30)
+- `llm_buy_evaluations` (migration 043, cycle276): PK `(trade_date, account_no, ticker, order_no)` + 53열 (`eval_kind` = `'order'`|`'blocked'` — enforce 로 가면 주문 없는 차단 평가가 `order_no=''` 로 하루 1행 = 전방 호환) + 인덱스 4
 - `parameter_recommendations.status`: pending → applied / partial / rejected / expired / applied_auto
 - `strategy_funnel_snapshots` (migration 030, 사이클 34): UNIQUE 변경 — `(target_date, strategy_id, step_no, snapshot_at)` (사이클 34) → `(target_date, strategy_id, step_no)` (**migration 035 사이클 145, snapshot_at 키 폐기**) + JSONB 필드 2개
 

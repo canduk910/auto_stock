@@ -14,7 +14,7 @@ import logging
 from datetime import date, datetime, timedelta, timezone
 
 from src.api.condition import add_business_days
-from src.engine import llm_buy_gate, open_price_rest
+from src.engine import open_price_rest
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
@@ -825,42 +825,7 @@ class LongTailVolatilityStrategy(StrategyBase):
             })
             if len(self.state.buy_signals) > 20:
                 self.state.buy_signals.pop(0)
-            # cycle274 — VB·LTV 매수 신호 LLM 평가 게이트(shadow). 값 복사만
-            # 넘긴다(전략 객체·_targets·config.params 참조 금지, 자문 §3.3/C17).
-            # 이 try/except 는 `observe_signal` 자신의 never-raise 계약과
-            # 별개다 — 호출 지점의 사고(시그니처 불일치·monkeypatch)까지
-            # 흡수해야 매매 행위가 한 글자도 바뀌지 않는다(cycle268 고지로
-            # 갭 관측 호출부의 흡수기 자리와 같은 계열).
-            try:
-                from src.engine.scanner import ticker_market_info as _llm_mkt_info
-                _llm_mkt = _llm_mkt_info.get(ticker) or {}
-                llm_buy_gate.observe_signal(
-                    strategy_id=self.strategy_id,
-                    ticker=ticker,
-                    name=ticker_names.get(ticker, ""),
-                    board=board,
-                    price_won=current_price,
-                    board_open_won=int(board_open),
-                    target_won=int(target),
-                    target_offset_won=int(board_info.get("target_offset", 0) or 0),
-                    k=float(info.get("k") or 0),
-                    prev_price_won=int(prev),
-                    prdy_close_won=int(ticker_prev_close.get(ticker, 0) or 0),
-                    market_cap_eok=_llm_mkt.get("market_cap"),
-                    trade_amount_eok=_llm_mkt.get("trade_amount"),
-                    budget_won=int(self.state.total_investment or 0),
-                    params_snapshot=dict(self.config.params),
-                    now_kst=_now_kst,
-                )
-                return Signal.BUY
-            except Exception:
-                try:
-                    trace_observer_failure(
-                        "[llm_buy_gate_call]", ticker or "-", None, dest_logger=logger,
-                    )
-                except Exception:  # pragma: no cover — 2차 예외까지 흡수
-                    pass
-                return Signal.BUY
+            return Signal.BUY
 
         return Signal.NONE
 

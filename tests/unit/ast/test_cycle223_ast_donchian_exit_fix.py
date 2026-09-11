@@ -434,8 +434,13 @@ def _content_sha(path: str) -> str:
 #    + `session_tracker.active`) + `_maybe_emit_pre_market_gate_divergence`.
 #    명세 = `_workspace/red/cycle238_pre_market_clock_gate_spec.md`.
 # TODO(cycle238 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
+# ✅ 2026-09-11 (cycle276) — AI 매수평가 주문 발화 시점 이동. 사용자 명시 승인
+#    범위 = `src/engine/order_engine.py` **단독**(import 1줄 + `execute_buy` 두 매수
+#    경로의 관측 훅 2곳). A-ATOMIC 구간 byte 동일, 매도 경로 훅 0건.
+# TODO(cycle276 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
-    # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
+    "src/engine/order_engine.py":
+        "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
 }
 
 
@@ -542,17 +547,18 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    OQ-5 nan/inf 중립화 + shadow 관측 `[kojiro_band_observe]` 배선. 가중치·자격
 #    게이트·청산 무접촉(C9 후보 집합 불변·C10 진입/수량/청산 sha 불변으로 실증).
 #    TODO(cycle273 커밋 후): 아래 항목을 **삭제**하고 dict 를 다시 비운다.
-# ✅ 2026-09-11 — cycle274 (VB·LTV 매수 신호 LLM 평가 게이트 shadow 배선,
-#    `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`): import 1줄 +
-#    `DEFAULT_PARAMS` 4키 + `return Signal.BUY` 직전 관측 호출(값 복사, C1 AST
-#    가드가 반환값 무관을 기계 증명). 청산·수량 sha 는
-#    `test_cycle264_scope_and_pins.py::_STRATEGY_PINS` 의 4핀 불변으로 별도 보증.
-#    TODO(cycle274 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
+# ✅ 2026-09-11 — cycle276 (AI 매수평가 주문 시점 이동,
+#    `_workspace/red/cycle276_order_time_llm_eval_spec.md`): cycle274 의 전략 배선을
+#    **원상 복구**하고 훅을 `order_engine.execute_buy` 로 옮겼다. VB·LTV 에 남는 것은
+#    `DEFAULT_PARAMS` 4키(설정 표면이자 킬스위치 — order_engine 이 `config.params`
+#    로 읽는다)뿐이라 **메서드 6핀은 cycle272 값으로 복귀**하고 **파일 sha 만** 다르다.
+#    그 방향 차이가 이 사이클의 미묘한 지점이다.
+#    TODO(cycle276 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
-        "1a0e242c2db5cdd6602f41abb3d589fec1226b39e935f8dc1429e3015fc4a009",
+        "9034476410029bc14622cbf8ec32e0647406cf470e91b9aa740a3f7d5b6cd5e3",
     "src/engine/strategies/long_tail_volatility.py":
-        "3294280dd98fb60a794cd96064a3e680a8b1979787329a6ef889ded1ef5c9ebd",
+        "5ad80779ac1a496791213e74b424d05caa1c9a2d1b56672333fa9cee68549016",
     "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
 }
 

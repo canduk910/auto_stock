@@ -27,7 +27,7 @@ cycle264 `open_price_observe.py` 는 "행위 변경 0" 이 첫 계약인 관측 
 
 | C | 내용 |
 |---|---|
-| C11 | 라운드 시각 09:00:35·…·09:04:35(fast 9) → 300초 간격 15:20 까지(slow) |
+| C11 | 라운드 시각 09:00:35·…·09:09:35(fast 19) → 300초 간격 15:20 까지(slow) |
 | C12 | 대상 = main∈boards ∧ enforce ∧ 미확정 · **`config.enabled` 미사용**(비활성 전략도 스윕) |
 | C13 | 공통 종목 한 라운드 fetch **정확히 1회** ∧ 확정은 두 전략 모두에 |
 | C14 | 확정 시 setter(`source="rest"`) **와** `mark_confirmed_via_rest` **둘 다** |
@@ -237,8 +237,10 @@ def test_c11_1_constants():
 
     - R1 = 09:00:35 (프린트 무릎 09:00:30 + 폴 정각 회피 5초)
     - 라운드 간격 30초 (캐시 TTL 5초의 6배)
-    - fast 9회 → 마지막 09:04:35 (09:05:00 `_swing_buy_poll_loop` 정각 ·
-      09:05:30 cycle264 대조 배치 **둘 다** 피한다)
+    - fast **19회** → 마지막 **09:09:35** (cycle276 후속 A-2: 종전 9회는 09:04:35 에
+      끝나고 첫 slow 가 09:09:35 라 그 5분을 메우는 주체가 없었다 — 스케줄러의 재시도
+      경로는 `_scan_loop` 안이고 그 루프는 09:30 에 시작한다). 30초 격자는
+      09:05:00 `_swing_buy_poll_loop` 정각 · 09:05:30 cycle264 대조 배치와 겹치지 않는다
     - slow 300초, 종료 15:20 (VB 매수컷과 같은 시각 — 그 뒤에 목표가를 세울 이유가 없다)
     - handoff 09:05:00 (이후 스케줄러 백스톱 부활)
     """
@@ -246,7 +248,7 @@ def test_c11_1_constants():
 
     assert leaf.TIME_MAIN_REST_BASIS_R1 == time(9, 0, 35)
     assert leaf.MAIN_REST_BASIS_ROUND_INTERVAL_S == 30.0
-    assert leaf.MAIN_REST_BASIS_FAST_ROUNDS == 9
+    assert leaf.MAIN_REST_BASIS_FAST_ROUNDS == 19
     assert leaf.MAIN_REST_BASIS_SLOW_INTERVAL_S == 300.0
     assert leaf.TIME_MAIN_REST_BASIS_STOP == time(15, 20)
     assert leaf.TIME_MAIN_REST_BASIS_HANDOFF == time(9, 5, 0)
@@ -255,16 +257,65 @@ def test_c11_1_constants():
 
 
 def test_c11_2_fast_round_times_exact():
-    """C11 — fast 9라운드가 **정확히** 09:00:35 … 09:04:35 다."""
+    """C11 — fast 19라운드가 **정확히** 09:00:35 … 09:09:35 다(30초 간격, 빈틈 0)."""
     from src.engine import open_price_rest as leaf
 
     fast = [row for row in leaf.round_schedule() if row[2] == "fast"]
     assert [row[3] for row in fast] == [
         time(9, 0, 35), time(9, 1, 5), time(9, 1, 35), time(9, 2, 5), time(9, 2, 35),
-        time(9, 3, 5), time(9, 3, 35), time(9, 4, 5), time(9, 4, 35),
+        time(9, 3, 5), time(9, 3, 35), time(9, 4, 5), time(9, 4, 35), time(9, 5, 5),
+        time(9, 5, 35), time(9, 6, 5), time(9, 6, 35), time(9, 7, 5), time(9, 7, 35),
+        time(9, 8, 5), time(9, 8, 35), time(9, 9, 5), time(9, 9, 35),
     ], f"실측 {[str(r[3]) for r in fast]}"
-    assert [row[0] for row in fast] == list(range(1, 10))
-    assert {row[1] for row in fast} == {9}, "fast 분모는 9 (`round=1/9 kind=fast` 판독 규약)"
+    assert [row[0] for row in fast] == list(range(1, 20))
+    assert {row[1] for row in fast} == {19}, "fast 분모는 19 (`round=1/19 kind=fast` 판독 규약)"
+
+
+def test_c11_2b_no_gap_between_last_fast_and_first_slow():
+    """A-2 (cycle276 후속) — fast 마지막과 첫 slow 사이에 **커버 공백이 없다**.
+
+    종전에는 09:04:35(마지막 fast) → 09:09:35(첫 slow) 5분이 비었고, 그 창에서
+    `owns_board` 는 이미 스케줄러로 이관(09:05:00)됐지만 스케줄러의 재시도 경로는
+    `_scan_loop`(09:30 시작) 안이라 아무도 REST 를 부르지 않았다. 09-11 실측 노출은
+    0건이었으나 구조적 구멍이므로 30초 격자로 연속 커버한다.
+    """
+    from src.engine import open_price_rest as leaf
+
+    rows = leaf.round_schedule()
+    fast = [r[3] for r in rows if r[2] == "fast"]
+    slow = [r[3] for r in rows if r[2] == "slow"]
+
+    def _secs(t):
+        return t.hour * 3600 + t.minute * 60 + t.second
+
+    gaps = [b - a for a, b in zip(map(_secs, fast), map(_secs, fast[1:]))]
+    assert set(gaps) == {30}, f"fast 간격에 구멍이 있다: {sorted(set(gaps))}"
+    # 마지막 fast 는 첫 slow 직전까지 온다 = 두 구간 사이에 미커버 30초 초과 창이 없다.
+    assert _secs(slow[0]) - _secs(fast[-1]) == leaf.MAIN_REST_BASIS_SLOW_INTERVAL_S
+    assert fast[-1] >= time(9, 9, 35), f"마지막 fast 가 너무 이르다 — {fast[-1]}"
+
+
+def test_c11_2c_handoff_unchanged_and_overlap_is_idempotent():
+    """A-2 — 09:05 이관 시각은 **바꾸지 않는다**(이관 ≠ leaf 라운드 종료).
+
+    09:05:00 뒤에는 leaf 라운드와 스케줄러 백스톱이 같은 종목에 REST 를 중복 호출할 수
+    있다. 라운드 대상은 `_pending_main_tickers`(=미확정 종목)뿐이고 확정 판정은
+    `open_price_observe._is_confirmed` 로 멱등이라 중복은 무해하다 — 이미 확정된 종목은
+    다음 라운드의 조회 대상에서 빠진다(`calls=0`).
+    """
+    from src.engine import open_price_rest as leaf
+
+    assert leaf.TIME_MAIN_REST_BASIS_HANDOFF == time(9, 5, 0)
+    after_handoff = [
+        r for r in leaf.round_schedule()
+        if r[2] == "fast" and r[3] > leaf.TIME_MAIN_REST_BASIS_HANDOFF
+    ]
+    assert after_handoff, "이관 뒤 fast 라운드가 없다 — 공백 메우기가 되지 않았다"
+    # 라운드 본체가 미확정 종목만 조회한다는 계약(멱등의 근거).
+    src = leaf.__file__ or ""
+    assert src, "leaf 모듈 경로를 읽을 수 없다"
+    text = Path(src).read_text(encoding="utf-8")
+    assert "_pending_main_tickers(strategy)" in text
 
 
 def test_c11_3_slow_rounds_every_300s_until_1520():
@@ -278,7 +329,7 @@ def test_c11_3_slow_rounds_every_300s_until_1520():
 
     slow = [row for row in leaf.round_schedule() if row[2] == "slow"]
     assert slow, "slow 라운드가 하나도 없다"
-    assert slow[0][3] == time(9, 9, 35), f"첫 slow 실측 {slow[0][3]}"
+    assert slow[0][3] == time(9, 14, 35), f"첫 slow 실측 {slow[0][3]}"
     assert slow[-1][3] <= time(15, 20), f"마지막 slow 가 15:20 을 넘었다 — {slow[-1][3]}"
     secs = [r[3].hour * 3600 + r[3].minute * 60 + r[3].second for r in slow]
     assert all(b - a == 300 for a, b in zip(secs, secs[1:])), "slow 간격이 300초가 아니다"

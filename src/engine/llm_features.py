@@ -430,8 +430,9 @@ def compute_technicals(bars_desc, *, current_price, today_open_won: int = 0) -> 
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """너는 한국 주식시장에서 데이트레이딩과 스윙트레이딩을 운용해 온 트레이더다.
-자동매매 시스템이 이미 발생시킨 **매수 신호 1건**을 넘겨받아, 그 진입의 품질을
+자동매매 시스템이 이미 **접수한 매수 주문 1건**을 넘겨받아, 그 진입의 품질을
 1~100 점으로 평가한다. 너는 매수를 실행하지 않는다 — 점수만 낸다.
+시각 필드(`order_kst`)는 **주문 접수 시각**이다(신호 발생 시각이 아니다).
 
 ## 점수의 정의 (반드시 이 척도로만 매긴다)
 score = 이 진입이 아래 "청산 규약"까지 **수수료·세금 차감 후 플러스로 끝날 확률(%)** 의 추정치다.
@@ -452,8 +453,8 @@ score = 이 진입이 아래 "청산 규약"까지 **수수료·세금 차감 �
 3. 거래량 — `vol_ratio_time_norm` 이 1.0 미만이면 돌파를 뒷받침하는 거래가 없다는 뜻이다.
 4. 변동성 대비 손절 폭 — `stop_loss_pct` 의 절대값이 `atr14_pct` 보다 작으면 정상 잡음에
    손절이 맞는다. 그런 진입은 낮게 매긴다.
-5. 남은 시간 — `mins_from_krx_open` 과 청산 규약을 함께 본다. 당일 청산 전략에서 장 막바지
-   진입은 이익이 자랄 시간이 없다.
+5. 남은 시간 — `mins_from_krx_open`(돌파 후 **주문이 접수된 시각**)과 청산 규약을 함께
+   본다. 당일 청산 전략에서 장 막바지 진입은 이익이 자랄 시간이 없다.
 6. 갭 — `gap_open_pct` 가 크면 시가 자체가 이미 프리미엄이다.
 
 ## 하지 말 것
@@ -475,7 +476,8 @@ score = 이 진입이 아래 "청산 규약"까지 **수수료·세금 차감 �
 - 시각은 전부 KST 다."""
 
 _USER_PREAMBLE = (
-    "아래는 자동매매 시스템이 방금 발생시킨 매수 신호 1건이다.\n"
+    "아래는 자동매매 시스템이 방금 **접수한 매수 주문 1건**이다.\n"
+    "주문은 이미 나갔다 — 너는 그 진입의 품질을 사후에 채점한다.\n"
     "system 의 점수 정의와 규칙에 따라 JSON 하나만 출력하라.\n\n"
 )
 
@@ -520,12 +522,22 @@ _BOARD_NOTE_PRE_NXT = (
 # §3.3 B군 24필드 중 "strategy"/"symbol"/"strategy.exit_rule" 블록이 이미
 # 담당하는 6개(strategy/ticker/name/market_cap_eok/trade_amount_eok/exit_rule)
 # 를 뺀 나머지가 이 목록이다.
+#
+# 🔁 cycle276 (2026-09-11) — 판정 시점이 **신호 → 주문 접수**로 옮겨지면서
+# `signal_kst`→`order_kst`, `price_won`→`order_price_won` 로 정직화하고,
+# 주문 스냅샷 3키(`order_division`/`order_path`/`exchange`)를 더했다.
+# `prev_price_won`·`target_offset_won` 은 **뺐다** — 주문 시점에 복구 불가하거나
+# (전략이 판정 직후 `current_price` 로 덮는다) 애초에 `buy_signals` 에 없는 값이라
+# 남겨 두면 항상 `null` 이 실린다. SYSTEM_PROMPT 는 "결측 필드가 3개 이상이면
+# score 는 50 을 넘기지 않는다" 고 지시하므로, 영구 null 필드는 점수를 구조적으로
+# 끌어내린다(자문 R7 · 명세 §14-4).
 _SNAPSHOT_KEYS = (
-    "board", "signal_kst", "mins_from_krx_open",
-    "price_won", "board_open_won", "target_won", "target_offset_won", "k",
-    "breakout_excess_bp", "prev_price_won", "prdy_close_won",
+    "board", "order_kst", "mins_from_krx_open",
+    "order_price_won", "board_open_won", "target_won", "k",
+    "breakout_excess_bp", "prdy_close_won",
     "prdy_ctrt_pct", "intraday_ctrt_pct",
     "acml_vol_shares", "vol_ratio_vs_avg20", "vol_ratio_time_norm",
+    "order_division", "order_path", "exchange",
     "stop_loss_pct", "budget_won", "position_ratio",
 )
 
@@ -573,8 +585,11 @@ def build_messages(payload: dict, tech: dict, bars30: list) -> list[dict]:
 
     meta_block = {
         "market": "KRX", "currency": "KRW", "tz": "Asia/Seoul",
-        "asof_kst": payload.get("signal_kst", ""),
-        "schema_version": "cycle274.1",
+        "asof_kst": payload.get("order_kst", ""),
+        # cycle276 — `_SNAPSHOT_KEYS` 가 바뀌었으므로 스키마 버전도 올린다
+        # (`signal_kst`→`order_kst` 등). 이 리터럴을 옛 값으로 두면 payload 는
+        # 바뀌었는데 payload 자신이 "안 바뀌었다" 고 말한다.
+        "schema_version": "cycle276.1",
     }
 
     try:

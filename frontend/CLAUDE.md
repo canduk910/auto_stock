@@ -479,7 +479,38 @@ stock_master 컬럼 / raw JSONB 키 / stock_master_daily 컬럼 추가 시 **반
 
 두 탭:
 - 주문체결내역: `TradeHistoryGrid` (raw 행)
-- 매매손익: `TradePnLGrid` (`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)" 라벨, emerald-50 배경. 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). 그리드 상단 실현손익 요약 바(`pnl-summary`) — `data.summary`(슬라이스 전 전체 closed 페어 집계) 기반 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·현재 전략 필터 라벨. summary 부재 시 0 graceful
+- 매매손익: `TradePnLGrid` (`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)" 라벨, emerald-50 배경. 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). **cycle276** — 응답 페어에 `buy_order_nos`/`sell_order_nos`/`pair_key` 3키가 추가되고 맨 오른쪽에 "AI 자문" 열이 붙는다(아래 cycle276 절). 그리드 상단 실현손익 요약 바(`pnl-summary`) — `data.summary`(슬라이스 전 전체 closed 페어 집계) 기반 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·현재 전략 필터 라벨. summary 부재 시 0 graceful
+
+### cycle276 (2026-09-11) — 두 그리드에 "AI 자문" 버튼 + 상세 팝업
+
+사용자 지시 = "UI의 거래기록(체결, 매매손익)에서 각 행에 AI매매자문 버튼을 달고 버튼 선택 시 팝업형태로 확인".
+
+- **신규 3파일** = `types/llm-evaluation.ts`(`LlmEvaluationSummary` 10키 → `LlmEvaluation` 이 그것을 extends 해 상세 53키 · `LlmEvaluationSummaryMap`) ·
+  `api/llm-evaluations.ts`(`getLlmEvaluationSummaries(orderNos, tradeDate?)` 배치 · `getLlmEvaluation(orderNo, tradeDate?)` 단건 —
+  **try/catch 금지**: axios 오류를 React Query 로 흘려야 화면이 404(회색 안내)와 500·네트워크(빨강 오류)를 가른다, cycle266) ·
+  `components/LlmEvaluationModal.tsx`(팝업, 신규 의존성 0 · `<pre>` 원문 · `dangerouslySetInnerHTML` 금지).
+- **버튼 활성 판정은 배치 1요청**이다 — 행마다 개별 조회하면 페이지당 20~30 요청이 나간다. 요약 맵의 키는
+  **`"<trade_date>|<order_no>"` 복합 키**이고(cycle276 후속 B-2 · 라우트 `summary_key()` 와 같은 규약) 조회는
+  `findLlmSummary(summaries, tradeDate, orderNo)` 로 한다. 그 조합의 키가 있으면 활성, 없으면 비활성(회색) +
+  툴팁 — 사유는 `llmSummaryDatesFor(summaries, orderNo)` 로 갈린다("평가 기록 없음" vs "다른 날짜(…)의 평가
+  기록"). 기록 없는 조합은 응답에 **키 자체가 없다**(`null` 값 아님).
+- 체결 그리드(`TradeHistoryGrid`)는 **BUY 행의 `order_no`** 기준, 손익 그리드(`TradePnLGrid`)는 **`buy_order_nos`** 기준
+  (한 페어가 매수 주문 2건 이상인 실측 9건 — 라벨에 `AI 자문 (n)`, 팝업이 주문별 목록으로 n개를 나란히 보여준다).
+  `pair_key`(= `strategy:ticker:첫 매수 order_no`)가 버튼 testid 이고 `null` 이면 비활성.
+- ⚠️ **KIS 주문번호(ODNO)는 하루 단위로만 유일하다** — 배치 요약은 날짜 없이 묻지만 응답이 날짜별로 갈린 복합 키라,
+  활성 근거는 **그 행의 매수일로 조회한 키가 있는가** 하나다(종전처럼 주문번호 단독 키를 찾은 뒤 날짜를 비교하는
+  방식은 같은 번호의 다른 날짜 기록이 배치에서 지워지던 결함과 짝이었다 — B-2). 상세는 반드시 날짜와 함께 묻는다(빼면 라우트가 "가장 최근 1건" 을 골라 같은 번호가
+  재사용된 **다른 거래의 평가**를 띄운다 — 회귀 가드 F25b). 다른 날짜 기록만 있으면 툴팁이 그 사실을 말한다.
+- 팝업 내용 = 점수/임계/차단여부(`would_block`) · 사유(rationale) · 핵심 위험 · 무효화 조건 · 지표 요약 · 주문 스냅샷
+  (주문가·수량·목표가·보드) · 모델/토큰/비용/지연 · 원문 입력 payload(접기). **`result==='failed'` 기록은 오류가 아니라
+  정상 기록**이며 실패 사유를 크게 보여 준다(`llm-eval-failed`) — "평가 안 함" 과 "평가 실패" 를 구별하는 것이 목적이다.
+- 계좌번호는 **마스킹된 값만**(`account_no_masked`, 앞 4자리 + `****`) 화면에 오르고 타입에 원문 키가 없다 — 이 표면은
+  리포터 키로도 읽힌다(cycle249). 숫자는 전부 방어 변환(`toSafeNumber`), 시각은 전부 `timeZone:'Asia/Seoul'` 명시.
+- 목 동기화 의무 = `src/test/handlers.ts`(MSW) + `src/test/factories.ts` + `e2e/fixtures/api-mocks.ts`(LIFO 정합) 셋 다.
+  세 목 모두 배치 응답을 **복합 키**로 만든다 — 주문번호 단독 키로 만들면 목이 실제 응답 형태를 담지 않아
+  화면이 전부 비활성인데도 초록이 된다(cycle266 §C-3 계열). 헬퍼 가드 =
+  `src/components/__tests__/llmEvalKey.cycle276.test.ts`(키 형식·날짜별 구분·두 그리드의 직접 인덱싱 0건).
+  cycle266 교훈대로 목이 *의도한 계약*만 담고 *실제 응답*(NUMERIC 문자열 등)을 담지 않으면 몇 달간 초록인 채로 결함이 산다.
 
 ## Logs (`/logs`) — 통합 메뉴
 

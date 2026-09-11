@@ -237,26 +237,42 @@ def _wire(mod, monkeypatch, client: FakeClient | None, bars: _BarsSpy | None = N
 
 
 def _observe(mod, **over) -> None:
+    """🔁 cycle276 — 진입점이 `observe_signal`(신호 시점) → `observe_order`(주문 접수
+    시점)로 옮겨졌다. 종목명·시총·거래대금·전일종가는 이제 leaf 가 `scanner` 에서
+    직접 읽고(호출부는 계좌도 넘기지 않는다), 목표가·K 는 `buy_signals` 꼬리 역참조로
+    푼다. 옛 시각 인자 `now_kst=` 는 `order_kst=` 로 이름만 바뀌었다.
+    """
     kw = dict(
         strategy_id=_VB,
         ticker=_TICKER,
-        name="삼성전자",
-        board="main",
-        price_won=80500,
-        board_open_won=80000,
-        target_won=80400,
-        target_offset_won=400,
-        k=0.5,
-        prev_price_won=80200,
-        prdy_close_won=70000,
-        market_cap_eok=5_000_000,
-        trade_amount_eok=3_000,
-        budget_won=247_949,
+        order_no="0000123456",
+        order_kst=_NOW,
+        order_price_won=80500,
+        ordered_qty=3,
+        order_division="MARKET",
+        order_path="market",
+        exchange="KRX",
+        current_price_won=80500,
+        budget_total_won=247_949,
+        budget_remaining_after_won=32_549,
+        open_positions_n=1,
         params_snapshot=dict(_PARAMS),
-        now_kst=_NOW,
+        buy_signals_tail=[{
+            "ticker": _TICKER,
+            "name": "삼성전자",
+            "price": 80500,
+            "target_price": 80400,
+            "k": 0.5,
+            "board": "main",
+            "change_rate": 0.6,
+            "time": "09:04:42",
+        }],
     )
+    # 옛 이름으로 시각을 넘기던 호출부 호환 — 래치 날짜 롤오버 케이스가 그 인자를 쓴다.
+    if "now_kst" in over:
+        over["order_kst"] = over.pop("now_kst")
     kw.update(over)
-    assert mod.observe_signal(**kw) is None, "`observe_signal` 반환은 항상 None 이어야 한다"
+    assert mod.observe_order(**kw) is None, "`observe_order` 반환은 항상 None 이어야 한다"
 
 
 async def _drain(rounds: int = 400) -> None:
@@ -536,9 +552,15 @@ async def test_m1_1_score_line_fields(monkeypatch, caplog) -> None:
     line = lines[0]
     assert "\n" not in line, "관측 행은 1행이어야 한다(개행 금지)"
     for name in (
-        "strategy", "ticker", "board", "mode", "score", "min_score", "would_block",
-        "signal_price", "target", "excess_bp", "k", "signal_kst", "mins_from_open",
-        "verdict_price", "slip_bp", "verdict_lag_ms", "latency_ms", "model",
+        # 🔁 cycle276 — 판정 모집단이 **신호 → 주문**으로 바뀌며 세 필드가 개명됐다:
+        #   signal_price → order_price · signal_kst → order_kst ·
+        #   verdict_price/slip_bp → drift_price/post_order_drift_bp
+        # (마지막 쌍은 부호 **의미**가 반대다 — 배포 전후 로그를 합산하지 말 것).
+        # `order_no` 는 신설(주문↔평가 조인 키).
+        "strategy", "ticker", "order_no", "board", "mode",
+        "score", "min_score", "would_block",
+        "order_price", "target", "excess_bp", "k", "order_kst", "mins_from_open",
+        "drift_price", "post_order_drift_bp", "verdict_lag_ms", "latency_ms", "model",
         "tokens_in", "tokens_out", "cost_usd", "bars", "rsi14", "pos_ch20", "volr",
     ):
         _field(line, name)
@@ -653,8 +675,11 @@ async def test_m1_8_name_is_sanitized_in_score_line(monkeypatch, caplog) -> None
     이 위조 행(`score=100 would_block=False` 등)을 그대로 읽는다."""
     gate = _setup(monkeypatch)
     caplog.set_level(logging.INFO, logger=_LOGGER)
+    # 🔁 cycle276 — 종목명은 호출부 인자가 아니라 leaf 가 `scanner` 에서 직접 읽는다.
+    from src.engine import scanner
+    monkeypatch.setattr(scanner, "ticker_names", {_TICKER: "삼성\n\nA|B"}, raising=False)
     _wire(gate, monkeypatch, _resp(_GOOD_JSON))
-    _observe(gate, name="삼성\n\nA|B")
+    _observe(gate)
     await _drain()
     lines = _lines(caplog, gate.MARKER_SCORE)
     assert len(lines) == 1, f"개행 포함 이름이 로그 행을 쪼갰다: {lines}"
@@ -664,14 +689,14 @@ async def test_m1_8_name_is_sanitized_in_score_line(monkeypatch, caplog) -> None
 
 
 # ===========================================================================
-# §7.2 — `slip_bp` (이 자문의 핵심 신설 필드)
+# §7.2 — 판정 시점 표류 (cycle276 개명: `slip_bp` → `post_order_drift_bp`)
 # ===========================================================================
 @freeze_time(_UTC_090442)
 async def test_m2_1_slip_bp_from_scanner_prices(monkeypatch, caplog) -> None:
-    """§7.2 (핵심) — 판정 도착 순간의 현재가 대비 신호가 이동폭을 bp 로 남긴다.
+    """§7.2 (핵심) — 판정 도착 순간의 현재가 대비 **주문가** 이동폭을 bp 로 남긴다.
 
-    enforce 의 진짜 비용은 API 요금이 아니라 **진입 지연**이다. 신호가 80,500 →
-    판정 시 80,900 ⇒ (400/80500)×10000 = 49.7bp.
+    주문이 80,500 → 판정 시 80,900 ⇒ (400/80500)×10000 = 49.7bp.
+    🔁 cycle276 — 산식은 같지만 부호의 **의미**가 반대다(이제 + 는 주문 뒤 상승 = 이득).
     """
     gate = _setup(monkeypatch)
     caplog.set_level(logging.INFO, logger=_LOGGER)
@@ -681,13 +706,16 @@ async def test_m2_1_slip_bp_from_scanner_prices(monkeypatch, caplog) -> None:
     _observe(gate)
     await _drain()
     line = _lines(caplog, gate.MARKER_SCORE)[0]
-    assert _field(line, "verdict_price") == "80900"
-    assert float(_field(line, "slip_bp")) == pytest.approx(400 / 80500 * 10000, abs=0.05)
+    assert _field(line, "drift_price") == "80900"
+    assert float(_field(line, "post_order_drift_bp")) == pytest.approx(
+        400 / 80500 * 10000, abs=0.05
+    )
 
 
 @freeze_time(_UTC_090442)
 async def test_m2_2_slip_bp_absent_ticker_is_none_sentinel(monkeypatch, caplog) -> None:
-    """§7.2 — `scanner.ticker_prices` 에 종목이 없으면 `verdict_price=0` + `slip_bp=none`.
+    """§7.2 — `scanner.ticker_prices` 에 종목이 없으면 `drift_price=0` +
+    `post_order_drift_bp=none`.
 
     0bp 로 위장하면 "이동이 없었다" 와 "잴 수 없었다" 가 같은 값이 된다.
     """
@@ -699,8 +727,8 @@ async def test_m2_2_slip_bp_absent_ticker_is_none_sentinel(monkeypatch, caplog) 
     _observe(gate)
     await _drain()
     line = _lines(caplog, gate.MARKER_SCORE)[0]
-    assert _field(line, "verdict_price") == "0"
-    assert _field(line, "slip_bp").lower() == "none"
+    assert _field(line, "drift_price") == "0"
+    assert _field(line, "post_order_drift_bp").lower() == "none"
 
 
 @freeze_time(_UTC_090442)
@@ -855,26 +883,35 @@ async def test_c6_2_low_score_also_latches(monkeypatch, caplog) -> None:
 
 @freeze_time(_UTC_090442)
 async def test_c6_3_other_ticker_is_not_latched(monkeypatch, caplog) -> None:
-    """C6 — 래치 키는 (전략, 종목)이다. 다른 종목은 막히지 않는다."""
+    """C6 — 다른 종목의 **다른 주문**은 막히지 않는다.
+
+    🔁 cycle276 — 래치 키가 `(전략, 종목)/일` → **주문번호**로 바뀌었다. 종목이
+    달라도 주문번호가 같으면(현실에 없는 상황) 같은 평가이므로 여기서 주문번호를
+    분리한다.
+    """
     gate = _setup(monkeypatch)
     caplog.set_level(logging.INFO, logger=_LOGGER)
     client = _resp(_GOOD_JSON)
     _wire(gate, monkeypatch, client)
-    _observe(gate)
-    _observe(gate, ticker="000660")
+    _observe(gate, order_no="O-1")
+    _observe(gate, ticker="000660", order_no="O-2")
     await _drain()
     assert len(client.calls) == 2
 
 
 @freeze_time(_UTC_090442)
 async def test_c6_4_other_strategy_is_not_latched(monkeypatch, caplog) -> None:
-    """C6 — 같은 종목이라도 전략이 다르면 별개 평가다(VB·LTV 는 규약이 다르다)."""
+    """C6 — 같은 종목이라도 전략이 다르면 별개 주문·별개 평가다(VB·LTV 는 규약이 다르다).
+
+    🔁 cycle276 — 래치 키가 주문번호이므로 두 전략의 주문번호를 분리한다(실제로 두
+    전략이 같은 주문번호를 받을 일은 없다).
+    """
     gate = _setup(monkeypatch)
     caplog.set_level(logging.INFO, logger=_LOGGER)
     client = _resp(_GOOD_JSON)
     _wire(gate, monkeypatch, client)
-    _observe(gate, strategy_id=_VB)
-    _observe(gate, strategy_id=_LTV)
+    _observe(gate, strategy_id=_VB, order_no="O-VB")
+    _observe(gate, strategy_id=_LTV, order_no="O-LTV")
     await _drain()
     assert len(client.calls) == 2
 
@@ -909,8 +946,8 @@ async def test_c7_1_cap_blocks_third_signal(monkeypatch, caplog) -> None:
     _wire(gate, monkeypatch, client)
     created = _tasks_created(monkeypatch, gate)
     params = dict(_PARAMS, llm_gate_daily_call_cap=2)
-    for tk in ("005930", "000660", "035720"):
-        _observe(gate, ticker=tk, params_snapshot=params)
+    for i, tk in enumerate(("005930", "000660", "035720")):
+        _observe(gate, ticker=tk, order_no=f"O-{i}", params_snapshot=params)
     await _drain()
     assert len(created) == 2, f"cap=2 인데 task {len(created)}"
     assert len(client.calls) == 2
@@ -923,8 +960,9 @@ async def test_c7_2_cap_marker_is_warning_once_per_strategy(monkeypatch, caplog)
     caplog.set_level(logging.INFO, logger=_LOGGER)
     _wire(gate, monkeypatch, _resp(_GOOD_JSON))
     params = dict(_PARAMS, llm_gate_daily_call_cap=1)
-    for tk in ("005930", "000660", "035720"):
-        _observe(gate, ticker=tk, params_snapshot=params)
+    # 🔁 cycle276 — 래치 키가 주문번호다. 주문 3건이어야 cap 판정이 3번 돈다.
+    for i, tk in enumerate(("005930", "000660", "035720")):
+        _observe(gate, ticker=tk, order_no=f"O-{i}", params_snapshot=params)
     await _drain()
 
     caps = _lines(caplog, gate.MARKER_DAILY_CAP)
@@ -942,9 +980,9 @@ async def test_c7_3_cap_is_per_strategy(monkeypatch, caplog) -> None:
     client = _resp(_GOOD_JSON)
     _wire(gate, monkeypatch, client)
     params = dict(_PARAMS, llm_gate_daily_call_cap=1)
-    _observe(gate, strategy_id=_VB, ticker="005930", params_snapshot=params)
-    _observe(gate, strategy_id=_VB, ticker="000660", params_snapshot=params)
-    _observe(gate, strategy_id=_LTV, ticker="035720", params_snapshot=params)
+    _observe(gate, strategy_id=_VB, ticker="005930", order_no="O-1", params_snapshot=params)
+    _observe(gate, strategy_id=_VB, ticker="000660", order_no="O-2", params_snapshot=params)
+    _observe(gate, strategy_id=_LTV, ticker="035720", order_no="O-3", params_snapshot=params)
     await _drain()
     assert len(client.calls) == 2
 
@@ -1005,7 +1043,7 @@ async def test_c8_1_at_most_two_inflight_calls(monkeypatch, caplog) -> None:
     _wire(gate, monkeypatch, client)
     params = dict(_PARAMS, llm_gate_daily_call_cap=50)
     for i in range(10):
-        _observe(gate, ticker=f"00{i:04d}", params_snapshot=params)
+        _observe(gate, ticker=f"00{i:04d}", order_no=f"O-{i}", params_snapshot=params)
     await _spin(120)
     assert client.max_inflight <= 2, f"동시 콜 {client.max_inflight} > 2"
     assert client.max_inflight >= 2, "세마포어 슬롯이 채워지지 않았다(테스트 무의미)"
@@ -1243,7 +1281,15 @@ async def test_m4_1_call_uses_json_object_and_no_temperature(monkeypatch, caplog
 
 @freeze_time(_UTC_090442)
 async def test_m4_2_call_caps_completion_tokens(monkeypatch, caplog) -> None:
-    """§4.4 — 출력 상한 400. ⚠️ `max_tokens` 는 gpt-5 계열에서 거부될 수 있다."""
+    """§4.4 — 출력 상한은 `_MAX_COMPLETION_TOKENS` 하나에서 온다.
+
+    ⚠️ `max_tokens` 는 gpt-5 계열에서 거부될 수 있으므로 쓰지 않는다.
+
+    ⚠️ 값 400 리터럴은 **폐기**했다(cycle276 후속 A-1) — `gpt-5.6-luna` 는 추론 모델이라
+    추론 토큰이 이 한도를 함께 소비하고, 400 은 실측 여유가 30 토큰뿐이어서 09-11 실전
+    2건이 `content=""` → 실패로 끝났다. 지금은 2000 이고, 이 테스트는 "호출부가 상수를
+    그대로 쓴다" 와 "다시 굶기지 않는다"(≥1000) 만 잰다.
+    """
     gate = _setup(monkeypatch)
     caplog.set_level(logging.INFO, logger=_LOGGER)
     client = _resp(_GOOD_JSON)
@@ -1251,7 +1297,10 @@ async def test_m4_2_call_caps_completion_tokens(monkeypatch, caplog) -> None:
     _observe(gate)
     await _drain()
     kw = client.calls[0]
-    assert kw.get("max_completion_tokens") == 400
+    assert kw.get("max_completion_tokens") == gate._MAX_COMPLETION_TOKENS
+    assert gate._MAX_COMPLETION_TOKENS >= 1000, (
+        "추론 토큰이 같은 한도를 소비하므로 400 급 한도는 전건 실패를 만든다"
+    )
     assert "max_tokens" not in kw
 
 
