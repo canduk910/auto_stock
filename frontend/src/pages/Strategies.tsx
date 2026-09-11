@@ -16,8 +16,10 @@
  *   - 데이터 부재 시 graceful (params={} → "—")
  *   - 모바일 viewport 375px 정합
  */
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import apiClient from '../api/client'
+import StrategyParamsEditor from '../components/StrategyParamsEditor'
 import type { ApiResponse } from '../types/common'
 import { getStrategyColor } from '../types/strategy'
 import type { TeRrMetrics } from '../types/strategy'
@@ -344,12 +346,14 @@ function StrategyCard({
   teMetrics,
   teLoading,
   teError,
+  onOpenParams,
 }: {
   strategyKey: string
   strategy: StrategyStatus
   teMetrics: TeRrMetrics | undefined
   teLoading: boolean
   teError: boolean
+  onOpenParams: (strategyKey: string) => void
 }) {
   const color = getStrategyColor(strategyKey)
 
@@ -369,15 +373,26 @@ function StrategyCard({
               ` · 배정 ${(strategy.total_investment / 10000).toFixed(0)}만원`}
           </p>
         </div>
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-            strategy.enabled
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-500'
-          }`}
-        >
-          {strategy.enabled ? '활성' : '비활성'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+              strategy.enabled
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-500'
+            }`}
+          >
+            {strategy.enabled ? '활성' : '비활성'}
+          </span>
+          {/* cycle278 — 카탈로그 기반 편집기 진입점. 이 카드의 4 임계는 읽기 전용 요약으로 남고,
+              설정 가능한 전 항목은 편집기가 스키마 응답으로 렌더한다. */}
+          <button
+            data-testid={`strategy-params-open-${strategyKey}`}
+            onClick={() => onOpenParams(strategyKey)}
+            className="px-2 py-0.5 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50"
+          >
+            파라미터
+          </button>
+        </div>
       </div>
 
       {/* 4 임계 그리드 */}
@@ -418,6 +433,9 @@ function StrategyCard({
 }
 
 export default function Strategies() {
+  // cycle278 — 파라미터 편집기를 연 전략 id (null = 닫힘). 스키마는 열 때만 fetch 한다.
+  const [paramsStrategy, setParamsStrategy] = useState<string | null>(null)
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['strategies'],
     queryFn: async () => {
@@ -517,6 +535,7 @@ export default function Strategies() {
               teMetrics={teMetricsMap[key]}
               teLoading={teIsLoading}
               teError={teIsError}
+              onOpenParams={setParamsStrategy}
             />
           ))}
         </div>
@@ -524,6 +543,14 @@ export default function Strategies() {
 
       {/* 사이클 F — TE/RR 참조표 + 교육 캡션 (페이지 하단 1회) */}
       {!isLoading && !isError && strategyKeys.length > 0 && <TeRrReferenceFooter />}
+
+      {/* cycle278 — 파라미터 편집기 (스키마 응답만으로 렌더, 키 하드코딩 0건) */}
+      {paramsStrategy && (
+        <StrategyParamsEditor
+          strategyId={paramsStrategy}
+          onClose={() => setParamsStrategy(null)}
+        />
+      )}
 
       {/* 안내 */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">

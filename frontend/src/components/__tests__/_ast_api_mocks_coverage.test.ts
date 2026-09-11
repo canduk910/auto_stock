@@ -344,6 +344,30 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
     })
   })
 
+  // cycle278 (2026-09-11) — 전략 파라미터 카탈로그 스키마 endpoint.
+  // 편집기가 이 한 응답으로 렌더하므로 미등록이면 Strategies 화면의 "파라미터" 버튼이
+  // 영영 로딩 상태로 남는다(vite proxy → ECONNREFUSED → retry 누적). 사이클 85 G-AST6 패턴 답습.
+  describe('G-AST11 (cycle278): 파라미터 카탈로그 스키마 endpoint 등록', () => {
+    it('api-mocks.ts 에 /api/strategies/params-schema 라우트 등록 의무', () => {
+      const source = loadApiMocksSource()
+      expect(
+        isRouteRegistered(source, '/api/strategies/params-schema'),
+        'e2e api-mocks.ts 에 /api/strategies/params-schema 라우트 누락 — ' +
+          'StrategyParamsEditor 마운트 시 ECONNREFUSED. ' +
+          '사이클 80 hotfix #3 LIFO 정합 의무 (`**/api/strategies/*/params` 보다 *후* 등록).',
+      ).toBe(true)
+    })
+
+    it('frontend/src/api/strategies.ts 가 params-schema 를 호출한다 (방어 가드)', () => {
+      const apiSource = readFileSync(path.join(FRONTEND_API_DIR, 'strategies.ts'), 'utf-8')
+      expect(
+        apiSource.includes('/strategies/params-schema'),
+        '방어 가드: 스키마 fetch 가 api/strategies.ts 에 없다 — ' +
+          '편집기가 키를 하드코딩하거나 다른 경로로 새고 있다는 뜻이다 (cycle278 C35 위반 신호).',
+      ).toBe(true)
+    })
+  })
+
   describe('G-AST4: 3 컴포넌트 useQuery `retry:` 옵션 명시 (Q4 확장)', () => {
     const TARGET_COMPONENTS = [
       'IntegrationToggleCard.tsx',

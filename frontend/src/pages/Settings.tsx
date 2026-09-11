@@ -11,8 +11,8 @@ import KrxOpenApiCard from '../components/KrxOpenApiCard'
 import PriceFilterCard from '../components/PriceFilterCard'
 import TradeAmountFilterCard from '../components/TradeAmountFilterCard'
 import ConfirmModal from '../components/ConfirmModal'
+import StrategyParamsEditor from '../components/StrategyParamsEditor'
 import InfoTooltip from '../components/InfoTooltip'
-import { PARAM_LABELS, formatParamValue } from '../utils/paramLabels'
 import { STRATEGY_INFO } from '../utils/strategyInfo'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 
@@ -35,10 +35,8 @@ export default function Settings() {
   const [weights, setWeights] = useState<Record<string, number>>({})
   const [showConfirm, setShowConfirm] = useState(false)
   const [dirty, setDirty] = useState(false)
-  const [editingParams, setEditingParams] = useState<string | null>(null) // strategy key
-  const [paramEdits, setParamEdits] = useState<Record<string, string>>({})
-  const [paramDirty, setParamDirty] = useState(false)
-  const [showParamConfirm, setShowParamConfirm] = useState(false)
+  // cycle278 — 카탈로그 편집기를 연 전략 key (null = 닫힘). 스키마는 열 때만 fetch 한다.
+  const [paramsStrategy, setParamsStrategy] = useState<string | null>(null)
   const [weightError, setWeightError] = useState<string | null>(null)
 
   const { data, isLoading, isError } = useQuery({
@@ -60,19 +58,6 @@ export default function Settings() {
       setShowConfirm(false)
       setWeightError(err.message)
     },
-  })
-
-  const paramMutation = useMutation({
-    mutationFn: ({ id, params }: { id: string; params: Record<string, StrategyParamValue> }) =>
-      updateStrategyParams(id, params),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['strategies'] })
-      queryClient.invalidateQueries({ queryKey: ['tradingStatus'] })
-      setShowParamConfirm(false)
-      setParamDirty(false)
-      setEditingParams(null)
-    },
-    onError: () => setShowParamConfirm(false),
   })
 
   useEffect(() => {
@@ -146,33 +131,6 @@ export default function Settings() {
       }
     }
     weightMutation.mutate(normalized)
-  }
-
-  const openParamEditor = (strategyKey: string, params: Record<string, unknown>) => {
-    const editable: Record<string, string> = {}
-    for (const [k, v] of Object.entries(params)) {
-      if (typeof v === 'number' && k in PARAM_LABELS) {
-        editable[k] = String(v)
-      }
-    }
-    setParamEdits(editable)
-    setEditingParams(strategyKey)
-    setParamDirty(false)
-  }
-
-  const handleParamChange = (key: string, value: string) => {
-    setParamEdits((prev) => ({ ...prev, [key]: value }))
-    setParamDirty(true)
-  }
-
-  const handleSaveParams = () => {
-    if (!editingParams) return
-    const parsed: Record<string, number> = {}
-    for (const [k, v] of Object.entries(paramEdits)) {
-      const n = Number(v)
-      if (Number.isFinite(n)) parsed[k] = n
-    }
-    paramMutation.mutate({ id: editingParams, params: parsed })
   }
 
   return (
@@ -356,111 +314,58 @@ export default function Settings() {
       {/* 사이클 65 (2026-06-06) — 거래대금 동행 필터 (WebSocket 구독 대상 필터 순차 hook) */}
       <TradeAmountFilterCard />
 
-      {/* 전략별 파라미터 */}
-      <div className="space-y-4">
-        {strategies.map((s) => {
-          const color = getStrategyColor(s.key)
-          const isEditing = editingParams === s.key
-          const params = (s as unknown as { params?: Record<string, unknown> }).params ?? {}
-          const editableKeys = Object.keys(params).filter((k) => k in PARAM_LABELS && typeof params[k] === 'number')
-
-          if (editableKeys.length === 0) return null
-
-          return (
-            <div key={s.key} className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
+      {/* 전략별 파라미터 — cycle278: 24키 화이트리스트 패널을 카탈로그 편집기로 교체.
+          구 패널은 `PARAM_LABELS` 24키 ∩ `typeof === 'number'` 로 이중 게이팅해서 99키 중
+          73키가 구조적으로 편집 불가였고 bool/str/enum/list_str 키는 영영 올 수 없었다.
+          편집기 구현은 하나뿐이다(`components/StrategyParamsEditor.tsx`) — 같은 값을 고치는
+          화면이 둘이면 한쪽이 반드시 뒤처진다. */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">전략별 파라미터</h2>
+        <p className="text-xs text-gray-500 mb-4">
+          전략마다 설정 가능한 전 항목을 그룹별로 열어 고칩니다. 현재값·기본값이 함께 표시되고,
+          저장 전에 변경분을 확인합니다. 리스크 정체성 상수는 2단계 확인을 거칩니다.
+        </p>
+        {strategies.length === 0 ? (
+          <p className="text-sm text-gray-500">등록된 전략이 없습니다.</p>
+        ) : (
+          <div className="space-y-2">
+            {strategies.map((s) => (
+              <div
+                key={s.key}
+                className="flex items-center justify-between border border-gray-200 rounded p-3"
+              >
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color.hex }} />
-                  <h2 className="text-lg font-semibold text-gray-900">{s.name} 파라미터</h2>
+                  <span
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: getStrategyColor(s.key).hex }}
+                  />
+                  <span className="text-sm font-medium text-gray-900">{s.name}</span>
+                  <span className="text-xs text-gray-400">
+                    {Object.keys(
+                      (s as unknown as { params?: Record<string, unknown> }).params ?? {},
+                    ).length}
+                    개 항목
+                  </span>
                 </div>
-                {!isEditing && (
-                  <button
-                    onClick={() => openParamEditor(s.key, params)}
-                    className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-md"
-                  >
-                    편집
-                  </button>
-                )}
+                <button
+                  data-testid={`strategy-params-open-${s.key}`}
+                  onClick={() => setParamsStrategy(s.key)}
+                  className="px-3 py-1 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50"
+                >
+                  파라미터
+                </button>
               </div>
-
-              {isEditing ? (
-                <div className="space-y-3">
-                  {editableKeys.map((key) => {
-                    const meta = PARAM_LABELS[key]
-                    const rawValue = paramEdits[key] ?? '0'
-                    const numValue = Number(rawValue)
-                    const safeNum = Number.isFinite(numValue) ? numValue : 0
-                    const totalInv = s.total_investment ?? 0
-                    return (
-                      <div key={key}>
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-gray-600 w-40 shrink-0 inline-flex items-center">
-                            <label>{meta.label}</label>
-                            <InfoTooltip content={meta.description} ariaLabel={`${meta.label} 설명`} />
-                          </span>
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            value={rawValue}
-                            onChange={(e) => handleParamChange(key, e.target.value)}
-                            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="text-xs text-gray-400 w-8">{meta.unit}</span>
-                        </div>
-                        {key === 'position_ratio' && totalInv > 0 && (
-                          <div className="ml-44 mt-1 text-xs text-gray-400">
-                            예상 종목당 매수: ~{((totalInv * safeNum) / 10000).toFixed(0)}만원
-                            (할당금 {(totalInv / 10000).toFixed(0)}만원 x {(safeNum * 100).toFixed(0)}%)
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                  <div className="flex justify-end gap-2 mt-4">
-                    <button
-                      onClick={() => { setEditingParams(null); setParamDirty(false) }}
-                      className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md"
-                    >
-                      취소
-                    </button>
-                    <button
-                      onClick={() => setShowParamConfirm(true)}
-                      disabled={!paramDirty}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      저장
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  {editableKeys.map((key) => {
-                    const meta = PARAM_LABELS[key]
-                    const value = params[key] as number
-                    const totalInv = s.total_investment ?? 0
-                    return (
-                      <div key={key}>
-                        <div className="flex justify-between text-sm py-1">
-                          <span className="text-gray-500 inline-flex items-center">
-                            {meta.label}
-                            <InfoTooltip content={meta.description} ariaLabel={`${meta.label} 설명`} />
-                          </span>
-                          <span className="font-medium">{formatParamValue(key, value)}{meta.unit && !formatParamValue(key, value).includes(meta.unit) ? meta.unit : ''}</span>
-                        </div>
-                        {key === 'position_ratio' && totalInv > 0 && (
-                          <div className="col-span-2 text-xs text-gray-400 -mt-0.5 mb-1">
-                            예상 종목당 매수: ~{((totalInv * value) / 10000).toFixed(0)}만원
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )
-        })}
+            ))}
+          </div>
+        )}
       </div>
+
+      {paramsStrategy && (
+        <StrategyParamsEditor
+          strategyId={paramsStrategy}
+          onClose={() => setParamsStrategy(null)}
+        />
+      )}
 
       <ConfirmModal
         open={showConfirm}
@@ -469,14 +374,6 @@ export default function Settings() {
         onConfirm={handleSaveWeights}
         onCancel={() => setShowConfirm(false)}
         loading={weightMutation.isPending}
-      />
-      <ConfirmModal
-        open={showParamConfirm}
-        title="파라미터 변경"
-        message="전략 파라미터를 변경하시겠습니까? 다음 스캔부터 적용됩니다."
-        onConfirm={handleSaveParams}
-        onCancel={() => setShowParamConfirm(false)}
-        loading={paramMutation.isPending}
       />
     </div>
   )
