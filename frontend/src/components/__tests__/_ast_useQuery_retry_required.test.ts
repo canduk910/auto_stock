@@ -69,7 +69,15 @@ const TARGET_FILES = [
 // 1 useQuery (fetchRealtimeHealth) retry:1 명시 의무 영구 가드 (사이클 85 패턴 답습).
 // cycle278 (2026-09-11) — Strategies.tsx 추가. 전략 카드에서 파라미터 편집기를 여는
 // 진입점 페이지이고 자체 useQuery 2건(strategies / strategy-te)을 가진다.
-const TARGET_PAGES = ['Settings.tsx', 'StockMaster.tsx', 'RealtimeHealth.tsx', 'Strategies.tsx']
+// cycle282 (2026-09-11) — MarketState.tsx 추가. 장운영상태는 30초 폴링 화면이라
+// retry 미명시 시 e2e/백엔드 미기동 환경에서 기본 retry(3회 backoff)가 폴링마다 누적된다.
+const TARGET_PAGES = [
+  'Settings.tsx',
+  'StockMaster.tsx',
+  'RealtimeHealth.tsx',
+  'Strategies.tsx',
+  'MarketState.tsx',
+]
 
 describe('사이클 65 hotfix H3 + 사이클 75 Q4 확장 — useQuery retry 옵션 영구 가드', () => {
   it.each(TARGET_FILES)(

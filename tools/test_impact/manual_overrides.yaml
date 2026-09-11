@@ -48,3 +48,25 @@
 "src/db/system_logs.py":
   - "tests/contract/test_routes_logs.py"
   - "tests/unit/db/test_system_logs_filter.py"
+
+# 사이클 282 (2026-09-11) — 장운영상태. 세 테스트 파일이 Red 관례대로
+# `importlib.import_module("src.engine.market_state")` 로 **지연 import** 해
+# (미구현 단계에서 수집 오류 대신 FAIL 이 되게 한다) 정적 import 분석에 잡히지 않는다.
+"src/engine/market_state.py":
+  - "tests/unit/engine/test_cycle282_market_state.py"
+  - "tests/unit/routes/test_cycle282_market_state_route.py"
+  - "tests/unit/routes/test_cycle282_fixture_sync.py"
+  - "tests/unit/ast/test_cycle282_ast_purity.py"
+"src/routes/market_state.py":
+  - "tests/unit/routes/test_cycle282_market_state_route.py"
+  - "tests/unit/routes/test_cycle282_fixture_sync.py"
+  - "tests/unit/ast/test_cycle282_ast_purity.py"
+
+# 골든 픽스처와 그 생성기는 서로 byte 비교된다 — 어느 쪽이 바뀌어도 동기화 가드를 돌린다.
+"tools/test_fixtures/gen_market_state_fixture.py":
+  - "tests/unit/routes/test_cycle282_fixture_sync.py"
+"frontend/src/test/fixtures/marketState.fixture.ts":
+  - "tests/unit/routes/test_cycle282_fixture_sync.py"
+"e2e/fixtures/market-state.fixture.ts":
+  - "tests/unit/routes/test_cycle282_fixture_sync.py"
+  - "e2e/market-state.spec.ts"

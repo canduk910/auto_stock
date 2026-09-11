@@ -21,6 +21,8 @@ import {
 } from "./factories";
 // cycle278 — 전략 파라미터 카탈로그 스키마 골든 픽스처(param_catalog.py 에서 기계 생성).
 import { PARAM_SCHEMA_FIXTURE } from "./fixtures/paramSchema.fixture";
+// cycle282 — 장운영상태(표 + 커서) 골든 픽스처(market_state.py 에서 기계 생성).
+import { MARKET_STATE_FIXTURE } from "./fixtures/marketState.fixture";
 
 const base = "/api";
 
@@ -525,4 +527,14 @@ export const handlers = [
   http.get(`${base}/strategies/params-schema`, () =>
     HttpResponse.json(wrap(PARAM_SCHEMA_FIXTURE))
   ),
+
+  // cycle282 (2026-09-11) — 장운영상태(거래소 실제 장 운영 상태) 표 + 커서.
+  // **표와 커서가 한 응답에서 나온다** — 둘을 따로 부르면 자정·경계 순간에 갈라져
+  // 화면이 거짓말을 한다(M9). 그래서 목도 한 응답으로 둔다.
+  //
+  // 기본 변종은 평범한 정규장(13:05:22). 동시 중첩(08:35)·장 종료(20:30)·미리보기가
+  // 필요한 시나리오는 각 테스트가 `server.use(...)` 로 다른 변종을 덮어쓴다.
+  // 목 본문은 손으로 쓴 요약이 아니라 `market_state.py` 에서 생성한 골든 픽스처다 —
+  // 목이 *의도한 계약*만 담고 *실제 응답*을 안 담아 3개월 초록이던 cycle266 재발 차단.
+  http.get(`${base}/market-state`, () => HttpResponse.json(wrap(MARKET_STATE_FIXTURE))),
 ];
