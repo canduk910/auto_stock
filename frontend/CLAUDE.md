@@ -44,8 +44,35 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 
 - **상태**: `useContentWidth()` 훅 — `autostock.contentWidth` localStorage 키(정수 level 0~100, **기본 100=전체폭**). lazy `useState` 초기화가 mount 시 localStorage 복원(vite CSR, SSR 없음). `setLevel` 이 state+localStorage 동기, try/catch graceful(프라이빗 모드).
 - **슬라이더**: 나브 PC 행(`hidden sm:flex`) 우측 `ml-auto` 에 `<input type="range" min=0 max=100 step=5>` (`data-testid="content-width-slider"`, `aria-label="화면 폭 조정"`, 네이티브 range = 키보드 Arrow/Home/End 조작). **모바일 미노출**(소화면 조정 불요).
-- **적용**: `<main>` 과 나브 내부 컨테이너 둘 다 `max-w-7xl` 제거 + `style={{ maxWidth: contentMaxWidth(level) }}`. `contentMaxWidth(level) = max(1024px, {60 + level*0.4}%)` (level 100→전체폭 / level 0→`max(1024px, 60%)`). `max()` 는 **상한**이라 소화면 오버플로 없음(뷰포트 폭으로 자연 축소). 나브도 동일 폭 → 전체폭 시 메뉴/슬라이더가 콘텐츠 좌우 끝에 정렬.
-- 회귀 가드 `src/__tests__/ContentWidthSlider.test.tsx` 5 케이스 (슬라이더 aria-label/role, 기본 전체폭 100%, 조정+localStorage 저장 '0', 복원 40→76%, AppShell 구조 회귀). **프론트 전용, 백엔드/매매 무관**.
+- **적용 (cycle288, 2026-09-12 개정)**: **`<main>` 만** 슬라이더 값에 반응한다 — `App.tsx` 의 `<main style={{ maxWidth: contentMaxWidth(level) }}>`. `contentMaxWidth(level) = max(1024px, {60 + level*0.4}%)` (level 100→전체폭 / level 0→`max(1024px, 60%)`). `max()` 는 **상한**이라 소화면 오버플로 없음(뷰포트 폭으로 자연 축소).
+- 🔴 **나브는 기본폭 고정이다** — `NavBar.tsx` 의 `NAV_INNER_MAX_WIDTH`(= `contentMaxWidth(기본 level)`). 종전에는 나브 내부 컨테이너도 같은 동적 값을 받아 "전체폭 시 메뉴/슬라이더가 콘텐츠 좌우 끝에 정렬" 되게 했는데, **슬라이더 자체가 그 컨테이너 안에 있어서** 드래그하는 동안 컨테이너가 리사이즈되며 슬라이더의 화면 위치가 포인터와 어긋났다(사용자 실측 = 깜박임). 정렬보다 조작감이 우선이라 2026-09-12 에 뒤집었다 — **되돌리지 마라.** 되돌리면 깜박임이 재발한다.
+- 회귀 가드 `src/__tests__/ContentWidthSlider.test.tsx` (슬라이더 aria-label/role, 기본 전체폭 100%, 조정+localStorage 저장 '0', 복원 40→76%, AppShell 구조 회귀, **T6 = 나브 고정 ∧ main 반응을 한 케이스에서 함께 단언**(나브만 얼리는 오시정도 잡는다), **T7 = 슬라이더가 `nav-inner` 안에 있음**(깜박임의 구조적 원인 봉인)). **프론트 전용, 백엔드/매매 무관**.
+
+### 나브 2단 카테고리 구조 (cycle288, 2026-09-12)
+
+나브 전체가 **`src/components/NavBar.tsx`** 로 분리됐다(`App.tsx` 는 라우트·레이아웃·`useContentWidth` 소유만 남는다). 공유 상수·훅(`CONTENT_WIDTH_*`·`contentMaxWidth`·`useContentWidth`)은 **`src/utils/contentWidth.ts`** 가 단일 출처다.
+
+메뉴 항목 10개를 **상위 7개**로 묶었다(사용자 지정 묶음·순서 — 바꾸지 마라):
+
+| 상위 | 세부 | 경로 |
+|---|---|---|
+| 대시보드 | (단독) | `/` |
+| 거래 내역 | (단독) | `/history` |
+| 로그 | (단독) | `/logs` |
+| **종목** | 조건검색 추적 · 종목마스터 | `/strategy-funnel` · `/stock-master` |
+| **전략** | 전략 현황 · 전략수정 AI자문 | `/strategies` · `/recommendations` |
+| 설정 | (단독) | `/settings` |
+| **운영상태** | 장운영상태 · 실시간 상태 | `/market-state` · `/realtime-health` |
+
+- 자료구조 `NavEntry = leaf{to,label} | group{id,label,children}` — **드롭다운 유무가 데이터로 결정된다**(컴포넌트에 분기를 흩뿌리지 않는다). 단독 항목에 드롭다운을 만들지 않는다(하위가 하나뿐인 드롭다운은 클릭을 한 번 더 요구해 더 난잡해진다).
+- **활성 표시**: 세부 경로에 있으면 상위 트리거도 활성(`bg-gray-100`). 현재 위치를 잃지 않는 것이 계약이다.
+- **disclosure 패턴**(`aria-expanded` 만, `aria-haspopup` 없음) — `role=menu`/`menuitem` 을 두지 않았으므로 `aria-haspopup="true"` 로 메뉴를 약속하면 스크린리더에 거짓이 된다(cycle288 적대 검증 지적).
+- 키보드: Enter/Space 열기 · ArrowDown/Up 이동 · Escape 로 닫고 트리거 포커스 복귀 · 항목 선택 후에도 트리거로 포커스 복원(패널 언마운트로 `<body>` 로 떨어지는 회귀 차단). 포커스 트랩은 두지 않는다.
+- 닫힘 조건 3: 바깥 클릭 · 포커스 이탈(`onBlur`/focusout) · 라우트 이동(뒤로가기 포함). `openGroup` 단일 상태라 한 번에 하나만 열린다.
+- 모바일 드로어는 **접지 않는다** — "그룹 제목(링크 아님) + 들여쓴 하위" 로 10개 leaf 를 항상 보여준다.
+- 🔴 **경로 10/10 이 메뉴에서 도달 가능해야 한다.** 그룹 안에 묻혀 사라진 메뉴는 URL 을 직접 치지 않으면 영영 못 본다 — `AppShell.test.tsx` 가 href 10개 집합의 불변을 단언한다. (`/log-reports` 는 `/logs?tab=daily-report` 로 가는 **구 북마크 리다이렉트**라 메뉴 항목이 아니다.)
+- 보존 testid 4: `nav-sticky-wrapper` · `content-width-slider` · `mobile-menu-button` · `mobile-menu-drawer`. 신규 = `nav-inner` · `nav-mobile-group-{id}` 등.
+- ⚠️ e2e 에서 그룹 하위 라벨은 **접힌 상태에 DOM 에 없다.** 페이지 제목을 검증할 때 `getByText(...)` 를 쓰면 모바일 헤더의 숨은 현재-메뉴 span 을 집는다(cycle288 적대 검증이 실측으로 4건 발견). 본문 제목은 `getByRole("heading", {name})` 로 고정하고, 그룹 트리거 클릭은 `getByRole("button", {name, exact: true})` 로 부분 일치를 막는다.
 
 ## StrategyFunnel (`/strategy-funnel`, 사이클 34, 2026-05-21)
 
@@ -59,14 +86,14 @@ Dashboard 만 즉시 import. History/Recommendations/Logs/Settings/**StrategyFun
 
 ## 시각적 컨벤션
 
-- **DK Stock 디자인시스템 v2 (cycle261, 2026-09-05) — 가을 팔레트 + Gmarket Sans.** 브랜드명 "DK Stock"(`App.tsx` PC/모바일 로고타입, 종전 "AutoStock" 폐기). 본문 서체 `font-sans` = Gmarket Sans(Light 100–300 / Medium 400–500 / Bold 600–900, `font-display: swap`, `public/fonts/GmarketSans{Light,Medium,Bold}.ttf`), 로고타입은 `font-brand`. `src/index.css` 의 Tailwind v4 `@theme` 가 `red/blue/gray` 를 가을 톤(rust/slate-blue/warm-gray)으로 재정의하고 `green→sky, amber/yellow→beige, purple/violet/indigo→navy, pink/orange→brown, emerald→blue, cyan→sky, slate→gray` 별칭을 매핑한다 — 기존 `bg-*-*` className 은 무수정으로 새 톤을 받고, 신규 이름 `navy/beige/brown/sky` 도 직접 사용 가능. 단일 진실원은 `src/index.css`(`@theme` 원본)와 `utils/pnlColor.ts`/`types/strategy.ts`(파생 hex) 뿐 — 다른 소스 파일에 색 hex 리터럴을 새로 두지 않는다(회귀 가드 `src/__tests__/designSystem.v2.test.ts` 가 `#FF3333`/`#3366FF`/`#333333`/`#2563eb` 4종의 전수 부재를 잠근다).
+- **DK Stock 디자인시스템 v2 (cycle261, 2026-09-05) — 가을 팔레트 + Gmarket Sans.** 브랜드명 "DK Stock"(로고타입 — cycle288 부터 `components/NavBar.tsx`, 종전 `App.tsx`. 종전 "AutoStock" 폐기). 본문 서체 `font-sans` = Gmarket Sans(Light 100–300 / Medium 400–500 / Bold 600–900, `font-display: swap`, `public/fonts/GmarketSans{Light,Medium,Bold}.ttf`), 로고타입은 `font-brand`. `src/index.css` 의 Tailwind v4 `@theme` 가 `red/blue/gray` 를 가을 톤(rust/slate-blue/warm-gray)으로 재정의하고 `green→sky, amber/yellow→beige, purple/violet/indigo→navy, pink/orange→brown, emerald→blue, cyan→sky, slate→gray` 별칭을 매핑한다 — 기존 `bg-*-*` className 은 무수정으로 새 톤을 받고, 신규 이름 `navy/beige/brown/sky` 도 직접 사용 가능. 단일 진실원은 `src/index.css`(`@theme` 원본)와 `utils/pnlColor.ts`/`types/strategy.ts`(파생 hex) 뿐 — 다른 소스 파일에 색 hex 리터럴을 새로 두지 않는다(회귀 가드 `src/__tests__/designSystem.v2.test.ts` 가 `#FF3333`/`#3366FF`/`#333333`/`#2563eb` 4종의 전수 부재를 잠근다).
 - **손익색 (`utils/pnlColor.ts` 단일 진실원)**: 이익 `PROFIT_HEX '#c34a36'` (rust, red-500) / 손실 `LOSS_HEX '#3d73b7'` (slate-blue, blue-500) / 보합 `NEUTRAL_HEX '#41403b'` (gray-700). `pnlColorClass(value)` 는 하드코딩 임의값이 아니라 시맨틱 Tailwind 클래스 `text-pnl-profit` / `text-pnl-loss` / `text-pnl-flat` 를 반환하고, `@theme` 의 `--color-pnl-{profit,loss,flat}` 이 이 상수와 동일 값으로 정의된다(드리프트 시 `designSystem.v2.test.ts` 가 붉어진다). `pnlColorHex(value)` 는 style 인라인 color 용 hex 문자열(undefined/null/NaN → NEUTRAL). ⚠️ `text-red-600`/`text-blue-600` shade 계열(`TradePnLGrid`/`BreakoutCandidateMonitor`)은 별개 shade 라 이 상수에 편입하지 않는다(픽셀 변경 방지, 종전 계약 영속).
 - **전략 식별 7색 (`types/strategy.ts::STRATEGY_COLORS`)**: momentum `#3d73b7`(blue) · volatility_breakout `#364c6d`(navy) · long_tail_volatility `#b39364`(beige) · donchian_swing `#488eb4`(sky) · bull_flag_breakout `#c34a36`(red) · vcp_breakout `#9d6644`(brown) · kojiro `#141c2b`(navy 900) · DEFAULT `#74716a`(gray). 각 `bg/text/badge` 는 위 팔레트 색 이름의 `@theme` 토큰을 가리킨다(별칭 정의도 인정).
 - **⚠️ 별칭 재정의는 서로 다른 상태가 같은 실제 hex 로 겹칠 수 있다 — 새 배지 색을 고를 때 별칭표(위)를 먼저 대조한다.** cycle261 적대 검토가 4건을 실측으로 찾아 시정했다(모두 배경 sRGB/ΔE2000 거리로 재검증): `ScanMonitor` `BOARD_META`(보드 배지, 5보드를 blue/sky/navy/beige/brown 로 재배정 — 종전 `pre_nxt`(teal)≡`krx_open`(sky), `post_nxt`(violet)≡`krx_after`(purple) 가 08:30~09:00/15:30~18:00 구간에 실제로 동시 노출) · `IntegrationToggleCard` `ToggleRow` 의 ON 상태 배지(emerald→sky, 종전 emerald≡blue 라 바로 위 `sourceBadgeClass`(db)·`BuyBlockSection` SOFT 배지와 동일 hex) · `PortfolioRiskCard` `AccountGateBlock` 의 '경고' 배지(amber→beige 이후 '정상'(gray-100)과 배경 거리 ≈10.5 로 근접 → `beige-200/800` 로 거리 ≈39 복원) · `TradeHistoryGrid` 체결상태 배지의 PARTIAL(orange→brown 이후 PENDING(beige-100)과 거리 ≈15.9 로 근접 → `brown-200/800`). 회귀 가드 = `ScanMonitor.boardColorAlias.test.tsx` / `IntegrationToggleCard.badgeAlias.test.tsx` / `badgeContrast.cycle261.test.tsx`(PortfolioRiskCard+TradeHistoryGrid 2케이스).
 - **자체 호스팅 서체 nginx 캐시 (cycle261 후속)**: `nginx.conf.template`/`nginx.tls.conf.template` 의 정적자산 정규식(`~*\.(js|css|...|woff2?)$`)에 `ttf` 가 없어 `/fonts/*.ttf` 가 SPA fallback location 으로 떨어져 `no-store`(전체 새로고침마다 Medium+Bold ≈4.9MB 재다운로드 + FOUT 반복)를 받던 결함을 `location ^~ /fonts/ { expires 30d; add_header Cache-Control "public, max-age=2592000"; default_type font/ttf; }` 로 시정(파일명에 해시가 없어 `immutable` 대신 유한 TTL). 회귀 가드 `tests/unit/ast/test_cycle261_font_cache_headers.py`(백엔드, 8케이스) + nginx:alpine 실컨테이너 실측.
 - 금액: 천 단위 콤마 / 수익률: 소수 2자리 + %
 - 환경 배너: 실전=빨강(`bg-red-600`) "실전 매매 환경" / 모의=`bg-sky-600`(가을 팔레트, 종전 `bg-green-600`) "모의투자 환경"
-- 슬라이더 accent 색은 리터럴 hex 대신 `'var(--color-navy-600)'`(Tailwind v4 `@theme` 가 `:root` 에 노출하는 CSS 변수) 를 쓴다 — `App.tsx`(폭 슬라이더) + `CashUsageRatioCard.tsx` + `TradeAmountFilterCard.tsx` + `PriceFilterCard.tsx`(최소/최대 2곳) 5곳 동일. 신규 슬라이더 추가 시도 같은 값으로 맞춘다.
+- 슬라이더 accent 색은 리터럴 hex 대신 `'var(--color-navy-600)'`(Tailwind v4 `@theme` 가 `:root` 에 노출하는 CSS 변수) 를 쓴다 — `components/NavBar.tsx`(폭 슬라이더 — cycle288 부터, 종전 `App.tsx`) + `CashUsageRatioCard.tsx` + `TradeAmountFilterCard.tsx` + `PriceFilterCard.tsx`(최소/최대 2곳) 5곳 동일. 신규 슬라이더 추가 시도 같은 값으로 맞춘다.
 - **시각 표시는 KST 강제** — `Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', ... })` 또는 `toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false })`. `new Date(iso).getHours()/getFullYear()` 등 브라우저 로컬타임 추출 금지 (도커 빌드 UTC / 다른 TZ 환경 어긋남). 적용: `TradeHistoryGrid.formatDate/formatTime` (Intl.DateTimeFormat formatToParts) / `DailyReportTab.formatDateTime` / `Recommendations.formatDateTime` / 모든 timestamp 필드. 백엔드 `_to_kst` 헬퍼와 동일 컨벤션. ⚠️ **`Recommendations.formatDateTime` 은 cycle256-G(09-06) 이전엔 `toLocaleString('ko-KR', { hour12: false })` 로 `timeZone` 자체가 없어** 표시 시각이 브라우저/컨테이너 로컬타임이었다(DailyReportTab 의 구결함보다 한 단계 더 나빴다 — 그쪽은 tz 는 있고 서식만 ICU 의존). 위임 후에는 아래 단일 진실원을 통해 KST 가 환경 무관 고정된다.
   - **cycle256 (2026-09-05) — 단일 진실원 `src/utils/kst.ts`**: `formatKstHHMM(iso)`(HH:mm, `hour12:false`) · `formatKstDateTime(iso)`(`yyyy-MM-dd HH:mm:ss`, `formatToParts` 조립) · `kstTodayISO(now?)`. 잘못된 입력은 `'—'`. **새 KST 표기는 이 유틸에 위임**한다(신규 `Intl.DateTimeFormat`/`toLocale*String` 생성 금지 — `utils/__tests__/kst.test.ts` K4 텍스트 가드가 위임 대상 `DELEGATING_FILES`(`src/` 기준 상대 경로) 로 잠근다). 위임 = `PortfolioRiskCard`(byte 동일) + `DailyReportTab`(cycle256-F, 09-05 사용자 결정 "바꾸자" — 서식 `2026-09-07 09:05:00`, 빈 값 `'-'` 유지) + `pages/Recommendations`(cycle256-G, 09-05 3부 보고서 카드 ③ 사용자 결정 "바꿔" — 동일 서식·빈 값 계약, HEAD 는 timeZone 자체가 없던 결함). 나머지 사이트는 **사이트별 출력 스냅샷 승인 후 점진 이관**. ⚠️ **타입 검사는 `npx tsc -b`** — 루트 `tsconfig.json` 이 `files: []` 솔루션 형식이라 `npx tsc --noEmit` 은 파일을 0개 검사한다(cycle256 F3 실측: `--listFiles | wc -l` → 0). `GateLevel` 유니온 등 타입 계약은 `tsc -b`(=`npm run build` 1단계)만 잰다.
 

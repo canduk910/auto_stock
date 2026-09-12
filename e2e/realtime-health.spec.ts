@@ -175,8 +175,8 @@ test.describe("L-NAV1 (LOW) — PC 메뉴 '실시간 상태' 클릭 → 라우�
   });
 });
 
-test.describe("L-MOB (LOW) — 모바일 viewport 375px 햄버거 9개 메뉴", () => {
-  test("실시간 상태 + 전략 현황 포함 9개 메뉴 drawer 표시 (사이클 81 G-M5 → 9개 갱신)", async ({ page }) => {
+test.describe("L-MOB (LOW) — 모바일 viewport 375px 햄버거 메뉴 10개 (cycle288 — 상위 7 그룹 아래 leaf 10, 드로어는 접지 않는다)", () => {
+  test("실시간 상태 + 전략 현황 포함 leaf 10개 drawer 표시 (사이클 81 G-M5 → cycle288 10개 갱신)", async ({ page }) => {
     // 사이클 81 G-M3 — 375px iPhone viewport
     await page.setViewportSize({ width: 375, height: 667 });
     await installApiMocks(page);
@@ -191,7 +191,7 @@ test.describe("L-MOB (LOW) — 모바일 viewport 375px 햄버거 9개 메뉴", 
     const drawer = page.getByTestId("mobile-menu-drawer");
     await expect(drawer).toBeVisible({ timeout: 20000 });
 
-    // 사이클 103 추가 메뉴 2개 (8번째 / 9번째) 포함 검증
+    // 사이클 103 추가 메뉴 2개 포함 검증 (cycle288 이후 leaf 10개 중 2개)
     await expect(drawer.getByText("실시간 상태")).toBeVisible({ timeout: 20000 });
     await expect(drawer.getByText("전략 현황")).toBeVisible({ timeout: 20000 });
 

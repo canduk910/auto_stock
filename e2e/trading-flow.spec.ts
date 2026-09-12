@@ -20,7 +20,7 @@ test.describe("자동매매 대시보드", () => {
     });
   });
 
-  test("네비게이션 메뉴 5개가 보인다", async ({ page }) => {
+  test("네비게이션 상위 메뉴가 보인다 (cycle288 — 상위 7개 중 이 스펙이 쓰는 것들)", async ({ page }) => {
     await installApiMocks(page);
     await page.goto("/");
     for (const label of ["대시보드", "거래 내역", "로그", "설정"]) {

@@ -5,7 +5,7 @@
  * cycle266 D-3 (2026-09-07): G-E2E-9 추가 → 9 케이스 (일봉 탭 실브라우저 커버리지).
  * 사이클 80 hotfix #2 답습: timeout 20s (카드 누적 + useQuery 다중 + lazy + Suspense fallback)
  * 사이클 80 hotfix #3 답습: Playwright LIFO 정합 (api-mocks 5 stock-master 라우트 영속)
- * 사이클 81 G-M5 답습: 모바일 햄버거 메뉴 7개 압축 검증
+ * 사이클 81 G-M5 답습: 모바일 햄버거 메뉴 압축 검증 (cycle288 이후 leaf 10개)
  * 사이클 85 답습: installApiMocks 영속 (5 stock-master 라우트 LIFO 등록)
  *
  * production 코드 변경 0 — spec 파일 신규 단일 산출물.
@@ -70,8 +70,8 @@ test.describe("G-E2E-2 (HIGH) — stats 카드 4 지표 구조 + list 빈 상태
   });
 });
 
-test.describe("G-E2E-3 (HIGH) — 모바일 viewport 375px 햄버거 메뉴 7개 압축", () => {
-  test("종목마스터 포함 7개 메뉴 drawer 표시 (사이클 81 G-M5 영속)", async ({ page }) => {
+test.describe("G-E2E-3 (HIGH) — 모바일 viewport 375px 햄버거 메뉴 압축 (cycle288 이후 leaf 10개)", () => {
+  test("종목마스터 포함 drawer 표시 (사이클 81 G-M5 영속 · cycle288 그룹화 반영)", async ({ page }) => {
     // 사이클 81 G-M3 — 375px iPhone viewport
     await page.setViewportSize({ width: 375, height: 667 });
     await installApiMocks(page);
@@ -93,7 +93,7 @@ test.describe("G-E2E-3 (HIGH) — 모바일 viewport 375px 햄버거 메뉴 7개
     const drawer = page.getByTestId("mobile-menu-drawer");
     await expect(drawer.getByText("종목마스터")).toBeVisible({ timeout: 20000 });
 
-    // 기존 6개 메뉴도 drawer 내부에 표시 검증 (사이클 65 hotfix #3 + 사이클 80 hotfix #2 timeout 영속)
+    // 기존 메뉴도 drawer 내부에 표시 검증 (사이클 65 hotfix #3 + 사이클 80 hotfix #2 timeout 영속)
     await expect(drawer.getByText("대시보드")).toBeVisible({ timeout: 20000 });
     await expect(drawer.getByText("거래 내역")).toBeVisible({ timeout: 20000 });
     await expect(drawer.getByText("설정")).toBeVisible({ timeout: 20000 });
