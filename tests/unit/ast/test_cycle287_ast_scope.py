@@ -114,11 +114,15 @@ _BASE_SHA = {
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
-    # 시각 표의 **유일 정본** — 읽기만 한다. 바꾸면 픽스처 동기 사슬
+    # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
-    # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다.
+    # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
+    # 이 파일을 건드리자 정확히 그 둘이 붉어져 생성기를 다시 돌렸다).
+    # ⚠️ 핀 값은 **cycle289**(주문유형코드 27~47 명칭 확정) 기준선이다 — cycle287 이
+    # 이 파일을 바꿨다는 뜻이 아니다. cycle287 배포분(`7dc6dae`)에서 이 파일의 sha 는
+    # `7594ccadec61aacc6a47b0ef7be46d96d9a82912235622edd790694209d0b48c` 였다.
     "src/engine/market_state.py":
-        "7594ccadec61aacc6a47b0ef7be46d96d9a82912235622edd790694209d0b48c",
+        "29c794cbc245824e0eea1271bc5e9e0d8bef21331fb6942732b68aec32202657",
     # TTL 축 — 호출부가 넘기는 **인자의 의미**만 바꾸고 이 파일은 손대지 않는다(K9-g/h).
     "src/engine/sell_rejection.py":
         "6df3a6c697019f0d0a35e4870d0fc115171d1504f11fb3e43ae16aea4883fdec",
@@ -148,8 +152,12 @@ _BASE_SHA = {
 #: 명시 dict 가 못 보는 나머지 ~120 파일의 **diff 0** 을 한 줄로 잠근다 —
 #: `routes/`·`services/`·`db/`·`middleware/`·`workers/` 가 조용히 바뀌는 것도 접촉이다.
 _SRC_TREE_FILES = 147
+#: ⚠️ 값은 **cycle289**(주문유형코드 27~47 명칭 확정 — `market_state.py`) 기준선이다.
+#: cycle287 배포분(`7dc6dae`)의 digest 는
+#: `01e200a2e2214f8cf8864b98bb0828b867688c48b8e8e39a644d31e3d8483e56` 였다.
+#: 기준선은 옮겨도 단언은 그대로다 — 다음 사이클이 `src/` 를 조용히 바꾸면 여전히 붉어진다.
 _SRC_TREE_DIGEST = (
-    "01e200a2e2214f8cf8864b98bb0828b867688c48b8e8e39a644d31e3d8483e56"
+    "aec29293fca87c48cd0429321b4b12738b530a0ac16c93fcae0d7ab6c03d7ad9"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -254,6 +262,10 @@ def test_s1_pinned_files_are_byte_identical(rel: str) -> None:
 
     한 파일이라도 바뀌면 "cycle287 은 세 파일만 바꾼다" 가 거짓이고, 별도 승인
     (8영역 승인 + `domain-consult` 선행)이 필요하다.
+
+    ⚠️ 이 가드는 **cycle287 당시의 무접촉 약속**을 기록한 것이고, 핀 값은 그 뒤 사이클이
+    같은 파일을 정당하게 바꿀 때마다 기준선으로 옮겨진다(값만 옮기고 단언은 약화시키지
+    않는다). 어느 사이클이 무엇을 바꿨는지는 `_BASE_SHA` 의 주석이 남긴다.
     """
     path = _ROOT / rel
     assert path.exists(), f"{rel} 이 사라졌다 — 무접촉 계약 위반"

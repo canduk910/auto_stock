@@ -477,27 +477,47 @@ _GROUP_NXT_GTP = "NXT GTP(27~29)"
 _GROUP_KRX_AFTER = "KRX 애프터마켓(41~47)"
 
 _NAME_UNCONFIRMED = "name_unconfirmed"
-_NOTE_NAME_UNKNOWN = "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
 _NOTE_NO_SOR = "SOR 에 없다(발견 2)."
 
+#: cycle289 (2026-09-13) — 27~29·41~47 의 개별 명칭이 **확정**됐다.
+#: 출처 = KIS Open API 공지 2026-09-09 「[중요] KRX 애프터마켓 도입 및 NXT 제도 변경에
+#: 따른 안내」(시행 2026-09-14). 공지 원문의 표기를 그대로 옮긴다 — 지어내거나 다듬지
+#: 않는다(`docs/kis/domestic-stock-order.md` 의 `ORD_DVSN` 필드 칸과 같은 값이어야 한다).
+#: 종전에는 명칭이 정본에 없어 그룹명만 표시하고 `confidence=_NAME_UNCONFIRMED` 였다 —
+#: 화면에 10개 코드가 전부 "확인필요" 로 떴다(사용자 지적 2026-09-12).
+_NOTE_NAME_CONFIRMED = "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문."
 
-def _gtp(value: str) -> OrderDivisionSpec:
-    """27~29 — 개별 명칭이 정본에 없다. 지어내지 않고 그룹명으로만 표시한다."""
+
+def _gtp(value: str, name_ko: str) -> OrderDivisionSpec:
+    """27~29 — NXT 프리마켓 전용호가 GTP(Good Till Pre-Market).
+
+    미체결잔량은 프리마켓 종료(08:50)에 일괄 취소된다 — 그 취소 규약이 GTP 의
+    정체성이라 `note` 에 남긴다(코드값만 보고는 알 수 없다).
+    """
     return OrderDivisionSpec(
-        code=value, name_ko="NXT GTP", group_ko=_GROUP_NXT_GTP,
+        code=value, name_ko=name_ko, group_ko=_GROUP_NXT_GTP,
         exchanges=_ONLY_NXT, exchanges_unknown=_UNKNOWN_SOR,
         effective_from=_REFORM_DAY, effective_to=None,
-        confidence=_NAME_UNCONFIRMED, note=_NOTE_NAME_UNKNOWN,
+        confidence=_CONFIRMED,
+        note=_NOTE_NAME_CONFIRMED + " 미체결잔량은 프리마켓 종료(08:50) 일괄 취소.",
     )
 
 
-def _krx_after(value: str) -> OrderDivisionSpec:
-    """41~47 — 같은 이유로 그룹명만."""
+def _krx_after(value: str, name_ko: str) -> OrderDivisionSpec:
+    """41~47 — KRX 애프터마켓(16:00~20:00) 전용 호가유형.
+
+    정규장과 **분리된 시장**이라 호가유형 선택이 필수이고, **시장가(01)가 없다**.
+    ETP(ETF/ETN) 거래 불가. 가격제한은 전일 KRX 정규장 종가 ±30%.
+    우리가 청산에 쓰는 것은 44(1차)·41(폴백) 둘뿐이다(cycle287) — IOC/FOK(42·43·45·46)는
+    잔량을 자동취소해 손절 잔여를 잃고, 47(최우선지정가)은 자기 방향 최우선호가라
+    크로스하지 않아 체결 보장이 없다.
+    """
     return OrderDivisionSpec(
-        code=value, name_ko="KRX 애프터마켓 주문유형", group_ko=_GROUP_KRX_AFTER,
+        code=value, name_ko=name_ko, group_ko=_GROUP_KRX_AFTER,
         exchanges=_ONLY_KRX, exchanges_unknown=_UNKNOWN_SOR,
         effective_from=_REFORM_DAY, effective_to=None,
-        confidence=_NAME_UNCONFIRMED, note=_NOTE_NAME_UNKNOWN,
+        confidence=_CONFIRMED,
+        note=_NOTE_NAME_CONFIRMED + " 애프터마켓은 시장가 불가·ETP 불가.",
     )
 
 
@@ -541,9 +561,17 @@ ORDER_DIVISIONS: tuple[OrderDivisionSpec, ...] = (
                       None, None, _CONFIRMED, ""),
     OrderDivisionSpec("24", "중간가FOK", _GROUP_MID_STOP, _KRX_NXT, _NONE_UNKNOWN,
                       None, None, _CONFIRMED, ""),
-    _gtp("27"), _gtp("28"), _gtp("29"),
-    _krx_after("41"), _krx_after("42"), _krx_after("43"), _krx_after("44"),
-    _krx_after("45"), _krx_after("46"), _krx_after("47"),
+    # 공지 원문 표기 그대로 (2026-09-09 · 시행 09-14)
+    _gtp("27", "NXT GTP지정가"),
+    _gtp("28", "NXT GTP최유리"),
+    _gtp("29", "NXT GTP최우선"),
+    _krx_after("41", "KRX애프터마켓지정가"),
+    _krx_after("42", "KRX애프터마켓지정가IOC"),
+    _krx_after("43", "KRX애프터마켓지정가FOK"),
+    _krx_after("44", "KRX애프터마켓최유리지정가"),
+    _krx_after("45", "KRX애프터마켓최유리지정가IOC"),
+    _krx_after("46", "KRX애프터마켓최유리지정가FOK"),
+    _krx_after("47", "KRX애프터마켓최우선지정가"),
 )
 
 

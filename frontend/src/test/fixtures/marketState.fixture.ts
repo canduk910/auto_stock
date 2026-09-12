@@ -915,7 +915,7 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
     },
     {
       "code": "27",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP지정가",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -924,12 +924,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "28",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP최유리",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -938,12 +938,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "29",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP최우선",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -952,12 +952,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "41",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -966,12 +966,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "42",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가IOC",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -980,12 +980,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "43",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가FOK",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -994,12 +994,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "44",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -1008,12 +1008,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "45",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가IOC",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -1022,12 +1022,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "46",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가FOK",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -1036,12 +1036,12 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "47",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최우선지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -1050,8 +1050,8 @@ export const MARKET_STATE_AT_0835: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     }
   ],
   "phases": [
@@ -1928,7 +1928,7 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
     },
     {
       "code": "27",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP지정가",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -1937,12 +1937,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "28",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP최유리",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -1951,12 +1951,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "29",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP최우선",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -1965,12 +1965,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "41",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -1979,12 +1979,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "42",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가IOC",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -1993,12 +1993,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "43",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가FOK",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2007,12 +2007,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "44",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2021,12 +2021,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "45",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가IOC",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2035,12 +2035,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "46",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가FOK",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2049,12 +2049,12 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "47",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최우선지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2063,8 +2063,8 @@ export const MARKET_STATE_AT_1305: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     }
   ],
   "phases": [
@@ -2863,7 +2863,7 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
     },
     {
       "code": "27",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP지정가",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -2872,12 +2872,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "28",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP최유리",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -2886,12 +2886,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "29",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP최우선",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -2900,12 +2900,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "41",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2914,12 +2914,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "42",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가IOC",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2928,12 +2928,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "43",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가FOK",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2942,12 +2942,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "44",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2956,12 +2956,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "45",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가IOC",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2970,12 +2970,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "46",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가FOK",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2984,12 +2984,12 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "47",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최우선지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -2998,8 +2998,8 @@ export const MARKET_STATE_AT_2030: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     }
   ],
   "phases": [
@@ -3748,7 +3748,7 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
     },
     {
       "code": "27",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP지정가",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -3757,12 +3757,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "28",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP최유리",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -3771,12 +3771,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "29",
-      "name_ko": "NXT GTP",
+      "name_ko": "NXT GTP최우선",
       "group_ko": "NXT GTP(27~29)",
       "exchange_support": {
         "KRX": "no",
@@ -3785,12 +3785,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 미체결잔량은 프리마켓 종료(08:50) 일괄 취소."
     },
     {
       "code": "41",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -3799,12 +3799,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "42",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가IOC",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -3813,12 +3813,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "43",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓지정가FOK",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -3827,12 +3827,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "44",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -3841,12 +3841,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "45",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가IOC",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -3855,12 +3855,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "46",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최유리지정가FOK",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -3869,12 +3869,12 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     },
     {
       "code": "47",
-      "name_ko": "KRX 애프터마켓 주문유형",
+      "name_ko": "KRX애프터마켓최우선지정가",
       "group_ko": "KRX 애프터마켓(41~47)",
       "exchange_support": {
         "KRX": "yes",
@@ -3883,8 +3883,8 @@ export const MARKET_STATE_PREVIEW: MarketStateData = {
       },
       "effective_from": "2026-09-14",
       "effective_to": null,
-      "confidence": "name_unconfirmed",
-      "note": "개별 명칭이 정본에 없다 — 그룹명으로만 표시한다(Q5)."
+      "confidence": "confirmed",
+      "note": "명칭 확정 — 공지 2026-09-09(시행 09-14) 원문. 애프터마켓은 시장가 불가·ETP 불가."
     }
   ],
   "phases": [
@@ -4045,10 +4045,18 @@ export const MARKET_STATE_FORBIDDEN: MarketStateForbidden = {
     "IOC시장가",
     "IOC지정가",
     "IOC최유리",
-    "KRX 애프터마켓 주문유형",
     "KRX 애프터마켓(41~47)",
-    "NXT GTP",
+    "KRX애프터마켓지정가",
+    "KRX애프터마켓지정가FOK",
+    "KRX애프터마켓지정가IOC",
+    "KRX애프터마켓최우선지정가",
+    "KRX애프터마켓최유리지정가",
+    "KRX애프터마켓최유리지정가FOK",
+    "KRX애프터마켓최유리지정가IOC",
     "NXT GTP(27~29)",
+    "NXT GTP지정가",
+    "NXT GTP최우선",
+    "NXT GTP최유리",
     "스톱지정가",
     "시간외단일가",
     "시장가",
