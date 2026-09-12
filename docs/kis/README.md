@@ -3,6 +3,7 @@
 > 원본: `한국투자증권_오픈API_전체문서_20260911_030009.xlsx`
 > 총 API: 338개 (REST 278 + WebSocket 60) · 필드 14,746개 **전수 수록**
 > 재생성 도구: 워크북 → `docs/kis/*.md` 자동 생성. 상세 명세는 손으로 고치지 않는다(목록 표의 `사용` 표시만 보존).
+> **예외 = 아래 「제도 변경 공지 반영」 절에 열거한 항목.** 워크북보다 나중에 나온 공지라 자동 생성분에 없고, 손으로 넣었다. **재생성 시 이 절을 보고 다시 넣어야 한다.**
 
 ## 카테고리별 명세 파일
 
@@ -56,6 +57,32 @@
 | CTRP6504R | 해외주식 체결기준현재잔고 | [해외주식] 주문/계좌 | `/uapi/overseas-stock/v1/trading/inquire-present-balance` |
 | TTTS3007R | 해외주식 매수가능금액조회 | [해외주식] 주문/계좌 | `/uapi/overseas-stock/v1/trading/inquire-psamount` |
 | TTTS3018R | 해외주식 미체결내역 | [해외주식] 주문/계좌 | `/uapi/overseas-stock/v1/trading/inquire-nccs` |
+
+## 제도 변경 공지 반영 (워크북 이후 · 손으로 넣은 항목)
+
+원본 워크북(`20260911`)에는 없고 KIS 공지에만 있는 내용이다. **`docs/kis/*.md` 를 재생성하면 사라지므로
+아래 표를 보고 다시 넣는다.** 공지 원문의 요약이 아니라 원문 값을 그대로 옮긴 것이다.
+
+### 공지 ① 2026-09-09 「[중요] KRX 애프터마켓 도입 및 NXT 제도 변경에 따른 안내」 — 시행 2026-09-14(월)
+
+출처: <https://apiportal.koreainvestment.com/community/10000000-0000-0011-0000-000000000001/post/26dfe350-eb72-48e5-8175-34eb27970f3e>
+
+| 반영 파일 | 반영 위치 | 넣은 내용 |
+|---|---|---|
+| [domestic-stock-order.md](domestic-stock-order.md) | 주식주문(현금) · 주식주문(신용) · 주식주문(정정취소) 의 `ORD_DVSN` | KRX 애프터마켓 `41`~`47` 7종 + NXT 프리마켓 GTP `27`~`29` 3종. 애프터마켓은 정규장과 분리된 시장이라 호가유형 선택 필수 · **ETP 거래 불가** · **시장가 없음**. `07`(시간외 단일가)은 폐지로 무효 |
+| [domestic-stock-order.md](domestic-stock-order.md) | 주식잔고조회 · 주식잔고조회_실현손익 의 `AFHR_FLPR_YN` | 값 의미 변경 — `N` KRX정규장종가 / `X` NXT / `Y` KRX+NXT 통합시세 |
+| [domestic-stock-realtime.md](domestic-stock-realtime.md) | 실시간체결가 KRX(`H0STCNT0`) · 통합(`H0UNCNT0`) · NXT(`H0NXCNT0`) · 실시간호가 KRX(`H0STASP0`) | output `MARKET_CLS_CODE`(장 구분 코드) 신규 — `1`프리 `2`정규 `3`애프터 `5`종가 |
+| [domestic-stock-realtime.md](domestic-stock-realtime.md) | 실시간호가 통합(`H0UNASP0`) | output `ANTC_EXCH_CLS_CODE`(예상체결 거래소구분) 신규 — `1`KRX `2`NXT |
+| [domestic-stock-realtime.md](domestic-stock-realtime.md) | 시간외 실시간체결가(`H0STOUP0`) · 시간외 실시간호가(`H0STOAA0`) · 시간외 실시간예상체결(`H0STOAC0`) | 🔴 시간외단일가 폐지로 **대상 시장이 사라진다**는 주의문. 애프터마켓은 이 채널이 아니라 정규 채널로 온다 |
+| [domestic-stock-realtime.md](domestic-stock-realtime.md) | 장운영정보 NXT(`H0NXMKO0`) | NXT 단일가 도입(정지 후 재개, 호가접수 30초) · VI 발동 시 단일가매매(2분) + 정적 VI 신규 · 프리마켓 GTP(08:50 일괄취소) |
+
+**아직 공지에 없어 실측이 필요한 것** (2026-09-14 첫 장에서 확인)
+
+| 미확인 항목 | 왜 중요한가 |
+|---|---|
+| `MARKET_CLS_CODE` · `ANTC_EXCH_CLS_CODE` 의 **payload 안 위치(index)** | 공지는 "추가됩니다" 만 밝혔다. 우리 핸들러는 파이프 구분 payload 를 **위치로** 파싱하므로, 중간에 끼면 뒤 필드가 전부 밀린다 |
+| 시간외 전용 채널 3종이 실제로 폐지되는지 | 구독이 계속 ACK 되는지 · 프레임이 오는지 |
+| 애프터마켓 주문 거부 시 `msg1` 원문 | 우리 폴백 분기(`is_market_order_disallowed` vs `is_market_closed_rejection`)가 어느 쪽으로 떨어지는지가 여기서 갈린다 |
 
 ## 도메인 정보
 

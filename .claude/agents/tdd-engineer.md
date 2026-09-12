@@ -114,5 +114,5 @@ KIS API 응답을 회귀 테스트로 합성할 때는 **KIS MCP** (`mcp__kis-co
   `insane-search` 는 그 계열을 위한 스킬이다.
 - **예외**: KIS API 스펙은 밖으로 나가기 전에 **`docs/kis/*.md` 와 `kis-mcp-query` 스킬을 먼저** 본다
   (로컬 정본이 2026-09-11 워크북 전수 수록본이다). 그래도 없을 때 외부로 나간다.
-- **09-14 제도 변경은 `docs/market-changes-2026-09-14.md` 가 정본이다** — `docs/kis/*.md` 는 2026-09-11 스냅샷(변경 전)이라 시간외 단일가·`H0STOUP0` 가 살아 있는 것으로 적혀 있다. 그 메모를 먼저 본다
+- **09-14 제도 변경의 정본은 둘로 나뉘어 있다** — 제도·시간표·보드 영향은 `src/engine/CLAUDE.md` 의 `session.py` 절, TR·필드 변경(`ORD_DVSN` 41~47·27~29 · `MARKET_CLS_CODE` · `AFHR_FLPR_YN`)은 `docs/kis/README.md` 「제도 변경 공지 반영」 절과 각 필드 자리다. 우리가 할 일·실측 목록은 `_workspace/00_URGENT_WORKLIST.md`. ⚠️ `docs/kis/*.md` 본문은 2026-09-11 워크북 스냅샷이라 손으로 넣은 그 항목들 말고는 **변경 전** 세계다
 - 단순 웹 검색으로 충분하면 `WebSearch` 를 쓴다 — `insane-search` 는 막힌 곳을 뚫는 도구다.

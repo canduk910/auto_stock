@@ -378,7 +378,7 @@ _BASE_SHA = {
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "f999183c7b92b29e0a9fc1222161e4c6c978a7baaef6603173ead48e65944b99",
+        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — 주문 API
@@ -402,7 +402,7 @@ _BASE_SHA = {
         "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/scheduler.py":
-        "e083419ca01dda278ea93b9943b1682b2ea253419dd696109003df2fdb06dff3",
+        "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 전략 7파일
@@ -439,7 +439,7 @@ def test_h3_eight_areas_untouched(rel):
     assert path.exists(), f"{rel} 이 사라졌다 — 무접촉 계약 위반"
     got = _content_sha(rel)
     assert got == _BASE_SHA[rel], (
-        f"{rel} 이 base(34f662f) 에서 바뀌었다 — {got} != {_BASE_SHA[rel]}. "
+        f"{rel} 이 base(main 병합 시점 = cycle283 배포분 fc82697) 에서 바뀌었다 — {got} != {_BASE_SHA[rel]}. "
         "cycle282 는 8영역 무접촉이다(M8). 의도된 변경이라면 별도 승인 대상이다"
     )
 
