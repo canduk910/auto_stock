@@ -8,6 +8,65 @@
 > 원문은 `_workspace/reports/2026-09-07_weekday_verification.md` ·
 > `_workspace/reports/2026-09-07_evening_four_defects.md`.
 
+## 📋 2026-09-14(월) 판독 계획 — 한 장으로 모은 것 (2026-09-13 작성)
+
+> 09-12~13 주말에 5개 사이클이 배포됐고 각자 D+1 서명을 남겼다. 월요일 아침에 이 절 하나만
+> 보면 되도록 시각순으로 합쳤다. **원문 근거는 각 행의 사이클 번호** — `docs/HARNESS_CHANGELOG.md`
+> 와 커밋 메시지가 정본이다.
+>
+> 🔴 **그날은 새 제도 첫날이다.** KRX 애프터마켓(16:00~20:00)이 처음 열리고, cycle283 이
+> 옮긴 저녁 블록(20:00 자문 · 20:05 metrics · 20:30 일봉 · 21:30 정산)이 처음 돈다.
+> 둘이 같은 날 겹치므로 **이상이 보이면 어느 축인지부터 가른다.**
+
+### 주말에 배포된 것 (전부 CI·Deploy 성공 + 운영 실측 확인)
+
+| 커밋 | 사이클 | 무엇 | 월요일 행위 변화 |
+|---|---|---|---|
+| `a42f519` | **286** | LTV `main` 매수 15:20 컷 + NXT 거부 귀속 좁힘 | 있다(예방) |
+| `4d08b94` | **288** | 메뉴 2단 + 폭 슬라이더 깜박임 | 화면만 |
+| `7dc6dae` | **287** | 시각이 거래소·호가코드를 정한다 + 애프터 청산 개통 | **있다 — 09:00부터** |
+| `42413cf` | **289** | 주문유형코드 27~47 명칭 확정 | 화면만 |
+| `d1df9bf` | **287b** | SOR 폐기 표시 + 장운영 각주 정직화 | 화면·어휘만 |
+
+### 시각순 판독표
+
+| 시각 | 무엇을 본다 | 성공 서명 | 실패 서명 |
+|---|---|---|---|
+| 07:45 | 부팅 | `[daily_head_stale]` **미발화**(발화하면 주말 재적재가 헛됐다) | 발화 시 그날 헤드가 하루 밀린 채 종일 간다 |
+| 07:45 | 전략 설정 | VB·LTV `enabled` 유지 | 재시작이 `_targets` 를 지운다 |
+| 08:00~08:50 | 프리장 라우팅 | `[order_channel]` **미발화**(프리장은 base 유지 = routed==base) · 매도 시 `[sell_market_preconvert_pre_nxt]` 정상 | `reason=krx_by_clock` 이 이 구간에 뜨면 프리장 clause 가 깨졌다 |
+| 09:00~15:30 | **정규장 라우팅(287 핵심)** | `[order_channel] ... base=SOR exchange=KRX reason=krx_by_clock` 주문 종목별 1행 | `reason=probe_error` **1건이라도** = 그날 라우팅 미적용 · `[order_channel_config]` 0행 = 카나리아 침묵 |
+| 09:0x~09:4x | `nxt_downgrade` 프로브 생존 | `[nxt_downgrade]` 평소(≈0.77건/일) 수준 발화 | 0건이면 프로브가 죽었다(라우팅이 그 앞을 가로챘는지 확인) |
+| 15:20 | **LTV 매수 컷(286)** | `[ltv_main_buy_cutoff]` 발화 시 would_buy 기록 1행 | — (전 기간 0건이라 미발화가 정상) |
+| 15:20~15:30 | 강제청산 | `_force_clear_main_only` 정상 · 그 뒤 신규 매수 0 | 15:21 이후 LTV 매수가 있으면 컷 실패 |
+| 15:30~16:00 | **휴식 구간** | 주문 0건이 정상 | `[order_channel] reason=krx_by_clock` 이 뜨면 규약 위반(이 구간은 base 유지다) |
+| **16:00~20:00** | **KRX 애프터 첫날(287 핵심)** | 청산 발생 시 `[after_exit_division] div=44 unpr=0` → 성공 | `div=41`(폴백 발화) · `[after_exit_rejected]` · `[after_exit_giveup] fails=5`(CRITICAL) |
+| 16:00~20:00 | 애프터 거부 원문 | — | `[after_exit_rejected] ... msg1=` 이 **미지 해소의 유일한 기회**다. 원문을 그대로 기록해 둘 것 |
+| 16:00~20:00 | 체결 슬리피지 | `slip_bp = (체결가 − cur) / cur × 10000`, `cur` 은 `[after_exit_division]` 의 필드. **1틱(20~21bp) 이내면 44 정상** | 5틱(38~110bp)에 가까우면 최유리가 지정가처럼 쓸려 내려간 것 — 재조사 |
+| 16:00~20:00 | 거부 오염 차단(286) | `[nxt_post_reinforce] ... wrote=0 reason=exchange+window` | `wrote=1` 이 16:xx 에 뜨면 C4-a 실패 |
+| 20:00 | 기동 거부 경계 | `'장 종료 후 시작 시도 — 거부됨'` **0행** | 90행 가까우면 `run_daily` 가 옛 상수를 본다 |
+| 20:05 | metrics 1차 스냅샷 | `[daily_metrics_snapshot] ... saved=1` 정확히 1행 | `saved=0` = 저장 실패(pass=1 만으로는 성공을 못 읽는다) |
+| 20:30 | 일봉 적재 | `[stock_master_daily_load_summary]` ≤20:33 · `skipped_fresh ≈ 0` | `skipped_fresh` 가 크면 부분 봉을 건너뛴 것 |
+| 21:30 | 정산 | `'금일 매매 종료'` 1행(21:31~21:35) · `daily_performance` 오늘 행 | — |
+| 21:30 | 일일 리포트 | `daily_log_reports` 09-14 행이 **정확히 1개** · `created_at≈20:05` · `summary`·`model` 채워짐 · `ext_provider` 생존 | 행이 둘이거나 `ext_*` 가 비면 upsert SET 절 확인 |
+
+### 09-15(화) 아침에 재는 것
+
+| # | 무엇 | 왜 |
+|---|---|---|
+| 1 | `SELECT max(bas_dd) FROM stock_master_daily;` = **2026-09-14** | 09-11 이면 월요일 저녁 적재 결손 |
+| 2 | 09-14 봉의 `stck_hgpr`/`stck_lwpr` vs 09-14 15:30 KRX 정규장 고가/저가(6종목) | **애프터 체결이 일봉 H/L 에 반영되는가** — 참이면 영향이 거래량 3전략에서 **가격 축 5전략**으로 넓어진다 |
+| 3 | KIS 일봉 확정 시각 — 한 종목을 20:05/20:20/20:40/21:00 재조회해 `acml_vol` 이 언제 멈추는지 | cycle283 의 커트오프 20:00 가 **아직 미실측 가설**이다 |
+| 4 | 체결 프레임 원문 덤프 → `MARKET_CLS_CODE` 의 **payload 인덱스** | 우리 핸들러는 위치로 파싱한다. 중간 삽입이면 `_parse_day_high` 가 예외도 로그도 없이 0 을 준다 |
+| 5 | 시간외 전용 3채널(`H0STOUP0`·`H0STOAA0`·`H0STOAC0`) 구독 ACK·프레임 | 폐지 여부가 공지에 없다 |
+
+### 3세대 합산 금지 (지표 의미가 바뀐 것)
+
+- `[nxt_post_reinforce]` — cycle286 전후로 `wrote=` 의 의미가 다르다
+- `[order_channel]` — cycle287 신설. 그 전에는 없다
+- `exchange` 파라미터 — cycle287 부터 **프리장에서만** 실효(09:00 이후는 시각이 정한다)
+- `market_state` 의 `confidence` — cycle289 가 10개 코드를 `unconfirmed` → `confirmed` 로 옮겼다
+
 ## 🔴 2026-09-14(월) 시장 제도 변경 — 우리 시스템 접점과 실측 목록
 
 > **사실의 집은 이 문서가 아니다.** 제도·시간표·보드 영향 = [`src/engine/CLAUDE.md`](../src/engine/CLAUDE.md) 의
