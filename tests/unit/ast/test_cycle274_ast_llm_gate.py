@@ -549,6 +549,10 @@ def test_c17_4_leaf_does_not_import_eight_area_modules() -> None:
 # (커밋 39db6c0·2c1f190·a60f43e·dad24bc, 병합 133d6bc)이 바꾼 것이지 cycle274 가 아니다 —
 # `git diff 4ca3463 aa31761 -- <path>` 를 눈으로 확인한 뒤 병합 결과(=aa31761 의 내용)로 재핀했다.
 # ===========================================================================
+# 🔁 2026-09-11 (cycle283) 재핀 — 저녁 창 재설계가 `scanner.py`(8영역, 사용자 승인)와
+#    `scheduler.py`(라인 상한 승인 대상)를 바꿨다. 이 사이클의 변경이 아니라 **다른
+#    사이클의 승인된 변경**이므로 값만 현재 워킹트리로 재산출한다(cycle274→cycle276
+#    승계 때와 같은 절차). 나머지 핀은 불변이다.
 _BASE_SHA = {
     "src/engine/risk.py": "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
     # 🔁 cycle276 — 사용자 명시 승인 하에 이 사이클이 바꾸는 **유일한** 8영역 파일이다
@@ -557,12 +561,12 @@ _BASE_SHA = {
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "f999183c7b92b29e0a9fc1222161e4c6c978a7baaef6603173ead48e65944b99",
+        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
         "ccd430b445358062a41b6b37f8e4d379b9a97c24090ab5133aa83ae829207115",
-    "src/engine/scheduler.py": "e083419ca01dda278ea93b9943b1682b2ea253419dd696109003df2fdb06dff3",
+    "src/engine/scheduler.py": "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     "src/auth/token.py":
@@ -619,7 +623,7 @@ def test_c15_2_realtime_and_auth_have_no_new_python_files() -> None:
 def test_c16_1_scheduler_line_count_unchanged() -> None:
     """C16 — `scheduler.py` 는 이 사이클에서 **무접촉**이라 3,897L 그대로다."""
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3872, f"scheduler.py {lines}L (기대 3,872 — cycle274 는 무접촉; 병합 133d6bc 뒤 재핀)"
+    assert lines == 3897, f"scheduler.py {lines}L (기대 3,897 — cycle274 는 무접촉; cycle283 저녁 창 재설계 뒤 재핀)"
 
 
 def test_c16_2_scheduler_line_cap_is_not_looser_than_cycle257() -> None:

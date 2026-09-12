@@ -2057,11 +2057,21 @@ _DAILY_LOAD_VCP_BACKFILL_DAYS = 120
 _DAILY_LOAD_MIN_MCAP_EOK = 500  # 억원 (raw.hts_avls 는 억원 단위, 사이클 166/108)
 _DAILY_LOAD_MIN_TRADE_WON = 1_000_000_000  # 10억원 (kojiro 500억/10억 정합, raw.acml_tr_pbmn 원 단위)
 
-# 사이클 263 — 오늘봉(확정 전 잠정봉) 커트오프. KRX 마감 15:30 + 마감 동시호가 흡수 10분.
+# 사이클 263 → cycle283 (2026-09-11, 사용자 결정 D1) — 오늘봉(확정 전 잠정봉) 커트오프.
+# 근거 = **그날 거래가 끝나는 시각**이다. 2026-09-14 부터 KRX 애프터마켓(16:00~20:00
+# 실시간 체결)이 신설되고 시간외 단일가(16:00~18:00)가 폐지돼 거래가 20:00 에 끝난다.
+# 종전 15:40(= 마감 동시호가 흡수 마진)은 **그 뒤의 모든 적재 실행**(정기·재기동
+# immediate·`force=True`)이 부분 거래량 봉을 확정봉으로 받아들이게 했다 — 09-11(금)
+# 사고의 직접 원인(16:14 재기동이 1,005종목 부분봉 저장 → 18:10 정기가 908종목 skip;
+# 40종목 대조 중앙값 +0.51%, 최대 +13.97%). 일봉 OHLC 는 15:30 에 확정되지만
+# 거래량·거래대금은 시간외 거래 동안 계속 증가한다(6종목 전수 실측).
+# ⚠️ "KIS 일봉이 20:00 직후 확정되는가" 는 아직 **미실측 가설**이다
+# (`docs/market-changes-2026-09-14.md` §2/§4-1). 어긋나면 이 상수와 scheduler 의 일봉
+# 적재 시각을 함께 뒤로 민다 — 부등식 `커트오프 ≤ 적재 < 정산` 만 지키면 상수 2개 조정이다.
 # scanner **전용** 상수다 — 값이 같아 보여도 scheduler 의 매매/보드 시각 상수를 재사용하지
 # 않는다: 매수 보드 시각 변경이 적재 규약을 딸려 바꾸는 커플링을 끊는다(tradable_boards ↔
 # 청산 규약 커플링을 끊어 둔 기존 원칙과 같은 이유).
-_DAILY_LOAD_TODAY_BAR_CUTOFF = _dtime(15, 40)
+_DAILY_LOAD_TODAY_BAR_CUTOFF = _dtime(20, 0)
 
 # 사이클 273 D5 — 보유/익일청산 강제 포함 관측 마커 (실행당 1행, 사이클 237 교훈 — 종목당 emit 금지)
 _DAILY_LOAD_PROTECTED_FORCED_MARKER = "[daily_load_protected_forced]"
@@ -2070,18 +2080,18 @@ _DAILY_LOAD_PROTECTED_FORCED_MARKER = "[daily_load_protected_forced]"
 def _drop_today_bars(
     candles: list[dict], *, now_kst: datetime, today: date
 ) -> list[dict]:
-    """확정 전 오늘봉을 걸러낸다 (사이클 263, 순수 함수 — 입력 리스트 비파괴).
+    """확정 전 오늘봉을 걸러낸다 (사이클 263 · 커트오프 cycle283, 순수 함수 — 입력 비파괴).
 
-    규칙 (`now_kst` 는 호출부가 **루프 밖에서 1회** 계산한다 — 15:39 에 시작해 15:42 에
+    규칙 (`now_kst` 는 호출부가 **루프 밖에서 1회** 계산한다 — 19:59 에 시작해 20:02 에
     끝나는 실행이 종목마다 다른 기준을 쓰면 안 된다):
-    - `now_kst` < 15:40 → `bas_dd >= today` 폐기 (장 전 껍데기 봉 · 장중 부분봉)
-    - `now_kst` >= 15:40 → `bas_dd > today` 만 폐기 (시계 왜곡 방어)
+    - `now_kst` < 20:00 → `bas_dd >= today` 폐기 (장 전 껍데기 봉 · 장중/시간외 부분봉)
+    - `now_kst` >= 20:00 → `bas_dd > today` 만 폐기 (시계 왜곡 방어)
     - `bas_dd` 파싱 불가/부재 → **보존** (fail-open — 판정 실패가 곧 데이터 유실이 되면 안 된다)
 
     ⚠️ 판정 기준은 **시각 단독**이다. "거래량 0 ∧ OHLC 평탄"(데이터 기준)으로 바꾸지 말 것.
     반증 2건 — (1) 장중 재시작이 만드는 부분봉은 거래량>0·비평탄이라 데이터 기준을 확정봉인
     척 통과한다(껍데기보다 나쁘다: 평탄하지 않아 눈에 안 띈다) (2) 거래정지 종목의 *진짜*
-    평탄 확정봉(하루 1~8건)을 16:00 에 죽여 그 날짜 행을 영영 못 갖게 한다. 시각 기준은 둘
+    평탄 확정봉(하루 1~8건)을 저녁 적재에서 죽여 그 날짜 행을 영영 못 갖게 한다. 시각 기준은 둘
     다 자동 처리하고 진짜 무거래봉을 정의상 100% 보존한다.
     """
     today_ymd = today.strftime("%Y%m%d")
@@ -2382,8 +2392,12 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             )
 
     # 사이클 263 — 오늘봉 필터 관측: **실행당 1행**. 종목당 emit 은 하루 1,000행 폭주다
-    # (사이클 237 donchian 청산 로그 폭주 시정의 교훈). ⚠️ 이 시정으로 16:00 실행의
-    # `skipped_fresh` 가 ~1,000 → ~0 으로 **의미가 반전**한다 — 배포 전후 로그 합산 금지.
+    # (사이클 237 donchian 청산 로그 폭주 시정의 교훈).
+    # ⚠️ 이 마커의 의미는 **3세대** 다 — 원본 / cycle263 / cycle283. 세대 간 합산 금지:
+    #   · cycle263 — 16:00 실행의 `skipped_fresh` 가 ~1,000 → ~0 으로 반전
+    #   · cycle283 — 커트오프 15:40 → 20:00 이라 **15:40~20:00 구간 실행의 `mode` 가
+    #     keep → drop 으로 뒤집힌다**. `dropped_rows`·`tickers_affected` 도 같은 이유로
+    #     세대 간 합산 불가다.
     logger.info(
         "[daily_load_today_bar_filter] mode=%s cutoff=%s now=%s today=%s "
         "dropped_rows=%d tickers_affected=%d filter_errors=%d",

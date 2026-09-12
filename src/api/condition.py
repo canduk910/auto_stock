@@ -145,7 +145,7 @@ _cache_epoch: int = 0
 def clear_caches() -> None:
     """일일 정산 reset 등 외부 트리거에서 호출 — 캐시 비우기 + epoch bump.
 
-    `scheduler._reset_daily_state()` 가 매일 20:10 정산 후 호출해 야간 누적 방지.
+    `scheduler._reset_daily_state()` 가 매일 21:30 정산 후(cycle283 D3, 종전 20:10) 호출해 야간 누적 방지.
 
     PR-C2 (2026-05-14): `_cache_epoch` 를 증가시켜 진행 중 inflight fetch 가
     완료 시점에 캐시 write 를 skip 하도록 강제 (fetch 결과는 정상 반환). inflight

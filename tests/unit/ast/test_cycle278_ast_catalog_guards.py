@@ -186,6 +186,9 @@ def test_seven_strategy_default_params_source_sha_unchanged(strategy_id: str):
 # ===========================================================================
 # C31 — 8영역 · scheduler · strategy_base · 전략 7파일 내용 sha 불변
 # ===========================================================================
+# 🔁 2026-09-11 (cycle283) 재핀 — `scanner.py`(8영역, 사용자 승인)·`scheduler.py`(라인 상한
+#    승인 대상) 2건. cycle278 이 그 파일들을 건드린 것이 아니라 **다른 사이클의 승인된
+#    변경**이므로 값만 현재 워킹트리로 재산출했다. 나머지 핀은 불변이다.
 _BASE_SHA = {
     "src/engine/risk.py":
         "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
@@ -193,7 +196,7 @@ _BASE_SHA = {
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "f999183c7b92b29e0a9fc1222161e4c6c978a7baaef6603173ead48e65944b99",
+        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
@@ -209,7 +212,7 @@ _BASE_SHA = {
     "src/realtime/websocket_pool.py":
         "bd1108dd40da4e72eab10581485b1b032e58af7c06754a9118fc7fafc20c8de7",
     "src/engine/scheduler.py":
-        "e083419ca01dda278ea93b9943b1682b2ea253419dd696109003df2fdb06dff3",
+        "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     "src/engine/strategies/momentum.py":

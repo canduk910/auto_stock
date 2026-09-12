@@ -130,7 +130,7 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - **검증 결과**: 2026-05-15 로컬 헬스체크 통과 — 실제 서버에 `tools/list` 응답 정상, 백테스트 도구 노출 확인. Phase 2 진입 게이트 통과
 - **사후 보호 의무 (Phase 2+ 에 인계)**:
   - 백테스트 결과를 자동매매 파라미터에 **자동 반영 절대 금지** — 운영자가 Settings 에서 명시 적용(`apply_weight` J4 패턴 차용) 만 허용
-  - 백테스트 task 가 settlement 20:10 와 race 가능 — fire-and-forget 별도 task + 자체 폴링. settlement 의 `_reset_daily_state()` 에서 task cancel 의무
+  - 백테스트 task 가 settlement(21:30 — cycle283 D3, 종전 20:10)와 race 가능 — fire-and-forget 별도 task + 자체 폴링. settlement 의 `_reset_daily_state()` 에서 task cancel 의무
 
 #### Phase 2 (2026-05-15) — BacktestEngine + 6 전략 YAML DSL + 마이그 019
 - **`BacktestEngine`** (`src/engine/backtest_engine.py`): submit(`run_for_strategy`) → poll(`poll(job_id)` / `wait_for_result`) 분리. 응답 unwrap 헬퍼로 `{success, data}` 또는 직접 dict 모두 지원. 모듈 레벨 싱글톤 `get_backtest_engine()`
@@ -159,7 +159,7 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - **DB 영속화** — `supabase/migrations/020_parameter_recommendations_backtest.sql`: `parameter_recommendations.backtest_summary JSONB` nullable
 - **race 안전성**:
   - 자문 INSERT 와 backtest enqueue 는 `try/except` 분리 — enqueue 예외 시 자문 INSERT 보존
-  - settlement 20:10 시점에 폴 task 미완료여도 자문 row 영속 (자문은 20:00 동기 완료)
+  - settlement(21:30) 시점에 폴 task 미완료여도 자문 row 영속 (자문은 20:00 동기 완료)
   - settlement `_reset_daily_state()` 의 task cancel 책임 (현재 구현 확인 필요 — Phase 5b 모니터링)
 - **회귀 가드**:
   - `tests/integration/test_recommendation_backtest_flow.py` 2 케이스 — full flow / settlement race
@@ -1010,9 +1010,11 @@ DEFAULT_PARAMS = {
 | 16:30 | KIS 종목 마스터 파일 적재 (`master_raw`) |
 | 16:40 | 재무 5 TR 주1회 적재 (`stock_master_financial`) |
 | 19:50 | NXT 애프터 신규 매수 중단 (`buy_disabled = True`. 자문은 20:00 으로 이동, Phase 0/2026-05-15) |
-| 20:00 | NXT 애프터 종료(WebSocket 구독 해제) + 전략수정 AI자문 생성(OpenAI → `parameter_recommendations`). 동기 순차 실행 — 자문 ~3분, settlement 20:10 까지 7분 여유 |
+| 20:00 | NXT 애프터 종료(WebSocket 구독 해제) + 전략수정 AI자문 생성(OpenAI → `parameter_recommendations`). 동기 순차 실행 — 자문 ~3분. **cycle283 D4 — 같은 20:00 이 기동 거부 경계(`TIME_SESSION_START_CUTOFF`)** 다 |
 | 20:00:05 | 전체 유니버스 적재 (`_full_universe_load`, AI자문 직후 5초 마진) |
-| 20:10 | 전략별 + 합산 일일 정산, daily_performance 기록, 일일 로그 분석 리포트 생성(OpenAI → `daily_log_reports`), 프로세스 Sleep |
+| 20:05 | **cycle283 D5** — metrics 1차 스냅샷(`daily_metrics_snapshot`, OpenAI 미호출). `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용이라 정산이 21:30 으로 밀린 만큼(90분) 유실 노출이 커진다 — 5분으로 줄인다 |
+| 20:30 | **cycle283 D2** — KIS 일봉 일괄 적재(종전 16:00 → 18:10 → 20:30). 09-14 KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤. 전략 진입 판정이 읽는 전일봉 거래량의 품질을 결정한다 |
+| 21:30 | **cycle283 D3**(종전 20:10) — 전략별 + 합산 일일 정산, daily_performance 기록, 일일 로그 분석 리포트 생성(OpenAI → `daily_log_reports`, 완전판이 20:05 1차 행을 덮어쓴다), 프로세스 Sleep |
 
 ### 야간 매매(POST_NXT 15:30~20:00) 운용 원칙 — Q3=A 활성
 - 사용자 부재 시간대 사고 위험 인지 — Settings 상단 amber 경고 배너 노출
@@ -1034,7 +1036,7 @@ DEFAULT_PARAMS = {
 ### 전략별 잔고/실적 관리
 - trade_history: strategy 컬럼으로 전략별 거래내역 분리
 - daily_performance: (date, strategy) 복합PK로 전략별 + 합산 실적 기록
-- 정산 시각 변경 영향: total_asset 계산 시점이 16:10 → 20:10로 이동, 종가가 NXT 20:00 마지막 체결가가 됨
+- 정산 시각 변경 영향: total_asset 계산 시점이 16:10 → 20:10 → **21:30**(cycle283 D3)로 이동, 종가가 애프터마켓 20:00 마지막 체결가가 됨
 
 ### 시간 상수 (`src/engine/scheduler.py`)
 | 상수 | 값 | 의미 |
@@ -1050,7 +1052,7 @@ DEFAULT_PARAMS = {
 | `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감 (종가 흡수 마진 시작, `_force_clear_main_only` 가드 기준) |
 | `TIME_POST_NXT_OPEN_PRESUBSCRIBE` | 15:39:10 | NXT 채널 사전 subscribe 시작 (사이클 26) |
 | `TIME_POST_NXT_OPEN` | 15:40 | NXT 애프터 진입 (사이클 26: 15:30 → 15:40) |
-| `TIME_STOCK_MASTER_DAILY_LOAD` | 16:00 | KIS 일봉 일괄 적재 (사이클 122) |
+| `TIME_STOCK_MASTER_DAILY_LOAD` | 20:30 | KIS 일봉 일괄 적재 (사이클 122 → cycle273f 18:10 → **cycle283 D2** 20:30 — 애프터마켓 종료 후) |
 | `TIME_STOCK_MASTER_BASICS_REFRESH` | 16:10 | KIS CTPF1002R 매스 보강 (사이클 126) |
 | `TIME_STOCK_MASTER_DAILY_PURGE` | 16:15 | `stock_master_daily` retention purge (사이클 150) |
 | `TIME_EVENING_FUNNEL_CAPTURE` | 16:20 | 저녁 잠정 funnel 캡처 (사이클 171) |
@@ -1060,7 +1062,9 @@ DEFAULT_PARAMS = {
 | `TIME_NXT_POST_CLOSE` | 20:00 | NXT 애프터 종료, unsubscribe |
 | `TIME_RECOMMENDATION` | 20:00 | AI자문 생성 (Phase 0, 2026-05-15: 19:50 → 20:00 이동, 백테스트 검증 정합성) |
 | `TIME_FULL_UNIVERSE_LOAD` | 20:00:05 | 전체 유니버스 적재 (사이클 101 — AI자문 직후 5초 마진) |
-| `TIME_SETTLEMENT` | 20:10 | 정산 + 일일 로그 분석 |
+| `TIME_SESSION_START_CUTOFF` | 20:00 | **cycle283 D4** — `scheduler.start()` 기동 거부 경계. 종전에는 `TIME_SETTLEMENT` 이 겸했으나 정산이 21:30 으로 밀리면서 분리했다(겸하면 20:00~21:30 재기동이 AI 자문·`auto_apply_recommendations` 를 재실행한다). `run_daily` 의 일자 전환 판정도 같은 상수를 쓴다. ⚠️ 그 창의 재기동은 그날 20:30 일봉 적재를 잃는다 |
+| `TIME_METRICS_SNAPSHOT` | 20:05 | **cycle283 D5** — metrics 1차 스냅샷 (OpenAI 미호출, `reset_request_metrics()` 미호출) |
+| `TIME_SETTLEMENT` | 21:30 | **cycle283 D3**(종전 20:10) — 정산 + 일일 로그 분석. 일봉 적재(20:30) 뒤여야 한다. 주기 task 수명 상한이기도 하다 |
 | `NEXT_DAY_STABILIZE_SECS` | 30 | 익일 청산 NXT 프리 시가 안정화 |
 | `SESSION_TICK_INTERVAL` | 30 | SessionTracker 보드 전환 감시 주기 |
 
@@ -2728,7 +2732,7 @@ SELECT * FROM system_logs WHERE message LIKE '[quote_session_health_db_fail]%' O
 - **전략별 하드손절%** = 손절 후보 7키(`stop_loss_rate`/`intraday_stop_loss`/`overnight_stop_loss`/`stop_loss_main`/`stop_loss_pre_nxt`/`turtle_backstop_pct`/`hard_stop_pct`) 중 음수만 → `min` (최대 계획 손실, `_normalize_stop_loss_rate` 선례 확장). 결측 시 **−7.0 fail-open** (0.0 금지)
 - **섹터 분류 정본** = `src/engine/sector_naming.py::resolve_sector_name(s)` 단일 진실원 (2026-08-04 추출 — portfolio 라우트 / 일일리포트 / 잔고 3 소비처 공유, 이식 금지). 우선순위 ① basics raw `bstp_kor_isnm`(사람이 읽는 업종 한글명) → ② `kojiro._kojiro_sector_key(master_raw)`(KRX 산업지수 플래그, `stock_master.get_master_raw(ticker)` 소스 = kojiro 섹터 캡과 동일·함수 무변경) → ③ `미분류-{ticker}` 독립 취급 (fail-open, kojiro 동일). 따라서 `by_sector` 키는 대부분 업종 한글명이고 KRX 플래그 키는 ①이 빈 종목에만 나타난다 (Phase 2a 는 ②의 소스를 basics `get().raw` → `get_master_raw` 로 승격한 사이클)
 - **집계** = 총 명목/총 오픈리스크/순자산 대비%/동시보유 수/전략별·섹터별 분해/top 섹터
-- 노출 경로 = `GET /api/portfolio/risk` (pull) + 20:10 일일 리포트 metrics `portfolio_risk_snapshot` + `[portfolio_risk]` 구조화 로그 1행 (정산 경로 한정)
+- 노출 경로 = `GET /api/portfolio/risk` (pull) + 21:30 일일 리포트 metrics `portfolio_risk_snapshot` + `[portfolio_risk]` 구조화 로그 1행 (정산 경로 한정)
 
 ### 금기 (Phase 1)
 - 이 지표로 매수 차단/수량 축소/포지션 배제 금지 — Phase 2 (2주 관찰 게이트) 별도 사이클

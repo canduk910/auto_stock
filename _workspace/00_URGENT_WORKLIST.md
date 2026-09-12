@@ -364,6 +364,39 @@ KRX 개장가가 나온다.** 채널 리졸버 제안(P1-7 B)을 뒷받침하는
   완료** — 배포는 main 병합 후. D+1(09-11 금) 판독 = `[kojiro_gap_observe] caller=on_tick`
   0행 + `caller=_swing_buy_poll_loop` ≥6행(양성 대조 짝) + kojiro 청산 마커 불변.
 
+## 🟠 cycle283 열린 후속 (등재만 — 이번 사이클 범위 밖, 승인 필요)
+
+배경 = 저녁 창 재설계(커트오프 20:00 · 적재 20:30 · 정산 21:30 · 기동 거부 20:00). 상세는
+`docs/HARNESS_CHANGELOG.md` cycle283 행.
+
+1. **(HIGH, 적대 검증 R1) 20:00~21:30 재기동으로 잃은 저녁 블록의 자동 복구** — 그 창의
+   `start()` 는 거부되므로 그날 **20:30 일봉 적재 · `_settle()`(daily_performance) · 일일 로그
+   분석 · 로그 retention** 이 한꺼번에 사라진다. 일봉 결손은 다음 아침 07:59 immediate 가
+   보정하지만 **07:55 prepare 보다 4분 늦어** 그날 헤드가 하루 밀린 채 종일 고정된다
+   (VB/LTV 목표가 · donchian `prior_high`). DB 신선도 게이트는 이걸 못 잡는다 —
+   `stock_master_daily.py` 의 `DAILY_STALENESS_DAYS = 4` 라 D-2 헤드(차이 2일)는 KIS 폴백을
+   발동시키지 않는다. 이번 사이클의 완화는 **관측 1행**(`[daily_head_stale]`)뿐이다.
+   - 완전 시정(= boot 가 적재를 await)은 07:55~07:59 에 KIS 전량 호출 ~121초를 끼워 넣는 것이라
+     **별도 사이클 · 별도 승인**. 착수 전 D8 배포 창(21:35~07:45) 준수로 발생 빈도를 0 으로 둔다.
+   - 즉시 확인 = 09-15(화) 08:00 `SELECT max(bas_dd) FROM stock_master_daily;` 가 `2026-09-14`
+     인가. `2026-09-11` 이면 R1 이 실현된 것이다.
+2. **(운영 조치, 코드 아님 — 주말에 1회)** 09-11(금) 16:14~16:16 저장된 **1,005종목 부분 거래량
+   봉**이 09-14(월) 07:55 prepare 입력으로 그대로 쓰인다. **주말에 `POST /api/stock-master/daily/refresh`
+   1회**로 해결된다(주말엔 오늘 날짜 봉이 없어 `_drop_today_bars` 무접촉, 멱등 skip 없음, 이 라우트는
+   `run_periodic_task_loop` 를 안 타 신선도 마커 무접촉 — 부작용 0 · ~121초). ⚠️ **평일 20:00
+   이전에 실행하면 오늘 봉이 커트오프에 걸려 빠진다**(`force=True` 로도 못 넘는다).
+3. **(MEDIUM, 프론트) `POST /api/log-reports/run` 의 `force` 가 UI 에 없다** — 21:30 이후 완성
+   리포트가 있는 날 대시보드 "분석 실행" 버튼은 거부 메시지만 낸다(크래시 없음). `force` 는
+   `api_metrics`/`strategy_funnel` 을 0 으로 덮는 **파괴적** 조작이라 비중 변경과 같은 이중확인
+   모달이 필요하고, `frontend/src/api/log_reports.ts` · `handlers.ts` · `e2e/fixtures/api-mocks.ts`
+   동행이 따른다. 백엔드만 바뀐 이번 사이클 범위 밖 — 별도 프론트 사이클.
+4. **(LOW, D+1 실측으로 판정)** 20:00 `unsubscribe_all()` 이후 WS 세션 유지 창이 10분 → **90분**
+   (`disconnect()` 는 정산 뒤). 추적 밖 보조 세션 구독이 남아 있으면 그 구간 stray tick 이
+   `risk.on_tick` 을 거쳐 장외 매도 시도를 만든다(APBK0918 로 거부되고 `_reset_daily_state` 가
+   해제하므로 **다음 날 상태는 불변** — 위험은 무의미 호출이지 포지션 오염이 아니다).
+   09-14(월) 20:00~21:30 에 `[stale_watcher]`·SUBSCRIBE SEND 가 **0** 인지 확인. 0 이 아니면
+   `unsubscribe_all` 보강을 별도 사이클로(`realtime/**` = 8영역, 승인 필요).
+
 ## 🔵 결정 대기 — 사용자 답 필요 (재개 시 순서대로)
 
 1. **cycle265(시가 오염 근본 시정 — VB·LTV 목표가 기준을 KRX 조회값으로 교체) 시기·방향 리포트**

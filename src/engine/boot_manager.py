@@ -38,6 +38,90 @@ logger = logging.getLogger(__name__)
 BOOT_PREPARE_STOCK_MASTER_WAIT_SECS = 300
 BOOT_PREPARE_STOCK_MASTER_POLL_SECS = 10
 
+#: `[daily_head_stale]` 관측 전용 KST (cycle283 — 달력일 판정 금지, 주말 갭 오탐 차단)
+_HEAD_STALE_KST = timezone(timedelta(hours=9))
+
+#: 직전 영업일 역산 상한 (일). 한국 최장 연휴 + 주말도 10일 안에 들어온다.
+#: 상한에 닿으면 그 시점 후보를 그대로 쓴다 — 무한 루프 대신 현행(주말만 건너뛰기) 근사.
+_HEAD_STALE_MAX_BACKTRACK_DAYS = 10
+
+
+async def _previous_trading_day(today):
+    """`today` 직전 **영업일**을 돌려준다 (주말 + KIS 휴장일 역산).
+
+    주말만 건너뛰면 **공휴일 다음 영업일 아침마다 오탐**한다(연 10~15회). 그리고
+    그 오탐은 진짜 결손(전날 저녁 적재 유실)과 출력이 **글자 하나 다르지 않다** —
+    월요일이 공휴일이면 화요일 아침의 `head=금 / expected=월` 이 두 경우 모두에서
+    같은 값이 되기 때문이다. 달력일 간격(`today - head`)으로도 구분되지 않는다
+    (둘 다 4일). 휴장일 달력이 유일한 판별 수단이라 KIS `chk-holiday` 를 쓴다.
+
+    비용: 정상일에는 호출 **1회**(첫 후보가 영업일이면 즉시 반환). 월요일 아침은
+    주말을 호출 없이 건너뛰므로 역시 1회. 부팅 경로(07:55)라 매매 예산 영향 0.
+
+    fail-open: `is_market_open` 은 조회 실패 시 스스로 `True`(영업일 가정)를 돌려주고,
+    그마저 예외가 되면 여기서 현행 근사(주말만 건너뛴 후보)로 떨어진다 — 관측 하나가
+    부팅 경로를 흔들면 안 된다.
+    """
+    from src.api.condition import is_market_open
+
+    expected = today - timedelta(days=1)
+    for _ in range(_HEAD_STALE_MAX_BACKTRACK_DAYS):
+        if expected.weekday() >= 5:  # 5=토, 6=일 — 달력일 기준이면 매주 월요일 오탐
+            expected -= timedelta(days=1)
+            continue
+        try:
+            opened = await is_market_open(expected)
+        except Exception:
+            logger.debug("[daily_head_stale] 휴장일 조회 실패 — 주말 근사로 폴백", exc_info=True)
+            return expected
+        if opened:
+            return expected
+        expected -= timedelta(days=1)
+    return expected
+
+
+async def emit_daily_head_staleness() -> None:
+    """일봉 헤드가 직전 영업일보다 오래됐으면 `[daily_head_stale]` WARNING 1행 (cycle283).
+
+    **관측 전용 — 행위 변경 0.** 적재를 부르지 않는다(07:55~07:59 에 KIS 전량 호출을
+    끼워 넣는 것은 별도 사이클·별도 승인 대상이다).
+
+    왜 필요한가 (자문 R1): cycle283 D4 가 기동 거부 경계를 20:00 로 두면서 **20:00~21:30
+    재기동은 그날 20:30 일봉 적재를 통째로 잃는다**(`start()` 가 거부되면 그날
+    `_stock_master_daily_load_task` 자체가 생성되지 않는다). 보정 자체는 이미 존재한다 —
+    다음 영업일 07:59 immediate 가 마커 20h 초과로 실행돼 7일 증분으로 D-1 을 덮는다.
+    없는 것은 보정이 아니라 **순서**다: 그 보정이 `prepare()`(07:55)보다 4분 늦다.
+    그 사이 prepare 가 읽는 헤드는 하루 밀려 있고, 재prepare 는 `_scanned_tickers` 가
+    공집합일 때만 시도되므로 "하루 밀린" 상태는 재시도 대상이 아니다 ⇒ VB/LTV 목표가
+    (`K×(prev_high − prev_low)`)와 donchian 신고가(`max(highs[1:21])`)가 **종일** 밀린
+    값으로 돈다. 사람이 07:56 에 알면 09:00 전에
+    `POST /api/stock-master/daily/refresh` + `POST /api/trading/restart` 로 복구할 수 있다.
+
+    무음 조건(오탐 차단): 헤드 == 직전 영업일(정상) · 주말 갭(월요일 아침의 금요일 헤드) ·
+    **공휴일 갭**(연휴 다음 영업일 아침 — `_previous_trading_day` 가 KIS 휴장일로 역산) ·
+    빈 테이블(`None`, 최초 부팅/초기화는 `[stock_master_daily_load_*]` 계열이 말한다) ·
+    조회 실패(never-raise — 관측이 매매를 끊으면 안 된다).
+    """
+    try:
+        from src.db import stock_master_daily
+
+        head = await stock_master_daily.max_bas_dd(None)
+        if head is None:
+            return
+        today = datetime.now(_HEAD_STALE_KST).date()
+        expected = await _previous_trading_day(today)
+        if head >= expected:
+            return
+        logger.warning(
+            "[daily_head_stale] max_bas_dd=%s expected=%s — 저녁 일봉 적재가 결손됐다. "
+            "09:00 전에 POST /api/stock-master/daily/refresh 후 재기동을 검토하라",
+            head.isoformat(), expected.isoformat(),
+        )
+    except Exception:
+        logger.debug("[daily_head_stale] 관측 실패 graceful", exc_info=True)
+
+
+
 
 async def boot(scheduler: "TradingScheduler") -> None:
     """시스템 기동: 토큰 갱신, 잔고 동기화 + 포지션 복구.
@@ -117,6 +201,11 @@ async def boot(scheduler: "TradingScheduler") -> None:
             "[boot_prepare_wait_timeout] stock_master 0건 — %ds 대기 후 prepare 진행 (graceful)",
             BOOT_PREPARE_STOCK_MASTER_WAIT_SECS,
         )
+
+    # cycle283 — prepare **앞** 관측 1행 `[daily_head_stale]` (행위 0, never-raise).
+    # 20:00~21:30 재기동으로 그날 저녁 적재를 잃으면 이 prepare 가 하루 밀린 전일봉을
+    # 읽고 그 상태가 종일 고정된다. 관측이 prepare 뒤면 이미 굳은 뒤라 소용이 없다.
+    await emit_daily_head_staleness()
 
     # 전략별 prepare 호출
     for strategy in scheduler.registry.enabled():

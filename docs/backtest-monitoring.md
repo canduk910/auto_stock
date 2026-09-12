@@ -162,7 +162,7 @@ where created_at::date = current_date
 ```
 
 `last_poll_log` 가 20:30 이후 갱신 없으면:
-- `_backtest_poll_loop_running` set 에 target_date 잔류 가능성 — settlement 20:10 의 `_reset_daily_state()` 가 task cancel + set discard 처리 (현재 구현 확인)
+- `_backtest_poll_loop_running` set 에 target_date 잔류 가능성 — settlement 21:30(cycle283 D3, 종전 20:10)의 `_reset_daily_state()` 가 task cancel + set discard 처리 (현재 구현 확인)
 - 다음 영업일 09:00 부터 `_boot()` 재발화 안 됨 (자문은 20:00 만 발화)
 - 수동 회복: `select id, mcp_job_id from backtest_runs where status='running' and target_date=current_date;` 으로 job_id 추출 후 `curl -X POST $MCP/.../get_backtest_result_tool` 수동 호출 가능 (운영자 작업)
 
@@ -315,7 +315,7 @@ max_drawdown=16.1  win_rate=33.0  profit_factor=1.18  total_trades=6
 
 - **백테스트 결과는 자동매매 파라미터에 자동 반영 절대 금지** — 운영자 명시 적용만 허용
 - **백테스트 task 는 fire-and-forget** — `_enqueue_backtest_jobs` 가 자문 INSERT 보존 후 별도 task 발화
-- **settlement 20:10 race 무관** — 자문 INSERT 는 20:00 직후 동기 완료. 폴 task 미완료여도 자문은 영속
+- **settlement(21:30) race 무관** — 자문 INSERT 는 20:00 직후 동기 완료. 폴 task 미완료여도 자문은 영속
 - **외부 서버 다운/타임아웃 graceful degrade** — `backtest_summary=null` 로 자연 처리, 운영 영향 0
 - **`KIS_MCP_ENABLED=false` 환경** — (a) (b) 12 row 모두 즉시 skipped. UI 는 (b) 폴백 라벨로 노출
 
@@ -324,7 +324,7 @@ max_drawdown=16.1  win_rate=33.0  profit_factor=1.18  total_trades=6
 | 시나리오 | 가드 위치 |
 |---------|---------|
 | 20:00 정상 흐름 → backtest_summary 동봉 | `tests/integration/test_recommendation_backtest_flow.py::test_full_flow_20_00_recommendation_backtest` |
-| settlement 20:10 race — 자문 INSERT 보존 | `test_recommendation_backtest_flow.py::test_settlement_race_preserves_recommendation_insert` |
+| settlement(21:30) race — 자문 INSERT 보존 | `test_recommendation_backtest_flow.py::test_settlement_race_preserves_recommendation_insert` |
 | `KIS_MCP_ENABLED=false` 모든 row skipped | `tests/integration/test_backtest_disabled_and_graceful.py::test_kis_mcp_disabled_marks_all_runs_skipped` |
 | 외부 서버 다운 — (a) failed / 자문 보존 | `test_backtest_disabled_and_graceful.py::test_external_server_down_marks_runs_failed_recommendation_preserved` |
 | 폴 timeout 24h — 미완료 row failed | `test_backtest_disabled_and_graceful.py::test_backtest_poll_timeout_marks_running_rows_failed` |

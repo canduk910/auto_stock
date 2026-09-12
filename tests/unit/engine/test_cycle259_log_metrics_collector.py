@@ -85,10 +85,15 @@ MOVED_FUNCTIONS = (
 #: collector 소유가 되는 3 (재export 계약).
 REEXPORTED = ("collect_daily_log_metrics", "DAILY_LOG_FETCH_LIMIT", "HIGH_SEVERITY_FETCH_CAP")
 
-#: `routes/log_reports.py:13` 리터럴 — 이 줄이 바뀌면 카드 ⑦ 의 "routes 무접촉" 전제가 깨진다.
-LOG_REPORTS_IMPORT_LINE = (
-    "from src.engine.log_analysis_engine import _validate_report, "
-    "collect_daily_log_metrics, generate_daily_log_report"
+#: `routes/log_reports.py` 가 **`log_analysis_engine` 에서** 가져가야 하는 이름들.
+#: 카드 ⑦ "routes 무접촉" 의 실질은 '한 줄의 글자' 가 아니라 **가져가는 출처**다 —
+#: cycle283 이 같은 모듈에서 `OPENAI_EMPTY_RESPONSE_SUMMARY` 를 하나 더 가져가며
+#: 줄바꿈이 생겼고(재실행 가드가 실패 placeholder 를 상수 하나로 공유해야 한다),
+#: 리터럴 핀은 그 정당한 변경까지 붉혔다. 그래서 **AST 로 출처와 이름 집합**을 잰다.
+LOG_REPORTS_REQUIRED_IMPORTS = (
+    "_validate_report",
+    "collect_daily_log_metrics",
+    "generate_daily_log_report",
 )
 
 #: `collect_daily_log_metrics` 반환 키 **순서** (cycle249 C-1 과 동일 리터럴).
@@ -180,12 +185,28 @@ def test_l2_reexported_symbols_are_the_same_objects():
         "log_analysis_engine.py", "`_validate_report` 는 LLM 계층 잔류가 계약"
 
 
-def test_l2_log_reports_route_import_line_is_unchanged():
+def test_l2_log_reports_route_imports_from_the_reexport_module():
+    """카드 ⑦ — 라우트는 **`log_analysis_engine` 에서만** 가져간다(collector 직접 import 금지).
+
+    종전에는 import 문 한 줄을 리터럴로 핀했다. 그 형태는 같은 모듈에서 이름을 하나 더
+    가져가는 정당한 변경(cycle283 의 `OPENAI_EMPTY_RESPONSE_SUMMARY` — 재실행 가드가
+    OpenAI 실패 placeholder 를 **단일 출처**로 읽어야 한다)까지 붉혔다. 계약의 본질은
+    글자가 아니라 **출처**이므로 AST 로 잰다: 필요한 세 이름이 전부
+    `src.engine.log_analysis_engine` 에서 바인딩되고, collector 직접 import 는 0건.
+    """
     body = LOG_REPORTS_ROUTE.read_text(encoding="utf-8")
-    assert LOG_REPORTS_IMPORT_LINE in body, (
-        "`src/routes/log_reports.py` 의 import 문이 바뀌었다 — 카드 ⑦ 의 금기다"
-        f"\n기대 리터럴: {LOG_REPORTS_IMPORT_LINE}"
-    )
+    tree = ast.parse(body)
+    bound: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            for alias in node.names:
+                bound[alias.asname or alias.name] = node.module
+
+    for name in LOG_REPORTS_REQUIRED_IMPORTS:
+        assert bound.get(name) == LAE_MOD, (
+            f"`{name}` 이 `{LAE_MOD}` 에서 오지 않는다 (실측 {bound.get(name)!r}) — "
+            "카드 ⑦ 의 재export 계약이 깨졌다"
+        )
     assert COLLECTOR_MOD not in body, (
         "라우트가 collector 를 직접 import 한다 — 재export 계약(라우트 무접촉)이 목적이다"
     )

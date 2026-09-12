@@ -337,11 +337,25 @@ TradingScheduler (scheduler.py)
        │
 20:00  NXT 애프터 종료, unsubscribe_all() ──→ WebSocket 구독 해제
        │                                       (TIME_NXT_POST_CLOSE)
+       │  ※ 같은 20:00 이 기동 거부 경계   (TIME_SESSION_START_CUTOFF, cycle283 D4)
+       │    — 이 시각 이후 `start()` 는 거부된다. 20:00~21:30 재기동은 그날 20:30
+       │      일봉 적재를 통째로 잃는다(다음 영업일 아침 immediate 가 보정하지만
+       │      07:55 prepare 보다 늦다 → `[daily_head_stale]` WARNING)
        │
-20:10  _settle()                              (TIME_SETTLEMENT)
+20:05  run_daily_metrics_snapshot()           (TIME_METRICS_SNAPSHOT, cycle283 D5)
+       │  ├─ collect_daily_log_metrics() ─────→ DB system_logs / trade_history
+       │  └─ insert_log_report(model=None) → DB daily_log_reports (1차, OpenAI 미호출)
+       │     ※ api_metrics·strategy_funnel 은 프로세스 메모리 전용 — 유실 노출 90분 → 5분
+       │
+20:30  _stock_master_daily_load_once()        (TIME_STOCK_MASTER_DAILY_LOAD, cycle283 D2)
+       │  └─ KIS FHKST03010100 ──────────────→ DB stock_master_daily (~121초)
+       │     ※ 09-14 KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤
+       │
+21:30  _settle()                              (TIME_SETTLEMENT, cycle283 D3)
        │  ├─ get_balance() ─────────────────────────────────→ GET inquire-balance
        │  ├─ upsert_daily_performance() → DB (전략별 + total)
-       │  ├─ generate_daily_log_report() → DB daily_log_reports (OpenAI)
+       │  ├─ generate_daily_log_report() → DB daily_log_reports (OpenAI, 완전판이
+       │  │                                  20:05 1차 행을 upsert 로 덮어쓴다)
        │  └─ disconnect() ─────→ WebSocket 종료
        │
        └── 익일 07:45까지 대기 (주말 자동 건너뜀)
@@ -600,7 +614,7 @@ on_tick(ticker, current_price)
 | 테이블 | 마이그레이션 | 용도 |
 |--------|-------------|------|
 | `parameter_recommendations` | 007 (+020/021/028) | 20:00 AI 자문 — `(target_date, strategy_id)` UNIQUE + `recommended_weight/code_review_notes/applied_weight/weight_reasoning/backtest_summary JSONB`. status: pending/applied/applied_auto/partial/rejected/expired |
-| `daily_log_reports` | 013 (+031) | 20:10 일일 로그 분석 — `(target_date)` UNIQUE + summary/findings/metrics JSONB + input_tokens/output_tokens/total_tokens/latency_ms/cost_estimate_usd 5 컬럼 (사이클 31) |
+| `daily_log_reports` | 013 (+031) | 일일 로그 분석 (cycle283: 20:05 1차 스냅샷 + 21:30 완전판이 `ON CONFLICT (target_date) DO UPDATE` 로 같은 행) — `(target_date)` UNIQUE + summary/findings/metrics JSONB + input_tokens/output_tokens/total_tokens/latency_ms/cost_estimate_usd 5 컬럼 (사이클 31) |
 | `system_logs` 인덱스 | 014 | log_level + timestamp 복합 인덱스 (조회 가속) |
 | `backtest_runs` | 019 | 외부 MCP 백테스트 영속화 — `(target_date, strategy_id, params_kind)` UNIQUE. status: queued/running/completed/failed/skipped |
 | `market_regime_snapshots` | 022 | dkstock.cloud 매크로 일일 스냅샷 — `_boot()` 시점 1행 + `buy_blocked/computed_cash_usage_ratio/raw_response JSONB` |
@@ -914,7 +928,7 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 |------|------|------|
 | 0 | 현재 — 컨테이너 2개(backend / frontend) | 가동 중 |
 | 1 | AI 매수평가(LLM)를 `llm_worker` 로 분리 | **진행 중** (cycle279 — 워커 컨테이너 신설) |
-| 2 | 20:00 자문 · 20:10 로그 분석 · 외부 백테스트 분리 (퍼널은 가를 수 없다 → 15.3) | 계획 (착수 미정) |
+| 2 | 20:00 자문 · 21:30 로그 분석 · 외부 백테스트 분리 (퍼널은 가를 수 없다 → 15.3) | 계획 (착수 미정) |
 | 3 | 시세 감시 ↔ 전략 판정 ↔ 주문 완전 분리 | **보류** (착수하지 않는다) |
 
 > 1단계가 "진행 중"인 근거는 **사용자 결정(2026-09-11 — "1단계만 진행")** 이다. 사이클 번호
@@ -930,7 +944,7 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
   |  SPA + BasicAuth |          |  strategies(7) -> risk -> order_engine    |     KIS WebSocket
   +------------------+          |  llm_buy_gate (AI 매수평가 — VB·LTV 만)   |<--> (시세 · 체결통보)
                                 |  recommendation_engine  (20:00 자문)      |
-                                |  log_analysis_engine    (20:10 분석)      |     KIS REST
+                                |  log_analysis_engine    (21:30 분석)      |     KIS REST
                                 |  api/base.py  _semaphore = Semaphore(20)  |<--> (주문 · 잔고 · 일봉)
                                 +---------------------+---------------------+
                                                       | asyncpg (db/pg.py)
@@ -1024,7 +1038,7 @@ VB·LTV 두 전략의 매수 주문 직후에 LLM 이 점수를 매겨 **기록�
 
 ### 15.3 2단계 — 관측·분석 분리 (계획 · 착수 미정)
 
-20:00 AI 자문, 20:10 일일 로그 분석, 외부 백테스트 연동을 워커 쪽으로 옮긴다.
+20:00 AI 자문, 21:30 일일 로그 분석, 외부 백테스트 연동을 워커 쪽으로 옮긴다.
 
 ```
   +---------------------------------------------+
@@ -1047,18 +1061,18 @@ VB·LTV 두 전략의 매수 주문 직후에 LLM 이 점수를 매겨 **기록�
   +---------------------------------------------+
   |  llm_worker  (2단계에서 분석 작업 추가)     |
   |   20:00 AI 자문     recommendation_engine   |
-  |   20:10 로그 분석   log_analysis_engine     |
+  |   21:30 로그 분석   log_analysis_engine     |
   |   외부 백테스트 MCP                         |
   +---------------------------------------------+
 ```
 
-- **얻는 것** — 리포트 로직을 장중에 고칠 수 있다. 20:10 정산 시각에 무거운 분석이
+- **얻는 것** — 리포트 로직을 장중에 고칠 수 있다. 21:30 정산 시각에 무거운 분석이
   엔진 이벤트 루프를 점유하지 않는다.
 - **위험 — 균일하지 않다. 셋으로 갈린다.**
 
 | 대상 | 위험 | 이유 |
 |------|------|------|
-| 20:10 로그 분석 · 외부 백테스트 | 낮음 | live registry 를 읽지 않는다. DB 를 읽어 DB 에 쓴다 |
+| 21:30 로그 분석 · 외부 백테스트 | 낮음 | live registry 를 읽지 않는다. DB 를 읽어 DB 에 쓴다 |
 | 20:00 AI 자문 | **중간 — 매매 행위가 바뀐다** | `recommendation_engine.py:404-406`·`:581-582` 가 `trading_scheduler.registry` 를 잡아 **살아 있는 전략 객체**를 읽고, auto_apply 는 `:626 strategy.config.weight = new_weight` · `:657 strategy.config.params[k] = v` 로 그 객체를 **직접 변이**한다. 이 in-memory 쓰기가 파라미터 즉시 반영의 유일한 경로다(루트 `CLAUDE.md` — `strategy_config` SQL UPDATE 는 다음 재시작에서만 반영). 워커로 옮기면 DB 쓰기만 남아 감액·보수적 파라미터가 **다음 재시작까지 실매매에 반영되지 않는다** |
 | 퍼널 스냅샷 | 가를 수 없다 | 데이터 원천이 DB 가 아니라 **엔진 프로세스의 메모리**다. `capture_funnel_snapshots(registry, …)`(`scheduler.py:186`)가 registry 를 순회해 각 전략의 `_funnel_steps` 를 읽고(`:236`, 접근 실패 로그 `:238`), 호출자는 `_scan_loop` 안의 `:2424` 다. 워커 프로세스엔 그 객체가 없다 |
 

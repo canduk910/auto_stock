@@ -8,7 +8,7 @@ OpenAI 호출·응답 검증·비용 계산과 `daily_log_reports` INSERT 만 �
 `routes/log_reports.py:13` 의 `from src.engine.log_analysis_engine import ...` 는 이
 재export 덕에 무변경이다.
 
-매일 정산(20:10) 직후 호출되어 당일 system_logs + trade_history를 집계하고
+매일 정산(21:30, cycle283) 직후 호출되어 당일 system_logs + trade_history를 집계하고
 OpenAI에 개선 리포트 생성을 요청한 뒤 daily_log_reports에 저장한다.
 
 생성 결과 스키마:
@@ -55,9 +55,18 @@ __all__ = [
     "collect_daily_log_metrics",
     # LLM 계층 공개 API
     "generate_daily_log_report",
+    "OPENAI_EMPTY_RESPONSE_SUMMARY",
 ]
 
 logger = logging.getLogger(__name__)
+
+#: OpenAI 가 타임아웃·빈 응답으로 끝난 날 `summary` 에 들어가는 **실패 placeholder**.
+#: 모듈 상수인 이유: `POST /api/log-reports/run` 의 재실행 가드가 "완성본" 과 "실패한
+#: 날의 행" 을 구별하려면 **같은 문자열 하나**를 봐야 한다. 리터럴을 두 벌로 두면
+#: 그 판정이 조용히 어긋나 OpenAI 실패일의 수동 복구가 막힌다(이 라우트의 존재 이유).
+OPENAI_EMPTY_RESPONSE_SUMMARY = (
+    "AI 분석 응답을 받지 못했거나 빈 결과입니다 — 입력 메트릭만 보존합니다."
+)
 
 # 사이클 58 V-2 (2026-06-04) — OpenAI 모델별 토큰 단가 (USD per 1K tokens)
 # (input_per_1k, output_per_1k)
@@ -221,7 +230,7 @@ async def _call_openai(
 async def generate_daily_log_report(
     _now_kst: datetime | None = None,
 ) -> dict | None:
-    """매일 정산(16:10) 직후 호출.
+    """매일 정산(21:30, cycle283 D3) 직후 호출.
 
     당일 KST 00:00 ~ now 사이의 system_logs + trade_history를 집계해
     OpenAI에 분석 요청 → daily_log_reports INSERT.
@@ -267,9 +276,10 @@ async def generate_daily_log_report(
 
     summary, findings = _validate_report(raw)
     if not summary and not findings:
-        summary = "AI 분석 응답을 받지 못했거나 빈 결과입니다 — 입력 메트릭만 보존합니다."
+        summary = OPENAI_EMPTY_RESPONSE_SUMMARY
 
-    # 3. INSERT (UNIQUE 충돌 시 None — 재실행 안전)
+    # 3. upsert (cycle283 D6 — `ON CONFLICT (target_date) DO UPDATE`, base 9컬럼만).
+    #    20:05 1차 스냅샷 행을 이 완전판이 덮어쓰고, 20:20 클라우드 루틴의 `ext_*` 는 보존된다.
     # 사이클 58 V-2: OpenAI 메타(tokens/latency/cost) 함께 저장
     row = await insert_log_report(
         target_date=target_date,
@@ -287,6 +297,15 @@ async def generate_daily_log_report(
         logger.info(
             "로그 분석 리포트 저장 완료 — %s, findings %d건",
             target_date, len(findings),
+        )
+    else:
+        # cycle283 — upsert 이후 이 분기는 **정상 경로에서 도달 불가**하다.
+        # 살아 있는 이유는 하나: `ON CONFLICT` 타깃이 어긋났을 때 울리는 유일한 종이다.
+        # (종전에는 else 가 없어 그날 `metrics` JSONB 유실이 아무 소리 없이 지나갔다.)
+        logger.warning(
+            "[daily_log_report_not_saved] target_date=%s — 저장 결과가 비었다. "
+            "insert_log_report 의 ON CONFLICT 타깃(target_date)을 확인하라",
+            target_date,
         )
     # 리포트 INSERT 후 api 메트릭 리셋 — 다음 영업일 누적 시작
     reset_request_metrics()

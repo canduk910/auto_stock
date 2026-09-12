@@ -82,7 +82,11 @@ async def full_universe_load_task_loop(scheduler: Any, *, wait_time) -> None:
 
 
 async def stock_master_daily_load_task_loop(scheduler: Any, *, wait_time) -> None:
-    """사이클 122/134 — 매일 18:10 KST(cycle273f, 종전 16시 정각) KIS 일봉 적재 task facade."""
+    """사이클 122/134 — 매일 저녁 고정 시각(cycle283, 종전 16시 정각 → cycle273f) KIS 일봉 적재 task facade.
+
+    시각 정본은 `scheduler.TIME_STOCK_MASTER_DAILY_LOAD` 하나다 — 이 facade 는 값을
+    주입받기만 한다(리터럴·주석 모두 정본 이원화 금지).
+    """
     from src.engine.scanner import _stock_master_daily_load_once
     from src.engine.stock_master_daily_metrics import (
         record_stock_master_daily_load,
@@ -93,7 +97,7 @@ async def stock_master_daily_load_task_loop(scheduler: Any, *, wait_time) -> Non
     await run_periodic_task_loop(
         scheduler=scheduler,
         task_label="stock_master_daily_load",
-        wait_time=wait_time,  # 18:10 KST (cycle273f, 종전 16시 정각)
+        wait_time=wait_time,  # 정본 = scheduler.TIME_STOCK_MASTER_DAILY_LOAD
         once_callable=_stock_master_daily_load_once,
         record_fn=record_stock_master_daily_load,
         flush_fn=flush_stock_master_daily_load_collector,
@@ -109,9 +113,9 @@ async def stock_master_daily_load_task_loop(scheduler: Any, *, wait_time) -> Non
         initial_delay_secs=240,
         # 사이클 263 신선도 게이트 투입 — 사이클 193 이 daily_load 만 게이트를 뺀 근거였던
         # "max_bas_dd 멱등" 이 실제로는 깨져 있었다: 아침 immediate(07:56)가 장 전 KIS 로부터
-        # 오늘 날짜 껍데기 봉을 받아 먼저 써서 max_bas_dd == today 를 만들고, 그날 18:10 정기
+        # 오늘 날짜 껍데기 봉을 받아 먼저 써서 max_bas_dd == today 를 만들고, 그날 저녁 정기
         # 실행을 전 종목 skip 시킨다(09-03/09-04 실측). 게이트는 그 껍데기 생성 주체를 없애
-        # 사이클 193 의 전제를 되살린다. 마커는 once() 성공 시에만 갱신되므로 18:10 실패·
+        # 사이클 193 의 전제를 되살린다. 마커는 once() 성공 시에만 갱신되므로 저녁 실패·
         # 프로세스 다운이면 다음 아침 immediate 가 자동 부활한다(사이클 106 안전망 보존).
         immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS,
     )
