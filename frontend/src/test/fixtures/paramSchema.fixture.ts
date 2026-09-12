@@ -2334,9 +2334,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         },
         {
           "value": "SOR",
-          "label_ko": "SOR (최선주문집행)",
-          "deprecated": false,
-          "help": "모의투자(VTS) 환경에서는 KIS 가 거부한다"
+          "label_ko": "SOR (폐기 — 주문에 쓰이지 않음)",
+          "deprecated": true,
+          "help": "cycle287(2026-09-12)부터 시각이 거래소를 정한다 — 정규장·애프터는 KRX, 프리장만 이 값을 본다. 저장돼 있어도 09:00 이후 주문에는 반영되지 않는다. 새로 선택하지 말 것. 모의투자(VTS)에서는 KIS 가 거부한다"
         }
       ],
       "applies_to": [
@@ -2348,7 +2348,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "vcp_breakout",
         "kojiro"
       ],
-      "help": "주문 전송 시 KIS 에 넘기는 거래소 코드. 모의투자(VTS) 환경에서 NXT/SOR 는 거부된다. 종목이 NXT 비대상이면 코드가 KRX 로 자동 다운그레이드한다."
+      "help": "주문 전송 시 KIS 에 넘기는 거래소 코드. ⚠️ cycle287(2026-09-12)부터 이 값이 실제로 쓰이는 구간은 **프리장(08:00~09:00)뿐**이다 — 09:00~15:30 정규장과 16:00~20:00 애프터마켓은 시각이 KRX 를 강제한다 (`order_engine._route_exchange_by_clock`, 킬스위치 `order_exchange_clock_mode`). SOR 은 폐기됐다(사용자 결정). 모의투자(VTS) 환경에서 NXT/SOR 는 거부된다. 종목이 NXT 비대상이면 코드가 KRX 로 자동 다운그레이드한다."
     },
     {
       "key": "entry_start",

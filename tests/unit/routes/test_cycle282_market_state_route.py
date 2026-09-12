@@ -508,7 +508,11 @@ def test_g16_constants_come_from_leaf(client):
     leaf = _leaf()
     data = _data(client)
     assert data["findings"] == list(leaf.FINDINGS), "findings 가 leaf 와 다르다"
-    assert len(data["findings"]) == 2
+    # 개수 핀 — 위 등식이 "라우트가 leaf 를 그대로 비춘다" 를 이미 보장하므로, 이 줄의
+    # 역할은 **leaf 가 조용히 findings 를 잃는 것**을 잡는 것이다. 늘거나 줄면 의도한
+    # 변경인지 확인한 뒤 이 수를 함께 옮긴다.
+    #   2 → 3 (cycle287b, 2026-09-13): SOR 폐기 각주 추가.
+    assert len(data["findings"]) == 3
     assert data["board_note"] == leaf.BOARD_VS_MARKET_NOTE
     assert data["unconfirmed_note"] == leaf.UNCONFIRMED_NOTE
     vocab = data["vocab"]

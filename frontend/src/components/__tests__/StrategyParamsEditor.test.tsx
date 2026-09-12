@@ -263,7 +263,12 @@ describe('cycle278 F03~F08 — 타입·단위별 위젯과 표시 규약', () =>
     expect(select.value).toBe('KRX')
     expect(within(select).getByText(/KRX \(한국거래소\)/)).toBeInTheDocument()
     expect(within(select).getByText(/NXT \(넥스트레이드\)/)).toBeInTheDocument()
-    expect(within(select).getByText(/SOR \(최선주문집행\)/)).toBeInTheDocument()
+    // cycle287b (2026-09-13) — SOR 은 어휘에 남아 있지만 라벨이 폐기를 말한다.
+    // `<option>` 은 브라우저가 스타일을 제한해 `choice.deprecated` 회색 처리가 닿지
+    // 않으므로(목록형 위젯은 `:854` 에서 회색), **라벨 자체가 유일한 신호**다.
+    // 이 단언이 그 신호를 봉인한다 — 라벨이 "SOR (최선주문집행)" 으로 되돌아가면
+    // 운영자는 폐기된 값을 정상 선택지로 읽는다.
+    expect(within(select).getByText(/SOR \(폐기 — 주문에 쓰이지 않음\)/)).toBeInTheDocument()
   })
 
   it('F07 bool 키는 체크박스로 렌더된다 (구 24키 화면에서 구조적으로 못 오던 타입)', async () => {

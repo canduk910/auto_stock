@@ -348,10 +348,27 @@ _VB_POST_NXT_FORBIDDEN: tuple[ForbiddenChoice, ...] = (
     ),
 )
 
+#: cycle287b (2026-09-13) — **SOR 폐기 표시.** 사용자 결정(2026-09-12, 여러 차례):
+#: "내가 SOR 하지 말자고 한두번 이야기한게 아닌데? SOR 내용들 UI에서 일단 걷어내자." +
+#: "정규장에서는 NXT 필요없어. SOR이 최적호가라는 보장도 없고."
+#: cycle287 부터 **시각이 거래소를 정한다**(`order_engine._route_exchange_by_clock`) —
+#: 09:00~15:30 정규장과 16:00~20:00 애프터는 KRX, 프리장(08:00~09:00)만 이 값을 본다.
+#: ⚠️ **어휘에서 지우지 않고 `deprecated=True` 로 남긴다.** 운영 DB 7 전략이 전부 `SOR`
+#: 이고 그 값의 마이그레이션은 별도 승인 대상이라, 어휘를 먼저 좁히면 그 값을 명시 저장하는
+#: 경로가 422 가 된다(현재 두 PUT 클라이언트가 변경분만 보내 실害는 없지만, 어휘를 좁히는
+#: 것은 DB 값을 옮긴 **뒤**가 순서다 — `test_cycle287_sor_retired.py::test_n3b` 가 그
+#: 순서를 강제한다). 폐기 파라미터는 **숨기지 않고 회색 배지로 보여 준다** — 값이 바뀌어도
+#: 매매가 안 바뀌는 입력란은 운영자를 속인다(리포 관례, `deprecated` 8키와 동일).
+#: 프론트 Settings 의 거래소 선택 UI 에서는 cycle287 이 이미 SOR 을 **선택지에서 제거**했다.
 _EXCHANGE_CHOICES: tuple[Choice, ...] = (
     Choice("KRX", "KRX (한국거래소)"),
     Choice("NXT", "NXT (넥스트레이드)", False, "모의투자(VTS) 환경에서는 KIS 가 거부한다"),
-    Choice("SOR", "SOR (최선주문집행)", False, "모의투자(VTS) 환경에서는 KIS 가 거부한다"),
+    Choice(
+        "SOR", "SOR (폐기 — 주문에 쓰이지 않음)", True,
+        "cycle287(2026-09-12)부터 시각이 거래소를 정한다 — 정규장·애프터는 KRX, 프리장만 "
+        "이 값을 본다. 저장돼 있어도 09:00 이후 주문에는 반영되지 않는다. "
+        "새로 선택하지 말 것. 모의투자(VTS)에서는 KIS 가 거부한다",
+    ),
 )
 
 _SIZING_MODE_CHOICES: tuple[Choice, ...] = (
@@ -1089,8 +1106,13 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         type="enum", min=None, max=None, step=None, unit="",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
         applies_to=_ALL7, range_src="enum", choices=_EXCHANGE_CHOICES,
-        help="주문 전송 시 KIS 에 넘기는 거래소 코드. 모의투자(VTS) 환경에서 NXT/SOR 는"
-             " 거부된다. 종목이 NXT 비대상이면 코드가 KRX 로 자동 다운그레이드한다.",
+        help="주문 전송 시 KIS 에 넘기는 거래소 코드. ⚠️ cycle287(2026-09-12)부터 이 값이"
+             " 실제로 쓰이는 구간은 **프리장(08:00~09:00)뿐**이다 — 09:00~15:30 정규장과"
+             " 16:00~20:00 애프터마켓은 시각이 KRX 를 강제한다"
+             " (`order_engine._route_exchange_by_clock`, 킬스위치"
+             " `order_exchange_clock_mode`). SOR 은 폐기됐다(사용자 결정). 모의투자(VTS)"
+             " 환경에서 NXT/SOR 는 거부된다. 종목이 NXT 비대상이면 코드가 KRX 로 자동"
+             " 다운그레이드한다.",
     ),
     _s(
         key="entry_start", label_ko="매수 시작 시각", group="time_board",
