@@ -164,3 +164,45 @@ test.describe("G-E2E-282c — 모르는 것은 숨기지 않는다", () => {
     }
   });
 });
+
+test.describe("G-E2E-285 — 야간작업 현황 + 실시간 장운영 (cycle285)", () => {
+  test("지금 시장은 섹션과 오늘 야간작업 타임라인이 기존 표 아래 함께 보인다", async ({ page }) => {
+    await installApiMocks(page);
+    await page.goto("/market-state");
+    await expect(page.getByTestId("market-state-page")).toBeVisible(T);
+
+    // 섹션 A — 실시간 장운영(백엔드 신규 0, 기존 /api/realtime/market-operation 재사용)
+    await expect(page.getByTestId("market-state-now-section")).toBeVisible(T);
+    // test 렌즈 LOW #11 — 본문 제목은 testid 가 아니라 role 로도 고정한다(frontend/CLAUDE.md
+    // cycle288 지침). testid 만 단언하면 <h2> 텍스트가 바뀌어도 아무것도 안 붉어진다.
+    await expect(
+      page.getByTestId("market-state-now-section").getByRole("heading", { name: "지금 시장은" }),
+    ).toBeVisible(T);
+    await expect(page.getByTestId("market-state-now-vi")).toBeVisible(T);
+    await expect(page.getByTestId("market-state-now-halt")).toBeVisible(T);
+    await expect(page.getByTestId("market-state-now-cb")).toBeVisible(T);
+    // §4-2 — 관측 커버리지 한계 문구가 실제로 화면에 있어야 한다
+    await expect(page.getByTestId("market-state-now-coverage-note")).toContainText(
+      "관측 대상",
+      T,
+    );
+
+    // 섹션 B — 야간작업 현황(신규 GET /api/market-ops)
+    await expect(page.getByTestId("market-state-ops-section")).toBeVisible(T);
+    await expect(
+      page.getByTestId("market-state-ops-section").getByRole("heading", { name: "오늘 야간작업" }),
+    ).toBeVisible(T);
+    await expect(page.getByTestId("market-state-ops-table")).toBeVisible(T);
+    await expect(page.getByTestId("market-state-ops-status-recommendation")).toContainText(
+      "완료",
+      T,
+    );
+    await expect(page.getByTestId("market-state-ops-status-quote_token_refresh")).toContainText(
+      "확인 불가",
+      T,
+    );
+
+    // 기존 (2) 표는 무접촉 — 여전히 그 아래 정상 렌더
+    await expect(page.getByTestId("market-state-table")).toBeVisible(T);
+  });
+});

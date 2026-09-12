@@ -151,13 +151,19 @@ _BASE_SHA = {
 #: `src/**/*.py` 전수(세 변경 파일 제외)의 (경로, 내용sha) 누적 digest.
 #: 명시 dict 가 못 보는 나머지 ~120 파일의 **diff 0** 을 한 줄로 잠근다 —
 #: `routes/`·`services/`·`db/`·`middleware/`·`workers/` 가 조용히 바뀌는 것도 접촉이다.
-_SRC_TREE_FILES = 147
-#: ⚠️ 값은 **cycle287b**(SOR 폐기 각주 — `market_state.py`) 기준선이다.
-#: cycle287 배포분(`7dc6dae`)의 digest 는
-#: `01e200a2e2214f8cf8864b98bb0828b867688c48b8e8e39a644d31e3d8483e56` 였다.
+#: ⚠️ 값은 **cycle285 적대 검증 반영**(야간작업 현황 라우트 `src/routes/market_ops.py`
+#: 수정 — 휴장일 오탐·overwritten 오분류·evidence-time 게이트·is_provisional 필터
+#: 시정) 기준선이다 — cycle287 이 이 수를 바꿨다는 뜻이 아니다. 파일 수는 148 로
+#: **불변**(신규 파일 0 — market_ops.py 는 기존 파일을 편집만 했다). cycle287b
+#: 배포분에서는 147 이었다(신규 파일 없음).
+_SRC_TREE_FILES = 148
+#: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
+#: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
+#: cycle287b 배포분의 digest 는
+#: `7d122ab634df31ce986770c6390a52b245f68d2e693835880d608dff64e73b6a` 였다.
 #: 기준선은 옮겨도 단언은 그대로다 — 다음 사이클이 `src/` 를 조용히 바꾸면 여전히 붉어진다.
 _SRC_TREE_DIGEST = (
-    "7d122ab634df31ce986770c6390a52b245f68d2e693835880d608dff64e73b6a"
+    "239a21e95d596b9664d8b9118cd8e15626fd4279c3b3eb2465032eb93e137379"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

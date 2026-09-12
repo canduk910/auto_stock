@@ -762,4 +762,68 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     if (route.request().resourceType() === "script") return route.continue();
     return route.fulfill({ json: envelope(MARKET_STATE_FIXTURE) });
   });
+
+  // ── cycle285 (2026-09-13) — 야간작업 현황(오늘 완료현황 타임라인) ──────────────
+  // `/api/market-state` 와 별도 엔드포인트다(표는 코드 상수, 이쪽은 DB/메모리 산출물이라
+  // 실패 도메인이 다르다). 같은 함정(vite 모듈 `src/api/market-ops.ts` 가 이 glob 에
+  // 잡히는 것)이 있어 동일한 resourceType 가드를 단다.
+  await page.route("**/api/market-ops*", (route) => {
+    if (route.request().resourceType() === "script") return route.continue();
+    return route.fulfill({
+      json: envelope({
+        as_of_kst: "2026-09-13T20:35:00+09:00",
+        is_trading_day: true,
+        trading_day_source: "kis",
+        engine: { running: true, phase: "closing", heartbeat_at: "2026-09-13T20:34:40+09:00" },
+        tasks: [
+          {
+            id: "stock_master_basics_refresh",
+            label_ko: "종목마스터 기본정보 보강",
+            scheduled_at: "16:10",
+            status: "done",
+            last_success_at: "2026-09-13T16:12:03+09:00",
+            evidence: { total: 2700, updated: 2700 },
+            note: null,
+          },
+          {
+            id: "quote_token_refresh",
+            label_ko: "보조 시세계정 토큰 강제 재발급",
+            scheduled_at: "19:00",
+            status: "unknown",
+            last_success_at: null,
+            evidence: {},
+            note: "이 작업은 성공 마커를 남기지 않는다",
+          },
+          {
+            id: "recommendation",
+            label_ko: "AI 매매자문",
+            scheduled_at: "20:00",
+            status: "done",
+            last_success_at: "2026-09-13T20:00:42+09:00",
+            evidence: { recommendation_rows_today: 7 },
+            note: null,
+          },
+          {
+            id: "stock_master_daily_load",
+            label_ko: "일봉(KIS) 적재",
+            scheduled_at: "20:30",
+            status: "scheduled",
+            last_success_at: "2026-09-11T18:10:13+09:00",
+            evidence: { daily_head: "2026-09-11" },
+            note: null,
+          },
+          {
+            id: "settlement",
+            label_ko: "정산(전략별 실적 집계)",
+            scheduled_at: "21:30",
+            status: "scheduled",
+            last_success_at: null,
+            evidence: {},
+            note: null,
+          },
+        ],
+        evidence_errors: [],
+      }),
+    });
+  });
 }

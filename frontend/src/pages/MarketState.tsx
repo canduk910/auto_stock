@@ -28,7 +28,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { fetchMarketState } from '../api/market-state'
+import { fetchMarketOperationStatus } from '../api/market-operation'
+import { fetchMarketOps } from '../api/market-ops'
 import { formatKstDateTime } from '../utils/kst'
+import { MarketStateNow } from '../components/MarketStateNow'
+import { MarketStateOps } from '../components/MarketStateOps'
 import type {
   MarketStateCursor,
   MarketStateData,
@@ -501,6 +505,44 @@ export default function MarketState() {
     refetchOnWindowFocus: true,
   })
 
+  // 섹션 A(지금 시장은) — cycle186 이 이미 노출한 엔드포인트를 그대로 재사용한다(백엔드
+  // 신규 0). 쿼리키를 RealtimeHealth 와 같게 두어 두 화면을 같이 열어도 캐시를 공유한다.
+  const {
+    data: marketOp,
+    isLoading: marketOpLoading,
+    isError: marketOpError,
+    dataUpdatedAt: marketOpUpdatedAt,
+  } = useQuery({
+    queryKey: ['market-operation'],
+    queryFn: () => fetchMarketOperationStatus(),
+    refetchInterval: 30_000,
+    retry: 1,
+    staleTime: 30_000,
+    // cycle285 검증(honest #4) — 표(위 쿼리)와 같은 신선도 계약. 이게 없으면 WS
+    // 세션이 장중에 죽어도(리포의 만성 결함) 배지는 "관측 중" 을 유지한 채 탭을
+    // 다시 열 때까지 값이 얼어붙는다.
+    refetchOnWindowFocus: true,
+  })
+
+  // 섹션 B(오늘 야간작업) — cycle285 신규 엔드포인트. 표(market-state)와 별도 실패 도메인
+  // 이라 독립 쿼리로 둔다(한쪽이 죽어도 다른 쪽은 정상 렌더).
+  const {
+    data: marketOps,
+    isLoading: marketOpsLoading,
+    isError: marketOpsError,
+  } = useQuery({
+    queryKey: ['market-ops'],
+    queryFn: () => fetchMarketOps(),
+    refetchInterval: 30_000,
+    retry: 1,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  })
+
+  // §4-4 의 다른 얼굴 — 엔진 상태 "조회" 자체가 실패한 경우 그 사실을 세션 배지가
+  // 삼키면 "세션 종료" 처럼 확정적으로 잘못 읽힌다(honest 렌즈 LOW #11).
+  const engineSourceError = Boolean(marketOps?.evidence_errors?.includes('engine'))
+
   // 1초 심장박동 — 남은 시간만 다시 그린다. 행 판정은 여기서 하지 않는다.
   const [, setTick] = useState(0)
   useEffect(() => {
@@ -673,6 +715,19 @@ export default function MarketState() {
           })}
         </div>
       ) : null}
+
+      {/* (1-A) 지금 시장은 — 실시간 VI·거래정지·서킷브레이커(추정), cycle285 */}
+      <MarketStateNow
+        marketOp={marketOp}
+        marketOpLoading={marketOpLoading}
+        marketOpError={marketOpError}
+        marketOpUpdatedAt={marketOpUpdatedAt}
+        engine={marketOps?.engine}
+        engineError={marketOpsError || engineSourceError}
+      />
+
+      {/* (1-B) 오늘 야간작업 — 매매 외 작업 완료현황, cycle285 */}
+      <MarketStateOps data={marketOps} isLoading={marketOpsLoading} isError={marketOpsError} />
 
       {/* (2) 커서 표 */}
       <section className="rounded-lg bg-white p-4 shadow">

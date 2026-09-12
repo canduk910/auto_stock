@@ -847,3 +847,36 @@ async def set_task_last_success(task_label: str, iso_ts: str) -> None:
     JSONB 표준 {"value": iso} 형태.
     """
     await _set_string(f"task_last_success_{task_label}", iso_ts)
+
+
+async def get_task_last_success_bulk(task_labels: list[str]) -> dict:
+    """여러 `task_last_success_<label>` 키를 **단일 쿼리**로 조회한다 (cycle285).
+
+    야간작업 현황 화면이 폴링되는데 `get_task_last_success` 를 라벨 수만큼 왕복하면
+    폴링 주기마다 그 수만큼 쿼리가 는다. `key = ANY($1)` 로 한 번에 묶는다.
+    실패는 **빈 dict**(개별 라벨 결측과 동일하게 fail-open) — 호출자가 `.get(label)`
+    로 안전하게 읽는다. 마커가 없는 라벨은 결과 dict 에 키 자체가 없다(빈 문자열이
+    아니다 — "없음" 과 "빈 값" 을 구별해야 호출자가 오판하지 않는다).
+    """
+    if not task_labels:
+        return {}
+    keys = [f"task_last_success_{label}" for label in task_labels]
+    try:
+        rows = await pg.fetch(
+            "SELECT key, value FROM system_config WHERE key = ANY($1::text[])", keys
+        )
+    except Exception:
+        logger.exception("[task_last_success_bulk] 조회 실패 — 빈 dict 반환")
+        return {}
+    prefix = "task_last_success_"
+    result: dict = {}
+    for row in rows or []:
+        key = row.get("key") or ""
+        if not key.startswith(prefix):
+            continue
+        label = key[len(prefix):]
+        value = row.get("value")
+        v = value.get("value") if isinstance(value, dict) else value
+        if v is not None:
+            result[label] = str(v)
+    return result

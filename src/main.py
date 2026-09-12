@@ -47,6 +47,7 @@ from src.routes import (
     portfolio,
     llm_evaluations,
     market_state,
+    market_ops,
 )
 from src.routes.stock_master import router as stock_master_router
 from src.auth.token import token_manager
@@ -349,6 +350,7 @@ app.include_router(kis_quote_accounts.router)
 app.include_router(portfolio.router)
 app.include_router(llm_evaluations.router)
 app.include_router(market_state.router)
+app.include_router(market_ops.router)
 app.include_router(stock_master_router, prefix="/api/stock-master", tags=["stock-master"])
 
 

@@ -537,4 +537,152 @@ export const handlers = [
   // 목 본문은 손으로 쓴 요약이 아니라 `market_state.py` 에서 생성한 골든 픽스처다 —
   // 목이 *의도한 계약*만 담고 *실제 응답*을 안 담아 3개월 초록이던 cycle266 재발 차단.
   http.get(`${base}/market-state`, () => HttpResponse.json(wrap(MARKET_STATE_FIXTURE))),
+
+  // cycle285 (2026-09-13) — 야간작업 현황. `/api/market-state`(위) 와 별도 엔드포인트라
+  // 목도 별도다 — 표 조회가 실패해도 이쪽은 독립적으로 정상일 수 있다는 계약을 목에서도
+  // 반영한다. 기본 변종 = 평일 저녁, 대부분 완료·일부 확인불가/건너뜀 섞은 대표 상태.
+  // 시나리오별 다른 상태가 필요하면 각 테스트가 `server.use(...)` 로 덮어쓴다.
+  http.get(`${base}/market-ops`, () =>
+    HttpResponse.json(
+      wrap({
+        as_of_kst: "2026-09-13T20:35:00+09:00",
+        is_trading_day: true,
+        trading_day_source: "kis",
+        engine: {
+          running: true,
+          phase: "closing",
+          heartbeat_at: "2026-09-13T20:34:40+09:00",
+        },
+        tasks: [
+          {
+            id: "stock_master_basics_refresh",
+            label_ko: "종목마스터 기본정보 보강",
+            scheduled_at: "16:10",
+            status: "done",
+            last_success_at: "2026-09-13T16:12:03+09:00",
+            evidence: { total: 2700, processed: 2700, updated: 2700, skipped: 0, failed: 0 },
+            note: null,
+          },
+          {
+            id: "stock_master_daily_purge",
+            label_ko: "일봉 보관기간 정리",
+            scheduled_at: "16:15",
+            status: "unknown",
+            last_success_at: null,
+            evidence: { retention_tail: "2026-02-04" },
+            note: "이 작업은 성공 마커를 남기지 않는다 — 보관 경계값만으로는 오늘 실행 여부를 알 수 없다",
+          },
+          {
+            id: "evening_funnel_capture",
+            label_ko: "저녁 잠정 퍼널 캡처",
+            scheduled_at: "16:20",
+            status: "done",
+            last_success_at: "2026-09-13T16:20:11+09:00",
+            evidence: { snapshot_rows_today: 61 },
+            note: null,
+          },
+          {
+            id: "stock_master_master_load",
+            label_ko: "종목마스터 파일(.mst) 적재",
+            scheduled_at: "16:30",
+            status: "done",
+            last_success_at: "2026-09-13T16:30:15+09:00",
+            evidence: { total: 3583, processed: 3583, updated: 3583, skipped: 0, failed: 0 },
+            note: null,
+          },
+          {
+            id: "stock_master_financial_load",
+            label_ko: "재무 데이터 적재(주 1회)",
+            scheduled_at: "16:40",
+            status: "skipped_weekly",
+            last_success_at: "2026-09-11T16:40:01+09:00",
+            evidence: {},
+            note: "주 1회 게이트 — 오늘 미실행이 정상일 수 있다",
+          },
+          {
+            id: "quote_token_refresh",
+            label_ko: "보조 시세계정 토큰 강제 재발급",
+            scheduled_at: "19:00",
+            status: "unknown",
+            last_success_at: null,
+            evidence: {},
+            note: "이 작업은 성공 마커를 남기지 않는다 — 서버 로그(system_logs) 로만 확인 가능",
+          },
+          {
+            id: "nxt_post_buy_stop",
+            label_ko: "NXT 애프터 신규 매수 중단",
+            scheduled_at: "19:50",
+            status: "done",
+            last_success_at: null,
+            evidence: {},
+            note: "시각 기준 컷오프 — 별도 산출물 없음(코드가 그 시각부터 매수를 막는다는 사실만 보장)",
+          },
+          {
+            id: "recommendation",
+            label_ko: "AI 매매자문",
+            scheduled_at: "20:00",
+            status: "done",
+            last_success_at: "2026-09-13T20:00:42+09:00",
+            evidence: { recommendation_rows_today: 7 },
+            note: null,
+          },
+          {
+            id: "full_universe_load",
+            label_ko: "전체 유니버스 적재",
+            scheduled_at: "20:00:05",
+            status: "done",
+            last_success_at: null,
+            evidence: { total: 3577, processed: 3577, updated: 120, skipped: 3457, failed: 0 },
+            note: null,
+          },
+          {
+            id: "metrics_snapshot",
+            label_ko: "매매지표 1차 스냅샷",
+            scheduled_at: "20:05",
+            status: "overwritten",
+            last_success_at: null,
+            evidence: {},
+            note: "정산(21:30) 의 최종 분석이 이 값을 덮어쓴다 — 정산 이후 'overwritten' 은 결함이 아니다",
+          },
+          {
+            id: "cloud_report_routine",
+            label_ko: "클라우드 로그 분석 루틴(외부)",
+            scheduled_at: null,
+            status: "unknown",
+            last_success_at: null,
+            evidence: { ext_provider: null, ext_model: null },
+            note: "이 코드베이스에 예정 시각 상수가 없다 — 외부 크론이 부른다",
+          },
+          {
+            id: "stock_master_daily_load",
+            label_ko: "일봉(KIS) 적재",
+            scheduled_at: "20:30",
+            status: "scheduled",
+            last_success_at: "2026-09-11T18:10:13+09:00",
+            evidence: { daily_head: "2026-09-11", daily_rows_today: 0 },
+            note: "daily_head 가 오늘이 아니면 다음 영업일 아침 재기동 전까지 그대로다",
+          },
+          {
+            id: "settlement",
+            label_ko: "정산(전략별 실적 집계)",
+            scheduled_at: "21:30",
+            status: "scheduled",
+            last_success_at: null,
+            evidence: { daily_performance_rows_today: 0 },
+            note: null,
+          },
+          {
+            id: "log_analysis",
+            label_ko: "일일 로그 분석(AI)",
+            scheduled_at: "21:30",
+            status: "scheduled",
+            last_success_at: null,
+            evidence: { model: null, has_api_metrics: false },
+            note: null,
+          },
+        ],
+        evidence_errors: [],
+      })
+    )
+  ),
 ];
