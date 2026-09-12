@@ -748,13 +748,30 @@ def test_c5_3_scheduler_line_cap_is_not_looser_than_cycle257() -> None:
 # ===========================================================================
 # C11 / C12 — 전략 2파일 원상 복구
 # ===========================================================================
-@pytest.mark.parametrize("key", sorted(_CYCLE272_METHOD_SHA))
+# 🔁 2026-09-12 (cycle286, C2-a) — `("ltv", "check_buy_signal")` 항목은 **자기소멸**
+#    했다(cycle223 헤더 TODO 선례 — 자문 §명세 조건 2, backend-dev Green 적용).
+#    LTV `check_buy_signal` 이 이 사이클에서 **다시, 정당하게** 바뀐다(main 보드 15:20
+#    매수 컷 발사점 게이트) — cycle276 의 "cycle272 값으로 복귀" 불변식과 cycle274 의
+#    "현재값으로 재핀"(`test_cycle274_ast_llm_gate.py::test_c18_3`, 동적 비교라 항상
+#    참) 이 이제 동시에 성립할 수 없는 매듭이었다. 자문 권고대로 **청산·수량 4핀은
+#    불변 유지**하고 `check_buy_signal` 엔트리만 여기서 은퇴한다 — VB 의
+#    `check_buy_signal` 은 이 사이클 무접촉이라 cycle272 값 그대로 남는다(아래에서
+#    계속 검사). `test_cycle264_scope_and_pins.py::_STRATEGY_PINS` 의 LTV
+#    `check_buy_signal` 핀은 cycle286 현재값으로 갱신했다(그 파일의 동적 재핀 계약과
+#    정합). ⚠️ 이 은퇴는 도메인 자문이 권고했으나 최종 확정은 메인 세션 몫이다
+#    (자문 §명세 "그 은퇴 결정은 메인 세션이 내린다").
+_FROZEN_272 = sorted(k for k in _CYCLE272_METHOD_SHA if k != ("ltv", "check_buy_signal"))
+
+
+@pytest.mark.parametrize("key", _FROZEN_272)
 def test_c6_1_strategy_methods_return_to_cycle272_sha(key) -> None:
-    """C11 (HIGH) — VB·LTV 6 메서드 세그먼트 sha 가 **cycle272 값으로 복귀**한다.
+    """C11 (HIGH) — VB·LTV 5 메서드(청산·수량 4 + VB `check_buy_signal`) 세그먼트 sha 가
+    **cycle272 값으로 복귀**한다.
 
     cycle274 가 `check_buy_signal` 2핀을 바꿨다. cycle276 은 훅을 `order_engine` 으로
     옮기므로 그 2핀이 되돌아와야 한다 — 되돌아오지 않으면 전략에 죽은 배선이 남았다는 뜻.
-    나머지 4핀은 애초부터 불변(청산·수량 무접촉).
+    청산·수량 4핀은 애초부터 불변. **LTV `check_buy_signal` 은 cycle286 이 은퇴**했다
+    (위 배너) — 그 사이클에서 정당하게 다시 바뀌었기 때문이다.
     """
     kind, method = key
     assert _current_method_sha(kind, method) == _CYCLE272_METHOD_SHA[key], (
@@ -833,13 +850,19 @@ def test_c6_3b_four_keys_stay_out_of_param_ranges(key: str) -> None:
 # C14 / C15 — 자매 핀 4곳 대칭 ("핀은 항상 4곳")
 # ===========================================================================
 def test_c6_4a_cycle264_pins_are_restored_to_cycle272_values() -> None:
-    """C15 — cycle264 `_STRATEGY_PINS` 의 `check_buy_signal` 2핀이 **cycle272 값으로 복귀**.
+    """C15 — cycle264 `_STRATEGY_PINS` 의 VB `check_buy_signal` 핀이 **cycle272 값으로 복귀**.
 
-    cycle274 가 그 둘을 현재값으로 갱신했다. 전략을 되돌리면 핀도 함께 되돌아와야 한다 —
+    cycle274 가 이 핀을 현재값으로 갱신했다. 전략을 되돌리면 핀도 함께 되돌아와야 한다 —
     아니면 cycle264 가드가 붉어지고, 붉다고 그 가드를 지우면 무접촉 증거가 사라진다.
+
+    🔁 2026-09-12 (cycle286) — **LTV 는 이 단정에서 은퇴**했다(위 `test_c6_1` 배너와
+    같은 매듭). LTV `check_buy_signal` 이 cycle286 에서 다시 정당하게 바뀌어
+    `_STRATEGY_PINS` 의 그 항목은 이제 cycle272 값이 아니라 **cycle286 현재값**을
+    가져야 한다 — 그 계약은 `test_cycle274_ast_llm_gate.py::test_c18_3`(동적 비교)가
+    계속 잰다.
     """
     text = (_AST_DIR / "test_cycle264_scope_and_pins.py").read_text(encoding="utf-8")
-    for kind in _KINDS:
+    for kind in ("vb",):
         module = "volatility_breakout" if kind == "vb" else "long_tail_volatility"
         m = re.search(
             rf'\(\s*"{module}"\s*,\s*"\w+"\s*,\s*"check_buy_signal"\s*\)\s*:\s*\n?\s*"([0-9a-f]{{64}})"',

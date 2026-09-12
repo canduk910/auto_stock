@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 from src.api.condition import add_business_days
 from src.engine import open_price_rest
@@ -27,6 +27,21 @@ KST = timezone(timedelta(hours=9))
 # 금지 — 한쪽만 바꾸려는 미래의 변경이 다른 쪽을 조용히 끌고 간다, cycle229 G-4).
 OPEN_ENTRY_HOLD_START_HOUR = 9
 OPEN_ENTRY_HOLD_MAX_SECS = 600
+
+# cycle286 (2026-09-12, C2-a) — `main` 보드 신규 매수 컷 15:20 KST.
+# **모듈 상수 = DB override 불가** (DEFAULT_PARAMS/PARAM_RANGES/INT_PARAMS 편입 금지).
+# 이유: (a) KRX 연속체결은 15:20 에 끝난다(market_state K3.end) — LTV 의 돌파 판정이
+# 유효한 가격형성이 그 시각에 소멸한다. (b) 15:20~15:30 종가 단일가(K4)는 00/01 을
+# **접수**하므로 거부라는 우연한 안전판이 없고, 15:20 `_force_clear_main_only` 는 이미
+# 지나가 있어 그 체결은 **당일 모드 그대로 오버나이트로 남는다**(익일청산·갭가드·
+# 트레일링이 전부 `_limit_up_reached` 전용). 오버나이트 금지는 DB 토글로 뚫려선 안 되는
+# 규칙이다(cycle229 G-2 동일 논거). (c) 15:30~15:40 은 KRX 가 종가 고정(K5, 06 전용)이고
+# NXT 는 애프터 단일가(N5)라 그 구간의 "돌파"는 확정 종가 1틱 또는 타 시장 가격이다.
+# 값은 scheduler.TIME_KRX_MAIN_BUY_STOP / VB·momentum BUY_CUTOFF_KST 와 같으나 상수는
+# **전략별 소유**(cycle229 G-4 — 파일 간 결합 금지, scheduler import 는 순환).
+# 이름에 MAIN 을 넣은 이유 = LTV 는 VB 와 달리 **보드 스코프 컷**이다(post_nxt 15:40~19:50
+# 매수는 무접촉). 롤백 = 1커밋 revert, 장중 긴급 = PUT tradable_boards 에서 "main" 제거.
+MAIN_BUY_CUTOFF_KST = time(15, 20)
 
 logger = logging.getLogger(__name__)
 
@@ -168,6 +183,10 @@ class LongTailVolatilityStrategy(StrategyBase):
         # 서브클래스 override 하나로 관측이 영구 침묵한다.
         self._open_entry_hold_config_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
         self._open_entry_hold_blocked_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        # cycle286 (C2-a) — `main` 15:20 매수 컷 관측 cap. cycle262 cap 과 **별개
+        # 인스턴스**(같은 슬롯을 다투면 config 1행이 그날의 blocked 표본을 통째로
+        # 침묵시킨다 — cycle236 '별개 cap 가드' / donchian OB-11 선례). 1회/ticker/일.
+        self._main_buy_cutoff_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 
     def register_cooldown_after_exit(self, ticker: str) -> None:
         """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 213, VB 201 패턴 답습).
@@ -655,6 +674,18 @@ class LongTailVolatilityStrategy(StrategyBase):
                 return candidate
         return None
 
+    def _main_buy_cutoff_blocked(self, board: str, now: datetime) -> bool:
+        """`main` 보드 신규 매수 컷 판정 (cycle286 C2-a).
+
+        `main` 이외 보드(`pre_nxt`/`post_nxt`)와 컷 이전 시각은 항상 `False` —
+        `post_nxt`(15:40~19:50) 야간 매수·`pre_nxt`(08:00~08:50) 프리장 매수는
+        스코프 밖이다. `now` 는 호출부가 이미 들고 있는 tz-aware KST 를 그대로
+        받는다(헬퍼가 스스로 시계를 읽지 않는다 — cycle262 `G-262-4` 동형 계약).
+        """
+        from src.engine.session import MarketBoard
+
+        return board == MarketBoard.MAIN.value and now.time() >= MAIN_BUY_CUTOFF_KST
+
     def on_open_price_confirmed(
         self, ticker: str, open_price: int, board: str = "main", *, source: str = "ws",
     ) -> None:
@@ -807,6 +838,46 @@ class LongTailVolatilityStrategy(StrategyBase):
                     except Exception:  # pragma: no cover — 2차 예외까지 흡수
                         pass
                 return Signal.NONE
+
+            # cycle286 (C2-a) — `main` 보드 15:20 신규 매수 컷. **이 자리가 계약이다.**
+            # 최상단은 불가(계좌 SOFT 게이트가 첫 문장 — cycle233 M6)이고, board 해소
+            # 뒤여야 보드 스코프가 성립하며, baseline 갱신 뒤여야 동결이 없다
+            # (cycle233 C233-F1). 발사점이라야 **무엇을 살 뻔했는지**가 남는다.
+            # cycle262 hold 블록과 창이 서로소(09:00~09:01:30 vs ≥15:20)라 순서 무관.
+            if self._main_buy_cutoff_blocked(board, _now_kst):
+                try:
+                    _key = ticker or "-"
+                    if self._main_buy_cutoff_logged.should_emit(_key, now=_now_kst):
+                        logger.info(
+                            "[ltv_main_buy_cutoff] ticker=%s board=%s cutoff=%s "
+                            "now=%s current_price=%d target=%d board_open=%d prev=%d "
+                            "k=%.4f offset=%d prdy_close=%d "
+                            "note='15:20 이후 신규 매수 차단 — would_buy 정본 "
+                            "(연속체결 종료·종가단일가 체결은 진입 대상이 아니다)'",
+                            _key, board, MAIN_BUY_CUTOFF_KST.strftime("%H:%M"),
+                            # 적대 검증 LOW-3(behavior) — 자매 마커 `[nxt_post_reinforce]`
+                            # 는 `now=` 를 싣는데 이 마커는 상수 `cutoff=` 뿐이라
+                            # "now>=15:20" 을 행마다 기계 판독할 수 없었다. 로그
+                            # prefix 타임스탬프로 유도 가능했으나 grep 정합을 위해
+                            # 명시 필드로 병기한다.
+                            _now_kst.strftime("%H:%M:%S"),
+                            current_price, target,
+                            int(board_info.get("open_price", 0) or 0), prev,
+                            float(info.get("k") or 0),
+                            int(board_info.get("target_offset", 0) or 0),
+                            int(ticker_prev_close.get(ticker, 0) or 0),
+                        )
+                        self._main_buy_cutoff_logged.mark_emitted(_key, now=_now_kst)
+                except Exception:
+                    try:
+                        trace_observer_failure(
+                            "[ltv_main_buy_cutoff]", ticker or "-",
+                            self._main_buy_cutoff_logged, dest_logger=logger,
+                        )
+                    except Exception:  # pragma: no cover — 2차 예외까지 흡수
+                        pass
+                return Signal.NONE
+
             board_open = board_info.get("open_price", 0)
             change_rate = round((current_price - board_open) / board_open * 100, 1) if board_open > 0 else 0
             logger.info(

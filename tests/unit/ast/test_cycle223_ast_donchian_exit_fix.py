@@ -443,11 +443,14 @@ def _content_sha(path: str) -> str:
 #    docstring 정직화). 판정식 2줄은 **텍스트 동일**이고 나머지 7영역은 diff 0 이다.
 #    자매 가드 **네 곳 전부**에 같은 값으로 핀한다.
 # TODO(cycle283 커밋 후): 아래 항목을 **삭제**한다.
+# ✅ 2026-09-12 (cycle286, C4-a) — `nxt_tradable=False` 사후 보강 판정축 교체
+#    (거래소 ∧ 좁힌 프리장 창). 사용자 명시 8영역 승인. 자매 가드 네 곳 전부 같은
+#    값(`test_g3_9b` 계약). TODO(cycle286 커밋 후): 아래 항목을 **삭제**한다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     "src/engine/scanner.py":
         "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     "src/engine/order_engine.py":
-        "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
+        "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
 }
 
 
@@ -561,11 +564,18 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    로 읽는다)뿐이라 **메서드 6핀은 cycle272 값으로 복귀**하고 **파일 sha 만** 다르다.
 #    그 방향 차이가 이 사이클의 미묘한 지점이다.
 #    TODO(cycle276 커밋 후): 아래 두 항목을 **삭제**하고 dict 를 다시 비운다.
+# ✅ 2026-09-12 (cycle286, C2-a) — LTV `main` 보드 신규 매수 15:20 컷. 사용자 승인
+#    범위 = `src/engine/strategies/long_tail_volatility.py` 단독. 추가는 모듈 상수
+#    `MAIN_BUY_CUTOFF_KST` + 헬퍼 `_main_buy_cutoff_blocked` + emit cap 필드 1개 +
+#    `check_buy_signal` 발사점(cycle262 hold 블록 직후) 신규 게이트 블록뿐이다.
+#    `check_exit_signal`/`calc_buy_quantity`/`prepare`/`on_open_price_confirmed`
+#    는 byte 동일(`tests/unit/ast/test_cycle286_ast_scope.py::_LTV_FROZEN_METHODS`).
+#    TODO(cycle286 커밋 후): 아래 LTV 항목을 **삭제**하고 dict 를 다시 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
         "9034476410029bc14622cbf8ec32e0647406cf470e91b9aa740a3f7d5b6cd5e3",
     "src/engine/strategies/long_tail_volatility.py":
-        "5ad80779ac1a496791213e74b424d05caa1c9a2d1b56672333fa9cee68549016",
+        "728fc2d51edd6db9c0a6f6448b60d8b15872c273e5158caae3f814dd4394a8ee",
     "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
 }
 

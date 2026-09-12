@@ -249,8 +249,15 @@ async def test_c1_when_tracker_is_blocked_then_no_kis_call_and_info_log_once(
 # ===========================================================================
 # C-2 — market_closed 거부 → tracker 등록 + stock_master 사후 보강 보존
 # ===========================================================================
+# cycle286 (C4-a, 2026-09-12) — 이 자리의 원래 단정은 "NXT 시간대(시계)면 무조건
+# nxt_tradable=False 를 쓴다" 였고 `mock_strategy_exchange` 는 기본값 "KRX" 를
+# 돌려주는데도 통과했다 — 그게 곧 이번에 닫은 결함의 화석이다(시계만으로 판정하면
+# KRX 로 나간 주문의 거부에도 쓴다). 이제 판정축은 **거래소 ∧ 좁힌 프리장 창
+# (08:00~08:50)** 이라 이 테스트는 거래소를 명시적으로 NXT 로 고정해 "진짜 NXT
+# 거부의 학습은 살아 있다"를 증명하고, 바로 아래 `test_c2b_*` 가 그 반대(KRX 라우팅
+# 거부는 쓰지 않는다)를 짝으로 고정한다.
 @pytest.mark.asyncio
-@freeze_time("2026-06-03 08:30:00", tz_offset=-9)  # NXT 시간대
+@freeze_time("2026-06-03 08:30:00", tz_offset=-9)  # NXT 프리마켓(08:00~08:50) 안
 async def test_c2_when_market_closed_then_tracker_register_called_and_stock_master_upsert(
     engine: OrderEngine,
     mock_insert_trade: AsyncMock,
@@ -258,10 +265,21 @@ async def test_c2_when_market_closed_then_tracker_register_called_and_stock_mast
     mock_write_log: AsyncMock,
     mock_strategy_exchange,
     mock_stock_master,
+    monkeypatch: pytest.MonkeyPatch,
 ):
-    """C-2: NXT 시간대 market_closed 거부 → tracker.register_market_closed 호출 +
+    """C-2 (cycle286 갱신): NXT 로 나간 주문의 market_closed 거부 → tracker 등록 +
     stock_master.upsert_one 사후 보강 양쪽 모두 발화.
+
+    `target_exchange` 를 명시적으로 "NXT" 로 override 한다 — `mock_strategy_exchange`
+    공용 픽스처의 기본값 "KRX" 로는 이 사이클부터 학습 write 가 발생하지 않는다
+    (그것이 정확히 이번 사이클이 닫은 결함이다).
     """
+    async def _nxt(self, strategy_id, *, ticker=None):  # noqa: ARG001
+        return "NXT"
+
+    monkeypatch.setattr(
+        "src.engine.order_engine.OrderEngine._strategy_exchange_async", _nxt,
+    )
     mock_place_order.side_effect = [_market_closed_err()]
 
     await engine.execute_sell("064400", Signal.STOP_LOSS, "momentum")
@@ -274,8 +292,33 @@ async def test_c2_when_market_closed_then_tracker_register_called_and_stock_mast
         "_blocked_reason 등록 누락 또는 잘못된 분류"
     )
 
-    # NXT 시간대 — stock_master.upsert_one 사후 보강 호출 보존 (절대 규칙)
+    # NXT 로 나간 프리마켓 거부 — stock_master.upsert_one 사후 보강 호출 보존
     mock_stock_master.upsert_one.assert_awaited()
+
+
+@pytest.mark.asyncio
+@freeze_time("2026-06-03 08:30:00", tz_offset=-9)  # NXT 프리마켓(08:00~08:50) 안
+async def test_c2b_when_market_closed_and_krx_routed_then_no_stock_master_upsert(
+    engine: OrderEngine,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    mock_write_log: AsyncMock,
+    mock_strategy_exchange,
+    mock_stock_master,
+):
+    """C-2b (cycle286 신규, C4-a): 같은 시각·같은 거부라도 **KRX 로 나간 주문**이면
+    학습하지 않는다 — `mock_strategy_exchange` 기본값 "KRX" 그대로(override 없음).
+
+    거부는 여전히 tracker 에 등록된다(TTL 축 무접촉) — 달라지는 것은 DB write 뿐이다.
+    """
+    mock_place_order.side_effect = [_market_closed_err()]
+
+    await engine.execute_sell("064400", Signal.STOP_LOSS, "momentum")
+
+    assert "064400" in engine._sell_rejection._blocked_until, (
+        "KRX 라우팅이어도 tracker 등록(TTL 축)은 그대로여야 한다"
+    )
+    mock_stock_master.upsert_one.assert_not_awaited()
 
 
 # ===========================================================================

@@ -771,13 +771,29 @@ class OrderEngine:
                     # 다음 사이클에서 _strategy_exchange_async 가 KRX 로 사전 다운그레이드.
                     # NXT 시간대(08:00~09:00, 15:30~20:00) 거부에서만 적용 — KRX 정규장 거부는 보강하지 않음.
                     try:
+                        # cycle286 (C4-a) — `nxt_tradable=False` 사후 보강의 판정축을
+                        # **시계 단독 → 거래소 ∧ 좁힌 프리장 창**으로 바꾼다.
+                        #  (1) 거래소: 이 주문을 어디로 보냈는지 우리가 이미 안다
+                        #      (`target_exchange`, `:664`/`:666`). KRX 로 보낸 주문의
+                        #      거부는 NXT 거래가능 여부의 증거가 0이다.
+                        #  (2) 창: 2026-09-14 부터 KRX 애프터마켓(16:00~20:00)이 구
+                        #      NXT 창 15:30~20:00 안에 통째로 들어온다. 그 구간의
+                        #      거부는 어느 시장이 낸 것인지 가릴 수 없고(SOR 은 leg
+                        #      정보가 없다), 16:30 이후의 오염은 그날 16:10 전수
+                        #      재적재를 이미 지나쳐 **다음 영업일 프리장까지 ≈24h
+                        #      존속**하며 자기 강화 래치가 된다. 판단 불가 = 쓰지
+                        #      않는다(fail-safe). 상한 08:50 은 NXT 프리마켓 실질
+                        #      종료(GTP 미체결 일괄취소) = market_state N1.end.
+                        # ⚠️ 이 식은 `is_nxt_session_hours`(TTL 축, `:983`/`:1002`)와
+                        #    **의도적으로 다르다** — TTL 은 "팔 수단이 없으니 길게
+                        #    막는다" 가 안전측이라 15:30~20:00 유지, 학습은 "모르면
+                        #    안 쓴다" 가 안전측이다. 두 축을 같은 창으로 되돌리지 말 것.
                         from datetime import time as _dtime
                         now_t = _now_kst.time()
-                        is_nxt_window = (
-                            _dtime(8, 0) <= now_t < _dtime(9, 0)
-                            or _dtime(15, 30) <= now_t < _dtime(20, 0)
-                        )
-                        if is_nxt_window:
+                        _exchange_ok = target_exchange in ("NXT", "SOR")
+                        _window_ok = _dtime(8, 0) <= now_t < _dtime(8, 50)
+                        _nxt_evidence = _exchange_ok and _window_ok
+                        if _nxt_evidence:
                             from src.db import stock_master
                             existing = await stock_master.get(ticker)
                             existing_raw = existing.raw if existing else {}
@@ -796,8 +812,30 @@ class OrderEngine:
                                 )
                             )
                             logger.info(
-                                "stock_master 사후 보강: %s nxt_tradable=False (거부 응답 기반)",
-                                ticker,
+                                "[nxt_post_reinforce] ticker=%s exchange=%s div=%s "
+                                "now=%s wrote=1 reason=nxt_pre_window",
+                                ticker, target_exchange, order_division.value,
+                                now_t.strftime("%H:%M:%S"),
+                            )
+                        else:
+                            # 적대 검증 LOW-4(behavior) — 두 조건이 동시에 실패하면
+                            # (예: 09-14 이후 KRX 로 보낸 16:xx 애프터 거부는 거래소·
+                            # 시각 둘 다 불만족) 종전엔 `exchange` 만 보여 이 사이클의
+                            # 핵심 mandate(창 차단)를 `reason=window` 로 관측할 수
+                            # 없었다. 복합값으로 **둘 다** 남긴다 — 앞자리가 항상
+                            # `exchange`(불만족 시)이므로 기존 `reason=exchange`/
+                            # `reason=window` 단독 문자열 판독(부분일치)과 호환된다.
+                            _reason_parts = []
+                            if not _exchange_ok:
+                                _reason_parts.append("exchange")
+                            if not _window_ok:
+                                _reason_parts.append("window")
+                            logger.info(
+                                "[nxt_post_reinforce] ticker=%s exchange=%s div=%s "
+                                "now=%s wrote=0 reason=%s",
+                                ticker, target_exchange, order_division.value,
+                                now_t.strftime("%H:%M:%S"),
+                                "+".join(_reason_parts) if _reason_parts else "unknown",
                             )
                     except Exception:
                         logger.exception("stock_master 사후 보강 실패: %s", ticker)

@@ -106,7 +106,7 @@ def test_g213_1_default_params_reentry_cooldown_is_2() -> None:
 # ===========================================================================
 # G-213-2 [핵심 HIGH, Red] 당일 모드 손절 → 쿨다운 등록 → 재돌파 차단 (테스 재현)
 # ===========================================================================
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 def test_g213_2_today_mode_close_registers_cooldown_blocks_rebuy(monkeypatch) -> None:
     """G-213-2 (HIGH Red, whipsaw): 당일 모드 종목 청산 → 쿨다운 등록 → 재돌파 NONE.
 
@@ -142,7 +142,7 @@ def test_g213_2_today_mode_close_registers_cooldown_blocks_rebuy(monkeypatch) ->
 # ===========================================================================
 # G-213-3 [HIGH, Red] 상한가 모드 종목 청산 → 쿨다운 면제 (정상 재진입 보존)
 # ===========================================================================
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 def test_g213_3_limit_up_mode_close_exempts_cooldown(monkeypatch) -> None:
     """G-213-3 (HIGH Red, 면제): 상한가 모드 종목(멤버) 청산 → `_cooldown_until` 미등록.
 
@@ -172,7 +172,7 @@ def test_g213_3_limit_up_mode_close_exempts_cooldown(monkeypatch) -> None:
 # ===========================================================================
 # G-213-4 [HIGH, Red] DISCARD-ORDER 행위 — 상한가 멤버 청산 시 discard AND 미등록 동시
 # ===========================================================================
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 def test_g213_4_discard_order_limit_up_discarded_and_not_registered(monkeypatch) -> None:
     """G-213-4 (HIGH Red, DISCARD-ORDER): 상한가 멤버 청산 → discard 됨 AND 쿨다운 미등록 동시.
 
@@ -201,7 +201,7 @@ def test_g213_4_discard_order_limit_up_discarded_and_not_registered(monkeypatch)
 # ===========================================================================
 # G-213-5 [SET-185-PRESERVE] on_position_closed 후 discard (양쪽 모드)
 # ===========================================================================
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 @pytest.mark.parametrize("is_limit_up", [True, False], ids=["limit_up", "today_mode"])
 def test_g213_5_set_185_discard_preserved(monkeypatch, is_limit_up) -> None:
     """G-213-5 (SET-185-PRESERVE): on_position_closed 후 `_limit_up_reached` discard.
@@ -224,7 +224,7 @@ def test_g213_5_set_185_discard_preserved(monkeypatch, is_limit_up) -> None:
 # ===========================================================================
 # [Red] register_cooldown_after_exit — 즉시 근사 (today + days+2)  (VB 201 답습)
 # ===========================================================================
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 def test_register_cooldown_after_exit_approx(monkeypatch) -> None:
     """(Red): `register_cooldown_after_exit` → `_cooldown_until[t] == today + (2+2)`.
 
@@ -246,7 +246,7 @@ def test_register_cooldown_after_exit_approx(monkeypatch) -> None:
 # [Red] _refine_cooldown_business_days — 성공/실패 graceful  (VB 201 답습)
 # ===========================================================================
 @pytest.mark.asyncio
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 async def test_refine_success_replaces_with_business_day(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -274,7 +274,7 @@ async def test_refine_success_replaces_with_business_day(
 
 
 @pytest.mark.asyncio
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 async def test_refine_failure_keeps_approx_graceful(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -303,7 +303,7 @@ async def test_refine_failure_keeps_approx_graceful(
 # ===========================================================================
 # [불변식 PASS] 쿨다운 없는 정상 종목 돌파 → BUY (게이트 over-block 차단)
 # ===========================================================================
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 def test_normal_breakout_allows_buy(monkeypatch) -> None:
     """(불변식 PASS): 쿨다운 미등록 종목 정상 돌파 → BUY (게이트가 정상 종목 미차단).
 
@@ -325,7 +325,7 @@ def test_normal_breakout_allows_buy(monkeypatch) -> None:
 # ===========================================================================
 # G-213-7 [SAFETY 대리] check_exit_signal 본체 불변 (당일 -3% / 상한가 -5% 분기 보존)
 # ===========================================================================
-@freeze_time("2026-07-14 10:00:00")
+@freeze_time("2026-07-14 01:00:00")
 def test_g213_7_check_exit_signal_body_unchanged(monkeypatch) -> None:
     """G-213-7 (SAFETY 대리): check_exit_signal 당일/상한가 청산 분기 불변.
 

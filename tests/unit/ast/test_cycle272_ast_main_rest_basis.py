@@ -241,6 +241,17 @@ def test_g272_5d_gate_has_no_await_or_db_or_write_log():
 #    6/6 그대로다 — 그것이 "여섯 가지 무접촉" 의 기계적 증거다. cycle264
 #    `_STRATEGY_PINS` 와 **같은 값**을 유지한다(`test_g272_7b` 가 두 dict 의
 #    동일성을 강제하므로 한쪽만 고치면 그 가드가 붉어진다).
+#
+# 🔁 2026-09-12 (cycle286, C2-a) — LTV `check_buy_signal` 이 **다시, 정당하게**
+#    바뀐다(main 보드 15:20 매수 컷). 이 dict 는 **cycle272 당시 값을 역사 기록으로
+#    남긴다**(값을 바꾸지 않는다) — 대신 그 한 항목을 아래 "무접촉 6종" 강제와
+#    "cycle264 와 동일성" 강제 양쪽에서 제외한다(`_RETIRED_BY_CYCLE286`). LTV
+#    `check_buy_signal` 의 살아있는 계약은 이제 `test_cycle286_ast_scope.py` 가
+#    담당한다.
+_RETIRED_BY_CYCLE286 = {
+    ("long_tail_volatility", "LongTailVolatilityStrategy", "check_buy_signal"),
+}
+
 _FROZEN_PINS = {
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_buy_signal"):
         "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
@@ -267,9 +278,10 @@ def _method_sha(module: str, cls_name: str, method: str) -> str:
     return hashlib.sha256(seg.encode("utf-8")).hexdigest()
 
 
-@pytest.mark.parametrize("key", sorted(_FROZEN_PINS))
+@pytest.mark.parametrize("key", sorted(k for k in _FROZEN_PINS if k not in _RETIRED_BY_CYCLE286))
 def test_g272_7a_entry_exit_qty_methods_unchanged(key):
-    """C7 — 진입·청산·수량 6메서드는 cycle272 전후 **문자 그대로 동결**이다."""
+    """C7 — 진입·청산·수량 5메서드(+ VB `check_buy_signal`)는 cycle272 전후 **문자 그대로
+    동결**이다. LTV `check_buy_signal` 은 cycle286 이 정당하게 재변경해 은퇴했다(위 배너)."""
     module, cls_name, method = key
     actual = _method_sha(module, cls_name, method)
     assert actual == _FROZEN_PINS[key], (
@@ -287,8 +299,13 @@ def test_g272_7b_cycle264_pins_are_not_rewritten():
     """
     from tests.unit.ast.test_cycle264_scope_and_pins import _STRATEGY_PINS
 
-    assert _STRATEGY_PINS == _FROZEN_PINS, (
-        "cycle264 `_STRATEGY_PINS` 가 재산출됐다 — cycle272 는 그 여섯을 건드리지 않는다"
+    # cycle286 이 LTV `check_buy_signal` 을 정당하게 재변경해 그 한 키는 두 dict 가
+    # 갈라진다(cycle264 쪽은 현재값으로 재핀, 이 파일은 cycle272 당시 값을 역사
+    # 기록으로 보존) — 그래서 동일성 비교에서 제외한다(위 `_RETIRED_BY_CYCLE286`).
+    live = {k: v for k, v in _STRATEGY_PINS.items() if k not in _RETIRED_BY_CYCLE286}
+    frozen = {k: v for k, v in _FROZEN_PINS.items() if k not in _RETIRED_BY_CYCLE286}
+    assert live == frozen, (
+        "cycle264 `_STRATEGY_PINS` 가 재산출됐다 — cycle272 는 그 나머지를 건드리지 않는다"
     )
 
 

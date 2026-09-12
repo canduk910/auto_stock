@@ -369,12 +369,15 @@ def test_h5b_new_is_trading_day_reuses_same_url_and_tr_id():
 # H3 — 무접촉 sha 핀 (M8) · ⚠️ 사이클 한정
 # ===========================================================================
 #: base `34f662f` blob 의 파일 내용 sha256.
+# 🔁 2026-09-12 (cycle286) 재핀 — `order_engine.py`(C4-a, 8영역 사용자 승인)·
+#    `long_tail_volatility.py`(C2-a, 전략 7파일 목록 대상) 2건. 값만 현재
+#    워킹트리로 재산출했다.
 _BASE_SHA = {
     # 8영역 — 엔진 5파일
     "src/engine/risk.py":
         "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
     "src/engine/order_engine.py":
-        "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
+        "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
@@ -415,7 +418,7 @@ _BASE_SHA = {
     "src/engine/strategies/kojiro.py":
         "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
     "src/engine/strategies/long_tail_volatility.py":
-        "5ad80779ac1a496791213e74b424d05caa1c9a2d1b56672333fa9cee68549016",
+        "728fc2d51edd6db9c0a6f6448b60d8b15872c273e5158caae3f814dd4394a8ee",
     "src/engine/strategies/momentum.py":
         "5bfc25a183a13ec0e00bdce7ff0e1727d323bd62f1ba8b8937561a4eb74c0da1",
     "src/engine/strategies/vcp_breakout.py":

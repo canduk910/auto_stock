@@ -189,10 +189,13 @@ def test_seven_strategy_default_params_source_sha_unchanged(strategy_id: str):
 # 🔁 2026-09-11 (cycle283) 재핀 — `scanner.py`(8영역, 사용자 승인)·`scheduler.py`(라인 상한
 #    승인 대상) 2건. cycle278 이 그 파일들을 건드린 것이 아니라 **다른 사이클의 승인된
 #    변경**이므로 값만 현재 워킹트리로 재산출했다. 나머지 핀은 불변이다.
+# 🔁 2026-09-12 (cycle286) 재핀 — `order_engine.py`(C4-a, 8영역 사용자 승인)·
+#    `long_tail_volatility.py`(C2-a, 전략 7파일 목록 대상 — 승인 항목) 2건. 값만
+#    현재 워킹트리로 재산출했다.
 _BASE_SHA = {
     "src/engine/risk.py":
         "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
-    "src/engine/order_engine.py": "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
+    "src/engine/order_engine.py": "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
@@ -218,7 +221,7 @@ _BASE_SHA = {
     "src/engine/strategies/momentum.py":
         "5bfc25a183a13ec0e00bdce7ff0e1727d323bd62f1ba8b8937561a4eb74c0da1",
     "src/engine/strategies/volatility_breakout.py": "9034476410029bc14622cbf8ec32e0647406cf470e91b9aa740a3f7d5b6cd5e3",
-    "src/engine/strategies/long_tail_volatility.py": "5ad80779ac1a496791213e74b424d05caa1c9a2d1b56672333fa9cee68549016",
+    "src/engine/strategies/long_tail_volatility.py": "728fc2d51edd6db9c0a6f6448b60d8b15872c273e5158caae3f814dd4394a8ee",
     "src/engine/strategies/donchian_swing.py":
         "107246d21feeac07ed6556269897b60d61ab1b617746d3c2f6aacd3d1385dfa0",
     "src/engine/strategies/bull_flag_breakout.py":

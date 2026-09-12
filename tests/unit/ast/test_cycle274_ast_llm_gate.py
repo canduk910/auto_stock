@@ -553,11 +553,14 @@ def test_c17_4_leaf_does_not_import_eight_area_modules() -> None:
 #    `scheduler.py`(라인 상한 승인 대상)를 바꿨다. 이 사이클의 변경이 아니라 **다른
 #    사이클의 승인된 변경**이므로 값만 현재 워킹트리로 재산출한다(cycle274→cycle276
 #    승계 때와 같은 절차). 나머지 핀은 불변이다.
+# 🔁 2026-09-12 (cycle286, C4-a) 재핀 — `nxt_tradable=False` 사후 보강 판정축 교체가
+#    또 다른 사이클(cycle286)의 사용자 명시 8영역 승인 하에 `order_engine.py` 를
+#    바꿨다. 값만 현재 워킹트리로 재산출한다(같은 승계 절차).
 _BASE_SHA = {
     "src/engine/risk.py": "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
-    # 🔁 cycle276 — 사용자 명시 승인 하에 이 사이클이 바꾸는 **유일한** 8영역 파일이다
-    # (import 1줄 + `execute_buy` 두 매수 경로의 관측 훅 2곳). A-ATOMIC 구간은 byte 동일.
-    "src/engine/order_engine.py": "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
+    # 🔁 cycle276 → cycle286 — 사용자 명시 승인 하에 order_engine.py 를 바꾼 두 사이클의
+    # 누적 결과값이다. A-ATOMIC 구간은 byte 동일.
+    "src/engine/order_engine.py": "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":

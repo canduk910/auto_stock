@@ -1147,12 +1147,15 @@ _EIGHT_AREAS = [
 #    docstring 정직화). 판정식 2줄은 **텍스트 동일**이고 나머지 7영역은 diff 0 이다.
 #    자매 가드 **네 곳 전부**에 같은 값으로 핀한다.
 # TODO(cycle283 커밋 후): 아래 항목을 **삭제**한다.
+# ✅ 2026-09-12 (cycle286, C4-a) — `nxt_tradable=False` 사후 보강 판정축 교체.
+#    사용자 명시 8영역 승인, 범위 = `src/engine/order_engine.py` 단독. 자매 가드
+#    네 곳 전부 같은 값. TODO(cycle286 커밋 후): 아래 항목을 **삭제**한다.
 _ALLOWED_CONTENT_SHA: dict[str, str] = {
     "src/engine/scanner.py":
         "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
     "src/engine/order_engine.py":
-        "d9039ff1ae7f8d3bf43d80fef478df2f57020cd6a0bab4c237aa5ecb2c1fc9ec",
+        "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
 }
 
 

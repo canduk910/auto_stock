@@ -210,14 +210,22 @@ _STRATEGY_PINS = {
     # 그 복귀가 "전략에 죽은 배선이 남지 않았다" 의 유일한 기계적 증거다.
     # 나머지 4핀(`check_exit_signal`/`calc_buy_quantity`)은 처음부터 불변이다.
     # 값-출처 = `ast.get_source_segment` sha256.
+    # 🔁 cycle286 (2026-09-12, C2-a) — LTV `check_buy_signal` 이 **다시, 정당하게**
+    # 바뀐다(main 보드 15:20 매수 컷 발사점 게이트, 8영역 밖 승인 항목). 이 항목만
+    # 현재값으로 재핀한다 — VB `check_buy_signal` 은 이 사이클 무접촉이라 cycle272
+    # 값 그대로 남는다. `test_cycle276_ast_order_hook.py::test_c6_1`/`test_c6_4a` 의
+    # "cycle272 값으로 복귀" 불변식은 이 항목에 한해 자기소멸했다(그 파일 배너 참조).
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_buy_signal"):
         "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_exit_signal"):
         "86593b038e4cf8121ae47069fb368346edc50d9692b29db4cbdcc8897421b72e",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "calc_buy_quantity"):
         "6d24ef3f3afd211ae6123623075b08320cdc08c9cd48a6db965355305ad4e732",
+    # 🔁 2026-09-12 (cycle286 검증 반영) — `[ltv_main_buy_cutoff]` 마커에 `now=` 필드
+    # 병기(적대 검증 LOW-3/behavior)로 세그먼트가 다시 바뀌어 재핀했다. 진입 판정
+    # 로직·발사점 위치·baseline 계약은 byte 동일이고 로그 포맷 1줄만 늘었다.
     ("long_tail_volatility", "LongTailVolatilityStrategy", "check_buy_signal"):
-        "fb1e7460e5d6906aacd9dd6cbc1037fb7327759c24ca4df055773ba1f22cac2a",
+        "6c70101fe4abc9e5afc7f7e4a47af46ce5ebdf68fd84c2a18e22a46cb4546d1b",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "check_exit_signal"):
         "c8b0e6a8c8705d49bb6f12f82f505d426a5bdeb81413f8b2e0276eabb7dd9cad",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "calc_buy_quantity"):

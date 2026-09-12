@@ -20,6 +20,7 @@ def _today_kst():
     return datetime.now(_KST).date()
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.session import MarketBoard, session_tracker
 from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
@@ -85,6 +86,7 @@ def test_buy_when_prdy_rate_below_min_then_none(ltv, monkeypatch):
     assert ltv.check_buy_signal("005930", 73000, 70000) == Signal.NONE
 
 
+@freeze_time("2026-07-14 01:00:00")  # KST 10:00:00 — cycle286 C2-a 15:20 컷 창 안
 def test_buy_when_breakout_and_prdy_rate_above_min_then_buy(ltv, monkeypatch):
     """cycle272 — 레거시(off) 경로 회귀 가드. 인라인 자동확정(첫 틱에서 `source`
     미지정으로 `on_open_price_confirmed` 를 스스로 부르는 경로)에 의존한다 —
