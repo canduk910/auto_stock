@@ -60,6 +60,28 @@
 | 4 | 체결 프레임 원문 덤프 → `MARKET_CLS_CODE` 의 **payload 인덱스** | 우리 핸들러는 위치로 파싱한다. 중간 삽입이면 `_parse_day_high` 가 예외도 로그도 없이 0 을 준다 |
 | 5 | 시간외 전용 3채널(`H0STOUP0`·`H0STOAA0`·`H0STOAC0`) 구독 ACK·프레임 | 폐지 여부가 공지에 없다 |
 
+### 🔴 09-14 저녁에 이상이 보이면 — 끌 수단이 없다
+
+cycle287 이 만든 두 킬스위치는 **`param_catalog` 미등재**라 `PUT /api/strategies/{id}/params`
+가 `unknown_key` 로 **422** 다(2026-09-13 실측). 코드는 `params.get(...)` 로 읽지만 그 키를
+전략 `params` JSONB 에 넣을 경로가 API 에 없다.
+
+| 수단 | 가능한가 | 문제 |
+|---|---|---|
+| `PUT /api/strategies/{id}/params` | ❌ **422 unknown_key** | 카탈로그·`DEFAULT_PARAMS` 미등재 |
+| `strategy_config.params` 직접 UPDATE | ⚠️ 승인 대상 | 되돌리기 어려운 운영 조치 + cycle245 실측대로 **다음 재시작에서만** 반영 |
+| 1커밋 revert + 재배포 | ⚠️ | **그 재배포가 곧 16:00~20:00 재시작**이다 — 막으려는 것과 같은 행위 |
+
+⇒ **그날 16:00~20:00 에 애프터 청산이 오작동하면 즉시 끌 방법이 사실상 없다.**
+그래서 그 창에는 (a) 화면·로그로 지켜보고 (b) 이상이 보이면 **끄는 대신 먼저 보고**하고
+(c) 필요하면 **20:00 이후**(애프터 종료 뒤)에 revert 배포한다.
+
+**봉인이 대신 막아 주는 것** = 종목당 5회 실패 시 `[after_exit_giveup]` CRITICAL +
+익일청산 전환 + 그날 밤 포기. 즉 폭주는 자동으로 멈추지만 **개별 오작동은 안 멈춘다.**
+
+시정(승인 필요) = 두 키를 전략 `DEFAULT_PARAMS` + `param_catalog` 에 등재. 매매 행위 변경이라
+`domain-consult` 선행 대상이다. **월요일 전에 넣을지가 결정 카드다.**
+
 ### 3세대 합산 금지 (지표 의미가 바뀐 것)
 
 - `[nxt_post_reinforce]` — cycle286 전후로 `wrote=` 의 의미가 다르다
