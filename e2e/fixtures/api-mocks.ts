@@ -8,6 +8,8 @@
 import type { Page } from "@playwright/test";
 // cycle278 — 전략 파라미터 카탈로그 스키마 골든 픽스처(param_catalog.py 에서 기계 생성).
 import { PARAM_SCHEMA_FIXTURE } from "./param-schema.fixture";
+// cycle282 — 장운영상태(표 + 커서) 골든 픽스처(market_state.py 에서 기계 생성).
+import { MARKET_STATE_FIXTURE } from "./market-state.fixture";
 
 type AnyJson = Record<string, unknown>;
 
@@ -742,5 +744,22 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     return route.fulfill({
       json: envelope({ applied: params, warnings: [] }, "파라미터 저장 완료"),
     });
+  });
+
+  // ── cycle282 (2026-09-11) — 장운영상태(거래소 실제 장 운영 상태) ────────────
+  // 표와 커서가 **한 응답**에서 나온다(M9). 미등록이면 vite proxy → 백엔드 미기동
+  // → ECONNREFUSED → 페이지 timeout 이다(사이클 65 H3 계열).
+  // 시나리오별 다른 시각/미리보기가 필요하면 이 호출 **뒤에** page.route 를 덧등록한다
+  // (Playwright LIFO — 나중 등록이 이긴다).
+  //
+  // ⚠️ 사이클 104 hotfix 와 **같은 함정** — glob `**/api/market-state*` 는 vite dev 의 모듈
+  // 요청 `http://localhost:3000/src/api/market-state.ts`(resourceType='script') 까지 잡아
+  // JSON 으로 응답한다. 그러면 MIME 불일치로 `MarketState.tsx` 동적 import 가 통째로 실패해
+  // 화면이 빈 채로 남는다(실측: "Failed to fetch dynamically imported module").
+  // `**/api/logs*` 가 `src/api/logs.ts` 때문에 이미 같은 가드를 달고 있다 — 프론트 API
+  // 모듈 파일명이 endpoint 이름과 같으면 항상 이 충돌이 난다.
+  await page.route("**/api/market-state*", (route) => {
+    if (route.request().resourceType() === "script") return route.continue();
+    return route.fulfill({ json: envelope(MARKET_STATE_FIXTURE) });
   });
 }

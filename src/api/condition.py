@@ -255,6 +255,38 @@ async def next_trading_day(after_date) -> "date":
     return after_date + timedelta(days=1)
 
 
+async def is_trading_day(target_date) -> "bool | None":
+    """KIS 휴장일 API(CTCA0903R)로 개장 여부를 **3상태**로 반환한다 (사이클 282).
+
+    True  = opnd_yn == "Y"   (확정 개장)
+    False = opnd_yn == "N"   (확정 휴장)
+    None  = 조회 실패 / 응답에 그 날짜 행 없음 / 예외  ← **모른다**
+
+    `is_market_open()` 과 의도적으로 다르다. 그 함수는 실패 시 **True**(영업일 가정)를
+    돌려주는데, 그건 scheduler·strategy_funnel 등 **매매 경로**의 fail-open 계약이라
+    바꾸면 안 된다. 반면 화면은 "모른다" 를 "개장" 으로 보여주면 안 된다 —
+    조용한 True 는 휴장일에 장운영상태 화면이 정상 개장처럼 보이게 만든다.
+    그래서 같은 호출(같은 URL·TR_ID)을 3상태로 감싼 함수를 **따로** 둔다.
+
+    호출자 = `src/routes/market_state.py` 뿐이다(매매 경로 무관).
+    """
+    yyyymmdd = target_date.strftime("%Y%m%d")
+    try:
+        data = await kis_get_quote(
+            HOLIDAY_URL,
+            "CTCA0903R",
+            {"BASS_DT": yyyymmdd, "CTX_AREA_NK": "", "CTX_AREA_FK": ""},
+        )
+        for row in (data or {}).get("output", []) or []:
+            if row.get("bass_dt") == yyyymmdd:
+                return row.get("opnd_yn") == "Y"
+        logger.warning("휴장일 응답에 %s 항목 없음 — 확인 불가로 남긴다", yyyymmdd)
+        return None
+    except Exception:
+        logger.exception("휴장일 조회 실패: %s — 확인 불가로 남긴다", yyyymmdd)
+        return None
+
+
 async def add_business_days(base_date, n: int):
     """base_date 로부터 n 영업일 후 날짜를 반환한다 (사이클 191 — 영업일 2단계 등록).
 

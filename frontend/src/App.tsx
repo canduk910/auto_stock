@@ -17,6 +17,8 @@ const StockMaster = lazy(() => import('./pages/StockMaster'))
 const RealtimeHealth = lazy(() => import('./pages/RealtimeHealth'))
 // 사이클 103 (2026-06-11) — 전략 현황 (손절 임계 가시화) 신규 페이지 (9번째 메뉴)
 const Strategies = lazy(() => import('./pages/Strategies'))
+// cycle282 (2026-09-11) — 장운영상태(거래소 실제 장 운영 상태 + 주문유형 카탈로그) 신규 페이지
+const MarketState = lazy(() => import('./pages/MarketState'))
 
 const navItems = [
   { to: '/', label: '대시보드' },
@@ -28,6 +30,7 @@ const navItems = [
   { to: '/settings', label: '설정' },
   { to: '/realtime-health', label: '실시간 상태' },
   { to: '/strategies', label: '전략 현황' },
+  { to: '/market-state', label: '장운영상태' },
 ]
 
 // 나브바 화면 폭 슬라이더 — 콘텐츠 max-width 사용자 조정 (localStorage 영속)
@@ -241,6 +244,8 @@ function AppShell() {
             {/* 사이클 103 (2026-06-11) — 실시간 건강 + 전략 현황 */}
             <Route path="/realtime-health" element={<RealtimeHealth />} />
             <Route path="/strategies" element={<Strategies />} />
+            {/* cycle282 (2026-09-11) — 장운영상태 */}
+            <Route path="/market-state" element={<MarketState />} />
           </Routes>
         </Suspense>
       </main>
