@@ -45,6 +45,7 @@ from dataclasses import dataclass
 from unittest.mock import AsyncMock
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.order_engine import OrderEngine
 from src.engine.strategy_base import (
@@ -309,10 +310,14 @@ async def test_s4_when_nxt_tradable_true_then_no_downgrade_and_no_log(
     """
     _make_stock_master_mock(monkeypatch, ticker_to_nxt={"005930": True})
 
+    # cycle287 검증 시정 (H2) — base 가 "SOR" 유지로 기대되는 이 케이스는 규칙 1
+    # 라우터가 실행 시각에 KRX 정규장/애프터마켓을 만나면 "KRX" 로 되돌린다.
+    # 어느 거래소도 우리 호가유형을 받지 않는 23:00 KST 로 고정한다.
     return_values: list[str] = []
-    for _ in range(100):
-        result = await engine._strategy_exchange_async("momentum", ticker="005930")
-        return_values.append(result)
+    with freeze_time("2026-01-15 14:00:00"):  # UTC → KST 23:00, both_unsupported_keep
+        for _ in range(100):
+            result = await engine._strategy_exchange_async("momentum", ticker="005930")
+            return_values.append(result)
 
     # 핵심 검증 1: 다운그레이드 안 함 — 전략 base exchange (SOR) 반환
     assert all(r == "SOR" for r in return_values), (

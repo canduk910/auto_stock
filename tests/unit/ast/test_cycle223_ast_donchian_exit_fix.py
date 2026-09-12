@@ -446,11 +446,16 @@ def _content_sha(path: str) -> str:
 # ✅ 2026-09-12 (cycle286, C4-a) — `nxt_tradable=False` 사후 보강 판정축 교체
 #    (거래소 ∧ 좁힌 프리장 창). 사용자 명시 8영역 승인. 자매 가드 네 곳 전부 같은
 #    값(`test_g3_9b` 계약). TODO(cycle286 커밋 후): 아래 항목을 **삭제**한다.
+# ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다. 사용자 명시 8영역
+#    승인, 범위 = `order_engine.py` + `api/order.py`(docstring 만). 자매 가드
+#    네 곳 전부 같은 값. TODO(cycle287 커밋 후): 아래 항목을 **삭제**한다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     "src/engine/scanner.py":
         "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     "src/engine/order_engine.py":
-        "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
+        "33033e740205ff01c6b1eb8090a35dfd6c9f88cc3f4172da45663b45aab3bd32",
+    "src/api/order.py":
+        "10a8a1dd57a702f78b31fdc84acb38f12a36f3a0688e6abcf801fc130f10154f",
 }
 
 

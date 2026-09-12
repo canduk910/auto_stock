@@ -72,6 +72,16 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - **자금 안전**: 본 모듈은 `kis_post` (메인 단일) 만 사용. `kis_post_quote` / `kis_get_quote` 절대 import 안 함 — `test_condition_quote_routing.py::test_order_module_never_imports_quote_pool` 가드
 - `place_order(..., exchange="KRX")` / `cancel_order(..., exchange="KRX")`: `EXCG_ID_DVSN_CD` body. `KRX`(기본) / `NXT` / `SOR`. 모의(VTS) KRX 만 허용 — SOR/NXT 실전 한정. 미지정 시 KRX (후방 호환)
 - **매수 지정가 분기**: `order_engine.execute_buy` 가 "시장가매매불가" 거부 폴백 시 `place_order(side=BUY, price=fallback_price>0, order_division=LIMIT, exchange=...)`. body 는 `ORD_DVSN=order_division.value`, `ORD_UNPR=str(price)` 직렬화 — 매도 지정가와 동일 경로
+- **`OrderDivision`(cycle287, 2026-09-12) — 시각이 정한다.** `place_order` 는 값을 **검증 없이 그대로** `ORD_DVSN` 에 흘려보낸다(화이트리스트 절대 금지 — 끼워 넣으면 `44` 가 조용히 사라진다). 표:
+
+  | 구간 | `ORD_DVSN` | 의미 | `ORD_UNPR` |
+  |---|---|---|---|
+  | 정규장·프리장 | `"01"` | 시장가(기본) | `"0"` |
+  | 정규장·프리장 폴백 | `"00"` | 지정가 | 매수 `step_up(5)` / 매도 `step_down(5)` |
+  | **KRX 애프터**(16:00~20:00, 2026-09-14 신설) 1차 | `"44"` | 최유리지정가 | `"0"`(정본에 명시된 유일 값, §4-A — 틀리면 즉시 거부돼 관측 가능. 현재가를 넣으면 지정가로 오인 접수돼 미체결 잔존 = 손절 무음 실패라 더 위험) |
+  | KRX 애프터 폴백 | `"41"` | 지정가 | `step_down(현재가,5)`(우리가 가격을 통제) |
+
+  41~47 전체가 애프터 전용이지만 `OrderDivision` 은 `41`/`44` 둘만 갖는다 — IOC/FOK(42/43/45/46)는 잔량 자동취소로 손절 잔여를 잃고, 47(최우선지정가)은 자기 방향 최우선호가라 크로스하지 않아 체결 보장이 없다. **애프터마켓엔 시장가(01)가 없고 ETP(ETF/ETN) 거래가 불가**(KIS 공지 verbatim). `EXCG_ID_DVSN_CD` 는 이 코드와 별개로 라우팅된다 — 시각·거래소 결정 로직(`_route_exchange_by_clock`/`_apply_clock`)은 `src/engine/CLAUDE.md` §order_engine.py 「cycle287」 절이 정본. **취소(`cancel_order`)의 `ORD_DVSN` 은 `"00"` 하드코딩을 그대로 유지**했다 — 애프터 원주문 취소가 이 값으로 정상 처리되는지는 all-time 0건이라 미검증(docstring에 명시). 관측 자체는 적대 검증 시정으로 이미 구현돼 있다 — `order_engine.py` 의 취소 3경로(`_cancel_after_wait`/`_cancel_and_reorder`/`cancel_remaining`)가 매 시도마다 `[after_cancel_result] ticker= order_no= ord_dvsn=00 exchange= result=ok|error err=` 1행을 남긴다(`cancel_order` 시그니처·`ORD_DVSN` 값은 byte 동일, `order_division` 인자 추가 없음). 첫 애프터 실측에서 `result=error` 가 나오면 그때 opt-in 인자를 검토한다.
 
 ## balance.py — 잔고/조회
 

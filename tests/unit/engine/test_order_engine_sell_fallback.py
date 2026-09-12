@@ -160,7 +160,7 @@ def mock_strategy_exchange(monkeypatch: pytest.MonkeyPatch):
     Phase G stock_master 보강 의존성을 분리해 폴백 분기만 단위 검증.
     """
 
-    async def _fake(self, strategy_id, *, ticker=None):  # noqa: ARG001
+    async def _fake(self, strategy_id, *, ticker=None, side="sell"):  # noqa: ARG001
         return "KRX"
 
     monkeypatch.setattr(

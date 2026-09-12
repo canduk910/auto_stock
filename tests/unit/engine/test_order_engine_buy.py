@@ -435,7 +435,7 @@ async def test_execute_buy_preconverts_market_to_limit_in_pre_nxt_only_window(
     set_active({MarketBoard.PRE_NXT})
 
     # _strategy_exchange_async 가 SOR 반환하도록 패치
-    async def _fake_exchange(self, strategy_id, *, ticker=None):
+    async def _fake_exchange(self, strategy_id, *, ticker=None, side="sell"):
         return "SOR"
     monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
 
@@ -489,7 +489,7 @@ async def test_execute_buy_preconverts_when_pre_nxt_and_krx_open_both_active(
     # 08:30~09:00 시나리오: PRE_NXT + KRX_OPEN 동시 활성
     set_active({MarketBoard.PRE_NXT, MarketBoard.KRX_OPEN})
 
-    async def _fake_exchange(self, strategy_id, *, ticker=None):
+    async def _fake_exchange(self, strategy_id, *, ticker=None, side="sell"):
         return "SOR"
     monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
 
@@ -523,7 +523,7 @@ async def test_execute_buy_keeps_market_order_in_main_board(
     set_active, MarketBoard = _patch_session_active
     set_active({MarketBoard.MAIN})
 
-    async def _fake_exchange(self, strategy_id, *, ticker=None):
+    async def _fake_exchange(self, strategy_id, *, ticker=None, side="sell"):
         return "SOR"
     monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
 
@@ -556,7 +556,7 @@ async def test_execute_buy_keeps_market_order_for_krx_exchange_in_pre_nxt(
     set_active, MarketBoard = _patch_session_active
     set_active({MarketBoard.PRE_NXT})
 
-    async def _fake_exchange(self, strategy_id, *, ticker=None):
+    async def _fake_exchange(self, strategy_id, *, ticker=None, side="sell"):
         return "KRX"
     monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
 
@@ -588,7 +588,7 @@ async def test_execute_buy_market_preconvert_emits_log(
     set_active, MarketBoard = _patch_session_active
     set_active({MarketBoard.PRE_NXT})
 
-    async def _fake_exchange(self, strategy_id, *, ticker=None):
+    async def _fake_exchange(self, strategy_id, *, ticker=None, side="sell"):
         return "NXT"
     monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
 
@@ -624,7 +624,7 @@ async def test_execute_buy_post_fallback_still_works_for_apbk1943(
     set_active, MarketBoard = _patch_session_active
     set_active({MarketBoard.MAIN})
 
-    async def _fake_exchange(self, strategy_id, *, ticker=None):
+    async def _fake_exchange(self, strategy_id, *, ticker=None, side="sell"):
         return "SOR"
     monkeypatch.setattr(_oe.OrderEngine, "_strategy_exchange_async", _fake_exchange)
 

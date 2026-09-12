@@ -47,6 +47,156 @@ logger = logging.getLogger(__name__)
 # KST timezone — scanner.KST_TZ 와 동일 (circular import 방지용 재정의)
 _KST_TZ = timezone(timedelta(hours=9))
 
+# ─────────────────────────── cycle287 — 시각이 거래소·호가유형을 정한다 ───────
+# (2026-09-12, 자문 `cycle287_domain_consult` §1·§4·§9). 규칙 1(라우팅)과
+# 규칙 2(KRX 애프터마켓 41/44)가 같은 파일에 산다 — 분리 배포하면 규칙 1 단독은
+# 오늘(2026-09-12)보다 나쁘다(§2-C: 09-14 부터 KRX 애프터가 `01`도 `00`도
+# 받지 않는데 라우팅만 켜면 지금 NXT 애프터에서 체결되던 청산 경로가 사라진다).
+#
+# `_CLOCK_ROUTED_BASES` — 이 두 값만 시각 재판정 대상이다. `KRX` 가 여기 들어오면
+# `nxt_tradable=False` 다운그레이드가 내린 `KRX` 를 라우터가 되돌리려 들게 되므로
+# (프리장에서 그 값이 "복귀"하면 NXT 비대상 종목에 NXT 주문이 나간다) 절대 넣지
+# 않는다.
+_CLOCK_ROUTED_BASES: tuple[str, ...] = ("NXT", "SOR")
+
+# 우리가 실제로 KIS 에 보낼 수 있는 호가유형 — `OrderDivision` 값 집합과 항상
+# 동치여야 한다(enum 확장 시 이 상수도 함께 넓어진다, `test_r1e`). 판정의 전제가
+# "우리가 보낼 수 있는 코드" 라서, 이 둘이 갈리면 판정이 조용히 거짓이 된다.
+_SENDABLE_DIVISIONS: frozenset[str] = frozenset(d.value for d in OrderDivision)
+
+# 킬스위치 기본값 — 두 신규 파라미터(`order_exchange_clock_mode`·
+# `after_market_exit_division`)는 브리프 제약(전략 7파일 diff 0)으로 이 사이클엔
+# 어느 전략 `DEFAULT_PARAMS` 에도 없다. 이 모듈 상수가 유일한 정본이고,
+# 키 부재 = 이 값이다(cycle287b 가 param_catalog/DEFAULT_PARAMS 에 등재할 때까지).
+_ORDER_EXCHANGE_CLOCK_MODE_DEFAULT: str = "enforce"
+_AFTER_EXIT_DIVISION_DEFAULT: str = "44"
+#: 화이트리스트(클램프 아님) — 밖은 `44` 로 폴백해 청산을 여는 방향으로 떨어진다.
+_AFTER_EXIT_DIVISION_ALLOWED: frozenset[str] = frozenset({"44", "41"})
+#: K9 봉인2 — 종목당 그 저녁 실패 임계. 상한 검산 = 종목당 ≤10 주문(5회 ×
+#: 1차+폴백) / 보유 7종목 전건 실패 ≤70 주문/저녁(KIS 20/s 대비 무해).
+_AFTER_EXIT_GIVEUP_THRESHOLD: int = 5
+
+
+def _resolve_exit_capable_krx_phases() -> frozenset:
+    """§4-I 상수 계산 전용 — `market_state` 는 이 함수 **안**에서만 읽는다.
+
+    모듈 최상단에 `from src.engine.market_state import MarketPhase` 를 두면
+    `test_s3e`(`order_engine.py` 최상단 `src.*` import 집합 고정)가 즉시 RED 다.
+    이 함수는 모듈 로드 시 **한 번** 호출되어 `_EXIT_CAPABLE_KRX_PHASES` 를
+    채우고, import 문 자체는 함수 본문 안(비-최상단)에 남는다.
+    """
+    from src.engine.market_state import MarketPhase
+
+    return frozenset({
+        MarketPhase.REGULAR, MarketPhase.CLOSE_AUCTION, MarketPhase.AFTER_MARKET,
+    })
+
+
+#: TTL 축(§4-I) 정의 = "그 시각 KRX 가 우리 청산 호가를 받는가". 09-14 **이전**에는
+#: `sell_rejection.is_krx_main_hours`(09:00~15:30)와 완전히 일치한다(K7 AFTER_SINGLE
+#: 은 집합 밖). 09-14 부터 AFTER_MARKET(K6) 하나만 늘어난다. ⚠️ `PRE_AUCTION`(시가
+#: 단일가)을 넣지 않는다 — 그 창의 거부는 09:00 재평가를 기다리는 것이 옳고, 5분
+#: TTL 로 줄이면 단일가에 시장가를 반복 발사한다.
+_EXIT_CAPABLE_KRX_PHASES = _resolve_exit_capable_krx_phases()
+
+
+def _route_exchange_by_clock(
+    base: str,
+    *,
+    side: str = "sell",
+    mode: str = "enforce",
+    now: datetime | None = None,
+) -> tuple[str, str]:
+    """규칙 1 — 시각이 거래소를 정한다(자문 §1·§9-B). 순수 함수, never-raise.
+
+    판정 순서(첫 성립에서 반환) — 시각 리터럴은 여기 0건이다. 경계는
+    `market_state.MARKET_TABLE`(유일 정본)에서 나온다:
+
+      1. base ∉ {"NXT","SOR"}                               -> (base, "base_krx")
+      2. mode == "off"                                      -> (base, "mode_off")
+      3. mode == "sell_only" ∧ side != "sell"                -> (base, "mode_sell_only")
+      4. PRE_NXT ∈ session_tracker.active ∧ MAIN ∉ active    -> (base, "pre_nxt_keep")
+      5. _SENDABLE_DIVISIONS ∩ KRX.order_divisions ≠ ∅       -> ("KRX", "krx_by_clock")
+      6. _SENDABLE_DIVISIONS ∩ NXT.order_divisions ≠ ∅       -> (base, "krx_unsupported_keep")
+      7. else                                                -> (base, "both_unsupported_keep")
+      예외                                                    -> (base, "probe_error")  # fail-open
+
+    프리장 clause 는 매수 PR-F·매도 프리장 사전 지정가 변환과 **같은 출처**
+    (`session_tracker.active`)를 읽는다 — 08:50~09:00(NXT N2 휴장)에 여기서
+    `market_state` 의 NXT phase 를 쓰면 그 사전 변환이 죽어 시가 단일가에
+    시장가가 나간다(자문 §1-B·§G).
+    """
+    try:
+        if base not in _CLOCK_ROUTED_BASES:
+            return base, "base_krx"
+        if mode == "off":
+            return base, "mode_off"
+        if mode == "sell_only" and side != "sell":
+            return base, "mode_sell_only"
+
+        from src.engine.session import MarketBoard, boards_at, session_tracker
+
+        moment = now if now is not None else datetime.now(_KST_TZ)
+        active = session_tracker.active
+        if not active:
+            # 적대 검증 시정(MEDIUM — exit lens M1 / test lens M4) —
+            # `session_tracker.active` 는 `tick()`(30초 주기)이 채우는 **캐시**라
+            # 기동 직후 첫 tick 전에는 빈 집합이다. 그 순간이 08:20~09:00 프리장
+            # 창과 겹치면 이 clause 가 실패해 아래 KRX 판정으로 떨어지고,
+            # KRX PRE_AUCTION(시가 단일가)이 마침 시장가를 받아 조용히 KRX 로
+            # 나간다 — 사전 지정가 변환(PR-F)이 같은 `session_tracker.active`
+            # 를 읽어 함께 실패하므로 겉으로는 "정상 접수"처럼 보이지만
+            # NXT 프리장 매매 의도와 다른 시장으로 샌 것이다. `boards_at`
+            # (session.py 의 순수 함수, 파일 자체는 무접촉)로 그 순간의
+            # 스케줄을 즉석 재계산해 캐시가 비었을 때만 보강한다 — 캐시가
+            # 채워져 있으면(정상 상태) 이 분기는 진입하지 않아 기존 판정과
+            # 완전히 동일하다.
+            active = boards_at(moment.time())
+        if MarketBoard.PRE_NXT in active and MarketBoard.MAIN not in active:
+            return base, "pre_nxt_keep"
+
+        from src.engine.market_state import get_market_state
+
+        krx_divisions = set(get_market_state(moment, market="KRX").order_divisions)
+        if _SENDABLE_DIVISIONS & krx_divisions:
+            return "KRX", "krx_by_clock"
+        nxt_divisions = set(get_market_state(moment, market="NXT").order_divisions)
+        if _SENDABLE_DIVISIONS & nxt_divisions:
+            return base, "krx_unsupported_keep"
+        return base, "both_unsupported_keep"
+    except Exception:
+        return base, "probe_error"
+
+
+def _exit_capable_krx_window(now: datetime) -> bool:
+    """§4-I — 그 시각 KRX 가 우리 청산 호가유형을 받는가(TTL 축 재정의).
+
+    `sell_rejection.py` 는 diff 0 이다 — 이 함수는 그 파일을 고치는 대신
+    호출부(`register_market_closed` 의 `in_krx_main_hours=`)가 넘기는 인자의
+    **의미**를 "매도 가능 창 안인가" 로 재정의한다. 09-14 이전에는
+    `is_krx_main_hours` 와 값이 완전히 같고, 09-14 부터 KRX 애프터마켓
+    (16:00~20:00) 하나만 늘어난다. 판정 예외는 그 함수로 fail-open 한다.
+    """
+    try:
+        from src.engine.market_state import get_market_state
+
+        return get_market_state(now, market="KRX").phase in _EXIT_CAPABLE_KRX_PHASES
+    except Exception:
+        return is_krx_main_hours(now)
+
+
+def _classify_after_exit_rejection(e: KisApiError) -> str:
+    """K10 — 애프터 거부 관측 분류(관측 전용, 폴백 게이트에는 쓰이지 않는다).
+
+    애프터 폴백은 분류에 의존하지 않는 **구조적 폴백**이다(자문 §1-E) — 44 거부의
+    msg1 원문이 완전 미지라 이 분류는 오직 `[after_exit_rejected]` 판독용이다.
+    """
+    if is_market_closed_rejection(e):
+        return "closed"
+    if is_market_order_disallowed(e):
+        return "disallowed"
+    return "unclassified"
+
 
 def _compute_next_market_open_kst(now: datetime) -> datetime:
     """now KST 기준 다음 KRX 정규시간 시작 시각 (09:00) 반환.
@@ -88,6 +238,10 @@ class OrderEngine:
         self._pending_buy_orders: dict[str, dict] = {}  # order_no -> {ticker, price, quantity, strategy_id}
         self._order_strategy: dict[str, str] = {}  # order_no -> strategy_id
         self._order_ticker: dict[str, str] = {}   # order_no -> ticker (체결통보 종목코드 보정용)
+        # cycle287 적대 검증 시정 — order_no -> 그 주문이 실제로 나간 거래소.
+        # 취소 경로가 취소 시각의 라우터 재평가 대신 이 값을 우선 사용한다
+        # (원주문·취소가 시간 경계를 사이에 두고 다른 거래소로 갈리는 것을 막는다).
+        self._order_exchange: dict[str, str] = {}
         self._selling: set[str] = set()  # 매도 진행 중인 종목 (중복 매도 차단)
         self._selling_since: dict[str, datetime] = {}  # ticker -> _selling 진입 시각 (KST). stale 재대조 age gate.
         # 체결통보가 place_order 응답보다 먼저 도착해 COMPLETED row를 직접 INSERT한 order_no.
@@ -108,6 +262,13 @@ class OrderEngine:
         # 사이클 54 set[str] → DailyEmitCap[str] 호환 layer 경유 (add/clear/__contains__).
         # 다운그레이드 결정 무영향, 로그만 cap. _reset_daily_state 동행 clear.
         self._nxt_downgrade_logged_today: DailyEmitCap[str] = DailyEmitCap[str]()
+        # cycle287 — 규칙 1 관측 cap. 키 = (ticker, side, reason) / (strategy_id, mode, dial).
+        # `base == routed` 인 정규장·프리장 폭주(초당 1틱)를 하루 1행으로 접는다.
+        self._order_channel_logged: DailyEmitCap[tuple] = DailyEmitCap[tuple]()
+        self._order_channel_config_logged: DailyEmitCap[tuple] = DailyEmitCap[tuple]()
+        # cycle287 K9 봉인2 — (ticker, KST date) -> 그 저녁 애프터 청산 실패 횟수.
+        # `_AFTER_EXIT_GIVEUP_THRESHOLD` 도달 시 그날 밤은 포기(다음 09:00 래치).
+        self._after_exit_fails: dict = {}
 
     # ──────────────────────────── 사이클 52 호환 layer (사이클 55 R-1)
 
@@ -143,14 +304,211 @@ class OrderEngine:
             return "KRX"
         return str(strategy.config.params.get("exchange", "KRX")).upper()
 
-    async def _strategy_exchange_async(
-        self, strategy_id: str | None, *, ticker: str | None = None
-    ) -> str:
-        """전략 exchange + stock_master NXT 사전 차단 (Phase G, 2026-05-11).
+    def _clock_params(self, strategy_id: str | None) -> tuple[str, str]:
+        """규칙 1·2 공용 — 전략 params 에서 `mode`/`dial` 조회(fail-open).
 
-        ticker 인자가 주어지고 `stock_master.get(ticker).nxt_tradable=False` 이면
-        NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` system_logs 1행.
-        캐시 miss / KIS 오류 시 전략 기본 exchange 그대로 (보수적 fallback).
+        `_apply_clock`·`_strategy_exchange_async` 가 공유한다 — 파라미터 조회
+        로직이 두 곳으로 갈라지면 한쪽만 킬스위치를 반영하는 사고가 난다.
+        """
+        try:
+            strategy = self.registry.get(strategy_id) if strategy_id else None
+            params = strategy.config.params if strategy is not None else {}
+        except Exception:
+            params = {}
+        mode = str(
+            params.get("order_exchange_clock_mode", _ORDER_EXCHANGE_CLOCK_MODE_DEFAULT)
+        )
+        dial = str(
+            params.get("after_market_exit_division", _AFTER_EXIT_DIVISION_DEFAULT)
+        )
+        if dial not in _AFTER_EXIT_DIVISION_ALLOWED:
+            dial = _AFTER_EXIT_DIVISION_DEFAULT
+        return mode, dial
+
+    def _apply_clock(
+        self,
+        base: str,
+        strategy_id: str | None,
+        *,
+        side: str = "sell",
+        ticker: str | None = None,
+        now: datetime | None = None,
+    ) -> str:
+        """규칙 1(시각이 거래소를 정한다) 적용 지점 — 자문 §S4.
+
+        `limit_price>0` 분기 + 동기 취소 3경로(§S6e, `_cancel_after_wait`·
+        `_cancel_and_reorder`·`cancel_remaining`)가 전부 이 메서드를 거친다
+        (`_strategy_exchange_async` 는 이미 async 라 §S3g 에 따라 라우터를
+        직접 부르고 같은 emit 헬퍼로 마커를 남긴다 — 로직 중복 없이 동일
+        서식). 라우터를 호출부마다 직접 부르면 마커·mode 조회·예외 흡수가
+        네 군데로 복제되고, 한 곳을 빠뜨리면 그 경로만 조용히 라우팅을
+        비켜간다.
+
+        **동기 함수**여야 한다 — 동기 취소 3경로가 이 seam 을 쓴다. 예외는
+        전부 흡수하고 `base` 를 반환한다(fail-safe — 판정 실패가 주문 자체를
+        막으면 안 된다).
+        """
+        mode, dial = self._clock_params(strategy_id)
+        moment = now if now is not None else datetime.now(_KST_TZ)
+        routed, reason = _route_exchange_by_clock(base, side=side, mode=mode, now=moment)
+
+        try:
+            self._emit_order_channel_config(strategy_id, mode, dial)
+        except Exception:
+            logger.debug("[order_channel_config] 발화 실패", exc_info=True)
+
+        # 적대 검증 시정(MEDIUM) — `routed != base` 게이트는 `probe_error` 도
+        # 함께 침묵시킨다. 판정 자체가 예외로 죽어도 `base` 로 fail-safe 하므로
+        # `routed == base` 라 다른 정상 유지 사유(pre_nxt_keep 등)와 구별이
+        # 안 됐다 — 라우팅이 안 걸린 것과 라우팅이 걸릴 필요가 없던 것을
+        # 가르는 유일한 신호라 이 사유만 게이트 밖에서 예외적으로 남긴다.
+        if routed != base or reason == "probe_error":
+            try:
+                self._emit_order_channel(side, ticker, strategy_id, base, routed, reason)
+            except Exception:
+                logger.debug("[order_channel] 발화 실패", exc_info=True)
+
+        return routed
+
+    def _emit_order_channel(
+        self,
+        side: str,
+        ticker: str | None,
+        strategy_id: str | None,
+        base: str,
+        exchange: str,
+        reason: str,
+    ) -> None:
+        """R8 — `[order_channel]` 1회/(ticker,side,reason)/일.
+
+        운영자는 화면에서 `SOR` 을 보면서 `KRX` 로 나가는 주문을 갖게 된다
+        (자문 §4-E) — 이 마커가 그 불일치를 매일 남기는 유일한 분모다.
+        """
+        key = (ticker or "", side, reason)
+        if key in self._order_channel_logged:
+            return
+        self._order_channel_logged.add(key)
+        logger.info(
+            "[order_channel] side=%s ticker=%s strategy=%s base=%s exchange=%s reason=%s",
+            side, ticker, strategy_id, base, exchange, reason,
+        )
+
+    def _emit_order_channel_config(
+        self, strategy_id: str | None, mode: str, dial: str,
+    ) -> None:
+        """R8d — `[order_channel_config]` 카나리아 1회/(전략,mode,dial)/일.
+
+        D+1 판독 "라우팅이 켜졌는가" 를 한 줄로 확인하는 채널(cycle245
+        `[ratio_cap_config]` 관례). 값-민감 키라 K·예산이 실제로 바뀐 날에만
+        1행이 더 붙는다.
+        """
+        key = (strategy_id, mode, dial)
+        if key in self._order_channel_config_logged:
+            return
+        self._order_channel_config_logged.add(key)
+        logger.info(
+            "[order_channel_config] strategy=%s mode=%s division=%s",
+            strategy_id, mode, dial,
+        )
+
+    def _register_after_exit_disallowed(
+        self, ticker: str, now_kst: datetime, *, fallback_succeeded: bool,
+    ) -> bool:
+        """K9 봉인① 공용 — TTL(30초) 등록, 성공 여부를 반환한다.
+
+        적대 검증 시정(H1) — `[after_exit_rejected]` 의 `ttl_registered=` 가
+        하드코딩 리터럴 `1` 이었다(등록을 시도조차 안 한 경로에서도 참을
+        주장). 이 래퍼가 실측 결과를 돌려주고, 호출부는 그 값을 그대로
+        로그에 싣는다. never-raise — 등록 실패가 매도 흐름을 막지 않는다.
+        """
+        try:
+            self._sell_rejection.register_market_order_disallowed(
+                ticker, now_kst,
+                is_nxt_session=is_nxt_session_hours(now_kst),
+                fallback_succeeded=fallback_succeeded,
+            )
+            return True
+        except Exception:
+            logger.debug(
+                "[after_exit_rejected] TTL 등록 실패: %s", ticker, exc_info=True,
+            )
+            return False
+
+    def _bump_after_exit_fails_and_maybe_giveup(
+        self, ticker: str, strategy_id: str, now_kst: datetime,
+    ) -> None:
+        """K9 봉인② 공용 — 그 저녁 실패(=주문 사이클 전체가 무성사) 횟수 누적.
+
+        적대 검증 시정(CRITICAL C1) — 종전에는 이 카운터가 "폴백을 시도했고
+        그것도 거부된" 경로에만 있었다. 폴백을 **시도조차 못 한**
+        (`cur_price<=0`) 경로는 카운터가 전혀 늘지 않아 브레이크 없이
+        틱마다(16:00~20:00 은 실시간 연속체결) 재발사했다 — 이 헬퍼를 그
+        경로에도 호출해 같은 상한을 공유시킨다. `_AFTER_EXIT_GIVEUP_THRESHOLD`
+        도달 시 다음 09:00 TTL 로 전환 + 익일청산 등록 + CRITICAL 1행.
+        never-raise.
+        """
+        try:
+            fail_key = (ticker, now_kst.date())
+            fails = self._after_exit_fails.get(fail_key, 0) + 1
+            self._after_exit_fails[fail_key] = fails
+            if fails >= _AFTER_EXIT_GIVEUP_THRESHOLD:
+                self._sell_rejection.register_market_closed(
+                    ticker, now_kst, in_krx_main_hours=False,
+                )
+                try:
+                    pending = self._pending_next_day_clear_provider()
+                    if pending is not None:
+                        pending.add((ticker, strategy_id))
+                except Exception:
+                    logger.debug(
+                        "[after_exit_giveup] pending 등록 실패: %s",
+                        ticker, exc_info=True,
+                    )
+                logger.critical(
+                    "[after_exit_giveup] ticker=%s fails=%d next_day_clear=1",
+                    ticker, fails,
+                )
+        except Exception:
+            logger.debug("[after_exit_giveup] 판정 실패: %s", ticker, exc_info=True)
+
+    async def _observe_after_exit_etp(self, ticker: str) -> None:
+        """K7 — 애프터 1차 거부 직후 ETP 관측(fail-open, 행위 분기 없음).
+
+        관측을 행복 경로(주문 직전)에 두면 손절에 DB 왕복 지연이 붙으므로
+        거부 후로 옮긴다(자문 §4-F/§S5) — 판정에 쓰지 않으니 정보 손실 0.
+        판별 정본 = `stock_master.raw.scty_grp_id_cd ∈ {EF,EN,FE}`
+        (CTPF1002R #7, 신규 KIS 호출 0 — 값이 이미 `stock_master.raw` 에 있다).
+        ⚠️ `prdt_type_cd` 로 판정하면 안 된다 — `stock_master` 전 종목이
+        `'300'`(ETF 포함)이라 한 건도 걸러내지 못한다(조사 실측).
+        """
+        try:
+            from src.db import stock_master
+
+            basics = await stock_master.get(ticker)
+            raw = basics.raw if basics is not None else None
+            scty_grp = raw.get("scty_grp_id_cd") if isinstance(raw, dict) else None
+            if scty_grp in ("EF", "EN", "FE"):
+                logger.info(
+                    "[after_etp_exit_observe] ticker=%s scty_grp=%s source=raw",
+                    ticker, scty_grp,
+                )
+        except Exception:
+            logger.debug("[after_etp_exit_observe] 관측 실패", exc_info=True)
+
+    async def _probe_nxt_downgrade_base(
+        self, strategy_id: str | None, ticker: str | None,
+    ) -> str:
+        """전략 exchange + stock_master NXT 사전 차단(Phase G, 2026-05-11) — **다운그레이드까지만**.
+
+        `stock_master.get(ticker).nxt_tradable=False` 이면 NXT/SOR → KRX 강제
+        다운그레이드 + `[nxt_downgrade]` system_logs 1행. 캐시 miss / KIS 오류
+        시 전략 기본 exchange 그대로 (보수적 fallback).
+
+        cycle287 — 이 메서드는 시각 라우팅을 하지 **않는다**. 호출자
+        `_strategy_exchange_async` 가 이 반환값을 받아 함수 말미에서 **한 번**
+        `_route_exchange_by_clock` 으로 감싼다(자문 §9-B "함수 말미에서 한 번
+        감싼다") — 그래서 `[nxt_downgrade]`/`[stock_master_miss]` 는 항상
+        라우팅 **전**에 발화한다.
         """
         base = self._strategy_exchange(strategy_id)
         if not ticker or base == "KRX":
@@ -213,6 +571,44 @@ class OrderEngine:
             except Exception:
                 logger.debug("[nxt_downgrade] write_log 실패", exc_info=True)
         return "KRX"
+
+    async def _strategy_exchange_async(
+        self,
+        strategy_id: str | None,
+        *,
+        ticker: str | None = None,
+        side: str = "sell",
+    ) -> str:
+        """전략 exchange 결정 — Phase G 다운그레이드 + cycle287 규칙 1 라우팅.
+
+        다운그레이드(`_probe_nxt_downgrade_base`) **뒤**에 라우터를 적용해야
+        `[nxt_downgrade]`/`[stock_master_miss]` 관측이 라우팅과 무관하게
+        발화한다(함수 맨 앞에 두면 그 관측이 조용히 사라진다 — 자문 §9-B 경고).
+        `side` 는 매수 호출부(`execute_buy`)가 `"buy"` 를, 그 외(매도)가
+        기본값 `"sell"` 을 쓴다 — `sell_only` 킬스위치가 성립하려면 이 구분이
+        필요하다. 이미 async 인 이 함수는 `_apply_clock` 을 거치지 않고
+        라우터(`_route_exchange_by_clock`)를 직접 불러 **한 번**(함수 말미)
+        감싼다 — 동일한 emit 헬퍼로 `_apply_clock` 과 같은 마커 서식을 낸다.
+        """
+        base = await self._probe_nxt_downgrade_base(strategy_id, ticker)
+        mode, dial = self._clock_params(strategy_id)
+        moment = datetime.now(_KST_TZ)
+        routed, reason = _route_exchange_by_clock(base, side=side, mode=mode, now=moment)
+
+        try:
+            self._emit_order_channel_config(strategy_id, mode, dial)
+        except Exception:
+            logger.debug("[order_channel_config] 발화 실패", exc_info=True)
+
+        # 적대 검증 시정(MEDIUM) — `_apply_clock` 과 동일하게 `probe_error`
+        # 는 `routed == base` 여도 게이트 밖에서 남긴다(판정 실패 신호 보존).
+        if routed != base or reason == "probe_error":
+            try:
+                self._emit_order_channel(side, ticker, strategy_id, base, routed, reason)
+            except Exception:
+                logger.debug("[order_channel] 발화 실패", exc_info=True)
+
+        return routed
 
     async def _insert_pending_buy_or_absorb_race(
         self,
@@ -357,9 +753,11 @@ class OrderEngine:
         state.pending_buy_amounts[ticker] = current_price * quantity
         state.order_attempt_today += 1
 
-        # exchange 결정 — stock_master 사전 차단 (Phase G). place_order 호출 전 await 로 완료.
+        # exchange 결정 — stock_master 사전 차단 (Phase G) + cycle287 규칙 1 라우팅.
+        # place_order 호출 전 await 로 완료. side="buy" — `sell_only` 킬스위치가
+        # 매수/매도 축을 구분하려면 호출부가 이 값을 명시해야 한다(자문 §R5-d).
         buy_exchange = await self._strategy_exchange_async(
-            strategy.strategy_id, ticker=ticker
+            strategy.strategy_id, ticker=ticker, side="buy"
         )
 
         # PR-F (P2, 2026-05-15) — NXT 프리마켓 시장가 사전 차단.
@@ -418,6 +816,13 @@ class OrderEngine:
             self._order_qty[result.order_no] = quantity
             self._order_strategy[result.order_no] = strategy.strategy_id
             self._order_ticker[result.order_no] = ticker
+            # 적대 검증 시정(HIGH) — 이 주문이 실제로 나간 거래소를 기억한다.
+            # 취소 경로(`_cancel_after_wait`/`_cancel_and_reorder`/`cancel_remaining`)
+            # 가 취소 시각의 라우터 재평가 대신 이 값을 우선 사용해야 원주문·취소가
+            # 시간 경계를 사이에 두고 다른 거래소로 갈리지 않는다(자문 §4-C2 의도
+            # — "동기 3 호출부도 라우터를 거친다" 는 "매번 새로 판정한다" 를
+            # 뜻하지 않았다. `cancel_order` 계약도 "원주문이 접수된 거래소" 다).
+            self._order_exchange[result.order_no] = buy_exchange
             self._pending_buy_orders[result.order_no] = {
                 "ticker": ticker,
                 "price": record_price,
@@ -519,6 +924,7 @@ class OrderEngine:
                     self._order_qty[result.order_no] = quantity
                     self._order_strategy[result.order_no] = strategy.strategy_id
                     self._order_ticker[result.order_no] = ticker
+                    self._order_exchange[result.order_no] = buy_exchange
                     self._pending_buy_orders[result.order_no] = {
                         "ticker": ticker,
                         "price": fallback_price,
@@ -660,11 +1066,15 @@ class OrderEngine:
         order_unpr = limit_price if limit_price > 0 else 0
         # 지정가 NXT 청산은 거래소도 NXT 로 강제 (전략 기본 exchange 무관).
         # 시장가 청산은 stock_master 사전 차단(NXT/SOR → KRX) 적용 — Phase G.
+        # cycle287 — 양쪽 다 규칙 1 라우터를 거친다(자문 §S3h/§R7). 호출자가
+        # 현재 0곳(dead)이지만 `test_cycle100_strategy_exchange_persistence_sell.py`
+        # 가 "limit_price > 0" 소스 문자열을 영속 단정하므로 분기 자체는 지우지
+        # 않고 결과에만 라우팅을 씌운다.
         if limit_price > 0:
-            target_exchange = "NXT"
+            target_exchange = self._apply_clock("NXT", strategy_id, side="sell", ticker=ticker)
         else:
             target_exchange = await self._strategy_exchange_async(
-                strategy_id, ticker=ticker
+                strategy_id, ticker=ticker, side="sell"
             )
 
         # NXT 프리 시장가 매도 사전 지정가 변환 (2026-08-06 — 매수 PR-F :323 대칭).
@@ -699,6 +1109,73 @@ class OrderEngine:
                     ticker, exc_info=True,
                 )
 
+        # cycle287 규칙 2 — KRX 애프터마켓(16:00~20:00, 2026-09-14 신설) 청산 호가
+        # 변환. 프리장 사전 변환(위 블록) **뒤** · 재시도 루프 **앞** — 이 순서가
+        # 계약이다(자문 §S5). `order_division == MARKET` 인 랏만 대상이라 지정가
+        # 매도(limit_price>0)·프리장 사전 변환 결과와 상호배타다. VTS 는 41~47
+        # 지원 여부가 정본에 없어 실전 전용(`settings.is_production`).
+        # `primary_div`/`fallback_div` 는 아래 재시도 루프의 폴백 게이트를
+        # "order_division == MARKET" 에서 "order_division == primary_div" 로
+        # 일반화하는 데 쓰인다 — 정규장·프리장은 `primary_div is MARKET` 이라
+        # 그 일반화가 기존 조건과 논리적으로 항등이다(byte 동일 증명, 보고서 참조).
+        primary_div, fallback_div = OrderDivision.MARKET, OrderDivision.LIMIT
+        _after_market_dial = ""
+        try:
+            if (
+                order_division == OrderDivision.MARKET
+                and target_exchange == "KRX"
+            ):
+                from src.config import settings
+                if settings.is_production:
+                    from src.engine.market_state import MarketPhase, get_market_state
+                    _now_after = datetime.now(_KST_TZ)
+                    if get_market_state(_now_after, market="KRX").phase is MarketPhase.AFTER_MARKET:
+                        from src.engine.scanner import ticker_prices as _tp_after
+                        _cur_after = int(
+                            _tp_after.get(ticker, {}).get("current_price", 0) or 0
+                        )
+                        _after_market_dial = str(
+                            strategy.config.params.get(
+                                "after_market_exit_division", _AFTER_EXIT_DIVISION_DEFAULT
+                            )
+                        )
+                        if _after_market_dial not in _AFTER_EXIT_DIVISION_ALLOWED:
+                            _after_market_dial = _AFTER_EXIT_DIVISION_DEFAULT
+                        if _after_market_dial == "44":
+                            primary_div = OrderDivision.KRX_AFTER_BEST
+                            fallback_div = OrderDivision.KRX_AFTER_LIMIT
+                            order_division, order_unpr = primary_div, 0
+                            logger.info(
+                                "[after_exit_division] ticker=%s div=%s unpr=%d cur=%d "
+                                "exchange=KRX dial=%s",
+                                ticker, order_division.value, order_unpr, _cur_after,
+                                _after_market_dial,
+                            )
+                        else:
+                            primary_div = fallback_div = OrderDivision.KRX_AFTER_LIMIT
+                            if _cur_after > 0:
+                                order_division = primary_div
+                                order_unpr = step_down(_cur_after, steps=5)
+                                logger.info(
+                                    "[after_exit_division] ticker=%s div=%s unpr=%d cur=%d "
+                                    "exchange=KRX dial=%s",
+                                    ticker, order_division.value, order_unpr, _cur_after,
+                                    _after_market_dial,
+                                )
+                            else:
+                                # 현재가 미확보 — 41 지정가 가격을 못 정한다.
+                                # 임의 가격 지정가가 더 위험하다(기존 프리장 변환과
+                                # 같은 판단) — 시장가 유지 + 주문은 그대로 나간다.
+                                primary_div, fallback_div = (
+                                    OrderDivision.MARKET, OrderDivision.LIMIT,
+                                )
+        except Exception:
+            primary_div, fallback_div = OrderDivision.MARKET, OrderDivision.LIMIT
+            order_division, order_unpr = OrderDivision.MARKET, 0
+            logger.debug(
+                "[after_exit_division] 판정 실패 — 시장가 유지: %s", ticker, exc_info=True,
+            )
+
         for attempt in range(1, SELL_MAX_RETRIES + 1):
             try:
                 result = await place_order(
@@ -715,6 +1192,7 @@ class OrderEngine:
                 self._order_qty[result.order_no] = pos.quantity
                 self._order_strategy[result.order_no] = strategy_id
                 self._order_ticker[result.order_no] = ticker
+                self._order_exchange[result.order_no] = target_exchange
 
                 # 체결통보가 응답보다 먼저 도착해 COMPLETED row가 이미 INSERT됐다면 PENDING INSERT 생략
                 if result.order_no in self._completed_orders:
@@ -765,7 +1243,7 @@ class OrderEngine:
                     # emit cap 리셋(_logged_today.discard) 은 register_market_closed 내부에서 수행.
                     _now_kst = datetime.now(_KST_TZ)
                     self._sell_rejection.register_market_closed(
-                        ticker, _now_kst, in_krx_main_hours=is_krx_main_hours(_now_kst)
+                        ticker, _now_kst, in_krx_main_hours=_exit_capable_krx_window(_now_kst)
                     )
                     # 사후 보강 (Phase G): NXT 거래 불가 종목으로 추정 → stock_master 에 즉시 반영.
                     # 다음 사이클에서 _strategy_exchange_async 가 KRX 로 사전 다운그레이드.
@@ -839,6 +1317,22 @@ class OrderEngine:
                             )
                     except Exception:
                         logger.exception("stock_master 사후 보강 실패: %s", ticker)
+                    # 적대 검증 시정(HIGH — market_closed 가 검사 순서 1번이라
+                    # 구조적 폴백(41)에 전혀 도달하지 못하는데, cycle287 이 애프터
+                    # 창의 TTL 을 5분으로 좁혀 놓아 저녁 내내 최대 ~48회를
+                    # 41 을 한 번도 못 써 보고 재시도만 반복할 수 있다. 검사 순서·
+                    # 보류 계약(2026-08-06 사용자 결정)은 동결이라 여기서 폴백을
+                    # 열지 않는다 — 관측 + 그날 밤 포기 래치만 이 분기 안에서도
+                    # 적용해 무제한 재시도를 K9 봉인②의 같은 상한으로 묶는다.
+                    if primary_div is not OrderDivision.MARKET:
+                        logger.info(
+                            "[after_exit_rejected] ticker=%s div=%s msg_cd=%s "
+                            "classified=closed ttl_registered=1 msg1=%s",
+                            ticker, order_division.value, e.msg_cd, e.msg1,
+                        )
+                        self._bump_after_exit_fails_and_maybe_giveup(
+                            ticker, strategy_id, _now_kst,
+                        )
                     return  # positions / DB 보존, 다음 trigger 대기
                 # 1.5) 수량 초과(APBK0400, cycle236 N2) — 잔고 재대조 → 수량 보정 재시도.
                 #    "요청 > 가능" 은 부분 보유가 내재된 코드다(257720 실사고: 실보유 2주
@@ -956,7 +1450,37 @@ class OrderEngine:
                 #    `limit_price>0` 인 지정가 매도에서는 이미 지정가 → 폴백 의미 없음, 기존 재시도 유지.
                 #    폴백 실패 시 cooldown 등록 안 함 — 매도는 청산 의무, 다음 사이클 자연 재트리거.
                 #    2026-05-11 계양전기 사례 대응 (`docs/kis/error-codes.md` 5-4절).
-                if is_market_order_disallowed(e) and order_division == OrderDivision.MARKET:
+                # cycle287 규칙 2 — 애프터마켓(primary_div != MARKET)에서는 분류에
+                # 의존하지 않는 **구조적 폴백**이다(자문 §1-E) — 44 거부의 msg1
+                # 원문이 완전 미지라 키워드에 폴백을 인질로 줄 수 없다. 정규장·
+                # 프리장은 `primary_div is MARKET` 이라 이 조건이 기존
+                # `is_market_order_disallowed(e) and order_division == MARKET`
+                # 과 논리적으로 항등이다.
+                if order_division == primary_div and (
+                    is_market_order_disallowed(e) or primary_div is not OrderDivision.MARKET
+                ):
+                    _after_market_primary = primary_div is not OrderDivision.MARKET
+                    if _after_market_primary:
+                        # K7 — 애프터 1차 거부 직후 ETP 관측(fail-open, 행위 분기 없음).
+                        # 적대 검증 시정(MEDIUM) — 자문 §S5/§4-F 는 "관측을 행복
+                        # 경로에 두면 손절에 DB 왕복 지연이 붙으므로 거부 후로
+                        # 옮긴다" 고 명시했는데, 거부 후라도 `await` 로 41 폴백
+                        # 주문 발사 앞을 막으면 지연이 그대로 남는다 — 41 발사와
+                        # 무관하게 fire-and-forget 한다(`_log_stale_async` 선례,
+                        # `:471` 과 동일 RuntimeError 흡수).
+                        try:
+                            asyncio.create_task(self._observe_after_exit_etp(ticker))
+                        except RuntimeError:
+                            logger.debug(
+                                "[after_etp_exit_observe] task 등록 실패 — 이벤트 루프 없음",
+                                exc_info=True,
+                            )
+                        logger.info(
+                            "[after_exit_rejected] ticker=%s div=%s msg_cd=%s classified=%s "
+                            "ttl_registered=1 msg1=%s",
+                            ticker, order_division.value, e.msg_cd,
+                            _classify_after_exit_rejection(e), e.msg1,
+                        )
                     from src.engine.scanner import ticker_prices as _ticker_prices
                     px_info = _ticker_prices.get(ticker) or {}
                     cur_price = int(px_info.get("current_price") or 0)
@@ -967,6 +1491,27 @@ class OrderEngine:
                             "(전략: %s, [%s] %s)",
                             t(ticker), strategy_id, e.msg_cd, e.msg1,
                         )
+                        if _after_market_primary:
+                            # 적대 검증 시정(CRITICAL) — 이 분기는 폴백을
+                            # 시도조차 못 하는데, 종전엔 봉인①(TTL 항상 등록)·
+                            # 봉인②(그날 저녁 포기 래치)가 모두 미적용이었다.
+                            # 그 결과 다음 틱에도 아무 차단이 없어 애프터마켓
+                            # (16:00~20:00, 실시간 연속체결) 동안 매 틱 최대
+                            # SELL_MAX_RETRIES(3)발씩 무제한 재발사할 수 있었다
+                            # — 정확히 자문 §1-E 가 막으려던 폭주다.
+                            _now_np = datetime.now(_KST_TZ)
+                            _ttl_np_ok = self._register_after_exit_disallowed(
+                                ticker, _now_np, fallback_succeeded=False,
+                            )
+                            logger.info(
+                                "[after_exit_rejected] ticker=%s div=%s msg_cd=%s "
+                                "classified=%s ttl_registered=%d msg1=no_price_for_fallback",
+                                ticker, order_division.value, e.msg_cd,
+                                _classify_after_exit_rejection(e), int(_ttl_np_ok),
+                            )
+                            self._bump_after_exit_fails_and_maybe_giveup(
+                                ticker, strategy_id, _now_np,
+                            )
                     else:
                         fallback_price = step_down(cur_price, steps=5)
                         try:
@@ -975,7 +1520,7 @@ class OrderEngine:
                                 side=OrderSide.SELL,
                                 quantity=pos.quantity,
                                 price=fallback_price,
-                                order_division=OrderDivision.LIMIT,
+                                order_division=fallback_div,
                                 exchange=target_exchange,
                             )
 
@@ -983,6 +1528,7 @@ class OrderEngine:
                             self._order_qty[fb_result.order_no] = pos.quantity
                             self._order_strategy[fb_result.order_no] = strategy_id
                             self._order_ticker[fb_result.order_no] = ticker
+                            self._order_exchange[fb_result.order_no] = target_exchange
 
                             # 체결통보 선행 race 가드 (매수 폴백·시장가 경로 동일 규약)
                             if fb_result.order_no in self._completed_orders:
@@ -1012,6 +1558,13 @@ class OrderEngine:
                                 t(ticker), fallback_price, e.msg_cd, e.msg1,
                                 fb_result.order_no, strategy_id,
                             )
+                            if _after_market_primary:
+                                logger.info(
+                                    "[after_exit_division] ticker=%s div=%s unpr=%d cur=%d "
+                                    "exchange=%s dial=%s",
+                                    ticker, fallback_div.value, fallback_price, cur_price,
+                                    target_exchange, _after_market_dial,
+                                )
                             # 사이클 55 R-1 Q2 — 폴백 성공 시에도 30초 TTL 등록 (동일 tick 폭주 차단).
                             # KRX/NXT 무관. next_day_clear_required = is_nxt AND NOT fallback_succeeded
                             # → 성공이므로 False.
@@ -1035,6 +1588,13 @@ class OrderEngine:
                                 f"매도 시장가+지정가 폴백 모두 거부 — 포지션 보존: {t(ticker)} "
                                 f"(전략: {strategy_id}, [{fb_err.msg_cd}] {fb_err.msg1})",
                             )
+                            if _after_market_primary:
+                                logger.info(
+                                    "[after_exit_rejected] ticker=%s div=%s msg_cd=%s "
+                                    "classified=%s ttl_registered=1 msg1=%s",
+                                    ticker, fallback_div.value, fb_err.msg_cd,
+                                    _classify_after_exit_rejection(fb_err), fb_err.msg1,
+                                )
                             # 사이클 55 R-1 Q2 — 폴백 실패 30초 TTL + NXT 시 익일 청산 전환.
                             _now_kst_fb = datetime.now(_KST_TZ)
                             _is_nxt = is_nxt_session_hours(_now_kst_fb)
@@ -1060,6 +1620,16 @@ class OrderEngine:
                                         "[next_day_clear_deferred] _pending_next_day_clear 등록 실패: %s",
                                         ticker, exc_info=True,
                                     )
+                            if _after_market_primary:
+                                # cycle287 K9 봉인2 — 일일 포기 래치. 30초 TTL 만으로는
+                                # 저녁 4시간에 ticker 당 ≈1,440 요청이 남는다. 임계
+                                # 도달 시 그날 밤은 포기(다음 09:00 래치) — 위 30초
+                                # TTL 등록보다 **뒤**에서 덮어써야 next-09:00 이 이긴다.
+                                # 공용 헬퍼(적대 검증 시정) — `cur_price<=0` 분기와
+                                # 같은 카운터·같은 임계를 공유한다.
+                                self._bump_after_exit_fails_and_maybe_giveup(
+                                    ticker, strategy_id, _now_kst_fb,
+                                )
                             return  # positions/DB 보존, 다음 사이클 자연 재트리거
                 logger.warning(
                     "매도 주문 실패 (시도 %d/%d): %s — [%s] %s",
@@ -1460,6 +2030,7 @@ class OrderEngine:
             self._order_qty.pop(order_no, None)
             self._order_strategy.pop(order_no, None)
             self._order_ticker.pop(order_no, None)
+            self._order_exchange.pop(order_no, None)
             # P1-B (B-1) — 전량 체결 처리 완료 시점 동기 등록. 매핑 pop 이후 도착하는
             # 동일 order_no 후속 체결통보를 함수 진입부에서 즉시 무시하기 위한 멱등 마커.
             self._completed_buy_orders.add(order_no)
@@ -1612,6 +2183,7 @@ class OrderEngine:
             self._order_qty.pop(order_no, None)
             self._order_strategy.pop(order_no, None)
             self._order_ticker.pop(order_no, None)
+            self._order_exchange.pop(order_no, None)
             logger.info("매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s)", t(ticker), total_filled, price, profit_loss, strategy_id)
             # cycle273a (D2-가-a) — 자기 order_no 의 잔여취소/재주문 타이머 해제(매수 축과
             # 동일 게이트, §1.4). 해제하지 않으면 `_cancel_and_reorder` 가 30초 뒤 잔량 0 인
@@ -1638,24 +2210,58 @@ class OrderEngine:
         if ticker in self._pending_cancel_tasks:
             self._pending_cancel_tasks[ticker].cancel()
 
-        async def _cancel_after_wait():
-            try:
-                await asyncio.sleep(PARTIAL_FILL_WAIT)
-                await cancel_order(order_no, 0, cancel_all=True, exchange=self._strategy_exchange(strategy_id))
-                await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
-                logger.info("부분 체결 잔여 취소: %s (주문번호: %s)", t(ticker), order_no)
-            except asyncio.CancelledError:
-                pass  # 새 task로 교체됨 — pop은 새 task가 관리
-            except Exception:
-                logger.exception("부분 체결 잔여 취소 실패: %s", ticker)
-            finally:
-                # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
-                if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
-                    self._pending_cancel_tasks.pop(ticker, None)
-                    self._pending_cancel_order_no.pop(ticker, None)
-
-        self._pending_cancel_tasks[ticker] = asyncio.create_task(_cancel_after_wait())
+        self._pending_cancel_tasks[ticker] = asyncio.create_task(
+            self._cancel_after_wait(ticker, order_no, strategy_id)
+        )
         self._pending_cancel_order_no[ticker] = order_no
+
+    async def _cancel_after_wait(self, ticker: str, order_no: str, strategy_id: str) -> None:
+        """`_schedule_cancel` 태스크 본체 — 30초 후 미체결 잔량 취소.
+
+        cycle287 §S6e — 예전엔 `_schedule_cancel` 안의 nested closure 였다.
+        `_apply_clock` 사용처 AST 가드가 이 메서드를 `OrderEngine` 의 실제
+        메서드로 요구해 여기로 승격했다(행위 byte 동일, 자리만 옮겼다).
+        """
+        try:
+            await asyncio.sleep(PARTIAL_FILL_WAIT)
+            # 적대 검증 시정(HIGH) — 원주문이 실제로 나간 거래소를 우선
+            # 쓴다(`_order_exchange`). 30초 대기 동안 시각 경계(예: 15:59:45
+            # 주문 → 16:00:15 취소)를 넘으면 라우터를 다시 부르는 쪽은 원주문과
+            # 다른 거래소를 낼 수 있다 — `cancel_order` 의 계약은 "원주문이
+            # 접수된 거래소" 다(자문 §4-C2). 매핑이 없을 때만(레거시·매핑 유실)
+            # 현행 라우터 재평가로 fail-open 한다.
+            ex = self._order_exchange.get(order_no)
+            if ex is None:
+                ex = self._apply_clock(
+                    self._strategy_exchange(strategy_id), strategy_id,
+                    side="sell", ticker=ticker,
+                )
+            _cancel_ok = False
+            _cancel_err = ""
+            try:
+                await cancel_order(order_no, 0, cancel_all=True, exchange=ex)
+                _cancel_ok = True
+            except KisApiError as _cancel_exc:
+                _cancel_err = f"[{_cancel_exc.msg_cd}] {_cancel_exc.msg1}"
+                raise
+            finally:
+                # K11(자문 §4-C1) — 관측만. `ORD_DVSN="00"` 하드코딩은 변경 0.
+                logger.info(
+                    "[after_cancel_result] ticker=%s order_no=%s ord_dvsn=00 "
+                    "exchange=%s result=%s err=%s",
+                    ticker, order_no, ex, "ok" if _cancel_ok else "error", _cancel_err,
+                )
+            await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
+            logger.info("부분 체결 잔여 취소: %s (주문번호: %s)", t(ticker), order_no)
+        except asyncio.CancelledError:
+            pass  # 새 task로 교체됨 — pop은 새 task가 관리
+        except Exception:
+            logger.exception("부분 체결 잔여 취소 실패: %s", ticker)
+        finally:
+            # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
+            if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
+                self._pending_cancel_tasks.pop(ticker, None)
+                self._pending_cancel_order_no.pop(ticker, None)
 
     def _schedule_cancel_and_reorder(
         self, ticker: str, order_no: str, remaining: int, *, is_stop_loss: bool
@@ -1664,37 +2270,103 @@ class OrderEngine:
         if ticker in self._pending_cancel_tasks:
             self._pending_cancel_tasks[ticker].cancel()
 
-        async def _cancel_and_reorder():
-            try:
-                await asyncio.sleep(PARTIAL_FILL_WAIT)
-                strategy_id = self._order_strategy.get(order_no, "momentum")
-                ex = self._strategy_exchange(strategy_id)
-                await cancel_order(order_no, 0, cancel_all=True, exchange=ex)
-                await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
-                logger.info("매도 잔여 취소: %s %d주", t(ticker), remaining)
-
-                if is_stop_loss and remaining > 0:
-                    # 손절 잔여분 재주문
-                    await place_order(
-                        ticker=ticker,
-                        side=OrderSide.SELL,
-                        quantity=remaining,
-                        price=0,
-                        exchange=ex,
-                    )
-                    logger.info("손절 잔여 재주문: %s %d주", t(ticker), remaining)
-            except asyncio.CancelledError:
-                pass  # 새 task로 교체됨 — pop은 새 task가 관리
-            except Exception:
-                logger.exception("매도 잔여 취소/재주문 실패: %s", ticker)
-            finally:
-                # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
-                if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
-                    self._pending_cancel_tasks.pop(ticker, None)
-                    self._pending_cancel_order_no.pop(ticker, None)
-
-        self._pending_cancel_tasks[ticker] = asyncio.create_task(_cancel_and_reorder())
+        self._pending_cancel_tasks[ticker] = asyncio.create_task(
+            self._cancel_and_reorder(ticker, order_no, remaining, is_stop_loss=is_stop_loss)
+        )
         self._pending_cancel_order_no[ticker] = order_no
+
+    async def _cancel_and_reorder(
+        self, ticker: str, order_no: str, remaining: int, *, is_stop_loss: bool
+    ) -> None:
+        """`_schedule_cancel_and_reorder` 태스크 본체.
+
+        cycle287 §S6e — 예전엔 `_schedule_cancel_and_reorder` 안의 nested
+        closure 였다(승격 사유는 `_cancel_after_wait` 와 동일).
+        """
+        try:
+            await asyncio.sleep(PARTIAL_FILL_WAIT)
+            strategy_id = self._order_strategy.get(order_no, "momentum")
+            # 적대 검증 시정(HIGH) — `_cancel_after_wait` 와 동일 이유로 원주문의
+            # 실제 거래소(`_order_exchange`)를 우선한다. 매핑이 없을 때만
+            # 현행 라우터 재평가로 fail-open.
+            ex = self._order_exchange.get(order_no)
+            if ex is None:
+                ex = self._apply_clock(
+                    self._strategy_exchange(strategy_id), strategy_id,
+                    side="sell", ticker=ticker,
+                )
+            _cancel_ok = False
+            _cancel_err = ""
+            try:
+                await cancel_order(order_no, 0, cancel_all=True, exchange=ex)
+                _cancel_ok = True
+            except KisApiError as _cancel_exc:
+                _cancel_err = f"[{_cancel_exc.msg_cd}] {_cancel_exc.msg1}"
+                raise
+            finally:
+                # K11(자문 §4-C1) — 관측만. `ORD_DVSN="00"` 하드코딩은 변경 0.
+                logger.info(
+                    "[after_cancel_result] ticker=%s order_no=%s ord_dvsn=00 "
+                    "exchange=%s result=%s err=%s",
+                    ticker, order_no, ex, "ok" if _cancel_ok else "error", _cancel_err,
+                )
+            await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
+            logger.info("매도 잔여 취소: %s %d주", t(ticker), remaining)
+
+            if is_stop_loss and remaining > 0:
+                # 손절 잔여분 재주문 — cycle287 §4-C3. 시장가(price=0)는
+                # KRX 애프터마켓(16:00~20:00)에서 100% 거부되므로(§1-A "시장가
+                # 없음") 그 창에서만 창 호가쌍으로 교체한다. 그 밖은 순수
+                # 추가 계약(byte 동일 — 정규장·프리장 재주문은 그대로 시장가).
+                reorder_division: OrderDivision | None = None
+                reorder_price = 0
+                try:
+                    from src.config import settings
+                    if ex == "KRX" and settings.is_production:
+                        from src.engine.market_state import MarketPhase, get_market_state
+                        _now_ro = datetime.now(_KST_TZ)
+                        if get_market_state(_now_ro, market="KRX").phase is MarketPhase.AFTER_MARKET:
+                            _ro_strategy = self.registry.get(strategy_id)
+                            _ro_params = _ro_strategy.config.params if _ro_strategy else {}
+                            _ro_dial = str(_ro_params.get(
+                                "after_market_exit_division", _AFTER_EXIT_DIVISION_DEFAULT
+                            ))
+                            if _ro_dial not in _AFTER_EXIT_DIVISION_ALLOWED:
+                                _ro_dial = _AFTER_EXIT_DIVISION_DEFAULT
+                            if _ro_dial == "44":
+                                reorder_division, reorder_price = OrderDivision.KRX_AFTER_BEST, 0
+                            else:
+                                from src.engine.scanner import ticker_prices as _tp_ro
+                                _ro_cur = int(
+                                    _tp_ro.get(ticker, {}).get("current_price", 0) or 0
+                                )
+                                if _ro_cur > 0:
+                                    reorder_division = OrderDivision.KRX_AFTER_LIMIT
+                                    reorder_price = step_down(_ro_cur, steps=5)
+                except Exception:
+                    reorder_division, reorder_price = None, 0
+                    logger.debug(
+                        "[after_exit_division] 잔여 재주문 판정 실패 — 시장가 유지: %s",
+                        ticker, exc_info=True,
+                    )
+
+                place_kwargs = dict(
+                    ticker=ticker, side=OrderSide.SELL, quantity=remaining,
+                    price=reorder_price, exchange=ex,
+                )
+                if reorder_division is not None:
+                    place_kwargs["order_division"] = reorder_division
+                await place_order(**place_kwargs)
+                logger.info("손절 잔여 재주문: %s %d주", t(ticker), remaining)
+        except asyncio.CancelledError:
+            pass  # 새 task로 교체됨 — pop은 새 task가 관리
+        except Exception:
+            logger.exception("매도 잔여 취소/재주문 실패: %s", ticker)
+        finally:
+            # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
+            if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
+                self._pending_cancel_tasks.pop(ticker, None)
+                self._pending_cancel_order_no.pop(ticker, None)
 
     def reset_daily_state(self) -> None:
         """일일 차단 게이트 상태 초기화 (scheduler `_reset_daily_state` 가 위임 호출).
@@ -1709,6 +2381,10 @@ class OrderEngine:
         self._sell_rejection.reset_daily()  # 4 필드 (_blocked_until / _blocked_reason / _logged_today / _history) 일괄 clear
         self._nxt_downgrade_logged_today.clear()  # 사이클 54 유지 (사이클 56-C 통합 완료)
         self._completed_buy_orders.clear()  # P1-B (B-1) 멱등 마커 일일 정리
+        self._order_channel_logged.clear()  # cycle287 규칙 1 관측 cap 일일 정리
+        self._order_channel_config_logged.clear()
+        self._after_exit_fails.clear()  # cycle287 K9 봉인2 일일 정리
+        self._order_exchange.clear()  # cycle287 적대 검증 시정 — order_no 는 하루 단위로만 유일
 
     async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
         """미체결 잔량을 취소한다."""
@@ -1719,7 +2395,29 @@ class OrderEngine:
         if not pos:
             return
         try:
-            await cancel_order(pos.order_no, pos.quantity, cancel_all=True, exchange=self._strategy_exchange(strategy_id))
+            # 적대 검증 시정(HIGH) — 원주문 거래소 우선(`_order_exchange`), 매핑
+            # 없을 때만 라우터 재평가로 fail-open(`_cancel_after_wait` 동일 이유).
+            ex = self._order_exchange.get(pos.order_no)
+            if ex is None:
+                ex = self._apply_clock(
+                    self._strategy_exchange(strategy_id), strategy_id,
+                    side="sell", ticker=ticker,
+                )
+            _cancel_ok = False
+            _cancel_err = ""
+            try:
+                await cancel_order(pos.order_no, pos.quantity, cancel_all=True, exchange=ex)
+                _cancel_ok = True
+            except KisApiError as _cancel_exc:
+                _cancel_err = f"[{_cancel_exc.msg_cd}] {_cancel_exc.msg1}"
+                raise
+            finally:
+                # K11(자문 §4-C1) — 관측만.
+                logger.info(
+                    "[after_cancel_result] ticker=%s order_no=%s ord_dvsn=00 "
+                    "exchange=%s result=%s err=%s",
+                    ticker, pos.order_no, ex, "ok" if _cancel_ok else "error", _cancel_err,
+                )
             logger.info("미체결 취소: %s (주문번호: %s)", t(ticker), pos.order_no)
         except Exception:
             logger.exception("미체결 취소 실패: %s", ticker)

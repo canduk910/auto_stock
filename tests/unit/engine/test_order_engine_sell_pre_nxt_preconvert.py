@@ -101,7 +101,7 @@ def _active(monkeypatch):
 
 @pytest.fixture
 def _exchange_nxt(monkeypatch):
-    async def _fake(self, strategy_id, *, ticker=None):
+    async def _fake(self, strategy_id, *, ticker=None, side="sell"):
         return "NXT"
     monkeypatch.setattr(OrderEngine, "_strategy_exchange_async", _fake)
 
@@ -149,7 +149,7 @@ async def test_krx_exchange_keeps_market_sell(
     engine, mock_place_order, mock_io, _active, _price, monkeypatch,
 ):
     """KRX 라우팅은 변환 대상 아님 (프리장 KRX 주문은 다른 규약)."""
-    async def _krx(self, strategy_id, *, ticker=None):
+    async def _krx(self, strategy_id, *, ticker=None, side="sell"):
         return "KRX"
     monkeypatch.setattr(OrderEngine, "_strategy_exchange_async", _krx)
     _active({MarketBoard.PRE_NXT})

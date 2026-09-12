@@ -23,10 +23,21 @@ from __future__ import annotations
 from unittest.mock import AsyncMock
 
 import pytest
+from freezegun import freeze_time
 
 from src.engine.order_engine import OrderEngine
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
 from src.engine.strategy_registry import StrategyRegistry
+
+# cycle287 검증 시정 — `_strategy_exchange_async` 는 다운그레이드(시각 무관) *뒤*
+# 규칙 1 라우터(시각 의존)를 거친다. base 가 이미 "KRX" 인 케이스는 라우터가
+# clause 1(`base_krx`)에서 즉시 통과해 시각 무관이지만, base 가 "NXT"/"SOR" 로
+# 유지되길 기대하는 케이스는 실행 시각에 따라 KRX 정규장·애프터마켓 시간대에
+# 걸리면 라우터가 "KRX" 로 되돌린다(적대 검증 H2 — CI 가 UTC 기준으로 도는
+# 시각에 따라 이 파일이 깨지던 결함). 어느 거래소도 우리 호가유형을 받지 않는
+# `both_unsupported_keep` 창(23:00 KST)으로 고정해 라우터가 항상 base 를
+# 그대로 반환하게 한다.
+_BOTH_UNSUPPORTED_KST_2300 = "2026-01-15 14:00:00"  # UTC → KST 23:00
 
 pytestmark = pytest.mark.unit
 
@@ -167,7 +178,8 @@ async def test_strategy_exchange_keeps_nxt_when_tradable(
     reg = _registry("momentum", "NXT")
     eng = OrderEngine(reg)
 
-    result = await eng._strategy_exchange_async("momentum", ticker="012200")
+    with freeze_time(_BOTH_UNSUPPORTED_KST_2300):
+        result = await eng._strategy_exchange_async("momentum", ticker="012200")
     assert result == "NXT"
     # downgrade 로그 없음
     logged = " ".join(
@@ -188,7 +200,8 @@ async def test_strategy_exchange_cache_miss_keeps_strategy_default(
     reg = _registry("momentum", "SOR")
     eng = OrderEngine(reg)
 
-    result = await eng._strategy_exchange_async("momentum", ticker="012200")
+    with freeze_time(_BOTH_UNSUPPORTED_KST_2300):
+        result = await eng._strategy_exchange_async("momentum", ticker="012200")
     assert result == "SOR"
 
 

@@ -239,7 +239,7 @@ def _exchange(monkeypatch: pytest.MonkeyPatch, value):
     NXT/SOR → KRX 로 **이미** 다운그레이드한다. 즉 `target_exchange` 는 "이 주문이
     실제로 어느 거래소로 나갔는지" 의 직접 증거다.
     """
-    async def _fake(self, strategy_id, *, ticker=None):  # noqa: ARG001
+    async def _fake(self, strategy_id, *, ticker=None, side="sell"):  # noqa: ARG001
         return value
 
     monkeypatch.setattr(

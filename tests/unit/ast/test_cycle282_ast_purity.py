@@ -377,7 +377,7 @@ _BASE_SHA = {
     "src/engine/risk.py":
         "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
     "src/engine/order_engine.py":
-        "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
+        "33033e740205ff01c6b1eb8090a35dfd6c9f88cc3f4172da45663b45aab3bd32",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
@@ -386,7 +386,7 @@ _BASE_SHA = {
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — 주문 API
     "src/api/order.py":
-        "ccd430b445358062a41b6b37f8e4d379b9a97c24090ab5133aa83ae829207115",
+        "10a8a1dd57a702f78b31fdc84acb38f12a36f3a0688e6abcf801fc130f10154f",
     # 8영역 — realtime 전부 (⚠️ wt280 시세 전환 사이클과 겹치는 영역이라 특히 중요)
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

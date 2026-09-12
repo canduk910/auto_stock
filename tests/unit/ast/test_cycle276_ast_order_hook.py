@@ -344,7 +344,7 @@ _BASE_SHA = {
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
-        "ccd430b445358062a41b6b37f8e4d379b9a97c24090ab5133aa83ae829207115",
+        "10a8a1dd57a702f78b31fdc84acb38f12a36f3a0688e6abcf801fc130f10154f",
     "src/engine/scheduler.py":
         "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
     "src/engine/strategy_base.py":
@@ -892,9 +892,12 @@ def test_c6_4b_cycle223_sibling_content_pin_matches_current_source() -> None:
 
 #: `_APPROVED_CONTENT_SHA`(= `test_cycle222a3_ast_followup_fixes.py`)에 등록돼도 좋은
 #: 8영역 파일 — **사용자 승인을 받은 사이클만** 여기 한 줄을 더한다.
-#:   · `order_engine.py` = cycle276(AI 매수평가 주문 발화 시점 이동)
+#:   · `order_engine.py` = cycle276(AI 매수평가 주문 발화 시점 이동) → cycle287 재핀
 #:   · `scanner.py`      = cycle283(오늘봉 커트오프 15:40 → 20:00)
-_APPROVED_EIGHT_AREA_PINS = {_ORDER_ENGINE_REL, "src/engine/scanner.py"}
+#:   · `api/order.py`    = cycle287(시각이 거래소·호가유형을 정한다, docstring 만)
+_APPROVED_EIGHT_AREA_PINS = {
+    _ORDER_ENGINE_REL, "src/engine/scanner.py", "src/api/order.py",
+}
 
 
 def test_c6_4c_cycle222a3_approves_only_order_engine() -> None:

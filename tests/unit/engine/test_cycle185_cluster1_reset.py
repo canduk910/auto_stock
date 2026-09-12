@@ -204,7 +204,7 @@ def mock_write_log(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
 
 @pytest.fixture
 def mock_strategy_exchange(monkeypatch: pytest.MonkeyPatch):
-    async def _fake(self, strategy_id, *, ticker=None):  # noqa: ARG001
+    async def _fake(self, strategy_id, *, ticker=None, side="sell"):  # noqa: ARG001
         return "KRX"
 
     monkeypatch.setattr(

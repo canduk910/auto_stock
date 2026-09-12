@@ -17,6 +17,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from freezegun import freeze_time
 
 pytestmark = pytest.mark.unit
 
@@ -300,7 +301,12 @@ async def test_stock_master_miss_stale_does_not_block_order_path():
     class _Basics:
         nxt_tradable = True
 
-    with patch("src.db.stock_master.get", new=AsyncMock(return_value=_Basics())), \
+    # cycle287 검증 시정 (H2) — base 가 "NXT" 유지로 기대되는 이 케이스는 규칙 1
+    # 라우터가 실행 시각에 KRX 정규장/애프터마켓을 만나면 "KRX" 로 되돌린다.
+    # 어느 거래소도 우리 호가유형을 받지 않는 23:00 KST 로 고정한다(asyncio
+    # 의 monotonic 기반 타이머는 freezegun 기본 설정의 영향을 받지 않는다).
+    with freeze_time("2026-01-15 14:00:00"), \
+         patch("src.db.stock_master.get", new=AsyncMock(return_value=_Basics())), \
          patch("src.db.stock_master.is_stale", new=_slow_is_stale), \
          patch("src.engine.order_engine.write_log", new=AsyncMock()):
         # _strategy_exchange_async 호출이 _slow_is_stale 완료 전에 반환되어야 함

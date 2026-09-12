@@ -463,11 +463,17 @@ _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 #    명시 승인했다. `execute_sell` 의 `is_market_closed_rejection` 분기 안 학습 write
 #    조건식만 바뀌고 분류 순서·TTL 등록·positions 보존은 byte 동일이다.
 #    TODO(cycle286 커밋 후): 아래 항목을 **삭제**한다.
+# ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다(규칙 1 라우팅 +
+#    규칙 2 KRX 애프터마켓 41/44). 사용자 명시 8영역 승인, 범위 =
+#    `src/engine/order_engine.py` + `src/api/order.py`(docstring 만, 본문 byte
+#    동일). 자매 가드 네 곳 전부 같은 값. TODO(cycle287 커밋 후): 아래 항목을 **삭제**한다.
 _APPROVED_CONTENT_SHA: dict[str, str] = {
     "src/engine/scanner.py":
         "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
     "src/engine/order_engine.py":
-        "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
+        "33033e740205ff01c6b1eb8090a35dfd6c9f88cc3f4172da45663b45aab3bd32",
+    "src/api/order.py":
+        "10a8a1dd57a702f78b31fdc84acb38f12a36f3a0688e6abcf801fc130f10154f",
 }
 
 

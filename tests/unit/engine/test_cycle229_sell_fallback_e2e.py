@@ -156,7 +156,7 @@ def mock_delete_position(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
 def mock_strategy_exchange(monkeypatch: pytest.MonkeyPatch):
     """`_strategy_exchange_async` → "KRX" 고정 — stock_master 의존성 분리."""
 
-    async def _fake(self, strategy_id, *, ticker=None):  # noqa: ARG001
+    async def _fake(self, strategy_id, *, ticker=None, side="sell"):  # noqa: ARG001
         return "KRX"
 
     monkeypatch.setattr(

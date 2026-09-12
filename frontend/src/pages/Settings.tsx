@@ -16,10 +16,16 @@ import InfoTooltip from '../components/InfoTooltip'
 import { STRATEGY_INFO } from '../utils/strategyInfo'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 
+// cycle287 (2026-09-12) — 사용자 결정 "SOR 하지 말자 ... UI에서 걷어내자" +
+// "정규장에서는 NXT 필요없어, SOR이 최적호가라는 보장도 없고" + "프리장은 NXT, 나머지는 전부 KRX로."
+// 09:00~15:30(정규장)·16:00~20:00(애프터)은 이제 백엔드 시각 라우팅이 거래소를 강제로 정한다
+// (order_engine.py `_route_exchange_by_clock`). 여기 선택지는 그 라우팅 밖 구간(프리장 08:00~09:00
+// 등)에만 실제로 적용된다 — SOR 을 선택지에서 뺀다(더 이상 쓰지 않는 값을 새로 저장하게 두지
+// 않는다). 이미 SOR 로 저장된 전략은 아래에서 값 자체를 지우지 않고 회색 배지로 보여준다
+// (리포 관례 — "값이 바뀌어도 매매가 안 바뀌는 입력란은 운영자를 속인다").
 const EXCHANGE_OPTIONS: { value: string; label: string; description: string }[] = [
-  { value: 'KRX', label: 'KRX', description: '한국거래소 단일 — 안전, 모의(VTS)도 지원' },
-  { value: 'NXT', label: 'NXT', description: '넥스트레이드 ATS 단일 — 실전 한정' },
-  { value: 'SOR', label: 'SOR', description: 'Smart Order Routing — KIS가 KRX/NXT에 자동 분배 (실전 한정)' },
+  { value: 'KRX', label: 'KRX', description: '한국거래소 단일 — 09:00~15:30·16:00~20:00은 시각이 자동으로 이 값을 씁니다. ⚠️ 이 값을 저장하면 프리장(08:00~09:00) 청산 라우팅과 NXT 거래불가 종목 자동 다운그레이드 감시가 함께 꺼집니다' },
+  { value: 'NXT', label: 'NXT', description: '넥스트레이드 ATS — 프리장(08:00~09:00) 등 시각 라우팅 밖 구간 전용, 실전 한정' },
 ]
 
 const BOARD_OPTIONS: { value: string; label: string; hint: string }[] = [
@@ -171,7 +177,9 @@ export default function Settings() {
         </div>
         <p className="text-xs text-gray-400 mt-3">
           자동 시작 07:45 / 부트 07:55 / NXT 프리 08:00 / KRX 메인 09:00 / KRX 마감 15:30 / NXT 애프터 종료 20:00 / 정산 21:30
-          · <strong>VTS(모의)는 KRX만 지원</strong> — NXT/SOR는 실전 한정
+          · <strong>VTS(모의)는 KRX만 지원</strong> — NXT는 실전 한정
+          · <strong>09:00~15:30·16:00~20:00은 시각이 거래소를 KRX로 고정합니다(cycle287)</strong> —
+          아래 값은 그 밖의 구간(프리장 등)에만 적용됩니다
         </p>
       </div>
 
@@ -404,6 +412,10 @@ function ExchangeBoardRow({ strategy }: StrategyRowProps) {
 
   const color = getStrategyColor(strategy.key)
   const dirty = exchange !== initialExchange || !sameSet(boards, initialBoards)
+  // cycle287 — 선택지에서 뺀 값(예: 종전 SOR)이 이미 저장돼 있을 수 있다. 값 자체는 지우지
+  // 않고(운영 DB 는 이 사이클에서 무접촉) 폐기 배지로 알린다 — 리스트에 없다고 조용히
+  // 사라진 걸로 보이면 "값이 바뀌었나?" 하는 오해를 산다.
+  const isRetiredExchangeValue = !EXCHANGE_OPTIONS.some((opt) => opt.value === initialExchange)
 
   const mutation = useMutation({
     mutationFn: (next: Record<string, StrategyParamValue>) =>
@@ -436,11 +448,24 @@ function ExchangeBoardRow({ strategy }: StrategyRowProps) {
       setConfirm(false)
       return
     }
-    mutation.mutate({ exchange, tradable_boards: boards })
+    // 바뀐 키만 보낸다 — 카탈로그 편집기(`StrategyParamsEditor`)의 관례 답습. `exchange` 가
+    // 향후(cycle287b) 백엔드에서 선택지 제약이 좁아져도, 편집하지 않은 필드까지 매번 다시
+    // 보내면 그 변경과 무관하게 저장이 거부될 수 있다 — 지금은 위험이 없지만 미리 좁혀 둔다.
+    const payload: Record<string, StrategyParamValue> = {}
+    if (exchange !== initialExchange) payload.exchange = exchange
+    if (!sameSet(boards, initialBoards)) payload.tradable_boards = boards
+    mutation.mutate(payload)
   }
 
   const exchangeNote = (() => {
     if (exchange === 'KRX') return null
+    if (!EXCHANGE_OPTIONS.some((opt) => opt.value === exchange)) {
+      return (
+        <span className="text-xs text-gray-500">
+          폐기된 값입니다 — 주문 거래소는 이제 시각이 정합니다(cycle287). KRX 또는 NXT 중 하나를 선택하세요.
+        </span>
+      )
+    }
     if (isVts) {
       return (
         <span className="text-xs text-red-700">⛔ 현재 모의(VTS) 환경 — {exchange} 주문은 KIS가 거절합니다. KRX로 변경하세요</span>
@@ -502,7 +527,7 @@ function ExchangeBoardRow({ strategy }: StrategyRowProps) {
 
       {editing ? (
         <div className="space-y-3">
-          {/* 거래소 라디오 — 모의(vts) 환경에선 NXT/SOR 차단 */}
+          {/* 거래소 라디오 — 모의(vts) 환경에선 NXT 차단. SOR 은 cycle287 부터 선택지에서 제외 */}
           <div>
             <div className="text-xs font-medium text-gray-700 mb-1">거래소 (EXCG_ID_DVSN_CD)</div>
             <div className="flex gap-2">
@@ -580,6 +605,15 @@ function ExchangeBoardRow({ strategy }: StrategyRowProps) {
         <div className="text-xs text-gray-600 flex items-center flex-wrap gap-2">
           <span>
             거래소: <strong className="text-gray-800">{initialExchange}</strong>
+            {isRetiredExchangeValue && (
+              <span
+                data-testid={`exchange-retired-badge-${strategy.key}`}
+                className="ml-1 px-1 py-0.5 text-[10px] bg-gray-100 text-gray-500 rounded align-middle"
+                title="주문 거래소는 이제 시각이 정합니다(cycle287) — 09:00~15:30·16:00~20:00은 KRX로 자동 고정되고, 이 값은 더 이상 선택할 수 없습니다."
+              >
+                폐기
+              </span>
+            )}
           </span>
           <span className="text-gray-300">|</span>
           <span>매매 보드:</span>

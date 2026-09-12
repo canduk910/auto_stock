@@ -560,7 +560,7 @@ _BASE_SHA = {
     "src/engine/risk.py": "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
     # 🔁 cycle276 → cycle286 — 사용자 명시 승인 하에 order_engine.py 를 바꾼 두 사이클의
     # 누적 결과값이다. A-ATOMIC 구간은 byte 동일.
-    "src/engine/order_engine.py": "274af0f3b0398dc48106ef00c3e66c0df4e5a8f0fafd5e5d8adeda0c39f37830",
+    "src/engine/order_engine.py": "33033e740205ff01c6b1eb8090a35dfd6c9f88cc3f4172da45663b45aab3bd32",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
@@ -568,7 +568,7 @@ _BASE_SHA = {
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
-        "ccd430b445358062a41b6b37f8e4d379b9a97c24090ab5133aa83ae829207115",
+        "10a8a1dd57a702f78b31fdc84acb38f12a36f3a0688e6abcf801fc130f10154f",
     "src/engine/scheduler.py": "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",

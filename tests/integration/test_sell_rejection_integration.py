@@ -138,7 +138,7 @@ def mock_write_log(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
 
 @pytest.fixture
 def mock_strategy_exchange(monkeypatch: pytest.MonkeyPatch):
-    async def _fake(self, strategy_id, *, ticker=None):  # noqa: ARG001
+    async def _fake(self, strategy_id, *, ticker=None, side="sell"):  # noqa: ARG001
         return "KRX"
 
     monkeypatch.setattr(
@@ -274,7 +274,7 @@ async def test_c2_when_market_closed_then_tracker_register_called_and_stock_mast
     공용 픽스처의 기본값 "KRX" 로는 이 사이클부터 학습 write 가 발생하지 않는다
     (그것이 정확히 이번 사이클이 닫은 결함이다).
     """
-    async def _nxt(self, strategy_id, *, ticker=None):  # noqa: ARG001
+    async def _nxt(self, strategy_id, *, ticker=None, side="sell"):  # noqa: ARG001
         return "NXT"
 
     monkeypatch.setattr(
