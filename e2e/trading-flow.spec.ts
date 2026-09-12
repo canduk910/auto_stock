@@ -23,9 +23,13 @@ test.describe("자동매매 대시보드", () => {
   test("네비게이션 메뉴 5개가 보인다", async ({ page }) => {
     await installApiMocks(page);
     await page.goto("/");
-    for (const label of ["대시보드", "거래 내역", "전략수정 AI자문", "로그", "설정"]) {
+    for (const label of ["대시보드", "거래 내역", "로그", "설정"]) {
       // 사이클 65 hotfix #3 — toBeVisible default 5s 대신 명시 (e2e *.spec.ts 일관성)
       await expect(page.getByRole("link", { name: label })).toBeVisible({ timeout: 10000 });
     }
+    // cycle288 — "전략수정 AI자문"은 "전략" 그룹 하위로 묶였다. 접힌 패널은 DOM 에
+    // 없으므로(조건부 렌더) 그룹 트리거를 먼저 열어야 보인다.
+    await page.getByRole("button", { name: "전략", exact: true }).click();
+    await expect(page.getByRole("link", { name: "전략수정 AI자문" })).toBeVisible({ timeout: 10000 });
   });
 });

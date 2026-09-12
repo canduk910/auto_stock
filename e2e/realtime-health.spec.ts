@@ -161,7 +161,8 @@ test.describe("L-NAV1 (LOW) — PC 메뉴 '실시간 상태' 클릭 → 라우�
     await installApiMocks(page);
     await page.goto("/");
 
-    // PC viewport (기본) — 가로 메뉴에서 `실시간 상태` 링크 클릭
+    // PC viewport (기본) — cycle288: "실시간 상태"는 "운영상태" 그룹 하위. 트리거를 먼저 연다.
+    await page.getByRole("button", { name: "운영상태", exact: true }).click();
     await page.getByRole("link", { name: "실시간 상태" }).first().click();
 
     // URL /realtime-health 전환 검증

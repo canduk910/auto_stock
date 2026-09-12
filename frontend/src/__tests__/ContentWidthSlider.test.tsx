@@ -25,6 +25,11 @@ import { server } from "../test/server";
  * 실행: npx vitest run src/__tests__/ContentWidthSlider.test.tsx
  * 기대(Red): T1~T4 는 슬라이더/인라인 maxWidth 미구현으로 실패,
  *            T5(회귀 가드)는 기존 구조라 green 유지.
+ *
+ * cycle288 (2026-09-12) 추가 — 슬라이더가 나브 컨테이너 자신의 폭을 흔들어 드래그 중
+ * 깜박이던 결함 시정. 나브(components/NavBar.tsx)는 이제 기본 레벨 고정폭
+ * (data-testid="nav-inner")을 쓰고, <main> 만 슬라이더 값에 반응한다. T6/T7 이 그
+ * 구조를 봉인한다.
  */
 
 const STORAGE_KEY = "autostock.contentWidth";
@@ -153,5 +158,47 @@ describe("ContentWidthSlider — 나브바 화면 폭 슬라이더", () => {
     expect(main).not.toBeNull();
     // max-w-7xl 제거가 기존 sticky/main 분리 구조를 깨지 않는다 (AppShell.test.tsx M-8 영속)
     expect(stickyWrapper.contains(main)).toBe(false);
+  });
+
+  // cycle288 — 나브 폭 슬라이더 깜박임 시정. 원인 = 나브 컨테이너가 main 과 같은 동적
+  // maxWidth 를 썼고, 슬라이더 <input> 이 바로 그 컨테이너 안에 있어 드래그 중 컨테이너가
+  // 리사이즈되며 슬라이더의 화면 좌표가 함께 움직였다. 아래 T6 은 그 구조적 원인이
+  // 봉인됐는지를 직접 잰다 — "나브가 고정"만 단언하면 main 까지 함께 얼리는 오시정도
+  // 통과하므로, 나브 불변 + main 반응을 **한 케이스에서 함께** 확인한다.
+  it("T6 (cycle288): 나브 내부 컨테이너 maxWidth 는 슬라이더 값과 무관하게 고정이고, main 은 반응한다", () => {
+    renderApp();
+
+    const navInner = screen.getByTestId("nav-inner");
+    const main = document.querySelector("main");
+    expect(main).not.toBeNull();
+
+    const navWidthAt100 = navInner.style.maxWidth;
+    const mainWidthAt100 = main!.style.maxWidth;
+    // 기본 level=100 에서는 우연히 나브/메인이 같은 값일 수 있으므로(둘 다 100%),
+    // 슬라이더를 움직여야 "고정 vs 반응"이 실제로 갈라지는지 알 수 있다.
+    expect(mainWidthAt100).toContain("100%");
+
+    const slider = screen.getByTestId("content-width-slider") as HTMLInputElement;
+    fireEvent.change(slider, { target: { value: "0" } });
+
+    // main 은 반응 — level 0 → max(1024px, 60%)
+    expect(main!.style.maxWidth).toContain("60%");
+    expect(main!.style.maxWidth).not.toBe(mainWidthAt100);
+
+    // 나브는 고정 — 슬라이더를 아무리 움직여도 최초 렌더 값(level=100 고정폭)과 byte 동일
+    expect(navInner.style.maxWidth).toBe(navWidthAt100);
+  });
+
+  // cycle288 — 깜박임의 직접 원인: 슬라이더가 리사이즈되는 컨테이너의 자식이었다.
+  // 검증 라운드 시정 — 이 케이스는 포함 관계(슬라이더 ⊂ nav-inner)만 본다. 나브 폭을
+  // 다시 동적으로 만들어도(위 T6 이 잡는 회귀) 슬라이더는 여전히 nav-inner 안에 있으므로
+  // 이 케이스 **단독**으로는 초록이다 — 실제로 방어하는 것은 "슬라이더를 이 컨테이너
+  // 밖(main 등)으로 옮기는" 리팩터뿐이다. 원인 재발의 첫 방어선은 T6 이다.
+  it("T7 (cycle288): 폭 슬라이더는 고정폭 나브 컨테이너(nav-inner) 안에 있다", () => {
+    renderApp();
+
+    const navInner = screen.getByTestId("nav-inner");
+    const slider = screen.getByTestId("content-width-slider");
+    expect(navInner.contains(slider)).toBe(true);
   });
 });

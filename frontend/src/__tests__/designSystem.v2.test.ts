@@ -31,6 +31,10 @@ const SRC_ROOT = path.resolve(path.dirname(SELF), '..')
 const FRONTEND_ROOT = path.resolve(SRC_ROOT, '..')
 const INDEX_CSS = path.join(SRC_ROOT, 'index.css')
 const APP_TSX = path.join(SRC_ROOT, 'App.tsx')
+// cycle288 (2026-09-12) — 메뉴바 2단 카테고리화로 나브(로고타입 2곳 + 폭 슬라이더)가
+// components/NavBar.tsx 로 옮겨갔다. 브랜드 단일 정의 계약은 "그 문자열이 사는 파일이
+// App.tsx 하나"가 아니라 "나브 관련 두 파일 합쳐 정확히 그 개수"로 넓혀 유지한다.
+const NAVBAR_TSX = path.join(SRC_ROOT, 'components', 'NavBar.tsx')
 const FONT_DIR = path.join(FRONTEND_ROOT, 'public', 'fonts')
 
 const FONT_WEIGHTS = ['Light', 'Medium', 'Bold'] as const
@@ -216,12 +220,19 @@ describe('cycle261 (d) STRATEGY_COLORS — 명세 hex 7키 + 클래스↔@theme 
 
 // ── (e) App.tsx — 브랜드/배경/배너 + accentColor 5곳 ────────────────────────
 describe('cycle261 (e) App.tsx — DK Stock 브랜드 · beige 배경 · sky 배너', () => {
-  it('로고타입이 DK Stock 2곳(font-brand)이고 AutoStock 은 0건이다', () => {
+  it('로고타입이 DK Stock 2곳(font-brand)이고 AutoStock 은 0건이다 (cycle288: App.tsx+NavBar.tsx 합산)', () => {
     const app = read(APP_TSX)
-    expect(countOf(app, 'AutoStock'), '[cycle261 (e)] 구 브랜드명 AutoStock 잔존').toBe(0)
-    expect(countOf(app, 'DK Stock'), '[cycle261 (e)] 로고타입 DK Stock 은 PC/모바일 2곳').toBe(2)
+    const navBar = read(NAVBAR_TSX)
     expect(
-      countOf(app, 'font-brand'),
+      countOf(app, 'AutoStock') + countOf(navBar, 'AutoStock'),
+      '[cycle261 (e)] 구 브랜드명 AutoStock 잔존',
+    ).toBe(0)
+    expect(
+      countOf(app, 'DK Stock') + countOf(navBar, 'DK Stock'),
+      '[cycle261 (e)] 로고타입 DK Stock 은 PC/모바일 2곳',
+    ).toBe(2)
+    expect(
+      countOf(app, 'font-brand') + countOf(navBar, 'font-brand'),
       '[cycle261 (e)] 로고타입 2곳에 font-brand 적용(--font-brand 사용)',
     ).toBeGreaterThanOrEqual(2)
   })
@@ -243,7 +254,7 @@ describe('cycle261 (e) App.tsx — DK Stock 브랜드 · beige 배경 · sky 배
 })
 
 describe('cycle261 (e2) 슬라이더 accentColor — 5곳 모두 var(--color-navy-600)', () => {
-  // 명세 §행위 5: App.tsx 1 + TradeAmountFilterCard 1 + CashUsageRatioCard 1 + PriceFilterCard 2.
+  // 명세 §행위 5: NavBar.tsx 1(cycle288 이전 App.tsx) + TradeAmountFilterCard 1 + CashUsageRatioCard 1 + PriceFilterCard 2.
   // hex 리터럴 대신 CSS 변수를 쓰는 이유 = @theme 이 단일 진실원이고, 팔레트를 다시
   // 조정할 때 5곳을 각각 고치면 반드시 하나가 뒤처진다.
   const EXPECTED = 'var(--color-navy-600)'

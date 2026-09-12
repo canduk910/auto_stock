@@ -650,6 +650,9 @@ describe('cycle282 FE22 — 신규 메뉴 항목과 경로', () => {
   }, 20_000)
 
   it('나브에 장운영상태 링크가 **한 개** 있고 `/market-state` 를 가리킨다', async () => {
+    // cycle288 — 장운영상태는 "운영상태" 그룹 하위로 묶였다. 접힌 상태에선 PC 드롭다운
+    // 패널이 DOM 에 없으므로(조건부 렌더), 그룹 트리거를 먼저 열어야 링크가 나타난다.
+    // 모바일 드로어는 닫혀 있어 렌더되지 않으므로 여전히 PC 경로 1개만 잡힌다.
     server.use(http.get(ENDPOINT, () => HttpResponse.json(wrap(MARKET_STATE_AT_1305))))
     render(
       <QueryClientProvider client={createClient()}>
@@ -660,10 +663,12 @@ describe('cycle282 FE22 — 신규 메뉴 항목과 경로', () => {
     )
     await screen.findByTestId('market-state-page', {}, LONG)
 
+    fireEvent.click(screen.getByRole('button', { name: '운영상태' }))
+
     const links = screen
       .getAllByRole('link')
       .filter((el) => el.getAttribute('href') === '/market-state')
-    // PC 가로 메뉴 1개 — 모바일 드로어는 닫혀 있어 렌더되지 않는다.
+    // PC 그룹 패널 1개 — 모바일 드로어는 닫혀 있어 렌더되지 않는다.
     expect(links.length, '나브 항목이 없거나 중복 등록됐다').toBe(1)
     expect(links[0].textContent?.trim()).toBe('장운영상태')
   }, 20_000)

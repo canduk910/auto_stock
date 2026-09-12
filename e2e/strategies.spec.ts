@@ -86,8 +86,11 @@ test.describe("H-ST4 (HIGH) — 페이지 제목 visible", () => {
     await installApiMocks(page);
     await page.goto("/strategies");
 
+    // cycle288 검증 라운드 시정 — "전략 현황"은 나브 그룹 하위 라벨과도 겹치는 텍스트라
+    // getByText(...).first() 가 (닫힌 그룹 안이라 숨겨진) 나브 요소를 집을 수 있다.
+    // 페이지 본문의 <h1> 으로 좁힌다.
     await expect(
-      page.getByText("전략 현황").first()
+      page.getByRole("heading", { name: "전략 현황" })
     ).toBeVisible({ timeout: 20000 });
   });
 });
@@ -157,7 +160,8 @@ test.describe("L-NAV2 (LOW) — PC 메뉴 '전략 현황' 클릭 → 라우트 �
     await installApiMocks(page);
     await page.goto("/");
 
-    // PC viewport (기본) — 가로 메뉴에서 `전략 현황` 링크 클릭
+    // PC viewport (기본) — cycle288: "전략 현황"은 "전략" 그룹 하위. 트리거를 먼저 연다.
+    await page.getByRole("button", { name: "전략", exact: true }).click();
     await page.getByRole("link", { name: "전략 현황" }).first().click();
 
     // URL /strategies 전환 검증
@@ -181,8 +185,8 @@ test.describe("L-ST8 (LOW) — Lazy 로딩 + Suspense fallback 정상 전환", (
       page.getByTestId("strategy-card-momentum")
     ).toBeVisible({ timeout: 20000 });
 
-    // 페이지 제목 텍스트 확인
-    await expect(page.getByText("전략 현황").first()).toBeVisible({ timeout: 20000 });
+    // 페이지 제목 텍스트 확인 — cycle288 검증 라운드 시정: <h1> 으로 좁힌다 (위 H-ST4 사유 동일)
+    await expect(page.getByRole("heading", { name: "전략 현황" })).toBeVisible({ timeout: 20000 });
   });
 });
 

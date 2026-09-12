@@ -194,8 +194,10 @@ test.describe("G-E2E-7 (LOW) — lazy 로 + Suspense fallback 정상 전환", ()
       page.getByTestId("stock-master-stats-card"),
     ).toBeVisible({ timeout: 20000 });
 
-    // 페이지 제목 텍스트 확인
-    await expect(page.getByText("종목마스터").first()).toBeVisible({ timeout: 20000 });
+    // 페이지 제목 텍스트 확인 — cycle288 검증 라운드 시정: "종목마스터"는 나브 그룹 하위
+    // 라벨과도 겹치는 텍스트라 getByText(...).first() 가 (닫힌 그룹 안이라 숨겨진) 나브 요소를
+    // 집을 수 있다. 페이지 본문의 <h1> 으로 좁힌다.
+    await expect(page.getByRole("heading", { name: "종목마스터" })).toBeVisible({ timeout: 20000 });
   });
 });
 
@@ -205,8 +207,9 @@ test.describe("G-E2E-8 (LOW) — 7번째 메뉴 종목마스터 클릭 → 라�
     await installApiMocks(page);
     await page.goto("/");
 
-    // PC viewport (기본) — 가로 메뉴에서 `종목마스터` 링크 클릭
+    // PC viewport (기본) — cycle288: "종목마스터"는 "종목" 그룹 하위. 트리거를 먼저 연다.
     // sm 이상 viewport = hidden sm:flex 메뉴 가시 (playwright 기본 Desktop Chrome)
+    await page.getByRole("button", { name: "종목", exact: true }).click();
     await page.getByRole("link", { name: "종목마스터" }).first().click();
 
     // URL /stock-master 전환 검증

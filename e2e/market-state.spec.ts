@@ -38,6 +38,8 @@ test.describe("G-E2E-282a — 메뉴 진입과 커서", () => {
     await installApiMocks(page);
     await page.goto("/");
 
+    // cycle288 — "장운영상태"는 "운영상태" 그룹 하위. 트리거를 먼저 열어야 링크가 보인다.
+    await page.getByRole("button", { name: "운영상태", exact: true }).click();
     await page.getByRole("link", { name: "장운영상태" }).first().click();
     await expect(page).toHaveURL(/\/market-state$/, T);
     await expect(page.getByTestId("market-state-page")).toBeVisible(T);
